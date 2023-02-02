@@ -1,42 +1,24 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
+using System.Collections.Generic;
 using Game.Networking.Packets;
 
 namespace Game.DungeonFinding
 {
     public class LFGPlayerData
     {
-        private ObjectGuid _Group;
-
-        // Achievement-related
-        private byte _NumberOfPartyMembersAtJoin;
-        private LfgState _OldState;
-
-        // Queue
-        private LfgRoles _Roles;
-        private List<uint> _SelectedDungeons = new();
-
-        private LfgState _State;
-
-        // Player
-        private Team _Team;
-
-        // General
-        private RideTicket _Ticket;
-
         public LFGPlayerData()
         {
-            _State = LfgState.None;
-            _OldState = LfgState.None;
+            m_State = LfgState.None;
+            m_OldState = LfgState.None;
         }
 
         public void SetTicket(RideTicket ticket)
         {
-            _Ticket = ticket;
+            m_Ticket = ticket;
         }
 
         public void SetState(LfgState state)
@@ -45,92 +27,104 @@ namespace Game.DungeonFinding
             {
                 case LfgState.None:
                 case LfgState.FinishedDungeon:
-                    _Roles = 0;
-                    _SelectedDungeons.Clear();
+                    m_Roles = 0;
+                    m_SelectedDungeons.Clear();
                     goto case LfgState.Dungeon;
                 case LfgState.Dungeon:
-                    _OldState = state;
-
+                    m_OldState = state;
                     break;
             }
-
-            _State = state;
+            m_State = state;
         }
 
         public void RestoreState()
         {
-            if (_OldState == LfgState.None)
+            if (m_OldState == LfgState.None)
             {
-                _SelectedDungeons.Clear();
-                _Roles = 0;
+                m_SelectedDungeons.Clear();
+                m_Roles = 0;
             }
-
-            _State = _OldState;
+            m_State = m_OldState;
         }
 
         public void SetTeam(Team team)
         {
-            _Team = team;
+            m_Team = team;
         }
 
         public void SetGroup(ObjectGuid group)
         {
-            _Group = group;
+            m_Group = group;
         }
 
         public void SetRoles(LfgRoles roles)
         {
-            _Roles = roles;
+            m_Roles = roles;
         }
 
         public void SetSelectedDungeons(List<uint> dungeons)
         {
-            _SelectedDungeons = dungeons;
+            m_SelectedDungeons = dungeons;
         }
 
         public RideTicket GetTicket()
         {
-            return _Ticket;
+            return m_Ticket;
         }
 
         public LfgState GetState()
         {
-            return _State;
+            return m_State;
         }
 
         public LfgState GetOldState()
         {
-            return _OldState;
+            return m_OldState;
         }
 
         public Team GetTeam()
         {
-            return _Team;
+            return m_Team;
         }
 
         public ObjectGuid GetGroup()
         {
-            return _Group;
+            return m_Group;
         }
 
         public LfgRoles GetRoles()
         {
-            return _Roles;
+            return m_Roles;
         }
 
         public List<uint> GetSelectedDungeons()
         {
-            return _SelectedDungeons;
+            return m_SelectedDungeons;
         }
 
         public void SetNumberOfPartyMembersAtJoin(byte count)
         {
-            _NumberOfPartyMembersAtJoin = count;
+            m_NumberOfPartyMembersAtJoin = count;
         }
 
         public byte GetNumberOfPartyMembersAtJoin()
         {
-            return _NumberOfPartyMembersAtJoin;
+            return m_NumberOfPartyMembersAtJoin;
         }
+
+        // General
+        RideTicket m_Ticket;
+        LfgState m_State;
+        LfgState m_OldState;
+        // Player
+        Team m_Team;
+        ObjectGuid m_Group;
+
+        // Queue
+        LfgRoles m_Roles;
+        List<uint> m_SelectedDungeons = new();
+
+        // Achievement-related
+        byte m_NumberOfPartyMembersAtJoin;
     }
 }

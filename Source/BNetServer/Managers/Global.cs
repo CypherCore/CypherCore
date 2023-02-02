@@ -5,6 +5,6 @@ using BNetServer;
 
 public static class Global
 {
-    public static RealmManager RealmMgr => RealmManager.Instance;
-    public static LoginServiceManager LoginServiceMgr => LoginServiceManager.Instance;
+    public static RealmManager RealmMgr { get { return RealmManager.Instance; } }
+    public static LoginServiceManager LoginServiceMgr { get { return LoginServiceManager.Instance; } }
 }

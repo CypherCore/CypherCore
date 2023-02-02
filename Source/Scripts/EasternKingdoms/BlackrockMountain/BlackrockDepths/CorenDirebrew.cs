@@ -13,7 +13,7 @@ using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
-using Game.Spells.Auras.EffectHandlers;
+using Game.Spells;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebrew
 {
@@ -129,7 +129,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
         public override void EnterEvadeMode(EvadeReason why)
         {
             _EnterEvadeMode();
-            Summons.DespawnAll();
+            summons.DespawnAll();
             _DespawnAtEvade(TimeSpan.FromSeconds(10));
         }
 
@@ -150,14 +150,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
                                                         introTask2 =>
                                                         {
                                                             EntryCheckPredicate pred = new(CreatureIds.Antagonist);
-                                                            Summons.DoAction(ActionIds.AntagonistSay1, pred);
+                                                            summons.DoAction(ActionIds.AntagonistSay1, pred);
 
                                                             introTask2.Schedule(TimeSpan.FromSeconds(3),
                                                                                 introlTask3 =>
                                                                                 {
                                                                                     Talk(TextIds.SayIntro2);
                                                                                     EntryCheckPredicate pred = new(CreatureIds.Antagonist);
-                                                                                    Summons.DoAction(ActionIds.AntagonistSay2, pred);
+                                                                                    summons.DoAction(ActionIds.AntagonistSay2, pred);
                                                                                 });
                                                         });
                                 });
@@ -176,7 +176,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
                 DoZoneInCombat();
 
                 EntryCheckPredicate pred = new(CreatureIds.Antagonist);
-                Summons.DoAction(ActionIds.AntagonistHostile, pred);
+                summons.DoAction(ActionIds.AntagonistHostile, pred);
 
                 _scheduler.Schedule(TimeSpan.FromSeconds(15),
                                     task =>
@@ -437,7 +437,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
         {
             Unit caster = GetCaster();
 
-            targets.RemoveAll(new Game.Maps.Checks.UnitAuraCheck<WorldObject>(true, SpellIds.HasDarkBrewmaidensBrew));
+            targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.HasDarkBrewmaidensBrew));
 
             if (targets.Count > 1)
                 targets.RemoveAll(obj =>

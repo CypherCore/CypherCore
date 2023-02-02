@@ -1,4 +1,6 @@
-﻿namespace Framework.Cryptography.Ed25519.Internal
+﻿using System;
+
+namespace Framework.Cryptography.Ed25519.Internal
 {
     // Array8<UInt32> Poly1305 key
     // Array8<UInt64> SHA-512 state/output

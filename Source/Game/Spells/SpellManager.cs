@@ -1,27 +1,27 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using Framework.Constants;
 using Framework.Database;
 using Framework.Dynamic;
+using Game.BattleFields;
+using Game.BattleGrounds;
 using Game.BattlePets;
 using Game.DataStorage;
 using Game.Movement;
 using Game.Spells;
-using Game.Spells.Auras.EffectHandlers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace Game.Entities
 {
     public sealed class SpellManager : Singleton<SpellManager>
     {
-        private SpellManager()
+        SpellManager()
         {
             Assembly currentAsm = Assembly.GetExecutingAssembly();
-
             foreach (var type in currentAsm.GetTypes())
             {
                 foreach (var methodInfo in type.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic))
@@ -32,36 +32,27 @@ namespace Game.Entities
                             continue;
 
                         var parameters = methodInfo.GetParameters();
-
                         if (parameters.Length < 3)
                         {
-                            Log.outError(LogFilter.ServerLoading, "Method: {0} has wrong parameter Count: {1} Should be 3. Can't load AuraEffect.", methodInfo.Name, parameters.Length);
-
+                            Log.outError(LogFilter.ServerLoading, "Method: {0} has wrong parameter count: {1} Should be 3. Can't load AuraEffect.", methodInfo.Name, parameters.Length);
                             continue;
                         }
 
-                        if (parameters[0].ParameterType != typeof(AuraApplication) ||
-                            parameters[1].ParameterType != typeof(AuraEffectHandleModes) ||
-                            parameters[2].ParameterType != typeof(bool))
+                        if (parameters[0].ParameterType != typeof(AuraApplication) || parameters[1].ParameterType != typeof(AuraEffectHandleModes) || parameters[2].ParameterType != typeof(bool))
                         {
-                            Log.outError(LogFilter.ServerLoading,
-                                         "Method: {0} has wrong parameter Types: ({1}, {2}, {3}) Should be (AuraApplication, AuraEffectHandleModes, Bool). Can't load AuraEffect.",
-                                         methodInfo.Name,
-                                         parameters[0].ParameterType,
-                                         parameters[1].ParameterType,
-                                         parameters[2].ParameterType);
-
+                            Log.outError(LogFilter.ServerLoading, "Method: {0} has wrong parameter Types: ({1}, {2}, {3}) Should be (AuraApplication, AuraEffectHandleModes, Bool). Can't load AuraEffect.",
+                                methodInfo.Name, parameters[0].ParameterType, parameters[1].ParameterType, parameters[2].ParameterType);
                             continue;
                         }
 
                         if (AuraEffectHandlers.ContainsKey(auraEffect.AuraType))
                         {
                             Log.outError(LogFilter.ServerLoading, "Tried to override AuraEffectHandler of {0} with {1} (AuraType {2}).", AuraEffectHandlers[auraEffect.AuraType].GetMethodInfo().Name, methodInfo.Name, auraEffect.AuraType);
-
                             continue;
                         }
 
                         AuraEffectHandlers.Add(auraEffect.AuraType, (AuraEffectHandler)methodInfo.CreateDelegate(typeof(AuraEffectHandler)));
+
                     }
 
                     foreach (var spellEffect in methodInfo.GetCustomAttributes<SpellEffectHandlerAttribute>())
@@ -72,7 +63,6 @@ namespace Game.Entities
                         if (SpellEffectsHandlers.ContainsKey(spellEffect.EffectName))
                         {
                             Log.outError(LogFilter.ServerLoading, "Tried to override SpellEffectsHandler of {0} with {1} (EffectName {2}).", SpellEffectsHandlers[spellEffect.EffectName].ToString(), methodInfo.Name, spellEffect.EffectName);
-
                             continue;
                         }
 
@@ -91,7 +81,6 @@ namespace Game.Entities
         public bool IsSpellValid(uint spellId, Player player = null, bool msg = true)
         {
             SpellInfo spellInfo = GetSpellInfo(spellId, Difficulty.None);
-
             return IsSpellValid(spellInfo, player, msg);
         }
 
@@ -105,85 +94,84 @@ namespace Game.Entities
 
             // check effects
             foreach (var spellEffectInfo in spellInfo.GetEffects())
+            {
                 switch (spellEffectInfo.Effect)
                 {
                     case 0:
                         continue;
 
-                    // craft spell for crafting non-existed Item (break client recipes list show)
+                    // craft spell for crafting non-existed item (break client recipes list show)
                     case SpellEffectName.CreateItem:
                     case SpellEffectName.CreateLoot:
+                    {
+                        if (spellEffectInfo.ItemType == 0)
                         {
-                            if (spellEffectInfo.ItemType == 0)
-                            {
-                                // skip auto-loot crafting spells, its not need explicit Item info (but have special fake items sometime)
-                                if (!spellInfo.IsLootCrafting())
-                                {
-                                    if (msg)
-                                    {
-                                        if (player)
-                                            player.SendSysMessage("Craft spell {0} not have create Item entry.", spellInfo.Id);
-                                        else
-                                            Log.outError(LogFilter.Spells, "Craft spell {0} not have create Item entry.", spellInfo.Id);
-                                    }
-
-                                    return false;
-                                }
-                            }
-                            // also possible IsLootCrafting case but fake Item must exist anyway
-                            else if (Global.ObjectMgr.GetItemTemplate(spellEffectInfo.ItemType) == null)
+                            // skip auto-loot crafting spells, its not need explicit item info (but have special fake items sometime)
+                            if (!spellInfo.IsLootCrafting())
                             {
                                 if (msg)
                                 {
                                     if (player)
-                                        player.SendSysMessage("Craft spell {0} create not-exist in DB Item (Entry: {1}) and then...", spellInfo.Id, spellEffectInfo.ItemType);
+                                        player.SendSysMessage("Craft spell {0} not have create item entry.", spellInfo.Id);
                                     else
-                                        Log.outError(LogFilter.Spells, "Craft spell {0} create not-exist in DB Item (Entry: {1}) and then...", spellInfo.Id, spellEffectInfo.ItemType);
+                                        Log.outError(LogFilter.Spells, "Craft spell {0} not have create item entry.", spellInfo.Id);
                                 }
-
                                 return false;
                             }
 
-                            needCheckReagents = true;
-
-                            break;
                         }
-                    case SpellEffectName.LearnSpell:
+                        // also possible IsLootCrafting case but fake item must exist anyway
+                        else if (Global.ObjectMgr.GetItemTemplate(spellEffectInfo.ItemType) == null)
                         {
-                            SpellInfo spellInfo2 = GetSpellInfo(spellEffectInfo.TriggerSpell, Difficulty.None);
-
-                            if (!IsSpellValid(spellInfo2, player, msg))
+                            if (msg)
                             {
-                                if (msg)
-                                {
-                                    if (player != null)
-                                        player.SendSysMessage("Spell {0} learn to broken spell {1}, and then...", spellInfo.Id, spellEffectInfo.TriggerSpell);
-                                    else
-                                        Log.outError(LogFilter.Spells, "Spell {0} learn to invalid spell {1}, and then...", spellInfo.Id, spellEffectInfo.TriggerSpell);
-                                }
-
-                                return false;
+                                if (player)
+                                    player.SendSysMessage("Craft spell {0} create not-exist in DB item (Entry: {1}) and then...", spellInfo.Id, spellEffectInfo.ItemType);
+                                else
+                                    Log.outError(LogFilter.Spells, "Craft spell {0} create not-exist in DB item (Entry: {1}) and then...", spellInfo.Id, spellEffectInfo.ItemType);
                             }
-
-                            break;
+                            return false;
                         }
+
+                        needCheckReagents = true;
+                        break;
+                    }
+                    case SpellEffectName.LearnSpell:
+                    {
+                        SpellInfo spellInfo2 = GetSpellInfo(spellEffectInfo.TriggerSpell, Difficulty.None);
+                        if (!IsSpellValid(spellInfo2, player, msg))
+                        {
+                            if (msg)
+                            {
+                                if (player != null)
+                                    player.SendSysMessage("Spell {0} learn to broken spell {1}, and then...", spellInfo.Id, spellEffectInfo.TriggerSpell);
+                                else
+                                    Log.outError(LogFilter.Spells, "Spell {0} learn to invalid spell {1}, and then...", spellInfo.Id, spellEffectInfo.TriggerSpell);
+                            }
+                            return false;
+                        }
+                        break;
+                    }
                 }
+            }
 
             if (needCheckReagents)
+            {
                 for (int j = 0; j < SpellConst.MaxReagents; ++j)
-                    if (spellInfo.Reagent[j] > 0 &&
-                        Global.ObjectMgr.GetItemTemplate((uint)spellInfo.Reagent[j]) == null)
+                {
+                    if (spellInfo.Reagent[j] > 0 && Global.ObjectMgr.GetItemTemplate((uint)spellInfo.Reagent[j]) == null)
                     {
                         if (msg)
                         {
                             if (player != null)
-                                player.SendSysMessage("Craft spell {0} have not-exist reagent in DB Item (Entry: {1}) and then...", spellInfo.Id, spellInfo.Reagent[j]);
+                                player.SendSysMessage("Craft spell {0} have not-exist reagent in DB item (Entry: {1}) and then...", spellInfo.Id, spellInfo.Reagent[j]);
                             else
-                                Log.outError(LogFilter.Spells, "Craft spell {0} have not-exist reagent in DB Item (Entry: {1}) and then...", spellInfo.Id, spellInfo.Reagent[j]);
+                                Log.outError(LogFilter.Spells, "Craft spell {0} have not-exist reagent in DB item (Entry: {1}) and then...", spellInfo.Id, spellInfo.Reagent[j]);
                         }
-
                         return false;
                     }
+                }
+            }
 
             return true;
         }
@@ -196,9 +184,8 @@ namespace Game.Entities
         public uint GetFirstSpellInChain(uint spell_id)
         {
             var node = GetSpellChainNode(spell_id);
-
             if (node != null)
-                return node.First.Id;
+                return node.first.Id;
 
             return spell_id;
         }
@@ -206,9 +193,8 @@ namespace Game.Entities
         public uint GetLastSpellInChain(uint spell_id)
         {
             var node = GetSpellChainNode(spell_id);
-
             if (node != null)
-                return node.Last.Id;
+                return node.last.Id;
 
             return spell_id;
         }
@@ -216,10 +202,9 @@ namespace Game.Entities
         public uint GetNextSpellInChain(uint spell_id)
         {
             var node = GetSpellChainNode(spell_id);
-
             if (node != null)
-                if (node.Next != null)
-                    return node.Next.Id;
+                if (node.next != null)
+                    return node.next.Id;
 
             return 0;
         }
@@ -227,10 +212,9 @@ namespace Game.Entities
         public uint GetPrevSpellInChain(uint spell_id)
         {
             var node = GetSpellChainNode(spell_id);
-
             if (node != null)
-                if (node.Prev != null)
-                    return node.Prev.Id;
+                if (node.prev != null)
+                    return node.prev.Id;
 
             return 0;
         }
@@ -238,9 +222,8 @@ namespace Game.Entities
         public byte GetSpellRank(uint spell_id)
         {
             var node = GetSpellChainNode(spell_id);
-
             if (node != null)
-                return node.Rank;
+                return node.rank;
 
             return 0;
         }
@@ -248,16 +231,13 @@ namespace Game.Entities
         public uint GetSpellWithRank(uint spell_id, uint rank, bool strict = false)
         {
             var node = GetSpellChainNode(spell_id);
-
             if (node != null)
             {
-                if (rank != node.Rank)
-                    return GetSpellWithRank(node.Rank < rank ? node.Next.Id : node.Prev.Id, rank, strict);
+                if (rank != node.rank)
+                    return GetSpellWithRank(node.rank < rank ? node.next.Id : node.prev.Id, rank, strict);
             }
             else if (strict && rank > 1)
-            {
                 return 0;
-            }
 
             return spell_id;
         }
@@ -277,9 +257,10 @@ namespace Game.Entities
             var spellsRequiringSpell = GetSpellsRequiringSpellBounds(req_spellid);
 
             foreach (var spell in spellsRequiringSpell)
+            {
                 if (spell == spellid)
                     return true;
-
+            }
             return false;
         }
 
@@ -293,14 +274,17 @@ namespace Game.Entities
             return mSpellLearnSpells.LookupByKey(spell_id);
         }
 
+        bool IsSpellLearnSpell(uint spell_id)
+        {
+            return mSpellLearnSpells.ContainsKey(spell_id);
+        }
+
         public bool IsSpellLearnToSpell(uint spell_id1, uint spell_id2)
         {
             var bounds = GetSpellLearnSpellMapBounds(spell_id1);
-
             foreach (var bound in bounds)
                 if (bound.Spell == spell_id2)
                     return true;
-
             return false;
         }
 
@@ -317,12 +301,17 @@ namespace Game.Entities
         public bool IsSpellMemberOfSpellGroup(uint spellid, SpellGroup groupid)
         {
             var spellGroup = GetSpellSpellGroupMapBounds(spellid);
-
             foreach (var group in spellGroup)
+            {
                 if (group == groupid)
                     return true;
-
+            }
             return false;
+        }
+
+        List<int> GetSpellGroupSpellMapBounds(SpellGroup group_id)
+        {
+            return mSpellGroupSpell.LookupByKey(group_id);
         }
 
         public void GetSetOfSpellsInSpellGroup(SpellGroup group_id, out List<int> foundSpells)
@@ -331,16 +320,37 @@ namespace Game.Entities
             GetSetOfSpellsInSpellGroup(group_id, out foundSpells, ref usedGroups);
         }
 
+        void GetSetOfSpellsInSpellGroup(SpellGroup group_id, out List<int> foundSpells, ref List<SpellGroup> usedGroups)
+        {
+            foundSpells = new List<int>();
+            if (usedGroups.Find(p => p == group_id) == 0)
+                return;
+
+            usedGroups.Add(group_id);
+
+            var groupSpell = GetSpellGroupSpellMapBounds(group_id);
+            foreach (var group in groupSpell)
+            {
+                if (group < 0)
+                {
+                    SpellGroup currGroup = (SpellGroup)Math.Abs(group);
+                    GetSetOfSpellsInSpellGroup(currGroup, out foundSpells, ref usedGroups);
+                }
+                else
+                {
+                    foundSpells.Add(group);
+                }
+            }
+        }
+
         public bool AddSameEffectStackRuleSpellGroups(SpellInfo spellInfo, AuraType auraType, int amount, Dictionary<SpellGroup, int> groups)
         {
             uint spellId = spellInfo.GetFirstRankSpell().Id;
             var spellGroupList = GetSpellSpellGroupMapBounds(spellId);
-
             // Find group with SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT if it belongs to one
             foreach (var group in spellGroupList)
             {
                 var found = mSpellSameEffectStack.LookupByKey(group);
-
                 if (found != null)
                 {
                     // check auraTypes
@@ -349,23 +359,18 @@ namespace Game.Entities
 
                     // Put the highest amount in the map
                     if (!groups.ContainsKey(group))
-                    {
                         groups.Add(group, amount);
-                    }
                     else
                     {
                         int curr_amount = groups[group];
-
                         // Take absolute value because this also counts for the highest negative aura
                         if (Math.Abs(curr_amount) < Math.Abs(amount))
                             groups[group] = amount;
                     }
-
                     // return because a spell should be in only one SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT group per auraType
                     return true;
                 }
             }
-
             // Not in a SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT group, so return false
             return false;
         }
@@ -378,44 +383,39 @@ namespace Game.Entities
             // find SpellGroups which are common for both spells
             var spellGroup1 = GetSpellSpellGroupMapBounds(spellid_1);
             List<SpellGroup> groups = new();
-
             foreach (var group in spellGroup1)
+            {
                 if (IsSpellMemberOfSpellGroup(spellid_2, group))
                 {
                     bool add = true;
                     var groupSpell = GetSpellGroupSpellMapBounds(group);
-
                     foreach (var group2 in groupSpell)
+                    {
                         if (group2 < 0)
                         {
                             SpellGroup currGroup = (SpellGroup)Math.Abs(group2);
-
-                            if (IsSpellMemberOfSpellGroup(spellid_1, currGroup) &&
-                                IsSpellMemberOfSpellGroup(spellid_2, currGroup))
+                            if (IsSpellMemberOfSpellGroup(spellid_1, currGroup) && IsSpellMemberOfSpellGroup(spellid_2, currGroup))
                             {
                                 add = false;
-
                                 break;
                             }
                         }
-
+                    }
                     if (add)
                         groups.Add(group);
                 }
+            }
 
             SpellGroupStackRule rule = SpellGroupStackRule.Default;
 
             foreach (var group in groups)
             {
                 var found = mSpellGroupStack.LookupByKey(group);
-
                 if (found != 0)
                     rule = found;
-
                 if (rule != 0)
                     break;
             }
-
             return rule;
         }
 
@@ -430,40 +430,37 @@ namespace Game.Entities
         public SpellProcEntry GetSpellProcEntry(SpellInfo spellInfo)
         {
             SpellProcEntry procEntry = mSpellProcMap.LookupByKey((spellInfo.Id, spellInfo.Difficulty));
-
             if (procEntry != null)
                 return procEntry;
 
             DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(spellInfo.Difficulty);
-
             if (difficulty != null)
+            {
                 do
                 {
                     procEntry = mSpellProcMap.LookupByKey((spellInfo.Id, (Difficulty)difficulty.FallbackDifficultyID));
-
                     if (procEntry != null)
                         return procEntry;
 
                     difficulty = CliDB.DifficultyStorage.LookupByKey(difficulty.FallbackDifficultyID);
                 } while (difficulty != null);
+            }
 
             return null;
         }
 
         public static bool CanSpellTriggerProcOnEvent(SpellProcEntry procEntry, ProcEventInfo eventInfo)
         {
-            // proc Type doesn't match
+            // proc type doesn't match
             if (!(eventInfo.GetTypeMask() & procEntry.ProcFlags))
                 return false;
 
-            // check XP or honor Target requirement
+            // check XP or honor target requirement
             if (((uint)procEntry.AttributesMask & 0x0000001) != 0)
             {
                 Player actor = eventInfo.GetActor().ToPlayer();
-
                 if (actor)
-                    if (eventInfo.GetActionTarget() &&
-                        !actor.IsHonorOrXPTarget(eventInfo.GetActionTarget()))
+                    if (eventInfo.GetActionTarget() && !actor.IsHonorOrXPTarget(eventInfo.GetActionTarget()))
                         return false;
             }
 
@@ -475,7 +472,6 @@ namespace Game.Entities
 
                 var costs = eventInfo.GetProcSpell().GetPowerCost();
                 var m = costs.Find(cost => cost.Amount > 0);
-
                 if (m == null)
                     return false;
             }
@@ -485,47 +481,44 @@ namespace Game.Entities
                 return true;
 
             // check school mask (if set) for other trigger types
-            if (procEntry.SchoolMask != 0 &&
-                !Convert.ToBoolean(eventInfo.GetSchoolMask() & procEntry.SchoolMask))
+            if (procEntry.SchoolMask != 0 && !Convert.ToBoolean(eventInfo.GetSchoolMask() & procEntry.SchoolMask))
                 return false;
 
-            // check spell family Name/Flags (if set) for spells
+            // check spell family name/flags (if set) for spells
             if (eventInfo.GetTypeMask().HasFlag(ProcFlags.SpellMask))
             {
                 SpellInfo eventSpellInfo = eventInfo.GetSpellInfo();
-
                 if (eventSpellInfo != null)
                     if (!eventSpellInfo.IsAffected(procEntry.SpellFamilyName, procEntry.SpellFamilyMask))
                         return false;
 
-                // check spell Type mask (if set)
-                if (procEntry.SpellTypeMask != 0 &&
-                    !Convert.ToBoolean(eventInfo.GetSpellTypeMask() & procEntry.SpellTypeMask))
+                // check spell type mask (if set)
+                if (procEntry.SpellTypeMask != 0 && !Convert.ToBoolean(eventInfo.GetSpellTypeMask() & procEntry.SpellTypeMask))
                     return false;
             }
 
             // check spell phase mask
             if (eventInfo.GetTypeMask().HasFlag(ProcFlags.ReqSpellPhaseMask))
+            {
                 if (!Convert.ToBoolean(eventInfo.GetSpellPhaseMask() & procEntry.SpellPhaseMask))
                     return false;
+            }
 
             // check hit mask (on taken hit or on done hit, but not on spell cast phase)
-            if (eventInfo.GetTypeMask().HasFlag(ProcFlags.TakenHitMask) ||
-                (eventInfo.GetTypeMask().HasFlag(ProcFlags.DoneHitMask) && !Convert.ToBoolean(eventInfo.GetSpellPhaseMask() & ProcFlagsSpellPhase.Cast)))
+            if (eventInfo.GetTypeMask().HasFlag(ProcFlags.TakenHitMask) || (eventInfo.GetTypeMask().HasFlag(ProcFlags.DoneHitMask)
+                && !Convert.ToBoolean(eventInfo.GetSpellPhaseMask() & ProcFlagsSpellPhase.Cast)))
             {
                 ProcFlagsHit hitMask = procEntry.HitMask;
-
                 // get default values if hit mask not set
                 if (hitMask == 0)
                 {
-                    // for taken procs allow normal + Critical hits by default
+                    // for taken procs allow normal + critical hits by default
                     if (eventInfo.GetTypeMask().HasFlag(ProcFlags.TakenHitMask))
                         hitMask |= ProcFlagsHit.Normal | ProcFlagsHit.Critical;
-                    // for done procs allow normal + Critical + absorbs by default
+                    // for done procs allow normal + critical + absorbs by default
                     else
                         hitMask |= ProcFlagsHit.Normal | ProcFlagsHit.Critical | ProcFlagsHit.Absorb;
                 }
-
                 if (!Convert.ToBoolean(eventInfo.GetHitMask() & hitMask))
                     return false;
             }
@@ -536,15 +529,11 @@ namespace Game.Entities
         public SpellThreatEntry GetSpellThreatEntry(uint spellID)
         {
             var spellthreat = mSpellThreatMap.LookupByKey(spellID);
-
             if (spellthreat != null)
-            {
                 return spellthreat;
-            }
             else
             {
                 uint firstSpell = GetFirstSpellInChain(spellID);
-
                 return mSpellThreatMap.LookupByKey(firstSpell);
             }
         }
@@ -567,7 +556,6 @@ namespace Game.Entities
         public bool IsArenaAllowedEnchancment(uint ench_id)
         {
             var enchantment = CliDB.SpellItemEnchantmentStorage.LookupByKey(ench_id);
-
             if (enchantment != null)
                 return enchantment.GetFlags().HasFlag(SpellItemEnchantmentFlags.AllowEnteringArena);
 
@@ -619,24 +607,28 @@ namespace Game.Entities
             var list = mSpellInfoMap.LookupByKey(spellId);
 
             var index = list.FindIndex(spellInfo => spellInfo.Difficulty == difficulty);
-
             if (index != -1)
                 return list[index];
 
             DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
-
             if (difficultyEntry != null)
+            {
                 do
                 {
                     index = list.FindIndex(spellInfo => spellInfo.Difficulty == (Difficulty)difficultyEntry.FallbackDifficultyID);
-
                     if (index != -1)
                         return list[index];
 
                     difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficultyEntry.FallbackDifficultyID);
                 } while (difficultyEntry != null);
+            }
 
             return null;
+        }
+
+        List<SpellInfo> _GetSpellInfo(uint spellId)
+        {
+            return mSpellInfoMap.LookupByKey(spellId);
         }
 
         public void ForEachSpellInfo(Action<SpellInfo> callback)
@@ -651,160 +643,7 @@ namespace Game.Entities
                 callback(spellInfo);
         }
 
-        // SpellInfo object management
-        public bool HasSpellInfo(uint spellId, Difficulty difficulty)
-        {
-            var list = mSpellInfoMap.LookupByKey(spellId);
-
-            if (list.Count == 0)
-                return false;
-
-            return list.Any(spellInfo => spellInfo.Difficulty == difficulty);
-        }
-
-        public MultiMap<uint, SpellInfo> GetSpellInfoStorage()
-        {
-            return mSpellInfoMap;
-        }
-
-        //Extra Shit
-        public SpellEffectHandler GetSpellEffectHandler(SpellEffectName eff)
-        {
-            if (!SpellEffectsHandlers.ContainsKey(eff))
-            {
-                Log.outError(LogFilter.Spells, "No defined handler for SpellEffect {0}", eff);
-
-                return SpellEffectsHandlers[SpellEffectName.None];
-            }
-
-            return SpellEffectsHandlers[eff];
-        }
-
-        public AuraEffectHandler GetAuraEffectHandler(AuraType type)
-        {
-            if (!AuraEffectHandlers.ContainsKey(type))
-            {
-                Log.outError(LogFilter.Spells, "No defined handler for AuraEffect {0}", type);
-
-                return AuraEffectHandlers[AuraType.None];
-            }
-
-            return AuraEffectHandlers[type];
-        }
-
-        public SkillRangeType GetSkillRangeType(SkillRaceClassInfoRecord rcEntry)
-        {
-            SkillLineRecord skill = CliDB.SkillLineStorage.LookupByKey(rcEntry.SkillID);
-
-            if (skill == null)
-                return SkillRangeType.None;
-
-            if (Global.ObjectMgr.GetSkillTier(rcEntry.SkillTierID) != null)
-                return SkillRangeType.Rank;
-
-            if (rcEntry.SkillID == (uint)SkillType.Runeforging)
-                return SkillRangeType.Mono;
-
-            switch (skill.CategoryID)
-            {
-                case SkillCategory.Armor:
-                    return SkillRangeType.Mono;
-                case SkillCategory.Languages:
-                    return SkillRangeType.Language;
-            }
-
-            return SkillRangeType.Level;
-        }
-
-        public bool IsPrimaryProfessionSkill(uint skill)
-        {
-            SkillLineRecord pSkill = CliDB.SkillLineStorage.LookupByKey(skill);
-
-            return pSkill != null && pSkill.CategoryID == SkillCategory.Profession && pSkill.ParentSkillLineID == 0;
-        }
-
-        public bool IsWeaponSkill(uint skill)
-        {
-            var pSkill = CliDB.SkillLineStorage.LookupByKey(skill);
-
-            return pSkill != null && pSkill.CategoryID == SkillCategory.Weapon;
-        }
-
-        public bool IsProfessionOrRidingSkill(uint skill)
-        {
-            return IsProfessionSkill(skill) || skill == (uint)SkillType.Riding;
-        }
-
-        public bool IsProfessionSkill(uint skill)
-        {
-            return IsPrimaryProfessionSkill(skill) || skill == (uint)SkillType.Fishing || skill == (uint)SkillType.Cooking;
-        }
-
-        public bool IsPartOfSkillLine(SkillType skillId, uint spellId)
-        {
-            var skillBounds = GetSkillLineAbilityMapBounds(spellId);
-
-            if (skillBounds != null)
-                foreach (var skill in skillBounds)
-                    if (skill.SkillLine == (uint)skillId)
-                        return true;
-
-            return false;
-        }
-
-        public SpellSchools GetFirstSchoolInMask(SpellSchoolMask mask)
-        {
-            for (int i = 0; i < (int)SpellSchools.Max; ++i)
-                if (Convert.ToBoolean((int)mask & (1 << i)))
-                    return (SpellSchools)i;
-
-            return SpellSchools.Normal;
-        }
-
-        public uint GetModelForTotem(uint spellId, Race race)
-        {
-            return mSpellTotemModel.LookupByKey(Tuple.Create(spellId, (byte)race));
-        }
-
-        private bool IsSpellLearnSpell(uint spell_id)
-        {
-            return mSpellLearnSpells.ContainsKey(spell_id);
-        }
-
-        private List<int> GetSpellGroupSpellMapBounds(SpellGroup group_id)
-        {
-            return mSpellGroupSpell.LookupByKey(group_id);
-        }
-
-        private void GetSetOfSpellsInSpellGroup(SpellGroup group_id, out List<int> foundSpells, ref List<SpellGroup> usedGroups)
-        {
-            foundSpells = new List<int>();
-
-            if (usedGroups.Find(p => p == group_id) == 0)
-                return;
-
-            usedGroups.Add(group_id);
-
-            var groupSpell = GetSpellGroupSpellMapBounds(group_id);
-
-            foreach (var group in groupSpell)
-                if (group < 0)
-                {
-                    SpellGroup currGroup = (SpellGroup)Math.Abs(group);
-                    GetSetOfSpellsInSpellGroup(currGroup, out foundSpells, ref usedGroups);
-                }
-                else
-                {
-                    foundSpells.Add(group);
-                }
-        }
-
-        private List<SpellInfo> _GetSpellInfo(uint spellId)
-        {
-            return mSpellInfoMap.LookupByKey(spellId);
-        }
-
-        private void UnloadSpellInfoChains()
+        void UnloadSpellInfoChains()
         {
             foreach (var pair in mSpellChains)
                 foreach (SpellInfo spellInfo in _GetSpellInfo(pair.Key))
@@ -813,119 +652,19 @@ namespace Game.Entities
             mSpellChains.Clear();
         }
 
-        private bool IsTriggerAura(AuraType type)
-        {
-            switch (type)
-            {
-                case AuraType.Dummy:
-                case AuraType.PeriodicDummy:
-                case AuraType.ModConfuse:
-                case AuraType.ModThreat:
-                case AuraType.ModStun:
-                case AuraType.ModDamageDone:
-                case AuraType.ModDamageTaken:
-                case AuraType.ModResistance:
-                case AuraType.ModStealth:
-                case AuraType.ModFear:
-                case AuraType.ModRoot:
-                case AuraType.Transform:
-                case AuraType.ReflectSpells:
-                case AuraType.DamageImmunity:
-                case AuraType.ProcTriggerSpell:
-                case AuraType.ProcTriggerDamage:
-                case AuraType.ModCastingSpeedNotStack:
-                case AuraType.SchoolAbsorb:
-                case AuraType.ModPowerCostSchoolPct:
-                case AuraType.ModPowerCostSchool:
-                case AuraType.ReflectSpellsSchool:
-                case AuraType.MechanicImmunity:
-                case AuraType.ModDamagePercentTaken:
-                case AuraType.SpellMagnet:
-                case AuraType.ModAttackPower:
-                case AuraType.ModPowerRegenPercent:
-                case AuraType.InterceptMeleeRangedAttacks:
-                case AuraType.OverrideClassScripts:
-                case AuraType.ModMechanicResistance:
-                case AuraType.MeleeAttackPowerAttackerBonus:
-                case AuraType.ModMeleeHaste:
-                case AuraType.ModMeleeHaste3:
-                case AuraType.ModAttackerMeleeHitChance:
-                case AuraType.ProcTriggerSpellWithValue:
-                case AuraType.ModSchoolMaskDamageFromCaster:
-                case AuraType.ModSpellDamageFromCaster:
-                case AuraType.AbilityIgnoreAurastate:
-                case AuraType.ModInvisibility:
-                case AuraType.ForceReaction:
-                case AuraType.ModTaunt:
-                case AuraType.ModDetaunt:
-                case AuraType.ModDamagePercentDone:
-                case AuraType.ModAttackPowerPct:
-                case AuraType.ModHitChance:
-                case AuraType.ModWeaponCritPercent:
-                case AuraType.ModBlockPercent:
-                case AuraType.ModRoot2:
-                    return true;
-            }
-
-            return false;
-        }
-
-        private bool IsAlwaysTriggeredAura(AuraType type)
-        {
-            switch (type)
-            {
-                case AuraType.OverrideClassScripts:
-                case AuraType.ModStealth:
-                case AuraType.ModConfuse:
-                case AuraType.ModFear:
-                case AuraType.ModRoot:
-                case AuraType.ModStun:
-                case AuraType.Transform:
-                case AuraType.ModInvisibility:
-                case AuraType.SpellMagnet:
-                case AuraType.SchoolAbsorb:
-                case AuraType.ModRoot2:
-                    return true;
-            }
-
-            return false;
-        }
-
-        private ProcFlagsSpellType GetSpellTypeMask(AuraType type)
-        {
-            switch (type)
-            {
-                case AuraType.ModStealth:
-                    return ProcFlagsSpellType.Damage | ProcFlagsSpellType.NoDmgHeal;
-                case AuraType.ModConfuse:
-                case AuraType.ModFear:
-                case AuraType.ModRoot:
-                case AuraType.ModRoot2:
-                case AuraType.ModStun:
-                case AuraType.Transform:
-                case AuraType.ModInvisibility:
-                    return ProcFlagsSpellType.Damage;
-                default:
-                    return ProcFlagsSpellType.MaskAll;
-            }
-        }
-
         #region Loads
-
         public void LoadSpellRanks()
         {
             uint oldMSTime = Time.GetMSTime();
 
             Dictionary<uint /*spell*/, uint /*next*/> chains = new();
             List<uint> hasPrev = new();
-
             foreach (SkillLineAbilityRecord skillAbility in CliDB.SkillLineAbilityStorage.Values)
             {
                 if (skillAbility.SupercedesSpell == 0)
                     continue;
 
-                if (!HasSpellInfo(skillAbility.SupercedesSpell, Difficulty.None) ||
-                    !HasSpellInfo(skillAbility.Spell, Difficulty.None))
+                if (!HasSpellInfo(skillAbility.SupercedesSpell, Difficulty.None) || !HasSpellInfo(skillAbility.Spell, Difficulty.None))
                     continue;
 
                 chains[skillAbility.SupercedesSpell] = skillAbility.Spell;
@@ -944,60 +683,55 @@ namespace Game.Entities
                 if (!mSpellChains.ContainsKey(pair.Key))
                     mSpellChains[pair.Key] = new SpellChainNode();
 
-                mSpellChains[pair.Key].First = first;
-                mSpellChains[pair.Key].Prev = null;
-                mSpellChains[pair.Key].Next = next;
-                mSpellChains[pair.Key].Last = next;
-                mSpellChains[pair.Key].Rank = 1;
-
+                mSpellChains[pair.Key].first = first;
+                mSpellChains[pair.Key].prev = null;
+                mSpellChains[pair.Key].next = next;
+                mSpellChains[pair.Key].last = next;
+                mSpellChains[pair.Key].rank = 1;
                 foreach (SpellInfo difficultyInfo in _GetSpellInfo(pair.Key))
                     difficultyInfo.ChainEntry = mSpellChains[pair.Key];
 
                 if (!mSpellChains.ContainsKey(pair.Value))
                     mSpellChains[pair.Value] = new SpellChainNode();
 
-                mSpellChains[pair.Value].First = first;
-                mSpellChains[pair.Value].Prev = first;
-                mSpellChains[pair.Value].Next = null;
-                mSpellChains[pair.Value].Last = next;
-                mSpellChains[pair.Value].Rank = 2;
-
+                mSpellChains[pair.Value].first = first;
+                mSpellChains[pair.Value].prev = first;
+                mSpellChains[pair.Value].next = null;
+                mSpellChains[pair.Value].last = next;
+                mSpellChains[pair.Value].rank = 2;
                 foreach (SpellInfo difficultyInfo in _GetSpellInfo(pair.Value))
                     difficultyInfo.ChainEntry = mSpellChains[pair.Value];
 
                 byte rank = 3;
                 var nextPair = chains.Find(pair.Value);
-
                 while (nextPair.Key != 0)
                 {
                     SpellInfo prev = GetSpellInfo(nextPair.Key, Difficulty.None); // already checked in previous iteration (or above, in case this is the first one)
                     SpellInfo last = GetSpellInfo(nextPair.Value, Difficulty.None);
-
                     if (last == null)
                         break;
 
                     if (!mSpellChains.ContainsKey(nextPair.Key))
                         mSpellChains[nextPair.Key] = new SpellChainNode();
 
-                    mSpellChains[nextPair.Key].Next = last;
+                    mSpellChains[nextPair.Key].next = last;
 
                     if (!mSpellChains.ContainsKey(nextPair.Value))
                         mSpellChains[nextPair.Value] = new SpellChainNode();
 
-                    mSpellChains[nextPair.Value].First = first;
-                    mSpellChains[nextPair.Value].Prev = prev;
-                    mSpellChains[nextPair.Value].Next = null;
-                    mSpellChains[nextPair.Value].Last = last;
-                    mSpellChains[nextPair.Value].Rank = rank++;
-
+                    mSpellChains[nextPair.Value].first = first;
+                    mSpellChains[nextPair.Value].prev = prev;
+                    mSpellChains[nextPair.Value].next = null;
+                    mSpellChains[nextPair.Value].last = last;
+                    mSpellChains[nextPair.Value].rank = rank++;
                     foreach (SpellInfo difficultyInfo in _GetSpellInfo(nextPair.Value))
                         difficultyInfo.ChainEntry = mSpellChains[nextPair.Value];
 
                     // fill 'last'
                     do
                     {
-                        mSpellChains[prev.Id].Last = last;
-                        prev = mSpellChains[prev.Id].Prev;
+                        mSpellChains[prev.Id].last = last;
+                        prev = mSpellChains[prev.Id].prev;
                     } while (prev != null);
 
                     nextPair = chains.Find(nextPair.Value);
@@ -1011,12 +745,11 @@ namespace Game.Entities
         {
             uint oldMSTime = Time.GetMSTime();
 
-            mSpellsReqSpell.Clear(); // need for reload case
-            mSpellReq.Clear();       // need for reload case
+            mSpellsReqSpell.Clear();                                   // need for reload case
+            mSpellReq.Clear();                                         // need for reload case
 
             //                                                   0        1
             SQLResult result = DB.World.Query("SELECT spell_id, req_spell from spell_required");
-
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell required records. DB table `spell_required` is empty.");
@@ -1025,7 +758,6 @@ namespace Game.Entities
             }
 
             uint count = 0;
-
             do
             {
                 uint spell_id = result.Read<uint>(0);
@@ -1033,34 +765,28 @@ namespace Game.Entities
 
                 // check if chain is made with valid first spell
                 SpellInfo spell = GetSpellInfo(spell_id, Difficulty.None);
-
                 if (spell == null)
                 {
                     Log.outError(LogFilter.Sql, "spell_id {0} in `spell_required` table is not found in dbcs, skipped", spell_id);
-
                     continue;
                 }
 
                 SpellInfo req_spell = GetSpellInfo(spell_req, Difficulty.None);
-
                 if (req_spell == null)
                 {
                     Log.outError(LogFilter.Sql, "req_spell {0} in `spell_required` table is not found in dbcs, skipped", spell_req);
-
                     continue;
                 }
 
                 if (spell.IsRankOf(req_spell))
                 {
                     Log.outError(LogFilter.Sql, "req_spell {0} and spell_id {1} in `spell_required` table are ranks of the same spell, entry not needed, skipped", spell_req, spell_id);
-
                     continue;
                 }
 
                 if (IsSpellRequiringSpell(spell_id, spell_req))
                 {
                     Log.outError(LogFilter.Sql, "duplicated entry of req_spell {0} and spell_id {1} in `spell_required`, skipped", spell_req, spell_id);
-
                     continue;
                 }
 
@@ -1070,15 +796,15 @@ namespace Game.Entities
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell required records in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+
         }
 
         public void LoadSpellLearnSkills()
         {
             mSpellLearnSkills.Clear();
 
-            // search auto-learned Skills and add its to map also for use in unlearn spells/talents
+            // search auto-learned skills and add its to map also for use in unlearn spells/talents
             uint dbc_count = 0;
-
             foreach (var entry in mSpellInfoMap.Values)
             {
                 if (entry.Difficulty != Difficulty.None)
@@ -1087,27 +813,22 @@ namespace Game.Entities
                 foreach (var spellEffectInfo in entry.GetEffects())
                 {
                     SpellLearnSkillNode dbc_node = new();
-
                     switch (spellEffectInfo.Effect)
                     {
                         case SpellEffectName.Skill:
-                            dbc_node.Skill = (SkillType)spellEffectInfo.MiscValue;
-                            dbc_node.Step = (ushort)spellEffectInfo.CalcValue();
-
-                            if (dbc_node.Skill != SkillType.Riding)
-                                dbc_node.Value = 1;
+                            dbc_node.skill = (SkillType)spellEffectInfo.MiscValue;
+                            dbc_node.step = (ushort)spellEffectInfo.CalcValue();
+                            if (dbc_node.skill != SkillType.Riding)
+                                dbc_node.value = 1;
                             else
-                                dbc_node.Value = (ushort)(dbc_node.Step * 75);
-
-                            dbc_node.Maxvalue = (ushort)(dbc_node.Step * 75);
-
+                                dbc_node.value = (ushort)(dbc_node.step * 75);
+                            dbc_node.maxvalue = (ushort)(dbc_node.step * 75);
                             break;
                         case SpellEffectName.DualWield:
-                            dbc_node.Skill = SkillType.DualWield;
-                            dbc_node.Step = 1;
-                            dbc_node.Value = 1;
-                            dbc_node.Maxvalue = 1;
-
+                            dbc_node.skill = SkillType.DualWield;
+                            dbc_node.step = 1;
+                            dbc_node.value = 1;
+                            dbc_node.maxvalue = 1;
                             break;
                         default:
                             continue;
@@ -1115,11 +836,9 @@ namespace Game.Entities
 
                     mSpellLearnSkills.Add(entry.Id, dbc_node);
                     ++dbc_count;
-
                     break;
                 }
             }
-
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Spell Learn Skills from DBC", dbc_count);
         }
 
@@ -1131,16 +850,12 @@ namespace Game.Entities
 
             //                                         0      1        2
             SQLResult result = DB.World.Query("SELECT entry, SpellID, Active FROM spell_learn_spell");
-
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell learn spells. DB table `spell_learn_spell` is empty.");
-
                 return;
             }
-
             uint count = 0;
-
             do
             {
                 uint spell_id = result.Read<uint>(0);
@@ -1152,25 +867,21 @@ namespace Game.Entities
                 node.AutoLearned = false;
 
                 SpellInfo spellInfo = GetSpellInfo(spell_id, Difficulty.None);
-
                 if (spellInfo == null)
                 {
                     Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_learn_spell` does not exist", spell_id);
-
                     continue;
                 }
 
                 if (!HasSpellInfo(node.Spell, Difficulty.None))
                 {
                     Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_learn_spell` learning not existed spell {1}", spell_id, node.Spell);
-
                     continue;
                 }
 
                 if (spellInfo.HasAttribute(SpellCustomAttributes.IsTalent))
                 {
                     Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_learn_spell` attempt learning talent spell {1}, skipped", spell_id, node.Spell);
-
                     continue;
                 }
 
@@ -1180,18 +891,18 @@ namespace Game.Entities
 
             // search auto-learned spells and add its to map also for use in unlearn spells/talents
             uint dbc_count = 0;
-
             foreach (var entry in mSpellInfoMap.Values)
             {
                 if (entry.Difficulty != Difficulty.None)
                     continue;
 
                 foreach (var spellEffectInfo in entry.GetEffects())
+                {
                     if (spellEffectInfo.Effect == SpellEffectName.LearnSpell)
                     {
                         var dbc_node = new SpellLearnSpellNode();
                         dbc_node.Spell = spellEffectInfo.TriggerSpell;
-                        dbc_node.Active = true; // all dbc based learned spells is active (show in spell book or hide by client itself)
+                        dbc_node.Active = true;                     // all dbc based learned spells is active (show in spell book or hide by client itself)
                         dbc_node.OverridesSpell = 0;
 
                         // ignore learning not existed spells (broken/outdated/or generic learnig spell 483
@@ -1206,45 +917,42 @@ namespace Game.Entities
                         var db_node_bounds = GetSpellLearnSpellMapBounds(entry.Id);
 
                         bool found = false;
-
                         foreach (var bound in db_node_bounds)
+                        {
                             if (bound.Spell == dbc_node.Spell)
                             {
-                                Log.outError(LogFilter.Sql,
-                                             "Spell {0} auto-learn spell {1} in spell.dbc then the record in `spell_learn_spell` is redundant, please fix DB.",
-                                             entry.Id,
-                                             dbc_node.Spell);
-
+                                Log.outError(LogFilter.Sql, "Spell {0} auto-learn spell {1} in spell.dbc then the record in `spell_learn_spell` is redundant, please fix DB.",
+                                    entry.Id, dbc_node.Spell);
                                 found = true;
-
                                 break;
                             }
+                        }
 
-                        if (!found) // add new spell-spell pair if not found
+                        if (!found)                                  // add new spell-spell pair if not found
                         {
                             mSpellLearnSpells.Add(entry.Id, dbc_node);
                             ++dbc_count;
                         }
                     }
+                }
             }
 
             foreach (var spellLearnSpell in CliDB.SpellLearnSpellStorage.Values)
             {
-                if (!HasSpellInfo(spellLearnSpell.SpellID, Difficulty.None) ||
-                    !HasSpellInfo(spellLearnSpell.LearnSpellID, Difficulty.None))
+                if (!HasSpellInfo(spellLearnSpell.SpellID, Difficulty.None) || !HasSpellInfo(spellLearnSpell.LearnSpellID, Difficulty.None))
                     continue;
 
                 var db_node_bounds = mSpellLearnSpells.LookupByKey(spellLearnSpell.SpellID);
                 bool found = false;
-
                 foreach (var spellNode in db_node_bounds)
+                {
                     if (spellNode.Spell == spellLearnSpell.LearnSpellID)
                     {
                         Log.outError(LogFilter.Sql, $"Found redundant record (entry: {spellLearnSpell.SpellID}, SpellID: {spellLearnSpell.LearnSpellID}) in `spell_learn_spell`, spell added automatically from SpellLearnSpell.db2");
                         found = true;
-
                         break;
                     }
+                }
 
                 if (found)
                     continue;
@@ -1252,14 +960,14 @@ namespace Game.Entities
                 // Check if it is already found in Spell.dbc, ignore silently if yes
                 var dbc_node_bounds = GetSpellLearnSpellMapBounds(spellLearnSpell.SpellID);
                 found = false;
-
                 foreach (var spellNode in dbc_node_bounds)
+                {
                     if (spellNode.Spell == spellLearnSpell.LearnSpellID)
                     {
                         found = true;
-
                         break;
                     }
+                }
 
                 if (found)
                     continue;
@@ -1281,73 +989,61 @@ namespace Game.Entities
         {
             uint oldMSTime = Time.GetMSTime();
 
-            mSpellTargetPositions.Clear(); // need for reload case
+            mSpellTargetPositions.Clear();                                // need for reload case
 
             //                                         0   1         2           3                  4                  5
             SQLResult result = DB.World.Query("SELECT ID, EffectIndex, MapID, PositionX, PositionY, PositionZ FROM spell_target_position");
-
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell Target coordinates. DB table `spell_target_position` is empty.");
-
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell target coordinates. DB table `spell_target_position` is empty.");
                 return;
             }
 
             uint count = 0;
-
             do
             {
                 uint spellId = result.Read<uint>(0);
                 uint effIndex = result.Read<byte>(1);
 
                 SpellTargetPosition st = new();
-                st.Target_mapId = result.Read<uint>(2);
-                st.Target_X = result.Read<float>(3);
-                st.Target_Y = result.Read<float>(4);
-                st.Target_Z = result.Read<float>(5);
+                st.target_mapId = result.Read<uint>(2);
+                st.target_X = result.Read<float>(3);
+                st.target_Y = result.Read<float>(4);
+                st.target_Z = result.Read<float>(5);
 
-                var mapEntry = CliDB.MapStorage.LookupByKey(st.Target_mapId);
-
+                var mapEntry = CliDB.MapStorage.LookupByKey(st.target_mapId);
                 if (mapEntry == null)
                 {
-                    Log.outError(LogFilter.Sql, "Spell (ID: {0}, EffectIndex: {1}) is using a non-existant MapID (ID: {2})", spellId, effIndex, st.Target_mapId);
-
+                    Log.outError(LogFilter.Sql, "Spell (ID: {0}, EffectIndex: {1}) is using a non-existant MapID (ID: {2})", spellId, effIndex, st.target_mapId);
                     continue;
                 }
 
-                if (st.Target_X == 0 &&
-                    st.Target_Y == 0 &&
-                    st.Target_Z == 0)
+                if (st.target_X == 0 && st.target_Y == 0 && st.target_Z == 0)
                 {
-                    Log.outError(LogFilter.Sql, "Spell (ID: {0}, EffectIndex: {1}) Target coordinates not provided.", spellId, effIndex);
-
+                    Log.outError(LogFilter.Sql, "Spell (ID: {0}, EffectIndex: {1}) target coordinates not provided.", spellId, effIndex);
                     continue;
                 }
 
                 SpellInfo spellInfo = GetSpellInfo(spellId, Difficulty.None);
-
                 if (spellInfo == null)
                 {
                     Log.outError(LogFilter.Sql, "Spell (ID: {0}) listed in `spell_target_position` does not exist.", spellId);
-
                     continue;
                 }
 
                 if (effIndex >= spellInfo.GetEffects().Count)
                 {
                     Log.outError(LogFilter.Sql, "Spell (Id: {0}, effIndex: {1}) listed in `spell_target_position` does not have an effect at index {2}.", spellId, effIndex, effIndex);
-
                     continue;
                 }
 
-                // Target facing is in degrees for 6484 & 9268... (blizz sucks)
+                // target facing is in degrees for 6484 & 9268... (blizz sucks)
                 if (spellInfo.GetEffect(effIndex).PositionFacing > 2 * Math.PI)
-                    st.Target_Orientation = spellInfo.GetEffect(effIndex).PositionFacing * (float)Math.PI / 180;
+                    st.target_Orientation = spellInfo.GetEffect(effIndex).PositionFacing * (float)Math.PI / 180;
                 else
-                    st.Target_Orientation = spellInfo.GetEffect(effIndex).PositionFacing;
+                    st.target_Orientation = spellInfo.GetEffect(effIndex).PositionFacing;
 
-                if (spellInfo.GetEffect(effIndex).TargetA.GetTarget() == Targets.DestDb ||
-                    spellInfo.GetEffect(effIndex).TargetB.GetTarget() == Targets.DestDb)
+                if (spellInfo.GetEffect(effIndex).TargetA.GetTarget() == Targets.DestDb || spellInfo.GetEffect(effIndex).TargetB.GetTarget() == Targets.DestDb)
                 {
                     var key = new KeyValuePair<uint, uint>(spellId, effIndex);
                     mSpellTargetPositions[key] = st;
@@ -1355,11 +1051,12 @@ namespace Game.Entities
                 }
                 else
                 {
-                    Log.outError(LogFilter.Sql, "Spell (Id: {0}, effIndex: {1}) listed in `spell_target_position` does not have Target TARGET_DEST_DB (17).", spellId, effIndex);
-
+                    Log.outError(LogFilter.Sql, "Spell (Id: {0}, effIndex: {1}) listed in `spell_target_position` does not have target TARGET_DEST_DB (17).", spellId, effIndex);
                     continue;
                 }
-            } while (result.NextRow());
+
+            }
+            while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell teleport coordinates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
@@ -1368,53 +1065,47 @@ namespace Game.Entities
         {
             uint oldMSTime = Time.GetMSTime();
 
-            mSpellSpellGroup.Clear(); // need for reload case
+            mSpellSpellGroup.Clear();                                  // need for reload case
             mSpellGroupSpell.Clear();
 
             //                                                0     1
-            SQLResult result = DB.World.Query("SELECT Id, spell_id FROM spell_group");
-
+            SQLResult result = DB.World.Query("SELECT id, spell_id FROM spell_group");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell group definitions. DB table `spell_group` is empty.");
-
                 return;
             }
 
             List<uint> groups = new();
             uint count = 0;
-
             do
             {
                 uint group_id = result.Read<uint>(0);
-
-                if (group_id <= 1000 &&
-                    group_id >= (uint)SpellGroup.CoreRangeMax)
+                if (group_id <= 1000 && group_id >= (uint)SpellGroup.CoreRangeMax)
                 {
-                    Log.outError(LogFilter.Sql, "SpellGroup Id {0} listed in `spell_group` is in core range, but is not defined in core!", group_id);
-
+                    Log.outError(LogFilter.Sql, "SpellGroup id {0} listed in `spell_group` is in core range, but is not defined in core!", group_id);
                     continue;
                 }
-
                 int spell_id = result.Read<int>(1);
 
                 groups.Add(group_id);
                 mSpellGroupSpell.Add((SpellGroup)group_id, spell_id);
+
             } while (result.NextRow());
 
             foreach (var group in mSpellGroupSpell.KeyValueList)
+            {
                 if (group.Value < 0)
                 {
                     if (!groups.Contains((uint)Math.Abs(group.Value)))
                     {
-                        Log.outError(LogFilter.Sql, "SpellGroup Id {0} listed in `spell_group` does not exist", Math.Abs(group.Value));
+                        Log.outError(LogFilter.Sql, "SpellGroup id {0} listed in `spell_group` does not exist", Math.Abs(group.Value));
                         mSpellGroupSpell.Remove(group.Key);
                     }
                 }
                 else
                 {
                     SpellInfo spellInfo = GetSpellInfo((uint)group.Value, Difficulty.None);
-
                     if (spellInfo == null)
                     {
                         Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_group` does not exist", group.Value);
@@ -1426,6 +1117,7 @@ namespace Game.Entities
                         mSpellGroupSpell.Remove(group.Key);
                     }
                 }
+            }
 
             foreach (var group in groups)
             {
@@ -1446,41 +1138,34 @@ namespace Game.Entities
         {
             uint oldMSTime = Time.GetMSTime();
 
-            mSpellGroupStack.Clear(); // need for reload case
+            mSpellGroupStack.Clear();                                  // need for reload case
             mSpellSameEffectStack.Clear();
 
             List<SpellGroup> sameEffectGroups = new();
 
             //                                         0         1
             SQLResult result = DB.World.Query("SELECT group_id, stack_rule FROM spell_group_stack_rules");
-
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell group stack rules. DB table `spell_group_stack_rules` is empty.");
-
                 return;
             }
 
             uint count = 0;
-
             do
             {
                 SpellGroup group_id = (SpellGroup)result.Read<uint>(0);
                 SpellGroupStackRule stack_rule = (SpellGroupStackRule)result.Read<byte>(1);
-
                 if (stack_rule >= SpellGroupStackRule.Max)
                 {
                     Log.outError(LogFilter.Sql, "SpellGroupStackRule {0} listed in `spell_group_stack_rules` does not exist", stack_rule);
-
                     continue;
                 }
 
                 var spellGroup = GetSpellGroupSpellMapBounds(group_id);
-
                 if (spellGroup == null)
                 {
-                    Log.outError(LogFilter.Sql, "SpellGroup Id {0} listed in `spell_group_stack_rules` does not exist", group_id);
-
+                    Log.outError(LogFilter.Sql, "SpellGroup id {0} listed in `spell_group_stack_rules` does not exist", group_id);
                     continue;
                 }
 
@@ -1512,23 +1197,25 @@ namespace Game.Entities
                     // only waylay for the moment (shared group)
                     AuraType[] SubGroups =
                     {
-                        AuraType.ModMeleeHaste, AuraType.ModMeleeRangedHaste, AuraType.ModRangedHaste
+                        AuraType.ModMeleeHaste,
+                        AuraType.ModMeleeRangedHaste,
+                        AuraType.ModRangedHaste
                     };
 
                     foreach (uint spellId in spellIds)
                     {
                         SpellInfo spellInfo = GetSpellInfo(spellId, Difficulty.None);
-
                         foreach (var spellEffectInfo in spellInfo.GetEffects())
                         {
                             if (!spellEffectInfo.IsAura())
                                 continue;
 
                             AuraType auraName = spellEffectInfo.ApplyAuraName;
-
                             if (SubGroups.Contains(auraName))
-                                // Count as first aura
+                            {
+                                // count as first aura
                                 auraName = SubGroups[0];
+                            }
 
                             frequencyContainer.Add(auraName);
                         }
@@ -1536,11 +1223,9 @@ namespace Game.Entities
 
                     AuraType auraType = 0;
                     int auraTypeCount = 0;
-
                     foreach (AuraType auraName in frequencyContainer)
                     {
                         int currentCount = frequencyContainer.Count(p => p == auraName);
-
                         if (currentCount > auraTypeCount)
                         {
                             auraType = auraName;
@@ -1551,7 +1236,6 @@ namespace Game.Entities
                     if (auraType == SubGroups[0])
                     {
                         auraTypes.AddRange(SubGroups);
-
                         break;
                     }
 
@@ -1565,16 +1249,16 @@ namespace Game.Entities
                     SpellInfo spellInfo = GetSpellInfo(spellId, Difficulty.None);
 
                     bool found = false;
-
                     while (spellInfo != null)
                     {
                         foreach (AuraType auraType in auraTypes)
+                        {
                             if (spellInfo.HasAura(auraType))
                             {
                                 found = true;
-
                                 break;
                             }
+                        }
 
                         if (found)
                             break;
@@ -1598,15 +1282,14 @@ namespace Game.Entities
         {
             uint oldMSTime = Time.GetMSTime();
 
-            mSpellProcMap.Clear(); // need for reload case
+            mSpellProcMap.Clear();                             // need for reload case
 
             //                                         0        1           2                3                 4                 5                 6
             SQLResult result = DB.World.Query("SELECT SpellId, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, SpellFamilyMask3, " +
-                                              //7          8           9              10              11       12              13                  14              15      16        17
-                                              "ProcFlags, ProcFlags2, SpellTypeMask, SpellPhaseMask, HitMask, AttributesMask, DisableEffectsMask, ProcsPerMinute, Chance, Cooldown, Charges FROM spell_proc");
+                //7          8           9              10              11       12              13                  14              15      16        17
+                "ProcFlags, ProcFlags2, SpellTypeMask, SpellPhaseMask, HitMask, AttributesMask, DisableEffectsMask, ProcsPerMinute, Chance, Cooldown, Charges FROM spell_proc");
 
             uint count = 0;
-
             if (!result.IsEmpty())
             {
                 do
@@ -1614,7 +1297,6 @@ namespace Game.Entities
                     int spellId = result.Read<int>(0);
 
                     bool allRanks = false;
-
                     if (spellId < 0)
                     {
                         allRanks = true;
@@ -1622,21 +1304,20 @@ namespace Game.Entities
                     }
 
                     SpellInfo spellInfo = GetSpellInfo((uint)spellId, Difficulty.None);
-
                     if (spellInfo == null)
                     {
                         Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_proc` does not exist", spellId);
-
                         continue;
                     }
 
                     if (allRanks)
+                    {
                         if (spellInfo.GetFirstRankSpell().Id != (uint)spellId)
                         {
                             Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_proc` is not first rank of spell.", spellId);
-
                             continue;
                         }
+                    }
 
                     SpellProcEntry baseProcEntry = new();
 
@@ -1659,95 +1340,67 @@ namespace Game.Entities
                         if (mSpellProcMap.ContainsKey((spellInfo.Id, spellInfo.Difficulty)))
                         {
                             Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_proc` has duplicate entry in the table", spellInfo.Id);
-
                             break;
                         }
-
                         SpellProcEntry procEntry = baseProcEntry;
 
                         // take defaults from dbcs
                         if (!procEntry.ProcFlags)
                             procEntry.ProcFlags = spellInfo.ProcFlags;
-
                         if (procEntry.Charges == 0)
                             procEntry.Charges = spellInfo.ProcCharges;
-
-                        if (procEntry.Chance == 0 &&
-                            procEntry.ProcsPerMinute == 0)
+                        if (procEntry.Chance == 0 && procEntry.ProcsPerMinute == 0)
                             procEntry.Chance = spellInfo.ProcChance;
-
                         if (procEntry.Cooldown == 0)
                             procEntry.Cooldown = spellInfo.ProcCooldown;
 
-                        // validate _data
+                        // validate data
                         if (Convert.ToBoolean(procEntry.SchoolMask & ~SpellSchoolMask.All))
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SchoolMask` set: {1}", spellInfo.Id, procEntry.SchoolMask);
-
-                        if (procEntry.SpellFamilyName != 0 &&
-                            !Global.DB2Mgr.IsValidSpellFamiliyName(procEntry.SpellFamilyName))
+                        if (procEntry.SpellFamilyName != 0 && !Global.DB2Mgr.IsValidSpellFamiliyName(procEntry.SpellFamilyName))
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SpellFamilyName` set: {1}", spellInfo.Id, procEntry.SpellFamilyName);
-
                         if (procEntry.Chance < 0)
                         {
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has negative value in `Chance` field", spellInfo.Id);
                             procEntry.Chance = 0;
                         }
-
                         if (procEntry.ProcsPerMinute < 0)
                         {
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has negative value in `ProcsPerMinute` field", spellInfo.Id);
                             procEntry.ProcsPerMinute = 0;
                         }
-
                         if (!procEntry.ProcFlags)
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} doesn't have `ProcFlags` value defined, proc will not be triggered", spellInfo.Id);
-
                         if (Convert.ToBoolean(procEntry.SpellTypeMask & ~ProcFlagsSpellType.MaskAll))
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SpellTypeMask` set: {1}", spellInfo.Id, procEntry.SpellTypeMask);
-
-                        if (procEntry.SpellTypeMask != 0 &&
-                            !procEntry.ProcFlags.HasFlag(ProcFlags.SpellMask))
+                        if (procEntry.SpellTypeMask != 0 && !procEntry.ProcFlags.HasFlag(ProcFlags.SpellMask))
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has `SpellTypeMask` value defined, but it won't be used for defined `ProcFlags` value", spellInfo.Id);
-
-                        if (procEntry.SpellPhaseMask == 0 &&
-                            procEntry.ProcFlags.HasFlag(ProcFlags.ReqSpellPhaseMask))
+                        if (procEntry.SpellPhaseMask == 0 && procEntry.ProcFlags.HasFlag(ProcFlags.ReqSpellPhaseMask))
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} doesn't have `SpellPhaseMask` value defined, but it's required for defined `ProcFlags` value, proc will not be triggered", spellInfo.Id);
-
                         if (Convert.ToBoolean(procEntry.SpellPhaseMask & ~ProcFlagsSpellPhase.MaskAll))
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SpellPhaseMask` set: {1}", spellInfo.Id, procEntry.SpellPhaseMask);
-
-                        if (procEntry.SpellPhaseMask != 0 &&
-                            !procEntry.ProcFlags.HasFlag(ProcFlags.ReqSpellPhaseMask))
+                        if (procEntry.SpellPhaseMask != 0 && !procEntry.ProcFlags.HasFlag(ProcFlags.ReqSpellPhaseMask))
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has `SpellPhaseMask` value defined, but it won't be used for defined `ProcFlags` value", spellInfo.Id);
-
                         if (Convert.ToBoolean(procEntry.HitMask & ~ProcFlagsHit.MaskAll))
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `HitMask` set: {1}", spellInfo.Id, procEntry.HitMask);
-
-                        if (procEntry.HitMask != 0 &&
-                            !(procEntry.ProcFlags.HasFlag(ProcFlags.TakenHitMask) || (procEntry.ProcFlags.HasFlag(ProcFlags.DoneHitMask) && (procEntry.SpellPhaseMask == 0 || Convert.ToBoolean(procEntry.SpellPhaseMask & (ProcFlagsSpellPhase.Hit | ProcFlagsSpellPhase.Finish))))))
+                        if (procEntry.HitMask != 0 && !(procEntry.ProcFlags.HasFlag(ProcFlags.TakenHitMask) || (procEntry.ProcFlags.HasFlag(ProcFlags.DoneHitMask) && (procEntry.SpellPhaseMask == 0 || Convert.ToBoolean(procEntry.SpellPhaseMask & (ProcFlagsSpellPhase.Hit | ProcFlagsSpellPhase.Finish))))))
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has `HitMask` value defined, but it won't be used for defined `ProcFlags` and `SpellPhaseMask` values", spellInfo.Id);
-
                         foreach (var spellEffectInfo in spellInfo.GetEffects())
-                            if ((procEntry.DisableEffectsMask & (1u << (int)spellEffectInfo.EffectIndex)) != 0 &&
-                                !spellEffectInfo.IsAura())
+                            if ((procEntry.DisableEffectsMask & (1u << (int)spellEffectInfo.EffectIndex)) != 0 && !spellEffectInfo.IsAura())
                                 Log.outError(LogFilter.Sql, $"The `spell_proc` table entry for spellId {spellInfo.Id} has DisableEffectsMask with effect {spellEffectInfo.EffectIndex}, but effect {spellEffectInfo.EffectIndex} is not an aura effect");
 
                         if (procEntry.AttributesMask.HasFlag(ProcAttributes.ReqSpellmod))
                         {
                             bool found = false;
-
                             foreach (var spellEffectInfo in spellInfo.GetEffects())
                             {
                                 if (!spellEffectInfo.IsAura())
                                     continue;
 
-                                if (spellEffectInfo.ApplyAuraName == AuraType.AddPctModifier ||
-                                    spellEffectInfo.ApplyAuraName == AuraType.AddFlatModifier ||
-                                    spellEffectInfo.ApplyAuraName == AuraType.AddPctModifierBySpellLabel ||
-                                    spellEffectInfo.ApplyAuraName == AuraType.AddFlatModifierBySpellLabel)
+                                if (spellEffectInfo.ApplyAuraName == AuraType.AddPctModifier || spellEffectInfo.ApplyAuraName == AuraType.AddFlatModifier
+                                    || spellEffectInfo.ApplyAuraName == AuraType.AddPctModifierBySpellLabel || spellEffectInfo.ApplyAuraName == AuraType.AddFlatModifierBySpellLabel)
                                 {
                                     found = true;
-
                                     break;
                                 }
                             }
@@ -1755,7 +1408,6 @@ namespace Game.Entities
                             if (!found)
                                 Log.outError(LogFilter.Sql, $"The `spell_proc` table entry for spellId {spellInfo.Id} has Attribute PROC_ATTR_REQ_SPELLMOD, but spell has no spell mods. Proc will not be triggered");
                         }
-
                         if ((procEntry.AttributesMask & ~ProcAttributes.AllAllowed) != 0)
                         {
                             Log.outError(LogFilter.Sql, $"The `spell_proc` table entry for spellId {spellInfo.Id} has `AttributesMask` value specifying invalid attributes 0x{(procEntry.AttributesMask & ~ProcAttributes.AllAllowed):X}.");
@@ -1772,15 +1424,13 @@ namespace Game.Entities
                     }
                 } while (result.NextRow());
 
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell proc conditions and _data in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell proc conditions and data in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             }
             else
-            {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell proc conditions and _data. DB table `spell_proc` is empty.");
-            }
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell proc conditions and data. DB table `spell_proc` is empty.");
 
             // This generates default procs to retain compatibility with previous proc system
-            Log.outInfo(LogFilter.ServerLoading, "Generating spell proc _data from SpellMap...");
+            Log.outInfo(LogFilter.ServerLoading, "Generating spell proc data from SpellMap...");
             count = 0;
             oldMSTime = Time.GetMSTime();
 
@@ -1790,62 +1440,59 @@ namespace Game.Entities
                 if (mSpellProcMap.ContainsKey((spellInfo.Id, spellInfo.Difficulty)))
                     continue;
 
-                // Nothing to do if no Flags set
+                // Nothing to do if no flags set
                 if (spellInfo.ProcFlags == null)
                     continue;
 
                 bool addTriggerFlag = false;
                 ProcFlagsSpellType procSpellTypeMask = ProcFlagsSpellType.None;
                 uint nonProcMask = 0;
-
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
                 {
                     if (!spellEffectInfo.IsEffect())
                         continue;
 
                     AuraType auraName = spellEffectInfo.ApplyAuraName;
-
                     if (auraName == 0)
                         continue;
 
                     if (!IsTriggerAura(auraName))
                     {
-                        // explicitly disable non proccing Auras to avoid losing charges on self proc
+                        // explicitly disable non proccing auras to avoid losing charges on self proc
                         nonProcMask |= 1u << (int)spellEffectInfo.EffectIndex;
-
                         continue;
                     }
 
                     procSpellTypeMask |= GetSpellTypeMask(auraName);
-
                     if (IsAlwaysTriggeredAura(auraName))
                         addTriggerFlag = true;
 
-                    // many proc Auras with taken procFlag mask don't have attribute "can proc with triggered"
+                    // many proc auras with taken procFlag mask don't have attribute "can proc with triggered"
                     // they should proc nevertheless (example mage armor spells with judgement)
-                    if (!addTriggerFlag &&
-                        spellInfo.ProcFlags.HasFlag(ProcFlags.TakenHitMask))
+                    if (!addTriggerFlag && spellInfo.ProcFlags.HasFlag(ProcFlags.TakenHitMask))
+                    {
                         switch (auraName)
                         {
                             case AuraType.ProcTriggerSpell:
                             case AuraType.ProcTriggerDamage:
                                 addTriggerFlag = true;
-
                                 break;
                             default:
                                 break;
                         }
+                    }
                 }
 
                 if (procSpellTypeMask == 0)
                 {
                     foreach (var spellEffectInfo in spellInfo.GetEffects())
+                    {
                         if (spellEffectInfo.IsAura())
                         {
-                            Log.outDebug(LogFilter.Sql, $"Spell Id {spellInfo.Id} has DBC ProcFlags 0x{spellInfo.ProcFlags[0]:X} 0x{spellInfo.ProcFlags[1]:X}, but it's of non-proc aura Type, it probably needs an entry in `spell_proc` table to be handled correctly.");
-
+                            Log.outDebug(LogFilter.Sql, $"Spell Id {spellInfo.Id} has DBC ProcFlags 0x{spellInfo.ProcFlags[0]:X} 0x{spellInfo.ProcFlags[1]:X}, but it's of non-proc aura type, it probably needs an entry in `spell_proc` table to be handled correctly.");
                             break;
                         }
+                    }
 
                     continue;
                 }
@@ -1854,10 +1501,8 @@ namespace Game.Entities
                 procEntry.SchoolMask = 0;
                 procEntry.ProcFlags = spellInfo.ProcFlags;
                 procEntry.SpellFamilyName = 0;
-
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
-                    if (spellEffectInfo.IsEffect() &&
-                        IsTriggerAura(spellEffectInfo.ApplyAuraName))
+                    if (spellEffectInfo.IsEffect() && IsTriggerAura(spellEffectInfo.ApplyAuraName))
                         procEntry.SpellFamilyMask |= spellEffectInfo.SpellClassMask;
 
                 if (procEntry.SpellFamilyMask)
@@ -1874,41 +1519,34 @@ namespace Game.Entities
 
                     switch (spellEffectInfo.ApplyAuraName)
                     {
-                        // Reflect Auras should only proc off reflects
+                        // Reflect auras should only proc off reflects
                         case AuraType.ReflectSpells:
                         case AuraType.ReflectSpellsSchool:
                             procEntry.HitMask = ProcFlagsHit.Reflect;
-
                             break;
                         // Only drop charge on crit
                         case AuraType.ModWeaponCritPercent:
                             procEntry.HitMask = ProcFlagsHit.Critical;
-
                             break;
                         // Only drop charge on block
                         case AuraType.ModBlockPercent:
                             procEntry.HitMask = ProcFlagsHit.Block;
-
                             break;
-                        // proc Auras with another aura reducing hit chance (eg 63767) only proc on missed attack
+                        // proc auras with another aura reducing hit chance (eg 63767) only proc on missed attack
                         case AuraType.ModHitChance:
                             if (spellEffectInfo.CalcValue() <= -100)
                                 procEntry.HitMask = ProcFlagsHit.Miss;
-
                             break;
                         default:
                             continue;
                     }
-
                     break;
                 }
 
                 procEntry.AttributesMask = 0;
                 procEntry.DisableEffectsMask = nonProcMask;
-
                 if (spellInfo.ProcFlags.HasFlag(ProcFlags.Kill))
                     procEntry.AttributesMask |= ProcAttributes.ReqExpOrHonor;
-
                 if (addTriggerFlag)
                     procEntry.AttributesMask |= ProcAttributes.TriggeredCanProc;
 
@@ -1921,27 +1559,23 @@ namespace Game.Entities
                 ++count;
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Generated spell proc _data for {0} spells in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, "Generated spell proc data for {0} spells in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
         public void LoadSpellThreats()
         {
             uint oldMSTime = Time.GetMSTime();
 
-            mSpellThreatMap.Clear(); // need for reload case
+            mSpellThreatMap.Clear();                                // need for reload case
 
             //                                           0      1        2       3
             SQLResult result = DB.World.Query("SELECT entry, flatMod, pctMod, apPctMod FROM spell_threat");
-
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 aggro generating spells. DB table `spell_threat` is empty.");
-
                 return;
             }
-
             uint count = 0;
-
             do
             {
                 uint entry = result.Read<uint>(0);
@@ -1949,14 +1583,13 @@ namespace Game.Entities
                 if (!HasSpellInfo(entry, Difficulty.None))
                 {
                     Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_threat` does not exist", entry);
-
                     continue;
                 }
 
                 SpellThreatEntry ste = new();
-                ste.FlatMod = result.Read<int>(1);
-                ste.PctMod = result.Read<float>(2);
-                ste.ApPctMod = result.Read<float>(3);
+                ste.flatMod = result.Read<int>(1);
+                ste.pctMod = result.Read<float>(2);
+                ste.apPctMod = result.Read<float>(3);
 
                 mSpellThreatMap[entry] = ste;
                 count++;
@@ -1981,20 +1614,17 @@ namespace Game.Entities
         {
             uint oldMSTime = Time.GetMSTime();
 
-            mSpellPetAuraMap.Clear(); // need for reload case
+            mSpellPetAuraMap.Clear();                                  // need for reload case
 
             //                                                  0       1       2    3
             SQLResult result = DB.World.Query("SELECT spell, effectId, pet, aura FROM spell_pet_auras");
-
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell pet Auras. DB table `spell_pet_auras` is empty.");
-
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell pet auras. DB table `spell_pet_auras` is empty.");
                 return;
             }
 
             uint count = 0;
-
             do
             {
                 uint spell = result.Read<uint>(0);
@@ -2003,84 +1633,67 @@ namespace Game.Entities
                 uint aura = result.Read<uint>(3);
 
                 var petAura = mSpellPetAuraMap.LookupByKey((spell << 8) + eff);
-
                 if (petAura != null)
-                {
                     petAura.AddAura(pet, aura);
-                }
                 else
                 {
                     SpellInfo spellInfo = GetSpellInfo(spell, Difficulty.None);
-
                     if (spellInfo == null)
                     {
                         Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_pet_auras` does not exist", spell);
-
                         continue;
                     }
-
                     if (eff >= spellInfo.GetEffects().Count)
                     {
                         Log.outError(LogFilter.Spells, "Spell {0} listed in `spell_pet_auras` does not have effect at index {1}", spell, eff);
-
                         continue;
                     }
 
-                    if (spellInfo.GetEffect(eff).Effect != SpellEffectName.Dummy &&
-                        (spellInfo.GetEffect(eff).Effect != SpellEffectName.ApplyAura || spellInfo.GetEffect(eff).ApplyAuraName != AuraType.Dummy))
+                    if (spellInfo.GetEffect(eff).Effect != SpellEffectName.Dummy && (spellInfo.GetEffect(eff).Effect != SpellEffectName.ApplyAura || spellInfo.GetEffect(eff).ApplyAuraName != AuraType.Dummy))
                     {
                         Log.outError(LogFilter.Spells, "Spell {0} listed in `spell_pet_auras` does not have dummy aura or dummy effect", spell);
-
                         continue;
                     }
 
                     SpellInfo spellInfo2 = GetSpellInfo(aura, Difficulty.None);
-
                     if (spellInfo2 == null)
                     {
                         Log.outError(LogFilter.Sql, "Aura {0} listed in `spell_pet_auras` does not exist", aura);
-
                         continue;
                     }
 
                     PetAura pa = new(pet, aura, spellInfo.GetEffect(eff).TargetA.GetTarget() == Targets.UnitPet, spellInfo.GetEffect(eff).CalcValue());
                     mSpellPetAuraMap[(spell << 8) + eff] = pa;
                 }
-
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell pet Auras in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell pet auras in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
         public void LoadSpellEnchantProcData()
         {
             uint oldMSTime = Time.GetMSTime();
 
-            mSpellEnchantProcEventMap.Clear(); // need for reload case
+            mSpellEnchantProcEventMap.Clear();                             // need for reload case
 
             //                                         0          1       2               3        4
             SQLResult result = DB.World.Query("SELECT EnchantID, Chance, ProcsPerMinute, HitMask, AttributesMask FROM spell_enchant_proc_data");
-
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell enchant proc event conditions. DB table `spell_enchant_proc_data` is empty.");
-
                 return;
             }
 
             uint count = 0;
-
             do
             {
                 uint enchantId = result.Read<uint>(0);
 
                 var ench = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchantId);
-
                 if (ench == null)
                 {
                     Log.outError(LogFilter.Sql, "Enchancment {0} listed in `spell_enchant_proc_data` does not exist", enchantId);
-
                     continue;
                 }
 
@@ -2095,27 +1708,24 @@ namespace Game.Entities
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} enchant proc _data definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} enchant proc data definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
         public void LoadSpellLinked()
         {
             uint oldMSTime = Time.GetMSTime();
 
-            mSpellLinkedMap.Clear(); // need for reload case
+            mSpellLinkedMap.Clear();    // need for reload case
 
             //                                                0              1             2
-            SQLResult result = DB.World.Query("SELECT spell_trigger, spell_effect, Type FROM spell_linked_spell");
-
+            SQLResult result = DB.World.Query("SELECT spell_trigger, spell_effect, type FROM spell_linked_spell");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 linked spells. DB table `spell_linked_spell` is empty.");
-
                 return;
             }
 
             uint count = 0;
-
             do
             {
                 int trigger = result.Read<int>(0);
@@ -2123,38 +1733,37 @@ namespace Game.Entities
                 SpellLinkedType type = (SpellLinkedType)result.Read<byte>(2);
 
                 SpellInfo spellInfo = GetSpellInfo((uint)Math.Abs(trigger), Difficulty.None);
-
                 if (spellInfo == null)
                 {
                     Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_linked_spell` does not exist", Math.Abs(trigger));
-
                     continue;
                 }
 
                 if (effect >= 0)
+                {
                     foreach (var spellEffectInfo in spellInfo.GetEffects())
+                    {
                         if (spellEffectInfo.CalcValue() == Math.Abs(effect))
                             Log.outError(LogFilter.Sql, $"The spell {Math.Abs(trigger)} Effect: {Math.Abs(effect)} listed in `spell_linked_spell` has same bp{spellEffectInfo.EffectIndex} like effect (possible hack)");
+                    }
+                }
 
                 if (!HasSpellInfo((uint)Math.Abs(effect), Difficulty.None))
                 {
                     Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_linked_spell` does not exist", Math.Abs(effect));
-
                     continue;
                 }
 
-                if (type < SpellLinkedType.Cast ||
-                    type > SpellLinkedType.Remove)
+                if (type < SpellLinkedType.Cast || type > SpellLinkedType.Remove)
                 {
-                    Log.outError(LogFilter.Sql, $"The spell trigger {trigger}, effect {effect} listed in `spell_linked_spell` has invalid link Type {type}, skipped.");
-
+                    Log.outError(LogFilter.Sql, $"The spell trigger {trigger}, effect {effect} listed in `spell_linked_spell` has invalid link type {type}, skipped.");
                     continue;
                 }
 
                 if (trigger < 0)
                 {
                     if (type != SpellLinkedType.Cast)
-                        Log.outError(LogFilter.Sql, $"The spell trigger {trigger} listed in `spell_linked_spell` has invalid link Type {type}, changed to 0.");
+                        Log.outError(LogFilter.Sql, $"The spell trigger {trigger} listed in `spell_linked_spell` has invalid link type {type}, changed to 0.");
 
                     trigger = -trigger;
                     type = SpellLinkedType.Remove;
@@ -2162,12 +1771,13 @@ namespace Game.Entities
 
 
                 if (type != SpellLinkedType.Aura)
+                {
                     if (trigger == effect)
                     {
                         Log.outError(LogFilter.Sql, $"The spell trigger {trigger}, effect {effect} listed in `spell_linked_spell` triggers itself (infinite loop), skipped.");
-
                         continue;
                     }
+                }
 
                 mSpellLinkedMap.Add((type, (uint)trigger), effect);
 
@@ -2181,19 +1791,19 @@ namespace Game.Entities
         {
             uint oldMSTime = Time.GetMSTime();
 
-            mPetLevelupSpellMap.Clear(); // need for reload case
+            mPetLevelupSpellMap.Clear();                                   // need for reload case
 
             uint count = 0;
             uint family_count = 0;
 
             foreach (var creatureFamily in CliDB.CreatureFamilyStorage.Values)
+            {
                 for (byte j = 0; j < 2; ++j)
                 {
                     if (creatureFamily.SkillLine[j] == 0)
                         continue;
 
                     var skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill((uint)creatureFamily.SkillLine[j]);
-
                     if (skillLineAbilities == null)
                         continue;
 
@@ -2203,7 +1813,6 @@ namespace Game.Entities
                             continue;
 
                         SpellInfo spell = GetSpellInfo(skillLine.Spell, Difficulty.None);
-
                         if (spell == null) // not exist or triggered or talent
                             continue;
 
@@ -2214,7 +1823,6 @@ namespace Game.Entities
                             mPetLevelupSpellMap.Add(creatureFamily.Id, new MultiMap<uint, uint>());
 
                         var spellSet = mPetLevelupSpellMap.LookupByKey(creatureFamily.Id);
-
                         if (spellSet.Count == 0)
                             ++family_count;
 
@@ -2222,6 +1830,7 @@ namespace Game.Entities
                         ++count;
                     }
                 }
+            }
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} pet levelup and default spells for {1} families in {2} ms", count, family_count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
@@ -2238,27 +1847,26 @@ namespace Game.Entities
 
             // different summon spells
             foreach (var spellEntry in mSpellInfoMap.Values)
+            {
                 if (spellEntry.Difficulty != Difficulty.None)
+                {
                     foreach (var spellEffectInfo in spellEntry.GetEffects())
-                        if (spellEffectInfo.Effect == SpellEffectName.Summon ||
-                            spellEffectInfo.Effect == SpellEffectName.SummonPet)
+                    {
+                        if (spellEffectInfo.Effect == SpellEffectName.Summon || spellEffectInfo.Effect == SpellEffectName.SummonPet)
                         {
                             int creature_id = spellEffectInfo.MiscValue;
                             CreatureTemplate cInfo = Global.ObjectMgr.GetCreatureTemplate((uint)creature_id);
-
                             if (cInfo == null)
                                 continue;
 
                             // get default pet spells from creature_template
                             uint petSpellsId = cInfo.Entry;
-
                             if (mPetDefaultSpellsMap.LookupByKey(cInfo.Entry) != null)
                                 continue;
 
                             PetDefaultSpellsEntry petDefSpells = new();
-
                             for (byte j = 0; j < SharedConst.MaxCreatureSpellDataSlots; ++j)
-                                petDefSpells.Spellid[j] = cInfo.Spells[j];
+                                petDefSpells.spellid[j] = cInfo.Spells[j];
 
                             if (LoadPetDefaultSpells_helper(cInfo, petDefSpells))
                             {
@@ -2266,54 +1874,58 @@ namespace Game.Entities
                                 ++countCreature;
                             }
                         }
+                    }
+                }
+            }
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} summonable creature templates in {1} ms", countCreature, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        private bool LoadPetDefaultSpells_helper(CreatureTemplate cInfo, PetDefaultSpellsEntry petDefSpells)
+        bool LoadPetDefaultSpells_helper(CreatureTemplate cInfo, PetDefaultSpellsEntry petDefSpells)
         {
             // skip empty list;
             bool have_spell = false;
-
             for (byte j = 0; j < SharedConst.MaxCreatureSpellDataSlots; ++j)
-                if (petDefSpells.Spellid[j] != 0)
+            {
+                if (petDefSpells.spellid[j] != 0)
                 {
                     have_spell = true;
-
                     break;
                 }
-
+            }
             if (!have_spell)
                 return false;
 
             // remove duplicates with levelupSpells if any
             var levelupSpells = cInfo.Family != 0 ? GetPetLevelupSpellList(cInfo.Family) : null;
-
             if (levelupSpells != null)
+            {
                 for (byte j = 0; j < SharedConst.MaxCreatureSpellDataSlots; ++j)
                 {
-                    if (petDefSpells.Spellid[j] == 0)
+                    if (petDefSpells.spellid[j] == 0)
                         continue;
 
                     foreach (var pair in levelupSpells)
-                        if (pair.Value == petDefSpells.Spellid[j])
+                    {
+                        if (pair.Value == petDefSpells.spellid[j])
                         {
-                            petDefSpells.Spellid[j] = 0;
-
+                            petDefSpells.spellid[j] = 0;
                             break;
                         }
+                    }
                 }
+            }
 
             // skip empty list;
             have_spell = false;
-
             for (byte j = 0; j < SharedConst.MaxCreatureSpellDataSlots; ++j)
-                if (petDefSpells.Spellid[j] != 0)
+            {
+                if (petDefSpells.spellid[j] != 0)
                 {
                     have_spell = true;
-
                     break;
                 }
+            }
 
             return have_spell;
         }
@@ -2322,15 +1934,14 @@ namespace Game.Entities
         {
             uint oldMSTime = Time.GetMSTime();
 
-            mSpellAreaMap.Clear(); // need for reload case
+            mSpellAreaMap.Clear();                                  // need for reload case
             mSpellAreaForAreaMap.Clear();
             mSpellAreaForQuestMap.Clear();
             mSpellAreaForQuestEndMap.Clear();
             mSpellAreaForAuraMap.Clear();
 
             //                                            0     1         2              3               4                 5          6          7       8      9
-            SQLResult result = DB.World.Query("SELECT spell, area, quest_start, quest_start_status, quest_end_status, quest_end, aura_spell, racemask, Gender, Flags FROM spell_area");
-
+            SQLResult result = DB.World.Query("SELECT spell, area, quest_start, quest_start_status, quest_end_status, quest_end, aura_spell, racemask, gender, flags FROM spell_area");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell area requirements. DB table `spell_area` is empty.");
@@ -2339,209 +1950,177 @@ namespace Game.Entities
             }
 
             uint count = 0;
-
             do
             {
                 uint spell = result.Read<uint>(0);
 
                 SpellArea spellArea = new();
-                spellArea.SpellId = spell;
-                spellArea.AreaId = result.Read<uint>(1);
-                spellArea.QuestStart = result.Read<uint>(2);
-                spellArea.QuestStartStatus = result.Read<uint>(3);
-                spellArea.QuestEndStatus = result.Read<uint>(4);
-                spellArea.QuestEnd = result.Read<uint>(5);
-                spellArea.AuraSpell = result.Read<int>(6);
-                spellArea.RaceMask = result.Read<ulong>(7);
-                spellArea.Gender = (Gender)result.Read<uint>(8);
-                spellArea.Flags = (SpellAreaFlag)result.Read<byte>(9);
+                spellArea.spellId = spell;
+                spellArea.areaId = result.Read<uint>(1);
+                spellArea.questStart = result.Read<uint>(2);
+                spellArea.questStartStatus = result.Read<uint>(3);
+                spellArea.questEndStatus = result.Read<uint>(4);
+                spellArea.questEnd = result.Read<uint>(5);
+                spellArea.auraSpell = result.Read<int>(6);
+                spellArea.raceMask = result.Read<ulong>(7);
+                spellArea.gender = (Gender)result.Read<uint>(8);
+                spellArea.flags = (SpellAreaFlag)result.Read<byte>(9);
 
                 SpellInfo spellInfo = GetSpellInfo(spell, Difficulty.None);
-
                 if (spellInfo != null)
                 {
-                    if (spellArea.Flags.HasAnyFlag(SpellAreaFlag.AutoCast))
+                    if (spellArea.flags.HasAnyFlag(SpellAreaFlag.AutoCast))
                         spellInfo.Attributes |= SpellAttr0.NoAuraCancel;
                 }
                 else
                 {
                     Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` does not exist", spell);
-
                     continue;
                 }
 
                 {
                     bool ok = true;
-                    var sa_bounds = GetSpellAreaMapBounds(spellArea.SpellId);
-
+                    var sa_bounds = GetSpellAreaMapBounds(spellArea.spellId);
                     foreach (var bound in sa_bounds)
                     {
-                        if (spellArea.SpellId != bound.SpellId)
+                        if (spellArea.spellId != bound.spellId)
                             continue;
-
-                        if (spellArea.AreaId != bound.AreaId)
+                        if (spellArea.areaId != bound.areaId)
                             continue;
-
-                        if (spellArea.QuestStart != bound.QuestStart)
+                        if (spellArea.questStart != bound.questStart)
                             continue;
-
-                        if (spellArea.AuraSpell != bound.AuraSpell)
+                        if (spellArea.auraSpell != bound.auraSpell)
                             continue;
-
-                        if ((spellArea.RaceMask & bound.RaceMask) == 0)
+                        if ((spellArea.raceMask & bound.raceMask) == 0)
                             continue;
-
-                        if (spellArea.Gender != bound.Gender)
+                        if (spellArea.gender != bound.gender)
                             continue;
 
                         // duplicate by requirements
                         ok = false;
-
                         break;
                     }
 
                     if (!ok)
                     {
                         Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` already listed with similar requirements.", spell);
-
                         continue;
                     }
                 }
 
-                if (spellArea.AreaId != 0 &&
-                    !CliDB.AreaTableStorage.ContainsKey(spellArea.AreaId))
+                if (spellArea.areaId != 0 && !CliDB.AreaTableStorage.ContainsKey(spellArea.areaId))
                 {
-                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong area ({1}) requirement", spell, spellArea.AreaId);
-
+                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong area ({1}) requirement", spell, spellArea.areaId);
                     continue;
                 }
 
-                if (spellArea.QuestStart != 0 &&
-                    Global.ObjectMgr.GetQuestTemplate(spellArea.QuestStart) == null)
+                if (spellArea.questStart != 0 && Global.ObjectMgr.GetQuestTemplate(spellArea.questStart) == null)
                 {
-                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong start quest ({1}) requirement", spell, spellArea.QuestStart);
-
+                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong start quest ({1}) requirement", spell, spellArea.questStart);
                     continue;
                 }
 
-                if (spellArea.QuestEnd != 0)
-                    if (Global.ObjectMgr.GetQuestTemplate(spellArea.QuestEnd) == null)
+                if (spellArea.questEnd != 0)
+                {
+                    if (Global.ObjectMgr.GetQuestTemplate(spellArea.questEnd) == null)
                     {
-                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong end quest ({1}) requirement", spell, spellArea.QuestEnd);
-
+                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong end quest ({1}) requirement", spell, spellArea.questEnd);
                         continue;
                     }
+                }
 
-                if (spellArea.AuraSpell != 0)
+                if (spellArea.auraSpell != 0)
                 {
-                    SpellInfo info = GetSpellInfo((uint)Math.Abs(spellArea.AuraSpell), Difficulty.None);
-
+                    SpellInfo info = GetSpellInfo((uint)Math.Abs(spellArea.auraSpell), Difficulty.None);
                     if (info == null)
                     {
-                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong aura spell ({1}) requirement", spell, Math.Abs(spellArea.AuraSpell));
-
+                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong aura spell ({1}) requirement", spell, Math.Abs(spellArea.auraSpell));
                         continue;
                     }
 
-                    if (Math.Abs(spellArea.AuraSpell) == spellArea.SpellId)
+                    if (Math.Abs(spellArea.auraSpell) == spellArea.spellId)
                     {
-                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have aura spell ({1}) requirement for itself", spell, Math.Abs(spellArea.AuraSpell));
-
+                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have aura spell ({1}) requirement for itself", spell, Math.Abs(spellArea.auraSpell));
                         continue;
                     }
 
                     // not allow autocast chains by auraSpell field (but allow use as alternative if not present)
-                    if (spellArea.Flags.HasAnyFlag(SpellAreaFlag.AutoCast) &&
-                        spellArea.AuraSpell > 0)
+                    if (spellArea.flags.HasAnyFlag(SpellAreaFlag.AutoCast) && spellArea.auraSpell > 0)
                     {
                         bool chain = false;
-                        var saBound = GetSpellAreaForAuraMapBounds(spellArea.SpellId);
-
+                        var saBound = GetSpellAreaForAuraMapBounds(spellArea.spellId);
                         foreach (var bound in saBound)
-                            if (bound.Flags.HasAnyFlag(SpellAreaFlag.AutoCast) &&
-                                bound.AuraSpell > 0)
+                        {
+                            if (bound.flags.HasAnyFlag(SpellAreaFlag.AutoCast) && bound.auraSpell > 0)
                             {
                                 chain = true;
-
                                 break;
                             }
+                        }
 
                         if (chain)
                         {
-                            Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have aura spell ({1}) requirement that itself autocast from aura", spell, spellArea.AuraSpell);
-
+                            Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have aura spell ({1}) requirement that itself autocast from aura", spell, spellArea.auraSpell);
                             continue;
                         }
 
-                        var saBound2 = GetSpellAreaMapBounds((uint)spellArea.AuraSpell);
-
+                        var saBound2 = GetSpellAreaMapBounds((uint)spellArea.auraSpell);
                         foreach (var bound in saBound2)
-                            if (bound.Flags.HasAnyFlag(SpellAreaFlag.AutoCast) &&
-                                bound.AuraSpell > 0)
+                        {
+                            if (bound.flags.HasAnyFlag(SpellAreaFlag.AutoCast) && bound.auraSpell > 0)
                             {
                                 chain = true;
-
                                 break;
                             }
+                        }
 
                         if (chain)
                         {
-                            Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have aura spell ({1}) requirement that itself autocast from aura", spell, spellArea.AuraSpell);
-
+                            Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have aura spell ({1}) requirement that itself autocast from aura", spell, spellArea.auraSpell);
                             continue;
                         }
                     }
                 }
 
-                if (spellArea.RaceMask != 0 &&
-                    (spellArea.RaceMask & SharedConst.RaceMaskAllPlayable) == 0)
+                if (spellArea.raceMask != 0 && (spellArea.raceMask & SharedConst.RaceMaskAllPlayable) == 0)
                 {
-                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong race mask ({1}) requirement", spell, spellArea.RaceMask);
-
+                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong race mask ({1}) requirement", spell, spellArea.raceMask);
                     continue;
                 }
 
-                if (spellArea.Gender != Gender.None &&
-                    spellArea.Gender != Gender.Female &&
-                    spellArea.Gender != Gender.Male)
+                if (spellArea.gender != Gender.None && spellArea.gender != Gender.Female && spellArea.gender != Gender.Male)
                 {
-                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong Gender ({1}) requirement", spell, spellArea.Gender);
-
+                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong gender ({1}) requirement", spell, spellArea.gender);
                     continue;
                 }
-
                 mSpellAreaMap.Add(spell, spellArea);
                 var sa = mSpellAreaMap[spell];
 
                 // for search by current zone/subzone at zone/subzone change
-                if (spellArea.AreaId != 0)
-                    mSpellAreaForAreaMap.AddRange(spellArea.AreaId, sa);
+                if (spellArea.areaId != 0)
+                    mSpellAreaForAreaMap.AddRange(spellArea.areaId, sa);
 
                 // for search at quest update checks
-                if (spellArea.QuestStart != 0 ||
-                    spellArea.QuestEnd != 0)
+                if (spellArea.questStart != 0 || spellArea.questEnd != 0)
                 {
-                    if (spellArea.QuestStart == spellArea.QuestEnd)
-                    {
-                        mSpellAreaForQuestMap.AddRange(spellArea.QuestStart, sa);
-                    }
+                    if (spellArea.questStart == spellArea.questEnd)
+                        mSpellAreaForQuestMap.AddRange(spellArea.questStart, sa);
                     else
                     {
-                        if (spellArea.QuestStart != 0)
-                            mSpellAreaForQuestMap.AddRange(spellArea.QuestStart, sa);
-
-                        if (spellArea.QuestEnd != 0)
-                            mSpellAreaForQuestMap.AddRange(spellArea.QuestEnd, sa);
+                        if (spellArea.questStart != 0)
+                            mSpellAreaForQuestMap.AddRange(spellArea.questStart, sa);
+                        if (spellArea.questEnd != 0)
+                            mSpellAreaForQuestMap.AddRange(spellArea.questEnd, sa);
                     }
                 }
 
                 // for search at quest start/reward
-                if (spellArea.QuestEnd != 0)
-                    mSpellAreaForQuestEndMap.AddRange(spellArea.QuestEnd, sa);
+                if (spellArea.questEnd != 0)
+                    mSpellAreaForQuestEndMap.AddRange(spellArea.questEnd, sa);
 
                 // for search at aura apply
-                if (spellArea.AuraSpell != 0)
-                    mSpellAreaForAuraMap.AddRange((uint)Math.Abs(spellArea.AuraSpell), sa);
+                if (spellArea.auraSpell != 0)
+                    mSpellAreaForAuraMap.AddRange((uint)Math.Abs(spellArea.auraSpell), sa);
 
                 ++count;
             } while (result.NextRow());
@@ -2557,7 +2136,6 @@ namespace Game.Entities
             var loadData = new Dictionary<(uint Id, Difficulty difficulty), SpellInfoLoadHelper>();
 
             Dictionary<uint, BattlePetSpeciesRecord> battlePetSpeciesByCreature = new();
-
             foreach (var battlePetSpecies in CliDB.BattlePetSpeciesStorage.Values)
                 if (battlePetSpecies.CreatureID != 0)
                     battlePetSpeciesByCreature[battlePetSpecies.CreatureID] = battlePetSpecies;
@@ -2565,7 +2143,6 @@ namespace Game.Entities
             SpellInfoLoadHelper GetLoadHelper(uint spellId, uint difficulty)
             {
                 var key = (spellId, (Difficulty)difficulty);
-
                 if (!loadData.ContainsKey(key))
                     loadData[key] = new SpellInfoLoadHelper();
 
@@ -2585,16 +2162,15 @@ namespace Game.Entities
                 if (effect.Effect == (int)SpellEffectName.Summon)
                 {
                     var summonProperties = CliDB.SummonPropertiesStorage.LookupByKey(effect.EffectMiscValue[1]);
-
                     if (summonProperties != null)
-                        if (summonProperties.Slot == (int)SummonSlot.MiniPet &&
-                            summonProperties.GetFlags().HasFlag(SummonPropertiesFlags.SummonFromBattlePetJournal))
+                    {
+                        if (summonProperties.Slot == (int)SummonSlot.MiniPet && summonProperties.GetFlags().HasFlag(SummonPropertiesFlags.SummonFromBattlePetJournal))
                         {
                             var battlePetSpecies = battlePetSpeciesByCreature.LookupByKey(effect.EffectMiscValue[0]);
-
                             if (battlePetSpecies != null)
                                 BattlePetMgr.AddBattlePetSpeciesBySpell(effect.SpellID, battlePetSpecies);
                         }
+                    }
                 }
 
                 if (effect.Effect == (int)SpellEffectName.Language)
@@ -2641,7 +2217,6 @@ namespace Game.Entities
                 byte index = power.OrderIndex;
 
                 SpellPowerDifficultyRecord powerDifficulty = CliDB.SpellPowerDifficultyStorage.LookupByKey(power.Id);
-
                 if (powerDifficulty != null)
                 {
                     difficulty = powerDifficulty.DifficultyID;
@@ -2682,18 +2257,16 @@ namespace Game.Entities
             foreach (var data in loadData)
             {
                 SpellNameRecord spellNameEntry = CliDB.SpellNameStorage.LookupByKey(data.Key.Id);
-
                 if (spellNameEntry == null)
                     continue;
 
                 // fill blanks
                 DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(data.Key.difficulty);
-
                 if (difficultyEntry != null)
+                {
                     do
                     {
                         SpellInfoLoadHelper fallbackData = loadData.LookupByKey((data.Key.Id, (Difficulty)difficultyEntry.FallbackDifficultyID));
-
                         if (fallbackData != null)
                         {
                             if (data.Value.AuraOptions == null)
@@ -2763,9 +2336,10 @@ namespace Game.Entities
 
                         difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficultyEntry.FallbackDifficultyID);
                     } while (difficultyEntry != null);
+                }
 
-                //first key = Id, difficulty
-                //second key = Id
+                //first key = id, difficulty
+                //second key = id
 
 
                 mSpellInfoMap.Add(spellNameEntry.Id, new SpellInfo(spellNameEntry, data.Key.difficulty, data.Value));
@@ -2778,6 +2352,7 @@ namespace Game.Entities
         {
             foreach (var spell in mSpellInfoMap.Values)
                 spell._UnloadImplicitTargetConditionLists();
+
         }
 
         public void LoadSpellInfoServerside()
@@ -2788,18 +2363,19 @@ namespace Game.Entities
 
             //                                                0        1            2             3       4           5                6
             SQLResult effectsResult = DB.World.Query("SELECT SpellID, EffectIndex, DifficultyID, Effect, EffectAura, EffectAmplitude, EffectAttributes, " +
-                                                     //7                 8                       9                     10                  11              12              13
-                                                     "EffectAuraPeriod, EffectBonusCoefficient, EffectChainAmplitude, EffectChainTargets, EffectItemType, EffectMechanic, EffectPointsPerResource, " +
-                                                     //14               15                        16                  17                      18             19           20
-                                                     "EffectPosFacing, EffectRealPointsPerLevel, EffectTriggerSpell, BonusCoefficientFromAP, PvpMultiplier, Coefficient, Variance, " +
-                                                     //21                   22                              23                24                25                26
-                                                     "ResourceCoefficient, GroupSizeBasePointsCoefficient, EffectBasePoints, EffectMiscValue1, EffectMiscValue2, EffectRadiusIndex1, " +
-                                                     //27                  28                     29                     30                     31                     32
-                                                     "EffectRadiusIndex2, EffectSpellClassMask1, EffectSpellClassMask2, EffectSpellClassMask3, EffectSpellClassMask4, ImplicitTarget1, " +
-                                                     //33
-                                                     "ImplicitTarget2 FROM serverside_spell_effect");
+                //7                 8                       9                     10                  11              12              13
+                "EffectAuraPeriod, EffectBonusCoefficient, EffectChainAmplitude, EffectChainTargets, EffectItemType, EffectMechanic, EffectPointsPerResource, " +
+                //14               15                        16                  17                      18             19           20
+                "EffectPosFacing, EffectRealPointsPerLevel, EffectTriggerSpell, BonusCoefficientFromAP, PvpMultiplier, Coefficient, Variance, " +
+                //21                   22                              23                24                25                26
+                "ResourceCoefficient, GroupSizeBasePointsCoefficient, EffectBasePoints, EffectMiscValue1, EffectMiscValue2, EffectRadiusIndex1, " +
+                //27                  28                     29                     30                     31                     32
+                "EffectRadiusIndex2, EffectSpellClassMask1, EffectSpellClassMask2, EffectSpellClassMask3, EffectSpellClassMask4, ImplicitTarget1, " +
+                //33
+                "ImplicitTarget2 FROM serverside_spell_effect");
 
             if (!effectsResult.IsEmpty())
+            {
                 do
                 {
                     uint spellId = effectsResult.Read<uint>(0);
@@ -2836,103 +2412,97 @@ namespace Game.Entities
                     effect.ImplicitTarget[1] = effectsResult.Read<short>(33);
 
                     var existingSpellBounds = _GetSpellInfo(spellId);
-
                     if (existingSpellBounds == null)
                     {
                         Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} effext index {effect.EffectIndex} references a regular spell loaded from file. Adding serverside effects to existing spells is not allowed.");
-
                         continue;
                     }
 
-                    if (difficulty != Difficulty.None &&
-                        !CliDB.DifficultyStorage.HasRecord((uint)difficulty))
+                    if (difficulty != Difficulty.None && !CliDB.DifficultyStorage.HasRecord((uint)difficulty))
                     {
                         Log.outError(LogFilter.Sql, $"Serverside spell {spellId} effect index {effect.EffectIndex} references non-existing difficulty {difficulty}, skipped");
-
                         continue;
                     }
 
                     if (effect.EffectIndex >= SpellConst.MaxEffects)
                     {
                         Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has more than {SpellConst.MaxEffects} effects, effect at index {effect.EffectIndex} skipped");
-
                         continue;
                     }
 
                     if (effect.Effect >= (uint)SpellEffectName.TotalSpellEffects)
                     {
-                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid effect Type {effect.Effect} at index {effect.EffectIndex}, skipped");
-
+                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid effect type {effect.Effect} at index {effect.EffectIndex}, skipped");
                         continue;
                     }
 
                     if (effect.EffectAura >= (uint)AuraType.Total)
                     {
-                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid aura Type {effect.EffectAura} at index {effect.EffectIndex}, skipped");
-
+                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid aura type {effect.EffectAura} at index {effect.EffectIndex}, skipped");
                         continue;
                     }
 
                     if (effect.ImplicitTarget[0] >= (uint)Targets.TotalSpellTargets)
                     {
-                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid targetA Type {effect.ImplicitTarget[0]} at index {effect.EffectIndex}, skipped");
-
+                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid targetA type {effect.ImplicitTarget[0]} at index {effect.EffectIndex}, skipped");
                         continue;
                     }
 
                     if (effect.ImplicitTarget[1] >= (uint)Targets.TotalSpellTargets)
                     {
-                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid targetB Type {effect.ImplicitTarget[1]} at index {effect.EffectIndex}, skipped");
-
+                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid targetB type {effect.ImplicitTarget[1]} at index {effect.EffectIndex}, skipped");
                         continue;
                     }
 
-                    if (effect.EffectRadiusIndex[0] != 0 &&
-                        !CliDB.SpellRadiusStorage.HasRecord(effect.EffectRadiusIndex[0]))
-                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid radius Id {effect.EffectRadiusIndex[0]} at index {effect.EffectIndex}, set to 0");
+                    if (effect.EffectRadiusIndex[0] != 0 && !CliDB.SpellRadiusStorage.HasRecord(effect.EffectRadiusIndex[0]))
+                    {
+                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid radius id {effect.EffectRadiusIndex[0]} at index {effect.EffectIndex}, set to 0");
+                    }
 
-                    if (effect.EffectRadiusIndex[1] != 0 &&
-                        !CliDB.SpellRadiusStorage.HasRecord(effect.EffectRadiusIndex[1]))
-                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid max radius Id {effect.EffectRadiusIndex[1]} at index {effect.EffectIndex}, set to 0");
+                    if (effect.EffectRadiusIndex[1] != 0 && !CliDB.SpellRadiusStorage.HasRecord(effect.EffectRadiusIndex[1]))
+                    {
+                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid max radius id {effect.EffectRadiusIndex[1]} at index {effect.EffectIndex}, set to 0");
+                    }
 
                     spellEffects.Add((spellId, difficulty), effect);
+
                 } while (effectsResult.NextRow());
+            }
 
             //                                               0   1             2           3       4         5           6             7              8
             SQLResult spellsResult = DB.World.Query("SELECT Id, DifficultyID, CategoryId, Dispel, Mechanic, Attributes, AttributesEx, AttributesEx2, AttributesEx3, " +
-                                                    //9              10             11             12             13             14             15              16              17              18
-                                                    "AttributesEx4, AttributesEx5, AttributesEx6, AttributesEx7, AttributesEx8, AttributesEx9, AttributesEx10, AttributesEx11, AttributesEx12, AttributesEx13, " +
-                                                    //19              20       21          22       23                  24                  25                 26               27
-                                                    "AttributesEx14, Stances, StancesNot, Targets, TargetCreatureType, RequiresSpellFocus, FacingCasterFlags, CasterAuraState, TargetAuraState, " +
-                                                    //28                      29                      30               31               32                      33
-                                                    "ExcludeCasterAuraState, ExcludeTargetAuraState, CasterAuraSpell, TargetAuraSpell, ExcludeCasterAuraSpell, ExcludeTargetAuraSpell, " +
-                                                    //34              35              36                     37                     38
-                                                    "CasterAuraType, TargetAuraType, ExcludeCasterAuraType, ExcludeTargetAuraType, CastingTimeIndex, " +
-                                                    //39            40                    41                     42                 43              44                   45
-                                                    "RecoveryTime, CategoryRecoveryTime, StartRecoveryCategory, StartRecoveryTime, InterruptFlags, AuraInterruptFlags1, AuraInterruptFlags2, " +
-                                                    //46                      47                      48         49          50          51           52            53           54        55         56
-                                                    "ChannelInterruptFlags1, ChannelInterruptFlags2, ProcFlags, ProcFlags2, ProcChance, ProcCharges, ProcCooldown, ProcBasePPM, MaxLevel, BaseLevel, SpellLevel, " +
-                                                    //57             58          59     60           61           62                 63                        64                             65
-                                                    "DurationIndex, RangeIndex, Speed, LaunchDelay, StackAmount, EquippedItemClass, EquippedItemSubClassMask, EquippedItemInventoryTypeMask, ContentTuningId, " +
-                                                    //66         67         68         69              70                  71               72                 73                 74                 75
-                                                    "SpellName, ConeAngle, ConeWidth, MaxTargetLevel, MaxAffectedTargets, SpellFamilyName, SpellFamilyFlags1, SpellFamilyFlags2, SpellFamilyFlags3, SpellFamilyFlags4, " +
-                                                    //76        77              78           79          80
-                                                    "DmgClass, PreventionType, AreaGroupId, SchoolMask, ChargeCategoryId FROM serverside_spell");
+                //9              10             11             12             13             14             15              16              17              18
+                "AttributesEx4, AttributesEx5, AttributesEx6, AttributesEx7, AttributesEx8, AttributesEx9, AttributesEx10, AttributesEx11, AttributesEx12, AttributesEx13, " +
+                //19              20       21          22       23                  24                  25                 26               27
+                "AttributesEx14, Stances, StancesNot, Targets, TargetCreatureType, RequiresSpellFocus, FacingCasterFlags, CasterAuraState, TargetAuraState, " +
+                //28                      29                      30               31               32                      33
+                "ExcludeCasterAuraState, ExcludeTargetAuraState, CasterAuraSpell, TargetAuraSpell, ExcludeCasterAuraSpell, ExcludeTargetAuraSpell, " +
+                //34              35              36                     37                     38
+                "CasterAuraType, TargetAuraType, ExcludeCasterAuraType, ExcludeTargetAuraType, CastingTimeIndex, " +
+                //39            40                    41                     42                 43              44                   45
+                "RecoveryTime, CategoryRecoveryTime, StartRecoveryCategory, StartRecoveryTime, InterruptFlags, AuraInterruptFlags1, AuraInterruptFlags2, " +
+                //46                      47                      48         49          50          51           52            53           54        55         56
+                "ChannelInterruptFlags1, ChannelInterruptFlags2, ProcFlags, ProcFlags2, ProcChance, ProcCharges, ProcCooldown, ProcBasePPM, MaxLevel, BaseLevel, SpellLevel, " +
+                //57             58          59     60           61           62                 63                        64                             65
+                "DurationIndex, RangeIndex, Speed, LaunchDelay, StackAmount, EquippedItemClass, EquippedItemSubClassMask, EquippedItemInventoryTypeMask, ContentTuningId, " +
+                //66         67         68         69              70                  71               72                 73                 74                 75
+                "SpellName, ConeAngle, ConeWidth, MaxTargetLevel, MaxAffectedTargets, SpellFamilyName, SpellFamilyFlags1, SpellFamilyFlags2, SpellFamilyFlags3, SpellFamilyFlags4, " +
+                //76        77              78           79          80
+                "DmgClass, PreventionType, AreaGroupId, SchoolMask, ChargeCategoryId FROM serverside_spell");
 
             if (!spellsResult.IsEmpty())
+            {
                 do
                 {
                     uint spellId = spellsResult.Read<uint>(0);
                     Difficulty difficulty = (Difficulty)spellsResult.Read<uint>(1);
-
                     if (CliDB.SpellNameStorage.HasRecord(spellId))
                     {
                         Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} is already loaded from file. Overriding existing spells is not allowed.");
-
                         continue;
                     }
 
-                    mServersideSpellNames.Add(new ServersideSpellName(spellId, spellsResult.Read<string>(66)));
+                    mServersideSpellNames.Add(new(spellId, spellsResult.Read<string>(66)));
 
                     SpellInfo spellInfo = new(mServersideSpellNames.Last().Name, difficulty, spellEffects[(spellId, difficulty)]);
                     spellInfo.CategoryId = spellsResult.Read<uint>(2);
@@ -3011,7 +2581,9 @@ namespace Game.Entities
                     spellInfo.ChargeCategoryId = spellsResult.Read<uint>(80);
 
                     mSpellInfoMap.Add(spellId, spellInfo);
+
                 } while (spellsResult.NextRow());
+            }
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {mServersideSpellNames.Count} serverside spells {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
@@ -3022,42 +2594,36 @@ namespace Game.Entities
             uint oldMSTime2 = oldMSTime;
 
             SQLResult result = DB.World.Query("SELECT entry, attributes FROM spell_custom_attr");
-
             if (result.IsEmpty())
-            {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell custom attributes from DB. DB table `spell_custom_attr` is empty.");
-            }
             else
             {
                 uint count = 0;
-
                 do
                 {
                     uint spellId = result.Read<uint>(0);
                     uint attributes = result.Read<uint>(1);
 
                     var spells = _GetSpellInfo(spellId);
-
                     if (spells.Empty())
                     {
                         Log.outError(LogFilter.Sql, "Table `spell_custom_attr` has wrong spell (entry: {0}), ignored.", spellId);
-
                         continue;
                     }
 
                     foreach (SpellInfo spellInfo in spells)
                     {
                         if (attributes.HasAnyFlag((uint)SpellCustomAttributes.ShareDamage))
+                        {
                             if (!spellInfo.HasEffect(SpellEffectName.SchoolDamage))
                             {
                                 Log.outError(LogFilter.Sql, "Spell {0} listed in table `spell_custom_attr` with SPELL_ATTR0_CU_SHARE_DAMAGE has no SPELL_EFFECT_SCHOOL_DAMAGE, ignored.", spellId);
-
                                 continue;
                             }
+                        }
 
                         spellInfo.AttributesCu |= (SpellCustomAttributes)attributes;
                     }
-
                     ++count;
                 } while (result.NextRow());
 
@@ -3065,7 +2631,6 @@ namespace Game.Entities
             }
 
             List<uint> talentSpells = new();
-
             foreach (var talentInfo in CliDB.TalentStorage.Values)
                 talentSpells.Add(talentInfo.SpellID);
 
@@ -3086,14 +2651,13 @@ namespace Game.Entities
                         case AuraType.ModFear:
                         case AuraType.ModStun:
                             spellInfo.AttributesCu |= SpellCustomAttributes.AuraCC;
-
                             break;
                     }
 
                     switch (spellEffectInfo.ApplyAuraName)
                     {
-                        case AuraType.OpenStable: // No point in saving this, since the stable dialog can't be open on aura load anyway.
-                                                  // Auras that require both caster & Target to be in world cannot be saved
+                        case AuraType.OpenStable:    // No point in saving this, since the stable dialog can't be open on aura load anyway.
+                        // Auras that require both caster & target to be in world cannot be saved
                         case AuraType.ControlVehicle:
                         case AuraType.BindSight:
                         case AuraType.ModPossess:
@@ -3104,7 +2668,6 @@ namespace Game.Entities
                         case AuraType.BattleGroundPlayerPosition:
                         case AuraType.BattleGroundPlayerPositionFactional:
                             spellInfo.AttributesCu |= SpellCustomAttributes.AuraCannotBeSaved;
-
                             break;
                     }
 
@@ -3122,7 +2685,6 @@ namespace Game.Entities
                         case SpellEffectName.HealPct:
                         case SpellEffectName.DamageFromMaxHealthPCT:
                             spellInfo.AttributesCu |= SpellCustomAttributes.CanCrit;
-
                             break;
                     }
 
@@ -3135,7 +2697,6 @@ namespace Game.Entities
                         case SpellEffectName.WeaponPercentDamage:
                         case SpellEffectName.Heal:
                             spellInfo.AttributesCu |= SpellCustomAttributes.DirectDamage;
-
                             break;
                         case SpellEffectName.PowerDrain:
                         case SpellEffectName.PowerBurn:
@@ -3146,7 +2707,6 @@ namespace Game.Entities
                         case SpellEffectName.Energize:
                         case SpellEffectName.HealMechanical:
                             spellInfo.AttributesCu |= SpellCustomAttributes.NoInitialThreat;
-
                             break;
                         case SpellEffectName.Charge:
                         case SpellEffectName.ChargeDest:
@@ -3154,46 +2714,43 @@ namespace Game.Entities
                         case SpellEffectName.JumpDest:
                         case SpellEffectName.LeapBack:
                             spellInfo.AttributesCu |= SpellCustomAttributes.Charge;
-
                             break;
                         case SpellEffectName.Pickpocket:
                             spellInfo.AttributesCu |= SpellCustomAttributes.PickPocket;
-
                             break;
                         case SpellEffectName.EnchantItem:
                         case SpellEffectName.EnchantItemTemporary:
                         case SpellEffectName.EnchantItemPrismatic:
                         case SpellEffectName.EnchantHeldItem:
+                        {
+                            // only enchanting profession enchantments procs can stack
+                            if (IsPartOfSkillLine(SkillType.Enchanting, spellInfo.Id))
                             {
-                                // only enchanting profession enchantments procs can stack
-                                if (IsPartOfSkillLine(SkillType.Enchanting, spellInfo.Id))
+                                uint enchantId = (uint)spellEffectInfo.MiscValue;
+                                var enchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchantId);
+                                if (enchant == null)
+                                    break;
+
+                                for (var s = 0; s < ItemConst.MaxItemEnchantmentEffects; ++s)
                                 {
-                                    uint enchantId = (uint)spellEffectInfo.MiscValue;
-                                    var enchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchantId);
+                                    if (enchant.Effect[s] != ItemEnchantmentType.CombatSpell)
+                                        continue;
 
-                                    if (enchant == null)
-                                        break;
-
-                                    for (var s = 0; s < ItemConst.MaxItemEnchantmentEffects; ++s)
+                                    foreach (SpellInfo procInfo in _GetSpellInfo(enchant.EffectArg[s]))
                                     {
-                                        if (enchant.Effect[s] != ItemEnchantmentType.CombatSpell)
+
+                                        // if proced directly from enchantment, not via proc aura
+                                        // NOTE: Enchant Weapon - Blade Ward also has proc aura spell and is proced directly
+                                        // however its not expected to stack so this check is good
+                                        if (procInfo.HasAura(AuraType.ProcTriggerSpell))
                                             continue;
 
-                                        foreach (SpellInfo procInfo in _GetSpellInfo(enchant.EffectArg[s]))
-                                        {
-                                            // if proced directly from enchantment, not via proc aura
-                                            // NOTE: Enchant Weapon - Blade Ward also has proc aura spell and is proced directly
-                                            // however its not expected to stack so this check is good
-                                            if (procInfo.HasAura(AuraType.ProcTriggerSpell))
-                                                continue;
-
-                                            procInfo.AttributesCu |= SpellCustomAttributes.EnchantProc;
-                                        }
+                                        procInfo.AttributesCu |= SpellCustomAttributes.EnchantProc;
                                     }
                                 }
-
-                                break;
                             }
+                            break;
+                        }
                     }
                 }
 
@@ -3201,8 +2758,8 @@ namespace Game.Entities
                 if (!spellInfo.HasAttribute(SpellAttr3.AlwaysHit))
                 {
                     bool setFlag = false;
-
                     foreach (var spellEffectInfo in spellInfo.GetEffects())
+                    {
                         if (spellEffectInfo.IsEffect())
                         {
                             switch (spellEffectInfo.Effect)
@@ -3226,67 +2783,55 @@ namespace Game.Entities
                                 case SpellEffectName.ApplyAuraOnPet:
                                 case SpellEffectName.ApplyAreaAuraSummons:
                                 case SpellEffectName.ApplyAreaAuraPartyNonrandom:
-                                    {
-                                        if (spellEffectInfo.ApplyAuraName == AuraType.PeriodicDamage ||
-                                            spellEffectInfo.ApplyAuraName == AuraType.PeriodicDamagePercent ||
-                                            spellEffectInfo.ApplyAuraName == AuraType.PeriodicDummy ||
-                                            spellEffectInfo.ApplyAuraName == AuraType.PeriodicLeech ||
-                                            spellEffectInfo.ApplyAuraName == AuraType.PeriodicHealthFunnel ||
-                                            spellEffectInfo.ApplyAuraName == AuraType.PeriodicDummy)
-                                            break;
-
-                                        goto default;
-                                    }
-                                default:
-                                    {
-                                        // No value and not interrupt cast or crowd control without SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY flag
-                                        if (spellEffectInfo.CalcValue() == 0 &&
-                                            !((spellEffectInfo.Effect == SpellEffectName.InterruptCast || spellInfo.HasAttribute(SpellCustomAttributes.AuraCC)) && !spellInfo.HasAttribute(SpellAttr0.NoImmunities)))
-                                            break;
-
-                                        // Sindragosa Frost Breath
-                                        if (spellInfo.Id == 69649 ||
-                                            spellInfo.Id == 71056 ||
-                                            spellInfo.Id == 71057 ||
-                                            spellInfo.Id == 71058 ||
-                                            spellInfo.Id == 73061 ||
-                                            spellInfo.Id == 73062 ||
-                                            spellInfo.Id == 73063 ||
-                                            spellInfo.Id == 73064)
-                                            break;
-
-                                        // Frostbolt
-                                        if (spellInfo.SpellFamilyName == SpellFamilyNames.Mage &&
-                                            spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x20u))
-                                            break;
-
-                                        // Frost Fever
-                                        if (spellInfo.Id == 55095)
-                                            break;
-
-                                        // Haunt
-                                        if (spellInfo.SpellFamilyName == SpellFamilyNames.Warlock &&
-                                            spellInfo.SpellFamilyFlags[1].HasAnyFlag(0x40000u))
-                                            break;
-
-                                        setFlag = true;
-
+                                {
+                                    if (spellEffectInfo.ApplyAuraName == AuraType.PeriodicDamage ||
+                                        spellEffectInfo.ApplyAuraName == AuraType.PeriodicDamagePercent ||
+                                        spellEffectInfo.ApplyAuraName == AuraType.PeriodicDummy ||
+                                        spellEffectInfo.ApplyAuraName == AuraType.PeriodicLeech ||
+                                        spellEffectInfo.ApplyAuraName == AuraType.PeriodicHealthFunnel ||
+                                        spellEffectInfo.ApplyAuraName == AuraType.PeriodicDummy)
                                         break;
-                                    }
+
+                                    goto default;
+                                }
+                                default:
+                                {
+                                    // No value and not interrupt cast or crowd control without SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY flag
+                                    if (spellEffectInfo.CalcValue() == 0 && !((spellEffectInfo.Effect == SpellEffectName.InterruptCast || spellInfo.HasAttribute(SpellCustomAttributes.AuraCC)) && !spellInfo.HasAttribute(SpellAttr0.NoImmunities)))
+                                        break;
+
+                                    // Sindragosa Frost Breath
+                                    if (spellInfo.Id == 69649 || spellInfo.Id == 71056 || spellInfo.Id == 71057 || spellInfo.Id == 71058 || spellInfo.Id == 73061 || spellInfo.Id == 73062 || spellInfo.Id == 73063 || spellInfo.Id == 73064)
+                                        break;
+
+                                    // Frostbolt
+                                    if (spellInfo.SpellFamilyName == SpellFamilyNames.Mage && spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x20u))
+                                        break;
+
+                                    // Frost Fever
+                                    if (spellInfo.Id == 55095)
+                                        break;
+
+                                    // Haunt
+                                    if (spellInfo.SpellFamilyName == SpellFamilyNames.Warlock && spellInfo.SpellFamilyFlags[1].HasAnyFlag(0x40000u))
+                                        break;
+
+                                    setFlag = true;
+                                    break;
+                                }
                             }
 
                             if (setFlag)
                             {
                                 spellInfo.AttributesCu |= SpellCustomAttributes.BinarySpell;
-
                                 break;
                             }
                         }
+                    }
                 }
 
-                // Remove normal school mask to properly calculate Damage
-                if (spellInfo.SchoolMask.HasAnyFlag(SpellSchoolMask.Normal) &&
-                    spellInfo.SchoolMask.HasAnyFlag(SpellSchoolMask.Magic))
+                // Remove normal school mask to properly calculate damage
+                if (spellInfo.SchoolMask.HasAnyFlag(SpellSchoolMask.Normal) && spellInfo.SchoolMask.HasAnyFlag(SpellSchoolMask.Magic))
                 {
                     spellInfo.SchoolMask &= ~SpellSchoolMask.Normal;
                     spellInfo.AttributesCu |= SpellCustomAttributes.SchoolmaskNormalWithMagic;
@@ -3304,21 +2849,18 @@ namespace Game.Entities
                 {
                     case SpellFamilyNames.Warrior:
                         // Shout / Piercing Howl
-                        if (spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x20000u) /* || spellInfo.SpellFamilyFlags[1] & 0x20*/)
+                        if (spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x20000u)/* || spellInfo.SpellFamilyFlags[1] & 0x20*/)
                             spellInfo.AttributesCu |= SpellCustomAttributes.AuraCC;
-
                         break;
                     case SpellFamilyNames.Druid:
                         // Roar
                         if (spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x8u))
                             spellInfo.AttributesCu |= SpellCustomAttributes.AuraCC;
-
                         break;
                     case SpellFamilyNames.Generic:
                         // Stoneclaw Totem effect
                         if (spellInfo.Id == 5729)
                             spellInfo.AttributesCu |= SpellCustomAttributes.AuraCC;
-
                         break;
                     default:
                         break;
@@ -3328,29 +2870,24 @@ namespace Game.Entities
 
                 if (spellInfo.Speed > 0.0f)
                 {
-                    static bool visualNeedsAmmo(SpellXSpellVisualRecord spellXspellVisual)
+                    bool visualNeedsAmmo(SpellXSpellVisualRecord spellXspellVisual)
                     {
                         SpellVisualRecord spellVisual = CliDB.SpellVisualStorage.LookupByKey(spellXspellVisual.SpellVisualID);
-
                         if (spellVisual == null)
                             return false;
 
                         var spellVisualMissiles = Global.DB2Mgr.GetSpellVisualMissiles(spellVisual.SpellVisualMissileSetID);
-
                         if (spellVisualMissiles.Empty())
                             return false;
 
                         foreach (SpellVisualMissileRecord spellVisualMissile in spellVisualMissiles)
                         {
                             var spellVisualEffectName = CliDB.SpellVisualEffectNameStorage.LookupByKey(spellVisualMissile.SpellVisualEffectNameID);
-
                             if (spellVisualEffectName == null)
                                 continue;
 
                             SpellVisualEffectNameType type = (SpellVisualEffectNameType)spellVisualEffectName.Type;
-
-                            if (type == SpellVisualEffectNameType.UnitAmmoBasic ||
-                                type == SpellVisualEffectNameType.UnitAmmoPreferred)
+                            if (type == SpellVisualEffectNameType.UnitAmmoBasic || type == SpellVisualEffectNameType.UnitAmmoPreferred)
                                 return true;
                         }
 
@@ -3358,15 +2895,16 @@ namespace Game.Entities
                     }
 
                     foreach (SpellXSpellVisualRecord spellXspellVisual in spellInfo.GetSpellVisuals())
+                    {
                         if (visualNeedsAmmo(spellXspellVisual))
                         {
                             spellInfo.AttributesCu |= SpellCustomAttributes.NeedsAmmoData;
-
                             break;
                         }
+                    }
                 }
 
-                // Saving to DB happens before removing from world - skip saving these Auras
+                // Saving to DB happens before removing from world - skip saving these auras
                 if (spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.LeaveWorld))
                     spellInfo.AttributesCu |= SpellCustomAttributes.AuraCannotBeSaved;
             }
@@ -3378,29 +2916,28 @@ namespace Game.Entities
                 {
                     bool allNonBinary = true;
                     bool overrideAttr = false;
-
                     foreach (var spellEffectInfo in spellInfo.GetEffects())
-                        if (spellEffectInfo.IsAura() &&
-                            spellEffectInfo.TriggerSpell != 0)
+                    {
+                        if (spellEffectInfo.IsAura() && spellEffectInfo.TriggerSpell != 0)
+                        {
                             switch (spellEffectInfo.ApplyAuraName)
                             {
                                 case AuraType.PeriodicTriggerSpell:
                                 case AuraType.PeriodicTriggerSpellFromClient:
                                 case AuraType.PeriodicTriggerSpellWithValue:
                                     SpellInfo triggerSpell = Global.SpellMgr.GetSpellInfo(spellEffectInfo.TriggerSpell, Difficulty.None);
-
                                     if (triggerSpell != null)
                                     {
                                         overrideAttr = true;
-
                                         if (triggerSpell.HasAttribute(SpellCustomAttributes.BinarySpell))
                                             allNonBinary = false;
                                     }
-
                                     break;
                                 default:
                                     break;
                             }
+                        }
+                    }
 
                     if (overrideAttr && allNonBinary)
                         spellInfo.AttributesCu &= ~SpellCustomAttributes.BinarySpell;
@@ -3412,25 +2949,25 @@ namespace Game.Entities
                         spellInfo.AttributesCu &= ~SpellCustomAttributes.CanCrit;
             }
 
-            // add custom attribute to liquid Auras
+            // add custom attribute to liquid auras
             foreach (var liquid in CliDB.LiquidTypeStorage.Values)
+            {
                 if (liquid.SpellID != 0)
                     foreach (SpellInfo spellInfo in _GetSpellInfo(liquid.SpellID))
                         spellInfo.AttributesCu |= SpellCustomAttributes.AuraCannotBeSaved;
+            }
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo custom attributes in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        private void ApplySpellFix(int[] spellIds, Action<SpellInfo> fix)
+        void ApplySpellFix(int[] spellIds, Action<SpellInfo> fix)
         {
             foreach (uint spellId in spellIds)
             {
                 var range = _GetSpellInfo(spellId);
-
                 if (range == null)
                 {
                     Log.outError(LogFilter.ServerLoading, $"Spell info correction specified for non-existing spell {spellId}");
-
                     continue;
                 }
 
@@ -3439,12 +2976,11 @@ namespace Game.Entities
             }
         }
 
-        private void ApplySpellEffectFix(SpellInfo spellInfo, uint effectIndex, Action<SpellEffectInfo> fix)
+        void ApplySpellEffectFix(SpellInfo spellInfo, uint effectIndex, Action<SpellEffectInfo> fix)
         {
             if (spellInfo.GetEffects().Count <= effectIndex)
             {
                 Log.outError(LogFilter.ServerLoading, $"Spell effect info correction specified for non-existing effect {effectIndex} of spell {spellInfo.Id}");
-
                 return;
             }
 
@@ -3457,1459 +2993,1283 @@ namespace Game.Entities
 
             // Some spells have no amplitude set
             {
-                ApplySpellFix(new[]
-                              {
-                                  6727,     // Poison Mushroom
-					              7331,     // Healing Aura (TEST) (Rank 1)
-					              /*
-					              30400, // Nether Beam - Perseverance
-					                  Blizzlike to have it disabled? DBC says:
-					                  "This is currently turned off to increase performance. Enable this to make it fire more frequently."
-					              */ 34589, // Dangerous Water
-					              52562,    // Arthas Zombie Catcher
-					              57550,    // Tirion Aggro
-					              65755
-                              },
-                              spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.ApplyAuraPeriod = 1 * Time.InMilliseconds; }); });
+                ApplySpellFix(new[] {
+                    6727,  // Poison Mushroom
+                    7331,  // Healing Aura (TEST) (Rank 1)
+                    /*
+                    30400, // Nether Beam - Perseverance
+                        Blizzlike to have it disabled? DBC says:
+                        "This is currently turned off to increase performance. Enable this to make it fire more frequently."
+                    */
+                    34589, // Dangerous Water
+                    52562, // Arthas Zombie Catcher
+                    57550, // Tirion Aggro
+                    65755
+                }, spellInfo =>
+                {
+                    ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                    {
+                        spellEffectInfo.ApplyAuraPeriod = 1 * Time.InMilliseconds;
+                    });
+                });
 
-                ApplySpellFix(new[]
-                              {
-                                  24707, // Food
-					              26263, // Dim Sum
-					              29055  // Refreshing Red Apple
-				              },
-                              spellInfo =>
-                              {
-                                  ApplySpellEffectFix(spellInfo,
-                                                      1,
-                                                      spellEffectInfo =>
-                                                      {
-                                                          spellEffectInfo.ApplyAuraPeriod = 1 * Time.InMilliseconds;
-                                                          ;
-                                                      });
-                              });
+                ApplySpellFix(new[] {
+                    24707, // Food
+                    26263, // Dim Sum
+                    29055  // Refreshing Red Apple
+                }, spellInfo =>
+                {
+                    ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
+                    {
+                        spellEffectInfo.ApplyAuraPeriod = 1 * Time.InMilliseconds;;
+                    });
+                });
 
-                // Karazhan - Chess NPC AI, Action timer
-                ApplySpellFix(new[]
-                              {
-                                  37504
-                              },
-                              spellInfo =>
-                              {
-                                  ApplySpellEffectFix(spellInfo,
-                                                      1,
-                                                      spellEffectInfo =>
-                                                      {
-                                                          spellEffectInfo.ApplyAuraPeriod = 5 * Time.InMilliseconds;
-                                                          ;
-                                                      });
-                              });
+                // Karazhan - Chess NPC AI, action timer
+                ApplySpellFix(new[] { 37504 }, spellInfo =>
+                {
+                    ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
+                    {
+                        spellEffectInfo.ApplyAuraPeriod = 5 * Time.InMilliseconds;;
+                    });
+                });
 
                 // Vomit
-                ApplySpellFix(new[]
-                              {
-                                  43327
-                              },
-                              spellInfo =>
-                              {
-                                  ApplySpellEffectFix(spellInfo,
-                                                      1,
-                                                      spellEffectInfo =>
-                                                      {
-                                                          spellEffectInfo.ApplyAuraPeriod = 1 * Time.InMilliseconds;
-                                                          ;
-                                                      });
-                              });
+                ApplySpellFix(new[] { 43327 }, spellInfo =>
+                {
+                    ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
+                    {
+                        spellEffectInfo.ApplyAuraPeriod = 1 * Time.InMilliseconds;;
+                    });
+                });
             }
 
             // specific code for cases with no trigger spell provided in field
             {
                 // Brood Affliction: Bronze
-                ApplySpellFix(new[]
-                              {
-                                  23170
-                              },
-                              spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.TriggerSpell = 23171; }); });
+                ApplySpellFix(new[] { 23170 }, spellInfo =>
+                {
+                    ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                    {
+                        spellEffectInfo.TriggerSpell = 23171;
+                    });
+                });
 
                 // Feed Captured Animal
-                ApplySpellFix(new[]
-                              {
-                                  29917
-                              },
-                              spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.TriggerSpell = 29916; }); });
+                ApplySpellFix(new[] { 29917 }, spellInfo =>
+                {
+                    ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                    {
+                        spellEffectInfo.TriggerSpell = 29916;
+                    });
+                });
 
                 // Remote Toy
-                ApplySpellFix(new[]
-                              {
-                                  37027
-                              },
-                              spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.TriggerSpell = 37029; }); });
+                ApplySpellFix(new[] { 37027 }, spellInfo =>
+                {
+                    ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                    {
+                        spellEffectInfo.TriggerSpell = 37029;
+                    });
+                });
 
                 // Eye of Grillok
-                ApplySpellFix(new[]
-                              {
-                                  38495
-                              },
-                              spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.TriggerSpell = 38530; }); });
+                ApplySpellFix(new[] { 38495 }, spellInfo =>
+                {
+                    ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                    {
+                        spellEffectInfo.TriggerSpell = 38530;
+                    });
+                });
 
                 // Tear of Azzinoth Summon Channel - it's not really supposed to do anything, and this only prevents the console spam
-                ApplySpellFix(new[]
-                              {
-                                  39857
-                              },
-                              spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.TriggerSpell = 39856; }); });
+                ApplySpellFix(new[] { 39857 }, spellInfo =>
+                {
+                    ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                    {
+                        spellEffectInfo.TriggerSpell = 39856;
+                    });
+                });
 
                 // Personalized Weather
-                ApplySpellFix(new[]
-                              {
-                                  46736
-                              },
-                              spellInfo =>
-                              {
-                                  ApplySpellEffectFix(spellInfo,
-                                                      0,
-                                                      spellEffectInfo =>
-                                                      {
-                                                          spellEffectInfo.TriggerSpell = 46737;
-                                                          spellEffectInfo.ApplyAuraName = AuraType.PeriodicTriggerSpell;
-                                                      });
-                              });
+                ApplySpellFix(new[] { 46736 }, spellInfo =>
+                {
+                    ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                    {
+                        spellEffectInfo.TriggerSpell = 46737;
+                        spellEffectInfo.ApplyAuraName = AuraType.PeriodicTriggerSpell;
+                    });
+                });
             }
 
             // Allows those to crit
-            ApplySpellFix(new[]
-                          {
-                              379,   // Earth Shield
-				              71607, // Item - Bauble of True Blood 10m
-				              71646, // Item - Bauble of True Blood 25m
-				              71610, // Item - Althor's Abacus trigger 10m
-				              71641  // Item - Althor's Abacus trigger 25m
-			              },
-                          spellInfo =>
-                          {
-                              // We need more spells to find a general way (if there is any)
-                              spellInfo.DmgClass = SpellDmgClass.Magic;
-                          });
+            ApplySpellFix(new[] {
+                379,   // Earth Shield
+                71607, // Item - Bauble of True Blood 10m
+                71646, // Item - Bauble of True Blood 25m
+                71610, // Item - Althor's Abacus trigger 10m
+                71641  // Item - Althor's Abacus trigger 25m
+            }, spellInfo =>
+            {
+                // We need more spells to find a general way (if there is any)
+                spellInfo.DmgClass = SpellDmgClass.Magic;
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              63026, // Summon Aspirant Test NPC (HACK: Target shouldn't be changed)
-				              63137  // Summon Valiant Test (HACK: Target shouldn't be changed; summon position should be untied from spell destination)
-			              },
-                          spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.DestDb); }); });
+            ApplySpellFix(new[] {
+                63026, // Summon Aspirant Test NPC (HACK: Target shouldn't be changed)
+                63137  // Summon Valiant Test (HACK: Target shouldn't be changed; summon position should be untied from spell destination)
+            }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.DestDb);
+                });
+            });
 
             // Summon Skeletons
-            ApplySpellFix(new[]
-                          {
-                              52611, 52612
-                          },
-                          spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.MiscValueB = 64; }); });
+            ApplySpellFix(new[] { 52611, 52612 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.MiscValueB = 64;
+                });
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              40244, // Simon Game Visual
-				              40245, // Simon Game Visual
-				              40246, // Simon Game Visual
-				              40247, // Simon Game Visual
-				              42835  // Spout, remove Damage effect, only anim is needed
-			              },
-                          spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.Effect = SpellEffectName.None; }); });
+            ApplySpellFix(new[] {
+                40244, // Simon Game Visual
+                40245, // Simon Game Visual
+                40246, // Simon Game Visual
+                40247, // Simon Game Visual
+                42835  // Spout, remove damage effect, only anim is needed
+            }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.Effect = SpellEffectName.None;
+                });
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              63665, // Charge (Argent Tournament Emote on riders)
-				              31298, // Sleep (needs Target selection script)
-				              51904, // Summon Ghouls On Scarlet Crusade (this should use conditions table, script for this spell needs to be fixed)
-				              68933, // Wrath of Air Totem rank 2 (Aura)
-				              29200  // Purify Helboar Meat
-			              },
-                          spellInfo =>
-                          {
-                              ApplySpellEffectFix(spellInfo,
-                                                  0,
-                                                  spellEffectInfo =>
-                                                  {
-                                                      spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.UnitCaster);
-                                                      spellEffectInfo.TargetB = new SpellImplicitTargetInfo();
-                                                  });
-                          });
+            ApplySpellFix(new[] {
+                63665, // Charge (Argent Tournament emote on riders)
+                31298, // Sleep (needs target selection script)
+                51904, // Summon Ghouls On Scarlet Crusade (this should use conditions table, script for this spell needs to be fixed)
+                68933, // Wrath of Air Totem rank 2 (Aura)
+                29200  // Purify Helboar Meat
+            }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.UnitCaster);
+                    spellEffectInfo.TargetB = new SpellImplicitTargetInfo();
+                });
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              56690, // Thrust Spear
-				              60586, // Mighty Spear Thrust
-				              60776, // Claw Swipe
-				              60881, // Fatal Strike
-				              60864  // Jaws of Death
-			              },
-                          spellInfo => { spellInfo.AttributesEx4 |= SpellAttr4.IgnoreDamageTakenModifiers; });
+            ApplySpellFix(new[] {
+                56690, // Thrust Spear
+                60586, // Mighty Spear Thrust
+                60776, // Claw Swipe
+                60881, // Fatal Strike
+                60864  // Jaws of Death
+           }, spellInfo =>
+           {
+               spellInfo.AttributesEx4 |= SpellAttr4.IgnoreDamageTakenModifiers;
+           });
 
             // Howl of Azgalor
-            ApplySpellFix(new[]
-                          {
-                              31344
-                          },
-                          spellInfo =>
-                          {
-                              ApplySpellEffectFix(spellInfo,
-                                                  0,
-                                                  spellEffectInfo =>
-                                                  {
-                                                      spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards100); // 100yards instead of 50000?!
-                                                  });
-                          });
+            ApplySpellFix(new[] { 31344 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards100); // 100yards instead of 50000?!
+                });
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              42818, // Headless Horseman - Wisp Flight Port
-				              42821  // Headless Horseman - Wisp Flight Missile
-			              },
-                          spellInfo =>
-                          {
-                              spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(6); // 100 yards
-                          });
+            ApplySpellFix(new[] {
+                42818, // Headless Horseman - Wisp Flight Port
+                42821  // Headless Horseman - Wisp Flight Missile
+            }, spellInfo =>
+            {
+                spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(6); // 100 yards
+            });
 
             // They Must Burn Bomb Aura (self)
-            ApplySpellFix(new[]
-                          {
-                              36350
-                          },
-                          spellInfo =>
-                          {
-                              ApplySpellEffectFix(spellInfo,
-                                                  0,
-                                                  spellEffectInfo =>
-                                                  {
-                                                      spellEffectInfo.TriggerSpell = 36325; // They Must Burn Bomb Drop (DND)
-                                                  });
-                          });
+            ApplySpellFix(new[] { 36350 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.TriggerSpell = 36325; // They Must Burn Bomb Drop (DND)
+                });
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              31347, // Doom
-				              36327, // Shoot Arcane Explosion Arrow
-				              39365, // Thundering Storm
-				              41071, // Raise Dead (HACK)
-				              42442, // Vengeance Landing Cannonfire
-				              42611, // Shoot
-				              44978, // Wild Magic
-				              45001, // Wild Magic
-				              45002, // Wild Magic
-				              45004, // Wild Magic
-				              45006, // Wild Magic
-				              45010, // Wild Magic
-				              45761, // Shoot Gun
-				              45863, // Cosmetic - Incinerate to Random Target
-				              48246, // Ball of Flame
-				              41635, // Prayer of Mending
-				              44869, // Spectral Blast
-				              45027, // Revitalize
-				              45976, // Muru Portal Channel
-				              52124, // Sky Darkener Assault
-				              52479, // Gift of the Harvester
-				              61588, // Blazing Harpoon
-				              55479, // Force Obedience
-				              28560, // Summon Blizzard (Sapphiron)
-				              53096, // Quetz'lun's Judgment
-				              70743, // AoD Special
-				              70614, // AoD Special - Vegard
-				              4020,  // Safirdrang's Chill
-				              52438, // Summon Skittering Swarmer (Force Cast)
-				              52449, // Summon Skittering Infector (Force Cast)
-				              53609, // Summon Anub'ar Assassin (Force Cast)
-				              53457, // Summon Impale Trigger (AoE)
-				              45907, // Torch Target Picker
-				              52953, // Torch
-				              58121, // Torch
-				              43109, // Throw Torch
-				              58552, // Return to Orgrimmar
-				              58533, // Return to Stormwind
-				              21855, // Challenge Flag
-				              38762, // Force of Neltharaku
-				              51122, // Fierce Lightning Stike
-				              71848, // Toxic Wasteling Find Target
-				              36146, // Chains of Naberius
-				              33711, // Murmur's Touch
-				              38794  // Murmur's Touch
-			              },
-                          spellInfo => { spellInfo.MaxAffectedTargets = 1; });
+            ApplySpellFix(new[] {
+                31347, // Doom
+                36327, // Shoot Arcane Explosion Arrow
+                39365, // Thundering Storm
+                41071, // Raise Dead (HACK)
+                42442, // Vengeance Landing Cannonfire
+                42611, // Shoot
+                44978, // Wild Magic
+                45001, // Wild Magic
+                45002, // Wild Magic
+                45004, // Wild Magic
+                45006, // Wild Magic
+                45010, // Wild Magic
+                45761, // Shoot Gun
+                45863, // Cosmetic - Incinerate to Random Target
+                48246, // Ball of Flame
+                41635, // Prayer of Mending
+                44869, // Spectral Blast
+                45027, // Revitalize
+                45976, // Muru Portal Channel
+                52124, // Sky Darkener Assault
+                52479, // Gift of the Harvester
+                61588, // Blazing Harpoon
+                55479, // Force Obedience
+                28560, // Summon Blizzard (Sapphiron)
+                53096, // Quetz'lun's Judgment
+                70743, // AoD Special
+                70614, // AoD Special - Vegard
+                4020,  // Safirdrang's Chill
+                52438, // Summon Skittering Swarmer (Force Cast)
+                52449, // Summon Skittering Infector (Force Cast)
+                53609, // Summon Anub'ar Assassin (Force Cast)
+                53457, // Summon Impale Trigger (AoE)
+                45907, // Torch Target Picker
+                52953, // Torch
+                58121, // Torch
+                43109, // Throw Torch
+                58552, // Return to Orgrimmar
+                58533, // Return to Stormwind
+                21855, // Challenge Flag
+                38762, // Force of Neltharaku
+                51122, // Fierce Lightning Stike
+                71848, // Toxic Wasteling Find Target
+                36146, // Chains of Naberius
+                33711, // Murmur's Touch
+                38794  // Murmur's Touch
+            }, spellInfo =>
+            {
+                spellInfo.MaxAffectedTargets = 1;
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              36384, // Skartax Purple Beam
-				              47731  // Critter
-			              },
-                          spellInfo => { spellInfo.MaxAffectedTargets = 2; });
+            ApplySpellFix(new[] {
+                36384, // Skartax Purple Beam
+                47731  // Critter
+            }, spellInfo =>
+            {
+                spellInfo.MaxAffectedTargets = 2;
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              28542, // Life Drain - Sapphiron
-				              29213, // Curse of the Plaguebringer - Noth
-				              29576, // Multi-Shot
-				              37790, // Spread Shot
-				              39992, // Needle Spine
-				              40816, // Saber Lash
-				              41303, // Soul Drain
-				              41376, // Spite
-				              45248, // Shadow Blades
-				              46771, // Flame Sear
-				              66588  // Flaming Spear
-			              },
-                          spellInfo => { spellInfo.MaxAffectedTargets = 3; });
+            ApplySpellFix(new[] {
+                28542, // Life Drain - Sapphiron
+                29213, // Curse of the Plaguebringer - Noth
+                29576, // Multi-Shot
+                37790, // Spread Shot
+                39992, // Needle Spine
+                40816, // Saber Lash
+                41303, // Soul Drain
+                41376, // Spite
+                45248, // Shadow Blades
+                46771, // Flame Sear
+                66588  // Flaming Spear
+            }, spellInfo =>
+            {
+                spellInfo.MaxAffectedTargets = 3;
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              38310, // Multi-Shot
-				              53385  // Divine Storm (Damage)
-			              },
-                          spellInfo => { spellInfo.MaxAffectedTargets = 4; });
+            ApplySpellFix(new[] {
+                38310, // Multi-Shot
+                53385  // Divine Storm (Damage)
+            }, spellInfo =>
+            {
+                spellInfo.MaxAffectedTargets = 4;
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              42005, // Bloodboil
-				              38296, // Spitfire Totem
-				              37676, // Insidious Whisper
-				              46008, // Negative Energy
-				              45641, // Fire Bloom
-				              55665, // Life Drain - Sapphiron (H)
-				              28796, // Poison Bolt Volly - Faerlina
-				              37135  // Domination
-			              },
-                          spellInfo => { spellInfo.MaxAffectedTargets = 5; });
+            ApplySpellFix(new[] {
+                42005, // Bloodboil
+                38296, // Spitfire Totem
+                37676, // Insidious Whisper
+                46008, // Negative Energy
+                45641, // Fire Bloom
+                55665, // Life Drain - Sapphiron (H)
+                28796, // Poison Bolt Volly - Faerlina
+                37135  // Domination
+            }, spellInfo =>
+            {
+                spellInfo.MaxAffectedTargets = 5;
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              40827, // Sinful Beam
-				              40859, // Sinister Beam
-				              40860, // Vile Beam
-				              40861, // Wicked Beam
-				              54098, // Poison Bolt Volly - Faerlina (H)
-				              54835  // Curse of the Plaguebringer - Noth (H)
-			              },
-                          spellInfo => { spellInfo.MaxAffectedTargets = 10; });
+            ApplySpellFix(new[] {
+                40827, // Sinful Beam
+                40859, // Sinister Beam
+                40860, // Vile Beam
+                40861, // Wicked Beam
+                54098, // Poison Bolt Volly - Faerlina (H)
+                54835  // Curse of the Plaguebringer - Noth (H)
+            }, spellInfo =>
+            {
+                spellInfo.MaxAffectedTargets = 10;
+            });
 
             // Unholy Frenzy
-            ApplySpellFix(new[]
-                          {
-                              50312
-                          },
-                          spellInfo => { spellInfo.MaxAffectedTargets = 15; });
+            ApplySpellFix(new[] { 50312 }, spellInfo =>
+            {
+                spellInfo.MaxAffectedTargets = 15;
+            });
 
             // Fingers of Frost
-            ApplySpellFix(new[]
-                          {
-                              44544
-                          },
-                          spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.SpellClassMask[0] |= 0x20000; }); });
+            ApplySpellFix(new[] { 44544 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.SpellClassMask[0] |= 0x20000;
+                });
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              52212, // Death and Decay
-				              41485, // Deadly Poison - Black Temple
-				              41487  // Envenom - Black Temple
-			              },
-                          spellInfo => { spellInfo.AttributesEx6 |= SpellAttr6.IgnorePhaseShift; });
+            ApplySpellFix(new[] {
+                52212, // Death and Decay
+                41485, // Deadly Poison - Black Temple
+                41487  // Envenom - Black Temple
+            }, spellInfo =>
+            {
+                spellInfo.AttributesEx6 |= SpellAttr6.IgnorePhaseShift;
+            });
 
             // Oscillation Field
-            ApplySpellFix(new[]
-                          {
-                              37408
-                          },
-                          spellInfo => { spellInfo.AttributesEx3 |= SpellAttr3.DotStackingRule; });
+            ApplySpellFix(new[] { 37408 }, spellInfo =>
+            {
+                spellInfo.AttributesEx3 |= SpellAttr3.DotStackingRule;
+            });
 
             // Crafty's Ultra-Advanced Proto-Typical Shortening Blaster
-            ApplySpellFix(new[]
-                          {
-                              51912
-                          },
-                          spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.ApplyAuraPeriod = 3000; }); });
+            ApplySpellFix(new[] { 51912 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.ApplyAuraPeriod = 3000;
+                });
+            });
 
             // Nether Portal - Perseverence
-            ApplySpellFix(new[]
-                          {
-                              30421
-                          },
-                          spellInfo => { ApplySpellEffectFix(spellInfo, 2, spellEffectInfo => { spellEffectInfo.BasePoints += 30000; }); });
+            ApplySpellFix(new[] { 30421 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 2, spellEffectInfo =>
+                {
+                    spellEffectInfo.BasePoints += 30000;
+                });
+            });
 
             // Parasitic Shadowfiend Passive
-            ApplySpellFix(new[]
-                          {
-                              41913
-                          },
-                          spellInfo =>
-                          {
-                              ApplySpellEffectFix(spellInfo,
-                                                  0,
-                                                  spellEffectInfo =>
-                                                  {
-                                                      spellEffectInfo.ApplyAuraName = AuraType.Dummy; // proc debuff, and summon infinite fiends
-                                                  });
-                          });
+            ApplySpellFix(new[] { 41913 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.ApplyAuraName = AuraType.Dummy; // proc debuff, and summon infinite fiends
+                });
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              27892, // To Anchor 1
-				              27928, // To Anchor 1
-				              27935  // To Anchor 1
-			              },
-                          spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards10); }); });
+            ApplySpellFix(new[] {
+                27892, // To Anchor 1
+                27928, // To Anchor 1
+                27935, // To Anchor 1
+            }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards10);
+                });
+            });
 
             // Wrath of the Plaguebringer
-            ApplySpellFix(new[]
-                          {
-                              29214, 54836
-                          },
-                          spellInfo =>
-                          {
-                              // Target allys instead of enemies, Target A is src_caster, spells with effect like that have ally Target
-                              // this is the only known exception, probably just wrong _data
-                              ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.TargetB = new SpellImplicitTargetInfo(Targets.UnitSrcAreaAlly); });
-                              ApplySpellEffectFix(spellInfo, 1, spellEffectInfo => { spellEffectInfo.TargetB = new SpellImplicitTargetInfo(Targets.UnitSrcAreaAlly); });
-                          });
+            ApplySpellFix(new[] { 29214, 54836 }, spellInfo =>
+            {
+                // target allys instead of enemies, target A is src_caster, spells with effect like that have ally target
+                // this is the only known exception, probably just wrong data
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.TargetB = new SpellImplicitTargetInfo(Targets.UnitSrcAreaAlly);
+                });
+                ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
+                {
+                    spellEffectInfo.TargetB = new SpellImplicitTargetInfo(Targets.UnitSrcAreaAlly);
+                });
+            });
 
             // Earthbind Totem (instant pulse)
-            ApplySpellFix(new[]
-                          {
-                              6474
-                          },
-                          spellInfo => { spellInfo.AttributesEx5 |= SpellAttr5.ExtraInitialPeriod; });
+            ApplySpellFix(new[] { 6474 }, spellInfo =>
+            {
+                spellInfo.AttributesEx5 |= SpellAttr5.ExtraInitialPeriod;
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              70728, // Exploit Weakness (needs Target selection script)
-				              70840  // Devious Minds (needs Target selection script)
-			              },
-                          spellInfo =>
-                          {
-                              ApplySpellEffectFix(spellInfo,
-                                                  0,
-                                                  spellEffectInfo =>
-                                                  {
-                                                      spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.UnitCaster);
-                                                      spellEffectInfo.TargetB = new SpellImplicitTargetInfo(Targets.UnitPet);
-                                                  });
-                          });
+            ApplySpellFix(new[] {
+                70728, // Exploit Weakness (needs target selection script)
+                70840  // Devious Minds (needs target selection script)
+            }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.UnitCaster);
+                    spellEffectInfo.TargetB = new SpellImplicitTargetInfo(Targets.UnitPet);
+                });
+            });
 
             // Ride Carpet
-            ApplySpellFix(new[]
-                          {
-                              45602
-                          },
-                          spellInfo =>
-                          {
-                              ApplySpellEffectFix(spellInfo,
-                                                  0,
-                                                  spellEffectInfo =>
-                                                  {
-                                                      spellEffectInfo.BasePoints = 0; // Force Seat 0, vehicle doesn't have the required Seat Flags for "no Seat specified (-1)"
-                                                  });
-                          });
+            ApplySpellFix(new[] { 45602 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.BasePoints = 0; // force seat 0, vehicle doesn't have the required seat flags for "no seat specified (-1)"
+                });
+            });
 
-            // Easter Lay Noblegarden Egg Aura - Interrupt Flags copied from aura which this aura is linked with
-            ApplySpellFix(new[]
-                          {
-                              61719
-                          },
-                          spellInfo => { spellInfo.AuraInterruptFlags = SpellAuraInterruptFlags.HostileActionReceived | SpellAuraInterruptFlags.Damage; });
+            // Easter Lay Noblegarden Egg Aura - Interrupt flags copied from aura which this aura is linked with
+            ApplySpellFix(new[] { 61719 }, spellInfo =>
+            {
+                spellInfo.AuraInterruptFlags = SpellAuraInterruptFlags.HostileActionReceived | SpellAuraInterruptFlags.Damage;
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              71838, // Drain Life - Bryntroll Normal
-				              71839  // Drain Life - Bryntroll Heroic
-			              },
-                          spellInfo => { spellInfo.AttributesEx2 |= SpellAttr2.CantCrit; });
+            ApplySpellFix(new[] {
+                71838, // Drain Life - Bryntroll Normal
+                71839  // Drain Life - Bryntroll Heroic
+            }, spellInfo =>
+            {
+                spellInfo.AttributesEx2 |= SpellAttr2.CantCrit;
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              51597, // Summon Scourged Captive
-				              56606, // Ride Jokkum
-				              61791  // Ride Vehicle (Yogg-Saron)
-			              },
-                          spellInfo =>
-                          {
-                              /// @todo: remove this when basepoints of all Ride Vehicle Auras are calculated correctly
-                              ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.BasePoints = 1; });
-                          });
+            ApplySpellFix(new[] {
+                51597, // Summon Scourged Captive
+                56606, // Ride Jokkum
+                61791  // Ride Vehicle (Yogg-Saron)
+            }, spellInfo =>
+            {
+                /// @todo: remove this when basepoints of all Ride Vehicle auras are calculated correctly
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.BasePoints = 1;
+                });
+            });
 
             // Summon Scourged Captive
-            ApplySpellFix(new[]
-                          {
-                              51597
-                          },
-                          spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.Scaling.Variance = 0.0f; }); });
+            ApplySpellFix(new[] { 51597 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.Scaling.Variance = 0.0f;
+                });
+            });
 
             // Black Magic
-            ApplySpellFix(new[]
-                          {
-                              59630
-                          },
-                          spellInfo => { spellInfo.Attributes |= SpellAttr0.Passive; });
+            ApplySpellFix(new[] { 59630 }, spellInfo =>
+            {
+                spellInfo.Attributes |= SpellAttr0.Passive;
+            });
 
             // Paralyze
-            ApplySpellFix(new[]
-                          {
-                              48278
-                          },
-                          spellInfo => { spellInfo.AttributesEx3 |= SpellAttr3.DotStackingRule; });
+            ApplySpellFix(new[] { 48278 }, spellInfo =>
+            {
+                spellInfo.AttributesEx3 |= SpellAttr3.DotStackingRule;
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              51798, // Brewfest - Relay Race - Intro - Quest Complete
-				              47134  // Quest Complete
-			              },
-                          spellInfo =>
-                          {
-                              //! HACK: This spell break quest complete for alliance and on retail not used
-                              ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.Effect = SpellEffectName.None; });
-                          });
+            ApplySpellFix(new[] {
+                51798, // Brewfest - Relay Race - Intro - Quest Complete
+                47134  // Quest Complete
+            }, spellInfo =>
+            {
+                //! HACK: This spell break quest complete for alliance and on retail not used
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.Effect = SpellEffectName.None;
+                });
+            });
 
             // Siege Cannon (Tol Barad)
-            ApplySpellFix(new[]
-                          {
-                              85123
-                          },
-                          spellInfo =>
-                          {
-                              ApplySpellEffectFix(spellInfo,
-                                                  0,
-                                                  spellEffectInfo =>
-                                                  {
-                                                      spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards200);
-                                                      spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.UnitSrcAreaEntry);
-                                                  });
-                          });
+            ApplySpellFix(new[] { 85123 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards200);
+                    spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.UnitSrcAreaEntry);
+                });
+            });
 
             // Gathering Storms
-            ApplySpellFix(new[]
-                          {
-                              198300
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.ProcCharges = 1; // override proc charges, has 0 (unlimited) in db2
-                          });
+            ApplySpellFix(new[] { 198300 }, spellInfo =>
+            {
+                spellInfo.ProcCharges = 1; // override proc charges, has 0 (unlimited) in db2
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              15538, // Gout of Flame
-				              42490, // Energized!
-				              42492, // Cast Energized
-				              43115  // Plague Vial
-			              },
-                          spellInfo => { spellInfo.AttributesEx |= SpellAttr1.NoThreat; });
+            ApplySpellFix(new[] {
+                15538, // Gout of Flame
+                42490, // Energized!
+                42492, // Cast Energized
+                43115  // Plague Vial
+            }, spellInfo =>
+            {
+                spellInfo.AttributesEx |= SpellAttr1.NoThreat;
+            });
 
             // Test Ribbon Pole Channel
-            ApplySpellFix(new[]
-                          {
-                              29726
-                          },
-                          spellInfo => { spellInfo.ChannelInterruptFlags &= ~SpellAuraInterruptFlags.Action; });
+            ApplySpellFix(new[] { 29726 }, spellInfo =>
+            {
+                spellInfo.ChannelInterruptFlags &= ~SpellAuraInterruptFlags.Action;
+            });
 
             // Sic'em
-            ApplySpellFix(new[]
-                          {
-                              42767
-                          },
-                          spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.UnitNearbyEntry); }); });
+            ApplySpellFix(new[] { 42767 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.UnitNearbyEntry);
+                });
+            });
 
             // Burn Body
-            ApplySpellFix(new[]
-                          {
-                              42793
-                          },
-                          spellInfo =>
-                          {
-                              ApplySpellEffectFix(spellInfo,
-                                                  2,
-                                                  spellEffectInfo =>
-                                                  {
-                                                      spellEffectInfo.MiscValue = 24008; // Fallen Combatant
-                                                  });
-                          });
+            ApplySpellFix(new[] { 42793 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 2, spellEffectInfo =>
+                {
+                    spellEffectInfo.MiscValue = 24008; // Fallen Combatant
+                });
+            });
 
             // Gift of the Naaru (priest and monk variants)
-            ApplySpellFix(new[]
-                          {
-                              59544, 121093
-                          },
-                          spellInfo => { spellInfo.SpellFamilyFlags[2] = 0x80000000; });
+            ApplySpellFix(new[] { 59544, 121093 }, spellInfo =>
+            {
+                spellInfo.SpellFamilyFlags[2] = 0x80000000;
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              50661, // Weakened Resolve
-				              68979, // Unleashed Souls
-				              48714, // Compelled
-				              7853   // The Art of Being a Water Terror: Force Cast on Player
-			              },
-                          spellInfo =>
-                          {
-                              spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(13); // 50000yd
-                          });
+            ApplySpellFix(new[] {
+                50661, // Weakened Resolve
+                68979, // Unleashed Souls
+                48714, // Compelled
+                7853,  // The Art of Being a Water Terror: Force Cast on Player
+            }, spellInfo =>
+            {
+                spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(13); // 50000yd
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              44327, // Trained Rock Falcon/Hawk Hunting
-				              44408  // Trained Rock Falcon/Hawk Hunting
-			              },
-                          spellInfo => { spellInfo.Speed = 0.0f; });
+            ApplySpellFix(new[] {
+                44327, // Trained Rock Falcon/Hawk Hunting
+                44408  // Trained Rock Falcon/Hawk Hunting
+             }, spellInfo =>
+             {
+                spellInfo.Speed = 0.0f;
+            });
 
             // Summon Corpse Scarabs
-            ApplySpellFix(new[]
-                          {
-                              28864, 29105
-                          },
-                          spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards10); }); });
+            ApplySpellFix(new[] { 28864, 29105 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards10);
+                });
+            });
 
             // Tag Greater Felfire Diemetradon
-            ApplySpellFix(new[]
-                          {
-                              37851, // Tag Greater Felfire Diemetradon
-				              37918  // Arcano-pince
-			              },
-                          spellInfo => { spellInfo.RecoveryTime = 3000; });
+            ApplySpellFix(new[] { 
+                37851, // Tag Greater Felfire Diemetradon
+                37918  // Arcano-pince
+            }, spellInfo =>
+            {
+                spellInfo.RecoveryTime = 3000;
+            });
 
             // Jormungar Strike
-            ApplySpellFix(new[]
-                          {
-                              56513
-                          },
-                          spellInfo => { spellInfo.RecoveryTime = 2000; });
+            ApplySpellFix(new[] { 56513 }, spellInfo =>
+            {
+                spellInfo.RecoveryTime = 2000;
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              54997, // Cast Net (tooltip says 10s but sniffs say 6s)
-				              56524  // Acid Breath
-			              },
-                          spellInfo => { spellInfo.RecoveryTime = 6000; });
+            ApplySpellFix(new[] {
+                54997, // Cast Net (tooltip says 10s but sniffs say 6s)
+                56524  // Acid Breath
+            }, spellInfo =>
+            {
+                spellInfo.RecoveryTime = 6000;
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              47911, // EMP
-				              48620, // Wing Buffet
-				              51752  // Stampy's Stompy-Stomp
-			              },
-                          spellInfo => { spellInfo.RecoveryTime = 10000; });
+            ApplySpellFix(new[] {
+                47911, // EMP
+                48620, // Wing Buffet
+                51752  // Stampy's Stompy-Stomp
+            }, spellInfo =>
+            {
+                spellInfo.RecoveryTime = 10000;
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              37727, // Touch of Darkness
-				              54996  // Ice Slick (tooltip says 20s but sniffs say 12s)
-			              },
-                          spellInfo => { spellInfo.RecoveryTime = 12000; });
+            ApplySpellFix(new[] {
+                37727, // Touch of Darkness
+                54996  // Ice Slick (tooltip says 20s but sniffs say 12s)
+            }, spellInfo =>
+            {
+                spellInfo.RecoveryTime = 12000;
+            });
 
             // Signal Helmet to Attack
-            ApplySpellFix(new[]
-                          {
-                              51748
-                          },
-                          spellInfo => { spellInfo.RecoveryTime = 15000; });
+            ApplySpellFix(new[] { 51748 }, spellInfo =>
+            {
+                spellInfo.RecoveryTime = 15000;
+            });
 
             // Charge
-            ApplySpellFix(new[]
-                          {
-                              51756, // Charge
-				              37919, //Arcano-dismantle
-				              37917  //Arcano-Cloak
-			              },
-                          spellInfo => { spellInfo.RecoveryTime = 20000; });
+            ApplySpellFix(new[] {
+                51756, // Charge
+                37919, //Arcano-dismantle
+                37917  //Arcano-Cloak
+            }, spellInfo =>
+            {
+                spellInfo.RecoveryTime = 20000;
+            });
 
             // Summon Frigid Bones
-            ApplySpellFix(new[]
-                          {
-                              53525
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(4); // 2 minutes
-                          });
+            ApplySpellFix(new[] { 53525 }, spellInfo =>
+            {
+                spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(4); // 2 minutes
+            });
 
             // Dark Conclave Ritualist Channel
-            ApplySpellFix(new[]
-                          {
-                              38469
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(6); // 100yd
-                          });
+            ApplySpellFix(new[] { 38469 }, spellInfo =>
+            {
+                spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(6);  // 100yd
+            });
 
             // Chrono Shift (enemy slow part)
-            ApplySpellFix(new[]
-                          {
-                              236299
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(6); // 100yd
-                          });
+            ApplySpellFix(new[] { 236299 }, spellInfo =>
+            {
+                spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(6);  // 100yd
+            });
 
             //
             // VIOLET HOLD SPELLS
             //
             // Water Globule (Ichoron)
-            ApplySpellFix(new[]
-                          {
-                              54258, 54264, 54265, 54266, 54267
-                          },
-                          spellInfo =>
-                          {
-                              // in 3.3.5 there is only one radius in dbc which is 0 yards in this case
-                              // use max radius from 4.3.4
-                              ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards25); });
-                          });
+            ApplySpellFix(new[] { 54258, 54264, 54265, 54266, 54267 }, spellInfo =>
+            {
+                // in 3.3.5 there is only one radius in dbc which is 0 yards in this case
+                // use max radius from 4.3.4
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards25);
+                });
+            });
             // ENDOF VIOLET HOLD
 
             //
             // ULDUAR SPELLS
             //
             // Pursued (Flame Leviathan)
-            ApplySpellFix(new[]
-                          {
-                              62374
-                          },
-                          spellInfo =>
-                          {
-                              ApplySpellEffectFix(spellInfo,
-                                                  0,
-                                                  spellEffectInfo =>
-                                                  {
-                                                      spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards50000); // 50000yd
-                                                  });
-                          });
+            ApplySpellFix(new[] { 62374 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards50000);   // 50000yd
+                });
+            });
 
             // Focused Eyebeam Summon Trigger (Kologarn)
-            ApplySpellFix(new[]
-                          {
-                              63342
-                          },
-                          spellInfo => { spellInfo.MaxAffectedTargets = 1; });
+            ApplySpellFix(new[] { 63342 }, spellInfo =>
+            {
+                spellInfo.MaxAffectedTargets = 1;
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              65584, // Growth of Nature (Freya)
-				              64381  // Strength of the Pack (Auriaya)
-			              },
-                          spellInfo => { spellInfo.AttributesEx3 |= SpellAttr3.DotStackingRule; });
+            ApplySpellFix(new[] {
+                65584, // Growth of Nature (Freya)
+                64381  // Strength of the Pack (Auriaya)
+            }, spellInfo =>
+            {
+                spellInfo.AttributesEx3 |= SpellAttr3.DotStackingRule;
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              63018, // Searing Light (XT-002)
-				              65121, // Searing Light (25m) (XT-002)
-				              63024, // Gravity Bomb (XT-002)
-				              64234  // Gravity Bomb (25m) (XT-002)
-			              },
-                          spellInfo => { spellInfo.MaxAffectedTargets = 1; });
+            ApplySpellFix(new[] {
+                63018, // Searing Light (XT-002)
+                65121, // Searing Light (25m) (XT-002)
+                63024, // Gravity Bomb (XT-002)
+                64234  // Gravity Bomb (25m) (XT-002)
+            }, spellInfo =>
+            {
+                spellInfo.MaxAffectedTargets = 1;
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              64386, // Terrifying Screech (Auriaya)
-				              64389, // Sentinel Blast (Auriaya)
-				              64678  // Sentinel Blast (Auriaya)
-			              },
-                          spellInfo =>
-                          {
-                              spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(28); // 5 seconds, wrong DBC _data?
-                          });
+            ApplySpellFix(new[] {
+                64386, // Terrifying Screech (Auriaya)
+                64389, // Sentinel Blast (Auriaya)
+                64678  // Sentinel Blast (Auriaya)
+            }, spellInfo =>
+            {
+                spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(28); // 5 seconds, wrong DBC data?
+            });
 
             // Potent Pheromones (Freya)
-            ApplySpellFix(new[]
-                          {
-                              64321
-                          },
-                          spellInfo =>
-                          {
-                              // spell should dispel area aura, but doesn't have the attribute
-                              // may be db _data bug, or blizz may keep reapplying area Auras every update with checking immunity
-                              // that will be clear if we get more spells with problem like this
-                              spellInfo.AttributesEx |= SpellAttr1.ImmunityPurgesEffect;
-                          });
+            ApplySpellFix(new[] { 64321 }, spellInfo =>
+            {
+                // spell should dispel area aura, but doesn't have the attribute
+                // may be db data bug, or blizz may keep reapplying area auras every update with checking immunity
+                // that will be clear if we get more spells with problem like this
+                spellInfo.AttributesEx |= SpellAttr1.ImmunityPurgesEffect;
+            });
 
             // Blizzard (Thorim)
-            ApplySpellFix(new[]
-                          {
-                              62576, 62602
-                          },
-                          spellInfo =>
-                          {
-                              // DBC _data is wrong for 0, it's a different dynobject Target than 1
-                              // Both effects should be shared by the same DynObject
-                              ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.DestCasterLeft); });
-                          });
+            ApplySpellFix(new[] { 62576, 62602 }, spellInfo =>
+            {
+                // DBC data is wrong for 0, it's a different dynobject target than 1
+                // Both effects should be shared by the same DynObject
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.DestCasterLeft);
+                });
+            });
 
             // Spinning Up (Mimiron)
-            ApplySpellFix(new[]
-                          {
-                              63414
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.ChannelInterruptFlags = SpellAuraInterruptFlags.None;
-                              spellInfo.ChannelInterruptFlags2 = SpellAuraInterruptFlags2.None;
-                              ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.TargetB = new SpellImplicitTargetInfo(Targets.UnitCaster); });
-                          });
+            ApplySpellFix(new[] { 63414 }, spellInfo =>
+            {
+                spellInfo.ChannelInterruptFlags = SpellAuraInterruptFlags.None;
+                spellInfo.ChannelInterruptFlags2 = SpellAuraInterruptFlags2.None;
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.TargetB = new SpellImplicitTargetInfo(Targets.UnitCaster);
+                });
+            });
 
             // Rocket Strike (Mimiron)
-            ApplySpellFix(new[]
-                          {
-                              63036
-                          },
-                          spellInfo => { spellInfo.Speed = 0; });
+            ApplySpellFix(new[] { 63036 }, spellInfo =>
+            {
+                spellInfo.Speed = 0;
+            });
 
             // Magnetic Field (Mimiron)
-            ApplySpellFix(new[]
-                          {
-                              64668
-                          },
-                          spellInfo => { spellInfo.Mechanic = Mechanics.None; });
+            ApplySpellFix(new[] { 64668 }, spellInfo =>
+            {
+                spellInfo.Mechanic = Mechanics.None;
+            });
 
             // Empowering Shadows (Yogg-Saron)
-            ApplySpellFix(new[]
-                          {
-                              64468, 64486
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.MaxAffectedTargets = 3; // same for both modes?
-                          });
+            ApplySpellFix(new[] { 64468, 64486 }, spellInfo =>
+            {
+                spellInfo.MaxAffectedTargets = 3;  // same for both modes?
+            });
 
             // Cosmic Smash (Algalon the Observer)
-            ApplySpellFix(new[]
-                          {
-                              62301
-                          },
-                          spellInfo => { spellInfo.MaxAffectedTargets = 1; });
+            ApplySpellFix(new[] { 62301 }, spellInfo =>
+            {
+                spellInfo.MaxAffectedTargets = 1;
+            });
 
             // Cosmic Smash (Algalon the Observer)
-            ApplySpellFix(new[]
-                          {
-                              64598
-                          },
-                          spellInfo => { spellInfo.MaxAffectedTargets = 3; });
+            ApplySpellFix(new[] { 64598 }, spellInfo =>
+            {
+                spellInfo.MaxAffectedTargets = 3;
+            });
 
             // Cosmic Smash (Algalon the Observer)
-            ApplySpellFix(new[]
-                          {
-                              62293
-                          },
-                          spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.TargetB = new SpellImplicitTargetInfo(Targets.DestCaster); }); });
+            ApplySpellFix(new[] { 62293 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.TargetB = new SpellImplicitTargetInfo(Targets.DestCaster);
+                });
+            });
 
             // Cosmic Smash (Algalon the Observer)
-            ApplySpellFix(new[]
-                          {
-                              62311, 64596
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(6); // 100yd
-                          });
+            ApplySpellFix(new[] { 62311, 64596 }, spellInfo =>
+            {
+                spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(6);  // 100yd
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              64014, // Expedition Base Camp Teleport
-				              64024, // Conservatory Teleport
-				              64025, // Halls of Invention Teleport
-				              64028, // Colossal Forge Teleport
-				              64029, // Shattered Walkway Teleport
-				              64030, // Antechamber Teleport
-				              64031, // Scrapyard Teleport
-				              64032, // Formation Grounds Teleport
-				              65042  // Prison of Yogg-Saron Teleport
-			              },
-                          spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.DestDb); }); });
+            ApplySpellFix(new[] {
+                64014, // Expedition Base Camp Teleport
+                64024, // Conservatory Teleport
+                64025, // Halls of Invention Teleport
+                64028, // Colossal Forge Teleport
+                64029, // Shattered Walkway Teleport
+                64030, // Antechamber Teleport
+                64031, // Scrapyard Teleport
+                64032, // Formation Grounds Teleport
+                65042  // Prison of Yogg-Saron Teleport
+            }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.DestDb);
+                });
+            });
             // ENDOF ULDUAR SPELLS
 
             //
             // TRIAL OF THE CRUSADER SPELLS
             //
             // Infernal Eruption
-            ApplySpellFix(new[]
-                          {
-                              66258
-                          },
-                          spellInfo =>
-                          {
-                              // increase duration from 15 to 18 seconds because caster is already
-                              // unsummoned when spell missile hits the ground so nothing happen in result
-                              spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(85);
-                          });
+            ApplySpellFix(new[] { 66258 }, spellInfo =>
+            {
+                // increase duration from 15 to 18 seconds because caster is already
+                // unsummoned when spell missile hits the ground so nothing happen in result
+                spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(85);
+            });
             // ENDOF TRIAL OF THE CRUSADER SPELLS
 
             //
             // ICECROWN CITADEL SPELLS
             //
-            ApplySpellFix(new[]
-                          {
-                              70781, // Light's Hammer Teleport
-				              70856, // Oratory of the Damned Teleport
-				              70857, // Rampart of Skulls Teleport
-				              70858, // Deathbringer's Rise Teleport
-				              70859, // Upper Spire Teleport
-				              70860, // Frozen Throne Teleport
-				              70861  // Sindragosa's Lair Teleport
-			              },
-                          spellInfo =>
-                          {
-                              // THESE SPELLS ARE WORKING CORRECTLY EVEN WITHOUT THIS HACK
-                              // THE ONLY REASON ITS HERE IS THAT CURRENT GRID SYSTEM
-                              // DOES NOT ALLOW FAR OBJECT SELECTION (dist > 333)
-                              ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.DestDb); });
-                          });
+            ApplySpellFix(new[] {
+                70781, // Light's Hammer Teleport
+                70856, // Oratory of the Damned Teleport
+                70857, // Rampart of Skulls Teleport
+                70858, // Deathbringer's Rise Teleport
+                70859, // Upper Spire Teleport
+                70860, // Frozen Throne Teleport
+                70861  // Sindragosa's Lair Teleport
+            }, spellInfo =>
+            {
+                // THESE SPELLS ARE WORKING CORRECTLY EVEN WITHOUT THIS HACK
+                // THE ONLY REASON ITS HERE IS THAT CURRENT GRID SYSTEM
+                // DOES NOT ALLOW FAR OBJECT SELECTION (dist > 333)
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.DestDb);
+                });
+            });
 
             // Shadow's Fate
-            ApplySpellFix(new[]
-                          {
-                              71169
-                          },
-                          spellInfo => { spellInfo.AttributesEx3 |= SpellAttr3.DotStackingRule; });
+            ApplySpellFix(new[] { 71169 }, spellInfo =>
+            {
+                spellInfo.AttributesEx3 |= SpellAttr3.DotStackingRule;
+            });
 
             // Resistant Skin (Deathbringer Saurfang adds)
-            ApplySpellFix(new[]
-                          {
-                              72723
-                          },
-                          spellInfo =>
-                          {
-                              // this spell initially granted Shadow Damage immunity, however it was removed but the _data was left in client
-                              ApplySpellEffectFix(spellInfo, 2, spellEffectInfo => { spellEffectInfo.Effect = SpellEffectName.None; });
-                          });
+            ApplySpellFix(new[] { 72723 }, spellInfo =>
+            {
+                // this spell initially granted Shadow damage immunity, however it was removed but the data was left in client
+                ApplySpellEffectFix(spellInfo, 2, spellEffectInfo =>
+                {
+                    spellEffectInfo.Effect = SpellEffectName.None;
+                });
+            });
 
             // Coldflame Jets (Traps after Saurfang)
-            ApplySpellFix(new[]
-                          {
-                              70460
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(1); // 10 seconds
-                          });
+            ApplySpellFix(new[] { 70460 }, spellInfo =>
+            {
+                spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(1); // 10 seconds
+            });
 
-            ApplySpellFix(new[]
-                          {
-                              71412, // Green Ooze Summon (Professor Putricide)
-				              71415  // Orange Ooze Summon (Professor Putricide)
-			              },
-                          spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.UnitTargetAny); }); });
+            ApplySpellFix(new[] {
+                71412, // Green Ooze Summon (Professor Putricide)
+                71415  // Orange Ooze Summon (Professor Putricide)
+            }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.UnitTargetAny);
+                });
+            });
 
             // Awaken Plagued Zombies
-            ApplySpellFix(new[]
-                          {
-                              71159
-                          },
-                          spellInfo => { spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(21); });
+            ApplySpellFix(new[] { 71159 }, spellInfo =>
+            {
+                spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(21);
+            });
 
             // Volatile Ooze Beam Protection (Professor Putricide)
-            ApplySpellFix(new[]
-                          {
-                              70530
-                          },
-                          spellInfo =>
-                          {
-                              ApplySpellEffectFix(spellInfo,
-                                                  0,
-                                                  spellEffectInfo =>
-                                                  {
-                                                      spellEffectInfo.Effect = SpellEffectName.ApplyAura; // for an unknown reason this was SPELL_EFFECT_APPLY_AREA_AURA_RAID
-                                                  });
-                          });
+            ApplySpellFix(new[] { 70530 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.Effect = SpellEffectName.ApplyAura; // for an unknown reason this was SPELL_EFFECT_APPLY_AREA_AURA_RAID
+                });
+            });
 
             // Mutated Strength (Professor Putricide)
-            ApplySpellFix(new[]
-                          {
-                              71604
-                          },
-                          spellInfo =>
-                          {
-                              // THIS IS HERE BECAUSE COOLDOWN ON CREATURE PROCS WERE NOT IMPLEMENTED WHEN THE SCRIPT WAS WRITTEN
-                              ApplySpellEffectFix(spellInfo, 1, spellEffectInfo => { spellEffectInfo.Effect = SpellEffectName.None; });
-                          });
+            ApplySpellFix(new[] { 71604 }, spellInfo =>
+            {
+                // THIS IS HERE BECAUSE COOLDOWN ON CREATURE PROCS WERE NOT IMPLEMENTED WHEN THE SCRIPT WAS WRITTEN
+                ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
+                {
+                    spellEffectInfo.Effect = SpellEffectName.None;
+                });
+            });
 
-            // Unbound Plague (Professor Putricide) (needs Target selection script)
-            ApplySpellFix(new[]
-                          {
-                              70911
-                          },
-                          spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.TargetB = new SpellImplicitTargetInfo(Targets.UnitTargetEnemy); }); });
+            // Unbound Plague (Professor Putricide) (needs target selection script)
+            ApplySpellFix(new[] { 70911 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.TargetB = new SpellImplicitTargetInfo(Targets.UnitTargetEnemy);
+                });
+            });
 
             // Empowered Flare (Blood Prince Council)
-            ApplySpellFix(new[]
-                          {
-                              71708
-                          },
-                          spellInfo => { spellInfo.AttributesEx3 |= SpellAttr3.IgnoreCasterModifiers; });
+            ApplySpellFix(new[] { 71708 }, spellInfo =>
+            {
+                spellInfo.AttributesEx3 |= SpellAttr3.IgnoreCasterModifiers;
+            });
 
             // Swarming Shadows
-            ApplySpellFix(new[]
-                          {
-                              71266
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.RequiredAreasID = 0; // originally, these require area 4522, which is... outside of Icecrown Citadel
-                          });
+            ApplySpellFix(new[] { 71266 }, spellInfo =>
+            {
+                spellInfo.RequiredAreasID = 0; // originally, these require area 4522, which is... outside of Icecrown Citadel
+            });
 
             // Corruption
-            ApplySpellFix(new[]
-                          {
-                              70602
-                          },
-                          spellInfo => { spellInfo.AttributesEx3 |= SpellAttr3.DotStackingRule; });
+            ApplySpellFix(new[] { 70602 }, spellInfo =>
+            {
+                spellInfo.AttributesEx3 |= SpellAttr3.DotStackingRule;
+            });
 
             // Column of Frost (visual marker)
-            ApplySpellFix(new[]
-                          {
-                              70715
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(32); // 6 seconds (missing)
-                          });
+            ApplySpellFix(new[] { 70715 }, spellInfo =>
+            {
+                spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(32); // 6 seconds (missing)
+            });
 
             // Mana Void (periodic aura)
-            ApplySpellFix(new[]
-                          {
-                              71085
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(9); // 30 seconds (missing)
-                          });
+            ApplySpellFix(new[] { 71085 }, spellInfo =>
+            {
+                spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(9); // 30 seconds (missing)
+            });
 
-            // Summon Suppressor (needs Target selection script)
-            ApplySpellFix(new[]
-                          {
-                              70936
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(157); // 90yd
-
-                              ApplySpellEffectFix(spellInfo,
-                                                  0,
-                                                  spellEffectInfo =>
-                                                  {
-                                                      spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.UnitTargetAny);
-                                                      spellEffectInfo.TargetB = new SpellImplicitTargetInfo();
-                                                  });
-                          });
+            // Summon Suppressor (needs target selection script)
+            ApplySpellFix(new[] { 70936 }, spellInfo =>
+            {
+                spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(157); // 90yd
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.UnitTargetAny);
+                    spellEffectInfo.TargetB = new SpellImplicitTargetInfo();
+                });
+            });
 
             // Sindragosa's Fury
-            ApplySpellFix(new[]
-                          {
-                              70598
-                          },
-                          spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.DestDest); }); });
+            ApplySpellFix(new[] { 70598 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.DestDest);
+                });
+            });
 
             // Frost Bomb
-            ApplySpellFix(new[]
-                          {
-                              69846
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.Speed = 0.0f; // This spell's summon happens instantly
-                          });
+            ApplySpellFix(new[] { 69846 }, spellInfo =>
+            {
+                spellInfo.Speed = 0.0f;    // This spell's summon happens instantly
+            });
 
             // Chilled to the Bone
-            ApplySpellFix(new[]
-                          {
-                              70106
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.AttributesEx3 |= SpellAttr3.IgnoreCasterModifiers;
-                              spellInfo.AttributesEx6 |= SpellAttr6.IgnoreCasterDamageModifiers;
-                          });
+            ApplySpellFix(new[] { 70106 }, spellInfo =>
+            {
+                spellInfo.AttributesEx3 |= SpellAttr3.IgnoreCasterModifiers;
+                spellInfo.AttributesEx6 |= SpellAttr6.IgnoreCasterDamageModifiers;
+            });
 
             // Ice Lock
-            ApplySpellFix(new[]
-                          {
-                              71614
-                          },
-                          spellInfo => { spellInfo.Mechanic = Mechanics.Stun; });
+            ApplySpellFix(new[] { 71614 }, spellInfo =>
+            {
+                spellInfo.Mechanic = Mechanics.Stun;
+            });
 
             // Defile
-            ApplySpellFix(new[]
-                          {
-                              72762
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(559); // 53 seconds
-                          });
+            ApplySpellFix(new[] { 72762 }, spellInfo =>
+            {
+                spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(559); // 53 seconds
+            });
 
             // Defile
-            ApplySpellFix(new[]
-                          {
-                              72743
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(22); // 45 seconds
-                          });
+            ApplySpellFix(new[] { 72743 }, spellInfo =>
+            {
+                spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(22); // 45 seconds
+            });
 
             // Defile
-            ApplySpellFix(new[]
-                          {
-                              72754
-                          },
-                          spellInfo =>
-                          {
-                              ApplySpellEffectFix(spellInfo,
-                                                  0,
-                                                  spellEffectInfo =>
-                                                  {
-                                                      spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards200); // 200yd
-                                                  });
-
-                              ApplySpellEffectFix(spellInfo,
-                                                  1,
-                                                  spellEffectInfo =>
-                                                  {
-                                                      spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards200); // 200yd
-                                                  });
-                          });
+            ApplySpellFix(new[] { 72754 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards200); // 200yd
+                });
+                ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
+                {
+                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards200); // 200yd
+                });
+            });
 
             // Val'kyr Target Search
-            ApplySpellFix(new[]
-                          {
-                              69030
-                          },
-                          spellInfo => { spellInfo.Attributes |= SpellAttr0.NoImmunities; });
+            ApplySpellFix(new[] { 69030 }, spellInfo =>
+            {
+                spellInfo.Attributes |= SpellAttr0.NoImmunities;
+            });
 
             // Raging Spirit Visual
-            ApplySpellFix(new[]
-                          {
-                              69198
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(13); // 50000yd
-                          });
+            ApplySpellFix(new[] { 69198 }, spellInfo =>
+            {
+                spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(13); // 50000yd
+            });
 
             // Harvest Soul
-            ApplySpellFix(new[]
-                          {
-                              73655
-                          },
-                          spellInfo => { spellInfo.AttributesEx3 |= SpellAttr3.IgnoreCasterModifiers; });
+            ApplySpellFix(new[] { 73655 }, spellInfo =>
+            {
+                spellInfo.AttributesEx3 |= SpellAttr3.IgnoreCasterModifiers;
+            });
 
             // Summon Shadow Trap
-            ApplySpellFix(new[]
-                          {
-                              73540
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(3); // 60 seconds
-                          });
+            ApplySpellFix(new[] { 73540 }, spellInfo =>
+            {
+                spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(3); // 60 seconds
+            });
 
             // Shadow Trap (visual)
-            ApplySpellFix(new[]
-                          {
-                              73530
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(27); // 3 seconds
-                          });
+            ApplySpellFix(new[] { 73530 }, spellInfo =>
+            {
+                spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(27); // 3 seconds
+            });
 
             // Summon Spirit Bomb
-            ApplySpellFix(new[]
-                          {
-                              74302
-                          },
-                          spellInfo => { spellInfo.MaxAffectedTargets = 2; });
+            ApplySpellFix(new[] { 74302 }, spellInfo =>
+            {
+                spellInfo.MaxAffectedTargets = 2;
+            });
 
             // Summon Spirit Bomb
-            ApplySpellFix(new[]
-                          {
-                              73579
-                          },
-                          spellInfo =>
-                          {
-                              ApplySpellEffectFix(spellInfo,
-                                                  0,
-                                                  spellEffectInfo =>
-                                                  {
-                                                      spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards25); // 25yd
-                                                  });
-                          });
+            ApplySpellFix(new[] { 73579 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards25); // 25yd
+                });
+            });
 
             // Raise Dead
-            ApplySpellFix(new[]
-                          {
-                              72376
-                          },
-                          spellInfo => { spellInfo.MaxAffectedTargets = 3; });
+            ApplySpellFix(new[] { 72376 }, spellInfo =>
+            {
+                spellInfo.MaxAffectedTargets = 3;
+            });
 
             // Jump
-            ApplySpellFix(new[]
-                          {
-                              71809
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(5); // 40yd
-
-                              ApplySpellEffectFix(spellInfo,
-                                                  0,
-                                                  spellEffectInfo =>
-                                                  {
-                                                      spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards10); // 10yd
-                                                      spellEffectInfo.MiscValue = 190;
-                                                  });
-                          });
+            ApplySpellFix(new[] { 71809 }, spellInfo =>
+            {
+                spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(5); // 40yd
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards10); // 10yd
+            spellEffectInfo.MiscValue = 190;
+                });
+            });
 
             // Broken Frostmourne
-            ApplySpellFix(new[]
-                          {
-                              72405
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.AttributesEx |= SpellAttr1.NoThreat;
-
-                              ApplySpellEffectFix(spellInfo,
-                                                  1,
-                                                  spellEffectInfo =>
-                                                  {
-                                                      spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards20); // 20yd
-                                                  });
-                          });
+            ApplySpellFix(new[] { 72405 }, spellInfo =>
+            {
+                spellInfo.AttributesEx |= SpellAttr1.NoThreat;
+                ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
+                {
+                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards20); // 20yd
+                });
+            });
             // ENDOF ICECROWN CITADEL SPELLS
 
             //
             // RUBY SANCTUM SPELLS
             //
             // Soul Consumption
-            ApplySpellFix(new[]
-                          {
-                              74799
-                          },
-                          spellInfo => { ApplySpellEffectFix(spellInfo, 1, spellEffectInfo => { spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards12); }); });
+            ApplySpellFix(new[] { 74799 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
+                {
+                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards12);
+                });
+            });
 
             // Twilight Mending
-            ApplySpellFix(new[]
-                          {
-                              75509
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.AttributesEx6 |= SpellAttr6.IgnorePhaseShift;
-                              spellInfo.AttributesEx2 |= SpellAttr2.IgnoreLineOfSight;
-                          });
+            ApplySpellFix(new[] { 75509 }, spellInfo =>
+            {
+                spellInfo.AttributesEx6 |= SpellAttr6.IgnorePhaseShift;
+                spellInfo.AttributesEx2 |= SpellAttr2.IgnoreLineOfSight;
+            });
 
             // Awaken Flames
-            ApplySpellFix(new[]
-                          {
-                              75888
-                          },
-                          spellInfo => { spellInfo.AttributesEx |= SpellAttr1.ExcludeCaster; });
+            ApplySpellFix(new[] { 75888 }, spellInfo =>
+            {
+                spellInfo.AttributesEx |= SpellAttr1.ExcludeCaster;
+            });
             // ENDOF RUBY SANCTUM SPELLS
 
             //
             // EYE OF ETERNITY SPELLS
             //
-            ApplySpellFix(new[]
-                          {
-                              57473, // Arcane Storm bonus explicit visual spell
-				              57431, // Summon Static Field
-				              56091, // Flame Spike (Wyrmrest Skytalon)
-				              56092, // Engulf in Flames (Wyrmrest Skytalon)
-				              57090, // Revivify (Wyrmrest Skytalon)
-				              57143  // Life Burst (Wyrmrest Skytalon)
-			              },
-                          spellInfo =>
-                          {
-                              // All spells work even without these changes. The LOS attribute is due to problem
-                              // from collision between maps & gos with active destroyed State.
-                              spellInfo.AttributesEx2 |= SpellAttr2.IgnoreLineOfSight;
-                          });
+            ApplySpellFix(new[] {
+                57473, // Arcane Storm bonus explicit visual spell
+                57431, // Summon Static Field
+                56091, // Flame Spike (Wyrmrest Skytalon)
+                56092, // Engulf in Flames (Wyrmrest Skytalon)
+                57090, // Revivify (Wyrmrest Skytalon)
+                57143  // Life Burst (Wyrmrest Skytalon)
+            }, spellInfo =>
+            {
+                // All spells work even without these changes. The LOS attribute is due to problem
+                // from collision between maps & gos with active destroyed state.
+                spellInfo.AttributesEx2 |= SpellAttr2.IgnoreLineOfSight;
+            });
 
             // Arcane Barrage (cast by players and NONMELEEDAMAGELOG with caster Scion of Eternity (original caster)).
-            ApplySpellFix(new[]
-                          {
-                              63934
-                          },
-                          spellInfo =>
-                          {
-                              // This would never crit on retail and it has attribute for SPELL_ATTR3_NO_DONE_BONUS because is handled from player,
-                              // until someone figures how to make scions not critting without hack and without making them main casters this should stay here.
-                              spellInfo.AttributesEx2 |= SpellAttr2.CantCrit;
-                          });
+            ApplySpellFix(new[] { 63934 }, spellInfo =>
+            {
+                // This would never crit on retail and it has attribute for SPELL_ATTR3_NO_DONE_BONUS because is handled from player,
+                // until someone figures how to make scions not critting without hack and without making them main casters this should stay here.
+                spellInfo.AttributesEx2 |= SpellAttr2.CantCrit;
+            });
             // ENDOF EYE OF ETERNITY SPELLS
 
-            ApplySpellFix(new[]
-                          {
-                              40055, // Introspection
-				              40165, // Introspection
-				              40166, // Introspection
-				              40167  // Introspection
-			              },
-                          spellInfo => { spellInfo.Attributes |= SpellAttr0.AuraIsDebuff; });
+            ApplySpellFix(new[] {
+                40055, // Introspection
+                40165, // Introspection
+                40166, // Introspection
+                40167, // Introspection
+            }, spellInfo =>
+            {
+                spellInfo.Attributes |= SpellAttr0.AuraIsDebuff;
+            });
 
             //
             // STONECORE SPELLS
             //
-            ApplySpellFix(new[]
-                          {
-                              95284, // Teleport (from entrance to Slabhide)
-				              95285  // Teleport (from Slabhide to entrance)
-			              },
-                          spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.TargetB = new SpellImplicitTargetInfo(Targets.DestDb); }); });
+            ApplySpellFix(new[] {
+                95284, // Teleport (from entrance to Slabhide)
+                95285  // Teleport (from Slabhide to entrance)
+            }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.TargetB = new SpellImplicitTargetInfo(Targets.DestDb);
+                });
+            });
             // ENDOF STONECORE SPELLS
 
             //
             // HALLS OF ORIGINATION SPELLS
             //
-            ApplySpellFix(new[]
-                          {
-                              76606, // Disable Beacon Beams L
-				              76608  // Disable Beacon Beams R
-			              },
-                          spellInfo =>
-                          {
-                              // Little hack, Increase the radius so it can hit the Cave In Stalkers in the platform.
-                              ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.MaxRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards45); });
-                          });
+            ApplySpellFix(new[] {
+                76606, // Disable Beacon Beams L
+                76608  // Disable Beacon Beams R
+            }, spellInfo =>
+            {
+                // Little hack, Increase the radius so it can hit the Cave In Stalkers in the platform.
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.MaxRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards45);
+                });
+            });
 
             // ENDOF HALLS OF ORIGINATION SPELLS
 
             // Threatening Gaze
-            ApplySpellFix(new[]
-                          {
-                              24314
-                          },
-                          spellInfo => { spellInfo.AuraInterruptFlags |= SpellAuraInterruptFlags.Action | SpellAuraInterruptFlags.Moving | SpellAuraInterruptFlags.Anim; });
+            ApplySpellFix(new[] { 24314 }, spellInfo =>
+            {
+                spellInfo.AuraInterruptFlags |= SpellAuraInterruptFlags.Action | SpellAuraInterruptFlags.Moving | SpellAuraInterruptFlags.Anim;
+            });
 
             // Travel Form (dummy) - cannot be cast indoors.
-            ApplySpellFix(new[]
-                          {
-                              783
-                          },
-                          spellInfo => { spellInfo.Attributes |= SpellAttr0.OnlyOutdoors; });
+            ApplySpellFix(new[] { 783 }, spellInfo =>
+            {
+                spellInfo.Attributes |= SpellAttr0.OnlyOutdoors;
+            });
 
             // Tree of Life (Passive)
-            ApplySpellFix(new[]
-                          {
-                              5420
-                          },
-                          spellInfo => { spellInfo.Stances = 1ul << ((int)ShapeShiftForm.TreeOfLife - 1); });
+            ApplySpellFix(new[] { 5420 }, spellInfo =>
+            {
+                spellInfo.Stances = 1ul << ((int)ShapeShiftForm.TreeOfLife - 1);
+            });
 
             // Gaze of Occu'thar
-            ApplySpellFix(new[]
-                          {
-                              96942
-                          },
-                          spellInfo => { spellInfo.AttributesEx &= ~SpellAttr1.IsChannelled; });
+            ApplySpellFix(new[] { 96942 }, spellInfo =>
+            {
+                spellInfo.AttributesEx &= ~SpellAttr1.IsChannelled;
+            });
 
             // Evolution
-            ApplySpellFix(new[]
-                          {
-                              75610
-                          },
-                          spellInfo => { spellInfo.MaxAffectedTargets = 1; });
+            ApplySpellFix(new[] { 75610 }, spellInfo =>
+            {
+                spellInfo.MaxAffectedTargets = 1;
+            });
 
             // Evolution
-            ApplySpellFix(new[]
-                          {
-                              75697
-                          },
-                          spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.UnitSrcAreaEntry); }); });
+            ApplySpellFix(new[] { 75697 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.UnitSrcAreaEntry);
+                });
+            });
 
             //
             // ISLE OF CONQUEST SPELLS
             //
             // Teleport
-            ApplySpellFix(new[]
-                          {
-                              66551
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(13); // 50000yd
-                          });
+            ApplySpellFix(new[] { 66551 }, spellInfo =>
+            {
+                spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(13); // 50000yd
+            });
             // ENDOF ISLE OF CONQUEST SPELLS
 
             // Aura of Fear
-            ApplySpellFix(new[]
-                          {
-                              40453
-                          },
-                          spellInfo =>
-                          {
-                              // Bad DBC _data? Copying 25820 here due to spell description
-                              // either is a periodic with chance on tick, or a proc
+            ApplySpellFix(new[] { 40453 }, spellInfo =>
+            {
+                // Bad DBC data? Copying 25820 here due to spell description
+                // either is a periodic with chance on tick, or a proc
 
-                              ApplySpellEffectFix(spellInfo,
-                                                  0,
-                                                  spellEffectInfo =>
-                                                  {
-                                                      spellEffectInfo.ApplyAuraName = AuraType.ProcTriggerSpell;
-                                                      spellEffectInfo.ApplyAuraPeriod = 0;
-                                                  });
-
-                              spellInfo.ProcChance = 10;
-                          });
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.ApplyAuraName = AuraType.ProcTriggerSpell;
+                    spellEffectInfo.ApplyAuraPeriod = 0;
+                });
+                spellInfo.ProcChance = 10;
+            });
 
             // Survey Sinkholes
-            ApplySpellFix(new[]
-                          {
-                              45853
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(5); // 40 yards
-                          });
+            ApplySpellFix(new[] { 45853 }, spellInfo =>
+            {
+                spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(5); // 40 yards
+            });
 
             // Baron Rivendare (Stratholme) - Unholy Aura
-            ApplySpellFix(new[]
-                          {
-                              17466, 17467
-                          },
-                          spellInfo => { spellInfo.AttributesEx2 |= SpellAttr2.NoInitialThreat; });
+            ApplySpellFix(new [] { 17466, 17467 }, spellInfo =>
+            {
+                spellInfo.AttributesEx2 |= SpellAttr2.NoInitialThreat;
+            });
 
             // Spore - Spore Visual
-            ApplySpellFix(new[]
-                          {
-                              42525
-                          },
-                          spellInfo =>
-                          {
-                              spellInfo.AttributesEx3 |= SpellAttr3.AllowAuraWhileDead;
-                              spellInfo.AttributesEx2 |= SpellAttr2.AllowDeadTarget;
-                          });
+            ApplySpellFix(new[] { 42525 }, spellInfo =>
+            {
+                spellInfo.AttributesEx3 |= SpellAttr3.AllowAuraWhileDead;
+                spellInfo.AttributesEx2 |= SpellAttr2.AllowDeadTarget;
+            });
 
             // Soul Sickness (Forge of Souls)
-            ApplySpellFix(new[]
-                          {
-                              69131
-                          },
-                          spellInfo => { ApplySpellEffectFix(spellInfo, 1, spellEffectInfo => { spellEffectInfo.ApplyAuraName = AuraType.ModDecreaseSpeed; }); });
+            ApplySpellFix(new[] { 69131 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
+                {
+                    spellEffectInfo.ApplyAuraName = AuraType.ModDecreaseSpeed;
+                });
+            });
 
             //
             // FIRELANDS SPELLS
             //
             // Torment Searcher
-            ApplySpellFix(new[]
-                          {
-                              99253
-                          },
-                          spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.MaxRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards15); }); });
+            ApplySpellFix(new[] { 99253 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.MaxRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards15);
+                });
+            });
 
             // Torment Damage
-            ApplySpellFix(new[]
-                          {
-                              99256
-                          },
-                          spellInfo => { spellInfo.Attributes |= SpellAttr0.AuraIsDebuff; });
+            ApplySpellFix(new[] { 99256 }, spellInfo =>
+            {
+                spellInfo.Attributes |= SpellAttr0.AuraIsDebuff;
+            });
 
             // Blaze of Glory
-            ApplySpellFix(new[]
-                          {
-                              99252
-                          },
-                          spellInfo => { spellInfo.AuraInterruptFlags |= SpellAuraInterruptFlags.LeaveWorld; });
+            ApplySpellFix(new[] { 99252 }, spellInfo =>
+            {
+                spellInfo.AuraInterruptFlags |= SpellAuraInterruptFlags.LeaveWorld;
+            });
             // ENDOF FIRELANDS SPELLS
 
             //
@@ -4917,53 +4277,57 @@ namespace Game.Entities
             //
 
             // Decimation
-            ApplySpellFix(new[]
-                          {
-                              244449
-                          },
-                          spellInfo =>
-                          {
-                              // For some reason there is a instakill effect that serves absolutely no purpose.
-                              // Until we figure out what it's actually used for we disable it.
-                              ApplySpellEffectFix(spellInfo, 2, spellEffectInfo => { spellEffectInfo.Effect = SpellEffectName.None; });
-                          });
+            ApplySpellFix(new[] { 244449 }, spellInfo =>
+            {
+                // For some reason there is a instakill effect that serves absolutely no purpose.
+                // Until we figure out what it's actually used for we disable it.
+                ApplySpellEffectFix(spellInfo, 2, spellEffectInfo =>
+                {
+                    spellEffectInfo.Effect = SpellEffectName.None;
+                });
+            });
 
             // ENDOF ANTORUS THE BURNING THRONE SPELLS
 
             // Summon Master Li Fei
-            ApplySpellFix(new[]
-                          {
-                              102445
-                          },
-                          spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.DestDb); }); });
+            ApplySpellFix(new[] { 102445 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.DestDb);
+                });
+            });
 
             // Earthquake
-            ApplySpellFix(new[]
-                          {
-                              61882
-                          },
-                          spellInfo => { spellInfo.NegativeEffects[2] = true; });
+            ApplySpellFix(new [] { 61882 }, spellInfo =>
+            {
+                spellInfo.NegativeEffects[2] = true;
+            });
 
             // Headless Horseman Climax - Return Head (Hallow End)
             // Headless Horseman Climax - Body Regen (confuse only - removed on death)
             // Headless Horseman Climax - Head Is Dead
-            ApplySpellFix(new[]
-                          {
-                              42401, 43105, 42428
-                          },
-                          spellInfo => { spellInfo.Attributes |= SpellAttr0.NoImmunities; });
+            ApplySpellFix(new[] { 42401, 43105, 42428 }, spellInfo =>
+            {
+                spellInfo.Attributes |= SpellAttr0.NoImmunities;
+            });
 
-            // Horde / Alliance switch (BG Mercenary system)
-            ApplySpellFix(new[]
-                          {
-                              195838, 195843
-                          },
-                          spellInfo =>
-                          {
-                              ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.Effect = SpellEffectName.ApplyAura; });
-                              ApplySpellEffectFix(spellInfo, 1, spellEffectInfo => { spellEffectInfo.Effect = SpellEffectName.ApplyAura; });
-                              ApplySpellEffectFix(spellInfo, 2, spellEffectInfo => { spellEffectInfo.Effect = SpellEffectName.ApplyAura; });
-                          });
+            // Horde / Alliance switch (BG mercenary system)
+            ApplySpellFix(new[] { 195838, 195843 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.Effect = SpellEffectName.ApplyAura;
+                });
+                ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
+                {
+                    spellEffectInfo.Effect = SpellEffectName.ApplyAura;
+                });
+                ApplySpellEffectFix(spellInfo, 2, spellEffectInfo =>
+                {
+                    spellEffectInfo.Effect = SpellEffectName.ApplyAura;
+                });
+            });
 
             // Fire Cannon
             ApplySpellFix(new[] { 181593 }, spellInfo =>
@@ -4978,19 +4342,18 @@ namespace Game.Entities
             });
 
             // Ray of Frost (Fingers of Frost charges)
-            ApplySpellFix(new[]
-                          {
-                              269748
-                          },
-                          spellInfo => { spellInfo.AttributesEx &= ~SpellAttr1.IsChannelled; });
+            ApplySpellFix(new []{ 269748 }, spellInfo =>
+            {
+                spellInfo.AttributesEx &= ~SpellAttr1.IsChannelled;
+            });
 
             foreach (var spellInfo in mSpellInfoMap.Values)
             {
                 // Fix range for trajectory triggered spell
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
                 {
-                    if (spellEffectInfo.IsEffect() &&
-                        (spellEffectInfo.TargetA.GetTarget() == Targets.DestTraj || spellEffectInfo.TargetB.GetTarget() == Targets.DestTraj))
+                    if (spellEffectInfo.IsEffect() && (spellEffectInfo.TargetA.GetTarget() == Targets.DestTraj || spellEffectInfo.TargetB.GetTarget() == Targets.DestTraj))
+                    {
                         // Get triggered spell if any
                         foreach (SpellInfo spellInfoTrigger in _GetSpellInfo(spellEffectInfo.TriggerSpell))
                         {
@@ -5001,6 +4364,7 @@ namespace Game.Entities
                             if (maxRangeTrigger < maxRangeMain)
                                 spellInfoTrigger.RangeEntry = spellInfo.RangeEntry;
                         }
+                    }
 
                     switch (spellEffectInfo.Effect)
                     {
@@ -5009,29 +4373,24 @@ namespace Game.Entities
                         case SpellEffectName.Jump:
                         case SpellEffectName.JumpDest:
                         case SpellEffectName.LeapBack:
-                            if (spellInfo.Speed == 0 &&
-                                spellInfo.SpellFamilyName == 0 &&
-                                !spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
+                            if (spellInfo.Speed == 0 && spellInfo.SpellFamilyName == 0 && !spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
                                 spellInfo.Speed = MotionMaster.SPEED_CHARGE;
-
                             break;
                     }
 
-                    if (spellEffectInfo.TargetA.GetSelectionCategory() == SpellTargetSelectionCategories.Cone ||
-                        spellEffectInfo.TargetB.GetSelectionCategory() == SpellTargetSelectionCategories.Cone)
+                    if (spellEffectInfo.TargetA.GetSelectionCategory() == SpellTargetSelectionCategories.Cone || spellEffectInfo.TargetB.GetSelectionCategory() == SpellTargetSelectionCategories.Cone)
                         if (MathFunctions.fuzzyEq(spellInfo.ConeAngle, 0.0f))
                             spellInfo.ConeAngle = 90.0f;
 
-                    // Area Auras may not Target area (they're self cast)
-                    if (spellEffectInfo.IsAreaAuraEffect() &&
-                        spellEffectInfo.IsTargetingArea())
+                    // Area auras may not target area (they're self cast)
+                    if (spellEffectInfo.IsAreaAuraEffect() && spellEffectInfo.IsTargetingArea())
                     {
-                        spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.UnitCaster);
-                        spellEffectInfo.TargetB = new SpellImplicitTargetInfo();
+                        spellEffectInfo.TargetA = new(Targets.UnitCaster);
+                        spellEffectInfo.TargetB = new();
                     }
                 }
 
-                // disable proc for magnet Auras, they're handled differently
+                // disable proc for magnet auras, they're handled differently
                 if (spellInfo.HasAura(AuraType.SpellMagnet))
                     spellInfo.ProcFlags = new ProcFlagsInit();
 
@@ -5039,26 +4398,20 @@ namespace Game.Entities
                 if (spellInfo.HasAura(AuraType.ControlVehicle))
                     spellInfo.AttributesEx5 |= SpellAttr5.AiDoesntFaceTarget;
 
-                if (spellInfo.ActiveIconFileDataId == 135754) // flight
+                if (spellInfo.ActiveIconFileDataId == 135754)  // flight
                     spellInfo.Attributes |= SpellAttr0.Passive;
 
-                if (spellInfo.IsSingleTarget() &&
-                    spellInfo.MaxAffectedTargets == 0)
+                if (spellInfo.IsSingleTarget() && spellInfo.MaxAffectedTargets == 0)
                     spellInfo.MaxAffectedTargets = 1;
             }
 
             SummonPropertiesRecord properties = CliDB.SummonPropertiesStorage.LookupByKey(121);
-
             if (properties != null)
                 properties.Title = SummonTitle.Totem;
-
             properties = CliDB.SummonPropertiesStorage.LookupByKey(647); // 52893
-
             if (properties != null)
                 properties.Title = SummonTitle.Totem;
-
             properties = CliDB.SummonPropertiesStorage.LookupByKey(628);
-
             if (properties != null) // Hungry Plaguehound
                 properties.Control = SummonCategory.Pet;
 
@@ -5112,7 +4465,6 @@ namespace Game.Entities
         public void LoadPetFamilySpellsStore()
         {
             Dictionary<uint, SpellLevelsRecord> levelsBySpell = new();
-
             foreach (SpellLevelsRecord levels in CliDB.SpellLevelsStorage.Values)
                 if (levels.DifficultyID == 0)
                     levelsBySpell[levels.SpellID] = levels;
@@ -5120,21 +4472,18 @@ namespace Game.Entities
             foreach (var skillLine in CliDB.SkillLineAbilityStorage.Values)
             {
                 SpellInfo spellInfo = GetSpellInfo(skillLine.Spell, Difficulty.None);
-
                 if (spellInfo == null)
                     continue;
 
                 var levels = levelsBySpell.LookupByKey(skillLine.Spell);
-
-                if (levels != null &&
-                    levels.SpellLevel != 0)
+                if (levels != null && levels.SpellLevel != 0)
                     continue;
 
                 if (spellInfo.IsPassive())
+                {
                     foreach (CreatureFamilyRecord cFamily in CliDB.CreatureFamilyStorage.Values)
                     {
-                        if (skillLine.SkillLine != cFamily.SkillLine[0] &&
-                            skillLine.SkillLine != cFamily.SkillLine[1])
+                        if (skillLine.SkillLine != cFamily.SkillLine[0] && skillLine.SkillLine != cFamily.SkillLine[1])
                             continue;
 
                         if (skillLine.AcquireMethod != AbilityLearnType.OnSkillLearn)
@@ -5142,6 +4491,7 @@ namespace Game.Entities
 
                         Global.SpellMgr.PetFamilySpellsStorage.Add(cFamily.Id, spellInfo.Id);
                     }
+                }
             }
         }
 
@@ -5150,16 +4500,13 @@ namespace Game.Entities
             uint oldMSTime = Time.GetMSTime();
 
             SQLResult result = DB.World.Query("SELECT SpellID, RaceID, DisplayID from spell_totem_model");
-
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell totem model records. DB table `spell_totem_model` is empty.");
-
                 return;
             }
 
             uint count = 0;
-
             do
             {
                 uint spellId = result.Read<uint>(0);
@@ -5167,76 +4514,533 @@ namespace Game.Entities
                 uint displayId = result.Read<uint>(2);
 
                 SpellInfo spellEntry = GetSpellInfo(spellId, Difficulty.None);
-
                 if (spellEntry == null)
                 {
                     Log.outError(LogFilter.Sql, $"SpellID: {spellId} in `spell_totem_model` table could not be found in dbc, skipped.");
-
                     continue;
                 }
 
                 if (!CliDB.ChrRacesStorage.ContainsKey(race))
                 {
                     Log.outError(LogFilter.Sql, $"Race {race} defined in `spell_totem_model` does not exists, skipped.");
-
                     continue;
                 }
 
                 if (!CliDB.CreatureDisplayInfoStorage.ContainsKey(displayId))
                 {
                     Log.outError(LogFilter.Sql, $"SpellID: {spellId} defined in `spell_totem_model` has non-existing model ({displayId}).");
-
                     continue;
                 }
 
                 mSpellTotemModel[Tuple.Create(spellId, race)] = displayId;
                 ++count;
+
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} spell totem model records in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+
+        }
+        #endregion
+
+        bool IsTriggerAura(AuraType type)
+        {
+            switch (type)
+            {
+                case AuraType.Dummy:
+                case AuraType.PeriodicDummy:
+                case AuraType.ModConfuse:
+                case AuraType.ModThreat:
+                case AuraType.ModStun:
+                case AuraType.ModDamageDone:
+                case AuraType.ModDamageTaken:
+                case AuraType.ModResistance:
+                case AuraType.ModStealth:
+                case AuraType.ModFear:
+                case AuraType.ModRoot:
+                case AuraType.Transform:
+                case AuraType.ReflectSpells:
+                case AuraType.DamageImmunity:
+                case AuraType.ProcTriggerSpell:
+                case AuraType.ProcTriggerDamage:
+                case AuraType.ModCastingSpeedNotStack:
+                case AuraType.SchoolAbsorb:
+                case AuraType.ModPowerCostSchoolPct:
+                case AuraType.ModPowerCostSchool:
+                case AuraType.ReflectSpellsSchool:
+                case AuraType.MechanicImmunity:
+                case AuraType.ModDamagePercentTaken:
+                case AuraType.SpellMagnet:
+                case AuraType.ModAttackPower:
+                case AuraType.ModPowerRegenPercent:
+                case AuraType.InterceptMeleeRangedAttacks:
+                case AuraType.OverrideClassScripts:
+                case AuraType.ModMechanicResistance:
+                case AuraType.MeleeAttackPowerAttackerBonus:
+                case AuraType.ModMeleeHaste:
+                case AuraType.ModMeleeHaste3:
+                case AuraType.ModAttackerMeleeHitChance:
+                case AuraType.ProcTriggerSpellWithValue:
+                case AuraType.ModSchoolMaskDamageFromCaster:
+                case AuraType.ModSpellDamageFromCaster:
+                case AuraType.AbilityIgnoreAurastate:
+                case AuraType.ModInvisibility:
+                case AuraType.ForceReaction:
+                case AuraType.ModTaunt:
+                case AuraType.ModDetaunt:
+                case AuraType.ModDamagePercentDone:
+                case AuraType.ModAttackPowerPct:
+                case AuraType.ModHitChance:
+                case AuraType.ModWeaponCritPercent:
+                case AuraType.ModBlockPercent:
+                case AuraType.ModRoot2:
+                    return true;
+            }
+            return false;
+        }
+        bool IsAlwaysTriggeredAura(AuraType type)
+        {
+            switch (type)
+            {
+                case AuraType.OverrideClassScripts:
+                case AuraType.ModStealth:
+                case AuraType.ModConfuse:
+                case AuraType.ModFear:
+                case AuraType.ModRoot:
+                case AuraType.ModStun:
+                case AuraType.Transform:
+                case AuraType.ModInvisibility:
+                case AuraType.SpellMagnet:
+                case AuraType.SchoolAbsorb:
+                case AuraType.ModRoot2:
+                    return true;
+            }
+            return false;
+        }
+        ProcFlagsSpellType GetSpellTypeMask(AuraType type)
+        {
+            switch (type)
+            {
+                case AuraType.ModStealth:
+                    return ProcFlagsSpellType.Damage | ProcFlagsSpellType.NoDmgHeal;
+                case AuraType.ModConfuse:
+                case AuraType.ModFear:
+                case AuraType.ModRoot:
+                case AuraType.ModRoot2:
+                case AuraType.ModStun:
+                case AuraType.Transform:
+                case AuraType.ModInvisibility:
+                    return ProcFlagsSpellType.Damage;
+                default:
+                    return ProcFlagsSpellType.MaskAll;
+            }
         }
 
-        #endregion
+        // SpellInfo object management
+        public bool HasSpellInfo(uint spellId, Difficulty difficulty)
+        {
+            var list = mSpellInfoMap.LookupByKey(spellId);
+            if (list.Count == 0)
+                return false;
+
+            return list.Any(spellInfo => spellInfo.Difficulty == difficulty);
+        }
+
+        public MultiMap<uint, SpellInfo> GetSpellInfoStorage()
+        {
+            return mSpellInfoMap;
+        }
+
+        //Extra Shit
+        public SpellEffectHandler GetSpellEffectHandler(SpellEffectName eff)
+        {
+            if (!SpellEffectsHandlers.ContainsKey(eff))
+            {
+                Log.outError(LogFilter.Spells, "No defined handler for SpellEffect {0}", eff);
+                return SpellEffectsHandlers[SpellEffectName.None];
+            }
+
+            return SpellEffectsHandlers[eff];
+        }
+
+        public AuraEffectHandler GetAuraEffectHandler(AuraType type)
+        {
+            if (!AuraEffectHandlers.ContainsKey(type))
+            {
+                Log.outError(LogFilter.Spells, "No defined handler for AuraEffect {0}", type);
+                return AuraEffectHandlers[AuraType.None];
+            }
+
+            return AuraEffectHandlers[type];
+        }
+
+        public SkillRangeType GetSkillRangeType(SkillRaceClassInfoRecord rcEntry)
+        {
+            SkillLineRecord skill = CliDB.SkillLineStorage.LookupByKey(rcEntry.SkillID);
+            if (skill == null)
+                return SkillRangeType.None;
+
+            if (Global.ObjectMgr.GetSkillTier(rcEntry.SkillTierID) != null)
+                return SkillRangeType.Rank;
+
+            if (rcEntry.SkillID == (uint)SkillType.Runeforging)
+                return SkillRangeType.Mono;
+
+            switch (skill.CategoryID)
+            {
+                case SkillCategory.Armor:
+                    return SkillRangeType.Mono;
+                case SkillCategory.Languages:
+                    return SkillRangeType.Language;
+            }
+            return SkillRangeType.Level;
+        }
+
+        public bool IsPrimaryProfessionSkill(uint skill)
+        {
+            SkillLineRecord pSkill = CliDB.SkillLineStorage.LookupByKey(skill);
+            return pSkill != null && pSkill.CategoryID == SkillCategory.Profession && pSkill.ParentSkillLineID == 0;
+        }
+
+        public bool IsWeaponSkill(uint skill)
+        {
+            var pSkill = CliDB.SkillLineStorage.LookupByKey(skill);
+            return pSkill != null && pSkill.CategoryID == SkillCategory.Weapon;
+        }
+
+        public bool IsProfessionOrRidingSkill(uint skill)
+        {
+            return IsProfessionSkill(skill) || skill == (uint)SkillType.Riding;
+        }
+
+        public bool IsProfessionSkill(uint skill)
+        {
+            return IsPrimaryProfessionSkill(skill) || skill == (uint)SkillType.Fishing || skill == (uint)SkillType.Cooking;
+        }
+
+        public bool IsPartOfSkillLine(SkillType skillId, uint spellId)
+        {
+            var skillBounds = GetSkillLineAbilityMapBounds(spellId);
+            if (skillBounds != null)
+            {
+                foreach (var skill in skillBounds)
+                    if (skill.SkillLine == (uint)skillId)
+                        return true;
+            }
+
+            return false;
+        }
+
+        public SpellSchools GetFirstSchoolInMask(SpellSchoolMask mask)
+        {
+            for (int i = 0; i < (int)SpellSchools.Max; ++i)
+                if (Convert.ToBoolean((int)mask & (1 << i)))
+                    return (SpellSchools)i;
+
+            return SpellSchools.Normal;
+        }
+
+        public uint GetModelForTotem(uint spellId, Race race)
+        {
+            return mSpellTotemModel.LookupByKey(Tuple.Create(spellId, (byte)race));
+        }
 
         #region Fields
-
-        private readonly Dictionary<uint, SpellChainNode> mSpellChains = new();
-        private readonly MultiMap<uint, uint> mSpellsReqSpell = new();
-        private readonly MultiMap<uint, uint> mSpellReq = new();
-        private readonly Dictionary<uint, SpellLearnSkillNode> mSpellLearnSkills = new();
-        private readonly MultiMap<uint, SpellLearnSpellNode> mSpellLearnSpells = new();
-        private readonly Dictionary<KeyValuePair<uint, uint>, SpellTargetPosition> mSpellTargetPositions = new();
-        private readonly MultiMap<uint, SpellGroup> mSpellSpellGroup = new();
-        private readonly MultiMap<SpellGroup, int> mSpellGroupSpell = new();
-        private readonly Dictionary<SpellGroup, SpellGroupStackRule> mSpellGroupStack = new();
-        private readonly MultiMap<SpellGroup, AuraType> mSpellSameEffectStack = new();
-        private readonly List<ServersideSpellName> mServersideSpellNames = new();
-        private readonly Dictionary<(uint id, Difficulty difficulty), SpellProcEntry> mSpellProcMap = new();
-        private readonly Dictionary<uint, SpellThreatEntry> mSpellThreatMap = new();
-        private readonly Dictionary<uint, PetAura> mSpellPetAuraMap = new();
-        private readonly MultiMap<(SpellLinkedType, uint), int> mSpellLinkedMap = new();
-        private readonly Dictionary<uint, SpellEnchantProcEntry> mSpellEnchantProcEventMap = new();
-        private readonly MultiMap<uint, SpellArea> mSpellAreaMap = new();
-        private readonly MultiMap<uint, SpellArea> mSpellAreaForQuestMap = new();
-        private readonly MultiMap<uint, SpellArea> mSpellAreaForQuestEndMap = new();
-        private readonly MultiMap<uint, SpellArea> mSpellAreaForAuraMap = new();
-        private readonly MultiMap<uint, SpellArea> mSpellAreaForAreaMap = new();
-        private readonly MultiMap<uint, SkillLineAbilityRecord> mSkillLineAbilityMap = new();
-        private readonly Dictionary<uint, MultiMap<uint, uint>> mPetLevelupSpellMap = new();
-        private readonly Dictionary<uint, PetDefaultSpellsEntry> mPetDefaultSpellsMap = new(); // only spells not listed in related mPetLevelupSpellMap entry
-        private readonly MultiMap<uint, SpellInfo> mSpellInfoMap = new();
-        private readonly Dictionary<Tuple<uint, byte>, uint> mSpellTotemModel = new();
+        Dictionary<uint, SpellChainNode> mSpellChains = new();
+        MultiMap<uint, uint> mSpellsReqSpell = new();
+        MultiMap<uint, uint> mSpellReq = new();
+        Dictionary<uint, SpellLearnSkillNode> mSpellLearnSkills = new();
+        MultiMap<uint, SpellLearnSpellNode> mSpellLearnSpells = new();
+        Dictionary<KeyValuePair<uint, uint>, SpellTargetPosition> mSpellTargetPositions = new();
+        MultiMap<uint, SpellGroup> mSpellSpellGroup = new();
+        MultiMap<SpellGroup, int> mSpellGroupSpell = new();
+        Dictionary<SpellGroup, SpellGroupStackRule> mSpellGroupStack = new();
+        MultiMap<SpellGroup, AuraType> mSpellSameEffectStack = new();
+        List<ServersideSpellName> mServersideSpellNames = new();
+        Dictionary<(uint id, Difficulty difficulty), SpellProcEntry> mSpellProcMap = new();
+        Dictionary<uint, SpellThreatEntry> mSpellThreatMap = new();
+        Dictionary<uint, PetAura> mSpellPetAuraMap = new();
+        MultiMap<(SpellLinkedType, uint), int> mSpellLinkedMap = new();
+        Dictionary<uint, SpellEnchantProcEntry> mSpellEnchantProcEventMap = new();
+        MultiMap<uint, SpellArea> mSpellAreaMap = new();
+        MultiMap<uint, SpellArea> mSpellAreaForQuestMap = new();
+        MultiMap<uint, SpellArea> mSpellAreaForQuestEndMap = new();
+        MultiMap<uint, SpellArea> mSpellAreaForAuraMap = new();
+        MultiMap<uint, SpellArea> mSpellAreaForAreaMap = new();
+        MultiMap<uint, SkillLineAbilityRecord> mSkillLineAbilityMap = new();
+        Dictionary<uint, MultiMap<uint, uint>> mPetLevelupSpellMap = new();
+        Dictionary<uint, PetDefaultSpellsEntry> mPetDefaultSpellsMap = new();           // only spells not listed in related mPetLevelupSpellMap entry
+        MultiMap<uint, SpellInfo> mSpellInfoMap = new();
+        Dictionary<Tuple<uint, byte>, uint> mSpellTotemModel = new();
 
         public delegate void AuraEffectHandler(AuraEffect effect, AuraApplication aurApp, AuraEffectHandleModes mode, bool apply);
-
-        private readonly Dictionary<AuraType, AuraEffectHandler> AuraEffectHandlers = new();
-
+        Dictionary<AuraType, AuraEffectHandler> AuraEffectHandlers = new();
         public delegate void SpellEffectHandler(Spell spell);
-
-        private readonly Dictionary<SpellEffectName, SpellEffectHandler> SpellEffectsHandlers = new();
+        Dictionary<SpellEffectName, SpellEffectHandler> SpellEffectsHandlers = new();
 
         public MultiMap<uint, uint> PetFamilySpellsStorage = new();
-
         #endregion
+    }
+
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    public class AuraEffectHandlerAttribute : Attribute
+    {
+        public AuraEffectHandlerAttribute(AuraType type)
+        {
+            AuraType = type;
+        }
+
+        public AuraType AuraType { get; set; }
+    }
+
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    public class SpellEffectHandlerAttribute : Attribute
+    {
+        public SpellEffectHandlerAttribute(SpellEffectName effectName)
+        {
+            EffectName = effectName;
+        }
+
+        public SpellEffectName EffectName { get; set; }
+    }
+
+    public class SpellInfoLoadHelper
+    {
+        public SpellAuraOptionsRecord AuraOptions;
+        public SpellAuraRestrictionsRecord AuraRestrictions;
+        public SpellCastingRequirementsRecord CastingRequirements;
+        public SpellCategoriesRecord Categories;
+        public SpellClassOptionsRecord ClassOptions;
+        public SpellCooldownsRecord Cooldowns;
+        public SpellEffectRecord[] Effects = new SpellEffectRecord[SpellConst.MaxEffects];
+        public SpellEquippedItemsRecord EquippedItems;
+        public SpellInterruptsRecord Interrupts;
+        public List<SpellLabelRecord> Labels = new();
+        public SpellLevelsRecord Levels;
+        public SpellMiscRecord Misc;
+        public SpellPowerRecord[] Powers = new SpellPowerRecord[SpellConst.MaxPowersPerSpell];
+        public SpellReagentsRecord Reagents;
+        public List<SpellReagentsCurrencyRecord> ReagentsCurrency = new();
+        public SpellScalingRecord Scaling;
+        public SpellShapeshiftRecord Shapeshift;
+        public SpellTargetRestrictionsRecord TargetRestrictions;
+        public SpellTotemsRecord Totems;
+        public List<SpellXSpellVisualRecord> Visuals = new(); // only to group visuals when parsing sSpellXSpellVisualStore, not for loading
+    }
+
+    public class SpellThreatEntry
+    {
+        public int flatMod;                                    // flat threat-value for this Spell  - default: 0
+        public float pctMod;                                     // threat-multiplier for this Spell  - default: 1.0f
+        public float apPctMod;                                   // Pct of AP that is added as Threat - default: 0.0f
+    }
+
+    public class SpellProcEntry
+    {
+        public SpellSchoolMask SchoolMask { get; set; }                                 // if nonzero - bitmask for matching proc condition based on spell's school
+        public SpellFamilyNames SpellFamilyName { get; set; }                            // if nonzero - for matching proc condition based on candidate spell's SpellFamilyName
+        public FlagArray128 SpellFamilyMask { get; set; } = new(4);    // if nonzero - bitmask for matching proc condition based on candidate spell's SpellFamilyFlags
+        public ProcFlagsInit ProcFlags { get; set; }                                   // if nonzero - owerwrite procFlags field for given Spell.dbc entry, bitmask for matching proc condition, see enum ProcFlags
+        public ProcFlagsSpellType SpellTypeMask { get; set; }                              // if nonzero - bitmask for matching proc condition based on candidate spell's damage/heal effects, see enum ProcFlagsSpellType
+        public ProcFlagsSpellPhase SpellPhaseMask { get; set; }                             // if nonzero - bitmask for matching phase of a spellcast on which proc occurs, see enum ProcFlagsSpellPhase
+        public ProcFlagsHit HitMask { get; set; }                                    // if nonzero - bitmask for matching proc condition based on hit result, see enum ProcFlagsHit
+        public ProcAttributes AttributesMask { get; set; }                             // bitmask, see ProcAttributes
+        public uint DisableEffectsMask { get; set; }                            // bitmask
+        public float ProcsPerMinute { get; set; }                              // if nonzero - chance to proc is equal to value * aura caster's weapon speed / 60
+        public float Chance { get; set; }                                     // if nonzero - owerwrite procChance field for given Spell.dbc entry, defines chance of proc to occur, not used if ProcsPerMinute set
+        public uint Cooldown { get; set; }                                   // if nonzero - cooldown in secs for aura proc, applied to aura
+        public uint Charges { get; set; }                                   // if nonzero - owerwrite procCharges field for given Spell.dbc entry, defines how many times proc can occur before aura remove, 0 - infinite
+    }
+
+    struct ServersideSpellName
+    {
+        public SpellNameRecord Name;
+
+        public ServersideSpellName(uint id, string name)
+        {
+            Name = new();
+            Name.Name = new LocalizedString();
+
+            Name.Id = id;
+            for (Locale i = 0; i < Locale.Total; ++i)
+                Name.Name[i] = name;
+        }
+    }
+
+
+    public class PetDefaultSpellsEntry
+    {
+        public uint[] spellid = new uint[4];
+    }
+
+    public class SpellArea
+    {
+        public uint spellId;
+        public uint areaId;                                         // zone/subzone/or 0 is not limited to zone
+        public uint questStart;                                     // quest start (quest must be active or rewarded for spell apply)
+        public uint questEnd;                                       // quest end (quest must not be rewarded for spell apply)
+        public int auraSpell;                                       // spell aura must be applied for spell apply)if possitive) and it must not be applied in other case
+        public ulong raceMask;                                      // can be applied only to races
+        public Gender gender;                                       // can be applied only to gender
+        public uint questStartStatus;                               // QuestStatus that quest_start must have in order to keep the spell
+        public uint questEndStatus;                                 // QuestStatus that the quest_end must have in order to keep the spell (if the quest_end's status is different than this, the spell will be dropped)
+        public SpellAreaFlag flags;                                 // if SPELL_AREA_FLAG_AUTOCAST then auto applied at area enter, in other case just allowed to cast || if SPELL_AREA_FLAG_AUTOREMOVE then auto removed inside area (will allways be removed on leaved even without flag)
+
+        // helpers
+        public bool IsFitToRequirements(Player player, uint newZone, uint newArea)
+        {
+            if (gender != Gender.None)                   // not in expected gender
+                if (player == null || gender != player.GetNativeGender())
+                    return false;
+
+            if (raceMask != 0)                                // not in expected race
+                if (player == null || !Convert.ToBoolean(raceMask & (ulong)SharedConst.GetMaskForRace(player.GetRace())))
+                    return false;
+
+            if (areaId != 0)                                  // not in expected zone
+                if (newZone != areaId && newArea != areaId)
+                    return false;
+
+            if (questStart != 0)                              // not in expected required quest state
+                if (player == null || (((1 << (int)player.GetQuestStatus(questStart)) & questStartStatus) == 0))
+                    return false;
+
+            if (questEnd != 0)                                // not in expected forbidden quest state
+                if (player == null || (((1 << (int)player.GetQuestStatus(questEnd)) & questEndStatus) == 0))
+                    return false;
+
+            if (auraSpell != 0)                               // not have expected aura
+                if (player == null || (auraSpell > 0 && !player.HasAura((uint)auraSpell)) || (auraSpell < 0 && player.HasAura((uint)-auraSpell)))
+                    return false;
+
+            if (player)
+            {
+                Battleground bg = player.GetBattleground();
+                if (bg)
+                    return bg.IsSpellAllowed(spellId, player);
+            }
+
+            // Extra conditions -- leaving the possibility add extra conditions...
+            switch (spellId)
+            {
+                case 91604: // No fly Zone - Wintergrasp
+                {
+                    if (!player)
+                        return false;
+
+                    BattleField Bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(player.GetMap(), player.GetZoneId());
+                    if (Bf == null || Bf.CanFlyIn() || (!player.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed) && !player.HasAuraType(AuraType.Fly)))
+                        return false;
+                    break;
+                }
+                case 56618: // Horde Controls Factory Phase Shift
+                case 56617: // Alliance Controls Factory Phase Shift
+                {
+                    if (!player)
+                        return false;
+
+                    BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(player.GetMap(), player.GetZoneId());
+
+                    if (bf == null || bf.GetTypeId() != (int)BattleFieldTypes.WinterGrasp)
+                        return false;
+
+                    // team that controls the workshop in the specified area
+                    uint team = bf.GetData(newArea);
+
+                    if (team == TeamId.Horde)
+                        return spellId == 56618;
+                    else if (team == TeamId.Alliance)
+                        return spellId == 56617;
+                    break;
+                }
+                case 57940: // Essence of Wintergrasp - Northrend
+                case 58045: // Essence of Wintergrasp - Wintergrasp
+                {
+                    if (!player)
+                        return false;
+
+                    BattleField battlefieldWG = Global.BattleFieldMgr.GetBattlefieldByBattleId(player.GetMap(), 1);
+                    if (battlefieldWG != null)
+                        return battlefieldWG.IsEnabled() && (player.GetTeamId() == battlefieldWG.GetDefenderTeam()) && !battlefieldWG.IsWarTime();
+                    break;
+                }
+                case 74411: // Battleground- Dampening
+                {
+                    if (!player)
+                        return false;
+
+                    BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(player.GetMap(), player.GetZoneId());
+                    if (bf != null)
+                        return bf.IsWarTime();
+                    break;
+                }
+            }
+            return true;
+        }
+    }
+
+    public class PetAura
+    {
+        public PetAura()
+        {
+            removeOnChangePet = false;
+            damage = 0;
+        }
+
+        public PetAura(uint petEntry, uint aura, bool _removeOnChangePet, int _damage)
+        {
+            removeOnChangePet = _removeOnChangePet;
+            damage = _damage;
+
+            auras[petEntry] = aura;
+        }
+
+        public uint GetAura(uint petEntry)
+        {
+            var auraId = auras.LookupByKey(petEntry);
+            if (auraId != 0)
+                return auraId;
+
+            auraId = auras.LookupByKey(0);
+            if (auraId != 0)
+                return auraId;
+
+            return 0;
+        }
+
+        public void AddAura(uint petEntry, uint aura)
+        {
+            auras[petEntry] = aura;
+        }
+
+        public bool IsRemovedOnChangePet()
+        {
+            return removeOnChangePet;
+        }
+
+        public int GetDamage()
+        {
+            return damage;
+        }
+
+        Dictionary<uint, uint> auras = new();
+        bool removeOnChangePet;
+        int damage;
+    }
+
+    public class SpellEnchantProcEntry
+    {
+        public float Chance;         // if nonzero - overwrite SpellItemEnchantment value
+        public float ProcsPerMinute; // if nonzero - chance to proc is equal to value * aura caster's weapon speed / 60
+        public uint HitMask;        // if nonzero - bitmask for matching proc condition based on hit result, see enum ProcFlagsHit
+        public EnchantProcAttributes AttributesMask; // bitmask, see EnchantProcAttributes
+    }
+
+    public class SpellTargetPosition
+    {
+        public uint target_mapId;
+        public float target_X;
+        public float target_Y;
+        public float target_Z;
+        public float target_Orientation;
     }
 }

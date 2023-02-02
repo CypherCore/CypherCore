@@ -43,11 +43,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Shazzrah
         public override void JustEngagedWith(Unit target)
         {
             base.JustEngagedWith(target);
-            Events.ScheduleEvent(EventIds.ArcaneExplosion, TimeSpan.FromSeconds(6));
-            Events.ScheduleEvent(EventIds.ShazzrahCurse, TimeSpan.FromSeconds(10));
-            Events.ScheduleEvent(EventIds.MagicGrounding, TimeSpan.FromSeconds(24));
-            Events.ScheduleEvent(EventIds.Counterspell, TimeSpan.FromSeconds(15));
-            Events.ScheduleEvent(EventIds.ShazzrahGate, TimeSpan.FromSeconds(45));
+            _events.ScheduleEvent(EventIds.ArcaneExplosion, TimeSpan.FromSeconds(6));
+            _events.ScheduleEvent(EventIds.ShazzrahCurse, TimeSpan.FromSeconds(10));
+            _events.ScheduleEvent(EventIds.MagicGrounding, TimeSpan.FromSeconds(24));
+            _events.ScheduleEvent(EventIds.Counterspell, TimeSpan.FromSeconds(15));
+            _events.ScheduleEvent(EventIds.ShazzrahGate, TimeSpan.FromSeconds(45));
         }
 
         public override void UpdateAI(uint diff)
@@ -55,18 +55,18 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Shazzrah
             if (!UpdateVictim())
                 return;
 
-            Events.Update(diff);
+            _events.Update(diff);
 
             if (me.HasUnitState(UnitState.Casting))
                 return;
 
-            Events.ExecuteEvents(eventId =>
+            _events.ExecuteEvents(eventId =>
                                   {
                                       switch (eventId)
                                       {
                                           case EventIds.ArcaneExplosion:
                                               DoCastVictim(SpellIds.ArcaneExplosion);
-                                              Events.ScheduleEvent(EventIds.ArcaneExplosion, TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(7));
+                                              _events.ScheduleEvent(EventIds.ArcaneExplosion, TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(7));
 
                                               break;
                                           // Triggered subsequent to using "Gate of Shazzrah".
@@ -80,25 +80,25 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Shazzrah
                                               if (target)
                                                   DoCast(target, SpellIds.ShazzrahCurse);
 
-                                              Events.ScheduleEvent(EventIds.ShazzrahCurse, TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(30));
+                                              _events.ScheduleEvent(EventIds.ShazzrahCurse, TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(30));
 
                                               break;
                                           case EventIds.MagicGrounding:
                                               DoCast(me, SpellIds.MagicGrounding);
-                                              Events.ScheduleEvent(EventIds.MagicGrounding, TimeSpan.FromSeconds(35));
+                                              _events.ScheduleEvent(EventIds.MagicGrounding, TimeSpan.FromSeconds(35));
 
                                               break;
                                           case EventIds.Counterspell:
                                               DoCastVictim(SpellIds.Counterspell);
-                                              Events.ScheduleEvent(EventIds.Counterspell, TimeSpan.FromSeconds(16), TimeSpan.FromSeconds(20));
+                                              _events.ScheduleEvent(EventIds.Counterspell, TimeSpan.FromSeconds(16), TimeSpan.FromSeconds(20));
 
                                               break;
                                           case EventIds.ShazzrahGate:
                                               ResetThreatList();
                                               DoCastAOE(SpellIds.ShazzrahGateDummy);
-                                              Events.ScheduleEvent(EventIds.ArcaneExplosionTriggered, TimeSpan.FromSeconds(2));
-                                              Events.RescheduleEvent(EventIds.ArcaneExplosion, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(6));
-                                              Events.ScheduleEvent(EventIds.ShazzrahGate, TimeSpan.FromSeconds(45));
+                                              _events.ScheduleEvent(EventIds.ArcaneExplosionTriggered, TimeSpan.FromSeconds(2));
+                                              _events.RescheduleEvent(EventIds.ArcaneExplosion, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(6));
+                                              _events.ScheduleEvent(EventIds.ShazzrahGate, TimeSpan.FromSeconds(45));
 
                                               break;
                                           default:

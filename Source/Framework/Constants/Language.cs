@@ -47,7 +47,7 @@ namespace Framework.Constants
         Trebelim = 295,
         Bassalim = 296,
         EmbeddedLanguages = 297,
-        Unknowable = 298
+        Unknowable = 298,
     }
 
     public enum CypherStrings
@@ -142,7 +142,7 @@ namespace Framework.Constants
         GoinfoAddon = 85,
         GoinfoModel = 86,
         UnknownError = 87,
-        TwoFACommandsNotSetup = 88,
+    TwoFACommandsNotSetup = 88,
         TwoFAAlreadySetup = 89,
         TwoFAInvalidToken = 90,
         TwoFASecretSuggestion = 91,
@@ -182,7 +182,7 @@ namespace Framework.Constants
         YouChangeEnergy = 122,
         YoursEnergyChanged = 123,
 
-        CurrentEnergy = 124, //Log
+        CurrentEnergy = 124,              //Log
         YouChangeRage = 125,
         YoursRageChanged = 126,
         YouChangeLvl = 127,
@@ -222,7 +222,7 @@ namespace Framework.Constants
         YoursMoneyGiven = 158,
         YouHearSound = 159,
 
-        NewMoney = 160, // Log
+        NewMoney = 160,              // Log
 
         RemoveBit = 161,
         SetBit = 162,
@@ -535,7 +535,6 @@ namespace Framework.Constants
         CommandGraveyardalrlinked = 450,
         CommandGraveyardlinked = 451,
         CommandGraveyardwrongzone = 452,
-
         //                                    = 453, See PinfoPlayer
         CommandGraveyarderror = 454,
         CommandGraveyardNoteam = 455,
@@ -585,8 +584,8 @@ namespace Framework.Constants
         RemoveallCooldown = 492,
         RemoveCooldown = 493,
 
-        Additem = 494,    //Log
-        Additemset = 495, //Log
+        Additem = 494,              //Log
+        Additemset = 495,              //Log
         Removeitem = 496,
         ItemCannotCreate = 497,
         InsertGuildName = 498,
@@ -619,7 +618,7 @@ namespace Framework.Constants
 
         GameobjectNotExist = 522,
 
-        GameobjectCurrent = 523, //Log
+        GameobjectCurrent = 523,              //Log
         GameobjectDetail = 524,
         GameobjectAdd = 525,
 
@@ -627,7 +626,6 @@ namespace Framework.Constants
         MovegensIdle = 527,
         MovegensRandom = 528,
         MovegensWaypoint = 529,
-
         //                                    = 530, Not Used
         MovegensConfused = 531,
         MovegensChasePlayer = 532,
@@ -671,17 +669,17 @@ namespace Framework.Constants
         Update = 562,
         UpdateChange = 563,
         TooBigIndex = 564,
-        SetUint = 565, //Log
+        SetUint = 565,              //Log
         SetUintField = 566,
-        SetFloat = 567, //Log
+        SetFloat = 567,              //Log
         SetFloatField = 568,
-        GetUint = 569, //Log
+        GetUint = 569,              //Log
         GetUintField = 570,
-        GetFloat = 571, //Log
+        GetFloat = 571,              //Log
         GetFloatField = 572,
-        Set32bit = 573, //Log
+        Set32bit = 573,              //Log
         Set32bitField = 574,
-        Change32bit = 575, //Log
+        Change32bit = 575,              //Log
         Change32bitField = 576,
 
         InvisibleInvisible = 577,
@@ -728,50 +726,46 @@ namespace Framework.Constants
         BgQueueAnnounceSelf = 711,
         BgQueueAnnounceWorld = 712,
         YourArenaLevelReqError = 713,
-
         //                                        = 714, See PinfoAccAccount
         YourBgLevelReqError = 715,
-
         //                                        = 716, See PinfoAccLastlogin
         BgStartedAnnounceWorld = 717,
         ArenaQueueAnnounceWorldJoin = 718,
         ArenaQueueAnnounceWorldExit = 719,
 
-        BgGroupTooLarge = 720,       // "Your Group Is Too Large For This Battleground. Please Regroup To Join."
-        ArenaGroupTooLarge = 721,    // "Your Group Is Too Large For This Arena. Please Regroup To Join."
-        ArenaYourTeamOnly = 722,     // "Your Group Has Members Not In Your Arena Team. Please Regroup To Join."
-        ArenaNotEnoughPlayers = 723, // "Your Group Does Not Have Enough Players To Join This Match."
+        BgGroupTooLarge = 720,              // "Your Group Is Too Large For This Battleground. Please Regroup To Join."
+        ArenaGroupTooLarge = 721,              // "Your Group Is Too Large For This Arena. Please Regroup To Join."
+        ArenaYourTeamOnly = 722,              // "Your Group Has Members Not In Your Arena Team. Please Regroup To Join."
+        ArenaNotEnoughPlayers = 723,              // "Your Group Does Not Have Enough Players To Join This Match."
+                                                  //                                      724-726 - Free
+        BgGroupOfflineMember = 727,              // "Your Group Has An Offline Member. Please Remove Him Before Joining."
+        BgGroupMixedFaction = 728,              // "Your Group Has Players From The Opposing Faction. You Can'T Join The Battleground As A Group."
+        BgGroupMixedLevels = 729,              // "Your Group Has Players From Different Battleground Brakets. You Can'T Join As Group."
+        BgGroupMemberAlreadyInQueue = 730,            // "Someone In Your Party Is Already In This Battleground Queue. (S)He Must Leave It Before Joining As Group."
+        BgGroupMemberDeserter = 731,              // "Someone In Your Party Is Deserter. You Can'T Join As Group."
+        BgGroupMemberNoFreeQueueSlots = 732,         // "Someone In Your Party Is Already In Three Battleground Queues. You Cannot Join As Group."
 
-        //                                      724-726 - Free
-        BgGroupOfflineMember = 727,          // "Your Group Has An Offline Member. Please Remove Him Before Joining."
-        BgGroupMixedFaction = 728,           // "Your Group Has Players From The Opposing Faction. You Can'T Join The Battleground As A Group."
-        BgGroupMixedLevels = 729,            // "Your Group Has Players From Different Battleground Brakets. You Can'T Join As Group."
-        BgGroupMemberAlreadyInQueue = 730,   // "Someone In Your Party Is Already In This Battleground Queue. (S)He Must Leave It Before Joining As Group."
-        BgGroupMemberDeserter = 731,         // "Someone In Your Party Is Deserter. You Can'T Join As Group."
-        BgGroupMemberNoFreeQueueSlots = 732, // "Someone In Your Party Is Already In Three Battleground Queues. You Cannot Join As Group."
-
-        CannotTeleToBg = 733,     // "You Cannot Teleport To A Battleground Or Arena Map."
-        CannotSummonToBg = 734,   // "You Cannot Summon Players To A Battleground Or Arena Map."
-        CannotGoToBgGm = 735,     // "You Must Be In Gm Mode To Teleport To A Player In A Battleground."
-        CannotGoToBgFromBg = 736, // "You Cannot Teleport To A Battleground From Another Battleground. Please Leave The Current Battleground First."
+        CannotTeleToBg = 733,              // "You Cannot Teleport To A Battleground Or Arena Map."
+        CannotSummonToBg = 734,              // "You Cannot Summon Players To A Battleground Or Arena Map."
+        CannotGoToBgGm = 735,              // "You Must Be In Gm Mode To Teleport To A Player In A Battleground."
+        CannotGoToBgFromBg = 736,              // "You Cannot Teleport To A Battleground From Another Battleground. Please Leave The Current Battleground First."
         DebugArenaOn = 737,
         DebugArenaOff = 738,
         DebugBgOn = 739,
         DebugBgOff = 740,
-        DistArenaPointsStart = 741,       // 3.3.5 Reserved
+        DistArenaPointsStart = 741, // 3.3.5 Reserved
         DistArenaPointsOnlineStart = 742, // 3.3.5 Reserved
-        DistArenaPointsOnlineEnd = 743,   // 3.3.5 Reserved
-        DistArenaPointsTeamStart = 744,   // 3.3.5 Reserved
-        DistArenaPointsTeamEnd = 745,     // 3.3.5 Reserved
-        DistArenaPointsEnd = 746,         // 3.3.5 Reserved
+        DistArenaPointsOnlineEnd = 743, // 3.3.5 Reserved
+        DistArenaPointsTeamStart = 744, // 3.3.5 Reserved
+        DistArenaPointsTeamEnd = 745, // 3.3.5 Reserved
+        DistArenaPointsEnd = 746, // 3.3.5 Reserved
         BgDisabled = 747,
         ArenaDisabled = 748,
-
         //                                        = 749, See PinfoAccOs
-        BattlegroundPrematureFinishWarning = 750,     // "Not Enough Players. This Game Will Close In %U Mins."
-        BattlegroundPrematureFinishWarningSecs = 751, // "Not Enough Players. This Game Will Close In %U Seconds."
-                                                      //                                        = 752, See PinfoAccIp
-                                                      // 753-755 - Free
+        BattlegroundPrematureFinishWarning = 750,       // "Not Enough Players. This Game Will Close In %U Mins."
+        BattlegroundPrematureFinishWarningSecs = 751,  // "Not Enough Players. This Game Will Close In %U Seconds."
+                                                       //                                        = 752, See PinfoAccIp
+                                                       // 753-755 - Free
 
         // Room For Bg/Arena                  = 773-784
         ArenaTesting = 785,
@@ -790,7 +784,6 @@ namespace Framework.Constants
         NeedCharacterName = 807,
         PlayerNotExistOrOffline = 808,
         AccountForPlayerNotFound = 809,
-
         // Unused                             = 810,
         GuildMaster = 811,
         GuildOfficer = 812,
@@ -846,7 +839,6 @@ namespace Framework.Constants
         ArenaInfoHeader = 868,
         ArenaInfoMembers = 869,
         ArenaLookup = 870,
-
         //                                    = 871, See PinfoChrLevelHigh
         CommandWrongemail = 872,
         NewEmailsNotMatch = 873,
@@ -855,11 +847,9 @@ namespace Framework.Constants
         CommandNotchangeemail = 876,
         OldEmailIsNewEmail = 877,
         CommandEmailOutput = 878,
-
         //                                    = 879, See PinfoChrRegmails
         AccountSecType = 880,
         RbacEmailRequired = 881,
-
         //                                    = 882, PinfoChrMapWithArea
         Account = 883,
         QuestObjectiveNotfound = 884,
@@ -989,7 +979,7 @@ namespace Framework.Constants
         GuildInfoBankGold = 1181,
         GuildInfoMotd = 1182,
         GuildInfoExtraInfo = 1183,
-        ChangeAccountSuccess = 1184, // Log
+        ChangeAccountSuccess = 1184,             // Log
         GroupNotInRaidGroup = 1185,
         GroupRoleChanged = 1186,
         LeaderCannotBeAssistant = 1187,
@@ -997,7 +987,6 @@ namespace Framework.Constants
         CommandNoInstancesMatch = 1189,
         CommandMultipleInstancesMatch = 1190,
         CommandMultipleInstancesEntry = 1191,
-
         //                                      1192 Unused
         CommandInstanceNoEntrance = 1193,
         CommandInstanceNoExit = 1194,
@@ -1052,10 +1041,9 @@ namespace Framework.Constants
 
         // 1516-1998 - Free
         DebugAreatriggerLeft = 1999,
-
         // Ticket Strings 2000-2030
-        CommandTicketnew = 2000,           // 3.3.5 Reserved
-        CommandTicketupdated = 2001,       // 3.3.5 Reserved
+        CommandTicketnew = 2000, // 3.3.5 Reserved
+        CommandTicketupdated = 2001, // 3.3.5 Reserved
         CommandTicketplayerabandon = 2002, // 3.3.5 Reserved
         CommandTicketclosed = 2003,
         CommandTicketdeleted = 2004,
@@ -1084,7 +1072,7 @@ namespace Framework.Constants
         CommandTicketpending = 2027,
         CommandTicketreset = 2028,
         CommandTicketlistresponse = 2029, // 3.3.5 Reserved
-        CommandTicketcompleted = 2030,    // 3.3.5 Reserved
+        CommandTicketcompleted = 2030, // 3.3.5 Reserved
 
         // Trinity Strings                      5000-9999
         CommandFreeze = 5000,
@@ -1099,7 +1087,6 @@ namespace Framework.Constants
         CommandPlayedToAll = 5009,
         NpcinfoLinkguid = 5010,
         TeleportedToByConsole = 5011,
-
         // For Command Lookup Map
         CommandNomapfound = 5012,
         Continent = 5013,
@@ -1145,9 +1132,8 @@ namespace Framework.Constants
         CommandInstStatPlayersIn = 5051,
         CommandInstStatSaves = 5052,
         CommandInstStatPlayersbound = 5053,
-
         //                                    = 5054, // old LANG_COMMAND_INST_STAT_GROUPSBOUND
-        NotDungeon = 5055,     // Map Is Not A Dungeon.
+        NotDungeon = 5055, // Map Is Not A Dungeon.
         NoInstanceData = 5056, // Map Has No Instance Data.
         CommandInstSetBossState = 5057,
         CommandInstGetBossState = 5058,
@@ -1179,7 +1165,6 @@ namespace Framework.Constants
         ListRespawnsZone = 5078,
         ListRespawnsListheader = 5079,
         ListRespawnsOverdue = 5080,
-
         // Unused 5081
         // Unused 5082
         ObjectinfoAiType = 5083,
@@ -1208,7 +1193,7 @@ namespace Framework.Constants
         GmNotify = 6614,
         GmAnnounceColor = 6615,
 
-        GmSilence = 6616, // "Silence Is On For %S" - Spell 1852
+        GmSilence = 6616,  // "Silence Is On For %S" - Spell 1852
 
         WorldClosed = 7523,
         WorldOpened = 7524,
@@ -1239,7 +1224,6 @@ namespace Framework.Constants
         // Opvp Si
         OpvpSiCaptureH = 10049,
         OpvpSiCaptureA = 10050,
-
         // Opvp Gossips
         OpvpEpFlightNpt = 10051,
         OpvpEpFlightEwt = 10052,

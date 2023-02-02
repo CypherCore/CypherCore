@@ -9,7 +9,8 @@ using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
-using Game.Spells.Auras.EffectHandlers;
+using System;
+using System.Collections.Generic;
 
 namespace Scripts.Spells.Evoker
 {
@@ -28,8 +29,7 @@ namespace Scripts.Spells.Evoker
     class spell_evo_azure_strike : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
-
-        public void FilterTargets(List<WorldObject> targets)
+        void FilterTargets(List<WorldObject> targets)
         {
             targets.Remove(GetExplTargetUnit());
             targets.RandomResize((uint)GetEffectInfo(0).CalcValue(GetCaster()) - 1);
@@ -115,4 +115,5 @@ namespace Scripts.Spells.Evoker
             SpellEffects.Add(new EffectHandler(HandleLaunchTarget, 0, SpellEffectName.Dummy, SpellScriptHookType.LaunchTarget));
         }
     }
+
 }

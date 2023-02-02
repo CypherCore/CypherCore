@@ -175,7 +175,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
         //this mean she at some point evaded
         public override void JustReachedHome()
         {
-            Instance.SetBossState(DataTypes.PriestessDelrissa, EncounterState.Fail);
+            instance.SetBossState(DataTypes.PriestessDelrissa, EncounterState.Fail);
         }
 
         public override void JustEngagedWith(Unit who)
@@ -190,7 +190,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                     AddThreat(who, 0.0f, pAdd);
             }
 
-            Instance.SetBossState(DataTypes.PriestessDelrissa, EncounterState.InProgress);
+            instance.SetBossState(DataTypes.PriestessDelrissa, EncounterState.InProgress);
         }
 
         public override void KilledUnit(Unit victim)
@@ -208,8 +208,8 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
         {
             Talk(TextIds.SayDeath);
 
-            if (Instance.GetData(DataTypes.DelrissaDeathCount) == MiscConst.MaxActiveLackey)
-                Instance.SetBossState(DataTypes.PriestessDelrissa, EncounterState.Done);
+            if (instance.GetData(DataTypes.DelrissaDeathCount) == MiscConst.MaxActiveLackey)
+                instance.SetBossState(DataTypes.PriestessDelrissa, EncounterState.Done);
             else
                 me.RemoveDynamicFlag(UnitDynFlags.Lootable);
         }

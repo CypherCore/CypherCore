@@ -95,7 +95,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             if (me.IsAlive())
                 SpawnAdds();
 
-            Instance.SetBossState(DataTypes.Moroes, EncounterState.NotStarted);
+            instance.SetBossState(DataTypes.Moroes, EncounterState.NotStarted);
         }
 
         public override void JustEngagedWith(Unit who)
@@ -180,7 +180,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             DeSpawnAdds();
 
             //remove aura from spell Garrote when Moroes dies
-            Instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.Garrote);
+            instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.Garrote);
         }
 
         public override void UpdateAI(uint diff)

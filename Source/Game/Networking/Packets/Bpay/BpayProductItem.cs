@@ -1,4 +1,6 @@
-﻿namespace Game.Networking.Packets.Bpay
+﻿using System.Collections.Generic;
+
+namespace Game.Networking.Packets.Bpay
 {
     public class BpayProductItem
     {

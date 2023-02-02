@@ -1,23 +1,18 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
 using Framework.Constants;
+using Framework.Dynamic;
 using Game.Entities;
 using Game.Groups;
+using System;
+using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
     public class ChatMessage : ClientPacket
     {
-        public Language Language = Language.Universal;
-
-        public string Text;
-
-        public ChatMessage(WorldPacket packet) : base(packet)
-        {
-        }
+        public ChatMessage(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -25,17 +20,14 @@ namespace Game.Networking.Packets
             uint len = _worldPacket.ReadBits<uint>(11);
             Text = _worldPacket.ReadString(len);
         }
+
+        public string Text;
+        public Language Language = Language.Universal;
     }
 
     public class ChatMessageWhisper : ClientPacket
     {
-        public Language Language = Language.Universal;
-        public string Target;
-        public string Text;
-
-        public ChatMessageWhisper(WorldPacket packet) : base(packet)
-        {
-        }
+        public ChatMessageWhisper(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -45,19 +37,15 @@ namespace Game.Networking.Packets
             Target = _worldPacket.ReadString(targetLen);
             Text = _worldPacket.ReadString(textLen);
         }
+
+        public Language Language = Language.Universal;
+        public string Text;
+        public string Target;
     }
 
     public class ChatMessageChannel : ClientPacket
     {
-        public ObjectGuid ChannelGUID;
-
-        public Language Language = Language.Universal;
-        public string Target;
-        public string Text;
-
-        public ChatMessageChannel(WorldPacket packet) : base(packet)
-        {
-        }
+        public ChatMessageChannel(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -68,32 +56,28 @@ namespace Game.Networking.Packets
             Target = _worldPacket.ReadString(targetLen);
             Text = _worldPacket.ReadString(textLen);
         }
+
+        public Language Language = Language.Universal;
+        public ObjectGuid ChannelGUID;
+        public string Text;
+        public string Target;
     }
 
     public class ChatAddonMessage : ClientPacket
     {
-        public ChatAddonMessageParams Params = new();
-
-        public ChatAddonMessage(WorldPacket packet) : base(packet)
-        {
-        }
+        public ChatAddonMessage(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Params.Read(_worldPacket);
         }
+
+        public ChatAddonMessageParams Params = new();
     }
 
-    internal class ChatAddonMessageTargeted : ClientPacket
+    class ChatAddonMessageTargeted : ClientPacket
     {
-        public ObjectGuid? ChannelGUID; // not optional in the packet. Optional for api reasons
-        public ChatAddonMessageParams Params = new();
-
-        public string Target;
-
-        public ChatAddonMessageTargeted(WorldPacket packet) : base(packet)
-        {
-        }
+        public ChatAddonMessageTargeted(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -102,81 +86,54 @@ namespace Game.Networking.Packets
             ChannelGUID = _worldPacket.ReadPackedGuid();
             Target = _worldPacket.ReadString(targetLen);
         }
+
+        public string Target;
+        public ChatAddonMessageParams Params = new();
+        public ObjectGuid? ChannelGUID; // not optional in the packet. Optional for api reasons
     }
 
     public class ChatMessageDND : ClientPacket
     {
-        public string Text;
-
-        public ChatMessageDND(WorldPacket packet) : base(packet)
-        {
-        }
+        public ChatMessageDND(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             uint len = _worldPacket.ReadBits<uint>(11);
             Text = _worldPacket.ReadString(len);
         }
+
+        public string Text;
     }
 
     public class ChatMessageAFK : ClientPacket
     {
-        public string Text;
-
-        public ChatMessageAFK(WorldPacket packet) : base(packet)
-        {
-        }
+        public ChatMessageAFK(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             uint len = _worldPacket.ReadBits<uint>(11);
             Text = _worldPacket.ReadString(len);
         }
+
+        public string Text;
     }
 
     public class ChatMessageEmote : ClientPacket
     {
-        public string Text;
-
-        public ChatMessageEmote(WorldPacket packet) : base(packet)
-        {
-        }
+        public ChatMessageEmote(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             uint len = _worldPacket.ReadBits<uint>(11);
             Text = _worldPacket.ReadString(len);
         }
+
+        public string Text;
     }
 
     public class ChatPkt : ServerPacket
     {
-        public ChatFlags _ChatFlags;
-        public Language _Language = Language.Universal;
-        public uint AchievementID;
-        public string Channel = "";
-        public ObjectGuid? ChannelGUID;
-        public string ChatText = "";
-        public float DisplayTime;
-        public bool FakeSenderName;
-        public bool HideChatLog;
-        public ObjectGuid PartyGUID;
-        public string Prefix = "";
-        public ObjectGuid SenderAccountGUID;
-        public ObjectGuid SenderGUID;
-        public ObjectGuid SenderGuildGUID;
-        public string SenderName = "";
-        public uint SenderVirtualAddress;
-
-        public ChatMsg SlashCmd;
-        public ObjectGuid TargetGUID;
-        public string TargetName = "";
-        public uint TargetVirtualAddress;
-        public uint? Unused_801;
-
-        public ChatPkt() : base(ServerOpcodes.Chat)
-        {
-        }
+        public ChatPkt() : base(ServerOpcodes.Chat) { }
 
         public void Initialize(ChatMsg chatType, Language language, WorldObject sender, WorldObject receiver, string message, uint achievementId = 0, string channelName = "", Locale locale = Locale.enUS, string addonPrefix = "")
         {
@@ -209,12 +166,33 @@ namespace Game.Networking.Packets
             ChatText = message;
         }
 
+        void SetSender(WorldObject sender, Locale locale)
+        {
+            SenderGUID = sender.GetGUID();
+
+            Creature creatureSender = sender.ToCreature();
+            if (creatureSender)
+                SenderName = creatureSender.GetName(locale);
+
+            Player playerSender = sender.ToPlayer();
+            if (playerSender)
+            {
+                SenderAccountGUID = playerSender.GetSession().GetAccountGUID();
+                _ChatFlags = playerSender.GetChatFlags();
+
+                SenderGuildGUID = ObjectGuid.Create(HighGuid.Guild, playerSender.GetGuildId());
+
+                Group group = playerSender.GetGroup();
+                if (group)
+                    PartyGUID = group.GetGUID();
+            }
+        }
+
         public void SetReceiver(WorldObject receiver, Locale locale)
         {
             TargetGUID = receiver.GetGUID();
 
             Creature creatureReceiver = receiver.ToCreature();
-
             if (creatureReceiver)
                 TargetName = creatureReceiver.GetName(locale);
         }
@@ -257,43 +235,32 @@ namespace Game.Networking.Packets
                 _worldPacket.WritePackedGuid(ChannelGUID.Value);
         }
 
-        private void SetSender(WorldObject sender, Locale locale)
-        {
-            SenderGUID = sender.GetGUID();
-
-            Creature creatureSender = sender.ToCreature();
-
-            if (creatureSender)
-                SenderName = creatureSender.GetName(locale);
-
-            Player playerSender = sender.ToPlayer();
-
-            if (playerSender)
-            {
-                SenderAccountGUID = playerSender.Session.GetAccountGUID();
-                _ChatFlags = playerSender.GetChatFlags();
-
-                SenderGuildGUID = ObjectGuid.Create(HighGuid.Guild, playerSender.GetGuildId());
-
-                Group group = playerSender.GetGroup();
-
-                if (group)
-                    PartyGUID = group.GetGUID();
-            }
-        }
+        public ChatMsg SlashCmd;
+        public Language _Language = Language.Universal;
+        public ObjectGuid SenderGUID;
+        public ObjectGuid SenderGuildGUID;
+        public ObjectGuid SenderAccountGUID;
+        public ObjectGuid TargetGUID;
+        public ObjectGuid PartyGUID;
+        public uint SenderVirtualAddress;
+        public uint TargetVirtualAddress;
+        public string SenderName = "";
+        public string TargetName = "";
+        public string Prefix = "";
+        public string Channel = "";
+        public string ChatText = "";
+        public uint AchievementID;
+        public ChatFlags _ChatFlags;
+        public float DisplayTime;
+        public uint? Unused_801;
+        public bool HideChatLog;
+        public bool FakeSenderName;
+        public ObjectGuid? ChannelGUID;
     }
 
     public class EmoteMessage : ServerPacket
     {
-        public uint EmoteID;
-
-        public ObjectGuid Guid;
-        public int SequenceVariation;
-        public List<uint> SpellVisualKitIDs = new();
-
-        public EmoteMessage() : base(ServerOpcodes.Emote, ConnectionType.Instance)
-        {
-        }
+        public EmoteMessage() : base(ServerOpcodes.Emote, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -305,20 +272,16 @@ namespace Game.Networking.Packets
             foreach (var id in SpellVisualKitIDs)
                 _worldPacket.WriteUInt32(id);
         }
+
+        public ObjectGuid Guid;
+        public uint EmoteID;
+        public List<uint> SpellVisualKitIDs = new();
+        public int SequenceVariation;
     }
 
     public class CTextEmote : ClientPacket
     {
-        public int EmoteID;
-        public int SequenceVariation;
-        public int SoundIndex;
-        public uint[] SpellVisualKitIDs;
-
-        public ObjectGuid Target;
-
-        public CTextEmote(WorldPacket packet) : base(packet)
-        {
-        }
+        public CTextEmote(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -328,24 +291,20 @@ namespace Game.Networking.Packets
 
             SpellVisualKitIDs = new uint[_worldPacket.ReadUInt32()];
             SequenceVariation = _worldPacket.ReadInt32();
-
             for (var i = 0; i < SpellVisualKitIDs.Length; ++i)
                 SpellVisualKitIDs[i] = _worldPacket.ReadUInt32();
         }
+
+        public ObjectGuid Target;
+        public int EmoteID;
+        public int SoundIndex;
+        public uint[] SpellVisualKitIDs;
+        public int SequenceVariation;
     }
 
     public class STextEmote : ServerPacket
     {
-        public int EmoteID;
-        public int SoundIndex = -1;
-        public ObjectGuid SourceAccountGUID;
-
-        public ObjectGuid SourceGUID;
-        public ObjectGuid TargetGUID;
-
-        public STextEmote() : base(ServerOpcodes.TextEmote, ConnectionType.Instance)
-        {
-        }
+        public STextEmote() : base(ServerOpcodes.TextEmote, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -355,12 +314,16 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(SoundIndex);
             _worldPacket.WritePackedGuid(TargetGUID);
         }
+
+        public ObjectGuid SourceGUID;
+        public ObjectGuid SourceAccountGUID;
+        public ObjectGuid TargetGUID;
+        public int SoundIndex = -1;
+        public int EmoteID;
     }
 
     public class PrintNotification : ServerPacket
     {
-        public string NotifyText;
-
         public PrintNotification(string notifyText) : base(ServerOpcodes.PrintNotification)
         {
             NotifyText = notifyText;
@@ -371,23 +334,19 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(NotifyText.GetByteCount(), 12);
             _worldPacket.WriteString(NotifyText);
         }
+
+        public string NotifyText;
     }
 
     public class EmoteClient : ClientPacket
     {
-        public EmoteClient(WorldPacket packet) : base(packet)
-        {
-        }
+        public EmoteClient(WorldPacket packet) : base(packet) { }
 
-        public override void Read()
-        {
-        }
+        public override void Read() { }
     }
 
-    internal class ChatPlayerNotfound : ServerPacket
+    class ChatPlayerNotfound : ServerPacket
     {
-        private readonly string Name;
-
         public ChatPlayerNotfound(string name) : base(ServerOpcodes.ChatPlayerNotfound)
         {
             Name = name;
@@ -398,12 +357,12 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(Name.GetByteCount(), 9);
             _worldPacket.WriteString(Name);
         }
+
+        string Name;
     }
 
-    internal class ChatPlayerAmbiguous : ServerPacket
+    class ChatPlayerAmbiguous : ServerPacket
     {
-        private readonly string Name;
-
         public ChatPlayerAmbiguous(string name) : base(ServerOpcodes.ChatPlayerAmbiguous)
         {
             Name = name;
@@ -414,12 +373,12 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(Name.GetByteCount(), 9);
             _worldPacket.WriteString(Name);
         }
+
+        string Name;
     }
 
-    internal class ChatRestricted : ServerPacket
+    class ChatRestricted : ServerPacket
     {
-        private readonly ChatRestrictionType Reason;
-
         public ChatRestricted(ChatRestrictionType reason) : base(ServerOpcodes.ChatRestricted)
         {
             Reason = reason;
@@ -429,16 +388,13 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt8((byte)Reason);
         }
+
+        ChatRestrictionType Reason;
     }
 
-    internal class ChatServerMessage : ServerPacket
+    class ChatServerMessage : ServerPacket
     {
-        public int MessageID;
-        public string StringParam = "";
-
-        public ChatServerMessage() : base(ServerOpcodes.ChatServerMessage)
-        {
-        }
+        public ChatServerMessage() : base(ServerOpcodes.ChatServerMessage) { }
 
         public override void Write()
         {
@@ -447,15 +403,14 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(StringParam.GetByteCount(), 11);
             _worldPacket.WriteString(StringParam);
         }
+
+        public int MessageID;
+        public string StringParam = "";
     }
 
-    internal class ChatRegisterAddonPrefixes : ClientPacket
+    class ChatRegisterAddonPrefixes : ClientPacket
     {
-        public string[] Prefixes = new string[64];
-
-        public ChatRegisterAddonPrefixes(WorldPacket packet) : base(packet)
-        {
-        }
+        public ChatRegisterAddonPrefixes(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -464,28 +419,20 @@ namespace Game.Networking.Packets
             for (int i = 0; i < count && i < 64; ++i)
                 Prefixes[i] = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(5));
         }
+
+        public string[] Prefixes = new string[64];
     }
 
-    internal class ChatUnregisterAllAddonPrefixes : ClientPacket
+    class ChatUnregisterAllAddonPrefixes : ClientPacket
     {
-        public ChatUnregisterAllAddonPrefixes(WorldPacket packet) : base(packet)
-        {
-        }
+        public ChatUnregisterAllAddonPrefixes(WorldPacket packet) : base(packet) { }
 
-        public override void Read()
-        {
-        }
+        public override void Read() { }
     }
 
-    internal class DefenseMessage : ServerPacket
+    class DefenseMessage : ServerPacket
     {
-        public string MessageText = "";
-
-        public uint ZoneID;
-
-        public DefenseMessage() : base(ServerOpcodes.DefenseMessage)
-        {
-        }
+        public DefenseMessage() : base(ServerOpcodes.DefenseMessage) { }
 
         public override void Write()
         {
@@ -494,32 +441,27 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
             _worldPacket.WriteString(MessageText);
         }
+
+        public uint ZoneID;
+        public string MessageText = "";
     }
 
-    internal class ChatReportIgnored : ClientPacket
+    class ChatReportIgnored : ClientPacket
     {
-        public ObjectGuid IgnoredGUID;
-        public byte Reason;
-
-        public ChatReportIgnored(WorldPacket packet) : base(packet)
-        {
-        }
+        public ChatReportIgnored(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             IgnoredGUID = _worldPacket.ReadPackedGuid();
             Reason = _worldPacket.ReadUInt8();
         }
+
+        public ObjectGuid IgnoredGUID;
+        public byte Reason;
     }
 
     public class ChatAddonMessageParams
     {
-        public bool IsLogged;
-
-        public string Prefix;
-        public string Text;
-        public ChatMsg Type = ChatMsg.Party;
-
         public void Read(WorldPacket data)
         {
             uint prefixLen = data.ReadBits<uint>(5);
@@ -529,5 +471,10 @@ namespace Game.Networking.Packets
             Prefix = data.ReadString(prefixLen);
             Text = data.ReadString(textLen);
         }
+
+        public string Prefix;
+        public string Text;
+        public ChatMsg Type = ChatMsg.Party;
+        public bool IsLogged;
     }
 }

@@ -1,18 +1,17 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.BattleGrounds;
 using Game.Entities;
+using Game.Networking.Packets;
+using System;
 
 namespace Game.Arenas
 {
-    internal class RingofValorArena : Arena
+    class RingofValorArena : Arena
     {
-        private new readonly EventMap _events;
-
         public RingofValorArena(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
         {
             _events = new EventMap();
@@ -23,21 +22,17 @@ namespace Game.Arenas
             bool result = true;
             result &= AddObject(RingofValorObjectTypes.Elevator1, RingofValorGameObjects.Elevator1, 763.536377f, -294.535767f, 0.505383f, 3.141593f, 0, 0, 0, 0);
             result &= AddObject(RingofValorObjectTypes.Elevator2, RingofValorGameObjects.Elevator2, 763.506348f, -273.873352f, 0.505383f, 0.000000f, 0, 0, 0, 0);
-
             if (!result)
             {
                 Log.outError(LogFilter.Sql, "RingofValorArena: Failed to spawn elevator object!");
-
                 return false;
             }
 
             result &= AddObject(RingofValorObjectTypes.Buff1, RingofValorGameObjects.Buff1, 735.551819f, -284.794678f, 28.276682f, 0.034906f, 0, 0, 0, 0);
             result &= AddObject(RingofValorObjectTypes.Buff2, RingofValorGameObjects.Buff2, 791.224487f, -284.794464f, 28.276682f, 2.600535f, 0, 0, 0, 0);
-
             if (!result)
             {
                 Log.outError(LogFilter.Sql, "RingofValorArena: Failed to spawn buff object!");
-
                 return false;
             }
 
@@ -45,11 +40,9 @@ namespace Game.Arenas
             result &= AddObject(RingofValorObjectTypes.Fire2, RingofValorGameObjects.Fire2, 782.971802f, -283.799469f, 28.286655f, 3.141593f, 0, 0, 0, 0);
             result &= AddObject(RingofValorObjectTypes.Firedoor1, RingofValorGameObjects.Firedoor1, 743.711060f, -284.099609f, 27.542587f, 3.141593f, 0, 0, 0, 0);
             result &= AddObject(RingofValorObjectTypes.Firedoor2, RingofValorGameObjects.Firedoor2, 783.221252f, -284.133362f, 27.535686f, 0.000000f, 0, 0, 0, 0);
-
             if (!result)
             {
                 Log.outError(LogFilter.Sql, "RingofValorArena: Failed to spawn fire/firedoor object!");
-
                 return false;
             }
 
@@ -57,11 +50,9 @@ namespace Game.Arenas
             result &= AddObject(RingofValorObjectTypes.Gear2, RingofValorGameObjects.Gear2, 763.578979f, -306.146149f, 26.665222f, 3.141593f, 0, 0, 0, 0);
             result &= AddObject(RingofValorObjectTypes.Pulley1, RingofValorGameObjects.Pulley1, 700.722290f, -283.990662f, 39.517582f, 3.141593f, 0, 0, 0, 0);
             result &= AddObject(RingofValorObjectTypes.Pulley2, RingofValorGameObjects.Pulley2, 826.303833f, -283.996429f, 39.517582f, 0.000000f, 0, 0, 0, 0);
-
             if (!result)
             {
                 Log.outError(LogFilter.Sql, "RingofValorArena: Failed to spawn gear/pully object!");
-
                 return false;
             }
 
@@ -73,11 +64,9 @@ namespace Game.Arenas
             result &= AddObject(RingofValorObjectTypes.PilarCollision2, RingofValorGameObjects.PilarCollision2, 723.644287f, -284.493256f, 32.382710f, 0.000000f, 0, 0, 0, 0);
             result &= AddObject(RingofValorObjectTypes.PilarCollision3, RingofValorGameObjects.PilarCollision3, 763.611145f, -261.856750f, 30.639660f, 0.000000f, 0, 0, 0, 0);
             result &= AddObject(RingofValorObjectTypes.PilarCollision4, RingofValorGameObjects.PilarCollision4, 802.211609f, -284.493256f, 32.382710f, 3.141593f, 0, 0, 0, 0);
-
             if (!result)
             {
                 Log.outError(LogFilter.Sql, "RingofValorArena: Failed to spawn pilar object!");
-
                 return false;
             }
 
@@ -114,7 +103,6 @@ namespace Game.Arenas
                     break;
                 default:
                     base.HandleAreaTrigger(player, trigger, entered);
-
                     break;
             }
         }
@@ -127,53 +115,51 @@ namespace Game.Arenas
             _events.Update(diff);
 
             _events.ExecuteEvents(eventId =>
-                                  {
-                                      switch (eventId)
-                                      {
-                                          case RingofValorEvents.OpenFences:
-                                              // Open fire (only at game start)
-                                              for (byte i = RingofValorObjectTypes.Fire1; i <= RingofValorObjectTypes.Firedoor2; ++i)
-                                                  DoorOpen(i);
-
-                                              _events.ScheduleEvent(RingofValorEvents.CloseFire, TimeSpan.FromSeconds(5));
-
-                                              break;
-                                          case RingofValorEvents.CloseFire:
-                                              for (byte i = RingofValorObjectTypes.Fire1; i <= RingofValorObjectTypes.Firedoor2; ++i)
-                                                  DoorClose(i);
-
-                                              // Fire got closed after five seconds, leaves twenty seconds before toggling pillars
-                                              _events.ScheduleEvent(RingofValorEvents.SwitchPillars, TimeSpan.FromSeconds(20));
-
-                                              break;
-                                          case RingofValorEvents.SwitchPillars:
-                                              TogglePillarCollision(true);
-                                              _events.Repeat(TimeSpan.FromSeconds(25));
-
-                                              break;
-                                      }
-                                  });
+            {
+                switch (eventId)
+                {
+                    case RingofValorEvents.OpenFences:
+                        // Open fire (only at game start)
+                        for (byte i = RingofValorObjectTypes.Fire1; i <= RingofValorObjectTypes.Firedoor2; ++i)
+                            DoorOpen(i);
+                        _events.ScheduleEvent(RingofValorEvents.CloseFire, TimeSpan.FromSeconds(5));
+                        break;
+                    case RingofValorEvents.CloseFire:
+                        for (byte i = RingofValorObjectTypes.Fire1; i <= RingofValorObjectTypes.Firedoor2; ++i)
+                            DoorClose(i);
+                        // Fire got closed after five seconds, leaves twenty seconds before toggling pillars
+                        _events.ScheduleEvent(RingofValorEvents.SwitchPillars, TimeSpan.FromSeconds(20));
+                        break;
+                    case RingofValorEvents.SwitchPillars:
+                        TogglePillarCollision(true);
+                        _events.Repeat(TimeSpan.FromSeconds(25));
+                        break;
+                }
+            });
         }
 
-        private void TogglePillarCollision(bool enable)
+        void TogglePillarCollision(bool enable)
         {
-            // Toggle visual pillars, pulley, gear, and collision based on previous State
+            // Toggle visual pillars, pulley, gear, and collision based on previous state
             for (int i = RingofValorObjectTypes.Pilar1; i <= RingofValorObjectTypes.Gear2; ++i)
+            {
                 if (enable)
                     DoorOpen(i);
                 else
                     DoorClose(i);
+            }
 
             for (byte i = RingofValorObjectTypes.Pilar2; i <= RingofValorObjectTypes.Pulley2; ++i)
+            {
                 if (enable)
                     DoorClose(i);
                 else
-                    DoorOpen(i);
+                     DoorOpen(i);
+            }
 
             for (byte i = RingofValorObjectTypes.Pilar1; i <= RingofValorObjectTypes.PilarCollision4; ++i)
             {
                 GameObject go = GetBGObject(i);
-
                 if (go)
                 {
                     if (i >= RingofValorObjectTypes.PilarCollision1)
@@ -185,23 +171,24 @@ namespace Game.Arenas
                     foreach (var guid in GetPlayers().Keys)
                     {
                         Player player = Global.ObjAccessor.FindPlayer(guid);
-
                         if (player)
                             go.SendUpdateToPlayer(player);
                     }
                 }
             }
         }
+
+        EventMap _events;
     }
 
-    internal struct RingofValorEvents
+    struct RingofValorEvents
     {
         public const int OpenFences = 0;
         public const int SwitchPillars = 1;
         public const int CloseFire = 2;
     }
 
-    internal struct RingofValorObjectTypes
+    struct RingofValorObjectTypes
     {
         public const int Buff1 = 1;
         public const int Buff2 = 2;
@@ -226,11 +213,11 @@ namespace Game.Arenas
         public const int PilarCollision4 = 18;
 
         public const int Elevator1 = 19;
-        public const int Elevator2 = 20;
+        public const int Elevator2= 20;
         public const int Max = 21;
     }
 
-    internal struct RingofValorGameObjects
+    struct RingofValorGameObjects
     {
         public const uint Buff1 = 184663;
         public const uint Buff2 = 184664;
@@ -254,6 +241,6 @@ namespace Game.Arenas
         public const uint Pilar1 = 194583; // Axe
         public const uint Pilar2 = 194584; // Arena
         public const uint Pilar3 = 194585; // Lightning
-        public const uint Pilar4 = 194587; // Ivory
+        public const uint Pilar4 = 194587;  // Ivory
     }
 }

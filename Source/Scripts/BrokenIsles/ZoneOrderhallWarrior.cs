@@ -578,7 +578,7 @@ namespace Scripts.BrokenIsles.ZoneOrderhallWarrior
 						                     * 1.4125f is guessed value. Which makes the JumpGravity way closer to the intended one. Not sure how to do it 100% blizzlike.
 						                     * Also the MoveTime is not correct but I don't know how to set it here.
 						                     */
-                                            me.GetMotionMaster().MoveJump(new Position(1107.84f, 7222.57f, 38.9725f, me.GetOrientation()), me.GetSpeed(UnitMoveType.Run), (float)(MotionMaster.GRAVITY * 1.4125f), 3);
+                                            me.GetMotionMaster().MoveJump(new Position(1107.84f, 7222.57f, 38.9725f, me.GetOrientation()), me.GetSpeed(UnitMoveType.Run), (float)(MotionMaster.gravity * 1.4125f), 3);
                                         });
 
                     break;
@@ -635,7 +635,7 @@ namespace Scripts.BrokenIsles.ZoneOrderhallWarrior
 						                     * 1.4125f is guessed value. Which makes the JumpGravity way closer to the intended one. Not sure how to do it 100% blizzlike.
 						                     * Also the MoveTime is not correct but I don't know how to set it here.
 						                     */
-                                            me.GetMotionMaster().MoveJump(new Position(1107.84f, 7222.57f, 38.9725f, me.GetOrientation()), me.GetSpeed(UnitMoveType.Run), (float)(MotionMaster.GRAVITY * 1.4125f), 3);
+                                            me.GetMotionMaster().MoveJump(new Position(1107.84f, 7222.57f, 38.9725f, me.GetOrientation()), me.GetSpeed(UnitMoveType.Run), (float)(MotionMaster.gravity * 1.4125f), 3);
                                         });
 
                     break;
@@ -692,7 +692,7 @@ namespace Scripts.BrokenIsles.ZoneOrderhallWarrior
 						                     * 1.4125f is guessed value. Which makes the JumpGravity way closer to the intended one. Not sure how to do it 100% blizzlike.
 						                     * Also the MoveTime is not correct but I don't know how to set it here.
 						                     */
-                                            me.GetMotionMaster().MoveJump(new Position(1107.84f, 7222.57f, 38.9725f, me.GetOrientation()), me.GetSpeed(UnitMoveType.Run), (float)(MotionMaster.GRAVITY * 1.4125f), 3);
+                                            me.GetMotionMaster().MoveJump(new Position(1107.84f, 7222.57f, 38.9725f, me.GetOrientation()), me.GetSpeed(UnitMoveType.Run), (float)(MotionMaster.gravity * 1.4125f), 3);
                                         });
 
                     break;
@@ -749,7 +749,7 @@ namespace Scripts.BrokenIsles.ZoneOrderhallWarrior
 						                     * 1.4125f is guessed value. Which makes the JumpGravity way closer to the intended one. Not sure how to do it 100% blizzlike.
 						                     * Also the MoveTime is not correct but I don't know how to set it here.
 						                     */
-                                            me.GetMotionMaster().MoveJump(new Position(1107.84f, 7222.57f, 38.9725f, me.GetOrientation()), me.GetSpeed(UnitMoveType.Run), (float)(MotionMaster.GRAVITY * 1.4125f), 3);
+                                            me.GetMotionMaster().MoveJump(new Position(1107.84f, 7222.57f, 38.9725f, me.GetOrientation()), me.GetSpeed(UnitMoveType.Run), (float)(MotionMaster.gravity * 1.4125f), 3);
                                         });
 
                     break;
@@ -806,7 +806,7 @@ namespace Scripts.BrokenIsles.ZoneOrderhallWarrior
 						                     * 1.4125f is guessed value. Which makes the JumpGravity way closer to the intended one. Not sure how to do it 100% blizzlike.
 						                     * Also the MoveTime is not correct but I don't know how to set it here.
 						                     */
-                                            me.GetMotionMaster().MoveJump(new Position(1107.84f, 7222.57f, 38.9725f, me.GetOrientation()), me.GetSpeed(UnitMoveType.Run), (float)(MotionMaster.GRAVITY * 1.4125f), 3);
+                                            me.GetMotionMaster().MoveJump(new Position(1107.84f, 7222.57f, 38.9725f, me.GetOrientation()), me.GetSpeed(UnitMoveType.Run), (float)(MotionMaster.gravity * 1.4125f), 3);
                                         });
 
                     break;
@@ -863,7 +863,7 @@ namespace Scripts.BrokenIsles.ZoneOrderhallWarrior
 						                     * 1.4125f is guessed value. Which makes the JumpGravity way closer to the intended one. Not sure how to do it 100% blizzlike.
 						                     * Also the MoveTime is not correct but I don't know how to set it here.
 						                     */
-                                            me.GetMotionMaster().MoveJump(new Position(1107.84f, 7222.57f, 38.9725f, me.GetOrientation()), me.GetSpeed(UnitMoveType.Run), (float)(MotionMaster.GRAVITY * 1.4125f), 3);
+                                            me.GetMotionMaster().MoveJump(new Position(1107.84f, 7222.57f, 38.9725f, me.GetOrientation()), me.GetSpeed(UnitMoveType.Run), (float)(MotionMaster.gravity * 1.4125f), 3);
                                         });
 
                     break;
@@ -920,7 +920,7 @@ namespace Scripts.BrokenIsles.ZoneOrderhallWarrior
 						                     * 1.4125f is guessed value. Which makes the JumpGravity way closer to the intended one. Not sure how to do it 100% blizzlike.
 						                     * Also the MoveTime is not correct but I don't know how to set it here.
 						                     */
-                                            me.GetMotionMaster().MoveJump(new Position(1107.84f, 7222.57f, 38.9725f, me.GetOrientation()), me.GetSpeed(UnitMoveType.Run), (float)(MotionMaster.GRAVITY * 1.4125f), 3);
+                                            me.GetMotionMaster().MoveJump(new Position(1107.84f, 7222.57f, 38.9725f, me.GetOrientation()), me.GetSpeed(UnitMoveType.Run), (float)(MotionMaster.gravity * 1.4125f), 3);
                                         });
 
                     break;

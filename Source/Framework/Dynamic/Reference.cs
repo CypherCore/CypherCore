@@ -7,8 +7,8 @@ namespace Framework.Dynamic
 {
     public class Reference<TO, FROM> : LinkedListElement where TO : class where FROM : class
     {
-        private TO _RefTo;
-        private FROM _RefFrom;
+        TO _RefTo;
+        FROM _RefFrom;
 
         // Tell our refTo (target) object that we have a link
         public virtual void TargetObjectBuildLink() { }

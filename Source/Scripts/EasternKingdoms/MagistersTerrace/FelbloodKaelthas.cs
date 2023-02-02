@@ -10,7 +10,7 @@ using Game.Maps;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
-using Game.Spells.Auras.EffectHandlers;
+using Game.Spells;
 
 namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
 {
@@ -162,14 +162,14 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
         public override void JustDied(Unit killer)
         {
             // No _JustDied() here because otherwise we would reset the events which will trigger the death sequence twice.
-            Instance.SetBossState(DataTypes.KaelthasSunstrider, EncounterState.Done);
+            instance.SetBossState(DataTypes.KaelthasSunstrider, EncounterState.Done);
         }
 
         public override void EnterEvadeMode(EvadeReason why)
         {
             DoCastAOE(SpellIds.ClearFlight, new CastSpellExtraArgs(true));
             _EnterEvadeMode();
-            Summons.DespawnAll();
+            summons.DespawnAll();
             _DespawnAtEvade();
         }
 
@@ -183,7 +183,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
                 me.SetReactState(ReactStates.Passive);
                 me.InterruptNonMeleeSpells(true);
                 me.RemoveAurasDueToSpell(DungeonMode(SpellIds.PowerFeedback, SpellIds.HPowerFeedback));
-                Summons.DespawnAll();
+                summons.DespawnAll();
                 DoCastAOE(SpellIds.ClearFlight);
                 Talk(TextIds.SayDeath);
 
@@ -240,7 +240,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
                                                                                                     Talk(TextIds.SayPowerFeedback);
                                                                                                     DoCastAOE(SpellIds.ClearFlight);
                                                                                                     DoCastSelf(DungeonMode(SpellIds.PowerFeedback, SpellIds.HPowerFeedback));
-                                                                                                    Summons.DespawnEntry(CreatureIds.ArcaneSphere);
+                                                                                                    summons.DespawnEntry(CreatureIds.ArcaneSphere);
                                                                                                     task.Repeat(TimeSpan.FromSeconds(11));
                                                                                                 });
                                                                         });
@@ -301,7 +301,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
                     {
                         DoCast(unitTarget, MiscConst.GravityLapseTeleportSpells[_gravityLapseTargetCount], new CastSpellExtraArgs(true));
 
-                        target.Events.AddEventAtOffset(() =>
+                        target.m_Events.AddEventAtOffset(() =>
                                                         {
                                                             target.CastSpell(target, DungeonMode(SpellIds.GravityLapse, SpellIds.HGravityLapse));
                                                             target.CastSpell(target, SpellIds.GravityLapseFly);
@@ -324,7 +324,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
 
         public override void JustSummoned(Creature summon)
         {
-            Summons.Summon(summon);
+            summons.Summon(summon);
 
             switch (summon.GetEntry())
             {

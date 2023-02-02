@@ -278,7 +278,7 @@ namespace Game.Battlepay
                     case ProductType.Pet: // 2
                         if (player) // if logged in
                         {
-                            player.Session.GetBattlePayMgr().AddBattlePetFromBpayShop(product.ItemId);
+                            player.GetSession().GetBattlePayMgr().AddBattlePetFromBpayShop(product.ItemId);
                         }
                         else
                         {

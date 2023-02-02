@@ -1,10 +1,11 @@
-using System;
 using System.Diagnostics;
+using dtNodeIndex = System.UInt16;
+using dtPolyRef = System.UInt64;
 
 public partial class Detour
 {
     // From Thomas Wang, https://gist.github.com/badboy/6267743
-    public static uint dtHashRef(ulong a)
+    public static uint dtHashRef(dtPolyRef a)
     {
         a = (~a) + (a << 18); // a = (a << 18) - a - 1;
         a = a ^ (a >> 31);
@@ -12,30 +13,39 @@ public partial class Detour
         a = a ^ (a >> 11);
         a = a + (a << 6);
         a = a ^ (a >> 22);
-
         return (uint)a;
     }
 }
 
 public partial class Detour
 {
+    public enum dtNodeFlags
+    {
+        DT_NODE_OPEN = 0x01,
+        DT_NODE_CLOSED = 0x02,
+        DT_NODE_PARENT_DETACHED = 0x04, // parent of the node is not adjacent. Found using raycast.
+    };
+
+    public const dtNodeIndex DT_NULL_IDX = dtNodeIndex.MaxValue; //(dtNodeIndex)~0;
+
     public class dtNode
     {
-        public float cost;                 //< Cost from previous node to current node.
-        public byte flags;                 // : 3;		//< Node flags 0/open/closed.
-        public ulong id;                   //< Polygon ref the node corresponds to.
-        public uint pidx;                  // : 24;		//< Index to parent node.
-        public float[] pos = new float[3]; //< Position of the node.
-        public uint state;                 // : 2;	///< extra state information. A polyRef can have multiple nodes with different extra info. see DT_MAX_STATES_PER_NODE
-        public float total;                //< Cost up to the node.
-
+        public float[] pos = new float[3];				//< Position of the node.
+        public float cost;					//< Cost from previous node to current node.
+        public float total;				//< Cost up to the node.
+        public uint pidx;// : 24;		//< Index to parent node.
+        public uint state;// : 2;	///< extra state information. A polyRef can have multiple nodes with different extra info. see DT_MAX_STATES_PER_NODE
+        public byte flags;// : 3;		//< Node flags 0/open/closed.
+        public dtPolyRef id;				    //< Polygon ref the node corresponds to.
         ///
         public static int getSizeOf()
         {
             //C# can't guess the sizeof of the float array, let's pretend
-            return sizeof(float) * (3 + 1 + 1) + sizeof(uint) + sizeof(byte) + sizeof(ulong);
+            return sizeof(float) * (3 + 1 + 1)
+                + sizeof(uint)
+                + sizeof(byte)
+                + sizeof(dtPolyRef);
         }
-
         public void dtcsClearFlag(dtNodeFlags flag)
         {
             unchecked
@@ -43,12 +53,10 @@ public partial class Detour
                 flags &= (byte)(~flag);
             }
         }
-
         public void dtcsSetFlag(dtNodeFlags flag)
         {
             flags |= (byte)flag;
         }
-
         public bool dtcsTestFlag(dtNodeFlags flag)
         {
             return (flags & (byte)flag) != 0;
@@ -58,44 +66,48 @@ public partial class Detour
 
     public class dtNodePool
     {
-        private readonly ushort[] _first;
-        private readonly int _hashSize;
-        private readonly int _maxNodes;
-        private readonly ushort[] _next;
-        private readonly dtNode[] _nodes;
-        private int _nodeCount;
+        private dtNode[] m_nodes;
+        private dtNodeIndex[] m_first;
+        private dtNodeIndex[] m_next;
+        private int m_maxNodes;
+        private int m_hashSize;
+        private int m_nodeCount;
 
         //////////////////////////////////////////////////////////////////////////////////////////
         public dtNodePool(int maxNodes, int hashSize)
         {
-            _maxNodes = maxNodes;
-            _hashSize = hashSize;
+            m_maxNodes = maxNodes;
+            m_hashSize = hashSize;
 
-            Debug.Assert(dtNextPow2((uint)_hashSize) == (uint)_hashSize);
-            Debug.Assert(_maxNodes > 0);
+            Debug.Assert(dtNextPow2((uint)m_hashSize) == (uint)m_hashSize);
+            Debug.Assert(m_maxNodes > 0);
 
-            _nodes = new dtNode[_maxNodes];
-            dtcsArrayItemsCreate(_nodes);
-            _next = new ushort[_maxNodes];
-            _first = new ushort[hashSize];
+            m_nodes = new dtNode[m_maxNodes];
+            dtcsArrayItemsCreate(m_nodes);
+            m_next = new dtNodeIndex[m_maxNodes];
+            m_first = new dtNodeIndex[hashSize];
 
-            Debug.Assert(_nodes != null);
-            Debug.Assert(_next != null);
-            Debug.Assert(_first != null);
+            Debug.Assert(m_nodes != null);
+            Debug.Assert(m_next != null);
+            Debug.Assert(m_first != null);
 
             for (int i = 0; i < hashSize; ++i)
-                _first[i] = DT_NULL_IDX;
-
-            for (int i = 0; i < _maxNodes; ++i)
-                _next[i] = DT_NULL_IDX;
+            {
+                m_first[i] = DT_NULL_IDX;
+            }
+            for (int i = 0; i < m_maxNodes; ++i)
+            {
+                m_next[i] = DT_NULL_IDX;
+            }
         }
 
         public void clear()
         {
-            for (int i = 0; i < _hashSize; ++i)
-                _first[i] = DT_NULL_IDX;
-
-            _nodeCount = 0;
+            for (int i = 0; i < m_hashSize; ++i)
+            {
+                m_first[i] = DT_NULL_IDX;
+            }
+            m_nodeCount = 0;
         }
 
         public uint getNodeIdx(dtNode node)
@@ -103,85 +115,76 @@ public partial class Detour
             if (node == null)
                 return 0;
 
-            return (uint)(Array.IndexOf(_nodes, node)) + 1;
+            return (uint)(System.Array.IndexOf(m_nodes, node)) + 1;
         }
 
         public dtNode getNodeAtIdx(uint idx)
         {
             if (idx == 0)
                 return null;
-
-            return _nodes[idx - 1];
+            return m_nodes[idx - 1];
         }
 
         public int getMemUsed()
         {
             return
                 sizeof(int) * 3 +
-                dtNode.getSizeOf() * _maxNodes +
-                sizeof(ushort) * _maxNodes +
-                sizeof(ushort) * _hashSize;
+                dtNode.getSizeOf() * m_maxNodes +
+                sizeof(dtNodeIndex) * m_maxNodes +
+                sizeof(dtNodeIndex) * m_hashSize;
         }
 
         public int getMaxNodes()
         {
-            return _maxNodes;
+            return m_maxNodes;
         }
 
         public int getHashSize()
         {
-            return _hashSize;
+            return m_hashSize;
+        }
+        public dtNodeIndex getFirst(int bucket)
+        {
+            return m_first[bucket];
+        }
+        public dtNodeIndex getNext(int i)
+        {
+            return m_next[i];
         }
 
-        public ushort getFirst(int bucket)
+        public dtNode findNode(dtPolyRef id)
         {
-            return _first[bucket];
-        }
-
-        public ushort getNext(int i)
-        {
-            return _next[i];
-        }
-
-        public dtNode findNode(ulong id)
-        {
-            uint bucket = (uint)(dtHashRef(id) & (_hashSize - 1));
-            ushort i = _first[bucket];
-
+            uint bucket = (uint)(dtHashRef(id) & (m_hashSize - 1));
+            dtNodeIndex i = m_first[bucket];
             while (i != DT_NULL_IDX)
             {
-                if (_nodes[i].id == id)
-                    return _nodes[i];
-
-                i = _next[i];
+                if (m_nodes[i].id == id)
+                    return m_nodes[i];
+                i = m_next[i];
             }
-
             return null;
         }
 
-        public dtNode getNode(ulong id, byte state = 0)
+        public dtNode getNode(dtPolyRef id, byte state = 0)
         {
-            uint bucket = (uint)(dtHashRef(id) & (_hashSize - 1));
-            ushort i = _first[bucket];
+            uint bucket = (uint)(dtHashRef(id) & (m_hashSize - 1));
+            dtNodeIndex i = m_first[bucket];
             dtNode node = null;
-
             while (i != DT_NULL_IDX)
             {
-                if (_nodes[i].id == id &&
-                    _nodes[i].state == state)
-                    return _nodes[i];
-
-                i = _next[i];
+                if (m_nodes[i].id == id && m_nodes[i].state == state)
+                    return m_nodes[i];
+                i = m_next[i];
             }
 
-            if (_nodeCount >= _maxNodes)
+            if (m_nodeCount >= m_maxNodes)
                 return null;
 
-            i = (ushort)_nodeCount;
-            _nodeCount++;
+            i = (dtNodeIndex)m_nodeCount;
+            m_nodeCount++;
 
             // Init node
-            node = _nodes[i];
+            node = m_nodes[i];
             node.pidx = 0;
             node.cost = 0;
             node.total = 0;
@@ -189,8 +192,8 @@ public partial class Detour
             node.state = state;
             node.flags = 0;
 
-            _next[i] = _first[bucket];
-            _first[bucket] = i;
+            m_next[i] = m_first[bucket];
+            m_first[bucket] = i;
 
             return node;
         }
@@ -200,112 +203,100 @@ public partial class Detour
     //////////////////////////////////////////////////////////////////////////////////////////
     public class dtNodeQueue
     {
-        private readonly int _capacity;
-        private readonly dtNode[] _heap;
-        private int _size;
+        private dtNode[] m_heap;
+        private int m_capacity;
+        private int m_size;
 
         public dtNodeQueue(int n)
         {
-            _capacity = n;
-            Debug.Assert(_capacity > 0);
+            m_capacity = n;
+            Debug.Assert(m_capacity > 0);
 
-            _heap = new dtNode[_capacity + 1]; //(dtNode**)dtAlloc(sizeof(dtNode*)*(_capacity+1), DT_ALLOC_PERM);
-            Debug.Assert(_heap != null);
+            m_heap = new dtNode[m_capacity + 1];//(dtNode**)dtAlloc(sizeof(dtNode*)*(m_capacity+1), DT_ALLOC_PERM);
+            Debug.Assert(m_heap != null);
         }
 
         public void clear()
         {
-            _size = 0;
+            m_size = 0;
         }
 
         public dtNode top()
         {
-            return _heap[0];
+            return m_heap[0];
         }
 
         public dtNode pop()
         {
-            dtNode result = _heap[0];
-            _size--;
-            trickleDown(0, _heap[_size]);
-
+            dtNode result = m_heap[0];
+            m_size--;
+            trickleDown(0, m_heap[m_size]);
             return result;
         }
 
         public void push(dtNode node)
         {
-            _size++;
-            bubbleUp(_size - 1, node);
+            m_size++;
+            bubbleUp(m_size - 1, node);
         }
 
         public void modify(dtNode node)
         {
-            for (int i = 0; i < _size; ++i)
-                if (_heap[i] == node)
+            for (int i = 0; i < m_size; ++i)
+            {
+                if (m_heap[i] == node)
                 {
                     bubbleUp(i, node);
-
                     return;
                 }
+            }
         }
 
         public bool empty()
         {
-            return _size == 0;
+            return m_size == 0;
         }
 
         public int getMemUsed()
         {
             return sizeof(int) * 2 +
-                   dtNode.getSizeOf() * (_capacity + 1);
+            dtNode.getSizeOf() * (m_capacity + 1);
         }
 
         public int getCapacity()
         {
-            return _capacity;
+            return m_capacity;
         }
 
 
         public void bubbleUp(int i, dtNode node)
         {
             int parent = (i - 1) / 2;
-
             // note: (index > 0) means there is a parent
-            while ((i > 0) && (_heap[parent].total > node.total))
+            while ((i > 0) && (m_heap[parent].total > node.total))
             {
-                _heap[i] = _heap[parent];
+                m_heap[i] = m_heap[parent];
                 i = parent;
                 parent = (i - 1) / 2;
             }
-
-            _heap[i] = node;
+            m_heap[i] = node;
         }
 
         public void trickleDown(int i, dtNode node)
         {
             int child = (i * 2) + 1;
-
-            while (child < _size)
+            while (child < m_size)
             {
-                if (((child + 1) < _size) &&
-                    (_heap[child].total > _heap[child + 1].total))
+                if (((child + 1) < m_size) &&
+                    (m_heap[child].total > m_heap[child + 1].total))
+                {
                     child++;
-
-                _heap[i] = _heap[child];
+                }
+                m_heap[i] = m_heap[child];
                 i = child;
                 child = (i * 2) + 1;
             }
-
             bubbleUp(i, node);
         }
     }
-
-    public enum dtNodeFlags
-    {
-        DT_NODE_OPEN = 0x01,
-        DT_NODE_CLOSED = 0x02,
-        DT_NODE_PARENT_DETACHED = 0x04 // parent of the node is not adjacent. Found using raycast.
-    };
-
-    public const ushort DT_NULL_IDX = ushort.MaxValue; //(dtNodeIndex)~0;
 }

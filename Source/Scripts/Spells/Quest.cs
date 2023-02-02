@@ -6,14 +6,14 @@ using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
-using Game.Maps.Checks;
-using Game.Maps.Notifiers;
+
+
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
-using Game.Spells.Auras.EffectHandlers;
+using Game.Spells;
 
 namespace Scripts.Spells.Quest
 {

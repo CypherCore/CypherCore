@@ -1,22 +1,20 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
+using System;
+using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    internal class TraitsCommitConfig : ClientPacket
+    class TraitsCommitConfig : ClientPacket
     {
         public TraitConfigPacket Config = new();
         public int SavedConfigID;
         public int SavedLocalIdentifier;
 
-        public TraitsCommitConfig(WorldPacket packet) : base(packet)
-        {
-        }
+        public TraitsCommitConfig(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -26,11 +24,11 @@ namespace Game.Networking.Packets
         }
     }
 
-    internal class TraitConfigCommitFailed : ServerPacket
+    class TraitConfigCommitFailed : ServerPacket
     {
         public int ConfigID;
-        public int Reason;
         public uint SpellID;
+        public int Reason;
 
         public TraitConfigCommitFailed(int configId = 0, uint spellId = 0, int reason = 0) : base(ServerOpcodes.TraitConfigCommitFailed)
         {
@@ -48,13 +46,11 @@ namespace Game.Networking.Packets
         }
     }
 
-    internal class ClassTalentsRequestNewConfig : ClientPacket
+    class ClassTalentsRequestNewConfig : ClientPacket
     {
         public TraitConfigPacket Config = new();
 
-        public ClassTalentsRequestNewConfig(WorldPacket packet) : base(packet)
-        {
-        }
+        public ClassTalentsRequestNewConfig(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -62,14 +58,12 @@ namespace Game.Networking.Packets
         }
     }
 
-    internal class ClassTalentsRenameConfig : ClientPacket
+    class ClassTalentsRenameConfig : ClientPacket
     {
         public int ConfigID;
         public string Name;
 
-        public ClassTalentsRenameConfig(WorldPacket packet) : base(packet)
-        {
-        }
+        public ClassTalentsRenameConfig(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -79,13 +73,11 @@ namespace Game.Networking.Packets
         }
     }
 
-    internal class ClassTalentsDeleteConfig : ClientPacket
+    class ClassTalentsDeleteConfig : ClientPacket
     {
         public int ConfigID;
 
-        public ClassTalentsDeleteConfig(WorldPacket packet) : base(packet)
-        {
-        }
+        public ClassTalentsDeleteConfig(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -93,14 +85,12 @@ namespace Game.Networking.Packets
         }
     }
 
-    internal class ClassTalentsSetStarterBuildActive : ClientPacket
+    class ClassTalentsSetStarterBuildActive : ClientPacket
     {
-        public bool Active;
         public int ConfigID;
+        public bool Active;
 
-        public ClassTalentsSetStarterBuildActive(WorldPacket packet) : base(packet)
-        {
-        }
+        public ClassTalentsSetStarterBuildActive(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -109,15 +99,13 @@ namespace Game.Networking.Packets
         }
     }
 
-    internal class ClassTalentsSetUsesSharedActionBars : ClientPacket
+    class ClassTalentsSetUsesSharedActionBars : ClientPacket
     {
         public int ConfigID;
-        public bool IsLastSelectedSavedConfig;
         public bool UsesShared;
+        public bool IsLastSelectedSavedConfig;
 
-        public ClassTalentsSetUsesSharedActionBars(WorldPacket packet) : base(packet)
-        {
-        }
+        public ClassTalentsSetUsesSharedActionBars(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -129,15 +117,12 @@ namespace Game.Networking.Packets
 
     public class TraitEntryPacket
     {
-        public int GrantedRanks;
-        public int Rank;
-        public int TraitNodeEntryID;
         public int TraitNodeID;
+        public int TraitNodeEntryID;
+        public int Rank;
+        public int GrantedRanks;
 
-        public TraitEntryPacket()
-        {
-        }
-
+        public TraitEntryPacket() { }
         public TraitEntryPacket(TraitEntry ufEntry)
         {
             TraitNodeID = ufEntry.TraitNodeID;
@@ -165,20 +150,17 @@ namespace Game.Networking.Packets
 
     public class TraitConfigPacket
     {
+        public int ID;
+        public TraitConfigType Type;
         public int ChrSpecializationID = 0;
         public TraitCombatConfigFlags CombatConfigFlags;
-        public List<TraitEntryPacket> Entries = new();
-        public int ID;
-        public int LocalIdentifier; // Local to specialization
-        public string Name = "";
+        public int LocalIdentifier;  // Local to specialization
         public uint SkillLineID;
         public int TraitSystemID;
-        public TraitConfigType Type;
+        public List<TraitEntryPacket> Entries = new();
+        public string Name = "";
 
-        public TraitConfigPacket()
-        {
-        }
-
+        public TraitConfigPacket() { }
         public TraitConfigPacket(TraitConfig ufConfig)
         {
             ID = ufConfig.ID;
@@ -188,34 +170,28 @@ namespace Game.Networking.Packets
             LocalIdentifier = ufConfig.LocalIdentifier;
             SkillLineID = (uint)(int)ufConfig.SkillLineID;
             TraitSystemID = ufConfig.TraitSystemID;
-
             foreach (TraitEntry ufEntry in ufConfig.Entries)
                 Entries.Add(new TraitEntryPacket(ufEntry));
-
             Name = ufConfig.Name;
         }
-
+        
         public void Read(WorldPacket data)
         {
             ID = data.ReadInt32();
             Type = (TraitConfigType)data.ReadInt32();
             var entriesCount = data.ReadInt32();
-
             switch (Type)
             {
                 case TraitConfigType.Combat:
                     ChrSpecializationID = data.ReadInt32();
                     CombatConfigFlags = (TraitCombatConfigFlags)data.ReadInt32();
                     LocalIdentifier = data.ReadInt32();
-
                     break;
                 case TraitConfigType.Profession:
                     SkillLineID = data.ReadUInt32();
-
                     break;
                 case TraitConfigType.Generic:
                     TraitSystemID = data.ReadInt32();
-
                     break;
                 default:
                     break;
@@ -237,22 +213,18 @@ namespace Game.Networking.Packets
             data.WriteInt32(ID);
             data.WriteInt32((int)Type);
             data.WriteInt32(Entries.Count);
-
             switch (Type)
             {
                 case TraitConfigType.Combat:
                     data.WriteInt32(ChrSpecializationID);
                     data.WriteInt32((int)CombatConfigFlags);
                     data.WriteInt32(LocalIdentifier);
-
                     break;
                 case TraitConfigType.Profession:
                     data.WriteUInt32(SkillLineID);
-
                     break;
                 case TraitConfigType.Generic:
                     data.WriteInt32(TraitSystemID);
-
                     break;
                 default:
                     break;

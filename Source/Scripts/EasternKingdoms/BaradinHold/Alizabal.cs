@@ -97,15 +97,15 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
         {
             base.JustEngagedWith(who);
             Talk(TextIds.SayAggro);
-            Instance.SendEncounterUnit(EncounterFrameType.Engage, me);
-            Events.ScheduleEvent(EventIds.RandomCast, TimeSpan.FromSeconds(10));
+            instance.SendEncounterUnit(EncounterFrameType.Engage, me);
+            _events.ScheduleEvent(EventIds.RandomCast, TimeSpan.FromSeconds(10));
         }
 
         public override void JustDied(Unit killer)
         {
             _JustDied();
             Talk(TextIds.SayDeath);
-            Instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
+            instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
         }
 
         public override void KilledUnit(Unit who)
@@ -116,7 +116,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
 
         public override void EnterEvadeMode(EvadeReason why)
         {
-            Instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
+            instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
             me.GetMotionMaster().MoveTargetedHome();
             _DespawnAtEvade();
         }
@@ -141,7 +141,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
             switch (pointId)
             {
                 case PointIds.Storm:
-                    Events.ScheduleEvent(EventIds.CastStorm, TimeSpan.FromMilliseconds(1));
+                    _events.ScheduleEvent(EventIds.CastStorm, TimeSpan.FromMilliseconds(1));
 
                     break;
             }
@@ -152,9 +152,9 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
             if (!UpdateVictim())
                 return;
 
-            Events.Update(diff);
+            _events.Update(diff);
 
-            Events.ExecuteEvents(eventId =>
+            _events.ExecuteEvents(eventId =>
                                   {
                                       switch (eventId)
                                       {
@@ -175,7 +175,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
                                                               }
 
                                                               _skewer = true;
-                                                              Events.ScheduleEvent(EventIds.RandomCast, TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(10));
+                                                              _events.ScheduleEvent(EventIds.RandomCast, TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(10));
                                                           }
                                                           else if (!_hate)
                                                           {
@@ -188,16 +188,16 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
                                                               }
 
                                                               _hate = true;
-                                                              Events.ScheduleEvent(EventIds.RandomCast, TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(10));
+                                                              _events.ScheduleEvent(EventIds.RandomCast, TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(10));
                                                           }
                                                           else if (_hate && _skewer)
                                                           {
                                                               Talk(TextIds.SayBladeStorm);
                                                               DoCastAOE(SpellIds.BladeDanceDummy);
                                                               DoCastAOE(SpellIds.BladeDance);
-                                                              Events.ScheduleEvent(EventIds.RandomCast, TimeSpan.FromSeconds(21));
-                                                              Events.ScheduleEvent(EventIds.MoveStorm, TimeSpan.FromMilliseconds(4050));
-                                                              Events.ScheduleEvent(EventIds.StopStorm, TimeSpan.FromSeconds(13));
+                                                              _events.ScheduleEvent(EventIds.RandomCast, TimeSpan.FromSeconds(21));
+                                                              _events.ScheduleEvent(EventIds.MoveStorm, TimeSpan.FromMilliseconds(4050));
+                                                              _events.ScheduleEvent(EventIds.StopStorm, TimeSpan.FromSeconds(13));
                                                           }
 
                                                           break;
@@ -213,7 +213,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
                                                               }
 
                                                               _hate = true;
-                                                              Events.ScheduleEvent(EventIds.RandomCast, TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(10));
+                                                              _events.ScheduleEvent(EventIds.RandomCast, TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(10));
                                                           }
                                                           else if (!_skewer)
                                                           {
@@ -227,16 +227,16 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
                                                               }
 
                                                               _skewer = true;
-                                                              Events.ScheduleEvent(EventIds.RandomCast, TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(10));
+                                                              _events.ScheduleEvent(EventIds.RandomCast, TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(10));
                                                           }
                                                           else if (_hate && _skewer)
                                                           {
                                                               Talk(TextIds.SayBladeStorm);
                                                               DoCastAOE(SpellIds.BladeDanceDummy);
                                                               DoCastAOE(SpellIds.BladeDance);
-                                                              Events.ScheduleEvent(EventIds.RandomCast, TimeSpan.FromSeconds(21));
-                                                              Events.ScheduleEvent(EventIds.MoveStorm, TimeSpan.FromMilliseconds(4050));
-                                                              Events.ScheduleEvent(EventIds.StopStorm, TimeSpan.FromSeconds(13));
+                                                              _events.ScheduleEvent(EventIds.RandomCast, TimeSpan.FromSeconds(21));
+                                                              _events.ScheduleEvent(EventIds.MoveStorm, TimeSpan.FromMilliseconds(4050));
+                                                              _events.ScheduleEvent(EventIds.StopStorm, TimeSpan.FromSeconds(13));
                                                           }
 
                                                           break;
@@ -253,7 +253,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
                                                   if (target)
                                                       me.GetMotionMaster().MovePoint(PointIds.Storm, target.GetPositionX(), target.GetPositionY(), target.GetPositionZ());
 
-                                                  Events.ScheduleEvent(EventIds.MoveStorm, TimeSpan.FromMilliseconds(4050));
+                                                  _events.ScheduleEvent(EventIds.MoveStorm, TimeSpan.FromMilliseconds(4050));
 
                                                   break;
                                               }

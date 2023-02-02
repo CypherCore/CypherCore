@@ -1,58 +1,55 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Framework.Constants;
 using Game.Combat;
 using Game.Entities;
 using Game.Spells;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.AI
 {
     public class UnitAI
     {
-        /// <summary>
-        ///  Select the best Target (in
-        ///  <targetType>
-        ///   order) satisfying
-        ///   <predicate>
-        ///    from the threat list.
-        ///    If <offset> is nonzero, the first <offset> entries in <targetType> order (or MAXTHREAT order, if <targetType> is RANDOM) are skipped.
-        /// </summary>
-        public delegate bool SelectTargetDelegate(Unit unit);
+        static Dictionary<(uint id, Difficulty difficulty), AISpellInfoType> _aiSpellInfo = new();
 
-        private static readonly Dictionary<(uint id, Difficulty difficulty), AISpellInfoType> _aiSpellInfo = new();
+        protected Unit me { get; private set; }
 
         public UnitAI(Unit _unit)
         {
             me = _unit;
         }
 
-        protected Unit me { get; private set; }
-
         public virtual void AttackStart(Unit victim)
         {
-            if (victim != null &&
-                me.Attack(victim, true))
+            if (victim != null && me.Attack(victim, true))
             {
-                // Clear distracted State on attacking
+                // Clear distracted state on attacking
                 if (me.HasUnitState(UnitState.Distracted))
                 {
                     me.ClearUnitState(UnitState.Distracted);
                     me.GetMotionMaster().Clear();
                 }
-
                 me.GetMotionMaster().MoveChase(victim);
             }
         }
 
         public void AttackStartCaster(Unit victim, float dist)
         {
-            if (victim != null &&
-                me.Attack(victim, false))
+            if (victim != null && me.Attack(victim, false))
                 me.GetMotionMaster().MoveChase(victim, dist);
+        }
+
+        ThreatManager GetThreatManager()
+        {
+            return me.GetThreatManager();
+        }
+
+        void SortByDistance(List<Unit> targets, bool ascending)
+        {
+            targets.Sort(new ObjectDistanceOrderPred(me, ascending));
         }
 
         public void DoMeleeAttackIfReady()
@@ -72,8 +69,7 @@ namespace Game.AI
                 me.ResetAttackTimer();
             }
 
-            if (me.HaveOffhandWeapon() &&
-                me.IsAttackReady(WeaponAttackType.OffAttack))
+            if (me.HaveOffhandWeapon() && me.IsAttackReady(WeaponAttackType.OffAttack))
             {
                 me.AttackerStateUpdate(victim, WeaponAttackType.OffAttack);
                 me.ResetAttackTimer(WeaponAttackType.OffAttack);
@@ -82,48 +78,32 @@ namespace Game.AI
 
         public bool DoSpellAttackIfReady(uint spellId)
         {
-            if (me.HasUnitState(UnitState.Casting) ||
-                !me.IsAttackReady())
+            if (me.HasUnitState(UnitState.Casting) || !me.IsAttackReady())
                 return true;
 
             var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, me.GetMap().GetDifficultyID());
-
             if (spellInfo != null)
+            {
                 if (me.IsWithinCombatRange(me.GetVictim(), spellInfo.GetMaxRange(false)))
                 {
                     me.CastSpell(me.GetVictim(), spellId, new CastSpellExtraArgs(me.GetMap().GetDifficultyID()));
                     me.ResetAttackTimer();
-
                     return true;
                 }
+            }
 
             return false;
         }
 
         /// <summary>
-        ///  Select the best Target (in
-        ///  <targetType>
-        ///   order) from the threat list that fulfill the following:
-        ///   - Not among the first
-        ///   <offset>
-        ///    entries in
-        ///    <targetType>
-        ///     order (or MAXTHREAT order, if
-        ///     <targetType>
-        ///      is RANDOM).
-        ///      - Within at most
-        ///      <dist>
-        ///       yards (if dist > 0.0f)
-        ///       - At least -
-        ///       <dist>
-        ///        yards away (if dist
-        ///        < 0.0f)
-        ///         - Is a player ( if playerOnly= true)
-        ///         - Not the current tank ( if withTank= false)
-        ///         - Has aura with ID
-        ///        <aura>
-        ///         (if aura > 0)
-        ///         - Does not have aura with ID -<aura> (if aura < 0)
+        /// Select the best target (in <targetType> order) from the threat list that fulfill the following:
+        /// - Not among the first <offset> entries in <targetType> order (or MAXTHREAT order, if <targetType> is RANDOM).
+        /// - Within at most <dist> yards (if dist > 0.0f)
+        /// - At least -<dist> yards away (if dist < 0.0f)
+        /// - Is a player (if playerOnly = true)
+        /// - Not the current tank (if withTank = false)
+        /// - Has aura with ID <aura> (if aura > 0)
+        /// - Does not have aura with ID -<aura> (if aura < 0)
         /// </summary>
         public Unit SelectTarget(SelectTargetMethod targetType, uint offset = 0, float dist = 0.0f, bool playerOnly = false, bool withTank = true, int aura = 0)
         {
@@ -135,10 +115,14 @@ namespace Game.AI
             return SelectTarget(targetType, offset, selector.Invoke);
         }
 
+        /// <summary>
+        /// Select the best target (in <targetType> order) satisfying <predicate> from the threat list.
+        /// If <offset> is nonzero, the first <offset> entries in <targetType> order (or MAXTHREAT order, if <targetType> is RANDOM) are skipped.
+        /// </summary>
+        public delegate bool SelectTargetDelegate(Unit unit);
         public Unit SelectTarget(SelectTargetMethod targetType, uint offset, SelectTargetDelegate selector)
         {
             ThreatManager mgr = GetThreatManager();
-
             // shortcut: if we ignore the first <offset> elements, and there are at most <offset> elements, then we ignore ALL elements
             if (mgr.GetThreatListSize() <= offset)
                 return null;
@@ -153,41 +137,20 @@ namespace Game.AI
             {
                 SelectTargetMethod.MaxThreat or SelectTargetMethod.MinThreat or SelectTargetMethod.MaxDistance or SelectTargetMethod.MinDistance => targetList[0],
                 SelectTargetMethod.Random => targetList.SelectRandom(),
-                _ => null
+                _ => null,
             };
         }
 
         /// <summary>
-        ///  Select the best (up to)
-        ///  <num>
-        ///   targets (in
-        ///   <targetType>
-        ///    order) from the threat list that fulfill the following:
-        ///    - Not among the first
-        ///    <offset>
-        ///     entries in
-        ///     <targetType>
-        ///      order (or MAXTHREAT order, if
-        ///      <targetType>
-        ///       is RANDOM).
-        ///       - Within at most
-        ///       <dist>
-        ///        yards (if dist > 0.0f)
-        ///        - At least -
-        ///        <dist>
-        ///         yards away (if dist
-        ///         < 0.0f)
-        ///          - Is a player ( if playerOnly= true)
-        ///          - Not the current tank ( if withTank= false)
-        ///          - Has aura with ID
-        ///         <aura>
-        ///          (if aura > 0)
-        ///          - Does not have aura with ID -
-        ///          <aura>
-        ///           (if aura
-        ///           < 0)
-        ///            The resulting targets are stored in
-        ///           <targetList> (which is cleared first).
+        /// Select the best (up to) <num> targets (in <targetType> order) from the threat list that fulfill the following:
+        /// - Not among the first <offset> entries in <targetType> order (or MAXTHREAT order, if <targetType> is RANDOM).
+        /// - Within at most <dist> yards (if dist > 0.0f)
+        /// - At least -<dist> yards away (if dist < 0.0f)
+        /// - Is a player (if playerOnly = true)
+        /// - Not the current tank (if withTank = false)
+        /// - Has aura with ID <aura> (if aura > 0)
+        /// - Does not have aura with ID -<aura> (if aura < 0)
+        /// The resulting targets are stored in <targetList> (which is cleared first).
         /// </summary>
         public List<Unit> SelectTargetList(uint num, SelectTargetMethod targetType, uint offset = 0, float dist = 0f, bool playerOnly = false, bool withTank = true, int aura = 0)
         {
@@ -195,29 +158,19 @@ namespace Game.AI
         }
 
         /// <summary>
-        ///  Select the best (up to)
-        ///  <num>
-        ///   targets (in
-        ///   <targetType>
-        ///    order) satisfying
-        ///    <predicate>
-        ///     from the threat list and stores them in
-        ///     <targetList>
-        ///      (which is cleared first).
-        ///      If <offset> is nonzero, the first <offset> entries in <targetType> order (or MAXTHREAT order, if <targetType> is RANDOM) are skipped.
+        /// Select the best (up to) <num> targets (in <targetType> order) satisfying <predicate> from the threat list and stores them in <targetList> (which is cleared first).
+        /// If <offset> is nonzero, the first <offset> entries in <targetType> order (or MAXTHREAT order, if <targetType> is RANDOM) are skipped.
         /// </summary>
         public List<Unit> SelectTargetList(uint num, SelectTargetMethod targetType, uint offset, SelectTargetDelegate selector)
         {
             var targetList = new List<Unit>();
 
             ThreatManager mgr = GetThreatManager();
-
             // shortcut: we're gonna ignore the first <offset> elements, and there's at most <offset> elements, so we ignore them all - nothing to do here
             if (mgr.GetThreatListSize() <= offset)
                 return targetList;
 
-            if (targetType == SelectTargetMethod.MaxDistance ||
-                targetType == SelectTargetMethod.MinDistance)
+            if (targetType == SelectTargetMethod.MaxDistance || targetType == SelectTargetMethod.MinDistance)
             {
                 foreach (ThreatReference refe in mgr.GetSortedThreatList())
                 {
@@ -230,7 +183,6 @@ namespace Game.AI
             else
             {
                 Unit currentVictim = mgr.GetCurrentVictim();
-
                 if (currentVictim != null)
                     targetList.Add(currentVictim);
 
@@ -240,7 +192,6 @@ namespace Game.AI
                         continue;
 
                     Unit thisTarget = refe.GetVictim();
-
                     if (thisTarget != currentVictim)
                         targetList.Add(thisTarget);
                 }
@@ -250,13 +201,11 @@ namespace Game.AI
             if (targetList.Count <= offset)
             {
                 targetList.Clear();
-
                 return targetList;
             }
 
             // right now, list is unsorted for DISTANCE types - re-sort by MAXDISTANCE
-            if (targetType == SelectTargetMethod.MaxDistance ||
-                targetType == SelectTargetMethod.MinDistance)
+            if (targetType == SelectTargetMethod.MaxDistance || targetType == SelectTargetMethod.MinDistance)
                 SortByDistance(targetList, targetType == SelectTargetMethod.MinDistance);
 
             // now the list is MAX sorted, reverse for MIN types
@@ -290,99 +239,77 @@ namespace Game.AI
             AITarget aiTargetType = AITarget.Self;
 
             AISpellInfoType info = GetAISpellInfo(spellId, me.GetMap().GetDifficultyID());
-
             if (info != null)
-                aiTargetType = info.Target;
+                aiTargetType = info.target;
 
             switch (aiTargetType)
             {
                 default:
                 case AITarget.Self:
                     target = me;
-
                     break;
                 case AITarget.Victim:
                     target = me.GetVictim();
-
                     break;
                 case AITarget.Enemy:
+                {
+                    var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, me.GetMap().GetDifficultyID());
+                    if (spellInfo != null)
                     {
-                        var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, me.GetMap().GetDifficultyID());
-
-                        if (spellInfo != null)
+                        DefaultTargetSelector targetSelectorInner = new(me, spellInfo.GetMaxRange(false), false, true, 0);
+                        bool targetSelector(Unit candidate)
                         {
-                            DefaultTargetSelector targetSelectorInner = new(me, spellInfo.GetMaxRange(false), false, true, 0);
-
-                            bool targetSelector(Unit candidate)
+                            if (!candidate.IsPlayer())
                             {
-                                if (!candidate.IsPlayer())
-                                {
-                                    if (spellInfo.HasAttribute(SpellAttr3.OnlyOnPlayer))
-                                        return false;
-
-                                    if (spellInfo.HasAttribute(SpellAttr5.NotOnPlayerControlledNpc) &&
-                                        candidate.IsControlledByPlayer())
-                                        return false;
-                                }
-                                else if (spellInfo.HasAttribute(SpellAttr5.NotOnPlayer))
-                                {
+                                if (spellInfo.HasAttribute(SpellAttr3.OnlyOnPlayer))
                                     return false;
-                                }
 
-                                return targetSelectorInner.Invoke(candidate);
+                                if (spellInfo.HasAttribute(SpellAttr5.NotOnPlayerControlledNpc) && candidate.IsControlledByPlayer())
+                                    return false;
                             }
+                            else if (spellInfo.HasAttribute(SpellAttr5.NotOnPlayer))
+                                return false;
 
-                            ;
-                            target = SelectTarget(SelectTargetMethod.Random, 0, targetSelector);
-                        }
-
-                        break;
+                            return targetSelectorInner.Invoke(candidate);
+                        };
+                        target = SelectTarget(SelectTargetMethod.Random, 0, targetSelector);
                     }
+                    break;
+                }
                 case AITarget.Ally:
                 case AITarget.Buff:
                     target = me;
-
                     break;
                 case AITarget.Debuff:
+                {
+                    var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, me.GetMap().GetDifficultyID());
+                    if (spellInfo != null)
                     {
-                        var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, me.GetMap().GetDifficultyID());
+                        float range = spellInfo.GetMaxRange(false);
 
-                        if (spellInfo != null)
+                        DefaultTargetSelector targetSelectorInner = new(me, range, false, true, -(int)spellId);
+                        bool targetSelector(Unit candidate)
                         {
-                            float range = spellInfo.GetMaxRange(false);
-
-                            DefaultTargetSelector targetSelectorInner = new(me, range, false, true, -(int)spellId);
-
-                            bool targetSelector(Unit candidate)
+                            if (!candidate.IsPlayer())
                             {
-                                if (!candidate.IsPlayer())
-                                {
-                                    if (spellInfo.HasAttribute(SpellAttr3.OnlyOnPlayer))
-                                        return false;
-
-                                    if (spellInfo.HasAttribute(SpellAttr5.NotOnPlayerControlledNpc) &&
-                                        candidate.IsControlledByPlayer())
-                                        return false;
-                                }
-                                else if (spellInfo.HasAttribute(SpellAttr5.NotOnPlayer))
-                                {
+                                if (spellInfo.HasAttribute(SpellAttr3.OnlyOnPlayer))
                                     return false;
-                                }
 
-                                return targetSelectorInner.Invoke(candidate);
+                                if (spellInfo.HasAttribute(SpellAttr5.NotOnPlayerControlledNpc) && candidate.IsControlledByPlayer())
+                                    return false;
                             }
+                            else if (spellInfo.HasAttribute(SpellAttr5.NotOnPlayer))
+                                return false;
 
-                            ;
-
-                            if (!spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.NotVictim) &&
-                                targetSelector(me.GetVictim()))
-                                target = me.GetVictim();
-                            else
-                                target = SelectTarget(SelectTargetMethod.Random, 0, targetSelector);
-                        }
-
-                        break;
+                            return targetSelectorInner.Invoke(candidate);
+                        };
+                        if (!spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.NotVictim) && targetSelector(me.GetVictim()))
+                            target = me.GetVictim();
+                        else
+                            target = SelectTarget(SelectTargetMethod.Random, 0, targetSelector);
                     }
+                    break;
+                }
             }
 
             if (target != null)
@@ -395,167 +322,152 @@ namespace Game.AI
         {
             args = args ?? new CastSpellExtraArgs();
 
-            if (me.HasUnitState(UnitState.Casting) &&
-                !args.TriggerFlags.HasAnyFlag(TriggerCastFlags.IgnoreCastInProgress))
+            if (me.HasUnitState(UnitState.Casting) && !args.TriggerFlags.HasAnyFlag(TriggerCastFlags.IgnoreCastInProgress))
                 return SpellCastResult.SpellInProgress;
 
             return me.CastSpell(victim, spellId, args);
         }
 
-        public SpellCastResult DoCastSelf(uint spellId, CastSpellExtraArgs args = null)
-        {
-            return DoCast(me, spellId, args);
-        }
+        public SpellCastResult DoCastSelf(uint spellId, CastSpellExtraArgs args = null) { return DoCast(me, spellId, args); }
 
         public SpellCastResult DoCastVictim(uint spellId, CastSpellExtraArgs args = null)
         {
             Unit victim = me.GetVictim();
-
             if (victim != null)
                 return DoCast(victim, spellId, args);
 
             return SpellCastResult.BadTargets;
         }
 
-        public SpellCastResult DoCastAOE(uint spellId, CastSpellExtraArgs args = null)
-        {
-            return DoCast(null, spellId, args);
-        }
+        public SpellCastResult DoCastAOE(uint spellId, CastSpellExtraArgs args = null) { return DoCast(null, spellId, args); }
 
         public static void FillAISpellInfo()
         {
             Global.SpellMgr.ForEachSpellInfo(spellInfo =>
-                                             {
-                                                 AISpellInfoType AIInfo = new();
+            {
+                AISpellInfoType AIInfo = new();
+                if (spellInfo.HasAttribute(SpellAttr0.AllowCastWhileDead))
+                    AIInfo.condition = AICondition.Die;
+                else if (spellInfo.IsPassive() || spellInfo.GetDuration() == -1)
+                    AIInfo.condition = AICondition.Aggro;
+                else
+                    AIInfo.condition = AICondition.Combat;
 
-                                                 if (spellInfo.HasAttribute(SpellAttr0.AllowCastWhileDead))
-                                                     AIInfo.Condition = AICondition.Die;
-                                                 else if (spellInfo.IsPassive() ||
-                                                          spellInfo.GetDuration() == -1)
-                                                     AIInfo.Condition = AICondition.Aggro;
-                                                 else
-                                                     AIInfo.Condition = AICondition.Combat;
+                if (AIInfo.cooldown.TotalMilliseconds < spellInfo.RecoveryTime)
+                    AIInfo.cooldown = TimeSpan.FromMilliseconds(spellInfo.RecoveryTime);
 
-                                                 if (AIInfo.Cooldown.TotalMilliseconds < spellInfo.RecoveryTime)
-                                                     AIInfo.Cooldown = TimeSpan.FromMilliseconds(spellInfo.RecoveryTime);
+                if (spellInfo.GetMaxRange(false) != 0)
+                {
+                    foreach (var spellEffectInfo in spellInfo.GetEffects())
+                    {
+                        var targetType = spellEffectInfo.TargetA.GetTarget();
+                        if (targetType == Targets.UnitTargetEnemy || targetType == Targets.DestTargetEnemy)
+                        {
+                            if (AIInfo.target < AITarget.Victim)
+                                AIInfo.target = AITarget.Victim;
+                        }
+                        else if (targetType == Targets.UnitDestAreaEnemy)
+                        {
+                            if (AIInfo.target < AITarget.Enemy)
+                                AIInfo.target = AITarget.Enemy;
+                        }
 
-                                                 if (spellInfo.GetMaxRange(false) != 0)
-                                                     foreach (var spellEffectInfo in spellInfo.GetEffects())
-                                                     {
-                                                         var targetType = spellEffectInfo.TargetA.GetTarget();
+                        if (spellEffectInfo.IsEffect(SpellEffectName.ApplyAura))
+                        {
+                            if (targetType == Targets.UnitTargetEnemy)
+                            {
+                                if (AIInfo.target < AITarget.Debuff)
+                                    AIInfo.target = AITarget.Debuff;
+                            }
+                            else if (spellInfo.IsPositive())
+                            {
+                                if (AIInfo.target < AITarget.Buff)
+                                    AIInfo.target = AITarget.Buff;
+                            }
+                        }
+                    }
+                }
 
-                                                         if (targetType == Targets.UnitTargetEnemy ||
-                                                             targetType == Targets.DestTargetEnemy)
-                                                         {
-                                                             if (AIInfo.Target < AITarget.Victim)
-                                                                 AIInfo.Target = AITarget.Victim;
-                                                         }
-                                                         else if (targetType == Targets.UnitDestAreaEnemy)
-                                                         {
-                                                             if (AIInfo.Target < AITarget.Enemy)
-                                                                 AIInfo.Target = AITarget.Enemy;
-                                                         }
+                AIInfo.realCooldown = TimeSpan.FromMilliseconds(spellInfo.RecoveryTime + spellInfo.StartRecoveryTime);
+                AIInfo.maxRange = spellInfo.GetMaxRange(false) * 3 / 4;
 
-                                                         if (spellEffectInfo.IsEffect(SpellEffectName.ApplyAura))
-                                                         {
-                                                             if (targetType == Targets.UnitTargetEnemy)
-                                                             {
-                                                                 if (AIInfo.Target < AITarget.Debuff)
-                                                                     AIInfo.Target = AITarget.Debuff;
-                                                             }
-                                                             else if (spellInfo.IsPositive())
-                                                             {
-                                                                 if (AIInfo.Target < AITarget.Buff)
-                                                                     AIInfo.Target = AITarget.Buff;
-                                                             }
-                                                         }
-                                                     }
+                AIInfo.Effects = 0;
+                AIInfo.Targets = 0;
 
-                                                 AIInfo.RealCooldown = TimeSpan.FromMilliseconds(spellInfo.RecoveryTime + spellInfo.StartRecoveryTime);
-                                                 AIInfo.MaxRange = spellInfo.GetMaxRange(false) * 3 / 4;
+                foreach (var spellEffectInfo in spellInfo.GetEffects())
+                {
+                    // Spell targets self.
+                    if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitCaster)
+                        AIInfo.Targets |= 1 << ((int)SelectTargetType.Self - 1);
 
-                                                 AIInfo.Effects = 0;
-                                                 AIInfo.Targets = 0;
+                    // Spell targets a single enemy.
+                    if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitTargetEnemy ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.DestTargetEnemy)
+                        AIInfo.Targets |= 1 << ((int)SelectTargetType.SingleEnemy - 1);
 
-                                                 foreach (var spellEffectInfo in spellInfo.GetEffects())
-                                                 {
-                                                     // Spell targets self.
-                                                     if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitCaster)
-                                                         AIInfo.Targets |= 1 << ((int)SelectTargetType.Self - 1);
+                    // Spell targets AoE at enemy.
+                    if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitSrcAreaEnemy ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.UnitDestAreaEnemy ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.SrcCaster ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.DestDynobjEnemy)
+                        AIInfo.Targets |= 1 << ((int)SelectTargetType.AoeEnemy - 1);
 
-                                                     // Spell targets a single enemy.
-                                                     if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitTargetEnemy ||
-                                                         spellEffectInfo.TargetA.GetTarget() == Targets.DestTargetEnemy)
-                                                         AIInfo.Targets |= 1 << ((int)SelectTargetType.SingleEnemy - 1);
+                    // Spell targets an enemy.
+                    if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitTargetEnemy ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.DestTargetEnemy ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.UnitSrcAreaEnemy ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.UnitDestAreaEnemy ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.SrcCaster ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.DestDynobjEnemy)
+                        AIInfo.Targets |= 1 << ((int)SelectTargetType.AnyEnemy - 1);
 
-                                                     // Spell targets AoE at enemy.
-                                                     if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitSrcAreaEnemy ||
-                                                         spellEffectInfo.TargetA.GetTarget() == Targets.UnitDestAreaEnemy ||
-                                                         spellEffectInfo.TargetA.GetTarget() == Targets.SrcCaster ||
-                                                         spellEffectInfo.TargetA.GetTarget() == Targets.DestDynobjEnemy)
-                                                         AIInfo.Targets |= 1 << ((int)SelectTargetType.AoeEnemy - 1);
+                    // Spell targets a single friend (or self).
+                    if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitCaster ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.UnitTargetAlly ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.UnitTargetParty)
+                        AIInfo.Targets |= 1 << ((int)SelectTargetType.SingleFriend - 1);
 
-                                                     // Spell targets an enemy.
-                                                     if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitTargetEnemy ||
-                                                         spellEffectInfo.TargetA.GetTarget() == Targets.DestTargetEnemy ||
-                                                         spellEffectInfo.TargetA.GetTarget() == Targets.UnitSrcAreaEnemy ||
-                                                         spellEffectInfo.TargetA.GetTarget() == Targets.UnitDestAreaEnemy ||
-                                                         spellEffectInfo.TargetA.GetTarget() == Targets.SrcCaster ||
-                                                         spellEffectInfo.TargetA.GetTarget() == Targets.DestDynobjEnemy)
-                                                         AIInfo.Targets |= 1 << ((int)SelectTargetType.AnyEnemy - 1);
+                    // Spell targets AoE friends.
+                    if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitCasterAreaParty ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.UnitLastTargetAreaParty ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.SrcCaster)
+                        AIInfo.Targets |= 1 << ((int)SelectTargetType.AoeFriend - 1);
 
-                                                     // Spell targets a single friend (or self).
-                                                     if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitCaster ||
-                                                         spellEffectInfo.TargetA.GetTarget() == Targets.UnitTargetAlly ||
-                                                         spellEffectInfo.TargetA.GetTarget() == Targets.UnitTargetParty)
-                                                         AIInfo.Targets |= 1 << ((int)SelectTargetType.SingleFriend - 1);
+                    // Spell targets any friend (or self).
+                    if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitCaster ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.UnitTargetAlly ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.UnitTargetParty ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.UnitCasterAreaParty ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.UnitLastTargetAreaParty ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.SrcCaster)
+                        AIInfo.Targets |= 1 << ((int)SelectTargetType.AnyFriend - 1);
 
-                                                     // Spell targets AoE friends.
-                                                     if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitCasterAreaParty ||
-                                                         spellEffectInfo.TargetA.GetTarget() == Targets.UnitLastTargetAreaParty ||
-                                                         spellEffectInfo.TargetA.GetTarget() == Targets.SrcCaster)
-                                                         AIInfo.Targets |= 1 << ((int)SelectTargetType.AoeFriend - 1);
+                    // Make sure that this spell includes a damage effect.
+                    if (spellEffectInfo.Effect == SpellEffectName.SchoolDamage ||
+                        spellEffectInfo.Effect == SpellEffectName.Instakill ||
+                        spellEffectInfo.Effect == SpellEffectName.EnvironmentalDamage ||
+                        spellEffectInfo.Effect == SpellEffectName.HealthLeech)
+                        AIInfo.Effects |= 1 << ((int)SelectEffect.Damage - 1);
 
-                                                     // Spell targets any friend (or self).
-                                                     if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitCaster ||
-                                                         spellEffectInfo.TargetA.GetTarget() == Targets.UnitTargetAlly ||
-                                                         spellEffectInfo.TargetA.GetTarget() == Targets.UnitTargetParty ||
-                                                         spellEffectInfo.TargetA.GetTarget() == Targets.UnitCasterAreaParty ||
-                                                         spellEffectInfo.TargetA.GetTarget() == Targets.UnitLastTargetAreaParty ||
-                                                         spellEffectInfo.TargetA.GetTarget() == Targets.SrcCaster)
-                                                         AIInfo.Targets |= 1 << ((int)SelectTargetType.AnyFriend - 1);
+                    // Make sure that this spell includes a healing effect (or an apply aura with a periodic heal).
+                    if (spellEffectInfo.Effect == SpellEffectName.Heal ||
+                        spellEffectInfo.Effect == SpellEffectName.HealMaxHealth ||
+                        spellEffectInfo.Effect == SpellEffectName.HealMechanical ||
+                        (spellEffectInfo.Effect == SpellEffectName.ApplyAura && spellEffectInfo.ApplyAuraName == AuraType.PeriodicHeal))
+                        AIInfo.Effects |= 1 << ((int)SelectEffect.Healing - 1);
 
-                                                     // Make sure that this spell includes a Damage effect.
-                                                     if (spellEffectInfo.Effect == SpellEffectName.SchoolDamage ||
-                                                         spellEffectInfo.Effect == SpellEffectName.Instakill ||
-                                                         spellEffectInfo.Effect == SpellEffectName.EnvironmentalDamage ||
-                                                         spellEffectInfo.Effect == SpellEffectName.HealthLeech)
-                                                         AIInfo.Effects |= 1 << ((int)SelectEffect.Damage - 1);
+                    // Make sure that this spell applies an aura.
+                    if (spellEffectInfo.Effect == SpellEffectName.ApplyAura)
+                        AIInfo.Effects |= 1 << ((int)SelectEffect.Aura - 1);
+                }
 
-                                                     // Make sure that this spell includes a healing effect (or an apply aura with a periodic heal).
-                                                     if (spellEffectInfo.Effect == SpellEffectName.Heal ||
-                                                         spellEffectInfo.Effect == SpellEffectName.HealMaxHealth ||
-                                                         spellEffectInfo.Effect == SpellEffectName.HealMechanical ||
-                                                         (spellEffectInfo.Effect == SpellEffectName.ApplyAura && spellEffectInfo.ApplyAuraName == AuraType.PeriodicHeal))
-                                                         AIInfo.Effects |= 1 << ((int)SelectEffect.Healing - 1);
-
-                                                     // Make sure that this spell applies an aura.
-                                                     if (spellEffectInfo.Effect == SpellEffectName.ApplyAura)
-                                                         AIInfo.Effects |= 1 << ((int)SelectEffect.Aura - 1);
-                                                 }
-
-                                                 _aiSpellInfo[(spellInfo.Id, spellInfo.Difficulty)] = AIInfo;
-                                             });
+                _aiSpellInfo[(spellInfo.Id, spellInfo.Difficulty)] = AIInfo;
+            });
         }
 
-        public virtual bool CanAIAttack(Unit victim)
-        {
-            return true;
-        }
+        public virtual bool CanAIAttack(Unit victim) { return true; }
 
-        public virtual void UpdateAI(uint diff)
-        {
-        }
+        public virtual void UpdateAI(uint diff) { }
 
         public virtual void InitializeAI()
         {
@@ -563,93 +475,50 @@ namespace Game.AI
                 Reset();
         }
 
-        public virtual void Reset()
-        {
-        }
+        public virtual void Reset() { }
 
         /// <summary>
-        // Called when unit's charm State changes with isNew = false
+        // Called when unit's charm state changes with isNew = false
         // Implementation should call me->ScheduleAIChange() if AI replacement is desired
         // If this call is made, AI will be replaced on the next tick
         // When replacement is made, OnCharmed is called with isNew = true
         /// </summary>
-        /// <param Name="apply"></param>
+        /// <param name="apply"></param>
         public virtual void OnCharmed(bool isNew)
         {
             if (!isNew)
                 me.ScheduleAIChange();
         }
 
-        public virtual bool ShouldSparWith(Unit target)
-        {
-            return false;
-        }
+        public virtual bool ShouldSparWith(Unit target) { return false; }
 
-        public virtual void DoAction(int action)
-        {
-        }
-
-        public virtual uint GetData(uint id = 0)
-        {
-            return 0;
-        }
-
-        public virtual void SetData(uint id, uint value)
-        {
-        }
-
-        public virtual void SetGUID(ObjectGuid guid, int id = 0)
-        {
-        }
-
-        public virtual ObjectGuid GetGUID(int id = 0)
-        {
-            return ObjectGuid.Empty;
-        }
+        public virtual void DoAction(int action) { }
+        public virtual uint GetData(uint id = 0) { return 0; }
+        public virtual void SetData(uint id, uint value) { }
+        public virtual void SetGUID(ObjectGuid guid, int id = 0) { }
+        public virtual ObjectGuid GetGUID(int id = 0) { return ObjectGuid.Empty; }
 
         // Called when the unit enters combat
         // (NOTE: Creature engage logic should NOT be here, but in JustEngagedWith, which happens once threat is established!)
-        public virtual void JustEnteredCombat(Unit who)
-        {
-        }
+        public virtual void JustEnteredCombat(Unit who) { }
 
         // Called when the unit leaves combat
-        public virtual void JustExitedCombat()
-        {
-        }
+        public virtual void JustExitedCombat() { }
 
         // Called when the unit is about to be removed from the world (despawn, grid unload, corpse disappearing, player logging out etc.)
-        public virtual void OnDespawn()
-        {
-        }
+        public virtual void OnDespawn() { }
 
-        // Called at any Damage to any victim (before Damage apply)
-        public virtual void DamageDealt(Unit victim, ref uint damage, DamageEffectType damageType)
-        {
-        }
-
-        public virtual void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
-        {
-        }
-
-        public virtual void HealReceived(Unit by, uint addhealth)
-        {
-        }
-
-        public virtual void HealDone(Unit to, uint addhealth)
-        {
-        }
-
-        public virtual void SpellInterrupted(uint spellId, uint unTimeMs)
-        {
-        }
+        // Called at any Damage to any victim (before damage apply)
+        public virtual void DamageDealt(Unit victim, ref uint damage, DamageEffectType damageType) { }
+        public virtual void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null) { }
+        public virtual void HealReceived(Unit by, uint addhealth) { }
+        public virtual void HealDone(Unit to, uint addhealth) { }
+        public virtual void SpellInterrupted(uint spellId, uint unTimeMs) { }
 
         /// <summary>
-        ///  Called when a game event starts or ends
+        /// Called when a game event starts or ends
         /// </summary>
-        public virtual void OnGameEvent(bool start, ushort eventId)
-        {
-        }
+        public virtual void OnGameEvent(bool start, ushort eventId) { }
 
         public virtual string GetDebugInfo()
         {
@@ -659,16 +528,6 @@ namespace Game.AI
         public static AISpellInfoType GetAISpellInfo(uint spellId, Difficulty difficulty)
         {
             return _aiSpellInfo.LookupByKey((spellId, difficulty));
-        }
-
-        private ThreatManager GetThreatManager()
-        {
-            return me.GetThreatManager();
-        }
-
-        private void SortByDistance(List<Unit> targets, bool ascending)
-        {
-            targets.Sort(new ObjectDistanceOrderPred(me, ascending));
         }
     }
 }

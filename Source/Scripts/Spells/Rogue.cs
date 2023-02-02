@@ -13,7 +13,7 @@ using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
-using Game.Spells.Auras.EffectHandlers;
+using Game.Spells;
 
 namespace Scripts.Spells.Rogue
 {
@@ -87,8 +87,8 @@ namespace Scripts.Spells.Rogue
             if (hitUnit.IsInBack(caster))
             {
                 float currDamage = (float)GetHitDamage();
-                float newDamage = MathFunctions.AddPct(currDamage, (float)GetEffectInfo(3).CalcValue(caster));
-                SetHitDamage((int)newDamage);
+                MathFunctions.AddPct(ref currDamage, (float)GetEffectInfo(3).CalcValue(caster));
+                SetHitDamage((int)currDamage);
             }
         }
     }

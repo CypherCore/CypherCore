@@ -8,27 +8,18 @@ namespace Game.Groups
 {
     public class GroupInstanceReference : Reference<Group, InstanceMap>
     {
-        public new GroupInstanceReference Next()
-        {
-            return (GroupInstanceReference)base.Next();
-        }
+        ~GroupInstanceReference() { Unlink(); }
+
+        public new GroupInstanceReference Next() { return (GroupInstanceReference)base.Next(); }
 
         public override void TargetObjectBuildLink()
         {
             GetTarget().LinkOwnedInstance(this);
         }
-
-        ~GroupInstanceReference()
-        {
-            Unlink();
-        }
     }
 
-    internal class GroupInstanceRefManager : RefManager<Group, InstanceMap>
+    class GroupInstanceRefManager : RefManager<Group, InstanceMap>
     {
-        public new GroupInstanceReference GetFirst()
-        {
-            return (GroupInstanceReference)base.GetFirst();
-        }
+        public new GroupInstanceReference GetFirst() { return (GroupInstanceReference)base.GetFirst(); }
     }
 }

@@ -17,7 +17,7 @@ namespace Game.Scripting.BaseScripts
             _args = args;
         }
 
-        public CreatureAI GetAI(Creature me)
+        public virtual CreatureAI GetAI(Creature me)
         {
             if (me.GetInstanceScript() != null)
                 return GetInstanceAI<AI>(me);

@@ -2,23 +2,22 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Framework.IO;
 using Game.DataStorage;
 using Game.Entities;
 
 namespace Game.Chat
 {
     [CommandGroup("scene")]
-    internal class SceneCommands
+    class SceneCommands
     {
         [Command("cancel", RBACPermissions.CommandSceneCancel)]
-        private static bool HandleCancelSceneCommand(CommandHandler handler, uint sceneScriptPackageId)
+        static bool HandleCancelSceneCommand(CommandHandler handler, uint sceneScriptPackageId)
         {
             Player target = handler.GetSelectedPlayerOrSelf();
-
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
-
                 return false;
             }
 
@@ -26,15 +25,13 @@ namespace Game.Chat
                 return false;
 
             target.GetSceneMgr().CancelSceneByPackageId(sceneScriptPackageId);
-
             return true;
         }
 
         [Command("debug", RBACPermissions.CommandSceneDebug)]
-        private static bool HandleDebugSceneCommand(CommandHandler handler)
+        static bool HandleDebugSceneCommand(CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
-
             if (player)
             {
                 player.GetSceneMgr().ToggleDebugSceneMode();
@@ -45,14 +42,12 @@ namespace Game.Chat
         }
 
         [Command("play", RBACPermissions.CommandScenePlay)]
-        private static bool HandlePlaySceneCommand(CommandHandler handler, uint sceneId)
+        static bool HandlePlaySceneCommand(CommandHandler handler, uint sceneId)
         {
             Player target = handler.GetSelectedPlayerOrSelf();
-
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
-
                 return false;
             }
 
@@ -60,19 +55,16 @@ namespace Game.Chat
                 return false;
 
             target.GetSceneMgr().PlayScene(sceneId);
-
             return true;
         }
 
         [Command("playpackage", RBACPermissions.CommandScenePlayPackage)]
-        private static bool HandlePlayScenePackageCommand(CommandHandler handler, uint sceneScriptPackageId, SceneFlags? flags)
+        static bool HandlePlayScenePackageCommand(CommandHandler handler, uint sceneScriptPackageId, SceneFlags? flags)
         {
             Player target = handler.GetSelectedPlayerOrSelf();
-
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
-
                 return false;
             }
 
@@ -80,7 +72,6 @@ namespace Game.Chat
                 return false;
 
             target.GetSceneMgr().PlaySceneByPackageId(sceneScriptPackageId, flags.GetValueOrDefault(0));
-
             return true;
         }
     }

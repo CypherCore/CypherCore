@@ -346,7 +346,7 @@ namespace Framework.Constants
         PetCamel = 2807,
         StygiaCrafting = 2811,
         LanguageCypher = 2817,
-        PhotoformSynthesis = 2819
+        PhotoformSynthesis = 2819,
     }
 
     public enum SkillState
@@ -372,10 +372,10 @@ namespace Framework.Constants
 
     public enum SkillRangeType
     {
-        Language, // 300..300
-        Level,    // 1..max skill for level
-        Mono,     // 1..1, grey monolite bar
-        Rank,     // 1..skill for known rank
-        None      // 0..0 always
+        Language,                                   // 300..300
+        Level,                                      // 1..max skill for level
+        Mono,                                       // 1..1, grey monolite bar
+        Rank,                                       // 1..skill for known rank
+        None                                        // 0..0 always
     }
 }

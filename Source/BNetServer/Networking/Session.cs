@@ -1,10 +1,6 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Sockets;
 using Bgs.Protocol;
 using Framework.Constants;
 using Framework.Database;
@@ -12,24 +8,29 @@ using Framework.IO;
 using Framework.Networking;
 using Framework.Realm;
 using Google.Protobuf;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
 
 namespace BNetServer.Networking
 {
-    public partial class Session : SSLSocket
+    partial class Session : SSLSocket
     {
-        private readonly byte[] clientSecret;
+        AccountInfo accountInfo;
+        GameAccountInfo gameAccountInfo;
 
-        private readonly AsyncCallbackProcessor<QueryCallback> queryProcessor;
-        private readonly Dictionary<uint, Action<CodedInputStream>> responseCallbacks;
-        private AccountInfo accountInfo;
-        private bool authed;
-        private uint build;
-        private GameAccountInfo gameAccountInfo;
-        private string ipCountry;
+        string locale;
+        string os;
+        uint build;
+        string ipCountry;
 
-        private string locale;
-        private string os;
-        private uint requestToken;
+        byte[] clientSecret;
+        bool authed;
+        uint requestToken;
+
+        AsyncCallbackProcessor<QueryCallback> queryProcessor;
+        Dictionary<uint, Action<CodedInputStream>> responseCallbacks;
 
         public Session(Socket socket) : base(socket)
         {
@@ -50,33 +51,31 @@ namespace BNetServer.Networking
             stmt.AddValue(0, ipAddress);
             stmt.AddValue(1, BitConverter.ToUInt32(GetRemoteIpEndPoint().Address.GetAddressBytes(), 0));
 
-            queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt)
-                                         .WithCallback(async result =>
-                                                       {
-                                                           if (!result.IsEmpty())
-                                                           {
-                                                               bool banned = false;
+            queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(async result =>            
+            {
+                if (!result.IsEmpty())
+                {
+                    bool banned = false;
+                    do
+                    {
+                        if (result.Read<ulong>(0) != 0)
+                            banned = true;
 
-                                                               do
-                                                               {
-                                                                   if (result.Read<ulong>(0) != 0)
-                                                                       banned = true;
+                        if (!string.IsNullOrEmpty(result.Read<string>(1)))
+                            ipCountry = result.Read<string>(1);
 
-                                                                   if (!string.IsNullOrEmpty(result.Read<string>(1)))
-                                                                       ipCountry = result.Read<string>(1);
-                                                               } while (result.NextRow());
+                    } while (result.NextRow());
 
-                                                               if (banned)
-                                                               {
-                                                                   Log.outDebug(LogFilter.Session, $"{GetClientInfo()} trying to login with banned ipaddress!");
-                                                                   CloseSocket();
+                    if (banned)
+                    {
+                        Log.outDebug(LogFilter.Session, $"{GetClientInfo()} trying to login with banned ipaddress!");
+                        CloseSocket();
+                        return;
+                    }
+                }
 
-                                                                   return;
-                                                               }
-                                                           }
-
-                                                           await AsyncHandshake(Global.LoginServiceMgr.GetCertificate());
-                                                       }));
+                await AsyncHandshake(Global.LoginServiceMgr.GetCertificate());
+            }));
         }
 
         public override bool Update()
@@ -89,13 +88,12 @@ namespace BNetServer.Networking
             return true;
         }
 
-        public override async void ReadHandler(byte[] data, int receivedLength)
+        public async override void ReadHandler(byte[] data, int receivedLength)
         {
             if (!IsOpen())
                 return;
 
             int readPos = 0;
-
             while (readPos < receivedLength)
             {
                 var headerLength = (ushort)IPAddress.HostToNetworkOrder(BitConverter.ToInt16(data, readPos));
@@ -105,18 +103,14 @@ namespace BNetServer.Networking
                 header.MergeFrom(data, readPos, headerLength);
                 readPos += headerLength;
 
-                var stream = new CodedInputStream(data, readPos, (int)header.Size);
+                var stream = new CodedInputStream(data, readPos, (int)header.Size);                
                 readPos += (int)header.Size;
 
-                if (header.ServiceId != 0xFE &&
-                    header.ServiceHash != 0)
+                if (header.ServiceId != 0xFE && header.ServiceHash != 0)
                 {
                     var handler = Global.LoginServiceMgr.GetHandler(header.ServiceHash, header.MethodId);
-
                     if (handler != null)
-                    {
                         handler.Invoke(this, header.Token, stream);
-                    }
                     else
                     {
                         Log.outError(LogFilter.ServiceProtobuf, $"{GetClientInfo()} tried to call not implemented methodId: {header.MethodId} for servicehash: {header.ServiceHash}");
@@ -126,7 +120,6 @@ namespace BNetServer.Networking
                 else
                 {
                     var handler = responseCallbacks.LookupByKey(header.Token);
-
                     if (handler != null)
                     {
                         handler(stream);
@@ -200,9 +193,7 @@ namespace BNetServer.Networking
         public string GetClientInfo()
         {
             string stream = '[' + GetRemoteIpEndPoint().ToString();
-
-            if (accountInfo != null &&
-                !accountInfo.Login.IsEmpty())
+            if (accountInfo != null && !accountInfo.Login.IsEmpty())
                 stream += ", Account: " + accountInfo.Login;
 
             if (gameAccountInfo != null)
@@ -215,16 +206,17 @@ namespace BNetServer.Networking
     }
 
     public class AccountInfo
-    {
-        public Dictionary<uint, GameAccountInfo> GameAccounts;
+    {   
         public uint Id;
-        public bool IsBanned;
-        public bool IsLockedToIP;
-        public bool IsPermanenetlyBanned;
-        public string LastIP;
-        public string LockCountry;
         public string Login;
+        public bool IsLockedToIP;
+        public string LockCountry;
+        public string LastIP;
         public uint LoginTicketExpiry;
+        public bool IsBanned;
+        public bool IsPermanenetlyBanned;
+
+        public Dictionary<uint, GameAccountInfo> GameAccounts;
 
         public AccountInfo(SQLResult result)
         {
@@ -239,26 +231,27 @@ namespace BNetServer.Networking
 
             GameAccounts = new Dictionary<uint, GameAccountInfo>();
             const int GameAccountFieldsOffset = 8;
-
             do
             {
                 var account = new GameAccountInfo(result.GetFields(), GameAccountFieldsOffset);
                 GameAccounts[result.Read<uint>(GameAccountFieldsOffset)] = account;
+
             } while (result.NextRow());
         }
     }
 
     public class GameAccountInfo
     {
-        public Dictionary<uint, byte> CharacterCounts;
-        public string DisplayName;
         public uint Id;
+        public string Name;
+        public string DisplayName;
+        public uint UnbanDate;
         public bool IsBanned;
         public bool IsPermanenetlyBanned;
-        public Dictionary<string, LastPlayedCharacterInfo> LastPlayedCharacters;
-        public string Name;
         public AccountTypes SecurityLevel;
-        public uint UnbanDate;
+
+        public Dictionary<uint, byte> CharacterCounts;
+        public Dictionary<string, LastPlayedCharacterInfo> LastPlayedCharacters;
 
         public GameAccountInfo(SQLFields fields, int startColumn)
         {
@@ -270,7 +263,6 @@ namespace BNetServer.Networking
             SecurityLevel = (AccountTypes)fields.Read<byte>(startColumn + 4);
 
             int hashPos = Name.IndexOf('#');
-
             if (hashPos != -1)
                 DisplayName = "WoW" + Name[(hashPos + 1)..];
             else
@@ -283,9 +275,9 @@ namespace BNetServer.Networking
 
     public class LastPlayedCharacterInfo
     {
-        public ulong CharacterGUID;
-        public string CharacterName;
-        public uint LastPlayedTime;
         public RealmId RealmId;
+        public string CharacterName;
+        public ulong CharacterGUID;
+        public uint LastPlayedTime;
     }
 }

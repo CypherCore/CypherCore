@@ -10,9 +10,9 @@ using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
-using Game.Spells.Auras.EffectHandlers;
+using Game.Spells;
 
-namespace Scripts.Events.Midsummer
+namespace Scripts.m_Events.Midsummer
 {
     internal struct SpellIds
     {

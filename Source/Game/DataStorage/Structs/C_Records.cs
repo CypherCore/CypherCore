@@ -555,4 +555,12 @@ namespace Game.DataStorage
         public ushort CurveID;
         public byte OrderIndex;
     }
+
+    public sealed class CharBaseInfo
+    {
+        public uint Id { get; set; }
+        public byte RaceId { get; set; }
+        public byte ClassId { get; set; }
+        public int FactionXferId { get; set; }
+    }
 }

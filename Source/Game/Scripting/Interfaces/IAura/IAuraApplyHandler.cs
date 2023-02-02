@@ -1,6 +1,6 @@
 ﻿using System;
 using Framework.Constants;
-using Game.Spells.Auras.EffectHandlers;
+using Game.Spells;
 
 namespace Game.Scripting.Interfaces.IAura
 {

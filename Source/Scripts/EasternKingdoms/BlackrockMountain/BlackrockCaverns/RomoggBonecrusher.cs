@@ -55,7 +55,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns.RomoggBonec
             _JustDied();
             Talk(TextIds.YellDeath);
 
-            Creature raz = Instance.GetCreature(DataTypes.RazTheCrazed);
+            Creature raz = instance.GetCreature(DataTypes.RazTheCrazed);
 
             if (raz)
                 raz.GetAI().SetData(MiscConst.TypeRaz, MiscConst.DataRomoggDead);

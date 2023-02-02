@@ -1,27 +1,15 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
+using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    internal class ArtifactAddPower : ClientPacket
+    class ArtifactAddPower : ClientPacket
     {
-        public struct ArtifactPowerChoice
-        {
-            public uint ArtifactPowerID;
-            public byte Rank;
-        }
-
-        public ObjectGuid ArtifactGUID;
-        public ObjectGuid ForgeGUID;
-        public Array<ArtifactPowerChoice> PowerChoices = new(1);
-
-        public ArtifactAddPower(WorldPacket packet) : base(packet)
-        {
-        }
+        public ArtifactAddPower(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -29,7 +17,6 @@ namespace Game.Networking.Packets
             ForgeGUID = _worldPacket.ReadPackedGuid();
 
             var powerCount = _worldPacket.ReadUInt32();
-
             for (var i = 0; i < powerCount; ++i)
             {
                 ArtifactPowerChoice artifactPowerChoice;
@@ -38,18 +25,21 @@ namespace Game.Networking.Packets
                 PowerChoices[i] = artifactPowerChoice;
             }
         }
-    }
-
-    internal class ArtifactSetAppearance : ClientPacket
-    {
-        public int ArtifactAppearanceID;
 
         public ObjectGuid ArtifactGUID;
         public ObjectGuid ForgeGUID;
+        public Array<ArtifactPowerChoice> PowerChoices = new(1);
 
-        public ArtifactSetAppearance(WorldPacket packet) : base(packet)
+        public struct ArtifactPowerChoice
         {
+            public uint ArtifactPowerID;
+            public byte Rank;
         }
+    }
+
+    class ArtifactSetAppearance : ClientPacket
+    {
+        public ArtifactSetAppearance(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -57,70 +47,65 @@ namespace Game.Networking.Packets
             ForgeGUID = _worldPacket.ReadPackedGuid();
             ArtifactAppearanceID = _worldPacket.ReadInt32();
         }
+
+        public ObjectGuid ArtifactGUID;
+        public ObjectGuid ForgeGUID;
+        public int ArtifactAppearanceID;
     }
 
-    internal class ConfirmArtifactRespec : ClientPacket
+    class ConfirmArtifactRespec : ClientPacket
     {
-        public ObjectGuid ArtifactGUID;
-        public ObjectGuid NpcGUID;
-
-        public ConfirmArtifactRespec(WorldPacket packet) : base(packet)
-        {
-        }
+        public ConfirmArtifactRespec(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             ArtifactGUID = _worldPacket.ReadPackedGuid();
             NpcGUID = _worldPacket.ReadPackedGuid();
         }
+
+        public ObjectGuid ArtifactGUID;
+        public ObjectGuid NpcGUID;
     }
 
-    internal class OpenArtifactForge : ServerPacket
+    class OpenArtifactForge : ServerPacket
     {
-        public ObjectGuid ArtifactGUID;
-        public ObjectGuid ForgeGUID;
-
-        public OpenArtifactForge() : base(ServerOpcodes.OpenArtifactForge)
-        {
-        }
+        public OpenArtifactForge() : base(ServerOpcodes.OpenArtifactForge) { }
 
         public override void Write()
         {
             _worldPacket.WritePackedGuid(ArtifactGUID);
             _worldPacket.WritePackedGuid(ForgeGUID);
         }
+
+        public ObjectGuid ArtifactGUID;
+        public ObjectGuid ForgeGUID;
     }
 
-    internal class ArtifactRespecPrompt : ServerPacket
+    class ArtifactRespecPrompt : ServerPacket
     {
-        public ObjectGuid ArtifactGUID;
-        public ObjectGuid NpcGUID;
-
-        public ArtifactRespecPrompt() : base(ServerOpcodes.ArtifactRespecPrompt)
-        {
-        }
+        public ArtifactRespecPrompt() : base(ServerOpcodes.ArtifactRespecPrompt) { }
 
         public override void Write()
         {
             _worldPacket.WritePackedGuid(ArtifactGUID);
             _worldPacket.WritePackedGuid(NpcGUID);
         }
-    }
-
-    internal class ArtifactXpGain : ServerPacket
-    {
-        public ulong Amount;
 
         public ObjectGuid ArtifactGUID;
+        public ObjectGuid NpcGUID;
+    }
 
-        public ArtifactXpGain() : base(ServerOpcodes.ArtifactXpGain)
-        {
-        }
+    class ArtifactXpGain : ServerPacket
+    {
+        public ArtifactXpGain() : base(ServerOpcodes.ArtifactXpGain) { }
 
         public override void Write()
         {
             _worldPacket.WritePackedGuid(ArtifactGUID);
             _worldPacket.WriteUInt64(Amount);
         }
+
+        public ObjectGuid ArtifactGUID;
+        public ulong Amount;
     }
 }

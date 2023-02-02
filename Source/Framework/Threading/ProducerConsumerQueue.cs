@@ -8,9 +8,9 @@ namespace Framework.Threading
 {
     public class ProducerConsumerQueue<T>
     {
-        private readonly Queue<T> _queue = new();
-        private readonly object _queueLock = new();
-        private volatile bool _shutdown;
+        object _queueLock = new();
+        Queue<T> _queue = new();
+        volatile bool _shutdown;
 
         public ProducerConsumerQueue()
         {
@@ -29,22 +29,18 @@ namespace Framework.Threading
         public bool Empty()
         {
             lock (_queueLock)
-            {
                 return _queue.Count == 0;
-            }
         }
 
         public bool Pop(out T value)
         {
             value = default;
-
             lock (_queueLock)
             {
                 if (_queue.Count == 0 || _shutdown)
                     return false;
 
                 value = _queue.Dequeue();
-
                 return true;
             }
         }
@@ -52,7 +48,6 @@ namespace Framework.Threading
         public void WaitAndPop(out T value)
         {
             value = default;
-
             lock (_queueLock)
             {
                 while (_queue.Count == 0 && !_shutdown)
@@ -70,7 +65,9 @@ namespace Framework.Threading
             lock (_queueLock)
             {
                 while (_queue.Count != 0)
+                {
                     _queue.Dequeue();
+                }
 
                 _shutdown = true;
                 Monitor.PulseAll(_queueLock);

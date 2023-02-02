@@ -13,7 +13,7 @@ using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
-using Game.Spells.Auras.EffectHandlers;
+using Game.Spells;
 
 namespace Scripts.Spells.Druid
 {
@@ -321,7 +321,7 @@ namespace Scripts.Spells.Druid
         private void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // counters are applied with a delay
-            GetTarget().Events.AddEventAtOffset(new InitializeEclipseCountersEvent(GetTarget(), (uint)aurEff.GetAmount()), TimeSpan.FromSeconds(1));
+            GetTarget().m_Events.AddEventAtOffset(new InitializeEclipseCountersEvent(GetTarget(), (uint)aurEff.GetAmount()), TimeSpan.FromSeconds(1));
         }
 
         private void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1617,7 +1617,7 @@ namespace Scripts.Spells.Druid
 
             reduction *= (aurEff.GetTickNumber() - 1);
 
-            damage = MathFunctions.AddPct(damage, 6.0f - reduction);
+            MathFunctions.AddPct(ref damage, 6.0f - reduction);
             aurEff.SetAmount((int)damage);
         }
     }

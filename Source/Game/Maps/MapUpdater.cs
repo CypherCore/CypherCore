@@ -1,24 +1,24 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System.Threading;
 using Framework.Threading;
+using System.Threading;
 
 namespace Game.Maps
 {
     public class MapUpdater
     {
-        private readonly object _lock = new();
-        private readonly ProducerConsumerQueue<MapUpdateRequest> _queue = new();
+        ProducerConsumerQueue<MapUpdateRequest> _queue = new();
 
-        private readonly Thread[] _workerThreads;
-        private volatile bool _cancelationToken;
-        private int _pendingRequests;
+        Thread[] _workerThreads;
+        volatile bool _cancelationToken;
+
+        object _lock = new();
+        int _pendingRequests;
 
         public MapUpdater(int numThreads)
         {
             _workerThreads = new Thread[numThreads];
-
             for (var i = 0; i < numThreads; ++i)
             {
                 _workerThreads[i] = new Thread(WorkerThread);
@@ -33,7 +33,6 @@ namespace Game.Maps
             Wait();
 
             _queue.Cancel();
-
             foreach (var thread in _workerThreads)
                 thread.Join();
         }
@@ -67,7 +66,7 @@ namespace Game.Maps
             }
         }
 
-        private void WorkerThread()
+        void WorkerThread()
         {
             while (true)
             {
@@ -85,27 +84,27 @@ namespace Game.Maps
 
     public class MapUpdateRequest
     {
-        private readonly uint _diff;
-        private readonly Map _map;
-        private readonly MapUpdater _updater;
+        Map m_map;
+        MapUpdater m_updater;
+        uint m_diff;
 
         public MapUpdateRequest(Map m, uint d)
         {
-            _map = m;
-            _diff = d;
+            m_map = m;
+            m_diff = d;
         }
 
         public MapUpdateRequest(Map m, MapUpdater u, uint d)
         {
-            _map = m;
-            _updater = u;
-            _diff = d;
+            m_map = m;
+            m_updater = u;
+            m_diff = d;
         }
 
         public void Call()
         {
-            _map.Update(_diff);
-            _updater.UpdateFinished();
+            m_map.Update(m_diff);
+            m_updater.UpdateFinished();
         }
     }
 }

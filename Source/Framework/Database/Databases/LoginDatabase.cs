@@ -27,13 +27,11 @@ namespace Framework.Database
             PrepareStatement(LoginStatements.UPD_LOGON, "UPDATE account SET salt = ?, verifier = ? WHERE id = ?");
             PrepareStatement(LoginStatements.SEL_ACCOUNT_ID_BY_NAME, "SELECT id FROM account WHERE username = ?");
             PrepareStatement(LoginStatements.SEL_ACCOUNT_LIST_BY_NAME, "SELECT id, username FROM account WHERE username = ?");
-
-            PrepareStatement(LoginStatements.SEL_ACCOUNT_INFO_BY_NAME,
-                             "SELECT a.id, a.session_key_bnet, ba.last_ip, ba.locked, ba.lock_country, a.expansion, a.mutetime, ba.locale, a.recruiter, a.os, ba.id, aa.SecurityLevel, " +
-                             "bab.unbandate > UNIX_TIMESTAMP() OR bab.unbandate = bab.bandate, ab.unbandate > UNIX_TIMESTAMP() OR ab.unbandate = ab.bandate, r.id " +
-                             "FROM account a LEFT JOIN account r ON a.id = r.recruiter LEFT JOIN battlenet_accounts ba ON a.battlenet_account = ba.id " +
-                             "LEFT JOIN account_access aa ON a.id = aa.AccountID AND aa.RealmID IN (-1, ?) LEFT JOIN battlenet_account_bans bab ON ba.id = bab.id LEFT JOIN account_banned ab ON a.id = ab.id AND ab.active = 1 " +
-                             "WHERE a.username = ? AND LENGTH(a.session_key_bnet) = 64 ORDER BY aa.RealmID DESC LIMIT 1");
+            PrepareStatement(LoginStatements.SEL_ACCOUNT_INFO_BY_NAME, "SELECT a.id, a.session_key_bnet, ba.last_ip, ba.locked, ba.lock_country, a.expansion, a.mutetime, ba.locale, a.recruiter, a.os, ba.id, aa.SecurityLevel, " +
+                "bab.unbandate > UNIX_TIMESTAMP() OR bab.unbandate = bab.bandate, ab.unbandate > UNIX_TIMESTAMP() OR ab.unbandate = ab.bandate, r.id " +
+                "FROM account a LEFT JOIN account r ON a.id = r.recruiter LEFT JOIN battlenet_accounts ba ON a.battlenet_account = ba.id " +
+                "LEFT JOIN account_access aa ON a.id = aa.AccountID AND aa.RealmID IN (-1, ?) LEFT JOIN battlenet_account_bans bab ON ba.id = bab.id LEFT JOIN account_banned ab ON a.id = ab.id AND ab.active = 1 " +
+                "WHERE a.username = ? AND LENGTH(a.session_key_bnet) = 64 ORDER BY aa.RealmID DESC LIMIT 1");
 
             PrepareStatement(LoginStatements.SEL_ACCOUNT_LIST_BY_EMAIL, "SELECT id, username FROM account WHERE email = ?");
             PrepareStatement(LoginStatements.SEL_ACCOUNT_BY_IP, "SELECT id, username FROM account WHERE last_ip = ?");
@@ -103,15 +101,9 @@ namespace Framework.Database
             PrepareStatement(LoginStatements.SelBnetAuthentication, "SELECT ba.id, ba.sha_pass_hash, ba.failed_logins, ba.LoginTicket, ba.LoginTicketExpiry, bab.unbandate > UNIX_TIMESTAMP() OR bab.unbandate = bab.bandate FROM battlenet_accounts ba LEFT JOIN battlenet_account_bans bab ON ba.id = bab.id WHERE email = ?");
             PrepareStatement(LoginStatements.UpdBnetAuthentication, "UPDATE battlenet_accounts SET LoginTicket = ?, LoginTicketExpiry = ? WHERE id = ?");
             PrepareStatement(LoginStatements.SEL_BNET_EXISTING_AUTHENTICATION_BY_ID, "SELECT LoginTicket FROM battlenet_accounts WHERE id = ?");
-
-            PrepareStatement(LoginStatements.SelBnetAccountInfo,
-                             "SELECT " +
-                             BnetAccountInfo +
-                             ", " +
-                             BnetGameAccountInfo +
-                             " FROM battlenet_accounts ba LEFT JOIN battlenet_account_bans bab ON ba.id = bab.id LEFT JOIN account a ON ba.id = a.battlenet_account" +
-                             " LEFT JOIN account_banned ab ON a.id = ab.id AND ab.active = 1 LEFT JOIN account_access aa ON a.id = aa.AccountID AND aa.RealmID = -1 WHERE ba.LoginTicket = ? ORDER BY a.id");
-
+            PrepareStatement(LoginStatements.SelBnetAccountInfo, "SELECT " + BnetAccountInfo + ", " + BnetGameAccountInfo +
+                " FROM battlenet_accounts ba LEFT JOIN battlenet_account_bans bab ON ba.id = bab.id LEFT JOIN account a ON ba.id = a.battlenet_account" +
+                " LEFT JOIN account_banned ab ON a.id = ab.id AND ab.active = 1 LEFT JOIN account_access aa ON a.id = aa.AccountID AND aa.RealmID = -1 WHERE ba.LoginTicket = ? ORDER BY a.id");
             PrepareStatement(LoginStatements.UpdBnetLastLoginInfo, "UPDATE battlenet_accounts SET last_ip = ?, last_login = NOW(), locale = ?, failed_logins = 0, os = ? WHERE id = ?");
             PrepareStatement(LoginStatements.UPD_BNET_GAME_ACCOUNT_LOGIN_INFO, "UPDATE account SET session_key_bnet = ?, last_ip = ?, last_login = NOW(), locale = ?, failed_logins = 0, os = ? WHERE username = ?");
             PrepareStatement(LoginStatements.SelBnetCharacterCountsByAccountId, "SELECT rc.acctid, rc.numchars, r.id, r.Region, r.Battlegroup FROM realmcharacters rc INNER JOIN realmlist r ON rc.realmid = r.id WHERE rc.acctid = ?");
@@ -133,7 +125,7 @@ namespace Framework.Database
 
             PrepareStatement(LoginStatements.UpdBnetFailedLogins, "UPDATE battlenet_accounts SET failed_logins = failed_logins + 1 WHERE id = ?");
             PrepareStatement(LoginStatements.InsBnetAccountAutoBanned, "INSERT INTO battlenet_account_bans(id, bandate, unbandate, bannedby, banreason) VALUES(?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+?, 'Trinity Auth', 'Failed login autoban')");
-            PrepareStatement(LoginStatements.DelBnetExpiredAccountBanned, "DELETE FROM battlenet_account_bans WHERE unbandate<>bandate AND unbandate<=UNIX_TIMESTAMP()");
+            PrepareStatement(LoginStatements.DelBnetExpiredAccountBanned, "DELETE FROM battlenet_account_bans WHERE unbandate<>bandate AND unbandate<=UNIX_TIMESTAMP()");          
             PrepareStatement(LoginStatements.UpdBnetResetFailedLogins, "UPDATE battlenet_accounts SET failed_logins = 0 WHERE id = ?");
 
             PrepareStatement(LoginStatements.SEL_LAST_CHAR_UNDELETE, "SELECT LastCharacterUndelete FROM battlenet_accounts WHERE Id = ?");
@@ -172,6 +164,7 @@ namespace Framework.Database
             PrepareStatement(LoginStatements.SEL_BNET_TRANSMOG_ILLUSIONS, "SELECT blobIndex, illusionMask FROM battlenet_account_transmog_illusions WHERE battlenetAccountId = ? ORDER BY blobIndex DESC");
             PrepareStatement(LoginStatements.INS_BNET_TRANSMOG_ILLUSIONS, "INSERT INTO battlenet_account_transmog_illusions (battlenetAccountId, blobIndex, illusionMask) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE illusionMask = illusionMask | VALUES(illusionMask)");
 
+
             PrepareStatement(LoginStatements.LOGIN_SEL_BATTLE_PAY_ACCOUNT_CREDITS, "SELECT `battlePayCredits` from battlenet_accounts WHERE id = ?;");
             PrepareStatement(LoginStatements.LOGIN_UPD_BATTLE_PAY_ACCOUNT_CREDITS, "UPDATE battlenet_accounts SET battlePayCredits = ? WHERE id = ?;");
             PrepareStatement(LoginStatements.LOGIN_INS_PURCHASE, "INSERT INTO battlepay_purchases (battlenetAccountId, realm, characterGuid, productID, productName, CurrentPrice, RemoteAddress) VALUES (?, ?, ?, ?, ?, ?, ?)");
@@ -179,6 +172,7 @@ namespace Framework.Database
             /// Seraphim
             PrepareStatement(LoginStatements.LOGIN_SEL_BNET_RUNEFORGE_MEMORIES, "SELECT blobIndex, runeForgeMask FROM battlenet_account_runeforge_memories WHERE battlenetAccountId = ? ORDER BY blobIndex DESC");
             PrepareStatement(LoginStatements.LOGIN_INS_BNET_RUNEFORGE_MEMORIES, "INSERT INTO battlenet_account_runeforge_memories (battlenetAccountId, blobIndex, runeForgeMask) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE runeForgeMask = runeForgeMask | VALUES(runeForgeMask)");
+
         }
     }
 

@@ -13,20 +13,14 @@ namespace Framework.Collections
             INext = IPrev = null;
         }
 
-        public bool IsInList()
-        {
-            return (INext != null && IPrev != null);
-        }
+        ~LinkedListElement() { Delink(); }
 
-        public LinkedListElement GetNextElement()
-        {
-            return HasNext() ? INext : null;
-        }
+        bool HasNext() { return (INext != null && INext.INext != null); }
+        bool HasPrev() { return (IPrev != null && IPrev.IPrev != null); }
+        public bool IsInList() { return (INext != null && IPrev != null); }
 
-        public LinkedListElement GetPrevElement()
-        {
-            return HasPrev() ? IPrev : null;
-        }
+        public LinkedListElement GetNextElement() { return HasNext() ? INext : null; }
+        public LinkedListElement GetPrevElement() { return HasPrev() ? IPrev : null; }
 
         public void Delink()
         {
@@ -54,28 +48,13 @@ namespace Framework.Collections
             INext.IPrev = pElem;
             INext = pElem;
         }
-
-        private bool HasNext()
-        {
-            return (INext != null && INext.INext != null);
-        }
-
-        private bool HasPrev()
-        {
-            return (IPrev != null && IPrev.IPrev != null);
-        }
-
-        ~LinkedListElement()
-        {
-            Delink();
-        }
     }
 
     public class LinkedListHead
     {
-        private readonly LinkedListElement _iFirst = new();
-        private readonly LinkedListElement _iLast = new();
-        private uint _iSize;
+        LinkedListElement _iFirst = new();
+        LinkedListElement _iLast = new();
+        uint _iSize;
 
         public LinkedListHead()
         {
@@ -86,20 +65,10 @@ namespace Framework.Collections
             _iLast.IPrev = _iFirst;
         }
 
-        public bool IsEmpty()
-        {
-            return (!_iFirst.INext.IsInList());
-        }
+        public bool IsEmpty() { return (!_iFirst.INext.IsInList()); }
 
-        public LinkedListElement GetFirstElement()
-        {
-            return (IsEmpty() ? null : _iFirst.INext);
-        }
-
-        public LinkedListElement GetLastElement()
-        {
-            return (IsEmpty() ? null : _iLast.IPrev);
-        }
+        public LinkedListElement GetFirstElement() { return (IsEmpty() ? null : _iFirst.INext); }
+        public LinkedListElement GetLastElement() { return (IsEmpty() ? null : _iLast.IPrev); }
 
         public void InsertFirst(LinkedListElement pElem)
         {
@@ -117,29 +86,18 @@ namespace Framework.Collections
             {
                 uint result = 0;
                 LinkedListElement e = GetFirstElement();
-
                 while (e != null)
                 {
                     ++result;
                     e = e.GetNextElement();
                 }
-
                 return result;
             }
             else
-            {
                 return _iSize;
-            }
         }
 
-        public void IncSize()
-        {
-            ++_iSize;
-        }
-
-        public void DecSize()
-        {
-            --_iSize;
-        }
+        public void IncSize() { ++_iSize; }
+        public void DecSize() { --_iSize; }
     }
 }

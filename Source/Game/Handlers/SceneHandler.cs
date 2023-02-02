@@ -10,7 +10,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.SceneTriggerEvent)]
-        private void HandleSceneTriggerEvent(SceneTriggerEvent sceneTriggerEvent)
+        void HandleSceneTriggerEvent(SceneTriggerEvent sceneTriggerEvent)
         {
             Log.outDebug(LogFilter.Scenes, "HandleSceneTriggerEvent: SceneInstanceID: {0} Event: {1}", sceneTriggerEvent.SceneInstanceID, sceneTriggerEvent._Event);
 
@@ -18,7 +18,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ScenePlaybackComplete)]
-        private void HandleScenePlaybackComplete(ScenePlaybackComplete scenePlaybackComplete)
+        void HandleScenePlaybackComplete(ScenePlaybackComplete scenePlaybackComplete)
         {
             Log.outDebug(LogFilter.Scenes, "HandleScenePlaybackComplete: SceneInstanceID: {0}", scenePlaybackComplete.SceneInstanceID);
 
@@ -26,11 +26,12 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ScenePlaybackCanceled)]
-        private void HandleScenePlaybackCanceled(ScenePlaybackCanceled scenePlaybackCanceled)
+        void HandleScenePlaybackCanceled(ScenePlaybackCanceled scenePlaybackCanceled)
         {
             Log.outDebug(LogFilter.Scenes, "HandleScenePlaybackCanceled: SceneInstanceID: {0}", scenePlaybackCanceled.SceneInstanceID);
 
             GetPlayer().GetSceneMgr().OnSceneCancel(scenePlaybackCanceled.SceneInstanceID);
         }
+
     }
 }

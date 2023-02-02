@@ -61,16 +61,12 @@ namespace Game.Scripting
                 {
                     // If the script is already assigned . delete it!
                     Log.outError(LogFilter.Scripts, "Script '{0}' already assigned with the same script Name, so the script can't work.", script.GetName());
-
-                    Cypher.Assert(false); // Error that should be fixed ASAP.
                 }
             }
             else
             {
                 // The script uses a script Name from database, but isn't assigned to anything.
                 Log.outError(LogFilter.Sql, "Script named '{0}' does not have a script Name assigned in database.", script.GetName());
-
-                return;
             }
         }
 

@@ -1,67 +1,53 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
 using Framework.Constants;
 using Game.DataStorage;
 using Game.Entities;
+using System;
+using System.Collections.Generic;
+using Framework.Dynamic;
 
 namespace Game.Networking.Packets
 {
-    internal class GarrisonCreateResult : ServerPacket
+    class GarrisonCreateResult : ServerPacket
     {
-        public uint GarrSiteLevelID;
-        public uint Result;
-
-        public GarrisonCreateResult() : base(ServerOpcodes.GarrisonCreateResult, ConnectionType.Instance)
-        {
-        }
+        public GarrisonCreateResult() : base(ServerOpcodes.GarrisonCreateResult, ConnectionType.Instance) { }
 
         public override void Write()
         {
             _worldPacket.WriteUInt32(Result);
             _worldPacket.WriteUInt32(GarrSiteLevelID);
         }
+
+        public uint GarrSiteLevelID;
+        public uint Result;
     }
 
-    internal class GarrisonDeleteResult : ServerPacket
+    class GarrisonDeleteResult : ServerPacket
     {
-        public uint GarrSiteID;
-
-        public GarrisonError Result;
-
-        public GarrisonDeleteResult() : base(ServerOpcodes.GarrisonDeleteResult, ConnectionType.Instance)
-        {
-        }
+        public GarrisonDeleteResult() : base(ServerOpcodes.GarrisonDeleteResult, ConnectionType.Instance) { }
 
         public override void Write()
         {
             _worldPacket.WriteUInt32((uint)Result);
             _worldPacket.WriteUInt32(GarrSiteID);
         }
+
+        public GarrisonError Result;
+        public  uint GarrSiteID;
     }
 
-    internal class GetGarrisonInfo : ClientPacket
+    class GetGarrisonInfo : ClientPacket
     {
-        public GetGarrisonInfo(WorldPacket packet) : base(packet)
-        {
-        }
+        public GetGarrisonInfo(WorldPacket packet) : base(packet) { }
 
-        public override void Read()
-        {
-        }
+        public override void Read() { }
     }
 
-    internal class GetGarrisonInfoResult : ServerPacket
+    class GetGarrisonInfoResult : ServerPacket
     {
-        public uint FactionIndex;
-        public List<FollowerSoftCapInfo> FollowerSoftCaps = new();
-        public List<GarrisonInfo> Garrisons = new();
-
-        public GetGarrisonInfoResult() : base(ServerOpcodes.GetGarrisonInfoResult, ConnectionType.Instance)
-        {
-        }
+        public GetGarrisonInfoResult() : base(ServerOpcodes.GetGarrisonInfoResult, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -75,35 +61,29 @@ namespace Game.Networking.Packets
             foreach (GarrisonInfo garrison in Garrisons)
                 garrison.Write(_worldPacket);
         }
+
+        public uint FactionIndex;
+        public List<GarrisonInfo> Garrisons = new();
+        public List<FollowerSoftCapInfo> FollowerSoftCaps = new();
     }
 
-    internal class GarrisonRemoteInfo : ServerPacket
+    class GarrisonRemoteInfo : ServerPacket
     {
-        public List<GarrisonRemoteSiteInfo> Sites = new();
-
-        public GarrisonRemoteInfo() : base(ServerOpcodes.GarrisonRemoteInfo, ConnectionType.Instance)
-        {
-        }
+        public GarrisonRemoteInfo() : base(ServerOpcodes.GarrisonRemoteInfo, ConnectionType.Instance) { }
 
         public override void Write()
         {
             _worldPacket.WriteInt32(Sites.Count);
-
             foreach (GarrisonRemoteSiteInfo site in Sites)
                 site.Write(_worldPacket);
         }
+
+        public List<GarrisonRemoteSiteInfo> Sites = new();
     }
 
-    internal class GarrisonPurchaseBuilding : ClientPacket
+    class GarrisonPurchaseBuilding : ClientPacket
     {
-        public uint BuildingID;
-
-        public ObjectGuid NpcGUID;
-        public uint PlotInstanceID;
-
-        public GarrisonPurchaseBuilding(WorldPacket packet) : base(packet)
-        {
-        }
+        public GarrisonPurchaseBuilding(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -111,19 +91,15 @@ namespace Game.Networking.Packets
             PlotInstanceID = _worldPacket.ReadUInt32();
             BuildingID = _worldPacket.ReadUInt32();
         }
+
+        public ObjectGuid NpcGUID;
+        public uint BuildingID;
+        public uint PlotInstanceID;
     }
 
-    internal class GarrisonPlaceBuildingResult : ServerPacket
+    class GarrisonPlaceBuildingResult : ServerPacket
     {
-        public GarrisonBuildingInfo BuildingInfo = new();
-
-        public GarrisonType GarrTypeID;
-        public bool PlayActivationCinematic;
-        public GarrisonError Result;
-
-        public GarrisonPlaceBuildingResult() : base(ServerOpcodes.GarrisonPlaceBuildingResult, ConnectionType.Instance)
-        {
-        }
+        public GarrisonPlaceBuildingResult() : base(ServerOpcodes.GarrisonPlaceBuildingResult, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -133,35 +109,30 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(PlayActivationCinematic);
             _worldPacket.FlushBits();
         }
+
+        public GarrisonType GarrTypeID;
+        public GarrisonError Result;
+        public GarrisonBuildingInfo BuildingInfo = new();
+        public bool PlayActivationCinematic;
     }
 
-    internal class GarrisonCancelConstruction : ClientPacket
+    class GarrisonCancelConstruction : ClientPacket
     {
-        public ObjectGuid NpcGUID;
-        public uint PlotInstanceID;
-
-        public GarrisonCancelConstruction(WorldPacket packet) : base(packet)
-        {
-        }
+        public GarrisonCancelConstruction(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             NpcGUID = _worldPacket.ReadPackedGuid();
             PlotInstanceID = _worldPacket.ReadUInt32();
         }
+
+        public ObjectGuid NpcGUID;
+        public uint PlotInstanceID;
     }
 
-    internal class GarrisonBuildingRemoved : ServerPacket
+    class GarrisonBuildingRemoved : ServerPacket
     {
-        public uint GarrBuildingID;
-        public uint GarrPlotInstanceID;
-
-        public GarrisonType GarrTypeID;
-        public GarrisonError Result;
-
-        public GarrisonBuildingRemoved() : base(ServerOpcodes.GarrisonBuildingRemoved, ConnectionType.Instance)
-        {
-        }
+        public GarrisonBuildingRemoved() : base(ServerOpcodes.GarrisonBuildingRemoved, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -170,18 +141,16 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(GarrPlotInstanceID);
             _worldPacket.WriteUInt32(GarrBuildingID);
         }
-    }
-
-    internal class GarrisonLearnBlueprintResult : ServerPacket
-    {
-        public uint BuildingID;
 
         public GarrisonType GarrTypeID;
         public GarrisonError Result;
+        public uint GarrPlotInstanceID;
+        public uint GarrBuildingID;
+    }
 
-        public GarrisonLearnBlueprintResult() : base(ServerOpcodes.GarrisonLearnBlueprintResult, ConnectionType.Instance)
-        {
-        }
+    class GarrisonLearnBlueprintResult : ServerPacket
+    {
+        public GarrisonLearnBlueprintResult() : base(ServerOpcodes.GarrisonLearnBlueprintResult, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -189,18 +158,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32((uint)Result);
             _worldPacket.WriteUInt32(BuildingID);
         }
-    }
-
-    internal class GarrisonUnlearnBlueprintResult : ServerPacket
-    {
-        public uint BuildingID;
 
         public GarrisonType GarrTypeID;
+        public uint BuildingID;
         public GarrisonError Result;
+    }
 
-        public GarrisonUnlearnBlueprintResult() : base(ServerOpcodes.GarrisonUnlearnBlueprintResult, ConnectionType.Instance)
-        {
-        }
+    class GarrisonUnlearnBlueprintResult : ServerPacket
+    {
+        public GarrisonUnlearnBlueprintResult() : base(ServerOpcodes.GarrisonUnlearnBlueprintResult, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -208,36 +174,28 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32((uint)Result);
             _worldPacket.WriteUInt32(BuildingID);
         }
-    }
-
-    internal class GarrisonRequestBlueprintAndSpecializationData : ClientPacket
-    {
-        public GarrisonRequestBlueprintAndSpecializationData(WorldPacket packet) : base(packet)
-        {
-        }
-
-        public override void Read()
-        {
-        }
-    }
-
-    internal class GarrisonRequestBlueprintAndSpecializationDataResult : ServerPacket
-    {
-        public List<uint> BlueprintsKnown = null;
 
         public GarrisonType GarrTypeID;
-        public List<uint> SpecializationsKnown = null;
+        public uint BuildingID;
+        public GarrisonError Result;
+    }
 
-        public GarrisonRequestBlueprintAndSpecializationDataResult() : base(ServerOpcodes.GarrisonRequestBlueprintAndSpecializationDataResult, ConnectionType.Instance)
-        {
-        }
+    class GarrisonRequestBlueprintAndSpecializationData : ClientPacket
+    {
+        public GarrisonRequestBlueprintAndSpecializationData(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+
+    class GarrisonRequestBlueprintAndSpecializationDataResult : ServerPacket
+    {
+        public GarrisonRequestBlueprintAndSpecializationDataResult() : base(ServerOpcodes.GarrisonRequestBlueprintAndSpecializationDataResult, ConnectionType.Instance) { }
 
         public override void Write()
         {
             _worldPacket.WriteUInt32((uint)GarrTypeID);
             _worldPacket.WriteInt32(BlueprintsKnown != null ? BlueprintsKnown.Count : 0);
             _worldPacket.WriteInt32(SpecializationsKnown != null ? SpecializationsKnown.Count : 0);
-
             if (BlueprintsKnown != null)
                 foreach (uint blueprint in BlueprintsKnown)
                     _worldPacket.WriteUInt32(blueprint);
@@ -246,96 +204,78 @@ namespace Game.Networking.Packets
                 foreach (uint specialization in SpecializationsKnown)
                     _worldPacket.WriteUInt32(specialization);
         }
+
+        public GarrisonType GarrTypeID;
+        public List<uint> SpecializationsKnown = null;
+        public List<uint> BlueprintsKnown = null;
     }
 
-    internal class GarrisonGetMapData : ClientPacket
+    class GarrisonGetMapData : ClientPacket
     {
-        public GarrisonGetMapData(WorldPacket packet) : base(packet)
-        {
-        }
+        public GarrisonGetMapData(WorldPacket packet) : base(packet) { }
 
-        public override void Read()
-        {
-        }
+        public override void Read() { }
     }
 
-    internal class GarrisonMapDataResponse : ServerPacket
+    class GarrisonMapDataResponse : ServerPacket
     {
-        public List<GarrisonBuildingMapData> Buildings = new();
-
-        public GarrisonMapDataResponse() : base(ServerOpcodes.GarrisonMapDataResponse, ConnectionType.Instance)
-        {
-        }
+        public GarrisonMapDataResponse() : base(ServerOpcodes.GarrisonMapDataResponse, ConnectionType.Instance) { }
 
         public override void Write()
         {
             _worldPacket.WriteInt32(Buildings.Count);
-
             foreach (GarrisonBuildingMapData landmark in Buildings)
                 landmark.Write(_worldPacket);
         }
+
+        public List<GarrisonBuildingMapData> Buildings = new();
     }
 
-    internal class GarrisonPlotPlaced : ServerPacket
+    class GarrisonPlotPlaced : ServerPacket
     {
-        public GarrisonType GarrTypeID;
-        public GarrisonPlotInfo PlotInfo;
-
-        public GarrisonPlotPlaced() : base(ServerOpcodes.GarrisonPlotPlaced, ConnectionType.Instance)
-        {
-        }
+        public GarrisonPlotPlaced() : base(ServerOpcodes.GarrisonPlotPlaced, ConnectionType.Instance) { }
 
         public override void Write()
         {
             _worldPacket.WriteInt32((int)GarrTypeID);
             PlotInfo.Write(_worldPacket);
         }
+
+        public GarrisonType GarrTypeID;
+        public GarrisonPlotInfo PlotInfo;
     }
 
-    internal class GarrisonPlotRemoved : ServerPacket
+    class GarrisonPlotRemoved : ServerPacket
     {
-        public uint GarrPlotInstanceID;
-
-        public GarrisonPlotRemoved() : base(ServerOpcodes.GarrisonPlotRemoved, ConnectionType.Instance)
-        {
-        }
+        public GarrisonPlotRemoved() : base(ServerOpcodes.GarrisonPlotRemoved, ConnectionType.Instance) { }
 
         public override void Write()
         {
             _worldPacket.WriteUInt32(GarrPlotInstanceID);
         }
+
+        public uint GarrPlotInstanceID;
     }
 
-    internal class GarrisonAddFollowerResult : ServerPacket
+    class GarrisonAddFollowerResult : ServerPacket
     {
-        public GarrisonFollower Follower;
-
-        public GarrisonType GarrTypeID;
-        public GarrisonError Result;
-
-        public GarrisonAddFollowerResult() : base(ServerOpcodes.GarrisonAddFollowerResult, ConnectionType.Instance)
-        {
-        }
+        public GarrisonAddFollowerResult() : base(ServerOpcodes.GarrisonAddFollowerResult, ConnectionType.Instance) { }
 
         public override void Write()
         {
             _worldPacket.WriteInt32((int)GarrTypeID);
-            _worldPacket.WriteUInt32((uint)Result);
+            _worldPacket .WriteUInt32((uint)Result);
             Follower.Write(_worldPacket);
         }
+
+        public GarrisonType GarrTypeID;
+        public GarrisonFollower Follower;
+        public GarrisonError Result;
     }
 
-    internal class GarrisonRemoveFollowerResult : ServerPacket
+    class GarrisonRemoveFollowerResult : ServerPacket
     {
-        public uint Destroyed;
-
-        public ulong FollowerDBID;
-        public int GarrTypeID;
-        public uint Result;
-
-        public GarrisonRemoveFollowerResult() : base(ServerOpcodes.GarrisonRemoveFollowerResult)
-        {
-        }
+        public GarrisonRemoveFollowerResult() : base(ServerOpcodes.GarrisonRemoveFollowerResult) { }
 
         public override void Write()
         {
@@ -344,22 +284,25 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Result);
             _worldPacket.WriteUInt32(Destroyed);
         }
+
+        public ulong FollowerDBID;
+        public int GarrTypeID;
+        public uint Result;
+        public uint Destroyed;
     }
 
-    internal class GarrisonBuildingActivated : ServerPacket
+    class GarrisonBuildingActivated : ServerPacket
     {
-        public uint GarrPlotInstanceID;
-
-        public GarrisonBuildingActivated() : base(ServerOpcodes.GarrisonBuildingActivated, ConnectionType.Instance)
-        {
-        }
+        public GarrisonBuildingActivated() : base(ServerOpcodes.GarrisonBuildingActivated, ConnectionType.Instance) { }
 
         public override void Write()
         {
             _worldPacket.WriteUInt32(GarrPlotInstanceID);
         }
-    }
 
+        public uint GarrPlotInstanceID;
+    }
+    
     //Structs
     public struct GarrisonPlotInfo
     {
@@ -377,14 +320,6 @@ namespace Game.Networking.Packets
 
     public class GarrisonBuildingInfo
     {
-        public bool Active;
-        public uint CurrentGarSpecID;
-        public uint GarrBuildingID;
-
-        public uint GarrPlotInstanceID;
-        public long TimeBuilt;
-        public long TimeSpecCooldown = 2288912640; // 06/07/1906 18:35:44 - another in the series of magic blizz dates
-
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(GarrPlotInstanceID);
@@ -395,29 +330,17 @@ namespace Game.Networking.Packets
             data.WriteBit(Active);
             data.FlushBits();
         }
+
+        public uint GarrPlotInstanceID;
+        public uint GarrBuildingID;
+        public long TimeBuilt;
+        public uint CurrentGarSpecID;
+        public long TimeSpecCooldown = 2288912640;   // 06/07/1906 18:35:44 - another in the series of magic blizz dates
+        public bool Active;
     }
 
     public class GarrisonFollower
     {
-        public List<GarrAbilityRecord> AbilityID = new();
-        public sbyte BoardIndex;
-        public uint CurrentBuildingID;
-        public uint CurrentMissionID;
-        public string CustomName = "";
-
-        public ulong DbID;
-        public uint Durability;
-        public uint FollowerLevel;
-        public uint FollowerStatus;
-        public uint GarrFollowerID;
-        public long HealingTimestamp;
-        public int Health;
-        public uint ItemLevelArmor;
-        public uint ItemLevelWeapon;
-        public uint Quality;
-        public uint Xp;
-        public uint ZoneSupportSpellID;
-
         public void Write(WorldPacket data)
         {
             data.WriteUInt64(DbID);
@@ -443,17 +366,35 @@ namespace Game.Networking.Packets
             data.FlushBits();
             data.WriteString(CustomName);
         }
+
+        public ulong DbID;
+        public uint GarrFollowerID;
+        public uint Quality;
+        public uint FollowerLevel;
+        public uint ItemLevelWeapon;
+        public uint ItemLevelArmor;
+        public uint Xp;
+        public uint Durability;
+        public uint CurrentBuildingID;
+        public uint CurrentMissionID;
+        public List<GarrAbilityRecord> AbilityID = new();
+        public uint ZoneSupportSpellID;
+        public uint FollowerStatus;
+        public int Health;
+        public long HealingTimestamp;
+        public sbyte BoardIndex;
+        public string CustomName = "";
     }
 
-    internal class GarrisonEncounter
+    class GarrisonEncounter
     {
-        public int Attack;
-        public sbyte BoardIndex;
-        public int GarrAutoCombatantID;
         public int GarrEncounterID;
+        public List<int> Mechanics = new();
+        public int GarrAutoCombatantID;
         public int Health;
         public int MaxHealth;
-        public List<int> Mechanics = new();
+        public int Attack;
+        public sbyte BoardIndex;
 
         public void Write(WorldPacket data)
         {
@@ -470,7 +411,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    internal struct GarrisonMissionReward
+    struct GarrisonMissionReward
     {
         public void Write(WorldPacket data)
         {
@@ -484,7 +425,8 @@ namespace Game.Networking.Packets
             data.WriteBit(ItemInstance != null);
             data.FlushBits();
 
-            ItemInstance?.Write(data);
+            if (ItemInstance != null)
+                ItemInstance.Write(data);
         }
 
         public int ItemID;
@@ -497,23 +439,23 @@ namespace Game.Networking.Packets
         public ItemInstance ItemInstance;
     }
 
-    internal class GarrisonMission
+    class GarrisonMission
     {
-        public int ContentTuningID = 0;
         public ulong DbID;
-        public List<GarrisonEncounter> Encounters = new();
-        public uint Flags = 0;
-        public uint MissionDuration;
         public int MissionRecID;
-        public float MissionScalar = 1.0f;
-        public int MissionState = 0;
-        public uint OfferDuration;
         public long OfferTime;
-        public List<GarrisonMissionReward> OvermaxRewards = new();
-        public List<GarrisonMissionReward> Rewards = new();
+        public uint OfferDuration;
         public long StartTime = 2288912640;
-        public int SuccessChance = 0;
         public uint TravelDuration;
+        public uint MissionDuration;
+        public int MissionState = 0;
+        public int SuccessChance = 0;
+        public uint Flags = 0;
+        public float MissionScalar = 1.0f;
+        public int ContentTuningID = 0;
+        public List<GarrisonEncounter> Encounters = new();
+        public List<GarrisonMissionReward> Rewards = new();
+        public List<GarrisonMissionReward> OvermaxRewards = new();
 
         public void Write(WorldPacket data)
         {
@@ -544,7 +486,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    internal struct GarrisonMissionBonusAbility
+    struct GarrisonMissionBonusAbility
     {
         public void Write(WorldPacket data)
         {
@@ -556,7 +498,7 @@ namespace Game.Networking.Packets
         public long StartTime;
     }
 
-    internal struct GarrisonTalentSocketData
+    struct GarrisonTalentSocketData
     {
         public int SoulbindConduitID;
         public int SoulbindConduitRank;
@@ -568,7 +510,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    internal struct GarrisonTalent
+    struct GarrisonTalent
     {
         public void Write(WorldPacket data)
         {
@@ -590,7 +532,7 @@ namespace Game.Networking.Packets
         public GarrisonTalentSocketData? Socket;
     }
 
-    internal struct GarrisonCollectionEntry
+    struct GarrisonCollectionEntry
     {
         public int EntryID;
         public int Rank;
@@ -602,22 +544,21 @@ namespace Game.Networking.Packets
         }
     }
 
-    internal class GarrisonCollection
+    class GarrisonCollection
     {
-        public List<GarrisonCollectionEntry> Entries = new();
         public int Type;
+        public List<GarrisonCollectionEntry> Entries = new();
 
         public void Write(WorldPacket data)
         {
             data.WriteInt32(Type);
             data.WriteInt32(Entries.Count);
-
             foreach (GarrisonCollectionEntry collectionEntry in Entries)
                 collectionEntry.Write(data);
         }
     }
 
-    internal struct GarrisonEventEntry
+    struct GarrisonEventEntry
     {
         public int EntryID;
         public long EventValue;
@@ -629,22 +570,21 @@ namespace Game.Networking.Packets
         }
     }
 
-    internal class GarrisonEventList
+    class GarrisonEventList
     {
-        public List<GarrisonEventEntry> Events = new();
         public int Type;
+        public List<GarrisonEventEntry> Events = new();
 
         public void Write(WorldPacket data)
         {
             data.WriteInt32(Type);
             data.WriteInt32(Events.Count);
-
             foreach (GarrisonEventEntry eventEntry in Events)
                 eventEntry.Write(data);
         }
     }
 
-    internal struct GarrisonSpecGroup
+    struct GarrisonSpecGroup
     {
         public int ChrSpecializationID;
         public int SoulbindID;
@@ -656,30 +596,8 @@ namespace Game.Networking.Packets
         }
     }
 
-    internal class GarrisonInfo
+    class GarrisonInfo
     {
-        public List<int> ArchivedMissions = new();
-        public List<GarrisonFollower> AutoTroops = new();
-        public List<GarrisonBuildingInfo> Buildings = new();
-        public List<bool> CanStartMission = new();
-        public List<GarrisonCollection> Collections = new();
-        public List<GarrisonEventList> EventLists = new();
-        public List<GarrisonFollower> Followers = new();
-        public uint GarrSiteID;
-        public uint GarrSiteLevelID;
-
-        public GarrisonType GarrTypeID;
-        public int MinAutoTroopLevel;
-        public List<GarrisonMissionBonusAbility> MissionAreaBonuses = new();
-        public List<List<GarrisonMissionReward>> MissionOvermaxRewards = new();
-        public List<List<GarrisonMissionReward>> MissionRewards = new();
-        public List<GarrisonMission> Missions = new();
-        public uint NumFollowerActivationsRemaining;
-        public uint NumMissionsStartedToday; // might mean something else, but sending 0 here enables follower abilities "Increase success chance of the first mission of the day by %."
-        public List<GarrisonPlotInfo> Plots = new();
-        public List<GarrisonSpecGroup> SpecGroups = new();
-        public List<GarrisonTalent> Talents = new();
-
         public void Write(WorldPacket data)
         {
             data.WriteUInt32((uint)GarrTypeID);
@@ -755,9 +673,30 @@ namespace Game.Networking.Packets
                 foreach (GarrisonMissionReward missionRewardItem in missionReward)
                     missionRewardItem.Write(data);
         }
+
+        public GarrisonType GarrTypeID;
+        public uint GarrSiteID;
+        public uint GarrSiteLevelID;
+        public uint NumFollowerActivationsRemaining;
+        public uint NumMissionsStartedToday;   // might mean something else, but sending 0 here enables follower abilities "Increase success chance of the first mission of the day by %."
+        public int MinAutoTroopLevel;
+        public List<GarrisonPlotInfo> Plots = new();
+        public List<GarrisonBuildingInfo> Buildings = new();
+        public List<GarrisonFollower> Followers = new();
+        public List<GarrisonFollower> AutoTroops = new();
+        public List<GarrisonMission> Missions = new();
+        public List<List<GarrisonMissionReward>> MissionRewards = new();
+        public List<List<GarrisonMissionReward>> MissionOvermaxRewards = new();
+        public List<GarrisonMissionBonusAbility> MissionAreaBonuses = new();
+        public List<GarrisonTalent> Talents = new();
+        public List<GarrisonCollection> Collections = new();
+        public List<GarrisonEventList> EventLists = new();
+        public List<GarrisonSpecGroup> SpecGroups = new();
+        public List<bool> CanStartMission = new();
+        public List<int> ArchivedMissions = new();
     }
 
-    internal struct FollowerSoftCapInfo
+    struct FollowerSoftCapInfo
     {
         public void Write(WorldPacket data)
         {
@@ -769,7 +708,7 @@ namespace Game.Networking.Packets
         public uint Count;
     }
 
-    internal struct GarrisonRemoteBuildingInfo
+    struct GarrisonRemoteBuildingInfo
     {
         public GarrisonRemoteBuildingInfo(uint plotInstanceId, uint buildingId)
         {
@@ -787,23 +726,21 @@ namespace Game.Networking.Packets
         public uint GarrBuildingID;
     }
 
-    internal class GarrisonRemoteSiteInfo
+    class GarrisonRemoteSiteInfo
     {
-        public List<GarrisonRemoteBuildingInfo> Buildings = new();
-
-        public uint GarrSiteLevelID;
-
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(GarrSiteLevelID);
             data.WriteInt32(Buildings.Count);
-
             foreach (GarrisonRemoteBuildingInfo building in Buildings)
                 building.Write(data);
         }
+
+        public uint GarrSiteLevelID;
+        public List<GarrisonRemoteBuildingInfo> Buildings = new();
     }
 
-    internal struct GarrisonBuildingMapData
+    struct GarrisonBuildingMapData
     {
         public GarrisonBuildingMapData(uint buildingPlotInstId, Position pos)
         {

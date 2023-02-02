@@ -3,13 +3,8 @@
 
 using System.Collections.Generic;
 
-internal class Logger
+class Logger
 {
-    private readonly Dictionary<byte, Appender> appenders = new();
-
-    private readonly string name;
-    private LogLevel level;
-
     public Logger(string _name, LogLevel _level)
     {
         name = _name;
@@ -43,12 +38,14 @@ internal class Logger
 
     public void write(LogMessage message)
     {
-        if (level == 0 ||
-            level > message.level ||
-            string.IsNullOrEmpty(message.text))
+        if (level == 0 || level > message.level || string.IsNullOrEmpty(message.text))
             return;
 
         foreach (var appender in appenders.Values)
             appender.Write(message);
     }
+
+    string name;
+    LogLevel level;
+    Dictionary<byte, Appender> appenders = new();
 }

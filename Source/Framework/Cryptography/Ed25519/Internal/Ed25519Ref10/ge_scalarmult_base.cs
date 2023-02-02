@@ -1,106 +1,36 @@
-﻿namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
+﻿using System;
+
+namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 {
     internal static partial class GroupOperations
     {
-        /*
-		h = a * B
-		where a = a[0]+256*a[1]+...+256^31 a[31]
-		B is the Ed25519 base point (x,4/5) with x positive.
-
-		Preconditions:
-		  a[31] <= 127
-		*/
-
-        public static void ge_scalarmult_base(out GroupElementP3 h, byte[] a, int offset)
+        static byte equal(byte b, byte c)
         {
-            // todo: Perhaps remove this allocation
-            var e = new sbyte[64];
-            sbyte carry;
 
-            GroupElementP1P1 r;
-            GroupElementP2 s;
-            GroupElementPreComp t;
-
-            for (int i = 0; i < 32; ++i)
-            {
-                e[2 * i + 0] = (sbyte)((a[offset + i] >> 0) & 15);
-                e[2 * i + 1] = (sbyte)((a[offset + i] >> 4) & 15);
-            }
-            /* each e[i] is between 0 and 15 */
-            /* e[63] is between 0 and 7 */
-
-            carry = 0;
-
-            for (int i = 0; i < 63; ++i)
-            {
-                e[i] += carry;
-                carry = (sbyte)(e[i] + 8);
-                carry >>= 4;
-                e[i] -= (sbyte)(carry << 4);
-            }
-
-            e[63] += carry;
-            /* each e[i] is between -8 and 8 */
-
-            ge_p3_0(out h);
-
-            for (int i = 1; i < 64; i += 2)
-            {
-                select(out t, i / 2, e[i]);
-                ge_madd(out r, ref h, ref t);
-                ge_p1p1_to_p3(out h, ref r);
-            }
-
-            ge_p3_dbl(out r, ref h);
-            ge_p1p1_to_p2(out s, ref r);
-            ge_p2_dbl(out r, ref s);
-            ge_p1p1_to_p2(out s, ref r);
-            ge_p2_dbl(out r, ref s);
-            ge_p1p1_to_p2(out s, ref r);
-            ge_p2_dbl(out r, ref s);
-            ge_p1p1_to_p3(out h, ref r);
-
-            for (int i = 0; i < 64; i += 2)
-            {
-                select(out t, i / 2, e[i]);
-                ge_madd(out r, ref h, ref t);
-                ge_p1p1_to_p3(out h, ref r);
-            }
-        }
-
-        private static byte equal(byte b, byte c)
-        {
             byte ub = b;
             byte uc = c;
             byte x = (byte)(ub ^ uc); /* 0: yes; 1..255: no */
-            uint y = x;               /* 0: yes; 1..255: no */
-
-            unchecked
-            {
-                y -= 1;
-            } /* 4294967295: yes; 0..254: no */
-
+            uint y = x; /* 0: yes; 1..255: no */
+            unchecked { y -= 1; } /* 4294967295: yes; 0..254: no */
             y >>= 31; /* 1: yes; 0: no */
-
             return (byte)y;
         }
 
-        private static byte negative(sbyte b)
+        static byte negative(sbyte b)
         {
             var x = unchecked((ulong)b); /* 18446744073709551361..18446744073709551615: yes; 0..255: no */
-            x >>= 63;                    /* 1: yes; 0: no */
-
+            x >>= 63; /* 1: yes; 0: no */
             return (byte)x;
         }
 
-        private static void cmov(ref GroupElementPreComp t, ref GroupElementPreComp u, byte b)
+        static void cmov(ref GroupElementPreComp t, ref GroupElementPreComp u, byte b)
         {
             FieldOperations.fe_cmov(ref t.yplusx, ref u.yplusx, b);
             FieldOperations.fe_cmov(ref t.yminusx, ref u.yminusx, b);
             FieldOperations.fe_cmov(ref t.xy2d, ref u.xy2d, b);
         }
 
-        private static void select(out GroupElementPreComp t, int pos, sbyte b)
+        static void select(out GroupElementPreComp t, int pos, sbyte b)
         {
             GroupElementPreComp minust;
             var bnegative = negative(b);
@@ -121,5 +51,63 @@
             FieldOperations.fe_neg(out minust.xy2d, ref t.xy2d);
             cmov(ref t, ref minust, bnegative);
         }
+
+        /*
+        h = a * B
+        where a = a[0]+256*a[1]+...+256^31 a[31]
+        B is the Ed25519 base point (x,4/5) with x positive.
+
+        Preconditions:
+          a[31] <= 127
+        */
+
+        public static void ge_scalarmult_base(out GroupElementP3 h, byte[] a, int offset)
+        {
+            // todo: Perhaps remove this allocation
+            var e = new sbyte[64];
+            sbyte carry;
+
+            GroupElementP1P1 r;
+            GroupElementP2 s;
+            GroupElementPreComp t;
+
+            for (int i = 0; i < 32; ++i)
+            {
+                e[2 * i + 0] = (sbyte)((a[offset + i] >> 0) & 15);
+                e[2 * i + 1] = (sbyte)((a[offset + i] >> 4) & 15);
+            }
+            /* each e[i] is between 0 and 15 */
+            /* e[63] is between 0 and 7 */
+
+            carry = 0;
+            for (int i = 0; i < 63; ++i)
+            {
+                e[i] += carry;
+                carry = (sbyte)(e[i] + 8);
+                carry >>= 4;
+                e[i] -= (sbyte)(carry << 4);
+            }
+            e[63] += carry;
+            /* each e[i] is between -8 and 8 */
+
+            ge_p3_0(out h);
+            for (int i = 1; i < 64; i += 2)
+            {
+                select(out t, i / 2, e[i]);
+                ge_madd(out r, ref h, ref t); ge_p1p1_to_p3(out h, ref r);
+            }
+
+            ge_p3_dbl(out r, ref h); ge_p1p1_to_p2(out s, ref r);
+            ge_p2_dbl(out r, ref s); ge_p1p1_to_p2(out s, ref r);
+            ge_p2_dbl(out r, ref s); ge_p1p1_to_p2(out s, ref r);
+            ge_p2_dbl(out r, ref s); ge_p1p1_to_p3(out h, ref r);
+
+            for (int i = 0; i < 64; i += 2)
+            {
+                select(out t, i / 2, e[i]);
+                ge_madd(out r, ref h, ref t); ge_p1p1_to_p3(out h, ref r);
+            }
+        }
+
     }
 }

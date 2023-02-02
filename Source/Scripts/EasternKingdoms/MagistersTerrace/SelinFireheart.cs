@@ -81,8 +81,8 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
             switch (action)
             {
                 case MiscConst.ActionSwitchPhase:
-                    Events.SetPhase(PhaseIds.Normal);
-                    Events.ScheduleEvent(EventIds.FelExplosion, TimeSpan.FromSeconds(2), 0, PhaseIds.Normal);
+                    _events.SetPhase(PhaseIds.Normal);
+                    _events.ScheduleEvent(EventIds.FelExplosion, TimeSpan.FromSeconds(2), 0, PhaseIds.Normal);
                     AttackStart(me.GetVictim());
                     me.GetMotionMaster().MoveChase(me.GetVictim());
 
@@ -97,8 +97,8 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
             Talk(TextIds.SayAggro);
             base.JustEngagedWith(who);
 
-            Events.SetPhase(PhaseIds.Normal);
-            Events.ScheduleEvent(EventIds.FelExplosion, TimeSpan.FromMilliseconds(2100), 0, PhaseIds.Normal);
+            _events.SetPhase(PhaseIds.Normal);
+            _events.ScheduleEvent(EventIds.FelExplosion, TimeSpan.FromMilliseconds(2100), 0, PhaseIds.Normal);
         }
 
         public override void KilledUnit(Unit victim)
@@ -119,7 +119,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
                 {
                     CrystalChosen.RemoveUnitFlag(UnitFlags.Uninteractible);
                     CrystalChosen.CastSpell(me, SpellIds.ManaRage, true);
-                    Events.ScheduleEvent(EventIds.Empower, TimeSpan.FromSeconds(10), PhaseIds.Drain);
+                    _events.ScheduleEvent(EventIds.Empower, TimeSpan.FromSeconds(10), PhaseIds.Drain);
                 }
             }
         }
@@ -137,18 +137,18 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
             if (!UpdateVictim())
                 return;
 
-            Events.Update(diff);
+            _events.Update(diff);
 
             if (me.HasUnitState(UnitState.Casting))
                 return;
 
-            Events.ExecuteEvents(eventId =>
+            _events.ExecuteEvents(eventId =>
                                   {
                                       switch (eventId)
                                       {
                                           case EventIds.FelExplosion:
                                               DoCastAOE(SpellIds.FelExplosion);
-                                              Events.ScheduleEvent(EventIds.FelExplosion, TimeSpan.FromSeconds(2), 0, PhaseIds.Normal);
+                                              _events.ScheduleEvent(EventIds.FelExplosion, TimeSpan.FromSeconds(2), 0, PhaseIds.Normal);
 
                                               break;
                                           case EventIds.DrainCrystal:
@@ -163,7 +163,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
                                                   if (target != null)
                                                       DoCast(target, SpellIds.DrainMana);
 
-                                                  Events.ScheduleEvent(EventIds.DrainMana, TimeSpan.FromSeconds(10), 0, PhaseIds.Normal);
+                                                  _events.ScheduleEvent(EventIds.DrainMana, TimeSpan.FromSeconds(10), 0, PhaseIds.Normal);
 
                                                   break;
                                               }
@@ -174,7 +174,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
                                                   if (target != null)
                                                       DoCast(target, SpellIds.DrainLife);
 
-                                                  Events.ScheduleEvent(EventIds.DrainLife, TimeSpan.FromSeconds(10), 0, PhaseIds.Normal);
+                                                  _events.ScheduleEvent(EventIds.DrainLife, TimeSpan.FromSeconds(10), 0, PhaseIds.Normal);
 
                                                   break;
                                               }
@@ -203,21 +203,21 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
                                   });
 
             if (me.GetPowerPct(PowerType.Mana) < 10.0f)
-                if (Events.IsInPhase(PhaseIds.Normal) &&
+                if (_events.IsInPhase(PhaseIds.Normal) &&
                     !_scheduledEvents)
                 {
                     _scheduledEvents = true;
                     TimeSpan timer = RandomHelper.RandTime(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(7));
-                    Events.ScheduleEvent(EventIds.DrainLife, timer, 0, PhaseIds.Normal);
+                    _events.ScheduleEvent(EventIds.DrainLife, timer, 0, PhaseIds.Normal);
 
                     if (IsHeroic())
                     {
-                        Events.ScheduleEvent(EventIds.DrainCrystal, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15), 0, PhaseIds.Normal);
-                        Events.ScheduleEvent(EventIds.DrainMana, timer + TimeSpan.FromSeconds(5), 0, PhaseIds.Normal);
+                        _events.ScheduleEvent(EventIds.DrainCrystal, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15), 0, PhaseIds.Normal);
+                        _events.ScheduleEvent(EventIds.DrainMana, timer + TimeSpan.FromSeconds(5), 0, PhaseIds.Normal);
                     }
                     else
                     {
-                        Events.ScheduleEvent(EventIds.DrainCrystal, TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(25), 0, PhaseIds.Normal);
+                        _events.ScheduleEvent(EventIds.DrainCrystal, TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(25), 0, PhaseIds.Normal);
                     }
                 }
 
@@ -239,7 +239,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
                 float x, y, z;
                 crystal.GetClosePoint(out x, out y, out z, me.GetCombatReach(), SharedConst.ContactDistance);
 
-                Events.SetPhase(PhaseIds.Drain);
+                _events.SetPhase(PhaseIds.Drain);
                 me.SetWalk(false);
                 me.GetMotionMaster().MovePoint(1, x, y, z);
             }

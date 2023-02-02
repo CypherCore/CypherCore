@@ -9,19 +9,17 @@ namespace Framework.Networking
     public class SocketManager<TSocketType> where TSocketType : ISocket
     {
         public AsyncAcceptor Acceptor;
-        private int _threadCount;
-        private NetworkThread<TSocketType>[] _threads;
+        NetworkThread<TSocketType>[] _threads;
+        int _threadCount;
 
         public virtual bool StartNetwork(string bindIp, int port, int threadCount = 1)
         {
             Cypher.Assert(threadCount > 0);
 
             Acceptor = new AsyncAcceptor();
-
             if (!Acceptor.Start(bindIp, port))
             {
                 Log.outError(LogFilter.Network, "StartNetwork failed to Start AsyncAcceptor");
-
                 return false;
             }
 
@@ -54,6 +52,13 @@ namespace Framework.Networking
             _threadCount = 0;
         }
 
+        void Wait()
+        {
+            if (_threadCount != 0)
+                for (int i = 0; i < _threadCount; ++i)
+                    _threads[i].Wait();
+        }
+
         public virtual void OnSocketOpen(Socket sock)
         {
             try
@@ -69,19 +74,9 @@ namespace Framework.Networking
             }
         }
 
-        public int GetNetworkThreadCount()
-        {
-            return _threadCount;
-        }
+        public int GetNetworkThreadCount() { return _threadCount; }
 
-        private void Wait()
-        {
-            if (_threadCount != 0)
-                for (int i = 0; i < _threadCount; ++i)
-                    _threads[i].Wait();
-        }
-
-        private uint SelectThreadWithMinConnections()
+        uint SelectThreadWithMinConnections()
         {
             uint min = 0;
 

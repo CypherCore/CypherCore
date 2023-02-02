@@ -31,7 +31,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.PitLordArgaloth
         public override void JustEngagedWith(Unit who)
         {
             base.JustEngagedWith(who);
-            Instance.SendEncounterUnit(EncounterFrameType.Engage, me);
+            instance.SendEncounterUnit(EncounterFrameType.Engage, me);
 
             _scheduler.Schedule(TimeSpan.FromSeconds(10),
                                 TimeSpan.FromSeconds(20),
@@ -54,7 +54,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.PitLordArgaloth
 
         public override void EnterEvadeMode(EvadeReason why)
         {
-            Instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
+            instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
             _DespawnAtEvade();
         }
 
@@ -68,7 +68,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.PitLordArgaloth
         public override void JustDied(Unit killer)
         {
             _JustDied();
-            Instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
+            instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
         }
 
         public override void UpdateAI(uint diff)

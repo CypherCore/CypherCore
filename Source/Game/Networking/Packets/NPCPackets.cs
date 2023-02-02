@@ -1,11 +1,12 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Constants;
+using Framework.Dynamic;
+using Game.Entities;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Framework.Constants;
-using Game.Entities;
 
 namespace Game.Networking.Packets
 {
@@ -18,28 +19,19 @@ namespace Game.Networking.Packets
     // CMSG_BATTLEMASTER_HELLO
     public class Hello : ClientPacket
     {
-        public ObjectGuid Unit;
-
-        public Hello(WorldPacket packet) : base(packet)
-        {
-        }
+        public Hello(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Unit = _worldPacket.ReadPackedGuid();
         }
+
+        public ObjectGuid Unit;
     }
 
     public class NPCInteractionOpenResult : ServerPacket
     {
-        public PlayerInteractionType InteractionType;
-
-        public ObjectGuid Npc;
-        public bool Success = true;
-
-        public NPCInteractionOpenResult() : base(ServerOpcodes.NpcInteractionOpenResult)
-        {
-        }
+        public NPCInteractionOpenResult() : base(ServerOpcodes.NpcInteractionOpenResult) { }
 
         public override void Write()
         {
@@ -48,22 +40,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(Success);
             _worldPacket.FlushBits();
         }
-    }
 
+        public ObjectGuid Npc;
+        public PlayerInteractionType InteractionType;
+        public bool Success = true;
+    }
+    
     public class GossipMessagePkt : ServerPacket
     {
-        public int FriendshipFactionID;
-        public ObjectGuid GossipGUID;
-        public uint GossipID;
-
-        public List<ClientGossipOptions> GossipOptions = new();
-        public List<ClientGossipText> GossipText = new();
-        public int? TextID;
-        public int? TextID2;
-
-        public GossipMessagePkt() : base(ServerOpcodes.GossipMessage)
-        {
-        }
+        public GossipMessagePkt() : base(ServerOpcodes.GossipMessage) { }
 
         public override void Write()
         {
@@ -88,19 +73,19 @@ namespace Game.Networking.Packets
             foreach (ClientGossipText text in GossipText)
                 text.Write(_worldPacket);
         }
+
+        public List<ClientGossipOptions> GossipOptions = new();
+        public int FriendshipFactionID;
+        public ObjectGuid GossipGUID;
+        public List<ClientGossipText> GossipText = new();
+        public int? TextID;
+        public int? TextID2;
+        public uint GossipID;
     }
 
     public class GossipSelectOption : ClientPacket
     {
-        public uint GossipID;
-        public int GossipOptionID;
-
-        public ObjectGuid GossipUnit;
-        public string PromotionCode;
-
-        public GossipSelectOption(WorldPacket packet) : base(packet)
-        {
-        }
+        public GossipSelectOption(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -111,18 +96,16 @@ namespace Game.Networking.Packets
             uint length = _worldPacket.ReadBits<uint>(8);
             PromotionCode = _worldPacket.ReadString(length);
         }
+
+        public ObjectGuid GossipUnit;
+        public int GossipOptionID;
+        public uint GossipID;
+        public string PromotionCode;
     }
 
-    internal class GossipOptionNPCInteraction : ServerPacket
+    class GossipOptionNPCInteraction : ServerPacket
     {
-        public int? FriendshipFactionID;
-
-        public ObjectGuid GossipGUID;
-        public int GossipNpcOptionID;
-
-        public GossipOptionNPCInteraction() : base(ServerOpcodes.GossipOptionNpcInteraction)
-        {
-        }
+        public GossipOptionNPCInteraction() : base(ServerOpcodes.GossipOptionNpcInteraction) { }
 
         public override void Write()
         {
@@ -134,15 +117,17 @@ namespace Game.Networking.Packets
             if (FriendshipFactionID.HasValue)
                 _worldPacket.WriteInt32(FriendshipFactionID.Value);
         }
-    }
 
+        public ObjectGuid GossipGUID;
+        public int GossipNpcOptionID;
+        public int? FriendshipFactionID;
+    }
+    
     public class GossipComplete : ServerPacket
     {
         public bool SuppressSound;
 
-        public GossipComplete() : base(ServerOpcodes.GossipComplete)
-        {
-        }
+        public GossipComplete() : base(ServerOpcodes.GossipComplete) { }
 
         public override void Write()
         {
@@ -153,14 +138,7 @@ namespace Game.Networking.Packets
 
     public class VendorInventory : ServerPacket
     {
-        public List<VendorItemPkt> Items = new();
-
-        public byte Reason = 0;
-        public ObjectGuid Vendor;
-
-        public VendorInventory() : base(ServerOpcodes.VendorInventory, ConnectionType.Instance)
-        {
-        }
+        public VendorInventory() : base(ServerOpcodes.VendorInventory, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -171,20 +149,15 @@ namespace Game.Networking.Packets
             foreach (VendorItemPkt item in Items)
                 item.Write(_worldPacket);
         }
+
+        public byte Reason = 0;
+        public List<VendorItemPkt> Items = new();
+        public ObjectGuid Vendor;
     }
 
     public class TrainerList : ServerPacket
     {
-        public string Greeting;
-        public List<TrainerListSpell> Spells = new();
-
-        public ObjectGuid TrainerGUID;
-        public int TrainerID = 1;
-        public int TrainerType;
-
-        public TrainerList() : base(ServerOpcodes.TrainerList, ConnectionType.Instance)
-        {
-        }
+        public TrainerList() : base(ServerOpcodes.TrainerList, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -193,7 +166,6 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(TrainerID);
 
             _worldPacket.WriteInt32(Spells.Count);
-
             foreach (TrainerListSpell spell in Spells)
             {
                 _worldPacket.WriteUInt32(spell.SpellID);
@@ -212,22 +184,17 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
             _worldPacket.WriteString(Greeting);
         }
+
+        public ObjectGuid TrainerGUID;
+        public int TrainerType;
+        public int TrainerID = 1;
+        public List<TrainerListSpell> Spells = new();
+        public string Greeting;
     }
 
-    internal class GossipPOI : ServerPacket
+    class GossipPOI : ServerPacket
     {
-        public uint Flags;
-        public uint Icon;
-
-        public uint Id;
-        public uint Importance;
-        public string Name;
-        public Vector3 Pos;
-        public uint WMOGroupID;
-
-        public GossipPOI() : base(ServerOpcodes.GossipPoi)
-        {
-        }
+        public GossipPOI() : base(ServerOpcodes.GossipPoi) { }
 
         public override void Write()
         {
@@ -241,51 +208,47 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
             _worldPacket.WriteString(Name);
         }
+
+        public uint Id;
+        public uint Flags;
+        public Vector3 Pos;
+        public uint Icon;
+        public uint Importance;
+        public uint WMOGroupID;
+        public string Name;
     }
 
-    internal class SpiritHealerActivate : ClientPacket
+    class SpiritHealerActivate : ClientPacket
     {
-        public ObjectGuid Healer;
-
-        public SpiritHealerActivate(WorldPacket packet) : base(packet)
-        {
-        }
+        public SpiritHealerActivate(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Healer = _worldPacket.ReadPackedGuid();
         }
+
+        public ObjectGuid Healer;
     }
 
-    internal class TrainerBuySpell : ClientPacket
+    class TrainerBuySpell : ClientPacket
     {
-        public uint SpellID;
-
-        public ObjectGuid TrainerGUID;
-        public uint TrainerID;
-
-        public TrainerBuySpell(WorldPacket packet) : base(packet)
-        {
-        }
+        public TrainerBuySpell(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             TrainerGUID = _worldPacket.ReadPackedGuid();
             TrainerID = _worldPacket.ReadUInt32();
-            SpellID = _worldPacket.ReadUInt32();
+            SpellID= _worldPacket.ReadUInt32();
         }
-    }
-
-    internal class TrainerBuyFailed : ServerPacket
-    {
-        public uint SpellID;
-        public TrainerFailReason TrainerFailedReason;
 
         public ObjectGuid TrainerGUID;
+        public uint TrainerID;
+        public uint SpellID;
+    }
 
-        public TrainerBuyFailed() : base(ServerOpcodes.TrainerBuyFailed)
-        {
-        }
+    class TrainerBuyFailed : ServerPacket
+    {
+        public TrainerBuyFailed() : base(ServerOpcodes.TrainerBuyFailed) { }
 
         public override void Write()
         {
@@ -293,32 +256,27 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(SpellID);
             _worldPacket.WriteUInt32((uint)TrainerFailedReason);
         }
+
+        public ObjectGuid TrainerGUID;
+        public uint SpellID;
+        public TrainerFailReason TrainerFailedReason;
     }
 
-    internal class RequestStabledPets : ClientPacket
+    class RequestStabledPets : ClientPacket
     {
-        public ObjectGuid StableMaster;
-
-        public RequestStabledPets(WorldPacket packet) : base(packet)
-        {
-        }
+        public RequestStabledPets(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             StableMaster = _worldPacket.ReadPackedGuid();
         }
-    }
-
-    internal class SetPetSlot : ClientPacket
-    {
-        public byte DestSlot;
-        public uint PetNumber;
 
         public ObjectGuid StableMaster;
+    }
 
-        public SetPetSlot(WorldPacket packet) : base(packet)
-        {
-        }
+    class SetPetSlot : ClientPacket
+    {
+        public SetPetSlot(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -326,8 +284,12 @@ namespace Game.Networking.Packets
             DestSlot = _worldPacket.ReadUInt8();
             StableMaster = _worldPacket.ReadPackedGuid();
         }
-    }
 
+        public ObjectGuid StableMaster;
+        public uint PetNumber;
+        public byte DestSlot;
+    }
+    
     //Structs
     public struct TreasureItem
     {
@@ -350,7 +312,6 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteInt32(Items.Count);
-
             foreach (TreasureItem treasureItem in Items)
                 treasureItem.Write(data);
         }
@@ -358,19 +319,19 @@ namespace Game.Networking.Packets
 
     public class ClientGossipOptions
     {
-        public string Confirm = "";
-        public GossipOptionFlags Flags;
         public int GossipOptionID;
-        public int OptionCost;
-        public byte OptionFlags;
-        public uint OptionLanguage;
         public GossipOptionNpc OptionNPC;
+        public byte OptionFlags;
+        public int OptionCost;
+        public uint OptionLanguage;
+        public GossipOptionFlags Flags;
         public int OrderIndex;
-        public int? OverrideIconID;
-        public int? SpellID;
         public GossipOptionStatus Status;
         public string Text = "";
+        public string Confirm = "";
         public TreasureLootList Treasure = new();
+        public int? SpellID;
+        public int? OverrideIconID;
 
         public void Write(WorldPacket data)
         {
@@ -403,13 +364,13 @@ namespace Game.Networking.Packets
 
     public class ClientGossipText
     {
-        public uint ContentTuningID;
-        public uint QuestFlags;
-        public uint QuestFlagsEx;
         public uint QuestID;
-        public string QuestTitle;
+        public uint ContentTuningID;
         public int QuestType;
         public bool Repeatable;
+        public string QuestTitle;
+        public uint QuestFlags;
+        public uint QuestFlagsEx;
 
         public void Write(WorldPacket data)
         {
@@ -429,20 +390,6 @@ namespace Game.Networking.Packets
 
     public class VendorItemPkt
     {
-        public bool DoNotFilterOnVendor;
-        public int Durability;
-        public int ExtendedCostID;
-        public ItemInstance Item = new();
-        public bool Locked;
-
-        public int MuID;
-        public int PlayerConditionFailed;
-        public ulong Price;
-        public int Quantity = -1;
-        public bool Refundable;
-        public int StackCount;
-        public int Type;
-
         public void Write(WorldPacket data)
         {
             data.WriteUInt64(Price);
@@ -457,19 +404,32 @@ namespace Game.Networking.Packets
             data.WriteBit(DoNotFilterOnVendor);
             data.WriteBit(Refundable);
             data.FlushBits();
-
+            
             Item.Write(data);
         }
+
+        public int MuID;
+        public int Type;
+        public ItemInstance Item = new();
+        public int Quantity = -1;
+        public ulong Price;
+        public int Durability;
+        public int StackCount;
+        public int ExtendedCostID;
+        public int PlayerConditionFailed;
+        public bool Locked;
+        public bool DoNotFilterOnVendor;
+        public bool Refundable;
     }
 
     public class TrainerListSpell
     {
+        public uint SpellID;
         public uint MoneyCost;
-        public uint[] ReqAbility = new uint[SharedConst.MaxTrainerspellAbilityReqs];
-        public byte ReqLevel;
         public uint ReqSkillLine;
         public uint ReqSkillRank;
-        public uint SpellID;
+        public uint[] ReqAbility = new uint[SharedConst.MaxTrainerspellAbilityReqs];
         public TrainerSpellState Usable;
+        public byte ReqLevel;
     }
 }

@@ -1,29 +1,30 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
 using Framework.Constants;
 using Game.Entities;
 using Game.Groups;
+using Game.Maps;
+using System;
 
 namespace Game.AI
 {
-    internal enum FollowState
+    enum FollowState
     {
         None = 0x00,
-        Inprogress = 0x01, //must always have this State for any follow
-        Paused = 0x02,     //disables following
-        Complete = 0x04,   //follow is completed and may end
-        PreEvent = 0x08,   //not implemented (allow pre event to run, before follow is initiated)
-        PostEvent = 0x10   //can be set at complete and allow post event to run
+        Inprogress = 0x01,                    //must always have this state for any follow
+        Paused = 0x02,                        //disables following
+        Complete = 0x04,                      //follow is completed and may end
+        PreEvent = 0x08,                      //not implemented (allow pre event to run, before follow is initiated)
+        PostEvent = 0x10                      //can be set at complete and allow post event to run
     }
 
-    internal class FollowerAI : ScriptedAI
+    class FollowerAI : ScriptedAI
     {
-        private FollowState _followState;
-        private ObjectGuid _leaderGUID;
-        private uint _questForFollow;
-        private uint _updateFollowTimer;
+        ObjectGuid _leaderGUID;
+        uint _updateFollowTimer;
+        FollowState _followState;
+        uint _questForFollow;
 
         public FollowerAI(Creature creature) : base(creature)
         {
@@ -33,8 +34,7 @@ namespace Game.AI
 
         public override void MoveInLineOfSight(Unit who)
         {
-            if (HasFollowState(FollowState.Inprogress) &&
-                !ShouldAssistPlayerInCombatAgainst(who))
+            if (HasFollowState(FollowState.Inprogress) && !ShouldAssistPlayerInCombatAgainst(who))
                 return;
 
             base.MoveInLineOfSight(who);
@@ -42,27 +42,24 @@ namespace Game.AI
 
         public override void JustDied(Unit killer)
         {
-            if (!HasFollowState(FollowState.Inprogress) ||
-                _leaderGUID.IsEmpty() ||
-                _questForFollow == 0)
+            if (!HasFollowState(FollowState.Inprogress) || _leaderGUID.IsEmpty() || _questForFollow == 0)
                 return;
 
-            // @todo need a better check for quests with Time limit.
+            // @todo need a better check for quests with time limit.
             Player player = GetLeaderForFollower();
-
             if (player)
             {
                 Group group = player.GetGroup();
-
                 if (group)
+                {
                     for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                     {
                         Player member = groupRef.GetSource();
-
                         if (member)
                             if (member.IsInMap(player))
                                 member.FailQuest(_questForFollow);
                     }
+                }
                 else
                     player.FailQuest(_questForFollow);
             }
@@ -74,40 +71,32 @@ namespace Game.AI
                 return;
 
             Player player = GetLeaderForFollower();
-
             if (player != null)
             {
                 if (HasFollowState(FollowState.Paused))
                     return;
-
                 me.GetMotionMaster().MoveFollow(player, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
             }
             else
-            {
                 me.DespawnOrUnsummon();
-            }
         }
 
         public override void OwnerAttackedBy(Unit attacker)
         {
-            if (!me.HasReactState(ReactStates.Passive) &&
-                ShouldAssistPlayerInCombatAgainst(attacker))
+            if (!me.HasReactState(ReactStates.Passive) && ShouldAssistPlayerInCombatAgainst(attacker))
                 me.EngageWithTarget(attacker);
         }
 
         public override void UpdateAI(uint uiDiff)
         {
-            if (HasFollowState(FollowState.Inprogress) &&
-                !me.IsEngaged())
+            if (HasFollowState(FollowState.Inprogress) && !me.IsEngaged())
             {
                 if (_updateFollowTimer <= uiDiff)
                 {
-                    if (HasFollowState(FollowState.Complete) &&
-                        !HasFollowState(FollowState.PostEvent))
+                    if (HasFollowState(FollowState.Complete) && !HasFollowState(FollowState.PostEvent))
                     {
                         Log.outDebug(LogFilter.ScriptsAi, $"FollowerAI::UpdateAI: is set completed, despawns. ({me.GetGUID()})");
                         me.DespawnOrUnsummon();
-
                         return;
                     }
 
@@ -115,17 +104,14 @@ namespace Game.AI
                     bool questAbandoned = (_questForFollow != 0);
 
                     Player player = GetLeaderForFollower();
-
                     if (player)
                     {
                         Group group = player.GetGroup();
-
                         if (group)
                         {
                             for (GroupReference groupRef = group.GetFirstMember(); groupRef != null && (maxRangeExceeded || questAbandoned); groupRef = groupRef.Next())
                             {
                                 Player member = groupRef.GetSource();
-
                                 if (member == null)
                                     continue;
 
@@ -135,9 +121,7 @@ namespace Game.AI
                                 if (questAbandoned)
                                 {
                                     QuestStatus status = member.GetQuestStatus(_questForFollow);
-
-                                    if ((status == QuestStatus.Complete) ||
-                                        (status == QuestStatus.Incomplete))
+                                    if ((status == QuestStatus.Complete) || (status == QuestStatus.Incomplete))
                                         questAbandoned = false;
                                 }
                             }
@@ -150,9 +134,7 @@ namespace Game.AI
                             if (questAbandoned)
                             {
                                 QuestStatus status = player.GetQuestStatus(_questForFollow);
-
-                                if ((status == QuestStatus.Complete) ||
-                                    (status == QuestStatus.Incomplete))
+                                if ((status == QuestStatus.Complete) || (status == QuestStatus.Incomplete))
                                     questAbandoned = false;
                             }
                         }
@@ -162,41 +144,44 @@ namespace Game.AI
                     {
                         Log.outDebug(LogFilter.ScriptsAi, $"FollowerAI::UpdateAI: failed because player/group was to far away or not found ({me.GetGUID()})");
                         me.DespawnOrUnsummon();
-
                         return;
                     }
 
                     _updateFollowTimer = 1000;
                 }
                 else
-                {
                     _updateFollowTimer -= uiDiff;
-                }
             }
 
             UpdateFollowerAI(uiDiff);
         }
 
+        void UpdateFollowerAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+
         public void StartFollow(Player player, uint factionForFollower = 0, Quest quest = null)
         {
             CreatureData cdata = me.GetCreatureData();
-
             if (cdata != null)
-                if (WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc) &&
-                    cdata.spawnGroupData.flags.HasFlag(SpawnGroupFlags.EscortQuestNpc))
+            {
+                if (WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc) && cdata.spawnGroupData.flags.HasFlag(SpawnGroupFlags.EscortQuestNpc))
                     me.SaveRespawnTime(me.GetRespawnDelay());
+            }
 
             if (me.IsEngaged())
             {
                 Log.outDebug(LogFilter.Scripts, $"FollowerAI::StartFollow: attempt to StartFollow while in combat. ({me.GetGUID()})");
-
                 return;
             }
 
             if (HasFollowState(FollowState.Inprogress))
             {
                 Log.outError(LogFilter.Scenario, $"FollowerAI::StartFollow: attempt to StartFollow while already following. ({me.GetGUID()})");
-
                 return;
             }
 
@@ -223,8 +208,7 @@ namespace Game.AI
 
         public void SetFollowPaused(bool paused)
         {
-            if (!HasFollowState(FollowState.Inprogress) ||
-                HasFollowState(FollowState.Complete))
+            if (!HasFollowState(FollowState.Inprogress) || HasFollowState(FollowState.Complete))
                 return;
 
             if (paused)
@@ -239,7 +223,6 @@ namespace Game.AI
                 RemoveFollowState(FollowState.Paused);
 
                 Player leader = GetLeaderForFollower();
-
                 if (leader != null)
                     me.GetMotionMaster().MoveFollow(leader, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
             }
@@ -251,9 +234,7 @@ namespace Game.AI
                 me.GetMotionMaster().Remove(MovementGeneratorType.Follow);
 
             if (withEndEvent)
-            {
                 AddFollowState(FollowState.PostEvent);
-            }
             else
             {
                 if (HasFollowState(FollowState.PostEvent))
@@ -263,63 +244,42 @@ namespace Game.AI
             AddFollowState(FollowState.Complete);
         }
 
-        public override bool IsEscorted()
-        {
-            return HasFollowState(FollowState.Inprogress);
-        }
-
-        private void UpdateFollowerAI(uint diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            DoMeleeAttackIfReady();
-        }
-
-        private Player GetLeaderForFollower()
+        Player GetLeaderForFollower()
         {
             Player player = Global.ObjAccessor.GetPlayer(me, _leaderGUID);
-
             if (player)
             {
                 if (player.IsAlive())
-                {
                     return player;
-                }
                 else
                 {
                     Group group = player.GetGroup();
-
                     if (group)
+                    {
                         for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                         {
                             Player member = groupRef.GetSource();
-
-                            if (member &&
-                                me.IsWithinDistInMap(member, 100.0f) &&
-                                member.IsAlive())
+                            if (member && me.IsWithinDistInMap(member, 100.0f) && member.IsAlive())
                             {
                                 Log.outDebug(LogFilter.Scripts, $"FollowerAI::GetLeaderForFollower: GetLeader changed and returned new leader. ({me.GetGUID()})");
                                 _leaderGUID = member.GetGUID();
-
                                 return member;
                             }
                         }
+                    }
                 }
             }
 
             Log.outDebug(LogFilter.Scripts, $"FollowerAI::GetLeaderForFollower: GetLeader can not find suitable leader. ({me.GetGUID()})");
-
             return null;
         }
 
         //This part provides assistance to a player that are attacked by who, even if out of normal aggro range
         //It will cause me to attack who that are attacking _any_ player (which has been confirmed may happen also on offi)
         //The flag (type_flag) is unconfirmed, but used here for further research and is a good candidate.
-        private bool ShouldAssistPlayerInCombatAgainst(Unit who)
+        bool ShouldAssistPlayerInCombatAgainst(Unit who)
         {
-            if (!who ||
-                !who.GetVictim())
+            if (!who || !who.GetVictim())
                 return false;
 
             //experimental (unknown) flag not present
@@ -337,8 +297,7 @@ namespace Game.AI
                 return false;
 
             // or if enemy is in evade mode
-            if (who.GetTypeId() == TypeId.Unit &&
-                who.ToCreature().IsInEvadeMode())
+            if (who.GetTypeId() == TypeId.Unit && who.ToCreature().IsInEvadeMode())
                 return false;
 
             //never attack friendly
@@ -346,26 +305,18 @@ namespace Game.AI
                 return false;
 
             //too far away and no free sight?
-            if (!me.IsWithinDistInMap(who, 100.0f) ||
-                !me.IsWithinLOSInMap(who))
+            if (!me.IsWithinDistInMap(who, 100.0f) || !me.IsWithinLOSInMap(who))
                 return false;
 
             return true;
         }
 
-        private bool HasFollowState(FollowState uiFollowState)
-        {
-            return (_followState & uiFollowState) != 0;
-        }
+        public override bool IsEscorted() { return HasFollowState(FollowState.Inprogress); }
 
-        private void AddFollowState(FollowState uiFollowState)
-        {
-            _followState |= uiFollowState;
-        }
+        bool HasFollowState(FollowState uiFollowState) { return (_followState & uiFollowState) != 0; }
 
-        private void RemoveFollowState(FollowState uiFollowState)
-        {
-            _followState &= ~uiFollowState;
-        }
+        void AddFollowState(FollowState uiFollowState) { _followState |= uiFollowState; }
+
+        void RemoveFollowState(FollowState uiFollowState) { _followState &= ~uiFollowState; }
     }
 }

@@ -27,7 +27,7 @@ namespace Framework.Constants
         ModStealthDetect = 17,
         ModInvisibility = 18,
         ModInvisibilityDetect = 19,
-        ObsModHealth = 20, // 20, 21 Unofficial
+        ObsModHealth = 20,   // 20, 21 Unofficial
         ObsModPower = 21,
         ModResistance = 22,
         PeriodicTriggerSpell = 23,
@@ -53,9 +53,9 @@ namespace Framework.Constants
         ProcTriggerDamage = 43,
         TrackCreatures = 44,
         TrackResources = 45,
-        Unk46 = 46, // Ignore All Gear Test Spells
+        Unk46 = 46,   // Ignore All Gear Test Spells
         ModParryPercent = 47,
-        PeriodicTriggerSpellFromClient = 48, // One Periodic Spell
+        PeriodicTriggerSpellFromClient = 48,   // One Periodic Spell
         ModDodgePercent = 49,
         ModCriticalHealingAmount = 50,
         ModBlockPercent = 51,
@@ -70,7 +70,7 @@ namespace Framework.Constants
         ModPacifySilence = 60,
         ModScale = 61,
         PeriodicHealthFunnel = 62,
-        ModAdditionalPowerCost = 63, // NYI
+        ModAdditionalPowerCost = 63,   // NYI
         PeriodicManaLeech = 64,
         ModCastingSpeedNotStack = 65,
         FeignDeath = 66,
@@ -97,7 +97,7 @@ namespace Framework.Constants
         ModDamagePercentTaken = 87,
         ModHealthRegenPercent = 88,
         PeriodicDamagePercent = 89,
-        Unk90 = 90, // Old ModResistChance
+        Unk90 = 90,   // Old ModResistChance
         ModDetectRange = 91,
         PreventsFleeing = 92,
         ModUnattackable = 93,
@@ -148,7 +148,7 @@ namespace Framework.Constants
         ModMeleeHaste = 138,
         ForceReaction = 139,
         ModRangedHaste = 140,
-        Unk141 = 141, // Old ModRangedAmmoHaste, Unused Now
+        Unk141 = 141,  // Old ModRangedAmmoHaste, Unused Now
         ModBaseResistancePct = 142,
         ModRecoveryRateBySpellLabel = 143, // NYI
         SafeFall = 144,
@@ -156,18 +156,18 @@ namespace Framework.Constants
         AllowTamePetType = 146,
         MechanicImmunityMask = 147,
         ModChargeRecoveryRate = 148, // NYI
-        ReducePushback = 149,        //    Reduce Pushback
+        ReducePushback = 149,  //    Reduce Pushback
         ModShieldBlockvaluePct = 150,
-        TrackStealthed = 151,   //    Track Stealthed
-        ModDetectedRange = 152, //    Mod Detected Range
+        TrackStealthed = 151,  //    Track Stealthed
+        ModDetectedRange = 152,  //    Mod Detected Range
         ModAutoAttackRange = 153,
-        ModStealthLevel = 154,   //    Stealth Level Modifier
-        ModWaterBreathing = 155, //    Mod Water Breathing
-        ModReputationGain = 156, //    Mod Reputation Gain
-        PetDamageMulti = 157,    //    Mod Pet Damage
+        ModStealthLevel = 154,  //    Stealth Level Modifier
+        ModWaterBreathing = 155,  //    Mod Water Breathing
+        ModReputationGain = 156,  //    Mod Reputation Gain
+        PetDamageMulti = 157,  //    Mod Pet Damage
         AllowTalentSwapping = 158,
         NoPvpCredit = 159,
-        Unk160 = 160, // Old ModAoeAvoidance. Unused 4.3.4
+        Unk160 = 160,  // Old ModAoeAvoidance. Unused 4.3.4
         ModHealthRegenInCombat = 161,
         PowerBurn = 162,
         ModCritDamageBonus = 163,
@@ -180,16 +180,16 @@ namespace Framework.Constants
         DetectAmore = 170,
         ModSpeedNotStack = 171,
         ModMountedSpeedNotStack = 172,
-        ModRecoveryRate2 = 173,            // NYI
-        ModSpellDamageOfStatPercent = 174, // By Defeult Intelect, Dependent From ModSpellHealingOfStatPercent
+        ModRecoveryRate2 = 173,  // NYI
+        ModSpellDamageOfStatPercent = 174,  // By Defeult Intelect, Dependent From ModSpellHealingOfStatPercent
         ModSpellHealingOfStatPercent = 175,
         SpiritOfRedemption = 176,
         AoeCharm = 177,
         ModMaxPowerPct = 178,
         ModPowerDisplay = 179,
         ModFlatSpellDamageVersus = 180,
-        ModSpellCurrencyReagentsCountPct = 181,      // NYI
-        SuppressItemPassiveEffectBySpellLabel = 182, //NYI
+        ModSpellCurrencyReagentsCountPct = 181,  // NYI
+        SuppressItemPassiveEffectBySpellLabel = 182,  //NYI
         ModCritChanceVersusTargetHealth = 183,
         ModAttackerMeleeHitChance = 184,
         ModAttackerRangedHitChance = 185,
@@ -203,16 +203,16 @@ namespace Framework.Constants
         MeleeSlow = 193,
         ModTargetAbsorbSchool = 194,
         LearnSpell = 195,
-        ModCooldown = 196, // Only 24818 Noxious Breath
+        ModCooldown = 196,  // Only 24818 Noxious Breath
         ModAttackerSpellAndWeaponCritChance = 197,
         ModCombatRatingFromCombatRating = 198,
-        Unk199 = 199, // Old ModIncreasesSpellPctToHit. Unused 4.3.4
+        Unk199 = 199,  // Old ModIncreasesSpellPctToHit. Unused 4.3.4
         ModXpPct = 200,
         Fly = 201,
         IgnoreCombatResult = 202,
-        PreventInterrupt = 203,     // NYI
+        PreventInterrupt = 203, // NYI
         PreventCorpseRelease = 204, // NYI
-        ModChargeCooldown = 205,    // NYI
+        ModChargeCooldown = 205, // NYI
         ModIncreaseVehicleFlightSpeed = 206,
         ModIncreaseMountedFlightSpeed = 207,
         ModIncreaseFlightSpeed = 208,
@@ -240,7 +240,7 @@ namespace Framework.Constants
         ModMaxHealth = 230,
         ProcTriggerSpellWithValue = 231,
         MechanicDurationMod = 232,
-        ChangeModelForAllHumanoids = 233, // Client-Side Only
+        ChangeModelForAllHumanoids = 233,  // Client-Side Only
         MechanicDurationModNotStack = 234,
         HoverNoHeightOffset = 235,
         ControlVehicle = 236,
@@ -281,16 +281,16 @@ namespace Framework.Constants
         ModSpellDamageFromCaster = 271,
         ModBlockValuePct = 272, //NYI
         XRay = 273,
-        ModBlockValueFlat = 274, //NYI
+        ModBlockValueFlat = 274,  //NYI
         ModIgnoreShapeshift = 275,
         ModDamageDoneForMechanic = 276,
-        Unk277 = 277, // Old ModMaxAffectedTargets. Unused 4.3.4
+        Unk277 = 277,  // Old ModMaxAffectedTargets. Unused 4.3.4
         ModDisarmRanged = 278,
         InitializeImages = 279,
         ProvideSpellFocus = 280,
         ModGuildReputationGainPct = 281, // NYI
         ModBaseHealthPct = 282,
-        ModHealingReceived = 283, // Possibly Only For Some Spell Family Class Spells
+        ModHealingReceived = 283,  // Possibly Only For Some Spell Family Class Spells
         Linked = 284,
         Linked2 = 285,
         ModRecoveryRate = 286,
@@ -316,7 +316,7 @@ namespace Framework.Constants
         ModCritChanceForCaster = 306,
         CastWhileWalkingBySpellLabel = 307, //NYI
         ModCritChanceForCasterWithAbilities = 308,
-        ModResilience = 309, // NYI
+        ModResilience = 309,  // NYI
         ModCreatureAoeDamageAvoidance = 310,
         IgnoreCombat = 311, //NYI
         AnimReplacementSet = 312,
@@ -330,11 +330,11 @@ namespace Framework.Constants
         Unk320 = 320,
         ModNoActions = 321,
         InterfereTargetting = 322,
-        Unk323 = 323,                             // Not Used In 4.3.4
-        OverrideUnlockedAzeriteEssenceRank = 324, // testing aura
-        LearnPvpTalent = 325,                     // NYI
-        PhaseGroup = 326,                         // Phase Related
-        PhaseAlwaysVisible = 327,                 // Sets PhaseShiftFlags::AlwaysVisible
+        Unk323 = 323,  // Not Used In 4.3.4
+        OverrideUnlockedAzeriteEssenceRank = 324,  // testing aura
+        LearnPvpTalent = 325,  // NYI
+        PhaseGroup = 326,  // Phase Related
+        PhaseAlwaysVisible = 327,  // Sets PhaseShiftFlags::AlwaysVisible
         TriggerSpellOnPowerPct = 328,
         ModPowerGainPct = 329,
         CastWhileWalking = 330,
@@ -347,49 +347,49 @@ namespace Framework.Constants
         ModVendorItemsPrices = 337,
         ModDurabilityLoss = 338,
         ModCritChanceForCasterPet = 339,
-        ModResurrectedHealthByGuildMember = 340, // Increases Health Gained When Resurrected By A Guild Member By X
+        ModResurrectedHealthByGuildMember = 340,  // Increases Health Gained When Resurrected By A Guild Member By X
         ModSpellCategoryCooldown = 341,
         ModMeleeRangedHaste2 = 342,
         ModMeleeDamageFromCaster = 343,
         ModAutoAttackDamage = 344,
         BypassArmorForCaster = 345,
-        EnableAltPower = 346, // Nyi
+        EnableAltPower = 346,  // Nyi
         ModSpellCooldownByHaste = 347,
-        ModMoneyGain = 348, // Modifies gold gains from source: [Misc = 0, Quests][Misc = 1, Loot]
+        ModMoneyGain = 348,  // Modifies gold gains from source: [Misc = 0, Quests][Misc = 1, Loot]
         ModCurrencyGain = 349,
         Unk350 = 350,
         ModCurrencyCategoryGainPct = 351, //NYI
         Unk352 = 352,
-        ModCamouflage = 353,                       // Nyi
-        ModHealingDonePctVersusTargetHealth = 354, // Restoration Shaman Mastery - Mod Healing Based On Target'S Health (Less = More Healing)
-        ModCastingSpeed = 355,                     // NYI
+        ModCamouflage = 353,  // Nyi
+        ModHealingDonePctVersusTargetHealth = 354,  // Restoration Shaman Mastery - Mod Healing Based On Target'S Health (Less = More Healing)
+        ModCastingSpeed = 355,  // NYI
         ProvideTotemCategory = 356,
         EnableBoss1UnitFrame = 357,
         WorgenAlteredForm = 358,
         ModHealingDoneVersusAurastate = 359,
-        ProcTriggerSpellCopy = 360,              // Procs The Same Spell That Caused This Proc (Dragonwrath, Tarecgosa'S Rest)
-        OverrideAutoattackWithMeleeSpell = 361,  // NYI
-        Unk362 = 362,                            // Not Used In 4.3.4
-        ModNextSpell = 363,                      // Used By 101601 Throw Totem - Causes The Client To Initialize Spell Cast With Specified Spell
-        Unk364 = 364,                            // Not Used In 4.3.4
-        MaxFarClipPlane = 365,                   // Overrides Client'S View Distance Setting To Max("Fair", CurrentSetting) And Turns Off Terrain Display
-        OverrideSpellPowerByApPct = 366,         // Sets Spellpower Equal To % Of Attack Power, Discarding All Other Bonuses (From Gear And Buffs)
+        ProcTriggerSpellCopy = 360,  // Procs The Same Spell That Caused This Proc (Dragonwrath, Tarecgosa'S Rest)
+        OverrideAutoattackWithMeleeSpell = 361, // NYI
+        Unk362 = 362,  // Not Used In 4.3.4
+        ModNextSpell = 363,  // Used By 101601 Throw Totem - Causes The Client To Initialize Spell Cast With Specified Spell
+        Unk364 = 364,  // Not Used In 4.3.4
+        MaxFarClipPlane = 365,  // Overrides Client'S View Distance Setting To Max("Fair", CurrentSetting) And Turns Off Terrain Display
+        OverrideSpellPowerByApPct = 366,  // Sets Spellpower Equal To % Of Attack Power, Discarding All Other Bonuses (From Gear And Buffs)
         OverrideAutoattackWithRangedSpell = 367, // NYI
-        Unk368 = 368,                            // Not Used In 4.3.4
+        Unk368 = 368,  // Not Used In 4.3.4
         EnablePowerBarTimer = 369,
         SpellOverrideNameGroup = 370, // picks a random SpellOverrideName id from a group (group id in miscValue)
         Unk371 = 371,
         OverrideMountFromSet = 372, // NYI
-        ModSpeedNoControl = 373,    // NYI
+        ModSpeedNoControl = 373, // NYI
         ModifyFallDamagePct = 374,
         ModPossessPet = 375,
         ModCurrencyGainFromSource = 376, // NYI
-        CastWhileWalkingAll = 377,       // Enables casting all spells while moving
+        CastWhileWalkingAll = 377, // Enables casting all spells while moving
         Unk378 = 378,
         ModManaRegenPct = 379,
         Unk380 = 380,
         ModDamageTakenFromCasterPet = 381, // NYI
-        ModPetStatPct = 382,               // NYI
+        ModPetStatPct = 382, // NYI
         IgnoreSpellCooldown = 383,
         Unk384 = 384,
         Unk385 = 385,
@@ -413,14 +413,14 @@ namespace Framework.Constants
         OverrideSpellVisual = 403,
         OverrideAttackPowerBySpPct = 404,
         ModRatingPct = 405,
-        KeyboundOverride = 406, // NYI
+        KeyboundOverride = 406,  // NYI
         ModFear2 = 407,
         SetActionButtonSpellCount = 408,
         CanTurnWhileFalling = 409,
         Unk410 = 410,
         ModMaxCharges = 411,
         Unk412 = 412,
-        ModRangedAttackDeflectChance = 413,      //NYI
+        ModRangedAttackDeflectChance = 413, //NYI
         ModRangedAttackBlockChanceInFront = 414, //NYI
         Unk415 = 415,
         ModCooldownByHasteRegen = 416,
@@ -428,7 +428,7 @@ namespace Framework.Constants
         ModMaxPower = 418, // NYI
         ModBaseManaPct = 419,
         ModBattlePetXpPct = 420,
-        ModAbsorbEffectsDonePct = 421,  // NYI
+        ModAbsorbEffectsDonePct = 421, // NYI
         ModAbsorbEffectsTakenPct = 422, //NYI
         ModManaCostPct = 423,
         CasterIgnoreLos = 424, //NYI
@@ -449,8 +449,8 @@ namespace Framework.Constants
         Unk439 = 439,
         ModMultistrikeDamage = 440, // NYI
         ModMultistrikeChance = 441, // NYI
-        ModReadiness = 442,         // NYI
-        ModLeech = 443,             // NYI
+        ModReadiness = 442, // NYI
+        ModLeech = 443, // NYI
         Unk444 = 444,
         Unk445 = 445,
         Unk446 = 446,
@@ -469,9 +469,9 @@ namespace Framework.Constants
         IgnoreMovementForces = 459,
         ResetCooldownsOnDuelStart = 460,
         Unk461 = 461,
-        ModHealingAndAbsorbFromCaster = 462,     // NYI
+        ModHealingAndAbsorbFromCaster = 462, // NYI
         ConvertCritRatingPctToParryRating = 463, // NYI
-        ModAttackPowerOfBonusArmor = 464,        // NYI
+        ModAttackPowerOfBonusArmor = 464, // NYI
         ModBonusArmor = 465,
         ModBonusArmorPct = 466,
         ModStatBonusPct = 467,
@@ -490,7 +490,7 @@ namespace Framework.Constants
         ModArtifactItemLevel = 480,
         ConvertConsumedRune = 481,
         Unk482 = 482,
-        SuppressTransforms = 483,  // NYI
+        SuppressTransforms = 483, // NYI
         AllowInterruptSpell = 484, // NYI
         ModMovementForceMagnitude = 485,
         Unk486 = 486,
@@ -504,20 +504,20 @@ namespace Framework.Constants
         SetPowerPointCharge = 494, // NYI
         TriggerSpellOnExpire = 495,
         AllowChangingEquipmentInTorghast = 496, // NYI
-        ModAnimaGain = 497,                     // NYI
-        CurrencyLossPctOnDeath = 498,           // NYI
+        ModAnimaGain = 497, // NYI
+        CurrencyLossPctOnDeath = 498, // NYI
         ModRestedXpConsumption = 499,
         IgnoreSpellChargeCooldown = 500, // NYI
         ModCriticalDamageTakenFromCaster = 501,
-        ModVersatilityDamageDoneBenefit = 502,  // NYI
+        ModVersatilityDamageDoneBenefit = 502, // NYI
         ModVersatilityHealingDoneBenefit = 503, // NYI
         ModHealingTakenFromCaster = 504,
         ModPlayerChoiceRerolls = 505, // NYI
-        DisableInertia = 506,         // NYI
+        DisableInertia = 506, // NYI
         ModDamageTakenFromCasterByLabel = 507,
         Unk508 = 508,
         Unk509 = 509,
-        ModifiedRaidInstance = 510,  // NYI; Related to "Fated" raid affixes
+        ModifiedRaidInstance = 510, // NYI; Related to "Fated" raid affixes
         ApplyProfessionEffect = 511, // Nyi; Miscvalue[0] = Professioneffectid
         Unk512 = 512,
         Unk513 = 513,
@@ -549,14 +549,14 @@ namespace Framework.Constants
     public enum AuraEffectHandleModes
     {
         Default = 0x0,
-        Real = 0x01,                                // Handler Applies/Removes Effect From Unit
-        SendForClient = 0x02,                       // Handler Sends Apply/Remove Packet To Unit
-        ChangeAmount = 0x04,                        // Handler Updates Effect On Target After Effect Amount Change
-        Reapply = 0x08,                             // Handler Updates Effect On Target After Aura Is Reapplied On Target
-        Stat = 0x10,                                // Handler Updates Effect On Target When Stat Removal/Apply Is Needed For Calculations By Core
-        Skill = 0x20,                               // Handler Updates Effect On Target When Skill Removal/Apply Is Needed For Calculations By Core
+        Real = 0x01, // Handler Applies/Removes Effect From Unit
+        SendForClient = 0x02, // Handler Sends Apply/Remove Packet To Unit
+        ChangeAmount = 0x04, // Handler Updates Effect On Target After Effect Amount Change
+        Reapply = 0x08, // Handler Updates Effect On Target After Aura Is Reapplied On Target
+        Stat = 0x10, // Handler Updates Effect On Target When Stat Removal/Apply Is Needed For Calculations By Core
+        Skill = 0x20, // Handler Updates Effect On Target When Skill Removal/Apply Is Needed For Calculations By Core
         SendForClientMask = (SendForClient | Real), // Any Case Handler Need To Send Packet
-        ChangeAmountMask = (ChangeAmount | Real),   // Any Case Handler Applies Effect Depending On Amount
+        ChangeAmountMask = (ChangeAmount | Real), // Any Case Handler Applies Effect Depending On Amount
         ChangeAmountSendForClientMask = (ChangeAmountMask | SendForClientMask),
         RealOrReapplyMask = (Reapply | Real)
     }
@@ -570,15 +570,15 @@ namespace Framework.Constants
     public enum AuraTriggerOnHealthChangeDirection
     {
         Above = 0,
-        Below = 1
+        Below = 1,
     }
 
     // Diminishing Returns Types
     public enum DiminishingReturnsType
     {
-        None = 0,   // this spell is not diminished, but may have its duration limited
-        Player = 1, // this spell is diminished only when applied on players
-        All = 2     // this spell is diminished in every case
+        None = 0,                                // this spell is not diminished, but may have its duration limited
+        Player = 1,                              // this spell is diminished only when applied on players
+        All = 2                                  // this spell is diminished in every case
     }
 
     // Diminishing Return Groups

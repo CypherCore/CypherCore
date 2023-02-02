@@ -6,7 +6,7 @@ namespace Framework.Constants
     public enum AreaTriggerFlags
     {
         HasAbsoluteOrientation = 0x01, // Nyi
-        HasDynamicShape = 0x02,        // Implemented For Spheres
+        HasDynamicShape = 0x02, // Implemented For Spheres
         HasAttached = 0x04,
         HasFaceMovementDir = 0x08,
         HasFollowsTerrain = 0x010, // Nyi

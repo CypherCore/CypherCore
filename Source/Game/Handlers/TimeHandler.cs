@@ -4,13 +4,14 @@
 using Framework.Constants;
 using Game.Networking;
 using Game.Networking.Packets;
+using System.Linq;
 
 namespace Game
 {
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.ServerTimeOffsetRequest, Status = SessionStatus.Authed, Processing = PacketProcessing.Inplace)]
-        private void HandleServerTimeOffsetRequest(ServerTimeOffsetRequest packet)
+        void HandleServerTimeOffsetRequest(ServerTimeOffsetRequest packet)
         {
             ServerTimeOffset response = new();
             response.Time = GameTime.GetGameTime();

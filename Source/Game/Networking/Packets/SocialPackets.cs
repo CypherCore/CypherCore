@@ -1,32 +1,27 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
+using System;
+using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
     public class SendContactList : ClientPacket
     {
-        public SocialFlag Flags;
-
-        public SendContactList(WorldPacket packet) : base(packet)
-        {
-        }
+        public SendContactList(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Flags = (SocialFlag)_worldPacket.ReadUInt32();
         }
+
+        public SocialFlag Flags;
     }
 
     public class ContactList : ServerPacket
     {
-        public List<ContactInfo> Contacts;
-        public SocialFlag Flags;
-
         public ContactList() : base(ServerOpcodes.ContactList)
         {
             Contacts = new List<ContactInfo>();
@@ -41,25 +36,14 @@ namespace Game.Networking.Packets
             foreach (ContactInfo contact in Contacts)
                 contact.Write(_worldPacket);
         }
+
+        public List<ContactInfo> Contacts;
+        public SocialFlag Flags;
     }
 
     public class FriendStatusPkt : ServerPacket
     {
-        public uint AreaID;
-        public Class ClassID = Class.None;
-        public FriendsResult FriendResult;
-        public ObjectGuid Guid;
-        public uint Level;
-        public bool Mobile;
-        public string Notes;
-        public FriendStatus Status;
-
-        public uint VirtualRealmAddress;
-        public ObjectGuid WowAccountGuid;
-
-        public FriendStatusPkt() : base(ServerOpcodes.FriendStatus)
-        {
-        }
+        public FriendStatusPkt() : base(ServerOpcodes.FriendStatus) { }
 
         public void Initialize(ObjectGuid guid, FriendsResult result, FriendInfo friendInfo)
         {
@@ -89,17 +73,22 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
             _worldPacket.WriteString(Notes);
         }
+
+        public uint VirtualRealmAddress;
+        public string Notes;
+        public Class ClassID = Class.None;
+        public FriendStatus Status;
+        public ObjectGuid Guid;
+        public ObjectGuid WowAccountGuid;
+        public uint Level;
+        public uint AreaID;
+        public FriendsResult FriendResult;
+        public bool Mobile;
     }
 
     public class AddFriend : ClientPacket
     {
-        public string Name;
-
-        public string Notes;
-
-        public AddFriend(WorldPacket packet) : base(packet)
-        {
-        }
+        public AddFriend(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -108,48 +97,40 @@ namespace Game.Networking.Packets
             Name = _worldPacket.ReadString(nameLength);
             Notes = _worldPacket.ReadString(noteslength);
         }
+
+        public string Notes;
+        public string Name;
     }
 
     public class DelFriend : ClientPacket
     {
-        public QualifiedGUID Player;
-
-        public DelFriend(WorldPacket packet) : base(packet)
-        {
-        }
+        public DelFriend(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Player.Read(_worldPacket);
         }
+
+        public QualifiedGUID Player;
     }
 
     public class SetContactNotes : ClientPacket
     {
-        public string Notes;
-
-        public QualifiedGUID Player;
-
-        public SetContactNotes(WorldPacket packet) : base(packet)
-        {
-        }
+        public SetContactNotes(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Player.Read(_worldPacket);
             Notes = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(10));
         }
+
+        public QualifiedGUID Player;
+        public string Notes;
     }
 
     public class AddIgnore : ClientPacket
     {
-        public ObjectGuid AccountGUID;
-
-        public string Name;
-
-        public AddIgnore(WorldPacket packet) : base(packet)
-        {
-        }
+        public AddIgnore(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -157,40 +138,35 @@ namespace Game.Networking.Packets
             AccountGUID = _worldPacket.ReadPackedGuid();
             Name = _worldPacket.ReadString(nameLength);
         }
+
+        public string Name;
+        public ObjectGuid AccountGUID;
     }
 
     public class DelIgnore : ClientPacket
     {
-        public QualifiedGUID Player;
-
-        public DelIgnore(WorldPacket packet) : base(packet)
-        {
-        }
+        public DelIgnore(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Player.Read(_worldPacket);
         }
+
+        public QualifiedGUID Player;
     }
 
-    internal class SocialContractRequest : ClientPacket
+    class SocialContractRequest : ClientPacket
     {
-        public SocialContractRequest(WorldPacket packet) : base(packet)
-        {
-        }
+        public SocialContractRequest(WorldPacket packet) : base(packet) { }
 
-        public override void Read()
-        {
-        }
+        public override void Read() { }
     }
 
-    internal class SocialContractRequestResponse : ServerPacket
+    class SocialContractRequestResponse : ServerPacket
     {
         public bool ShowSocialContract;
 
-        public SocialContractRequestResponse() : base(ServerOpcodes.SocialContractRequestResponse)
-        {
-        }
+        public SocialContractRequestResponse() : base(ServerOpcodes.SocialContractRequestResponse) { }
 
         public override void Write()
         {
@@ -198,23 +174,10 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
         }
     }
-
+    
     //Structs
     public class ContactInfo
     {
-        private readonly uint AreaID;
-        private readonly Class ClassID;
-        private readonly uint Level;
-        private readonly bool Mobile;
-        private readonly uint NativeRealmAddr;
-        private readonly string Notes;
-        private readonly FriendStatus Status;
-        private readonly SocialFlag TypeFlags;
-        private readonly uint VirtualRealmAddr;
-
-        private ObjectGuid Guid;
-        private ObjectGuid WowAccountGuid;
-
         public ContactInfo(ObjectGuid guid, FriendInfo friendInfo)
         {
             Guid = guid;
@@ -245,6 +208,18 @@ namespace Game.Networking.Packets
             data.FlushBits();
             data.WriteString(Notes);
         }
+
+        ObjectGuid Guid;
+        ObjectGuid WowAccountGuid;
+        uint VirtualRealmAddr;
+        uint NativeRealmAddr;
+        SocialFlag TypeFlags;
+        string Notes;
+        FriendStatus Status;
+        uint AreaID;
+        uint Level;
+        Class ClassID;
+        bool Mobile;
     }
 
     public struct QualifiedGUID

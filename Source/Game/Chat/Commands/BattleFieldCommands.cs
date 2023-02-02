@@ -2,32 +2,30 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Framework.IO;
 using Game.BattleFields;
 
 namespace Game.Chat
 {
     [CommandGroup("bf")]
-    internal class BattleFieldCommands
+    class BattleFieldCommands
     {
         [Command("enable", RBACPermissions.CommandBfEnable)]
-        private static bool HandleBattlefieldEnable(CommandHandler handler, uint battleId)
+        static bool HandleBattlefieldEnable(CommandHandler handler, uint battleId)
         {
             BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(handler.GetPlayer().GetMap(), battleId);
-
             if (bf == null)
                 return false;
 
             if (bf.IsEnabled())
             {
                 bf.ToggleBattlefield(false);
-
                 if (battleId == 1)
                     handler.SendGlobalGMSysMessage("Wintergrasp is disabled");
             }
             else
             {
                 bf.ToggleBattlefield(true);
-
                 if (battleId == 1)
                     handler.SendGlobalGMSysMessage("Wintergrasp is enabled");
             }
@@ -36,10 +34,9 @@ namespace Game.Chat
         }
 
         [Command("start", RBACPermissions.CommandBfStart)]
-        private static bool HandleBattlefieldStart(CommandHandler handler, uint battleId)
+        static bool HandleBattlefieldStart(CommandHandler handler, uint battleId)
         {
             BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(handler.GetPlayer().GetMap(), battleId);
-
             if (bf == null)
                 return false;
 
@@ -52,10 +49,9 @@ namespace Game.Chat
         }
 
         [Command("stop", RBACPermissions.CommandBfStop)]
-        private static bool HandleBattlefieldEnd(CommandHandler handler, uint battleId)
+        static bool HandleBattlefieldEnd(CommandHandler handler, uint battleId)
         {
             BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(handler.GetPlayer().GetMap(), battleId);
-
             if (bf == null)
                 return false;
 
@@ -68,15 +64,13 @@ namespace Game.Chat
         }
 
         [Command("switch", RBACPermissions.CommandBfSwitch)]
-        private static bool HandleBattlefieldSwitch(CommandHandler handler, uint battleId)
+        static bool HandleBattlefieldSwitch(CommandHandler handler, uint battleId)
         {
             BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(handler.GetPlayer().GetMap(), battleId);
-
             if (bf == null)
                 return false;
 
             bf.EndBattle(false);
-
             if (battleId == 1)
                 handler.SendGlobalGMSysMessage("Wintergrasp (Command switch used)");
 
@@ -84,15 +78,13 @@ namespace Game.Chat
         }
 
         [Command("timer", RBACPermissions.CommandBfTimer)]
-        private static bool HandleBattlefieldTimer(CommandHandler handler, uint battleId, uint time)
+        static bool HandleBattlefieldTimer(CommandHandler handler, uint battleId, uint time)
         {
             BattleField bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(handler.GetPlayer().GetMap(), battleId);
-
             if (bf == null)
                 return false;
 
             bf.SetTimer(time * Time.InMilliseconds);
-
             if (battleId == 1)
                 handler.SendGlobalGMSysMessage("Wintergrasp (Command timer used)");
 

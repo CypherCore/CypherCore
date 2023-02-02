@@ -6,36 +6,23 @@ using Game.Entities;
 
 namespace Game.Networking.Packets
 {
-    internal class TotemDestroyed : ClientPacket
+    class TotemDestroyed : ClientPacket
     {
-        public byte Slot;
-
-        public ObjectGuid TotemGUID;
-
-        public TotemDestroyed(WorldPacket packet) : base(packet)
-        {
-        }
+        public TotemDestroyed(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Slot = _worldPacket.ReadUInt8();
             TotemGUID = _worldPacket.ReadPackedGuid();
         }
+
+        public ObjectGuid TotemGUID;
+        public byte Slot;
     }
 
-    internal class TotemCreated : ServerPacket
+    class TotemCreated : ServerPacket
     {
-        public bool CannotDismiss;
-        public uint Duration;
-        public byte Slot;
-        public uint SpellID;
-        public float TimeMod = 1.0f;
-
-        public ObjectGuid Totem;
-
-        public TotemCreated() : base(ServerOpcodes.TotemCreated)
-        {
-        }
+        public TotemCreated() : base(ServerOpcodes.TotemCreated) { }
 
         public override void Write()
         {
@@ -47,18 +34,18 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(CannotDismiss);
             _worldPacket.FlushBits();
         }
-    }
-
-    internal class TotemMoved : ServerPacket
-    {
-        public byte NewSlot;
-        public byte Slot;
 
         public ObjectGuid Totem;
+        public uint SpellID;
+        public uint Duration;
+        public byte Slot;
+        public float TimeMod = 1.0f;
+        public bool CannotDismiss;
+    }
 
-        public TotemMoved() : base(ServerOpcodes.TotemMoved)
-        {
-        }
+    class TotemMoved : ServerPacket
+    {
+        public TotemMoved() : base(ServerOpcodes.TotemMoved) { }
 
         public override void Write()
         {
@@ -66,5 +53,9 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8(NewSlot);
             _worldPacket.WritePackedGuid(Totem);
         }
+
+        public ObjectGuid Totem;
+        public byte Slot;
+        public byte NewSlot;
     }
 }

@@ -1,35 +1,15 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
+using System;
+using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
     public class ChannelListResponse : ServerPacket
     {
-        public struct ChannelPlayer
-        {
-            public ChannelPlayer(ObjectGuid guid, uint realm, ChannelMemberFlags flags)
-            {
-                Guid = guid;
-                VirtualRealmAddress = realm;
-                Flags = flags;
-            }
-
-            public ObjectGuid Guid; // Player Guid
-            public uint VirtualRealmAddress;
-            public ChannelMemberFlags Flags;
-        }
-
-        public string Channel; // Channel Name
-        public ChannelFlags ChannelFlags;
-        public bool Display;
-
-        public List<ChannelPlayer> Members;
-
         public ChannelListResponse() : base(ServerOpcodes.ChannelList)
         {
             Members = new List<ChannelPlayer>();
@@ -50,26 +30,30 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt8((byte)player.Flags);
             }
         }
+
+        public List<ChannelPlayer> Members;
+        public string Channel; // Channel Name
+        public ChannelFlags ChannelFlags;
+        public bool Display;
+
+        public struct ChannelPlayer
+        {
+            public ChannelPlayer(ObjectGuid guid, uint realm, ChannelMemberFlags flags)
+            {
+                Guid = guid;
+                VirtualRealmAddress = realm;
+                Flags = flags;
+            }
+
+            public ObjectGuid Guid; // Player Guid
+            public uint VirtualRealmAddress;
+            public ChannelMemberFlags Flags;
+        }
     }
 
     public class ChannelNotify : ServerPacket
     {
-        public string Channel;
-        public int ChatChannelID;
-        public ChannelMemberFlags NewFlags;
-        public ChannelMemberFlags OldFlags;
-
-        public string Sender = "";
-        public ObjectGuid SenderAccountID;
-        public ObjectGuid SenderGuid;
-        public uint SenderVirtualRealm;
-        public ObjectGuid TargetGuid;
-        public uint TargetVirtualRealm;
-        public ChatNotify Type;
-
-        public ChannelNotify() : base(ServerOpcodes.ChannelNotify)
-        {
-        }
+        public ChannelNotify() : base(ServerOpcodes.ChannelNotify) { }
 
         public override void Write()
         {
@@ -93,21 +77,23 @@ namespace Game.Networking.Packets
             _worldPacket.WriteString(Channel);
             _worldPacket.WriteString(Sender);
         }
+
+        public string Sender = "";
+        public ObjectGuid SenderGuid;
+        public ObjectGuid SenderAccountID;
+        public ChatNotify Type;
+        public ChannelMemberFlags OldFlags;
+        public ChannelMemberFlags NewFlags;
+        public string Channel;
+        public uint SenderVirtualRealm;
+        public ObjectGuid TargetGuid;
+        public uint TargetVirtualRealm;
+        public int ChatChannelID;
     }
 
     public class ChannelNotifyJoined : ServerPacket
     {
-        public string Channel = "";
-        public ChannelFlags ChannelFlags;
-        public ObjectGuid ChannelGUID;
-
-        public string ChannelWelcomeMsg = "";
-        public int ChatChannelID;
-        public ulong InstanceID;
-
-        public ChannelNotifyJoined() : base(ServerOpcodes.ChannelNotifyJoined)
-        {
-        }
+        public ChannelNotifyJoined() : base(ServerOpcodes.ChannelNotifyJoined) { }
 
         public override void Write()
         {
@@ -120,17 +106,18 @@ namespace Game.Networking.Packets
             _worldPacket.WriteString(Channel);
             _worldPacket.WriteString(ChannelWelcomeMsg);
         }
+
+        public string ChannelWelcomeMsg = "";
+        public int ChatChannelID;
+        public ulong InstanceID;
+        public ChannelFlags ChannelFlags;
+        public string Channel = "";
+        public ObjectGuid ChannelGUID;
     }
 
     public class ChannelNotifyLeft : ServerPacket
     {
-        public string Channel;
-        public uint ChatChannelID;
-        public bool Suspended;
-
-        public ChannelNotifyLeft() : base(ServerOpcodes.ChannelNotifyLeft)
-        {
-        }
+        public ChannelNotifyLeft() : base(ServerOpcodes.ChannelNotifyLeft) { }
 
         public override void Write()
         {
@@ -139,19 +126,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(ChatChannelID);
             _worldPacket.WriteString(Channel);
         }
+
+        public string Channel;
+        public uint ChatChannelID;
+        public bool Suspended;
     }
 
-    internal class UserlistAdd : ServerPacket
+    class UserlistAdd : ServerPacket
     {
-        public ObjectGuid AddedUserGUID;
-        public ChannelFlags ChannelFlags;
-        public uint ChannelID;
-        public string ChannelName;
-        public ChannelMemberFlags UserFlags;
-
-        public UserlistAdd() : base(ServerOpcodes.UserlistAdd)
-        {
-        }
+        public UserlistAdd() : base(ServerOpcodes.UserlistAdd) { }
 
         public override void Write()
         {
@@ -164,19 +147,17 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
             _worldPacket.WriteString(ChannelName);
         }
-    }
 
-    internal class UserlistRemove : ServerPacket
-    {
+        public ObjectGuid AddedUserGUID;
         public ChannelFlags ChannelFlags;
+        public ChannelMemberFlags UserFlags;
         public uint ChannelID;
         public string ChannelName;
+    }
 
-        public ObjectGuid RemovedUserGUID;
-
-        public UserlistRemove() : base(ServerOpcodes.UserlistRemove)
-        {
-        }
+    class UserlistRemove : ServerPacket
+    {
+        public UserlistRemove() : base(ServerOpcodes.UserlistRemove) { }
 
         public override void Write()
         {
@@ -188,20 +169,16 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
             _worldPacket.WriteString(ChannelName);
         }
-    }
 
-    internal class UserlistUpdate : ServerPacket
-    {
+        public ObjectGuid RemovedUserGUID;
         public ChannelFlags ChannelFlags;
         public uint ChannelID;
         public string ChannelName;
+    }
 
-        public ObjectGuid UpdatedUserGUID;
-        public ChannelMemberFlags UserFlags;
-
-        public UserlistUpdate() : base(ServerOpcodes.UserlistUpdate)
-        {
-        }
+    class UserlistUpdate : ServerPacket
+    {
+        public UserlistUpdate() : base(ServerOpcodes.UserlistUpdate) { }
 
         public override void Write()
         {
@@ -214,12 +191,16 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
             _worldPacket.WriteString(ChannelName);
         }
+
+        public ObjectGuid UpdatedUserGUID;
+        public ChannelFlags ChannelFlags;
+        public ChannelMemberFlags UserFlags;
+        public uint ChannelID;
+        public string ChannelName;
     }
 
-    internal class ChannelCommand : ClientPacket
+    class ChannelCommand : ClientPacket
     {
-        public string ChannelName;
-
         public ChannelCommand(WorldPacket packet) : base(packet)
         {
             switch (GetOpcode())
@@ -240,13 +221,12 @@ namespace Game.Networking.Packets
         {
             ChannelName = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(7));
         }
+
+        public string ChannelName;
     }
 
-    internal class ChannelPlayerCommand : ClientPacket
+    class ChannelPlayerCommand : ClientPacket
     {
-        public string ChannelName;
-        public string Name;
-
         public ChannelPlayerCommand(WorldPacket packet) : base(packet)
         {
             switch (GetOpcode())
@@ -274,16 +254,14 @@ namespace Game.Networking.Packets
             ChannelName = _worldPacket.ReadString(channelNameLength);
             Name = _worldPacket.ReadString(nameLength);
         }
+
+        public string ChannelName;
+        public string Name;
     }
 
-    internal class ChannelPassword : ClientPacket
+    class ChannelPassword : ClientPacket
     {
-        public string ChannelName;
-        public string Password;
-
-        public ChannelPassword(WorldPacket packet) : base(packet)
-        {
-        }
+        public ChannelPassword(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -292,20 +270,14 @@ namespace Game.Networking.Packets
             ChannelName = _worldPacket.ReadString(channelNameLength);
             Password = _worldPacket.ReadString(passwordLength);
         }
+
+        public string ChannelName;
+        public string Password;
     }
 
     public class JoinChannel : ClientPacket
     {
-        public string ChannelName;
-        public int ChatChannelId;
-        public bool CreateVoiceSession;
-        public bool Internal;
-
-        public string Password;
-
-        public JoinChannel(WorldPacket packet) : base(packet)
-        {
-        }
+        public JoinChannel(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -317,22 +289,25 @@ namespace Game.Networking.Packets
             ChannelName = _worldPacket.ReadString(channelLength);
             Password = _worldPacket.ReadString(passwordLength);
         }
+
+        public string Password;
+        public string ChannelName;
+        public bool CreateVoiceSession;
+        public int ChatChannelId;
+        public bool Internal;
     }
 
     public class LeaveChannel : ClientPacket
     {
-        public string ChannelName;
-
-        public int ZoneChannelID;
-
-        public LeaveChannel(WorldPacket packet) : base(packet)
-        {
-        }
+        public LeaveChannel(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             ZoneChannelID = _worldPacket.ReadInt32();
             ChannelName = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(7));
         }
+
+        public int ZoneChannelID;
+        public string ChannelName;
     }
 }

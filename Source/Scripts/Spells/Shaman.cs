@@ -8,13 +8,13 @@ using Framework.Dynamic;
 using Game.AI;
 using Game.Entities;
 using Game.Maps;
-using Game.Maps.Checks;
+
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
-using Game.Spells.Auras.EffectHandlers;
+using Game.Spells;
 
 namespace Scripts.Spells.Shaman
 {
@@ -1020,7 +1020,7 @@ namespace Scripts.Spells.Shaman
             Aura lavaSurge = caster.GetAura(SpellIds.LavaSurge);
 
             if (lavaSurge != null)
-                if (!GetSpell().AppliedMods.Contains(lavaSurge))
+                if (!GetSpell().m_appliedMods.Contains(lavaSurge))
                 {
                     uint chargeCategoryId = GetSpellInfo().ChargeCategoryId;
 
@@ -1263,7 +1263,7 @@ namespace Scripts.Spells.Shaman
             Aura stormkeeper = eventInfo.GetActor().GetAura(SpellIds.Stormkeeper);
 
             if (stormkeeper != null)
-                if (eventInfo.GetProcSpell().AppliedMods.Contains(stormkeeper))
+                if (eventInfo.GetProcSpell().m_appliedMods.Contains(stormkeeper))
                     chance = 100.0f;
 
             return RandomHelper.randChance(chance);
@@ -1277,9 +1277,9 @@ namespace Scripts.Spells.Shaman
 
             var targets = new CastSpellTargetArg(procInfo.GetProcTarget());
             var overloadSpellId = GetTriggeredSpellId(procInfo.GetSpellInfo().Id);
-            var originalCastId = procInfo.GetProcSpell().CastId;
+            var originalCastId = procInfo.GetProcSpell().m_castId;
 
-            caster.Events.AddEventAtOffset(() =>
+            caster.m_Events.AddEventAtOffset(() =>
                                             {
                                                 if (targets.Targets == null)
                                                     return;

@@ -84,13 +84,13 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
         public override void JustEngagedWith(Unit victim)
         {
             base.JustEngagedWith(victim);
-            Events.ScheduleEvent(EventIds.Eruption, TimeSpan.FromSeconds(15));
-            Events.ScheduleEvent(EventIds.WrathOfRagnaros, TimeSpan.FromSeconds(30));
-            Events.ScheduleEvent(EventIds.HandOfRagnaros, TimeSpan.FromSeconds(25));
-            Events.ScheduleEvent(EventIds.LavaBurst, TimeSpan.FromSeconds(10));
-            Events.ScheduleEvent(EventIds.ElementalFire, TimeSpan.FromSeconds(3));
-            Events.ScheduleEvent(EventIds.MagmaBlast, TimeSpan.FromSeconds(2));
-            Events.ScheduleEvent(EventIds.Submerge, TimeSpan.FromMinutes(3));
+            _events.ScheduleEvent(EventIds.Eruption, TimeSpan.FromSeconds(15));
+            _events.ScheduleEvent(EventIds.WrathOfRagnaros, TimeSpan.FromSeconds(30));
+            _events.ScheduleEvent(EventIds.HandOfRagnaros, TimeSpan.FromSeconds(25));
+            _events.ScheduleEvent(EventIds.LavaBurst, TimeSpan.FromSeconds(10));
+            _events.ScheduleEvent(EventIds.ElementalFire, TimeSpan.FromSeconds(3));
+            _events.ScheduleEvent(EventIds.MagmaBlast, TimeSpan.FromSeconds(2));
+            _events.ScheduleEvent(EventIds.Submerge, TimeSpan.FromMinutes(3));
         }
 
         public override void KilledUnit(Unit victim)
@@ -106,17 +106,17 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                 if (_introState == 0)
                 {
                     me.HandleEmoteCommand(Emote.OneshotEmerge);
-                    Events.ScheduleEvent(EventIds.Intro1, TimeSpan.FromSeconds(4));
-                    Events.ScheduleEvent(EventIds.Intro2, TimeSpan.FromSeconds(23));
-                    Events.ScheduleEvent(EventIds.Intro3, TimeSpan.FromSeconds(42));
-                    Events.ScheduleEvent(EventIds.Intro4, TimeSpan.FromSeconds(43));
-                    Events.ScheduleEvent(EventIds.Intro5, TimeSpan.FromSeconds(53));
+                    _events.ScheduleEvent(EventIds.Intro1, TimeSpan.FromSeconds(4));
+                    _events.ScheduleEvent(EventIds.Intro2, TimeSpan.FromSeconds(23));
+                    _events.ScheduleEvent(EventIds.Intro3, TimeSpan.FromSeconds(42));
+                    _events.ScheduleEvent(EventIds.Intro4, TimeSpan.FromSeconds(43));
+                    _events.ScheduleEvent(EventIds.Intro5, TimeSpan.FromSeconds(53));
                     _introState = 1;
                 }
 
-                Events.Update(diff);
+                _events.Update(diff);
 
-                Events.ExecuteEvents(eventId =>
+                _events.ExecuteEvents(eventId =>
                                       {
                                           switch (eventId)
                                           {
@@ -134,7 +134,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                                                   break;
                                               case EventIds.Intro4:
                                                   Talk(TextIds.SayArrival5Rag);
-                                                  Creature executus = ObjectAccessor.GetCreature(me, Instance.GetGuidData(DataTypes.MajordomoExecutus));
+                                                  Creature executus = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.MajordomoExecutus));
 
                                                   if (executus)
                                                       Unit.Kill(me, executus);
@@ -154,7 +154,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
             }
             else
             {
-                if (_isBanished && ((_emergeTimer <= diff) || (Instance.GetData(MCMiscConst.DataRagnarosAdds)) > 8))
+                if (_isBanished && ((_emergeTimer <= diff) || (instance.GetData(MCMiscConst.DataRagnarosAdds)) > 8))
                 {
                     //Become unbanished again
                     me.SetReactState(ReactStates.Aggressive);
@@ -167,7 +167,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                     if (target)
                         AttackStart(target);
 
-                    Instance.SetData(MCMiscConst.DataRagnarosAdds, 0);
+                    instance.SetData(MCMiscConst.DataRagnarosAdds, 0);
 
                     //DoCast(me, SpellRagemerge); //"phase spells" didnt worked correctly so Ive commented them and wrote solution witch doesnt need core support
                     _isBanished = false;
@@ -184,15 +184,15 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                 if (!UpdateVictim())
                     return;
 
-                Events.Update(diff);
+                _events.Update(diff);
 
-                Events.ExecuteEvents(eventId =>
+                _events.ExecuteEvents(eventId =>
                                       {
                                           switch (eventId)
                                           {
                                               case EventIds.Eruption:
                                                   DoCastVictim(SpellIds.Erruption);
-                                                  Events.ScheduleEvent(EventIds.Eruption, TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(45));
+                                                  _events.ScheduleEvent(EventIds.Eruption, TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(45));
 
                                                   break;
                                               case EventIds.WrathOfRagnaros:
@@ -201,7 +201,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                                                   if (RandomHelper.URand(0, 1) != 0)
                                                       Talk(TextIds.SayWrath);
 
-                                                  Events.ScheduleEvent(EventIds.WrathOfRagnaros, TimeSpan.FromSeconds(25));
+                                                  _events.ScheduleEvent(EventIds.WrathOfRagnaros, TimeSpan.FromSeconds(25));
 
                                                   break;
                                               case EventIds.HandOfRagnaros:
@@ -210,17 +210,17 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                                                   if (RandomHelper.URand(0, 1) != 0)
                                                       Talk(TextIds.SayHand);
 
-                                                  Events.ScheduleEvent(EventIds.HandOfRagnaros, TimeSpan.FromSeconds(20));
+                                                  _events.ScheduleEvent(EventIds.HandOfRagnaros, TimeSpan.FromSeconds(20));
 
                                                   break;
                                               case EventIds.LavaBurst:
                                                   DoCastVictim(SpellIds.LavaBurst);
-                                                  Events.ScheduleEvent(EventIds.LavaBurst, TimeSpan.FromSeconds(10));
+                                                  _events.ScheduleEvent(EventIds.LavaBurst, TimeSpan.FromSeconds(10));
 
                                                   break;
                                               case EventIds.ElementalFire:
                                                   DoCastVictim(SpellIds.ElementalFire);
-                                                  Events.ScheduleEvent(EventIds.ElementalFire, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(14));
+                                                  _events.ScheduleEvent(EventIds.ElementalFire, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(14));
 
                                                   break;
                                               case EventIds.MagmaBlast:
@@ -236,7 +236,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                                                       }
                                                   }
 
-                                                  Events.ScheduleEvent(EventIds.MagmaBlast, TimeSpan.FromMilliseconds(2500));
+                                                  _events.ScheduleEvent(EventIds.MagmaBlast, TimeSpan.FromMilliseconds(2500));
 
                                                   break;
                                               case EventIds.Submerge:
@@ -256,7 +256,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                                                           me.SetUnitFlag(UnitFlags.Uninteractible);
                                                           me.SetEmoteState(Emote.StateSubmerged);
                                                           me.HandleEmoteCommand(Emote.OneshotSubmerge);
-                                                          Instance.SetData(MCMiscConst.DataRagnarosAdds, 0);
+                                                          instance.SetData(MCMiscConst.DataRagnarosAdds, 0);
 
                                                           if (!_hasSubmergedOnce)
                                                           {
@@ -302,7 +302,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                                                           }
                                                       }
 
-                                                      Events.ScheduleEvent(EventIds.Submerge, TimeSpan.FromMinutes(3));
+                                                      _events.ScheduleEvent(EventIds.Submerge, TimeSpan.FromMinutes(3));
 
                                                       break;
                                                   }

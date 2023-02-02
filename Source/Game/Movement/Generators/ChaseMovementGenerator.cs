@@ -1,27 +1,27 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
+using System;
 
 namespace Game.Movement
 {
-    internal class ChaseMovementGenerator : MovementGenerator
+    class ChaseMovementGenerator : MovementGenerator
     {
-        private static readonly uint RANGE_CHECK_INTERVAL = 100; // Time (ms) until we attempt to recalculate
+        static uint RANGE_CHECK_INTERVAL = 100; // time (ms) until we attempt to recalculate
 
-        private readonly AbstractFollower _abstractFollower;
-        private readonly bool _movingTowards = true;
-        private readonly TimeTracker _rangeCheckTimer;
-        private ChaseAngle? _angle;
-        private Position _lastTargetPosition;
-        private bool _mutualChase = true;
+        ChaseRange? _range;
+        ChaseAngle? _angle;
 
-        private PathGenerator _path;
+        PathGenerator _path;
+        Position _lastTargetPosition;
+        TimeTracker _rangeCheckTimer;
+        bool _movingTowards = true;
+        bool _mutualChase = true;
 
-        private ChaseRange? _range;
+        AbstractFollower _abstractFollower;
 
         public ChaseMovementGenerator(Unit target, ChaseRange? range, ChaseAngle? angle)
         {
@@ -34,7 +34,7 @@ namespace Game.Movement
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Chase;
 
-            _rangeCheckTimer = new TimeTracker(RANGE_CHECK_INTERVAL);
+            _rangeCheckTimer = new(RANGE_CHECK_INTERVAL);
         }
 
         public override void Initialize(Unit owner)
@@ -55,28 +55,22 @@ namespace Game.Movement
         public override bool Update(Unit owner, uint diff)
         {
             // owner might be dead or gone (can we even get nullptr here?)
-            if (!owner ||
-                !owner.IsAlive())
+            if (!owner || !owner.IsAlive())
                 return false;
 
-            // our Target might have gone away
+            // our target might have gone away
             Unit target = _abstractFollower.GetTarget();
-
-            if (target == null ||
-                !target.IsInWorld)
+            if (target == null || !target.IsInWorld)
                 return false;
 
-            // the owner might be unable to move (rooted or casting), or we have lost the Target, pause movement
-            if (owner.HasUnitState(UnitState.NotMove) ||
-                owner.IsMovementPreventedByCasting() ||
-                HasLostTarget(owner, target))
+            // the owner might be unable to move (rooted or casting), or we have lost the target, pause movement
+            if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting() || HasLostTarget(owner, target))
             {
                 owner.StopMoving();
                 _lastTargetPosition = null;
                 Creature cOwner = owner.ToCreature();
-
-                cOwner?.SetCannotReachTarget(false);
-
+                if (cOwner != null)
+                    cOwner.SetCannotReachTarget(false);
                 return true;
             }
 
@@ -90,65 +84,52 @@ namespace Game.Movement
 
             // periodically check if we're already in the expected range...
             _rangeCheckTimer.Update(diff);
-
             if (_rangeCheckTimer.Passed())
             {
                 _rangeCheckTimer.Reset(RANGE_CHECK_INTERVAL);
-
-                if (HasFlag(MovementGeneratorFlags.InformEnabled) &&
-                    PositionOkay(owner, target, _movingTowards ? null : minTarget, _movingTowards ? maxTarget : null, angle))
+                if (HasFlag(MovementGeneratorFlags.InformEnabled) && PositionOkay(owner, target, _movingTowards ? null : minTarget, _movingTowards ? maxTarget : null, angle))
                 {
                     RemoveFlag(MovementGeneratorFlags.InformEnabled);
                     _path = null;
 
                     Creature cOwner = owner.ToCreature();
-
-                    cOwner?.SetCannotReachTarget(false);
+                    if (cOwner != null)
+                        cOwner.SetCannotReachTarget(false);
 
                     owner.StopMoving();
                     owner.SetInFront(target);
                     DoMovementInform(owner, target);
-
                     return true;
                 }
             }
 
             // if we're done moving, we want to clean up
-            if (owner.HasUnitState(UnitState.ChaseMove) &&
-                owner.MoveSpline.Finalized())
+            if (owner.HasUnitState(UnitState.ChaseMove) && owner.MoveSpline.Finalized())
             {
                 RemoveFlag(MovementGeneratorFlags.InformEnabled);
                 _path = null;
                 Creature cOwner = owner.ToCreature();
-
-                cOwner?.SetCannotReachTarget(false);
-
+                if (cOwner != null)
+                    cOwner.SetCannotReachTarget(false);
                 owner.ClearUnitState(UnitState.ChaseMove);
                 owner.SetInFront(target);
                 DoMovementInform(owner, target);
             }
 
-            // if the Target moved, we have to consider whether to adjust
-            if (_lastTargetPosition == null ||
-                target.GetPosition() != _lastTargetPosition ||
-                mutualChase != _mutualChase)
+            // if the target moved, we have to consider whether to adjust
+            if (_lastTargetPosition == null || target.GetPosition() != _lastTargetPosition || mutualChase != _mutualChase)
             {
-                _lastTargetPosition = new Position(target.GetPosition());
+                _lastTargetPosition = new(target.GetPosition());
                 _mutualChase = mutualChase;
-
-                if (owner.HasUnitState(UnitState.ChaseMove) ||
-                    !PositionOkay(owner, target, minRange, maxRange, angle))
+                if (owner.HasUnitState(UnitState.ChaseMove) || !PositionOkay(owner, target, minRange, maxRange, angle))
                 {
                     Creature cOwner = owner.ToCreature();
-
-                    // can we get to the Target?
-                    if (cOwner != null &&
-                        !target.IsInAccessiblePlaceFor(cOwner))
+                    // can we get to the target?
+                    if (cOwner != null && !target.IsInAccessiblePlaceFor(cOwner))
                     {
                         cOwner.SetCannotReachTarget(true);
                         cOwner.StopMoving();
                         _path = null;
-
                         return true;
                     }
 
@@ -156,14 +137,12 @@ namespace Game.Movement
                     bool moveToward = !owner.IsInDist(target, maxRange);
 
                     // make a new path if we have to...
-                    if (_path == null ||
-                        moveToward != _movingTowards)
+                    if (_path == null || moveToward != _movingTowards)
                         _path = new PathGenerator(owner);
 
                     float x, y, z;
                     bool shortenPath;
-
-                    // if we want to move toward the Target and there's no fixed angle...
+                    // if we want to move toward the target and there's no fixed angle...
                     if (moveToward && !angle.HasValue)
                     {
                         // ...we'll pathfind to the center, then shorten the path
@@ -181,15 +160,12 @@ namespace Game.Movement
                         owner.UpdateAllowedPositionZ(x, y, ref z);
 
                     bool success = _path.CalculatePath(x, y, z, owner.CanFly());
-
-                    if (!success ||
-                        _path.GetPathType().HasAnyFlag(PathType.NoPath))
+                    if (!success || _path.GetPathType().HasAnyFlag(PathType.NoPath))
                     {
                         if (cOwner)
                             cOwner.SetCannotReachTarget(true);
 
                         owner.StopMoving();
-
                         return true;
                     }
 
@@ -200,21 +176,20 @@ namespace Game.Movement
                         cOwner.SetCannotReachTarget(false);
 
                     bool walk = false;
-
                     if (cOwner && !cOwner.IsPet())
+                    {
                         switch (cOwner.GetMovementTemplate().GetChase())
                         {
                             case CreatureChaseMovementType.CanWalk:
                                 walk = owner.IsWalking();
-
                                 break;
                             case CreatureChaseMovementType.AlwaysWalk:
                                 walk = true;
-
                                 break;
                             default:
                                 break;
                         }
+                    }
 
                     owner.AddUnitState(UnitState.ChaseMove);
                     AddFlag(MovementGeneratorFlags.InformEnabled);
@@ -237,86 +212,70 @@ namespace Game.Movement
             RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.InformEnabled);
             owner.ClearUnitState(UnitState.ChaseMove);
             Creature cOwner = owner.ToCreature();
-
-            cOwner?.SetCannotReachTarget(false);
+            if (cOwner != null)
+                cOwner.SetCannotReachTarget(false);
         }
 
         public override void Finalize(Unit owner, bool active, bool movementInform)
         {
             AddFlag(MovementGeneratorFlags.Finalized);
-
             if (active)
             {
                 owner.ClearUnitState(UnitState.ChaseMove);
                 Creature cOwner = owner.ToCreature();
-
-                cOwner?.SetCannotReachTarget(false);
+                if (cOwner != null)
+                    cOwner.SetCannotReachTarget(false);
             }
         }
 
-        public override MovementGeneratorType GetMovementGeneratorType()
-        {
-            return MovementGeneratorType.Chase;
-        }
+        public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Chase; }
 
-        public override void UnitSpeedChanged()
-        {
-            _lastTargetPosition = null;
-        }
+        public override void UnitSpeedChanged() { _lastTargetPosition = null; }
 
-        public Unit GetTarget()
-        {
-            return _abstractFollower.GetTarget();
-        }
-
-        private static bool HasLostTarget(Unit owner, Unit target)
+        static bool HasLostTarget(Unit owner, Unit target)
         {
             return owner.GetVictim() != target;
         }
 
-        private static bool IsMutualChase(Unit owner, Unit target)
+        static bool IsMutualChase(Unit owner, Unit target)
         {
             if (target.GetMotionMaster().GetCurrentMovementGeneratorType() != MovementGeneratorType.Chase)
                 return false;
 
             ChaseMovementGenerator movement = target.GetMotionMaster().GetCurrentMovementGenerator() as ChaseMovementGenerator;
-
             if (movement != null)
                 return movement.GetTarget() == owner;
 
             return false;
         }
 
-        private static bool PositionOkay(Unit owner, Unit target, float? minDistance, float? maxDistance, ChaseAngle? angle)
+        static bool PositionOkay(Unit owner, Unit target, float? minDistance, float? maxDistance, ChaseAngle? angle)
         {
             float distSq = owner.GetExactDistSq(target);
-
-            if (minDistance.HasValue &&
-                distSq < minDistance.Value * minDistance.Value)
+            if (minDistance.HasValue && distSq < minDistance.Value * minDistance.Value)
                 return false;
-
-            if (maxDistance.HasValue &&
-                distSq > maxDistance.Value * maxDistance.Value)
+            if (maxDistance.HasValue && distSq > maxDistance.Value * maxDistance.Value)
                 return false;
-
-            if (angle.HasValue &&
-                !angle.Value.IsAngleOkay(target.GetRelativeAngle(owner)))
+            if (angle.HasValue && !angle.Value.IsAngleOkay(target.GetRelativeAngle(owner)))
                 return false;
-
             if (!owner.IsWithinLOSInMap(target))
                 return false;
-
             return true;
         }
 
-        private static void DoMovementInform(Unit owner, Unit target)
+        static void DoMovementInform(Unit owner, Unit target)
         {
             if (!owner.IsCreature())
                 return;
 
             CreatureAI ai = owner.ToCreature().GetAI();
+            if (ai != null)
+                ai.MovementInform(MovementGeneratorType.Chase, (uint)target.GetGUID().GetCounter());
+        }
 
-            ai?.MovementInform(MovementGeneratorType.Chase, (uint)target.GetGUID().GetCounter());
+        public Unit GetTarget()
+        {
+            return _abstractFollower.GetTarget();
         }
     }
 }

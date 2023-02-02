@@ -1,33 +1,15 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
+using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    internal class UpdateTalentData : ServerPacket
+    class UpdateTalentData : ServerPacket
     {
-        public class TalentGroupInfo
-        {
-            public List<PvPTalent> PvPTalents = new();
-            public uint SpecID;
-            public List<ushort> TalentIDs = new();
-        }
-
-        public class TalentInfoUpdate
-        {
-            public byte ActiveGroup;
-            public uint PrimarySpecialization;
-            public List<TalentGroupInfo> TalentGroups = new();
-        }
-
-        public TalentInfoUpdate Info = new();
-
-        public UpdateTalentData() : base(ServerOpcodes.UpdateTalentData, ConnectionType.Instance)
-        {
-        }
+        public UpdateTalentData() : base(ServerOpcodes.UpdateTalentData, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -48,35 +30,41 @@ namespace Game.Networking.Packets
                     talent.Write(_worldPacket);
             }
         }
+
+        public TalentInfoUpdate Info = new();
+
+        public class TalentGroupInfo
+        {
+            public uint SpecID;
+            public List<ushort> TalentIDs = new();
+            public List<PvPTalent> PvPTalents = new();
+        }
+
+        public class TalentInfoUpdate
+        {
+            public byte ActiveGroup;
+            public uint PrimarySpecialization;
+            public List<TalentGroupInfo> TalentGroups = new();
+        }
     }
 
-    internal class LearnTalents : ClientPacket
+    class LearnTalents : ClientPacket
     {
-        public Array<ushort> Talents = new(PlayerConst.MaxTalentTiers);
-
-        public LearnTalents(WorldPacket packet) : base(packet)
-        {
-        }
+        public LearnTalents(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             uint count = _worldPacket.ReadBits<uint>(6);
-
             for (int i = 0; i < count; ++i)
                 Talents[i] = _worldPacket.ReadUInt16();
         }
+
+        public Array<ushort> Talents = new(PlayerConst.MaxTalentTiers);
     }
 
-    internal class RespecWipeConfirm : ServerPacket
+    class RespecWipeConfirm : ServerPacket
     {
-        public uint Cost;
-
-        public ObjectGuid RespecMaster;
-        public SpecResetType RespecType;
-
-        public RespecWipeConfirm() : base(ServerOpcodes.RespecWipeConfirm)
-        {
-        }
+        public RespecWipeConfirm() : base(ServerOpcodes.RespecWipeConfirm) { }
 
         public override void Write()
         {
@@ -84,33 +72,29 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Cost);
             _worldPacket.WritePackedGuid(RespecMaster);
         }
+
+        public ObjectGuid RespecMaster;
+        public uint Cost;
+        public SpecResetType RespecType;
     }
 
-    internal class ConfirmRespecWipe : ClientPacket
+    class ConfirmRespecWipe : ClientPacket
     {
-        public ObjectGuid RespecMaster;
-        public SpecResetType RespecType;
-
-        public ConfirmRespecWipe(WorldPacket packet) : base(packet)
-        {
-        }
+        public ConfirmRespecWipe(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             RespecMaster = _worldPacket.ReadPackedGuid();
             RespecType = (SpecResetType)_worldPacket.ReadUInt8();
         }
+
+        public ObjectGuid RespecMaster;
+        public SpecResetType RespecType;
     }
 
-    internal class LearnTalentFailed : ServerPacket
+    class LearnTalentFailed : ServerPacket
     {
-        public uint Reason;
-        public int SpellID;
-        public List<ushort> Talents = new();
-
-        public LearnTalentFailed() : base(ServerOpcodes.LearnTalentFailed)
-        {
-        }
+        public LearnTalentFailed() : base(ServerOpcodes.LearnTalentFailed) { }
 
         public override void Write()
         {
@@ -121,55 +105,47 @@ namespace Game.Networking.Packets
             foreach (var talent in Talents)
                 _worldPacket.WriteUInt16(talent);
         }
+
+        public uint Reason;
+        public int SpellID;
+        public List<ushort> Talents = new();
     }
 
-    internal class ActiveGlyphs : ServerPacket
+    class ActiveGlyphs : ServerPacket
     {
-        public List<GlyphBinding> Glyphs = new();
-        public bool IsFullUpdate;
-
-        public ActiveGlyphs() : base(ServerOpcodes.ActiveGlyphs)
-        {
-        }
+        public ActiveGlyphs() : base(ServerOpcodes.ActiveGlyphs) { }
 
         public override void Write()
         {
             _worldPacket.WriteInt32(Glyphs.Count);
-
             foreach (GlyphBinding glyph in Glyphs)
                 glyph.Write(_worldPacket);
 
             _worldPacket.WriteBit(IsFullUpdate);
             _worldPacket.FlushBits();
         }
+
+        public List<GlyphBinding> Glyphs = new();
+        public bool IsFullUpdate;
     }
 
-    internal class LearnPvpTalents : ClientPacket
+    class LearnPvpTalents : ClientPacket
     {
-        public Array<PvPTalent> Talents = new(4);
-
-        public LearnPvpTalents(WorldPacket packet) : base(packet)
-        {
-        }
+        public LearnPvpTalents(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             uint size = _worldPacket.ReadUInt32();
-
             for (int i = 0; i < size; ++i)
                 Talents[i] = new PvPTalent(_worldPacket);
         }
+
+        public Array<PvPTalent> Talents = new(4);
     }
 
-    internal class LearnPvpTalentFailed : ServerPacket
+    class LearnPvpTalentFailed : ServerPacket
     {
-        public uint Reason;
-        public uint SpellID;
-        public List<PvPTalent> Talents = new();
-
-        public LearnPvpTalentFailed() : base(ServerOpcodes.LearnPvpTalentFailed)
-        {
-        }
+        public LearnPvpTalentFailed() : base(ServerOpcodes.LearnPvpTalentFailed) { }
 
         public override void Write()
         {
@@ -180,6 +156,10 @@ namespace Game.Networking.Packets
             foreach (var pvpTalent in Talents)
                 pvpTalent.Write(_worldPacket);
         }
+
+        public uint Reason;
+        public uint SpellID;
+        public List<PvPTalent> Talents = new();
     }
 
     //Structs
@@ -201,7 +181,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    internal readonly struct GlyphBinding
+    struct GlyphBinding
     {
         public GlyphBinding(uint spellId, ushort glyphId)
         {
@@ -215,7 +195,7 @@ namespace Game.Networking.Packets
             data.WriteUInt16(GlyphID);
         }
 
-        private readonly uint SpellID;
-        private readonly ushort GlyphID;
+        uint SpellID;
+        ushort GlyphID;
     }
 }

@@ -131,7 +131,7 @@ namespace Game
                     {
                         if (player)
                         {
-                            if (product.Items.Count > GetBagsFreeSlots(player))
+                            if (product.Items.Count > player.GetFreeBagSlotCount())
                             {
                                 GetBattlePayMgr().SendBattlePayMessage(11, product.Name);
                                 SendStartPurchaseResponse(session, purchaseData, BpayError.PurchaseDenied);

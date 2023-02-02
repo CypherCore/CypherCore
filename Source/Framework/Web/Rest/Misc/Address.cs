@@ -8,8 +8,10 @@ namespace Framework.Web
     [DataContract]
     public class Address
     {
-        [DataMember(Name = "ip")] public string Ip { get; set; }
+        [DataMember(Name = "ip")]
+        public string Ip { get; set; }
 
-        [DataMember(Name = "port")] public int Port { get; set; }
+        [DataMember(Name = "port")]
+        public int Port { get; set; }
     }
 }

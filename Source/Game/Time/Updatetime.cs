@@ -1,19 +1,18 @@
 ﻿using System;
-using Framework.Configuration;
 
 namespace Game
 {
     public class UpdateTime
     {
-        private readonly uint[] _updateTimeDataTable = new uint[500];
-        private uint _averageUpdateTime;
-        private uint _maxUpdateTime;
-        private uint _maxUpdateTimeOfCurrentTable;
-        private uint _maxUpdateTimeOfLastTable;
+        uint[] _updateTimeDataTable = new uint[500];
+        uint _averageUpdateTime;
+        uint _totalUpdateTime;
+        uint _updateTimeTableIndex;
+        uint _maxUpdateTime;
+        uint _maxUpdateTimeOfLastTable;
+        uint _maxUpdateTimeOfCurrentTable;
 
-        private uint _recordedTime;
-        private uint _totalUpdateTime;
-        private uint _updateTimeTableIndex;
+        uint _recordedTime;
 
         public uint GetAverageUpdateTime()
         {
@@ -23,7 +22,6 @@ namespace Game
         public uint GetTimeWeightedAverageUpdateTime()
         {
             uint sum = 0, weightsum = 0;
-
             foreach (uint diff in _updateTimeDataTable)
             {
                 sum += diff * diff;
@@ -94,14 +92,14 @@ namespace Game
 
     public class WorldUpdateTime : UpdateTime
     {
-        private uint _lastRecordTime;
-        private uint _recordUpdateTimeInverval;
-        private uint _recordUpdateTimeMin;
+        uint _recordUpdateTimeInverval;
+        uint _recordUpdateTimeMin;
+        uint _lastRecordTime;
 
         public void LoadFromConfig()
         {
-            _recordUpdateTimeInverval = ConfigMgr.GetDefaultValue("RecordUpdateTimeDiffInterval", 60000u);
-            _recordUpdateTimeMin = ConfigMgr.GetDefaultValue("MinRecordUpdateTimeDiff", 100u);
+            _recordUpdateTimeInverval = WorldConfig.GetDefaultValue("RecordUpdateTimeDiffInterval", 60000u);
+            _recordUpdateTimeMin = WorldConfig.GetDefaultValue("MinRecordUpdateTimeDiff", 100u);
         }
 
         public void SetRecordUpdateTimeInterval(uint t)
@@ -111,13 +109,14 @@ namespace Game
 
         public void RecordUpdateTime(uint gameTimeMs, uint diff, uint sessionCount)
         {
-            if (_recordUpdateTimeInverval > 0 &&
-                diff > _recordUpdateTimeMin)
+            if (_recordUpdateTimeInverval > 0 && diff > _recordUpdateTimeMin)
+            {
                 if (Time.GetMSTimeDiff(_lastRecordTime, gameTimeMs) > _recordUpdateTimeInverval)
                 {
-                    Log.outDebug(LogFilter.Misc, $"Update Time diff: {GetAverageUpdateTime()}. Players online: {sessionCount}.");
+                    Log.outDebug(LogFilter.Misc, $"Update time diff: {GetAverageUpdateTime()}. Players online: {sessionCount}.");
                     _lastRecordTime = gameTimeMs;
                 }
+            }
         }
 
         public void RecordUpdateTimeDuration(string text)

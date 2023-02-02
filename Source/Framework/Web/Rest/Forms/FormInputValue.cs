@@ -8,8 +8,10 @@ namespace Framework.Web
     [DataContract]
     public class FormInputValue
     {
-        [DataMember(Name = "input_id")] public string Id { get; set; }
+        [DataMember(Name = "input_id")]
+        public string Id { get; set; }
 
-        [DataMember(Name = "value")] public string Value { get; set; }
+        [DataMember(Name = "value")]
+        public string Value { get; set; }
     }
 }

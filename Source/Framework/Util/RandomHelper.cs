@@ -13,7 +13,7 @@ public class RandomHelper
     }
 
     /// <summary>
-    ///  Returns a random number between 0.0 and 1.0.
+    /// Returns a random number between 0.0 and 1.0.
     /// </summary>
     /// <returns></returns>
     public static double NextDouble()
@@ -22,7 +22,7 @@ public class RandomHelper
     }
 
     /// <summary>
-    ///  Returns a nonnegative random number.
+    /// Returns a nonnegative random number.
     /// </summary>
     /// <returns></returns>
     public static uint Rand32()
@@ -31,7 +31,7 @@ public class RandomHelper
     }
 
     /// <summary>
-    ///  Returns a nonnegative random number less than the specified maximum.
+    /// Returns a nonnegative random number less than the specified maximum.
     /// </summary>
     /// <param name="maxValue"></param>
     /// <returns></returns>
@@ -41,7 +41,7 @@ public class RandomHelper
     }
 
     /// <summary>
-    ///  Returns a random number within a specified range.
+    /// Returns a random number within a specified range.
     /// </summary>
     /// <param name="minValue"></param>
     /// <param name="maxValue"></param>
@@ -50,21 +50,18 @@ public class RandomHelper
     {
         return rand.Next(minValue, maxValue);
     }
-
     public static uint URand(dynamic minValue, dynamic maxValue)
     {
         return (uint)rand.Next(Convert.ToInt32(minValue), Convert.ToInt32(maxValue));
     }
-
     public static float FRand(float min, float max)
     {
         Cypher.Assert(max >= min);
-
         return (float)(rand.NextDouble() * (max - min) + min);
     }
 
     /// <summary>
-    ///  Returns true if rand.Next less then i
+    /// Returns true if rand.Next less then i
     /// </summary>
     /// <param name="i"></param>
     /// <returns></returns>
@@ -79,7 +76,7 @@ public class RandomHelper
     }
 
     /// <summary>
-    ///  Fills the elements of a specified array of bytes with random numbers.
+    /// Fills the elements of a specified array of bytes with random numbers.
     /// </summary>
     /// <param name="buffer"></param>
     public static void NextBytes(byte[] buffer)
@@ -99,7 +96,7 @@ public class RandomHelper
         double diff = max.TotalMilliseconds - min.TotalMilliseconds;
         Cypher.Assert(diff >= 0);
         Cypher.Assert(diff <= 0xFFFFFFFF);
-
         return min + TimeSpan.FromMilliseconds(URand(0, (uint)diff));
     }
 }
+

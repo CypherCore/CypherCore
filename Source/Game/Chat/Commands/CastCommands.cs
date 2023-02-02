@@ -1,25 +1,24 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
 using Framework.Constants;
+using Framework.IO;
 using Game.Entities;
 using Game.Spells;
+using System;
 
 namespace Game.Chat
 {
     [CommandGroup("cast")]
-    internal class CastCommands
+    class CastCommands
     {
         [Command("", RBACPermissions.CommandCast)]
-        private static bool HandleCastCommand(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
+        static bool HandleCastCommand(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
         {
             Unit target = handler.GetSelectedUnit();
-
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
-
                 return false;
             }
 
@@ -27,24 +26,20 @@ namespace Game.Chat
                 return false;
 
             TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
-
             if (!triggerFlags.HasValue)
                 return false;
 
             handler.GetSession().GetPlayer().CastSpell(target, spellId, new CastSpellExtraArgs(triggerFlags.Value));
-
             return true;
         }
 
         [Command("back", RBACPermissions.CommandCastBack)]
-        private static bool HandleCastBackCommand(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
+        static bool HandleCastBackCommand(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
         {
             Creature caster = handler.GetSelectedCreature();
-
             if (!caster)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
-
                 return false;
             }
 
@@ -52,7 +47,6 @@ namespace Game.Chat
                 return false;
 
             TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
-
             if (!triggerFlags.HasValue)
                 return false;
 
@@ -62,13 +56,12 @@ namespace Game.Chat
         }
 
         [Command("dist", RBACPermissions.CommandCastDist)]
-        private static bool HandleCastDistCommand(CommandHandler handler, uint spellId, float dist, [OptionalArg] string triggeredStr)
+        static bool HandleCastDistCommand(CommandHandler handler, uint spellId, float dist, [OptionalArg] string triggeredStr)
         {
             if (CheckSpellExistsAndIsValid(handler, spellId))
                 return false;
 
             TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
-
             if (!triggerFlags.HasValue)
                 return false;
 
@@ -81,14 +74,12 @@ namespace Game.Chat
         }
 
         [Command("self", RBACPermissions.CommandCastSelf)]
-        private static bool HandleCastSelfCommand(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
+        static bool HandleCastSelfCommand(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
         {
             Unit target = handler.GetSelectedUnit();
-
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
-
                 return false;
             }
 
@@ -96,7 +87,6 @@ namespace Game.Chat
                 return false;
 
             TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
-
             if (!triggerFlags.HasValue)
                 return false;
 
@@ -105,22 +95,19 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("Target", RBACPermissions.CommandCastTarget)]
-        private static bool HandleCastTargetCommad(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
+        [Command("target", RBACPermissions.CommandCastTarget)]
+        static bool HandleCastTargetCommad(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
         {
             Creature caster = handler.GetSelectedCreature();
-
             if (!caster)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
-
                 return false;
             }
 
             if (!caster.GetVictim())
             {
                 handler.SendSysMessage(CypherStrings.SelectedTargetNotHaveVictim);
-
                 return false;
             }
 
@@ -128,7 +115,6 @@ namespace Game.Chat
                 return false;
 
             TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
-
             if (!triggerFlags.HasValue)
                 return false;
 
@@ -138,14 +124,12 @@ namespace Game.Chat
         }
 
         [Command("dest", RBACPermissions.CommandCastDest)]
-        private static bool HandleCastDestCommand(CommandHandler handler, uint spellId, float x, float y, float z, [OptionalArg] string triggeredStr)
+        static bool HandleCastDestCommand(CommandHandler handler, uint spellId, float x, float y, float z, [OptionalArg] string triggeredStr)
         {
             Unit caster = handler.GetSelectedUnit();
-
             if (!caster)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
-
                 return false;
             }
 
@@ -153,7 +137,6 @@ namespace Game.Chat
                 return false;
 
             TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
-
             if (!triggerFlags.HasValue)
                 return false;
 
@@ -162,7 +145,7 @@ namespace Game.Chat
             return true;
         }
 
-        private static TriggerCastFlags? GetTriggerFlags(string triggeredStr)
+        static TriggerCastFlags? GetTriggerFlags(string triggeredStr)
         {
             if (!triggeredStr.IsEmpty())
             {
@@ -171,28 +154,23 @@ namespace Game.Chat
                 else
                     return null;
             }
-
             return TriggerCastFlags.None;
         }
-
-        private static bool CheckSpellExistsAndIsValid(CommandHandler handler, uint spellId)
+        
+        static bool CheckSpellExistsAndIsValid(CommandHandler handler, uint spellId)
         {
             var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
-
             if (spellInfo == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandNospellfound);
-
                 return false;
             }
 
             if (!Global.SpellMgr.IsSpellValid(spellInfo, handler.GetPlayer()))
             {
                 handler.SendSysMessage(CypherStrings.CommandSpellBroken, spellInfo.Id);
-
                 return false;
             }
-
             return true;
         }
     }

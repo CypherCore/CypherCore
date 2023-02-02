@@ -4,8 +4,8 @@ namespace Framework.IO
 {
     public class SocketBuffer
     {
-        private byte[] _storage;
-        private int _wpos;
+        byte[] _storage;
+        int _wpos;
 
         public SocketBuffer(int initialSize = 0)
         {
@@ -28,10 +28,7 @@ namespace Framework.IO
             _wpos += size;
         }
 
-        public int GetRemainingSpace()
-        {
-            return _storage.Length - _wpos;
-        }
+        public int GetRemainingSpace() { return _storage.Length - _wpos; }
 
         public void Reset()
         {

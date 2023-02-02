@@ -1,15 +1,13 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System.Numerics;
 using Framework.GameMath;
+using System.Numerics;
 
 namespace Game.Collision
 {
     public class DynamicMapTree
     {
-        private readonly DynTreeImpl impl;
-
         public DynamicMapTree()
         {
             impl = new DynTreeImpl();
@@ -45,10 +43,8 @@ namespace Game.Collision
             float distance = maxDist;
             DynamicTreeIntersectionCallback callback = new(phaseShift);
             impl.IntersectRay(ray, callback, ref distance, endPos);
-
             if (callback.DidHit())
                 maxDist = distance;
-
             return callback.DidHit();
         }
 
@@ -58,23 +54,18 @@ namespace Game.Collision
             float maxDist = (endPos - startPos).Length();
             // valid map coords should *never ever* produce float overflow, but this would produce NaNs too
             Cypher.Assert(maxDist < float.MaxValue);
-
             // prevent NaN values which can cause BIH intersection to enter infinite loop
             if (maxDist < 1e-10f)
             {
                 resultHitPos = endPos;
-
                 return false;
             }
-
-            Vector3 dir = (endPos - startPos) / maxDist; // direction with length of 1
+            Vector3 dir = (endPos - startPos) / maxDist;              // direction with length of 1
             Ray ray = new(startPos, dir);
             float dist = maxDist;
-
             if (GetIntersectionTime(ray, endPos, phaseShift, ref dist))
             {
                 resultHitPos = startPos + dir * dist;
-
                 if (modifyDist < 0)
                 {
                     if ((resultHitPos - startPos).Length() > -modifyDist)
@@ -83,9 +74,7 @@ namespace Game.Collision
                         resultHitPos = startPos;
                 }
                 else
-                {
                     resultHitPos += dir * modifyDist;
-                }
 
                 result = true;
             }
@@ -94,7 +83,6 @@ namespace Game.Collision
                 resultHitPos = endPos;
                 result = false;
             }
-
             return result;
         }
 
@@ -135,18 +123,15 @@ namespace Game.Collision
             Vector3 v = new(x, y, z + 0.5f);
             DynamicTreeAreaInfoCallback intersectionCallBack = new(phaseShift);
             impl.IntersectPoint(v, intersectionCallBack);
-
-            if (intersectionCallBack.GetAreaInfo().Result)
+            if (intersectionCallBack.GetAreaInfo().result)
             {
-                flags = intersectionCallBack.GetAreaInfo().Flags;
-                adtId = intersectionCallBack.GetAreaInfo().AdtId;
-                rootId = intersectionCallBack.GetAreaInfo().RootId;
-                groupId = intersectionCallBack.GetAreaInfo().GroupId;
-                z = intersectionCallBack.GetAreaInfo().Ground_Z;
-
+                flags = intersectionCallBack.GetAreaInfo().flags;
+                adtId = intersectionCallBack.GetAreaInfo().adtId;
+                rootId = intersectionCallBack.GetAreaInfo().rootId;
+                groupId = intersectionCallBack.GetAreaInfo().groupId;
+                z = intersectionCallBack.GetAreaInfo().ground_Z;
                 return true;
             }
-
             return false;
         }
 
@@ -157,33 +142,27 @@ namespace Game.Collision
             Vector3 v = new(x, y, z + 0.5f);
             DynamicTreeLocationInfoCallback intersectionCallBack = new(phaseShift);
             impl.IntersectPoint(v, intersectionCallBack);
-
-            if (intersectionCallBack.GetLocationInfo().HitModel != null)
+            if (intersectionCallBack.GetLocationInfo().hitModel != null)
             {
-                data.FloorZ = intersectionCallBack.GetLocationInfo().Ground_Z;
-                uint liquidType = intersectionCallBack.GetLocationInfo().HitModel.GetLiquidType();
+                data.floorZ = intersectionCallBack.GetLocationInfo().ground_Z;
+                uint liquidType = intersectionCallBack.GetLocationInfo().hitModel.GetLiquidType();
                 float liquidLevel = 0;
-
-                if (reqLiquidType == 0 ||
-                    (Global.DB2Mgr.GetLiquidFlags(liquidType) & reqLiquidType) != 0)
+                if (reqLiquidType == 0 || (Global.DB2Mgr.GetLiquidFlags(liquidType) & reqLiquidType) != 0)
                     if (intersectionCallBack.GetHitModel().GetLiquidLevel(v, intersectionCallBack.GetLocationInfo(), ref liquidLevel))
-                        data.LiquidInfoData = new AreaAndLiquidData.LiquidInfo(liquidType, liquidLevel);
+                        data.liquidInfo = new AreaAndLiquidData.LiquidInfo(liquidType, liquidLevel);
 
-                data.AreaInfoData = new AreaAndLiquidData.AreaInfo(intersectionCallBack.GetHitModel().GetNameSetId(),
-                                                                   intersectionCallBack.GetLocationInfo().RootId,
-                                                                   (int)intersectionCallBack.GetLocationInfo().HitModel.GetWmoID(),
-                                                                   intersectionCallBack.GetLocationInfo().HitModel.GetMogpFlags());
+                data.areaInfo = new(intersectionCallBack.GetHitModel().GetNameSetId(), intersectionCallBack.GetLocationInfo().rootId,
+                    (int)intersectionCallBack.GetLocationInfo().hitModel.GetWmoID(), intersectionCallBack.GetLocationInfo().hitModel.GetMogpFlags());
             }
 
             return data;
         }
+        
+        DynTreeImpl impl;
     }
 
-    public class DynTreeImpl : RegularGrid2D<GameObjectModel, BoundingIntervalHierarchyWrap<GameObjectModel>>
+    public class DynTreeImpl : RegularGrid2D<GameObjectModel, BIHWrap<GameObjectModel>>
     {
-        private readonly TimeTracker rebalance_timer;
-        private int unbalanced_times;
-
         public DynTreeImpl()
         {
             rebalance_timer = new TimeTracker(200);
@@ -214,14 +193,15 @@ namespace Game.Collision
                 return;
 
             rebalance_timer.Update(difftime);
-
             if (rebalance_timer.Passed())
             {
                 rebalance_timer.Reset(200);
-
                 if (unbalanced_times > 0)
                     Balance();
             }
         }
+
+        TimeTracker rebalance_timer;
+        int unbalanced_times;
     }
 }

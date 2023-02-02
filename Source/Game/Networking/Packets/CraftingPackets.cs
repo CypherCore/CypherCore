@@ -1,12 +1,12 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using Game.Entities;
+using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    internal struct SpellReducedReagent
+    struct SpellReducedReagent
     {
         public int ItemID;
         public int Quantity;
@@ -18,9 +18,8 @@ namespace Game.Networking.Packets
         }
     }
 
-    internal class CraftingData
+    class CraftingData
     {
-        public bool BonusCraft;
         public int CraftingQualityID;
         public float QualityProgress;
         public int SkillLineAbilityID;
@@ -31,18 +30,17 @@ namespace Game.Networking.Packets
         public int CritBonusSkill;
         public float field_1C;
         public ulong field_20;
+        public bool IsCrit;
         public bool field_29;
         public bool field_2A;
-        public int field_4;
-        public int field_8;
-        public bool IsCrit;
-        public ObjectGuid ItemGUID;
-        public int EnchantID;
-        public ItemInstance NewItem = new();
-        public ItemInstance OldItem = new();
-        public uint OperationID;
-        public int Quantity;
+        public bool BonusCraft;
         public List<SpellReducedReagent> ResourcesReturned = new();
+        public uint OperationID;
+        public ObjectGuid ItemGUID;
+        public int Quantity;
+        public ItemInstance OldItem = new();
+        public ItemInstance NewItem = new();
+        public int EnchantID;
 
         public void Write(WorldPacket data)
         {

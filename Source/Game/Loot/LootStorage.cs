@@ -5,17 +5,17 @@ namespace Game.Loots
 {
     public class LootStorage
     {
-        public static LootStore Creature { get; set; }
-        public static LootStore Fishing { get; set; }
-        public static LootStore Gameobject { get; set; }
-        public static LootStore Items { get; set; }
-        public static LootStore Mail { get; set; }
-        public static LootStore Milling { get; set; }
-        public static LootStore Pickpocketing { get; set; }
-        public static LootStore Reference { get; set; }
-        public static LootStore Skinning { get; set; }
-        public static LootStore Disenchant { get; set; }
-        public static LootStore Prospecting { get; set; }
-        public static LootStore Spell { get; set; }
+        public static LootStore Creature;
+        public static LootStore Fishing;
+        public static LootStore Gameobject;
+        public static LootStore Items;
+        public static LootStore Mail;
+        public static LootStore Milling;
+        public static LootStore Pickpocketing;
+        public static LootStore Reference;
+        public static LootStore Skinning;
+        public static LootStore Disenchant;
+        public static LootStore Prospecting;
+        public static LootStore Spell;
     }
 }

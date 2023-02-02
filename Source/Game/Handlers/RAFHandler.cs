@@ -4,5 +4,6 @@
 namespace Game
 {
     public partial class WorldSession
-    {}
+    {
+    }
 }

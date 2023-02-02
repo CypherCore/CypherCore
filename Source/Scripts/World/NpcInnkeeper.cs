@@ -33,16 +33,16 @@ namespace Scripts.World.NpcInnkeeper
 
             if (Global.GameEventMgr.IsHolidayActive(HolidayIds.HallowsEnd) &&
                 !player.HasAura(SpellIds.TrickOrTreated))
-                player.AddGossipItem(Gossip.MenuEventId, 0, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                player.AddGossipItem(Gossip.MenuEventId, 0, GossipSender.GOSSIP_SENDER_MAIN, GossipAction.GOSSIP_ACTION_INFO_DEF + 1);
 
             if (me.IsQuestGiver())
                 player.PrepareQuestMenu(me.GetGUID());
 
             if (me.IsVendor())
-                player.AddGossipItem(Gossip.MenuId, 2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionTrade);
+                player.AddGossipItem(Gossip.MenuId, 2, GossipSender.GOSSIP_SENDER_MAIN, GossipAction.GOSSIP_ACTION_TRADE);
 
             if (me.IsInnkeeper())
-                player.AddGossipItem(Gossip.MenuId, 1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInn);
+                player.AddGossipItem(Gossip.MenuId, 1, GossipSender.GOSSIP_SENDER_MAIN, GossipAction.GOSSIP_ACTION_INN);
 
             player.TalkedToCreature(me.GetEntry(), me.GetGUID());
             player.SendGossipMenu(player.GetGossipTextId(me), me.GetGUID());
@@ -55,7 +55,7 @@ namespace Scripts.World.NpcInnkeeper
             uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
             player.ClearGossipMenu();
 
-            if (action == eTradeskill.GossipActionInfoDef + 1 &&
+            if (action == GossipAction.GOSSIP_ACTION_INFO_DEF + 1 &&
                 Global.GameEventMgr.IsHolidayActive(HolidayIds.HallowsEnd) &&
                 !player.HasAura(SpellIds.TrickOrTreated))
             {
@@ -141,11 +141,11 @@ namespace Scripts.World.NpcInnkeeper
 
             switch (action)
             {
-                case eTradeskill.GossipActionTrade:
-                    player.Session.SendListInventory(me.GetGUID());
+                case GossipAction.GOSSIP_ACTION_TRADE:
+                    player.GetSession().SendListInventory(me.GetGUID());
 
                     break;
-                case eTradeskill.GossipActionInn:
+                case GossipAction.GOSSIP_ACTION_INN:
                     player.SetBindPoint(me.GetGUID());
 
                     break;

@@ -8,19 +8,6 @@ namespace Framework.Cryptography
 {
     public sealed class WorldCrypt : IDisposable
     {
-        private ulong _clientCounter;
-        private AesGcm _clientDecrypt;
-        private ulong _serverCounter;
-
-        private AesGcm _serverEncrypt;
-
-        public bool IsInitialized { get; set; }
-
-        public void Dispose()
-        {
-            IsInitialized = false;
-        }
-
         public void Initialize(byte[] key)
         {
             if (IsInitialized)
@@ -40,7 +27,6 @@ namespace Framework.Cryptography
                     _serverEncrypt.Encrypt(BitConverter.GetBytes(_serverCounter).Combine(BitConverter.GetBytes(0x52565253)), data, data, tag);
 
                 ++_serverCounter;
-
                 return true;
             }
             catch (CryptographicException)
@@ -57,7 +43,6 @@ namespace Framework.Cryptography
                     _clientDecrypt.Decrypt(BitConverter.GetBytes(_clientCounter).Combine(BitConverter.GetBytes(0x544E4C43)), data, tag, data);
 
                 ++_clientCounter;
-
                 return true;
             }
             catch (CryptographicException)
@@ -65,5 +50,17 @@ namespace Framework.Cryptography
                 return false;
             }
         }
+
+        public void Dispose()
+        {
+            IsInitialized = false;
+        }
+
+        public bool IsInitialized { get; set; }
+
+        AesGcm _serverEncrypt;
+        AesGcm _clientDecrypt;
+        ulong _clientCounter;
+        ulong _serverCounter;
     }
 }
