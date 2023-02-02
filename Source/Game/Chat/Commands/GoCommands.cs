@@ -81,7 +81,7 @@ namespace Game.Chat.Commands
             }
 
             // see if we have multiple equal matches left
-            var keyValueList = matches.KeyValueList.ToList();
+            var keyValueList = matches.KeyValueListCopy.ToList();
             uint maxCount = keyValueList.Last().Key;
             for (var i = keyValueList.Count; i > 0;)
             {
@@ -225,7 +225,7 @@ namespace Game.Chat.Commands
             }
 
             // see if we have multiple equal matches left
-            var keyValueList = matches.KeyValueList.ToList();
+            var keyValueList = matches.KeyValueListCopy.ToList();
             uint maxCount = keyValueList.Last().Key;
             for (var i = keyValueList.Count; i > 0;)
             {

@@ -164,6 +164,20 @@ namespace System.Collections.Generic
             }
         }
 
+        public IEnumerable<KeyValuePair<TKey, TValue>> KeyValueListCopy
+        {
+            get
+            {
+                List<KeyValuePair<TKey, TValue>> retVal = new();
+
+                foreach (var pair in _interalStorage)
+                    foreach (var value in pair.Value)
+                        retVal.Add(new KeyValuePair<TKey, TValue>(pair.Key, value));
+
+                return retVal;
+            }
+        }
+
         public IEnumerable<KeyValuePair<TKey, TValue>> KeyValueList
         {
             get

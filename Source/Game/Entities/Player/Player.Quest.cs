@@ -1900,7 +1900,7 @@ namespace Game.Entities
             var questStatus = m_QuestStatus.LookupByKey(questId);
             if (questStatus != null)
             {
-                foreach (var objective in m_questObjectiveStatus.KeyValueList)
+                foreach (var objective in m_questObjectiveStatus.KeyValueListCopy)
                 {
                     if (objective.Value.QuestStatusPair.Status == questStatus)
                         m_questObjectiveStatus.Remove(objective);

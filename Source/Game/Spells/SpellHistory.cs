@@ -168,7 +168,7 @@ namespace Game.Spells
                 }
             }
 
-            foreach (var pair in _categoryCharges.KeyValueList)
+            foreach (var pair in _categoryCharges.KeyValueListCopy)
             {
                 if (pair.Value.RechargeEnd <= now)
                     _categoryCharges.Remove(pair);

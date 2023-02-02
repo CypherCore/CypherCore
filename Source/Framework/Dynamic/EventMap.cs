@@ -208,7 +208,7 @@ namespace Framework.Dynamic
 
             MultiMap<TimeSpan, uint> delayed = new();
 
-            foreach (var pair in _eventMap.KeyValueList)
+            foreach (var pair in _eventMap.KeyValueListCopy)
             {
                 delayed.Add(pair.Key + delay, pair.Value);
                 _eventMap.Remove(pair.Key, pair.Value);
@@ -230,7 +230,7 @@ namespace Framework.Dynamic
 
             MultiMap<TimeSpan, uint> delayed = new();
 
-            foreach (var pair in _eventMap.KeyValueList)
+            foreach (var pair in _eventMap.KeyValueListCopy)
             {
                 if (Convert.ToBoolean(pair.Value & (1 << (int)(group + 15))))
                 {
@@ -252,7 +252,7 @@ namespace Framework.Dynamic
             if (Empty())
                 return;
 
-            foreach (var pair in _eventMap.KeyValueList)
+            foreach (var pair in _eventMap.KeyValueListCopy)
             {
                 if (eventId == (pair.Value & 0x0000FFFF))
                     _eventMap.Remove(pair.Key, pair.Value);
@@ -268,7 +268,7 @@ namespace Framework.Dynamic
             if (group == 0 || group > 8 || Empty())
                 return;
 
-            foreach (var pair in _eventMap.KeyValueList)
+            foreach (var pair in _eventMap.KeyValueListCopy)
             {
                 if (Convert.ToBoolean(pair.Value & (uint)(1 << ((int)group + 15))))
                     _eventMap.Remove(pair.Key, pair.Value);
