@@ -9,7 +9,7 @@ namespace System.Collections.Generic
 
         int Count { get; }
         ICollection<TKey> Keys { get; }
-        IEnumerable<KeyValuePair<TKey, TValue>> KeyValueList { get; }
+        IEnumerable<KeyValuePair<TKey, TValue>> KeyValueListCopy { get; }
         ICollection<TValue> Values { get; }
 
         void Add(KeyValuePair<TKey, TValue> item);

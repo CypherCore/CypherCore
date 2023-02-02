@@ -50,7 +50,7 @@ namespace Framework.Dynamic
 
         public void KillAllEvents(bool force)
         {
-            foreach (var pair in m_events.KeyValueList)
+            foreach (var pair in m_events.KeyValueListCopy)
             {
                 // Abort events which weren't aborted already
                 if (!pair.Value.IsAborted())

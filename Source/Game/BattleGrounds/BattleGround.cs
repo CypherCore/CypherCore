@@ -1315,7 +1315,7 @@ namespace Game.BattleGrounds
 
         public void RemovePlayerFromResurrectQueue(ObjectGuid player_guid)
         {
-            foreach (var pair in m_ReviveQueue.KeyValueList)
+            foreach (var pair in m_ReviveQueue.KeyValueListCopy)
             {
                 if (pair.Value == player_guid)
                 {

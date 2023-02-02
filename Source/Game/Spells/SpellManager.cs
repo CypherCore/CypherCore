@@ -1093,7 +1093,7 @@ namespace Game.Entities
 
             } while (result.NextRow());
 
-            foreach (var group in mSpellGroupSpell.KeyValueList)
+            foreach (var group in mSpellGroupSpell.KeyValueListCopy)
             {
                 if (group.Value < 0)
                 {

@@ -2489,11 +2489,11 @@ namespace Game.Entities
         public List<Aura> GetSingleCastAuras() { return m_scAuras; }
         public IEnumerable<KeyValuePair<uint, Aura>> GetOwnedAuras()
         {
-            return m_ownedAuras.KeyValueList;
+            return m_ownedAuras.KeyValueListCopy;
         }
         public IEnumerable<KeyValuePair<uint, AuraApplication>> GetAppliedAuras()
         {
-            return m_appliedAuras.KeyValueList;
+            return m_appliedAuras.KeyValueListCopy;
         }
 
         public int GetAppliedAurasCount()
