@@ -5,6 +5,7 @@ using Framework.Constants;
 using Framework.Database;
 using Game.Entities;
 using Game.Maps;
+using Game.Networking.Packets;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -119,7 +120,12 @@ namespace Game.DataStorage
 
                     if (areaTriggerTemplate.Id.IsServerSide && areaTriggerTemplate.Flags != 0)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `areatrigger_template` has listed server-side areatrigger (Id: {areaTriggerTemplate.Id.Id}, IsServerSide: {areaTriggerTemplate.Id.IsServerSide}) with none-zero flags");
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"DELETE FROM areatrigger_template WHERE Id = {areaTriggerTemplate.Id}");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, $"Table `areatrigger_template` has listed server-side areatrigger (Id: {areaTriggerTemplate.Id.Id}, IsServerSide: {areaTriggerTemplate.Id.IsServerSide}) with none-zero flags");
                         continue;
                     }
 

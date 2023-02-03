@@ -526,7 +526,12 @@ namespace Game.Loots
                 ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemid);
                 if (proto == null)
                 {
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: item does not exist - skipped", store.GetName(), entry, itemid);
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM {store.GetName()} WHERE Entry = {itemid}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: item does not exist - skipped", store.GetName(), entry, itemid);
                     return false;
                 }
 
@@ -608,11 +613,16 @@ namespace Game.Loots
         {
             // all still listed ids isn't referenced
             foreach (var id in lootIdSet)
-                Log.outError( LogFilter.Sql, "Table '{0}' entry {1} isn't {2} and not referenced from loot, and then useless.", GetName(), id, GetEntryName());
+                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                {
+                    DB.World.Execute($"DELETE FROM {GetName()} WHERE Entry = {id}");
+                }
+                else
+                    Log.outError( LogFilter.Sql, "Table '{0}' entry {1} isn't {2} and not referenced from loot, and then useless.", GetName(), id, GetEntryName());
         }
         public void ReportNonExistingId(uint lootId, uint ownerId)
         {
-            Log.outError( LogFilter.Sql, "Table '{0}' Entry {1} does not exist but it is used by {2} {3}", GetName(), lootId, GetEntryName(), ownerId);
+            Log.outDebug( LogFilter.Sql, "Table '{0}' Entry {1} does not exist but it is used by {2} {3}", GetName(), lootId, GetEntryName(), ownerId);
         }
 
         public bool HaveLootFor(uint loot_id) { return m_LootTemplates.LookupByKey(loot_id) != null; }

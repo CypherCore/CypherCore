@@ -102,13 +102,23 @@ namespace Game.Entities
                 {
                     if (Global.ObjectMgr.GetCreatureData(member.LeaderSpawnId) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"creature_formations table leader guid {member.LeaderSpawnId} incorrect (not exist)");
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"DELETE FROM creature_formations WHERE leaderGUID = {member.LeaderSpawnId}");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, $"creature_formations table leader guid {member.LeaderSpawnId} incorrect (not exist)");
                         continue;
                     }
 
                     if (Global.ObjectMgr.GetCreatureData(memberSpawnId) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"creature_formations table member guid {memberSpawnId} incorrect (not exist)");
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"DELETE FROM creature_formations WHERE memberGUID = {memberSpawnId}");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, $"creature_formations table member guid {memberSpawnId} incorrect (not exist)");
                         continue;
                     }
 

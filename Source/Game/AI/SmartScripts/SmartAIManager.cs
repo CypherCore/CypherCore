@@ -3,6 +3,7 @@
 
 using Framework.Constants;
 using Framework.Database;
+using Game.Achievements;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Movement;
@@ -49,14 +50,24 @@ namespace Game.AI
                 temp.EntryOrGuid = result.Read<int>(0);
                 if (temp.EntryOrGuid == 0)
                 {
-                    Log.outError(LogFilter.Sql, "SmartAIMgr.LoadFromDB: invalid entryorguid (0), skipped loading.");
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM smart_scripts WHERE entryorguid = {temp.EntryOrGuid}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, "SmartAIMgr.LoadFromDB: invalid entryorguid (0), skipped loading.");
                     continue;
                 }
 
                 SmartScriptType source_type = (SmartScriptType)result.Read<byte>(1);
                 if (source_type >= SmartScriptType.Max)
                 {
-                    Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAI: invalid source_type ({0}), skipped loading.", source_type);
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM smart_scripts WHERE entryorguid = {temp.EntryOrGuid}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAI: invalid source_type ({0}), skipped loading.", source_type);
                     continue;
                 }
                 if (temp.EntryOrGuid >= 0)
@@ -66,7 +77,12 @@ namespace Game.AI
                         case SmartScriptType.Creature:
                             if (Global.ObjectMgr.GetCreatureTemplate((uint)temp.EntryOrGuid) == null)
                             {
-                                Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAI: Creature entry ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM smart_scripts WHERE entryorguid = {temp.EntryOrGuid}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAI: Creature entry ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
                                 continue;
                             }
                             break;
@@ -75,7 +91,12 @@ namespace Game.AI
                         {
                             if (Global.ObjectMgr.GetGameObjectTemplate((uint)temp.EntryOrGuid) == null)
                             {
-                                Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAI: GameObject entry ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
+                                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                    {
+                                        DB.World.Execute($"DELETE FROM smart_scripts WHERE entryorguid = {temp.EntryOrGuid}");
+                                    }
+                                    else
+                                        Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAI: GameObject entry ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
                                 continue;
                             }
                             break;
@@ -84,7 +105,12 @@ namespace Game.AI
                         {
                             if (CliDB.AreaTableStorage.LookupByKey((uint)temp.EntryOrGuid) == null)
                             {
-                                Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAI: AreaTrigger entry ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
+                                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                    {
+                                        DB.World.Execute($"DELETE FROM smart_scripts WHERE entryorguid = {temp.EntryOrGuid}");
+                                    }
+                                    else
+                                        Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAI: AreaTrigger entry ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
                                 continue;
                             }
                             break;
@@ -93,7 +119,12 @@ namespace Game.AI
                         {
                             if (Global.ObjectMgr.GetSceneTemplate((uint)temp.EntryOrGuid) == null)
                             {
-                                Log.outError(LogFilter.Sql, "SmartAIMgr.LoadFromDB: Scene id ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
+                                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                    {
+                                        DB.World.Execute($"DELETE FROM smart_scripts WHERE entryorguid = {temp.EntryOrGuid}");
+                                    }
+                                    else
+                                        Log.outError(LogFilter.Sql, "SmartAIMgr.LoadFromDB: Scene id ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
                                 continue;
                             }
                             break;
@@ -102,7 +133,12 @@ namespace Game.AI
                         {
                             if (Global.ObjectMgr.GetQuestTemplate((uint)temp.EntryOrGuid) == null)
                             {
-                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Quest id ({temp.EntryOrGuid}) does not exist, skipped loading.");
+                                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                    {
+                                        DB.World.Execute($"DELETE FROM smart_scripts WHERE entryorguid = {temp.EntryOrGuid}");
+                                    }
+                                    else
+                                        Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Quest id ({temp.EntryOrGuid}) does not exist, skipped loading.");
                                 continue;
                             }
                             break;
@@ -113,7 +149,12 @@ namespace Game.AI
                         {
                             if (Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(new AreaTriggerId((uint)temp.EntryOrGuid, false)) == null)
                             {
-                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: AreaTrigger entry ({temp.EntryOrGuid} IsServerSide false) does not exist, skipped loading.");
+                                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                    {
+                                        DB.World.Execute($"DELETE FROM smart_scripts WHERE entryorguid = {temp.EntryOrGuid}");
+                                    }
+                                    else
+                                        Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: AreaTrigger entry ({temp.EntryOrGuid} IsServerSide false) does not exist, skipped loading.");
                                 continue;
                             }
                             break;
@@ -122,13 +163,23 @@ namespace Game.AI
                         {
                             if (Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(new AreaTriggerId((uint)temp.EntryOrGuid, true)) == null)
                             {
-                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: AreaTrigger entry ({temp.EntryOrGuid} IsServerSide true) does not exist, skipped loading.");
+                                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                    {
+                                        DB.World.Execute($"DELETE FROM smart_scripts WHERE entryorguid = {temp.EntryOrGuid}");
+                                    }
+                                    else
+                                        Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: AreaTrigger entry ({temp.EntryOrGuid} IsServerSide true) does not exist, skipped loading.");
                                 continue;
                             }
                             break;
                         }
                         default:
-                            Log.outError(LogFilter.Sql, "SmartAIMgr.LoadFromDB: not yet implemented source_type {0}", source_type);
+                            if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                            {
+                                DB.World.Execute($"DELETE FROM smart_scripts WHERE entryorguid = {temp.EntryOrGuid}");
+                            }
+                            else
+                                Log.outError(LogFilter.Sql, "SmartAIMgr.LoadFromDB: not yet implemented source_type {0}", source_type);
                             continue;
                     }
                 }
@@ -141,20 +192,35 @@ namespace Game.AI
                             CreatureData creature = Global.ObjectMgr.GetCreatureData((ulong)-temp.EntryOrGuid);
                             if (creature == null)
                             {
-                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Creature guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
+                                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                    {
+                                        DB.World.Execute($"DELETE FROM smart_scripts WHERE entryorguid = {temp.EntryOrGuid}");
+                                    }
+                                    else
+                                        Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Creature guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
                                 continue;
                             }
 
                             CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(creature.Id);
                             if (creatureInfo == null)
                             {
-                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Creature entry ({creature.Id}) guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
+                                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                    {
+                                        DB.World.Execute($"DELETE FROM smart_scripts WHERE entryorguid = {temp.EntryOrGuid}");
+                                    }
+                                    else
+                                        Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Creature entry ({creature.Id}) guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
                                 continue;
                             }
 
                             if (creatureInfo.AIName != "SmartAI")
                             {
-                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Creature entry ({creature.Id}) guid ({-temp.EntryOrGuid}) is not using SmartAI, skipped loading.");
+                                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                    {
+                                        DB.World.Execute($"DELETE FROM smart_scripts WHERE entryorguid = {temp.EntryOrGuid}");
+                                    }
+                                    else
+                                        Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Creature entry ({creature.Id}) guid ({-temp.EntryOrGuid}) is not using SmartAI, skipped loading.");
                                 continue;
                             }
                             break;
@@ -164,26 +230,46 @@ namespace Game.AI
                             GameObjectData gameObject = Global.ObjectMgr.GetGameObjectData((ulong)-temp.EntryOrGuid);
                             if (gameObject == null)
                             {
-                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: GameObject guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
+                                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                    {
+                                        DB.World.Execute($"DELETE FROM smart_scripts WHERE entryorguid = {temp.EntryOrGuid}");
+                                    }
+                                    else
+                                        Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: GameObject guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
                                 continue;
                             }
 
                             GameObjectTemplate gameObjectInfo = Global.ObjectMgr.GetGameObjectTemplate(gameObject.Id);
                             if (gameObjectInfo == null)
                             {
-                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: GameObject entry ({gameObject.Id}) guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
+                                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                    {
+                                        DB.World.Execute($"DELETE FROM smart_scripts WHERE entryorguid = {temp.EntryOrGuid}");
+                                    }
+                                    else
+                                        Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: GameObject entry ({gameObject.Id}) guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
                                 continue;
                             }
 
                             if (gameObjectInfo.AIName != "SmartGameObjectAI")
                             {
-                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: GameObject entry ({gameObject.Id}) guid ({-temp.EntryOrGuid}) is not using SmartGameObjectAI, skipped loading.");
+                                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                    {
+                                        DB.World.Execute($"DELETE FROM smart_scripts WHERE entryorguid = {temp.EntryOrGuid}");
+                                    }
+                                    else
+                                        Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: GameObject entry ({gameObject.Id}) guid ({-temp.EntryOrGuid}) is not using SmartGameObjectAI, skipped loading.");
                                 continue;
                             }
                             break;
                         }
                         default:
-                            Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: GUID-specific scripting not yet implemented for source_type {source_type}");
+                            if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                            {
+                                DB.World.Execute($"DELETE FROM smart_scripts WHERE entryorguid = {temp.EntryOrGuid}");
+                            }
+                            else
+                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: GUID-specific scripting not yet implemented for source_type {source_type}");
                             continue;
                     }
                 }

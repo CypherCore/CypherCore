@@ -6,9 +6,11 @@ using Framework.Configuration;
 using Framework.Constants;
 using Framework.Database;
 using Framework.IO;
+using Game.AI;
 using Game.Conditions;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Guilds;
 using Game.Loots;
 using Game.Mails;
 using Game.Maps;
@@ -22,6 +24,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using static Game.ScriptNameContainer;
 
 namespace Game
 {
@@ -563,7 +566,12 @@ namespace Game
 
                 if (GetNpcText(gMenu.TextId) == null)
                 {
-                    Log.outError(LogFilter.Sql, "Table gossip_menu: Id {0} is using non-existing TextId {1}", gMenu.MenuId, gMenu.TextId);
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM gossip_menu WHERE MenuID = {gMenu.MenuId}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, "Table gossip_menu: Id {0} is using non-existing TextId {1}", gMenu.MenuId, gMenu.TextId);
                     continue;
                 }
 
@@ -631,20 +639,35 @@ namespace Game
                 {
                     if (!CliDB.BroadcastTextStorage.ContainsKey(gMenuItem.OptionBroadcastTextId))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuID}, OptionIndex {gMenuItem.OrderIndex} has non-existing or incompatible OptionBroadcastTextId {gMenuItem.OptionBroadcastTextId}, ignoring.");
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"UPDATE gossip_menu_option SET OptionBroadcastTextID = 0 WHERE MenuID = {gMenuItem.MenuID}");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuID}, OptionIndex {gMenuItem.OrderIndex} has non-existing or incompatible OptionBroadcastTextId {gMenuItem.OptionBroadcastTextId}, ignoring.");
                         gMenuItem.OptionBroadcastTextId = 0;
                     }
                 }
 
                 if (gMenuItem.Language != 0 && !CliDB.LanguagesStorage.ContainsKey(gMenuItem.Language))
                 {
-                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} use non-existing Language {gMenuItem.Language}, ignoring");
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"UPDATE gossip_menu_option SET OptionID = 0 WHERE MenuID = {gMenuItem.MenuID}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} use non-existing Language {gMenuItem.Language}, ignoring");
                     gMenuItem.Language = 0;
                 }
 
                 if (gMenuItem.ActionMenuID != 0 && gMenuItem.OptionNpc != GossipOptionNpc.None)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} can not use ActionMenuID for GossipOptionNpc different from GossipOptionNpc.None, ignoring");
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"UPDATE gossip_menu_option SET ActionMenuID = 0 WHERE MenuID = {gMenuItem.MenuID}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} can not use ActionMenuID for GossipOptionNpc different from GossipOptionNpc.None, ignoring");
                     gMenuItem.ActionMenuID = 0;
                 }
 
@@ -652,12 +675,22 @@ namespace Game
                 {
                     if (gMenuItem.OptionNpc != GossipOptionNpc.None)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} can not use ActionPoiID for GossipOptionNpc different from GossipOptionNpc.None, ignoring");
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"UPDATE gossip_menu_option SET ActionPoiID = 0 WHERE MenuID = {gMenuItem.MenuID}");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} can not use ActionPoiID for GossipOptionNpc different from GossipOptionNpc.None, ignoring");
                         gMenuItem.ActionPoiID = 0;
                     }
                     else if (GetPointOfInterest(gMenuItem.ActionPoiID) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} use non-existing ActionPoiID {gMenuItem.ActionPoiID}, ignoring");
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"UPDATE gossip_menu_option SET ActionPoiID = 0 WHERE MenuID = {gMenuItem.MenuID}");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} use non-existing ActionPoiID {gMenuItem.ActionPoiID}, ignoring");
                         gMenuItem.ActionPoiID = 0;
                     }
                 }
@@ -666,7 +699,12 @@ namespace Game
                 {
                     if (!CliDB.GossipNPCOptionStorage.ContainsKey(gMenuItem.GossipNpcOptionID.Value))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} use non-existing GossipNPCOption {gMenuItem.GossipNpcOptionID}, ignoring");
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"UPDATE gossip_menu_option SET GossipNpcOptionID = 0 WHERE MenuID = {gMenuItem.MenuID}");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} use non-existing GossipNPCOption {gMenuItem.GossipNpcOptionID}, ignoring");
                         gMenuItem.GossipNpcOptionID = null;
                     }
                 }
@@ -681,7 +719,12 @@ namespace Game
                 {
                     if (!CliDB.BroadcastTextStorage.ContainsKey(gMenuItem.BoxBroadcastTextId))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuID}, OptionIndex {gMenuItem.OrderIndex} has non-existing or incompatible BoxBroadcastTextId {gMenuItem.BoxBroadcastTextId}, ignoring.");
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"UPDATE gossip_menu_option SET BoxBroadcastTextID = 0 WHERE MenuID = {gMenuItem.MenuID}");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuID}, OptionIndex {gMenuItem.OrderIndex} has non-existing or incompatible BoxBroadcastTextId {gMenuItem.BoxBroadcastTextId}, ignoring.");
                         gMenuItem.BoxBroadcastTextId = 0;
                     }
                 }
@@ -690,7 +733,12 @@ namespace Game
                 {
                     if (!Global.SpellMgr.HasSpellInfo((uint)gMenuItem.SpellID.Value, Difficulty.None))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} use non-existing Spell {gMenuItem.SpellID}, ignoring");
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"UPDATE gossip_menu_option SET SpellID = 0 WHERE MenuID = {gMenuItem.MenuID}");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for menu {gMenuItem.MenuID}, id {gMenuItem.OrderIndex} use non-existing Spell {gMenuItem.SpellID}, ignoring");
                         gMenuItem.SpellID = null;
                     }
                 }
@@ -1203,13 +1251,23 @@ namespace Game
                     {
                         if (tmp.Talk.ChatType > ChatMsg.RaidBossWhisper)
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid talk type (datalong = {1}) in SCRIPT_COMMAND_TALK for script id {2}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` has invalid talk type (datalong = {1}) in SCRIPT_COMMAND_TALK for script id {2}",
                                 tableName, tmp.Talk.ChatType, tmp.id);
                             continue;
                         }
                         if (!CliDB.BroadcastTextStorage.ContainsKey((uint)tmp.Talk.TextID))
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid talk text id (dataint = {1}) in SCRIPT_COMMAND_TALK for script id {2}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` has invalid talk text id (dataint = {1}) in SCRIPT_COMMAND_TALK for script id {2}",
                                 tableName, tmp.Talk.TextID, tmp.id);
                             continue;
                         }
@@ -1220,7 +1278,12 @@ namespace Game
                     {
                         if (!CliDB.EmotesStorage.ContainsKey(tmp.Emote.EmoteID))
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid emote id (datalong = {1}) in SCRIPT_COMMAND_EMOTE for script id {2}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` has invalid emote id (datalong = {1}) in SCRIPT_COMMAND_EMOTE for script id {2}",
                                 tableName, tmp.Emote.EmoteID, tmp.id);
                             continue;
                         }
@@ -1231,14 +1294,24 @@ namespace Game
                     {
                         if (!CliDB.MapStorage.ContainsKey(tmp.TeleportTo.MapID))
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid map (Id: {1}) in SCRIPT_COMMAND_TELEPORT_TO for script id {2}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` has invalid map (Id: {1}) in SCRIPT_COMMAND_TELEPORT_TO for script id {2}",
                                 tableName, tmp.TeleportTo.MapID, tmp.id);
                             continue;
                         }
 
                         if (!GridDefines.IsValidMapCoord(tmp.TeleportTo.DestX, tmp.TeleportTo.DestY, tmp.TeleportTo.DestZ, tmp.TeleportTo.Orientation))
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid coordinates (X: {1} Y: {2} Z: {3} O: {4}) in SCRIPT_COMMAND_TELEPORT_TO for script id {5}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` has invalid coordinates (X: {1} Y: {2} Z: {3} O: {4}) in SCRIPT_COMMAND_TELEPORT_TO for script id {5}",
                                 tableName, tmp.TeleportTo.DestX, tmp.TeleportTo.DestY, tmp.TeleportTo.DestZ, tmp.TeleportTo.Orientation, tmp.id);
                             continue;
                         }
@@ -1250,7 +1323,12 @@ namespace Game
                         Quest quest = GetQuestTemplate(tmp.QuestExplored.QuestID);
                         if (quest == null)
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid quest (ID: {1}) in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {2}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` has invalid quest (ID: {1}) in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {2}",
                                 tableName, tmp.QuestExplored.QuestID, tmp.id);
                             continue;
                         }
@@ -1275,14 +1353,24 @@ namespace Game
 
                         if (tmp.QuestExplored.Distance != 0 && tmp.QuestExplored.Distance > SharedConst.DefaultVisibilityDistance)
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` has too large distance ({1}) for exploring objective complete in `datalong2` in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {2}, max distance is {3} or 0 for disable distance check",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` has too large distance ({1}) for exploring objective complete in `datalong2` in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {2}, max distance is {3} or 0 for disable distance check",
                                 tableName, tmp.QuestExplored.Distance, tmp.id, SharedConst.DefaultVisibilityDistance);
                             continue;
                         }
 
                         if (tmp.QuestExplored.Distance != 0 && tmp.QuestExplored.Distance < SharedConst.InteractionDistance)
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` has too small distance ({1}) for exploring objective complete in `datalong2` in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {2}, min distance is {3} or 0 for disable distance check",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` has too small distance ({1}) for exploring objective complete in `datalong2` in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {2}, min distance is {3} or 0 for disable distance check",
                                 tableName, tmp.QuestExplored.Distance, tmp.id, SharedConst.InteractionDistance);
                             continue;
                         }
@@ -1294,7 +1382,12 @@ namespace Game
                     {
                         if (GetCreatureTemplate(tmp.KillCredit.CreatureEntry) == null)
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid creature (Entry: {1}) in SCRIPT_COMMAND_KILL_CREDIT for script id {2}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` has invalid creature (Entry: {1}) in SCRIPT_COMMAND_KILL_CREDIT for script id {2}",
                                 tableName, tmp.KillCredit.CreatureEntry, tmp.id);
                             continue;
                         }
@@ -1306,7 +1399,12 @@ namespace Game
                         GameObjectData data = GetGameObjectData(tmp.RespawnGameObject.GOGuid);
                         if (data == null)
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid gameobject (GUID: {1}) in SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id {2}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` has invalid gameobject (GUID: {1}) in SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id {2}",
                                 tableName, tmp.RespawnGameObject.GOGuid, tmp.id);
                             continue;
                         }
@@ -1314,7 +1412,12 @@ namespace Game
                         GameObjectTemplate info = GetGameObjectTemplate(data.Id);
                         if (info == null)
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` has gameobject with invalid entry (GUID: {1} Entry: {2}) in SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id {3}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` has gameobject with invalid entry (GUID: {1} Entry: {2}) in SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id {3}",
                                 tableName, tmp.RespawnGameObject.GOGuid, data.Id, tmp.id);
                             continue;
                         }
@@ -1322,7 +1425,12 @@ namespace Game
                         if (info.type == GameObjectTypes.FishingNode || info.type == GameObjectTypes.FishingHole || info.type == GameObjectTypes.Door ||
                             info.type == GameObjectTypes.Button || info.type == GameObjectTypes.Trap)
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` have gameobject type ({1}) unsupported by command SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id {2}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` have gameobject type ({1}) unsupported by command SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id {2}",
                                 tableName, info.entry, tmp.id);
                             continue;
                         }
@@ -1333,14 +1441,24 @@ namespace Game
                     {
                         if (!GridDefines.IsValidMapCoord(tmp.TempSummonCreature.PosX, tmp.TempSummonCreature.PosY, tmp.TempSummonCreature.PosZ, tmp.TempSummonCreature.Orientation))
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid coordinates (X: {1} Y: {2} Z: {3} O: {4}) in SCRIPT_COMMAND_TEMP_SUMMON_CREATURE for script id {5}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` has invalid coordinates (X: {1} Y: {2} Z: {3} O: {4}) in SCRIPT_COMMAND_TEMP_SUMMON_CREATURE for script id {5}",
                                 tableName, tmp.TempSummonCreature.PosX, tmp.TempSummonCreature.PosY, tmp.TempSummonCreature.PosZ, tmp.TempSummonCreature.Orientation, tmp.id);
                             continue;
                         }
 
                         if (GetCreatureTemplate(tmp.TempSummonCreature.CreatureEntry) == null)
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid creature (Entry: {1}) in SCRIPT_COMMAND_TEMP_SUMMON_CREATURE for script id {2}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` has invalid creature (Entry: {1}) in SCRIPT_COMMAND_TEMP_SUMMON_CREATURE for script id {2}",
                                 tableName, tmp.TempSummonCreature.CreatureEntry, tmp.id);
                             continue;
                         }
@@ -1353,7 +1471,12 @@ namespace Game
                         GameObjectData data = GetGameObjectData(tmp.ToggleDoor.GOGuid);
                         if (data == null)
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid gameobject (GUID: {1}) in {2} for script id {3}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` has invalid gameobject (GUID: {1}) in {2} for script id {3}",
                                 tableName, tmp.ToggleDoor.GOGuid, tmp.command, tmp.id);
                             continue;
                         }
@@ -1361,14 +1484,24 @@ namespace Game
                         GameObjectTemplate info = GetGameObjectTemplate(data.Id);
                         if (info == null)
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` has gameobject with invalid entry (GUID: {1} Entry: {2}) in {3} for script id {4}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` has gameobject with invalid entry (GUID: {1} Entry: {2}) in {3} for script id {4}",
                                 tableName, tmp.ToggleDoor.GOGuid, data.Id, tmp.command, tmp.id);
                             continue;
                         }
 
                         if (info.type != GameObjectTypes.Door)
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` has gameobject type ({1}) non supported by command {2} for script id {3}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` has gameobject type ({1}) non supported by command {2} for script id {3}",
                                 tableName, info.entry, tmp.command, tmp.id);
                             continue;
                         }
@@ -1380,13 +1513,23 @@ namespace Game
                     {
                         if (!Global.SpellMgr.HasSpellInfo(tmp.RemoveAura.SpellID, Difficulty.None))
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` using non-existent spell (id: {1}) in SCRIPT_COMMAND_REMOVE_AURA for script id {2}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` using non-existent spell (id: {1}) in SCRIPT_COMMAND_REMOVE_AURA for script id {2}",
                                 tableName, tmp.RemoveAura.SpellID, tmp.id);
                             continue;
                         }
                         if (Convert.ToBoolean((int)tmp.RemoveAura.Flags & ~0x1))                    // 1 bits (0, 1)
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` using unknown flags in datalong2 ({1}) in SCRIPT_COMMAND_REMOVE_AURA for script id {2}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` using unknown flags in datalong2 ({1}) in SCRIPT_COMMAND_REMOVE_AURA for script id {2}",
                                 tableName, tmp.RemoveAura.Flags, tmp.id);
                             continue;
                         }
@@ -1397,25 +1540,45 @@ namespace Game
                     {
                         if (!Global.SpellMgr.HasSpellInfo(tmp.CastSpell.SpellID, Difficulty.None))
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` using non-existent spell (id: {1}) in SCRIPT_COMMAND_CAST_SPELL for script id {2}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` using non-existent spell (id: {1}) in SCRIPT_COMMAND_CAST_SPELL for script id {2}",
                                 tableName, tmp.CastSpell.SpellID, tmp.id);
                             continue;
                         }
                         if ((int)tmp.CastSpell.Flags > 4)                      // targeting type
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` using unknown target in datalong2 ({1}) in SCRIPT_COMMAND_CAST_SPELL for script id {2}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` using unknown target in datalong2 ({1}) in SCRIPT_COMMAND_CAST_SPELL for script id {2}",
                                 tableName, tmp.CastSpell.Flags, tmp.id);
                             continue;
                         }
                         if ((int)tmp.CastSpell.Flags != 4 && Convert.ToBoolean(tmp.CastSpell.CreatureEntry & ~0x1))                      // 1 bit (0, 1)
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` using unknown flags in dataint ({1}) in SCRIPT_COMMAND_CAST_SPELL for script id {2}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` using unknown flags in dataint ({1}) in SCRIPT_COMMAND_CAST_SPELL for script id {2}",
                                 tableName, tmp.CastSpell.CreatureEntry, tmp.id);
                             continue;
                         }
                         else if ((int)tmp.CastSpell.Flags == 4 && GetCreatureTemplate((uint)tmp.CastSpell.CreatureEntry) == null)
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` using invalid creature entry in dataint ({1}) in SCRIPT_COMMAND_CAST_SPELL for script id {2}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` using invalid creature entry in dataint ({1}) in SCRIPT_COMMAND_CAST_SPELL for script id {2}",
                                 tableName, tmp.CastSpell.CreatureEntry, tmp.id);
                             continue;
                         }
@@ -1426,13 +1589,23 @@ namespace Game
                     {
                         if (GetItemTemplate(tmp.CreateItem.ItemEntry) == null)
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` has nonexistent item (entry: {1}) in SCRIPT_COMMAND_CREATE_ITEM for script id {2}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` has nonexistent item (entry: {1}) in SCRIPT_COMMAND_CREATE_ITEM for script id {2}",
                                 tableName, tmp.CreateItem.ItemEntry, tmp.id);
                             continue;
                         }
                         if (tmp.CreateItem.Amount == 0)
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` SCRIPT_COMMAND_CREATE_ITEM but amount is {1} for script id {2}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` SCRIPT_COMMAND_CREATE_ITEM but amount is {1} for script id {2}",
                                 tableName, tmp.CreateItem.Amount, tmp.id);
                             continue;
                         }
@@ -1442,7 +1615,12 @@ namespace Game
                     {
                         if (!CliDB.AnimKitStorage.ContainsKey(tmp.PlayAnimKit.AnimKitID))
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid AnimKid id (datalong = {1}) in SCRIPT_COMMAND_PLAY_ANIMKIT for script id {2}",
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Table `{0}` has invalid AnimKid id (datalong = {1}) in SCRIPT_COMMAND_PLAY_ANIMKIT for script id {2}",
                                 tableName, tmp.PlayAnimKit.AnimKitID, tmp.id);
                             continue;
                         }
@@ -1452,7 +1630,12 @@ namespace Game
                     case ScriptCommands.FlagSetDeprecated:
                     case ScriptCommands.FlagRemoveDeprecated:
                     {
-                        Log.outError(LogFilter.Sql, $"Table `{tableName}` uses deprecated direct updatefield modify command {tmp.command} for script id {tmp.id}");
+                            if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                            {
+                                DB.World.Execute($"DELETE FROM {tableName} WHERE id = {tmp.id}");
+                            }
+                            else
+                                Log.outError(LogFilter.Sql, $"Table `{tableName}` uses deprecated direct updatefield modify command {tmp.command} for script id {tmp.id}");
                         continue;
                     }
                     default:
@@ -1665,7 +1848,7 @@ namespace Game
 
             uint count = 0;
 
-            foreach (var script in spellScriptsStorage.KeyValueListCopy)
+            spellScriptsStorage.RemoveIfMatching((script) =>
             {
                 SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(script.Key, Difficulty.None);
 
@@ -1690,7 +1873,7 @@ namespace Game
                     }
 
                     if (!valid)
-                        spellScriptsStorage.Remove(script);
+                        return true;
                 }
 
                 Dictionary<AuraScriptLoader, uint> AuraScriptLoaders = Global.ScriptMgr.CreateAuraScriptLoaders(script.Key);
@@ -1714,10 +1897,12 @@ namespace Game
                     }
 
                     if (!valid)
-                        spellScriptsStorage.Remove(script);
+                        return true;
                 }
                 ++count;
-            }
+
+                return false;
+            });
 
             Log.outInfo(LogFilter.ServerLoading, "Validated {0} scripts in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
@@ -2027,7 +2212,12 @@ namespace Game
                 CreatureTemplate cInfo = GetCreatureTemplate(creatureId);
                 if (cInfo == null)
                 {
-                    Log.outDebug(LogFilter.Sql, $"Creature template (Entry: {creatureId}) does not exist but has a record in `creature_template_model`");
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM creature_template_model WHERE CreatureID = {creatureId}");
+                    }
+                    else
+                        Log.outDebug(LogFilter.Sql, $"Creature template (Entry: {creatureId}) does not exist but has a record in `creature_template_model`");
                     continue;
                 }
 
@@ -2130,7 +2320,12 @@ namespace Game
                 uint entry = result.Read<uint>(0);
                 if (GetCreatureTemplate(entry) == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature template (Entry: {entry}) does not exist but has a record in `creature_template_addon`");
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM creature_template_addon WHERE entry = {entry}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, $"Creature template (Entry: {entry}) does not exist but has a record in `creature_template_addon`");
                     continue;
                 }
 
@@ -2158,22 +2353,37 @@ namespace Game
                     SpellInfo AdditionalSpellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
                     if (AdditionalSpellInfo == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has wrong spell {spellId} defined in `auras` field in `creature_template_addon`.");
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"DELETE FROM creature_template_addon WHERE entry = {entry}");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has wrong spell {spellId} defined in `auras` field in `creature_template_addon`.");
                         continue;
                     }
 
                     if (AdditionalSpellInfo.HasAura(AuraType.ControlVehicle))
-                        Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has SPELL_AURA_CONTROL_VEHICLE aura {spellId} defined in `auras` field in `creature_template_addon`.");
+                        Log.outDebug(LogFilter.Sql, $"Creature (Entry: {entry}) has SPELL_AURA_CONTROL_VEHICLE aura {spellId} defined in `auras` field in `creature_template_addon`.");
 
                     if (creatureAddon.auras.Contains(spellId))
                     {
-                        Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has duplicate aura (spell {spellId}) in `auras` field in `creature_template_addon`.");
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"DELETE FROM creature_template_addon WHERE entry = {entry}");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has duplicate aura (spell {spellId}) in `auras` field in `creature_template_addon`.");
                         continue;
                     }
 
                     if (AdditionalSpellInfo.GetDuration() > 0)
                     {
-                        Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has temporary aura (spell {spellId}) in `auras` field in `creature_template_addon`.");
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"DELETE FROM creature_template_addon WHERE entry = {entry}");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has temporary aura (spell {spellId}) in `auras` field in `creature_template_addon`.");
                         continue;
                     }
 
@@ -2184,26 +2394,26 @@ namespace Game
                 {
                     if (CliDB.CreatureDisplayInfoStorage.LookupByKey(creatureAddon.mount) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid displayInfoId ({creatureAddon.mount}) for mount defined in `creature_template_addon`");
+                        Log.outDebug(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid displayInfoId ({creatureAddon.mount}) for mount defined in `creature_template_addon`");
                         creatureAddon.mount = 0;
                     }
                 }
 
                 if (creatureAddon.standState >= (int)UnitStandStateType.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid unit stand state ({creatureAddon.standState}) defined in `creature_template_addon`. Truncated to 0.");
+                    Log.outDebug(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid unit stand state ({creatureAddon.standState}) defined in `creature_template_addon`. Truncated to 0.");
                     creatureAddon.standState = 0;
                 }
 
                 if (creatureAddon.animTier >= (int)AnimTier.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid animation tier ({creatureAddon.animTier}) defined in `creature_template_addon`. Truncated to 0.");
+                    Log.outDebug(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid animation tier ({creatureAddon.animTier}) defined in `creature_template_addon`. Truncated to 0.");
                     creatureAddon.animTier = 0;
                 }
 
                 if (creatureAddon.sheathState >= (int)SheathState.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid sheath state ({creatureAddon.sheathState}) defined in `creature_template_addon`. Truncated to 0.");
+                    Log.outDebug(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid sheath state ({creatureAddon.sheathState}) defined in `creature_template_addon`. Truncated to 0.");
                     creatureAddon.sheathState = 0;
                 }
 
@@ -2211,31 +2421,31 @@ namespace Game
 
                 if (!CliDB.EmotesStorage.ContainsKey(creatureAddon.emote))
                 {
-                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid emote ({creatureAddon.emote}) defined in `creatureaddon`.");
+                    Log.outDebug(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid emote ({creatureAddon.emote}) defined in `creatureaddon`.");
                     creatureAddon.emote = 0;
                 }
 
                 if (creatureAddon.aiAnimKit != 0 && !CliDB.AnimKitStorage.ContainsKey(creatureAddon.aiAnimKit))
                 {
-                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid aiAnimKit ({creatureAddon.aiAnimKit}) defined in `creature_template_addon`.");
+                    Log.outDebug(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid aiAnimKit ({creatureAddon.aiAnimKit}) defined in `creature_template_addon`.");
                     creatureAddon.aiAnimKit = 0;
                 }
 
                 if (creatureAddon.movementAnimKit != 0 && !CliDB.AnimKitStorage.ContainsKey(creatureAddon.movementAnimKit))
                 {
-                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid movementAnimKit ({creatureAddon.movementAnimKit}) defined in `creature_template_addon`.");
+                    Log.outDebug(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid movementAnimKit ({creatureAddon.movementAnimKit}) defined in `creature_template_addon`.");
                     creatureAddon.movementAnimKit = 0;
                 }
 
                 if (creatureAddon.meleeAnimKit != 0 && !CliDB.AnimKitStorage.ContainsKey(creatureAddon.meleeAnimKit))
                 {
-                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid meleeAnimKit ({creatureAddon.meleeAnimKit}) defined in `creature_template_addon`.");
+                    Log.outDebug(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid meleeAnimKit ({creatureAddon.meleeAnimKit}) defined in `creature_template_addon`.");
                     creatureAddon.meleeAnimKit = 0;
                 }
 
                 if (creatureAddon.visibilityDistanceType >= VisibilityDistanceType.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid visibilityDistanceType ({creatureAddon.visibilityDistanceType}) defined in `creature_template_addon`.");
+                    Log.outDebug(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid visibilityDistanceType ({creatureAddon.visibilityDistanceType}) defined in `creature_template_addon`.");
                     creatureAddon.visibilityDistanceType = VisibilityDistanceType.Normal;
                 }
 
@@ -2264,7 +2474,12 @@ namespace Game
                 CreatureData creData = GetCreatureData(guid);
                 if (creData == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature (GUID: {guid}) does not exist but has a record in `creatureaddon`");
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM creature_addon WHERE guid = {guid}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, $"Creature (GUID: {guid}) does not exist but has a record in `creatureaddon`");
                     continue;
                 }
 
@@ -2314,7 +2529,7 @@ namespace Game
 
                     if (AdditionalSpellInfo.GetDuration() > 0)
                     {
-                        Log.outError(LogFilter.Sql, $"Creature (GUID: {guid}) has temporary aura (spell {spellId}) in `auras` field in `creature_addon`.");
+                        Log.outDebug(LogFilter.Sql, $"Creature (GUID: {guid}) has temporary aura (spell {spellId}) in `auras` field in `creature_addon`.");
                         continue;
                     }
 
@@ -2408,7 +2623,12 @@ namespace Game
 
                 if (!creatureTemplateStorage.ContainsKey(entry))
                 {
-                    Log.outError(LogFilter.Sql, "Table `creature_questitem` has data for nonexistent creature (entry: {0}, idx: {1}), skipped", entry, idx);
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM creature_questitem WHERE CreatureEntry = {entry}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, "Table `creature_questitem` has data for nonexistent creature (entry: {0}, idx: {1}), skipped", entry, idx);
                     continue;
                 }
 
@@ -2448,7 +2668,12 @@ namespace Game
 
                 if (GetCreatureTemplate(entry) == null)
                 {
-                    Log.outError(LogFilter.Sql, "Creature template (CreatureID: {0}) does not exist but has a record in `creature_equip_template`", entry);
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM creature_equip_template WHERE CreatureID = {entry}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, "Creature template (CreatureID: {0}) does not exist but has a record in `creature_equip_template`", entry);
                     continue;
                 }
 
@@ -2531,7 +2756,12 @@ namespace Game
                 ulong spawnId = result.Read<ulong>(0);
                 if (GetCreatureData(spawnId) == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature (GUID: {spawnId}) does not exist but has a record in `creature_movement_override`");
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM creature_movement_override WHERE SpawnId = {spawnId}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, $"Creature (GUID: {spawnId}) does not exist but has a record in `creature_movement_override`");
                     continue;
                 }
 
@@ -2690,7 +2920,12 @@ namespace Game
                 var template = creatureTemplateStorage.LookupByKey(entry);
                 if (template == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature template (Entry: {entry}) does not exist but has a record in `creature_template_scaling`");
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM creature_template_scaling WHERE entry = {entry}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, $"Creature template (Entry: {entry}) does not exist but has a record in `creature_template_scaling`");
                     continue;
                 }
 
@@ -3094,7 +3329,12 @@ namespace Game
                         CreatureData slave = GetCreatureData(guidLow);
                         if (slave == null)
                         {
-                            Log.outError(LogFilter.Sql, "Couldn't get creature data for GUIDLow {0}", guidLow);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM linked_respawn WHERE guid = {guidLow}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Couldn't get creature data for GUIDLow {0}", guidLow);
                             error = true;
                             break;
                         }
@@ -3102,7 +3342,12 @@ namespace Game
                         CreatureData master = GetCreatureData(linkedGuidLow);
                         if (master == null)
                         {
-                            Log.outError(LogFilter.Sql, "Couldn't get creature data for GUIDLow {0}", linkedGuidLow);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM linked_respawn WHERE guid = {guidLow}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Couldn't get creature data for GUIDLow {0}", linkedGuidLow);
                             error = true;
                             break;
                         }
@@ -3110,7 +3355,12 @@ namespace Game
                         MapRecord map = CliDB.MapStorage.LookupByKey(master.MapId);
                         if (map == null || !map.Instanceable() || (master.MapId != slave.MapId))
                         {
-                            Log.outError(LogFilter.Sql, "Creature '{0}' linking to '{1}' on an unpermitted map.", guidLow, linkedGuidLow);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM linked_respawn WHERE guid = {guidLow}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Creature '{0}' linking to '{1}' on an unpermitted map.", guidLow, linkedGuidLow);
                             error = true;
                             break;
                         }
@@ -3118,7 +3368,12 @@ namespace Game
                         // they must have a possibility to meet (normal/heroic difficulty)
                         if (!master.SpawnDifficulties.Intersect(slave.SpawnDifficulties).Any())
                         {
-                            Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM linked_respawn WHERE guid = {guidLow}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
                             error = true;
                             break;
                         }
@@ -3132,7 +3387,12 @@ namespace Game
                         CreatureData slave = GetCreatureData(guidLow);
                         if (slave == null)
                         {
-                            Log.outError(LogFilter.Sql, "Couldn't get creature data for GUIDLow {0}", guidLow);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM linked_respawn WHERE guid = {guidLow}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Couldn't get creature data for GUIDLow {0}", guidLow);
                             error = true;
                             break;
                         }
@@ -3140,7 +3400,12 @@ namespace Game
                         GameObjectData master = GetGameObjectData(linkedGuidLow);
                         if (master == null)
                         {
-                            Log.outError(LogFilter.Sql, "Couldn't get gameobject data for GUIDLow {0}", linkedGuidLow);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM linked_respawn WHERE guid = {guidLow}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Couldn't get gameobject data for GUIDLow {0}", linkedGuidLow);
                             error = true;
                             break;
                         }
@@ -3148,7 +3413,12 @@ namespace Game
                         MapRecord map = CliDB.MapStorage.LookupByKey(master.MapId);
                         if (map == null || !map.Instanceable() || (master.MapId != slave.MapId))
                         {
-                            Log.outError(LogFilter.Sql, "Creature '{0}' linking to '{1}' on an unpermitted map.", guidLow, linkedGuidLow);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM linked_respawn WHERE guid = {guidLow}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Creature '{0}' linking to '{1}' on an unpermitted map.", guidLow, linkedGuidLow);
                             error = true;
                             break;
                         }
@@ -3170,7 +3440,12 @@ namespace Game
                         GameObjectData slave = GetGameObjectData(guidLow);
                         if (slave == null)
                         {
-                            Log.outError(LogFilter.Sql, "Couldn't get gameobject data for GUIDLow {0}", guidLow);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM linked_respawn WHERE guid = {guidLow}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Couldn't get gameobject data for GUIDLow {0}", guidLow);
                             error = true;
                             break;
                         }
@@ -3178,7 +3453,12 @@ namespace Game
                         GameObjectData master = GetGameObjectData(linkedGuidLow);
                         if (master == null)
                         {
-                            Log.outError(LogFilter.Sql, "Couldn't get gameobject data for GUIDLow {0}", linkedGuidLow);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM linked_respawn WHERE guid = {guidLow}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Couldn't get gameobject data for GUIDLow {0}", linkedGuidLow);
                             error = true;
                             break;
                         }
@@ -3186,7 +3466,12 @@ namespace Game
                         MapRecord map = CliDB.MapStorage.LookupByKey(master.MapId);
                         if (map == null || !map.Instanceable() || (master.MapId != slave.MapId))
                         {
-                            Log.outError(LogFilter.Sql, "Creature '{0}' linking to '{1}' on an unpermitted map.", guidLow, linkedGuidLow);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM linked_respawn WHERE guid = {guidLow}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Creature '{0}' linking to '{1}' on an unpermitted map.", guidLow, linkedGuidLow);
                             error = true;
                             break;
                         }
@@ -3194,7 +3479,12 @@ namespace Game
                         // they must have a possibility to meet (normal/heroic difficulty)
                         if (!master.SpawnDifficulties.Intersect(slave.SpawnDifficulties).Any())
                         {
-                            Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM linked_respawn WHERE guid = {guidLow}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
                             error = true;
                             break;
                         }
@@ -3208,7 +3498,12 @@ namespace Game
                         GameObjectData slave = GetGameObjectData(guidLow);
                         if (slave == null)
                         {
-                            Log.outError(LogFilter.Sql, "Couldn't get gameobject data for GUIDLow {0}", guidLow);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM linked_respawn WHERE guid = {guidLow}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Couldn't get gameobject data for GUIDLow {0}", guidLow);
                             error = true;
                             break;
                         }
@@ -3216,7 +3511,12 @@ namespace Game
                         CreatureData master = GetCreatureData(linkedGuidLow);
                         if (master == null)
                         {
-                            Log.outError(LogFilter.Sql, "Couldn't get creature data for GUIDLow {0}", linkedGuidLow);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM linked_respawn WHERE guid = {guidLow}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Couldn't get creature data for GUIDLow {0}", linkedGuidLow);
                             error = true;
                             break;
                         }
@@ -3224,7 +3524,12 @@ namespace Game
                         MapRecord map = CliDB.MapStorage.LookupByKey(master.MapId);
                         if (map == null || !map.Instanceable() || (master.MapId != slave.MapId))
                         {
-                            Log.outError(LogFilter.Sql, "Creature '{0}' linking to '{1}' on an unpermitted map.", guidLow, linkedGuidLow);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM linked_respawn WHERE guid = {guidLow}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Creature '{0}' linking to '{1}' on an unpermitted map.", guidLow, linkedGuidLow);
                             error = true;
                             break;
                         }
@@ -3232,7 +3537,12 @@ namespace Game
                         // they must have a possibility to meet (normal/heroic difficulty)
                         if (!master.SpawnDifficulties.Intersect(slave.SpawnDifficulties).Any())
                         {
-                            Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM linked_respawn WHERE guid = {guidLow}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
                             error = true;
                             break;
                         }
@@ -3393,7 +3703,7 @@ namespace Game
                 } while (trainersResult.NextRow());
             }
 
-            foreach (var unusedSpells in spellsByTrainer)
+            foreach (var unusedSpells in spellsByTrainer.KeyValueList)
             {
                 Log.outError(LogFilter.Sql, $"Table `trainer_spell` references non-existing trainer (TrainerId: {unusedSpells.Key}) for SpellId {unusedSpells.Value.SpellId}, ignoring");
 
@@ -3440,13 +3750,23 @@ namespace Game
 
                     if (GetCreatureTemplate(creatureId) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `creature_trainer` references non-existing creature template (CreatureId: {creatureId}), ignoring");
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"DELETE FROM creature_trainer WHERE CreatureID = {creatureId}");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, $"Table `creature_trainer` references non-existing creature template (CreatureId: {creatureId}), ignoring");
                         continue;
                     }
 
                     if (GetTrainer(trainerId) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `creature_trainer` references non-existing trainer (TrainerId: {trainerId}) for CreatureId {creatureId} MenuId {gossipMenuId} OptionIndex {gossipOptionIndex}, ignoring");
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"DELETE FROM creature_trainer WHERE CreatureID = {creatureId}");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, $"Table `creature_trainer` references non-existing trainer (TrainerId: {trainerId}) for CreatureId {creatureId} MenuId {gossipMenuId} OptionIndex {gossipOptionIndex}, ignoring");
                         continue;
                     }
 
@@ -3460,7 +3780,12 @@ namespace Game
 
                         if (gossipOptionItr == null)
                         {
-                            Log.outError(LogFilter.Sql, $"Table `creature_trainer` references non-existing gossip menu option (MenuId {gossipMenuId} OptionIndex {gossipOptionIndex}) for CreatureId {creatureId} and TrainerId {trainerId}, ignoring");
+                            if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                            {
+                                DB.World.Execute($"DELETE FROM creature_trainer WHERE CreatureID = {creatureId}");
+                            }
+                            else
+                                Log.outError(LogFilter.Sql, $"Table `creature_trainer` references non-existing gossip menu option (MenuId {gossipMenuId} OptionIndex {gossipOptionIndex}) for CreatureId {creatureId} and TrainerId {trainerId}, ignoring");
                             continue;
                         }
                     }
@@ -3625,7 +3950,12 @@ namespace Game
                 CreatureTemplate cInfo = GetCreatureTemplate(entry);
                 if (cInfo == null)
                 {
-                    Log.outError(LogFilter.Sql, "Table `creature` has creature (GUID: {0}) with non existing creature entry {1}, skipped.", guid, entry);
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM creature WHERE id = {entry}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, "Table `creature` has creature (GUID: {0}) with non existing creature entry {1}, skipped.", guid, entry);
                     continue;
                 }
 
@@ -4291,7 +4621,12 @@ namespace Game
                 GameObjectTemplate got = GetGameObjectTemplate(entry);
                 if (got == null)
                 {
-                    Log.outError(LogFilter.Sql, $"GameObject template (Entry: {entry}) does not exist but has a record in `gameobject_template_addon`");
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM gameobject_template_addon WHERE entry = {entry}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, $"GameObject template (Entry: {entry}) does not exist but has a record in `gameobject_template_addon`");
                     continue;
                 }
 
@@ -4373,7 +4708,12 @@ namespace Game
                 GameObjectData goData = GetGameObjectData(spawnId);
                 if (goData == null)
                 {
-                    Log.outError(LogFilter.Sql, $"GameObject (SpawnId: {spawnId}) does not exist but has a record in `gameobject_overrides`");
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM gameobject_overrides WHERE spawnId = {spawnId}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, $"GameObject (SpawnId: {spawnId}) does not exist but has a record in `gameobject_overrides`");
                     continue;
                 }
 
@@ -4643,7 +4983,12 @@ namespace Game
                 GameObjectData goData = GetGameObjectData(guid);
                 if (goData == null)
                 {
-                    Log.outError(LogFilter.Sql, $"GameObject (GUID: {guid}) does not exist but has a record in `gameobject_addon`");
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM gameobject_addon WHERE guid = {guid}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, $"GameObject (GUID: {guid}) does not exist but has a record in `gameobject_addon`");
                     continue;
                 }
 
@@ -4862,7 +5207,7 @@ namespace Game
             if (CliDB.LockStorage.ContainsKey(dataN))
                 return;
 
-            Log.outError(LogFilter.Sql, "Gameobject (Entry: {0} GoType: {1}) have data{2}={3} but lock (Id: {4}) not found.", goInfo.entry, goInfo.type, N, goInfo.Door.open, goInfo.Door.open);
+            Log.outDebug(LogFilter.Sql, "Gameobject (Entry: {0} GoType: {1}) have data{2}={3} but lock (Id: {4}) not found.", goInfo.entry, goInfo.type, N, goInfo.Door.open, goInfo.Door.open);
         }
         void CheckGOLinkedTrapId(GameObjectTemplate goInfo, uint dataN, uint N)
         {
@@ -5245,7 +5590,12 @@ namespace Game
                 if (player != null)
                     player.SendSysMessage(CypherStrings.CommandVendorselection);
                 else
-                    Log.outError(LogFilter.Sql, "Table `(gameevent)npcvendor` have data for not existed creature template (Entry: {0}), ignore", vendorentry);
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM npc_vendor WHERE entry = {vendorentry}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, "Table `(gameevent)npcvendor` have data for not existed creature template (Entry: {0}), ignore", vendorentry);
                 return false;
             }
 
@@ -5256,7 +5606,12 @@ namespace Game
                     if (player != null)
                         player.SendSysMessage(CypherStrings.CommandVendorselection);
                     else
-                        Log.outError(LogFilter.Sql, "Table `(gameevent)npcvendor` have data for not creature template (Entry: {0}) without vendor flag, ignore", vendorentry);
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"DELETE FROM npc_vendor WHERE entry = {vendorentry}");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, "Table `(gameevent)npcvendor` have data for not creature template (Entry: {0}) without vendor flag, ignore", vendorentry);
 
                     if (skipvendors != null)
                         skipvendors.Add(vendorentry);
@@ -5761,22 +6116,38 @@ namespace Game
             {
                 uint groupId = result.Read<uint>(0);
                 SpawnObjectType spawnType = (SpawnObjectType)result.Read<byte>(1);
+                ulong spawnId = result.Read<ulong>(2);
+
                 if (!SpawnData.TypeIsValid(spawnType))
                 {
-                    Log.outError(LogFilter.Sql, $"Spawn data with invalid type {spawnType} listed for spawn group {groupId}. Skipped.");
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM spawn_group WHERE groupId = {groupId} AND spawnType = {(byte)spawnType} AND spawnId = {spawnId}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, $"Spawn data with invalid type {spawnType} listed for spawn group {groupId}. Skipped.");
                     continue;
                 }
-                ulong spawnId = result.Read<ulong>(2);
 
                 SpawnMetadata data = GetSpawnMetadata(spawnType, spawnId);
                 if (data == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Spawn data with ID ({spawnType},{spawnId}) not found, but is listed as a member of spawn group {groupId}!");
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM spawn_group WHERE groupId = {groupId} AND spawnType = {(byte)spawnType} AND spawnId = {spawnId}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, $"Spawn data with ID ({spawnType},{spawnId}) not found, but is listed as a member of spawn group {groupId}!");
                     continue;
                 }
                 else if (data.spawnGroupData.groupId != 0)
                 {
-                    Log.outError(LogFilter.Sql, $"Spawn with ID ({spawnType},{spawnId}) is listed as a member of spawn group {groupId}, but is already a member of spawn group {data.spawnGroupData.groupId}. Skipping.");
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM spawn_group WHERE groupId = {groupId} AND spawnType = {(byte)spawnType} AND spawnId = {spawnId}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, $"Spawn with ID ({spawnType},{spawnId}) is listed as a member of spawn group {groupId}, but is already a member of spawn group {data.spawnGroupData.groupId}. Skipping.");
                     continue;
                 }
                 var groupTemplate = _spawnGroupDataStorage.LookupByKey(groupId);
@@ -5794,7 +6165,12 @@ namespace Game
                     }
                     else if (groupTemplate.mapId != data.MapId && !groupTemplate.flags.HasAnyFlag(SpawnGroupFlags.System))
                     {
-                        Log.outError(LogFilter.Sql, $"Spawn group {groupId} has map ID {groupTemplate.mapId}, but spawn ({spawnType},{spawnId}) has map id {data.MapId} - spawn NOT added to group!");
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"DELETE FROM spawn_group WHERE groupId = {groupId} AND spawnType = {(byte)spawnType} AND spawnId = {spawnId}");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, $"Spawn group {groupId} has map ID {groupTemplate.mapId}, but spawn ({spawnType},{spawnId}) has map id {data.MapId} - spawn NOT added to group!");
                         continue;
                     }
                     data.spawnGroupData = groupTemplate;
@@ -5826,13 +6202,23 @@ namespace Game
                 var spawnGroupTemplate = _spawnGroupDataStorage.LookupByKey(spawnGroupId);
                 if (spawnGroupTemplate == null || spawnGroupTemplate.flags.HasAnyFlag(SpawnGroupFlags.System))
                 {
-                    Log.outError(LogFilter.Sql, $"Invalid spawn group {spawnGroupId} specified for instance {instanceMapId}. Skipped.");
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM instance_spawn_groups WHERE instanceMapId = {instanceMapId} AND spawnGroupId = {spawnGroupId}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, $"Invalid spawn group {spawnGroupId} specified for instance {instanceMapId}. Skipped.");
                     continue;
                 }
 
                 if (spawnGroupTemplate.mapId != instanceMapId)
                 {
-                    Log.outError(LogFilter.Sql, $"Instance spawn group {spawnGroupId} specified for instance {instanceMapId} has spawns on a different map {spawnGroupTemplate.mapId}. Skipped.");
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM instance_spawn_groups WHERE instanceMapId = {instanceMapId} AND spawnGroupId = {spawnGroupId}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, $"Instance spawn group {spawnGroupId} specified for instance {instanceMapId} has spawns on a different map {spawnGroupTemplate.mapId}. Skipped.");
                     continue;
                 }
 
@@ -6110,7 +6496,7 @@ namespace Game
                         if (CliDB.MovieStorage.ContainsKey(introMovieId))
                             info.introMovieId = introMovieId;
                         else
-                            Log.outError(LogFilter.Sql, $"Invalid intro movie id {introMovieId} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
+                            Log.outDebug(LogFilter.Sql, $"Invalid intro movie id {introMovieId} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
                     }
 
                     if (!result.IsNull(14))
@@ -6119,7 +6505,7 @@ namespace Game
                         if (GetSceneTemplate(introSceneId) != null)
                             info.introSceneId = introSceneId;
                         else
-                            Log.outError(LogFilter.Sql, $"Invalid intro scene id {introSceneId} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
+                            Log.outDebug(LogFilter.Sql, $"Invalid intro scene id {introSceneId} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
                     }
 
                     if (!result.IsNull(15))
@@ -6128,7 +6514,7 @@ namespace Game
                         if (GetSceneTemplate(introSceneId) != null)
                             info.introSceneIdNPE = introSceneId;
                         else
-                            Log.outError(LogFilter.Sql, $"Invalid NPE intro scene id {introSceneId} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
+                            Log.outDebug(LogFilter.Sql, $"Invalid NPE intro scene id {introSceneId} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
                     }
 
                     _playerInfo[Tuple.Create((Race)currentrace, (Class)currentclass)] = info;
@@ -6791,7 +7177,12 @@ namespace Game
                 uint creatureid = result.Read<uint>(0);
                 if (GetCreatureTemplate(creatureid) == null)
                 {
-                    Log.outError(LogFilter.Sql, "Wrong creature id {0} in `pet_levelstats` table, ignoring.", creatureid);
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM pet_levelstats WHERE creature_entry = {creatureid}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, "Wrong creature id {0} in `pet_levelstats` table, ignoring.", creatureid);
                     continue;
                 }
 
@@ -7593,7 +7984,12 @@ namespace Game
                     }
                     else if (qinfo.SourceItemIdCount == 0)
                     {
-                        Log.outError(LogFilter.Sql, "Quest {0} has `StartItem` = {1} but `ProvidedItemCount` = 0, set to 1 but need fix in DB.",
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"UPDATE quest_template_addon SET ProvidedItemCount = 1 WHERE ID = {qinfo.Id}");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, "Quest {0} has `StartItem` = {1} but `ProvidedItemCount` = 0, set to 1 but need fix in DB.",
                             qinfo.Id, qinfo.SourceItemId);
                         qinfo.SourceItemIdCount = 1;                    // update to 1 for allow quest work for backward compatibility with DB
                     }
@@ -7651,69 +8047,144 @@ namespace Game
                     {
                         case QuestObjectiveType.Item:
                             if (GetItemTemplate((uint)obj.ObjectID) == null)
-                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing item entry {obj.ObjectID}, quest can't be done.");
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM quest_objectives WHERE QuestID = {obj.QuestID}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing item entry {obj.ObjectID}, quest can't be done.");
                             break;
                         case QuestObjectiveType.Monster:
                             if (GetCreatureTemplate((uint)obj.ObjectID) == null)
-                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing creature entry {obj.ObjectID}, quest can't be done.");
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM quest_objectives WHERE QuestID = {obj.QuestID}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing creature entry {obj.ObjectID}, quest can't be done.");
                             break;
                         case QuestObjectiveType.GameObject:
                             if (GetGameObjectTemplate((uint)obj.ObjectID) == null)
-                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing gameobject entry {obj.ObjectID}, quest can't be done.");
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM quest_objectives WHERE QuestID = {obj.QuestID}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing gameobject entry {obj.ObjectID}, quest can't be done.");
                             break;
                         case QuestObjectiveType.TalkTo:
                             if (GetCreatureTemplate((uint)obj.ObjectID) == null)
-                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing creature entry {obj.ObjectID}, quest can't be done.");
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM quest_objectives WHERE QuestID = {obj.QuestID}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing creature entry {obj.ObjectID}, quest can't be done.");
                             break;
                         case QuestObjectiveType.MinReputation:
                         case QuestObjectiveType.MaxReputation:
                         case QuestObjectiveType.IncreaseReputation:
                             if (!CliDB.FactionStorage.ContainsKey((uint)obj.ObjectID))
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing faction id {2}", qinfo.Id, obj.Id, obj.ObjectID);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM quest_objectives WHERE QuestID = {obj.QuestID}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing faction id {2}", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.PlayerKills:
                             if (obj.Amount <= 0)
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has invalid player kills count {2}", qinfo.Id, obj.Id, obj.Amount);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM quest_objectives WHERE QuestID = {obj.QuestID}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Quest {0} objective {1} has invalid player kills count {2}", qinfo.Id, obj.Id, obj.Amount);
                             break;
                         case QuestObjectiveType.Currency:
                         case QuestObjectiveType.HaveCurrency:
                         case QuestObjectiveType.ObtainCurrency:
                             if (!CliDB.CurrencyTypesStorage.ContainsKey((uint)obj.ObjectID))
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing currency {2}", qinfo.Id, obj.Id, obj.ObjectID);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM quest_objectives WHERE QuestID = {obj.QuestID}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing currency {2}", qinfo.Id, obj.Id, obj.ObjectID);
                             if (obj.Amount <= 0)
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has invalid currency amount {2}", qinfo.Id, obj.Id, obj.Amount);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM quest_objectives WHERE QuestID = {obj.QuestID}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Quest {0} objective {1} has invalid currency amount {2}", qinfo.Id, obj.Id, obj.Amount);
                             break;
                         case QuestObjectiveType.LearnSpell:
                             if (!Global.SpellMgr.HasSpellInfo((uint)obj.ObjectID, Difficulty.None))
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing spell id {2}", qinfo.Id, obj.Id, obj.ObjectID);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM quest_objectives WHERE QuestID = {obj.QuestID}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing spell id {2}", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.WinPetBattleAgainstNpc:
                             if (obj.ObjectID != 0 && GetCreatureTemplate((uint)obj.ObjectID) == null)
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing creature entry {2}, quest can't be done.", qinfo.Id, obj.Id, obj.ObjectID);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM quest_objectives WHERE QuestID = {obj.QuestID}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing creature entry {2}, quest can't be done.", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.DefeatBattlePet:
                             if (!CliDB.BattlePetSpeciesStorage.ContainsKey((uint)obj.ObjectID))
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing battlepet species id {2}", qinfo.Id, obj.Id, obj.ObjectID);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM quest_objectives WHERE QuestID = {obj.QuestID}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing battlepet species id {2}", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.CriteriaTree:
                             if (!CliDB.CriteriaTreeStorage.ContainsKey((uint)obj.ObjectID))
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing criteria tree id {2}", qinfo.Id, obj.Id, obj.ObjectID);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM quest_objectives WHERE QuestID = {obj.QuestID}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing criteria tree id {2}", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.AreaTrigger:
                             if (!CliDB.AreaTriggerStorage.ContainsKey((uint)obj.ObjectID) && obj.ObjectID != -1)
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing AreaTrigger.db2 id {2}", qinfo.Id, obj.Id, obj.ObjectID);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM quest_objectives WHERE QuestID = {obj.QuestID}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing AreaTrigger.db2 id {2}", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.AreaTriggerEnter:
                         case QuestObjectiveType.AreaTriggerExit:
                             if (Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(new AreaTriggerId((uint)obj.ObjectID, false)) == null && Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(new AreaTriggerId((uint)obj.ObjectID, true)) != null)
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing areatrigger id {2}", qinfo.Id, obj.Id, obj.ObjectID);
+                                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                                {
+                                    DB.World.Execute($"DELETE FROM quest_objectives WHERE QuestID = {obj.QuestID}");
+                                }
+                                else
+                                    Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing areatrigger id {2}", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.Money:
                         case QuestObjectiveType.WinPvpPetBattles:
                         case QuestObjectiveType.ProgressBar:
                             break;
                         default:
-                            Log.outError(LogFilter.Sql, "Quest {0} objective {1} has unhandled type {2}", qinfo.Id, obj.Id, obj.Type);
+                            if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                            {
+                                DB.World.Execute($"DELETE FROM quest_objectives WHERE QuestID = {obj.QuestID}");
+                            }
+                            else
+                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has unhandled type {2}", qinfo.Id, obj.Id, obj.Type);
                             break;
                     }
 
@@ -8084,7 +8555,7 @@ namespace Game
         {
             LoadQuestRelationsHelper(_goQuestRelations, null, "gameobject_queststarter");
 
-            foreach (var pair in _goQuestRelations)
+            foreach (var pair in _goQuestRelations.KeyValueList)
             {
                 GameObjectTemplate goInfo = GetGameObjectTemplate(pair.Key);
                 if (goInfo == null)
@@ -8097,7 +8568,7 @@ namespace Game
         {
             LoadQuestRelationsHelper(_goQuestInvolvedRelations, _goQuestInvolvedRelationsReverse, "gameobject_questender");
 
-            foreach (var pair in _goQuestInvolvedRelations)
+            foreach (var pair in _goQuestInvolvedRelations.KeyValueList)
             {
                 GameObjectTemplate goInfo = GetGameObjectTemplate(pair.Key);
                 if (goInfo == null)
@@ -8110,7 +8581,7 @@ namespace Game
         {
             LoadQuestRelationsHelper(_creatureQuestRelations, null, "creature_queststarter");
 
-            foreach (var pair in _creatureQuestRelations)
+            foreach (var pair in _creatureQuestRelations.KeyValueList)
             {
                 CreatureTemplate cInfo = GetCreatureTemplate(pair.Key);
                 if (cInfo == null)
@@ -8126,7 +8597,7 @@ namespace Game
         {
             LoadQuestRelationsHelper(_creatureQuestInvolvedRelations, _creatureQuestInvolvedRelationsReverse, "creature_questender");
 
-            foreach (var pair in _creatureQuestInvolvedRelations)
+            foreach (var pair in _creatureQuestInvolvedRelations.KeyValueList)
             {
                 CreatureTemplate cInfo = GetCreatureTemplate(pair.Key);
                 if (cInfo == null)
@@ -8228,7 +8699,12 @@ namespace Game
                 bool alwaysAllowMergingBlobs = result.Read<bool>(14);
 
                 if (GetQuestTemplate(questID) == null)
-                    Log.outError(LogFilter.Sql, $"`quest_poi` quest id ({questID}) Idx1 ({idx1}) does not exist in `quest_template`");
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM quest_poi WHERE QuestID = {questID}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, $"`quest_poi` quest id ({questID}) Idx1 ({idx1}) does not exist in `quest_template`");
 
                 var blobs = allPoints.LookupByKey(questID);
                 if (blobs != null)
@@ -8448,7 +8924,7 @@ namespace Game
         }
         public void UnloadPhaseConditions()
         {
-            foreach (var pair in _phaseInfoByArea)
+            foreach (var pair in _phaseInfoByArea.KeyValueList)
                 pair.Value.Conditions.Clear();
         }
         void LoadTerrainWorldMaps()
@@ -8575,7 +9051,7 @@ namespace Game
                 ++count;
             } while (result.NextRow());
 
-            foreach (var pair in _phaseInfoByArea)
+            foreach (var pair in _phaseInfoByArea.KeyValueList)
             {
                 uint parentAreaId = pair.Key;
                 do
@@ -8654,7 +9130,7 @@ namespace Game
             {
                 if (creature.Npcflag.HasAnyFlag((uint)NPCFlags.SpellClick) && !_spellClickInfoStorage.ContainsKey(creature.Entry))
                 {
-                    Log.outError(LogFilter.Sql, "npc_spellclick_spells: Creature template {0} has UNIT_NPC_FLAG_SPELLCLICK but no data in spellclick table! Removing flag", creature.Entry);
+                    Log.outWarn(LogFilter.Sql, "npc_spellclick_spells: Creature template {0} has UNIT_NPC_FLAG_SPELLCLICK but no data in spellclick table! Removing flag", creature.Entry);
                     creature.Npcflag &= ~(uint)NPCFlags.SpellClick;
                 }
             }
@@ -10185,14 +10661,24 @@ namespace Game
                     var playerChoiceLocale = _playerChoiceLocales.LookupByKey(choiceId);
                     if (playerChoiceLocale == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_locale` references non-existing ChoiceId: {choiceId} for ResponseId {responseId} locale {localeName}, skipped");
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"DELETE FROM playerchoice_response_locale WHERE ChoiceID = {choiceId} AND ResponseID = {responseId} AND locale = \"{localeName}\"");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, $"Table `playerchoice_locale` references non-existing ChoiceId: {choiceId} for ResponseId {responseId} locale {localeName}, skipped");
                         continue;
                     }
 
                     PlayerChoice playerChoice = GetPlayerChoice(choiceId);
                     if (playerChoice.GetResponse(responseId) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_locale` references non-existing ResponseId: {responseId} for ChoiceId {choiceId} locale {localeName}, skipped");
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"DELETE FROM playerchoice_response_locale WHERE ChoiceID = {choiceId} AND ResponseID = {responseId} AND locale = \"{localeName}\"");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, $"Table `playerchoice_locale` references non-existing ResponseId: {responseId} for ChoiceId {choiceId} locale {localeName}, skipped");
                         continue;
                     }
 
@@ -10208,7 +10694,12 @@ namespace Game
                     }
                     else
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_locale` references non-existing locale for ResponseId: {responseId} for ChoiceId {choiceId} locale {localeName}, skipped");
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"DELETE FROM playerchoice_response_locale WHERE ChoiceID = {choiceId} AND ResponseID = {responseId} AND locale = \"{localeName}\"");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, $"Table `playerchoice_locale` references non-existing locale for ResponseId: {responseId} for ChoiceId {choiceId} locale {localeName}, skipped");
                     }
                 } while (result.NextRow());
 

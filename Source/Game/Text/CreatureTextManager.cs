@@ -61,30 +61,55 @@ namespace Game
                 {
                     if (!CliDB.SoundKitStorage.ContainsKey(temp.sound))
                     {
-                        Log.outError(LogFilter.Sql, $"GossipManager: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_texts` has Sound {temp.sound} but sound does not exist.");
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"UPDATE creature_text SET Sound = 0 WHERE CreatureID = {temp.creatureId} AND GroupID = {temp.groupId}");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, $"GossipManager: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_texts` has Sound {temp.sound} but sound does not exist.");
                         temp.sound = 0;
                     }
                 }
                 if (temp.SoundPlayType >= SoundKitPlayType.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_text` has PlayType {temp.SoundPlayType} but does not exist.");
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"UPDATE creature_text SET SoundPlayType = 0 WHERE CreatureID = {temp.creatureId} AND GroupID = {temp.groupId}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_text` has PlayType {temp.SoundPlayType} but does not exist.");
                     temp.SoundPlayType = SoundKitPlayType.Normal;
                 }
                 if (temp.lang != Language.Universal && !Global.LanguageMgr.IsLanguageExist(temp.lang))
                 {
-                    Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_texts` using Language {temp.lang} but Language does not exist.");
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"UPDATE creature_text SET Language = 0 WHERE CreatureID = {temp.creatureId} AND GroupID = {temp.groupId}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_texts` using Language {temp.lang} but Language does not exist.");
                     temp.lang = Language.Universal;
                 }
                 if (temp.type >= ChatMsg.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_texts` has Type {temp.type} but this Chat Type does not exist.");
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"UPDATE creature_text SET Type = {ChatMsg.Say} WHERE CreatureID = {temp.creatureId} AND GroupID = {temp.groupId}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_texts` has Type {temp.type} but this Chat Type does not exist.");
                     temp.type = ChatMsg.Say;
                 }
                 if (temp.emote != 0)
                 {
                     if (!CliDB.EmotesStorage.ContainsKey((uint)temp.emote))
                     {
-                        Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_texts` has Emote {temp.emote} but emote does not exist.");
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"UPDATE creature_text SET Emote = 0 WHERE CreatureID = {temp.creatureId} AND GroupID = {temp.groupId}");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_texts` has Emote {temp.emote} but emote does not exist.");
                         temp.emote = Emote.OneshotNone;
                     }
                 }
@@ -93,14 +118,24 @@ namespace Game
                 {
                     if (!CliDB.BroadcastTextStorage.ContainsKey(temp.BroadcastTextId))
                     {
-                        Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId}, Id {temp.id} in table `creature_texts` has non-existing or incompatible BroadcastTextId {temp.BroadcastTextId}.");
+                        if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                        {
+                            DB.World.Execute($"UPDATE creature_text SET BroadcastTextId = 0 WHERE CreatureID = {temp.creatureId} AND GroupID = {temp.groupId}");
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId}, Id {temp.id} in table `creature_texts` has non-existing or incompatible BroadcastTextId {temp.BroadcastTextId}.");
                         temp.BroadcastTextId = 0;
                     }
                 }
 
                 if (temp.TextRange > CreatureTextRange.Personal)
                 {
-                    Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId}, Id {temp.id} in table `creature_text` has incorrect TextRange {temp.TextRange}.");
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"UPDATE creature_text SET TextRange = 0 WHERE CreatureID = {temp.creatureId} AND GroupID = {temp.groupId}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId}, Id {temp.id} in table `creature_text` has incorrect TextRange {temp.TextRange}.");
                     temp.TextRange = CreatureTextRange.Normal;
                 }
 

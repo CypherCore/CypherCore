@@ -365,7 +365,12 @@ namespace Game
                         CreatureData data = Global.ObjectMgr.GetCreatureData(guid);
                         if (data == null)
                         {
-                            Log.outError(LogFilter.Sql, "`game_event_creature` contains creature (GUID: {0}) not found in `creature` table.", guid);
+                            if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                            {
+                                DB.World.Execute($"DELETE FROM game_event_creature WHERE guid = {guid}");
+                            }
+                            else
+                                Log.outError(LogFilter.Sql, "`game_event_creature` contains creature (GUID: {0}) not found in `creature` table.", guid);
                             continue;
                         }
 

@@ -194,7 +194,12 @@ namespace Game.Scenarios
                     }
                 }
 
-                Log.outError(LogFilter.Sql, $"Table scenario_poi references unknown scenario poi points for criteria tree id {criteriaTreeID} POI id {blobIndex}");
+                if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                {
+                    DB.World.Execute($"DELETE FROM scenario_poi WHERE criteriaTreeID = {criteriaTreeID}");
+                }
+                else
+                    Log.outError(LogFilter.Sql, $"Table scenario_poi references unknown scenario poi points for criteria tree id {criteriaTreeID} POI id {blobIndex}");
 
             } while (result.NextRow());
 

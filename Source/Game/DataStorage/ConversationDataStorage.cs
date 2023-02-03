@@ -221,7 +221,12 @@ namespace Game.DataStorage
 
                 if (worldObject == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` references null world object (GUID: {SpawnId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
+                    if (WorldConfig.GetDefaultValue("load.autoclean", false))
+                    {
+                        DB.World.Execute($"DELETE FROM conversation_actors WHERE ConversationId = {ConversationId}");
+                    }
+                    else
+                        Log.outError(LogFilter.Sql, $"Table `conversation_actors` references null world object (GUID: {SpawnId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
                     return false;
                 }
 
