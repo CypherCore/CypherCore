@@ -1,4 +1,10 @@
-## CypherCore [![Build status](https://ci.appveyor.com/api/projects/status/ge4hjp1h1d28q25j?svg=true)](https://ci.appveyor.com/project/hondacrx/cyphercore)
+## Forged Core [![Build status](https://ci.appveyor.com/api/projects/status/2wgy97jxy0wfl7ly?svg=true)](https://ci.appveyor.com/project/JBurlison/forgedcore)
+
+Forged Core is an open source branch of CypherCore.
+Forge Core is the core of the Forged WoW Server and aims to be the most complete and up to date core.
+Forged Core also features a very extencible script loading system for easy additions to all types of gameplay. Scripts can be loaded into the script directory and reloaded during runtime.
+
+[Forged WoW Website](http://forgedwow.gg/)
 
 CypherCore is an open source server project for World of Warcraft written in C#.
 
@@ -6,7 +12,7 @@ The current support game version is: 10.0.5.47871
 
 ### Prerequisites
 * .NET 7.0 SDK [Download](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
-* MariaDB 10.6 or higher [Download](https://mariadb.org/download/)
+* MariaDB 10.6/Mysql 8 or higher [Download](https://mariadb.org/download/)
 * Optional: Visual Studio 2022, Visual Studio Code or Jetbrains Rider
 
 ### Server Setup
