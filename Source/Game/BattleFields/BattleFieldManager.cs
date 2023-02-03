@@ -143,7 +143,7 @@ namespace Game.BattleFields
             _updateTimer += diff;
             if (_updateTimer > 1000)
             {
-                foreach (var (map, battlefield) in _battlefieldsByMap)
+                foreach (var (map, battlefield) in _battlefieldsByMap.KeyValueList)
                     if (battlefield.IsEnabled())
                         battlefield.Update(_updateTimer);
 

@@ -130,8 +130,9 @@ namespace Game.PvP
             m_UpdateTimer += diff;
             if (m_UpdateTimer > 1000)
             {
-                foreach (var (_, outdoor) in m_OutdoorPvPByMap)
+                foreach (var (_, outdoor) in m_OutdoorPvPByMap.KeyValueList)
                     outdoor.Update(m_UpdateTimer);
+
                 m_UpdateTimer = 0;
             }
         }

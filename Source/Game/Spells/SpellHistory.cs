@@ -99,7 +99,7 @@ namespace Game.Spells
                     }
                 }
 
-                foreach (var pair in _categoryCharges)
+                foreach (var pair in _categoryCharges.KeyValueList)
                 {
                     index = 0;
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_PET_SPELL_CHARGES);
@@ -137,7 +137,7 @@ namespace Game.Spells
                     }
                 }
 
-                foreach (var pair in _categoryCharges)
+                foreach (var pair in _categoryCharges.KeyValueList)
                 {
                     index = 0;
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_SPELL_CHARGES);
@@ -168,11 +168,7 @@ namespace Game.Spells
                 }
             }
 
-            foreach (var pair in _categoryCharges.KeyValueListCopy)
-            {
-                if (pair.Value.RechargeEnd <= now)
-                    _categoryCharges.Remove(pair);
-            }
+            _categoryCharges.RemoveIfMatching((pair) => pair.Value.RechargeEnd <= now);
         }
 
         public void HandleCooldowns(SpellInfo spellInfo, Item item, Spell spell = null)

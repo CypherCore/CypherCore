@@ -43,7 +43,7 @@ namespace Scripts.Spells.Warlock
 
             FlagArray128 classMask = GetEffectInfo().SpellClassMask;
 
-            foreach (var itr in appliedAuras)
+            foreach (var itr in appliedAuras.KeyValueList)
             {
                 SpellInfo spellProto = itr.Value.GetBase().GetSpellInfo();
 

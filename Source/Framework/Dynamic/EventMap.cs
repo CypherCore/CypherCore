@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Framework.Constants;
 
 namespace Framework.Dynamic
 {
@@ -172,7 +173,7 @@ namespace Framework.Dynamic
         {
             while (!Empty())
             {
-                var pair = _eventMap.FirstOrDefault();
+                var pair = _eventMap.KeyValueList.FirstOrDefault();
 
                 if (pair.Key > _time)
                     return 0;
@@ -206,16 +207,13 @@ namespace Framework.Dynamic
             if (Empty())
                 return;
 
-            MultiMap<TimeSpan, uint> delayed = new();
+            MultiMap<TimeSpan, uint> delayed = _eventMap.GetCopy();
 
-            foreach (var pair in _eventMap.KeyValueListCopy)
+            foreach (var pair in delayed.KeyValueList)
             {
-                delayed.Add(pair.Key + delay, pair.Value);
                 _eventMap.Remove(pair.Key, pair.Value);
+                _eventMap.Add(pair.Key + delay, pair.Value);
             }
-
-            foreach (var del in delayed)
-                _eventMap.Add(del);
         }
 
         /// <summary>
@@ -228,19 +226,14 @@ namespace Framework.Dynamic
             if (group == 0 || group > 8 || Empty())
                 return;
 
-            MultiMap<TimeSpan, uint> delayed = new();
-
-            foreach (var pair in _eventMap.KeyValueListCopy)
+            MultiMap<TimeSpan, uint> delayed = _eventMap.RemoveIfMatchingMulti((pair) =>
             {
-                if (Convert.ToBoolean(pair.Value & (1 << (int)(group + 15))))
-                {
-                    delayed.Add(pair.Key + delay, pair.Value);
-                    _eventMap.Remove(pair.Key, pair.Value);
-                }
-            }
+                return Convert.ToBoolean(pair.Value & (1 << (int)(group + 15)));
+            });
 
-            foreach (var del in delayed)
-                _eventMap.Add(del);
+            foreach (var pair in delayed.KeyValueList)
+                _eventMap.Add(pair.Key + delay, pair.Value);
+
         }
 
         /// <summary>
@@ -252,11 +245,8 @@ namespace Framework.Dynamic
             if (Empty())
                 return;
 
-            foreach (var pair in _eventMap.KeyValueListCopy)
-            {
-                if (eventId == (pair.Value & 0x0000FFFF))
-                    _eventMap.Remove(pair.Key, pair.Value);
-            }
+
+            _eventMap.RemoveIfMatching((pair) => eventId == (pair.Value & 0x0000FFFF));
         }
 
         /// <summary>
@@ -268,11 +258,7 @@ namespace Framework.Dynamic
             if (group == 0 || group > 8 || Empty())
                 return;
 
-            foreach (var pair in _eventMap.KeyValueListCopy)
-            {
-                if (Convert.ToBoolean(pair.Value & (uint)(1 << ((int)group + 15))))
-                    _eventMap.Remove(pair.Key, pair.Value);
-            }
+            _eventMap.RemoveIfMatching((pair) => Convert.ToBoolean(pair.Value & (uint)(1 << ((int)group + 15))));
         }
 
         /// <summary>
@@ -282,7 +268,7 @@ namespace Framework.Dynamic
         /// <returns>Time of next event. If event is not scheduled returns <see cref="TimeSpan.MaxValue"/></returns>
         public TimeSpan GetTimeUntilEvent(uint eventId)
         {
-            foreach (var pair in _eventMap)
+            foreach (var pair in _eventMap.KeyValueList)
                 if (eventId == (pair.Value & 0x0000FFFF))
                     return pair.Key - _time;
 

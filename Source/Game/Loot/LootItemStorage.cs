@@ -97,7 +97,7 @@ namespace Game.Loots
             LootTemplate lt = LootStorage.Items.GetLootFor(item.GetEntry());
             if (lt != null)
             {
-                foreach (var (id, storedItem) in container.GetLootItems())
+                foreach (var (id, storedItem) in container.GetLootItems().KeyValueList)
                 {
                     LootItem li = new();
                     li.itemid = id;

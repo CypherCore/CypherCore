@@ -1093,14 +1093,14 @@ namespace Game.Entities
 
             } while (result.NextRow());
 
-            foreach (var group in mSpellGroupSpell.KeyValueListCopy)
+            mSpellGroupSpell.RemoveIfMatching((group) =>
             {
                 if (group.Value < 0)
                 {
                     if (!groups.Contains((uint)Math.Abs(group.Value)))
                     {
                         Log.outError(LogFilter.Sql, "SpellGroup id {0} listed in `spell_group` does not exist", Math.Abs(group.Value));
-                        mSpellGroupSpell.Remove(group.Key);
+                        return true;
                     }
                 }
                 else
@@ -1109,15 +1109,17 @@ namespace Game.Entities
                     if (spellInfo == null)
                     {
                         Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_group` does not exist", group.Value);
-                        mSpellGroupSpell.Remove(group.Key);
+                        return true;
                     }
                     else if (spellInfo.GetRank() > 1)
                     {
                         Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_group` is not first rank of spell", group.Value);
-                        mSpellGroupSpell.Remove(group.Key);
+                        return true;
                     }
                 }
-            }
+
+                return false;
+            });
 
             foreach (var group in groups)
             {
@@ -1905,7 +1907,7 @@ namespace Game.Entities
                     if (petDefSpells.spellid[j] == 0)
                         continue;
 
-                    foreach (var pair in levelupSpells)
+                    foreach (var pair in levelupSpells.KeyValueList)
                     {
                         if (pair.Value == petDefSpells.spellid[j])
                         {

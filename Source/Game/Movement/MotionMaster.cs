@@ -1221,7 +1221,7 @@ namespace Game.Movement
         void ClearBaseUnitStates()
         {
             uint unitState = 0;
-            foreach (var itr in _baseUnitStatesMap)
+            foreach (var itr in _baseUnitStatesMap.KeyValueList)
                 unitState |= itr.Key;
 
             _owner.ClearUnitState((UnitState)unitState);

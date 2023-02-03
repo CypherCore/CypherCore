@@ -21,7 +21,7 @@ namespace Framework.Dynamic
 
             // main event loop
             KeyValuePair<ulong, BasicEvent> i;
-            while ((i = m_events.FirstOrDefault()).Value != null && i.Key <= m_time)
+            while ((i = m_events.KeyValueList.FirstOrDefault()).Value != null && i.Key <= m_time)
             {
                 var Event = i.Value;
                 m_events.Remove(i);
@@ -50,7 +50,7 @@ namespace Framework.Dynamic
 
         public void KillAllEvents(bool force)
         {
-            foreach (var pair in m_events.KeyValueListCopy)
+            m_events.RemoveIfMatching((pair) =>
             {
                 // Abort events which weren't aborted already
                 if (!pair.Value.IsAborted())
@@ -62,11 +62,13 @@ namespace Framework.Dynamic
                 // Skip non-deletable events when we are
                 // not forcing the event cancellation.
                 if (!force && !pair.Value.IsDeletable())
-                    continue;
+                    return false;
 
                 if (!force)
-                    m_events.Remove(pair);
-            }
+                    return true;
+
+                return false;
+            });
 
             // fast clear event list (in force case)
             if (force)
@@ -92,15 +94,16 @@ namespace Framework.Dynamic
 
         public void ModifyEventTime(BasicEvent Event, TimeSpan newTime)
         {
-            foreach (var pair in m_events)
+            if(m_events.RemoveFirstMatching((pair) =>
             {
                 if (pair.Value != Event)
-                    continue;
+                    return false;
 
                 Event.m_execTime = (ulong)newTime.TotalMilliseconds;
-                m_events.Remove(pair);
+                return true;
+            }, out var foundVal))
+            {
                 m_events.Add((ulong)newTime.TotalMilliseconds, Event);
-                break;
             }
         }
 

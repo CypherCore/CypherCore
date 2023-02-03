@@ -366,7 +366,7 @@ namespace Game
         {
             List<CalendarEvent> events = new();
 
-            foreach (var pair in _invites)
+            foreach (var pair in _invites.KeyValueList)
             {
                 if (pair.Value.InviteeGuid == guid)
                 {

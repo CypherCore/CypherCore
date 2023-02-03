@@ -226,7 +226,7 @@ namespace Game.BattleGrounds
                 if (GetReviveQueueSize() != 0)
                 {
                     Creature sh = null;
-                    foreach (var pair in m_ReviveQueue)
+                    foreach (var pair in m_ReviveQueue.KeyValueList)
                     {
                         Player player = Global.ObjAccessor.FindPlayer(pair.Value);
                         if (!player)
@@ -1315,18 +1315,20 @@ namespace Game.BattleGrounds
 
         public void RemovePlayerFromResurrectQueue(ObjectGuid player_guid)
         {
-            foreach (var pair in m_ReviveQueue.KeyValueListCopy)
+            m_ReviveQueue.RemoveIfMatching((pair) =>
             {
                 if (pair.Value == player_guid)
                 {
-                    m_ReviveQueue.Remove(pair);
                     Player player = Global.ObjAccessor.FindPlayer(player_guid);
+
                     if (player)
                         player.RemoveAurasDueToSpell(BattlegroundConst.SpellWaitingForResurrect);
-                    return;
+
+                    return true;
                 }
 
-            }
+                return false;
+            });
         }
 
         public void RelocateDeadPlayers(ObjectGuid guideGuid)

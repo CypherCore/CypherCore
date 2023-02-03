@@ -2,6 +2,8 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using System.Linq;
+using System.Runtime.CompilerServices;
+using Google.Protobuf.WellKnownTypes;
 
 namespace System.Collections.Generic
 {
@@ -235,6 +237,55 @@ namespace System.Collections.Generic
         public static bool has_value(this object obj)
         { 
             return obj != null; 
+        }
+
+        public static void Add<T, V>(this IDictionary<T, List<V>> dict, T key, V val)
+        {
+            if (dict == null) throw new ArgumentNullException();
+
+            if (!dict.TryGetValue(key, out var list))
+            {
+                list= new List<V>();
+                dict.Add(key, list);
+            }
+            list.Add(val);
+        }
+
+        public static void RemoveIf<TKey, TValue>(this IDictionary<TKey, TValue> dict, Func<TKey, bool> pred)
+        {
+            List<TKey> toRemove = new();
+
+            foreach (var item in dict)
+                if (pred(item.Key))
+                    toRemove.Add(item.Key);
+
+            dict.Remove(toRemove);
+        }
+
+        public static void RemoveIf<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, Func<TKey, TValue, bool> pred)
+        {
+            foreach (var item in dict)
+            {
+                List<TValue> toRemove = new();
+
+                foreach (var val in item.Value)
+                    if (pred(item.Key, val))
+                        toRemove.Add(val);
+                
+                item.Value.Remove(toRemove);
+            }
+        }
+
+        public static void Remove<T>(this List<T> list, List<T> toRemove)
+        {
+            foreach (var val in toRemove)
+                list.Remove(val);
+        }
+
+        public static void Remove<TKey, TValue>(this IDictionary<TKey, TValue> dict, List<TKey> toRemove)
+        {
+            foreach (var val in toRemove)
+                dict.Remove(val);
         }
     }
 

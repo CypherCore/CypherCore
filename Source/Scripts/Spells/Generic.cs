@@ -1363,7 +1363,7 @@ namespace Scripts.Spells.Generic
                     {
                         var auras = target.GetAppliedAuras();
 
-                        foreach (var pair in auras)
+                        foreach (var pair in auras.KeyValueList.ToList())
                         {
                             Aura aura = pair.Value.GetBase();
 
@@ -2760,7 +2760,7 @@ namespace Scripts.Spells.Generic
                     {
                         var auras = target.GetAppliedAuras();
 
-                        foreach (var pair in auras)
+                        foreach (var pair in auras.KeyValueList)
                         {
                             Aura aura = pair.Value.GetBase();
 

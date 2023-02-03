@@ -1631,22 +1631,22 @@ namespace Game.Entities
 
         void RemoveItemDependentAurasAndCasts(Item pItem)
         {
-            foreach (var pair in GetOwnedAuras())
+            GetOwnedAuras().CallOnMatch((pair) =>
             {
                 Aura aura = pair.Value;
 
                 // skip not self applied auras
                 SpellInfo spellInfo = aura.GetSpellInfo();
                 if (aura.GetCasterGUID() != GetGUID())
-                    continue;
+                    return false;
 
                 // skip if not item dependent or have alternative item
                 if (HasItemFitToSpellRequirements(spellInfo, pItem))
-                    continue;
+                    return false;
 
                 // no alt item, remove aura, restart check
-                RemoveOwnedAura(pair);
-            }
+                return true;
+            }, (pair) => RemoveOwnedAura(pair));
 
             // currently casted spells can be dependent from item
             for (CurrentSpellTypes i = 0; i < CurrentSpellTypes.Max; ++i)
@@ -1911,12 +1911,9 @@ namespace Game.Entities
         public void UpdateAreaDependentAuras(uint newArea)
         {
             // remove auras from spells with area limitations
-            foreach (var pair in GetOwnedAuras())
-            {
-                // use m_zoneUpdateId for speed: UpdateArea called from UpdateZone or instead UpdateZone in both cases m_zoneUpdateId up-to-date
-                if (pair.Value.GetSpellInfo().CheckLocation(GetMapId(), m_zoneUpdateId, newArea, this) != SpellCastResult.SpellCastOk)
-                    RemoveOwnedAura(pair);
-            }
+            // use m_zoneUpdateId for speed: UpdateArea called from UpdateZone or instead UpdateZone in both cases m_zoneUpdateId up-to-date
+            GetOwnedAuras().CallOnMatch((pair) => pair.Value.GetSpellInfo().CheckLocation(GetMapId(), m_zoneUpdateId, newArea, this) != SpellCastResult.SpellCastOk,
+                                        (pair) => RemoveOwnedAura(pair));
 
             // some auras applied at subzone enter
             var saBounds = Global.SpellMgr.GetSpellAreaForAreaMapBounds(newArea);

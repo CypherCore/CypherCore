@@ -33,7 +33,7 @@ namespace Game.Collision
 
         public void Initialize(MultiMap<uint, uint> mapData)
         {
-            foreach (var pair in mapData)
+            foreach (var pair in mapData.KeyValueList)
                 iParentMapData[pair.Value] = pair.Key;
         }
 

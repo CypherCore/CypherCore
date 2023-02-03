@@ -68,9 +68,7 @@ namespace Game.Chat.Commands
                 }
 
                 // remove any matches without spawns
-                foreach (var pair in matches.ToList())
-                    if (spawnLookup[pair.Value.Entry].Empty())
-                        matches.Remove(pair.Key, pair.Value);
+                matches.RemoveIfMatching((pair) => spawnLookup[pair.Value.Entry].Empty());
             }
 
             // check if we even have any matches left
@@ -81,7 +79,7 @@ namespace Game.Chat.Commands
             }
 
             // see if we have multiple equal matches left
-            var keyValueList = matches.KeyValueListCopy.ToList();
+            var keyValueList = matches.KeyValueList.ToList();
             uint maxCount = keyValueList.Last().Key;
             for (var i = keyValueList.Count; i > 0;)
             {
@@ -96,7 +94,7 @@ namespace Game.Chat.Commands
                 }
             }
 
-            CreatureTemplate boss = matches.Last().Value;
+            CreatureTemplate boss = matches.KeyValueList.Last().Value;
             var spawns = spawnLookup[boss.Entry];
             Cypher.Assert(!spawns.Empty());
 
@@ -225,7 +223,7 @@ namespace Game.Chat.Commands
             }
 
             // see if we have multiple equal matches left
-            var keyValueList = matches.KeyValueListCopy.ToList();
+            var keyValueList = matches.KeyValueList.ToList();
             uint maxCount = keyValueList.Last().Key;
             for (var i = keyValueList.Count; i > 0;)
             {
@@ -240,7 +238,7 @@ namespace Game.Chat.Commands
                 }
             }
 
-            var it = matches.Last();
+            var it = matches.KeyValueList.Last();
             uint mapId = it.Value.Item1;
             string mapName = it.Value.Item2;
 

@@ -3,13 +3,13 @@
 
 namespace System.Collections.Generic
 {
-    public interface IMultiMap<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
+    public interface IMultiMap<TKey, TValue>
     {
         List<TValue> this[TKey key] { get; set; }
 
         int Count { get; }
         ICollection<TKey> Keys { get; }
-        IEnumerable<KeyValuePair<TKey, TValue>> KeyValueListCopy { get; }
+        IEnumerable<KeyValuePair<TKey, TValue>> KeyValueList { get; }
         ICollection<TValue> Values { get; }
 
         void Add(KeyValuePair<TKey, TValue> item);
@@ -26,5 +26,8 @@ namespace System.Collections.Generic
         bool Remove(TKey key);
         bool Remove(TKey key, TValue value);
         bool Empty();
+        MultiMap<TKey, TValue> RemoveIfMatchingMulti(Func<KeyValuePair<TKey, TValue>, bool> pred);
+        List<KeyValuePair<TKey, TValue>> RemoveIfMatching(Func<KeyValuePair<TKey, TValue>, bool> pred);
+        MultiMap<TKey, TValue> GetCopy();
     }
 }

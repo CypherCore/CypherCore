@@ -156,7 +156,7 @@ namespace Game.Chat
 
         public bool ForEachLanguage(Func<uint, LanguageDesc, bool> callback)
         {
-            foreach (var pair in _langsMap)
+            foreach (var pair in _langsMap.KeyValueList)
                 if (!callback(pair.Key, pair.Value))
                     return false;
             return true;

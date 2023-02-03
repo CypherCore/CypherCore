@@ -50,6 +50,136 @@ namespace System.Collections.Generic
             return _interalStorage.Remove(key);
         }
 
+        /// <summary>
+        ///     Removes all the entries of the matching expression
+        /// </summary>
+        /// <param name="pred">Expression to check to remove an item</param>
+        /// <returns>Multimap of removed values.</returns>
+        public MultiMap<TKey, TValue> RemoveIfMatchingMulti(Func<KeyValuePair<TKey, TValue>, bool> pred)
+        {
+            var toRemove = new MultiMap<TKey, TValue>();
+
+            foreach (var item in KeyValueList)
+                if (pred(item))
+                    toRemove.Add(item);
+
+            foreach (var item in toRemove.KeyValueList)
+                Remove(item.Key, item.Value);
+
+            return toRemove;
+        }
+
+        public bool RemoveFirstMatching(Func<KeyValuePair<TKey, TValue>, bool> pred, out KeyValuePair<TKey, TValue> foundValue)
+        {
+            foundValue = new KeyValuePair<TKey, TValue>();
+            bool found = false;
+
+            foreach (var item in KeyValueList)
+                if (pred(item))
+                {
+                    foundValue = item;
+                    found = true;
+                    break;
+                }
+
+            if (found)
+                Remove(foundValue.Key, foundValue.Value);
+
+            return found;
+        }
+
+        /// <summary>
+        ///     Removes all the entries of the matching expression
+        /// </summary>
+        /// <param name="pred">Expression to check to remove an item</param>
+        /// <returns>List of removed key/value pairs.</returns>
+        public List<KeyValuePair<TKey, TValue>> RemoveIfMatching(Func<KeyValuePair<TKey, TValue>, bool> pred)
+        {
+            var toRemove = new List<KeyValuePair<TKey, TValue>>();
+
+            foreach (var item in KeyValueList)
+                if (pred(item))
+                    toRemove.Add(item);
+
+            foreach (var item in toRemove)
+                Remove(item.Key, item.Value);
+
+            return toRemove;
+        }
+
+        /// <summary>
+        ///     Calls the action for the first matching pred and returns. Allows the action to be safely modify this map without getting enumeration exceptions
+        /// </summary>
+        public bool CallOnFirstMatch(Func<KeyValuePair<TKey, TValue>, bool> pred, Action<KeyValuePair<TKey, TValue>> action)
+        {
+            foreach (var item in KeyValueList)
+                if (pred(item))
+                {
+                    action(item);
+                    return true;
+                }
+
+            return false;
+        }
+
+        /// <summary>
+        ///     Calls the action for each matching pred. Allows the action to be safely modify this map without getting enumeration exceptions
+        /// </summary>
+        public List<KeyValuePair<TKey, TValue>> CallOnMatch(Func<KeyValuePair<TKey, TValue>, bool> pred, Action<KeyValuePair<TKey, TValue>> action)
+        {
+            var matches = new List<KeyValuePair<TKey, TValue>>();
+
+            foreach (var item in KeyValueList)
+                if (pred(item))
+                    matches.Add(item);
+
+            foreach (var item in matches)
+                action(item);
+
+            return matches;
+        }
+
+        /// <summary>
+        ///     Calls the action for each matching pred. Allows the action to be safely modify this map without getting enumeration exceptions
+        /// </summary>
+        public List<TValue> CallOnMatch(TKey key, Func<TValue, bool> pred, Action<TValue> action)
+        {
+            var matches = new List<TValue>();
+
+            if (_interalStorage.TryGetValue(key, out var list))
+                foreach(var val in list)
+                    if (pred(val))
+                        matches.Add(val);
+
+            foreach (var val in matches)
+                action(val);
+
+            return matches;
+        }
+
+        /// <summary>
+        ///     Calls the action for the first matching pred and returns. Allows the action to be safely modify this map without getting enumeration exceptions
+        /// </summary>
+        public bool CallOnFirstMatch(TKey key, Func<TValue, bool> pred, Action<TValue> action)
+        {
+            var matches = default(TValue);
+            bool found = false;
+
+            if (_interalStorage.TryGetValue(key, out var list))
+                foreach (var val in list)
+                    if (pred(val))
+                    {
+                        matches = val;
+                        found = true;
+                        break;
+                    }
+
+            if (found)
+                action(matches);
+
+            return found;
+        }
+
         public bool Remove(KeyValuePair<TKey, TValue> item)
         {
             if (!ContainsKey(item.Key))
@@ -117,16 +247,9 @@ namespace System.Collections.Generic
             return _emptyList.Cast<TValue>().ToList();
         }
 
-        bool TryGetValue(TKey key, out TValue value)
+        bool TryGetValue(TKey key, out List<TValue> value)
         {
-            value = default(TValue);
-            if (_interalStorage.TryGetValue(key, out var val))
-            {
-                value = val.LastOrDefault();
-                return true;
-            }
-
-            return false;
+            return _interalStorage.TryGetValue(key, out value);
         }
 
         public List<TValue> this[TKey key]
@@ -164,20 +287,6 @@ namespace System.Collections.Generic
             }
         }
 
-        public IEnumerable<KeyValuePair<TKey, TValue>> KeyValueListCopy
-        {
-            get
-            {
-                List<KeyValuePair<TKey, TValue>> retVal = new();
-
-                foreach (var pair in _interalStorage)
-                    foreach (var value in pair.Value)
-                        retVal.Add(new KeyValuePair<TKey, TValue>(pair.Key, value));
-
-                return retVal;
-            }
-        }
-
         public IEnumerable<KeyValuePair<TKey, TValue>> KeyValueList
         {
             get
@@ -205,9 +314,23 @@ namespace System.Collections.Generic
                 array = new KeyValuePair<TKey, TValue>[Count];
 
             int index = arrayIndex;
-            foreach (KeyValuePair<TKey, TValue> pair in this)
-                array[index++] = new KeyValuePair<TKey, TValue>(pair.Key, pair.Value);
+            foreach (KeyValuePair<TKey, TValue> pair in KeyValueList)
+                array[index++] = pair;
+        }
 
+        /// <summary>
+        ///     Returns an exact copy of the multimap as a new instance.
+        /// </summary>
+        /// <returns></returns>
+        public MultiMap<TKey, TValue> GetCopy()
+        {
+            var retval = new MultiMap<TKey, TValue>();
+
+            foreach (var pair in _interalStorage)
+                foreach (var item in pair.Value)
+                    retval.Add(pair.Key, item);
+
+            return retval;
         }
 
         public int Count
@@ -223,21 +346,9 @@ namespace System.Collections.Generic
             }
         }
 
-
-
-        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
-        {
-            return new MultiMapEnumerator<TKey, TValue>(this);
-        }
-
         public bool Empty()
         {
             return _interalStorage == null || _interalStorage.Count == 0;  
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
         }
 
         private Dictionary<TKey, List<TValue>> _interalStorage = new();

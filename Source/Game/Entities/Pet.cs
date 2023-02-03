@@ -961,7 +961,7 @@ namespace Game.Entities
             trans.Append(stmt);
 
             byte index;
-            foreach (var pair in GetOwnedAuras())
+            foreach (var pair in GetOwnedAuras().KeyValueList)
             {
                 Aura aura = pair.Value;
 
@@ -1152,7 +1152,7 @@ namespace Game.Entities
             if (levelupSpells != null)
             {
                 // PetLevelupSpellSet ordered by levels, process in reversed order
-                foreach (var pair in levelupSpells)
+                foreach (var pair in levelupSpells.KeyValueList)
                 {
                     // will called first if level down
                     if (pair.Key > level)

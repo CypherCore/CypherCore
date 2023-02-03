@@ -4307,7 +4307,7 @@ namespace Scripts.Spells.Items
             {
                 var Auras = target.GetAppliedAuras();
 
-                foreach (var pair in Auras)
+                foreach (var pair in Auras.KeyValueList)
                 {
                     uint spell_id = pair.Value.GetBase().GetId();
 

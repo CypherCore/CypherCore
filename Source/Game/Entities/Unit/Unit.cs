@@ -219,7 +219,7 @@ namespace Game.Entities
                 }
             }
 
-            foreach (var app in GetOwnedAuras())
+            foreach (var app in GetOwnedAuras().KeyValueList)
             {
                 Aura i_aura = app.Value;
                 if (i_aura == null)
@@ -229,11 +229,7 @@ namespace Game.Entities
             }
 
             // remove expired auras - do that after updates(used in scripts?)
-            foreach (var pair in GetOwnedAuras())
-            {
-                if (pair.Value != null && pair.Value.IsExpired())
-                    RemoveOwnedAura(pair, AuraRemoveMode.Expire);
-            }
+            GetOwnedAuras().CallOnMatch((pair) => pair.Value != null && pair.Value.IsExpired(), (pair) => RemoveOwnedAura(pair, AuraRemoveMode.Expire));
 
             foreach (var aura in m_visibleAurasToUpdate)
                 aura.ClientUpdate();
@@ -1139,7 +1135,7 @@ namespace Game.Entities
         void CancelSpellMissiles(uint spellId, bool reverseMissile = false)
         {
             bool hasMissile = false;
-            foreach (var pair in m_Events.GetEvents())
+            foreach (var pair in m_Events.GetEvents().KeyValueList)
             {
                 Spell spell = Spell.ExtractSpellFromEvent(pair.Value);
                 if (spell != null)

@@ -422,7 +422,7 @@ namespace Game.Spells
 
                 ObjectGuid guid = target.GetGUID();
                 var auras = target.GetAppliedAuras();
-                foreach (var iter in auras)
+                foreach (var iter in auras.KeyValueList)
                 {
                     Aura aura = iter.Value.GetBase();
                     // only passive and permament auras-active auras should have amount set on spellcast and not be affected
@@ -811,18 +811,20 @@ namespace Game.Spells
                     }
                 }
 
-                foreach (var app in target.GetAppliedAuras())
+                target.GetAppliedAuras().CallOnMatch((app) =>
                 {
                     if (app.Value == null)
-                        continue;
+                        return false;
 
                     // Use the new aura to see on what stance the target will be
                     ulong newStance = newAura != null ? (1ul << (newAura.GetMiscValue() - 1)) : 0;
 
                     // If the stances are not compatible with the spell, remove it
                     if (app.Value.GetBase().IsRemovedOnShapeLost(target) && !Convert.ToBoolean(app.Value.GetBase().GetSpellInfo().Stances & newStance))
-                        target.RemoveAura(app);
-                }
+                        return true;
+
+                    return false;
+                }, (app) => target.RemoveAura(app));
             }
         }
 
@@ -5921,7 +5923,7 @@ namespace Game.Spells
                 return;
 
             List<Aura> suppressedAuras = new();
-            foreach (var appliedAura in aurApp.GetTarget().GetOwnedAuras())
+            foreach (var appliedAura in aurApp.GetTarget().GetOwnedAuras().KeyValueList)
                 if (appliedAura.Value.GetSpellInfo().HasLabel((uint)GetMiscValue()))
                     suppressedAuras.Add(appliedAura.Value);
 

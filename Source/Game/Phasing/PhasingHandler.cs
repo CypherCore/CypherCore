@@ -261,7 +261,7 @@ namespace Game
             obj.GetPhaseShift().UiMapPhaseIds.Clear();
             obj.GetSuppressedPhaseShift().VisibleMapIds.Clear();
 
-            foreach (var (mapId, visibleMapInfo) in Global.ObjectMgr.GetTerrainSwaps())
+            foreach (var (mapId, visibleMapInfo) in Global.ObjectMgr.GetTerrainSwaps().KeyValueList)
             {
                 if (Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.TerrainSwap, visibleMapInfo.Id, srcInfo))
                 {

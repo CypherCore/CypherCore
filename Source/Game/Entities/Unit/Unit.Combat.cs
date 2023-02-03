@@ -26,7 +26,7 @@ namespace Game.Entities
     {
         public virtual void AtEnterCombat()
         {
-            foreach (var pair in GetAppliedAuras())
+            foreach (var pair in GetAppliedAuras().KeyValueList)
                 pair.Value.GetBase().CallScriptEnterLeaveCombatHandlers(pair.Value, true);
 
             Spell spell = GetCurrentSpell(CurrentSpellTypes.Generic);
@@ -42,7 +42,7 @@ namespace Game.Entities
 
         public virtual void AtExitCombat()
         {
-            foreach (var pair in GetAppliedAuras())
+            foreach (var pair in GetAppliedAuras().KeyValueList)
                 pair.Value.GetBase().CallScriptEnterLeaveCombatHandlers(pair.Value, false);
 
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.LeavingCombat);
@@ -156,7 +156,7 @@ namespace Game.Entities
 
         public virtual void OnCombatExit()
         {
-            foreach (var pair in GetAppliedAuras())
+            foreach (var pair in GetAppliedAuras().KeyValueList)
             {
                 AuraApplication aurApp = pair.Value;
                 aurApp.GetBase().CallScriptEnterLeaveCombatHandlers(aurApp, false);

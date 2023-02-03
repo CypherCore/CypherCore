@@ -223,7 +223,7 @@ namespace Game
                     tree.ConfigType = TraitConfigType.Profession;
             }
 
-            foreach (var (traitSystemId, traitTreeId) in traitTreesIdsByTraitSystem)
+            foreach (var (traitSystemId, traitTreeId) in traitTreesIdsByTraitSystem.KeyValueList)
             {
                 Tree tree = _traitTrees.LookupByKey(traitTreeId);
                 if (tree != null)

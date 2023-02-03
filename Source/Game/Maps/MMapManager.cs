@@ -18,7 +18,7 @@ namespace Game
 
         public void Initialize(MultiMap<uint, uint> mapData)
         {
-            foreach (var pair in mapData)
+            foreach (var pair in mapData.KeyValueList)
                 parentMapData[pair.Value] = pair.Key;
         }
 

@@ -1878,7 +1878,7 @@ namespace Game.Entities
             trans.Append(stmt);
 
             byte index;
-            foreach (var pair in GetOwnedAuras())
+            foreach (var pair in GetOwnedAuras().KeyValueList)
             {
                 Aura aura = pair.Value;
                 if (!aura.CanBeSaved())
@@ -4176,7 +4176,7 @@ namespace Game.Entities
                         while (resultMail.NextRow());
 
                         // Free remaining items
-                        foreach (var pair in itemsByMail)
+                        foreach (var pair in itemsByMail.KeyValueList)
                             pair.Value.Dispose();
                     }
 
