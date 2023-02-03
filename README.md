@@ -1,4 +1,4 @@
-## CypherCore [![Build status](https://ci.appveyor.com/api/projects/status/ge4hjp1h1d28q25j?svg=true)](https://ci.appveyor.com/project/hondacrx/cyphercore)
+## Forged Core [![Build status](https://ci.appveyor.com/api/projects/status/2wgy97jxy0wfl7ly?svg=true)](https://ci.appveyor.com/project/JBurlison/forgedcore)
 
 Forged Core is an open source branch of CypherCore.
 Forge Core is the core of the Forged WoW Server and aims to be the most complete and up to date core.
