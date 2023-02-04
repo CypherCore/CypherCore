@@ -3976,7 +3976,50 @@ namespace Game.AI
 
         public void OnInitialize(WorldObject obj, AreaTriggerRecord at = null, SceneTemplate scene = null, Quest qst = null)
         {
-            if (obj != null)
+            if (at != null)
+            {
+                _scriptType = SmartScriptType.AreaTrigger;
+                _trigger = at;
+                _atPlayer = obj.ToPlayer();
+
+                if (_atPlayer == null)
+                {
+                    Log.outError(LogFilter.Scripts, $"SmartScript::OnInitialize: source is AreaTrigger with id {_trigger.Id}, missing trigger player");
+                    return;
+                }
+
+                Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is AreaTrigger {_trigger.Id}, triggered by player {_atPlayer.GetGUID()}");
+
+            }
+            else if (scene != null)
+            {
+                _scriptType = SmartScriptType.Scene;
+                _sceneTemplate = scene;
+                _atPlayer = obj.ToPlayer();
+
+                if (_atPlayer == null)
+                {
+                    Log.outError(LogFilter.Scripts, $"SmartScript::OnInitialize: source is Scene with id {_sceneTemplate.SceneId}, missing trigger player");
+                    return;
+                }
+
+                Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is Scene with id {_sceneTemplate.SceneId}, triggered by player {_atPlayer.GetGUID()}");
+            }
+            else if (qst != null)
+            {
+                _scriptType = SmartScriptType.Quest;
+                _quest = qst;
+                _atPlayer = obj.ToPlayer();
+
+                if (_atPlayer == null)
+                {
+                    Log.outError(LogFilter.Scripts, $"SmartScript::OnInitialize: source is Quest with id {_quest.Id}, missing trigger player");
+                    return;
+                }
+
+                Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is Quest with id {_quest.Id}, triggered by player {_atPlayer.GetGUID()}");
+            }
+            else if (obj != null)
             {
                 switch (obj.GetTypeId())
                 {
@@ -3984,55 +4027,37 @@ namespace Game.AI
                         _scriptType = SmartScriptType.Creature;
                         _me = obj.ToCreature();
                         Log.outDebug(LogFilter.Scripts, $"SmartScript.OnInitialize: source is Creature {_me.GetEntry()}");
+
                         break;
                     case TypeId.GameObject:
                         _scriptType = SmartScriptType.GameObject;
                         _go = obj.ToGameObject();
                         Log.outDebug(LogFilter.Scripts, $"SmartScript.OnInitialize: source is GameObject {_go.GetEntry()}");
-                        break;
-                    case TypeId.Player:
-                        if (at != null)
-                        {
-                            _scriptType = SmartScriptType.AreaTrigger;
-                            _trigger = at;
-                            _atPlayer = obj.ToPlayer();
-                            Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is AreaTrigger {_trigger.Id}, triggered by player {_atPlayer.GetGUID()}");
-                        }
-                        else
-                            Log.outError(LogFilter.Misc, "SmartScript::OnInitialize: !WARNING! Player TypeID is only allowed for AreaTriggers");
+
                         break;
                     case TypeId.AreaTrigger:
                         _areaTrigger = obj.ToAreaTrigger();
                         _scriptType = _areaTrigger.IsServerSide() ? SmartScriptType.AreaTriggerEntityServerside : SmartScriptType.AreaTriggerEntity;
                         Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.OnInitialize: source is AreaTrigger {_areaTrigger.GetEntry()}, IsServerSide {_areaTrigger.IsServerSide()}");
+
                         break;
                     default:
                         Log.outError(LogFilter.Scripts, "SmartScript.OnInitialize: Unhandled TypeID !WARNING!");
+
                         return;
                 }
-            }
-            else if (scene != null)
-            {
-                _scriptType = SmartScriptType.Scene;
-                _sceneTemplate = scene;
-                Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.OnInitialize: Scene with id {scene.SceneId}");
-            }
-            else if (qst != null)
-            {
-                _scriptType = SmartScriptType.Quest;
-                _quest = qst;
-                Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.OnInitialize: source is Quest with id {qst.Id}");
             }
             else
             {
                 Log.outError(LogFilter.ScriptsAi, "SmartScript.OnInitialize: !WARNING! Initialized WorldObject is Null.");
+
                 return;
             }
 
-            GetScript();//load copy of script
+            GetScript(); //load copy of script
 
             foreach (var holder in _events)
-                InitTimer(holder);//calculate timers for first time use
+                InitTimer(holder); //calculate timers for first Time use
 
             ProcessEventsFor(SmartEvents.AiInit);
             InstallEvents();
