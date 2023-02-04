@@ -179,13 +179,16 @@ namespace Game.DataStorage
                         }
                     }
 
-                    var id = (uint)fields[header.IdIndex == -1 ? 0 : header.IdIndex].GetValue(obj);
+                    if (fields.Length != 0)
+                    {
+                        var id = (uint)fields[header.IdIndex == -1 ? 0 : header.IdIndex].GetValue(obj);
 
-                    if (WorldConfig.GetDefaultValue<bool>("LoadAllHotfix", false))
-                        if (base.TryGetValue(id, out var value) && !IOHelpers.AreObjectsEqual(value, obj))
-                            DB2Manager.Instance.AddHotfixRecord(_header.TableHash, id);
+                        if (WorldConfig.GetDefaultValue<bool>("LoadAllHotfix", false))
+                            if (base.TryGetValue(id, out var value) && !IOHelpers.AreObjectsEqual(value, obj))
+                                DB2Manager.Instance.AddHotfixRecord(_header.TableHash, id);
 
-                    base[id] = obj;
+                        base[id] = obj;
+                    }
                 }
                 while (result.NextRow());
             }
