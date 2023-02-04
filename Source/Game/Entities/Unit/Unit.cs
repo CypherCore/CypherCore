@@ -1135,7 +1135,7 @@ namespace Game.Entities
         void CancelSpellMissiles(uint spellId, bool reverseMissile = false)
         {
             bool hasMissile = false;
-            foreach (var pair in m_Events.GetEvents().KeyValueList)
+            foreach (var pair in m_Events.GetEvents().KeyValueList())
             {
                 Spell spell = Spell.ExtractSpellFromEvent(pair.Value);
                 if (spell != null)

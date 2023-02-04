@@ -59,7 +59,7 @@ namespace Scripts.Spells.Warrior
                                     return;
                                 }
                                 targets.RemoveAura(WarriorSpells.WAR_BANNER_BUFF);
-                            }, TimeSpan.FromSeconds(15));
+                            }, targets.m_Events.CalculateTime(TimeSpan.FromSeconds(15)));
 
                             _timer = 1000;
                         }

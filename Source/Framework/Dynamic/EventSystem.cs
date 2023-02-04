@@ -21,8 +21,9 @@ namespace Framework.Dynamic
 
             // main event loop
             KeyValuePair<ulong, BasicEvent> i;
-            while ((i = m_events.KeyValueList.FirstOrDefault()).Value != null && i.Key <= m_time)
+            while ((i = m_events.KeyValueList().FirstOrDefault()).Value != null && i.Key <= m_time) 
             {
+                // sorted dictionart will stop looping at the first time that does not meet the while condition
                 var Event = i.Value;
                 m_events.Remove(i);
 
@@ -112,10 +113,10 @@ namespace Framework.Dynamic
             return TimeSpan.FromMilliseconds(m_time) + t_offset;
         }
 
-        public MultiMap<ulong, BasicEvent> GetEvents() { return m_events; }
+        public SortedDictionary<ulong, List<BasicEvent>> GetEvents() { return m_events; }
 
         ulong m_time;
-        MultiMap<ulong, BasicEvent> m_events = new();
+        SortedDictionary<ulong, List<BasicEvent>> m_events = new();
     }
 
     public class BasicEvent

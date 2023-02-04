@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace System.Collections.Generic
 {
-    public sealed class MultiMap<TKey, TValue> : IMultiMap<TKey, TValue>
+    public sealed class MultiMap<TKey, TValue>
     {
         static List<object> _emptyList = new List<object>();
         public MultiMap() { }
@@ -20,13 +20,7 @@ namespace System.Collections.Generic
 
         public void Add(TKey key, TValue value)
         {
-            if (!_interalStorage.TryGetValue(key, out var val))
-            {
-                val = new List<TValue>();
-                _interalStorage.Add(key, val);
-            }
-
-            val.Add(value);
+            _interalStorage.AddToList(key, value);
         }
 
         public void AddRange(TKey key, IEnumerable<TValue> valueList)
@@ -71,21 +65,7 @@ namespace System.Collections.Generic
 
         public bool RemoveFirstMatching(Func<KeyValuePair<TKey, TValue>, bool> pred, out KeyValuePair<TKey, TValue> foundValue)
         {
-            foundValue = new KeyValuePair<TKey, TValue>();
-            bool found = false;
-
-            foreach (var item in KeyValueList)
-                if (pred(item))
-                {
-                    foundValue = item;
-                    found = true;
-                    break;
-                }
-
-            if (found)
-                Remove(foundValue.Key, foundValue.Value);
-
-            return found;
+            return _interalStorage.RemoveFirstMatching(pred, out foundValue);
         }
 
         /// <summary>
@@ -95,16 +75,7 @@ namespace System.Collections.Generic
         /// <returns>List of removed key/value pairs.</returns>
         public List<KeyValuePair<TKey, TValue>> RemoveIfMatching(Func<KeyValuePair<TKey, TValue>, bool> pred)
         {
-            var toRemove = new List<KeyValuePair<TKey, TValue>>();
-
-            foreach (var item in KeyValueList)
-                if (pred(item))
-                    toRemove.Add(item);
-
-            foreach (var item in toRemove)
-                Remove(item.Key, item.Value);
-
-            return toRemove;
+            return _interalStorage.RemoveIfMatching(pred);
         }
 
         /// <summary>
@@ -112,14 +83,7 @@ namespace System.Collections.Generic
         /// </summary>
         public bool CallOnFirstMatch(Func<KeyValuePair<TKey, TValue>, bool> pred, Action<KeyValuePair<TKey, TValue>> action)
         {
-            foreach (var item in KeyValueList)
-                if (pred(item))
-                {
-                    action(item);
-                    return true;
-                }
-
-            return false;
+            return _interalStorage.CallOnFirstMatch(pred, action);
         }
 
         /// <summary>
@@ -127,15 +91,7 @@ namespace System.Collections.Generic
         /// </summary>
         public bool CallOnFirstMatch(TKey key, Func<TValue, bool> pred, Action<TValue> action)
         {
-            if (_interalStorage.TryGetValue(key, out var list))
-                foreach (var item in list)
-                    if (pred(item))
-                    {
-                        action(item);
-                        return true;
-                    }
-
-            return false;
+            return _interalStorage.CallOnFirstMatch(key, pred, action);
         }
 
         /// <summary>
@@ -143,16 +99,7 @@ namespace System.Collections.Generic
         /// </summary>
         public List<KeyValuePair<TKey, TValue>> CallOnMatch(Func<KeyValuePair<TKey, TValue>, bool> pred, Action<KeyValuePair<TKey, TValue>> action)
         {
-            var matches = new List<KeyValuePair<TKey, TValue>>();
-
-            foreach (var item in KeyValueList)
-                if (pred(item))
-                    matches.Add(item);
-
-            foreach (var item in matches)
-                action(item);
-
-            return matches;
+            return _interalStorage.CallOnMatch(pred, action);
         }
 
         /// <summary>
@@ -160,48 +107,17 @@ namespace System.Collections.Generic
         /// </summary>
         public List<TValue> CallOnMatch(TKey key, Func<TValue, bool> pred, Action<TValue> action)
         {
-            var matches = new List<TValue>();
-
-            if (_interalStorage.TryGetValue(key, out var list))
-                foreach(var val in list)
-                    if (pred(val))
-                        matches.Add(val);
-
-            foreach (var val in matches)
-                action(val);
-
-            return matches;
+            return _interalStorage.CallOnMatch(key, pred, action);
         }
 
         public bool Remove(KeyValuePair<TKey, TValue> item)
         {
-            if (!ContainsKey(item.Key))
-                return false;
-
-            bool val = _interalStorage[item.Key].Remove(item.Value);
-
-            if (!val)
-                return false;
-
-            if (_interalStorage[item.Key].Empty())
-                _interalStorage.Remove(item.Key);
-
-            return true;
+            return _interalStorage.Remove(item);
         }
 
         public bool Remove(TKey key, TValue value)
         {
-            if (!ContainsKey(key))
-                return false;
-
-            bool val = _interalStorage[key].Remove(value);
-            if (!val)
-                return false;
-
-            if (_interalStorage[key].Empty())
-                _interalStorage.Remove(key);
-
-            return true;
+            return _interalStorage.Remove(key, value);
         }
 
         public bool ContainsKey(TKey key)

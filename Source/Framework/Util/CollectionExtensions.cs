@@ -251,29 +251,182 @@ namespace System.Collections.Generic
             list.Add(val);
         }
 
-        public static void RemoveIf<TKey, TValue>(this IDictionary<TKey, TValue> dict, Func<TKey, bool> pred)
+        public static void AddToList<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, TKey key, TValue value)
         {
-            List<TKey> toRemove = new();
+            if (!dict.TryGetValue(key, out var val))
+            {
+                val = new List<TValue>();
+                dict.Add(key, val);
+            }
 
-            foreach (var item in dict)
-                if (pred(item.Key))
-                    toRemove.Add(item.Key);
-
-            dict.Remove(toRemove);
+            val.Add(value);
         }
 
-        public static void RemoveIf<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, Func<TKey, TValue, bool> pred)
+        public static void AddToList<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, KeyValuePair<TKey, TValue> item)
         {
-            foreach (var item in dict)
-            {
-                List<TValue> toRemove = new();
+            dict.AddToList(item.Key, item.Value);
+        }
 
-                foreach (var val in item.Value)
-                    if (pred(item.Key, val))
-                        toRemove.Add(val);
-                
-                item.Value.Remove(toRemove);
-            }
+
+        public static bool Remove<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, KeyValuePair<TKey, TValue> item)
+        {
+            if (!dict.ContainsKey(item.Key))
+                return false;
+
+            bool val = dict[item.Key].Remove(item.Value);
+
+            if (!val)
+                return false;
+
+            if (dict[item.Key].Empty())
+                dict.Remove(item.Key);
+
+            return true;
+        }
+
+        public static bool Remove<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, TKey key, TValue value)
+        {
+            if (!dict.ContainsKey(key))
+                return false;
+
+            bool val = dict[key].Remove(value);
+            if (!val)
+                return false;
+
+            if (dict[key].Empty())
+                dict.Remove(key);
+
+            return true;
+        }
+
+        /// <summary>
+        ///     Removes all the entries of the matching expression
+        /// </summary>
+        /// <param name="pred">Expression to check to remove an item</param>
+        /// <returns>Multimap of removed values.</returns>
+        public static Dictionary<TKey, List<TValue>> RemoveIfMatchingMulti<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, Func<KeyValuePair<TKey, TValue>, bool> pred)
+        {
+            var toRemove = new Dictionary<TKey, List<TValue>>();
+
+            foreach (var item in dict.KeyValueList())
+                if (pred(item))
+                    toRemove.AddToList(item);
+
+            foreach (var item in toRemove.KeyValueList())
+                dict.Remove(item.Key, item.Value);
+
+            return toRemove;
+        }
+
+        public static bool RemoveFirstMatching<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, Func<KeyValuePair<TKey, TValue>, bool> pred, out KeyValuePair<TKey, TValue> foundValue)
+        {
+            foundValue = new KeyValuePair<TKey, TValue>();
+            bool found = false;
+
+            foreach (var item in dict.KeyValueList())
+                if (pred(item))
+                {
+                    foundValue = item;
+                    found = true;
+                    break;
+                }
+
+            if (found)
+                dict.Remove(foundValue.Key, foundValue.Value);
+
+            return found;
+        }
+
+        /// <summary>
+        ///     Removes all the entries of the matching expression
+        /// </summary>
+        /// <param name="pred">Expression to check to remove an item</param>
+        /// <returns>List of removed key/value pairs.</returns>
+        public static List<KeyValuePair<TKey, TValue>> RemoveIfMatching<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, Func<KeyValuePair<TKey, TValue>, bool> pred)
+        {
+            var toRemove = new List<KeyValuePair<TKey, TValue>>();
+
+            foreach (var item in dict.KeyValueList())
+                if (pred(item))
+                    toRemove.Add(item);
+
+            foreach (var item in toRemove)
+                dict.Remove(item.Key, item.Value);
+
+            return toRemove;
+        }
+
+        /// <summary>
+        ///     Calls the action for the first matching pred and returns. Allows the action to be safely modify this map without getting enumeration exceptions
+        /// </summary>
+        public static bool CallOnFirstMatch<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, Func<KeyValuePair<TKey, TValue>, bool> pred, Action<KeyValuePair<TKey, TValue>> action)
+        {
+            foreach (var item in dict.KeyValueList())
+                if (pred(item))
+                {
+                    action(item);
+                    return true;
+                }
+
+            return false;
+        }
+
+        /// <summary>
+        ///     Calls the action for the first matching pred and returns. Allows the action to be safely modify this map without getting enumeration exceptions
+        /// </summary>
+        public static bool CallOnFirstMatch<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, TKey key, Func<TValue, bool> pred, Action<TValue> action)
+        {
+            if (dict.TryGetValue(key, out var list))
+                foreach (var item in list)
+                    if (pred(item))
+                    {
+                        action(item);
+                        return true;
+                    }
+
+            return false;
+        }
+
+        /// <summary>
+        ///     Calls the action for each matching pred. Allows the action to be safely modify this map without getting enumeration exceptions
+        /// </summary>
+        public static List<KeyValuePair<TKey, TValue>> CallOnMatch<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, Func<KeyValuePair<TKey, TValue>, bool> pred, Action<KeyValuePair<TKey, TValue>> action)
+        {
+            var matches = new List<KeyValuePair<TKey, TValue>>();
+
+            foreach (var item in dict.KeyValueList())
+                if (pred(item))
+                    matches.Add(item);
+
+            foreach (var item in matches)
+                action(item);
+
+            return matches;
+        }
+
+        /// <summary>
+        ///     Calls the action for each matching pred. Allows the action to be safely modify this map without getting enumeration exceptions
+        /// </summary>
+        public static List<TValue> CallOnMatch<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, TKey key, Func<TValue, bool> pred, Action<TValue> action)
+        {
+            var matches = new List<TValue>();
+
+            if (dict.TryGetValue(key, out var list))
+                foreach (var val in list)
+                    if (pred(val))
+                        matches.Add(val);
+
+            foreach (var val in matches)
+                action(val);
+
+            return matches;
+        }
+
+        public static IEnumerable<KeyValuePair<TKey, TValue>> KeyValueList<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict)
+        {
+            foreach (var pair in dict)
+                foreach (var value in pair.Value)
+                    yield return new KeyValuePair<TKey, TValue>(pair.Key, value);
         }
 
         public static void Remove<T>(this List<T> list, List<T> toRemove)
