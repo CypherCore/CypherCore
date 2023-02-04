@@ -7,26 +7,16 @@ using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
-using Game.Spells;
-
-namespace Scripts.Spells.Warlock
+namespace Scripts.Spells.Warrior
 {
-    [SpellScript(37377, "spell_warl_t4_2p_bonus_shadow", false, SpellIds.FLAMESHADOW)] // 37377 - Shadowflame
-    [SpellScript(39437, "spell_warl_t4_2p_bonus_fire", false, SpellIds.SHADOWFLAME)]   // 39437 - Shadowflame Hellfire and RoF
-    internal class spell_warl_t4_2p_bonus : AuraScript, IHasAuraEffects
+    [Script] // 215538 - Trauma
+    internal class spell_warr_trauma : AuraScript, IHasAuraEffects
     {
-        private readonly uint _triggerSpell;
-
-        public spell_warl_t4_2p_bonus(uint triggerSpell)
-        {
-            _triggerSpell = triggerSpell;
-        }
-
         public List<IAuraEffectHandler> Effects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(_triggerSpell);
+            return ValidateSpellInfo(SpellIds.TRAUMA_EFFECT);
         }
 
         public override void Register()
@@ -36,9 +26,12 @@ namespace Scripts.Spells.Warlock
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            PreventDefaultAction();
-            Unit caster = eventInfo.GetActor();
-            caster.CastSpell(caster, _triggerSpell, new CastSpellExtraArgs(aurEff));
+            Unit target = eventInfo.GetActionTarget();
+            //Get 25% of Damage from the spell casted (Slam & Whirlwind) plus Remaining Damage from Aura
+            int damage = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()) / Global.SpellMgr.GetSpellInfo(SpellIds.TRAUMA_EFFECT, GetCastDifficulty()).GetMaxTicks());
+            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+            args.AddSpellMod(SpellValueMod.BasePoint0, damage);
+            GetCaster().CastSpell(target, SpellIds.TRAUMA_EFFECT, args);
         }
     }
 }
