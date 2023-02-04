@@ -16,10 +16,10 @@ namespace Scripts.Spells.Warrior
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.GLYPH_OF_HEROIC_LEAP,
-                                     SpellIds.GLYPH_OF_HEROIC_LEAP_BUFF,
-                                     SpellIds.IMPROVED_HEROIC_LEAP,
-                                     SpellIds.TAUNT);
+            return ValidateSpellInfo(WarriorSpells.GLYPH_OF_HEROIC_LEAP,
+                                     WarriorSpells.GLYPH_OF_HEROIC_LEAP_BUFF,
+                                     WarriorSpells.IMPROVED_HEROIC_LEAP,
+                                     WarriorSpells.TAUNT);
         }
 
         public override void Register()
@@ -29,11 +29,11 @@ namespace Scripts.Spells.Warrior
 
         private void AfterJump(uint effIndex)
         {
-            if (GetCaster().HasAura(SpellIds.GLYPH_OF_HEROIC_LEAP))
-                GetCaster().CastSpell(GetCaster(), SpellIds.GLYPH_OF_HEROIC_LEAP_BUFF, true);
+            if (GetCaster().HasAura(WarriorSpells.GLYPH_OF_HEROIC_LEAP))
+                GetCaster().CastSpell(GetCaster(), WarriorSpells.GLYPH_OF_HEROIC_LEAP_BUFF, true);
 
-            if (GetCaster().HasAura(SpellIds.IMPROVED_HEROIC_LEAP))
-                GetCaster().GetSpellHistory().ResetCooldown(SpellIds.TAUNT, true);
+            if (GetCaster().HasAura(WarriorSpells.IMPROVED_HEROIC_LEAP))
+                GetCaster().GetSpellHistory().ResetCooldown(WarriorSpells.TAUNT, true);
         }
     }
 }

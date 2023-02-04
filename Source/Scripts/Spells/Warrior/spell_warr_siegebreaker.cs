@@ -14,7 +14,7 @@ namespace Scripts.Spells.Warrior
         public void OnHit()
         {
             Unit caster = GetCaster();
-            caster.CastSpell(null, SpellIds.SIEGEBREAKER_BUFF, true);
+            caster.CastSpell(null, WarriorSpells.SIEGEBREAKER_BUFF, true);
         }
     }
 }

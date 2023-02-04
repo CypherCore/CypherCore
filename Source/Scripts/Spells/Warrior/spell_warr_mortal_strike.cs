@@ -17,7 +17,7 @@ namespace Scripts.Spells.Warrior
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.MORTAL_WOUNDS);
+            return ValidateSpellInfo(WarriorSpells.MORTAL_WOUNDS);
         }
 
         public override void Register()
@@ -30,7 +30,7 @@ namespace Scripts.Spells.Warrior
             Unit target = GetHitUnit();
 
             if (target)
-                GetCaster().CastSpell(target, SpellIds.MORTAL_WOUNDS, true);
+                GetCaster().CastSpell(target, WarriorSpells.MORTAL_WOUNDS, true);
         }
     }
 }

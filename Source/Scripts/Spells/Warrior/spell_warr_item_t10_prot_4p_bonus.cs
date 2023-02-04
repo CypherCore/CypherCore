@@ -14,7 +14,7 @@ namespace Scripts.Spells.Warrior
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.STOICISM) && spellInfo.GetEffects().Count > 1;
+            return ValidateSpellInfo(WarriorSpells.STOICISM) && spellInfo.GetEffects().Count > 1;
         }
 
         public void OnProc(ProcEventInfo eventInfo)
@@ -25,7 +25,7 @@ namespace Scripts.Spells.Warrior
             int bp0 = (int)MathFunctions.CalculatePct(target.GetMaxHealth(), GetEffectInfo(1).CalcValue());
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.AddSpellMod(SpellValueMod.BasePoint0, bp0);
-            target.CastSpell((Unit)null, SpellIds.STOICISM, args);
+            target.CastSpell((Unit)null, WarriorSpells.STOICISM, args);
         }
     }
 }

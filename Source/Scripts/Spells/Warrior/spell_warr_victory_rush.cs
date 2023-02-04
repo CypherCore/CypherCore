@@ -12,15 +12,15 @@ namespace Scripts.Spells.Warrior
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.VICTORIOUS, SpellIds.VICTORY_RUSH_HEAL);
+            return ValidateSpellInfo(WarriorSpells.VICTORIOUS, WarriorSpells.VICTORY_RUSH_HEAL);
         }
 
         public void AfterCast()
         {
             Unit caster = GetCaster();
 
-            caster.CastSpell(caster, SpellIds.VICTORY_RUSH_HEAL, true);
-            caster.RemoveAurasDueToSpell(SpellIds.VICTORIOUS);
+            caster.CastSpell(caster, WarriorSpells.VICTORY_RUSH_HEAL, true);
+            caster.RemoveAurasDueToSpell(WarriorSpells.VICTORIOUS);
         }
     }
 }

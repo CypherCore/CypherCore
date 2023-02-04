@@ -17,7 +17,7 @@ namespace Scripts.Spells.Warrior
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.COLOSSUS_SMASH);
+            return ValidateSpellInfo(WarriorSpells.COLOSSUS_SMASH);
         }
 
         public override void Register()
@@ -31,7 +31,7 @@ namespace Scripts.Spells.Warrior
             Player player = GetTarget().ToPlayer();
 
             if (player)
-                player.GetSpellHistory().ResetCooldown(SpellIds.COLOSSUS_SMASH, true);
+                player.GetSpellHistory().ResetCooldown(WarriorSpells.COLOSSUS_SMASH, true);
         }
     }
 }

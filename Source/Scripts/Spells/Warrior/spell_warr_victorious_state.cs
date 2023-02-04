@@ -16,7 +16,7 @@ namespace Scripts.Spells.Warrior
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.IMPENDING_VICTORY);
+            return ValidateSpellInfo(WarriorSpells.IMPENDING_VICTORY);
         }
 
         public override void Register()
@@ -30,7 +30,7 @@ namespace Scripts.Spells.Warrior
                 procInfo.GetActor().ToPlayer().GetPrimarySpecialization() == (uint)TalentSpecialization.WarriorFury)
                 PreventDefaultAction();
 
-            procInfo.GetActor().GetSpellHistory().ResetCooldown(SpellIds.IMPENDING_VICTORY, true);
+            procInfo.GetActor().GetSpellHistory().ResetCooldown(WarriorSpells.IMPENDING_VICTORY, true);
         }
     }
 }

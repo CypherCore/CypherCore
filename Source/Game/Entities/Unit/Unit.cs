@@ -4021,6 +4021,54 @@ namespace Game.Entities
                 UpdateDamagePctDoneMods(attackType);
         }
 
+        public void GetAnyUnitListInRange(List<Unit> list, float fMaxSearchRange)
+        {
+            CellCoord p = new CellCoord(GridDefines.ComputeCellCoord(GetPositionX(), GetPositionY()));
+            Cell cell = new Cell(p);
+            cell.SetNoCreate();
+
+            AnyUnitInObjectRangeCheck u_check = new AnyUnitInObjectRangeCheck(this, fMaxSearchRange);
+            UnitListSearcher searcher = new UnitListSearcher(this, list, u_check);
+
+            var world_unit_searcher = new Visitor(searcher, GridMapTypeMask.AllWorld);
+            var grid_unit_searcher = new Visitor(searcher, GridMapTypeMask.AllGrid);
+
+            cell.Visit(p, world_unit_searcher, GetMap(), this, fMaxSearchRange);
+            cell.Visit(p, grid_unit_searcher, GetMap(), this, fMaxSearchRange);
+        }
+
+        public void GetAttackableUnitListInRange(List<Unit> list, float fMaxSearchRange)
+        {
+            CellCoord p = new CellCoord(GridDefines.ComputeCellCoord(GetPositionX(), GetPositionY()));
+            Cell cell = new Cell(p);
+            cell.SetNoCreate();
+
+            var u_check = new NearestAttackableUnitInObjectRangeCheck(this, this, fMaxSearchRange);
+            UnitListSearcher searcher = new UnitListSearcher(this, list, u_check);
+
+            var world_unit_searcher = new Visitor(searcher, GridMapTypeMask.AllWorld);
+            var grid_unit_searcher = new Visitor(searcher, GridMapTypeMask.AllGrid);
+
+            cell.Visit(p, world_unit_searcher, GetMap(), this, fMaxSearchRange);
+            cell.Visit(p, grid_unit_searcher, GetMap(), this, fMaxSearchRange);
+        }
+
+        public void GetFriendlyUnitListInRange(List<Unit> list, float fMaxSearchRange, bool exceptSelf = false)
+        {
+            CellCoord p = new CellCoord(GridDefines.ComputeCellCoord(GetPositionX(), GetPositionY()));
+            Cell cell = new Cell(p);
+            cell.SetNoCreate();
+
+            AnyFriendlyUnitInObjectRangeCheck u_check = new AnyFriendlyUnitInObjectRangeCheck(this, this, fMaxSearchRange, false, exceptSelf);
+            UnitListSearcher searcher = new UnitListSearcher(this, list, u_check);
+
+            var world_unit_searcher = new Visitor(searcher, GridMapTypeMask.AllWorld);
+            var grid_unit_searcher = new Visitor(searcher, GridMapTypeMask.AllGrid);
+
+            cell.Visit(p, world_unit_searcher, GetMap(), this, fMaxSearchRange);
+            cell.Visit(p, grid_unit_searcher, GetMap(), this, fMaxSearchRange);
+        }
+
         public CombatManager GetCombatManager() { return m_combatManager; }
 
         // Exposes the threat manager directly - be careful when interfacing with this

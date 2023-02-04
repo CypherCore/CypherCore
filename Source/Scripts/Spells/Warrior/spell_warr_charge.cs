@@ -16,7 +16,7 @@ namespace Scripts.Spells.Warrior
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.CHARGE_EFFECT, SpellIds.CHARGE_EFFECT_BLAZING_TRAIL);
+            return ValidateSpellInfo(WarriorSpells.CHARGE_EFFECT, WarriorSpells.CHARGE_EFFECT_BLAZING_TRAIL);
         }
 
         public override void Register()
@@ -26,10 +26,10 @@ namespace Scripts.Spells.Warrior
 
         private void HandleDummy(uint effIndex)
         {
-            uint spellId = SpellIds.CHARGE_EFFECT;
+            uint spellId = WarriorSpells.CHARGE_EFFECT;
 
-            if (GetCaster().HasAura(SpellIds.GLYPH_OF_THE_BLAZING_TRAIL))
-                spellId = SpellIds.CHARGE_EFFECT_BLAZING_TRAIL;
+            if (GetCaster().HasAura(WarriorSpells.GLYPH_OF_THE_BLAZING_TRAIL))
+                spellId = WarriorSpells.CHARGE_EFFECT_BLAZING_TRAIL;
 
             GetCaster().CastSpell(GetHitUnit(), spellId, true);
         }

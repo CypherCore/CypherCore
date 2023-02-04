@@ -16,7 +16,7 @@ namespace Scripts.Spells.Warrior
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.RALLYING_CRY);
+            return ValidateSpellInfo(WarriorSpells.RALLYING_CRY);
         }
 
         public override bool Load()
@@ -34,7 +34,7 @@ namespace Scripts.Spells.Warrior
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.AddSpellMod(SpellValueMod.BasePoint0, (int)GetHitUnit().CountPctFromMaxHealth(GetEffectValue()));
 
-            GetCaster().CastSpell(GetHitUnit(), SpellIds.RALLYING_CRY, args);
+            GetCaster().CastSpell(GetHitUnit(), WarriorSpells.RALLYING_CRY, args);
         }
     }
 }

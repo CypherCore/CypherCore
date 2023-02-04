@@ -12,14 +12,14 @@ namespace Scripts.Spells.Warrior
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.IMPENDING_VICTORY_HEAL);
+            return ValidateSpellInfo(WarriorSpells.IMPENDING_VICTORY_HEAL);
         }
 
         public void AfterCast()
         {
             Unit caster = GetCaster();
-            caster.CastSpell(caster, SpellIds.IMPENDING_VICTORY_HEAL, true);
-            caster.RemoveAurasDueToSpell(SpellIds.VICTORIOUS);
+            caster.CastSpell(caster, WarriorSpells.IMPENDING_VICTORY_HEAL, true);
+            caster.RemoveAurasDueToSpell(WarriorSpells.VICTORIOUS);
         }
     }
 }

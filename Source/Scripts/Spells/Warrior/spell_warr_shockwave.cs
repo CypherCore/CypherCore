@@ -17,7 +17,7 @@ namespace Scripts.Spells.Warrior
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            if (!ValidateSpellInfo(SpellIds.SHOCKWAVE, SpellIds.SHOCKWAVE_STUN))
+            if (!ValidateSpellInfo(WarriorSpells.SHOCKWAVE, WarriorSpells.SHOCKWAVE_STUN))
                 return false;
 
             return spellInfo.GetEffects().Count > 3;
@@ -44,7 +44,7 @@ namespace Scripts.Spells.Warrior
 
         private void HandleStun(uint effIndex)
         {
-            GetCaster().CastSpell(GetHitUnit(), SpellIds.SHOCKWAVE_STUN, true);
+            GetCaster().CastSpell(GetHitUnit(), WarriorSpells.SHOCKWAVE_STUN, true);
             ++_targetCount;
         }
     }

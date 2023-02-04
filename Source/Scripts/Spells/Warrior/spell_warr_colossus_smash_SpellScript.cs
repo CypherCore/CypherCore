@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warrior
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.COLOSSUS_SMASH_EFFECT);
+            return ValidateSpellInfo(WarriorSpells.COLOSSUS_SMASH_EFFECT);
         }
 
         public void OnHit()
@@ -20,7 +20,7 @@ namespace Scripts.Spells.Warrior
             Unit target = GetHitUnit();
 
             if (target)
-                GetCaster().CastSpell(target, SpellIds.COLOSSUS_SMASH_EFFECT, true);
+                GetCaster().CastSpell(target, WarriorSpells.COLOSSUS_SMASH_EFFECT, true);
         }
     }
 }

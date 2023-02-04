@@ -16,7 +16,7 @@ namespace Scripts.Spells.Warrior
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.STORM_BOLT_STUN);
+            return ValidateSpellInfo(WarriorSpells.STORM_BOLT_STUN);
         }
 
         public override void Register()
@@ -26,7 +26,7 @@ namespace Scripts.Spells.Warrior
 
         private void HandleOnHit(uint effIndex)
         {
-            GetCaster().CastSpell(GetHitUnit(), SpellIds.STORM_BOLT_STUN, true);
+            GetCaster().CastSpell(GetHitUnit(), WarriorSpells.STORM_BOLT_STUN, true);
         }
     }
 }

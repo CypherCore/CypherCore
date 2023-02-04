@@ -18,7 +18,7 @@ namespace Scripts.Spells.Warrior
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.CHARGE_PAUSE_RAGE_DECAY, SpellIds.CHARGE_ROOT_EFFECT, SpellIds.CHARGE_SLOW_EFFECT);
+            return ValidateSpellInfo(WarriorSpells.CHARGE_PAUSE_RAGE_DECAY, WarriorSpells.CHARGE_ROOT_EFFECT, WarriorSpells.CHARGE_SLOW_EFFECT);
         }
 
         public override void Register()
@@ -30,9 +30,9 @@ namespace Scripts.Spells.Warrior
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
-            caster.CastSpell(caster, SpellIds.CHARGE_PAUSE_RAGE_DECAY, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, 0));
-            caster.CastSpell(target, SpellIds.CHARGE_ROOT_EFFECT, true);
-            caster.CastSpell(target, SpellIds.CHARGE_SLOW_EFFECT, true);
+            caster.CastSpell(caster, WarriorSpells.CHARGE_PAUSE_RAGE_DECAY, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, 0));
+            caster.CastSpell(target, WarriorSpells.CHARGE_ROOT_EFFECT, true);
+            caster.CastSpell(target, WarriorSpells.CHARGE_SLOW_EFFECT, true);
         }
     }
 }

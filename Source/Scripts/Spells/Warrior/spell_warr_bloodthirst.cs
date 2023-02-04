@@ -17,7 +17,7 @@ namespace Scripts.Spells.Warrior
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.BLOODTHIRST_HEAL);
+            return ValidateSpellInfo(WarriorSpells.BLOODTHIRST_HEAL);
         }
 
         public override void Register()
@@ -27,7 +27,7 @@ namespace Scripts.Spells.Warrior
 
         private void HandleDummy(uint effIndex)
         {
-            GetCaster().CastSpell(GetCaster(), SpellIds.BLOODTHIRST_HEAL, true);
+            GetCaster().CastSpell(GetCaster(), WarriorSpells.BLOODTHIRST_HEAL, true);
         }
 
         public void OnCast()
@@ -44,23 +44,23 @@ namespace Scripts.Spells.Warrior
                 SetHitDamage(GetHitDamage() / 2);
             }
 
-            if (caster.HasAura(SpellIds.FRESH_MEAT))
+            if (caster.HasAura(WarriorSpells.FRESH_MEAT))
             {
                 if (RandomHelper.FRand(0, 15) != 0)
                 {
-                    caster.CastSpell(null, SpellIds.ENRAGE_AURA, true);
+                    caster.CastSpell(null, WarriorSpells.ENRAGE_AURA, true);
                 }
             }
 
-            if (caster.HasAura(SpellIds.THIRST_FOR_BATTLE))
+            if (caster.HasAura(WarriorSpells.THIRST_FOR_BATTLE))
             {
-                caster.AddAura(SpellIds.THIRST_FOR_BATTLE_BUFF, caster);
+                caster.AddAura(WarriorSpells.THIRST_FOR_BATTLE_BUFF, caster);
             }
         }
 
         public void OnHit()
         {
-            GetCaster().CastSpell(GetCaster(), SpellIds.BLOODTHIRST_HEAL, true);
+            GetCaster().CastSpell(GetCaster(), WarriorSpells.BLOODTHIRST_HEAL, true);
         }
     }
 }

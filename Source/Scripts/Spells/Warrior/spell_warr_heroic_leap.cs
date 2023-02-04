@@ -17,7 +17,7 @@ namespace Scripts.Spells.Warrior
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.HEROIC_LEAP_JUMP);
+            return ValidateSpellInfo(WarriorSpells.HEROIC_LEAP_JUMP);
         }
 
         public SpellCastResult CheckCast()
@@ -67,7 +67,7 @@ namespace Scripts.Spells.Warrior
             WorldLocation dest = GetHitDest();
 
             if (dest != null)
-                GetCaster().CastSpell(dest.GetPosition(), SpellIds.HEROIC_LEAP_JUMP, new CastSpellExtraArgs(true));
+                GetCaster().CastSpell(dest.GetPosition(), WarriorSpells.HEROIC_LEAP_JUMP, new CastSpellExtraArgs(true));
         }
     }
 }

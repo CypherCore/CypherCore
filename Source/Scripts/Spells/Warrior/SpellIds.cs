@@ -4,7 +4,7 @@
 
 namespace Scripts.Spells.Warrior
 {
-    internal struct SpellIds
+    internal struct WarriorSpells
     {
         public const uint BLADESTORM_PERIODIC_WHIRLWIND = 50622;
         public const uint BLOODTHIRST_HEAL = 117313;

@@ -16,7 +16,7 @@ namespace Scripts.Spells.Warrior
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.TRAUMA_EFFECT);
+            return ValidateSpellInfo(WarriorSpells.TRAUMA_EFFECT);
         }
 
         public override void Register()
@@ -28,10 +28,10 @@ namespace Scripts.Spells.Warrior
         {
             Unit target = eventInfo.GetActionTarget();
             //Get 25% of Damage from the spell casted (Slam & Whirlwind) plus Remaining Damage from Aura
-            int damage = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()) / Global.SpellMgr.GetSpellInfo(SpellIds.TRAUMA_EFFECT, GetCastDifficulty()).GetMaxTicks());
+            int damage = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()) / Global.SpellMgr.GetSpellInfo(WarriorSpells.TRAUMA_EFFECT, GetCastDifficulty()).GetMaxTicks());
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.AddSpellMod(SpellValueMod.BasePoint0, damage);
-            GetCaster().CastSpell(target, SpellIds.TRAUMA_EFFECT, args);
+            GetCaster().CastSpell(target, WarriorSpells.TRAUMA_EFFECT, args);
         }
     }
 }
