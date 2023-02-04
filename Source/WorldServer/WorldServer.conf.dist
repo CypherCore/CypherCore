@@ -75,6 +75,27 @@ HotfixDatabaseInfo.Database = "hotfixes"
 HotfixDatabaseInfo.SSL = false
 
 #
+#	Creates a Hotfix record for any data loaded in the hotfix database.
+#	It does not require a entry into hotfix_data table.
+#	Note: It will only send records that differ from the DBC data in case you have the entire dbc loaded in that table.
+#
+#	0 = Disabled
+#	1 = Enabled
+
+LoadAllHotfix = 0
+
+#	WARNING USE AT YOUR OWN RISK !!!!!!
+#		This will prune (DELETE) any commonly invalid data from the database as the server loads such as 
+#		Missing table maps and chat prompts. This is process cannot be reversed. This is usually non critical data
+#		such as loot tables that are mapped to creatures that do not exist in creature template.
+#		See https://github.com/ForgedWoW/ForgedCore/commit/565c3197bc85fa40e4774d553e98e29cfeae9fe9 for exact details
+#
+#	0 = Disabled
+#	1 = Enabled
+
+load.autoclean = 0
+
+#
 #    WorldServerPort
 #        Description: TCP port to reach the world server.
 #        Default:     8085

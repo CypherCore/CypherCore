@@ -13,6 +13,7 @@ using Game.AI;
 using Game.Chat;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Extendability;
 using Game.Groups;
 using Game.Guilds;
 using Game.Movement;
@@ -164,7 +165,7 @@ namespace Game.Scripting
 
         public void LoadScripts()
         {
-            List<Assembly> assemblies = new List<Assembly>();
+            List<Assembly> assemblies = IOHelpers.GetAllAssembliesInDir(Path.Combine(AppContext.BaseDirectory, "Scripts"));
 
             if (File.Exists(AppContext.BaseDirectory + "Scripts.dll"))
             {
@@ -173,16 +174,6 @@ namespace Game.Scripting
                 if (scrAss != null)
                     assemblies.Add(scrAss);
             }
-            
-            assemblies.Add(typeof(IScriptActivator).Assembly);
-
-            var scriptDir = Path.Combine(AppContext.BaseDirectory, "Scripts");
-
-            if (!Directory.Exists(scriptDir))
-                Directory.CreateDirectory(scriptDir);
-
-            foreach (var file in Directory.GetFiles(scriptDir, "*.dll"))
-                assemblies.Add(Assembly.LoadFile(file));
 
             Dictionary<string, IScriptActivator> activators = new();
             Dictionary<Type, IScriptRegister> registers = new();
@@ -292,7 +283,7 @@ namespace Game.Scripting
 
         private static void RegisterActivators(Dictionary<string, IScriptActivator> activators, Type type)
         {
-            if (DoesTypeSupportInterface(type, typeof(IScriptActivator)))
+            if (IOHelpers.DoesTypeSupportInterface(type, typeof(IScriptActivator)))
             {
                 var asa = (IScriptActivator)Activator.CreateInstance(type);
 
@@ -303,24 +294,11 @@ namespace Game.Scripting
 
         private static void RegisterRegistors(Dictionary<Type, IScriptRegister> registers, Type type)
         {
-            if (DoesTypeSupportInterface(type, typeof(IScriptRegister)))
+            if (IOHelpers.DoesTypeSupportInterface(type, typeof(IScriptRegister)))
             {
                 var newReg = (IScriptRegister)Activator.CreateInstance(type);
                 registers[newReg.AttributeType] = newReg;
             }
-        }
-
-        public static bool DoesTypeSupportInterface(Type type, Type inter)
-        {
-            if (type == inter) return false;
-
-            if (inter.IsAssignableFrom(type))
-                return true;
-
-            if (type.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == inter))
-                return true;
-
-            return false;
         }
 
         public void LoadDatabase()

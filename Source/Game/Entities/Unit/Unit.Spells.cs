@@ -3172,7 +3172,7 @@ namespace Game.Entities
                     return true;
 
                 return false;
-            }, (aura) => RemoveOwnedAura(aura, removeMode)));
+            }, (aura) => RemoveOwnedAura(new KeyValuePair<uint, Aura>(spellId, aura), removeMode)));
         }
 
         public void RemoveAurasDueToSpell(uint spellId, ObjectGuid casterGUID = default, uint reqEffMask = 0, AuraRemoveMode removeMode = AuraRemoveMode.Default)

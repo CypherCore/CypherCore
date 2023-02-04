@@ -158,7 +158,7 @@ namespace Game.DataStorage
     {
         public LocalizedString Name;
         public LocalizedString Description;
-        public int ID;
+        public uint ID;
         public Vector3 Pos;
         public int PortLocID;
         public uint PlayerConditionID;
@@ -181,12 +181,12 @@ namespace Game.DataStorage
 
     public class AreaPOIStateRecord
     {
-        public int ID;
+        public uint ID;
         public LocalizedString Description;
         public byte WorldStateValue;
         public byte IconEnumValue;
         public uint UiTextureAtlasMemberID;
-        public int AreaPoiID;
+        public uint AreaPoiID;
     }
 
     public sealed class AreaTriggerRecord

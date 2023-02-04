@@ -9,10 +9,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Xml;
 
 namespace Game.DataStorage
 {
     using static CliDB;
+    using static Game.Networking.Packets.SetupCurrency;
 
     public class DB2Manager : Singleton<DB2Manager>
     {
@@ -649,6 +651,24 @@ namespace Game.DataStorage
         public IDB2Storage GetStorage(uint type)
         {
             return _storage.LookupByKey(type);
+        }
+
+        public void AddHotfixRecord(uint tableHash, uint recordId, HotfixRecord.Status status = HotfixRecord.Status.Valid, int id = 80000, uint uniqueId = 123456789)
+        {
+            HotfixRecord hotfixRecord = new();
+            hotfixRecord.TableHash = tableHash;
+            hotfixRecord.RecordID = (int)recordId;
+            hotfixRecord.ID.PushID = id;
+            hotfixRecord.ID.UniqueID = uniqueId;
+            hotfixRecord.HotfixStatus = status;
+            _hotfixData.Add(id, hotfixRecord);
+
+            if (status == HotfixRecord.Status.RecordRemoved)
+            {
+                var store = _storage.LookupByKey(tableHash);
+                if (store != null)
+                    store.EraseRecord((uint)recordId);
+            }
         }
 
         public void LoadHotfixData()
