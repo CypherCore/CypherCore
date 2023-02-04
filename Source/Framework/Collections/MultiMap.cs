@@ -123,6 +123,22 @@ namespace System.Collections.Generic
         }
 
         /// <summary>
+        ///     Calls the action for the first matching pred and returns. Allows the action to be safely modify this map without getting enumeration exceptions
+        /// </summary>
+        public bool CallOnFirstMatch(TKey key, Func<TValue, bool> pred, Action<TValue> action)
+        {
+            if (_interalStorage.TryGetValue(key, out var list))
+                foreach (var item in list)
+                    if (pred(item))
+                    {
+                        action(item);
+                        return true;
+                    }
+
+            return false;
+        }
+
+        /// <summary>
         ///     Calls the action for each matching pred. Allows the action to be safely modify this map without getting enumeration exceptions
         /// </summary>
         public List<KeyValuePair<TKey, TValue>> CallOnMatch(Func<KeyValuePair<TKey, TValue>, bool> pred, Action<KeyValuePair<TKey, TValue>> action)
@@ -155,29 +171,6 @@ namespace System.Collections.Generic
                 action(val);
 
             return matches;
-        }
-
-        /// <summary>
-        ///     Calls the action for the first matching pred and returns. Allows the action to be safely modify this map without getting enumeration exceptions
-        /// </summary>
-        public bool CallOnFirstMatch(TKey key, Func<TValue, bool> pred, Action<TValue> action)
-        {
-            var matches = default(TValue);
-            bool found = false;
-
-            if (_interalStorage.TryGetValue(key, out var list))
-                foreach (var val in list)
-                    if (pred(val))
-                    {
-                        matches = val;
-                        found = true;
-                        break;
-                    }
-
-            if (found)
-                action(matches);
-
-            return found;
         }
 
         public bool Remove(KeyValuePair<TKey, TValue> item)
@@ -241,8 +234,8 @@ namespace System.Collections.Generic
         public List<TValue> LookupByKey(object key)
         {
             TKey newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
-            if (_interalStorage.ContainsKey(newkey))
-                return _interalStorage[newkey];
+            if (_interalStorage.TryGetValue(newkey, out var values))
+                return values;
 
             return _emptyList.Cast<TValue>().ToList();
         }

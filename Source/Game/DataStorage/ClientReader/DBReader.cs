@@ -45,7 +45,9 @@ namespace Game.DataStorage
                 storage.Add((uint)b.Key, b.Value.As<T>());
 
             storage.LoadData(reader.Header, availableDb2Locales, preparedStatement, preparedStatementLocale);
-
+#if DEBUG
+            Log.outInfo(LogFilter.ServerLoading, $"{fileName}, {reader.Header.TableHash}");
+#endif
             Global.DB2Mgr.AddDB2(reader.Header.TableHash, storage);
             loadedFileCount++;
             return storage;
