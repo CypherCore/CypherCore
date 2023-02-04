@@ -1608,7 +1608,12 @@ namespace Framework.Constants
         CovenantVenthyr = 158,
         CovenantKyrian = 159,
         CovenantNecrolord = 160,
-        ProfessionEngineering = 161
+        ProfessionEngineering = 161,
+        DragonIslesHerbalism = 162,
+        DragonIslesEnchanting = 169,
+        DragonIslesTresure = 170,
+        DragonIslesOpenKneeling = 186,
+        DragonIslesMining = 188
     }
 
     public enum MapTypes : byte

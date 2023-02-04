@@ -349,6 +349,7 @@ namespace Game.Entities
                     var skill = result.Read<ushort>(0);
                     var value = result.Read<ushort>(1);
                     var max = result.Read<ushort>(2);
+                    var professionSlot = result.Read<byte>(3);
 
                     SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skill, race, GetClass());
                     if (rcEntry == null)
@@ -391,11 +392,7 @@ namespace Game.Entities
                             step = (ushort)(max / 75);
 
                             if (skillLine.ParentSkillLineID != 0 && skillLine.ParentTierIndex != 0)
-                            {
-                                int professionSlot = FindProfessionSlotFor(skill);
-                                if (professionSlot != -1)
-                                    SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, (int)professionSlot), skill);
-                            }
+                                SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, (int)professionSlot), skill);
                         }
                     }
 
@@ -1785,6 +1782,7 @@ namespace Game.Entities
 
                 ushort value = skillInfoField.SkillRank[pair.Value.Pos];
                 ushort max = skillInfoField.SkillMaxRank[pair.Value.Pos];
+                byte professionSlot = (byte)GetProfessionSlotFor(pair.Key);
 
                 switch (pair.Value.State)
                 {
@@ -1794,14 +1792,16 @@ namespace Game.Entities
                         stmt.AddValue(1, (ushort)pair.Key);
                         stmt.AddValue(2, value);
                         stmt.AddValue(3, max);
+                        stmt.AddValue(4, professionSlot);
                         trans.Append(stmt);
                         break;
                     case SkillState.Changed:
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_SKILLS);
                         stmt.AddValue(0, value);
                         stmt.AddValue(1, max);
-                        stmt.AddValue(2, GetGUID().GetCounter());
-                        stmt.AddValue(3, (ushort)pair.Key);
+                        stmt.AddValue(2, professionSlot);
+                        stmt.AddValue(3, GetGUID().GetCounter());
+                        stmt.AddValue(4, (ushort)pair.Key);
                         trans.Append(stmt);
                         break;
                     case SkillState.Deleted:

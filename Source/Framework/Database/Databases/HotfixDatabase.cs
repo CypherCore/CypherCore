@@ -50,6 +50,19 @@ namespace Framework.Database
                 "LiquidTypeID1, LiquidTypeID2, LiquidTypeID3, LiquidTypeID4 FROM area_table WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_AREA_TABLE_LOCALE, "SELECT ID, AreaName_lang FROM area_table_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
 
+            // AreaPOI
+            PrepareStatement(HotfixStatements.SEL_AREA_POI, "SELECT Name, Description, ID, Pos1, Pos2, Pos3, PortLocID, PlayerConditionID, UiTextureAtlasMemberID, " +
+                "Flags, WmoGroupID, PoiDataType, PoiData, Field_9_1_0, Field_10_0_0_45141_012, ContinentID, AreaID, WorldStateID, UiWidgetSetID, " +
+                "UiTextureKitID, Field_9_1_0_38783, Importance, Icon FROM area_poi WHERE (`VerifiedBuild` > 0) = ?");
+
+            PrepareStatement(HotfixStatements.SEL_AREA_POI, "SELECT ID, Name_lang, Description_lang FROM area_poi_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
+
+            // AreaPOIState.db2
+            PrepareStatement(HotfixStatements.SEL_AREA_POI_STATE, "SELECT ID, Description, WorldStateValue, IconEnumValue, UiTextureAtlasMemberID, AreaPoiID" +
+                " FROM area_p_o_i_state WHERE (`VerifiedBuild` > 0) = ?");
+            
+            PrepareStatement(HotfixStatements.SEL_AREA_POI_STATE_LOCALE, "SELECT ID, Description_lang FROM area_p_o_i_state_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
+
             // AreaTrigger.db2
             PrepareStatement(HotfixStatements.SEL_AREA_TRIGGER, "SELECT PosX, PosY, PosZ, ID, ContinentID, PhaseUseFlags, PhaseID, PhaseGroupID, Radius, BoxLength, " +
                 "BoxWidth, BoxHeight, BoxYaw, ShapeType, ShapeID, AreaTriggerActionSetID, Flags FROM area_trigger WHERE (`VerifiedBuild` > 0) = ?");
@@ -1558,6 +1571,12 @@ namespace Framework.Database
 
         SEL_AREA_TABLE,
         SEL_AREA_TABLE_LOCALE,
+
+        SEL_AREA_POI,
+        SEL_AREA_POI_LOCALE,
+
+        SEL_AREA_POI_STATE,
+        SEL_AREA_POI_STATE_LOCALE,
 
         SEL_AREA_TRIGGER,
 

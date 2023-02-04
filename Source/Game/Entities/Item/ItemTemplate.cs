@@ -79,6 +79,15 @@ namespace Game.Entities
                 0, SkillType.Cloth, SkillType.Leather, SkillType.Mail, SkillType.PlateMail, 0, SkillType.Shield, 0, 0, 0, 0, 0
             };
 
+            SkillType[] item_profession_skills =
+            {
+                SkillType.Blacksmithing, SkillType.Leatherworking, SkillType.Alchemy, SkillType.Herbalism, SkillType.Cooking,
+                SkillType.ClassicBlacksmithing, SkillType.ClassicLeatherworking, SkillType.ClassicAlchemy, SkillType.ClassicHerbalism, SkillType.ClassicCooking,
+                SkillType.Mining, SkillType.Tailoring, SkillType.Engineering, SkillType.Enchanting, SkillType.Fishing,
+                SkillType.ClassicMining, SkillType.ClassicTailoring, SkillType.ClassicEngineering, SkillType.ClassicEnchanting, SkillType.ClassicFishing,
+                SkillType.Skinning, SkillType.Jewelcrafting, SkillType.Inscription, SkillType.Archaeology,
+                SkillType.ClassicSkinning, SkillType.ClassicJewelcrafting, SkillType.ClassicInscription
+            };
 
             switch (GetClass())
             {
@@ -93,6 +102,12 @@ namespace Game.Entities
                         return 0;
                     else
                         return item_armor_skills[GetSubClass()];
+
+                case ItemClass.Profession:
+                    if (GetSubClass() >= (int)ItemSubclassPorfession.Max)
+                        return 0;
+                    else
+                        return item_profession_skills[GetSubClass()];
 
                 default:
                     return 0;

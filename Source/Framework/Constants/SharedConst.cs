@@ -360,7 +360,7 @@ namespace Framework.Constants
                 case LockType.LumberMill:
                     return SkillType.Logging;
                 case LockType.ClassicHerbalism:
-                    return SkillType.Herbalism2;
+                    return SkillType.ClassicHerbalism;
                 case LockType.OutlandHerbalism:
                     return SkillType.OutlandHerbalism;
                 case LockType.NorthrendHerbalism:
@@ -376,7 +376,7 @@ namespace Framework.Constants
                 case LockType.KulTiranHerbalism:
                     return SkillType.KulTiranHerbalism;
                 case LockType.ClassicMining:
-                    return SkillType.Mining2;
+                    return SkillType.ClassicMining;
                 case LockType.OutlandMining:
                     return SkillType.OutlandMining;
                 case LockType.NorthrendMining:
@@ -391,6 +391,12 @@ namespace Framework.Constants
                     return SkillType.LegionMining;
                 case LockType.KulTiranMining:
                     return SkillType.KulTiranMining;
+                case LockType.DragonIslesEnchanting:
+                    return SkillType.DragonIslesEnchanting;
+                case LockType.DragonIslesHerbalism:
+                    return SkillType.DragonIslesHerbalism;
+                case LockType.DragonIslesMining:
+                    return SkillType.DragonIslesMining;
             }
             return SkillType.None;
         }

@@ -2002,6 +2002,8 @@ namespace Game.DungeonFinding
                     return Global.GameEventMgr.IsHolidayActive(HolidayIds.TimewalkingDungeonEventLkDefault);
                 case 1146: // Random Timewalking Dungeon (Cataclysm)
                     return Global.GameEventMgr.IsHolidayActive(HolidayIds.TimewalkingDungeonEventCataDefault);
+                case 1453:  // Timewalker MoP
+                    return Global.GameEventMgr.IsHolidayActive(HolidayIds.TimewalkingDungeonEventMopDefault);
             }
             return false;
         }

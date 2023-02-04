@@ -3,6 +3,7 @@
 
 using Framework.Constants;
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace Game.DataStorage
@@ -150,6 +151,42 @@ namespace Game.DataStorage
         public bool HasFlag(AreaFlags flag) { return Flags[0].HasAnyFlag((uint)flag); }
 
         public bool HasFlag2(AreaFlags2 flag) { return Flags[1].HasAnyFlag((uint)flag); }
+    }
+
+
+    public sealed class AreaPOIRecord
+    {
+        public LocalizedString Name;
+        public LocalizedString Description;
+        public int ID;
+        public Vector3 Pos;
+        public int PortLocID;
+        public uint PlayerConditionID;
+        public uint UiTextureAtlasMemberID;
+        public uint Flags;
+        public int WmoGroupID;
+        public int PoiDataType;
+        public int PoiData;
+        public uint Field_9_1_0;
+        public int Field_10_0_0_45141_012;
+        public ushort ContinentID;
+        public short AreaID;
+        public ushort WorldStateID;
+        public ushort UiWidgetSetID;
+        public ushort UiTextureKitID;
+        public ushort Field_9_1_0_38783;
+        public byte Importance;
+        public byte Icon;
+    }
+
+    public class AreaPOIStateRecord
+    {
+        public int ID;
+        public LocalizedString Description;
+        public byte WorldStateValue;
+        public byte IconEnumValue;
+        public uint UiTextureAtlasMemberID;
+        public int AreaPoiID;
     }
 
     public sealed class AreaTriggerRecord

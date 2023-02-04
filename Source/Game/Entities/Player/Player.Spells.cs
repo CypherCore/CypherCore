@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.DataStorage;
+using Game.Networking;
 using Game.Networking.Packets;
 using Game.Scripting.Interfaces.IItem;
 using Game.Spells;
@@ -840,6 +841,9 @@ namespace Game.Entities
                 SetSkillPermBonus(skillStatusData.Pos, (ushort)(skillInfoField.SkillPermBonus[skillStatusData.Pos] + val));
             else
                 SetSkillTempBonus(skillStatusData.Pos, (ushort)(skillInfoField.SkillTempBonus[skillStatusData.Pos] + val));
+
+            foreach (var skill in DB2Manager.Instance.GetSkillLinesForParentSkill((uint)skillid))
+                ModifySkillBonus(skillid, val, talent);
         }
 
         public void StopCastingBindSight()
@@ -1030,8 +1034,12 @@ namespace Game.Entities
         }
         public void SetSkill(uint id, uint step, uint newVal, uint maxVal)
         {
-            if (id == 0)
+            var skillEntry = CliDB.SkillLineStorage.LookupByKey(id);
+            if (skillEntry == null)
+            {
+                Log.outError(LogFilter.Misc, $"Player.Spells.SetSkill: Skillid: {id} not found in SkillLineStorage for player {GetName()} ({GetGUID()})");
                 return;
+            }
 
             ushort currVal;
             var skillStatusData = mSkillStatus.LookupByKey(id);
@@ -1068,16 +1076,115 @@ namespace Game.Entities
                     UpdateCriteria(CriteriaType.AchieveSkillStep, id);
 
                     // update skill state
-                    if (skillStatusData.State == SkillState.Unchanged)
+                    if (skillStatusData.State == SkillState.Unchanged || skillStatusData.State == SkillState.Deleted)
                     {
                         if (currVal == 0)   // activated skill, mark as new to save into database
+                        {
                             skillStatusData.State = SkillState.New;
+                            // Set profession line
+                            if (skillEntry.ParentSkillLineID != 0 && skillEntry.CategoryID == SkillCategory.Profession)
+                            {
+                                int freeProfessionSlot = FindProfessionSlotFor(id);
+                                if (freeProfessionSlot != -1)
+                                {
+                                    SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, freeProfessionSlot), id);
+                                }
+                            }
+
+                            // Temporary bonuses
+                            foreach (AuraEffect effect in GetAuraEffectsByType(AuraType.ModSkill))
+                            {
+                                if (effect.GetMiscValue() == (int)id)
+                                {
+                                    effect.HandleEffect(this, AuraEffectHandleModes.Skill, true);
+                                }
+                            }
+
+                            foreach (AuraEffect effect in GetAuraEffectsByType(AuraType.ModSkill2))
+                            {
+                                if (effect.GetMiscValue() == (int)id)
+                                {
+                                    effect.HandleEffect(this, AuraEffectHandleModes.Skill, true);
+                                }
+                            }
+
+                            // Permanent bonuses
+                            foreach (AuraEffect effect in GetAuraEffectsByType(AuraType.ModSkillTalent))
+                            {
+                                if (effect.GetMiscValue() == (int)id)
+                                {
+                                    effect.HandleEffect(this, AuraEffectHandleModes.Skill, true);
+                                }
+                            }
+
+                        }
                         else                // updated skill, mark as changed to save into database
                             skillStatusData.State = SkillState.Changed;
                     }
                 }
                 else if (currVal != 0 && newVal == 0) // Deactivate skill line
                 {
+                    if (skillEntry.ParentSkillLineID != 0 && skillEntry.CategoryID == SkillCategory.Profession)
+                    {
+                        var storeProfessionItem = (Item professionItem) =>
+                        {
+                            if (professionItem == null)
+                            {
+                                return true;
+                            }
+
+                            List<ItemPosCount> professionItemDest = new();
+
+                            if (CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, professionItemDest, professionItem, false) == InventoryResult.Ok)
+                            {
+                                RemoveItem(InventorySlots.Bag0, professionItem.GetSlot(), true);
+                                StoreItem(professionItemDest, professionItem, true);
+                                return true;
+                            }
+
+                            return false;
+                        };
+
+                        int professionSlot = GetProfessionSlotFor(id);
+
+                        if (professionSlot != -1)
+                        {
+                            bool isFirstProfession = (professionSlot == 0);
+                            byte professionSlotStart = isFirstProfession ? ProfessionSlots.Profession1Tool : ProfessionSlots.Profession2Tool;
+
+                            // Get all profession items equipped
+                            List<Item> professionItems = new List<Item>();
+                            for (byte slotOffset = 0; slotOffset < ProfessionSlots.End; slotOffset++)
+                            {
+                                Item professionItem = GetItemByPos(InventorySlots.Bag0, (byte)(professionSlotStart + slotOffset));
+
+                                if (professionItem != null)
+                                    professionItems.Add(professionItem);
+                            }
+
+                            // Check if there is space for all items
+                            uint itemIds = 0;
+                            if (CanStoreItems(professionItems, professionItems.Count, ref  itemIds) == InventoryResult.Ok)
+                            {
+                                foreach (Item professionItem in professionItems)
+                                {
+                                    // Store item in bag
+                                    if (!storeProfessionItem(professionItem))
+                                    {
+                                        SendPacket(new DisplayGameError(GameError.BagFull));
+                                        return;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                SendPacket(new DisplayGameError(GameError.BagFull));
+                                return;
+                            }
+                        }
+                    }
+                    
+
                     //remove enchantments needing this skill
                     UpdateSkillEnchantments(id, currVal, 0);
                     // clear skill fields
@@ -1089,10 +1196,7 @@ namespace Game.Entities
                     SetSkillPermBonus(skillStatusData.Pos, 0);
 
                     // mark as deleted so the next save will delete the data from the database
-                    if (skillStatusData.State != SkillState.New)
-                        skillStatusData.State = SkillState.Deleted;
-                    else
-                        skillStatusData.State = SkillState.Unchanged;
+                    skillStatusData.State = SkillState.Deleted;
 
                     // remove all spells that related to this skill
                     List<SkillLineAbilityRecord> skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill(id);
@@ -1134,13 +1238,6 @@ namespace Game.Entities
                 if (skillSlot == 0)
                 {
                     Log.outError(LogFilter.Misc, $"Tried to add skill {id} but player {GetName()} ({GetGUID()}) cannot have additional skills");
-                    return;
-                }
-
-                SkillLineRecord skillEntry = CliDB.SkillLineStorage.LookupByKey(id);
-                if (skillEntry == null)
-                {
-                    Log.outError(LogFilter.Misc, $"Player.SetSkill: Skill (SkillID: {id}) not found in SkillLineStore for player '{GetName()}' ({GetGUID()})");
                     return;
                 }
 
@@ -1280,7 +1377,7 @@ namespace Game.Entities
             switch (SkillId)
             {
                 case SkillType.Herbalism:
-                case SkillType.Herbalism2:
+                case SkillType.ClassicHerbalism:
                 case SkillType.OutlandHerbalism:
                 case SkillType.NorthrendHerbalism:
                 case SkillType.CataclysmHerbalism:
@@ -1290,9 +1387,12 @@ namespace Game.Entities
                 case SkillType.KulTiranHerbalism:
                 case SkillType.Jewelcrafting:
                 case SkillType.Inscription:
+                case SkillType.DragonIslesHerbalism:
+                case SkillType.DragonIslesInscription:
+                case SkillType.DragonIslesJewelcrafting:
                     return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, grayLevel, greenLevel, yellowLevel) * (int)Multiplicator, gathering_skill_gain);
                 case SkillType.Skinning:
-                case SkillType.Skinning2:
+                case SkillType.ClassicSkinning:
                 case SkillType.OutlandSkinning:
                 case SkillType.NorthrendSkinning:
                 case SkillType.CataclysmSkinning:
@@ -1300,12 +1400,13 @@ namespace Game.Entities
                 case SkillType.DraenorSkinning:
                 case SkillType.LegionSkinning:
                 case SkillType.KulTiranSkinning:
+                case SkillType.DragonIslesSkining:
                     if (WorldConfig.GetIntValue(WorldCfg.SkillChanceSkinningSteps) == 0)
                         return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, grayLevel, greenLevel, yellowLevel) * (int)Multiplicator, gathering_skill_gain);
                     else
                         return UpdateSkillPro(SkillId, (int)(SkillGainChance(SkillValue, grayLevel, greenLevel, yellowLevel) * Multiplicator) >> (int)(SkillValue / WorldConfig.GetIntValue(WorldCfg.SkillChanceSkinningSteps)), gathering_skill_gain);
                 case SkillType.Mining:
-                case SkillType.Mining2:
+                case SkillType.ClassicMining:
                 case SkillType.OutlandMining:
                 case SkillType.NorthrendMining:
                 case SkillType.CataclysmMining:
@@ -1313,6 +1414,7 @@ namespace Game.Entities
                 case SkillType.DraenorMining:
                 case SkillType.LegionMining:
                 case SkillType.KulTiranMining:
+                case SkillType.DragonIslesMining:
                     if (WorldConfig.GetIntValue(WorldCfg.SkillChanceMiningSteps) == 0)
                         return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, grayLevel, greenLevel, yellowLevel) * (int)Multiplicator, gathering_skill_gain);
                     else
@@ -1610,10 +1712,36 @@ namespace Game.Entities
             }
         }
 
+        public int GetProfessionSlotFor(uint skillId)
+        {
+            var skillEntry = CliDB.SkillLineStorage.LookupByKey(skillId);
+
+            if (skillEntry == null)
+                return -1;
+
+            if (skillEntry.ParentSkillLineID == 0 || skillEntry.CategoryID != SkillCategory.Profession)
+                return -1;
+
+            int slot = 0;
+
+            foreach (var bit in m_activePlayerData.ProfessionSkillLine)
+            {
+                if (bit == skillId)
+                    return slot;
+
+                slot++;
+            }
+
+            return -1;
+        }
+
         int FindProfessionSlotFor(uint skillId)
         {
             SkillLineRecord skillEntry = CliDB.SkillLineStorage.LookupByKey(skillId);
             if (skillEntry == null)
+                return -1;
+
+            if (skillEntry.ParentSkillLineID != 0 || skillEntry.CategoryID != SkillCategory.Profession) 
                 return -1;
 
             int index = 0;

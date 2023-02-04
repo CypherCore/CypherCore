@@ -41,6 +41,9 @@ namespace Game.DataStorage
             foreach (var areaGroupMember in AreaGroupMemberStorage.Values)
                 _areaGroupMembers.Add(areaGroupMember.AreaGroupID, areaGroupMember.AreaID);
 
+            foreach (var arPoi in AreaPOIStorage.Values)
+                _areaPOIRecords.Add((uint)arPoi.AreaID, arPoi);
+
             foreach (ArtifactPowerRecord artifactPower in ArtifactPowerStorage.Values)
                 _artifactPowers.Add(artifactPower.ArtifactID, artifactPower);
 
@@ -847,6 +850,11 @@ namespace Game.DataStorage
         public List<uint> GetAreasForGroup(uint areaGroupId)
         {
             return _areaGroupMembers.LookupByKey(areaGroupId);
+        }
+
+        public List<AreaPOIRecord> GetAreaPoiID(uint areaId)
+        {
+            return _areaPOIRecords.LookupByKey(areaId);
         }
 
         public bool IsInArea(uint objectAreaId, uint areaId)
@@ -2356,6 +2364,7 @@ namespace Game.DataStorage
         MultiMap<(uint tableHash, int recordId), HotfixOptionalData>[] _hotfixOptionalData = new MultiMap<(uint tableHash, int recordId), HotfixOptionalData>[(int)Locale.Total];
 
         MultiMap<uint, uint> _areaGroupMembers = new();
+        MultiMap<uint, AreaPOIRecord> _areaPOIRecords = new();
         MultiMap<uint, ArtifactPowerRecord> _artifactPowers = new();
         MultiMap<uint, uint> _artifactPowerLinks = new();
         Dictionary<Tuple<uint, byte>, ArtifactPowerRankRecord> _artifactPowerRanks = new();

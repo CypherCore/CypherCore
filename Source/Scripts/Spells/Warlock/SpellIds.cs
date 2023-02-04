@@ -293,7 +293,8 @@ namespace Scripts.Spells.Warlock
         public const uint FLAMESHADOW = 37379;
         public const uint GEN_REPLENISHMENT = 57669;
         public const uint PRIEST_SHADOW_WORD_DEATH = 32409;
-
+        public const uint SPELL_INQUISITORS_GAZE = 386344;
+        public const uint SPELL_INQUISITORS_GAZE_EFFECT = 388068;
         public const uint NPC_WARLOCK_DEMONIC_GATEWAY_PURPLE = 59271;
 
         public const uint NPC_WARLOCK_DEMONIC_GATEWAY_GREEN = 59262;

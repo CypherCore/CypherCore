@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Game.Networking;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -128,7 +129,7 @@ namespace Game.Entities
         public bool HasValue() { return _hasValue; }
     }
 
-    public class UpdateFieldArray<T> where T : new()
+    public class UpdateFieldArray<T> : IEnumerable<T> where T : new()
     {
         public T[] _values;
         public int FirstElementBit;
@@ -162,6 +163,11 @@ namespace Game.Entities
         {
             foreach (var obj in _values)
                 yield return obj;
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 
