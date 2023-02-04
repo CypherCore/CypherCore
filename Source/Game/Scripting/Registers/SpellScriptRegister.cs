@@ -16,7 +16,7 @@ namespace Game.Scripting.Registers
             if (attribute is SpellScriptAttribute spellScript && spellScript.SpellIds != null)
                 foreach (var id in spellScript.SpellIds)
                 {
-                    Global.ObjectMgr.RegisterSpellScript(id, scriptName);
+                    Global.ObjectMgr.RegisterSpellScript(id, scriptName, spellScript.AllRanks);
 
                     if (script != null)
                         Global.ScriptMgr.AddScript(script);

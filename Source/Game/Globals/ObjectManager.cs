@@ -1785,13 +1785,8 @@ namespace Game
             if (allRanks)
             {
                 if (!spellInfo.IsRanked())
-                    Log.outError(LogFilter.Sql, "Scriptname: `{0}` spell (Id: {1}) has no ranks of spell.", scriptName, spellId);
+                    Log.outDebug(LogFilter.Sql, "Scriptname: `{0}` spell (Id: {1}) has no ranks of spell.", scriptName, spellId);
 
-                if (spellInfo.GetFirstRankSpell().Id != spellId)
-                {
-                    Log.outError(LogFilter.Sql, "Scriptname: `{0}` spell (Id: {1}) is not first rank of spell.", scriptName, spellId);
-                    return false;
-                }
                 while (spellInfo != null)
                 {
                     spellScriptsStorage.Add(spellInfo.Id, GetScriptId(scriptName));
@@ -1801,7 +1796,7 @@ namespace Game
             else
             {
                 if (spellInfo.IsRanked())
-                    Log.outError(LogFilter.Sql, "Scriptname: `{0}` spell (Id: {1}) is ranked spell. Perhaps not all ranks are assigned to this script.", scriptName, spellId);
+                    Log.outDebug(LogFilter.Sql, "Scriptname: `{0}` spell (Id: {1}) is ranked spell. Perhaps not all ranks are assigned to this script.", scriptName, spellId);
 
                 spellScriptsStorage.Add(spellInfo.Id, GetScriptId(scriptName));
             }

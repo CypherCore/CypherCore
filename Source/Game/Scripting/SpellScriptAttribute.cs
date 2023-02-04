@@ -12,19 +12,22 @@ namespace Game.Scripting
         {
         }
 
-        public SpellScriptAttribute(uint spellId, string name = "", params object[] args) : base(name, args)
+        public SpellScriptAttribute(uint spellId, string name = "", bool allRanks = false, params object[] args) : base(name, args)
         {
             SpellIds = new[]
                        {
                            spellId
                        };
+            AllRanks = allRanks;
         }
 
-        public SpellScriptAttribute(uint[] spellId, string name = "", params object[] args) : base(name, args)
+        public SpellScriptAttribute(uint[] spellId, string name = "", bool allRanks = false,  params object[] args) : base(name, args)
         {
             SpellIds = spellId;
+            AllRanks = allRanks;
         }
 
         public uint[] SpellIds { get; private set; }
+        public bool AllRanks { get; private set; }
     }
 }

@@ -23,8 +23,9 @@ namespace Game.Scripting.Registers
                         Log.outError(LogFilter.Scripts, $"CreatureScriptAttribute: Unknown creature id {id} for script name {scriptName}");
                         continue;
                     }
-
-                    creatureTemplate.ScriptID = Global.ObjectMgr.GetScriptId(scriptName);
+                    
+                    if (creatureTemplate.ScriptID == 0) // dont override database
+                        creatureTemplate.ScriptID = Global.ObjectMgr.GetScriptId(scriptName);
 
                     if (script != null)
                         Global.ScriptMgr.AddScript(script);

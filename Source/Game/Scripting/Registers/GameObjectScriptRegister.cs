@@ -24,7 +24,8 @@ namespace Game.Scripting.Registers
                         continue;
                     }
 
-                    gameObject.ScriptId = Global.ObjectMgr.GetScriptId(scriptName);
+                    if (gameObject.ScriptId == 0) // dont override database
+                        gameObject.ScriptId = Global.ObjectMgr.GetScriptId(scriptName);
 
                     if (script != null)
                         Global.ScriptMgr.AddScript(script);
