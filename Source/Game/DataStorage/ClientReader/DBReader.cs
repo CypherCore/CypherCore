@@ -21,37 +21,15 @@ namespace Game.DataStorage
     {
         private const uint WDC3FmtSig = 0x33434457; // WDC3
 
-        public static DB6Storage<T> Read<T>(BitSet availableDb2Locales, string db2Path, string fileName, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale, ref uint loadedFileCount) where T : new()
-        {
-            DB6Storage<T> storage = new();
+        public WDCHeader Header;
+        public FieldMetaData[] FieldMeta;
+        public ColumnMetaData[] ColumnMeta;
+        public Value32[][] PalletData;
+        public Dictionary<int, Value32>[] CommonData;
 
-            if (!File.Exists(db2Path + fileName))
-            {
-                Log.outError(LogFilter.ServerLoading, $"File {fileName} not found.");
-                return storage;
-            }
+        public Dictionary<int, WDC3Row> Records = new();
 
-            DBReader reader = new();
-            using (var stream = new FileStream(db2Path + fileName, FileMode.Open))
-            {
-                if (!reader.Load(stream))
-                {
-                    Log.outError(LogFilter.ServerLoading, $"Error loading {fileName}.");
-                    return storage;
-                }
-            }
-
-            foreach (var b in reader._records)
-                storage.Add((uint)b.Key, b.Value.As<T>());
-
-            storage.LoadData(reader.Header, availableDb2Locales, preparedStatement, preparedStatementLocale);
-
-            Global.DB2Mgr.AddDB2(reader.Header.TableHash, storage);
-            loadedFileCount++;
-            return storage;
-        }
-
-        bool Load(Stream stream)
+        public bool Load(Stream stream)
         {
             using (var reader = new BinaryReader(stream, Encoding.UTF8))
             {
@@ -229,16 +207,16 @@ namespace Game.DataStorage
                         long recordOffset =  (recordIndex * Header.RecordSize) - (Header.RecordCount * Header.RecordSize);
 
                         var rec = new WDC3Row(this, bitReader, (int)recordOffset, Header.HasIndexTable() ? (isIndexEmpty ? i : indexData[i]) : -1, hasRef ? refId : -1, stringsTable);
-                        _records.Add(rec.Id, rec);
+                        Records.Add(rec.Id, rec);
                     }
 
                     foreach (var copyRow in copyData)
                     {
                         if (copyRow.Key != 0)
                         {
-                            var rec = _records[copyRow.Value].Clone();
+                            var rec = Records[copyRow.Value].Clone();
                             rec.Id = copyRow.Key;
-                            _records.Add(copyRow.Key, rec);
+                            Records.Add(copyRow.Key, rec);
                         }
                     }
 
@@ -249,14 +227,6 @@ namespace Game.DataStorage
 
             return true;            
         }
-
-        internal WDCHeader Header;
-        internal FieldMetaData[] FieldMeta;
-        internal ColumnMetaData[] ColumnMeta;
-        internal Value32[][] PalletData;
-        internal Dictionary<int, Value32>[] CommonData;
-
-        Dictionary<int, WDC3Row> _records = new();
     }
 
     class WDC3Row
