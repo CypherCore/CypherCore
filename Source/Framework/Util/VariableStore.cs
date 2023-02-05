@@ -24,5 +24,10 @@ namespace Framework.Util
             lock (_variables)
                 _variables[key] = objectVal;
         }
+
+        public void Remove(string key)
+        {
+            _variables.Remove(key);
+        }
     }
 }

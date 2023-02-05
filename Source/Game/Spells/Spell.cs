@@ -4410,6 +4410,7 @@ namespace Game.Spells
                 }
 
                 unitCaster.ModifyPower(cost.Power, -cost.Amount);
+                ForEachSpellScript<IOnTakePower>(a => a.TakePower(cost));
             }
         }
 
@@ -7958,6 +7959,12 @@ namespace Game.Spells
                 return scripts;
 
             return _dummy;
+        }
+
+        public void ForEachSpellScript<T>(Action<T> action) where T : ISpellScript
+        {
+            foreach (T script in GetSpellScripts<T>())
+                action.Invoke(script);
         }
 
         public List<(ISpellScript, ISpellEffect)> GetEffectScripts(SpellScriptHookType h, uint index)

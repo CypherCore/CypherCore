@@ -1,0 +1,40 @@
+﻿using System.Collections.Generic;
+using Framework.Constants;
+using Game.Entities;
+using Game.Scripting;
+using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.ISpell;
+
+namespace Scripts.Spells.Warrior
+{
+    // 1680 Whirlwind
+    [SpellScript(1680)]
+    public class spell_warr_wirlwind_dmg : SpellScript, IHasSpellEffects
+    {
+        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
+
+        public void HandleOnHitTarget(uint UnnamedParameter)
+        {
+            Player caster = GetCaster().ToPlayer();
+            if (caster != null)
+            {
+                if (caster.HasAura(202316)) // Fervor of Battle
+                {
+                    Unit target = caster.GetSelectedUnit();
+                    if (target != null)
+                    {
+                        if (caster.IsValidAttackTarget(target))
+                        {
+                            caster.CastSpell(target, WarriorSpells.SLAM_ARMS, true);
+                        }
+                    }
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleOnHitTarget, 0, SpellEffectName.TriggerSpell, SpellScriptHookType.EffectHitTarget));
+        }
+    }
+}

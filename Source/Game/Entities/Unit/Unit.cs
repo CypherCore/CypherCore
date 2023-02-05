@@ -912,6 +912,20 @@ namespace Game.Entities
             return null;
         }
 
+        public Creature GetSummonedCreatureByEntry(uint entry)
+        {
+            foreach(var sum in m_SummonSlot)
+            {
+                var cre = ObjectAccessor.GetCreature(this, sum);
+
+                if (cre.GetEntry() == entry) 
+                    return cre;
+            }
+
+            return null;
+        }
+
+
         public Unit SelectNearbyTarget(Unit exclude = null, float dist = SharedConst.NominalMeleeRange)
         {
             List<Unit> targets = new();
