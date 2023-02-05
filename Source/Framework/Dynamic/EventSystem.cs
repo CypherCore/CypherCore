@@ -21,6 +21,7 @@ namespace Framework.Dynamic
 
             // main event loop
             KeyValuePair<ulong, BasicEvent> i;
+            if (m_events.Count > 0)
             while ((i = m_events.KeyValueList().FirstOrDefault()).Value != null && i.Key <= m_time) 
             {
                 // sorted dictionart will stop looping at the first time that does not meet the while condition
