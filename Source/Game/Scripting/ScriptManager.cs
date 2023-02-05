@@ -35,6 +35,7 @@ namespace Game.Scripting
         // creature entry + chain ID
         private readonly MultiMap<Tuple<uint, ushort>, SplineChainLink> _mSplineChainsMap = new(); // spline chains
 
+        private readonly Dictionary<Type, Dictionary<Class, List<IScriptObject>>> _scriptClassByType = new();
         private readonly Dictionary<Type, List<IScriptObject>> _scriptByType = new();
         private readonly Dictionary<Type, ScriptRegistry> _scriptStorage = new();
         private readonly Dictionary<uint, WaypointPath> _waypointStore = new();
@@ -93,6 +94,20 @@ namespace Game.Scripting
                     a.Invoke(s);
         }
 
+        public void ForEach<T>(Class playerClass, Action<T> a) where T : IScriptObject, IClassRescriction
+        {
+            if (_scriptClassByType.TryGetValue(typeof(T), out var classKvp))
+            {
+                if (classKvp.TryGetValue(playerClass, out var ifaceImp))
+                    foreach (T s in ifaceImp)
+                        a.Invoke(s);
+
+                if (classKvp.TryGetValue(Class.None, out var ifaceImpNone))
+                    foreach (T s in ifaceImpNone)
+                        a.Invoke(s);
+            }
+        }
+
         public bool RunScriptRet<T>(Func<T, bool> func, uint id, bool ret = false) where T : IScriptObject
         {
             return RunScriptRet<T, bool>(func, id, ret);
@@ -128,6 +143,8 @@ namespace Game.Scripting
 
             scriptReg.AddScript(script);
 
+            bool hasClass = typeof(T).GetInterfaces().Any(iface => iface.Name == nameof(IClassRescriction));
+
             foreach (var iface in typeof(T).GetInterfaces())
             {
                 if (iface.Name == nameof(IScriptObject))
@@ -140,6 +157,17 @@ namespace Game.Scripting
                 }
 
                 loadedTypes.Add(script);
+
+                if (hasClass)
+                {
+                    if (!_scriptClassByType.TryGetValue(iface, out var classDict))
+                    {
+                        classDict = new Dictionary<Class, List<IScriptObject>>();
+                        _scriptClassByType[iface] = classDict;
+                    }
+
+                    classDict.AddToList(((IClassRescriction)script).PlayerClass, script);
+                }
             }
         }
 

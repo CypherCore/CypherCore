@@ -23,6 +23,7 @@ using Game.Misc;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.PvP;
+using Game.Scripting;
 using Game.Scripting.Interfaces.IPlayer;
 using Game.Spells;
 using System;
@@ -3974,6 +3975,7 @@ namespace Game.Entities
             if (corpseReclaimDelay >= 0)
                 SendCorpseReclaimDelay(corpseReclaimDelay);
 
+            ScriptManager.Instance.ForEach<IPlayerOnDeath>(GetClass(), a => a.OnDeath(this));
             // don't create corpse at this moment, player might be falling
 
             // update visibility

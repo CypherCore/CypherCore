@@ -2675,7 +2675,7 @@ namespace Game.Spells
             {
                 // now that we've done the basic check, now run the scripts
                 // should be done before the spell is actually executed
-                Global.ScriptMgr.ForEach<IPlayerOnSpellCast>(p => p.OnSpellCast(playerCaster, this, skipCheck));
+                Global.ScriptMgr.ForEach<IPlayerOnSpellCast>(playerCaster.GetClass(), p => p.OnSpellCast(playerCaster, this, skipCheck));
 
                 // As of 3.0.2 pets begin attacking their owner's target immediately
                 // Let any pets know we've attacked something. Check DmgClass for harmful spells only

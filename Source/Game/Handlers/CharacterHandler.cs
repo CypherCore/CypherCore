@@ -611,7 +611,7 @@ namespace Game
                         if (success)
                         {
                             Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Create Character: {2} {3}", GetAccountId(), GetRemoteAddress(), createInfo.Name, newChar.GetGUID().ToString());
-                            Global.ScriptMgr.ForEach<IPlayerOnCreate>(p => p.OnCreate(newChar));
+                            Global.ScriptMgr.ForEach<IPlayerOnCreate>(newChar.GetClass(), p => p.OnCreate(newChar));
                             Global.CharacterCacheStorage.AddCharacterCacheEntry(newChar.GetGUID(), GetAccountId(), newChar.GetName(), (byte)newChar.GetNativeGender(), (byte)newChar.GetRace(), (byte)newChar.GetClass(), (byte)newChar.GetLevel(), false);
 
                             SendCharCreate(ResponseCodes.CharCreateSuccess, newChar.GetGUID());
