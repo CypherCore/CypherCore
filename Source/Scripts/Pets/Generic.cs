@@ -133,10 +133,10 @@ namespace Scripts.Pets
 
             public override void Register()
             {
-                Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+                AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
             }
 
-            public List<IAuraEffectHandler> Effects { get; } = new();
+            public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
             private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
             {
@@ -154,7 +154,7 @@ namespace Scripts.Pets
         [Script] // 70050 - [DND] Lich Pet
         internal class spell_pet_gen_lich_pet_periodic_emote : AuraScript, IHasAuraEffects
         {
-            public List<IAuraEffectHandler> Effects { get; } = new();
+            public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
             public override bool Validate(SpellInfo spellInfo)
             {
@@ -163,7 +163,7 @@ namespace Scripts.Pets
 
             public override void Register()
             {
-                Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
+                AuraEffects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
             }
 
             private void OnPeriodic(AuraEffect aurEff)
@@ -183,11 +183,11 @@ namespace Scripts.Pets
         [Script] // 70049 - [DND] Lich Pet
         internal class spell_pet_gen_lich_pet_emote : AuraScript, IHasAuraEffects
         {
-            public List<IAuraEffectHandler> Effects { get; } = new();
+            public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
             public override void Register()
             {
-                Effects.Add(new EffectApplyHandler(AfterApply, 0, AuraType.ModRoot, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+                AuraEffects.Add(new EffectApplyHandler(AfterApply, 0, AuraType.ModRoot, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
             }
 
             private void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)

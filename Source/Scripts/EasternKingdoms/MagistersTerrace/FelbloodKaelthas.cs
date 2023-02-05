@@ -470,7 +470,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
     [Script] // 44191 - Flame Strike
     internal class spell_felblood_kaelthas_flame_strike : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -479,7 +479,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)

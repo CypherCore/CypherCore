@@ -21,7 +21,7 @@ namespace Scripts.Spells.Warlock
             _triggerSpell = triggerSpell;
         }
 
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -30,7 +30,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)

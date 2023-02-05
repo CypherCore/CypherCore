@@ -110,11 +110,11 @@ namespace Scripts.m_Events.PilgrimsBounty
             _handled = false;
         }
 
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(HandleTriggerSpell, 2, AuraType.PeriodicTriggerSpell));
+            AuraEffects.Add(new EffectPeriodicHandler(HandleTriggerSpell, 2, AuraType.PeriodicTriggerSpell));
         }
 
         private void HandleTriggerSpell(AuraEffect aurEff)
@@ -479,7 +479,7 @@ namespace Scripts.m_Events.PilgrimsBounty
             _triggeredSpellId = triggeredSpellId;
         }
 
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spell)
         {
@@ -488,8 +488,8 @@ namespace Scripts.m_Events.PilgrimsBounty
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            AuraEffects.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            AuraEffects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
 
         private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)

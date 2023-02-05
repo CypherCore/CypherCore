@@ -364,7 +364,7 @@ namespace Scripts.Spells.Quest
     [Script] // 9712 - Thaumaturgy Channel
     internal class spell_q2203_thaumaturgy_channel : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -373,7 +373,7 @@ namespace Scripts.Spells.Quest
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicTriggerSpell));
+            AuraEffects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicTriggerSpell));
         }
 
         private void HandleEffectPeriodic(AuraEffect aurEff)
@@ -444,12 +444,12 @@ namespace Scripts.Spells.Quest
     [Script] // 43874 - Scourge Mur'gul Camp: Force Shield Arcane Purple x3
     internal class spell_q11396_11399_force_shield_arcane_purple_x3 : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
-            Effects.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            AuraEffects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            AuraEffects.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
 
         private void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -673,11 +673,11 @@ namespace Scripts.Spells.Quest
     [Script] // 54798 FLAMING Arrow Triggered Effect
     internal class spell_q12851_going_bearback : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectAfterApply));
+            AuraEffects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectAfterApply));
         }
 
         private void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -921,11 +921,11 @@ namespace Scripts.Spells.Quest
     [Script] // 40113 Knockdown Fel Cannon: The Aggro Check Aura
     internal class spell_q11010_q11102_q11023_aggro_check_aura : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(HandleTriggerSpell, 0, AuraType.PeriodicTriggerSpell));
+            AuraEffects.Add(new EffectPeriodicHandler(HandleTriggerSpell, 0, AuraType.PeriodicTriggerSpell));
         }
 
         private void HandleTriggerSpell(AuraEffect aurEff)
@@ -963,11 +963,11 @@ namespace Scripts.Spells.Quest
     [Script] // 40119 Knockdown Fel Cannon: The Aggro Burst
     internal class spell_q11010_q11102_q11023_aggro_burst : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+            AuraEffects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
         }
 
         private void HandleEffectPeriodic(AuraEffect aurEff)
@@ -1074,7 +1074,7 @@ namespace Scripts.Spells.Quest
     [Script] // 53350 - Quenching Mist
     internal class spell_q12730_quenching_mist : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1083,7 +1083,7 @@ namespace Scripts.Spells.Quest
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicHeal));
+            AuraEffects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicHeal));
         }
 
         private void HandleEffectPeriodic(AuraEffect aurEff)
@@ -1216,12 +1216,12 @@ namespace Scripts.Spells.Quest
     [Script] // 59579 - Burst at the Seams
     internal class spell_q13264_q13276_q13288_q13289_burst_at_the_seams_59579 : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            AuraEffects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1264,12 +1264,12 @@ namespace Scripts.Spells.Quest
     [Script] // 52593 - Bloated Abomination Feign Death
     internal class spell_q13264_q13276_q13288_q13289_bloated_abom_feign_death : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            AuraEffects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1432,7 +1432,7 @@ namespace Scripts.Spells.Quest
     [Script]
     internal class spell_quest_taming_the_beast : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1458,7 +1458,7 @@ namespace Scripts.Spells.Quest
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1694,11 +1694,11 @@ namespace Scripts.Spells.Quest
     [Script] // 51769 - Emblazon Runeblade
     internal class spell_q12619_emblazon_runeblade_AuraScript : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicTriggerSpell));
+            AuraEffects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicTriggerSpell));
         }
 
         private void HandleEffectPeriodic(AuraEffect aurEff)
@@ -1837,7 +1837,7 @@ namespace Scripts.Spells.Quest
     [Script] // 39238 - Fumping
     internal class spell_q10929_fumping : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spell)
         {
@@ -1846,7 +1846,7 @@ namespace Scripts.Spells.Quest
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            AuraEffects.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
 
         private void HandleEffectRemove(AuraEffect aurEff, AuraEffectHandleModes mode)

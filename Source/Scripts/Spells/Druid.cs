@@ -83,7 +83,7 @@ namespace Scripts.Spells.Druid
     [Script] // 22812 - Barkskin
     internal class spell_dru_barkskin : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -92,7 +92,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(HandlePeriodic, 2, AuraType.PeriodicDummy));
+            AuraEffects.Add(new EffectPeriodicHandler(HandlePeriodic, 2, AuraType.PeriodicDummy));
         }
 
         private void HandlePeriodic(AuraEffect aurEff)
@@ -123,7 +123,7 @@ namespace Scripts.Spells.Druid
     [Script] // 203953 - Brambles - SPELL_DRUID_BRAMBLES_PASSIVE
     internal class spell_dru_brambles : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -132,8 +132,8 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectAbsorbHandler(HandleAbsorb, 0, false, AuraScriptHookType.EffectAbsorb));
-            Effects.Add(new EffectAbsorbHandler(HandleAfterAbsorb, 0, false, AuraScriptHookType.EffectAfterAbsorb));
+            AuraEffects.Add(new EffectAbsorbHandler(HandleAbsorb, 0, false, AuraScriptHookType.EffectAbsorb));
+            AuraEffects.Add(new EffectAbsorbHandler(HandleAfterAbsorb, 0, false, AuraScriptHookType.EffectAfterAbsorb));
         }
 
         private void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
@@ -156,7 +156,7 @@ namespace Scripts.Spells.Druid
     [Script] // 155835 - Bristling Fur
     internal class spell_dru_bristling_fur : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -165,7 +165,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -187,7 +187,7 @@ namespace Scripts.Spells.Druid
     [Script] // 768 - CatForm - SPELL_DRUID_CAT_FORM
     internal class spell_dru_cat_form : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -196,7 +196,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(HandleAfterRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectApplyHandler(HandleAfterRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void HandleAfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -208,11 +208,11 @@ namespace Scripts.Spells.Druid
     [Script] // 1850 - Dash
     public class spell_dru_dash : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModIncreaseSpeed));
+            AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModIncreaseSpeed));
         }
 
         private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -239,7 +239,7 @@ namespace Scripts.Spells.Druid
     [Script] // 48517 Eclipse (Solar) + 48518 Eclipse (Lunar)
     internal class spell_dru_eclipse_aura : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -248,7 +248,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(HandleRemoved, 0, AuraType.AddPctModifier, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectApplyHandler(HandleRemoved, 0, AuraType.AddPctModifier, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void HandleRemoved(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -312,11 +312,11 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            AuraEffects.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            AuraEffects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
 
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         private void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
@@ -363,7 +363,7 @@ namespace Scripts.Spells.Druid
     [Script] // 329910 - Eclipse out of combat - SPELL_DRUID_ECLIPSE_OOC
     internal class spell_dru_eclipse_ooc : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -372,7 +372,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(Tick, 0, AuraType.PeriodicDummy));
+            AuraEffects.Add(new EffectPeriodicHandler(Tick, 0, AuraType.PeriodicDummy));
         }
 
         private void Tick(AuraEffect aurEff)
@@ -396,7 +396,7 @@ namespace Scripts.Spells.Druid
     [Script] // 203974 - Earthwarden
     internal class spell_dru_earthwarden : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -405,7 +405,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -494,10 +494,10 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
@@ -539,7 +539,7 @@ namespace Scripts.Spells.Druid
     [Script] // 203964 - Galactic Guardian
     internal class spell_dru_galactic_guardian : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -548,7 +548,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -571,7 +571,7 @@ namespace Scripts.Spells.Druid
     [Script] // 24858 - Moonkin Form
     internal class spell_dru_glyph_of_stars : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spell)
         {
@@ -580,8 +580,8 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(OnApply, 1, AuraType.ModShapeshift, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
-            Effects.Add(new EffectApplyHandler(OnRemove, 1, AuraType.ModShapeshift, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            AuraEffects.Add(new EffectApplyHandler(OnApply, 1, AuraType.ModShapeshift, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            AuraEffects.Add(new EffectApplyHandler(OnRemove, 1, AuraType.ModShapeshift, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
 
         private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -601,7 +601,7 @@ namespace Scripts.Spells.Druid
     [Script] // 210706 - Gore
     internal class spell_dru_gore : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -610,8 +610,8 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.Dummy));
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.Dummy));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -683,7 +683,7 @@ namespace Scripts.Spells.Druid
     [Script] // 40442 - Druid Tier 6 Trinket
     internal class spell_dru_item_t6_trinket : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -692,7 +692,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -737,7 +737,7 @@ namespace Scripts.Spells.Druid
     [Script] // 33763 - Lifebloom
     internal class spell_dru_lifebloom : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spell)
         {
@@ -746,7 +746,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.PeriodicHeal, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.PeriodicHeal, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -761,7 +761,7 @@ namespace Scripts.Spells.Druid
     [Script] // 155580 - Lunar Inspiration
     internal class spell_dru_lunar_inspiration : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spell)
         {
@@ -770,8 +770,8 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
-            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            AuraEffects.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            AuraEffects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
 
         private void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -809,7 +809,7 @@ namespace Scripts.Spells.Druid
     [Script] // 16864 - Omen of Clarity
     internal class spell_dru_omen_of_clarity : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -818,7 +818,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -849,7 +849,7 @@ namespace Scripts.Spells.Druid
     [Script] // 1079 - Rip
     internal class spell_dru_rip : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Load()
         {
@@ -860,7 +860,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.PeriodicDamage));
+            AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.PeriodicDamage));
         }
 
         private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -905,7 +905,7 @@ namespace Scripts.Spells.Druid
     [Script]
     internal class spell_dru_savage_roar_AuraScript : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -914,8 +914,8 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(AfterApply, 1, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectApplyHandler(AfterRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectApplyHandler(AfterApply, 1, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            AuraEffects.Add(new EffectApplyHandler(AfterRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1027,7 +1027,7 @@ namespace Scripts.Spells.Druid
     [Script] // 61336 - Survival Instincts
     internal class spell_dru_survival_instincts_AuraScript : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spell)
         {
@@ -1036,8 +1036,8 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            AuraEffects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1054,7 +1054,7 @@ namespace Scripts.Spells.Druid
     [Script] // 40121 - Swift Flight Form (Passive)
     internal class spell_dru_swift_flight_passive : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Load()
         {
@@ -1063,7 +1063,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 1, AuraType.ModIncreaseVehicleFlightSpeed));
+            AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 1, AuraType.ModIncreaseVehicleFlightSpeed));
         }
 
         private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -1079,7 +1079,7 @@ namespace Scripts.Spells.Druid
     [Script] // 28744 - Regrowth
     internal class spell_dru_t3_6p_bonus : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1088,7 +1088,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.OverrideClassScripts, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.OverrideClassScripts, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1101,7 +1101,7 @@ namespace Scripts.Spells.Druid
     [Script] // 28719 - Healing Touch
     internal class spell_dru_t3_8p_bonus : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1110,7 +1110,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1139,7 +1139,7 @@ namespace Scripts.Spells.Druid
     [Script] // 37295 - Mana Restore
     internal class spell_dru_t4_2p_bonus : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1148,7 +1148,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1161,7 +1161,7 @@ namespace Scripts.Spells.Druid
     [Script] // 70723 - Item - Druid T10 Balance 4P Bonus
     internal class spell_dru_t10_balance_4p_bonus : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1170,7 +1170,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1275,10 +1275,10 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
@@ -1322,7 +1322,7 @@ namespace Scripts.Spells.Druid
     [Script] // 192090 - Thrash (Aura) - SPELL_DRUID_THRASH_BEAR_AURA
     internal class spell_dru_thrash_AuraScript : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1331,7 +1331,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicDamage));
+            AuraEffects.Add(new EffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicDamage));
         }
 
         private void HandlePeriodic(AuraEffect aurEff)
@@ -1351,7 +1351,7 @@ namespace Scripts.Spells.Druid
     internal class spell_dru_travel_form_AuraScript : AuraScript, IHasAuraEffects
     {
         private uint triggeredSpellId;
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1365,8 +1365,8 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
-            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            AuraEffects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         public static uint GetFormSpellId(Player player, Difficulty difficulty, bool requiresOutdoor)
@@ -1455,7 +1455,7 @@ namespace Scripts.Spells.Druid
     [Script]
     internal class spell_dru_travel_form_dummy_AuraScript : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1469,8 +1469,8 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
-            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            AuraEffects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1512,11 +1512,11 @@ namespace Scripts.Spells.Druid
     [Script] // 252216 - Tiger Dash (Aura)
     internal class spell_dru_tiger_dash_AuraScript : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(HandlePeriodic, 1, AuraType.PeriodicDummy));
+            AuraEffects.Add(new EffectPeriodicHandler(HandlePeriodic, 1, AuraType.PeriodicDummy));
         }
 
         private void HandlePeriodic(AuraEffect aurEff)
@@ -1586,7 +1586,7 @@ namespace Scripts.Spells.Druid
     [Script]
     internal class spell_dru_wild_growth_AuraScript : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1595,7 +1595,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            Effects.Add(new EffectUpdatePeriodicHandler(HandleTickUpdate, 0, AuraType.PeriodicHeal));
+            AuraEffects.Add(new EffectUpdatePeriodicHandler(HandleTickUpdate, 0, AuraType.PeriodicHeal));
         }
 
         private void HandleTickUpdate(AuraEffect aurEff)

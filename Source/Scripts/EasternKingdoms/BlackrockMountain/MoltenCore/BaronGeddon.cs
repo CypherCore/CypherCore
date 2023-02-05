@@ -95,11 +95,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.BaronGeddon
     [Script] // 19695 - Inferno
     internal class spell_baron_geddon_inferno : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
+            AuraEffects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
         }
 
         private void OnPeriodic(AuraEffect aurEff)

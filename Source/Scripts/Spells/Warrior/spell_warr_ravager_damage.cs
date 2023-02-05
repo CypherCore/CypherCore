@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Scripting.Interfaces.ISpell;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.ISpell;
 
 namespace Scripts.Spells.Warrior
 {

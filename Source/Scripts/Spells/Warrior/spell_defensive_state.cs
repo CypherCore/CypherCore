@@ -13,7 +13,7 @@ namespace Scripts.Spells.Warrior
     [SpellScript(197690)]
     public class spell_defensive_state : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
         private void OnApply(AuraEffect aura, AuraEffectHandleModes auraMode)
         {
@@ -30,7 +30,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.ModDamagePercentTaken, AuraEffectHandleModes.Real));
+            AuraEffects.Add(new EffectApplyHandler(OnApply, 0, AuraType.ModDamagePercentTaken, AuraEffectHandleModes.Real));
         }
     }
 }

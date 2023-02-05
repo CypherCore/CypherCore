@@ -110,7 +110,7 @@ namespace Scripts.Spells.DeathKnight
             absorbedAmount = 0;
         }
 
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -128,9 +128,9 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
-            Effects.Add(new EffectAbsorbHandler(Trigger, 0, false, AuraScriptHookType.EffectAfterAbsorb));
-            Effects.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.SchoolAbsorb, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
+            AuraEffects.Add(new EffectAbsorbHandler(Trigger, 0, false, AuraScriptHookType.EffectAfterAbsorb));
+            AuraEffects.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.SchoolAbsorb, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -217,7 +217,7 @@ namespace Scripts.Spells.DeathKnight
     [Script] // 49028 - Dancing Rune Weapon
     internal class spell_dk_dancing_rune_weapon : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -229,7 +229,7 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         // This is a port of the old switch hack in Unit.cpp, it's not correct
@@ -297,11 +297,11 @@ namespace Scripts.Spells.DeathKnight
     [Script] // 43265 - Death and Decay
     internal class spell_dk_death_and_decay_AuraScript : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(HandleDummyTick, 2, AuraType.PeriodicDummy));
+            AuraEffects.Add(new EffectPeriodicHandler(HandleDummyTick, 2, AuraType.PeriodicDummy));
         }
 
         private void HandleDummyTick(AuraEffect aurEff)
@@ -411,11 +411,11 @@ namespace Scripts.Spells.DeathKnight
     [Script] // 48743 - Death Pact
     internal class spell_dk_death_pact : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectCalcAmountHandler(HandleCalcAmount, 1, AuraType.SchoolHealAbsorb));
+            AuraEffects.Add(new EffectCalcAmountHandler(HandleCalcAmount, 1, AuraType.SchoolHealAbsorb));
         }
 
         private void HandleCalcAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -487,12 +487,12 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicDummy, AuraScriptHookType.EffectProc));
-            Effects.Add(new EffectCalcAmountHandler(HandleCalcAmount, 0, AuraType.PeriodicDummy));
-            Effects.Add(new EffectUpdatePeriodicHandler(Update, 0, AuraType.PeriodicDummy));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicDummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectCalcAmountHandler(HandleCalcAmount, 0, AuraType.PeriodicDummy));
+            AuraEffects.Add(new EffectUpdatePeriodicHandler(Update, 0, AuraType.PeriodicDummy));
         }
 
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         private void Update(AuraEffect aurEff)
         {
@@ -631,7 +631,7 @@ namespace Scripts.Spells.DeathKnight
     [Script] // 206940 - Mark of Blood
     internal class spell_dk_mark_of_blood : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -640,7 +640,7 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -656,7 +656,7 @@ namespace Scripts.Spells.DeathKnight
     [Script] // 207346 - Necrosis
     internal class spell_dk_necrosis : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -665,7 +665,7 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -740,10 +740,10 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
@@ -781,7 +781,7 @@ namespace Scripts.Spells.DeathKnight
     [Script] // 59057 - Rime
     internal class spell_dk_rime : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -790,7 +790,7 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            Effects.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.ProcTriggerSpell));
+            AuraEffects.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.ProcTriggerSpell));
         }
 
         private bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -807,11 +807,11 @@ namespace Scripts.Spells.DeathKnight
     [Script] // 55233 - Vampiric Blood
     internal class spell_dk_vampiric_blood : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 1, AuraType.ModIncreaseHealth2));
+            AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 1, AuraType.ModIncreaseHealth2));
         }
 
         private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)

@@ -14,7 +14,7 @@ namespace Scripts.Spells.Warlock
     [Script] // 198590 - Drain Soul
     internal class spell_warl_drain_soul : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -23,7 +23,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.PeriodicDamage, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.PeriodicDamage, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)

@@ -88,7 +88,7 @@ namespace Scripts.Spells.Mage
     {
         private ulong _health;
         private Position _pos;
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -97,8 +97,8 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.OverrideActionbarSpells, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
-            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.OverrideActionbarSpells, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectApplyHandler(OnApply, 0, AuraType.OverrideActionbarSpells, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            AuraEffects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.OverrideActionbarSpells, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -272,7 +272,7 @@ namespace Scripts.Spells.Mage
     [Script] // 235313 - Blazing Barrier
     internal class spell_mage_blazing_barrier : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -281,8 +281,8 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
-            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 1, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
         private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -386,7 +386,7 @@ namespace Scripts.Spells.Mage
     [Script]
     internal class spell_mage_cauterize_AuraScript : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -395,7 +395,7 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            Effects.Add(new EffectAbsorbHandler(HandleAbsorb, 0, false, AuraScriptHookType.EffectAbsorb));
+            AuraEffects.Add(new EffectAbsorbHandler(HandleAbsorb, 0, false, AuraScriptHookType.EffectAbsorb));
         }
 
         private void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
@@ -575,7 +575,7 @@ namespace Scripts.Spells.Mage
     [Script] // 112965 - Fingers of Frost
     internal class spell_mage_fingers_of_frost_AuraScript : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -584,10 +584,10 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            Effects.Add(new CheckEffectProcHandler(CheckFrostboltProc, 0, AuraType.Dummy));
-            Effects.Add(new CheckEffectProcHandler(CheckFrozenOrbProc, 1, AuraType.Dummy));
-            Effects.Add(new EffectProcHandler(Trigger, 0, AuraType.Dummy, AuraScriptHookType.EffectAfterProc));
-            Effects.Add(new EffectProcHandler(Trigger, 1, AuraType.Dummy, AuraScriptHookType.EffectAfterProc));
+            AuraEffects.Add(new CheckEffectProcHandler(CheckFrostboltProc, 0, AuraType.Dummy));
+            AuraEffects.Add(new CheckEffectProcHandler(CheckFrozenOrbProc, 1, AuraType.Dummy));
+            AuraEffects.Add(new EffectProcHandler(Trigger, 0, AuraType.Dummy, AuraScriptHookType.EffectAfterProc));
+            AuraEffects.Add(new EffectProcHandler(Trigger, 1, AuraType.Dummy, AuraScriptHookType.EffectAfterProc));
         }
 
         private bool CheckFrostboltProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -628,7 +628,7 @@ namespace Scripts.Spells.Mage
     [Script] // 321712 - Pyroblast
     internal class spell_mage_firestarter_dots : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -637,7 +637,7 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            Effects.Add(new EffectCalcCritChanceHandler(CalcCritChance, SpellConst.EffectAll, AuraType.PeriodicDamage));
+            AuraEffects.Add(new EffectCalcCritChanceHandler(CalcCritChance, SpellConst.EffectAll, AuraType.PeriodicDamage));
         }
 
         private void CalcCritChance(AuraEffect aurEff, Unit victim, ref float critChance)
@@ -653,7 +653,7 @@ namespace Scripts.Spells.Mage
     // 205029 - Flame On
     internal class spell_mage_flame_on : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -662,7 +662,7 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 1, AuraType.ChargeRecoveryMultiplier));
+            AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 1, AuraType.ChargeRecoveryMultiplier));
         }
 
         private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -692,7 +692,7 @@ namespace Scripts.Spells.Mage
     [Script] // 11426 - Ice Barrier
     internal class spell_mage_ice_barrier : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellEntry)
         {
@@ -701,8 +701,8 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.SchoolAbsorb, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.SchoolAbsorb, AuraScriptHookType.EffectProc));
         }
 
         private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -848,10 +848,10 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
@@ -872,7 +872,7 @@ namespace Scripts.Spells.Mage
     [Script] // 61062 - Improved Mana Gems
     internal class spell_mage_imp_mana_gems : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -881,7 +881,7 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -895,7 +895,7 @@ namespace Scripts.Spells.Mage
     internal class spell_mage_incanters_flow : AuraScript, IHasAuraEffects
     {
         private sbyte modifier = 1;
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -904,7 +904,7 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(HandlePeriodicTick, 0, AuraType.PeriodicDummy));
+            AuraEffects.Add(new EffectPeriodicHandler(HandlePeriodicTick, 0, AuraType.PeriodicDummy));
         }
 
         private void HandlePeriodicTick(AuraEffect aurEff)
@@ -990,7 +990,7 @@ namespace Scripts.Spells.Mage
     [Script] // 217694 - Living Bomb
     internal class spell_mage_living_bomb_periodic : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -999,7 +999,7 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(AfterRemove, 2, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectApplyHandler(AfterRemove, 2, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1051,11 +1051,11 @@ namespace Scripts.Spells.Mage
     [Script] // 235450 - Prismatic Barrier
     internal class spell_mage_prismatic_barrier : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
+            AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
         }
 
         private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -1087,7 +1087,7 @@ namespace Scripts.Spells.Mage
     [Script]
     internal class spell_mage_ray_of_frost_aura : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1096,8 +1096,8 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 1, AuraType.PeriodicDamage));
-            Effects.Add(new EffectApplyHandler(OnRemove, 1, AuraType.PeriodicDamage, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 1, AuraType.PeriodicDamage));
+            AuraEffects.Add(new EffectApplyHandler(OnRemove, 1, AuraType.PeriodicDamage, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void HandleEffectPeriodic(AuraEffect aurEff)
@@ -1121,7 +1121,7 @@ namespace Scripts.Spells.Mage
     internal class spell_mage_ring_of_frost : AuraScript, IHasAuraEffects
     {
         private ObjectGuid _ringOfFrostGUID;
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1130,8 +1130,8 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.ProcTriggerSpell));
-            Effects.Add(new EffectApplyHandler(Apply, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectApply));
+            AuraEffects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.ProcTriggerSpell));
+            AuraEffects.Add(new EffectApplyHandler(Apply, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectApply));
         }
 
         private void HandleEffectPeriodic(AuraEffect aurEff)
@@ -1218,7 +1218,7 @@ namespace Scripts.Spells.Mage
     [Script]
     internal class spell_mage_ring_of_frost_freeze_AuraScript : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1227,7 +1227,7 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModStun, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModStun, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1294,7 +1294,7 @@ namespace Scripts.Spells.Mage
     [Script] // 210824 - Touch of the Magi (Aura)
     internal class spell_mage_touch_of_the_magi_aura : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1303,8 +1303,8 @@ namespace Scripts.Spells.Mage
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)

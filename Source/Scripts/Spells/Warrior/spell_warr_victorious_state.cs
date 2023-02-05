@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warrior
     [Script] // 32215 - Victorious State
     internal class spell_warr_victorious_state : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -21,7 +21,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleOnProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleOnProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
         private void HandleOnProc(AuraEffect aurEff, ProcEventInfo procInfo)

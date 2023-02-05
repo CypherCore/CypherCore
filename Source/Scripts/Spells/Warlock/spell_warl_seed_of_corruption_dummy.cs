@@ -14,7 +14,7 @@ namespace Scripts.Spells.Warlock
     [SpellScript(27243)] // 27243 - Seed of Corruption
     internal class spell_warl_seed_of_corruption_dummy : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -23,8 +23,8 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            Effects.Add(new EffectCalcAmountHandler(CalculateBuffer, 2, AuraType.Dummy));
-            Effects.Add(new EffectProcHandler(HandleProc, 2, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectCalcAmountHandler(CalculateBuffer, 2, AuraType.Dummy));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 2, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void CalculateBuffer(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)

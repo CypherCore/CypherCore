@@ -102,7 +102,7 @@ namespace Scripts.Spells.Paladin
     [Script] // 267344 - Art of War
     internal class spell_pal_art_of_war : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -111,8 +111,8 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            Effects.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -192,7 +192,7 @@ namespace Scripts.Spells.Paladin
     [Script] // 248033 - Awakening
     internal class spell_pal_awakening : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -201,8 +201,8 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            Effects.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -298,7 +298,7 @@ namespace Scripts.Spells.Paladin
     [Script] // 26573 - Consecration
     internal class spell_pal_consecration : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -307,7 +307,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+            AuraEffects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
         }
 
         private void HandleEffectPeriodic(AuraEffect aurEff)
@@ -357,7 +357,7 @@ namespace Scripts.Spells.Paladin
     [Script] // 196926 - Crusader Might
     internal class spell_pal_crusader_might : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -366,7 +366,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -378,7 +378,7 @@ namespace Scripts.Spells.Paladin
     [Script] // 223817 - Divine Purpose
     internal class spell_pal_divine_purpose : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -387,8 +387,8 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            Effects.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -514,7 +514,7 @@ namespace Scripts.Spells.Paladin
     [Script] // 205191 - Eye for an Eye
     internal class spell_pal_eye_for_an_eye : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -523,7 +523,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -535,7 +535,7 @@ namespace Scripts.Spells.Paladin
     [Script] // 234299 - Fist of Justice
     internal class spell_pal_fist_of_justice : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -544,8 +544,8 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            Effects.Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.Dummy));
-            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.Dummy));
+            AuraEffects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -581,10 +581,10 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
@@ -640,7 +640,7 @@ namespace Scripts.Spells.Paladin
     internal class spell_pal_hand_of_sacrifice : AuraScript, IHasAuraEffects
     {
         private int remainingAmount;
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Load()
         {
@@ -658,7 +658,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            Effects.Add(new EffectSplitHandler(Split, 0));
+            AuraEffects.Add(new EffectSplitHandler(Split, 0));
         }
 
         private void Split(AuraEffect aurEff, DamageInfo dmgInfo, uint splitAmount)
@@ -674,7 +674,7 @@ namespace Scripts.Spells.Paladin
     internal class spell_pal_infusion_of_light : AuraScript, IHasAuraEffects
     {
         private static readonly FlagArray128 HolyLightSpellClassMask = new(0, 0, 0x400);
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -683,11 +683,11 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            Effects.Add(new CheckEffectProcHandler(CheckFlashOfLightProc, 0, AuraType.AddPctModifier));
-            Effects.Add(new CheckEffectProcHandler(CheckFlashOfLightProc, 2, AuraType.AddFlatModifier));
+            AuraEffects.Add(new CheckEffectProcHandler(CheckFlashOfLightProc, 0, AuraType.AddPctModifier));
+            AuraEffects.Add(new CheckEffectProcHandler(CheckFlashOfLightProc, 2, AuraType.AddFlatModifier));
 
-            Effects.Add(new CheckEffectProcHandler(CheckHolyLightProc, 1, AuraType.Dummy));
-            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new CheckEffectProcHandler(CheckHolyLightProc, 1, AuraType.Dummy));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private bool CheckFlashOfLightProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -919,7 +919,7 @@ namespace Scripts.Spells.Paladin
     [Script] // 37705 - Healing Discount
     internal class spell_pal_item_healing_discount : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -928,7 +928,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -941,7 +941,7 @@ namespace Scripts.Spells.Paladin
     [Script] // 40470 - Paladin Tier 6 Trinket
     internal class spell_pal_item_t6_trinket : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -950,7 +950,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1040,10 +1040,10 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
@@ -1107,7 +1107,7 @@ namespace Scripts.Spells.Paladin
     [Script] // 114918 - Light's Hammer (Periodic)
     internal class spell_pal_light_hammer_periodic : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1116,7 +1116,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+            AuraEffects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
         }
 
         private void HandleEffectPeriodic(AuraEffect aurEff)
@@ -1136,7 +1136,7 @@ namespace Scripts.Spells.Paladin
     internal class spell_pal_righteous_protector : AuraScript, IHasAuraEffects
     {
         private SpellPowerCost _baseHolyPowerCost;
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1145,8 +1145,8 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            Effects.Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.Dummy));
-            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.Dummy));
+            AuraEffects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1173,7 +1173,7 @@ namespace Scripts.Spells.Paladin
     [Script] // 267610 - Righteous Verdict
     internal class spell_pal_righteous_verdict : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellEntry)
         {
@@ -1182,7 +1182,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo procInfo)
@@ -1194,11 +1194,11 @@ namespace Scripts.Spells.Paladin
     [Script] // 85804 - Selfless Healer
     internal class spell_pal_selfless_healer : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.ProcTriggerSpell));
+            AuraEffects.Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.ProcTriggerSpell));
         }
 
         private bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1236,7 +1236,7 @@ namespace Scripts.Spells.Paladin
     [Script] // 28789 - Holy Power
     internal class spell_pal_t3_6p_bonus : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1245,7 +1245,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1290,7 +1290,7 @@ namespace Scripts.Spells.Paladin
     [Script] // 64890 - Item - Paladin T8 Holy 2P Bonus
     internal class spell_pal_t8_2p_bonus : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1299,7 +1299,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1328,7 +1328,7 @@ namespace Scripts.Spells.Paladin
     [Script] // 269569 - Zeal
     internal class spell_pal_zeal : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1337,7 +1337,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
         private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo procInfo)

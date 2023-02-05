@@ -270,7 +270,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
     [Script] // 96942 / 101009 - Gaze of Occu'thar
     internal class spell_occuthar_occuthars_destruction_AuraScript : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Load()
         {
@@ -279,7 +279,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(OnRemove, 2, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            AuraEffects.Add(new EffectApplyHandler(OnRemove, 2, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
 
         private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)

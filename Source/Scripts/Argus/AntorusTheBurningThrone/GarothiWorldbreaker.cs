@@ -503,7 +503,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
     [Script]
     internal class spell_garothi_apocalypse_drive : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -512,7 +512,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(HandlePeriodic, 1, AuraType.PeriodicDummy));
+            AuraEffects.Add(new EffectPeriodicHandler(HandlePeriodic, 1, AuraType.PeriodicDummy));
         }
 
         private void HandlePeriodic(AuraEffect aurEff)
@@ -566,7 +566,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
     [Script]
     internal class spell_garothi_fel_bombardment_warning : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -575,7 +575,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -593,7 +593,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
     [Script]
     internal class spell_garothi_fel_bombardment_periodic : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -602,7 +602,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicTriggerSpell));
+            AuraEffects.Add(new EffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicTriggerSpell));
         }
 
         private void HandlePeriodic(AuraEffect aurEff)
@@ -706,7 +706,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
     [Script]
     internal class spell_garothi_decimation_warning : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -715,7 +715,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -738,11 +738,11 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
     [Script]
     internal class spell_garothi_carnage : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -822,7 +822,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
     [Script]
     internal class spell_garothi_surging_fel : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -831,7 +831,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.AreaTrigger, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.AreaTrigger, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)

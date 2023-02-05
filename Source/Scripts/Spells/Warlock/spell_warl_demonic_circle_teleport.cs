@@ -13,11 +13,11 @@ namespace Scripts.Spells.Warlock
     [SpellScript(48020)] // 48020 - Demonic Circle: Teleport
     internal class spell_warl_demonic_circle_teleport : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(HandleTeleport, 0, AuraType.MechanicImmunity, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            AuraEffects.Add(new EffectApplyHandler(HandleTeleport, 0, AuraType.MechanicImmunity, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
         }
 
         private void HandleTeleport(AuraEffect aurEff, AuraEffectHandleModes mode)

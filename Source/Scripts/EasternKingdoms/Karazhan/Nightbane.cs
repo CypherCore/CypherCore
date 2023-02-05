@@ -376,7 +376,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
     [Script] // 37098 - Rain of Bones
     internal class spell_rain_of_bones_AuraScript : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -385,7 +385,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(OnTrigger, 1, AuraType.PeriodicTriggerSpell));
+            AuraEffects.Add(new EffectPeriodicHandler(OnTrigger, 1, AuraType.PeriodicTriggerSpell));
         }
 
         private void OnTrigger(AuraEffect aurEff)

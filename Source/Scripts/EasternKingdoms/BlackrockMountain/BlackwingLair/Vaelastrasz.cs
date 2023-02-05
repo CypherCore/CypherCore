@@ -208,11 +208,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
     [Script] // 18173 - Burning Adrenaline
     internal class spell_vael_burning_adrenaline : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(OnAuraRemoveHandler, 2, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectApplyHandler(OnAuraRemoveHandler, 2, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void OnAuraRemoveHandler(AuraEffect aurEff, AuraEffectHandleModes mode)

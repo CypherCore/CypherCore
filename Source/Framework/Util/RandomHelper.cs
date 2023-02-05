@@ -54,11 +54,23 @@ public class RandomHelper
     {
         return (uint)rand.Next(Convert.ToInt32(minValue), Convert.ToInt32(maxValue));
     }
+
     public static float FRand(float min, float max)
     {
         Cypher.Assert(max >= min);
         return (float)(rand.NextDouble() * (max - min) + min);
     }
+
+    /// <summary>
+    /// Returns true if rand.Next less then i
+    /// </summary>
+    /// <param name="i"></param>
+    /// <returns></returns>
+    public static bool randChance(double i)
+    {
+        return i > randChance();
+    }
+
 
     /// <summary>
     /// Returns true if rand.Next less then i

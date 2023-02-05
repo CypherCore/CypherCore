@@ -488,7 +488,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
     // 47369 - Send Mug Control Aura
     internal class spell_send_mug_control_aura : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -497,7 +497,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDummy));
+            AuraEffects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDummy));
         }
 
         private void PeriodicTick(AuraEffect aurEff)
@@ -509,11 +509,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
     // 50278 - Barreled Control Aura
     internal class spell_barreled_control_aura : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
+            AuraEffects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
         }
 
         private void PeriodicTick(AuraEffect aurEff)
@@ -526,7 +526,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
     // 47407 - Direbrew's Disarm (precast)
     internal class spell_direbrew_disarm : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -535,8 +535,8 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicDummy));
-            Effects.Add(new EffectApplyHandler(OnApply, 1, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            AuraEffects.Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicDummy));
+            AuraEffects.Add(new EffectApplyHandler(OnApply, 1, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
         }
 
         private void PeriodicTick(AuraEffect aurEff)

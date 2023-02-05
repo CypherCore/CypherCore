@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warrior
     [SpellScript(new uint[] { 152277, 228920 })]
     public class aura_warr_ravager : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects => new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
 
         private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
         {
@@ -37,8 +37,8 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(this.OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask));
-            Effects.Add(new EffectPeriodicHandler(this.OnTick, 2, AuraType.PeriodicDummy));
+            AuraEffects.Add(new EffectApplyHandler(this.OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask));
+            AuraEffects.Add(new EffectPeriodicHandler(this.OnTick, 2, AuraType.PeriodicDummy));
         }
     }
 }

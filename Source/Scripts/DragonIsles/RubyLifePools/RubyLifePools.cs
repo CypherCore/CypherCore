@@ -25,11 +25,11 @@ namespace Scripts.DragonIsles.RubyLifePools
     // 371652 - Executed
     internal class spell_ruby_life_pools_executed : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.ModStun, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            AuraEffects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.ModStun, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
         }
 
         private void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -44,11 +44,11 @@ namespace Scripts.DragonIsles.RubyLifePools
     // 384933 - Ice Shield
     internal class spell_ruby_life_pools_ice_shield : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+            AuraEffects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
         }
 
         private void HandleEffectPeriodic(AuraEffect aurEff)
@@ -61,11 +61,11 @@ namespace Scripts.DragonIsles.RubyLifePools
     // 372793 - Excavate
     internal class spell_ruby_life_pools_excavate : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+            AuraEffects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
         }
 
         private void HandleEffectPeriodic(AuraEffect aurEff)

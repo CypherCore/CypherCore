@@ -13,7 +13,7 @@ namespace Scripts.Spells.Warrior
     [Script]
     internal class spell_warr_sudden_death : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -22,7 +22,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply)); // correct?
+            AuraEffects.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply)); // correct?
         }
 
         private void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)

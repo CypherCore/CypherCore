@@ -13,11 +13,11 @@ namespace Scripts.Spells.Warrior
     [SpellScript(126661)] // 126661 - Warrior Charge Drop Fire Periodic
     internal class spell_warr_charge_drop_fire_periodic : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(DropFireVisual, 0, AuraType.PeriodicTriggerSpell));
+            AuraEffects.Add(new EffectPeriodicHandler(DropFireVisual, 0, AuraType.PeriodicTriggerSpell));
         }
 
         private void DropFireVisual(AuraEffect aurEff)

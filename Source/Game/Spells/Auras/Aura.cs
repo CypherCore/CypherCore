@@ -1958,7 +1958,7 @@ namespace Game.Spells
         private void RegisterSpellEffectHandler(AuraScript script)
         {
             if (script is IHasAuraEffects hse)
-                foreach (var effect in hse.Effects)
+                foreach (var effect in hse.AuraEffects)
                     if (effect is IAuraEffectHandler se)
                     {
                         uint mask = 0;

@@ -67,7 +67,7 @@ namespace Scripts.m_Events.Midsummer
     [Script] // 45724 - Braziers Hit!
     internal class spell_midsummer_braziers_hit : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -76,7 +76,7 @@ namespace Scripts.m_Events.Midsummer
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Reapply, AuraScriptHookType.EffectAfterApply));
+            AuraEffects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Reapply, AuraScriptHookType.EffectAfterApply));
         }
 
         private void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -146,7 +146,7 @@ namespace Scripts.m_Events.Midsummer
     [Script] // 29705, 29726, 29727 - Test Ribbon Pole Channel
     internal class spell_midsummer_test_ribbon_pole_channel : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -155,8 +155,8 @@ namespace Scripts.m_Events.Midsummer
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(HandleRemove, 1, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
-            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicTriggerSpell));
+            AuraEffects.Add(new EffectApplyHandler(HandleRemove, 1, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicTriggerSpell));
         }
 
         private void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -190,7 +190,7 @@ namespace Scripts.m_Events.Midsummer
     [Script] // 45406 - Holiday - Midsummer, Ribbon Pole Periodic Visual
     internal class spell_midsummer_ribbon_pole_periodic_visual : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -199,7 +199,7 @@ namespace Scripts.m_Events.Midsummer
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDummy));
+            AuraEffects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDummy));
         }
 
         private void PeriodicTick(AuraEffect aurEff)

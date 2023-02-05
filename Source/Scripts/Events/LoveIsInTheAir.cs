@@ -55,7 +55,7 @@ namespace Scripts.m_Events.LoveIsInTheAir
     [Script] // 45102 Romantic Picnic
     internal class spell_love_is_in_the_air_romantic_picnic : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -64,8 +64,8 @@ namespace Scripts.m_Events.LoveIsInTheAir
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
+            AuraEffects.Add(new EffectApplyHandler(OnApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            AuraEffects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
         }
 
         private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -170,7 +170,7 @@ namespace Scripts.m_Events.LoveIsInTheAir
     [Script] // 71507 - Heavily Perfumed
     internal class spell_love_is_in_the_air_heavily_perfumed : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -179,7 +179,7 @@ namespace Scripts.m_Events.LoveIsInTheAir
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -191,7 +191,7 @@ namespace Scripts.m_Events.LoveIsInTheAir
     [Script] // 71508 - Recently Analyzed
     internal class spell_love_is_in_the_air_recently_analyzed : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -200,7 +200,7 @@ namespace Scripts.m_Events.LoveIsInTheAir
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -212,11 +212,11 @@ namespace Scripts.m_Events.LoveIsInTheAir
     [Script] // 69438 - Sample Satisfaction
     internal class spell_love_is_in_the_air_sample_satisfaction : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
+            AuraEffects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
         }
 
         private void OnPeriodic(AuraEffect aurEff)
@@ -229,7 +229,7 @@ namespace Scripts.m_Events.LoveIsInTheAir
     [Script] // 71450 - Crown Parcel Service Uniform
     internal class spell_love_is_in_the_air_service_uniform : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -238,8 +238,8 @@ namespace Scripts.m_Events.LoveIsInTheAir
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Transform, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Transform, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Transform, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            AuraEffects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Transform, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)

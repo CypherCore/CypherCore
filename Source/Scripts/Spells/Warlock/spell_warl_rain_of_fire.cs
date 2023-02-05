@@ -13,11 +13,11 @@ namespace Scripts.Spells.Warlock
     [SpellScript(5740)] // 5740 - Rain of Fire Updated 7.1.5
     internal class spell_warl_rain_of_fire : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(HandleDummyTick, 2, AuraType.PeriodicDummy));
+            AuraEffects.Add(new EffectPeriodicHandler(HandleDummyTick, 2, AuraType.PeriodicDummy));
         }
 
         private void HandleDummyTick(AuraEffect aurEff)

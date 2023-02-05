@@ -13,13 +13,13 @@ namespace Scripts.Spells.Warlock
     [SpellScript(755)] // 755 - Health Funnel
     internal class spell_warl_health_funnel : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public override void Register()
         {
-            Effects.Add(new EffectApplyHandler(ApplyEffect, 0, AuraType.ObsModHealth, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
-            Effects.Add(new EffectApplyHandler(RemoveEffect, 0, AuraType.ObsModHealth, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
-            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.ObsModHealth));
+            AuraEffects.Add(new EffectApplyHandler(ApplyEffect, 0, AuraType.ObsModHealth, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            AuraEffects.Add(new EffectApplyHandler(RemoveEffect, 0, AuraType.ObsModHealth, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            AuraEffects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.ObsModHealth));
         }
 
         private void ApplyEffect(AuraEffect aurEff, AuraEffectHandleModes mode)

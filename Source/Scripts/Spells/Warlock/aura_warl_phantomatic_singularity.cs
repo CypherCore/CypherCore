@@ -14,7 +14,7 @@ namespace Scripts.Spells.Warlock
     [SpellScript(205179)]
     public class aura_warl_phantomatic_singularity : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new();
+        public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
         public void OnTick(AuraEffect UnnamedParameter)
         {
@@ -26,7 +26,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            Effects.Add(new EffectPeriodicHandler(OnTick, 0, AuraType.PeriodicLeech));
+            AuraEffects.Add(new EffectPeriodicHandler(OnTick, 0, AuraType.PeriodicLeech));
         }
     }
 }
