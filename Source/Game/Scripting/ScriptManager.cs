@@ -538,6 +538,7 @@ namespace Game.Scripting
 
             _scriptStorage.Clear();
             _scriptByType.Clear();
+            _scriptClassByType.Clear();
         }
 
         #endregion
