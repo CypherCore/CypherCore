@@ -132,7 +132,7 @@ namespace Game.Networking
         bool CheckAccessLevelAndPassword(string email, string password)
         {
             //"SELECT a.id, a.username FROM account a LEFT JOIN battlenet_accounts ba ON a.battlenet_account = ba.id WHERE ba.email = ?"
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_GAME_ACCOUNT_LIST);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_GAME_ACCOUNT_LIST);
             stmt.AddValue(0, email);
             SQLResult result = DB.Login.Query(stmt);
             if (result.IsEmpty())
@@ -144,7 +144,7 @@ namespace Game.Networking
             uint accountId = result.Read<uint>(0);
             string username = result.Read<string>(1);
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_ACCESS_BY_ID);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_ACCESS_BY_ID);
             stmt.AddValue(0, accountId);
             result = DB.Login.Query(stmt);
             if (result.IsEmpty())
@@ -165,7 +165,7 @@ namespace Game.Networking
                 return false;
             }
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_CHECK_PASSWORD);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_CHECK_PASSWORD);
             stmt.AddValue(0, accountId);
             result = DB.Login.Query(stmt);
             if (!result.IsEmpty())

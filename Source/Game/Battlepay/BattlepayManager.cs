@@ -30,7 +30,7 @@ namespace Game.Battlepay
 
         public uint GetBattlePayCredits()
         {
-            var stmt = DB.Login.GetPreparedStatement(LoginStatements.LOGIN_SEL_BATTLE_PAY_ACCOUNT_CREDITS);
+            var stmt = LoginDatabase.GetPreparedStatement(LoginStatements.LOGIN_SEL_BATTLE_PAY_ACCOUNT_CREDITS);
 
             stmt.AddValue(0, _session.GetBattlenetAccountId());
 
@@ -62,7 +62,7 @@ namespace Game.Battlepay
         {
             //TC_LOG_INFO("server.BattlePay", "UpdateBattlePayCredits: GetBattlePayCredits(): {} - price: {}", GetBattlePayCredits(), price);
             ulong calcCredit = (GetBattlePayCredits() - price) / 10000;
-            var stmt = DB.Login.GetPreparedStatement(LoginStatements.LOGIN_UPD_BATTLE_PAY_ACCOUNT_CREDITS);
+            var stmt = LoginDatabase.GetPreparedStatement(LoginStatements.LOGIN_UPD_BATTLE_PAY_ACCOUNT_CREDITS);
             stmt.AddValue(0, calcCredit);
             stmt.AddValue(1, _session.GetBattlenetAccountId());
             DB.Login.Execute(stmt);
@@ -73,7 +73,7 @@ namespace Game.Battlepay
 
         public bool ModifyBattlePayCredits(uint credits)
         {
-            var stmt = DB.Login.GetPreparedStatement(LoginStatements.LOGIN_UPD_BATTLE_PAY_ACCOUNT_CREDITS);
+            var stmt = LoginDatabase.GetPreparedStatement(LoginStatements.LOGIN_UPD_BATTLE_PAY_ACCOUNT_CREDITS);
             stmt.AddValue(0, credits);
             stmt.AddValue(1, _session.GetBattlenetAccountId());
             DB.Login.Execute(stmt);
@@ -177,7 +177,7 @@ namespace Game.Battlepay
         {
             var productInfo = BattlePayDataStoreMgr.Instance.GetProductInfoForProduct(purchase.ProductID);
             var displayInfo = BattlePayDataStoreMgr.Instance.GetDisplayInfo(productInfo.Entry);
-            var stmt = DB.Login.GetPreparedStatement(LoginStatements.LOGIN_INS_PURCHASE);
+            var stmt = LoginDatabase.GetPreparedStatement(LoginStatements.LOGIN_INS_PURCHASE);
             stmt.AddValue(0, _session.GetAccountId());
             stmt.AddValue(1, Global.WorldMgr.GetVirtualRealmAddress());
             stmt.AddValue(2, _session.GetPlayer() ? _session.GetPlayer().GetGUID().GetCounter() : 0);
@@ -1287,7 +1287,7 @@ namespace Game.Battlepay
         {
             //    auto sessionId = _session->GetAccountId();
             //
-            //    LoginDatabasePreparedStatement* stmt = DB.Login.GetPreparedStatement(LOGIN_SEL_BATTLE_PAY_ACCOUNT_CREDITS);
+            //    LoginDatabasePreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_BATTLE_PAY_ACCOUNT_CREDITS);
             //    stmt->setUInt32(0, _session->GetAccountId());
             //    PreparedQueryResult result = DB.Login.Query(stmt);
             //

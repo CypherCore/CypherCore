@@ -55,7 +55,7 @@ namespace BNetServer.Networking
             if (verifyWebCredentialsRequest.WebCredentials.IsEmpty)
                 return BattlenetRpcErrorCode.Denied;
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SelBnetAccountInfo);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SelBnetAccountInfo);
             stmt.AddValue(0, verifyWebCredentialsRequest.WebCredentials.ToStringUtf8());
 
             SQLResult result = DB.Login.Query(stmt);
@@ -67,7 +67,7 @@ namespace BNetServer.Networking
             if (accountInfo.LoginTicketExpiry < Time.UnixTime)
                 return BattlenetRpcErrorCode.TimedOut;
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_CHARACTER_COUNTS_BY_BNET_ID);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_CHARACTER_COUNTS_BY_BNET_ID);
             stmt.AddValue(0, accountInfo.Id);
 
             SQLResult characterCountsResult = DB.Login.Query(stmt);
@@ -81,7 +81,7 @@ namespace BNetServer.Networking
                 } while (characterCountsResult.NextRow());
             }
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.SelBnetLastPlayerCharacters);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SelBnetLastPlayerCharacters);
             stmt.AddValue(0, accountInfo.Id);
 
             SQLResult lastPlayerCharactersResult = DB.Login.Query(stmt);
@@ -177,7 +177,7 @@ namespace BNetServer.Networking
                 return BattlenetRpcErrorCode.BadProgram;
             }
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_EXISTING_AUTHENTICATION_BY_ID);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_EXISTING_AUTHENTICATION_BY_ID);
             stmt.AddValue(0, accountInfo.Id);
 
             queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(result =>

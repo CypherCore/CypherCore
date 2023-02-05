@@ -36,7 +36,7 @@ namespace Game
 
             (byte[] salt, byte[] verifier) = SRP6.MakeRegistrationData(username, password);
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_ACCOUNT);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_ACCOUNT);
             stmt.AddValue(0, username);
             stmt.AddValue(1, salt);
             stmt.AddValue(2, verifier);
@@ -54,7 +54,7 @@ namespace Game
             }
             DB.Login.DirectExecute(stmt); // Enforce saving, otherwise AddGroup can fail
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_REALM_CHARACTERS_INIT);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_REALM_CHARACTERS_INIT);
             DB.Login.Execute(stmt);
 
             return AccountOpResult.Ok;
@@ -63,14 +63,14 @@ namespace Game
         public AccountOpResult DeleteAccount(uint accountId)
         {
             // Check if accounts exists
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_ID);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_ID);
             stmt.AddValue(0, accountId);
             SQLResult result = DB.Login.Query(stmt);
             if (result.IsEmpty())
                 return AccountOpResult.NameNotExist;
 
             // Obtain accounts characters
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARS_BY_ACCOUNT_ID);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARS_BY_ACCOUNT_ID);
             stmt.AddValue(0, accountId);
             result = DB.Characters.Query(stmt);
             if (!result.IsEmpty())
@@ -93,37 +93,37 @@ namespace Game
             }
 
             // table realm specific but common for all characters of account for realm
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_TUTORIALS);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_TUTORIALS);
             stmt.AddValue(0, accountId);
             DB.Characters.Execute(stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ACCOUNT_DATA);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ACCOUNT_DATA);
             stmt.AddValue(0, accountId);
             DB.Characters.Execute(stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_BAN);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHARACTER_BAN);
             stmt.AddValue(0, accountId);
             DB.Characters.Execute(stmt);
 
             SQLTransaction trans = new();
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_ACCOUNT);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_ACCOUNT);
             stmt.AddValue(0, accountId);
             trans.Append(stmt);
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_ACCOUNT_ACCESS);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_ACCOUNT_ACCESS);
             stmt.AddValue(0, accountId);
             trans.Append(stmt);
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_REALM_CHARACTERS);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_REALM_CHARACTERS);
             stmt.AddValue(0, accountId);
             trans.Append(stmt);
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_ACCOUNT_BANNED);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_ACCOUNT_BANNED);
             stmt.AddValue(0, accountId);
             trans.Append(stmt);
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_ACCOUNT_MUTED);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_ACCOUNT_MUTED);
             stmt.AddValue(0, accountId);
             trans.Append(stmt);
 
@@ -135,7 +135,7 @@ namespace Game
         public AccountOpResult ChangeUsername(uint accountId, string newUsername, string newPassword)
         {
             // Check if accounts exists
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_ID);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_ID);
             stmt.AddValue(0, accountId);
             SQLResult result = DB.Login.Query(stmt);
             if (result.IsEmpty())
@@ -147,13 +147,13 @@ namespace Game
             if (newPassword.Length > MaxAccountLength)
                 return AccountOpResult.PassTooLong;
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_USERNAME);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_USERNAME);
             stmt.AddValue(0, newUsername);
             stmt.AddValue(1, accountId);
             DB.Login.Execute(stmt);
 
             (byte[] salt, byte[] verifier) = SRP6.MakeRegistrationData(newUsername, newPassword);
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LOGON);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_LOGON);
             stmt.AddValue(0, salt);
             stmt.AddValue(1, verifier);
             stmt.AddValue(2, accountId);
@@ -174,7 +174,7 @@ namespace Game
 
             (byte[] salt, byte[] verifier) = SRP6.MakeRegistrationData(username, newPassword);
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LOGON);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_LOGON);
             stmt.AddValue(0, salt);
             stmt.AddValue(1, verifier);
             stmt.AddValue(2, accountId);
@@ -191,7 +191,7 @@ namespace Game
             if (newEmail.Length > MaxEmailLength)
                 return AccountOpResult.EmailTooLong;
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_EMAIL);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_EMAIL);
             stmt.AddValue(0, newEmail);
             stmt.AddValue(1, accountId);
             DB.Login.Execute(stmt);
@@ -207,7 +207,7 @@ namespace Game
             if (newEmail.Length > MaxEmailLength)
                 return AccountOpResult.EmailTooLong;
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_REG_EMAIL);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_REG_EMAIL);
             stmt.AddValue(0, newEmail);
             stmt.AddValue(1, accountId);
             DB.Login.Execute(stmt);
@@ -217,7 +217,7 @@ namespace Game
 
         public uint GetId(string username)
         {
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.GET_ACCOUNT_ID_BY_USERNAME);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.GET_ACCOUNT_ID_BY_USERNAME);
             stmt.AddValue(0, username);
             SQLResult result = DB.Login.Query(stmt);
             return !result.IsEmpty() ? result.Read<uint>(0) : 0;
@@ -225,7 +225,7 @@ namespace Game
 
         public AccountTypes GetSecurity(uint accountId, int realmId)
         {
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.GET_GMLEVEL_BY_REALMID);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.GET_GMLEVEL_BY_REALMID);
             stmt.AddValue(0, accountId);
             stmt.AddValue(1, realmId);
             SQLResult result = DB.Login.Query(stmt);
@@ -234,7 +234,7 @@ namespace Game
 
         public QueryCallback GetSecurityAsync(uint accountId, int realmId, Action<uint> callback)
         {
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.GET_GMLEVEL_BY_REALMID);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.GET_GMLEVEL_BY_REALMID);
             stmt.AddValue(0, accountId);
             stmt.AddValue(1, realmId);
             return DB.Login.AsyncQuery(stmt).WithCallback(result =>
@@ -246,7 +246,7 @@ namespace Game
         public bool GetName(uint accountId, out string name)
         {
             name = "";
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.GET_USERNAME_BY_ID);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.GET_USERNAME_BY_ID);
             stmt.AddValue(0, accountId);
             SQLResult result = DB.Login.Query(stmt);
             if (!result.IsEmpty())
@@ -261,7 +261,7 @@ namespace Game
         public bool GetEmail(uint accountId, out string email)
         {
             email = "";
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.GET_EMAIL_BY_ID);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.GET_EMAIL_BY_ID);
             stmt.AddValue(0, accountId);
             SQLResult result = DB.Login.Query(stmt);
             if (!result.IsEmpty())
@@ -280,7 +280,7 @@ namespace Game
             if (!GetName(accountId, out username))
                 return false;
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_CHECK_PASSWORD);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_CHECK_PASSWORD);
             stmt.AddValue(0, accountId);
             SQLResult result = DB.Login.Query(stmt);
             if (!result.IsEmpty())
@@ -311,7 +311,7 @@ namespace Game
         public uint GetCharactersCount(uint accountId)
         {
             // check character count
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_SUM_CHARS);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_SUM_CHARS);
             stmt.AddValue(0, accountId);
             SQLResult result = DB.Characters.Query(stmt);
             return result.IsEmpty() ? 0 : (uint)result.Read<ulong>(0);
@@ -319,7 +319,7 @@ namespace Game
 
         public bool IsBannedAccount(string name)
         {
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BANNED_BY_USERNAME);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BANNED_BY_USERNAME);
             stmt.AddValue(0, name);
             SQLResult result = DB.Login.Query(stmt);
             return !result.IsEmpty();
@@ -431,13 +431,13 @@ namespace Game
             // Delete old security level from DB
             if (realmId == -1)
             {
-                stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_ACCOUNT_ACCESS);
+                stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_ACCOUNT_ACCESS);
                 stmt.AddValue(0, accountId);
                 trans.Append(stmt);
             }
             else
             {
-                stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_ACCOUNT_ACCESS_BY_REALM);
+                stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_ACCOUNT_ACCESS_BY_REALM);
                 stmt.AddValue(0, accountId);
                 stmt.AddValue(1, realmId);
                 trans.Append(stmt);
@@ -446,7 +446,7 @@ namespace Game
             // Add new security level
             if (securityLevel != 0)
             {
-                stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_ACCOUNT_ACCESS);
+                stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_ACCOUNT_ACCESS);
                 stmt.AddValue(0, accountId);
                 stmt.AddValue(1, securityLevel);
                 stmt.AddValue(2, realmId);

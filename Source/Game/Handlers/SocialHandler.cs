@@ -169,7 +169,7 @@ namespace Game
                 return;
             }
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_WHOIS);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_WHOIS);
             stmt.AddValue(0, player.GetSession().GetAccountId());
 
             SQLResult result = DB.Login.Query(stmt);

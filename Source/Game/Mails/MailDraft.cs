@@ -105,7 +105,7 @@ namespace Game.Mails
                 {
                     item.SaveToDB(trans);                      // item not in inventory and can be save standalone
                     // owner in data will set at mail receive and item extracting
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ITEM_OWNER);
+                    PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ITEM_OWNER);
                     stmt.AddValue(0, receiver_guid);
                     stmt.AddValue(1, item.GetGUID().GetCounter());
                     trans.Append(stmt);
@@ -152,7 +152,7 @@ namespace Game.Mails
 
             // Add to DB
             byte index = 0;
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_MAIL);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_MAIL);
             stmt.AddValue(index, mailId);
             stmt.AddValue(++index, (byte)sender.GetMailMessageType());
             stmt.AddValue(++index, (sbyte)sender.GetStationery());
@@ -171,7 +171,7 @@ namespace Game.Mails
 
             foreach (var item in m_items.Values)
             {
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_MAIL_ITEM);
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_MAIL_ITEM);
                 stmt.AddValue(0, mailId);
                 stmt.AddValue(1, item.GetGUID().GetCounter());
                 stmt.AddValue(2, receiver.GetPlayerGUIDLow());

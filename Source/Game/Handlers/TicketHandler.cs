@@ -84,7 +84,7 @@ namespace Game
             if (!Global.SupportMgr.GetBugSystemStatus())
                 return;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_BUG_REPORT);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_BUG_REPORT);
             stmt.AddValue(0, bugReport.Text);
             stmt.AddValue(1, bugReport.DiagInfo);
             DB.Characters.Execute(stmt);

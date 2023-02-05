@@ -166,7 +166,7 @@ namespace Game.Entities
                 friendInfo.Flags |= flag;
                 friendInfo.WowAccountGuid = accountGuid;
 
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_SOCIAL_FLAGS);
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHARACTER_SOCIAL_FLAGS);
                 stmt.AddValue(0, (byte)friendInfo.Flags);
                 stmt.AddValue(1, GetPlayerGUID().GetCounter());
                 stmt.AddValue(2, friendGuid.GetCounter());
@@ -179,7 +179,7 @@ namespace Game.Entities
                 fi.WowAccountGuid = accountGuid;
                 PlayerSocialMap[friendGuid] = fi;
 
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER_SOCIAL);
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHARACTER_SOCIAL);
                 stmt.AddValue(0, GetPlayerGUID().GetCounter());
                 stmt.AddValue(1, friendGuid.GetCounter());
                 stmt.AddValue(2, (byte)flag);
@@ -202,7 +202,7 @@ namespace Game.Entities
 
             if (friendInfo.Flags == 0)
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_SOCIAL);
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHARACTER_SOCIAL);
                 stmt.AddValue(0, GetPlayerGUID().GetCounter());
                 stmt.AddValue(1, friendGuid.GetCounter());
                 DB.Characters.Execute(stmt);
@@ -220,7 +220,7 @@ namespace Game.Entities
             }
             else
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_SOCIAL_FLAGS);
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHARACTER_SOCIAL_FLAGS);
                 stmt.AddValue(0, (byte)friendInfo.Flags);
                 stmt.AddValue(1, GetPlayerGUID().GetCounter());
                 stmt.AddValue(2, friendGuid.GetCounter());
@@ -233,7 +233,7 @@ namespace Game.Entities
             if (!PlayerSocialMap.ContainsKey(friendGuid))                     // not exist
                 return;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_SOCIAL_NOTE);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHARACTER_SOCIAL_NOTE);
             stmt.AddValue(0, note);
             stmt.AddValue(1, GetPlayerGUID().GetCounter());
             stmt.AddValue(2, friendGuid.GetCounter());

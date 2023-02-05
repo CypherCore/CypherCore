@@ -215,7 +215,7 @@ namespace Game
                 SendPacket(logoutComplete);
 
                 //! Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ACCOUNT_ONLINE);
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ACCOUNT_ONLINE);
                 stmt.AddValue(0, GetAccountId());
                 DB.Characters.Execute(stmt);
             }
@@ -465,7 +465,7 @@ namespace Game
                 return;
 
             bool hasTutorialsInDB = tutorialsChanged.HasAnyFlag(TutorialsFlag.LoadedFromDB);
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(hasTutorialsInDB ? CharStatements.UPD_TUTORIALS : CharStatements.INS_TUTORIALS);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(hasTutorialsInDB ? CharStatements.UPD_TUTORIALS : CharStatements.INS_TUTORIALS);
             for (var i = 0; i < SharedConst.MaxAccountTutorialValues; ++i)
                 stmt.AddValue(i, tutorials[i]);
             stmt.AddValue(SharedConst.MaxAccountTutorialValues, GetAccountId());
@@ -544,7 +544,7 @@ namespace Game
         {
             if (Convert.ToBoolean((1 << (int)type) & (int)AccountDataTypes.GlobalCacheMask))
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_ACCOUNT_DATA);
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_ACCOUNT_DATA);
                 stmt.AddValue(0, GetAccountId());
                 stmt.AddValue(1, (byte)type);
                 stmt.AddValue(2, time);
@@ -557,7 +557,7 @@ namespace Game
                 if (m_GUIDLow == 0)
                     return;
 
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_PLAYER_ACCOUNT_DATA);
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_PLAYER_ACCOUNT_DATA);
                 stmt.AddValue(0, m_GUIDLow);
                 stmt.AddValue(1, (byte)type);
                 stmt.AddValue(2, time);
@@ -1126,11 +1126,11 @@ namespace Game
     {
         public void Initialize(uint accountId, uint battlenetAccountId)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ACCOUNT_DATA);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ACCOUNT_DATA);
             stmt.AddValue(0, accountId);
             SetQuery(AccountInfoQueryLoad.GlobalAccountDataIndexPerRealm, stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_TUTORIALS);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_TUTORIALS);
             stmt.AddValue(0, accountId);
             SetQuery(AccountInfoQueryLoad.TutorialsIndexPerRealm, stmt);
         }
@@ -1140,40 +1140,40 @@ namespace Game
     {
         public void Initialize(uint accountId, uint battlenetAccountId)
         {
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_TOYS);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_TOYS);
             stmt.AddValue(0, battlenetAccountId);
             SetQuery(AccountInfoQueryLoad.GlobalAccountToys, stmt);
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BATTLE_PETS);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BATTLE_PETS);
             stmt.AddValue(0, battlenetAccountId);
             stmt.AddValue(1, Global.WorldMgr.GetRealmId().Index);
             SetQuery(AccountInfoQueryLoad.BattlePets, stmt);
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BATTLE_PET_SLOTS);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BATTLE_PET_SLOTS);
             stmt.AddValue(0, battlenetAccountId);
             SetQuery(AccountInfoQueryLoad.BattlePetSlot, stmt);
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_HEIRLOOMS);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_HEIRLOOMS);
             stmt.AddValue(0, battlenetAccountId);
             SetQuery(AccountInfoQueryLoad.GlobalAccountHeirlooms, stmt);
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_MOUNTS);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_MOUNTS);
             stmt.AddValue(0, battlenetAccountId);
             SetQuery(AccountInfoQueryLoad.Mounts, stmt);
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.SelBnetCharacterCountsByAccountId);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SelBnetCharacterCountsByAccountId);
             stmt.AddValue(0, accountId);
             SetQuery(AccountInfoQueryLoad.GlobalRealmCharacterCounts, stmt);
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_ITEM_APPEARANCES);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_ITEM_APPEARANCES);
             stmt.AddValue(0, battlenetAccountId);
             SetQuery(AccountInfoQueryLoad.ItemAppearances, stmt);
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_ITEM_FAVORITE_APPEARANCES);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_ITEM_FAVORITE_APPEARANCES);
             stmt.AddValue(0, battlenetAccountId);
             SetQuery(AccountInfoQueryLoad.ItemFavoriteAppearances, stmt);
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_TRANSMOG_ILLUSIONS);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_TRANSMOG_ILLUSIONS);
             stmt.AddValue(0, battlenetAccountId);
             SetQuery(AccountInfoQueryLoad.TransmogIllusions, stmt);
         }

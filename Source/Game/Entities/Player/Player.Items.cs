@@ -1283,7 +1283,7 @@ namespace Game.Entities
                     foreach (var guid in allowedLooters)
                         ss.AppendFormat("{0} ", guid);
 
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEM_BOP_TRADE);
+                    PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ITEM_BOP_TRADE);
                     stmt.AddValue(0, item.GetGUID().GetCounter());
                     stmt.AddValue(1, ss.ToString());
                     DB.Characters.Execute(stmt);
@@ -5779,7 +5779,7 @@ namespace Game.Entities
 
                 if (pItem.IsWrapped())
                 {
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GIFT);
+                    PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GIFT);
                     stmt.AddValue(0, pItem.GetGUID().GetCounter());
                     DB.Characters.Execute(stmt);
                 }

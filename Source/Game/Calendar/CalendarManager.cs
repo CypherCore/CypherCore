@@ -153,7 +153,7 @@ namespace Game
             for (int i = 0; i < eventInvites.Count; ++i)
             {
                 CalendarInvite invite = eventInvites[i];
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CALENDAR_INVITE);
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CALENDAR_INVITE);
                 stmt.AddValue(0, invite.InviteId);
                 trans.Append(stmt);
 
@@ -165,7 +165,7 @@ namespace Game
 
             _invites.Remove(calendarEvent.EventId);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CALENDAR_EVENT);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CALENDAR_EVENT);
             stmt.AddValue(0, calendarEvent.EventId);
             trans.Append(stmt);
             DB.Characters.CommitTransaction(trans);
@@ -194,7 +194,7 @@ namespace Game
                 return;
 
             SQLTransaction trans = new();
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CALENDAR_INVITE);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CALENDAR_INVITE);
             stmt.AddValue(0, calendarInvite.InviteId);
             trans.Append(stmt);
             DB.Characters.CommitTransaction(trans);
@@ -215,7 +215,7 @@ namespace Game
         public void UpdateEvent(CalendarEvent calendarEvent)
         {
             SQLTransaction trans = new();
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_CALENDAR_EVENT);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_CALENDAR_EVENT);
             stmt.AddValue(0, calendarEvent.EventId);
             stmt.AddValue(1, calendarEvent.OwnerGuid.GetCounter());
             stmt.AddValue(2, calendarEvent.Title);
@@ -231,7 +231,7 @@ namespace Game
 
         public void UpdateInvite(CalendarInvite invite, SQLTransaction trans = null)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_CALENDAR_INVITE);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_CALENDAR_INVITE);
             stmt.AddValue(0, invite.InviteId);
             stmt.AddValue(1, invite.EventId);
             stmt.AddValue(2, invite.InviteeGuid.GetCounter());

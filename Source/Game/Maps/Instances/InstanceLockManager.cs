@@ -270,13 +270,13 @@ namespace Game.Maps
                     $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Expired instance lock for {playerGuid} in instance {updateEvent.InstanceId} is now active");
             }
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_INSTANCE_LOCK);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHARACTER_INSTANCE_LOCK);
             stmt.AddValue(0, playerGuid.GetCounter());
             stmt.AddValue(1, entries.MapDifficulty.MapID);
             stmt.AddValue(2, entries.MapDifficulty.LockID);
             trans.Append(stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER_INSTANCE_LOCK);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHARACTER_INSTANCE_LOCK);
             stmt.AddValue(0, playerGuid.GetCounter());
             stmt.AddValue(1, entries.MapDifficulty.MapID);
             stmt.AddValue(2, entries.MapDifficulty.LockID);
@@ -308,11 +308,11 @@ namespace Game.Maps
             if (updateEvent.EntranceWorldSafeLocId.HasValue)
                 sharedData.EntranceWorldSafeLocId = updateEvent.EntranceWorldSafeLocId.Value;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INSTANCE);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_INSTANCE);
             stmt.AddValue(0, sharedData.InstanceId);
             trans.Append(stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_INSTANCE);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_INSTANCE);
             stmt.AddValue(0, sharedData.InstanceId);
             stmt.AddValue(1, sharedData.Data);
             stmt.AddValue(2, sharedData.CompletedEncountersMask);
@@ -326,7 +326,7 @@ namespace Game.Maps
                 return;
 
             _instanceLockDataById.Remove(instanceId);
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INSTANCE);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_INSTANCE);
             stmt.AddValue(0, instanceId);
             DB.Characters.Execute(stmt);
             Log.outDebug(LogFilter.Instance, $"Deleting instance {instanceId} as it is no longer referenced by any player");
@@ -339,7 +339,7 @@ namespace Game.Maps
             {
                 DateTime oldExpiryTime = instanceLock.GetEffectiveExpiryTime();
                 instanceLock.SetExtended(extended);
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_INSTANCE_LOCK_EXTENSION);
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHARACTER_INSTANCE_LOCK_EXTENSION);
                 stmt.AddValue(0, extended ? 1 : 0);
                 stmt.AddValue(1, playerGuid.GetCounter());
                 stmt.AddValue(2, entries.MapDifficulty.MapID);
@@ -395,7 +395,7 @@ namespace Game.Maps
                     instanceLock.SetExpiryTime(newExpiryTime);
                     instanceLock.SetExtended(false);
 
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_INSTANCE_LOCK_FORCE_EXPIRE);
+                    PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHARACTER_INSTANCE_LOCK_FORCE_EXPIRE);
                     stmt.AddValue(0, (ulong)Time.DateTimeToUnixTime(newExpiryTime));
                     stmt.AddValue(1, playerGuid.GetCounter());
                     stmt.AddValue(2, entries.MapDifficulty.MapID);

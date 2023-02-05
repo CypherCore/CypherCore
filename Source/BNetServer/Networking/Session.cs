@@ -45,9 +45,9 @@ namespace BNetServer.Networking
             Log.outInfo(LogFilter.Network, $"{GetClientInfo()} Connection Accepted.");
 
             // Verify that this IP is not in the ip_banned table
-            DB.Login.Execute(DB.Login.GetPreparedStatement(LoginStatements.DelExpiredIpBans));
+            DB.Login.Execute(LoginDatabase.GetPreparedStatement(LoginStatements.DelExpiredIpBans));
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SelIpInfo);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SelIpInfo);
             stmt.AddValue(0, ipAddress);
             stmt.AddValue(1, BitConverter.ToUInt32(GetRemoteIpEndPoint().Address.GetAddressBytes(), 0));
 

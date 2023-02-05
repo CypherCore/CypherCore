@@ -711,7 +711,7 @@ namespace Game
 
             SQLTransaction trans = new();
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_GIFT);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHAR_GIFT);
             stmt.AddValue(0, item.GetOwnerGUID().GetCounter());
             stmt.AddValue(1, item.GetGUID().GetCounter());
             stmt.AddValue(2, item.GetEntry());

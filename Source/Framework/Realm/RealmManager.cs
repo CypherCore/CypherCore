@@ -76,7 +76,7 @@ public class RealmManager : Singleton<RealmManager>
 
     void UpdateRealms(object source, ElapsedEventArgs e)
     {
-        PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_REALMLIST);
+        PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_REALMLIST);
         SQLResult result = DB.Login.Query(stmt);
         Dictionary<RealmId, string> existingRealms = new();
         foreach (var p in _realms)
@@ -280,7 +280,7 @@ public class RealmManager : Singleton<RealmManager>
             byte[] serverSecret = new byte[0].GenerateRandomKey(32);
             byte[] keyData = clientSecret.ToArray().Combine(serverSecret);
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_GAME_ACCOUNT_LOGIN_INFO);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_BNET_GAME_ACCOUNT_LOGIN_INFO);
             stmt.AddValue(0, keyData);
             stmt.AddValue(1, clientAddress.ToString());
             stmt.AddValue(2, (byte)locale);

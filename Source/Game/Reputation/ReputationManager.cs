@@ -759,12 +759,12 @@ namespace Game
             {
                 if (factionState.needSave)
                 {
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_REPUTATION_BY_FACTION);
+                    PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_REPUTATION_BY_FACTION);
                     stmt.AddValue(0, _player.GetGUID().GetCounter());
                     stmt.AddValue(1, factionState.Id);
                     trans.Append(stmt);
 
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_REPUTATION_BY_FACTION);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHAR_REPUTATION_BY_FACTION);
                     stmt.AddValue(0, _player.GetGUID().GetCounter());
                     stmt.AddValue(1, factionState.Id);
                     stmt.AddValue(2, factionState.Standing);

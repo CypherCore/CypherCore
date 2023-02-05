@@ -182,7 +182,7 @@ namespace Game.Chat
                 {
                     if (channel != null)
                         channel.SetOwnership(true);
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHANNEL_OWNERSHIP);
+                    PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHANNEL_OWNERSHIP);
                     stmt.AddValue(0, 1);
                     stmt.AddValue(1, channelName);
                     DB.Characters.Execute(stmt);
@@ -192,7 +192,7 @@ namespace Game.Chat
                 {
                     if (channel != null)
                         channel.SetOwnership(false);
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHANNEL_OWNERSHIP);
+                    PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHANNEL_OWNERSHIP);
                     stmt.AddValue(0, 0);
                     stmt.AddValue(1, channelName);
                     DB.Characters.Execute(stmt);

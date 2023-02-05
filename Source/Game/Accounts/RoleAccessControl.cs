@@ -116,7 +116,7 @@ namespace Game.Accounts
 
         void SavePermission(uint permission, bool granted, int realmId)
         {
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_RBAC_ACCOUNT_PERMISSION);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_RBAC_ACCOUNT_PERMISSION);
             stmt.AddValue(0, GetId());
             stmt.AddValue(1, permission);
             stmt.AddValue(2, granted);
@@ -142,7 +142,7 @@ namespace Game.Accounts
             {
                 Log.outDebug(LogFilter.Rbac, "RBACData.RevokePermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Ok and DB updated",
                                GetId(), GetName(), permissionId, realmId);
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_RBAC_ACCOUNT_PERMISSION);
+                PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_RBAC_ACCOUNT_PERMISSION);
                 stmt.AddValue(0, GetId());
                 stmt.AddValue(1, permissionId);
                 stmt.AddValue(2, realmId);
@@ -163,7 +163,7 @@ namespace Game.Accounts
 
             Log.outDebug(LogFilter.Rbac, "RBACData.LoadFromDB [Id: {0} Name: {1}]: Loading permissions", GetId(), GetName());
             // Load account permissions (granted and denied) that affect current realm
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_RBAC_ACCOUNT_PERMISSIONS);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_RBAC_ACCOUNT_PERMISSIONS);
             stmt.AddValue(0, GetId());
             stmt.AddValue(1, GetRealmId());
 
@@ -176,7 +176,7 @@ namespace Game.Accounts
 
             Log.outDebug(LogFilter.Rbac, "RBACData.LoadFromDB [Id: {0} Name: {1}]: Loading permissions", GetId(), GetName());
             // Load account permissions (granted and denied) that affect current realm
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_RBAC_ACCOUNT_PERMISSIONS);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_RBAC_ACCOUNT_PERMISSIONS);
             stmt.AddValue(0, GetId());
             stmt.AddValue(1, GetRealmId());
 

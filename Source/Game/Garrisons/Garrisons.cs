@@ -128,7 +128,7 @@ namespace Game.Garrisons
         {
             DeleteFromDB(_owner.GetGUID().GetCounter(), trans);
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER_GARRISON);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHARACTER_GARRISON);
             stmt.AddValue(0, _owner.GetGUID().GetCounter());
             stmt.AddValue(1, _siteLevel.Id);
             stmt.AddValue(2, _followerActivationsRemainingToday);
@@ -136,7 +136,7 @@ namespace Game.Garrisons
 
             foreach (uint building in _knownBuildings)
             {
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER_GARRISON_BLUEPRINTS);
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHARACTER_GARRISON_BLUEPRINTS);
                 stmt.AddValue(0, _owner.GetGUID().GetCounter());
                 stmt.AddValue(1, building);
                 trans.Append(stmt);
@@ -146,7 +146,7 @@ namespace Game.Garrisons
             {
                 if (plot.BuildingInfo.PacketInfo != null)
                 {
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER_GARRISON_BUILDINGS);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHARACTER_GARRISON_BUILDINGS);
                     stmt.AddValue(0, _owner.GetGUID().GetCounter());
                     stmt.AddValue(1, plot.BuildingInfo.PacketInfo.GarrPlotInstanceID);
                     stmt.AddValue(2, plot.BuildingInfo.PacketInfo.GarrBuildingID);
@@ -159,7 +159,7 @@ namespace Game.Garrisons
             foreach (var follower in _followers.Values)
             {
                 byte index = 0;
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER_GARRISON_FOLLOWERS);
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHARACTER_GARRISON_FOLLOWERS);
                 stmt.AddValue(index++, follower.PacketInfo.DbID);
                 stmt.AddValue(index++, _owner.GetGUID().GetCounter());
                 stmt.AddValue(index++, follower.PacketInfo.GarrFollowerID);
@@ -176,7 +176,7 @@ namespace Game.Garrisons
                 byte slot = 0;
                 foreach (GarrAbilityRecord ability in follower.PacketInfo.AbilityID)
                 {
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER_GARRISON_FOLLOWER_ABILITIES);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHARACTER_GARRISON_FOLLOWER_ABILITIES);
                     stmt.AddValue(0, follower.PacketInfo.DbID);
                     stmt.AddValue(1, ability.Id);
                     stmt.AddValue(2, slot++);
@@ -187,19 +187,19 @@ namespace Game.Garrisons
 
         public static void DeleteFromDB(ulong ownerGuid, SQLTransaction trans)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_GARRISON);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHARACTER_GARRISON);
             stmt.AddValue(0, ownerGuid);
             trans.Append(stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_GARRISON_BLUEPRINTS);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHARACTER_GARRISON_BLUEPRINTS);
             stmt.AddValue(0, ownerGuid);
             trans.Append(stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_GARRISON_BUILDINGS);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHARACTER_GARRISON_BUILDINGS);
             stmt.AddValue(0, ownerGuid);
             trans.Append(stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_GARRISON_FOLLOWERS);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHARACTER_GARRISON_FOLLOWERS);
             stmt.AddValue(0, ownerGuid);
             trans.Append(stmt);
         }

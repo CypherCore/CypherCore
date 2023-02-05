@@ -108,7 +108,7 @@ namespace BNetServer.Networking
             if (!clientInfoOk)
                 return BattlenetRpcErrorCode.WowServicesDeniedRealmListTicket;
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UpdBnetLastLoginInfo);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UpdBnetLastLoginInfo);
             stmt.AddValue(0, GetRemoteIpEndPoint().ToString());
             stmt.AddValue(1, (byte)locale.ToEnum<Locale>());
             stmt.AddValue(2, os);

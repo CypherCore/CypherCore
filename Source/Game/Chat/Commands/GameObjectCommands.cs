@@ -243,7 +243,7 @@ namespace Game.Chat
 
             Player player = handler.GetPlayer();
 
-            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_GAMEOBJECT_NEAREST);
+            PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_GAMEOBJECT_NEAREST);
             stmt.AddValue(0, player.GetPositionX());
             stmt.AddValue(1, player.GetPositionY());
             stmt.AddValue(2, player.GetPositionZ());

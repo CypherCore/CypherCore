@@ -206,7 +206,7 @@ namespace Game.Chat
             uint entry;
             while ((entry = args.NextUInt32()) != 0)
             {
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_CREATURE_TEMPLATE);
+                PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_CREATURE_TEMPLATE);
                 stmt.AddValue(0, entry);
                 stmt.AddValue(1, 0);
                 SQLResult result = DB.World.Query(stmt);

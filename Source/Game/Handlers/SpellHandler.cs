@@ -175,7 +175,7 @@ namespace Game
 
             if (item.IsWrapped())// wrapped?
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_GIFT_BY_ITEM);
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_GIFT_BY_ITEM);
                 stmt.AddValue(0, item.GetGUID().GetCounter());
 
                 var pos = item.GetPos();
@@ -238,7 +238,7 @@ namespace Game
 
             GetPlayer().SaveInventoryAndGoldToDB(trans);
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GIFT);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GIFT);
             stmt.AddValue(0, itemGuid.GetCounter());
             trans.Append(stmt);
 

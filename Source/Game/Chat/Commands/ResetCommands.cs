@@ -133,7 +133,7 @@ namespace Game.Chat
             }
             else
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
                 stmt.AddValue(0, (ushort)AtLoginFlags.ResetSpells);
                 stmt.AddValue(1, player.GetGUID().GetCounter());
                 DB.Characters.Execute(stmt);
@@ -193,7 +193,7 @@ namespace Game.Chat
             }
             else if (!player.GetGUID().IsEmpty())
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
                 stmt.AddValue(0, (ushort)(AtLoginFlags.None | AtLoginFlags.ResetPetTalents));
                 stmt.AddValue(1, player.GetGUID().GetCounter());
                 DB.Characters.Execute(stmt);
@@ -233,7 +233,7 @@ namespace Game.Chat
                 return false;
             }
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ALL_AT_LOGIN_FLAGS);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ALL_AT_LOGIN_FLAGS);
             stmt.AddValue(0, (ushort)atLogin);
             DB.Characters.Execute(stmt);
 

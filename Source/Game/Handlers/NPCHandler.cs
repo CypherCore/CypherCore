@@ -502,7 +502,7 @@ namespace Game
 
             SQLTransaction trans = new();
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_ID);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_ID);
             stmt.AddValue(0, (short)dstPetSlot);
             stmt.AddValue(1, _player.GetGUID().GetCounter());
             stmt.AddValue(2, srcPet.PetNumber);
@@ -510,7 +510,7 @@ namespace Game
 
             if (dstPet != null)
             {
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_ID);
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_ID);
                 stmt.AddValue(0, (short)srcPetSlot);
                 stmt.AddValue(1, _player.GetGUID().GetCounter());
                 stmt.AddValue(2, dstPet.PetNumber);

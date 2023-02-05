@@ -192,7 +192,7 @@ namespace Game.Chat.Commands
             else
                 targetGuid = target.GetGUID();
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_BANINFO);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_BANINFO);
             stmt.AddValue(0, targetGuid.GetCounter());
             SQLResult result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
@@ -271,18 +271,18 @@ namespace Game.Chat.Commands
         [Command("account", RBACPermissions.CommandBanlistAccount, true)]
         static bool HandleBanListAccountCommand(CommandHandler handler, [OptionalArg] string filter)
         {
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.DelExpiredIpBans);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DelExpiredIpBans);
             DB.Login.Execute(stmt);
 
             SQLResult result;
             if (filter.IsEmpty())
             {
-                stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BANNED_ALL);
+                stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BANNED_ALL);
                 result = DB.Login.Query(stmt);
             }
             else
             {
-                stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BANNED_BY_FILTER);
+                stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BANNED_BY_FILTER);
                 stmt.AddValue(0, filter);
                 result = DB.Login.Query(stmt);
             }
@@ -302,7 +302,7 @@ namespace Game.Chat.Commands
             if (filter.IsEmpty())
                 return false;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GUID_BY_NAME_FILTER);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUID_BY_NAME_FILTER);
             stmt.AddValue(0, filter);
             SQLResult result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
@@ -319,7 +319,7 @@ namespace Game.Chat.Commands
                 do
                 {
 
-                    PreparedStatement stmt2 = DB.Characters.GetPreparedStatement(CharStatements.SEL_BANNED_NAME);
+                    PreparedStatement stmt2 = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_BANNED_NAME);
                     stmt2.AddValue(0, result.Read<ulong>(0));
                     SQLResult banResult = DB.Characters.Query(stmt2);
                     if (!banResult.IsEmpty())
@@ -339,7 +339,7 @@ namespace Game.Chat.Commands
 
                     string char_name = result.Read<string>(1);
 
-                    PreparedStatement stmt2 = DB.Characters.GetPreparedStatement(CharStatements.SEL_BANINFO_LIST);
+                    PreparedStatement stmt2 = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_BANINFO_LIST);
                     stmt2.AddValue(0, result.Read<ulong>(0));
                     SQLResult banInfo = DB.Characters.Query(stmt2);
                     if (!banInfo.IsEmpty())
@@ -380,19 +380,19 @@ namespace Game.Chat.Commands
         [Command("ip", RBACPermissions.CommandBanlistIp, true)]
         static bool HandleBanListIPCommand(CommandHandler handler, [OptionalArg] string filter)
         {
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.DelExpiredIpBans);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DelExpiredIpBans);
             DB.Login.Execute(stmt);
 
             SQLResult result;
 
             if (filter.IsEmpty())
             {
-                stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_IP_BANNED_ALL);
+                stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_IP_BANNED_ALL);
                 result = DB.Login.Query(stmt);
             }
             else
             {
-                stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_IP_BANNED_BY_IP);
+                stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_IP_BANNED_BY_IP);
                 stmt.AddValue(0, filter);
                 result = DB.Login.Query(stmt);
             }

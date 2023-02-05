@@ -743,7 +743,7 @@ player.enableExtaBagSlots = 0
 #		1 = Enabled
 #		0 = Disabled
 
-player.lowerExpInLowerExpansions = 1
+player.lowerExpInLowerExpansions = 0
 
 #
 #	When enabled the client must have the proper client/server expation to use the class/races from that expation or lower

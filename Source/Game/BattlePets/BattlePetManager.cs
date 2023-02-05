@@ -277,7 +277,7 @@ namespace Game.BattlePets
                 switch (pair.Value.SaveInfo)
                 {
                     case BattlePetSaveInfo.New:
-                        stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_BATTLE_PETS);
+                        stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_BATTLE_PETS);
                         stmt.AddValue(0, pair.Key);
                         stmt.AddValue(1, _owner.GetBattlenetAccountId());
                         stmt.AddValue(2, pair.Value.PacketInfo.Species);
@@ -305,7 +305,7 @@ namespace Game.BattlePets
 
                         if (pair.Value.DeclinedName != null)
                         {
-                            stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_BATTLE_PET_DECLINED_NAME);
+                            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_BATTLE_PET_DECLINED_NAME);
                             stmt.AddValue(0, pair.Key);
 
                             for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
@@ -318,7 +318,7 @@ namespace Game.BattlePets
                         pair.Value.SaveInfo = BattlePetSaveInfo.Unchanged;
                         break;
                     case BattlePetSaveInfo.Changed:
-                        stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BATTLE_PETS);
+                        stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_BATTLE_PETS);
                         stmt.AddValue(0, pair.Value.PacketInfo.Level);
                         stmt.AddValue(1, pair.Value.PacketInfo.Exp);
                         stmt.AddValue(2, pair.Value.PacketInfo.Health);
@@ -330,13 +330,13 @@ namespace Game.BattlePets
                         stmt.AddValue(8, pair.Key);
                         trans.Append(stmt);
 
-                        stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_BATTLE_PET_DECLINED_NAME);
+                        stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_BATTLE_PET_DECLINED_NAME);
                         stmt.AddValue(0, pair.Key);
                         trans.Append(stmt);
 
                         if (pair.Value.DeclinedName != null)
                         {
-                            stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_BATTLE_PET_DECLINED_NAME);
+                            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_BATTLE_PET_DECLINED_NAME);
                             stmt.AddValue(0, pair.Key);
 
                             for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
@@ -348,11 +348,11 @@ namespace Game.BattlePets
                         pair.Value.SaveInfo = BattlePetSaveInfo.Unchanged;
                         break;
                     case BattlePetSaveInfo.Removed:
-                        stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_BATTLE_PET_DECLINED_NAME);
+                        stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_BATTLE_PET_DECLINED_NAME);
                         stmt.AddValue(0, pair.Key);
                         trans.Append(stmt);
 
-                        stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_BATTLE_PETS);
+                        stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_BATTLE_PETS);
                         stmt.AddValue(0, _owner.GetBattlenetAccountId());
                         stmt.AddValue(1, pair.Key);
                         trans.Append(stmt);
@@ -361,13 +361,13 @@ namespace Game.BattlePets
                 }
             }
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_BATTLE_PET_SLOTS);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_BATTLE_PET_SLOTS);
             stmt.AddValue(0, _owner.GetBattlenetAccountId());
             trans.Append(stmt);
 
             foreach (var slot in _slots)
             {
-                stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_BATTLE_PET_SLOTS);
+                stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_BATTLE_PET_SLOTS);
                 stmt.AddValue(0, slot.Index);
                 stmt.AddValue(1, _owner.GetBattlenetAccountId());
                 stmt.AddValue(2, slot.Pet.Guid.GetCounter());
