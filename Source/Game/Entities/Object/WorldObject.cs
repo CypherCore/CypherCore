@@ -3,6 +3,7 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
+using Framework.Util;
 using Game.AI;
 using Game.BattleFields;
 using Game.DataStorage;
@@ -3772,6 +3773,8 @@ namespace Game.Entities
         }
 
         public void SetLocationInstanceId(uint _instanceId) { instanceId = _instanceId; }
+
+        public VariableStore VariableStorage { get; } = new VariableStore();
 
         #region Fields
         public TypeMask ObjectTypeMask { get; set; }

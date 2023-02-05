@@ -125,7 +125,6 @@ namespace Game.Entities
         ushort _aiAnimKitId;
         ushort _movementAnimKitId;
         ushort _meleeAnimKitId;
-        public VariableStore VariableStorage { get; } = new VariableStore();
 
         class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
         {
