@@ -1949,6 +1949,7 @@ namespace Game.Spells
                         }
 
                         spellScripts.Add(script);
+                        RegisterSpellEffectHandler(script);
                     }
                 }
             }
