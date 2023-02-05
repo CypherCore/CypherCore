@@ -55,7 +55,7 @@ namespace Framework.Database
                 "Flags, WmoGroupID, PoiDataType, PoiData, Field_9_1_0, Field_10_0_0_45141_012, ContinentID, AreaID, WorldStateID, UiWidgetSetID, " +
                 "UiTextureKitID, Field_9_1_0_38783, Importance, Icon FROM area_poi ");
 
-            PrepareStatement(HotfixStatements.SEL_AREA_POI, "SELECT ID, Name_lang, Description_lang FROM area_poi_locale WHERE locale = ?");
+            PrepareStatement(HotfixStatements.SEL_AREA_POI_LOCALE, "SELECT ID, Name_lang, Description_lang FROM area_poi_locale WHERE locale = ?");
 
             // AreaPOIState.db2
             PrepareStatement(HotfixStatements.SEL_AREA_POI_STATE, "SELECT ID, Description, WorldStateValue, IconEnumValue, UiTextureAtlasMemberID, AreaPoiID" +
