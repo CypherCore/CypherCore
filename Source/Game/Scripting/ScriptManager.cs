@@ -150,13 +150,7 @@ namespace Game.Scripting
                 if (iface.Name == nameof(IScriptObject))
                     continue;
 
-                if (!_scriptByType.TryGetValue(iface, out var loadedTypes))
-                {
-                    loadedTypes = new List<IScriptObject>();
-                    _scriptByType[iface] = loadedTypes;
-                }
-
-                loadedTypes.Add(script);
+                _scriptByType.AddToList(iface, script);
 
                 if (hasClass)
                 {
