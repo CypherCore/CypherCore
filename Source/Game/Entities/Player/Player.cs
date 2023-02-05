@@ -3530,7 +3530,6 @@ namespace Game.Entities
             packet.Resisted = (int)resist;
 
             uint final_damage = DealDamage(this, this, damage, null, DamageEffectType.Self, dmgSchool, null, false);
-            ScriptManager.Instance.ForEach<IPlayerOnTakeDamage>(GetClass(), a => a.OnPlayerTakeDamage(this, final_damage, dmgSchool));
             packet.LogData.Initialize(this);
 
             SendCombatLogMessage(packet);
