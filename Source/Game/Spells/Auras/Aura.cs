@@ -789,6 +789,14 @@ namespace Game.Spells
             SetNeedClientUpdateForTargets();
         }
 
+        /// <summary>
+        ///     Adds the given duration to the auras duration.
+        /// </summary>
+        public void ModDuration(int duration, bool withMods = false)
+        {
+            SetDuration(GetDuration() + duration, withMods);
+        }
+
         public void RefreshDuration(bool withMods = false)
         {
             Unit caster = GetCaster();

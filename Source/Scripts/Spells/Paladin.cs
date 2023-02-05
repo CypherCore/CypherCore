@@ -239,7 +239,7 @@ namespace Scripts.Spells.Paladin
 
     // 1022 - Blessing of Protection
     [Script] // 204018 - Blessing of Spellwarding
-    internal class spell_pal_blessing_of_protection : SpellScript, ISpellCheckCastHander, ISpellAfterHit
+    internal class spell_pal_blessing_of_protection : SpellScript, ISpellCheckCast, ISpellAfterHit
     {
         public void AfterHit()
         {
@@ -414,7 +414,7 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 642 - Divine Shield
-    internal class spell_pal_divine_shield : SpellScript, ISpellCheckCastHander, ISpellAfterCast
+    internal class spell_pal_divine_shield : SpellScript, ISpellCheckCast, ISpellAfterCast
     {
         public void AfterCast()
         {
@@ -835,7 +835,7 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 20473 - Holy Shock
-    internal class spell_pal_holy_shock : SpellScript, ISpellCheckCastHander, IHasSpellEffects
+    internal class spell_pal_holy_shock : SpellScript, ISpellCheckCast, IHasSpellEffects
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -987,7 +987,7 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 633 - Lay on Hands
-    internal class spell_pal_lay_on_hands : SpellScript, ISpellCheckCastHander, ISpellAfterHit
+    internal class spell_pal_lay_on_hands : SpellScript, ISpellCheckCast, ISpellAfterHit
     {
         public void AfterHit()
         {

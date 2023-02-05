@@ -13,7 +13,7 @@ using Game.Spells;
 namespace Scripts.Spells.Warrior
 {
     [Script] // 6544 Heroic leap
-    internal class spell_warr_heroic_leap : SpellScript, ISpellCheckCastHander, IHasSpellEffects
+    internal class spell_warr_heroic_leap : SpellScript, ISpellCheckCast, IHasSpellEffects
     {
         public override bool Validate(SpellInfo spellInfo)
         {

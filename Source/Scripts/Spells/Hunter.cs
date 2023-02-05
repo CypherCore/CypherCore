@@ -188,7 +188,7 @@ namespace Scripts.Spells.Hunter
 
     // 53271 - Masters Call
     [Script]
-    internal class spell_hun_masters_call : SpellScript, ISpellCheckCastHander, IHasSpellEffects
+    internal class spell_hun_masters_call : SpellScript, ISpellCheckCast, IHasSpellEffects
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -452,7 +452,7 @@ namespace Scripts.Spells.Hunter
 
     // 1515 - Tame Beast
     [Script]
-    internal class spell_hun_tame_beast : SpellScript, ISpellCheckCastHander
+    internal class spell_hun_tame_beast : SpellScript, ISpellCheckCast
     {
         private static readonly uint[] CallPetSpellIds =
         {

@@ -644,7 +644,7 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 29166 - Innervate
-    internal class spell_dru_innervate : SpellScript, ISpellCheckCastHander, ISpellOnHit
+    internal class spell_dru_innervate : SpellScript, ISpellCheckCast, ISpellOnHit
     {
         public SpellCastResult CheckCast()
         {
@@ -889,7 +889,7 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 52610 - Savage Roar
-    internal class spell_dru_savage_roar : SpellScript, ISpellCheckCastHander
+    internal class spell_dru_savage_roar : SpellScript, ISpellCheckCast
     {
         public SpellCastResult CheckCast()
         {
@@ -1430,7 +1430,7 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 783 - Travel Form (dummy)
-    internal class spell_dru_travel_form_dummy : SpellScript, ISpellCheckCastHander
+    internal class spell_dru_travel_form_dummy : SpellScript, ISpellCheckCast
     {
         public override bool Validate(SpellInfo spellEntry)
         {

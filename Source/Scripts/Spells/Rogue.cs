@@ -384,7 +384,7 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script]
-    internal class spell_rog_pickpocket : SpellScript, ISpellCheckCastHander
+    internal class spell_rog_pickpocket : SpellScript, ISpellCheckCast
     {
         public SpellCastResult CheckCast()
         {
@@ -584,7 +584,7 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 185438 - Shadowstrike
-    internal class spell_rog_shadowstrike : SpellScript, ISpellCheckCastHander, IHasSpellEffects
+    internal class spell_rog_shadowstrike : SpellScript, ISpellCheckCast, IHasSpellEffects
     {
         private bool _hasPremeditationAura = false;
 

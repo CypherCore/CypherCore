@@ -559,7 +559,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    internal class spell_gen_allow_cast_from_item_only : SpellScript, ISpellCheckCastHander
+    internal class spell_gen_allow_cast_from_item_only : SpellScript, ISpellCheckCast
     {
         public SpellCastResult CheckCast()
         {
@@ -780,7 +780,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    internal class spell_gen_bandage : SpellScript, ISpellCheckCastHander, ISpellAfterHit
+    internal class spell_gen_bandage : SpellScript, ISpellCheckCast, ISpellAfterHit
     {
         public void AfterHit()
         {
@@ -1427,7 +1427,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    internal class spell_gen_cannibalize : SpellScript, ISpellCheckCastHander, IHasSpellEffects
+    internal class spell_gen_cannibalize : SpellScript, ISpellCheckCast, IHasSpellEffects
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -3283,7 +3283,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    internal class spell_gen_profession_research : SpellScript, ISpellCheckCastHander, IHasSpellEffects
+    internal class spell_gen_profession_research : SpellScript, ISpellCheckCast, IHasSpellEffects
     {
         public override bool Load()
         {
@@ -3645,7 +3645,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    internal class spell_gen_two_forms : SpellScript, ISpellCheckCastHander, IHasSpellEffects
+    internal class spell_gen_two_forms : SpellScript, ISpellCheckCast, IHasSpellEffects
     {
         public SpellCastResult CheckCast()
         {
@@ -3785,7 +3785,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    internal class spell_gen_summon_tournament_mount : SpellScript, ISpellCheckCastHander
+    internal class spell_gen_summon_tournament_mount : SpellScript, ISpellCheckCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -4165,7 +4165,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    internal class spell_gen_wg_water : SpellScript, ISpellCheckCastHander
+    internal class spell_gen_wg_water : SpellScript, ISpellCheckCast
     {
         public SpellCastResult CheckCast()
         {

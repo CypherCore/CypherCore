@@ -350,7 +350,7 @@ namespace Scripts.Spells.DemonHunter
     }
 
     [Script] // 131347 - Glide
-    internal class spell_dh_glide : SpellScript, ISpellCheckCastHander, ISpellBeforeCast
+    internal class spell_dh_glide : SpellScript, ISpellCheckCast, ISpellBeforeCast
     {
         public void BeforeCast()
         {

@@ -7594,11 +7594,11 @@ namespace Game.Spells
         {
             SpellCastResult retVal = SpellCastResult.SpellCastOk;
 
-            foreach (ISpellScript script in GetSpellScripts<ISpellCheckCastHander>())
+            foreach (ISpellScript script in GetSpellScripts<ISpellCheckCast>())
             {
                 script._PrepareScriptCall(SpellScriptHookType.CheckCast);
 
-                var tempResult = ((ISpellCheckCastHander)script).CheckCast();
+                var tempResult = ((ISpellCheckCast)script).CheckCast();
                 if (tempResult != SpellCastResult.SpellCastOk)
                     retVal = tempResult;
 
@@ -7775,7 +7775,7 @@ namespace Game.Spells
 
         public void CallScriptOnResistAbsorbCalculateHandlers(DamageInfo damageInfo, ref uint resistAmount, ref int absorbAmount)
         {
-            foreach (ISpellScript script in GetSpellScripts<ISpellCheckCastHander>())
+            foreach (ISpellScript script in GetSpellScripts<ISpellCheckCast>())
             {
                 script._PrepareScriptCall(SpellScriptHookType.OnResistAbsorbCalculation);
 

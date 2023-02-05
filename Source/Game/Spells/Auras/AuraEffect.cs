@@ -872,6 +872,23 @@ namespace Game.Spells
         public uint GetTickNumber() { return _ticksDone; }
         public uint GetRemainingTicks() { return GetTotalTicks() - _ticksDone; }
 
+        public int GetRemainingAmount(int maxDurationIfPermanent = 0)
+        {
+            int ticks = (int)GetTotalTicks();
+            if (!GetBase().IsPermanent())
+            {
+                ticks -= (int)GetTickNumber();
+            }
+
+            var total = GetAmount() * ticks;
+
+            if (total > maxDurationIfPermanent)
+                return maxDurationIfPermanent;
+
+            return total;
+        }
+
+
         public bool IsPeriodic() { return m_isPeriodic; }
         public void SetPeriodic(bool isPeriodic) { m_isPeriodic = isPeriodic; }
         bool HasSpellClassMask() { return GetSpellEffectInfo().SpellClassMask; }

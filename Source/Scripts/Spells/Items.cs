@@ -2790,7 +2790,7 @@ namespace Scripts.Spells.Items
     }
 
     [Script]
-    internal class spell_item_book_of_glyph_mastery : SpellScript, ISpellCheckCastHander, IHasSpellEffects
+    internal class spell_item_book_of_glyph_mastery : SpellScript, ISpellCheckCast, IHasSpellEffects
     {
         public override bool Load()
         {
@@ -2830,7 +2830,7 @@ namespace Scripts.Spells.Items
     }
 
     [Script]
-    internal class spell_item_gift_of_the_harvester : SpellScript, ISpellCheckCastHander
+    internal class spell_item_gift_of_the_harvester : SpellScript, ISpellCheckCast
     {
         public SpellCastResult CheckCast()
         {
@@ -2849,7 +2849,7 @@ namespace Scripts.Spells.Items
     }
 
     [Script]
-    internal class spell_item_map_of_the_geyser_fields : SpellScript, ISpellCheckCastHander
+    internal class spell_item_map_of_the_geyser_fields : SpellScript, ISpellCheckCast
     {
         public SpellCastResult CheckCast()
         {
@@ -3095,7 +3095,7 @@ namespace Scripts.Spells.Items
     }
 
     [Script]
-    internal class spell_item_demon_broiled_surprise : SpellScript, ISpellCheckCastHander, IHasSpellEffects
+    internal class spell_item_demon_broiled_surprise : SpellScript, ISpellCheckCast, IHasSpellEffects
     {
         public override bool Validate(SpellInfo spell)
         {
@@ -3301,7 +3301,7 @@ namespace Scripts.Spells.Items
     }
 
     [Script]
-    internal class spell_item_rocket_boots : SpellScript, ISpellCheckCastHander, IHasSpellEffects
+    internal class spell_item_rocket_boots : SpellScript, ISpellCheckCast, IHasSpellEffects
     {
         public override bool Load()
         {

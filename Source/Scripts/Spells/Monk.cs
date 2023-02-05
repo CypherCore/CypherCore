@@ -99,7 +99,7 @@ namespace Scripts.Spells.Monk
     }
 
     [Script] // 115546 - Provoke
-    internal class spell_monk_provoke : SpellScript, ISpellCheckCastHander, IHasSpellEffects
+    internal class spell_monk_provoke : SpellScript, ISpellCheckCast, IHasSpellEffects
     {
         private const uint BlackOxStatusEntry = 61146;
 
@@ -148,7 +148,7 @@ namespace Scripts.Spells.Monk
     }
 
     [Script] // 109132 - Roll
-    internal class spell_monk_roll : SpellScript, ISpellCheckCastHander, IHasSpellEffects
+    internal class spell_monk_roll : SpellScript, ISpellCheckCast, IHasSpellEffects
     {
         public override bool Validate(SpellInfo spellInfo)
         {

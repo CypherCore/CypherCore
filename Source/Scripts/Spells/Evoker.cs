@@ -43,7 +43,7 @@ namespace Scripts.Spells.Evoker
     }
 
     [Script] // 358733 - Glide (Racial)
-    internal class spell_evo_glide : SpellScript, ISpellCheckCastHander, ISpellOnCast
+    internal class spell_evo_glide : SpellScript, ISpellCheckCast, ISpellOnCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {

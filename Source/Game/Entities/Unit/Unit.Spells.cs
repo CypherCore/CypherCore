@@ -3804,6 +3804,18 @@ namespace Game.Entities
             return null;
         }
 
+        public int GetAuraEffectAmount(uint spellId, byte effIndex)
+        {
+            AuraEffect aurEff = GetAuraEffect(spellId, effIndex);
+            if (aurEff != null)
+            {
+                return aurEff.GetAmount();
+            }
+
+            return 0;
+        }
+
+
         public Aura GetAura(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)
         {
             AuraApplication aurApp = GetAuraApplication(spellId, casterGUID, itemCasterGUID, reqEffMask);

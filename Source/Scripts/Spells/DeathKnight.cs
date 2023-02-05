@@ -164,7 +164,7 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 127517 - Army Transform
-    internal class spell_dk_army_transform : SpellScript, ISpellCheckCastHander, IHasSpellEffects
+    internal class spell_dk_army_transform : SpellScript, ISpellCheckCast, IHasSpellEffects
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -340,7 +340,7 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 52751 - Death Gate
-    internal class spell_dk_death_gate : SpellScript, ISpellCheckCastHander, IHasSpellEffects
+    internal class spell_dk_death_gate : SpellScript, ISpellCheckCast, IHasSpellEffects
     {
         public SpellCastResult CheckCast()
         {
@@ -372,7 +372,7 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 49576 - Death Grip Initial
-    internal class spell_dk_death_grip_initial : SpellScript, ISpellCheckCastHander, IHasSpellEffects
+    internal class spell_dk_death_grip_initial : SpellScript, ISpellCheckCast, IHasSpellEffects
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -676,7 +676,7 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 121916 - Glyph of the Geist (Unholy)
-    internal class spell_dk_pet_geist_transform : SpellScript, ISpellCheckCastHander
+    internal class spell_dk_pet_geist_transform : SpellScript, ISpellCheckCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -701,7 +701,7 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 147157 Glyph of the Skeleton (Unholy)
-    internal class spell_dk_pet_skeleton_transform : SpellScript, ISpellCheckCastHander
+    internal class spell_dk_pet_skeleton_transform : SpellScript, ISpellCheckCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {

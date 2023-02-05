@@ -1010,7 +1010,7 @@ namespace Scripts.Spells.Quest
 
     // 39844 - Skyguard Blasting Charge
     [Script] // 40160 - Throw Bomb
-    internal class spell_q11010_q11102_q11023_q11008_check_fly_mount : SpellScript, ISpellCheckCastHander
+    internal class spell_q11010_q11102_q11023_q11008_check_fly_mount : SpellScript, ISpellCheckCast
     {
         public SpellCastResult CheckCast()
         {

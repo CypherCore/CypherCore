@@ -700,7 +700,7 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 47540 - Penance
-    internal class spell_pri_penance : SpellScript, ISpellCheckCastHander, IHasSpellEffects
+    internal class spell_pri_penance : SpellScript, ISpellCheckCast, IHasSpellEffects
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -942,7 +942,7 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 17 - Power Word: Shield
-    internal class spell_pri_power_word_shield : SpellScript, ISpellCheckCastHander, ISpellAfterHit
+    internal class spell_pri_power_word_shield : SpellScript, ISpellCheckCast, ISpellAfterHit
     {
         public void AfterHit()
         {

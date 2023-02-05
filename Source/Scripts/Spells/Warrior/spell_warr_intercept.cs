@@ -11,7 +11,7 @@ namespace Scripts.Spells.Warrior
 {
     // Intercept (As of Legion) - 198304
     [SpellScript(198304)]
-    public class spell_warr_intercept : SpellScript, ISpellCheckCastHander, IHasSpellEffects
+    public class spell_warr_intercept : SpellScript, ISpellCheckCast, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects => throw new NotImplementedException();
 
