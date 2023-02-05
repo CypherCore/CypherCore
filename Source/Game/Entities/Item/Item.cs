@@ -135,7 +135,7 @@ namespace Game.Entities
                 case ItemUpdateState.Changed:
                 {
                     byte index = 0;
-                    stmt = DB.Characters.GetPreparedStatement(uState == ItemUpdateState.New ? CharStatements.REP_ITEM_INSTANCE : CharStatements.UPD_ITEM_INSTANCE);
+                    stmt = CharacterDatabase.GetPreparedStatement(uState == ItemUpdateState.New ? CharStatements.REP_ITEM_INSTANCE : CharStatements.UPD_ITEM_INSTANCE);
                     stmt.AddValue(index, GetEntry());
                     stmt.AddValue(++index, GetOwnerGUID().GetCounter());
                     stmt.AddValue(++index, GetCreator().GetCounter());
@@ -183,19 +183,19 @@ namespace Game.Entities
 
                     if ((uState == ItemUpdateState.Changed) && IsWrapped())
                     {
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GIFT_OWNER);
+                        stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GIFT_OWNER);
                         stmt.AddValue(0, GetOwnerGUID().GetCounter());
                         stmt.AddValue(1, GetGUID().GetCounter());
                         DB.Characters.Execute(stmt);
                     }
 
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_GEMS);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_GEMS);
                     stmt.AddValue(0, GetGUID().GetCounter());
                     trans.Append(stmt);
 
                     if (m_itemData.Gems.Size() != 0)
                     {
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_GEMS);
+                        stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_GEMS);
                         stmt.AddValue(0, GetGUID().GetCounter());
                         int i = 0;
                         int gemFields = 4;
@@ -260,13 +260,13 @@ namespace Game.Entities
                         ItemModifier.TransmogSecondaryAppearanceSpec5
                     };
 
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_TRANSMOG);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_TRANSMOG);
                     stmt.AddValue(0, GetGUID().GetCounter());
                     trans.Append(stmt);
 
                     if (transmogMods.Any(modifier => GetModifier(modifier) != 0))
                     {
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_TRANSMOG);
+                        stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_TRANSMOG);
                         stmt.AddValue(0, GetGUID().GetCounter());
                         stmt.AddValue(1, GetModifier(ItemModifier.TransmogAppearanceAllSpecs));
                         stmt.AddValue(2, GetModifier(ItemModifier.TransmogAppearanceSpec1));
@@ -289,17 +289,17 @@ namespace Game.Entities
                         trans.Append(stmt);
                     }
 
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_ARTIFACT);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_ARTIFACT);
                     stmt.AddValue(0, GetGUID().GetCounter());
                     trans.Append(stmt);
 
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_ARTIFACT_POWERS);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_ARTIFACT_POWERS);
                     stmt.AddValue(0, GetGUID().GetCounter());
                     trans.Append(stmt);
 
                     if (GetTemplate().GetArtifactID() != 0)
                     {
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_ARTIFACT);
+                        stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_ARTIFACT);
                         stmt.AddValue(0, GetGUID().GetCounter());
                         stmt.AddValue(1, (ulong)m_itemData.ArtifactXP);
                         stmt.AddValue(2, GetModifier(ItemModifier.ArtifactAppearanceId));
@@ -308,7 +308,7 @@ namespace Game.Entities
 
                         foreach (ArtifactPower artifactPower in m_itemData.ArtifactPowers)
                         {
-                            stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_ARTIFACT_POWERS);
+                            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_ARTIFACT_POWERS);
                             stmt.AddValue(0, GetGUID().GetCounter());
                             stmt.AddValue(1, artifactPower.ArtifactPowerId);
                             stmt.AddValue(2, artifactPower.PurchasedRank);
@@ -322,13 +322,13 @@ namespace Game.Entities
                             ItemModifier.ArtifactKnowledgeLevel
                         };
 
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_MODIFIERS);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_MODIFIERS);
                     stmt.AddValue(0, GetGUID().GetCounter());
                     trans.Append(stmt);
 
                     if (modifiersTable.Any(modifier => GetModifier(modifier) != 0))
                     {
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_MODIFIERS);
+                        stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_MODIFIERS);
                         stmt.AddValue(0, GetGUID().GetCounter());
                         stmt.AddValue(1, GetModifier(ItemModifier.TimewalkerLevel));
                         stmt.AddValue(2, GetModifier(ItemModifier.ArtifactKnowledgeLevel));
@@ -338,33 +338,33 @@ namespace Game.Entities
                 }
                 case ItemUpdateState.Removed:
                 {
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE);
                     stmt.AddValue(0, GetGUID().GetCounter());
                     trans.Append(stmt);
 
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_GEMS);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_GEMS);
                     stmt.AddValue(0, GetGUID().GetCounter());
                     trans.Append(stmt);
 
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_TRANSMOG);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_TRANSMOG);
                     stmt.AddValue(0, GetGUID().GetCounter());
                     trans.Append(stmt);
 
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_ARTIFACT);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_ARTIFACT);
                     stmt.AddValue(0, GetGUID().GetCounter());
                     trans.Append(stmt);
 
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_ARTIFACT_POWERS);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_ARTIFACT_POWERS);
                     stmt.AddValue(0, GetGUID().GetCounter());
                     trans.Append(stmt);
 
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_MODIFIERS);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_MODIFIERS);
                     stmt.AddValue(0, GetGUID().GetCounter());
                     trans.Append(stmt);
 
                     if (IsWrapped())
                     {
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GIFT);
+                        stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GIFT);
                         stmt.AddValue(0, GetGUID().GetCounter());
                         trans.Append(stmt);
                     }
@@ -540,7 +540,7 @@ namespace Game.Entities
             if (need_save)                                           // normal item changed state set not work at loading
             {
                 byte index = 0;
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ITEM_INSTANCE_ON_LOAD);
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ITEM_INSTANCE_ON_LOAD);
                 stmt.AddValue(index++, (uint)m_itemData.Expiration);
                 stmt.AddValue(index++, (uint)m_itemData.DynamicFlags);
                 stmt.AddValue(index++, (uint)m_itemData.Durability);
@@ -639,31 +639,31 @@ namespace Game.Entities
 
         public static void DeleteFromDB(SQLTransaction trans, ulong itemGuid)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE);
             stmt.AddValue(0, itemGuid);
             DB.Characters.ExecuteOrAppend(trans, stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_GEMS);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_GEMS);
             stmt.AddValue(0, itemGuid);
             DB.Characters.ExecuteOrAppend(trans, stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_TRANSMOG);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_TRANSMOG);
             stmt.AddValue(0, itemGuid);
             DB.Characters.ExecuteOrAppend(trans, stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_ARTIFACT);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_ARTIFACT);
             stmt.AddValue(0, itemGuid);
             DB.Characters.ExecuteOrAppend(trans, stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_ARTIFACT_POWERS);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_ARTIFACT_POWERS);
             stmt.AddValue(0, itemGuid);
             DB.Characters.ExecuteOrAppend(trans, stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_MODIFIERS);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_MODIFIERS);
             stmt.AddValue(0, itemGuid);
             DB.Characters.ExecuteOrAppend(trans, stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GIFT);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GIFT);
             stmt.AddValue(0, itemGuid);
             DB.Characters.ExecuteOrAppend(trans, stmt);
         }
@@ -679,7 +679,7 @@ namespace Game.Entities
 
         public static void DeleteFromInventoryDB(SQLTransaction trans, ulong itemGuid)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_INVENTORY_BY_ITEM);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_INVENTORY_BY_ITEM);
             stmt.AddValue(0, itemGuid);
             trans.Append(stmt);
         }
@@ -1374,7 +1374,7 @@ namespace Game.Entities
         {
             DeleteRefundDataFromDB();
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEM_REFUND_INSTANCE);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ITEM_REFUND_INSTANCE);
             stmt.AddValue(0, GetGUID().GetCounter());
             stmt.AddValue(1, GetRefundRecipient().GetCounter());
             stmt.AddValue(2, GetPaidMoney());
@@ -1384,7 +1384,7 @@ namespace Game.Entities
 
         public void DeleteRefundDataFromDB(SQLTransaction trans = null)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_REFUND_INSTANCE);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_REFUND_INSTANCE);
             stmt.AddValue(0, GetGUID().GetCounter());
             if (trans != null)
                 trans.Append(stmt);
@@ -1467,7 +1467,7 @@ namespace Game.Entities
             currentOwner.GetSession().GetCollectionMgr().AddItemAppearance(this);
             allowedGUIDs.Clear();
             SetState(ItemUpdateState.Changed, currentOwner);
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_BOP_TRADE);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_BOP_TRADE);
             stmt.AddValue(0, GetGUID().GetCounter());
             DB.Characters.Execute(stmt);
         }

@@ -89,9 +89,9 @@ namespace BNetServer
 
         static void BanExpiryCheckTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            DB.Login.Execute(DB.Login.GetPreparedStatement(LoginStatements.DelExpiredIpBans));
-            DB.Login.Execute(DB.Login.GetPreparedStatement(LoginStatements.UpdExpiredAccountBans));
-            DB.Login.Execute(DB.Login.GetPreparedStatement(LoginStatements.DelBnetExpiredAccountBanned));
+            DB.Login.Execute(LoginDatabase.GetPreparedStatement(LoginStatements.DelExpiredIpBans));
+            DB.Login.Execute(LoginDatabase.GetPreparedStatement(LoginStatements.UpdExpiredAccountBans));
+            DB.Login.Execute(LoginDatabase.GetPreparedStatement(LoginStatements.DelBnetExpiredAccountBanned));
         }
 
         static Timer _banExpiryCheckTimer;

@@ -388,7 +388,7 @@ namespace Game.Entities
             if (GetSession().m_muteTime != 0 && GetSession().m_muteTime < now)
             {
                 GetSession().m_muteTime = 0;
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME);
+                PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME);
                 stmt.AddValue(0, 0); // Set the mute time to 0
                 stmt.AddValue(1, "");
                 stmt.AddValue(2, "");
@@ -2886,7 +2886,7 @@ namespace Game.Entities
             homebindAreaId = areaId;
 
             // update sql homebind
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_PLAYER_HOMEBIND);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_PLAYER_HOMEBIND);
             stmt.AddValue(0, homebind.GetMapId());
             stmt.AddValue(1, homebindAreaId);
             stmt.AddValue(2, homebind.GetPositionX());
@@ -3971,7 +3971,7 @@ namespace Game.Entities
         public static void OfflineResurrect(ObjectGuid guid, SQLTransaction trans)
         {
             Corpse.DeleteFromDB(guid, trans);
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
             stmt.AddValue(0, (ushort)AtLoginFlags.Resurrect);
             stmt.AddValue(1, guid.GetCounter());
             DB.Characters.ExecuteOrAppend(trans, stmt);
@@ -4797,7 +4797,7 @@ namespace Game.Entities
             atLoginFlags &= ~flags;
             if (persist)
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_REM_AT_LOGIN_FLAG);
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_REM_AT_LOGIN_FLAG);
                 stmt.AddValue(0, (ushort)flags);
                 stmt.AddValue(1, GetGUID().GetCounter());
 

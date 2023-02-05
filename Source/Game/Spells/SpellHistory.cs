@@ -75,11 +75,11 @@ namespace Game.Spells
             PreparedStatement stmt;
             if (typeof(T) == typeof(Pet))
             {
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PET_SPELL_COOLDOWNS);
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PET_SPELL_COOLDOWNS);
                 stmt.AddValue(0, _owner.GetCharmInfo().GetPetNumber());
                 trans.Append(stmt);
 
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PET_SPELL_CHARGES);
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PET_SPELL_CHARGES);
                 stmt.AddValue(0, _owner.GetCharmInfo().GetPetNumber());
                 trans.Append(stmt);
 
@@ -89,7 +89,7 @@ namespace Game.Spells
                     if (!pair.Value.OnHold)
                     {
                         index = 0;
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_PET_SPELL_COOLDOWN);
+                        stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PET_SPELL_COOLDOWN);
                         stmt.AddValue(index++, _owner.GetCharmInfo().GetPetNumber());
                         stmt.AddValue(index++, pair.Key);
                         stmt.AddValue(index++, Time.DateTimeToUnixTime(pair.Value.CooldownEnd));
@@ -102,7 +102,7 @@ namespace Game.Spells
                 foreach (var pair in _categoryCharges)
                 {
                     index = 0;
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_PET_SPELL_CHARGES);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PET_SPELL_CHARGES);
                     stmt.AddValue(index++, _owner.GetCharmInfo().GetPetNumber());
                     stmt.AddValue(index++, pair.Key);
                     stmt.AddValue(index++, Time.DateTimeToUnixTime(pair.Value.RechargeStart));
@@ -112,11 +112,11 @@ namespace Game.Spells
             }
             else
             {
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_SPELL_COOLDOWNS);
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_SPELL_COOLDOWNS);
                 stmt.AddValue(0, _owner.GetGUID().GetCounter());
                 trans.Append(stmt);
 
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_SPELL_CHARGES);
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_SPELL_CHARGES);
                 stmt.AddValue(0, _owner.GetGUID().GetCounter());
                 trans.Append(stmt);
 
@@ -126,7 +126,7 @@ namespace Game.Spells
                     if (!pair.Value.OnHold)
                     {
                         index = 0;
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_SPELL_COOLDOWN);
+                        stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHAR_SPELL_COOLDOWN);
                         stmt.AddValue(index++, _owner.GetGUID().GetCounter());
                         stmt.AddValue(index++, pair.Key);
                         stmt.AddValue(index++, pair.Value.ItemId);
@@ -140,7 +140,7 @@ namespace Game.Spells
                 foreach (var pair in _categoryCharges)
                 {
                     index = 0;
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_SPELL_CHARGES);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHAR_SPELL_CHARGES);
                     stmt.AddValue(index++, _owner.GetGUID().GetCounter());
                     stmt.AddValue(index++, pair.Key);
                     stmt.AddValue(index++, Time.DateTimeToUnixTime(pair.Value.RechargeStart));

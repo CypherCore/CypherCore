@@ -43,11 +43,11 @@ namespace Game
         {
             SQLTransaction trans = new();
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA);
             stmt.AddValue(0, guid.GetCounter());
             trans.Append(stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA_PROGRESS);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA_PROGRESS);
             stmt.AddValue(0, guid.GetCounter());
             trans.Append(stmt);
 
@@ -86,7 +86,7 @@ namespace Game
                         // Removing non-existing criteria data for all characters
                         Log.outError(LogFilter.Player, $"Non-existing quest objective criteria {criteriaId} data has been removed from the table `character_queststatus_objectives_criteria_progress`.");
 
-                        PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INVALID_QUEST_PROGRESS_CRITERIA);
+                        PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_INVALID_QUEST_PROGRESS_CRITERIA);
                         stmt.AddValue(0, criteriaId);
                         DB.Characters.Execute(stmt);
 
@@ -108,7 +108,7 @@ namespace Game
 
         public void SaveToDB(SQLTransaction trans)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA);
             stmt.AddValue(0, _owner.GetGUID().GetCounter());
             trans.Append(stmt);
 
@@ -116,7 +116,7 @@ namespace Game
             {
                 foreach (uint completedObjectiveId in _completedObjectives)
                 {
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA);
                     stmt.AddValue(0, _owner.GetGUID().GetCounter());
                     stmt.AddValue(1, completedObjectiveId);
                     trans.Append(stmt);
@@ -130,14 +130,14 @@ namespace Game
                     if (!pair.Value.Changed)
                         continue;
 
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA_PROGRESS_BY_CRITERIA);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA_PROGRESS_BY_CRITERIA);
                     stmt.AddValue(0, _owner.GetGUID().GetCounter());
                     stmt.AddValue(1, pair.Key);
                     trans.Append(stmt);
 
                     if (pair.Value.Counter != 0)
                     {
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA_PROGRESS);
+                        stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA_PROGRESS);
                         stmt.AddValue(0, _owner.GetGUID().GetCounter());
                         stmt.AddValue(1, pair.Key);
                         stmt.AddValue(2, pair.Value.Counter);

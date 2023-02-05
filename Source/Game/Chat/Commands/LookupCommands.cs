@@ -897,7 +897,7 @@ namespace Game.Chat
                     ip = target.GetSession().GetRemoteAddress();
                 }
 
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_IP);
+                PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_IP);
                 stmt.AddValue(0, ip);
                 return LookupPlayerSearchCommand(DB.Login.Query(stmt), limit, handler);
             }
@@ -905,7 +905,7 @@ namespace Game.Chat
             [Command("account", RBACPermissions.CommandLookupPlayerAccount)]
             static bool HandleLookupPlayerAccountCommand(CommandHandler handler, string account, int limit = -1)
             {
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_LIST_BY_NAME);
+                PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_LIST_BY_NAME);
                 stmt.AddValue(0, account);
                 return LookupPlayerSearchCommand(DB.Login.Query(stmt), limit, handler);
             }
@@ -913,7 +913,7 @@ namespace Game.Chat
             [Command("email", RBACPermissions.CommandLookupPlayerEmail)]
             static bool HandleLookupPlayerEmailCommand(CommandHandler handler, string email, int limit = -1)
             {
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_LIST_BY_EMAIL);
+                PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_LIST_BY_EMAIL);
                 stmt.AddValue(0, email);
                 return LookupPlayerSearchCommand(DB.Login.Query(stmt), limit, handler);
             }
@@ -938,7 +938,7 @@ namespace Game.Chat
                     uint accountId = result.Read<uint>(0);
                     string accountName = result.Read<string>(1);
 
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_GUID_NAME_BY_ACC);
+                    PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_GUID_NAME_BY_ACC);
                     stmt.AddValue(0, accountId);
                     SQLResult result2 = DB.Characters.Query(stmt);
 

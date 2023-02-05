@@ -75,7 +75,7 @@ namespace Game
         {
             _waypointStore.Remove(id);
 
-            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_BY_ID);
+            PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_BY_ID);
             stmt.AddValue(0, id);
             SQLResult result = DB.World.Query(stmt);
 

@@ -33,7 +33,7 @@ namespace Game.AI
             for (byte i = 0; i < (int)SmartScriptType.Max; i++)
                 _eventMap[i].Clear();  //Drop Existing SmartAI List
 
-            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_SMART_SCRIPTS);
+            PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_SMART_SCRIPTS);
             SQLResult result = DB.World.Query(stmt);
             if (result.IsEmpty())
             {
@@ -318,7 +318,7 @@ namespace Game.AI
 
             _waypointStore.Clear();
 
-            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_SMARTAI_WP);
+            PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_SMARTAI_WP);
             SQLResult result = DB.World.Query(stmt);
 
             if (result.IsEmpty())

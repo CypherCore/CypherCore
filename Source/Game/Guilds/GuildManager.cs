@@ -357,7 +357,7 @@ namespace Game
                 // Delete orphan guild bank items
                 DB.Characters.DirectExecute("DELETE gbi FROM guild_bank_item gbi LEFT JOIN guild g ON gbi.guildId = g.guildId WHERE g.guildId IS NULL");
 
-                SQLResult result = DB.Characters.Query(DB.Characters.GetPreparedStatement(CharStatements.SEL_GUILD_BANK_ITEMS));
+                SQLResult result = DB.Characters.Query(CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUILD_BANK_ITEMS));
                 if (result.IsEmpty())
                 {
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 guild bank tab items. DB table `guild_bank_item` or `item_instance` is empty.");
@@ -387,11 +387,11 @@ namespace Game
 
                 foreach (var pair in GuildStore)
                 {
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GUILD_ACHIEVEMENT);
+                    PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUILD_ACHIEVEMENT);
                     stmt.AddValue(0, pair.Key);
                     SQLResult achievementResult = DB.Characters.Query(stmt);
 
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GUILD_ACHIEVEMENT_CRITERIA);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUILD_ACHIEVEMENT_CRITERIA);
                     stmt.AddValue(0, pair.Key);
                     SQLResult criteriaResult = DB.Characters.Query(stmt);
 
@@ -451,7 +451,7 @@ namespace Game
                     continue;
                 }
 
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_GUILD_REWARDS_REQ_ACHIEVEMENTS);
+                PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_GUILD_REWARDS_REQ_ACHIEVEMENTS);
                 stmt.AddValue(0, reward.ItemID);
                 SQLResult reqAchievementResult = DB.World.Query(stmt);
                 if (!reqAchievementResult.IsEmpty())
@@ -478,7 +478,7 @@ namespace Game
 
         public void ResetTimes(bool week)
         {
-            DB.Characters.Execute(DB.Characters.GetPreparedStatement(CharStatements.DEL_GUILD_MEMBER_WITHDRAW));
+            DB.Characters.Execute(CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_MEMBER_WITHDRAW));
 
             foreach (var guild in GuildStore.Values)
                     guild.ResetTimes(week);

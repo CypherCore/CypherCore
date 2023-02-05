@@ -191,7 +191,7 @@ namespace Game.Chat
             Global.ObjectMgr.AddCreatureToGrid(data);
 
             // update position in DB
-            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_POSITION);
+            PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_CREATURE_POSITION);
             stmt.AddValue(0, player.GetPositionX());
             stmt.AddValue(1, player.GetPositionY());
             stmt.AddValue(2, player.GetPositionZ());
@@ -216,7 +216,7 @@ namespace Game.Chat
 
             Player player = handler.GetPlayer();
 
-            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_CREATURE_NEAREST);
+            PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_CREATURE_NEAREST);
             stmt.AddValue(0, player.GetPositionX());
             stmt.AddValue(1, player.GetPositionY());
             stmt.AddValue(2, player.GetPositionZ());
@@ -658,7 +658,7 @@ namespace Game.Chat
                 }
 
                 // Update movement type
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_MOVEMENT_TYPE);
+                PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_CREATURE_MOVEMENT_TYPE);
                 stmt.AddValue(0, (byte)MovementGeneratorType.Waypoint);
                 stmt.AddValue(1, lowGuid);
                 DB.World.Execute(stmt);
@@ -695,7 +695,7 @@ namespace Game.Chat
                 FormationMgr.AddFormationMember(lowguid, followAngle, followDist, leaderGUID, groupAI);
                 creature.SearchFormation();
 
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.INS_CREATURE_FORMATION);
+                PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.INS_CREATURE_FORMATION);
                 stmt.AddValue(0, leaderGUID);
                 stmt.AddValue(1, lowguid);
                 stmt.AddValue(2, followAngle);
@@ -936,7 +936,7 @@ namespace Game.Chat
                     cinfo.Faction = factionId;
 
                 // ..and DB
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_FACTION);
+                PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_CREATURE_FACTION);
 
                 stmt.AddValue(0, factionId);
                 stmt.AddValue(1, factionId);
@@ -960,7 +960,7 @@ namespace Game.Chat
                 creature.ReplaceAllNpcFlags(npcFlags);
                 creature.ReplaceAllNpcFlags2(npcFlags2);
 
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_NPCFLAG);
+                PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_CREATURE_NPCFLAG);
                 stmt.AddValue(0, (ulong)npcFlags | ((ulong)npcFlags2 << 32));
                 stmt.AddValue(1, creature.GetEntry());
                 DB.World.Execute(stmt);
@@ -1216,7 +1216,7 @@ namespace Game.Chat
                     creature.Respawn();
                 }
 
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_WANDER_DISTANCE);
+                PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_CREATURE_WANDER_DISTANCE);
                 stmt.AddValue(0, option);
                 stmt.AddValue(1, (byte)mtype);
                 stmt.AddValue(2, guidLow);
@@ -1234,7 +1234,7 @@ namespace Game.Chat
                 if (!creature)
                     return false;
 
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_SPAWN_TIME_SECS);
+                PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_CREATURE_SPAWN_TIME_SECS);
                 stmt.AddValue(0, spawnTime);
                 stmt.AddValue(1, creature.GetSpawnId());
                 DB.World.Execute(stmt);

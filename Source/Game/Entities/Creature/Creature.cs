@@ -1337,13 +1337,13 @@ namespace Game.Entities
             // update in DB
             SQLTransaction trans = new();
 
-            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_CREATURE);
+            PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_CREATURE);
             stmt.AddValue(0, m_spawnId);
             trans.Append(stmt);
 
             byte index = 0;
 
-            stmt = DB.World.GetPreparedStatement(WorldStatements.INS_CREATURE);
+            stmt = WorldDatabase.GetPreparedStatement(WorldStatements.INS_CREATURE);
             stmt.AddValue(index++, m_spawnId);
             stmt.AddValue(index++, GetEntry());
             stmt.AddValue(index++, mapid);
@@ -1672,43 +1672,43 @@ namespace Game.Entities
             // ... and the database
             trans = new();
 
-            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_CREATURE);
+            PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_CREATURE);
             stmt.AddValue(0, spawnId);
             trans.Append(stmt);
 
-            stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_SPAWNGROUP_MEMBER);
+            stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_SPAWNGROUP_MEMBER);
             stmt.AddValue(0, (byte)SpawnObjectType.Creature);
             stmt.AddValue(1, spawnId);
             trans.Append(stmt);
 
-            stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_CREATURE_ADDON);
+            stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_CREATURE_ADDON);
             stmt.AddValue(0, spawnId);
             trans.Append(stmt);
 
-            stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_GAME_EVENT_CREATURE);
+            stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_GAME_EVENT_CREATURE);
             stmt.AddValue(0, spawnId);
             trans.Append(stmt);
 
-            stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_GAME_EVENT_MODEL_EQUIP);
+            stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_GAME_EVENT_MODEL_EQUIP);
             stmt.AddValue(0, spawnId);
             trans.Append(stmt);
 
-            stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN);
+            stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN);
             stmt.AddValue(0, spawnId);
             stmt.AddValue(1, (uint)CreatureLinkedRespawnType.CreatureToCreature);
             trans.Append(stmt);
 
-            stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN);
+            stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN);
             stmt.AddValue(0, spawnId);
             stmt.AddValue(1, (uint)CreatureLinkedRespawnType.CreatureToGO);
             trans.Append(stmt);
 
-            stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN_MASTER);
+            stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN_MASTER);
             stmt.AddValue(0, spawnId);
             stmt.AddValue(1, (uint)CreatureLinkedRespawnType.CreatureToCreature);
             trans.Append(stmt);
 
-            stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN_MASTER);
+            stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN_MASTER);
             stmt.AddValue(0, spawnId);
             stmt.AddValue(1, (uint)CreatureLinkedRespawnType.GOToCreature);
             trans.Append(stmt);

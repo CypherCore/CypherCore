@@ -29,7 +29,7 @@ namespace Game.Chat.Commands
                     pathId = target.GetWaypointPath();
                 else
                 {
-                    stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_MAX_ID);
+                    stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_MAX_ID);
                     SQLResult result1 = DB.World.Query(stmt);
 
                     uint maxpathid = result1.Read<uint>(0);
@@ -49,7 +49,7 @@ namespace Game.Chat.Commands
                 return true;
             }
 
-            stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_MAX_POINT);
+            stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_MAX_POINT);
             stmt.AddValue(0, pathId);
             SQLResult result = DB.World.Query(stmt);
 
@@ -58,7 +58,7 @@ namespace Game.Chat.Commands
 
             Player player = handler.GetSession().GetPlayer();
 
-            stmt = DB.World.GetPreparedStatement(WorldStatements.INS_WAYPOINT_DATA);
+            stmt = WorldDatabase.GetPreparedStatement(WorldStatements.INS_WAYPOINT_DATA);
             stmt.AddValue(0, pathId);
             stmt.AddValue(1, point + 1);
             stmt.AddValue(2, player.GetPositionX());
@@ -85,13 +85,13 @@ namespace Game.Chat.Commands
             {
                 if (id != 0)
                 {
-                    stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPT_ID_BY_GUID);
+                    stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPT_ID_BY_GUID);
                     stmt.AddValue(0, id);
                     SQLResult result = DB.World.Query(stmt);
 
                     if (result.IsEmpty())
                     {
-                        stmt = DB.World.GetPreparedStatement(WorldStatements.INS_WAYPOINT_SCRIPT);
+                        stmt = WorldDatabase.GetPreparedStatement(WorldStatements.INS_WAYPOINT_SCRIPT);
                         stmt.AddValue(0, id);
                         DB.World.Execute(stmt);
 
@@ -102,11 +102,11 @@ namespace Game.Chat.Commands
                 }
                 else
                 {
-                    stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPTS_MAX_ID);
+                    stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPTS_MAX_ID);
                     SQLResult result = DB.World.Query(stmt);
                     id = result.Read<uint>(0);
 
-                    stmt = DB.World.GetPreparedStatement(WorldStatements.INS_WAYPOINT_SCRIPT);
+                    stmt = WorldDatabase.GetPreparedStatement(WorldStatements.INS_WAYPOINT_SCRIPT);
                     stmt.AddValue(0, id + 1);
                     DB.World.Execute(stmt);
 
@@ -128,7 +128,7 @@ namespace Game.Chat.Commands
                 float a8, a9, a10, a11;
                 string a7;
 
-                stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPT_BY_ID);
+                stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPT_BY_ID);
                 stmt.AddValue(0, id);
                 SQLResult result = DB.World.Query(stmt);
 
@@ -166,13 +166,13 @@ namespace Game.Chat.Commands
                     return true;
                 }
 
-                stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPT_ID_BY_GUID);
+                stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPT_ID_BY_GUID);
                 stmt.AddValue(0, id);
                 SQLResult result = DB.World.Query(stmt);
 
                 if (!result.IsEmpty())
                 {
-                    stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_WAYPOINT_SCRIPT);
+                    stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_WAYPOINT_SCRIPT);
                     stmt.AddValue(0, id);
                     DB.World.Execute(stmt);
 
@@ -218,7 +218,7 @@ namespace Game.Chat.Commands
                         return false;
                     handler.SendSysMessage("|cff00ff00Wp Event: Waypoint script guid: {0}|r|cff00ffff id changed: |r|cff00ff00{1}|r", newid, id);
 
-                    stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_ID);
+                    stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_ID);
                     stmt.AddValue(0, newid);
                     stmt.AddValue(1, id);
 
@@ -228,7 +228,7 @@ namespace Game.Chat.Commands
                 }
                 else
                 {
-                    stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPT_ID_BY_GUID);
+                    stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPT_ID_BY_GUID);
                     stmt.AddValue(0, id);
                     SQLResult result = DB.World.Query(stmt);
 
@@ -243,7 +243,7 @@ namespace Game.Chat.Commands
                         if (!float.TryParse(arg2, out float arg3))
                             return false;
 
-                        stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_X);
+                        stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_X);
                         stmt.AddValue(0, arg3);
                         stmt.AddValue(1, id);
                         DB.World.Execute(stmt);
@@ -256,7 +256,7 @@ namespace Game.Chat.Commands
                         if (!float.TryParse(arg2, out float arg3))
                             return false;
 
-                        stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_Y);
+                        stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_Y);
                         stmt.AddValue(0, arg3);
                         stmt.AddValue(1, id);
                         DB.World.Execute(stmt);
@@ -269,7 +269,7 @@ namespace Game.Chat.Commands
                         if (!float.TryParse(arg2, out float arg3))
                             return false;
 
-                        stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_Z);
+                        stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_Z);
                         stmt.AddValue(0, arg3);
                         stmt.AddValue(1, id);
                         DB.World.Execute(stmt);
@@ -282,7 +282,7 @@ namespace Game.Chat.Commands
                         if (!float.TryParse(arg2, out float arg3))
                             return false;
 
-                        stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_O);
+                        stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_O);
                         stmt.AddValue(0, arg3);
                         stmt.AddValue(1, id);
                         DB.World.Execute(stmt);
@@ -341,26 +341,26 @@ namespace Game.Chat.Commands
 
             ulong guidLow = target.GetSpawnId();
 
-            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_CREATURE_ADDON_BY_GUID);
+            PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_CREATURE_ADDON_BY_GUID);
             stmt.AddValue(0, guidLow);
             SQLResult result = DB.World.Query(stmt);
 
             if (!result.IsEmpty())
             {
-                stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_ADDON_PATH);
+                stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_CREATURE_ADDON_PATH);
                 stmt.AddValue(0, pathId);
                 stmt.AddValue(1, guidLow);
             }
             else
             {
-                stmt = DB.World.GetPreparedStatement(WorldStatements.INS_CREATURE_ADDON);
+                stmt = WorldDatabase.GetPreparedStatement(WorldStatements.INS_CREATURE_ADDON);
                 stmt.AddValue(0, guidLow);
                 stmt.AddValue(1, pathId);
             }
 
             DB.World.Execute(stmt);
 
-            stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_MOVEMENT_TYPE);
+            stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_CREATURE_MOVEMENT_TYPE);
             stmt.AddValue(0, (byte)MovementGeneratorType.Waypoint);
             stmt.AddValue(1, guidLow);
 
@@ -404,7 +404,7 @@ namespace Game.Chat.Commands
             }
 
             // Check the creature
-            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_BY_WPGUID);
+            PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_BY_WPGUID);
             stmt.AddValue(0, target.GetSpawnId());
             SQLResult result = DB.World.Query(stmt);
 
@@ -418,7 +418,7 @@ namespace Game.Chat.Commands
                 // See also: http://dev.mysql.com/doc/refman/5.0/en/problems-with-float.html
                 string maxDiff = "0.01";
 
-                stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_BY_POS);
+                stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_BY_POS);
                 stmt.AddValue(0, target.GetPositionX());
                 stmt.AddValue(1, maxDiff);
                 stmt.AddValue(2, target.GetPositionY());
@@ -458,12 +458,12 @@ namespace Game.Chat.Commands
                 if (Creature.DeleteFromDB(target.GetSpawnId()))
                 {
 
-                    stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_WAYPOINT_DATA);
+                    stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_WAYPOINT_DATA);
                     stmt.AddValue(0, pathid);
                     stmt.AddValue(1, point);
                     DB.World.Execute(stmt);
 
-                    stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_DATA_POINT);
+                    stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_DATA_POINT);
                     stmt.AddValue(0, pathid);
                     stmt.AddValue(1, point);
                     DB.World.Execute(stmt);
@@ -518,7 +518,7 @@ namespace Game.Chat.Commands
                     return false;
                 }
 
-                stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_DATA_POSITION);
+                stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_DATA_POSITION);
                 stmt.AddValue(0, chr.GetPositionX());
                 stmt.AddValue(1, chr.GetPositionY());
                 stmt.AddValue(2, chr.GetPositionZ());
@@ -604,7 +604,7 @@ namespace Game.Chat.Commands
                     return false;
                 }
 
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_ALL_BY_WPGUID);
+                PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_ALL_BY_WPGUID);
                 stmt.AddValue(0, target.GetSpawnId());
                 SQLResult result = DB.World.Query(stmt);
 
@@ -637,7 +637,7 @@ namespace Game.Chat.Commands
 
             if (subCommand == "on")
             {
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_POS_BY_ID);
+                PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_POS_BY_ID);
                 stmt.AddValue(0, pathId);
                 SQLResult result = DB.World.Query(stmt);
 
@@ -650,7 +650,7 @@ namespace Game.Chat.Commands
                 handler.SendSysMessage("|cff00ff00DEBUG: wp on, PathID: |cff00ffff{0}|r", pathId);
 
                 // Delete all visuals for this NPC
-                stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_WPGUID_BY_ID);
+                stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_WPGUID_BY_ID);
                 stmt.AddValue(0, pathId);
                 SQLResult result2 = DB.World.Query(stmt);
 
@@ -723,7 +723,7 @@ namespace Game.Chat.Commands
                     }
 
                     // Set "wpguid" column to the visual waypoint
-                    stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_DATA_WPGUID);
+                    stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_DATA_WPGUID);
                     stmt.AddValue(0, creature.GetSpawnId());
                     stmt.AddValue(1, pathId);
                     stmt.AddValue(2, point);
@@ -739,7 +739,7 @@ namespace Game.Chat.Commands
             {
                 handler.SendSysMessage("|cff00ff00DEBUG: wp first, pathid: {0}|r", pathId);
 
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_POS_FIRST_BY_ID);
+                PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_POS_FIRST_BY_ID);
                 stmt.AddValue(0, pathId);
                 SQLResult result = DB.World.Query(stmt);
 
@@ -793,7 +793,7 @@ namespace Game.Chat.Commands
             {
                 handler.SendSysMessage("|cff00ff00DEBUG: wp last, PathID: |r|cff00ffff{0}|r", pathId);
 
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_POS_LAST_BY_ID);
+                PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_POS_LAST_BY_ID);
                 stmt.AddValue(0, pathId);
                 SQLResult result = DB.World.Query(stmt);
 
@@ -846,7 +846,7 @@ namespace Game.Chat.Commands
 
             if (subCommand == "off")
             {
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_CREATURE_BY_ID);
+                PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_CREATURE_BY_ID);
                 stmt.AddValue(0, 1);
                 SQLResult result = DB.World.Query(stmt);
 
@@ -868,7 +868,7 @@ namespace Game.Chat.Commands
                 }
                 while (result.NextRow());
                 // set "wpguid" column to "empty" - no visual waypoint spawned
-                stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_DATA_ALL_WPGUID);
+                stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_DATA_ALL_WPGUID);
 
                 DB.World.Execute(stmt);
                 //DB.World.PExecute("UPDATE creature_movement SET wpguid = '0' WHERE wpguid <> '0'");
@@ -912,13 +912,13 @@ namespace Game.Chat.Commands
                 return true;
             }
 
-            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_CREATURE_ADDON);
+            PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_CREATURE_ADDON);
             stmt.AddValue(0, guidLow);
             DB.World.Execute(stmt);
 
             target.UpdateCurrentWaypointInfo(0, 0);
 
-            stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_MOVEMENT_TYPE);
+            stmt = WorldDatabase.GetPreparedStatement(WorldStatements.UPD_CREATURE_MOVEMENT_TYPE);
             stmt.AddValue(0, (byte)MovementGeneratorType.Idle);
             stmt.AddValue(1, guidLow);
             DB.World.Execute(stmt);

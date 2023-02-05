@@ -678,7 +678,7 @@ namespace Game.Entities
             m_IsBGRandomWinner = isWinner;
             if (m_IsBGRandomWinner)
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_BATTLEGROUND_RANDOM);
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_BATTLEGROUND_RANDOM);
                 stmt.AddValue(0, GetGUID().GetCounter());
                 DB.Characters.Execute(stmt);
             }

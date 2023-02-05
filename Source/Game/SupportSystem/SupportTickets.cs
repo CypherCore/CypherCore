@@ -144,7 +144,7 @@ namespace Game.SupportSystem
         public override void SaveToDB()
         {
             byte idx = 0;
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_GM_BUG);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_GM_BUG);
             stmt.AddValue(idx, _id);
             stmt.AddValue(++idx, _playerGuid.GetCounter());
             stmt.AddValue(++idx, _note);
@@ -163,7 +163,7 @@ namespace Game.SupportSystem
 
         public override void DeleteFromDB()
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GM_BUG);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GM_BUG);
             stmt.AddValue(0, _id);
             DB.Characters.Execute(stmt);
         }
@@ -261,7 +261,7 @@ namespace Game.SupportSystem
             var trans = new SQLTransaction();
 
             byte idx = 0;
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_GM_COMPLAINT);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_GM_COMPLAINT);
             stmt.AddValue(idx, _id);
             stmt.AddValue(++idx, _playerGuid.GetCounter());
             stmt.AddValue(++idx, _note);
@@ -288,7 +288,7 @@ namespace Game.SupportSystem
             foreach (var c in _chatLog.Lines)
             {
                 idx = 0;
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_GM_COMPLAINT_CHATLINE);
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_GM_COMPLAINT_CHATLINE);
                 stmt.AddValue(idx, _id);
                 stmt.AddValue(++idx, lineIndex);
                 stmt.AddValue(++idx, c.Timestamp);
@@ -303,11 +303,11 @@ namespace Game.SupportSystem
 
         public override void DeleteFromDB()
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GM_COMPLAINT);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GM_COMPLAINT);
             stmt.AddValue(0, _id);
             DB.Characters.Execute(stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GM_COMPLAINT_CHATLOG);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GM_COMPLAINT_CHATLOG);
             stmt.AddValue(0, _id);
             DB.Characters.Execute(stmt);
         }
@@ -398,7 +398,7 @@ namespace Game.SupportSystem
         public override void SaveToDB()
         {
             byte idx = 0;
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_GM_SUGGESTION);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_GM_SUGGESTION);
             stmt.AddValue(idx, _id);
             stmt.AddValue(++idx, _playerGuid.GetCounter());
             stmt.AddValue(++idx, _note);
@@ -417,7 +417,7 @@ namespace Game.SupportSystem
 
         public override void DeleteFromDB()
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GM_SUGGESTION);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GM_SUGGESTION);
             stmt.AddValue(0, _id);
             DB.Characters.Execute(stmt);
         }

@@ -98,14 +98,14 @@ namespace Game.Chat.Commands
             // inventory case
             uint inventoryCount = 0;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_INVENTORY_COUNT_ITEM);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_INVENTORY_COUNT_ITEM);
             stmt.AddValue(0, itemId);
             SQLResult result = DB.Characters.Query(stmt);
 
             if (!result.IsEmpty())
                 inventoryCount = result.Read<uint>(0);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_INVENTORY_ITEM_BY_ENTRY);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_INVENTORY_ITEM_BY_ENTRY);
             stmt.AddValue(0, itemId);
             stmt.AddValue(1, count);
             result = DB.Characters.Query(stmt);
@@ -143,7 +143,7 @@ namespace Game.Chat.Commands
             // mail case
             uint mailCount = 0;
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAIL_COUNT_ITEM);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAIL_COUNT_ITEM);
             stmt.AddValue(0, itemId);
             result = DB.Characters.Query(stmt);
 
@@ -152,7 +152,7 @@ namespace Game.Chat.Commands
 
             if (count > 0)
             {
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAIL_ITEMS_BY_ENTRY);
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAIL_ITEMS_BY_ENTRY);
                 stmt.AddValue(0, itemId);
                 stmt.AddValue(1, count);
                 result = DB.Characters.Query(stmt);
@@ -184,7 +184,7 @@ namespace Game.Chat.Commands
             // auction case
             uint auctionCount = 0;
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_AUCTIONHOUSE_COUNT_ITEM);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_AUCTIONHOUSE_COUNT_ITEM);
             stmt.AddValue(0, itemId);
             result = DB.Characters.Query(stmt);
 
@@ -193,7 +193,7 @@ namespace Game.Chat.Commands
 
             if (count > 0)
             {
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_AUCTIONHOUSE_ITEM_BY_ENTRY);
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_AUCTIONHOUSE_ITEM_BY_ENTRY);
                 stmt.AddValue(0, itemId);
                 stmt.AddValue(1, count);
                 result = DB.Characters.Query(stmt);
@@ -220,14 +220,14 @@ namespace Game.Chat.Commands
             // guild bank case
             uint guildCount = 0;
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GUILD_BANK_COUNT_ITEM);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUILD_BANK_COUNT_ITEM);
             stmt.AddValue(0, itemId);
             result = DB.Characters.Query(stmt);
 
             if (!result.IsEmpty())
                 guildCount = result.Read<uint>(0);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GUILD_BANK_ITEM_BY_ENTRY);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GUILD_BANK_ITEM_BY_ENTRY);
             stmt.AddValue(0, itemId);
             stmt.AddValue(1, count);
             result = DB.Characters.Query(stmt);
@@ -267,7 +267,7 @@ namespace Game.Chat.Commands
             if (player == null)
                 return false;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAIL_LIST_COUNT);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAIL_LIST_COUNT);
             stmt.AddValue(0, player.GetGUID().GetCounter());
             SQLResult result = DB.Characters.Query(stmt);
             if (!result.IsEmpty())
@@ -278,7 +278,7 @@ namespace Game.Chat.Commands
                 handler.SendSysMessage(CypherStrings.ListMailHeader, countMail, nameLink, player.GetGUID().ToString());
                 handler.SendSysMessage(CypherStrings.AccountListBar);
 
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAIL_LIST_INFO);
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAIL_LIST_INFO);
                 stmt.AddValue(0, player.GetGUID().GetCounter());
                 SQLResult result1 = DB.Characters.Query(stmt);
 
@@ -313,7 +313,7 @@ namespace Game.Chat.Commands
                                 do
                                 {
                                     uint item_guid = result2.Read<uint>(0);
-                                    stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAIL_LIST_ITEMS);
+                                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAIL_LIST_ITEMS);
                                     stmt.AddValue(0, item_guid);
                                     SQLResult result3 = DB.Characters.Query(stmt);
                                     if (!result3.IsEmpty())

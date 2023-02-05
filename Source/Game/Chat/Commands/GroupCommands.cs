@@ -165,7 +165,7 @@ namespace Game.Chat
             // If not, we extract it from the SQL.
             if (!groupTarget)
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GROUP_MEMBER);
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GROUP_MEMBER);
                 stmt.AddValue(0, guidTarget.GetCounter());
                 SQLResult resultGroup = DB.Characters.Query(stmt);
                 if (!resultGroup.IsEmpty())

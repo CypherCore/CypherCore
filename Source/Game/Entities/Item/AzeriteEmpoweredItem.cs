@@ -36,7 +36,7 @@ namespace Game.Entities
 
         public override void SaveToDB(SQLTransaction trans)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_EMPOWERED);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_EMPOWERED);
             stmt.AddValue(0, GetGUID().GetCounter());
             trans.Append(stmt);
 
@@ -44,7 +44,7 @@ namespace Game.Entities
             {
                 case ItemUpdateState.New:
                 case ItemUpdateState.Changed:
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_AZERITE_EMPOWERED);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_AZERITE_EMPOWERED);
                     stmt.AddValue(0, GetGUID().GetCounter());
                     for (int i = 0; i < SharedConst.MaxAzeriteEmpoweredTier; ++i)
                         stmt.AddValue(1 + i, m_azeriteEmpoweredItemData.Selections[i]);
@@ -79,7 +79,7 @@ namespace Game.Entities
 
             if (needSave)
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ITEM_INSTANCE_AZERITE_EMPOWERED);
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ITEM_INSTANCE_AZERITE_EMPOWERED);
                 for (int i = 0; i < SharedConst.MaxAzeriteEmpoweredTier; ++i)
                     stmt.AddValue(i, m_azeriteEmpoweredItemData.Selections[i]);
 
@@ -90,7 +90,7 @@ namespace Game.Entities
 
         public static new void DeleteFromDB(SQLTransaction trans, ulong itemGuid)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_EMPOWERED);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_EMPOWERED);
             stmt.AddValue(0, itemGuid);
             DB.Characters.ExecuteOrAppend(trans, stmt);
         }

@@ -234,7 +234,7 @@ namespace Game
             if (GetWorldStateTemplate(worldStateId) == null)
                 return;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_WORLD_STATE);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_WORLD_STATE);
             stmt.AddValue(0, worldStateId);
             stmt.AddValue(1, value);
             DB.Characters.Execute(stmt);

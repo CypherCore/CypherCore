@@ -48,7 +48,7 @@ namespace Game.BlackMarket
             // Clear in case we are reloading
             _auctions.Clear();
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_BLACKMARKET_AUCTIONS);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_BLACKMARKET_AUCTIONS);
             SQLResult result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
             {

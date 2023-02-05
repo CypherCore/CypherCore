@@ -100,7 +100,7 @@ namespace Game.Chat.Commands
                         break;
                 }
 
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_DISABLES);
+                PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_DISABLES);
                 stmt.AddValue(0, entry);
                 stmt.AddValue(1, (byte)disableType);
                 SQLResult result = DB.World.Query(stmt);
@@ -110,7 +110,7 @@ namespace Game.Chat.Commands
                     return false;
                 }
 
-                stmt = DB.World.GetPreparedStatement(WorldStatements.INS_DISABLES);
+                stmt = WorldDatabase.GetPreparedStatement(WorldStatements.INS_DISABLES);
                 stmt.AddValue(0, entry);
                 stmt.AddValue(1, (byte)disableType);
                 stmt.AddValue(2, flags);
@@ -178,7 +178,7 @@ namespace Game.Chat.Commands
                 if (entry == 0)
                     return false;
 
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_DISABLES);
+                PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_DISABLES);
                 stmt.AddValue(0, entry);
                 stmt.AddValue(1, (byte)disableType);
                 SQLResult result = DB.World.Query(stmt);
@@ -188,7 +188,7 @@ namespace Game.Chat.Commands
                     return false;
                 }
 
-                stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_DISABLES);
+                stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_DISABLES);
                 stmt.AddValue(0, entry);
                 stmt.AddValue(1, (byte)disableType);
                 DB.World.Execute(stmt);

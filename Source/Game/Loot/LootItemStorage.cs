@@ -21,7 +21,7 @@ namespace Game.Loots
             _lootItemStorage.Clear();
             uint count = 0;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ITEMCONTAINER_ITEMS);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ITEMCONTAINER_ITEMS);
             SQLResult result = DB.Characters.Query(stmt);
             if (!result.IsEmpty())
             {
@@ -60,7 +60,7 @@ namespace Game.Loots
             else
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 stored item loots");
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ITEMCONTAINER_MONEY);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ITEMCONTAINER_MONEY);
             result = DB.Characters.Query(stmt);
             if (!result.IsEmpty())
             {
@@ -146,11 +146,11 @@ namespace Game.Loots
             _lootItemStorage.TryRemove(containerId, out _);
 
             SQLTransaction trans = new();
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEMS);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEMS);
             stmt.AddValue(0, containerId);
             trans.Append(stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_MONEY);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_MONEY);
             stmt.AddValue(0, containerId);
             trans.Append(stmt);
 
@@ -183,7 +183,7 @@ namespace Game.Loots
             if (loot.gold != 0)
                 container.AddMoney(loot.gold, trans);
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEMS);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEMS);
             stmt.AddValue(0, containerId);
             trans.Append(stmt);
 
@@ -226,7 +226,7 @@ namespace Game.Loots
             if (trans == null)
                 return;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEMCONTAINER_ITEMS);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ITEMCONTAINER_ITEMS);
 
             // container_id, item_id, item_count, follow_rules, ffa, blocked, counted, under_threshold, needs_quest, rnd_prop, rnd_suffix
             stmt.AddValue(0, _containerId);
@@ -256,11 +256,11 @@ namespace Game.Loots
             if (trans == null)
                 return;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_MONEY);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_MONEY);
             stmt.AddValue(0, _containerId);
             trans.Append(stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEMCONTAINER_MONEY);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ITEMCONTAINER_MONEY);
             stmt.AddValue(0, _containerId);
             stmt.AddValue(1, _money);
             trans.Append(stmt);
@@ -270,7 +270,7 @@ namespace Game.Loots
         {
             _money = 0;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_MONEY);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_MONEY);
             stmt.AddValue(0, _containerId);
             DB.Characters.Execute(stmt);
         }
@@ -288,7 +288,7 @@ namespace Game.Loots
             }
 
             // Deletes a single item associated with an openable item from the DB
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEM);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEM);
             stmt.AddValue(0, _containerId);
             stmt.AddValue(1, itemId);
             stmt.AddValue(2, count);

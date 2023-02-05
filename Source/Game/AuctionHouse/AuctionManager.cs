@@ -139,7 +139,7 @@ namespace Game
             // need to clear in case we are reloading
             _itemsByGuid.Clear();
 
-            SQLResult result = DB.Characters.Query(DB.Characters.GetPreparedStatement(CharStatements.SEL_AUCTION_ITEMS));
+            SQLResult result = DB.Characters.Query(CharacterDatabase.GetPreparedStatement(CharStatements.SEL_AUCTION_ITEMS));
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 auctions. DB table `auctionhouse` is empty.");
@@ -181,7 +181,7 @@ namespace Game
             oldMSTime = Time.GetMSTime();
             count = 0;
 
-            result = DB.Characters.Query(DB.Characters.GetPreparedStatement(CharStatements.SEL_AUCTION_BIDDERS));
+            result = DB.Characters.Query(CharacterDatabase.GetPreparedStatement(CharStatements.SEL_AUCTION_BIDDERS));
             if (!result.IsEmpty())
             {
                 do
@@ -196,7 +196,7 @@ namespace Game
             oldMSTime = Time.GetMSTime();
             count = 0;
 
-            result = DB.Characters.Query(DB.Characters.GetPreparedStatement(CharStatements.SEL_AUCTIONS));
+            result = DB.Characters.Query(CharacterDatabase.GetPreparedStatement(CharStatements.SEL_AUCTIONS));
             if (!result.IsEmpty())
             {
                 SQLTransaction trans = new();
@@ -210,7 +210,7 @@ namespace Game
                     if (auctionHouse == null)
                     {
                         Log.outError(LogFilter.Misc, $"Auction {auction.Id} has wrong auctionHouseId {auctionHouseId}");
-                        PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_AUCTION);
+                        PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_AUCTION);
                         stmt.AddValue(0, auction.Id);
                         trans.Append(stmt);
                         continue;
@@ -219,7 +219,7 @@ namespace Game
                     if (!itemsByAuction.ContainsKey(auction.Id))
                     {
                         Log.outError(LogFilter.Misc, $"Auction {auction.Id} has no items");
-                        PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_AUCTION);
+                        PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_AUCTION);
                         stmt.AddValue(0, auction.Id);
                         trans.Append(stmt);
                         continue;
@@ -337,7 +337,7 @@ namespace Game
                     if (auction != null)
                         auction.EndTime = GameTime.GetSystemTime();
 
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_AUCTION_EXPIRATION);
+                    PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_AUCTION_EXPIRATION);
                     stmt.AddValue(0, (uint)GameTime.GetGameTime());
                     stmt.AddValue(1, pendingAuction.AuctionId);
                     trans.Append(stmt);
@@ -377,7 +377,7 @@ namespace Game
                         if (auction != null)
                             auction.EndTime = GameTime.GetSystemTime();
 
-                        PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_AUCTION_EXPIRATION);
+                        PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_AUCTION_EXPIRATION);
                         stmt.AddValue(0, (uint)GameTime.GetGameTime());
                         stmt.AddValue(1, pendingAuction.AuctionId);
                         trans.Append(stmt);
@@ -630,7 +630,7 @@ namespace Game
 
             if (trans != null)
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_AUCTION);
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_AUCTION);
                 stmt.AddValue(0, auction.Id);
                 stmt.AddValue(1, _auctionHouse.Id);
                 stmt.AddValue(2, auction.Owner.GetCounter());
@@ -646,7 +646,7 @@ namespace Game
 
                 foreach (Item item in auction.Items)
                 {
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_AUCTION_ITEMS);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_AUCTION_ITEMS);
                     stmt.AddValue(0, auction.Id);
                     stmt.AddValue(1, item.GetGUID().GetCounter());
                     trans.Append(stmt);
@@ -738,7 +738,7 @@ namespace Game
             else
                 _buckets.Remove(bucket.Key);
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_AUCTION);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_AUCTION);
             stmt.AddValue(0, auction.Id);
             trans.Append(stmt);
 
@@ -1325,7 +1325,7 @@ namespace Game
 
                 for (int i = 0; i < batch.ItemsCount; ++i)
                 {
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_AUCTION_ITEMS_BY_ITEM);
+                    PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_AUCTION_ITEMS_BY_ITEM);
                     stmt.AddValue(0, batch.Items[i].GetGUID().GetCounter());
                     trans.Append(stmt);
 
@@ -1429,7 +1429,7 @@ namespace Game
                 // owner in `data` will set at mail receive and item extracting
                 foreach (Item item in auction.Items)
                 {
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ITEM_OWNER);
+                    PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ITEM_OWNER);
                     stmt.AddValue(0, auction.Bidder.GetCounter());
                     stmt.AddValue(1, item.GetGUID().GetCounter());
                     trans.Append(stmt);

@@ -122,7 +122,7 @@ namespace Game.Chat.Commands
         [Command("listgameaccounts", RBACPermissions.CommandBnetAccountListGameAccounts, true)]
         static bool HandleListGameAccountsCommand(CommandHandler handler, string battlenetAccountName)
         {
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_GAME_ACCOUNT_LIST);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_GAME_ACCOUNT_LIST);
             stmt.AddValue(0, battlenetAccountName);
 
             SQLResult accountList = DB.Login.Query(stmt);
@@ -250,7 +250,7 @@ namespace Game.Chat.Commands
             [Command("ip", RBACPermissions.CommandBnetAccountLockIp, true)]
             static bool HandleAccountLockIpCommand(CommandHandler handler, bool state)
             {
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_ACCOUNT_LOCK);
+                PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_BNET_ACCOUNT_LOCK);
 
                 if (state)
                 {

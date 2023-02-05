@@ -80,13 +80,12 @@ namespace Framework.Database
 
     public abstract class MySqlBase<T>
     {
-        Dictionary<T, string> _preparedQueries = new();
-        ProducerConsumerQueue<ISqlOperation> _queue = new();
+        static Dictionary<T, string> _preparedQueries = new();
 
+        ProducerConsumerQueue<ISqlOperation> _queue = new();
         MySqlConnectionInfo _connectionInfo;
         DatabaseUpdater<T> _updater;
         DatabaseWorker<T> _worker;
-
         DBVersion version;
 
         public MySqlErrorCode Initialize(MySqlConnectionInfo connectionInfo)
@@ -225,7 +224,7 @@ namespace Framework.Database
             _preparedQueries[statement] = sb.ToString();
         }
 
-        public PreparedStatement GetPreparedStatement(T statement)
+        public static PreparedStatement GetPreparedStatement(T statement)
         {
             return new PreparedStatement(_preparedQueries[statement]);
         }

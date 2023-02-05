@@ -238,7 +238,7 @@ namespace Game.Chat
                         target.TeleportTo(target.GetHomebind());
                     else
                     {
-                        PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_HOMEBIND);
+                        PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_HOMEBIND);
                         stmt.AddValue(0, player.GetGUID().GetCounter());
                         SQLResult result = DB.Characters.Query(stmt);
 

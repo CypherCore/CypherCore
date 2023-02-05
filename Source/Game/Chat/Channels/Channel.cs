@@ -95,7 +95,7 @@ namespace Game.Chat
                 foreach (var iter in _bannedStore)
                     banlist += iter.GetRawValue().ToHexString() + ' ';
 
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHANNEL);
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHANNEL);
                 stmt.AddValue(0, _channelName);
                 stmt.AddValue(1, (uint)_channelTeam);
                 stmt.AddValue(2, _announceEnabled);
@@ -108,7 +108,7 @@ namespace Game.Chat
             {
                 if (!_playersStore.Empty())
                 {
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHANNEL_USAGE);
+                    PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHANNEL_USAGE);
                     stmt.AddValue(0, _channelName);
                     stmt.AddValue(1, (uint)_channelTeam);
                     DB.Characters.Execute(stmt);

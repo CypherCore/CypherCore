@@ -669,13 +669,13 @@ namespace Game.BattleGrounds
             ulong battlegroundId = 1;
             if (IsBattleground() && WorldConfig.GetBoolValue(WorldCfg.BattlegroundStoreStatisticsEnable))
             {
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PVPSTATS_MAXID);
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PVPSTATS_MAXID);
                 SQLResult result = DB.Characters.Query(stmt);
 
                 if (!result.IsEmpty())
                     battlegroundId = result.Read<ulong>(0) + 1;
 
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_PVPSTATS_BATTLEGROUND);
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PVPSTATS_BATTLEGROUND);
                 stmt.AddValue(0, battlegroundId);
                 stmt.AddValue(1, (byte)GetWinner());
                 stmt.AddValue(2, GetUniqueBracketId());
@@ -725,7 +725,7 @@ namespace Game.BattleGrounds
 
                 if (IsBattleground() && WorldConfig.GetBoolValue(WorldCfg.BattlegroundStoreStatisticsEnable))
                 {
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_PVPSTATS_PLAYER);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PVPSTATS_PLAYER);
                     var score = PlayerScores.LookupByKey(player.GetGUID());
 
                     stmt.AddValue(0, battlegroundId);

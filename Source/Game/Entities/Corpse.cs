@@ -96,7 +96,7 @@ namespace Game.Entities
                 items.Append($"{m_corpseData.Items[i]} ");
 
             byte index = 0;
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CORPSE);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CORPSE);
             stmt.AddValue(index++, GetOwnerGUID().GetCounter());                            // guid
             stmt.AddValue(index++, GetPositionX());                                         // posX
             stmt.AddValue(index++, GetPositionY());                                         // posY
@@ -118,7 +118,7 @@ namespace Game.Entities
             foreach (var phaseId in GetPhaseShift().GetPhases().Keys)
             {
                 index = 0;
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CORPSE_PHASES);
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CORPSE_PHASES);
                 stmt.AddValue(index++, GetOwnerGUID().GetCounter());                        // OwnerGuid
                 stmt.AddValue(index++, phaseId);                                            // PhaseId
                 trans.Append(stmt);
@@ -127,7 +127,7 @@ namespace Game.Entities
             foreach (var customization in m_corpseData.Customizations)
             {
                 index = 0;
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CORPSE_CUSTOMIZATIONS);
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CORPSE_CUSTOMIZATIONS);
                 stmt.AddValue(index++, GetOwnerGUID().GetCounter());                        // OwnerGuid
                 stmt.AddValue(index++, customization.ChrCustomizationOptionID);
                 stmt.AddValue(index++, customization.ChrCustomizationChoiceID);
@@ -144,15 +144,15 @@ namespace Game.Entities
 
         public static void DeleteFromDB(ObjectGuid ownerGuid, SQLTransaction trans)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CORPSE);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CORPSE);
             stmt.AddValue(0, ownerGuid.GetCounter());
             DB.Characters.ExecuteOrAppend(trans, stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CORPSE_PHASES);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CORPSE_PHASES);
             stmt.AddValue(0, ownerGuid.GetCounter());
             DB.Characters.ExecuteOrAppend(trans, stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CORPSE_CUSTOMIZATIONS);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CORPSE_CUSTOMIZATIONS);
             stmt.AddValue(0, ownerGuid.GetCounter());
             DB.Characters.ExecuteOrAppend(trans, stmt);
         }

@@ -27,7 +27,7 @@ namespace Game
             mTextMap.Clear(); // for reload case
             //all currently used temp texts are NOT reset
 
-            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_CREATURE_TEXT);
+            PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_CREATURE_TEXT);
             SQLResult result = DB.World.Query(stmt);
 
             if (result.IsEmpty())

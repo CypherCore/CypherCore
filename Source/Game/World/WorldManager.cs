@@ -78,7 +78,7 @@ namespace Game
 
         public void LoadDBAllowedSecurityLevel()
         {
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_REALMLIST_SECURITY_LEVEL);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_REALMLIST_SECURITY_LEVEL);
             stmt.AddValue(0, (int)_realm.Id.Index);
             SQLResult result = DB.Login.Query(stmt);
 
@@ -1269,7 +1269,7 @@ namespace Game
 
             m_Autobroadcasts.Clear();
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_AUTOBROADCAST);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_AUTOBROADCAST);
             stmt.AddValue(0, _realm.Id.Index);
 
             SQLResult result = DB.Login.Query(stmt);
@@ -1398,7 +1398,7 @@ namespace Game
 
                 m_timers[WorldTimers.UpTime].Reset();
 
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_UPTIME_PLAYERS);
+                PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_UPTIME_PLAYERS);
 
                 stmt.AddValue(0, tmpDiff);
                 stmt.AddValue(1, maxOnlinePlayers);
@@ -1415,7 +1415,7 @@ namespace Game
                 {
                     m_timers[WorldTimers.CleanDB].Reset();
 
-                    PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_OLD_LOGS);
+                    PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_OLD_LOGS);
                     stmt.AddValue(0, WorldConfig.GetIntValue(WorldCfg.LogdbCleartime));
                     stmt.AddValue(1, 0);
                     stmt.AddValue(2, GetRealm().Id.Index);
@@ -1637,10 +1637,10 @@ namespace Game
             {
                 case BanMode.IP:
                     // No SQL injection with prepared statements
-                    stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_IP);
+                    stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_IP);
                     stmt.AddValue(0, nameOrIP);
                     resultAccounts = DB.Login.Query(stmt);
-                    stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_IP_BANNED);
+                    stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_IP_BANNED);
                     stmt.AddValue(0, nameOrIP);
                     stmt.AddValue(1, duration_secs);
                     stmt.AddValue(2, author);
@@ -1649,13 +1649,13 @@ namespace Game
                     break;
                 case BanMode.Account:
                     // No SQL injection with prepared statements
-                    stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_ID_BY_NAME);
+                    stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_ID_BY_NAME);
                     stmt.AddValue(0, nameOrIP);
                     resultAccounts = DB.Login.Query(stmt);
                     break;
                 case BanMode.Character:
                     // No SQL injection with prepared statements
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ACCOUNT_BY_NAME);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ACCOUNT_BY_NAME);
                     stmt.AddValue(0, nameOrIP);
                     resultAccounts = DB.Characters.Query(stmt);
                     break;
@@ -1680,11 +1680,11 @@ namespace Game
                 if (mode != BanMode.IP)
                 {
                     // make sure there is only one active ban
-                    stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_NOT_BANNED);
+                    stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_NOT_BANNED);
                     stmt.AddValue(0, account);
                     trans.Append(stmt);
                     // No SQL injection with prepared statements
-                    stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_ACCOUNT_BANNED);
+                    stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_ACCOUNT_BANNED);
                     stmt.AddValue(0, account);
                     stmt.AddValue(1, duration_secs);
                     stmt.AddValue(2, author);
@@ -1711,7 +1711,7 @@ namespace Game
             PreparedStatement stmt;
             if (mode == BanMode.IP)
             {
-                stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_IP_NOT_BANNED);
+                stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_IP_NOT_BANNED);
                 stmt.AddValue(0, nameOrIP);
                 DB.Login.Execute(stmt);
             }
@@ -1727,7 +1727,7 @@ namespace Game
                     return false;
 
                 //NO SQL injection as account is uint32
-                stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_NOT_BANNED);
+                stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_NOT_BANNED);
                 stmt.AddValue(0, account);
                 DB.Login.Execute(stmt);
             }
@@ -1760,11 +1760,11 @@ namespace Game
             SQLTransaction trans = new();
 
             // make sure there is only one active ban
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_BAN);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHARACTER_BAN);
             stmt.AddValue(0, guid.GetCounter());
             trans.Append(stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER_BAN);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHARACTER_BAN);
             stmt.AddValue(0, guid.GetCounter());
             stmt.AddValue(1, (long)durationSecs);
             stmt.AddValue(2, author);
@@ -1794,7 +1794,7 @@ namespace Game
             else
                 guid = pBanned.GetGUID();
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_BAN);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHARACTER_BAN);
             stmt.AddValue(0, guid.GetCounter());
             DB.Characters.Execute(stmt);
             return true;
@@ -1962,7 +1962,7 @@ namespace Game
 
         public void UpdateRealmCharCount(uint accountId)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_COUNT);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_COUNT);
             stmt.AddValue(0, accountId);
             _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(UpdateRealmCharCount));
         }
@@ -1974,7 +1974,7 @@ namespace Game
                 uint Id = result.Read<uint>(0);
                 uint charCount = result.Read<uint>(1);
 
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.REP_REALM_CHARACTERS);
+                PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.REP_REALM_CHARACTERS);
                 stmt.AddValue(0, charCount);
                 stmt.AddValue(1, Id);
                 stmt.AddValue(2, _realm.Id.Index);
@@ -1997,10 +1997,10 @@ namespace Game
         public void DailyReset()
         {
             // reset all saved quest status
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_DAILY);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_DAILY);
             DB.Characters.Execute(stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_GARRISON_FOLLOWER_ACTIVATIONS);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHARACTER_GARRISON_FOLLOWER_ACTIVATIONS);
             stmt.AddValue(0, 1);
             DB.Characters.Execute(stmt);
 
@@ -2044,7 +2044,7 @@ namespace Game
         public void ResetWeeklyQuests()
         {
             // reset all saved quest status
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_WEEKLY);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_WEEKLY);
             DB.Characters.Execute(stmt);
             // reset all quest status in memory
             foreach (var itr in m_sessions)
@@ -2082,7 +2082,7 @@ namespace Game
         public void ResetMonthlyQuests()
         {
             // reset all saved quest status
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_MONTHLY);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_MONTHLY);
             DB.Characters.Execute(stmt);
             // reset all quest status in memory
             foreach (var itr in m_sessions)
@@ -2212,7 +2212,7 @@ namespace Game
 
         public void ResetEventSeasonalQuests(ushort event_id, long eventStartTime)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_SEASONAL_BY_EVENT);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_SEASONAL_BY_EVENT);
             stmt.AddValue(0, event_id);
             stmt.AddValue(1, eventStartTime);
             DB.Characters.Execute(stmt);
@@ -2225,7 +2225,7 @@ namespace Game
         {
             Log.outInfo(LogFilter.Server, "Random BG status reset for all characters.");
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_BATTLEGROUND_RANDOM_ALL);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_BATTLEGROUND_RANDOM_ALL);
             DB.Characters.Execute(stmt);
 
             foreach (var session in m_sessions.Values)
@@ -2308,7 +2308,7 @@ namespace Game
         {
             m_worldVariables[var] = value;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_WORLD_VARIABLE);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_WORLD_VARIABLE);
             stmt.AddValue(0, var);
             stmt.AddValue(1, value);
             DB.Characters.Execute(stmt);
@@ -2446,7 +2446,7 @@ namespace Game
             long[] warModeEnabledFaction = new long[2];
 
             // Search for characters that have war mode enabled and played during the last week
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_WAR_MODE_TUNING);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_WAR_MODE_TUNING);
             stmt.AddValue(0, (uint)PlayerFlags.WarModeDesired);
             stmt.AddValue(1, (uint)PlayerFlags.WarModeDesired);
 

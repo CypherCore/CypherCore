@@ -40,7 +40,7 @@ namespace Game.Chat
                 }
             }
 
-            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_COMMANDS);
+            PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_COMMANDS);
             SQLResult result = DB.World.Query(stmt);
             if (!result.IsEmpty())
             {

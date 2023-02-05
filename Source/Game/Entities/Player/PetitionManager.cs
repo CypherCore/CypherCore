@@ -74,7 +74,7 @@ namespace Game.Entities
             if (isLoading)
                 return;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_PETITION);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PETITION);
             stmt.AddValue(0, ownerGuid.GetCounter());
             stmt.AddValue(1, petitionGuid.GetCounter());
             stmt.AddValue(2, name);
@@ -88,11 +88,11 @@ namespace Game.Entities
             // Delete From DB
             SQLTransaction trans = new();
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PETITION_BY_GUID);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PETITION_BY_GUID);
             stmt.AddValue(0, petitionGuid.GetCounter());
             trans.Append(stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PETITION_SIGNATURE_BY_GUID);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PETITION_SIGNATURE_BY_GUID);
             stmt.AddValue(0, petitionGuid.GetCounter());
             trans.Append(stmt);
 
@@ -121,11 +121,11 @@ namespace Game.Entities
             }
 
             SQLTransaction trans = new();
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PETITION_BY_OWNER);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PETITION_BY_OWNER);
             stmt.AddValue(0, ownerGuid.GetCounter());
             trans.Append(stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PETITION_SIGNATURE_BY_OWNER);
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PETITION_SIGNATURE_BY_OWNER);
             stmt.AddValue(0, ownerGuid.GetCounter());
             trans.Append(stmt);
             DB.Characters.CommitTransaction(trans);
@@ -136,7 +136,7 @@ namespace Game.Entities
             foreach (var petitionPair in _petitionStorage)
                 petitionPair.Value.RemoveSignatureBySigner(signerGuid);
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ALL_PETITION_SIGNATURES);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ALL_PETITION_SIGNATURES);
             stmt.AddValue(0, signerGuid.GetCounter());
             DB.Characters.Execute(stmt);
         }
@@ -165,7 +165,7 @@ namespace Game.Entities
             if (isLoading)
                 return;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_PETITION_SIGNATURE);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PETITION_SIGNATURE);
             stmt.AddValue(0, ownerGuid.GetCounter());
             stmt.AddValue(1, PetitionGuid.GetCounter());
             stmt.AddValue(2, playerGuid.GetCounter());
@@ -178,7 +178,7 @@ namespace Game.Entities
         {
             PetitionName = newName;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_PETITION_NAME);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_PETITION_NAME);
             stmt.AddValue(0, newName);
             stmt.AddValue(1, PetitionGuid.GetCounter());
             DB.Characters.Execute(stmt);

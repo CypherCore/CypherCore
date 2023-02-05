@@ -60,7 +60,7 @@ namespace Game.SupportSystem
             _lastBugId = 0;
             _openBugTicketCount = 0;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GM_BUGS);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GM_BUGS);
             SQLResult result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
             {
@@ -96,7 +96,7 @@ namespace Game.SupportSystem
             _lastComplaintId = 0;
             _openComplaintTicketCount = 0;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GM_COMPLAINTS);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GM_COMPLAINTS);
             SQLResult result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
             {
@@ -119,7 +119,7 @@ namespace Game.SupportSystem
                 if (_lastComplaintId < id)
                     _lastComplaintId = id;
 
-                chatLogStmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GM_COMPLAINT_CHATLINES);
+                chatLogStmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GM_COMPLAINT_CHATLINES);
                 chatLogStmt.AddValue(0, id);
                 chatLogResult = DB.Characters.Query(stmt);
 
@@ -146,7 +146,7 @@ namespace Game.SupportSystem
             _lastSuggestionId = 0;
             _openSuggestionTicketCount = 0;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GM_SUGGESTIONS);
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GM_SUGGESTIONS);
             SQLResult result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
             {
@@ -255,7 +255,7 @@ namespace Game.SupportSystem
 
                     _lastBugId = 0;
 
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ALL_GM_BUGS);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ALL_GM_BUGS);
                     DB.Characters.Execute(stmt);
                     break;
                 case "ComplaintTicket":
@@ -264,8 +264,8 @@ namespace Game.SupportSystem
                     _lastComplaintId = 0;
 
                     SQLTransaction trans = new();
-                    trans.Append(DB.Characters.GetPreparedStatement(CharStatements.DEL_ALL_GM_COMPLAINTS));
-                    trans.Append(DB.Characters.GetPreparedStatement(CharStatements.DEL_ALL_GM_COMPLAINT_CHATLOGS));
+                    trans.Append(CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ALL_GM_COMPLAINTS));
+                    trans.Append(CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ALL_GM_COMPLAINT_CHATLOGS));
                     DB.Characters.CommitTransaction(trans);
                     break;
                 case "SuggestionTicket":
@@ -273,7 +273,7 @@ namespace Game.SupportSystem
 
                     _lastSuggestionId = 0;
 
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ALL_GM_SUGGESTIONS);
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ALL_GM_SUGGESTIONS);
                     DB.Characters.Execute(stmt);
                     break;
             }
