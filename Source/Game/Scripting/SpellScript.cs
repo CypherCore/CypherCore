@@ -671,8 +671,6 @@ namespace Game.Scripting
             }
             return false;
         }
-
-        private void PreventHitHeal() { SetHitHeal(0); }
     }
 
 }
