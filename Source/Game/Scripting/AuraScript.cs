@@ -275,85 +275,85 @@ namespace Game.Scripting
         }
 
         // returns owner if it's dynobj, null otherwise
-        private DynamicObject GetDynobjOwner()
+        public DynamicObject GetDynobjOwner()
         {
             return _aura.GetDynobjOwner();
         }
 
         // returns Type of the aura, may be dynobj owned aura or unit owned aura
-        private AuraObjectType GetAuraType()
+        public AuraObjectType GetAuraType()
         {
             return _aura.GetAuraType();
         }
 
         // sets duration to maxduration
-        private void RefreshDuration()
+        public void RefreshDuration()
         {
             _aura.RefreshDuration();
         }
 
-        private long GetApplyTime()
+        public long GetApplyTime()
         {
             return _aura.GetApplyTime();
         }
 
-        private int CalcMaxDuration()
+        public int CalcMaxDuration()
         {
             return _aura.CalcMaxDuration();
         }
 
         // permament - has infinite duration
-        private bool IsPermanent()
+        public bool IsPermanent()
         {
             return _aura.IsPermanent();
         }
 
         // charges manipulation - 0 - not charged aura
-        private byte GetCharges()
+        public byte GetCharges()
         {
             return _aura.GetCharges();
         }
 
-        private void SetCharges(byte charges)
+        public void SetCharges(byte charges)
         {
             _aura.SetCharges(charges);
         }
 
-        private byte CalcMaxCharges()
+        public byte CalcMaxCharges()
         {
             return _aura.CalcMaxCharges();
         }
 
-        private bool ModCharges(sbyte num, AuraRemoveMode removeMode = AuraRemoveMode.Default)
+        public bool ModCharges(sbyte num, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
             return _aura.ModCharges(num, removeMode);
         }
 
         // returns true if last charge dropped
-        private bool DropCharge(AuraRemoveMode removeMode = AuraRemoveMode.Default)
+        public bool DropCharge(AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
             return _aura.DropCharge(removeMode);
         }
 
-        private void SetStackAmount(byte num)
+        public void SetStackAmount(byte num)
         {
             _aura.SetStackAmount(num);
         }
 
         // passive - "working in background", not saved, not removed by immunities, not seen by player
-        private bool IsPassive()
+        public bool IsPassive()
         {
             return _aura.IsPassive();
         }
 
         // death persistent - not removed on death
-        private bool IsDeathPersistent()
+        public bool IsDeathPersistent()
         {
             return _aura.IsDeathPersistent();
         }
 
         // check if aura has effect of given aura Type
-        private bool HasEffectType(AuraType type)
+        public bool HasEffectType(AuraType type)
         {
             return _aura.HasEffectType(type);
         }
