@@ -814,7 +814,7 @@ namespace Scripts.Spells.Quest
     }
 
     [Script] // 4336 - Jump Jets
-    internal class spell_q13280_13283_jump_jets : SpellScript, IOnCast
+    internal class spell_q13280_13283_jump_jets : SpellScript, ISpellOnCast
     {
         public void OnCast()
         {
@@ -1010,7 +1010,7 @@ namespace Scripts.Spells.Quest
 
     // 39844 - Skyguard Blasting Charge
     [Script] // 40160 - Throw Bomb
-    internal class spell_q11010_q11102_q11023_q11008_check_fly_mount : SpellScript, ICheckCastHander
+    internal class spell_q11010_q11102_q11023_q11008_check_fly_mount : SpellScript, ISpellCheckCastHander
     {
         public SpellCastResult CheckCast()
         {
@@ -1862,7 +1862,7 @@ namespace Scripts.Spells.Quest
     }
 
     [Script] // 93072 - Get Our Boys Back Dummy
-    internal class spell_q28813_get_our_boys_back_dummy : SpellScript, IOnCast
+    internal class spell_q28813_get_our_boys_back_dummy : SpellScript, ISpellOnCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1883,7 +1883,7 @@ namespace Scripts.Spells.Quest
     }
 
     [Script] // 53034 - Set Health Random
-    internal class spell_q28813_set_health_random : SpellScript, IOnCast
+    internal class spell_q28813_set_health_random : SpellScript, ISpellOnCast
     {
         public void OnCast()
         {

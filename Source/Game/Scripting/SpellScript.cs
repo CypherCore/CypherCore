@@ -477,6 +477,11 @@ namespace Game.Scripting
             dynAura?.Remove();
         }
 
+        public void PreventHitHeal()
+        {
+            SetHitHeal(0);
+        }
+
         // prevents effect execution on current spell hit Target
         // including other effect/hit scripts
         // will not work on aura/Damage/heal

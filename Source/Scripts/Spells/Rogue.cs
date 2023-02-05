@@ -136,7 +136,7 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 2818 - Deadly Poison
-    internal class spell_rog_deadly_poison_SpellScript : SpellScript, IBeforeHit, IAfterHit
+    internal class spell_rog_deadly_poison_SpellScript : SpellScript, ISpellBeforeHit, ISpellAfterHit
     {
         private byte _stackAmount = 0;
 
@@ -384,7 +384,7 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script]
-    internal class spell_rog_pickpocket : SpellScript, ICheckCastHander
+    internal class spell_rog_pickpocket : SpellScript, ISpellCheckCastHander
     {
         public SpellCastResult CheckCast()
         {
@@ -584,7 +584,7 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 185438 - Shadowstrike
-    internal class spell_rog_shadowstrike : SpellScript, ICheckCastHander, IHasSpellEffects
+    internal class spell_rog_shadowstrike : SpellScript, ISpellCheckCastHander, IHasSpellEffects
     {
         private bool _hasPremeditationAura = false;
 
@@ -856,7 +856,7 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 57934 - Tricks of the Trade
-    internal class spell_rog_tricks_of_the_trade : SpellScript, IAfterHit
+    internal class spell_rog_tricks_of_the_trade : SpellScript, ISpellAfterHit
     {
         public void AfterHit()
         {

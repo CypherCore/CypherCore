@@ -254,7 +254,7 @@ namespace Scripts.Spells.DemonHunter
     // 200685 - Blade Dance
     // 210153 - Death Sweep
     [Script] // 210155 - Death Sweep
-    internal class spell_dh_blade_dance_damage : SpellScript, IOnHit
+    internal class spell_dh_blade_dance_damage : SpellScript, ISpellOnHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -350,7 +350,7 @@ namespace Scripts.Spells.DemonHunter
     }
 
     [Script] // 131347 - Glide
-    internal class spell_dh_glide : SpellScript, ICheckCastHander, IBeforeCast
+    internal class spell_dh_glide : SpellScript, ISpellCheckCastHander, ISpellBeforeCast
     {
         public void BeforeCast()
         {

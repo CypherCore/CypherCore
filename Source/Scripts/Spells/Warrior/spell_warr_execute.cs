@@ -16,7 +16,7 @@ namespace Scripts.Spells.Warrior
     // 217955  - Execute
     // 281000  - Execute
     [SpellScript(new uint[] { 163201, 217955, 281000 })]
-    public class spell_warr_execute : SpellScript, IAfterHit, IOnTakePower
+    public class spell_warr_execute : SpellScript, ISpellAfterHit, ISpellOnTakePower
     {
         private int m_powerTaken = 0;
 

@@ -209,7 +209,7 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 2825 - Bloodlust
-    internal class spell_sha_bloodlust : SpellScript, IAfterHit, IHasSpellEffects
+    internal class spell_sha_bloodlust : SpellScript, ISpellAfterHit, IHasSpellEffects
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -297,7 +297,7 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 187874 - Crash Lightning
-    internal class spell_sha_crash_lightning : SpellScript, IAfterCast, IHasSpellEffects
+    internal class spell_sha_crash_lightning : SpellScript, ISpellAfterCast, IHasSpellEffects
     {
         private int _targetsHit;
 
@@ -335,7 +335,7 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 207778 - Downpour
-    internal class spell_sha_downpour : SpellScript, IAfterCast, IAfterHit, IHasSpellEffects
+    internal class spell_sha_downpour : SpellScript, ISpellAfterCast, ISpellAfterHit, IHasSpellEffects
     {
         private int _healedTargets = 0;
 
@@ -525,7 +525,7 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 77478 - Earthquake tick
-    internal class spell_sha_earthquake_tick : SpellScript, IOnHit, IHasSpellEffects
+    internal class spell_sha_earthquake_tick : SpellScript, ISpellOnHit, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
@@ -568,7 +568,7 @@ namespace Scripts.Spells.Shaman
 
     // 117014 - Elemental Blast
     [Script] // 120588 - Elemental Blast Overload
-    internal class spell_sha_elemental_blast : SpellScript, IAfterCast, IHasSpellEffects
+    internal class spell_sha_elemental_blast : SpellScript, ISpellAfterCast, IHasSpellEffects
     {
         private readonly uint[] BuffSpells =
         {
@@ -673,7 +673,7 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 73920 - Healing Rain
-    internal class spell_sha_healing_rain : SpellScript, IAfterHit
+    internal class spell_sha_healing_rain : SpellScript, ISpellAfterHit
     {
         public void AfterHit()
         {
@@ -768,7 +768,7 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 32182 - Heroism
-    internal class spell_sha_heroism : SpellScript, IAfterHit, IHasSpellEffects
+    internal class spell_sha_heroism : SpellScript, ISpellAfterHit, IHasSpellEffects
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1006,7 +1006,7 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 51505 - Lava burst
-    internal class spell_sha_lava_burst : SpellScript, IAfterCast, IHasSpellEffects
+    internal class spell_sha_lava_burst : SpellScript, ISpellAfterCast, IHasSpellEffects
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1049,7 +1049,7 @@ namespace Scripts.Spells.Shaman
 
     // 285452 - Lava Burst Damage
     [Script] // 285466 - Lava Burst Overload Damage
-    internal class spell_sha_lava_crit_chance : SpellScript, ICalcCritChance
+    internal class spell_sha_lava_crit_chance : SpellScript, ISpellCalcCritChance
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1106,7 +1106,7 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 77762 - Lava Surge
-    internal class spell_sha_lava_surge_proc : SpellScript, IAfterHit
+    internal class spell_sha_lava_surge_proc : SpellScript, ISpellAfterHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {

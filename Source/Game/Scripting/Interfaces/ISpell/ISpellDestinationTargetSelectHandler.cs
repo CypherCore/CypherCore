@@ -3,12 +3,12 @@ using Game.Spells;
 
 namespace Game.Scripting.Interfaces.ISpell
 {
-    public interface IDestinationTargetSelectHandler : ITargetHookHandler
+    public interface ISpellDestinationTargetSelectHandler : ITargetHookHandler
     {
         void SetDest(ref SpellDestination dest);
     }
 
-    public class DestinationTargetSelectHandler : TargetHookHandler, IDestinationTargetSelectHandler
+    public class DestinationTargetSelectHandler : TargetHookHandler, ISpellDestinationTargetSelectHandler
     {
         public delegate void SpellDestinationTargetSelectFnType(ref SpellDestination dest);
 

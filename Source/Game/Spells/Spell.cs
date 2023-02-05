@@ -4410,7 +4410,7 @@ namespace Game.Spells
                 }
 
                 unitCaster.ModifyPower(cost.Power, -cost.Amount);
-                ForEachSpellScript<IOnTakePower>(a => a.TakePower(cost));
+                ForEachSpellScript<ISpellOnTakePower>(a => a.TakePower(cost));
             }
         }
 
@@ -7546,21 +7546,21 @@ namespace Game.Spells
 
         void CallScriptOnPrecastHandler()
         {
-            foreach (ISpellScript script in GetSpellScripts<IOnPrecast>())
+            foreach (ISpellScript script in GetSpellScripts<ISpellOnPrecast>())
             {
                 script._PrepareScriptCall(SpellScriptHookType.OnPrecast);
-                ((IOnPrecast)script).OnPrecast();
+                ((ISpellOnPrecast)script).OnPrecast();
                 script._FinishScriptCall();
             }
         }
 
         void CallScriptBeforeCastHandlers()
         {
-            foreach (ISpellScript script in GetSpellScripts<IBeforeCast>())
+            foreach (ISpellScript script in GetSpellScripts<ISpellBeforeCast>())
             {
                 script._PrepareScriptCall(SpellScriptHookType.BeforeCast);
 
-                ((IBeforeCast)script).BeforeCast();
+                ((ISpellBeforeCast)script).BeforeCast();
 
                 script._FinishScriptCall();
             }
@@ -7568,11 +7568,11 @@ namespace Game.Spells
 
         void CallScriptOnCastHandlers()
         {
-            foreach (ISpellScript script in GetSpellScripts<IOnCast>())
+            foreach (ISpellScript script in GetSpellScripts<ISpellOnCast>())
             {
                 script._PrepareScriptCall(SpellScriptHookType.OnCast);
 
-                ((IOnCast)script).OnCast();
+                ((ISpellOnCast)script).OnCast();
 
                 script._FinishScriptCall();
             }
@@ -7580,11 +7580,11 @@ namespace Game.Spells
 
         void CallScriptAfterCastHandlers()
         {
-            foreach (ISpellScript script in GetSpellScripts<IAfterCast>())
+            foreach (ISpellScript script in GetSpellScripts<ISpellAfterCast>())
             {
                 script._PrepareScriptCall(SpellScriptHookType.AfterCast);
 
-                ((IAfterCast)script).AfterCast();
+                ((ISpellAfterCast)script).AfterCast();
 
                 script._FinishScriptCall();
             }
@@ -7594,11 +7594,11 @@ namespace Game.Spells
         {
             SpellCastResult retVal = SpellCastResult.SpellCastOk;
 
-            foreach (ISpellScript script in GetSpellScripts<ICheckCastHander>())
+            foreach (ISpellScript script in GetSpellScripts<ISpellCheckCastHander>())
             {
                 script._PrepareScriptCall(SpellScriptHookType.CheckCast);
 
-                var tempResult = ((ICheckCastHander)script).CheckCast();
+                var tempResult = ((ISpellCheckCastHander)script).CheckCast();
                 if (tempResult != SpellCastResult.SpellCastOk)
                     retVal = tempResult;
 
@@ -7610,10 +7610,10 @@ namespace Game.Spells
 
         int CallScriptCalcCastTimeHandlers(int castTime)
         {
-            foreach (ISpellScript script in GetSpellScripts<ICalculateCastTime>())
+            foreach (ISpellScript script in GetSpellScripts<ISpellCalculateCastTime>())
             {
                 script._PrepareScriptCall(SpellScriptHookType.CalcCastTime);
-                castTime = ((ICalculateCastTime)script).CalcCastTime(castTime);
+                castTime = ((ISpellCalculateCastTime)script).CalcCastTime(castTime);
                 script._FinishScriptCall();
             }
             return castTime;
@@ -7690,42 +7690,42 @@ namespace Game.Spells
 
         public void CallScriptBeforeHitHandlers(SpellMissInfo missInfo)
         {
-            foreach (ISpellScript script in GetSpellScripts<IBeforeHit>())
+            foreach (ISpellScript script in GetSpellScripts<ISpellBeforeHit>())
             {
                 script._InitHit();
                 script._PrepareScriptCall(SpellScriptHookType.BeforeHit);
-                ((IBeforeHit)script).BeforeHit(missInfo);
+                ((ISpellBeforeHit)script).BeforeHit(missInfo);
                 script._FinishScriptCall();
             }
         }
 
         public void CallScriptOnHitHandlers()
         {
-            foreach (ISpellScript script in GetSpellScripts<IOnHit>())
+            foreach (ISpellScript script in GetSpellScripts<ISpellOnHit>())
             {
                 script._PrepareScriptCall(SpellScriptHookType.Hit);
-                ((IOnHit)script).OnHit();
+                ((ISpellOnHit)script).OnHit();
                 script._FinishScriptCall();
             }
         }
 
         public void CallScriptAfterHitHandlers()
         {
-            foreach (ISpellScript script in GetSpellScripts<IAfterHit>())
+            foreach (ISpellScript script in GetSpellScripts<ISpellAfterHit>())
             {
                 script._PrepareScriptCall(SpellScriptHookType.AfterHit);
-                ((IAfterHit)script).AfterHit();
+                ((ISpellAfterHit)script).AfterHit();
                 script._FinishScriptCall();
             }
         }
 
         public void CallScriptCalcCritChanceHandlers(Unit victim, ref float critChance)
         {
-            foreach (ISpellScript loadedScript in GetSpellScripts<ICalcCritChance>())
+            foreach (ISpellScript loadedScript in GetSpellScripts<ISpellCalcCritChance>())
             {
                 loadedScript._PrepareScriptCall(SpellScriptHookType.CalcCritChance);
        
-                ((ICalcCritChance)loadedScript).CalcCritChance(victim, ref critChance);
+                ((ISpellCalcCritChance)loadedScript).CalcCritChance(victim, ref critChance);
 
                 loadedScript._FinishScriptCall();
             }
@@ -7737,7 +7737,7 @@ namespace Game.Spells
             {
                 script.Item1._PrepareScriptCall(SpellScriptHookType.ObjectAreaTargetSelect);
 
-                if (script.Item2 is IObjectAreaTargetSelect oas)
+                if (script.Item2 is ISpellObjectAreaTargetSelect oas)
                     if (targetType.GetTarget() == oas.TargetType)
                         oas.FilterTargets(targets);
 
@@ -7751,7 +7751,7 @@ namespace Game.Spells
             {
                 script.Item1._PrepareScriptCall(SpellScriptHookType.ObjectTargetSelect);
 
-                if (script.Item2 is IObjectTargetSelectHandler ots)
+                if (script.Item2 is ISpellObjectTargetSelectHandler ots)
                     if (targetType.GetTarget() == ots.TargetType)
                         ots.TargetSelect(ref target);
 
@@ -7765,7 +7765,7 @@ namespace Game.Spells
             {
                 script.Item1._PrepareScriptCall(SpellScriptHookType.DestinationTargetSelect);
 
-                if (script.Item2 is IDestinationTargetSelectHandler dts)
+                if (script.Item2 is ISpellDestinationTargetSelectHandler dts)
                     if (targetType.GetTarget() == dts.TargetType)
                         dts.SetDest(ref target);
 
@@ -7775,11 +7775,11 @@ namespace Game.Spells
 
         public void CallScriptOnResistAbsorbCalculateHandlers(DamageInfo damageInfo, ref uint resistAmount, ref int absorbAmount)
         {
-            foreach (ISpellScript script in GetSpellScripts<ICheckCastHander>())
+            foreach (ISpellScript script in GetSpellScripts<ISpellCheckCastHander>())
             {
                 script._PrepareScriptCall(SpellScriptHookType.OnResistAbsorbCalculation);
 
-                ((ICalculateResistAbsorb)script).CalculateResistAbsorb(damageInfo, ref resistAmount, ref absorbAmount);
+                ((ISpellCalculateResistAbsorb)script).CalculateResistAbsorb(damageInfo, ref resistAmount, ref absorbAmount);
 
                 script._FinishScriptCall();
             }

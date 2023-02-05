@@ -3508,11 +3508,12 @@ namespace Game.Entities
             // Absorb, resist some environmental damage type
             uint absorb = 0;
             uint resist = 0;
+            var dmgSchool = GetEnviormentDamageType(type);
             switch (type)
             {
                 case EnviromentalDamage.Lava:
                 case EnviromentalDamage.Slime:
-                    DamageInfo dmgInfo = new(this, this, damage, null, type == EnviromentalDamage.Lava ? SpellSchoolMask.Fire : SpellSchoolMask.Nature, DamageEffectType.Direct, WeaponAttackType.BaseAttack);
+                    DamageInfo dmgInfo = new(this, this, damage, null, dmgSchool, DamageEffectType.Direct, WeaponAttackType.BaseAttack);
                     CalcAbsorbResist(dmgInfo);
                     absorb = dmgInfo.GetAbsorb();
                     resist = dmgInfo.GetResist();
@@ -3521,7 +3522,6 @@ namespace Game.Entities
             }
 
             DealDamageMods(null, this, ref damage, ref absorb);
-
             EnvironmentalDamageLog packet = new();
             packet.Victim = GetGUID();
             packet.Type = type != EnviromentalDamage.FallToVoid ? type : EnviromentalDamage.Fall;
@@ -3529,7 +3529,8 @@ namespace Game.Entities
             packet.Absorbed = (int)absorb;
             packet.Resisted = (int)resist;
 
-            uint final_damage = DealDamage(this, this, damage, null, DamageEffectType.Self, SpellSchoolMask.Normal, null, false);
+            uint final_damage = DealDamage(this, this, damage, null, DamageEffectType.Self, dmgSchool, null, false);
+            ScriptManager.Instance.ForEach<IPlayerOnTakeDamage>(GetClass(), a => a.OnPlayerTakeDamage(this, final_damage, dmgSchool));
             packet.LogData.Initialize(this);
 
             SendCombatLogMessage(packet);
@@ -3548,6 +3549,20 @@ namespace Game.Entities
             }
 
             return final_damage;
+        }
+
+        private SpellSchoolMask GetEnviormentDamageType(EnviromentalDamage dmgType)
+        {
+            switch(dmgType)
+            {
+                case EnviromentalDamage.Lava:
+                case EnviromentalDamage.Fire:
+                    return SpellSchoolMask.Fire;
+                case EnviromentalDamage.Slime:
+                    return SpellSchoolMask.Nature;
+                default:
+                    return SpellSchoolMask.Normal;
+            }
         }
 
         bool IsTotalImmune()

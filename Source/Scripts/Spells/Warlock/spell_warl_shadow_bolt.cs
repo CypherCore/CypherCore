@@ -8,7 +8,7 @@ using Game.Spells;
 namespace Scripts.Spells.Warlock
 {
     [SpellScript(686)] // 686 - Shadow Bolt
-    internal class spell_warl_shadow_bolt : SpellScript, IAfterCast
+    internal class spell_warl_shadow_bolt : SpellScript, ISpellAfterCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {

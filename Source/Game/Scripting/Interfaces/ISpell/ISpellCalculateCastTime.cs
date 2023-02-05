@@ -1,6 +1,6 @@
 ﻿namespace Game.Scripting.Interfaces.ISpell
 {
-    public interface ICalculateCastTime : ISpellScript
+    public interface ISpellCalculateCastTime : ISpellScript
     {
         public int CalcCastTime(int castTime);
     }

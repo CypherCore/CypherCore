@@ -1,6 +1,6 @@
 ﻿namespace Game.Scripting.Interfaces.ISpell
 {
-    public interface IAfterHit : ISpellScript
+    public interface ISpellAfterHit : ISpellScript
     {
         void AfterHit();
     }

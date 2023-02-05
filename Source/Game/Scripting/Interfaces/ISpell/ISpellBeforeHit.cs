@@ -2,7 +2,7 @@
 
 namespace Game.Scripting.Interfaces.ISpell
 {
-    public interface IBeforeHit : ISpellScript
+    public interface ISpellBeforeHit : ISpellScript
     {
         public void BeforeHit(SpellMissInfo missInfo);
     }

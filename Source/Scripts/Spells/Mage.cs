@@ -154,7 +154,7 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 44425 - Arcane Barrage
-    internal class spell_mage_arcane_barrage : SpellScript, IAfterCast, IHasSpellEffects
+    internal class spell_mage_arcane_barrage : SpellScript, ISpellAfterCast, IHasSpellEffects
     {
         private ObjectGuid _primaryTarget;
 
@@ -608,7 +608,7 @@ namespace Scripts.Spells.Mage
 
     // 133 - Fireball
     [Script] // 11366 - Pyroblast
-    internal class spell_mage_firestarter : SpellScript, ICalcCritChance
+    internal class spell_mage_firestarter : SpellScript, ISpellCalcCritChance
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -673,7 +673,7 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 116 - Frostbolt
-    internal class spell_mage_frostbolt : SpellScript, IOnHit
+    internal class spell_mage_frostbolt : SpellScript, ISpellOnHit
     {
         public override bool Validate(SpellInfo spell)
         {
@@ -1069,7 +1069,7 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 205021 - Ray of Frost
-    internal class spell_mage_ray_of_frost : SpellScript, IOnHit
+    internal class spell_mage_ray_of_frost : SpellScript, ISpellOnHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1260,7 +1260,7 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 80353 - Time Warp
-    internal class spell_mage_time_warp : SpellScript, IAfterHit, IHasSpellEffects
+    internal class spell_mage_time_warp : SpellScript, ISpellAfterHit, IHasSpellEffects
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1337,7 +1337,7 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 33395 Water Elemental's Freeze
-    internal class spell_mage_water_elemental_freeze : SpellScript, IAfterHit
+    internal class spell_mage_water_elemental_freeze : SpellScript, ISpellAfterHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {

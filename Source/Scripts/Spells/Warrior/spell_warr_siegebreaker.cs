@@ -9,7 +9,7 @@ namespace Scripts.Spells.Warrior
 {
     //280772 - Siegebreaker
     [SpellScript(280772)]
-    public class spell_warr_siegebreaker : SpellScript, IOnHit
+    public class spell_warr_siegebreaker : SpellScript, ISpellOnHit
     {
         public void OnHit()
         {

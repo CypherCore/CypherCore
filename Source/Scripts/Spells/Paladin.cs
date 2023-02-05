@@ -239,7 +239,7 @@ namespace Scripts.Spells.Paladin
 
     // 1022 - Blessing of Protection
     [Script] // 204018 - Blessing of Spellwarding
-    internal class spell_pal_blessing_of_protection : SpellScript, ICheckCastHander, IAfterHit
+    internal class spell_pal_blessing_of_protection : SpellScript, ISpellCheckCastHander, ISpellAfterHit
     {
         public void AfterHit()
         {
@@ -414,7 +414,7 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 642 - Divine Shield
-    internal class spell_pal_divine_shield : SpellScript, ICheckCastHander, IAfterCast
+    internal class spell_pal_divine_shield : SpellScript, ISpellCheckCastHander, ISpellAfterCast
     {
         public void AfterCast()
         {
@@ -445,7 +445,7 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 190784 - Divine Steed
-    internal class spell_pal_divine_steed : SpellScript, IOnCast
+    internal class spell_pal_divine_steed : SpellScript, ISpellOnCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -498,7 +498,7 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 224239 - Divine Storm
-    internal class spell_pal_divine_storm : SpellScript, IOnCast
+    internal class spell_pal_divine_storm : SpellScript, ISpellOnCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -710,7 +710,7 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 327193 - Moment of Glory
-    internal class spell_pal_moment_of_glory : SpellScript, IOnHit
+    internal class spell_pal_moment_of_glory : SpellScript, ISpellOnHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -724,7 +724,7 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 20271/275779/275773 - Judgement (Retribution/Protection/Holy)
-    internal class spell_pal_judgment : SpellScript, IOnHit
+    internal class spell_pal_judgment : SpellScript, ISpellOnHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -835,7 +835,7 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 20473 - Holy Shock
-    internal class spell_pal_holy_shock : SpellScript, ICheckCastHander, IHasSpellEffects
+    internal class spell_pal_holy_shock : SpellScript, ISpellCheckCastHander, IHasSpellEffects
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -889,7 +889,7 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 25912 - Holy Shock
-    internal class spell_pal_holy_shock_damage_visual : SpellScript, IAfterHit
+    internal class spell_pal_holy_shock_damage_visual : SpellScript, ISpellAfterHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -903,7 +903,7 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 25914 - Holy Shock
-    internal class spell_pal_holy_shock_heal_visual : SpellScript, IAfterHit
+    internal class spell_pal_holy_shock_heal_visual : SpellScript, ISpellAfterHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -987,7 +987,7 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 633 - Lay on Hands
-    internal class spell_pal_lay_on_hands : SpellScript, ICheckCastHander, IAfterHit
+    internal class spell_pal_lay_on_hands : SpellScript, ISpellCheckCastHander, ISpellAfterHit
     {
         public void AfterHit()
         {
@@ -1077,7 +1077,7 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 122773 - Light's Hammer
-    internal class spell_pal_light_hammer_init_summon : SpellScript, IAfterCast
+    internal class spell_pal_light_hammer_init_summon : SpellScript, ISpellAfterCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {

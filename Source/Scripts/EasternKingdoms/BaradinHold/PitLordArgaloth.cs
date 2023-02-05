@@ -97,7 +97,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.PitLordArgaloth
     }
 
     [Script] // 88942 / 95172 - Meteor Slash
-    internal class spell_argaloth_meteor_slash_SpellScript : SpellScript, IOnHit, IHasSpellEffects
+    internal class spell_argaloth_meteor_slash_SpellScript : SpellScript, ISpellOnHit, IHasSpellEffects
     {
         private int _targetCount;
         public List<ISpellEffect> SpellEffects { get; } = new();

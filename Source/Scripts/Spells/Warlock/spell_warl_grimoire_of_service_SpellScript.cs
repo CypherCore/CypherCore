@@ -15,7 +15,7 @@ namespace Scripts.Spells.Warlock
                  {
                      111859, 111895, 111896, 111897, 111898
                  })]
-    public class spell_warl_grimoire_of_service_SpellScript : SpellScript, IOnSummon
+    public class spell_warl_grimoire_of_service_SpellScript : SpellScript, ISpellOnSummon
     {
         public enum eServiceSpells
         {

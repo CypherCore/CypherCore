@@ -700,7 +700,7 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 47540 - Penance
-    internal class spell_pri_penance : SpellScript, ICheckCastHander, IHasSpellEffects
+    internal class spell_pri_penance : SpellScript, ISpellCheckCastHander, IHasSpellEffects
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -942,7 +942,7 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 17 - Power Word: Shield
-    internal class spell_pri_power_word_shield : SpellScript, ICheckCastHander, IAfterHit
+    internal class spell_pri_power_word_shield : SpellScript, ISpellCheckCastHander, ISpellAfterHit
     {
         public void AfterHit()
         {
@@ -1246,7 +1246,7 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 47536 - Rapture
-    internal class spell_pri_rapture : SpellScript, IAfterCast, IHasSpellEffects
+    internal class spell_pri_rapture : SpellScript, ISpellAfterCast, IHasSpellEffects
     {
         private ObjectGuid _raptureTarget;
 
@@ -1330,7 +1330,7 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 186263 - Shadow Mend
-    internal class spell_pri_shadow_mend : SpellScript, IAfterHit
+    internal class spell_pri_shadow_mend : SpellScript, ISpellAfterHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {

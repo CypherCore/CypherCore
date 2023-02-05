@@ -559,7 +559,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    internal class spell_gen_allow_cast_from_item_only : SpellScript, ICheckCastHander
+    internal class spell_gen_allow_cast_from_item_only : SpellScript, ISpellCheckCastHander
     {
         public SpellCastResult CheckCast()
         {
@@ -780,7 +780,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    internal class spell_gen_bandage : SpellScript, ICheckCastHander, IAfterHit
+    internal class spell_gen_bandage : SpellScript, ISpellCheckCastHander, ISpellAfterHit
     {
         public void AfterHit()
         {
@@ -1427,7 +1427,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    internal class spell_gen_cannibalize : SpellScript, ICheckCastHander, IHasSpellEffects
+    internal class spell_gen_cannibalize : SpellScript, ISpellCheckCastHander, IHasSpellEffects
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1709,7 +1709,7 @@ namespace Scripts.Spells.Generic
 
     [Script("spell_gen_default_count_pct_from_max_hp", 0)]
     [Script("spell_gen_50pct_count_pct_from_max_hp", 50)]
-    internal class spell_gen_count_pct_from_max_hp : SpellScript, IOnHit
+    internal class spell_gen_count_pct_from_max_hp : SpellScript, ISpellOnHit
     {
         private int _damagePct;
 
@@ -1838,7 +1838,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script] // 32065 - Fungal Decay
-    internal class spell_gen_decay_over_time_fungal_decay_SpellScript : SpellScript, IAfterHit
+    internal class spell_gen_decay_over_time_fungal_decay_SpellScript : SpellScript, ISpellAfterHit
     {
         public void AfterHit()
         {
@@ -1881,7 +1881,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script] // 36659 - Tail Sting
-    internal class spell_gen_decay_over_time_tail_sting_SpellScript : SpellScript, IAfterHit
+    internal class spell_gen_decay_over_time_tail_sting_SpellScript : SpellScript, ISpellAfterHit
     {
         public void AfterHit()
         {
@@ -2024,7 +2024,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    internal class spell_gen_dungeon_credit : SpellScript, IAfterHit
+    internal class spell_gen_dungeon_credit : SpellScript, ISpellAfterHit
     {
         private bool _handled;
 
@@ -3245,9 +3245,9 @@ namespace Scripts.Spells.Generic
                     newPet.SetFullHealth();
                     newPet.SetFullPower(newPet.GetPowerType());
 
-                    var summonScript = GetSpell().GetSpellScripts<IOnSummon>();
+                    var summonScript = GetSpell().GetSpellScripts<ISpellOnSummon>();
 
-                    foreach (IOnSummon summon in summonScript)
+                    foreach (ISpellOnSummon summon in summonScript)
                         summon.HandleSummon(newPet);
 
                     switch (newPet.GetEntry())
@@ -3283,7 +3283,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    internal class spell_gen_profession_research : SpellScript, ICheckCastHander, IHasSpellEffects
+    internal class spell_gen_profession_research : SpellScript, ISpellCheckCastHander, IHasSpellEffects
     {
         public override bool Load()
         {
@@ -3336,7 +3336,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    internal class spell_gen_pvp_trinket : SpellScript, IAfterCast
+    internal class spell_gen_pvp_trinket : SpellScript, ISpellAfterCast
     {
         public void AfterCast()
         {
@@ -3645,7 +3645,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    internal class spell_gen_two_forms : SpellScript, ICheckCastHander, IHasSpellEffects
+    internal class spell_gen_two_forms : SpellScript, ISpellCheckCastHander, IHasSpellEffects
     {
         public SpellCastResult CheckCast()
         {
@@ -3687,7 +3687,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    internal class spell_gen_darkflight : SpellScript, IAfterCast
+    internal class spell_gen_darkflight : SpellScript, ISpellAfterCast
     {
         public void AfterCast()
         {
@@ -3785,7 +3785,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    internal class spell_gen_summon_tournament_mount : SpellScript, ICheckCastHander
+    internal class spell_gen_summon_tournament_mount : SpellScript, ISpellCheckCastHander
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -3920,7 +3920,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    internal class spell_gen_trigger_exclude_caster_aura_spell : SpellScript, IAfterCast
+    internal class spell_gen_trigger_exclude_caster_aura_spell : SpellScript, ISpellAfterCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -3935,7 +3935,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    internal class spell_gen_trigger_exclude_target_aura_spell : SpellScript, IAfterHit
+    internal class spell_gen_trigger_exclude_target_aura_spell : SpellScript, ISpellAfterHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -3954,7 +3954,7 @@ namespace Scripts.Spells.Generic
 
     [Script("spell_pvp_trinket_shared_cd", SpellIds.WillOfTheForsakenCooldownTrigger)]
     [Script("spell_wotf_shared_cd", SpellIds.WillOfTheForsakenCooldownTriggerWotf)]
-    internal class spell_pvp_trinket_wotf_shared_cd : SpellScript, IAfterCast
+    internal class spell_pvp_trinket_wotf_shared_cd : SpellScript, ISpellAfterCast
     {
         private readonly uint _triggered;
 
@@ -4165,7 +4165,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    internal class spell_gen_wg_water : SpellScript, ICheckCastHander
+    internal class spell_gen_wg_water : SpellScript, ISpellCheckCastHander
     {
         public SpellCastResult CheckCast()
         {
@@ -4274,7 +4274,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    internal class spell_gen_eject_all_passengers : SpellScript, IAfterHit
+    internal class spell_gen_eject_all_passengers : SpellScript, ISpellAfterHit
     {
         public void AfterHit()
         {
@@ -4991,7 +4991,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script] // Used for some spells cast by vehicles or charmed creatures that do not send a cooldown event on their own
-    internal class spell_gen_charmed_unit_spell_cooldown : SpellScript, IOnCast
+    internal class spell_gen_charmed_unit_spell_cooldown : SpellScript, ISpellOnCast
     {
         public void OnCast()
         {
@@ -5457,7 +5457,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script] // 274738 - Ancestral Call (Mag'har Orc Racial)
-    internal class spell_gen_ancestral_call : SpellScript, IOnCast
+    internal class spell_gen_ancestral_call : SpellScript, ISpellOnCast
     {
         private static readonly uint[] AncestralCallBuffs =
         {

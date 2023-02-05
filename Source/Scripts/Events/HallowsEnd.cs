@@ -230,7 +230,7 @@ namespace Scripts.m_Events.HallowsEnd
     }
 
     [Script] // 24717, 24718, 24719, 24720, 24724, 24733, 24737, 24741
-    internal class spell_hallow_end_wand : SpellScript, IOnHit
+    internal class spell_hallow_end_wand : SpellScript, ISpellOnHit
     {
         public override bool Validate(SpellInfo spellEntry)
         {

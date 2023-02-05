@@ -2,7 +2,7 @@
 
 namespace Game.Scripting.Interfaces.ISpell
 {
-    public interface IOnTakePower : ISpellScript
+    public interface ISpellOnTakePower : ISpellScript
     {
         public void TakePower(SpellPowerCost cost);
     }

@@ -2790,7 +2790,7 @@ namespace Scripts.Spells.Items
     }
 
     [Script]
-    internal class spell_item_book_of_glyph_mastery : SpellScript, ICheckCastHander, IHasSpellEffects
+    internal class spell_item_book_of_glyph_mastery : SpellScript, ISpellCheckCastHander, IHasSpellEffects
     {
         public override bool Load()
         {
@@ -2830,7 +2830,7 @@ namespace Scripts.Spells.Items
     }
 
     [Script]
-    internal class spell_item_gift_of_the_harvester : SpellScript, ICheckCastHander
+    internal class spell_item_gift_of_the_harvester : SpellScript, ISpellCheckCastHander
     {
         public SpellCastResult CheckCast()
         {
@@ -2849,7 +2849,7 @@ namespace Scripts.Spells.Items
     }
 
     [Script]
-    internal class spell_item_map_of_the_geyser_fields : SpellScript, ICheckCastHander
+    internal class spell_item_map_of_the_geyser_fields : SpellScript, ISpellCheckCastHander
     {
         public SpellCastResult CheckCast()
         {
@@ -3095,7 +3095,7 @@ namespace Scripts.Spells.Items
     }
 
     [Script]
-    internal class spell_item_demon_broiled_surprise : SpellScript, ICheckCastHander, IHasSpellEffects
+    internal class spell_item_demon_broiled_surprise : SpellScript, ISpellCheckCastHander, IHasSpellEffects
     {
         public override bool Validate(SpellInfo spell)
         {
@@ -3301,7 +3301,7 @@ namespace Scripts.Spells.Items
     }
 
     [Script]
-    internal class spell_item_rocket_boots : SpellScript, ICheckCastHander, IHasSpellEffects
+    internal class spell_item_rocket_boots : SpellScript, ISpellCheckCastHander, IHasSpellEffects
     {
         public override bool Load()
         {
@@ -4256,7 +4256,7 @@ namespace Scripts.Spells.Items
     }
 
     [Script] // 45051 - Mad Alchemist's Potion (34440)
-    internal class spell_item_mad_alchemists_potion : SpellScript, IAfterCast
+    internal class spell_item_mad_alchemists_potion : SpellScript, ISpellAfterCast
     {
         public void AfterCast()
         {
@@ -4327,7 +4327,7 @@ namespace Scripts.Spells.Items
     }
 
     [Script] // 53750 - Crazy Alchemist's Potion (40077)
-    internal class spell_item_crazy_alchemists_potion : SpellScript, IAfterCast
+    internal class spell_item_crazy_alchemists_potion : SpellScript, ISpellAfterCast
     {
         public void AfterCast()
         {

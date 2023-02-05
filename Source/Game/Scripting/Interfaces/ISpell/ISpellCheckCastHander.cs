@@ -2,7 +2,7 @@
 
 namespace Game.Scripting.Interfaces.ISpell
 {
-    public interface ICheckCastHander : ISpellScript
+    public interface ISpellCheckCastHander : ISpellScript
     {
         SpellCastResult CheckCast();
     }

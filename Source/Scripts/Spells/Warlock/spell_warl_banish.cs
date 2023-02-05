@@ -10,7 +10,7 @@ using Game.Spells;
 namespace Scripts.Spells.Warlock
 {
     [Script] // 710 - Banish
-    internal class spell_warl_banish : SpellScript, IBeforeHit
+    internal class spell_warl_banish : SpellScript, ISpellBeforeHit
     {
         public void BeforeHit(SpellMissInfo missInfo)
         {

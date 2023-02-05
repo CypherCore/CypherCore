@@ -163,7 +163,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Razorgore
     }
 
     [Script] // 19873 - Destroy Egg
-    internal class spell_egg_event : SpellScript, IOnHit
+    internal class spell_egg_event : SpellScript, ISpellOnHit
     {
         public void OnHit()
         {

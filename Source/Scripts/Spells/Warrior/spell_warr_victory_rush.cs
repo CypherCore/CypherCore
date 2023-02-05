@@ -8,7 +8,7 @@ using Game.Spells;
 namespace Scripts.Spells.Warrior
 {
     [Script] // 34428 - Victory Rush
-    internal class spell_warr_victory_rush : SpellScript, IAfterCast
+    internal class spell_warr_victory_rush : SpellScript, ISpellAfterCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {

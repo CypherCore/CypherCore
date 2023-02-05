@@ -8,7 +8,7 @@ using Game.Spells;
 namespace Scripts.Spells.Warrior
 {
     [Script] // 202168 - Impending Victory
-    internal class spell_warr_impending_victory : SpellScript, IAfterCast
+    internal class spell_warr_impending_victory : SpellScript, ISpellAfterCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {

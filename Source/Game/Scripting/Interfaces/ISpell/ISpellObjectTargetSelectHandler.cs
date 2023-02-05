@@ -3,12 +3,12 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.ISpell
 {
-    public interface IObjectTargetSelectHandler : ITargetHookHandler
+    public interface ISpellObjectTargetSelectHandler : ITargetHookHandler
     {
         void TargetSelect(ref WorldObject targets);
     }
 
-    public class ObjectTargetSelectHandler : TargetHookHandler, IObjectTargetSelectHandler
+    public class ObjectTargetSelectHandler : TargetHookHandler, ISpellObjectTargetSelectHandler
     {
         public delegate void SpellObjectTargetSelectFnType(ref WorldObject targets);
 

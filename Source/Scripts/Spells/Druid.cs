@@ -105,7 +105,7 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 77758 - Berserk
-    internal class spell_dru_berserk : SpellScript, IBeforeCast
+    internal class spell_dru_berserk : SpellScript, ISpellBeforeCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -628,7 +628,7 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 99 - Incapacitating Roar
-    internal class spell_dru_incapacitating_roar : SpellScript, IBeforeCast
+    internal class spell_dru_incapacitating_roar : SpellScript, ISpellBeforeCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -644,7 +644,7 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 29166 - Innervate
-    internal class spell_dru_innervate : SpellScript, ICheckCastHander, IOnHit
+    internal class spell_dru_innervate : SpellScript, ISpellCheckCastHander, ISpellOnHit
     {
         public SpellCastResult CheckCast()
         {
@@ -831,7 +831,7 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 5215 - Prowl
-    internal class spell_dru_prowl : SpellScript, IBeforeCast
+    internal class spell_dru_prowl : SpellScript, ISpellBeforeCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -889,7 +889,7 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 52610 - Savage Roar
-    internal class spell_dru_savage_roar : SpellScript, ICheckCastHander
+    internal class spell_dru_savage_roar : SpellScript, ISpellCheckCastHander
     {
         public SpellCastResult CheckCast()
         {
@@ -953,7 +953,7 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 106898 - Stampeding Roar
-    internal class spell_dru_stampeding_roar : SpellScript, IBeforeCast
+    internal class spell_dru_stampeding_roar : SpellScript, ISpellBeforeCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1430,7 +1430,7 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 783 - Travel Form (dummy)
-    internal class spell_dru_travel_form_dummy : SpellScript, ICheckCastHander
+    internal class spell_dru_travel_form_dummy : SpellScript, ISpellCheckCastHander
     {
         public override bool Validate(SpellInfo spellEntry)
         {
@@ -1494,7 +1494,7 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 252216 - Tiger Dash
-    internal class spell_dru_tiger_dash : SpellScript, IBeforeCast
+    internal class spell_dru_tiger_dash : SpellScript, ISpellBeforeCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {

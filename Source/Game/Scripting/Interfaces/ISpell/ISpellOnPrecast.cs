@@ -1,6 +1,6 @@
 ﻿namespace Game.Scripting.Interfaces.ISpell
 {
-    public interface IOnPrecast : ISpellScript
+    public interface ISpellOnPrecast : ISpellScript
     {
         void OnPrecast();
     }

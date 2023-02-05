@@ -805,7 +805,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
     }
 
     [Script]
-    internal class spell_garothi_eradication : SpellScript, IOnHit
+    internal class spell_garothi_eradication : SpellScript, ISpellOnHit
     {
         public void OnHit()
         {

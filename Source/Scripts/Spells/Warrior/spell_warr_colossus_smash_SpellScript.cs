@@ -8,7 +8,7 @@ using Game.Spells;
 namespace Scripts.Spells.Warrior
 {
     [Script] // 167105 - Colossus Smash 7.1.5
-    internal class spell_warr_colossus_smash_SpellScript : SpellScript, IOnHit
+    internal class spell_warr_colossus_smash_SpellScript : SpellScript, ISpellOnHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {

@@ -8,7 +8,7 @@ namespace Scripts.Spells.Warrior
 {
     // Victory Rush (heal) - 118779
     [SpellScript(118779)]
-    public class spell_warr_victory_rush_heal : SpellScript, IOnHit
+    public class spell_warr_victory_rush_heal : SpellScript, ISpellOnHit
     {
         public override bool Validate(SpellInfo UnnamedParameter)
         {

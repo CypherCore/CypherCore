@@ -11,7 +11,7 @@ using Game.Spells;
 namespace Scripts.Spells.Warrior
 {
     [Script] // 46968 - Shockwave
-    internal class spell_warr_shockwave : SpellScript, IAfterCast, IHasSpellEffects
+    internal class spell_warr_shockwave : SpellScript, ISpellAfterCast, IHasSpellEffects
     {
         private uint _targetCount;
 

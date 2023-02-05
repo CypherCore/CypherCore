@@ -11,7 +11,7 @@ using Game.Scripting.Interfaces.ISpell;
 namespace Scripts.Spells.Warlock
 {
     [Script] // 116858 - Chaos Bolt
-    internal class spell_warl_chaos_bolt : SpellScript, IHasSpellEffects, ICalcCritChance
+    internal class spell_warl_chaos_bolt : SpellScript, IHasSpellEffects, ISpellCalcCritChance
     {
         public override bool Load()
         {

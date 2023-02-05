@@ -13,6 +13,7 @@ using Game.Movement;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Scripting;
+using Game.Scripting.Interfaces.IPlayer;
 using Game.Scripting.Interfaces.IUnit;
 using Game.Spells;
 using System;
@@ -2773,6 +2774,12 @@ namespace Game.Entities
                     he.CastSpell(he, 7267, true);                  // beg
                     he.DuelComplete(DuelCompleteType.Won);
                 }
+            }
+
+            if (victim.IsPlayer())
+            {
+                player = victim.ToPlayer();
+                ScriptManager.Instance.ForEach<IPlayerOnTakeDamage>(player.GetClass(), a => a.OnPlayerTakeDamage(player, damage, damageSchoolMask));
             }
 
             // make player victims stand up automatically

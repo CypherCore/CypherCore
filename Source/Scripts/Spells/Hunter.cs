@@ -103,7 +103,7 @@ namespace Scripts.Spells.Hunter
     }
 
     [Script] // 109304 - Exhilaration
-    internal class spell_hun_exhilaration : SpellScript, IOnHit
+    internal class spell_hun_exhilaration : SpellScript, ISpellOnHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -188,7 +188,7 @@ namespace Scripts.Spells.Hunter
 
     // 53271 - Masters Call
     [Script]
-    internal class spell_hun_masters_call : SpellScript, ICheckCastHander, IHasSpellEffects
+    internal class spell_hun_masters_call : SpellScript, ISpellCheckCastHander, IHasSpellEffects
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -347,7 +347,7 @@ namespace Scripts.Spells.Hunter
     }
 
     [Script] // 781 - Disengage
-    internal class spell_hun_posthaste : SpellScript, IAfterCast
+    internal class spell_hun_posthaste : SpellScript, ISpellAfterCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -432,7 +432,7 @@ namespace Scripts.Spells.Hunter
 
     // 56641 - Steady Shot
     [Script]
-    internal class spell_hun_steady_shot : SpellScript, IOnHit
+    internal class spell_hun_steady_shot : SpellScript, ISpellOnHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -452,7 +452,7 @@ namespace Scripts.Spells.Hunter
 
     // 1515 - Tame Beast
     [Script]
-    internal class spell_hun_tame_beast : SpellScript, ICheckCastHander
+    internal class spell_hun_tame_beast : SpellScript, ISpellCheckCastHander
     {
         private static readonly uint[] CallPetSpellIds =
         {

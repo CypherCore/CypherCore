@@ -9,7 +9,7 @@ using Game.Spells;
 namespace Scripts.Spells.Warlock
 {
     [Script] // 48181 - Haunt
-    internal class spell_warl_haunt : SpellScript, IAfterHit
+    internal class spell_warl_haunt : SpellScript, ISpellAfterHit
     {
         public void AfterHit()
         {

@@ -240,7 +240,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
     }
 
     [Script] // Id - 96932 Eyes of Occu'thar
-    internal class spell_occuthar_eyes_of_occuthar_vehicle_SpellScript : SpellScript, IAfterHit
+    internal class spell_occuthar_eyes_of_occuthar_vehicle_SpellScript : SpellScript, ISpellAfterHit
     {
         public override bool Load()
         {

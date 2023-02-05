@@ -10,7 +10,7 @@ using Game.Spells;
 namespace Scripts.EasternKingdoms.Deadmines.Spells
 {
     [SpellScript(new uint[]{ 89268, 89740, 90561, 90562, 90563, 90564, 90565, 90582, 90583, 90584, 90585, 90586 })]
-    public class spell_captain_cookie_throw_food_targeting : SpellScript, IAfterHit
+    public class spell_captain_cookie_throw_food_targeting : SpellScript, ISpellAfterHit
     {
         public void AfterHit()
         {

@@ -1,6 +1,6 @@
 ﻿namespace Game.Scripting.Interfaces.ISpell
 {
-    public interface IAfterCast : ISpellScript
+    public interface ISpellAfterCast : ISpellScript
     {
         public void AfterCast();
     }
