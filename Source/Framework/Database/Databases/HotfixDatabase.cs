@@ -11,7 +11,7 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_ACHIEVEMENT, "SELECT Description, Title, Reward, ID, InstanceID, Faction, Supercedes, Category, MinimumCriteria, " +
                 "Points, Flags, UiOrder, IconFileID, RewardItemID, CriteriaTree, SharesCriteria, CovenantID FROM achievement ");
             PrepareStatement(HotfixStatements.SEL_ACHIEVEMENT_LOCALE, "SELECT ID, Description_lang, Title_lang, Reward_lang FROM achievement_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // AchievementCategory.db2
             PrepareStatement(HotfixStatements.SEL_ACHIEVEMENT_CATEGORY, "SELECT Name, ID, Parent, UiOrder FROM achievement_category ");
@@ -24,13 +24,13 @@ namespace Framework.Database
                 "ItemQuantity, CurrencyType, CurrencyQuantity, UiMapID, BonusPlayerConditionID1, BonusPlayerConditionID2, BonusValue1, BonusValue2" +
                 " FROM adventure_journal ");
             PrepareStatement(HotfixStatements.SEL_ADVENTURE_JOURNAL_LOCALE, "SELECT ID, Name_lang, Description_lang, ButtonText_lang, RewardDescription_lang, " +
-                "ContinueDescription_lang FROM adventure_journal_locale  AND locale = ?");
+                "ContinueDescription_lang FROM adventure_journal_locale WHERE locale = ?");
 
             // AdventureMapPoi.db2
             PrepareStatement(HotfixStatements.SEL_ADVENTURE_MAP_POI, "SELECT ID, Title, Description, WorldPositionX, WorldPositionY, Type, PlayerConditionID, QuestID, " +
                 "LfgDungeonID, RewardItemID, UiTextureAtlasMemberID, UiTextureKitID, MapID, AreaTableID FROM adventure_map_poi ");
             PrepareStatement(HotfixStatements.SEL_ADVENTURE_MAP_POI_LOCALE, "SELECT ID, Title_lang, Description_lang FROM adventure_map_poi_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // AnimationData.db2
             PrepareStatement(HotfixStatements.SEL_ANIMATION_DATA, "SELECT ID, Fallback, BehaviorTier, BehaviorID, Flags1, Flags2 FROM animation_data" +
@@ -48,20 +48,20 @@ namespace Framework.Database
                 "SoundProviderPrefUnderwater, AmbienceID, UwAmbience, ZoneMusic, UwZoneMusic, IntroSound, UwIntroSound, FactionGroupMask, AmbientMultiplier, " +
                 "MountFlags, PvpCombatWorldStateID, WildBattlePetLevelMin, WildBattlePetLevelMax, WindSettingsID, ContentTuningID, Flags1, Flags2, " +
                 "LiquidTypeID1, LiquidTypeID2, LiquidTypeID3, LiquidTypeID4 FROM area_table ");
-            PrepareStatement(HotfixStatements.SEL_AREA_TABLE_LOCALE, "SELECT ID, AreaName_lang FROM area_table_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_AREA_TABLE_LOCALE, "SELECT ID, AreaName_lang FROM area_table_locale WHERE locale = ?");
 
             // AreaPOI
             PrepareStatement(HotfixStatements.SEL_AREA_POI, "SELECT Name, Description, ID, Pos1, Pos2, Pos3, PortLocID, PlayerConditionID, UiTextureAtlasMemberID, " +
                 "Flags, WmoGroupID, PoiDataType, PoiData, Field_9_1_0, Field_10_0_0_45141_012, ContinentID, AreaID, WorldStateID, UiWidgetSetID, " +
                 "UiTextureKitID, Field_9_1_0_38783, Importance, Icon FROM area_poi ");
 
-            PrepareStatement(HotfixStatements.SEL_AREA_POI, "SELECT ID, Name_lang, Description_lang FROM area_poi_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_AREA_POI, "SELECT ID, Name_lang, Description_lang FROM area_poi_locale WHERE locale = ?");
 
             // AreaPOIState.db2
             PrepareStatement(HotfixStatements.SEL_AREA_POI_STATE, "SELECT ID, Description, WorldStateValue, IconEnumValue, UiTextureAtlasMemberID, AreaPoiID" +
                 " FROM area_p_o_i_state ");
             
-            PrepareStatement(HotfixStatements.SEL_AREA_POI_STATE_LOCALE, "SELECT ID, Description_lang FROM area_p_o_i_state_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_AREA_POI_STATE_LOCALE, "SELECT ID, Description_lang FROM area_p_o_i_state_locale WHERE locale = ?");
 
             // AreaTrigger.db2
             PrepareStatement(HotfixStatements.SEL_AREA_TRIGGER, "SELECT PosX, PosY, PosZ, ID, ContinentID, PhaseUseFlags, PhaseID, PhaseGroupID, Radius, BoxLength, " +
@@ -74,7 +74,7 @@ namespace Framework.Database
             // Artifact.db2
             PrepareStatement(HotfixStatements.SEL_ARTIFACT, "SELECT Name, ID, UiTextureKitID, UiNameColor, UiBarOverlayColor, UiBarBackgroundColor, " +
                 "ChrSpecializationID, Flags, ArtifactCategoryID, UiModelSceneID, SpellVisualKitID FROM artifact ");
-            PrepareStatement(HotfixStatements.SEL_ARTIFACT_LOCALE, "SELECT ID, Name_lang FROM artifact_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_ARTIFACT_LOCALE, "SELECT ID, Name_lang FROM artifact_locale WHERE locale = ?");
 
             // ArtifactAppearance.db2
             PrepareStatement(HotfixStatements.SEL_ARTIFACT_APPEARANCE, "SELECT Name, ID, ArtifactAppearanceSetID, DisplayIndex, UnlockPlayerConditionID, " +
@@ -88,7 +88,7 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_ARTIFACT_APPEARANCE_SET, "SELECT Name, Description, ID, DisplayIndex, UiCameraID, AltHandUICameraID, " +
                 "ForgeAttachmentOverride, Flags, ArtifactID FROM artifact_appearance_set ");
             PrepareStatement(HotfixStatements.SEL_ARTIFACT_APPEARANCE_SET_LOCALE, "SELECT ID, Name_lang, Description_lang FROM artifact_appearance_set_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // ArtifactCategory.db2
             PrepareStatement(HotfixStatements.SEL_ARTIFACT_CATEGORY, "SELECT ID, XpMultCurrencyID, XpMultCurveID FROM artifact_category ");
@@ -122,7 +122,7 @@ namespace Framework.Database
             // AuctionHouse.db2
             PrepareStatement(HotfixStatements.SEL_AUCTION_HOUSE, "SELECT ID, Name, FactionID, DepositRate, ConsignmentRate FROM auction_house" +
                 " ");
-            PrepareStatement(HotfixStatements.SEL_AUCTION_HOUSE_LOCALE, "SELECT ID, Name_lang FROM auction_house_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_AUCTION_HOUSE_LOCALE, "SELECT ID, Name_lang FROM auction_house_locale WHERE locale = ?");
 
             // AzeriteEmpoweredItem.db2
             PrepareStatement(HotfixStatements.SEL_AZERITE_EMPOWERED_ITEM, "SELECT ID, ItemID, AzeriteTierUnlockSetID, AzeritePowerSetID FROM azerite_empowered_item" +
@@ -131,13 +131,13 @@ namespace Framework.Database
             // AzeriteEssence.db2
             PrepareStatement(HotfixStatements.SEL_AZERITE_ESSENCE, "SELECT ID, Name, Description, SpecSetID FROM azerite_essence ");
             PrepareStatement(HotfixStatements.SEL_AZERITE_ESSENCE_LOCALE, "SELECT ID, Name_lang, Description_lang FROM azerite_essence_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // AzeriteEssencePower.db2
             PrepareStatement(HotfixStatements.SEL_AZERITE_ESSENCE_POWER, "SELECT ID, SourceAlliance, SourceHorde, AzeriteEssenceID, Tier, MajorPowerDescription, " +
                 "MinorPowerDescription, MajorPowerActual, MinorPowerActual FROM azerite_essence_power ");
             PrepareStatement(HotfixStatements.SEL_AZERITE_ESSENCE_POWER_LOCALE, "SELECT ID, SourceAlliance_lang, SourceHorde_lang FROM azerite_essence_power_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // AzeriteItem.db2
             PrepareStatement(HotfixStatements.SEL_AZERITE_ITEM, "SELECT ID, ItemID FROM azerite_item ");
@@ -182,7 +182,7 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_BARBER_SHOP_STYLE, "SELECT ID, DisplayName, Description, Type, CostModifier, Race, Sex, Data FROM barber_shop_style" +
                 " ");
             PrepareStatement(HotfixStatements.SEL_BARBER_SHOP_STYLE_LOCALE, "SELECT ID, DisplayName_lang, Description_lang FROM barber_shop_style_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // BattlePetBreedQuality.db2
             PrepareStatement(HotfixStatements.SEL_BATTLE_PET_BREED_QUALITY, "SELECT ID, MaxQualityRoll, StateMultiplier, QualityEnum FROM battle_pet_breed_quality" +
@@ -196,7 +196,7 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_BATTLE_PET_SPECIES, "SELECT Description, SourceText, ID, CreatureID, SummonSpellID, IconFileDataID, PetTypeEnum, " +
                 "Flags, SourceTypeEnum, CardUIModelSceneID, LoadoutUIModelSceneID, CovenantID FROM battle_pet_species ");
             PrepareStatement(HotfixStatements.SEL_BATTLE_PET_SPECIES_LOCALE, "SELECT ID, Description_lang, SourceText_lang FROM battle_pet_species_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // BattlePetSpeciesState.db2
             PrepareStatement(HotfixStatements.SEL_BATTLE_PET_SPECIES_STATE, "SELECT ID, BattlePetStateID, Value, BattlePetSpeciesID FROM battle_pet_species_state" +
@@ -208,7 +208,7 @@ namespace Framework.Database
                 "MapID1, MapID2, MapID3, MapID4, MapID5, MapID6, MapID7, MapID8, MapID9, MapID10, MapID11, MapID12, MapID13, MapID14, MapID15, MapID16" +
                 " FROM battlemaster_list ");
             PrepareStatement(HotfixStatements.SEL_BATTLEMASTER_LIST_LOCALE, "SELECT ID, Name_lang, GameType_lang, ShortDescription_lang, LongDescription_lang" +
-                " FROM battlemaster_list_locale  AND locale = ?");
+                " FROM battlemaster_list_locale WHERE locale = ?");
 
             // BroadcastText.db2
             PrepareStatement(HotfixStatements.SEL_BROADCAST_TEXT, "SELECT `Text`, Text1, ID, LanguageID, ConditionID, EmotesID, Flags, ChatBubbleDurationMs, " +
@@ -270,7 +270,7 @@ namespace Framework.Database
                 "ChrCustomizationVisReqID, SortOrder, UiOrderIndex, Flags, AddedInPatch, SwatchColor1, SwatchColor2 FROM chr_customization_choice" +
                 " ");
             PrepareStatement(HotfixStatements.SEL_CHR_CUSTOMIZATION_CHOICE_LOCALE, "SELECT ID, Name_lang FROM chr_customization_choice_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // ChrCustomizationDisplayInfo.db2
             PrepareStatement(HotfixStatements.SEL_CHR_CUSTOMIZATION_DISPLAY_INFO, "SELECT ID, ShapeshiftFormID, DisplayID, BarberShopMinCameraDistance, " +
@@ -287,7 +287,7 @@ namespace Framework.Database
                 "OptionType, BarberShopCostModifier, ChrCustomizationID, ChrCustomizationReqID, UiOrderIndex, AddedInPatch FROM chr_customization_option" +
                 " ");
             PrepareStatement(HotfixStatements.SEL_CHR_CUSTOMIZATION_OPTION_LOCALE, "SELECT ID, Name_lang FROM chr_customization_option_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // ChrCustomizationReq.db2
             PrepareStatement(HotfixStatements.SEL_CHR_CUSTOMIZATION_REQ, "SELECT ID, ReqSource, Flags, ClassMask, AchievementID, QuestID, OverrideArchive, " +
@@ -323,14 +323,14 @@ namespace Framework.Database
                 "FemaleModelFallbackSex, MaleTextureFallbackSex, FemaleTextureFallbackSex FROM chr_races ");
             PrepareStatement(HotfixStatements.SEL_CHR_RACES_LOCALE, "SELECT ID, Name_lang, NameFemale_lang, NameLowercase_lang, NameFemaleLowercase_lang, LoreName_lang, " +
                 "LoreNameFemale_lang, LoreNameLower_lang, LoreNameLowerFemale_lang, LoreDescription_lang, ShortName_lang, ShortNameFemale_lang, " +
-                "ShortNameLower_lang, ShortNameLowerFemale_lang FROM chr_races_locale  AND locale = ?");
+                "ShortNameLower_lang, ShortNameLowerFemale_lang FROM chr_races_locale WHERE locale = ?");
 
             // ChrSpecialization.db2
             PrepareStatement(HotfixStatements.SEL_CHR_SPECIALIZATION, "SELECT Name, FemaleName, Description, ID, ClassID, OrderIndex, PetTalentType, Role, Flags, " +
                 "SpellIconFileID, PrimaryStatPriority, AnimReplacements, MasterySpellID1, MasterySpellID2 FROM chr_specialization" +
                 " ");
             PrepareStatement(HotfixStatements.SEL_CHR_SPECIALIZATION_LOCALE, "SELECT ID, Name_lang, FemaleName_lang, Description_lang FROM chr_specialization_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // CinematicCamera.db2
             PrepareStatement(HotfixStatements.SEL_CINEMATIC_CAMERA, "SELECT ID, OriginX, OriginY, OriginZ, SoundID, OriginFacing, FileDataID, ConversationID" +
@@ -370,7 +370,7 @@ namespace Framework.Database
             // CreatureFamily.db2
             PrepareStatement(HotfixStatements.SEL_CREATURE_FAMILY, "SELECT ID, Name, MinScale, MinScaleLevel, MaxScale, MaxScaleLevel, PetFoodMask, PetTalentType, " +
                 "IconFileID, SkillLine1, SkillLine2 FROM creature_family ");
-            PrepareStatement(HotfixStatements.SEL_CREATURE_FAMILY_LOCALE, "SELECT ID, Name_lang FROM creature_family_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_CREATURE_FAMILY_LOCALE, "SELECT ID, Name_lang FROM creature_family_locale WHERE locale = ?");
 
             // CreatureModelData.db2
             PrepareStatement(HotfixStatements.SEL_CREATURE_MODEL_DATA, "SELECT ID, GeoBox1, GeoBox2, GeoBox3, GeoBox4, GeoBox5, GeoBox6, Flags, FileDataID, BloodID, " +
@@ -382,7 +382,7 @@ namespace Framework.Database
 
             // CreatureType.db2
             PrepareStatement(HotfixStatements.SEL_CREATURE_TYPE, "SELECT ID, Name, Flags FROM creature_type ");
-            PrepareStatement(HotfixStatements.SEL_CREATURE_TYPE_LOCALE, "SELECT ID, Name_lang FROM creature_type_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_CREATURE_TYPE_LOCALE, "SELECT ID, Name_lang FROM creature_type_locale WHERE locale = ?");
 
             // Criteria.db2
             PrepareStatement(HotfixStatements.SEL_CRITERIA, "SELECT ID, Type, Asset, ModifierTreeId, StartEvent, StartAsset, StartTimer, FailEvent, FailAsset, Flags, " +
@@ -398,7 +398,7 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_CURRENCY_CONTAINER, "SELECT ID, ContainerName, ContainerDescription, MinAmount, MaxAmount, ContainerIconID, " +
                 "ContainerQuality, OnLootSpellVisualKitID, CurrencyTypesID FROM currency_container ");
             PrepareStatement(HotfixStatements.SEL_CURRENCY_CONTAINER_LOCALE, "SELECT ID, ContainerName_lang, ContainerDescription_lang FROM currency_container_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // CurrencyTypes.db2
             PrepareStatement(HotfixStatements.SEL_CURRENCY_TYPES, "SELECT ID, Name, Description, CategoryID, InventoryIconFileID, SpellWeight, SpellCategory, MaxQty, " +
@@ -425,7 +425,7 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_DIFFICULTY, "SELECT ID, Name, InstanceType, OrderIndex, OldEnumValue, FallbackDifficultyID, MinPlayers, MaxPlayers, " +
                 "Flags, ItemContext, ToggleDifficultyID, GroupSizeHealthCurveID, GroupSizeDmgCurveID, GroupSizeSpellPointsCurveID FROM difficulty" +
                 " ");
-            PrepareStatement(HotfixStatements.SEL_DIFFICULTY_LOCALE, "SELECT ID, Name_lang FROM difficulty_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_DIFFICULTY_LOCALE, "SELECT ID, Name_lang FROM difficulty_locale WHERE locale = ?");
 
             // DungeonEncounter.db2
             PrepareStatement(HotfixStatements.SEL_DUNGEON_ENCOUNTER, "SELECT Name, ID, MapID, DifficultyID, OrderIndex, CompleteWorldStateID, Bit, Flags, " +
@@ -472,7 +472,7 @@ namespace Framework.Database
                 "ReputationFlags3, ReputationFlags4, ReputationBase1, ReputationBase2, ReputationBase3, ReputationBase4, ReputationMax1, ReputationMax2, " +
                 "ReputationMax3, ReputationMax4, ParentFactionMod1, ParentFactionMod2, ParentFactionCap1, ParentFactionCap2 FROM faction" +
                 " ");
-            PrepareStatement(HotfixStatements.SEL_FACTION_LOCALE, "SELECT ID, Name_lang, Description_lang FROM faction_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_FACTION_LOCALE, "SELECT ID, Name_lang, Description_lang FROM faction_locale WHERE locale = ?");
 
             // FactionTemplate.db2
             PrepareStatement(HotfixStatements.SEL_FACTION_TEMPLATE, "SELECT ID, Faction, Flags, FactionGroup, FriendGroup, EnemyGroup, Enemies1, Enemies2, Enemies3, " +
@@ -483,13 +483,13 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_FRIENDSHIP_REP_REACTION, "SELECT ID, Reaction, FriendshipRepID, ReactionThreshold, OverrideColor" +
                 " FROM friendship_rep_reaction ");
             PrepareStatement(HotfixStatements.SEL_FRIENDSHIP_REP_REACTION_LOCALE, "SELECT ID, Reaction_lang FROM friendship_rep_reaction_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // FriendshipReputation.db2
             PrepareStatement(HotfixStatements.SEL_FRIENDSHIP_REPUTATION, "SELECT Description, StandingModified, StandingChanged, ID, FactionID, TextureFileID, Flags" +
                 " FROM friendship_reputation ");
             PrepareStatement(HotfixStatements.SEL_FRIENDSHIP_REPUTATION_LOCALE, "SELECT ID, Description_lang, StandingModified_lang, StandingChanged_lang" +
-                " FROM friendship_reputation_locale  AND locale = ?");
+                " FROM friendship_reputation_locale WHERE locale = ?");
 
             // GameobjectArtKit.db2
             PrepareStatement(HotfixStatements.SEL_GAMEOBJECT_ART_KIT, "SELECT ID, AttachModelFileID, TextureVariationFileID1, TextureVariationFileID2, " +
@@ -503,7 +503,7 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_GAMEOBJECTS, "SELECT Name, PosX, PosY, PosZ, Rot1, Rot2, Rot3, Rot4, ID, OwnerID, DisplayID, Scale, TypeID, " +
                 "PhaseUseFlags, PhaseID, PhaseGroupID, PropValue1, PropValue2, PropValue3, PropValue4, PropValue5, PropValue6, PropValue7, PropValue8" +
                 " FROM gameobjects ");
-            PrepareStatement(HotfixStatements.SEL_GAMEOBJECTS_LOCALE, "SELECT ID, Name_lang FROM gameobjects_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_GAMEOBJECTS_LOCALE, "SELECT ID, Name_lang FROM gameobjects_locale WHERE locale = ?");
 
             // GarrAbility.db2
             PrepareStatement(HotfixStatements.SEL_GARR_ABILITY, "SELECT ID, Name, Description, GarrAbilityCategoryID, GarrFollowerTypeID, IconFileDataID, " +
@@ -517,7 +517,7 @@ namespace Framework.Database
                 "AllianceUiTextureKitID, IconFileDataID, AllianceSceneScriptPackageID, HordeSceneScriptPackageID, MaxAssignments, ShipmentCapacity, " +
                 "GarrAbilityID, BonusGarrAbilityID, GoldCost, Flags FROM garr_building ");
             PrepareStatement(HotfixStatements.SEL_GARR_BUILDING_LOCALE, "SELECT ID, HordeName_lang, AllianceName_lang, Description_lang, Tooltip_lang" +
-                " FROM garr_building_locale  AND locale = ?");
+                " FROM garr_building_locale WHERE locale = ?");
 
             // GarrBuildingPlotInst.db2
             PrepareStatement(HotfixStatements.SEL_GARR_BUILDING_PLOT_INST, "SELECT MapOffsetX, MapOffsetY, ID, GarrBuildingID, GarrSiteLevelPlotInstID, " +
@@ -527,7 +527,7 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_GARR_CLASS_SPEC, "SELECT ID, ClassSpec, ClassSpecMale, ClassSpecFemale, UiTextureAtlasMemberID, GarrFollItemSetID, " +
                 "FollowerClassLimit, Flags FROM garr_class_spec ");
             PrepareStatement(HotfixStatements.SEL_GARR_CLASS_SPEC_LOCALE, "SELECT ID, ClassSpec_lang, ClassSpecMale_lang, ClassSpecFemale_lang FROM garr_class_spec_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // GarrFollower.db2
             PrepareStatement(HotfixStatements.SEL_GARR_FOLLOWER, "SELECT ID, HordeSourceText, AllianceSourceText, TitleName, GarrTypeID, GarrFollowerTypeID, " +
@@ -537,7 +537,7 @@ namespace Framework.Database
                 "AllianceFlavorGarrStringID, HordeSlottingBroadcastTextID, AllySlottingBroadcastTextID, ChrClassID, Flags, Gender, AutoCombatantID, " +
                 "CovenantID FROM garr_follower ");
             PrepareStatement(HotfixStatements.SEL_GARR_FOLLOWER_LOCALE, "SELECT ID, HordeSourceText_lang, AllianceSourceText_lang, TitleName_lang FROM garr_follower_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // GarrFollowerXAbility.db2
             PrepareStatement(HotfixStatements.SEL_GARR_FOLLOWER_X_ABILITY, "SELECT ID, OrderIndex, FactionIndex, GarrAbilityID, GarrFollowerID" +
@@ -550,7 +550,7 @@ namespace Framework.Database
                 "TravelDuration, OfferDuration, BaseCompletionChance, BaseFollowerXP, OvermaxRewardPackID, FollowerDeathChance, AreaID, Flags, " +
                 "AutoMissionScalar, AutoMissionScalarCurveID, AutoCombatantEnvCasterID FROM garr_mission ");
             PrepareStatement(HotfixStatements.SEL_GARR_MISSION_LOCALE, "SELECT ID, Name_lang, Location_lang, Description_lang FROM garr_mission_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // GarrPlot.db2
             PrepareStatement(HotfixStatements.SEL_GARR_PLOT, "SELECT ID, Name, PlotType, HordeConstructObjID, AllianceConstructObjID, Flags, UiCategoryID, " +
@@ -574,7 +574,7 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_GARR_TALENT_TREE, "SELECT ID, Name, GarrTypeID, ClassID, MaxTiers, UiOrder, Flags, UiTextureKitID, " +
                 "GarrTalentTreeType, PlayerConditionID, FeatureTypeIndex, FeatureSubtypeIndex, CurrencyID FROM garr_talent_tree" +
                 " ");
-            PrepareStatement(HotfixStatements.SEL_GARR_TALENT_TREE_LOCALE, "SELECT ID, Name_lang FROM garr_talent_tree_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_GARR_TALENT_TREE_LOCALE, "SELECT ID, Name_lang FROM garr_talent_tree_locale WHERE locale = ?");
 
             // GemProperties.db2
             PrepareStatement(HotfixStatements.SEL_GEM_PROPERTIES, "SELECT ID, EnchantId, Type FROM gem_properties ");
@@ -615,7 +615,7 @@ namespace Framework.Database
                 "LegacyItemID, UpgradeItemID1, UpgradeItemID2, UpgradeItemID3, UpgradeItemID4, UpgradeItemID5, UpgradeItemID6, UpgradeItemBonusListID1, " +
                 "UpgradeItemBonusListID2, UpgradeItemBonusListID3, UpgradeItemBonusListID4, UpgradeItemBonusListID5, UpgradeItemBonusListID6 FROM heirloom" +
                 " ");
-            PrepareStatement(HotfixStatements.SEL_HEIRLOOM_LOCALE, "SELECT ID, SourceText_lang FROM heirloom_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_HEIRLOOM_LOCALE, "SELECT ID, SourceText_lang FROM heirloom_locale WHERE locale = ?");
 
             // Holidays.db2
             PrepareStatement(HotfixStatements.SEL_HOLIDAYS, "SELECT ID, Region, Looping, HolidayNameID, HolidayDescriptionID, Priority, CalendarFilterType, Flags, " +
@@ -660,7 +660,7 @@ namespace Framework.Database
 
             // ItemBagFamily.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_BAG_FAMILY, "SELECT ID, Name FROM item_bag_family ");
-            PrepareStatement(HotfixStatements.SEL_ITEM_BAG_FAMILY_LOCALE, "SELECT ID, Name_lang FROM item_bag_family_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_ITEM_BAG_FAMILY_LOCALE, "SELECT ID, Name_lang FROM item_bag_family_locale WHERE locale = ?");
 
             // ItemBonus.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_BONUS, "SELECT ID, Value1, Value2, Value3, Value4, ParentItemBonusListID, Type, OrderIndex FROM item_bonus" +
@@ -680,7 +680,7 @@ namespace Framework.Database
 
             // ItemClass.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_CLASS, "SELECT ID, ClassName, ClassID, PriceModifier, Flags FROM item_class ");
-            PrepareStatement(HotfixStatements.SEL_ITEM_CLASS_LOCALE, "SELECT ID, ClassName_lang FROM item_class_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_ITEM_CLASS_LOCALE, "SELECT ID, ClassName_lang FROM item_class_locale WHERE locale = ?");
 
             // ItemCurrencyCost.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_CURRENCY_COST, "SELECT ID, ItemID FROM item_currency_cost ");
@@ -751,7 +751,7 @@ namespace Framework.Database
             // ItemNameDescription.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_NAME_DESCRIPTION, "SELECT ID, Description, Color FROM item_name_description ");
             PrepareStatement(HotfixStatements.SEL_ITEM_NAME_DESCRIPTION_LOCALE, "SELECT ID, Description_lang FROM item_name_description_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // ItemPriceBase.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_PRICE_BASE, "SELECT ID, ItemLevel, Armor, Weapon FROM item_price_base ");
@@ -767,7 +767,7 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_ITEM_SET, "SELECT ID, Name, SetFlags, RequiredSkill, RequiredSkillRank, ItemID1, ItemID2, ItemID3, ItemID4, ItemID5, " +
                 "ItemID6, ItemID7, ItemID8, ItemID9, ItemID10, ItemID11, ItemID12, ItemID13, ItemID14, ItemID15, ItemID16, ItemID17 FROM item_set" +
                 " ");
-            PrepareStatement(HotfixStatements.SEL_ITEM_SET_LOCALE, "SELECT ID, Name_lang FROM item_set_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_ITEM_SET_LOCALE, "SELECT ID, Name_lang FROM item_set_locale WHERE locale = ?");
 
             // ItemSetSpell.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_SET_SPELL, "SELECT ID, ChrSpecID, SpellID, Threshold, ItemSetID FROM item_set_spell" +
@@ -789,7 +789,7 @@ namespace Framework.Database
                 "StatModifierBonusStat10, ContainerSlots, RequiredPVPMedal, RequiredPVPRank, RequiredLevel, InventoryType, OverallQualityID FROM item_sparse" +
                 " ");
             PrepareStatement(HotfixStatements.SEL_ITEM_SPARSE_LOCALE, "SELECT ID, Description_lang, Display3_lang, Display2_lang, Display1_lang, Display_lang" +
-                " FROM item_sparse_locale  AND locale = ?");
+                " FROM item_sparse_locale WHERE locale = ?");
 
             // ItemSpec.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_SPEC, "SELECT ID, MinLevel, MaxLevel, ItemType, PrimaryStat, SecondaryStat, SpecializationID FROM item_spec" +
@@ -808,24 +808,24 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_JOURNAL_ENCOUNTER, "SELECT Name, Description, MapX, MapY, ID, JournalInstanceID, DungeonEncounterID, OrderIndex, " +
                 "FirstSectionID, UiMapID, MapDisplayConditionID, Flags, DifficultyMask FROM journal_encounter ");
             PrepareStatement(HotfixStatements.SEL_JOURNAL_ENCOUNTER_LOCALE, "SELECT ID, Name_lang, Description_lang FROM journal_encounter_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // JournalEncounterSection.db2
             PrepareStatement(HotfixStatements.SEL_JOURNAL_ENCOUNTER_SECTION, "SELECT ID, Title, BodyText, JournalEncounterID, OrderIndex, ParentSectionID, " +
                 "FirstChildSectionID, NextSiblingSectionID, Type, IconCreatureDisplayInfoID, UiModelSceneID, SpellID, IconFileDataID, Flags, IconFlags, " +
                 "DifficultyMask FROM journal_encounter_section ");
             PrepareStatement(HotfixStatements.SEL_JOURNAL_ENCOUNTER_SECTION_LOCALE, "SELECT ID, Title_lang, BodyText_lang FROM journal_encounter_section_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // JournalInstance.db2
             PrepareStatement(HotfixStatements.SEL_JOURNAL_INSTANCE, "SELECT ID, Name, Description, MapID, BackgroundFileDataID, ButtonFileDataID, " +
                 "ButtonSmallFileDataID, LoreFileDataID, Flags, AreaID FROM journal_instance ");
             PrepareStatement(HotfixStatements.SEL_JOURNAL_INSTANCE_LOCALE, "SELECT ID, Name_lang, Description_lang FROM journal_instance_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // JournalTier.db2
             PrepareStatement(HotfixStatements.SEL_JOURNAL_TIER, "SELECT ID, Name, PlayerConditionID FROM journal_tier ");
-            PrepareStatement(HotfixStatements.SEL_JOURNAL_TIER_LOCALE, "SELECT ID, Name_lang FROM journal_tier_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_JOURNAL_TIER_LOCALE, "SELECT ID, Name_lang FROM journal_tier_locale WHERE locale = ?");
 
             // Keychain.db2
             PrepareStatement(HotfixStatements.SEL_KEYCHAIN, "SELECT ID, Key1, Key2, Key3, Key4, Key5, Key6, Key7, Key8, Key9, Key10, Key11, Key12, Key13, Key14, Key15, " +
@@ -843,7 +843,7 @@ namespace Framework.Database
             // Languages.db2
             PrepareStatement(HotfixStatements.SEL_LANGUAGES, "SELECT ID, Name, Flags, UiTextureKitID, UiTextureKitElementCount FROM languages" +
                 " ");
-            PrepareStatement(HotfixStatements.SEL_LANGUAGES_LOCALE, "SELECT ID, Name_lang FROM languages_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_LANGUAGES_LOCALE, "SELECT ID, Name_lang FROM languages_locale WHERE locale = ?");
 
             // LfgDungeons.db2
             PrepareStatement(HotfixStatements.SEL_LFG_DUNGEONS, "SELECT ID, Name, Description, TypeID, Subtype, Faction, IconTextureFileID, RewardsBgTextureFileID, " +
@@ -873,7 +873,7 @@ namespace Framework.Database
 
             // MailTemplate.db2
             PrepareStatement(HotfixStatements.SEL_MAIL_TEMPLATE, "SELECT ID, Body FROM mail_template ");
-            PrepareStatement(HotfixStatements.SEL_MAIL_TEMPLATE_LOCALE, "SELECT ID, Body_lang FROM mail_template_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_MAIL_TEMPLATE_LOCALE, "SELECT ID, Body_lang FROM mail_template_locale WHERE locale = ?");
 
             // Map.db2
             PrepareStatement(HotfixStatements.SEL_MAP, "SELECT ID, Directory, MapName, MapDescription0, MapDescription1, PvpShortDescription, PvpLongDescription, " +
@@ -881,7 +881,7 @@ namespace Framework.Database
                 "TimeOffset, MinimapIconScale, CorpseMapID, MaxPlayers, WindSettingsID, ZmpFileDataID, WdtFileDataID, NavigationMaxDistance, Flags1, Flags2, " +
                 "Flags3 FROM map ");
             PrepareStatement(HotfixStatements.SEL_MAP_LOCALE, "SELECT ID, MapName_lang, MapDescription0_lang, MapDescription1_lang, PvpShortDescription_lang, " +
-                "PvpLongDescription_lang FROM map_locale  AND locale = ?");
+                "PvpLongDescription_lang FROM map_locale WHERE locale = ?");
 
             // MapChallengeMode.db2
             PrepareStatement(HotfixStatements.SEL_MAP_CHALLENGE_MODE, "SELECT Name, ID, MapID, Flags, ExpansionLevel, RequiredWorldStateID, CriteriaCount1, " +
@@ -892,13 +892,13 @@ namespace Framework.Database
             // MapDifficulty.db2
             PrepareStatement(HotfixStatements.SEL_MAP_DIFFICULTY, "SELECT ID, Message, DifficultyID, LockID, ResetInterval, MaxPlayers, ItemContext, " +
                 "ItemContextPickerID, Flags, ContentTuningID, MapID FROM map_difficulty ");
-            PrepareStatement(HotfixStatements.SEL_MAP_DIFFICULTY_LOCALE, "SELECT ID, Message_lang FROM map_difficulty_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_MAP_DIFFICULTY_LOCALE, "SELECT ID, Message_lang FROM map_difficulty_locale WHERE locale = ?");
 
             // MapDifficultyXCondition.db2
             PrepareStatement(HotfixStatements.SEL_MAP_DIFFICULTY_X_CONDITION, "SELECT ID, FailureDescription, PlayerConditionID, OrderIndex, MapDifficultyID" +
                 " FROM map_difficulty_x_condition ");
             PrepareStatement(HotfixStatements.SEL_MAP_DIFFICULTY_X_CONDITION_LOCALE, "SELECT ID, FailureDescription_lang FROM map_difficulty_x_condition_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // MawPower.db2
             PrepareStatement(HotfixStatements.SEL_MAW_POWER, "SELECT ID, SpellID, MawPowerRarityID FROM maw_power ");
@@ -1005,7 +1005,7 @@ namespace Framework.Database
             // PvpTalent.db2
             PrepareStatement(HotfixStatements.SEL_PVP_TALENT, "SELECT Description, ID, SpecID, SpellID, OverridesSpellID, Flags, ActionBarSpellID, PvpTalentCategoryID, " +
                 "LevelRequired, PlayerConditionID FROM pvp_talent ");
-            PrepareStatement(HotfixStatements.SEL_PVP_TALENT_LOCALE, "SELECT ID, Description_lang FROM pvp_talent_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_PVP_TALENT_LOCALE, "SELECT ID, Description_lang FROM pvp_talent_locale WHERE locale = ?");
 
             // PvpTalentCategory.db2
             PrepareStatement(HotfixStatements.SEL_PVP_TALENT_CATEGORY, "SELECT ID, TalentSlotMask FROM pvp_talent_category ");
@@ -1017,7 +1017,7 @@ namespace Framework.Database
             // PvpTier.db2
             PrepareStatement(HotfixStatements.SEL_PVP_TIER, "SELECT Name, ID, MinRating, MaxRating, PrevTier, NextTier, BracketID, `Rank`, RankIconFileDataID" +
                 " FROM pvp_tier ");
-            PrepareStatement(HotfixStatements.SEL_PVP_TIER_LOCALE, "SELECT ID, Name_lang FROM pvp_tier_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_PVP_TIER_LOCALE, "SELECT ID, Name_lang FROM pvp_tier_locale WHERE locale = ?");
 
             // QuestFactionReward.db2
             PrepareStatement(HotfixStatements.SEL_QUEST_FACTION_REWARD, "SELECT ID, Difficulty1, Difficulty2, Difficulty3, Difficulty4, Difficulty5, Difficulty6, " +
@@ -1025,7 +1025,7 @@ namespace Framework.Database
 
             // QuestInfo.db2
             PrepareStatement(HotfixStatements.SEL_QUEST_INFO, "SELECT ID, InfoName, Type, Modifiers, Profession FROM quest_info ");
-            PrepareStatement(HotfixStatements.SEL_QUEST_INFO_LOCALE, "SELECT ID, InfoName_lang FROM quest_info_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_QUEST_INFO_LOCALE, "SELECT ID, InfoName_lang FROM quest_info_locale WHERE locale = ?");
 
             // QuestLineXQuest.db2
             PrepareStatement(HotfixStatements.SEL_QUEST_LINE_X_QUEST, "SELECT ID, QuestLineID, QuestID, OrderIndex, Flags FROM quest_line_x_quest" +
@@ -1041,7 +1041,7 @@ namespace Framework.Database
 
             // QuestSort.db2
             PrepareStatement(HotfixStatements.SEL_QUEST_SORT, "SELECT ID, SortName, UiOrderIndex FROM quest_sort ");
-            PrepareStatement(HotfixStatements.SEL_QUEST_SORT_LOCALE, "SELECT ID, SortName_lang FROM quest_sort_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_QUEST_SORT_LOCALE, "SELECT ID, SortName_lang FROM quest_sort_locale WHERE locale = ?");
 
             // QuestV2.db2
             PrepareStatement(HotfixStatements.SEL_QUEST_V2, "SELECT ID, UniqueBitFlag, UiQuestDetailsTheme FROM quest_v2 ");
@@ -1070,7 +1070,7 @@ namespace Framework.Database
 
             // Scenario.db2
             PrepareStatement(HotfixStatements.SEL_SCENARIO, "SELECT ID, Name, AreaTableID, Type, Flags, UiTextureKitID FROM scenario ");
-            PrepareStatement(HotfixStatements.SEL_SCENARIO_LOCALE, "SELECT ID, Name_lang FROM scenario_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_SCENARIO_LOCALE, "SELECT ID, Name_lang FROM scenario_locale WHERE locale = ?");
 
             // ScenarioStep.db2
             PrepareStatement(HotfixStatements.SEL_SCENARIO_STEP, "SELECT ID, Description, Title, ScenarioID, Criteriatreeid, RewardQuestID, RelatedStep, Supersedes, " +
@@ -1096,14 +1096,14 @@ namespace Framework.Database
                 "CategoryID, SpellIconFileID, CanLink, ParentSkillLineID, ParentTierIndex, Flags, SpellBookSpellID, ExpansionNameSharedStringID, " +
                 "HordeExpansionNameSharedStringID FROM skill_line ");
             PrepareStatement(HotfixStatements.SEL_SKILL_LINE_LOCALE, "SELECT ID, DisplayName_lang, AlternateVerb_lang, Description_lang, HordeDisplayName_lang" +
-                " FROM skill_line_locale  AND locale = ?");
+                " FROM skill_line_locale WHERE locale = ?");
 
             // SkillLineAbility.db2
             PrepareStatement(HotfixStatements.SEL_SKILL_LINE_ABILITY, "SELECT RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, " +
                 "SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, " +
                 "SkillupSkillLineID FROM skill_line_ability ");
             PrepareStatement(HotfixStatements.SEL_SKILL_LINE_ABILITY_LOCALE, "SELECT ID, AbilityVerb_lang, AbilityAllVerb_lang FROM skill_line_ability_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // SkillLineXTraitTree.db2
             PrepareStatement(HotfixStatements.SEL_SKILL_LINE_X_TRAIT_TREE, "SELECT ID, SkillLineID, TraitTreeID, OrderIndex FROM skill_line_x_trait_tree" +
@@ -1126,7 +1126,7 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_SPECIALIZATION_SPELLS, "SELECT Description, ID, SpecID, SpellID, OverridesSpellID, DisplayOrder" +
                 " FROM specialization_spells ");
             PrepareStatement(HotfixStatements.SEL_SPECIALIZATION_SPELLS_LOCALE, "SELECT ID, Description_lang FROM specialization_spells_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // SpecSetMember.db2
             PrepareStatement(HotfixStatements.SEL_SPEC_SET_MEMBER, "SELECT ID, ChrSpecializationID, SpecSetID FROM spec_set_member ");
@@ -1154,7 +1154,7 @@ namespace Framework.Database
             // SpellCategory.db2
             PrepareStatement(HotfixStatements.SEL_SPELL_CATEGORY, "SELECT ID, Name, Flags, UsesPerWeek, MaxCharges, ChargeRecoveryTime, TypeMask FROM spell_category" +
                 " ");
-            PrepareStatement(HotfixStatements.SEL_SPELL_CATEGORY_LOCALE, "SELECT ID, Name_lang FROM spell_category_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_SPELL_CATEGORY_LOCALE, "SELECT ID, Name_lang FROM spell_category_locale WHERE locale = ?");
 
             // SpellClassOptions.db2
             PrepareStatement(HotfixStatements.SEL_SPELL_CLASS_OPTIONS, "SELECT ID, SpellID, ModalNextSpell, SpellClassSet, SpellClassMask1, SpellClassMask2, " +
@@ -1195,7 +1195,7 @@ namespace Framework.Database
                 "Charges, Effect1, Effect2, Effect3, ScalingClass, ScalingClassRestricted, ConditionID, MinLevel, MaxLevel FROM spell_item_enchantment" +
                 " ");
             PrepareStatement(HotfixStatements.SEL_SPELL_ITEM_ENCHANTMENT_LOCALE, "SELECT ID, Name_lang, HordeName_lang FROM spell_item_enchantment_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // SpellItemEnchantmentCondition.db2
             PrepareStatement(HotfixStatements.SEL_SPELL_ITEM_ENCHANTMENT_CONDITION, "SELECT ID, LtOperandType1, LtOperandType2, LtOperandType3, LtOperandType4, " +
@@ -1223,7 +1223,7 @@ namespace Framework.Database
 
             // SpellName.db2
             PrepareStatement(HotfixStatements.SEL_SPELL_NAME, "SELECT ID, Name FROM spell_name ");
-            PrepareStatement(HotfixStatements.SEL_SPELL_NAME_LOCALE, "SELECT ID, Name_lang FROM spell_name_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_SPELL_NAME_LOCALE, "SELECT ID, Name_lang FROM spell_name_locale WHERE locale = ?");
 
             // SpellPower.db2
             PrepareStatement(HotfixStatements.SEL_SPELL_POWER, "SELECT ID, OrderIndex, ManaCost, ManaCostPerLevel, ManaPerSecond, PowerDisplayID, AltPowerBarID, " +
@@ -1249,7 +1249,7 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_SPELL_RANGE, "SELECT ID, DisplayName, DisplayNameShort, Flags, RangeMin1, RangeMin2, RangeMax1, RangeMax2" +
                 " FROM spell_range ");
             PrepareStatement(HotfixStatements.SEL_SPELL_RANGE_LOCALE, "SELECT ID, DisplayName_lang, DisplayNameShort_lang FROM spell_range_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // SpellReagents.db2
             PrepareStatement(HotfixStatements.SEL_SPELL_REAGENTS, "SELECT ID, SpellID, Reagent1, Reagent2, Reagent3, Reagent4, Reagent5, Reagent6, Reagent7, Reagent8, " +
@@ -1324,13 +1324,13 @@ namespace Framework.Database
             // Talent.db2
             PrepareStatement(HotfixStatements.SEL_TALENT, "SELECT ID, Description, TierID, Flags, ColumnIndex, ClassID, SpecID, SpellID, OverridesSpellID, " +
                 "CategoryMask1, CategoryMask2 FROM talent ");
-            PrepareStatement(HotfixStatements.SEL_TALENT_LOCALE, "SELECT ID, Description_lang FROM talent_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_TALENT_LOCALE, "SELECT ID, Description_lang FROM talent_locale WHERE locale = ?");
 
             // TaxiNodes.db2
             PrepareStatement(HotfixStatements.SEL_TAXI_NODES, "SELECT Name, PosX, PosY, PosZ, MapOffsetX, MapOffsetY, FlightMapOffsetX, FlightMapOffsetY, ID, " +
                 "ContinentID, ConditionID, CharacterBitNumber, Flags, UiTextureKitID, MinimapAtlasMemberID, Facing, SpecialIconConditionID, " +
                 "VisibilityConditionID, MountCreatureID1, MountCreatureID2 FROM taxi_nodes ");
-            PrepareStatement(HotfixStatements.SEL_TAXI_NODES_LOCALE, "SELECT ID, Name_lang FROM taxi_nodes_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_TAXI_NODES_LOCALE, "SELECT ID, Name_lang FROM taxi_nodes_locale WHERE locale = ?");
 
             // TaxiPath.db2
             PrepareStatement(HotfixStatements.SEL_TAXI_PATH, "SELECT ID, FromTaxiNode, ToTaxiNode, Cost FROM taxi_path ");
@@ -1342,11 +1342,11 @@ namespace Framework.Database
             // TotemCategory.db2
             PrepareStatement(HotfixStatements.SEL_TOTEM_CATEGORY, "SELECT ID, Name, TotemCategoryType, TotemCategoryMask FROM totem_category" +
                 " ");
-            PrepareStatement(HotfixStatements.SEL_TOTEM_CATEGORY_LOCALE, "SELECT ID, Name_lang FROM totem_category_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_TOTEM_CATEGORY_LOCALE, "SELECT ID, Name_lang FROM totem_category_locale WHERE locale = ?");
 
             // Toy.db2
             PrepareStatement(HotfixStatements.SEL_TOY, "SELECT SourceText, ID, ItemID, Flags, SourceTypeEnum FROM toy ");
-            PrepareStatement(HotfixStatements.SEL_TOY_LOCALE, "SELECT ID, SourceText_lang FROM toy_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_TOY_LOCALE, "SELECT ID, SourceText_lang FROM toy_locale WHERE locale = ?");
 
             // TransmogHoliday.db2
             PrepareStatement(HotfixStatements.SEL_TRANSMOG_HOLIDAY, "SELECT ID, RequiredTransmogHoliday FROM transmog_holiday ");
@@ -1366,13 +1366,13 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_TRAIT_CURRENCY_SOURCE, "SELECT Requirement, ID, TraitCurrencyID, Amount, QuestID, AchievementID, PlayerLevel, " +
                 "TraitNodeEntryID, OrderIndex FROM trait_currency_source ");
             PrepareStatement(HotfixStatements.SEL_TRAIT_CURRENCY_SOURCE_LOCALE, "SELECT ID, Requirement_lang FROM trait_currency_source_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // TraitDefinition.db2
             PrepareStatement(HotfixStatements.SEL_TRAIT_DEFINITION, "SELECT OverrideName, OverrideSubtext, OverrideDescription, ID, SpellID, OverrideIcon, " +
                 "OverridesSpellID, VisibleSpellID FROM trait_definition ");
             PrepareStatement(HotfixStatements.SEL_TRAIT_DEFINITION_LOCALE, "SELECT ID, OverrideName_lang, OverrideSubtext_lang, OverrideDescription_lang" +
-                " FROM trait_definition_locale  AND locale = ?");
+                " FROM trait_definition_locale WHERE locale = ?");
 
             // TraitDefinitionEffectPoints.db2
             PrepareStatement(HotfixStatements.SEL_TRAIT_DEFINITION_EFFECT_POINTS, "SELECT ID, TraitDefinitionID, EffectIndex, OperationType, CurveID" +
@@ -1451,7 +1451,7 @@ namespace Framework.Database
             // TransmogSet.db2
             PrepareStatement(HotfixStatements.SEL_TRANSMOG_SET, "SELECT Name, ID, ClassMask, TrackingQuestID, Flags, TransmogSetGroupID, ItemNameDescriptionID, " +
                 "ParentTransmogSetID, Unknown810, ExpansionID, PatchID, UiOrder, PlayerConditionID FROM transmog_set ");
-            PrepareStatement(HotfixStatements.SEL_TRANSMOG_SET_LOCALE, "SELECT ID, Name_lang FROM transmog_set_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_TRANSMOG_SET_LOCALE, "SELECT ID, Name_lang FROM transmog_set_locale WHERE locale = ?");
 
             // TransmogSetGroup.db2
             PrepareStatement(HotfixStatements.SEL_TRANSMOG_SET_GROUP, "SELECT ID, Name FROM transmog_set_group ");
@@ -1473,7 +1473,7 @@ namespace Framework.Database
             // UiMap.db2
             PrepareStatement(HotfixStatements.SEL_UI_MAP, "SELECT Name, ID, ParentUiMapID, Flags, `System`, Type, BountySetID, BountyDisplayLocation, " +
                 "VisibilityPlayerConditionID, HelpTextPosition, BkgAtlasID, AlternateUiMapGroup, ContentTuningID FROM ui_map ");
-            PrepareStatement(HotfixStatements.SEL_UI_MAP_LOCALE, "SELECT ID, Name_lang FROM ui_map_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_UI_MAP_LOCALE, "SELECT ID, Name_lang FROM ui_map_locale WHERE locale = ?");
 
             // UiMapAssignment.db2
             PrepareStatement(HotfixStatements.SEL_UI_MAP_ASSIGNMENT, "SELECT UiMinX, UiMinY, UiMaxX, UiMaxY, Region1X, Region1Y, Region1Z, Region2X, Region2Y, " +
@@ -1492,7 +1492,7 @@ namespace Framework.Database
                 "PlayerConditionID, CharLevelConditionID, RequiredTimeEventPassed FROM ui_splash_screen ");
             PrepareStatement(HotfixStatements.SEL_UI_SPLASH_SCREEN_LOCALE, "SELECT ID, Header_lang, TopLeftFeatureTitle_lang, TopLeftFeatureDesc_lang, " +
                 "BottomLeftFeatureTitle_lang, BottomLeftFeatureDesc_lang, RightFeatureTitle_lang, RightFeatureDesc_lang FROM ui_splash_screen_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // UnitCondition.db2
             PrepareStatement(HotfixStatements.SEL_UNIT_CONDITION, "SELECT ID, Flags, Variable1, Variable2, Variable3, Variable4, Variable5, Variable6, Variable7, " +
@@ -1504,7 +1504,7 @@ namespace Framework.Database
                 "RegenerationPeace, RegenerationCombat, BarType, Flags, StartInset, EndInset, FileDataID1, FileDataID2, FileDataID3, FileDataID4, " +
                 "FileDataID5, FileDataID6, Color1, Color2, Color3, Color4, Color5, Color6 FROM unit_power_bar ");
             PrepareStatement(HotfixStatements.SEL_UNIT_POWER_BAR_LOCALE, "SELECT ID, Name_lang, Cost_lang, OutOfError_lang, ToolTip_lang FROM unit_power_bar_locale" +
-                "  AND locale = ?");
+                " WHERE locale = ?");
 
             // Vehicle.db2
             PrepareStatement(HotfixStatements.SEL_VEHICLE, "SELECT ID, Flags, FlagsB, TurnSpeed, PitchSpeed, PitchMin, PitchMax, MouseLookOffsetPitch, " +
@@ -1528,7 +1528,7 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_WMO_AREA_TABLE, "SELECT AreaName, ID, WmoID, NameSetID, WmoGroupID, SoundProviderPref, SoundProviderPrefUnderwater, " +
                 "AmbienceID, UwAmbience, ZoneMusic, UwZoneMusic, IntroSound, UwIntroSound, AreaTableID, Flags FROM wmo_area_table" +
                 " ");
-            PrepareStatement(HotfixStatements.SEL_WMO_AREA_TABLE_LOCALE, "SELECT ID, AreaName_lang FROM wmo_area_table_locale  AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_WMO_AREA_TABLE_LOCALE, "SELECT ID, AreaName_lang FROM wmo_area_table_locale WHERE locale = ?");
 
             // WorldEffect.db2
             PrepareStatement(HotfixStatements.SEL_WORLD_EFFECT, "SELECT ID, QuestFeedbackEffectID, WhenToDisplay, TargetType, TargetAsset, PlayerConditionID, " +
