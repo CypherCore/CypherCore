@@ -31,17 +31,17 @@ namespace Scripts.Spells.Warlock
 
             Unit target = GetTarget();
 
-            if (caster.HasAura(SpellIds.IMPROVED_HEALTH_FUNNEL_R2))
-                target.CastSpell(target, SpellIds.IMPROVED_HEALTH_FUNNEL_BUFF_R2, true);
-            else if (caster.HasAura(SpellIds.IMPROVED_HEALTH_FUNNEL_R1))
-                target.CastSpell(target, SpellIds.IMPROVED_HEALTH_FUNNEL_BUFF_R1, true);
+            if (caster.HasAura(WarlockSpells.IMPROVED_HEALTH_FUNNEL_R2))
+                target.CastSpell(target, WarlockSpells.IMPROVED_HEALTH_FUNNEL_BUFF_R2, true);
+            else if (caster.HasAura(WarlockSpells.IMPROVED_HEALTH_FUNNEL_R1))
+                target.CastSpell(target, WarlockSpells.IMPROVED_HEALTH_FUNNEL_BUFF_R1, true);
         }
 
         private void RemoveEffect(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            target.RemoveAurasDueToSpell(SpellIds.IMPROVED_HEALTH_FUNNEL_BUFF_R1);
-            target.RemoveAurasDueToSpell(SpellIds.IMPROVED_HEALTH_FUNNEL_BUFF_R2);
+            target.RemoveAurasDueToSpell(WarlockSpells.IMPROVED_HEALTH_FUNNEL_BUFF_R1);
+            target.RemoveAurasDueToSpell(WarlockSpells.IMPROVED_HEALTH_FUNNEL_BUFF_R2);
         }
 
         private void OnPeriodic(AuraEffect aurEff)

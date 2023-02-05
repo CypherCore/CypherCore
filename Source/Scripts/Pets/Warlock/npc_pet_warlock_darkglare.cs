@@ -31,8 +31,8 @@ namespace Scripts.Pets
 
                     if (target != null)
                     {
-                        target.RemoveAura(SpellIds.DOOM, owner.GetGUID());
-                        me.CastSpell(target, SpellIds.EYE_LASER, new CastSpellExtraArgs(TriggerCastFlags.None).SetOriginalCaster(owner.GetGUID()));
+                        target.RemoveAura(WarlockSpells.DOOM, owner.GetGUID());
+                        me.CastSpell(target, WarlockSpells.EYE_LASER, new CastSpellExtraArgs(TriggerCastFlags.None).SetOriginalCaster(owner.GetGUID()));
                     }
                 }
             }

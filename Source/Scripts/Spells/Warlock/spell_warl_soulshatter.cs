@@ -18,7 +18,7 @@ namespace Scripts.Spells.Warlock
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.SOULSHATTER);
+            return ValidateSpellInfo(WarlockSpells.SOULSHATTER);
         }
 
         public override void Register()
@@ -34,7 +34,7 @@ namespace Scripts.Spells.Warlock
             if (target)
                 if (target.CanHaveThreatList() &&
                     target.GetThreatManager().GetThreat(caster) > 0.0f)
-                    caster.CastSpell(target, SpellIds.SOULSHATTER, true);
+                    caster.CastSpell(target, WarlockSpells.SOULSHATTER, true);
         }
     }
 }

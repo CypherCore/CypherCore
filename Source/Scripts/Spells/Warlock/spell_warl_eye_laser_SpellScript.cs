@@ -24,7 +24,7 @@ namespace Scripts.Spells.Warlock
             if (caster == null)
                 return;
 
-            targets.RemoveAll(new UnitAuraCheck<WorldObject>(false, SpellIds.DOOM, caster.GetGUID()));
+            targets.RemoveAll(new UnitAuraCheck<WorldObject>(false, WarlockSpells.DOOM, caster.GetGUID()));
         }
 
         public override void Register()

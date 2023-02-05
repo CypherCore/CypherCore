@@ -17,7 +17,7 @@ namespace Scripts.Spells.Warlock
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.IMMOLATE_DOT);
+            return ValidateSpellInfo(WarlockSpells.IMMOLATE_DOT);
         }
 
         public override void Register()
@@ -27,7 +27,7 @@ namespace Scripts.Spells.Warlock
 
         private void HandleOnEffectHit(uint effIndex)
         {
-            GetCaster().CastSpell(GetHitUnit(), SpellIds.IMMOLATE_DOT, GetSpell());
+            GetCaster().CastSpell(GetHitUnit(), WarlockSpells.IMMOLATE_DOT, GetSpell());
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Scripts.Spells.Warlock
             Unit caster = GetCaster();
 
             if (GetCaster())
-                caster.CastSpell(GetTarget().GetPosition(), SpellIds.PHANTOMATIC_SINGULARITY_DAMAGE, true);
+                caster.CastSpell(GetTarget().GetPosition(), WarlockSpells.PHANTOMATIC_SINGULARITY_DAMAGE, true);
         }
 
         public override void Register()

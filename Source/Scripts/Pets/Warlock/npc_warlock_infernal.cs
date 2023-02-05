@@ -51,8 +51,8 @@ namespace Scripts.Pets
                             if (isLordSummon)
                                 return;
 
-                            if (player.HasAura(SpellIds.LORD_OF_THE_FLAMES) &&
-                                !player.HasAura(SpellIds.LORD_OF_THE_FLAMES_CD))
+                            if (player.HasAura(WarlockSpells.LORD_OF_THE_FLAMES) &&
+                                !player.HasAura(WarlockSpells.LORD_OF_THE_FLAMES_CD))
                             {
                                 List<float> angleOffsets = new()
                                                            {
@@ -62,9 +62,9 @@ namespace Scripts.Pets
                                                            };
 
                                 for (uint i = 0; i < 3; ++i)
-                                    player.CastSpell(me, SpellIds.LORD_OF_THE_FLAMES_SUMMON, true);
+                                    player.CastSpell(me, WarlockSpells.LORD_OF_THE_FLAMES_SUMMON, true);
 
-                                player.CastSpell(player, SpellIds.LORD_OF_THE_FLAMES_CD, true);
+                                player.CastSpell(player, WarlockSpells.LORD_OF_THE_FLAMES_CD, true);
                             }
                         }
                     }
@@ -72,8 +72,8 @@ namespace Scripts.Pets
 
                 public override void UpdateAI(uint UnnamedParameter)
                 {
-                    if (!me.HasAura(SpellIds.IMMOLATION))
-                        DoCast(SpellIds.IMMOLATION);
+                    if (!me.HasAura(WarlockSpells.IMMOLATION))
+                        DoCast(WarlockSpells.IMMOLATION);
 
                     // "The Infernal deals strong area of effect Damage, and will be drawn to attack targets near the impact point"
                     if (!me.GetVictim())

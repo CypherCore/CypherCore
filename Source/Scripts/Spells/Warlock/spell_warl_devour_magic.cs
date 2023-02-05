@@ -18,7 +18,7 @@ namespace Scripts.Spells.Warlock
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.GLYPH_OF_DEMON_TRAINING, SpellIds.DEVOUR_MAGIC_HEAL) && spellInfo.GetEffects().Count > 1;
+            return ValidateSpellInfo(WarlockSpells.GLYPH_OF_DEMON_TRAINING, WarlockSpells.DEVOUR_MAGIC_HEAL) && spellInfo.GetEffects().Count > 1;
         }
 
         public override void Register()
@@ -32,14 +32,14 @@ namespace Scripts.Spells.Warlock
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.AddSpellMod(SpellValueMod.BasePoint0, GetEffectInfo(1).CalcValue(caster));
 
-            caster.CastSpell(caster, SpellIds.DEVOUR_MAGIC_HEAL, args);
+            caster.CastSpell(caster, WarlockSpells.DEVOUR_MAGIC_HEAL, args);
 
             // Glyph of Felhunter
             Unit owner = caster.GetOwner();
 
             if (owner)
-                if (owner.GetAura(SpellIds.GLYPH_OF_DEMON_TRAINING) != null)
-                    owner.CastSpell(owner, SpellIds.DEVOUR_MAGIC_HEAL, args);
+                if (owner.GetAura(WarlockSpells.GLYPH_OF_DEMON_TRAINING) != null)
+                    owner.CastSpell(owner, WarlockSpells.DEVOUR_MAGIC_HEAL, args);
         }
     }
 }

@@ -27,7 +27,7 @@ namespace Scripts.Spells.Warlock
                     return false;
 
                 if (RandomHelper.randChance(10))
-                    owner.CastSpell(owner, SpellIds.GRIMOIRE_OF_SYNERGY_BUFF, true);
+                    owner.CastSpell(owner, WarlockSpells.GRIMOIRE_OF_SYNERGY_BUFF, true);
 
                 return true;
             }
@@ -42,7 +42,7 @@ namespace Scripts.Spells.Warlock
                     return false;
 
                 if (RandomHelper.randChance(10))
-                    player.CastSpell(guardian, SpellIds.GRIMOIRE_OF_SYNERGY_BUFF, true);
+                    player.CastSpell(guardian, WarlockSpells.GRIMOIRE_OF_SYNERGY_BUFF, true);
 
                 return true;
             }

@@ -47,23 +47,23 @@ namespace Scripts.Spells.Warlock
 
             switch (GetSpellInfo().Id)
             {
-                case SpellIds.GRIMOIRE_IMP: // Imp
+                case WarlockSpells.GRIMOIRE_IMP: // Imp
                     creature.CastSpell(caster, (uint)eServiceSpells.SPELL_IMP_SINGE_MAGIC, true);
 
                     break;
-                case SpellIds.GRIMOIRE_VOIDWALKER: // Voidwalker
+                case WarlockSpells.GRIMOIRE_VOIDWALKER: // Voidwalker
                     creature.CastSpell(target, (uint)eServiceSpells.SPELL_VOIDWALKER_SUFFERING, true);
 
                     break;
-                case SpellIds.GRIMOIRE_SUCCUBUS: // Succubus
+                case WarlockSpells.GRIMOIRE_SUCCUBUS: // Succubus
                     creature.CastSpell(target, (uint)eServiceSpells.SPELL_SUCCUBUS_SEDUCTION, true);
 
                     break;
-                case SpellIds.GRIMOIRE_FELHUNTER: // Felhunter
+                case WarlockSpells.GRIMOIRE_FELHUNTER: // Felhunter
                     creature.CastSpell(target, (uint)eServiceSpells.SPELL_FELHUNTER_SPELL_LOCK, true);
 
                     break;
-                case SpellIds.GRIMOIRE_FELGUARD: // Felguard
+                case WarlockSpells.GRIMOIRE_FELGUARD: // Felguard
                     creature.CastSpell(target, (uint)eServiceSpells.SPELL_FELGUARD_AXE_TOSS, true);
 
                     break;

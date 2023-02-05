@@ -36,7 +36,7 @@ namespace Scripts.Pets
                     if (me.HasUnitState(UnitState.Casting))
                         return;
 
-                    me.CastSpell(me, SpellIds.FEL_LORD_CLEAVE, false);
+                    me.CastSpell(me, WarlockSpells.FEL_LORD_CLEAVE, false);
                 }
             }
 

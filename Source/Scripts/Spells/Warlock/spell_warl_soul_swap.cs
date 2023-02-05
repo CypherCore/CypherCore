@@ -17,7 +17,7 @@ namespace Scripts.Spells.Warlock
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.GLYPH_OF_SOUL_SWAP, SpellIds.SOUL_SWAP_CD_MARKER, SpellIds.SOUL_SWAP_OVERRIDE);
+            return ValidateSpellInfo(WarlockSpells.GLYPH_OF_SOUL_SWAP, WarlockSpells.SOUL_SWAP_CD_MARKER, WarlockSpells.SOUL_SWAP_OVERRIDE);
         }
 
         public override void Register()
@@ -27,8 +27,8 @@ namespace Scripts.Spells.Warlock
 
         private void HandleHit(uint effIndex)
         {
-            GetCaster().CastSpell(GetCaster(), SpellIds.SOUL_SWAP_OVERRIDE, true);
-            GetHitUnit().CastSpell(GetCaster(), SpellIds.SOUL_SWAP_OVERRIDE, true);
+            GetCaster().CastSpell(GetCaster(), WarlockSpells.SOUL_SWAP_OVERRIDE, true);
+            GetHitUnit().CastSpell(GetCaster(), WarlockSpells.SOUL_SWAP_OVERRIDE, true);
         }
     }
 }

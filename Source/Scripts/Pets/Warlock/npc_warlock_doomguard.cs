@@ -36,7 +36,7 @@ namespace Scripts.Pets
                     events.ScheduleEvent(1, TimeSpan.FromSeconds(3));
 
                     me.SetControlled(true, UnitState.Root);
-                    maxDistance = SpellManager.Instance.GetSpellInfo(SpellIds.PET_DOOMBOLT, Difficulty.None).RangeEntry.RangeMax[0];
+                    maxDistance = SpellManager.Instance.GetSpellInfo(WarlockSpells.PET_DOOMBOLT, Difficulty.None).RangeEntry.RangeMax[0];
                 }
 
                 public override void UpdateAI(uint diff)
@@ -70,7 +70,7 @@ namespace Scripts.Pets
                                 }
 
                                 me.SetControlled(true, UnitState.Root);
-                                me.CastSpell(me.GetVictim(), SpellIds.PET_DOOMBOLT, new CastSpellExtraArgs(TriggerCastFlags.None).SetOriginalCaster(me.GetOwnerGUID()));
+                                me.CastSpell(me.GetVictim(), WarlockSpells.PET_DOOMBOLT, new CastSpellExtraArgs(TriggerCastFlags.None).SetOriginalCaster(me.GetOwnerGUID()));
                                 events.ScheduleEvent(eventId, TimeSpan.FromSeconds(3));
 
                                 break;

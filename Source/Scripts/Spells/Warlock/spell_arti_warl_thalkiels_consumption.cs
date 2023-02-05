@@ -28,7 +28,7 @@ namespace Scripts.Spells.Warlock
                 return;
             }
 
-            caster.CastSpell(target, SpellIds.THALKIELS_CONSUMPTION_DAMAGE, new CastSpellExtraArgs(SpellValueMod.BasePoint0, _damage));
+            caster.CastSpell(target, WarlockSpells.THALKIELS_CONSUMPTION_DAMAGE, new CastSpellExtraArgs(SpellValueMod.BasePoint0, _damage));
         }
 
         public void SaveDamage(List<WorldObject> targets)

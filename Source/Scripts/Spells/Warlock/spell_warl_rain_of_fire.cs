@@ -22,7 +22,7 @@ namespace Scripts.Spells.Warlock
 
         private void HandleDummyTick(AuraEffect aurEff)
         {
-            List<AreaTrigger> rainOfFireAreaTriggers = GetTarget().GetAreaTriggers(SpellIds.RAIN_OF_FIRE);
+            List<AreaTrigger> rainOfFireAreaTriggers = GetTarget().GetAreaTriggers(WarlockSpells.RAIN_OF_FIRE);
             List<ObjectGuid> targetsInRainOfFire = new();
 
             foreach (AreaTrigger rainOfFireAreaTrigger in rainOfFireAreaTriggers)
@@ -37,7 +37,7 @@ namespace Scripts.Spells.Warlock
 
                 if (insideTarget)
                     if (!GetTarget().IsFriendlyTo(insideTarget))
-                        GetTarget().CastSpell(insideTarget, SpellIds.RAIN_OF_FIRE_DAMAGE, true);
+                        GetTarget().CastSpell(insideTarget, WarlockSpells.RAIN_OF_FIRE_DAMAGE, true);
             }
         }
     }

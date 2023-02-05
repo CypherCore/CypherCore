@@ -18,7 +18,7 @@ namespace Scripts.Spells.Warlock
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.SEED_OF_CORRUPTION_DAMAGE);
+            return ValidateSpellInfo(WarlockSpells.SEED_OF_CORRUPTION_DAMAGE);
         }
 
         public override void Register()
@@ -63,7 +63,7 @@ namespace Scripts.Spells.Warlock
             if (!caster)
                 return;
 
-            caster.CastSpell(eventInfo.GetActionTarget(), SpellIds.SEED_OF_CORRUPTION_DAMAGE, true);
+            caster.CastSpell(eventInfo.GetActionTarget(), WarlockSpells.SEED_OF_CORRUPTION_DAMAGE, true);
         }
     }
 }

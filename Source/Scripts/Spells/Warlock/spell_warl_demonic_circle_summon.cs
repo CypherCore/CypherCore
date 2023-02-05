@@ -29,7 +29,7 @@ namespace Scripts.Spells.Warlock
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Reapply))
                 GetTarget().RemoveGameObject(GetId(), true);
 
-            GetTarget().RemoveAura(SpellIds.DEMONIC_CIRCLE_ALLOW_CAST);
+            GetTarget().RemoveAura(WarlockSpells.DEMONIC_CIRCLE_ALLOW_CAST);
         }
 
         private void HandleDummyTick(AuraEffect aurEff)
@@ -42,16 +42,16 @@ namespace Scripts.Spells.Warlock
                 // WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST; allowing him to cast the WARLOCK_DEMONIC_CIRCLE_TELEPORT.
                 // If not in range Remove the WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST.
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.DEMONIC_CIRCLE_TELEPORT, GetCastDifficulty());
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(WarlockSpells.DEMONIC_CIRCLE_TELEPORT, GetCastDifficulty());
 
                 if (GetTarget().IsWithinDist(circle, spellInfo.GetMaxRange(true)))
                 {
-                    if (!GetTarget().HasAura(SpellIds.DEMONIC_CIRCLE_ALLOW_CAST))
-                        GetTarget().CastSpell(GetTarget(), SpellIds.DEMONIC_CIRCLE_ALLOW_CAST, true);
+                    if (!GetTarget().HasAura(WarlockSpells.DEMONIC_CIRCLE_ALLOW_CAST))
+                        GetTarget().CastSpell(GetTarget(), WarlockSpells.DEMONIC_CIRCLE_ALLOW_CAST, true);
                 }
                 else
                 {
-                    GetTarget().RemoveAura(SpellIds.DEMONIC_CIRCLE_ALLOW_CAST);
+                    GetTarget().RemoveAura(WarlockSpells.DEMONIC_CIRCLE_ALLOW_CAST);
                 }
             }
         }

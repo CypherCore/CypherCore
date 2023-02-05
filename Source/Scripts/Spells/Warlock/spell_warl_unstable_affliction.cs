@@ -18,7 +18,7 @@ namespace Scripts.Spells.Warlock
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.UNSTABLE_AFFLICTION_DISPEL);
+            return ValidateSpellInfo(WarlockSpells.UNSTABLE_AFFLICTION_DISPEL);
         }
 
         public void HandleDispel(DispelInfo dispelInfo)
@@ -34,7 +34,7 @@ namespace Scripts.Spells.Warlock
                     // backfire Damage and silence
                     CastSpellExtraArgs args = new(aurEff);
                     args.AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount() * 9);
-                    caster.CastSpell(dispelInfo.GetDispeller(), SpellIds.UNSTABLE_AFFLICTION_DISPEL, args);
+                    caster.CastSpell(dispelInfo.GetDispeller(), WarlockSpells.UNSTABLE_AFFLICTION_DISPEL, args);
                 }
             }
         }

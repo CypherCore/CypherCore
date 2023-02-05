@@ -12,12 +12,12 @@ namespace Scripts.Spells.Warlock
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.SHADOW_BOLT_SHOULSHARD);
+            return ValidateSpellInfo(WarlockSpells.SHADOW_BOLT_SHOULSHARD);
         }
 
         public void AfterCast()
         {
-            GetCaster().CastSpell(GetCaster(), SpellIds.SHADOW_BOLT_SHOULSHARD, true);
+            GetCaster().CastSpell(GetCaster(), WarlockSpells.SHADOW_BOLT_SHOULSHARD, true);
         }
     }
 }

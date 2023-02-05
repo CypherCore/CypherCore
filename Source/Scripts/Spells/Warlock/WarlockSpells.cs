@@ -6,7 +6,7 @@ using Game.Maps;
 
 namespace Scripts.Spells.Warlock
 {
-    internal struct SpellIds
+    internal struct WarlockSpells
     {
         public const uint INFERNO_AURA = 270545;
         public const uint CREATE_HEALTHSTONE = 23517;

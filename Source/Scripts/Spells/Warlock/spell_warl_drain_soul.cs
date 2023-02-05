@@ -18,7 +18,7 @@ namespace Scripts.Spells.Warlock
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.DRAIN_SOUL_ENERGIZE);
+            return ValidateSpellInfo(WarlockSpells.DRAIN_SOUL_ENERGIZE);
         }
 
         public override void Register()
@@ -33,7 +33,7 @@ namespace Scripts.Spells.Warlock
 
             Unit caster = GetCaster();
 
-            caster?.CastSpell(caster, SpellIds.DRAIN_SOUL_ENERGIZE, true);
+            caster?.CastSpell(caster, WarlockSpells.DRAIN_SOUL_ENERGIZE, true);
         }
     }
 }

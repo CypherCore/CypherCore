@@ -27,7 +27,7 @@ namespace Scripts.Pets
                 {
                     if (firstTick)
                     {
-                        me.CastSpell(me, SpellIds.DEMONIC_GATEWAY_VISUAL, true);
+                        me.CastSpell(me, WarlockSpells.DEMONIC_GATEWAY_VISUAL, true);
 
                         //todo me->SetInteractSpellId(SPELL_WARLOCK_DEMONIC_GATEWAY_ACTIVATE);
                         me.SetUnitFlag(UnitFlags.NonAttackable);
@@ -72,7 +72,7 @@ namespace Scripts.Pets
                         return;
 
                     // check if Target wasn't recently teleported
-                    if (target.HasAura(SpellIds.DEMONIC_GATEWAY_DEBUFF))
+                    if (target.HasAura(WarlockSpells.DEMONIC_GATEWAY_DEBUFF))
                         return;
 
                     // only if in same party
@@ -83,8 +83,8 @@ namespace Scripts.Pets
                     if (!target.CanFreeMove())
                         return;
 
-                    uint otherGateway = me.GetEntry() == SpellIds.NPC_WARLOCK_DEMONIC_GATEWAY_GREEN ? SpellIds.NPC_WARLOCK_DEMONIC_GATEWAY_PURPLE : SpellIds.NPC_WARLOCK_DEMONIC_GATEWAY_GREEN;
-                    uint teleportSpell = me.GetEntry() == SpellIds.NPC_WARLOCK_DEMONIC_GATEWAY_GREEN ? SpellIds.DEMONIC_GATEWAY_JUMP_GREEN : SpellIds.DEMONIC_GATEWAY_JUMP_PURPLE;
+                    uint otherGateway = me.GetEntry() == WarlockSpells.NPC_WARLOCK_DEMONIC_GATEWAY_GREEN ? WarlockSpells.NPC_WARLOCK_DEMONIC_GATEWAY_PURPLE : WarlockSpells.NPC_WARLOCK_DEMONIC_GATEWAY_GREEN;
+                    uint teleportSpell = me.GetEntry() == WarlockSpells.NPC_WARLOCK_DEMONIC_GATEWAY_GREEN ? WarlockSpells.DEMONIC_GATEWAY_JUMP_GREEN : WarlockSpells.DEMONIC_GATEWAY_JUMP_PURPLE;
 
                     var gateways = me.GetCreatureListWithEntryInGrid(otherGateway, 100.0f);
 
@@ -95,15 +95,15 @@ namespace Scripts.Pets
 
                         target.CastSpell(gateway, teleportSpell, true);
 
-                        if (target.HasAura(SpellIds.PLANESWALKER))
-                            target.CastSpell(target, SpellIds.PLANESWALKER_BUFF, true);
+                        if (target.HasAura(WarlockSpells.PLANESWALKER))
+                            target.CastSpell(target, WarlockSpells.PLANESWALKER_BUFF, true);
 
                         // Item - Warlock PvP Set 4P Bonus: "Your allies can use your Demonic Gateway again 15 sec sooner"
-                        int amount = owner.GetAuraEffect(SpellIds.PVP_4P_BONUS, 0).GetAmount();
+                        int amount = owner.GetAuraEffect(WarlockSpells.PVP_4P_BONUS, 0).GetAmount();
 
                         if (amount > 0)
                         {
-                            Aura aura = target.GetAura(SpellIds.DEMONIC_GATEWAY_DEBUFF);
+                            Aura aura = target.GetAura(WarlockSpells.DEMONIC_GATEWAY_DEBUFF);
 
                             aura?.SetDuration(aura.GetDuration() - amount * Time.InMilliseconds);
                         }

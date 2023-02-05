@@ -17,7 +17,7 @@ namespace Scripts.Spells.Warlock
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.CREATE_HEALTHSTONE);
+            return ValidateSpellInfo(WarlockSpells.CREATE_HEALTHSTONE);
         }
 
         public override bool Load()
@@ -32,7 +32,7 @@ namespace Scripts.Spells.Warlock
 
         private void HandleScriptEffect(uint effIndex)
         {
-            GetCaster().CastSpell(GetCaster(), SpellIds.CREATE_HEALTHSTONE, true);
+            GetCaster().CastSpell(GetCaster(), WarlockSpells.CREATE_HEALTHSTONE, true);
         }
     }
 }

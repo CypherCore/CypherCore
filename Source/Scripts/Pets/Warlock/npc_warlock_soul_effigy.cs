@@ -30,7 +30,7 @@ namespace Scripts.Pets
                 public override void Reset()
                 {
                     me.SetControlled(true, UnitState.Root);
-                    me.CastSpell(me, SpellIds.SOUL_EFFIGY_AURA, true);
+                    me.CastSpell(me, WarlockSpells.SOUL_EFFIGY_AURA, true);
                 }
 
                 public override void UpdateAI(uint UnnamedParameter)

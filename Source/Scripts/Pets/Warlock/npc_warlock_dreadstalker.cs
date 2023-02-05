@@ -36,7 +36,7 @@ namespace Scripts.Pets
                         Unit target = owner.ToPlayer().GetSelectedUnit();
 
                         if (owner.ToPlayer().GetSelectedUnit())
-                            me.CastSpell(target, SpellIds.DREADSTALKER_CHARGE, true);
+                            me.CastSpell(target, WarlockSpells.DREADSTALKER_CHARGE, true);
 
                         firstTick = false;
 

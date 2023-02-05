@@ -10,8 +10,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Warlock
 {
-    [SpellScript(37377, "spell_warl_t4_2p_bonus_shadow", false, SpellIds.FLAMESHADOW)] // 37377 - Shadowflame
-    [SpellScript(39437, "spell_warl_t4_2p_bonus_fire", false, SpellIds.SHADOWFLAME)]   // 39437 - Shadowflame Hellfire and RoF
+    [SpellScript(37377, "spell_warl_t4_2p_bonus_shadow", false, WarlockSpells.FLAMESHADOW)] // 37377 - Shadowflame
+    [SpellScript(39437, "spell_warl_t4_2p_bonus_fire", false, WarlockSpells.SHADOWFLAME)]   // 39437 - Shadowflame Hellfire and RoF
     internal class spell_warl_t4_2p_bonus : AuraScript, IHasAuraEffects
     {
         private readonly uint _triggerSpell;

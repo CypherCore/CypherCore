@@ -15,7 +15,7 @@ namespace Scripts.Spells.Warlock
     {
         public override bool Validate(SpellInfo UnnamedParameter)
         {
-            return SpellManager.Instance.GetSpellInfo(SpellIds.DEMONIC_CALLING_TRIGGER, Difficulty.None) != null;
+            return SpellManager.Instance.GetSpellInfo(WarlockSpells.DEMONIC_CALLING_TRIGGER, Difficulty.None) != null;
         }
 
         public bool CheckProc(ProcEventInfo eventInfo)
@@ -26,9 +26,9 @@ namespace Scripts.Spells.Warlock
                 return false;
 
             if (eventInfo.GetSpellInfo() != null &&
-                (eventInfo.GetSpellInfo().Id == SpellIds.DEMONBOLT || eventInfo.GetSpellInfo().Id == SpellIds.SHADOW_BOLT) &&
+                (eventInfo.GetSpellInfo().Id == WarlockSpells.DEMONBOLT || eventInfo.GetSpellInfo().Id == WarlockSpells.SHADOW_BOLT) &&
                 RandomHelper.randChance(20))
-                caster.CastSpell(caster, SpellIds.DEMONIC_CALLING_TRIGGER, true);
+                caster.CastSpell(caster, WarlockSpells.DEMONIC_CALLING_TRIGGER, true);
 
             return false;
         }

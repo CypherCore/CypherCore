@@ -33,7 +33,7 @@ namespace Scripts.Spells.Warlock
 
             var appliedAuras = swapVictim.GetAppliedAuras();
             spell_warl_soul_swap_override swapSpellScript = null;
-            Aura swapOverrideAura = warlock.GetAura(SpellIds.SOUL_SWAP_OVERRIDE);
+            Aura swapOverrideAura = warlock.GetAura(WarlockSpells.SOUL_SWAP_OVERRIDE);
 
             if (swapOverrideAura != null)
                 swapSpellScript = swapOverrideAura.GetScript<spell_warl_soul_swap_override>();

@@ -68,7 +68,7 @@ namespace Scripts.Pets
                     !me.VariableStorage.GetValue("controlled", false))
                 {
                     _targetGUID = target.GetGUID();
-                    var result = me.CastSpell(target, SpellIds.FEL_FIREBOLT, new CastSpellExtraArgs(TriggerCastFlags.IgnorePowerAndReagentCost).SetOriginalCaster(owner.GetGUID()));
+                    var result = me.CastSpell(target, WarlockSpells.FEL_FIREBOLT, new CastSpellExtraArgs(TriggerCastFlags.IgnorePowerAndReagentCost).SetOriginalCaster(owner.GetGUID()));
                 }
             }
         }

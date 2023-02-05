@@ -22,13 +22,13 @@ namespace Scripts.Spells.Warlock
 
             if (GetCaster().ToPlayer())
             {
-                player.LearnSpell(SpellIds.GRIMOIRE_IMP, false);
-                player.LearnSpell(SpellIds.GRIMOIRE_VOIDWALKER, false);
-                player.LearnSpell(SpellIds.GRIMOIRE_SUCCUBUS, false);
-                player.LearnSpell(SpellIds.GRIMOIRE_FELHUNTER, false);
+                player.LearnSpell(WarlockSpells.GRIMOIRE_IMP, false);
+                player.LearnSpell(WarlockSpells.GRIMOIRE_VOIDWALKER, false);
+                player.LearnSpell(WarlockSpells.GRIMOIRE_SUCCUBUS, false);
+                player.LearnSpell(WarlockSpells.GRIMOIRE_FELHUNTER, false);
 
                 if (player.GetPrimarySpecialization() == (uint)TalentSpecialization.WarlockDemonology)
-                    player.LearnSpell(SpellIds.GRIMOIRE_FELGUARD, false);
+                    player.LearnSpell(WarlockSpells.GRIMOIRE_FELGUARD, false);
             }
         }
 
@@ -38,11 +38,11 @@ namespace Scripts.Spells.Warlock
 
             if (GetCaster().ToPlayer())
             {
-                player.RemoveSpell(SpellIds.GRIMOIRE_IMP, false, false);
-                player.RemoveSpell(SpellIds.GRIMOIRE_VOIDWALKER, false, false);
-                player.RemoveSpell(SpellIds.GRIMOIRE_SUCCUBUS, false, false);
-                player.RemoveSpell(SpellIds.GRIMOIRE_FELHUNTER, false, false);
-                player.RemoveSpell(SpellIds.GRIMOIRE_FELGUARD, false, false);
+                player.RemoveSpell(WarlockSpells.GRIMOIRE_IMP, false, false);
+                player.RemoveSpell(WarlockSpells.GRIMOIRE_VOIDWALKER, false, false);
+                player.RemoveSpell(WarlockSpells.GRIMOIRE_SUCCUBUS, false, false);
+                player.RemoveSpell(WarlockSpells.GRIMOIRE_FELHUNTER, false, false);
+                player.RemoveSpell(WarlockSpells.GRIMOIRE_FELGUARD, false, false);
             }
         }
 

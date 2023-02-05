@@ -26,7 +26,7 @@ namespace Scripts.Spells.Warlock
 
             if (player)
             {
-                GameObject circle = player.GetGameObject(SpellIds.DEMONIC_CIRCLE_SUMMON);
+                GameObject circle = player.GetGameObject(WarlockSpells.DEMONIC_CIRCLE_SUMMON);
 
                 if (circle)
                 {

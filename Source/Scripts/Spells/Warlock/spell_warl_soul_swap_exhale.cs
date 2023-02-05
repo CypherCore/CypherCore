@@ -16,14 +16,14 @@ namespace Scripts.Spells.Warlock
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.SOUL_SWAP_MOD_COST, SpellIds.SOUL_SWAP_OVERRIDE);
+            return ValidateSpellInfo(WarlockSpells.SOUL_SWAP_MOD_COST, WarlockSpells.SOUL_SWAP_OVERRIDE);
         }
 
         public SpellCastResult CheckCast()
         {
             Unit currentTarget = GetExplTargetUnit();
             Unit swapTarget = null;
-            Aura swapOverride = GetCaster().GetAura(SpellIds.SOUL_SWAP_OVERRIDE);
+            Aura swapOverride = GetCaster().GetAura(WarlockSpells.SOUL_SWAP_OVERRIDE);
 
             if (swapOverride != null)
             {
@@ -51,12 +51,12 @@ namespace Scripts.Spells.Warlock
 
         private void onEffectHit(uint effIndex)
         {
-            GetCaster().CastSpell(GetCaster(), SpellIds.SOUL_SWAP_MOD_COST, true);
-            bool hasGlyph = GetCaster().HasAura(SpellIds.GLYPH_OF_SOUL_SWAP);
+            GetCaster().CastSpell(GetCaster(), WarlockSpells.SOUL_SWAP_MOD_COST, true);
+            bool hasGlyph = GetCaster().HasAura(WarlockSpells.GLYPH_OF_SOUL_SWAP);
 
             List<uint> dotList = new();
             Unit swapSource = null;
-            Aura swapOverride = GetCaster().GetAura(SpellIds.SOUL_SWAP_OVERRIDE);
+            Aura swapOverride = GetCaster().GetAura(WarlockSpells.SOUL_SWAP_OVERRIDE);
 
             if (swapOverride != null)
             {
@@ -81,10 +81,10 @@ namespace Scripts.Spells.Warlock
             }
 
             // Remove Soul Swap Exhale buff
-            GetCaster().RemoveAurasDueToSpell(SpellIds.SOUL_SWAP_OVERRIDE);
+            GetCaster().RemoveAurasDueToSpell(WarlockSpells.SOUL_SWAP_OVERRIDE);
 
             if (hasGlyph) // Add a cooldown on Soul Swap if caster has the glyph
-                GetCaster().CastSpell(GetCaster(), SpellIds.SOUL_SWAP_CD_MARKER, false);
+                GetCaster().CastSpell(GetCaster(), WarlockSpells.SOUL_SWAP_CD_MARKER, false);
         }
     }
 }

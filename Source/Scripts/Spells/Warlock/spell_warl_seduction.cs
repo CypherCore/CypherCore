@@ -18,7 +18,7 @@ namespace Scripts.Spells.Warlock
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.GLYPH_OF_SUCCUBUS, SpellIds.PRIEST_SHADOW_WORD_DEATH);
+            return ValidateSpellInfo(WarlockSpells.GLYPH_OF_SUCCUBUS, WarlockSpells.PRIEST_SHADOW_WORD_DEATH);
         }
 
         public override void Register()
@@ -33,9 +33,9 @@ namespace Scripts.Spells.Warlock
 
             if (target)
                 if (caster.GetOwner() &&
-                    caster.GetOwner().HasAura(SpellIds.GLYPH_OF_SUCCUBUS))
+                    caster.GetOwner().HasAura(WarlockSpells.GLYPH_OF_SUCCUBUS))
                 {
-                    target.RemoveAurasByType(AuraType.PeriodicDamage, ObjectGuid.Empty, target.GetAura(SpellIds.PRIEST_SHADOW_WORD_DEATH)); // SW:D shall not be Removed.
+                    target.RemoveAurasByType(AuraType.PeriodicDamage, ObjectGuid.Empty, target.GetAura(WarlockSpells.PRIEST_SHADOW_WORD_DEATH)); // SW:D shall not be Removed.
                     target.RemoveAurasByType(AuraType.PeriodicDamagePercent);
                     target.RemoveAurasByType(AuraType.PeriodicLeech);
                 }

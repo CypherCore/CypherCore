@@ -14,7 +14,7 @@ using Game.Spells;
 namespace Scripts.Spells.Warlock
 {
     // 196277 - Implosion
-    [SpellScript(SpellIds.IMPLOSION)]
+    [SpellScript(WarlockSpells.IMPLOSION)]
     public class spell_warl_implosion_SpellScript : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
@@ -36,7 +36,7 @@ namespace Scripts.Spells.Warlock
                     imp.InterruptNonMeleeSpells(false);
                     imp.VariableStorage.Set("controlled", true);
                     imp.VariableStorage.Set("ForceUpdateTimers", true);
-                    imp.CastSpell(target, SpellIds.IMPLOSION_JUMP, true);
+                    imp.CastSpell(target, WarlockSpells.IMPLOSION_JUMP, true);
                     imp.GetMotionMaster().MoveJump(target, 300.0f, 1.0f, EventId.Jump);
                     ObjectGuid casterGuid = caster.GetGUID();
 
@@ -44,7 +44,7 @@ namespace Scripts.Spells.Warlock
                        .Scheduler.Schedule(TimeSpan.FromMilliseconds(500),
                                            task =>
                                            {
-                                               imp.CastSpell(imp, SpellIds.IMPLOSION_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(casterGuid));
+                                               imp.CastSpell(imp, WarlockSpells.IMPLOSION_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(casterGuid));
                                                imp.DisappearAndDie();
                                            });
                 }
@@ -71,7 +71,7 @@ namespace Scripts.Spells.Warlock
         {
             if (_caster && _target)
             {
-                _caster.CastSpell(_target, SpellIds.IMPLOSION_DAMAGE, true);
+                _caster.CastSpell(_target, WarlockSpells.IMPLOSION_DAMAGE, true);
                 _target.ToCreature().DisappearAndDie();
             }
 
