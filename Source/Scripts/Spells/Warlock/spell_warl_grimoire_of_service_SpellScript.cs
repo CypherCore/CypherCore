@@ -35,7 +35,7 @@ namespace Scripts.Spells.Warlock
                    SpellManager.Instance.GetSpellInfo((uint)eServiceSpells.SPELL_VOIDWALKER_SUFFERING, Difficulty.None) != null;
         }
 
-        public void HandleSummon(Creature creature)
+        public void OnSummon(Creature creature)
         {
             Unit caster = GetCaster();
             Unit target = GetExplTargetUnit();

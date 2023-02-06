@@ -4,6 +4,6 @@ namespace Game.Scripting.Interfaces.ISpell
 {
     public interface ISpellOnSummon : ISpellScript
     {
-        void HandleSummon(Creature creature);
+        void OnSummon(Creature creature);
     }
 }

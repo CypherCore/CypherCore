@@ -52,14 +52,14 @@ namespace Scripts.Spells.Warrior
                                 targets.AddAura(WarriorSpells.WAR_BANNER_BUFF, targets);
                             }
 
-                            targets.m_Events.AddEvent(() =>
+                            targets.m_Events.AddEventAtOffset(() =>
                             {
                                 if (!targets)
                                 {
                                     return;
                                 }
                                 targets.RemoveAura(WarriorSpells.WAR_BANNER_BUFF);
-                            }, targets.m_Events.CalculateTime(TimeSpan.FromSeconds(15)));
+                            }, TimeSpan.FromSeconds(15));
 
                             _timer = 1000;
                         }

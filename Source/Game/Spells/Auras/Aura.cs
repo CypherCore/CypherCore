@@ -2065,11 +2065,11 @@ namespace Game.Spells
 
         public void CallScriptDispel(DispelInfo dispelInfo)
         {
-            foreach (IOnAuraDispel auraScript in GetAuraScripts<IOnAuraDispel>())
+            foreach (IAuraOnDispel auraScript in GetAuraScripts<IAuraOnDispel>())
             {
                 auraScript._PrepareScriptCall(AuraScriptHookType.Dispel);
 
-                auraScript.HandleDispel(dispelInfo);
+                auraScript.OnDispel(dispelInfo);
 
                 auraScript._FinishScriptCall();
             }
@@ -2298,13 +2298,13 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectSplitHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, uint splitAmount)
+        public void CallScriptEffectSplitHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref uint splitAmount)
         {
             foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectSplit, aurEff.GetEffIndex()))
             {
                 auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectSplit, aurApp);
 
-                ((IAuraSplitHandler)auraScript.Item2).Split(aurEff, dmgInfo, splitAmount);
+                ((IAuraSplitHandler)auraScript.Item2).Split(aurEff, dmgInfo, ref splitAmount);
 
                 auraScript.Item1._FinishScriptCall();
             }

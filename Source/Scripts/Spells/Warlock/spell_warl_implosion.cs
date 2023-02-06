@@ -15,7 +15,7 @@ namespace Scripts.Spells.Warlock
 {
     // 196277 - Implosion
     [SpellScript(WarlockSpells.IMPLOSION)]
-    public class spell_warl_implosion_SpellScript : SpellScript, IHasSpellEffects
+    public class spell_warl_implosion : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
@@ -54,29 +54,5 @@ namespace Scripts.Spells.Warlock
         {
             SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
-    }
-
-    public class ImplosionDamageEvent : BasicEvent
-    {
-        private readonly Unit _caster;
-        private readonly Unit _target;
-
-        public ImplosionDamageEvent(Unit caster, Unit target)
-        {
-            _caster = caster;
-            _target = target;
-        }
-
-        public override bool Execute(ulong UnnamedParameter, uint UnnamedParameter2)
-        {
-            if (_caster && _target)
-            {
-                _caster.CastSpell(_target, WarlockSpells.IMPLOSION_DAMAGE, true);
-                _target.ToCreature().DisappearAndDie();
-            }
-
-            return true;
-        }
-
     }
 }

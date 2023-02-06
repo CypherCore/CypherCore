@@ -13,7 +13,7 @@ namespace Scripts.Spells.Warlock
 {
     // Eye Laser - 205231
     [SpellScript(205231)]
-    public class spell_warl_eye_laser_SpellScript : SpellScript, IHasSpellEffects
+    public class spell_warl_eye_laser : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
@@ -24,6 +24,9 @@ namespace Scripts.Spells.Warlock
             if (caster == null)
                 return;
 
+            AllWorldObjectsInRange check = new AllWorldObjectsInRange(caster, 100.0f);
+            WorldObjectListSearcher search = new WorldObjectListSearcher(caster, targets, check);
+            Cell.VisitAllObjects(caster, search, 100.0f);
             targets.RemoveAll(new UnitAuraCheck<WorldObject>(false, WarlockSpells.DOOM, caster.GetGUID()));
         }
 

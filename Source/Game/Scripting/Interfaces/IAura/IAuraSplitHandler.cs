@@ -6,12 +6,12 @@ namespace Game.Scripting.Interfaces.IAura
 {
     public interface IAuraSplitHandler : IAuraEffectHandler
     {
-        void Split(AuraEffect aura, DamageInfo damageInfo, uint splitAmount);
+        void Split(AuraEffect aura, DamageInfo damageInfo, ref uint splitAmount);
     }
 
     public class EffectSplitHandler : AuraEffectHandler, IAuraSplitHandler
     {
-        public delegate void AuraEffectSplitDelegate(AuraEffect aura, DamageInfo damageInfo, uint splitAmount);
+        public delegate void AuraEffectSplitDelegate(AuraEffect aura, DamageInfo damageInfo, ref uint splitAmount);
 
         private readonly AuraEffectSplitDelegate _fn;
 
@@ -20,9 +20,9 @@ namespace Game.Scripting.Interfaces.IAura
             _fn = fn;
         }
 
-        public void Split(AuraEffect aura, DamageInfo damageInfo, uint splitAmount)
+        public void Split(AuraEffect aura, DamageInfo damageInfo, ref uint splitAmount)
         {
-            _fn(aura, damageInfo, splitAmount);
+            _fn(aura, damageInfo, ref splitAmount);
         }
     }
 }

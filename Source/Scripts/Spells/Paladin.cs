@@ -661,7 +661,7 @@ namespace Scripts.Spells.Paladin
             AuraEffects.Add(new EffectSplitHandler(Split, 0));
         }
 
-        private void Split(AuraEffect aurEff, DamageInfo dmgInfo, uint splitAmount)
+        private void Split(AuraEffect aurEff, DamageInfo dmgInfo, ref uint splitAmount)
         {
             remainingAmount -= (int)splitAmount;
 

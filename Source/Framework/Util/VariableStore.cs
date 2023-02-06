@@ -25,6 +25,11 @@ namespace Framework.Util
                 _variables[key] = objectVal;
         }
 
+        public bool Exist(string key)
+        {
+            return _variables.ContainsKey(key);
+        }
+
         public void Remove(string key)
         {
             _variables.Remove(key);

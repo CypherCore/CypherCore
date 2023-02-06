@@ -1642,6 +1642,19 @@ namespace Game.Entities
             }
         }
 
+        public void GetCreatureListInGrid(List<Creature> creatureList, float maxSearchRange)
+        {
+            CellCoord pair = new CellCoord((uint)GetPositionX(), (uint)GetPositionY());
+            Cell cell = new Cell(pair);
+            cell.SetNoCreate();
+
+            AllCreaturesWithinRange check = new AllCreaturesWithinRange(this, maxSearchRange);
+            CreatureListSearcher searcher = new CreatureListSearcher(this, creatureList, check);
+
+            Visitor gnotifier = new(searcher, GridMapTypeMask.Creature);
+            cell.Visit(pair, gnotifier, GetMap(), this, maxSearchRange);
+        }
+
         public Creature FindNearestCreature(uint entry, float range, bool alive = true)
         {
             var checker = new NearestCreatureEntryWithLiveStateInObjectRangeCheck(this, entry, alive, range);

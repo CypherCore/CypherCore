@@ -3571,7 +3571,7 @@ namespace Game.Entities
 
                     uint splitDamage = MathFunctions.CalculatePct(damageInfo.GetDamage(), itr.GetAmount());
 
-                    itr.GetBase().CallScriptEffectSplitHandlers(itr, aurApp, damageInfo, splitDamage);
+                    itr.GetBase().CallScriptEffectSplitHandlers(itr, aurApp, damageInfo, ref splitDamage);
 
                     // absorb must be smaller than the damage itself
                     splitDamage = MathFunctions.RoundToInterval(ref splitDamage, 0, damageInfo.GetDamage());

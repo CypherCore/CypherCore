@@ -3248,7 +3248,7 @@ namespace Scripts.Spells.Generic
                     var summonScript = GetSpell().GetSpellScripts<ISpellOnSummon>();
 
                     foreach (ISpellOnSummon summon in summonScript)
-                        summon.HandleSummon(newPet);
+                        summon.OnSummon(newPet);
 
                     switch (newPet.GetEntry())
                     {
