@@ -15,7 +15,7 @@ using Game.Scripting;
 namespace Scripts.EasternKingdoms.Deadmines
 {
 
-    [Script]
+    //[Script]
     internal class instance_deadmines : InstanceMapScript, IInstanceMapGetInstanceScript
     {
         private class instance_deadmines_InstanceMapScript : InstanceScript
@@ -23,10 +23,6 @@ namespace Scripts.EasternKingdoms.Deadmines
             public static readonly Position NoteSpawn = new Position(-74.36111f, -820.0139f, 40.67145f, 4.014257f);
             public const string NOTE_TEXT = "A note falls to the floor!";
 
-            private ObjectGuid _factoryDoorGUID;
-            private ObjectGuid _foundaryDoorGUID;
-            private ObjectGuid _heavyDoorGUID;
-            private ObjectGuid _ironcladDoorGUID;
             private ObjectGuid _vanessa;
             private ObjectGuid _vanessaNote;
             private ObjectGuid _vanessaBoss;
@@ -49,11 +45,11 @@ namespace Scripts.EasternKingdoms.Deadmines
 
             private static DoorData[] _doorData =
             {
-                new(DMGameObjects.GO_FOUNDRY_DOOR, DMCreatures.NPC_HELIX_GEARBREAKER, DoorType.Passage),
-                new(DMGameObjects.GO_FOUNDRY_DOOR, DMCreatures.NPC_HELIX_NIGHTMARE, DoorType.Passage),
-                new(DMGameObjects.GO_IRONCLAD_DOOR, DMCreatures.NPC_MECHANICAL_NIGHTMARE, DoorType.Passage),
-                new(DMGameObjects.GO_FACTORY_DOOR, DMCreatures.NPC_GLUBTOK, DoorType.Passage),
-                new(DMGameObjects.GO_FACTORY_DOOR, DMCreatures.NPC_GLUBTOK_NIGHTMARE, DoorType.Passage)
+                new(DMGameObjects.GO_FACTORY_DOOR, DMData.DATA_GLUBTOK, DoorType.Passage),
+                new(DMGameObjects.GO_HEAVY_DOOR_HELIX, DMData.DATA_HELIX, DoorType.Passage),
+                new(DMGameObjects.GO_FOUNDRY_DOOR, DMData.DATA_FOEREAPER, DoorType.Passage),
+                new(DMGameObjects.GO_IRONCLAD_DOOR, DMData.DATA_FOEREAPER, DoorType.Passage),
+
             };
 
             private static ObjectData[] _creatureData =
@@ -151,61 +147,6 @@ namespace Scripts.EasternKingdoms.Deadmines
                 }
             }
 
-            public override void OnGameObjectCreate(GameObject go)
-            {
-                switch (go.GetEntry())
-                {
-                    case DMGameObjects.GO_FACTORY_DOOR: // Door after first boss
-                        _factoryDoorGUID = go.GetGUID();
-                        break;
-                    case DMGameObjects.GO_FOUNDRY_DOOR: // Door before ship
-                        _foundaryDoorGUID = go.GetGUID();
-                        break;
-                    case DMGameObjects.GO_HEAVY_DOOR_HELIX:
-                        _heavyDoorGUID = go.GetGUID();
-                        break;
-                    case DMGameObjects.GO_IRONCLAD_DOOR:
-                        _ironcladDoorGUID = go.GetGUID();
-                        break;
-                }
-            }
-
-            public override void SetData(uint type, uint value)
-            {
-                var state = (EncounterState)value;
-                switch (type)
-                {
-                    case DMData.DATA_NIGHTMARE_HELIX:
-                        if (state == EncounterState.Done)
-                        {
-                            GameObject go = instance.GetGameObject(_foundaryDoorGUID);
-
-                            if (go != null)
-                                go.SetGoState(GameObjectState.Active);
-                        }
-                        break;
-                    case DMData.DATA_NIGHTMARE_MECHANICAL:
-                        if (state == EncounterState.Done)
-                        {
-                            GameObject go = instance.GetGameObject(_ironcladDoorGUID);
-
-                            if (go != null)
-                                go.SetGoState(GameObjectState.Active);
-                            
-                        }
-                        break;
-                    case DMData.DATA_GLUBTOK:
-                        if (state == EncounterState.Done)
-                        {
-                            GameObject go = instance.GetGameObject(_factoryDoorGUID);
-
-                            if (go != null)
-                                go.SetGoState(GameObjectState.Active);
-                        }
-                        break;
-                }
-            }
-
             public override bool SetBossState(uint id, EncounterState state)
             {
                 if (!base.SetBossState(id, state))
@@ -215,33 +156,6 @@ namespace Scripts.EasternKingdoms.Deadmines
 
                 switch (id)
                 {
-                    case DMData.DATA_GLUBTOK:
-                        if (state == EncounterState.Done)
-                        {
-                            GameObject go = instance.GetGameObject(_factoryDoorGUID);
-                            
-                            if (go != null)
-                                go.SetGoState(GameObjectState.Active);
-                        }
-                        break;
-                    case DMData.DATA_HELIX:
-                        if (state == EncounterState.Done)
-                        {
-                            GameObject go = instance.GetGameObject(_heavyDoorGUID);
-
-                            if (go != null)
-                                go.SetGoState(GameObjectState.Active);
-                        }
-                        break;
-                    case DMData.DATA_FOEREAPER:
-                        if (state == EncounterState.Done)
-                        {
-                            GameObject go = instance.GetGameObject(_foundaryDoorGUID);
-                            
-                            if (go != null)
-                                go.SetGoState(GameObjectState.Active);
-                        }
-                        break;
                     case DMData.DATA_COOKIE:
                         if (state == EncounterState.Done)
                         {
@@ -271,20 +185,6 @@ namespace Scripts.EasternKingdoms.Deadmines
 
                 if (Note != null)
                     Note.TextEmote(NOTE_TEXT, null, true);
-
-                GameObject go = instance.GetGameObject(_ironcladDoorGUID);
-
-                if (go != null)
-                    go.SetGoState(GameObjectState.Ready);
-
-                go = instance.GetGameObject(_heavyDoorGUID);
-                if (go != null)
-                    go.SetGoState(GameObjectState.Ready);
-
-                go = instance.GetGameObject(_foundaryDoorGUID);
-
-                if (go != null)
-                    go.SetGoState(GameObjectState.Ready);
             }
 
             public override ulong GetData64(uint data)

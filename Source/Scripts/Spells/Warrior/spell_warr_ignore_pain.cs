@@ -14,7 +14,7 @@ namespace Scripts.Spells.Warrior
     [SpellScript(190456)]
     public class spell_warr_ignore_pain : SpellScript, IHasSpellEffects
     {
-        public List<ISpellEffect> SpellEffects => throw new NotImplementedException();
+        public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
 
         public override bool Validate(SpellInfo UnnamedParameter)
         {

@@ -278,7 +278,7 @@ namespace System.Collections.Generic
             if (!val)
                 return false;
 
-            if (dict[item.Key].Empty())
+            if (!dict[item.Key].Empty())
                 dict.Remove(item.Key);
 
             return true;
@@ -293,7 +293,7 @@ namespace System.Collections.Generic
             if (!val)
                 return false;
 
-            if (dict[key].Empty())
+            if (!dict[key].Empty())
                 dict.Remove(key);
 
             return true;
