@@ -56,9 +56,10 @@ namespace System.Collections.Generic
 
         public static TValue LookupByKey<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key)
         {
-            TValue val;
+            if (dict.TryGetValue(key, out var val))
+                return val;
 
-            return dict.TryGetValue(key, out val) ? val : default;
+            return default;
         }
 
         public static KeyValuePair<TKey, TValue> Find<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key)
