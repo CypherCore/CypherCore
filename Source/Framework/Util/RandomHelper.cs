@@ -61,6 +61,11 @@ public class RandomHelper
         return (float)(rand.NextDouble() * (max - min) + min);
     }
 
+    public static float RandFloat()
+    {
+        return (float)(rand.NextDouble());
+    }
+
     /// <summary>
     /// Returns true if rand.Next less then i
     /// </summary>
@@ -109,6 +114,11 @@ public class RandomHelper
         Cypher.Assert(diff >= 0);
         Cypher.Assert(diff <= 0xFFFFFFFF);
         return min + TimeSpan.FromMilliseconds(URand(0, (uint)diff));
+    }
+
+    public static uint RandShort()
+    {
+        return (uint)rand.Next(short.MaxValue);
     }
 }
 
