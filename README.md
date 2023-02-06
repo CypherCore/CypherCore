@@ -29,7 +29,7 @@ The current support game version is: 10.0.5.47871
 * Must use Arctium WoW Client Launcher [Download](https://arctium.io/wow)
 
 ### Support / General Info
-* Check out our Discord [Here](https://discord.gg/tCx3JbJ5qQ)
+* Check out our Discord [Here](https://discord.gg/forgedwow)
 * Check out Trinity Core Wiki as a few steps are the same [Here](https://trinitycore.atlassian.net/wiki/spaces/tc/pages/2130077/Installation+Guide)
 
 ### Legal

@@ -286,6 +286,8 @@ namespace Game.DataStorage
             SpellCooldownsStorage = ReadDB2<SpellCooldownsRecord>("SpellCooldowns.db2", HotfixStatements.SEL_SPELL_COOLDOWNS);
             SpellDurationStorage = ReadDB2<SpellDurationRecord>("SpellDuration.db2", HotfixStatements.SEL_SPELL_DURATION);
             SpellEffectStorage = ReadDB2<SpellEffectRecord>("SpellEffect.db2", HotfixStatements.SEL_SPELL_EFFECT);
+            SpellEmpowerStorage = ReadDB2<SpellEmpowerRecord>("SpellEmpower.db2", HotfixStatements.SEL_SPELL_EMPOWER);
+            SpellEmpowerStageStorage = ReadDB2<SpellEmpowerStageRecord>("SpellEmpowerStage.db2", HotfixStatements.SEL_SPELL_EMPOWER_STAGE);
             SpellEquippedItemsStorage = ReadDB2<SpellEquippedItemsRecord>("SpellEquippedItems.db2", HotfixStatements.SEL_SPELL_EQUIPPED_ITEMS);
             SpellFocusObjectStorage = ReadDB2<SpellFocusObjectRecord>("SpellFocusObject.db2", HotfixStatements.SEL_SPELL_FOCUS_OBJECT, HotfixStatements.SEL_SPELL_FOCUS_OBJECT_LOCALE);
             SpellInterruptsStorage = ReadDB2<SpellInterruptsRecord>("SpellInterrupts.db2", HotfixStatements.SEL_SPELL_INTERRUPTS);
@@ -303,6 +305,7 @@ namespace Game.DataStorage
             SpellRangeStorage = ReadDB2<SpellRangeRecord>("SpellRange.db2", HotfixStatements.SEL_SPELL_RANGE, HotfixStatements.SEL_SPELL_RANGE_LOCALE);
             SpellReagentsStorage = ReadDB2<SpellReagentsRecord>("SpellReagents.db2", HotfixStatements.SEL_SPELL_REAGENTS);
             SpellReagentsCurrencyStorage = ReadDB2<SpellReagentsCurrencyRecord>("SpellReagentsCurrency.db2", HotfixStatements.SEL_SPELL_REAGENTS_CURRENCY);
+            SpellReplacementStorage = ReadDB2<SpellReplacementRecord>("SpellReplacement.db2", HotfixStatements.SEL_SPELL_REPLACEMENT);
             SpellScalingStorage = ReadDB2<SpellScalingRecord>("SpellScaling.db2", HotfixStatements.SEL_SPELL_SCALING);
             SpellShapeshiftStorage = ReadDB2<SpellShapeshiftRecord>("SpellShapeshift.db2", HotfixStatements.SEL_SPELL_SHAPESHIFT);
             SpellShapeshiftFormStorage = ReadDB2<SpellShapeshiftFormRecord>("SpellShapeshiftForm.db2", HotfixStatements.SEL_SPELL_SHAPESHIFT_FORM, HotfixStatements.SEL_SPELL_SHAPESHIFT_FORM_LOCALE);
@@ -465,6 +468,16 @@ namespace Game.DataStorage
             XpGameTable = ReadGameTable<GtXpRecord>("xp.txt");
 
             Log.outInfo(LogFilter.ServerLoading, "Initialized {0} DBC GameTables data stores in {1} ms", loadedFileCount, Time.GetMSTimeDiffToNow(oldMSTime));
+        }
+
+        public static DB6Storage<T> ReadDB2<T>(BitSet availableDb2Locales, string db2Path, Locale defaultLocale, string fileName, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale = 0) where T : new()
+        {
+            DB6Storage<T> storage = new();
+            storage.LoadData($"{db2Path}/{defaultLocale}/{fileName}");
+            storage.LoadHotfixData(availableDb2Locales, preparedStatement, preparedStatementLocale);
+
+            Global.DB2Mgr.AddDB2(storage.GetTableHash(), storage);
+            return storage;
         }
 
         #region Main Collections
@@ -701,6 +714,7 @@ namespace Game.DataStorage
         public static DB6Storage<SoundKitRecord> SoundKitStorage;
         public static DB6Storage<SpecializationSpellsRecord> SpecializationSpellsStorage;
         public static DB6Storage<SpecSetMemberRecord> SpecSetMemberStorage;
+        public static DB6Storage<SpellRecord> SpellStorage;
         public static DB6Storage<SpellAuraOptionsRecord> SpellAuraOptionsStorage;
         public static DB6Storage<SpellAuraRestrictionsRecord> SpellAuraRestrictionsStorage;
         public static DB6Storage<SpellCastTimesRecord> SpellCastTimesStorage;
@@ -711,6 +725,8 @@ namespace Game.DataStorage
         public static DB6Storage<SpellCooldownsRecord> SpellCooldownsStorage;
         public static DB6Storage<SpellDurationRecord> SpellDurationStorage;
         public static DB6Storage<SpellEffectRecord> SpellEffectStorage;
+        public static DB6Storage<SpellEmpowerRecord> SpellEmpowerStorage;
+        public static DB6Storage<SpellEmpowerStageRecord> SpellEmpowerStageStorage;
         public static DB6Storage<SpellEquippedItemsRecord> SpellEquippedItemsStorage;
         public static DB6Storage<SpellFocusObjectRecord> SpellFocusObjectStorage;
         public static DB6Storage<SpellInterruptsRecord> SpellInterruptsStorage;
@@ -729,6 +745,7 @@ namespace Game.DataStorage
         public static DB6Storage<SpellRangeRecord> SpellRangeStorage;
         public static DB6Storage<SpellReagentsRecord> SpellReagentsStorage;
         public static DB6Storage<SpellReagentsCurrencyRecord> SpellReagentsCurrencyStorage;
+        public static DB6Storage<SpellReplacementRecord> SpellReplacementStorage;
         public static DB6Storage<SpellScalingRecord> SpellScalingStorage;
         public static DB6Storage<SpellShapeshiftRecord> SpellShapeshiftStorage;
         public static DB6Storage<SpellShapeshiftFormRecord> SpellShapeshiftFormStorage;
@@ -765,6 +782,7 @@ namespace Game.DataStorage
         public static DB6Storage<TraitNodeXTraitCondRecord> TraitNodeXTraitCondStorage;
         public static DB6Storage<TraitNodeXTraitCostRecord> TraitNodeXTraitCostStorage;
         public static DB6Storage<TraitNodeXTraitNodeEntryRecord> TraitNodeXTraitNodeEntryStorage;
+        public static DB6Storage<TraitSystemRecord> TraitSystemStorage;
         public static DB6Storage<TraitTreeRecord> TraitTreeStorage;
         public static DB6Storage<TraitTreeLoadoutRecord> TraitTreeLoadoutStorage;
         public static DB6Storage<TraitTreeLoadoutEntryRecord> TraitTreeLoadoutEntryStorage;

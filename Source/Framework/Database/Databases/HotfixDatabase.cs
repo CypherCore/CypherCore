@@ -1135,6 +1135,9 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_SPELL_AURA_OPTIONS, "SELECT ID, DifficultyID, CumulativeAura, ProcCategoryRecovery, ProcChance, ProcCharges, " +
                 "SpellProcsPerMinuteID, ProcTypeMask1, ProcTypeMask2, SpellID FROM spell_aura_options ");
 
+            // Spell.db2
+            PrepareStatement(HotfixStatements.SEL_SPELL, "SELECT ID, NameSubtext, Description, AuraDescription FROM spell ");
+
             // SpellAuraRestrictions.db2
             PrepareStatement(HotfixStatements.SEL_SPELL_AURA_RESTRICTIONS, "SELECT ID, DifficultyID, CasterAuraState, TargetAuraState, ExcludeCasterAuraState, " +
                 "ExcludeTargetAuraState, CasterAuraSpell, TargetAuraSpell, ExcludeCasterAuraSpell, ExcludeTargetAuraSpell, CasterAuraType, TargetAuraType, " +
@@ -1174,6 +1177,12 @@ namespace Framework.Database
                 "ResourceCoefficient, GroupSizeBasePointsCoefficient, EffectBasePoints, ScalingClass, EffectMiscValue1, EffectMiscValue2, EffectRadiusIndex1, " +
                 "EffectRadiusIndex2, EffectSpellClassMask1, EffectSpellClassMask2, EffectSpellClassMask3, EffectSpellClassMask4, ImplicitTarget1, " +
                 "ImplicitTarget2, SpellID FROM spell_effect ");
+
+            // SpellEmpower.db2
+            PrepareStatement(HotfixStatements.SEL_SPELL_EMPOWER, "SELECT ID, SpellID, OtherValue FROM spell_empower ");
+
+            // SpellEmpowerStage.db2
+            PrepareStatement(HotfixStatements.SEL_SPELL_EMPOWER_STAGE, "SELECT ID, SpellEmpowerStage, OtherValue FROM spell_empower_stage ");
 
             // SpellEquippedItems.db2
             PrepareStatement(HotfixStatements.SEL_SPELL_EQUIPPED_ITEMS, "SELECT ID, SpellID, EquippedItemClass, EquippedItemInvTypes, EquippedItemSubclass" +
@@ -1261,6 +1270,9 @@ namespace Framework.Database
             // SpellReagentsCurrency.db2
             PrepareStatement(HotfixStatements.SEL_SPELL_REAGENTS_CURRENCY, "SELECT ID, SpellID, CurrencyTypesID, CurrencyCount FROM spell_reagents_currency" +
                 " ");
+
+            // SpellEmpowerStage.db2
+            PrepareStatement(HotfixStatements.SEL_SPELL_REPLACEMENT, "SELECT ID, SpellID FROM spell_replacement ");
 
             // SpellScaling.db2
             PrepareStatement(HotfixStatements.SEL_SPELL_SCALING, "SELECT ID, SpellID, MinScalingLevel, MaxScalingLevel, ScalesFromItemLevel FROM spell_scaling" +
@@ -1422,6 +1434,10 @@ namespace Framework.Database
 
             // TraitNodeXTraitNodeEntry.db2
             PrepareStatement(HotfixStatements.SEL_TRAIT_NODE_X_TRAIT_NODE_ENTRY, "SELECT ID, TraitNodeID, TraitNodeEntryID, `Index` FROM trait_node_x_trait_node_entry" +
+                " ");
+
+            // TraitSystemEntry.db2
+            PrepareStatement(HotfixStatements.SEL_TRAIT_SYSTEM, "SELECT ID, `Field_10_0_0_44795_001`, WidgetSetID FROM trait_system" +
                 " ");
 
             // TraitTree.db2
@@ -2091,6 +2107,8 @@ namespace Framework.Database
 
         SEL_SPEC_SET_MEMBER,
 
+        SEL_SPELL,
+
         SEL_SPELL_AURA_OPTIONS,
 
         SEL_SPELL_AURA_RESTRICTIONS,
@@ -2111,6 +2129,10 @@ namespace Framework.Database
         SEL_SPELL_DURATION,
 
         SEL_SPELL_EFFECT,
+
+        SEL_SPELL_EMPOWER,
+
+        SEL_SPELL_EMPOWER_STAGE,
 
         SEL_SPELL_EQUIPPED_ITEMS,
 
@@ -2151,6 +2173,8 @@ namespace Framework.Database
         SEL_SPELL_REAGENTS,
 
         SEL_SPELL_REAGENTS_CURRENCY,
+
+        SEL_SPELL_REPLACEMENT,
 
         SEL_SPELL_SCALING,
 
@@ -2232,6 +2256,8 @@ namespace Framework.Database
         SEL_TRAIT_NODE_X_TRAIT_COST,
 
         SEL_TRAIT_NODE_X_TRAIT_NODE_ENTRY,
+
+        SEL_TRAIT_SYSTEM,
 
         SEL_TRAIT_TREE,
 

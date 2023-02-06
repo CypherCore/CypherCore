@@ -261,6 +261,13 @@ namespace Game.DataStorage
         public int Index;
     }
 
+    public sealed class TraitSystemRecord
+    {
+        public uint Id;
+        public int Field_10_0_0_44795_001;
+        public int WidgetSetID;
+    }
+
     public sealed class TraitTreeRecord
     {
         public uint Id;
