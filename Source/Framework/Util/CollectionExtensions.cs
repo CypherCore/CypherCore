@@ -3,6 +3,7 @@
 
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Framework.Collections;
 using Google.Protobuf.WellKnownTypes;
 
 namespace System.Collections.Generic
@@ -271,15 +272,15 @@ namespace System.Collections.Generic
 
         public static bool Remove<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, KeyValuePair<TKey, TValue> item)
         {
-            if (!dict.ContainsKey(item.Key))
+            if (!dict.TryGetValue(item.Key, out var valList))
                 return false;
 
-            bool val = dict[item.Key].Remove(item.Value);
+            bool val = valList.Remove(item.Value);
 
             if (!val)
                 return false;
 
-            if (!dict[item.Key].Empty())
+            if (valList.Empty())
                 dict.Remove(item.Key);
 
             return true;
@@ -287,14 +288,14 @@ namespace System.Collections.Generic
 
         public static bool Remove<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, TKey key, TValue value)
         {
-            if (!dict.ContainsKey(key))
+            if (!dict.TryGetValue(key, out var valList))
                 return false;
 
-            bool val = dict[key].Remove(value);
+            bool val = valList.Remove(value);
             if (!val)
                 return false;
 
-            if (!dict[key].Empty())
+            if (valList.Empty())
                 dict.Remove(key);
 
             return true;
@@ -440,6 +441,21 @@ namespace System.Collections.Generic
         {
             foreach (var val in toRemove)
                 dict.Remove(val);
+        }
+
+        public static ManyToOneLookup<TKey, TValue> ToManyToOneLookup<TKey, TValue>(this IEnumerable<TValue> source, Func<TValue, TKey> keySelector, IEqualityComparer<TKey> keyComparer = null, IEqualityComparer<TValue> valueComparer = null)
+        {
+            var manyToOne = new ManyToOneLookup<TKey, TValue>(keyComparer, valueComparer);
+
+            foreach (var item in source)
+            {
+                var key = keySelector(item);
+
+                if (key != null)
+                    manyToOne.Add(key, item);
+            }
+
+            return manyToOne;
         }
     }
 

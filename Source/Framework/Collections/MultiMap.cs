@@ -10,6 +10,11 @@ namespace System.Collections.Generic
         static List<object> _emptyList = new List<object>();
         public MultiMap() { }
 
+        public MultiMap(IEqualityComparer<TKey> keyComparer)
+        {
+            _interalStorage = new Dictionary<TKey, List<TValue>>(keyComparer);
+        }
+
         public MultiMap(IEnumerable<KeyValuePair<TKey, TValue>> initialData)
         {
             foreach (var item in initialData)
@@ -156,7 +161,7 @@ namespace System.Collections.Generic
             return _emptyList.Cast<TValue>().ToList();
         }
 
-        bool TryGetValue(TKey key, out List<TValue> value)
+        public bool TryGetValue(TKey key, out List<TValue> value)
         {
             return _interalStorage.TryGetValue(key, out value);
         }
