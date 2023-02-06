@@ -176,6 +176,19 @@ namespace Game.DataStorage
         public uint ChrSpecializationID;
         public uint SpecSetID;
     }
+    public sealed class SpellRecord
+    {
+        public uint Id;
+        public string NameSubtext_lang;
+        public string Description_lang;
+        public string AuraDescription_lang;
+    }
+
+    public sealed class SpellIconRecord
+    {
+        public uint Id;
+        public string TextureFilename;
+    }
 
     public sealed class SpellAuraOptionsRecord
     {
@@ -312,6 +325,19 @@ namespace Game.DataStorage
         public FlagArray128 EffectSpellClassMask;
         public short[] ImplicitTarget = new short[2];
         public uint SpellID;
+    }
+    public sealed class SpellEmpowerRecord
+    {
+        public uint Id;
+        public uint SpellID;
+        public uint OtherValue;
+    }
+
+    public sealed class SpellEmpowerStageRecord
+    {
+        public uint Id;
+        public uint SpellEmpowerStage;
+        public uint OtherValue;
     }
 
     public sealed class SpellEquippedItemsRecord
@@ -512,6 +538,13 @@ namespace Game.DataStorage
         public ushort CurrencyTypesID;
         public ushort CurrencyCount;
     }
+
+    public sealed class SpellReplacementRecord
+    {
+        public uint Id;
+        public uint SpellID;
+    }
+
 
     public sealed class SpellScalingRecord
     {
