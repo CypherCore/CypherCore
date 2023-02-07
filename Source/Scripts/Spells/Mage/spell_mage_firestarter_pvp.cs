@@ -1,0 +1,37 @@
+﻿using System;
+using System.Collections.Generic;
+using Framework.Constants;
+using Game.Entities;
+using Game.Scripting;
+using Game.Scripting.Interfaces.IAura;
+using Game.Spells;
+
+namespace Scripts.Spells.Mage;
+
+[SpellScript(203283)]
+public class spell_mage_firestarter_pvp : AuraScript, IAuraCheckProc, IHasAuraEffects
+{
+	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+
+	public bool CheckProc(ProcEventInfo eventInfo)
+	{
+		return eventInfo.GetSpellInfo().Id == MageSpells.SPELL_MAGE_FIREBALL;
+	}
+
+	private void HandleProc(AuraEffect aurEff, ProcEventInfo UnnamedParameter)
+	{
+		Unit caster = GetCaster();
+		if (caster == null)
+		{
+			return;
+		}
+
+		caster.GetSpellHistory().ModifyCooldown(MageSpells.SPELL_MAGE_COMBUSTION, TimeSpan.FromSeconds((aurEff.GetAmount() * -1) - 5000));
+	}
+
+	public override void Register()
+	{
+
+		AuraEffects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
+	}
+}

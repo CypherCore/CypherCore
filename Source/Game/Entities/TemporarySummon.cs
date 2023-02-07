@@ -27,6 +27,11 @@ namespace Game.Entities
             return !m_summonerGUID.IsEmpty() ? Global.ObjAccessor.GetWorldObject(this, m_summonerGUID) : null;
         }
 
+        public void SetSummonerGUID(ObjectGuid summonerGUID)
+        {
+            m_summonerGUID = summonerGUID;
+        }
+
         public Unit GetSummonerUnit()
         {
             WorldObject summoner = GetSummoner();

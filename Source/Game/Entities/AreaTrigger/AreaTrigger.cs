@@ -12,6 +12,7 @@ using Game.Scripting.Interfaces.IAreaTriggerEntity;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using static Game.AI.SmartEvent;
 
@@ -1079,6 +1080,20 @@ namespace Game.Entities
                     if (player.IsDebugAreaTriggers)
                         player.SummonCreature(1, this, TempSummonType.TimedDespawn, TimeSpan.FromMilliseconds(GetTimeToTarget()));
             }
+        }
+
+        public bool SetDestination(Position pos, uint timeToTarget)
+        {
+            PathGenerator path = new PathGenerator(GetCaster());
+            bool result = path.CalculatePath(GetPositionX(), GetPositionY(), GetPositionZ(), true);
+
+            if (!result || (path.GetPathType() & PathType.NoPath) != 0)
+            {
+                return false;
+            }
+
+            InitSplines(path.GetPath().ToList(), timeToTarget);
+            return true;
         }
 
         public bool IsRemoved() { return _isRemoved; }

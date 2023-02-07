@@ -10,7 +10,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(208253)]
 public class spell_dru_essence_of_ghanir : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => throw new NotImplementedException();
+	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
 
 	private void HandleEffectCalcSpellMod(AuraEffect aurEff, ref SpellModifier spellMod)
 	{

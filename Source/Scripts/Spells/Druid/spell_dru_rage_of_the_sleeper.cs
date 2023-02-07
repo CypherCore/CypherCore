@@ -11,7 +11,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(200851)]
 public class spell_dru_rage_of_the_sleeper : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => throw new NotImplementedException();
+	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
 
 
 	private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)

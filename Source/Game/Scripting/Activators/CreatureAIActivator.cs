@@ -22,7 +22,8 @@ namespace Game.Scripting.Activators
                                                    nameof(ReactorAI),
                                                    nameof(ScheduledChangeAI),
                                                    nameof(SmartAI),
-                                                   nameof(VehicleAI)
+                                                   nameof(VehicleAI),
+                                                   nameof(CasterAI)
                                                };
 
         public IScriptObject Activate(Type type, string name, ScriptAttribute attribute)
