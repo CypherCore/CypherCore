@@ -86,6 +86,13 @@ namespace Framework.Dynamic
             m_events.Add((ulong)e_time.TotalMilliseconds, Event);
         }
 
+        public EventSystem AddRepeatEvent(Func<TimeSpan> func, TimeSpan offset)
+        {
+            AddEvent(new RepeatEvent(this, func), offset);
+            return this;
+        }
+
+
         public EventSystem AddEvent(Action action, TimeSpan e_time, bool set_addtime = true) { AddEvent(new LambdaBasicEvent(action), e_time, set_addtime); return this; }
         
         public EventSystem AddEventAtOffset(BasicEvent Event, TimeSpan offset) { AddEvent(Event, CalculateTime(offset)); return this; }
@@ -93,6 +100,12 @@ namespace Framework.Dynamic
         public EventSystem AddEventAtOffset(BasicEvent Event, TimeSpan offset, TimeSpan offset2) { AddEvent(Event, CalculateTime(RandomHelper.RandTime(offset, offset2))); return this; }
 
         public EventSystem AddEventAtOffset(Action action, TimeSpan offset) { AddEventAtOffset(new LambdaBasicEvent(action), offset); return this; }
+
+        public EventSystem AddRepeatEventAtOffset(Func<TimeSpan> func, TimeSpan offset)
+        {
+            AddEventAtOffset(new RepeatEvent(this, func), offset); 
+            return this;
+        }
 
         public void ModifyEventTime(BasicEvent Event, TimeSpan newTime)
         {
@@ -175,5 +188,24 @@ namespace Framework.Dynamic
         Running,
         Scheduled,
         Aborted
+    }
+
+    public class RepeatEvent : BasicEvent 
+    {
+        Func<TimeSpan> _event;
+        EventSystem _eventSystem;
+
+        public RepeatEvent(EventSystem eventSystem, Func<TimeSpan> func) : base()
+        {
+            _event = func;
+            _eventSystem = eventSystem;
+        }
+        public override bool Execute(ulong e_time, uint p_time)
+        {
+            var ts = _event.Invoke();
+            if (ts != default)
+                _eventSystem.AddEventAtOffset(this, ts);
+            return true;
+        }
     }
 }

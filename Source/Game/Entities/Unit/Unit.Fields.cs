@@ -375,7 +375,7 @@ namespace Game.Entities
         public Unit GetVictim() { return m_victim; }
         public SpellInfo GetSpellInfo() { return m_spellInfo; }
         public SpellSchoolMask GetSchoolMask() { return m_schoolMask; }
-        DamageEffectType GetDamageType() { return m_damageType; }
+        public DamageEffectType GetDamageType() { return m_damageType; }
         public WeaponAttackType GetAttackType() { return m_attackType; }
         public uint GetDamage() { return m_damage; }
         public uint GetOriginalDamage() { return m_originalDamage; }

@@ -12,6 +12,7 @@ using Game.Movement;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
@@ -629,6 +630,13 @@ namespace Game.Entities
         List<SpellInfo> _GetSpellInfo(uint spellId)
         {
             return mSpellInfoMap.LookupByKey(spellId);
+        }
+
+        public SpellInfo AssertSpellInfo(uint spellId, Difficulty difficulty)
+        {
+            SpellInfo spellInfo = GetSpellInfo(spellId, difficulty);
+            Cypher.Assert(spellInfo != null);
+            return spellInfo;
         }
 
         public void ForEachSpellInfo(Action<SpellInfo> callback)
