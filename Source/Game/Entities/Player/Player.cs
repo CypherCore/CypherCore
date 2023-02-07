@@ -3380,7 +3380,7 @@ namespace Game.Entities
                 curValue = maxPower;
 
             if (m_regenTimerCount >= 2000 || forcesSetPower)
-                SetPower(power, curValue);
+                SetPower(power, curValue, true, true);
             else
             {
                 // throttle packet sending

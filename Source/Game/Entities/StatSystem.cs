@@ -4,10 +4,13 @@
 using Framework.Constants;
 using Game.DataStorage;
 using Game.Networking.Packets;
+using Game.Scripting.Interfaces.IPlayer;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Game.AI.SmartAction;
+using System.Text.RegularExpressions;
 
 namespace Game.Entities
 {
@@ -593,7 +596,7 @@ namespace Game.Entities
             if (val < cur_power)
                 SetPower(powerType, val);
         }
-        public void SetPower(PowerType powerType, int val, bool withPowerUpdate = true)
+        public void SetPower(PowerType powerType, int val, bool withPowerUpdate = true, bool isRegen = false)
         {
             uint powerIndex = GetPowerIndex(powerType);
             if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
@@ -604,6 +607,9 @@ namespace Game.Entities
                 val = maxPower;
 
             int oldPower = m_unitData.Power[(int)powerIndex];
+
+            TriggerOnPowerChangeAuras(powerType, oldPower, ref val, isRegen);
+
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, (int)powerIndex), val);
 
             if (IsInWorld && withPowerUpdate)
@@ -614,7 +620,6 @@ namespace Game.Entities
                 SendMessageToSet(packet, IsTypeId(TypeId.Player));
             }
 
-            TriggerOnPowerChangeAuras(powerType, oldPower, val);
 
             // group update
             if (IsTypeId(TypeId.Player))
@@ -629,6 +634,8 @@ namespace Game.Entities
                 if (pet.isControlled())
                     pet.SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_CUR_POWER);
             }*/
+
+            Global.ScriptMgr.ForEach<IPlayerOnAfterModifyPower>(p => p.OnAfterModifyPower(ToPlayer(), powerType, oldPower, val, isRegen));
         }
         public void SetFullPower(PowerType powerType) { SetPower(powerType, GetMaxPower(powerType)); }
         public int GetPower(PowerType powerType)
@@ -661,12 +668,18 @@ namespace Game.Entities
         public virtual uint GetPowerIndex(PowerType powerType) { return 0; }
         public float GetPowerPct(PowerType powerType) { return GetMaxPower(powerType) != 0 ? 100.0f * GetPower(powerType) / GetMaxPower(powerType) : 0.0f; }
 
-        void TriggerOnPowerChangeAuras(PowerType power, int oldVal, int newVal)
+        void TriggerOnPowerChangeAuras(PowerType power, int oldVal, ref int newVal, bool regen = false)
         {
             var effects = GetAuraEffectsByType(AuraType.TriggerSpellOnPowerPct);
             var effectsAmount = GetAuraEffectsByType(AuraType.TriggerSpellOnPowerAmount);
             effects.AddRange(effectsAmount);
 
+            if (IsPlayer())
+            {
+                var val = newVal;
+                Global.ScriptMgr.ForEach<IPlayerOnModifyPower>(p => p.OnModifyPower(ToPlayer(), power, oldVal, ref val, regen));
+                newVal = val;
+            }
             foreach (AuraEffect effect in effects)
             {
                 if (effect.GetMiscValue() == (int)power)
