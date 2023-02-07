@@ -22,7 +22,7 @@ namespace Scripts.Spells.Warlock
                 return;
             }
             // allow only in Destruction
-            if ((TalentSpecialization)caster.GetPrimarySpecialization() != TalentSpecialization.WarlockDestruction)
+            if (caster.GetPrimarySpecialization() != TalentSpecialization.WarlockDestruction)
             {
                 return;
             }

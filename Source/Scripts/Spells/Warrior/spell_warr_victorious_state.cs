@@ -27,7 +27,7 @@ namespace Scripts.Spells.Warrior
         private void HandleOnProc(AuraEffect aurEff, ProcEventInfo procInfo)
         {
             if (procInfo.GetActor().GetTypeId() == TypeId.Player &&
-                procInfo.GetActor().ToPlayer().GetPrimarySpecialization() == (uint)TalentSpecialization.WarriorFury)
+                procInfo.GetActor().ToPlayer().GetPrimarySpecialization() == TalentSpecialization.WarriorFury)
                 PreventDefaultAction();
 
             procInfo.GetActor().GetSpellHistory().ResetCooldown(WarriorSpells.IMPENDING_VICTORY, true);

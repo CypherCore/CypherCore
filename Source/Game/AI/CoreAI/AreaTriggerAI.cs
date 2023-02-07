@@ -37,6 +37,8 @@ namespace Game.AI
 
         // Called when the AreaTrigger is removed
         public virtual void OnRemove() { }
+
+        public virtual void OnPeriodicProc() { }
     }
 
     class NullAreaTriggerAI : AreaTriggerAI

@@ -21,7 +21,7 @@ namespace Scripts.Spells.Warrior
                 return;
             }
 
-            TalentSpecialization _spec = (TalentSpecialization)caster.GetPrimarySpecialization();
+            var _spec = caster.GetPrimarySpecialization();
             if (_spec != TalentSpecialization.WarriorFury) //only fury warriors should deal damage with offhand
             {
                 PreventHitDamage();

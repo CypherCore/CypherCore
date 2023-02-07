@@ -27,7 +27,7 @@ namespace Scripts.Spells.Warlock
                 player.LearnSpell(WarlockSpells.GRIMOIRE_SUCCUBUS, false);
                 player.LearnSpell(WarlockSpells.GRIMOIRE_FELHUNTER, false);
 
-                if (player.GetPrimarySpecialization() == (uint)TalentSpecialization.WarlockDemonology)
+                if (player.GetPrimarySpecialization() == TalentSpecialization.WarlockDemonology)
                     player.LearnSpell(WarlockSpells.GRIMOIRE_FELGUARD, false);
             }
         }

@@ -46,7 +46,7 @@ namespace Scripts.Spells.Warrior
 
 			if (anger != null)
             {
-                TalentSpecialization spec = (TalentSpecialization)player.GetPrimarySpecialization();
+                var spec = player.GetPrimarySpecialization();
                 
                 //int32 mod = powerCost->Amount * 100 / anger->GetEffect(EFFECT_0).GetAmount();
                 //int32 mod = std::max(powerCost->Amount * 100, anger->GetEffect(EFFECT_0).GetAmount()) / 2;

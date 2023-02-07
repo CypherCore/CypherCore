@@ -148,44 +148,44 @@ namespace Framework.Constants
         Drunk = 2,
         Smashed = 3
     }
-
-    public enum TalentSpecialization : uint // talent tabs
+    public struct TalentSpecialization // talent tabs
     {
-        MageArcane = 62,
-        MageFire = 63,
-        MageFrost = 64,
-        PaladinHoly = 65,
-        PaladinProtection = 66,
-        PaladinRetribution = 70,
-        WarriorArms = 71,
-        WarriorFury = 72,
-        WarriorProtection = 73,
-        DruidBalance = 102,
-        DruidFeralCombat = 103,
-        DruidRestoration = 104,
-        DeathKnightBlood = 250,
-        DeathKnightFrost = 251,
-        DeathKnightUnholy = 252,
-        HunterBeastMastery = 253,
-        HunterMarksman = 254,
-        HunterSurvival = 255,
-        PriestDiscipline = 256,
-        PriestHoly = 257,
-        PriestShadow = 258,
-        RogueAssassination = 259,
-        RogueCombat = 260,
-        RogueSubtlety = 261,
-        ShamanElemental = 262,
-        ShamanEnhancement = 263,
-        ShamanRestoration = 264,
-        WarlockAffliction = 265,
-        WarlockDemonology = 266,
-        WarlockDestruction = 267,
-        MonkBrewmaster = 268,
-        MonkBattledancer = 269,
-        MonkMistweaver = 270,
-        DemonHunterHavoc = 577,
-        DemonHunterVengeance = 581
+        public static uint MageArcane = 62;
+        public static uint MageFire = 63;
+        public static uint MageFrost = 64;
+        public static uint PaladinHoly = 65;
+        public static uint PaladinProtection = 66;
+        public static uint PaladinRetribution = 70;
+        public static uint WarriorArms = 71;
+        public static uint WarriorFury = 72;
+        public static uint WarriorProtection = 73;
+        public static uint DruidBalance = 102;
+        public static uint DruidCat = 103;
+        public static uint DruidBear = 104;
+        public static uint DruidRestoration = 105;
+        public static uint DeathKnightBlood = 250;
+        public static uint DeathKnightFrost = 251;
+        public static uint DeathKnightUnholy = 252;
+        public static uint HunterBeastMastery = 253;
+        public static uint HunterMarksman = 254;
+        public static uint HunterSurvival = 255;
+        public static uint PriestDiscipline = 256;
+        public static uint PriestHoly = 257;
+        public static uint PriestShadow = 258;
+        public static uint RogueAssassination = 259;
+        public static uint RogueCombat = 260;
+        public static uint RogueSubtlety = 261;
+        public static uint ShamanElemental = 262;
+        public static uint ShamanEnhancement = 263;
+        public static uint ShamanRestoration = 264;
+        public static uint WarlockAffliction = 265;
+        public static uint WarlockDemonology = 266;
+        public static uint WarlockDestruction = 267;
+        public static uint MonkBrewmaster = 268;
+        public static uint MonkBattledancer = 269;
+        public static uint MonkMistweaver = 270;
+        public static uint DemonHunterHavoc = 577;
+        public static uint DemonHunterVengeance = 581;
     }
 
     public enum SpecResetType

@@ -26,7 +26,7 @@ namespace Scripts.Spells.Warlock
                 return;
             }
 
-            if ((TalentSpecialization)GetCaster().ToPlayer().GetPrimarySpecialization() == TalentSpecialization.WarlockDestruction)
+            if (GetCaster().ToPlayer().GetPrimarySpecialization() == TalentSpecialization.WarlockDestruction)
             {
                 caster.CastSpell(target, WarlockSpells.IMMOLATE_DOT, true);
             }

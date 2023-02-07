@@ -395,11 +395,11 @@ namespace Game.AI
 
             return who.GetClass() switch
             {
-                Class.Paladin => who.GetPrimarySpecialization() == (uint)TalentSpecialization.PaladinHoly,
-                Class.Priest => who.GetPrimarySpecialization() == (uint)TalentSpecialization.PriestDiscipline || who.GetPrimarySpecialization() == (uint)TalentSpecialization.PriestHoly,
-                Class.Shaman => who.GetPrimarySpecialization() == (uint)TalentSpecialization.ShamanRestoration,
-                Class.Monk => who.GetPrimarySpecialization() == (uint)TalentSpecialization.MonkMistweaver,
-                Class.Druid => who.GetPrimarySpecialization() == (uint)TalentSpecialization.DruidRestoration,
+                Class.Paladin => who.GetPrimarySpecialization() == TalentSpecialization.PaladinHoly,
+                Class.Priest => who.GetPrimarySpecialization() == TalentSpecialization.PriestDiscipline || who.GetPrimarySpecialization() == TalentSpecialization.PriestHoly,
+                Class.Shaman => who.GetPrimarySpecialization() == TalentSpecialization.ShamanRestoration,
+                Class.Monk => who.GetPrimarySpecialization() == TalentSpecialization.MonkMistweaver,
+                Class.Druid => who.GetPrimarySpecialization() == TalentSpecialization.DruidRestoration,
                 _ => false,
             };
         }
@@ -433,11 +433,11 @@ namespace Game.AI
                         return false;
                     }
                 case Class.Priest:
-                    return who.GetPrimarySpecialization() == (uint)TalentSpecialization.PriestShadow;
+                    return who.GetPrimarySpecialization() == TalentSpecialization.PriestShadow;
                 case Class.Shaman:
-                    return who.GetPrimarySpecialization() == (uint)TalentSpecialization.ShamanElemental;
+                    return who.GetPrimarySpecialization() == TalentSpecialization.ShamanElemental;
                 case Class.Druid:
-                    return who.GetPrimarySpecialization() == (uint)TalentSpecialization.DruidBalance;
+                    return who.GetPrimarySpecialization() == TalentSpecialization.DruidBalance;
             }
         }
 

@@ -126,6 +126,9 @@ namespace Game.Entities
         ushort _movementAnimKitId;
         ushort _meleeAnimKitId;
 
+        public static TimeSpan MAX_DAMAGE_HISTORY_DURATION = TimeSpan.FromSeconds(20);
+        public SortedDictionary<DateTime, uint> _damageTakenHistory = new SortedDictionary<DateTime, uint>();
+
         class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
         {
             Unit Owner;

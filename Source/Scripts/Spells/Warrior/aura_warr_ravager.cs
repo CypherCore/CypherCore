@@ -19,7 +19,7 @@ namespace Scripts.Spells.Warrior
             Player player = GetTarget().ToPlayer();
             if (player != null)
             {
-                if (player.GetPrimarySpecialization() == (uint)TalentSpecialization.WarriorProtection)
+                if (player.GetPrimarySpecialization() == TalentSpecialization.WarriorProtection)
                 {
                     player.CastSpell(player, WarriorSpells.RAVAGER_PARRY, true);
                 }

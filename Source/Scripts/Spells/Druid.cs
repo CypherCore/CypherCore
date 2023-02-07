@@ -6,14 +6,17 @@ using System.Collections.Generic;
 using System.Linq;
 using Framework.Constants;
 using Framework.Dynamic;
+using Game.AI;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.BaseScripts;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
 using Game.Spells;
+using static Game.Scripting.Interfaces.ISpell.EffectHandler;
 
 namespace Scripts.Spells.Druid
 {
@@ -79,6 +82,2889 @@ namespace Scripts.Spells.Druid
         public const uint ThrashBearAura = 192090;
         public const uint ThrashCat = 106830;
     }
+
+    public struct DruidSpells
+    {
+        public static uint SPELL_DRUID_THRASH_BEAR_PERIODIC_DAMAGE = 192090;
+        public static uint SPELL_DRUID_MAUL = 6807;
+        public static uint SPELL_DRUID_BLESSING_OF_THE_ANCIENTS = 202360;
+        public static uint SPELL_DRUID_BLESSING_OF_ELUNE = 202737;
+        public static uint SPELL_DRUID_BLESSING_OF_ANSHE = 202739;
+        public static uint SPELL_DRUID_STARLORD_DUMMY = 202345;
+        public static uint SPELL_DRUID_STARLORD_SOLAR = 202416;
+        public static uint SPELL_DRUID_STARLORD_LUNAR = 202423;
+        public static uint SPELL_DRUID_GLYPH_OF_STARS = 114301;
+        public static uint SPELL_DRUID_CHOSEN_OF_ELUNE = 102560;
+        public static uint SPELL_DRUID_BLUE_COLOR = 108268;
+        public static uint SPELL_DRUID_SHADOWY_GHOST = 165114;
+        public static uint SPELL_DRUID_GORE = 210706;
+        public static uint SPELL_DRUID_YSERA_GIFT = 145108;
+        public static uint SPELL_DRUID_YSERA_GIFT_CASTER_HEAL = 145109;
+        public static uint SPELL_DRUID_YSERA_GIFT_RAID_HEAL = 145110;
+        public static uint SPELL_DRUID_REJUVENATION = 774;
+        public static uint SPELL_DRUID_HEALING_TOUCH = 5185;
+        public static uint SPELL_DRUID_SWIFTMEND = 18562;
+        public static uint SPELL_DRUID_TRAVEL_FORM = 783;
+        public static uint SPELL_DRUID_FELINE_SWIFTNESS = 131768;
+        public static uint SPELL_DRUID_SHRED = 5221;
+        public static uint SPELL_DRUID_RAKE = 1822;
+        public static uint SPELL_DRUID_RIP = 1079;
+        public static uint SPELL_DRUID_FEROCIOUS_BITE = 22568;
+        public static uint SPELL_DRUID_MOONFIRE_CAT = 155625;
+        public static uint SPELL_DRUID_SWIPE_CAT = 106785;
+        public static uint SPELL_DRUID_SABERTOOTH = 202031;
+        public static uint SPELL_DRUID_FORMS_TRINKET_BEAR = 37340;
+        public static uint SPELL_DRUID_FORMS_TRINKET_CAT = 37341;
+        public static uint SPELL_DRUID_FORMS_TRINKET_MOONKIN = 37343;
+        public static uint SPELL_DRUID_FORMS_TRINKET_NONE = 37344;
+        public static uint SPELL_DRUID_FORMS_TRINKET_TREE = 37342;
+        public static uint SPELL_DRUID_GLYPH_OF_INNERVATE = 54833;
+        public static uint SPELL_DRUID_INCREASED_MOONFIRE_DURATION = 38414;
+        public static uint SPELL_DRUID_GLYPH_OF_STARFIRE = 54846;
+        public static uint SPELL_DRUID_ITEM_T8_BALANCE_RELIC = 64950;
+        public static uint SPELL_DRUID_STAMPEDE = 81022;
+        public static uint SPELL_DRUID_STAMPEDE_BAER_RANK_1 = 81016;
+        public static uint SPELL_DRUID_STAMPEDE_CAT_RANK_1 = 81021;
+        public static uint SPELL_DRUID_STAMPEDE_CAT_STATE = 109881;
+        public static uint SPELL_DRUID_FERAL_CHARGE_BEAR = 16979;
+        public static uint SPELL_DRUID_FERAL_CHARGE_CAT = 49376;
+        public static uint SPELL_DRUID_GLYPH_OF_TYPHOON = 62135;
+        public static uint SPELL_DRUID_EXHILARATE = 28742;
+        public static uint SPELL_DRUID_INFUSION = 37238;
+        public static uint SPELL_DRUID_BLESSING_OF_THE_CLAW = 28750;
+        public static uint SPELL_DRUID_BLESSING_OF_REMULOS = 40445;
+        public static uint SPELL_DRUID_BLESSING_OF_ELUNE_40446 = 40446;
+        public static uint SPELL_DRUID_BLESSING_OF_CENARIUS = 40452;
+        public static uint SPELL_DRUID_LANGUISH = 71023;
+        public static uint SPELL_DRUID_REJUVENATION_T10_PROC = 70691;
+        public static uint SPELL_DRUID_SHOOTING_STARS = 93400;
+        public static uint SPELL_DRUID_SOLAR_ECLIPSE = 48517;
+        public static uint SPELL_DRUID_SOLAR_ECLIPSE_MARKER = 67483; // Will make the yellow arrow on eclipse bar point to the yellow side (solar)
+        public static uint SPELL_DRUID_LUNAR_ECLIPSE = 48518;
+        public static uint SPELL_DRUID_LUNAR_ECLIPSE_MARKER = 67484; // Will make the yellow arrow on eclipse bar point to the blue side (lunar)
+        public static uint SPELL_DRUID_WRATH = 5176;
+        public static uint SPELL_DRUID_EUPHORIA = 152222;
+        public static uint SPELL_DRUID_STARFIRE = 2912;
+        public static uint SPELL_DRUID_SOLAR_BEAM = 78675;
+        public static uint SPELL_DRUID_SOLAR_BEAM_SILENCE = 81261;
+        public static uint SPELL_DRU_REGROWTH = 8936;
+        public static uint SPELL_DRU_BLOODTALONS = 155672;
+        public static uint SPELL_DRU_BLOODTALONS_TRIGGERED = 145152;
+        public static uint SPELL_DRU_MOMENT_OF_CLARITY = 155577;
+        public static uint SPELL_DRU_CLEARCASTING = 16870;
+        public static uint SPELL_DRUID_OMEN_OF_CLARITY = 113043;
+        public static uint SPELL_ZANDALARI_TROLL_DRUID_SABERTUSK_CAT_SHAPESHIFT = 287362;
+        public static uint SPELL_ZANDALARI_PTERRODAX_FLY_SHAPESHIFT = 265524;
+        public static uint SPELL_ZANDALARI_TRAVEL_FORM_RAPTOR_SHAPESHIFT = 271899;
+        public static uint SPELL_ZANDALARI_BEAR_FORM_ANKYLODON_SHAPESHIFT = 262551;
+        public static uint MODEL_ZANDALARI_BEAR_FORM = 84869;
+        //SPELL_ZANDALARI_TROLL_AQUATIC_FORM                    = ?
+        public static uint SPELL_FERAL_FRENZY_MAIN = 274837;
+        public static uint SPELL_FERAL_FRENZY_BLEED = 274838;
+        public static uint SPELL_DRU_ECLIPSE = 279619;
+        public static uint SPELL_DRU_SOLAR_EMPOWEREMENT = 164545;
+        public static uint SPELL_DRU_LUNAR_EMPOWEREMENT = 164547;
+        public static uint SPELL_DRU_STARLORD = 203245;
+        public static uint SPELL_DRU_STARLORD_BUFF = 279709;
+        public static uint SPELL_DRU_ABUNDANCE = 207383;
+        public static uint SPELL_DRU_ABUNDANCE_BUFF = 207640;
+        public static uint SPELL_DRU_SOUL_OF_THE_FOREST_RESTO = 158478;
+        public static uint SPELL_DRU_SOUL_OF_THE_FOREST_RESTO_BUFF = 114108;
+        public static uint SPELL_DRU_CULTIVATION = 200390;
+        public static uint SPELL_DRU_CULTIVATION_HEAL = 200389;
+        public static uint SPELL_DRU_GERMINATION = 155675;
+        public static uint SPELL_DRU_GERMINATION_HOT = 155777;
+        public static uint SPELL_DRU_GLYPH_OF_REJUVENATION = 17076;
+        public static uint SPELL_DRU_GLYPH_OF_REJUVENATION_EFFECT = 96206;
+        public static uint SPELL_DRU_SPRING_BLOSSOMS = 207385;
+        public static uint SPELL_DRU_SPRING_BLOSSOMS_HEAL = 207386;
+        public static uint SPELL_DRU_PHOTOSYNTHESIS = 274902;
+        public static uint SPELL_DRU_PHOTOSYNTHESIS_MOD_HEAL_TICKS = 274906;
+        public static uint SPELL_DRU_LUNAR_BEAM_DAMAGE_HEAL = 204069;
+        public static uint SPELL_DRU_URSOL_VORTEX_PULL = 118283;
+        public static uint SPELL_DRU_URSOL_VORTEX_DEBUFF = 127797;
+        public static uint SPELL_DRU_MASS_ENTANGLEMENT = 102359;
+        public static uint SPELL_DRU_GALACTIC_GUARDIAN = 203964;
+        public static uint SPELL_DRU_GALACTIC_GAURDIAN_MOD_MOONFIRE = 213708;
+        public static uint SPELL_DRU_PREDATOR = 202021;
+        public static uint SPELL_DRU_TIGER_FURY = 5217;
+    }
+
+    public struct ShapeshiftFormSpells
+    {
+        public static uint SPELL_DRUID_BEAR_FORM = 5487;
+        public static uint SPELL_DRUID_CAT_FORM = 768;
+        public static uint SPELL_DRUID_MOONKIN_FORM = 24858;
+        public static uint SPELL_DRUID_INCARNATION_TREE_OF_LIFE = 33891;
+        public static uint SPELL_DRUID_INCARNATION_KING_OF_JUNGLE = 102543;
+    }
+
+    public struct SoulOfTheForestSpells
+    {
+        public static uint SPELL_DRUID_SOUL_OF_THE_FOREST_RESTO_TALENT = 158478;
+        public static uint SPELL_DRUID_SOUL_OF_THE_FOREST_RESTO = 114108;
+    }
+    public struct MoonfireSpells
+    {
+        public const uint SPELL_DRUID_MOONFIRE_DAMAGE = 164812;
+    }
+
+    public struct EfflorescenceSpells
+    {
+        public static uint SPELL_DRUID_EFFLORESCENCE_HEAL = 81269;
+        public static uint SPELL_DRUID_EFFLORESCENCE_DUMMY = 81262;
+    }
+
+    public struct GoreSpells
+    {
+        public static uint SPELL_DRUID_THRASH = 106832;
+        public static uint SPELL_DRUID_MOONFIRE = 8921;
+        public static uint SPELL_DRUID_SWIPE = 213764;
+    }
+    public struct LifebloomSpells
+    {
+        public static uint SPELL_DRUID_LIFEBLOOM_FINAL_HEAL = 33778;
+    }
+
+    public struct SunfireSpells
+    {
+        public static uint SPELL_DRUID_SUNFIRE_DAMAGE = 164815;
+    }
+
+    public struct BalanceAffinitySpells
+    {
+        public static uint SPELL_DRUID_STARSURGE = 78674;
+        public static uint SPELL_DRUID_SUNFIRE = 93402;
+        public static uint SPELL_DRUID_LUNAR_STRIKE = 194153;
+        public static uint SPELL_DRUID_SOLAR_WRATH = 190984;
+    }
+
+
+    public struct SavageRoarSpells
+    {
+        public const uint SPELL_DRUID_SAVAGE_ROAR = 62071;
+    }
+
+    public struct SurvivalInstinctsSpells
+    {
+        public const uint SPELL_DRUID_SURVIVAL_INSTINCTS = 50322;
+    }
+
+    public struct CatFormSpells
+    {
+        public static uint SPELL_DRUID_DASH = 1850;
+        public static uint SPELL_DRUID_PROWL = 5215;
+        public static uint SPELL_DRUID_FORM_CAT_INCREASE_SPEED = 113636;
+        public static uint SPELL_DRUID_CATFORM_OVERRIDE = 48629;
+        public static uint SPELL_DRUID_LUNAR_INSPIRATION = 155580;
+        public static uint SPELL_DRUID_MOONFIRE_CAT_OVERRIDE = 155627;
+    }
+
+    public struct DruidFlamesSpells
+    {
+        public static uint SPELL_DRUID_DRUID_OF_THE_FLAMES = 99245;
+        public static uint SPELL_DRUID_BURNING_ESSENCE = 138927;
+        public static uint MODEL_DRUID_OF_THE_FLAMES = 38150;
+    }
+
+    public struct BearFormSpells
+    {
+        public static uint SPELL_DRUID_BEARFORM_OVERRIDE = 106829;
+        public static uint SPELL_DRUID_STAMPEDING_ROAR = 106898;
+        public static uint SPELL_DRUID_STAMPEDING_ROAR_BEAR_OVERRIDE = 106899;
+    }
+
+    public struct SkullBashSpells
+    {
+        public const uint SPELL_DRUID_SKULL_BASH_CHARGE = 221514;
+        public const uint SPELL_DRUID_SKULL_BASH_INTERUPT = 93985;
+    }
+
+    public struct RakeSpells
+    {
+        public const uint SPELL_DRUID_RAKE_STUN = 163505;
+    }
+
+    public struct MaimSpells
+    {
+        public const uint SPELL_DRUID_MAIM_STUN = 203123;
+    }
+
+
+    public struct BloodTalonsSpells
+    {
+        public const uint SPELL_BLOODTALONS = 155672;
+        public const uint SPELL_BLOODTALONS_AURA = 145152;
+    }
+
+    public struct DruidForms
+    {
+        public const uint DRUID_AQUATIC_FORM = 1066;
+        public const uint DRUID_FLIGHT_FORM = 33943;
+        public const uint DRUID_STAG_FORM = 165961;
+        public const uint DRUID_SWIFT_FLIGHT_FORM = 40120;
+    }
+
+
+    public struct StarfallSpells
+    {
+        public const uint SPELL_DRUID_STARFALL_DAMAGE = 191037;
+        public const uint SPELL_DRUID_STELLAR_EMPOWERMENT = 197637;
+    }
+
+    // Maul (Bear Form) - 6807
+    [SpellScript(6807)]
+    public class spell_dru_maul_bear : SpellScript, IHasSpellEffects
+    {
+        public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+
+        private void OnHit(uint UnnamedParameter)
+        {
+            Unit caster = GetCaster();
+            Unit target = GetHitUnit();
+            if (caster == null || target == null)
+            {
+                return;
+            }
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(OnHit, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+            SpellEffects.Add(new EffectHandler(OnHit, 1, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
+        }
+    }
+
+    // Blessing of the Ancients - 202360
+    [SpellScript(202360)]
+    public class spell_dru_blessing_of_the_ancients : SpellScript, IHasSpellEffects
+    {
+        public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+
+
+        private void HandleDummy(uint UnnamedParameter)
+        {
+            uint removeAura = GetCaster().HasAura(DruidSpells.SPELL_DRUID_BLESSING_OF_ELUNE) ? (uint)DruidSpells.SPELL_DRUID_BLESSING_OF_ELUNE : (uint)DruidSpells.SPELL_DRUID_BLESSING_OF_ANSHE;
+            uint addAura = GetCaster().HasAura(DruidSpells.SPELL_DRUID_BLESSING_OF_ELUNE) ? (uint)DruidSpells.SPELL_DRUID_BLESSING_OF_ANSHE : (uint)DruidSpells.SPELL_DRUID_BLESSING_OF_ELUNE;
+
+            GetCaster().RemoveAurasDueToSpell(removeAura);
+            GetCaster().CastSpell(null, addAura, true);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+    }
+
+    // Efflorescence - 145205
+    [SpellScript(145205)]
+    public class spell_dru_efflorescence : SpellScript, ISpellOnCast
+    {
+
+
+        private struct eCreature
+        {
+            public static uint NPC_EFFLORESCENCE = 47649;
+        }
+
+        public void OnCast()
+        {
+            Unit caster = GetCaster();
+            if (caster != null)
+            {
+                Creature efflorescence = caster.GetSummonedCreatureByEntry(eCreature.NPC_EFFLORESCENCE);
+                if (efflorescence != null)
+                {
+                    efflorescence.DespawnOrUnsummon();
+                }
+            }
+        }
+
+
+    }
+
+    // Efflorescence (Aura) - 81262
+    [SpellScript(81262)]
+    public class spell_dru_efflorescence_aura : AuraScript, IHasAuraEffects
+    {
+        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+
+        private void HandleHeal(AuraEffect UnnamedParameter)
+        {
+            if (GetCaster() && GetCaster().GetOwner())
+            {
+                GetCaster().GetOwner().CastSpell(GetCaster().GetPosition(), EfflorescenceSpells.SPELL_DRUID_EFFLORESCENCE_HEAL);
+           
+                var playerList = GetCaster().GetPlayerListInGrid(11.2f);
+                foreach (var targets in playerList)
+                {
+                    if (GetCaster().GetOwner().HasAura(DruidSpells.SPELL_DRU_SPRING_BLOSSOMS))
+                    {
+                        if (!targets.HasAura(DruidSpells.SPELL_DRU_SPRING_BLOSSOMS_HEAL))
+                        {
+                            GetCaster().GetOwner().CastSpell(targets, DruidSpells.SPELL_DRU_SPRING_BLOSSOMS_HEAL, true);
+                        }
+                    }
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            AuraEffects.Add(new EffectPeriodicHandler(HandleHeal, 0, AuraType.PeriodicDummy));
+        }
+    }
+
+    // Efflorescence (Heal) - 81269
+    [SpellScript(81269)]
+    public class spell_dru_efflorescence_heal : SpellScript, IHasSpellEffects
+    {
+        public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+
+
+        private void SortTargets(List<WorldObject> targets)
+        {
+            targets.Sort(new HealthPctOrderPred());
+
+            if (targets.Count > 3)
+            {
+                targets.Resize(3);
+            }
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(SortTargets, 0, Targets.UnitDestAreaAlly));
+        }
+    }
+
+    // 159286 Primal Fury
+    [SpellScript(159286)]
+    public class spell_dru_primal_fury : AuraScript, IAuraCheckProc
+    {
+
+
+        public bool CheckProc(ProcEventInfo eventInfo)
+        {
+            bool _spellCanProc = (eventInfo.GetSpellInfo().Id == DruidSpells.SPELL_DRUID_SHRED || eventInfo.GetSpellInfo().Id == DruidSpells.SPELL_DRUID_RAKE || eventInfo.GetSpellInfo().Id == DruidSpells.SPELL_DRUID_SWIPE_CAT || eventInfo.GetSpellInfo().Id == DruidSpells.SPELL_DRUID_MOONFIRE_CAT);
+
+            if ((eventInfo.GetHitMask() & ProcFlagsHit.Critical) != 0 && _spellCanProc)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+
+    }
+
+    public struct PredatorySwiftnessSpells
+    {
+        public static uint SPELL_DRUID_PREDATORY_SWIFTNESS = 16974;
+        public static uint SPELL_DRUID_PREDATORY_SWIFTNESS_AURA = 69369;
+    }
+
+    // Predatory Swiftness - 16974
+    // @Called : Maim - 22570, Ferocious Bite - 22568, Rip - 1079, Savage Roar - 1079
+    // @Version : 7.1.0.22908
+    [SpellScript(16974)]
+    public class spell_dru_predatory_swiftness : SpellScript, ISpellCheckCast, ISpellOnHit
+    {
+        private int _cp;
+
+        public override bool Load()
+        {
+            _cp = GetCaster().GetPower(PowerType.ComboPoints);
+            return true;
+        }
+
+        public SpellCastResult CheckCast()
+        {
+            if (GetCaster())
+            {
+                if (GetCaster().GetTypeId() != TypeId.Player)
+                {
+                    return SpellCastResult.DontReport;
+                }
+
+                if (GetCaster().ToPlayer().GetPower(PowerType.ComboPoints) != 0)
+                {
+                    return SpellCastResult.NoComboPoints;
+                }
+            }
+            else
+            {
+                return SpellCastResult.DontReport;
+            }
+
+            return SpellCastResult.SpellCastOk;
+        }
+
+        public void OnHit()
+        {
+            Player player = GetCaster().ToPlayer();
+            if (player != null)
+            {
+                if (player.HasAura(PredatorySwiftnessSpells.SPELL_DRUID_PREDATORY_SWIFTNESS) && RandomHelper.randChance(20 * _cp))
+                {
+                    player.CastSpell(player, PredatorySwiftnessSpells.SPELL_DRUID_PREDATORY_SWIFTNESS_AURA, true);
+                }
+            }
+        }
+    }
+
+    // Predatory Swiftness (Aura) - 69369
+    // @Called : Entangling Roots - 339, Rebirth - 20484, Regrowth - 8936
+    // @Version : 7.1.0.22908
+    [SpellScript(69369)]
+    public class spell_dru_predatory_swiftness_aura : SpellScript, ISpellAfterHit
+    {
+
+
+        public void AfterHit()
+        {
+            Player player = GetCaster().ToPlayer();
+            if (player != null)
+            {
+                if (player.HasAura(PredatorySwiftnessSpells.SPELL_DRUID_PREDATORY_SWIFTNESS_AURA))
+                {
+                    player.RemoveAurasDueToSpell(PredatorySwiftnessSpells.SPELL_DRUID_PREDATORY_SWIFTNESS_AURA);
+                }
+            }
+        }
+    }
+
+    // 197488 Balance Affinity (Feral, Guardian) -
+    // @Version : 7.1.0.22908
+    [SpellScript(197488)]
+    public class spell_dru_balance_affinity_dps : AuraScript, IHasAuraEffects
+    {
+
+
+        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+
+        private void LearnSpells(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
+        {
+            Unit caster = GetCaster();
+            if (caster == null)
+            {
+                return;
+            }
+
+            Player player = caster.ToPlayer();
+            if (player != null)
+            {
+                player.AddTemporarySpell(ShapeshiftFormSpells.SPELL_DRUID_MOONKIN_FORM);
+                player.AddTemporarySpell(BalanceAffinitySpells.SPELL_DRUID_STARSURGE);
+                player.AddTemporarySpell(BalanceAffinitySpells.SPELL_DRUID_LUNAR_STRIKE);
+                player.AddTemporarySpell(BalanceAffinitySpells.SPELL_DRUID_SOLAR_WRATH);
+                player.AddTemporarySpell(BalanceAffinitySpells.SPELL_DRUID_SUNFIRE);
+            }
+        }
+
+        private void UnlearnSpells(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
+        {
+            Unit caster = GetCaster();
+            if (caster == null)
+            {
+                return;
+            }
+
+            Player player = caster.ToPlayer();
+            if (player != null)
+            {
+                player.RemoveTemporarySpell(ShapeshiftFormSpells.SPELL_DRUID_MOONKIN_FORM);
+                player.RemoveTemporarySpell(BalanceAffinitySpells.SPELL_DRUID_STARSURGE);
+                player.RemoveTemporarySpell(BalanceAffinitySpells.SPELL_DRUID_LUNAR_STRIKE);
+                player.RemoveTemporarySpell(BalanceAffinitySpells.SPELL_DRUID_SOLAR_WRATH);
+                player.RemoveTemporarySpell(BalanceAffinitySpells.SPELL_DRUID_SUNFIRE);
+            }
+        }
+
+        public override void Register()
+        {
+            AuraEffects.Add(new EffectApplyHandler(UnlearnSpells, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            AuraEffects.Add(new EffectApplyHandler(LearnSpells, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+
+
+    // 197632 Balance Affinity (Restoration) -
+    // @Version : 7.1.0.22908
+    [SpellScript(197632)]
+    public class spell_dru_balance_affinity_resto : AuraScript, IHasAuraEffects
+    {
+        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+
+        private void LearnSpells(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
+        {
+            Unit caster = GetCaster();
+            if (caster == null)
+            {
+                return;
+            }
+
+            Player player = caster.ToPlayer();
+            if (player != null)
+            {
+                player.AddTemporarySpell(ShapeshiftFormSpells.SPELL_DRUID_MOONKIN_FORM);
+                player.AddTemporarySpell(BalanceAffinitySpells.SPELL_DRUID_STARSURGE);
+                player.AddTemporarySpell(BalanceAffinitySpells.SPELL_DRUID_LUNAR_STRIKE);
+            }
+        }
+
+        private void UnlearnSpells(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
+        {
+            Unit caster = GetCaster();
+            if (caster == null)
+            {
+                return;
+            }
+
+            Player player = caster.ToPlayer();
+            if (player != null)
+            {
+                player.RemoveTemporarySpell(ShapeshiftFormSpells.SPELL_DRUID_MOONKIN_FORM);
+                player.RemoveTemporarySpell(BalanceAffinitySpells.SPELL_DRUID_STARSURGE);
+                player.RemoveTemporarySpell(BalanceAffinitySpells.SPELL_DRUID_LUNAR_STRIKE);
+            }
+        }
+
+        public override void Register()
+        {
+            AuraEffects.Add(new EffectApplyHandler(UnlearnSpells, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            AuraEffects.Add(new EffectApplyHandler(LearnSpells, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+
+
+    // 102560 Incarnation : Chosen of Elune -
+    // @Version : 7.1.0.22908
+    [SpellScript(102560)]
+    public class spell_dru_incarnation_chosen_of_elune : SpellScript, ISpellOnCast
+    {
+        public void OnCast()
+        {
+            Player player = GetCaster().ToPlayer();
+            if (player != null)
+            {
+                if (!player.HasAura(ShapeshiftFormSpells.SPELL_DRUID_MOONKIN_FORM))
+                {
+                    player.CastSpell(player, ShapeshiftFormSpells.SPELL_DRUID_MOONKIN_FORM, true);
+                }
+            }
+        }
+    }
+
+    // 102543 Incarnation : King of the Jungle -
+    // @Version : 7.1.0.22908
+    [SpellScript(102543)]
+    public class spell_dru_incarnation_king_of_the_jungle : SpellScript, ISpellOnCast
+    {
+        public void OnCast()
+        {
+            Player player = GetCaster().ToPlayer();
+            if (player != null)
+            {
+                if (!player.HasAura(ShapeshiftFormSpells.SPELL_DRUID_CAT_FORM))
+                {
+                    player.CastSpell(player, ShapeshiftFormSpells.SPELL_DRUID_CAT_FORM, true);
+                }
+            }
+        }
+    }
+
+    // 102558 Incarnation : Guardian of Ursoc -
+    // @Version : 7.1.0.22908
+    [SpellScript(102558)]
+    public class spell_dru_incarnation_guardian_of_ursoc : SpellScript, ISpellOnCast
+    {
+        public void OnCast()
+        {
+            Player player = GetCaster().ToPlayer();
+            if (player != null)
+            {
+                if (!player.HasAura(ShapeshiftFormSpells.SPELL_DRUID_BEAR_FORM))
+                {
+                    player.CastSpell(player, ShapeshiftFormSpells.SPELL_DRUID_BEAR_FORM, true);
+                }
+            }
+        }
+    }
+
+    // 102383 Wild Charge (Moonkin) -
+    // @Version : 7.1.0.22908
+    [SpellScript(102383)]
+    public class spell_dru_wild_charge_moonkin : SpellScript, ISpellCheckCast
+    {
+        public SpellCastResult CheckCast()
+        {
+            if (GetCaster())
+            {
+                if (!GetCaster().IsInCombat())
+                {
+                    return SpellCastResult.DontReport;
+                }
+            }
+            else
+            {
+                return SpellCastResult.DontReport;
+            }
+
+            return SpellCastResult.SpellCastOk;
+        }
+    }
+
+
+    // Bear form - 5487
+    // @Called : Bear Form (Thrash/Swipe) - 106829, Bear Form (Stampeding Roar) - 106899
+    // @Version : 7.1.0.22908
+    [SpellScript(5487)]
+    public class spell_dru_bear_form : AuraScript, IHasAuraEffects
+    {
+        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+
+        private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
+        {
+            Unit caster = GetCaster();
+            if (caster == null)
+            {
+                return;
+            }
+
+            caster.CastSpell(caster, BearFormSpells.SPELL_DRUID_BEARFORM_OVERRIDE, true);
+
+            if (caster.HasSpell(BearFormSpells.SPELL_DRUID_STAMPEDING_ROAR))
+            {
+                caster.CastSpell(caster, BearFormSpells.SPELL_DRUID_STAMPEDING_ROAR_BEAR_OVERRIDE, true);
+            }
+        }
+
+        private void OnRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
+        {
+            Unit caster = GetCaster();
+            if (caster == null)
+            {
+                return;
+            }
+
+            caster.RemoveAurasDueToSpell(BearFormSpells.SPELL_DRUID_BEARFORM_OVERRIDE);
+
+            if (caster.HasSpell(BearFormSpells.SPELL_DRUID_STAMPEDING_ROAR))
+            {
+                caster.RemoveAurasDueToSpell(BearFormSpells.SPELL_DRUID_STAMPEDING_ROAR_BEAR_OVERRIDE);
+            }
+        }
+
+        public override void Register()
+        {
+            AuraEffects.Add(new EffectApplyHandler(OnApply, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real));
+            AuraEffects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+        }
+    }
+
+    // Activate Cat Form
+    // @Called : Dash - 1850, Prowl - 5215, Displacer Beast - 102280
+    // @Version : 7.1.0.22908
+    [SpellScript(new uint[] { 1850, 5215, 102280 })]
+    public class spell_dru_activate_cat_form : SpellScript, ISpellOnHit
+    {
+        public void OnHit()
+        {
+            Unit caster = GetCaster();
+            if (caster == null)
+            {
+                return;
+            }
+
+            if (!caster.HasAura(ShapeshiftFormSpells.SPELL_DRUID_CAT_FORM))
+            {
+                caster.CastSpell(caster, ShapeshiftFormSpells.SPELL_DRUID_CAT_FORM, true);
+            }
+        }
+    }
+
+    // Infected wound - 48484
+    // @Version : 7.1.0.22908
+    [SpellScript(48484)]
+    public class spell_dru_infected_wound : AuraScript, IAuraCheckProc
+    {
+        public bool CheckProc(ProcEventInfo eventInfo)
+        {
+            if (eventInfo.GetSpellInfo().Id == DruidSpells.SPELL_DRUID_RAKE)
+            {
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    // Ysera's Gift - 145108
+    [SpellScript(145108)]
+    public class spell_dru_ysera_gift : AuraScript, IHasAuraEffects
+    {
+        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+
+        private void HandlePeriodic(AuraEffect aurEff)
+        {
+            Unit caster = GetCaster();
+            if (caster == null || !caster.IsAlive())
+            {
+                return;
+            }
+
+            var amount = MathFunctions.CalculatePct(caster.GetMaxHealth(), aurEff.GetBaseAmount());
+            CastSpellExtraArgs values = new CastSpellExtraArgs(TriggerCastFlags.FullMask);
+            values.AddSpellMod(SpellValueMod.MaxTargets, 1);
+            values.AddSpellMod(SpellValueMod.BasePoint0, (int)amount);
+
+            if (caster.IsFullHealth())
+                caster.CastSpell(caster, DruidSpells.SPELL_DRUID_YSERA_GIFT_RAID_HEAL, values);
+            else
+                caster.CastSpell(caster, DruidSpells.SPELL_DRUID_YSERA_GIFT_CASTER_HEAL, values);
+        }
+
+        public override void Register()
+        {
+            AuraEffects.Add(new EffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicDummy));
+        }
+    }
+
+    // Rake - 1822
+    [SpellScript(1822)]
+    public class spell_dru_rake : SpellScript, IHasSpellEffects
+    {
+        private bool _stealthed = false;
+
+        public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+        public override bool Load()
+        {
+            Unit caster = GetCaster();
+            if (caster.HasAuraType(AuraType.ModStealth))
+            {
+                _stealthed = true;
+            }
+
+            return true;
+        }
+
+        private void HandleOnHit(uint UnnamedParameter)
+        {
+            Unit caster = GetCaster();
+            Unit target = GetExplTargetUnit();
+            if (caster == null || target == null)
+            {
+                return;
+            }
+
+            // While stealthed or have Incarnation: King of the Jungle aura, deal 100% increased damage
+            if (_stealthed || caster.HasAura(ShapeshiftFormSpells.SPELL_DRUID_INCARNATION_KING_OF_JUNGLE))
+            {
+                SetHitDamage(GetHitDamage() * 2);
+            }
+
+            // Only stun if the caster was in stealth
+            if (_stealthed)
+            {
+                caster.CastSpell(target, RakeSpells.SPELL_DRUID_RAKE_STUN, true);
+            }
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleOnHit, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
+        }
+
+ 
+    }
+
+    // Maim - 22570
+    [SpellScript(22570)]
+    public class spell_dru_maim : SpellScript, ISpellAfterCast, ISpellOnTakePower
+    {
+        private int _usedComboPoints = 0;
+
+        public void TakePower(SpellPowerCost powerCost)
+        {
+            if (powerCost.Power == PowerType.ComboPoints)
+            {
+                _usedComboPoints = powerCost.Amount;
+            }
+        }
+
+        public void AfterCast()
+        {
+            Unit target = GetExplTargetUnit();
+            if (target == null)
+            {
+                return;
+            }
+
+            GetCaster().CastSpell(target, MaimSpells.SPELL_DRUID_MAIM_STUN, true);
+
+            Aura maimStun = target.GetAura(MaimSpells.SPELL_DRUID_MAIM_STUN, GetCaster().GetGUID());
+            if (maimStun != null)
+            {
+                maimStun.SetDuration(_usedComboPoints * 1000);
+            }
+        }
+    }
+
+    // 24858  Moonkin Form
+    // 102560 Chosen of Elune
+    // 197625
+    [SpellScript(new uint[] { 24858, 102560, 197625 })]
+    public class aura_dru_astral_form : AuraScript, IHasAuraEffects
+    {
+        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+
+        public override bool Validate(SpellInfo UnnamedParameter)
+        {
+            return ValidateSpellInfo(DruidSpells.SPELL_DRUID_GLYPH_OF_STARS);
+        }
+
+        private void AfterApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
+        {
+            Unit target = GetTarget();
+            if (target.HasAura(DruidSpells.SPELL_DRUID_GLYPH_OF_STARS))
+            {
+                target.SetDisplayId(target.GetNativeDisplayId());
+                target.AddAura(DruidSpells.SPELL_DRUID_BLUE_COLOR, target);
+                target.AddAura(DruidSpells.SPELL_DRUID_SHADOWY_GHOST, target);
+                target.CastSpell(target, (uint)Global.SpellMgr.GetSpellInfo(DruidSpells.SPELL_DRUID_GLYPH_OF_STARS, Difficulty.None).GetEffect(0).BasePoints, true);
+            }
+        }
+
+        private void AfterRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
+        {
+            Unit target = GetTarget();
+            if (target.HasAura(ShapeshiftFormSpells.SPELL_DRUID_MOONKIN_FORM) || target.HasAura(DruidSpells.SPELL_DRUID_CHOSEN_OF_ELUNE))
+            {
+                return;
+            }
+
+            target.RemoveAura((uint)Global.SpellMgr.GetSpellInfo(DruidSpells.SPELL_DRUID_GLYPH_OF_STARS, Difficulty.None).GetEffect(0).BasePoints);
+            target.RemoveAura(DruidSpells.SPELL_DRUID_BLUE_COLOR);
+            target.RemoveAura(DruidSpells.SPELL_DRUID_SHADOWY_GHOST);
+        }
+
+        public override void Register()
+        {
+            switch (ScriptSpellId)
+            {
+                case 197625:
+                case 24858:
+                    AuraEffects.Add(new EffectApplyHandler(AfterApply, 1, AuraType.ModShapeshift, AuraEffectHandleModes.Real));
+                    AuraEffects.Add(new EffectApplyHandler(AfterRemove, 1, AuraType.ModShapeshift, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+                    break;
+                case 102560:
+                    AuraEffects.Add(new EffectApplyHandler(AfterApply, 1, AuraType.AddPctModifier, AuraEffectHandleModes.Real));
+                    AuraEffects.Add(new EffectApplyHandler(AfterRemove, 1, AuraType.AddPctModifier, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+                    break;
+            }
+        }
+    }
+
+    // 197492 - Restoration Affinity
+    [SpellScript(197492)]
+    public class aura_dru_restoration_affinity : AuraScript, IHasAuraEffects
+    {
+        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+
+
+        private readonly List<uint> LearnedSpells = new List<uint>() { (uint)DruidSpells.SPELL_DRUID_YSERA_GIFT, (uint)DruidSpells.SPELL_DRUID_REJUVENATION, (uint)DruidSpells.SPELL_DRUID_HEALING_TOUCH, (uint)DruidSpells.SPELL_DRUID_SWIFTMEND };
+
+        private void AfterApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
+        {
+            Player target = GetTarget().ToPlayer();
+            if (target != null)
+            {
+                foreach (uint spellId in LearnedSpells)
+                {
+                    target.LearnSpell(spellId, false);
+                }
+            }
+        }
+
+        private void AfterRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
+        {
+            Player target = GetTarget().ToPlayer();
+            if (target != null)
+            {
+                foreach (uint spellId in LearnedSpells)
+                {
+                    target.RemoveSpell(spellId);
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            AuraEffects.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            AuraEffects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+    }
+
+    // 202157 - Feral Affinity
+    [SpellScript(202157)]
+    public class aura_dru_feral_affinity : AuraScript, IHasAuraEffects
+    {
+        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+
+
+        private readonly List<uint> LearnedSpells = new List<uint>() { (uint)DruidSpells.SPELL_DRUID_FELINE_SWIFTNESS, (uint)DruidSpells.SPELL_DRUID_SHRED, (uint)DruidSpells.SPELL_DRUID_RAKE, (uint)DruidSpells.SPELL_DRUID_RIP, (uint)DruidSpells.SPELL_DRUID_FEROCIOUS_BITE, (uint)DruidSpells.SPELL_DRUID_SWIPE_CAT };
+
+        private void AfterApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
+        {
+            Player target = GetTarget().ToPlayer();
+            if (target != null)
+            {
+                foreach (uint spellId in LearnedSpells)
+                {
+                    target.LearnSpell(spellId, false);
+                }
+            }
+        }
+
+        private void AfterRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
+        {
+            Player target = GetTarget().ToPlayer();
+            if (target != null)
+            {
+                foreach (uint spellId in LearnedSpells)
+                {
+                    target.RemoveSpell(spellId);
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            AuraEffects.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            AuraEffects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+    }
+
+    // 22842 - Frenzied Regeneration
+    [SpellScript(22842)]
+    public class aura_dru_frenzied_regeneration : AuraScript, IHasAuraEffects
+    {
+        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+
+        private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
+        {
+            Aura frenzied = GetCaster().GetAura(22842);
+            if (frenzied != null)
+            {
+                frenzied.GetMaxDuration();
+            }
+            ulong healAmount = MathFunctions.CalculatePct(GetCaster().GetDamageOverLastSeconds(5), 50);
+            ulong minHealAmount = MathFunctions.CalculatePct(GetCaster().GetMaxHealth(), 5);
+            healAmount = Math.Max(healAmount, minHealAmount);
+            amount = (int)healAmount;
+        }
+
+        public override void Register()
+        {
+            AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ObsModHealth));
+        }
+    }
+
+
+    // Starfall - 191034
+    // AreaTriggerID - 9482
+    [Script]
+    public class at_dru_starfall : AreaTriggerAI
+    {
+        public int timeInterval;
+
+        public at_dru_starfall(AreaTrigger areatrigger) : base(areatrigger)
+        {
+            // How often should the action be executed
+            areatrigger.SetPeriodicProcTimer(850);
+        }
+
+        public override void OnPeriodicProc()
+        {
+            Unit caster = at.GetCaster();
+            if (caster != null)
+            {
+                foreach (ObjectGuid objguid in at.GetInsideUnits())
+                {
+                    Unit unit = ObjectAccessor.Instance.GetUnit(caster, objguid);
+                    if (unit != null)
+                    {
+                        if (caster.IsValidAttackTarget(unit))
+                        {
+                            if (unit.IsInCombat())
+                            {
+                                caster.CastSpell(unit, StarfallSpells.SPELL_DRUID_STARFALL_DAMAGE, true);
+                                caster.CastSpell(unit, StarfallSpells.SPELL_DRUID_STELLAR_EMPOWERMENT, true);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public struct UrsolsVortexSpells
+    {
+        public const uint SPELL_DRUID_URSOLS_VORTEX_SLOW = 127797;
+        public const uint SPELL_DRUID_URSOLS_VORTEX_PULL = 118283;
+    }
+
+    // Efflorescence
+    // NPC Id - 47649
+    [CreatureScript(47649)]
+    public class npc_dru_efflorescence : ScriptedAI
+    {
+        public npc_dru_efflorescence(Creature creature) : base(creature)
+        {
+        }
+
+        public override void Reset()
+        {
+            me.CastSpell(me, EfflorescenceSpells.SPELL_DRUID_EFFLORESCENCE_DUMMY, true);
+            me.SetUnitFlag(UnitFlags.NonAttackable);
+            me.SetUnitFlag(UnitFlags.Uninteractible);
+            me.SetUnitFlag(UnitFlags.RemoveClientControl);
+            me.SetReactState(ReactStates.Passive);
+        }
+    }
+
+    // Charm Woodland Creature - 127757
+    [SpellScript(127757)]
+    public class aura_dru_charm_woodland_creature : AuraScript, IHasAuraEffects
+    {
+        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+
+        private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
+        {
+            // Make targeted creature follow the player - Using pet's default dist and angle
+            //if (Unit* caster = GetCaster())
+            //if (Unit* target = GetTarget())
+            //target->GetMotionMaster()->MoveFollow(caster, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+
+            var caster = GetCaster();
+            var target = GetTarget();
+
+            if (caster != null && target != null)
+            {
+                target.GetMotionMaster().MoveFollow(caster, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
+            }
+        }
+
+        private void OnRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
+        {
+            //if (Unit* target = GetTarget())
+            //if (target->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
+            //target->GetMotionMaster()->MovementExpired(true); // reset movement
+            var target = GetTarget();
+
+            if (target != null)
+            {
+                if (target.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Follow) 
+                {
+                    target.GetMotionMaster().Initialize();
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            AuraEffects.Add(new EffectApplyHandler(OnApply, 0, AuraType.AoeCharm, AuraEffectHandleModes.Real));
+            AuraEffects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.AoeCharm, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+        }
+    }
+
+    // Swipe - 106785
+    [SpellScript(106785)]
+    public class spell_dru_swipe : SpellScript, IHasSpellEffects
+    {
+        private bool _awardComboPoint = true;
+
+        public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+
+
+        private void HandleOnHit(uint UnnamedParameter)
+        {
+            Unit caster = GetCaster();
+            Unit target = GetHitUnit();
+            if (caster == null || target == null)
+            {
+                return;
+            }
+
+            int damage = GetHitDamage();
+            var casterLevel = caster.GetLevelForTarget(caster);
+
+            // This prevent awarding multiple Combo Points when multiple targets hit with Swipe AoE
+            if (_awardComboPoint)
+            {
+                // Awards the caster 1 Combo Point (get value from the spell data)
+                caster.ModifyPower(PowerType.ComboPoints, Global.SpellMgr.GetSpellInfo(DruidSpells.SPELL_DRUID_SWIPE_CAT, Difficulty.None).GetEffect(0).BasePoints);
+            }
+
+            // If caster is level >= 44 and the target is bleeding, deals 20% increased damage (get value from the spell data)
+            if ((casterLevel >= 44) && target.HasAuraState( AuraStateType.Bleed))
+            {
+                MathFunctions.AddPct(ref damage, Global.SpellMgr.GetSpellInfo(DruidSpells.SPELL_DRUID_SWIPE_CAT, Difficulty.None).GetEffect(1).BasePoints);
+            }
+
+            SetHitDamage(damage);
+            _awardComboPoint = false;
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleOnHit, 1, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
+    }
+
+    // Brutal Slash - 202028
+    [SpellScript(202028)]
+    public class spell_dru_brutal_slash : SpellScript, ISpellOnHit
+    {
+        private bool _awardComboPoint = true;
+
+        public void OnHit()
+        {
+            Unit caster = GetCaster();
+            Unit target = GetHitUnit();
+            if (caster == null || target == null)
+            {
+                return;
+            }
+
+            // This prevent awarding multiple Combo Points when multiple targets hit with Brutal Slash AoE
+            if (_awardComboPoint)
+            {
+                // Awards the caster 1 Combo Point (get value from the spell data)
+                caster.ModifyPower(PowerType.ComboPoints, Global.SpellMgr.GetSpellInfo(DruidSpells.SPELL_DRUID_SWIPE_CAT, Difficulty.None).GetEffect(0).BasePoints);
+            }
+
+            _awardComboPoint = false;
+        }
+    }
+
+    // Thrash (Cat Form) - 106830
+    [SpellScript(106830)]
+    public class spell_dru_thrash_cat : SpellScript, IHasSpellEffects
+    {
+        public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+
+        private void EffectHitTarget(uint UnnamedParameter)
+        {
+            Unit caster = GetCaster();
+            Unit target = GetHitUnit();
+            if (caster == null || target == null)
+            {
+                return;
+            }
+
+            // This prevent awarding multiple Combo Points when multiple targets hit with Thrash AoE
+            if (m_awardComboPoint)
+            {
+                // Awards the caster 1 Combo Point
+                caster.ModifyPower(PowerType.ComboPoints, 1);
+            }
+            m_awardComboPoint = false;
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(EffectHitTarget, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private bool m_awardComboPoint = true;
+    }
+
+    // Shred - 5221
+    [SpellScript(5221)]
+    public class spell_dru_shred : SpellScript, ISpellOnHit, ISpellCalcCritChance
+    {
+
+
+        public override bool Load()
+        {
+            Unit caster = GetCaster();
+
+            if (caster.HasAuraType(AuraType.ModStealth))
+            {
+                m_stealthed = true;
+            }
+
+            if (caster.HasAura(ShapeshiftFormSpells.SPELL_DRUID_INCARNATION_KING_OF_JUNGLE))
+            {
+                m_incarnation = true;
+            }
+
+            m_casterLevel = caster.GetLevelForTarget(caster);
+
+            return true;
+        }
+
+        public void CalcCritChance(Unit victim, ref float chance)
+        {
+            // If caster is level >= 56, While stealthed or have Incarnation: King of the Jungle aura,
+            // Double the chance to critically strike
+            if ((m_casterLevel >= 56) && (m_stealthed || m_incarnation))
+            {
+                chance *= 2.0f;
+            }
+        }
+
+        public void OnHit()
+        {
+            Unit caster = GetCaster();
+            Unit target = GetHitUnit();
+            if (caster == null || target == null)
+            {
+                return;
+            }
+
+            int damage = GetHitDamage();
+
+            caster.ModifyPower(PowerType.ComboPoints, 1);
+
+            // If caster is level >= 56, While stealthed or have Incarnation: King of the Jungle aura,
+            // deals 50% increased damage (get value from the spell data)
+            if ((caster.HasAura(231057)) && (m_stealthed || m_incarnation))
+            {
+                MathFunctions.AddPct(ref damage, Global.SpellMgr.GetSpellInfo(DruidSpells.SPELL_DRUID_SHRED, Difficulty.None).GetEffect(2).BasePoints);
+            }
+
+            SetHitDamage(damage);
+        }
+
+        private bool m_stealthed = false;
+        private bool m_incarnation = false;
+        private uint m_casterLevel;
+    }
+
+    // 8936 - Regrowth
+    [SpellScript(8936)]
+    public class spell_dru_regrowth : SpellScript, IHasSpellEffects
+    {
+        public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+
+        public override bool Validate(SpellInfo UnnamedParameter)
+        {
+            return ValidateSpellInfo(DruidSpells.SPELL_DRU_REGROWTH, DruidSpells.SPELL_DRU_BLOODTALONS, DruidSpells.SPELL_DRU_BLOODTALONS_TRIGGERED, DruidSpells.SPELL_DRU_MOMENT_OF_CLARITY, DruidSpells.SPELL_DRU_CLEARCASTING);
+        }
+
+        private void HandleHealEffect(uint UnnamedParameter)
+        {
+            if (GetCaster().HasAura(DruidSpells.SPELL_DRU_BLOODTALONS))
+            {
+                GetCaster().AddAura(DruidSpells.SPELL_DRU_BLOODTALONS_TRIGGERED, GetCaster());
+            }
+
+            Aura clearcasting = GetCaster().GetAura(DruidSpells.SPELL_DRU_CLEARCASTING);
+            if (clearcasting != null)
+            {
+                if (GetCaster().HasAura(DruidSpells.SPELL_DRU_MOMENT_OF_CLARITY))
+                {
+                    int amount = clearcasting.GetEffect(0).GetAmount();
+                    clearcasting.GetEffect(0).SetAmount(amount - 1);
+                    if (amount == -102)
+                    {
+                        GetCaster().RemoveAurasDueToSpell(DruidSpells.SPELL_DRU_CLEARCASTING);
+                    }
+                }
+                else
+                {
+                    GetCaster().RemoveAurasDueToSpell(DruidSpells.SPELL_DRU_CLEARCASTING);
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleHealEffect, 0, SpellEffectName.Heal, SpellScriptHookType.EffectHitTarget));
+        }
+    }
+
+    // 197721 - Flourish
+    [SpellScript(197721)]
+    public class spell_dru_flourish : SpellScript, IHasSpellEffects
+    {
+        public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+
+        private void HandleHit(uint UnnamedParameter)
+        {
+            if (!GetCaster() || !GetHitUnit())
+            {
+                return;
+            }
+
+            List<AuraEffect> auraEffects = GetHitUnit().GetAuraEffectsByType(AuraType.PeriodicHeal);
+
+            foreach (AuraEffect auraEffect in auraEffects)
+            {
+                if (auraEffect.GetCasterGUID() == GetCaster().GetGUID())
+                {
+                    Aura healAura = auraEffect.GetBase();
+                    if (healAura != null)
+                    {
+                        healAura.SetDuration(healAura.GetDuration() + GetEffectValue() * Time.InMilliseconds);
+                    }
+                }
+            }
+        }
+
+        private void FilterTargets(List<WorldObject> targets)
+        {
+            List<WorldObject> tempTargets = new List<WorldObject>();
+            foreach (WorldObject target in targets)
+            {
+                if (target.IsPlayer())
+                {
+                    if (target.ToUnit().HasAuraTypeWithCaster(AuraType.PeriodicHeal, GetCaster().GetGUID()))
+                    {
+                        tempTargets.Add(target);
+                    }
+                }
+            }
+
+            if (tempTargets.Count > 0)
+            {
+                targets.Clear();
+                foreach (WorldObject target in tempTargets)
+                {
+                    targets.Add(target);
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaAlly));
+        }
+    }
+
+    // 18562 - swiftmend
+    [SpellScript(18562)]
+    public class spell_dru_swiftmend : SpellScript, IHasSpellEffects
+    {
+        public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+
+
+        private struct Spells
+        {
+            public static uint SPELL_DRUID_SOUL_OF_THE_FOREST = 158478;
+            public static uint SPELL_DRUID_SOUL_OF_THE_FOREST_TRIGGERED = 114108;
+        }
+
+
+        private void HandleHit(uint UnnamedParameter)
+        {
+            Unit caster = GetCaster();
+            if (caster != null)
+            {
+                if (caster.HasAura(Spells.SPELL_DRUID_SOUL_OF_THE_FOREST))
+                {
+                    caster.AddAura(Spells.SPELL_DRUID_SOUL_OF_THE_FOREST_TRIGGERED, caster);
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.Heal, SpellScriptHookType.EffectHitTarget));
+        }
+    }
+
+    // 102793 - Ursol's Vortex
+    [SpellScript(102793)]
+    public class spell_dru_ursols_vortex : SpellScript, IHasSpellEffects
+    {
+        public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+
+
+        private struct Spells
+        {
+            public static uint SPELL_DRUID_URSOLS_VORTEX_SLOW = 127797;
+        }
+
+
+        private void HandleHit(uint UnnamedParameter)
+        {
+            Unit caster = GetCaster();
+            if (caster != null)
+            {
+                caster.AddAura(Spells.SPELL_DRUID_URSOLS_VORTEX_SLOW, GetHitUnit());
+            }
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+    }
+
+    // 102351 - Cenarion Ward
+    [SpellScript(102351)]
+    public class spell_dru_cenarion_ward : AuraScript, IHasAuraEffects
+    {
+        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+
+        private struct Spells
+        {
+            public static uint SPELL_DRUID_CENARION_WARD_TRIGGERED = 102352;
+        }
+
+        public override bool Validate(SpellInfo UnnamedParameter)
+        {
+            return ValidateSpellInfo(Spells.SPELL_DRUID_CENARION_WARD_TRIGGERED);
+        }
+
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+
+            if (!GetCaster() || !eventInfo.GetActionTarget())
+            {
+                return;
+            }
+
+            GetCaster().CastSpell(eventInfo.GetActionTarget(), Spells.SPELL_DRUID_CENARION_WARD_TRIGGERED, true);
+        }
+
+        public override void Register()
+        {
+            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+    }
+
+    // 102352 - Cenarion Ward
+    [SpellScript(102352)]
+    public class spell_dru_cenarion_ward_hot : AuraScript, IHasAuraEffects
+    {
+        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+
+
+        private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
+        {
+            if (!GetCaster())
+            {
+                return;
+            }
+
+            amount = (int)MathFunctions.CalculatePct(GetCaster().SpellBaseHealingBonusDone(SpellSchoolMask.Nature), 220) / 4;
+        }
+
+        public override void Register()
+        {
+            AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.PeriodicHeal));
+        }
+    }
+
+    // 54845 - Glyph of Starfire
+    [SpellScript(54845)]
+    public class spell_dru_glyph_of_starfire_proc : AuraScript, IHasAuraEffects
+    {
+        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+
+
+        private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+            GetTarget().CastSpell(eventInfo.GetProcTarget(), DruidSpells.SPELL_DRUID_GLYPH_OF_STARFIRE, true);
+        }
+
+        public override void Register()
+        {
+            AuraEffects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+    }
+
+    // 61391 - Typhoon
+    [SpellScript(61391)]
+    public class spell_dru_typhoon : SpellScript, IHasSpellEffects
+    {
+        public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+
+        private void HandleKnockBack(uint effIndex)
+        {
+            // Glyph of Typhoon
+            if (GetCaster().HasAura(DruidSpells.SPELL_DRUID_GLYPH_OF_TYPHOON))
+            {
+                PreventHitDefaultEffect(effIndex);
+            }
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleKnockBack, 0, SpellEffectName.KnockBack, SpellScriptHookType.EffectHitTarget));
+        }
+    }
+
+    // 202808 - Primal Vitality
+    [SpellScript(202808)]
+    public class spell_dru_primal_vitality : AuraScript, IHasAuraEffects
+    {
+
+
+        private const int SPELL_DRUID_PRIMAL_VITALITY_PASSIVE = 202808;
+        private const int SPELL_DRUID_PRIMAL_VITALITY_EFFECT = 202812;
+        private const int SPELL_DRUID_PROWL = 5215;
+
+        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+
+        public bool CheckProc(ProcEventInfo eventInfo)
+        {
+            if (eventInfo.GetSpellInfo() != null)
+            {
+                return false;
+            }
+
+            if (eventInfo.GetDamageInfo() != null)
+            {
+                return false;
+            }
+
+            if (eventInfo.GetSpellInfo().Id != SPELL_DRUID_PROWL)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+
+            Unit target = eventInfo.GetProcTarget();
+            if (target != null)
+            {
+                if (!target.HasAura(SPELL_DRUID_PRIMAL_VITALITY_EFFECT))
+                {
+                    target.AddAura(SPELL_DRUID_PRIMAL_VITALITY_EFFECT, target);
+                }
+
+            }
+        }
+
+        public override void Register()
+        {
+
+            AuraEffects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+        }
+
+    }
+
+ 
+    [SpellScript(50464)]
+    public class spell_dru_nourish : SpellScript
+    {
+        private const int SPELL_DRUID_NOURISH_PASSIVE = 203374;
+        private const int SPELL_DRUID_REJUVENATION = 774;
+
+        public void OnHit()
+        {
+            Unit caster = GetCaster();
+            if (caster != null)
+            {
+                Unit target = GetHitUnit();
+                if (target != null)
+                {
+                    if (caster.HasAura(SPELL_DRUID_NOURISH_PASSIVE))
+                    {
+                        caster.CastSpell(target, SPELL_DRUID_REJUVENATION, true);
+                    }
+                }
+            }
+        }
+
+
+    }
+
+    // Called by Ironfur - 192081
+    // Den Mother - 201522
+    [SpellScript(201522)]
+    public class spell_dru_denmother : SpellScript, ISpellOnHit
+    {
+        private const int SPELL_DRUID_DEN_MOTHER = 201522;
+        private const int SPELL_DRUID_DEN_MOTHER_IRONFUR = 201629;
+
+        public void OnHit()
+        {
+            Player _player = GetCaster().ToPlayer();
+            if (_player != null)
+            {
+                if (_player.HasAura(SPELL_DRUID_DEN_MOTHER))
+                {
+                    List<Unit> validTargets = new List<Unit>();
+                    List<Unit> groupList = new List<Unit>();
+
+                    _player.GetPartyMembers(groupList);
+
+                    if (groupList.Count == 0)
+                    {
+                        return;
+                    }
+
+                    foreach (var itr in groupList)
+                    {
+                        if ((itr.GetGUID() != _player.GetGUID()) && (itr.IsInRange(_player, 0, 50, true)))
+                        {
+                            validTargets.Add(itr.ToUnit());
+                        }
+                    }
+
+                    if (validTargets.Count == 0)
+                    {
+                        return;
+                    }
+
+                    validTargets.Sort(new HealthPctOrderPred());
+                    var lowTarget = validTargets.First();
+
+                    _player.CastSpell(lowTarget, 201629, true);
+                }
+            }
+        }
+    }
+    /*
+    // Overgrowth - 203651
+    public class spell_dru_overgrowth : SpellScriptLoader
+    {
+        public spell_dru_overgrowth() : base("spell_dru_overgrowth")
+        {
+        }
+
+        public class spell_dru_overgrowth : SpellScript
+        {
+
+
+            private const int SPELL_DRUID_REJUVENATION = 774;
+            private const int SPELL_DRUID_WILD_GROWTH = 48438;
+            private const int SPELL_DRUID_LIFE_BLOOM = 33763;
+            private const int SPELL_DRUID_REGROWTH = 8936;
+
+            private void HandleDummy(uint UnnamedParameter)
+            {
+                Unit caster = GetCaster();
+                if (caster != null)
+                {
+                    Unit target = GetHitUnit();
+                    if (target != null)
+                    {
+                        caster.AddAura(SPELL_DRUID_REJUVENATION, target);
+                        caster.AddAura(SPELL_DRUID_WILD_GROWTH, target);
+                        caster.AddAura(SPELL_DRUID_LIFE_BLOOM, target);
+                        caster.AddAura(SPELL_DRUID_REGROWTH, target);
+                    }
+                }
+            }
+
+            public override void Register()
+            {
+                SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+            }
+        }
+
+
+
+        public override SpellScript GetSpellScript()
+        {
+            return new spell_dru_overgrowth();
+        }
+    }
+
+    // 221514 - Skull Bash Charge
+    public class spell_dru_skull_bash_charge : SpellScriptLoader
+    {
+        public spell_dru_skull_bash_charge() : base("spell_dru_skull_bash_charge")
+        {
+        }
+
+        public class spell_dru_skull_bash_charge : SpellScript
+        {
+
+
+            private void HandleCharge(uint effIndex)
+            {
+                if (!GetCaster())
+                {
+                    return;
+                }
+
+                if (!GetHitUnit())
+                {
+                    return;
+                }
+
+                GetCaster().CastSpell(GetHitUnit(), 93985, true);
+            }
+
+            public override void Register()
+            {
+                SpellEffects.Add(new EffectHandler(HandleCharge, 0, SPELL_EFFECT_CHARGE, SpellScriptHookType.EffectHitTarget));
+            }
+        }
+
+
+
+        public override SpellScript GetSpellScript()
+        {
+            return new spell_dru_skull_bash_charge();
+        }
+    }
+
+    // 157982 - Tranquility Heal
+    public class spell_dru_tranquility_heal : SpellScriptLoader
+    {
+        public spell_dru_tranquility_heal() : base("spell_dru_tranquility_heal")
+        {
+        }
+
+        public class spell_dru_tranquility_heal : SpellScript
+        {
+
+
+            private void HandleHeal(uint UnnamedParameter)
+            {
+                if (!GetCaster())
+                {
+                    return;
+                }
+
+                Unit caster = GetCaster();
+                if (caster != null)
+                {
+                    uint heal = MathFunctions.CalculatePct(caster.SpellBaseHealingBonusDone(SpellSchoolMask.Nature), 180);
+                    SetHitHeal(heal);
+                }
+            }
+
+            public override void Register()
+            {
+                SpellEffects.Add(new EffectHandler(HandleHeal, 0, SpellEffectName.Heal, SpellScriptHookType.EffectHit));
+            }
+        }
+
+
+
+        public SpellScript GetSpellScript()
+        {
+            return new spell_dru_tranquility_heal();
+        }
+    }
+
+    // 200389 - Cultivation
+    public class spell_dru_cultivation : SpellScriptLoader
+    {
+        public spell_dru_cultivation() : base("spell_dru_cultivation")
+        {
+        }
+
+        public class spell_dru_cultivation : AuraScript
+        {
+
+
+            private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
+            {
+                if (!GetCaster())
+                {
+                    return;
+                }
+
+                amount = MathFunctions.CalculatePct(GetCaster().SpellBaseHealingBonusDone(SpellSchoolMask.Nature), 60);
+            }
+
+            public override void Register()
+            {
+                AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.PeriodicHeal));
+            }
+        }
+
+
+
+        public override AuraScript GetAuraScript()
+        {
+            return new spell_dru_cultivation();
+        }
+    }
+
+    // 774 - Rejuvenation
+    public class spell_dru_rejuvenation : SpellScriptLoader
+    {
+        public spell_dru_rejuvenation() : base("spell_dru_rejuvenation")
+        {
+        }
+
+        public enum Spells : uint
+        {
+            SPELL_DRUID_CULTIVATION = 200390,
+            SPELL_DRUID_CULTIVATION_HOT = 200389,
+            SPELL_DRUID_GERMINATION = 155675,
+            SPELL_DRUID_GERMINATION_HOT = 155777,
+            SPELL_DRUID_ABUNDANCE = 207383,
+            SPELL_DRUID_ABUNDANCE_BUFF = 207640
+        }
+
+        public class spell_dru_rejuvenation : AuraScript
+        {
+
+
+            //Posible Fixed
+
+
+            // bool Validate(SpellInfo const* spellInfo) override
+            // {
+            //     return ValidateSpellInfo(
+            //         {
+            //             SPELL_DRUID_CULTIVATION,
+            //             SPELL_DRUID_CULTIVATION_HOT,
+            //             SPELL_DRUID_ABUNDANCE,
+            //             SPELL_DRUID_ABUNDANCE_BUFF,
+            //         });
+            // }
+            //
+            // void AfterRemove(AuraEffect const* aurEff, AuraEffectHandleModes mode)
+            // {
+            //     if (Unit* caster = GetCaster())
+            //         if (caster->HasAura(SPELL_DRUID_ABUNDANCE))
+            //             if (Aura* abundanceBuff = caster->GetAura(SPELL_DRUID_ABUNDANCE_BUFF))
+            //                 abundanceBuff->ModStackAmount(-1);
+            // }
+            //
+            // void OnPeriodic(AuraEffect const* aurEff)
+            // {
+            //     if (Unit* target = GetTarget())
+            //         if (GetCaster()->HasAura(SPELL_DRUID_CULTIVATION) && !target->HasAura(SPELL_DRUID_CULTIVATION_HOT) && target->HealthBelowPct(Global.SpellMgr->GetSpellInfo//(SPELL_DRUID_CULTIVATION)->GetEffect(0).BasePoints))
+            //             GetCaster()->CastSpell(target, SPELL_DRUID_CULTIVATION_HOT, true);
+            // }
+            //
+            // void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& canBeRecalculated)
+            // {
+            //     if (!GetCaster())
+            //         return;
+            //
+            //     amount = MathFunctions.CalculatePct(GetCaster()->SpellBaseHealingBonusDone(SpellSchoolMask.Nature), 60);
+            // }
+
+            //Posible Fixed
+          
+            private enum Spells : uint
+            {
+                GlyphofRejuvenation = 17076,
+                GlyphofRejuvenationEffect = 96206
+            }
+            private void HandleCalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
+            {
+                Unit l_Caster = GetCaster();
+                if (l_Caster != null)
+                {
+                    ///If soul of the forest is activated we increase the heal by 100%
+                    if (l_Caster.HasAura(SoulOfTheForestSpells.SPELL_DRUID_SOUL_OF_THE_FOREST_RESTO) && !l_Caster.HasAura(DruidSpells.SPELL_DRUID_REJUVENATION))
+                    {
+                        amount *= 2;
+                        l_Caster.RemoveAura(SoulOfTheForestSpells.SPELL_DRUID_SOUL_OF_THE_FOREST_RESTO);
+                    }
+                }
+            }
+
+            private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
+            {
+                Unit caster = GetCaster();
+
+                if (caster == null)
+                {
+                    return;
+                }
+
+                AuraEffect GlyphOfRejuvenation = caster.GetAuraEffect(Spells.GlyphofRejuvenation, 0);
+                if (GlyphOfRejuvenation != null)
+                {
+                    GlyphOfRejuvenation.SetAmount(GlyphOfRejuvenation.GetAmount() + 1);
+                    if (GlyphOfRejuvenation.GetAmount() >= 3)
+                    {
+                        caster.CastSpell(caster, Spells.GlyphofRejuvenationEffect, true);
+                    }
+                }
+            }
+
+            private void OnRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
+            {
+                Unit caster = GetCaster();
+
+                if (caster == null)
+                {
+                    return;
+                }
+
+                AuraEffect l_GlyphOfRejuvenation = caster.GetAuraEffect(Spells.GlyphofRejuvenation, 0);
+                if (l_GlyphOfRejuvenation != null)
+                {
+                    l_GlyphOfRejuvenation.SetAmount(l_GlyphOfRejuvenation.GetAmount() - 1);
+                    if (l_GlyphOfRejuvenation.GetAmount() < 3)
+                    {
+                        caster.RemoveAura(Spells.GlyphofRejuvenationEffect);
+                    }
+                }
+            }
+
+            public override void Register()
+            {
+                // Posible Fixed
+                AuraEffects.Add(new EffectApplyHandler(OnApply, 0, AuraType.PeriodicHeal, AuraEffectHandleModes.Real));
+                AuraEffects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.PeriodicHeal, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+                AuraEffects.Add(new EffectCalcAmountHandler(HandleCalculateAmount, 0, AuraType.PeriodicHeal));
+
+                //  OnEffectPeriodic += AuraEffectPeriodicFn(spell_dru_rejuvenation::OnPeriodic, 0, AuraType.PeriodicHeal);
+                //  DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_rejuvenation::CalculateAmount, 0, AuraType.PeriodicHeal);
+                //  AfterEffectRemove += AuraEffectRemoveFn(spell_dru_rejuvenation::AfterRemove, 0, AuraType.PeriodicHeal, AuraEffectHandleModes.Real);
+            }
+        }
+
+
+
+        public override AuraScript GetAuraScript()
+        {
+            return new spell_dru_rejuvenation();
+        }
+
+        public class spell_dru_rejuvenation : SpellScript
+        {
+
+
+            public override bool Validate(SpellInfo UnnamedParameter)
+            {
+                return ValidateSpellInfo(SPELL_DRUID_GERMINATION, SPELL_DRUID_GERMINATION_HOT, SPELL_DRUID_ABUNDANCE, SPELL_DRUID_ABUNDANCE_BUFF);
+            }
+
+            private int m_RejuvenationAura = 0;
+            private int m_RejuvenationAuraAmount = 0;
+
+            public void AfterHit()
+            {
+                Unit caster = GetCaster();
+                if (caster == null)
+                {
+                    return;
+                }
+
+                Unit target = GetHitUnit();
+                if (target == null)
+                {
+                    return;
+                }
+
+                Aura RejuvenationAura = target.GetAura(DruidSpells.SPELL_DRUID_REJUVENATION, caster.GetGUID());
+
+                if (RejuvenationAura != null && m_RejuvenationAura > 0)
+                {
+                    RejuvenationAura.SetDuration(m_RejuvenationAura);
+                }
+
+                AuraEffect NewRejuvenationAuraEffect = target.GetAuraEffect(DruidSpells.SPELL_DRUID_REJUVENATION, 0);
+                if (NewRejuvenationAuraEffect != null)
+                {
+                    if (caster.HasAura(SoulOfTheForestSpells.SPELL_DRUID_SOUL_OF_THE_FOREST_RESTO))
+                    {
+                        NewRejuvenationAuraEffect.SetAmount(NewRejuvenationAuraEffect.GetAmount() * 2);
+                        caster.RemoveAura(SoulOfTheForestSpells.SPELL_DRUID_SOUL_OF_THE_FOREST_RESTO);
+                    }
+                }
+                if (caster.HasAura(207383))
+                {
+                    caster.CastSpell(caster, SPELL_DRUID_ABUNDANCE, true);
+                }
+            }
+
+            private void HandleBeforeHit(SpellMissInfo missInfo)
+            {
+                Unit caster = GetCaster();
+                if (caster == null)
+                {
+                    return;
+                }
+
+                Unit target = GetHitUnit();
+                if (target == null)
+                {
+                    return;
+                }
+
+                if (caster.HasAura(SoulOfTheForestSpells.SPELL_DRUID_SOUL_OF_THE_FOREST_RESTO))
+                {
+                    //      NewRejuvenationAuraEffect->SetAmount(NewRejuvenationAuraEffect->GetAmount() * 2);
+                    SetHitHeal(GetHitHeal() * 2);
+                    //      caster->RemoveAura(SPELL_DRUID_SOUL_OF_THE_FOREST_RESTO);
+                }
+
+                ///Germination
+                if (caster.HasAura(155675) && target.HasAura(DruidSpells.SPELL_DRUID_REJUVENATION, caster.GetGUID()))
+                {
+                    Aura RejuvenationAura = target.GetAura(DruidSpells.SPELL_DRUID_REJUVENATION, caster.GetGUID());
+                    if (RejuvenationAura == null)
+                    {
+                        return;
+                    }
+
+                    if (!target.HasAura(155777, caster.GetGUID()))
+                    {
+                        caster.CastSpell(target, 155777, true);
+                        m_RejuvenationAura = RejuvenationAura.GetDuration();
+                    }
+                    else
+                    {
+                        Aura GerminationAura = target.GetAura(155777, caster.GetGUID());
+                        Aura RejuvenationAura = target.GetAura(DruidSpells.SPELL_DRUID_REJUVENATION, caster.GetGUID());
+                        if (GerminationAura != null && RejuvenationAura != null)
+                        {
+                            int GerminationDuration = GerminationAura.GetDuration();
+                            int RejuvenationDuration = RejuvenationAura.GetDuration();
+                            if (GerminationDuration > RejuvenationDuration)
+                            {
+                                caster.AddAura(DruidSpells.SPELL_DRUID_REJUVENATION, target);
+                            }
+                            else
+                            {
+                                caster.CastSpell(target, 155777, true);
+                                m_RejuvenationAura = RejuvenationDuration;
+                            }
+                        }
+                    }
+                }
+            }
+
+            public override void Register()
+            {
+                BeforeHit += BeforeSpellHitFn(this.HandleBeforeHit);
+
+            }
+        }
+
+
+
+        public SpellScript GetSpellScript()
+        {
+            return new spell_dru_rejuvenation();
+        }
+    }
+
+    // 58180 - Infected Wounds
+    public class spell_dru_infected_wounds : SpellScriptLoader
+    {
+        public spell_dru_infected_wounds() : base("spell_dru_infected_wounds")
+        {
+        }
+
+
+        public class spell_dru_infected_wounds : SpellScript
+        {
+
+
+            private void HandleDummy(uint UnnamedParameter)
+            {
+                if (!GetCaster())
+                {
+                    return;
+                }
+
+                if (GetCaster().HasAura(GetSpellInfo().Id))
+                {
+                    GetCaster().RemoveAurasDueToSpell(GetSpellInfo().Id);
+                }
+            }
+
+            public override void Register()
+            {
+                SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ApplyAura, SpellScriptHookType.EffectHitTarget));
+            }
+        }
+
+
+
+        public override SpellScript GetSpellScript()
+        {
+            return new spell_dru_infected_wounds();
+        }
+    }
+
+    // 190984 - Solar Wrath | 194153 - Lunar Strike
+    public class spell_dru_blessing_of_elune : SpellScript
+    {
+
+
+        public void OnHit()
+        {
+            Unit caster = GetCaster();
+
+            if (caster == null)
+            {
+                return;
+            }
+
+            uint power = GetHitDamage();
+
+            Aura aura = caster.GetAura(202737);
+            if (aura != null)
+            {
+                AuraEffect aurEff = aura.GetEffect(0);
+                if (aurEff != null)
+                {
+                    power += MathFunctions.CalculatePct(power, aurEff.GetAmount());
+                }
+            }
+
+            SetHitDamage(power);
+        }
+
+
+    }
+
+    // 208253 - Essence of G'Hanir
+    public class spell_dru_essence_of_ghanir : SpellScriptLoader
+    {
+        public spell_dru_essence_of_ghanir() : base("spell_dru_essence_of_ghanir")
+        {
+        }
+
+        public class spell_dru_essence_of_ghanir : AuraScript
+        {
+
+
+            private void HandleEffectCalcSpellMod(AuraEffect aurEff, ref SpellModifier spellMod)
+            {
+                if (spellMod == null)
+                {
+                    SpellModifierByClassMask mod = new SpellModifierByClassMask(GetAura());
+                    mod.op = SpellModOp.PeriodicHealingAndDamage;
+                    mod.type = SPELLMOD_FLAT;
+                    mod.spellId = GetId();
+                    mod.mask = aurEff.GetSpellEffectInfo().SpellClassMask;
+                    spellMod = mod;
+                }
+
+                ((SpellModifierByClassMask)spellMod).value = aurEff.GetAmount() / 7;
+            }
+
+            public override void Register()
+            {
+                DoEffectCalcSpellMod += AuraEffectCalcSpellModFn(this.HandleEffectCalcSpellMod, 0, AuraType.AddPctModifier);
+            }
+        }
+
+
+
+        public AuraScript GetAuraScript()
+        {
+            return new spell_dru_essence_of_ghanir();
+        }
+    }
+
+    // 200851 - Rage of the Sleeper
+    public class spell_dru_rage_of_the_sleeper : SpellScriptLoader
+    {
+        public spell_dru_rage_of_the_sleeper() : base("spell_dru_rage_of_the_sleeper")
+        {
+        }
+
+        public class spell_dru_rage_of_the_sleeper : AuraScript
+        {
+
+
+            private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
+            {
+                amount = -1;
+            }
+
+            private void OnRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
+            {
+                Unit caster = GetCaster();
+                if (caster != null)
+                {
+                    Unit target = caster.GetVictim();
+                    if (target != null)
+                    {
+                        caster.CastSpell(target, 219432, true);
+                    }
+                }
+            }
+
+            public override void Register()
+            {
+                AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 1, AuraType.SchoolAbsorb));
+                AuraEffects.Add(new EffectApplyHandler(OnRemove, 1, AuraType.SchoolAbsorb, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            }
+        }
+
+
+
+        public AuraScript GetAuraScript()
+        {
+            return new spell_dru_rage_of_the_sleeper();
+        }
+    }
+
+    // 194153 Lunar Strike
+    public class spell_druid_lunar_strike : SpellScript
+    {
+
+
+        private enum Spells
+        {
+            SPELL_DRUID_LUNAR_STRIKE = 194153,
+            SPELL_DRUID_WARRIOR_OF_ELUNE = 202425,
+            SPELL_DRUID_NATURES_BALANCE = 202430
+        }
+
+        public override bool Validate(SpellInfo UnnamedParameter)
+        {
+            return ValidateSpellInfo(MoonfireSpells.SPELL_DRUID_MOONFIRE_DAMAGE, Spells.SPELL_DRUID_WARRIOR_OF_ELUNE, Spells.SPELL_DRUID_LUNAR_STRIKE, Spells.SPELL_DRUID_NATURES_BALANCE);
+        }
+
+        private void HandleHitTarget(uint UnnamedParameter)
+        {
+            Unit explTarget = GetExplTargetUnit();
+            Unit currentTarget = GetHitUnit();
+
+            if (explTarget == null || currentTarget == null)
+            {
+                return;
+            }
+
+            if (currentTarget != explTarget)
+            {
+                SetHitDamage(GetHitDamage() * GetSpellInfo().GetEffect(2).BasePoints / 100);
+            }
+
+            if (GetCaster().HasAura(Spells.SPELL_DRUID_NATURES_BALANCE))
+            {
+                Aura moonfireDOT = currentTarget.GetAura(MoonfireSpells.SPELL_DRUID_MOONFIRE_DAMAGE, GetCaster().GetGUID());
+                if (moonfireDOT != null)
+                {
+                    int duration = moonfireDOT.GetDuration();
+                    int newDuration = duration + 6 * Time.InMilliseconds;
+
+                    if (newDuration > moonfireDOT.GetMaxDuration())
+                    {
+                        moonfireDOT.SetMaxDuration(newDuration);
+                    }
+
+                    moonfireDOT.SetDuration(newDuration);
+                }
+            }
+
+            if (GetCaster() && RandomHelper.randChance(20) && GetCaster().HasAura(DruidSpells.SPELL_DRU_ECLIPSE))
+            {
+                GetCaster().CastSpell(null, DruidSpells.SPELL_DRU_SOLAR_EMPOWEREMENT, true);
+            }
+        }
+
+        private void HandleHit(uint UnnamedParameter)
+        {
+            Aura WarriorOfElune = GetCaster().GetAura(Spells.SPELL_DRUID_WARRIOR_OF_ELUNE);
+            if (WarriorOfElune != null)
+            {
+                int amount = WarriorOfElune.GetEffect(0).GetAmount();
+                WarriorOfElune.GetEffect(0).SetAmount(amount - 1);
+                if (amount == -102)
+                {
+                    GetCaster().RemoveAurasDueToSpell(Spells.SPELL_DRUID_WARRIOR_OF_ELUNE);
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleHitTarget, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
+            SpellEffects.Add(new EffectHandler(HandleHit, 1, SpellEffectName.Energize, SpellScriptHookType.EffectHit));
+        }
+    }
+
+    // 190984 Solar Wrath
+    public class spell_druid_solar_wrath : SpellScript
+    {
+
+
+        private enum Spells
+        {
+            SPELL_DRUID_SOLAR_WRATH = 190984,
+            SPELL_DRUID_NATURES_BALANCE = 202430,
+            SPELL_DRUID_SUNFIRE_DOT = 164815
+        }
+
+        public override bool Validate(SpellInfo UnnamedParameter)
+        {
+            return ValidateSpellInfo(Spells.SPELL_DRUID_SUNFIRE_DOT, Spells.SPELL_DRUID_SOLAR_WRATH, Spells.SPELL_DRUID_NATURES_BALANCE);
+        }
+
+        private void HandleHitTarget(uint UnnamedParameter)
+        {
+            Unit target = GetHitUnit();
+            if (target != null)
+            {
+                if (GetCaster().HasAura(Spells.SPELL_DRUID_NATURES_BALANCE))
+                {
+                    Aura sunfireDOT = target.GetAura(Spells.SPELL_DRUID_SUNFIRE_DOT, GetCaster().GetGUID());
+                    if (sunfireDOT != null)
+                    {
+                        int duration = sunfireDOT.GetDuration();
+                        int newDuration = duration + 4 * Time.InMilliseconds;
+
+                        if (newDuration > sunfireDOT.GetMaxDuration())
+                        {
+                            sunfireDOT.SetMaxDuration(newDuration);
+                        }
+
+                        sunfireDOT.SetDuration(newDuration);
+                    }
+                }
+            }
+            if (GetCaster() && RandomHelper.randChance(20) && GetCaster().HasAura(DruidSpells.SPELL_DRU_ECLIPSE))
+            {
+                GetCaster().CastSpell(null, DruidSpells.SPELL_DRU_LUNAR_EMPOWEREMENT, true);
+            }
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleHitTarget, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
+        }
+    }
+
+    // 203975 Earthwarden
+    public class spell_druid_earthwarden_triggered : AuraScript
+    {
+
+
+        private enum Spells
+        {
+            SPELL_DRUID_EARTHWARDEN = 203974,
+            SPELL_DRUID_EARTHWARDEN_TRIGGERED = 203975
+        }
+
+        public override bool Validate(SpellInfo UnnamedParameter)
+        {
+            return ValidateSpellInfo(Spells.SPELL_DRUID_EARTHWARDEN, Spells.SPELL_DRUID_EARTHWARDEN_TRIGGERED);
+        }
+
+        private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
+        {
+            amount = -1;
+        }
+
+        private void Absorb(AuraEffect auraEffect, DamageInfo dmgInfo, ref uint absorbAmount)
+        {
+            if (dmgInfo.GetDamageType() == DIRECT_DAMAGE)
+            {
+                SpellInfo earthwarden = Global.SpellMgr.AssertSpellInfo(Spells.SPELL_DRUID_EARTHWARDEN, Difficulty.None);
+
+                absorbAmount = MathFunctions.CalculatePct(dmgInfo.GetDamage(), earthwarden.GetEffect(0).BasePoints);
+                GetCaster().RemoveAurasDueToSpell(Spells.SPELL_DRUID_EARTHWARDEN_TRIGGERED);
+            }
+        }
+
+        public override void Register()
+        {
+            AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
+            AuraEffects.Add(new EffectAbsorbHandler(Absorb, 0));
+        }
+    }
+
+    // 203974 Earthwarden
+    public class spell_druid_earthwarden : AuraScript
+    {
+
+
+        private enum Spells
+        {
+            SPELL_DRUID_EARTHWARDEN = 203974,
+            SPELL_DRUID_EARTHWARDEN_TRIGGERED = 203975,
+            SPELL_DRUID_TRASH = 77758
+        }
+
+        public override bool Validate(SpellInfo UnnamedParameter)
+        {
+            return ValidateSpellInfo(Spells.SPELL_DRUID_EARTHWARDEN, Spells.SPELL_DRUID_EARTHWARDEN_TRIGGERED, Spells.SPELL_DRUID_TRASH);
+        }
+
+        private void OnProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+            if (!GetCaster().ToPlayer().GetSpellHistory().HasCooldown(Spells.SPELL_DRUID_EARTHWARDEN))
+            {
+                GetCaster().AddAura(Spells.SPELL_DRUID_EARTHWARDEN_TRIGGERED, GetCaster());
+            }
+            GetCaster().ToPlayer().GetSpellHistory().AddCooldown(Spells.SPELL_DRUID_EARTHWARDEN, 0, std::chrono.milliseconds(500));
+        }
+
+        public override void Register()
+        {
+            AuraEffects.Add(new EffectProcHandler(OnProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+    }
+
+    // 80313 Pulverize
+    public class spell_druid_pulverize : SpellScript
+    {
+
+
+        private enum Spells
+        {
+            SPELL_DRUID_PULVERIZE = 80313,
+            SPELL_DRUID_TRASH_DOT_TWO_STACKS_MARKER = 158790,
+            SPELL_DRUID_PULVERIZE_DAMAGE_REDUCTION_BUFF = 158792
+        }
+
+        public override bool Validate(SpellInfo UnnamedParameter)
+        {
+            return ValidateSpellInfo(Spells.SPELL_DRUID_PULVERIZE, Spells.SPELL_DRUID_TRASH_DOT_TWO_STACKS_MARKER);
+        }
+
+        private void HandleHitTarget(uint UnnamedParameter)
+        {
+            Unit target = GetHitUnit();
+            if (target != null)
+            {
+                target.RemoveAurasDueToSpell(Spells.SPELL_DRUID_TRASH_DOT_TWO_STACKS_MARKER);
+                GetCaster().CastSpell(target, Spells.SPELL_DRUID_PULVERIZE_DAMAGE_REDUCTION_BUFF, true);
+            }
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleHitTarget, 2, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+    }
+
+    // 204053 Rend and Tear
+    public class spell_druid_rend_and_tear : AuraScript
+    {
+
+
+        private enum Spells
+        {
+            SPELL_DRUID_REND_AND_TEAR = 204053,
+            SPELL_DRUID_TRASH_DOT = 192090
+        }
+
+        public override bool Validate(SpellInfo UnnamedParameter)
+        {
+            return ValidateSpellInfo(Spells.SPELL_DRUID_REND_AND_TEAR, Spells.SPELL_DRUID_TRASH_DOT);
+        }
+
+        private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
+        {
+            amount = -1;
+        }
+
+        private void Absorb(AuraEffect auraEffect, DamageInfo dmgInfo, ref uint absorbAmount)
+        {
+            Unit caster = GetCaster();
+            Unit attacker = dmgInfo.GetAttacker();
+            absorbAmount = 0;
+
+            if (caster == null || attacker == null || !HasEffect(1))
+            {
+                return;
+            }
+
+            if (caster.GetShapeshiftForm() == FORM_BEAR_FORM)
+            {
+                Aura trashDOT = attacker.GetAura(Spells.SPELL_DRUID_TRASH_DOT, caster.GetGUID());
+                if (trashDOT != null)
+                {
+                    absorbAmount = MathFunctions.CalculatePct(dmgInfo.GetDamage(), trashDOT.GetStackAmount() * GetSpellInfo().GetEffect(1).BasePoints);
+                }
+            }
+        }
+
+        private void HandleEffectCalcSpellMod(AuraEffect aurEff, ref SpellModifier spellMod)
+        {
+            if (spellMod == null)
+            {
+                return;
+            }
+
+            ((SpellModifierByClassMask)spellMod).value = GetCaster().GetShapeshiftForm() == FORM_BEAR_FORM ? aurEff.GetAmount() : 0;
+        }
+
+        public override void Register()
+        {
+            AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
+            AuraEffects.Add(new EffectAbsorbHandler(Absorb, 0));
+            DoEffectCalcSpellMod += AuraEffectCalcSpellModFn(this.HandleEffectCalcSpellMod, 1, AuraType.AddFlatModifier);
+            DoEffectCalcSpellMod += AuraEffectCalcSpellModFn(this.HandleEffectCalcSpellMod, 2, AuraType.AddFlatModifier);
+        }
+    }
+
+    //Incarnation: Tree of Life 33891
+    public class incarnation_tree_of_life : SpellScript
+    {
+
+
+        public void AfterCast()
+        {
+            Unit caster = GetCaster();
+            Aura tree = caster.GetAura(33891);
+            if (tree != null)
+            {
+                tree.SetDuration(30000, true);
+            }
+        }
+
+        public override void Register()
+        {
+            AfterCast += SpellCastFn(this.HandleAfterCast);
+        }
+    }
+
+    //274837
+    public class spell_feral_frenzy : SpellScript
+    {
+
+
+        public void OnHit()
+        {
+            Unit caster = GetCaster();
+            Unit target = GetHitUnit();
+
+            if (caster == null || target == null)
+            {
+                return;
+            }
+
+            this.strikes = 0;
+
+            int strikeDamage = 100 / 20 + caster.m_unitData.AttackPower;
+
+
+
+            caster.GetScheduler().Schedule(TimeSpan.FromMilliseconds(50), (TaskContext context) =>
+            {
+                if (caster.GetDistance2d(target) <= 5.0f)
+                {
+                    strikes++;
+                    if (this.strikes < 5)
+                    {
+                        context.Repeat(200ms);
+                    }
+                    else if (this.strikes == 5)
+                    {
+                        caster.CastSpell(target, DruidSpells.SPELL_FERAL_FRENZY_BLEED, true);
+                        int bleedDamage = 100 / 10 + caster.m_unitData.AttackPower;
+                    }
+                }
+            });
+        }
+
+
+
+        private byte strikes;
+    }
+
+    public class feral_spells : PlayerScript
+    {
+        public feral_spells() : base("feral_spells")
+        {
+        }
+
+        public override void OnLogin(Player player, bool UnnamedParameter)
+        {
+            if (player.GetPrimarySpecialization() != TALENT_SPEC_DRUID_CAT)
+            {
+                return;
+            }
+
+            if (player.GetLevel() >= 5 && !player.HasSpell(DruidSpells.SPELL_DRUID_SHRED))
+            {
+                player.LearnSpell(DruidSpells.SPELL_DRUID_SHRED, false, true);
+            }
+
+            if (player.GetLevel() >= 20 && !player.HasSpell(DruidSpells.SPELL_DRUID_RIP))
+            {
+                player.LearnSpell(DruidSpells.SPELL_DRUID_RIP, false, true);
+            }
+
+            if (player.GetLevel() >= 24 && !player.HasSpell(DruidSpells.SPELL_DRUID_RAKE))
+            {
+                player.LearnSpell(DruidSpells.SPELL_DRUID_RAKE, false, true);
+            }
+
+            if (player.GetLevel() >= 32 && !player.HasSpell(DruidSpells.SPELL_DRUID_FEROCIOUS_BITE))
+            {
+                player.LearnSpell(DruidSpells.SPELL_DRUID_FEROCIOUS_BITE, false, true);
+            }
+        }
+    }
+
+    //78674
+    public class spell_dru_starsurge : SpellScript
+    {
+
+
+        public void OnHit()
+        {
+            if (GetCaster())
+            {
+                if (GetCaster().GetAuraCount(DruidSpells.SPELL_DRU_STARLORD_BUFF) < 3)
+                {
+                    GetCaster().CastSpell(null, DruidSpells.SPELL_DRU_STARLORD_BUFF, true);
+                }
+            }
+        }
+
+
+    }
+
+    //191034
+    public class spell_dru_starfall : SpellScript
+    {
+
+
+        public void OnHit()
+        {
+            if (GetCaster())
+            {
+                if (GetCaster().GetAuraCount(DruidSpells.SPELL_DRU_STARLORD_BUFF) < 3)
+                {
+                    GetCaster().CastSpell(null, DruidSpells.SPELL_DRU_STARLORD_BUFF, true);
+                }
+            }
+        }
+
+
+    }
+
+    //274902
+    public class spell_dru_photosynthesis : AuraScript
+    {
+
+
+        private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
+        {
+            ////  if (!GetCaster()->HasAura(SPELL_DRU_PHOTOSYNTHESIS_MOD_HEAL_TICKS))
+            //    GetCaster()->AddAura(SPELL_DRU_PHOTOSYNTHESIS_MOD_HEAL_TICKS);
+        }
+
+        private void OnRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
+        {
+            if (GetCaster().HasAura(DruidSpells.SPELL_DRU_PHOTOSYNTHESIS_MOD_HEAL_TICKS))
+            {
+                GetCaster().RemoveAura(DruidSpells.SPELL_DRU_PHOTOSYNTHESIS_MOD_HEAL_TICKS);
+            }
+        }
+
+        public override void Register()
+        {
+            AuraEffects.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            AuraEffects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+        }
+    }
+
+    //10682, 204066
+    public class at_dru_lunar_beam : AreaTriggerAI
+    {
+        public at_dru_lunar_beam(AreaTrigger at) : base(at)
+        {
+        }
+
+        public override void OnCreate()
+        {
+            at.SetPeriodicProcTimer(1000);
+        }
+
+        public override void OnPeriodicProc()
+        {
+            if (at.GetCaster())
+            {
+                at.GetCaster().CastSpell(at.GetPosition(), DruidSpells.SPELL_DRU_LUNAR_BEAM_DAMAGE_HEAL, true);
+            }
+        }
+    }
+
+    //3020, 102793
+    public class at_dru_ursol_vortex : AreaTriggerAI
+    {
+        public at_dru_ursol_vortex(AreaTrigger at) : base(at)
+        {
+        }
+
+        public override void OnUnitEnter(Unit target)
+        {
+            VALIDATE_CASTER();
+
+            if (caster.IsInCombatWith(target))
+            {
+                caster.CastSpell(target, DruidSpells.SPELL_DRU_URSOL_VORTEX_DEBUFF, true);
+            }
+        }
+
+        public override void OnUnitExit(Unit target)
+        {
+            target.RemoveAurasDueToSpell(DruidSpells.SPELL_DRU_URSOL_VORTEX_DEBUFF);
+            if (!_hasPull && target.IsValidAttackTarget(at.GetCaster()))
+            {
+                _hasPull = true;
+                target.CastSpell(at.GetPosition(), DruidSpells.SPELL_DRU_URSOL_VORTEX_PULL, true);
+            }
+        }
+
+        private bool _hasPull = false;
+    }
+
+    //102359
+    public class spell_dru_mass_entanglement : SpellScript
+    {
+
+
+        public void OnCast()
+        {
+            List<Unit> targetList = new List<Unit>();
+            GetCaster().GetAttackableUnitListInRange(targetList, 15.0f);
+            if (targetList.Count != 0)
+            {
+                foreach (var targets in targetList)
+                {
+                    GetCaster().AddAura(DruidSpells.SPELL_DRU_MASS_ENTANGLEMENT, targets);
+                }
+            }
+        }
+
+
+    }
+
+    public class dru_predator : PlayerScript
+    {
+        public dru_predator() : base("dru_predator")
+        {
+        }
+
+        public void OnPVPKill(Player killer, Player killed)
+        {
+            if (killer.GetClass() == Class.Druid)
+            {
+                return;
+            }
+
+            if (!killer.HasAura(DruidSpells.SPELL_DRU_PREDATOR))
+            {
+                return;
+            }
+
+            if (killer.GetSpellHistory().HasCooldown(DruidSpells.SPELL_DRU_TIGER_FURY))
+            {
+                killer.GetSpellHistory().ResetCooldown(DruidSpells.SPELL_DRU_TIGER_FURY);
+            }
+        }
+
+        public void OnCreatureKill(Player killer, Creature killed)
+        {
+            if (killer.GetClass() == Class.Druid)
+            {
+                return;
+            }
+
+            if (!killer.HasAura(DruidSpells.SPELL_DRU_PREDATOR))
+            {
+                return;
+            }
+
+            if (killer.GetSpellHistory().HasCooldown(DruidSpells.SPELL_DRU_TIGER_FURY))
+            {
+                killer.GetSpellHistory().ResetCooldown(DruidSpells.SPELL_DRU_TIGER_FURY);
+            }
+        }
+    }
+
+    // Teleport : Moonglade - 18960
+    public class spell_dru_teleport_moonglade : SpellScriptLoader
+    {
+        public spell_dru_teleport_moonglade() : base("spell_dru_teleport_moonglade")
+        {
+        }
+
+        public class spell_dru_teleport_moonglade : SpellScript
+        {
+
+
+            public void AfterCast()
+            {
+                Player _player = GetCaster().ToPlayer();
+                if (_player != null)
+                {
+                    _player.TeleportTo(1, 7964.063f, -2491.099f, 487.83f, _player.GetOrientation());
+                }
+            }
+
+            public override void Register()
+            {
+                AfterCast += SpellCastFn(this.HandleAfterCast);
+            }
+        }
+
+
+
+        public SpellScript GetSpellScript()
+        {
+            return new spell_dru_teleport_moonglade();
+        }
+    }
+    // 202430 - Nature's Balance
+    public class spell_dru_natures_balance : AuraScript
+    {
+
+
+        private enum Spells
+        {
+            SPELL_DRUID_NATURES_BALANCE = 202430
+        }
+
+        public override bool Validate(SpellInfo UnnamedParameter)
+        {
+            return ValidateSpellInfo(Spells.SPELL_DRUID_NATURES_BALANCE);
+        }
+
+        private void HandlePeriodic(AuraEffect aurEff)
+        {
+            Unit caster = GetCaster();
+            if (caster == null || !caster.IsAlive() || caster.GetMaxPower(POWER_LUNAR_POWER) == 0)
+            {
+                return;
+            }
+
+            if (caster.IsInCombat())
+            {
+                int amount = Math.Max(caster.GetAuraEffect(Spells.SPELL_DRUID_NATURES_BALANCE, 0).GetAmount(), 0);
+                // don't regen when permanent aura target has full power
+                if (caster.GetPower(POWER_LUNAR_POWER) == caster.GetMaxPower(POWER_LUNAR_POWER))
+                {
+                    return;
+                }
+
+                caster.ModifyPower(POWER_LUNAR_POWER, amount);
+            }
+            else
+            {
+                if (caster.GetPower(POWER_LUNAR_POWER) > 500)
+                {
+                    return;
+                }
+
+                caster.SetPower(POWER_LUNAR_POWER, 500);
+            }
+        }
+
+        public override void Register()
+        {
+            AuraEffects.Add(new EffectPeriodicHandler(HandlePeriodic, 0, SPELL_AURA_PERIODIC_ENERGIZE));
+        }
+    }
+*/
 
     [Script] // 22812 - Barkskin
     internal class spell_dru_barkskin : AuraScript, IHasAuraEffects

@@ -424,6 +424,20 @@ namespace System.Collections.Generic
             return matches;
         }
 
+        public static void RemoveAllMatchingKeys<TKey, TValue>(this IDictionary<TKey, TValue> dict, Func<TKey, bool> pred)
+        {
+            var keys = new HashSet<TKey>();
+
+            foreach (var key in dict.Keys)
+                if (pred.Invoke(key))
+                    keys.Add(key);
+                else
+                    break;
+
+            foreach (var k in keys) 
+                dict.Remove(k);
+        }
+
         public static IEnumerable<KeyValuePair<TKey, TValue>> KeyValueList<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict)
         {
             foreach (var pair in dict)

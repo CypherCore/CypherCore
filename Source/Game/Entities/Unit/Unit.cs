@@ -2194,6 +2194,59 @@ namespace Game.Entities
             return u1.GetFaction() == u2.GetFaction();
         }
 
+        public void GetPartyMembers(List<Unit> TagUnitMap)
+        {
+            Unit owner = GetCharmerOrOwnerOrSelf();
+            Group group = null;
+            if (owner.GetTypeId() == TypeId.Player)
+            {
+                group = owner.ToPlayer().GetGroup();
+            }
+
+            if (group != null)
+            {
+                byte subgroup = owner.ToPlayer().GetSubGroup();
+
+                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+                {
+                    Player target = refe.GetSource();
+
+                    // IsHostileTo check duel and controlled by enemy
+                    if (target != null && target.IsInMap(owner) && target.GetSubGroup() == subgroup && !IsHostileTo(target))
+                    {
+                        if (target.IsAlive())
+                        {
+                            TagUnitMap.Add(target);
+                        }
+
+                        Guardian pet = target.GetGuardianPet();
+                        if (target.GetGuardianPet())
+                        {
+                            if (pet.IsAlive())
+                            {
+                                TagUnitMap.Add(pet);
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if ((owner == this || IsInMap(owner)) && owner.IsAlive())
+                {
+                    TagUnitMap.Add(owner);
+                }
+                Guardian pet = owner.GetGuardianPet();
+                if (owner.GetGuardianPet() != null)
+                {
+                    if ((pet == this || IsInMap(pet)) && pet.IsAlive())
+                    {
+                        TagUnitMap.Add(pet);
+                    }
+                }
+            }
+        }
+
         public UnitStandStateType GetStandState() { return (UnitStandStateType)(byte)m_unitData.StandState; }
         public void SetVisFlag(UnitVisFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.VisFlags), (byte)flags); }
         public void RemoveVisFlag(UnitVisFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.VisFlags), (byte)flags); }
@@ -2786,6 +2839,12 @@ namespace Game.Entities
             if (victim.GetStandState() != 0 && victim.IsPlayer())
                 victim.SetStandState(UnitStandStateType.Stand);
 
+            if (player != null)
+            {
+                if(player.GetPrimarySpecialization() == TalentSpecialization.DruidCat)
+                    victim.SaveDamageHistory(damage);
+
+            }
             return damage;
         }
 
@@ -3974,6 +4033,34 @@ namespace Game.Entities
 
             float tmpDamage = (float)(pdamage + TakenFlatBenefit) * TakenTotalMod;
             return (uint)Math.Max(tmpDamage, 0.0f);
+        }
+
+
+        public void SaveDamageHistory(uint damage)
+        {
+            var currentTime = GameTime.GetDateAndTime();
+            var maxPastTime = currentTime - MAX_DAMAGE_HISTORY_DURATION;
+
+            // Remove damages older than maxPastTime, can be increased if required
+            _damageTakenHistory.RemoveAllMatchingKeys(k => k < maxPastTime);
+
+            _damageTakenHistory[currentTime] += damage;
+        }
+
+        public uint GetDamageOverLastSeconds(uint seconds)
+        {
+            var maxPastTime = GameTime.GetDateAndTime() - TimeSpan.FromSeconds(seconds);
+
+            uint damageOverLastSeconds = 0;
+            foreach(var itr in _damageTakenHistory)
+            {
+                if (itr.Key >= maxPastTime)
+                {
+                    damageOverLastSeconds += itr.Value;
+                }
+            }
+
+            return damageOverLastSeconds;
         }
 
         bool IsBlockCritical()

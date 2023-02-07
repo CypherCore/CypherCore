@@ -309,6 +309,17 @@ namespace Game.Entities
             _ai.OnUpdate(diff);
 
             UpdateTargetList();
+
+            if (_basePeriodicProcTimer != 0)
+            {
+                if (_periodicProcTimer <= diff)
+                {
+                    _ai.OnPeriodicProc();
+                    _periodicProcTimer = _basePeriodicProcTimer;
+                }
+                else
+                    _periodicProcTimer -= diff;
+            }
         }
 
         public void Remove()
@@ -829,6 +840,12 @@ namespace Game.Entities
             return _orbitInfo != null;
         }
 
+        public void SetPeriodicProcTimer(uint periodicProctimer)
+        {
+            _basePeriodicProcTimer = periodicProctimer;
+            _periodicProcTimer = periodicProctimer;
+        }
+
         Position GetOrbitCenterPosition()
         {
             if (_orbitInfo == null)
@@ -1125,6 +1142,9 @@ namespace Game.Entities
         List<ObjectGuid> _insideUnits = new();
 
         AreaTriggerAI _ai;
+
+        uint _periodicProcTimer;
+        uint _basePeriodicProcTimer;
 
         class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
         {

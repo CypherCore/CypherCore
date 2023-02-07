@@ -17,7 +17,7 @@ namespace Scripts.Spells.Warlock
                 return SpellCastResult.CantDoThatRightNow;
             }
             // allow only in Demonology spec
-            if ((TalentSpecialization)caster.GetPrimarySpecialization() != TalentSpecialization.WarlockDemonology)
+            if (caster.GetPrimarySpecialization() != TalentSpecialization.WarlockDemonology)
             {
                 return SpellCastResult.NoSpec;
             }
