@@ -608,7 +608,12 @@ namespace Game.Entities
 
             int oldPower = m_unitData.Power[(int)powerIndex];
 
-            TriggerOnPowerChangeAuras(powerType, oldPower, ref val, isRegen);
+            if (IsPlayer())
+            {
+                var newVal = val;
+                Global.ScriptMgr.ForEach<IPlayerOnModifyPower>(p => p.OnModifyPower(ToPlayer(), powerType, newVal, ref val, isRegen));
+                val = newVal;
+            }
 
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, (int)powerIndex), val);
 
@@ -620,6 +625,7 @@ namespace Game.Entities
                 SendMessageToSet(packet, IsTypeId(TypeId.Player));
             }
 
+            TriggerOnPowerChangeAuras(powerType, oldPower, val);
 
             // group update
             if (IsTypeId(TypeId.Player))
@@ -635,7 +641,8 @@ namespace Game.Entities
                     pet.SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_CUR_POWER);
             }*/
 
-            Global.ScriptMgr.ForEach<IPlayerOnAfterModifyPower>(p => p.OnAfterModifyPower(ToPlayer(), powerType, oldPower, val, isRegen));
+            if (IsPlayer())
+                Global.ScriptMgr.ForEach<IPlayerOnAfterModifyPower>(p => p.OnAfterModifyPower(ToPlayer(), powerType, oldPower, val, isRegen));
         }
         public void SetFullPower(PowerType powerType) { SetPower(powerType, GetMaxPower(powerType)); }
         public int GetPower(PowerType powerType)
@@ -668,18 +675,12 @@ namespace Game.Entities
         public virtual uint GetPowerIndex(PowerType powerType) { return 0; }
         public float GetPowerPct(PowerType powerType) { return GetMaxPower(powerType) != 0 ? 100.0f * GetPower(powerType) / GetMaxPower(powerType) : 0.0f; }
 
-        void TriggerOnPowerChangeAuras(PowerType power, int oldVal, ref int newVal, bool regen = false)
+        void TriggerOnPowerChangeAuras(PowerType power, int oldVal, int newVal)
         {
             var effects = GetAuraEffectsByType(AuraType.TriggerSpellOnPowerPct);
             var effectsAmount = GetAuraEffectsByType(AuraType.TriggerSpellOnPowerAmount);
             effects.AddRange(effectsAmount);
-
-            if (IsPlayer())
-            {
-                var val = newVal;
-                Global.ScriptMgr.ForEach<IPlayerOnModifyPower>(p => p.OnModifyPower(ToPlayer(), power, oldVal, ref val, regen));
-                newVal = val;
-            }
+         
             foreach (AuraEffect effect in effects)
             {
                 if (effect.GetMiscValue() == (int)power)
