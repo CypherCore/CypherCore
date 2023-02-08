@@ -2406,6 +2406,21 @@ namespace Game.Entities
         {
             return CastSpell(null, spellId, triggered);
         }
+
+        public SpellCastResult CastSpell(WorldObject target, uint spellId, Spell triggeringSpell)
+        {
+            CastSpellExtraArgs args = new(true);
+            args.TriggeringSpell = triggeringSpell;
+            return CastSpell(target, spellId, args);
+        }
+
+        public SpellCastResult CastSpell(WorldObject target, uint spellId, AuraEffect triggeringAura)
+        {
+            CastSpellExtraArgs args = new(true);
+            args.TriggeringAura = triggeringAura;
+            return CastSpell(target, spellId, args);
+        }
+
         public SpellCastResult CastSpell(WorldObject target, uint spellId, bool triggered = false)
         {
             CastSpellExtraArgs args = new(triggered);

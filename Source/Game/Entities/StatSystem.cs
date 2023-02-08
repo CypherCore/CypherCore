@@ -454,6 +454,11 @@ namespace Game.Entities
         public void SetCreateHealth(uint val) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BaseHealth), val); }
         public ulong GetHealth() { return m_unitData.Health; }
         
+        public void SetHealth(float val)
+        {
+            SetHealth((ulong)val);  
+        }
+
         public void SetHealth(int val)
         {
             SetHealth((ulong)val);

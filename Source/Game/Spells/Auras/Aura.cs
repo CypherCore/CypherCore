@@ -912,6 +912,20 @@ namespace Game.Spells
             owner.m_Events.AddEvent(m_dropEvent, owner.m_Events.CalculateTime(TimeSpan.FromMilliseconds(delay)));
         }
 
+        public void AddStacks(int stacksToAdd)
+        {
+            var max = CalcMaxStackAmount();
+            var newStacks = stacksToAdd + m_stackAmount;
+
+            if (newStacks > max)
+                newStacks = (int)max;
+
+            if (newStacks < 0)
+                newStacks = 0;
+
+            SetStackAmount((byte)newStacks);
+        }
+
         public void SetStackAmount(byte stackAmount)
         {
             m_stackAmount = stackAmount;

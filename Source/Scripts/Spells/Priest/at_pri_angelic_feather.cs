@@ -1,0 +1,42 @@
+﻿using System.Collections.Generic;
+using Game.AI;
+using Game.Entities;
+using Game.Scripting;
+
+namespace Scripts.Spells.Priest;
+
+[Script]
+public class at_pri_angelic_feather : AreaTriggerAI
+{
+	public at_pri_angelic_feather(AreaTrigger areatrigger) : base(areatrigger)
+	{
+	}
+
+	public override void OnInitialize()
+	{
+		Unit caster = at.GetCaster();
+		if (caster != null)
+		{
+			List<AreaTrigger> areaTriggers = caster.GetAreaTriggers(PriestSpells.SPELL_PRIEST_ANGELIC_FEATHER_AREATRIGGER);
+
+			if (areaTriggers.Count >= 3)
+			{
+				areaTriggers[0].SetDuration(0);
+			}
+		}
+	}
+
+	public override void OnUnitEnter(Unit unit)
+	{
+		Unit caster = at.GetCaster();
+		if (caster != null)
+		{
+			if (caster.IsFriendlyTo(unit) && unit.IsPlayer())
+			{
+				// If target already has aura, increase duration to max 130% of initial duration
+				caster.CastSpell(unit, PriestSpells.SPELL_PRIEST_ANGELIC_FEATHER_AURA, true);
+				at.SetDuration(0);
+			}
+		}
+	}
+}
