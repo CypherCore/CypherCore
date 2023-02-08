@@ -2164,6 +2164,11 @@ namespace Game.Entities
             SendPacket(new SendUnlearnSpells());
         }
 
+        public void LearnSpell<T>(T spellId, bool dependent, uint fromSkill = 0, bool suppressMessaging = false, int? traitDefinitionId = null) where T : struct, System.Enum
+        {
+            LearnSpell(Convert.ToUInt32(spellId), dependent, fromSkill, suppressMessaging, traitDefinitionId);
+        }
+
         public void LearnSpell(uint spellId, bool dependent, uint fromSkill = 0, bool suppressMessaging = false, int? traitDefinitionId = null)
         {
             PlayerSpell spell = m_spells.LookupByKey(spellId);
@@ -2208,6 +2213,11 @@ namespace Game.Entities
             }
             else
                 UpdateQuestObjectiveProgress(QuestObjectiveType.LearnSpell, (int)spellId, 1);
+        }
+
+        public void RemoveSpell<T>(T spellId, bool disabled = false, bool learnLowRank = true, bool suppressMessaging = false) where T : struct, System.Enum
+        {
+            RemoveSpell(Convert.ToUInt32(spellId), disabled, learnLowRank, suppressMessaging);  
         }
 
         public void RemoveSpell(uint spellId, bool disabled = false, bool learnLowRank = true, bool suppressMessaging = false)

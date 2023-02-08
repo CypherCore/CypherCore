@@ -10,21 +10,21 @@ namespace Game.Spells.Events
 {
     public class DelayedCastEvent : BasicEvent
     {
-        private Unit _trigger;
-        private Unit _target;
-        private uint _spellId;
-        private CastSpellExtraArgs _castFlags;
+        public Unit Trigger { get; set; }
+        public Unit Target { get; set; }
+        public uint SpellId { get; set; }
+        public CastSpellExtraArgs CastFlags { get; set; }
         public DelayedCastEvent(Unit trigger, Unit target, uint spellId, CastSpellExtraArgs args)
         {
-            _trigger = trigger;
-            _target = target;
-            _spellId = spellId;
-            _castFlags = args;
+            Trigger = trigger;
+            Target = target;
+            SpellId = spellId;
+            CastFlags = args;
         }
 
         public override bool Execute(ulong e_time, uint p_time)
         {
-            _trigger.CastSpell(_target, _spellId, _castFlags);
+            Trigger.CastSpell(Target, SpellId, CastFlags);
             return true;
         }
     }

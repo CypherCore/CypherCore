@@ -695,6 +695,8 @@ namespace Game.Spells
 
         void Update(uint diff, Unit caster)
         {
+            ForEachAuraScript<IAuraOnUpdate>(u => u.AuraOnUpdate(diff));
+
             if (m_duration > 0)
             {
                 m_duration -= (int)diff;

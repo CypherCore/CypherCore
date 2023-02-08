@@ -384,6 +384,16 @@ namespace Game.Scripting
             return _spell.m_damage;
         }
 
+        public void SetHitDamage(float damage)
+        {
+            SetHitDamage((int)damage);
+        }
+
+        public void SetHitDamage(uint damage)
+        {
+            SetHitDamage((int)damage);
+        }
+
         public void SetHitDamage(int damage)
         {
             if (!IsInModifiableHook())

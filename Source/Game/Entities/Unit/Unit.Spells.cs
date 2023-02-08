@@ -62,6 +62,11 @@ namespace Game.Entities
             return DoneAdvertisedBenefit;
         }
 
+        public uint SpellDamageBonusDone(Unit victim, SpellInfo spellProto, float pdamage, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, uint stack = 1)
+        {
+            return SpellDamageBonusDone(victim, spellProto, (uint)pdamage, damagetype, spellEffectInfo, stack);
+        }
+
         public uint SpellDamageBonusDone(Unit victim, SpellInfo spellProto, uint pdamage, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, uint stack = 1)
         {
             if (spellProto == null || victim == null || damagetype == DamageEffectType.Direct)
@@ -238,6 +243,11 @@ namespace Game.Entities
             }
 
             return DoneTotalMod;
+        }
+
+        public uint SpellDamageBonusTaken(Unit caster, SpellInfo spellProto, float pdamage, DamageEffectType damagetype)
+        {
+            return SpellDamageBonusTaken(caster, spellProto, (uint)pdamage, damagetype);
         }
 
         public uint SpellDamageBonusTaken(Unit caster, SpellInfo spellProto, uint pdamage, DamageEffectType damagetype)
@@ -2642,6 +2652,11 @@ namespace Game.Entities
                 creature.GetAI().OnSpellClick(clicker, ref spellClickHandled);
         }
 
+        public bool HasAura<T>(T spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0) where T : struct, System.Enum
+        {
+            return GetAuraApplication(Convert.ToUInt32(spellId), casterGUID, itemCasterGUID, reqEffMask) != null;
+        }
+
         public bool HasAura(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)
         {
             return GetAuraApplication(spellId, casterGUID, itemCasterGUID, reqEffMask) != null;
@@ -3224,6 +3239,12 @@ namespace Game.Entities
             if (aura.GetOwner() == this)
                 aura.Remove(mode);
         }
+
+        public void RemoveAura<T>(T spellId, ObjectGuid caster = default, uint reqEffMask = 0, AuraRemoveMode removeMode = AuraRemoveMode.Default) where T : struct, System.Enum
+        {
+            RemoveAura(Convert.ToUInt32(spellId), caster, reqEffMask, removeMode);
+        }
+
         public void RemoveAura(uint spellId, ObjectGuid caster = default, uint reqEffMask = 0, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
             m_appliedAuras.CallOnFirstMatch(spellId, (iter) =>
@@ -3815,6 +3836,10 @@ namespace Game.Entities
             return 0;
         }
 
+        public Aura GetAura<T>(T spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0) where T : struct, System.Enum
+        {
+            return GetAura(Convert.ToUInt32(spellId), casterGUID, itemCasterGUID, reqEffMask);
+        }
 
         public Aura GetAura(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)
         {

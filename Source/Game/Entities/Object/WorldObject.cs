@@ -2407,6 +2407,11 @@ namespace Game.Entities
             return CastSpell(null, spellId, triggered);
         }
 
+        public SpellCastResult CastSpell<T>(WorldObject target, T spellId, bool triggered = false) where T : struct, Enum
+        {
+            return CastSpell(target, Convert.ToUInt32(spellId), triggered);
+        }
+
         public SpellCastResult CastSpell(WorldObject target, uint spellId, Spell triggeringSpell)
         {
             CastSpellExtraArgs args = new(true);

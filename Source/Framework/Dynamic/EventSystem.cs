@@ -167,7 +167,7 @@ namespace Framework.Dynamic
         public ulong m_execTime; // planned time of next execution, filled by event handler
     }
 
-    class LambdaBasicEvent : BasicEvent
+    public class LambdaBasicEvent : BasicEvent
     {
         Action _callback;
 

@@ -339,6 +339,11 @@ namespace System.Collections.Generic
             return found;
         }
 
+        public static bool RemoveFirstMatching<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, Func<KeyValuePair<TKey, TValue>, bool> pred)
+        {
+            return RemoveFirstMatching(dict, pred, out var _);
+        }
+
         /// <summary>
         ///     Removes all the entries of the matching expression
         /// </summary>

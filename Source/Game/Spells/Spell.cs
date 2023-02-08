@@ -9484,6 +9484,12 @@ namespace Game.Spells
             return this;
         }
 
+        public CastSpellExtraArgs AddSpellMod(SpellValueMod mod, float val)
+        {
+            SpellValueOverrides.Add(mod, (int)val);
+            return this;
+        }
+
         public CastSpellExtraArgs SetCustomArg(object customArg)
         {
             CustomArg = customArg;
