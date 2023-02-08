@@ -33,6 +33,6 @@ public class spell_mage_arcane_missiles : AuraScript, IHasAuraEffects
 
 	public override void Register()
 	{
-		AuraEffects.Add(new EffectApplyHandler(OnApply, 1, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real));
+		AuraEffects.Add(new AuraEffectApplyHandler(OnApply, 1, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real));
 	}
 }

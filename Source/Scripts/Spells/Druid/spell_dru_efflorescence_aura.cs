@@ -33,6 +33,6 @@ public class spell_dru_efflorescence_aura : AuraScript, IHasAuraEffects
 
 	public override void Register()
 	{
-		AuraEffects.Add(new EffectPeriodicHandler(HandleHeal, 0, AuraType.PeriodicDummy));
+		AuraEffects.Add(new AuraEffectPeriodicHandler(HandleHeal, 0, AuraType.PeriodicDummy));
 	}
 }

@@ -42,7 +42,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(OnApply, 0, AuraType.ModStun, AuraEffectHandleModes.Real));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnApply, 0, AuraType.ModStun, AuraEffectHandleModes.Real));
         }
     }
 }

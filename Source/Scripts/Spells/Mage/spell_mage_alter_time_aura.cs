@@ -21,8 +21,8 @@ internal class spell_mage_alter_time_aura : AuraScript, IHasAuraEffects
 
 	public override void Register()
 	{
-		AuraEffects.Add(new EffectApplyHandler(OnApply, 0, AuraType.OverrideActionbarSpells, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
-		AuraEffects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.OverrideActionbarSpells, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+		AuraEffects.Add(new AuraEffectApplyHandler(OnApply, 0, AuraType.OverrideActionbarSpells, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+		AuraEffects.Add(new AuraEffectApplyHandler(AfterRemove, 0, AuraType.OverrideActionbarSpells, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
 	}
 
 	private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)

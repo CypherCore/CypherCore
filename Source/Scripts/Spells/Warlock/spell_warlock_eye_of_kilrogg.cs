@@ -38,7 +38,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(OnRemove, 1, AuraType.ModInvisibilityDetect, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnRemove, 1, AuraType.ModInvisibilityDetect, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
     }
 }

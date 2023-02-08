@@ -29,7 +29,7 @@ public class spell_dru_essence_of_ghanir : AuraScript, IHasAuraEffects
 
 	public override void Register()
 	{
-		AuraEffects.Add(new EffectCalcSpellModHandler(HandleEffectCalcSpellMod, 0, AuraType.AddPctModifier));
-		AuraEffects.Add(new EffectCalcSpellModHandler(HandleEffectCalcSpellMod, 0, AuraType.AddPctModifier));
+		AuraEffects.Add(new AuraEffectCalcSpellModHandler(HandleEffectCalcSpellMod, 0, AuraType.AddPctModifier));
+		AuraEffects.Add(new AuraEffectCalcSpellModHandler(HandleEffectCalcSpellMod, 0, AuraType.AddPctModifier));
 	}
 }

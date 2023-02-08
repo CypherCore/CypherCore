@@ -23,8 +23,8 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectCalcAmountHandler(CalculateBuffer, 2, AuraType.Dummy));
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 2, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectCalcAmountHandler(CalculateBuffer, 2, AuraType.Dummy));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 2, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void CalculateBuffer(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)

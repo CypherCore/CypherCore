@@ -6106,7 +6106,7 @@ namespace Game.Spells
             if (result == SpellCastResult.SpellCastOk || result == SpellCastResult.UnitNotInfront)
             {
                 // do not check targets for ground-targeted spells (we target them on top of the intended target anyway)
-                if (GetSpellInfo().ExplicitTargetMask.HasAnyFlag((uint)SpellCastTargetFlags.DestLocation))
+                if (GetSpellInfo().ExplicitTargetMask.HasFlag(SpellCastTargetFlags.DestLocation))
                     return true;
                 SelectSpellTargets();
                 //check if among target units, our WANTED target is as well (.only self cast spells return false)

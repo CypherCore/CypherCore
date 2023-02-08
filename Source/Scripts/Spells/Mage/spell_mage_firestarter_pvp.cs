@@ -32,6 +32,6 @@ public class spell_mage_firestarter_pvp : AuraScript, IAuraCheckProc, IHasAuraEf
 	public override void Register()
 	{
 
-		AuraEffects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
+		AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
 	}
 }

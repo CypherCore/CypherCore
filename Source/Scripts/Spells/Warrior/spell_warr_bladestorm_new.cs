@@ -28,7 +28,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectPeriodicHandler(HandlePeriodicDummy, 0, AuraType.PeriodicDummy));
+            AuraEffects.Add(new AuraEffectPeriodicHandler(HandlePeriodicDummy, 0, AuraType.PeriodicDummy));
         }
     }
 }

@@ -89,9 +89,9 @@ namespace Scripts.m_Events.Brewfest
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(OnChange, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.ChangeAmountMask, AuraScriptHookType.EffectAfterApply));
-            AuraEffects.Add(new EffectApplyHandler(OnChange, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.ChangeAmountMask, AuraScriptHookType.EffectRemove));
-            AuraEffects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnChange, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.ChangeAmountMask, AuraScriptHookType.EffectAfterApply));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnChange, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.ChangeAmountMask, AuraScriptHookType.EffectRemove));
+            AuraEffects.Add(new AuraEffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
         }
 
         private void OnChange(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -156,7 +156,7 @@ namespace Scripts.m_Events.Brewfest
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectPeriodicHandler(OnPeriodic, 1, AuraType.PeriodicDummy));
+            AuraEffects.Add(new AuraEffectPeriodicHandler(OnPeriodic, 1, AuraType.PeriodicDummy));
         }
 
         private void OnPeriodic(AuraEffect aurEff)
@@ -222,7 +222,7 @@ namespace Scripts.m_Events.Brewfest
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectApply));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectApply));
         }
 
         private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -249,7 +249,7 @@ namespace Scripts.m_Events.Brewfest
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(OnApply, 0, AuraType.ForceReaction, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnApply, 0, AuraType.ForceReaction, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
         }
 
         private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -265,7 +265,7 @@ namespace Scripts.m_Events.Brewfest
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModDecreaseSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnRemove, 0, AuraType.ModDecreaseSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
 
         private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -350,7 +350,7 @@ namespace Scripts.m_Events.Brewfest
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(OnApply, 1, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnApply, 1, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
         }
 
         private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)

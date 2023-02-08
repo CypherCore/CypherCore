@@ -114,7 +114,7 @@ namespace Scripts.m_Events.PilgrimsBounty
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectPeriodicHandler(HandleTriggerSpell, 2, AuraType.PeriodicTriggerSpell));
+            AuraEffects.Add(new AuraEffectPeriodicHandler(HandleTriggerSpell, 2, AuraType.PeriodicTriggerSpell));
         }
 
         private void HandleTriggerSpell(AuraEffect aurEff)
@@ -488,8 +488,8 @@ namespace Scripts.m_Events.PilgrimsBounty
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
-            AuraEffects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
 
         private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)

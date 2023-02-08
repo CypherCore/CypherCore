@@ -115,9 +115,9 @@ public class spell_dru_rejuvenation_AuraScript : AuraScript, IHasAuraEffects
 	public override void Register()
 	{
 		// Posible Fixed
-		AuraEffects.Add(new EffectApplyHandler(OnApply, 0, AuraType.PeriodicHeal, AuraEffectHandleModes.Real));
-		AuraEffects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.PeriodicHeal, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
-		AuraEffects.Add(new EffectCalcAmountHandler(HandleCalculateAmount, 0, AuraType.PeriodicHeal));
+		AuraEffects.Add(new AuraEffectApplyHandler(OnApply, 0, AuraType.PeriodicHeal, AuraEffectHandleModes.Real));
+		AuraEffects.Add(new AuraEffectApplyHandler(OnRemove, 0, AuraType.PeriodicHeal, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+		AuraEffects.Add(new AuraEffectCalcAmountHandler(HandleCalculateAmount, 0, AuraType.PeriodicHeal));
 
 		//  OnEffectPeriodic += AuraEffectPeriodicFn(spell_dru_rejuvenation::OnPeriodic, 0, AuraType.PeriodicHeal);
 		//  DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_rejuvenation::CalculateAmount, 0, AuraType.PeriodicHeal);

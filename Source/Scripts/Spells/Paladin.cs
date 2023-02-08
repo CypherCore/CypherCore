@@ -111,8 +111,8 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            AuraEffects.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraCheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -201,8 +201,8 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            AuraEffects.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraCheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -307,7 +307,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+            AuraEffects.Add(new AuraEffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
         }
 
         private void HandleEffectPeriodic(AuraEffect aurEff)
@@ -366,7 +366,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -387,8 +387,8 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            AuraEffects.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraCheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -523,7 +523,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -544,8 +544,8 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            AuraEffects.Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.Dummy));
-            AuraEffects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraCheckEffectProcHandler(CheckEffectProc, 0, AuraType.Dummy));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -581,7 +581,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
         public List<IAuraEffectHandler> AuraEffects { get; } = new();
@@ -658,7 +658,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectSplitHandler(Split, 0));
+            AuraEffects.Add(new AuraEffectSplitHandler(Split, 0));
         }
 
         private void Split(AuraEffect aurEff, DamageInfo dmgInfo, ref uint splitAmount)
@@ -683,11 +683,11 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            AuraEffects.Add(new CheckEffectProcHandler(CheckFlashOfLightProc, 0, AuraType.AddPctModifier));
-            AuraEffects.Add(new CheckEffectProcHandler(CheckFlashOfLightProc, 2, AuraType.AddFlatModifier));
+            AuraEffects.Add(new AuraCheckEffectProcHandler(CheckFlashOfLightProc, 0, AuraType.AddPctModifier));
+            AuraEffects.Add(new AuraCheckEffectProcHandler(CheckFlashOfLightProc, 2, AuraType.AddFlatModifier));
 
-            AuraEffects.Add(new CheckEffectProcHandler(CheckHolyLightProc, 1, AuraType.Dummy));
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraCheckEffectProcHandler(CheckHolyLightProc, 1, AuraType.Dummy));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private bool CheckFlashOfLightProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -928,7 +928,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -950,7 +950,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1040,7 +1040,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         public List<IAuraEffectHandler> AuraEffects { get; } = new();
@@ -1116,7 +1116,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+            AuraEffects.Add(new AuraEffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
         }
 
         private void HandleEffectPeriodic(AuraEffect aurEff)
@@ -1145,8 +1145,8 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            AuraEffects.Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.Dummy));
-            AuraEffects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraCheckEffectProcHandler(CheckEffectProc, 0, AuraType.Dummy));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1182,7 +1182,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo procInfo)
@@ -1198,7 +1198,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            AuraEffects.Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.ProcTriggerSpell));
+            AuraEffects.Add(new AuraCheckEffectProcHandler(CheckEffectProc, 0, AuraType.ProcTriggerSpell));
         }
 
         private bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1245,7 +1245,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1299,7 +1299,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1337,7 +1337,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
         private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo procInfo)

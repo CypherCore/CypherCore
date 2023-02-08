@@ -26,7 +26,7 @@ namespace Scripts.Spells.Warlock
         }
         public override void Register()
         {
-            AuraEffects.Add(new EffectPeriodicHandler(OnTick, 1, AuraType.PeriodicDamagePercent));
+            AuraEffects.Add(new AuraEffectPeriodicHandler(OnTick, 1, AuraType.PeriodicDamagePercent));
         }
     }
 

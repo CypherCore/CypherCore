@@ -578,7 +578,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 1, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 1, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -600,7 +600,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
+            AuraEffects.Add(new AuraEffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
         }
 
         private void PeriodicTick(AuraEffect aurEff)
@@ -687,7 +687,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private bool CheckProc(ProcEventInfo eventInfo)
@@ -741,8 +741,8 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-            AuraEffects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -783,7 +783,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModThreat));
+            AuraEffects.Add(new AuraEffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModThreat));
         }
 
         private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -817,7 +817,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -902,7 +902,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectPeriodicHandler(HandlePeriodicDummy, 0, AuraType.PeriodicDummy));
+            AuraEffects.Add(new AuraEffectPeriodicHandler(HandlePeriodicDummy, 0, AuraType.PeriodicDummy));
         }
 
         private void HandlePeriodicDummy(AuraEffect aurEff)
@@ -948,7 +948,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         public List<IAuraEffectHandler> AuraEffects { get; } = new();
@@ -999,7 +999,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleStackDrop, 0, AuraType.ModRating, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleStackDrop, 0, AuraType.ModRating, AuraScriptHookType.EffectProc));
         }
 
         private void HandleStackDrop(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1067,7 +1067,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1267,7 +1267,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 2, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 2, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1338,7 +1338,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            AuraEffects.Add(new AuraEffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
         }
 
         private void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1359,7 +1359,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Transform, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            AuraEffects.Add(new AuraEffectApplyHandler(AfterApply, 0, AuraType.Transform, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
         }
 
         private void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1396,7 +1396,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1436,7 +1436,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
+            AuraEffects.Add(new AuraEffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
         }
 
         private void PeriodicTick(AuraEffect aurEff)
@@ -1474,7 +1474,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1593,7 +1593,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1674,7 +1674,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1822,7 +1822,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1900,7 +1900,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         public List<IAuraEffectHandler> AuraEffects { get; } = new();
@@ -2032,7 +2032,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
         public List<IAuraEffectHandler> AuraEffects { get; } = new();
@@ -2070,7 +2070,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -2123,8 +2123,8 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
-            AuraEffects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         public List<IAuraEffectHandler> AuraEffects { get; } = new();
@@ -2463,8 +2463,8 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-            AuraEffects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         public List<IAuraEffectHandler> AuraEffects { get; } = new();
@@ -2503,8 +2503,8 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(OnStackChange, 0, AuraType.ModStat, AuraEffectHandleModes.Real | AuraEffectHandleModes.Reapply, AuraScriptHookType.EffectAfterApply));
-            AuraEffects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModStat, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnStackChange, 0, AuraType.ModStat, AuraEffectHandleModes.Real | AuraEffectHandleModes.Reapply, AuraScriptHookType.EffectAfterApply));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnRemove, 0, AuraType.ModStat, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void OnStackChange(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -2612,7 +2612,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -2633,7 +2633,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModThreat));
+            AuraEffects.Add(new AuraEffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModThreat));
         }
 
         private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -2936,7 +2936,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectPeriodicHandler(HandleTriggerSpell, 1, AuraType.PeriodicTriggerSpell));
+            AuraEffects.Add(new AuraEffectPeriodicHandler(HandleTriggerSpell, 1, AuraType.PeriodicTriggerSpell));
         }
 
         private void HandleTriggerSpell(AuraEffect aurEff)
@@ -3272,8 +3272,8 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(HandleApply, 1, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
-            AuraEffects.Add(new EffectPeriodicHandler(HandlePeriodicDummy, 1, AuraType.PeriodicTriggerSpell));
+            AuraEffects.Add(new AuraEffectApplyHandler(HandleApply, 1, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            AuraEffects.Add(new AuraEffectPeriodicHandler(HandlePeriodicDummy, 1, AuraType.PeriodicTriggerSpell));
         }
 
         private void HandleApply(AuraEffect effect, AuraEffectHandleModes mode)
@@ -3527,7 +3527,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -3556,7 +3556,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -3619,7 +3619,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         public List<IAuraEffectHandler> AuraEffects { get; } = new();
@@ -3682,7 +3682,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -3743,8 +3743,8 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
-            AuraEffects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnRemove, 0, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -3788,7 +3788,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -3844,7 +3844,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -4054,7 +4054,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleStackDrop, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleStackDrop, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         public List<IAuraEffectHandler> AuraEffects { get; } = new();
@@ -4083,7 +4083,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModTotalStatPercentage));
+            AuraEffects.Add(new AuraEffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModTotalStatPercentage));
         }
 
         private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -4112,7 +4112,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModDamagePercentDone));
+            AuraEffects.Add(new AuraEffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModDamagePercentDone));
         }
 
         private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -4136,7 +4136,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnRemove, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
 
         private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
@@ -4157,7 +4157,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnRemove, 0, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
 
         private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
@@ -4178,7 +4178,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnRemove, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
 
         private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
@@ -4199,7 +4199,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnRemove, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
 
         private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
@@ -4224,7 +4224,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Mounted, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnRemove, 0, AuraType.Mounted, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
 
         private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
@@ -4246,7 +4246,7 @@ namespace Scripts.Spells.Items
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnRemove, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
 
         private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)

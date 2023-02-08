@@ -385,7 +385,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectPeriodicHandler(OnTrigger, 1, AuraType.PeriodicTriggerSpell));
+            AuraEffects.Add(new AuraEffectPeriodicHandler(OnTrigger, 1, AuraType.PeriodicTriggerSpell));
         }
 
         private void OnTrigger(AuraEffect aurEff)

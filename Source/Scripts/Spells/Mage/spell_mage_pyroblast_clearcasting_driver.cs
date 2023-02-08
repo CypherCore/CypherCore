@@ -66,7 +66,7 @@ public class spell_mage_pyroblast_clearcasting_driver : AuraScript, IAuraCheckPr
 
 	public override void Register()
 	{
-		AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+		AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
 
 	}
 }

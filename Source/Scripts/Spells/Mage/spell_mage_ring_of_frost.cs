@@ -20,8 +20,8 @@ internal class spell_mage_ring_of_frost : AuraScript, IHasAuraEffects
 
 	public override void Register()
 	{
-		AuraEffects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.ProcTriggerSpell));
-		AuraEffects.Add(new EffectApplyHandler(Apply, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectApply));
+		AuraEffects.Add(new AuraEffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.ProcTriggerSpell));
+		AuraEffects.Add(new AuraEffectApplyHandler(Apply, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectApply));
 	}
 
 	private void HandleEffectPeriodic(AuraEffect aurEff)

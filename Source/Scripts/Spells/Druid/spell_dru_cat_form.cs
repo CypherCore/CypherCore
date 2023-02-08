@@ -21,7 +21,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(HandleAfterRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new AuraEffectApplyHandler(HandleAfterRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void HandleAfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)

@@ -8,13 +8,13 @@ namespace Game.Scripting.Interfaces.IAura
         void HandleCalcAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated);
     }
 
-    public class EffectCalcAmountHandler : AuraEffectHandler, IAuraCalcAmount
+    public class AuraEffectCalcAmountHandler : AuraEffectHandler, IAuraCalcAmount
     {
         public delegate void AuraEffectCalcAmountDelegate(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated);
 
         private readonly AuraEffectCalcAmountDelegate _fn;
 
-        public EffectCalcAmountHandler(AuraEffectCalcAmountDelegate fn, uint effectIndex, AuraType auraType) : base(effectIndex, auraType, AuraScriptHookType.EffectCalcAmount)
+        public AuraEffectCalcAmountHandler(AuraEffectCalcAmountDelegate fn, uint effectIndex, AuraType auraType) : base(effectIndex, auraType, AuraScriptHookType.EffectCalcAmount)
         {
             _fn = fn;
         }

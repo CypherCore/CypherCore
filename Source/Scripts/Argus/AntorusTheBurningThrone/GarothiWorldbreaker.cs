@@ -512,7 +512,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectPeriodicHandler(HandlePeriodic, 1, AuraType.PeriodicDummy));
+            AuraEffects.Add(new AuraEffectPeriodicHandler(HandlePeriodic, 1, AuraType.PeriodicDummy));
         }
 
         private void HandlePeriodic(AuraEffect aurEff)
@@ -575,7 +575,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new AuraEffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -602,7 +602,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicTriggerSpell));
+            AuraEffects.Add(new AuraEffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicTriggerSpell));
         }
 
         private void HandlePeriodic(AuraEffect aurEff)
@@ -715,7 +715,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new AuraEffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -742,7 +742,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -831,7 +831,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.AreaTrigger, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new AuraEffectApplyHandler(AfterRemove, 0, AuraType.AreaTrigger, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)

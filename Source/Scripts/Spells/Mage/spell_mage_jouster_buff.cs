@@ -29,6 +29,6 @@ public class spell_mage_jouster_buff : AuraScript, IHasAuraEffects
 
 	public override void Register()
 	{
-		AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModDamagePercentTaken));
+		AuraEffects.Add(new AuraEffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModDamagePercentTaken));
 	}
 }

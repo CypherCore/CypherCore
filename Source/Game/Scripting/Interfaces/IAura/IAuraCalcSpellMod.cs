@@ -9,13 +9,13 @@ namespace Game.Scripting.Interfaces.IAura
         void CalcSpellMod(AuraEffect aura, ref SpellModifier spellMod);
     }
 
-    public class EffectCalcSpellModHandler : AuraEffectHandler, IAuraCalcSpellMod
+    public class AuraEffectCalcSpellModHandler : AuraEffectHandler, IAuraCalcSpellMod
     {
         public delegate void AuraEffectCalcSpellModDelegate(AuraEffect aura, ref SpellModifier spellMod);
 
         private readonly AuraEffectCalcSpellModDelegate _fn;
 
-        public EffectCalcSpellModHandler(AuraEffectCalcSpellModDelegate fn, uint effectIndex, AuraType auraType) : base(effectIndex, auraType, AuraScriptHookType.EffectCalcSpellmod)
+        public AuraEffectCalcSpellModHandler(AuraEffectCalcSpellModDelegate fn, uint effectIndex, AuraType auraType) : base(effectIndex, auraType, AuraScriptHookType.EffectCalcSpellmod)
         {
             _fn = fn;
         }

@@ -8,13 +8,13 @@ namespace Game.Scripting.Interfaces.IAura
         void UpdatePeriodic(AuraEffect aurEff);
     }
 
-    public class EffectUpdatePeriodicHandler : AuraEffectHandler, IAuraUpdatePeriodic
+    public class AuraEffectUpdatePeriodicHandler : AuraEffectHandler, IAuraUpdatePeriodic
     {
         public delegate void AuraEffectUpdatePeriodicDelegate(AuraEffect aura);
 
         private readonly AuraEffectUpdatePeriodicDelegate _fn;
 
-        public EffectUpdatePeriodicHandler(AuraEffectUpdatePeriodicDelegate fn, uint effectIndex, AuraType auraType) : base(effectIndex, auraType, AuraScriptHookType.EffectUpdatePeriodic)
+        public AuraEffectUpdatePeriodicHandler(AuraEffectUpdatePeriodicDelegate fn, uint effectIndex, AuraType auraType) : base(effectIndex, auraType, AuraScriptHookType.EffectUpdatePeriodic)
         {
             _fn = fn;
         }

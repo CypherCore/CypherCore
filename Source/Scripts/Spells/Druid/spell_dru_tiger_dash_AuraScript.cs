@@ -16,7 +16,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectPeriodicHandler(HandlePeriodic, 1, AuraType.PeriodicDummy));
+            AuraEffects.Add(new AuraEffectPeriodicHandler(HandlePeriodic, 1, AuraType.PeriodicDummy));
         }
 
         private void HandlePeriodic(AuraEffect aurEff)

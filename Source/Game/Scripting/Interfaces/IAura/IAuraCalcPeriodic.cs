@@ -8,13 +8,13 @@ namespace Game.Scripting.Interfaces.IAura
         void CalcPeriodic(AuraEffect aura, ref bool isPeriodic, ref int amplitude);
     }
 
-    public class EffectCalcPeriodicHandler : AuraEffectHandler, IAuraCalcPeriodic
+    public class AuraEffectCalcPeriodicHandler : AuraEffectHandler, IAuraCalcPeriodic
     {
         public delegate void AuraEffectCalcPeriodicDelegate(AuraEffect aura, ref bool isPeriodic, ref int amplitude);
 
         private readonly AuraEffectCalcPeriodicDelegate _fn;
 
-        public EffectCalcPeriodicHandler(AuraEffectCalcPeriodicDelegate fn, uint effectIndex, AuraType auraType) : base(effectIndex, auraType, AuraScriptHookType.EffectCalcPeriodic)
+        public AuraEffectCalcPeriodicHandler(AuraEffectCalcPeriodicDelegate fn, uint effectIndex, AuraType auraType) : base(effectIndex, auraType, AuraScriptHookType.EffectCalcPeriodic)
         {
             _fn = fn;
         }

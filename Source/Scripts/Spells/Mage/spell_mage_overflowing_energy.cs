@@ -50,6 +50,6 @@ public class spell_mage_overflowing_energy : AuraScript, IAuraCheckProc, IHasAur
 	public override void Register()
 	{
 
-		AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ModCritChanceForCaster, AuraScriptHookType.EffectProc));
+		AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.ModCritChanceForCaster, AuraScriptHookType.EffectProc));
 	}
 }

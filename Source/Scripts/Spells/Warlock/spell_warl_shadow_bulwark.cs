@@ -22,7 +22,7 @@ namespace Scripts.Spells.Warlock
         }
         public override void Register()
         {
-            AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModIncreaseHealthPercent));
+            AuraEffects.Add(new AuraEffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModIncreaseHealthPercent));
         }
     }
 }

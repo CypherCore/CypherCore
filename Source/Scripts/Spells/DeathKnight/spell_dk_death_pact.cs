@@ -1,0 +1,27 @@
+﻿using System.Collections.Generic;
+using Framework.Constants;
+using Game.Entities;
+using Game.Scripting;
+using Game.Scripting.Interfaces.IAura;
+using Game.Spells;
+
+namespace Scripts.Spells.DeathKnight;
+
+[Script] // 48743 - Death Pact
+internal class spell_dk_death_pact : AuraScript, IHasAuraEffects
+{
+	public List<IAuraEffectHandler> AuraEffects { get; } = new();
+
+	public override void Register()
+	{
+		AuraEffects.Add(new AuraEffectCalcAmountHandler(HandleCalcAmount, 1, AuraType.SchoolHealAbsorb));
+	}
+
+	private void HandleCalcAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+	{
+		Unit caster = GetCaster();
+
+		if (caster)
+			amount = (int)caster.CountPctFromMaxHealth(amount);
+	}
+}

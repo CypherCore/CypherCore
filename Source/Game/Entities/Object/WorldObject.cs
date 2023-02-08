@@ -2402,9 +2402,34 @@ namespace Game.Entities
             return my_faction.IsNeutralToAll();
         }
 
+        public SpellCastResult CastSpell(uint spellId, bool triggered = false)
+        {
+            return CastSpell(null, spellId, triggered);
+        }
         public SpellCastResult CastSpell(WorldObject target, uint spellId, bool triggered = false)
         {
             CastSpellExtraArgs args = new(triggered);
+            return CastSpell(target, spellId, args);
+        }
+
+        public SpellCastResult CastSpell(WorldObject target, uint spellId, TriggerCastFlags triggerCastFlags, bool triggered = false)
+        {
+            CastSpellExtraArgs args = new(triggered);
+            args.TriggerFlags = triggerCastFlags;
+            return CastSpell(target, spellId, args);
+        }
+
+        public SpellCastResult CastSpell(WorldObject target, uint spellId, int bp0Val, bool triggered = false)
+        {
+            CastSpellExtraArgs args = new(triggered);
+            args.SpellValueOverrides[SpellValueMod.BasePoint0] = bp0Val;
+            return CastSpell(target, spellId, args);
+        }
+
+        public SpellCastResult CastSpell(WorldObject target, uint spellId, SpellValueMod spellValueMod, int bp0Val, bool triggered = false)
+        {
+            CastSpellExtraArgs args = new(triggered);
+            args.SpellValueOverrides[spellValueMod] = bp0Val;
             return CastSpell(target, spellId, args);
         }
 

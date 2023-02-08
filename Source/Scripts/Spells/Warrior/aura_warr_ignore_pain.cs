@@ -61,8 +61,8 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectCalcAmountHandler(CalcAmount, 0, AuraType.SchoolAbsorb));
-            AuraEffects.Add(new EffectAbsorbHandler(OnAbsorb, 0));
+            AuraEffects.Add(new AuraEffectCalcAmountHandler(CalcAmount, 0, AuraType.SchoolAbsorb));
+            AuraEffects.Add(new AuraEffectAbsorbHandler(OnAbsorb, 0));
         }
     }
 }

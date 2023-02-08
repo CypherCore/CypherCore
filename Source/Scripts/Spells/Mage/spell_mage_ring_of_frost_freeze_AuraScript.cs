@@ -18,7 +18,7 @@ internal class spell_mage_ring_of_frost_freeze_AuraScript : AuraScript, IHasAura
 
 	public override void Register()
 	{
-		AuraEffects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModStun, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+		AuraEffects.Add(new AuraEffectApplyHandler(OnRemove, 0, AuraType.ModStun, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
 	}
 
 	private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)

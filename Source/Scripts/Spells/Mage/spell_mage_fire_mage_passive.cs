@@ -64,7 +64,7 @@ public class spell_mage_fire_mage_passive : AuraScript, IHasAuraEffects
 
 	public override void Register()
 	{
-		AuraEffects.Add(new EffectApplyHandler(HandleApply, 4, AuraType.Dummy, AuraEffectHandleModes.Real));
-		AuraEffects.Add(new EffectApplyHandler(HandleRemove, 4, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+		AuraEffects.Add(new AuraEffectApplyHandler(HandleApply, 4, AuraType.Dummy, AuraEffectHandleModes.Real));
+		AuraEffects.Add(new AuraEffectApplyHandler(HandleRemove, 4, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
 	}
 }

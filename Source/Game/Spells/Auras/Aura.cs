@@ -2018,6 +2018,12 @@ namespace Game.Spells
             return _dummy;
         }
 
+        public void ForEachAuraScript<T>(Action<T> action) where T : IAuraScript
+        {
+            foreach(T script in GetAuraScripts<T>())
+                action.Invoke(script);
+        }
+
         private void AddAuraEffect(uint index, IAuraScript script, IAuraEffectHandler effect)
         {
             if (!_effectHandlers.TryGetValue(index, out var effecTypes))
@@ -2044,7 +2050,10 @@ namespace Game.Spells
             return _dummyAuraEffects;
         }
 
-
+        public bool UsesScriptType<T>()
+        {
+            return m_auraScriptsByType.ContainsKey(typeof(T));
+        }    
 
         public virtual void Remove(AuraRemoveMode removeMode = AuraRemoveMode.Default) { }
         #region CallScripts
@@ -2230,7 +2239,7 @@ namespace Game.Spells
             {
                 auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectAbsorb, aurApp);
 
-                ((IEffectAbsorb)auraScript.Item2).HandleAbsorb(aurEff, dmgInfo, ref absorbAmount);
+                ((IAuraEffectAbsorb)auraScript.Item2).HandleAbsorb(aurEff, dmgInfo, ref absorbAmount);
 
                 defaultPrevented = auraScript.Item1._IsDefaultActionPrevented();
                 auraScript.Item1._FinishScriptCall();
@@ -2243,7 +2252,7 @@ namespace Game.Spells
             {
                 auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectAfterAbsorb, aurApp);
 
-                ((IEffectAbsorb)auraScript.Item2).HandleAbsorb(aurEff, dmgInfo, ref absorbAmount);
+                ((IAuraEffectAbsorb)auraScript.Item2).HandleAbsorb(aurEff, dmgInfo, ref absorbAmount);
 
                 auraScript.Item1._FinishScriptCall();
             }
@@ -2255,7 +2264,7 @@ namespace Game.Spells
             {
                 auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectAbsorb, aurApp);
 
-                ((IEffectAbsorbHeal)auraScript.Item2).HandleAbsorb(aurEff, healInfo, ref absorbAmount);
+                ((IAuraEffectAbsorbHeal)auraScript.Item2).HandleAbsorb(aurEff, healInfo, ref absorbAmount);
 
                 defaultPrevented = auraScript.Item1._IsDefaultActionPrevented();
                 auraScript.Item1._FinishScriptCall();
@@ -2268,7 +2277,7 @@ namespace Game.Spells
             {
                 auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectAfterAbsorbHeal, aurApp);
 
-                ((IEffectAbsorbHeal)auraScript.Item2).HandleAbsorb(aurEff, healInfo, ref absorbAmount);
+                ((IAuraEffectAbsorbHeal)auraScript.Item2).HandleAbsorb(aurEff, healInfo, ref absorbAmount);
 
                 auraScript.Item1._FinishScriptCall();
             }
@@ -2280,7 +2289,7 @@ namespace Game.Spells
             {
                 auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectManaShield, aurApp);
 
-                ((IEffectAbsorb)auraScript.Item2).HandleAbsorb(aurEff, dmgInfo, ref absorbAmount);
+                ((IAuraEffectAbsorb)auraScript.Item2).HandleAbsorb(aurEff, dmgInfo, ref absorbAmount);
 
                 auraScript.Item1._FinishScriptCall();
             }
@@ -2292,7 +2301,7 @@ namespace Game.Spells
             {
                 auraScript.Item1._PrepareScriptCall(AuraScriptHookType.EffectAfterManaShield, aurApp);
 
-                ((IEffectAbsorb)auraScript.Item2).HandleAbsorb(aurEff, dmgInfo, ref absorbAmount);
+                ((IAuraEffectAbsorb)auraScript.Item2).HandleAbsorb(aurEff, dmgInfo, ref absorbAmount);
 
                 auraScript.Item1._FinishScriptCall();
             }

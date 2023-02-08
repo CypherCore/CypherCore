@@ -9,13 +9,13 @@ namespace Game.Scripting.Interfaces.IAura
         void Split(AuraEffect aura, DamageInfo damageInfo, ref uint splitAmount);
     }
 
-    public class EffectSplitHandler : AuraEffectHandler, IAuraSplitHandler
+    public class AuraEffectSplitHandler : AuraEffectHandler, IAuraSplitHandler
     {
         public delegate void AuraEffectSplitDelegate(AuraEffect aura, DamageInfo damageInfo, ref uint splitAmount);
 
         private readonly AuraEffectSplitDelegate _fn;
 
-        public EffectSplitHandler(AuraEffectSplitDelegate fn, uint effectIndex) : base(effectIndex, AuraType.SplitDamagePct, AuraScriptHookType.EffectSplit)
+        public AuraEffectSplitHandler(AuraEffectSplitDelegate fn, uint effectIndex) : base(effectIndex, AuraType.SplitDamagePct, AuraScriptHookType.EffectSplit)
         {
             _fn = fn;
         }

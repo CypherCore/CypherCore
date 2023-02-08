@@ -56,7 +56,7 @@ public class spell_dru_primal_vitality : AuraScript, IHasAuraEffects
 	public override void Register()
 	{
 
-		AuraEffects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+		AuraEffects.Add(new AuraEffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
 	}
 
 }

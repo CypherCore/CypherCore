@@ -19,7 +19,7 @@ internal class spell_mage_firestarter_dots : AuraScript, IHasAuraEffects
 
 	public override void Register()
 	{
-		AuraEffects.Add(new EffectCalcCritChanceHandler(CalcCritChance, SpellConst.EffectAll, AuraType.PeriodicDamage));
+		AuraEffects.Add(new AuraEffectCalcCritChanceHandler(CalcCritChance, SpellConst.EffectAll, AuraType.PeriodicDamage));
 	}
 
 	private void CalcCritChance(AuraEffect aurEff, Unit victim, ref float critChance)

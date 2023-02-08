@@ -19,7 +19,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectAbsorbHandler(Absorb, 0));
+            AuraEffects.Add(new AuraEffectAbsorbHandler(Absorb, 0));
         }
     }
 }

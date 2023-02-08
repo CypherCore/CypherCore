@@ -37,8 +37,8 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(this.OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask));
-            AuraEffects.Add(new EffectPeriodicHandler(this.OnTick, 2, AuraType.PeriodicDummy));
+            AuraEffects.Add(new AuraEffectApplyHandler(this.OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask));
+            AuraEffects.Add(new AuraEffectPeriodicHandler(this.OnTick, 2, AuraType.PeriodicDummy));
         }
     }
 }

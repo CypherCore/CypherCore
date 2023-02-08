@@ -34,8 +34,8 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(OnApply, 0, AuraType.MeleeSlow, AuraEffectHandleModes.Real));
-            AuraEffects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.MeleeSlow, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnApply, 0, AuraType.MeleeSlow, AuraEffectHandleModes.Real));
+            AuraEffects.Add(new AuraEffectApplyHandler(HandleRemove, 0, AuraType.MeleeSlow, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
     }
 }

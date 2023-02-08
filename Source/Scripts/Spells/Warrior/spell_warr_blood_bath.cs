@@ -97,7 +97,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleOnProc, 1, AuraType.None, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleOnProc, 1, AuraType.None, AuraScriptHookType.EffectProc));
         }
     }
 }

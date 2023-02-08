@@ -20,10 +20,10 @@ internal class spell_mage_fingers_of_frost_AuraScript : AuraScript, IHasAuraEffe
 
 	public override void Register()
 	{
-		AuraEffects.Add(new CheckEffectProcHandler(CheckFrostboltProc, 0, AuraType.Dummy));
-		AuraEffects.Add(new CheckEffectProcHandler(CheckFrozenOrbProc, 1, AuraType.Dummy));
-		AuraEffects.Add(new EffectProcHandler(Trigger, 0, AuraType.Dummy, AuraScriptHookType.EffectAfterProc));
-		AuraEffects.Add(new EffectProcHandler(Trigger, 1, AuraType.Dummy, AuraScriptHookType.EffectAfterProc));
+		AuraEffects.Add(new AuraCheckEffectProcHandler(CheckFrostboltProc, 0, AuraType.Dummy));
+		AuraEffects.Add(new AuraCheckEffectProcHandler(CheckFrozenOrbProc, 1, AuraType.Dummy));
+		AuraEffects.Add(new AuraEffectProcHandler(Trigger, 0, AuraType.Dummy, AuraScriptHookType.EffectAfterProc));
+		AuraEffects.Add(new AuraEffectProcHandler(Trigger, 1, AuraType.Dummy, AuraScriptHookType.EffectAfterProc));
 	}
 
 	private bool CheckFrostboltProc(AuraEffect aurEff, ProcEventInfo eventInfo)

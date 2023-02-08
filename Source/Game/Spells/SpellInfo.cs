@@ -1343,7 +1343,7 @@ namespace Game.Spells
 
         public SpellCastTargetFlags GetExplicitTargetMask()
         {
-            return (SpellCastTargetFlags)ExplicitTargetMask;
+            return ExplicitTargetMask;
         }
 
         public AuraStateType GetAuraState()
@@ -3332,7 +3332,7 @@ namespace Game.Spells
                 targetMask |= effectTargetMask;
             }
 
-            ExplicitTargetMask = (uint)targetMask;
+            ExplicitTargetMask = targetMask;
         }
 
         public bool _isPositiveTarget(SpellEffectInfo effect)
@@ -4047,7 +4047,7 @@ namespace Game.Spells
 
         // SpellScalingEntry
         public ScalingInfo Scaling;
-        public uint ExplicitTargetMask { get; set; }
+        public SpellCastTargetFlags ExplicitTargetMask { get; set; }
         public SpellChainNode ChainEntry { get; set; }
 
         List<SpellEffectInfo> _effects = new();

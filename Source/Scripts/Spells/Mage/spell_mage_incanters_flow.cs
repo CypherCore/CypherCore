@@ -19,7 +19,7 @@ internal class spell_mage_incanters_flow : AuraScript, IHasAuraEffects
 
 	public override void Register()
 	{
-		AuraEffects.Add(new EffectPeriodicHandler(HandlePeriodicTick, 0, AuraType.PeriodicDummy));
+		AuraEffects.Add(new AuraEffectPeriodicHandler(HandlePeriodicTick, 0, AuraType.PeriodicDummy));
 	}
 
 	private void HandlePeriodicTick(AuraEffect aurEff)

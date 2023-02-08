@@ -43,6 +43,6 @@ public class spell_mage_snowdrift : AuraScript, IHasAuraEffects
 
 	public override void Register()
 	{
-		AuraEffects.Add(new EffectPeriodicHandler(OnTick, 0, AuraType.PeriodicDamage));
+		AuraEffects.Add(new AuraEffectPeriodicHandler(OnTick, 0, AuraType.PeriodicDamage));
 	}
 }

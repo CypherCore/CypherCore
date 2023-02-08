@@ -41,7 +41,7 @@ public class spell_druid_earthwarden_triggered : AuraScript, IHasAuraEffects
 
 	public override void Register()
 	{
-		AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
-		AuraEffects.Add(new EffectAbsorbHandler(Absorb, 0));
+		AuraEffects.Add(new AuraEffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
+		AuraEffects.Add(new AuraEffectAbsorbHandler(Absorb, 0));
 	}
 }

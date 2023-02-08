@@ -46,7 +46,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.Dummy));
+            AuraEffects.Add(new AuraEffectPeriodicHandler(PeriodicTick, 0, AuraType.Dummy));
         }
     }
 }

@@ -19,7 +19,7 @@ internal class spell_mage_imp_mana_gems : AuraScript, IHasAuraEffects
 
 	public override void Register()
 	{
-		AuraEffects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
+		AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
 	}
 
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)

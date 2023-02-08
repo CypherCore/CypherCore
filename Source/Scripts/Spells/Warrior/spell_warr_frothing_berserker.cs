@@ -20,10 +20,10 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 1, AuraType.AddFlatModifier, AuraScriptHookType.EffectProc));
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 2, AuraType.AddFlatModifier, AuraScriptHookType.EffectProc));
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 3, AuraType.AddFlatModifier, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 1, AuraType.AddFlatModifier, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 2, AuraType.AddFlatModifier, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 3, AuraType.AddFlatModifier, AuraScriptHookType.EffectProc));
         }
     }
 }

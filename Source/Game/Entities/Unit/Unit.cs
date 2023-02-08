@@ -1812,6 +1812,41 @@ namespace Game.Entities
 
         public Race GetRace() { return (Race)(byte)m_unitData.Race; }
         public void SetRace(Race race) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Race), (byte)race); }
+
+        public bool IsAlliedRace()
+        {
+            var player = ToPlayer();
+
+            if (player == null) 
+                return false;
+
+            var race = GetRace();
+            /* pandaren death knight (basically same thing as allied death knight) */
+            if ((race == Race.PandarenAlliance || race == Race.PandarenHorde || race == Race.PandarenNeutral) && GetClass() == Class.Deathknight)
+            {
+                return true;
+            }
+
+            /* other allied races */
+            switch (race)
+            {
+                case Race.Nightborne:
+                case Race.HighmountainTauren:
+                case Race.VoidElf:
+                case Race.LightforgedDraenei:
+                case Race.ZandalariTroll:
+                case Race.KulTiran:
+                case Race.DarkIronDwarf:
+                case Race.Vulpera:
+                case Race.MagharOrc:
+                case Race.MechaGnome:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+
         public Class GetClass() { return (Class)(byte)m_unitData.ClassId; }
         public void SetClass(Class classId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ClassId), (byte)classId); }
         public uint GetClassMask() { return (uint)(1 << ((int)GetClass() - 1)); }

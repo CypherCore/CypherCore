@@ -29,6 +29,6 @@ public class spell_mage_chilled : AuraScript, IHasAuraEffects
 
 	public override void Register()
 	{
-		AuraEffects.Add(new EffectApplyHandler(HandleApply, 0, AuraType.ModDecreaseSpeed, AuraEffectHandleModes.RealOrReapplyMask));
+		AuraEffects.Add(new AuraEffectApplyHandler(HandleApply, 0, AuraType.ModDecreaseSpeed, AuraEffectHandleModes.RealOrReapplyMask));
 	}
 }

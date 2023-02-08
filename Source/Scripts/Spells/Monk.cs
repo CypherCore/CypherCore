@@ -46,7 +46,7 @@ namespace Scripts.Spells.Monk
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectPeriodicHandler(OnTick, 0, AuraType.PeriodicDamage));
+            AuraEffects.Add(new AuraEffectPeriodicHandler(OnTick, 0, AuraType.PeriodicDamage));
         }
 
         private void OnTick(AuraEffect aurEff)
@@ -86,7 +86,7 @@ namespace Scripts.Spells.Monk
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         public List<IAuraEffectHandler> AuraEffects { get; } = new();
@@ -190,14 +190,14 @@ namespace Scripts.Spells.Monk
         public override void Register()
         {
             // Values need manual correction
-            AuraEffects.Add(new EffectCalcAmountHandler(CalcMovementAmount, 0, AuraType.ModSpeedNoControl));
-            AuraEffects.Add(new EffectCalcAmountHandler(CalcMovementAmount, 2, AuraType.ModMinimumSpeed));
-            AuraEffects.Add(new EffectCalcAmountHandler(CalcImmunityAmount, 5, AuraType.MechanicImmunity));
-            AuraEffects.Add(new EffectCalcAmountHandler(CalcImmunityAmount, 6, AuraType.MechanicImmunity));
+            AuraEffects.Add(new AuraEffectCalcAmountHandler(CalcMovementAmount, 0, AuraType.ModSpeedNoControl));
+            AuraEffects.Add(new AuraEffectCalcAmountHandler(CalcMovementAmount, 2, AuraType.ModMinimumSpeed));
+            AuraEffects.Add(new AuraEffectCalcAmountHandler(CalcImmunityAmount, 5, AuraType.MechanicImmunity));
+            AuraEffects.Add(new AuraEffectCalcAmountHandler(CalcImmunityAmount, 6, AuraType.MechanicImmunity));
 
             // This is a special aura that sets backward run speed equal to forward speed
-            AuraEffects.Add(new EffectApplyHandler(ChangeRunBackSpeed, 4, AuraType.UseNormalMovementSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
-            AuraEffects.Add(new EffectApplyHandler(RestoreRunBackSpeed, 4, AuraType.UseNormalMovementSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new AuraEffectApplyHandler(ChangeRunBackSpeed, 4, AuraType.UseNormalMovementSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            AuraEffects.Add(new AuraEffectApplyHandler(RestoreRunBackSpeed, 4, AuraType.UseNormalMovementSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void CalcMovementAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -233,8 +233,8 @@ namespace Scripts.Spells.Monk
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectAbsorbHandler(AbsorbNormal, 1, false, AuraScriptHookType.EffectAbsorb));
-            AuraEffects.Add(new EffectAbsorbHandler(AbsorbMagic, 2, false, AuraScriptHookType.EffectAbsorb));
+            AuraEffects.Add(new AuraEffectAbsorbHandler(AbsorbNormal, 1, false, AuraScriptHookType.EffectAbsorb));
+            AuraEffects.Add(new AuraEffectAbsorbHandler(AbsorbMagic, 2, false, AuraScriptHookType.EffectAbsorb));
         }
 
         public static Aura FindExistingStaggerEffect(Unit unit)
@@ -373,7 +373,7 @@ namespace Scripts.Spells.Monk
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectPeriodicHandler(OnPeriodicDamage, 0, AuraType.PeriodicDamage));
+            AuraEffects.Add(new AuraEffectPeriodicHandler(OnPeriodicDamage, 0, AuraType.PeriodicDamage));
         }
 
         private void OnPeriodicDamage(AuraEffect aurEff)
@@ -415,8 +415,8 @@ namespace Scripts.Spells.Monk
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(OnReapply, 1, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectAfterApply));
-            AuraEffects.Add(new EffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnReapply, 1, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectAfterApply));
+            AuraEffects.Add(new AuraEffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void OnReapply(AuraEffect aurEff, AuraEffectHandleModes mode)

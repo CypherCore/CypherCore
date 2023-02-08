@@ -22,7 +22,7 @@ internal class spell_mage_ignite : AuraScript, IAuraCheckProc, IHasAuraEffects
 
 	public override void Register()
 	{
-		AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+		AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
 	}
 
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();

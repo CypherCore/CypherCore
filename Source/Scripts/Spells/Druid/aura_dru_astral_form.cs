@@ -48,12 +48,12 @@ public class aura_dru_astral_form : AuraScript, IHasAuraEffects
 		{
 			case 197625:
 			case 24858:
-				AuraEffects.Add(new EffectApplyHandler(AfterApply, 1, AuraType.ModShapeshift, AuraEffectHandleModes.Real));
-				AuraEffects.Add(new EffectApplyHandler(AfterRemove, 1, AuraType.ModShapeshift, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+				AuraEffects.Add(new AuraEffectApplyHandler(AfterApply, 1, AuraType.ModShapeshift, AuraEffectHandleModes.Real));
+				AuraEffects.Add(new AuraEffectApplyHandler(AfterRemove, 1, AuraType.ModShapeshift, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
 				break;
 			case 102560:
-				AuraEffects.Add(new EffectApplyHandler(AfterApply, 1, AuraType.AddPctModifier, AuraEffectHandleModes.Real));
-				AuraEffects.Add(new EffectApplyHandler(AfterRemove, 1, AuraType.AddPctModifier, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+				AuraEffects.Add(new AuraEffectApplyHandler(AfterApply, 1, AuraType.AddPctModifier, AuraEffectHandleModes.Real));
+				AuraEffects.Add(new AuraEffectApplyHandler(AfterRemove, 1, AuraType.AddPctModifier, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
 				break;
 		}
 	}

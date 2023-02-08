@@ -45,7 +45,7 @@ namespace Scripts.Spells.Racials
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -65,7 +65,7 @@ namespace Scripts.Spells.Racials
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectApplyHandler(HandleHit, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            AuraEffects.Add(new AuraEffectApplyHandler(HandleHit, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
 

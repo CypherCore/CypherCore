@@ -61,9 +61,9 @@ public class spell_druid_rend_and_tear : AuraScript, IHasAuraEffects
 
 	public override void Register()
 	{
-		AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
-		AuraEffects.Add(new EffectAbsorbHandler(Absorb, 0));
-		AuraEffects.Add(new EffectCalcSpellModHandler(HandleEffectCalcSpellMod,  1,  AuraType.AddFlatModifier));
-		AuraEffects.Add(new EffectCalcSpellModHandler(HandleEffectCalcSpellMod,  2,  AuraType.AddFlatModifier));
+		AuraEffects.Add(new AuraEffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
+		AuraEffects.Add(new AuraEffectAbsorbHandler(Absorb, 0));
+		AuraEffects.Add(new AuraEffectCalcSpellModHandler(HandleEffectCalcSpellMod,  1,  AuraType.AddFlatModifier));
+		AuraEffects.Add(new AuraEffectCalcSpellModHandler(HandleEffectCalcSpellMod,  2,  AuraType.AddFlatModifier));
 	}
 }

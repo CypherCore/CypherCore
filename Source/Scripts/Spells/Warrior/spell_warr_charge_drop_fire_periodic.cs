@@ -17,7 +17,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectPeriodicHandler(DropFireVisual, 0, AuraType.PeriodicTriggerSpell));
+            AuraEffects.Add(new AuraEffectPeriodicHandler(DropFireVisual, 0, AuraType.PeriodicTriggerSpell));
         }
 
         private void DropFireVisual(AuraEffect aurEff)

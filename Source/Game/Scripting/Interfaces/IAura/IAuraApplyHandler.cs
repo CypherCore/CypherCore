@@ -10,13 +10,13 @@ namespace Game.Scripting.Interfaces.IAura
         void Apply(AuraEffect aura, AuraEffectHandleModes auraMode);
     }
 
-    public class EffectApplyHandler : AuraEffectHandler, IAuraApplyHandler
+    public class AuraEffectApplyHandler : AuraEffectHandler, IAuraApplyHandler
     {
         public delegate void AuraEffectApplicationModeDelegate(AuraEffect aura, AuraEffectHandleModes auraMode);
 
         private readonly AuraEffectApplicationModeDelegate _fn;
 
-        public EffectApplyHandler(AuraEffectApplicationModeDelegate fn, uint effectIndex, AuraType auraType, AuraEffectHandleModes mode, AuraScriptHookType hookType = AuraScriptHookType.EffectApply) : base(effectIndex, auraType, hookType)
+        public AuraEffectApplyHandler(AuraEffectApplicationModeDelegate fn, uint effectIndex, AuraType auraType, AuraEffectHandleModes mode, AuraScriptHookType hookType = AuraScriptHookType.EffectApply) : base(effectIndex, auraType, hookType)
         {
             _fn = fn;
             Modes = mode;
@@ -25,7 +25,7 @@ namespace Game.Scripting.Interfaces.IAura
                 hookType != AuraScriptHookType.EffectRemove &&
                 hookType != AuraScriptHookType.EffectAfterApply &&
                 hookType != AuraScriptHookType.EffectAfterRemove)
-                throw new Exception($"Hook Type {hookType} is not valid for {nameof(EffectApplyHandler)}. Use {AuraScriptHookType.EffectApply}, {AuraScriptHookType.EffectRemove}, {AuraScriptHookType.EffectAfterApply}, or {AuraScriptHookType.EffectAfterRemove}");
+                throw new Exception($"Hook Type {hookType} is not valid for {nameof(AuraEffectApplyHandler)}. Use {AuraScriptHookType.EffectApply}, {AuraScriptHookType.EffectRemove}, {AuraScriptHookType.EffectAfterApply}, or {AuraScriptHookType.EffectAfterRemove}");
         }
 
         public AuraEffectHandleModes Modes { get; }

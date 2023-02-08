@@ -34,7 +34,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectSplitHandler(HandleSplit, 0));
+            AuraEffects.Add(new AuraEffectSplitHandler(HandleSplit, 0));
         }
     }
 }

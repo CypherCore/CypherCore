@@ -133,7 +133,7 @@ namespace Scripts.Pets
 
             public override void Register()
             {
-                AuraEffects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+                AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
             }
 
             public List<IAuraEffectHandler> AuraEffects { get; } = new();
@@ -163,7 +163,7 @@ namespace Scripts.Pets
 
             public override void Register()
             {
-                AuraEffects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
+                AuraEffects.Add(new AuraEffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
             }
 
             private void OnPeriodic(AuraEffect aurEff)
@@ -187,7 +187,7 @@ namespace Scripts.Pets
 
             public override void Register()
             {
-                AuraEffects.Add(new EffectApplyHandler(AfterApply, 0, AuraType.ModRoot, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+                AuraEffects.Add(new AuraEffectApplyHandler(AfterApply, 0, AuraType.ModRoot, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
             }
 
             private void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)

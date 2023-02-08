@@ -22,7 +22,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectPeriodicHandler(Tick, 0, AuraType.PeriodicDummy));
+            AuraEffects.Add(new AuraEffectPeriodicHandler(Tick, 0, AuraType.PeriodicDummy));
         }
 
         private void Tick(AuraEffect aurEff)

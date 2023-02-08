@@ -32,7 +32,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            AuraEffects.Add(new EffectCalcAmountHandler(CalculateAmount, 1, AuraType.PeriodicDamage));
+            AuraEffects.Add(new AuraEffectCalcAmountHandler(CalculateAmount, 1, AuraType.PeriodicDamage));
         }
     }
 }
