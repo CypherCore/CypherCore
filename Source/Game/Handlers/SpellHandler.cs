@@ -702,5 +702,27 @@ namespace Game
         {
             GetPlayer().SendSpellCategoryCooldowns();
         }
+
+        [WorldPacketHandler(ClientOpcodes.KeyboundOverride, Processing = PacketProcessing.Inplace)]
+        void HandleKeyboundOverride(KeyboundOverride keyboundOverride)
+        {
+            ushort OverrideID = keyboundOverride.OverrideID;
+            if (OverrideID == 0)
+            {
+                return;
+            }
+
+            Player player = GetPlayer();
+
+            uint SpellID = player.m_KeyboundOverrides[OverrideID];
+            if (SpellID == 0)
+            {
+                Log.outError(LogFilter.Spells, $"Player has no SpellID assigned to KeyboundOverride {OverrideID}");
+                return;
+            }
+
+            player.CastSpell(player, SpellID);
+        }
+
     }
 }

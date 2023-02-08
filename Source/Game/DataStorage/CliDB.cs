@@ -293,6 +293,7 @@ namespace Game.DataStorage
             SpellInterruptsStorage = ReadDB2<SpellInterruptsRecord>("SpellInterrupts.db2", HotfixStatements.SEL_SPELL_INTERRUPTS);
             SpellItemEnchantmentStorage = ReadDB2<SpellItemEnchantmentRecord>("SpellItemEnchantment.db2", HotfixStatements.SEL_SPELL_ITEM_ENCHANTMENT, HotfixStatements.SEL_SPELL_ITEM_ENCHANTMENT_LOCALE);
             SpellItemEnchantmentConditionStorage = ReadDB2<SpellItemEnchantmentConditionRecord>("SpellItemEnchantmentCondition.db2", HotfixStatements.SEL_SPELL_ITEM_ENCHANTMENT_CONDITION);
+            SpellKeyboundOverrideStorage = ReadDB2<SpellKeyboundOverrideRecord>("SpellKeyboundOverride.db2", HotfixStatements.SEL_SPELL_KEYBOUND_OVERRIDE);
             SpellLabelStorage = ReadDB2<SpellLabelRecord>("SpellLabel.db2", HotfixStatements.SEL_SPELL_LABEL);
             SpellLearnSpellStorage = ReadDB2<SpellLearnSpellRecord>("SpellLearnSpell.db2", HotfixStatements.SEL_SPELL_LEARN_SPELL);
             SpellLevelsStorage = ReadDB2<SpellLevelsRecord>("SpellLevels.db2", HotfixStatements.SEL_SPELL_LEVELS);
@@ -732,6 +733,7 @@ namespace Game.DataStorage
         public static DB6Storage<SpellInterruptsRecord> SpellInterruptsStorage;
         public static DB6Storage<SpellItemEnchantmentRecord> SpellItemEnchantmentStorage;
         public static DB6Storage<SpellItemEnchantmentConditionRecord> SpellItemEnchantmentConditionStorage;
+        public static DB6Storage<SpellKeyboundOverrideRecord> SpellKeyboundOverrideStorage;
         public static DB6Storage<SpellLabelRecord> SpellLabelStorage;
         public static DB6Storage<SpellLearnSpellRecord> SpellLearnSpellStorage;
         public static DB6Storage<SpellLevelsRecord> SpellLevelsStorage;

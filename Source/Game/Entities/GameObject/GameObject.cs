@@ -288,7 +288,7 @@ namespace Game.Entities
                     m_goValue.FishingHole.MaxOpens = RandomHelper.URand(GetGoInfo().FishingHole.minRestock, GetGoInfo().FishingHole.maxRestock);
                     break;
                 case GameObjectTypes.DestructibleBuilding:
-                    m_goValue.Building.Health = 20000;//goinfo.DestructibleBuilding.intactNumHits + goinfo.DestructibleBuilding.damagedNumHits;
+                    m_goValue.Building.Health = (GetGoInfo().DestructibleBuilding.InteriorVisible != 0 ? GetGoInfo().DestructibleBuilding.InteriorVisible : 20000);
                     m_goValue.Building.MaxHealth = m_goValue.Building.Health;
                     SetGoAnimProgress(255);
                     // yes, even after the updatefield rewrite this garbage hack is still in client
@@ -621,8 +621,8 @@ namespace Game.Entities
                                 radius = goInfo.Trap.radius / 2.0f;
 
                             Unit target;
-                            // @todo this hack with search required until GO casting not implemented
-                            if (GetOwner() != null)
+                            
+                            if (GetOwner() != null || goInfo.Trap.Checkallunits != 0)
                             {
                                 // Hunter trap: Search units which are unfriendly to the trap's owner
                                 var checker = new NearestAttackableNoTotemUnitInObjectRangeCheck(this, radius);
@@ -962,7 +962,7 @@ namespace Game.Entities
                 ReplaceAllFlags(goOverride.Flags);
 
             uint poolid = GetGameObjectData() != null ? GetGameObjectData().poolId : 0;
-            if (poolid != 0)
+            if (m_respawnCompatibilityMode && poolid != 0)
                 Global.PoolMgr.UpdatePool<GameObject>(GetMap().GetPoolData(), poolid, GetSpawnId());
             else
                 AddObjectToRemoveList();
@@ -4060,9 +4060,13 @@ namespace Game.Entities
                     Vector3 prev = new(oldAnimation.Pos.X, oldAnimation.Pos.Y, oldAnimation.Pos.Z);
                     Vector3 next = new(newAnimation.Pos.X, newAnimation.Pos.Y, newAnimation.Pos.Z);
 
-                    float animProgress = (float)(newProgress - oldAnimation.TimeIndex) / (float)(newAnimation.TimeIndex - oldAnimation.TimeIndex);
+                    Vector3 dst = next;
 
-                    Vector3 dst = pathRotation.Multiply(Vector3.Lerp(prev, next, animProgress));
+                    if (prev != next)
+                    {
+                        float animProgress = (float)(newProgress - oldAnimation.TimeIndex) / (float)(newAnimation.TimeIndex - oldAnimation.TimeIndex);
+                        dst = pathRotation.Multiply(Vector3.Lerp(prev, next, animProgress));
+                    }
 
                     dst += _owner.GetStationaryPosition();
 
@@ -4076,9 +4080,12 @@ namespace Game.Entities
                     Quaternion prev = new(oldRotation.Rot[0], oldRotation.Rot[1], oldRotation.Rot[2], oldRotation.Rot[3]);
                     Quaternion next = new(newRotation.Rot[0], newRotation.Rot[1], newRotation.Rot[2], newRotation.Rot[3]);
 
-                    float animProgress = (float)(newProgress - oldRotation.TimeIndex) / (float)(newRotation.TimeIndex - oldRotation.TimeIndex);
-
-                    Quaternion rotation = Quaternion.Lerp(prev, next, animProgress);
+                    Quaternion rotation = next;
+                    if (prev != next)
+                    {
+                        float animProgress = (float)(newProgress - oldRotation.TimeIndex) / (float)(newRotation.TimeIndex - oldRotation.TimeIndex);
+                        rotation = Quaternion.Lerp(prev, next, animProgress);
+                    }
 
                     _owner.SetLocalRotation(rotation.X, rotation.Y, rotation.Z, rotation.W);
                     _owner.UpdateModelPosition();

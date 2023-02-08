@@ -5961,6 +5961,38 @@ namespace Game.Spells
 
             playerTarget.UpdatePositionData();
         }
+
+        [AuraEffectHandler(AuraType.KeyboundOverride)]
+        void HandleKeyboundOverride(AuraApplication aurApp, byte mode, bool apply)
+        {
+            if ((mode & (byte)AuraEffectHandleModes.Real) == 0)
+            {
+                return;
+            }
+
+            Player player = aurApp.GetTarget().ToPlayer();
+            if (player == null)
+            {
+                return;
+            }
+
+            ushort OverrideID = (ushort)GetMiscValue();
+            if (OverrideID == 0)
+            {
+                return;
+            }
+
+            var KeyboundOverride = CliDB.SpellKeyboundOverrideStorage.LookupByKey(OverrideID);
+            if (KeyboundOverride == null)
+            {
+                Log.outError(LogFilter.Spells, $"Can't find KeyboundOverride by id {OverrideID}");
+                return;
+            }
+
+            player.m_KeyboundOverrides[OverrideID] = apply ? KeyboundOverride.SpellID : 0;
+            Log.outDebug(LogFilter.Spells, $"Aura {GetId()} with KeyboundOverride {OverrideID} assigns spell {KeyboundOverride.SpellID} to {KeyboundOverride.Function}");
+        }
+
         #endregion
     }
 

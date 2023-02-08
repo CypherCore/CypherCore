@@ -2130,7 +2130,7 @@ namespace Game.Achievements
                     return false;
                 }
                 case ModifierTreeType.GarrisonMissionHasBeenCompleted: // 141 NYI
-                    return false;
+                    return true;
                 case ModifierTreeType.GarrisonBuildingLevelEqual: // 142
                 {
                     Garrison garrison = referencePlayer.GetGarrison();

@@ -1035,6 +1035,8 @@ namespace Game.Entities
             ITransport transport = GetTransport();
             if (transport != null)
                 transport.RemovePassenger(this);
+
+            m_Events.KillAllEvents(true);
         }
 
         public uint GetZoneId() { return m_zoneId; }
@@ -3110,7 +3112,10 @@ namespace Game.Entities
         public Conversation ToConversation() { return IsConversation() ? (this as Conversation) : null; }
         public SceneObject ToSceneObject() { return IsSceneObject() ? (this as SceneObject) : null; }
 
-        public virtual void Update(uint diff) { }
+        public virtual void Update(uint diff) 
+        { 
+            m_Events.Update(diff);
+        }
 
         public virtual uint GetLevelForTarget(WorldObject target) { return 1; }
 

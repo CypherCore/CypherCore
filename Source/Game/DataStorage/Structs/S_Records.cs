@@ -190,6 +190,15 @@ namespace Game.DataStorage
         public string TextureFilename;
     }
 
+    public sealed class SpellKeyboundOverrideRecord
+    {
+        public uint ID;
+        public string Function;
+        public sbyte Type;
+        public uint SpellID;
+        public uint Flags;
+    }
+
     public sealed class SpellAuraOptionsRecord
     {
         public uint Id;

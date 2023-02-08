@@ -1232,6 +1232,18 @@ namespace Game.Networking.Packets
         List<SpellLogPowerData> PowerData = new();
     }
 
+    class KeyboundOverride : ClientPacket
+    {
+        public KeyboundOverride(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            OverrideID = _worldPacket.ReadUInt16();
+        }
+
+        public ushort OverrideID;
+    }
+
     class ContentTuningParams
     {
         bool GenerateDataPlayerToPlayer(Player attacker, Player target)
