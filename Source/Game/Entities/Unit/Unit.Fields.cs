@@ -400,6 +400,18 @@ namespace Game.Entities
 
     public class HealInfo
     {
+        public HealInfo(Unit healer, Unit target, float heal, SpellInfo spellInfo, SpellSchoolMask schoolMask) :
+                this(healer, target, (uint)heal, spellInfo, schoolMask)
+        {
+
+        }
+
+        public HealInfo(Unit healer, Unit target, ulong heal, SpellInfo spellInfo, SpellSchoolMask schoolMask) : 
+                this(healer, target, (uint)heal, spellInfo, schoolMask)
+        {
+
+        }
+
         public HealInfo(Unit healer, Unit target, uint heal, SpellInfo spellInfo, SpellSchoolMask schoolMask)
         {
             _healer = healer;

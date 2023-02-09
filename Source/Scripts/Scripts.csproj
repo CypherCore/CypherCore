@@ -5,4 +5,8 @@
         <ProjectReference Include="..\Game\Game.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Spells\DemonHunter\" />
+    </ItemGroup>
+
 </Project>

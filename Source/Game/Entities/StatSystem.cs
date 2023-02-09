@@ -175,6 +175,11 @@ namespace Game.Entities
 
         int GetMinPower(PowerType power) { return power == PowerType.LunarPower ? -100 : 0; }
 
+        public int ModifyPower(PowerType power, float dVal, bool withPowerUpdate = true) 
+        { 
+            return ModifyPower(power, (int)dVal, withPowerUpdate);
+        }
+
         // returns negative amount on power reduction
         public int ModifyPower(PowerType power, int dVal, bool withPowerUpdate = true)
         {
@@ -534,9 +539,13 @@ namespace Game.Entities
         public bool HealthBelowPctDamaged(int pct, uint damage) { return GetHealth() - damage < CountPctFromMaxHealth(pct); }
         public bool HealthAbovePct(int pct) { return GetHealth() > CountPctFromMaxHealth(pct); }
         public bool HealthAbovePctHealed(int pct, uint heal) { return GetHealth() + heal > CountPctFromMaxHealth(pct); }
+        public ulong CountPctFromMaxHealth(float pct) { return CountPctFromMaxHealth((int)pct); }
         public ulong CountPctFromMaxHealth(int pct) { return MathFunctions.CalculatePct(GetMaxHealth(), pct); }
         public ulong CountPctFromCurHealth(int pct) { return MathFunctions.CalculatePct(GetHealth(), pct); }
-
+        public int CountPctFromMaxPower(PowerType power, int pct)
+        {
+            return MathFunctions.CalculatePct(GetMaxPower(power), pct);
+        }
         public virtual float GetHealthMultiplierForTarget(WorldObject target) { return 1.0f; }
         public virtual float GetDamageMultiplierForTarget(WorldObject target) { return 1.0f; }
         public virtual float GetArmorMultiplierForTarget(WorldObject target) { return 1.0f; }
@@ -906,7 +915,7 @@ namespace Game.Entities
             return Math.Max(chance, 0.0f);
         }
 
-        float GetUnitCriticalChanceAgainst(WeaponAttackType attackType, Unit victim)
+        public float GetUnitCriticalChanceAgainst(WeaponAttackType attackType, Unit victim)
         {
             float chance = GetUnitCriticalChanceDone(attackType);
             return victim.GetUnitCriticalChanceTaken(this, attackType, chance);
