@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Scripts.Spells.Shaman
 {
-    internal struct ShamanSpells
+    public struct ShamanSpells
     {
         public const uint SPELL_PET_NETHERWINDS_FATIGUED = 160455;
         public const uint SPELL_SHAMAN_ANCESTRAL_AWAKENING = 52759;
@@ -170,6 +170,85 @@ namespace Scripts.Spells.Shaman
         public const uint SPELL_GATHERING_STORMS_AURA = 198300;
         public const uint SPELL_CRASHING_STORM_TALENT_DAMAGE = 210801;
         public const uint SPELL_CRASHING_STORM_TALENT_AT = 210797;
+        public const uint AftershockEnergize = 210712;
+        public const uint AncestralGuidance = 108281;
+        public const uint AncestralGuidanceHeal = 114911;
+        public const uint ChainLightning = 188443;
+        public const uint ChainLightningEnergize = 195897;
+        public const uint ChainLightningOverload = 45297;
+        public const uint ChainLightningOverloadEnergize = 218558;
+        public const uint ChainedHeal = 70809;
+        public const uint CrashLightningCleave = 187878;
+        public const uint Earthquake = 61882;
+        public const uint EarthquakeKnockingDown = 77505;
+        public const uint EarthquakeTick = 77478;
+        public const uint EarthShieldHeal = 204290;
+        public const uint EarthenRagePassive = 170374;
+        public const uint EarthenRagePeriodic = 170377;
+        public const uint EarthenRageDamage = 170379;
+        public const uint Electrified = 64930;
+        public const uint ElementalBlast = 117014;
+        public const uint ElementalBlastCrit = 118522;
+        public const uint ElementalBlastEnergize = 344645;
+        public const uint ElementalBlastHaste = 173183;
+        public const uint ElementalBlastMastery = 173184;
+        public const uint ElementalBlastOverload = 120588;
+        public const uint ElementalMastery = 16166;
+        public const uint EnergySurge = 40465;
+        public const uint Exhaustion = 57723;
+        public const uint FlameShock = 188389;
+        public const uint FlametongueAttack = 10444;
+        public const uint FlametongueWeaponEnchant = 334294;
+        public const uint FlametongueWeaponAura = 319778;
+        public const uint FrostShockEnergize = 289439;
+        public const uint GatheringStorms = 198299;
+        public const uint GatheringStormsBuff = 198300;
+        public const uint GhostWolf = 2645;
+        public const uint HealingRainVisual = 147490;
+        public const uint HealingRainHeal = 73921;
+        public const uint Icefury = 210714;
+        public const uint IcefuryOverload = 219271;
+        public const uint IgneousPotential = 279830;
+        public const uint ItemLightningShield = 23552;
+        public const uint ItemLightningShieldDamage = 27635;
+        public const uint ItemManaSurge = 23571;
+        public const uint LavaBeam = 114074;
+        public const uint LavaBeamOverload = 114738;
+        public const uint LavaBurst = 51505;
+        public const uint LavaBurstBonusDamage = 71824;
+        public const uint LavaBurstOverload = 77451;
+        public const uint LavaBurstRank2 = 231721;
+        public const uint LavaSurge = 77762;
+        public const uint LightningBolt = 188196;
+        public const uint LightningBoltEnergize = 214815;
+        public const uint LightningBoltOverload = 45284;
+        public const uint LightningBoltOverloadEnergize = 214816;
+        public const uint LiquidMagmaHit = 192231;
+        public const uint MaelstromController = 343725;
+        public const uint MasteryElementalOverload = 168534;
+        public const uint PathOfFlamesSpread = 210621;
+        public const uint PathOfFlamesTalent = 201909;
+        public const uint PowerSurge = 40466;
+        public const uint Sated = 57724;
+        public const uint SpiritWolfTalent = 260878;
+        public const uint SpiritWolfPeriodic = 260882;
+        public const uint SpiritWolfAura = 260881;
+        public const uint Stormkeeper = 191634;
+        public const uint TidalWaves = 53390;
+        public const uint TotemicPowerMp5 = 28824;
+        public const uint TotemicPowerSpellPower = 28825;
+        public const uint TotemicPowerAttackPower = 28826;
+        public const uint TotemicPowerArmor = 28827;
+        public const uint UndulationProc = 216251;
+        public const uint UnlimitedPowerBuff = 272737;
+        public const uint WindfuryAttack = 25504;
+        public const uint WindfuryEnchantment = 334302;
+        public const uint WindRush = 192082;
+
+        //Misc
+        public const uint HunterInsanity = 95809;
+        public const uint MageTemporalDisplacement = 80354;
+        public const uint PetNetherwindsFatigued = 160455;
     }
 
     internal struct Resurgence

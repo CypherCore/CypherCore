@@ -1,0 +1,47 @@
+﻿using System.Collections.Generic;
+using Framework.Constants;
+using Game.Entities;
+using Game.Scripting;
+using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.ISpell;
+using Game.Spells;
+
+namespace Scripts.Spells.Shaman;
+
+[Script] // 318038 - Flametongue Weapon
+internal class spell_sha_flametongue_weapon : SpellScript, IHasSpellEffects
+{
+	public List<ISpellEffect> SpellEffects { get; } = new();
+
+	public override bool Validate(SpellInfo spellInfo)
+	{
+		return ValidateSpellInfo(ShamanSpells.FlametongueWeaponEnchant);
+	}
+
+	public override bool Load()
+	{
+		return GetCaster().IsTypeId(TypeId.Player);
+	}
+
+	public override void Register()
+	{
+		SpellEffects.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+	}
+
+	private void HandleEffectHitTarget(uint index)
+	{
+		Player player = GetCaster().ToPlayer();
+		byte   slot   = EquipmentSlot.MainHand;
+
+		if (player.GetPrimarySpecialization() == TalentSpecialization.ShamanEnhancement)
+			slot = EquipmentSlot.OffHand;
+
+		Item targetItem = player.GetItemByPos(InventorySlots.Bag0, slot);
+
+		if (targetItem == null ||
+		    !targetItem.GetTemplate().IsWeapon())
+			return;
+
+		GetCaster().CastSpell(targetItem, ShamanSpells.FlametongueWeaponEnchant, true);
+	}
+}
