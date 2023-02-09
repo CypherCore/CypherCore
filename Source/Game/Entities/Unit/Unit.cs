@@ -4216,5 +4216,57 @@ namespace Game.Entities
         // As a general rule of thumb, any unit pointer MUST be null checked BEFORE passing it to threatmanager methods
         // threatmanager will NOT null check your pointers for you - misuse = crash
         public ThreatManager GetThreatManager() { return m_threatManager; }
+
+        public int GetTotalSpellPowerValue(SpellSchoolMask mask, bool heal)
+        {
+            if (!IsPlayer())
+            {
+                if (GetOwner())
+                {
+                    Player ownerPlayer = GetOwner().ToPlayer();
+
+                    if (ownerPlayer != null)
+                    {
+                        if (IsTotem())
+                            return GetOwner().GetTotalSpellPowerValue(mask, heal);
+                        else
+                        {
+                            if (IsPet())
+                                return (int)ownerPlayer.m_activePlayerData.PetSpellPower.GetValue();
+                            else if (IsGuardian())
+                                return ((Guardian)this).GetBonusDamage();
+                        }
+                    }
+                }
+
+                if (heal)
+                    return (int)SpellBaseHealingBonusDone(mask);
+                else
+                    return SpellBaseDamageBonusDone(mask);
+            }
+
+            Player thisPlayer = ToPlayer();
+
+            int sp = 0;
+
+            if (heal)
+                sp = thisPlayer.m_activePlayerData.ModHealingDonePos;
+            else
+            {
+                int counter = 0;
+                for (int i = 1; i < (int)SpellSchools.Max; i++)
+                {
+                    if (((int)mask & (1 << i)) > 0)
+                    {
+                        sp += thisPlayer.m_activePlayerData.ModDamageDonePos[i];
+                        counter++;
+                    }
+                }
+                if (counter > 0)
+                    sp /= counter;
+            }
+
+            return Math.Max(sp, 0); //avoid negative spell power
+        }
     }
 }
