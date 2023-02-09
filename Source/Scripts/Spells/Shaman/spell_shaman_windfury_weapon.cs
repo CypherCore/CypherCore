@@ -18,7 +18,7 @@ namespace Scripts.Spells.Shaman
 			return Global.SpellMgr.GetSpellInfo(ShamanSpells.SPELL_SHAMAN_WINDFURY_WEAPON_PASSIVE, Difficulty.None) != null;
 		}
 
-		private void HandleDummy(uint UnnamedParameter)
+		private void HandleDummy(int UnnamedParameter)
 		{
 			var caster = GetCaster();
 

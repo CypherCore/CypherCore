@@ -39,7 +39,7 @@ internal class spell_sha_lava_burst : SpellScript, ISpellAfterCast, IHasSpellEff
 
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleScript(uint effIndex)
+	private void HandleScript(int effIndex)
 	{
 		var caster = GetCaster();
 

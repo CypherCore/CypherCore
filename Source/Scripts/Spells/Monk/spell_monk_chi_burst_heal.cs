@@ -11,7 +11,7 @@ public class spell_monk_chi_burst_heal : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleHeal(uint UnnamedParameter)
+	private void HandleHeal(int UnnamedParameter)
 	{
 		var caster = GetCaster();
 		var unit   = GetHitUnit();

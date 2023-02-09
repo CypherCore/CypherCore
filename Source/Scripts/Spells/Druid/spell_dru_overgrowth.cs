@@ -16,7 +16,7 @@ public class spell_dru_overgrowth : SpellScript, IHasSpellEffects
 
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleDummy(uint UnnamedParameter)
+	private void HandleDummy(int UnnamedParameter)
 	{
 		var caster = GetCaster();
 

@@ -140,7 +140,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Shazzrah
             targets.Add(target);
         }
 
-        private void HandleScript(uint effIndex)
+        private void HandleScript(int effIndex)
         {
             Unit target = GetHitUnit();
 

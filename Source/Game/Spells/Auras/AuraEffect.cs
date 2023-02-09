@@ -429,9 +429,9 @@ namespace Game.Spells
                     // if aura is cast by others, it will not be affected
                     if ((aura.IsPassive() || aura.IsPermanent()) && aura.GetCasterGUID() == guid && aura.GetSpellInfo().IsAffectedBySpellMod(m_spellmod))
                     {
-                        for (uint i = 0; i < recalculateEffectMask.Count; ++i)
+                        for (int i = 0; i < recalculateEffectMask.Count; ++i)
                         {
-                            if (recalculateEffectMask[(int)i])
+                            if (recalculateEffectMask[i])
                             {
                                 AuraEffect aurEff = aura.GetEffect(i);
                                 if (aurEff != null)
@@ -834,7 +834,7 @@ namespace Game.Spells
 
         public SpellInfo GetSpellInfo() { return m_spellInfo; }
         public uint GetId() { return m_spellInfo.Id; }
-        public uint GetEffIndex() { return _effectInfo.EffectIndex; }
+        public int GetEffIndex() { return _effectInfo.EffectIndex; }
         public int GetBaseAmount() { return m_baseAmount; }
         public int GetPeriod() { return _period; }
 

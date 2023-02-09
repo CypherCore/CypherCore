@@ -15,7 +15,7 @@ namespace Game.Scripting.Interfaces.IAura
 
         private readonly AuraEffectCalcCritChanceFnType _fn;
 
-        public AuraEffectCalcCritChanceHandler(AuraEffectCalcCritChanceFnType fn, uint effectIndex, AuraType auraType) : base(effectIndex, auraType, AuraScriptHookType.EffectCalcCritChance)
+        public AuraEffectCalcCritChanceHandler(AuraEffectCalcCritChanceFnType fn, int effectIndex, AuraType auraType) : base(effectIndex, auraType, AuraScriptHookType.EffectCalcCritChance)
         {
             _fn = fn;
         }

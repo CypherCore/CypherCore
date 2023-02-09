@@ -47,7 +47,7 @@ namespace Scripts.m_Events.WinterVeil
             SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleScript(uint effIndex)
+        private void HandleScript(int effIndex)
         {
             Player target = GetHitPlayer();
 
@@ -82,7 +82,7 @@ namespace Scripts.m_Events.WinterVeil
             SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleScript(uint effIndex)
+        private void HandleScript(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
 
@@ -114,7 +114,7 @@ namespace Scripts.m_Events.WinterVeil
             SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleDummy(uint effIndex)
+        private void HandleDummy(int effIndex)
         {
             Unit caster = GetCaster();
 

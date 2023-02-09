@@ -11,7 +11,7 @@ public class spell_dh_fel_lance : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleHit(uint UnnamedParameter)
+	private void HandleHit(int UnnamedParameter)
 	{
 		var caster = GetCaster();
 		var target = GetHitUnit();

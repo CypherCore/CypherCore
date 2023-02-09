@@ -22,7 +22,7 @@ internal class spell_gen_chaos_blast : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		var basepoints0 = 100;
 		var caster      = GetCaster();

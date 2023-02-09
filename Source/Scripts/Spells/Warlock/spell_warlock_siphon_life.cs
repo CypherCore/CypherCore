@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warlock
 	{
 		public List<ISpellEffect> SpellEffects => new();
 
-		private void HandleHit(uint effIndex)
+		private void HandleHit(int effIndex)
 		{
 			var caster = GetCaster();
 			var heal   = caster.SpellHealingBonusDone(caster, GetSpellInfo(), (uint)caster.CountPctFromMaxHealth(GetSpellInfo().GetEffect(effIndex).BasePoints), DamageEffectType.Heal, GetEffectInfo());

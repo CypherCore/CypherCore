@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warrior
 	{
 		public List<ISpellEffect> SpellEffects => new();
 
-		private void HandleEffect(uint UnnamedParameter)
+		private void HandleEffect(int UnnamedParameter)
 		{
 			if (!GetCaster())
 				return;

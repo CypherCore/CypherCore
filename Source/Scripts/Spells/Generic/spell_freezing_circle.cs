@@ -22,7 +22,7 @@ internal class spell_freezing_circle : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleDamage, 1, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDamage(uint effIndex)
+	private void HandleDamage(int effIndex)
 	{
 		var  caster  = GetCaster();
 		uint spellId = 0;

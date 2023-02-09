@@ -27,7 +27,7 @@ internal class spell_gen_mixology_bonus : AuraScript, IHasAuraEffects
 		AuraEffects.Add(new AuraEffectCalcAmountHandler(CalculateAmount, SpellConst.EffectAll, AuraType.Any));
 	}
 
-	private void SetBonusValueForEffect(uint effIndex, int value, AuraEffect aurEff)
+	private void SetBonusValueForEffect(int effIndex, int value, AuraEffect aurEff)
 	{
 		if (aurEff.GetEffIndex() == effIndex)
 			bonus = value;

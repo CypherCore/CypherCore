@@ -12,7 +12,7 @@ public class spell_rog_mutilate_SpellScript : SpellScript, IHasSpellEffects
 	public List<ISpellEffect> SpellEffects => new();
 
 
-	private void HandleOnHit(uint UnnamedParameter)
+	private void HandleOnHit(int UnnamedParameter)
 	{
 		var caster = GetCaster().ToPlayer();
 		var target = GetHitUnit();

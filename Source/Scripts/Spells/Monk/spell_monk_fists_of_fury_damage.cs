@@ -11,7 +11,7 @@ public class spell_monk_fists_of_fury_damage : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleDamage(uint UnnamedParameter)
+	private void HandleDamage(int UnnamedParameter)
 	{
 		if (!GetCaster())
 			return;

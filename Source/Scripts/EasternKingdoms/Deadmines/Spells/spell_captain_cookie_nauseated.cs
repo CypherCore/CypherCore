@@ -16,7 +16,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Spells
     {
         public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
 
-        public void HandleScript(uint UnnamedParameter)
+        public void HandleScript(int UnnamedParameter)
         {
             if (!GetCaster() || !GetHitUnit())
             {

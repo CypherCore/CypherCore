@@ -32,7 +32,7 @@ internal class spell_pri_prayer_of_mending : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleEffectDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleEffectDummy(uint effIndex)
+	private void HandleEffectDummy(int effIndex)
 	{
 		var                basePoints = GetCaster().SpellHealingBonusDone(GetHitUnit(), _spellInfoHeal, (uint)_healEffectDummy.CalcValue(GetCaster()), DamageEffectType.Heal, _healEffectDummy);
 		CastSpellExtraArgs args       = new(TriggerCastFlags.FullMask);

@@ -27,7 +27,7 @@ internal class spell_item_purify_helboar_meat : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		var caster = GetCaster();
 		caster.CastSpell(caster, RandomHelper.randChance(50) ? ItemSpellIds.SummonPurifiedHelboarMeat : ItemSpellIds.SummonToxicHelboarMeat, true);

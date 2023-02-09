@@ -17,7 +17,7 @@ internal class spell_item_unusual_compass : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		var caster = GetCaster();
 		caster.SetFacingTo(RandomHelper.FRand(0.0f, 2.0f * (float)Math.PI));

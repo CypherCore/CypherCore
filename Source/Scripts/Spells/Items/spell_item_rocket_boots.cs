@@ -35,7 +35,7 @@ internal class spell_item_rocket_boots : SpellScript, ISpellCheckCast, IHasSpell
 
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		var caster = GetCaster().ToPlayer();
 

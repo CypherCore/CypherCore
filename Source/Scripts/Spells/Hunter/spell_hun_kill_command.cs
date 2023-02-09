@@ -51,7 +51,7 @@ public class spell_hun_kill_command : SpellScript, IHasSpellEffects, ISpellCheck
 		return SpellCastResult.SpellCastOk;
 	}
 
-	private void HandleDummy(uint UnnamedParameter)
+	private void HandleDummy(int UnnamedParameter)
 	{
 		if (GetCaster().IsPlayer())
 		{

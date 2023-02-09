@@ -22,7 +22,7 @@ internal class spell_rog_backstab_SpellScript : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleHitDamage, 1, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleHitDamage(uint effIndex)
+	private void HandleHitDamage(int effIndex)
 	{
 		var hitUnit = GetHitUnit();
 

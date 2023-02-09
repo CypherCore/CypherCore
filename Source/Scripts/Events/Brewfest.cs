@@ -285,7 +285,7 @@ namespace Scripts.m_Events.Brewfest
             SpellEffects.Add(new EffectHandler(HandleForceCast, 0, SpellEffectName.ForceCast, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleForceCast(uint effIndex)
+        private void HandleForceCast(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
             // All this spells trigger a spell that requires reagents; if the
@@ -304,7 +304,7 @@ namespace Scripts.m_Events.Brewfest
             SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleDummy(uint effIndex)
+        private void HandleDummy(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
 
@@ -328,7 +328,7 @@ namespace Scripts.m_Events.Brewfest
             SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleScript(uint effIndex)
+        private void HandleScript(int effIndex)
         {
             GetCaster().RemoveAura(SpellIds.RentalRacingRam);
         }
@@ -395,7 +395,7 @@ namespace Scripts.m_Events.Brewfest
             SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleDummy(uint effIndex)
+        private void HandleDummy(int effIndex)
         {
             Player caster = GetCaster().ToPlayer();
 

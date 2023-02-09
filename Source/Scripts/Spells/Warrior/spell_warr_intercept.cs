@@ -18,7 +18,7 @@ namespace Scripts.Spells.Warrior
 			return Global.SpellMgr.GetSpellInfo(WarriorSpells.INTERVENE_TRIGGER, Difficulty.None) != null;
 		}
 
-		private void HandleDummy(uint UnnamedParameter)
+		private void HandleDummy(int UnnamedParameter)
 		{
 			var caster = GetCaster();
 			var target = GetHitUnit();

@@ -30,7 +30,7 @@ internal class spell_sha_path_of_flames_spread : SpellScript, IHasSpellEffects
 		targets.RandomResize(target => target.IsTypeId(TypeId.Unit) && !target.ToUnit().HasAura(ShamanSpells.FlameShock, GetCaster().GetGUID()), 1);
 	}
 
-	private void HandleScript(uint effIndex)
+	private void HandleScript(int effIndex)
 	{
 		var mainTarget = GetExplTargetUnit();
 

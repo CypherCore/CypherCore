@@ -11,7 +11,7 @@ public class spell_dh_artifact_anguish_damage : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleHit(uint UnnamedParameter)
+	private void HandleHit(int UnnamedParameter)
 	{
 		var stacks = GetSpellValue().AuraStackAmount;
 		SetHitDamage(GetHitDamage() * stacks);

@@ -29,14 +29,14 @@ internal class spell_mage_arcane_explosion : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleReverberate, 2, SpellEffectName.Energize, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void CheckRequiredAuraForBaselineEnergize(uint effIndex)
+	private void CheckRequiredAuraForBaselineEnergize(int effIndex)
 	{
 		if (GetUnitTargetCountForEffect(1) == 0 ||
 		    !GetCaster().HasAura(MageSpells.ArcaneMage))
 			PreventHitDefaultEffect(effIndex);
 	}
 
-	private void HandleReverberate(uint effIndex)
+	private void HandleReverberate(int effIndex)
 	{
 		var procTriggered = false;
 

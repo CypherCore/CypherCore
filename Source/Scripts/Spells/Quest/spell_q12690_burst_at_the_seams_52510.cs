@@ -35,7 +35,7 @@ internal class spell_q12690_burst_at_the_seams_52510 : SpellScript, IHasSpellEff
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleKnockBack(uint effIndex)
+	private void HandleKnockBack(int effIndex)
 	{
 		Unit creature = GetHitCreature();
 
@@ -66,7 +66,7 @@ internal class spell_q12690_burst_at_the_seams_52510 : SpellScript, IHasSpellEff
 		}
 	}
 
-	private void HandleScript(uint effIndex)
+	private void HandleScript(int effIndex)
 	{
 		GetCaster().ToCreature().DespawnOrUnsummon(TimeSpan.FromSeconds(2));
 	}

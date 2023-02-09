@@ -21,7 +21,7 @@ namespace Scripts.Spells.Warlock
 			return true;
 		}
 
-		private void HandleScriptEffect(uint UnnamedParameter)
+		private void HandleScriptEffect(int UnnamedParameter)
 		{
 			GetCaster().CastSpell(GetCaster(), 23517, true);
 		}

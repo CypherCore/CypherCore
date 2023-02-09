@@ -13,7 +13,7 @@ public class spell_hun_aimed_shot : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleDamage(uint effIndex)
+	private void HandleDamage(int effIndex)
 	{
 		var distance       = 30.0f;
 		var damagePct      = 50;

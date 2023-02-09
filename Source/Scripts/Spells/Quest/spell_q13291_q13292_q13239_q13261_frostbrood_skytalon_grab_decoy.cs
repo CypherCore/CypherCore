@@ -22,7 +22,7 @@ internal class spell_q13291_q13292_q13239_q13261_frostbrood_skytalon_grab_decoy 
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		if (!GetHitCreature())
 			return;

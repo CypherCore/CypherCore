@@ -35,7 +35,7 @@ namespace Scripts.Spells.Shaman
 			_takenPower = powerCost.Amount = Math.Min(GetCaster().GetPower(PowerType.Maelstrom), _maxTakenPower);
 		}
 
-		private void HandleDamage(uint UnnamedParameter)
+		private void HandleDamage(int UnnamedParameter)
 		{
 			if (_maxTakenPower > 0)
 			{

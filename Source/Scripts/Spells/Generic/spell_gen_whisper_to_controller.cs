@@ -23,7 +23,7 @@ internal class spell_gen_whisper_to_controller : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHit));
 	}
 
-	private void HandleScript(uint effIndex)
+	private void HandleScript(int effIndex)
 	{
 		var casterSummon = GetCaster().ToTempSummon();
 

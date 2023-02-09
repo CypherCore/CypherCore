@@ -18,7 +18,7 @@ public class spell_mage_ebonbolt_damage : SpellScript, IHasSpellEffects
 		return ValidateSpellInfo(MageSpells.SPELL_MAGE_SPLITTING_ICE);
 	}
 
-	private void DoEffectHitTarget(uint UnnamedParameter)
+	private void DoEffectHitTarget(int UnnamedParameter)
 	{
 		var hitUnit       = GetHitUnit();
 		var primaryTarget = GetCaster().VariableStorage.GetValue<ObjectGuid>("explTarget", default);

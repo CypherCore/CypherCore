@@ -16,7 +16,7 @@ internal class spell_gen_remove_flight_auras : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(uint effIndex)
+	private void HandleScript(int effIndex)
 	{
 		var target = GetHitUnit();
 

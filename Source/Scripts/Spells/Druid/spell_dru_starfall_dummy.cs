@@ -23,7 +23,7 @@ namespace Scripts.Spells.Druid
 			targets.Resize(2);
 		}
 
-		private void HandleDummy(uint effIndex)
+		private void HandleDummy(int effIndex)
 		{
 			var caster = GetCaster();
 

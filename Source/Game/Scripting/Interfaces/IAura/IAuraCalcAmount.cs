@@ -14,7 +14,7 @@ namespace Game.Scripting.Interfaces.IAura
 
         private readonly AuraEffectCalcAmountDelegate _fn;
 
-        public AuraEffectCalcAmountHandler(AuraEffectCalcAmountDelegate fn, uint effectIndex, AuraType auraType) : base(effectIndex, auraType, AuraScriptHookType.EffectCalcAmount)
+        public AuraEffectCalcAmountHandler(AuraEffectCalcAmountDelegate fn, int effectIndex, AuraType auraType) : base(effectIndex, auraType, AuraScriptHookType.EffectCalcAmount)
         {
             _fn = fn;
         }

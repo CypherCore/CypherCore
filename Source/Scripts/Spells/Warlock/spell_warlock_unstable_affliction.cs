@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warlock
 	{
 		public List<ISpellEffect> SpellEffects => new();
 
-		private void HandleHit(uint effIndex)
+		private void HandleHit(int effIndex)
 		{
 			PreventHitDefaultEffect(effIndex);
 			var caster = GetCaster();

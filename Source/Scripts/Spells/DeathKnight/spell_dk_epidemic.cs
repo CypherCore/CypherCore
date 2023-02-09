@@ -12,7 +12,7 @@ public class spell_dk_epidemic : SpellScript, IHasSpellEffects
 	public List<ISpellEffect> SpellEffects => new();
 
 
-	private void HandleHit(uint UnnamedParameter)
+	private void HandleHit(int UnnamedParameter)
 	{
 		var target = GetHitUnit();
 

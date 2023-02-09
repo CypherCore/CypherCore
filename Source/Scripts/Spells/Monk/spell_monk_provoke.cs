@@ -46,7 +46,7 @@ internal class spell_monk_provoke : SpellScript, ISpellCheckCast, IHasSpellEffec
 
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
 

@@ -17,7 +17,7 @@ class spell_evo_living_flame : SpellScript, IHasSpellEffects
 		return ValidateSpellInfo(EvokerSpells.LivingFlameDamage, EvokerSpells.LivingFlameHeal, EvokerSpells.EnergizingFlame);
 	}
 
-	void HandleHitTarget(uint effIndex)
+	void HandleHitTarget(int effIndex)
 	{
 		var caster  = GetCaster();
 		var hitUnit = GetHitUnit();
@@ -28,7 +28,7 @@ class spell_evo_living_flame : SpellScript, IHasSpellEffects
 			caster.CastSpell(hitUnit, EvokerSpells.LivingFlameDamage, true);
 	}
 
-	void HandleLaunchTarget(uint effIndex)
+	void HandleLaunchTarget(int effIndex)
 	{
 		var caster = GetCaster();
 

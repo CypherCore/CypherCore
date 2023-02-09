@@ -16,7 +16,7 @@ namespace Game.Scripting.Interfaces.IAura
 
         private readonly AuraEffectProcDelegate _fn;
 
-        public AuraEffectProcHandler(AuraEffectProcDelegate fn, uint effectIndex, AuraType auraType, AuraScriptHookType hookType) : base(effectIndex, auraType, hookType)
+        public AuraEffectProcHandler(AuraEffectProcDelegate fn, int effectIndex, AuraType auraType, AuraScriptHookType hookType) : base(effectIndex, auraType, hookType)
         {
             _fn = fn;
 

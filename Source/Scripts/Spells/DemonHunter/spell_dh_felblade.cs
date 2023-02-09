@@ -11,7 +11,7 @@ public class spell_dh_felblade : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleOnHit(uint UnnamedParameter)
+	private void HandleOnHit(int UnnamedParameter)
 	{
 		if (!GetCaster() || !GetHitUnit())
 			return;

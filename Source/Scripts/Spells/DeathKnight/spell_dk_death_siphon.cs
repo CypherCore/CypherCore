@@ -13,7 +13,7 @@ public class spell_dk_death_siphon : SpellScript, IHasSpellEffects
 	public List<ISpellEffect> SpellEffects => new();
 
 
-	private void HandleScriptEffect(uint UnnamedParameter)
+	private void HandleScriptEffect(int UnnamedParameter)
 	{
 		var _player = GetCaster().ToPlayer();
 

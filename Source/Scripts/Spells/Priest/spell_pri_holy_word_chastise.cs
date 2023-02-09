@@ -11,7 +11,7 @@ public class spell_pri_holy_word_chastise : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleOnHit(uint UnnamedParameter)
+	private void HandleOnHit(int UnnamedParameter)
 	{
 		var caster = GetCaster();
 		var target = GetHitUnit();

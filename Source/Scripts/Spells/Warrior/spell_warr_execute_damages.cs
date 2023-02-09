@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warrior
 	{
 		public List<ISpellEffect> SpellEffects { get; } = new();
 
-		private void HandleDamage(uint UnnamedParameter)
+		private void HandleDamage(int UnnamedParameter)
 		{
 			var damageMultiplier = GetCaster().VariableStorage.GetValue<float>("spell_warr_execute_damages::multiplier", 1.0f);
 			SetHitDamage((int)(GetHitDamage() * damageMultiplier));

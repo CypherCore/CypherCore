@@ -20,7 +20,7 @@ internal class spell_gen_increase_stats_buff : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		if (GetHitUnit().IsInRaidWith(GetCaster()))
 			GetCaster().CastSpell(GetCaster(), (uint)GetEffectValue() + 1, true); // raid buff

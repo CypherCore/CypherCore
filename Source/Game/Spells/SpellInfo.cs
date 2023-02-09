@@ -33,7 +33,7 @@ namespace Game.Spells
 
             // Correct EffectIndex for blank effects
             for (int i = 0; i < _effects.Count; ++i)
-                _effects[i].EffectIndex = (uint)i;
+                _effects[i].EffectIndex = i;
 
             SpellName = spellName.Name;
 
@@ -256,7 +256,7 @@ namespace Game.Spells
 
             // Correct EffectIndex for blank effects
             for (int i = 0; i < _effects.Count; ++i)
-                _effects[i].EffectIndex = (uint)i;
+                _effects[i].EffectIndex = i;
         }
 
         public bool HasEffect(SpellEffectName effect)
@@ -532,9 +532,9 @@ namespace Game.Spells
             return true;
         }
 
-        public bool IsPositiveEffect(uint effIndex)
+        public bool IsPositiveEffect(int effIndex)
         {
-            return !NegativeEffects.Get((int)effIndex);
+            return !NegativeEffects.Get(effIndex);
         }
 
         public bool IsChanneled()
@@ -1291,7 +1291,7 @@ namespace Game.Spells
             return mask;
         }
 
-        public ulong GetEffectMechanicMask(uint effIndex)
+        public ulong GetEffectMechanicMask(int effIndex)
         {
             ulong mask = 0;
             if (Mechanic != 0)
@@ -1316,7 +1316,7 @@ namespace Game.Spells
             return mask;
         }
 
-        public Mechanics GetEffectMechanic(uint effIndex)
+        public Mechanics GetEffectMechanic(int effIndex)
         {
             if (GetEffect(effIndex).IsEffect() && GetEffect(effIndex).Mechanic != 0)
                 return GetEffect(effIndex).Mechanic;
@@ -3344,7 +3344,7 @@ namespace Game.Spells
                 effect.TargetB.GetCheckType() != SpellTargetCheckTypes.Enemy;
         }
 
-        bool _isPositiveEffectImpl(SpellInfo spellInfo, SpellEffectInfo effect, List<Tuple<SpellInfo, uint>> visited)
+        bool _isPositiveEffectImpl(SpellInfo spellInfo, SpellEffectInfo effect, List<Tuple<SpellInfo, int>> visited)
         {
             if ( !effect.IsEffect())
                 return true;
@@ -3794,11 +3794,11 @@ namespace Game.Spells
 
         public void InitializeSpellPositivity()
         {
-            List<Tuple<SpellInfo, uint>> visited = new();
+            List<Tuple<SpellInfo, int>> visited = new();
 
             foreach (SpellEffectInfo effect in GetEffects())
                 if (!_isPositiveEffectImpl(this, effect, visited))
-                    NegativeEffects[(int)effect.EffectIndex] = true;
+                    NegativeEffects[effect.EffectIndex] = true;
 
 
             // additional checks after effects marked
@@ -3819,7 +3819,7 @@ namespace Game.Spells
                     case AuraType.ModAttackspeed:
                     case AuraType.ModDecreaseSpeed:
                     {
-                        for (uint j = spellEffectInfo.EffectIndex + 1; j < GetEffects().Count; ++j)
+                        for (int j = spellEffectInfo.EffectIndex + 1; j < GetEffects().Count; ++j)
                             if (!IsPositiveEffect(j)
                                 && spellEffectInfo.TargetA.GetTarget() == GetEffect(j).TargetA.GetTarget()
                                 && spellEffectInfo.TargetB.GetTarget() == GetEffect(j).TargetB.GetTarget())
@@ -3900,7 +3900,7 @@ namespace Game.Spells
 
         public List<SpellEffectInfo> GetEffects() { return _effects; }
 
-        public SpellEffectInfo GetEffect(uint index) { return _effects[(int)index]; }
+        public SpellEffectInfo GetEffect(int index) { return _effects[index]; }
 
         public bool HasTargetType(Targets target)
         {
@@ -4074,7 +4074,7 @@ namespace Game.Spells
             _spellInfo = spellInfo;
             if (effect != null)
             {
-                EffectIndex = (uint)effect.EffectIndex;
+                EffectIndex = effect.EffectIndex;
                 Effect = (SpellEffectName)effect.Effect;
                 ApplyAuraName = (AuraType)effect.EffectAura;
                 ApplyAuraPeriod = effect.EffectAuraPeriod;
@@ -4828,7 +4828,7 @@ namespace Game.Spells
 
         #region Fields
         SpellInfo _spellInfo;
-        public uint EffectIndex;
+        public int EffectIndex;
 
         public SpellEffectName Effect;
         public AuraType ApplyAuraName;

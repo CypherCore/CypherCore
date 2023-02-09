@@ -28,7 +28,7 @@ internal class spell_gen_eject_passenger : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(EjectPassenger, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void EjectPassenger(uint effIndex)
+	private void EjectPassenger(int effIndex)
 	{
 		var vehicle = GetHitUnit().GetVehicleKit();
 

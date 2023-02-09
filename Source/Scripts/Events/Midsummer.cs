@@ -114,7 +114,7 @@ namespace Scripts.m_Events.Midsummer
             SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleScript(uint effIndex)
+        private void HandleScript(int effIndex)
         {
             Unit target = GetHitUnit();
             target.CastSpell(target, SpellIds.TargetIndicatorCosmetic, true);
@@ -137,7 +137,7 @@ namespace Scripts.m_Events.Midsummer
             SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleScript(uint effIndex)
+        private void HandleScript(int effIndex)
         {
             GetHitUnit().CastSpell(GetCaster(), SpellIds.BraziersHit, true);
         }
@@ -235,7 +235,7 @@ namespace Scripts.m_Events.Midsummer
             SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
 
-        private void HandleDummy(uint effIndex)
+        private void HandleDummy(int effIndex)
         {
             if (GetExplTargetDest() == null)
                 return;
@@ -288,7 +288,7 @@ namespace Scripts.m_Events.Midsummer
             SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleDummy(uint effIndex)
+        private void HandleDummy(int effIndex)
         {
             Player player = GetHitPlayer();
 
@@ -316,7 +316,7 @@ namespace Scripts.m_Events.Midsummer
             SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
 
-        private void HandleDummy(uint effIndex)
+        private void HandleDummy(int effIndex)
         {
             Position dest = GetCaster().GetFirstCollisionPosition(30.0f, (float)RandomHelper.NextDouble() * (2 * MathF.PI));
             GetCaster().CastSpell(dest, SpellIds.FlingTorchTriggered, new CastSpellExtraArgs(true));
@@ -339,7 +339,7 @@ namespace Scripts.m_Events.Midsummer
             SpellEffects.Add(new EffectHandler(HandleTriggerMissile, 0, SpellEffectName.TriggerMissile, SpellScriptHookType.EffectHit));
         }
 
-        private void HandleTriggerMissile(uint effIndex)
+        private void HandleTriggerMissile(int effIndex)
         {
             Position pos = GetHitDest();
 
@@ -368,7 +368,7 @@ namespace Scripts.m_Events.Midsummer
             SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleScriptEffect(uint effIndex)
+        private void HandleScriptEffect(int effIndex)
         {
             Player player = GetHitPlayer();
 

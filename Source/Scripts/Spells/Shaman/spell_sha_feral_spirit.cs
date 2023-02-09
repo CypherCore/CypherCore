@@ -12,7 +12,7 @@ namespace Scripts.Spells.Shaman
 	{
 		public List<ISpellEffect> SpellEffects { get; } = new();
 
-		private void HandleDummy(uint UnnamedParameter)
+		private void HandleDummy(int UnnamedParameter)
 		{
 			var caster = GetCaster();
 

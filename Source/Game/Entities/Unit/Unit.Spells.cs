@@ -2677,7 +2677,7 @@ namespace Game.Entities
             return GetAuraApplication(predicate) != null;
         }
 
-        public bool HasAuraEffect(uint spellId, uint effIndex, ObjectGuid casterGUID = default)
+        public bool HasAuraEffect(uint spellId, int effIndex, ObjectGuid casterGUID = default)
         {
             var range = m_appliedAuras.LookupByKey(spellId);
             if (!range.Empty())
@@ -3736,7 +3736,7 @@ namespace Game.Entities
             Cypher.Assert(m_appliedAuras.CallOnFirstMatch(spellId, (app) => app == aurApp, (app) => _UnapplyAura(new KeyValuePair<uint, AuraApplication>(spellId, app), removeMode)));
         }
 
-        public AuraEffect GetAuraEffect(uint spellId, uint effIndex, ObjectGuid casterGUID = default)
+        public AuraEffect GetAuraEffect(uint spellId, int effIndex, ObjectGuid casterGUID = default)
         {
             var range = m_appliedAuras.LookupByKey(spellId);
             if (!range.Empty())
@@ -3752,7 +3752,7 @@ namespace Game.Entities
             }
             return null;
         }
-        public AuraEffect GetAuraEffectOfRankedSpell(uint spellId, uint effIndex, ObjectGuid casterGUID = default)
+        public AuraEffect GetAuraEffectOfRankedSpell(uint spellId, int effIndex, ObjectGuid casterGUID = default)
         {
             uint rankSpell = Global.SpellMgr.GetFirstSpellInChain(spellId);
             while (rankSpell != 0)
@@ -3901,7 +3901,7 @@ namespace Game.Entities
 
         public bool CanProc() { return m_procDeep == 0; }
 
-        public void _ApplyAuraEffect(Aura aura, uint effIndex)
+        public void _ApplyAuraEffect(Aura aura, int effIndex)
         {
             Cypher.Assert(aura != null);
             Cypher.Assert(aura.HasEffect(effIndex));

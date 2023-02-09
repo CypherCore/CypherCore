@@ -24,7 +24,7 @@ internal class spell_sha_liquid_magma_totem : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleEffectHitTarget(uint effIndex)
+	private void HandleEffectHitTarget(int effIndex)
 	{
 		var hitUnit = GetHitUnit();
 

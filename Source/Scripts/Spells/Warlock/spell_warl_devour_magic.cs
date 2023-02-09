@@ -25,7 +25,7 @@ namespace Scripts.Spells.Warlock
 			SpellEffects.Add(new EffectHandler(OnSuccessfulDispel, 0, SpellEffectName.Dispel, SpellScriptHookType.EffectSuccessfulDispel));
 		}
 
-		private void OnSuccessfulDispel(uint effIndex)
+		private void OnSuccessfulDispel(int effIndex)
 		{
 			var                caster = GetCaster();
 			CastSpellExtraArgs args   = new(TriggerCastFlags.FullMask);

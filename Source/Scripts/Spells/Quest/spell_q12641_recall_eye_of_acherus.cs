@@ -16,7 +16,7 @@ internal class spell_q12641_recall_eye_of_acherus : SpellScript, IHasSpellEffect
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		var player = GetCaster().GetCharmerOrOwner().ToPlayer();
 

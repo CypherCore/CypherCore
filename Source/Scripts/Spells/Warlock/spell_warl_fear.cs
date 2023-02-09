@@ -24,7 +24,7 @@ namespace Scripts.Spells.Warlock
 			return true;
 		}
 
-		private void HandleDummy(uint UnnamedParameter)
+		private void HandleDummy(int UnnamedParameter)
 		{
 			var caster = GetCaster();
 

@@ -13,7 +13,7 @@ public class spell_dk_gorefiends_grasp : SpellScript, IHasSpellEffects
 	public List<ISpellEffect> SpellEffects => new();
 
 
-	private void HandleScript(uint UnnamedParameter)
+	private void HandleScript(int UnnamedParameter)
 	{
 		var _player = GetCaster().ToPlayer();
 

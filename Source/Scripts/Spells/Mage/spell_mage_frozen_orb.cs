@@ -11,7 +11,7 @@ public class spell_mage_frozen_orb : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleHit(uint UnnamedParameter)
+	private void HandleHit(int UnnamedParameter)
 	{
 		var caster = GetCaster();
 		var target = GetHitUnit();

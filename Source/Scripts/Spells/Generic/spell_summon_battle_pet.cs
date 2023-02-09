@@ -18,7 +18,7 @@ internal class spell_summon_battle_pet : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleSummon, 0, SpellEffectName.Summon, SpellScriptHookType.EffectHit));
 	}
 
-	private void HandleSummon(uint effIndex)
+	private void HandleSummon(int effIndex)
 	{
 		var creatureId = (uint)GetSpellValue().EffectBasePoints[effIndex];
 

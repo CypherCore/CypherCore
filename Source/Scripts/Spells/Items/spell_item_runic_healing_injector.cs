@@ -21,7 +21,7 @@ internal class spell_item_runic_healing_injector : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleHeal, 0, SpellEffectName.Heal, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleHeal(uint effIndex)
+	private void HandleHeal(int effIndex)
 	{
 		var caster = GetCaster().ToPlayer();
 

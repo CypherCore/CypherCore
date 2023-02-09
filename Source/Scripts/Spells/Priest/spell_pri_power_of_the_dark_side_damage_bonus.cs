@@ -22,7 +22,7 @@ internal class spell_pri_power_of_the_dark_side_damage_bonus : SpellScript, IHas
 		SpellEffects.Add(new EffectHandler(HandleLaunchTarget, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.LaunchTarget));
 	}
 
-	private void HandleLaunchTarget(uint effIndex)
+	private void HandleLaunchTarget(int effIndex)
 	{
 		var powerOfTheDarkSide = GetCaster().GetAuraEffect(PriestSpells.PowerOfTheDarkSide, 0);
 

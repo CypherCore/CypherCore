@@ -24,7 +24,7 @@ public class spell_dh_fel_rush : SpellScript, IHasSpellEffects
 		return true;
 	}
 
-	private void HandleDashGround(uint UnnamedParameter)
+	private void HandleDashGround(int UnnamedParameter)
 	{
 		var caster = GetCaster();
 
@@ -46,7 +46,7 @@ public class spell_dh_fel_rush : SpellScript, IHasSpellEffects
 		}
 	}
 
-	private void HandleDashAir(uint UnnamedParameter)
+	private void HandleDashAir(int UnnamedParameter)
 	{
 		var caster = GetCaster();
 

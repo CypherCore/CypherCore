@@ -30,7 +30,7 @@ internal class spell_monk_roll : SpellScript, ISpellCheckCast, IHasSpellEffects
 
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		GetCaster()
 			.CastSpell(GetCaster(),

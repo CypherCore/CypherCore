@@ -12,7 +12,7 @@ public class spell_hun_kill_command_proc : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleDamage(uint UnnamedParameter)
+	private void HandleDamage(int UnnamedParameter)
 	{
 		var caster = GetCaster();
 		var owner  = caster.GetOwner();

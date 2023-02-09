@@ -22,7 +22,7 @@ internal class spell_gen_gadgetzan_transporter_backfire : SpellScript, IHasSpell
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		var caster = GetCaster();
 		var r      = RandomHelper.IRand(0, 119);

@@ -41,7 +41,7 @@ public class spell_pri_void_eruption : SpellScript, IHasSpellEffects, ISpellOnCa
 		powerCost.Amount = 0;
 	}
 
-	private void HandleDummy(uint UnnamedParameter)
+	private void HandleDummy(int UnnamedParameter)
 	{
 		var caster = GetCaster();
 		var target = GetHitUnit();

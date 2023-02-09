@@ -25,7 +25,7 @@ internal class spell_defender_of_azeroth_death_gate_selector : SpellScript, IHas
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		var player = GetHitUnit().ToPlayer();
 

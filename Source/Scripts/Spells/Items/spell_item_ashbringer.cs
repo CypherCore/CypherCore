@@ -21,7 +21,7 @@ internal class spell_item_ashbringer : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(OnDummyEffect, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
 	}
 
-	private void OnDummyEffect(uint effIndex)
+	private void OnDummyEffect(int effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
 

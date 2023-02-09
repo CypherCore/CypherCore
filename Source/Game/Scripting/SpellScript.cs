@@ -117,8 +117,8 @@ namespace Game.Scripting
             _hitPreventDefaultEffectMask = 0;
         }
 
-        public bool _IsEffectPrevented(uint effIndex) { return Convert.ToBoolean(_hitPreventEffectMask & 1 << (int)effIndex); }
-        public bool _IsDefaultEffectPrevented(uint effIndex) { return Convert.ToBoolean(_hitPreventDefaultEffectMask & 1 << (int)effIndex); }
+        public bool _IsEffectPrevented(int effIndex) { return Convert.ToBoolean(_hitPreventEffectMask & 1 << (int)effIndex); }
+        public bool _IsDefaultEffectPrevented(int effIndex) { return Convert.ToBoolean(_hitPreventDefaultEffectMask & 1 << (int)effIndex); }
 
         public void _PrepareScriptCall(SpellScriptHookType hookType)
         {
@@ -187,7 +187,7 @@ namespace Game.Scripting
         public Difficulty GetCastDifficulty() { return _spell.GetCastDifficulty(); }
         public SpellValue GetSpellValue() { return _spell.m_spellValue; }
 
-        public SpellEffectInfo GetEffectInfo(uint effIndex)
+        public SpellEffectInfo GetEffectInfo(int effIndex)
         {
             return GetSpellInfo().GetEffect(effIndex);
         }
@@ -228,7 +228,7 @@ namespace Game.Scripting
         // returns: Item which was selected as an explicit spell Target or null if there's no Target
         public Item GetExplTargetItem() { return _spell.m_targets.GetItemTarget(); }
 
-        public long GetUnitTargetCountForEffect(uint effect)
+        public long GetUnitTargetCountForEffect(int effect)
         {
             if (!IsAfterTargetSelectionPhase())
             {
@@ -238,7 +238,7 @@ namespace Game.Scripting
             return _spell.GetUnitTargetCountForEffect(effect);
         }
 
-        public long GetGameObjectTargetCountForEffect(uint effect)
+        public long GetGameObjectTargetCountForEffect(int effect)
         {
             if (!IsAfterTargetSelectionPhase())
             {
@@ -248,7 +248,7 @@ namespace Game.Scripting
             return _spell.GetGameObjectTargetCountForEffect(effect);
         }
 
-        public long GetItemTargetCountForEffect(uint effect)
+        public long GetItemTargetCountForEffect(int effect)
         {
             if (!IsAfterTargetSelectionPhase())
             {
@@ -258,7 +258,7 @@ namespace Game.Scripting
             return _spell.GetItemTargetCountForEffect(effect);
         }
 
-        public long GetCorpseTargetCountForEffect(uint effect)
+        public long GetCorpseTargetCountForEffect(int effect)
         {
             if (!IsAfterTargetSelectionPhase())
             {
@@ -506,21 +506,21 @@ namespace Game.Scripting
         // including other effect/hit scripts
         // will not work on aura/Damage/heal
         // will not work if effects were already handled
-        public void PreventHitEffect(uint effIndex)
+        public void PreventHitEffect(int effIndex)
         {
             if (!IsInHitPhase() && !IsInEffectHook())
             {
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.PreventHitEffect was called, but function has no effect in current hook!", ScriptName, ScriptSpellId);
                 return;
             }
-            _hitPreventEffectMask |= 1u << (int)effIndex;
+            _hitPreventEffectMask |= 1u << effIndex;
             PreventHitDefaultEffect(effIndex);
         }
 
         // prevents default effect execution on current spell hit Target
         // will not work on aura/Damage/heal effects
         // will not work if effects were already handled
-        public void PreventHitDefaultEffect(uint effIndex)
+        public void PreventHitDefaultEffect(int effIndex)
         {
             if (!IsInHitPhase() && !IsInEffectHook())
             {

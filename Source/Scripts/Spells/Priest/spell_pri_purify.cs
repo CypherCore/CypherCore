@@ -22,7 +22,7 @@ public class spell_pri_purify : SpellScript, IHasSpellEffects
 		return SpellCastResult.SpellCastOk;
 	}
 
-	private void AfterEffectHit(uint UnnamedParameter)
+	private void AfterEffectHit(int UnnamedParameter)
 	{
 		if (GetHitUnit().IsFriendlyTo(GetCaster()))
 		{

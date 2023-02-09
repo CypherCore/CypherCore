@@ -36,7 +36,7 @@ namespace Scripts.Spells.Shaman
 			targets.Add(target);
 		}
 
-		private void HandleDummy(uint UnnamedParameter)
+		private void HandleDummy(int UnnamedParameter)
 		{
 			GetCaster().CastSpell(GetHitUnit(), ShamanSpells.SPELL_SHAMAN_ANCESTRAL_AWAKENING_PROC, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)GetEffectValue()));
 		}

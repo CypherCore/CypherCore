@@ -13,7 +13,7 @@ public class spell_dk_glacial_advance : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleHit(uint UnnamedParameter)
+	private void HandleHit(int UnnamedParameter)
 	{
 		var caster = GetCaster();
 

@@ -17,7 +17,7 @@ internal class spell_mage_ice_lance_damage : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(ApplyDamageMultiplier, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void ApplyDamageMultiplier(uint effIndex)
+	private void ApplyDamageMultiplier(int effIndex)
 	{
 		var spellValue = GetSpellValue();
 

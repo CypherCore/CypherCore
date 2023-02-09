@@ -11,7 +11,7 @@ public class spell_dk_outbreak : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleOnHit(uint UnnamedParameter)
+	private void HandleOnHit(int UnnamedParameter)
 	{
 		var target = GetHitUnit();
 

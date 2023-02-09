@@ -13,7 +13,7 @@ public class spell_mage_flurry : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleDummy(uint UnnamedParameter)
+	private void HandleDummy(int UnnamedParameter)
 	{
 		var caster     = GetCaster();
 		var target     = GetHitUnit();

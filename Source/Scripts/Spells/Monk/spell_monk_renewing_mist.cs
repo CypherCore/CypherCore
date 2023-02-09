@@ -17,7 +17,7 @@ public class spell_monk_renewing_mist : SpellScript, IHasSpellEffects
 		return ValidateSpellInfo(MonkSpells.SPELL_MONK_RENEWING_MIST_HOT);
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
 		var target = GetExplTargetUnit();

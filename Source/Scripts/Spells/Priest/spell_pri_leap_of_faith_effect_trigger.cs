@@ -22,7 +22,7 @@ internal class spell_pri_leap_of_faith_effect_trigger : SpellScript, IHasSpellEf
 		SpellEffects.Add(new EffectHandler(HandleEffectDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleEffectDummy(uint effIndex)
+	private void HandleEffectDummy(int effIndex)
 	{
 		var destPos = GetHitDest().GetPosition();
 

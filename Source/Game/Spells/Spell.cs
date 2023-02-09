@@ -381,7 +381,7 @@ namespace Game.Spells
                             spellEffectInfo.TargetB.GetTarget() == effects[j].TargetB.GetTarget() &&
                             spellEffectInfo.ImplicitTargetConditions == effects[j].ImplicitTargetConditions &&
                             spellEffectInfo.CalcRadius(m_caster) == effects[j].CalcRadius(m_caster) &&
-                            CheckScriptEffectImplicitTargets(spellEffectInfo.EffectIndex, (uint)j))
+                            CheckScriptEffectImplicitTargets(spellEffectInfo.EffectIndex, j))
                         {
                             effectMask |= 1u << j;
                         }
@@ -2035,29 +2035,29 @@ namespace Game.Spells
             m_UniqueCorpseTargetInfo.Add(target);
         }
 
-        void AddDestTarget(SpellDestination dest, uint effIndex)
+        void AddDestTarget(SpellDestination dest, int effIndex)
         {
             m_destTargets[effIndex] = dest;
         }
 
-        public long GetUnitTargetCountForEffect(uint effect)
+        public long GetUnitTargetCountForEffect(int effect)
         {
-            return m_UniqueTargetInfo.Count(targetInfo => targetInfo.MissCondition == SpellMissInfo.None && (targetInfo.EffectMask & (1 << (int)effect)) != 0);
+            return m_UniqueTargetInfo.Count(targetInfo => targetInfo.MissCondition == SpellMissInfo.None && (targetInfo.EffectMask & (1 << effect)) != 0);
         }
 
-        public long GetGameObjectTargetCountForEffect(uint effect)
+        public long GetGameObjectTargetCountForEffect(int effect)
         {
-            return m_UniqueGOTargetInfo.Count(targetInfo => (targetInfo.EffectMask & (1 << (int)effect)) != 0);
+            return m_UniqueGOTargetInfo.Count(targetInfo => (targetInfo.EffectMask & (1 << effect)) != 0);
         }
 
-        public long GetItemTargetCountForEffect(uint effect)
+        public long GetItemTargetCountForEffect(int effect)
         {
-            return m_UniqueItemInfo.Count(targetInfo => (targetInfo.EffectMask & (1 << (int)effect)) != 0);
+            return m_UniqueItemInfo.Count(targetInfo => (targetInfo.EffectMask & (1 << effect)) != 0);
         }
 
-        public long GetCorpseTargetCountForEffect(uint effect)
+        public long GetCorpseTargetCountForEffect(int effect)
         {
-            return m_UniqueCorpseTargetInfo.Count(targetInfo => (targetInfo.EffectMask & (1u << (int)effect)) != 0);
+            return m_UniqueCorpseTargetInfo.Count(targetInfo => (targetInfo.EffectMask & (1u << effect)) != 0);
         }
 
         public SpellMissInfo PreprocessSpellHit(Unit unit, TargetInfo hitInfo)
@@ -7472,7 +7472,7 @@ namespace Game.Spells
                 }
         }
 
-        private bool CheckSpellEffectHandler(ISpellEffectHandler se, uint effIndex)
+        private bool CheckSpellEffectHandler(ISpellEffectHandler se, int effIndex)
         {
             if (m_spellInfo.GetEffects().Count <= effIndex)
                 return false;
@@ -7487,7 +7487,7 @@ namespace Game.Spells
             return se.EffectName == SpellEffectName.Any || spellEffectInfo.Effect == se.EffectName;
         }
 
-        public bool CheckTargetHookEffect(ITargetHookHandler th, uint effIndexToCheck)
+        public bool CheckTargetHookEffect(ITargetHookHandler th, int effIndexToCheck)
         {
             if (th.TargetType == 0)
                 return false;
@@ -7616,7 +7616,7 @@ namespace Game.Spells
             return castTime;
         }
 
-        bool CallScriptEffectHandlers(uint effIndex, SpellEffectHandleMode mode)
+        bool CallScriptEffectHandlers(int effIndex, SpellEffectHandleMode mode)
         {
             // execute script effect handler hooks and check if effects was prevented
             bool preventDefault = false;
@@ -7655,7 +7655,7 @@ namespace Game.Spells
             return preventDefault;
         }
 
-        private static bool ProcessScript(uint effIndex, bool preventDefault, ISpellScript script, ISpellEffect effect, SpellScriptHookType hookType)
+        private static bool ProcessScript(int effIndex, bool preventDefault, ISpellScript script, ISpellEffect effect, SpellScriptHookType hookType)
         {
             script._InitHit();
 
@@ -7672,7 +7672,7 @@ namespace Game.Spells
             return preventDefault;
         }
 
-        void CallScriptSuccessfulDispel(uint effIndex)
+        void CallScriptSuccessfulDispel(int effIndex)
         {
             foreach (var script in GetEffectScripts(SpellScriptHookType.EffectSuccessfulDispel, effIndex))
             {
@@ -7728,7 +7728,7 @@ namespace Game.Spells
             }
         }
 
-        void CallScriptObjectAreaTargetSelectHandlers(List<WorldObject> targets, uint effIndex, SpellImplicitTargetInfo targetType)
+        void CallScriptObjectAreaTargetSelectHandlers(List<WorldObject> targets, int effIndex, SpellImplicitTargetInfo targetType)
         {
             foreach (var script in GetEffectScripts(SpellScriptHookType.ObjectAreaTargetSelect, effIndex))
             {
@@ -7742,7 +7742,7 @@ namespace Game.Spells
             }
         }
 
-        void CallScriptObjectTargetSelectHandlers(ref WorldObject target, uint effIndex, SpellImplicitTargetInfo targetType)
+        void CallScriptObjectTargetSelectHandlers(ref WorldObject target, int effIndex, SpellImplicitTargetInfo targetType)
         {
             foreach (var script in GetEffectScripts(SpellScriptHookType.ObjectTargetSelect, effIndex))
             {
@@ -7756,7 +7756,7 @@ namespace Game.Spells
             }
         }
 
-        void CallScriptDestinationTargetSelectHandlers(ref SpellDestination target, uint effIndex, SpellImplicitTargetInfo targetType)
+        void CallScriptDestinationTargetSelectHandlers(ref SpellDestination target, int effIndex, SpellImplicitTargetInfo targetType)
         {
             foreach (var script in GetEffectScripts(SpellScriptHookType.DestinationTargetSelect, effIndex))
             {
@@ -7782,7 +7782,7 @@ namespace Game.Spells
             }
         }
 
-        bool CheckScriptEffectImplicitTargets(uint effIndex, uint effIndexToCheck)
+        bool CheckScriptEffectImplicitTargets(int effIndex, int effIndexToCheck)
         {
             // Skip if there are not any script
             if (m_loadedScripts.Empty())
@@ -7948,7 +7948,7 @@ namespace Game.Spells
         readonly Dictionary<Type, List<ISpellScript>> m_spellScriptsByType = new Dictionary<Type, List<ISpellScript>>();
         static List<ISpellScript> _dummy = new();
         static List<(ISpellScript, ISpellEffect)> _dummySpellEffects = new();
-        Dictionary<uint, Dictionary<SpellScriptHookType, List<(ISpellScript, ISpellEffect)>>> _effectHandlers = new Dictionary<uint, Dictionary<SpellScriptHookType, List<(ISpellScript, ISpellEffect)>>>();
+        Dictionary<int, Dictionary<SpellScriptHookType, List<(ISpellScript, ISpellEffect)>>> _effectHandlers = new Dictionary<int, Dictionary<SpellScriptHookType, List<(ISpellScript, ISpellEffect)>>>();
 
         public List<ISpellScript> GetSpellScripts<T>() where T : ISpellScript
         {
@@ -7964,7 +7964,7 @@ namespace Game.Spells
                 action.Invoke(script);
         }
 
-        public List<(ISpellScript, ISpellEffect)> GetEffectScripts(SpellScriptHookType h, uint index)
+        public List<(ISpellScript, ISpellEffect)> GetEffectScripts(SpellScriptHookType h, int index)
         {
             if (_effectHandlers.TryGetValue(index, out var effDict) &&
                 effDict.TryGetValue(h, out List<(ISpellScript, ISpellEffect)> scripts))
@@ -7974,7 +7974,7 @@ namespace Game.Spells
         }
 
   
-        private void AddSpellEffect(uint index, ISpellScript script, ISpellEffect effect)
+        private void AddSpellEffect(int index, ISpellScript script, ISpellEffect effect)
         {
             if (!_effectHandlers.TryGetValue(index, out var effecTypes))
             {
@@ -8552,10 +8552,10 @@ namespace Game.Spells
                         positive = false;
                     else if (spell.m_healing == 0)
                     {
-                        for (uint i = 0; i < spell.m_spellInfo.GetEffects().Count; ++i)
+                        for (int i = 0; i < spell.m_spellInfo.GetEffects().Count; ++i)
                         {
                             // in case of immunity, check all effects to choose correct procFlags, as none has technically hit
-                            if (EffectMask != 0 && (EffectMask & (1 << (int)i)) == 0)
+                            if (EffectMask != 0 && (EffectMask & (1 << i)) == 0)
                                 continue;
 
                             if (!spell.m_spellInfo.IsPositiveEffect(i))
@@ -8783,7 +8783,7 @@ namespace Game.Spells
                     {
                         // only apply unapplied effects (for reapply case)
                         uint effMask = EffectMask & aurApp.GetEffectsToApply();
-                        for (uint i = 0; i < spell.m_spellInfo.GetEffects().Count; ++i)
+                        for (int i = 0; i < spell.m_spellInfo.GetEffects().Count; ++i)
                             if ((effMask & (1 << (int)i)) != 0 && aurApp.HasEffect(i))
                                 effMask &= ~(1u << (int)i);
 

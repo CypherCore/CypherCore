@@ -16,7 +16,7 @@ internal class spell_gen_clone_weapon : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScriptEffect(uint effIndex)
+	private void HandleScriptEffect(int effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
 		GetHitUnit().CastSpell(GetCaster(), (uint)GetEffectValue(), true);

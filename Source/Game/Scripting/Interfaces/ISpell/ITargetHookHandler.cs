@@ -11,7 +11,7 @@ namespace Game.Scripting.Interfaces.ISpell
 
     public class TargetHookHandler : SpellEffect, ITargetHookHandler
     {
-        public TargetHookHandler(uint effectIndex, Targets targetType, bool area, SpellScriptHookType hookType, bool dest = false) : base(effectIndex, hookType)
+        public TargetHookHandler(int effectIndex, Targets targetType, bool area, SpellScriptHookType hookType, bool dest = false) : base(effectIndex, hookType)
         {
             TargetType = targetType;
             Area = area;

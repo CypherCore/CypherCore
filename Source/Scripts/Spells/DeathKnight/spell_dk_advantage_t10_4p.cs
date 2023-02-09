@@ -5,7 +5,7 @@ using Game.Scripting.Interfaces.IAura;
 
 namespace Scripts.Spells.DeathKnight;
 
-[Script] // 70656 - Advantage (T10 4P Melee Bonus)
+[SpellScript(70656)] // 70656 - Advantage (T10 4P Melee Bonus)
 internal class spell_dk_advantage_t10_4p : AuraScript, IAuraCheckProc
 {
 	public bool CheckProc(ProcEventInfo eventInfo)

@@ -25,7 +25,7 @@ namespace Scripts.Spells.Warrior
 			SpellEffects.Add(new EffectHandler(AfterJump, 1, SpellEffectName.JumpDest, SpellScriptHookType.EffectHit));
 		}
 
-		private void AfterJump(uint effIndex)
+		private void AfterJump(int effIndex)
 		{
 			if (GetCaster().HasAura(WarriorSpells.GLYPH_OF_HEROIC_LEAP))
 				GetCaster().CastSpell(GetCaster(), WarriorSpells.GLYPH_OF_HEROIC_LEAP_BUFF, true);

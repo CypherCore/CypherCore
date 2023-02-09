@@ -35,9 +35,9 @@ internal class spell_sha_elemental_blast : SpellScript, ISpellAfterCast, IHasSpe
 
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleEnergize(uint effIndex)
+	private void HandleEnergize(int effIndex)
 	{
-		var energizeAmount = GetCaster().GetAuraEffect(ShamanSpells.MaelstromController, GetSpellInfo().Id == ShamanSpells.ElementalBlast ? 9 : 10u);
+		var energizeAmount = GetCaster().GetAuraEffect(ShamanSpells.MaelstromController, GetSpellInfo().Id == ShamanSpells.ElementalBlast ? 9 : 10);
 
 		if (energizeAmount != null)
 			GetCaster()

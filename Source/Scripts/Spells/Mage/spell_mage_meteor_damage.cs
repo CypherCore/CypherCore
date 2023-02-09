@@ -14,7 +14,7 @@ public class spell_mage_meteor_damage : SpellScript, IHasSpellEffects
 
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleHit(uint UnnamedParameter)
+	private void HandleHit(int UnnamedParameter)
 	{
 		var unit = GetHitUnit();
 

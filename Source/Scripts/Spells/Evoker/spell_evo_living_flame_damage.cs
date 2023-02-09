@@ -17,7 +17,7 @@ public class spell_evo_living_flame_damage : SpellScript, IHasSpellEffects
 		return ValidateSpellInfo(EvokerSpells.SPELL_EVOKER_ENERGIZING_FLAME, EvokerSpells.SPELL_EVOKER_LIVING_FLAME);
 	}
 
-	private void HandleManaRestored(uint UnnamedParameter)
+	private void HandleManaRestored(int UnnamedParameter)
 	{
 		var auraEffect = GetCaster().GetAuraEffect(EvokerSpells.SPELL_EVOKER_ENERGIZING_FLAME, 0);
 

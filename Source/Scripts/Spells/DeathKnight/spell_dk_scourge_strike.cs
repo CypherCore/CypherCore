@@ -13,7 +13,7 @@ public class spell_dk_scourge_strike : SpellScript, IHasSpellEffects
 	public List<ISpellEffect> SpellEffects => new();
 
 
-	private void HandleOnHit(uint UnnamedParameter)
+	private void HandleOnHit(int UnnamedParameter)
 	{
 		var caster = GetCaster();
 		var target = GetHitUnit();

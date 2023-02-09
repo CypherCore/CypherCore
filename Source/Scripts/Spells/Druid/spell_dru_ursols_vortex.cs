@@ -18,7 +18,7 @@ public class spell_dru_ursols_vortex : SpellScript, IHasSpellEffects
 	}
 
 
-	private void HandleHit(uint UnnamedParameter)
+	private void HandleHit(int UnnamedParameter)
 	{
 		var caster = GetCaster();
 

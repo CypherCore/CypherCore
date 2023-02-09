@@ -22,7 +22,7 @@ internal class spell_q12634_despawn_fruit_tosser : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		var spellId = QuestSpellIds.BananasFallToGround;
 

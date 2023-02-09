@@ -23,7 +23,7 @@ public class spell_mage_ebonbolt : SpellScript, IHasSpellEffects, ISpellOnCast
 		GetCaster().CastSpell(GetCaster(), MageSpells.SPELL_MAGE_BRAIN_FREEZE_AURA, true);
 	}
 
-	private void DoEffectHitTarget(uint UnnamedParameter)
+	private void DoEffectHitTarget(int UnnamedParameter)
 	{
 		var explTarget = GetExplTargetUnit();
 		var hitUnit    = GetHitUnit();

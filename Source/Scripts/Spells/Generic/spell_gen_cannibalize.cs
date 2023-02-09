@@ -42,7 +42,7 @@ internal class spell_gen_cannibalize : SpellScript, ISpellCheckCast, IHasSpellEf
 
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		GetCaster().CastSpell(GetCaster(), GenericSpellIds.CannibalizeTriggered, false);
 	}

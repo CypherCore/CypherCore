@@ -27,7 +27,7 @@ internal class spell_sha_windfury_weapon : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleEffect, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleEffect(uint effIndex)
+	private void HandleEffect(int effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
 

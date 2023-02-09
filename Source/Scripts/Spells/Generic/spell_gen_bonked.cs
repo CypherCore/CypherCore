@@ -16,7 +16,7 @@ internal class spell_gen_bonked : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(uint effIndex)
+	private void HandleScript(int effIndex)
 	{
 		var target = GetHitPlayer();
 

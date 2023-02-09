@@ -22,7 +22,7 @@ internal class spell_item_vanquished_clutches : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		var spellId = RandomHelper.RAND(ItemSpellIds.Crusher, ItemSpellIds.Constrictor, ItemSpellIds.Corruptor);
 		var caster  = GetCaster();

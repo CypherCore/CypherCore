@@ -27,7 +27,7 @@ internal class spell_gen_divine_storm_cd_reset : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(uint effIndex)
+	private void HandleScript(int effIndex)
 	{
 		GetCaster().GetSpellHistory().ResetCooldown(GenericSpellIds.DivineStorm, true);
 	}

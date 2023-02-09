@@ -37,7 +37,7 @@ internal class spell_gen_two_forms : SpellScript, ISpellCheckCast, IHasSpellEffe
 
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleTransform(uint effIndex)
+	private void HandleTransform(int effIndex)
 	{
 		var target = GetHitUnit();
 		PreventHitDefaultEffect(effIndex);

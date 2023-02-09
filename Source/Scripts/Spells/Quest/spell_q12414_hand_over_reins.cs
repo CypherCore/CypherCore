@@ -16,7 +16,7 @@ internal class spell_q12414_hand_over_reins : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(uint effIndex)
+	private void HandleScript(int effIndex)
 	{
 		var caster = GetCaster().ToCreature();
 		GetHitUnit().ExitVehicle();

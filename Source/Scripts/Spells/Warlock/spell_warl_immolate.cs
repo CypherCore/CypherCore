@@ -22,7 +22,7 @@ namespace Scripts.Spells.Warlock
 			SpellEffects.Add(new EffectHandler(HandleOnEffectHit, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
 		}
 
-		private void HandleOnEffectHit(uint effIndex)
+		private void HandleOnEffectHit(int effIndex)
 		{
 			GetCaster().CastSpell(GetHitUnit(), WarlockSpells.IMMOLATE_DOT, GetSpell());
 		}

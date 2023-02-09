@@ -15,7 +15,7 @@ namespace Game.Scripting.Interfaces.ISpell
         private readonly SpellObjectTargetSelectFnType _func;
 
 
-        public ObjectTargetSelectHandler(SpellObjectTargetSelectFnType func, uint effectIndex, Targets targetType, SpellScriptHookType hookType = SpellScriptHookType.ObjectTargetSelect) : base(effectIndex, targetType, false, hookType)
+        public ObjectTargetSelectHandler(SpellObjectTargetSelectFnType func, int effectIndex, Targets targetType, SpellScriptHookType hookType = SpellScriptHookType.ObjectTargetSelect) : base(effectIndex, targetType, false, hookType)
         {
             _func = func;
         }

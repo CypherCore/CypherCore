@@ -26,7 +26,7 @@ namespace Scripts.Spells.Warlock
 			return SpellCastResult.Fizzle;
 		}
 
-		private void HandleOnHitTarget(uint effIndex)
+		private void HandleOnHitTarget(int effIndex)
 		{
 			PreventHitDefaultEffect(effIndex);
 			// if (!GetCaster()->HasAura(LIFE_TAP_GLYPH))

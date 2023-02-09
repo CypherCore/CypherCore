@@ -2941,7 +2941,7 @@ namespace Game.AI
         }
         public struct Spell
         {
-            public uint effIndex;
+            public int effIndex;
         }
         public struct Raw
         {

@@ -12,7 +12,7 @@ namespace Scripts.Spells.Shaman
 	{
 		public List<ISpellEffect> SpellEffects { get; } = new();
 
-		private void HandleSummon(uint UnnamedParameter)
+		private void HandleSummon(int UnnamedParameter)
 		{
 			GetCaster().CastSpell(GetHitUnit(), ShamanSpells.SPELL_SHAMAN_EARTH_ELEMENTAL_SUMMON, true);
 		}
