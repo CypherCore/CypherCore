@@ -19,7 +19,7 @@ internal class spell_sha_item_t18_elemental_4p_bonus : AuraScript, IHasAuraEffec
 	private void DiminishHaste(AuraEffect aurEff)
 	{
 		PreventDefaultAction();
-		AuraEffect hasteBuff = GetEffect(0);
+		var hasteBuff = GetEffect(0);
 
 		hasteBuff?.ChangeAmount(hasteBuff.GetAmount() - aurEff.GetAmount());
 	}

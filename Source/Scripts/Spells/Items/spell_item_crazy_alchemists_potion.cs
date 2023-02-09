@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
@@ -27,7 +26,7 @@ internal class spell_item_crazy_alchemists_potion : SpellScript, ISpellAfterCast
 			                              53915  // Mighty Shadow Protection Potion (40217)
 		                              };
 
-		Unit target = GetCaster();
+		var target = GetCaster();
 
 		if (!target.IsInCombat())
 			availableElixirs.Add(53753); // Potion of Nightmares (40081)
@@ -35,7 +34,7 @@ internal class spell_item_crazy_alchemists_potion : SpellScript, ISpellAfterCast
 		if (target.GetPowerType() == PowerType.Mana)
 			availableElixirs.Add(43186); // Runic Mana Potion(33448)
 
-		uint chosenElixir = availableElixirs.SelectRandom();
+		var chosenElixir = availableElixirs.SelectRandom();
 
 		target.CastSpell(target, chosenElixir, new CastSpellExtraArgs(GetCastItem()));
 	}

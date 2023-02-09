@@ -10,7 +10,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(81269)]
 public class spell_dru_efflorescence_heal : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 
 	private void SortTargets(List<WorldObject> targets)
@@ -18,9 +18,7 @@ public class spell_dru_efflorescence_heal : SpellScript, IHasSpellEffects
 		targets.Sort(new HealthPctOrderPred());
 
 		if (targets.Count > 3)
-		{
 			targets.Resize(3);
-		}
 	}
 
 	public override void Register()

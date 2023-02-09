@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -19,7 +18,7 @@ internal class spell_gen_anchor_here : SpellScript, IHasSpellEffects
 
 	private void HandleScript(uint effIndex)
 	{
-		Creature creature = GetHitCreature();
+		var creature = GetHitCreature();
 
 		creature?.SetHomePosition(creature.GetPositionX(), creature.GetPositionY(), creature.GetPositionZ(), creature.GetOrientation());
 	}

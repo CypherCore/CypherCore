@@ -33,7 +33,7 @@ internal class spell_sha_ancestral_guidance : AuraScript, IAuraCheckProc, IHasAu
 	private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
 		PreventDefaultAction();
-		int bp0 = MathFunctions.CalculatePct((int)eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount());
+		var bp0 = MathFunctions.CalculatePct((int)eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount());
 
 		if (bp0 != 0)
 		{

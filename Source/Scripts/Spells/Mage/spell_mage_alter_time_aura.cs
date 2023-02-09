@@ -27,14 +27,14 @@ internal class spell_mage_alter_time_aura : AuraScript, IHasAuraEffects
 
 	private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit unit = GetTarget();
+		var unit = GetTarget();
 		_health = unit.GetHealth();
 		_pos    = new Position(unit.GetPosition());
 	}
 
 	private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit unit = GetTarget();
+		var unit = GetTarget();
 
 		if (unit.GetDistance(_pos) <= 100.0f &&
 		    GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Expire)
@@ -44,7 +44,7 @@ internal class spell_mage_alter_time_aura : AuraScript, IHasAuraEffects
 
 			if (unit.HasAura(MageSpells.MasterOfTime))
 			{
-				SpellInfo blink = Global.SpellMgr.GetSpellInfo(MageSpells.Blink, Difficulty.None);
+				var blink = Global.SpellMgr.GetSpellInfo(MageSpells.Blink, Difficulty.None);
 				unit.GetSpellHistory().ResetCharges(blink.ChargeCategoryId);
 			}
 

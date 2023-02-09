@@ -6,29 +6,28 @@ using Game.Spells;
 
 namespace Scripts.Spells.Warrior
 {
-    // New Bladestorm - 222634
-    [SpellScript(222634)]
-    public class spell_warr_bladestorm_new : AuraScript, IHasAuraEffects
-    {
-        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	// New Bladestorm - 222634
+	[SpellScript(222634)]
+	public class spell_warr_bladestorm_new : AuraScript, IHasAuraEffects
+	{
+		public List<IAuraEffectHandler> AuraEffects => new();
 
-        public override bool Validate(SpellInfo UnnamedParameter)
-        {
-            if (Global.SpellMgr.GetSpellInfo(WarriorSpells.NEW_BLADESTORM, Difficulty.None) != null)
-            {
-                return false;
-            }
-            return true;
-        }
+		public override bool Validate(SpellInfo UnnamedParameter)
+		{
+			if (Global.SpellMgr.GetSpellInfo(WarriorSpells.NEW_BLADESTORM, Difficulty.None) != null)
+				return false;
 
-        private void HandlePeriodicDummy(AuraEffect UnnamedParameter)
-        {
-            GetCaster().CastSpell(GetCaster(), 50622, true); // Bladestorm main hand damage
-        }
+			return true;
+		}
 
-        public override void Register()
-        {
-            AuraEffects.Add(new AuraEffectPeriodicHandler(HandlePeriodicDummy, 0, AuraType.PeriodicDummy));
-        }
-    }
+		private void HandlePeriodicDummy(AuraEffect UnnamedParameter)
+		{
+			GetCaster().CastSpell(GetCaster(), 50622, true); // Bladestorm main hand damage
+		}
+
+		public override void Register()
+		{
+			AuraEffects.Add(new AuraEffectPeriodicHandler(HandlePeriodicDummy, 0, AuraType.PeriodicDummy));
+		}
+	}
 }

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -25,9 +24,9 @@ internal class spell_gen_chaos_blast : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		int  basepoints0 = 100;
-		Unit caster      = GetCaster();
-		Unit target      = GetHitUnit();
+		var basepoints0 = 100;
+		var caster      = GetCaster();
+		var target      = GetHitUnit();
 
 		if (target)
 		{

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -25,7 +24,7 @@ internal class spell_q13086_cannons_target : SpellScript, IHasSpellEffects
 
 	private void HandleEffectDummy(uint effIndex)
 	{
-		WorldLocation pos = GetExplTargetDest();
+		var pos = GetExplTargetDest();
 
 		if (pos != null)
 			GetCaster().CastSpell(pos.GetPosition(), (uint)GetEffectValue(), new CastSpellExtraArgs(true));

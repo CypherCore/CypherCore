@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -33,11 +32,11 @@ internal class spell_item_universal_remote_SpellScript : SpellScript, IHasSpellE
 
 	private void HandleDummy(uint effIndex)
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
 
 		if (target)
 		{
-			uint chance = RandomHelper.URand(0, 99);
+			var chance = RandomHelper.URand(0, 99);
 
 			if (chance < 15)
 				GetCaster().CastSpell(target, ItemSpellIds.TargetLock, new CastSpellExtraArgs(GetCastItem()));

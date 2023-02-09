@@ -10,14 +10,13 @@ namespace Scripts.Spells.Monk;
 [SpellScript(124081)]
 public class spell_monk_zen_pulse : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
 		if (Global.SpellMgr.GetSpellInfo(MonkSpells.SPELL_MONK_ZEN_PULSE_DAMAGE, Difficulty.None) != null)
-		{
 			return false;
-		}
+
 		return true;
 	}
 

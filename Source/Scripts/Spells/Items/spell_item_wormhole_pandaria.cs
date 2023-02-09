@@ -30,7 +30,7 @@ internal class spell_item_wormhole_pandaria : SpellScript, IHasSpellEffects
 	private void HandleTeleport(uint effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
-		uint spellId = WormholeTargetLocations.SelectRandom();
+		var spellId = WormholeTargetLocations.SelectRandom();
 		GetCaster().CastSpell(GetHitUnit(), spellId, true);
 	}
 }

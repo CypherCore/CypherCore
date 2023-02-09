@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -10,17 +9,20 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(155228)]
 public class spell_hun_lone_wolf : AuraScript, IHasAuraEffects, IAuraOnUpdate
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
-	internal static uint[] g_BuffSpells = { (uint)LoneWolfes.LoneWolfMastery, (uint)LoneWolfes.LoneWolfStamina, (uint)LoneWolfes.LoneWolfCritical, (uint)LoneWolfes.LoneWolfHaste, (uint)LoneWolfes.LoneWolfSpellPower, (uint)LoneWolfes.LoneWolfPrimarStats, (uint)LoneWolfes.LoneWolfVersatility, (uint)LoneWolfes.LoneWolfMultistrike };
+	public List<IAuraEffectHandler> AuraEffects => new();
+
+	internal static uint[] g_BuffSpells =
+	{
+		(uint)LoneWolfes.LoneWolfMastery, (uint)LoneWolfes.LoneWolfStamina, (uint)LoneWolfes.LoneWolfCritical, (uint)LoneWolfes.LoneWolfHaste, (uint)LoneWolfes.LoneWolfSpellPower, (uint)LoneWolfes.LoneWolfPrimarStats, (uint)LoneWolfes.LoneWolfVersatility, (uint)LoneWolfes.LoneWolfMultistrike
+	};
 
 	private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
 		if (!GetCaster())
-		{
 			return;
-		}
 
-		Player player = GetCaster().ToPlayer();
+		var player = GetCaster().ToPlayer();
+
 		if (player != null)
 		{
 			player.LearnSpell(LoneWolfes.LoneWolfMastery, false);
@@ -37,11 +39,10 @@ public class spell_hun_lone_wolf : AuraScript, IHasAuraEffects, IAuraOnUpdate
 	private void OnRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
 		if (!GetCaster())
-		{
 			return;
-		}
 
-		Player player = GetCaster().ToPlayer();
+		var player = GetCaster().ToPlayer();
+
 		if (player != null)
 		{
 			player.RemoveSpell(LoneWolfes.LoneWolfMastery);
@@ -59,36 +60,29 @@ public class spell_hun_lone_wolf : AuraScript, IHasAuraEffects, IAuraOnUpdate
 	public void AuraOnUpdate(uint diff)
 	{
 		if (!GetUnitOwner())
-		{
 			return;
-		}
 
-		Player player = GetUnitOwner().ToPlayer();
+		var player = GetUnitOwner().ToPlayer();
 
 		if (player == null)
-		{
 			return;
-		}
 
-		Pet pet    = player.GetPet();
+		var pet    = player.GetPet();
 		var aurEff = GetEffect(0);
 
 		if (pet != null)
 		{
 			player.RemoveAura(LoneWolfes.LoneWolfAura);
-               
+
 			aurEff.ChangeAmount(0, true, true);
 
-			AuraEffect auraEffect = GetEffect(1);
+			var auraEffect = GetEffect(1);
+
 			if (auraEffect != null)
-			{
 				auraEffect.ChangeAmount(0, true, true);
-			}
 
 			for (byte I = 0; I < 8; ++I)
-			{
 				player.RemoveAura(g_BuffSpells[I]);
-			}
 		}
 		else
 		{
@@ -98,11 +92,10 @@ public class spell_hun_lone_wolf : AuraScript, IHasAuraEffects, IAuraOnUpdate
 
 				aurEff.ChangeAmount(GetSpellInfo().GetEffect(0).BasePoints, true, true);
 
-				AuraEffect auraEffect = aurEff.GetBase().GetEffect(1);
+				var auraEffect = aurEff.GetBase().GetEffect(1);
+
 				if (auraEffect != null)
-				{
 					auraEffect.ChangeAmount(GetSpellInfo().GetEffect(0).BasePoints, true, true);
-				}
 			}
 		}
 	}

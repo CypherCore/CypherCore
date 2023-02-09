@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -20,7 +19,7 @@ internal class spell_q13264_q13276_q13288_q13289_burst_at_the_seams_59579 : Aura
 
 	private void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit target = GetTarget();
+		var target = GetTarget();
 		target.CastSpell(target, QuestSpellIds.TrollExplosion, true);
 		target.CastSpell(target, QuestSpellIds.ExplodeAbominationMeat, true);
 		target.CastSpell(target, QuestSpellIds.ExplodeTrollMeat, true);
@@ -31,8 +30,8 @@ internal class spell_q13264_q13276_q13288_q13289_burst_at_the_seams_59579 : Aura
 
 	private void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit target = GetTarget();
-		Unit caster = GetCaster();
+		var target = GetTarget();
+		var caster = GetCaster();
 
 		if (caster != null)
 			switch (target.GetEntry())

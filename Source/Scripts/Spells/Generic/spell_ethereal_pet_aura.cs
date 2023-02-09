@@ -13,7 +13,7 @@ internal class spell_ethereal_pet_aura : AuraScript, IAuraCheckProc, IHasAuraEff
 {
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
-		uint levelDiff = (uint)Math.Abs(GetTarget().GetLevel() - eventInfo.GetProcTarget().GetLevel());
+		var levelDiff = (uint)Math.Abs(GetTarget().GetLevel() - eventInfo.GetProcTarget().GetLevel());
 
 		return levelDiff <= 9;
 	}

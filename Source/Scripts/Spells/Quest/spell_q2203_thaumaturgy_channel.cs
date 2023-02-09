@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -25,7 +24,7 @@ internal class spell_q2203_thaumaturgy_channel : AuraScript, IHasAuraEffects
 	private void HandleEffectPeriodic(AuraEffect aurEff)
 	{
 		PreventDefaultAction();
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		if (caster)
 			caster.CastSpell(caster, QuestSpellIds.ThaumaturgyChannel, false);

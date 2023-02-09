@@ -25,7 +25,7 @@ internal class spell_corrupting_plague_aura : AuraScript, IHasAuraEffects
 
 	private void OnPeriodic(AuraEffect aurEff)
 	{
-		Unit owner = GetTarget();
+		var owner = GetTarget();
 
 		List<Creature>           targets           = new();
 		CorruptingPlagueSearcher creature_check    = new(owner, 15.0f);

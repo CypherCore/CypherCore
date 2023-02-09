@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -35,10 +34,10 @@ internal class spell_q11730_ultrasonic_screwdriver : SpellScript, IHasSpellEffec
 
 	private void HandleDummy(uint effIndex)
 	{
-		Item castItem = GetCastItem();
-		Unit caster   = GetCaster();
+		var castItem = GetCastItem();
+		var caster   = GetCaster();
 
-		Creature target = GetHitCreature();
+		var target = GetHitCreature();
 
 		if (target)
 		{

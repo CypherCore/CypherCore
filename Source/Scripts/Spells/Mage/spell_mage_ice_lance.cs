@@ -32,21 +32,21 @@ internal class spell_mage_ice_lance : SpellScript, IHasSpellEffects
 
 	private void HandleOnHit(uint effIndex)
 	{
-		Unit caster = GetCaster();
-		Unit target = GetHitUnit();
+		var caster = GetCaster();
+		var target = GetHitUnit();
 
-		int index = _orderedTargets.IndexOf(target.GetGUID());
+		var index = _orderedTargets.IndexOf(target.GetGUID());
 
 		if (index == 0 // only primary Target triggers these benefits
 		    &&
 		    target.HasAuraState(AuraStateType.Frozen, GetSpellInfo(), caster))
 		{
 			// Thermal Void
-			Aura thermalVoid = caster.GetAura(MageSpells.ThermalVoid);
+			var thermalVoid = caster.GetAura(MageSpells.ThermalVoid);
 
 			if (!thermalVoid.GetSpellInfo().GetEffects().Empty())
 			{
-				Aura icyVeins = caster.GetAura(MageSpells.IcyVeins);
+				var icyVeins = caster.GetAura(MageSpells.IcyVeins);
 
 				icyVeins?.SetDuration(icyVeins.GetDuration() + thermalVoid.GetSpellInfo().GetEffect(0).CalcValue(caster) * Time.InMilliseconds);
 			}

@@ -1,5 +1,4 @@
-﻿using Game.Entities;
-using Game.Scripting;
+﻿using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
 
@@ -15,7 +14,7 @@ internal class spell_mage_water_elemental_freeze : SpellScript, ISpellAfterHit
 
 	public void AfterHit()
 	{
-		Unit owner = GetCaster().GetOwner();
+		var owner = GetCaster().GetOwner();
 
 		if (!owner)
 			return;

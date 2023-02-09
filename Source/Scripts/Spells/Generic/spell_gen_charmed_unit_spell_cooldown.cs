@@ -1,5 +1,4 @@
 ﻿using Framework.Constants;
-using Game.Entities;
 using Game.Networking.Packets;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
@@ -11,8 +10,8 @@ internal class spell_gen_charmed_unit_spell_cooldown : SpellScript, ISpellOnCast
 {
 	public void OnCast()
 	{
-		Unit   caster = GetCaster();
-		Player owner  = caster.GetCharmerOrOwnerPlayerOrPlayerItself();
+		var caster = GetCaster();
+		var owner  = caster.GetCharmerOrOwnerPlayerOrPlayerItself();
 
 		if (owner != null)
 		{

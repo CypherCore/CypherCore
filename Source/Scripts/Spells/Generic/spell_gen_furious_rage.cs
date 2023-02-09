@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
 using Game.DataStorage;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -28,7 +27,7 @@ internal class spell_gen_furious_rage : AuraScript, IHasAuraEffects
 
 	private void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit target = GetTarget();
+		var target = GetTarget();
 		target.TextEmote(EmoteIds.FuriousRage, target, false);
 	}
 
@@ -37,7 +36,7 @@ internal class spell_gen_furious_rage : AuraScript, IHasAuraEffects
 		if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
 			return;
 
-		Unit target = GetTarget();
+		var target = GetTarget();
 		target.TextEmote(EmoteIds.Exhausted, target, false);
 		target.CastSpell(target, GenericSpellIds.Exhaustion, true);
 	}

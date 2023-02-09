@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -19,7 +18,7 @@ internal class spell_clear_all : SpellScript, IHasSpellEffects
 
 	private void HandleScript(uint effIndex)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 		caster.RemoveAllAurasOnDeath();
 	}
 }

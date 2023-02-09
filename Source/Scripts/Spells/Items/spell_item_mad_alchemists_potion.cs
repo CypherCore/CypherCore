@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
@@ -37,16 +36,16 @@ internal class spell_item_mad_alchemists_potion : SpellScript, ISpellAfterCast
 			                              28496  // Elixir of the Searching Eye (22830)
 		                              };
 
-		Unit target = GetCaster();
+		var target = GetCaster();
 
 		if (target.GetPowerType() == PowerType.Mana)
 			availableElixirs.Add(28509); // Elixir of Major Mageblood (22840)
 
-		uint chosenElixir = availableElixirs.SelectRandom();
+		var chosenElixir = availableElixirs.SelectRandom();
 
-		bool useElixir = true;
+		var useElixir = true;
 
-		SpellGroup chosenSpellGroup = SpellGroup.None;
+		var chosenSpellGroup = SpellGroup.None;
 
 		if (Global.SpellMgr.IsSpellMemberOfSpellGroup(chosenElixir, SpellGroup.ElixirBattle))
 			chosenSpellGroup = SpellGroup.ElixirBattle;
@@ -61,7 +60,7 @@ internal class spell_item_mad_alchemists_potion : SpellScript, ISpellAfterCast
 
 			foreach (var pair in Auras.KeyValueList)
 			{
-				uint spell_id = pair.Value.GetBase().GetId();
+				var spell_id = pair.Value.GetBase().GetId();
 
 				if (Global.SpellMgr.IsSpellMemberOfSpellGroup(spell_id, chosenSpellGroup) &&
 				    spell_id != chosenElixir)

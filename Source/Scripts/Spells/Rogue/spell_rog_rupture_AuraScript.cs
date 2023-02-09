@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -25,7 +24,7 @@ internal class spell_rog_rupture_AuraScript : AuraScript, IHasAuraEffects
 
 	private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		if (caster != null)
 		{
@@ -40,7 +39,7 @@ internal class spell_rog_rupture_AuraScript : AuraScript, IHasAuraEffects
 				0.0375f       // 5 points: ${($m1 + $b1*5 + 0.0375 * $AP) * 8} Damage over 16 secs
 			};
 
-			uint cp = caster.GetComboPoints();
+			var cp = caster.GetComboPoints();
 
 			if (cp > 5)
 				cp = 5;
@@ -54,25 +53,25 @@ internal class spell_rog_rupture_AuraScript : AuraScript, IHasAuraEffects
 		if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Death)
 			return;
 
-		Aura aura   = GetAura();
-		Unit caster = aura.GetCaster();
+		var aura   = GetAura();
+		var caster = aura.GetCaster();
 
 		if (!caster)
 			return;
 
-		Aura auraVenomousWounds = caster.GetAura(RogueSpells.VenomousWounds);
+		var auraVenomousWounds = caster.GetAura(RogueSpells.VenomousWounds);
 
 		if (auraVenomousWounds == null)
 			return;
 
 		// Venomous Wounds: if unit dies while being affected by rupture, regain energy based on remaining duration
-		SpellPowerCost cost = GetSpellInfo().CalcPowerCost(PowerType.Energy, false, caster, GetSpellInfo().GetSchoolMask(), null);
+		var cost = GetSpellInfo().CalcPowerCost(PowerType.Energy, false, caster, GetSpellInfo().GetSchoolMask(), null);
 
 		if (cost == null)
 			return;
 
-		float pct         = (float)aura.GetDuration() / (float)aura.GetMaxDuration();
-		int   extraAmount = (int)((float)cost.Amount * pct);
+		var pct         = (float)aura.GetDuration() / (float)aura.GetMaxDuration();
+		var extraAmount = (int)((float)cost.Amount * pct);
 		caster.ModifyPower(PowerType.Energy, extraAmount);
 	}
 }

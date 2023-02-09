@@ -25,8 +25,8 @@ internal class spell_monk_provoke : SpellScript, ISpellCheckCast, IHasSpellEffec
 	{
 		if (GetExplTargetUnit().GetEntry() != BlackOxStatusEntry)
 		{
-			SpellInfo       singleTarget               = Global.SpellMgr.GetSpellInfo(MonkSpells.ProvokeSingleTarget, GetCastDifficulty());
-			SpellCastResult singleTargetExplicitResult = singleTarget.CheckExplicitTarget(GetCaster(), GetExplTargetUnit());
+			var singleTarget               = Global.SpellMgr.GetSpellInfo(MonkSpells.ProvokeSingleTarget, GetCastDifficulty());
+			var singleTargetExplicitResult = singleTarget.CheckExplicitTarget(GetCaster(), GetExplTargetUnit());
 
 			if (singleTargetExplicitResult != SpellCastResult.SpellCastOk)
 				return singleTargetExplicitResult;

@@ -7,24 +7,23 @@ using Game.Spells;
 
 namespace Scripts.Spells.Warrior
 {
-    //200860 Unrivaled Strenght
-    [SpellScript(200860)]
-    public class spell_warr_unrivaled_strenght : AuraScript, IHasAuraEffects
-    {
-        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	//200860 Unrivaled Strenght
+	[SpellScript(200860)]
+	public class spell_warr_unrivaled_strenght : AuraScript, IHasAuraEffects
+	{
+		public List<IAuraEffectHandler> AuraEffects => new();
 
-        private void HandleProc(AuraEffect aurEff, ProcEventInfo UnnamedParameter)
-        {
-            GetCaster().CastSpell(GetCaster(), 200977, true);
-            if (GetCaster().HasAura(200977))
-            {
-                GetCaster().GetAura(200977).GetEffect(0).SetAmount(aurEff.GetBaseAmount());
-            }
-        }
+		private void HandleProc(AuraEffect aurEff, ProcEventInfo UnnamedParameter)
+		{
+			GetCaster().CastSpell(GetCaster(), 200977, true);
 
-        public override void Register()
-        {
-            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
-    }
+			if (GetCaster().HasAura(200977))
+				GetCaster().GetAura(200977).GetEffect(0).SetAmount(aurEff.GetBaseAmount());
+		}
+
+		public override void Register()
+		{
+			AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+		}
+	}
 }

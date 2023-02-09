@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -36,17 +35,17 @@ internal class spell_rog_shadowstrike : SpellScript, ISpellCheckCast, IHasSpellE
 
 	private void HandleEnergize(uint effIndex)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		if (_hasPremeditationAura)
 		{
 			if (caster.HasAura(RogueSpells.SliceAndDice))
 			{
-				Aura premeditationPassive = caster.GetAura(RogueSpells.PremeditationPassive);
+				var premeditationPassive = caster.GetAura(RogueSpells.PremeditationPassive);
 
 				if (premeditationPassive != null)
 				{
-					AuraEffect auraEff = premeditationPassive.GetEffect(1);
+					var auraEff = premeditationPassive.GetEffect(1);
 
 					if (auraEff != null)
 						SetHitDamage(GetHitDamage() + auraEff.GetAmount());
@@ -54,7 +53,7 @@ internal class spell_rog_shadowstrike : SpellScript, ISpellCheckCast, IHasSpellE
 			}
 
 			// Grant 10 seconds of slice and dice
-			int duration = Global.SpellMgr.GetSpellInfo(RogueSpells.PremeditationPassive, Difficulty.None).GetEffect(0).CalcValue(GetCaster());
+			var duration = Global.SpellMgr.GetSpellInfo(RogueSpells.PremeditationPassive, Difficulty.None).GetEffect(0).CalcValue(GetCaster());
 
 			CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
 			args.AddSpellMod(SpellValueMod.Duration, duration * Time.InMilliseconds);

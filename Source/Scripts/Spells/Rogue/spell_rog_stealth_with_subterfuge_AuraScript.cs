@@ -9,15 +9,13 @@ namespace Scripts.Spells.Rogue;
 [SpellScript(115191)]
 public class spell_rog_stealth_with_subterfuge_AuraScript : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 
 	private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
 		if (!GetCaster())
-		{
 			return;
-		}
 
 		GetCaster().RemoveAura(115191);
 		GetCaster().RemoveAura(115192);

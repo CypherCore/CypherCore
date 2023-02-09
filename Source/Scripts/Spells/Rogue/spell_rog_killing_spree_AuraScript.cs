@@ -39,8 +39,8 @@ internal class spell_rog_killing_spree_AuraScript : AuraScript, IHasAuraEffects
 	{
 		while (!_targets.Empty())
 		{
-			ObjectGuid guid   = _targets.SelectRandom();
-			Unit       target = Global.ObjAccessor.GetUnit(GetTarget(), guid);
+			var guid   = _targets.SelectRandom();
+			var target = Global.ObjAccessor.GetUnit(GetTarget(), guid);
 
 			if (target != null)
 			{

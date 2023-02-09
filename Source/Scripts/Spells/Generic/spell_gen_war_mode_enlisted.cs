@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -14,7 +13,7 @@ internal class spell_gen_war_mode_enlisted : AuraScript, IHasAuraEffects
 
 	public override void Register()
 	{
-		SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ScriptSpellId, Difficulty.None);
+		var spellInfo = Global.SpellMgr.GetSpellInfo(ScriptSpellId, Difficulty.None);
 
 		if (spellInfo.HasAura(AuraType.ModXpPct))
 			AuraEffects.Add(new AuraEffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.ModXpPct));
@@ -37,7 +36,7 @@ internal class spell_gen_war_mode_enlisted : AuraScript, IHasAuraEffects
 
 	private void CalcWarModeBonus(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
 	{
-		Player target = GetUnitOwner().ToPlayer();
+		var target = GetUnitOwner().ToPlayer();
 
 		if (target == null)
 			return;

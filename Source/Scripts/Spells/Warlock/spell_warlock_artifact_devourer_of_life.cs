@@ -7,29 +7,26 @@ using Game.Spells;
 
 namespace Scripts.Spells.Warlock
 {
-    [SpellScript(196301)]
-    public class spell_warlock_artifact_devourer_of_life : AuraScript, IHasAuraEffects
-    {
-        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	[SpellScript(196301)]
+	public class spell_warlock_artifact_devourer_of_life : AuraScript, IHasAuraEffects
+	{
+		public List<IAuraEffectHandler> AuraEffects => new();
 
-        private void OnProc(AuraEffect aurEff, ProcEventInfo UnnamedParameter)
-        {
-            PreventDefaultAction();
-            Unit caster = GetCaster();
-            if (caster == null)
-            {
-                return;
-            }
+		private void OnProc(AuraEffect aurEff, ProcEventInfo UnnamedParameter)
+		{
+			PreventDefaultAction();
+			var caster = GetCaster();
 
-            if (RandomHelper.randChance(aurEff.GetAmount()))
-            {
-                caster.CastSpell(caster, WarlockSpells.DEVOURER_OF_LIFE_PROC, true);
-            }
-        }
+			if (caster == null)
+				return;
 
-        public override void Register()
-        {
-            AuraEffects.Add(new AuraEffectProcHandler(OnProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
-    }
+			if (RandomHelper.randChance(aurEff.GetAmount()))
+				caster.CastSpell(caster, WarlockSpells.DEVOURER_OF_LIFE_PROC, true);
+		}
+
+		public override void Register()
+		{
+			AuraEffects.Add(new AuraEffectProcHandler(OnProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+		}
+	}
 }

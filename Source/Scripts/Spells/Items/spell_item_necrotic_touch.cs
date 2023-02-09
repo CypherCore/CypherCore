@@ -30,7 +30,7 @@ internal class spell_item_necrotic_touch : AuraScript, IAuraCheckProc, IHasAuraE
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
 		PreventDefaultAction();
-		DamageInfo damageInfo = eventInfo.GetDamageInfo();
+		var damageInfo = eventInfo.GetDamageInfo();
 
 		if (damageInfo == null ||
 		    damageInfo.GetDamage() == 0)

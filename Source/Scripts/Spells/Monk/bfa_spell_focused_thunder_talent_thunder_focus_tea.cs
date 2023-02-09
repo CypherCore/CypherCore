@@ -10,23 +10,21 @@ namespace Scripts.Spells.Monk;
 [SpellScript(116680)]
 public class bfa_spell_focused_thunder_talent_thunder_focus_tea : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
 		Unit caster = GetCaster().ToPlayer();
+
 		if (caster == null)
-		{
 			return;
-		}
 
 		if (caster.HasAura(MonkSpells.SPELL_FOCUSED_THUNDER_TALENT))
 		{
-			Aura thunder = caster.GetAura(MonkSpells.SPELL_MONK_THUNDER_FOCUS_TEA);
+			var thunder = caster.GetAura(MonkSpells.SPELL_MONK_THUNDER_FOCUS_TEA);
+
 			if (thunder != null)
-			{
 				thunder.SetStackAmount(2);
-			}
 		}
 	}
 

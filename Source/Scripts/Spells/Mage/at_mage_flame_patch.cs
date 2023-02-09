@@ -22,23 +22,18 @@ public class at_mage_flame_patch : AreaTriggerAI
 
 	public override void OnUpdate(uint diff)
 	{
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
 
 		if (caster == null)
-		{
 			return;
-		}
 
 		if (caster.GetTypeId() != TypeId.Player)
-		{
 			return;
-		}
 
 		timeInterval += (int)diff;
+
 		if (timeInterval < 1000)
-		{
 			return;
-		}
 
 		caster.CastSpell(at.GetPosition(), MageSpells.SPELL_MAGE_FLAME_PATCH_AOE_DMG, true);
 

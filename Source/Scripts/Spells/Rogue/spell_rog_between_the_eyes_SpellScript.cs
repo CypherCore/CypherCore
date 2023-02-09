@@ -1,5 +1,4 @@
 ﻿using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
@@ -14,21 +13,19 @@ public class spell_rog_between_the_eyes_SpellScript : SpellScript, ISpellAfterHi
 	public void TakePower(SpellPowerCost powerCost)
 	{
 		if (powerCost.Power == PowerType.ComboPoints)
-		{
 			_cp = powerCost.Amount;
-		}
 	}
 
 	public void AfterHit()
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
+
 		if (target != null)
 		{
-			Aura aura = target.GetAura(TrueBearingIDs.SPELL_ROGUE_BETWEEN_THE_EYES, GetCaster().GetGUID());
+			var aura = target.GetAura(TrueBearingIDs.SPELL_ROGUE_BETWEEN_THE_EYES, GetCaster().GetGUID());
+
 			if (aura != null)
-			{
 				aura.SetDuration(_cp * Time.InMilliseconds);
-			}
 		}
 	}
 }

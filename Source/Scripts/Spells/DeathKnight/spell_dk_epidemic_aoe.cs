@@ -10,49 +10,41 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(215969)]
 public class spell_dk_epidemic_aoe : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 
 	private void FilterTargets(List<WorldObject> targets)
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
+
 		if (target != null)
 		{
-			Unit caster = GetCaster();
+			var caster = GetCaster();
+
 			if (caster != null)
-			{
 				if (caster.GetDistance2d(target) > 30.0f)
-				{
 					targets.Remove(target);
-				}
-			}
 		}
 
 		if (targets.Count > 7)
-		{
 			targets.Resize(7);
-		}
 	}
 
 	private void HandleOnHitMain(uint UnnamedParameter)
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
+
 		if (target != null)
-		{
 			explicitTarget = target.GetGUID();
-		}
 	}
 
 	private void HandleOnHitAOE(uint UnnamedParameter)
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
+
 		if (target != null)
-		{
 			if (target.GetGUID() == explicitTarget)
-			{
 				PreventHitDamage();
-			}
-		}
 	}
 
 	public override void Register()
@@ -61,5 +53,6 @@ public class spell_dk_epidemic_aoe : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleOnHitMain, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 		SpellEffects.Add(new EffectHandler(HandleOnHitAOE, 1, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
 	}
-	private ObjectGuid explicitTarget = new ObjectGuid();
+
+	private ObjectGuid explicitTarget = new();
 }

@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.BattleGrounds;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -39,9 +37,9 @@ internal class spell_item_rocket_boots : SpellScript, ISpellCheckCast, IHasSpell
 
 	private void HandleDummy(uint effIndex)
 	{
-		Player caster = GetCaster().ToPlayer();
+		var caster = GetCaster().ToPlayer();
 
-		Battleground bg = caster.GetBattleground();
+		var bg = caster.GetBattleground();
 
 		if (bg)
 			bg.EventPlayerDroppedFlag(caster);

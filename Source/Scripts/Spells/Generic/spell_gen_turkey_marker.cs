@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -24,7 +23,7 @@ internal class spell_gen_turkey_marker : AuraScript, IHasAuraEffects
 	{
 		// store stack apply times, so we can pop them while they expire
 		_applyTimes.Add(GameTime.GetGameTimeMS());
-		Unit target = GetTarget();
+		var target = GetTarget();
 
 		// on stack 15 cast the Achievement crediting spell
 		if (GetStackAmount() >= 15)
@@ -33,7 +32,7 @@ internal class spell_gen_turkey_marker : AuraScript, IHasAuraEffects
 
 	private void OnPeriodic(AuraEffect aurEff)
 	{
-		int removeCount = 0;
+		var removeCount = 0;
 
 		// pop expired times off of the stack
 		while (!_applyTimes.Empty() && _applyTimes.FirstOrDefault() + GetMaxDuration() < GameTime.GetGameTimeMS())

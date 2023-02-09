@@ -39,7 +39,7 @@ internal class spell_gen_arena_drink : AuraScript, IHasAuraEffects
 	private void CalcPeriodic(AuraEffect aurEff, ref bool isPeriodic, ref int amplitude)
 	{
 		// Get SPELL_AURA_MOD_POWER_REGEN aura from spell
-		AuraEffect regen = GetAura().GetEffect(0);
+		var regen = GetAura().GetEffect(0);
 
 		if (regen == null)
 			return;
@@ -51,7 +51,7 @@ internal class spell_gen_arena_drink : AuraScript, IHasAuraEffects
 
 	private void CalcAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
 	{
-		AuraEffect regen = GetAura().GetEffect(0);
+		var regen = GetAura().GetEffect(0);
 
 		if (regen == null)
 			return;
@@ -63,7 +63,7 @@ internal class spell_gen_arena_drink : AuraScript, IHasAuraEffects
 
 	private void UpdatePeriodic(AuraEffect aurEff)
 	{
-		AuraEffect regen = GetAura().GetEffect(0);
+		var regen = GetAura().GetEffect(0);
 
 		if (regen == null)
 			return;

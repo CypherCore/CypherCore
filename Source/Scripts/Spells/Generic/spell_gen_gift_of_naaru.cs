@@ -28,9 +28,9 @@ internal class spell_gen_gift_of_naaru : AuraScript, IHasAuraEffects
 		    aurEff.GetTotalTicks() == 0)
 			return;
 
-		float healPct  = GetEffectInfo(1).CalcValue() / 100.0f;
-		float heal     = healPct * GetCaster().GetMaxHealth();
-		int   healTick = (int)Math.Floor(heal / aurEff.GetTotalTicks());
+		var healPct  = GetEffectInfo(1).CalcValue() / 100.0f;
+		var heal     = healPct * GetCaster().GetMaxHealth();
+		var healTick = (int)Math.Floor(heal / aurEff.GetTotalTicks());
 		amount += healTick;
 	}
 }

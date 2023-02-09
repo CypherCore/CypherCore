@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -30,13 +29,13 @@ internal class spell_sha_flametongue_weapon : SpellScript, IHasSpellEffects
 
 	private void HandleEffectHitTarget(uint index)
 	{
-		Player player = GetCaster().ToPlayer();
-		byte   slot   = EquipmentSlot.MainHand;
+		var player = GetCaster().ToPlayer();
+		var slot   = EquipmentSlot.MainHand;
 
 		if (player.GetPrimarySpecialization() == TalentSpecialization.ShamanEnhancement)
 			slot = EquipmentSlot.OffHand;
 
-		Item targetItem = player.GetItemByPos(InventorySlots.Bag0, slot);
+		var targetItem = player.GetItemByPos(InventorySlots.Bag0, slot);
 
 		if (targetItem == null ||
 		    !targetItem.GetTemplate().IsWeapon())

@@ -25,13 +25,13 @@ internal class spell_mage_ring_of_frost_freeze : SpellScript, IHasSpellEffects
 
 	private void FilterTargets(List<WorldObject> targets)
 	{
-		WorldLocation dest      = GetExplTargetDest();
-		float         outRadius = Global.SpellMgr.GetSpellInfo(MageSpells.RingOfFrostSummon, GetCastDifficulty()).GetEffect(0).CalcRadius();
-		float         inRadius  = 6.5f;
+		var dest      = GetExplTargetDest();
+		var outRadius = Global.SpellMgr.GetSpellInfo(MageSpells.RingOfFrostSummon, GetCastDifficulty()).GetEffect(0).CalcRadius();
+		var inRadius  = 6.5f;
 
 		targets.RemoveAll(target =>
 		                  {
-			                  Unit unit = target.ToUnit();
+			                  var unit = target.ToUnit();
 
 			                  if (!unit)
 				                  return true;

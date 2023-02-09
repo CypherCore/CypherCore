@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -22,7 +21,7 @@ internal class spell_gen_despawn_target : SpellScript, IHasSpellEffects
 		if (GetEffectInfo().IsEffect(SpellEffectName.Dummy) ||
 		    GetEffectInfo().IsEffect(SpellEffectName.ScriptEffect))
 		{
-			Creature target = GetHitCreature();
+			var target = GetHitCreature();
 
 			target?.DespawnOrUnsummon();
 		}

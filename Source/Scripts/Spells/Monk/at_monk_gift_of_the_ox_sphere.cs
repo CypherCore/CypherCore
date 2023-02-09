@@ -23,38 +23,30 @@ public class at_monk_gift_of_the_ox_sphere : AreaTriggerAI
 	public override void OnUpdate(uint diff)
 	{
 		if (pickupDelay >= diff)
-		{
 			pickupDelay -= diff;
-		}
 		else
-		{
 			pickupDelay = 0;
-		}
 	}
 
 	public override void OnUnitEnter(Unit unit)
 	{
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
+
 		if (caster != null)
-		{
 			if (unit == caster && pickupDelay == 0)
 			{
 				caster.CastSpell(caster, SpellsUsed.SPELL_MONK_GIFT_OF_THE_OX_HEAL, true);
 				at.Remove();
 			}
-		}
 	}
 
 	public override void OnRemove()
 	{
 		//Todo : Remove cooldown
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
+
 		if (caster != null)
-		{
 			if (caster.HasAura(SpellsUsed.SPELL_MONK_HEALING_SPHERE_COOLDOWN))
-			{
 				caster.RemoveAura(SpellsUsed.SPELL_MONK_HEALING_SPHERE_COOLDOWN);
-			}
-		}
 	}
 }

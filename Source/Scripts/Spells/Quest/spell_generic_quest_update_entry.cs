@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -40,7 +39,7 @@ internal class spell_generic_quest_update_entry : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		Creature creatureTarget = GetHitCreature();
+		var creatureTarget = GetHitCreature();
 
 		if (creatureTarget)
 			if (!creatureTarget.IsPet() &&

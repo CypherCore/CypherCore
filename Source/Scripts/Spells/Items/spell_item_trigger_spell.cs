@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -35,8 +34,8 @@ internal class spell_item_trigger_spell : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		Unit caster = GetCaster();
-		Item item   = GetCastItem();
+		var caster = GetCaster();
+		var item   = GetCastItem();
 
 		if (item)
 			caster.CastSpell(caster, _triggeredSpellId, new CastSpellExtraArgs(item));

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -25,7 +24,7 @@ internal class spell_sha_earthen_rage_proc_aura : AuraScript, IHasAuraEffects
 	private void HandleEffectPeriodic(AuraEffect aurEff)
 	{
 		PreventDefaultAction();
-		Aura aura = GetCaster().GetAura(ShamanSpells.EarthenRagePassive);
+		var aura = GetCaster().GetAura(ShamanSpells.EarthenRagePassive);
 
 		if (aura != null)
 		{
@@ -33,7 +32,7 @@ internal class spell_sha_earthen_rage_proc_aura : AuraScript, IHasAuraEffects
 
 			if (earthen_rage_script != null)
 			{
-				Unit procTarget = Global.ObjAccessor.GetUnit(GetCaster(), earthen_rage_script.GetProcTargetGuid());
+				var procTarget = Global.ObjAccessor.GetUnit(GetCaster(), earthen_rage_script.GetProcTargetGuid());
 
 				if (procTarget)
 					GetTarget().CastSpell(procTarget, ShamanSpells.EarthenRageDamage, true);

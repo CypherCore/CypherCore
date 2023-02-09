@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -25,13 +24,13 @@ internal class spell_quest_portal_with_condition : SpellScript, IHasSpellEffects
 
 	private void HandleScriptEffect(uint effIndex)
 	{
-		Player target = GetHitPlayer();
+		var target = GetHitPlayer();
 
 		if (target == null)
 			return;
 
-		uint spellId = (uint)GetEffectInfo().CalcValue();
-		uint questId = (uint)GetEffectInfo(1).CalcValue();
+		var spellId = (uint)GetEffectInfo().CalcValue();
+		var questId = (uint)GetEffectInfo(1).CalcValue();
 
 		// This probably should be a way to throw error in SpellCastResult
 		if (target.IsActiveQuest(questId))

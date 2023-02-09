@@ -10,13 +10,13 @@ internal class spell_item_unsated_craving : AuraScript, IAuraCheckProc
 {
 	public bool CheckProc(ProcEventInfo procInfo)
 	{
-		Unit caster = procInfo.GetActor();
+		var caster = procInfo.GetActor();
 
 		if (!caster ||
 		    caster.GetTypeId() != TypeId.Player)
 			return false;
 
-		Unit target = procInfo.GetActionTarget();
+		var target = procInfo.GetActionTarget();
 
 		if (!target ||
 		    target.GetTypeId() != TypeId.Unit ||

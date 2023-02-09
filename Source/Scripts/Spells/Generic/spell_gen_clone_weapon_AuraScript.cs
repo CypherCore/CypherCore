@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -33,8 +32,8 @@ internal class spell_gen_clone_weapon_AuraScript : AuraScript, IHasAuraEffects
 
 	private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit caster = GetCaster();
-		Unit target = GetTarget();
+		var caster = GetCaster();
+		var target = GetTarget();
 
 		if (!caster)
 			return;
@@ -47,11 +46,11 @@ internal class spell_gen_clone_weapon_AuraScript : AuraScript, IHasAuraEffects
 			{
 				prevItem = target.GetVirtualItemId(0);
 
-				Player player = caster.ToPlayer();
+				var player = caster.ToPlayer();
 
 				if (player)
 				{
-					Item mainItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+					var mainItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
 
 					if (mainItem)
 						target.SetVirtualItem(0, mainItem.GetEntry());
@@ -68,11 +67,11 @@ internal class spell_gen_clone_weapon_AuraScript : AuraScript, IHasAuraEffects
 			{
 				prevItem = target.GetVirtualItemId(1);
 
-				Player player = caster.ToPlayer();
+				var player = caster.ToPlayer();
 
 				if (player)
 				{
-					Item offItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
+					var offItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
 
 					if (offItem)
 						target.SetVirtualItem(1, offItem.GetEntry());
@@ -88,11 +87,11 @@ internal class spell_gen_clone_weapon_AuraScript : AuraScript, IHasAuraEffects
 			{
 				prevItem = target.GetVirtualItemId(2);
 
-				Player player = caster.ToPlayer();
+				var player = caster.ToPlayer();
 
 				if (player)
 				{
-					Item rangedItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+					var rangedItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
 
 					if (rangedItem)
 						target.SetVirtualItem(2, rangedItem.GetEntry());
@@ -111,7 +110,7 @@ internal class spell_gen_clone_weapon_AuraScript : AuraScript, IHasAuraEffects
 
 	private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit target = GetTarget();
+		var target = GetTarget();
 
 		switch (GetSpellInfo().Id)
 		{

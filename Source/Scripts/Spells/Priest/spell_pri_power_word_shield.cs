@@ -1,5 +1,4 @@
 ﻿using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
@@ -11,8 +10,8 @@ internal class spell_pri_power_word_shield : SpellScript, ISpellCheckCast, ISpel
 {
 	public void AfterHit()
 	{
-		Unit caster = GetCaster();
-		Unit target = GetHitUnit();
+		var caster = GetCaster();
+		var target = GetHitUnit();
 
 		if (target != null)
 			if (!caster.HasAura(PriestSpells.Rapture))
@@ -26,8 +25,8 @@ internal class spell_pri_power_word_shield : SpellScript, ISpellCheckCast, ISpel
 
 	public SpellCastResult CheckCast()
 	{
-		Unit caster = GetCaster();
-		Unit target = GetExplTargetUnit();
+		var caster = GetCaster();
+		var target = GetExplTargetUnit();
 
 		if (target != null)
 			if (!caster.HasAura(PriestSpells.Rapture))

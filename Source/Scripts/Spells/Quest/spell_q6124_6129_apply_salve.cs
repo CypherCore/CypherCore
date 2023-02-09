@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -24,11 +23,11 @@ internal class spell_q6124_6129_apply_salve : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		Player caster = GetCaster().ToPlayer();
+		var caster = GetCaster().ToPlayer();
 
 		if (GetCastItem())
 		{
-			Creature creatureTarget = GetHitCreature();
+			var creatureTarget = GetHitCreature();
 
 			if (creatureTarget)
 			{

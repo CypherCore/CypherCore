@@ -10,14 +10,13 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(206967)]
 public class spell_dk_will_of_the_necropolis : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
 		if (Global.SpellMgr.GetSpellInfo(DeathKnightSpells.SPELL_DK_WILL_OF_THE_NECROPOLIS, Difficulty.None) != null)
-		{
 			return false;
-		}
+
 		return true;
 	}
 
@@ -31,9 +30,7 @@ public class spell_dk_will_of_the_necropolis : AuraScript, IHasAuraEffects
 		absorbAmount = 0;
 
 		if (GetTarget().GetHealthPct() < GetEffect(2).GetBaseAmount())
-		{
 			absorbAmount = MathFunctions.CalculatePct(dmgInfo.GetDamage(), GetEffect(1).GetBaseAmount());
-		}
 	}
 
 	public override void Register()

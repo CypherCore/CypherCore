@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -25,11 +24,11 @@ internal class spell_q13400_illidan_kill_master : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		if (caster.IsVehicle())
 		{
-			Unit passenger = caster.GetVehicleKit().GetPassenger(0);
+			var passenger = caster.GetVehicleKit().GetPassenger(0);
 
 			if (passenger)
 				passenger.CastSpell(passenger, QuestSpellIds.IllidanKillCredit, true);

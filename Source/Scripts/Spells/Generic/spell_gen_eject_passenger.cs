@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -31,11 +30,11 @@ internal class spell_gen_eject_passenger : SpellScript, IHasSpellEffects
 
 	private void EjectPassenger(uint effIndex)
 	{
-		Vehicle vehicle = GetHitUnit().GetVehicleKit();
+		var vehicle = GetHitUnit().GetVehicleKit();
 
 		if (vehicle != null)
 		{
-			Unit passenger = vehicle.GetPassenger((sbyte)(GetEffectValue() - 1));
+			var passenger = vehicle.GetPassenger((sbyte)(GetEffectValue() - 1));
 
 			if (passenger)
 				passenger.ExitVehicle();

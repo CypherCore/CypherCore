@@ -26,9 +26,9 @@ internal class spell_item_death_choice : AuraScript, IHasAuraEffects
 	{
 		PreventDefaultAction();
 
-		Unit  caster = eventInfo.GetActor();
-		float str    = caster.GetStat(Stats.Strength);
-		float agi    = caster.GetStat(Stats.Agility);
+		var caster = eventInfo.GetActor();
+		var str    = caster.GetStat(Stats.Strength);
+		var agi    = caster.GetStat(Stats.Agility);
 
 		switch (aurEff.GetId())
 		{

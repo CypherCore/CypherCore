@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -24,7 +23,7 @@ internal class spell_item_scroll_of_recall : SpellScript, IHasSpellEffects
 
 	private void HandleScript(uint effIndex)
 	{
-		Unit caster       = GetCaster();
+		var  caster       = GetCaster();
 		byte maxSafeLevel = 0;
 
 		switch (GetSpellInfo().Id)
@@ -50,7 +49,7 @@ internal class spell_item_scroll_of_recall : SpellScript, IHasSpellEffects
 			caster.CastSpell(caster, ItemSpellIds.Lost, true);
 
 			// ALLIANCE from 60323 to 60330 - HORDE from 60328 to 60335
-			uint spellId = ItemSpellIds.ScrollOfRecallFailAlliance1;
+			var spellId = ItemSpellIds.ScrollOfRecallFailAlliance1;
 
 			if (GetCaster().ToPlayer().GetTeam() == Team.Horde)
 				spellId = ItemSpellIds.ScrollOfRecallFailHorde1;

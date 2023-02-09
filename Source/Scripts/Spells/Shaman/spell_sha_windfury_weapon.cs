@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -32,7 +31,7 @@ internal class spell_sha_windfury_weapon : SpellScript, IHasSpellEffects
 	{
 		PreventHitDefaultEffect(effIndex);
 
-		Item mainHand = GetCaster().ToPlayer().GetWeaponForAttack(WeaponAttackType.BaseAttack, false);
+		var mainHand = GetCaster().ToPlayer().GetWeaponForAttack(WeaponAttackType.BaseAttack, false);
 
 		if (mainHand != null)
 			GetCaster().CastSpell(mainHand, ShamanSpells.WindfuryEnchantment, GetSpell());

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Framework.Constants;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
@@ -10,13 +9,13 @@ namespace Scripts.Spells.Druid;
 [SpellScript(208253)]
 public class spell_dru_essence_of_ghanir : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private void HandleEffectCalcSpellMod(AuraEffect aurEff, ref SpellModifier spellMod)
 	{
 		if (spellMod == null)
 		{
-			SpellModifierByClassMask mod = new SpellModifierByClassMask(GetAura());
+			var mod = new SpellModifierByClassMask(GetAura());
 			mod.op      = SpellModOp.PeriodicHealingAndDamage;
 			mod.type    = SpellModType.Flat;
 			mod.spellId = GetId();

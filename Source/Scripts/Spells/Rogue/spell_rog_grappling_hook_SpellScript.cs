@@ -15,12 +15,11 @@ public class spell_rog_grappling_hook_SpellScript : SpellScript, ISpellOnHit
 
 	public void OnHit()
 	{
-		Unit          caster = GetCaster();
-		WorldLocation dest   = GetExplTargetDest();
+		var caster = GetCaster();
+		var dest   = GetExplTargetDest();
+
 		if (caster == null || dest == null)
-		{
 			return;
-		}
 
 		caster.CastSpell(new Position(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ()), RogueSpells.SPELL_ROGUE_GRAPPLING_HOOK_TRIGGER, true);
 	}

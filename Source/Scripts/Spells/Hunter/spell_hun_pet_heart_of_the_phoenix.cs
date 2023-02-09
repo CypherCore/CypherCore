@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -33,8 +32,8 @@ internal class spell_hun_pet_heart_of_the_phoenix : SpellScript, IHasSpellEffect
 
 	private void HandleScript(uint effIndex)
 	{
-		Unit caster = GetCaster();
-		Unit owner  = caster.GetOwner();
+		var caster = GetCaster();
+		var owner  = caster.GetOwner();
 
 		if (owner)
 			if (!caster.HasAura(HunterSpells.PetHeartOfThePhoenixDebuff))

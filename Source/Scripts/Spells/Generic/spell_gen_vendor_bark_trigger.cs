@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -19,7 +18,7 @@ internal class spell_gen_vendor_bark_trigger : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		Creature vendor = GetCaster().ToCreature();
+		var vendor = GetCaster().ToCreature();
 
 		if (vendor)
 			if (vendor.GetEntry() == CreatureIds.AmphitheaterVendor)

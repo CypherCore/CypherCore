@@ -46,8 +46,8 @@ internal class spell_item_sunwell_neck : AuraScript, IAuraCheckProc, IHasAuraEff
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
 		PreventDefaultAction();
-		Player player = eventInfo.GetActor().ToPlayer();
-		Unit   target = eventInfo.GetProcTarget();
+		var player = eventInfo.GetActor().ToPlayer();
+		var target = eventInfo.GetProcTarget();
 
 		// Aggression checks are in the spell system... just cast and forget
 		if (player.GetReputationRank(FactionIds.Aldor) == ReputationRank.Exalted)

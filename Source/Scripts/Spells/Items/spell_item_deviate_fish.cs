@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -30,8 +29,8 @@ internal class spell_item_deviate_fish : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		Unit caster  = GetCaster();
-		uint spellId = RandomHelper.RAND(ItemSpellIds.Sleepy, ItemSpellIds.Invigorate, ItemSpellIds.Shrink, ItemSpellIds.PartyTime, ItemSpellIds.HealthySpirit, ItemSpellIds.Rejuvenation);
+		var caster  = GetCaster();
+		var spellId = RandomHelper.RAND(ItemSpellIds.Sleepy, ItemSpellIds.Invigorate, ItemSpellIds.Shrink, ItemSpellIds.PartyTime, ItemSpellIds.HealthySpirit, ItemSpellIds.Rejuvenation);
 		caster.CastSpell(caster, spellId, true);
 	}
 }

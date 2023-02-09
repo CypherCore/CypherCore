@@ -39,7 +39,7 @@ internal class spell_item_heartpierce : AuraScript, IHasAuraEffects
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
 		PreventDefaultAction();
-		Unit caster = eventInfo.GetActor();
+		var caster = eventInfo.GetActor();
 
 		uint spellId;
 

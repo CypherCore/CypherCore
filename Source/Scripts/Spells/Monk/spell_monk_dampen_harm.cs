@@ -10,12 +10,13 @@ namespace Scripts.Spells.Monk;
 [SpellScript(122278)]
 public class spell_monk_dampen_harm : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 	private int healthPct;
 
 	public override bool Load()
 	{
 		healthPct = GetSpellInfo().GetEffect(0).CalcValue(GetCaster());
+
 		return GetUnitOwner().ToPlayer();
 	}
 
@@ -26,16 +27,16 @@ public class spell_monk_dampen_harm : AuraScript, IHasAuraEffects
 
 	private void Absorb(AuraEffect auraEffect, DamageInfo dmgInfo, ref uint absorbAmount)
 	{
-		Unit target = GetTarget();
-		var  health = target.CountPctFromMaxHealth(healthPct);
+		var target = GetTarget();
+		var health = target.CountPctFromMaxHealth(healthPct);
+
 		if (dmgInfo.GetDamage() < health)
-		{
 			return;
-		}
 
 		absorbAmount = (uint)(dmgInfo.GetDamage() * (GetSpellInfo().GetEffect(0).CalcValue(GetCaster()) / 100));
 		auraEffect.GetBase().DropCharge();
 	}
+
 	public override void Register()
 	{
 		AuraEffects.Add(new AuraEffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));

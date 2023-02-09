@@ -10,7 +10,7 @@ namespace Scripts.Spells.Mage;
 [CreatureScript(31216)]
 public class npc_mirror_imageAI : CasterAI
 {
-	private EventMap _events = new EventMap();
+	private readonly EventMap _events = new();
 
 	public struct eSpells
 	{
@@ -30,9 +30,7 @@ public class npc_mirror_imageAI : CasterAI
 	public override void IsSummonedBy(WorldObject owner)
 	{
 		if (owner == null || !owner.IsPlayer())
-		{
 			return;
-		}
 
 		if (!me.HasUnitState(UnitState.Follow))
 		{
@@ -53,7 +51,7 @@ public class npc_mirror_imageAI : CasterAI
 
 		for (uint attackType = 0; attackType < (int)WeaponAttackType.Max; ++attackType)
 		{
-			WeaponAttackType attackTypeEnum = (WeaponAttackType)attackType;
+			var attackTypeEnum = (WeaponAttackType)attackType;
 			me.SetBaseWeaponDamage(attackTypeEnum, WeaponDamageRange.MaxDamage, owner.ToUnit().GetWeaponDamageRange(attackTypeEnum, WeaponDamageRange.MaxDamage));
 			me.SetBaseWeaponDamage(attackTypeEnum, WeaponDamageRange.MinDamage, owner.ToUnit().GetWeaponDamageRange(attackTypeEnum, WeaponDamageRange.MinDamage));
 		}
@@ -63,26 +61,27 @@ public class npc_mirror_imageAI : CasterAI
 
 	public override void JustEngagedWith(Unit who)
 	{
-		Unit owner = me.GetOwner();
-		if (owner == null)
-		{
-			return;
-		}
+		var owner = me.GetOwner();
 
-		Player ownerPlayer = owner.ToPlayer();
-		if (ownerPlayer == null)
-		{
+		if (owner == null)
 			return;
-		}
+
+		var ownerPlayer = owner.ToPlayer();
+
+		if (ownerPlayer == null)
+			return;
 
 		var spellId = eSpells.SPELL_MAGE_FROSTBOLT;
+
 		switch (ownerPlayer.GetPrimarySpecialization())
 		{
 			case TalentSpecialization.MageArcane:
 				spellId = eSpells.SPELL_MAGE_ARCANE_BLAST;
+
 				break;
 			case TalentSpecialization.MageFire:
 				spellId = eSpells.SPELL_MAGE_FIREBALL;
+
 				break;
 			default:
 				break;
@@ -95,13 +94,12 @@ public class npc_mirror_imageAI : CasterAI
 	public override void EnterEvadeMode(EvadeReason UnnamedParameter)
 	{
 		if (me.IsInEvadeMode() || !me.IsAlive())
-		{
 			return;
-		}
 
-		Unit owner = me.GetOwner();
+		var owner = me.GetOwner();
 
 		me.CombatStop(true);
+
 		if (owner != null && !me.HasUnitState(UnitState.Follow))
 		{
 			me.GetMotionMaster().Clear();
@@ -111,14 +109,14 @@ public class npc_mirror_imageAI : CasterAI
 
 	public override void Reset()
 	{
-		Unit owner = me.GetOwner();
+		var owner = me.GetOwner();
+
 		if (owner != null)
 		{
 			owner.CastSpell(me, eSpells.SPELL_INITIALIZE_IMAGES, true);
 			owner.CastSpell(me, eSpells.SPELL_CLONE_CASTER, true);
 		}
 	}
-
 
 
 	public override bool CanAIAttack(Unit target)
@@ -131,7 +129,8 @@ public class npc_mirror_imageAI : CasterAI
 	{
 		_events.Update(diff);
 
-		Unit l_Victim = me.GetVictim();
+		var l_Victim = me.GetVictim();
+
 		if (l_Victim != null)
 		{
 			if (CanAIAttack(l_Victim))
@@ -139,7 +138,8 @@ public class npc_mirror_imageAI : CasterAI
 				/// If not already casting, cast! ("I'm a cast machine")
 				if (!me.HasUnitState(UnitState.Casting))
 				{
-					uint spellId = _events.ExecuteEvent();
+					var spellId = _events.ExecuteEvent();
+
 					if (_events.ExecuteEvent() != 0)
 					{
 						DoCast(spellId);
@@ -152,9 +152,7 @@ public class npc_mirror_imageAI : CasterAI
 			{
 				/// My victim has changed state, I shouldn't attack it anymore
 				if (me.HasUnitState(UnitState.Casting))
-				{
 					me.CastStop();
-				}
 
 				me.GetAI().EnterEvadeMode();
 			}
@@ -162,25 +160,24 @@ public class npc_mirror_imageAI : CasterAI
 		else
 		{
 			/// Let's choose a new target
-			Unit target = me.SelectVictim();
+			var target = me.SelectVictim();
+
 			if (target == null)
 			{
 				/// No target? Let's see if our owner has a better target for us
-				Unit owner = me.GetOwner();
+				var owner = me.GetOwner();
+
 				if (owner != null)
 				{
-					Unit ownerVictim = owner.GetVictim();
+					var ownerVictim = owner.GetVictim();
+
 					if (ownerVictim != null && me.CanCreatureAttack(ownerVictim))
-					{
 						target = ownerVictim;
-					}
 				}
 			}
 
 			if (target != null)
-			{
 				me.GetAI().AttackStart(target);
-			}
 		}
 	}
 }

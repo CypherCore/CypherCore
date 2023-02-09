@@ -10,7 +10,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(129914)]
 public class spell_monk_power_strike_proc : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

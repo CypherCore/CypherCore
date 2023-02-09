@@ -1,5 +1,4 @@
-﻿using Game.Entities;
-using Game.Scripting;
+﻿using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
 
@@ -15,8 +14,8 @@ internal class spell_q28813_get_our_boys_back_dummy : SpellScript, ISpellOnCast
 
 	public void OnCast()
 	{
-		Unit     caster                   = GetCaster();
-		Creature injuredStormwindInfantry = caster.FindNearestCreature(CreatureIds.InjuredStormwindInfantry, 5.0f, true);
+		var caster                   = GetCaster();
+		var injuredStormwindInfantry = caster.FindNearestCreature(CreatureIds.InjuredStormwindInfantry, 5.0f, true);
 
 		if (injuredStormwindInfantry)
 		{

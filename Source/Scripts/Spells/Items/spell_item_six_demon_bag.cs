@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -25,13 +24,13 @@ internal class spell_item_six_demon_bag : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		Unit caster = GetCaster();
-		Unit target = GetHitUnit();
+		var caster = GetCaster();
+		var target = GetHitUnit();
 
 		if (target)
 		{
 			uint spellId;
-			uint rand = RandomHelper.URand(0, 99);
+			var  rand = RandomHelper.URand(0, 99);
 
 			if (rand < 25) // Fireball (25% chance)
 			{

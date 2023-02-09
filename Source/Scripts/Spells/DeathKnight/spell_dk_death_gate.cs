@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -32,7 +31,7 @@ internal class spell_dk_death_gate : SpellScript, ISpellCheckCast, IHasSpellEffe
 	private void HandleScript(uint effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
 
 		if (target)
 			target.CastSpell(target, (uint)GetEffectValue(), false);

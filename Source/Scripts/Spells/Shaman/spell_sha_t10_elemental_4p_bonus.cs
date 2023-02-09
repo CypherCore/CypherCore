@@ -22,19 +22,19 @@ internal class spell_sha_t10_elemental_4p_bonus : AuraScript, IHasAuraEffects
 	{
 		PreventDefaultAction();
 
-		Unit caster = eventInfo.GetActor();
-		Unit target = eventInfo.GetProcTarget();
+		var caster = eventInfo.GetActor();
+		var target = eventInfo.GetProcTarget();
 
 		// try to find spell Flame Shock on the Target
-		AuraEffect flameShock = target.GetAuraEffect(AuraType.PeriodicDamage, SpellFamilyNames.Shaman, new FlagArray128(0x10000000), caster.GetGUID());
+		var flameShock = target.GetAuraEffect(AuraType.PeriodicDamage, SpellFamilyNames.Shaman, new FlagArray128(0x10000000), caster.GetGUID());
 
 		if (flameShock == null)
 			return;
 
-		Aura flameShockAura = flameShock.GetBase();
+		var flameShockAura = flameShock.GetBase();
 
-		int maxDuration = flameShockAura.GetMaxDuration();
-		int newDuration = flameShockAura.GetDuration() + aurEff.GetAmount() * Time.InMilliseconds;
+		var maxDuration = flameShockAura.GetMaxDuration();
+		var newDuration = flameShockAura.GetDuration() + aurEff.GetAmount() * Time.InMilliseconds;
 
 		flameShockAura.SetDuration(newDuration);
 

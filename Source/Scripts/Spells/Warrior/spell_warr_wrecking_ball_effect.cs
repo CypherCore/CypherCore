@@ -7,27 +7,24 @@ using Game.Spells;
 
 namespace Scripts.Spells.Warrior
 {
-    // 215570 - Wrecking Ball
-    [SpellScript(215570)]
-    public class spell_warr_wrecking_ball_effect : AuraScript, IHasAuraEffects
-    {
-        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	// 215570 - Wrecking Ball
+	[SpellScript(215570)]
+	public class spell_warr_wrecking_ball_effect : AuraScript, IHasAuraEffects
+	{
+		public List<IAuraEffectHandler> AuraEffects => new();
 
-        private void HandleProc(AuraEffect UnnamedParameter, ProcEventInfo UnnamedParameter2)
-        {
-            Unit caster = GetCaster();
-            if (caster != null)
-            {
-                if (caster.HasAura(WarriorSpells.WRECKING_BALL_EFFECT))
-                {
-                    caster.RemoveAura(WarriorSpells.WRECKING_BALL_EFFECT);
-                }
-            }
-        }
+		private void HandleProc(AuraEffect UnnamedParameter, ProcEventInfo UnnamedParameter2)
+		{
+			var caster = GetCaster();
 
-        public override void Register()
-        {
-            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.AddPctModifier, AuraScriptHookType.EffectProc));
-        }
-    }
+			if (caster != null)
+				if (caster.HasAura(WarriorSpells.WRECKING_BALL_EFFECT))
+					caster.RemoveAura(WarriorSpells.WRECKING_BALL_EFFECT);
+		}
+
+		public override void Register()
+		{
+			AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.AddPctModifier, AuraScriptHookType.EffectProc));
+		}
+	}
 }

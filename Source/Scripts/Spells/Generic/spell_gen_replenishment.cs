@@ -20,7 +20,7 @@ internal class spell_gen_replenishment : SpellScript, IHasSpellEffects
 	private void RemoveInvalidTargets(List<WorldObject> targets)
 	{
 		// In arenas Replenishment may only affect the caster
-		Player caster = GetCaster().ToPlayer();
+		var caster = GetCaster().ToPlayer();
 
 		if (caster)
 			if (caster.InArena())

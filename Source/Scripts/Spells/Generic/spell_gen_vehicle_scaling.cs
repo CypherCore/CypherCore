@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -26,7 +25,7 @@ internal class spell_gen_vehicle_scaling : AuraScript, IHasAuraEffects
 
 	private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
 	{
-		Unit   caster = GetCaster();
+		var    caster = GetCaster();
 		float  factor;
 		ushort baseItemLevel;
 
@@ -45,7 +44,7 @@ internal class spell_gen_vehicle_scaling : AuraScript, IHasAuraEffects
 				break;
 		}
 
-		float avgILvl = caster.ToPlayer().GetAverageItemLevel();
+		var avgILvl = caster.ToPlayer().GetAverageItemLevel();
 
 		if (avgILvl < baseItemLevel)
 			return; // @todo Research possibility of scaling down

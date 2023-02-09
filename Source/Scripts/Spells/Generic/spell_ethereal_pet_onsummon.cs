@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -25,7 +24,7 @@ internal class spell_ethereal_pet_onsummon : SpellScript, IHasSpellEffects
 
 	private void HandleScriptEffect(uint effIndex)
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
 		target.CastSpell(target, GenericSpellIds.ProcTriggerOnKillAura, true);
 	}
 }

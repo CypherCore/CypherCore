@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
-using Game.Spells;
 
 namespace Scripts.Spells.Generic;
 
@@ -20,12 +18,12 @@ internal class spell_gen_clear_debuffs : SpellScript, IHasSpellEffects
 
 	private void HandleScript(uint effIndex)
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
 
 		if (target)
 			target.RemoveOwnedAuras(aura =>
 			                        {
-				                        SpellInfo spellInfo = aura.GetSpellInfo();
+				                        var spellInfo = aura.GetSpellInfo();
 
 				                        return !spellInfo.IsPositive() && !spellInfo.IsPassive();
 			                        });

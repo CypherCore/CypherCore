@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -25,16 +24,16 @@ internal class spell_rog_backstab_SpellScript : SpellScript, IHasSpellEffects
 
 	private void HandleHitDamage(uint effIndex)
 	{
-		Unit hitUnit = GetHitUnit();
+		var hitUnit = GetHitUnit();
 
 		if (!hitUnit)
 			return;
 
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		if (hitUnit.IsInBack(caster))
 		{
-			float currDamage = (float)GetHitDamage();
+			var currDamage = (float)GetHitDamage();
 			MathFunctions.AddPct(ref currDamage, (float)GetEffectInfo(3).CalcValue(caster));
 			SetHitDamage((int)currDamage);
 		}

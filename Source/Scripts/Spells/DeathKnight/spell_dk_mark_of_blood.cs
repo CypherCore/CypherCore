@@ -25,7 +25,7 @@ internal class spell_dk_mark_of_blood : AuraScript, IHasAuraEffects
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
 		PreventDefaultAction();
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		if (caster)
 			caster.CastSpell(eventInfo.GetProcTarget(), DeathKnightSpells.MarkOfBloodHeal, true);

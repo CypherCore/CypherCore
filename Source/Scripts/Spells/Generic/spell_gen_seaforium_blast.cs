@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -32,11 +31,11 @@ internal class spell_gen_seaforium_blast : SpellScript, IHasSpellEffects
 	private void AchievementCredit(uint effIndex)
 	{
 		// but in effect handling OriginalCaster can become null
-		Unit owner = GetGObjCaster().GetOwner();
+		var owner = GetGObjCaster().GetOwner();
 
 		if (owner != null)
 		{
-			GameObject go = GetHitGObj();
+			var go = GetHitGObj();
 
 			if (go)
 				if (go.GetGoInfo().type == GameObjectTypes.DestructibleBuilding)

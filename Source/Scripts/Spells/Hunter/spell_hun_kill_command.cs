@@ -11,7 +11,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(34026)]
 public class spell_hun_kill_command : SpellScript, IHasSpellEffects, ISpellCheckCast
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	private struct sspell
 	{
@@ -24,35 +24,29 @@ public class spell_hun_kill_command : SpellScript, IHasSpellEffects, ISpellCheck
 		public const uint GreatStamina = 61688;
 		public const uint Cornered = 53497;
 	}
+
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
 		if (Global.SpellMgr.GetSpellInfo(HunterSpells.SPELL_HUNTER_KILL_COMMAND, Difficulty.None) != null)
-		{
 			return false;
-		}
+
 		return true;
 	}
 
 	public SpellCastResult CheckCast()
 	{
 		Unit pet       = GetCaster().GetGuardianPet();
-		Unit petTarget = GetExplTargetUnit();
+		var  petTarget = GetExplTargetUnit();
 
 		if (pet == null || pet.IsDead())
-		{
 			return SpellCastResult.NoPet;
-		}
 
 		// pet has a target and target is within 5 yards and target is in line of sight
 		if (petTarget == null || !pet.IsWithinDist(petTarget, 40.0f, true) || !petTarget.IsWithinLOSInMap(pet))
-		{
 			return SpellCastResult.DontReport;
-		}
 
 		if (pet.HasAuraType(AuraType.ModStun) || pet.HasAuraType(AuraType.ModConfuse) || pet.HasAuraType(AuraType.ModSilence) || pet.HasAuraType(AuraType.ModFear) || pet.HasAuraType(AuraType.ModFear2))
-		{
 			return SpellCastResult.CantDoThatRightNow;
-		}
 
 		return SpellCastResult.SpellCastOk;
 	}
@@ -62,19 +56,17 @@ public class spell_hun_kill_command : SpellScript, IHasSpellEffects, ISpellCheck
 		if (GetCaster().IsPlayer())
 		{
 			Unit pet = GetCaster().GetGuardianPet();
+
 			if (pet != null)
 			{
 				if (!pet)
-				{
 					return;
-				}
 
 				if (!GetExplTargetUnit())
-				{
 					return;
-				}
-				Unit   target = GetExplTargetUnit();
-				Player player = GetCaster().ToPlayer();
+
+				var target = GetExplTargetUnit();
+				var player = GetCaster().ToPlayer();
 
 				pet.CastSpell(GetExplTargetUnit(), HunterSpells.SPELL_HUNTER_KILL_COMMAND_TRIGGER, true);
 
@@ -93,17 +85,13 @@ public class spell_hun_kill_command : SpellScript, IHasSpellEffects, ISpellCheck
 				if (GetCaster().HasAura(sspell.AspectoftheBeast))
 				{
 					if (pet.HasAura(sspell.SpikedCollar))
-					{
 						player.CastSpell(target, sspell.BestialFerocity, true);
-					}
+
 					if (pet.HasAura(sspell.GreatStamina))
-					{
 						pet.CastSpell(pet, sspell.BestialTenacity, true);
-					}
+
 					if (pet.HasAura(sspell.Cornered))
-					{
 						player.CastSpell(target, sspell.BestialCunning, true);
-					}
 				}
 			}
 		}

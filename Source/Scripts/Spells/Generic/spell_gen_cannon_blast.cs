@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -25,8 +24,8 @@ internal class spell_gen_cannon_blast : SpellScript, IHasSpellEffects
 
 	private void HandleScript(uint effIndex)
 	{
-		int                bp     = GetEffectValue();
-		Unit               target = GetHitUnit();
+		var                bp     = GetEffectValue();
+		var                target = GetHitUnit();
 		CastSpellExtraArgs args   = new(TriggerCastFlags.FullMask);
 		args.AddSpellMod(SpellValueMod.BasePoint0, bp);
 		target.CastSpell(target, GenericSpellIds.CannonBlastDamage, args);

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -20,22 +19,22 @@ internal class spell_gen_feign_death_no_prevent_emotes : AuraScript, IHasAuraEff
 
 	private void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit target = GetTarget();
+		var target = GetTarget();
 		target.SetUnitFlag3(UnitFlags3.FakeDead);
 		target.SetUnitFlag2(UnitFlags2.FeignDeath);
 
-		Creature creature = target.ToCreature();
+		var creature = target.ToCreature();
 
 		creature?.SetReactState(ReactStates.Passive);
 	}
 
 	private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit target = GetTarget();
+		var target = GetTarget();
 		target.RemoveUnitFlag3(UnitFlags3.FakeDead);
 		target.RemoveUnitFlag2(UnitFlags2.FeignDeath);
 
-		Creature creature = target.ToCreature();
+		var creature = target.ToCreature();
 
 		creature?.InitializeReactState();
 	}

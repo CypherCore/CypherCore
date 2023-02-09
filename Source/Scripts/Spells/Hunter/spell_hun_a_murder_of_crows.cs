@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -25,8 +24,8 @@ internal class spell_hun_a_murder_of_crows : AuraScript, IHasAuraEffects
 
 	private void HandleDummyTick(AuraEffect aurEff)
 	{
-		Unit target = GetTarget();
-		Unit caster = GetCaster();
+		var target = GetTarget();
+		var caster = GetCaster();
 
 		caster?.CastSpell(target, HunterSpells.AMurderOfCrowsDamage, true);
 
@@ -40,7 +39,7 @@ internal class spell_hun_a_murder_of_crows : AuraScript, IHasAuraEffects
 	{
 		if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Death)
 		{
-			Unit caster = GetCaster();
+			var caster = GetCaster();
 
 			caster?.GetSpellHistory().ResetCooldown(GetId(), true);
 		}

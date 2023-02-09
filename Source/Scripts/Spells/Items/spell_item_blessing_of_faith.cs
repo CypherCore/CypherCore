@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -24,7 +23,7 @@ internal class spell_item_blessing_of_faith : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		Unit unitTarget = GetHitUnit();
+		var unitTarget = GetHitUnit();
 
 		if (unitTarget != null)
 		{
@@ -52,7 +51,7 @@ internal class spell_item_blessing_of_faith : SpellScript, IHasSpellEffects
 					return; // ignore for non-healing classes
 			}
 
-			Unit caster = GetCaster();
+			var caster = GetCaster();
 			caster.CastSpell(caster, spellId, true);
 		}
 	}

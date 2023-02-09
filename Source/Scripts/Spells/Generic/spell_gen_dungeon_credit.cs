@@ -1,6 +1,4 @@
 ﻿using Framework.Constants;
-using Game.Entities;
-using Game.Maps;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 
@@ -25,8 +23,8 @@ internal class spell_gen_dungeon_credit : SpellScript, ISpellAfterHit
 			return;
 
 		_handled = true;
-		Unit           caster   = GetCaster();
-		InstanceScript instance = caster.GetInstanceScript();
+		var caster   = GetCaster();
+		var instance = caster.GetInstanceScript();
 
 		instance?.UpdateEncounterStateForSpellCast(GetSpellInfo().Id, caster);
 	}

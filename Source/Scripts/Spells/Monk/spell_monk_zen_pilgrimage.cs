@@ -1,5 +1,4 @@
 ﻿using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 
@@ -11,22 +10,21 @@ public class spell_monk_zen_pilgrimage : SpellScript, ISpellOnCast, ISpellCheckC
 	public SpellCastResult CheckCast()
 	{
 		if (GetSpellInfo().Id == 194011)
-		{
 			return SpellCastResult.SpellCastOk;
-		}
 
-		Unit caster = GetCaster();
+		var caster = GetCaster();
+
 		if (caster != null)
 		{
-			Player _player = caster.ToPlayer();
+			var _player = caster.ToPlayer();
+
 			if (_player != null)
-			{
 				if (_player.IsQuestRewarded(40236)) // Check quest for port to oplot
 				{
 					caster.CastSpell(caster, 194011, false);
+
 					return SpellCastResult.DontReport;
 				}
-			}
 		}
 
 		return SpellCastResult.SpellCastOk;
@@ -34,10 +32,12 @@ public class spell_monk_zen_pilgrimage : SpellScript, ISpellOnCast, ISpellCheckC
 
 	public void OnCast()
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
+
 		if (caster != null)
 		{
-			Player _player = caster.ToPlayer();
+			var _player = caster.ToPlayer();
+
 			if (_player != null)
 			{
 				_player.SaveRecallPosition();

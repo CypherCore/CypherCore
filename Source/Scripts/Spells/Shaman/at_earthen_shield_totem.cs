@@ -1,116 +1,87 @@
 ﻿using Game.AI;
 using Game.Entities;
 using Game.Scripting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Scripts.Spells.Shaman
 {
-    //AT ID : 5760
-    //Spell ID : 198839
-    [Script]
-    public class at_earthen_shield_totem : AreaTriggerAI
-    {
-        public int timeInterval;
+	//AT ID : 5760
+	//Spell ID : 198839
+	[Script]
+	public class at_earthen_shield_totem : AreaTriggerAI
+	{
+		public int timeInterval;
 
-        public at_earthen_shield_totem(AreaTrigger areatrigger) : base(areatrigger)
-        {
-            timeInterval = 200;
-        }
+		public at_earthen_shield_totem(AreaTrigger areatrigger) : base(areatrigger)
+		{
+			timeInterval = 200;
+		}
 
-        public struct SpellsUsed
-        {
-            public const uint SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB = 201633;
-        }
+		public struct SpellsUsed
+		{
+			public const uint SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB = 201633;
+		}
 
-        public override void OnCreate()
-        {
-            Unit caster = at.GetCaster();
+		public override void OnCreate()
+		{
+			var caster = at.GetCaster();
 
-            if (caster == null)
-            {
-                return;
-            }
+			if (caster == null)
+				return;
 
-            foreach (var itr in at.GetInsideUnits())
-            {
-                Unit target = ObjectAccessor.Instance.GetUnit(caster, itr);
-                if (caster.IsFriendlyTo(target) || target == caster.GetOwner())
-                {
-                    if (!target.IsTotem())
-                    {
-                        caster.CastSpell(target, SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB, true);
-                    }
-                }
-            }
-        }
+			foreach (var itr in at.GetInsideUnits())
+			{
+				var target = ObjectAccessor.Instance.GetUnit(caster, itr);
 
-        public override void OnUnitEnter(Unit unit)
-        {
-            Unit caster = at.GetCaster();
+				if (caster.IsFriendlyTo(target) || target == caster.GetOwner())
+					if (!target.IsTotem())
+						caster.CastSpell(target, SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB, true);
+			}
+		}
 
-            if (caster == null || unit == null)
-            {
-                return;
-            }
+		public override void OnUnitEnter(Unit unit)
+		{
+			var caster = at.GetCaster();
 
-            if (unit.IsTotem())
-            {
-                return;
-            }
+			if (caster == null || unit == null)
+				return;
 
-            if (caster.IsFriendlyTo(unit) || unit == caster.GetOwner())
-            {
-                caster.CastSpell(unit, SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB, true);
-            }
-        }
+			if (unit.IsTotem())
+				return;
 
-        public override void OnUnitExit(Unit unit)
-        {
-            Unit caster = at.GetCaster();
+			if (caster.IsFriendlyTo(unit) || unit == caster.GetOwner())
+				caster.CastSpell(unit, SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB, true);
+		}
 
-            if (caster == null || unit == null)
-            {
-                return;
-            }
+		public override void OnUnitExit(Unit unit)
+		{
+			var caster = at.GetCaster();
 
-            if (unit.IsTotem())
-            {
-                return;
-            }
+			if (caster == null || unit == null)
+				return;
 
-            if (unit.HasAura(SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB) && unit.GetAura(SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB).GetCaster() == caster)
-            {
-                unit.RemoveAura(SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB);
-            }
-        }
+			if (unit.IsTotem())
+				return;
 
-        public override void OnRemove()
-        {
-            Unit caster = at.GetCaster();
+			if (unit.HasAura(SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB) && unit.GetAura(SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB).GetCaster() == caster)
+				unit.RemoveAura(SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB);
+		}
 
-            if (caster == null)
-            {
-                return;
-            }
+		public override void OnRemove()
+		{
+			var caster = at.GetCaster();
 
-            foreach (var itr in at.GetInsideUnits())
-            {
-                Unit target = ObjectAccessor.Instance.GetUnit(caster, itr);
-                if (target != null)
-                {
-                    if (!target.IsTotem())
-                    {
-                        if (target.HasAura(SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB) && target.GetAura(SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB).GetCaster() == caster)
-                        {
-                            target.RemoveAura(SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB);
-                        }
-                    }
-                }
-            }
-        }
-    }
+			if (caster == null)
+				return;
+
+			foreach (var itr in at.GetInsideUnits())
+			{
+				var target = ObjectAccessor.Instance.GetUnit(caster, itr);
+
+				if (target != null)
+					if (!target.IsTotem())
+						if (target.HasAura(SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB) && target.GetAura(SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB).GetCaster() == caster)
+							target.RemoveAura(SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB);
+			}
+		}
+	}
 }

@@ -26,7 +26,7 @@ internal class spell_pri_item_t6_trinket : AuraScript, IHasAuraEffects
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
 		PreventDefaultAction();
-		Unit caster = eventInfo.GetActor();
+		var caster = eventInfo.GetActor();
 
 		if (eventInfo.GetSpellTypeMask().HasAnyFlag(ProcFlagsSpellType.Heal))
 			caster.CastSpell((Unit)null, PriestSpells.DivineBlessing, true);

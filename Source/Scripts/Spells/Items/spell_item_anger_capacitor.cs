@@ -34,19 +34,19 @@ internal class spell_item_anger_capacitor : AuraScript, IHasAuraEffects
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
 		PreventDefaultAction();
-		Unit caster = eventInfo.GetActor();
-		Unit target = eventInfo.GetProcTarget();
+		var caster = eventInfo.GetActor();
+		var target = eventInfo.GetProcTarget();
 
 		caster.CastSpell((Unit)null, ItemSpellIds.MoteOfAnger, true);
-		Aura motes = caster.GetAura(ItemSpellIds.MoteOfAnger);
+		var motes = caster.GetAura(ItemSpellIds.MoteOfAnger);
 
 		if (motes == null ||
 		    motes.GetStackAmount() < _stackAmount)
 			return;
 
 		caster.RemoveAurasDueToSpell(ItemSpellIds.MoteOfAnger);
-		uint   spellId = ItemSpellIds.ManifestAngerMainHand;
-		Player player  = caster.ToPlayer();
+		var spellId = ItemSpellIds.ManifestAngerMainHand;
+		var player  = caster.ToPlayer();
 
 		if (player)
 			if (player.GetWeaponForAttack(WeaponAttackType.OffAttack, true) &&

@@ -29,25 +29,21 @@ public class at_mage_blizzard : AreaTriggerAI
 
 	public override void OnUpdate(uint diff)
 	{
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
 
 		if (caster == null)
-		{
 			return;
-		}
 
 		if (!caster.IsPlayer())
-		{
 			return;
-		}
 
 		timeInterval += (int)diff;
-		if (timeInterval < 1000)
-		{
-			return;
-		}
 
-		TempSummon tempSumm = caster.SummonCreature(12999, at.GetPosition(), TempSummonType.TimedDespawn, TimeSpan.FromSeconds(8100));
+		if (timeInterval < 1000)
+			return;
+
+		var tempSumm = caster.SummonCreature(12999, at.GetPosition(), TempSummonType.TimedDespawn, TimeSpan.FromSeconds(8100));
+
 		{
 			tempSumm.SetFaction(caster.GetFaction());
 			tempSumm.SetSummonerGUID(caster.GetGUID());

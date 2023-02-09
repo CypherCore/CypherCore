@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -20,10 +19,10 @@ internal class spell_q12308_escape_from_silverbrook_summon_worgen : SpellScript,
 
 	private void ModDest(ref SpellDestination dest)
 	{
-		float dist  = GetEffectInfo(0).CalcRadius(GetCaster());
-		float angle = RandomHelper.FRand(0.75f, 1.25f) * MathFunctions.PI;
+		var dist  = GetEffectInfo(0).CalcRadius(GetCaster());
+		var angle = RandomHelper.FRand(0.75f, 1.25f) * MathFunctions.PI;
 
-		Position pos = GetCaster().GetNearPosition(dist, angle);
+		var pos = GetCaster().GetNearPosition(dist, angle);
 		dest.Relocate(pos);
 	}
 }

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -23,7 +22,7 @@ internal class spell_dk_army_transform : SpellScript, ISpellCheckCast, IHasSpell
 
 	public SpellCastResult CheckCast()
 	{
-		Unit owner = GetCaster().GetOwner();
+		var owner = GetCaster().GetOwner();
 
 		if (owner)
 			if (owner.HasAura(DeathKnightSpells.GlyphOfFoulMenagerie))

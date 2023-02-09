@@ -10,7 +10,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(78203)]
 public class spell_pri_shadowy_apparitions : AuraScript, IHasAuraEffects, IAuraCheckProc
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
@@ -20,12 +20,8 @@ public class spell_pri_shadowy_apparitions : AuraScript, IHasAuraEffects, IAuraC
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
 		if (eventInfo.GetSpellInfo().Id == PriestSpells.SPELL_PRIEST_SHADOW_WORD_PAIN)
-		{
 			if ((eventInfo.GetHitMask() & ProcFlagsHit.Critical) != 0)
-			{
 				return true;
-			}
-		}
 
 		return false;
 	}
@@ -42,6 +38,5 @@ public class spell_pri_shadowy_apparitions : AuraScript, IHasAuraEffects, IAuraC
 	public override void Register()
 	{
 		AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-
 	}
 }

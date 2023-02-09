@@ -23,7 +23,7 @@ internal class spell_sha_crash_lightning : SpellScript, ISpellAfterCast, IHasSpe
 		if (_targetsHit >= 2)
 			GetCaster().CastSpell(GetCaster(), ShamanSpells.CrashLightningCleave, true);
 
-		AuraEffect gatheringStorms = GetCaster().GetAuraEffect(ShamanSpells.GatheringStorms, 0);
+		var gatheringStorms = GetCaster().GetAuraEffect(ShamanSpells.GatheringStorms, 0);
 
 		if (gatheringStorms != null)
 		{

@@ -37,7 +37,7 @@ internal class spell_item_shadowmourne : AuraScript, IAuraCheckProc, IHasAuraEff
 		GetTarget().CastSpell(GetTarget(), ItemSpellIds.ShadowmourneSoulFragment, new CastSpellExtraArgs(aurEff));
 
 		// this can't be handled in AuraScript of SoulFragments because we need to know victim
-		Aura soulFragments = GetTarget().GetAura(ItemSpellIds.ShadowmourneSoulFragment);
+		var soulFragments = GetTarget().GetAura(ItemSpellIds.ShadowmourneSoulFragment);
 
 		if (soulFragments != null)
 			if (soulFragments.GetStackAmount() >= 10)

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -20,7 +19,7 @@ internal class spell_item_party_time : AuraScript, IHasAuraEffects
 
 	private void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Player player = GetOwner().ToPlayer();
+		var player = GetOwner().ToPlayer();
 
 		if (player == null)
 			return;

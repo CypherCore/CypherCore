@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -23,8 +22,8 @@ internal class spell_sha_elemental_blast : SpellScript, ISpellAfterCast, IHasSpe
 
 	public void AfterCast()
 	{
-		Unit caster  = GetCaster();
-		uint spellId = BuffSpells.SelectRandomElementByWeight(buffSpellId => { return !caster.HasAura(buffSpellId) ? 1.0f : 0.0f; });
+		var caster  = GetCaster();
+		var spellId = BuffSpells.SelectRandomElementByWeight(buffSpellId => { return !caster.HasAura(buffSpellId) ? 1.0f : 0.0f; });
 
 		GetCaster().CastSpell(GetCaster(), spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
 	}
@@ -38,7 +37,7 @@ internal class spell_sha_elemental_blast : SpellScript, ISpellAfterCast, IHasSpe
 
 	private void HandleEnergize(uint effIndex)
 	{
-		AuraEffect energizeAmount = GetCaster().GetAuraEffect(ShamanSpells.MaelstromController, GetSpellInfo().Id == ShamanSpells.ElementalBlast ? 9 : 10u);
+		var energizeAmount = GetCaster().GetAuraEffect(ShamanSpells.MaelstromController, GetSpellInfo().Id == ShamanSpells.ElementalBlast ? 9 : 10u);
 
 		if (energizeAmount != null)
 			GetCaster()

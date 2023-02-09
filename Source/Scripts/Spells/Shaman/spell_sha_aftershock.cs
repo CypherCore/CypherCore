@@ -25,11 +25,11 @@ internal class spell_sha_aftershock : AuraScript, IHasAuraEffects
 
 	private bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
-		Spell procSpell = eventInfo.GetProcSpell();
+		var procSpell = eventInfo.GetProcSpell();
 
 		if (procSpell != null)
 		{
-			int? cost = procSpell.GetPowerTypeCostAmount(PowerType.Maelstrom);
+			var cost = procSpell.GetPowerTypeCostAmount(PowerType.Maelstrom);
 
 			if (cost.HasValue)
 				return cost > 0 && RandomHelper.randChance(aurEff.GetAmount());
@@ -40,8 +40,8 @@ internal class spell_sha_aftershock : AuraScript, IHasAuraEffects
 
 	private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
-		Spell procSpell = eventInfo.GetProcSpell();
-		int?  energize  = procSpell.GetPowerTypeCostAmount(PowerType.Maelstrom);
+		var procSpell = eventInfo.GetProcSpell();
+		var energize  = procSpell.GetPowerTypeCostAmount(PowerType.Maelstrom);
 
 		eventInfo.GetActor()
 		         .CastSpell(eventInfo.GetActor(),

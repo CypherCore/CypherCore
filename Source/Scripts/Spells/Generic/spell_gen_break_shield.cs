@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -27,7 +26,7 @@ internal class spell_gen_break_shield : SpellScript, IHasSpellEffects
 
 	private void HandleScriptEffect(uint effIndex)
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
 
 		switch (effIndex)
 		{
@@ -50,7 +49,7 @@ internal class spell_gen_break_shield : SpellScript, IHasSpellEffects
 						return;
 				}
 
-				Unit rider = GetCaster().GetCharmer();
+				var rider = GetCaster().GetCharmer();
 
 				if (rider)
 					rider.CastSpell(target, spellId, false);
@@ -65,7 +64,7 @@ internal class spell_gen_break_shield : SpellScript, IHasSpellEffects
 
 				foreach (var pair in auras.KeyValueList.ToList())
 				{
-					Aura aura = pair.Value.GetBase();
+					var aura = pair.Value.GetBase();
 
 					if (aura != null)
 						if (aura.GetId() == 62552 ||
@@ -75,11 +74,11 @@ internal class spell_gen_break_shield : SpellScript, IHasSpellEffects
 						{
 							aura.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
 							// Remove dummys from rider (Necessary for updating visual shields)
-							Unit rider = target.GetCharmer();
+							var rider = target.GetCharmer();
 
 							if (rider)
 							{
-								Aura defend = rider.GetAura(aura.GetId());
+								var defend = rider.GetAura(aura.GetId());
 
 								defend?.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
 							}

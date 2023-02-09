@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -30,12 +29,12 @@ internal class spell_item_dimensional_ripper_everlook : SpellScript, IHasSpellEf
 
 	private void HandleScript(uint effIndex)
 	{
-		int r = RandomHelper.IRand(0, 119);
+		var r = RandomHelper.IRand(0, 119);
 
 		if (r <= 70) // 7/12 success
 			return;
 
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		if (r < 100) // 4/12 evil twin
 			caster.CastSpell(caster, ItemSpellIds.EvilTwin, true);

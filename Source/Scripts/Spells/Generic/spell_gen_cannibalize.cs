@@ -19,8 +19,8 @@ internal class spell_gen_cannibalize : SpellScript, ISpellCheckCast, IHasSpellEf
 
 	public SpellCastResult CheckCast()
 	{
-		Unit  caster    = GetCaster();
-		float max_range = GetSpellInfo().GetMaxRange(false);
+		var caster    = GetCaster();
+		var max_range = GetSpellInfo().GetMaxRange(false);
 		// search for nearby enemy corpse in range
 		var check    = new AnyDeadUnitSpellTargetInRangeCheck<Unit>(caster, max_range, GetSpellInfo(), SpellTargetCheckTypes.Enemy, SpellTargetObjectTypes.CorpseEnemy);
 		var searcher = new UnitSearcher(caster, check);

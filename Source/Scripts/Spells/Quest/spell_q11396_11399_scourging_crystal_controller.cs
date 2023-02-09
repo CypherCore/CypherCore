@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -25,7 +24,7 @@ internal class spell_q11396_11399_scourging_crystal_controller : SpellScript, IH
 
 	private void HandleDummy(uint effIndex)
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
 
 		if (target)
 			if (target.IsTypeId(TypeId.Unit) &&

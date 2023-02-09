@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -19,8 +18,8 @@ internal class spell_gen_gryphon_wyvern_mount_check : AuraScript, IHasAuraEffect
 
 	private void HandleEffectPeriodic(AuraEffect aurEff)
 	{
-		Unit target = GetTarget();
-		Unit owner  = target.GetOwner();
+		var target = GetTarget();
+		var owner  = target.GetOwner();
 
 		if (owner == null)
 			return;

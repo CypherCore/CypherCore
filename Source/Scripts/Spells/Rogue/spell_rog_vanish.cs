@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -27,7 +26,7 @@ internal class spell_rog_vanish : SpellScript, IHasSpellEffects
 	{
 		PreventHitDefaultEffect(effIndex);
 
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
 
 		target.RemoveAurasByType(AuraType.ModStalked);
 

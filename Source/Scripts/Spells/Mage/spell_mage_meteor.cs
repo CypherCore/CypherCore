@@ -15,12 +15,11 @@ public class spell_mage_meteor : SpellScript, ISpellAfterCast
 
 	public void AfterCast()
 	{
-		Unit          caster = GetCaster();
-		WorldLocation dest   = GetExplTargetDest();
+		var caster = GetCaster();
+		var dest   = GetExplTargetDest();
+
 		if (caster == null || dest == null)
-		{
 			return;
-		}
 
 		caster.CastSpell(new Position(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ()), MageSpells.SPELL_MAGE_METEOR_TIMER, true);
 	}

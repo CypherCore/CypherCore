@@ -24,7 +24,7 @@ internal class spell_hun_masters_call : SpellScript, ISpellCheckCast, IHasSpellE
 
 	public SpellCastResult CheckCast()
 	{
-		Guardian pet = GetCaster().ToPlayer().GetGuardianPet();
+		var pet = GetCaster().ToPlayer().GetGuardianPet();
 
 		if (pet == null ||
 		    !pet.IsPet() ||
@@ -32,8 +32,8 @@ internal class spell_hun_masters_call : SpellScript, ISpellCheckCast, IHasSpellE
 			return SpellCastResult.NoPet;
 
 		// Do a mini Spell::CheckCasterAuras on the pet, no other way of doing this
-		SpellCastResult result   = SpellCastResult.SpellCastOk;
-		UnitFlags       unitflag = (UnitFlags)(uint)pet.m_unitData.Flags;
+		var result   = SpellCastResult.SpellCastOk;
+		var unitflag = (UnitFlags)(uint)pet.m_unitData.Flags;
 
 		if (!pet.GetCharmerGUID().IsEmpty())
 			result = SpellCastResult.Charmed;
@@ -47,7 +47,7 @@ internal class spell_hun_masters_call : SpellScript, ISpellCheckCast, IHasSpellE
 		if (result != SpellCastResult.SpellCastOk)
 			return result;
 
-		Unit target = GetExplTargetUnit();
+		var target = GetExplTargetUnit();
 
 		if (!target)
 			return SpellCastResult.BadTargets;

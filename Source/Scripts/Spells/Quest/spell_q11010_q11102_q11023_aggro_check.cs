@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -20,7 +19,7 @@ internal class spell_q11010_q11102_q11023_aggro_check : SpellScript, IHasSpellEf
 
 	private void HandleDummy(uint effIndex)
 	{
-		Player playerTarget = GetHitPlayer();
+		var playerTarget = GetHitPlayer();
 
 		if (playerTarget)
 			// Check if found player Target is on fly Mount or using flying form

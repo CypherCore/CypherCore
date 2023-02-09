@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
 using Game.DataStorage;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -20,7 +19,7 @@ internal class spell_item_dire_brew : AuraScript, IHasAuraEffects
 
 	private void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit target = GetTarget();
+		var target = GetTarget();
 
 		uint model    = 0;
 		var  gender   = target.GetGender();

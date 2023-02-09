@@ -16,7 +16,7 @@ internal class spell_sha_lava_crit_chance : SpellScript, ISpellCalcCritChance
 
 	public void CalcCritChance(Unit victim, ref float critChance)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		if (caster == null ||
 		    victim == null)

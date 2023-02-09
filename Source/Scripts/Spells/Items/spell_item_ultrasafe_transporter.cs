@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -33,7 +32,7 @@ internal class spell_item_ultrasafe_transporter : SpellScript, IHasSpellEffects
 		if (!RandomHelper.randChance(50)) // 50% success
 			return;
 
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		uint spellId = 0;
 

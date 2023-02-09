@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
 using Game.DataStorage;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -26,11 +25,11 @@ internal class spell_gen_whisper_to_controller : SpellScript, IHasSpellEffects
 
 	private void HandleScript(uint effIndex)
 	{
-		TempSummon casterSummon = GetCaster().ToTempSummon();
+		var casterSummon = GetCaster().ToTempSummon();
 
 		if (casterSummon != null)
 		{
-			Player target = casterSummon.GetSummonerUnit().ToPlayer();
+			var target = casterSummon.GetSummonerUnit().ToPlayer();
 
 			if (target != null)
 				casterSummon.Whisper((uint)GetEffectValue(), target, false);

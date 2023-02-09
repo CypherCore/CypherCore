@@ -10,7 +10,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(271233)]
 public class spell_monk_touch_of_death_amplifier : AuraScript, IHasAuraEffects, IAuraCheckProc
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
@@ -24,10 +24,12 @@ public class spell_monk_touch_of_death_amplifier : AuraScript, IHasAuraEffects, 
 
 	private void HandleProc(AuraEffect UnnamedParameter, ProcEventInfo eventInfo)
 	{
-		AuraEffect aurEff = GetTarget().GetAuraEffect(MonkSpells.SPELL_MONK_TOUCH_OF_DEATH, 0);
+		var aurEff = GetTarget().GetAuraEffect(MonkSpells.SPELL_MONK_TOUCH_OF_DEATH, 0);
+
 		if (aurEff != null)
 		{
-			AuraEffect aurEffAmplifier = eventInfo.GetActor().GetAuraEffect(MonkSpells.SPELL_MONK_TOUCH_OF_DEATH_AMPLIFIER, 0);
+			var aurEffAmplifier = eventInfo.GetActor().GetAuraEffect(MonkSpells.SPELL_MONK_TOUCH_OF_DEATH_AMPLIFIER, 0);
+
 			if (aurEffAmplifier != null)
 			{
 				var damage = aurEff.GetAmount() + MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEffAmplifier.GetAmount());
@@ -38,7 +40,6 @@ public class spell_monk_touch_of_death_amplifier : AuraScript, IHasAuraEffects, 
 
 	public override void Register()
 	{
-
 		AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
 	}
 }

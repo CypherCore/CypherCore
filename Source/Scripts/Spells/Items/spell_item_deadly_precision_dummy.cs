@@ -24,7 +24,7 @@ internal class spell_item_deadly_precision_dummy : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		SpellInfo          spellInfo = Global.SpellMgr.GetSpellInfo(ItemSpellIds.DeadlyPrecision, GetCastDifficulty());
+		var                spellInfo = Global.SpellMgr.GetSpellInfo(ItemSpellIds.DeadlyPrecision, GetCastDifficulty());
 		CastSpellExtraArgs args      = new(TriggerCastFlags.FullMask);
 		args.AddSpellMod(SpellValueMod.AuraStack, (int)spellInfo.StackAmount);
 		GetCaster().CastSpell(GetCaster(), spellInfo.Id, args);

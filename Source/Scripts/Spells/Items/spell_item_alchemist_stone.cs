@@ -32,7 +32,7 @@ internal class spell_item_alchemist_stone : AuraScript, IHasAuraEffects
 		PreventDefaultAction();
 
 		uint spellId = 0;
-		int  amount  = (int)(eventInfo.GetDamageInfo().GetDamage() * 0.4f);
+		var  amount  = (int)(eventInfo.GetDamageInfo().GetDamage() * 0.4f);
 
 		if (eventInfo.GetDamageInfo().GetSpellInfo().HasEffect(SpellEffectName.Heal))
 			spellId = ItemSpellIds.AlchemistStoneExtraHeal;
@@ -42,7 +42,7 @@ internal class spell_item_alchemist_stone : AuraScript, IHasAuraEffects
 		if (spellId == 0)
 			return;
 
-		Unit               caster = eventInfo.GetActionTarget();
+		var                caster = eventInfo.GetActionTarget();
 		CastSpellExtraArgs args   = new(aurEff);
 		args.AddSpellMod(SpellValueMod.BasePoint0, amount);
 		caster.CastSpell((Unit)null, spellId, args);

@@ -13,8 +13,8 @@ internal class spell_item_shadows_fate : AuraScript, IAuraOnProc
 	{
 		PreventDefaultAction();
 
-		Unit caster = procInfo.GetActor();
-		Unit target = GetCaster();
+		var caster = procInfo.GetActor();
+		var target = GetCaster();
 
 		if (!caster ||
 		    !target)

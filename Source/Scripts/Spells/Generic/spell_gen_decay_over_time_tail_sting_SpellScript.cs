@@ -1,6 +1,5 @@
 ﻿using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
-using Game.Spells;
 
 namespace Scripts.Spells.Generic;
 
@@ -9,7 +8,7 @@ internal class spell_gen_decay_over_time_tail_sting_SpellScript : SpellScript, I
 {
 	public void AfterHit()
 	{
-		Aura aur = GetHitAura();
+		var aur = GetHitAura();
 
 		aur?.SetStackAmount((byte)GetSpellInfo().StackAmount);
 	}

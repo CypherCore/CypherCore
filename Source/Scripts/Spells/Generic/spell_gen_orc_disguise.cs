@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -25,12 +24,12 @@ internal class spell_gen_orc_disguise : SpellScript, IHasSpellEffects
 
 	private void HandleScript(uint effIndex)
 	{
-		Unit   caster = GetCaster();
-		Player target = GetHitPlayer();
+		var caster = GetCaster();
+		var target = GetHitPlayer();
 
 		if (target)
 		{
-			Gender gender = target.GetNativeGender();
+			var gender = target.GetNativeGender();
 
 			if (gender == Gender.Male)
 				caster.CastSpell(target, GenericSpellIds.OrcDisguiseMale, true);

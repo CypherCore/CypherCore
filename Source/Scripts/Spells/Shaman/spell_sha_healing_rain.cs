@@ -1,7 +1,5 @@
-﻿using Game.Entities;
-using Game.Scripting;
+﻿using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
-using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
@@ -10,16 +8,16 @@ internal class spell_sha_healing_rain : SpellScript, ISpellAfterHit
 {
 	public void AfterHit()
 	{
-		Aura aura = GetHitAura();
+		var aura = GetHitAura();
 
 		if (aura != null)
 		{
-			WorldLocation dest = GetExplTargetDest();
+			var dest = GetExplTargetDest();
 
 			if (dest != null)
 			{
-				int        duration = GetSpellInfo().CalcDuration(GetOriginalCaster());
-				TempSummon summon   = GetCaster().GetMap().SummonCreature(CreatureIds.HealingRainInvisibleStalker, dest, null, (uint)duration, GetOriginalCaster());
+				var duration = GetSpellInfo().CalcDuration(GetOriginalCaster());
+				var summon   = GetCaster().GetMap().SummonCreature(CreatureIds.HealingRainInvisibleStalker, dest, null, (uint)duration, GetOriginalCaster());
 
 				if (summon == null)
 					return;

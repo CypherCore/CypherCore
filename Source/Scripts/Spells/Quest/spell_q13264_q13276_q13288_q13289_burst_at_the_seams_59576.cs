@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -25,7 +24,7 @@ internal class spell_q13264_q13276_q13288_q13289_burst_at_the_seams_59576 : Spel
 
 	private void HandleScript(uint effIndex)
 	{
-		Creature creature = GetCaster().ToCreature();
+		var creature = GetCaster().ToCreature();
 
 		if (creature != null)
 		{

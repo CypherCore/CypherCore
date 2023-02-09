@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -10,22 +9,18 @@ namespace Scripts.Spells.Monk;
 [SpellScript(MonkSpells.SPELL_MONK_FISTS_OF_FURY_DAMAGE)]
 public class spell_monk_fists_of_fury_damage : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	private void HandleDamage(uint UnnamedParameter)
 	{
 		if (!GetCaster())
-		{
 			return;
-		}
 
-		Unit   l_Target = GetHitUnit();
-		Player l_Player = GetCaster().ToPlayer();
+		var l_Target = GetHitUnit();
+		var l_Player = GetCaster().ToPlayer();
 
 		if (l_Target == null || l_Player == null)
-		{
 			return;
-		}
 
 		var l_Damage = l_Player.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 5.25f;
 		l_Damage = l_Player.SpellDamageBonusDone(l_Target, GetSpellInfo(), l_Damage, DamageEffectType.Direct, GetSpellInfo().GetEffect(0));

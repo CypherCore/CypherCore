@@ -26,18 +26,18 @@ internal class spell_sha_t8_elemental_4p_bonus : AuraScript, IHasAuraEffects
 	{
 		PreventDefaultAction();
 
-		DamageInfo damageInfo = eventInfo.GetDamageInfo();
+		var damageInfo = eventInfo.GetDamageInfo();
 
 		if (damageInfo == null ||
 		    damageInfo.GetDamage() == 0)
 			return;
 
-		SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ShamanSpells.Electrified, GetCastDifficulty());
-		int       amount    = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
+		var spellInfo = Global.SpellMgr.GetSpellInfo(ShamanSpells.Electrified, GetCastDifficulty());
+		var amount    = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
 		amount /= (int)spellInfo.GetMaxTicks();
 
-		Unit caster = eventInfo.GetActor();
-		Unit target = eventInfo.GetProcTarget();
+		var caster = eventInfo.GetActor();
+		var target = eventInfo.GetProcTarget();
 
 		CastSpellExtraArgs args = new(aurEff);
 		args.AddSpellMod(SpellValueMod.BasePoint0, amount);

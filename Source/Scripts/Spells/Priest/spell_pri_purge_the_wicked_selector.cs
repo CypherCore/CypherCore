@@ -12,7 +12,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(204215)]
 public class spell_pri_purge_the_wicked_selector : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
@@ -23,10 +23,9 @@ public class spell_pri_purge_the_wicked_selector : SpellScript, IHasSpellEffects
 	{
 		targets.RemoveIf(new UnitAuraCheck<WorldObject>(true, PriestSpells.SPELL_PRIEST_PURGE_THE_WICKED_DOT, GetCaster().GetGUID()));
 		targets.Sort(new ObjectDistanceOrderPred(GetExplTargetUnit()));
+
 		if (targets.Count > 1)
-		{
 			targets.Resize(1);
-		}
 	}
 
 	private void HandleDummy(uint UnnamedParameter)

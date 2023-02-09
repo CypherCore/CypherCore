@@ -11,7 +11,7 @@ internal class CometStormEvent : BasicEvent
 	private readonly Unit _caster;
 	private readonly Position _dest;
 	private byte _count;
-	private ObjectGuid _originalCastId;
+	private readonly ObjectGuid _originalCastId;
 
 	public CometStormEvent(Unit caster, ObjectGuid originalCastId, Position dest)
 	{

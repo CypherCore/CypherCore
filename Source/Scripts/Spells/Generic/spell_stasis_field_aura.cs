@@ -25,7 +25,7 @@ internal class spell_stasis_field_aura : AuraScript, IHasAuraEffects
 
 	private void OnPeriodic(AuraEffect aurEff)
 	{
-		Unit owner = GetTarget();
+		var owner = GetTarget();
 
 		List<Creature>       targets           = new();
 		StasisFieldSearcher  creature_check    = new(owner, 15.0f);

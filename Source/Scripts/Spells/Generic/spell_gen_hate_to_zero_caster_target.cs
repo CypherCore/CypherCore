@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -19,7 +18,7 @@ internal class spell_gen_hate_to_zero_caster_target : SpellScript, IHasSpellEffe
 
 	private void HandleDummy(uint effIndex)
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
 
 		if (target != null)
 			if (target.CanHaveThreatList())

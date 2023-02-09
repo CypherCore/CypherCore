@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -18,14 +17,14 @@ internal class spell_sha_lava_burst : SpellScript, ISpellAfterCast, IHasSpellEff
 
 	public void AfterCast()
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
-		Aura lavaSurge = caster.GetAura(ShamanSpells.LavaSurge);
+		var lavaSurge = caster.GetAura(ShamanSpells.LavaSurge);
 
 		if (lavaSurge != null)
 			if (!GetSpell().m_appliedMods.Contains(lavaSurge))
 			{
-				uint chargeCategoryId = GetSpellInfo().ChargeCategoryId;
+				var chargeCategoryId = GetSpellInfo().ChargeCategoryId;
 
 				// Ensure we have at least 1 usable charge after cast to allow next cast immediately
 				if (!caster.GetSpellHistory().HasCharge(chargeCategoryId))
@@ -42,7 +41,7 @@ internal class spell_sha_lava_burst : SpellScript, ISpellAfterCast, IHasSpellEff
 
 	private void HandleScript(uint effIndex)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		if (caster)
 			if (caster.HasAura(ShamanSpells.PathOfFlamesTalent))

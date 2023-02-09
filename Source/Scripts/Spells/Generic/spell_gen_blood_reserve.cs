@@ -17,7 +17,7 @@ internal class spell_gen_blood_reserve : AuraScript, IAuraCheckProc, IHasAuraEff
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
-		Unit caster = eventInfo.GetActionTarget();
+		var caster = eventInfo.GetActionTarget();
 
 		if (caster != null)
 			if (caster.HealthBelowPct(35))
@@ -37,7 +37,7 @@ internal class spell_gen_blood_reserve : AuraScript, IAuraCheckProc, IHasAuraEff
 	{
 		PreventDefaultAction();
 
-		Unit               caster = eventInfo.GetActionTarget();
+		var                caster = eventInfo.GetActionTarget();
 		CastSpellExtraArgs args   = new(aurEff);
 		args.AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount());
 		caster.CastSpell(caster, GenericSpellIds.BloodReserveHeal, args);

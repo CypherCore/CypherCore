@@ -38,7 +38,7 @@ internal class spell_sha_mastery_elemental_overload : AuraScript, IHasAuraEffect
 
 	private bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
-		SpellInfo spellInfo = eventInfo.GetSpellInfo();
+		var spellInfo = eventInfo.GetSpellInfo();
 
 		if (spellInfo == null ||
 		    !eventInfo.GetProcSpell())
@@ -52,7 +52,7 @@ internal class spell_sha_mastery_elemental_overload : AuraScript, IHasAuraEffect
 		if (spellInfo.Id == ShamanSpells.ChainLightning)
 			chance /= 3.0f;
 
-		Aura stormkeeper = eventInfo.GetActor().GetAura(ShamanSpells.Stormkeeper);
+		var stormkeeper = eventInfo.GetActor().GetAura(ShamanSpells.Stormkeeper);
 
 		if (stormkeeper != null)
 			if (eventInfo.GetProcSpell().m_appliedMods.Contains(stormkeeper))
@@ -65,7 +65,7 @@ internal class spell_sha_mastery_elemental_overload : AuraScript, IHasAuraEffect
 	{
 		PreventDefaultAction();
 
-		Unit caster = procInfo.GetActor();
+		var caster = procInfo.GetActor();
 
 		var targets         = new CastSpellTargetArg(procInfo.GetProcTarget());
 		var overloadSpellId = GetTriggeredSpellId(procInfo.GetSpellInfo().Id);

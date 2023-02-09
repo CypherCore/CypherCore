@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -28,7 +27,7 @@ internal class spell_item_impale_leviroth : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		Creature target = GetHitCreature();
+		var target = GetHitCreature();
 
 		if (target)
 			if (target.GetEntry() == CreatureIds.Leviroth &&

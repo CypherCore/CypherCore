@@ -38,7 +38,7 @@ internal class spell_rog_blade_flurry_AuraScript : AuraScript, IAuraCheckProc, I
 	{
 		PreventDefaultAction();
 
-		DamageInfo damageInfo = eventInfo.GetDamageInfo();
+		var damageInfo = eventInfo.GetDamageInfo();
 
 		if (damageInfo != null)
 		{

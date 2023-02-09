@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -19,7 +18,7 @@ internal class spell_q12414_hand_over_reins : SpellScript, IHasSpellEffects
 
 	private void HandleScript(uint effIndex)
 	{
-		Creature caster = GetCaster().ToCreature();
+		var caster = GetCaster().ToCreature();
 		GetHitUnit().ExitVehicle();
 
 		if (caster)

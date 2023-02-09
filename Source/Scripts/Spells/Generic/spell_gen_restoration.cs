@@ -21,17 +21,17 @@ internal class spell_gen_restoration : AuraScript, IHasAuraEffects
 	{
 		PreventDefaultAction();
 
-		Unit target = GetTarget();
+		var target = GetTarget();
 
 		if (target == null)
 			return;
 
-		uint     heal     = (uint)target.CountPctFromMaxHealth(10);
+		var      heal     = (uint)target.CountPctFromMaxHealth(10);
 		HealInfo healInfo = new(target, target, heal, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
 		target.HealBySpell(healInfo);
 
 		/// @todo: should proc other Auras?
-		int mana = target.GetMaxPower(PowerType.Mana);
+		var mana = target.GetMaxPower(PowerType.Mana);
 
 		if (mana != 0)
 		{

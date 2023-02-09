@@ -10,7 +10,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(162452)]
 public class spell_pri_shadowy_insight : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 
 	public override bool Validate(SpellInfo UnnamedParameter)

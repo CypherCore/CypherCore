@@ -10,7 +10,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(116645)]
 public class spell_monk_teachings_of_the_monastery_passive : AuraScript, IHasAuraEffects, IAuraCheckProc
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
@@ -20,9 +20,7 @@ public class spell_monk_teachings_of_the_monastery_passive : AuraScript, IHasAur
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
 		if (eventInfo.GetSpellInfo().Id != MonkSpells.SPELL_MONK_TIGER_PALM && eventInfo.GetSpellInfo().Id != MonkSpells.SPELL_MONK_BLACKOUT_KICK && eventInfo.GetSpellInfo().Id != MonkSpells.SPELL_MONK_BLACKOUT_KICK_TRIGGERED)
-		{
 			return false;
-		}
 
 		return true;
 	}
@@ -35,17 +33,15 @@ public class spell_monk_teachings_of_the_monastery_passive : AuraScript, IHasAur
 		}
 		else if (RandomHelper.randChance(aurEff.GetAmount()))
 		{
-			SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(MonkSpells.SPELL_MONK_RISING_SUN_KICK, Difficulty.None);
-			if (spellInfo != null) 
-			{
+			var spellInfo = Global.SpellMgr.GetSpellInfo(MonkSpells.SPELL_MONK_RISING_SUN_KICK, Difficulty.None);
+
+			if (spellInfo != null)
 				GetTarget().GetSpellHistory().RestoreCharge(spellInfo.ChargeCategoryId);
-			}
 		}
 	}
 
 	public override void Register()
 	{
-
 		AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
 	}
 }

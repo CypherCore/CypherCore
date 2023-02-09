@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -25,8 +24,8 @@ internal class spell_gen_gadgetzan_transporter_backfire : SpellScript, IHasSpell
 
 	private void HandleDummy(uint effIndex)
 	{
-		Unit caster = GetCaster();
-		int  r      = RandomHelper.IRand(0, 119);
+		var caster = GetCaster();
+		var r      = RandomHelper.IRand(0, 119);
 
 		if (r < 20) // Transporter Malfunction - 1/6 polymorph
 			caster.CastSpell(caster, GenericSpellIds.TransporterMalfunctionPolymorph, true);

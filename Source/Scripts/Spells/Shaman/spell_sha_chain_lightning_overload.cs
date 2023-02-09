@@ -24,7 +24,7 @@ internal class spell_sha_chain_lightning_overload : SpellScript, IHasSpellEffect
 
 	private void HandleScript(uint effIndex)
 	{
-		AuraEffect energizeAmount = GetCaster().GetAuraEffect(ShamanSpells.MaelstromController, 5);
+		var energizeAmount = GetCaster().GetAuraEffect(ShamanSpells.MaelstromController, 5);
 
 		if (energizeAmount != null)
 			GetCaster()

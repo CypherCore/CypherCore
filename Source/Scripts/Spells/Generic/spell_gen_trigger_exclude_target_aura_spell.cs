@@ -1,5 +1,4 @@
-﻿using Game.Entities;
-using Game.Scripting;
+﻿using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
 
@@ -15,7 +14,7 @@ internal class spell_gen_trigger_exclude_target_aura_spell : SpellScript, ISpell
 
 	public void AfterHit()
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
 
 		if (target)
 			// Blizz seems to just apply aura without bothering to cast

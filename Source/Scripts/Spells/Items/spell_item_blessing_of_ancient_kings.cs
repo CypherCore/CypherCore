@@ -32,14 +32,14 @@ internal class spell_item_blessing_of_ancient_kings : AuraScript, IAuraCheckProc
 	{
 		PreventDefaultAction();
 
-		HealInfo healInfo = eventInfo.GetHealInfo();
+		var healInfo = eventInfo.GetHealInfo();
 
 		if (healInfo == null ||
 		    healInfo.GetHeal() == 0)
 			return;
 
-		int        absorb  = (int)MathFunctions.CalculatePct(healInfo.GetHeal(), 15.0f);
-		AuraEffect protEff = eventInfo.GetProcTarget().GetAuraEffect(ItemSpellIds.ProtectionOfAncientKings, 0, eventInfo.GetActor().GetGUID());
+		var absorb  = (int)MathFunctions.CalculatePct(healInfo.GetHeal(), 15.0f);
+		var protEff = eventInfo.GetProcTarget().GetAuraEffect(ItemSpellIds.ProtectionOfAncientKings, 0, eventInfo.GetActor().GetGUID());
 
 		if (protEff != null)
 		{

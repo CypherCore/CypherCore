@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -20,7 +19,7 @@ internal class spell_q11396_11399_force_shield_arcane_purple_x3 : AuraScript, IH
 
 	private void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit target = GetTarget();
+		var target = GetTarget();
 		target.SetImmuneToPC(true);
 		target.AddUnitState(UnitState.Root);
 	}

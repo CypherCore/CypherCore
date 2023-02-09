@@ -1,41 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
 
 namespace Scripts.Spells.Warlock
 {
-    // 3110 - Firebolt
-    [SpellScript(3110)]
-    public class spell_warlock_imp_firebolt : SpellScript, IHasSpellEffects
-    {
-        public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	// 3110 - Firebolt
+	[SpellScript(3110)]
+	public class spell_warlock_imp_firebolt : SpellScript, IHasSpellEffects
+	{
+		public List<ISpellEffect> SpellEffects => new();
 
-        private void HandleHit(uint UnnamedParameter)
-        {
-            Unit caster = GetCaster();
-            Unit target = GetHitUnit();
-            if (caster == null || !caster.GetOwner() || target == null)
-            {
-                return;
-            }
+		private void HandleHit(uint UnnamedParameter)
+		{
+			var caster = GetCaster();
+			var target = GetHitUnit();
 
-            Unit owner = caster.GetOwner();
-            int damage = GetHitDamage();
-            if (target.HasAura(WarlockSpells.IMMOLATE_DOT, owner.GetGUID()))
-            {
-                MathFunctions.AddPct(ref damage, owner.GetAuraEffectAmount(WarlockSpells.FIREBOLT_BONUS, 0));
-            }
+			if (caster == null || !caster.GetOwner() || target == null)
+				return;
 
-            SetHitDamage(damage);
-        }
+			var owner  = caster.GetOwner();
+			var damage = GetHitDamage();
 
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
-        }
-    }
+			if (target.HasAura(WarlockSpells.IMMOLATE_DOT, owner.GetGUID()))
+				MathFunctions.AddPct(ref damage, owner.GetAuraEffectAmount(WarlockSpells.FIREBOLT_BONUS, 0));
+
+			SetHitDamage(damage);
+		}
+
+		public override void Register()
+		{
+			SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
+		}
+	}
 }

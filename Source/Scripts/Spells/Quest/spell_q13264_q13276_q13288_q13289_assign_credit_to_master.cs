@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -19,11 +18,11 @@ internal class spell_q13264_q13276_q13288_q13289_assign_credit_to_master : Spell
 
 	private void HandleScript(uint effIndex)
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
 
 		if (target != null)
 		{
-			Unit owner = target.GetOwner();
+			var owner = target.GetOwner();
 
 			owner?.CastSpell(owner, (uint)GetEffectValue(), true);
 		}

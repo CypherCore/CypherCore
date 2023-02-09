@@ -9,7 +9,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(MonkSpells.SPELL_MONK_FISTS_OF_FURY)]
 public class spell_monk_fists_of_fury_visual : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{

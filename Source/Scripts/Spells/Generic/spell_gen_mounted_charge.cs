@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -20,7 +19,7 @@ internal class spell_gen_mounted_charge : SpellScript, IHasSpellEffects
 
 	public override void Register()
 	{
-		SpellInfo spell = Global.SpellMgr.GetSpellInfo(ScriptSpellId, Difficulty.None);
+		var spell = Global.SpellMgr.GetSpellInfo(ScriptSpellId, Difficulty.None);
 
 		if (spell.HasEffect(SpellEffectName.ScriptEffect))
 			SpellEffects.Add(new EffectHandler(HandleScriptEffect, SpellConst.EffectFirstFound, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
@@ -31,7 +30,7 @@ internal class spell_gen_mounted_charge : SpellScript, IHasSpellEffects
 
 	private void HandleScriptEffect(uint effIndex)
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
 
 		switch (effIndex)
 		{
@@ -58,7 +57,7 @@ internal class spell_gen_mounted_charge : SpellScript, IHasSpellEffects
 				    RandomHelper.randChance(12.5f))
 					spellId = GenericSpellIds.MissEffect;
 
-				Unit vehicle = GetCaster().GetVehicleBase();
+				var vehicle = GetCaster().GetVehicleBase();
 
 				if (vehicle)
 					vehicle.CastSpell(target, spellId, false);
@@ -74,7 +73,7 @@ internal class spell_gen_mounted_charge : SpellScript, IHasSpellEffects
 
 				foreach (var pair in auras.KeyValueList)
 				{
-					Aura aura = pair.Value.GetBase();
+					var aura = pair.Value.GetBase();
 
 					if (aura != null)
 						if (aura.GetId() == 62552 ||
@@ -84,11 +83,11 @@ internal class spell_gen_mounted_charge : SpellScript, IHasSpellEffects
 						{
 							aura.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
 							// Remove dummys from rider (Necessary for updating visual shields)
-							Unit rider = target.GetCharmer();
+							var rider = target.GetCharmer();
 
 							if (rider)
 							{
-								Aura defend = rider.GetAura(aura.GetId());
+								var defend = rider.GetAura(aura.GetId());
 
 								defend?.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
 							}
@@ -126,7 +125,7 @@ internal class spell_gen_mounted_charge : SpellScript, IHasSpellEffects
 				return;
 		}
 
-		Unit rider = GetCaster().GetCharmer();
+		var rider = GetCaster().GetCharmer();
 
 		if (rider)
 			rider.CastSpell(GetHitUnit(), spellId, false);

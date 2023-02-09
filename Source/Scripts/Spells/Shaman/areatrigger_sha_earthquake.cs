@@ -23,11 +23,11 @@ internal class areatrigger_sha_earthquake : AreaTriggerAI
 
 	public override void OnCreate()
 	{
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
 
 		if (caster != null)
 		{
-			AuraEffect earthquake = caster.GetAuraEffect(ShamanSpells.Earthquake, 1);
+			var earthquake = caster.GetAuraEffect(ShamanSpells.Earthquake, 1);
 
 			if (earthquake != null)
 				_period = TimeSpan.FromMilliseconds(earthquake.GetPeriod());
@@ -40,7 +40,7 @@ internal class areatrigger_sha_earthquake : AreaTriggerAI
 
 		while (_refreshTimer <= TimeSpan.Zero)
 		{
-			Unit caster = at.GetCaster();
+			var caster = at.GetCaster();
 
 			caster?.CastSpell(at.GetPosition(),
 			                  ShamanSpells.EarthquakeTick,

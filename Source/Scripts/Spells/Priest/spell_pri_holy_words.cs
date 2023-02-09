@@ -25,7 +25,7 @@ internal class spell_pri_holy_words : AuraScript, IHasAuraEffects
 
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
-		SpellInfo spellInfo = eventInfo.GetSpellInfo();
+		var spellInfo = eventInfo.GetSpellInfo();
 
 		if (spellInfo == null)
 			return;
@@ -63,8 +63,8 @@ internal class spell_pri_holy_words : AuraScript, IHasAuraEffects
 				return;
 		}
 
-		SpellInfo targetSpellInfo = Global.SpellMgr.GetSpellInfo(targetSpellId, GetCastDifficulty());
-		int       cdReduction     = targetSpellInfo.GetEffect(cdReductionEffIndex).CalcValue(GetTarget());
+		var targetSpellInfo = Global.SpellMgr.GetSpellInfo(targetSpellId, GetCastDifficulty());
+		var cdReduction     = targetSpellInfo.GetEffect(cdReductionEffIndex).CalcValue(GetTarget());
 		GetTarget().GetSpellHistory().ModifyCooldown(targetSpellInfo, TimeSpan.FromSeconds(-cdReduction), true);
 	}
 }

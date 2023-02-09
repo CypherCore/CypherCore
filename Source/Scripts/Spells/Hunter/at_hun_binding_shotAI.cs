@@ -22,32 +22,24 @@ public class at_hun_binding_shotAI : AreaTriggerAI
 
 	public override void OnUnitEnter(Unit unit)
 	{
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
 
 		if (caster == null)
-		{
 			return;
-		}
 
 		if (unit == null)
-		{
 			return;
-		}
 
 		if (!caster.IsFriendlyTo(unit))
-		{
 			unit.CastSpell(unit, UsedSpells.SPELL_HUNTER_BINDING_SHOT_AURA, true);
-		}
 	}
 
 	public override void OnUnitExit(Unit unit)
 	{
 		if (unit == null || !at.GetCaster())
-		{
 			return;
-		}
 
-		Position pos = at.GetPosition();
+		var pos = at.GetPosition();
 
 		// Need to check range also, since when the trigger is removed, this get called as well.
 		if (unit.HasAura(UsedSpells.SPELL_HUNTER_BINDING_SHOT_AURA) && unit.GetExactDist(pos) >= 5.0f)

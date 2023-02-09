@@ -32,15 +32,15 @@ internal class spell_sha_path_of_flames_spread : SpellScript, IHasSpellEffects
 
 	private void HandleScript(uint effIndex)
 	{
-		Unit mainTarget = GetExplTargetUnit();
+		var mainTarget = GetExplTargetUnit();
 
 		if (mainTarget)
 		{
-			Aura flameShock = mainTarget.GetAura(ShamanSpells.FlameShock, GetCaster().GetGUID());
+			var flameShock = mainTarget.GetAura(ShamanSpells.FlameShock, GetCaster().GetGUID());
 
 			if (flameShock != null)
 			{
-				Aura newAura = GetCaster().AddAura(ShamanSpells.FlameShock, GetHitUnit());
+				var newAura = GetCaster().AddAura(ShamanSpells.FlameShock, GetHitUnit());
 
 				if (newAura != null)
 				{

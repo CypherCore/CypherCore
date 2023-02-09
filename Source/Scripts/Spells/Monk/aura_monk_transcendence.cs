@@ -9,7 +9,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(101643)]
 public class aura_monk_transcendence : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private void OnRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{

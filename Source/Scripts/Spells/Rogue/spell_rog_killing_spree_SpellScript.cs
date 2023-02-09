@@ -4,7 +4,6 @@ using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
-using Game.Spells;
 
 namespace Scripts.Spells.Rogue;
 
@@ -28,11 +27,11 @@ internal class spell_rog_killing_spree_SpellScript : SpellScript, IHasSpellEffec
 
 	private void HandleDummy(uint effIndex)
 	{
-		Aura aura = GetCaster().GetAura(RogueSpells.KillingSpree);
+		var aura = GetCaster().GetAura(RogueSpells.KillingSpree);
 
 		if (aura != null)
 		{
-			spell_rog_killing_spree_AuraScript script = aura.GetScript<spell_rog_killing_spree_AuraScript>();
+			var script = aura.GetScript<spell_rog_killing_spree_AuraScript>();
 
 			script?.AddTarget(GetHitUnit());
 		}

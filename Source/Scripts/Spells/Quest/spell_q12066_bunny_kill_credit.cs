@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -19,7 +18,7 @@ internal class spell_q12066_bunny_kill_credit : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		Creature target = GetHitCreature();
+		var target = GetHitCreature();
 
 		if (target)
 			target.CastSpell(GetCaster(), QuestSpellIds.BunnyCreditBeam, false);

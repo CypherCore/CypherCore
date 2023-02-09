@@ -10,7 +10,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(210802)]
 public class spell_monk_spirit_of_the_crane_passive : AuraScript, IHasAuraEffects, IAuraCheckProc
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
@@ -20,9 +20,8 @@ public class spell_monk_spirit_of_the_crane_passive : AuraScript, IHasAuraEffect
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
 		if (eventInfo.GetSpellInfo().Id != MonkSpells.SPELL_MONK_BLACKOUT_KICK_TRIGGERED)
-		{
 			return false;
-		}
+
 		return true;
 	}
 
@@ -34,7 +33,6 @@ public class spell_monk_spirit_of_the_crane_passive : AuraScript, IHasAuraEffect
 
 	public override void Register()
 	{
-
 		AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
 	}
 }

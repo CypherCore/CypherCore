@@ -1,5 +1,4 @@
 ﻿using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 
 namespace Scripts.Spells.DeathKnight;
@@ -9,16 +8,17 @@ public class spell_dk_empower_rune_weapon : SpellScript
 {
 	public void OnHit()
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
+
 		if (caster != null)
 		{
-			Player player = caster.ToPlayer();
+			var player = caster.ToPlayer();
+
 			if (player != null)
 			{
 				for (byte i = 0; i < PlayerConst.MaxRunes; ++i)
-				{
 					player.SetRuneCooldown(i, 0);
-				}
+
 				player.ResyncRunes();
 			}
 		}

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -31,7 +30,7 @@ internal class spell_dk_ghoul_explode : SpellScript, IHasSpellEffects
 
 	private void Suicide(uint effIndex)
 	{
-		Unit unitTarget = GetHitUnit();
+		var unitTarget = GetHitUnit();
 
 		if (unitTarget)
 			// Corpse Explosion (Suicide)

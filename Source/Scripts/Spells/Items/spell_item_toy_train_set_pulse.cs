@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.DataStorage;
 using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
@@ -21,12 +20,12 @@ internal class spell_item_toy_train_set_pulse : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint index)
 	{
-		Player target = GetHitUnit().ToPlayer();
+		var target = GetHitUnit().ToPlayer();
 
 		if (target)
 		{
 			target.HandleEmoteCommand(Emote.OneshotTrain);
-			EmotesTextSoundRecord soundEntry = Global.DB2Mgr.GetTextSoundEmoteFor((uint)TextEmotes.Train, target.GetRace(), target.GetNativeGender(), target.GetClass());
+			var soundEntry = Global.DB2Mgr.GetTextSoundEmoteFor((uint)TextEmotes.Train, target.GetRace(), target.GetNativeGender(), target.GetClass());
 
 			if (soundEntry != null)
 				target.PlayDistanceSound(soundEntry.SoundId);

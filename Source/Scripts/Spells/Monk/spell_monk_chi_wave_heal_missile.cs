@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -10,16 +9,15 @@ namespace Scripts.Spells.Monk;
 [SpellScript(132464)]
 public class spell_monk_chi_wave_heal_missile : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes UnnamedParameter)
 	{
-		Unit caster = GetCaster();
-		Unit target = GetTarget();
+		var caster = GetCaster();
+		var target = GetTarget();
+
 		if (target == null || caster == null)
-		{
 			return;
-		}
 
 		caster.CastSpell(target, 132463, true);
 		// rerun target selector

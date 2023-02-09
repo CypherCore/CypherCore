@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
 using Game.DataStorage;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -28,13 +27,13 @@ internal class spell_gen_running_wild_AuraScript : AuraScript, IHasAuraEffects
 
 	private void HandleMount(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit target = GetTarget();
+		var target = GetTarget();
 		PreventDefaultAction();
 
 		target.Mount(SharedConst.DisplayIdHiddenMount, 0, 0);
 
 		// cast speed aura
-		MountCapabilityRecord mountCapability = CliDB.MountCapabilityStorage.LookupByKey(aurEff.GetAmount());
+		var mountCapability = CliDB.MountCapabilityStorage.LookupByKey(aurEff.GetAmount());
 
 		if (mountCapability != null)
 			target.CastSpell(target, mountCapability.ModSpellAuraID, new CastSpellExtraArgs(TriggerCastFlags.FullMask));

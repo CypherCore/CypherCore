@@ -25,22 +25,22 @@ internal class areatrigger_pri_divine_star : AreaTriggerAI
 
 	public override void OnInitialize()
 	{
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
 
 		if (caster != null)
 		{
 			_casterCurrentPosition = caster.GetPosition();
 
 			// Note: max. distance at which the Divine Star can travel to is 24 yards.
-			float divineStarXOffSet = 24.0f;
+			var divineStarXOffSet = 24.0f;
 
-			Position destPos = _casterCurrentPosition;
+			var destPos = _casterCurrentPosition;
 			at.MovePositionToFirstCollision(destPos, divineStarXOffSet, 0.0f);
 
 			PathGenerator firstPath = new(at);
 			firstPath.CalculatePath(destPos.GetPositionX(), destPos.GetPositionY(), destPos.GetPositionZ(), false);
 
-			Vector3 endPoint = firstPath.GetPath().Last();
+			var endPoint = firstPath.GetPath().Last();
 
 			// Note: it takes 1000ms to reach 24 yards, so it takes 41.67ms to run 1 yard.
 			at.InitSplines(firstPath.GetPath().ToList(), (uint)(at.GetDistance(endPoint.X, endPoint.Y, endPoint.Z) * 41.67f));
@@ -54,7 +54,7 @@ internal class areatrigger_pri_divine_star : AreaTriggerAI
 
 	public override void OnUnitEnter(Unit unit)
 	{
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
 
 		if (caster != null)
 			if (!_affectedUnits.Contains(unit.GetGUID()))
@@ -71,7 +71,7 @@ internal class areatrigger_pri_divine_star : AreaTriggerAI
 	public override void OnUnitExit(Unit unit)
 	{
 		// Note: this ensures any unit receives a second hit if they happen to be inside the AT when Divine Star starts its return path.
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
 
 		if (caster != null)
 			if (!_affectedUnits.Contains(unit.GetGUID()))
@@ -87,7 +87,7 @@ internal class areatrigger_pri_divine_star : AreaTriggerAI
 
 	public override void OnDestinationReached()
 	{
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
 
 		if (caster == null)
 			return;
@@ -109,7 +109,7 @@ internal class areatrigger_pri_divine_star : AreaTriggerAI
 		_scheduler.Schedule(TimeSpan.FromMilliseconds(0),
 		                    task =>
 		                    {
-			                    Unit caster = at.GetCaster();
+			                    var caster = at.GetCaster();
 
 			                    if (caster != null)
 			                    {

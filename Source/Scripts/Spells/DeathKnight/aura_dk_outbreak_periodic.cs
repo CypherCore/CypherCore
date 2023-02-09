@@ -10,23 +10,20 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(196782)]
 public class aura_dk_outbreak_periodic : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private void HandleDummyTick(AuraEffect UnnamedParameter)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
+
 		if (caster != null)
 		{
-			List<Unit> friendlyUnits = new List<Unit>();
+			var friendlyUnits = new List<Unit>();
 			GetTarget().GetFriendlyUnitListInRange(friendlyUnits, 10.0f);
 
-			foreach (Unit unit in friendlyUnits)
-			{
+			foreach (var unit in friendlyUnits)
 				if (!unit.HasUnitFlag(UnitFlags.ImmuneToPc) && unit.IsInCombatWith(caster))
-				{
 					caster.CastSpell(unit, DeathKnightSpells.SPELL_DK_VIRULENT_PLAGUE, true);
-				}
-			}
 		}
 	}
 

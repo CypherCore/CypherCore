@@ -25,7 +25,7 @@ internal class spell_item_pet_healing : AuraScript, IHasAuraEffects
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
 		PreventDefaultAction();
-		DamageInfo damageInfo = eventInfo.GetDamageInfo();
+		var damageInfo = eventInfo.GetDamageInfo();
 
 		if (damageInfo == null ||
 		    damageInfo.GetDamage() == 0)

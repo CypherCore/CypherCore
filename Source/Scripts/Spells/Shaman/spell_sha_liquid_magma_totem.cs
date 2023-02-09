@@ -26,7 +26,7 @@ internal class spell_sha_liquid_magma_totem : SpellScript, IHasSpellEffects
 
 	private void HandleEffectHitTarget(uint effIndex)
 	{
-		Unit hitUnit = GetHitUnit();
+		var hitUnit = GetHitUnit();
 
 		if (hitUnit != null)
 			GetCaster().CastSpell(hitUnit, ShamanSpells.LiquidMagmaHit, true);
@@ -37,7 +37,7 @@ internal class spell_sha_liquid_magma_totem : SpellScript, IHasSpellEffects
 		// choose one random Target from targets
 		if (targets.Count > 1)
 		{
-			WorldObject selected = targets.SelectRandom();
+			var selected = targets.SelectRandom();
 			targets.Clear();
 			targets.Add(selected);
 		}

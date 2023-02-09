@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -19,7 +18,7 @@ internal class spell_gen_submerged : SpellScript, IHasSpellEffects
 
 	private void HandleScript(uint eff)
 	{
-		Creature target = GetHitCreature();
+		var target = GetHitCreature();
 
 		target?.SetStandState(UnitStandStateType.Submerged);
 	}

@@ -21,7 +21,7 @@ internal class spell_pri_divine_hymn : SpellScript, IHasSpellEffects
 	{
 		targets.RemoveAll(obj =>
 		                  {
-			                  Unit target = obj.ToUnit();
+			                  var target = obj.ToUnit();
 
 			                  if (target)
 				                  return !GetCaster().IsInRaidWith(target);

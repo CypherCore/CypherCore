@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -21,19 +20,19 @@ internal class spell_q12372_destabilize_azure_dragonshrine_dummy : SpellScript, 
 	{
 		if (GetHitCreature())
 		{
-			Unit caster = GetOriginalCaster();
+			var caster = GetOriginalCaster();
 
 			if (caster)
 			{
-				Vehicle vehicle = caster.GetVehicleKit();
+				var vehicle = caster.GetVehicleKit();
 
 				if (vehicle)
 				{
-					Unit passenger = vehicle.GetPassenger(0);
+					var passenger = vehicle.GetPassenger(0);
 
 					if (passenger)
 					{
-						Player player = passenger.ToPlayer();
+						var player = passenger.ToPlayer();
 
 						if (player)
 							player.KilledMonsterCredit(CreatureIds.WyrmrestTempleCredit);

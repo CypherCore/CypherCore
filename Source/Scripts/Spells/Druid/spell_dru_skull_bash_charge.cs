@@ -9,19 +9,15 @@ namespace Scripts.Spells.Druid;
 [SpellScript(221514)]
 public class spell_dru_skull_bash_charge : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	private void HandleCharge(uint effIndex)
 	{
 		if (!GetCaster())
-		{
 			return;
-		}
 
 		if (!GetHitUnit())
-		{
 			return;
-		}
 
 		GetCaster().CastSpell(GetHitUnit(), 93985, true);
 	}

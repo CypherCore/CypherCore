@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -27,11 +26,11 @@ internal class spell_gen_eject_passenger_with_seatId : SpellScript, IHasSpellEff
 
 	private void EjectPassenger(uint effIndex)
 	{
-		Vehicle vehicle = GetHitUnit().GetVehicleKit();
+		var vehicle = GetHitUnit().GetVehicleKit();
 
 		if (vehicle != null)
 		{
-			Unit passenger = vehicle.GetPassenger(_seatId);
+			var passenger = vehicle.GetPassenger(_seatId);
 
 			passenger?.ExitVehicle();
 		}

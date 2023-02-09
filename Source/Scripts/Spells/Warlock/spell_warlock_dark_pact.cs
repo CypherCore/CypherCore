@@ -6,22 +6,22 @@ using Game.Spells;
 
 namespace Scripts.Spells.Warlock
 {
-    // 108416 - Dark Pact
-    [SpellScript(108416)]
-    public class spell_warlock_dark_pact : AuraScript, IHasAuraEffects
-    {
-        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	// 108416 - Dark Pact
+	[SpellScript(108416)]
+	public class spell_warlock_dark_pact : AuraScript, IHasAuraEffects
+	{
+		public List<IAuraEffectHandler> AuraEffects => new();
 
-        private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
-        {
-            var sacrifiedHealth = GetCaster().CountPctFromCurHealth(GetSpellInfo().GetEffect(1).BasePoints);
-            GetCaster().ModifyHealth((long)sacrifiedHealth * -1);
-            amount = (int)MathFunctions.CalculatePct(sacrifiedHealth, GetSpellInfo().GetEffect(2).BasePoints);
-        }
+		private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
+		{
+			var sacrifiedHealth = GetCaster().CountPctFromCurHealth(GetSpellInfo().GetEffect(1).BasePoints);
+			GetCaster().ModifyHealth((long)sacrifiedHealth * -1);
+			amount = (int)MathFunctions.CalculatePct(sacrifiedHealth, GetSpellInfo().GetEffect(2).BasePoints);
+		}
 
-        public override void Register()
-        {
-            AuraEffects.Add(new AuraEffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
-        }
-    }
+		public override void Register()
+		{
+			AuraEffects.Add(new AuraEffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
+		}
+	}
 }

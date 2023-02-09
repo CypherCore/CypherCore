@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Networking.Packets;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
@@ -25,8 +24,8 @@ internal class spell_gen_spirit_healer_res : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		Player originalCaster = GetOriginalCaster().ToPlayer();
-		Unit   target         = GetHitUnit();
+		var originalCaster = GetOriginalCaster().ToPlayer();
+		var target         = GetHitUnit();
 
 		if (target)
 		{

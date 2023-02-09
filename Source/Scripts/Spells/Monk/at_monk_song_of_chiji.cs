@@ -13,21 +13,15 @@ public class at_monk_song_of_chiji : AreaTriggerAI
 
 	public override void OnUnitEnter(Unit unit)
 	{
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
 
 		if (caster == null || unit == null)
-		{
 			return;
-		}
 
 		if (!caster.ToPlayer())
-		{
 			return;
-		}
 
 		if (unit != caster && caster.IsValidAttackTarget(unit))
-		{
 			caster.CastSpell(unit, MonkSpells.SPELL_MONK_SONG_OF_CHIJI, true);
-		}
 	}
 }

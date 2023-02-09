@@ -39,11 +39,11 @@ internal class spell_item_trinket_stack : AuraScript, IHasAuraEffects
 	{
 		PreventDefaultAction();
 
-		Unit caster = eventInfo.GetActor();
+		var caster = eventInfo.GetActor();
 
 		caster.CastSpell(caster, _stackSpell, new CastSpellExtraArgs(aurEff)); // cast the stack
 
-		Aura dummy = caster.GetAura(_stackSpell); // retrieve aura
+		var dummy = caster.GetAura(_stackSpell); // retrieve aura
 
 		//dont do anything if it's not the right amount of stacks;
 		if (dummy == null ||
@@ -52,7 +52,7 @@ internal class spell_item_trinket_stack : AuraScript, IHasAuraEffects
 
 		// if right amount, Remove the aura and cast real trigger
 		caster.RemoveAurasDueToSpell(_stackSpell);
-		Unit target = eventInfo.GetActionTarget();
+		var target = eventInfo.GetActionTarget();
 
 		if (target)
 			caster.CastSpell(target, _triggerSpell, new CastSpellExtraArgs(aurEff));

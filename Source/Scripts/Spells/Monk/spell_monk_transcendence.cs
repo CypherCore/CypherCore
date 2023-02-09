@@ -23,12 +23,10 @@ public class spell_monk_transcendence : SpellScript, ISpellOnSummon
 
 	public static Creature GetSpirit(Unit caster)
 	{
-		ObjectGuid spiritGuid = caster.VariableStorage.GetValue<ObjectGuid>(MONK_TRANSCENDENCE_GUID, default);
+		var spiritGuid = caster.VariableStorage.GetValue<ObjectGuid>(MONK_TRANSCENDENCE_GUID, default);
 
 		if (spiritGuid.IsEmpty())
-		{
 			return null;
-		}
 
 		return ObjectAccessor.GetCreature(caster, spiritGuid);
 	}
@@ -36,11 +34,10 @@ public class spell_monk_transcendence : SpellScript, ISpellOnSummon
 	public static void DespawnSpirit(Unit caster)
 	{
 		// Remove previous one if any
-		Creature spirit = GetSpirit(caster);
+		var spirit = GetSpirit(caster);
+
 		if (spirit != null)
-		{
 			spirit.DespawnOrUnsummon();
-		}
 
 		caster.VariableStorage.Remove(MONK_TRANSCENDENCE_GUID);
 	}

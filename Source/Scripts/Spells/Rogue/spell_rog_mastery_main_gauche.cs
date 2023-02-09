@@ -29,7 +29,7 @@ internal class spell_rog_mastery_main_gauche : AuraScript, IAuraCheckProc, IHasA
 
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo procInfo)
 	{
-		Unit target = GetTarget();
+		var target = GetTarget();
 
 		target?.CastSpell(procInfo.GetDamageInfo().GetVictim(), RogueSpells.MainGauche, new CastSpellExtraArgs(aurEff));
 	}

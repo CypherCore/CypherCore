@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
 using Game.DataStorage;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -31,11 +30,11 @@ internal class spell_gen_oracle_wolvar_reputation : SpellScript, IHasSpellEffect
 
 	private void HandleDummy(uint effIndex)
 	{
-		Player player    = GetCaster().ToPlayer();
-		uint   factionId = (uint)GetEffectInfo().CalcValue();
-		int    repChange = GetEffectInfo(1).CalcValue();
+		var player    = GetCaster().ToPlayer();
+		var factionId = (uint)GetEffectInfo().CalcValue();
+		var repChange = GetEffectInfo(1).CalcValue();
 
-		FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(factionId);
+		var factionEntry = CliDB.FactionStorage.LookupByKey(factionId);
 
 		if (factionEntry == null)
 			return;

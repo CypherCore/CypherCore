@@ -92,13 +92,13 @@ internal class spell_item_deathbringers_will : AuraScript, IHasAuraEffects
 		};
 
 		PreventDefaultAction();
-		Unit caster       = eventInfo.GetActor();
-		var  randomSpells = triggeredSpells[(int)caster.GetClass()];
+		var caster       = eventInfo.GetActor();
+		var randomSpells = triggeredSpells[(int)caster.GetClass()];
 
 		if (randomSpells.Empty())
 			return;
 
-		uint spellId = randomSpells.SelectRandom();
+		var spellId = randomSpells.SelectRandom();
 		caster.CastSpell(caster, spellId, new CastSpellExtraArgs(aurEff));
 	}
 }

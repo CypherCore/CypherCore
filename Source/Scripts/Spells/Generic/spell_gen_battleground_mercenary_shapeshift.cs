@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
 using Game.DataStorage;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -331,7 +330,7 @@ internal class spell_gen_battleground_mercenary_shapeshift : AuraScript, IHasAur
 			if (!CliDB.ChrRacesStorage.ContainsKey(race))
 				return false;
 
-			foreach (Race otherRace in otherRaces)
+			foreach (var otherRace in otherRaces)
 				if (!CliDB.ChrRacesStorage.ContainsKey(otherRace))
 					return false;
 		}
@@ -341,14 +340,14 @@ internal class spell_gen_battleground_mercenary_shapeshift : AuraScript, IHasAur
 			if (!CliDB.ChrRacesStorage.ContainsKey(race))
 				return false;
 
-			foreach (uint displayId in displayIds)
+			foreach (var displayId in displayIds)
 				if (CliDB.CreatureDisplayInfoStorage.ContainsKey(displayId))
 					return false;
 		}
 
 		RacialSkills.Clear();
 
-		foreach (SkillLineRecord skillLine in CliDB.SkillLineStorage.Values)
+		foreach (var skillLine in CliDB.SkillLineStorage.Values)
 			if (skillLine.GetFlags().HasFlag(SkillLineFlags.RacialForThePurposeOfTemporaryRaceChange))
 				RacialSkills.Add(skillLine.Id);
 
@@ -366,7 +365,7 @@ internal class spell_gen_battleground_mercenary_shapeshift : AuraScript, IHasAur
 		var otherRaces = RaceInfo.LookupByKey(nativeRace);
 
 		if (otherRaces != null)
-			foreach (Race race in otherRaces)
+			foreach (var race in otherRaces)
 				if (Global.ObjectMgr.GetPlayerInfo(race, playerClass) != null)
 					return race;
 
@@ -385,13 +384,13 @@ internal class spell_gen_battleground_mercenary_shapeshift : AuraScript, IHasAur
 
 	private void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit owner            = GetUnitOwner();
-		Race otherFactionRace = GetReplacementRace(owner.GetRace(), owner.GetClass());
+		var owner            = GetUnitOwner();
+		var otherFactionRace = GetReplacementRace(owner.GetRace(), owner.GetClass());
 
 		if (otherFactionRace == Race.None)
 			return;
 
-		uint displayId = GetDisplayIdForRace(otherFactionRace, owner.GetNativeGender());
+		var displayId = GetDisplayIdForRace(otherFactionRace, owner.GetNativeGender());
 
 		if (displayId != 0)
 			owner.SetDisplayId(displayId);
@@ -402,8 +401,8 @@ internal class spell_gen_battleground_mercenary_shapeshift : AuraScript, IHasAur
 
 	private void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit owner            = GetUnitOwner();
-		Race otherFactionRace = GetReplacementRace(owner.GetRace(), owner.GetClass());
+		var owner            = GetUnitOwner();
+		var otherFactionRace = GetReplacementRace(owner.GetRace(), owner.GetClass());
 
 		if (otherFactionRace == Race.None)
 			return;
@@ -413,12 +412,12 @@ internal class spell_gen_battleground_mercenary_shapeshift : AuraScript, IHasAur
 
 	private void UpdateRacials(Race oldRace, Race newRace)
 	{
-		Player player = GetUnitOwner().ToPlayer();
+		var player = GetUnitOwner().ToPlayer();
 
 		if (player == null)
 			return;
 
-		foreach (uint racialSkillId in RacialSkills)
+		foreach (var racialSkillId in RacialSkills)
 		{
 			if (Global.DB2Mgr.GetSkillRaceClassInfo(racialSkillId, oldRace, player.GetClass()) != null)
 			{

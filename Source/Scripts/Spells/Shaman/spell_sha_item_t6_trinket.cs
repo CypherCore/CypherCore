@@ -26,7 +26,7 @@ internal class spell_sha_item_t6_trinket : AuraScript, IHasAuraEffects
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
 		PreventDefaultAction();
-		SpellInfo spellInfo = eventInfo.GetSpellInfo();
+		var spellInfo = eventInfo.GetSpellInfo();
 
 		if (spellInfo == null)
 			return;

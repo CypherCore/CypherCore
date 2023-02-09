@@ -7,45 +7,42 @@ using Game.Spells;
 
 namespace Scripts.Spells.Warrior
 {
-    //184783
-    [SpellScript(184783)]
-    public class spell_warr_tactician : AuraScript, IHasAuraEffects
-    {
-        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	//184783
+	[SpellScript(184783)]
+	public class spell_warr_tactician : AuraScript, IHasAuraEffects
+	{
+		public List<IAuraEffectHandler> AuraEffects => new();
 
-        private void HandleEffectProc(AuraEffect UnnamedParameter, ProcEventInfo procInfo)
-        {
-            PreventDefaultAction();
-            int rageSpent = 0;
+		private void HandleEffectProc(AuraEffect UnnamedParameter, ProcEventInfo procInfo)
+		{
+			PreventDefaultAction();
+			var rageSpent = 0;
 
-            Unit caster = GetCaster();
-            if (caster != null)
-            {
-                if (procInfo.GetSpellInfo() != null)
-                {
-                    foreach (SpellPowerCost cost in procInfo.GetSpellInfo().CalcPowerCost(caster, procInfo.GetSpellInfo().GetSchoolMask()))
-                    {
-                        if (cost.Power != PowerType.Rage)
-                        {
-                            continue;
-                        }
+			var caster = GetCaster();
 
-                        rageSpent = cost.Amount;
-                    }
+			if (caster != null)
+				if (procInfo.GetSpellInfo() != null)
+				{
+					foreach (var cost in procInfo.GetSpellInfo().CalcPowerCost(caster, procInfo.GetSpellInfo().GetSchoolMask()))
+					{
+						if (cost.Power != PowerType.Rage)
+							continue;
 
-                    if (RandomHelper.randChance((rageSpent / 10) * 1.40))
-                    {
-                        caster.GetSpellHistory().ResetCooldown(WarriorSpells.COLOSSUS_SMASH, true);
-                        caster.GetSpellHistory().ResetCooldown(WarriorSpells.MORTAL_STRIKE, true);
-                        caster.CastSpell(caster, WarriorSpells.TACTICIAN_CD, true);
-                    }
-                }
-            }
-        }
+						rageSpent = cost.Amount;
+					}
 
-        public override void Register()
-        {
-            AuraEffects.Add(new AuraEffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
-        }
-    }
+					if (RandomHelper.randChance((rageSpent / 10) * 1.40))
+					{
+						caster.GetSpellHistory().ResetCooldown(WarriorSpells.COLOSSUS_SMASH, true);
+						caster.GetSpellHistory().ResetCooldown(WarriorSpells.MORTAL_STRIKE, true);
+						caster.CastSpell(caster, WarriorSpells.TACTICIAN_CD, true);
+					}
+				}
+		}
+
+		public override void Register()
+		{
+			AuraEffects.Add(new AuraEffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+		}
+	}
 }

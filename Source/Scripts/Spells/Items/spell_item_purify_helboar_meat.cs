@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -30,7 +29,7 @@ internal class spell_item_purify_helboar_meat : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 		caster.CastSpell(caster, RandomHelper.randChance(50) ? ItemSpellIds.SummonPurifiedHelboarMeat : ItemSpellIds.SummonToxicHelboarMeat, true);
 	}
 }

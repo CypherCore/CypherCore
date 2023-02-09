@@ -34,7 +34,7 @@ internal class spell_hun_t9_4p_bonus : AuraScript, IAuraCheckProc, IHasAuraEffec
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
 		PreventDefaultAction();
-		Unit caster = eventInfo.GetActor();
+		var caster = eventInfo.GetActor();
 
 		caster.CastSpell(caster.ToPlayer().GetPet(), HunterSpells.T94PGreatness, new CastSpellExtraArgs(aurEff));
 	}

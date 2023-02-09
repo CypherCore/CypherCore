@@ -1,8 +1,6 @@
 ﻿using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
-using Game.Spells;
 
 namespace Scripts.Spells.Monk;
 
@@ -14,22 +12,19 @@ public class spell_monk_enveloping_mist : SpellScript, ISpellAfterCast, ISpellBe
 		if (GetCaster().GetCurrentSpell(CurrentSpellTypes.Channeled) && GetCaster().GetCurrentSpell(CurrentSpellTypes.Channeled).GetSpellInfo().Id == MonkSpells.SPELL_MONK_SOOTHING_MIST)
 		{
 			GetSpell().m_castFlagsEx = SpellCastFlagsEx.None;
-			SpellCastTargets targets = GetCaster().GetCurrentSpell(CurrentSpellTypes.Channeled).m_targets;
+			var targets = GetCaster().GetCurrentSpell(CurrentSpellTypes.Channeled).m_targets;
 			GetSpell().InitExplicitTargets(targets);
 		}
 	}
 
 	public void AfterCast()
 	{
-		Player caster = GetCaster().ToPlayer();
+		var caster = GetCaster().ToPlayer();
+
 		if (caster == null)
-		{
 			return;
-		}
 
 		if (caster.HasAura(MonkSpells.SPELL_LIFECYCLES))
-		{
 			caster.CastSpell(caster, MonkSpells.SPELL_MONK_LIFECYCLES_VIVIFY, true);
-		}
 	}
 }

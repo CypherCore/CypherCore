@@ -19,7 +19,7 @@ internal class spell_rog_venomous_wounds : AuraScript, IHasAuraEffects
 
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
-		int extraEnergy = aurEff.GetAmount();
+		var extraEnergy = aurEff.GetAmount();
 		GetTarget().ModifyPower(PowerType.Energy, extraEnergy);
 	}
 }

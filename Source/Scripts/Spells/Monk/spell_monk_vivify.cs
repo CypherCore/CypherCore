@@ -5,14 +5,13 @@ using Game.Maps;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
-using Game.Spells;
 
 namespace Scripts.Spells.Monk;
 
 [SpellScript(116670)]
 public class spell_monk_vivify : SpellScript, IHasSpellEffects, ISpellAfterCast, ISpellBeforeCast
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	private void FilterRenewingMist(List<WorldObject> targets)
 	{
@@ -24,23 +23,20 @@ public class spell_monk_vivify : SpellScript, IHasSpellEffects, ISpellAfterCast,
 		if (GetCaster().GetCurrentSpell(CurrentSpellTypes.Channeled) && GetCaster().GetCurrentSpell(CurrentSpellTypes.Channeled).GetSpellInfo().Id == MonkSpells.SPELL_MONK_SOOTHING_MIST)
 		{
 			GetSpell().m_castFlagsEx = SpellCastFlagsEx.None;
-			SpellCastTargets targets = GetCaster().GetCurrentSpell(CurrentSpellTypes.Channeled).m_targets;
+			var targets = GetCaster().GetCurrentSpell(CurrentSpellTypes.Channeled).m_targets;
 			GetSpell().InitExplicitTargets(targets);
 		}
 	}
 
 	public void AfterCast()
 	{
-		Player caster = GetCaster().ToPlayer();
+		var caster = GetCaster().ToPlayer();
+
 		if (caster == null)
-		{
 			return;
-		}
 
 		if (caster.HasAura(MonkSpells.SPELL_LIFECYCLES))
-		{
 			caster.CastSpell(caster, MonkSpells.SPELL_MONK_LIFECYCLES_ENVELOPING_MIST, true);
-		}
 	}
 
 	public override void Register()

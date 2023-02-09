@@ -1,5 +1,4 @@
 ﻿using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
@@ -11,7 +10,7 @@ internal class spell_gen_pvp_trinket : SpellScript, ISpellAfterCast
 {
 	public void AfterCast()
 	{
-		Player caster = GetCaster().ToPlayer();
+		var caster = GetCaster().ToPlayer();
 
 		switch (caster.GetEffectiveTeam())
 		{

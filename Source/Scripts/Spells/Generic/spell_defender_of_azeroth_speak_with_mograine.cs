@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -22,20 +21,20 @@ internal class spell_defender_of_azeroth_speak_with_mograine : SpellScript, IHas
 		if (!GetCaster())
 			return;
 
-		Player player = GetCaster().ToPlayer();
+		var player = GetCaster().ToPlayer();
 
 		if (player == null)
 			return;
 
-		Creature nazgrim = GetHitUnit().FindNearestCreature(CreatureIds.Nazgrim, 10.0f);
+		var nazgrim = GetHitUnit().FindNearestCreature(CreatureIds.Nazgrim, 10.0f);
 
 		nazgrim?.HandleEmoteCommand(Emote.OneshotPoint, player);
 
-		Creature trollbane = GetHitUnit().FindNearestCreature(CreatureIds.Trollbane, 10.0f);
+		var trollbane = GetHitUnit().FindNearestCreature(CreatureIds.Trollbane, 10.0f);
 
 		trollbane?.HandleEmoteCommand(Emote.OneshotPoint, player);
 
-		Creature whitemane = GetHitUnit().FindNearestCreature(CreatureIds.Whitemane, 10.0f);
+		var whitemane = GetHitUnit().FindNearestCreature(CreatureIds.Whitemane, 10.0f);
 
 		whitemane?.HandleEmoteCommand(Emote.OneshotPoint, player);
 

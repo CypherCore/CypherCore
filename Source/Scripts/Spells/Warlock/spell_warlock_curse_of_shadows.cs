@@ -7,34 +7,32 @@ using Game.Spells;
 
 namespace Scripts.Spells.Warlock
 {
-    // 234877 - Curse of Shadows
-    [SpellScript(234877)]
-    public class spell_warlock_curse_of_shadows : AuraScript, IHasAuraEffects
-    {
-        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	// 234877 - Curse of Shadows
+	[SpellScript(234877)]
+	public class spell_warlock_curse_of_shadows : AuraScript, IHasAuraEffects
+	{
+		public List<IAuraEffectHandler> AuraEffects => new();
 
-        private void OnProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-            Unit caster = GetCaster();
-            if (caster == null)
-            {
-                return;
-            }
+		private void OnProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+		{
+			PreventDefaultAction();
+			var caster = GetCaster();
 
-            SpellInfo spellInfo = eventInfo.GetDamageInfo().GetSpellInfo();
-            if (spellInfo == null || (spellInfo.GetSchoolMask() & SpellSchoolMask.Shadow) == 0)
-            {
-                return;
-            }
+			if (caster == null)
+				return;
 
-            var damage = MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount());
-            caster.CastSpell(eventInfo.GetActionTarget(), WarlockSpells.CURSE_OF_SHADOWS_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)damage));
-        }
+			var spellInfo = eventInfo.GetDamageInfo().GetSpellInfo();
 
-        public override void Register()
-        {
-            AuraEffects.Add(new AuraEffectProcHandler(OnProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
-    }
+			if (spellInfo == null || (spellInfo.GetSchoolMask() & SpellSchoolMask.Shadow) == 0)
+				return;
+
+			var damage = MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount());
+			caster.CastSpell(eventInfo.GetActionTarget(), WarlockSpells.CURSE_OF_SHADOWS_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)damage));
+		}
+
+		public override void Register()
+		{
+			AuraEffects.Add(new AuraEffectProcHandler(OnProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+		}
+	}
 }

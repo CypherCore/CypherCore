@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
@@ -21,8 +20,8 @@ internal class spell_gen_ancestral_call : SpellScript, ISpellOnCast
 
 	public void OnCast()
 	{
-		Unit caster  = GetCaster();
-		uint spellId = AncestralCallBuffs.SelectRandom();
+		var caster  = GetCaster();
+		var spellId = AncestralCallBuffs.SelectRandom();
 
 		caster.CastSpell(caster, spellId, true);
 	}

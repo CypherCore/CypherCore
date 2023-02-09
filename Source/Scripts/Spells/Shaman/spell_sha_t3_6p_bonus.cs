@@ -27,8 +27,8 @@ internal class spell_sha_t3_6p_bonus : AuraScript, IHasAuraEffects
 		PreventDefaultAction();
 
 		uint spellId;
-		Unit caster = eventInfo.GetActor();
-		Unit target = eventInfo.GetProcTarget();
+		var  caster = eventInfo.GetActor();
+		var  target = eventInfo.GetProcTarget();
 
 		switch (target.GetClass())
 		{

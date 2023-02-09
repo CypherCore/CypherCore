@@ -35,7 +35,7 @@ internal class spell_sha_healing_rain_AuraScript : AuraScript, IHasAuraEffects
 
 	private void HandleEffecRemoved(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Creature summon = ObjectAccessor.GetCreature(GetTarget(), _visualDummy);
+		var summon = ObjectAccessor.GetCreature(GetTarget(), _visualDummy);
 
 		summon?.DespawnOrUnsummon();
 	}

@@ -12,9 +12,7 @@ public class spell_dru_wild_charge_moonkin : SpellScript, ISpellCheckCast
 		if (GetCaster())
 		{
 			if (!GetCaster().IsInCombat())
-			{
 				return SpellCastResult.DontReport;
-			}
 		}
 		else
 		{

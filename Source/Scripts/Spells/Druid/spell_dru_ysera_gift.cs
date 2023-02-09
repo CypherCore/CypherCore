@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -10,18 +9,17 @@ namespace Scripts.Spells.Druid;
 [SpellScript(145108)]
 public class spell_dru_ysera_gift : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private void HandlePeriodic(AuraEffect aurEff)
 	{
-		Unit caster = GetCaster();
-		if (caster == null || !caster.IsAlive())
-		{
-			return;
-		}
+		var caster = GetCaster();
 
-		var                amount = MathFunctions.CalculatePct(caster.GetMaxHealth(), aurEff.GetBaseAmount());
-		CastSpellExtraArgs values = new CastSpellExtraArgs(TriggerCastFlags.FullMask);
+		if (caster == null || !caster.IsAlive())
+			return;
+
+		var amount = MathFunctions.CalculatePct(caster.GetMaxHealth(), aurEff.GetBaseAmount());
+		var values = new CastSpellExtraArgs(TriggerCastFlags.FullMask);
 		values.AddSpellMod(SpellValueMod.MaxTargets, 1);
 		values.AddSpellMod(SpellValueMod.BasePoint0, (int)amount);
 

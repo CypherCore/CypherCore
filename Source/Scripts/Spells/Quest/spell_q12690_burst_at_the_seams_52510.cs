@@ -41,11 +41,11 @@ internal class spell_q12690_burst_at_the_seams_52510 : SpellScript, IHasSpellEff
 
 		if (creature != null)
 		{
-			Unit charmer = GetCaster().GetCharmerOrOwner();
+			var charmer = GetCaster().GetCharmerOrOwner();
 
 			if (charmer != null)
 			{
-				Player player = charmer.ToPlayer();
+				var player = charmer.ToPlayer();
 
 				if (player != null)
 					if (player.GetQuestStatus(Misc.QuestFuelForTheFire) == QuestStatus.Incomplete)
@@ -57,7 +57,7 @@ internal class spell_q12690_burst_at_the_seams_52510 : SpellScript, IHasSpellEff
 						creature.CastSpell(creature, QuestSpellIds.BurstAtTheSeams59580, true);
 
 						player.CastSpell(player, QuestSpellIds.DrakkariSkullcrusherCredit, true);
-						ushort count = player.GetReqKillOrCastCurrentCount(Misc.QuestFuelForTheFire, (int)CreatureIds.DrakkariChieftaink);
+						var count = player.GetReqKillOrCastCurrentCount(Misc.QuestFuelForTheFire, (int)CreatureIds.DrakkariChieftaink);
 
 						if ((count % 20) == 0)
 							player.CastSpell(player, QuestSpellIds.SummonDrakkariChieftain, true);

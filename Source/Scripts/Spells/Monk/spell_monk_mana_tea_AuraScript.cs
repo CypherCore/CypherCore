@@ -9,7 +9,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(197908)]
 public class spell_monk_mana_tea_AuraScript : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private void OnTick(AuraEffect UnnamedParameter)
 	{
@@ -17,17 +17,14 @@ public class spell_monk_mana_tea_AuraScript : AuraScript, IHasAuraEffects
 		{
 			// remove one charge per tick instead of remove aura on cast
 			// "Cancelling the channel will not waste stacks"
-			Aura manaTea = GetCaster().GetAura(MonkSpells.SPELL_MONK_MANA_TEA_STACKS);
+			var manaTea = GetCaster().GetAura(MonkSpells.SPELL_MONK_MANA_TEA_STACKS);
+
 			if (manaTea != null)
 			{
 				if (manaTea.GetStackAmount() > 1)
-				{
 					manaTea.ModStackAmount(-1);
-				}
 				else
-				{
 					GetCaster().RemoveAura(MonkSpells.SPELL_MONK_MANA_TEA_STACKS);
-				}
 			}
 		}
 	}

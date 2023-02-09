@@ -4,58 +4,46 @@ using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
-using Game.Spells;
 
 namespace Scripts.Spells.Druid;
 
 [SpellScript(197721)]
 public class spell_dru_flourish : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	private void HandleHit(uint UnnamedParameter)
 	{
 		if (!GetCaster() || !GetHitUnit())
-		{
 			return;
-		}
 
-		List<AuraEffect> auraEffects = GetHitUnit().GetAuraEffectsByType(AuraType.PeriodicHeal);
+		var auraEffects = GetHitUnit().GetAuraEffectsByType(AuraType.PeriodicHeal);
 
-		foreach (AuraEffect auraEffect in auraEffects)
-		{
+		foreach (var auraEffect in auraEffects)
 			if (auraEffect.GetCasterGUID() == GetCaster().GetGUID())
 			{
-				Aura healAura = auraEffect.GetBase();
+				var healAura = auraEffect.GetBase();
+
 				if (healAura != null)
-				{
 					healAura.SetDuration(healAura.GetDuration() + GetEffectValue() * Time.InMilliseconds);
-				}
 			}
-		}
 	}
 
 	private void FilterTargets(List<WorldObject> targets)
 	{
-		List<WorldObject> tempTargets = new List<WorldObject>();
-		foreach (WorldObject target in targets)
-		{
+		var tempTargets = new List<WorldObject>();
+
+		foreach (var target in targets)
 			if (target.IsPlayer())
-			{
 				if (target.ToUnit().HasAuraTypeWithCaster(AuraType.PeriodicHeal, GetCaster().GetGUID()))
-				{
 					tempTargets.Add(target);
-				}
-			}
-		}
 
 		if (tempTargets.Count > 0)
 		{
 			targets.Clear();
-			foreach (WorldObject target in tempTargets)
-			{
+
+			foreach (var target in tempTargets)
 				targets.Add(target);
-			}
 		}
 	}
 

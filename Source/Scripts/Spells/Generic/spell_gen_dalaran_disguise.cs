@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -20,7 +19,7 @@ internal class spell_gen_dalaran_disguise : SpellScript, IHasSpellEffects
 		       {
 			       GenericSpellIds.SunreaverTrigger      => ValidateSpellInfo(GenericSpellIds.SunreaverFemale, GenericSpellIds.SunreaverMale),
 			       GenericSpellIds.SilverCovenantTrigger => ValidateSpellInfo(GenericSpellIds.SilverCovenantFemale, GenericSpellIds.SilverCovenantMale),
-			       _                              => false
+			       _                                     => false
 		       };
 	}
 
@@ -31,13 +30,13 @@ internal class spell_gen_dalaran_disguise : SpellScript, IHasSpellEffects
 
 	private void HandleScript(uint effIndex)
 	{
-		Player player = GetHitPlayer();
+		var player = GetHitPlayer();
 
 		if (player)
 		{
-			Gender gender = player.GetNativeGender();
+			var gender = player.GetNativeGender();
 
-			uint spellId = GetSpellInfo().Id;
+			var spellId = GetSpellInfo().Id;
 
 			switch (spellId)
 			{

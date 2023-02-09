@@ -25,17 +25,17 @@ internal class spell_monk_stagger : AuraScript, IHasAuraEffects
 
 	public static Aura FindExistingStaggerEffect(Unit unit)
 	{
-		Aura auraLight = unit.GetAura(MonkSpells.StaggerLight);
+		var auraLight = unit.GetAura(MonkSpells.StaggerLight);
 
 		if (auraLight != null)
 			return auraLight;
 
-		Aura auraModerate = unit.GetAura(MonkSpells.StaggerModerate);
+		var auraModerate = unit.GetAura(MonkSpells.StaggerModerate);
 
 		if (auraModerate != null)
 			return auraModerate;
 
-		Aura auraHeavy = unit.GetAura(MonkSpells.StaggerHeavy);
+		var auraHeavy = unit.GetAura(MonkSpells.StaggerHeavy);
 
 		if (auraHeavy != null)
 			return auraHeavy;
@@ -50,7 +50,7 @@ internal class spell_monk_stagger : AuraScript, IHasAuraEffects
 
 	private void AbsorbMagic(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
 	{
-		AuraEffect effect = GetEffect(4);
+		var effect = GetEffect(4);
 
 		if (effect == null)
 			return;
@@ -64,27 +64,27 @@ internal class spell_monk_stagger : AuraScript, IHasAuraEffects
 		PreventDefaultAction();
 
 		// make sure Damage doesn't come from stagger Damage spell SPELL_MONK_STAGGER_DAMAGE_AURA
-		SpellInfo dmgSpellInfo = dmgInfo.GetSpellInfo();
+		var dmgSpellInfo = dmgInfo.GetSpellInfo();
 
 		if (dmgSpellInfo != null)
 			if (dmgSpellInfo.Id == MonkSpells.StaggerDamageAura)
 				return;
 
-		AuraEffect effect = GetEffect(0);
+		var effect = GetEffect(0);
 
 		if (effect == null)
 			return;
 
-		Unit  target     = GetTarget();
-		float agility    = target.GetStat(Stats.Agility);
-		float baseAmount = MathFunctions.CalculatePct(agility, effect.GetAmount());
-		float K          = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, target.GetLevel(), -2, 0, target.GetClass());
+		var target     = GetTarget();
+		var agility    = target.GetStat(Stats.Agility);
+		var baseAmount = MathFunctions.CalculatePct(agility, effect.GetAmount());
+		var K          = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, target.GetLevel(), -2, 0, target.GetClass());
 
-		float newAmount = (baseAmount / (baseAmount + K));
+		var newAmount = (baseAmount / (baseAmount + K));
 		newAmount *= multiplier;
 
 		// Absorb X percentage of the Damage
-		float absorbAmount = dmgInfo.GetDamage() * newAmount;
+		var absorbAmount = dmgInfo.GetDamage() * newAmount;
 
 		if (absorbAmount > 0)
 		{
@@ -97,18 +97,18 @@ internal class spell_monk_stagger : AuraScript, IHasAuraEffects
 
 	private void AddAndRefreshStagger(float amount)
 	{
-		Unit target      = GetTarget();
-		Aura auraStagger = FindExistingStaggerEffect(target);
+		var target      = GetTarget();
+		var auraStagger = FindExistingStaggerEffect(target);
 
 		if (auraStagger != null)
 		{
-			AuraEffect effStaggerRemaining = auraStagger.GetEffect(1);
+			var effStaggerRemaining = auraStagger.GetEffect(1);
 
 			if (effStaggerRemaining == null)
 				return;
 
-			float newAmount = effStaggerRemaining.GetAmount() + amount;
-			uint  spellId   = GetStaggerSpellId(target, newAmount);
+			var newAmount = effStaggerRemaining.GetAmount() + amount;
+			var spellId   = GetStaggerSpellId(target, newAmount);
 
 			if (spellId == effStaggerRemaining.GetSpellInfo().Id)
 			{
@@ -133,7 +133,7 @@ internal class spell_monk_stagger : AuraScript, IHasAuraEffects
 		const float StaggerHeavy    = 0.6f;
 		const float StaggerModerate = 0.3f;
 
-		float staggerPct = amount / unit.GetMaxHealth();
+		var staggerPct = amount / unit.GetMaxHealth();
 
 		return (staggerPct >= StaggerHeavy)    ? MonkSpells.StaggerHeavy :
 		       (staggerPct >= StaggerModerate) ? MonkSpells.StaggerModerate :

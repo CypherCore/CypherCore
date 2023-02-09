@@ -10,15 +10,13 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(199532)]
 public class spell_hun_killer_cobra : AuraScript, IHasAuraEffects, IAuraCheckProc
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
 		if (eventInfo.GetSpellInfo().Id == HunterSpells.SPELL_HUNTER_COBRA_SHOT)
-		{
 			return true;
-		}
 
 		return false;
 	}
@@ -27,17 +25,12 @@ public class spell_hun_killer_cobra : AuraScript, IHasAuraEffects, IAuraCheckPro
 	{
 		PreventDefaultAction();
 
-		Unit caster = GetCaster();
+		var caster = GetCaster();
+
 		if (caster != null)
-		{
 			if (caster.HasAura(HunterSpells.SPELL_HUNTER_BESTIAL_WRATH))
-			{
 				if (caster.GetSpellHistory().HasCooldown(HunterSpells.SPELL_HUNTER_KILL_COMMAND))
-				{
 					caster.GetSpellHistory().ResetCooldown(HunterSpells.SPELL_HUNTER_KILL_COMMAND, true);
-				}
-			}
-		}
 	}
 
 	public override void Register()

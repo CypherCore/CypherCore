@@ -20,7 +20,7 @@ internal class spell_q11010_q11102_q11023_choose_loc : SpellScript, IHasSpellEff
 
 	private void HandleDummy(uint effIndex)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 		// Check for player that is in 65 y range
 		List<Unit>                  playerList = new();
 		AnyPlayerInObjectRangeCheck checker    = new(caster, 65.0f);

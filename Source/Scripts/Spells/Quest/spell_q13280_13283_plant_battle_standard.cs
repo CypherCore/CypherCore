@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -19,15 +18,15 @@ internal class spell_q13280_13283_plant_battle_standard : SpellScript, IHasSpell
 
 	private void HandleDummy(uint effIndex)
 	{
-		Unit caster           = GetCaster();
-		Unit target           = GetHitUnit();
-		uint triggeredSpellID = QuestSpellIds.AllianceBattleStandardState;
+		var caster           = GetCaster();
+		var target           = GetHitUnit();
+		var triggeredSpellID = QuestSpellIds.AllianceBattleStandardState;
 
 		caster.HandleEmoteCommand(Emote.OneshotRoar);
 
 		if (caster.IsVehicle())
 		{
-			Unit player = caster.GetVehicleKit().GetPassenger(0);
+			var player = caster.GetVehicleKit().GetPassenger(0);
 
 			if (player)
 				player.ToPlayer().KilledMonsterCredit(CreatureIds.KingOfTheMountaintKc);

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -40,7 +39,7 @@ internal class spell_gen_two_forms : SpellScript, ISpellCheckCast, IHasSpellEffe
 
 	private void HandleTransform(uint effIndex)
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
 		PreventHitDefaultEffect(effIndex);
 
 		if (target.HasAuraType(AuraType.WorgenAlteredForm))

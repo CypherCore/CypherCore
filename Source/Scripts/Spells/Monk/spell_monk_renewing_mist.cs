@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -11,7 +10,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(115151)]
 public class spell_monk_renewing_mist : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
@@ -21,11 +20,10 @@ public class spell_monk_renewing_mist : SpellScript, IHasSpellEffects
 	private void HandleDummy(uint effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
-		Unit target = GetExplTargetUnit();
+		var target = GetExplTargetUnit();
+
 		if (target != null)
-		{
 			GetCaster().CastSpell(target, MonkSpells.SPELL_MONK_RENEWING_MIST_HOT, true);
-		}
 	}
 
 	public override void Register()

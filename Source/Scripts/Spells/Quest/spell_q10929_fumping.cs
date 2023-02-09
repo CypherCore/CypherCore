@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -27,7 +26,7 @@ internal class spell_q10929_fumping : AuraScript, IHasAuraEffects
 		if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
 			return;
 
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		if (caster)
 			caster.CastSpell(caster, RandomHelper.URand(QuestSpellIds.SummonSandGnome, QuestSpellIds.SummonBoneSlicer), true);

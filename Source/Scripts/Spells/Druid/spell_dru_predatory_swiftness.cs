@@ -1,5 +1,4 @@
 ﻿using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 
@@ -13,6 +12,7 @@ public class spell_dru_predatory_swiftness : SpellScript, ISpellCheckCast, ISpel
 	public override bool Load()
 	{
 		_cp = GetCaster().GetPower(PowerType.ComboPoints);
+
 		return true;
 	}
 
@@ -21,14 +21,10 @@ public class spell_dru_predatory_swiftness : SpellScript, ISpellCheckCast, ISpel
 		if (GetCaster())
 		{
 			if (GetCaster().GetTypeId() != TypeId.Player)
-			{
 				return SpellCastResult.DontReport;
-			}
 
 			if (GetCaster().ToPlayer().GetPower(PowerType.ComboPoints) != 0)
-			{
 				return SpellCastResult.NoComboPoints;
-			}
 		}
 		else
 		{
@@ -40,13 +36,10 @@ public class spell_dru_predatory_swiftness : SpellScript, ISpellCheckCast, ISpel
 
 	public void OnHit()
 	{
-		Player player = GetCaster().ToPlayer();
+		var player = GetCaster().ToPlayer();
+
 		if (player != null)
-		{
 			if (player.HasAura(PredatorySwiftnessSpells.SPELL_DRUID_PREDATORY_SWIFTNESS) && RandomHelper.randChance(20 * _cp))
-			{
 				player.CastSpell(player, PredatorySwiftnessSpells.SPELL_DRUID_PREDATORY_SWIFTNESS_AURA, true);
-			}
-		}
 	}
 }

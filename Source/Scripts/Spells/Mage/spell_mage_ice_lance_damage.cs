@@ -4,7 +4,6 @@ using Framework.Constants;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
-using Game.Spells;
 
 namespace Scripts.Spells.Mage;
 
@@ -20,13 +19,13 @@ internal class spell_mage_ice_lance_damage : SpellScript, IHasSpellEffects
 
 	private void ApplyDamageMultiplier(uint effIndex)
 	{
-		SpellValue spellValue = GetSpellValue();
+		var spellValue = GetSpellValue();
 
 		if ((spellValue.CustomBasePointsMask & (1 << 1)) != 0)
 		{
-			int   originalDamage = GetHitDamage();
-			float targetIndex    = (float)spellValue.EffectBasePoints[1];
-			float multiplier     = MathF.Pow(GetEffectInfo().CalcDamageMultiplier(GetCaster(), GetSpell()), targetIndex);
+			var originalDamage = GetHitDamage();
+			var targetIndex    = (float)spellValue.EffectBasePoints[1];
+			var multiplier     = MathF.Pow(GetEffectInfo().CalcDamageMultiplier(GetCaster(), GetSpell()), targetIndex);
 			SetHitDamage((int)(originalDamage * multiplier));
 		}
 	}

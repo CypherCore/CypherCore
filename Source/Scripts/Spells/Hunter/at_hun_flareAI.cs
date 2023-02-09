@@ -16,18 +16,16 @@ public class at_hun_flareAI : AreaTriggerAI
 
 	public override void OnCreate()
 	{
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
+
 		if (caster == null)
-		{
 			return;
-		}
 
 		if (caster.GetTypeId() != TypeId.Player)
-		{
 			return;
-		}
 
-		TempSummon tempSumm = caster.SummonCreature(SharedConst.WorldTrigger, at.GetPosition(), TempSummonType.TimedDespawn, TimeSpan.FromSeconds(200));
+		var tempSumm = caster.SummonCreature(SharedConst.WorldTrigger, at.GetPosition(), TempSummonType.TimedDespawn, TimeSpan.FromSeconds(200));
+
 		if (tempSumm == null)
 		{
 			tempSumm.SetFaction(caster.GetFaction());
@@ -36,5 +34,4 @@ public class at_hun_flareAI : AreaTriggerAI
 			caster.CastSpell(tempSumm, HunterSpells.SPELL_HUNTER_FLARE_EFFECT, true);
 		}
 	}
-
 }

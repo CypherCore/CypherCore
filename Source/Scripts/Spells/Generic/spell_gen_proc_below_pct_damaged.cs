@@ -14,13 +14,13 @@ internal class spell_gen_proc_below_pct_damaged : AuraScript, IAuraCheckProc
 {
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
-		DamageInfo damageInfo = eventInfo.GetDamageInfo();
+		var damageInfo = eventInfo.GetDamageInfo();
 
 		if (damageInfo == null ||
 		    damageInfo.GetDamage() == 0)
 			return false;
 
-		int pct = GetSpellInfo().GetEffect(0).CalcValue();
+		var pct = GetSpellInfo().GetEffect(0).CalcValue();
 
 		if (eventInfo.GetActionTarget().HealthBelowPctDamaged(pct, damageInfo.GetDamage()))
 			return true;

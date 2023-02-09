@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -25,7 +24,7 @@ internal class spell_item_shadowmourne_soul_fragment : AuraScript, IHasAuraEffec
 
 	private void OnStackChange(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit target = GetTarget();
+		var target = GetTarget();
 
 		switch (GetStackAmount())
 		{
@@ -50,7 +49,7 @@ internal class spell_item_shadowmourne_soul_fragment : AuraScript, IHasAuraEffec
 
 	private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit target = GetTarget();
+		var target = GetTarget();
 		target.RemoveAurasDueToSpell(ItemSpellIds.ShadowmourneVisualLow);
 		target.RemoveAurasDueToSpell(ItemSpellIds.ShadowmourneVisualHigh);
 	}

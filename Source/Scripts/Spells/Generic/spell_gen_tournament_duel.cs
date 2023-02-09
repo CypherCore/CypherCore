@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -25,11 +24,11 @@ internal class spell_gen_tournament_duel : SpellScript, IHasSpellEffects
 
 	private void HandleScriptEffect(uint effIndex)
 	{
-		Unit rider = GetCaster().GetCharmer();
+		var rider = GetCaster().GetCharmer();
 
 		if (rider)
 		{
-			Player playerTarget = GetHitPlayer();
+			var playerTarget = GetHitPlayer();
 
 			if (playerTarget)
 			{
@@ -40,7 +39,7 @@ internal class spell_gen_tournament_duel : SpellScript, IHasSpellEffects
 				return;
 			}
 
-			Unit unitTarget = GetHitUnit();
+			var unitTarget = GetHitUnit();
 
 			if (unitTarget)
 				if (unitTarget.GetCharmer() &&

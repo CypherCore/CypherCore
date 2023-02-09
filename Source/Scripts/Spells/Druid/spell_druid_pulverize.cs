@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -11,13 +10,13 @@ namespace Scripts.Spells.Druid;
 [SpellScript(80313)]
 public class spell_druid_pulverize : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	private struct Spells
 	{
-		public static uint SPELL_DRUID_PULVERIZE = 80313;
-		public static uint SPELL_DRUID_TRASH_DOT_TWO_STACKS_MARKER = 158790;
-		public static uint SPELL_DRUID_PULVERIZE_DAMAGE_REDUCTION_BUFF = 158792;
+		public static readonly uint SPELL_DRUID_PULVERIZE = 80313;
+		public static readonly uint SPELL_DRUID_TRASH_DOT_TWO_STACKS_MARKER = 158790;
+		public static readonly uint SPELL_DRUID_PULVERIZE_DAMAGE_REDUCTION_BUFF = 158792;
 	}
 
 	public override bool Validate(SpellInfo UnnamedParameter)
@@ -27,7 +26,8 @@ public class spell_druid_pulverize : SpellScript, IHasSpellEffects
 
 	private void HandleHitTarget(uint UnnamedParameter)
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
+
 		if (target != null)
 		{
 			target.RemoveAurasDueToSpell(Spells.SPELL_DRUID_TRASH_DOT_TWO_STACKS_MARKER);

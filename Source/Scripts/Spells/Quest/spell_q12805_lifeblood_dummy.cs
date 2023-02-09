@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -25,9 +24,9 @@ internal class spell_q12805_lifeblood_dummy : SpellScript, IHasSpellEffects
 
 	private void HandleScript(uint effIndex)
 	{
-		Player caster = GetCaster().ToPlayer();
+		var caster = GetCaster().ToPlayer();
 
-		Creature target = GetHitCreature();
+		var target = GetHitCreature();
 
 		if (target)
 		{

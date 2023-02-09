@@ -25,7 +25,7 @@ internal class spell_item_zandalarian_charm : AuraScript, IAuraCheckProc, IHasAu
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
-		SpellInfo spellInfo = eventInfo.GetSpellInfo();
+		var spellInfo = eventInfo.GetSpellInfo();
 
 		if (spellInfo != null)
 			if (spellInfo.Id != ScriptSpellId)

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -24,7 +23,7 @@ internal class spell_hun_scatter_shot : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		Player caster = GetCaster().ToPlayer();
+		var caster = GetCaster().ToPlayer();
 		// break auto Shot and varhit
 		caster.InterruptSpell(CurrentSpellTypes.AutoRepeat);
 		caster.AttackStop();

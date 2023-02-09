@@ -1,5 +1,4 @@
 ﻿using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
@@ -16,7 +15,7 @@ internal class spell_mage_frostbolt : SpellScript, ISpellOnHit
 
 	public void OnHit()
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
 
 		if (target != null)
 			GetCaster().CastSpell(target, MageSpells.Chilled, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress));

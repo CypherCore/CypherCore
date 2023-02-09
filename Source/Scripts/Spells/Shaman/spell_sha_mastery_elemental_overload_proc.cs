@@ -24,7 +24,7 @@ internal class spell_sha_mastery_elemental_overload_proc : SpellScript, IHasSpel
 
 	private void ApplyDamageModifier(uint effIndex)
 	{
-		AuraEffect elementalOverload = GetCaster().GetAuraEffect(ShamanSpells.MasteryElementalOverload, 1);
+		var elementalOverload = GetCaster().GetAuraEffect(ShamanSpells.MasteryElementalOverload, 1);
 
 		if (elementalOverload != null)
 			SetHitDamage(MathFunctions.CalculatePct(GetHitDamage(), elementalOverload.GetAmount()));

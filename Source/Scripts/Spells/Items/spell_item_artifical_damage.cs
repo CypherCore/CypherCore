@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -29,7 +28,7 @@ internal class spell_item_artifical_damage : AuraScript, IHasAuraEffects
 
 	private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
 	{
-		Item artifact = GetOwner().ToPlayer().GetItemByGuid(GetAura().GetCastItemGUID());
+		var artifact = GetOwner().ToPlayer().GetItemByGuid(GetAura().GetCastItemGUID());
 
 		if (artifact)
 			amount = (int)(GetSpellInfo().GetEffect(1).BasePoints * artifact.GetTotalPurchasedArtifactPowers() / 100);

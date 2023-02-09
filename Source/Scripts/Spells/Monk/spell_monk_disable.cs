@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -11,7 +10,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(116095)]
 public class spell_monk_disable : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
@@ -20,14 +19,11 @@ public class spell_monk_disable : SpellScript, IHasSpellEffects
 
 	private void OnHitTarget(uint UnnamedParameter)
 	{
-		Unit target = GetExplTargetUnit();
+		var target = GetExplTargetUnit();
+
 		if (target != null)
-		{
 			if (target.HasAuraType(AuraType.ModDecreaseSpeed))
-			{
 				GetCaster().CastSpell(target, MonkSpells.SPELL_MONK_DISABLE_ROOT, true);
-			}
-		}
 	}
 
 	public override void Register()

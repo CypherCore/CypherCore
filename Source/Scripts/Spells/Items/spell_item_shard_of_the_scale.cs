@@ -36,8 +36,8 @@ internal class spell_item_shard_of_the_scale : AuraScript, IHasAuraEffects
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
 		PreventDefaultAction();
-		Unit caster = eventInfo.GetActor();
-		Unit target = eventInfo.GetProcTarget();
+		var caster = eventInfo.GetActor();
+		var target = eventInfo.GetProcTarget();
 
 		if (eventInfo.GetTypeMask().HasFlag(ProcFlags.DealHelpfulSpell))
 			caster.CastSpell(target, _healProcSpellId, new CastSpellExtraArgs(aurEff));

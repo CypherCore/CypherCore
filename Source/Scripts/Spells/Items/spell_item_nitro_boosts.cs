@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
 using Game.DataStorage;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -34,9 +33,9 @@ internal class spell_item_nitro_boosts : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		Unit            caster    = GetCaster();
-		AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(caster.GetAreaId());
-		bool            success   = true;
+		var caster    = GetCaster();
+		var areaEntry = CliDB.AreaTableStorage.LookupByKey(caster.GetAreaId());
+		var success   = true;
 
 		if (areaEntry != null &&
 		    areaEntry.IsFlyable() &&

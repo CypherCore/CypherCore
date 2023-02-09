@@ -11,7 +11,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(119607)]
 public class spell_monk_renewing_mist_jump : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
@@ -20,29 +20,29 @@ public class spell_monk_renewing_mist_jump : SpellScript, IHasSpellEffects
 
 	private void HandleTargets(List<WorldObject> targets)
 	{
-		Unit caster         = GetCaster();
-		Unit previousTarget = GetExplTargetUnit();
+		var caster         = GetCaster();
+		var previousTarget = GetExplTargetUnit();
 
 		// Not remove full health targets now, dancing mists talent can jump on full health too
 
 
 		targets.RemoveIf((WorldObject a) =>
 		                 {
-			                 Unit ally = a.ToUnit();
+			                 var ally = a.ToUnit();
+
 			                 if (ally == null || ally.HasAura(MonkSpells.SPELL_MONK_RENEWING_MIST_HOT, caster.GetGUID()) || ally == previousTarget)
-			                 {
 				                 return true;
-			                 }
+
 			                 return false;
 		                 });
 
 		targets.RemoveIf((WorldObject a) =>
 		                 {
-			                 Unit ally = a.ToUnit();
+			                 var ally = a.ToUnit();
+
 			                 if (ally == null || ally.IsFullHealth())
-			                 {
 				                 return true;
-			                 }
+
 			                 return false;
 		                 });
 
@@ -58,15 +58,17 @@ public class spell_monk_renewing_mist_jump : SpellScript, IHasSpellEffects
 	private void HandleHit(uint effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
-		Unit caster         = GetCaster();
-		Unit previousTarget = ObjectAccessor.Instance.GetUnit(caster, _previousTargetGuid);
+		var caster         = GetCaster();
+		var previousTarget = ObjectAccessor.Instance.GetUnit(caster, _previousTargetGuid);
 
 		if (previousTarget != null)
 		{
-			Aura oldAura = previousTarget.GetAura(MonkSpells.SPELL_MONK_RENEWING_MIST_HOT, GetCaster().GetGUID());
+			var oldAura = previousTarget.GetAura(MonkSpells.SPELL_MONK_RENEWING_MIST_HOT, GetCaster().GetGUID());
+
 			if (oldAura != null)
 			{
-				Aura newAura = caster.AddAura(MonkSpells.SPELL_MONK_RENEWING_MIST_HOT, GetHitUnit());
+				var newAura = caster.AddAura(MonkSpells.SPELL_MONK_RENEWING_MIST_HOT, GetHitUnit());
+
 				if (newAura != null)
 				{
 					newAura.SetDuration(oldAura.GetDuration());
@@ -77,8 +79,8 @@ public class spell_monk_renewing_mist_jump : SpellScript, IHasSpellEffects
 		}
 	}
 
-	private ObjectGuid _previousTargetGuid = new ObjectGuid();
-	private ObjectGuid _additionalTargetGuid = new ObjectGuid();
+	private ObjectGuid _previousTargetGuid = new();
+	private ObjectGuid _additionalTargetGuid = new();
 
 	public override void Register()
 	{

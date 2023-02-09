@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -19,11 +18,11 @@ internal class spell_q13264_q13276_q13288_q13289_area_restrict_abom : SpellScrip
 
 	private void HandleScript(uint effIndex)
 	{
-		Creature creature = GetHitCreature();
+		var creature = GetHitCreature();
 
 		if (creature != null)
 		{
-			uint area = creature.GetAreaId();
+			var area = creature.GetAreaId();
 
 			if (area != Misc.AreaTheBrokenFront &&
 			    area != Misc.AreaMordRetharTheDeathGate)

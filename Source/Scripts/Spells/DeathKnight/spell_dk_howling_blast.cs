@@ -8,10 +8,13 @@ using Game.Spells;
 
 namespace Scripts.Spells.DeathKnight;
 
-[SpellScript(new uint[] { 237680, 49184 } )]
+[SpellScript(new uint[]
+             {
+	             237680, 49184
+             })]
 public class spell_dk_howling_blast : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	public const uint SPELL_VISUAL_ID_HOWLING_BLAST = 66812;
 
@@ -27,25 +30,23 @@ public class spell_dk_howling_blast : SpellScript, IHasSpellEffects
 			                 if (GetSpellInfo().Id == DeathKnightSpells.SPELL_DK_HOWLING_BLAST_AREA_DAMAGE)
 			                 {
 				                 if (GetSpell().m_customArg.has_value())
-				                 {
 					                 return target.GetGUID() == (ObjectGuid)GetSpell().m_customArg;
-				                 }
 			                 }
 			                 else
 			                 {
 				                 return GetExplTargetUnit() != target;
 			                 }
+
 			                 return false;
 		                 });
 	}
 
 	private void HandleFrostFever(uint UnnamedParameter)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
+
 		if (caster != null)
-		{
 			caster.CastSpell(GetHitUnit(), DeathKnightSpells.SPELL_DK_FROST_FEVER);
-		}
 	}
 
 	private void HandleAreaDamage(uint UnnamedParameter)
@@ -56,18 +57,16 @@ public class spell_dk_howling_blast : SpellScript, IHasSpellEffects
 	private void HandleSpellVisual(uint UnnamedParameter)
 	{
 		if (!GetSpell().m_customArg.has_value())
-		{
 			return;
-		}
 
-		Unit caster = GetCaster();
+		var caster = GetCaster();
+
 		if (caster != null)
 		{
-			Unit primaryTarget = ObjectAccessor.Instance.GetUnit(caster, (ObjectGuid)GetSpell().m_customArg);
+			var primaryTarget = ObjectAccessor.Instance.GetUnit(caster, (ObjectGuid)GetSpell().m_customArg);
+
 			if (primaryTarget != null)
-			{
 				primaryTarget.SendPlaySpellVisual(GetHitUnit(), SPELL_VISUAL_ID_HOWLING_BLAST, 0, 0, 0.0f);
-			}
 		}
 	}
 
@@ -75,13 +74,10 @@ public class spell_dk_howling_blast : SpellScript, IHasSpellEffects
 	{
 		SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaEnemy));
 		SpellEffects.Add(new EffectHandler(HandleFrostFever, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
+
 		if (ScriptSpellId == DeathKnightSpells.SPELL_DK_HOWLING_BLAST_AREA_DAMAGE)
-		{
 			SpellEffects.Add(new EffectHandler(HandleSpellVisual, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
-		}
 		else
-		{
 			SpellEffects.Add(new EffectHandler(HandleAreaDamage, 1, SpellEffectName.Dummy, SpellScriptHookType.LaunchTarget));
-		}
 	}
 }

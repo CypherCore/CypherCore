@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -20,7 +19,7 @@ internal class spell_item_piccolo_of_the_flaming_fire : SpellScript, IHasSpellEf
 	private void HandleScript(uint effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
-		Player target = GetHitPlayer();
+		var target = GetHitPlayer();
 
 		if (target)
 			target.HandleEmoteCommand(Emote.StateDance);

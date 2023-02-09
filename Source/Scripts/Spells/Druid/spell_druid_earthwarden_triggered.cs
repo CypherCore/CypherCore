@@ -10,12 +10,12 @@ namespace Scripts.Spells.Druid;
 [SpellScript(203975)]
 public class spell_druid_earthwarden_triggered : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private struct Spells
 	{
-		public static uint SPELL_DRUID_EARTHWARDEN = 203974;
-		public static uint SPELL_DRUID_EARTHWARDEN_TRIGGERED = 203975;
+		public static readonly uint SPELL_DRUID_EARTHWARDEN = 203974;
+		public static readonly uint SPELL_DRUID_EARTHWARDEN_TRIGGERED = 203975;
 	}
 
 	public override bool Validate(SpellInfo UnnamedParameter)
@@ -32,7 +32,7 @@ public class spell_druid_earthwarden_triggered : AuraScript, IHasAuraEffects
 	{
 		if (dmgInfo.GetDamageType() == DamageEffectType.Direct)
 		{
-			SpellInfo earthwarden = Global.SpellMgr.AssertSpellInfo(Spells.SPELL_DRUID_EARTHWARDEN, Difficulty.None);
+			var earthwarden = Global.SpellMgr.AssertSpellInfo(Spells.SPELL_DRUID_EARTHWARDEN, Difficulty.None);
 
 			absorbAmount = MathFunctions.CalculatePct(dmgInfo.GetDamage(), earthwarden.GetEffect(0).BasePoints);
 			GetCaster().RemoveAurasDueToSpell(Spells.SPELL_DRUID_EARTHWARDEN_TRIGGERED);

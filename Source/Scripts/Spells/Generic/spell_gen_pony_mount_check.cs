@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -19,12 +18,12 @@ internal class spell_gen_pony_mount_check : AuraScript, IHasAuraEffects
 
 	private void HandleEffectPeriodic(AuraEffect aurEff)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		if (!caster)
 			return;
 
-		Player owner = caster.GetOwner().ToPlayer();
+		var owner = caster.GetOwner().ToPlayer();
 
 		if (!owner ||
 		    !owner.HasAchieved(GenericSpellIds.AchievementPonyup))

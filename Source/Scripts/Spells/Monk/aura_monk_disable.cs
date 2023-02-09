@@ -10,15 +10,16 @@ public class aura_monk_disable : AuraScript, IAuraCheckProc
 {
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
-		DamageInfo damageInfo = eventInfo.GetDamageInfo();
-		if (damageInfo != null) 
-		{
+		var damageInfo = eventInfo.GetDamageInfo();
+
+		if (damageInfo != null)
 			if ((damageInfo.GetAttackType() == WeaponAttackType.BaseAttack || damageInfo.GetAttackType() == WeaponAttackType.OffAttack) && damageInfo.GetAttacker() == GetCaster())
 			{
 				GetAura().RefreshDuration();
+
 				return true;
 			}
-		}
+
 		return false;
 	}
 }

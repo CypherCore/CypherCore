@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -19,7 +18,7 @@ internal class spell_q11010_q11102_q11023_aggro_check_aura : AuraScript, IHasAur
 
 	private void HandleTriggerSpell(AuraEffect aurEff)
 	{
-		Unit target = GetTarget();
+		var target = GetTarget();
 
 		if (target)
 			// On trigger proccing

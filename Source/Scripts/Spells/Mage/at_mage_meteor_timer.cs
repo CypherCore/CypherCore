@@ -16,13 +16,13 @@ public class at_mage_meteor_timer : AreaTriggerAI
 
 	public override void OnCreate()
 	{
-		Unit caster = at.GetCaster();
-		if (caster == null)
-		{
-			return;
-		}
+		var caster = at.GetCaster();
 
-		TempSummon tempSumm = caster.SummonCreature(12999, at.GetPosition(), TempSummonType.TimedDespawn, TimeSpan.FromSeconds(5));
+		if (caster == null)
+			return;
+
+		var tempSumm = caster.SummonCreature(12999, at.GetPosition(), TempSummonType.TimedDespawn, TimeSpan.FromSeconds(5));
+
 		if (tempSumm != null)
 		{
 			tempSumm.SetFaction(caster.GetFaction());
@@ -30,18 +30,17 @@ public class at_mage_meteor_timer : AreaTriggerAI
 			PhasingHandler.InheritPhaseShift(tempSumm, caster);
 			caster.CastSpell(tempSumm, MageSpells.SPELL_MAGE_METEOR_VISUAL, true);
 		}
-
 	}
 
 	public override void OnRemove()
 	{
-		Unit caster = at.GetCaster();
-		if (caster == null)
-		{
-			return;
-		}
+		var caster = at.GetCaster();
 
-		TempSummon tempSumm = caster.SummonCreature(12999, at.GetPosition(), TempSummonType.TimedDespawn, TimeSpan.FromSeconds(5));
+		if (caster == null)
+			return;
+
+		var tempSumm = caster.SummonCreature(12999, at.GetPosition(), TempSummonType.TimedDespawn, TimeSpan.FromSeconds(5));
+
 		if (tempSumm != null)
 		{
 			tempSumm.SetFaction(caster.GetFaction());
@@ -50,5 +49,4 @@ public class at_mage_meteor_timer : AreaTriggerAI
 			caster.CastSpell(tempSumm, MageSpells.SPELL_MAGE_METEOR_DAMAGE, true);
 		}
 	}
-
 }

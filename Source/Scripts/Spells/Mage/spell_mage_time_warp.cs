@@ -19,7 +19,7 @@ internal class spell_mage_time_warp : SpellScript, ISpellAfterHit, IHasSpellEffe
 
 	public void AfterHit()
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
 
 		if (target)
 			target.CastSpell(target, MageSpells.TemporalDisplacement, true);

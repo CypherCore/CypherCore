@@ -31,7 +31,7 @@ internal class spell_item_power_circle : AuraScript, IAuraCheckAreaTarget, IHasA
 	private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
 		GetTarget().CastSpell(null, ItemSpellIds.LimitlessPower, true);
-		Aura buff = GetTarget().GetAura(ItemSpellIds.LimitlessPower);
+		var buff = GetTarget().GetAura(ItemSpellIds.LimitlessPower);
 
 		buff?.SetDuration(GetDuration());
 	}

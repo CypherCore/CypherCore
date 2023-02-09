@@ -19,7 +19,7 @@ internal class spell_sha_heroism : SpellScript, ISpellAfterHit, IHasSpellEffects
 
 	public void AfterHit()
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
 
 		if (target)
 			target.CastSpell(target, ShamanSpells.Exhaustion, true);

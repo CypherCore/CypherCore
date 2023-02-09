@@ -34,7 +34,7 @@ internal class spell_gen_animal_blood : AuraScript, IHasAuraEffects
 
 	private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit owner = GetUnitOwner();
+		var owner = GetUnitOwner();
 
 		if (owner)
 			owner.CastSpell(owner, GenericSpellIds.SpawnBloodPool, true);

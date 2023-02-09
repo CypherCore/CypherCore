@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -25,12 +24,12 @@ internal class spell_item_net_o_matic : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
 
 		if (target)
 		{
-			uint spellId = ItemSpellIds.NetOMaticTriggered3;
-			uint roll    = RandomHelper.URand(0, 99);
+			var spellId = ItemSpellIds.NetOMaticTriggered3;
+			var roll    = RandomHelper.URand(0, 99);
 
 			if (roll < 2) // 2% for 30 sec self root (off-like chance unknown)
 				spellId = ItemSpellIds.NetOMaticTriggered1;

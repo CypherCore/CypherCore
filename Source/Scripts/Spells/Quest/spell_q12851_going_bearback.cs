@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -19,17 +18,17 @@ internal class spell_q12851_going_bearback : AuraScript, IHasAuraEffects
 
 	private void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		if (caster)
 		{
-			Unit target = GetTarget();
+			var target = GetTarget();
 
 			// Already in fire
 			if (target.HasAura(QuestSpellIds.Ablaze))
 				return;
 
-			Player player = caster.GetCharmerOrOwnerPlayerOrPlayerItself();
+			var player = caster.GetCharmerOrOwnerPlayerOrPlayerItself();
 
 			if (player)
 				switch (target.GetEntry())

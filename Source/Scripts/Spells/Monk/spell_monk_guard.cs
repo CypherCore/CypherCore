@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -10,15 +9,14 @@ namespace Scripts.Spells.Monk;
 [SpellScript(202162)]
 public class spell_monk_guard : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private void CalcAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
+
 		if (caster == null)
-		{
 			return;
-		}
 
 		amount = (int)(caster.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 18);
 	}

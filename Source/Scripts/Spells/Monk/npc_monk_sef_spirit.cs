@@ -5,7 +5,10 @@ using Game.Scripting;
 
 namespace Scripts.Spells.Monk;
 
-[CreatureScript(new uint[] { 69791, 69792 })]
+[CreatureScript(new uint[]
+                {
+	                69791, 69792
+                })]
 public class npc_monk_sef_spirit : ScriptedAI
 {
 	public npc_monk_sef_spirit(Creature creature) : base(creature)
@@ -23,7 +26,8 @@ public class npc_monk_sef_spirit : ScriptedAI
 		var attackPower = summoner.ToUnit().m_unitData.AttackPower / 100 * 45.0f;
 		var spellPower  = summoner.ToUnit().SpellBaseDamageBonusDone(SpellSchoolMask.Nature) / 100 * 45.0f;
 
-		Unit target = ObjectAccessor.Instance.GetUnit(summoner, summoner.ToUnit().GetTarget());
+		var target = ObjectAccessor.Instance.GetUnit(summoner, summoner.ToUnit().GetTarget());
+
 		if (target != null)
 		{
 			me.CastSpell(target, StormEarthAndFireSpells.SPELL_MONK_SEF_CHARGE, true);
@@ -31,13 +35,9 @@ public class npc_monk_sef_spirit : ScriptedAI
 		else
 		{
 			if (me.GetEntry() == StormEarthAndFireSpells.NPC_FIRE_SPIRIT)
-			{
 				me.GetMotionMaster().MoveFollow(summoner.ToUnit(), SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
-			}
 			else
-			{
 				me.GetMotionMaster().MoveFollow(summoner.ToUnit(), SharedConst.PetFollowDist, SharedConst.PetFollowAngle * 3);
-			}
 		}
 	}
 }

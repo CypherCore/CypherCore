@@ -10,24 +10,23 @@ namespace Scripts.Spells.Rogue;
 [SpellScript(199754)]
 public class spell_rog_riposte_AuraScript : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 
 	private void HandleProc(AuraEffect UnnamedParameter, ProcEventInfo procInfo)
 	{
 		PreventDefaultAction();
 
-		Unit caster = GetCaster();
-		if (caster == null)
-		{
-			return;
-		}
+		var caster = GetCaster();
 
-		Unit target = procInfo.GetActionTarget();
-		if (target == null)
-		{
+		if (caster == null)
 			return;
-		}
+
+		var target = procInfo.GetActionTarget();
+
+		if (target == null)
+			return;
+
 		caster.CastSpell(target, RogueSpells.SPELL_ROGUE_RIPOSTE_DAMAGE, true);
 	}
 

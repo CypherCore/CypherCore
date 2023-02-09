@@ -9,20 +9,19 @@ namespace Scripts.Spells.Rogue;
 [SpellScript(14062)]
 public class spell_rog_nightstalker_AuraScript : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private void HandleRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
 		var caster = GetCaster();
+
 		if (caster)
 		{
 			if (caster.HasAura(RogueSpells.SPELL_ROGUE_SPELL_NIGHTSTALKER_DAMAGE_DONE))
 				caster.RemoveAura(RogueSpells.SPELL_ROGUE_SPELL_NIGHTSTALKER_DAMAGE_DONE);
 
 			if (caster.HasAura(RogueSpells.SPELL_ROGUE_SHADOW_FOCUS_EFFECT))
-			{
 				caster.RemoveAura(RogueSpells.SPELL_ROGUE_SHADOW_FOCUS_EFFECT);
-			}
 		}
 	}
 

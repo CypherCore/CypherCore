@@ -25,7 +25,7 @@ internal class spell_item_echoes_of_light : SpellScript, IHasSpellEffects
 
 		targets.Sort(new HealthPctOrderPred());
 
-		WorldObject target = targets.FirstOrDefault();
+		var target = targets.FirstOrDefault();
 		targets.Clear();
 		targets.Add(target);
 	}

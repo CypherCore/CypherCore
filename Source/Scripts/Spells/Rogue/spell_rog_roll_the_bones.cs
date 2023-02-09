@@ -30,11 +30,11 @@ internal class spell_rog_roll_the_bones : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		int currentDuration = 0;
+		var currentDuration = 0;
 
-		foreach (uint spellId in Spells)
+		foreach (var spellId in Spells)
 		{
-			Aura aura = GetCaster().GetAura(spellId);
+			var aura = GetCaster().GetAura(spellId);
 
 			if (aura != null)
 			{
@@ -49,17 +49,17 @@ internal class spell_rog_roll_the_bones : SpellScript, IHasSpellEffects
 		// 1 Roll the Bones buff  : 100.0 % chance;
 		// 2 Roll the Bones buffs : 19 % chance;
 		// 5 Roll the Bones buffs : 1 % chance.
-		int chance   = RandomHelper.IRand(1, 100);
-		int numBuffs = 1;
+		var chance   = RandomHelper.IRand(1, 100);
+		var numBuffs = 1;
 
 		if (chance <= 1)
 			numBuffs = 5;
 		else if (chance <= 20)
 			numBuffs = 2;
 
-		for (int i = 0; i < numBuffs; ++i)
+		for (var i = 0; i < numBuffs; ++i)
 		{
-			uint               spellId = possibleBuffs[i];
+			var                spellId = possibleBuffs[i];
 			CastSpellExtraArgs args    = new(TriggerCastFlags.FullMask);
 			args.AddSpellMod(SpellValueMod.Duration, GetSpellInfo().GetDuration() + currentDuration);
 			GetCaster().CastSpell(GetCaster(), spellId, args);

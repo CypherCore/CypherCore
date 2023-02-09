@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -37,11 +36,11 @@ internal class spell_item_book_of_glyph_mastery : SpellScript, ISpellCheckCast, 
 
 	private void HandleScript(uint effIndex)
 	{
-		Player caster  = GetCaster().ToPlayer();
-		uint   spellId = GetSpellInfo().Id;
+		var caster  = GetCaster().ToPlayer();
+		var spellId = GetSpellInfo().Id;
 
 		// learn random explicit discovery recipe (if any)
-		uint discoveredSpellId = SkillDiscovery.GetExplicitDiscoverySpell(spellId, caster);
+		var discoveredSpellId = SkillDiscovery.GetExplicitDiscoverySpell(spellId, caster);
 
 		if (discoveredSpellId != 0)
 			caster.LearnSpell(discoveredSpellId, false);

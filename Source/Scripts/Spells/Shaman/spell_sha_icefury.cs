@@ -24,7 +24,7 @@ internal class spell_sha_icefury : AuraScript, IHasAuraEffects
 
 	private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		caster?.CastSpell(caster, ShamanSpells.FrostShockEnergize, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress));
 	}

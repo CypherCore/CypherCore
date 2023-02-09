@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -20,7 +19,7 @@ internal class spell_sha_earthquake_tick : SpellScript, ISpellOnHit, IHasSpellEf
 
 	public void OnHit()
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
 
 		if (target != null)
 			if (RandomHelper.randChance(GetEffectInfo(1).CalcValue()))
@@ -30,7 +29,7 @@ internal class spell_sha_earthquake_tick : SpellScript, ISpellOnHit, IHasSpellEf
 
 				if (foundAreaTrigger != null)
 				{
-					areatrigger_sha_earthquake eq = foundAreaTrigger.GetAI<areatrigger_sha_earthquake>();
+					var eq = foundAreaTrigger.GetAI<areatrigger_sha_earthquake>();
 
 					if (eq != null)
 						if (eq.AddStunnedTarget(target.GetGUID()))

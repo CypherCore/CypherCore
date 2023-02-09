@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -35,10 +34,10 @@ internal class spell_monk_stagger_debuff_aura : AuraScript, IHasAuraEffects
 	{
 		// Calculate Damage per tick
 		float total   = aurEff.GetAmount();
-		float perTick = total * _period / (float)GetDuration(); // should be same as GetMaxDuration() TODO: verify
+		var   perTick = total * _period / (float)GetDuration(); // should be same as GetMaxDuration() TODO: verify
 
 		// Set amount on effect for tooltip
-		AuraEffect effInfo = GetAura().GetEffect(0);
+		var effInfo = GetAura().GetEffect(0);
 
 		effInfo?.ChangeAmount((int)perTick);
 
@@ -57,8 +56,8 @@ internal class spell_monk_stagger_debuff_aura : AuraScript, IHasAuraEffects
 
 	private void CastOrChangeTickDamage(float tickDamage)
 	{
-		Unit unit       = GetTarget();
-		Aura auraDamage = unit.GetAura(MonkSpells.StaggerDamageAura);
+		var unit       = GetTarget();
+		var auraDamage = unit.GetAura(MonkSpells.StaggerDamageAura);
 
 		if (auraDamage == null)
 		{
@@ -68,7 +67,7 @@ internal class spell_monk_stagger_debuff_aura : AuraScript, IHasAuraEffects
 
 		if (auraDamage != null)
 		{
-			AuraEffect eff = auraDamage.GetEffect(0);
+			var eff = auraDamage.GetEffect(0);
 
 			eff?.ChangeAmount((int)tickDamage);
 		}

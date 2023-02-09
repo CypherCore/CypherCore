@@ -1,5 +1,4 @@
 ﻿using System;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 
@@ -10,13 +9,16 @@ public class spell_monk_keg_smash : SpellScript, ISpellOnHit
 {
 	public void OnHit()
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
+
 		if (caster != null)
 		{
-			Player _player = caster.ToPlayer();
+			var _player = caster.ToPlayer();
+
 			if (_player != null)
 			{
-				Unit target = GetHitUnit();
+				var target = GetHitUnit();
+
 				if (target != null)
 				{
 					_player.CastSpell(target, MonkSpells.SPELL_MONK_KEG_SMASH_VISUAL, true);

@@ -24,7 +24,7 @@ internal class spell_q12634_despawn_fruit_tosser : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		uint spellId = QuestSpellIds.BananasFallToGround;
+		var spellId = QuestSpellIds.BananasFallToGround;
 
 		switch (RandomHelper.URand(0, 3))
 		{

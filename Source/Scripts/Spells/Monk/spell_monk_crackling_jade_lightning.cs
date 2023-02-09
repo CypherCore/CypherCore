@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -24,7 +23,7 @@ internal class spell_monk_crackling_jade_lightning : AuraScript, IHasAuraEffects
 
 	private void OnTick(AuraEffect aurEff)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		if (caster)
 			if (caster.HasAura(MonkSpells.StanceOfTheSpiritedCrane))

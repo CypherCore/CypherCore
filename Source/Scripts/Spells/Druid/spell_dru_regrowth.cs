@@ -10,7 +10,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(8936)]
 public class spell_dru_regrowth : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
@@ -20,21 +20,19 @@ public class spell_dru_regrowth : SpellScript, IHasSpellEffects
 	private void HandleHealEffect(uint UnnamedParameter)
 	{
 		if (GetCaster().HasAura(DruidSpells.SPELL_DRU_BLOODTALONS))
-		{
 			GetCaster().AddAura(DruidSpells.SPELL_DRU_BLOODTALONS_TRIGGERED, GetCaster());
-		}
 
-		Aura clearcasting = GetCaster().GetAura(DruidSpells.SPELL_DRU_CLEARCASTING);
+		var clearcasting = GetCaster().GetAura(DruidSpells.SPELL_DRU_CLEARCASTING);
+
 		if (clearcasting != null)
 		{
 			if (GetCaster().HasAura(DruidSpells.SPELL_DRU_MOMENT_OF_CLARITY))
 			{
-				int amount = clearcasting.GetEffect(0).GetAmount();
+				var amount = clearcasting.GetEffect(0).GetAmount();
 				clearcasting.GetEffect(0).SetAmount(amount - 1);
+
 				if (amount == -102)
-				{
 					GetCaster().RemoveAurasDueToSpell(DruidSpells.SPELL_DRU_CLEARCASTING);
-				}
 			}
 			else
 			{

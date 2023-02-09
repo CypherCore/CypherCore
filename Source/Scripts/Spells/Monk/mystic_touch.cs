@@ -17,31 +17,20 @@ public class mystic_touch : ScriptObjectAutoAdd, IPlayerOnDealDamage
 
 	public void OnDamage(Player caster, Unit target, ref uint damage, SpellInfo spellProto)
 	{
-		Player player = caster.ToPlayer();
+		var player = caster.ToPlayer();
+
 		if (player != null)
-		{
 			if (player.GetClass() != Class.Monk)
-			{
 				return;
-			}
-		}
 
 		if (caster == null || target == null)
-		{
 			return;
-		}
 
 		if (target.HasAura(MonkSpells.SPELL_MONK_MYSTIC_TOUCH_TARGET_DEBUFF))
-		{
 			return;
-		}
 
 		if (caster.HasAura(MonkSpells.SPELL_MONK_MYSTIC_TOUCH) && !target.HasAura(MonkSpells.SPELL_MONK_MYSTIC_TOUCH_TARGET_DEBUFF))
-		{
 			if (caster.IsWithinMeleeRange(target))
-			{
 				caster.CastSpell(MonkSpells.SPELL_MONK_MYSTIC_TOUCH_TARGET_DEBUFF, true);
-			}
-		}
 	}
 }

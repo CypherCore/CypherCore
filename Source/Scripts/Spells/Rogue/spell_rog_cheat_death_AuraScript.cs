@@ -10,7 +10,7 @@ namespace Scripts.Spells.Rogue;
 [SpellScript(31230)]
 public class spell_rog_cheat_death_AuraScript : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
@@ -30,22 +30,22 @@ public class spell_rog_cheat_death_AuraScript : AuraScript, IHasAuraEffects
 
 	private void Absorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref uint absorbAmount)
 	{
-		Player target = GetTarget().ToPlayer();
+		var target = GetTarget().ToPlayer();
+
 		if (target.HasAura(CheatDeath.SPELL_ROGUE_CHEAT_DEATH_DMG_REDUC))
 		{
 			absorbAmount = MathFunctions.CalculatePct(dmgInfo.GetDamage(), 85);
+
 			return;
 		}
 		else
 		{
 			if (dmgInfo.GetDamage() < target.GetHealth() || target.HasAura(RogueSpells.SPELL_ROGUE_CHEAT_DEATH_COOLDOWN))
-			{
 				return;
-			}
 
-			ulong health7 = target.CountPctFromMaxHealth(7);
+			var health7 = target.CountPctFromMaxHealth(7);
 			target.SetHealth(1);
-			HealInfo healInfo = new HealInfo(target, target, (uint)health7, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
+			var healInfo = new HealInfo(target, target, (uint)health7, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
 			target.HealBySpell(healInfo);
 			target.CastSpell(target, CheatDeath.SPELL_ROGUE_CHEAT_DEATH_ANIM, true);
 			target.CastSpell(target, CheatDeath.SPELL_ROGUE_CHEAT_DEATH_DMG_REDUC, true);

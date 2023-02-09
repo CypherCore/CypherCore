@@ -11,25 +11,24 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(194913)]
 public class spell_dk_glacial_advance : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	private void HandleHit(uint UnnamedParameter)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
-		Position castPosition = caster.GetPosition();
-		Position collisonPos  = caster.GetFirstCollisionPosition(GetEffectInfo().MaxRadiusEntry.RadiusMax, 0);
-		float    maxDistance  = caster.GetDistance(collisonPos);
+		var castPosition = caster.GetPosition();
+		var collisonPos  = caster.GetFirstCollisionPosition(GetEffectInfo().MaxRadiusEntry.RadiusMax, 0);
+		var maxDistance  = caster.GetDistance(collisonPos);
 
-		for (float dist = 0.0f; dist <= maxDistance; dist += 1.5f)
-		{
+		for (var dist = 0.0f; dist <= maxDistance; dist += 1.5f)
 			caster.m_Events.AddEventAtOffset(() =>
 			                                 {
-				                                 Position targetPosition = new Position(castPosition);
+				                                 var targetPosition = new Position(castPosition);
 				                                 caster.MovePosition(targetPosition, dist, 0.0f);
 				                                 caster.CastSpell(targetPosition, DeathKnightSpells.SPELL_DK_GLACIAL_ADVANCE_DAMAGE, true);
-			                                 }, TimeSpan.FromMilliseconds(dist / 1.5f * 50.0f));
-		}
+			                                 },
+			                                 TimeSpan.FromMilliseconds(dist / 1.5f * 50.0f));
 	}
 
 	public override void Register()

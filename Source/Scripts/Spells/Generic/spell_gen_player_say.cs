@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
 using Game.DataStorage;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -27,7 +26,7 @@ internal class spell_gen_player_say : SpellScript, IHasSpellEffects
 	private void HandleScript(uint effIndex)
 	{
 		// Note: Target here is always player; caster here is gameobject, creature or player (self cast)
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
 
 		target?.Say((uint)GetEffectValue(), target);
 	}

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -19,7 +18,7 @@ internal class spell_q12641_recall_eye_of_acherus : SpellScript, IHasSpellEffect
 
 	private void HandleDummy(uint effIndex)
 	{
-		Player player = GetCaster().GetCharmerOrOwner().ToPlayer();
+		var player = GetCaster().GetCharmerOrOwner().ToPlayer();
 
 		if (player)
 		{

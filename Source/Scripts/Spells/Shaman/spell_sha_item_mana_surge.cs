@@ -36,7 +36,7 @@ internal class spell_sha_item_mana_surge : AuraScript, IAuraCheckProc, IHasAuraE
 
 		if (m != null)
 		{
-			int mana = MathFunctions.CalculatePct(m.Amount, 35);
+			var mana = MathFunctions.CalculatePct(m.Amount, 35);
 
 			if (mana > 0)
 			{

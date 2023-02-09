@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -25,7 +24,7 @@ internal class spell_gen_burning_depths_necrolyte_image : AuraScript, IHasAuraEf
 
 	private void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		if (caster)
 			caster.CastSpell(GetTarget(), (uint)GetEffectInfo(2).CalcValue());

@@ -22,7 +22,7 @@ internal class areatrigger_mage_blizzard : AreaTriggerAI
 
 		while (_tickTimer <= TimeSpan.Zero)
 		{
-			Unit caster = at.GetCaster();
+			var caster = at.GetCaster();
 
 			caster?.CastSpell(at.GetPosition(), MageSpells.BlizzardDamage, new CastSpellExtraArgs());
 

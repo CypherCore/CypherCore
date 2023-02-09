@@ -18,7 +18,7 @@ internal class spell_item_arcane_shroud : AuraScript, IHasAuraEffects
 
 	private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
 	{
-		int diff = (int)GetUnitOwner().GetLevel() - 60;
+		var diff = (int)GetUnitOwner().GetLevel() - 60;
 
 		if (diff > 0)
 			amount += 2 * diff;

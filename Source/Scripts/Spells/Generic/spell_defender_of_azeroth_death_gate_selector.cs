@@ -11,8 +11,8 @@ namespace Scripts.Spells.Generic;
 [Script]
 internal class spell_defender_of_azeroth_death_gate_selector : SpellScript, IHasSpellEffects
 {
-	private (WorldLocation, uint) OrgrimmarInnLoc = (new WorldLocation(1, 1573.18f, -4441.62f, 16.06f, 1.818284034729003906f), 8618);
-	private (WorldLocation, uint) StormwindInnLoc = (new WorldLocation(0, -8868.1f, 675.82f, 97.9f, 5.164778709411621093f), 5148);
+	private readonly (WorldLocation, uint) OrgrimmarInnLoc = (new WorldLocation(1, 1573.18f, -4441.62f, 16.06f, 1.818284034729003906f), 8618);
+	private readonly (WorldLocation, uint) StormwindInnLoc = (new WorldLocation(0, -8868.1f, 675.82f, 97.9f, 5.164778709411621093f), 5148);
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	public override bool Validate(SpellInfo spell)
@@ -27,7 +27,7 @@ internal class spell_defender_of_azeroth_death_gate_selector : SpellScript, IHas
 
 	private void HandleDummy(uint effIndex)
 	{
-		Player player = GetHitUnit().ToPlayer();
+		var player = GetHitUnit().ToPlayer();
 
 		if (player == null)
 			return;

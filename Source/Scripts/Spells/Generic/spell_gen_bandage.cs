@@ -1,5 +1,4 @@
 ﻿using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
@@ -11,7 +10,7 @@ internal class spell_gen_bandage : SpellScript, ISpellCheckCast, ISpellAfterHit
 {
 	public void AfterHit()
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
 
 		if (target)
 			GetCaster().CastSpell(target, GenericSpellIds.RecentlyBandaged, true);
@@ -24,7 +23,7 @@ internal class spell_gen_bandage : SpellScript, ISpellCheckCast, ISpellAfterHit
 
 	public SpellCastResult CheckCast()
 	{
-		Unit target = GetExplTargetUnit();
+		var target = GetExplTargetUnit();
 
 		if (target)
 			if (target.HasAura(GenericSpellIds.RecentlyBandaged))

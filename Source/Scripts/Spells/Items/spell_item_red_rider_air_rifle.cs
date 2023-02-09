@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -26,14 +25,14 @@ internal class spell_item_red_rider_air_rifle : SpellScript, IHasSpellEffects
 	private void HandleScript(uint effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
-		Unit caster = GetCaster();
-		Unit target = GetHitUnit();
+		var caster = GetCaster();
+		var target = GetHitUnit();
 
 		if (target)
 		{
 			caster.CastSpell(caster, ItemSpellIds.AirRifleHoldVisual, true);
 			// needed because this spell shares GCD with its triggered spells (which must not be cast with triggered flag)
-			Player player = caster.ToPlayer();
+			var player = caster.ToPlayer();
 
 			if (player)
 				player.GetSpellHistory().CancelGlobalCooldown(GetSpellInfo());

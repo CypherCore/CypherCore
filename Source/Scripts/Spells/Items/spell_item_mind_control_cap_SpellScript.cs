@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -33,8 +32,8 @@ internal class spell_item_mind_control_cap_SpellScript : SpellScript, IHasSpellE
 
 	private void HandleDummy(uint effIndex)
 	{
-		Unit caster = GetCaster();
-		Unit target = GetHitUnit();
+		var caster = GetCaster();
+		var target = GetHitUnit();
 
 		if (target)
 		{

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -25,7 +24,7 @@ internal class spell_gen_upper_deck_create_foam_sword : SpellScript, IHasSpellEf
 
 	private void HandleScript(uint effIndex)
 	{
-		Player player = GetHitPlayer();
+		var player = GetHitPlayer();
 
 		if (player)
 		{

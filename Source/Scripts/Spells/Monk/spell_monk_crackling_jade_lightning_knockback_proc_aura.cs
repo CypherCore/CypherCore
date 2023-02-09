@@ -23,7 +23,7 @@ internal class spell_monk_crackling_jade_lightning_knockback_proc_aura : AuraScr
 		if (eventInfo.GetActor().HasAura(MonkSpells.CracklingJadeLightningChannel, GetTarget().GetGUID()))
 			return false;
 
-		Spell currentChanneledSpell = GetTarget().GetCurrentSpell(CurrentSpellTypes.Channeled);
+		var currentChanneledSpell = GetTarget().GetCurrentSpell(CurrentSpellTypes.Channeled);
 
 		if (!currentChanneledSpell ||
 		    currentChanneledSpell.GetSpellInfo().Id != MonkSpells.CracklingJadeLightningChannel)

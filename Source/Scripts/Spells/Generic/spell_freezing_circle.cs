@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
-using Game.Maps;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -26,16 +24,16 @@ internal class spell_freezing_circle : SpellScript, IHasSpellEffects
 
 	private void HandleDamage(uint effIndex)
 	{
-		Unit caster  = GetCaster();
+		var  caster  = GetCaster();
 		uint spellId = 0;
-		Map  map     = caster.GetMap();
+		var  map     = caster.GetMap();
 
 		if (map.IsDungeon())
 			spellId = map.IsHeroic() ? GenericSpellIds.FreezingCirclePitOfSaronHeroic : GenericSpellIds.FreezingCirclePitOfSaronNormal;
 		else
 			spellId = map.GetId() == Misc.MapIdBloodInTheSnowScenario ? GenericSpellIds.FreezingCircleScenario : GenericSpellIds.FreezingCircle;
 
-		SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetCastDifficulty());
+		var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetCastDifficulty());
 
 		if (spellInfo != null)
 			if (!spellInfo.GetEffects().Empty())

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -32,7 +31,7 @@ internal class spell_gen_fishing : SpellScript, IHasSpellEffects
 	{
 		PreventHitDefaultEffect(effIndex);
 		uint spellId;
-		Item mainHand = GetCaster().ToPlayer().GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+		var  mainHand = GetCaster().ToPlayer().GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
 
 		if (!mainHand ||
 		    mainHand.GetTemplate().GetClass() != ItemClass.Weapon ||

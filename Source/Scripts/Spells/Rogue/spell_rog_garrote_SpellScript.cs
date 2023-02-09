@@ -1,5 +1,4 @@
 ﻿using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
@@ -19,20 +18,17 @@ public class spell_rog_garrote_SpellScript : SpellScript, ISpellOnHit
 	public override bool Load()
 	{
 		if (GetCaster().HasAuraType(AuraType.ModStealth))
-		{
 			_stealthed = true;
-		}
+
 		return true;
 	}
 
 	public void OnHit()
 	{
-		Unit caster = GetCaster();
-		Unit target = GetExplTargetUnit();
+		var caster = GetCaster();
+		var target = GetExplTargetUnit();
 
 		if (_stealthed)
-		{
 			caster.CastSpell(target, RogueSpells.SPELL_ROGUE_GARROTE_SILENCE, true);
-		}
 	}
 }

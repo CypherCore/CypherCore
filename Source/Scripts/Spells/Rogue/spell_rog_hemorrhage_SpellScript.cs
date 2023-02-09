@@ -1,5 +1,4 @@
 ﻿using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 
@@ -12,40 +11,33 @@ public class spell_rog_hemorrhage_SpellScript : SpellScript, ISpellOnHit, ISpell
 
 	public void OnHit()
 	{
-		Player _player = GetCaster().ToPlayer();
+		var _player = GetCaster().ToPlayer();
+
 		if (_player != null)
-		{
 			if (GetHitUnit())
-			{
 				if (_player.HasAura(RogueSpells.SPELL_ROGUE_GLYPH_OF_HEMORRHAGE))
-				{
 					if (!_bleeding)
 					{
 						PreventHitAura();
+
 						return;
 					}
-				}
-			}
-		}
 	}
 
 	public void BeforeHit(SpellMissInfo UnnamedParameter)
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
+
 		if (target != null)
-		{
 			_bleeding = target.HasAuraState(AuraStateType.Bleed);
-		}
 	}
 
 	public void AfterHit()
 	{
-		Unit caster = GetCaster();
-		var  cp     = caster.GetPower(PowerType.ComboPoints);
+		var caster = GetCaster();
+		var cp     = caster.GetPower(PowerType.ComboPoints);
 
 		if (cp > 0)
-		{
 			caster.SetPower(PowerType.ComboPoints, cp - 1);
-		}
 	}
 }

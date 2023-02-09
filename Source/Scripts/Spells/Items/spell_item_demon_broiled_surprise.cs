@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -23,12 +22,12 @@ internal class spell_item_demon_broiled_surprise : SpellScript, ISpellCheckCast,
 
 	public SpellCastResult CheckCast()
 	{
-		Player player = GetCaster().ToPlayer();
+		var player = GetCaster().ToPlayer();
 
 		if (player.GetQuestStatus(QuestIds.SuperHotStew) != QuestStatus.Incomplete)
 			return SpellCastResult.CantDoThatRightNow;
 
-		Creature creature = player.FindNearestCreature(CreatureIds.AbyssalFlamebringer, 10, false);
+		var creature = player.FindNearestCreature(CreatureIds.AbyssalFlamebringer, 10, false);
 
 		if (creature)
 			if (creature.IsDead())
@@ -46,7 +45,7 @@ internal class spell_item_demon_broiled_surprise : SpellScript, ISpellCheckCast,
 
 	private void HandleDummy(uint effIndex)
 	{
-		Unit player = GetCaster();
+		var player = GetCaster();
 		player.CastSpell(player, ItemSpellIds.CreateDemonBroiledSurprise, false);
 	}
 }

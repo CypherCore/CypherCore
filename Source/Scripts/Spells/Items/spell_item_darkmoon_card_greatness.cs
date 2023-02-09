@@ -26,14 +26,14 @@ internal class spell_item_darkmoon_card_greatness : AuraScript, IHasAuraEffects
 	{
 		PreventDefaultAction();
 
-		Unit  caster = eventInfo.GetActor();
-		float str    = caster.GetStat(Stats.Strength);
-		float agi    = caster.GetStat(Stats.Agility);
-		float intl   = caster.GetStat(Stats.Intellect);
-		float vers   = 0.0f; // caster.GetStat(STAT_VERSATILITY);
-		float stat   = 0.0f;
+		var caster = eventInfo.GetActor();
+		var str    = caster.GetStat(Stats.Strength);
+		var agi    = caster.GetStat(Stats.Agility);
+		var intl   = caster.GetStat(Stats.Intellect);
+		var vers   = 0.0f; // caster.GetStat(STAT_VERSATILITY);
+		var stat   = 0.0f;
 
-		uint spellTrigger = ItemSpellIds.DarkmoonCardStrenght;
+		var spellTrigger = ItemSpellIds.DarkmoonCardStrenght;
 
 		if (str > stat)
 		{

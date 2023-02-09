@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -25,7 +24,7 @@ internal class spell_item_goblin_bomb_dispenser : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		Item item = GetCastItem();
+		var item = GetCastItem();
 
 		if (item != null)
 			GetCaster().CastSpell(GetCaster(), RandomHelper.randChance(95) ? ItemSpellIds.SummonGoblinBomb : ItemSpellIds.MalfunctionExplosion, item);

@@ -10,7 +10,7 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(167655)]
 public class spell_dk_item_t17_frost_4p_driver : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private struct eSpells
 	{
@@ -21,23 +21,20 @@ public class spell_dk_item_t17_frost_4p_driver : AuraScript, IHasAuraEffects
 	{
 		PreventDefaultAction();
 
-		Unit l_Caster = GetCaster();
+		var l_Caster = GetCaster();
+
 		if (l_Caster == null)
-		{
 			return;
-		}
 
-		SpellInfo l_ProcSpell = p_EventInfo.GetDamageInfo().GetSpellInfo();
+		var l_ProcSpell = p_EventInfo.GetDamageInfo().GetSpellInfo();
+
 		if (l_ProcSpell == null)
-		{
 			return;
-		}
 
-		Unit l_Target = p_EventInfo.GetActionTarget();
+		var l_Target = p_EventInfo.GetActionTarget();
+
 		if (l_Target == null || l_Target == l_Caster)
-		{
 			return;
-		}
 
 		/// While Pillar of Frost is active, your special attacks trap a soul in your rune weapon.
 		l_Caster.CastSpell(l_Target, eSpells.FrozenRuneblade, true);

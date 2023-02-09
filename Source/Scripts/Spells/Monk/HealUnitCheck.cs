@@ -9,20 +9,19 @@ public class HealUnitCheck : ICheck<WorldObject>
 	{
 		this.m_source = source;
 	}
+
 	public bool Invoke(WorldObject @object)
 	{
-		Unit unit = @object.ToUnit();
+		var unit = @object.ToUnit();
+
 		if (unit == null)
-		{
 			return true;
-		}
 
 		if (m_source.IsFriendlyTo(unit))
-		{
 			return false;
-		}
 
 		return true;
 	}
+
 	private readonly Unit m_source;
 }

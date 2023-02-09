@@ -1,5 +1,4 @@
 ﻿using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
@@ -13,11 +12,11 @@ public class spell_rog_shuriken_storm_SpellScript : SpellScript, ISpellOnHit, IS
 
 	public override bool Load()
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
+
 		if (caster.HasAuraType(AuraType.ModStealth) || caster.HasAura(RogueSpells.SPELL_ROGUE_SHADOW_DANCE))
-		{
 			_stealthed = true;
-		}
+
 		return true;
 	}
 
@@ -28,29 +27,27 @@ public class spell_rog_shuriken_storm_SpellScript : SpellScript, ISpellOnHit, IS
 
 	public void AfterHit()
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
+
 		if (target.HasAura(51690)) //Killing spree debuff #1
-		{
 			target.RemoveAura(51690);
-		}
+
 		if (target.HasAura(61851)) //Killing spree debuff #2
-		{
 			target.RemoveAura(61851);
-		}
 	}
 
 	public void OnHit()
 	{
-		Unit caster = GetCaster();
-		var  cp     = caster.GetPower(PowerType.ComboPoints);
+		var caster = GetCaster();
+		var cp     = caster.GetPower(PowerType.ComboPoints);
+
 		if (_stealthed)
 		{
-			int dmg = GetHitDamage();
+			var dmg = GetHitDamage();
 			SetHitDamage(dmg * 2); //Shuriken Storm deals 200% damage from stealth
 		}
+
 		if (cp < caster.GetMaxPower(PowerType.ComboPoints))
-		{
 			caster.SetPower(PowerType.ComboPoints, cp + 1);
-		}
 	}
 }

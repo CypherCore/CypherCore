@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
-using Game.Spells;
 
 namespace Scripts.Spells.Generic;
 
@@ -20,11 +18,11 @@ internal class spell_gen_bonked : SpellScript, IHasSpellEffects
 
 	private void HandleScript(uint effIndex)
 	{
-		Player target = GetHitPlayer();
+		var target = GetHitPlayer();
 
 		if (target)
 		{
-			Aura aura = GetHitAura();
+			var aura = GetHitAura();
 
 			if (!(aura != null && aura.GetStackAmount() == 3))
 				return;
@@ -36,7 +34,7 @@ internal class spell_gen_bonked : SpellScript, IHasSpellEffects
 
 			if (aura != null)
 			{
-				Item item = target.GetItemByGuid(aura.GetCastItemGUID());
+				var item = target.GetItemByGuid(aura.GetCastItemGUID());
 
 				if (item)
 					target.DestroyItemCount(item.GetEntry(), 1, true);

@@ -40,7 +40,7 @@ internal class spell_rog_tricks_of_the_trade_aura : AuraScript, IHasAuraEffects
 	{
 		PreventDefaultAction();
 
-		Unit rogue = GetTarget();
+		var rogue = GetTarget();
 
 		if (Global.ObjAccessor.GetUnit(rogue, _redirectTarget))
 			rogue.CastSpell(rogue, RogueSpells.TricksOfTheTradeProc, new CastSpellExtraArgs(aurEff));

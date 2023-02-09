@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -24,7 +23,7 @@ internal class spell_item_runic_healing_injector : SpellScript, IHasSpellEffects
 
 	private void HandleHeal(uint effIndex)
 	{
-		Player caster = GetCaster().ToPlayer();
+		var caster = GetCaster().ToPlayer();
 
 		if (caster != null)
 			if (caster.HasSkill(SkillType.Engineering))

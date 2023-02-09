@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -25,8 +24,8 @@ internal class spell_item_vanquished_clutches : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		uint spellId = RandomHelper.RAND(ItemSpellIds.Crusher, ItemSpellIds.Constrictor, ItemSpellIds.Corruptor);
-		Unit caster  = GetCaster();
+		var spellId = RandomHelper.RAND(ItemSpellIds.Crusher, ItemSpellIds.Constrictor, ItemSpellIds.Corruptor);
+		var caster  = GetCaster();
 		caster.CastSpell(caster, spellId, true);
 	}
 }

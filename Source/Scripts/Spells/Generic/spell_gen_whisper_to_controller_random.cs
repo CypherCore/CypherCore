@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -32,15 +31,15 @@ internal class spell_gen_whisper_to_controller_random : SpellScript, IHasSpellEf
 		if (!RandomHelper.randChance(20))
 			return;
 
-		Creature target = GetHitCreature();
+		var target = GetHitCreature();
 
 		if (target != null)
 		{
-			TempSummon targetSummon = target.ToTempSummon();
+			var targetSummon = target.ToTempSummon();
 
 			if (targetSummon != null)
 			{
-				Player player = targetSummon.GetSummonerUnit().ToPlayer();
+				var player = targetSummon.GetSummonerUnit().ToPlayer();
 
 				if (player != null)
 					targetSummon.GetAI().Talk(_text, player);
