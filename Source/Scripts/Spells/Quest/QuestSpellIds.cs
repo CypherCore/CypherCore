@@ -17,7 +17,7 @@ using Game.Spells;
 
 namespace Scripts.Spells.Quest
 {
-    internal struct SpellIds
+    internal struct QuestSpellIds
     {
         //Thaumaturgychannel        
         public const uint ThaumaturgyChannel = 21029;
@@ -368,7 +368,7 @@ namespace Scripts.Spells.Quest
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.ThaumaturgyChannel);
+            return ValidateSpellInfo(QuestSpellIds.ThaumaturgyChannel);
         }
 
         public override void Register()
@@ -382,7 +382,7 @@ namespace Scripts.Spells.Quest
             Unit caster = GetCaster();
 
             if (caster)
-                caster.CastSpell(caster, SpellIds.ThaumaturgyChannel, false);
+                caster.CastSpell(caster, QuestSpellIds.ThaumaturgyChannel, false);
         }
     }
 
@@ -472,7 +472,7 @@ namespace Scripts.Spells.Quest
 
         public override bool Validate(SpellInfo spellEntry)
         {
-            return ValidateSpellInfo(SpellIds.ForceShieldArcanePurpleX3, SpellIds.ScourgingCrystalController);
+            return ValidateSpellInfo(QuestSpellIds.ForceShieldArcanePurpleX3, QuestSpellIds.ScourgingCrystalController);
         }
 
         public override void Register()
@@ -486,10 +486,10 @@ namespace Scripts.Spells.Quest
 
             if (target)
                 if (target.IsTypeId(TypeId.Unit) &&
-                    target.HasAura(SpellIds.ForceShieldArcanePurpleX3))
+                    target.HasAura(QuestSpellIds.ForceShieldArcanePurpleX3))
                     // Make sure nobody else is channeling the same Target
-                    if (!target.HasAura(SpellIds.ScourgingCrystalController))
-                        GetCaster().CastSpell(target, SpellIds.ScourgingCrystalController, new CastSpellExtraArgs(GetCastItem()));
+                    if (!target.HasAura(QuestSpellIds.ScourgingCrystalController))
+                        GetCaster().CastSpell(target, QuestSpellIds.ScourgingCrystalController, new CastSpellExtraArgs(GetCastItem()));
         }
     }
 
@@ -500,7 +500,7 @@ namespace Scripts.Spells.Quest
 
         public override bool Validate(SpellInfo spellEntry)
         {
-            return ValidateSpellInfo(SpellIds.ForceShieldArcanePurpleX3);
+            return ValidateSpellInfo(QuestSpellIds.ForceShieldArcanePurpleX3);
         }
 
         public override void Register()
@@ -514,7 +514,7 @@ namespace Scripts.Spells.Quest
 
             if (target)
                 if (target.IsTypeId(TypeId.Unit))
-                    target.RemoveAurasDueToSpell(SpellIds.ForceShieldArcanePurpleX3);
+                    target.RemoveAurasDueToSpell(QuestSpellIds.ForceShieldArcanePurpleX3);
         }
     }
 
@@ -531,12 +531,12 @@ namespace Scripts.Spells.Quest
 
         public override bool Validate(SpellInfo spellEntry)
         {
-            return ValidateSpellInfo(SpellIds.SummonScavengebot004a8,
-                                     SpellIds.SummonSentrybot57k,
-                                     SpellIds.SummonDefendotank66d,
-                                     SpellIds.SummonScavengebot005b6,
-                                     SpellIds.Summon55dCollectatron,
-                                     SpellIds.RobotKillCredit);
+            return ValidateSpellInfo(QuestSpellIds.SummonScavengebot004a8,
+                                     QuestSpellIds.SummonSentrybot57k,
+                                     QuestSpellIds.SummonDefendotank66d,
+                                     QuestSpellIds.SummonScavengebot005b6,
+                                     QuestSpellIds.Summon55dCollectatron,
+                                     QuestSpellIds.RobotKillCredit);
         }
 
         public override void Register()
@@ -558,23 +558,23 @@ namespace Scripts.Spells.Quest
                 switch (target.GetEntry())
                 {
                     case CreatureIds.Scavengebot004a8:
-                        spellId = SpellIds.SummonScavengebot004a8;
+                        spellId = QuestSpellIds.SummonScavengebot004a8;
 
                         break;
                     case CreatureIds.Sentrybot57k:
-                        spellId = SpellIds.SummonSentrybot57k;
+                        spellId = QuestSpellIds.SummonSentrybot57k;
 
                         break;
                     case CreatureIds.Defendotank66d:
-                        spellId = SpellIds.SummonDefendotank66d;
+                        spellId = QuestSpellIds.SummonDefendotank66d;
 
                         break;
                     case CreatureIds.Scavengebot005b6:
-                        spellId = SpellIds.SummonScavengebot005b6;
+                        spellId = QuestSpellIds.SummonScavengebot005b6;
 
                         break;
                     case CreatureIds.Npc55dCollectatron:
-                        spellId = SpellIds.Summon55dCollectatron;
+                        spellId = QuestSpellIds.Summon55dCollectatron;
 
                         break;
                     default:
@@ -582,7 +582,7 @@ namespace Scripts.Spells.Quest
                 }
 
                 caster.CastSpell(caster, spellId, new CastSpellExtraArgs(castItem));
-                caster.CastSpell(caster, SpellIds.RobotKillCredit, true);
+                caster.CastSpell(caster, QuestSpellIds.RobotKillCredit, true);
                 target.DespawnOrUnsummon();
             }
         }
@@ -637,7 +637,7 @@ namespace Scripts.Spells.Quest
 
         public override bool Validate(SpellInfo spellEntry)
         {
-            return ValidateSpellInfo(SpellIds.BananasFallToGround, SpellIds.OrangeFallsToGround, SpellIds.PapayaFallsToGround, SpellIds.SummonAdventurousDwarf);
+            return ValidateSpellInfo(QuestSpellIds.BananasFallToGround, QuestSpellIds.OrangeFallsToGround, QuestSpellIds.PapayaFallsToGround, QuestSpellIds.SummonAdventurousDwarf);
         }
 
         public override void Register()
@@ -647,23 +647,23 @@ namespace Scripts.Spells.Quest
 
         private void HandleDummy(uint effIndex)
         {
-            uint spellId = SpellIds.BananasFallToGround;
+            uint spellId = QuestSpellIds.BananasFallToGround;
 
             switch (RandomHelper.URand(0, 3))
             {
                 case 1:
-                    spellId = SpellIds.OrangeFallsToGround;
+                    spellId = QuestSpellIds.OrangeFallsToGround;
 
                     break;
                 case 2:
-                    spellId = SpellIds.PapayaFallsToGround;
+                    spellId = QuestSpellIds.PapayaFallsToGround;
 
                     break;
             }
 
             // sometimes, if you're lucky, you get a dwarf
             if (RandomHelper.randChance(5))
-                spellId = SpellIds.SummonAdventurousDwarf;
+                spellId = QuestSpellIds.SummonAdventurousDwarf;
 
             GetCaster().CastSpell(GetCaster(), spellId, true);
         }
@@ -689,7 +689,7 @@ namespace Scripts.Spells.Quest
                 Unit target = GetTarget();
 
                 // Already in fire
-                if (target.HasAura(SpellIds.Ablaze))
+                if (target.HasAura(QuestSpellIds.Ablaze))
                     return;
 
                 Player player = caster.GetCharmerOrOwnerPlayerOrPlayerItself();
@@ -698,15 +698,15 @@ namespace Scripts.Spells.Quest
                     switch (target.GetEntry())
                     {
                         case CreatureIds.Frostworg:
-                            target.CastSpell(player, SpellIds.FrostworgCredit, true);
-                            target.CastSpell(target, SpellIds.Immolation, true);
-                            target.CastSpell(target, SpellIds.Ablaze, true);
+                            target.CastSpell(player, QuestSpellIds.FrostworgCredit, true);
+                            target.CastSpell(target, QuestSpellIds.Immolation, true);
+                            target.CastSpell(target, QuestSpellIds.Ablaze, true);
 
                             break;
                         case CreatureIds.Frostgiant:
-                            target.CastSpell(player, SpellIds.FrostgiantCredit, true);
-                            target.CastSpell(target, SpellIds.Immolation, true);
-                            target.CastSpell(target, SpellIds.Ablaze, true);
+                            target.CastSpell(player, QuestSpellIds.FrostgiantCredit, true);
+                            target.CastSpell(target, QuestSpellIds.Immolation, true);
+                            target.CastSpell(target, QuestSpellIds.Ablaze, true);
 
                             break;
                     }
@@ -793,7 +793,7 @@ namespace Scripts.Spells.Quest
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
-            uint triggeredSpellID = SpellIds.AllianceBattleStandardState;
+            uint triggeredSpellID = QuestSpellIds.AllianceBattleStandardState;
 
             caster.HandleEmoteCommand(Emote.OneshotRoar);
 
@@ -805,8 +805,8 @@ namespace Scripts.Spells.Quest
                     player.ToPlayer().KilledMonsterCredit(CreatureIds.KingOfTheMountaintKc);
             }
 
-            if (GetSpellInfo().Id == SpellIds.PlantHordeBattleStandard)
-                triggeredSpellID = SpellIds.HordeBattleStandardState;
+            if (GetSpellInfo().Id == QuestSpellIds.PlantHordeBattleStandard)
+                triggeredSpellID = QuestSpellIds.HordeBattleStandardState;
 
             target.RemoveAllAuras();
             target.CastSpell(target, triggeredSpellID, true);
@@ -824,7 +824,7 @@ namespace Scripts.Spells.Quest
             {
                 Unit rocketBunny = caster.GetVehicleKit().GetPassenger(1);
 
-                rocketBunny?.CastSpell(rocketBunny, SpellIds.JumpRocketBlast, true);
+                rocketBunny?.CastSpell(rocketBunny, QuestSpellIds.JumpRocketBlast, true);
             }
         }
     }
@@ -860,7 +860,7 @@ namespace Scripts.Spells.Quest
             Creature target = GetHitCreature();
 
             if (target)
-                target.CastSpell(GetCaster(), SpellIds.BunnyCreditBeam, false);
+                target.CastSpell(GetCaster(), QuestSpellIds.BunnyCreditBeam, false);
         }
     }
 
@@ -876,7 +876,7 @@ namespace Scripts.Spells.Quest
 
         private void HandleScript(uint effIndex)
         {
-            GetCaster().CastSpell(GetCaster(), SpellIds.SummonWyrmrestDefender, true);
+            GetCaster().CastSpell(GetCaster(), QuestSpellIds.SummonWyrmrestDefender, true);
         }
     }
 
@@ -934,7 +934,7 @@ namespace Scripts.Spells.Quest
 
             if (target)
                 // On trigger proccing
-                target.CastSpell(target, SpellIds.AggroCheck);
+                target.CastSpell(target, QuestSpellIds.AggroCheck);
         }
     }
 
@@ -956,7 +956,7 @@ namespace Scripts.Spells.Quest
                 // Check if found player Target is on fly Mount or using flying form
                 if (playerTarget.HasAuraType(AuraType.Fly) ||
                     playerTarget.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed))
-                    playerTarget.CastSpell(playerTarget, SpellIds.FlakCannonTrigger, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCasterMountedOrOnVehicle));
+                    playerTarget.CastSpell(playerTarget, QuestSpellIds.FlakCannonTrigger, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCasterMountedOrOnVehicle));
         }
     }
 
@@ -976,7 +976,7 @@ namespace Scripts.Spells.Quest
 
             if (target)
                 // On each tick cast Choose Loc to trigger summon
-                target.CastSpell(target, SpellIds.ChooseLoc);
+                target.CastSpell(target, QuestSpellIds.ChooseLoc);
         }
     }
 
@@ -1031,7 +1031,7 @@ namespace Scripts.Spells.Quest
 
         public override bool Validate(SpellInfo spell)
         {
-            return ValidateSpellInfo(SpellIds.SummonGorgedLurkingBasilisk);
+            return ValidateSpellInfo(QuestSpellIds.SummonGorgedLurkingBasilisk);
         }
 
         public override void Register()
@@ -1044,7 +1044,7 @@ namespace Scripts.Spells.Quest
             if (GetHitAura() != null &&
                 GetHitAura().GetStackAmount() >= GetSpellInfo().StackAmount)
             {
-                GetHitUnit().CastSpell((Unit)null, SpellIds.SummonGorgedLurkingBasilisk, true);
+                GetHitUnit().CastSpell((Unit)null, QuestSpellIds.SummonGorgedLurkingBasilisk, true);
                 Creature basilisk = GetHitUnit().ToCreature();
 
                 if (basilisk)
@@ -1078,7 +1078,7 @@ namespace Scripts.Spells.Quest
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.FlickeringFlames);
+            return ValidateSpellInfo(QuestSpellIds.FlickeringFlames);
         }
 
         public override void Register()
@@ -1088,7 +1088,7 @@ namespace Scripts.Spells.Quest
 
         private void HandleEffectPeriodic(AuraEffect aurEff)
         {
-            GetTarget().RemoveAurasDueToSpell(SpellIds.FlickeringFlames);
+            GetTarget().RemoveAurasDueToSpell(QuestSpellIds.FlickeringFlames);
         }
     }
 
@@ -1099,7 +1099,7 @@ namespace Scripts.Spells.Quest
 
         public override bool Validate(SpellInfo spell)
         {
-            return ValidateSpellInfo(SpellIds.Ride);
+            return ValidateSpellInfo(QuestSpellIds.Ride);
         }
 
         public override void Register()
@@ -1114,7 +1114,7 @@ namespace Scripts.Spells.Quest
 
             // TO DO: Being triggered is hack, but in checkcast it doesn't pass aurastate requirements.
             // Beside that the decoy won't keep it's freeze animation State when enter.
-            GetHitCreature().CastSpell(GetCaster(), SpellIds.Ride, true);
+            GetHitCreature().CastSpell(GetCaster(), QuestSpellIds.Ride, true);
         }
     }
 
@@ -1186,7 +1186,7 @@ namespace Scripts.Spells.Quest
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.BurstAtTheSeams59576, SpellIds.BloatedAbominationFeignDeath, SpellIds.BurstAtTheSeams59579, SpellIds.BurstAtTheSeamsBone, SpellIds.ExplodeAbominationMeat, SpellIds.ExplodeAbominationBloodyMeat);
+            return ValidateSpellInfo(QuestSpellIds.BurstAtTheSeams59576, QuestSpellIds.BloatedAbominationFeignDeath, QuestSpellIds.BurstAtTheSeams59579, QuestSpellIds.BurstAtTheSeamsBone, QuestSpellIds.ExplodeAbominationMeat, QuestSpellIds.ExplodeAbominationBloodyMeat);
         }
 
         public override void Register()
@@ -1200,15 +1200,15 @@ namespace Scripts.Spells.Quest
 
             if (creature != null)
             {
-                creature.CastSpell(creature, SpellIds.BloatedAbominationFeignDeath, true);
-                creature.CastSpell(creature, SpellIds.BurstAtTheSeams59579, true);
-                creature.CastSpell(creature, SpellIds.BurstAtTheSeamsBone, true);
-                creature.CastSpell(creature, SpellIds.BurstAtTheSeamsBone, true);
-                creature.CastSpell(creature, SpellIds.BurstAtTheSeamsBone, true);
-                creature.CastSpell(creature, SpellIds.ExplodeAbominationMeat, true);
-                creature.CastSpell(creature, SpellIds.ExplodeAbominationBloodyMeat, true);
-                creature.CastSpell(creature, SpellIds.ExplodeAbominationBloodyMeat, true);
-                creature.CastSpell(creature, SpellIds.ExplodeAbominationBloodyMeat, true);
+                creature.CastSpell(creature, QuestSpellIds.BloatedAbominationFeignDeath, true);
+                creature.CastSpell(creature, QuestSpellIds.BurstAtTheSeams59579, true);
+                creature.CastSpell(creature, QuestSpellIds.BurstAtTheSeamsBone, true);
+                creature.CastSpell(creature, QuestSpellIds.BurstAtTheSeamsBone, true);
+                creature.CastSpell(creature, QuestSpellIds.BurstAtTheSeamsBone, true);
+                creature.CastSpell(creature, QuestSpellIds.ExplodeAbominationMeat, true);
+                creature.CastSpell(creature, QuestSpellIds.ExplodeAbominationBloodyMeat, true);
+                creature.CastSpell(creature, QuestSpellIds.ExplodeAbominationBloodyMeat, true);
+                creature.CastSpell(creature, QuestSpellIds.ExplodeAbominationBloodyMeat, true);
             }
         }
     }
@@ -1227,12 +1227,12 @@ namespace Scripts.Spells.Quest
         private void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            target.CastSpell(target, SpellIds.TrollExplosion, true);
-            target.CastSpell(target, SpellIds.ExplodeAbominationMeat, true);
-            target.CastSpell(target, SpellIds.ExplodeTrollMeat, true);
-            target.CastSpell(target, SpellIds.ExplodeTrollMeat, true);
-            target.CastSpell(target, SpellIds.ExplodeTrollBloodyMeat, true);
-            target.CastSpell(target, SpellIds.BurstAtTheSeamsBone, true);
+            target.CastSpell(target, QuestSpellIds.TrollExplosion, true);
+            target.CastSpell(target, QuestSpellIds.ExplodeAbominationMeat, true);
+            target.CastSpell(target, QuestSpellIds.ExplodeTrollMeat, true);
+            target.CastSpell(target, QuestSpellIds.ExplodeTrollMeat, true);
+            target.CastSpell(target, QuestSpellIds.ExplodeTrollBloodyMeat, true);
+            target.CastSpell(target, QuestSpellIds.BurstAtTheSeamsBone, true);
         }
 
         private void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1244,20 +1244,20 @@ namespace Scripts.Spells.Quest
                 switch (target.GetEntry())
                 {
                     case CreatureIds.IcyGhoul:
-                        target.CastSpell(caster, SpellIds.AssignGhoulKillCreditToMaster, true);
+                        target.CastSpell(caster, QuestSpellIds.AssignGhoulKillCreditToMaster, true);
 
                         break;
                     case CreatureIds.ViciousGeist:
-                        target.CastSpell(caster, SpellIds.AssignGeistKillCreditToMaster, true);
+                        target.CastSpell(caster, QuestSpellIds.AssignGeistKillCreditToMaster, true);
 
                         break;
                     case CreatureIds.RisenAllianceSoldiers:
-                        target.CastSpell(caster, SpellIds.AssignSkeletonKillCreditToMaster, true);
+                        target.CastSpell(caster, QuestSpellIds.AssignSkeletonKillCreditToMaster, true);
 
                         break;
                 }
 
-            target.CastSpell(target, SpellIds.BurstAtTheSeams59580, true);
+            target.CastSpell(target, QuestSpellIds.BurstAtTheSeams59580, true);
         }
     }
 
@@ -1349,12 +1349,12 @@ namespace Scripts.Spells.Quest
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.BurstAtTheSeams52510,
-                                     SpellIds.BurstAtTheSeams52508,
-                                     SpellIds.BurstAtTheSeams59580,
-                                     SpellIds.BurstAtTheSeamsBone,
-                                     SpellIds.ExplodeAbominationMeat,
-                                     SpellIds.ExplodeAbominationBloodyMeat);
+            return ValidateSpellInfo(QuestSpellIds.BurstAtTheSeams52510,
+                                     QuestSpellIds.BurstAtTheSeams52508,
+                                     QuestSpellIds.BurstAtTheSeams59580,
+                                     QuestSpellIds.BurstAtTheSeamsBone,
+                                     QuestSpellIds.ExplodeAbominationMeat,
+                                     QuestSpellIds.ExplodeAbominationBloodyMeat);
         }
 
         public override bool Load()
@@ -1383,17 +1383,17 @@ namespace Scripts.Spells.Quest
                     if (player != null)
                         if (player.GetQuestStatus(Misc.QuestFuelForTheFire) == QuestStatus.Incomplete)
                         {
-                            creature.CastSpell(creature, SpellIds.BurstAtTheSeamsBone, true);
-                            creature.CastSpell(creature, SpellIds.ExplodeAbominationMeat, true);
-                            creature.CastSpell(creature, SpellIds.ExplodeAbominationBloodyMeat, true);
-                            creature.CastSpell(creature, SpellIds.BurstAtTheSeams52508, true);
-                            creature.CastSpell(creature, SpellIds.BurstAtTheSeams59580, true);
+                            creature.CastSpell(creature, QuestSpellIds.BurstAtTheSeamsBone, true);
+                            creature.CastSpell(creature, QuestSpellIds.ExplodeAbominationMeat, true);
+                            creature.CastSpell(creature, QuestSpellIds.ExplodeAbominationBloodyMeat, true);
+                            creature.CastSpell(creature, QuestSpellIds.BurstAtTheSeams52508, true);
+                            creature.CastSpell(creature, QuestSpellIds.BurstAtTheSeams59580, true);
 
-                            player.CastSpell(player, SpellIds.DrakkariSkullcrusherCredit, true);
+                            player.CastSpell(player, QuestSpellIds.DrakkariSkullcrusherCredit, true);
                             ushort count = player.GetReqKillOrCastCurrentCount(Misc.QuestFuelForTheFire, (int)CreatureIds.DrakkariChieftaink);
 
                             if ((count % 20) == 0)
-                                player.CastSpell(player, SpellIds.SummonDrakkariChieftain, true);
+                                player.CastSpell(player, QuestSpellIds.SummonDrakkariChieftain, true);
                         }
                 }
             }
@@ -1436,24 +1436,24 @@ namespace Scripts.Spells.Quest
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.TameIceClawBear,
-                                     SpellIds.TameLargeCragBoar,
-                                     SpellIds.TameSnowLeopard,
-                                     SpellIds.TameAdultPlainstrider,
-                                     SpellIds.TamePrairieStalker,
-                                     SpellIds.TameSwoop,
-                                     SpellIds.TameWebwoodLurker,
-                                     SpellIds.TameDireMottledBoar,
-                                     SpellIds.TameSurfCrawler,
-                                     SpellIds.TameArmoredScorpid,
-                                     SpellIds.TameNightsaberStalker,
-                                     SpellIds.TameStrigidScreecher,
-                                     SpellIds.TameBarbedCrawler,
-                                     SpellIds.TameGreaterTimberstrider,
-                                     SpellIds.TameNightstalker,
-                                     SpellIds.TameCrazedDragonhawk,
-                                     SpellIds.TameElderSpringpaw,
-                                     SpellIds.TameMistbat);
+            return ValidateSpellInfo(QuestSpellIds.TameIceClawBear,
+                                     QuestSpellIds.TameLargeCragBoar,
+                                     QuestSpellIds.TameSnowLeopard,
+                                     QuestSpellIds.TameAdultPlainstrider,
+                                     QuestSpellIds.TamePrairieStalker,
+                                     QuestSpellIds.TameSwoop,
+                                     QuestSpellIds.TameWebwoodLurker,
+                                     QuestSpellIds.TameDireMottledBoar,
+                                     QuestSpellIds.TameSurfCrawler,
+                                     QuestSpellIds.TameArmoredScorpid,
+                                     QuestSpellIds.TameNightsaberStalker,
+                                     QuestSpellIds.TameStrigidScreecher,
+                                     QuestSpellIds.TameBarbedCrawler,
+                                     QuestSpellIds.TameGreaterTimberstrider,
+                                     QuestSpellIds.TameNightstalker,
+                                     QuestSpellIds.TameCrazedDragonhawk,
+                                     QuestSpellIds.TameElderSpringpaw,
+                                     QuestSpellIds.TameMistbat);
         }
 
         public override void Register()
@@ -1473,24 +1473,24 @@ namespace Scripts.Spells.Quest
 
             uint finalSpellId = GetId() switch
             {
-                SpellIds.TameIceClawBear => SpellIds.TameIceClawBear1,
-                SpellIds.TameLargeCragBoar => SpellIds.TameLargeCragBoar1,
-                SpellIds.TameSnowLeopard => SpellIds.TameSnowLeopard1,
-                SpellIds.TameAdultPlainstrider => SpellIds.TameAdultPlainstrider1,
-                SpellIds.TamePrairieStalker => SpellIds.TamePrairieStalker1,
-                SpellIds.TameSwoop => SpellIds.TameSwoop1,
-                SpellIds.TameWebwoodLurker => SpellIds.TameWebwoodLurker1,
-                SpellIds.TameDireMottledBoar => SpellIds.TameDireMottledBoar1,
-                SpellIds.TameSurfCrawler => SpellIds.TameSurfCrawler1,
-                SpellIds.TameArmoredScorpid => SpellIds.TameArmoredScorpid1,
-                SpellIds.TameNightsaberStalker => SpellIds.TameNightsaberStalker1,
-                SpellIds.TameStrigidScreecher => SpellIds.TameStrigidScreecher1,
-                SpellIds.TameBarbedCrawler => SpellIds.TameBarbedCrawler1,
-                SpellIds.TameGreaterTimberstrider => SpellIds.TameGreaterTimberstrider1,
-                SpellIds.TameNightstalker => SpellIds.TameNightstalker1,
-                SpellIds.TameCrazedDragonhawk => SpellIds.TameCrazedDragonhawk1,
-                SpellIds.TameElderSpringpaw => SpellIds.TameElderSpringpaw1,
-                SpellIds.TameMistbat => SpellIds.TameMistbat1,
+                QuestSpellIds.TameIceClawBear => QuestSpellIds.TameIceClawBear1,
+                QuestSpellIds.TameLargeCragBoar => QuestSpellIds.TameLargeCragBoar1,
+                QuestSpellIds.TameSnowLeopard => QuestSpellIds.TameSnowLeopard1,
+                QuestSpellIds.TameAdultPlainstrider => QuestSpellIds.TameAdultPlainstrider1,
+                QuestSpellIds.TamePrairieStalker => QuestSpellIds.TamePrairieStalker1,
+                QuestSpellIds.TameSwoop => QuestSpellIds.TameSwoop1,
+                QuestSpellIds.TameWebwoodLurker => QuestSpellIds.TameWebwoodLurker1,
+                QuestSpellIds.TameDireMottledBoar => QuestSpellIds.TameDireMottledBoar1,
+                QuestSpellIds.TameSurfCrawler => QuestSpellIds.TameSurfCrawler1,
+                QuestSpellIds.TameArmoredScorpid => QuestSpellIds.TameArmoredScorpid1,
+                QuestSpellIds.TameNightsaberStalker => QuestSpellIds.TameNightsaberStalker1,
+                QuestSpellIds.TameStrigidScreecher => QuestSpellIds.TameStrigidScreecher1,
+                QuestSpellIds.TameBarbedCrawler => QuestSpellIds.TameBarbedCrawler1,
+                QuestSpellIds.TameGreaterTimberstrider => QuestSpellIds.TameGreaterTimberstrider1,
+                QuestSpellIds.TameNightstalker => QuestSpellIds.TameNightstalker1,
+                QuestSpellIds.TameCrazedDragonhawk => QuestSpellIds.TameCrazedDragonhawk1,
+                QuestSpellIds.TameElderSpringpaw => QuestSpellIds.TameElderSpringpaw1,
+                QuestSpellIds.TameMistbat => QuestSpellIds.TameMistbat1,
                 _ => 0
             };
 
@@ -1538,16 +1538,16 @@ namespace Scripts.Spells.Quest
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.GromsTrollTribute,
-                                     SpellIds.GromsTaurenTribute,
-                                     SpellIds.GromsUndeadTribute,
-                                     SpellIds.GromsOrcTribute,
-                                     SpellIds.GromsBloodelfTribute,
-                                     SpellIds.UthersHumanTribute,
-                                     SpellIds.UthersGnomeTribute,
-                                     SpellIds.UthersDwarfTribute,
-                                     SpellIds.UthersNightelfTribute,
-                                     SpellIds.UthersDraeneiTribute);
+            return ValidateSpellInfo(QuestSpellIds.GromsTrollTribute,
+                                     QuestSpellIds.GromsTaurenTribute,
+                                     QuestSpellIds.GromsUndeadTribute,
+                                     QuestSpellIds.GromsOrcTribute,
+                                     QuestSpellIds.GromsBloodelfTribute,
+                                     QuestSpellIds.UthersHumanTribute,
+                                     QuestSpellIds.UthersGnomeTribute,
+                                     QuestSpellIds.UthersDwarfTribute,
+                                     QuestSpellIds.UthersNightelfTribute,
+                                     QuestSpellIds.UthersDraeneiTribute);
         }
 
         public override void Register()
@@ -1564,16 +1564,16 @@ namespace Scripts.Spells.Quest
 
             uint spell = caster.GetRace() switch
             {
-                Race.Troll => SpellIds.GromsTrollTribute,
-                Race.Tauren => SpellIds.GromsTaurenTribute,
-                Race.Undead => SpellIds.GromsUndeadTribute,
-                Race.Orc => SpellIds.GromsOrcTribute,
-                Race.BloodElf => SpellIds.GromsBloodelfTribute,
-                Race.Human => SpellIds.UthersHumanTribute,
-                Race.Gnome => SpellIds.UthersGnomeTribute,
-                Race.Dwarf => SpellIds.UthersDwarfTribute,
-                Race.NightElf => SpellIds.UthersNightelfTribute,
-                Race.Draenei => SpellIds.UthersDraeneiTribute,
+                Race.Troll => QuestSpellIds.GromsTrollTribute,
+                Race.Tauren => QuestSpellIds.GromsTaurenTribute,
+                Race.Undead => QuestSpellIds.GromsUndeadTribute,
+                Race.Orc => QuestSpellIds.GromsOrcTribute,
+                Race.BloodElf => QuestSpellIds.GromsBloodelfTribute,
+                Race.Human => QuestSpellIds.UthersHumanTribute,
+                Race.Gnome => QuestSpellIds.UthersGnomeTribute,
+                Race.Dwarf => QuestSpellIds.UthersDwarfTribute,
+                Race.NightElf => QuestSpellIds.UthersNightelfTribute,
+                Race.Draenei => QuestSpellIds.UthersDraeneiTribute,
                 _ => 0
             };
 
@@ -1589,7 +1589,7 @@ namespace Scripts.Spells.Quest
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.SummonWorgen);
+            return ValidateSpellInfo(QuestSpellIds.SummonWorgen);
         }
 
         public override void Register()
@@ -1599,7 +1599,7 @@ namespace Scripts.Spells.Quest
 
         private void HandleDummy(uint effIndex)
         {
-            GetCaster().CastSpell(GetCaster(), SpellIds.SummonWorgen, true);
+            GetCaster().CastSpell(GetCaster(), QuestSpellIds.SummonWorgen, true);
         }
     }
 
@@ -1630,7 +1630,7 @@ namespace Scripts.Spells.Quest
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.ForgeCredit, SpellIds.TownHallCredit, SpellIds.ScarletHoldCredit, SpellIds.ChapelCredit);
+            return ValidateSpellInfo(QuestSpellIds.ForgeCredit, QuestSpellIds.TownHallCredit, QuestSpellIds.ScarletHoldCredit, QuestSpellIds.ChapelCredit);
         }
 
         public override void Register()
@@ -1645,19 +1645,19 @@ namespace Scripts.Spells.Quest
             switch (GetHitCreature().GetEntry())
             {
                 case CreatureIds.NewAvalonForge:
-                    spellId = SpellIds.ForgeCredit;
+                    spellId = QuestSpellIds.ForgeCredit;
 
                     break;
                 case CreatureIds.NewAvalonTownHall:
-                    spellId = SpellIds.TownHallCredit;
+                    spellId = QuestSpellIds.TownHallCredit;
 
                     break;
                 case CreatureIds.ScarletHold:
-                    spellId = SpellIds.ScarletHoldCredit;
+                    spellId = QuestSpellIds.ScarletHoldCredit;
 
                     break;
                 case CreatureIds.ChapelOfTheCrimsonFlame:
-                    spellId = SpellIds.ChapelCredit;
+                    spellId = QuestSpellIds.ChapelCredit;
 
                     break;
                 default:
@@ -1686,7 +1686,7 @@ namespace Scripts.Spells.Quest
             {
                 player.StopCastingCharm();
                 player.StopCastingBindSight();
-                player.RemoveAura(SpellIds.TheEyeOfAcherus);
+                player.RemoveAura(QuestSpellIds.TheEyeOfAcherus);
             }
         }
     }
@@ -1734,7 +1734,7 @@ namespace Scripts.Spells.Quest
 
         public override bool Validate(SpellInfo spell)
         {
-            return ValidateSpellInfo(SpellIds.RideGymer);
+            return ValidateSpellInfo(QuestSpellIds.RideGymer);
         }
 
         public override void Register()
@@ -1749,8 +1749,8 @@ namespace Scripts.Spells.Quest
 
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.AddSpellMod(SpellValueMod.BasePoint0, 2);
-            GetHitCreature().CastSpell(GetCaster(), SpellIds.RideGymer, args);
-            GetHitCreature().CastSpell(GetHitCreature(), SpellIds.Grabbed, true);
+            GetHitCreature().CastSpell(GetCaster(), QuestSpellIds.RideGymer, args);
+            GetHitCreature().CastSpell(GetHitCreature(), QuestSpellIds.Grabbed, true);
         }
     }
 
@@ -1775,7 +1775,7 @@ namespace Scripts.Spells.Quest
                 if (passenger)
                 {
                     passenger.ExitVehicle();
-                    caster.CastSpell(passenger, SpellIds.VargulExplosion, true);
+                    caster.CastSpell(passenger, QuestSpellIds.VargulExplosion, true);
                 }
             }
         }
@@ -1788,7 +1788,7 @@ namespace Scripts.Spells.Quest
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.IllidanKillCredit);
+            return ValidateSpellInfo(QuestSpellIds.IllidanKillCredit);
         }
 
         public override void Register()
@@ -1805,7 +1805,7 @@ namespace Scripts.Spells.Quest
                 Unit passenger = caster.GetVehicleKit().GetPassenger(0);
 
                 if (passenger)
-                    passenger.CastSpell(passenger, SpellIds.IllidanKillCredit, true);
+                    passenger.CastSpell(passenger, QuestSpellIds.IllidanKillCredit, true);
             }
         }
     }
@@ -1817,7 +1817,7 @@ namespace Scripts.Spells.Quest
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.TotemOfTheEarthenRing);
+            return ValidateSpellInfo(QuestSpellIds.TotemOfTheEarthenRing);
         }
 
         public override void Register()
@@ -1830,7 +1830,7 @@ namespace Scripts.Spells.Quest
             Player player = GetHitPlayer();
 
             if (player)
-                player.CastSpell(player, SpellIds.TotemOfTheEarthenRing, new CastSpellExtraArgs(TriggerCastFlags.FullMask)); // ignore reagent cost, consumed by quest
+                player.CastSpell(player, QuestSpellIds.TotemOfTheEarthenRing, new CastSpellExtraArgs(TriggerCastFlags.FullMask)); // ignore reagent cost, consumed by quest
         }
     }
 
@@ -1841,7 +1841,7 @@ namespace Scripts.Spells.Quest
 
         public override bool Validate(SpellInfo spell)
         {
-            return ValidateSpellInfo(SpellIds.SummonSandGnome, SpellIds.SummonBoneSlicer);
+            return ValidateSpellInfo(QuestSpellIds.SummonSandGnome, QuestSpellIds.SummonBoneSlicer);
         }
 
         public override void Register()
@@ -1857,7 +1857,7 @@ namespace Scripts.Spells.Quest
             Unit caster = GetCaster();
 
             if (caster)
-                caster.CastSpell(caster, RandomHelper.URand(SpellIds.SummonSandGnome, SpellIds.SummonBoneSlicer), true);
+                caster.CastSpell(caster, RandomHelper.URand(QuestSpellIds.SummonSandGnome, QuestSpellIds.SummonBoneSlicer), true);
         }
     }
 
@@ -1866,7 +1866,7 @@ namespace Scripts.Spells.Quest
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.RenewedLife);
+            return ValidateSpellInfo(QuestSpellIds.RenewedLife);
         }
 
         public void OnCast()
@@ -1877,7 +1877,7 @@ namespace Scripts.Spells.Quest
             if (injuredStormwindInfantry)
             {
                 injuredStormwindInfantry.SetCreatorGUID(caster.GetGUID());
-                injuredStormwindInfantry.CastSpell(injuredStormwindInfantry, SpellIds.RenewedLife, true);
+                injuredStormwindInfantry.CastSpell(injuredStormwindInfantry, QuestSpellIds.RenewedLife, true);
             }
         }
     }
