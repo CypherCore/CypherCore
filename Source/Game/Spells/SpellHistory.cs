@@ -476,6 +476,11 @@ namespace Game.Spells
                 StartCooldown(spellInfo, itemId, spell);
         }
 
+        public void AddCooldown<T>(T spellId, uint itemId, TimeSpan cooldownDuration) where T : struct, System.Enum
+        {
+            AddCooldown(Convert.ToUInt32(spellId), itemId, cooldownDuration);
+        }
+
         public void AddCooldown(uint spellId, uint itemId, TimeSpan cooldownDuration)
         {
             DateTime now = GameTime.GetSystemTime();
@@ -544,6 +549,11 @@ namespace Game.Spells
                 _categoryCooldowns.Remove(cooldownEntry.CategoryId);
                 _spellCooldowns.Remove(cooldownEntry.SpellId);
             }
+        }
+
+        public void ModifyCooldown<T>(T spellId, TimeSpan cooldownMod, bool withoutCategoryCooldown = false) where T : struct, System.Enum
+        {
+            ModifyCooldown(Convert.ToUInt32(spellId), cooldownMod, withoutCategoryCooldown);
         }
 
         public void ModifyCooldown(uint spellId, TimeSpan cooldownMod, bool withoutCategoryCooldown = false)
