@@ -24,6 +24,8 @@ namespace Scripts.Spells.Shaman
                 castTime = 0;
                 _takenPower = requiredMaelstrom;
             }
+
+            return castTime;
         }
 
         private void HandleEnergize(uint UnnamedParameter)
