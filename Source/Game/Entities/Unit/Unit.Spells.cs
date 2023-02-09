@@ -1582,7 +1582,7 @@ namespace Game.Entities
             // or generate one on our own
             else
             {
-                foreach (var pair in GetAppliedAuras().KeyValueList)
+                foreach (var pair in GetAppliedAuras().KeyValueList.ToArray())
                     processAuraApplication(pair.Value);
             }
         }
@@ -3866,7 +3866,7 @@ namespace Game.Entities
 
         public Aura GetAura(uint spellId)
         {
-            AuraApplication aurApp = GetAuraApplication(spellId).FirstOrDefault();
+            AuraApplication aurApp = GetAuraApplication(spellId)?.FirstOrDefault();
             return aurApp?.GetBase();
         }
 

@@ -1905,6 +1905,8 @@ namespace Game.Spells
             {
                 foreach (var eff in _effects)
                 {
+                    if (eff == null) continue;
+
                     var i = eff.GetEffIndex();
                     if (!Convert.ToBoolean(procEffectMask & (1 << i)))
                         continue;
