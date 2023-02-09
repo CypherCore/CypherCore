@@ -169,7 +169,7 @@ namespace Scripts.Spells.Shaman
         public const uint SPELL_SEARING_ASSULAT_TALENT_PROC = 268429;
         public const uint SPELL_GATHERING_STORMS_AURA = 198300;
         public const uint SPELL_CRASHING_STORM_TALENT_DAMAGE = 210801;
-        public const uint SPELL_CRASHING_STORM_TALENT_AT = 210797
+        public const uint SPELL_CRASHING_STORM_TALENT_AT = 210797;
     }
 
     internal struct Resurgence
@@ -207,7 +207,7 @@ namespace Scripts.Spells.Shaman
         public const uint SPELL_TOTEM_ANCESTRAL_PROTECTION_AT = 207495;
         public const uint SPELL_TOTEM_TOTEMIC_REVIVAL = 207553;
         public const uint SPELL_TOTEM_SKYFURY_EFFECT = 208963;
-        public const uint SPELL_TOTEM_GROUDING_TOTEM_EFFECT = 8178
+        public const uint SPELL_TOTEM_GROUDING_TOTEM_EFFECT = 8178;
     }
 
     // Spells used by the Earthgrab Totem of the Shaman
@@ -239,23 +239,23 @@ namespace Scripts.Spells.Shaman
     internal struct ShamanSpellIcons
     {
         public const uint SHAMAN_ICON_ID_SOOTHING_RAIN = 2011;
-        public const uint SHAMAN_ICON_ID_SHAMAN_LAVA_FLOW = 3087
+        public const uint SHAMAN_ICON_ID_SHAMAN_LAVA_FLOW = 3087;
     }
 
     internal struct MiscSpells
     {
         public const uint SPELL_HUNTER_INSANITY = 95809;
-        public const uint SPELL_MAGE_TEMPORAL_DISPLACEMENT = 80354
+        public const uint SPELL_MAGE_TEMPORAL_DISPLACEMENT = 80354;
     }
 
     internal struct AncestralAwakeningProc
     {
-        public const uint SPELL_ANCESTRAL_AWAKENING_PROC = 52752
+        public const uint SPELL_ANCESTRAL_AWAKENING_PROC = 52752;
     }
 
     internal struct ShamanNpcs
     {
         public const uint NPC_RAINFALL = 73400;
-        public const uint NPC_HEALING_RAIN = 73400
+        public const uint NPC_HEALING_RAIN = 73400;
     }
 }
