@@ -31,7 +31,7 @@ internal class spell_item_worn_troll_dice : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(int effIndex)
+	private void HandleScript(uint effIndex)
 	{
 		GetCaster().TextEmote(TextIds.WornTrollDice, GetHitUnit());
 

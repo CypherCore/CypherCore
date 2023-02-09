@@ -548,7 +548,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
                 targets.RemoveAll(new VictimCheck(caster, true));
         }
 
-        private void HandleWarningEffect(int effIndex)
+        private void HandleWarningEffect(uint effIndex)
         {
             Creature caster = GetCaster() ? GetCaster().ToCreature() : null;
 
@@ -629,7 +629,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleHit(int effIndex)
+        private void HandleHit(uint effIndex)
         {
             GetHitUnit().CastSpell(GetHitUnit(), SpellIds.SearingBarrageSelector, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)GetSpellInfo().Id));
         }
@@ -656,7 +656,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             MiscConst.PreferNonTankTargetsAndResizeTargets(targets, GetCaster());
         }
 
-        private void HandleHit(int effIndex)
+        private void HandleHit(uint effIndex)
         {
             uint spellId = GetEffectValue() == SpellIds.SearingBarrageDummyAnnihilator ? SpellIds.SearingBarrageDamageAnnihilator : SpellIds.SearingBarrageDamageDecimator;
             Unit caster = GetCaster();
@@ -687,7 +687,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             MiscConst.PreferNonTankTargetsAndResizeTargets(targets, GetCaster());
         }
 
-        private void HandleHit(int effIndex)
+        private void HandleHit(uint effIndex)
         {
             Unit caster = GetCaster();
 
@@ -769,7 +769,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleHit(int effIndex)
+        private void HandleHit(uint effIndex)
         {
             Unit caster = GetCaster();
 
@@ -793,7 +793,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             SpellEffects.Add(new EffectHandler(HandleHit, 1, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleHit(int effIndex)
+        private void HandleHit(uint effIndex)
         {
             Unit target = GetHitUnit();
 
@@ -851,7 +851,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             SpellEffects.Add(new EffectHandler(HandleDummyEffect, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleDummyEffect(int effIndex)
+        private void HandleDummyEffect(uint effIndex)
         {
             Creature caster = GetHitCreature();
 

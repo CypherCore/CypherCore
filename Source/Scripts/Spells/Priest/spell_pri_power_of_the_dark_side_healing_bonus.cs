@@ -22,7 +22,7 @@ internal class spell_pri_power_of_the_dark_side_healing_bonus : SpellScript, IHa
 		SpellEffects.Add(new EffectHandler(HandleLaunchTarget, 0, SpellEffectName.Heal, SpellScriptHookType.LaunchTarget));
 	}
 
-	private void HandleLaunchTarget(int effIndex)
+	private void HandleLaunchTarget(uint effIndex)
 	{
 		var powerOfTheDarkSide = GetCaster().GetAuraEffect(PriestSpells.PowerOfTheDarkSide, 0);
 

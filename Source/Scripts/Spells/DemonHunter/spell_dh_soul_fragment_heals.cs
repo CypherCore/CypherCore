@@ -15,13 +15,13 @@ public class spell_dh_soul_fragment_heals : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleHit(int effIndex)
+	private void HandleHit(uint effIndex)
 	{
 		if (!GetCaster().HasAura(DemonHunterSpells.SPELL_DH_DEMONIC_APPETITE))
 			PreventHitDefaultEffect(effIndex);
 	}
 
-	private void HandleHeal(int UnnamedParameter)
+	private void HandleHeal(uint UnnamedParameter)
 	{
 		var caster = GetCaster();
 

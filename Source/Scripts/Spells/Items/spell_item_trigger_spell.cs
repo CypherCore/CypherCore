@@ -32,7 +32,7 @@ internal class spell_item_trigger_spell : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
 	}
 
-	private void HandleDummy(int effIndex)
+	private void HandleDummy(uint effIndex)
 	{
 		var caster = GetCaster();
 		var item   = GetCastItem();

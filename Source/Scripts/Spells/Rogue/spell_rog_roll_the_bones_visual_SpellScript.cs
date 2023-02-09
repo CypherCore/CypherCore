@@ -12,7 +12,7 @@ public class spell_rog_roll_the_bones_visual_SpellScript : SpellScript, IHasSpel
 	public List<ISpellEffect> SpellEffects => new();
 
 
-	private void Prevent(int effIndex)
+	private void Prevent(uint effIndex)
 	{
 		var caster = GetCaster();
 

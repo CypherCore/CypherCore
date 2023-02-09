@@ -12,7 +12,7 @@ public class spell_dru_blessing_of_the_ancients : SpellScript, IHasSpellEffects
 	public List<ISpellEffect> SpellEffects => new();
 
 
-	private void HandleDummy(int UnnamedParameter)
+	private void HandleDummy(uint UnnamedParameter)
 	{
 		var removeAura = GetCaster().HasAura(DruidSpells.SPELL_DRUID_BLESSING_OF_ELUNE) ? (uint)DruidSpells.SPELL_DRUID_BLESSING_OF_ELUNE : (uint)DruidSpells.SPELL_DRUID_BLESSING_OF_ANSHE;
 		var addAura    = GetCaster().HasAura(DruidSpells.SPELL_DRUID_BLESSING_OF_ELUNE) ? (uint)DruidSpells.SPELL_DRUID_BLESSING_OF_ANSHE : (uint)DruidSpells.SPELL_DRUID_BLESSING_OF_ELUNE;

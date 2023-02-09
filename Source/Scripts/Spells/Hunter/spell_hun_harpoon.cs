@@ -31,7 +31,7 @@ public class spell_hun_harpoon : SpellScript, IHasSpellEffects, ISpellAfterCast,
 		player.CastSpell(target, HunterSpells.SPELL_HUNTER_HARPOON_ROOT, true);
 	}
 
-	private void HandleDummy(int UnnamedParameter)
+	private void HandleDummy(uint UnnamedParameter)
 	{
 		var player = GetCaster().ToPlayer();
 		var target = GetExplTargetUnit();

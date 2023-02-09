@@ -16,7 +16,7 @@ internal class spell_gen_ds_flush_knockback : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(int effIndex)
+	private void HandleScript(uint effIndex)
 	{
 		// Here the Target is the water spout and determines the position where the player is knocked from
 		var target = GetHitUnit();

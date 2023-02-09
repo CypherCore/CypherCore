@@ -53,7 +53,7 @@ namespace Scripts.DragonIsles
             SpellEffects.Add(new EffectHandler(HandleTeleport, 0, SpellEffectName.TeleportUnits, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleTeleport(int effIndex)
+        private void HandleTeleport(uint effIndex)
         {
             var room = MiscConst.LoginRoomData[RandomHelper.URand(0, 3)];
 

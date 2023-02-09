@@ -13,7 +13,7 @@ public class spell_dh_fel_devastation_damage : SpellScript, IHasSpellEffects
 
 	private bool firstHit = true;
 
-	private void HandleHit(int UnnamedParameter)
+	private void HandleHit(uint UnnamedParameter)
 	{
 		var caster = GetCaster();
 

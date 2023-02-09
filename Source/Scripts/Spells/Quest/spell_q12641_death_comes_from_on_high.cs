@@ -23,7 +23,7 @@ internal class spell_q12641_death_comes_from_on_high : SpellScript, IHasSpellEff
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(int effIndex)
+	private void HandleDummy(uint effIndex)
 	{
 		uint spellId;
 

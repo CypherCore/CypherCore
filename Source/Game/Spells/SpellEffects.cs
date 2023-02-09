@@ -1068,7 +1068,7 @@ namespace Game.Spells
                 return;
 
             // only handle at last effect
-            for (int i = effectInfo.EffectIndex + 1; i < m_spellInfo.GetEffects().Count; ++i)
+            for (uint i = effectInfo.EffectIndex + 1; i < m_spellInfo.GetEffects().Count; ++i)
                 if (m_spellInfo.GetEffect(i).IsEffect(SpellEffectName.PersistentAreaAura))
                     return;
 

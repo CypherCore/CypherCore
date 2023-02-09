@@ -289,9 +289,9 @@ namespace Game.Entities
             return false;
         }
 
-        public SpellTargetPosition GetSpellTargetPosition(uint spell_id, int effIndex)
+        public SpellTargetPosition GetSpellTargetPosition(uint spell_id, uint effIndex)
         {
-            return mSpellTargetPositions.LookupByKey(new KeyValuePair<uint, int>(spell_id, effIndex));
+            return mSpellTargetPositions.LookupByKey(new KeyValuePair<uint, uint>(spell_id, effIndex));
         }
 
         public List<SpellGroup> GetSpellSpellGroupMapBounds(uint spell_id)
@@ -1016,7 +1016,7 @@ namespace Game.Entities
             do
             {
                 uint spellId = result.Read<uint>(0);
-                int effIndex = result.Read<byte>(1);
+                uint effIndex = result.Read<byte>(1);
 
                 SpellTargetPosition st = new();
                 st.target_mapId = result.Read<uint>(2);
@@ -1058,7 +1058,7 @@ namespace Game.Entities
 
                 if (spellInfo.GetEffect(effIndex).TargetA.GetTarget() == Targets.DestDb || spellInfo.GetEffect(effIndex).TargetB.GetTarget() == Targets.DestDb)
                 {
-                    var key = new KeyValuePair<uint, int>(spellId, effIndex);
+                    var key = new KeyValuePair<uint, uint>(spellId, effIndex);
                     mSpellTargetPositions[key] = st;
                     ++count;
                 }
@@ -2991,7 +2991,7 @@ namespace Game.Entities
             }
         }
 
-        void ApplySpellEffectFix(SpellInfo spellInfo, int effectIndex, Action<SpellEffectInfo> fix)
+        void ApplySpellEffectFix(SpellInfo spellInfo, uint effectIndex, Action<SpellEffectInfo> fix)
         {
             if (spellInfo.GetEffects().Count <= effectIndex)
             {
@@ -4765,7 +4765,7 @@ namespace Game.Entities
         MultiMap<uint, uint> mSpellReq = new();
         Dictionary<uint, SpellLearnSkillNode> mSpellLearnSkills = new();
         MultiMap<uint, SpellLearnSpellNode> mSpellLearnSpells = new();
-        Dictionary<KeyValuePair<uint, int>, SpellTargetPosition> mSpellTargetPositions = new();
+        Dictionary<KeyValuePair<uint, uint>, SpellTargetPosition> mSpellTargetPositions = new();
         MultiMap<uint, SpellGroup> mSpellSpellGroup = new();
         MultiMap<SpellGroup, int> mSpellGroupSpell = new();
         Dictionary<SpellGroup, SpellGroupStackRule> mSpellGroupStack = new();

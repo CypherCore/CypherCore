@@ -22,7 +22,7 @@ internal class spell_mage_living_bomb : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(int effIndex)
+	private void HandleDummy(uint effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
 		GetCaster().CastSpell(GetHitUnit(), MageSpells.LivingBombPeriodic, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint2, 1));

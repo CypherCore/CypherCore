@@ -24,7 +24,7 @@ namespace Scripts.Spells.Shaman
 			targets.RemoveIf(new UnitAuraCheck<WorldObject>(true, ShamanSpells.SPELL_SHAMAN_FLAME_SHOCK, GetCaster().GetGUID()));
 		}
 
-		private void HandleScript(int UnnamedParameter)
+		private void HandleScript(uint UnnamedParameter)
 		{
 			var mainTarget = GetExplTargetUnit();
 

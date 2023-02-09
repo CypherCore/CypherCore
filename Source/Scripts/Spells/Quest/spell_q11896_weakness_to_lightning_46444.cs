@@ -16,7 +16,7 @@ internal class spell_q11896_weakness_to_lightning_46444 : SpellScript, IHasSpell
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(int effIndex)
+	private void HandleScript(uint effIndex)
 	{
 		var target = GetHitUnit();
 

@@ -67,7 +67,7 @@ public class spell_hun_pet_basic_attack : SpellScript, IHasSpellEffects, ISpellC
 		return SpellCastResult.SpellCastOk;
 	}
 
-	private void HandleDamage(int UnnamedParameter)
+	private void HandleDamage(uint UnnamedParameter)
 	{
 		var pet = GetCaster().ToPet();
 

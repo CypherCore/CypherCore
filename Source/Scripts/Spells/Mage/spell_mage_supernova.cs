@@ -16,7 +16,7 @@ internal class spell_mage_supernova : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleDamage, 1, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDamage(int effIndex)
+	private void HandleDamage(uint effIndex)
 	{
 		if (GetExplTargetUnit() == GetHitUnit())
 		{

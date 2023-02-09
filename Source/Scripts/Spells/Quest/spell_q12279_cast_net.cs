@@ -16,7 +16,7 @@ internal class spell_q12279_cast_net : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleActiveObject, 1, SpellEffectName.ActivateObject, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleActiveObject(int effIndex)
+	private void HandleActiveObject(uint effIndex)
 	{
 		GetHitGObj().SetLootState(LootState.JustDeactivated);
 	}

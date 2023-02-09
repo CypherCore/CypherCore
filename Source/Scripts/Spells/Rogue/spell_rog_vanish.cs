@@ -22,7 +22,7 @@ internal class spell_rog_vanish : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(OnLaunchTarget, 1, SpellEffectName.TriggerSpell, SpellScriptHookType.LaunchTarget));
 	}
 
-	private void OnLaunchTarget(int effIndex)
+	private void OnLaunchTarget(uint effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
 

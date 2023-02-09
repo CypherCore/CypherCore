@@ -17,7 +17,7 @@ public class spell_mage_fire_on : SpellScript, IHasSpellEffects
 		return ValidateSpellInfo(MageSpells.SPELL_MAGE_FIRE_ON, MageSpells.SPELL_MAGE_FIRE_BLAST);
 	}
 
-	private void HandleDummy(int UnnamedParameter)
+	private void HandleDummy(uint UnnamedParameter)
 	{
 		var caster = GetCaster();
 		var target = GetHitUnit();

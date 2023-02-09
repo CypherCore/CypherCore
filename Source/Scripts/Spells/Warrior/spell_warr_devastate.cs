@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warrior
 	{
 		public List<ISpellEffect> SpellEffects => new();
 
-		private void HandleOnHit(int effIndex)
+		private void HandleOnHit(uint effIndex)
 		{
 			var caster = GetCaster();
 

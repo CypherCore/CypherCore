@@ -11,7 +11,7 @@ public class spell_pri_shadow_word_death : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleDamage(int UnnamedParameter)
+	private void HandleDamage(uint UnnamedParameter)
 	{
 		var target = GetHitUnit();
 

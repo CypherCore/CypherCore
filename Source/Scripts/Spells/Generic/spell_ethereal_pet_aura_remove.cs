@@ -22,7 +22,7 @@ internal class spell_ethereal_pet_aura_remove : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScriptEffect(int effIndex)
+	private void HandleScriptEffect(uint effIndex)
 	{
 		GetHitUnit().RemoveAurasDueToSpell(GenericSpellIds.EtherealPetAura);
 	}

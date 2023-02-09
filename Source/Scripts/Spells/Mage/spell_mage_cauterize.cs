@@ -16,7 +16,7 @@ internal class spell_mage_cauterize : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(SuppressSpeedBuff, 2, SpellEffectName.TriggerSpell, SpellScriptHookType.Launch));
 	}
 
-	private void SuppressSpeedBuff(int effIndex)
+	private void SuppressSpeedBuff(uint effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
 	}

@@ -22,7 +22,7 @@ internal class spell_dh_sigil_of_chains : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleEffectHitTarget(int effIndex)
+	private void HandleEffectHitTarget(uint effIndex)
 	{
 		var loc = GetExplTargetDest();
 

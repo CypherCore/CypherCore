@@ -22,7 +22,7 @@ internal class spell_sha_lightning_bolt : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.Launch));
 	}
 
-	private void HandleScript(int effIndex)
+	private void HandleScript(uint effIndex)
 	{
 		var energizeAmount = GetCaster().GetAuraEffect(ShamanSpells.MaelstromController, 0);
 

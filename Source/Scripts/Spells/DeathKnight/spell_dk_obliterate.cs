@@ -13,7 +13,7 @@ public class spell_dk_obliterate : SpellScript, IHasSpellEffects
 	public List<ISpellEffect> SpellEffects => new();
 
 
-	private void HandleHit(int UnnamedParameter)
+	private void HandleHit(uint UnnamedParameter)
 	{
 		GetCaster().RemoveAurasDueToSpell(DeathKnightSpells.SPELL_DK_KILLING_MACHINE);
 

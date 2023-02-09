@@ -27,7 +27,7 @@ internal class spell_item_dimensional_ripper_area52 : SpellScript, IHasSpellEffe
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(int effIndex)
+	private void HandleScript(uint effIndex)
 	{
 		if (!RandomHelper.randChance(50)) // 50% success
 			return;

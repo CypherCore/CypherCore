@@ -17,7 +17,7 @@ public class spell_pri_leap_of_faith : SpellScript, IHasSpellEffects, ISpellOnHi
 		return Global.SpellMgr.GetSpellInfo(PriestSpells.SPELL_PRIEST_LEAP_OF_FAITH_GLYPH, Difficulty.None) != null && Global.SpellMgr.GetSpellInfo(PriestSpells.SPELL_PRIEST_LEAP_OF_FAITH_EFFECT, Difficulty.None) != null;
 	}
 
-	private void HandleScript(int UnnamedParameter)
+	private void HandleScript(uint UnnamedParameter)
 	{
 		var caster = GetCaster();
 

@@ -11,7 +11,7 @@ public class spell_dh_consume_soul_missile : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleHit(int effIndex)
+	private void HandleHit(uint effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
 		var caster = GetCaster();

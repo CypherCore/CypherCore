@@ -15,9 +15,9 @@ namespace Game.Scripting.Interfaces
         Difficulty GetCastDifficulty();
         Unit GetCaster();
         Item GetCastItem();
-        long GetCorpseTargetCountForEffect(int effect);
+        long GetCorpseTargetCountForEffect(uint effect);
         SpellEffectInfo GetEffectInfo();
-        SpellEffectInfo GetEffectInfo(int effIndex);
+        SpellEffectInfo GetEffectInfo(uint effIndex);
         int GetEffectValue();
         float GetEffectVariance();
         WorldLocation GetExplTargetDest();
@@ -25,7 +25,7 @@ namespace Game.Scripting.Interfaces
         Item GetExplTargetItem();
         Unit GetExplTargetUnit();
         WorldObject GetExplTargetWorldObject();
-        long GetGameObjectTargetCountForEffect(int effect);
+        long GetGameObjectTargetCountForEffect(uint effect);
         GameObject GetGObjCaster();
         Aura GetHitAura(bool dynObjAura = false);
         Corpse GetHitCorpse();
@@ -37,13 +37,13 @@ namespace Game.Scripting.Interfaces
         Item GetHitItem();
         Player GetHitPlayer();
         Unit GetHitUnit();
-        long GetItemTargetCountForEffect(int effect);
+        long GetItemTargetCountForEffect(uint effect);
         Unit GetOriginalCaster();
         Spell GetSpell();
         SpellInfo GetSpellInfo();
         SpellValue GetSpellValue();
         SpellInfo GetTriggeringSpell();
-        long GetUnitTargetCountForEffect(int effect);
+        long GetUnitTargetCountForEffect(uint effect);
         bool IsHitCrit();
         bool IsInCheckCastHook();
         bool IsInEffectHook();
@@ -51,8 +51,8 @@ namespace Game.Scripting.Interfaces
         bool IsInTargetHook();
         void PreventHitAura();
         void PreventHitDamage();
-        void PreventHitDefaultEffect(int effIndex);
-        void PreventHitEffect(int effIndex);
+        void PreventHitDefaultEffect(uint effIndex);
+        void PreventHitEffect(uint effIndex);
         void SelectRandomInjuredTargets(List<WorldObject> targets, uint maxTargets, bool prioritizePlayers);
         void SetCustomCastResultMessage(SpellCustomErrors result);
         void SetEffectValue(int value);
@@ -62,8 +62,8 @@ namespace Game.Scripting.Interfaces
         void SetHitHeal(int heal);
         void _FinishScriptCall();
         void _InitHit();
-        bool _IsDefaultEffectPrevented(int effIndex);
-        bool _IsEffectPrevented(int effIndex);
+        bool _IsDefaultEffectPrevented(uint effIndex);
+        bool _IsEffectPrevented(uint effIndex);
         bool _Load(Spell spell);
         void _PrepareScriptCall(SpellScriptHookType hookType);
     }

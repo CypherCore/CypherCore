@@ -23,7 +23,7 @@ public class spell_dru_rake : SpellScript, IHasSpellEffects
 		return true;
 	}
 
-	private void HandleOnHit(int UnnamedParameter)
+	private void HandleOnHit(uint UnnamedParameter)
 	{
 		var caster = GetCaster();
 		var target = GetExplTargetUnit();

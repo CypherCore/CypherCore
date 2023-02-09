@@ -17,7 +17,7 @@ internal class spell_item_mirrens_drinking_hat : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScriptEffect(int effIndex)
+	private void HandleScriptEffect(uint effIndex)
 	{
 		uint spellId = 0;
 

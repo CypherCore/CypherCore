@@ -21,7 +21,7 @@ internal class spell_gen_despawn_self : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleDummy, SpellConst.EffectAll, SpellEffectName.Any, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(int effIndex)
+	private void HandleDummy(uint effIndex)
 	{
 		if (GetEffectInfo().IsEffect(SpellEffectName.Dummy) ||
 		    GetEffectInfo().IsEffect(SpellEffectName.ScriptEffect))

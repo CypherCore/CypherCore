@@ -18,7 +18,7 @@ internal class spell_item_toy_train_set_pulse : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new ObjectAreaTargetSelectHandler(HandleTargets, SpellConst.EffectAll, Targets.UnitSrcAreaAlly));
 	}
 
-	private void HandleDummy(int index)
+	private void HandleDummy(uint index)
 	{
 		var target = GetHitUnit().ToPlayer();
 

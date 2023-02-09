@@ -59,7 +59,7 @@ namespace Scripts.Spells.Warrior
 
 		public List<ISpellEffect> SpellEffects { get; } = new();
 
-		private void HandleDummy(int effIndex)
+		private void HandleDummy(uint effIndex)
 		{
 			var dest = GetHitDest();
 

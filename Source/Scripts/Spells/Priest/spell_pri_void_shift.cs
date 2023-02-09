@@ -29,7 +29,7 @@ public class spell_pri_void_shift : SpellScript, IHasSpellEffects, ISpellCheckCa
 		return SpellCastResult.SpellCastOk;
 	}
 
-	private void HandleDummy(int UnnamedParameter)
+	private void HandleDummy(uint UnnamedParameter)
 	{
 		var _player = GetCaster().ToPlayer();
 

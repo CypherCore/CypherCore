@@ -43,7 +43,7 @@ internal class spell_sha_earthquake_tick : SpellScript, ISpellOnHit, IHasSpellEf
 		SpellEffects.Add(new EffectHandler(HandleDamageCalc, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.LaunchTarget));
 	}
 
-	private void HandleDamageCalc(int effIndex)
+	private void HandleDamageCalc(uint effIndex)
 	{
 		SetEffectValue((int)(GetCaster().SpellBaseDamageBonusDone(SpellSchoolMask.Nature) * 0.391f));
 	}

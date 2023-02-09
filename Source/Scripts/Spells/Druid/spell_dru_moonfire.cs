@@ -22,7 +22,7 @@ namespace Scripts.Spells.Druid
 			SpellEffects.Add(new EffectHandler(HandleOnHit, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 		}
 
-		private void HandleOnHit(int effIndex)
+		private void HandleOnHit(uint effIndex)
 		{
 			GetCaster().CastSpell(GetHitUnit(), DruidSpellIds.MoonfireDamage, true);
 		}

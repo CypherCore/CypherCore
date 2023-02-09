@@ -21,7 +21,7 @@ public class spell_hun_snake_hunter : SpellScript, IHasSpellEffects
 		return true;
 	}
 
-	private void HandleDummy(int UnnamedParameter)
+	private void HandleDummy(uint UnnamedParameter)
 	{
 		var player = GetCaster().ToPlayer();
 

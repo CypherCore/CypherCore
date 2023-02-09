@@ -16,7 +16,7 @@ internal class spell_q12459_seeds_of_natures_wrath : SpellScript, IHasSpellEffec
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(int effIndex)
+	private void HandleDummy(uint effIndex)
 	{
 		var creatureTarget = GetHitCreature();
 

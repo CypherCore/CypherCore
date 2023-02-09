@@ -32,7 +32,7 @@ namespace Scripts.Spells.Warrior
 			return true;
 		}
 
-		private void HandleDummy(int UnnamedParameter)
+		private void HandleDummy(uint UnnamedParameter)
 		{
 			var caster = GetCaster();
 

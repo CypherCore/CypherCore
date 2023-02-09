@@ -12,12 +12,12 @@ namespace Scripts.Spells.Warlock
 	{
 		public List<ISpellEffect> SpellEffects => new();
 
-		private void HandleOnHitMainTarget(int UnnamedParameter)
+		private void HandleOnHitMainTarget(uint UnnamedParameter)
 		{
 			GetCaster().ModifyPower(PowerType.SoulShards, 20);
 		}
 
-		private void HandleOnHitTarget(int UnnamedParameter)
+		private void HandleOnHitTarget(uint UnnamedParameter)
 		{
 			var target = GetHitUnit();
 

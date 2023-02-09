@@ -286,7 +286,7 @@ namespace Scripts.Spells.Paladin
             SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ApplyAura, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleDummy(int effIndex)
+        private void HandleDummy(uint effIndex)
         {
             Unit target = GetHitUnit();
 
@@ -629,7 +629,7 @@ namespace Scripts.Spells.Paladin
             SpellEffects.Add(new EffectHandler(HandleAoEHit, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleAoEHit(int effIndex)
+        private void HandleAoEHit(uint effIndex)
         {
             if (GetCaster().HasAura(SpellIds.ConsecrationProtectionAura))
                 GetCaster().CastSpell(GetHitUnit(), SpellIds.HammerOfTheRighteousAoe);
@@ -758,7 +758,7 @@ namespace Scripts.Spells.Paladin
             SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleDummy(int effIndex)
+        private void HandleDummy(uint effIndex)
         {
             if (GetCaster().IsFriendlyTo(GetHitUnit()))
                 GetCaster().CastSpell(GetHitUnit(), SpellIds.HolyPrismTargetAlly, true);
@@ -795,7 +795,7 @@ namespace Scripts.Spells.Paladin
             SpellEffects.Add(new EffectHandler(HandleScript, 2, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void SaveTargetGuid(int effIndex)
+        private void SaveTargetGuid(uint effIndex)
         {
             _targetGUID = GetHitUnit().GetGUID();
         }
@@ -826,7 +826,7 @@ namespace Scripts.Spells.Paladin
             targets.AddRange(_sharedTargets);
         }
 
-        private void HandleScript(int effIndex)
+        private void HandleScript(uint effIndex)
         {
             Unit initialTarget = Global.ObjAccessor.GetUnit(GetCaster(), _targetGUID);
 
@@ -873,7 +873,7 @@ namespace Scripts.Spells.Paladin
 
         public List<ISpellEffect> SpellEffects { get; } = new();
 
-        private void HandleDummy(int effIndex)
+        private void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
             Unit unitTarget = GetHitUnit();
@@ -1227,7 +1227,7 @@ namespace Scripts.Spells.Paladin
             SpellEffects.Add(new EffectHandler(HandleHitTarget, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleHitTarget(int effIndex)
+        private void HandleHitTarget(uint effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.TemplarVerdictDamage, true);
         }

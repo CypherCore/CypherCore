@@ -16,7 +16,7 @@ internal class spell_rog_eviscerate_SpellScript : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(CalculateDamage, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void CalculateDamage(int effIndex)
+	private void CalculateDamage(uint effIndex)
 	{
 		var damagePerCombo = GetHitDamage();
 		var t5             = GetCaster().GetAuraEffect(RogueSpells.T52pSetBonus, 0);

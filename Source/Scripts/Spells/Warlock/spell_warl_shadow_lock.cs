@@ -13,7 +13,7 @@ namespace Scripts.Spells.Warlock
 	{
 		public List<ISpellEffect> SpellEffects => new();
 
-		private void HandleHit(int UnnamedParameter)
+		private void HandleHit(uint UnnamedParameter)
 		{
 			var caster = GetCaster();
 			var target = GetHitUnit();

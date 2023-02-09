@@ -24,7 +24,7 @@ public class spell_druid_lunar_strike : SpellScript, IHasSpellEffects
 		return ValidateSpellInfo(MoonfireSpells.SPELL_DRUID_MOONFIRE_DAMAGE, Spells.SPELL_DRUID_WARRIOR_OF_ELUNE, Spells.SPELL_DRUID_LUNAR_STRIKE, Spells.SPELL_DRUID_NATURES_BALANCE);
 	}
 
-	private void HandleHitTarget(int UnnamedParameter)
+	private void HandleHitTarget(uint UnnamedParameter)
 	{
 		var explTarget    = GetExplTargetUnit();
 		var currentTarget = GetHitUnit();
@@ -55,7 +55,7 @@ public class spell_druid_lunar_strike : SpellScript, IHasSpellEffects
 			GetCaster().CastSpell(null, DruidSpells.SPELL_DRU_SOLAR_EMPOWEREMENT, true);
 	}
 
-	private void HandleHit(int UnnamedParameter)
+	private void HandleHit(uint UnnamedParameter)
 	{
 		var WarriorOfElune = GetCaster().GetAura(Spells.SPELL_DRUID_WARRIOR_OF_ELUNE);
 

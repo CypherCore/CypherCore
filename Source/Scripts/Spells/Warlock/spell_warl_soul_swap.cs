@@ -22,7 +22,7 @@ namespace Scripts.Spells.Warlock
 			SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
 		}
 
-		private void HandleHit(int effIndex)
+		private void HandleHit(uint effIndex)
 		{
 			GetCaster().CastSpell(GetCaster(), WarlockSpells.SOUL_SWAP_OVERRIDE, true);
 			GetHitUnit().CastSpell(GetCaster(), WarlockSpells.SOUL_SWAP_OVERRIDE, true);

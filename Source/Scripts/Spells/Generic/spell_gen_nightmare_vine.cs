@@ -22,7 +22,7 @@ internal class spell_gen_nightmare_vine : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(int effIndex)
+	private void HandleScript(uint effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
 		var target = GetHitUnit();

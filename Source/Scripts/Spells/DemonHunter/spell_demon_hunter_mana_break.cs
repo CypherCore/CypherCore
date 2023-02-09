@@ -12,7 +12,7 @@ public class spell_demon_hunter_mana_break : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	public void HandleHit(int UnnamedParameter)
+	public void HandleHit(uint UnnamedParameter)
 	{
 		var caster = GetCaster();
 		var target = GetHitUnit();

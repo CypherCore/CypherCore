@@ -16,7 +16,7 @@ internal class spell_gen_consumption : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleDamageCalc, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.LaunchTarget));
 	}
 
-	private void HandleDamageCalc(int effIndex)
+	private void HandleDamageCalc(uint effIndex)
 	{
 		var caster = GetCaster().ToCreature();
 

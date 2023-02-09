@@ -12,7 +12,7 @@ public class spell_dru_flourish : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleHit(int UnnamedParameter)
+	private void HandleHit(uint UnnamedParameter)
 	{
 		if (!GetCaster() || !GetHitUnit())
 			return;

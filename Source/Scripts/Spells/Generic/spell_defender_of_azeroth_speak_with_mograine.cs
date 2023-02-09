@@ -16,7 +16,7 @@ internal class spell_defender_of_azeroth_speak_with_mograine : SpellScript, IHas
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(int effIndex)
+	private void HandleDummy(uint effIndex)
 	{
 		if (!GetCaster())
 			return;

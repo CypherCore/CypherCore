@@ -11,7 +11,7 @@ public class spell_mage_pyroblast : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleOnHit(int UnnamedParameter)
+	private void HandleOnHit(uint UnnamedParameter)
 	{
 		var caster = GetCaster();
 

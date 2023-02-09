@@ -11,7 +11,7 @@ public class spell_rog_shadow_dance_SpellScript : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleHit(int UnnamedParameter)
+	private void HandleHit(uint UnnamedParameter)
 	{
 		var caster = GetCaster();
 

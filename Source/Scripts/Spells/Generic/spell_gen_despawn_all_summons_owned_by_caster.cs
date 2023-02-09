@@ -16,7 +16,7 @@ internal class spell_gen_despawn_all_summons_owned_by_caster : SpellScript, IHas
 		SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScriptEffect(int effIndex)
+	private void HandleScriptEffect(uint effIndex)
 	{
 		var caster = GetCaster();
 

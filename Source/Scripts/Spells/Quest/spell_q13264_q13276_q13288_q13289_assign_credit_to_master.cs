@@ -16,7 +16,7 @@ internal class spell_q13264_q13276_q13288_q13289_assign_credit_to_master : Spell
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(int effIndex)
+	private void HandleScript(uint effIndex)
 	{
 		var target = GetHitUnit();
 

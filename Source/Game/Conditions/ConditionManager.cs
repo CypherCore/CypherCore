@@ -694,13 +694,13 @@ namespace Game
                     }
 
                     // check if effect is already a part of some shared mask
-                    if (sharedMasks.Any(mask => !!Convert.ToBoolean(mask & (1 << spellEffectInfo.EffectIndex))))
+                    if (sharedMasks.Any(mask => !!Convert.ToBoolean(mask & (1 << (int)spellEffectInfo.EffectIndex))))
                         continue;
 
                     // build new shared mask with found effect
-                    uint sharedMask = (uint)(1 << spellEffectInfo.EffectIndex);
+                    uint sharedMask = (uint)(1 << (int)spellEffectInfo.EffectIndex);
                     List<Condition> cmp = spellEffectInfo.ImplicitTargetConditions;
-                    for (int effIndex = spellEffectInfo.EffectIndex + 1; effIndex < spellInfo.GetEffects().Count; ++effIndex)
+                    for (uint effIndex = spellEffectInfo.EffectIndex + 1; effIndex < spellInfo.GetEffects().Count; ++effIndex)
                         if (spellInfo.GetEffect(effIndex).ImplicitTargetConditions == cmp)
                             sharedMask |= (uint)(1 << (int)effIndex);
 
@@ -741,9 +741,9 @@ namespace Game
                             // add new list, create new shared mask
                             sharedList = new List<Condition>();
                             bool assigned = false;
-                            for (int i = firstEffIndex; i < spellInfo.GetEffects().Count; ++i)
+                            for (uint i = firstEffIndex; i < spellInfo.GetEffects().Count; ++i)
                             {
-                                if (((1 << i) & commonMask) != 0)
+                                if (((1 << (int)i) & commonMask) != 0)
                                 {
                                     spellInfo.GetEffect(i).ImplicitTargetConditions = sharedList;
                                     assigned = true;

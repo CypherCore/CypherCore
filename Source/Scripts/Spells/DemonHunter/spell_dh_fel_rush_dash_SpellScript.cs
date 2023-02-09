@@ -11,7 +11,7 @@ public class spell_dh_fel_rush_dash_SpellScript : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void PreventTrigger(int effIndex)
+	private void PreventTrigger(uint effIndex)
 	{
 		PreventHitEffect(effIndex);
 	}

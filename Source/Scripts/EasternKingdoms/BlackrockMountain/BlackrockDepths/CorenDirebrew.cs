@@ -416,7 +416,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
             SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleScriptEffect(int effIndex)
+        private void HandleScriptEffect(uint effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.MoleMachineMinionSummoner, true);
         }
@@ -456,7 +456,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
             targets.Add(target);
         }
 
-        private void HandleDummy(int effIndex)
+        private void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
             caster.GetAI().SetGUID(GetHitUnit().GetGUID(), MiscConst.DataTargetGuid);
@@ -479,7 +479,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
             SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleScriptEffect(int effIndex)
+        private void HandleScriptEffect(uint effIndex)
         {
             GetHitUnit().CastSpell(GetCaster(), SpellIds.SendSecondMug, true);
         }

@@ -19,7 +19,7 @@ public class spell_dru_swiftmend : SpellScript, IHasSpellEffects
 	}
 
 
-	private void HandleHit(int UnnamedParameter)
+	private void HandleHit(uint UnnamedParameter)
 	{
 		var caster = GetCaster();
 

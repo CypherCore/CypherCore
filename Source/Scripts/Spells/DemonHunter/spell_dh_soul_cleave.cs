@@ -14,7 +14,7 @@ public class spell_dh_soul_cleave : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleHeal(int UnnamedParameter)
+	private void HandleHeal(uint UnnamedParameter)
 	{
 		var caster = GetCaster();
 
@@ -28,7 +28,7 @@ public class spell_dh_soul_cleave : SpellScript, IHasSpellEffects
 			caster.CastSpell(caster, DemonHunterSpells.SPELL_DH_FEAST_OF_SOULS_HEAL, true);
 	}
 
-	private void HandleDummy(int UnnamedParameter)
+	private void HandleDummy(uint UnnamedParameter)
 	{
 		var caster = GetCaster();
 

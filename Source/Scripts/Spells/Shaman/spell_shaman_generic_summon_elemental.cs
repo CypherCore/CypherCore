@@ -44,7 +44,7 @@ namespace Scripts.Spells.Shaman
 			                         Spells.SummonPrimalElementalistStormElemental);
 		}
 
-		private void HandleSummon(int UnnamedParameter)
+		private void HandleSummon(uint UnnamedParameter)
 		{
 			uint triggerSpell;
 

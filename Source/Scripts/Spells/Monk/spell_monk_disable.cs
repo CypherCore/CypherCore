@@ -17,7 +17,7 @@ public class spell_monk_disable : SpellScript, IHasSpellEffects
 		return ValidateSpellInfo(MonkSpells.SPELL_MONK_DISABLE, MonkSpells.SPELL_MONK_DISABLE_ROOT);
 	}
 
-	private void OnHitTarget(int UnnamedParameter)
+	private void OnHitTarget(uint UnnamedParameter)
 	{
 		var target = GetExplTargetUnit();
 

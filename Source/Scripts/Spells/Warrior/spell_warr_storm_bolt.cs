@@ -22,7 +22,7 @@ namespace Scripts.Spells.Warrior
 			SpellEffects.Add(new EffectHandler(HandleOnHit, 1, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 		}
 
-		private void HandleOnHit(int effIndex)
+		private void HandleOnHit(uint effIndex)
 		{
 			GetCaster().CastSpell(GetHitUnit(), WarriorSpells.STORM_BOLT_STUN, true);
 		}

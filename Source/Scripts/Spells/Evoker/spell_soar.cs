@@ -17,7 +17,7 @@ public class spell_soar : SpellScript, IHasSpellEffects
 		return ValidateSpellInfo(EvokerSpells.SPELL_EVOKER_SOAR_RACIAL, EvokerSpells.SPELL_SKYWARD_ASCENT, EvokerSpells.SPELL_SURGE_FORWARD);
 	}
 
-	private void HandleOnHit(int UnnamedParameter)
+	private void HandleOnHit(uint UnnamedParameter)
 	{
 		var caster = GetCaster();
 

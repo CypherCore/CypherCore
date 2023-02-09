@@ -19,7 +19,7 @@ namespace Scripts.Spells.Warrior
 			return ValidateSpellInfo(WarriorSpells.LAST_STAND_TRIGGERED);
 		}
 
-		private void HandleDummy(int UnnamedParameter)
+		private void HandleDummy(uint UnnamedParameter)
 		{
 			var caster = GetCaster();
 			var args   = new CastSpellExtraArgs(TriggerCastFlags.FullMask);

@@ -55,7 +55,7 @@ public class spell_monk_renewing_mist_jump : SpellScript, IHasSpellEffects
 		_previousTargetGuid = previousTarget.GetGUID();
 	}
 
-	private void HandleHit(int effIndex)
+	private void HandleHit(uint effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
 		var caster         = GetCaster();

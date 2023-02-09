@@ -27,7 +27,7 @@ internal class spell_sha_flametongue_weapon : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleEffectHitTarget(int index)
+	private void HandleEffectHitTarget(uint index)
 	{
 		var player = GetCaster().ToPlayer();
 		var slot   = EquipmentSlot.MainHand;

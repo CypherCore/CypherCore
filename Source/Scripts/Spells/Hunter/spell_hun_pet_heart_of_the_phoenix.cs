@@ -30,7 +30,7 @@ internal class spell_hun_pet_heart_of_the_phoenix : SpellScript, IHasSpellEffect
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(int effIndex)
+	private void HandleScript(uint effIndex)
 	{
 		var caster = GetCaster();
 		var owner  = caster.GetOwner();

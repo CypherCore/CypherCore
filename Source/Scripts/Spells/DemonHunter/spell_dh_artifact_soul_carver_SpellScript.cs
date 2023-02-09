@@ -11,7 +11,7 @@ public class spell_dh_artifact_soul_carver_SpellScript : SpellScript, IHasSpellE
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleOnHit(int UnnamedParameter)
+	private void HandleOnHit(uint UnnamedParameter)
 	{
 		var target = GetHitUnit();
 

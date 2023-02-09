@@ -151,7 +151,7 @@ namespace Game.Spells
                 _flags |= AuraFlags.Scalable;
         }
 
-        public void _HandleEffect(int effIndex, bool apply)
+        public void _HandleEffect(uint effIndex, bool apply)
         {
             AuraEffect aurEff = GetBase().GetEffect(effIndex);
             if (aurEff == null)
@@ -161,7 +161,7 @@ namespace Game.Spells
             }
             Cypher.Assert(aurEff != null);
             Cypher.Assert(HasEffect(effIndex) == (!apply));
-            Cypher.Assert(Convert.ToBoolean((1 << effIndex) & _effectsToApply));
+            Cypher.Assert(Convert.ToBoolean((1 << (int)effIndex) & _effectsToApply));
             Log.outDebug(LogFilter.Spells, "AuraApplication._HandleEffect: {0}, apply: {1}: amount: {2}", aurEff.GetAuraType(), apply, aurEff.GetAmount());
 
             if (apply)
@@ -193,9 +193,9 @@ namespace Game.Spells
                 _target._UnapplyAura(this, AuraRemoveMode.Default);
                 return;
             }
-            
+
             // update real effects only if they were applied already
-            for (int i = 0; i < SpellConst.MaxEffects; ++i)
+            for (uint i = 0; i < SpellConst.MaxEffects; ++i)
             {
                 if (HasEffect(i) && (removeEffMask & (1 << (int)i)) != 0)
                     _HandleEffect(i, false);
@@ -205,7 +205,7 @@ namespace Game.Spells
 
             if (canHandleNewEffects)
             {
-                for (int i = 0; i < SpellConst.MaxEffects; ++i)
+                for (uint i = 0; i < SpellConst.MaxEffects; ++i)
                 {
                     if ((addEffMask & (1 << (int)i)) != 0)
                         _HandleEffect(i, true);
@@ -311,10 +311,10 @@ namespace Game.Spells
         public byte GetSlot() { return _slot; }
         public AuraFlags GetFlags() { return _flags; }
         public uint GetEffectMask() { return _effectMask; }
-        public bool HasEffect(int effect)
+        public bool HasEffect(uint effect)
         {
             Cypher.Assert(effect < SpellConst.MaxEffects);
-            return Convert.ToBoolean(_effectMask & (1 << effect));
+            return Convert.ToBoolean(_effectMask & (1 << (int)effect));
         }
         public bool IsPositive() { return _flags.HasAnyFlag(AuraFlags.Positive); }
         bool IsSelfcasted() { return _flags.HasAnyFlag(AuraFlags.NoCaster); }
@@ -389,7 +389,7 @@ namespace Game.Spells
 
             foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
             {
-                if ((effMask & (1 << spellEffectInfo.EffectIndex)) != 0)
+                if ((effMask & (1 << (int)spellEffectInfo.EffectIndex)) != 0)
                     _effects[spellEffectInfo.EffectIndex] = new AuraEffect(this, spellEffectInfo, baseAmount != null ? baseAmount[spellEffectInfo.EffectIndex] : null, caster);
             }
         }
@@ -632,7 +632,7 @@ namespace Game.Spells
         }
 
         // targets have to be registered and not have effect applied yet to use this function
-        public void _ApplyEffectForTargets(int effIndex)
+        public void _ApplyEffectForTargets(uint effIndex)
         {
             // prepare list of aura targets
             List<Unit> targetList = new();
@@ -824,8 +824,9 @@ namespace Game.Spells
                 m_timeCla = 1 * Time.InMilliseconds;
 
             // also reset periodic counters
-            foreach (var aurEff in _effects)
+            for (byte i = 0; i < SpellConst.MaxEffects; ++i)
             {
+                AuraEffect aurEff = GetEffect(i);
                 if (aurEff != null)
                     aurEff.ResetTicks();
             }
@@ -837,8 +838,9 @@ namespace Game.Spells
             if (m_spellInfo.HasAttribute(SpellAttr8.DontResetPeriodicTimer))
             {
                 int minPeriod = m_maxDuration;
-                foreach (var eff in _effects)
+                for (byte i = 0; i < SpellConst.MaxEffects; ++i)
                 {
+                    AuraEffect eff = GetEffect(i);
                     if (eff != null)
                     {
                         int period = eff.GetPeriod();
@@ -857,8 +859,9 @@ namespace Game.Spells
 
             RefreshDuration();
             Unit caster = GetCaster();
-            foreach (var aurEff in _effects)
+            for (byte i = 0; i < SpellConst.MaxEffects; ++i)
             {
+                AuraEffect aurEff = GetEffect(i);
                 if (aurEff != null)
                     aurEff.CalculatePeriodic(caster, resetPeriodicTimer, false);
             }
@@ -1903,17 +1906,14 @@ namespace Game.Spells
             bool prevented = CallScriptProcHandlers(aurApp, eventInfo);
             if (!prevented)
             {
-                foreach (var eff in _effects)
+                for (byte i = 0; i < SpellConst.MaxEffects; ++i)
                 {
-                    if (eff == null) continue;
-
-                    var i = eff.GetEffIndex();
                     if (!Convert.ToBoolean(procEffectMask & (1 << i)))
                         continue;
 
                     // OnEffectProc / AfterEffectProc hooks handled in AuraEffect.HandleProc()
                     if (aurApp.HasEffect(i))
-                        eff.HandleProc(aurApp, eventInfo);
+                        GetEffect(i).HandleProc(aurApp, eventInfo);
                 }
 
                 CallScriptAfterProcHandlers(aurApp, eventInfo);
@@ -1997,7 +1997,7 @@ namespace Game.Spells
                     }
         }
 
-        private bool CheckAuraEffectHandler(IAuraEffectHandler ae, int effIndex)
+        private bool CheckAuraEffectHandler(IAuraEffectHandler ae, uint effIndex)
         {
             if (m_spellInfo.GetEffects().Count <= effIndex)
                 return false;
@@ -2015,7 +2015,7 @@ namespace Game.Spells
         static List<IAuraScript> _dummy = new();
         static List<(IAuraScript, IAuraEffectHandler)> _dummyAuraEffects = new();
         readonly Dictionary<Type, List<IAuraScript>> m_auraScriptsByType = new Dictionary<Type, List<IAuraScript>>();
-        Dictionary<int, Dictionary<AuraScriptHookType, List<(IAuraScript, IAuraEffectHandler)>>> _effectHandlers = new Dictionary<int, Dictionary<AuraScriptHookType, List<(IAuraScript, IAuraEffectHandler)>>>();
+        Dictionary<uint, Dictionary<AuraScriptHookType, List<(IAuraScript, IAuraEffectHandler)>>> _effectHandlers = new Dictionary<uint, Dictionary<AuraScriptHookType, List<(IAuraScript, IAuraEffectHandler)>>>();
 
         public List<IAuraScript> GetAuraScripts<T>() where T : IAuraScript
         {
@@ -2031,7 +2031,7 @@ namespace Game.Spells
                 action.Invoke(script);
         }
 
-        private void AddAuraEffect(int index, IAuraScript script, IAuraEffectHandler effect)
+        private void AddAuraEffect(uint index, IAuraScript script, IAuraEffectHandler effect)
         {
             if (!_effectHandlers.TryGetValue(index, out var effecTypes))
             {
@@ -2048,7 +2048,7 @@ namespace Game.Spells
             effects.Add((script, effect));
         }
 
-        public List<(IAuraScript, IAuraEffectHandler)> GetEffectScripts(AuraScriptHookType h, int index)
+        public List<(IAuraScript, IAuraEffectHandler)> GetEffectScripts(AuraScriptHookType h, uint index)
         {
             if (_effectHandlers.TryGetValue(index, out var effDict) &&
                 effDict.TryGetValue(h, out List<(IAuraScript, IAuraEffectHandler)> scripts))
@@ -2531,11 +2531,11 @@ namespace Game.Spells
         public bool IsSingleTarget() { return m_isSingleTarget; }
         public void SetIsSingleTarget(bool val) { m_isSingleTarget = val; }
 
-        public bool HasEffect(int index)
+        public bool HasEffect(uint index)
         {
             return GetEffect(index) != null;
         }
-        public AuraEffect GetEffect(int index)
+        public AuraEffect GetEffect(uint index)
         {
             if (index >= _effects.Length)
                 return null;

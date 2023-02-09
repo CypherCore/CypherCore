@@ -28,7 +28,7 @@ internal class spell_gen_seaforium_blast : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(AchievementCredit, 1, SpellEffectName.GameObjectDamage, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void AchievementCredit(int effIndex)
+	private void AchievementCredit(uint effIndex)
 	{
 		// but in effect handling OriginalCaster can become null
 		var owner = GetGObjCaster().GetOwner();

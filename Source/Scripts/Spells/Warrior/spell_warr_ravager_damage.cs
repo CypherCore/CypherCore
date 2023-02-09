@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warrior
 	{
 		public List<ISpellEffect> SpellEffects { get; } = new();
 
-		private void HandleOnHitTarget(int UnnamedParameter)
+		private void HandleOnHitTarget(uint UnnamedParameter)
 		{
 			if (!_alreadyProc)
 			{

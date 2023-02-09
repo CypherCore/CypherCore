@@ -23,7 +23,7 @@ internal class spell_dk_raise_dead : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(int effIndex)
+	private void HandleDummy(uint effIndex)
 	{
 		var spellId = DeathKnightSpells.RaiseDeadSummon;
 

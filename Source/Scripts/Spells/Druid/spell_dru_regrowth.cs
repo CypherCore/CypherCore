@@ -17,7 +17,7 @@ public class spell_dru_regrowth : SpellScript, IHasSpellEffects
 		return ValidateSpellInfo(DruidSpells.SPELL_DRU_REGROWTH, DruidSpells.SPELL_DRU_BLOODTALONS, DruidSpells.SPELL_DRU_BLOODTALONS_TRIGGERED, DruidSpells.SPELL_DRU_MOMENT_OF_CLARITY, DruidSpells.SPELL_DRU_CLEARCASTING);
 	}
 
-	private void HandleHealEffect(int UnnamedParameter)
+	private void HandleHealEffect(uint UnnamedParameter)
 	{
 		if (GetCaster().HasAura(DruidSpells.SPELL_DRU_BLOODTALONS))
 			GetCaster().AddAura(DruidSpells.SPELL_DRU_BLOODTALONS_TRIGGERED, GetCaster());

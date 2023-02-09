@@ -149,7 +149,7 @@ namespace Scripts.m_Events.PilgrimsBounty
             SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleDummy(int effIndex)
+        private void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
 
@@ -230,7 +230,7 @@ namespace Scripts.m_Events.PilgrimsBounty
             SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleScript(int effIndex)
+        private void HandleScript(uint effIndex)
         {
             Creature caster = GetCaster().ToCreature();
             Unit target = GetHitUnit();
@@ -301,7 +301,7 @@ namespace Scripts.m_Events.PilgrimsBounty
             SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleScript(int effIndex)
+        private void HandleScript(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
             Player target = GetHitPlayer();
@@ -411,7 +411,7 @@ namespace Scripts.m_Events.PilgrimsBounty
             return null;
         }
 
-        private void HandleDummy(int effIndex)
+        private void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();

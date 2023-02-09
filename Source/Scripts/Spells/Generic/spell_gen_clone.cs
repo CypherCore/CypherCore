@@ -25,7 +25,7 @@ internal class spell_gen_clone : SpellScript, IHasSpellEffects
 		}
 	}
 
-	private void HandleScriptEffect(int effIndex)
+	private void HandleScriptEffect(uint effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
 		GetHitUnit().CastSpell(GetCaster(), (uint)GetEffectValue(), true);

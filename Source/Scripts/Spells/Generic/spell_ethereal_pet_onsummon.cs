@@ -22,7 +22,7 @@ internal class spell_ethereal_pet_onsummon : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScriptEffect(int effIndex)
+	private void HandleScriptEffect(uint effIndex)
 	{
 		var target = GetHitUnit();
 		target.CastSpell(target, GenericSpellIds.ProcTriggerOnKillAura, true);

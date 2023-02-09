@@ -27,7 +27,7 @@ namespace Scripts.Spells.Warlock
 			SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 		}
 
-		private void HandleScriptEffect(int effIndex)
+		private void HandleScriptEffect(uint effIndex)
 		{
 			GetCaster().CastSpell(GetCaster(), WarlockSpells.CREATE_HEALTHSTONE, true);
 		}

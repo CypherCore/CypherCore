@@ -27,7 +27,7 @@ namespace Scripts.Spells.Warlock
 
 		public List<ISpellEffect> SpellEffects { get; } = new();
 
-		private void HandleDummy(int effIndex)
+		private void HandleDummy(uint effIndex)
 		{
 			SetHitDamage(GetHitDamage() + MathFunctions.CalculatePct(GetHitDamage(), GetCaster().ToPlayer().m_activePlayerData.SpellCritPercentage));
 		}

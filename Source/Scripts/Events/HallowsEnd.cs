@@ -75,7 +75,7 @@ namespace Scripts.m_Events.HallowsEnd
             SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.Hit));
         }
 
-        private void HandleDummy(int effIndex)
+        private void HandleDummy(uint effIndex)
         {
             GetCaster().CastSpell(GetCaster(), spells.SelectRandom(), true);
         }
@@ -134,7 +134,7 @@ namespace Scripts.m_Events.HallowsEnd
             SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleScript(int effIndex)
+        private void HandleScript(uint effIndex)
         {
             Unit caster = GetCaster();
             Player target = GetHitPlayer();
@@ -190,7 +190,7 @@ namespace Scripts.m_Events.HallowsEnd
             SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleScript(int effIndex)
+        private void HandleScript(uint effIndex)
         {
             Unit caster = GetCaster();
             Player target = GetHitPlayer();
@@ -218,7 +218,7 @@ namespace Scripts.m_Events.HallowsEnd
             SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleScript(int effIndex)
+        private void HandleScript(uint effIndex)
         {
             Unit caster = GetCaster();
 

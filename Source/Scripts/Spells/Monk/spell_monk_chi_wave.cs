@@ -12,7 +12,7 @@ public class spell_monk_chi_wave : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleDummy(int UnnamedParameter)
+	private void HandleDummy(uint UnnamedParameter)
 	{
 		var caster = GetCaster();
 		var target = GetHitUnit();

@@ -22,7 +22,7 @@ internal class spell_item_complete_raptor_capture : SpellScript, IHasSpellEffect
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(int effIndex)
+	private void HandleDummy(uint effIndex)
 	{
 		var caster = GetCaster();
 

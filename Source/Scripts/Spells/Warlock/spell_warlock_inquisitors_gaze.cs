@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warlock
 	{
 		public List<ISpellEffect> SpellEffects { get; } = new();
 
-		private void HandleOnHit(int effectIndex)
+		private void HandleOnHit(uint effectIndex)
 		{
 			var target = GetHitUnit();
 

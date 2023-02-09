@@ -12,7 +12,7 @@ public class spell_monk_rising_sun_kick : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleOnHit(int UnnamedParameter)
+	private void HandleOnHit(uint UnnamedParameter)
 	{
 		var caster = GetCaster().ToPlayer();
 		var target = GetHitUnit();

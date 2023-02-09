@@ -22,7 +22,7 @@ namespace Scripts.Spells.Warrior
 			SpellEffects.Add(new EffectHandler(HandleDummy, 3, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
 		}
 
-		private void HandleDummy(int effIndex)
+		private void HandleDummy(uint effIndex)
 		{
 			GetCaster().CastSpell(GetCaster(), WarriorSpells.BLOODTHIRST_HEAL, true);
 		}

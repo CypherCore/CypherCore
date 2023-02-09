@@ -50,7 +50,7 @@ internal class spell_pri_power_word_radiance : SpellScript, IHasSpellEffects
 		}
 	}
 
-	private void HandleEffectHitTarget(int effIndex)
+	private void HandleEffectHitTarget(uint effIndex)
 	{
 		var caster = GetCaster();
 

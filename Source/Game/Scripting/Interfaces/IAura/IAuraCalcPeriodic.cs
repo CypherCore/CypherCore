@@ -14,7 +14,7 @@ namespace Game.Scripting.Interfaces.IAura
 
         private readonly AuraEffectCalcPeriodicDelegate _fn;
 
-        public AuraEffectCalcPeriodicHandler(AuraEffectCalcPeriodicDelegate fn, int effectIndex, AuraType auraType) : base(effectIndex, auraType, AuraScriptHookType.EffectCalcPeriodic)
+        public AuraEffectCalcPeriodicHandler(AuraEffectCalcPeriodicDelegate fn, uint effectIndex, AuraType auraType) : base(effectIndex, auraType, AuraScriptHookType.EffectCalcPeriodic)
         {
             _fn = fn;
         }

@@ -21,7 +21,7 @@ public class spell_dk_blighted_rune_weapon : SpellScript, IHasSpellEffects
 		return true;
 	}
 
-	private void HandleHit(int UnnamedParameter)
+	private void HandleHit(uint UnnamedParameter)
 	{
 		var target = GetHitUnit();
 

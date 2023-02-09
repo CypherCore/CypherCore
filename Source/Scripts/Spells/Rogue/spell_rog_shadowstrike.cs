@@ -33,7 +33,7 @@ internal class spell_rog_shadowstrike : SpellScript, ISpellCheckCast, IHasSpellE
 
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleEnergize(int effIndex)
+	private void HandleEnergize(uint effIndex)
 	{
 		var caster = GetCaster();
 

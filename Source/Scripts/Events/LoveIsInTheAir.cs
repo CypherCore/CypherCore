@@ -137,7 +137,7 @@ namespace Scripts.m_Events.LoveIsInTheAir
             SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleScript(int effIndex)
+        private void HandleScript(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
             Player target = GetHitPlayer();
@@ -161,7 +161,7 @@ namespace Scripts.m_Events.LoveIsInTheAir
             SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleScript(int effIndex)
+        private void HandleScript(uint effIndex)
         {
             GetHitUnit().RemoveAurasDueToSpell((uint)GetEffectValue());
         }
@@ -277,7 +277,7 @@ namespace Scripts.m_Events.LoveIsInTheAir
             SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleScript(int effIndex)
+        private void HandleScript(uint effIndex)
         {
             GetHitUnit().RemoveAurasDueToSpell(SpellIds.ServiceUniform);
         }
@@ -300,7 +300,7 @@ namespace Scripts.m_Events.LoveIsInTheAir
             SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHit));
         }
 
-        private void HandleScript(int effIndex)
+        private void HandleScript(uint effIndex)
         {
             GetCaster().RemoveAurasDueToSpell((uint)GetEffectValue());
         }

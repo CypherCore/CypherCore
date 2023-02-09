@@ -90,7 +90,7 @@ namespace Scripts.Pets
                 SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
             }
 
-            private void HandleScriptEffect(int effIndex)
+            private void HandleScriptEffect(uint effIndex)
             {
                 Unit target = GetHitUnit();
                 target.CastSpell(target, SpellIds.LichPetAura, true);
@@ -112,7 +112,7 @@ namespace Scripts.Pets
                 SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
             }
 
-            private void HandleScriptEffect(int effIndex)
+            private void HandleScriptEffect(uint effIndex)
             {
                 GetHitUnit().RemoveAurasDueToSpell(SpellIds.LichPetAura);
             }
@@ -211,7 +211,7 @@ namespace Scripts.Pets
                 SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
             }
 
-            private void HandleScript(int effIndex)
+            private void HandleScript(uint effIndex)
             {
                 GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue());
             }

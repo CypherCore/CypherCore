@@ -16,7 +16,7 @@ internal class spell_gen_submerged : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(int eff)
+	private void HandleScript(uint eff)
 	{
 		var target = GetHitCreature();
 

@@ -16,7 +16,7 @@ namespace Scripts.Spells.Warrior
 	{
 		public List<ISpellEffect> SpellEffects => new();
 
-		private void HandleScript(int effIndex)
+		private void HandleScript(uint effIndex)
 		{
 			PreventHitDefaultEffect(effIndex);
 

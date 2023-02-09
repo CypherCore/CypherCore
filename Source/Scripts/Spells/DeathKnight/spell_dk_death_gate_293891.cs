@@ -11,7 +11,7 @@ public class spell_dk_death_gate_293891 : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleHit(int UnnamedParameter)
+	private void HandleHit(uint UnnamedParameter)
 	{
 		var target = GetHitUnit();
 

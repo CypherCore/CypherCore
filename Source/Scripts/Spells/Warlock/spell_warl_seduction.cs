@@ -23,7 +23,7 @@ namespace Scripts.Spells.Warlock
 			SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ApplyAura, SpellScriptHookType.EffectHitTarget));
 		}
 
-		private void HandleScriptEffect(int effIndex)
+		private void HandleScriptEffect(uint effIndex)
 		{
 			var caster = GetCaster();
 			var target = GetHitUnit();

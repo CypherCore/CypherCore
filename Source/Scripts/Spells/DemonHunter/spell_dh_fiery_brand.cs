@@ -17,7 +17,7 @@ public class spell_dh_fiery_brand : SpellScript, IHasSpellEffects
 		return ValidateSpellInfo(DemonHunterSpells.SPELL_DH_FIERY_BRAND_DOT, DemonHunterSpells.SPELL_DH_FIERY_BRAND_MARKER);
 	}
 
-	private void HandleDamage(int UnnamedParameter)
+	private void HandleDamage(uint UnnamedParameter)
 	{
 		var target = GetHitUnit();
 

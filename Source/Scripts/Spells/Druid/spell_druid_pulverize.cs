@@ -24,7 +24,7 @@ public class spell_druid_pulverize : SpellScript, IHasSpellEffects
 		return ValidateSpellInfo(Spells.SPELL_DRUID_PULVERIZE, Spells.SPELL_DRUID_TRASH_DOT_TWO_STACKS_MARKER);
 	}
 
-	private void HandleHitTarget(int UnnamedParameter)
+	private void HandleHitTarget(uint UnnamedParameter)
 	{
 		var target = GetHitUnit();
 

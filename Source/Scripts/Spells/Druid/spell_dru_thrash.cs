@@ -22,7 +22,7 @@ namespace Scripts.Spells.Druid
 			SpellEffects.Add(new EffectHandler(HandleOnHitTarget, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
 		}
 
-		private void HandleOnHitTarget(int effIndex)
+		private void HandleOnHitTarget(uint effIndex)
 		{
 			var hitUnit = GetHitUnit();
 

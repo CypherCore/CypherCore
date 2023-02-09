@@ -56,7 +56,7 @@ namespace Scripts.Spells.Warlock
 			                 });
 		}
 
-		private void HandleHit(int UnnamedParameter)
+		private void HandleHit(uint UnnamedParameter)
 		{
 			var caster = GetCaster();
 

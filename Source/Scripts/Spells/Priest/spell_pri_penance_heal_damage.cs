@@ -20,7 +20,7 @@ public class spell_pri_penance_heal_damage : SpellScript, IHasSpellEffects
 		return ValidateSpellInfo(PriestSpells.SPELL_PRIEST_POWER_OF_THE_DARK_SIDE_MARKER, PriestSpells.SPELL_PRIEST_PENANCE_HEAL);
 	}
 
-	private void HandleDummy(int UnnamedParameter)
+	private void HandleDummy(uint UnnamedParameter)
 	{
 		if (GetCaster().GetAuraEffect(PriestSpells.SPELL_PRIEST_CONTRITION, 0) != null)
 			foreach (var auApp in GetCaster().GetAppliedAuras().LookupByKey(PriestSpells.SPELL_PRIEST_ATONEMENT_AURA))

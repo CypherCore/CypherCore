@@ -21,7 +21,7 @@ internal class spell_item_scroll_of_recall : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(int effIndex)
+	private void HandleScript(uint effIndex)
 	{
 		var  caster       = GetCaster();
 		byte maxSafeLevel = 0;

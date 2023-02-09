@@ -40,7 +40,7 @@ internal class spell_pri_penance : SpellScript, ISpellCheckCast, IHasSpellEffect
 
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleDummy(int effIndex)
+	private void HandleDummy(uint effIndex)
 	{
 		var caster = GetCaster();
 		var target = GetHitUnit();

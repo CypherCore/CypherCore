@@ -25,7 +25,7 @@ internal class spell_rog_killing_spree_SpellScript : SpellScript, IHasSpellEffec
 			FinishCast(SpellCastResult.OutOfRange);
 	}
 
-	private void HandleDummy(int effIndex)
+	private void HandleDummy(uint effIndex)
 	{
 		var aura = GetCaster().GetAura(RogueSpells.KillingSpree);
 

@@ -15,7 +15,7 @@ namespace Game.Scripting.Interfaces.IAura
 
         private readonly AuraEffectCalcSpellModDelegate _fn;
 
-        public AuraEffectCalcSpellModHandler(AuraEffectCalcSpellModDelegate fn, int effectIndex, AuraType auraType) : base(effectIndex, auraType, AuraScriptHookType.EffectCalcSpellmod)
+        public AuraEffectCalcSpellModHandler(AuraEffectCalcSpellModDelegate fn, uint effectIndex, AuraType auraType) : base(effectIndex, auraType, AuraScriptHookType.EffectCalcSpellmod)
         {
             _fn = fn;
         }

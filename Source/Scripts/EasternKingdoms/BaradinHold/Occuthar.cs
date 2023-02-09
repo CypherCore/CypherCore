@@ -233,7 +233,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
             targets.RandomResize(1);
         }
 
-        private void HandleScript(int effIndex)
+        private void HandleScript(uint effIndex)
         {
             GetHitUnit().CastSpell(GetCaster(), (uint)GetEffectValue(), true);
         }

@@ -20,7 +20,7 @@ public class spell_monk_zen_pulse : SpellScript, IHasSpellEffects
 		return true;
 	}
 
-	private void OnHit(int UnnamedParameter)
+	private void OnHit(uint UnnamedParameter)
 	{
 		GetCaster().CastSpell(GetCaster(), MonkSpells.SPELL_MONK_ZEN_PULSE_HEAL, true);
 	}

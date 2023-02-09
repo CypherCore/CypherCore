@@ -22,7 +22,7 @@ namespace Scripts.Spells.Druid
 			SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 		}
 
-		private void HandleDummy(int effIndex)
+		private void HandleDummy(uint effIndex)
 		{
 			GetCaster().CastSpell(GetHitUnit(), DruidSpellIds.SkullBashCharge, true);
 			GetCaster().CastSpell(GetHitUnit(), DruidSpellIds.SkullBashInterrupt, true);

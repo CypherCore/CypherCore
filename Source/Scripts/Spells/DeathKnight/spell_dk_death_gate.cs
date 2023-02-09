@@ -28,7 +28,7 @@ internal class spell_dk_death_gate : SpellScript, ISpellCheckCast, IHasSpellEffe
 
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleScript(int effIndex)
+	private void HandleScript(uint effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
 		var target = GetHitUnit();

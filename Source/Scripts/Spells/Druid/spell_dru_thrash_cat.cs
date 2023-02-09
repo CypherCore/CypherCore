@@ -11,7 +11,7 @@ public class spell_dru_thrash_cat : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void EffectHitTarget(int UnnamedParameter)
+	private void EffectHitTarget(uint UnnamedParameter)
 	{
 		var caster = GetCaster();
 		var target = GetHitUnit();

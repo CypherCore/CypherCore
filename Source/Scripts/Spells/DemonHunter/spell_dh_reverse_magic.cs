@@ -65,7 +65,7 @@ public class spell_dh_reverse_magic : SpellScript, ISpellOnCast
 
 				if (targetAura != null)
 				{
-					for (int i = 0; i < SpellConst.MaxEffects; ++i)
+					for (uint i = 0; i < SpellConst.MaxEffects; ++i)
 					{
 						targetAura.SetMaxDuration(aura.GetMaxDuration());
 						targetAura.SetDuration(aura.GetDuration());

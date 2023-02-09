@@ -16,7 +16,7 @@ namespace Scripts.Spells.Warrior
 	{
 		public List<ISpellEffect> SpellEffects { get; } = new();
 
-		private void HandleOnHit(int UnnamedParameter)
+		private void HandleOnHit(uint UnnamedParameter)
 		{
 			var dest = GetExplTargetDest();
 

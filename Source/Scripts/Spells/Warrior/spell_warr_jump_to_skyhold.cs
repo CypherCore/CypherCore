@@ -20,7 +20,7 @@ namespace Scripts.Spells.Warrior
 			return Global.SpellMgr.GetSpellInfo(WarriorSpells.JUMP_TO_SKYHOLD_TELEPORT, Difficulty.None) != null;
 		}
 
-		private void HandleJump(int effIndex)
+		private void HandleJump(uint effIndex)
 		{
 			PreventHitDefaultEffect(effIndex);
 

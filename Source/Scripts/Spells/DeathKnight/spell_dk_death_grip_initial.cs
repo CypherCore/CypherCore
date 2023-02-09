@@ -34,7 +34,7 @@ internal class spell_dk_death_grip_initial : SpellScript, ISpellCheckCast, IHasS
 
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleDummy(int effIndex)
+	private void HandleDummy(uint effIndex)
 	{
 		GetCaster().CastSpell(GetHitUnit(), DeathKnightSpells.DeathGripDummy, true);
 		GetHitUnit().CastSpell(GetCaster(), DeathKnightSpells.DeathGripJump, true);

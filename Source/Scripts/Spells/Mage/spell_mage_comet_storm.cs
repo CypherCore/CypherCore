@@ -23,7 +23,7 @@ internal class spell_mage_comet_storm : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(EffectHit, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
 	}
 
-	private void EffectHit(int effIndex)
+	private void EffectHit(uint effIndex)
 	{
 		GetCaster().m_Events.AddEventAtOffset(new CometStormEvent(GetCaster(), GetSpell().m_castId, GetHitDest()), RandomHelper.RandTime(TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(275)));
 	}

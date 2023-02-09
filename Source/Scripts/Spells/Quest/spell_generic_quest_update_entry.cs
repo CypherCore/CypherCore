@@ -20,7 +20,7 @@ internal class spell_generic_quest_update_entry : SpellScript, IHasSpellEffects
 
 	private readonly SpellEffectName _spellEffect;
 
-	public spell_generic_quest_update_entry(SpellEffectName spellEffect, int effIndex, uint originalEntry, uint newEntry, bool shouldAttack, uint despawnTime)
+	public spell_generic_quest_update_entry(SpellEffectName spellEffect, uint effIndex, uint originalEntry, uint newEntry, bool shouldAttack, uint despawnTime)
 	{
 		_spellEffect   = spellEffect;
 		_effIndex      = (byte)effIndex;
@@ -37,7 +37,7 @@ internal class spell_generic_quest_update_entry : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleDummy, _effIndex, _spellEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(int effIndex)
+	private void HandleDummy(uint effIndex)
 	{
 		var creatureTarget = GetHitCreature();
 

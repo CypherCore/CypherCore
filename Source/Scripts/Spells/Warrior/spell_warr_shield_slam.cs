@@ -14,14 +14,14 @@ namespace Scripts.Spells.Warrior
 	{
 		public List<ISpellEffect> SpellEffects => new();
 
-		private void HandleDispel(int effIndex)
+		private void HandleDispel(uint effIndex)
 		{
 			// 6.0.3 HOTFIX: Shield Slam modified by Glyph of Shield Slam now only dispels 1 magical effect while the Warrior is in Defensive Stance.
 			if (GetCaster().GetShapeshiftForm() != ShapeShiftForm.DefensiveStance)
 				PreventHitDefaultEffect(effIndex);
 		}
 
-		private void HandlePassive(int UnnamedParameter)
+		private void HandlePassive(uint UnnamedParameter)
 		{
 			//Handles the passive bonuses
 			var caster = GetCaster();

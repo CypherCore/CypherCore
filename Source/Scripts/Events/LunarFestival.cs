@@ -471,7 +471,7 @@ namespace Scripts.m_Events.LunarFestival
             SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleScript(int effIndex)
+        private void HandleScript(uint effIndex)
         {
             uint spellId = 0;
 

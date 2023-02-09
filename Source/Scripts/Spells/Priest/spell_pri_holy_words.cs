@@ -31,7 +31,7 @@ internal class spell_pri_holy_words : AuraScript, IHasAuraEffects
 			return;
 
 		uint targetSpellId;
-		int cdReductionEffIndex;
+		uint cdReductionEffIndex;
 
 		switch (spellInfo.Id)
 		{

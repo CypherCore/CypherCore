@@ -18,7 +18,7 @@ namespace Scripts.Spells.Shaman
 			_takenPower = powerCost.Amount;
 		}
 
-		private void HandleCalcDamage(int UnnamedParameter)
+		private void HandleCalcDamage(uint UnnamedParameter)
 		{
 			SetHitDamage(MathFunctions.CalculatePct(GetHitDamage(), _takenPower));
 		}

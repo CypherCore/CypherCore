@@ -34,7 +34,7 @@ internal class spell_item_book_of_glyph_mastery : SpellScript, ISpellCheckCast, 
 
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleScript(int effIndex)
+	private void HandleScript(uint effIndex)
 	{
 		var caster  = GetCaster().ToPlayer();
 		var spellId = GetSpellInfo().Id;

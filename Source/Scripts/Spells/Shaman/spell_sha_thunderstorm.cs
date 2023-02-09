@@ -12,7 +12,7 @@ namespace Scripts.Spells.Shaman
 	{
 		public List<ISpellEffect> SpellEffects { get; } = new();
 
-		private void HandleKnockBack(int effIndex)
+		private void HandleKnockBack(uint effIndex)
 		{
 			// Glyph of Thunderstorm
 			if (GetCaster().HasAura(ShamanSpells.SPELL_SHAMAN_GLYPH_OF_THUNDERSTORM))

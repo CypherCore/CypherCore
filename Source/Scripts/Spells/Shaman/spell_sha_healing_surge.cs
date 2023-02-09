@@ -25,7 +25,7 @@ namespace Scripts.Spells.Shaman
 			return castTime;
 		}
 
-		private void HandleEnergize(int UnnamedParameter)
+		private void HandleEnergize(uint UnnamedParameter)
 		{
 			SetEffectValue(-_takenPower);
 		}

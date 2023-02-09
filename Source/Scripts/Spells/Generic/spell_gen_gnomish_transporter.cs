@@ -22,7 +22,7 @@ internal class spell_gen_gnomish_transporter : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(int effIndex)
+	private void HandleDummy(uint effIndex)
 	{
 		GetCaster().CastSpell(GetCaster(), RandomHelper.randChance(50) ? GenericSpellIds.TransporterSuccess : GenericSpellIds.TransporterFailure, true);
 	}

@@ -43,7 +43,7 @@ internal class spell_item_demon_broiled_surprise : SpellScript, ISpellCheckCast,
 
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleDummy(int effIndex)
+	private void HandleDummy(uint effIndex)
 	{
 		var player = GetCaster();
 		player.CastSpell(player, ItemSpellIds.CreateDemonBroiledSurprise, false);

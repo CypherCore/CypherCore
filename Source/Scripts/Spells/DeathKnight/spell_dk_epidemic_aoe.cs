@@ -30,7 +30,7 @@ public class spell_dk_epidemic_aoe : SpellScript, IHasSpellEffects
 			targets.Resize(7);
 	}
 
-	private void HandleOnHitMain(int UnnamedParameter)
+	private void HandleOnHitMain(uint UnnamedParameter)
 	{
 		var target = GetHitUnit();
 
@@ -38,7 +38,7 @@ public class spell_dk_epidemic_aoe : SpellScript, IHasSpellEffects
 			explicitTarget = target.GetGUID();
 	}
 
-	private void HandleOnHitAOE(int UnnamedParameter)
+	private void HandleOnHitAOE(uint UnnamedParameter)
 	{
 		var target = GetHitUnit();
 

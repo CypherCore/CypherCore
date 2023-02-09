@@ -34,7 +34,7 @@ internal class spell_item_feast : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHit));
 	}
 
-	private void HandleScript(int effIndex)
+	private void HandleScript(uint effIndex)
 	{
 		var caster = GetCaster();
 		caster.TextEmote(_text, caster, false);

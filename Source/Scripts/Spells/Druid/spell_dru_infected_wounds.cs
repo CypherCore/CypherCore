@@ -11,7 +11,7 @@ public class spell_dru_infected_wounds : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleDummy(int UnnamedParameter)
+	private void HandleDummy(uint UnnamedParameter)
 	{
 		if (!GetCaster())
 			return;

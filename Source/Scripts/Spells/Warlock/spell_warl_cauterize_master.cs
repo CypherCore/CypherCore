@@ -27,7 +27,7 @@ namespace Scripts.Spells.Warlock
 			return SpellCastResult.SpellCastOk;
 		}
 
-		private void HandleHit(int UnnamedParameter)
+		private void HandleHit(uint UnnamedParameter)
 		{
 			var caster = GetCaster();
 			var pet    = caster.GetGuardianPet();

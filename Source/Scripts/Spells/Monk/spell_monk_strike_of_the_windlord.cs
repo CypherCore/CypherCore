@@ -14,7 +14,7 @@ public class spell_monk_strike_of_the_windlord : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects => new();
 
-	private void HandleDummy(int UnnamedParameter)
+	private void HandleDummy(uint UnnamedParameter)
 	{
 		var target = GetHitUnit();
 

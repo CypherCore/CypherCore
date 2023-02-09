@@ -17,7 +17,7 @@ internal class spell_dk_glyph_of_scourge_strike_script : SpellScript, IHasSpellE
 		SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScriptEffect(int effIndex)
+	private void HandleScriptEffect(uint effIndex)
 	{
 		var caster = GetCaster();
 		var target = GetHitUnit();

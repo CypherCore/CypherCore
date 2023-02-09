@@ -14,7 +14,7 @@ namespace Scripts.Spells.Warlock
 	{
 		public List<ISpellEffect> SpellEffects => new();
 
-		private void HandleLaunch(int UnnamedParameter)
+		private void HandleLaunch(uint UnnamedParameter)
 		{
 			var caster = GetCaster();
 
@@ -65,7 +65,7 @@ namespace Scripts.Spells.Warlock
 			return SpellCastResult.SpellCastOk;
 		}
 
-		private void HandleVisual(int UnnamedParameter)
+		private void HandleVisual(uint UnnamedParameter)
 		{
 			var caster = GetCaster();
 			var dest   = GetExplTargetDest();
