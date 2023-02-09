@@ -27,7 +27,7 @@ public class spell_pri_holy_word_salvation : SpellScript, ISpellAfterCast
 
 				if (prayer != null)
 				{
-					prayer.AddStacks(eff.BasePoints);
+					prayer.ModStackAmount(eff.BasePoints);
 				}
 			}
 		}

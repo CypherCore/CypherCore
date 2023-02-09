@@ -1,10 +1,13 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.AI;
-using Game.Arenas;
 using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.Conditions;
@@ -18,12 +21,6 @@ using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IPlayer;
 using Game.Scripting.Interfaces.ISpell;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using static Game.AI.SmartEvent;
 
 namespace Game.Spells
 {
@@ -133,7 +130,7 @@ namespace Game.Spells
                 Cypher.Assert(m_caster.ToPlayer().m_spellModTakingSpell != this);
         }
 
-        void InitExplicitTargets(SpellCastTargets targets)
+        public void InitExplicitTargets(SpellCastTargets targets)
         {
             m_targets = targets;
 
@@ -8662,6 +8659,12 @@ namespace Game.Spells
 
                         // Add bonuses and fill damageInfo struct
                         caster.CalculateSpellDamageTaken(damageInfo, spell.m_damage, spell.m_spellInfo, spell.m_attackType, IsCrit, MissCondition == SpellMissInfo.Block, spell);
+
+                        var p = caster.ToPlayer();
+
+                        if (p != null)
+                            Global.ScriptMgr.ForEach<IPlayerOnDealDamage>(p.GetClass(), d => d.OnDamage(p, spell.unitTarget, ref damageInfo.damage, spell.m_spellInfo));
+                        
                         Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
 
                         hitMask |= Unit.CreateProcHitMask(damageInfo, MissCondition);

@@ -612,6 +612,12 @@ namespace Game.Entities
             if (val < cur_power)
                 SetPower(powerType, val);
         }
+
+        public void SetPower(PowerType powerType, float val, bool withPowerUpdate = true, bool isRegen = false)
+        {
+            SetPower(powerType, (int)val, withPowerUpdate, isRegen);
+        }
+
         public void SetPower(PowerType powerType, int val, bool withPowerUpdate = true, bool isRegen = false)
         {
             uint powerIndex = GetPowerIndex(powerType);

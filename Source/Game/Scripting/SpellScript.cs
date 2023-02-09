@@ -418,6 +418,16 @@ namespace Game.Scripting
             return _spell.m_healing;
         }
 
+        public void SetHitHeal(float heal)
+        {
+            SetHitHeal((int)heal);
+        }
+
+        public void SetHitHeal(uint heal)
+        {
+            SetHitHeal((int)heal);
+        }
+
         public void SetHitHeal(int heal)
         {
             if (!IsInModifiableHook())
