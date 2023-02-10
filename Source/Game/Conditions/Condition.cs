@@ -595,7 +595,10 @@ namespace Game.Conditions
             StringBuilder ss = new();
             ss.AppendFormat("[Condition SourceType: {0}", SourceType);
             if (SourceType < ConditionSourceType.Max)
-                ss.AppendFormat(" ({0})", Global.ConditionMgr.StaticSourceTypeData[(int)SourceType]);
+            {
+                if (Global.ConditionMgr.StaticSourceTypeData.Length > (int)SourceType)
+                    ss.AppendFormat(" ({0})", Global.ConditionMgr.StaticSourceTypeData[(int)SourceType]);
+            }
             else
                 ss.Append(" (Unknown)");
             if (Global.ConditionMgr.CanHaveSourceGroupSet(SourceType))

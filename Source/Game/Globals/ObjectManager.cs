@@ -6368,8 +6368,23 @@ namespace Game
             SpawnMetadata data = GetSpawnMetadata(type, spawnId);
             return data != null ? data.spawnGroupData : null;
         }
-        public SpawnGroupTemplateData GetDefaultSpawnGroup() { return _spawnGroupDataStorage.ElementAt(0).Value; }
-        public SpawnGroupTemplateData GetLegacySpawnGroup() { return _spawnGroupDataStorage.ElementAt(1).Value; }
+
+        public SpawnGroupTemplateData GetDefaultSpawnGroup()
+        {
+            if (!_spawnGroupDataStorage.TryGetValue(0, out var gt))
+                gt = _spawnGroupDataStorage.ElementAt(0).Value;
+
+            return gt;
+        }
+
+        public SpawnGroupTemplateData GetLegacySpawnGroup()
+        {
+            if (!_spawnGroupDataStorage.TryGetValue(1, out var gt))
+                gt = _spawnGroupDataStorage.ElementAt(1).Value;
+
+            return gt;
+        }
+
         public List<SpawnMetadata> GetSpawnMetadataForGroup(uint groupId) { return _spawnGroupMapStorage.LookupByKey(groupId); }
         public List<uint> GetSpawnGroupsForMap(uint mapId) { return _spawnGroupsByMap.LookupByKey(mapId); }
         public SpawnMetadata GetSpawnMetadata(SpawnObjectType type, ulong spawnId)
