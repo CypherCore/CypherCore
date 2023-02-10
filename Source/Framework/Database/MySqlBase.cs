@@ -287,6 +287,7 @@ namespace Framework.Database
 
             // Invokes a mysql process which doesn't leak credentials to logs
             Process process = new();
+            DBExecutableUtil.CheckExecutable();
             process.StartInfo = new(DBExecutableUtil.GetMySQLExecutable());
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardOutput = true;
