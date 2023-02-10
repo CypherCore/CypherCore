@@ -15,7 +15,7 @@ internal class areatrigger_pri_halo : AreaTriggerAI
 
 	public override void OnUnitEnter(Unit unit)
 	{
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
 
 		if (caster != null)
 		{

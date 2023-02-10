@@ -31,10 +31,10 @@ internal class spell_mage_ignite : AuraScript, IAuraCheckProc, IHasAuraEffects
 	{
 		PreventDefaultAction();
 
-		SpellInfo igniteDot = Global.SpellMgr.GetSpellInfo(MageSpells.Ignite, GetCastDifficulty());
-		int       pct       = aurEff.GetAmount();
+		var igniteDot = Global.SpellMgr.GetSpellInfo(MageSpells.Ignite, GetCastDifficulty());
+		var pct       = aurEff.GetAmount();
 
-		int amount = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), pct) / igniteDot.GetMaxTicks());
+		var amount = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), pct) / igniteDot.GetMaxTicks());
 
 		CastSpellExtraArgs args = new(aurEff);
 		args.AddSpellMod(SpellValueMod.BasePoint0, amount);

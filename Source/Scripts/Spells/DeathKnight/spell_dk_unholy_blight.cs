@@ -9,7 +9,7 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(115994)]
 public class spell_dk_unholy_blight : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 
 	private void HandlePeriodic(AuraEffect UnnamedParameter)

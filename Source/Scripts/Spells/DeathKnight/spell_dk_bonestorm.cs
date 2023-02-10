@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -11,50 +10,50 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(194844)]
 public class spell_dk_bonestorm : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 
 	private int m_ExtraSpellCost;
 
 	public override bool Load()
 	{
-		Unit caster = GetCaster();
-		if (caster == null)
-		{
-			return false;
-		}
+		var caster = GetCaster();
 
-		int availablePower = Math.Min(caster.GetPower(PowerType.RunicPower), 90);
+		if (caster == null)
+			return false;
+
+		var availablePower = Math.Min(caster.GetPower(PowerType.RunicPower), 90);
 
 		//Round down to nearest multiple of 10
 		m_ExtraSpellCost = availablePower - (availablePower % 10);
+
 		return true;
 	}
 
 	private void HandleApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
-		int m_newDuration = GetDuration() + (m_ExtraSpellCost / 10);
+		var m_newDuration = GetDuration() + (m_ExtraSpellCost / 10);
 		SetDuration(m_newDuration);
 
-		Unit caster = GetCaster();
+		var caster = GetCaster();
+
 		if (caster != null)
 		{
-			int m_newPower = caster.GetPower(PowerType.RunicPower) - m_ExtraSpellCost;
+			var m_newPower = caster.GetPower(PowerType.RunicPower) - m_ExtraSpellCost;
+
 			if (m_newPower < 0)
-			{
 				m_newPower = 0;
-			}
+
 			caster.SetPower(PowerType.RunicPower, m_newPower);
 		}
 	}
 
 	private void HandlePeriodic(AuraEffect UnnamedParameter)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
+
 		if (caster == null)
-		{
 			return;
-		}
 
 		caster.CastSpell(caster, DeathKnightSpells.SPELL_DK_BONESTORM_HEAL, true);
 	}

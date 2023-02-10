@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -25,7 +24,7 @@ internal class spell_hun_last_stand_pet : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		Unit               caster = GetCaster();
+		var                caster = GetCaster();
 		CastSpellExtraArgs args   = new(TriggerCastFlags.FullMask);
 		args.AddSpellMod(SpellValueMod.BasePoint0, (int)caster.CountPctFromMaxHealth(30));
 		caster.CastSpell(caster, HunterSpells.PetLastStandTriggered, args);

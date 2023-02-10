@@ -9,13 +9,13 @@ namespace Scripts.Spells.Priest;
 [SpellScript(14769)]
 public class spell_pri_improved_power_word_shield : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private void HandleEffectCalcSpellMod(AuraEffect aurEff, ref SpellModifier spellMod)
 	{
 		if (spellMod == null)
 		{
-			SpellModifierByClassMask mod = new SpellModifierByClassMask(GetAura());
+			var mod = new SpellModifierByClassMask(GetAura());
 			spellMod.op      = (SpellModOp)aurEff.GetMiscValue();
 			spellMod.type    = SpellModType.Pct;
 			spellMod.spellId = GetId();

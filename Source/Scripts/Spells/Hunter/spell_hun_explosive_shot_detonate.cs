@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -10,12 +9,13 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(212679)]
 public class spell_hun_explosive_shot_detonate : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	private void HandleDummy(uint UnnamedParameter)
 	{
-		AreaTrigger at = GetCaster().GetAreaTrigger(HunterSpells.SPELL_HUNTER_EXPLOSIVE_SHOT);
-		if (at != null) 
+		var at = GetCaster().GetAreaTrigger(HunterSpells.SPELL_HUNTER_EXPLOSIVE_SHOT);
+
+		if (at != null)
 		{
 			GetCaster().RemoveAurasDueToSpell(HunterSpells.SPELL_HUNTER_EXPLOSIVE_SHOT);
 			GetCaster().CastSpell(at.GetPosition(), HunterSpells.SPELL_HUNTER_EXPLOSIVE_SHOT_DAMAGE, true);

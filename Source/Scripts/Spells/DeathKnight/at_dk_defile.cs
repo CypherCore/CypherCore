@@ -18,11 +18,10 @@ public class at_dk_defile : AreaTriggerAI
 
 	public override void OnUnitEnter(Unit unit)
 	{
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
+
 		if (caster != null)
-		{
 			caster.CastSpell(unit, DeathKnightSpells.SPELL_DK_DEFILE_DUMMY, true);
-		}
 	}
 
 	public override void OnUnitExit(Unit unit)

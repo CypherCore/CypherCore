@@ -17,13 +17,12 @@ public class at_mage_frozen_orb : AreaTriggerAI
 
 	public override void OnInitialize()
 	{
-		Unit caster = at.GetCaster();
-		if (caster == null)
-		{
-			return;
-		}
+		var caster = at.GetCaster();
 
-		Position pos = caster.GetPosition();
+		if (caster == null)
+			return;
+
+		var pos = caster.GetPosition();
 
 		at.MovePositionToFirstCollision(pos, 40.0f, 0.0f);
 		at.SetDestination(pos, 4000);
@@ -31,37 +30,32 @@ public class at_mage_frozen_orb : AreaTriggerAI
 
 	public override void OnUpdate(uint diff)
 	{
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
+
 		if (caster == null || !caster.IsPlayer())
-		{
 			return;
-		}
 
 		if (damageInterval <= diff)
 		{
 			if (!procDone)
-			{
-				foreach (ObjectGuid guid in at.GetInsideUnits())
+				foreach (var guid in at.GetInsideUnits())
 				{
-					Unit unit = ObjectAccessor.Instance.GetUnit(caster, guid);
+					var unit = ObjectAccessor.Instance.GetUnit(caster, guid);
+
 					if (unit != null)
-					{
 						if (caster.IsValidAttackTarget(unit))
 						{
 							if (caster.HasAura(MageSpells.SPELL_MAGE_FINGERS_OF_FROST_AURA))
-							{
 								caster.CastSpell(caster, MageSpells.SPELL_MAGE_FINGERS_OF_FROST_VISUAL_UI, true);
-							}
 
 							caster.CastSpell(caster, MageSpells.SPELL_MAGE_FINGERS_OF_FROST_AURA, true);
 
 							// at->UpdateTimeToTarget(8000); TODO
 							procDone = true;
+
 							break;
 						}
-					}
 				}
-			}
 
 			caster.CastSpell(at.GetPosition(), MageSpells.SPELL_MAGE_FROZEN_ORB_DAMAGE, true);
 			damageInterval = 500;

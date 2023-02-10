@@ -25,12 +25,12 @@ internal class spell_pri_aq_3p_bonus : AuraScript, IHasAuraEffects
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
 		PreventDefaultAction();
-		Unit caster = eventInfo.GetActor();
+		var caster = eventInfo.GetActor();
 
 		if (caster == eventInfo.GetProcTarget())
 			return;
 
-		HealInfo healInfo = eventInfo.GetHealInfo();
+		var healInfo = eventInfo.GetHealInfo();
 
 		if (healInfo == null ||
 		    healInfo.GetHeal() == 0)

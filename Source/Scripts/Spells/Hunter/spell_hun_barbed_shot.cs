@@ -9,7 +9,8 @@ public class spell_hun_barbed_shot : SpellScript, ISpellOnCast
 {
 	public void OnCast()
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
+
 		if (caster != null)
 		{
 			caster.CastSpell(caster, HunterSpells.SPELL_BARBED_SHOT_PLAYERAURA, true);
@@ -17,12 +18,11 @@ public class spell_hun_barbed_shot : SpellScript, ISpellOnCast
 			if (caster.IsPlayer())
 			{
 				Unit pet = caster.GetGuardianPet();
+
 				if (pet != null)
 				{
 					if (!pet)
-					{
 						return;
-					}
 
 					caster.CastSpell(pet, HunterSpells.SPELL_BARBED_SHOT_PETAURA, true);
 				}

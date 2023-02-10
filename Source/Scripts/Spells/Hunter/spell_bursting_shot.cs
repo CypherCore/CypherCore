@@ -1,5 +1,4 @@
-﻿using Game.Entities;
-using Game.Scripting;
+﻿using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 
 namespace Scripts.Spells.Hunter;
@@ -9,10 +8,9 @@ public class spell_bursting_shot : SpellScript, ISpellAfterHit
 {
 	public void AfterHit()
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
+
 		if (caster != null)
-		{
 			caster.CastSpell(GetHitUnit(), HunterSpells.SPELL_HUNTER_AURA_SHOOTING, true);
-		}
 	}
 }

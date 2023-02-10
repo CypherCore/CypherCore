@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
-using Game.Groups;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -26,11 +24,11 @@ internal class spell_mage_conjure_refreshment : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		Player caster = GetCaster().ToPlayer();
+		var caster = GetCaster().ToPlayer();
 
 		if (caster)
 		{
-			Group group = caster.GetGroup();
+			var group = caster.GetGroup();
 
 			if (group)
 				caster.CastSpell(caster, MageSpells.ConjureRefreshmentTable, true);

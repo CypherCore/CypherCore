@@ -603,6 +603,11 @@ namespace Game.Entities
             return mSpellAreaForAreaMap.LookupByKey(area_id);
         }
 
+        public SpellInfo GetSpellInfo<T>(T spellId, Difficulty difficulty) where T : struct, System.Enum
+        {
+            return GetSpellInfo(Convert.ToUInt32(spellId), difficulty);
+        }
+
         public SpellInfo GetSpellInfo(uint spellId, Difficulty difficulty)
         {
             var list = mSpellInfoMap.LookupByKey(spellId);

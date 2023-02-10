@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -10,19 +9,17 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(63900)]
 public class spell_hun_pet_thunderstomp : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 
 	private void HandleDamage(uint UnnamedParameter)
 	{
-		Unit caster = GetCaster();
-		Unit owner  = GetCaster().GetOwner();
-		Unit target = GetHitUnit();
+		var caster = GetCaster();
+		var owner  = GetCaster().GetOwner();
+		var target = GetHitUnit();
 
 		if (owner == null || target == null)
-		{
 			return;
-		}
 
 		var dmg = 1.5f * (owner.m_unitData.RangedAttackPower * 0.250f);
 

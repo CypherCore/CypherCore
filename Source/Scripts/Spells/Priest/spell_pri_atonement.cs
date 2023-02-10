@@ -46,13 +46,13 @@ public class spell_pri_atonement : AuraScript, IAuraCheckProc, IHasAuraEffects
 
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
-		DamageInfo         damageInfo = eventInfo.GetDamageInfo();
+		var                damageInfo = eventInfo.GetDamageInfo();
 		CastSpellExtraArgs args       = new(aurEff);
 		args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
 
 		_appliedAtonements.RemoveAll(targetGuid =>
 		                             {
-			                             Unit target = Global.ObjAccessor.GetUnit(GetTarget(), targetGuid);
+			                             var target = Global.ObjAccessor.GetUnit(GetTarget(), targetGuid);
 
 			                             if (target)
 			                             {
@@ -78,7 +78,7 @@ public class spell_pri_atonement : AuraScript, IAuraCheckProc, IHasAuraEffects
 			                             0, 1, 2
 		                             })
 		{
-			AuraEffect sinOfTheMany = GetUnitOwner().GetAuraEffect(PriestSpells.SinsOfTheMany, effectIndex);
+			var sinOfTheMany = GetUnitOwner().GetAuraEffect(PriestSpells.SinsOfTheMany, effectIndex);
 
 			sinOfTheMany?.ChangeAmount((int)damageByStack[Math.Min(_appliedAtonements.Count, damageByStack.Length - 1)]);
 		}

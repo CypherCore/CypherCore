@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -11,26 +10,23 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(201078)]
 public class spell_hun_snake_hunter : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
 		if (Global.SpellMgr.GetSpellInfo(HunterSpells.SPELL_HUNTER_MONGOOSE_BITE, Difficulty.None) != null)
-		{
 			return false;
-		}
+
 		return true;
 	}
 
 	private void HandleDummy(uint UnnamedParameter)
 	{
-		Player player = GetCaster().ToPlayer();
+		var player = GetCaster().ToPlayer();
 
 		if (player == null)
-		{
 			return;
-		}
 
 		player.GetSpellHistory().ResetCharges(Global.SpellMgr.GetSpellInfo(HunterSpells.SPELL_HUNTER_MONGOOSE_BITE, Difficulty.None).ChargeCategoryId);
 	}

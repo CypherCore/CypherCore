@@ -11,7 +11,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(228260)]
 public class spell_pri_void_eruption : SpellScript, IHasSpellEffects, ISpellOnCast, ISpellOnTakePower
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
@@ -20,19 +20,18 @@ public class spell_pri_void_eruption : SpellScript, IHasSpellEffects, ISpellOnCa
 
 	private void FilterTargets(List<WorldObject> targets)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
+
 		if (caster == null)
-		{
 			return;
-		}
 
 		targets.RemoveIf((WorldObject target) =>
 		                 {
-			                 Unit targ = target.ToUnit();
+			                 var targ = target.ToUnit();
+
 			                 if (targ == null)
-			                 {
 				                 return true;
-			                 }
+
 			                 return !(targ.HasAura(PriestSpells.SPELL_PRIEST_SHADOW_WORD_PAIN, caster.GetGUID()) || targ.HasAura(PriestSpells.SPELL_PRIEST_VAMPIRIC_TOUCH, caster.GetGUID()));
 		                 });
 	}
@@ -44,12 +43,11 @@ public class spell_pri_void_eruption : SpellScript, IHasSpellEffects, ISpellOnCa
 
 	private void HandleDummy(uint UnnamedParameter)
 	{
-		Unit caster = GetCaster();
-		Unit target = GetHitUnit();
+		var caster = GetCaster();
+		var target = GetHitUnit();
+
 		if (caster == null || target == null)
-		{
 			return;
-		}
 
 		var spellid = RandomHelper.RandShort() % 2; //there are two animations which should be random
 		caster.CastSpell(target, PriestSpells.SPELL_PRIEST_VOID_ERUPTION_DAMAGE + spellid, true);
@@ -57,17 +55,15 @@ public class spell_pri_void_eruption : SpellScript, IHasSpellEffects, ISpellOnCa
 
 	public void OnCast()
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
+
 		if (caster == null)
-		{
 			return;
-		}
 
 		caster.CastSpell(caster, PriestSpells.SPELL_PRIEST_VOIDFORM_BUFFS, true);
+
 		if (!caster.HasAura(PriestSpells.SPELL_PRIEST_SHADOWFORM_STANCE))
-		{
 			caster.CastSpell(caster, PriestSpells.SPELL_PRIEST_SHADOWFORM_STANCE, true);
-		}
 	}
 
 	public override void Register()

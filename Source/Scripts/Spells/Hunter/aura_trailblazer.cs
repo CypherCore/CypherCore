@@ -12,7 +12,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(199921)]
 public class aura_trailblazer : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 	DelayedCastEvent _event;
 	TimeSpan _ts;
 
@@ -20,11 +20,10 @@ public class aura_trailblazer : AuraScript, IHasAuraEffects
 	{
 		RescheduleBuff();
 
-		Player player = GetTarget().ToPlayer();
+		var player = GetTarget().ToPlayer();
+
 		if (player != null)
-		{
 			player.SetSpeed(UnitMoveType.Run, player.GetSpeedRate(UnitMoveType.Run) + 0.15f);
-		}
 	}
 
 	private void HandleProc(AuraEffect UnnamedParameter, ProcEventInfo UnnamedParameter2)
@@ -34,7 +33,7 @@ public class aura_trailblazer : AuraScript, IHasAuraEffects
 
 	private void RescheduleBuff()
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 		caster.RemoveAurasDueToSpell(HunterSpells.SPELL_HUNTER_TRAILBLAZER_BUFF);
 
 		if (_event == null)
@@ -43,24 +42,26 @@ public class aura_trailblazer : AuraScript, IHasAuraEffects
 			_ts    = TimeSpan.FromSeconds(GetSpellInfo().GetEffect(0).BasePoints);
 		}
 		else
-			caster.m_Events.GetEvents().RemoveFirstMatching(e =>
-			                                                {
-				                                                if (e.Value is DelayedCastEvent dce)
-					                                                return dce.SpellId == HunterSpells.SPELL_HUNTER_TRAILBLAZER_BUFF;
+		{
+			caster.m_Events.GetEvents()
+			      .RemoveFirstMatching(e =>
+			                           {
+				                           if (e.Value is DelayedCastEvent dce)
+					                           return dce.SpellId == HunterSpells.SPELL_HUNTER_TRAILBLAZER_BUFF;
 
-				                                                return false;
-			                                                });
+				                           return false;
+			                           });
+		}
 
 		caster.m_Events.AddEventAtOffset(_event, _ts);
 	}
 
 	private void OnRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
-		Player player = GetTarget().ToPlayer();
+		var player = GetTarget().ToPlayer();
+
 		if (player != null)
-		{
 			player.SetSpeed(UnitMoveType.Run, player.GetSpeedRate(UnitMoveType.Run) - 0.15f);
-		}
 	}
 
 	public override void Register()

@@ -8,61 +8,57 @@ using Game.Spells;
 
 namespace Scripts.Spells.Warlock
 {
-    // Soul Conduit - 215941
-    [SpellScript(215941)]
-    public class spell_warl_soul_conduit : AuraScript, IHasAuraEffects, IAuraCheckProc
-    {
-        private int _refund = 0;
+	// Soul Conduit - 215941
+	[SpellScript(215941)]
+	public class spell_warl_soul_conduit : AuraScript, IHasAuraEffects, IAuraCheckProc
+	{
+		private int _refund = 0;
 
-        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+		public List<IAuraEffectHandler> AuraEffects => new();
 
-        public bool CheckProc(ProcEventInfo eventInfo)
-        {
-            Unit caster = GetCaster();
-            if (caster == null)
-            {
-                return false;
-            }
-            if (eventInfo.GetActor() && eventInfo.GetActor() != caster)
-            {
-                return false;
-            }
+		public bool CheckProc(ProcEventInfo eventInfo)
+		{
+			var caster = GetCaster();
 
-            Spell spell = eventInfo.GetProcSpell();
-            if (spell == null) 
+			if (caster == null)
+				return false;
+
+			if (eventInfo.GetActor() && eventInfo.GetActor() != caster)
+				return false;
+
+			var spell = eventInfo.GetProcSpell();
+
+			if (spell == null)
 			{
-                List<SpellPowerCost> costs = spell.GetPowerCost();
+				var costs = spell.GetPowerCost();
 
-                var costData = costs.FirstOrDefault(cost => cost.Power == PowerType.Mana && cost.Amount > 0);
+				var costData = costs.FirstOrDefault(cost => cost.Power == PowerType.Mana && cost.Amount > 0);
 
-                if (costData == null)
-                    return false; 
+				if (costData == null)
+					return false;
 
-                _refund = costData.Amount;
-                return true;
-            }
+				_refund = costData.Amount;
 
-            return false;
-        }
+				return true;
+			}
 
-        private void HandleProc(AuraEffect UnnamedParameter, ProcEventInfo UnnamedParameter2)
-        {
-            Unit caster = GetCaster();
-            if (caster == null)
-            {
-                return;
-            }
+			return false;
+		}
 
-            if (RandomHelper.randChance(GetSpellInfo().GetEffect(0).BasePoints))
-            {
-                caster.CastSpell(caster, WarlockSpells.SOUL_CONDUIT_REFUND, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)_refund));
-            }
-        }
+		private void HandleProc(AuraEffect UnnamedParameter, ProcEventInfo UnnamedParameter2)
+		{
+			var caster = GetCaster();
 
-        public override void Register()
-        {
+			if (caster == null)
+				return;
 
-            AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
-    }
+			if (RandomHelper.randChance(GetSpellInfo().GetEffect(0).BasePoints))
+				caster.CastSpell(caster, WarlockSpells.SOUL_CONDUIT_REFUND, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)_refund));
+		}
+
+		public override void Register()
+		{
+			AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+		}
+	}
 }

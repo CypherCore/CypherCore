@@ -9,7 +9,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(5384)]
 public class spell_hun_feign_death : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private ulong health;
 	private int focus;

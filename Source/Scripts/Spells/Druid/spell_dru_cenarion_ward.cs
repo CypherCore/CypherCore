@@ -10,11 +10,11 @@ namespace Scripts.Spells.Druid;
 [SpellScript(102351)]
 public class spell_dru_cenarion_ward : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private struct Spells
 	{
-		public static uint SPELL_DRUID_CENARION_WARD_TRIGGERED = 102352;
+		public static readonly uint SPELL_DRUID_CENARION_WARD_TRIGGERED = 102352;
 	}
 
 	public override bool Validate(SpellInfo UnnamedParameter)
@@ -27,9 +27,7 @@ public class spell_dru_cenarion_ward : AuraScript, IHasAuraEffects
 		PreventDefaultAction();
 
 		if (!GetCaster() || !eventInfo.GetActionTarget())
-		{
 			return;
-		}
 
 		GetCaster().CastSpell(eventInfo.GetActionTarget(), Spells.SPELL_DRUID_CENARION_WARD_TRIGGERED, true);
 	}

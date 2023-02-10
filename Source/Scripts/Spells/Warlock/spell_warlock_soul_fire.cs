@@ -7,26 +7,24 @@ using Game.Scripting.Interfaces.ISpell;
 
 namespace Scripts.Spells.Warlock
 {
-    // 6353 - Soul Fire
-    [SpellScript(6353)]
-    public class spell_warlock_soul_fire : SpellScript, IHasSpellEffects
-    {
-        public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	// 6353 - Soul Fire
+	[SpellScript(6353)]
+	public class spell_warlock_soul_fire : SpellScript, IHasSpellEffects
+	{
+		public List<ISpellEffect> SpellEffects => new();
 
-        private void HandleHit(uint UnnamedParameter)
-        {
-            if (GetCaster())
-            {
-                GetCaster().ModifyPower(PowerType.SoulShards, +40);
-            }
+		private void HandleHit(uint UnnamedParameter)
+		{
+			if (GetCaster())
+				GetCaster().ModifyPower(PowerType.SoulShards, +40);
 
-            //TODO: Improve it later
-            GetCaster().GetSpellHistory().ModifyCooldown(WarlockSpells.SOUL_FIRE, TimeSpan.FromSeconds(-2));
-        }
+			//TODO: Improve it later
+			GetCaster().GetSpellHistory().ModifyCooldown(WarlockSpells.SOUL_FIRE, TimeSpan.FromSeconds(-2));
+		}
 
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHit));
-        }
-    }
+		public override void Register()
+		{
+			SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHit));
+		}
+	}
 }

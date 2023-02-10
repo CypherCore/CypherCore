@@ -1,79 +1,81 @@
-﻿using Framework.Constants;
+﻿using System.Collections.Generic;
+using Framework.Constants;
 using Game.Entities;
-using Game.Scripting.Interfaces.ISpell;
 using Game.Scripting;
+using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Scripts.Spells.Shaman
 {
-    // Spirit link
-    [SpellScript(98021)]
-    public class spell_sha_spirit_link : SpellScript, ISpellOnHit
-    {
-        public List<ISpellEffect> SpellEffects { get; } = new();
+	// Spirit link
+	[SpellScript(98021)]
+	public class spell_sha_spirit_link : SpellScript, ISpellOnHit
+	{
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
-        public override bool Load()
-        {
-            averagePercentage = 0.0f;
-            return true;
-        }
+		public override bool Load()
+		{
+			averagePercentage = 0.0f;
 
-        private void FilterTargets(List<WorldObject> unitList)
-        {
-            uint targetCount = 0;
-            for (List<WorldObject>.Enumerator itr = unitList.GetEnumerator(); itr.MoveNext();)
-            {
-                Unit target = itr.Current.ToUnit();
-                if (target != null)
-                {
-                    targets[target.GetGUID()] = target.GetHealthPct();
-                    averagePercentage += target.GetHealthPct();
-                    ++targetCount;
-                }
-            }
+			return true;
+		}
 
-            averagePercentage /= targetCount;
-        }
+		private void FilterTargets(List<WorldObject> unitList)
+		{
+			uint targetCount = 0;
 
-        public void OnHit()
-        {
-            Unit target = GetHitUnit();
-            if (target != null)
-            {
-                if (!targets.ContainsKey(target.GetGUID()))
-                {
-                    return;
-                }
+			for (var itr = unitList.GetEnumerator(); itr.MoveNext();)
+			{
+				var target = itr.Current.ToUnit();
 
-                float bp0 = 0.0f;
-                float bp1 = 0.0f;
-                float percentage = targets[target.GetGUID()];
-                ulong currentHp = target.CountPctFromMaxHealth((int)percentage);
-                ulong desiredHp = target.CountPctFromMaxHealth((int)averagePercentage);
+				if (target != null)
+				{
+					targets[target.GetGUID()] =  target.GetHealthPct();
+					averagePercentage         += target.GetHealthPct();
+					++targetCount;
+				}
+			}
 
-                if (desiredHp > currentHp)
-                    bp1 = desiredHp - currentHp;
-                else
-                    bp0 = currentHp - desiredHp;
+			averagePercentage /= targetCount;
+		}
 
-                CastSpellExtraArgs args = new CastSpellExtraArgs();
-                GetCaster().CastSpell(target, 98021, new CastSpellExtraArgs(TriggerCastFlags.None)
-                    .AddSpellMod(SpellValueMod.BasePoint0, (int)bp0)
-                    .AddSpellMod(SpellValueMod.BasePoint1, (int)bp1));
-            }
-        }
+		public void OnHit()
+		{
+			var target = GetHitUnit();
 
-        public override void Register()
-        {
-            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitCasterAreaRaid));
-        }
+			if (target != null)
+			{
+				if (!targets.ContainsKey(target.GetGUID()))
+					return;
 
-        private SortedDictionary<ObjectGuid, float> targets = new SortedDictionary<ObjectGuid, float>();
-        private float averagePercentage;
-    }
+				var bp0        = 0.0f;
+				var bp1        = 0.0f;
+				var percentage = targets[target.GetGUID()];
+				var currentHp  = target.CountPctFromMaxHealth((int)percentage);
+				var desiredHp  = target.CountPctFromMaxHealth((int)averagePercentage);
+
+				if (desiredHp > currentHp)
+					bp1 = desiredHp - currentHp;
+				else
+					bp0 = currentHp - desiredHp;
+
+				var args = new CastSpellExtraArgs();
+
+				GetCaster()
+					.CastSpell(target,
+					           98021,
+					           new CastSpellExtraArgs(TriggerCastFlags.None)
+						           .AddSpellMod(SpellValueMod.BasePoint0, (int)bp0)
+						           .AddSpellMod(SpellValueMod.BasePoint1, (int)bp1));
+			}
+		}
+
+		public override void Register()
+		{
+			SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitCasterAreaRaid));
+		}
+
+		private readonly SortedDictionary<ObjectGuid, float> targets = new();
+		private float averagePercentage;
+	}
 }

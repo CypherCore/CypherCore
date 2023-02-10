@@ -1,5 +1,4 @@
 ﻿using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
@@ -16,7 +15,7 @@ internal class spell_dk_pet_skeleton_transform : SpellScript, ISpellCheckCast
 
 	public SpellCastResult CheckCast()
 	{
-		Unit owner = GetCaster().GetOwner();
+		var owner = GetCaster().GetOwner();
 
 		if (owner)
 			if (owner.HasAura(DeathKnightSpells.GlyphOfTheSkeleton))

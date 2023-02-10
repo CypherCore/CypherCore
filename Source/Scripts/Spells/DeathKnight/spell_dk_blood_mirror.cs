@@ -10,13 +10,13 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(206977)]
 public class spell_dk_blood_mirror : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private void CalcAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
 	{
 		amount = -1;
 	}
-        
+
 
 	private void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
 	{
@@ -26,7 +26,6 @@ public class spell_dk_blood_mirror : AuraScript, IHasAuraEffects
 
 		if (caster != null && target != null)
 			caster.CastSpell(target, DeathKnightSpells.SPELL_DK_BLOOD_MIRROR_DAMAGE, (int)absorbAmount, true);
-
 	}
 
 	public override void Register()

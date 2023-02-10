@@ -23,34 +23,27 @@ public class at_hun_caltropsAI : AreaTriggerAI
 
 	public override void OnUpdate(uint p_Time)
 	{
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
+
 		if (caster == null)
-		{
 			return;
-		}
 
 		if (caster.GetTypeId() != TypeId.Player)
-		{
 			return;
-		}
 
 		// Check if we can handle actions
 		timeInterval += (int)p_Time;
+
 		if (timeInterval < 1000)
-		{
 			return;
-		}
 
 		foreach (var guid in at.GetInsideUnits())
 		{
-			Unit unit = ObjectAccessor.Instance.GetUnit(caster, guid);
+			var unit = ObjectAccessor.Instance.GetUnit(caster, guid);
+
 			if (unit != null)
-			{
 				if (!caster.IsFriendlyTo(unit))
-				{
 					caster.CastSpell(unit, UsedSpells.SPELL_HUNTER_CALTROPS_AURA, true);
-				}
-			}
 		}
 
 		timeInterval -= 1000;

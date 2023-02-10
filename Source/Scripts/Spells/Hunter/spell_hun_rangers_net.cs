@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -10,11 +9,11 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(200108)]
 public class spell_hun_rangers_net : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private void HandleEffectRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		caster.CastSpell(GetTarget(), HunterSpells.SPELL_HUNTER_RANGERS_NET_INCREASE_SPEED, true);
 	}

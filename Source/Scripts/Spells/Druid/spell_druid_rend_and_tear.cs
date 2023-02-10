@@ -10,12 +10,12 @@ namespace Scripts.Spells.Druid;
 [SpellScript(204053)]
 public class spell_druid_rend_and_tear : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private struct Spells
 	{
-		public static uint SPELL_DRUID_REND_AND_TEAR = 204053;
-		public static uint SPELL_DRUID_TRASH_DOT = 192090;
+		public static readonly uint SPELL_DRUID_REND_AND_TEAR = 204053;
+		public static readonly uint SPELL_DRUID_TRASH_DOT = 192090;
 	}
 
 	public override bool Validate(SpellInfo UnnamedParameter)
@@ -30,31 +30,26 @@ public class spell_druid_rend_and_tear : AuraScript, IHasAuraEffects
 
 	private void Absorb(AuraEffect auraEffect, DamageInfo dmgInfo, ref uint absorbAmount)
 	{
-		Unit caster   = GetCaster();
-		Unit attacker = dmgInfo.GetAttacker();
+		var caster   = GetCaster();
+		var attacker = dmgInfo.GetAttacker();
 		absorbAmount = 0;
 
 		if (caster == null || attacker == null || !HasEffect(1))
-		{
 			return;
-		}
 
 		if (caster.GetShapeshiftForm() == ShapeShiftForm.BearForm)
 		{
-			Aura trashDOT = attacker.GetAura(Spells.SPELL_DRUID_TRASH_DOT, caster.GetGUID());
+			var trashDOT = attacker.GetAura(Spells.SPELL_DRUID_TRASH_DOT, caster.GetGUID());
+
 			if (trashDOT != null)
-			{
 				absorbAmount = MathFunctions.CalculatePct(dmgInfo.GetDamage(), trashDOT.GetStackAmount() * GetSpellInfo().GetEffect(1).BasePoints);
-			}
 		}
 	}
 
 	private void HandleEffectCalcSpellMod(AuraEffect aurEff, ref SpellModifier spellMod)
 	{
 		if (spellMod == null)
-		{
 			return;
-		}
 
 		((SpellModifierByClassMask)spellMod).value = GetCaster().GetShapeshiftForm() == ShapeShiftForm.BearForm ? aurEff.GetAmount() : 0;
 	}
@@ -63,7 +58,7 @@ public class spell_druid_rend_and_tear : AuraScript, IHasAuraEffects
 	{
 		AuraEffects.Add(new AuraEffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
 		AuraEffects.Add(new AuraEffectAbsorbHandler(Absorb, 0));
-		AuraEffects.Add(new AuraEffectCalcSpellModHandler(HandleEffectCalcSpellMod,  1,  AuraType.AddFlatModifier));
-		AuraEffects.Add(new AuraEffectCalcSpellModHandler(HandleEffectCalcSpellMod,  2,  AuraType.AddFlatModifier));
+		AuraEffects.Add(new AuraEffectCalcSpellModHandler(HandleEffectCalcSpellMod, 1, AuraType.AddFlatModifier));
+		AuraEffects.Add(new AuraEffectCalcSpellModHandler(HandleEffectCalcSpellMod, 2, AuraType.AddFlatModifier));
 	}
 }

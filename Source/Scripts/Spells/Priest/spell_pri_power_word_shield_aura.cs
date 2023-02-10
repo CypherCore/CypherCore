@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -43,19 +42,19 @@ internal class spell_pri_power_word_shield_aura : AuraScript, IHasAuraEffects
 	{
 		canBeRecalculated = false;
 
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		if (caster != null)
 		{
-			float amountF = caster.SpellBaseDamageBonusDone(GetSpellInfo().GetSchoolMask()) * 1.65f;
+			var amountF = caster.SpellBaseDamageBonusDone(GetSpellInfo().GetSchoolMask()) * 1.65f;
 
-			Player player = caster.ToPlayer();
+			var player = caster.ToPlayer();
 
 			if (player != null)
 			{
 				MathFunctions.AddPct(ref amountF, player.GetRatingBonusValue(CombatRating.VersatilityDamageDone));
 
-				AuraEffect mastery = caster.GetAuraEffect(PriestSpells.MasteryGrace, 0);
+				var mastery = caster.GetAuraEffect(PriestSpells.MasteryGrace, 0);
 
 				if (mastery != null)
 					if (GetUnitOwner().HasAura(PriestSpells.AtonementTriggered) ||
@@ -63,7 +62,7 @@ internal class spell_pri_power_word_shield_aura : AuraScript, IHasAuraEffects
 						MathFunctions.AddPct(ref amountF, mastery.GetAmount());
 			}
 
-			AuraEffect rapture = caster.GetAuraEffect(PriestSpells.Rapture, 1);
+			var rapture = caster.GetAuraEffect(PriestSpells.Rapture, 1);
 
 			if (rapture != null)
 				MathFunctions.AddPct(ref amountF, rapture.GetAmount());
@@ -74,8 +73,8 @@ internal class spell_pri_power_word_shield_aura : AuraScript, IHasAuraEffects
 
 	private void HandleOnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit caster = GetCaster();
-		Unit target = GetTarget();
+		var caster = GetCaster();
+		var target = GetTarget();
 
 		if (!caster)
 			return;
@@ -100,7 +99,7 @@ internal class spell_pri_power_word_shield_aura : AuraScript, IHasAuraEffects
 	private void HandleOnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
 		GetTarget().RemoveAura(PriestSpells.StrengthOfSoulEffect);
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		if (caster)
 			if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.EnemySpell &&

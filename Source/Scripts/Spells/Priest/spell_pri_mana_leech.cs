@@ -10,7 +10,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(28305)]
 public class spell_pri_mana_leech : AuraScript, IHasAuraEffects, IAuraCheckProc
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	public spell_pri_mana_leech()
 	{
@@ -20,15 +20,15 @@ public class spell_pri_mana_leech : AuraScript, IHasAuraEffects, IAuraCheckProc
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
 		if (Global.SpellMgr.GetSpellInfo(PriestSpells.SPELL_PRIEST_MANA_LEECH_PROC, Difficulty.None) != null)
-		{
 			return false;
-		}
+
 		return true;
 	}
 
 	public bool CheckProc(ProcEventInfo UnnamedParameter)
 	{
 		_procTarget = GetTarget().GetOwner();
+
 		return _procTarget != null;
 	}
 
@@ -40,7 +40,6 @@ public class spell_pri_mana_leech : AuraScript, IHasAuraEffects, IAuraCheckProc
 
 	public override void Register()
 	{
-
 		AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
 	}
 

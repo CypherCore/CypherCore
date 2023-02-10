@@ -4,94 +4,81 @@ using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
-using Game.Spells;
 
 namespace Scripts.Spells.Warlock
 {
-    // Demonwrath damage - 193439
-    [SpellScript(193439)]
-    public class spell_warl_demonwrath : SpellScript, IHasSpellEffects
-    {
-        public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	// Demonwrath damage - 193439
+	[SpellScript(193439)]
+	public class spell_warl_demonwrath : SpellScript, IHasSpellEffects
+	{
+		public List<ISpellEffect> SpellEffects => new();
 
-        private void SelectTargets(List<WorldObject> targets)
-        {
-            Unit caster = GetCaster();
-            if (caster == null)
-            {
-                return;
-            }
+		private void SelectTargets(List<WorldObject> targets)
+		{
+			var caster = GetCaster();
 
-            List<Creature> pets = new List<Creature>();
-            caster.GetCreatureListInGrid(pets, 100.0f);
+			if (caster == null)
+				return;
 
-            pets.RemoveIf((Creature creature) =>
-            {
-                if (creature == caster)
-                {
-                    return true;
-                }
-                if (!creature.HasAura(WarlockSpells.DEMONWRATH_AURA))
-                {
-                    return true;
-                }
-                if (creature.GetCreatureType() != CreatureType.Demon)
-                {
-                    return true;
-                }
-                return false;
-            });
+			var pets = new List<Creature>();
+			caster.GetCreatureListInGrid(pets, 100.0f);
+
+			pets.RemoveIf((Creature creature) =>
+			              {
+				              if (creature == caster)
+					              return true;
+
+				              if (!creature.HasAura(WarlockSpells.DEMONWRATH_AURA))
+					              return true;
+
+				              if (creature.GetCreatureType() != CreatureType.Demon)
+					              return true;
+
+				              return false;
+			              });
 
 
+			targets.RemoveIf((WorldObject obj) =>
+			                 {
+				                 if (!obj.ToUnit())
+					                 return true;
 
-            targets.RemoveIf((WorldObject obj) =>
-            {
-                if (!obj.ToUnit())
-                {
-                    return true;
-                }
-                if (!caster.IsValidAttackTarget(obj.ToUnit()))
-                {
-                    return true;
-                }
-                bool inRange = false;
-                foreach (Unit pet in pets)
-                {
-                    if (pet.GetExactDist(obj) <= 10.0f)
-                    {
-                        inRange = true;
-                    }
-                }
-                return !inRange;
-            });
-        }
+				                 if (!caster.IsValidAttackTarget(obj.ToUnit()))
+					                 return true;
 
-        private void HandleHit(uint UnnamedParameter)
-        {
-            Unit caster = GetCaster();
-            if (caster == null)
-            {
-                return;
-            }
+				                 var inRange = false;
 
-            Aura aur = caster.GetAura(WarlockSpells.DEMONIC_CALLING);
-            if (aur != null)
-            {
-                AuraEffect aurEff = aur.GetEffect(1);
-                if (aurEff != null)
-                {
-                    if (RandomHelper.randChance(aurEff.GetBaseAmount()))
-                    {
-                        caster.CastSpell(caster, WarlockSpells.DEMONIC_CALLING_TRIGGER, true);
-                    }
-                }
-            }
-        }
+				                 foreach (Unit pet in pets)
+					                 if (pet.GetExactDist(obj) <= 10.0f)
+						                 inRange = true;
 
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
-            SpellEffects.Add(new ObjectAreaTargetSelectHandler(SelectTargets, 0, Targets.UnitSrcAreaEnemy));
-        }
-    }
+				                 return !inRange;
+			                 });
+		}
+
+		private void HandleHit(uint UnnamedParameter)
+		{
+			var caster = GetCaster();
+
+			if (caster == null)
+				return;
+
+			var aur = caster.GetAura(WarlockSpells.DEMONIC_CALLING);
+
+			if (aur != null)
+			{
+				var aurEff = aur.GetEffect(1);
+
+				if (aurEff != null)
+					if (RandomHelper.randChance(aurEff.GetBaseAmount()))
+						caster.CastSpell(caster, WarlockSpells.DEMONIC_CALLING_TRIGGER, true);
+			}
+		}
+
+		public override void Register()
+		{
+			SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
+			SpellEffects.Add(new ObjectAreaTargetSelectHandler(SelectTargets, 0, Targets.UnitSrcAreaEnemy));
+		}
+	}
 }

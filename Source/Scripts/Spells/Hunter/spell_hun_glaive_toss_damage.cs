@@ -7,17 +7,21 @@ using Game.Scripting.Interfaces.ISpell;
 
 namespace Scripts.Spells.Hunter;
 
-[SpellScript(new uint[] { 120761, 121414 })]
+[SpellScript(new uint[]
+             {
+	             120761, 121414
+             })]
 public class spell_hun_glaive_toss_damage : SpellScript, IHasSpellEffects, ISpellOnHit
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 
-	private ObjectGuid mainTargetGUID = new ObjectGuid();
+	private ObjectGuid mainTargetGUID = new();
 
 	private bool Load()
 	{
 		mainTargetGUID = ObjectGuid.Empty;
+
 		return true;
 	}
 
@@ -25,113 +29,84 @@ public class spell_hun_glaive_toss_damage : SpellScript, IHasSpellEffects, ISpel
 	{
 		targets.Clear();
 
-		List<Unit> targetList = new List<Unit>();
-		float      radius     = 50.0f;
+		var targetList = new List<Unit>();
+		var radius     = 50.0f;
 
 		GetCaster().GetAnyUnitListInRange(targetList, radius);
 
 		foreach (var itr in targetList)
-		{
 			if (itr.HasAura(HunterSpells.SPELL_HUNTER_GLAIVE_TOSS_AURA))
 			{
 				mainTargetGUID = itr.GetGUID();
+
 				break;
 			}
-		}
 
 		if (mainTargetGUID == default)
-		{
 			return;
-		}
 
-		Unit target = ObjectAccessor.Instance.GetUnit(GetCaster(), mainTargetGUID);
+		var target = ObjectAccessor.Instance.GetUnit(GetCaster(), mainTargetGUID);
+
 		if (target == null)
-		{
 			return;
-		}
 
 		targets.Add(target);
 
 		foreach (var itr in targetList)
-		{
 			if (itr.IsInBetween(GetCaster(), target, 5.0f))
-			{
 				if (!GetCaster().IsFriendlyTo(itr))
-				{
 					targets.Add(itr);
-				}
-			}
-		}
 	}
 
 	private void CorrectSnareRange(List<WorldObject> targets)
 	{
 		targets.Clear();
 
-		List<Unit> targetList = new List<Unit>();
-		float      radius     = 50.0f;
+		var targetList = new List<Unit>();
+		var radius     = 50.0f;
 
 		GetCaster().GetAnyUnitListInRange(targetList, radius);
 
 		foreach (var itr in targetList)
-		{
 			if (itr.HasAura(HunterSpells.SPELL_HUNTER_GLAIVE_TOSS_AURA))
 			{
 				mainTargetGUID = itr.GetGUID();
+
 				break;
 			}
-		}
 
 		if (mainTargetGUID == default)
-		{
 			return;
-		}
 
 		if (mainTargetGUID == default)
-		{
 			return;
-		}
 
-		Unit target = ObjectAccessor.Instance.GetUnit(GetCaster(), mainTargetGUID);
+		var target = ObjectAccessor.Instance.GetUnit(GetCaster(), mainTargetGUID);
+
 		if (target == null)
-		{
 			return;
-		}
 
 		targets.Add(target);
 
 		foreach (var itr in targetList)
-		{
 			if (itr.IsInBetween(GetCaster(), target, 5.0f))
-			{
 				if (!GetCaster().IsFriendlyTo(itr))
-				{
 					targets.Add(itr);
-				}
-			}
-		}
 	}
 
 	public void OnHit()
 	{
 		if (mainTargetGUID == default)
-		{
 			return;
-		}
 
-		Unit target = ObjectAccessor.Instance.GetUnit(GetCaster(), mainTargetGUID);
+		var target = ObjectAccessor.Instance.GetUnit(GetCaster(), mainTargetGUID);
+
 		if (target == null)
-		{
 			return;
-		}
 
 		if (GetHitUnit())
-		{
 			if (GetHitUnit() == target)
-			{
 				SetHitDamage(GetHitDamage() * 4);
-			}
-		}
 	}
 
 	public override void Register()

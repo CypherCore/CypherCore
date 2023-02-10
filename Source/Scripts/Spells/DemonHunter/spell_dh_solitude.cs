@@ -1,0 +1,54 @@
+﻿using System.Collections.Generic;
+using Framework.Constants;
+using Game.Entities;
+using Game.Maps;
+using Game.Scripting;
+using Game.Scripting.Interfaces.IAura;
+using Game.Spells;
+
+namespace Scripts.Spells.DemonHunter;
+
+/// Honor Talents
+
+// Solitude - 211509
+[SpellScript(211509)]
+public class spell_dh_solitude : AuraScript, IHasAuraEffects
+{
+	public List<IAuraEffectHandler> AuraEffects => new();
+
+
+	public override bool Validate(SpellInfo UnnamedParameter)
+	{
+		if (Global.SpellMgr.GetSpellInfo(DemonHunterSpells.SPELL_DH_SOLITUDE_BUFF, Difficulty.None) != null)
+			return false;
+
+		return true;
+	}
+
+	private void HandlePeriodic(AuraEffect UnnamedParameter)
+	{
+		PreventDefaultAction();
+
+		var caster = GetCaster();
+
+		if (caster == null || !GetSpellInfo().GetEffect(1).IsEffect())
+			return;
+
+		var range    = GetSpellInfo().GetEffect(1).BasePoints;
+		var allies   = new List<Unit>();
+		var check    = new AnyFriendlyUnitInObjectRangeCheck(caster, caster, range, true);
+		var searcher = new UnitListSearcher(caster, allies, check);
+		Cell.VisitAllObjects(caster, searcher, range);
+		allies.Remove(caster);
+
+		if (allies.Count == 0 && !caster.HasAura(DemonHunterSpells.SPELL_DH_SOLITUDE_BUFF))
+			caster.CastSpell(caster, DemonHunterSpells.SPELL_DH_SOLITUDE_BUFF, true);
+		else if (allies.Count > 0)
+			caster.RemoveAurasDueToSpell(DemonHunterSpells.SPELL_DH_SOLITUDE_BUFF);
+	}
+
+	public override void Register()
+	{
+		AuraEffects.Add(new AuraEffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicDummy));
+	}
+}

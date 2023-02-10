@@ -26,7 +26,7 @@ internal class spell_hun_roar_of_sacrifice : AuraScript, IHasAuraEffects
 
 	private bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
-		DamageInfo damageInfo = eventInfo.GetDamageInfo();
+		var damageInfo = eventInfo.GetDamageInfo();
 
 		if (damageInfo == null ||
 		    !Convert.ToBoolean((int)damageInfo.GetSchoolMask() & aurEff.GetMiscValue()))

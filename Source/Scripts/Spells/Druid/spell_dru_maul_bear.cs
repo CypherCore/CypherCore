@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -10,16 +9,15 @@ namespace Scripts.Spells.Druid;
 [SpellScript(6807)]
 public class spell_dru_maul_bear : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	private void OnHit(uint UnnamedParameter)
 	{
-		Unit caster = GetCaster();
-		Unit target = GetHitUnit();
+		var caster = GetCaster();
+		var target = GetHitUnit();
+
 		if (caster == null || target == null)
-		{
 			return;
-		}
 	}
 
 	public override void Register()

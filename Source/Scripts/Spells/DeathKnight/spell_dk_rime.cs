@@ -24,7 +24,7 @@ internal class spell_dk_rime : AuraScript, IHasAuraEffects
 
 	private bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
-		float chance = (float)GetSpellInfo().GetEffect(1).CalcValue(GetTarget());
+		var chance = (float)GetSpellInfo().GetEffect(1).CalcValue(GetTarget());
 
 		if (eventInfo.GetSpellInfo().Id == DeathKnightSpells.FrostScythe)
 			chance /= 2.0f;

@@ -1582,7 +1582,7 @@ namespace Game.Entities
             // or generate one on our own
             else
             {
-                foreach (var pair in GetAppliedAuras().KeyValueList)
+                foreach (var pair in GetAppliedAuras().KeyValueList.ToArray())
                     processAuraApplication(pair.Value);
             }
         }
@@ -2652,12 +2652,22 @@ namespace Game.Entities
                 creature.GetAI().OnSpellClick(clicker, ref spellClickHandled);
         }
 
-        public bool HasAura<T>(T spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0) where T : struct, System.Enum
+        public bool HasAura<T>(T spellId) where T : struct, System.Enum
+        {
+            return GetAuraApplication(Convert.ToUInt32(spellId)) != null;
+        }
+
+        public bool HasAura<T>(T spellId, ObjectGuid casterGUID, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0) where T : struct, System.Enum
         {
             return GetAuraApplication(Convert.ToUInt32(spellId), casterGUID, itemCasterGUID, reqEffMask) != null;
         }
 
-        public bool HasAura(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)
+        public bool HasAura(uint spellId)
+        {
+            return GetAuraApplication(spellId) != null;
+        }
+
+        public bool HasAura(uint spellId, ObjectGuid casterGUID, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)
         {
             return GetAuraApplication(spellId, casterGUID, itemCasterGUID, reqEffMask) != null;
         }
@@ -2812,18 +2822,18 @@ namespace Game.Entities
             return count;
         }
 
-        public Aura GetAuraOfRankedSpell(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)
+        public Aura GetAuraOfRankedSpell(uint spellId)
         {
-            var aurApp = GetAuraApplicationOfRankedSpell(spellId, casterGUID, itemCasterGUID, reqEffMask);
+            var aurApp = GetAuraApplicationOfRankedSpell(spellId);
             return aurApp?.GetBase();
         }
 
-        AuraApplication GetAuraApplicationOfRankedSpell(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0, AuraApplication except = null)
+        AuraApplication GetAuraApplicationOfRankedSpell(uint spellId)
         {
             uint rankSpell = Global.SpellMgr.GetFirstSpellInChain(spellId);
             while (rankSpell != 0)
             {
-                AuraApplication aurApp = GetAuraApplication(rankSpell, casterGUID, itemCasterGUID, reqEffMask, except);
+                AuraApplication aurApp = GetAuraApplication(rankSpell).FirstOrDefault();
                 if (aurApp != null)
                     return aurApp;
                 rankSpell = Global.SpellMgr.GetNextSpellInChain(rankSpell);
@@ -3773,7 +3783,15 @@ namespace Game.Entities
 
         }
 
-        public AuraApplication GetAuraApplication(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0, AuraApplication except = null)
+        public List<AuraApplication> GetAuraApplication(uint spellId)
+        {
+            if (m_appliedAuras.TryGetValue(spellId, out var aura))
+                return aura;
+
+            return null;
+        }
+
+        public AuraApplication GetAuraApplication(uint spellId, ObjectGuid casterGUID, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0, AuraApplication except = null)
         {
             return GetAuraApplication(spellId, app =>
             {
@@ -3836,12 +3854,23 @@ namespace Game.Entities
             return 0;
         }
 
-        public Aura GetAura<T>(T spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0) where T : struct, System.Enum
+        public Aura GetAura<T>(T spellId) where T : struct, System.Enum
+        {
+            return GetAura(Convert.ToUInt32(spellId));
+        }
+
+        public Aura GetAura<T>(T spellId, ObjectGuid casterGUID, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0) where T : struct, System.Enum
         {
             return GetAura(Convert.ToUInt32(spellId), casterGUID, itemCasterGUID, reqEffMask);
         }
 
-        public Aura GetAura(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)
+        public Aura GetAura(uint spellId)
+        {
+            AuraApplication aurApp = GetAuraApplication(spellId)?.FirstOrDefault();
+            return aurApp?.GetBase();
+        }
+
+        public Aura GetAura(uint spellId, ObjectGuid casterGUID, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)
         {
             AuraApplication aurApp = GetAuraApplication(spellId, casterGUID, itemCasterGUID, reqEffMask);
             return aurApp?.GetBase();

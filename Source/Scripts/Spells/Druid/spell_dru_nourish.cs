@@ -1,5 +1,4 @@
-﻿using Game.Entities;
-using Game.Scripting;
+﻿using Game.Scripting;
 
 namespace Scripts.Spells.Druid;
 
@@ -11,19 +10,15 @@ public class spell_dru_nourish : SpellScript
 
 	public void OnHit()
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
+
 		if (caster != null)
 		{
-			Unit target = GetHitUnit();
+			var target = GetHitUnit();
+
 			if (target != null)
-			{
 				if (caster.HasAura(SPELL_DRUID_NOURISH_PASSIVE))
-				{
 					caster.CastSpell(target, SPELL_DRUID_REJUVENATION, true);
-				}
-			}
 		}
 	}
-
-
 }

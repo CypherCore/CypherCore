@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -11,7 +10,7 @@ namespace Scripts.Spells.Mage;
 [SpellScript(205029)]
 public class spell_mage_fire_on : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
@@ -20,12 +19,11 @@ public class spell_mage_fire_on : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint UnnamedParameter)
 	{
-		Unit caster = GetCaster();
-		Unit target = GetHitUnit();
+		var caster = GetCaster();
+		var target = GetHitUnit();
+
 		if (caster == null || target == null || caster.GetTypeId() != TypeId.Player)
-		{
 			return;
-		}
 
 		caster.ToPlayer().GetSpellHistory().ResetCharges(Global.SpellMgr.GetSpellInfo(MageSpells.FireBlast, Difficulty.None).ChargeCategoryId);
 		// caster->ToPlayer()->GetSpellHistory()->ResetCharges(Global.SpellMgr->GetSpellInfo(SPELL_MAGE_FIRE_BLAST, Difficulty.None)->ChargeCategoryId);

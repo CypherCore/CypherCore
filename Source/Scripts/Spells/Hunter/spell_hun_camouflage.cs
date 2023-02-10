@@ -10,7 +10,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(199483)]
 public class spell_hun_camouflage : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 
 	private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
@@ -18,10 +18,9 @@ public class spell_hun_camouflage : AuraScript, IHasAuraEffects
 		if (GetCaster() && GetCaster().IsPlayer())
 		{
 			Unit pet = GetCaster().GetGuardianPet();
+
 			if (pet != null)
-			{
 				pet.CastSpell(pet, HunterSpells.SPELL_HUNTER_CAMOUFLAGE, true);
-			}
 		}
 	}
 
@@ -30,10 +29,9 @@ public class spell_hun_camouflage : AuraScript, IHasAuraEffects
 		if (GetCaster() && GetCaster().IsPlayer())
 		{
 			Unit pet = GetCaster().GetGuardianPet();
+
 			if (pet != null)
-			{
 				pet.RemoveAurasDueToSpell(HunterSpells.SPELL_HUNTER_CAMOUFLAGE);
-			}
 		}
 	}
 

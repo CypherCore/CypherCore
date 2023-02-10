@@ -10,16 +10,15 @@ namespace Scripts.Spells.Priest;
 [SpellScript(208771)]
 public class spell_pri_smite_absorb : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private void HandleAbsorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref uint absorbAmount)
 	{
-		Unit caster   = GetCaster();
-		Unit attacker = dmgInfo.GetAttacker();
+		var caster   = GetCaster();
+		var attacker = dmgInfo.GetAttacker();
+
 		if (caster == null || attacker == null)
-		{
 			return;
-		}
 
 		if (!attacker.HasAura(PriestSpells.SPELL_PRIEST_SMITE_AURA, caster.GetGUID()))
 		{
@@ -27,13 +26,16 @@ public class spell_pri_smite_absorb : AuraScript, IHasAuraEffects
 		}
 		else
 		{
-			Aura aur = attacker.GetAura(PriestSpells.SPELL_PRIEST_SMITE_AURA, caster.GetGUID());
+			var aur = attacker.GetAura(PriestSpells.SPELL_PRIEST_SMITE_AURA, caster.GetGUID());
+
 			if (aur != null)
 			{
-				AuraEffect aurEff = aur.GetEffect(0);
+				var aurEff = aur.GetEffect(0);
+
 				if (aurEff != null)
 				{
-					int absorb = Math.Max(0, aurEff.GetAmount() - (int)dmgInfo.GetDamage());
+					var absorb = Math.Max(0, aurEff.GetAmount() - (int)dmgInfo.GetDamage());
+
 					if (absorb <= 0)
 					{
 						absorbAmount = (uint)aurEff.GetAmount();

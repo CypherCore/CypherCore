@@ -1,0 +1,58 @@
+﻿using System.Collections.Generic;
+using Framework.Constants;
+using Game.Entities;
+using Game.Scripting;
+using Game.Scripting.Interfaces.IAura;
+using Game.Spells;
+
+namespace Scripts.Spells.DemonHunter;
+
+[SpellScript(209258)]
+public class spell_dh_last_resort : AuraScript, IHasAuraEffects
+{
+	public List<IAuraEffectHandler> AuraEffects => new();
+
+
+	public override bool Validate(SpellInfo UnnamedParameter)
+	{
+		if (Global.SpellMgr.GetSpellInfo(DemonHunterSpells.SPELL_DH_LAST_RESORT_DEBUFF, Difficulty.None) != null)
+			return false;
+
+		return true;
+	}
+
+	private void CalcAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
+	{
+		amount = -1;
+	}
+
+	private void HandleAbsorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref uint absorbAmount)
+	{
+		var target = GetTarget();
+
+		if (target == null)
+			return;
+
+		if (dmgInfo.GetDamage() < target.GetHealth())
+			return;
+
+		if (target.HasAura(DemonHunterSpells.SPELL_DH_LAST_RESORT_DEBUFF))
+			return;
+
+		var healthPct = GetSpellInfo().GetEffect(1).IsEffect() ? GetSpellInfo().GetEffect(1).BasePoints : 0;
+		target.SetHealth(1);
+		var healInfo = new HealInfo(target, target, target.CountPctFromMaxHealth(healthPct), GetSpellInfo(), (SpellSchoolMask)GetSpellInfo().SchoolMask);
+		target.HealBySpell(healInfo);
+		// We use AddAura instead of CastSpell, since if the spell is on cooldown, it will not be casted
+		target.AddAura(DemonHunterSpells.SPELL_DH_METAMORPHOSIS_VENGEANCE, target);
+		target.CastSpell(target, DemonHunterSpells.SPELL_DH_LAST_RESORT_DEBUFF, true);
+
+		absorbAmount = dmgInfo.GetDamage();
+	}
+
+	public override void Register()
+	{
+		AuraEffects.Add(new AuraEffectCalcAmountHandler(CalcAmount, 0, AuraType.SchoolAbsorb));
+		AuraEffects.Add(new AuraEffectAbsorbHandler(HandleAbsorb, 0));
+	}
+}

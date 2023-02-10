@@ -30,14 +30,14 @@ internal class spell_dk_dancing_rune_weapon : AuraScript, IHasAuraEffects
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
 		PreventDefaultAction();
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		if (!caster)
 			return;
 
 		Unit drw = null;
 
-		foreach (Unit controlled in caster.m_Controlled)
+		foreach (var controlled in caster.m_Controlled)
 			if (controlled.GetEntry() == CreatureIds.DancingRuneWeapon)
 			{
 				drw = controlled;
@@ -49,18 +49,18 @@ internal class spell_dk_dancing_rune_weapon : AuraScript, IHasAuraEffects
 		    !drw.GetVictim())
 			return;
 
-		SpellInfo spellInfo = eventInfo.GetSpellInfo();
+		var spellInfo = eventInfo.GetSpellInfo();
 
 		if (spellInfo == null)
 			return;
 
-		DamageInfo damageInfo = eventInfo.GetDamageInfo();
+		var damageInfo = eventInfo.GetDamageInfo();
 
 		if (damageInfo == null ||
 		    damageInfo.GetDamage() == 0)
 			return;
 
-		int                 amount = (int)damageInfo.GetDamage() / 2;
+		var                 amount = (int)damageInfo.GetDamage() / 2;
 		SpellNonMeleeDamage log    = new(drw, drw.GetVictim(), spellInfo, new SpellCastVisual(spellInfo.GetSpellXSpellVisualId(drw), 0), spellInfo.GetSchoolMask());
 		log.damage = (uint)amount;
 		Unit.DealDamage(drw, drw.GetVictim(), (uint)amount, null, DamageEffectType.SpellDirect, spellInfo.GetSchoolMask(), spellInfo, true);

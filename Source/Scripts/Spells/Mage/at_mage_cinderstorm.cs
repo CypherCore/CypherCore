@@ -13,13 +13,10 @@ public class at_mage_cinderstorm : AreaTriggerAI
 
 	public override void OnUnitEnter(Unit unit)
 	{
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
+
 		if (caster != null)
-		{
 			if (caster.IsValidAttackTarget(unit))
-			{
 				caster.CastSpell(unit, MageSpells.SPELL_MAGE_CINDERSTORM_DMG, true);
-			}
-		}
 	}
 }

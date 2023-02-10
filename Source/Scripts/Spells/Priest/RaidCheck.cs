@@ -12,11 +12,10 @@ public class RaidCheck : ICheck<WorldObject>
 
 	public bool Invoke(WorldObject obj)
 	{
-		Unit target = obj.ToUnit();
+		var target = obj.ToUnit();
+
 		if (target != null)
-		{
 			return !_caster.IsInRaidWith(target);
-		}
 
 		return true;
 	}

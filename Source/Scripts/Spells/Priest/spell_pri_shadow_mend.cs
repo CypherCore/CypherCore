@@ -1,5 +1,4 @@
 ﻿using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
@@ -16,14 +15,14 @@ internal class spell_pri_shadow_mend : SpellScript, ISpellAfterHit
 
 	public void AfterHit()
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
 
 		if (target != null)
 		{
-			Unit caster = GetCaster();
+			var caster = GetCaster();
 
-			int periodicAmount            = GetHitHeal() / 20;
-			int damageForAuraRemoveAmount = periodicAmount * 10;
+			var periodicAmount            = GetHitHeal() / 20;
+			var damageForAuraRemoveAmount = periodicAmount * 10;
 
 			if (caster.HasAura(PriestSpells.Atonement) &&
 			    !caster.HasAura(PriestSpells.Trinity))

@@ -28,7 +28,7 @@ internal class spell_mage_incanters_flow : AuraScript, IHasAuraEffects
 		if (!GetTarget().IsInCombat())
 			return;
 
-		Aura aura = GetTarget().GetAura(MageSpells.IncantersFlow);
+		var aura = GetTarget().GetAura(MageSpells.IncantersFlow);
 
 		if (aura != null)
 		{

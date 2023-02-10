@@ -24,24 +24,22 @@ public class at_hun_tar_trap_not_activatedAI : AreaTriggerAI
 
 	public override void OnCreate()
 	{
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
 
 		if (caster == null)
-		{
 			return;
-		}
 
 		if (!caster.ToPlayer())
-		{
 			return;
-		}
 
 		foreach (var itr in at.GetInsideUnits())
 		{
-			Unit target = ObjectAccessor.Instance.GetUnit(caster, itr);
+			var target = ObjectAccessor.Instance.GetUnit(caster, itr);
+
 			if (!caster.IsFriendlyTo(target))
 			{
-				TempSummon tempSumm = caster.SummonCreature(SharedConst.WorldTrigger, at.GetPosition(), TempSummonType.TimedDespawn, TimeSpan.FromMinutes(1));
+				var tempSumm = caster.SummonCreature(SharedConst.WorldTrigger, at.GetPosition(), TempSummonType.TimedDespawn, TimeSpan.FromMinutes(1));
+
 				if (tempSumm != null)
 				{
 					tempSumm.SetFaction(caster.GetFaction());
@@ -56,21 +54,18 @@ public class at_hun_tar_trap_not_activatedAI : AreaTriggerAI
 
 	public override void OnUnitEnter(Unit unit)
 	{
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
 
 		if (caster == null || unit == null)
-		{
 			return;
-		}
 
 		if (!caster.ToPlayer())
-		{
 			return;
-		}
 
 		if (!caster.IsFriendlyTo(unit))
 		{
-			TempSummon tempSumm = caster.SummonCreature(SharedConst.WorldTrigger, at.GetPosition(), TempSummonType.TimedDespawn, TimeSpan.FromMinutes(1));
+			var tempSumm = caster.SummonCreature(SharedConst.WorldTrigger, at.GetPosition(), TempSummonType.TimedDespawn, TimeSpan.FromMinutes(1));
+
 			if (tempSumm != null)
 			{
 				tempSumm.SetFaction(caster.GetFaction());

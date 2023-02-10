@@ -9,7 +9,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(274902)]
 public class spell_dru_photosynthesis : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
@@ -20,9 +20,7 @@ public class spell_dru_photosynthesis : AuraScript, IHasAuraEffects
 	private void OnRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
 		if (GetCaster().HasAura(DruidSpells.SPELL_DRU_PHOTOSYNTHESIS_MOD_HEAL_TICKS))
-		{
 			GetCaster().RemoveAura(DruidSpells.SPELL_DRU_PHOTOSYNTHESIS_MOD_HEAL_TICKS);
-		}
 	}
 
 	public override void Register()

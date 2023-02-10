@@ -10,27 +10,23 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(197531)]
 public class spell_dk_bloodworms : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	private void FilterTargets(List<WorldObject> targets)
 	{
 		targets.Clear();
 
-		Unit caster = GetCaster();
+		var caster = GetCaster();
+
 		if (caster != null)
-		{
 			foreach (var itr in caster.m_Controlled)
 			{
-				Unit unit = ObjectAccessor.Instance.GetUnit(caster, itr.GetGUID());
+				var unit = ObjectAccessor.Instance.GetUnit(caster, itr.GetGUID());
+
 				if (unit != null)
-				{
 					if (unit.GetEntry() == 99773)
-					{
 						targets.Add(unit);
-					}
-				}
 			}
-		}
 	}
 
 	public override void Register()

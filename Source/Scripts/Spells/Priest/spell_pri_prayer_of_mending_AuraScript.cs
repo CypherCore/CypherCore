@@ -26,8 +26,8 @@ internal class spell_pri_prayer_of_mending_AuraScript : AuraScript, IHasAuraEffe
 	{
 		// Caster: player (priest) that cast the Prayer of Mending
 		// Target: player that currently has Prayer of Mending aura on him
-		Unit target = GetTarget();
-		Unit caster = GetCaster();
+		var target = GetTarget();
+		var caster = GetCaster();
 
 		if (caster != null)
 		{

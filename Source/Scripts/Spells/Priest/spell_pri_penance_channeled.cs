@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -24,7 +23,7 @@ internal class spell_pri_penance_channeled : AuraScript, IHasAuraEffects
 
 	private void HandleOnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		caster?.RemoveAura(PriestSpells.PowerOfTheDarkSide);
 	}

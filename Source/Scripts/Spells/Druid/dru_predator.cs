@@ -15,36 +15,24 @@ public class dru_predator : ScriptObjectAutoAdd, IPlayerOnPVPKill, IPlayerOnCrea
 	public void OnPVPKill(Player killer, Player killed)
 	{
 		if (killer.GetClass() == Class.Druid)
-		{
 			return;
-		}
 
 		if (!killer.HasAura(DruidSpells.SPELL_DRU_PREDATOR))
-		{
 			return;
-		}
 
 		if (killer.GetSpellHistory().HasCooldown(DruidSpells.SPELL_DRU_TIGER_FURY))
-		{
 			killer.GetSpellHistory().ResetCooldown(DruidSpells.SPELL_DRU_TIGER_FURY);
-		}
 	}
 
 	public void OnCreatureKill(Player killer, Creature killed)
 	{
 		if (killer.GetClass() == Class.Druid)
-		{
 			return;
-		}
 
 		if (!killer.HasAura(DruidSpells.SPELL_DRU_PREDATOR))
-		{
 			return;
-		}
 
 		if (killer.GetSpellHistory().HasCooldown(DruidSpells.SPELL_DRU_TIGER_FURY))
-		{
 			killer.GetSpellHistory().ResetCooldown(DruidSpells.SPELL_DRU_TIGER_FURY);
-		}
 	}
 }

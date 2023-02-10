@@ -10,37 +10,28 @@ public class spell_hun_piercing_shot : SpellScript, ISpellOnHit
 {
 	public void OnHit()
 	{
-		uint damage = (uint)GetHitDamage();
+		var damage = (uint)GetHitDamage();
 		damage *= 2;
 		SetHitDamage(damage);
 
-		Unit caster = GetCaster();
+		var caster = GetCaster();
+
 		if (caster != null)
 		{
-			Unit target = GetHitUnit();
+			var target = GetHitUnit();
 
 			if (target == null)
-			{
 				return;
-			}
 
-			List<Unit> targets = new List<Unit>();
+			var targets = new List<Unit>();
 
 			caster.GetAnyUnitListInRange(targets, caster.GetDistance(target));
 
 			foreach (var otherTarget in targets)
-			{
 				if (otherTarget != target)
-				{
 					if (!caster.IsFriendlyTo(otherTarget))
-					{
 						if (otherTarget.IsInBetween(caster, target, 5.0f))
-						{
 							caster.CastSpell(otherTarget, 213678, true);
-						}
-					}
-				}
-			}
 		}
 	}
 }

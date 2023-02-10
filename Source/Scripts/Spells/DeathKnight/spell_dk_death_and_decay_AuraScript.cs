@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -19,7 +18,7 @@ internal class spell_dk_death_and_decay_AuraScript : AuraScript, IHasAuraEffects
 
 	private void HandleDummyTick(AuraEffect aurEff)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		if (caster)
 			caster.CastSpell(GetTarget(), DeathKnightSpells.DeathAndDecayDamage, new CastSpellExtraArgs(aurEff));

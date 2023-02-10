@@ -10,14 +10,12 @@ namespace Scripts.Spells.Mage;
 [SpellScript(7268)]
 public class spell_mage_arcane_missiles_damage : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	private void CheckTarget(ref WorldObject target)
 	{
 		if (target == GetCaster())
-		{
 			target = null;
-		}
 	}
 
 	public override void Register()

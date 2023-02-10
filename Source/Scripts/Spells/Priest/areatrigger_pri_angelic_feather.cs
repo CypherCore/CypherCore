@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
@@ -16,11 +15,11 @@ internal class areatrigger_pri_angelic_feather : AreaTriggerAI
 	// Called when the AreaTrigger has just been initialized, just before added to map
 	public override void OnInitialize()
 	{
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
 
 		if (caster)
 		{
-			List<AreaTrigger> areaTriggers = caster.GetAreaTriggers(PriestSpells.AngelicFeatherAreatrigger);
+			var areaTriggers = caster.GetAreaTriggers(PriestSpells.AngelicFeatherAreatrigger);
 
 			if (areaTriggers.Count >= 3)
 				areaTriggers.First().SetDuration(0);
@@ -29,7 +28,7 @@ internal class areatrigger_pri_angelic_feather : AreaTriggerAI
 
 	public override void OnUnitEnter(Unit unit)
 	{
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
 
 		if (caster)
 			if (caster.IsFriendlyTo(unit))

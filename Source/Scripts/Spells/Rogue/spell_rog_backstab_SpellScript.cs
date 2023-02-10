@@ -1,0 +1,41 @@
+﻿using System.Collections.Generic;
+using Framework.Constants;
+using Game.Scripting;
+using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.ISpell;
+using Game.Spells;
+
+namespace Scripts.Spells.Rogue;
+
+[Script] // 53 - Backstab
+internal class spell_rog_backstab_SpellScript : SpellScript, IHasSpellEffects
+{
+	public List<ISpellEffect> SpellEffects { get; } = new();
+
+	public override bool Validate(SpellInfo spellInfo)
+	{
+		return spellInfo.GetEffects().Count > 3;
+	}
+
+	public override void Register()
+	{
+		SpellEffects.Add(new EffectHandler(HandleHitDamage, 1, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
+	}
+
+	private void HandleHitDamage(uint effIndex)
+	{
+		var hitUnit = GetHitUnit();
+
+		if (!hitUnit)
+			return;
+
+		var caster = GetCaster();
+
+		if (hitUnit.IsInBack(caster))
+		{
+			var currDamage = (float)GetHitDamage();
+			MathFunctions.AddPct(ref currDamage, (float)GetEffectInfo(3).CalcValue(caster));
+			SetHitDamage((int)currDamage);
+		}
+	}
+}

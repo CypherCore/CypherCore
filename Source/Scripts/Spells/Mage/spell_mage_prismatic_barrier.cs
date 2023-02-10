@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -20,7 +19,7 @@ internal class spell_mage_prismatic_barrier : AuraScript, IHasAuraEffects
 	private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
 	{
 		canBeRecalculated = false;
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		if (caster)
 			amount += (int)(caster.SpellBaseHealingBonusDone(GetSpellInfo().GetSchoolMask()) * 7.0f);

@@ -12,18 +12,16 @@ public class spell_hun_way_of_the_moknathal : AuraScript, IAuraCheckProc
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
 		if (Global.SpellMgr.GetSpellInfo(HunterSpells.SPELL_HUNTER_RAPTOR_STRIKE, Difficulty.None) != null)
-		{
 			return false;
-		}
+
 		return true;
 	}
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
 		if (eventInfo.GetSpellInfo().Id == HunterSpells.SPELL_HUNTER_RAPTOR_STRIKE)
-		{
 			return true;
-		}
+
 		return false;
 	}
 }

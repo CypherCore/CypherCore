@@ -1,6 +1,5 @@
 ﻿using System;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 
@@ -16,7 +15,7 @@ internal class spell_hun_tame_beast : SpellScript, ISpellCheckCast
 
 	public SpellCastResult CheckCast()
 	{
-		Player caster = GetCaster().ToPlayer();
+		var caster = GetCaster().ToPlayer();
 
 		if (caster == null)
 			return SpellCastResult.DontReport;
@@ -24,7 +23,7 @@ internal class spell_hun_tame_beast : SpellScript, ISpellCheckCast
 		if (!GetExplTargetUnit())
 			return SpellCastResult.BadImplicitTargets;
 
-		Creature target = GetExplTargetUnit().ToCreature();
+		var target = GetExplTargetUnit().ToCreature();
 
 		if (target)
 		{
@@ -35,7 +34,7 @@ internal class spell_hun_tame_beast : SpellScript, ISpellCheckCast
 			if (!target.GetCreatureTemplate().IsTameable(caster.CanTameExoticPets()))
 				return SpellCastResult.BadTargets;
 
-			PetStable petStable = caster.GetPetStable();
+			var petStable = caster.GetPetStable();
 
 			if (petStable != null)
 			{

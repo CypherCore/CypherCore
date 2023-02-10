@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -25,8 +24,8 @@ internal class spell_pri_angelic_feather_trigger : SpellScript, IHasSpellEffects
 
 	private void HandleEffectDummy(uint effIndex)
 	{
-		Position destPos = GetHitDest().GetPosition();
-		float    radius  = GetEffectInfo().CalcRadius();
+		var destPos = GetHitDest().GetPosition();
+		var radius  = GetEffectInfo().CalcRadius();
 
 		// Caster is prioritary
 		if (GetCaster().IsWithinDist2d(destPos, radius))

@@ -1,5 +1,4 @@
 ﻿using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 
@@ -16,14 +15,11 @@ public class spell_dk_army_periodic_taunt : SpellScript, ISpellCheckCast
 
 	public SpellCastResult CheckCast()
 	{
-		Unit owner = GetCaster().GetOwner();
+		var owner = GetCaster().GetOwner();
+
 		if (owner != null)
-		{
 			if (!owner.HasAura(DeathKnightSpells.SPELL_DK_GLYPH_OF_ARMY_OF_THE_DEAD))
-			{
 				return SpellCastResult.SpellCastOk;
-			}
-		}
 
 		return SpellCastResult.SpellUnavailable;
 	}

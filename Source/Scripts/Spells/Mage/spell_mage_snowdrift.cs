@@ -10,17 +10,15 @@ namespace Scripts.Spells.Mage;
 [SpellScript(389794)]
 public class spell_mage_snowdrift : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private void OnTick(AuraEffect aurEff)
 	{
-		Unit target = GetTarget();
-		Unit caster = GetCaster();
+		var target = GetTarget();
+		var caster = GetCaster();
 
 		if (target == null || caster == null)
-		{
 			return;
-		}
 
 		// Slow enemies by 70%
 		target.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModDecreaseSpeed, true);

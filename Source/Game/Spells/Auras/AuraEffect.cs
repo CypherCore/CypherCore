@@ -843,6 +843,8 @@ namespace Game.Spells
         public AuraType GetAuraType() { return GetSpellEffectInfo().ApplyAuraName; }
         public int GetAmount() { return _amount; }
         public bool HasAmount() { return _amount != 0; }
+        public void SetAmount(float amount) { SetAmount((int)amount); }
+        public void SetAmount(long amount) { SetAmount((int)amount); }
         public void SetAmount(int amount) { _amount = amount; m_canBeRecalculated = false; }
         public void SetAmount(uint amount) { SetAmount((int)amount); }
         public float? GetEstimatedAmount() { return _estimatedAmount; }

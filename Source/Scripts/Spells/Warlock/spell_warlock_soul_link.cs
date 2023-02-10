@@ -6,35 +6,31 @@ using Game.Spells;
 
 namespace Scripts.Spells.Warlock
 {
-    // 108446 - Soul Link
-    [SpellScript(108446)]
-    public class spell_warlock_soul_link : AuraScript, IHasAuraEffects
-    {
-        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	// 108446 - Soul Link
+	[SpellScript(108446)]
+	public class spell_warlock_soul_link : AuraScript, IHasAuraEffects
+	{
+		public List<IAuraEffectHandler> AuraEffects => new();
 
-        private void HandleSplit(AuraEffect UnnamedParameter, DamageInfo UnnamedParameter2, ref uint splitAmount)
-        {
-            Unit pet = GetUnitOwner();
-            if (pet == null)
-            {
-                return;
-            }
+		private void HandleSplit(AuraEffect UnnamedParameter, DamageInfo UnnamedParameter2, ref uint splitAmount)
+		{
+			var pet = GetUnitOwner();
 
-            Unit owner = pet.GetOwner();
-            if (owner == null)
-            {
-                return;
-            }
+			if (pet == null)
+				return;
 
-            if (owner.HasAura(WarlockSpells.SOUL_SKIN) && owner.HealthBelowPct(35))
-            {
-                splitAmount *= 2;
-            }
-        }
+			var owner = pet.GetOwner();
 
-        public override void Register()
-        {
-            AuraEffects.Add(new AuraEffectSplitHandler(HandleSplit, 0));
-        }
-    }
+			if (owner == null)
+				return;
+
+			if (owner.HasAura(WarlockSpells.SOUL_SKIN) && owner.HealthBelowPct(35))
+				splitAmount *= 2;
+		}
+
+		public override void Register()
+		{
+			AuraEffects.Add(new AuraEffectSplitHandler(HandleSplit, 0));
+		}
+	}
 }

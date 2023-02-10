@@ -17,15 +17,15 @@ internal class spell_pri_vampiric_touch : AuraScript, IAfterAuraDispel, IAuraChe
 
 	public void HandleDispel(DispelInfo dispelInfo)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		if (caster)
 		{
-			Unit target = GetUnitOwner();
+			var target = GetUnitOwner();
 
 			if (target)
 			{
-				AuraEffect aurEff = GetEffect(1);
+				var aurEff = GetEffect(1);
 
 				if (aurEff != null)
 				{

@@ -17,7 +17,7 @@ internal class spell_dk_pvp_4p_bonus : AuraScript, IAuraCheckProc, IHasAuraEffec
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
-		SpellInfo spellInfo = eventInfo.GetSpellInfo();
+		var spellInfo = eventInfo.GetSpellInfo();
 
 		if (spellInfo == null)
 			return false;

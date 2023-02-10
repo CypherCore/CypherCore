@@ -12,7 +12,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(197862)]
 public class spell_pri_archangel : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
@@ -26,11 +26,10 @@ public class spell_pri_archangel : SpellScript, IHasSpellEffects
 
 	private void HandleScriptEffect(uint UnnamedParameter)
 	{
-		Aura aura = GetHitUnit().GetAura(PriestSpells.SPELL_PRIEST_ATONEMENT_AURA, GetCaster().GetGUID());
+		var aura = GetHitUnit().GetAura(PriestSpells.SPELL_PRIEST_ATONEMENT_AURA, GetCaster().GetGUID());
+
 		if (aura != null)
-		{
 			aura.RefreshDuration();
-		}
 	}
 
 	public override void Register()

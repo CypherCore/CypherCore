@@ -1761,6 +1761,12 @@ namespace Game.Entities
             SendMessageToSet(data, true);
         }
 
+
+        public bool HasExtraUnitMovementFlag(MovementFlag2 f) 
+        { 
+            return m_movementInfo.HasMovementFlag2(f); 
+        }
+
         public override ushort GetMeleeAnimKitId() { return _meleeAnimKitId; }
 
         public uint GetVirtualItemId(int slot)

@@ -12,11 +12,11 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(90355)]
 public class spell_hun_ancient_hysteria : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
-	UnitAuraCheck<WorldObject> _ins = new UnitAuraCheck<WorldObject>(true, AncientHysteriaSpells.SPELL_HUNTER_INSANITY);
-	UnitAuraCheck<WorldObject> _dis = new UnitAuraCheck<WorldObject>(true, AncientHysteriaSpells.SPELL_MAGE_TEMPORAL_DISPLACEMENT);
-	UnitAuraCheck<WorldObject> _ex = new UnitAuraCheck<WorldObject>(true, AncientHysteriaSpells.SPELL_SHAMAN_EXHAUSTION);
-	UnitAuraCheck<WorldObject> _sa = new UnitAuraCheck<WorldObject>(true, AncientHysteriaSpells.SPELL_SHAMAN_SATED);
+	public List<ISpellEffect> SpellEffects => new();
+	readonly UnitAuraCheck<WorldObject> _ins = new(true, AncientHysteriaSpells.SPELL_HUNTER_INSANITY);
+	readonly UnitAuraCheck<WorldObject> _dis = new(true, AncientHysteriaSpells.SPELL_MAGE_TEMPORAL_DISPLACEMENT);
+	readonly UnitAuraCheck<WorldObject> _ex = new(true, AncientHysteriaSpells.SPELL_SHAMAN_EXHAUSTION);
+	readonly UnitAuraCheck<WorldObject> _sa = new(true, AncientHysteriaSpells.SPELL_SHAMAN_SATED);
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
@@ -24,9 +24,8 @@ public class spell_hun_ancient_hysteria : SpellScript, IHasSpellEffects
 		    !Global.SpellMgr.HasSpellInfo(AncientHysteriaSpells.SPELL_MAGE_TEMPORAL_DISPLACEMENT, Difficulty.None) ||
 		    !Global.SpellMgr.HasSpellInfo(AncientHysteriaSpells.SPELL_SHAMAN_EXHAUSTION, Difficulty.None) ||
 		    !Global.SpellMgr.HasSpellInfo(AncientHysteriaSpells.SPELL_SHAMAN_SATED, Difficulty.None))
-		{
 			return false;
-		}
+
 		return true;
 	}
 
@@ -40,11 +39,10 @@ public class spell_hun_ancient_hysteria : SpellScript, IHasSpellEffects
 
 	private void ApplyDebuff()
 	{
-		Unit target = GetHitUnit();
+		var target = GetHitUnit();
+
 		if (target != null)
-		{
 			target.CastSpell(target, AncientHysteriaSpells.SPELL_HUNTER_INSANITY, true);
-		}
 	}
 
 	public override void Register()

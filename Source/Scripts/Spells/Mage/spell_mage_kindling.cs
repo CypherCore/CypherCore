@@ -11,7 +11,7 @@ namespace Scripts.Spells.Mage;
 [SpellScript(155148)]
 public class spell_mage_kindling : AuraScript, IHasAuraEffects, IAuraCheckProc
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
@@ -20,18 +20,16 @@ public class spell_mage_kindling : AuraScript, IHasAuraEffects, IAuraCheckProc
 
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo UnnamedParameter)
 	{
-		Unit caster = GetCaster();
-		if (caster == null)
-		{
-			return;
-		}
+		var caster = GetCaster();
 
-		caster.GetSpellHistory().ModifyCooldown(MageSpells.SPELL_MAGE_COMBUSTION,  TimeSpan.FromSeconds(aurEff.GetAmount() * -1));
+		if (caster == null)
+			return;
+
+		caster.GetSpellHistory().ModifyCooldown(MageSpells.SPELL_MAGE_COMBUSTION, TimeSpan.FromSeconds(aurEff.GetAmount() * -1));
 	}
 
 	public override void Register()
 	{
-
 		AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
 	}
 }

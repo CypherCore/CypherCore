@@ -9,7 +9,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(232698)]
 public class spell_pri_shadowform : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

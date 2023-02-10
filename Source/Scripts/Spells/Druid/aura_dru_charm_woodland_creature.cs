@@ -9,7 +9,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(127757)]
 public class aura_dru_charm_woodland_creature : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
@@ -22,9 +22,7 @@ public class aura_dru_charm_woodland_creature : AuraScript, IHasAuraEffects
 		var target = GetTarget();
 
 		if (caster != null && target != null)
-		{
 			target.GetMotionMaster().MoveFollow(caster, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
-		}
 	}
 
 	private void OnRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
@@ -35,12 +33,8 @@ public class aura_dru_charm_woodland_creature : AuraScript, IHasAuraEffects
 		var target = GetTarget();
 
 		if (target != null)
-		{
 			if (target.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Follow)
-			{
 				target.GetMotionMaster().Initialize();
-			}
-		}
 	}
 
 	public override void Register()

@@ -6,20 +6,20 @@ using Game.Spells;
 
 namespace Scripts.Spells.Warrior
 {
-    //214871 - Odyn's fury
-    [SpellScript(214871)]
-    internal class spell_warr_odyns_fury : AuraScript, IHasAuraEffects
-    {
-        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	//214871 - Odyn's fury
+	[SpellScript(214871)]
+	internal class spell_warr_odyns_fury : AuraScript, IHasAuraEffects
+	{
+		public List<IAuraEffectHandler> AuraEffects => new();
 
-        private void Absorb(AuraEffect UnnamedParameter, DamageInfo UnnamedParameter2, ref uint absorbAmount)
-        {
-            absorbAmount = 0;
-        }
+		private void Absorb(AuraEffect UnnamedParameter, DamageInfo UnnamedParameter2, ref uint absorbAmount)
+		{
+			absorbAmount = 0;
+		}
 
-        public override void Register()
-        {
-            AuraEffects.Add(new AuraEffectAbsorbHandler(Absorb, 0));
-        }
-    }
+		public override void Register()
+		{
+			AuraEffects.Add(new AuraEffectAbsorbHandler(Absorb, 0));
+		}
+	}
 }

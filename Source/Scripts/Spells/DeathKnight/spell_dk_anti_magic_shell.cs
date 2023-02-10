@@ -63,7 +63,7 @@ internal class spell_dk_anti_magic_shell : AuraScript, IHasAuraEffects
 
 	private void HandleEffectRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		AuraEffect volatileShielding = GetTarget().GetAuraEffect(DeathKnightSpells.VolatileShielding, 1);
+		var volatileShielding = GetTarget().GetAuraEffect(DeathKnightSpells.VolatileShielding, 1);
 
 		if (volatileShielding != null)
 		{

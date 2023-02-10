@@ -1,5 +1,4 @@
 ﻿using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 
@@ -15,15 +14,12 @@ public class spell_hun_chimera_shot : SpellScript, ISpellOnHit
 
 	public void OnHit()
 	{
-		Unit caster = GetCaster();
-		Unit target = GetHitUnit();
+		var caster = GetCaster();
+		var target = GetHitUnit();
+
 		if (RandomHelper.URand(0, 1) == 1)
-		{
 			caster.CastSpell(target, 171454, true);
-		}
 		else
-		{
 			caster.CastSpell(target, 171457, true);
-		}
 	}
 }

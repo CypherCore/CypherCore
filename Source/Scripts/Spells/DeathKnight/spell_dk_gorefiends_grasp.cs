@@ -10,43 +10,37 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(108199)]
 public class spell_dk_gorefiends_grasp : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 
 	private void HandleScript(uint UnnamedParameter)
 	{
-		Player _player = GetCaster().ToPlayer();
+		var _player = GetCaster().ToPlayer();
+
 		if (_player != null)
 		{
-			Unit target = GetHitUnit();
+			var target = GetHitUnit();
+
 			if (target != null)
 			{
-				List<Unit> tempList = new List<Unit>();
-				List<Unit> gripList = new List<Unit>();
+				var tempList = new List<Unit>();
+				var gripList = new List<Unit>();
 
 				_player.GetAttackableUnitListInRange(tempList, 20.0f);
 
 				foreach (var itr in tempList)
 				{
 					if (itr.GetGUID() == _player.GetGUID())
-					{
 						continue;
-					}
 
 					if (!_player.IsValidAttackTarget(itr))
-					{
 						continue;
-					}
 
 					if (itr.IsImmunedToSpell(GetSpellInfo(), GetCaster()))
-					{
 						continue;
-					}
 
 					if (!itr.IsWithinLOSInMap(_player))
-					{
 						continue;
-					}
 
 					gripList.Add(itr);
 				}

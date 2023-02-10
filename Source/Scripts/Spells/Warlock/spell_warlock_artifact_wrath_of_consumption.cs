@@ -7,24 +7,23 @@ using Game.Spells;
 
 namespace Scripts.Spells.Warlock
 {
-    // 199472 - Wrath of Consumption
-    [SpellScript(199472)]
-    public class spell_warlock_artifact_wrath_of_consumption : AuraScript, IHasAuraEffects
-    {
-        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	// 199472 - Wrath of Consumption
+	[SpellScript(199472)]
+	public class spell_warlock_artifact_wrath_of_consumption : AuraScript, IHasAuraEffects
+	{
+		public List<IAuraEffectHandler> AuraEffects => new();
 
-        private void OnProc(AuraEffect UnnamedParameter, ProcEventInfo UnnamedParameter2)
-        {
-            Unit caster = GetCaster();
-            if (caster != null)
-            {
-                caster.CastSpell(caster, WarlockSpells.WRATH_OF_CONSUMPTION_PROC, true);
-            }
-        }
+		private void OnProc(AuraEffect UnnamedParameter, ProcEventInfo UnnamedParameter2)
+		{
+			var caster = GetCaster();
 
-        public override void Register()
-        {
-            AuraEffects.Add(new AuraEffectProcHandler(OnProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
-    }
+			if (caster != null)
+				caster.CastSpell(caster, WarlockSpells.WRATH_OF_CONSUMPTION_PROC, true);
+		}
+
+		public override void Register()
+		{
+			AuraEffects.Add(new AuraEffectProcHandler(OnProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+		}
+	}
 }

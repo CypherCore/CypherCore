@@ -10,14 +10,13 @@ namespace Scripts.Spells.Priest;
 [SpellScript(49821)]
 public class spell_pri_mind_sear : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
 		if (Global.SpellMgr.GetSpellInfo(PriestSpells.SPELL_PRIEST_MIND_SEAR_INSANITY, Difficulty.None) != null)
-		{
 			return false;
-		}
+
 		return true;
 	}
 

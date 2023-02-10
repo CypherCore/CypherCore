@@ -1,36 +1,34 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
-using Game.Spells;
 
 namespace Scripts.Spells.Mage;
 
 [SpellScript(108978)]
 public class spell_mage_alter_time : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	private void HandleDummy(uint UnnamedParameter)
 	{
-		Unit caster = GetCaster();
-		Unit target = GetHitUnit();
+		var caster = GetCaster();
+		var target = GetHitUnit();
 
 		if (caster == null || target == null)
-		{
 			return;
-		}
 
 		// Check if the spell has been cast before
-		Aura alterTime = target.GetAura(MageSpells.SPELL_ALTER_TIME);
+		var alterTime = target.GetAura(MageSpells.SPELL_ALTER_TIME);
+
 		if (alterTime != null)
 		{
 			// Check if the target has moved a long distance
 			if (target.GetDistance(alterTime.GetCaster()) > 50.0f)
 			{
 				target.RemoveAura(MageSpells.SPELL_ALTER_TIME);
+
 				return;
 			}
 
@@ -38,6 +36,7 @@ public class spell_mage_alter_time : SpellScript, IHasSpellEffects
 			if (target.IsDead())
 			{
 				target.RemoveAura(MageSpells.SPELL_ALTER_TIME);
+
 				return;
 			}
 

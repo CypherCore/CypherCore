@@ -17,24 +17,20 @@ public class at_dru_starfall : AreaTriggerAI
 
 	public override void OnPeriodicProc()
 	{
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
+
 		if (caster != null)
-		{
-			foreach (ObjectGuid objguid in at.GetInsideUnits())
+			foreach (var objguid in at.GetInsideUnits())
 			{
-				Unit unit = ObjectAccessor.Instance.GetUnit(caster, objguid);
+				var unit = ObjectAccessor.Instance.GetUnit(caster, objguid);
+
 				if (unit != null)
-				{
 					if (caster.IsValidAttackTarget(unit))
-					{
 						if (unit.IsInCombat())
 						{
 							caster.CastSpell(unit, StarfallSpells.SPELL_DRUID_STARFALL_DAMAGE, true);
 							caster.CastSpell(unit, StarfallSpells.SPELL_DRUID_STELLAR_EMPOWERMENT, true);
 						}
-					}
-				}
 			}
-		}
 	}
 }

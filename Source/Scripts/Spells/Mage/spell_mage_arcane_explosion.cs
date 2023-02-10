@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -39,14 +38,14 @@ internal class spell_mage_arcane_explosion : SpellScript, IHasSpellEffects
 
 	private void HandleReverberate(uint effIndex)
 	{
-		bool procTriggered = false;
+		var procTriggered = false;
 
-		Unit       caster        = GetCaster();
-		AuraEffect triggerChance = caster.GetAuraEffect(MageSpells.Reverberate, 0);
+		var caster        = GetCaster();
+		var triggerChance = caster.GetAuraEffect(MageSpells.Reverberate, 0);
 
 		if (triggerChance != null)
 		{
-			AuraEffect requiredTargets = caster.GetAuraEffect(MageSpells.Reverberate, 1);
+			var requiredTargets = caster.GetAuraEffect(MageSpells.Reverberate, 1);
 
 			if (requiredTargets != null)
 				procTriggered = GetUnitTargetCountForEffect(1) >= requiredTargets.GetAmount() && RandomHelper.randChance(triggerChance.GetAmount());

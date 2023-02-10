@@ -11,7 +11,7 @@ namespace Scripts.Spells.Mage;
 [SpellScript(257538)]
 public class spell_mage_ebonbolt_damage : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
@@ -20,23 +20,18 @@ public class spell_mage_ebonbolt_damage : SpellScript, IHasSpellEffects
 
 	private void DoEffectHitTarget(uint UnnamedParameter)
 	{
-		Unit       hitUnit       = GetHitUnit();
-		ObjectGuid primaryTarget = GetCaster().VariableStorage.GetValue<ObjectGuid>("explTarget", default);
-		int        damage        = GetHitDamage();
+		var hitUnit       = GetHitUnit();
+		var primaryTarget = GetCaster().VariableStorage.GetValue<ObjectGuid>("explTarget", default);
+		var damage        = GetHitDamage();
+
 		if (hitUnit == null || primaryTarget == default)
-		{
 			return;
-		}
 
-		int eff1 = Global.SpellMgr.GetSpellInfo(MageSpells.SPELL_MAGE_SPLITTING_ICE, Difficulty.None).GetEffect(1).CalcValue();
+		var eff1 = Global.SpellMgr.GetSpellInfo(MageSpells.SPELL_MAGE_SPLITTING_ICE, Difficulty.None).GetEffect(1).CalcValue();
+
 		if (eff1 != 0)
-		{
 			if (hitUnit.GetGUID() != primaryTarget)
-			{
 				SetHitDamage(MathFunctions.CalculatePct(damage, eff1));
-			}
-		}
-
 	}
 
 	public override void Register()

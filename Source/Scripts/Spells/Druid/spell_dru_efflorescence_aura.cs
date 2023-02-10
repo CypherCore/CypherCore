@@ -9,7 +9,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(81262)]
 public class spell_dru_efflorescence_aura : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private void HandleHeal(AuraEffect UnnamedParameter)
 	{
@@ -18,16 +18,11 @@ public class spell_dru_efflorescence_aura : AuraScript, IHasAuraEffects
 			GetCaster().GetOwner().CastSpell(GetCaster().GetPosition(), EfflorescenceSpells.SPELL_DRUID_EFFLORESCENCE_HEAL);
 
 			var playerList = GetCaster().GetPlayerListInGrid(11.2f);
+
 			foreach (var targets in playerList)
-			{
 				if (GetCaster().GetOwner().HasAura(DruidSpells.SPELL_DRU_SPRING_BLOSSOMS))
-				{
 					if (!targets.HasAura(DruidSpells.SPELL_DRU_SPRING_BLOSSOMS_HEAL))
-					{
 						GetCaster().GetOwner().CastSpell(targets, DruidSpells.SPELL_DRU_SPRING_BLOSSOMS_HEAL, true);
-					}
-				}
-			}
 		}
 	}
 

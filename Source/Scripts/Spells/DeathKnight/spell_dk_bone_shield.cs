@@ -11,7 +11,7 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(195181)]
 public class spell_dk_bone_shield : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
 	{
@@ -21,78 +21,71 @@ public class spell_dk_bone_shield : AuraScript, IHasAuraEffects
 	private void Absorb(AuraEffect aurEffd, DamageInfo dmgInfo, ref uint absorbAmount)
 	{
 		absorbAmount = 0;
-		Unit target = GetTarget();
+		var target = GetTarget();
+
 		if (target == null)
-		{
 			return;
-		}
 
-		int absorbPerc  = GetSpellInfo().GetEffect(4).CalcValue(target);
-		int absorbStack = 1;
+		var absorbPerc  = GetSpellInfo().GetEffect(4).CalcValue(target);
+		var absorbStack = 1;
 
-		AuraEffect aurEff = target.GetAuraEffect(211078, 0);
+		var aurEff = target.GetAuraEffect(211078, 0);
+
 		if (aurEff != null) // Spectral Deflection
-		{
 			if (target.CountPctFromMaxHealth(aurEff.GetAmount()) < dmgInfo.GetDamage())
 			{
 				absorbPerc  *= 2;
 				absorbStack *= 2;
 				ModStackAmount(-1);
 			}
-		}
+
 		aurEff = target.GetAuraEffect(192558, 0);
+
 		if (aurEff != null) // Skeletal Shattering
 		{
-			Player thisPlayer = target.ToPlayer();
-			if (thisPlayer != null) 
-			{
+			var thisPlayer = target.ToPlayer();
+
+			if (thisPlayer != null)
 				if (RandomHelper.randChance(thisPlayer.m_activePlayerData.SpellCritPercentage))
-				{
 					absorbPerc += aurEff.GetAmount();
-				}
-			}
 		}
+
 		absorbAmount = MathFunctions.CalculatePct(dmgInfo.GetDamage(), absorbPerc);
 
-		Player _player = target.ToPlayer();
+		var _player = target.ToPlayer();
+
 		if (_player != null)
-		{
 			if ((dmgInfo.GetSchoolMask() & SpellSchoolMask.Normal) != 0)
 			{
 				//    if (AuraEffect const* aurEff = _player->GetAuraEffect(251876, 0)) // Item - Death Knight T21 Blood 2P Bonus
 				//      _player->GetSpellHistory()->ModifyCooldown(49028, aurEff->GetAmount() * absorbStack);
-
 				if (_player.HasSpell(221699)) // Blood Tap
 				{
-					SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(221699, Difficulty.None);
-					if (spellInfo != null) 
-					{
+					var spellInfo = Global.SpellMgr.GetSpellInfo(221699, Difficulty.None);
+
+					if (spellInfo != null)
 						_player.GetSpellHistory().ModifyCooldown(221699, TimeSpan.FromSeconds(1000 * spellInfo.GetEffect(1).CalcValue(target) * absorbStack));
-					}
 				}
 
 				ModStackAmount(-1);
 			}
-		}
 	}
 
 	private void OnStackChange(AuraEffect aurEffd, AuraEffectHandleModes UnnamedParameter)
 	{
-		Unit target = GetTarget();
-		if (target == null)
-		{
-			return;
-		}
+		var target = GetTarget();
 
-		AuraEffect aurEff = target.GetAuraEffect(219786, 0);
+		if (target == null)
+			return;
+
+		var aurEff = target.GetAuraEffect(219786, 0);
+
 		if (aurEff != null) // Ossuary
 		{
 			if (GetStackAmount() >= aurEff.GetAmount())
 			{
 				if (!target.HasAura(219788))
-				{
 					target.CastSpell(target, 219788, true);
-				}
 			}
 			else
 			{

@@ -7,33 +7,30 @@ using Game.Spells;
 
 namespace Scripts.Spells.Warlock
 {
-    // 211720 - Thal'kiel's Discord
-    [SpellScript(211720)]
-    public class spell_warlock_artifact_thalkiels_discord : AuraScript, IHasAuraEffects
-    {
-        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	// 211720 - Thal'kiel's Discord
+	[SpellScript(211720)]
+	public class spell_warlock_artifact_thalkiels_discord : AuraScript, IHasAuraEffects
+	{
+		public List<IAuraEffectHandler> AuraEffects => new();
 
-        private void OnProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-            Unit caster = GetCaster();
-            Unit target = eventInfo.GetActionTarget();
-            if (caster == null || target == null)
-            {
-                return;
-            }
+		private void OnProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+		{
+			PreventDefaultAction();
+			var caster = GetCaster();
+			var target = eventInfo.GetActionTarget();
 
-            if (!caster.IsValidAttackTarget(target))
-            {
-                return;
-            }
+			if (caster == null || target == null)
+				return;
 
-            caster.CastSpell(target, aurEff.GetSpellEffectInfo().TriggerSpell, true);
-        }
+			if (!caster.IsValidAttackTarget(target))
+				return;
 
-        public override void Register()
-        {
-            AuraEffects.Add(new AuraEffectProcHandler(OnProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
-        }
-    }
+			caster.CastSpell(target, aurEff.GetSpellEffectInfo().TriggerSpell, true);
+		}
+
+		public override void Register()
+		{
+			AuraEffects.Add(new AuraEffectProcHandler(OnProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+		}
+	}
 }

@@ -1,26 +1,24 @@
-﻿using Game.Entities;
-using Game.Scripting;
+﻿using Game.Scripting;
 
 namespace Scripts.Spells.DeathKnight;
 
 [SpellScript(63560)]
 public class spell_dk_dark_transformation_form : SpellScript
 {
-
 	public void OnHit()
 	{
-		Player _player = GetCaster().ToPlayer();
+		var _player = GetCaster().ToPlayer();
+
 		if (_player != null)
 		{
-			Unit pet = GetHitUnit();
+			var pet = GetHitUnit();
+
 			if (pet != null)
-			{
 				if (pet.HasAura(DeathKnightSpells.SPELL_DK_DARK_INFUSION_STACKS))
 				{
 					_player.RemoveAura(DeathKnightSpells.SPELL_DK_DARK_INFUSION_STACKS);
 					pet.RemoveAura(DeathKnightSpells.SPELL_DK_DARK_INFUSION_STACKS);
 				}
-			}
 		}
 	}
 }

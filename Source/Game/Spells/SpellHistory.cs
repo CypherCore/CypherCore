@@ -6,6 +6,7 @@ using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Networking.Packets;
+using Game.Scripting.Interfaces.IPlayer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -429,12 +430,16 @@ namespace Game.Spells
             // self spell cooldown
             if (recTime != curTime)
             {
+                Player playerOwner = GetPlayerOwner();
+
+                if (playerOwner)
+                    Global.ScriptMgr.ForEach<IPlayerOnCooldownStart>(playerOwner.GetClass(), c => c.OnCooldownStart(playerOwner, spellInfo, itemId, categoryId, cooldown, ref recTime, ref catrecTime, ref onHold));
+
                 AddCooldown(spellInfo.Id, itemId, recTime, categoryId, catrecTime, onHold);
 
-                if (needsCooldownPacket)
-                {
-                    Player playerOwner = GetPlayerOwner();
-                    if (playerOwner)
+                if (playerOwner)
+                { 
+                    if (needsCooldownPacket)
                     {
                         SpellCooldownPkt spellCooldown = new();
                         spellCooldown.Caster = _owner.GetGUID();
@@ -469,6 +474,11 @@ namespace Game.Spells
             // start cooldowns at server side, if any
             if (startCooldown)
                 StartCooldown(spellInfo, itemId, spell);
+        }
+
+        public void AddCooldown<T>(T spellId, uint itemId, TimeSpan cooldownDuration) where T : struct, System.Enum
+        {
+            AddCooldown(Convert.ToUInt32(spellId), itemId, cooldownDuration);
         }
 
         public void AddCooldown(uint spellId, uint itemId, TimeSpan cooldownDuration)
@@ -533,10 +543,17 @@ namespace Game.Spells
             }
 
             if (cooldownEntry.CooldownEnd <= now)
-            {                
+            {
+                if (playerOwner)
+                    Global.ScriptMgr.ForEach<IPlayerOnCooldownEnd>(playerOwner.GetClass(), c => c.OnCooldownEnd(playerOwner, Global.SpellMgr.GetSpellInfo(cooldownEntry.SpellId, Difficulty.None), cooldownEntry.ItemId, cooldownEntry.CategoryId));
                 _categoryCooldowns.Remove(cooldownEntry.CategoryId);
                 _spellCooldowns.Remove(cooldownEntry.SpellId);
             }
+        }
+
+        public void ModifyCooldown<T>(T spellId, TimeSpan cooldownMod, bool withoutCategoryCooldown = false) where T : struct, System.Enum
+        {
+            ModifyCooldown(Convert.ToUInt32(spellId), cooldownMod, withoutCategoryCooldown);
         }
 
         public void ModifyCooldown(uint spellId, TimeSpan cooldownMod, bool withoutCategoryCooldown = false)
@@ -775,6 +792,11 @@ namespace Game.Spells
                     recoveryStart = GameTime.GetSystemTime();
                 else
                     recoveryStart = charges.Last().RechargeEnd;
+
+                var p = GetPlayerOwner();
+
+                if (p != null)
+                    Global.ScriptMgr.ForEach<IPlayerOnChargeRecoveryTimeStart>(p.GetClass(), c => c.OnChargeRecoveryTimeStart(p, chargeCategoryId, ref chargeRecovery));
 
                 _categoryCharges.Add(chargeCategoryId, new ChargeEntry(recoveryStart, TimeSpan.FromMilliseconds(chargeRecovery)));
                 return true;

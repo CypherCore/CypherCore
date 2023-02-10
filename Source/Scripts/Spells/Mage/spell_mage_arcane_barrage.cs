@@ -20,14 +20,14 @@ internal class spell_mage_arcane_barrage : SpellScript, ISpellAfterCast, IHasSpe
 
 	public void AfterCast()
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		// Consume all arcane charges
-		int arcaneCharges = -caster.ModifyPower(PowerType.ArcaneCharges, -caster.GetMaxPower(PowerType.ArcaneCharges), false);
+		var arcaneCharges = -caster.ModifyPower(PowerType.ArcaneCharges, -caster.GetMaxPower(PowerType.ArcaneCharges), false);
 
 		if (arcaneCharges != 0)
 		{
-			AuraEffect auraEffect = caster.GetAuraEffect(MageSpells.ArcaneBarrageR3, 0, caster.GetGUID());
+			var auraEffect = caster.GetAuraEffect(MageSpells.ArcaneBarrageR3, 0, caster.GetGUID());
 
 			if (auraEffect != null)
 				caster.CastSpell(caster, MageSpells.ArcaneBarrageEnergize, new CastSpellExtraArgs(SpellValueMod.BasePoint0, arcaneCharges * auraEffect.GetAmount() / 100));

@@ -7,30 +7,27 @@ using Game.Spells;
 
 namespace Scripts.Spells.Warlock
 {
-    // 196236 - Soulsnatcher
-    [SpellScript(196236)]
-    internal class spell_warlock_artifact_soul_snatcher : AuraScript, IHasAuraEffects
-    {
-        public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	// 196236 - Soulsnatcher
+	[SpellScript(196236)]
+	internal class spell_warlock_artifact_soul_snatcher : AuraScript, IHasAuraEffects
+	{
+		public List<IAuraEffectHandler> AuraEffects => new();
 
-        private void OnProc(AuraEffect aurEff, ProcEventInfo UnnamedParameter)
-        {
-            PreventDefaultAction();
-            Unit caster = GetCaster();
-            if (caster == null)
-            {
-                return;
-            }
+		private void OnProc(AuraEffect aurEff, ProcEventInfo UnnamedParameter)
+		{
+			PreventDefaultAction();
+			var caster = GetCaster();
 
-            if (RandomHelper.randChance(aurEff.GetAmount()))
-            {
-                caster.CastSpell(caster, WarlockSpells.SOULSNATCHER_PROC, true);
-            }
-        }
+			if (caster == null)
+				return;
 
-        public override void Register()
-        {
-            AuraEffects.Add(new AuraEffectProcHandler(OnProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
-    }
+			if (RandomHelper.randChance(aurEff.GetAmount()))
+				caster.CastSpell(caster, WarlockSpells.SOULSNATCHER_PROC, true);
+		}
+
+		public override void Register()
+		{
+			AuraEffects.Add(new AuraEffectProcHandler(OnProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+		}
+	}
 }

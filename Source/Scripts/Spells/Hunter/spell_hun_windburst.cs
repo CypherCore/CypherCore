@@ -9,15 +9,14 @@ public class spell_hun_windburst : SpellScript, ISpellAfterHit
 {
 	public void AfterHit()
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
+
 		if (caster != null)
 		{
-			Unit target = GetHitUnit();
+			var target = GetHitUnit();
 
 			if (target == null)
-			{
 				return;
-			}
 
 			caster.CastSpell(new Position(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ()), 204475, true);
 		}

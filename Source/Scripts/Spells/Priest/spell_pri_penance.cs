@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -18,8 +17,8 @@ internal class spell_pri_penance : SpellScript, ISpellCheckCast, IHasSpellEffect
 
 	public SpellCastResult CheckCast()
 	{
-		Unit caster = GetCaster();
-		Unit target = GetExplTargetUnit();
+		var caster = GetCaster();
+		var target = GetExplTargetUnit();
 
 		if (target)
 			if (!caster.IsFriendlyTo(target))
@@ -43,8 +42,8 @@ internal class spell_pri_penance : SpellScript, ISpellCheckCast, IHasSpellEffect
 
 	private void HandleDummy(uint effIndex)
 	{
-		Unit caster = GetCaster();
-		Unit target = GetHitUnit();
+		var caster = GetCaster();
+		var target = GetHitUnit();
 
 		if (target)
 		{

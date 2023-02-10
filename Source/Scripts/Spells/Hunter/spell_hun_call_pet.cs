@@ -4,7 +4,10 @@ using Game.Scripting.Interfaces.ISpell;
 
 namespace Scripts.Spells.Hunter;
 
-[SpellScript(new uint[] { 883, 83242, 83243, 83244, 83245 })]
+[SpellScript(new uint[]
+             {
+	             883, 83242, 83243, 83244, 83245
+             })]
 public class spell_hun_call_pet : SpellScript, ISpellCheckCast
 {
 	public SpellCastResult CheckCast()

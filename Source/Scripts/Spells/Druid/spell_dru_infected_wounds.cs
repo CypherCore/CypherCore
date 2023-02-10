@@ -9,19 +9,15 @@ namespace Scripts.Spells.Druid;
 [SpellScript(58180)]
 public class spell_dru_infected_wounds : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	private void HandleDummy(uint UnnamedParameter)
 	{
 		if (!GetCaster())
-		{
 			return;
-		}
 
 		if (GetCaster().HasAura(GetSpellInfo().Id))
-		{
 			GetCaster().RemoveAurasDueToSpell(GetSpellInfo().Id);
-		}
 	}
 
 	public override void Register()

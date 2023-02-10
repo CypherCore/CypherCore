@@ -24,7 +24,7 @@ internal class spell_mage_cauterize_AuraScript : AuraScript, IHasAuraEffects
 
 	private void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
 	{
-		AuraEffect effectInfo = GetEffect(1);
+		var effectInfo = GetEffect(1);
 
 		if (effectInfo == null ||
 		    !GetTargetApplication().HasEffect(1) ||

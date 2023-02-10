@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -25,9 +24,9 @@ internal class spell_dk_death_coil : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint effIndex)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 		caster.CastSpell(GetHitUnit(), DeathKnightSpells.DeathCoilDamage, true);
-		AuraEffect unholyAura = caster.GetAuraEffect(DeathKnightSpells.Unholy, 6);
+		var unholyAura = caster.GetAuraEffect(DeathKnightSpells.Unholy, 6);
 
 		if (unholyAura != null) // can be any effect, just here to send SpellFailedDontReport on failure
 			caster.CastSpell(caster, DeathKnightSpells.UnholyVigor, new CastSpellExtraArgs(unholyAura));

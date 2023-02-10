@@ -9,7 +9,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(205065)]
 public class aura_pri_void_torrent : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new List<IAuraEffectHandler>();
+	public List<IAuraEffectHandler> AuraEffects => new();
 
 	private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{

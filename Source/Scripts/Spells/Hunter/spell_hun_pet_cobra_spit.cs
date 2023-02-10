@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -10,28 +9,25 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(206685)]
 public class spell_hun_pet_cobra_spit : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 
 	private void HandleDamage(uint UnnamedParameter)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
+
 		if (caster == null)
-		{
 			return;
-		}
 
-		Unit owner = caster.GetOwner();
+		var owner = caster.GetOwner();
+
 		if (owner == null)
-		{
 			return;
-		}
 
-		Unit target = GetExplTargetUnit();
+		var target = GetExplTargetUnit();
+
 		if (target == null)
-		{
 			return;
-		}
 
 		// (1 + AP * 0,2)
 		var dmg = 1 + owner.m_unitData.RangedAttackPower * 0.2f;

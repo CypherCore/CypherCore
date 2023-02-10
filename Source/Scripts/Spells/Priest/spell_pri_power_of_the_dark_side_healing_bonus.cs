@@ -24,14 +24,14 @@ internal class spell_pri_power_of_the_dark_side_healing_bonus : SpellScript, IHa
 
 	private void HandleLaunchTarget(uint effIndex)
 	{
-		AuraEffect powerOfTheDarkSide = GetCaster().GetAuraEffect(PriestSpells.PowerOfTheDarkSide, 0);
+		var powerOfTheDarkSide = GetCaster().GetAuraEffect(PriestSpells.PowerOfTheDarkSide, 0);
 
 		if (powerOfTheDarkSide != null)
 		{
 			PreventHitDefaultEffect(effIndex);
 
 			float healingBonus = GetCaster().SpellHealingBonusDone(GetHitUnit(), GetSpellInfo(), (uint)GetEffectValue(), DamageEffectType.Heal, GetEffectInfo());
-			float value        = healingBonus + healingBonus * GetEffectVariance();
+			var   value        = healingBonus + healingBonus * GetEffectVariance();
 			value *= 1.0f + (powerOfTheDarkSide.GetAmount() / 100.0f);
 			value =  GetHitUnit().SpellHealingBonusTaken(GetCaster(), GetSpellInfo(), (uint)value, DamageEffectType.Heal);
 			SetHitHeal((int)value);

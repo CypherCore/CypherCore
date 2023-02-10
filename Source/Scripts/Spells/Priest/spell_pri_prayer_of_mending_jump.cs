@@ -38,9 +38,9 @@ internal class spell_pri_prayer_of_mending_jump : SpellScript, IHasSpellEffects
 	private void OnTargetSelect(List<WorldObject> targets)
 	{
 		// Find the best Target - prefer players over pets
-		bool foundPlayer = false;
+		var foundPlayer = false;
 
-		foreach (WorldObject worldObject in targets)
+		foreach (var worldObject in targets)
 			if (worldObject.IsPlayer())
 			{
 				foundPlayer = true;
@@ -54,7 +54,7 @@ internal class spell_pri_prayer_of_mending_jump : SpellScript, IHasSpellEffects
 		// choose one random Target from targets
 		if (targets.Count > 1)
 		{
-			WorldObject selected = targets.SelectRandom();
+			var selected = targets.SelectRandom();
 			targets.Clear();
 			targets.Add(selected);
 		}
@@ -62,12 +62,12 @@ internal class spell_pri_prayer_of_mending_jump : SpellScript, IHasSpellEffects
 
 	private void HandleJump(uint effIndex)
 	{
-		Unit origCaster = GetOriginalCaster(); // the one that started the prayer of mending chain
-		Unit target     = GetHitUnit();        // the Target we decided the aura should Jump to
+		var origCaster = GetOriginalCaster(); // the one that started the prayer of mending chain
+		var target     = GetHitUnit();        // the Target we decided the aura should Jump to
 
 		if (origCaster)
 		{
-			uint               basePoints = origCaster.SpellHealingBonusDone(target, _spellInfoHeal, (uint)_healEffectDummy.CalcValue(origCaster), DamageEffectType.Heal, _healEffectDummy);
+			var                basePoints = origCaster.SpellHealingBonusDone(target, _spellInfoHeal, (uint)_healEffectDummy.CalcValue(origCaster), DamageEffectType.Heal, _healEffectDummy);
 			CastSpellExtraArgs args       = new(TriggerCastFlags.FullMask);
 			args.AddSpellMod(SpellValueMod.AuraStack, GetEffectValue());
 			args.AddSpellMod(SpellValueMod.BasePoint0, (int)basePoints);

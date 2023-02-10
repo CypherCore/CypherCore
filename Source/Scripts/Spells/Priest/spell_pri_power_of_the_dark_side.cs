@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
-using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
@@ -25,14 +24,14 @@ internal class spell_pri_power_of_the_dark_side : AuraScript, IHasAuraEffects
 
 	private void HandleOnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		caster?.CastSpell(caster, PriestSpells.PowerOfTheDarkSideTint, true);
 	}
 
 	private void HandleOnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		caster?.RemoveAura(PriestSpells.PowerOfTheDarkSideTint);
 	}

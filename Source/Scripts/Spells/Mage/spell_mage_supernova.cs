@@ -20,7 +20,7 @@ internal class spell_mage_supernova : SpellScript, IHasSpellEffects
 	{
 		if (GetExplTargetUnit() == GetHitUnit())
 		{
-			int damage = GetHitDamage();
+			var damage = GetHitDamage();
 			MathFunctions.AddPct(ref damage, GetEffectInfo(0).CalcValue());
 			SetHitDamage(damage);
 		}

@@ -23,21 +23,16 @@ public class at_mage_rune_of_power : AreaTriggerAI
 
 	public override void OnUnitEnter(Unit unit)
 	{
-		Unit caster = at.GetCaster();
+		var caster = at.GetCaster();
+
 		if (caster != null)
-		{
 			if (unit.GetGUID() == caster.GetGUID())
-			{
 				caster.CastSpell(unit, UsingSpells.SPELL_MAGE_RUNE_OF_POWER_AURA, true);
-			}
-		}
 	}
 
 	public override void OnUnitExit(Unit unit)
 	{
 		if (unit.HasAura(UsingSpells.SPELL_MAGE_RUNE_OF_POWER_AURA))
-		{
 			unit.RemoveAurasDueToSpell(UsingSpells.SPELL_MAGE_RUNE_OF_POWER_AURA);
-		}
 	}
 }

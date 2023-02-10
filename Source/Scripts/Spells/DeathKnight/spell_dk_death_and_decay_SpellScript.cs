@@ -1,5 +1,4 @@
-﻿using Game.Entities;
-using Game.Scripting;
+﻿using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
 
@@ -17,7 +16,7 @@ internal class spell_dk_death_and_decay_SpellScript : SpellScript, ISpellOnCast
 	{
 		if (GetCaster().HasAura(DeathKnightSpells.TighteningGrasp))
 		{
-			WorldLocation pos = GetExplTargetDest();
+			var pos = GetExplTargetDest();
 
 			if (pos != null)
 				GetCaster().CastSpell(pos, DeathKnightSpells.TighteningGraspSlow, new CastSpellExtraArgs(true));

@@ -10,19 +10,16 @@ namespace Scripts.Spells.Mage;
 [SpellScript(153564)]
 public class spell_mage_meteor_damage : SpellScript, IHasSpellEffects
 {
-
-
 	private int _targets;
 
-	public List<ISpellEffect> SpellEffects => new List<ISpellEffect>();
+	public List<ISpellEffect> SpellEffects => new();
 
 	private void HandleHit(uint UnnamedParameter)
 	{
-		Unit unit = GetHitUnit();
+		var unit = GetHitUnit();
+
 		if (unit == null)
-		{
 			return;
-		}
 
 		SetHitDamage(GetHitDamage() / _targets);
 	}

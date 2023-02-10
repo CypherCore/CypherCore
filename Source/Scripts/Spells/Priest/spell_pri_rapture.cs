@@ -20,8 +20,8 @@ internal class spell_pri_rapture : SpellScript, ISpellAfterCast, IHasSpellEffect
 
 	public void AfterCast()
 	{
-		Unit caster = GetCaster();
-		Unit target = Global.ObjAccessor.GetUnit(caster, _raptureTarget);
+		var caster = GetCaster();
+		var target = Global.ObjAccessor.GetUnit(caster, _raptureTarget);
 
 		if (target != null)
 			caster.CastSpell(target, PriestSpells.PowerWordShield, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnorePowerAndReagentCost | TriggerCastFlags.IgnoreCastInProgress).SetTriggeringSpell(GetSpell()));

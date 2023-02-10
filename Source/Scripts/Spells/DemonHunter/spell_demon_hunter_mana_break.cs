@@ -1,0 +1,38 @@
+﻿using System;
+using System.Collections.Generic;
+using Framework.Constants;
+using Game.Scripting;
+using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.ISpell;
+
+namespace Scripts.Spells.DemonHunter;
+
+[SpellScript(203704)]
+public class spell_demon_hunter_mana_break : SpellScript, IHasSpellEffects
+{
+	public List<ISpellEffect> SpellEffects => new();
+
+	public void HandleHit(uint UnnamedParameter)
+	{
+		var caster = GetCaster();
+		var target = GetHitUnit();
+
+		if (caster == null || target == null)
+			return;
+
+		var damage   = (float)GetSpellInfo().GetEffect(1).BasePoints;
+		var powerPct = target.GetPowerPct(PowerType.Mana);
+
+		if (powerPct >= 1.0f)
+			damage += (100.0f - powerPct) / 10.0f * GetSpellInfo().GetEffect(2).BasePoints;
+
+		damage = Math.Max((float)GetHitUnit().CountPctFromMaxHealth(GetSpellInfo().GetEffect(1).BasePoints), (float)damage);
+
+		SetHitDamage(damage);
+	}
+
+	public override void Register()
+	{
+		SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
+	}
+}

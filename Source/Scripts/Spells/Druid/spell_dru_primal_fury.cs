@@ -8,19 +8,13 @@ namespace Scripts.Spells.Druid;
 [SpellScript(159286)]
 public class spell_dru_primal_fury : AuraScript, IAuraCheckProc
 {
-
-
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
-		bool _spellCanProc = (eventInfo.GetSpellInfo().Id == DruidSpells.SPELL_DRUID_SHRED || eventInfo.GetSpellInfo().Id == DruidSpells.SPELL_DRUID_RAKE || eventInfo.GetSpellInfo().Id == DruidSpells.SPELL_DRUID_SWIPE_CAT || eventInfo.GetSpellInfo().Id == DruidSpells.SPELL_DRUID_MOONFIRE_CAT);
+		var _spellCanProc = (eventInfo.GetSpellInfo().Id == DruidSpells.SPELL_DRUID_SHRED || eventInfo.GetSpellInfo().Id == DruidSpells.SPELL_DRUID_RAKE || eventInfo.GetSpellInfo().Id == DruidSpells.SPELL_DRUID_SWIPE_CAT || eventInfo.GetSpellInfo().Id == DruidSpells.SPELL_DRUID_MOONFIRE_CAT);
 
 		if ((eventInfo.GetHitMask() & ProcFlagsHit.Critical) != 0 && _spellCanProc)
-		{
 			return true;
-		}
 
 		return false;
 	}
-
-
 }

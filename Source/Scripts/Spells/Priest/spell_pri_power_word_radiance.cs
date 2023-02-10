@@ -27,11 +27,11 @@ internal class spell_pri_power_word_radiance : SpellScript, IHasSpellEffects
 
 	private void OnTargetSelect(List<WorldObject> targets)
 	{
-		uint maxTargets = (uint)(GetEffectInfo(2).CalcValue(GetCaster()) + 1); // adding 1 for explicit Target unit
+		var maxTargets = (uint)(GetEffectInfo(2).CalcValue(GetCaster()) + 1); // adding 1 for explicit Target unit
 
 		if (targets.Count > maxTargets)
 		{
-			Unit explTarget = GetExplTargetUnit();
+			var explTarget = GetExplTargetUnit();
 
 			// Sort targets so units with no atonement are first, then units who are injured, then oher units
 			// Make sure explicit Target unit is first
@@ -52,12 +52,12 @@ internal class spell_pri_power_word_radiance : SpellScript, IHasSpellEffects
 
 	private void HandleEffectHitTarget(uint effIndex)
 	{
-		Unit caster = GetCaster();
+		var caster = GetCaster();
 
 		if (caster.HasAura(PriestSpells.Trinity))
 			return;
 
-		int durationPct = GetEffectInfo(3).CalcValue(caster);
+		var durationPct = GetEffectInfo(3).CalcValue(caster);
 
 		if (caster.HasAura(PriestSpells.Atonement))
 			caster.CastSpell(GetHitUnit(), PriestSpells.AtonementTriggered, new CastSpellExtraArgs(SpellValueMod.DurationPct, durationPct).SetTriggerFlags(TriggerCastFlags.FullMask));
@@ -71,7 +71,7 @@ internal class spell_pri_power_word_radiance : SpellScript, IHasSpellEffects
 	// Returns true if obj is a unit but has no atonement
 	private bool IsUnitWithNoAtonement(WorldObject obj)
 	{
-		Unit unit = obj.ToUnit();
+		var unit = obj.ToUnit();
 
 		return unit != null && !unit.HasAura(PriestSpells.AtonementTriggered, GetCaster().GetGUID());
 	}
@@ -79,7 +79,7 @@ internal class spell_pri_power_word_radiance : SpellScript, IHasSpellEffects
 	// Returns true if obj is a unit and is injured
 	private static bool IsUnitInjured(WorldObject obj)
 	{
-		Unit unit = obj.ToUnit();
+		var unit = obj.ToUnit();
 
 		return unit != null && unit.IsFullHealth();
 	}

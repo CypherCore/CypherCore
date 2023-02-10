@@ -10,29 +10,26 @@ public class spell_hun_throwing_axes : SpellScript, ISpellOnCast
 {
 	public void OnCast()
 	{
-		Unit caster = GetCaster();
-		Unit target = GetExplTargetUnit();
-		if (caster == null || target == null)
-		{
-			return;
-		}
+		var caster = GetCaster();
+		var target = GetExplTargetUnit();
 
-		ObjectGuid targetGUID = target.GetGUID();
-		var        throwCount = GetSpellInfo().GetEffect(0).BasePoints;
+		if (caster == null || target == null)
+			return;
+
+		var targetGUID = target.GetGUID();
+		var throwCount = GetSpellInfo().GetEffect(0).BasePoints;
 
 		for (byte i = 0; i < throwCount; ++i)
-		{
 			caster.m_Events.AddEventAtOffset(() =>
 			                                 {
 				                                 if (caster != null)
 				                                 {
 					                                 Unit target = ObjectAccessor.GetCreature(caster, targetGUID);
+
 					                                 if (target != null)
-					                                 {
 						                                 caster.CastSpell(target, HunterSpells.SPELL_HUNTER_THOWING_AXES_DAMAGE, false);
-					                                 }
 				                                 }
-			                                 }, TimeSpan.FromMilliseconds(500 * i));
-		}
+			                                 },
+			                                 TimeSpan.FromMilliseconds(500 * i));
 	}
 }

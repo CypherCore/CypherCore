@@ -1,42 +1,39 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Game.Entities;
 using Game.Scripting;
 
 namespace Scripts.Spells.Warlock
 {
-    [Script] // 86211 - Soul Swap - Also acts as a dot container
-    public class spell_warl_soul_swap_override : AuraScript
-    {
-        private readonly List<uint> _dotList = new();
+	[Script] // 86211 - Soul Swap - Also acts as a dot container
+	public class spell_warl_soul_swap_override : AuraScript
+	{
+		private readonly List<uint> _dotList = new();
 
-        private Unit _swapCaster;
+		private Unit _swapCaster;
 
-        //! Forced to, pure virtual functions must have a body when linking
-        public override void Register()
-        {
-        }
+		//! Forced to, pure virtual functions must have a body when linking
+		public override void Register()
+		{
+		}
 
-        public void AddDot(uint id)
-        {
-            _dotList.Add(id);
-        }
+		public void AddDot(uint id)
+		{
+			_dotList.Add(id);
+		}
 
-        public List<uint> GetDotList()
-        {
-            return _dotList;
-        }
+		public List<uint> GetDotList()
+		{
+			return _dotList;
+		}
 
-        public Unit GetOriginalSwapSource()
-        {
-            return _swapCaster;
-        }
+		public Unit GetOriginalSwapSource()
+		{
+			return _swapCaster;
+		}
 
-        public void SetOriginalSwapSource(Unit victim)
-        {
-            _swapCaster = victim;
-        }
-    }
+		public void SetOriginalSwapSource(Unit victim)
+		{
+			_swapCaster = victim;
+		}
+	}
 }

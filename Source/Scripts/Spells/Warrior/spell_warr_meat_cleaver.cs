@@ -4,13 +4,13 @@ using Game.Scripting.Interfaces.IAura;
 
 namespace Scripts.Spells.Warrior
 {
-    // Improved Whirlwind - 12950
+	// Improved Whirlwind - 12950
 
-    public class spell_warr_meat_cleaver : AuraScript, IAuraCheckProc
-    {
-        public bool CheckProc(ProcEventInfo UnnamedParameter)
-        {
-            return false;
-        }
-    }
+	public class spell_warr_meat_cleaver : AuraScript, IAuraCheckProc
+	{
+		public bool CheckProc(ProcEventInfo UnnamedParameter)
+		{
+			return false;
+		}
+	}
 }
