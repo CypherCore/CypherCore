@@ -596,7 +596,7 @@ namespace Game.DataStorage
         public byte MaxTargets;
         public uint MaxTargetLevel;
         public ushort TargetCreatureType;
-        public int Targets;
+        public uint Targets;
         public float Width;
         public uint SpellID;
     }

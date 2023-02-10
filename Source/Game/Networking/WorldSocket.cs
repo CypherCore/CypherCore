@@ -257,7 +257,7 @@ namespace Game.Networking
             PacketLog.Write(packet.GetData(), packet.GetOpcode(), GetRemoteIpAddress(), _connectType, true);
 
             ClientOpcodes opcode = (ClientOpcodes)packet.GetOpcode();
-
+       
             if (opcode != ClientOpcodes.HotfixRequest && !header.IsValidSize())
             {
                 Log.outError(LogFilter.Network, $"WorldSocket.ReadHeaderHandler(): client {GetRemoteIpAddress()} sent malformed packet (size: {header.Size})");
@@ -325,9 +325,11 @@ namespace Game.Networking
                             return ReadDataHandlerResult.Error;
                         }
 
+                        Log.outTrace(LogFilter.Network, "Received opcode: {0} ({1})", (ClientOpcodes)packet.GetOpcode(), packet.GetOpcode());
+
                         if (!PacketManager.ContainsHandler(opcode))
                         {
-                            Log.outError(LogFilter.Network, $"No defined handler for opcode {opcode} sent by {_worldSession.GetPlayerInfo()}");
+                            Log.outError(LogFilter.Network, $"No defined handler for opcode {opcode} ({packet.GetOpcode()}) sent by {_worldSession.GetPlayerInfo()}");
                             break;
                         }
 
@@ -353,6 +355,7 @@ namespace Game.Networking
 
             packet.LogPacket(_worldSession);
             packet.WritePacketData();
+            Log.outTrace(LogFilter.Network, "Received opcode: {0} ({1})", (ServerOpcodes)packet.GetOpcode(), (uint)packet.GetOpcode());
 
             var data = packet.GetData();
             ServerOpcodes opcode = packet.GetOpcode();
