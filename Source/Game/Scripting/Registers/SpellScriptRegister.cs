@@ -17,9 +17,6 @@ namespace Game.Scripting.Registers
                 foreach (var id in spellScript.SpellIds)
                 {
                     Global.ObjectMgr.RegisterSpellScript(id, scriptName, spellScript.AllRanks);
-
-                    if (script != null)
-                        Global.ScriptMgr.AddScript(script);
                 }
         }
 

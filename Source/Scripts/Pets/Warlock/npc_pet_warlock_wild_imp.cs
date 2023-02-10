@@ -10,7 +10,7 @@ namespace Scripts.Pets
     namespace Warlock
     {
         // Wild Imp - 99739
-        [Script]
+        [CreatureScript(new uint[] { 55659, 99739 })]
         public class npc_pet_warlock_wild_imp : PetAI
         {
             private ObjectGuid _targetGUID = new();

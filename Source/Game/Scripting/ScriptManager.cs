@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Formats.Asn1;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -21,7 +22,9 @@ using Game.Scripting.Activators;
 using Game.Scripting.BaseScripts;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAreaTrigger;
+using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.IPlayer;
+using Game.Scripting.Interfaces.ISpell;
 using Game.Scripting.Registers;
 using Game.Spells;
 
@@ -79,14 +82,6 @@ namespace Game.Scripting
 
         #region Main Script API
 
-        public IEnumerable<T> GetInterfaces<T>() where T : IScriptObject
-        {
-            if (_scriptByType.TryGetValue(typeof(T), out var ifaceImp))
-                return ifaceImp.Cast<T>();
-
-            return _blankList.Cast<T>(); // we dont return null as they might be looping. Empty list is best here.
-        }
-
         public void ForEach<T>(Action<T> a) where T : IScriptObject
         {
             if (_scriptByType.TryGetValue(typeof(T), out var ifaceImp))
@@ -135,34 +130,53 @@ namespace Game.Scripting
         {
             Cypher.Assert(script != null);
 
-            if (!_scriptStorage.TryGetValue(typeof(T), out var scriptReg))
+            var interfaces = script.GetType().GetInterfaces();
+            bool hasClass = interfaces.Any(iface => iface.Name == nameof(IClassRescriction));
+
+            if (!_scriptStorage.TryGetValue(script.GetType(), out var scriptReg))
             {
                 scriptReg = new ScriptRegistry();
-                _scriptStorage[typeof(T)] = scriptReg;
+                _scriptStorage[script.GetType()] = scriptReg;
             }
 
             scriptReg.AddScript(script);
-
-            bool hasClass = typeof(T).GetInterfaces().Any(iface => iface.Name == nameof(IClassRescriction));
-
-            foreach (var iface in typeof(T).GetInterfaces())
+    
+            foreach (var iface in interfaces)
             {
-                if (iface.Name == nameof(IScriptObject))
-                    continue;
-
-                _scriptByType.AddToList(iface, script);
-
-                if (hasClass)
-                {
-                    if (!_scriptClassByType.TryGetValue(iface, out var classDict))
-                    {
-                        classDict = new Dictionary<Class, List<IScriptObject>>();
-                        _scriptClassByType[iface] = classDict;
-                    }
-
-                    classDict.AddToList(((IClassRescriction)script).PlayerClass, script);
-                }
+                AddInterface(iface, script, hasClass);
             }
+        }
+
+        private void AddInterface<T>(Type iface, T script, bool hasClass) where T : IScriptObject
+        {
+            if (iface.Name == nameof(IScriptObject))
+                return;
+
+            if (!_scriptStorage.TryGetValue(iface, out var scriptReg))
+            {
+                scriptReg = new ScriptRegistry();
+                _scriptStorage[iface] = scriptReg;
+            }
+
+            scriptReg.AddScript(script);
+            _scriptByType.AddToList(iface, script);
+
+            if (IOHelpers.DoesTypeSupportInterface(iface, typeof(IScriptObject)))
+                _scriptStorage[iface] = scriptReg;
+
+            if (hasClass)
+            {
+                if (!_scriptClassByType.TryGetValue(iface, out var classDict))
+                {
+                    classDict = new Dictionary<Class, List<IScriptObject>>();
+                    _scriptClassByType[iface] = classDict;
+                }
+
+                classDict.AddToList(((IClassRescriction)script).PlayerClass, script);
+            }
+
+            foreach (var f in iface.GetInterfaces())
+                AddInterface(f, script, hasClass);
         }
 
         public ScriptRegistry GetScriptRegistry<T>()
@@ -551,14 +565,14 @@ namespace Game.Scripting
             var scriptList = new List<SpellScript>();
             var bounds = Global.ObjectMgr.GetSpellScriptsBounds(spellId);
 
-            var reg = GetScriptRegistry<SpellScriptLoader>();
+            var reg = GetScriptRegistry<ISpellScriptLoaderGetSpellScript>();
 
             if (reg == null)
                 return scriptList;
 
             foreach (var id in bounds)
             {
-                var tmpscript = reg.GetScriptById<SpellScriptLoader>(id);
+                var tmpscript = reg.GetScriptById<ISpellScriptLoaderGetSpellScript>(id);
 
                 if (tmpscript == null)
                     continue;
@@ -584,14 +598,14 @@ namespace Game.Scripting
             var scriptList = new List<AuraScript>();
             var bounds = Global.ObjectMgr.GetSpellScriptsBounds(spellId);
 
-            var reg = GetScriptRegistry<AuraScriptLoader>();
+            var reg = GetScriptRegistry<IAuraScriptLoaderGetAuraScript>();
 
             if (reg == null)
                 return scriptList;
 
             foreach (var id in bounds)
             {
-                var tmpscript = reg.GetScriptById<AuraScriptLoader>(id);
+                var tmpscript = reg.GetScriptById<IAuraScriptLoaderGetAuraScript>(id);
 
                 if (tmpscript == null)
                     continue;
@@ -612,19 +626,19 @@ namespace Game.Scripting
             return scriptList;
         }
 
-        public Dictionary<SpellScriptLoader, uint> CreateSpellScriptLoaders(uint spellId)
+        public Dictionary<ISpellScriptLoaderGetSpellScript, uint> CreateSpellScriptLoaders(uint spellId)
         {
-            var scriptDic = new Dictionary<SpellScriptLoader, uint>();
+            var scriptDic = new Dictionary<ISpellScriptLoaderGetSpellScript, uint>();
             var bounds = Global.ObjectMgr.GetSpellScriptsBounds(spellId);
 
-            var reg = GetScriptRegistry<SpellScriptLoader>();
+            var reg = GetScriptRegistry<ISpellScriptLoaderGetSpellScript>();
 
             if (reg == null)
                 return scriptDic;
 
             foreach (var id in bounds)
             {
-                var tmpscript = reg.GetScriptById<SpellScriptLoader>(id);
+                var tmpscript = reg.GetScriptById<ISpellScriptLoaderGetSpellScript>(id);
 
                 if (tmpscript == null)
                     continue;
@@ -635,19 +649,19 @@ namespace Game.Scripting
             return scriptDic;
         }
 
-        public Dictionary<AuraScriptLoader, uint> CreateAuraScriptLoaders(uint spellId)
+        public Dictionary<IAuraScriptLoaderGetAuraScript, uint> CreateAuraScriptLoaders(uint spellId)
         {
-            var scriptDic = new Dictionary<AuraScriptLoader, uint>();
+            var scriptDic = new Dictionary<IAuraScriptLoaderGetAuraScript, uint>();
             var bounds = Global.ObjectMgr.GetSpellScriptsBounds(spellId);
 
-            var reg = GetScriptRegistry<AuraScriptLoader>();
+            var reg = GetScriptRegistry<IAuraScriptLoaderGetAuraScript>();
 
             if (reg == null)
                 return scriptDic;
 
             foreach (var id in bounds)
             {
-                var tmpscript = reg.GetScriptById<AuraScriptLoader>(id);
+                var tmpscript = reg.GetScriptById<IAuraScriptLoaderGetAuraScript>(id);
 
                 if (tmpscript == null)
                     continue;

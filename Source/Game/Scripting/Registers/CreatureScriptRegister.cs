@@ -26,9 +26,6 @@ namespace Game.Scripting.Registers
                     
                     if (creatureTemplate.ScriptID == 0) // dont override database
                         creatureTemplate.ScriptID = Global.ObjectMgr.GetScriptId(scriptName);
-
-                    if (script != null)
-                        Global.ScriptMgr.AddScript(script);
                 }
         }
 

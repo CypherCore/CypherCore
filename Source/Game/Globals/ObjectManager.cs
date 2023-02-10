@@ -18,6 +18,8 @@ using Game.Misc;
 using Game.Movement;
 using Game.Scripting;
 using Game.Scripting.BaseScripts;
+using Game.Scripting.Interfaces.IAura;
+using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -1847,7 +1849,7 @@ namespace Game
             {
                 SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(script.Key, Difficulty.None);
 
-                Dictionary<SpellScriptLoader, uint> SpellScriptLoaders = Global.ScriptMgr.CreateSpellScriptLoaders(script.Key);
+                Dictionary<ISpellScriptLoaderGetSpellScript, uint> SpellScriptLoaders = Global.ScriptMgr.CreateSpellScriptLoaders(script.Key);
                 foreach (var pair in SpellScriptLoaders)
                 {
                     SpellScript spellScript = pair.Key.GetSpellScript();
@@ -1871,7 +1873,7 @@ namespace Game
                         return true;
                 }
 
-                Dictionary<AuraScriptLoader, uint> AuraScriptLoaders = Global.ScriptMgr.CreateAuraScriptLoaders(script.Key);
+                Dictionary<IAuraScriptLoaderGetAuraScript, uint> AuraScriptLoaders = Global.ScriptMgr.CreateAuraScriptLoaders(script.Key);
                 foreach (var pair in AuraScriptLoaders)
                 {
                     AuraScript auraScript = pair.Key.GetAuraScript();

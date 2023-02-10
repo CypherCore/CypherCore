@@ -234,27 +234,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
             }
 
             _phase = AdmiralPhases.PHASE_FOG;
-            var creature_list = me.GetCreatureListWithEntryInGrid(DMCreatures.NPC_GENERAL_PURPOSE_BUNNY_JMF2, 100.0f);
 
-            creature_list.Sort(new ObjectDistanceOrderPred(me));
-            foreach (var item in creature_list)
-            {
-                if (item != null && item.IsAlive() && item.GetTypeId() == TypeId.Unit)
-                {
-                    Creature bunny = item.ToCreature();
-                    if (bunny != null)
-                    {
-                        if (apply)
-                        {
-                            bunny.AddAura(eSpells.SPELL_FOG, bunny);
-                        }
-                        else
-                        {
-                            bunny.RemoveAura(eSpells.SPELL_FOG);
-                        }
-                    }
-                }
-            }
             return;
         }
 
@@ -283,11 +263,6 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
 
             SetFog(false);
 
-            Creature bunny = me.FindNearestCreature(DMCreatures.NPC_GENERAL_PURPOSE_BUNNY_JMF, 20.0f);
-            if (bunny != null)
-            {
-                bunny.DespawnOrUnsummon();
-            }
         }
 
         public void SummonFinalVapors()
@@ -317,12 +292,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
             if (me.GetHealthPct() < 75 && !_below_75)
             {
                 Talk(Says.SAY_FOG_1);
-                Creature bunny = me.SummonCreature(DMCreatures.NPC_GENERAL_PURPOSE_BUNNY_JMF, me.GetPositionX(), me.GetPositionY(), me.GetPositionZ());
-                if (bunny != null)
-                {
-                    bunny.AddAura(eSpells.SPELL_BUNNY_AURA, bunny);
-                    bunny.AddAura(eSpells.SPELL_FOG_AURA, bunny);
-                }
+  
                 SetFog(true);
                 _events.ScheduleEvent(BossEvents.EVENT_PHASE_TWO, TimeSpan.FromMilliseconds(1000));
                 _events.ScheduleEvent(BossEvents.EVENT_UPDATE_FOG, TimeSpan.FromMilliseconds(100));

@@ -185,14 +185,14 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
         public void SummonAllFires()
         {
-            for (byte i = 0; i < 4; ++i)
-            {
-                Creature saFires = me.SummonCreature(DMCreatures.NPC_FIRE_BUNNY, FieryBlaze[i], TempSummonType.ManualDespawn);
-                if (saFires != null)
-                {
-                    saFires.SetUnitFlag(UnitFlags.NonAttackable | UnitFlags.Pacified | UnitFlags.Uninteractible);
-                }
-            }
+            //for (byte i = 0; i < 4; ++i)
+            //{
+            //    Creature saFires = me.SummonCreature(DMCreatures.NPC_FIRE_BUNNY, FieryBlaze[i], TempSummonType.ManualDespawn);
+            //    if (saFires != null)
+            //    {
+            //        saFires.SetUnitFlag(UnitFlags.NonAttackable | UnitFlags.Pacified | UnitFlags.Uninteractible);
+            //    }
+            //}
         }
 
         public void SummonSparks()

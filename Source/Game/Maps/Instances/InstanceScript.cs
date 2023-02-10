@@ -689,7 +689,7 @@ namespace Game.Maps
 
         public DungeonEncounterRecord GetBossDungeonEncounter(Creature creature)
         {
-            BossAI bossAi = (BossAI)creature.GetAI();
+            BossAI bossAi = creature.GetAI() as BossAI;
             if (bossAi != null)
                 return GetBossDungeonEncounter(bossAi.GetBossId());
 

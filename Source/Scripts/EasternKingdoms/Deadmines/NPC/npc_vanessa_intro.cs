@@ -139,7 +139,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
                                     me.CastSpell(item, boss_vanessa_vancleef.Spells.SPELL_BLACKOUT, true);
                                 }
 
-                                me.SummonCreature(DMCreatures.NPC_TRAP_BUNNY, -65.93f, -820.33f, 40.98f, 0, TempSummonType.ManualDespawn);
+                                // me.SummonCreature(DMCreatures.NPC_TRAP_BUNNY, -65.93f, -820.33f, 40.98f, 0, TempSummonType.ManualDespawn);
 
                                 PongTimer = 4000;
                                 Phase++;

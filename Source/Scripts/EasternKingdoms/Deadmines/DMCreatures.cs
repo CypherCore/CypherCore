@@ -11,8 +11,6 @@ namespace Scripts.EasternKingdoms.Deadmines
 		public const uint NPC_GLUBTOK = 47162;
 		public const uint NPC_OAF = 47297;
 		public const uint NPC_HELIX_GEARBREAKER = 47296;
-		public const uint NPC_GENERAL_PURPOSE_BUNNY_JMF = 45979;
-		public const uint NPC_GENERAL_PURPOSE_BUNNY_JMF2 = 47242;
 		public const uint NPC_OGRE_HENCHMAN = 48230;
 		public const uint NPC_FOE_REAPER_5000 = 43778;
 		public const uint NPC_MINE_RAT = 51462;
@@ -24,8 +22,6 @@ namespace Scripts.EasternKingdoms.Deadmines
 		public const uint NPC_VANESSA_VANCLEEF = 49429;
 		public const uint NPC_VANESSA_BOSS = 49541;
 		public const uint NPC_VANESSA_NOTE = 49564;
-		public const uint NPC_SCORCH_MARK_BUNNY_JMF = 48446;
-		public const uint NPC_TRAP_BUNNY = 49454;
 		public const uint NPC_STEAM_VALVE = 49457;
 		public const uint NPC_ROPE = 49550;
 		public const uint NPC_ROPE_ANCHOR = 49552;
@@ -43,7 +39,6 @@ namespace Scripts.EasternKingdoms.Deadmines
 		//Nightmare NPC
 		public const uint NPC_VANESSA_NIGHTMARE = 49671;
 		public const uint NPC_GLUBTOK_NIGHTMARE = 49670;
-		public const uint NPC_FIRE_BUNNY = 51594;
 		public const uint NPC_COLAPSING = 49481;
 		public const uint NPC_HELIX_NIGHTMARE = 49674;
 		public const uint NPC_NIGHTMARE_SPIDER = 49493;

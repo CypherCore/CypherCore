@@ -2736,6 +2736,9 @@ namespace Game.Entities
                     return scriptId;
             }
 
+            if (m_creatureInfo.ScriptID != 0)
+                return m_creatureInfo.ScriptID;
+
             return Global.ObjectMgr.GetCreatureTemplate(GetEntry()) != null ? Global.ObjectMgr.GetCreatureTemplate(GetEntry()).ScriptID : 0;
         }
 

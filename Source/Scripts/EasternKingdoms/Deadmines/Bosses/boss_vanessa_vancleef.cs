@@ -235,28 +235,28 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
 
         public void FieryBoom()
         {
-            var fiery = me.GetCreatureListWithEntryInGrid(DMCreatures.NPC_GENERAL_PURPOSE_BUNNY_JMF2, 150.0f);
-            fiery.Sort(new ObjectDistanceOrderPred(me));
-            foreach (var item in fiery)
-            {
-                if (item.IsAlive() && item.GetTypeId() == TypeId.Unit)
-                {
-                    item.CastSpell(item, Spells.SPELL_FIERY_BLAZE, true);
-                }
-            }
+            //var fiery = me.GetCreatureListWithEntryInGrid(DMCreatures.NPC_GENERAL_PURPOSE_BUNNY_JMF2, 150.0f);
+            //fiery.Sort(new ObjectDistanceOrderPred(me));
+            //foreach (var item in fiery)
+            //{
+            //    if (item.IsAlive() && item.GetTypeId() == TypeId.Unit)
+            //    {
+            //        item.CastSpell(item, Spells.SPELL_FIERY_BLAZE, true);
+            //    }
+            //}
         }
 
         public void RemoveFiresFromShip()
         {
-            var fiery = me.GetCreatureListWithEntryInGrid(DMCreatures.NPC_GENERAL_PURPOSE_BUNNY_JMF2, 150.0f);
-            fiery.Sort(new ObjectDistanceOrderPred(me));
-            foreach (var item in fiery)
-            {
-                if (item.IsAlive() && item.GetTypeId() == TypeId.Unit)
-                {
-                    item.RemoveAurasDueToSpell(Spells.SPELL_FIERY_BLAZE);
-                }
-            }
+            //var fiery = me.GetCreatureListWithEntryInGrid(DMCreatures.NPC_GENERAL_PURPOSE_BUNNY_JMF2, 150.0f);
+            //fiery.Sort(new ObjectDistanceOrderPred(me));
+            //foreach (var item in fiery)
+            //{
+            //    if (item.IsAlive() && item.GetTypeId() == TypeId.Unit)
+            //    {
+            //        item.RemoveAurasDueToSpell(Spells.SPELL_FIERY_BLAZE);
+            //    }
+            //}
         }
 
         public override void DamageTaken(Unit done_by, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
@@ -301,18 +301,18 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
 
         public void SummonThreatController()
         {
-            Creature bunny = me.SummonCreature(DMCreatures.NPC_GENERAL_PURPOSE_BUNNY_JMF, -52.31f, -820.18f, 51.91f, 3.32963f);
-            if (bunny != null)
-            {
-                bunny.SetUnitFlag(UnitFlags.Stunned);
-                bunny.SetUnitFlag(UnitFlags.ImmuneToPc);
-                bunny.SetReactState(ReactStates.Aggressive);
-                bunny.SetFaction(18);
-                bunny.Attack(me, true);
-                me.GetThreatManager().AddThreat(bunny, 200000.0f);
-                me.SetInCombatWith(bunny);
-            }
-            me.SetInCombatWithZone();
+            //Creature bunny = me.SummonCreature(DMCreatures.NPC_GENERAL_PURPOSE_BUNNY_JMF, -52.31f, -820.18f, 51.91f, 3.32963f);
+            //if (bunny != null)
+            //{
+            //    bunny.SetUnitFlag(UnitFlags.Stunned);
+            //    bunny.SetUnitFlag(UnitFlags.ImmuneToPc);
+            //    bunny.SetReactState(ReactStates.Aggressive);
+            //    bunny.SetFaction(18);
+            //    bunny.Attack(me, true);
+            //    me.GetThreatManager().AddThreat(bunny, 200000.0f);
+            //    me.SetInCombatWith(bunny);
+            //}
+            //me.SetInCombatWithZone();
         }
 
         public void SummonRopes()
@@ -427,11 +427,11 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                         me.RemoveAllAuras();
                         _events.ScheduleEvent(BossEvents.EVENT_SHADOWGUARD, TimeSpan.FromMilliseconds(27000));
 
-                        Creature bunny = me.FindNearestCreature(DMCreatures.NPC_GENERAL_PURPOSE_BUNNY_JMF, 150.0f, true);
-                        if (bunny != null)
-                        {
-                            bunny.DespawnOrUnsummon(TimeSpan.FromMilliseconds(2000));
-                        }
+                        //Creature bunny = me.FindNearestCreature(DMCreatures.NPC_GENERAL_PURPOSE_BUNNY_JMF, 150.0f, true);
+                        //if (bunny != null)
+                        //{
+                        //    bunny.DespawnOrUnsummon(TimeSpan.FromMilliseconds(2000));
+                        //}
 
                         break;
                     case BossEvents.EVENT_FINAL_TIMER:

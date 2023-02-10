@@ -15,7 +15,7 @@ using Game.Scripting;
 namespace Scripts.EasternKingdoms.Deadmines
 {
 
-    //[Script]
+    [Script]
     internal class instance_deadmines : InstanceMapScript, IInstanceMapGetInstanceScript
     {
         private class instance_deadmines_InstanceMapScript : InstanceScript
