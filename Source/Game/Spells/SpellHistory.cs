@@ -1066,5 +1066,30 @@ namespace Game.Spells
             public DateTime RechargeStart;
             public DateTime RechargeEnd;
         }
+
+        public void ForceSendSpellCharge(SpellCategoryRecord chargeCategoryRecord)
+        {
+            Player player = GetPlayerOwner();
+
+            if (player == null || _categoryCharges.ContainsKey(chargeCategoryRecord.Id))
+                return;
+
+            SendSpellCharges sendSpellCharges = new SendSpellCharges();
+            var charges = _categoryCharges[chargeCategoryRecord.Id];
+
+            DateTime now = DateTime.Now;
+            uint cooldownDuration = (uint)(charges.First().RechargeEnd - now).TotalMilliseconds;
+
+            if (cooldownDuration <= 0)
+                return;
+
+            SpellChargeEntry chargeEntry = new SpellChargeEntry();
+            chargeEntry.Category = chargeCategoryRecord.Id;
+            chargeEntry.NextRecoveryTime = cooldownDuration;
+            chargeEntry.ConsumedCharges = (byte)charges.Count();
+            sendSpellCharges.Entries.Add(chargeEntry);
+
+            WritePacket(sendSpellCharges);
+        }
     }
 }
