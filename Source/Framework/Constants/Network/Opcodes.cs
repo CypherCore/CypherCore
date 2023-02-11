@@ -2028,7 +2028,7 @@ namespace Framework.Constants
         ZoneUnderAttack = 0x2bb5,
 
         // Opcodes That Are Not Generated Automatically
-        AccountHeirloomUpdate = 0x25ae, // No Client Handler
+        AccountHeirloomUpdate = 0x25b2, // No Client Handler
         CompressedPacket = 0x3052,
         MultiplePackets = 0x3051,
 
