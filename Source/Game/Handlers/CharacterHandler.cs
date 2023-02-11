@@ -5,6 +5,7 @@ using Framework.Collections;
 using Framework.Configuration;
 using Framework.Constants;
 using Framework.Database;
+using Game.Achievements;
 using Game.Cache;
 using Game.DataStorage;
 using Game.Entities;
@@ -118,8 +119,7 @@ namespace Game
                 EnumCharactersResult.RaceUnlock raceUnlock = new();
                 raceUnlock.RaceID = requirement.Key;
                 raceUnlock.HasExpansion = ConfigMgr.GetDefaultValue("character.EnforceRaceAndClassExpansions", true) ? (byte)GetAccountExpansion() >= requirement.Value.Expansion : true;
-                raceUnlock.HasAchievement = requirement.Value.AchievementId != 0 && (WorldConfig.GetBoolValue(WorldCfg.CharacterCreatingDisableAlliedRaceAchievementRequirement)
-                    /* || HasAccountAchievement(requirement.second.AchievementId)*/);
+                raceUnlock.HasAchievement = (WorldConfig.GetBoolValue(WorldCfg.CharacterCreatingDisableAlliedRaceAchievementRequirement) ? true : requirement.Value.AchievementId != 0 ? false : true); // TODO: fix false here for actual check of criteria.
                 
                 charResult.RaceUnlockData.Add(raceUnlock);
             }
