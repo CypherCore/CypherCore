@@ -390,7 +390,7 @@ namespace Game.Entities
                     {
                         if (missingQuest != 0 && !string.IsNullOrEmpty(ar.questFailedText))
                             SendSysMessage("{0}", ar.questFailedText);
-                        else if (mapDiff.Message[Global.WorldMgr.GetDefaultDbcLocale()][0] != '\0' || failedMapDifficultyXCondition != 0) // if (missingAchievement) covered by this case
+                        else if (!mapDiff.Message[Global.WorldMgr.GetDefaultDbcLocale()].IsEmpty() && mapDiff.Message[Global.WorldMgr.GetDefaultDbcLocale()][0] != '\0' || failedMapDifficultyXCondition != 0) // if (missingAchievement) covered by this case
                         {
                             if (abortParams != null)
                             {

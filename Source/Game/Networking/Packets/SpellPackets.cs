@@ -1657,8 +1657,8 @@ namespace Game.Networking.Packets
 
             SendCastFlags = data.ReadBits<uint>(5);
             bool hasMoveUpdate = data.HasBit();
-            bool hasCraftingOrderID = data.HasBit();
             var weightCount = data.ReadBits<uint>(2);
+            bool hasCraftingOrderID = data.HasBit();
 
             Target.Read(data);
 

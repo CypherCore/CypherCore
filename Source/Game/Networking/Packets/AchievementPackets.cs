@@ -60,7 +60,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(PlayerGUID);
             _worldPacket.WriteUInt32(Flags);
             _worldPacket.WritePackedTime(CurrentTime);
-            _worldPacket.WriteUInt32(ElapsedTime);
+            _worldPacket.WriteInt64(ElapsedTime);
             _worldPacket.WriteInt64(CreationTime);
             _worldPacket.WriteBit(RafAcceptanceID.HasValue);
             _worldPacket.FlushBits();
@@ -74,7 +74,7 @@ namespace Game.Networking.Packets
         public ObjectGuid PlayerGUID;
         public uint Flags;
         public long CurrentTime;
-        public uint ElapsedTime;
+        public long ElapsedTime;
         public long CreationTime;
         public ulong? RafAcceptanceID;
     }
@@ -319,8 +319,8 @@ namespace Game.Networking.Packets
             data.WriteUInt64(Quantity);
             data.WritePackedGuid(Player);
             data.WritePackedTime(Date);
-            data.WriteUInt32(TimeFromStart);
-            data.WriteUInt32(TimeFromCreate);
+            data.WriteInt64(TimeFromStart);
+            data.WriteInt64(TimeFromCreate);
             data.WriteBits(Flags, 4);
             data.WriteBit(RafAcceptanceID.HasValue);
             data.FlushBits();
@@ -334,8 +334,8 @@ namespace Game.Networking.Packets
         public ObjectGuid Player;
         public uint Flags;
         public long Date;
-        public uint TimeFromStart;
-        public uint TimeFromCreate;
+        public long TimeFromStart;
+        public long TimeFromCreate;
         public ulong? RafAcceptanceID;
     }
 

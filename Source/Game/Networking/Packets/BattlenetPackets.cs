@@ -51,7 +51,7 @@ namespace Game.Networking.Packets
         }
 
         public byte State;
-        public bool SuppressNotification;
+        public bool SuppressNotification = true;
     }
 
     class ChangeRealmTicketResponse : ServerPacket

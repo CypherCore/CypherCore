@@ -375,7 +375,6 @@ namespace Game.Networking.Packets
             _worldPacket.WriteString(ServerTimeTZ);
             _worldPacket.WriteString(GameTimeTZ);
             _worldPacket.WriteString(ServerRegionalTZ);
-
         }
 
         public string ServerTimeTZ;

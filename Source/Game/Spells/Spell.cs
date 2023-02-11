@@ -28,17 +28,6 @@ namespace Game.Spells
             m_spellInfo = info;
             m_caster = (info.HasAttribute(SpellAttr6.OriginateFromController) && caster.GetCharmerOrOwner() != null ? caster.GetCharmerOrOwner() : caster);
             m_spellValue = new SpellValue(m_spellInfo, caster);
-            m_castItemLevel = -1;
-
-            if (IsIgnoringCooldowns())
-                m_castFlagsEx |= SpellCastFlagsEx.IgnoreCooldown;
-
-            m_castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, m_caster.GetMapId(), m_spellInfo.Id, m_caster.GetMap().GenerateLowGuid(HighGuid.Cast));
-            m_originalCastId = originalCastId;
-            m_SpellVisual.SpellXSpellVisualID = caster.GetCastSpellXSpellVisualId(m_spellInfo);
-
-            m_customError = SpellCustomErrors.None;
-            m_fromClient = false;
             m_needComboPoints = m_spellInfo.NeedsComboPoints();
 
             // Get data for type of attack
@@ -79,7 +68,6 @@ namespace Game.Spells
                     m_originalCaster = null;
             }
 
-            m_spellState = SpellState.None;
             _triggeredCastFlags = triggerFlags;
 
             if (info.HasAttribute(SpellAttr2.DoNotReportSpellFailure))
@@ -88,7 +76,14 @@ namespace Game.Spells
             if (m_spellInfo.HasAttribute(SpellAttr4.AllowCastWhileCasting))
                 _triggeredCastFlags = _triggeredCastFlags | TriggerCastFlags.IgnoreCastInProgress;
 
-            effectHandleMode = SpellEffectHandleMode.Launch;
+            m_castItemLevel = -1;
+
+            if (IsIgnoringCooldowns())
+                m_castFlagsEx |= SpellCastFlagsEx.IgnoreCooldown;
+
+            m_castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, m_caster.GetMapId(), m_spellInfo.Id, m_caster.GetMap().GenerateLowGuid(HighGuid.Cast));
+            m_originalCastId = originalCastId;
+            m_SpellVisual.SpellXSpellVisualID = caster.GetCastSpellXSpellVisualId(m_spellInfo);
 
             //Auto Shot & Shoot (wand)
             m_autoRepeat = m_spellInfo.IsAutoRepeatRangedSpell();
@@ -104,7 +99,6 @@ namespace Game.Spells
             for (var i = 0; i < SpellConst.MaxEffects; ++i)
                 m_destTargets[i] = new SpellDestination(m_caster);
 
-            //not sure needed.
             m_targets = new SpellCastTargets();
             m_appliedMods = new List<Aura>();
         }

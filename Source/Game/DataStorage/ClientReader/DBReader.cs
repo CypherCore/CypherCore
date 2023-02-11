@@ -90,13 +90,11 @@ namespace Game.DataStorage
                     }
                 }
 
-                long previousStringTableSize = 0;
                 long previousRecordCount = 0;
                 for (int sectionIndex = 0; sectionIndex < Header.SectionsCount; sectionIndex++)
                 {
                     if (sections[sectionIndex].TactKeyLookup != 0)// && !hasTactKeyFunc(sections[sectionIndex].TactKeyLookup))
                     {
-                        previousStringTableSize += sections[sectionIndex].StringTableSize;
                         previousRecordCount += sections[sectionIndex].NumRecords;
                         //Console.WriteLine("Detected db2 with encrypted section! HasKey {0}", CASC.HasKey(Sections[sectionIndex].TactKeyLookup));
                         continue;
@@ -116,17 +114,11 @@ namespace Game.DataStorage
                         // string data
                         stringsTable = new Dictionary<long, string>();
 
-                        long stringDataOffset = 0;
-                        if (sectionIndex == 0)
-                            stringDataOffset = (Header.RecordCount - sections[sectionIndex].NumRecords) * Header.RecordSize;
-                        else
-                            stringDataOffset = previousStringTableSize;
-
                         for (int i = 0; i < sections[sectionIndex].StringTableSize;)
                         {
                             long oldPos = reader.BaseStream.Position;
 
-                            stringsTable[i + stringDataOffset] = reader.ReadCString();
+                            stringsTable[i] = reader.ReadCString();
 
                             i += (int)(reader.BaseStream.Position - oldPos);
                         }
@@ -220,7 +212,6 @@ namespace Game.DataStorage
                         }
                     }
 
-                    previousStringTableSize += sections[sectionIndex].StringTableSize;
                     previousRecordCount += sections[sectionIndex].NumRecords;
                 }
             }
