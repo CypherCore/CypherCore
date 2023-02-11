@@ -114,12 +114,6 @@ namespace Game.DataStorage
                         // string data
                         stringsTable = new Dictionary<long, string>();
 
-                        long stringDataOffset = 0;
-                        if (sectionIndex == 0)
-                            stringDataOffset = (Header.RecordCount - sections[sectionIndex].NumRecords) * Header.RecordSize;
-                        else
-                            stringDataOffset = previousStringTableSize;
-
                         for (int i = 0; i < sections[sectionIndex].StringTableSize;)
                         {
                             long oldPos = reader.BaseStream.Position;
