@@ -561,6 +561,6 @@ namespace Game.DataStorage
         public uint Id { get; set; }
         public byte RaceId { get; set; }
         public byte ClassId { get; set; }
-        public int FactionXferId { get; set; }
+        public uint FactionXferId { get; set; }
     }
 }

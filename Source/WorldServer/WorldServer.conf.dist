@@ -706,6 +706,13 @@ DeclinedNames = 0
 Expansion = 9
 
 #
+#	Player.OverrideExpansion
+#		Same as above. Will not read the flag on the account, rather use this setting. Used for things like; character creation, allied races xpack requirement and some conditions.
+#       Disable: -1
+
+Player.OverrideExpansion = -1
+
+#
 #    MinPlayerName
 #        Description: Minimal player name length.
 #        Range:       1-12
@@ -751,7 +758,7 @@ player.lowerExpInLowerExpansions = 0
 #		1 = Enabled
 #		0 = Disabled
 
-character.EnforceRaceAndClassExpations = 1
+character.EnforceRaceAndClassExpansions = 1
 
 #
 #	Max level you can gain for each xpack
@@ -1430,6 +1437,27 @@ BirthdayTime = 1222964635
 #                     1 - (Enabled)
 
 FeatureSystem.BpayStore.Enabled = 0
+
+#   FeatureSystem.BpayStore.Currency
+#        Description: Set currency in battle pay
+#        Default:	USD = 1,
+#					GBP = 2,
+#					KRW = 3,
+#					EUR = 4,
+#					RUB = 5,
+#					ARS = 8,
+#					CLP = 9,
+#					MXN = 10,
+#					BRL = 11,
+#					AUD = 12,
+#					CPT = 14,
+#					TPT = 15,
+#					BETA = 16,
+#					JPY = 28,
+#					CAD = 29,
+#					NZD = 30
+
+FeatureSystem.BpayStore.Currency = 1
 
 #
 #   FeatureSystem.CharacterUndelete.Enabled

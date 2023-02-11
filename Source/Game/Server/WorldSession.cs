@@ -38,7 +38,8 @@ namespace Game
             _accountId = id;
             _accountName = name;
             _battlenetAccountId = battlenetAccountId;
-            m_accountExpansion = expansion;
+            m_configuredExpansion = ConfigMgr.GetDefaultValue<int>("Player.OverrideExpansion", -1) == -1 ? Expansion.LevelCurrent : (Expansion)ConfigMgr.GetDefaultValue<int>("Player.OverrideExpansion", -1);
+            m_accountExpansion = Expansion.LevelCurrent == m_configuredExpansion ? expansion : m_configuredExpansion ;
             m_expansion = (Expansion)Math.Min((byte)expansion, WorldConfig.GetIntValue(WorldCfg.Expansion));
             _os = os;
             m_sessionDbcLocale = Global.WorldMgr.GetAvailableDbcLocale(locale);
@@ -959,6 +960,7 @@ namespace Game
         uint _battlenetAccountId;
         Expansion m_accountExpansion;
         Expansion m_expansion;
+        Expansion m_configuredExpansion;
         string _os;
 
         uint expireTime;
@@ -992,7 +994,7 @@ namespace Game
 
         public long m_muteTime;
         long m_timeOutTime;
-
+        
         ConcurrentQueue<WorldPacket> _recvQueue = new();
         RBACData _RBACData;
 

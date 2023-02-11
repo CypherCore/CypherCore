@@ -117,7 +117,7 @@ namespace Game
             {
                 EnumCharactersResult.RaceUnlock raceUnlock = new();
                 raceUnlock.RaceID = requirement.Key;
-                raceUnlock.HasExpansion = ConfigMgr.GetDefaultValue("character.EnforceRaceAndClassExpations", true) ? (byte)GetAccountExpansion() >= requirement.Value.Expansion : true;
+                raceUnlock.HasExpansion = ConfigMgr.GetDefaultValue("character.EnforceRaceAndClassExpansions", true) ? (byte)GetAccountExpansion() >= requirement.Value.Expansion : true;
                 raceUnlock.HasAchievement = requirement.Value.AchievementId != 0 && (WorldConfig.GetBoolValue(WorldCfg.CharacterCreatingDisableAlliedRaceAchievementRequirement)
                     /* || HasAccountAchievement(requirement.second.AchievementId)*/);
                 
@@ -312,59 +312,62 @@ namespace Game
                 return;
             }
 
-            // prevent character creating Expansion race without Expansion account
-            RaceUnlockRequirement raceExpansionRequirement = Global.ObjectMgr.GetRaceUnlockRequirement(charCreate.CreateInfo.RaceId);
-            if (raceExpansionRequirement == null)
+            if (!ConfigMgr.GetDefaultValue("character.EnforceRaceAndClassExpansions", true))
             {
-                Log.outError(LogFilter.Cheat, $"Account {GetAccountId()} tried to create character with unavailable race {charCreate.CreateInfo.RaceId}");
-                SendCharCreate(ResponseCodes.CharCreateFailed);
-                return;
-            }
-
-            if (raceExpansionRequirement.Expansion > (byte)GetAccountExpansion())
-            {
-                Log.outError(LogFilter.Cheat, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character with expansion {raceExpansionRequirement.Expansion} race ({charCreate.CreateInfo.RaceId})");
-                SendCharCreate(ResponseCodes.CharCreateExpansion);
-                return;
-            }
-
-            //if (raceExpansionRequirement.AchievementId && !)
-            //{
-            //    TC_LOG_ERROR("entities.player.cheat", "Expansion %u account:[%d] tried to Create character without achievement %u race (%u)",
-            //        GetAccountExpansion(), GetAccountId(), raceExpansionRequirement.AchievementId, charCreate.CreateInfo.Race);
-            //    SendCharCreate(CHAR_CREATE_ALLIED_RACE_ACHIEVEMENT);
-            //    return;
-            //}
-
-            // prevent character creating Expansion race without Expansion account
-            ClassAvailability raceClassExpansionRequirement = Global.ObjectMgr.GetClassExpansionRequirement(charCreate.CreateInfo.RaceId, charCreate.CreateInfo.ClassId);
-            if (raceClassExpansionRequirement != null)
-            {
-                if (raceClassExpansionRequirement.ActiveExpansionLevel > (byte)GetExpansion() || raceClassExpansionRequirement.AccountExpansionLevel > (byte)GetAccountExpansion())
+                // prevent character creating Expansion race without Expansion account
+                RaceUnlockRequirement raceExpansionRequirement = Global.ObjectMgr.GetRaceUnlockRequirement(charCreate.CreateInfo.RaceId);
+                if (raceExpansionRequirement == null)
                 {
-                    Log.outError(LogFilter.Cheat, $"Account:[{GetAccountId()}] tried to create character with race/class {charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId} without required expansion " +
-                        $"(had {GetExpansion()}/{GetAccountExpansion()}, required {raceClassExpansionRequirement.ActiveExpansionLevel}/{raceClassExpansionRequirement.AccountExpansionLevel})");
-                    SendCharCreate(ResponseCodes.CharCreateExpansionClass);
+                    Log.outError(LogFilter.Cheat, $"Account {GetAccountId()} tried to create character with unavailable race {charCreate.CreateInfo.RaceId}");
+                    SendCharCreate(ResponseCodes.CharCreateFailed);
                     return;
                 }
-            }
-            else
-            {
-                ClassAvailability classExpansionRequirement = Global.ObjectMgr.GetClassExpansionRequirementFallback((byte)charCreate.CreateInfo.ClassId);
-                if (classExpansionRequirement != null)
+
+                if (raceExpansionRequirement.Expansion > (byte)GetAccountExpansion())
                 {
-                    if (classExpansionRequirement.MinActiveExpansionLevel > (byte)GetExpansion() || classExpansionRequirement.AccountExpansionLevel > (byte)GetAccountExpansion())
+                    Log.outError(LogFilter.Cheat, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character with expansion {raceExpansionRequirement.Expansion} race ({charCreate.CreateInfo.RaceId})");
+                    SendCharCreate(ResponseCodes.CharCreateExpansion);
+                    return;
+                }
+
+                //if (raceExpansionRequirement.AchievementId && !)
+                //{
+                //    TC_LOG_ERROR("entities.player.cheat", "Expansion %u account:[%d] tried to Create character without achievement %u race (%u)",
+                //        GetAccountExpansion(), GetAccountId(), raceExpansionRequirement.AchievementId, charCreate.CreateInfo.Race);
+                //    SendCharCreate(CHAR_CREATE_ALLIED_RACE_ACHIEVEMENT);
+                //    return;
+                //}
+
+                // prevent character creating Expansion race without Expansion account
+                ClassAvailability raceClassExpansionRequirement = Global.ObjectMgr.GetClassExpansionRequirement(charCreate.CreateInfo.RaceId, charCreate.CreateInfo.ClassId);
+                if (raceClassExpansionRequirement != null)
+                {
+                    if (raceClassExpansionRequirement.ActiveExpansionLevel > (byte)GetExpansion() || raceClassExpansionRequirement.AccountExpansionLevel > (byte)GetAccountExpansion())
                     {
                         Log.outError(LogFilter.Cheat, $"Account:[{GetAccountId()}] tried to create character with race/class {charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId} without required expansion " +
-                            $"(had {GetExpansion()}/{GetAccountExpansion()}, required {classExpansionRequirement.ActiveExpansionLevel}/{classExpansionRequirement.AccountExpansionLevel})");
+                            $"(had {GetExpansion()}/{GetAccountExpansion()}, required {raceClassExpansionRequirement.ActiveExpansionLevel}/{raceClassExpansionRequirement.AccountExpansionLevel})");
                         SendCharCreate(ResponseCodes.CharCreateExpansionClass);
                         return;
                     }
                 }
                 else
-                    Log.outError(LogFilter.Cheat, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character for race/class combination that is missing requirements in db ({charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId})");
-                SendCharCreate(ResponseCodes.CharCreateExpansionClass);
-                return;
+                {
+                    ClassAvailability classExpansionRequirement = Global.ObjectMgr.GetClassExpansionRequirementFallback((byte)charCreate.CreateInfo.ClassId);
+                    if (classExpansionRequirement != null)
+                    {
+                        if (classExpansionRequirement.MinActiveExpansionLevel > (byte)GetExpansion() || classExpansionRequirement.AccountExpansionLevel > (byte)GetAccountExpansion())
+                        {
+                            Log.outError(LogFilter.Cheat, $"Account:[{GetAccountId()}] tried to create character with race/class {charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId} without required expansion " +
+                                $"(had {GetExpansion()}/{GetAccountExpansion()}, required {classExpansionRequirement.ActiveExpansionLevel}/{classExpansionRequirement.AccountExpansionLevel})");
+                            SendCharCreate(ResponseCodes.CharCreateExpansionClass);
+                            return;
+                        }
+                    }
+                    else
+                        Log.outError(LogFilter.Cheat, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character for race/class combination that is missing requirements in db ({charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId})");
+                    SendCharCreate(ResponseCodes.CharCreateExpansionClass);
+                    return;
+                }
             }
 
             if (!HasPermission(RBACPermissions.SkipCheckCharacterCreationRacemask))

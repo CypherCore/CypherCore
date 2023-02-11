@@ -136,7 +136,7 @@ namespace Game.Battlepay
 
         public uint GetShopCurrency()
         {
-            return (uint)WorldConfig.GetDefaultValue("BpayStore.Currency", 1);
+            return (uint)WorldConfig.GetDefaultValue("FeatureSystem.BpayStore.Currency", 1);
         }
 
         public bool IsAvailable()
@@ -144,7 +144,7 @@ namespace Game.Battlepay
             if (AccountManager.Instance.IsAdminAccount(_session.GetSecurity()))
                 return true;
 
-            return WorldConfig.GetDefaultValue("BpayStore.Enabled", false);
+            return WorldConfig.GetBoolValue(WorldCfg.FeatureSystemBpayStoreEnabled);
         }
 
         public bool AlreadyOwnProduct(uint itemId)

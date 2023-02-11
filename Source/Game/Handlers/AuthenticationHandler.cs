@@ -80,7 +80,7 @@ namespace Game
         public void SendFeatureSystemStatusGlueScreen()
         {
             FeatureSystemStatusGlueScreen features = new();
-            features.BpayStoreAvailable = false;
+            features.BpayStoreAvailable = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemBpayStoreEnabled);
             features.BpayStoreDisabledByParentalControls = false;
             features.CharUndeleteEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemCharacterUndeleteEnabled);
             features.BpayStoreEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemBpayStoreEnabled);
