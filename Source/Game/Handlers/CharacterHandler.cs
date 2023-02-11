@@ -312,7 +312,7 @@ namespace Game
                 return;
             }
 
-            if (!ConfigMgr.GetDefaultValue("character.EnforceRaceAndClassExpansions", true))
+            if (ConfigMgr.GetDefaultValue("character.EnforceRaceAndClassExpansions", true))
             {
                 // prevent character creating Expansion race without Expansion account
                 RaceUnlockRequirement raceExpansionRequirement = Global.ObjectMgr.GetRaceUnlockRequirement(charCreate.CreateInfo.RaceId);
@@ -365,8 +365,6 @@ namespace Game
                     }
                     else
                         Log.outError(LogFilter.Cheat, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character for race/class combination that is missing requirements in db ({charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId})");
-                    SendCharCreate(ResponseCodes.CharCreateExpansionClass);
-                    return;
                 }
             }
 
