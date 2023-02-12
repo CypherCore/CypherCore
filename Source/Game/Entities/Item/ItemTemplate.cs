@@ -63,23 +63,29 @@ namespace Game.Entities
             return false;
         }
 
+        static SkillType[] item_weapon_skills =
+        {
+            SkillType.Axes,             SkillType.TwoHandedAxes,    SkillType.Bows,     SkillType.Guns,             SkillType.Maces,
+            SkillType.TwoHandedMaces,   SkillType.Polearms,         SkillType.Swords,   SkillType.TwoHandedSwords,  SkillType.Warglaives,
+            SkillType.Staves,           0,                          0,                  SkillType.FistWeapons,      0,
+            SkillType.Daggers,          0,                          0,                  SkillType.Crossbows,        SkillType.Wands,
+            SkillType.Fishing
+        };
+
+        static SkillType[] item_armor_skills =
+        {
+            0, SkillType.Cloth, SkillType.Leather, SkillType.Mail, SkillType.PlateMail, 0, SkillType.Shield, 0, 0, 0, 0, 0
+        };
+
+        static SkillType[] itemProfessionSkills =
+        {
+            SkillType.Blacksmithing, SkillType.Leatherworking, SkillType.Alchemy,     SkillType.Herbalism,  SkillType.Cooking,
+            SkillType.Mining,        SkillType.Tailoring,      SkillType.Engineering, SkillType.Enchanting, SkillType.Fishing,
+            SkillType.Skinning,      SkillType.Jewelcrafting,  SkillType.Inscription, SkillType.Archaeology
+        };
+
         public SkillType GetSkill()
         {
-            SkillType[] item_weapon_skills =
-            {
-                SkillType.Axes,             SkillType.TwoHandedAxes,    SkillType.Bows,     SkillType.Guns,             SkillType.Maces,
-                SkillType.TwoHandedMaces,   SkillType.Polearms,         SkillType.Swords,   SkillType.TwoHandedSwords,  SkillType.Warglaives,
-                SkillType.Staves,           0,                          0,                  SkillType.FistWeapons,      0,
-                SkillType.Daggers,          0,                          0,                  SkillType.Crossbows,        SkillType.Wands,
-                SkillType.Fishing
-            };
-
-            SkillType[] item_armor_skills =
-            {
-                0, SkillType.Cloth, SkillType.Leather, SkillType.Mail, SkillType.PlateMail, 0, SkillType.Shield, 0, 0, 0, 0, 0
-            };
-
-
             switch (GetClass())
             {
                 case ItemClass.Weapon:
@@ -87,13 +93,16 @@ namespace Game.Entities
                         return 0;
                     else
                         return item_weapon_skills[GetSubClass()];
-
                 case ItemClass.Armor:
                     if (GetSubClass() >= (int)ItemSubClassArmor.Max)
                         return 0;
                     else
                         return item_armor_skills[GetSubClass()];
-
+                case ItemClass.Profession:
+                    if (GetSubClass() >= (int)ItemSubclassProfession.Max)
+                        return 0;
+                    else
+                        return itemProfessionSkills[GetSubClass()];
                 default:
                     return 0;
             }

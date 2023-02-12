@@ -335,6 +335,7 @@ namespace Game.Entities
             Race race = GetRace();
             uint count = 0;
             Dictionary<uint, uint> loadedSkillValues = new();
+            List<ushort> loadedProfessionsWithoutSlot = new(); // fixup old characters
             if (!result.IsEmpty())
             {
                 do
@@ -348,6 +349,7 @@ namespace Game.Entities
                     var skill = result.Read<ushort>(0);
                     var value = result.Read<ushort>(1);
                     var max = result.Read<ushort>(2);
+                    var professionSlot = result.Read<sbyte>(3);
 
                     SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skill, race, GetClass());
                     if (rcEntry == null)
@@ -391,13 +393,13 @@ namespace Game.Entities
 
                             if (skillLine.ParentSkillLineID != 0 && skillLine.ParentTierIndex != 0)
                             {
-                                int professionSlot = FindProfessionSlotFor(skill);
                                 if (professionSlot != -1)
-                                    SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, (int)professionSlot), skill);
+                                    SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, professionSlot), skill);
+                                else
+                                    loadedProfessionsWithoutSlot.Add(skill);
                             }
                         }
                     }
-
 
                     SetSkillLineId(skillStatusData.Pos, skill);
                     SetSkillStep(skillStatusData.Pos, step);
@@ -433,9 +435,20 @@ namespace Game.Entities
                 }
             }
 
+            foreach (ushort skill in loadedProfessionsWithoutSlot)
+            {
+                int emptyProfessionSlot = FindEmptyProfessionSlotFor(skill);
+                if (emptyProfessionSlot != -1)
+                {
+                    SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, emptyProfessionSlot), skill);
+                    mSkillStatus[skill].State = SkillState.Changed;
+                }
+            }
+
             if (HasSkill(SkillType.FistWeapons))
                 SetSkill(SkillType.FistWeapons, 0, GetSkillValue(SkillType.Unarmed), GetMaxSkillValueForLevel());
         }
+
         void _LoadSpells(SQLResult result, SQLResult favoritesResult)
         {
             if (!result.IsEmpty())
@@ -1786,6 +1799,7 @@ namespace Game.Entities
 
                 ushort value = skillInfoField.SkillRank[pair.Value.Pos];
                 ushort max = skillInfoField.SkillMaxRank[pair.Value.Pos];
+                sbyte professionSlot = (sbyte)GetProfessionSlotFor(pair.Key);
 
                 switch (pair.Value.State)
                 {
@@ -1795,14 +1809,16 @@ namespace Game.Entities
                         stmt.AddValue(1, (ushort)pair.Key);
                         stmt.AddValue(2, value);
                         stmt.AddValue(3, max);
+                        stmt.AddValue(4, professionSlot);
                         trans.Append(stmt);
                         break;
                     case SkillState.Changed:
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_SKILLS);
                         stmt.AddValue(0, value);
                         stmt.AddValue(1, max);
-                        stmt.AddValue(2, GetGUID().GetCounter());
-                        stmt.AddValue(3, (ushort)pair.Key);
+                        stmt.AddValue(2, professionSlot);
+                        stmt.AddValue(3, GetGUID().GetCounter());
+                        stmt.AddValue(4, (ushort)pair.Key);
                         trans.Append(stmt);
                         break;
                     case SkillState.Deleted:
