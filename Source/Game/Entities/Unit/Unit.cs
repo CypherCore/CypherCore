@@ -229,6 +229,8 @@ namespace Game.Entities
             {
                 if (pair.Value != null && pair.Value.IsExpired())
                     RemoveOwnedAura(pair, AuraRemoveMode.Expire);
+                else if (pair.Value.GetSpellInfo().IsChanneled() && pair.Value.GetCasterGUID() != GetGUID() && !Global.ObjAccessor.GetWorldObject(this, pair.Value.GetCasterGUID()))
+                    RemoveOwnedAura(pair, AuraRemoveMode.Cancel); // remove channeled auras when caster is not on the same map
             }
 
             foreach (var aura in m_visibleAurasToUpdate)
