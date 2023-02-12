@@ -212,18 +212,14 @@ namespace System.Collections.Generic
                     toRemove.Add(v);
 
             foreach (var v in toRemove)
-                values.Remove(v);
+                    values.Remove(v);
         }
+
         public static void RemoveIf<T>(this List<T> values, Func<T, bool> func)
         {
-            var toRemove = new List<T>();
-
-            foreach (var v in values)
-                if (func.Invoke(v))
-                    toRemove.Add(v);
-
-            foreach (var v in toRemove)
-                values.Remove(v);
+            for (int i = values.Count - 1; i >= 0; i--)
+                if (func.Invoke(values[i]))
+                    values.RemoveAt(i);
         }
 
         public static void RemoveIf<T>(this List<T> values, ICheck<T> check)

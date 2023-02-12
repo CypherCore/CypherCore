@@ -213,7 +213,7 @@ namespace Framework.Database
 
                 foreach (var entry in appliedFiles)
                 {
-                    Log.outWarn(LogFilter.SqlUpdates, $"File \'{entry.Key}\' was applied to the database but is missing in your update directory now!");
+                    Log.outTrace(LogFilter.SqlUpdates, $"File \'{entry.Key}\' was applied to the database but is missing in your update directory now!");
 
                     if (doCleanup)
                         Log.outInfo(LogFilter.SqlUpdates, $"Deleting orphaned entry \'{entry.Key}\'...");
