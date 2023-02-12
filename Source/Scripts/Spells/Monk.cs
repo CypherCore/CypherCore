@@ -16,6 +16,8 @@ namespace Scripts.Spells.Monk
         public const uint CracklingJadeLightningChiProc = 123333;
         public const uint CracklingJadeLightningKnockback = 117962;
         public const uint CracklingJadeLightningKnockbackCd = 117953;
+        public const uint PowerStrikeProc = 129914;
+        public const uint PowerStrikeEnergize = 121283;
         public const uint ProvokeSingleTarget = 116189;
         public const uint ProvokeAoe = 118635;
         public const uint NoFeatherFall = 79636;
@@ -88,6 +90,44 @@ namespace Scripts.Spells.Monk
         }
     }
 
+    [Script] // 121817 - Power Strike
+    class spell_monk_power_strike_periodic : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.PowerStrikeProc);
+        }
+
+        void HandlePeriodic(AuraEffect aurEff)
+        {
+            GetTarget().CastSpell(GetTarget(), SpellIds.PowerStrikeProc, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicDummy));
+        }
+    }
+
+    [Script] // 129914 - Power Strike Proc
+    class spell_monk_power_strike_proc : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.PowerStrikeEnergize);
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            GetTarget().CastSpell(GetTarget(), SpellIds.PowerStrikeEnergize, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+        }
+    }
+    
     [Script] // 115546 - Provoke
     class spell_monk_provoke : SpellScript
     {
