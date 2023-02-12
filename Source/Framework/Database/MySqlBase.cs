@@ -1,9 +1,6 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Configuration;
-using Framework.Threading;
-using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,6 +8,8 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
+using Framework.Configuration;
+using MySqlConnector;
 
 namespace Framework.Database
 {
@@ -82,7 +81,6 @@ namespace Framework.Database
     {
         static Dictionary<T, string> _preparedQueries = new();
 
-        ProducerConsumerQueue<ISqlOperation> _queue = new();
         MySqlConnectionInfo _connectionInfo;
         DatabaseUpdater<T> _updater;
         DatabaseWorker<T> _worker;
@@ -92,7 +90,7 @@ namespace Framework.Database
         {
             _connectionInfo = connectionInfo;
             _updater = new DatabaseUpdater<T>(this);
-            _worker = new DatabaseWorker<T>(_queue, this);
+            _worker = new DatabaseWorker<T>(this);
 
             try
             {
@@ -149,7 +147,7 @@ namespace Framework.Database
         public void Execute(PreparedStatement stmt)
         {
             PreparedStatementTask task = new(stmt);
-            _queue.Push(task);
+            _worker.QueueQuery(task);
         }
 
         public void ExecuteOrAppend(SQLTransaction trans, PreparedStatement stmt)
@@ -182,7 +180,7 @@ namespace Framework.Database
             catch (MySqlException ex)
             {
                 HandleMySQLException(ex, stmt.CommandText, stmt.Parameters);
-                return new SQLResult();
+                return null;
             }
         }
 
@@ -190,18 +188,18 @@ namespace Framework.Database
         {
             PreparedStatementTask task = new(stmt, true);
             // Store future result before enqueueing - task might get already processed and deleted before returning from this method
-            Task<SQLResult> result = task.GetFuture();
-            _queue.Push(task);
-            return new QueryCallback(result);
+            var callback = new QueryCallback(task, _worker.QueueQuery);
+            _worker.QueueQuery(task, callback.QueryProcessed);
+            return callback;
         }
 
         public SQLQueryHolderCallback<R> DelayQueryHolder<R>(SQLQueryHolder<R> holder)
         {
             SQLQueryHolderTask<R> task = new(holder);
             // Store future result before enqueueing - task might get already processed and deleted before returning from this method
-            Task<SQLQueryHolder<R>> result = task.GetFuture();
-            _queue.Push(task);
-            return new(result);
+            var callback = new SQLQueryHolderCallback<R>(task);
+            _worker.QueueQuery(task, callback.QueryExecuted);
+            return callback;
         }
 
         public void LoadPreparedStatements()
@@ -321,15 +319,15 @@ namespace Framework.Database
 
         public void CommitTransaction(SQLTransaction transaction)
         {
-            _queue.Push(new TransactionTask(transaction));
+            _worker.QueueQuery(new TransactionTask(transaction));
         }
 
         public TransactionCallback AsyncCommitTransaction(SQLTransaction transaction)
         {
             TransactionWithResultTask task = new(transaction);
-            Task<bool> result = task.GetFuture();
-            _queue.Push(task);
-            return new TransactionCallback(result);
+            var cb = new TransactionCallback(task);
+            _worker.QueueQuery(task, cb.QueryExecuted);
+            return cb;
         }
 
         public MySqlErrorCode DirectCommitTransaction(SQLTransaction transaction)

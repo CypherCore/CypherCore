@@ -124,7 +124,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.SEL_CHARACTER_GLYPHS, "SELECT talentGroup, glyphId FROM character_glyphs WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_TALENTS, "SELECT talentId, talentGroup FROM character_talent WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_PVP_TALENTS, "SELECT talentId0, talentId1, talentId2, talentId3, talentGroup FROM character_pvp_talent WHERE guid = ?");
-            PrepareStatement(CharStatements.SEL_CHARACTER_SKILLS, "SELECT skill, value, max, ProfessionSlot FROM character_skills, ProfessionSlot WHERE guid = ?");
+            PrepareStatement(CharStatements.SEL_CHARACTER_SKILLS, "SELECT skill, value, max, ProfessionSlot FROM character_skills WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_RANDOMBG, "SELECT guid FROM character_battleground_random WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_BANNED, "SELECT guid FROM character_banned WHERE guid = ? AND active = 1");
             PrepareStatement(CharStatements.SEL_CHARACTER_QUESTSTATUSREW, "SELECT quest FROM character_queststatus_rewarded WHERE guid = ? AND active = 1");
@@ -611,7 +611,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.UPD_CHAR_QUESTSTATUS_REWARDED_ACTIVE_BY_QUEST, "UPDATE character_queststatus_rewarded SET active = 0 WHERE quest = ? AND guid = ?");
             PrepareStatement(CharStatements.DEL_INVALID_QUEST_PROGRESS_CRITERIA, "DELETE FROM character_queststatus_objectives_criteria WHERE questObjectiveId = ?");
             PrepareStatement(CharStatements.DEL_CHAR_SKILL_BY_SKILL, "DELETE FROM character_skills WHERE guid = ? AND skill = ?");
-            PrepareStatement(CharStatements.INS_CHAR_SKILLS, "INSERT INTO character_skills (guid, skill, value, max, ProfessionSlot) VALUES (?, ?, ?, ?)");
+            PrepareStatement(CharStatements.INS_CHAR_SKILLS, "INSERT INTO character_skills (guid, skill, value, max, ProfessionSlot) VALUES (?, ?, ?, ?, ?)");
             PrepareStatement(CharStatements.UPD_CHAR_SKILLS, "UPDATE character_skills SET value = ?, max = ?, ProfessionSlot = ? WHERE guid = ? AND skill = ?");
             PrepareStatement(CharStatements.INS_CHAR_SPELL, "INSERT INTO character_spell (guid, spell, active, disabled) VALUES (?, ?, ?, ?)");
             PrepareStatement(CharStatements.DEL_CHAR_SPELL_FAVORITE, "DELETE FROM character_spell_favorite WHERE guid = ? AND spell = ?");
@@ -684,7 +684,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_PET_SPELL_CHARGES, "DELETE FROM pet_spell_charges WHERE guid = ?");
             PrepareStatement(CharStatements.INS_PET_SPELL_CHARGES, "INSERT INTO pet_spell_charges (guid, categoryId, rechargeStart, rechargeEnd) VALUES (?, ?, ?, ?)");
             PrepareStatement(CharStatements.DEL_PET_SPELL_BY_SPELL, "DELETE FROM pet_spell WHERE guid = ? and spell = ?");
-            PrepareStatement(CharStatements.INS_PET_SPELL, "INSERT INTO pet_spell (guid, spell, active) VALUES (?, ?, ?)");
+            PrepareStatement(CharStatements.INS_PET_SPELL, "INSERT IGNORE INTO pet_spell (guid, spell, active) VALUES (?, ?, ?)");
             PrepareStatement(CharStatements.INS_PET_AURA, "INSERT INTO pet_aura (guid, casterGuid, spell, effectMask, recalculateMask, difficulty, stackCount, maxDuration, remainTime, remainCharges) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             PrepareStatement(CharStatements.INS_PET_AURA_EFFECT, "INSERT INTO pet_aura_effect (guid, casterGuid, spell, effectMask, effectIndex, amount, baseAmount) " +

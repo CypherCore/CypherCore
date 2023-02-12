@@ -245,7 +245,6 @@ namespace Game.Entities
 
         Dictionary<int, PlayerSpellState> m_traitConfigStates = new();
 
-        public Dictionary<ushort, uint> m_KeyboundOverrides { get; } = new Dictionary<ushort, uint>();
         Dictionary<byte, ActionButton> m_actionButtons = new();
         ObjectGuid m_playerSharingQuest;
         uint m_sharedQuestId;

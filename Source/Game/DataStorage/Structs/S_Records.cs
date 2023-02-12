@@ -195,7 +195,7 @@ namespace Game.DataStorage
         public uint ID;
         public string Function;
         public sbyte Type;
-        public uint SpellID;
+        public uint Data;
         public uint Flags;
     }
 

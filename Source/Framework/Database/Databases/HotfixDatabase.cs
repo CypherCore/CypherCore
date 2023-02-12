@@ -1,6 +1,8 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Constants;
+
 namespace Framework.Database
 {
     public class HotfixDatabase : MySqlBase<HotfixStatements>
@@ -571,10 +573,9 @@ namespace Framework.Database
                 " FROM garr_site_level_plot_inst ");
 
             // GarrTalentTree.db2
-            PrepareStatement(HotfixStatements.SEL_GARR_TALENT_TREE, "SELECT ID, Name, GarrTypeID, ClassID, MaxTiers, UiOrder, Flags, UiTextureKitID, " +
-                "GarrTalentTreeType, PlayerConditionID, FeatureTypeIndex, FeatureSubtypeIndex, CurrencyID FROM garr_talent_tree" +
-                " ");
-            PrepareStatement(HotfixStatements.SEL_GARR_TALENT_TREE_LOCALE, "SELECT ID, Name_lang FROM garr_talent_tree_locale WHERE locale = ?");
+            PrepareStatement(HotfixStatements.SEL_GARR_TALENT_TREE, "SELECT ID, Title, GarrTypeID, ClassID, MaxTiers, UiOrder, Flags, UiTextureKitID, " +
+                "GarrTalentTreeType, PlayerConditionID, FeatureTypeIndex, FeatureSubtypeIndex, CurrencyID FROM garr_talent_tree");
+            PrepareStatement(HotfixStatements.SEL_GARR_TALENT_TREE_LOCALE, "SELECT ID, Title_lang FROM garr_talent_tree_locale WHERE locale = ?");
 
             // GemProperties.db2
             PrepareStatement(HotfixStatements.SEL_GEM_PROPERTIES, "SELECT ID, EnchantId, Type FROM gem_properties ");
@@ -1213,7 +1214,7 @@ namespace Framework.Database
                 "Logic1, Logic2, Logic3, Logic4, Logic5 FROM spell_item_enchantment_condition ");
 
             // SpellKeyboundOverride.db2
-            PrepareStatement(HotfixStatements.SEL_SPELL_KEYBOUND_OVERRIDE, "SELECT ID, Function, Type, SpellID, Flags FROM spell_keybound_override");
+            PrepareStatement(HotfixStatements.SEL_SPELL_KEYBOUND_OVERRIDE, "SELECT `ID`, `Function`, `Type`, `Data`, `Flags` FROM spell_keybound_override");
 
             // SpellLabel.db2
             PrepareStatement(HotfixStatements.SEL_SPELL_LABEL, "SELECT ID, LabelID, SpellID FROM spell_label ");

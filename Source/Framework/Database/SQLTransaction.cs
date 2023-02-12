@@ -32,7 +32,7 @@ namespace Framework.Database
         }
     }
 
-    class TransactionTask : ISqlOperation
+    public class TransactionTask : ISqlOperation
     {
         public TransactionTask(SQLTransaction trans)
         {
@@ -69,7 +69,7 @@ namespace Framework.Database
         public static object _deadlockLock = new();
     }
 
-    class TransactionWithResultTask : TransactionTask
+    public class TransactionWithResultTask : TransactionTask
     {
         public TransactionWithResultTask(SQLTransaction trans) : base(trans) { }
 
@@ -78,7 +78,7 @@ namespace Framework.Database
             MySqlErrorCode errorCode = TryExecute(mySqlBase);
             if (errorCode == MySqlErrorCode.None)
             {
-                m_result.SetResult(true);
+                Result = true;
                 return true;
             }
 
@@ -92,46 +92,48 @@ namespace Framework.Database
                     {
                         if (TryExecute(mySqlBase) == MySqlErrorCode.None)
                         {
-                            m_result.SetResult(true);
+                            Result = true;
                             return true;
                         }
                     }
                 }
             }
 
-            m_result.SetResult(false);
+            Result = false;
             return false;
         }
 
-        public Task<bool> GetFuture() { return m_result.Task; }
-
-        TaskCompletionSource<bool> m_result = new();
+        public bool? Result { get; private set; } = null;
     }
 
     public class TransactionCallback : ISqlCallback
     {
-        public TransactionCallback(Task<bool> future)
+
+        TransactionWithResultTask m_future;
+        Action<bool> _callback;
+
+        public TransactionCallback(TransactionWithResultTask future)
         {
             m_future = future;
         }
 
         public void AfterComplete(Action<bool> callback)
         {
-            m_callback = callback;
+            _callback = callback;
+        }
+
+        public virtual void QueryExecuted(bool success)
+        {
+            if (success)
+                if (m_future.Result.HasValue)
+                    _callback(m_future.Result.Value);
+
+            _callback = null;
         }
 
         public bool InvokeIfReady()
         {
-            if (m_future != null && m_future.Wait(0))
-            {
-                m_callback(m_future.Result);
-                return true;
-            }
-
-            return false;
+            return _callback == null;
         }
-
-        Task<bool> m_future;
-        Action<bool> m_callback;
     }
 }

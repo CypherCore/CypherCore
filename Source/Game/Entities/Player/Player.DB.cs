@@ -1782,7 +1782,7 @@ namespace Game.Entities
 
                 ushort value = skillInfoField.SkillRank[pair.Value.Pos];
                 ushort max = skillInfoField.SkillMaxRank[pair.Value.Pos];
-                byte professionSlot = (byte)GetProfessionSlotFor(pair.Key);
+                int professionSlot = GetProfessionSlotFor(pair.Key);
 
                 switch (pair.Value.State)
                 {

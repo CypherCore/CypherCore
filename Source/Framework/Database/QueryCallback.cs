@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -9,9 +10,11 @@ namespace Framework.Database
 {
     public class QueryCallback : ISqlCallback
     {
-        public QueryCallback(Task<SQLResult> result)
+
+        public QueryCallback(PreparedStatementTask task, Action<ISqlOperation, Action<bool>> queueAction)
         {
-            _result = result;
+            _awaitingTask = task;
+            _queueAction = queueAction;
         }
 
         public QueryCallback WithCallback(Action<SQLResult> callback)
@@ -26,64 +29,50 @@ namespace Framework.Database
 
         public QueryCallback WithChainingCallback(Action<QueryCallback, SQLResult> callback)
         {
-            _callbacks.Enqueue(new QueryCallbackData(callback));
+            _callbacks.Enqueue(callback);
             return this;
         }
 
         public void SetNextQuery(QueryCallback next)
         {
-            _result = next._result;
+            _next = next;
+        }
+
+        public void QueryProcessed(bool success)
+        {
+            if (success)
+            {
+                // queue to invoke on main thread
+                while (_callbacks.Count > 0)
+                {
+                    if (_callbacks.TryDequeue(out var cb) && cb != null)
+                        if (_awaitingTask.Result != null)
+                            cb(this, _awaitingTask.Result);
+                }
+
+                if (_callbacks.Count == 0 && _next != null) // if we processed everything call next.
+                {
+                    _queueAction(_next._awaitingTask, _next.QueryProcessed);
+                    _next = null;
+                }
+            }
+            else
+            {   // if we fail, clear the queue, dont invoke.
+                _next = null;
+                _callbacks.Clear();
+            }
         }
 
         public bool InvokeIfReady()
         {
-            QueryCallbackData callback = _callbacks.Peek();
-
-            while (true)
-            {
-                if (_result != null && _result.Wait(0))
-                {
-                    Task<SQLResult> f = _result;
-                    Action<QueryCallback, SQLResult> cb = callback._result;
-                    _result = null;
-
-                    cb(this, f.Result);
-
-                    _callbacks.Dequeue();
-                    bool hasNext = _result != null;
-                    if (_callbacks.Count == 0)
-                    {
-                        Cypher.Assert(!hasNext);
-                        return true;
-                    }
-
-                    // abort chain
-                    if (!hasNext)
-                        return true;
-
-                    callback = _callbacks.Peek();
-                }
-                else
-                    return false;
-            }
+            return _callbacks.Count > 0 && _next == null;
         }
 
-        Task<SQLResult> _result;
-        Queue<QueryCallbackData> _callbacks = new();
+        QueryCallback _next;
+        PreparedStatementTask _awaitingTask;
+        ConcurrentQueue<Action<QueryCallback, SQLResult>> _callbacks = new();
+
+        Action<ISqlOperation, Action<bool>> _queueAction;
     }
 
-    struct QueryCallbackData
-    {
-        public QueryCallbackData(Action<QueryCallback, SQLResult> callback)
-        {
-            _result = callback;
-        }
-
-        public void Clear()
-        {
-            _result = null;
-        }
-
-        public Action<QueryCallback, SQLResult> _result;
-    }
 }

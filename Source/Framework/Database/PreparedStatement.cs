@@ -91,14 +91,12 @@ namespace Framework.Database
     {
         PreparedStatement m_stmt;
         bool _needsResult;
-        TaskCompletionSource<SQLResult> m_result;
+        public SQLResult Result { get; private set; }
 
         public PreparedStatementTask(PreparedStatement stmt, bool needsResult = false)
         {
             m_stmt = stmt;
             _needsResult = needsResult;
-            if (needsResult)
-                m_result = new TaskCompletionSource<SQLResult>();
         }
 
         public bool Execute<T>(MySqlBase<T> mySqlBase)
@@ -108,17 +106,15 @@ namespace Framework.Database
                 SQLResult result = mySqlBase.Query(m_stmt);
                 if (result == null)
                 {
-                    m_result.SetResult(new SQLResult());
+                    Result = new SQLResult();
                     return false;
                 }
 
-                m_result.SetResult(result);
+                Result = result;
                 return true;
             }
 
             return mySqlBase.DirectExecute(m_stmt);
         }
-
-        public Task<SQLResult> GetFuture() { return m_result.Task; }
     }
 }

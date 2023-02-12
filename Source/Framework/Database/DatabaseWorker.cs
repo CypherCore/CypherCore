@@ -1,7 +1,8 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Threading;
+using System;
+using System.Collections.Concurrent;
 using System.Threading;
 
 namespace Framework.Database
@@ -15,12 +16,12 @@ namespace Framework.Database
     {
         Thread _workerThread;
         volatile bool _cancelationToken;
-        ProducerConsumerQueue<ISqlOperation> _queue;
+        AutoResetEvent _resetEvent = new AutoResetEvent(false);
+        ConcurrentQueue<(ISqlOperation, Action<bool>)> _queue = new();
         MySqlBase<T> _mySqlBase;
 
-        public DatabaseWorker(ProducerConsumerQueue<ISqlOperation> newQueue, MySqlBase<T> mySqlBase)
+        public DatabaseWorker(MySqlBase<T> mySqlBase)
         {
-            _queue = newQueue;
             _mySqlBase = mySqlBase;
             _cancelationToken = false;
             _workerThread = new Thread(WorkerThread);
@@ -32,17 +33,30 @@ namespace Framework.Database
             if (_queue == null)
                 return;
 
-            for (; ; )
+            while (true)
             {
-                ISqlOperation operation;
+                _resetEvent.WaitOne(500);
 
-                _queue.WaitAndPop(out operation);
+                while (_queue.Count > 0)
+                {
+                    if (!_queue.TryDequeue(out (ISqlOperation, Action<bool>) operation) || operation.Item1 == null)
+                        continue;
 
-                if (_cancelationToken || operation == null)
-                    return;
+                    if (_cancelationToken)
+                        return;
 
-                operation.Execute(_mySqlBase);
+                    var success = operation.Item1.Execute(_mySqlBase);
+                    
+                    if (operation.Item2 != null)
+                        operation.Item2(success);
+                }
             }
+        }
+
+        public void QueueQuery(ISqlOperation operation, Action<bool> callback = null)
+        {
+            _queue.Enqueue((operation, callback));
+            _resetEvent.Set();
         }
     }
 }

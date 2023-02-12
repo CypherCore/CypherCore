@@ -228,6 +228,10 @@ namespace Game.Entities
             }
 
             // remove expired auras - do that after updates(used in scripts?)
+            //GetOwnedAuras().CallOnMatch((pair) => (pair.Value != null && pair.Value.IsExpired()) || // it expired
+            //                                      (pair.Value.GetSpellInfo().IsChanneled() && pair.Value.GetCasterGUID() != GetGUID() && ObjectAccessor.Instance.GetWorldObject(this, pair.Value.GetCasterGUID()) != null), // OR object no longer in same map
+            //                                      (pair) => RemoveOwnedAura(pair, AuraRemoveMode.Expire)); // then remove.
+
             GetOwnedAuras().CallOnMatch((pair) => pair.Value != null && pair.Value.IsExpired(), (pair) => RemoveOwnedAura(pair, AuraRemoveMode.Expire));
 
             foreach (var aura in m_visibleAurasToUpdate)

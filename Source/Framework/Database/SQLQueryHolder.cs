@@ -36,56 +36,54 @@ namespace Framework.Database
         }
     }
 
-    class SQLQueryHolderTask<R> : ISqlOperation
+    public class SQLQueryHolderTask<R> : ISqlOperation
     {
-        SQLQueryHolder<R> m_holder;
-        TaskCompletionSource<SQLQueryHolder<R>> m_result;
 
         public SQLQueryHolderTask(SQLQueryHolder<R> holder)
         {
-            m_holder = holder;
-            m_result = new TaskCompletionSource<SQLQueryHolder<R>>();
+            QueryResults = holder;
         }
 
         public bool Execute<T>(MySqlBase<T> mySqlBase)
         {
-            if (m_holder == null)
+            if (QueryResults == null)
                 return false;
 
             // execute all queries in the holder and pass the results
-            foreach (var pair in m_holder.m_queries)
-                m_holder.SetResult(pair.Key, mySqlBase.Query(pair.Value));
+            foreach (var pair in QueryResults.m_queries)
+                QueryResults.SetResult(pair.Key, mySqlBase.Query(pair.Value));
 
-            return m_result.TrySetResult(m_holder);
+            return true;
         }
 
-        public Task<SQLQueryHolder<R>> GetFuture() { return m_result.Task; }
+        public SQLQueryHolder<R> QueryResults { get; private set; }
     }
 
     public class SQLQueryHolderCallback<R> : ISqlCallback
     {
-        Task<SQLQueryHolder<R>> m_future;
-        Action<SQLQueryHolder<R>> m_callback;
-
-        public SQLQueryHolderCallback(Task<SQLQueryHolder<R>> future)
+        SQLQueryHolderTask<R> _future;
+        Action<SQLQueryHolder<R>> _callback;
+        public SQLQueryHolderCallback(SQLQueryHolderTask<R> future)
         {
-            m_future = future;
+            _future = future;
         }
 
         public void AfterComplete(Action<SQLQueryHolder<R>> callback)
         {
-            m_callback = callback;
+            _callback = callback;
+        }
+
+        public virtual void QueryExecuted(bool success)
+        {
+            if (success && _future.QueryResults != null)
+                _callback(_future.QueryResults);
+
+            _callback = null;
         }
 
         public bool InvokeIfReady()
         {
-            if (m_future != null && m_future.Wait(0))
-            {
-                m_callback(m_future.Result);
-                return true;
-            }
-
-            return false;
+            return _callback == null;
         }
     }
 }

@@ -706,22 +706,17 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.KeyboundOverride, Processing = PacketProcessing.Inplace)]
         void HandleKeyboundOverride(KeyboundOverride keyboundOverride)
         {
-            ushort OverrideID = keyboundOverride.OverrideID;
-            if (OverrideID == 0)
-            {
-                return;
-            }
-
             Player player = GetPlayer();
 
-            uint SpellID = player.m_KeyboundOverrides[OverrideID];
-            if (SpellID == 0)
-            {
-                Log.outError(LogFilter.Spells, $"Player has no SpellID assigned to KeyboundOverride {OverrideID}");
+            if (!player.HasAuraTypeWithMiscvalue(AuraType.KeyboundOverride, keyboundOverride.OverrideID))
                 return;
-            }
 
-            player.CastSpell(player, SpellID);
+            var spellKeyboundOverride = CliDB.SpellKeyboundOverrideStorage.GetValueOrDefault(keyboundOverride.OverrideID);
+
+            if (spellKeyboundOverride == null)
+                return;
+
+            player.CastSpell(player, spellKeyboundOverride.Data);
         }
 
     }
