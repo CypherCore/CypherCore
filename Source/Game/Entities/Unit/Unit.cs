@@ -2547,7 +2547,7 @@ namespace Game.Entities
 
             if (tmpDamage != damageTaken)
             {
-                if (attacker != null)
+                if (attacker != null && hpMultiplier != 0)
                     damageDone = tmpDamage * hpMultiplier;
                 else
                     damageDone = tmpDamage;
