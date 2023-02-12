@@ -180,7 +180,8 @@ namespace Scripts.Events.LoveIsInTheAir
 
         void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            GetTarget().CastSpell(GetTarget(), SpellIds.HeavilyPerfumed);
+            if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Expire)
+                GetTarget().CastSpell(GetTarget(), SpellIds.HeavilyPerfumed);
         }
 
         public override void Register()
