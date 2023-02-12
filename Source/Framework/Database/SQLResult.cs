@@ -136,7 +136,7 @@ namespace Framework.Database
                 return true;
 
             if (result.Reader == null) 
-                return false;
+                return true;
 
             return result.Reader.IsClosed || !result.Reader.HasRows || result.Reader.FieldCount == 0;
         }
