@@ -120,14 +120,12 @@ namespace Game.Entities
         {
             // WARNING! Order of execution here is important, do not change.
             // Spells must be processed with event system BEFORE they go to _UpdateSpells.
-            m_Events.Update(diff);
+            base.Update(diff);
 
             if (!IsInWorld)
                 return;
 
             _UpdateSpells(diff);
-
-            base.Update(diff);
 
             // If this is set during update SetCantProc(false) call is missing somewhere in the code
             // Having this would prevent spells from being proced, so let's crash
@@ -527,9 +525,9 @@ namespace Game.Entities
             if (finalCleanup)
                 m_cleanupDone = true;
 
-            m_Events.KillAllEvents(false);                      // non-delatable (currently casted spells) will not deleted now but it will deleted at call in Map.RemoveAllObjectsInRemoveList
             CombatStop();
         }
+
         public override void CleanupsBeforeDelete(bool finalCleanup = true)
         {
             CleanupBeforeRemoveFromMap(finalCleanup);

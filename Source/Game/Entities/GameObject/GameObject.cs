@@ -391,8 +391,6 @@ namespace Game.Entities
 
         public override void Update(uint diff)
         {
-            m_Events.Update(diff);
-
             base.Update(diff);
 
             if (GetAI() != null)
