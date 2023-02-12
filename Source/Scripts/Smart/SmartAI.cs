@@ -55,28 +55,28 @@ namespace Scripts.Smart
         {
         }
 
-        public void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
+        public void OnSceneStart(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             SmartScript smartScript = new();
             smartScript.OnInitialize(player, null, sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneStart, player);
         }
 
-        public void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
+        public void OnSceneTriggerEvent(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
         {
             SmartScript smartScript = new();
             smartScript.OnInitialize(player, null, sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneTrigger, player, 0, 0, false, null, null, triggerName);
         }
 
-        public void OnSceneStart(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
+        public void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             SmartScript smartScript = new();
             smartScript.OnInitialize(player, null, sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneCancel, player);
         }
 
-        public void OnSceneTriggerEvent(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
+        public void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             SmartScript smartScript = new();
             smartScript.OnInitialize(player, null, sceneTemplate);
@@ -89,20 +89,6 @@ namespace Scripts.Smart
     {
         public SmartQuest() : base("SmartQuest")
         {
-        }
-
-        // Called when a quest objective data change
-        public void OnQuestObjectiveChange(Player player, Quest quest, QuestObjective objective, int oldAmount, int newAmount)
-        {
-            ushort slot = player.FindQuestSlot(quest.Id);
-
-            if (slot < SharedConst.MaxQuestLogSize &&
-                player.IsQuestObjectiveComplete(slot, quest, objective))
-            {
-                SmartScript smartScript = new();
-                smartScript.OnInitialize(player, null, null, quest);
-                smartScript.ProcessEventsFor(SmartEvents.QuestObjCompletion, player, objective.Id);
-            }
         }
 
         // Called when a quest status change
@@ -135,7 +121,7 @@ namespace Scripts.Smart
         }
 
         // Called when a quest objective data change
-        public override void OnQuestObjectiveChange(Player player, Quest quest, QuestObjective objective, int oldAmount, int newAmount)
+        public void OnQuestObjectiveChange(Player player, Quest quest, QuestObjective objective, int oldAmount, int newAmount)
         {
             ushort slot = player.FindQuestSlot(quest.Id);
             if (slot < SharedConst.MaxQuestLogSize && player.IsQuestObjectiveComplete(slot, quest, objective))
