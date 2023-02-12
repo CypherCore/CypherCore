@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Game.Entities
 {
@@ -234,7 +235,7 @@ namespace Game.Entities
 
             GetOwnedAuras().CallOnMatch((pair) => pair.Value != null && pair.Value.IsExpired(), (pair) => RemoveOwnedAura(pair, AuraRemoveMode.Expire));
 
-            foreach (var aura in m_visibleAurasToUpdate)
+            foreach (var aura in m_visibleAurasToUpdate.ToArray())
                 aura.ClientUpdate();
 
             m_visibleAurasToUpdate.Clear();
@@ -2526,6 +2527,11 @@ namespace Game.Entities
         {
             var damageDone = damageIn;
             var damageTaken = damageIn;
+            var hpMultiplier = (uint)victim.GetHealthMultiplierForTarget(attacker);
+
+            if (attacker != null && hpMultiplier != 0)
+                damageTaken = damageIn / hpMultiplier;
+
             var tmpDamage = damageTaken;
 
             UnitAI victimAI = victim.GetAI();
@@ -2542,7 +2548,7 @@ namespace Game.Entities
             if (tmpDamage != damageTaken)
             {
                 if (attacker != null)
-                    damageDone = tmpDamage * (uint)victim.GetHealthMultiplierForTarget(attacker);
+                    damageDone = tmpDamage * hpMultiplier;
                 else
                     damageDone = tmpDamage;
 
