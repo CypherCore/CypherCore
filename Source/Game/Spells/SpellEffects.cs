@@ -5032,6 +5032,18 @@ namespace Game.Spells
                 garrison.LearnBlueprint((uint)effectInfo.MiscValue);
         }
 
+        [SpellEffectHandler(SpellEffectName.RemoveAuraBySApellLabel)]
+        void EffectRemoveAuraBySpellLabel()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            if (!unitTarget)
+                return;
+
+            unitTarget.RemoveAppliedAuras(aurApp => aurApp.GetBase().GetSpellInfo().HasLabel((uint)effectInfo.MiscValue));
+        }
+
         [SpellEffectHandler(SpellEffectName.CreateGarrison)]
         void EffectCreateGarrison()
         {
