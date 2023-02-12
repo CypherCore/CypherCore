@@ -1524,7 +1524,7 @@ Updates.EnableDatabases = 15
 #        Description: The path to your SQL Files directory.
 #        Example:     "../../"
 
-Updates.SourcePath  = "../../"
+Updates.SourcePath  = "../../../"
 
 #
 #    Updates.AutoSetup
