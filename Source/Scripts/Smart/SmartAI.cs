@@ -47,28 +47,28 @@ namespace Scripts.Smart
         public override void OnSceneStart(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             SmartScript smartScript = new();
-            smartScript.OnInitialize(null, null, sceneTemplate);
+            smartScript.OnInitialize(player, null, sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneStart, player);
         }
 
         public override void OnSceneTriggerEvent(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
         {
             SmartScript smartScript = new();
-            smartScript.OnInitialize(null, null, sceneTemplate);
+            smartScript.OnInitialize(player, null, sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneTrigger, player, 0, 0, false, null, null, triggerName);
         }
 
         public override void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             SmartScript smartScript = new();
-            smartScript.OnInitialize(null, null, sceneTemplate);
+            smartScript.OnInitialize(player, null, sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneCancel, player);
         }
 
         public override void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             SmartScript smartScript = new();
-            smartScript.OnInitialize(null, null, sceneTemplate);
+            smartScript.OnInitialize(player, null, sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneComplete, player);
         }
     }
@@ -82,7 +82,7 @@ namespace Scripts.Smart
         public override void OnQuestStatusChange(Player player, Quest quest, QuestStatus oldStatus, QuestStatus newStatus)
         {
             SmartScript smartScript = new();
-            smartScript.OnInitialize(null, null, null, quest);
+            smartScript.OnInitialize(player, null, null, quest);
             switch (newStatus)
             {
                 case QuestStatus.Incomplete:
@@ -110,7 +110,7 @@ namespace Scripts.Smart
             if (slot < SharedConst.MaxQuestLogSize && player.IsQuestObjectiveComplete(slot, quest, objective))
             {
                 SmartScript smartScript = new();
-                smartScript.OnInitialize(null, null, null, quest);
+                smartScript.OnInitialize(player, null, null, quest);
                 smartScript.ProcessEventsFor(SmartEvents.QuestObjCompletion, player, objective.Id);
             }
         }
