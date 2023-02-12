@@ -622,7 +622,7 @@ namespace Game.Entities
 
                             Unit target;
                             // @todo this hack with search required until GO casting not implemented
-                            if (GetOwner() != null)
+                            if (GetOwner() != null || goInfo.Trap.Checkallunits != 0)
                             {
                                 // Hunter trap: Search units which are unfriendly to the trap's owner
                                 var checker = new NearestAttackableNoTotemUnitInObjectRangeCheck(this, radius);
