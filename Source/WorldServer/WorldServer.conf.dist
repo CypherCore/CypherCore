@@ -1,5 +1,5 @@
 ###############################################
-# Cypher World Server Configuration File #
+# Forged Core World Server Configuration File #
 ###############################################
 
 ###################################################################################################
@@ -16,7 +16,7 @@ RealmID = 1
 #    DataDir
 #        Description: Data directory setting.
 #        Important:   DataDir needs to be quoted, as the string might contain space characters.
-#        Example:     "@prefix@/share/cyphercore"
+#        Example:     "@prefix@/share/forgedcore"
 #        Default:     "./Data"
 
 DataDir = "./Data"
@@ -150,7 +150,7 @@ MySQLExecutable = ""
 #        Example:     "World.pkt" - (Enabled)
 #        Default:     ""          - (Disabled)
 
-PacketLogFile = "CypherCore.pkt"
+PacketLogFile = "ForgedCore.pkt"
 
 #
 #  Appender config values: Given an appender "name"
@@ -1359,7 +1359,7 @@ BeepAtStart = 1
 #        Example:     "Welcome to John's Server!@This server is proud to be powered by Trinity Core."
 #        Default:     "Welcome to a Trinity Core server."
 
-Motd = "Welcome to a Cypher Core server."
+Motd = "Welcome to a Forged Core server."
 
 #
 #    Server.LoginInfo

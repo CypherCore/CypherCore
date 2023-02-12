@@ -476,7 +476,7 @@ namespace Game
                 void finalizeCharacterCreation(SQLResult result1)
                 {
                     bool haveSameRace = false;
-                    if (result1 != null && !result1.IsEmpty())
+                    if (result1 != null && !result1.IsEmpty() && result.GetFieldCount() >= 3)
                     {
                         Team team = Player.TeamForRace(createInfo.RaceId);
                         byte accRace = result1.Read<byte>(1);
