@@ -11,7 +11,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(34861)]
 public class spell_pri_holy_word_sanctify : SpellScript, IHasSpellEffects, ISpellOnCast
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void FilterTargets(List<WorldObject> targets)
 	{

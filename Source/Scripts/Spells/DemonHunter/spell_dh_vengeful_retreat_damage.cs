@@ -11,7 +11,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(198813)]
 public class spell_dh_vengeful_retreat_damage : SpellScript, IHasSpellEffects, ISpellOnCast
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private bool _targetHit;
 

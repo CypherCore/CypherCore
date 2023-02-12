@@ -9,7 +9,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(126895)]
 public class spell_monk_zen_pilgrimage_return : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleDummy(uint UnnamedParameter)
 	{

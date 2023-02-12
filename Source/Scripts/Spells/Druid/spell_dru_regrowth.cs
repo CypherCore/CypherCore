@@ -10,7 +10,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(8936)]
 public class spell_dru_regrowth : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

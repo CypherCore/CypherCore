@@ -13,7 +13,7 @@ namespace Scripts.Spells.Priest;
              })]
 public class spell_pri_penance_heal_damage : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

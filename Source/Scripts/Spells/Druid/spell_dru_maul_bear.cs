@@ -9,7 +9,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(6807)]
 public class spell_dru_maul_bear : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void OnHit(uint UnnamedParameter)
 	{

@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warrior
 	[SpellScript(12975)]
 	public class spell_warr_last_stand : SpellScript, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		public override bool Validate(SpellInfo UnnamedParameter)
 		{

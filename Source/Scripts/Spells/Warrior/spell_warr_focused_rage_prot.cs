@@ -22,7 +22,7 @@ namespace Scripts.Spells.Warrior
 	[SpellScript(204488)]
 	public class spell_warr_focused_rage_prot_SpellScript : SpellScript, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		public override bool Validate(SpellInfo UnnamedParameter)
 		{

@@ -10,7 +10,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(107428)]
 public class spell_monk_rising_sun_kick : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleOnHit(uint UnnamedParameter)
 	{

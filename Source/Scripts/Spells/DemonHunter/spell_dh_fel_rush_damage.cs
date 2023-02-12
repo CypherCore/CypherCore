@@ -10,7 +10,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(223107)]
 public class spell_dh_fel_rush_damage : SpellScript, IHasSpellEffects, ISpellOnHit, ISpellOnCast
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private bool _targetHit;
 

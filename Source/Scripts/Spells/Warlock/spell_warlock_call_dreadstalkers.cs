@@ -10,7 +10,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(104316)]
 	public class spell_warlock_call_dreadstalkers : SpellScript, ISpellAfterCast, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void HandleHit(uint UnnamedParameter)
 		{

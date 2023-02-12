@@ -9,7 +9,7 @@ namespace Scripts.Spells.Rogue;
 [SpellScript(208244)]
 public class spell_rog_roll_the_bones_visual_SpellScript : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 
 	private void Prevent(uint effIndex)

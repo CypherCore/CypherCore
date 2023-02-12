@@ -10,7 +10,7 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(215969)]
 public class spell_dk_epidemic_aoe : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 
 	private void FilterTargets(List<WorldObject> targets)

@@ -10,7 +10,7 @@ namespace Scripts.Spells.Warlock
 {
 	internal class spell_warlock_artifact_dimensional_rift : SpellScript, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void HandleHit(uint UnnamedParameter)
 		{

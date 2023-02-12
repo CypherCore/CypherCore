@@ -9,7 +9,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(197923)]
 public class spell_dh_fel_rush_dash_SpellScript : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void PreventTrigger(uint effIndex)
 	{

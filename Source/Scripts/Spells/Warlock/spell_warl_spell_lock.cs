@@ -11,7 +11,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(119910)]
 	public class spell_warl_spell_lock : SpellScript, ISpellCheckCast, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		public SpellCastResult CheckCast()
 		{

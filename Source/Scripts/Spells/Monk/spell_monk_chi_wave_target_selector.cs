@@ -15,7 +15,7 @@ namespace Scripts.Spells.Monk;
              })]
 public class spell_monk_chi_wave_target_selector : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	public override bool Load()
 	{

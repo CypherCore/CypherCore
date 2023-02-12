@@ -9,7 +9,7 @@ namespace Scripts.Spells.Warrior
 	// Bladestorm - 227847, 46924
 	public class spell_warr_bladestorm : SpellScript, ISpellOnCast, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void HandleOnHit(uint effIndex)
 		{

@@ -9,7 +9,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(115399)]
 public class spell_monk_black_ox_brew : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleHit(uint UnnamedParameter)
 	{

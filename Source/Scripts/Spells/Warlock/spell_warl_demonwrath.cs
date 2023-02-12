@@ -11,7 +11,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(193439)]
 	public class spell_warl_demonwrath : SpellScript, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void SelectTargets(List<WorldObject> targets)
 		{

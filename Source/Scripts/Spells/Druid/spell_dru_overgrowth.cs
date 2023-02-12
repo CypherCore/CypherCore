@@ -14,7 +14,7 @@ public class spell_dru_overgrowth : SpellScript, IHasSpellEffects
 	private const int SPELL_DRUID_LIFE_BLOOM = 33763;
 	private const int SPELL_DRUID_REGROWTH = 8936;
 
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleDummy(uint UnnamedParameter)
 	{

@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warrior
 	[SpellScript(262161)]
 	public class spell_warr_warbreaker : SpellScript, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void HandleOnHitTarget(uint UnnamedParameter)
 		{

@@ -9,7 +9,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(206966)]
 public class spell_dh_fel_lance : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleHit(uint UnnamedParameter)
 	{

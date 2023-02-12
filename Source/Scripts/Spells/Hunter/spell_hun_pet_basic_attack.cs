@@ -13,7 +13,7 @@ namespace Scripts.Spells.Hunter;
              })]
 public class spell_hun_pet_basic_attack : SpellScript, IHasSpellEffects, ISpellCheckCast
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	public SpellCastResult CheckCast()
 	{

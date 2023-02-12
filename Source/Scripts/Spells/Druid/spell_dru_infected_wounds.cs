@@ -9,7 +9,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(58180)]
 public class spell_dru_infected_wounds : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleDummy(uint UnnamedParameter)
 	{

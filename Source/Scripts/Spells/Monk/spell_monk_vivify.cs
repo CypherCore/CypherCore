@@ -11,7 +11,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(116670)]
 public class spell_monk_vivify : SpellScript, IHasSpellEffects, ISpellAfterCast, ISpellBeforeCast
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void FilterRenewingMist(List<WorldObject> targets)
 	{

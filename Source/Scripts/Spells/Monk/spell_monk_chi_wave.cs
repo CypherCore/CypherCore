@@ -10,7 +10,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(115098)]
 public class spell_monk_chi_wave : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleDummy(uint UnnamedParameter)
 	{

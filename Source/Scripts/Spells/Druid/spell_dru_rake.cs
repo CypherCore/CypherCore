@@ -11,7 +11,7 @@ public class spell_dru_rake : SpellScript, IHasSpellEffects
 {
 	private bool _stealthed = false;
 
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	public override bool Load()
 	{

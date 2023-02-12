@@ -10,7 +10,7 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(195758)]
 public class spell_dk_blighted_rune_weapon : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 
 	public override bool Validate(SpellInfo UnnamedParameter)

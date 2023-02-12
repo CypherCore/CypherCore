@@ -9,7 +9,7 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(207230)]
 public class spell_dk_frostscythe : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleHit(uint UnnamedParameter)
 	{

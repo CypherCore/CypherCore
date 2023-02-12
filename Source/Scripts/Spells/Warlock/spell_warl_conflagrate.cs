@@ -11,7 +11,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(17962)]
 	public class spell_warl_conflagrate : SpellScript, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		public override bool Validate(SpellInfo UnnamedParameter)
 		{

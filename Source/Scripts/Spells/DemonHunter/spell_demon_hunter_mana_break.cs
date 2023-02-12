@@ -10,7 +10,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(203704)]
 public class spell_demon_hunter_mana_break : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	public void HandleHit(uint UnnamedParameter)
 	{

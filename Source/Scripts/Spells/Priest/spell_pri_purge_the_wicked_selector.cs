@@ -12,7 +12,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(204215)]
 public class spell_pri_purge_the_wicked_selector : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

@@ -11,7 +11,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(34026)]
 public class spell_hun_kill_command : SpellScript, IHasSpellEffects, ISpellCheckCast
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private struct sspell
 	{

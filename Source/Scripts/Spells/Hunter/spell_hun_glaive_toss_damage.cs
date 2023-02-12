@@ -13,7 +13,7 @@ namespace Scripts.Spells.Hunter;
              })]
 public class spell_hun_glaive_toss_damage : SpellScript, IHasSpellEffects, ISpellOnHit
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 
 	private ObjectGuid mainTargetGUID = new();

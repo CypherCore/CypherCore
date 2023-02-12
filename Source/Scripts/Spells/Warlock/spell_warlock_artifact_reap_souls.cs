@@ -10,7 +10,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(216698)]
 	public class spell_warlock_artifact_reap_souls : SpellScript, IHasSpellEffects, ISpellCheckCast
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void HandleHit(uint UnnamedParameter)
 		{

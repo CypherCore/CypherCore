@@ -10,7 +10,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(197721)]
 public class spell_dru_flourish : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleHit(uint UnnamedParameter)
 	{

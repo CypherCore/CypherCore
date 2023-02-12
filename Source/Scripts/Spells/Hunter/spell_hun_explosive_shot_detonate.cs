@@ -9,7 +9,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(212679)]
 public class spell_hun_explosive_shot_detonate : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleDummy(uint UnnamedParameter)
 	{

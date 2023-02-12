@@ -9,7 +9,7 @@ namespace Scripts.Spells.Mage;
 [SpellScript(2120)]
 public class spell_mage_flamestrike : SpellScript, ISpellAfterCast, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleOnHit(uint UnnamedParameter)
 	{

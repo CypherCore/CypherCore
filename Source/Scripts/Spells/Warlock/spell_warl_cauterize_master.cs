@@ -11,7 +11,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(119905)]
 	public class spell_warl_cauterize_master : SpellScript, ISpellCheckCast, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		public SpellCastResult CheckCast()
 		{

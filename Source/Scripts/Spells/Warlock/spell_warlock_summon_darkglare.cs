@@ -10,7 +10,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(205180)]
 	public class spell_warlock_summon_darkglare : SpellScript, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void HandleOnHitTarget(uint UnnamedParameter)
 		{

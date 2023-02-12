@@ -10,7 +10,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(3110)]
 	public class spell_warlock_imp_firebolt : SpellScript, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void HandleHit(uint UnnamedParameter)
 		{

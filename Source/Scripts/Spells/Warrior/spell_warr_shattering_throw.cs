@@ -14,7 +14,7 @@ namespace Scripts.Spells.Warrior
 	             })]
 	public class spell_warr_shattering_throw : SpellScript, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void HandleScript(uint effIndex)
 		{

@@ -10,7 +10,7 @@ namespace Scripts.Spells.Mage;
 [SpellScript(205029)]
 public class spell_mage_fire_on : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

@@ -9,7 +9,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(527)]
 public class spell_pri_purify : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	public SpellCastResult CheckCast()
 	{

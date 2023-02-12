@@ -9,7 +9,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(102793)]
 public class spell_dru_ursols_vortex : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 
 	private struct Spells

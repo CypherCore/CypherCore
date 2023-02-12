@@ -10,7 +10,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(116095)]
 public class spell_monk_disable : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

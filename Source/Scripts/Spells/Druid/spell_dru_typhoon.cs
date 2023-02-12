@@ -9,7 +9,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(61391)]
 public class spell_dru_typhoon : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleKnockBack(uint effIndex)
 	{

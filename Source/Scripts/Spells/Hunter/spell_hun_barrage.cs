@@ -10,7 +10,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(120361)]
 public class spell_hun_barrage : SpellScript, IHasSpellEffects, ISpellOnHit
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 
 	private void CheckLOS(List<WorldObject> targets)

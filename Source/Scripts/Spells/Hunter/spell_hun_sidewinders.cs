@@ -9,7 +9,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(214579)]
 public class spell_hun_sidewinders : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleDummy(uint UnnamedParameter)
 	{

@@ -10,7 +10,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(191840)]
 public class spell_monk_essence_font_heal : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void FilterTargets(List<WorldObject> p_Targets)
 	{

@@ -12,7 +12,7 @@ public class spell_mage_meteor_damage : SpellScript, IHasSpellEffects
 {
 	private int _targets;
 
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleHit(uint UnnamedParameter)
 	{

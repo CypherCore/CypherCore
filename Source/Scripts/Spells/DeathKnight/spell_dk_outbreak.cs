@@ -9,7 +9,7 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(77575)]
 public class spell_dk_outbreak : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleOnHit(uint UnnamedParameter)
 	{

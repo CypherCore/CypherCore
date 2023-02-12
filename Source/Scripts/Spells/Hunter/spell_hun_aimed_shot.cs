@@ -11,7 +11,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(19434)]
 public class spell_hun_aimed_shot : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleDamage(uint effIndex)
 	{

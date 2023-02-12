@@ -9,7 +9,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(32379)]
 public class spell_pri_shadow_word_death : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleDamage(uint UnnamedParameter)
 	{

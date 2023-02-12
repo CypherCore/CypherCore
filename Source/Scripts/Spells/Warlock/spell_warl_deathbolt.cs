@@ -11,7 +11,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(264106)]
 	public class spell_warl_deathbolt : SpellScript, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void HandleHit(uint effIndex)
 		{

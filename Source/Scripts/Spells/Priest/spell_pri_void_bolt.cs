@@ -9,7 +9,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(234746)]
 public class spell_pri_void_bolt : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleEffectScriptEffect(uint UnnamedParameter)
 	{

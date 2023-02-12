@@ -10,7 +10,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(81269)]
 public class spell_dru_efflorescence_heal : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 
 	private void SortTargets(List<WorldObject> targets)

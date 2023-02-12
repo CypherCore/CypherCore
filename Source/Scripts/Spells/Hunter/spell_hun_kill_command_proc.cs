@@ -10,7 +10,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(83381)]
 public class spell_hun_kill_command_proc : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleDamage(uint UnnamedParameter)
 	{

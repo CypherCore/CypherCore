@@ -10,7 +10,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(198030)]
 public class spell_demon_hunter_eye_beam_damage : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void FilterTargets(List<WorldObject> unitList)
 	{

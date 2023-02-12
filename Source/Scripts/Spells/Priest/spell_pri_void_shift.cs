@@ -10,7 +10,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(108968)]
 public class spell_pri_void_shift : SpellScript, IHasSpellEffects, ISpellCheckCast
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

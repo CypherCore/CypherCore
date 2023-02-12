@@ -10,7 +10,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(201078)]
 public class spell_hun_snake_hunter : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 
 	public override bool Validate(SpellInfo UnnamedParameter)

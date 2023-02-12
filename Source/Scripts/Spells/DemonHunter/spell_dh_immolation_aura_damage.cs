@@ -10,7 +10,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(258922)]
 public class spell_dh_immolation_aura_damage : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	readonly uint[] _hit = new uint[]
 	                       {

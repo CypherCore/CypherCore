@@ -11,7 +11,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(119907)]
 	public class spell_warl_suffering : SpellScript, ISpellCheckCast, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		public SpellCastResult CheckCast()
 		{

@@ -10,7 +10,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(152108)]
 	internal class spell_warl_cataclysm : SpellScript, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void HandleHit(uint UnnamedParameter)
 		{

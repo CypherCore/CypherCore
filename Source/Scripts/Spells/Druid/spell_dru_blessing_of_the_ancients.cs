@@ -9,7 +9,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(202360)]
 public class spell_dru_blessing_of_the_ancients : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 
 	private void HandleDummy(uint UnnamedParameter)

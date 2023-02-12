@@ -9,7 +9,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(202446)]
 public class spell_dh_artifact_anguish_damage : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleHit(uint UnnamedParameter)
 	{

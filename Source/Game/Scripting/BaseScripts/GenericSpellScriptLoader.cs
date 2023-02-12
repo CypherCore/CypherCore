@@ -16,7 +16,7 @@ namespace Game.Scripting.BaseScripts
 
         public override SpellScript GetSpellScript()
         {
-            return (S)Activator.CreateInstance(typeof(S), _args);
+            return Activator.CreateInstance(typeof(S), _args) as S;
         }
     }
 }

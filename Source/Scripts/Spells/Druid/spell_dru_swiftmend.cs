@@ -9,7 +9,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(18562)]
 public class spell_dru_swiftmend : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 
 	private struct Spells

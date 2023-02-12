@@ -9,7 +9,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(88625)]
 public class spell_pri_holy_word_chastise : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleOnHit(uint UnnamedParameter)
 	{

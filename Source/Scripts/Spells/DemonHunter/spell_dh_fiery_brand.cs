@@ -10,7 +10,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(204021)]
 public class spell_dh_fiery_brand : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

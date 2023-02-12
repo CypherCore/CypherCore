@@ -10,7 +10,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(29722)]
 	public class spell_warl_incinerate : SpellScript, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void HandleOnHitMainTarget(uint UnnamedParameter)
 		{

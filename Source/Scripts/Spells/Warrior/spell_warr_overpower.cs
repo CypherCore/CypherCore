@@ -10,7 +10,7 @@ namespace Scripts.Spells.Warrior
 	[SpellScript(7384)]
 	public class spell_warr_overpower : SpellScript, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void HandleEffect(uint UnnamedParameter)
 		{

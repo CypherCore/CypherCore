@@ -11,7 +11,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(119607)]
 public class spell_monk_renewing_mist_jump : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

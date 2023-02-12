@@ -8,7 +8,7 @@ namespace Scripts.Spells.Druid;
 
 public class spell_dru_tranquility_heal : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 
 	private void HandleHeal(uint UnnamedParameter)

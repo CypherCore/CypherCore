@@ -11,7 +11,7 @@ namespace Scripts.Spells.Warrior
 	[SpellScript(198304)]
 	public class spell_warr_intercept : SpellScript, ISpellCheckCast, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		public override bool Validate(SpellInfo UnnamedParameter)
 		{

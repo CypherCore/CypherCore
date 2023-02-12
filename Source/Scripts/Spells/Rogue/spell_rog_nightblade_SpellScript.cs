@@ -9,7 +9,7 @@ namespace Scripts.Spells.Rogue;
 [SpellScript(195452)]
 public class spell_rog_nightblade_SpellScript : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleLaunch(uint UnnamedParameter)
 	{

@@ -70,7 +70,7 @@ namespace Scripts.Spells.Racials
 	[SpellScript(313010)]
 	public class spell_class_mecagnomo_emergency3 : SpellScript, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void HandleHit(uint effIndex)
 		{

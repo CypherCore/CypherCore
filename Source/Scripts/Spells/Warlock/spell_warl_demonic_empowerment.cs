@@ -11,7 +11,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(193396)]
 	public class spell_warl_demonic_empowerment : SpellScript, IHasSpellEffects, ISpellOnCast
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void HandleTargets(List<WorldObject> targets)
 		{

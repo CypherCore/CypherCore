@@ -12,7 +12,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(197862)]
 public class spell_pri_archangel : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

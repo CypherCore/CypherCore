@@ -10,7 +10,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(80313)]
 public class spell_druid_pulverize : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private struct Spells
 	{

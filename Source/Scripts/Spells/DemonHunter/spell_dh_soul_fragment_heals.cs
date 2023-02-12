@@ -13,7 +13,7 @@ namespace Scripts.Spells.DemonHunter;
              })]
 public class spell_dh_soul_fragment_heals : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleHit(uint effIndex)
 	{

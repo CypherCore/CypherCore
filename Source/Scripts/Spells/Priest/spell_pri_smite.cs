@@ -11,7 +11,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(585)]
 public class spell_pri_smite : SpellScript, IHasSpellEffects, ISpellAfterCast
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

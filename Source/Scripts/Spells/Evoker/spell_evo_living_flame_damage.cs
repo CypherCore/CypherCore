@@ -10,7 +10,7 @@ namespace Scripts.Spells.Evoker;
 [SpellScript(361500)]
 public class spell_evo_living_flame_damage : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

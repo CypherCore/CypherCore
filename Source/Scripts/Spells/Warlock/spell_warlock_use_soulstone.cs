@@ -10,7 +10,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(3026)]
 	public class spell_warlock_use_soulstone : SpellScript, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void HandleHit(uint effIndex)
 		{

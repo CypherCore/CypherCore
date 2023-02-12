@@ -11,7 +11,7 @@ public class spell_dru_swipe : SpellScript, IHasSpellEffects
 {
 	private bool _awardComboPoint = true;
 
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 
 	private void HandleOnHit(uint UnnamedParameter)

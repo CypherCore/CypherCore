@@ -14,7 +14,7 @@ namespace Scripts.Spells.Warlock
 	{
 		private uint _damage = 0;
 
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void HandleHit(uint UnnamedParameter)
 		{

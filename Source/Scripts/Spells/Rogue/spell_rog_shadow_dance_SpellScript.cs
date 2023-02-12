@@ -9,7 +9,7 @@ namespace Scripts.Spells.Rogue;
 [SpellScript(185313)]
 public class spell_rog_shadow_dance_SpellScript : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleHit(uint UnnamedParameter)
 	{

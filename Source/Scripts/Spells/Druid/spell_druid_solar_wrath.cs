@@ -10,7 +10,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(190984)]
 public class spell_druid_solar_wrath : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 
 	private struct Spells

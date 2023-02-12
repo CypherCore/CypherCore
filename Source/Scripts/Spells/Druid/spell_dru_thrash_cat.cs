@@ -9,7 +9,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(106830)]
 public class spell_dru_thrash_cat : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void EffectHitTarget(uint UnnamedParameter)
 	{

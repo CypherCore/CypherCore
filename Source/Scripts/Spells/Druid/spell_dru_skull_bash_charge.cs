@@ -9,7 +9,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(221514)]
 public class spell_dru_skull_bash_charge : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleCharge(uint effIndex)
 	{

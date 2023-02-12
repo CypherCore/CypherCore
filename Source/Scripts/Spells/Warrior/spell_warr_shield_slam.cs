@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warrior
 	             })]
 	public class spell_warr_shield_slam : SpellScript, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void HandleDispel(uint effIndex)
 		{

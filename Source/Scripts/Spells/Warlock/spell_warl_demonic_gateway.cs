@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(111771)]
 	public class spell_warl_demonic_gateway : SpellScript, ISpellCheckCast, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void HandleLaunch(uint UnnamedParameter)
 		{

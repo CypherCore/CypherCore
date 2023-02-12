@@ -10,7 +10,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(1454)]
 	public class spell_warl_life_tap : SpellScript, IHasSpellEffects, ISpellCheckCast
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		public struct lifeTap
 		{

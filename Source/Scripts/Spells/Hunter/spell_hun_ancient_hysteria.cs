@@ -12,7 +12,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(90355)]
 public class spell_hun_ancient_hysteria : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 	readonly UnitAuraCheck<WorldObject> _ins = new(true, AncientHysteriaSpells.SPELL_HUNTER_INSANITY);
 	readonly UnitAuraCheck<WorldObject> _dis = new(true, AncientHysteriaSpells.SPELL_MAGE_TEMPORAL_DISPLACEMENT);
 	readonly UnitAuraCheck<WorldObject> _ex = new(true, AncientHysteriaSpells.SPELL_SHAMAN_EXHAUSTION);

@@ -10,7 +10,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(63106)]
 	public class spell_warlock_siphon_life : SpellScript, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void HandleHit(uint effIndex)
 		{

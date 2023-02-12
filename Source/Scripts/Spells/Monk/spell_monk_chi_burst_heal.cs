@@ -9,7 +9,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(130654)]
 public class spell_monk_chi_burst_heal : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleHeal(uint UnnamedParameter)
 	{

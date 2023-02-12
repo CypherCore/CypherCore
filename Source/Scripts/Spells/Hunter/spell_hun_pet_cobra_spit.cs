@@ -9,7 +9,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(206685)]
 public class spell_hun_pet_cobra_spit : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 
 	private void HandleDamage(uint UnnamedParameter)

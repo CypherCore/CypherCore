@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warlock
 	{
 		private int _soulshards = 1;
 
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		public override bool Load()
 		{

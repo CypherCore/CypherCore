@@ -15,7 +15,7 @@ namespace Scripts.Spells.Warlock
 	             })]
 	public class spell_warl_grimoire_of_service : SpellScript, IHasSpellEffects, ISpellOnSummon
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private struct eServiceSpells
 		{

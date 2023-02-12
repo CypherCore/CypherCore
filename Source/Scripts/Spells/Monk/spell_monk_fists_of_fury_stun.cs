@@ -11,7 +11,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(120086)]
 public class spell_monk_fists_of_fury_stun : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void RemoveInvalidTargets(List<WorldObject> targets)
 	{

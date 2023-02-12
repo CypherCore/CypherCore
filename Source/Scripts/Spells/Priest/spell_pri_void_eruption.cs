@@ -11,7 +11,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(228260)]
 public class spell_pri_void_eruption : SpellScript, IHasSpellEffects, ISpellOnCast, ISpellOnTakePower
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

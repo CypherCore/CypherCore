@@ -10,7 +10,7 @@ namespace Scripts.Spells.Warrior
 	[SpellScript(20243)]
 	public class spell_warr_devastate : SpellScript, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void HandleOnHit(uint effIndex)
 		{

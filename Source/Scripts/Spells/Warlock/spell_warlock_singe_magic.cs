@@ -11,7 +11,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(212623)]
 	public class spell_warlock_singe_magic : SpellScript, ISpellCheckCast, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void HandleHit(uint UnnamedParameter)
 		{

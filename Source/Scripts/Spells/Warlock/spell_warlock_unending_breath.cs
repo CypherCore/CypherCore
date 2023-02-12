@@ -10,7 +10,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(5697)]
 	internal class spell_warlock_unending_breath : SpellScript, IHasSpellEffects
 	{
-		public List<ISpellEffect> SpellEffects => new();
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		private void HandleHit(uint effIndex)
 		{

@@ -10,7 +10,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(73325)]
 public class spell_pri_leap_of_faith : SpellScript, IHasSpellEffects, ISpellOnHit
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

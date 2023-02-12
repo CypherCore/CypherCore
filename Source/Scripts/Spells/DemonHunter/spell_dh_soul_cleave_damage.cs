@@ -9,7 +9,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(228478)]
 public class spell_dh_soul_cleave_damage : SpellScript, IHasSpellEffects, ISpellOnHit
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private readonly int m_ExtraSpellCost = 0;
 

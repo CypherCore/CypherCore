@@ -11,7 +11,7 @@ namespace Scripts.Spells.Mage;
 [SpellScript(44614)]
 public class spell_mage_flurry : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	private void HandleDummy(uint UnnamedParameter)
 	{

@@ -14,7 +14,7 @@ namespace Scripts.Spells.DeathKnight;
              })]
 public class spell_dk_howling_blast : SpellScript, IHasSpellEffects
 {
-	public List<ISpellEffect> SpellEffects => new();
+	public List<ISpellEffect> SpellEffects { get; } = new();
 
 	public const uint SPELL_VISUAL_ID_HOWLING_BLAST = 66812;
 
