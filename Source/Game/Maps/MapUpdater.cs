@@ -35,7 +35,7 @@ namespace Game.Maps
 
             _mapUpdateComplete.Set();
             foreach (var thread in _workerThreads)
-                thread.Join();
+                thread.Join(1000); // only time we do this is on shutdown. Give a timeout to gracefully join
         }
 
         public void Wait()

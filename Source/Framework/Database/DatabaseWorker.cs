@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Framework.Database
 {
@@ -48,7 +49,17 @@ namespace Framework.Database
                     var success = operation.Item1.Execute(_mySqlBase);
                     
                     if (operation.Item2 != null)
-                        operation.Item2(success);
+                       Task.Run(() =>
+                       {
+                           try
+                           {
+                               operation.Item2(success);
+                           }
+                           catch(Exception ex)
+                           {
+                               Log.outException(ex, "DatabaseWorker.CallbackSuccessStatus");
+                           }
+                    });
                 }
             }
         }
