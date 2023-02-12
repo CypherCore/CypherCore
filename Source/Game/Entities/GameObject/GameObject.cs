@@ -962,7 +962,7 @@ namespace Game.Entities
                 ReplaceAllFlags(goOverride.Flags);
 
             uint poolid = GetGameObjectData() != null ? GetGameObjectData().poolId : 0;
-            if (poolid != 0)
+            if (m_respawnCompatibilityMode && poolid != 0)
                 Global.PoolMgr.UpdatePool<GameObject>(GetMap().GetPoolData(), poolid, GetSpawnId());
             else
                 AddObjectToRemoveList();
