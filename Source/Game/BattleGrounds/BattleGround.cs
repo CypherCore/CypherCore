@@ -1152,8 +1152,8 @@ namespace Game.BattleGrounds
                 // drop flag and handle other cleanups
                 RemovePlayer(player, guid, GetPlayerTeam(guid));
 
-                // 1 player is logging out, if it is the last, then end arena!
-                if (IsArena())
+                // 1 player is logging out, if it is the last alive, then end arena!
+                if (IsArena() && player.IsAlive())
                     if (GetAlivePlayersCountByTeam(player.GetBGTeam()) <= 1 && GetPlayersCountByTeam(GetOtherTeam(player.GetBGTeam())) != 0)
                         EndBattleground(GetOtherTeam(player.GetBGTeam()));
             }
