@@ -347,8 +347,9 @@ namespace Framework.Database
                             {
                                 cmd.Transaction = trans;
                                 cmd.Connection = Connection;
-                                cmd.ExecuteNonQuery();
                                 query = cmd.CommandText;
+
+                                cmd.ExecuteNonQuery();
                             }
 
                             trans.Commit();

@@ -106,13 +106,7 @@ namespace Framework.Database
 
         public int GetFieldCount() { return _reader.FieldCount; }
 
-        public bool IsEmpty()
-        {
-            if (_reader == null)
-                return true;
-            
-            return _reader.IsClosed || !_reader.HasRows || _reader.FieldCount == 0;
-        }
+        internal MySqlDataReader Reader { get { return _reader; } }
 
         public SQLFields GetFields()
         {
@@ -133,6 +127,21 @@ namespace Framework.Database
             return false;
         }
     }
+
+    public static class SQLEx
+    {
+        public static bool IsEmpty(this SQLResult result)
+        {
+            if (result == null)
+                return true;
+
+            if (result.Reader == null) 
+                return false;
+
+            return result.Reader.IsClosed || !result.Reader.HasRows || result.Reader.FieldCount == 0;
+        }
+    }
+
 
     public class SQLFields
     {
