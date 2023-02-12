@@ -4054,10 +4054,15 @@ namespace Game.Entities
                     Vector3 prev = new(oldAnimation.Pos.X, oldAnimation.Pos.Y, oldAnimation.Pos.Z);
                     Vector3 next = new(newAnimation.Pos.X, newAnimation.Pos.Y, newAnimation.Pos.Z);
 
-                    float animProgress = (float)(newProgress - oldAnimation.TimeIndex) / (float)(newAnimation.TimeIndex - oldAnimation.TimeIndex);
+                    Vector3 dst = next;
+                    if (prev != next)
+                    {
+                        float animProgress = (float)(newProgress - oldAnimation.TimeIndex) / (float)(newAnimation.TimeIndex - oldAnimation.TimeIndex);
 
-                    Vector3 dst = pathRotation.Multiply(Vector3.Lerp(prev, next, animProgress));
+                        dst = pathRotation.Multiply(Vector3.Lerp(prev, next, animProgress));
+                    }
 
+                    dst = pathRotation.Multiply(dst);
                     dst += _owner.GetStationaryPosition();
 
                     _owner.GetMap().GameObjectRelocation(_owner, dst.X, dst.Y, dst.Z, _owner.GetOrientation());
@@ -4070,9 +4075,14 @@ namespace Game.Entities
                     Quaternion prev = new(oldRotation.Rot[0], oldRotation.Rot[1], oldRotation.Rot[2], oldRotation.Rot[3]);
                     Quaternion next = new(newRotation.Rot[0], newRotation.Rot[1], newRotation.Rot[2], newRotation.Rot[3]);
 
-                    float animProgress = (float)(newProgress - oldRotation.TimeIndex) / (float)(newRotation.TimeIndex - oldRotation.TimeIndex);
+                    Quaternion rotation = next;
 
-                    Quaternion rotation = Quaternion.Lerp(prev, next, animProgress);
+                    if (prev != next)
+                    {
+                        float animProgress = (float)(newProgress - oldRotation.TimeIndex) / (float)(newRotation.TimeIndex - oldRotation.TimeIndex);
+
+                        rotation = Quaternion.Lerp(prev, next, animProgress);
+                    }
 
                     _owner.SetLocalRotation(rotation.X, rotation.Y, rotation.Z, rotation.W);
                     _owner.UpdateModelPosition();
