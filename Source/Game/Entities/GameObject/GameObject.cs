@@ -306,7 +306,7 @@ namespace Game.Entities
                     SetActive(true);
                     break;
                 case GameObjectTypes.FishingNode:
-                    SetLevel(1);
+                    SetLevel(0);
                     SetGoAnimProgress(255);
                     break;
                 case GameObjectTypes.Trap:
@@ -479,18 +479,7 @@ namespace Game.Entities
                                 // splash bobber (bobber ready now)
                                 Unit caster = GetOwner();
                                 if (caster != null && caster.IsTypeId(TypeId.Player))
-                                {
-                                    SetGoState(GameObjectState.Active);
-                                    ReplaceAllFlags(GameObjectFlags.NoDespawn);
-
-                                    UpdateData udata = new(caster.GetMapId());
-                                    UpdateObject packet;
-                                    BuildValuesUpdateBlockForPlayer(udata, caster.ToPlayer());
-                                    udata.BuildPacket(out packet);
-                                    caster.ToPlayer().SendPacket(packet);
-
-                                    SendCustomAnim(GetGoAnimProgress());
-                                }
+                                    SendCustomAnim(0);
 
                                 m_lootState = LootState.Ready;                 // can be successfully open with some chance
                             }
@@ -2005,6 +1994,13 @@ namespace Game.Entities
                     {
                         case LootState.Ready:                              // ready for loot
                         {
+                            SetLootState(LootState.Activated, player);
+
+                            SetGoState(GameObjectState.Active);
+                            ReplaceAllFlags(GameObjectFlags.InMultiUse);
+
+                            SendUpdateToPlayer(player);
+
                             uint zone, subzone;
                             GetZoneAndAreaId(out zone, out subzone);
 

@@ -274,7 +274,11 @@ namespace Game
 
                 if (loot.IsLooted() || go.GetGoType() == GameObjectTypes.FishingNode || go.GetGoType() == GameObjectTypes.FishingHole)
                 {
-                    if (go.GetGoType() == GameObjectTypes.FishingHole)
+                    if (go.GetGoType() == GameObjectTypes.FishingNode)
+                    {
+                        go.SetLootState(LootState.JustDeactivated);
+                    }
+                    else if (go.GetGoType() == GameObjectTypes.FishingHole)
                     {                                               // The fishing hole used once more
                         go.AddUse();                               // if the max usage is reached, will be despawned in next tick
                         if (go.GetUseCount() >= go.GetGoValue().FishingHole.MaxOpens)
