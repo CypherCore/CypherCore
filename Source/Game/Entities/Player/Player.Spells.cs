@@ -1279,7 +1279,7 @@ namespace Game.Entities
             switch (SkillId)
             {
                 case SkillType.Herbalism:
-                case SkillType.Herbalism2:
+                case SkillType.ClassicHerbalism:
                 case SkillType.OutlandHerbalism:
                 case SkillType.NorthrendHerbalism:
                 case SkillType.CataclysmHerbalism:
@@ -1291,7 +1291,7 @@ namespace Game.Entities
                 case SkillType.Inscription:
                     return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, grayLevel, greenLevel, yellowLevel) * (int)Multiplicator, gathering_skill_gain);
                 case SkillType.Skinning:
-                case SkillType.Skinning2:
+                case SkillType.ClassicSkinning:
                 case SkillType.OutlandSkinning:
                 case SkillType.NorthrendSkinning:
                 case SkillType.CataclysmSkinning:
@@ -1304,7 +1304,7 @@ namespace Game.Entities
                     else
                         return UpdateSkillPro(SkillId, (int)(SkillGainChance(SkillValue, grayLevel, greenLevel, yellowLevel) * Multiplicator) >> (int)(SkillValue / WorldConfig.GetIntValue(WorldCfg.SkillChanceSkinningSteps)), gathering_skill_gain);
                 case SkillType.Mining:
-                case SkillType.Mining2:
+                case SkillType.ClassicMining:
                 case SkillType.OutlandMining:
                 case SkillType.NorthrendMining:
                 case SkillType.CataclysmMining:
