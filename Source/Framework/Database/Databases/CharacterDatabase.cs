@@ -333,9 +333,9 @@ namespace Framework.Database
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
             // Currency
-            PrepareStatement(CharStatements.SEL_PLAYER_CURRENCY, "SELECT Currency, Quantity, WeeklyQuantity, TrackedQuantity, Flags FROM character_currency WHERE CharacterGuid = ?");
-            PrepareStatement(CharStatements.UPD_PLAYER_CURRENCY, "UPDATE character_currency SET Quantity = ?, WeeklyQuantity = ?, TrackedQuantity = ?, Flags = ? WHERE CharacterGuid = ? AND Currency = ?");
-            PrepareStatement(CharStatements.REP_PLAYER_CURRENCY, "REPLACE INTO character_currency (CharacterGuid, Currency, Quantity, WeeklyQuantity, TrackedQuantity, Flags) VALUES (?, ?, ?, ?, ?, ?)");
+            PrepareStatement(CharStatements.SEL_PLAYER_CURRENCY, "SELECT Currency, Quantity, WeeklyQuantity, TrackedQuantity, IncreasedCapQuantity, EarnedQuantity, Flags FROM character_currency WHERE CharacterGuid = ?");
+            PrepareStatement(CharStatements.UPD_PLAYER_CURRENCY, "UPDATE character_currency SET Quantity = ?, WeeklyQuantity = ?, TrackedQuantity = ?, IncreasedCapQuantity = ?, EarnedQuantity = ?, Flags = ? WHERE CharacterGuid = ? AND Currency = ?");
+            PrepareStatement(CharStatements.REP_PLAYER_CURRENCY, "REPLACE INTO character_currency (CharacterGuid, Currency, Quantity, WeeklyQuantity, TrackedQuantity, IncreasedCapQuantity, EarnedQuantity, Flags) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             PrepareStatement(CharStatements.DEL_PLAYER_CURRENCY, "DELETE FROM character_currency WHERE CharacterGuid = ?");
 
             // Account data

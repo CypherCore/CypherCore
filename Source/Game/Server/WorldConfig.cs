@@ -503,34 +503,6 @@ namespace Game
                 Values[WorldCfg.CurrencyResetInterval] = 7;
             }
 
-            Values[WorldCfg.CurrencyStartApexisCrystals] = GetDefaultValue("Currency.StartApexisCrystals", 0);
-            if ((int)Values[WorldCfg.CurrencyStartApexisCrystals] < 0)
-            {
-                Log.outError(LogFilter.ServerLoading, "Currency.StartApexisCrystals ({0}) must be >= 0, set to default 0.", Values[WorldCfg.CurrencyStartApexisCrystals]);
-                Values[WorldCfg.CurrencyStartApexisCrystals] = 0;
-            }
-            Values[WorldCfg.CurrencyMaxApexisCrystals] = GetDefaultValue("Currency.MaxApexisCrystals", 20000);
-            if ((int)Values[WorldCfg.CurrencyMaxApexisCrystals] < 0)
-            {
-                Log.outError(LogFilter.ServerLoading, "Currency.MaxApexisCrystals ({0}) can't be negative. Set to default 20000.", Values[WorldCfg.CurrencyMaxApexisCrystals]);
-                Values[WorldCfg.CurrencyMaxApexisCrystals] = 20000;
-            }
-            Values[WorldCfg.CurrencyMaxApexisCrystals] = (int)Values[WorldCfg.CurrencyMaxApexisCrystals] * 100;     //precision mod
-
-            Values[WorldCfg.CurrencyStartJusticePoints] = GetDefaultValue("Currency.StartJusticePoints", 0);
-            if ((int)Values[WorldCfg.CurrencyStartJusticePoints] < 0)
-            {
-                Log.outError(LogFilter.ServerLoading, "Currency.StartJusticePoints ({0}) must be >= 0, set to default 0.", Values[WorldCfg.CurrencyStartJusticePoints]);
-                Values[WorldCfg.CurrencyStartJusticePoints] = 0;
-            }
-            Values[WorldCfg.CurrencyMaxJusticePoints] = GetDefaultValue("Currency.MaxJusticePoints", 4000);
-            if ((int)Values[WorldCfg.CurrencyMaxJusticePoints] < 0)
-            {
-                Log.outError(LogFilter.ServerLoading, "Currency.MaxJusticePoints ({0}) can't be negative. Set to default 4000.", Values[WorldCfg.CurrencyMaxJusticePoints]);
-                Values[WorldCfg.CurrencyMaxJusticePoints] = 4000;
-            }
-            Values[WorldCfg.CurrencyMaxJusticePoints] = (int)Values[WorldCfg.CurrencyMaxJusticePoints] * 100;     //precision mod
-
             Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel] = GetDefaultValue("RecruitAFriend.MaxLevel", 60);
             if ((int)Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel] > (int)Values[WorldCfg.MaxPlayerLevel])
             {

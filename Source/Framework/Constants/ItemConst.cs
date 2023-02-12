@@ -1282,20 +1282,13 @@ namespace Framework.Constants
         MawPower = 4
     }
 
-    public enum CurrencyFlags
-    {
-        Tradeable = 0x01,
-        // ...
-        HighPrecision = 0x08,
-        // ...
-    }
-
     public enum CurrencyTypes
     {
         JusticePoints = 395,
         ValorPoints = 396,
         ApexisCrystals = 823,
-        Azerite = 1553
+        Azerite = 1553,
+        AncientMana = 1155
     }
 
     public enum PlayerCurrencyState

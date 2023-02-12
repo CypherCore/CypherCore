@@ -2258,7 +2258,7 @@ namespace Game
                 for (var i = 0; i < condition.CurrencyID.Length; ++i)
                 {
                     if (condition.CurrencyID[i] != 0)
-                        results[i] = player.GetCurrency(condition.CurrencyID[i]) >= condition.CurrencyCount[i];
+                        results[i] = player.GetCurrencyQuantity(condition.CurrencyID[i]) >= condition.CurrencyCount[i];
                 }
 
                 if (!PlayerConditionLogic(condition.CurrencyLogic, results))

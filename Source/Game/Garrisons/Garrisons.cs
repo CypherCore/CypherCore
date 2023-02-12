@@ -369,7 +369,7 @@ namespace Game.Garrisons
                         map.AddToMap(go);
                 }
 
-                _owner.ModifyCurrency(building.CurrencyTypeID, -building.CurrencyQty, false, true);
+                _owner.RemoveCurrency(building.CurrencyTypeID, building.CurrencyQty, CurrencyDestroyReason.Garrison);
                 _owner.ModifyMoney(-building.GoldCost * MoneyConstants.Gold, false);
 
                 if (oldBuildingId != 0)
@@ -409,7 +409,7 @@ namespace Game.Garrisons
 
                 GarrBuildingRecord constructing = CliDB.GarrBuildingStorage.LookupByKey(buildingRemoved.GarrBuildingID);
                 // Refund construction/upgrade cost
-                _owner.ModifyCurrency(constructing.CurrencyTypeID, constructing.CurrencyQty, false, true);
+                _owner.AddCurrency(constructing.CurrencyTypeID, (uint)constructing.CurrencyQty, CurrencyGainSource.GarrisonBuildingRefund);
                 _owner.ModifyMoney(constructing.GoldCost * MoneyConstants.Gold, false);
 
                 if (constructing.UpgradeLevel > 1)

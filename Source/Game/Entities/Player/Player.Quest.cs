@@ -968,7 +968,7 @@ namespace Game.Entities
                         DestroyItemCount((uint)obj.ObjectID, (uint)obj.Amount, true);
                         break;
                     case QuestObjectiveType.Currency:
-                        ModifyCurrency((uint)obj.ObjectID, -obj.Amount, false, true);
+                        RemoveCurrency((uint)obj.ObjectID, obj.Amount, CurrencyDestroyReason.QuestTurnin);
                         break;
                 }
             }
@@ -1006,6 +1006,14 @@ namespace Game.Entities
                 }
             }
 
+            CurrencyGainSource currencyGainSource = CurrencyGainSource.QuestReward;
+            if (quest.IsDaily())
+                currencyGainSource = CurrencyGainSource.DailyQuestReward;
+            else if (quest.IsWeekly())
+                currencyGainSource = CurrencyGainSource.WeeklyQuestReward;
+            else if (quest.IsWorldQuest())
+                currencyGainSource = CurrencyGainSource.WorldQuestReward;
+
             switch (rewardType)
             {
                 case LootItemType.Item:
@@ -1036,7 +1044,7 @@ namespace Game.Entities
                     {
                         for (uint i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
                             if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemType[i] == LootItemType.Currency && quest.RewardChoiceItemId[i] == rewardId)
-                                ModifyCurrency(quest.RewardChoiceItemId[i], (int)quest.RewardChoiceItemCount[i]);
+                                AddCurrency(quest.RewardChoiceItemId[i], quest.RewardChoiceItemCount[i], currencyGainSource);
                     }
                     break;
             }
@@ -1044,7 +1052,7 @@ namespace Game.Entities
             for (byte i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
             {
                 if (quest.RewardCurrencyId[i] != 0)
-                    ModifyCurrency(quest.RewardCurrencyId[i], (int)quest.RewardCurrencyCount[i]);
+                    AddCurrency(quest.RewardCurrencyId[i], quest.RewardCurrencyCount[i], currencyGainSource);
             }
 
             uint skill = quest.RewardSkillId;
@@ -2139,7 +2147,7 @@ namespace Game.Entities
                     else if (obj.Type == QuestObjectiveType.HaveCurrency)
                     {
                         uint reqCurrencyCount = (uint)obj.Amount;
-                        uint curCurrencyCount = GetCurrency((uint)obj.ObjectID);
+                        uint curCurrencyCount = GetCurrencyQuantity((uint)obj.ObjectID);
                         SetQuestObjectiveData(obj, (int)Math.Min(reqCurrencyCount, curCurrencyCount));
                     }
                 }
@@ -2489,7 +2497,7 @@ namespace Game.Entities
                         switch (objectiveType)
                         {
                             case QuestObjectiveType.Currency:
-                                objectiveIsNowComplete = GetCurrency((uint)objectId) + addCount >= objective.Amount;
+                                objectiveIsNowComplete = GetCurrencyQuantity((uint)objectId) + addCount >= objective.Amount;
                                 break;
                             case QuestObjectiveType.LearnSpell:
                                 objectiveIsNowComplete = addCount != 0;
@@ -2941,7 +2949,7 @@ namespace Game.Entities
         {
             SendQuestGiverStatusMultiple(m_clientGUIDs);
         }
-        
+
         public void SendQuestGiverStatusMultiple(List<ObjectGuid> guids)
         {
             QuestGiverStatusMultiple response = new();

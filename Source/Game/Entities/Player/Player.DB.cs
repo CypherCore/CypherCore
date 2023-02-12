@@ -653,7 +653,9 @@ namespace Game.Entities
                 cur.Quantity = result.Read<uint>(1);
                 cur.WeeklyQuantity = result.Read<uint>(2);
                 cur.TrackedQuantity = result.Read<uint>(3);
-                cur.Flags = result.Read<byte>(4);
+                cur.IncreasedCapQuantity = result.Read<uint>(4);
+                cur.EarnedQuantity = result.Read<uint>(5);
+                cur.Flags = (CurrencyDbFlags)result.Read<byte>(6);
 
                 _currencyStorage.Add(currencyID, cur);
             } while (result.NextRow());
@@ -1946,39 +1948,43 @@ namespace Game.Entities
         void _SaveCurrency(SQLTransaction trans)
         {
             PreparedStatement stmt;
-            foreach (var pair in _currencyStorage)
+            foreach (var (id, currency) in _currencyStorage)
             {
-                CurrencyTypesRecord entry = CliDB.CurrencyTypesStorage.LookupByKey(pair.Key);
+                CurrencyTypesRecord entry = CliDB.CurrencyTypesStorage.LookupByKey(id);
                 if (entry == null) // should never happen
                     continue;
 
-                switch (pair.Value.state)
+                switch (currency.state)
                 {
                     case PlayerCurrencyState.New:
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_PLAYER_CURRENCY);
                         stmt.AddValue(0, GetGUID().GetCounter());
-                        stmt.AddValue(1, pair.Key);
-                        stmt.AddValue(2, pair.Value.Quantity);
-                        stmt.AddValue(3, pair.Value.WeeklyQuantity);
-                        stmt.AddValue(4, pair.Value.TrackedQuantity);
-                        stmt.AddValue(5, pair.Value.Flags);
+                        stmt.AddValue(1, id);
+                        stmt.AddValue(2, currency.Quantity);
+                        stmt.AddValue(3, currency.WeeklyQuantity);
+                        stmt.AddValue(4, currency.TrackedQuantity);
+                        stmt.AddValue(5, currency.IncreasedCapQuantity);
+                        stmt.AddValue(6, currency.EarnedQuantity);
+                        stmt.AddValue(7, (byte)currency.Flags);
                         trans.Append(stmt);
                         break;
                     case PlayerCurrencyState.Changed:
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_PLAYER_CURRENCY);
-                        stmt.AddValue(0, pair.Value.Quantity);
-                        stmt.AddValue(1, pair.Value.WeeklyQuantity);
-                        stmt.AddValue(2, pair.Value.TrackedQuantity);
-                        stmt.AddValue(3, pair.Value.Flags);
-                        stmt.AddValue(4, GetGUID().GetCounter());
-                        stmt.AddValue(5, pair.Key);
+                        stmt.AddValue(0, currency.Quantity);
+                        stmt.AddValue(1, currency.WeeklyQuantity);
+                        stmt.AddValue(2, currency.TrackedQuantity);
+                        stmt.AddValue(3, currency.IncreasedCapQuantity);
+                        stmt.AddValue(4, currency.EarnedQuantity);
+                        stmt.AddValue(5, (byte)currency.Flags);
+                        stmt.AddValue(6, GetGUID().GetCounter());
+                        stmt.AddValue(7, id);
                         trans.Append(stmt);
                         break;
                     default:
                         break;
                 }
 
-                pair.Value.state = PlayerCurrencyState.Unchanged;
+                currency.state = PlayerCurrencyState.Unchanged;
             }
         }
 
