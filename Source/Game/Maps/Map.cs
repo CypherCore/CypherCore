@@ -2374,11 +2374,19 @@ namespace Game.Maps
             foreach (uint spawnGroupId in spawnGroups)
             {
                 SpawnGroupTemplateData spawnGroupTemplate = GetSpawnGroupData(spawnGroupId);
-                if (spawnGroupTemplate.flags.HasFlag(SpawnGroupFlags.ManualSpawn))
-                    continue;
 
                 bool isActive = IsSpawnGroupActive(spawnGroupId);
                 bool shouldBeActive = Global.ConditionMgr.IsMapMeetingNotGroupedConditions(ConditionSourceType.SpawnGroup, spawnGroupId, this);
+
+                if (spawnGroupTemplate.flags.HasFlag(SpawnGroupFlags.ManualSpawn))
+                {
+                    // Only despawn the group if it isn't meeting conditions
+                    if (isActive && !shouldBeActive && spawnGroupTemplate.flags.HasFlag(SpawnGroupFlags.DespawnOnConditionFailure))
+                        SpawnGroupDespawn(spawnGroupId, true);
+
+                    continue;
+                }
+
                 if (isActive == shouldBeActive)
                     continue;
 
