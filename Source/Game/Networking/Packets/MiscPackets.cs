@@ -91,15 +91,20 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt32(Type);
             _worldPacket.WriteInt32(Quantity);
-            _worldPacket.WriteUInt32(Flags);
+            _worldPacket.WriteUInt32((uint)Flags);
+            _worldPacket.WriteInt32(Toasts.Count);
+
+            foreach (var toast in Toasts)
+                toast.Write(_worldPacket);
+
             _worldPacket.WriteBit(WeeklyQuantity.HasValue);
             _worldPacket.WriteBit(TrackedQuantity.HasValue);
             _worldPacket.WriteBit(MaxQuantity.HasValue);
             _worldPacket.WriteBit(TotalEarned.HasValue);
             _worldPacket.WriteBit(SuppressChatLog);
             _worldPacket.WriteBit(QuantityChange.HasValue);
-            _worldPacket.WriteBit(QuantityLostSource.HasValue);
             _worldPacket.WriteBit(QuantityGainSource.HasValue);
+            _worldPacket.WriteBit(QuantityLostSource.HasValue);
             _worldPacket.WriteBit(FirstCraftOperationID.HasValue);
             _worldPacket.WriteBit(LastSpendTime.HasValue);
             _worldPacket.FlushBits();
@@ -119,11 +124,11 @@ namespace Game.Networking.Packets
             if (QuantityChange.HasValue)
                 _worldPacket.WriteInt32(QuantityChange.Value);
 
-            if (QuantityLostSource.HasValue)
-                _worldPacket.WriteInt32(QuantityLostSource.Value);
-
             if (QuantityGainSource.HasValue)
-                _worldPacket.WriteInt32(QuantityGainSource.Value);
+                _worldPacket.WriteInt32((int)QuantityGainSource.Value);
+
+            if (QuantityLostSource.HasValue)
+                _worldPacket.WriteInt32((int)QuantityLostSource.Value);
 
             if (FirstCraftOperationID.HasValue)
                 _worldPacket.WriteUInt32(FirstCraftOperationID.Value);
@@ -134,15 +139,15 @@ namespace Game.Networking.Packets
 
         public uint Type;
         public int Quantity;
-        public uint Flags;
+        public CurrencyGainFlags Flags;
         public List<UiEventToast> Toasts = new();
         public int? WeeklyQuantity;
         public int? TrackedQuantity;
         public int? MaxQuantity;
         public int? TotalEarned;
         public int? QuantityChange;
-        public int? QuantityGainSource;
-        public int? QuantityLostSource;
+        public CurrencyGainSource? QuantityGainSource;
+        public CurrencyDestroyReason? QuantityLostSource;
         public uint? FirstCraftOperationID;
         public long? LastSpendTime;
         public bool SuppressChatLog;
@@ -223,7 +228,7 @@ namespace Game.Networking.Packets
             public int? MaxQuantity;
             public int? TotalEarned;
             public long? LastSpendTime;
-            public byte Flags;                      // 0 = none, 
+            public byte Flags;
         }
     }
 

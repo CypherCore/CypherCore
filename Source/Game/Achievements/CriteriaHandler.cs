@@ -1905,7 +1905,7 @@ namespace Game.Achievements
                     break;
                 }
                 case ModifierTreeType.PlayerHasTrackedCurrencyEqualOrGreaterThan: // 121
-                    if (referencePlayer.GetTrackedCurrencyCount(reqValue) < secondaryAsset)
+                    if (referencePlayer.GetCurrencyTrackedQuantity(reqValue) < secondaryAsset)
                         return false;
                     break;
                 case ModifierTreeType.PlayerMapInstanceType: // 122
@@ -2666,7 +2666,7 @@ namespace Game.Achievements
                     return false;
                 }
                 case ModifierTreeType.PlayerHasCurrencyEqual: // 209
-                    if (referencePlayer.GetCurrency(reqValue) != secondaryAsset)
+                    if (referencePlayer.GetCurrencyQuantity(reqValue) != secondaryAsset)
                         return false;
                     break;
                 case ModifierTreeType.MinimumAverageItemHighWaterMarkForSpec: // 210 NYI

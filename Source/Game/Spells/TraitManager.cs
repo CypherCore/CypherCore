@@ -384,7 +384,7 @@ namespace Game
                             if (!currencies.ContainsKey((int)currency.Id))
                                 currencies[(int)currency.Id] = 0;
 
-                            currencies[(int)currency.Id] += (int)player.GetCurrency((uint)currency.CurrencyTypesID);
+                            currencies[(int)currency.Id] += (int)player.GetCurrencyQuantity((uint)currency.CurrencyTypesID);
                             break;
                         case TraitCurrencyType.TraitSourced:
                             var currencySources = _traitCurrencySourcesByCurrency.LookupByKey(currency.Id);

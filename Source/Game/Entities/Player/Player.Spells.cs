@@ -831,6 +831,11 @@ namespace Game.Entities
 
         public void ModifySkillBonus(SkillType skillid, int val, bool talent)
         {
+            ModifySkillBonus((uint)skillid, val, talent);
+        }
+
+        public void ModifySkillBonus(uint skillid, int val, bool talent)
+        {
             SkillInfo skillInfoField = m_activePlayerData.Skill;
 
             var skillStatusData = mSkillStatus.LookupByKey(skillid);
@@ -842,8 +847,11 @@ namespace Game.Entities
             else
                 SetSkillTempBonus(skillStatusData.Pos, (ushort)(skillInfoField.SkillTempBonus[skillStatusData.Pos] + val));
 
-            foreach (var skill in DB2Manager.Instance.GetSkillLinesForParentSkill((uint)skillid))
-                ModifySkillBonus(skillid, val, talent);
+            // Apply/Remove bonus to child skill lines
+            var childSkillLines = Global.DB2Mgr.GetSkillLinesForParentSkill(skillid);
+            if (childSkillLines != null)
+                foreach (var childSkillLine in childSkillLines)
+                    ModifySkillBonus(childSkillLine.Id, val, talent);
         }
 
         public void StopCastingBindSight()
@@ -1045,6 +1053,23 @@ namespace Game.Entities
             var skillStatusData = mSkillStatus.LookupByKey(id);
             SkillInfo skillInfoField = m_activePlayerData.Skill;
 
+            void refreshSkillBonusAuras()
+            {
+                // Temporary bonuses
+                foreach (AuraEffect effect in GetAuraEffectsByType(AuraType.ModSkill))
+                    if (effect.GetMiscValue() == id)
+                        effect.HandleEffect(this, AuraEffectHandleModes.Skill, true);
+
+                foreach (AuraEffect effect in GetAuraEffectsByType(AuraType.ModSkill2))
+                    if (effect.GetMiscValue() == id)
+                        effect.HandleEffect(this, AuraEffectHandleModes.Skill, true);
+
+                // Permanent bonuses
+                foreach (AuraEffect effect in GetAuraEffectsByType(AuraType.ModSkillTalent))
+                    if (effect.GetMiscValue() == id)
+                        effect.HandleEffect(this, AuraEffectHandleModes.Skill, true);
+            }
+
             // Handle already stored skills
             if (skillStatusData != null)
             {
@@ -1081,42 +1106,13 @@ namespace Game.Entities
                         if (currVal == 0)   // activated skill, mark as new to save into database
                         {
                             skillStatusData.State = SkillState.New;
+
                             // Set profession line
-                            if (skillEntry.ParentSkillLineID != 0 && skillEntry.CategoryID == SkillCategory.Profession)
-                            {
-                                int freeProfessionSlot = FindProfessionSlotFor(id);
-                                if (freeProfessionSlot != -1)
-                                {
-                                    SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, freeProfessionSlot), id);
-                                }
-                            }
+                            int freeProfessionSlot = FindEmptyProfessionSlotFor(id);
+                            if (freeProfessionSlot != -1)
+                                SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, freeProfessionSlot), id);
 
-                            // Temporary bonuses
-                            foreach (AuraEffect effect in GetAuraEffectsByType(AuraType.ModSkill))
-                            {
-                                if (effect.GetMiscValue() == (int)id)
-                                {
-                                    effect.HandleEffect(this, AuraEffectHandleModes.Skill, true);
-                                }
-                            }
-
-                            foreach (AuraEffect effect in GetAuraEffectsByType(AuraType.ModSkill2))
-                            {
-                                if (effect.GetMiscValue() == (int)id)
-                                {
-                                    effect.HandleEffect(this, AuraEffectHandleModes.Skill, true);
-                                }
-                            }
-
-                            // Permanent bonuses
-                            foreach (AuraEffect effect in GetAuraEffectsByType(AuraType.ModSkillTalent))
-                            {
-                                if (effect.GetMiscValue() == (int)id)
-                                {
-                                    effect.HandleEffect(this, AuraEffectHandleModes.Skill, true);
-                                }
-                            }
-
+                            refreshSkillBonusAuras();
                         }
                         else                // updated skill, mark as changed to save into database
                             skillStatusData.State = SkillState.Changed;
@@ -1124,66 +1120,36 @@ namespace Game.Entities
                 }
                 else if (currVal != 0 && newVal == 0) // Deactivate skill line
                 {
-                    if (skillEntry.ParentSkillLineID != 0 && skillEntry.CategoryID == SkillCategory.Profession)
+                    // Try to store profession tools and accessories into the bag
+                    // If we can't, we can't unlearn the profession
+                    int professionSlot = GetProfessionSlotFor(id);
+                    if (professionSlot != -1)
                     {
-                        var storeProfessionItem = (Item professionItem) =>
+                        byte professionSlotStart = (byte)(ProfessionSlots.Profession1Tool + professionSlot * ProfessionSlots.MaxCount);
+
+                        // Get all profession items equipped
+                        for (byte slotOffset = 0; slotOffset < ProfessionSlots.MaxCount; ++slotOffset)
                         {
-                            if (professionItem == null)
+                            Item professionItem = GetItemByPos(InventorySlots.Bag0, (byte)(professionSlotStart + slotOffset));
+                            if (professionItem != null)
                             {
-                                return true;
-                            }
+                                // Store item in bag
+                                List<ItemPosCount> professionItemDest = new();
 
-                            List<ItemPosCount> professionItemDest = new();
+                                if (CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, professionItemDest, professionItem, false) != InventoryResult.Ok)
+                                {
+                                    SendPacket(new DisplayGameError(GameError.InvFull));
+                                    return;
+                                }
 
-                            if (CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, professionItemDest, professionItem, false) == InventoryResult.Ok)
-                            {
                                 RemoveItem(InventorySlots.Bag0, professionItem.GetSlot(), true);
                                 StoreItem(professionItemDest, professionItem, true);
-                                return true;
-                            }
-
-                            return false;
-                        };
-
-                        int professionSlot = GetProfessionSlotFor(id);
-
-                        if (professionSlot != -1)
-                        {
-                            bool isFirstProfession = (professionSlot == 0);
-                            byte professionSlotStart = isFirstProfession ? ProfessionSlots.Profession1Tool : ProfessionSlots.Profession2Tool;
-
-                            // Get all profession items equipped
-                            List<Item> professionItems = new List<Item>();
-                            for (byte slotOffset = 0; slotOffset < ProfessionSlots.End; slotOffset++)
-                            {
-                                Item professionItem = GetItemByPos(InventorySlots.Bag0, (byte)(professionSlotStart + slotOffset));
-
-                                if (professionItem != null)
-                                    professionItems.Add(professionItem);
-                            }
-
-                            // Check if there is space for all items
-                            uint itemIds = 0;
-                            if (CanStoreItems(professionItems, professionItems.Count, ref  itemIds) == InventoryResult.Ok)
-                            {
-                                foreach (Item professionItem in professionItems)
-                                {
-                                    // Store item in bag
-                                    if (!storeProfessionItem(professionItem))
-                                    {
-                                        SendPacket(new DisplayGameError(GameError.BagFull));
-                                        return;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                SendPacket(new DisplayGameError(GameError.BagFull));
-                                return;
                             }
                         }
+
+                        // Clear profession lines
+                        SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, professionSlot), 0u);
                     }
-                    
 
                     //remove enchantments needing this skill
                     UpdateSkillEnchantments(id, currVal, 0);
@@ -1197,6 +1163,7 @@ namespace Game.Entities
 
                     // mark as deleted so the next save will delete the data from the database
                     skillStatusData.State = SkillState.Deleted;
+
 
                     // remove all spells that related to this skill
                     List<SkillLineAbilityRecord> skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill(id);
@@ -1212,12 +1179,6 @@ namespace Game.Entities
                                 SetSkill(childSkillLine.Id, 0, 0, 0);
                         }
                     }
-
-                    // Clear profession lines
-                    if (m_activePlayerData.ProfessionSkillLine[0] == id)
-                        SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, 0), 0u);
-                    else if (m_activePlayerData.ProfessionSkillLine[1] == id)
-                        SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, 1), 0u);
                 }
             }
             else
@@ -1266,12 +1227,9 @@ namespace Game.Entities
                             if (!HasSkill((SkillType)childSkillLine.Id))
                                 SetSkill(childSkillLine.Id, 0, 0, 0);
 
-                    if (skillEntry.CategoryID == SkillCategory.Profession)
-                    {
-                        int freeProfessionSlot = FindProfessionSlotFor(id);
-                        if (freeProfessionSlot != -1)
-                            SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, freeProfessionSlot), id);
-                    }
+                    int freeProfessionSlot = FindEmptyProfessionSlotFor(id);
+                    if (freeProfessionSlot != -1)
+                        SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, freeProfessionSlot), id);
                 }
 
                 if (skillStatusData == null)
@@ -1292,19 +1250,7 @@ namespace Game.Entities
 
                 if (newVal != 0)
                 {
-                    // temporary bonuses
-                    foreach (var auraEffect in GetAuraEffectsByType(AuraType.ModSkill))
-                        if (auraEffect.GetMiscValue() == id)
-                            auraEffect.HandleEffect(this, AuraEffectHandleModes.Skill, true);
-
-                    foreach (var auraEffect in GetAuraEffectsByType(AuraType.ModSkill2))
-                        if (auraEffect.GetMiscValue() == id)
-                            auraEffect.HandleEffect(this, AuraEffectHandleModes.Skill, true);
-
-                    // permanent bonuses
-                    foreach (var auraEffect in GetAuraEffectsByType(AuraType.ModSkillTalent))
-                        if (auraEffect.GetMiscValue() == id)
-                            auraEffect.HandleEffect(this, AuraEffectHandleModes.Skill, true);
+                    refreshSkillBonusAuras();
 
                     // Learn all spells for skill
                     LearnSkillRewardedSpells(id, newVal, GetRace());
@@ -1734,14 +1680,14 @@ namespace Game.Entities
 
             return -1;
         }
-
-        int FindProfessionSlotFor(uint skillId)
+        
+        int FindEmptyProfessionSlotFor(uint skillId)
         {
             SkillLineRecord skillEntry = CliDB.SkillLineStorage.LookupByKey(skillId);
             if (skillEntry == null)
                 return -1;
 
-            if (skillEntry.ParentSkillLineID != 0 || skillEntry.CategoryID != SkillCategory.Profession) 
+            if (skillEntry.ParentSkillLineID != 0 || skillEntry.CategoryID != SkillCategory.Profession)
                 return -1;
 
             int index = 0;

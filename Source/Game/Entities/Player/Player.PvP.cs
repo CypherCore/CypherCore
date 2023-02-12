@@ -235,7 +235,7 @@ namespace Game.Entities
 
             var rewardCurrencyTypes = Global.DB2Mgr.GetRewardPackCurrencyTypesByRewardID(rewardPackEntry.Id);
             foreach (RewardPackXCurrencyTypeRecord currency in rewardCurrencyTypes)
-                ModifyCurrency(currency.CurrencyTypeID, currency.Quantity);
+                AddCurrency(currency.CurrencyTypeID, (uint)currency.Quantity/* TODO: CurrencyGainSource */);
 
             var rewardPackXItems = Global.DB2Mgr.GetRewardPackItemsByRewardID(rewardPackEntry.Id);
             foreach (RewardPackXItemRecord rewardPackXItem in rewardPackXItems)

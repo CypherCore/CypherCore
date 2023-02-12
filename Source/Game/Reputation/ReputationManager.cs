@@ -222,7 +222,7 @@ namespace Game
 
             CurrencyTypesRecord currency = CliDB.CurrencyTypesStorage.LookupByKey(renownFactionEntry.RenownCurrencyID);
             if (currency != null)
-                return (int)_player.GetCurrency(currency.Id);
+                return (int)_player.GetCurrencyQuantity(currency.Id);
 
             return 0;
         }
@@ -246,7 +246,7 @@ namespace Game
 
             CurrencyTypesRecord currency = CliDB.CurrencyTypesStorage.LookupByKey(renownFactionEntry.RenownCurrencyID);
             if (currency != null)
-                return (int)currency.MaxQty;
+                return (int)_player.GetCurrencyMaxQuantity(currency);
 
             return 0;
         }
@@ -482,7 +482,7 @@ namespace Game
             if (factionState != null)
             {
                 // Ignore renown reputation already raised to the maximum level
-                if (HasMaximumRenownReputation(factionEntry))
+                if (HasMaximumRenownReputation(factionEntry) && standing > 0)
                 {
                     factionState.needSend = false;
                     factionState.needSave = false;
@@ -548,8 +548,9 @@ namespace Game
 
                         factionState.VisualStandingIncrease = reputationChange;
 
+                        // If the reputation is decreased by command, we will send CurrencyDestroyReason::Cheat
                         if (oldRenownLevel != newRenownLevel)
-                            _player.ModifyCurrency(currency.Id, newRenownLevel - oldRenownLevel, false);
+                            _player.ModifyCurrency(currency.Id, newRenownLevel - oldRenownLevel, CurrencyGainSource.RenownRepGain, CurrencyDestroyReason.Cheat);
                     }
                 }
 

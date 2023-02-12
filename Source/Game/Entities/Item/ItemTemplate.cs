@@ -1,6 +1,7 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Configuration;
 using Framework.Constants;
 using Game.DataStorage;
 using System;
@@ -63,22 +64,26 @@ namespace Game.Entities
             return false;
         }
 
-        public SkillType GetSkill()
+        static SkillType[] item_weapon_skills =
         {
-            SkillType[] item_weapon_skills =
-            {
-                SkillType.Axes,             SkillType.TwoHandedAxes,    SkillType.Bows,     SkillType.Guns,             SkillType.Maces,
-                SkillType.TwoHandedMaces,   SkillType.Polearms,         SkillType.Swords,   SkillType.TwoHandedSwords,  SkillType.Warglaives,
-                SkillType.Staves,           0,                          0,                  SkillType.FistWeapons,      0,
-                SkillType.Daggers,          0,                          0,                  SkillType.Crossbows,        SkillType.Wands,
-                SkillType.Fishing
-            };
+            SkillType.Axes,             SkillType.TwoHandedAxes,    SkillType.Bows,     SkillType.Guns,             SkillType.Maces,
+            SkillType.TwoHandedMaces,   SkillType.Polearms,         SkillType.Swords,   SkillType.TwoHandedSwords,  SkillType.Warglaives,
+            SkillType.Staves,           0,                          0,                  SkillType.FistWeapons,      0,
+            SkillType.Daggers,          0,                          0,                  SkillType.Crossbows,        SkillType.Wands,
+            SkillType.Fishing
+        };
 
-            SkillType[] item_armor_skills =
-            {
-                0, SkillType.Cloth, SkillType.Leather, SkillType.Mail, SkillType.PlateMail, 0, SkillType.Shield, 0, 0, 0, 0, 0
-            };
+        static SkillType[] item_armor_skills =
+        {
+            0, SkillType.Cloth, SkillType.Leather, SkillType.Mail, SkillType.PlateMail, 0, SkillType.Shield, 0, 0, 0, 0, 0
+        };
 
+        static SkillType[] itemProfessionSkills =
+        {
+            SkillType.Blacksmithing, SkillType.Leatherworking, SkillType.Alchemy,     SkillType.Herbalism,  SkillType.Cooking,
+            SkillType.Mining,        SkillType.Tailoring,      SkillType.Engineering, SkillType.Enchanting, SkillType.Fishing,
+            SkillType.Skinning,      SkillType.Jewelcrafting,  SkillType.Inscription, SkillType.Archaeology
+        };
             SkillType[] item_profession_skills =
             {
                 SkillType.Blacksmithing, SkillType.Leatherworking, SkillType.Alchemy, SkillType.Herbalism, SkillType.Cooking,
@@ -89,6 +94,8 @@ namespace Game.Entities
                 SkillType.ClassicSkinning, SkillType.ClassicJewelcrafting, SkillType.ClassicInscription
             };
 
+        public SkillType GetSkill()
+        {
             switch (GetClass())
             {
                 case ItemClass.Weapon:
@@ -96,7 +103,6 @@ namespace Game.Entities
                         return 0;
                     else
                         return item_weapon_skills[GetSubClass()];
-
                 case ItemClass.Armor:
                     if (GetSubClass() >= (int)ItemSubClassArmor.Max)
                         return 0;
@@ -104,10 +110,17 @@ namespace Game.Entities
                         return item_armor_skills[GetSubClass()];
 
                 case ItemClass.Profession:
-                    if (GetSubClass() >= (int)ItemSubclassPorfession.Max)
-                        return 0;
+
+                    if (ConfigMgr.GetDefaultValue("Professions.AllowClassicProfessionSlots", false))
+                        if (GetSubClass() >= (int)ItemSubclassProfession.Max)
+                            return 0;
+                        else
+                            return item_profession_skills[GetSubClass()];
                     else
-                        return item_profession_skills[GetSubClass()];
+                        if (GetSubClass() >= (int)ItemSubclassProfession.Max)
+                            return 0;
+                        else
+                            return itemProfessionSkills[GetSubClass()];
 
                 default:
                     return 0;

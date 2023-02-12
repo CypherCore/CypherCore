@@ -306,7 +306,7 @@ namespace Game.Entities
                     SetActive(true);
                     break;
                 case GameObjectTypes.FishingNode:
-                    SetLevel(1);
+                    SetLevel(0);
                     SetGoAnimProgress(255);
                     break;
                 case GameObjectTypes.Trap:
@@ -391,8 +391,6 @@ namespace Game.Entities
 
         public override void Update(uint diff)
         {
-            m_Events.Update(diff);
-
             base.Update(diff);
 
             if (GetAI() != null)
@@ -479,18 +477,7 @@ namespace Game.Entities
                                 // splash bobber (bobber ready now)
                                 Unit caster = GetOwner();
                                 if (caster != null && caster.IsTypeId(TypeId.Player))
-                                {
-                                    SetGoState(GameObjectState.Active);
-                                    ReplaceAllFlags(GameObjectFlags.NoDespawn);
-
-                                    UpdateData udata = new(caster.GetMapId());
-                                    UpdateObject packet;
-                                    BuildValuesUpdateBlockForPlayer(udata, caster.ToPlayer());
-                                    udata.BuildPacket(out packet);
-                                    caster.ToPlayer().SendPacket(packet);
-
-                                    SendCustomAnim(GetGoAnimProgress());
-                                }
+                                    SendCustomAnim(0);
 
                                 m_lootState = LootState.Ready;                 // can be successfully open with some chance
                             }
@@ -621,7 +608,7 @@ namespace Game.Entities
                                 radius = goInfo.Trap.radius / 2.0f;
 
                             Unit target;
-                            
+                            // @todo this hack with search required until GO casting not implemented
                             if (GetOwner() != null || goInfo.Trap.Checkallunits != 0)
                             {
                                 // Hunter trap: Search units which are unfriendly to the trap's owner
@@ -2005,6 +1992,13 @@ namespace Game.Entities
                     {
                         case LootState.Ready:                              // ready for loot
                         {
+                            SetLootState(LootState.Activated, player);
+
+                            SetGoState(GameObjectState.Active);
+                            ReplaceAllFlags(GameObjectFlags.InMultiUse);
+
+                            SendUpdateToPlayer(player);
+
                             uint zone, subzone;
                             GetZoneAndAreaId(out zone, out subzone);
 
@@ -4061,13 +4055,14 @@ namespace Game.Entities
                     Vector3 next = new(newAnimation.Pos.X, newAnimation.Pos.Y, newAnimation.Pos.Z);
 
                     Vector3 dst = next;
-
                     if (prev != next)
                     {
                         float animProgress = (float)(newProgress - oldAnimation.TimeIndex) / (float)(newAnimation.TimeIndex - oldAnimation.TimeIndex);
+
                         dst = pathRotation.Multiply(Vector3.Lerp(prev, next, animProgress));
                     }
 
+                    dst = pathRotation.Multiply(dst);
                     dst += _owner.GetStationaryPosition();
 
                     _owner.GetMap().GameObjectRelocation(_owner, dst.X, dst.Y, dst.Z, _owner.GetOrientation());
@@ -4081,9 +4076,11 @@ namespace Game.Entities
                     Quaternion next = new(newRotation.Rot[0], newRotation.Rot[1], newRotation.Rot[2], newRotation.Rot[3]);
 
                     Quaternion rotation = next;
+
                     if (prev != next)
                     {
                         float animProgress = (float)(newProgress - oldRotation.TimeIndex) / (float)(newRotation.TimeIndex - oldRotation.TimeIndex);
+
                         rotation = Quaternion.Lerp(prev, next, animProgress);
                     }
 

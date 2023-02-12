@@ -105,6 +105,7 @@ namespace Framework.Constants
 
         public const byte End = 30;
         public const byte Start = Profession1Tool;
+        public const byte MaxCount = Profession2Tool - Profession1Tool;
     }
 
     public struct InventorySlots
@@ -886,7 +887,7 @@ namespace Framework.Constants
         Max = 1
     }
 
-    public enum ItemSubclassPorfession
+    public enum ItemSubclassProfession
     {
         Blacksmithing = 0,
         Leatherworking = 1,
@@ -1282,20 +1283,13 @@ namespace Framework.Constants
         MawPower = 4
     }
 
-    public enum CurrencyFlags
-    {
-        Tradeable = 0x01,
-        // ...
-        HighPrecision = 0x08,
-        // ...
-    }
-
     public enum CurrencyTypes
     {
         JusticePoints = 395,
         ValorPoints = 396,
         ApexisCrystals = 823,
-        Azerite = 1553
+        Azerite = 1553,
+        AncientMana = 1155
     }
 
     public enum PlayerCurrencyState

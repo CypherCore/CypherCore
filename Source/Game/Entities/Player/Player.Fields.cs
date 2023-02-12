@@ -346,7 +346,9 @@ namespace Game.Entities
         public uint Quantity;
         public uint WeeklyQuantity;
         public uint TrackedQuantity;
-        public byte Flags;
+        public uint IncreasedCapQuantity;
+        public uint EarnedQuantity;
+        public CurrencyDbFlags Flags;
     }
 
     public class SpecializationInfo

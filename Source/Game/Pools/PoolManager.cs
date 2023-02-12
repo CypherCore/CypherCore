@@ -147,16 +147,6 @@ namespace Game
                             continue;
                         }
 
-                        GameObjectTemplate goinfo = Global.ObjectMgr.GetGameObjectTemplate(data.Id);
-                        if (goinfo.type != GameObjectTypes.Chest &&
-                            goinfo.type != GameObjectTypes.FishingHole &&
-                            goinfo.type != GameObjectTypes.GatheringNode &&
-                            goinfo.type != GameObjectTypes.Goober)
-                        {
-                            Log.outError(LogFilter.Sql, "`pool_gameobject` has a not lootable gameobject spawn (GUID: {0}, type: {1}) defined for pool id ({2}), skipped.", guid, goinfo.type, pool_id);
-                            continue;
-                        }
-
                         if (!mPoolTemplate.ContainsKey(pool_id))
                         {
                             Log.outError(LogFilter.Sql, "`pool_gameobject` pool id ({0}) is not in `pool_template`, skipped.", pool_id);

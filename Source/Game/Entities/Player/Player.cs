@@ -252,8 +252,6 @@ namespace Game.Entities
             InitRunes();
 
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Coinage), (ulong)WorldConfig.GetIntValue(WorldCfg.StartPlayerMoney));
-            SetCreateCurrency(CurrencyTypes.ApexisCrystals, WorldConfig.GetUIntValue(WorldCfg.CurrencyStartApexisCrystals));
-            SetCreateCurrency(CurrencyTypes.JusticePoints, WorldConfig.GetUIntValue(WorldCfg.CurrencyStartJusticePoints));
 
             // Played time
             m_Last_tick = GameTime.GetGameTime();
@@ -1096,23 +1094,223 @@ namespace Game.Entities
             SendPacket(petSpells);
         }
 
-        //Currency - Money
-        void SetCreateCurrency(CurrencyTypes id, uint count, bool printLog = true)
+        //Currency
+        void SetCreateCurrency(CurrencyTypes id, uint amount)
         {
-            var playerCurrency = _currencyStorage.LookupByKey(id);
-            if (playerCurrency == null)
+            SetCreateCurrency((uint)id, amount);
+        }
+
+        void SetCreateCurrency(uint id, uint amount)
+        {
+            if (!_currencyStorage.ContainsKey(id))
             {
-                PlayerCurrency cur = new();
-                cur.state = PlayerCurrencyState.New;
-                cur.Quantity = count;
-                cur.WeeklyQuantity = 0;
-                cur.TrackedQuantity = 0;
-                cur.Flags = 0;
-                _currencyStorage[(uint)id] = cur;
+                PlayerCurrency playerCurrency = new();
+                playerCurrency.state = PlayerCurrencyState.New;
+                playerCurrency.Quantity = amount;
+                _currencyStorage.Add(id, playerCurrency);
             }
         }
 
-        public uint GetCurrency(uint id)
+        public void ModifyCurrency(uint id, int amount, CurrencyGainSource gainSource = CurrencyGainSource.Cheat, CurrencyDestroyReason destroyReason = CurrencyDestroyReason.Cheat)
+        {
+            if (amount == 0)
+                return;
+
+            CurrencyTypesRecord currency = CliDB.CurrencyTypesStorage.LookupByKey(id);
+            Cypher.Assert(currency != null);
+
+            // Check faction
+            if ((currency.IsAlliance() && GetTeam() != Team.Alliance) ||
+                (currency.IsHorde() && GetTeam() != Team.Horde))
+                return;
+
+            // Check award condition
+            if (currency.AwardConditionID != 0)
+            {
+                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(currency.AwardConditionID);
+                if (playerCondition != null && !ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
+                    return;
+            }
+
+            bool isGainOnRefund = false;
+
+            if (gainSource == CurrencyGainSource.ItemRefund ||
+                gainSource == CurrencyGainSource.GarrisonBuildingRefund ||
+                gainSource == CurrencyGainSource.PlayerTraitRefund)
+                isGainOnRefund = true;
+
+            if (amount > 0 && !isGainOnRefund && gainSource != CurrencyGainSource.Vendor)
+            {
+                amount = (int)(amount * GetTotalAuraMultiplierByMiscValue(AuraType.ModCurrencyGain, (int)id));
+                amount = (int)(amount * GetTotalAuraMultiplierByMiscValue(AuraType.ModCurrencyCategoryGainPct, currency.CategoryID));
+            }
+
+            int scaler = currency.GetScaler();
+
+            // Currency that is immediately converted into reputation with that faction instead
+            FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(currency.FactionID);
+            if (factionEntry != null)
+            {
+                amount /= scaler;
+                GetReputationMgr().ModifyReputation(factionEntry, amount, false, true);
+                return;
+            }
+
+            // Azerite
+            if (id == (uint)CurrencyTypes.Azerite)
+            {
+                if (amount > 0)
+                {
+                    Item heartOfAzeroth = GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
+                    if (heartOfAzeroth != null)
+                        heartOfAzeroth.ToAzeriteItem().GiveXP((ulong)amount);
+                }
+                return;
+            }
+
+            var playerCurrency = _currencyStorage.LookupByKey(id);
+            if (playerCurrency == null)
+            {
+                playerCurrency = new();
+                playerCurrency.state = PlayerCurrencyState.New;
+                _currencyStorage.Add(id, playerCurrency);
+            }
+
+            // Weekly cap
+            uint weeklyCap = GetCurrencyWeeklyCap(currency);
+            if (weeklyCap != 0 && amount > 0 && (playerCurrency.WeeklyQuantity + amount) > weeklyCap)
+                if (!isGainOnRefund) // Ignore weekly cap for refund
+                    amount = (int)(weeklyCap - playerCurrency.WeeklyQuantity);
+
+            // Max cap
+            uint maxCap = GetCurrencyMaxQuantity(currency, false, gainSource == CurrencyGainSource.UpdatingVersion);
+            if (maxCap != 0 && amount > 0 && (playerCurrency.Quantity + amount) > maxCap)
+                amount = (int)(maxCap - playerCurrency.Quantity);
+
+            // Underflow protection
+            if (amount < 0 && Math.Abs(amount) > playerCurrency.Quantity)
+                amount = (int)(playerCurrency.Quantity * -1);
+
+            if (amount == 0)
+                return;
+
+            if (playerCurrency.state != PlayerCurrencyState.New)
+                playerCurrency.state = PlayerCurrencyState.Changed;
+
+            playerCurrency.Quantity += (uint)amount;
+
+            if (amount > 0 && !isGainOnRefund) // Ignore total values update for refund
+            {
+                if (weeklyCap != 0)
+                    playerCurrency.WeeklyQuantity += (uint)amount;
+
+                if (currency.IsTrackingQuantity())
+                    playerCurrency.TrackedQuantity += (uint)amount;
+
+                if (currency.HasTotalEarned())
+                    playerCurrency.EarnedQuantity += (uint)amount;
+
+                UpdateCriteria(CriteriaType.CurrencyGained, id, (ulong)amount);
+            }
+
+            CurrencyChanged(id, amount);
+
+            SetCurrency packet = new();
+            packet.Type = currency.Id;
+            packet.Quantity = (int)playerCurrency.Quantity;
+            packet.Flags = CurrencyGainFlags.None; // TODO: Check when flags are applied
+
+            if ((playerCurrency.WeeklyQuantity / currency.GetScaler()) > 0)
+                packet.WeeklyQuantity = (int)playerCurrency.WeeklyQuantity;
+
+            if (currency.HasMaxQuantity(false, gainSource == CurrencyGainSource.UpdatingVersion))
+                packet.MaxQuantity = (int)GetCurrencyMaxQuantity(currency);
+
+            if (currency.HasTotalEarned())
+                packet.TotalEarned = (int)playerCurrency.EarnedQuantity;
+
+            packet.SuppressChatLog = currency.IsSuppressingChatLog(gainSource == CurrencyGainSource.UpdatingVersion);
+            packet.QuantityChange = amount;
+
+            if (amount > 0)
+                packet.QuantityGainSource = gainSource;
+            else
+                packet.QuantityLostSource = destroyReason;
+
+            // TODO: FirstCraftOperationID, LastSpendTime & Toasts
+            SendPacket(packet);
+        }
+
+        public void AddCurrency(uint id, uint amount, CurrencyGainSource gainSource = CurrencyGainSource.Cheat)
+        {
+            ModifyCurrency(id, (int)amount, gainSource);
+        }
+
+        public void RemoveCurrency(uint id, int amount, CurrencyDestroyReason destroyReason = CurrencyDestroyReason.Cheat)
+        {
+            ModifyCurrency(id, -amount, default, destroyReason);
+        }
+
+        public void IncreaseCurrencyCap(uint id, uint amount)
+        {
+            if (amount == 0)
+                return;
+
+            CurrencyTypesRecord currency = CliDB.CurrencyTypesStorage.LookupByKey(id);
+            Cypher.Assert(currency != null);
+
+            // Check faction
+            if ((currency.IsAlliance() && GetTeam() != Team.Alliance) ||
+                (currency.IsHorde() && GetTeam() != Team.Horde))
+                return;
+
+            // Check dynamic maximum flag
+            if (!currency.GetFlags().HasFlag(CurrencyTypesFlags.DynamicMaximum))
+                return;
+
+            // Ancient mana maximum cap
+            if (id == (uint)CurrencyTypes.AncientMana)
+            {
+                uint maxQuantity = GetCurrencyMaxQuantity(currency);
+
+                if ((maxQuantity + amount) > PlayerConst.CurrencyMaxCapAncientMana)
+                    amount = PlayerConst.CurrencyMaxCapAncientMana - maxQuantity;
+            }
+
+            var playerCurrency = _currencyStorage.LookupByKey(id);
+            if (playerCurrency == null)
+            {
+                playerCurrency = new();
+                playerCurrency.state = PlayerCurrencyState.New;
+                playerCurrency.IncreasedCapQuantity = amount;
+                _currencyStorage[id] = playerCurrency;
+            }
+            else
+            {
+                playerCurrency.IncreasedCapQuantity += amount;
+            }
+
+            if (playerCurrency.state != PlayerCurrencyState.New)
+                playerCurrency.state = PlayerCurrencyState.Changed;
+
+            SetCurrency packet = new();
+            packet.Type = currency.Id;
+            packet.Quantity = (int)playerCurrency.Quantity;
+            packet.Flags = CurrencyGainFlags.None;
+
+            if ((playerCurrency.WeeklyQuantity / currency.GetScaler()) > 0)
+                packet.WeeklyQuantity = (int)playerCurrency.WeeklyQuantity;
+
+            if (currency.IsTrackingQuantity())
+                packet.TrackedQuantity = (int)playerCurrency.TrackedQuantity;
+
+            packet.MaxQuantity = (int)GetCurrencyMaxQuantity(currency);
+            packet.SuppressChatLog = currency.IsSuppressingChatLog();
+
+            SendPacket(packet);
+        }
+
+        public uint GetCurrencyQuantity(uint id)
         {
             var playerCurrency = _currencyStorage.LookupByKey(id);
             if (playerCurrency == null)
@@ -1121,169 +1319,7 @@ namespace Game.Entities
             return playerCurrency.Quantity;
         }
 
-        public void ModifyCurrency(uint id, int count, bool printLog = true, bool ignoreMultipliers = false)
-        {
-            if (count == 0)
-                return;
-
-            CurrencyTypesRecord currency = CliDB.CurrencyTypesStorage.LookupByKey(id);
-            Cypher.Assert(currency != null);
-
-            if (!ignoreMultipliers)
-                count *= (int)GetTotalAuraMultiplierByMiscValue(AuraType.ModCurrencyGain, (int)id);
-
-            // Currency that is immediately converted into reputation with that faction instead
-            FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(currency.FactionID);
-            if (factionEntry != null)
-            {
-                if (currency.Flags[0].HasAnyFlag((int)CurrencyFlags.HighPrecision))
-                    count /= 100;
-                GetReputationMgr().ModifyReputation(factionEntry, count, false, true);
-                return;
-            }
-
-            if (id == (uint)CurrencyTypes.Azerite)
-            {
-                if (count > 0)
-                {
-                    Item heartOfAzeroth = GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
-                    if (heartOfAzeroth != null)
-                        heartOfAzeroth.ToAzeriteItem().GiveXP((ulong)count);
-                }
-                return;
-            }
-
-            uint oldTotalCount = 0;
-            uint oldWeekCount = 0;
-            uint oldTrackedCount = 0;
-
-            var playerCurrency = _currencyStorage.LookupByKey(id);
-            if (playerCurrency == null)
-            {
-                PlayerCurrency cur = new();
-                cur.state = PlayerCurrencyState.New;
-                cur.Quantity = 0;
-                cur.WeeklyQuantity = 0;
-                cur.TrackedQuantity = 0;
-                cur.Flags = 0;
-                _currencyStorage[id] = cur;
-                playerCurrency = _currencyStorage.LookupByKey(id);
-            }
-            else
-            {
-                oldTotalCount = playerCurrency.Quantity;
-                oldWeekCount = playerCurrency.WeeklyQuantity;
-                oldTrackedCount = playerCurrency.TrackedQuantity;
-            }
-
-            // count can't be more then weekCap if used (weekCap > 0)
-            uint weekCap = GetCurrencyWeekCap(currency);
-            if (weekCap != 0 && count > weekCap)
-                count = (int)weekCap;
-
-            // count can't be more then totalCap if used (totalCap > 0)
-            uint totalCap = GetCurrencyTotalCap(currency);
-            if (totalCap != 0 && count > totalCap)
-                count = (int)totalCap;
-
-            int newTrackedCount = (int)(oldTrackedCount) + (count > 0 ? count : 0);
-            if (newTrackedCount < 0)
-                newTrackedCount = 0;
-
-            int newTotalCount = (int)oldTotalCount + count;
-            if (newTotalCount < 0)
-                newTotalCount = 0;
-
-            int newWeekCount = (int)oldWeekCount + (count > 0 ? count : 0);
-            if (newWeekCount < 0)
-                newWeekCount = 0;
-
-            // if we get more then weekCap just set to limit
-            if (weekCap != 0 && weekCap < newWeekCount)
-            {
-                newWeekCount = (int)weekCap;
-                // weekCap - oldWeekCount always >= 0 as we set limit before!
-                newTotalCount = (int)(oldTotalCount + (weekCap - oldWeekCount));
-            }
-
-            // if we get more then totalCap set to maximum;
-            if (totalCap != 0 && totalCap < newTotalCount)
-            {
-                newTotalCount = (int)totalCap;
-                newWeekCount = (int)weekCap;
-            }
-
-            if (newTotalCount != oldTotalCount)
-            {
-                if (playerCurrency.state != PlayerCurrencyState.New)
-                    playerCurrency.state = PlayerCurrencyState.Changed;
-
-                CurrencyChanged(id, count);
-
-                playerCurrency.Quantity = (uint)newTotalCount;
-                playerCurrency.WeeklyQuantity = (uint)newWeekCount;
-                playerCurrency.TrackedQuantity = (uint)newTrackedCount;
-
-                if (count > 0)
-                    UpdateCriteria(CriteriaType.CurrencyGained, id, (uint)count);
-
-                _currencyStorage[id] = playerCurrency;
-
-                SetCurrency packet = new();
-                packet.Type = id;
-                packet.Quantity = newTotalCount;
-                packet.SuppressChatLog = !printLog;
-                packet.WeeklyQuantity = newWeekCount;
-                packet.TrackedQuantity = newTrackedCount;
-                packet.Flags = playerCurrency.Flags;
-                packet.QuantityChange = count;
-
-                SendPacket(packet);
-            }
-        }
-
-        public bool HasCurrency(uint id, uint count)
-        {
-            var playerCurrency = _currencyStorage.LookupByKey(id);
-            return playerCurrency != null && playerCurrency.Quantity >= count;
-        }
-        public uint GetCurrencyWeekCap(CurrencyTypes id)
-        {
-            CurrencyTypesRecord entry = CliDB.CurrencyTypesStorage.LookupByKey((uint)id);
-            if (entry == null)
-                return 0;
-
-            return GetCurrencyWeekCap(entry);
-        }
-        public uint GetCurrencyWeekCap(CurrencyTypesRecord currency)
-        {
-            return currency.MaxEarnablePerWeek;
-        }
-        uint GetCurrencyTotalCap(CurrencyTypesRecord currency)
-        {
-            uint cap = currency.MaxQty;
-
-            switch ((CurrencyTypes)currency.Id)
-            {
-                case CurrencyTypes.ApexisCrystals:
-                {
-                    uint apexiscap = WorldConfig.GetUIntValue(WorldCfg.CurrencyMaxApexisCrystals);
-                    if (apexiscap > 0)
-                        cap = apexiscap;
-                    break;
-                }
-                case CurrencyTypes.JusticePoints:
-                {
-                    uint justicecap = WorldConfig.GetUIntValue(WorldCfg.CurrencyMaxJusticePoints);
-                    if (justicecap > 0)
-                        cap = justicecap;
-                    break;
-                }
-            }
-
-            return cap;
-        }
-        uint GetCurrencyOnWeek(CurrencyTypes id)
+        public uint GetCurrencyWeeklyQuantity(uint id)
         {
             var playerCurrency = _currencyStorage.LookupByKey(id);
             if (playerCurrency == null)
@@ -1291,12 +1327,60 @@ namespace Game.Entities
 
             return playerCurrency.WeeklyQuantity;
         }
-        public uint GetTrackedCurrencyCount(uint id)
+
+        public uint GetCurrencyTrackedQuantity(uint id)
         {
-            if (!_currencyStorage.ContainsKey(id))
+            var playerCurrency = _currencyStorage.LookupByKey(id);
+            if (playerCurrency == null)
                 return 0;
 
-            return _currencyStorage[id].TrackedQuantity;
+            return playerCurrency.TrackedQuantity;
+        }
+
+        uint GetCurrencyIncreasedCapQuantity(uint id)
+        {
+            var playerCurrency = _currencyStorage.LookupByKey(id);
+            if (playerCurrency == null)
+                return 0;
+
+            return playerCurrency.IncreasedCapQuantity;
+        }
+
+        public uint GetCurrencyMaxQuantity(CurrencyTypesRecord currency, bool onLoad = false, bool onUpdateVersion = false)
+        {
+            if (!currency.HasMaxQuantity(onLoad, onUpdateVersion))
+                return 0;
+
+            uint maxQuantity = currency.MaxQty;
+            if (currency.MaxQtyWorldStateID != 0)
+                maxQuantity = (uint)Global.WorldStateMgr.GetValue(currency.MaxQtyWorldStateID, GetMap());
+
+            uint increasedCap = 0;
+            if (currency.GetFlags().HasFlag(CurrencyTypesFlags.DynamicMaximum))
+                increasedCap = GetCurrencyIncreasedCapQuantity(currency.Id);
+
+            return maxQuantity + increasedCap;
+        }
+
+        uint GetCurrencyWeeklyCap(uint id)
+        {
+            CurrencyTypesRecord currency = CliDB.CurrencyTypesStorage.LookupByKey(id);
+            if (currency == null)
+                return 0;
+
+            return GetCurrencyWeeklyCap(currency);
+        }
+
+        uint GetCurrencyWeeklyCap(CurrencyTypesRecord currency)
+        {
+            // TODO: CurrencyTypeFlags::ComputedWeeklyMaximum
+            return currency.MaxEarnablePerWeek;
+        }
+
+        public bool HasCurrency(uint id, uint amount)
+        {
+            var playerCurrency = _currencyStorage.LookupByKey(id);
+            return playerCurrency != null && playerCurrency.Quantity >= amount;
         }
 
         //Action Buttons - CUF Profile
@@ -1823,7 +1907,7 @@ namespace Game.Entities
 
                 // remove all dyn objects
                 RemoveAllDynObjects();
-                
+
                 // remove all areatriggers entities
                 RemoveAllAreaTriggers();
 
@@ -5827,49 +5911,50 @@ namespace Game.Entities
             return true;
         }
 
-        void SendNewCurrency(uint id)
-        {
-            var Curr = _currencyStorage.LookupByKey(id);
-            if (Curr == null)
-                return;
-
-            CurrencyTypesRecord entry = CliDB.CurrencyTypesStorage.LookupByKey(id);
-            if (entry == null) // should never happen
-                return;
-
-            SetupCurrency packet = new();
-            SetupCurrency.Record record = new();
-            record.Type = entry.Id;
-            record.Quantity = Curr.Quantity;
-            record.WeeklyQuantity = Curr.WeeklyQuantity;
-            record.MaxWeeklyQuantity = GetCurrencyWeekCap(entry);
-            record.TrackedQuantity = Curr.TrackedQuantity;
-            record.Flags = Curr.Flags;
-
-            packet.Data.Add(record);
-
-            SendPacket(packet);
-        }
-
         void SendCurrencies()
         {
             SetupCurrency packet = new();
 
-            foreach (var pair in _currencyStorage)
+            foreach (var (id, currency) in _currencyStorage)
             {
-                CurrencyTypesRecord entry = CliDB.CurrencyTypesStorage.LookupByKey(pair.Key);
-
-                // not send init meta currencies.
-                if (entry == null || entry.CategoryID == 89) //CURRENCY_CATEGORY_META_CONQUEST
+                CurrencyTypesRecord currencyRecord = CliDB.CurrencyTypesStorage.LookupByKey(id);
+                if (currencyRecord == null)
                     continue;
 
+                // Check faction
+                if ((currencyRecord.IsAlliance() && GetTeam() != Team.Alliance) ||
+                    (currencyRecord.IsHorde() && GetTeam() != Team.Horde))
+                    continue;
+
+                // Check award condition
+                if (currencyRecord.AwardConditionID != 0)
+                {
+                    PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(currencyRecord.AwardConditionID);
+                    if (playerCondition != null && !ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
+                        continue;
+                }
+
                 SetupCurrency.Record record = new();
-                record.Type = entry.Id;
-                record.Quantity = pair.Value.Quantity;
-                record.WeeklyQuantity = pair.Value.WeeklyQuantity;
-                record.MaxWeeklyQuantity = GetCurrencyWeekCap(entry);
-                record.TrackedQuantity = pair.Value.TrackedQuantity;
-                record.Flags = pair.Value.Flags;
+                record.Type = currencyRecord.Id;
+                record.Quantity = currency.Quantity;
+
+                if ((currency.WeeklyQuantity / currencyRecord.GetScaler()) > 0)
+                    record.WeeklyQuantity = currency.WeeklyQuantity;
+
+                if (currencyRecord.HasMaxEarnablePerWeek())
+                    record.MaxWeeklyQuantity = GetCurrencyWeeklyCap(currencyRecord);
+
+                if (currencyRecord.IsTrackingQuantity())
+                    record.TrackedQuantity = currency.TrackedQuantity;
+
+                if (currencyRecord.HasTotalEarned())
+                    record.TotalEarned = (int)currency.EarnedQuantity;
+
+                if (currencyRecord.HasMaxQuantity(true))
+                    record.MaxQuantity = (int)GetCurrencyMaxQuantity(currencyRecord, true);
+
+                record.Flags = (byte)currency.Flags;
+                record.Flags = (byte)(record.Flags & ~(int)CurrencyDbFlags.UnusedFlags);
 
                 packet.Data.Add(record);
             }
@@ -7401,11 +7486,11 @@ namespace Game.Entities
         }
 
         //Helpers
-        public void AddGossipItem(GossipOptionNpc optionNpc, string text, uint sender, uint action) 
+        public void AddGossipItem(GossipOptionNpc optionNpc, string text, uint sender, uint action)
         {
             PlayerTalkClass.GetGossipMenu().AddMenuItem(0, -1, optionNpc, text, 0, GossipOptionFlags.None, null, 0, 0, false, 0, "", null, null, sender, action);
         }
-        public void AddGossipItem(GossipOptionNpc optionNpc, string text, uint sender, uint action, string popupText, uint popupMoney, bool coded) 
+        public void AddGossipItem(GossipOptionNpc optionNpc, string text, uint sender, uint action, string popupText, uint popupMoney, bool coded)
         {
             PlayerTalkClass.GetGossipMenu().AddMenuItem(0, -1, optionNpc, text, 0, GossipOptionFlags.None, null, 0, 0, coded, popupMoney, popupText, null, null, sender, action);
         }

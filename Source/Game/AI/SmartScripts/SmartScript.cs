@@ -34,7 +34,7 @@ namespace Game.AI
         ObjectGuid _meOrigGUID;
         GameObject _go;
         ObjectGuid _goOrigGUID;
-        Player _atPlayer;
+        Player _player;
         AreaTriggerRecord _trigger;
         AreaTrigger _areaTrigger;
         SceneTemplate _sceneTemplate;
@@ -1135,7 +1135,7 @@ namespace Game.AI
                 {
                     SmartActionSummonCreatureFlags flags = (SmartActionSummonCreatureFlags)e.Action.summonCreature.flags;
                     bool preferUnit = flags.HasAnyFlag(SmartActionSummonCreatureFlags.PreferUnit);
-                    WorldObject summoner = preferUnit ? unit : GetBaseObjectOrPlayerTrigger() ?? unit;
+                    WorldObject summoner = preferUnit ? unit : GetBaseObjectOrUnitInvoker(unit);
                     if (summoner == null)
                         break;
 
@@ -1175,7 +1175,7 @@ namespace Game.AI
                 }
                 case SmartActions.SummonGo:
                 {
-                    WorldObject summoner = GetBaseObjectOrUnit(unit);
+                    WorldObject summoner = GetBaseObjectOrUnitInvoker(unit);
                     if (!summoner)
                         break;
 
@@ -2478,7 +2478,7 @@ namespace Game.AI
                 }
                 case SmartActions.TriggerGameEvent:
                 {
-                    WorldObject sourceObject = GetBaseObjectOrUnit(unit);
+                    WorldObject sourceObject = GetBaseObjectOrUnitInvoker(unit);
                     foreach (WorldObject target in targets)
                     {
                         if (e.Action.triggerGameEvent.useSaiTargetAsGameEventSource != 0)
@@ -2580,7 +2580,7 @@ namespace Game.AI
                     scriptTrigger = tempLastInvoker;
             }
 
-            WorldObject baseObject = GetBaseObjectOrPlayerTrigger();
+            WorldObject baseObject = GetBaseObject();
 
             List<WorldObject> targets = new();
             switch (e.GetTargetType())
@@ -3033,7 +3033,7 @@ namespace Game.AI
         List<WorldObject> GetWorldObjectsInDist(float dist)
         {
             List<WorldObject> targets = new();
-            WorldObject obj = GetBaseObjectOrPlayerTrigger();
+            WorldObject obj = GetBaseObject();
             if (obj == null)
                 return targets;
 
@@ -3980,46 +3980,45 @@ namespace Game.AI
             {
                 _scriptType = SmartScriptType.AreaTrigger;
                 _trigger = at;
-                _atPlayer = obj.ToPlayer();
+                _player = obj.ToPlayer();
 
-                if (_atPlayer == null)
+                if (_player == null)
                 {
-                    Log.outError(LogFilter.Scripts, $"SmartScript::OnInitialize: source is AreaTrigger with id {_trigger.Id}, missing trigger player");
+                    Log.outError(LogFilter.Misc, $"SmartScript::OnInitialize: source is AreaTrigger with id {_trigger.Id}, missing trigger player");
                     return;
                 }
 
-                Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is AreaTrigger {_trigger.Id}, triggered by player {_atPlayer.GetGUID()}");
-
+                Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is AreaTrigger with id {_trigger.Id}, triggered by player {_player.GetGUID()}");
             }
             else if (scene != null)
             {
                 _scriptType = SmartScriptType.Scene;
                 _sceneTemplate = scene;
-                _atPlayer = obj.ToPlayer();
+                _player = obj.ToPlayer();
 
-                if (_atPlayer == null)
+                if (_player == null)
                 {
-                    Log.outError(LogFilter.Scripts, $"SmartScript::OnInitialize: source is Scene with id {_sceneTemplate.SceneId}, missing trigger player");
+                    Log.outError(LogFilter.Misc, $"SmartScript::OnInitialize: source is Scene with id {_sceneTemplate.SceneId}, missing trigger player");
                     return;
                 }
 
-                Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is Scene with id {_sceneTemplate.SceneId}, triggered by player {_atPlayer.GetGUID()}");
+                Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is Scene with id {_sceneTemplate.SceneId}, triggered by player {_player.GetGUID()}");
             }
             else if (qst != null)
             {
                 _scriptType = SmartScriptType.Quest;
                 _quest = qst;
-                _atPlayer = obj.ToPlayer();
+                _player = obj.ToPlayer();
 
-                if (_atPlayer == null)
+                if (_player == null)
                 {
-                    Log.outError(LogFilter.Scripts, $"SmartScript::OnInitialize: source is Quest with id {_quest.Id}, missing trigger player");
+                    Log.outError(LogFilter.Misc, $"SmartScript::OnInitialize: source is Quest with id {qst.Id}, missing trigger player");
                     return;
                 }
 
-                Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is Quest with id {_quest.Id}, triggered by player {_atPlayer.GetGUID()}");
+                Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is Quest with id {qst.Id}, triggered by player {_player.GetGUID()}");
             }
-            else if (obj != null)
+            else if (obj != null) // Handle object based scripts
             {
                 switch (obj.GetTypeId())
                 {
@@ -4033,7 +4032,6 @@ namespace Game.AI
                         _scriptType = SmartScriptType.GameObject;
                         _go = obj.ToGameObject();
                         Log.outDebug(LogFilter.Scripts, $"SmartScript.OnInitialize: source is GameObject {_go.GetEntry()}");
-
                         break;
                     case TypeId.AreaTrigger:
                         _areaTrigger = obj.ToAreaTrigger();
@@ -4179,7 +4177,9 @@ namespace Game.AI
         }
 
         public void SetPathId(uint id) { _pathId = id; }
+
         public uint GetPathId() { return _pathId; }
+
         WorldObject GetBaseObject()
         {
             WorldObject obj = null;
@@ -4189,28 +4189,25 @@ namespace Game.AI
                 obj = _go;
             else if (_areaTrigger != null)
                 obj = _areaTrigger;
+            else if (_player != null)
+                obj = _player;
 
             return obj;
         }
-        WorldObject GetBaseObjectOrUnit(Unit unit)
-        {
-            WorldObject summoner = GetBaseObject();
 
-            if (!summoner && unit)
-                return unit;
-
-            return summoner;
-        }
-        WorldObject GetBaseObjectOrPlayerTrigger()
+        WorldObject GetBaseObjectOrUnitInvoker(Unit invoker)
         {
-            return _trigger != null ? _atPlayer : GetBaseObject();
+            return GetBaseObject() ?? invoker;
         }
 
         public bool HasAnyEventWithFlag(SmartEventFlags flag) { return _allEventFlags.HasAnyFlag(flag); }
         
         public bool IsUnit(WorldObject obj) { return obj != null && (obj.IsTypeId(TypeId.Unit) || obj.IsTypeId(TypeId.Player)); }
+
         public bool IsPlayer(WorldObject obj) { return obj != null && obj.IsTypeId(TypeId.Player); }
+
         public bool IsCreature(WorldObject obj) { return obj != null && obj.IsTypeId(TypeId.Unit); }
+
         public bool IsCharmedCreature(WorldObject obj)
         {
             if (!obj)
@@ -4222,6 +4219,7 @@ namespace Game.AI
 
             return false;
         }
+
         public bool IsGameObject(WorldObject obj) { return obj != null && obj.IsTypeId(TypeId.GameObject); }
 
         bool IsSmart(Creature creature, bool silent = false)

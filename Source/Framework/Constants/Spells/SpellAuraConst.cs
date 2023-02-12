@@ -358,7 +358,7 @@ namespace Framework.Constants
         ModMoneyGain = 348,  // Modifies gold gains from source: [Misc = 0, Quests][Misc = 1, Loot]
         ModCurrencyGain = 349,
         Unk350 = 350,
-        ModCurrencyCategoryGainPct = 351, //NYI
+        ModCurrencyCategoryGainPct = 351,
         Unk352 = 352,
         ModCamouflage = 353,  // Nyi
         ModHealingDonePctVersusTargetHealth = 354,  // Restoration Shaman Mastery - Mod Healing Based On Target'S Health (Less = More Healing)

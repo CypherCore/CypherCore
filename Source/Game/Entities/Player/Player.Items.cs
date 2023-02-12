@@ -124,7 +124,7 @@ namespace Game.Entities
                 uint count = iece.CurrencyCount[i];
                 uint currencyid = iece.CurrencyID[i];
                 if (count != 0 && currencyid != 0)
-                    ModifyCurrency(currencyid, (int)count, true, true);
+                    AddCurrency(currencyid, count, CurrencyGainSource.ItemRefund);
             }
 
             // Grant back money
@@ -2592,7 +2592,7 @@ namespace Game.Entities
                         continue;
 
                     if (iece.CurrencyID[i] != 0)
-                        ModifyCurrency(iece.CurrencyID[i], -(int)(iece.CurrencyCount[i] * stacks), true, true);
+                        RemoveCurrency(iece.CurrencyID[i], (int)(iece.CurrencyCount[i] * stacks), CurrencyDestroyReason.Vendor);
                 }
             }
 
@@ -3318,7 +3318,7 @@ namespace Game.Entities
                 return false;
             }
 
-            ModifyCurrency(currency, (int)count, true, true);
+            AddCurrency(currency, count, CurrencyGainSource.Vendor);
             if (iece != null)
             {
                 for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i)
@@ -3337,7 +3337,7 @@ namespace Game.Entities
                     if (iece.Flags.HasAnyFlag((byte)((uint)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
                         continue;
 
-                    ModifyCurrency(iece.CurrencyID[i], -(int)(iece.CurrencyCount[i] * stacks), false, true);
+                    RemoveCurrency(iece.CurrencyID[i], (int)(iece.CurrencyCount[i] * stacks), CurrencyDestroyReason.Vendor);
                 }
             }
 
@@ -4971,80 +4971,67 @@ namespace Game.Entities
                     break;
                 case InventoryType.ProfessionTool:
                 case InventoryType.ProfessionGear:
-                        bool isProfessionTool = item.GetTemplate().GetInventoryType() == InventoryType.ProfessionTool;
+                {
+                    bool isProfessionTool = item.GetTemplate().GetInventoryType() == InventoryType.ProfessionTool;
 
-                        // Validate item class
-                        if (!(item.GetTemplate().GetClass() == ItemClass.Profession))
-                        {
-                            return ItemConst.NullSlot;
-                        }
-
-                        // Check if player has profession skill
-                        var itemSkill = item.GetTemplate().GetSkill();
-                        if (!HasSkill(itemSkill))
-                        {
-                            return ItemConst.NullSlot;
-                        }
-
-                        switch ((ItemSubclassPorfession)item.GetTemplate().GetSubClass())
-                        {
-                            case ItemSubclassPorfession.Cooking:
-                                slots[0] = isProfessionTool ? ProfessionSlots.CookingTool : ProfessionSlots.CookingGear1;
-                                break;
-                            case ItemSubclassPorfession.Fishing:
-                                {
-                                    // Fishing doesn't make use of gear slots (clientside)
-                                    if (!isProfessionTool)
-                                    {
-                                        return ItemConst.NullSlot;
-                                    }
-
-                                    slots[0] = ProfessionSlots.FishingTool;
-                                    break;
-                                }
-                            case ItemSubclassPorfession.Blacksmithing:
-                            case ItemSubclassPorfession.Leatherworking:
-                            case ItemSubclassPorfession.Alchemy:
-                            case ItemSubclassPorfession.Herbalism:
-                            case ItemSubclassPorfession.Mining:
-                            case ItemSubclassPorfession.Tailoring:
-                            case ItemSubclassPorfession.Engineering:
-                            case ItemSubclassPorfession.Enchanting:
-                            case ItemSubclassPorfession.Skinning:
-                            case ItemSubclassPorfession.Jewelcrafting:
-                            case ItemSubclassPorfession.Inscription:
-                                {
-                                    int professionSlot = GetProfessionSlotFor((uint)itemSkill);
-
-                                    if (professionSlot != -1)
-                                    {
-                                        bool isFirstProfession = (professionSlot == 0);
-
-                                        if (isProfessionTool)
-                                        {
-                                            slots[0] = isFirstProfession ? ProfessionSlots.Profession1Tool : ProfessionSlots.Profession2Tool;
-                                        }
-                                        else
-                                        {
-                                            slots[0] = isFirstProfession ? ProfessionSlots.Profession1Gear1 : ProfessionSlots.Profession2Gear1;
-                                            slots[1] = isFirstProfession ? ProfessionSlots.Profession1Gear2 : ProfessionSlots.Profession2Gear2;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        return ItemConst.NullSlot;
-                                    }
-
-                                    break;
-                                }
-                            default:
-                                return ItemConst.NullSlot;
-                        }
-
+                    // Validate item class
+                    if (!(item.GetTemplate().GetClass() == ItemClass.Profession))
                         return ItemConst.NullSlot;
+
+                    // Check if player has profession skill
+                    uint itemSkill = (uint)item.GetTemplate().GetSkill();
+                    if (!HasSkill(itemSkill))
+                        return ItemConst.NullSlot;
+
+                    switch ((ItemSubclassProfession)item.GetTemplate().GetSubClass())
+                    {
+                        case ItemSubclassProfession.Cooking:
+                            slots[0] = isProfessionTool ? ProfessionSlots.CookingTool : ProfessionSlots.CookingGear1;
+                            break;
+                        case ItemSubclassProfession.Fishing:
+                        {
+                            // Fishing doesn't make use of gear slots (clientside)
+                            if (!isProfessionTool)
+                                return ItemConst.NullSlot;
+
+                            slots[0] = ProfessionSlots.FishingTool;
+                            break;
+                        }
+                        case ItemSubclassProfession.Blacksmithing :
+                        case ItemSubclassProfession.Leatherworking :
+                        case ItemSubclassProfession.Alchemy :
+                        case ItemSubclassProfession.Herbalism :
+                        case ItemSubclassProfession.Mining :
+                        case ItemSubclassProfession.Tailoring :
+                        case ItemSubclassProfession.Engineering :
+                        case ItemSubclassProfession.Enchanting :
+                        case ItemSubclassProfession.Skinning :
+                        case ItemSubclassProfession.Jewelcrafting :
+                        case ItemSubclassProfession.Inscription :
+                        {
+                            int professionSlot = GetProfessionSlotFor(itemSkill);
+                            if (professionSlot == -1)
+                                return ItemConst.NullSlot;
+
+                            if (isProfessionTool)
+                                slots[0] = (byte)(ProfessionSlots.Profession1Tool + professionSlot * ProfessionSlots.MaxCount);
+                            else
+                            {
+                                slots[0] = (byte)(ProfessionSlots.Profession1Gear1 + professionSlot * ProfessionSlots.MaxCount);
+                                slots[0] = (byte)(ProfessionSlots.Profession1Gear2 + professionSlot * ProfessionSlots.MaxCount);
+                            }
+
+                            break;
+                        }
+                        default:
+                            return ItemConst.NullSlot;
+                    }
+                    break;
+                }
                 default:
                     return ItemConst.NullSlot;
             }
+
 
             if (slot != ItemConst.NullSlot)
             {

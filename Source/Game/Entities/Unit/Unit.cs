@@ -229,7 +229,7 @@ namespace Game.Entities
 
             // remove expired auras - do that after updates(used in scripts?)
             //GetOwnedAuras().CallOnMatch((pair) => (pair.Value != null && pair.Value.IsExpired()) || // it expired
-            //                                      (pair.Value.GetSpellInfo().IsChanneled() && pair.Value.GetCasterGUID() != GetGUID() && ObjectAccessor.Instance.GetWorldObject(this, pair.Value.GetCasterGUID()) != null), // OR object no longer in same map
+            //                                      (pair.Value.GetSpellInfo().IsChanneled() && pair.Value.GetCasterGUID() != GetGUID() && !Global.ObjAccessor.GetWorldObject(this, pair.Value.GetCasterGUID())), // OR object no longer in same map
             //                                      (pair) => RemoveOwnedAura(pair, AuraRemoveMode.Expire)); // then remove.
 
             GetOwnedAuras().CallOnMatch((pair) => pair.Value != null && pair.Value.IsExpired(), (pair) => RemoveOwnedAura(pair, AuraRemoveMode.Expire));
@@ -533,9 +533,9 @@ namespace Game.Entities
             if (finalCleanup)
                 m_cleanupDone = true;
 
-            m_Events.KillAllEvents(false);                      // non-delatable (currently casted spells) will not deleted now but it will deleted at call in Map.RemoveAllObjectsInRemoveList
             CombatStop();
         }
+
         public override void CleanupsBeforeDelete(bool finalCleanup = true)
         {
             CleanupBeforeRemoveFromMap(finalCleanup);
