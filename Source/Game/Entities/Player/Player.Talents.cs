@@ -23,7 +23,7 @@ namespace Game.Entities
                 ResetTalentSpecialization();
 
             uint talentTiers = Global.DB2Mgr.GetNumTalentsAtLevel(level, GetClass());
-            if (level < 15)
+            if (level < 10)
             {
                 // Remove all talent points
                 ResetTalents(true);

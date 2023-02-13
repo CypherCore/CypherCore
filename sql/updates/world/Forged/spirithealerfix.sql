@@ -1,0 +1,1 @@
+UPDATE creature_template SET gossip_menu_id = 25872 WHERE name = "Spirit Healer"
