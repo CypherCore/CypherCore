@@ -28,8 +28,8 @@ internal class spell_sha_flametongue_weapon_AuraScript : AuraScript, IHasAuraEff
 	{
 		PreventDefaultAction();
 
-		var                attacker = eventInfo.GetActor();
-		CastSpellExtraArgs args     = new(aurEff);
+		var attacker = eventInfo.GetActor();
+		CastSpellExtraArgs args = new(aurEff);
 		args.AddSpellMod(SpellValueMod.BasePoint0, Math.Max(1, (int)(attacker.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.0264f)));
 		attacker.CastSpell(eventInfo.GetActionTarget(), ShamanSpells.FlametongueAttack, args);
 	}

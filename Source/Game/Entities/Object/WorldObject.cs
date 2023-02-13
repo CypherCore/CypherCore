@@ -3147,6 +3147,7 @@ namespace Game.Entities
         public bool IsCreature() { return GetTypeId() == TypeId.Unit; }
         public bool IsPlayer() { return GetTypeId() == TypeId.Player; }
         public bool IsGameObject() { return GetTypeId() == TypeId.GameObject; }
+        public bool IsItem() { return GetTypeId() == TypeId.Item; }
         public bool IsUnit() { return IsTypeMask(TypeMask.Unit); }
         public bool IsCorpse() { return GetTypeId() == TypeId.Corpse; }
         public bool IsDynObject() { return GetTypeId() == TypeId.DynamicObject; }
@@ -3157,6 +3158,7 @@ namespace Game.Entities
         public Creature ToCreature() { return IsCreature() ? (this as Creature) : null; }
         public Player ToPlayer() { return IsPlayer() ? (this as Player) : null; }
         public GameObject ToGameObject() { return IsGameObject() ? (this as GameObject) : null; }
+        public Item ToItem() { return IsItem() ? (this as Item) : null; }
         public Unit ToUnit() { return IsUnit() ? (this as Unit) : null; }
         public Corpse ToCorpse() { return IsCorpse() ? (this as Corpse) : null; }
         public DynamicObject ToDynamicObject() { return IsDynObject() ? (this as DynamicObject) : null; }

@@ -9342,6 +9342,15 @@ namespace Game.Spells
                         Targets = new();
                         Targets.SetGOTarget(goTarget);
                     }
+                    else
+                    {
+                        Item itemTarget = target.ToItem();
+                        if (itemTarget != null)
+                        {
+                            Targets = new();
+                            Targets.SetItemTarget(itemTarget);
+                        }
+                    }
                     // error when targeting anything other than units and gameobjects
                 }
             }

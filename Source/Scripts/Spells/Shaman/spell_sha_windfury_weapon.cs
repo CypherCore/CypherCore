@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Framework.Constants;
+using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -9,10 +10,8 @@ namespace Scripts.Spells.Shaman;
 
 // 33757 - Windfury Weapon
 [SpellScript(33757)]
-internal class spell_sha_windfury_weapon : SpellScript, IHasSpellEffects
+internal class spell_sha_windfury_weapon : SpellScript, ISpellOnCast, ISpellCheckCast
 {
-	public List<ISpellEffect> SpellEffects { get; } = new();
-
 	public override bool Validate(SpellInfo spellInfo)
 	{
 		return ValidateSpellInfo(ShamanSpells.WindfuryEnchantment);
@@ -21,20 +20,18 @@ internal class spell_sha_windfury_weapon : SpellScript, IHasSpellEffects
 	public override bool Load()
 	{
 		return GetCaster().IsPlayer();
-	}
+    }
 
-	public override void Register()
+    public SpellCastResult CheckCast()
+    {
+        _item = GetCaster().ToPlayer().GetWeaponForAttack(WeaponAttackType.BaseAttack, false);
+        return _item == null || !_item.GetTemplate().IsWeapon() ? SpellCastResult.TargetNoWeapons : SpellCastResult.SpellCastOk;
+    }
+
+    public void OnCast()
 	{
-		SpellEffects.Add(new EffectHandler(HandleEffect, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-	}
+		GetCaster().CastSpell(_item, ShamanSpells.WindfuryEnchantment, GetSpell());
+    }
 
-	private void HandleEffect(uint effIndex)
-	{
-		PreventHitDefaultEffect(effIndex);
-
-		var mainHand = GetCaster().ToPlayer().GetWeaponForAttack(WeaponAttackType.BaseAttack, false);
-
-		if (mainHand != null)
-			GetCaster().CastSpell(mainHand, ShamanSpells.WindfuryEnchantment, GetSpell());
-	}
+    Item _item;
 }
