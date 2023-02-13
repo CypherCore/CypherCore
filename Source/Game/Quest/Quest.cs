@@ -373,7 +373,7 @@ namespace Game
                     diffFactor = 10;
 
                 uint xp = (uint)(diffFactor * questXp.Difficulty[xpDifficulty] * xpMultiplier / 10);
-                if (player.GetLevel() >= Global.ObjectMgr.GetMaxLevelForExpansion(PlayerConst.CurrentExpansion - 1) && player.GetSession().GetExpansion() == PlayerConst.CurrentExpansion && expansion >= 0 && expansion < (int)PlayerConst.CurrentExpansion)
+                if (player.GetLevel() >= Global.ObjectMgr.GetMaxLevelForExpansion((Expansion)WorldConfig.GetIntValue(WorldCfg.Expansion) - 1) && player.GetSession().GetExpansion() == (Expansion)WorldConfig.GetIntValue(WorldCfg.Expansion) && expansion >= 0 && expansion < (int)WorldConfig.GetIntValue(WorldCfg.Expansion))
                     xp = (uint)(xp / 9.0f);
 
                 xp = RoundXPValue(xp);

@@ -53,6 +53,11 @@ namespace Game.Extendability
             return false;
         }
 
+        public static bool AreObjectsNotEqual(object obj1, object obj2)
+        {
+            return !AreObjectsEqual(obj1, obj2);
+        }
+
         /// <summary>
         ///     Compares the values of 2 objects
         /// </summary>
@@ -60,25 +65,30 @@ namespace Game.Extendability
         public static bool AreObjectsEqual(object obj1, object obj2)
         {
             if (obj1 == null || obj2 == null)
-            {
                 return obj1 == obj2;
-            }
 
             Type type = obj1.GetType();
-            if (type != obj2.GetType())
-            {
-                return false;
-            }
 
+            if (type != obj2.GetType())
+                return false;
+            
             PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             foreach (PropertyInfo property in properties)
             {
                 object value1 = property.GetValue(obj1);
                 object value2 = property.GetValue(obj2);
+
                 if (!Equals(value1, value2))
-                {
                     return false;
-                }
+            }
+
+            var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
+            foreach (FieldInfo field in fields)
+            {
+                var value1 = field.GetValue(obj1);
+                var value2 = field.GetValue(obj2);
+                if (!Equals(value1, value2))
+                    return false;
             }
 
             return true;

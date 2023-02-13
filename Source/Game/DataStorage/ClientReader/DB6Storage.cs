@@ -223,25 +223,20 @@ namespace Game.DataStorage
                     }
                 }
 
-                    if (fields.Length != 0)
-                    {
-                        var id = (uint)fields[_header.IdIndex == -1 ? 0 : _header.IdIndex].GetValue(obj);
-
-                        if (WorldConfig.GetDefaultValue<bool>("LoadAllHotfix", false))
-                            if (base.TryGetValue(id, out var value) && !IOHelpers.AreObjectsEqual(value, obj))
-                                DB2Manager.Instance.AddHotfixRecord(_header.TableHash, id);
-
-                        base[id] = obj;
-                    }
+                if (fields.Length != 0)
+                {
+                    var id = (uint)fields[_header.IdIndex == -1 ? 0 : _header.IdIndex].GetValue(obj);
+                    base[id] = obj;
                 }
-                while (result.NextRow());
             }
+            while (result.NextRow());
+        }
 
         void LoadStringsFromDB(bool custom, Locale locale, HotfixStatements preparedStatement)
         {
             PreparedStatement stmt = HotfixDatabase.GetPreparedStatement(preparedStatement);
-            // stmt.AddValue(0, !custom); // This is from cypher. I always load all of them.
-            stmt.AddValue(0, locale.ToString());
+            stmt.AddValue(0, !custom);
+            stmt.AddValue(1, locale.ToString());
             SQLResult result = DB.Hotfix.Query(stmt);
             if (result.IsEmpty())
                 return;

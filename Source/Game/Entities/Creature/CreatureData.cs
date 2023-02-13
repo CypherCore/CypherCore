@@ -155,8 +155,8 @@ namespace Game.Entities
         }
 
         public int GetHealthScalingExpansion()
-        {
-            return HealthScalingExpansion == (int)Expansion.LevelCurrent ? (int)Expansion.WarlordsOfDraenor : HealthScalingExpansion;
+        { 
+            return HealthScalingExpansion == (int)Expansion.LevelCurrent ? WorldConfig.GetIntValue(WorldCfg.Expansion) : HealthScalingExpansion;
         }
 
         public SkillType GetRequiredLootSkill()

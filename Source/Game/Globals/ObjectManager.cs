@@ -1780,14 +1780,14 @@ namespace Game
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo == null)
             {
-                Log.outError(LogFilter.Sql, "Scriptname: `{0}` spell (Id: {1}) does not exist.", scriptName, spellId);
+                Log.outError(LogFilter.ServerLoading, "Scriptname: `{0}` spell (Id: {1}) does not exist.", scriptName, spellId);
                 return false;
             }
 
             if (allRanks)
             {
                 if (!spellInfo.IsRanked())
-                    Log.outDebug(LogFilter.Sql, "Scriptname: `{0}` spell (Id: {1}) has no ranks of spell.", scriptName, spellId);
+                    Log.outDebug(LogFilter.ServerLoading, "Scriptname: `{0}` spell (Id: {1}) has no ranks of spell.", scriptName, spellId);
 
                 while (spellInfo != null)
                 {
@@ -1798,7 +1798,7 @@ namespace Game
             else
             {
                 if (spellInfo.IsRanked())
-                    Log.outDebug(LogFilter.Sql, "Scriptname: `{0}` spell (Id: {1}) is ranked spell. Perhaps not all ranks are assigned to this script.", scriptName, spellId);
+                    Log.outDebug(LogFilter.ServerLoading, "Scriptname: `{0}` spell (Id: {1}) is ranked spell. Perhaps not all ranks are assigned to this script.", scriptName, spellId);
 
                 spellScriptsStorage.Add(spellInfo.Id, GetScriptId(scriptName));
             }

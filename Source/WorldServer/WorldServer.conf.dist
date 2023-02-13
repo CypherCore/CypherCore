@@ -74,15 +74,6 @@ HotfixDatabaseInfo.Password = "password"
 HotfixDatabaseInfo.Database = "hotfixes"
 HotfixDatabaseInfo.SSL = false
 
-#
-#	Creates a Hotfix record for any data loaded in the hotfix database.
-#	It does not require a entry into hotfix_data table.
-#	Note: It will only send records that differ from the DBC data in case you have the entire dbc loaded in that table.
-#
-#	0 = Disabled
-#	1 = Enabled
-
-LoadAllHotfix = 0
 
 #	WARNING USE AT YOUR OWN RISK !!!!!!
 #		This will prune (DELETE) any commonly invalid data from the database as the server loads such as 

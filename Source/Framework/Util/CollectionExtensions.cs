@@ -260,6 +260,38 @@ namespace System.Collections.Generic
             val.Add(value);
         }
 
+        public static void AddUniqueToList<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, TKey key, TValue value)
+        {
+            if (!dict.TryGetValue(key, out var val))
+            {
+                val = new List<TValue>();
+                dict.Add(key, val);
+            }
+
+            if (!val.Contains(value))
+                val.Add(value);
+        }
+
+        public static void AddIf<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, TKey key, TValue value, Func<TValue, TValue, bool> testExistingVsNew)
+        {
+            if (!dict.TryGetValue(key, out var val))
+            {
+                val = new List<TValue>();
+                dict.Add(key, val);
+            }
+            bool ok = true;
+
+            foreach(var kv in val)
+                if (!testExistingVsNew(kv, value))
+                {
+                    ok = false; 
+                    break;
+                }
+
+            if (ok)
+                val.Add(value);
+        }
+
         public static void AddToList<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, KeyValuePair<TKey, TValue> item)
         {
             dict.AddToList(item.Key, item.Value);
@@ -345,6 +377,14 @@ namespace System.Collections.Generic
                 }
 
             return toRemove;
+        }
+
+        public static void RemoveIfMatching<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, TKey key, Func<TValue, bool> pred)
+        {
+            if (dict.TryGetValue(key, out var values))
+                for (int i = values.Count - 1; i >= 0; i--)
+                    if (pred.Invoke(values[i]))
+                        values.RemoveAt(i);
         }
 
         /// <summary>

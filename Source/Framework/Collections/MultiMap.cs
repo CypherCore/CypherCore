@@ -29,6 +29,16 @@ namespace System.Collections.Generic
             _interalStorage.AddToList(key, value);
         }
 
+        public void AddUnique(TKey key, TValue value)
+        {
+            _interalStorage.AddUniqueToList(key, value);
+        }
+
+        public void AddIf(TKey key, TValue value, Func<TValue, TValue, bool> testExistingVsNew)
+        {
+            _interalStorage.AddIf(key, value, testExistingVsNew);
+        }
+
         public void AddRange(TKey key, IEnumerable<TValue> valueList)
         {
             if (!_interalStorage.TryGetValue(key, out var val))
@@ -83,6 +93,12 @@ namespace System.Collections.Generic
         {
             return _interalStorage.RemoveIfMatching(pred);
         }
+
+        public void RemoveIfMatching(TKey key, Func<TValue, bool> pred)
+        {
+            _interalStorage.RemoveIfMatching(key, pred);
+        }
+
 
         /// <summary>
         ///     Calls the action for the first matching pred and returns. Allows the action to be safely modify this map without getting enumeration exceptions
