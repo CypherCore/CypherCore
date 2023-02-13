@@ -21,7 +21,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Reset()
         {
-            me.CastSpell(me, PaladinSpells.SPELL_PALADIN_LIGHT_HAMMER_COSMETIC, true);
+            me.CastSpell(me, PaladinSpells.LightHammerCosmetic, true);
             me.SetUnitFlag(UnitFlags.NonAttackable | UnitFlags.Uninteractible | UnitFlags.RemoveClientControl);
         }
     }

@@ -28,7 +28,7 @@ namespace Scripts.Spells.Paladin
 			    {
                     if (creTemplate.CreatureType == CreatureType.Demon || creTemplate.CreatureType == CreatureType.Undead)
                     {
-                        GetCaster().CastSpell(target, PaladinSpells.SPELL_PALADIN_WAKE_OF_ASHES_STUN, true);
+                        GetCaster().CastSpell(target, PaladinSpells.WAKE_OF_ASHES_STUN, true);
                     }
                 }
             }

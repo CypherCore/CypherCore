@@ -8,7 +8,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 187874 - Crash Lightning
+// 187874 - Crash Lightning
+[SpellScript(187874)]
 internal class spell_sha_crash_lightning : SpellScript, ISpellAfterCast, IHasSpellEffects
 {
 	private int _targetsHit;

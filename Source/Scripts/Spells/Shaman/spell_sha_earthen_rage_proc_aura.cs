@@ -6,7 +6,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 170377 - Earthen Rage (Proc Aura)
+// 170377 - Earthen Rage (Proc Aura)
+[SpellScript(170377)]
 internal class spell_sha_earthen_rage_proc_aura : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();

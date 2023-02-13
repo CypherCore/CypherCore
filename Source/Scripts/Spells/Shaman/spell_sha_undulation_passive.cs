@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 200071 - Undulation
+// 200071 - Undulation
+[SpellScript(200071)]
 internal class spell_sha_undulation_passive : AuraScript, IHasAuraEffects
 {
 	private byte _castCounter = 1; // first proc happens after two casts, then one every 3 casts

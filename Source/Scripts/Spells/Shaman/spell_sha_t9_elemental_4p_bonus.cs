@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 67228 - Item - Shaman T9 Elemental 4P Bonus (Lava Burst)
+// 67228 - Item - Shaman T9 Elemental 4P Bonus (Lava Burst)
+[SpellScript(67228)]
 internal class spell_sha_t9_elemental_4p_bonus : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();

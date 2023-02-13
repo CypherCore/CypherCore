@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 28820 - Lightning Shield
+// 28820 - Lightning Shield
+[SpellScript(28820)]
 internal class spell_sha_t3_8p_bonus : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();

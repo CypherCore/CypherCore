@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 188443 - Chain Lightning
+// 188443 - Chain Lightning
+[SpellScript(188443)]
 internal class spell_sha_chain_lightning : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();

@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 285466 - Lava Burst Overload
+// 285466 - Lava Burst Overload
+[SpellScript(285466)]
 internal class spell_sha_mastery_elemental_overload_proc : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();

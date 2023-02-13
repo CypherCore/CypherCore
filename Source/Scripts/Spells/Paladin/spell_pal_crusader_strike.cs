@@ -17,16 +17,16 @@ namespace Scripts.Spells.Paladin
         {
             Unit caster = GetCaster();
 
-            if (caster.HasAura(PaladinSpells.SPELL_PALADIN_CRUSADERS_MIGHT))
+            if (caster.HasAura(PaladinSpells.CRUSADERS_MIGHT))
             {
-                if (caster.GetSpellHistory().HasCooldown(PaladinSpells.SPELL_PALADIN_HOLY_SHOCK_GENERIC))
+                if (caster.GetSpellHistory().HasCooldown(PaladinSpells.HolyShock))
                 {
-                    caster.GetSpellHistory().ModifyCooldown(PaladinSpells.SPELL_PALADIN_HOLY_SHOCK_GENERIC, TimeSpan.FromMilliseconds(-1 * Time.InMilliseconds));
+                    caster.GetSpellHistory().ModifyCooldown(PaladinSpells.HolyShock, TimeSpan.FromMilliseconds(-1 * Time.InMilliseconds));
                 }
 
-                if (caster.GetSpellHistory().HasCooldown(PaladinSpells.SPELL_PALADIN_LIGHT_OF_DAWN))
+                if (caster.GetSpellHistory().HasCooldown(PaladinSpells.LIGHT_OF_DAWN))
                 {
-                    caster.GetSpellHistory().ModifyCooldown(PaladinSpells.SPELL_PALADIN_LIGHT_OF_DAWN, TimeSpan.FromMilliseconds(-1 * Time.InMilliseconds));
+                    caster.GetSpellHistory().ModifyCooldown(PaladinSpells.LIGHT_OF_DAWN, TimeSpan.FromMilliseconds(-1 * Time.InMilliseconds));
                 }
             }
         }

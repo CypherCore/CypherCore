@@ -35,12 +35,12 @@ namespace Scripts.Spells.Paladin
                 return;
             }
 
-            if (caster.HasAura(PaladinSpells.SPELL_PALADIN_JUDGMENT_OF_LIGHT) && target.HasAura(PaladinSpells.SPELL_PALADIN_JUDGMENT_OF_LIGHT_TARGET_DEBUFF))
+            if (caster.HasAura(PaladinSpells.JUDGMENT_OF_LIGHT) && target.HasAura(PaladinSpells.JUDGMENT_OF_LIGHT_TARGET_DEBUFF))
             {
                 if (caster.IsWithinMeleeRange(target))
                 {
-                    caster.CastSpell(null, PaladinSpells.SPELL_PALADIN_JUDGMENT_OF_LIGHT_HEAL, true);
-                    target.RemoveAura(PaladinSpells.SPELL_PALADIN_JUDGMENT_OF_LIGHT_TARGET_DEBUFF, ObjectGuid.Empty, 0, AuraRemoveMode.EnemySpell);
+                    caster.CastSpell(null, PaladinSpells.JUDGMENT_OF_LIGHT_HEAL, true);
+                    target.RemoveAura(PaladinSpells.JUDGMENT_OF_LIGHT_TARGET_DEBUFF, ObjectGuid.Empty, 0, AuraRemoveMode.EnemySpell);
                 }
             }
         }

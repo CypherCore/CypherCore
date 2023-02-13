@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 188196 - Lightning Bolt
+// 188196 - Lightning Bolt
+[SpellScript(188196)]
 internal class spell_sha_lightning_bolt : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();

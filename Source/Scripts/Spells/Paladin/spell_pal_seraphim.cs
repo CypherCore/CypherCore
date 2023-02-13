@@ -20,12 +20,12 @@ namespace Scripts.Spells.Paladin
 
         public override bool Validate(SpellInfo UnnamedParameter)
         {
-            return ValidateSpellInfo(PaladinSpells.SPELL_PALADIN_SERAPHIM, PaladinSpells.SPELL_PALADIN_SHIELD_OF_THE_RIGHTEOUS);
+            return ValidateSpellInfo(PaladinSpells.SERAPHIM, PaladinSpells.SHIELD_OF_THE_RIGHTEOUS);
         }
 
         public SpellCastResult CheckCast()
         {
-            uint ChargeCategoryId = Global.SpellMgr.GetSpellInfo(PaladinSpells.SPELL_PALADIN_SHIELD_OF_THE_RIGHTEOUS, Difficulty.None).ChargeCategoryId;
+            uint ChargeCategoryId = Global.SpellMgr.GetSpellInfo(PaladinSpells.SHIELD_OF_THE_RIGHTEOUS, Difficulty.None).ChargeCategoryId;
             
             if (!GetCaster().GetSpellHistory().HasCharge(ChargeCategoryId))
             {
@@ -37,7 +37,7 @@ namespace Scripts.Spells.Paladin
 
         private void HandleDummy(uint effIndex)
         {
-            uint ChargeCategoryId = Global.SpellMgr.GetSpellInfo(PaladinSpells.SPELL_PALADIN_SHIELD_OF_THE_RIGHTEOUS, Difficulty.None).ChargeCategoryId;
+            uint ChargeCategoryId = Global.SpellMgr.GetSpellInfo(PaladinSpells.SHIELD_OF_THE_RIGHTEOUS, Difficulty.None).ChargeCategoryId;
             SpellHistory spellHistory = GetCaster().GetSpellHistory();
 
             spellHistory.ConsumeCharge(ChargeCategoryId);

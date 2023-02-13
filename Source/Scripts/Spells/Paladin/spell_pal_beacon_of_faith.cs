@@ -23,7 +23,7 @@ namespace Scripts.Spells.Paladin
                 return SpellCastResult.DontReport;
             }
 
-            if (target.HasAura(PaladinSpells.SPELL_PALADIN_BEACON_OF_LIGHT))
+            if (target.HasAura(PaladinSpells.BeaconOfLight))
             {
                 return SpellCastResult.BadTargets;
             }

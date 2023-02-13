@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 77478 - Earthquake tick
+// 77478 - Earthquake tick
+[SpellScript(77478)]
 internal class spell_sha_earthquake_tick : SpellScript, ISpellOnHit, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();

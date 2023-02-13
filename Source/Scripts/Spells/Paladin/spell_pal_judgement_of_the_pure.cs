@@ -17,7 +17,7 @@ namespace Scripts.Spells.Paladin
         public bool CheckProc(ProcEventInfo eventInfo)
         {
             var spellinfo = eventInfo.GetSpellInfo();
-            return spellinfo != null && eventInfo.GetSpellInfo().Id == PaladinSpells.SPELL_PALADIN_JUDGMENT;
+            return spellinfo != null && eventInfo.GetSpellInfo().Id == PaladinSpells.JUDGMENT;
         }
     }
 }

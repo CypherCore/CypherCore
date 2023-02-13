@@ -25,7 +25,7 @@ namespace Scripts.Spells.Paladin
 
         public override bool Validate(SpellInfo UnnamedParameter)
         {
-            return ValidateSpellInfo(PaladinSpells.SPELL_PALADIN_ARDENT_DEFENDER);
+            return ValidateSpellInfo(PaladinSpells.ARDENT_DEFENDER);
         }
 
         public override bool Load()
@@ -51,7 +51,7 @@ namespace Scripts.Spells.Paladin
             }
 
             float healAmount = target.CountPctFromMaxHealth(healPct);
-            target.CastSpell(target, PaladinSpells.SPELL_PALADIN_ARDENT_DEFENDER_HEAL, (int)healAmount);
+            target.CastSpell(target, PaladinSpells.ARDENT_DEFENDER_HEAL, (int)healAmount);
             aurEff.GetBase().Remove();
         }
 

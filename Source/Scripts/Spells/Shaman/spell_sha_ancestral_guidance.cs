@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 108281 - Ancestral Guidance
+// 108281 - Ancestral Guidance
+[SpellScript(108281)]
 internal class spell_sha_ancestral_guidance : AuraScript, IAuraCheckProc, IHasAuraEffects
 {
 	public override bool Validate(SpellInfo spellInfo)

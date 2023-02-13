@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 77756 - Lava Surge
+// 77756 - Lava Surge
+[SpellScript(77756)]
 internal class spell_sha_lava_surge : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();

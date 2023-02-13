@@ -23,10 +23,10 @@ namespace Scripts.Spells.Paladin
             if (caster == null)
                 return;
 
-            Aura dawnTrigger = caster.GetAura(PaladinSpells.SPELL_PALADIN_DARKEST_BEFORE_THE_DAWN);
+            Aura dawnTrigger = caster.GetAura(PaladinSpells.DARKEST_BEFORE_THE_DAWN);
 
             if (dawnTrigger != null)
-                caster.AddAura(PaladinSpells.SPELL_PALADIN_DARKEST_BEFORE_THE_DAWN_BUFF, caster);
+                caster.AddAura(PaladinSpells.DARKEST_BEFORE_THE_DAWN_BUFF, caster);
         }
 
         public override void Register()

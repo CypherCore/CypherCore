@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 51562 - Tidal Waves
+// 51562 - Tidal Waves
+[SpellScript(51562)]
 internal class spell_sha_tidal_waves : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();

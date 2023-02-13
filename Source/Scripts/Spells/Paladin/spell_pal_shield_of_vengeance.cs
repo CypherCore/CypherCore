@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 namespace Scripts.Spells.Paladin
 {
     // 184662 - Shield of Vengeance
+    [SpellScript(184662)]
     public class spell_pal_shield_of_vengeance : AuraScript, IHasAuraEffects
     {
         public List<IAuraEffectHandler> AuraEffects { get; } = new();
@@ -65,7 +66,7 @@ namespace Scripts.Spells.Paladin
                 absorb /= (int)targetSize;
             }
 
-            caster.CastSpell(caster, PaladinSpells.SPELL_PALADIN_SHIELD_OF_VENGEANCE_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)absorb));
+            caster.CastSpell(caster, PaladinSpells.SHIELD_OF_VENGEANCE_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)absorb));
         }
 
         public override void Register()

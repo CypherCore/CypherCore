@@ -24,9 +24,9 @@ namespace Scripts.Spells.Paladin
                 Unit caster = GetCaster();
                 if (caster != null)
                 {
-                    if (caster.HasAura(PaladinSpells.SPELL_PALADIN_LAW_AND_ORDER))
+                    if (caster.HasAura(PaladinSpells.LAW_AND_ORDER))
                     {
-                        caster.GetSpellHistory().ModifyCooldown(PaladinSpells.SPELL_PALADIN_HAND_OF_HINDRANCE, TimeSpan.FromSeconds(-15));
+                        caster.GetSpellHistory().ModifyCooldown(PaladinSpells.HAND_OF_HINDRANCE, TimeSpan.FromSeconds(-15));
                     }
                 }
             }

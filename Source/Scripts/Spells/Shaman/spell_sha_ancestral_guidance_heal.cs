@@ -8,7 +8,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 114911 - Ancestral Guidance Heal
+// 114911 - Ancestral Guidance Heal
+[SpellScript(114911)]
 internal class spell_sha_ancestral_guidance_heal : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();

@@ -21,7 +21,7 @@ namespace Scripts.Spells.Paladin
 
         public override bool Validate(SpellInfo UnnamedParameter)
         {
-            if (Global.SpellMgr.GetSpellInfo(PaladinSpells.SPELL_PALADIN_LIGHT_OF_THE_MARTYR_DAMAGE, Difficulty.None) != null)
+            if (Global.SpellMgr.GetSpellInfo(PaladinSpells.LIGHT_OF_THE_MARTYR_DAMAGE, Difficulty.None) != null)
             {
                 return false;
             }
@@ -33,10 +33,10 @@ namespace Scripts.Spells.Paladin
             Unit caster = GetCaster();
 
             float dmg = (GetHitHeal() * 50.0f) / 100.0f;
-            caster.CastSpell(caster, PaladinSpells.SPELL_PALADIN_LIGHT_OF_THE_MARTYR_DAMAGE, (int)dmg);
+            caster.CastSpell(caster, PaladinSpells.LIGHT_OF_THE_MARTYR_DAMAGE, (int)dmg);
 
-            if (caster.HasAura(PaladinSpells.SPELL_PALADIN_FERVENT_MARTYR_BUFF))
-                caster.RemoveAurasDueToSpell(PaladinSpells.SPELL_PALADIN_FERVENT_MARTYR_BUFF);
+            if (caster.HasAura(PaladinSpells.FERVENT_MARTYR_BUFF))
+                caster.RemoveAurasDueToSpell(PaladinSpells.FERVENT_MARTYR_BUFF);
         }
 
         public override void Register()

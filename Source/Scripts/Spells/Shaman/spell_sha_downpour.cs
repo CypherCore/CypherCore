@@ -9,7 +9,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 207778 - Downpour
+// 207778 - Downpour
+[SpellScript(207778)]
 internal class spell_sha_downpour : SpellScript, ISpellAfterCast, ISpellAfterHit, IHasSpellEffects
 {
 	private int _healedTargets = 0;

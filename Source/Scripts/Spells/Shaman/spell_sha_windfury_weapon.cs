@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 33757 - Windfury Weapon
+// 33757 - Windfury Weapon
+[SpellScript(33757)]
 internal class spell_sha_windfury_weapon : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();

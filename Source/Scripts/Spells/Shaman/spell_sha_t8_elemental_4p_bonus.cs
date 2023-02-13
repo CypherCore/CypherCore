@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 64928 - Item - Shaman T8 Elemental 4P Bonus
+// 64928 - Item - Shaman T8 Elemental 4P Bonus
+[SpellScript(64928)]
 internal class spell_sha_t8_elemental_4p_bonus : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();

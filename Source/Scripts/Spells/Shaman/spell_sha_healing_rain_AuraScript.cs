@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 73920 - Healing Rain (Aura)
+// 73920 - Healing Rain (Aura)
+[SpellScript(73920)]
 internal class spell_sha_healing_rain_AuraScript : AuraScript, IHasAuraEffects
 {
 	private ObjectGuid _visualDummy;

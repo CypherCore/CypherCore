@@ -8,7 +8,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 192223 - Liquid Magma Totem (erupting hit spell)
+// 192223 - Liquid Magma Totem (erupting hit spell)
+[SpellScript(192223)]
 internal class spell_sha_liquid_magma_totem : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();

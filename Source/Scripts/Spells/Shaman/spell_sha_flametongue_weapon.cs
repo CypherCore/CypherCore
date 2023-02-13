@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 318038 - Flametongue Weapon
+// 318038 - Flametongue Weapon
+[SpellScript(318038)]
 internal class spell_sha_flametongue_weapon : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();
@@ -24,10 +25,10 @@ internal class spell_sha_flametongue_weapon : SpellScript, IHasSpellEffects
 
 	public override void Register()
 	{
-		SpellEffects.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+		SpellEffects.Add(new EffectHandler(HandleEffect, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleEffectHitTarget(uint index)
+	private void HandleEffect(uint index)
 	{
 		var player = GetCaster().ToPlayer();
 		var slot   = EquipmentSlot.MainHand;

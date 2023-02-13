@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 273221 - Aftershock
+// 273221 - Aftershock
+[SpellScript(273221)]
 internal class spell_sha_aftershock : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();

@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 204288 - Earth Shield
+// 204288 - Earth Shield
+[SpellScript(204288)]
 internal class spell_sha_earth_shield : AuraScript, IAuraCheckProc, IHasAuraEffects
 {
 	public override bool Validate(SpellInfo spellInfo)

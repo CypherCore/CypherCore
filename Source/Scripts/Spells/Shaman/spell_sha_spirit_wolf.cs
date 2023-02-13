@@ -6,7 +6,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 260878 - Spirit Wolf
+// 260878 - Spirit Wolf
+[SpellScript(260878)]
 internal class spell_sha_spirit_wolf : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();

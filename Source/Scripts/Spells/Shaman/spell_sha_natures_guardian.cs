@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 30884 - Nature's Guardian
+// 30884 - Nature's Guardian
+[SpellScript(30884)]
 internal class spell_sha_natures_guardian : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();

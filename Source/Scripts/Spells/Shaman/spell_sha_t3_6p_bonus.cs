@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 28823 - Totemic Power
+// 28823 - Totemic Power
+[SpellScript(28823)]
 internal class spell_sha_t3_6p_bonus : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();

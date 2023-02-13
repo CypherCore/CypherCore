@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 319773 - Windfury Weapon (proc)
+// 319773 - Windfury Weapon (proc)
+[SpellScript(319773)]
 internal class spell_sha_windfury_weapon_proc : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();

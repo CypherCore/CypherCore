@@ -24,7 +24,7 @@ namespace Scripts.Spells.Paladin
                 int damage = (int)player.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack);
                 int dot_damage = (int)(damage * 0.23f * 6);
                 int dot_duration = 12;
-                GetHitUnit().CastSpell(GetHitUnit(), PaladinSpells.SPELL_PALADIN_EXORCISM_DF, damage);
+                GetHitUnit().CastSpell(GetHitUnit(), PaladinSpells.EXORCISM_DF, damage);
 
                 if (GetHitUnit().HasAura(26573))
                 {
@@ -33,7 +33,7 @@ namespace Scripts.Spells.Paladin
                     UnitListSearcher searcher = new UnitListSearcher(GetHitUnit(), targets, check);
                     for (List<Unit>.Enumerator i = targets.GetEnumerator(); i.MoveNext();)
                     {
-                        GetHitUnit().CastSpell(i.Current, PaladinSpells.SPELL_PALADIN_EXORCISM_DF, damage);
+                        GetHitUnit().CastSpell(i.Current, PaladinSpells.EXORCISM_DF, damage);
                     }
                 }
 

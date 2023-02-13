@@ -39,7 +39,7 @@ namespace Scripts.Spells.Paladin
 
                 foreach (var item in LightsHammerlist)
                 {
-                    item.CastSpell(item, PaladinSpells.SPELL_PALADIN_LIGHTS_HAMMER_TICK, true);
+                    item.CastSpell(item, PaladinSpells.LightHammerPeriodic, true);
                 }
             }
         }

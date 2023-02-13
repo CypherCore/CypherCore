@@ -15,7 +15,7 @@ namespace Scripts.Spells.Paladin
     {
         public bool CheckProc(ProcEventInfo eventInfo)
         {
-            return eventInfo.GetSpellInfo().Id == PaladinSpells.SPELL_PALADIN_CRUSADER_STRIKE;
+            return eventInfo.GetSpellInfo().Id == PaladinSpells.CRUSADER_STRIKE;
         }
     }
 }

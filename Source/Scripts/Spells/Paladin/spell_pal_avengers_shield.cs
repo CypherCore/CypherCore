@@ -23,14 +23,14 @@ namespace Scripts.Spells.Paladin
                 return;
             }
 
-            if (caster.HasAura(PaladinSpells.SPELL_PALADIN_GRAND_CRUSADER_PROC))
+            if (caster.HasAura(PaladinSpells.GRAND_CRUSADER_PROC))
             {
-                caster.RemoveAurasDueToSpell(PaladinSpells.SPELL_PALADIN_GRAND_CRUSADER_PROC);
+                caster.RemoveAurasDueToSpell(PaladinSpells.GRAND_CRUSADER_PROC);
             }
 
             int damage = GetHitDamage();
 
-            if (caster.HasAura(PaladinSpells.SPELL_PALADIN_FIRST_AVENGER))
+            if (caster.HasAura(PaladinSpells.FIRST_AVENGER))
             {
                 MathFunctions.AddPct(ref damage, 50);
             }

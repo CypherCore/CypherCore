@@ -9,7 +9,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 2825 - Bloodlust
+// 2825 - Bloodlust
+[SpellScript(2825)]
 internal class spell_sha_bloodlust : SpellScript, ISpellAfterHit, IHasSpellEffects
 {
 	public override bool Validate(SpellInfo spellInfo)
