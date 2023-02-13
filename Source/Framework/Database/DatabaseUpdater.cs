@@ -336,7 +336,7 @@ namespace Framework.Database
 
                 if (!Directory.Exists(path))
                 {
-                    Log.outWarn(LogFilter.SqlUpdates, $"DBUpdater: Given update include directory \"{path}\" isn't existing, skipped!");
+                    Log.outTrace(LogFilter.SqlUpdates, $"DBUpdater: Given update include directory \"{path}\" isn't existing, skipped!");
                     continue;
                 }
 

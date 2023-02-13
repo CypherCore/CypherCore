@@ -302,37 +302,25 @@ namespace System.Collections.Generic
         /// </summary>
         /// <param name="pred">Expression to check to remove an item</param>
         /// <returns>Multimap of removed values.</returns>
-        public static Dictionary<TKey, List<TValue>> RemoveIfMatchingMulti<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, Func<KeyValuePair<TKey, TValue>, bool> pred)
+        public static void RemoveIfMatchingMulti<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, Func<KeyValuePair<TKey, TValue>, bool> pred)
         {
-            var toRemove = new Dictionary<TKey, List<TValue>>();
-
             foreach (var item in dict.KeyValueList())
                 if (pred(item))
-                    toRemove.AddToList(item);
-
-            foreach (var item in toRemove.KeyValueList())
-                dict.Remove(item.Key, item.Value);
-
-            return toRemove;
+                    dict.Remove(item.Key, item.Value);
         }
 
         public static bool RemoveFirstMatching<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, Func<KeyValuePair<TKey, TValue>, bool> pred, out KeyValuePair<TKey, TValue> foundValue)
         {
-            foundValue = new KeyValuePair<TKey, TValue>();
-            bool found = false;
-
             foreach (var item in dict.KeyValueList())
                 if (pred(item))
                 {
+                    dict.Remove(item.Key, item.Value);
                     foundValue = item;
-                    found = true;
-                    break;
+                    return true;
                 }
 
-            if (found)
-                dict.Remove(foundValue.Key, foundValue.Value);
-
-            return found;
+            foundValue = default;
+            return false;
         }
 
         public static bool RemoveFirstMatching<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, Func<KeyValuePair<TKey, TValue>, bool> pred)
@@ -351,10 +339,10 @@ namespace System.Collections.Generic
 
             foreach (var item in dict.KeyValueList())
                 if (pred(item))
+                {
                     toRemove.Add(item);
-
-            foreach (var item in toRemove)
-                dict.Remove(item.Key, item.Value);
+                    dict.Remove(item.Key, item.Value);
+                }
 
             return toRemove;
         }
@@ -399,10 +387,10 @@ namespace System.Collections.Generic
 
             foreach (var item in dict.KeyValueList())
                 if (pred(item))
+                {
                     matches.Add(item);
-
-            foreach (var item in matches)
-                action(item);
+                    action(item);
+                }
 
             return matches;
         }
@@ -417,33 +405,30 @@ namespace System.Collections.Generic
             if (dict.TryGetValue(key, out var list))
                 foreach (var val in list)
                     if (pred(val))
+                    {
                         matches.Add(val);
-
-            foreach (var val in matches)
-                action(val);
+                        action(val);
+                    }
 
             return matches;
         }
 
         public static void RemoveAllMatchingKeys<TKey, TValue>(this IDictionary<TKey, TValue> dict, Func<TKey, bool> pred)
         {
-            var keys = new HashSet<TKey>();
-
-            foreach (var key in dict.Keys)
+            foreach (var key in dict.Keys.ToArray())
                 if (pred.Invoke(key))
-                    keys.Add(key);
-                else
-                    break;
-
-            foreach (var k in keys) 
-                dict.Remove(k);
+                    dict.Remove(key);
         }
 
         public static IEnumerable<KeyValuePair<TKey, TValue>> KeyValueList<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict)
         {
-            foreach (var pair in dict)
-                foreach (var value in pair.Value)
-                    yield return new KeyValuePair<TKey, TValue>(pair.Key, value);
+            foreach (var key in dict.Keys.ToArray()) // this allows it to be safely enumerated off of and have items removed.
+            {
+                var val = dict[key];
+
+                for (int i = val.Count - 1; i >= 0; i--)
+                    yield return new KeyValuePair<TKey, TValue>(key, val[i]);
+            }
         }
 
         public static void Remove<T>(this List<T> list, List<T> toRemove)

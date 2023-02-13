@@ -219,7 +219,7 @@ namespace Game.Entities
                 }
             }
 
-            foreach (var app in GetOwnedAuras().KeyValueList.ToList())
+            foreach (var app in GetOwnedAuras().KeyValueList)
             {
                 Aura i_aura = app.Value;
                 if (i_aura == null)

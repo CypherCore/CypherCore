@@ -62,7 +62,7 @@ internal class spell_gen_break_shield : SpellScript, IHasSpellEffects
 			{
 				var auras = target.GetAppliedAuras();
 
-				foreach (var pair in auras.KeyValueList.ToList())
+				foreach (var pair in auras.KeyValueList)
 				{
 					var aura = pair.Value.GetBase();
 

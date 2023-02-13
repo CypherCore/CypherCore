@@ -1582,7 +1582,7 @@ namespace Game.Entities
             // or generate one on our own
             else
             {
-                foreach (var pair in GetAppliedAuras().KeyValueList.ToArray())
+                foreach (var pair in GetAppliedAuras().KeyValueList)
                     processAuraApplication(pair.Value);
             }
         }
@@ -3409,10 +3409,10 @@ namespace Game.Entities
             // we want to have all auras removed, so use your brain when linking events
             for (int counter = 0; !m_appliedAuras.Empty() || !m_ownedAuras.Empty(); counter++)
             {                
-                foreach (var aurAppIter in GetAppliedAuras().KeyValueList.ToList())
+                foreach (var aurAppIter in GetAppliedAuras().KeyValueList)
                     _UnapplyAura(aurAppIter, AuraRemoveMode.Default);
 
-                foreach (var aurIter in GetOwnedAuras().KeyValueList.ToList())
+                foreach (var aurIter in GetOwnedAuras().KeyValueList)
                     RemoveOwnedAura(aurIter);
 
                 const int maxIteration = 50;

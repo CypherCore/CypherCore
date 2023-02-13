@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using System.Linq;
+using Google.Protobuf.WellKnownTypes;
 
 namespace System.Collections.Generic
 {
@@ -205,9 +206,13 @@ namespace System.Collections.Generic
         {
             get
             {
-                foreach (var pair in _interalStorage)
-                    foreach (var value in pair.Value)
-                        yield return new KeyValuePair<TKey, TValue>(pair.Key, value);
+                foreach (var key in _interalStorage.Keys.ToArray()) // this allows it to be safely enumerated off of and have items removed.
+                {
+                    var val = _interalStorage[key];
+
+                    for (int i = val.Count - 1; i >= 0; i--)
+                        yield return new KeyValuePair<TKey, TValue>(key, val[i]);
+                }
             }
         }
 
