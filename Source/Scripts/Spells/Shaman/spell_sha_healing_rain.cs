@@ -3,7 +3,8 @@ using Game.Scripting.Interfaces.ISpell;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 73920 - Healing Rain
+// 73920 - Healing Rain
+[SpellScript(73920)]
 internal class spell_sha_healing_rain : SpellScript, ISpellAfterHit
 {
 	public void AfterHit()

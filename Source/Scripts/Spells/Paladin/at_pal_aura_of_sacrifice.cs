@@ -28,7 +28,7 @@ namespace Scripts.Spells.Paladin
                 {
                     if (caster.ToPlayer().IsInSameRaidWith(unit.ToPlayer()))
                     {
-                        caster.CastSpell(unit, PaladinSpells.SPELL_PALADIN_AURA_OF_SACRIFICE_ALLY, true);
+                        caster.CastSpell(unit, PaladinSpells.AURA_OF_SACRIFICE_ALLY, true);
                     }
                 }
             }
@@ -36,7 +36,7 @@ namespace Scripts.Spells.Paladin
 
         public override void OnUnitExit(Unit unit)
         {
-            unit.RemoveAurasDueToSpell(PaladinSpells.SPELL_PALADIN_AURA_OF_SACRIFICE_ALLY);
+            unit.RemoveAurasDueToSpell(PaladinSpells.AURA_OF_SACRIFICE_ALLY);
         }
     }
 }

@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 45297 - Chain Lightning Overload
+// 45297 - Chain Lightning Overload
+[SpellScript(45297)]
 internal class spell_sha_chain_lightning_overload : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();

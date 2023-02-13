@@ -8,7 +8,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 168534 - Mastery: Elemental Overload (passive)
+// 168534 - Mastery: Elemental Overload (passive)
+[SpellScript(168534)]
 internal class spell_sha_mastery_elemental_overload : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();

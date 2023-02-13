@@ -8,7 +8,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 40463 - Shaman Tier 6 Trinket
+// 40463 - Shaman Tier 6 Trinket
+[SpellScript(40463)]
 internal class spell_sha_item_t6_trinket : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();

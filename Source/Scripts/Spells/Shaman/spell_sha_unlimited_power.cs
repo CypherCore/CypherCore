@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 260895 - Unlimited Power
+// 260895 - Unlimited Power
+[SpellScript(260895)]
 internal class spell_sha_unlimited_power : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();

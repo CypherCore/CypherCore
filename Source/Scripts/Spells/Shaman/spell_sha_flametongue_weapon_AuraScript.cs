@@ -8,7 +8,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 319778 - Flametongue
+// 319778 - Flametongue
+[SpellScript(319778)]
 internal class spell_sha_flametongue_weapon_AuraScript : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();

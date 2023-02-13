@@ -5,7 +5,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 77762 - Lava Surge
+// 77762 - Lava Surge
+[SpellScript(77762)]
 internal class spell_sha_lava_surge_proc : SpellScript, ISpellAfterHit
 {
 	public override bool Validate(SpellInfo spellInfo)

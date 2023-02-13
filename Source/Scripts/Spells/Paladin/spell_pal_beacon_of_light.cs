@@ -18,7 +18,7 @@ namespace Scripts.Spells.Paladin
                 return SpellCastResult.DontReport;
             }
 
-            if (target.HasAura(PaladinSpells.SPELL_PALADIN_BEACON_OF_FAITH))
+            if (target.HasAura(PaladinSpells.BEACON_OF_FAITH))
             {
                 return SpellCastResult.BadTargets;
             }

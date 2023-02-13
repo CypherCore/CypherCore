@@ -15,7 +15,7 @@ namespace Scripts.Spells.Paladin
     {
         public void OnHit()
         {
-            GetCaster().RemoveAurasDueToSpell(PaladinSpells.SPELL_PALADIN_INFUSION_OF_LIGHT_AURA);
+            GetCaster().RemoveAurasDueToSpell(PaladinSpells.InfusionOfLightAura);
         }
     }
 }

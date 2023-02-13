@@ -7,7 +7,8 @@ using Game.Scripting.Interfaces.ISpell;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 52042 - Healing Stream Totem
+// 52042 - Healing Stream Totem
+[SpellScript(52042)]
 internal class spell_sha_healing_stream_totem_heal : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();

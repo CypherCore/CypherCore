@@ -6,7 +6,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 189063 - Lightning Vortex (proc 185881 Item - Shaman T18 Elemental 4P Bonus)
+// 189063 - Lightning Vortex (proc 185881 Item - Shaman T18 Elemental 4P Bonus)
+[SpellScript(189063)]
 internal class spell_sha_item_t18_elemental_4p_bonus : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();

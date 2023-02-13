@@ -23,7 +23,7 @@ namespace Scripts.Spells.Paladin
             if (caster == null)
                 return;
 
-            caster.GetSpellHistory().ResetCooldown(PaladinSpells.SPELL_PALADIN_BLADE_OF_JUSTICE, true);
+            caster.GetSpellHistory().ResetCooldown(PaladinSpells.BLADE_OF_JUSTICE, true);
         }
 
         public override void Register()

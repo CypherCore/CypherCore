@@ -21,7 +21,7 @@ namespace Scripts.Spells.Paladin
             Player player = GetCaster().ToPlayer();
             if (player != null)
             {
-                if (player.HasSpell(PaladinSpells.SPELL_PALADIN_DIVINE_PURPOSE_RET) || player.HasSpell(PaladinSpells.SPELL_PALADIN_DIVINE_PURPOSE_HOLY))
+                if (player.HasSpell(PaladinSpells.DIVINE_PURPOSE_RET) || player.HasSpell(PaladinSpells.DIVINE_PURPOSE_HOLY))
                 {
                     uint spec = player.GetPrimarySpecialization();
                     uint activateSpell = GetSpellInfo().Id;
@@ -32,9 +32,9 @@ namespace Scripts.Spells.Paladin
                             {
                                 if (RandomHelper.randChance(20))
                                 {
-                                    if (activateSpell == (uint)PaladinSpells.SPELL_PALADIN_JUSTICARS_VENGEANCE || activateSpell == (uint)PaladinSpells.SPELL_PALADIN_WORD_OF_GLORY || activateSpell == (uint)PaladinSpells.SPELL_PALADIN_DIVINE_STORM || activateSpell == (uint)PaladinSpells.SPELL_PALADIN_TEMPLARS_VERDICT)
+                                    if (activateSpell == (uint)PaladinSpells.JUSTICARS_VENGEANCE || activateSpell == (uint)PaladinSpells.WORD_OF_GLORY || activateSpell == (uint)PaladinSpells.DIVINE_STORM || activateSpell == (uint)PaladinSpells.TEMPLARS_VERDICT)
                                     {
-                                        player.CastSpell(player, PaladinSpells.SPELL_PALADIN_DIVINE_PURPOSE_RET_AURA);
+                                        player.CastSpell(player, PaladinSpells.DivinePurposeTriggerred);
                                     }
                                 }
                                 break;
@@ -43,23 +43,23 @@ namespace Scripts.Spells.Paladin
                             {
                                 if (RandomHelper.randChance(15))
                                 {
-                                    if (activateSpell == (uint)PaladinSpells.SPELL_PALADIN_HOLY_SHOCK_GENERIC)
+                                    if (activateSpell == (uint)PaladinSpells.HolyShock)
                                     {
-                                        player.CastSpell(player, PaladinSpells.SPELL_PALADIN_DIVINE_PURPOSE_HOLY_AURA_1);
+                                        player.CastSpell(player, PaladinSpells.DIVINE_PURPOSE_HOLY_AURA_1);
 
-                                        if (player.GetSpellHistory().HasCooldown(PaladinSpells.SPELL_PALADIN_HOLY_SHOCK_GENERIC))
+                                        if (player.GetSpellHistory().HasCooldown(PaladinSpells.HolyShock))
                                         {
-                                            player.GetSpellHistory().ResetCooldown(PaladinSpells.SPELL_PALADIN_HOLY_SHOCK_GENERIC, true);
+                                            player.GetSpellHistory().ResetCooldown(PaladinSpells.HolyShock, true);
                                         }
                                     }
 
-                                    if (activateSpell == (uint)PaladinSpells.SPELL_PALADIN_LIGHT_OF_DAWN)
+                                    if (activateSpell == (uint)PaladinSpells.LIGHT_OF_DAWN)
                                     {
-                                        player.CastSpell(player, PaladinSpells.SPELL_PALADIN_DIVINE_PURPOSE_HOLY_AURA_2);
+                                        player.CastSpell(player, PaladinSpells.DIVINE_PURPOSE_HOLY_AURA_2);
 
-                                        if (player.GetSpellHistory().HasCooldown(PaladinSpells.SPELL_PALADIN_LIGHT_OF_DAWN))
+                                        if (player.GetSpellHistory().HasCooldown(PaladinSpells.LIGHT_OF_DAWN))
                                         {
-                                            player.GetSpellHistory().ResetCooldown(PaladinSpells.SPELL_PALADIN_LIGHT_OF_DAWN, true);
+                                            player.GetSpellHistory().ResetCooldown(PaladinSpells.LIGHT_OF_DAWN, true);
                                         }
                                     }
                                 }

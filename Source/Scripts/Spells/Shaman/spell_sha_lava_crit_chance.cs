@@ -6,7 +6,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 285466 - Lava Burst Overload Damage
+// 285466 - Lava Burst Overload Damage
+[SpellScript(285466)]
 internal class spell_sha_lava_crit_chance : SpellScript, ISpellCalcCritChance
 {
 	public override bool Validate(SpellInfo spellInfo)

@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 45284 - Lightning Bolt Overload
+// 45284 - Lightning Bolt Overload
+[SpellScript(45284)]
 internal class spell_sha_lightning_bolt_overload : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();

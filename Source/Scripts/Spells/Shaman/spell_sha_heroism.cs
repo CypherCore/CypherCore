@@ -9,7 +9,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 32182 - Heroism
+// 32182 - Heroism
+[SpellScript(32182)]
 internal class spell_sha_heroism : SpellScript, ISpellAfterHit, IHasSpellEffects
 {
 	public override bool Validate(SpellInfo spellInfo)

@@ -23,9 +23,9 @@ namespace Scripts.Spells.Paladin
 
             switch (spellID)
             {
-                case PaladinSpells.SPELL_PALADIN_ARCING_LIGHT_HEAL: // Light's Hammer
-                case PaladinSpells.SPELL_PALADIN_HOLY_PRISM_ALLIES: // Holy Prism
-                case PaladinSpells.SPELL_PALADIN_LIGHT_OF_DAWN: // Light of Dawn
+                case PaladinSpells.ARCING_LIGHT_HEAL: // Light's Hammer
+                case PaladinSpells.HolyPrismTargetAlly: // Holy Prism
+                case PaladinSpells.LIGHT_OF_DAWN: // Light of Dawn
                     pct = 15; // 15% heal from these spells
                     break;
                 default:
@@ -42,7 +42,7 @@ namespace Scripts.Spells.Paladin
             Unit targetOfBeacon = GetCaster();
             Unit targetOfHeal = eventInfo.GetActionTarget();
 
-            //if (eventInfo.GetSpellInfo() && eventInfo.GetSpellInfo()->Id != SPELL_PALADIN_BEACON_OF_LIGHT_HEAL && eventInfo.GetSpellInfo()->Id != SPELL_PALADIN_LIGHT_OF_THE_MARTYR && targetOfBeacon->IsWithinLOSInMap(ownerOfBeacon) && targetOfHeal->GetGUID() != targetOfBeacon->GetGUID())
+            //if (eventInfo.GetSpellInfo() && eventInfo.GetSpellInfo()->Id != BEACON_OF_LIGHT_HEAL && eventInfo.GetSpellInfo()->Id != LIGHT_OF_THE_MARTYR && targetOfBeacon->IsWithinLOSInMap(ownerOfBeacon) && targetOfHeal->GetGUID() != targetOfBeacon->GetGUID())
             return true;
 
             return false;
@@ -69,16 +69,16 @@ namespace Scripts.Spells.Paladin
 
             var bp = MathFunctions.CalculatePct(healInfo.GetHeal(), GetPctBySpell(GetSpellInfo().Id));
 
-            if (GetSpellInfo().Id == PaladinSpells.SPELL_PALADIN_BEACON_OF_LIGHT_PROC_AURA && (targetOfBeacon.HasAura(PaladinSpells.SPELL_PALADIN_BEACON_OF_LIGHT) || targetOfBeacon.HasAura(PaladinSpells.SPELL_PALADIN_BEACON_OF_VIRTUE)))
+            if (GetSpellInfo().Id == PaladinSpells.BEACON_OF_LIGHT_PROC_AURA && (targetOfBeacon.HasAura(PaladinSpells.BeaconOfLight) || targetOfBeacon.HasAura(PaladinSpells.BEACON_OF_VIRTUE)))
             {
-                ownerOfBeacon.CastSpell(targetOfBeacon, PaladinSpells.SPELL_PALADIN_BEACON_OF_LIGHT_HEAL, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)bp));
+                ownerOfBeacon.CastSpell(targetOfBeacon, PaladinSpells.BeaconOfLightHeal, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)bp));
                 auraCheck = true;
             }
 
-            if ((GetSpellInfo().Id == PaladinSpells.SPELL_PALADIN_BEACON_OF_FAITH_PROC_AURA && targetOfBeacon.HasAura(PaladinSpells.SPELL_PALADIN_BEACON_OF_FAITH)))
+            if ((GetSpellInfo().Id == PaladinSpells.BEACON_OF_FAITH_PROC_AURA && targetOfBeacon.HasAura(PaladinSpells.BEACON_OF_FAITH)))
             {
                 bp /= 2;
-                ownerOfBeacon.CastSpell(targetOfBeacon, PaladinSpells.SPELL_PALADIN_BEACON_OF_LIGHT_HEAL, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)bp));
+                ownerOfBeacon.CastSpell(targetOfBeacon, PaladinSpells.BeaconOfLightHeal, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)bp));
                 auraCheck = true;
             }
 

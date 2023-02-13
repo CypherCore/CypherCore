@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 120588 - Elemental Blast Overload
+// 120588 - Elemental Blast Overload
+[SpellScript(120588)]
 internal class spell_sha_elemental_blast : SpellScript, ISpellAfterCast, IHasSpellEffects
 {
 	private readonly uint[] BuffSpells =

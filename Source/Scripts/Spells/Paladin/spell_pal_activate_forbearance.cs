@@ -18,7 +18,7 @@ namespace Scripts.Spells.Paladin
     {
         public override bool Validate(SpellInfo UnnamedParameter)
         {
-            return ValidateSpellInfo(PaladinSpells.SPELL_PALADIN_FORBEARANCE);
+            return ValidateSpellInfo(PaladinSpells.Forbearance);
         }
 
         public SpellCastResult CheckCast()
@@ -26,7 +26,7 @@ namespace Scripts.Spells.Paladin
             Unit target = GetExplTargetUnit();
             if (target != null)
             {
-                if (target.HasAura(PaladinSpells.SPELL_PALADIN_FORBEARANCE))
+                if (target.HasAura(PaladinSpells.Forbearance))
                 {
                     return SpellCastResult.TargetAurastate;
                 }
@@ -42,7 +42,7 @@ namespace Scripts.Spells.Paladin
                 Unit target = GetHitUnit();
                 if (target != null)
                 {
-                    player.CastSpell(target, PaladinSpells.SPELL_PALADIN_FORBEARANCE, true);
+                    player.CastSpell(target, PaladinSpells.Forbearance, true);
                 }
             }
         }

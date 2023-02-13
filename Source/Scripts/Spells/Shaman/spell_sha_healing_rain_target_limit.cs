@@ -7,7 +7,8 @@ using Game.Scripting.Interfaces.ISpell;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 73921 - Healing Rain
+// 73921 - Healing Rain
+[SpellScript(73921)]
 internal class spell_sha_healing_rain_target_limit : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();

@@ -33,16 +33,16 @@ namespace Scripts.Spells.Paladin
                 SetEffectValue(damage);
             }
 
-            if (caster.HasAura(PaladinSpells.SPELL_PALADIN_DIVINE_PURPOSE_RET_AURA))
+            if (caster.HasAura(PaladinSpells.DivinePurposeTriggerred))
             {
-                caster.RemoveAurasDueToSpell(PaladinSpells.SPELL_PALADIN_DIVINE_PURPOSE_RET_AURA);
+                caster.RemoveAurasDueToSpell(PaladinSpells.DivinePurposeTriggerred);
             }
 
-            if (caster.HasAura(PaladinSpells.SPELL_PALADIN_FIST_OF_JUSTICE_RETRI))
+            if (caster.HasAura(PaladinSpells.FIST_OF_JUSTICE_RETRI))
             {
-                if (caster.GetSpellHistory().HasCooldown(PaladinSpells.SPELL_PALADIN_HAMMER_OF_JUSTICE))
+                if (caster.GetSpellHistory().HasCooldown(PaladinSpells.HammerOfJustice))
                 {
-                    caster.GetSpellHistory().ModifyCooldown(PaladinSpells.SPELL_PALADIN_HAMMER_OF_JUSTICE, TimeSpan.FromSeconds(-10 * Time.InMilliseconds));
+                    caster.GetSpellHistory().ModifyCooldown(PaladinSpells.HammerOfJustice, TimeSpan.FromSeconds(-10 * Time.InMilliseconds));
                 }
             }
         }

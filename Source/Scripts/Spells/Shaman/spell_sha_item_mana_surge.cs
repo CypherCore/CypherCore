@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 23572 - Mana Surge
+// 23572 - Mana Surge
+[SpellScript(23572)]
 internal class spell_sha_item_mana_surge : AuraScript, IAuraCheckProc, IHasAuraEffects
 {
 	public override bool Validate(SpellInfo spellInfo)

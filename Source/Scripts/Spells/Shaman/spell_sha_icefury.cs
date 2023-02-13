@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 210714 - Icefury
+// 210714 - Icefury
+[SpellScript(210714)]
 internal class spell_sha_icefury : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();

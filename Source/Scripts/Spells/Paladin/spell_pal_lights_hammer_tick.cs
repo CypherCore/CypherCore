@@ -28,8 +28,8 @@ namespace Scripts.Spells.Paladin
                     CastSpellExtraArgs args = new CastSpellExtraArgs();
                     args.SetTriggerFlags(TriggerCastFlags.FullMask);
                     args.SetOriginalCaster(caster.GetOwner().GetGUID());
-                    caster.CastSpell(new Position(caster.GetPositionX(), caster.GetPositionY(), caster.GetPositionZ()), PaladinSpells.SPELL_PALADIN_ARCING_LIGHT_HEAL, args);
-                    caster.CastSpell(new Position(caster.GetPositionX(), caster.GetPositionY(), caster.GetPositionZ()), PaladinSpells.SPELL_PALADIN_ARCING_LIGHT_DAMAGE, args);
+                    caster.CastSpell(new Position(caster.GetPositionX(), caster.GetPositionY(), caster.GetPositionZ()), PaladinSpells.ARCING_LIGHT_HEAL, args);
+                    caster.CastSpell(new Position(caster.GetPositionX(), caster.GetPositionY(), caster.GetPositionZ()), PaladinSpells.ARCING_LIGHT_DAMAGE, args);
                 }
             }
         }

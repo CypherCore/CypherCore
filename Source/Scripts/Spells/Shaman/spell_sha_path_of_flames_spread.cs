@@ -8,7 +8,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 210621 - Path of Flames Spread
+// 210621 - Path of Flames Spread
+[SpellScript(210621)]
 internal class spell_sha_path_of_flames_spread : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();

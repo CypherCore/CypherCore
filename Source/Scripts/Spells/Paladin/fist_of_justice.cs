@@ -26,7 +26,7 @@ namespace Scripts.Spells.Paladin
                 return;
             }
 
-            if (!player.HasAura(PaladinSpells.SPELL_PALADIN_FIST_OF_JUSTICE))
+            if (!player.HasAura(PaladinSpells.FIST_OF_JUSTICE))
             {
                 return;
             }
@@ -35,9 +35,9 @@ namespace Scripts.Spells.Paladin
             {
                 if (newValue < oldValue)
                 {
-                    if (player.HasAura(PaladinSpells.SPELL_PALADIN_FIST_OF_JUSTICE))
+                    if (player.HasAura(PaladinSpells.FIST_OF_JUSTICE))
                     {
-                        player.GetSpellHistory().ModifyCooldown(PaladinSpells.SPELL_PALADIN_HAMMER_OF_JUSTICE, TimeSpan.FromSeconds(-2));
+                        player.GetSpellHistory().ModifyCooldown(PaladinSpells.HammerOfJustice, TimeSpan.FromSeconds(-2));
                     }
                 }
             }

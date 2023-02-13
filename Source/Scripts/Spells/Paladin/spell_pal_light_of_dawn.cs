@@ -17,7 +17,7 @@ namespace Scripts.Spells.Paladin
     {
         public override bool Validate(SpellInfo UnnamedParameter)
         {
-            if (Global.SpellMgr.GetSpellInfo(PaladinSpells.SPELL_PALADIN_LIGHT_OF_DAWN_TRIGGER, Difficulty.None) != null)
+            if (Global.SpellMgr.GetSpellInfo(PaladinSpells.LIGHT_OF_DAWN_TRIGGER, Difficulty.None) != null)
             {
                 return false;
             }
@@ -29,11 +29,11 @@ namespace Scripts.Spells.Paladin
             Unit caster = GetCaster();
             if (caster != null)
             {
-                caster.CastSpell(caster, PaladinSpells.SPELL_PALADIN_LIGHT_OF_DAWN_TRIGGER, true);
+                caster.CastSpell(caster, PaladinSpells.LIGHT_OF_DAWN_TRIGGER, true);
 
-                if (caster.HasAura(PaladinSpells.SPELL_PALADIN_DIVINE_PURPOSE_HOLY_AURA_2))
+                if (caster.HasAura(PaladinSpells.DIVINE_PURPOSE_HOLY_AURA_2))
                 {
-                    caster.RemoveAurasDueToSpell(PaladinSpells.SPELL_PALADIN_DIVINE_PURPOSE_HOLY_AURA_2);
+                    caster.RemoveAurasDueToSpell(PaladinSpells.DIVINE_PURPOSE_HOLY_AURA_2);
                 }
             }
         }
@@ -47,13 +47,13 @@ namespace Scripts.Spells.Paladin
                 return;
             }
 
-            if (caster.HasAura(PaladinSpells.SPELL_PALADIN_AWAKENING))
+            if (caster.HasAura(PaladinSpells.AWAKENING))
             {
                 if (RandomHelper.randChance(15))
                 {
-                    caster.CastSpell(null, PaladinSpells.SPELL_PALADIN_AVENGING_WRATH, true);
+                    caster.CastSpell(null, PaladinSpells.AvengingWrath, true);
 
-                    Aura avengingWrath = caster.GetAura(PaladinSpells.SPELL_PALADIN_AVENGING_WRATH);
+                    Aura avengingWrath = caster.GetAura(PaladinSpells.AvengingWrath);
                     if (avengingWrath != null)
                     {
                         avengingWrath.SetDuration(10000, true);

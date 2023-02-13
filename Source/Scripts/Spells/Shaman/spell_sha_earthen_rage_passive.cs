@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 170374 - Earthen Rage (Passive)
+// 170374 - Earthen Rage (Passive)
+[SpellScript(170374)]
 public class spell_sha_earthen_rage_passive : AuraScript, IAuraCheckProc, IHasAuraEffects
 {
 	private ObjectGuid _procTargetGuid;

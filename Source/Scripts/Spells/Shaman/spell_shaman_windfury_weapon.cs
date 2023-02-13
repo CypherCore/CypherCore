@@ -33,7 +33,7 @@ namespace Scripts.Spells.Shaman
 
 		public override void Register()
 		{
-			SpellEffects.Add(new EffectHandler(HandleDummy, 1, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+			SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 		}
 	}
 }

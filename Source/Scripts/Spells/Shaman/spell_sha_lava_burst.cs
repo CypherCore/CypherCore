@@ -7,7 +7,8 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman;
 
-[Script] // 51505 - Lava burst
+// 51505 - Lava burst
+[SpellScript(51505)]
 internal class spell_sha_lava_burst : SpellScript, ISpellAfterCast, IHasSpellEffects
 {
 	public override bool Validate(SpellInfo spellInfo)
