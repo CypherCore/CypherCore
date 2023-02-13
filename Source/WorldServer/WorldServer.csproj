@@ -2,9 +2,12 @@
   <Import Project="..\..\default.props" />
   <PropertyGroup>
 	<OutputType>Exe</OutputType>
-    <ApplicationIcon>Blue.ico</ApplicationIcon>
+    <ApplicationIcon>Forged Icon.ico</ApplicationIcon>
     <StartupObject>WorldServer.Server</StartupObject>
   </PropertyGroup>
+  <ItemGroup>
+    <Content Include="Forged Icon.ico" />
+  </ItemGroup>
 
   <ItemGroup>
 	<ProjectReference Include="..\Game\Game.csproj" />

@@ -44,16 +44,16 @@ public class Log
             loggers[LogFilter.Server] = serverLogger;
         }
 
-        outInfo(LogFilter.Server, @" ____                    __                      ");
-        outInfo(LogFilter.Server, @"/\  _`\                 /\ \                     ");
-        outInfo(LogFilter.Server, @"\ \ \/\_\  __  __  _____\ \ \___      __   _ __  ");
-        outInfo(LogFilter.Server, @" \ \ \/_/_/\ \/\ \/\ '__`\ \  _ `\  /'__`\/\`'__\");
-        outInfo(LogFilter.Server, @"  \ \ \L\ \ \ \_\ \ \ \L\ \ \ \ \ \/\  __/\ \ \/ ");
-        outInfo(LogFilter.Server, @"   \ \____/\/`____ \ \ ,__/\ \_\ \_\ \____\\ \_\ ");
-        outInfo(LogFilter.Server, @"    \/___/  `/___/> \ \ \/  \/_/\/_/\/____/ \/_/ ");
-        outInfo(LogFilter.Server, @"               /\___/\ \_\                       ");
-        outInfo(LogFilter.Server, @"               \/__/  \/_/                   Core");
-        outInfo(LogFilter.Server, "https://github.com/CypherCore/CypherCore \r\n");
+        outInfo(LogFilter.Server, @"```````````````````````````````````````````````````````````````````````````````````````");
+        outInfo(LogFilter.Server, @"███████╗ ██████╗ ██████╗  ██████╗ ███████╗██████╗      ██████╗ ██████╗ ██████╗ ███████╗");
+        outInfo(LogFilter.Server, @"██╔════╝██╔═══██╗██╔══██╗██╔════╝ ██╔════╝██╔══██╗    ██╔════╝██╔═══██╗██╔══██╗██╔════╝");
+        outInfo(LogFilter.Server, @"█████╗  ██║   ██║██████╔╝██║  ███╗█████╗  ██║  ██║    ██║     ██║   ██║██████╔╝█████╗  ");
+        outInfo(LogFilter.Server, @"██╔══╝  ██║   ██║██╔══██╗██║   ██║██╔══╝  ██║  ██║    ██║     ██║   ██║██╔══██╗██╔══╝  ");
+        outInfo(LogFilter.Server, @"██║     ╚██████╔╝██║  ██║╚██████╔╝███████╗██████╔╝    ╚██████╗╚██████╔╝██║  ██║███████╗");
+        outInfo(LogFilter.Server, @"╚═╝      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═════╝      ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝");
+        outInfo(LogFilter.Server, @"                                                                     A Cypher Core Fork");
+        outInfo(LogFilter.Server, @"```````````````````````````````````````````````````````````````````````````````````````");
+        outInfo(LogFilter.Server, "https://github.com/ForgedWoW/ForgedCore \r\n");
     }
 
     static bool ShouldLog(LogFilter type, LogLevel level)
