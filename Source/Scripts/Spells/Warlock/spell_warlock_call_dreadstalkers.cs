@@ -56,7 +56,9 @@ namespace Scripts.Spells.Warlock
 					dreadstalker.SetMaxHealth(caster.GetMaxHealth() / 3);
 					dreadstalker.SetHealth(caster.GetHealth() / 3);
 					dreadstalker.GetAI().AttackStart(target);
-				}
+                   
+
+                }
 
 			var impsToSummon = caster.GetAuraEffectAmount(WarlockSpells.IMPROVED_DREADSTALKERS, 0);
 

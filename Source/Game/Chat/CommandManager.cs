@@ -120,14 +120,14 @@ namespace Game.Chat
                 Console.Beep();
 
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("Cypher>> ");
+            Console.Write("Forged>> ");
 
             var handler = new ConsoleHandler();
             while (!Global.WorldMgr.IsStopped)
             {
                 handler.ParseCommands(Console.ReadLine());
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write("Cypher>> ");
+                Console.Write("Forged>> ");
             }
         }
 

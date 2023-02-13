@@ -1,5 +1,5 @@
 ###################################################################################################
-# Cypher BNet Server Configuration File #
+# Forged BNet Server Configuration File #
 ###################################################################################################
 
 ###################################################################################################
@@ -158,9 +158,9 @@ Updates.EnableDatabases = 0
 
 #
 #    Updates.SourcePath
-#        Description: The path to your CypherCore source directory.
+#        Description: The path to your ForgedCore source directory.
 #                     If the path is left empty, built-in CMAKE_SOURCE_DIR is used.
-#        Example:     "../CypherCore"
+#        Example:     "../ForgedCore"
 #        Default:     ""
 
 Updates.SourcePath  = ""

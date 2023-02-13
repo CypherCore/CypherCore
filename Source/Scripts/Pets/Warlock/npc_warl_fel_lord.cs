@@ -10,43 +10,31 @@ namespace Scripts.Pets
     namespace Warlock
     {
         // 107024 - Fel Lord
-        [Script]
-        public class npc_warl_fel_lord : ScriptObjectAutoAddDBBound, ICreatureGetAI
+        [CreatureScript(107024)]
+        public class npc_warl_fel_lordAI : CreatureAI
         {
-            public class npc_warl_fel_lordAI : CreatureAI
-            {
-                public npc_warl_fel_lordAI(Creature creature) : base(creature)
-                {
-                }
-
-                public override void Reset()
-                {
-                    Unit owner = me.GetOwner();
-
-                    if (owner == null)
-                        return;
-
-                    me.SetMaxHealth(owner.GetMaxHealth());
-                    me.SetHealth(me.GetMaxHealth());
-                    me.SetControlled(true, UnitState.Root);
-                }
-
-                public override void UpdateAI(uint UnnamedParameter)
-                {
-                    if (me.HasUnitState(UnitState.Casting))
-                        return;
-
-                    me.CastSpell(me, WarlockSpells.FEL_LORD_CLEAVE, false);
-                }
-            }
-
-            public npc_warl_fel_lord() : base("npc_warl_fel_lord")
+            public npc_warl_fel_lordAI(Creature creature) : base(creature)
             {
             }
 
-            public CreatureAI GetAI(Creature creature)
+            public override void Reset()
             {
-                return new npc_warl_fel_lordAI(creature);
+                Unit owner = me.GetOwner();
+
+                if (owner == null)
+                    return;
+
+                me.SetMaxHealth(owner.GetMaxHealth());
+                me.SetHealth(me.GetMaxHealth());
+                me.SetControlled(true, UnitState.Root);
+            }
+
+            public override void UpdateAI(uint UnnamedParameter)
+            {
+                if (me.HasUnitState(UnitState.Casting))
+                    return;
+
+                me.CastSpell(me, WarlockSpells.FEL_LORD_CLEAVE, false);
             }
         }
     }
