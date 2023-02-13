@@ -262,7 +262,7 @@ namespace Game
                     }
 
                     if (log && sendMail.Info.SendMoney > 0)
-                        Log.outCommand(GetAccountId(), "GM {GetPlayerName()} ({_player.GetGUID()}) (Account: {GetAccountId()}) mail money: {mailInfo.SendMoney} to: {mailInfo.Target} ({receiverGuid}) (Account: {receiverAccountId})");
+                        Log.outCommand(GetAccountId(), $"GM {GetPlayerName()} ({_player.GetGUID()}) (Account: {GetAccountId()}) mail money: {sendMail.Info.SendMoney} to: {sendMail.Info.Target} ({receiverGuid}) (Account: {receiverAccountId})");
                 }
 
                 // If theres is an item, there is a one hour delivery delay if sent to another account's character.

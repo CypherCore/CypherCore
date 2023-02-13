@@ -4137,7 +4137,7 @@ namespace Game.Entities
 
                             do
                             {
-                                ulong mailId = resultItems.Read<ulong>(44);
+                                ulong mailId = resultItems.Read<ulong>(52);
                                 Item mailItem = _LoadMailedItem(playerGuid, null, mailId, null, resultItems.GetFields(), additionalData.LookupByKey(resultItems.Read<ulong>(0)));
                                 if (mailItem != null)
                                     itemsByMail.Add(mailId, mailItem);
