@@ -15,6 +15,13 @@ namespace Scripts.Pets
         {
             public npc_warlock_soul_effigyAI(Creature creature) : base(creature)
             {
+                Unit owner = me.GetOwner();
+                if (owner == null)
+                    return;
+
+                creature.SetLevel(owner.GetLevel());
+                creature.UpdateLevelDependantStats();
+                creature.SetReactState(ReactStates.Aggressive);
             }
 
             public override void Reset()

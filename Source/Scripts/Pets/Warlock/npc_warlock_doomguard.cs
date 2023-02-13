@@ -21,6 +21,13 @@ namespace Scripts.Pets
 
             public npc_warlock_doomguardAI(Creature creature) : base(creature)
             {
+                Unit owner = me.GetOwner();
+                if (owner == null)
+                    return;
+
+                creature.SetLevel(owner.GetLevel());
+                creature.UpdateLevelDependantStats();
+                creature.SetReactState(ReactStates.Assist);
             }
 
             public override void Reset()

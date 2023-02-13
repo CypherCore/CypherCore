@@ -1,4 +1,5 @@
-﻿using Game.AI;
+﻿using Framework.Constants;
+using Game.AI;
 using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ICreature;
@@ -16,35 +17,40 @@ namespace Scripts.Pets
 
             public npc_warlock_dreadstalkerAI(Creature creature) : base(creature)
             {
-                
+                Unit owner = me.GetOwner();
+                if (owner == null)
+                    return;
+
+                creature.SetLevel(owner.GetLevel());
+                creature.UpdateLevelDependantStats();
+                creature.SetReactState(ReactStates.Assist);
             }
 
-            //public override void UpdateAI(uint UnnamedParameter)
-            //{
-            //    if (firstTick)
-            //    {
-            //        Unit owner = me.GetOwner();
+            public override void UpdateAI(uint UnnamedParameter)
+            {
+                if (firstTick)
+                {
+                    Unit owner = me.GetOwner();
 
-            //        if (!me.GetOwner() ||
-            //            !me.GetOwner().ToPlayer())
-            //            return;
+                    if (!me.GetOwner() ||
+                        !me.GetOwner().ToPlayer())
+                        return;
 
-            //        me.SetMaxHealth(owner.CountPctFromMaxHealth(40));
-            //        me.SetHealth(me.GetMaxHealth());
+                    me.SetMaxHealth(owner.CountPctFromMaxHealth(40));
+                    me.SetHealth(me.GetMaxHealth());
 
-            //        Unit target = owner.ToPlayer().GetSelectedUnit();
+                    Unit target = owner.ToPlayer().GetSelectedUnit();
 
-            //        if (owner.ToPlayer().GetSelectedUnit())
-            //            me.CastSpell(target, WarlockSpells.DREADSTALKER_CHARGE, true);
+                    if (owner.ToPlayer().GetSelectedUnit())
+                        me.CastSpell(target, WarlockSpells.DREADSTALKER_CHARGE, true);
 
-            //        firstTick = false;
+                    firstTick = false;
 
-            //        //me->CastSpell(SPELL_WARLOCK_SHARPENED_DREADFANGS_BUFF, SPELLVALUE_BASE_POINT0, owner->GetAuraEffectAmount(SPELL_WARLOCK_SHARPENED_DREADFANGS, EFFECT_0), me, true);
-            //    }
+                    //me->CastSpell(SPELL_WARLOCK_SHARPENED_DREADFANGS_BUFF, SPELLVALUE_BASE_POINT0, owner->GetAuraEffectAmount(SPELL_WARLOCK_SHARPENED_DREADFANGS, EFFECT_0), me, true);
+                }
 
-            //    UpdateVictim();
-            //    DoMeleeAttackIfReady();
-            //}
+                base.UpdateAI(UnnamedParameter);
+            }
         }
     }
 }

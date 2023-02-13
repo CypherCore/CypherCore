@@ -1389,7 +1389,7 @@ namespace Game.Entities
             UpdateLevelDependantStats();
         }
 
-        void UpdateLevelDependantStats()
+        public void UpdateLevelDependantStats()
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
             CreatureEliteType rank = IsPet() ? 0 : cInfo.Rank;

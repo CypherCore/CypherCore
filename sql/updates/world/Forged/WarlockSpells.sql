@@ -1,0 +1,1 @@
+UPDATE creature_template SET ScriptName = "npc_warl_vilefield" WHERE entry = 125816

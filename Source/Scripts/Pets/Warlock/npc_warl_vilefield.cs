@@ -9,11 +9,10 @@ namespace Scripts.Pets
 {
     namespace Warlock
     {
-        // 107024 - Fel Lord
-        [CreatureScript(107024)]
-        public class npc_warl_fel_lordAI : PetAI
+        [CreatureScript(135816)]
+        public class npc_warl_vilefield : PetAI
         {
-            public npc_warl_fel_lordAI(Creature creature) : base(creature)
+            public npc_warl_vilefield(Creature creature) : base(creature)
             {
                 Unit owner = me.GetOwner();
                 if (owner == null)
@@ -21,7 +20,7 @@ namespace Scripts.Pets
 
                 creature.SetLevel(owner.GetLevel());
                 creature.UpdateLevelDependantStats();
-                creature.SetReactState(ReactStates.Assist);
+                creature.SetReactState(ReactStates.Aggressive);
             }
 
             public override void Reset()
@@ -35,14 +34,6 @@ namespace Scripts.Pets
                 me.SetHealth(me.GetMaxHealth());
                 me.SetControlled(true, UnitState.Root);
             }
-
-            //public override void UpdateAI(uint UnnamedParameter)
-            //{
-            //    if (me.HasUnitState(UnitState.Casting))
-            //        return;
-
-            //    me.CastSpell(me, WarlockSpells.FEL_LORD_CLEAVE, false);
-            //}
         }
     }
 }

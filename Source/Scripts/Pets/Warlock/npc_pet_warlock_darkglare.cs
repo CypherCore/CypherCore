@@ -16,6 +16,14 @@ namespace Scripts.Pets
         {
             public npc_pet_warlock_darkglare_PetAI(Creature creature) : base(creature)
             {
+                Unit owner = me.GetOwner();
+
+                if (owner == null)
+                    return;
+
+                creature.SetLevel(owner.GetLevel());
+                creature.UpdateLevelDependantStats();
+                creature.SetReactState(ReactStates.Assist);
             }
 
             public override void UpdateAI(uint UnnamedParameter)
