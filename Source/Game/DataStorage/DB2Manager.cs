@@ -653,24 +653,6 @@ namespace Game.DataStorage
             return _storage.LookupByKey(type);
         }
 
-        public void AddHotfixRecord(uint tableHash, uint recordId, HotfixRecord.Status status = HotfixRecord.Status.Valid, int id = 80000, uint uniqueId = 123456789)
-        {
-            HotfixRecord hotfixRecord = new();
-            hotfixRecord.TableHash = tableHash;
-            hotfixRecord.RecordID = (int)recordId;
-            hotfixRecord.ID.PushID = id;
-            hotfixRecord.ID.UniqueID = uniqueId;
-            hotfixRecord.HotfixStatus = status;
-            _hotfixData.Add(id, hotfixRecord);
-
-            if (status == HotfixRecord.Status.RecordRemoved)
-            {
-                var store = _storage.LookupByKey(tableHash);
-                if (store != null)
-                    store.EraseRecord((uint)recordId);
-            }
-        }
-
         public void LoadHotfixData()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -707,6 +689,7 @@ namespace Game.DataStorage
                 hotfixRecord.ID.PushID = id;
                 hotfixRecord.ID.UniqueID = uniqueId;
                 hotfixRecord.HotfixStatus = status;
+
                 _hotfixData.Add(id, hotfixRecord);
                 deletedRecords[(tableHash, recordId)] = status == HotfixRecord.Status.RecordRemoved;
 
