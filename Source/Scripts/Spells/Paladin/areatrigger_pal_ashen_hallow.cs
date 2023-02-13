@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace Scripts.Spells.Paladin
 {
     // 19042 - Ashen Hallow
-    [SpellScript(19042)]
+    [Script]
     internal class areatrigger_pal_ashen_hallow : AreaTriggerAI
     {
         private TimeSpan _period;
