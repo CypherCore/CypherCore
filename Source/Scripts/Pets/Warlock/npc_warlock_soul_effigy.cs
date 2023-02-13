@@ -10,32 +10,21 @@ namespace Scripts.Pets
     namespace Warlock
     {
         // 103679 - Soul Effigy
-        public class npc_warlock_soul_effigy : ScriptObjectAutoAddDBBound, ICreatureGetAI
+        [CreatureScript(103679)]
+        public class npc_warlock_soul_effigyAI : CreatureAI
         {
-            public npc_warlock_soul_effigy() : base("npc_warlock_soul_effigy")
+            public npc_warlock_soul_effigyAI(Creature creature) : base(creature)
             {
             }
 
-            public CreatureAI GetAI(Creature creature)
+            public override void Reset()
             {
-                return new npc_warlock_soul_effigyAI(creature);
+                me.SetControlled(true, UnitState.Root);
+                me.CastSpell(me, WarlockSpells.SOUL_EFFIGY_AURA, true);
             }
 
-            public class npc_warlock_soul_effigyAI : CreatureAI
+            public override void UpdateAI(uint UnnamedParameter)
             {
-                public npc_warlock_soul_effigyAI(Creature creature) : base(creature)
-                {
-                }
-
-                public override void Reset()
-                {
-                    me.SetControlled(true, UnitState.Root);
-                    me.CastSpell(me, WarlockSpells.SOUL_EFFIGY_AURA, true);
-                }
-
-                public override void UpdateAI(uint UnnamedParameter)
-                {
-                }
             }
         }
     }
