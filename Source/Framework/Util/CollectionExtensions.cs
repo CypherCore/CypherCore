@@ -383,8 +383,13 @@ namespace System.Collections.Generic
         {
             if (dict.TryGetValue(key, out var values))
                 for (int i = values.Count - 1; i >= 0; i--)
+                {
+                    if (values.Count <= i)
+                        continue;
+
                     if (pred.Invoke(values[i]))
                         values.RemoveAt(i);
+                }
         }
 
         /// <summary>
@@ -443,12 +448,19 @@ namespace System.Collections.Generic
             var matches = new List<TValue>();
 
             if (dict.TryGetValue(key, out var list))
-                foreach (var val in list)
+                for (int i = list.Count - 1; i >= 0; i--)
+                {
+                    if (list.Count <= i)
+                        continue;
+
+                    var val = list[i];
+
                     if (pred(val))
                     {
                         matches.Add(val);
                         action(val);
                     }
+                }
 
             return matches;
         }
@@ -467,7 +479,12 @@ namespace System.Collections.Generic
                 var val = dict[key];
 
                 for (int i = val.Count - 1; i >= 0; i--)
+                {
+                    if (val.Count <= i)
+                        continue;
+
                     yield return new KeyValuePair<TKey, TValue>(key, val[i]);
+                }
             }
         }
 

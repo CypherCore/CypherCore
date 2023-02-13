@@ -227,7 +227,12 @@ namespace System.Collections.Generic
                     var val = _interalStorage[key];
 
                     for (int i = val.Count - 1; i >= 0; i--)
+                    {
+                        if (val.Count <= i)
+                            continue;
+
                         yield return new KeyValuePair<TKey, TValue>(key, val[i]);
+                    }
                 }
             }
         }
