@@ -1,4 +1,10 @@
-## Forged Core [![Build status](https://ci.appveyor.com/api/projects/status/2wgy97jxy0wfl7ly?svg=true)](https://ci.appveyor.com/project/JBurlison/forgedcore)
+## Forged Core 
+[![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/)
+[![Build status](https://ci.appveyor.com/api/projects/status/2wgy97jxy0wfl7ly?svg=true)](https://ci.appveyor.com/project/JBurlison/forgedcore)
+
+![GitHub last commit](https://img.shields.io/github/last-commit/ForgedWoW/ForgedCore)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/w/ForgedWoW/ForgedCore)
+[![PR's Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat)](git-client://clone?repo=https%3A%2F%2Fgithub.com%2FForgedWoW%2FForgedCore) 
 
 Forged Core is an open source branch of CypherCore.
 Forge Core is the core of the Forged WoW Server and aims to be the most complete and up to date core.
@@ -29,7 +35,7 @@ The current support game version is: 10.0.5.48001
 * Must use Arctium WoW Client Launcher [Download](https://arctium.io/wow)
 
 ### Support / General Info
-* Check out our Discord [Here](https://discord.gg/forgedwow)
+* Check out our Discord ![Discord](https://img.shields.io/discord/920073768162963477)
 * Check out Trinity Core Wiki as a few steps are the same [Here](https://trinitycore.atlassian.net/wiki/spaces/tc/pages/2130077/Installation+Guide)
 
 ### Legal
