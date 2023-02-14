@@ -2,7 +2,7 @@
 <h1 align="center"> </h1>
 
 [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/)
-[![Build status](https://ci.appveyor.com/api/projects/status/2wgy97jxy0wfl7ly?svg=true)](https://ci.appveyor.com/project/JBurlison/forgedcore)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/ForgedWoW/ForgedCore/dotnet.yml)
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/ForgedWoW/ForgedCore)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/ForgedWoW/ForgedCore)
