@@ -1,4 +1,6 @@
-## Forged Core 
+![](Forged_Logo.png)
+<h1 align="center"> </h1>
+
 [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/)
 [![Build status](https://ci.appveyor.com/api/projects/status/2wgy97jxy0wfl7ly?svg=true)](https://ci.appveyor.com/project/JBurlison/forgedcore)
 
