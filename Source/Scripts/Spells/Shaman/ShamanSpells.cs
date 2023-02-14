@@ -241,9 +241,10 @@ namespace Scripts.Spells.Shaman
 		public const uint WindfuryAttack = 25504;
 		public const uint WindfuryEnchantment = 334302;
 		public const uint WindRush = 192082;
+		public const uint PrimordialWave = 327163;
 
-		//Misc
-		public const uint HunterInsanity = 95809;
+        //Misc
+        public const uint HunterInsanity = 95809;
 		public const uint MageTemporalDisplacement = 80354;
 		public const uint PetNetherwindsFatigued = 160455;
 	}
