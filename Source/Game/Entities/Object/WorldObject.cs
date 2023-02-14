@@ -2973,6 +2973,16 @@ namespace Game.Entities
             return creatureList;
         }
 
+        public List<Creature> GetCreatureListWithEntryInGrid(uint[] entry, float maxSearchRange = 250.0f)
+        {
+            List<Creature> creatureList = new();
+            var check = new AllCreaturesOfEntriesInRange(this, entry, maxSearchRange);
+            var searcher = new CreatureListSearcher(this, creatureList, check, GridType.Grid);
+
+            Cell.VisitGrid(this, searcher, maxSearchRange, true);
+            return creatureList;
+        }
+
         public List<Creature> GetCreatureListWithOptionsInGrid(float maxSearchRange, FindCreatureOptions options)
         {
             List<Creature> creatureList = new();

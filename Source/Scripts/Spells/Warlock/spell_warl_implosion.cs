@@ -38,15 +38,15 @@ namespace Scripts.Spells.Warlock
 					imp.GetMotionMaster().MoveJump(target, 300.0f, 1.0f, EventId.Jump);
 					var casterGuid = caster.GetGUID();
 
-					imp.GetAI()
-					   .Scheduler.Schedule(TimeSpan.FromMilliseconds(500),
-					                       task =>
+					imp.m_Events.AddEventAtOffset(() =>
 					                       {
 						                       imp.CastSpell(imp, WarlockSpells.IMPLOSION_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(casterGuid));
 						                       imp.DisappearAndDie();
-					                       });
+					                       }, TimeSpan.FromMilliseconds(500));
 				}
-		}
+
+            caster.RemoveAura(296553);
+        }
 
 		public override void Register()
 		{

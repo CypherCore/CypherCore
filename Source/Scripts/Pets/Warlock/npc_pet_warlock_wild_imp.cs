@@ -14,7 +14,7 @@ namespace Scripts.Pets
     namespace Warlock
     {
         // Wild Imp - 99739
-        [CreatureScript(new uint[] { 55659, 99739 })]
+        [CreatureScript(55659)]
         public class npc_pet_warlock_wild_imp : PetAI
         {
             private ObjectGuid _targetGUID = new();
@@ -71,8 +71,7 @@ namespace Scripts.Pets
 
                 if (caster == null) return; 
 
-                if (caster.GetCreatureListWithEntryInGrid(55659).Count == 0 && 
-                    caster.GetCreatureListWithEntryInGrid(99739).Count == 0)
+                if (caster.GetCreatureListWithEntryInGrid(55659).Count == 0)
                     caster.RemoveAura(296553);
             }
 
