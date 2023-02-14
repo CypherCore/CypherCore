@@ -345,7 +345,7 @@ namespace Game.Movement
             Array.Resize(ref lengths, index_hi + 1);
             while (i < index_hi)
             {
-                length += SegLength(i);
+                length += (int)SegLength(i);
                 lengths[++i] = length;
             }
         }

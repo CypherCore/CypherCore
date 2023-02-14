@@ -69,10 +69,9 @@ namespace Game.Spells
                 m_originalCaster = Global.ObjAccessor.GetUnit(m_caster, m_originalCasterGUID);
                 if (m_originalCaster != null && !m_originalCaster.IsInWorld)
                     m_originalCaster = null;
+                else
+                    m_originalCaster = m_caster.ToUnit();
             }
-
-            if (m_originalCaster == null)
-                m_originalCaster = caster.ToUnit();
 
             _triggeredCastFlags = triggerFlags;
 
@@ -6940,6 +6939,8 @@ namespace Game.Spells
                 m_originalCaster = Global.ObjAccessor.GetUnit(m_caster, m_originalCasterGUID);
                 if (m_originalCaster != null && !m_originalCaster.IsInWorld)
                     m_originalCaster = null;
+                else
+                    m_originalCaster = m_caster.ToUnit();
             }
 
             if (!m_castItemGUID.IsEmpty() && m_caster.IsTypeId(TypeId.Player))
