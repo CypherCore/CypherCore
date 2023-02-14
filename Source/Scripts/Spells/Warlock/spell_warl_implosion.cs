@@ -36,6 +36,7 @@ namespace Scripts.Spells.Warlock
 					imp.VariableStorage.Set("ForceUpdateTimers", true);
 					imp.CastSpell(target, WarlockSpells.IMPLOSION_JUMP, true);
 					imp.GetMotionMaster().MoveJump(target, 300.0f, 1.0f, EventId.Jump);
+					imp.SendUpdateToPlayer(caster.ToPlayer());
 					var casterGuid = caster.GetGUID();
 
 					imp.m_Events.AddEventAtOffset(() =>

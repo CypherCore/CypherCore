@@ -45,7 +45,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Mailbox = _worldPacket.ReadPackedGuid();
-            MailID = _worldPacket.ReadUInt32();
+            MailID = _worldPacket.ReadUInt64();
         }
 
         public ObjectGuid Mailbox;
@@ -181,7 +181,7 @@ namespace Game.Networking.Packets
         {
             Mailbox = _worldPacket.ReadPackedGuid();
             MailID = _worldPacket.ReadUInt64();
-            AttachID = _worldPacket.ReadUInt32();
+            AttachID = _worldPacket.ReadUInt64();
         }
 
         public ObjectGuid Mailbox;
