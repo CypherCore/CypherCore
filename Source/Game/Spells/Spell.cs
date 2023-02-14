@@ -39,6 +39,9 @@ namespace Game.Spells
 
             m_spellSchoolMask = m_spellInfo.GetSchoolMask();           // Can be override for some spell (wand shoot for example)
 
+            if (originalCasterGUID.IsEmpty())
+                m_originalCasterGUID = m_caster.GetGUID();
+
             Player playerCaster = m_caster.ToPlayer();
             if (playerCaster != null)
             {
