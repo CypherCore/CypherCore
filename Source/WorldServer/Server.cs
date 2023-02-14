@@ -200,7 +200,7 @@ namespace WorldServer
                 loops++;
                 total += diff;
 
-                if (loops % 20 == 0)
+                if (loops % 200 == 0)
                     Console.WriteLine("Avg: " + total / loops);
 #endif
             }
