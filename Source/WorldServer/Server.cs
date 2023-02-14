@@ -176,6 +176,8 @@ namespace WorldServer
             if (halfMaxCoreStuckTime == 0)
                 halfMaxCoreStuckTime = uint.MaxValue;
 
+            ulong loops = 0;
+            ulong total = 0;
             while (!Global.WorldMgr.IsStopped)
             {
                 var realCurrTime = Time.GetMSTime();
@@ -194,6 +196,13 @@ namespace WorldServer
 
                 Global.WorldMgr.Update(diff);
                 realPrevTime = realCurrTime;
+#if DEBUG
+                loops++;
+                total += diff;
+
+                if (loops % 20 == 0)
+                    Console.WriteLine("Avg: " + total / loops);
+#endif
             }
         }
 
