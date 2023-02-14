@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Constants;
 using Framework.Dynamic;
@@ -3384,15 +3384,15 @@ namespace Game.Spells
             breakTarget.Data.UnitGUID = m_caster.GetGUID();
             breakTarget.Data.Write();
 
-            var notifierBreak = new MessageDistDelivererToHostile<PacketSenderOwning<BreakTarget>>(unitCaster, breakTarget, dist);
-            Cell.VisitWorldObjects(m_caster, notifierBreak, dist);
+            var notifierBreak = new MessageDistDelivererToHostile<PacketSenderOwning<BreakTarget>>(unitCaster, breakTarget, dist, GridType.World);
+            Cell.VisitGrid(m_caster, notifierBreak, dist);
 
             // and selection
             PacketSenderOwning<ClearTarget> clearTarget = new();
             clearTarget.Data.Guid = m_caster.GetGUID();
             clearTarget.Data.Write();
-            var notifierClear = new MessageDistDelivererToHostile<PacketSenderOwning<ClearTarget>>(unitCaster, clearTarget, dist);
-            Cell.VisitWorldObjects(m_caster, notifierClear, dist);
+            var notifierClear = new MessageDistDelivererToHostile<PacketSenderOwning<ClearTarget>>(unitCaster, clearTarget, dist, GridType.World);
+            Cell.VisitGrid(m_caster, notifierClear, dist);
 
             // we should also force pets to remove us from current target
             List<Unit> attackerSet = new();
@@ -5082,8 +5082,8 @@ namespace Game.Spells
 
             List<WorldObject> objs = new();
             ObjectEntryAndPrivateOwnerIfExistsCheck check = new(unitTarget.GetGUID(), (uint)effectInfo.MiscValue);
-            WorldObjectListSearcher checker = new(unitTarget, objs, check, GridMapTypeMask.Conversation);
-            Cell.VisitGridObjects(unitTarget, checker, 100.0f);
+            WorldObjectListSearcher checker = new(unitTarget, objs, check, GridMapTypeMask.Conversation, GridType.Grid);
+            Cell.VisitGrid(unitTarget, checker, 100.0f);
 
             foreach (WorldObject obj in objs)
             {

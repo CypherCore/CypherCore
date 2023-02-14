@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Configuration;
 using Framework.Constants;
@@ -706,8 +706,8 @@ namespace Game.Entities
             if (radius > 0)
             {
                 var u_check = new NearestAssistCreatureInCreatureRangeCheck(this, GetVictim(), radius);
-                var searcher = new CreatureLastSearcher(this, u_check);
-                Cell.VisitGridObjects(this, searcher, radius);
+                var searcher = new CreatureLastSearcher(this, u_check, GridType.Grid);
+                Cell.VisitGrid(this, searcher, radius);
 
                 var creature = searcher.GetTarget();
 
@@ -2104,8 +2104,8 @@ namespace Game.Entities
                 dist = SharedConst.MaxVisibilityDistance;
 
             var u_check = new NearestHostileUnitCheck(this, dist);
-            var searcher = new UnitLastSearcher(this, u_check);
-            Cell.VisitAllObjects(this, searcher, dist);
+            var searcher = new UnitLastSearcher(this, u_check, GridType.All);
+            Cell.VisitGrid(this, searcher, dist);
 
             return searcher.GetTarget();
         }
@@ -2120,9 +2120,9 @@ namespace Game.Entities
             }
 
             var u_check = new NearestHostileUnitInAttackDistanceCheck(this, dist);
-            var searcher = new UnitLastSearcher(this, u_check);
+            var searcher = new UnitLastSearcher(this, u_check, GridType.All);
 
-            Cell.VisitAllObjects(this, searcher, Math.Max(dist, SharedConst.AttackDistance));
+            Cell.VisitGrid(this, searcher, Math.Max(dist, SharedConst.AttackDistance));
 
             return searcher.GetTarget();
         }
@@ -2150,8 +2150,8 @@ namespace Game.Entities
                     List<Creature> assistList = new();
 
                     var u_check = new AnyAssistCreatureInRangeCheck(this, GetVictim(), radius);
-                    var searcher = new CreatureListSearcher(this, assistList, u_check);
-                    Cell.VisitGridObjects(this, searcher, radius);
+                    var searcher = new CreatureListSearcher(this, assistList, u_check, GridType.Grid);
+                    Cell.VisitGrid(this, searcher, radius);
 
                     if (!assistList.Empty())
                     {
@@ -2186,8 +2186,8 @@ namespace Game.Entities
             }
 
             var u_do = new CallOfHelpCreatureInRangeDo(this, target, radius);
-            var worker = new CreatureWorker(this, u_do);
-            Cell.VisitGridObjects(this, worker, radius);
+            var worker = new CreatureWorker(this, u_do, GridType.Grid);
+            Cell.VisitGrid(this, worker, radius);
         }
 
         public bool CanAssistTo(Unit u, Unit enemy, bool checkfaction = true)
@@ -2955,8 +2955,8 @@ namespace Game.Entities
             // Selects nearest hostile target within creature's aggro range. Used primarily by
             //  pets set to aggressive. Will not return neutral or friendly targets
             var u_check = new NearestHostileUnitInAggroRangeCheck(this, useLOS, ignoreCivilians);
-            var searcher = new UnitSearcher(this, u_check);
-            Cell.VisitGridObjects(this, searcher, SharedConst.MaxAggroRadius);
+            var searcher = new UnitSearcher(this, u_check, GridType.Grid);
+            Cell.VisitGrid(this, searcher, SharedConst.MaxAggroRadius);
             return searcher.GetTarget();
         }
 

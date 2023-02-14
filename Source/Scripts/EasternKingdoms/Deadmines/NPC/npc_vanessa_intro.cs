@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -85,7 +88,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
                                 AnyPlayerInObjectRangeCheck checker = new AnyPlayerInObjectRangeCheck(me, 150.0f);
                                 PlayerListSearcher searcher = new PlayerListSearcher(me, players, checker);
-                                Cell.VisitWorldObjects(me, searcher, 150f);
+                                Cell.VisitGrid(me, searcher, 150f);
 
                                 foreach (var item in players)
                                 {
@@ -107,7 +110,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
                                 AnyPlayerInObjectRangeCheck checker = new AnyPlayerInObjectRangeCheck(me, 150.0f);
                                 PlayerListSearcher searcher = new PlayerListSearcher(me, players, checker);
-                                Cell.VisitWorldObjects(me, searcher, 150f);
+                                Cell.VisitGrid(me, searcher, 150f);
 
                                 Creature controller_achi = me.FindNearestCreature(boss_vanessa_vancleef.eAchievementMisc.NPC_ACHIEVEMENT_CONTROLLER, 300.0f);
                                 if (controller_achi != null)
@@ -132,7 +135,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
                                 AnyPlayerInObjectRangeCheck checker = new AnyPlayerInObjectRangeCheck(me, 150.0f);
                                 PlayerListSearcher searcher = new PlayerListSearcher(me, players, checker);
-                                Cell.VisitWorldObjects(me, searcher, 150f);
+                                Cell.VisitGrid(me, searcher, 150f);
 
                                 foreach (var item in players)
                                 {

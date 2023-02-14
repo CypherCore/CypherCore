@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Constants;
 using Framework.Dynamic;
@@ -1677,9 +1677,9 @@ namespace Game.Spells
             {
                 List<Unit> targets = new();
                 var u_check = new AnyUnfriendlyUnitInObjectRangeCheck(target, target, target.GetMap().GetVisibilityRange());
-                var searcher = new UnitListSearcher(target, targets, u_check);
+                var searcher = new UnitListSearcher(target, targets, u_check, GridType.All);
 
-                Cell.VisitAllObjects(target, searcher, target.GetMap().GetVisibilityRange());
+                Cell.VisitGrid(target, searcher, target.GetMap().GetVisibilityRange());
                 foreach (var unit in targets)
                 {
                     if (!unit.HasUnitState(UnitState.Casting))

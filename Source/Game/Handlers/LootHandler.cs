@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Constants;
 using Game.DataStorage;
@@ -214,8 +214,8 @@ namespace Game
             GetPlayer().RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Looting);
 
             List<Creature> corpses = new();
-            CreatureListSearcher searcher = new(_player, corpses, check);
-            Cell.VisitGridObjects(_player, searcher, AELootCreatureCheck.LootDistance);
+            CreatureListSearcher searcher = new(_player, corpses, check, GridType.Grid);
+            Cell.VisitGrid(_player, searcher, AELootCreatureCheck.LootDistance);
 
             if (!corpses.Empty())
                 SendPacket(new AELootTargets((uint)corpses.Count + 1));

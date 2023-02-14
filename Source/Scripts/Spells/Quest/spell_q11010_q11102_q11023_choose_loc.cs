@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
+
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
@@ -25,7 +28,7 @@ internal class spell_q11010_q11102_q11023_choose_loc : SpellScript, IHasSpellEff
 		List<Unit>                  playerList = new();
 		AnyPlayerInObjectRangeCheck checker    = new(caster, 65.0f);
 		PlayerListSearcher          searcher   = new(caster, playerList, checker);
-		Cell.VisitWorldObjects(caster, searcher, 65.0f);
+		Cell.VisitGrid(caster, searcher, 65.0f);
 
 		foreach (Player player in playerList)
 			// Check if found player Target is on fly Mount or using flying form

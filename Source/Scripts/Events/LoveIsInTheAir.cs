@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using System.Collections.Generic;
 using Framework.Constants;
@@ -98,7 +98,7 @@ namespace Scripts.m_Events.LoveIsInTheAir
             List<Unit> playerList = new();
             AnyPlayerInObjectRangeCheck checker = new(target, SharedConst.InteractionDistance * 2);
             var searcher = new PlayerListSearcher(target, playerList, checker);
-            Cell.VisitWorldObjects(target, searcher, SharedConst.InteractionDistance * 2);
+            Cell.VisitGrid(target, searcher, SharedConst.InteractionDistance * 2);
 
             foreach (Player playerFound in playerList)
                 if (target != playerFound &&

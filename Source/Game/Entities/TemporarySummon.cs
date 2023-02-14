@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Constants;
 using Framework.Dynamic;
@@ -262,8 +262,8 @@ namespace Game.Entities
                 }
             }
 
-            VisibleChangesNotifier notifier = new(objectsToUpdate);
-            Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
+            VisibleChangesNotifier notifier = new(objectsToUpdate, GridType.World);
+            Cell.VisitGrid(this, notifier, GetVisibilityRange());
         }
 
         public override void UpdateObjectVisibilityOnDestroy()
@@ -290,8 +290,8 @@ namespace Game.Entities
                 }
             }
 
-            VisibleChangesNotifier notifier = new(objectsToUpdate);
-            Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
+            VisibleChangesNotifier notifier = new(objectsToUpdate, GridType.World);
+            Cell.VisitGrid(this, notifier, GetVisibilityRange());
 
             if (original != null) // original is only != null when it was replaced
             {

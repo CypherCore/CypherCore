@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
+
+using System.Collections.Generic;
 using System.Linq;
 using Framework.Constants;
 using Game.Entities;
@@ -49,7 +52,7 @@ namespace Scripts.Spells.Shaman
 			var chainTargets = new List<WorldObject>();
 			var check        = new WorldObjectSpellAreaTargetCheck(range, _primaryTarget, caster, caster, GetSpellInfo(), targetInfo.GetCheckType(), conditions, SpellTargetObjectTypes.Unit);
 			var searcher     = new WorldObjectListSearcher(caster, chainTargets, check, containerTypeMask);
-			Cell.VisitAllObjects(_primaryTarget, searcher, range);
+			Cell.VisitGrid(_primaryTarget, searcher, range);
 
 			chainTargets.RemoveIf(new UnitAuraCheck<WorldObject>(false, ShamanSpells.SPELL_SHAMAN_RIPTIDE, caster.GetGUID()));
 

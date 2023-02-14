@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using System;
 using System.Collections.Generic;
@@ -15,6 +15,7 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Loots;
 using Game.Maps;
+using Game.Maps.Interfaces;
 using Game.Movement;
 using Game.Networking.Packets;
 using Game.Scripting;
@@ -1584,14 +1585,14 @@ namespace Game.Spells
             return retMask;
         }
 
-        void SearchTargets(Notifier notifier, GridMapTypeMask containerMask, WorldObject referer, Position pos, float radius)
+        void SearchTargets(IGridNotifier notifier, GridMapTypeMask containerMask, WorldObject referer, Position pos, float radius)
         {
             if (containerMask == 0)
                 return;
 
-            bool searchInGrid = containerMask.HasAnyFlag(GridMapTypeMask.Creature | GridMapTypeMask.GameObject);
-            bool searchInWorld = containerMask.HasAnyFlag(GridMapTypeMask.Creature | GridMapTypeMask.Player | GridMapTypeMask.Corpse);
-            if (searchInGrid || searchInWorld)
+            bool searchInWorld = containerMask.HasAnyFlag(GridMapTypeMask.Creature | GridMapTypeMask.Player | GridMapTypeMask.Corpse | GridMapTypeMask.GameObject);
+
+            if (searchInWorld)
             {
                 float x = pos.GetPositionX();
                 float y = pos.GetPositionY();
@@ -1603,10 +1604,7 @@ namespace Game.Spells
                 Map map = referer.GetMap();
 
                 if (searchInWorld)
-                    Cell.VisitWorldObjects(x, y, map, notifier, radius);
-
-                if (searchInGrid)
-                    Cell.VisitGridObjects(x, y, map, notifier, radius);
+                    Cell.VisitGrid(x, y, map, notifier, radius);
             }
         }
 
@@ -1732,7 +1730,7 @@ namespace Game.Spells
         GameObject SearchSpellFocus()
         {
             var check = new GameObjectFocusCheck(m_caster, m_spellInfo.RequiresSpellFocus);
-            var searcher = new GameObjectSearcher(m_caster, check);
+            var searcher = new GameObjectSearcher(m_caster, check, GridType.All);
             SearchTargets(searcher, GridMapTypeMask.GameObject, m_caster, m_caster, m_caster.GetVisibilityRange());
             return searcher.GetTarget();
         }

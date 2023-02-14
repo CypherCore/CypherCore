@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Constants;
 using Framework.Database;
@@ -613,16 +613,16 @@ namespace Game.Entities
                             {
                                 // Hunter trap: Search units which are unfriendly to the trap's owner
                                 var checker = new NearestAttackableNoTotemUnitInObjectRangeCheck(this, radius);
-                                var searcher = new UnitLastSearcher(this, checker);
-                                Cell.VisitAllObjects(this, searcher, radius);
+                                var searcher = new UnitLastSearcher(this, checker, GridType.All);
+                                Cell.VisitGrid(this, searcher, radius);
                                 target = searcher.GetTarget();
                             }
                             else
                             {
                                 // Environmental trap: Any player
                                 var check = new AnyPlayerInObjectRangeCheck(this, radius);
-                                var searcher = new PlayerSearcher(this, check);
-                                Cell.VisitWorldObjects(this, searcher, radius);
+                                var searcher = new PlayerSearcher(this, check, GridType.World);
+                                Cell.VisitGrid(this, searcher, radius);
                                 target = searcher.GetTarget();
                             }
 
@@ -1417,9 +1417,9 @@ namespace Game.Entities
         GameObject LookupFishingHoleAround(float range)
         {
             var u_check = new NearestGameObjectFishingHole(this, range);
-            var checker = new GameObjectSearcher(this, u_check);
+            var checker = new GameObjectSearcher(this, u_check, GridType.Grid);
 
-            Cell.VisitGridObjects(this, checker, range);
+            Cell.VisitGrid(this, checker, range);
             return checker.GetTarget();
         }
 

@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Constants;
 using Framework.Dynamic;
@@ -1419,14 +1419,14 @@ namespace Game.Entities
         {
             PacketSenderRef sender = new(data);
             MessageDistDeliverer<PacketSenderRef> notifier = new(this, sender, dist);
-            Cell.VisitWorldObjects(this, notifier, dist);
+            Cell.VisitGrid(this, notifier, dist);
         }
 
         public virtual void SendMessageToSet(ServerPacket data, Player skip)
         {
             PacketSenderRef sender = new(data);
             var notifier = new MessageDistDeliverer<PacketSenderRef>(this, sender, GetVisibilityRange(), false, skip);
-            Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
+            Cell.VisitGrid(this, notifier, GetVisibilityRange());
         }
 
         public void SendCombatLogMessage(CombatLogServerPacket combatLog)
@@ -1438,7 +1438,7 @@ namespace Game.Entities
                 combatLogSender.Invoke(self);
 
             MessageDistDeliverer<CombatLogSender> notifier = new(this, combatLogSender, GetVisibilityRange());
-            Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
+            Cell.VisitGrid(this, notifier, GetVisibilityRange());
         }
 
         public virtual void SetMap(Map map)
@@ -1658,18 +1658,17 @@ namespace Game.Entities
             cell.SetNoCreate();
 
             AllCreaturesWithinRange check = new AllCreaturesWithinRange(this, maxSearchRange);
-            CreatureListSearcher searcher = new CreatureListSearcher(this, creatureList, check);
+            CreatureListSearcher searcher = new CreatureListSearcher(this, creatureList, check, GridType.All);
 
-            Visitor gnotifier = new(searcher, GridMapTypeMask.Creature);
-            cell.Visit(pair, gnotifier, GetMap(), this, maxSearchRange);
+            cell.Visit(pair, searcher, GetMap(), this, maxSearchRange);
         }
 
         public Creature FindNearestCreature(uint entry, float range, bool alive = true)
         {
             var checker = new NearestCreatureEntryWithLiveStateInObjectRangeCheck(this, entry, alive, range);
-            var searcher = new CreatureLastSearcher(this, checker);
+            var searcher = new CreatureLastSearcher(this, checker, GridType.All);
 
-            Cell.VisitAllObjects(this, searcher, range);
+            Cell.VisitGrid(this, searcher, range);
             return searcher.GetTarget();
         }
 
@@ -1677,46 +1676,46 @@ namespace Game.Entities
         {
             NearestCheckCustomizer checkCustomizer = new(this, range);
             CreatureWithOptionsInObjectRangeCheck<NearestCheckCustomizer> checker = new(this, checkCustomizer, options);
-            CreatureLastSearcher searcher = new(this, checker);
+            CreatureLastSearcher searcher = new(this, checker, GridType.All);
             if (options.IgnorePhases)
                 searcher.i_phaseShift = PhasingHandler.GetAlwaysVisiblePhaseShift();
 
-            Cell.VisitAllObjects(this, searcher, range);
+            Cell.VisitGrid(this, searcher, range);
             return searcher.GetTarget();
         }
 
         public GameObject FindNearestGameObject(uint entry, float range, bool spawnedOnly = true)
         {
             var checker = new NearestGameObjectEntryInObjectRangeCheck(this, entry, range, spawnedOnly);
-            var searcher = new GameObjectLastSearcher(this, checker);
+            var searcher = new GameObjectLastSearcher(this, checker, GridType.Grid);
 
-            Cell.VisitGridObjects(this, searcher, range);
+            Cell.VisitGrid(this, searcher, range);
             return searcher.GetTarget();
         }
 
         public GameObject FindNearestUnspawnedGameObject(uint entry, float range)
         {
             NearestUnspawnedGameObjectEntryInObjectRangeCheck checker = new(this, entry, range);
-            GameObjectLastSearcher searcher = new(this, checker);
+            GameObjectLastSearcher searcher = new(this, checker, GridType.Grid);
 
-            Cell.VisitGridObjects(this, searcher, range);
+            Cell.VisitGrid(this, searcher, range);
             return searcher.GetTarget();
         }
 
         public GameObject FindNearestGameObjectOfType(GameObjectTypes type, float range)
         {
             var checker = new NearestGameObjectTypeInObjectRangeCheck(this, type, range);
-            var searcher = new GameObjectLastSearcher(this, checker);
+            var searcher = new GameObjectLastSearcher(this, checker, GridType.Grid);
 
-            Cell.VisitGridObjects(this, searcher, range);
+            Cell.VisitGrid(this, searcher, range);
             return searcher.GetTarget();
         }
 
         public Player SelectNearestPlayer(float distance)
         {
             var checker = new NearestPlayerInObjectRangeCheck(this, distance);
-            var searcher = new PlayerLastSearcher(this, checker);
-            Cell.VisitAllObjects(this, searcher, distance);
+            var searcher = new PlayerLastSearcher(this, checker, GridType.All);
+            Cell.VisitGrid(this, searcher, distance);
             return searcher.GetTarget();
         }
 
@@ -2958,9 +2957,9 @@ namespace Game.Entities
         {
             List<GameObject> gameobjectList = new();
             var check = new AllGameObjectsWithEntryInRange(this, entry, maxSearchRange);
-            var searcher = new GameObjectListSearcher(this, gameobjectList, check);
+            var searcher = new GameObjectListSearcher(this, gameobjectList, check, GridType.Grid);
 
-            Cell.VisitGridObjects(this, searcher, maxSearchRange);
+            Cell.VisitGrid(this, searcher, maxSearchRange, true);
             return gameobjectList;
         }
 
@@ -2968,9 +2967,9 @@ namespace Game.Entities
         {
             List<Creature> creatureList = new();
             var check = new AllCreaturesOfEntryInRange(this, entry, maxSearchRange);
-            var searcher = new CreatureListSearcher(this, creatureList, check);
+            var searcher = new CreatureListSearcher(this, creatureList, check, GridType.Grid);
 
-            Cell.VisitGridObjects(this, searcher, maxSearchRange);
+            Cell.VisitGrid(this, searcher, maxSearchRange, true);
             return creatureList;
         }
 
@@ -2979,11 +2978,11 @@ namespace Game.Entities
             List<Creature> creatureList = new();
             NoopCheckCustomizer checkCustomizer = new();
             CreatureWithOptionsInObjectRangeCheck<NoopCheckCustomizer> check = new(this, checkCustomizer, options);
-            CreatureListSearcher searcher = new(this, creatureList, check);
+            CreatureListSearcher searcher = new(this, creatureList, check, GridType.Grid);
             if (options.IgnorePhases)
                 searcher.i_phaseShift = PhasingHandler.GetAlwaysVisiblePhaseShift();
 
-            Cell.VisitGridObjects(this, searcher, maxSearchRange);
+            Cell.VisitGrid(this, searcher, maxSearchRange, true);
             return creatureList;
         }
 
@@ -2994,7 +2993,7 @@ namespace Game.Entities
             var checker = new AnyPlayerInObjectRangeCheck(this, maxSearchRange, alive);
             var searcher = new PlayerListSearcher(this, playerList, checker);
 
-            Cell.VisitWorldObjects(this, searcher, maxSearchRange);
+            Cell.VisitGrid(this, searcher, maxSearchRange);
             return playerList;
         }
 
@@ -3063,7 +3062,7 @@ namespace Game.Entities
             var check = new AnyPlayerInObjectRangeCheck(this, GetVisibilityRange(), false);
             var searcher = new PlayerListSearcher(this, targets, check);
 
-            Cell.VisitWorldObjects(this, searcher, GetVisibilityRange());
+            Cell.VisitGrid(this, searcher, GetVisibilityRange());
             foreach (Player player in targets)
             {
                 if (player == this)
@@ -3083,8 +3082,8 @@ namespace Game.Entities
         public virtual void UpdateObjectVisibility(bool force = true)
         {
             //updates object's visibility for nearby players
-            var notifier = new VisibleChangesNotifier(new[] { this });
-            Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
+            var notifier = new VisibleChangesNotifier(new[] { this }, GridType.World);
+            Cell.VisitGrid(this, notifier, GetVisibilityRange());
         }
 
         public virtual void UpdateObjectVisibilityOnCreate()
@@ -3096,8 +3095,8 @@ namespace Game.Entities
 
         public virtual void BuildUpdate(Dictionary<Player, UpdateData> data)
         {
-            var notifier = new WorldObjectChangeAccumulator(this, data);
-            Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
+            var notifier = new WorldObjectChangeAccumulator(this, data, GridType.World);
+            Cell.VisitGrid(this, notifier, GetVisibilityRange());
 
             ClearUpdateMask(false);
         }
@@ -3667,8 +3666,8 @@ namespace Game.Entities
         public Player FindNearestPlayer(float range, bool alive = true)
         {
             AnyPlayerInObjectRangeCheck check = new AnyPlayerInObjectRangeCheck(this, GetVisibilityRange());
-            PlayerSearcher searcher = new PlayerSearcher(this, check);
-            Cell.VisitGridObjects(this, searcher, range);
+            PlayerSearcher searcher = new PlayerSearcher(this, check, GridType.Grid);
+            Cell.VisitGrid(this, searcher, range);
             return searcher.GetTarget();
         }
 

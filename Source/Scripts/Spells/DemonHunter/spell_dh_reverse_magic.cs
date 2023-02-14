@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
+
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
@@ -21,8 +24,8 @@ public class spell_dh_reverse_magic : SpellScript, ISpellOnCast
 
 		var allies   = new List<Unit>();
 		var check    = new AnyFriendlyUnitInObjectRangeCheck(_player, _player, 10.0f, true);
-		var searcher = new UnitListSearcher(_player, allies, check);
-		Cell.VisitAllObjects(_player, searcher, 10.0f);
+		var searcher = new UnitListSearcher(_player, allies, check, GridType.All);
+		Cell.VisitGrid(_player, searcher, 10.0f);
 
 		foreach (var unit in allies)
 		{

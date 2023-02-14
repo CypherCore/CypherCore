@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
+
+using System;
 using System.Diagnostics.Contracts;
 
 namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10

@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -12,17 +12,17 @@ namespace System.Collections.Generic
     {
         public static bool Empty<T>(this Queue<T> queue)
         {
-            return queue.Count == 0;
+            return queue == null || queue.Count == 0;
         }
 
         public static bool Empty<TValue>(this ICollection<TValue> collection)
         {
-            return collection.Count == 0;
+            return collection == null || collection.Count == 0;
         }
 
         public static bool Empty<Tkey, TValue>(this IDictionary<Tkey, TValue> dictionary)
         {
-            return dictionary.Count == 0;
+            return dictionary == null || dictionary.Count == 0;
         }
 
         /// <summary>
@@ -474,7 +474,7 @@ namespace System.Collections.Generic
 
         public static IEnumerable<KeyValuePair<TKey, TValue>> KeyValueList<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict)
         {
-            foreach (var key in dict.Keys.ToArray()) // this allows it to be safely enumerated off of and have items removed.
+            foreach (var key in dict.Keys.ToList()) // this allows it to be safely enumerated off of and have items removed.
             {
                 var val = dict[key];
 

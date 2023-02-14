@@ -1,8 +1,9 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Constants;
 using Game.Entities;
+using Game.Maps.Interfaces;
 using System;
 
 namespace Game.Maps
@@ -102,14 +103,14 @@ namespace Game.Maps
                 data.grid_y != cell.data.grid_y);
         }
 
-        public void Visit(CellCoord standing_cell, Visitor visitor, Map map, WorldObject obj, float radius)
+        public void Visit(CellCoord standing_cell, IGridNotifier visitor, Map map, WorldObject obj, float radius)
         {
             //we should increase search radius by object's radius, otherwise
             //we could have problems with huge creatures, which won't attack nearest players etc
             Visit(standing_cell, visitor, map, obj.GetPositionX(), obj.GetPositionY(), radius + obj.GetCombatReach());
         }
 
-        public void Visit(CellCoord standing_cell, Visitor visitor, Map map, float x_off, float y_off, float radius)
+        public void Visit(CellCoord standing_cell, IGridNotifier visitor, Map map, float x_off, float y_off, float radius)
         {
             if (!standing_cell.IsCoordValid())
                 return;
@@ -166,7 +167,7 @@ namespace Game.Maps
             }
         }
 
-        void VisitCircle(Visitor visitor, Map map, ICoord begin_cell, ICoord end_cell)
+        void VisitCircle(IGridNotifier visitor, Map map, ICoord begin_cell, ICoord end_cell)
         {
             //here is an algorithm for 'filling' circum-squared octagon
             uint x_shift = (uint)Math.Ceiling((end_cell.X_coord - begin_cell.X_coord) * 0.3f - 0.5f);
@@ -217,74 +218,24 @@ namespace Game.Maps
             }
         }
 
-        public static void VisitGridObjects(WorldObject center_obj, Notifier visitor, float radius, bool dont_load = true)
+        public static void VisitGrid(WorldObject center_obj, IGridNotifier visitor, float radius, bool dont_load = true)
         {
             CellCoord p = GridDefines.ComputeCellCoord(center_obj.GetPositionX(), center_obj.GetPositionY());
             Cell cell = new(p);
             if (dont_load)
                 cell.SetNoCreate();
 
-            Visitor gnotifier = new(visitor, GridMapTypeMask.AllGrid);
-            cell.Visit(p, gnotifier, center_obj.GetMap(), center_obj, radius);
+            cell.Visit(p, visitor, center_obj.GetMap(), center_obj, radius);
         }
 
-        public static void VisitWorldObjects(WorldObject center_obj, Notifier visitor, float radius, bool dont_load = true)
-        {
-            CellCoord p = GridDefines.ComputeCellCoord(center_obj.GetPositionX(), center_obj.GetPositionY());
-            Cell cell = new(p);
-            if (dont_load)
-                cell.SetNoCreate();
-
-            Visitor gnotifier = new(visitor, GridMapTypeMask.AllWorld);
-            cell.Visit(p, gnotifier, center_obj.GetMap(), center_obj, radius);
-        }
-
-        public static void VisitAllObjects(WorldObject center_obj, Notifier visitor, float radius, bool dont_load = true)
-        {
-            CellCoord p = GridDefines.ComputeCellCoord(center_obj.GetPositionX(), center_obj.GetPositionY());
-            Cell cell = new(p);
-            if (dont_load)
-                cell.SetNoCreate();
-
-            Visitor wnotifier = new(visitor, GridMapTypeMask.AllWorld);
-            cell.Visit(p, wnotifier, center_obj.GetMap(), center_obj, radius);
-            Visitor gnotifier = new(visitor, GridMapTypeMask.AllGrid);
-            cell.Visit(p, gnotifier, center_obj.GetMap(), center_obj, radius);
-        }
-
-        public static void VisitGridObjects(float x, float y, Map map, Notifier visitor, float radius, bool dont_load = true)
+        public static void VisitGrid(float x, float y, Map map, IGridNotifier visitor, float radius, bool dont_load = true)
         {
             CellCoord p = GridDefines.ComputeCellCoord(x, y);
             Cell cell = new(p);
             if (dont_load)
                 cell.SetNoCreate();
 
-            Visitor gnotifier = new(visitor, GridMapTypeMask.AllGrid);
-            cell.Visit(p, gnotifier, map, x, y, radius);
-        }
-
-        public static void VisitWorldObjects(float x, float y, Map map, Notifier visitor, float radius, bool dont_load = true)
-        {
-            CellCoord p = GridDefines.ComputeCellCoord(x, y);
-            Cell cell = new(p);
-            if (dont_load)
-                cell.SetNoCreate();
-
-            Visitor gnotifier = new(visitor, GridMapTypeMask.AllWorld);
-            cell.Visit(p, gnotifier, map, x, y, radius);
-        }
-
-        public static void VisitAllObjects(float x, float y, Map map, Notifier visitor, float radius, bool dont_load = true)
-        {
-            CellCoord p = GridDefines.ComputeCellCoord(x, y);
-            Cell cell = new(p);
-            if (dont_load)
-                cell.SetNoCreate();
-
-            Visitor wnotifier = new(visitor, GridMapTypeMask.AllWorld);
-            cell.Visit(p, wnotifier, map, x, y, radius);
-            Visitor gnotifier = new(visitor, GridMapTypeMask.AllGrid);
-            cell.Visit(p, gnotifier, map, x, y, radius);
+            cell.Visit(p, visitor, map, x, y, radius);
         }
 
         public static CellArea CalculateCellArea(float x, float y, float radius)

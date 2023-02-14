@@ -1,4 +1,7 @@
-﻿using Framework.Constants;
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
+
+using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting.BaseScripts;
@@ -30,7 +33,7 @@ namespace Scripts.Spells.Paladin
                 {
                     List<Unit> targets = new List<Unit>();
                     AnyUnfriendlyUnitInObjectRangeCheck check = new AnyUnfriendlyUnitInObjectRangeCheck(GetHitUnit(), player, 7);
-                    UnitListSearcher searcher = new UnitListSearcher(GetHitUnit(), targets, check);
+                    UnitListSearcher searcher = new UnitListSearcher(GetHitUnit(), targets, check, GridType.All);
                     for (List<Unit>.Enumerator i = targets.GetEnumerator(); i.MoveNext();)
                     {
                         GetHitUnit().CastSpell(i.Current, PaladinSpells.EXORCISM_DF, damage);
