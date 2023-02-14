@@ -4,6 +4,7 @@ using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
 using Scripts.Spells.Warlock;
+using static Game.AI.SmartAction;
 
 namespace Scripts.Pets
 {
@@ -24,6 +25,12 @@ namespace Scripts.Pets
                     me.SetLevel(owner.GetLevel());
                     me.SetMaxHealth(owner.GetMaxHealth() / 3);
                     me.SetHealth(owner.GetHealth() / 3);
+
+                    if (owner.IsPlayer())
+                    {
+                        var p = owner.ToPlayer();
+                        p.AddAura(296553, p);
+                    }
                 }
             }
 
@@ -53,6 +60,17 @@ namespace Scripts.Pets
                         target = newTarget;
 
                 CastSpellOnTarget(owner, target);
+            }
+
+            public override void OnDespawn()
+            {
+                var caster = me.GetOwner();
+
+                if (caster == null) return; 
+
+                if (caster.GetCreatureListWithEntryInGrid(55659).Count == 0 && 
+                    caster.GetCreatureListWithEntryInGrid(99739).Count == 0)
+                    caster.RemoveAura(296553);
             }
 
             private Unit GetTarget()
