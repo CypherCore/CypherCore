@@ -40,6 +40,24 @@ namespace Game.Extendability
             return assemblies;
         }
 
+        public static IEnumerable<T> GetAllObjectsFromAssemblies<T>(string path, bool loadGameAssembly = true)
+        {
+            List<Assembly> assemblies = GetAllAssembliesInDir(Path.Combine(AppContext.BaseDirectory, "Scripts"));
+
+            if (File.Exists(AppContext.BaseDirectory + "Scripts.dll"))
+            {
+                Assembly scrAss = Assembly.LoadFile(AppContext.BaseDirectory + "Scripts.dll");
+
+                if (scrAss != null)
+                    assemblies.Add(scrAss);
+            }
+
+            foreach (var assembly in assemblies)
+                foreach (var type in assembly.GetTypes())
+                    if (DoesTypeSupportInterface(type, typeof(T)))
+                        yield return (T)Activator.CreateInstance(type);
+        }
+
         public static bool DoesTypeSupportInterface(Type type, Type inter)
         {
             if (type == inter) return false;

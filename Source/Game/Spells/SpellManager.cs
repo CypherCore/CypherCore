@@ -8,11 +8,14 @@ using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.BattlePets;
 using Game.DataStorage;
+using Game.Extendability;
 using Game.Movement;
+using Game.Scripting.Interfaces.ISpellManager;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 
@@ -3002,9 +3005,18 @@ namespace Game.Entities
             fix(spellInfo.GetEffect(effectIndex));
         }
 
+        public void LoadSpellInfosLateFix()
+        {
+            foreach (var fix in IOHelpers.GetAllObjectsFromAssemblies<ISpellManagerSpellLateFix>(Path.Combine(AppContext.BaseDirectory, "Scripts")))
+                ApplySpellFix(fix.SpellIds, fix.ApplySpellFix);
+        }
+
         public void LoadSpellInfoCorrections()
         {
             uint oldMSTime = Time.GetMSTime();
+
+            foreach (var fix in IOHelpers.GetAllObjectsFromAssemblies<ISpellManagerSpellFix>(Path.Combine(AppContext.BaseDirectory, "Scripts")))
+                ApplySpellFix(fix.SpellIds, fix.ApplySpellFix);
 
             // Some spells have no amplitude set
             {
