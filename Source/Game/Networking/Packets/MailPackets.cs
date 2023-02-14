@@ -45,7 +45,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Mailbox = _worldPacket.ReadPackedGuid();
-            MailID = _worldPacket.ReadUInt32();
+            MailID = _worldPacket.ReadUInt64();
         }
 
         public ObjectGuid Mailbox;
@@ -137,7 +137,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            MailID = _worldPacket.ReadUInt32();
+            MailID = _worldPacket.ReadUInt64();
             SenderGUID = _worldPacket.ReadPackedGuid();
         }
 
@@ -152,7 +152,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Mailbox = _worldPacket.ReadPackedGuid();
-            MailID = _worldPacket.ReadUInt32();
+            MailID = _worldPacket.ReadUInt64();
         }
 
         public ObjectGuid Mailbox;
@@ -165,7 +165,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            MailID = _worldPacket.ReadUInt32();
+            MailID = _worldPacket.ReadUInt64();
             DeleteReason = _worldPacket.ReadInt32();
         }
 
@@ -180,8 +180,8 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Mailbox = _worldPacket.ReadPackedGuid();
-            MailID = _worldPacket.ReadUInt32();
-            AttachID = _worldPacket.ReadUInt32();
+            MailID = _worldPacket.ReadUInt64();
+            AttachID = _worldPacket.ReadUInt64();
         }
 
         public ObjectGuid Mailbox;
@@ -196,7 +196,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Mailbox = _worldPacket.ReadPackedGuid();
-            MailID = _worldPacket.ReadUInt32();
+            MailID = _worldPacket.ReadUInt64();
             Money = _worldPacket.ReadUInt64();
         }
 

@@ -611,7 +611,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.UPD_CHAR_QUESTSTATUS_REWARDED_ACTIVE_BY_QUEST, "UPDATE character_queststatus_rewarded SET active = 0 WHERE quest = ? AND guid = ?");
             PrepareStatement(CharStatements.DEL_INVALID_QUEST_PROGRESS_CRITERIA, "DELETE FROM character_queststatus_objectives_criteria WHERE questObjectiveId = ?");
             PrepareStatement(CharStatements.DEL_CHAR_SKILL_BY_SKILL, "DELETE FROM character_skills WHERE guid = ? AND skill = ?");
-            PrepareStatement(CharStatements.INS_CHAR_SKILLS, "INSERT INTO character_skills (guid, skill, value, max, professionSlot) VALUES (?, ?, ?, ?)");
+            PrepareStatement(CharStatements.INS_CHAR_SKILLS, "INSERT INTO character_skills (guid, skill, value, max, professionSlot) VALUES (?, ?, ?, ?, ?)");
             PrepareStatement(CharStatements.UPD_CHAR_SKILLS, "UPDATE character_skills SET value = ?, max = ?, professionSlot = ? WHERE guid = ? AND skill = ?");
             PrepareStatement(CharStatements.INS_CHAR_SPELL, "INSERT INTO character_spell (guid, spell, active, disabled) VALUES (?, ?, ?, ?)");
             PrepareStatement(CharStatements.DEL_CHAR_SPELL_FAVORITE, "DELETE FROM character_spell_favorite WHERE guid = ? AND spell = ?");
