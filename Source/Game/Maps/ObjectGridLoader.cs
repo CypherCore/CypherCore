@@ -1,14 +1,15 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Constants;
 using Game.Entities;
+using Game.Maps.Interfaces;
 using System;
 using System.Collections.Generic;
 
 namespace Game.Maps
 {
-    class ObjectGridLoaderBase : Notifier
+    class ObjectGridLoaderBase
     {
         internal Cell i_cell;
         internal Grid i_grid;
@@ -69,9 +70,13 @@ namespace Game.Maps
         }
     }
 
-    class ObjectGridLoader : ObjectGridLoaderBase
+    class ObjectGridLoader : ObjectGridLoaderBase, IGridNotifierGameObject, IGridNotifierCreature, IGridNotifierAreaTrigger
     {
-        public ObjectGridLoader(Grid grid, Map map, Cell cell) : base(grid, map, cell) { }
+        public GridType GridType { get; set; }
+        public ObjectGridLoader(Grid grid, Map map, Cell cell, GridType gridType) : base(grid, map, cell) 
+        { 
+            GridType = gridType;
+        }
 
         public void LoadN()
         {
@@ -86,60 +91,60 @@ namespace Game.Maps
                 {
                     i_cell.data.cell_y = y;
 
-                    var visitor = new Visitor(this, GridMapTypeMask.AllGrid);
-                    i_grid.VisitGrid(x, y, visitor);
+                    i_grid.VisitGrid(x, y, this);
 
-                    ObjectWorldLoader worker = new(this);
-                    visitor = new Visitor(worker, GridMapTypeMask.AllWorld);
-                    i_grid.VisitGrid(x, y, visitor);
+                    ObjectWorldLoader worker = new(this, GridType.World);
+                    i_grid.VisitGrid(x, y, worker);
                 }
             }
             Log.outDebug(LogFilter.Maps, $"{i_gameObjects} GameObjects, {i_creatures} Creatures, {i_areaTriggers} AreaTrriggers and {i_corpses} Corpses/Bones loaded for grid {i_grid.GetGridId()} on map {i_map.GetId()}");
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public void Visit(IList<GameObject> objs)
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
             CellObjectGuids cellguids = Global.ObjectMgr.GetCellObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), cellCoord.GetId());
-            if (cellguids == null)
+            if (cellguids == null || cellguids.gameobjects.Empty())
                 return;
 
             LoadHelper<GameObject>(cellguids.gameobjects, cellCoord, ref i_gameObjects, i_map);
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
             CellObjectGuids cellguids = Global.ObjectMgr.GetCellObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), cellCoord.GetId());
-            if (cellguids == null)
+            if (cellguids == null || cellguids.creatures.Empty())
                 return;
 
             LoadHelper<Creature>(cellguids.creatures, cellCoord, ref i_creatures, i_map);
         }
 
-        public override void Visit(IList<AreaTrigger> objs)
+        public void Visit(IList<AreaTrigger> objs)
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
             SortedSet<ulong> areaTriggers = Global.AreaTriggerDataStorage.GetAreaTriggersForMapAndCell(i_map.GetId(), cellCoord.GetId());
-            if (areaTriggers == null)
+            if (areaTriggers == null || areaTriggers.Empty())
                 return;
 
             LoadHelper<AreaTrigger>(areaTriggers, cellCoord, ref i_areaTriggers, i_map);
         }
     }
 
-    class PersonalPhaseGridLoader : ObjectGridLoaderBase
+    class PersonalPhaseGridLoader : ObjectGridLoaderBase, IGridNotifierCreature, IGridNotifierGameObject
     {
         uint _phaseId;
         ObjectGuid _phaseOwner;
+        public GridType GridType { get; set; }
 
-        public PersonalPhaseGridLoader(Grid grid, Map map, Cell cell, ObjectGuid phaseOwner) : base(grid, map, cell)
+        public PersonalPhaseGridLoader(Grid grid, Map map, Cell cell, ObjectGuid phaseOwner, GridType gridType) : base(grid, map, cell)
         {
             _phaseId = 0;
             _phaseOwner = phaseOwner;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public void Visit(IList<GameObject> objs)
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
             CellObjectGuids cell_guids = Global.ObjectMgr.GetCellPersonalObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), _phaseId, cellCoord.GetId());
@@ -147,7 +152,7 @@ namespace Game.Maps
                 LoadHelper<GameObject>(cell_guids.gameobjects, cellCoord, ref i_gameObjects, i_map, _phaseId, _phaseOwner);
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
             CellObjectGuids cell_guids = Global.ObjectMgr.GetCellPersonalObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), _phaseId, cellCoord.GetId());
@@ -167,24 +172,25 @@ namespace Game.Maps
                     i_cell.data.cell_y = y;
 
                     //Load creatures and game objects
-                    var visitor = new Visitor(this, GridMapTypeMask.AllGrid);
-                    i_grid.VisitGrid(x, y, visitor);
+                    i_grid.VisitGrid(x, y, this);
                 }
             }
         }
     }
 
-    class ObjectWorldLoader : Notifier
+    class ObjectWorldLoader : IGridNotifierCorpse
     {
-        public ObjectWorldLoader(ObjectGridLoaderBase gloader)
+        public GridType GridType { get; set; }
+        public ObjectWorldLoader(ObjectGridLoaderBase gloader, GridType gridType)
         {
             i_cell = gloader.i_cell;
             i_map = gloader.i_map;
             i_grid = gloader.i_grid;
             i_corpses = gloader.i_corpses;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<Corpse> objs)
+        public void Visit(IList<Corpse> objs)
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
             var corpses = i_map.GetCorpsesInCell(cellCoord.GetId());
@@ -215,9 +221,16 @@ namespace Game.Maps
     }
 
     //Stop the creatures before unloading the NGrid
-    class ObjectGridStoper : Notifier
+    class ObjectGridStoper : IGridNotifierCreature
     {
-        public override void Visit(IList<Creature> objs)
+        public GridType GridType { get; set; }
+
+        public ObjectGridStoper(GridType gridType)
+        {
+            GridType = gridType;
+        }
+
+        public void Visit(IList<Creature> objs)
         {
             // stop any fights at grid de-activation and remove dynobjects/areatriggers created at cast by creatures
             for (var i = 0; i < objs.Count; ++i)
@@ -233,9 +246,16 @@ namespace Game.Maps
     }
 
     //Move the foreign creatures back to respawn positions before unloading the NGrid
-    class ObjectGridEvacuator : Notifier
+    class ObjectGridEvacuator : IGridNotifierCreature, IGridNotifierGameObject
     {
-        public override void Visit(IList<Creature> objs)
+        public GridType GridType { get; set; }
+
+        public ObjectGridEvacuator(GridType gridType)
+        {
+            GridType = gridType;
+        }
+
+        public void Visit(IList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -247,7 +267,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public void Visit(IList<GameObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -261,9 +281,15 @@ namespace Game.Maps
     }
 
     //Clean up and remove from world
-    class ObjectGridCleaner : Notifier
+    class ObjectGridCleaner : IGridNotifierWorldObject
     {
-        public override void Visit(IList<WorldObject> objs)
+        public GridType GridType { get; set; }
+        public ObjectGridCleaner(GridType gridType)
+        {
+            GridType = gridType;
+        }
+
+        public void Visit(IList<WorldObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -279,9 +305,16 @@ namespace Game.Maps
     }
 
     //Delete objects before deleting NGrid
-    class ObjectGridUnloader : Notifier
+    internal class ObjectGridUnloader : IGridNotifierWorldObject
     {
-        public override void Visit(IList<WorldObject> objs)
+        public GridType GridType { get; set; }
+
+        internal ObjectGridUnloader(GridType gridType = GridType.Grid)
+        {
+            GridType = gridType;
+        }
+
+        public void Visit(IList<WorldObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {

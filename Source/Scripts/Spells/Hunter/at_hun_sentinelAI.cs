@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
+
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
@@ -36,8 +39,8 @@ public class at_hun_sentinelAI : AreaTriggerAI
 			var radius     = Global.SpellMgr.GetSpellInfo(HunterSpells.SPELL_HUNTER_SENTINEL, Difficulty.None).GetEffect(0).CalcRadius(caster);
 
 			var l_Check    = new AnyUnitInObjectRangeCheck(at, radius);
-			var l_Searcher = new UnitListSearcher(at, targetList, l_Check);
-			Cell.VisitAllObjects(at, l_Searcher, radius);
+			var l_Searcher = new UnitListSearcher(at, targetList, l_Check, GridType.All);
+			Cell.VisitGrid(at, l_Searcher, radius);
 
 			foreach (var l_Unit in targetList)
 
@@ -60,8 +63,8 @@ public class at_hun_sentinelAI : AreaTriggerAI
 			var radius     = Global.SpellMgr.GetSpellInfo(HunterSpells.SPELL_HUNTER_SENTINEL, Difficulty.None).GetEffect(0).CalcRadius(caster);
 
 			var l_Check    = new AnyUnitInObjectRangeCheck(at, radius);
-			var l_Searcher = new UnitListSearcher(at, targetList, l_Check);
-			Cell.VisitAllObjects(at, l_Searcher, radius);
+			var l_Searcher = new UnitListSearcher(at, targetList, l_Check, GridType.All);
+			Cell.VisitGrid(at, l_Searcher, radius);
 
 			foreach (var l_Unit in targetList)
 				if (l_Unit != caster && caster.IsValidAttackTarget(l_Unit))

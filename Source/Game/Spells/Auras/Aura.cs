@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Constants;
 using Framework.Dynamic;
@@ -2882,8 +2882,8 @@ namespace Game.Spells
                 if (selectionType != SpellTargetCheckTypes.Default)
                 {
                     WorldObjectSpellAreaTargetCheck check = new(radius, GetUnitOwner(), refe, GetUnitOwner(), GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
-                    UnitListSearcher searcher = new(GetUnitOwner(), units, check);
-                    Cell.VisitAllObjects(GetUnitOwner(), searcher, radius + extraSearchRadius);
+                    UnitListSearcher searcher = new(GetUnitOwner(), units, check, GridType.All);
+                    Cell.VisitGrid(GetUnitOwner(), searcher, radius + extraSearchRadius);
 
                     // by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for auras it is not acceptable
                     units.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetUnitOwner()));
@@ -2964,8 +2964,8 @@ namespace Game.Spells
                 var condList = spellEffectInfo.ImplicitTargetConditions;
 
                 WorldObjectSpellAreaTargetCheck check = new(radius, GetDynobjOwner(), dynObjOwnerCaster, dynObjOwnerCaster, GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
-                UnitListSearcher searcher = new(GetDynobjOwner(), targetList, check);
-                Cell.VisitAllObjects(GetDynobjOwner(), searcher, radius);
+                UnitListSearcher searcher = new(GetDynobjOwner(), targetList, check, GridType.All);
+                Cell.VisitGrid(GetDynobjOwner(), searcher, radius);
 
                 // by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for auras it is not acceptable
                 targetList.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetDynobjOwner()));

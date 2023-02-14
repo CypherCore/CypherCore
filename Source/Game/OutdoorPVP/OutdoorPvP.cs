@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Constants;
 using Framework.Database;
@@ -346,7 +346,7 @@ namespace Game.PvP
             List<Unit> players = new();
             var checker = new AnyPlayerInObjectRangeCheck(m_capturePoint, radius);
             var searcher = new PlayerListSearcher(m_capturePoint, players, checker);
-            Cell.VisitWorldObjects(m_capturePoint, searcher, radius);
+            Cell.VisitGrid(m_capturePoint, searcher, radius);
 
             foreach (Player player in players)
             {

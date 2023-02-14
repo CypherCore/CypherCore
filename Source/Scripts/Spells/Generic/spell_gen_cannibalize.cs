@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
+
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
@@ -23,11 +26,14 @@ internal class spell_gen_cannibalize : SpellScript, ISpellCheckCast, IHasSpellEf
 		var max_range = GetSpellInfo().GetMaxRange(false);
 		// search for nearby enemy corpse in range
 		var check    = new AnyDeadUnitSpellTargetInRangeCheck<Unit>(caster, max_range, GetSpellInfo(), SpellTargetCheckTypes.Enemy, SpellTargetObjectTypes.CorpseEnemy);
-		var searcher = new UnitSearcher(caster, check);
-		Cell.VisitWorldObjects(caster, searcher, max_range);
+		var searcher = new UnitSearcher(caster, check, GridType.Grid);
+		Cell.VisitGrid(caster, searcher, max_range);
 
 		if (!searcher.GetTarget())
-			Cell.VisitGridObjects(caster, searcher, max_range);
+		{
+			searcher.GridType = GridType.World;
+			Cell.VisitGrid(caster, searcher, max_range);
+		}
 
 		if (!searcher.GetTarget())
 			return SpellCastResult.NoEdibleCorpses;

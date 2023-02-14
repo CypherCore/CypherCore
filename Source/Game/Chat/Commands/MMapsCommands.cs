@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Constants;
 using Framework.IO;
@@ -222,9 +222,9 @@ namespace Game.Chat
             List<Unit> creatureList = new();
 
             var go_check = new AnyUnitInObjectRangeCheck(obj, radius);
-            var go_search = new UnitListSearcher(obj, creatureList, go_check);
+            var go_search = new UnitListSearcher(obj, creatureList, go_check, GridType.Grid);
 
-            Cell.VisitGridObjects(obj, go_search, radius);
+            Cell.VisitGrid(obj, go_search, radius);
             if (!creatureList.Empty())
             {
                 handler.SendSysMessage("Found {0} Creatures.", creatureList.Count);

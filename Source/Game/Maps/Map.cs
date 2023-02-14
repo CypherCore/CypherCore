@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Constants;
 using Framework.Database;
@@ -9,6 +9,7 @@ using Game.Collision;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
+using Game.Maps.Interfaces;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Scenarios;
@@ -256,7 +257,7 @@ namespace Game.Maps
             }
 
             var cell = new Cell(p);
-            if (!IsGridLoaded(new GridCoord(cell.GetGridX(), cell.GetGridY())))
+            if (!IsGridLoaded(cell.GetGridX(), cell.GetGridY()))
                 return;
 
             Log.outDebug(LogFilter.Maps, "Switch object {0} from grid[{1}, {2}] {3}", obj.GetGUID(), cell.GetGridX(), cell.GetGridY(), on);
@@ -353,7 +354,7 @@ namespace Game.Maps
 
         public virtual void LoadGridObjects(Grid grid, Cell cell)
         {
-            ObjectGridLoader loader = new(grid, this, cell);
+            ObjectGridLoader loader = new(grid, this, cell, GridType.Grid);
             loader.LoadN();
         }
 
@@ -373,7 +374,7 @@ namespace Game.Maps
         void GridUnmarkNoUnload(uint x, uint y)
         {
             // If grid is loaded, clear unload lock
-            if (IsGridLoaded(new GridCoord(x, y)))
+            if (IsGridLoaded(x, y))
             {
                 var grid = GetGrid(x, y);
                 grid.SetUnloadExplicitLock(false);
@@ -563,18 +564,23 @@ namespace Game.Maps
             return true;
         }
 
-        public bool IsGridLoaded(uint gridId) { return IsGridLoaded(new GridCoord(gridId % MapConst.MaxGrids, gridId / MapConst.MaxGrids)); }
+        public bool IsGridLoaded(uint gridId) { return IsGridLoaded(gridId % MapConst.MaxGrids, gridId / MapConst.MaxGrids); }
 
         public bool IsGridLoaded(float x, float y) { return IsGridLoaded(GridDefines.ComputeGridCoord(x, y)); }
 
         public bool IsGridLoaded(Position pos) { return IsGridLoaded(pos.GetPositionX(), pos.GetPositionY()); }
+
+        public bool IsGridLoaded(uint x, uint y)
+        {
+            return (GetGrid(x, y) != null && IsGridObjectDataLoaded(x, y));
+        }
 
         public bool IsGridLoaded(GridCoord p)
         {
             return (GetGrid(p.X_coord, p.Y_coord) != null && IsGridObjectDataLoaded(p.X_coord, p.Y_coord));
         }
 
-        void VisitNearbyCellsOf(WorldObject obj, Visitor gridVisitor, Visitor worldVisitor)
+        void VisitNearbyCellsOf(WorldObject obj, IGridNotifier gridVisitor)
         {
             // Check for valid position
             if (!obj.IsPositionValid())
@@ -598,7 +604,6 @@ namespace Game.Maps
                     var cell = new Cell(pair);
                     cell.SetNoCreate();
                     Visit(cell, gridVisitor);
-                    Visit(cell, worldVisitor);
                 }
             }
         }
@@ -650,10 +655,7 @@ namespace Game.Maps
             // update active cells around players and active objects
             ResetMarkedCells();
 
-            var update = new UpdaterNotifier(diff);
-
-            var grid_object_update = new Visitor(update, GridMapTypeMask.AllGrid);
-            var world_object_update = new Visitor(update, GridMapTypeMask.AllWorld);
+            var update = new UpdaterNotifier(diff, GridType.All);
 
             for (var i = 0; i < m_activePlayers.Count; ++i)
             {
@@ -664,12 +666,12 @@ namespace Game.Maps
                 // update players at tick
                 player.Update(diff);
 
-                VisitNearbyCellsOf(player, grid_object_update, world_object_update);
+                VisitNearbyCellsOf(player, update);
 
                 // If player is using far sight or mind vision, visit that object too
                 WorldObject viewPoint = player.GetViewpoint();
                 if (viewPoint)
-                    VisitNearbyCellsOf(viewPoint, grid_object_update, world_object_update);
+                    VisitNearbyCellsOf(viewPoint, update);
 
                 // Handle updates for creatures in combat with player and are more than 60 yards away
                 if (player.IsInCombat())
@@ -684,7 +686,7 @@ namespace Game.Maps
                     }
 
                     foreach (Unit unit in toVisit)
-                        VisitNearbyCellsOf(unit, grid_object_update, world_object_update);
+                        VisitNearbyCellsOf(unit, update);
                 }
 
                 { // Update any creatures that own auras the player has applications of
@@ -697,7 +699,7 @@ namespace Game.Maps
                                 toVisit.Add(caster);
                     }
                     foreach (Unit unit in toVisit)
-                        VisitNearbyCellsOf(unit, grid_object_update, world_object_update);
+                        VisitNearbyCellsOf(unit, update);
                 }
 
                 { // Update player's summons
@@ -716,7 +718,7 @@ namespace Game.Maps
                     }
 
                     foreach (Unit unit in toVisit)
-                        VisitNearbyCellsOf(unit, grid_object_update, world_object_update);
+                        VisitNearbyCellsOf(unit, update);
                 }
             }
 
@@ -726,7 +728,7 @@ namespace Game.Maps
                 if (!obj.IsInWorld)
                     continue;
 
-                VisitNearbyCellsOf(obj, grid_object_update, world_object_update);
+                VisitNearbyCellsOf(obj, update);
             }
 
             for (var i = 0; i < _transports.Count; ++i)
@@ -808,19 +810,14 @@ namespace Game.Maps
                             var cell = new Cell(pair);
                             cell.SetNoCreate();
 
-                            var cell_relocation = new DelayedUnitRelocation(cell, pair, this, SharedConst.MaxVisibilityDistance);
-                            var grid_object_relocation = new Visitor(cell_relocation, GridMapTypeMask.AllGrid);
-                            var world_object_relocation = new Visitor(cell_relocation, GridMapTypeMask.AllWorld);
+                            var cell_relocation = new DelayedUnitRelocation(cell, pair, this, SharedConst.MaxVisibilityDistance, GridType.All);
 
-                            Visit(cell, grid_object_relocation);
-                            Visit(cell, world_object_relocation);
+                            Visit(cell, cell_relocation);
                         }
                     }
                 }
             }
-            var reset = new ResetNotifier();
-            var grid_notifier = new Visitor(reset, GridMapTypeMask.AllGrid);
-            var world_notifier = new Visitor(reset, GridMapTypeMask.AllWorld);
+            var reset = new ResetNotifier(GridType.All);
 
             for (uint x = 0; x < MapConst.MaxGrids; ++x)
             {
@@ -856,8 +853,7 @@ namespace Game.Maps
                             var pair = new CellCoord(xx, yy);
                             var cell = new Cell(pair);
                             cell.SetNoCreate();
-                            Visit(cell, grid_notifier);
-                            Visit(cell, world_notifier);
+                            Visit(cell, reset);
                         }
                     }
                 }
@@ -1500,9 +1496,8 @@ namespace Game.Maps
                 MoveAllAreaTriggersInMoveList();
 
                 // move creatures to respawn grids if this is diff.grid or to remove list
-                ObjectGridEvacuator worker = new();
-                var visitor = new Visitor(worker, GridMapTypeMask.AllGrid);
-                grid.VisitAllGrids(visitor);
+                ObjectGridEvacuator worker = new(GridType.Grid);
+                grid.VisitAllGrids(worker);
 
                 // Finish creature moves, remove and delete all creatures with delayed remove before unload
                 MoveAllCreaturesInMoveList();
@@ -1511,9 +1506,8 @@ namespace Game.Maps
             }
 
             {
-                ObjectGridCleaner worker = new();
-                var visitor = new Visitor(worker, GridMapTypeMask.AllGrid);
-                grid.VisitAllGrids(visitor);
+                ObjectGridCleaner worker = new(GridType.Grid);
+                grid.VisitAllGrids(worker);
             }
 
             RemoveAllObjectsInRemoveList();
@@ -1523,8 +1517,7 @@ namespace Game.Maps
 
             {
                 ObjectGridUnloader worker = new();
-                var visitor = new Visitor(worker, GridMapTypeMask.AllGrid);
-                grid.VisitAllGrids(visitor);
+                grid.VisitAllGrids(worker);
             }
 
             Cypher.Assert(i_objectsToRemove.Empty());
@@ -3649,14 +3642,14 @@ namespace Game.Maps
             }
         }
 
-        public void Visit(Cell cell, Visitor visitor)
+        public void Visit(Cell cell, IGridNotifier visitor)
         {
             uint x = cell.GetGridX();
             uint y = cell.GetGridY();
             uint cell_x = cell.GetCellX();
             uint cell_y = cell.GetCellY();
 
-            if (!cell.NoCreate() || IsGridLoaded(new GridCoord(x, y)))
+            if (!cell.NoCreate() || IsGridLoaded(x, y))
             {
                 EnsureGridLoaded(cell);
                 GetGrid(x, y).VisitGrid(cell_x, cell_y, visitor);
@@ -3791,8 +3784,8 @@ namespace Game.Maps
             summon.InitSummon();
 
             // call MoveInLineOfSight for nearby creatures
-            AIRelocationNotifier notifier = new(summon);
-            Cell.VisitAllObjects(summon, notifier, GetVisibilityRange());
+            AIRelocationNotifier notifier = new(summon, GridType.All);
+            Cell.VisitGrid(summon, notifier, GetVisibilityRange());
 
             return summon;
         }

@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
+
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
@@ -23,7 +26,7 @@ namespace Scripts.Spells.Warlock
 
 			var check  = new AllWorldObjectsInRange(caster, 100.0f);
 			var search = new WorldObjectListSearcher(caster, targets, check);
-			Cell.VisitAllObjects(caster, search, 100.0f);
+			Cell.VisitGrid(caster, search, 100.0f);
 			targets.RemoveAll(new UnitAuraCheck<WorldObject>(false, WarlockSpells.DOOM, caster.GetGUID()));
 		}
 

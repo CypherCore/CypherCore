@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
+
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
@@ -37,8 +40,8 @@ public class spell_dh_solitude : AuraScript, IHasAuraEffects
 		var range    = GetSpellInfo().GetEffect(1).BasePoints;
 		var allies   = new List<Unit>();
 		var check    = new AnyFriendlyUnitInObjectRangeCheck(caster, caster, range, true);
-		var searcher = new UnitListSearcher(caster, allies, check);
-		Cell.VisitAllObjects(caster, searcher, range);
+		var searcher = new UnitListSearcher(caster, allies, check, GridType.All);
+		Cell.VisitGrid(caster, searcher, range);
 		allies.Remove(caster);
 
 		if (allies.Count == 0 && !caster.HasAura(DemonHunterSpells.SPELL_DH_SOLITUDE_BUFF))

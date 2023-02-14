@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Dynamic;
 using Game.Entities;
@@ -125,7 +125,7 @@ namespace Game
             if (!phaseShift.HasPersonalPhase())
                 return;
 
-            PersonalPhaseGridLoader loader = new(grid, map, cell, phaseShift.GetPersonalGuid());
+            PersonalPhaseGridLoader loader = new(grid, map, cell, phaseShift.GetPersonalGuid(), Framework.Constants.GridType.Grid);
             PlayerPersonalPhasesTracker playerTracker = _playerData[phaseShift.GetPersonalGuid()];
 
             foreach (var phaseRef in phaseShift.GetPhases())

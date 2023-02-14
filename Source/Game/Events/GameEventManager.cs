@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Collections;
 using Framework.Constants;
@@ -7,6 +7,7 @@ using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
+using Game.Maps.Interfaces;
 using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
@@ -1582,8 +1583,8 @@ namespace Game
             Global.MapMgr.DoForAllMaps(map =>
             {
                 GameEventAIHookWorker worker = new(event_id, activate);
-                var visitor = new Visitor(worker, GridMapTypeMask.None);
-                visitor.Visit(map.GetObjectsStore().Values.ToList());
+    
+                worker.Visit(map.GetObjectsStore().Values.ToList());
             });
         }
 
@@ -1767,15 +1768,17 @@ namespace Game
         public byte equipement_id_prev;
     }
 
-    class GameEventAIHookWorker : Notifier
+    class GameEventAIHookWorker : IGridNotifierGameObject, IGridNotifierCreature, IGridNotifierWorldObject
     {
-        public GameEventAIHookWorker(ushort eventId, bool activate)
+        public GridType GridType { get; set; }
+        public GameEventAIHookWorker(ushort eventId, bool activate, GridType gridType = GridType.All)
         {
             _eventId = eventId;
             _activate = activate;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1784,7 +1787,7 @@ namespace Game
                     creature.GetAI().OnGameEvent(_activate, _eventId);
             }
         }
-        public override void Visit(IList<GameObject> objs)
+        public void Visit(IList<GameObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1794,8 +1797,19 @@ namespace Game
             }
         }
 
+        public void Visit(IList<WorldObject> objs)
+        {
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                var gameObject = objs[i] as GameObject;
+                if (gameObject != null && gameObject.IsInWorld)
+                    gameObject.GetAI().OnGameEvent(_activate, _eventId);
+            }
+        }
+
         ushort _eventId;
         bool _activate;
+
     }
 
     public enum GameEventState

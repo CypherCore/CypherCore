@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Constants;
 using Game.Chat;
@@ -3039,7 +3039,7 @@ namespace Game.AI
 
             var u_check = new AllWorldObjectsInRange(obj, dist);
             var searcher = new WorldObjectListSearcher(obj, targets, u_check);
-            Cell.VisitAllObjects(obj, searcher, dist);
+            Cell.VisitGrid(obj, searcher, dist);
             return targets;
         }
 
@@ -4077,16 +4077,16 @@ namespace Game.AI
                 return null;
 
             var u_check = new MostHPMissingInRange<Unit>(_me, range, MinHPDiff);
-            var searcher = new UnitLastSearcher(_me, u_check);
-            Cell.VisitGridObjects(_me, searcher, range);
+            var searcher = new UnitLastSearcher(_me, u_check, GridType.Grid);
+            Cell.VisitGrid(_me, searcher, range);
             return searcher.GetTarget();
         }
 
         public Unit DoSelectBelowHpPctFriendlyWithEntry(uint entry, float range, byte minHPDiff = 1, bool excludeSelf = true)
         {
             FriendlyBelowHpPctEntryInRange u_check = new(_me, entry, range, minHPDiff, excludeSelf);
-            UnitLastSearcher searcher = new(_me, u_check);
-            Cell.VisitAllObjects(_me, searcher, range);
+            UnitLastSearcher searcher = new(_me, u_check, GridType.All);
+            Cell.VisitGrid(_me, searcher, range);
 
             return searcher.GetTarget();
         }
@@ -4097,8 +4097,8 @@ namespace Game.AI
                 return null;
 
             MostHPPercentMissingInRange u_check = new(_me, range, minHpPct, maxHpPct);
-            UnitLastSearcher searcher = new(_me, u_check);
-            Cell.VisitGridObjects(_me, searcher, range);
+            UnitLastSearcher searcher = new(_me, u_check, GridType.Grid);
+            Cell.VisitGrid(_me, searcher, range);
             return searcher.GetTarget();
         }
         
@@ -4108,8 +4108,8 @@ namespace Game.AI
                 return;
 
             var u_check = new FriendlyCCedInRange(_me, range);
-            var searcher = new CreatureListSearcher(_me, creatures, u_check);
-            Cell.VisitGridObjects(_me, searcher, range);
+            var searcher = new CreatureListSearcher(_me, creatures, u_check, GridType.Grid);
+            Cell.VisitGrid(_me, searcher, range);
         }
 
         void DoFindFriendlyMissingBuff(List<Creature> creatures, float range, uint spellid)
@@ -4118,8 +4118,8 @@ namespace Game.AI
                 return;
 
             var u_check = new FriendlyMissingBuffInRange(_me, range, spellid);
-            var searcher = new CreatureListSearcher(_me, creatures, u_check);
-            Cell.VisitGridObjects(_me, searcher, range);
+            var searcher = new CreatureListSearcher(_me, creatures, u_check, GridType.Grid);
+            Cell.VisitGrid(_me, searcher, range);
         }
 
         Unit DoFindClosestFriendlyInRange(float range)
@@ -4128,8 +4128,8 @@ namespace Game.AI
                 return null;
 
             var u_check = new AnyFriendlyUnitInObjectRangeCheck(_me, _me, range);
-            var searcher = new UnitLastSearcher(_me, u_check);
-            Cell.VisitAllObjects(_me, searcher, range);
+            var searcher = new UnitLastSearcher(_me, u_check, GridType.All);
+            Cell.VisitGrid(_me, searcher, range);
             return searcher.GetTarget();
         }
 

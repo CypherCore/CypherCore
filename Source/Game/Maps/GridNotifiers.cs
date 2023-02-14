@@ -1,31 +1,23 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Bgs.Protocol.Notification.V1;
 using Framework.Constants;
 using Game.Chat;
 using Game.Entities;
+using Game.Maps.Interfaces;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Maps
 {
-    public class Notifier
+    public static class NotifierHelpers
     {
-        public virtual void Visit(IList<WorldObject> objs) { }
-        public virtual void Visit(IList<Creature> objs) { }
-        public virtual void Visit(IList<AreaTrigger> objs) { }
-        public virtual void Visit(IList<SceneObject> objs) { }
-        public virtual void Visit(IList<Conversation> objs) { }
-        public virtual void Visit(IList<GameObject> objs) { }
-        public virtual void Visit(IList<DynamicObject> objs) { }
-        public virtual void Visit(IList<Corpse> objs) { }
-        public virtual void Visit(IList<Player> objs) { }
-
-        public void CreatureUnitRelocationWorker(Creature c, Unit u)
+        public static void CreatureUnitRelocationWorker(Creature c, Unit u)
         {
             if (!u.IsAlive() || !c.IsAlive() || c == u || u.IsInFlight())
                 return;
@@ -43,39 +35,19 @@ namespace Game.Maps
         }
     }
 
-    public class Visitor
+    public class VisibleNotifier : IGridNotifierWorldObject
     {
-        public Visitor(Notifier notifier, GridMapTypeMask mask)
-        {
-            _notifier = notifier;
-            _mask = mask;
-        }
-
-        public void Visit(IList<WorldObject> collection) { _notifier.Visit(collection); }
-        public void Visit(IList<Creature> creatures) { _notifier.Visit(creatures); }
-        public void Visit(IList<AreaTrigger> areatriggers) { _notifier.Visit(areatriggers); }
-        public void Visit(IList<SceneObject> sceneObjects) { _notifier.Visit(sceneObjects); }
-        public void Visit(IList<Conversation> conversations) { _notifier.Visit(conversations); }
-        public void Visit(IList<GameObject> gameobjects) { _notifier.Visit(gameobjects); }
-        public void Visit(IList<DynamicObject> dynamicobjects) { _notifier.Visit(dynamicobjects); }
-        public void Visit(IList<Corpse> corpses) { _notifier.Visit(corpses); }
-        public void Visit(IList<Player> players) { _notifier.Visit(players); }
-
-        Notifier _notifier;
-        internal GridMapTypeMask _mask;
-    }
-
-    public class VisibleNotifier : Notifier
-    {
-        public VisibleNotifier(Player pl)
+        public GridType GridType { get; set; }
+        public VisibleNotifier(Player pl, GridType gridType)
         {
             i_player = pl;
             i_data = new UpdateData(pl.GetMapId());
             vis_guids = new List<ObjectGuid>(pl.m_clientGUIDs);
             i_visibleNow = new List<Unit>();
+            GridType = gridType;
         }
 
-        public override void Visit(IList<WorldObject> objs)
+        public void Visit(IList<WorldObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -155,16 +127,18 @@ namespace Game.Maps
         internal List<Unit> i_visibleNow;
     }
 
-    public class VisibleChangesNotifier : Notifier
+    public class VisibleChangesNotifier : IGridNotifierCreature, IGridNotifierPlayer, IGridNotifierDynamicObject
     {
         ICollection<WorldObject> i_objects;
+        public GridType GridType { get; set; }
 
-        public VisibleChangesNotifier(ICollection<WorldObject> objects)
+        public VisibleChangesNotifier(ICollection<WorldObject> objects, GridType gridType)
         {
             i_objects = objects;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<Player> objs)
+        public void Visit(IList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -180,7 +154,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -191,7 +165,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<DynamicObject> objs)
+        public void Visit(IList<DynamicObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -207,13 +181,13 @@ namespace Game.Maps
         }
     }
 
-    public class PlayerRelocationNotifier : VisibleNotifier
+    public class PlayerRelocationNotifier : VisibleNotifier, IGridNotifierPlayer, IGridNotifierCreature
     {
-        public PlayerRelocationNotifier(Player player) : base(player) { }
+        public PlayerRelocationNotifier(Player player, GridType gridType) : base(player, gridType) { }
 
-        public override void Visit(IList<Player> objs)
+        public void Visit(IList<Player> objs)
         {
-            base.Visit(objs);
+            Visit(objs.Cast<WorldObject>().ToList());
 
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -229,9 +203,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
-            base.Visit(objs);
+            Visit(objs.Cast<WorldObject>().ToList());
 
             bool relocated_for_ai = (i_player == i_player.seerView);
 
@@ -243,19 +217,21 @@ namespace Game.Maps
                 i_player.UpdateVisibilityOf(creature, i_data, i_visibleNow);
 
                 if (relocated_for_ai && !creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
-                    CreatureUnitRelocationWorker(creature, i_player);
+                    NotifierHelpers.CreatureUnitRelocationWorker(creature, i_player);
             }
         }
     }
 
-    public class CreatureRelocationNotifier : Notifier
+    public class CreatureRelocationNotifier : IGridNotifierCreature, IGridNotifierPlayer
     {
-        public CreatureRelocationNotifier(Creature c)
+        public GridType GridType { get; set; }
+        public CreatureRelocationNotifier(Creature c, GridType gridType)
         {
             i_creature = c;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<Player> objs)
+        public void Visit(IList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -263,11 +239,11 @@ namespace Game.Maps
                 if (!player.seerView.IsNeedNotify(NotifyFlags.VisibilityChanged))
                     player.UpdateVisibilityOf(i_creature);
 
-                CreatureUnitRelocationWorker(i_creature, player);
+                NotifierHelpers.CreatureUnitRelocationWorker(i_creature, player);
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
             if (!i_creature.IsAlive())
                 return;
@@ -275,27 +251,29 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                CreatureUnitRelocationWorker(i_creature, creature);
+                NotifierHelpers.CreatureUnitRelocationWorker(i_creature, creature);
 
                 if (!creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
-                    CreatureUnitRelocationWorker(creature, i_creature);
+                    NotifierHelpers.CreatureUnitRelocationWorker(creature, i_creature);
             }
         }
 
         Creature i_creature;
     }
 
-    public class DelayedUnitRelocation : Notifier
+    public class DelayedUnitRelocation : IGridNotifierCreature, IGridNotifierPlayer
     {
-        public DelayedUnitRelocation(Cell c, CellCoord pair, Map map, float radius)
+        public GridType GridType { get; set; }
+        public DelayedUnitRelocation(Cell c, CellCoord pair, Map map, float radius, GridType gridType)
         {
             i_map = map;
             cell = c;
             p = pair;
             i_radius = radius;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<Player> objs)
+        public void Visit(IList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -308,14 +286,14 @@ namespace Game.Maps
                 if (player != viewPoint && !viewPoint.IsPositionValid())
                     continue;
 
-                var relocate = new PlayerRelocationNotifier(player);
-                Cell.VisitAllObjects(viewPoint, relocate, i_radius, false);
+                var relocate = new PlayerRelocationNotifier(player, GridType.All);
+                Cell.VisitGrid(viewPoint, relocate, i_radius, false);
 
                 relocate.SendToSelf();
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -323,13 +301,9 @@ namespace Game.Maps
                 if (!creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
                     continue;
 
-                CreatureRelocationNotifier relocate = new(creature);
+                CreatureRelocationNotifier relocate = new(creature, GridType.All);
 
-                var c2world_relocation = new Visitor(relocate, GridMapTypeMask.AllWorld);
-                var c2grid_relocation = new Visitor(relocate, GridMapTypeMask.AllGrid);
-
-                cell.Visit(p, c2world_relocation, i_map, creature, i_radius);
-                cell.Visit(p, c2grid_relocation, i_map, creature, i_radius);
+                cell.Visit(p, relocate, i_map, creature, i_radius);
             }
         }
 
@@ -339,22 +313,24 @@ namespace Game.Maps
         float i_radius;
     }
 
-    public class AIRelocationNotifier : Notifier
+    public class AIRelocationNotifier : IGridNotifierCreature
     {
-        public AIRelocationNotifier(Unit unit)
+        public GridType GridType { get; set; }
+        public AIRelocationNotifier(Unit unit, GridType gridType)
         {
             i_unit = unit;
             isCreature = unit.IsTypeId(TypeId.Unit);
+            GridType = gridType;
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                CreatureUnitRelocationWorker(creature, i_unit);
+                NotifierHelpers.CreatureUnitRelocationWorker(creature, i_unit);
                 if (isCreature)
-                    CreatureUnitRelocationWorker(i_unit.ToCreature(), creature);
+                    NotifierHelpers.CreatureUnitRelocationWorker(i_unit.ToCreature(), creature);
             }
         }
 
@@ -387,8 +363,9 @@ namespace Game.Maps
         }
     }
 
-    public class MessageDistDeliverer<T> : Notifier where T : IDoWork<Player>
+    public class MessageDistDeliverer<T> : IGridNotifierPlayer, IGridNotifierDynamicObject, IGridNotifierCreature where T : IDoWork<Player>
     {
+        public GridType GridType { get; set; } = GridType.World;
         WorldObject i_source;
         T i_packetSender;
         PhaseShift i_phaseShift;
@@ -410,7 +387,7 @@ namespace Game.Maps
             required3dDist = req3dDist;
         }
 
-        public override void Visit(IList<Player> objs)
+        public void Visit(IList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -434,7 +411,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -455,7 +432,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<DynamicObject> objs)
+        public void Visit(IList<DynamicObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -490,22 +467,24 @@ namespace Game.Maps
         }
     }
 
-    public class MessageDistDelivererToHostile<T> : Notifier where T : IDoWork<Player>
+    public class MessageDistDelivererToHostile<T> : IGridNotifierPlayer, IGridNotifierDynamicObject, IGridNotifierCreature where T : IDoWork<Player>
     {
+        public GridType GridType { get; set; }
         Unit i_source;
         T i_packetSender;
         PhaseShift i_phaseShift;
         float i_distSq;
 
-        public MessageDistDelivererToHostile(Unit src, T packetSender, float dist)
+        public MessageDistDelivererToHostile(Unit src, T packetSender, float dist, GridType gridType)
         {
             i_source = src;
             i_packetSender = packetSender;
             i_phaseShift = src.GetPhaseShift();
             i_distSq = dist * dist;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<Player> objs)
+        public void Visit(IList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -529,7 +508,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -550,7 +529,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<DynamicObject> objs)
+        public void Visit(IList<DynamicObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -582,14 +561,16 @@ namespace Game.Maps
         }
     }
 
-    public class UpdaterNotifier : Notifier
+    public class UpdaterNotifier : IGridNotifierWorldObject
     {
-        public UpdaterNotifier(uint diff)
+        public GridType GridType { get; set; }
+        public UpdaterNotifier(uint diff, GridType gridType)
         {
             i_timeDiff = diff;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<WorldObject> objs)
+        public void Visit(IList<WorldObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -606,18 +587,20 @@ namespace Game.Maps
         uint i_timeDiff;
     }
 
-    public class PlayerWorker : Notifier
+    public class PlayerWorker : IGridNotifierPlayer
     {
+        public GridType GridType { get; set; }
         PhaseShift i_phaseShift;
         Action<Player> action;
 
-        public PlayerWorker(WorldObject searcher, Action<Player> _action)
+        public PlayerWorker(WorldObject searcher, Action<Player> _action, GridType gridType)
         {
             i_phaseShift = searcher.GetPhaseShift();
             action = _action;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<Player> objs)
+        public void Visit(IList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -628,18 +611,20 @@ namespace Game.Maps
         }
     }
 
-    public class CreatureWorker : Notifier
+    public class CreatureWorker : IGridNotifierCreature
     {
+        public GridType GridType { get; set; }
         PhaseShift i_phaseShift;
         IDoWork<Creature> Do;
 
-        public CreatureWorker(WorldObject searcher, IDoWork<Creature> _Do)
+        public CreatureWorker(WorldObject searcher, IDoWork<Creature> _Do, GridType gridType)
         {
             i_phaseShift = searcher.GetPhaseShift();
             Do = _Do;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -650,18 +635,20 @@ namespace Game.Maps
         }
     }
 
-    public class GameObjectWorker : Notifier
+    public class GameObjectWorker : IGridNotifierGameObject
     {
         PhaseShift i_phaseShift;
         IDoWork<GameObject> _do;
+        public GridType GridType { get; set; }
 
-        public GameObjectWorker(WorldObject searcher, IDoWork<GameObject> @do)
+        public GameObjectWorker(WorldObject searcher, IDoWork<GameObject> @do, GridType gridType)
         {
             i_phaseShift = searcher.GetPhaseShift();
             _do = @do;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public void Visit(IList<GameObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -672,22 +659,24 @@ namespace Game.Maps
         }
     }
 
-    public class WorldObjectWorker : Notifier
+    public class WorldObjectWorker : IGridNotifierPlayer, IGridNotifierCreature, IGridNotifierCorpse, IGridNotifierGameObject, IGridNotifierDynamicObject, IGridNotifierAreaTrigger, IGridNotifierSceneObject, IGridNotifierConversation
     {
-        GridMapTypeMask i_mapTypeMask;
+        public GridType GridType { get; set; }
+        public GridMapTypeMask Mask { get; set; }
         PhaseShift i_phaseShift;
         IDoWork<WorldObject> i_do;
 
-        public WorldObjectWorker(WorldObject searcher, IDoWork<WorldObject> _do, GridMapTypeMask mapTypeMask = GridMapTypeMask.All)
+        public WorldObjectWorker(WorldObject searcher, IDoWork<WorldObject> _do, GridMapTypeMask mapTypeMask = GridMapTypeMask.All, GridType gridType = GridType.All)
         {
-            i_mapTypeMask = mapTypeMask;
+            Mask = mapTypeMask;
             i_phaseShift = searcher.GetPhaseShift();
             i_do = _do;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public void Visit(IList<GameObject> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.GameObject))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -698,9 +687,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Player> objs)
+        public void Visit(IList<Player> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.Player))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -711,9 +700,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.Creature))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -724,9 +713,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Corpse> objs)
+        public void Visit(IList<Corpse> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.Corpse))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -737,9 +726,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<DynamicObject> objs)
+        public void Visit(IList<DynamicObject> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.DynamicObject))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -750,9 +739,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<AreaTrigger> objs)
+        public void Visit(IList<AreaTrigger> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -763,9 +752,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<SceneObject> objs)
+        public void Visit(IList<SceneObject> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.SceneObject))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.SceneObject))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -776,9 +765,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Conversation> objs)
+        public void Visit(IList<Conversation> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.Conversation))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -790,9 +779,16 @@ namespace Game.Maps
         }
     }
 
-    public class ResetNotifier : Notifier
+    public class ResetNotifier : IGridNotifierPlayer, IGridNotifierCreature
     {
-        public override void Visit(IList<Player> objs)
+        public GridType GridType { get; set; }
+
+        public ResetNotifier(GridType gridType)
+        {
+            GridType = gridType;
+        }
+
+        public void Visit(IList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -801,7 +797,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -811,15 +807,17 @@ namespace Game.Maps
         }
     }
 
-    public class WorldObjectChangeAccumulator : Notifier
+    public class WorldObjectChangeAccumulator : IGridNotifierPlayer, IGridNotifierCreature, IGridNotifierDynamicObject
     {
-        public WorldObjectChangeAccumulator(WorldObject obj, Dictionary<Player, UpdateData> d)
+        public GridType GridType { get; set; }
+        public WorldObjectChangeAccumulator(WorldObject obj, Dictionary<Player, UpdateData> d, GridType gridType)
         {
             updateData = d;
             worldObject = obj;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<Player> objs)
+        public void Visit(IList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -834,7 +832,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -847,7 +845,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<DynamicObject> objs)
+        public void Visit(IList<DynamicObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -880,20 +878,22 @@ namespace Game.Maps
         List<ObjectGuid> plr_list = new();
     }
 
-    public class PlayerDistWorker : Notifier
+    public class PlayerDistWorker : IGridNotifierPlayer
     {
+        public GridType GridType { get; set; }
         WorldObject i_searcher;
         float i_dist;
         IDoWork<Player> _do;
 
-        public PlayerDistWorker(WorldObject searcher, float _dist, IDoWork<Player> @do)
+        public PlayerDistWorker(WorldObject searcher, float _dist, IDoWork<Player> @do, GridType gridType)
         {
             i_searcher = searcher;
             i_dist = _dist;
             _do = @do;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<Player> objs)
+        public void Visit(IList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -987,23 +987,25 @@ namespace Game.Maps
     }
 
     //Searchers
-    public class WorldObjectSearcher : Notifier
+    public class WorldObjectSearcher : IGridNotifierPlayer, IGridNotifierCreature, IGridNotifierCorpse, IGridNotifierGameObject, IGridNotifierDynamicObject, IGridNotifierAreaTrigger, IGridNotifierSceneObject, IGridNotifierConversation
     {
-        GridMapTypeMask i_mapTypeMask;
+        public GridMapTypeMask Mask { get; set; }
+        public GridType GridType { get; set; }
         PhaseShift i_phaseShift;
         WorldObject i_object;
         ICheck<WorldObject> i_check;
 
-        public WorldObjectSearcher(WorldObject searcher, ICheck<WorldObject> check, GridMapTypeMask mapTypeMask = GridMapTypeMask.All)
+        public WorldObjectSearcher(WorldObject searcher, ICheck<WorldObject> check, GridMapTypeMask mapTypeMask = GridMapTypeMask.All, GridType gridType = GridType.All)
         {
-            i_mapTypeMask = mapTypeMask;
+            Mask = mapTypeMask;
             i_phaseShift = searcher.GetPhaseShift();
             i_check = check;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public void Visit(IList<GameObject> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.GameObject))
                 return;
 
             // already found
@@ -1024,9 +1026,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Player> objs)
+        public void Visit(IList<Player> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.Player))
                 return;
 
             // already found
@@ -1047,9 +1049,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.Creature))
                 return;
 
             // already found
@@ -1070,9 +1072,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Corpse> objs)
+        public void Visit(IList<Corpse> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.Corpse))
                 return;
 
             // already found
@@ -1093,9 +1095,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<DynamicObject> objs)
+        public void Visit(IList<DynamicObject> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.DynamicObject))
                 return;
 
             // already found
@@ -1116,9 +1118,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<AreaTrigger> objs)
+        public void Visit(IList<AreaTrigger> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
                 return;
 
             // already found
@@ -1139,9 +1141,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<SceneObject> objs)
+        public void Visit(IList<SceneObject> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.SceneObject))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.SceneObject))
                 return;
 
             // already found
@@ -1162,9 +1164,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Conversation> objs)
+        public void Visit(IList<Conversation> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.Conversation))
                 return;
 
             // already found
@@ -1188,23 +1190,25 @@ namespace Game.Maps
         public WorldObject GetTarget() { return i_object; }
     }
 
-    public class WorldObjectLastSearcher : Notifier
+    public class WorldObjectLastSearcher : IGridNotifierPlayer, IGridNotifierCreature, IGridNotifierCorpse, IGridNotifierGameObject, IGridNotifierDynamicObject, IGridNotifierAreaTrigger, IGridNotifierSceneObject, IGridNotifierConversation
     {
-        GridMapTypeMask i_mapTypeMask;
+        public GridType GridType { get; set; }
+        public GridMapTypeMask Mask { get; set; }
         PhaseShift i_phaseShift;
         WorldObject i_object;
         ICheck<WorldObject> i_check;
 
-        public WorldObjectLastSearcher(WorldObject searcher, ICheck<WorldObject> check, GridMapTypeMask mapTypeMask = GridMapTypeMask.All)
+        public WorldObjectLastSearcher(WorldObject searcher, ICheck<WorldObject> check, GridMapTypeMask mapTypeMask = GridMapTypeMask.All, GridType gridType = GridType.All)
         {
-            i_mapTypeMask = mapTypeMask;
+            Mask = mapTypeMask;
             i_phaseShift = searcher.GetPhaseShift();
             i_check = check;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public void Visit(IList<GameObject> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.GameObject))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1218,9 +1222,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Player> objs)
+        public void Visit(IList<Player> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.Player))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1234,9 +1238,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.Creature))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1250,9 +1254,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Corpse> objs)
+        public void Visit(IList<Corpse> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.Corpse))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1266,9 +1270,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<DynamicObject> objs)
+        public void Visit(IList<DynamicObject> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.DynamicObject))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1282,9 +1286,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<AreaTrigger> objs)
+        public void Visit(IList<AreaTrigger> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1298,9 +1302,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<SceneObject> objs)
+        public void Visit(IList<SceneObject> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.SceneObject))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.SceneObject))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1314,9 +1318,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Conversation> objs)
+        public void Visit(IList<Conversation> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.Conversation))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1333,24 +1337,26 @@ namespace Game.Maps
         public WorldObject GetTarget() { return i_object; }
     }
 
-    public class WorldObjectListSearcher : Notifier
+    public class WorldObjectListSearcher : IGridNotifierPlayer, IGridNotifierCreature, IGridNotifierCorpse, IGridNotifierGameObject, IGridNotifierDynamicObject, IGridNotifierAreaTrigger, IGridNotifierSceneObject, IGridNotifierConversation
     {
-        GridMapTypeMask i_mapTypeMask;
+        public GridMapTypeMask Mask { get; set; }
+        public GridType GridType { get; set; }
         List<WorldObject> i_objects;
         PhaseShift i_phaseShift;
         ICheck<WorldObject> i_check;
 
-        public WorldObjectListSearcher(WorldObject searcher, List<WorldObject> objects, ICheck<WorldObject> check, GridMapTypeMask mapTypeMask = GridMapTypeMask.All)
+        public WorldObjectListSearcher(WorldObject searcher, List<WorldObject> objects, ICheck<WorldObject> check, GridMapTypeMask mapTypeMask = GridMapTypeMask.All, GridType gridType = GridType.All)
         {
-            i_mapTypeMask = mapTypeMask;
+            Mask = mapTypeMask;
             i_phaseShift = searcher.GetPhaseShift();
             i_objects = objects;
             i_check = check;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<Player> objs)
+        public void Visit(IList<Player> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.Player))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1361,9 +1367,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.Creature))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1374,9 +1380,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Corpse> objs)
+        public void Visit(IList<Corpse> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.Corpse))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1387,9 +1393,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public void Visit(IList<GameObject> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.GameObject))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1400,9 +1406,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<DynamicObject> objs)
+        public void Visit(IList<DynamicObject> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.DynamicObject))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1413,9 +1419,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<AreaTrigger> objs)
+        public void Visit(IList<AreaTrigger> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1426,9 +1432,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<SceneObject> objs)
+        public void Visit(IList<SceneObject> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.Conversation))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1439,9 +1445,9 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Conversation> objs)
+        public void Visit(IList<Conversation> objs)
         {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
+            if (!Mask.HasAnyFlag(GridMapTypeMask.Conversation))
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1453,19 +1459,22 @@ namespace Game.Maps
         }
     }
 
-    public class GameObjectSearcher : Notifier
+    public class GameObjectSearcher : IGridNotifierGameObject
     {
         PhaseShift i_phaseShift;
         GameObject i_object;
         ICheck<GameObject> i_check;
 
-        public GameObjectSearcher(WorldObject searcher, ICheck<GameObject> check)
+        public GridType GridType { get; set; }
+
+        public GameObjectSearcher(WorldObject searcher, ICheck<GameObject> check, GridType gridType)
         {
             i_phaseShift = searcher.GetPhaseShift();
             i_check = check;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public void Visit(IList<GameObject> objs)
         {
             // already found
             if (i_object)
@@ -1488,19 +1497,21 @@ namespace Game.Maps
         public GameObject GetTarget() { return i_object; }
     }
 
-    public class GameObjectLastSearcher : Notifier
+    public class GameObjectLastSearcher : IGridNotifierGameObject
     {
         PhaseShift i_phaseShift;
         GameObject i_object;
         ICheck<GameObject> i_check;
+        public GridType GridType { get; set; }
 
-        public GameObjectLastSearcher(WorldObject searcher, ICheck<GameObject> check)
+        public GameObjectLastSearcher(WorldObject searcher, ICheck<GameObject> check, GridType gridType)
         {
             i_phaseShift = searcher.GetPhaseShift();
             i_check = check;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public void Visit(IList<GameObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1516,20 +1527,22 @@ namespace Game.Maps
         public GameObject GetTarget() { return i_object; }
     }
 
-    public class GameObjectListSearcher : Notifier
+    public class GameObjectListSearcher : IGridNotifierGameObject
     {
         PhaseShift i_phaseShift;
         List<GameObject> i_objects;
         ICheck<GameObject> i_check;
+        public GridType GridType { get; set; }
 
-        public GameObjectListSearcher(WorldObject searcher, List<GameObject> objects, ICheck<GameObject> check)
+        public GameObjectListSearcher(WorldObject searcher, List<GameObject> objects, ICheck<GameObject> check, GridType gridType)
         {
             i_phaseShift = searcher.GetPhaseShift();
             i_objects = objects;
             i_check = check;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public void Visit(IList<GameObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1541,19 +1554,21 @@ namespace Game.Maps
         }
     }
 
-    public class UnitSearcher : Notifier
+    public class UnitSearcher : IGridNotifierPlayer, IGridNotifierCreature
     {
         PhaseShift i_phaseShift;
         Unit i_object;
         ICheck<Unit> i_check;
+        public GridType GridType { get; set; }
 
-        public UnitSearcher(WorldObject searcher, ICheck<Unit> check)
+        public UnitSearcher(WorldObject searcher, ICheck<Unit> check, GridType gridType)
         {
             i_phaseShift = searcher.GetPhaseShift();
             i_check = check;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<Player> objs)
+        public void Visit(IList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1569,7 +1584,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1588,19 +1603,21 @@ namespace Game.Maps
         public Unit GetTarget() { return i_object; }
     }
 
-    public class UnitLastSearcher : Notifier
+    public class UnitLastSearcher : IGridNotifierPlayer, IGridNotifierCreature
     {
         PhaseShift i_phaseShift;
         Unit i_object;
         ICheck<Unit> i_check;
+        public GridType GridType { get; set; }
 
-        public UnitLastSearcher(WorldObject searcher, ICheck<Unit> check)
+        public UnitLastSearcher(WorldObject searcher, ICheck<Unit> check, GridType gridType)
         {
             i_phaseShift = searcher.GetPhaseShift();
             i_check = check;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<Player> objs)
+        public void Visit(IList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1613,7 +1630,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1629,20 +1646,22 @@ namespace Game.Maps
         public Unit GetTarget() { return i_object; }
     }
 
-    public class UnitListSearcher : Notifier
+    public class UnitListSearcher : IGridNotifierCreature, IGridNotifierPlayer
     {
         PhaseShift i_phaseShift;
         List<Unit> i_objects;
         ICheck<Unit> i_check;
+        public GridType GridType { get; set; }
 
-        public UnitListSearcher(WorldObject searcher, List<Unit> objects, ICheck<Unit> check)
+        public UnitListSearcher(WorldObject searcher, List<Unit> objects, ICheck<Unit> check, GridType gridType)
         {
             i_phaseShift = searcher.GetPhaseShift();
             i_objects = objects;
             i_check = check;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<Player> objs)
+        public void Visit(IList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1653,7 +1672,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1665,19 +1684,21 @@ namespace Game.Maps
         }
     }
 
-    public class CreatureSearcher : Notifier
+    public class CreatureSearcher : IGridNotifierCreature
     {
         PhaseShift i_phaseShift;
         Creature i_object;
         ICheck<Creature> i_check;
+        public GridType GridType { get; set; }
 
-        public CreatureSearcher(WorldObject searcher, ICheck<Creature> check)
+        public CreatureSearcher(WorldObject searcher, ICheck<Creature> check, GridType gridType)
         {
             i_phaseShift = searcher.GetPhaseShift();
             i_check = check;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
             // already found
             if (i_object)
@@ -1700,19 +1721,21 @@ namespace Game.Maps
         public Creature GetTarget() { return i_object; }
     }
 
-    public class CreatureLastSearcher : Notifier
+    public class CreatureLastSearcher : IGridNotifierCreature
     {
         internal PhaseShift i_phaseShift;
         Creature i_object;
         ICheck<Creature> i_check;
+        public GridType GridType { get; set; }
 
-        public CreatureLastSearcher(WorldObject searcher, ICheck<Creature> check)
+        public CreatureLastSearcher(WorldObject searcher, ICheck<Creature> check, GridType gridType)
         {
             i_phaseShift = searcher.GetPhaseShift();
             i_check = check;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1728,20 +1751,23 @@ namespace Game.Maps
         public Creature GetTarget() { return i_object; }
     }
 
-    public class CreatureListSearcher : Notifier
+    public class CreatureListSearcher : IGridNotifierCreature
     {
         internal PhaseShift i_phaseShift;
         List<Creature> i_objects;
         ICheck<Creature> i_check;
+        public GridType GridType { get; set; }
 
-        public CreatureListSearcher(WorldObject searcher, List<Creature> objects, ICheck<Creature> check)
+
+        public CreatureListSearcher(WorldObject searcher, List<Creature> objects, ICheck<Creature> check, GridType gridType)
         {
             i_phaseShift = searcher.GetPhaseShift();
             i_objects = objects;
             i_check = check;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<Creature> objs)
+        public void Visit(IList<Creature> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1753,19 +1779,21 @@ namespace Game.Maps
         }
     }
 
-    public class PlayerSearcher : Notifier
+    public class PlayerSearcher : IGridNotifierPlayer
     {
+        public GridType GridType { get; set; }
         PhaseShift i_phaseShift;
         Player i_object;
         ICheck<Player> i_check;
 
-        public PlayerSearcher(WorldObject searcher, ICheck<Player> check)
+        public PlayerSearcher(WorldObject searcher, ICheck<Player> check, GridType gridType)
         {
             i_phaseShift = searcher.GetPhaseShift();
             i_check = check;
+            GridType = gridType;    
         }
 
-        public override void Visit(IList<Player> objs)
+        public void Visit(IList<Player> objs)
         {
             // already found
             if (i_object)
@@ -1788,19 +1816,21 @@ namespace Game.Maps
         public Player GetTarget() { return i_object; }
     }
 
-    public class PlayerLastSearcher : Notifier
+    public class PlayerLastSearcher : IGridNotifierPlayer
     {
+        public GridType GridType { get; set; }
         PhaseShift i_phaseShift;
         Player i_object;
         ICheck<Player> i_check;
 
-        public PlayerLastSearcher(WorldObject searcher, ICheck<Player> check)
+        public PlayerLastSearcher(WorldObject searcher, ICheck<Player> check, GridType gridType)
         {
             i_phaseShift = searcher.GetPhaseShift();
             i_check = check;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<Player> objs)
+        public void Visit(IList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {
@@ -1816,26 +1846,30 @@ namespace Game.Maps
         public Player GetTarget() { return i_object; }
     }
 
-    public class PlayerListSearcher : Notifier
+    public class PlayerListSearcher : IGridNotifierPlayer
     {
+        public GridType GridType { get; set; }
         PhaseShift i_phaseShift;
         List<Unit> i_objects;
         ICheck<Player> i_check;
 
-        public PlayerListSearcher(WorldObject searcher, List<Unit> objects, ICheck<Player> check)
+        public PlayerListSearcher(WorldObject searcher, List<Unit> objects, ICheck<Player> check, GridType gridType = GridType.World)
         {
             i_phaseShift = searcher.GetPhaseShift();
             i_objects = objects;
             i_check = check;
+            GridType = gridType;
         }
-        public PlayerListSearcher(PhaseShift phaseShift, List<Unit> objects, ICheck<Player> check)
+
+        public PlayerListSearcher(PhaseShift phaseShift, List<Unit> objects, ICheck<Player> check, GridType gridType = GridType.World)
         {
             i_phaseShift = phaseShift;
             i_objects = objects;
             i_check = check;
+            GridType = gridType;
         }
 
-        public override void Visit(IList<Player> objs)
+        public void Visit(IList<Player> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
             {

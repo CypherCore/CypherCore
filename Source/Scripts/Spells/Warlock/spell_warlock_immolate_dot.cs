@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
+
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
@@ -57,8 +60,8 @@ namespace Scripts.Spells.Warlock
 
 			var enemies  = new List<Unit>();
 			var check    = new AnyUnfriendlyUnitInObjectRangeCheck(caster, caster, 100.0f);
-			var searcher = new UnitListSearcher(caster, enemies, check);
-			Cell.VisitAllObjects(caster, searcher, 100.0f);
+			var searcher = new UnitListSearcher(caster, enemies, check, GridType.All);
+			Cell.VisitGrid(caster, searcher, 100.0f);
 			var checker = new UnitAuraCheck<Unit>(false, WarlockSpells.IMMOLATE_DOT, caster.GetGUID());
 			enemies.RemoveIf(checker);
 

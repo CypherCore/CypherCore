@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
+
+using System.Collections.Generic;
 using Game.AI;
 using Game.Entities;
 using Game.Maps;
@@ -49,8 +52,8 @@ namespace Scripts.Spells.Shaman
 
 			var targets  = new List<Unit>();
 			var check    = new AnyFriendlyUnitInObjectRangeCheck(me, me, TotemData.RANGE);
-			var searcher = new UnitListSearcher(me, targets, check);
-			Cell.VisitAllObjects(me, searcher, TotemData.RANGE);
+			var searcher = new UnitListSearcher(me, targets, check, Framework.Constants.GridType.All);
+			Cell.VisitGrid(me, searcher, TotemData.RANGE);
 
 			foreach (var itr in targets)
 			{

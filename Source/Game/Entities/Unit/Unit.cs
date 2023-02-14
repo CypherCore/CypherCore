@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Constants;
 using Game.AI;
@@ -364,8 +364,8 @@ namespace Game.Entities
         {
             var builder = new CustomChatTextBuilder(this, msgType, text, language, target);
             var localizer = new LocalizedDo(builder);
-            var worker = new PlayerDistWorker(this, textRange, localizer);
-            Cell.VisitWorldObjects(this, worker, textRange);
+            var worker = new PlayerDistWorker(this, textRange, localizer, GridType.World);
+            Cell.VisitGrid(this, worker, textRange);
         }
 
         public virtual void Say(string text, Language language, WorldObject target = null)
@@ -409,8 +409,8 @@ namespace Game.Entities
 
             var builder = new BroadcastTextBuilder(this, msgType, textId, GetGender(), target);
             var localizer = new LocalizedDo(builder);
-            var worker = new PlayerDistWorker(this, textRange, localizer);
-            Cell.VisitWorldObjects(this, worker, textRange);
+            var worker = new PlayerDistWorker(this, textRange, localizer, GridType.World);
+            Cell.VisitGrid(this, worker, textRange);
         }
 
         public virtual void Say(uint textId, WorldObject target = null)
@@ -454,8 +454,8 @@ namespace Game.Entities
             {
                 base.UpdateObjectVisibility(true);
                 // call MoveInLineOfSight for nearby creatures
-                AIRelocationNotifier notifier = new(this);
-                Cell.VisitAllObjects(this, notifier, GetVisibilityRange());
+                AIRelocationNotifier notifier = new(this, GridType.All);
+                Cell.VisitGrid(this, notifier, GetVisibilityRange());
             }
         }
 
@@ -934,8 +934,8 @@ namespace Game.Entities
         {
             List<Unit> targets = new();
             var u_check = new AnyUnfriendlyUnitInObjectRangeCheck(this, this, dist);
-            var searcher = new UnitListSearcher(this, targets, u_check);
-            Cell.VisitAllObjects(this, searcher, dist);
+            var searcher = new UnitListSearcher(this, targets, u_check, GridType.All);
+            Cell.VisitGrid(this, searcher, dist);
 
             // remove current target
             if (GetVictim())
@@ -4181,13 +4181,9 @@ namespace Game.Entities
             cell.SetNoCreate();
 
             AnyUnitInObjectRangeCheck u_check = new AnyUnitInObjectRangeCheck(this, fMaxSearchRange);
-            UnitListSearcher searcher = new UnitListSearcher(this, list, u_check);
+            UnitListSearcher searcher = new UnitListSearcher(this, list, u_check, GridType.All);
 
-            var world_unit_searcher = new Visitor(searcher, GridMapTypeMask.AllWorld);
-            var grid_unit_searcher = new Visitor(searcher, GridMapTypeMask.AllGrid);
-
-            cell.Visit(p, world_unit_searcher, GetMap(), this, fMaxSearchRange);
-            cell.Visit(p, grid_unit_searcher, GetMap(), this, fMaxSearchRange);
+            cell.Visit(p, searcher, GetMap(), this, fMaxSearchRange);
         }
 
         public void GetAttackableUnitListInRange(List<Unit> list, float fMaxSearchRange)
@@ -4197,13 +4193,9 @@ namespace Game.Entities
             cell.SetNoCreate();
 
             var u_check = new NearestAttackableUnitInObjectRangeCheck(this, this, fMaxSearchRange);
-            UnitListSearcher searcher = new UnitListSearcher(this, list, u_check);
+            UnitListSearcher searcher = new UnitListSearcher(this, list, u_check, GridType.All);
 
-            var world_unit_searcher = new Visitor(searcher, GridMapTypeMask.AllWorld);
-            var grid_unit_searcher = new Visitor(searcher, GridMapTypeMask.AllGrid);
-
-            cell.Visit(p, world_unit_searcher, GetMap(), this, fMaxSearchRange);
-            cell.Visit(p, grid_unit_searcher, GetMap(), this, fMaxSearchRange);
+            cell.Visit(p, searcher, GetMap(), this, fMaxSearchRange);
         }
 
         public void GetFriendlyUnitListInRange(List<Unit> list, float fMaxSearchRange, bool exceptSelf = false)
@@ -4213,13 +4205,9 @@ namespace Game.Entities
             cell.SetNoCreate();
 
             AnyFriendlyUnitInObjectRangeCheck u_check = new AnyFriendlyUnitInObjectRangeCheck(this, this, fMaxSearchRange, false, exceptSelf);
-            UnitListSearcher searcher = new UnitListSearcher(this, list, u_check);
+            UnitListSearcher searcher = new UnitListSearcher(this, list, u_check, GridType.All);
 
-            var world_unit_searcher = new Visitor(searcher, GridMapTypeMask.AllWorld);
-            var grid_unit_searcher = new Visitor(searcher, GridMapTypeMask.AllGrid);
-
-            cell.Visit(p, world_unit_searcher, GetMap(), this, fMaxSearchRange);
-            cell.Visit(p, grid_unit_searcher, GetMap(), this, fMaxSearchRange);
+            cell.Visit(p, searcher, GetMap(), this, fMaxSearchRange);
         }
 
         public CombatManager GetCombatManager() { return m_combatManager; }

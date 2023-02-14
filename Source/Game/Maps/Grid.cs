@@ -1,8 +1,9 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Constants;
 using Game.Entities;
+using Game.Maps.Interfaces;
 using System.Collections.Generic;
 
 namespace Game.Maps
@@ -194,9 +195,8 @@ namespace Game.Maps
                     {
                         if (GetWorldObjectCountInNGrid<Player>() == 0 && !map.ActiveObjectsNearGrid(this))
                         {
-                            ObjectGridStoper worker = new();
-                            var visitor = new Visitor(worker, GridMapTypeMask.AllGrid);
-                            VisitAllGrids(visitor);
+                            ObjectGridStoper worker = new(GridType.Grid);
+                            VisitAllGrids(worker);
                             SetGridState(GridState.Idle);
                             Log.outDebug(LogFilter.Maps, "Grid[{0}, {1}] on map {2} moved to IDLE state", GetX(), GetY(),
                                 map.GetId());
@@ -230,14 +230,14 @@ namespace Game.Maps
             }
         }
 
-        public void VisitAllGrids(Visitor visitor)
+        public void VisitAllGrids(IGridNotifier visitor)
         {
             for (uint x = 0; x < MapConst.MaxCells; ++x)
                 for (uint y = 0; y < MapConst.MaxCells; ++y)
                     GetGridCell(x, y).Visit(visitor);
         }
 
-        public void VisitGrid(uint x, uint y, Visitor visitor)
+        public void VisitGrid(uint x, uint y, IGridNotifier visitor)
         {
             GetGridCell(x, y).Visit(visitor);
         }
@@ -268,31 +268,43 @@ namespace Game.Maps
             _container = new MultiTypeContainer();
         }
 
-        public void Visit(Visitor visitor)
+        public void Visit(IGridNotifier visitor)
         {
-            switch (visitor._mask)
-            {
-                case GridMapTypeMask.AllGrid:
-                    visitor.Visit(_container.gameObjects);
-                    visitor.Visit(_container.creatures);
-                    visitor.Visit(_container.dynamicObjects);
-                    visitor.Visit(_container.corpses);
-                    visitor.Visit(_container.areaTriggers);
-                    visitor.Visit(_container.sceneObjects);
-                    visitor.Visit(_container.conversations);
-                    visitor.Visit(_container.worldObjects);
-                    break;
-                case GridMapTypeMask.AllWorld:
-                    visitor.Visit(_objects.players);
-                    visitor.Visit(_objects.creatures);
-                    visitor.Visit(_objects.corpses);
-                    visitor.Visit(_objects.dynamicObjects);
-                    visitor.Visit(_objects.worldObjects);
-                    break;
-                default:
-                    Log.outError(LogFilter.Server, "{0} called Visit with Unknown Mask {1}.", visitor.ToString(), visitor._mask);
-                    break;
-            }
+            if (visitor.GridType.HasFlag(GridType.Grid))
+                ProccessContainer(visitor, _container);
+
+            if (visitor.GridType.HasFlag(GridType.World))
+                ProccessContainer(visitor, _objects);
+        }
+
+        private static void ProccessContainer(IGridNotifier visitor, MultiTypeContainer container)
+        {
+            if (visitor is IGridNotifierGameObject go)
+                go.Visit(container.gameObjects);
+
+            if (visitor is IGridNotifierCreature cr)
+                cr.Visit(container.creatures);
+
+            if (visitor is IGridNotifierDynamicObject dyn)
+                dyn.Visit(container.dynamicObjects);
+
+            if (visitor is IGridNotifierCorpse cor)
+                cor.Visit(container.corpses);
+
+            if (visitor is IGridNotifierAreaTrigger at)
+                at.Visit(container.areaTriggers);
+
+            if (visitor is IGridNotifierSceneObject so)
+                so.Visit(container.sceneObjects);
+
+            if (visitor is IGridNotifierConversation conv)
+                conv.Visit(container.conversations);
+
+            if (visitor is IGridNotifierWorldObject wo)
+                wo.Visit(container.worldObjects);
+
+            if (visitor is IGridNotifierPlayer p)
+                p.Visit(container.players);
         }
 
         public uint GetWorldObjectCountInGrid<T>() where T : WorldObject

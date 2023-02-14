@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Constants;
 using Game.DataStorage;
@@ -574,16 +574,16 @@ namespace Game.Entities
                 AddUnitState(UnitState.AttackPlayer);
                 SetPlayerFlag(PlayerFlags.ContestedPVP);
                 // call MoveInLineOfSight for nearby contested guards
-                AIRelocationNotifier notifier = new(this);
-                Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
+                AIRelocationNotifier notifier = new(this, GridType.World);
+                Cell.VisitGrid(this, notifier, GetVisibilityRange());
             }
             foreach (Unit unit in m_Controlled)
             {
                 if (!unit.HasUnitState(UnitState.AttackPlayer))
                 {
                     unit.AddUnitState(UnitState.AttackPlayer);
-                    AIRelocationNotifier notifier = new(unit);
-                    Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
+                    AIRelocationNotifier notifier = new(unit, GridType.World);
+                    Cell.VisitGrid(this, notifier, GetVisibilityRange());
                 }
             }
         }

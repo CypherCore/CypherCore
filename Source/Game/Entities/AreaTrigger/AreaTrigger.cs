@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Constants;
 using Framework.Dynamic;
@@ -399,12 +399,12 @@ namespace Game.Entities
             if (IsServerSide())
             {
                 var searcher = new PlayerListSearcher(this, targetList, check);
-                Cell.VisitWorldObjects(this, searcher, GetMaxSearchRadius());
+                Cell.VisitGrid(this, searcher, GetMaxSearchRadius());
             }
             else
             {
-                var searcher = new UnitListSearcher(this, targetList, check);
-                Cell.VisitAllObjects(this, searcher, GetMaxSearchRadius());
+                var searcher = new UnitListSearcher(this, targetList, check, GridType.All);
+                Cell.VisitGrid(this, searcher, GetMaxSearchRadius());
             }
         }
 

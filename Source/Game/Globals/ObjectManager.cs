@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Collections;
 using Framework.Configuration;
@@ -11037,20 +11037,26 @@ namespace Game
         {
             var key = (mapid, difficulty);
 
-            if (!mapObjectGuidsStore.ContainsKey(key))
-                mapObjectGuidsStore.Add(key, new Dictionary<uint, CellObjectGuids>());
+            if (!mapObjectGuidsStore.TryGetValue(key, out var internalDict))
+            {
+                internalDict = new Dictionary<uint, CellObjectGuids>();
+                mapObjectGuidsStore.Add(key, internalDict);
+            }
 
-            if (!mapObjectGuidsStore[key].ContainsKey(cellid))
-                mapObjectGuidsStore[key].Add(cellid, new CellObjectGuids());
+            if (!internalDict.TryGetValue(cellid, out var cell))
+            {
+                cell = new CellObjectGuids();
+                mapObjectGuidsStore[key].Add(cellid, cell);
+            }
 
-            return mapObjectGuidsStore[key][cellid];
+            return cell;
         }
         public CellObjectGuids GetCellObjectGuids(uint mapid, Difficulty difficulty, uint cellid)
         {
             var key = (mapid, difficulty);
 
-            if (mapObjectGuidsStore.ContainsKey(key) && mapObjectGuidsStore[key].ContainsKey(cellid))
-                return mapObjectGuidsStore[key][cellid];
+            if (mapObjectGuidsStore.TryGetValue(key, out var internDict) && internDict.TryGetValue(cellid, out var val))
+                return val;
 
             return null;
         }

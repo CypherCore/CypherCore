@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Constants;
 using Framework.IO;
@@ -141,8 +141,8 @@ namespace Game.Chat
             else
             {
                 var check = new AllCreaturesOfEntryInRange(handler.GetPlayer(), entry, 20.0f);
-                var searcher = new CreatureSearcher(handler.GetPlayer(), check);
-                Cell.VisitAllObjects(handler.GetPlayer(), searcher, 30.0f);
+                var searcher = new CreatureSearcher(handler.GetPlayer(), check, GridType.All);
+                Cell.VisitGrid(handler.GetPlayer(), searcher, 30.0f);
                 var passenger = searcher.GetTarget();
                 if (!passenger || passenger == target)
                     return false;

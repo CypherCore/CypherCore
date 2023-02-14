@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Collections;
 using Framework.Constants;
@@ -545,8 +545,8 @@ namespace Game
             }
 
             float dist = GetRangeForChatType(msgType);
-            var worker = new PlayerDistWorker(source, dist, localizer);
-            Cell.VisitWorldObjects(source, worker, dist);
+            var worker = new PlayerDistWorker(source, dist, localizer, GridType.World);
+            Cell.VisitGrid(source, worker, dist);
         }
 
         Dictionary<uint, MultiMap<byte, CreatureTextEntry>> mTextMap = new();

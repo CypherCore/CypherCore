@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Configuration;
 using Framework.Constants;
@@ -5453,7 +5453,8 @@ namespace Game.Entities
             update.UpdateAll = true;
             update.UnitGUID = target.GetGUID();
 
-            foreach (var auraApp in visibleAuras)
+           
+            foreach (var auraApp in visibleAuras.ToList())
             {
                 AuraInfo auraInfo = new();
                 auraApp.BuildUpdatePacket(ref auraInfo, false);
@@ -5846,8 +5847,8 @@ namespace Game.Entities
         public void UpdateVisibilityForPlayer()
         {
             // updates visibility of all objects around point of view for current player
-            var notifier = new VisibleNotifier(this);
-            Cell.VisitAllObjects(seerView, notifier, GetSightRange());
+            var notifier = new VisibleNotifier(this, GridType.All);
+            Cell.VisitGrid(seerView, notifier, GetSightRange());
             notifier.SendToSelf();   // send gathered data
         }
 
@@ -5860,7 +5861,7 @@ namespace Game.Entities
 
             PacketSenderRef sender = new(data);
             var notifier = new MessageDistDeliverer<PacketSenderRef>(this, sender, dist);
-            Cell.VisitWorldObjects(this, notifier, dist);
+            Cell.VisitGrid(this, notifier, dist);
         }
 
         void SendMessageToSetInRange(ServerPacket data, float dist, bool self, bool own_team_only, bool required3dDist = false)
@@ -5870,7 +5871,7 @@ namespace Game.Entities
 
             PacketSenderRef sender = new(data);
             var notifier = new MessageDistDeliverer<PacketSenderRef>(this, sender, dist, own_team_only, null, required3dDist);
-            Cell.VisitWorldObjects(this, notifier, dist);
+            Cell.VisitGrid(this, notifier, dist);
         }
 
         public override void SendMessageToSet(ServerPacket data, Player skipped_rcvr)
@@ -5882,7 +5883,7 @@ namespace Game.Entities
             // update: replaced by GetMap().GetVisibilityDistance()
             PacketSenderRef sender = new(data);
             var notifier = new MessageDistDeliverer<PacketSenderRef>(this, sender, GetVisibilityRange(), false, skipped_rcvr);
-            Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
+            Cell.VisitGrid(this, notifier, GetVisibilityRange());
         }
         public override void SendMessageToSet(ServerPacket data, bool self)
         {
@@ -6134,7 +6135,7 @@ namespace Game.Entities
 
             // Send to players
             MessageDistDeliverer<LocalizedDo> notifier = new(this, localizer, range, false, null, true);
-            Cell.VisitWorldObjects(this, notifier, range);
+            Cell.VisitGrid(this, notifier, range);
         }
 
         public override void Say(uint textId, WorldObject target = null)

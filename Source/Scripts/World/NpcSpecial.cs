@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using System;
 using System.Collections.Generic;
@@ -777,7 +777,7 @@ namespace Scripts.World.NpcSpecial
             List<Unit> players = new();
             var check = new UnitAuraCheck<Player>(true, SpellIds.RibbonDanceCosmetic);
             var searcher = new PlayerListSearcher(me, players, check);
-            Cell.VisitWorldObjects(me, searcher, 10.0f);
+            Cell.VisitGrid(me, searcher, 10.0f);
 
             return players.Empty();
         }

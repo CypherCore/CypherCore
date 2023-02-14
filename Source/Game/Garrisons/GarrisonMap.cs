@@ -1,9 +1,10 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
+using Game.Maps.Interfaces;
 using System.Collections.Generic;
 
 namespace Game.Garrisons
@@ -60,14 +61,16 @@ namespace Game.Garrisons
         Player _loadingPlayer; // @workaround Player is not registered in ObjectAccessor during login
     }
 
-    class GarrisonGridLoader : Notifier
+    class GarrisonGridLoader : IGridNotifierGameObject
     {
-        public GarrisonGridLoader(Grid grid, GarrisonMap map, Cell cell)
+        public GridType GridType { get; set; }
+        public GarrisonGridLoader(Grid grid, GarrisonMap map, Cell cell, GridType gridType = GridType.Grid)
         {
             i_cell = cell;
             i_grid = grid;
             i_map = map;
             i_garrison = map.GetGarrison();
+            GridType = gridType;
         }
 
         public void LoadN()
@@ -83,8 +86,7 @@ namespace Game.Garrisons
                         i_cell.data.cell_y = y;
 
                         //Load creatures and game objects
-                        var visitor = new Visitor(this, GridMapTypeMask.AllGrid);
-                        i_grid.VisitGrid(x, y, visitor);
+                        i_grid.VisitGrid(x, y, this);
                     }
                 }
             }
@@ -92,7 +94,7 @@ namespace Game.Garrisons
             Log.outDebug(LogFilter.Maps, "{0} GameObjects and {1} Creatures loaded for grid {2} on map {3}", i_gameObjects, i_creatures, i_grid.GetGridId(), i_map.GetId());
         }
 
-        public override void Visit(IList<GameObject> objs)
+        public void Visit(IList<GameObject> objs)
         {
             ICollection<Garrison.Plot> plots = i_garrison.GetPlots();
             if (!plots.Empty())
@@ -115,8 +117,6 @@ namespace Game.Garrisons
                 }
             }
         }
-
-        public override void Visit(IList<Creature> objs) { }
 
         Cell i_cell;
         Grid i_grid;

@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Collections;
 using Framework.Constants;
@@ -1628,7 +1628,7 @@ namespace Game.Chat
 
             // First handle any creatures that still have a corpse around
             var worker = new WorldObjectWorker(player, new RespawnDo());
-            Cell.VisitGridObjects(player, worker, player.GetGridActivationRange());
+            Cell.VisitGrid(player, worker, player.GetGridActivationRange());
 
             // Now handle any that had despawned, but had respawn time logged.
             List<RespawnInfo> data = new();

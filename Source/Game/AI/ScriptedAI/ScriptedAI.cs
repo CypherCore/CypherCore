@@ -1,5 +1,5 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using Framework.Constants;
 using Game.DataStorage;
@@ -217,12 +217,12 @@ namespace Game.AI
 
             List<Creature> creatures = new();
             AllCreaturesOfEntryInRange check = new(me, entry, maxSearchRange);
-            CreatureListSearcher searcher = new(me, creatures, check);
+            CreatureListSearcher searcher = new(me, creatures, check, GridType.Grid);
 
             if (!samePhase)
                 PhasingHandler.SetAlwaysVisible(me, true, false);
 
-            Cell.VisitGridObjects(me, searcher, maxSearchRange);
+            Cell.VisitGrid(me, searcher, maxSearchRange);
 
             if (!samePhase)
                 PhasingHandler.SetAlwaysVisible(me, false, false);
@@ -371,8 +371,8 @@ namespace Game.AI
         public Unit DoSelectLowestHpFriendly(float range, uint minHPDiff = 1)
         {
             var u_check = new MostHPMissingInRange<Unit>(me, range, minHPDiff);
-            var searcher = new UnitLastSearcher(me, u_check);
-            Cell.VisitAllObjects(me, searcher, range);
+            var searcher = new UnitLastSearcher(me, u_check, GridType.All);
+            Cell.VisitGrid(me, searcher, range);
 
             return searcher.GetTarget();
         }
@@ -382,8 +382,8 @@ namespace Game.AI
         {
             List<Creature> list = new();
             var u_check = new FriendlyCCedInRange(me, range);
-            var searcher = new CreatureListSearcher(me, list, u_check);
-            Cell.VisitAllObjects(me, searcher, range);
+            var searcher = new CreatureListSearcher(me, list, u_check, GridType.All);
+            Cell.VisitGrid(me, searcher, range);
 
             return list;
         }
@@ -393,8 +393,8 @@ namespace Game.AI
         {
             List<Creature> list = new();
             var u_check = new FriendlyMissingBuffInRange(me, range, spellId);
-            var searcher = new CreatureListSearcher(me, list, u_check);
-            Cell.VisitAllObjects(me, searcher, range);
+            var searcher = new CreatureListSearcher(me, list, u_check, GridType.All);
+            Cell.VisitGrid(me, searcher, range);
 
             return list;
         }
@@ -403,8 +403,8 @@ namespace Game.AI
         public Player GetPlayerAtMinimumRange(float minimumRange)
         {
             var check = new PlayerAtMinimumRangeAway(me, minimumRange);
-            var searcher = new PlayerSearcher(me, check);
-            Cell.VisitWorldObjects(me, searcher, minimumRange);
+            var searcher = new PlayerSearcher(me, check, GridType.World);
+            Cell.VisitGrid(me, searcher, minimumRange);
 
             return searcher.GetTarget();
         }
