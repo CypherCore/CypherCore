@@ -71,6 +71,9 @@ namespace Game.Spells
                     m_originalCaster = null;
             }
 
+            if (m_originalCaster == null)
+                m_originalCaster = caster.ToUnit();
+
             _triggeredCastFlags = triggerFlags;
 
             if (info.HasAttribute(SpellAttr2.DoNotReportSpellFailure))
