@@ -10,7 +10,7 @@ using Game.Spells;
 
 namespace Scripts.Spells.Warlock
 {
-    [SpellScript(387506)]
+    [SpellScript(WarlockSpells.MAYHEM)]
     public class aura_warl_mayhem : AuraScript, IAuraCheckProc, IAuraOnProc
     {
         public bool CheckProc(ProcEventInfo info)
