@@ -27,6 +27,14 @@ namespace Scripts.Pets
                 creature.SetLevel(owner.GetLevel());
                 creature.UpdateLevelDependantStats();
                 creature.SetReactState(ReactStates.Assist);
+                creature.SetCreatorGUID(owner.GetGUID());
+
+                var summon = creature.ToTempSummon();
+                
+                if (summon != null)
+                {
+                    summon.SetCanFollowOwner(true);
+                }
             }
 
             public override void UpdateAI(uint UnnamedParameter)

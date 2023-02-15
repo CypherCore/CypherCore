@@ -4,6 +4,7 @@
 using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
+using Game.AI;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
@@ -1784,7 +1785,12 @@ namespace Game
             {
                 Creature creature = objs[i];
                 if (creature.IsInWorld && creature.IsAIEnabled())
-                    creature.GetAI().OnGameEvent(_activate, _eventId);
+                {
+                    var ai = creature.GetAI();
+
+                    if (ai != null)
+                        ai.OnGameEvent(_activate, _eventId);
+                }
             }
         }
         public void Visit(IList<GameObject> objs)
@@ -1793,7 +1799,12 @@ namespace Game
             {
                 GameObject gameObject = objs[i];
                 if (gameObject.IsInWorld)
-                    gameObject.GetAI().OnGameEvent(_activate, _eventId);
+                {
+                    var ai = gameObject.GetAI();
+
+                    if (ai != null)
+                        ai.OnGameEvent(_activate, _eventId);
+                }
             }
         }
 
@@ -1803,7 +1814,12 @@ namespace Game
             {
                 var gameObject = objs[i] as GameObject;
                 if (gameObject != null && gameObject.IsInWorld)
-                    gameObject.GetAI().OnGameEvent(_activate, _eventId);
+                {
+                    var ai = gameObject.GetAI();
+
+                    if (ai != null)
+                        ai.OnGameEvent(_activate, _eventId);
+                }
             }
         }
 

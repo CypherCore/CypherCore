@@ -24,6 +24,14 @@ namespace Scripts.Pets
                 creature.SetLevel(owner.GetLevel());
                 creature.UpdateLevelDependantStats();
                 creature.SetReactState(ReactStates.Aggressive);
+                creature.SetCreatorGUID(owner.GetGUID());
+
+                var summon = creature.ToTempSummon();
+
+                if (summon != null)
+                {
+                    summon.SetCanFollowOwner(true);
+                }
             }
 
             public override void Reset()
