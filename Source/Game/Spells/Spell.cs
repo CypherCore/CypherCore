@@ -8129,6 +8129,21 @@ namespace Game.Spells
             return spell != null;
         }
 
+        public uint StandardVariance(double damage)
+        {
+            return (uint)(damage * (Random.Shared.Next(975, 1025) * 0.001));
+        }
+
+        public uint StandardVariance(int damage)
+        {
+            return (uint)(damage * (Random.Shared.Next(975, 1025) * 0.001));
+        }
+
+        public uint StandardVariance(uint damage)
+        {
+            return (uint)(damage * (Random.Shared.Next(975, 1025) * 0.001));
+        }
+
         #region Fields
         Dictionary<SpellEffectName, SpellLogEffect> _executeLogEffects = new();
         PathGenerator m_preGeneratedPath;

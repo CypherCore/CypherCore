@@ -7,7 +7,7 @@ using Game.Spells;
 
 namespace Scripts.Spells.Shaman
 {
-	[SpellScript(327163)]
+	[SpellScript(375982)]
 	public class spell_sha_primordial_wave : SpellScript, ISpellOnHit
 	{
         public void OnHit()
@@ -18,29 +18,30 @@ namespace Scripts.Spells.Shaman
             if (player == null || victim == null)
                 return;
 
-            uint amount = (uint)GetSpellInfo().GetEffect(0).CalcValue(player, null, victim);
-
-            switch (player.GetPrimarySpecialization())
+            if (player.IsFriendlyTo(victim))
             {
-                case TalentSpecialization.ShamanEnhancement:
-                    if (player.IsFriendlyTo(victim))
-                    {
-                        var healInfo = new HealInfo(player, victim, amount, GetSpellInfo(), SpellSchoolMask.Shadow);
-                        victim.HealBySpell(healInfo);
-                    }
-                    else
-                    {
+                uint amount = GetSpell().StandardVariance(player.GetTotalSpellPowerValue(SpellSchoolMask.Shadow, true) * 0.65);
+                var healInfo = new HealInfo(player, victim, amount, GetSpellInfo(), SpellSchoolMask.Shadow);
+                victim.HealBySpell(healInfo);
+            }
+            else
+            {
+                uint amount = GetSpell().StandardVariance(player.GetTotalSpellPowerValue(SpellSchoolMask.Shadow, false) * 0.65);
+
+                switch (player.GetPrimarySpecialization())
+                {
+                    case TalentSpecialization.ShamanEnhancement:
                         var damageInfo = new SpellNonMeleeDamage(player, victim,
                             GetSpellInfo(), new(), SpellSchoolMask.Shadow);
                         damageInfo.damage = amount;
 
                         victim.DealSpellDamage(damageInfo, true);
-                    }
-                    break;
-                case TalentSpecialization.ShamanRestoration:
-                    break;
-                case TalentSpecialization.ShamanElemental:
-                    break;
+                        break;
+                    case TalentSpecialization.ShamanRestoration:
+                        break;
+                    case TalentSpecialization.ShamanElemental:
+                        break;
+                }
             }
         }
 
@@ -48,8 +49,6 @@ namespace Scripts.Spells.Shaman
         {
             return ValidateSpellInfo(ShamanSpells.PrimordialWave);
         }
-
-
     }
 }
 
