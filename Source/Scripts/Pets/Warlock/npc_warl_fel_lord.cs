@@ -14,9 +14,9 @@ namespace Scripts.Pets
     {
         // 107024 - Fel Lord
         [CreatureScript(107024)]
-        public class npc_warl_fel_lordAI : PetAI
+        public class npc_warl_fel_lord : SmartAI
         {
-            public npc_warl_fel_lordAI(Creature creature) : base(creature)
+            public npc_warl_fel_lord(Creature creature) : base(creature)
             {
                 Unit owner = me.GetOwner();
                 if (owner == null)
@@ -24,7 +24,17 @@ namespace Scripts.Pets
 
                 creature.SetLevel(owner.GetLevel());
                 creature.UpdateLevelDependantStats();
-                creature.SetReactState(ReactStates.Assist);
+                creature.SetReactState(ReactStates.Aggressive);
+                creature.SetCreatorGUID(owner.GetGUID());
+
+                var summon = creature.ToTempSummon();
+
+                if (summon != null)
+                {
+                    summon.SetCanFollowOwner(true);
+                    summon.GetMotionMaster().Clear();
+                    summon.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, summon.GetFollowAngle());
+                }
             }
 
             public override void Reset()

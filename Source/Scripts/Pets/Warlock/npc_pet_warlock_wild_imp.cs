@@ -8,6 +8,7 @@ using Game.Scripting;
 using Game.Spells;
 using Scripts.Spells.Warlock;
 using static Game.AI.SmartAction;
+using static Game.AI.SmartEvent;
 
 namespace Scripts.Pets
 {
@@ -15,7 +16,7 @@ namespace Scripts.Pets
     {
         // Wild Imp - 99739
         [CreatureScript(55659)]
-        public class npc_pet_warlock_wild_imp : PetAI
+        public class npc_pet_warlock_wild_imp : SmartAI
         {
             private ObjectGuid _targetGUID = new();
 
@@ -34,6 +35,20 @@ namespace Scripts.Pets
                         var p = owner.ToPlayer();
                         p.AddAura(296553, p);
                     }
+                }
+
+
+                creature.UpdateLevelDependantStats();
+                creature.SetReactState(ReactStates.Aggressive);
+                creature.SetCreatorGUID(owner.GetGUID());
+
+                var summon = creature.ToTempSummon();
+
+                if (summon != null)
+                {
+                    summon.SetCanFollowOwner(true);
+                    summon.GetMotionMaster().Clear();
+                    summon.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, summon.GetFollowAngle());
                 }
             }
 

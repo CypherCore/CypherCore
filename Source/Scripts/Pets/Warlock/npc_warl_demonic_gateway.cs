@@ -14,13 +14,13 @@ namespace Scripts.Pets
 {
     namespace Warlock
     {
-        [Script]
-        public class npc_warl_demonic_gatewayAI : CreatureAI
+        [CreatureScript(47319)]
+        public class npc_warl_demonic_gateway : CreatureAI
         {
             public EventMap events = new();
             public bool firstTick = true;
 
-            public npc_warl_demonic_gatewayAI(Creature creature) : base(creature)
+            public npc_warl_demonic_gateway(Creature creature) : base(creature)
             {
             }
 

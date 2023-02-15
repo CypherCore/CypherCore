@@ -1153,18 +1153,20 @@ namespace Game.Entities
         void CancelSpellMissiles(uint spellId, bool reverseMissile = false)
         {
             bool hasMissile = false;
-            foreach (var pair in m_Events.GetEvents().KeyValueList())
+            m_Events.ScheduleAbortOnAllMatchingEvents(e =>
             {
-                Spell spell = Spell.ExtractSpellFromEvent(pair.Value);
+                Spell spell = Spell.ExtractSpellFromEvent(e);
                 if (spell != null)
                 {
                     if (spell.GetSpellInfo().Id == spellId)
                     {
-                        pair.Value.ScheduleAbort();
                         hasMissile = true;
+                        return true;
                     }
                 }
-            }
+
+                return false;
+            });
 
             if (hasMissile)
             {

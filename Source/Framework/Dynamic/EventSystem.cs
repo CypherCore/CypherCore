@@ -20,8 +20,9 @@ namespace Framework.Dynamic
             m_time += p_time;
 
             // main event loop
-            KeyValuePair<ulong, BasicEvent> i;
-            if (m_events.Count > 0)
+            KeyValuePair<double, BasicEvent> i;
+            lock (m_events)
+                if (m_events.Count > 0)
             while ((i = m_events.KeyValueList().FirstOrDefault()).Value != null && i.Key <= m_time) 
             {
                 // sorted dictionart will stop looping at the first time that does not meet the while condition
@@ -46,44 +47,43 @@ namespace Framework.Dynamic
 
                 // Reschedule non deletable events to be checked at
                 // the next update tick
-                AddEvent(Event, CalculateTime(TimeSpan.FromMilliseconds(1)), false);
+                InternalAddEvent(Event, CalculateTime(TimeSpan.FromMilliseconds(1)), false);
             }
         }
 
         public void KillAllEvents(bool force)
         {
-            m_events.RemoveIfMatching((pair) =>
-            {
-                // Abort events which weren't aborted already
-                if (!pair.Value.IsAborted())
+            lock (m_events)
+                m_events.RemoveIfMatching((pair) =>
                 {
-                    pair.Value.SetAborted();
-                    pair.Value.Abort(m_time);
-                }
+                    // Abort events which weren't aborted already
+                    if (!pair.Value.IsAborted())
+                    {
+                        pair.Value.SetAborted();
+                        pair.Value.Abort(m_time);
+                    }
 
-                // Skip non-deletable events when we are
-                // not forcing the event cancellation.
-                if (!force && !pair.Value.IsDeletable())
+                    // Skip non-deletable events when we are
+                    // not forcing the event cancellation.
+                    if (!force && !pair.Value.IsDeletable())
+                        return false;
+
+                    if (!force)
+                        return true;
+
                     return false;
-
-                if (!force)
-                    return true;
-
-                return false;
-            });
+                });
 
             // fast clear event list (in force case)
             if (force)
-                m_events.Clear();
+                lock (m_events)
+                    m_events.Clear();
         }
 
         public void AddEvent(BasicEvent Event, TimeSpan e_time, bool set_addtime = true)
         {
-            if (set_addtime)
-                Event.m_addTime = m_time;
-
-            Event.m_execTime = (ulong)e_time.TotalMilliseconds;
-            m_events.Add((ulong)e_time.TotalMilliseconds, Event);
+            lock (m_events)
+                InternalAddEvent(Event, e_time, set_addtime);
         }
 
         public EventSystem AddRepeatEvent(Func<TimeSpan> func, TimeSpan offset)
@@ -109,16 +109,17 @@ namespace Framework.Dynamic
 
         public void ModifyEventTime(BasicEvent Event, TimeSpan newTime)
         {
+            lock (m_events)
             if(m_events.RemoveFirstMatching((pair) =>
             {
                 if (pair.Value != Event)
                     return false;
 
-                Event.m_execTime = (ulong)newTime.TotalMilliseconds;
+                Event.m_execTime = newTime.TotalMilliseconds;
                 return true;
             }, out var foundVal))
             {
-                m_events.Add((ulong)newTime.TotalMilliseconds, Event);
+                m_events.Add(newTime.TotalMilliseconds, Event);
             }
         }
 
@@ -127,10 +128,39 @@ namespace Framework.Dynamic
             return TimeSpan.FromMilliseconds(m_time) + t_offset;
         }
 
-        public SortedDictionary<ulong, List<BasicEvent>> GetEvents() { return m_events; }
+        public void ScheduleAbortOnAllMatchingEvents(Func<BasicEvent, bool> func)
+        {
+            lock (m_events)
+                foreach (var l in m_events.Values)
+                    foreach (var e in l)
+                        if (func(e))
+                            e.ScheduleAbort();
+        }
+
+        public void ScheduleAbortOnFirstMatchingEvent(Func<BasicEvent, bool> func)
+        {
+            lock (m_events)
+                foreach (var l in m_events.Values)
+                    foreach (var e in l)
+                        if (func(e))
+                        {
+                            e.ScheduleAbort();
+                            break;
+                        }
+        }
+
+        private void InternalAddEvent(BasicEvent Event, TimeSpan e_time, bool set_addtime = true)
+        {
+            if (set_addtime)
+                Event.m_addTime = m_time;
+
+            Event.m_execTime = e_time.TotalMilliseconds;
+
+            m_events.Add(e_time.TotalMilliseconds, Event);
+        }
 
         ulong m_time;
-        SortedDictionary<ulong, List<BasicEvent>> m_events = new();
+        SortedDictionary<double, List<BasicEvent>> m_events = new();
     }
 
     public class BasicEvent
@@ -164,7 +194,7 @@ namespace Framework.Dynamic
 
         AbortState m_abortState; // set by externals when the event is aborted, aborted events don't execute
         public ulong m_addTime; // time when the event was added to queue, filled by event handler
-        public ulong m_execTime; // planned time of next execution, filled by event handler
+        public double m_execTime; // planned time of next execution, filled by event handler
     }
 
     public class LambdaBasicEvent : BasicEvent

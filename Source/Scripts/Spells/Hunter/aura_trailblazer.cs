@@ -46,14 +46,14 @@ public class aura_trailblazer : AuraScript, IHasAuraEffects
 		}
 		else
 		{
-			caster.m_Events.GetEvents()
-			      .RemoveFirstMatching(e =>
-			                           {
-				                           if (e.Value is DelayedCastEvent dce)
-					                           return dce.SpellId == HunterSpells.SPELL_HUNTER_TRAILBLAZER_BUFF;
+			caster.m_Events.ScheduleAbortOnFirstMatchingEvent(e =>
+			{
+				if (e is DelayedCastEvent dce)
+					return dce.SpellId == HunterSpells.SPELL_HUNTER_TRAILBLAZER_BUFF;
 
-				                           return false;
-			                           });
+				return false;
+            });
+			    
 		}
 
 		caster.m_Events.AddEventAtOffset(_event, _ts);

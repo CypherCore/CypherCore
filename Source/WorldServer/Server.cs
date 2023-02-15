@@ -201,7 +201,11 @@ namespace WorldServer
                 total += diff;
 
                 if (loops % 2000 == 0)
-                    Console.WriteLine("Avg: " + total / loops);
+                {
+                    Console.WriteLine("Avg: " + total / loops + ", Num loops: " + loops + ", Total Ticks: " + total);
+                    total = 0;
+                    loops= 0;
+                }
 #endif
             }
         }

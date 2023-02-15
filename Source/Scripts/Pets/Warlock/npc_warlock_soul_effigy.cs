@@ -14,9 +14,9 @@ namespace Scripts.Pets
     {
         // 103679 - Soul Effigy
         [CreatureScript(103679)]
-        public class npc_warlock_soul_effigyAI : CreatureAI
+        public class npc_warlock_soul_effigy : CreatureAI
         {
-            public npc_warlock_soul_effigyAI(Creature creature) : base(creature)
+            public npc_warlock_soul_effigy(Creature creature) : base(creature)
             {
                 Unit owner = me.GetOwner();
                 if (owner == null)

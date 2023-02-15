@@ -17,12 +17,12 @@ namespace Scripts.Pets
     {
         [CreatureScript(new uint[] { 11859, 59000 })]
         // Doomguard - 11859, Terrorguard - 59000
-        public class npc_warlock_doomguardAI : PetAI
+        public class npc_warlock_doomguard : SmartAI
         {
             public EventMap events = new();
             public float maxDistance;
 
-            public npc_warlock_doomguardAI(Creature creature) : base(creature)
+            public npc_warlock_doomguard(Creature creature) : base(creature)
             {
                 Unit owner = me.GetOwner();
                 if (owner == null)
@@ -30,7 +30,17 @@ namespace Scripts.Pets
 
                 creature.SetLevel(owner.GetLevel());
                 creature.UpdateLevelDependantStats();
-                creature.SetReactState(ReactStates.Assist);
+                creature.SetReactState(ReactStates.Aggressive);
+                creature.SetCreatorGUID(owner.GetGUID());
+
+                var summon = creature.ToTempSummon();
+
+                if (summon != null)
+                {
+                    summon.SetCanFollowOwner(true);
+                    summon.GetMotionMaster().Clear();
+                    summon.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, summon.GetFollowAngle());
+                }
             }
 
             public override void Reset()

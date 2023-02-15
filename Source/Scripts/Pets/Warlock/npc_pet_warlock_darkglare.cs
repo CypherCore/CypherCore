@@ -15,9 +15,9 @@ namespace Scripts.Pets
     {
         // Darkglare - 103673
         [CreatureScript(103673)]
-        public class npc_pet_warlock_darkglare_PetAI : PetAI
+        public class npc_pet_warlock_darkglare : SmartAI
         {
-            public npc_pet_warlock_darkglare_PetAI(Creature creature) : base(creature)
+            public npc_pet_warlock_darkglare(Creature creature) : base(creature)
             {
                 Unit owner = me.GetOwner();
 
@@ -30,10 +30,13 @@ namespace Scripts.Pets
                 creature.SetCreatorGUID(owner.GetGUID());
 
                 var summon = creature.ToTempSummon();
-                
+
+
                 if (summon != null)
                 {
                     summon.SetCanFollowOwner(true);
+                    summon.GetMotionMaster().Clear();
+                    summon.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, summon.GetFollowAngle());
                 }
             }
 

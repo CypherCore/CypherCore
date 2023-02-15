@@ -13,7 +13,7 @@ namespace Scripts.Pets
     namespace Warlock
     {
         [CreatureScript(135816)]
-        public class npc_warl_vilefield : PetAI
+        public class npc_warl_vilefield : SmartAI
         {
             public npc_warl_vilefield(Creature creature) : base(creature)
             {
@@ -31,6 +31,8 @@ namespace Scripts.Pets
                 if (summon != null)
                 {
                     summon.SetCanFollowOwner(true);
+                    summon.GetMotionMaster().Clear();
+                    summon.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, summon.GetFollowAngle());
                 }
             }
 

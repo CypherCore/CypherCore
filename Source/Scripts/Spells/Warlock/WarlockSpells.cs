@@ -108,7 +108,7 @@ namespace Scripts.Spells.Warlock
 		public const uint COMPOUNDING_HORROR_DAMAGE = 231489;
 		public const uint DARK_REGENERATION = 108359;
 		public const uint DARK_SOUL_INSTABILITY = 113858;
-		public const uint DREADSTALKER_CHARGE = 194247;
+		public const uint DREADSTALKER_CHARGE = 334713;
 		public const uint DARK_SOUL_KNOWLEDGE = 113861;
 		public const uint DARK_SOUL_MISERY = 113860;
 		public const uint UNSTABLE_AFFLICTION_RANK2 = 231791;

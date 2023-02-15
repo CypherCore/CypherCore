@@ -13,7 +13,7 @@ namespace Scripts.Pets
     namespace Warlock
     {
         [CreatureScript(17252)]
-        public class npc_warl_felguard : PetAI
+        public class npc_warl_felguard : SmartAI
         {
             public npc_warl_felguard(Creature creature) : base(creature)
             {
@@ -23,6 +23,17 @@ namespace Scripts.Pets
 
                 creature.SetLevel(owner.GetLevel());
                 creature.UpdateLevelDependantStats();
+                creature.SetReactState(ReactStates.Assist);
+                creature.SetCreatorGUID(owner.GetGUID());
+
+                var summon = creature.ToTempSummon();
+
+                if (summon != null)
+                {
+                    summon.SetCanFollowOwner(true);
+                    summon.GetMotionMaster().Clear();
+                    summon.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, summon.GetFollowAngle());
+                }
             }
 
             public override void Reset()
