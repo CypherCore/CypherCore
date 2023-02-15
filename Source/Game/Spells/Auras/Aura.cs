@@ -2062,7 +2062,11 @@ namespace Game.Spells
             return m_auraScriptsByType.ContainsKey(typeof(T));
         }    
 
-        public virtual void Remove(AuraRemoveMode removeMode = AuraRemoveMode.Default) { }
+        public virtual void Remove(AuraRemoveMode removeMode = AuraRemoveMode.Default) 
+        {
+            ForEachAuraScript<IAuraOnRemove>(a => a.Remove());
+        }
+
         #region CallScripts
 
         bool CallScriptCheckAreaTargetHandlers(Unit target)
@@ -2789,6 +2793,7 @@ namespace Game.Spells
             if (IsRemoved())
                 return;
             GetUnitOwner().RemoveOwnedAura(this, removeMode);
+            base.Remove(removeMode);
         }
 
         public override void FillTargetMap(ref Dictionary<Unit, uint> targets, Unit caster)
@@ -2943,6 +2948,7 @@ namespace Game.Spells
             if (IsRemoved())
                 return;
             _Remove(removeMode);
+            base.Remove(removeMode);
         }
 
         public override void FillTargetMap(ref Dictionary<Unit, uint> targets, Unit caster)

@@ -295,9 +295,10 @@ namespace Scripts.Spells.Warlock
 		public const uint NPC_WARLOCK_DEMONIC_GATEWAY_PURPLE = 59271;
 
 		public const uint NPC_WARLOCK_DEMONIC_GATEWAY_GREEN = 59262;
-
-		// pets
-		public const uint NPC_WARLOCK_PET_IMP = 416;
+		public const uint PYROGENICS = 387095;
+        public const uint PYROGENICS_AURA = 387096;
+        // pets
+        public const uint NPC_WARLOCK_PET_IMP = 416;
 		public const uint NPC_WARLOCK_PET_FEL_IMP = 58959;
 		public const uint NPC_WARLOCK_PET_VOIDWALKER = 1860;
 		public const uint NPC_WARLOCK_PET_VOIDLORD = 58960;
