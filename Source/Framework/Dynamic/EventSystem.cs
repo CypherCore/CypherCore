@@ -9,6 +9,7 @@ namespace Framework.Dynamic
 {
     public class EventSystem
     {
+        List<double> _removeKeys = new List<double>();
         public EventSystem()
         {
             m_time = 0;
@@ -20,35 +21,46 @@ namespace Framework.Dynamic
             m_time += p_time;
 
             // main event loop
-            KeyValuePair<double, BasicEvent> i;
             lock (m_events)
                 if (m_events.Count > 0)
-            while ((i = m_events.KeyValueList().FirstOrDefault()).Value != null && i.Key <= m_time) 
-            {
-                // sorted dictionart will stop looping at the first time that does not meet the while condition
-                var Event = i.Value;
-                m_events.Remove(i);
-
-                if (Event.IsRunning())
                 {
-                    Event.Execute(m_time, p_time);
-                    continue;
+                    foreach (var key in m_events.Keys.ToList())
+                    {
+                        // sorted dictionary will stop looping at the first time that does not meet the while condition
+                        if (key > m_time)
+                            break;
+
+                        _removeKeys.Add(key);
+
+                        foreach (var Event in m_events[key])
+                        {
+                            if (Event.IsRunning())
+                            {
+                                Event.Execute(m_time, p_time);
+                                continue;
+                            }
+
+                            if (Event.IsAbortScheduled())
+                            {
+                                Event.Abort(m_time);
+                                // Mark the event as aborted
+                                Event.SetAborted();
+                            }
+
+                            if (Event.IsDeletable())
+                                continue;
+
+                            // Reschedule non deletable events to be checked at
+                            // the next update tick
+                            InternalAddEvent(Event, CalculateTime(TimeSpan.FromMilliseconds(1)), false);
+                        }
+                    }
+
+                    foreach (var key in _removeKeys)
+                        m_events.Remove(key);
+
+                    _removeKeys.Clear();
                 }
-
-                if (Event.IsAbortScheduled())
-                {
-                    Event.Abort(m_time);
-                    // Mark the event as aborted
-                    Event.SetAborted();
-                }
-
-                if (Event.IsDeletable())
-                    continue;
-
-                // Reschedule non deletable events to be checked at
-                // the next update tick
-                InternalAddEvent(Event, CalculateTime(TimeSpan.FromMilliseconds(1)), false);
-            }
         }
 
         public void KillAllEvents(bool force)

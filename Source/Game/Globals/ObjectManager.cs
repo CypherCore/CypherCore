@@ -1791,7 +1791,7 @@ namespace Game
 
                 while (spellInfo != null)
                 {
-                    spellScriptsStorage.Add(spellInfo.Id, GetScriptId(scriptName));
+                    spellScriptsStorage.AddUnique(spellInfo.Id, GetScriptId(scriptName));
                     spellInfo = spellInfo.GetNextRankSpell();
                 }
             }
@@ -1800,7 +1800,7 @@ namespace Game
                 if (spellInfo.IsRanked())
                     Log.outDebug(LogFilter.ServerLoading, "Scriptname: `{0}` spell (Id: {1}) is ranked spell. Perhaps not all ranks are assigned to this script.", scriptName, spellId);
 
-                spellScriptsStorage.Add(spellInfo.Id, GetScriptId(scriptName));
+                spellScriptsStorage.AddUnique(spellInfo.Id, GetScriptId(scriptName));
             }
 
             return true;

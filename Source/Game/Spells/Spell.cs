@@ -22,6 +22,7 @@ using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IPlayer;
 using Game.Scripting.Interfaces.ISpell;
+using static Game.AI.SmartEvent;
 
 namespace Game.Spells
 {
@@ -3037,6 +3038,7 @@ namespace Game.Spells
             DoProcessTargetContainer(m_UniqueGOTargetInfo);
 
             DoProcessTargetContainer(m_UniqueCorpseTargetInfo);
+            CallScriptOnHitHandlers();
 
             FinishTargetProcessing();
 
@@ -3115,6 +3117,9 @@ namespace Game.Spells
                 });
 
                 DoProcessTargetContainer(delayedTargets);
+
+                if (next_time == 0)
+                    CallScriptOnHitHandlers();
             }
 
             // now recheck gameobject targeting correctness
@@ -8488,8 +8493,6 @@ namespace Game.Spells
                     _spellHitTarget = null;
                 }
             }
-
-            spell.CallScriptOnHitHandlers();
 
             // scripts can modify damage/healing for current target, save them
             Damage = spell.m_damage;
