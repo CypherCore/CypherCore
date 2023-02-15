@@ -298,7 +298,10 @@ namespace Game.Entities
         public PlayerInfo()
         {
             for (var i = 0; i < castSpells.Length; ++i)
-                castSpells[i] = new List<uint>();
+                castSpells[i] = new();
+
+            for (var i = 0; i < levelInfo.Length; ++i)
+                levelInfo[i] = new();
         }
 
         public struct CreatePosition

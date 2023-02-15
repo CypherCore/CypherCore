@@ -6913,13 +6913,8 @@ namespace Game
                         if (playerInfo == null)
                             continue;
 
-                        if (playerInfo.levelInfo[currentlevel - 1] == null)
-                            playerInfo.levelInfo[currentlevel - 1] = new PlayerLevelInfo();
-
-                        var levelinfo = playerInfo.levelInfo[currentlevel - 1];
-
                         for (var i = 0; i < (int)Stats.Max; i++)
-                            levelinfo.stats[i] = (ushort)(result.Read<ushort>(i + 2) + raceStatModifiers[race][i]);
+                            playerInfo.levelInfo[currentlevel - 1].stats[i] = (ushort)(result.Read<ushort>(i + 2) + raceStatModifiers[race][i]);
                     }
 
                     ++count;
@@ -6963,10 +6958,10 @@ namespace Game
                         }
 
                         // fatal error if no level 1 data
-                        if (playerInfo.levelInfo == null || playerInfo.levelInfo[0].stats[0] == 0)
+                        if (playerInfo.levelInfo[0].stats[0] == 0)
                         {
                             Log.outError(LogFilter.Sql, "Race {0} Class {1} Level 1 does not have stats data!", race, _class);
-                            Global.WorldMgr.StopNow();
+                            Environment.Exit(1);
                             return;
                         }
 
