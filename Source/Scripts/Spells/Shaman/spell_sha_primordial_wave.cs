@@ -27,22 +27,15 @@ namespace Scripts.Spells.Shaman
             else
             {
                 uint amount = GetSpell().StandardVariance(player.GetTotalSpellPowerValue(SpellSchoolMask.Shadow, false) * 0.65);
+                var damageInfo = new SpellNonMeleeDamage(player, victim,
+                    GetSpellInfo(), new(), SpellSchoolMask.Shadow);
+                damageInfo.damage = amount;
 
-                switch (player.GetPrimarySpecialization())
-                {
-                    case TalentSpecialization.ShamanEnhancement:
-                        var damageInfo = new SpellNonMeleeDamage(player, victim,
-                            GetSpellInfo(), new(), SpellSchoolMask.Shadow);
-                        damageInfo.damage = amount;
-
-                        victim.DealSpellDamage(damageInfo, true);
-                        break;
-                    case TalentSpecialization.ShamanRestoration:
-                        break;
-                    case TalentSpecialization.ShamanElemental:
-                        break;
-                }
+                victim.DealSpellDamage(damageInfo, true);
+                player.AddAura(ShamanSpells.FlameShock, victim);
             }
+
+            player.AddAura(ShamanSpells.PrimordialWaveAura, player);
         }
 
         public override bool Validate(SpellInfo spellInfo)

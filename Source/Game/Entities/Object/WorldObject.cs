@@ -1663,6 +1663,68 @@ namespace Game.Entities
             cell.Visit(pair, searcher, GetMap(), this, maxSearchRange);
         }
 
+        public void GetAlliesWithinRange(List<Creature> creatureList, float maxSearchRange)
+        {
+            CellCoord pair = new CellCoord((uint)GetPositionX(), (uint)GetPositionY());
+            Cell cell = new Cell(pair);
+            cell.SetNoCreate();
+
+            List<Creature> creatures = new List<Creature>();
+            AllCreaturesWithinRange check = new AllCreaturesWithinRange(this, maxSearchRange);
+            CreatureListSearcher searcher = new CreatureListSearcher(this, creatures, check, GridType.All);
+
+            cell.Visit(pair, searcher, GetMap(), this, maxSearchRange);
+
+            creatureList = new();
+
+            foreach (var creature in creatures)
+                if (IsFriendlyTo(creature))
+                    creatureList.Add(creature);
+        }
+
+        public void GetAlliesWithOwnedAura(List<Creature> creatureList, float maxSearchRange, uint auraId)
+        {
+            List<Creature> creatures = new List<Creature>();
+            GetAlliesWithinRange(creatures, maxSearchRange);
+
+            creatureList = new();
+
+            foreach (var creature in creatures)
+                if (creature.HasAura(auraId, GetGUID()))
+                    creatureList.Add(creature);
+        }
+
+        public void GetEnemiesWithinRange(List<Creature> creatureList, float maxSearchRange)
+        {
+            CellCoord pair = new CellCoord((uint)GetPositionX(), (uint)GetPositionY());
+            Cell cell = new Cell(pair);
+            cell.SetNoCreate();
+
+            List<Creature> creatures = new List<Creature>();
+            AllCreaturesWithinRange check = new AllCreaturesWithinRange(this, maxSearchRange);
+            CreatureListSearcher searcher = new CreatureListSearcher(this, creatures, check, GridType.All);
+
+            cell.Visit(pair, searcher, GetMap(), this, maxSearchRange);
+
+            creatureList = new();
+
+            foreach (var creature in creatures)
+                if (!IsFriendlyTo(creature))
+                    creatureList.Add(creature);
+        }
+
+        public void GetEnemiesWithOwnedAura(List<Creature> creatureList, float maxSearchRange, uint auraId)
+        {
+            List<Creature> creatures = new List<Creature>();
+            GetEnemiesWithinRange(creatures, maxSearchRange);
+
+            creatureList = new();
+
+            foreach (var creature in creatures)
+                if (creature.HasAura(auraId, GetGUID()))
+                    creatureList.Add(creature);
+        }
+
         public Creature FindNearestCreature(uint entry, float range, bool alive = true)
         {
             var checker = new NearestCreatureEntryWithLiveStateInObjectRangeCheck(this, entry, alive, range);

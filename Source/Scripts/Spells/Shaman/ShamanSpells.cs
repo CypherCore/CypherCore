@@ -117,7 +117,7 @@ namespace Scripts.Spells.Shaman
 		public const uint SPELL_SHAMAN_RAINFALL = 215864;
 		public const uint SPELL_SHAMAN_RAINFALL_HEAL = 215871;
 		public const uint SPELL_SHAMAN_RESTORATIVE_MISTS = 114083;
-		public const uint SPELL_SHAMAN_RIPTIDE = 61295;
+		public const uint Riptide = 61295;
 		public const uint SPELL_SHAMAN_ROLLING_THUNDER_AURA = 88764;
 		public const uint SPELL_SHAMAN_ROLLING_THUNDER_ENERGIZE = 88765;
 		public const uint SPELL_SHAMAN_RUSHING_STREAMS = 147074;
@@ -241,7 +241,9 @@ namespace Scripts.Spells.Shaman
 		public const uint WindfuryAttack = 25504;
 		public const uint WindfuryEnchantment = 334302;
 		public const uint WindRush = 192082;
-		public const uint PrimordialWave = 327163;
+        public const uint PrimordialWave = 327163;
+        public const uint PrimordialWaveAura = 375986;
+        public const uint HealingWave = 77472;
 
         //Misc
         public const uint HunterInsanity = 95809;

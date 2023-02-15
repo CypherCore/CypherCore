@@ -54,7 +54,7 @@ namespace Scripts.Spells.Shaman
 			var searcher     = new WorldObjectListSearcher(caster, chainTargets, check, containerTypeMask);
 			Cell.VisitGrid(_primaryTarget, searcher, range);
 
-			chainTargets.RemoveIf(new UnitAuraCheck<WorldObject>(false, ShamanSpells.SPELL_SHAMAN_RIPTIDE, caster.GetGUID()));
+			chainTargets.RemoveIf(new UnitAuraCheck<WorldObject>(false, ShamanSpells.Riptide, caster.GetGUID()));
 
 			if (chainTargets.Count == 0)
 				return;

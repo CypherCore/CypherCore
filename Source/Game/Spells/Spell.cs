@@ -9505,13 +9505,13 @@ namespace Game.Spells
 
         public CastSpellExtraArgs AddSpellMod(SpellValueMod mod, int val)
         {
-            SpellValueOverrides.Add(mod, val);
+            SpellValueOverrides[mod] = val;
             return this;
         }
 
         public CastSpellExtraArgs AddSpellMod(SpellValueMod mod, float val)
         {
-            SpellValueOverrides.Add(mod, (int)val);
+            SpellValueOverrides[mod] = (int)val;
             return this;
         }
 
