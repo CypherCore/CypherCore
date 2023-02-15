@@ -41,7 +41,7 @@ namespace Scripts.Spells.Warlock
 
 					imp.m_Events.AddEventAtOffset(() =>
 					                       {
-						                       imp.CastSpell(imp, WarlockSpells.IMPLOSION_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(casterGuid));
+						                       imp.CastSpell(imp, WarlockSpells.IMPLOSION_DAMAGE, new CastSpellExtraArgs(SpellValueMod.BasePoint0, (int)GetEffectInfo(1).Amplitude).SetOriginalCaster(casterGuid).SetTriggerFlags(TriggerCastFlags.FullMask));
 						                       imp.DisappearAndDie();
 					                       }, TimeSpan.FromMilliseconds(500));
 				}
