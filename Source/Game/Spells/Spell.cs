@@ -9465,6 +9465,18 @@ namespace Game.Spells
             return this;
         }
 
+        public CastSpellExtraArgs SetIsTriggered(bool triggered)
+        {
+            TriggerFlags = triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None;
+            return this;
+        }
+
+        public CastSpellExtraArgs SetSpellValueMod(SpellValueMod mod, int val)
+        {
+            SpellValueOverrides[mod] = val;
+            return this;
+        }
+
         public CastSpellExtraArgs SetTriggeringSpell(Spell triggeringSpell)
         {
             TriggeringSpell = triggeringSpell;

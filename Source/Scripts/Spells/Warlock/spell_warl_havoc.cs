@@ -12,7 +12,7 @@ using Game.Spells;
 namespace Scripts.Spells.Warlock
 {
 	//80240 - Havoc
-	[SpellScript(80240)]
+	[SpellScript(WarlockSpells.HAVOC)]
 	internal class spell_warl_havoc : AuraScript, IHasAuraEffects
 	{
 		public List<IAuraEffectHandler> AuraEffects => new();
