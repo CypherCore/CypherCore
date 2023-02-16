@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
+using Game.Maps;
 using Game.Networking.Packets;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
@@ -70,12 +71,22 @@ namespace Scripts.Spells.Warlock
 
             if (spellInfo != null)
             {
-                var spell = new SpellNonMeleeDamage(p, target, spellInfo, new SpellCastVisual(spellInfo.GetSpellVisual(p), 0), SpellSchoolMask.Shadow);
-                spell.damage = dmg;
-                spell.cleanDamage = spell.damage;
-                p.DealSpellDamage(spell, false);
-                p.SendSpellNonMeleeDamageLog(spell);
+                List<Creature> targets = new List<Creature>();
+                var check = new AllEnemyCreaturesWithinRange(target, 8);
+                var searcher = new CreatureListSearcher(target, targets, check, GridType.All);
+                Cell.VisitGrid(target, searcher, 8);
+
+                foreach (var creature in targets)
+                {
+                    var spell = new SpellNonMeleeDamage(p, creature, spellInfo, new SpellCastVisual(spellInfo.GetSpellVisual(p), 0), SpellSchoolMask.Shadow);
+                    spell.damage = dmg;
+                    spell.cleanDamage = spell.damage;
+                    p.DealSpellDamage(spell, false);
+                    p.SendSpellNonMeleeDamageLog(spell);
+                }
             }
+
+            target.RemoveAura(WarlockSpells.HAVOC);
         }
 
         private static void InternalCombustion(Player p, Unit target)

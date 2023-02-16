@@ -2630,6 +2630,34 @@ namespace Game.Maps
         float m_fRange;
     }
 
+    public class AllEnemyCreaturesWithinRange : ICheck<Creature>
+    {
+        public AllEnemyCreaturesWithinRange(Unit obj, float maxRange = 0f)
+        {
+            m_pObject = obj;
+            m_fRange = maxRange;
+        }
+
+        public bool Invoke(Creature creature)
+        {
+            if (!creature.IsHostileTo(m_pObject))
+                return false;
+
+            if (m_fRange != 0f)
+            {
+                if (m_fRange > 0.0f && !m_pObject.IsWithinDist(creature, m_fRange, false))
+                    return false;
+                if (m_fRange < 0.0f && m_pObject.IsWithinDist(creature, m_fRange, false))
+                    return false;
+            }
+
+            return true;
+        }
+
+        Unit m_pObject;
+        float m_fRange;
+    }
+
     public class AllCreaturesWithinRange : ICheck<Creature>
     {
         public AllCreaturesWithinRange(WorldObject obj, float maxRange = 0f)
