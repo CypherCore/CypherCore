@@ -387,8 +387,10 @@ namespace System.Collections.Generic
                     if (values.Count <= i)
                         continue;
 
-                    if (pred.Invoke(values[i]))
-                        values.RemoveAt(i);
+                    var val = values[i];
+
+                    if (pred.Invoke(val))
+                        values.Remove(val);
                 }
         }
 

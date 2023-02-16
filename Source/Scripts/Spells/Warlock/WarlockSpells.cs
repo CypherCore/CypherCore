@@ -298,6 +298,7 @@ namespace Scripts.Spells.Warlock
 		public const uint PYROGENICS = 387095;
         public const uint PYROGENICS_AURA = 387096;
 		public const uint MAYHEM = 387506;
+		public const uint CRY_HAVOC = 387522;
         // pets
         public const uint NPC_WARLOCK_PET_IMP = 416;
 		public const uint NPC_WARLOCK_PET_FEL_IMP = 58959;

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
+using Game.Networking.Packets;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -37,57 +38,88 @@ namespace Scripts.Spells.Warlock
 		}
 
 		public void OnHit()
-		{
-			var p = GetCaster().ToPlayer();
+        {
+            var p = GetCaster().ToPlayer();
 
-			if (p == null)
-				return;
+            if (p == null)
+                return;
 
-			var internalCombustion = p.GetAura(WarlockSpells.INTERNAL_COMBUSTION_TALENT_AURA);
+            var target = GetExplTargetUnit();
 
-			if (internalCombustion == null)
-				return;
+            if (target == null)
+                return;
 
-			var target = GetExplTargetUnit();
+            InternalCombustion(p, target);
+            CryHavoc(p, target);
+        }
 
-			if (target == null)
-				return;
+        private static void CryHavoc(Player p, Unit target)
+        {
+            var cryHavoc = p.GetAura(WarlockSpells.CRY_HAVOC);
+            if (cryHavoc == null)
+                return;
 
-			var immolationAura = target.GetAura(WarlockSpells.IMMOLATE_DOT);
+            var havoc = target.GetAura(WarlockSpells.HAVOC);
 
-			if (immolationAura == null)
-				return;
+            if (havoc == null) 
+                return;
 
-			var estAmount = immolationAura.GetEffect(0).GetEstimatedAmount();
+            var dmg = (uint)(cryHavoc.GetEffect(0).GetAmount() * .5); // 50%
 
-			if (!estAmount.HasValue)
-				return;
+            var spellInfo = cryHavoc.GetSpellInfo();
 
-			var dmgPerTick = (int)estAmount.Value;
+            if (spellInfo != null)
+            {
+                var spell = new SpellNonMeleeDamage(p, target, spellInfo, new SpellCastVisual(spellInfo.GetSpellVisual(p), 0), SpellSchoolMask.Shadow);
+                spell.damage = dmg;
+                spell.cleanDamage = spell.damage;
+                p.DealSpellDamage(spell, false);
+                p.SendSpellNonMeleeDamageLog(spell);
+            }
+        }
 
-			var duration = immolationAura.GetDuration();
-			var modDur = internalCombustion.GetEffect(0).m_baseAmount * Time.InMilliseconds;
+        private static void InternalCombustion(Player p, Unit target)
+        {
+            var internalCombustion = p.GetAura(WarlockSpells.INTERNAL_COMBUSTION_TALENT_AURA);
 
-			if (modDur <= 0)
-				modDur = Time.InMilliseconds;
+            if (internalCombustion == null)
+                return;
 
-			if (duration <= 0)
-				duration = Time.InMilliseconds;
+            var immolationAura = target.GetAura(WarlockSpells.IMMOLATE_DOT);
 
-			var diff = duration - modDur;
+            if (immolationAura == null)
+                return;
 
-			if (diff > 0)
-			{
-				immolationAura.ModDuration(-modDur);
-				p.CastSpell(target, WarlockSpells.INTERNAL_COMBUSTION_DMG, Math.Max(modDur / Time.InMilliseconds, 1) * dmgPerTick, true);
-			}
-			else
-			{
-				immolationAura.ModDuration(-duration);
-				p.CastSpell(target, WarlockSpells.INTERNAL_COMBUSTION_DMG, Math.Max(duration / Time.InMilliseconds, 1) * dmgPerTick, true);
-			}
-		}
-	}
+            var estAmount = immolationAura.GetEffect(0).GetEstimatedAmount();
+
+            if (!estAmount.HasValue)
+                return;
+
+            var dmgPerTick = (int)estAmount.Value;
+
+            var duration = immolationAura.GetDuration();
+            var modDur = internalCombustion.GetEffect(0).m_baseAmount * Time.InMilliseconds;
+
+            if (modDur <= 0)
+                modDur = Time.InMilliseconds;
+
+            if (duration <= 0)
+                duration = Time.InMilliseconds;
+
+            var diff = duration - modDur;
+
+            if (diff > 0)
+            {
+                immolationAura.ModDuration(-modDur);
+                p.CastSpell(target, WarlockSpells.INTERNAL_COMBUSTION_DMG, Math.Max(modDur / Time.InMilliseconds, 1) * dmgPerTick, true);
+            }
+            else
+            {
+                immolationAura.ModDuration(-duration);
+                p.CastSpell(target, WarlockSpells.INTERNAL_COMBUSTION_DMG, Math.Max(duration / Time.InMilliseconds, 1) * dmgPerTick, true);
+            }
+        }
+    }
 }
             
         
