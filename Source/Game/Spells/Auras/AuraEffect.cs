@@ -5992,7 +5992,7 @@ namespace Game.Spells
             if (player == null)
             return;
 
-            uint triggeredSpellId = (uint)GetSpellEffectInfo().TriggerSpell;]
+            uint triggeredSpellId = GetSpellEffectInfo().TriggerSpell;
 
             if (apply)
                 player.AddTemporarySpell(triggeredSpellId);
