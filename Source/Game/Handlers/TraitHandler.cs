@@ -39,70 +39,74 @@ namespace Game
 
             bool hasRemovedEntries = false;
             TraitConfigPacket newConfigState = new(existingConfig);
-            foreach (TraitEntryPacket newEntry in traitsCommitConfig.Config.Entries)
-            {
-                TraitEntryPacket traitEntry = newConfigState.Entries.Find(traitEntry => traitEntry.TraitNodeID == newEntry.TraitNodeID && traitEntry.TraitNodeEntryID == newEntry.TraitNodeEntryID);
-                if (traitEntry != null && traitEntry.Rank > newEntry.Rank)
+
+            foreach (var kvp in traitsCommitConfig.Config.Entries.Values)
+                foreach (TraitEntryPacket newEntry in kvp.Values)
                 {
-                    TraitNodeRecord traitNode = CliDB.TraitNodeStorage.LookupByKey(newEntry.TraitNodeID);
-                    if (traitNode == null)
+                    TraitEntryPacket traitEntry = newConfigState.Entries.LookupByKey(newEntry.TraitNodeID)?.LookupByKey(newEntry.TraitNodeEntryID);
+
+                    if (traitEntry == null)
                     {
-                        SendPacket(new TraitConfigCommitFailed(configId, 0, (int)TalentLearnResult.FailedUnknown));
-                        return;
+                        newConfigState.AddEntry(newEntry);
+                        continue;
                     }
 
-                    TraitTreeRecord traitTree = CliDB.TraitTreeStorage.LookupByKey(traitNode.TraitTreeID);
-                    if (traitTree == null)
+                    if (traitEntry.Rank > newEntry.Rank)
                     {
-                        SendPacket(new TraitConfigCommitFailed(configId, 0, (int)TalentLearnResult.FailedUnknown));
-                        return;
+                        TraitNodeRecord traitNode = CliDB.TraitNodeStorage.LookupByKey(newEntry.TraitNodeID);
+                        if (traitNode == null)
+                        {
+                            SendPacket(new TraitConfigCommitFailed(configId, 0, (int)TalentLearnResult.FailedUnknown));
+                            return;
+                        }
+
+                        TraitTreeRecord traitTree = CliDB.TraitTreeStorage.LookupByKey(traitNode.TraitTreeID);
+                        if (traitTree == null)
+                        {
+                            SendPacket(new TraitConfigCommitFailed(configId, 0, (int)TalentLearnResult.FailedUnknown));
+                            return;
+                        }
+
+                        if (traitTree.GetFlags().HasFlag(TraitTreeFlag.CannotRefund))
+                        {
+                            SendPacket(new TraitConfigCommitFailed(configId, 0, (int)TalentLearnResult.FailedCantRemoveTalent));
+                            return;
+                        }
+
+                        TraitNodeEntryRecord traitNodeEntry = CliDB.TraitNodeEntryStorage.LookupByKey(newEntry.TraitNodeEntryID);
+                        if (traitNodeEntry == null)
+                        {
+                            SendPacket(new TraitConfigCommitFailed(configId, 0, (int)TalentLearnResult.FailedUnknown));
+                            return;
+                        }
+
+                        TraitDefinitionRecord traitDefinition = CliDB.TraitDefinitionStorage.LookupByKey(traitNodeEntry.TraitDefinitionID);
+                        if (traitDefinition == null)
+                        {
+                            SendPacket(new TraitConfigCommitFailed(configId, 0, (int)TalentLearnResult.FailedUnknown));
+                            return;
+                        }
+
+                        if (traitDefinition.SpellID != 0 && _player.GetSpellHistory().HasCooldown(traitDefinition.SpellID))
+                        {
+                            SendPacket(new TraitConfigCommitFailed(configId, traitDefinition.SpellID, (int)TalentLearnResult.FailedCantRemoveTalent));
+                            return;
+                        }
+
+                        if (traitDefinition.VisibleSpellID != 0 && _player.GetSpellHistory().HasCooldown((uint)traitDefinition.VisibleSpellID))
+                        {
+                            SendPacket(new TraitConfigCommitFailed(configId, traitDefinition.VisibleSpellID, (int)TalentLearnResult.FailedCantRemoveTalent));
+                            return;
+                        }
+
+                        hasRemovedEntries = true;
                     }
 
-                    if (traitTree.GetFlags().HasFlag(TraitTreeFlag.CannotRefund))
-                    {
-                        SendPacket(new TraitConfigCommitFailed(configId, 0, (int)TalentLearnResult.FailedCantRemoveTalent));
-                        return;
-                    }
-
-                    TraitNodeEntryRecord traitNodeEntry = CliDB.TraitNodeEntryStorage.LookupByKey(newEntry.TraitNodeEntryID);
-                    if (traitNodeEntry == null)
-                    {
-                        SendPacket(new TraitConfigCommitFailed(configId, 0, (int)TalentLearnResult.FailedUnknown));
-                        return;
-                    }
-
-                    TraitDefinitionRecord traitDefinition = CliDB.TraitDefinitionStorage.LookupByKey(traitNodeEntry.TraitDefinitionID);
-                    if (traitDefinition == null)
-                    {
-                        SendPacket(new TraitConfigCommitFailed(configId, 0, (int)TalentLearnResult.FailedUnknown));
-                        return;
-                    }
-
-                    if (traitDefinition.SpellID != 0 && _player.GetSpellHistory().HasCooldown(traitDefinition.SpellID))
-                    {
-                        SendPacket(new TraitConfigCommitFailed(configId, traitDefinition.SpellID, (int)TalentLearnResult.FailedCantRemoveTalent));
-                        return;
-                    }
-
-                    if (traitDefinition.VisibleSpellID != 0 && _player.GetSpellHistory().HasCooldown((uint)traitDefinition.VisibleSpellID))
-                    {
-                        SendPacket(new TraitConfigCommitFailed(configId, traitDefinition.VisibleSpellID, (int)TalentLearnResult.FailedCantRemoveTalent));
-                        return;
-                    }
-
-                    hasRemovedEntries = true;
-                }
-
-                if (traitEntry != null)
-                {
                     if (newEntry.Rank != 0)
                         traitEntry.Rank = newEntry.Rank;
                     else
-                        newConfigState.Entries.RemoveAll(TraitEntrytraitEntry => traitEntry.TraitNodeID == newEntry.TraitNodeID && traitEntry.TraitNodeEntryID == newEntry.TraitNodeEntryID);
+                        newConfigState.Entries.Remove(traitEntry.TraitNodeID);
                 }
-                else
-                    newConfigState.Entries.Add(newEntry);
-            }
 
             TalentLearnResult validationResult = TraitMgr.ValidateConfig(newConfigState, _player, true);
             if (validationResult != TalentLearnResult.LearnOk)
@@ -161,11 +165,11 @@ namespace Game
 
             foreach (TraitEntry grantedEntry in TraitMgr.GetGrantedTraitEntriesForConfig(classTalentsRequestNewConfig.Config, _player))
             {
-                var newEntry = classTalentsRequestNewConfig.Config.Entries.Find(entry => { return entry.TraitNodeID == grantedEntry.TraitNodeID && entry.TraitNodeEntryID == grantedEntry.TraitNodeEntryID; });
+                var newEntry = classTalentsRequestNewConfig.Config.Entries.LookupByKey(grantedEntry.TraitNodeID)?.LookupByKey(grantedEntry.TraitNodeEntryID);
                 if (newEntry == null)
                 {
                     newEntry = new();
-                    classTalentsRequestNewConfig.Config.Entries.Add(newEntry);
+                    classTalentsRequestNewConfig.Config.AddEntry(newEntry);
                 }
 
                 newEntry.TraitNodeID = grantedEntry.TraitNodeID;

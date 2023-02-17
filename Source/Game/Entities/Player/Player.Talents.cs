@@ -855,7 +855,7 @@ namespace Game.Entities
 
             foreach (TraitEntry grantedEntry in TraitMgr.GetGrantedTraitEntriesForConfig(traitConfig, this))
             {
-                var entryIndex = traitConfig.Entries.Find(entry => entry.TraitNodeID == grantedEntry.TraitNodeID && entry.TraitNodeEntryID == grantedEntry.TraitNodeEntryID);
+                var entryIndex = traitConfig.Entries.LookupByKey(grantedEntry.TraitNodeID)?.LookupByKey(grantedEntry.TraitNodeEntryID);
                 if (entryIndex == null)
                 {
                     TraitConfig value = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TraitConfigs, traitConfigIndex);
@@ -880,7 +880,8 @@ namespace Game.Entities
 
             AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TraitConfigs), setter);
 
-            foreach (TraitEntryPacket traitEntry in traitConfig.Entries)
+            foreach (var kvp in traitConfig.Entries.Values)
+            foreach (TraitEntryPacket traitEntry in kvp.Values)
             {
                 TraitEntry newEntry = new();
                 newEntry.TraitNodeID = traitEntry.TraitNodeID;
@@ -966,7 +967,7 @@ namespace Game.Entities
             for (int i = 0; i < editedConfig.Entries.Size(); ++i)
             {
                 TraitEntry oldEntry = editedConfig.Entries[i];
-                var entryItr = newConfig.Entries.Find(ufEntry => ufEntry.TraitNodeID == oldEntry.TraitNodeID && ufEntry.TraitNodeEntryID == oldEntry.TraitNodeEntryID);
+                var entryItr = newConfig.Entries.LookupByKey(oldEntry.TraitNodeID)?.LookupByKey(oldEntry.TraitNodeEntryID);
                 if (entryItr != null)
                     continue;
 
@@ -985,46 +986,46 @@ namespace Game.Entities
             List<TraitEntryPacket> costEntries = new();
 
             // apply new traits
-            for (var i = 0; i < newConfig.Entries.Count; ++i)
-            {
-                TraitEntryPacket newEntry = newConfig.Entries[i];
-                int oldEntryIndex = editedConfig.Entries.FindIndexIf(ufEntry => ufEntry.TraitNodeID == newEntry.TraitNodeID && ufEntry.TraitNodeEntryID == newEntry.TraitNodeEntryID);
-                if (oldEntryIndex < 0)
+            foreach (var kvp in newConfig.Entries.Values)
+                foreach (TraitEntryPacket newEntry in kvp.Values)
                 {
-                    if (consumeCurrencies)
-                        costEntries.Add(newEntry);
-
-                    TraitConfig newTraitConfig = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TraitConfigs, editedIndex);
-                    TraitEntry newUfEntry = new();
-                    newUfEntry.TraitNodeID = newEntry.TraitNodeID;
-                    newUfEntry.TraitNodeEntryID = newEntry.TraitNodeEntryID;
-                    newUfEntry.Rank = newEntry.Rank;
-                    newUfEntry.GrantedRanks = newEntry.GrantedRanks;
-
-                    AddDynamicUpdateFieldValue(newTraitConfig.ModifyValue(newTraitConfig.Entries), newUfEntry);
-
-                    if (applyTraits)
-                        ApplyTraitEntry(newUfEntry.TraitNodeEntryID, newUfEntry.Rank, 0, true);
-                }
-                else if (newEntry.Rank != editedConfig.Entries[oldEntryIndex].Rank || newEntry.GrantedRanks != editedConfig.Entries[oldEntryIndex].GrantedRanks)
-                {
-                    if (consumeCurrencies && newEntry.Rank > editedConfig.Entries[oldEntryIndex].Rank)
+                    int oldEntryIndex = editedConfig.Entries.FindIndexIf(ufEntry => ufEntry.TraitNodeID == newEntry.TraitNodeID && ufEntry.TraitNodeEntryID == newEntry.TraitNodeEntryID);
+                    if (oldEntryIndex < 0)
                     {
-                        TraitEntryPacket costEntry = new();
-                        costEntry.Rank -= editedConfig.Entries[oldEntryIndex].Rank;
-                        costEntries.Add(newEntry);
+                        if (consumeCurrencies)
+                            costEntries.Add(newEntry);
+
+                        TraitConfig newTraitConfig = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TraitConfigs, editedIndex);
+                        TraitEntry newUfEntry = new();
+                        newUfEntry.TraitNodeID = newEntry.TraitNodeID;
+                        newUfEntry.TraitNodeEntryID = newEntry.TraitNodeEntryID;
+                        newUfEntry.Rank = newEntry.Rank;
+                        newUfEntry.GrantedRanks = newEntry.GrantedRanks;
+
+                        AddDynamicUpdateFieldValue(newTraitConfig.ModifyValue(newTraitConfig.Entries), newUfEntry);
+
+                        if (applyTraits)
+                            ApplyTraitEntry(newUfEntry.TraitNodeEntryID, newUfEntry.Rank, 0, true);
                     }
+                    else if (newEntry.Rank != editedConfig.Entries[oldEntryIndex].Rank || newEntry.GrantedRanks != editedConfig.Entries[oldEntryIndex].GrantedRanks)
+                    {
+                        if (consumeCurrencies && newEntry.Rank > editedConfig.Entries[oldEntryIndex].Rank)
+                        {
+                            TraitEntryPacket costEntry = new();
+                            costEntry.Rank -= editedConfig.Entries[oldEntryIndex].Rank;
+                            costEntries.Add(newEntry);
+                        }
 
-                    TraitConfig traitConfig = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TraitConfigs, editedIndex);
-                    TraitEntry traitEntry = traitConfig.ModifyValue(traitConfig.Entries, oldEntryIndex);
-                    traitEntry.Rank = newEntry.Rank;
-                    traitEntry.GrantedRanks = newEntry.GrantedRanks;
-                    SetUpdateFieldValue(traitConfig.Entries, oldEntryIndex, traitEntry);
+                        TraitConfig traitConfig = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TraitConfigs, editedIndex);
+                        TraitEntry traitEntry = traitConfig.ModifyValue(traitConfig.Entries, oldEntryIndex);
+                        traitEntry.Rank = newEntry.Rank;
+                        traitEntry.GrantedRanks = newEntry.GrantedRanks;
+                        SetUpdateFieldValue(traitConfig.Entries, oldEntryIndex, traitEntry);
 
-                    if (applyTraits)
-                        ApplyTraitEntry(newEntry.TraitNodeEntryID, newEntry.Rank, newEntry.GrantedRanks, true);
+                        if (applyTraits)
+                            ApplyTraitEntry(newEntry.TraitNodeEntryID, newEntry.Rank, newEntry.GrantedRanks, true);
+                    }
                 }
-            }
 
             if (consumeCurrencies)
             {

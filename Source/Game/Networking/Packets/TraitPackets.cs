@@ -157,7 +157,7 @@ namespace Game.Networking.Packets
         public int LocalIdentifier;  // Local to specialization
         public uint SkillLineID;
         public int TraitSystemID;
-        public List<TraitEntryPacket> Entries = new();
+        public Dictionary<int, Dictionary<int, TraitEntryPacket>> Entries = new();
         public string Name = "";
 
         public TraitConfigPacket() { }
@@ -170,9 +170,22 @@ namespace Game.Networking.Packets
             LocalIdentifier = ufConfig.LocalIdentifier;
             SkillLineID = (uint)(int)ufConfig.SkillLineID;
             TraitSystemID = ufConfig.TraitSystemID;
+
             foreach (TraitEntry ufEntry in ufConfig.Entries)
-                Entries.Add(new TraitEntryPacket(ufEntry));
+                AddEntry(new TraitEntryPacket(ufEntry));
+
             Name = ufConfig.Name;
+        }
+
+        public void AddEntry(TraitEntryPacket packet)
+        {
+            if (!Entries.TryGetValue(packet.TraitNodeID, out var innerDict))
+            {
+                innerDict = new Dictionary<int, TraitEntryPacket>();
+                Entries[packet.TraitNodeID] = innerDict;
+            }
+
+            innerDict[packet.TraitNodeEntryID] = packet;
         }
         
         public void Read(WorldPacket data)
@@ -201,7 +214,7 @@ namespace Game.Networking.Packets
             {
                 TraitEntryPacket traitEntry = new();
                 traitEntry.Read(data);
-                Entries.Add(traitEntry);
+                AddEntry(traitEntry);
             }
 
             uint nameLength = data.ReadBits<uint>(9);
@@ -230,8 +243,9 @@ namespace Game.Networking.Packets
                     break;
             }
 
-            foreach (TraitEntryPacket traitEntry in Entries)
-                traitEntry.Write(data);
+            foreach (var tkvp in Entries)
+                foreach (var traitEntry in tkvp.Value.Values)
+                    traitEntry.Write(data);
 
             data.WriteBits(Name.GetByteCount(), 9);
             data.FlushBits();

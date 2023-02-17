@@ -1075,13 +1075,13 @@ namespace Game.Entities
                     traitConfig.Name = configsResult.Read<string>(7);
 
                     foreach (var traitEntry in traitEntriesByConfig.LookupByKey(traitConfig.ID))
-                        traitConfig.Entries.Add(traitEntry);
+                        traitConfig.AddEntry(traitEntry);
 
                     if (TraitMgr.ValidateConfig(traitConfig, this) != TalentLearnResult.LearnOk)
                     {
                         traitConfig.Entries.Clear();
                         foreach (TraitEntry grantedEntry in TraitMgr.GetGrantedTraitEntriesForConfig(traitConfig, this))
-                            traitConfig.Entries.Add(new TraitEntryPacket(grantedEntry));
+                            traitConfig.AddEntry(new TraitEntryPacket(grantedEntry));
                     }
 
                     AddTraitConfig(traitConfig);
