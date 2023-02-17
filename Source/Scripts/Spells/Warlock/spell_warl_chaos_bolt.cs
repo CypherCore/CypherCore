@@ -54,7 +54,7 @@ namespace Scripts.Spells.Warlock
             CryHavoc(p, target);
         }
 
-        private static void CryHavoc(Player p, Unit target)
+        private void CryHavoc(Player p, Unit target)
         {
             var cryHavoc = p.GetAura(WarlockSpells.CRY_HAVOC);
             if (cryHavoc == null)
@@ -65,14 +65,20 @@ namespace Scripts.Spells.Warlock
             if (havoc == null) 
                 return;
 
-            var dmg = (uint)(cryHavoc.GetEffect(0).GetAmount() * .5); // 50%
+            var cryHavocDmgSpll = Global.SpellMgr.GetSpellInfo(WarlockSpells.CRY_HAVOC_DMG, Difficulty.None);
+
+            if (cryHavocDmgSpll == null)
+                return;
+
+            var havocDamageBase = havoc.GetEffect(0).m_baseAmount * .01; // .6 or 60% by default.
+            var dmg = (uint)((cryHavoc.GetEffect(0).GetAmount() * .01) * (cryHavocDmgSpll.GetEffect(1).BonusCoefficient * (GetHitDamage() * havocDamageBase)));
 
             var spellInfo = cryHavoc.GetSpellInfo();
 
             if (spellInfo != null)
             {
                 List<Creature> targets = new List<Creature>();
-                var check = new AllEnemyCreaturesWithinRange(target, 8);
+                var check = new GetAllAlliesOfTargetCreaturesWithinRange(target, 8);
                 var searcher = new CreatureListSearcher(target, targets, check, GridType.All);
                 Cell.VisitGrid(target, searcher, 8);
 
@@ -89,7 +95,7 @@ namespace Scripts.Spells.Warlock
             target.RemoveAura(WarlockSpells.HAVOC);
         }
 
-        private static void InternalCombustion(Player p, Unit target)
+        private void InternalCombustion(Player p, Unit target)
         {
             var internalCombustion = p.GetAura(WarlockSpells.INTERNAL_COMBUSTION_TALENT_AURA);
 
