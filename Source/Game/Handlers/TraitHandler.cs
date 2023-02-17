@@ -17,7 +17,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.TraitsCommitConfig)]
         void HandleTraitsCommitConfig(TraitsCommitConfig traitsCommitConfig)
         {
-            int configId = (int)(uint)traitsCommitConfig.Config.ID;
+            int configId = traitsCommitConfig.Config.ID;
             TraitConfig existingConfig = _player.GetTraitConfig(configId);
             if (existingConfig == null)
             {

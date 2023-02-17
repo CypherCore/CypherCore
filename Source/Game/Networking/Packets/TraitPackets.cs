@@ -179,7 +179,7 @@ namespace Game.Networking.Packets
         {
             ID = data.ReadInt32();
             Type = (TraitConfigType)data.ReadInt32();
-            var entriesCount = data.ReadInt32();
+            var entriesCount = data.ReadUInt32();
             switch (Type)
             {
                 case TraitConfigType.Combat:

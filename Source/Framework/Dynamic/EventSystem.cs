@@ -19,48 +19,37 @@ namespace Framework.Dynamic
         {
             // update time
             m_time += p_time;
-
+            KeyValuePair<double, BasicEvent> i = default;
+            
             // main event loop
             lock (m_events)
                 if (m_events.Count > 0)
-                {
-                    foreach (var key in m_events.Keys.ToList())
+                    while ((i = m_events.KeyValueList().FirstOrDefault()).Value != null && i.Key <= m_time)
                     {
-                        // sorted dictionary will stop looping at the first time that does not meet the while condition
-                        if (key > m_time)
-                            break;
+                        // sorted dictionart will stop looping at the first time that does not meet the while condition
+                        var Event = i.Value;
+                        m_events.Remove(i);
 
-                        _removeKeys.Add(key);
-
-                        foreach (var Event in m_events[key])
+                        if (Event.IsRunning())
                         {
-                            if (Event.IsRunning())
-                            {
-                                Event.Execute(m_time, p_time);
-                                continue;
-                            }
-
-                            if (Event.IsAbortScheduled())
-                            {
-                                Event.Abort(m_time);
-                                // Mark the event as aborted
-                                Event.SetAborted();
-                            }
-
-                            if (Event.IsDeletable())
-                                continue;
-
-                            // Reschedule non deletable events to be checked at
-                            // the next update tick
-                            InternalAddEvent(Event, CalculateTime(TimeSpan.FromMilliseconds(1)), false);
+                            Event.Execute(m_time, p_time);
+                            continue;
                         }
+
+                        if (Event.IsAbortScheduled())
+                        {
+                            Event.Abort(m_time);
+                            // Mark the event as aborted
+                            Event.SetAborted();
+                        }
+
+                        if (Event.IsDeletable())
+                            continue;
+
+                        // Reschedule non deletable events to be checked at
+                        // the next update tick
+                        InternalAddEvent(Event, CalculateTime(TimeSpan.FromMilliseconds(1)), false);
                     }
-
-                    foreach (var key in _removeKeys)
-                        m_events.Remove(key);
-
-                    _removeKeys.Clear();
-                }
         }
 
         public void KillAllEvents(bool force)

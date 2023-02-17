@@ -127,7 +127,7 @@ namespace Game.DataStorage
                     conversationTemplate.TextureKitId = templateResult.Read<uint>(2);
                     conversationTemplate.ScriptId = Global.ObjectMgr.GetScriptId(templateResult.Read<string>(3));
 
-                    conversationTemplate.Actors = actorsByConversation.TryGetValue(conversationTemplate.Id, out var actors) ? actors.ToList() : null;
+                    conversationTemplate.Actors = actorsByConversation.TryGetValue(conversationTemplate.Id, out var actors) ? actors.ToList() : new();
 
                     uint correctedFirstLineId = getFirstLineIdFromAnyLineId(conversationTemplate.FirstLineId);
                     if (conversationTemplate.FirstLineId != correctedFirstLineId)

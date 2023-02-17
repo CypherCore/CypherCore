@@ -5045,7 +5045,7 @@ namespace Game.Entities
 
             PushQuests();
 
-            Global.ScriptMgr.ForEach<IPlayerOnLevelChanged>(p => p.OnLevelChanged(this, (byte)oldLevel));
+            Global.ScriptMgr.ForEach<IPlayerOnLevelChanged>(p => p.OnLevelChanged(this, oldLevel));
         }
 
         public bool CanParry()
