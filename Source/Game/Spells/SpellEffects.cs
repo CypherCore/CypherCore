@@ -5753,6 +5753,125 @@ namespace Game.Spells
 
             target.UpdateTraitConfig(m_customArg as TraitConfigPacket, damage, false);
         }
+
+        [SpellEffectHandler(SpellEffectName.ChangePartyMembers)]
+        public void EffectJoinOrLeavePlayerParty()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            if (!unitTarget || !m_caster || !unitTarget.IsPlayer())
+            return;
+
+            Player player = unitTarget.ToPlayer();
+
+            Group group = player.GetGroup();
+            Creature creature = m_caster.ToCreature();
+            if (creature == null)
+            return;
+
+            if (group == null)
+            {
+                group = new Group();
+                group.Create(player);
+                // group->ConvertToLFG(dungeon);
+                group.SetDungeonDifficultyID(GetSpellInfo().Difficulty);
+                Global.GroupMgr.AddGroup(group);
+            }
+            else if (group.IsMember(creature.GetGUID()))
+                return;
+
+            /* if (m_spellInfo->GetEffect(effIndex, m_diffMode)->MiscValue == 1)
+                 group->AddCreatureMember(creature);
+             else
+                 group->RemoveCreatureMember(creature->GetGUID());*/
+        }
+
+        [SpellEffectHandler(SpellEffectName.ChangeItemBonuses)]
+        public void EffectChangeItemBonuses()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.Hit)
+            return;
+
+            Player player = m_caster.ToPlayer();
+            if (player == null)
+            return;
+
+            Item item = m_targets.GetItemTarget();
+            if (item == null || !item.IsSoulBound())
+            return;
+
+            var OldItemBonusTree = effectInfo.MiscValue;
+            var NewItemBonusTree = effectInfo.MiscValue;
+
+            if (OldItemBonusTree == NewItemBonusTree) // Not release
+                return;
+
+            List<ItemBonusTreeNodeRecord> OldBonusTree = DB2Manager.Instance.GetItemBonusSet((uint)OldItemBonusTree);
+            List<ItemBonusTreeNodeRecord> NewBonusTre = DB2Manager.Instance.GetItemBonusSet((uint)NewItemBonusTree);
+
+            if (OldBonusTree == null || NewBonusTre == null)
+                return;
+
+            List<uint> bonuses = new List<uint>();
+
+            bool _found = false;
+            uint _treeMod = 0;
+
+            foreach (var bonus in bonuses)
+            {
+                foreach (var oldBonus in OldBonusTree)
+                {
+                    if (bonus == oldBonus.ChildItemBonusListID)
+                    {
+                        _found = true;
+                        _treeMod = oldBonus.ItemContext;
+                        break;
+                    }
+                }
+            }
+
+            if (!_found)
+                return;
+
+            List<uint> bonusesNew = new List<uint>();
+
+            foreach (var bonus in bonuses)
+            {
+                bool bonusDel = false;
+
+                foreach (var oldBonus in OldBonusTree)
+                {
+                    if (bonus == oldBonus.ChildItemBonusListID && _treeMod == oldBonus.ItemContext)
+                    {
+                        bonusDel = true;
+                        break;
+                    }
+                }
+                if (!bonusDel)
+                {
+                    bonusesNew.Add(bonus);
+                }
+            }
+
+            item._bonusData = new BonusData(item.GetTemplate());
+
+            foreach (var newBonus in NewBonusTre)
+            {
+                if (_treeMod == newBonus.ItemContext)
+                {
+                    bonusesNew.Add(newBonus.ChildItemBonusListID);
+                }
+            }
+
+            foreach (uint bonusId in bonusesNew)
+            {
+                item.AddBonuses(bonusId);
+            }
+
+            item.SetState(ItemUpdateState.Changed, player);
+        }
+
     }
 
     public class DispelableAura

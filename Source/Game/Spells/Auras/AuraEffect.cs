@@ -5965,6 +5965,41 @@ namespace Game.Spells
         }
 
         #endregion
+
+        [AuraEffectHandler(AuraType.ModSpellPowerPct)]
+        public void HandleAuraModSpellPowerPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if ((mode & (AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)) == 0)
+                return;
+
+            Player target = aurApp.GetTarget().ToPlayer();
+           
+            if (target == null)
+                return;
+
+            // Recalculate bonus
+            target.UpdateSpellDamageAndHealingBonus();
+        }
+
+        [AuraEffectHandler(AuraType.ModNextSpell)]
+        public void HandleModNextSpell(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if ((mode & AuraEffectHandleModes.Real) == 0)
+            return;
+
+            Player player = aurApp.GetTarget().ToPlayer();
+
+            if (player == null)
+            return;
+
+            uint triggeredSpellId = (uint)GetSpellEffectInfo().TriggerSpell;]
+
+            if (apply)
+                player.AddTemporarySpell(triggeredSpellId);
+            else
+                player.RemoveTemporarySpell(triggeredSpellId);
+        }
+
     }
 
     class AbsorbAuraOrderPred : Comparer<AuraEffect>

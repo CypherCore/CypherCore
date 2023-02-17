@@ -1438,6 +1438,11 @@ namespace Game.DataStorage
             return _itemBonusLists.LookupByKey(bonusListId);
         }
 
+        public List<ItemBonusTreeNodeRecord> GetItemBonusSet(uint itemBonusTreeId)
+        {
+            return _itemBonusTrees.LookupByKey(itemBonusTreeId);
+        }
+
         public uint GetItemBonusListForItemLevelDelta(short delta)
         {
             return _itemLevelDeltaToBonusListContainer.LookupByKey(delta);
