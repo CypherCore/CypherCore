@@ -5813,7 +5813,7 @@ namespace Game.Spells
             if (OldBonusTree == null || NewBonusTre == null)
                 return;
 
-            List<uint> bonuses = new List<uint>();
+            List<uint> bonuses = NewBonusTre.Select(s => s.ChildItemBonusListID).Cast<uint>().ToList();
 
             bool _found = false;
             uint _treeMod = 0;
