@@ -130,15 +130,17 @@ namespace Game.Garrisons
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHARACTER_GARRISON);
             stmt.AddValue(0, _owner.GetGUID().GetCounter());
-            stmt.AddValue(1, _siteLevel.Id);
-            stmt.AddValue(2, _followerActivationsRemainingToday);
+            stmt.AddValue(1, (int)_garrisonType);
+            stmt.AddValue(2, _siteLevel.Id);
+            stmt.AddValue(3, _followerActivationsRemainingToday);
             trans.Append(stmt);
 
             foreach (uint building in _knownBuildings)
             {
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHARACTER_GARRISON_BLUEPRINTS);
                 stmt.AddValue(0, _owner.GetGUID().GetCounter());
-                stmt.AddValue(1, building);
+                stmt.AddValue(1, (int)_garrisonType);
+                stmt.AddValue(2, building);
                 trans.Append(stmt);
             }
 
@@ -148,10 +150,11 @@ namespace Game.Garrisons
                 {
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHARACTER_GARRISON_BUILDINGS);
                     stmt.AddValue(0, _owner.GetGUID().GetCounter());
-                    stmt.AddValue(1, plot.BuildingInfo.PacketInfo.GarrPlotInstanceID);
-                    stmt.AddValue(2, plot.BuildingInfo.PacketInfo.GarrBuildingID);
-                    stmt.AddValue(3, plot.BuildingInfo.PacketInfo.TimeBuilt);
-                    stmt.AddValue(4, plot.BuildingInfo.PacketInfo.Active);
+                    stmt.AddValue(1, (int)_garrisonType);
+                    stmt.AddValue(2, plot.BuildingInfo.PacketInfo.GarrPlotInstanceID);
+                    stmt.AddValue(3, plot.BuildingInfo.PacketInfo.GarrBuildingID);
+                    stmt.AddValue(4, plot.BuildingInfo.PacketInfo.TimeBuilt);
+                    stmt.AddValue(5, plot.BuildingInfo.PacketInfo.Active);
                     trans.Append(stmt);
                 }
             }
@@ -162,6 +165,7 @@ namespace Game.Garrisons
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHARACTER_GARRISON_FOLLOWERS);
                 stmt.AddValue(index++, follower.PacketInfo.DbID);
                 stmt.AddValue(index++, _owner.GetGUID().GetCounter());
+                stmt.AddValue(index++, (int)_garrisonType);
                 stmt.AddValue(index++, follower.PacketInfo.GarrFollowerID);
                 stmt.AddValue(index++, follower.PacketInfo.Quality);
                 stmt.AddValue(index++, follower.PacketInfo.FollowerLevel);
@@ -287,7 +291,7 @@ namespace Game.Garrisons
             return _owner.GetTeam() == Team.Horde ? GarrisonFactionIndex.Horde : GarrisonFactionIndex.Alliance;
         }
 
-        public GarrisonType GetGarrisonType() { return GarrisonType.Garrison; }
+        public GarrisonType GetGarrisonType() { return _garrisonType; }
         public GarrSiteLevelRecord GetSiteLevel() { return _siteLevel; }
 
         public ICollection<Plot> GetPlots()
@@ -662,6 +666,7 @@ namespace Game.Garrisons
 
         Player _owner;
         GarrSiteLevelRecord _siteLevel;
+        GarrisonType _garrisonType;
         uint _followerActivationsRemainingToday;
 
         Dictionary<uint, Plot> _plots = new();
