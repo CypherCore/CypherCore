@@ -31,17 +31,17 @@ namespace Scripts.Spells.Shaman
             List<Creature> targets = new();
             if (spec == TalentSpecialization.ShamanElemental && spellId == ShamanSpells.LavaBurst)
             {
-                player.GetEnemiesWithOwnedAura(targets, 100, ShamanSpells.FlameShock);
+                player.GetEnemiesWithOwnedAura(targets, 100.0f, ShamanSpells.FlameShock);
                 procSpell = ShamanSpells.LavaBurst;
             }
             else if (spec == TalentSpecialization.ShamanEnhancement && spellId == ShamanSpells.LightningBolt)
             {
-                player.GetEnemiesWithOwnedAura(targets, 100, ShamanSpells.FlameShock);
+                player.GetEnemiesWithOwnedAura(targets, 100.0f, ShamanSpells.FlameShock);
                 procSpell = ShamanSpells.LightningBolt;
             }
             else if (spec == TalentSpecialization.ShamanRestoration && spellId == ShamanSpells.HealingWave)
             {
-                player.GetAlliesWithOwnedAura(targets, 100, ShamanSpells.Riptide);
+                player.GetAlliesWithOwnedAura(targets, 100.0f, ShamanSpells.Riptide);
                 procSpell = ShamanSpells.Riptide;
             }
 

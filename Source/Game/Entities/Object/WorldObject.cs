@@ -1663,66 +1663,50 @@ namespace Game.Entities
             cell.Visit(pair, searcher, GetMap(), this, maxSearchRange);
         }
 
-        public void GetAlliesWithinRange(List<Creature> creatureList, float maxSearchRange)
+        public void GetAlliesWithinRange(List<Creature> creatureList, float maxSearchRange, bool includeSelf = true)
         {
-            CellCoord pair = new CellCoord((uint)GetPositionX(), (uint)GetPositionY());
-            Cell cell = new Cell(pair);
-            cell.SetNoCreate();
+            GetCreatureListInGrid(creatureList, maxSearchRange);
 
-            List<Creature> creatures = new List<Creature>();
-            AllCreaturesWithinRange check = new AllCreaturesWithinRange(this, maxSearchRange);
-            CreatureListSearcher searcher = new CreatureListSearcher(this, creatures, check, GridType.All);
+            creatureList.RemoveIf((creature) =>
+            {
+                if (creature == this)
+                    return !includeSelf;
 
-            cell.Visit(pair, searcher, GetMap(), this, maxSearchRange);
-
-            creatureList = new();
-
-            foreach (var creature in creatures)
-                if (IsFriendlyTo(creature))
-                    creatureList.Add(creature);
+                return !IsFriendlyTo(creature);
+            });
         }
 
-        public void GetAlliesWithOwnedAura(List<Creature> creatureList, float maxSearchRange, uint auraId)
+        public void GetAlliesWithOwnedAura(List<Creature> creatureList, float maxSearchRange, uint auraId, bool includeSelf = true)
         {
-            List<Creature> creatures = new List<Creature>();
-            GetAlliesWithinRange(creatures, maxSearchRange);
+            GetCreatureListInGrid(creatureList, maxSearchRange);
 
-            creatureList = new();
+            creatureList.RemoveIf((creature) =>
+            {
+                if (creature == this)
+                    return !includeSelf;
 
-            foreach (var creature in creatures)
-                if (creature.HasAura(auraId, GetGUID()))
-                    creatureList.Add(creature);
+                return !IsFriendlyTo(creature) || !creature.HasAura(auraId, GetGUID());
+            });
         }
 
         public void GetEnemiesWithinRange(List<Creature> creatureList, float maxSearchRange)
         {
-            CellCoord pair = new CellCoord((uint)GetPositionX(), (uint)GetPositionY());
-            Cell cell = new Cell(pair);
-            cell.SetNoCreate();
+            GetCreatureListInGrid(creatureList, maxSearchRange);
 
-            List<Creature> creatures = new List<Creature>();
-            AllCreaturesWithinRange check = new AllCreaturesWithinRange(this, maxSearchRange);
-            CreatureListSearcher searcher = new CreatureListSearcher(this, creatures, check, GridType.All);
-
-            cell.Visit(pair, searcher, GetMap(), this, maxSearchRange);
-
-            creatureList = new();
-
-            foreach (var creature in creatures)
-                if (!IsFriendlyTo(creature))
-                    creatureList.Add(creature);
+            creatureList.RemoveIf((creature) =>
+            {
+                return IsFriendlyTo(creature);
+            });
         }
 
         public void GetEnemiesWithOwnedAura(List<Creature> creatureList, float maxSearchRange, uint auraId)
         {
-            List<Creature> creatures = new List<Creature>();
-            GetEnemiesWithinRange(creatures, maxSearchRange);
+            GetCreatureListInGrid(creatureList, maxSearchRange);
 
-            creatureList = new();
-
-            foreach (var creature in creatures)
-                if (creature.HasAura(auraId, GetGUID()))
-                    creatureList.Add(creature);
+            creatureList.RemoveIf((creature) =>
+            {
+                return IsFriendlyTo(creature) || !creature.HasAura(auraId, GetGUID());
+            });
         }
 
         public Creature FindNearestCreature(uint entry, float range, bool alive = true)
