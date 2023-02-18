@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Framework.Constants;
 using Framework.Dynamic;
 using Game;
@@ -1443,51 +1442,6 @@ namespace Scripts.World.NpcSpecial
             UpdateVictim();
 
             _scheduler.Update(diff);
-        }
-    }
-
-    [Script]
-    internal class npc_training_dummy : NullCreatureAI
-    {
-        private readonly Dictionary<ObjectGuid, TimeSpan> _combatTimer = new();
-
-        public npc_training_dummy(Creature creature) : base(creature)
-        {
-        }
-
-        public override void JustEnteredCombat(Unit who)
-        {
-            _combatTimer[who.GetGUID()] = TimeSpan.FromSeconds(5);
-        }
-
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
-        {
-            damage = 0;
-
-            if (!attacker ||
-                damageType == DamageEffectType.DOT)
-                return;
-
-            _combatTimer[attacker.GetGUID()] = TimeSpan.FromSeconds(5);
-        }
-
-        public override void UpdateAI(uint diff)
-        {
-            foreach (var key in _combatTimer.Keys.ToList())
-            {
-                _combatTimer[key] -= TimeSpan.FromMilliseconds(diff);
-
-                if (_combatTimer[key] <= TimeSpan.Zero)
-                {
-                    // The Attacker has not dealt any Damage to the dummy for over 5 seconds. End combat.
-                    var pveRefs = me.GetCombatManager().GetPvECombatRefs();
-                    var it = pveRefs.LookupByKey(key);
-
-                    it?.EndCombat();
-
-                    _combatTimer.Remove(key);
-                }
-            }
         }
     }
 
