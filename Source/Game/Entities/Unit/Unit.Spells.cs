@@ -2826,7 +2826,7 @@ namespace Game.Entities
             uint rankSpell = Global.SpellMgr.GetFirstSpellInChain(spellId);
             while (rankSpell != 0)
             {
-                AuraApplication aurApp = GetAuraApplication(rankSpell).FirstOrDefault();
+                AuraApplication aurApp = GetAuraApplication(rankSpell)?.FirstOrDefault();
                 if (aurApp != null)
                     return aurApp;
                 rankSpell = Global.SpellMgr.GetNextSpellInChain(rankSpell);
