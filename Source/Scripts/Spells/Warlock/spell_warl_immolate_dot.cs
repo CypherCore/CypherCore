@@ -62,7 +62,7 @@ namespace Scripts.Spells.Warlock
 			if (caster == null)
 				return;
 
-            var checker = new UnitAuraCheck<Unit>(false, WarlockSpells.IMMOLATE_DOT, caster.GetGUID());
+            var checker = new UnitAuraCheck<Unit>(true, WarlockSpells.IMMOLATE_DOT, caster.GetGUID());
             var enemies  = new List<Unit>();
 			var check    = new AnyUnfriendlyUnitInObjectRangeCheck(caster, caster, 100.0f, checker.Invoke);
 			var searcher = new UnitListSearcher(caster, enemies, check, GridType.All);
