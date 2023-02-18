@@ -31,7 +31,7 @@ public class spell_dk_defile_aura : AuraScript, IHasAuraEffects
 			                                       if (target == null || caster == null)
 				                                       return default;
 
-			                                       caster.CastSpell(target, DeathKnightSpells.SPELL_DK_DEFILE_DAMAGE, true);
+			                                       caster.CastSpell(target, DeathKnightSpells.DEFILE_DAMAGE, true);
 
 			                                       if (target.HasAura(156004) && caster != null)
 				                                       return oneSec;

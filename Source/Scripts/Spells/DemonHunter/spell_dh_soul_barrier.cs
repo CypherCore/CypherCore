@@ -35,9 +35,9 @@ public class spell_dh_soul_barrier : AuraScript, IHasAuraEffects
 
 			// Consume all soul fragments in 25 yards;
 			var fragments = new List<List<AreaTrigger>>();
-			fragments.Add(caster.GetAreaTriggers(ShatteredSoulsSpells.SPELL_DH_SHATTERED_SOULS));
-			fragments.Add(caster.GetAreaTriggers(ShatteredSoulsSpells.SPELL_DH_SHATTERED_SOULS_DEMON));
-			fragments.Add(caster.GetAreaTriggers(ShatteredSoulsSpells.SPELL_DH_LESSER_SOUL_SHARD));
+			fragments.Add(caster.GetAreaTriggers(ShatteredSoulsSpells.SHATTERED_SOULS));
+			fragments.Add(caster.GetAreaTriggers(ShatteredSoulsSpells.SHATTERED_SOULS_DEMON));
+			fragments.Add(caster.GetAreaTriggers(ShatteredSoulsSpells.LESSER_SOUL_SHARD));
 			var range = 25.0f;
 
 			foreach (var vec in fragments)
@@ -59,25 +59,25 @@ public class spell_dh_soul_barrier : AuraScript, IHasAuraEffects
 						{
 							case 6007:
 							case 5997:
-								bp = (int)ShatteredSoulsSpells.SPELL_DH_SOUL_FRAGMENT_HEAL_VENGEANCE;
+								bp = (int)ShatteredSoulsSpells.SOUL_FRAGMENT_HEAL_VENGEANCE;
 
 								break;
 							case 6710:
-								bp = (int)ShatteredSoulsSpells.SPELL_DH_LESSER_SOUL_SHARD_HEAL;
+								bp = (int)ShatteredSoulsSpells.LESSER_SOUL_SHARD_HEAL;
 
 								break;
 						}
 
-						caster.CastSpell(tempSumm, ShatteredSoulsSpells.SPELL_DH_CONSUME_SOUL_MISSILE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)bp));
+						caster.CastSpell(tempSumm, ShatteredSoulsSpells.CONSUME_SOUL_MISSILE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)bp));
 
 						if (at.GetTemplate().Id.Id == 6007)
-							caster.CastSpell(caster, ShatteredSoulsSpells.SPELL_DH_SOUL_FRAGMENT_DEMON_BONUS, true);
+							caster.CastSpell(caster, ShatteredSoulsSpells.SOUL_FRAGMENT_DEMON_BONUS, true);
 
-						if (caster.HasAura(DemonHunterSpells.SPELL_DH_FEED_THE_DEMON))
-							caster.GetSpellHistory().ModifyCooldown(Global.SpellMgr.GetSpellInfo(DemonHunterSpells.SPELL_DH_DEMON_SPIKES, Difficulty.None).ChargeCategoryId, TimeSpan.FromMilliseconds(-1000));
+						if (caster.HasAura(DemonHunterSpells.FEED_THE_DEMON))
+							caster.GetSpellHistory().ModifyCooldown(Global.SpellMgr.GetSpellInfo(DemonHunterSpells.DEMON_SPIKES, Difficulty.None).ChargeCategoryId, TimeSpan.FromMilliseconds(-1000));
 
-						if (caster.HasAura(ShatteredSoulsSpells.SPELL_DH_PAINBRINGER))
-							caster.CastSpell(caster, ShatteredSoulsSpells.SPELL_DH_PAINBRINGER_BUFF, true);
+						if (caster.HasAura(ShatteredSoulsSpells.PAINBRINGER))
+							caster.CastSpell(caster, ShatteredSoulsSpells.PAINBRINGER_BUFF, true);
 
 						amount += (int)(soulShardCoeff * ap);
 
@@ -87,7 +87,7 @@ public class spell_dh_soul_barrier : AuraScript, IHasAuraEffects
 			}
 		}
 
-		var appList = caster.GetAuraApplication(DemonHunterSpells.SPELL_DH_SOUL_BARRIER);
+		var appList = caster.GetAuraApplication(DemonHunterSpells.SOUL_BARRIER);
 
 		if (appList != null)
 			foreach (var app in appList)
@@ -106,7 +106,7 @@ public class spell_dh_soul_barrier : AuraScript, IHasAuraEffects
 		if (absorbAmount < dmgInfo.GetDamage())
 			aurEff.SetAmount(absorbAmount + threshold);
 
-		var appList = caster.GetAuraApplication(DemonHunterSpells.SPELL_DH_SOUL_BARRIER);
+		var appList = caster.GetAuraApplication(DemonHunterSpells.SOUL_BARRIER);
 
 		if (appList != null)
 			foreach (var app in appList)

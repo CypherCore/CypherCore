@@ -21,7 +21,7 @@ namespace Scripts.Spells.Shaman
 			var caster = GetCaster();
 
 			if (caster != null)
-				caster.CastSpell(caster, ShamanSpells.SPELL_SHAMAN_STORMLASH_BUFF, true);
+				caster.CastSpell(caster, ShamanSpells.STORMLASH_BUFF, true);
 		}
 
 		public override void Register()

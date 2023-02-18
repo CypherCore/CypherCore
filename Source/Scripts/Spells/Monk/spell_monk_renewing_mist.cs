@@ -17,7 +17,7 @@ public class spell_monk_renewing_mist : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(MonkSpells.SPELL_MONK_RENEWING_MIST_HOT);
+		return ValidateSpellInfo(MonkSpells.RENEWING_MIST_HOT);
 	}
 
 	private void HandleDummy(uint effIndex)
@@ -26,7 +26,7 @@ public class spell_monk_renewing_mist : SpellScript, IHasSpellEffects
 		var target = GetExplTargetUnit();
 
 		if (target != null)
-			GetCaster().CastSpell(target, MonkSpells.SPELL_MONK_RENEWING_MIST_HOT, true);
+			GetCaster().CastSpell(target, MonkSpells.RENEWING_MIST_HOT, true);
 	}
 
 	public override void Register()

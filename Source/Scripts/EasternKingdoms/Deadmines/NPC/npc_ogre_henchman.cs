@@ -26,7 +26,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
         {
             if (UppercutTimer <= diff)
             {
-                DoCastVictim(boss_vanessa_vancleef.Spells.SPELL_UPPERCUT);
+                DoCastVictim(boss_vanessa_vancleef.Spells.UPPERCUT);
                 UppercutTimer = RandomHelper.URand(8000, 11000);
             }
             else

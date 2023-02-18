@@ -27,9 +27,9 @@ public class spell_dru_ysera_gift : AuraScript, IHasAuraEffects
 		values.AddSpellMod(SpellValueMod.BasePoint0, (int)amount);
 
 		if (caster.IsFullHealth())
-			caster.CastSpell(caster, DruidSpells.SPELL_DRUID_YSERA_GIFT_RAID_HEAL, values);
+			caster.CastSpell(caster, DruidSpells.YSERA_GIFT_RAID_HEAL, values);
 		else
-			caster.CastSpell(caster, DruidSpells.SPELL_DRUID_YSERA_GIFT_CASTER_HEAL, values);
+			caster.CastSpell(caster, DruidSpells.YSERA_GIFT_CASTER_HEAL, values);
 	}
 
 	public override void Register()

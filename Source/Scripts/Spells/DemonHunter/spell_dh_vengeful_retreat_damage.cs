@@ -20,7 +20,7 @@ public class spell_dh_vengeful_retreat_damage : SpellScript, IHasSpellEffects, I
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (Global.SpellMgr.GetSpellInfo(DemonHunterSpells.SPELL_DH_PREPARED_FURY, Difficulty.None) != null)
+		if (Global.SpellMgr.GetSpellInfo(DemonHunterSpells.PREPARED_FURY, Difficulty.None) != null)
 			return false;
 
 		return true;
@@ -37,10 +37,10 @@ public class spell_dh_vengeful_retreat_damage : SpellScript, IHasSpellEffects, I
 
 		if (caster != null)
 		{
-			if (caster.HasAura(DemonHunterSpells.SPELL_DH_PREPARED) && _targetHit)
-				caster.CastSpell(caster, DemonHunterSpells.SPELL_DH_PREPARED_FURY, true);
+			if (caster.HasAura(DemonHunterSpells.PREPARED) && _targetHit)
+				caster.CastSpell(caster, DemonHunterSpells.PREPARED_FURY, true);
 
-			var aur = caster.GetAura(DemonHunterSpells.SPELL_DH_GLIMPSE);
+			var aur = caster.GetAura(DemonHunterSpells.GLIMPSE);
 
 			if (aur != null)
 			{
@@ -48,16 +48,16 @@ public class spell_dh_vengeful_retreat_damage : SpellScript, IHasSpellEffects, I
 
 				if (aurEff != null)
 				{
-					var blur = caster.AddAura(DemonHunterSpells.SPELL_DH_BLUR_BUFF, caster);
+					var blur = caster.AddAura(DemonHunterSpells.BLUR_BUFF, caster);
 
 					if (blur != null)
 						blur.SetDuration(aurEff.GetBaseAmount());
 				}
 			}
 
-			if (caster.HasAura(DemonHunterSpells.SPELL_DH_RUSHING_VAULT))
+			if (caster.HasAura(DemonHunterSpells.RUSHING_VAULT))
 			{
-				var chargeCatId = Global.SpellMgr.GetSpellInfo(DemonHunterSpells.SPELL_DH_FEL_RUSH, Difficulty.None).ChargeCategoryId;
+				var chargeCatId = Global.SpellMgr.GetSpellInfo(DemonHunterSpells.FEL_RUSH, Difficulty.None).ChargeCategoryId;
 				caster.GetSpellHistory().RestoreCharge(chargeCatId);
 			}
 		}

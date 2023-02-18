@@ -12,7 +12,7 @@ using Game.Spells;
 
 namespace Scripts.Spells.Druid
 {
-	[Script] // 79577 - Eclipse - SPELL_DRUID_ECLIPSE_DUMMY
+	[Script] // 79577 - Eclipse - ECLIPSE_DUMMY
 	internal class spell_dru_eclipse_dummy : AuraScript, IAuraOnProc, IAuraEnterLeaveCombat, IHasAuraEffects
 	{
 		private class InitializeEclipseCountersEvent : BasicEvent

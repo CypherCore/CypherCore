@@ -58,7 +58,7 @@ public class spell_dk_bonestorm : AuraScript, IHasAuraEffects
 		if (caster == null)
 			return;
 
-		caster.CastSpell(caster, DeathKnightSpells.SPELL_DK_BONESTORM_HEAL, true);
+		caster.CastSpell(caster, DeathKnightSpells.BONESTORM_HEAL, true);
 	}
 
 	public override void Register()

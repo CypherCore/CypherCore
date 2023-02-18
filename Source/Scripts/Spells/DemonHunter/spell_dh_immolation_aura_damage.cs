@@ -17,13 +17,13 @@ public class spell_dh_immolation_aura_damage : SpellScript, IHasSpellEffects
 
 	readonly uint[] _hit = new uint[]
 	                       {
-		                       DemonHunterSpells.SPELL_DH_FIERY_BRAND_DOT, DemonHunterSpells.SPELL_DH_FIERY_BRAND_MARKER
+		                       DemonHunterSpells.FIERY_BRAND_DOT, DemonHunterSpells.FIERY_BRAND_MARKER
 	                       };
 
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(DemonHunterSpells.SPELL_DH_CHARRED_FLESH, DemonHunterSpells.SPELL_DH_FIERY_BRAND_DOT, DemonHunterSpells.SPELL_DH_FIERY_BRAND_MARKER);
+		return ValidateSpellInfo(DemonHunterSpells.CHARRED_FLESH, DemonHunterSpells.FIERY_BRAND_DOT, DemonHunterSpells.FIERY_BRAND_MARKER);
 	}
 
 	private void HandleHit(uint UnnamedParameter)
@@ -31,14 +31,14 @@ public class spell_dh_immolation_aura_damage : SpellScript, IHasSpellEffects
 		var target = GetHitUnit();
 
 		if (target != null)
-			if (GetCaster().HasAura(DemonHunterSpells.SPELL_DH_CHARRED_FLESH))
+			if (GetCaster().HasAura(DemonHunterSpells.CHARRED_FLESH))
 				foreach (var spellId in _hit)
 				{
 					var fieryBrand = target.GetAura(spellId);
 
 					if (fieryBrand != null)
 					{
-						var durationMod = GetCaster().GetAuraEffectAmount(DemonHunterSpells.SPELL_DH_CHARRED_FLESH, 0);
+						var durationMod = GetCaster().GetAuraEffectAmount(DemonHunterSpells.CHARRED_FLESH, 0);
 						fieryBrand.ModDuration(durationMod);
 					}
 				}

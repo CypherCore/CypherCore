@@ -18,7 +18,7 @@ namespace Scripts.Spells.Shaman
 
 		private void HandleProc(AuraEffect UnnamedParameter, ProcEventInfo eventInfo)
 		{
-			eventInfo.GetActor().CastSpell(eventInfo.GetActionTarget(), ShamanSpells.SPELL_SHAMAN_STORMLASH_DAMAGE, true);
+			eventInfo.GetActor().CastSpell(eventInfo.GetActionTarget(), ShamanSpells.STORMLASH_DAMAGE, true);
 		}
 
 		public override void Register()

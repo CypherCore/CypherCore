@@ -17,10 +17,10 @@ public class aura_dru_restoration_affinity : AuraScript, IHasAuraEffects
 
 	private readonly List<uint> LearnedSpells = new()
 	                                            {
-		                                            (uint)DruidSpells.SPELL_DRUID_YSERA_GIFT,
-		                                            (uint)DruidSpells.SPELL_DRUID_REJUVENATION,
-		                                            (uint)DruidSpells.SPELL_DRUID_HEALING_TOUCH,
-		                                            (uint)DruidSpells.SPELL_DRUID_SWIFTMEND
+		                                            (uint)DruidSpells.YSERA_GIFT,
+		                                            (uint)DruidSpells.REJUVENATION,
+		                                            (uint)DruidSpells.HEALING_TOUCH,
+		                                            (uint)DruidSpells.SWIFTMEND
 	                                            };
 
 	private void AfterApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)

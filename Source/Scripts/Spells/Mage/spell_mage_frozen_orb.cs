@@ -22,16 +22,16 @@ public class spell_mage_frozen_orb : SpellScript, IHasSpellEffects
 		if (caster == null || target == null)
 			return;
 
-		caster.CastSpell(target, MageSpells.SPELL_MAGE_CHILLED, true);
+		caster.CastSpell(target, MageSpells.CHILLED, true);
 
 		// Fingers of Frost
-		if (caster.HasSpell(MageSpells.SPELL_MAGE_FINGERS_OF_FROST))
+		if (caster.HasSpell(MageSpells.FINGERS_OF_FROST))
 		{
 			var fingersFrostChance = 10.0f;
 
-			if (caster.HasAura(MageSpells.SPELL_MAGE_FROZEN_TOUCH))
+			if (caster.HasAura(MageSpells.FROZEN_TOUCH))
 			{
-				var frozenEff0 = caster.GetAuraEffect(MageSpells.SPELL_MAGE_FROZEN_TOUCH, 0);
+				var frozenEff0 = caster.GetAuraEffect(MageSpells.FROZEN_TOUCH, 0);
 
 				if (frozenEff0 != null)
 				{
@@ -42,8 +42,8 @@ public class spell_mage_frozen_orb : SpellScript, IHasSpellEffects
 
 			if (RandomHelper.randChance(fingersFrostChance))
 			{
-				caster.CastSpell(caster, MageSpells.SPELL_MAGE_FINGERS_OF_FROST_VISUAL_UI, true);
-				caster.CastSpell(caster, MageSpells.SPELL_MAGE_FINGERS_OF_FROST_AURA, true);
+				caster.CastSpell(caster, MageSpells.FINGERS_OF_FROST_VISUAL_UI, true);
+				caster.CastSpell(caster, MageSpells.FINGERS_OF_FROST_AURA, true);
 			}
 		}
 	}

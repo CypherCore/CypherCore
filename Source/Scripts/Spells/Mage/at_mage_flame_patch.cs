@@ -38,7 +38,7 @@ public class at_mage_flame_patch : AreaTriggerAI
 		if (timeInterval < 1000)
 			return;
 
-		caster.CastSpell(at.GetPosition(), MageSpells.SPELL_MAGE_FLAME_PATCH_AOE_DMG, true);
+		caster.CastSpell(at.GetPosition(), MageSpells.FLAME_PATCH_AOE_DMG, true);
 
 		timeInterval -= 1000;
 	}

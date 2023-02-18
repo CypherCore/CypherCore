@@ -21,7 +21,7 @@ public class spell_monk_roll_trigger : AuraScript, IHasAuraEffects
 		if (caster == null)
 			return;
 
-		if (caster.HasAura(MonkSpells.SPELL_MONK_ENHANCED_ROLL))
+		if (caster.HasAura(MonkSpells.ENHANCED_ROLL))
 			amount = 277;
 	}
 
@@ -32,7 +32,7 @@ public class spell_monk_roll_trigger : AuraScript, IHasAuraEffects
 		if (caster == null)
 			return;
 
-		if (!caster.HasAura(MonkSpells.SPELL_MONK_ENHANCED_ROLL))
+		if (!caster.HasAura(MonkSpells.ENHANCED_ROLL))
 			return;
 
 		amount = 377;
@@ -45,7 +45,7 @@ public class spell_monk_roll_trigger : AuraScript, IHasAuraEffects
 		if (caster == null)
 			return;
 
-		if (!caster.HasAura(MonkSpells.SPELL_MONK_ENHANCED_ROLL))
+		if (!caster.HasAura(MonkSpells.ENHANCED_ROLL))
 			return;
 
 		var aur = GetAura();

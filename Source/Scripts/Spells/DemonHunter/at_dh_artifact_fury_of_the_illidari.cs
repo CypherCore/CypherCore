@@ -32,8 +32,8 @@ public class at_dh_artifact_fury_of_the_illidari : AreaTriggerAI
 		/* if (timer >= 490)
 			 {
 			     at->VariableStorage.Set<int32>("_timer", timer - 490);
-			     caster->CastSpell(at, SPELL_DH_FURY_OF_THE_ILLIDARI_MAINHAND, true);
-			     caster->CastSpell(at, SPELL_DH_FURY_OF_THE_ILLIDARI_OFFHAND, true);
+			     caster->CastSpell(at, FURY_OF_THE_ILLIDARI_MAINHAND, true);
+			     caster->CastSpell(at, FURY_OF_THE_ILLIDARI_OFFHAND, true);
 			 }
 			 else
 			     at->VariableStorage.Set("_timer", timer);*/
@@ -56,10 +56,10 @@ public class at_dh_artifact_fury_of_the_illidari : AreaTriggerAI
 		var target = caster.SummonCreature(SharedConst.WorldTrigger, at, TempSummonType.TimedDespawn, TimeSpan.FromSeconds(1));
 
 		if (target != null)
-			caster.CastSpell(at, DemonHunterSpells.SPELL_DH_RAGE_OF_THE_ILLIDARI_VISUAL, true);
+			caster.CastSpell(at, DemonHunterSpells.RAGE_OF_THE_ILLIDARI_VISUAL, true);
 		//  caster->m_Events.AddEventAtOffset(() =>
 		// {
-		//caster->CastCustomSpell(SPELL_DH_RAGE_OF_THE_ILLIDARI_DAMAGE, SpellValueMod.BasePoint0, rageOfTheIllidari, target, TriggerCastFlags.FullMask);
+		//caster->CastCustomSpell(RAGE_OF_THE_ILLIDARI_DAMAGE, SpellValueMod.BasePoint0, rageOfTheIllidari, target, TriggerCastFlags.FullMask);
 		//}, TimeSpan.FromMilliseconds(750), [caster, target);
 	}
 }

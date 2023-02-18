@@ -25,7 +25,7 @@ public class at_pri_power_word_barrier : AreaTriggerAI
 			return;
 
 		if (caster.IsFriendlyTo(unit))
-			caster.CastSpell(unit, PriestSpells.SPELL_PRIEST_POWER_WORD_BARRIER_BUFF, true);
+			caster.CastSpell(unit, PriestSpells.POWER_WORD_BARRIER_BUFF, true);
 	}
 
 	public override void OnUnitExit(Unit unit)
@@ -38,7 +38,7 @@ public class at_pri_power_word_barrier : AreaTriggerAI
 		if (!caster.ToPlayer())
 			return;
 
-		if (unit.HasAura(PriestSpells.SPELL_PRIEST_POWER_WORD_BARRIER_BUFF, caster.GetGUID()))
-			unit.RemoveAurasDueToSpell(PriestSpells.SPELL_PRIEST_POWER_WORD_BARRIER_BUFF, caster.GetGUID());
+		if (unit.HasAura(PriestSpells.POWER_WORD_BARRIER_BUFF, caster.GetGUID()))
+			unit.RemoveAurasDueToSpell(PriestSpells.POWER_WORD_BARRIER_BUFF, caster.GetGUID());
 	}
 }

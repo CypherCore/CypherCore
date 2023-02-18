@@ -12,7 +12,7 @@ public class spell_dru_infected_wound : AuraScript, IAuraCheckProc
 {
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
-		if (eventInfo.GetSpellInfo().Id == DruidSpells.SPELL_DRUID_RAKE)
+		if (eventInfo.GetSpellInfo().Id == DruidSpells.RAKE)
 			return true;
 
 		return false;

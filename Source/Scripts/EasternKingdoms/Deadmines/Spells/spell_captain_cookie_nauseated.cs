@@ -26,8 +26,8 @@ namespace Scripts.EasternKingdoms.Deadmines.Spells
                 return;
             }
 
-            GetHitUnit().RemoveAuraFromStack(eSpell.SPELL_SETIATED);
-            GetHitUnit().RemoveAuraFromStack(eSpell.SPELL_SETIATED_H);
+            GetHitUnit().RemoveAuraFromStack(eSpell.SETIATED);
+            GetHitUnit().RemoveAuraFromStack(eSpell.SETIATED_H);
         }
 
         public override void Register()

@@ -12,7 +12,7 @@ public class spell_mage_chrono_shift : AuraScript, IAuraCheckProc
 {
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
-		var _spellCanProc = (eventInfo.GetSpellInfo().Id == MageSpells.SPELL_MAGE_ARCANE_BARRAGE || eventInfo.GetSpellInfo().Id == MageSpells.SPELL_MAGE_ARCANE_BARRAGE_TRIGGERED);
+		var _spellCanProc = (eventInfo.GetSpellInfo().Id == MageSpells.ARCANE_BARRAGE || eventInfo.GetSpellInfo().Id == MageSpells.ARCANE_BARRAGE_TRIGGERED);
 
 		if (_spellCanProc)
 			return true;

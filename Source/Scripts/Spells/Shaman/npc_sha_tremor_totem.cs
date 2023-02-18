@@ -18,7 +18,7 @@ namespace Scripts.Spells.Shaman
 
 		public enum SpellRelated
 		{
-			SPELL_TREMOR_TOTEM_DISPELL = 8146
+			TREMOR_TOTEM_DISPELL = 8146
 		}
 
 		public override void Reset()
@@ -37,7 +37,7 @@ namespace Scripts.Spells.Shaman
 					foreach (Player target in playerList)
 						if (target.IsFriendlyTo(me.GetOwner()))
 							if (target.HasAuraType(AuraType.ModFear) || target.HasAuraType(AuraType.ModFear2) || target.HasAuraType(AuraType.ModCharm))
-								me.CastSpell(target, SpellRelated.SPELL_TREMOR_TOTEM_DISPELL, true);
+								me.CastSpell(target, SpellRelated.TREMOR_TOTEM_DISPELL, true);
 			}
 		}
 	}

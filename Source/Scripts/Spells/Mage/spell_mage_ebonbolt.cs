@@ -18,12 +18,12 @@ public class spell_mage_ebonbolt : SpellScript, IHasSpellEffects, ISpellOnCast
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(MageSpells.SPELL_MAGE_SPLITTING_ICE, MageSpells.SPELL_MAGE_EBONBOLT_DAMAGE, MageSpells.SPELL_MAGE_BRAIN_FREEZE_AURA);
+		return ValidateSpellInfo(MageSpells.SPLITTING_ICE, MageSpells.EBONBOLT_DAMAGE, MageSpells.BRAIN_FREEZE_AURA);
 	}
 
 	public void OnCast()
 	{
-		GetCaster().CastSpell(GetCaster(), MageSpells.SPELL_MAGE_BRAIN_FREEZE_AURA, true);
+		GetCaster().CastSpell(GetCaster(), MageSpells.BRAIN_FREEZE_AURA, true);
 	}
 
 	private void DoEffectHitTarget(uint UnnamedParameter)
@@ -34,10 +34,10 @@ public class spell_mage_ebonbolt : SpellScript, IHasSpellEffects, ISpellOnCast
 		if (hitUnit == null || explTarget == null)
 			return;
 
-		if (GetCaster().HasAura(MageSpells.SPELL_MAGE_SPLITTING_ICE))
+		if (GetCaster().HasAura(MageSpells.SPLITTING_ICE))
 			GetCaster().VariableStorage.Set<ObjectGuid>("explTarget", explTarget.GetGUID());
 
-		GetCaster().CastSpell(hitUnit, MageSpells.SPELL_MAGE_EBONBOLT_DAMAGE, true);
+		GetCaster().CastSpell(hitUnit, MageSpells.EBONBOLT_DAMAGE, true);
 	}
 
 	public override void Register()

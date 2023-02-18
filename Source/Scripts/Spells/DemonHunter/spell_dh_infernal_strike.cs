@@ -14,7 +14,7 @@ public class spell_dh_infernal_strike : SpellScript, ISpellOnCast, ISpellOnHit
 {
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(DemonHunterSpells.SPELL_DH_INFERNAL_STRIKE_JUMP, DemonHunterSpells.SPELL_DH_INFERNAL_STRIKE_DAMAGE);
+		return ValidateSpellInfo(DemonHunterSpells.INFERNAL_STRIKE_JUMP, DemonHunterSpells.INFERNAL_STRIKE_DAMAGE);
 	}
 
 	public void OnHit()
@@ -28,8 +28,8 @@ public class spell_dh_infernal_strike : SpellScript, ISpellOnCast, ISpellOnHit
 
 		if (target.IsHostileTo(caster))
 		{
-			caster.CastSpell(new Position(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ()), DemonHunterSpells.SPELL_DH_INFERNAL_STRIKE_JUMP, true);
-			caster.CastSpell(caster, DemonHunterSpells.SPELL_DH_INFERNAL_STRIKE_VISUAL, true);
+			caster.CastSpell(new Position(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ()), DemonHunterSpells.INFERNAL_STRIKE_JUMP, true);
+			caster.CastSpell(caster, DemonHunterSpells.INFERNAL_STRIKE_VISUAL, true);
 		}
 	}
 

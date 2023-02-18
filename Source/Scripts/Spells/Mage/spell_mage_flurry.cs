@@ -25,11 +25,11 @@ public class spell_mage_flurry : SpellScript, IHasSpellEffects
 		if (caster == null || target == null)
 			return;
 
-		if (caster.HasAura(MageSpells.SPELL_MAGE_BRAIN_FREEZE_AURA))
+		if (caster.HasAura(MageSpells.BRAIN_FREEZE_AURA))
 		{
-			caster.RemoveAura(MageSpells.SPELL_MAGE_BRAIN_FREEZE_AURA);
+			caster.RemoveAura(MageSpells.BRAIN_FREEZE_AURA);
 
-			if (caster.HasSpell(MageSpells.SPELL_MAGE_BRAIN_FREEZE_IMPROVED))
+			if (caster.HasSpell(MageSpells.BRAIN_FREEZE_IMPROVED))
 				isImproved = true;
 		}
 
@@ -45,10 +45,10 @@ public class spell_mage_flurry : SpellScript, IHasSpellEffects
 
 						                                 if (target != null)
 						                                 {
-							                                 caster.CastSpell(target, MageSpells.SPELL_MAGE_FLURRY_VISUAL, false);
+							                                 caster.CastSpell(target, MageSpells.FLURRY_VISUAL, false);
 
 							                                 if (isImproved)
-								                                 caster.CastSpell(target, MageSpells.SPELL_MAGE_FLURRY_CHILL_PROC, false);
+								                                 caster.CastSpell(target, MageSpells.FLURRY_CHILL_PROC, false);
 						                                 }
 					                                 }
 				                                 },

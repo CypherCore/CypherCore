@@ -16,7 +16,7 @@ public class at_mage_rune_of_power : AreaTriggerAI
 
 	public struct UsingSpells
 	{
-		public const uint SPELL_MAGE_RUNE_OF_POWER_AURA = 116014;
+		public const uint RUNE_OF_POWER_AURA = 116014;
 	}
 
 	public override void OnCreate()
@@ -30,12 +30,12 @@ public class at_mage_rune_of_power : AreaTriggerAI
 
 		if (caster != null)
 			if (unit.GetGUID() == caster.GetGUID())
-				caster.CastSpell(unit, UsingSpells.SPELL_MAGE_RUNE_OF_POWER_AURA, true);
+				caster.CastSpell(unit, UsingSpells.RUNE_OF_POWER_AURA, true);
 	}
 
 	public override void OnUnitExit(Unit unit)
 	{
-		if (unit.HasAura(UsingSpells.SPELL_MAGE_RUNE_OF_POWER_AURA))
-			unit.RemoveAurasDueToSpell(UsingSpells.SPELL_MAGE_RUNE_OF_POWER_AURA);
+		if (unit.HasAura(UsingSpells.RUNE_OF_POWER_AURA))
+			unit.RemoveAurasDueToSpell(UsingSpells.RUNE_OF_POWER_AURA);
 	}
 }

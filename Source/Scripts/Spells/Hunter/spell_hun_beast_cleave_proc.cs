@@ -25,7 +25,7 @@ public class spell_hun_beast_cleave_proc : AuraScript, IHasAuraEffects
 		if (eventInfo.GetActor().GetGUID() != GetTarget().GetGUID())
 			return;
 
-		if (eventInfo.GetDamageInfo().GetSpellInfo() != null && eventInfo.GetDamageInfo().GetSpellInfo().Id == HunterSpells.SPELL_HUNTER_BEAST_CLEAVE_DAMAGE)
+		if (eventInfo.GetDamageInfo().GetSpellInfo() != null && eventInfo.GetDamageInfo().GetSpellInfo().Id == HunterSpells.BEAST_CLEAVE_DAMAGE)
 			return;
 
 		var player = GetCaster().ToPlayer();
@@ -36,7 +36,7 @@ public class spell_hun_beast_cleave_proc : AuraScript, IHasAuraEffects
 				var args = new CastSpellExtraArgs(TriggerCastFlags.FullMask);
 				args.AddSpellMod(SpellValueMod.BasePoint0, eventInfo.GetDamageInfo().GetDamage() * 0.75f);
 
-				GetTarget().CastSpell(GetTarget(), HunterSpells.SPELL_HUNTER_BEAST_CLEAVE_DAMAGE, args);
+				GetTarget().CastSpell(GetTarget(), HunterSpells.BEAST_CLEAVE_DAMAGE, args);
 			}
 	}
 

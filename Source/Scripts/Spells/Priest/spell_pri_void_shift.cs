@@ -17,7 +17,7 @@ public class spell_pri_void_shift : SpellScript, IHasSpellEffects, ISpellCheckCa
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (Global.SpellMgr.GetSpellInfo(PriestSpells.SPELL_PRIEST_VOID_SHIFT, Difficulty.None) != null)
+		if (Global.SpellMgr.GetSpellInfo(PriestSpells.VOID_SHIFT, Difficulty.None) != null)
 			return false;
 
 		return true;

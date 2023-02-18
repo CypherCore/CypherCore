@@ -12,7 +12,7 @@ public class spell_rog_serrated_blades_SpellScript : SpellScript, ISpellOnHit
 {
 	public void OnHit()
 	{
-		var blade = GetCaster().GetAuraEffectOfRankedSpell(RogueSpells.SPELL_ROGUE_SERRATED_BLADES_R1, 0);
+		var blade = GetCaster().GetAuraEffectOfRankedSpell(RogueSpells.SERRATED_BLADES_R1, 0);
 
 		if (blade != null)
 		{
@@ -20,7 +20,7 @@ public class spell_rog_serrated_blades_SpellScript : SpellScript, ISpellOnHit
 
 			if (RandomHelper.randChance(blade.GetAmount() * combo))
 			{
-				var dot = GetHitUnit().GetAura(RogueSpells.SPELL_ROGUE_RUPTURE, GetCaster().GetGUID());
+				var dot = GetHitUnit().GetAura(RogueSpells.RUPTURE, GetCaster().GetGUID());
 
 				if (dot != null)
 					dot.RefreshDuration();

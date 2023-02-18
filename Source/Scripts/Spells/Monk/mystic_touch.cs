@@ -29,11 +29,11 @@ public class mystic_touch : ScriptObjectAutoAdd, IPlayerOnDealDamage
 		if (caster == null || target == null)
 			return;
 
-		if (target.HasAura(MonkSpells.SPELL_MONK_MYSTIC_TOUCH_TARGET_DEBUFF))
+		if (target.HasAura(MonkSpells.MYSTIC_TOUCH_TARGET_DEBUFF))
 			return;
 
-		if (caster.HasAura(MonkSpells.SPELL_MONK_MYSTIC_TOUCH) && !target.HasAura(MonkSpells.SPELL_MONK_MYSTIC_TOUCH_TARGET_DEBUFF))
+		if (caster.HasAura(MonkSpells.MYSTIC_TOUCH) && !target.HasAura(MonkSpells.MYSTIC_TOUCH_TARGET_DEBUFF))
 			if (caster.IsWithinMeleeRange(target))
-				caster.CastSpell(MonkSpells.SPELL_MONK_MYSTIC_TOUCH_TARGET_DEBUFF, true);
+				caster.CastSpell(MonkSpells.MYSTIC_TOUCH_TARGET_DEBUFF, true);
 	}
 }

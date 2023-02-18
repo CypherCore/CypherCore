@@ -23,7 +23,7 @@ public class spell_dh_demonic_appetite : AuraScript, IHasAuraEffects
 		if (caster == null)
 			return;
 
-		//caster->CastSpell(caster, SPELL_DH_SHATTERED_SOULS_MISSILE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)SPELL_DH_LESSER_SOUL_SHARD));
+		//caster->CastSpell(caster, SHATTERED_SOULS_MISSILE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)LESSER_SOUL_SHARD));
 	}
 
 	public override void Register()

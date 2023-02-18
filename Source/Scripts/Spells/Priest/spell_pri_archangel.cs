@@ -19,17 +19,17 @@ public class spell_pri_archangel : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(PriestSpells.SPELL_PRIEST_ATONEMENT_AURA);
+		return ValidateSpellInfo(PriestSpells.ATONEMENT_AURA);
 	}
 
 	private void FilterTargets(List<WorldObject> targets)
 	{
-		targets.RemoveIf(new UnitAuraCheck<WorldObject>(false, PriestSpells.SPELL_PRIEST_ATONEMENT_AURA, GetCaster().GetGUID()));
+		targets.RemoveIf(new UnitAuraCheck<WorldObject>(false, PriestSpells.ATONEMENT_AURA, GetCaster().GetGUID()));
 	}
 
 	private void HandleScriptEffect(uint UnnamedParameter)
 	{
-		var aura = GetHitUnit().GetAura(PriestSpells.SPELL_PRIEST_ATONEMENT_AURA, GetCaster().GetGUID());
+		var aura = GetHitUnit().GetAura(PriestSpells.ATONEMENT_AURA, GetCaster().GetGUID());
 
 		if (aura != null)
 			aura.RefreshDuration();

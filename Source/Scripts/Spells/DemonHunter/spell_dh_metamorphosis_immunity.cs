@@ -22,7 +22,7 @@ public class spell_dh_metamorphosis_immunity : AuraScript, IHasAuraEffects
 		if (caster == null)
 			return;
 
-		caster.CastSpell(caster, DemonHunterSpells.SPELL_DH_METAMORPHOSIS_STUN, true);
+		caster.CastSpell(caster, DemonHunterSpells.METAMORPHOSIS_STUN, true);
 	}
 
 	public override void Register()

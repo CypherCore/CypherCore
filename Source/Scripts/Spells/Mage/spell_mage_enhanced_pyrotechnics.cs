@@ -14,12 +14,12 @@ public class spell_mage_enhanced_pyrotechnics : AuraScript
 	{
 		var caster = GetCaster();
 
-		if (eventInfo.GetSpellInfo().Id == MageSpells.SPELL_MAGE_FIREBALL)
+		if (eventInfo.GetSpellInfo().Id == MageSpells.FIREBALL)
 		{
 			if ((eventInfo.GetHitMask() & ProcFlagsHit.Critical) != 0)
 			{
-				if (caster.HasAura(MageSpells.SPELL_MAGE_ENHANCED_PYROTECHNICS_AURA))
-					caster.RemoveAurasDueToSpell(MageSpells.SPELL_MAGE_ENHANCED_PYROTECHNICS_AURA);
+				if (caster.HasAura(MageSpells.ENHANCED_PYROTECHNICS_AURA))
+					caster.RemoveAurasDueToSpell(MageSpells.ENHANCED_PYROTECHNICS_AURA);
 
 				return false;
 			}

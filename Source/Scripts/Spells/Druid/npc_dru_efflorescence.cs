@@ -17,7 +17,7 @@ public class npc_dru_efflorescence : ScriptedAI
 
 	public override void Reset()
 	{
-		me.CastSpell(me, EfflorescenceSpells.SPELL_DRUID_EFFLORESCENCE_DUMMY, true);
+		me.CastSpell(me, EfflorescenceSpells.EFFLORESCENCE_DUMMY, true);
 		me.SetUnitFlag(UnitFlags.NonAttackable);
 		me.SetUnitFlag(UnitFlags.Uninteractible);
 		me.SetUnitFlag(UnitFlags.RemoveClientControl);

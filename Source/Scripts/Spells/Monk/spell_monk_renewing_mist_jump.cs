@@ -18,7 +18,7 @@ public class spell_monk_renewing_mist_jump : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(MonkSpells.SPELL_MONK_RENEWING_MIST_HOT);
+		return ValidateSpellInfo(MonkSpells.RENEWING_MIST_HOT);
 	}
 
 	private void HandleTargets(List<WorldObject> targets)
@@ -33,7 +33,7 @@ public class spell_monk_renewing_mist_jump : SpellScript, IHasSpellEffects
 		                 {
 			                 var ally = a.ToUnit();
 
-			                 if (ally == null || ally.HasAura(MonkSpells.SPELL_MONK_RENEWING_MIST_HOT, caster.GetGUID()) || ally == previousTarget)
+			                 if (ally == null || ally.HasAura(MonkSpells.RENEWING_MIST_HOT, caster.GetGUID()) || ally == previousTarget)
 				                 return true;
 
 			                 return false;
@@ -66,16 +66,16 @@ public class spell_monk_renewing_mist_jump : SpellScript, IHasSpellEffects
 
 		if (previousTarget != null)
 		{
-			var oldAura = previousTarget.GetAura(MonkSpells.SPELL_MONK_RENEWING_MIST_HOT, GetCaster().GetGUID());
+			var oldAura = previousTarget.GetAura(MonkSpells.RENEWING_MIST_HOT, GetCaster().GetGUID());
 
 			if (oldAura != null)
 			{
-				var newAura = caster.AddAura(MonkSpells.SPELL_MONK_RENEWING_MIST_HOT, GetHitUnit());
+				var newAura = caster.AddAura(MonkSpells.RENEWING_MIST_HOT, GetHitUnit());
 
 				if (newAura != null)
 				{
 					newAura.SetDuration(oldAura.GetDuration());
-					previousTarget.SendPlaySpellVisual(GetHitUnit().GetPosition(), previousTarget.GetOrientation(), MonkSpells.SPELL_MONK_VISUAL_RENEWING_MIST, 0, 0, 50.0f, false);
+					previousTarget.SendPlaySpellVisual(GetHitUnit().GetPosition(), previousTarget.GetOrientation(), MonkSpells.VISUAL_RENEWING_MIST, 0, 0, 50.0f, false);
 					oldAura.Remove();
 				}
 			}

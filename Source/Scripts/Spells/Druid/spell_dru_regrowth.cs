@@ -17,29 +17,29 @@ public class spell_dru_regrowth : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(DruidSpells.SPELL_DRU_REGROWTH, DruidSpells.SPELL_DRU_BLOODTALONS, DruidSpells.SPELL_DRU_BLOODTALONS_TRIGGERED, DruidSpells.SPELL_DRU_MOMENT_OF_CLARITY, DruidSpells.SPELL_DRU_CLEARCASTING);
+		return ValidateSpellInfo(DruidSpells.REGROWTH, DruidSpells.BLOODTALONS, DruidSpells.BLOODTALONS_TRIGGERED, DruidSpells.MOMENT_OF_CLARITY, DruidSpells.CLEARCASTING);
 	}
 
 	private void HandleHealEffect(uint UnnamedParameter)
 	{
-		if (GetCaster().HasAura(DruidSpells.SPELL_DRU_BLOODTALONS))
-			GetCaster().AddAura(DruidSpells.SPELL_DRU_BLOODTALONS_TRIGGERED, GetCaster());
+		if (GetCaster().HasAura(DruidSpells.BLOODTALONS))
+			GetCaster().AddAura(DruidSpells.BLOODTALONS_TRIGGERED, GetCaster());
 
-		var clearcasting = GetCaster().GetAura(DruidSpells.SPELL_DRU_CLEARCASTING);
+		var clearcasting = GetCaster().GetAura(DruidSpells.CLEARCASTING);
 
 		if (clearcasting != null)
 		{
-			if (GetCaster().HasAura(DruidSpells.SPELL_DRU_MOMENT_OF_CLARITY))
+			if (GetCaster().HasAura(DruidSpells.MOMENT_OF_CLARITY))
 			{
 				var amount = clearcasting.GetEffect(0).GetAmount();
 				clearcasting.GetEffect(0).SetAmount(amount - 1);
 
 				if (amount == -102)
-					GetCaster().RemoveAurasDueToSpell(DruidSpells.SPELL_DRU_CLEARCASTING);
+					GetCaster().RemoveAurasDueToSpell(DruidSpells.CLEARCASTING);
 			}
 			else
 			{
-				GetCaster().RemoveAurasDueToSpell(DruidSpells.SPELL_DRU_CLEARCASTING);
+				GetCaster().RemoveAurasDueToSpell(DruidSpells.CLEARCASTING);
 			}
 		}
 	}

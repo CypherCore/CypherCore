@@ -36,7 +36,7 @@ public class spell_dh_frailty : AuraScript, IHasAuraEffects
 
 		if (_damage != 0)
 		{
-			caster.CastSpell(caster, DemonHunterSpells.SPELL_DH_FRAILTY_HEAL, (int)(_damage * .1), true);
+			caster.CastSpell(caster, DemonHunterSpells.FRAILTY_HEAL, (int)(_damage * .1), true);
 			_damage = 0;
 		}
 	}

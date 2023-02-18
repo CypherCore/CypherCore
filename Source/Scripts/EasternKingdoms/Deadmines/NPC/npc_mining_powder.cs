@@ -27,7 +27,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
                 return;
             }
             _damaged = true;
-            me.CastSpell(me, DMSpells.SPELL_EXPLODE);
+            me.CastSpell(me, DMSpells.EXPLODE);
             me.DespawnOrUnsummon(TimeSpan.FromMilliseconds(100));
         }
     }

@@ -17,6 +17,6 @@ public class spell_pri_dark_void : SpellScript, ISpellOnHit
 		if (caster == null || target == null)
 			return;
 
-		caster.CastSpell(target, PriestSpells.SPELL_PRIEST_SHADOW_WORD_PAIN, true);
+		caster.CastSpell(target, PriestSpells.SHADOW_WORD_PAIN, true);
 	}
 }

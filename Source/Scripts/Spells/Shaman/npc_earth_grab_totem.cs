@@ -30,17 +30,17 @@ namespace Scripts.Spells.Shaman
 
 				                                   foreach (var target in unitList)
 				                                   {
-					                                   if (target.HasAura(TotemSpells.SPELL_TOTEM_EARTH_GRAB_ROOT_EFFECT))
+					                                   if (target.HasAura(TotemSpells.TOTEM_EARTH_GRAB_ROOT_EFFECT))
 						                                   continue;
 
 					                                   if (!alreadyRooted.Contains(target.GetGUID()))
 					                                   {
 						                                   alreadyRooted.Add(target.GetGUID());
-						                                   me.CastSpell(target, TotemSpells.SPELL_TOTEM_EARTH_GRAB_ROOT_EFFECT, true);
+						                                   me.CastSpell(target, TotemSpells.TOTEM_EARTH_GRAB_ROOT_EFFECT, true);
 					                                   }
 					                                   else
 					                                   {
-						                                   me.CastSpell(target, TotemSpells.SPELL_TOTEM_EARTH_GRAB_SLOW_EFFECT, true);
+						                                   me.CastSpell(target, TotemSpells.TOTEM_EARTH_GRAB_SLOW_EFFECT, true);
 					                                   }
 				                                   }
 

@@ -10,7 +10,7 @@ using Game.Spells;
 
 namespace Scripts.Spells.Rogue;
 
-[Script] // 79134 - Venomous Wounds - SPELL_ROGUE_VENOMOUS_WOUNDS
+[Script] // 79134 - Venomous Wounds - VENOMOUS_WOUNDS
 internal class spell_rog_venomous_wounds : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();

@@ -50,12 +50,12 @@ public class spell_mage_clearcasting : AuraScript, IAuraCheckProc, IHasAuraEffec
 	private void HandleProc(AuraEffect UnnamedParameter, ProcEventInfo eventInfo)
 	{
 		var actor = eventInfo.GetActor();
-		actor.CastSpell(actor, MageSpells.SPELL_MAGE_CLEARCASTING_BUFF, true);
+		actor.CastSpell(actor, MageSpells.CLEARCASTING_BUFF, true);
 
-		if (actor.HasAura(MageSpells.SPELL_MAGE_ARCANE_EMPOWERMENT))
-			actor.CastSpell(actor, MageSpells.SPELL_MAGE_CLEARCASTING_PVP_STACK_EFFECT, true);
+		if (actor.HasAura(MageSpells.ARCANE_EMPOWERMENT))
+			actor.CastSpell(actor, MageSpells.CLEARCASTING_PVP_STACK_EFFECT, true);
 		else
-			actor.CastSpell(actor, MageSpells.SPELL_MAGE_CLEARCASTING_EFFECT, true);
+			actor.CastSpell(actor, MageSpells.CLEARCASTING_EFFECT, true);
 	}
 
 	public override void Register()

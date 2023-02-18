@@ -10,7 +10,7 @@ using Game.Spells;
 
 namespace Scripts.Spells.Warlock
 {
-	[SpellScript(WarlockSpells.SPELL_INQUISITORS_GAZE)]
+	[SpellScript(WarlockSpells.INQUISITORS_GAZE)]
 	public class spell_warlock_inquisitors_gaze : SpellScript, IHasSpellEffects
 	{
 		public List<ISpellEffect> SpellEffects { get; } = new();
@@ -22,7 +22,7 @@ namespace Scripts.Spells.Warlock
 			if (target != null)
 			{
 				var damage = (GetCaster().SpellBaseDamageBonusDone(GetSpellInfo().GetSchoolMask()) * 15 * 16) / 100;
-				GetCaster().CastSpell(target, WarlockSpells.SPELL_INQUISITORS_GAZE_EFFECT, new CastSpellExtraArgs(SpellValueMod.BasePoint0, damage));
+				GetCaster().CastSpell(target, WarlockSpells.INQUISITORS_GAZE_EFFECT, new CastSpellExtraArgs(SpellValueMod.BasePoint0, damage));
 			}
 		}
 

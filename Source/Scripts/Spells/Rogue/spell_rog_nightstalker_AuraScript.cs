@@ -20,11 +20,11 @@ public class spell_rog_nightstalker_AuraScript : AuraScript, IHasAuraEffects
 
 		if (caster)
 		{
-			if (caster.HasAura(RogueSpells.SPELL_ROGUE_SPELL_NIGHTSTALKER_DAMAGE_DONE))
-				caster.RemoveAura(RogueSpells.SPELL_ROGUE_SPELL_NIGHTSTALKER_DAMAGE_DONE);
+			if (caster.HasAura(RogueSpells.NIGHTSTALKER_DAMAGE_DONE))
+				caster.RemoveAura(RogueSpells.NIGHTSTALKER_DAMAGE_DONE);
 
-			if (caster.HasAura(RogueSpells.SPELL_ROGUE_SHADOW_FOCUS_EFFECT))
-				caster.RemoveAura(RogueSpells.SPELL_ROGUE_SHADOW_FOCUS_EFFECT);
+			if (caster.HasAura(RogueSpells.SHADOW_FOCUS_EFFECT))
+				caster.RemoveAura(RogueSpells.SHADOW_FOCUS_EFFECT);
 		}
 	}
 

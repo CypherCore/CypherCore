@@ -26,7 +26,7 @@ public class spell_rog_nightblade_AuraScript : AuraScript, IHasAuraEffects
 		if (caster == null)
 			return;
 
-		var maxcp = caster.HasAura(RogueSpells.SPELL_ROGUE_DEEPER_STRATAGEM) ? 6 : 5;
+		var maxcp = caster.HasAura(RogueSpells.DEEPER_STRATAGEM) ? 6 : 5;
 		_cp = Math.Min(caster.GetPower(PowerType.ComboPoints) + 1, maxcp);
 
 		var aur = GetAura();
@@ -40,17 +40,17 @@ public class spell_rog_nightblade_AuraScript : AuraScript, IHasAuraEffects
 		if (caster != null)
 			caster.ModifyPower(PowerType.ComboPoints, -1 * (_cp - 1));
 
-		var catEntry = Global.SpellMgr.GetSpellInfo(RogueSpells.SPELL_ROGUE_SHADOW_DANCE, Difficulty.None);
+		var catEntry = Global.SpellMgr.GetSpellInfo(RogueSpells.SHADOW_DANCE, Difficulty.None);
 
-		if (caster.HasAura(RogueSpells.SPELL_ROGUE_DEEPENING_SHADOWS) && RandomHelper.randChance(20 * _cp))
+		if (caster.HasAura(RogueSpells.DEEPENING_SHADOWS) && RandomHelper.randChance(20 * _cp))
 			caster.GetSpellHistory().ModifyCooldown(catEntry, TimeSpan.FromMilliseconds(_cp * -3000));
 
 		if (caster != null)
-			if (caster.HasAura(RogueSpells.SPELL_ROGUE_RELENTLESS_STRIKES) && RandomHelper.randChance(20 * _cp))
-				caster.CastSpell(caster, RogueSpells.SPELL_ROGUE_RELENTLESS_STRIKES_POWER, true);
+			if (caster.HasAura(RogueSpells.RELENTLESS_STRIKES) && RandomHelper.randChance(20 * _cp))
+				caster.CastSpell(caster, RogueSpells.RELENTLESS_STRIKES_POWER, true);
 
-		if (caster.HasAura(RogueSpells.SPELL_ROGUE_ALACRITY) && RandomHelper.randChance(20 * _cp))
-			caster.CastSpell(caster, RogueSpells.SPELL_ROGUE_ALACRITY_BUFF, true);
+		if (caster.HasAura(RogueSpells.ALACRITY) && RandomHelper.randChance(20 * _cp))
+			caster.CastSpell(caster, RogueSpells.ALACRITY_BUFF, true);
 	}
 
 	public bool CheckProc(ProcEventInfo eventInfo)
@@ -63,7 +63,7 @@ public class spell_rog_nightblade_AuraScript : AuraScript, IHasAuraEffects
 			if (caster == null || target == null)
 				return false;
 
-			caster.CastSpell(target, RogueSpells.SPELL_ROGUE_NIGHTBLADE_SLOW, true);
+			caster.CastSpell(target, RogueSpells.NIGHTBLADE_SLOW, true);
 
 			return true;
 		}

@@ -15,11 +15,11 @@ public class spell_rog_nightstalker_SpellScript : SpellScript, ISpellOnHit
 
 		if (_player != null)
 		{
-			if (_player.HasAura(RogueSpells.SPELL_ROGUE_SPELL_NIGHTSTALKER_AURA))
-				_player.CastSpell(_player, RogueSpells.SPELL_ROGUE_SPELL_NIGHTSTALKER_DAMAGE_DONE, true);
+			if (_player.HasAura(RogueSpells.NIGHTSTALKER_AURA))
+				_player.CastSpell(_player, RogueSpells.NIGHTSTALKER_DAMAGE_DONE, true);
 
-			if (_player.HasAura(RogueSpells.SPELL_ROGUE_SHADOW_FOCUS))
-				_player.CastSpell(_player, RogueSpells.SPELL_ROGUE_SHADOW_FOCUS_EFFECT, true);
+			if (_player.HasAura(RogueSpells.SHADOW_FOCUS))
+				_player.CastSpell(_player, RogueSpells.SHADOW_FOCUS_EFFECT, true);
 		}
 	}
 }

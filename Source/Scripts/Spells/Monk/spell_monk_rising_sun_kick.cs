@@ -23,27 +23,27 @@ public class spell_monk_rising_sun_kick : SpellScript, IHasSpellEffects
 		if (target == null || caster == null)
 			return;
 
-		if (caster.HasAura(MonkSpells.SPELL_MONK_RISING_THUNDER))
-			caster.ToPlayer().GetSpellHistory().ResetCooldown(MonkSpells.SPELL_MONK_THUNDER_FOCUS_TEA, true);
+		if (caster.HasAura(MonkSpells.RISING_THUNDER))
+			caster.ToPlayer().GetSpellHistory().ResetCooldown(MonkSpells.THUNDER_FOCUS_TEA, true);
 
 		if (caster.GetPrimarySpecialization() == TalentSpecialization.MonkBattledancer)
-			caster.CastSpell(target, MonkSpells.SPELL_MONK_MORTAL_WOUNDS, true);
+			caster.CastSpell(target, MonkSpells.MORTAL_WOUNDS, true);
 
-		if (caster.GetPrimarySpecialization() == TalentSpecialization.MonkMistweaver && caster.HasAura(MonkSpells.SPELL_RISING_MIST))
+		if (caster.GetPrimarySpecialization() == TalentSpecialization.MonkMistweaver && caster.HasAura(MonkSpells.RISING_MIST))
 		{
-			caster.CastSpell(MonkSpells.SPELL_RISING_MIST_HEAL, true);
+			caster.CastSpell(MonkSpells.RISING_MIST_HEAL, true);
 
-			var reneWingMist = caster.GetAura(MonkSpells.SPELL_MONK_RENEWING_MIST_HOT);
+			var reneWingMist = caster.GetAura(MonkSpells.RENEWING_MIST_HOT);
 
 			if (reneWingMist != null)
 				reneWingMist.RefreshDuration(true);
 
-			var envelopingMist = caster.GetAura(MonkSpells.SPELL_MONK_ENVELOPING_MIST);
+			var envelopingMist = caster.GetAura(MonkSpells.ENVELOPING_MIST);
 
 			if (envelopingMist != null)
 				envelopingMist.RefreshDuration(true);
 
-			var essenceFont = caster.GetAura(MonkSpells.SPELL_MONK_ESSENCE_FONT_PERIODIC_HEAL);
+			var essenceFont = caster.GetAura(MonkSpells.ESSENCE_FONT_PERIODIC_HEAL);
 
 			if (essenceFont != null)
 				essenceFont.RefreshDuration(true);
@@ -54,13 +54,13 @@ public class spell_monk_rising_sun_kick : SpellScript, IHasSpellEffects
 
 		foreach (var targets in u_li)
 		{
-			var relatedAuras = targets.GetAura(MonkSpells.SPELL_MONK_RENEWING_MIST_HOT);
+			var relatedAuras = targets.GetAura(MonkSpells.RENEWING_MIST_HOT);
 
 			if (relatedAuras == null)
-				relatedAuras = targets.GetAura(MonkSpells.SPELL_MONK_ENVELOPING_MIST);
+				relatedAuras = targets.GetAura(MonkSpells.ENVELOPING_MIST);
 
 			if (relatedAuras == null)
-				relatedAuras = targets.GetAura(MonkSpells.SPELL_MONK_ESSENCE_FONT_PERIODIC_HEAL);
+				relatedAuras = targets.GetAura(MonkSpells.ESSENCE_FONT_PERIODIC_HEAL);
 
 			if (relatedAuras != null)
 				relatedAuras.RefreshDuration(true);

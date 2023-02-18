@@ -26,7 +26,7 @@ public class spell_dh_fel_devastation_damage : SpellScript, IHasSpellEffects
 		if (firstHit)
 		{
 			firstHit = false;
-			caster.CastSpell(caster, DemonHunterSpells.SPELL_DH_FEL_DEVASTATION_HEAL, true);
+			caster.CastSpell(caster, DemonHunterSpells.FEL_DEVASTATION_HEAL, true);
 		}
 	}
 

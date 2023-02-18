@@ -19,7 +19,7 @@ public class spell_dh_fel_barrage : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (!Global.SpellMgr.HasSpellInfo(DemonHunterSpells.SPELL_DH_FEL_BARRAGE, Difficulty.None) || !Global.SpellMgr.HasSpellInfo(DemonHunterSpells.SPELL_DH_FEL_BARRAGE_TRIGGER, Difficulty.None))
+		if (!Global.SpellMgr.HasSpellInfo(DemonHunterSpells.FEL_BARRAGE, Difficulty.None) || !Global.SpellMgr.HasSpellInfo(DemonHunterSpells.FEL_BARRAGE_TRIGGER, Difficulty.None))
 			return false;
 
 		return true;
@@ -54,7 +54,7 @@ public class spell_dh_fel_barrage : AuraScript, IHasAuraEffects
 		var args = new CastSpellExtraArgs();
 		args.AddSpellMod(SpellValueMod.BasePoint0, (int)_charges);
 		args.SetTriggerFlags(TriggerCastFlags.FullMask);
-		caster.CastSpell(target, DemonHunterSpells.SPELL_DH_FEL_BARRAGE_TRIGGER, args);
+		caster.CastSpell(target, DemonHunterSpells.FEL_BARRAGE_TRIGGER, args);
 	}
 
 	public override void Register()

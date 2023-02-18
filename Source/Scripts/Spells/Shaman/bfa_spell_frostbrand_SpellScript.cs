@@ -23,7 +23,7 @@ namespace Scripts.Spells.Shaman
 			if (caster == null || target == null)
 				return;
 
-			caster.CastSpell(target, ShamanSpells.SPELL_FROSTBRAND_SLOW, true);
+			caster.CastSpell(target, ShamanSpells.FROSTBRAND_SLOW, true);
 		}
 	}
 }

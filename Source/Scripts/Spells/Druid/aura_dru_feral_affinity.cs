@@ -17,12 +17,12 @@ public class aura_dru_feral_affinity : AuraScript, IHasAuraEffects
 
 	private readonly List<uint> LearnedSpells = new()
 	                                            {
-		                                            (uint)DruidSpells.SPELL_DRUID_FELINE_SWIFTNESS,
-		                                            (uint)DruidSpells.SPELL_DRUID_SHRED,
-		                                            (uint)DruidSpells.SPELL_DRUID_RAKE,
-		                                            (uint)DruidSpells.SPELL_DRUID_RIP,
-		                                            (uint)DruidSpells.SPELL_DRUID_FEROCIOUS_BITE,
-		                                            (uint)DruidSpells.SPELL_DRUID_SWIPE_CAT
+		                                            (uint)DruidSpells.FELINE_SWIFTNESS,
+		                                            (uint)DruidSpells.SHRED,
+		                                            (uint)DruidSpells.RAKE,
+		                                            (uint)DruidSpells.RIP,
+		                                            (uint)DruidSpells.FEROCIOUS_BITE,
+		                                            (uint)DruidSpells.SWIPE_CAT
 	                                            };
 
 	private void AfterApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)

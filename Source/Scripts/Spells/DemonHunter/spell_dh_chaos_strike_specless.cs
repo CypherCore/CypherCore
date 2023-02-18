@@ -13,6 +13,6 @@ public class spell_dh_chaos_strike_specless : SpellScript, ISpellOnCast
 	{
 		var caster = GetCaster();
 
-		caster.CastSpell(DemonHunterSpells.SPELL_DH_CHAOS_STRIKE, true);
+		caster.CastSpell(DemonHunterSpells.CHAOS_STRIKE, true);
 	}
 }

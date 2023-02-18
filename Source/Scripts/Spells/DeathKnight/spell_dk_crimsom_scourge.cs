@@ -18,7 +18,7 @@ public class spell_dk_crimsom_scourge : AuraScript, IAuraCheckProc, IHasAuraEffe
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
 		var target = GetTarget();
-		target.HasAura(DeathKnightSpells.SPELL_DK_BLOOD_PLAGUE);
+		target.HasAura(DeathKnightSpells.BLOOD_PLAGUE);
 
 		return true;
 	}

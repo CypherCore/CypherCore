@@ -28,10 +28,10 @@ internal class spell_pvp_trinket_wotf_shared_cd : SpellScript, ISpellAfterCast
 	{
 		/*
 			 * @workaround: PendingCast flag normally means 'triggered' spell, however
-			 * if the spell is cast triggered, the core won't send SMSG_SPELL_GO packet
+			 * if the spell is cast triggered, the core won't send SMSG_GO packet
 			 * so client never registers the cooldown (see Spell::IsNeedSendToClient)
 			 *
-			 * ServerToClient: SMSG_SPELL_GO (0x0132) Length: 42 ConnIdx: 0 Time: 07/19/2010 02:32:35.000 Number: 362675
+			 * ServerToClient: SMSG_GO (0x0132) Length: 42 ConnIdx: 0 Time: 07/19/2010 02:32:35.000 Number: 362675
 			 * Caster GUID: Full: Player
 			 * Caster Unit GUID: Full: Player
 			 * Cast Count: 0

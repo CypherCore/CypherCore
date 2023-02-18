@@ -79,45 +79,45 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
 
         public struct Spells
         {
-            public const uint SPELL_BACKSLASH = 92619;
-            public const uint SPELL_DEFLECTION = 92614;
-            public const uint SPELL_DEADLY_BLADES = 92622;
-            public const uint SPELL_VENGEANCE = 95542;
-            public const uint SPELL_POWDER_EXP = 96283;
-            public const uint SPELL_FIERY_BLAZE = 93484;
-            public const uint SPELL_FIERY_BLAZE_DMG = 93485;
-            public const uint SPELL_CLICK_ME = 95527;
+            public const uint BACKSLASH = 92619;
+            public const uint DEFLECTION = 92614;
+            public const uint DEADLY_BLADES = 92622;
+            public const uint VENGEANCE = 95542;
+            public const uint POWDER_EXP = 96283;
+            public const uint FIERY_BLAZE = 93484;
+            public const uint FIERY_BLAZE_DMG = 93485;
+            public const uint CLICK_ME = 95527;
             // misc
-            public const uint SPELL_EVASION = 90958;
-            public const uint SPELL_SHADOWSTEP = 90956;
-            public const uint SPELL_SINISTER = 90951;
-            public const uint SPELL_BLADES = 90960;
-            public const uint SPELL_CHARGE = 90928;
-            public const uint SPELL_RECKLESSNESS = 90929;
-            public const uint SPELL_BLOODBATH = 90925;
-            public const uint SPELL_MOTIVATE = 91036;
-            public const uint SPELL_THREATENING = 91034;
-            public const uint SPELL_UPPERCUT = 91045;
-            public const uint SPELL_AXE_HEAD = 90098;
-            public const uint SPELL_ENRAGE = 8599;
-            public const uint SPELL_BLOODBOLT = 90938;
-            public const uint SPELL_BLOODWASH = 90946;
-            public const uint SPELL_RAGEZONE = 90932;
+            public const uint EVASION = 90958;
+            public const uint SHADOWSTEP = 90956;
+            public const uint SINISTER = 90951;
+            public const uint BLADES = 90960;
+            public const uint CHARGE = 90928;
+            public const uint RECKLESSNESS = 90929;
+            public const uint BLOODBATH = 90925;
+            public const uint MOTIVATE = 91036;
+            public const uint THREATENING = 91034;
+            public const uint UPPERCUT = 91045;
+            public const uint AXE_HEAD = 90098;
+            public const uint ENRAGE = 8599;
+            public const uint BLOODBOLT = 90938;
+            public const uint BLOODWASH = 90946;
+            public const uint RAGEZONE = 90932;
             //envocer
-            public const uint SPELL_HOLY_FIRE = 91004;
-            public const uint SPELL_RENEGADE = 90047;
-            public const uint SPELL_SHIELD = 92001;
+            public const uint HOLY_FIRE = 91004;
+            public const uint RENEGADE = 90047;
+            public const uint SHIELD = 92001;
             // Vanessa event
-            public const uint SPELL_SITTING = 89279;
-            public const uint SPELL_NOXIOUS_CONCOCTION = 92100;
-            public const uint SPELL_BLACKOUT = 92120;
-            public const uint SPELL_RIDE_VEHICLE = 46598;
+            public const uint SITTING = 89279;
+            public const uint NOXIOUS_CONCOCTION = 92100;
+            public const uint BLACKOUT = 92120;
+            public const uint RIDE_VEHICLE = 46598;
 
             //1 Nightmare
-            public const uint SPELL_EFFECT_1 = 92563;
-            public const uint SPELL_ICYCLE = 92189;
-            public const uint SPELL_SPIRIT_STRIKE = 59304;
-            public const uint SPELL_SPRINT = 92604;
+            public const uint EFFECT_1 = 92563;
+            public const uint ICYCLE = 92189;
+            public const uint SPIRIT_STRIKE = 59304;
+            public const uint SPRINT = 92604;
         }
 
         public struct eAchievementMisc
@@ -244,7 +244,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
             //{
             //    if (item.IsAlive() && item.GetTypeId() == TypeId.Unit)
             //    {
-            //        item.CastSpell(item, Spells.SPELL_FIERY_BLAZE, true);
+            //        item.CastSpell(item, Spells.FIERY_BLAZE, true);
             //    }
             //}
         }
@@ -257,7 +257,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
             //{
             //    if (item.IsAlive() && item.GetTypeId() == TypeId.Unit)
             //    {
-            //        item.RemoveAurasDueToSpell(Spells.SPELL_FIERY_BLAZE);
+            //        item.RemoveAurasDueToSpell(Spells.FIERY_BLAZE);
             //    }
             //}
         }
@@ -337,7 +337,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                 {
                     if (rope.IsAlive())
                     {
-                        rope.AddAura(Spells.SPELL_CLICK_ME, rope);
+                        rope.AddAura(Spells.CLICK_ME, rope);
                         SummonThreatController();
                     }
                 }
@@ -361,7 +361,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                     case BossEvents.EVENT_DEFLECTION:
                         if (HealthAbovePct(25))
                         {
-                            DoCast(me, Spells.SPELL_DEFLECTION);
+                            DoCast(me, Spells.DEFLECTION);
                             _events.ScheduleEvent(BossEvents.EVENT_DEFLECTION, TimeSpan.FromMilliseconds(50000));
                         }
                         break;
@@ -387,19 +387,19 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                         }
                         break;
                     case BossEvents.EVENT_DEADLY_BLADES:
-                        DoCast(me, Spells.SPELL_DEADLY_BLADES);
+                        DoCast(me, Spells.DEADLY_BLADES);
                         _events.ScheduleEvent(BossEvents.EVENT_DEADLY_BLADES, TimeSpan.FromMilliseconds(35000));
                         break;
                     case BossEvents.EVENT_BACKSLASH:
                         Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
                         if (target != null)
                         {
-                            DoCast(target, Spells.SPELL_BACKSLASH);
+                            DoCast(target, Spells.BACKSLASH);
                         }
                         _events.ScheduleEvent(BossEvents.EVENT_BACKSLASH, TimeSpan.FromMilliseconds(17000));
                         break;
                     case BossEvents.EVENT_VENGEANCE:
-                        me.AddAura(Spells.SPELL_VENGEANCE, me);
+                        me.AddAura(Spells.VENGEANCE, me);
                         break;
 
                     case BossEvents.EVENT_DISSAPEAR:
@@ -438,7 +438,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
 
                         break;
                     case BossEvents.EVENT_FINAL_TIMER:
-                        me.CastSpell(me, Spells.SPELL_POWDER_EXP, true);
+                        me.CastSpell(me, Spells.POWDER_EXP, true);
                         me.AttackStop();
                         me.ClearAllReactives();
                         Unit.Kill(me, me, false);

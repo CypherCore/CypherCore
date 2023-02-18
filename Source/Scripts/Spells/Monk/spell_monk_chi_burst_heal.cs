@@ -22,7 +22,7 @@ public class spell_monk_chi_burst_heal : SpellScript, IHasSpellEffects
 		if (caster == null || unit == null)
 			return;
 
-		var spellInfo = Global.SpellMgr.GetSpellInfo(MonkSpells.SPELL_MONK_CHI_BURST_HEAL, Difficulty.None);
+		var spellInfo = Global.SpellMgr.GetSpellInfo(MonkSpells.CHI_BURST_HEAL, Difficulty.None);
 
 		if (spellInfo == null)
 			return;

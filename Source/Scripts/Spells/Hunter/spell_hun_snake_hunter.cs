@@ -18,7 +18,7 @@ public class spell_hun_snake_hunter : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (Global.SpellMgr.GetSpellInfo(HunterSpells.SPELL_HUNTER_MONGOOSE_BITE, Difficulty.None) != null)
+		if (Global.SpellMgr.GetSpellInfo(HunterSpells.MONGOOSE_BITE, Difficulty.None) != null)
 			return false;
 
 		return true;
@@ -31,7 +31,7 @@ public class spell_hun_snake_hunter : SpellScript, IHasSpellEffects
 		if (player == null)
 			return;
 
-		player.GetSpellHistory().ResetCharges(Global.SpellMgr.GetSpellInfo(HunterSpells.SPELL_HUNTER_MONGOOSE_BITE, Difficulty.None).ChargeCategoryId);
+		player.GetSpellHistory().ResetCharges(Global.SpellMgr.GetSpellInfo(HunterSpells.MONGOOSE_BITE, Difficulty.None).ChargeCategoryId);
 	}
 
 	public override void Register()

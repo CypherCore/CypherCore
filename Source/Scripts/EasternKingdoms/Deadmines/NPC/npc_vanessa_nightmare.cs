@@ -390,7 +390,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
                                 foreach (var item in players)
                                 {
-                                    me.CastSpell(item, boss_vanessa_vancleef.Spells.SPELL_SPRINT, true);
+                                    me.CastSpell(item, boss_vanessa_vancleef.Spells.SPRINT, true);
                                 }
 
                                 me.SummonCreature(DMCreatures.NPC_EMME_HARRINGTON, FamilySpawn[0], TempSummonType.ManualDespawn);
@@ -417,7 +417,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
                                 foreach (var item in players)
                                 {
                                     item.TextEmote(boss_vanessa_vancleef.VANESSA_NIGHTMARE_11, null, true);
-                                    me.CastSpell(item, boss_vanessa_vancleef.Spells.SPELL_SPRINT, true);
+                                    me.CastSpell(item, boss_vanessa_vancleef.Spells.SPRINT, true);
                                 }
 
                                 me.SummonCreature(DMCreatures.NPC_ERIK_HARRINGTON, FamilySpawn[1], TempSummonType.ManualDespawn);
@@ -441,7 +441,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
                                 foreach (var item in players)
                                 {
-                                    me.CastSpell(item, boss_vanessa_vancleef.Spells.SPELL_SPRINT, true);
+                                    me.CastSpell(item, boss_vanessa_vancleef.Spells.SPRINT, true);
                                     item.TextEmote(boss_vanessa_vancleef.VANESSA_NIGHTMARE_12, null, true);
                                 }
 
@@ -467,8 +467,8 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
                                 foreach (var item in players)
                                 {
-                                    item.RemoveAurasDueToSpell(DMSharedSpells.SPELL_NIGHTMARE_ELIXIR);
-                                    item.RemoveAurasDueToSpell(boss_vanessa_vancleef.Spells.SPELL_EFFECT_1);
+                                    item.RemoveAurasDueToSpell(DMSharedSpells.NIGHTMARE_ELIXIR);
+                                    item.RemoveAurasDueToSpell(boss_vanessa_vancleef.Spells.EFFECT_1);
                                     item.TextEmote(boss_vanessa_vancleef.VANESSA_NIGHTMARE_13, null, true);
                                 }
                                 me.SummonCreature(DMCreatures.NPC_VANESSA_BOSS, -79.44965f, -819.8351f, 39.89838f, 0.01745329f, TempSummonType.CorpseTimedDespawn, TimeSpan.FromMilliseconds(120000));

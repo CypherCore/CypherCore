@@ -18,12 +18,12 @@ public class spell_monk_vivify : SpellScript, IHasSpellEffects, ISpellAfterCast,
 
 	private void FilterRenewingMist(List<WorldObject> targets)
 	{
-		targets.RemoveIf(new UnitAuraCheck<WorldObject>(false, MonkSpells.SPELL_MONK_RENEWING_MIST_HOT, GetCaster().GetGUID()));
+		targets.RemoveIf(new UnitAuraCheck<WorldObject>(false, MonkSpells.RENEWING_MIST_HOT, GetCaster().GetGUID()));
 	}
 
 	public void BeforeCast()
 	{
-		if (GetCaster().GetCurrentSpell(CurrentSpellTypes.Channeled) && GetCaster().GetCurrentSpell(CurrentSpellTypes.Channeled).GetSpellInfo().Id == MonkSpells.SPELL_MONK_SOOTHING_MIST)
+		if (GetCaster().GetCurrentSpell(CurrentSpellTypes.Channeled) && GetCaster().GetCurrentSpell(CurrentSpellTypes.Channeled).GetSpellInfo().Id == MonkSpells.SOOTHING_MIST)
 		{
 			GetSpell().m_castFlagsEx = SpellCastFlagsEx.None;
 			var targets = GetCaster().GetCurrentSpell(CurrentSpellTypes.Channeled).m_targets;
@@ -38,8 +38,8 @@ public class spell_monk_vivify : SpellScript, IHasSpellEffects, ISpellAfterCast,
 		if (caster == null)
 			return;
 
-		if (caster.HasAura(MonkSpells.SPELL_LIFECYCLES))
-			caster.CastSpell(caster, MonkSpells.SPELL_MONK_LIFECYCLES_ENVELOPING_MIST, true);
+		if (caster.HasAura(MonkSpells.LIFECYCLES))
+			caster.CastSpell(caster, MonkSpells.LIFECYCLES_ENVELOPING_MIST, true);
 	}
 
 	public override void Register()

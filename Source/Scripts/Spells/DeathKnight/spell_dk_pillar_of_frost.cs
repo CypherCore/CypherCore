@@ -19,7 +19,7 @@ public class spell_dk_pillar_of_frost : AuraScript, IHasAuraEffects
 		var _player = GetTarget().ToPlayer();
 
 		if (_player != null)
-			_player.ApplySpellImmune(DeathKnightSpells.SPELL_DK_PILLAR_OF_FROST, SpellImmunity.Mechanic, Mechanics.Knockout, false);
+			_player.ApplySpellImmune(DeathKnightSpells.PILLAR_OF_FROST, SpellImmunity.Mechanic, Mechanics.Knockout, false);
 	}
 
 	private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
@@ -27,7 +27,7 @@ public class spell_dk_pillar_of_frost : AuraScript, IHasAuraEffects
 		var _player = GetTarget().ToPlayer();
 
 		if (_player != null)
-			_player.ApplySpellImmune(DeathKnightSpells.SPELL_DK_PILLAR_OF_FROST, SpellImmunity.Mechanic, Mechanics.Knockout, true);
+			_player.ApplySpellImmune(DeathKnightSpells.PILLAR_OF_FROST, SpellImmunity.Mechanic, Mechanics.Knockout, true);
 	}
 
 	public override void Register()

@@ -20,7 +20,7 @@ public class spell_pri_prayer_of_mending_heal : SpellScript, IHasSpellEffects
 
 		if (caster != null)
 		{
-			var aurEff = caster.GetAuraEffect(PriestSpells.SPELL_PRIEST_T9_HEALING_2P, 0);
+			var aurEff = caster.GetAuraEffect(PriestSpells.T9_HEALING_2P, 0);
 
 			if (aurEff != null)
 			{

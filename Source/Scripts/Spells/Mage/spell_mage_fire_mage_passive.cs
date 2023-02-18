@@ -14,8 +14,8 @@ public class spell_mage_fire_mage_passive : AuraScript, IHasAuraEffects
 {
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		// if (!Global.SpellMgr->GetSpellInfo(SPELL_MAGE_FIRE_MAGE_PASSIVE, Difficulty.None) ||
-		//    !Global.SpellMgr->GetSpellInfo(SPELL_MAGE_FIRE_BLAST, Difficulty.None))
+		// if (!Global.SpellMgr->GetSpellInfo(FIRE_MAGE_PASSIVE, Difficulty.None) ||
+		//    !Global.SpellMgr->GetSpellInfo(FIRE_BLAST, Difficulty.None))
 		//  return false;
 		return true;
 	}
@@ -40,7 +40,7 @@ public class spell_mage_fire_mage_passive : AuraScript, IHasAuraEffects
 		var mod = new SpellModifierByClassMask(aurEffect.GetBase());
 		mod.op      = SpellModOp.CritChance;
 		mod.type    = SpellModType.Flat;
-		mod.spellId = MageSpells.SPELL_MAGE_FIRE_MAGE_PASSIVE;
+		mod.spellId = MageSpells.FIRE_MAGE_PASSIVE;
 		mod.value   = 200;
 		mod.mask[0] = 0x2;
 

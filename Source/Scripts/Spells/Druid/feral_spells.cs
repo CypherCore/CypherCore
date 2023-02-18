@@ -25,16 +25,16 @@ public class feral_spells : ScriptObjectAutoAdd, IPlayerOnLogin
 		if (player.GetPrimarySpecialization() != TalentSpecialization.DruidCat)
 			return;
 
-		if (player.GetLevel() >= 5 && !player.HasSpell(DruidSpells.SPELL_DRUID_SHRED))
-			player.LearnSpell(DruidSpells.SPELL_DRUID_SHRED, false);
+		if (player.GetLevel() >= 5 && !player.HasSpell(DruidSpells.SHRED))
+			player.LearnSpell(DruidSpells.SHRED, false);
 
-		if (player.GetLevel() >= 20 && !player.HasSpell(DruidSpells.SPELL_DRUID_RIP))
-			player.LearnSpell(DruidSpells.SPELL_DRUID_RIP, false);
+		if (player.GetLevel() >= 20 && !player.HasSpell(DruidSpells.RIP))
+			player.LearnSpell(DruidSpells.RIP, false);
 
-		if (player.GetLevel() >= 24 && !player.HasSpell(DruidSpells.SPELL_DRUID_RAKE))
-			player.LearnSpell(DruidSpells.SPELL_DRUID_RAKE, false);
+		if (player.GetLevel() >= 24 && !player.HasSpell(DruidSpells.RAKE))
+			player.LearnSpell(DruidSpells.RAKE, false);
 
-		if (player.GetLevel() >= 32 && !player.HasSpell(DruidSpells.SPELL_DRUID_FEROCIOUS_BITE))
-			player.LearnSpell(DruidSpells.SPELL_DRUID_FEROCIOUS_BITE, false);
+		if (player.GetLevel() >= 32 && !player.HasSpell(DruidSpells.FEROCIOUS_BITE))
+			player.LearnSpell(DruidSpells.FEROCIOUS_BITE, false);
 	}
 }

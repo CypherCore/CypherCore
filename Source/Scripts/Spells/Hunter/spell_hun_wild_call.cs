@@ -17,7 +17,7 @@ public class spell_hun_wild_call : AuraScript, IHasAuraEffects
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
-		if (eventInfo.GetSpellInfo().Id == HunterSpells.SPELL_HUNTER_AUTO_SHOT && (eventInfo.GetHitMask() & ProcFlagsHit.Critical) != 0)
+		if (eventInfo.GetSpellInfo().Id == HunterSpells.AUTO_SHOT && (eventInfo.GetHitMask() & ProcFlagsHit.Critical) != 0)
 			return true;
 
 		return false;
@@ -28,8 +28,8 @@ public class spell_hun_wild_call : AuraScript, IHasAuraEffects
 		var player = GetCaster().ToPlayer();
 
 		if (player != null)
-			if (player.GetSpellHistory().HasCooldown(HunterSpells.SPELL_BARBED_SHOT))
-				player.GetSpellHistory().ResetCooldown(HunterSpells.SPELL_BARBED_SHOT, true);
+			if (player.GetSpellHistory().HasCooldown(HunterSpells.BARBED_SHOT))
+				player.GetSpellHistory().ResetCooldown(HunterSpells.BARBED_SHOT, true);
 	}
 
 	public override void Register()

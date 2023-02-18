@@ -17,14 +17,14 @@ public class spell_monk_storm_earth_and_fire : AuraScript, IHasAuraEffects
 	private void HandleApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
 		var target = GetTarget();
-		target.CastSpell(target, StormEarthAndFireSpells.SPELL_MONK_SEF_STORM_VISUAL, true);
-		target.CastSpell(target, StormEarthAndFireSpells.SPELL_MONK_SEF_SUMMON_EARTH, true);
-		target.CastSpell(target, StormEarthAndFireSpells.SPELL_MONK_SEF_SUMMON_FIRE, true);
+		target.CastSpell(target, StormEarthAndFireSpells.SEF_STORM_VISUAL, true);
+		target.CastSpell(target, StormEarthAndFireSpells.SEF_SUMMON_EARTH, true);
+		target.CastSpell(target, StormEarthAndFireSpells.SEF_SUMMON_FIRE, true);
 	}
 
 	private void HandleRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
-		GetTarget().RemoveAurasDueToSpell(StormEarthAndFireSpells.SPELL_MONK_SEF_STORM_VISUAL);
+		GetTarget().RemoveAurasDueToSpell(StormEarthAndFireSpells.SEF_STORM_VISUAL);
 
 		var fireSpirit = GetTarget().GetSummonedCreatureByEntry(StormEarthAndFireSpells.NPC_FIRE_SPIRIT);
 

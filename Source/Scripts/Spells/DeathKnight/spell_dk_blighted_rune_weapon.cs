@@ -18,7 +18,7 @@ public class spell_dk_blighted_rune_weapon : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (Global.SpellMgr.GetSpellInfo(DeathKnightSpells.SPELL_DK_FESTERING_WOUND, Difficulty.None) != null)
+		if (Global.SpellMgr.GetSpellInfo(DeathKnightSpells.FESTERING_WOUND, Difficulty.None) != null)
 			return false;
 
 		return true;
@@ -29,7 +29,7 @@ public class spell_dk_blighted_rune_weapon : SpellScript, IHasSpellEffects
 		var target = GetHitUnit();
 
 		if (target != null)
-			GetCaster().CastSpell(target, DeathKnightSpells.SPELL_DK_FESTERING_WOUND, true);
+			GetCaster().CastSpell(target, DeathKnightSpells.FESTERING_WOUND, true);
 	}
 
 	public override void Register()

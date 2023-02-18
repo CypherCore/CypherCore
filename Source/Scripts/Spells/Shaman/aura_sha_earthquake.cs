@@ -17,15 +17,15 @@ namespace Scripts.Spells.Shaman
 
 		public override bool Validate(SpellInfo UnnamedParameter)
 		{
-			return ValidateSpellInfo(ShamanSpells.SPELL_SHAMAN_EARTHQUAKE);
+			return ValidateSpellInfo(ShamanSpells.EARTHQUAKE);
 		}
 
 		private void HandlePeriodic(AuraEffect UnnamedParameter)
 		{
-			var at = GetTarget().GetAreaTrigger(ShamanSpells.SPELL_SHAMAN_EARTHQUAKE);
+			var at = GetTarget().GetAreaTrigger(ShamanSpells.EARTHQUAKE);
 
 			if (at != null)
-				GetTarget().CastSpell(at.GetPosition(), ShamanSpells.SPELL_SHAMAN_EARTHQUAKE_TICK, true);
+				GetTarget().CastSpell(at.GetPosition(), ShamanSpells.EARTHQUAKE_TICK, true);
 		}
 
 		public override void Register()

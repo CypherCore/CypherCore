@@ -19,7 +19,7 @@ public class spell_hun_mortal_wounds : AuraScript, IHasAuraEffects, IAuraCheckPr
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
-		if ((eventInfo.GetHitMask() & ProcFlagsHit.None) != 0 && eventInfo.GetSpellInfo().Id == HunterSpells.SPELL_HUNTER_LACERATE)
+		if ((eventInfo.GetHitMask() & ProcFlagsHit.None) != 0 && eventInfo.GetSpellInfo().Id == HunterSpells.LACERATE)
 			return true;
 
 		return false;
@@ -33,7 +33,7 @@ public class spell_hun_mortal_wounds : AuraScript, IHasAuraEffects, IAuraCheckPr
 
 		if (player != null)
 		{
-			var chargeCatId = Global.SpellMgr.GetSpellInfo(HunterSpells.SPELL_HUNTER_MONGOOSE_BITE, Difficulty.None).ChargeCategoryId;
+			var chargeCatId = Global.SpellMgr.GetSpellInfo(HunterSpells.MONGOOSE_BITE, Difficulty.None).ChargeCategoryId;
 
 			var mongooseBite = CliDB.SpellCategoryStorage.LookupByKey(chargeCatId);
 

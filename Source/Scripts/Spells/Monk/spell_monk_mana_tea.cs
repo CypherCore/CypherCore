@@ -21,7 +21,7 @@ public class spell_monk_mana_tea : SpellScript, ISpellAfterCast, ISpellBeforeCas
 		{
 			var stacks = 0;
 
-			var manaTeaStacks = _player.GetAura(MonkSpells.SPELL_MONK_MANA_TEA_STACKS);
+			var manaTeaStacks = _player.GetAura(MonkSpells.MANA_TEA_STACKS);
 
 			if (manaTeaStacks != null)
 			{
@@ -33,7 +33,7 @@ public class spell_monk_mana_tea : SpellScript, ISpellAfterCast, ISpellBeforeCas
 				var mod = new SpellModifierByClassMask(manaTeaStacks);
 				mod.op                                = SpellModOp.Duration;
 				mod.type                              = SpellModType.Flat;
-				mod.spellId                           = MonkSpells.SPELL_MONK_MANA_TEA_REGEN;
+				mod.spellId                           = MonkSpells.MANA_TEA_REGEN;
 				((SpellModifierByClassMask)mod).value = newDuration;
 				mod.mask[1]                           = 0x200000;
 				mod.mask[2]                           = 0x1;

@@ -19,8 +19,8 @@ public class spell_dk_outbreak : SpellScript, IHasSpellEffects
 		var target = GetHitUnit();
 
 		if (target != null)
-			if (!target.HasAura(DeathKnightSpells.SPELL_DK_OUTBREAK_PERIODIC, GetCaster().GetGUID()))
-				GetCaster().CastSpell(target, DeathKnightSpells.SPELL_DK_OUTBREAK_PERIODIC, true);
+			if (!target.HasAura(DeathKnightSpells.OUTBREAK_PERIODIC, GetCaster().GetGUID()))
+				GetCaster().CastSpell(target, DeathKnightSpells.OUTBREAK_PERIODIC, true);
 	}
 
 	public override void Register()

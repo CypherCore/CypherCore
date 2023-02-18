@@ -5,5 +5,5 @@ namespace Scripts.Spells.Druid;
 
 public struct SavageRoarSpells
 {
-	public const uint SPELL_DRUID_SAVAGE_ROAR = 62071;
+	public const uint SAVAGE_ROAR = 62071;
 }

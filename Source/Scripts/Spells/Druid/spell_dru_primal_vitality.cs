@@ -13,9 +13,9 @@ namespace Scripts.Spells.Druid;
 [SpellScript(202808)]
 public class spell_dru_primal_vitality : AuraScript, IHasAuraEffects
 {
-	private const int SPELL_DRUID_PRIMAL_VITALITY_PASSIVE = 202808;
-	private const int SPELL_DRUID_PRIMAL_VITALITY_EFFECT = 202812;
-	private const int SPELL_DRUID_PROWL = 5215;
+	private const int PRIMAL_VITALITY_PASSIVE = 202808;
+	private const int PRIMAL_VITALITY_EFFECT = 202812;
+	private const int PROWL = 5215;
 
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
@@ -27,7 +27,7 @@ public class spell_dru_primal_vitality : AuraScript, IHasAuraEffects
 		if (eventInfo.GetDamageInfo() != null)
 			return false;
 
-		if (eventInfo.GetSpellInfo().Id != SPELL_DRUID_PROWL)
+		if (eventInfo.GetSpellInfo().Id != PROWL)
 			return false;
 
 		return true;
@@ -40,8 +40,8 @@ public class spell_dru_primal_vitality : AuraScript, IHasAuraEffects
 		var target = eventInfo.GetProcTarget();
 
 		if (target != null)
-			if (!target.HasAura(SPELL_DRUID_PRIMAL_VITALITY_EFFECT))
-				target.AddAura(SPELL_DRUID_PRIMAL_VITALITY_EFFECT, target);
+			if (!target.HasAura(PRIMAL_VITALITY_EFFECT))
+				target.AddAura(PRIMAL_VITALITY_EFFECT, target);
 	}
 
 	public override void Register()

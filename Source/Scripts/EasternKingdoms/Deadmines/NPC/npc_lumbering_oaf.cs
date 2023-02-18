@@ -90,7 +90,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
                 //    if (_bunny = me.FindNearestCreature(DMCreatures.NPC_GENERAL_PURPOSE_BUNNY_JMF, 100.0f))
                 //    {
-                //        me.CastSpell(me, IsHeroic() ? eSpels.SPELL_OAF_SMASH_H : eSpels.SPELL_OAF_SMASH);
+                //        me.CastSpell(me, IsHeroic() ? eSpels.OAF_SMASH_H : eSpels.OAF_SMASH);
 
                 //        me.SummonCreature(DMCreatures.NPC_MINE_RAT, -303.193481f, -486.287140f, 49.185917f, 2.152038f, TempSummonType.TimedDespawn, TimeSpan.FromMilliseconds(360000));
                 //        me.SummonCreature(DMCreatures.NPC_MINE_RAT, -300.496674f, -490.433746f, 49.073387f, 5.243889f, TempSummonType.TimedDespawn, TimeSpan.FromMilliseconds( 360000));
@@ -139,7 +139,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
                         Unit target = SelectTarget(SelectTargetMethod.Random, 0, 150, true);
                         if (target != null)
                         {
-                            target.CastSpell(me, eSpels.SPELL_RIDE_VEHICLE_HARDCODED);
+                            target.CastSpell(me, eSpels.RIDE_VEHICLE_HARDCODED);
                         }
                         _events.ScheduleEvent(HelOaf_Events.EVENT_MOVE_TO_POINT, TimeSpan.FromMilliseconds(500));
                         break;

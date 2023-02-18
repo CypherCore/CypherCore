@@ -30,7 +30,7 @@ public class spell_mage_combustion : AuraScript, IHasAuraEffects
 
 	private void HandleRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
-		GetCaster().RemoveAurasDueToSpell(MageSpells.SPELL_INFERNO);
+		GetCaster().RemoveAurasDueToSpell(MageSpells.INFERNO);
 	}
 
 	public override void Register()

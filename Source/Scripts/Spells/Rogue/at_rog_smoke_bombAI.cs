@@ -25,7 +25,7 @@ public class at_rog_smoke_bombAI : AreaTriggerAI
 			return;
 
 		if (caster.IsValidAssistTarget(unit))
-			caster.CastSpell(unit, RogueSpells.SPELL_ROGUE_SMOKE_BOMB_AURA, true);
+			caster.CastSpell(unit, RogueSpells.SMOKE_BOMB_AURA, true);
 	}
 
 	public override void OnUnitExit(Unit unit)
@@ -38,7 +38,7 @@ public class at_rog_smoke_bombAI : AreaTriggerAI
 		if (!caster.ToPlayer())
 			return;
 
-		if (unit.HasAura(RogueSpells.SPELL_ROGUE_SMOKE_BOMB_AURA))
-			unit.RemoveAurasDueToSpell(RogueSpells.SPELL_ROGUE_SMOKE_BOMB_AURA);
+		if (unit.HasAura(RogueSpells.SMOKE_BOMB_AURA))
+			unit.RemoveAurasDueToSpell(RogueSpells.SMOKE_BOMB_AURA);
 	}
 }

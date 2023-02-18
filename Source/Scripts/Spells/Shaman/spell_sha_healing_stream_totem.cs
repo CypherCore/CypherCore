@@ -19,11 +19,11 @@ namespace Scripts.Spells.Shaman
 			if (caster == null)
 				return;
 
-			if (caster.HasAura(ShamanSpells.SPELL_SHAMAN_CARESS_OF_THE_TIDEMOTHER))
+			if (caster.HasAura(ShamanSpells.CARESS_OF_THE_TIDEMOTHER))
 			{
-				var auraeffx = caster.GetAura(ShamanSpells.SPELL_SHAMAN_CARESS_OF_THE_TIDEMOTHER).GetEffect(0);
+				var auraeffx = caster.GetAura(ShamanSpells.CARESS_OF_THE_TIDEMOTHER).GetEffect(0);
 				var amount   = auraeffx.GetAmount();
-				caster.CastSpell(caster, ShamanSpells.SPELL_SHAMAN_CARESS_OF_THE_TIDEMOTHER_AURA, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, amount));
+				caster.CastSpell(caster, ShamanSpells.CARESS_OF_THE_TIDEMOTHER_AURA, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, amount));
 			}
 		}
 	}

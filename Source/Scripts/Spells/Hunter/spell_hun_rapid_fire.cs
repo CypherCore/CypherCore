@@ -21,7 +21,7 @@ public class spell_hun_rapid_fire : AuraScript, IHasAuraEffects
 		if (target != null)
 			if (GetCaster())
 			{
-				GetCaster().CastSpell(target, HunterSpells.SPELL_HUNTER_RAPID_FIRE_MISSILE, true);
+				GetCaster().CastSpell(target, HunterSpells.RAPID_FIRE_MISSILE, true);
 
 				if (GetCaster().GetPowerPct(PowerType.Focus) != 100)
 					GetCaster().ModifyPower(PowerType.Focus, +1);

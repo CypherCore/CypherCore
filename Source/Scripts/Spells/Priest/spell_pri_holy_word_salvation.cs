@@ -22,7 +22,7 @@ public class spell_pri_holy_word_salvation : SpellScript, ISpellAfterCast
 		foreach (var friendPlayers in friendlyList)
 			if (friendPlayers.IsFriendlyTo(caster))
 			{
-				caster.CastSpell(friendPlayers, PriestSpells.SPELL_PRIEST_RENEW, true);
+				caster.CastSpell(friendPlayers, PriestSpells.RENEW, true);
 
 				var prayer = friendPlayers.GetAura(PriestSpells.PrayerOfMendingAura);
 

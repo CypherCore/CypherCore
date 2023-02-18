@@ -16,7 +16,7 @@ public class spell_monk_tiger_palm : SpellScript, IHasSpellEffects
 
 	private void HandleHit(uint UnnamedParameter)
 	{
-		var powerStrikes = GetCaster().GetAura(MonkSpells.SPELL_MONK_POWER_STRIKES_AURA);
+		var powerStrikes = GetCaster().GetAura(MonkSpells.POWER_STRIKES_AURA);
 
 		if (powerStrikes != null)
 		{

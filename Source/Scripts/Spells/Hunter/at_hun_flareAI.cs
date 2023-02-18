@@ -34,7 +34,7 @@ public class at_hun_flareAI : AreaTriggerAI
 			tempSumm.SetFaction(caster.GetFaction());
 			tempSumm.SetSummonerGUID(caster.GetGUID());
 			PhasingHandler.InheritPhaseShift(tempSumm, caster);
-			caster.CastSpell(tempSumm, HunterSpells.SPELL_HUNTER_FLARE_EFFECT, true);
+			caster.CastSpell(tempSumm, HunterSpells.FLARE_EFFECT, true);
 		}
 	}
 }

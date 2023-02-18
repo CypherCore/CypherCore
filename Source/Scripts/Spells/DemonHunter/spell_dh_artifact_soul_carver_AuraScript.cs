@@ -22,7 +22,7 @@ public class spell_dh_artifact_soul_carver_AuraScript : AuraScript, IHasAuraEffe
 		if (caster == null)
 			return;
 
-		caster.CastSpell(caster, ShatteredSoulsSpells.SPELL_DH_SHATTERED_SOULS_MISSILE, SpellValueMod.BasePoint0, (int)ShatteredSoulsSpells.SPELL_DH_LESSER_SOUL_SHARD, true);
+		caster.CastSpell(caster, ShatteredSoulsSpells.SHATTERED_SOULS_MISSILE, SpellValueMod.BasePoint0, (int)ShatteredSoulsSpells.LESSER_SOUL_SHARD, true);
 	}
 
 	public override void Register()

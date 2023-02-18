@@ -12,7 +12,7 @@ using Game.Spells;
 
 namespace Scripts.Spells.Priest;
 
-[Script] // 155793 - prayer of mending (Jump) - SPELL_PRIEST_PRAYER_OF_MENDING_JUMP
+[Script] // 155793 - prayer of mending (Jump) - PRAYER_OF_MENDING_JUMP
 internal class spell_pri_prayer_of_mending_jump : SpellScript, IHasSpellEffects
 {
 	private SpellEffectInfo _healEffectDummy;

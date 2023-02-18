@@ -21,7 +21,7 @@ public class spell_dk_army_periodic_taunt : SpellScript, ISpellCheckCast
 		var owner = GetCaster().GetOwner();
 
 		if (owner != null)
-			if (!owner.HasAura(DeathKnightSpells.SPELL_DK_GLYPH_OF_ARMY_OF_THE_DEAD))
+			if (!owner.HasAura(DeathKnightSpells.GLYPH_OF_ARMY_OF_THE_DEAD))
 				return SpellCastResult.SpellCastOk;
 
 		return SpellCastResult.SpellUnavailable;

@@ -21,7 +21,7 @@ namespace Scripts.Spells.Shaman
 
 		public struct SpellsUsed
 		{
-			public const uint SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB = 201633;
+			public const uint EARTHEN_SHIELD_ABSORB = 201633;
 		}
 
 		public override void OnCreate()
@@ -37,7 +37,7 @@ namespace Scripts.Spells.Shaman
 
 				if (caster.IsFriendlyTo(target) || target == caster.GetOwner())
 					if (!target.IsTotem())
-						caster.CastSpell(target, SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB, true);
+						caster.CastSpell(target, SpellsUsed.EARTHEN_SHIELD_ABSORB, true);
 			}
 		}
 
@@ -52,7 +52,7 @@ namespace Scripts.Spells.Shaman
 				return;
 
 			if (caster.IsFriendlyTo(unit) || unit == caster.GetOwner())
-				caster.CastSpell(unit, SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB, true);
+				caster.CastSpell(unit, SpellsUsed.EARTHEN_SHIELD_ABSORB, true);
 		}
 
 		public override void OnUnitExit(Unit unit)
@@ -65,8 +65,8 @@ namespace Scripts.Spells.Shaman
 			if (unit.IsTotem())
 				return;
 
-			if (unit.HasAura(SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB) && unit.GetAura(SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB).GetCaster() == caster)
-				unit.RemoveAura(SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB);
+			if (unit.HasAura(SpellsUsed.EARTHEN_SHIELD_ABSORB) && unit.GetAura(SpellsUsed.EARTHEN_SHIELD_ABSORB).GetCaster() == caster)
+				unit.RemoveAura(SpellsUsed.EARTHEN_SHIELD_ABSORB);
 		}
 
 		public override void OnRemove()
@@ -82,8 +82,8 @@ namespace Scripts.Spells.Shaman
 
 				if (target != null)
 					if (!target.IsTotem())
-						if (target.HasAura(SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB) && target.GetAura(SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB).GetCaster() == caster)
-							target.RemoveAura(SpellsUsed.SPELL_SHAMAN_EARTHEN_SHIELD_ABSORB);
+						if (target.HasAura(SpellsUsed.EARTHEN_SHIELD_ABSORB) && target.GetAura(SpellsUsed.EARTHEN_SHIELD_ABSORB).GetCaster() == caster)
+							target.RemoveAura(SpellsUsed.EARTHEN_SHIELD_ABSORB);
 			}
 		}
 	}

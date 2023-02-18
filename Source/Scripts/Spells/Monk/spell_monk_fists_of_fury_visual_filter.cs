@@ -11,7 +11,7 @@ using Game.Scripting.Interfaces.ISpell;
 
 namespace Scripts.Spells.Monk;
 
-[SpellScript(MonkSpells.SPELL_MONK_FISTS_OF_FURY)]
+[SpellScript(MonkSpells.FISTS_OF_FURY)]
 public class spell_monk_fists_of_fury_visual_filter : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();

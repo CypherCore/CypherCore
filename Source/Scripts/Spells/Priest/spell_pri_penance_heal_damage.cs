@@ -20,20 +20,20 @@ public class spell_pri_penance_heal_damage : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(PriestSpells.SPELL_PRIEST_POWER_OF_THE_DARK_SIDE_MARKER, PriestSpells.SPELL_PRIEST_PENANCE_HEAL);
+		return ValidateSpellInfo(PriestSpells.POWER_OF_THE_DARK_SIDE_MARKER, PriestSpells.PENANCE_HEAL);
 	}
 
 	private void HandleDummy(uint UnnamedParameter)
 	{
-		if (GetCaster().GetAuraEffect(PriestSpells.SPELL_PRIEST_CONTRITION, 0) != null)
-			foreach (var auApp in GetCaster().GetAppliedAuras().LookupByKey(PriestSpells.SPELL_PRIEST_ATONEMENT_AURA))
-				GetCaster().CastSpell(auApp.GetTarget(), PriestSpells.SPELL_PRIEST_CONTRITION_HEAL, true);
+		if (GetCaster().GetAuraEffect(PriestSpells.CONTRITION, 0) != null)
+			foreach (var auApp in GetCaster().GetAppliedAuras().LookupByKey(PriestSpells.ATONEMENT_AURA))
+				GetCaster().CastSpell(auApp.GetTarget(), PriestSpells.CONTRITION_HEAL, true);
 
-		var powerOfTheDarkSide = GetCaster().GetAuraEffect(PriestSpells.SPELL_PRIEST_POWER_OF_THE_DARK_SIDE_MARKER, 0);
+		var powerOfTheDarkSide = GetCaster().GetAuraEffect(PriestSpells.POWER_OF_THE_DARK_SIDE_MARKER, 0);
 
 		if (powerOfTheDarkSide != null)
 		{
-			if (GetSpellInfo().Id == PriestSpells.SPELL_PRIEST_PENANCE_HEAL)
+			if (GetSpellInfo().Id == PriestSpells.PENANCE_HEAL)
 			{
 				var heal = GetHitHeal();
 				MathFunctions.AddPct(ref heal, powerOfTheDarkSide.GetAmount());
@@ -50,10 +50,10 @@ public class spell_pri_penance_heal_damage : SpellScript, IHasSpellEffects
 
 	public override void Register()
 	{
-		if (ScriptSpellId == PriestSpells.SPELL_PRIEST_PENANCE_HEAL)
+		if (ScriptSpellId == PriestSpells.PENANCE_HEAL)
 			SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Heal, SpellScriptHookType.EffectHitTarget));
 
-		if (ScriptSpellId == PriestSpells.SPELL_PRIEST_PENANCE_DAMAGE)
+		if (ScriptSpellId == PriestSpells.PENANCE_DAMAGE)
 			SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
 	}
 }

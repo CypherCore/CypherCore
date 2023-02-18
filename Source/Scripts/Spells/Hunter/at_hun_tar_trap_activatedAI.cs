@@ -14,7 +14,7 @@ public class at_hun_tar_trap_activatedAI : AreaTriggerAI
 
 	public enum UsedSpells
 	{
-		SPELL_HUNTER_TAR_TRAP_SLOW = 135299
+		TAR_TRAP_SLOW = 135299
 	}
 
 	public at_hun_tar_trap_activatedAI(AreaTrigger areatrigger) : base(areatrigger)
@@ -37,7 +37,7 @@ public class at_hun_tar_trap_activatedAI : AreaTriggerAI
 			var target = ObjectAccessor.Instance.GetUnit(caster, itr);
 
 			if (!caster.IsFriendlyTo(target))
-				caster.CastSpell(target, UsedSpells.SPELL_HUNTER_TAR_TRAP_SLOW, true);
+				caster.CastSpell(target, UsedSpells.TAR_TRAP_SLOW, true);
 		}
 	}
 
@@ -52,7 +52,7 @@ public class at_hun_tar_trap_activatedAI : AreaTriggerAI
 			return;
 
 		if (!caster.IsFriendlyTo(unit))
-			caster.CastSpell(unit, UsedSpells.SPELL_HUNTER_TAR_TRAP_SLOW, true);
+			caster.CastSpell(unit, UsedSpells.TAR_TRAP_SLOW, true);
 	}
 
 	public override void OnUnitExit(Unit unit)
@@ -65,8 +65,8 @@ public class at_hun_tar_trap_activatedAI : AreaTriggerAI
 		if (!caster.ToPlayer())
 			return;
 
-		if (unit.HasAura(UsedSpells.SPELL_HUNTER_TAR_TRAP_SLOW) && unit.GetAura(UsedSpells.SPELL_HUNTER_TAR_TRAP_SLOW).GetCaster() == caster)
-			unit.RemoveAura(UsedSpells.SPELL_HUNTER_TAR_TRAP_SLOW);
+		if (unit.HasAura(UsedSpells.TAR_TRAP_SLOW) && unit.GetAura(UsedSpells.TAR_TRAP_SLOW).GetCaster() == caster)
+			unit.RemoveAura(UsedSpells.TAR_TRAP_SLOW);
 	}
 
 	public override void OnRemove()
@@ -83,8 +83,8 @@ public class at_hun_tar_trap_activatedAI : AreaTriggerAI
 		{
 			var target = ObjectAccessor.Instance.GetUnit(caster, itr);
 
-			if (target.HasAura(UsedSpells.SPELL_HUNTER_TAR_TRAP_SLOW) && target.GetAura(UsedSpells.SPELL_HUNTER_TAR_TRAP_SLOW).GetCaster() == caster)
-				target.RemoveAura(UsedSpells.SPELL_HUNTER_TAR_TRAP_SLOW);
+			if (target.HasAura(UsedSpells.TAR_TRAP_SLOW) && target.GetAura(UsedSpells.TAR_TRAP_SLOW).GetCaster() == caster)
+				target.RemoveAura(UsedSpells.TAR_TRAP_SLOW);
 		}
 	}
 }

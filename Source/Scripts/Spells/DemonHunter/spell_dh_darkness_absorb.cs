@@ -28,7 +28,7 @@ public class spell_dh_darkness_absorb : AuraScript, IHasAuraEffects
 		if (caster == null)
 			return;
 
-		var chance = GetSpellInfo().GetEffect(1).BasePoints + caster.GetAuraEffectAmount(ShatteredSoulsSpells.SPELL_DH_COVER_OF_DARKNESS, 0);
+		var chance = GetSpellInfo().GetEffect(1).BasePoints + caster.GetAuraEffectAmount(ShatteredSoulsSpells.COVER_OF_DARKNESS, 0);
 
 		if (RandomHelper.randChance(chance))
 			absorbAmount = dmgInfo.GetDamage();

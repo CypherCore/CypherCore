@@ -17,13 +17,13 @@ public class spell_druid_rend_and_tear : AuraScript, IHasAuraEffects
 
 	private struct Spells
 	{
-		public static readonly uint SPELL_DRUID_REND_AND_TEAR = 204053;
-		public static readonly uint SPELL_DRUID_TRASH_DOT = 192090;
+		public static readonly uint REND_AND_TEAR = 204053;
+		public static readonly uint TRASH_DOT = 192090;
 	}
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(Spells.SPELL_DRUID_REND_AND_TEAR, Spells.SPELL_DRUID_TRASH_DOT);
+		return ValidateSpellInfo(Spells.REND_AND_TEAR, Spells.TRASH_DOT);
 	}
 
 	private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
@@ -42,7 +42,7 @@ public class spell_druid_rend_and_tear : AuraScript, IHasAuraEffects
 
 		if (caster.GetShapeshiftForm() == ShapeShiftForm.BearForm)
 		{
-			var trashDOT = attacker.GetAura(Spells.SPELL_DRUID_TRASH_DOT, caster.GetGUID());
+			var trashDOT = attacker.GetAura(Spells.TRASH_DOT, caster.GetGUID());
 
 			if (trashDOT != null)
 				absorbAmount = MathFunctions.CalculatePct(dmgInfo.GetDamage(), trashDOT.GetStackAmount() * GetSpellInfo().GetEffect(1).BasePoints);

@@ -27,7 +27,7 @@ public class spell_dk_death_siphon : SpellScript, IHasSpellEffects
 				var   args = new CastSpellExtraArgs();
 				args.AddSpellMod(SpellValueMod.BasePoint0, (int)bp);
 				args.SetTriggerFlags(TriggerCastFlags.FullMask);
-				_player.CastSpell(_player, DeathKnightSpells.SPELL_DK_DEATH_SIPHON_HEAL, args);
+				_player.CastSpell(_player, DeathKnightSpells.DEATH_SIPHON_HEAL, args);
 			}
 	}
 

@@ -18,7 +18,7 @@ public class spell_hun_sticky_bomb : AuraScript, IHasAuraEffects
 	{
 		var caster = GetCaster();
 
-		caster.CastSpell(GetTarget(), HunterSpells.SPELL_HUNTER_STICKY_BOMB_PROC, true);
+		caster.CastSpell(GetTarget(), HunterSpells.STICKY_BOMB_PROC, true);
 	}
 
 	public override void Register()

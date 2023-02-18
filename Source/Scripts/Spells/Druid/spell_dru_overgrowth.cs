@@ -12,10 +12,10 @@ namespace Scripts.Spells.Druid;
 [SpellScript(203651)]
 public class spell_dru_overgrowth : SpellScript, IHasSpellEffects
 {
-	private const int SPELL_DRUID_REJUVENATION = 774;
-	private const int SPELL_DRUID_WILD_GROWTH = 48438;
-	private const int SPELL_DRUID_LIFE_BLOOM = 33763;
-	private const int SPELL_DRUID_REGROWTH = 8936;
+	private const int REJUVENATION = 774;
+	private const int WILD_GROWTH = 48438;
+	private const int LIFE_BLOOM = 33763;
+	private const int REGROWTH = 8936;
 
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
@@ -29,10 +29,10 @@ public class spell_dru_overgrowth : SpellScript, IHasSpellEffects
 
 			if (target != null)
 			{
-				caster.AddAura(SPELL_DRUID_REJUVENATION, target);
-				caster.AddAura(SPELL_DRUID_WILD_GROWTH, target);
-				caster.AddAura(SPELL_DRUID_LIFE_BLOOM, target);
-				caster.AddAura(SPELL_DRUID_REGROWTH, target);
+				caster.AddAura(REJUVENATION, target);
+				caster.AddAura(WILD_GROWTH, target);
+				caster.AddAura(LIFE_BLOOM, target);
+				caster.AddAura(REGROWTH, target);
 			}
 		}
 	}

@@ -27,7 +27,7 @@ namespace Scripts.EasternKingdoms.Deadmines.GameObjects
 
         public override bool OnGossipSelect(Player player, uint menuId, uint action)
         {
-            if (player.HasAura(DMSharedSpells.SPELL_NIGHTMARE_ELIXIR))
+            if (player.HasAura(DMSharedSpells.NIGHTMARE_ELIXIR))
             {
                 return false;
             }
@@ -51,7 +51,7 @@ namespace Scripts.EasternKingdoms.Deadmines.GameObjects
 
         public override bool OnGossipHello(Player player)
         {
-            if (player.HasAura(DMSharedSpells.SPELL_NIGHTMARE_ELIXIR))
+            if (player.HasAura(DMSharedSpells.NIGHTMARE_ELIXIR))
             {
                 return false;
             }

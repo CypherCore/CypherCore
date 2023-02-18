@@ -16,7 +16,7 @@ public class spell_monk_touch_of_karma_buff : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(MonkSpells.SPELL_MONK_TOUCH_OF_KARMA);
+		return ValidateSpellInfo(MonkSpells.TOUCH_OF_KARMA);
 	}
 
 	private void HandleRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
@@ -26,7 +26,7 @@ public class spell_monk_touch_of_karma_buff : AuraScript, IHasAuraEffects
 		if (caster == null)
 			return;
 
-		foreach (var aurApp in caster.GetAppliedAuras().LookupByKey(MonkSpells.SPELL_MONK_TOUCH_OF_KARMA))
+		foreach (var aurApp in caster.GetAppliedAuras().LookupByKey(MonkSpells.TOUCH_OF_KARMA))
 		{
 			var targetAura = aurApp.GetBase();
 

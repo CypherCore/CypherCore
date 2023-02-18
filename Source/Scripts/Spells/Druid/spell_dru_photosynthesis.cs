@@ -16,14 +16,14 @@ public class spell_dru_photosynthesis : AuraScript, IHasAuraEffects
 
 	private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
-		////  if (!GetCaster()->HasAura(SPELL_DRU_PHOTOSYNTHESIS_MOD_HEAL_TICKS))
-		//    GetCaster()->AddAura(SPELL_DRU_PHOTOSYNTHESIS_MOD_HEAL_TICKS);
+		////  if (!GetCaster()->HasAura(PHOTOSYNTHESIS_MOD_HEAL_TICKS))
+		//    GetCaster()->AddAura(PHOTOSYNTHESIS_MOD_HEAL_TICKS);
 	}
 
 	private void OnRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
-		if (GetCaster().HasAura(DruidSpells.SPELL_DRU_PHOTOSYNTHESIS_MOD_HEAL_TICKS))
-			GetCaster().RemoveAura(DruidSpells.SPELL_DRU_PHOTOSYNTHESIS_MOD_HEAL_TICKS);
+		if (GetCaster().HasAura(DruidSpells.PHOTOSYNTHESIS_MOD_HEAL_TICKS))
+			GetCaster().RemoveAura(DruidSpells.PHOTOSYNTHESIS_MOD_HEAL_TICKS);
 	}
 
 	public override void Register()

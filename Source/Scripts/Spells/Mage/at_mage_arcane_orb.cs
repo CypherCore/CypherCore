@@ -20,6 +20,6 @@ public class at_mage_arcane_orb : AreaTriggerAI
 
 		if (caster != null)
 			if (caster.IsValidAttackTarget(unit))
-				caster.CastSpell(unit, MageSpells.SPELL_MAGE_ARCANE_ORB_DAMAGE, true);
+				caster.CastSpell(unit, MageSpells.ARCANE_ORB_DAMAGE, true);
 	}
 }

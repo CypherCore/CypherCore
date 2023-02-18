@@ -24,7 +24,7 @@ public class spell_dh_chaos_cleave : AuraScript, IHasAuraEffects
 			return;
 
 		var damage = MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount());
-		caster.CastSpell(caster, DemonHunterSpells.SPELL_DH_CHAOS_CLEAVE_PROC, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)damage));
+		caster.CastSpell(caster, DemonHunterSpells.CHAOS_CLEAVE_PROC, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)damage));
 	}
 
 	public override void Register()

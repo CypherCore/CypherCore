@@ -18,7 +18,7 @@ public class spell_hun_rangers_net : AuraScript, IHasAuraEffects
 	{
 		var caster = GetCaster();
 
-		caster.CastSpell(GetTarget(), HunterSpells.SPELL_HUNTER_RANGERS_NET_INCREASE_SPEED, true);
+		caster.CastSpell(GetTarget(), HunterSpells.RANGERS_NET_INCREASE_SPEED, true);
 	}
 
 	public override void Register()

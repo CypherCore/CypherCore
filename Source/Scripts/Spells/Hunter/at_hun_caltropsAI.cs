@@ -15,7 +15,7 @@ public class at_hun_caltropsAI : AreaTriggerAI
 
 	public enum UsedSpells
 	{
-		SPELL_HUNTER_CALTROPS_AURA = 194279
+		CALTROPS_AURA = 194279
 	}
 
 	public at_hun_caltropsAI(AreaTrigger areatrigger) : base(areatrigger)
@@ -46,7 +46,7 @@ public class at_hun_caltropsAI : AreaTriggerAI
 
 			if (unit != null)
 				if (!caster.IsFriendlyTo(unit))
-					caster.CastSpell(unit, UsedSpells.SPELL_HUNTER_CALTROPS_AURA, true);
+					caster.CastSpell(unit, UsedSpells.CALTROPS_AURA, true);
 		}
 
 		timeInterval -= 1000;

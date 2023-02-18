@@ -66,7 +66,7 @@ internal class spell_monk_stagger : AuraScript, IHasAuraEffects
 		// Prevent default Action (which would remove the aura)
 		PreventDefaultAction();
 
-		// make sure Damage doesn't come from stagger Damage spell SPELL_MONK_STAGGER_DAMAGE_AURA
+		// make sure Damage doesn't come from stagger Damage spell STAGGER_DAMAGE_AURA
 		var dmgSpellInfo = dmgInfo.GetSpellInfo();
 
 		if (dmgSpellInfo != null)

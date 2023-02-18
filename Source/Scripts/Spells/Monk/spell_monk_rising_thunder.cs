@@ -10,14 +10,14 @@ using Game.Spells;
 
 namespace Scripts.Spells.Monk;
 
-[SpellScript(MonkSpells.SPELL_MONK_RISING_THUNDER)]
+[SpellScript(MonkSpells.RISING_THUNDER)]
 public class spell_monk_rising_thunder : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (Global.SpellMgr.GetSpellInfo(MonkSpells.SPELL_MONK_RISING_THUNDER, Difficulty.None) != null)
+		if (Global.SpellMgr.GetSpellInfo(MonkSpells.RISING_THUNDER, Difficulty.None) != null)
 			return false;
 
 		return true;
@@ -27,7 +27,7 @@ public class spell_monk_rising_thunder : AuraScript, IHasAuraEffects
 	{
 		var caster = GetCaster();
 
-		caster.ToPlayer().GetSpellHistory().ResetCooldown(MonkSpells.SPELL_MONK_THUNDER_FOCUS_TEA, true);
+		caster.ToPlayer().GetSpellHistory().ResetCooldown(MonkSpells.THUNDER_FOCUS_TEA, true);
 	}
 
 	public override void Register()

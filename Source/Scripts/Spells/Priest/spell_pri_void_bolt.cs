@@ -16,7 +16,7 @@ public class spell_pri_void_bolt : SpellScript, IHasSpellEffects
 
 	private void HandleEffectScriptEffect(uint UnnamedParameter)
 	{
-		var voidBoltDurationBuffAura = GetCaster().GetAura(PriestSpells.SPELL_PRIEST_VOID_BOLT_DURATION);
+		var voidBoltDurationBuffAura = GetCaster().GetAura(PriestSpells.VOID_BOLT_DURATION);
 
 		if (voidBoltDurationBuffAura != null)
 		{
@@ -26,12 +26,12 @@ public class spell_pri_void_bolt : SpellScript, IHasSpellEffects
 			{
 				var durationIncreaseMs = voidBoltDurationBuffAura.GetEffect(0).GetBaseAmount();
 
-				var pain = unit.GetAura(PriestSpells.SPELL_PRIEST_SHADOW_WORD_PAIN, GetCaster().GetGUID());
+				var pain = unit.GetAura(PriestSpells.SHADOW_WORD_PAIN, GetCaster().GetGUID());
 
 				if (pain != null)
 					pain.ModDuration(durationIncreaseMs);
 
-				var vampiricTouch = unit.GetAura(PriestSpells.SPELL_PRIEST_VAMPIRIC_TOUCH, GetCaster().GetGUID());
+				var vampiricTouch = unit.GetAura(PriestSpells.VAMPIRIC_TOUCH, GetCaster().GetGUID());
 
 				if (vampiricTouch != null)
 					vampiricTouch.ModDuration(durationIncreaseMs);

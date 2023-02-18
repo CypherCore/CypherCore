@@ -18,24 +18,24 @@ public class spell_druid_earthwarden : AuraScript, IHasAuraEffects
 
 	private struct Spells
 	{
-		public static readonly uint SPELL_DRUID_EARTHWARDEN = 203974;
-		public static readonly uint SPELL_DRUID_EARTHWARDEN_TRIGGERED = 203975;
-		public static readonly uint SPELL_DRUID_TRASH = 77758;
+		public static readonly uint EARTHWARDEN = 203974;
+		public static readonly uint EARTHWARDEN_TRIGGERED = 203975;
+		public static readonly uint TRASH = 77758;
 	}
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(Spells.SPELL_DRUID_EARTHWARDEN, Spells.SPELL_DRUID_EARTHWARDEN_TRIGGERED, Spells.SPELL_DRUID_TRASH);
+		return ValidateSpellInfo(Spells.EARTHWARDEN, Spells.EARTHWARDEN_TRIGGERED, Spells.TRASH);
 	}
 
 	private void OnProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
 		PreventDefaultAction();
 
-		if (!GetCaster().ToPlayer().GetSpellHistory().HasCooldown(Spells.SPELL_DRUID_EARTHWARDEN))
-			GetCaster().AddAura(Spells.SPELL_DRUID_EARTHWARDEN_TRIGGERED, GetCaster());
+		if (!GetCaster().ToPlayer().GetSpellHistory().HasCooldown(Spells.EARTHWARDEN))
+			GetCaster().AddAura(Spells.EARTHWARDEN_TRIGGERED, GetCaster());
 
-		GetCaster().ToPlayer().GetSpellHistory().AddCooldown(Spells.SPELL_DRUID_EARTHWARDEN, 0, TimeSpan.FromMicroseconds(500));
+		GetCaster().ToPlayer().GetSpellHistory().AddCooldown(Spells.EARTHWARDEN, 0, TimeSpan.FromMicroseconds(500));
 	}
 
 	public override void Register()

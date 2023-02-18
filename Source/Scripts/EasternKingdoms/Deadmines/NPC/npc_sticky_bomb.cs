@@ -32,7 +32,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
                 return;
             }
 
-            DoCast(me, eSpels.SPELL_CHEST_BOMB);
+            DoCast(me, eSpels.CHEST_BOMB);
         }
 
         public override void UpdateAI(uint uiDiff)
@@ -47,27 +47,27 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
                 switch (_phase)
                 {
                     case 1:
-                        DoCast(me, eSpels.SPELL_ARMING_VISUAL_YELLOW);
+                        DoCast(me, eSpels.ARMING_VISUAL_YELLOW);
                         _uiTimer = 700;
                         break;
 
                     case 2:
-                        DoCast(me, eSpels.SPELL_ARMING_VISUAL_ORANGE);
+                        DoCast(me, eSpels.ARMING_VISUAL_ORANGE);
                         _uiTimer = 600;
                         break;
 
                     case 3:
-                        DoCast(me, eSpels.SPELL_ARMING_VISUAL_RED);
+                        DoCast(me, eSpels.ARMING_VISUAL_RED);
                         _uiTimer = 500;
                         break;
 
                     case 4:
-                        DoCast(me, eSpels.SPELL_BOMB_ARMED_STATE);
+                        DoCast(me, eSpels.BOMB_ARMED_STATE);
                         _uiTimer = 400;
                         break;
 
                     case 5:
-                        DoCast(me, me.GetMap().IsHeroic() ? eSpels.SPELL_STICKY_BOMB_EXPLODE_H : eSpels.SPELL_STICKY_BOMB_EXPLODE);
+                        DoCast(me, me.GetMap().IsHeroic() ? eSpels.STICKY_BOMB_EXPLODE_H : eSpels.STICKY_BOMB_EXPLODE);
                         _uiTimer = 300;
                         break;
 

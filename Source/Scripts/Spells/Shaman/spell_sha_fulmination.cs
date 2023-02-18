@@ -19,27 +19,27 @@ namespace Scripts.Spells.Shaman
 
 		public override bool Validate(SpellInfo UnnamedParameter)
 		{
-			if (Global.SpellMgr.GetSpellInfo(ShamanSpells.SPELL_SHAMAN_FULMINATION, Difficulty.None) != null)
+			if (Global.SpellMgr.GetSpellInfo(ShamanSpells.FULMINATION, Difficulty.None) != null)
 				return false;
 
-			if (Global.SpellMgr.GetSpellInfo(ShamanSpells.SPELL_SHAMAN_FULMINATION_INFO, Difficulty.None) != null)
+			if (Global.SpellMgr.GetSpellInfo(ShamanSpells.FULMINATION_INFO, Difficulty.None) != null)
 				return false;
 
-			if (Global.SpellMgr.GetSpellInfo(ShamanSpells.SPELL_SHAMAN_IMPROVED_LIGHTNING_SHIELD, Difficulty.None) != null)
+			if (Global.SpellMgr.GetSpellInfo(ShamanSpells.IMPROVED_LIGHTNING_SHIELD, Difficulty.None) != null)
 				return false;
 
-			var lightningShield = Global.SpellMgr.GetSpellInfo(ShamanSpells.SPELL_SHAMAN_LIGHTNING_SHIELD, Difficulty.None);
+			var lightningShield = Global.SpellMgr.GetSpellInfo(ShamanSpells.LIGHTNING_SHIELD, Difficulty.None);
 
 			if (lightningShield == null || !lightningShield.GetEffect(0).IsEffect() || Global.SpellMgr.GetSpellInfo(lightningShield.GetEffect(0).TriggerSpell, Difficulty.None) != null)
 				return false;
 
-			if (Global.SpellMgr.GetSpellInfo(ShamanSpells.SPELL_SHAMAN_ITEM_T18_ELEMENTAL_2P_BONUS, Difficulty.None) != null)
+			if (Global.SpellMgr.GetSpellInfo(ShamanSpells.ITEM_T18_ELEMENTAL_2P_BONUS, Difficulty.None) != null)
 				return false;
 
-			if (Global.SpellMgr.GetSpellInfo(ShamanSpells.SPELL_SHAMAN_ITEM_T18_ELEMENTAL_4P_BONUS, Difficulty.None) != null)
+			if (Global.SpellMgr.GetSpellInfo(ShamanSpells.ITEM_T18_ELEMENTAL_4P_BONUS, Difficulty.None) != null)
 				return false;
 
-			if (Global.SpellMgr.GetSpellInfo(ShamanSpells.SPELL_SHAMAN_ITEM_T18_LIGHTNING_VORTEX, Difficulty.None) != null)
+			if (Global.SpellMgr.GetSpellInfo(ShamanSpells.ITEM_T18_LIGHTNING_VORTEX, Difficulty.None) != null)
 				return false;
 
 			return true;
@@ -48,17 +48,17 @@ namespace Scripts.Spells.Shaman
 		public bool CheckProc(ProcEventInfo eventInfo)
 		{
 			// Lava Burst cannot add lightning shield stacks without Improved Lightning Shield
-			if ((eventInfo.GetSpellInfo().SpellFamilyFlags[1] & 0x00001000) != 0 && !eventInfo.GetActor().HasAura(ShamanSpells.SPELL_SHAMAN_IMPROVED_LIGHTNING_SHIELD))
+			if ((eventInfo.GetSpellInfo().SpellFamilyFlags[1] & 0x00001000) != 0 && !eventInfo.GetActor().HasAura(ShamanSpells.IMPROVED_LIGHTNING_SHIELD))
 				return false;
 
-			return eventInfo.GetActor().HasAura(ShamanSpells.SPELL_SHAMAN_LIGHTNING_SHIELD);
+			return eventInfo.GetActor().HasAura(ShamanSpells.LIGHTNING_SHIELD);
 		}
 
 		private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 		{
 			var caster = eventInfo.GetActor();
 			var target = eventInfo.GetActionTarget();
-			var aura   = caster.GetAura(ShamanSpells.SPELL_SHAMAN_LIGHTNING_SHIELD);
+			var aura   = caster.GetAura(ShamanSpells.LIGHTNING_SHIELD);
 
 			if (aura != null)
 			{
@@ -76,19 +76,19 @@ namespace Scripts.Spells.Shaman
 						damage = caster.SpellDamageBonusDone(target, triggerSpell, (uint)triggerEffect.CalcValue(caster), DamageEffectType.SpellDirect, triggerEffect, stacks - 1);
 						damage = target.SpellDamageBonusTaken(caster, triggerSpell, damage, DamageEffectType.SpellDirect);
 
-						caster.CastSpell(target, ShamanSpells.SPELL_SHAMAN_FULMINATION, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)(int)damage));
-						caster.RemoveAurasDueToSpell(ShamanSpells.SPELL_SHAMAN_FULMINATION_INFO);
+						caster.CastSpell(target, ShamanSpells.FULMINATION, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)(int)damage));
+						caster.RemoveAurasDueToSpell(ShamanSpells.FULMINATION_INFO);
 
-						var t18_4p = caster.GetAuraEffect(ShamanSpells.SPELL_SHAMAN_ITEM_T18_ELEMENTAL_4P_BONUS, 0);
+						var t18_4p = caster.GetAuraEffect(ShamanSpells.ITEM_T18_ELEMENTAL_4P_BONUS, 0);
 
 						if (t18_4p != null)
 						{
-							var gatheringVortex = caster.GetAura(ShamanSpells.SPELL_SHAMAN_ITEM_T18_GATHERING_VORTEX);
+							var gatheringVortex = caster.GetAura(ShamanSpells.ITEM_T18_GATHERING_VORTEX);
 
 							if (gatheringVortex != null)
 							{
 								if (gatheringVortex.GetStackAmount() + stacks >= (uint)t18_4p.GetAmount())
-									caster.CastSpell(caster, ShamanSpells.SPELL_SHAMAN_ITEM_T18_LIGHTNING_VORTEX, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
+									caster.CastSpell(caster, ShamanSpells.ITEM_T18_LIGHTNING_VORTEX, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
 
 								var newStacks = (byte)((gatheringVortex.GetStackAmount() + stacks) % t18_4p.GetAmount());
 
@@ -99,16 +99,16 @@ namespace Scripts.Spells.Shaman
 							}
 							else
 							{
-								caster.CastSpell(caster, ShamanSpells.SPELL_SHAMAN_ITEM_T18_GATHERING_VORTEX, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.AuraStack, (int)stacks));
+								caster.CastSpell(caster, ShamanSpells.ITEM_T18_GATHERING_VORTEX, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.AuraStack, (int)stacks));
 							}
 						}
 
-						var t18_2p = caster.GetAuraEffect(ShamanSpells.SPELL_SHAMAN_ITEM_T18_ELEMENTAL_2P_BONUS, 0);
+						var t18_2p = caster.GetAuraEffect(ShamanSpells.ITEM_T18_ELEMENTAL_2P_BONUS, 0);
 
 						if (t18_2p != null)
 							if (RandomHelper.randChance(t18_2p.GetAmount()))
 							{
-								caster.GetSpellHistory().ResetCooldown(ShamanSpells.SPELL_SHAMAN_EARTH_SHOCK, true);
+								caster.GetSpellHistory().ResetCooldown(ShamanSpells.EARTH_SHOCK, true);
 
 								return;
 							}
@@ -124,7 +124,7 @@ namespace Scripts.Spells.Shaman
 					aura.RefreshDuration();
 
 					if (aura.GetCharges() == aurEff.GetAmount())
-						caster.CastSpell(caster, ShamanSpells.SPELL_SHAMAN_FULMINATION_INFO, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
+						caster.CastSpell(caster, ShamanSpells.FULMINATION_INFO, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
 				}
 			}
 		}

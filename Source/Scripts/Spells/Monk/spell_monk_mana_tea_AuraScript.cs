@@ -20,14 +20,14 @@ public class spell_monk_mana_tea_AuraScript : AuraScript, IHasAuraEffects
 		{
 			// remove one charge per tick instead of remove aura on cast
 			// "Cancelling the channel will not waste stacks"
-			var manaTea = GetCaster().GetAura(MonkSpells.SPELL_MONK_MANA_TEA_STACKS);
+			var manaTea = GetCaster().GetAura(MonkSpells.MANA_TEA_STACKS);
 
 			if (manaTea != null)
 			{
 				if (manaTea.GetStackAmount() > 1)
 					manaTea.ModStackAmount(-1);
 				else
-					GetCaster().RemoveAura(MonkSpells.SPELL_MONK_MANA_TEA_STACKS);
+					GetCaster().RemoveAura(MonkSpells.MANA_TEA_STACKS);
 			}
 		}
 	}

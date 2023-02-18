@@ -23,8 +23,8 @@ public class spell_dh_artifact_soul_carver_SpellScript : SpellScript, IHasSpellE
 			var attackPower    = GetCaster().GetTotalAttackPowerValue(WeaponAttackType.BaseAttack);
 			var damage         = (165.0f / 100.0f) * attackPower + (165.0f / 100.0f) * attackPower;
 			var damageOverTime = (107.415f / 100.0f) * attackPower;
-			GetCaster().CastSpell(target, DemonHunterSpells.SPELL_DH_SOUL_CARVER_DAMAGE, (int)damage);
-			GetCaster().CastSpell(target, DemonHunterSpells.SPELL_DH_SOUL_CARVER_DAMAGE, (int)damageOverTime);
+			GetCaster().CastSpell(target, DemonHunterSpells.SOUL_CARVER_DAMAGE, (int)damage);
+			GetCaster().CastSpell(target, DemonHunterSpells.SOUL_CARVER_DAMAGE, (int)damageOverTime);
 			// Code for shattering the soul fragments
 		}
 	}

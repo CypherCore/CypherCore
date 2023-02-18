@@ -17,7 +17,7 @@ public class spell_mage_fire_on : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(MageSpells.SPELL_MAGE_FIRE_ON, MageSpells.SPELL_MAGE_FIRE_BLAST);
+		return ValidateSpellInfo(MageSpells.FIRE_ON, MageSpells.FIRE_BLAST);
 	}
 
 	private void HandleDummy(uint UnnamedParameter)
@@ -29,7 +29,7 @@ public class spell_mage_fire_on : SpellScript, IHasSpellEffects
 			return;
 
 		caster.ToPlayer().GetSpellHistory().ResetCharges(Global.SpellMgr.GetSpellInfo(MageSpells.FireBlast, Difficulty.None).ChargeCategoryId);
-		// caster->ToPlayer()->GetSpellHistory()->ResetCharges(Global.SpellMgr->GetSpellInfo(SPELL_MAGE_FIRE_BLAST, Difficulty.None)->ChargeCategoryId);
+		// caster->ToPlayer()->GetSpellHistory()->ResetCharges(Global.SpellMgr->GetSpellInfo(FIRE_BLAST, Difficulty.None)->ChargeCategoryId);
 	}
 
 	public override void Register()

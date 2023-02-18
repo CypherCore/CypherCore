@@ -15,8 +15,8 @@ public class spell_dk_marrowrend : SpellScript, ISpellOnCast
 
 		if (caster != null)
 		{
-			caster.CastSpell(null, DeathKnightSpells.SPELL_DK_BONE_SHIELD, true);
-			var boneShield = caster.GetAura(DeathKnightSpells.SPELL_DK_BONE_SHIELD);
+			caster.CastSpell(null, DeathKnightSpells.BONE_SHIELD, true);
+			var boneShield = caster.GetAura(DeathKnightSpells.BONE_SHIELD);
 
 			if (boneShield != null)
 				boneShield.SetStackAmount(3);

@@ -20,6 +20,6 @@ public class at_mage_cinderstorm : AreaTriggerAI
 
 		if (caster != null)
 			if (caster.IsValidAttackTarget(unit))
-				caster.CastSpell(unit, MageSpells.SPELL_MAGE_CINDERSTORM_DMG, true);
+				caster.CastSpell(unit, MageSpells.CINDERSTORM_DMG, true);
 	}
 }

@@ -12,7 +12,7 @@ public class spell_monk_enveloping_mist : SpellScript, ISpellAfterCast, ISpellBe
 {
 	public void BeforeCast()
 	{
-		if (GetCaster().GetCurrentSpell(CurrentSpellTypes.Channeled) && GetCaster().GetCurrentSpell(CurrentSpellTypes.Channeled).GetSpellInfo().Id == MonkSpells.SPELL_MONK_SOOTHING_MIST)
+		if (GetCaster().GetCurrentSpell(CurrentSpellTypes.Channeled) && GetCaster().GetCurrentSpell(CurrentSpellTypes.Channeled).GetSpellInfo().Id == MonkSpells.SOOTHING_MIST)
 		{
 			GetSpell().m_castFlagsEx = SpellCastFlagsEx.None;
 			var targets = GetCaster().GetCurrentSpell(CurrentSpellTypes.Channeled).m_targets;
@@ -27,7 +27,7 @@ public class spell_monk_enveloping_mist : SpellScript, ISpellAfterCast, ISpellBe
 		if (caster == null)
 			return;
 
-		if (caster.HasAura(MonkSpells.SPELL_LIFECYCLES))
-			caster.CastSpell(caster, MonkSpells.SPELL_MONK_LIFECYCLES_VIVIFY, true);
+		if (caster.HasAura(MonkSpells.LIFECYCLES))
+			caster.CastSpell(caster, MonkSpells.LIFECYCLES_VIVIFY, true);
 	}
 }

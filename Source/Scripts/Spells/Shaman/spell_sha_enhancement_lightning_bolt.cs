@@ -19,7 +19,7 @@ namespace Scripts.Spells.Shaman
 
 		public override bool Validate(SpellInfo UnnamedParameter)
 		{
-			return ValidateSpellInfo(ShamanSpells.SPELL_SHAMAN_OVERCHARGE);
+			return ValidateSpellInfo(ShamanSpells.OVERCHARGE);
 		}
 
 		public void TakePower(SpellPowerCost powerCost)
@@ -27,7 +27,7 @@ namespace Scripts.Spells.Shaman
 			_maxTakenPower    = 0;
 			_maxDamagePercent = 0;
 
-			var overcharge = GetCaster().GetAura(ShamanSpells.SPELL_SHAMAN_OVERCHARGE);
+			var overcharge = GetCaster().GetAura(ShamanSpells.OVERCHARGE);
 
 			if (overcharge != null)
 			{

@@ -13,7 +13,7 @@ public class spell_mage_meteor : SpellScript, ISpellAfterCast
 {
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(MageSpells.SPELL_MAGE_METEOR_DAMAGE);
+		return ValidateSpellInfo(MageSpells.METEOR_DAMAGE);
 	}
 
 	public void AfterCast()
@@ -24,6 +24,6 @@ public class spell_mage_meteor : SpellScript, ISpellAfterCast
 		if (caster == null || dest == null)
 			return;
 
-		caster.CastSpell(new Position(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ()), MageSpells.SPELL_MAGE_METEOR_TIMER, true);
+		caster.CastSpell(new Position(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ()), MageSpells.METEOR_TIMER, true);
 	}
 }

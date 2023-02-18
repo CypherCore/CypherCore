@@ -12,11 +12,11 @@ public class at_hun_binding_shotAI : AreaTriggerAI
 {
 	public enum UsedSpells
 	{
-		SPELL_HUNTER_BINDING_SHOT_AURA = 117405,
-		SPELL_HUNTER_BINDING_SHOT_STUN = 117526,
-		SPELL_HUNTER_BINDING_SHOT_IMMUNE = 117553,
-		SPELL_HUNTER_BINDING_SHOT_VISUAL_1 = 118306,
-		SPELL_HUNDER_BINDING_SHOT_VISUAL_2 = 117614
+		BINDING_SHOT_AURA = 117405,
+		BINDING_SHOT_STUN = 117526,
+		BINDING_SHOT_IMMUNE = 117553,
+		BINDING_SHOT_VISUAL_1 = 118306,
+		HUNDER_BINDING_SHOT_VISUAL_2 = 117614
 	}
 
 	public at_hun_binding_shotAI(AreaTrigger areatrigger) : base(areatrigger)
@@ -34,7 +34,7 @@ public class at_hun_binding_shotAI : AreaTriggerAI
 			return;
 
 		if (!caster.IsFriendlyTo(unit))
-			unit.CastSpell(unit, UsedSpells.SPELL_HUNTER_BINDING_SHOT_AURA, true);
+			unit.CastSpell(unit, UsedSpells.BINDING_SHOT_AURA, true);
 	}
 
 	public override void OnUnitExit(Unit unit)
@@ -45,10 +45,10 @@ public class at_hun_binding_shotAI : AreaTriggerAI
 		var pos = at.GetPosition();
 
 		// Need to check range also, since when the trigger is removed, this get called as well.
-		if (unit.HasAura(UsedSpells.SPELL_HUNTER_BINDING_SHOT_AURA) && unit.GetExactDist(pos) >= 5.0f)
+		if (unit.HasAura(UsedSpells.BINDING_SHOT_AURA) && unit.GetExactDist(pos) >= 5.0f)
 		{
-			unit.RemoveAura(UsedSpells.SPELL_HUNTER_BINDING_SHOT_AURA);
-			at.GetCaster().CastSpell(unit, UsedSpells.SPELL_HUNTER_BINDING_SHOT_STUN, true);
+			unit.RemoveAura(UsedSpells.BINDING_SHOT_AURA);
+			at.GetCaster().CastSpell(unit, UsedSpells.BINDING_SHOT_STUN, true);
 		}
 	}
 }

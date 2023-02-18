@@ -10,7 +10,7 @@ using Game.Spells;
 
 namespace Scripts.Spells.Priest;
 
-[Script] // 41635 - Prayer of Mending (Aura) - SPELL_PRIEST_PRAYER_OF_MENDING_AURA
+[Script] // 41635 - Prayer of Mending (Aura) - PRAYER_OF_MENDING_AURA
 internal class spell_pri_prayer_of_mending_AuraScript : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();

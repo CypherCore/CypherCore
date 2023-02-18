@@ -16,12 +16,12 @@ public class spell_monk_power_strike_periodic : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(MonkSpells.SPELL_MONK_POWER_STRIKES_AURA);
+		return ValidateSpellInfo(MonkSpells.POWER_STRIKES_AURA);
 	}
 
 	private void HandlePeriodic(AuraEffect UnnamedParameter)
 	{
-		GetTarget().CastSpell(GetTarget(), MonkSpells.SPELL_MONK_POWER_STRIKES_AURA, true);
+		GetTarget().CastSpell(GetTarget(), MonkSpells.POWER_STRIKES_AURA, true);
 	}
 
 	public override void Register()

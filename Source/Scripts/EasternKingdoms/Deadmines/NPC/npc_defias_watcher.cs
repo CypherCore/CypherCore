@@ -40,9 +40,9 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
             me.SetPowerType(PowerType.Energy);
             if (Status == true)
             {
-                if (!me.HasAura(eSpell.SPELL_ON_FIRE))
+                if (!me.HasAura(eSpell.ON_FIRE))
                 {
-                    me.AddAura(eSpell.SPELL_ON_FIRE, me);
+                    me.AddAura(eSpell.ON_FIRE, me);
                 }
                 me.SetFaction(35);
             }
@@ -68,14 +68,14 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
             me.SetHealth(15);
             me.SetRegenerateHealth(false);
             me.SetFaction(35);
-            me.AddAura(eSpell.SPELL_ON_FIRE, me);
-            me.CastSpell(me, eSpell.SPELL_ON_FIRE);
+            me.AddAura(eSpell.ON_FIRE, me);
+            me.CastSpell(me, eSpell.ON_FIRE);
             me.SetInCombatWithZone();
  
             Creature reaper = me.FindNearestCreature(DMCreatures.NPC_FOE_REAPER_5000, 200.0f);
             if (reaper != null)
             {
-                me.CastSpell(reaper, eSpell.SPELL_ENERGIZE);
+                me.CastSpell(reaper, eSpell.ENERGIZE);
             }
         }
 

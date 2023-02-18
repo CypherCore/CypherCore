@@ -15,7 +15,7 @@ public class spell_dk_presence_SpellScript : SpellScript
 {
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (Global.SpellMgr.GetSpellInfo(DeathKnightSpells.SPELL_DK_SCOURGE_STRIKE_TRIGGERED, Difficulty.None) != null)
+		if (Global.SpellMgr.GetSpellInfo(DeathKnightSpells.SCOURGE_STRIKE_TRIGGERED, Difficulty.None) != null)
 			return false;
 
 		return true;

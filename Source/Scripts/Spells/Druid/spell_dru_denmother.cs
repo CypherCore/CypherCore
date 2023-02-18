@@ -12,15 +12,15 @@ namespace Scripts.Spells.Druid;
 [SpellScript(201522)]
 public class spell_dru_denmother : SpellScript, ISpellOnHit
 {
-	private const int SPELL_DRUID_DEN_MOTHER = 201522;
-	private const int SPELL_DRUID_DEN_MOTHER_IRONFUR = 201629;
+	private const int DEN_MOTHER = 201522;
+	private const int DEN_MOTHER_IRONFUR = 201629;
 
 	public void OnHit()
 	{
 		var _player = GetCaster().ToPlayer();
 
 		if (_player != null)
-			if (_player.HasAura(SPELL_DRUID_DEN_MOTHER))
+			if (_player.HasAura(DEN_MOTHER))
 			{
 				var validTargets = new List<Unit>();
 				var groupList    = new List<Unit>();

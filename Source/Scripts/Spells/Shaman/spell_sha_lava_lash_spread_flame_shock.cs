@@ -24,7 +24,7 @@ namespace Scripts.Spells.Shaman
 
 		private void FilterTargets(List<WorldObject> targets)
 		{
-			targets.RemoveIf(new UnitAuraCheck<WorldObject>(true, ShamanSpells.SPELL_SHAMAN_FLAME_SHOCK, GetCaster().GetGUID()));
+			targets.RemoveIf(new UnitAuraCheck<WorldObject>(true, ShamanSpells.FLAME_SHOCK, GetCaster().GetGUID()));
 		}
 
 		private void HandleScript(uint UnnamedParameter)
@@ -33,11 +33,11 @@ namespace Scripts.Spells.Shaman
 
 			if (mainTarget != null)
 			{
-				var flameShock = mainTarget.GetAura(ShamanSpells.SPELL_SHAMAN_FLAME_SHOCK, GetCaster().GetGUID());
+				var flameShock = mainTarget.GetAura(ShamanSpells.FLAME_SHOCK, GetCaster().GetGUID());
 
 				if (flameShock != null)
 				{
-					var newAura = GetCaster().AddAura(ShamanSpells.SPELL_SHAMAN_FLAME_SHOCK, GetHitUnit());
+					var newAura = GetCaster().AddAura(ShamanSpells.FLAME_SHOCK, GetHitUnit());
 
 					if (newAura != null)
 					{

@@ -16,12 +16,12 @@ public class aura_pri_void_torrent : AuraScript, IHasAuraEffects
 
 	private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
-		GetTarget().CastSpell(GetTarget(), PriestSpells.SPELL_PRIEST_VOID_TORRENT_PREVENT_REGEN, true);
+		GetTarget().CastSpell(GetTarget(), PriestSpells.VOID_TORRENT_PREVENT_REGEN, true);
 	}
 
 	private void HandleRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
-		GetTarget().RemoveAurasDueToSpell(PriestSpells.SPELL_PRIEST_VOID_TORRENT_PREVENT_REGEN);
+		GetTarget().RemoveAurasDueToSpell(PriestSpells.VOID_TORRENT_PREVENT_REGEN);
 	}
 
 	public override void Register()

@@ -14,8 +14,8 @@ namespace Scripts.Spells.Shaman
 			var _player = GetCaster().ToPlayer();
 
 			if (_player != null)
-				if (_player.HasAura(ShamanSpells.SPELL_SHAMAN_GLYPH_OF_LAKESTRIDER))
-					_player.CastSpell(_player, ShamanSpells.SPELL_SHAMAN_WATER_WALKING, true);
+				if (_player.HasAura(ShamanSpells.GLYPH_OF_LAKESTRIDER))
+					_player.CastSpell(_player, ShamanSpells.WATER_WALKING, true);
 		}
 	}
 }

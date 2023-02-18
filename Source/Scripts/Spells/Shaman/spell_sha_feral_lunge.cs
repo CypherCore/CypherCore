@@ -18,7 +18,7 @@ namespace Scripts.Spells.Shaman
 
 		public override bool Validate(SpellInfo UnnamedParameter)
 		{
-			if (Global.SpellMgr.GetSpellInfo(ShamanSpells.SPELL_SHAMAN_FERAL_LUNGE_DAMAGE, Difficulty.None) != null)
+			if (Global.SpellMgr.GetSpellInfo(ShamanSpells.FERAL_LUNGE_DAMAGE, Difficulty.None) != null)
 				return false;
 
 			return true;
@@ -32,7 +32,7 @@ namespace Scripts.Spells.Shaman
 			if (caster == null || target == null)
 				return;
 
-			caster.CastSpell(target, ShamanSpells.SPELL_SHAMAN_FERAL_LUNGE_DAMAGE, true);
+			caster.CastSpell(target, ShamanSpells.FERAL_LUNGE_DAMAGE, true);
 		}
 
 		public override void Register()

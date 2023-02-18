@@ -30,7 +30,7 @@ namespace Scripts.Pets
                 {
                     me.CastSpell(me, WarlockSpells.DEMONIC_GATEWAY_VISUAL, true);
 
-                    //todo me->SetInteractSpellId(SPELL_WARLOCK_DEMONIC_GATEWAY_ACTIVATE);
+                    //todo me->SetInteractSpellId(WARLOCK_DEMONIC_GATEWAY_ACTIVATE);
                     me.SetUnitFlag(UnitFlags.NonAttackable);
                     me.SetNpcFlag(NPCFlags.SpellClick);
                     me.SetReactState(ReactStates.Passive);

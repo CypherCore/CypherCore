@@ -17,12 +17,12 @@ public class spell_dru_cenarion_ward : AuraScript, IHasAuraEffects
 
 	private struct Spells
 	{
-		public static readonly uint SPELL_DRUID_CENARION_WARD_TRIGGERED = 102352;
+		public static readonly uint CENARION_WARD_TRIGGERED = 102352;
 	}
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(Spells.SPELL_DRUID_CENARION_WARD_TRIGGERED);
+		return ValidateSpellInfo(Spells.CENARION_WARD_TRIGGERED);
 	}
 
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -32,7 +32,7 @@ public class spell_dru_cenarion_ward : AuraScript, IHasAuraEffects
 		if (!GetCaster() || !eventInfo.GetActionTarget())
 			return;
 
-		GetCaster().CastSpell(eventInfo.GetActionTarget(), Spells.SPELL_DRUID_CENARION_WARD_TRIGGERED, true);
+		GetCaster().CastSpell(eventInfo.GetActionTarget(), Spells.CENARION_WARD_TRIGGERED, true);
 	}
 
 	public override void Register()

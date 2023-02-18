@@ -26,7 +26,7 @@ public class spell_dh_artifact_charred_warblades : AuraScript, IHasAuraEffects
 			return;
 
 		var heal = MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount());
-		caster.CastSpell(caster, ShatteredSoulsSpells.SPELL_DH_CHARRED_WARBLADES_HEAL, (int)heal);
+		caster.CastSpell(caster, ShatteredSoulsSpells.CHARRED_WARBLADES_HEAL, (int)heal);
 	}
 
 	public override void Register()

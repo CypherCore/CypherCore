@@ -17,14 +17,14 @@ public class spell_druid_pulverize : SpellScript, IHasSpellEffects
 
 	private struct Spells
 	{
-		public static readonly uint SPELL_DRUID_PULVERIZE = 80313;
-		public static readonly uint SPELL_DRUID_TRASH_DOT_TWO_STACKS_MARKER = 158790;
-		public static readonly uint SPELL_DRUID_PULVERIZE_DAMAGE_REDUCTION_BUFF = 158792;
+		public static readonly uint PULVERIZE = 80313;
+		public static readonly uint TRASH_DOT_TWO_STACKS_MARKER = 158790;
+		public static readonly uint PULVERIZE_DAMAGE_REDUCTION_BUFF = 158792;
 	}
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(Spells.SPELL_DRUID_PULVERIZE, Spells.SPELL_DRUID_TRASH_DOT_TWO_STACKS_MARKER);
+		return ValidateSpellInfo(Spells.PULVERIZE, Spells.TRASH_DOT_TWO_STACKS_MARKER);
 	}
 
 	private void HandleHitTarget(uint UnnamedParameter)
@@ -33,8 +33,8 @@ public class spell_druid_pulverize : SpellScript, IHasSpellEffects
 
 		if (target != null)
 		{
-			target.RemoveAurasDueToSpell(Spells.SPELL_DRUID_TRASH_DOT_TWO_STACKS_MARKER);
-			GetCaster().CastSpell(target, Spells.SPELL_DRUID_PULVERIZE_DAMAGE_REDUCTION_BUFF, true);
+			target.RemoveAurasDueToSpell(Spells.TRASH_DOT_TWO_STACKS_MARKER);
+			GetCaster().CastSpell(target, Spells.PULVERIZE_DAMAGE_REDUCTION_BUFF, true);
 		}
 	}
 

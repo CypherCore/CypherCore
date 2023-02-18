@@ -24,6 +24,6 @@ public class spell_demon_hunter_chaos_strike : SpellScript, ISpellBeforeCast
 		// Chaos Strike and Annihilation have a mainhand and an offhand spell, but the crit chance should be the same.
 		var criticalChances = caster.GetUnitCriticalChanceAgainst(WeaponAttackType.BaseAttack, target);
 		caster.VariableStorage.Set("Spells.ChaosStrikeCrit", RandomHelper.randChance(criticalChances));
-		caster.CastSpell(DemonHunterSpells.SPELL_DH_CHAOS_STRIKE_PROC, true);
+		caster.CastSpell(DemonHunterSpells.CHAOS_STRIKE_PROC, true);
 	}
 }

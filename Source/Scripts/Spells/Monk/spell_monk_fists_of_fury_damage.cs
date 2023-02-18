@@ -9,7 +9,7 @@ using Game.Scripting.Interfaces.ISpell;
 
 namespace Scripts.Spells.Monk;
 
-[SpellScript(MonkSpells.SPELL_MONK_FISTS_OF_FURY_DAMAGE)]
+[SpellScript(MonkSpells.FISTS_OF_FURY_DAMAGE)]
 public class spell_monk_fists_of_fury_damage : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();

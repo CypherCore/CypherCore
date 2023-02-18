@@ -13,7 +13,7 @@ namespace Scripts.Spells.Shaman
 	{
 		public override bool Validate(SpellInfo UnnamedParameter)
 		{
-			if (Global.SpellMgr.GetSpellInfo(ShamanSpells.SPELL_SHAMAN_HEALING_STREAM, Difficulty.None) != null)
+			if (Global.SpellMgr.GetSpellInfo(ShamanSpells.HEALING_STREAM, Difficulty.None) != null)
 				return false;
 
 			return true;
@@ -32,8 +32,8 @@ namespace Scripts.Spells.Shaman
 
 				if (target != null)
 					// Glyph of Healing Stream Totem
-					if (target.GetGUID() != _player.GetGUID() && _player.HasAura(ShamanSpells.SPELL_SHAMAN_GLYPH_OF_HEALING_STREAM_TOTEM))
-						_player.CastSpell(target, ShamanSpells.SPELL_SHAMAN_GLYPH_OF_HEALING_STREAM, true);
+					if (target.GetGUID() != _player.GetGUID() && _player.HasAura(ShamanSpells.GLYPH_OF_HEALING_STREAM_TOTEM))
+						_player.CastSpell(target, ShamanSpells.GLYPH_OF_HEALING_STREAM, true);
 			}
 		}
 	}

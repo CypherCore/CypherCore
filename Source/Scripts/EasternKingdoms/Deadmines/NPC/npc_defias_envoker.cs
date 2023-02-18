@@ -32,7 +32,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
                 if (target != null)
                 {
-                    DoCast(target, boss_vanessa_vancleef.Spells.SPELL_HOLY_FIRE);
+                    DoCast(target, boss_vanessa_vancleef.Spells.HOLY_FIRE);
                 }
                 HolyfireTimer = RandomHelper.URand(8000, 11000);
             }
@@ -45,7 +45,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
             {
                 if (IsHeroic())
                 {
-                    DoCast(me, boss_vanessa_vancleef.Spells.SPELL_SHIELD);
+                    DoCast(me, boss_vanessa_vancleef.Spells.SHIELD);
                     ShieldTimer = RandomHelper.URand(18000, 20000);
                 }
             }

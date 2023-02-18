@@ -18,7 +18,7 @@ public class spell_rog_hemorrhage_SpellScript : SpellScript, ISpellOnHit, ISpell
 
 		if (_player != null)
 			if (GetHitUnit())
-				if (_player.HasAura(RogueSpells.SPELL_ROGUE_GLYPH_OF_HEMORRHAGE))
+				if (_player.HasAura(RogueSpells.GLYPH_OF_HEMORRHAGE))
 					if (!_bleeding)
 					{
 						PreventHitAura();

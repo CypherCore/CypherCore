@@ -23,7 +23,7 @@ public class spell_hun_camouflage : AuraScript, IHasAuraEffects
 			Unit pet = GetCaster().GetGuardianPet();
 
 			if (pet != null)
-				pet.CastSpell(pet, HunterSpells.SPELL_HUNTER_CAMOUFLAGE, true);
+				pet.CastSpell(pet, HunterSpells.CAMOUFLAGE, true);
 		}
 	}
 
@@ -34,7 +34,7 @@ public class spell_hun_camouflage : AuraScript, IHasAuraEffects
 			Unit pet = GetCaster().GetGuardianPet();
 
 			if (pet != null)
-				pet.RemoveAurasDueToSpell(HunterSpells.SPELL_HUNTER_CAMOUFLAGE);
+				pet.RemoveAurasDueToSpell(HunterSpells.CAMOUFLAGE);
 		}
 	}
 

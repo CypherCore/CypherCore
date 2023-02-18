@@ -18,13 +18,13 @@ public class at_dk_antimagic_zone : AreaTriggerAI
 	{
 		//TODO: Improve unit targets
 		if (unit.IsPlayer() && !unit.IsHostileTo(at.GetCaster()))
-			if (!unit.HasAura(DeathKnightSpells.SPELL_DK_ANTIMAGIC_ZONE_DAMAGE_TAKEN))
-				unit.AddAura(DeathKnightSpells.SPELL_DK_ANTIMAGIC_ZONE_DAMAGE_TAKEN, unit);
+			if (!unit.HasAura(DeathKnightSpells.ANTIMAGIC_ZONE_DAMAGE_TAKEN))
+				unit.AddAura(DeathKnightSpells.ANTIMAGIC_ZONE_DAMAGE_TAKEN, unit);
 	}
 
 	public override void OnUnitExit(Unit unit)
 	{
-		if (unit.HasAura(DeathKnightSpells.SPELL_DK_ANTIMAGIC_ZONE_DAMAGE_TAKEN))
-			unit.RemoveAura(DeathKnightSpells.SPELL_DK_ANTIMAGIC_ZONE_DAMAGE_TAKEN);
+		if (unit.HasAura(DeathKnightSpells.ANTIMAGIC_ZONE_DAMAGE_TAKEN))
+			unit.RemoveAura(DeathKnightSpells.ANTIMAGIC_ZONE_DAMAGE_TAKEN);
 	}
 }

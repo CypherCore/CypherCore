@@ -26,10 +26,10 @@ namespace Scripts.Spells.Shaman
 			if (caster == null || attacker == null)
 				return;
 
-			caster.CastSpell(attacker, ShamanSpells.SPELL_FROSTBRAND_SLOW, true);
+			caster.CastSpell(attacker, ShamanSpells.FROSTBRAND_SLOW, true);
 
-			if (caster.HasAura(ShamanSpells.SPELL_HAILSTORM_TALENT))
-				caster.CastSpell(attacker, ShamanSpells.SPELL_HAILSTORM_TALENT_PROC, true);
+			if (caster.HasAura(ShamanSpells.HAILSTORM_TALENT))
+				caster.CastSpell(attacker, ShamanSpells.HAILSTORM_TALENT_PROC, true);
 		}
 
 		public override void Register()

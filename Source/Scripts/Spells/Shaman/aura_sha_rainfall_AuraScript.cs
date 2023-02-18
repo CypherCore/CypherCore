@@ -26,7 +26,7 @@ namespace Scripts.Spells.Shaman
 				var rainfallTrigger = caster.GetSummonedCreatureByEntry(ShamanNpcs.NPC_RAINFALL);
 
 				if (rainfallTrigger != null)
-					caster.CastSpell(rainfallTrigger.GetPosition(), ShamanSpells.SPELL_SHAMAN_RAINFALL_HEAL, true);
+					caster.CastSpell(rainfallTrigger.GetPosition(), ShamanSpells.RAINFALL_HEAL, true);
 			}
 		}
 

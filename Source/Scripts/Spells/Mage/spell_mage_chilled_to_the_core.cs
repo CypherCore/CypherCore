@@ -12,6 +12,6 @@ public class spell_mage_chilled_to_the_core : AuraScript, IAuraCheckProc
 {
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
-		return eventInfo.GetSpellInfo().Id == MageSpells.SPELL_MAGE_ICY_VEINS;
+		return eventInfo.GetSpellInfo().Id == MageSpells.ICY_VEINS;
 	}
 }

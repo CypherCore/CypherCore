@@ -24,7 +24,7 @@ namespace Scripts.Spells.Warlock
 			if (caster == null || pet == null)
 				return SpellCastResult.DontReport;
 
-			if (pet.GetSpellHistory().HasCooldown(WarlockSpells.FELHUNTER_SPELL_LOCK))
+			if (pet.GetSpellHistory().HasCooldown(WarlockSpells.FELHUNTER_LOCK))
 				return SpellCastResult.CantDoThatRightNow;
 
 			return SpellCastResult.SpellCastOk;
@@ -42,7 +42,7 @@ namespace Scripts.Spells.Warlock
 			/*if (pet->GetEntry() != PET_ENTRY_FELHUNTER)
 				return;*/
 
-			pet.CastSpell(target, WarlockSpells.FELHUNTER_SPELL_LOCK, true);
+			pet.CastSpell(target, WarlockSpells.FELHUNTER_LOCK, true);
 			caster.ToPlayer().GetSpellHistory().ModifyCooldown(GetSpellInfo().Id, TimeSpan.FromSeconds(24));
 		}
 

@@ -9,7 +9,7 @@ using Game.Spells;
 
 namespace Scripts.Spells.Monk;
 
-[SpellScript(MonkSpells.SPELL_MONK_FISTS_OF_FURY)]
+[SpellScript(MonkSpells.FISTS_OF_FURY)]
 public class spell_monk_fists_of_fury : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
@@ -22,7 +22,7 @@ public class spell_monk_fists_of_fury : AuraScript, IHasAuraEffects
 			return;
 
 		if (aurEff.GetTickNumber() % 6 == 0)
-			caster.CastSpell(GetTarget(), MonkSpells.SPELL_MONK_FISTS_OF_FURY_DAMAGE, true);
+			caster.CastSpell(GetTarget(), MonkSpells.FISTS_OF_FURY_DAMAGE, true);
 	}
 
 	public override void Register()

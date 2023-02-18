@@ -13,7 +13,7 @@ public class spell_monk_crackling_jade_knockback : SpellScript, ISpellAfterHit
 {
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return Global.SpellMgr.GetSpellInfo(CracklingJade.SPELL_MONK_CRACKLING_JADE_LIGHTNING_KNOCK_BACK, Difficulty.None) != null;
+		return Global.SpellMgr.GetSpellInfo(CracklingJade.CRACKLING_JADE_LIGHTNING_KNOCK_BACK, Difficulty.None) != null;
 	}
 
 	public void AfterHit()
@@ -21,7 +21,7 @@ public class spell_monk_crackling_jade_knockback : SpellScript, ISpellAfterHit
 		var target = GetHitUnit();
 		var caster = GetCaster();
 
-		if (caster != null && target != null && caster.HasAura(CracklingJade.SPELL_MONK_CRACKLING_JADE_LIGHTNING_TALENT))
-			caster.CastSpell(target, CracklingJade.SPELL_MONK_CRACKLING_JAD_LIGHTNING_TALENT_SPEED, true);
+		if (caster != null && target != null && caster.HasAura(CracklingJade.CRACKLING_JADE_LIGHTNING_TALENT))
+			caster.CastSpell(target, CracklingJade.CRACKLING_JAD_LIGHTNING_TALENT_SPEED, true);
 	}
 }

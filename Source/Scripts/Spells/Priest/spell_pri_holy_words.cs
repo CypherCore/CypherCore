@@ -43,7 +43,7 @@ internal class spell_pri_holy_words : AuraScript, IHasAuraEffects
 				targetSpellId       = PriestSpells.HolyWordSerenity;
 				cdReductionEffIndex = 1;
 
-				// cdReduction = sSpellMgr.GetSpellInfo(SPELL_PRIEST_HOLY_WORD_SERENITY, GetCastDifficulty()).GetEffect(EFFECT_1).CalcValue(player);
+				// cdReduction = sSpellMgr.GetSpellInfo(HOLY_WORD_SERENITY, GetCastDifficulty()).GetEffect(EFFECT_1).CalcValue(player);
 				break;
 			case PriestSpells.PrayerOfHealing: // reduce Holy Word: Sanctify cd by 6 seconds
 				targetSpellId       = PriestSpells.HolyWordSanctify;

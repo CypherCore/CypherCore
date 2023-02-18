@@ -17,13 +17,13 @@ public class npc_mirror_imageAI : CasterAI
 
 	public struct eSpells
 	{
-		public const uint SPELL_MAGE_FROSTBOLT = 59638;
-		public const uint SPELL_MAGE_FIREBALL = 133;
-		public const uint SPELL_MAGE_ARCANE_BLAST = 30451;
-		public const uint SPELL_MAGE_GLYPH = 63093;
-		public const uint SPELL_INITIALIZE_IMAGES = 102284;
-		public const uint SPELL_CLONE_CASTER = 60352;
-		public const uint SPELL_INHERIT_MASTER_THREAT = 58838;
+		public const uint FROSTBOLT = 59638;
+		public const uint FIREBALL = 133;
+		public const uint ARCANE_BLAST = 30451;
+		public const uint GLYPH = 63093;
+		public const uint INITIALIZE_IMAGES = 102284;
+		public const uint CLONE_CASTER = 60352;
+		public const uint INHERIT_MASTER_THREAT = 58838;
 	}
 
 	public npc_mirror_imageAI(Creature creature) : base(creature)
@@ -47,7 +47,7 @@ public class npc_mirror_imageAI : CasterAI
 		me.SetHealth(owner.ToUnit().GetHealth());
 		me.SetReactState(ReactStates.Defensive);
 
-		me.CastSpell(owner, eSpells.SPELL_INHERIT_MASTER_THREAT, true);
+		me.CastSpell(owner, eSpells.INHERIT_MASTER_THREAT, true);
 
 		// here mirror image casts on summoner spell (not present in client dbc) 49866
 		// here should be auras (not present in client dbc): 35657, 35658, 35659, 35660 selfcasted by mirror images (stats related?)
@@ -74,16 +74,16 @@ public class npc_mirror_imageAI : CasterAI
 		if (ownerPlayer == null)
 			return;
 
-		var spellId = eSpells.SPELL_MAGE_FROSTBOLT;
+		var spellId = eSpells.FROSTBOLT;
 
 		switch (ownerPlayer.GetPrimarySpecialization())
 		{
 			case TalentSpecialization.MageArcane:
-				spellId = eSpells.SPELL_MAGE_ARCANE_BLAST;
+				spellId = eSpells.ARCANE_BLAST;
 
 				break;
 			case TalentSpecialization.MageFire:
-				spellId = eSpells.SPELL_MAGE_FIREBALL;
+				spellId = eSpells.FIREBALL;
 
 				break;
 			default:
@@ -116,8 +116,8 @@ public class npc_mirror_imageAI : CasterAI
 
 		if (owner != null)
 		{
-			owner.CastSpell(me, eSpells.SPELL_INITIALIZE_IMAGES, true);
-			owner.CastSpell(me, eSpells.SPELL_CLONE_CASTER, true);
+			owner.CastSpell(me, eSpells.INITIALIZE_IMAGES, true);
+			owner.CastSpell(me, eSpells.CLONE_CASTER, true);
 		}
 	}
 

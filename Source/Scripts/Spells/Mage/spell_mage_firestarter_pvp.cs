@@ -18,7 +18,7 @@ public class spell_mage_firestarter_pvp : AuraScript, IAuraCheckProc, IHasAuraEf
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
-		return eventInfo.GetSpellInfo().Id == MageSpells.SPELL_MAGE_FIREBALL;
+		return eventInfo.GetSpellInfo().Id == MageSpells.FIREBALL;
 	}
 
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo UnnamedParameter)
@@ -28,7 +28,7 @@ public class spell_mage_firestarter_pvp : AuraScript, IAuraCheckProc, IHasAuraEf
 		if (caster == null)
 			return;
 
-		caster.GetSpellHistory().ModifyCooldown(MageSpells.SPELL_MAGE_COMBUSTION, TimeSpan.FromSeconds((aurEff.GetAmount() * -1) - 5000));
+		caster.GetSpellHistory().ModifyCooldown(MageSpells.COMBUSTION, TimeSpan.FromSeconds((aurEff.GetAmount() * -1) - 5000));
 	}
 
 	public override void Register()

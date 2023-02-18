@@ -21,7 +21,7 @@ public class spell_monk_black_ox_brew : SpellScript, IHasSpellEffects
 		if (caster == null)
 			return;
 
-		caster.GetSpellHistory().ResetCharges(Global.SpellMgr.GetSpellInfo(MonkSpells.SPELL_MONK_PURIFYING_BREW, Difficulty.None).ChargeCategoryId);
+		caster.GetSpellHistory().ResetCharges(Global.SpellMgr.GetSpellInfo(MonkSpells.PURIFYING_BREW, Difficulty.None).ChargeCategoryId);
 	}
 
 	public override void Register()

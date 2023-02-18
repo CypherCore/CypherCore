@@ -13,7 +13,7 @@ public class spell_dh_nether_bond : SpellScript, ISpellOnCast
 {
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (!Global.SpellMgr.HasSpellInfo(DemonHunterSpells.SPELL_DH_NETHER_BOND_DAMAGE, Difficulty.None) || !Global.SpellMgr.HasSpellInfo(DemonHunterSpells.SPELL_DH_NETHER_BOND_PERIODIC, Difficulty.None))
+		if (!Global.SpellMgr.HasSpellInfo(DemonHunterSpells.NETHER_BOND_DAMAGE, Difficulty.None) || !Global.SpellMgr.HasSpellInfo(DemonHunterSpells.NETHER_BOND_PERIODIC, Difficulty.None))
 			return false;
 
 		return true;
@@ -26,6 +26,6 @@ public class spell_dh_nether_bond : SpellScript, ISpellOnCast
 		if (caster == null)
 			return;
 
-		caster.CastSpell(caster, DemonHunterSpells.SPELL_DH_NETHER_BOND_PERIODIC, true);
+		caster.CastSpell(caster, DemonHunterSpells.NETHER_BOND_PERIODIC, true);
 	}
 }

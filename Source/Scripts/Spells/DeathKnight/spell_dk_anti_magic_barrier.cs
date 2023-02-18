@@ -16,7 +16,7 @@ public class spell_dk_anti_magic_barrier : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (Global.SpellMgr.GetSpellInfo(DeathKnightSpells.SPELL_DK_ANTI_MAGIC_BARRIER, Difficulty.None) != null)
+		if (Global.SpellMgr.GetSpellInfo(DeathKnightSpells.ANTI_MAGIC_BARRIER, Difficulty.None) != null)
 			return false;
 
 		return true;

@@ -30,7 +30,7 @@ public class spell_dk_unholy_frenzy : AuraScript, IHasAuraEffects
 				                                       return default;
 
 			                                       if (target.HasAura(156004))
-				                                       caster.CastSpell(target, DeathKnightSpells.SPELL_DK_FESTERING_WOUND_DAMAGE, true);
+				                                       caster.CastSpell(target, DeathKnightSpells.FESTERING_WOUND_DAMAGE, true);
 
 			                                       if (caster.HasAura(156004))
 				                                       return TimeSpan.FromSeconds(2);

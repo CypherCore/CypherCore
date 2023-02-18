@@ -14,7 +14,7 @@ public class at_hun_freezing_trapAI : AreaTriggerAI
 
 	public enum UsedSpells
 	{
-		SPELL_HUNTER_FREEZING_TRAP_STUN = 3355
+		FREEZING_TRAP_STUN = 3355
 	}
 
 	public at_hun_freezing_trapAI(AreaTrigger areatrigger) : base(areatrigger)
@@ -38,7 +38,7 @@ public class at_hun_freezing_trapAI : AreaTriggerAI
 
 			if (!caster.IsFriendlyTo(target))
 			{
-				caster.CastSpell(target, UsedSpells.SPELL_HUNTER_FREEZING_TRAP_STUN, true);
+				caster.CastSpell(target, UsedSpells.FREEZING_TRAP_STUN, true);
 				at.Remove();
 
 				return;
@@ -58,7 +58,7 @@ public class at_hun_freezing_trapAI : AreaTriggerAI
 
 		if (!caster.IsFriendlyTo(unit))
 		{
-			caster.CastSpell(unit, UsedSpells.SPELL_HUNTER_FREEZING_TRAP_STUN, true);
+			caster.CastSpell(unit, UsedSpells.FREEZING_TRAP_STUN, true);
 			at.Remove();
 
 			return;

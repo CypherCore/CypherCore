@@ -17,7 +17,7 @@ public class spell_monk_zen_pulse : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (Global.SpellMgr.GetSpellInfo(MonkSpells.SPELL_MONK_ZEN_PULSE_DAMAGE, Difficulty.None) != null)
+		if (Global.SpellMgr.GetSpellInfo(MonkSpells.ZEN_PULSE_DAMAGE, Difficulty.None) != null)
 			return false;
 
 		return true;
@@ -25,7 +25,7 @@ public class spell_monk_zen_pulse : SpellScript, IHasSpellEffects
 
 	private void OnHit(uint UnnamedParameter)
 	{
-		GetCaster().CastSpell(GetCaster(), MonkSpells.SPELL_MONK_ZEN_PULSE_HEAL, true);
+		GetCaster().CastSpell(GetCaster(), MonkSpells.ZEN_PULSE_HEAL, true);
 	}
 
 	public override void Register()

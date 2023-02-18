@@ -18,8 +18,8 @@ public class spell_rog_deadly_poison_instant_damage_SpellScript : SpellScript, I
 			var target = GetExplTargetUnit();
 
 			if (target != null)
-				if (target.HasAura(RogueSpells.SPELL_ROGUE_DEADLY_POISON_DOT, _player.GetGUID()))
-					_player.CastSpell(target, RogueSpells.SPELL_ROGUE_DEADLY_POISON_INSTANT_DAMAGE, true);
+				if (target.HasAura(RogueSpells.DEADLY_POISON_DOT, _player.GetGUID()))
+					_player.CastSpell(target, RogueSpells.DEADLY_POISON_INSTANT_DAMAGE, true);
 		}
 	}
 }

@@ -19,7 +19,7 @@ public class spell_pri_voidform : AuraScript, IHasAuraEffects
 		var caster = GetCaster();
 
 		if (caster != null)
-			caster.RemoveAurasDueToSpell(PriestSpells.SPELL_PRIEST_LINGERING_INSANITY);
+			caster.RemoveAurasDueToSpell(PriestSpells.LINGERING_INSANITY);
 	}
 
 	private void HandlePeriodic(AuraEffect aurEff)
@@ -42,26 +42,26 @@ public class spell_pri_voidform : AuraScript, IHasAuraEffects
 		switch (tick)
 		{
 			case 0:
-				caster.CastSpell(caster, PriestSpells.SPELL_PRIEST_VOIDFORM_TENTACLES, true);
+				caster.CastSpell(caster, PriestSpells.VOIDFORM_TENTACLES, true);
 
 				break;
 			case 3:
-				caster.CastSpell(caster, PriestSpells.SPELL_PRIEST_VOIDFORM_TENTACLES + 1, true);
+				caster.CastSpell(caster, PriestSpells.VOIDFORM_TENTACLES + 1, true);
 
 				break;
 			case 6:
-				caster.CastSpell(caster, PriestSpells.SPELL_PRIEST_VOIDFORM_TENTACLES + 2, true);
+				caster.CastSpell(caster, PriestSpells.VOIDFORM_TENTACLES + 2, true);
 
 				break;
 			case 9:
-				caster.CastSpell(caster, PriestSpells.SPELL_PRIEST_VOIDFORM_TENTACLES + 3, true);
+				caster.CastSpell(caster, PriestSpells.VOIDFORM_TENTACLES + 3, true);
 
 				break;
 			default:
 				break;
 		}
 
-		caster.CastSpell(caster, PriestSpells.SPELL_PRIEST_VOIDFORM_BUFFS, true);
+		caster.CastSpell(caster, PriestSpells.VOIDFORM_BUFFS, true);
 	}
 
 	private void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes UnnamedParameter)
@@ -72,19 +72,19 @@ public class spell_pri_voidform : AuraScript, IHasAuraEffects
 			return;
 
 		for (uint i = 0; i < 4; ++i)
-			caster.RemoveAurasDueToSpell(PriestSpells.SPELL_PRIEST_VOIDFORM_TENTACLES + i);
+			caster.RemoveAurasDueToSpell(PriestSpells.VOIDFORM_TENTACLES + i);
 
 		var haste = aurEff.GetAmount();
 		var mod   = new CastSpellExtraArgs();
 		mod.AddSpellMod(SpellValueMod.BasePoint0, haste);
 
-		var aEff = caster.GetAuraEffectOfRankedSpell(PriestSpells.SPELL_PRIEST_VOIDFORM_BUFFS, 3, caster.GetGUID());
+		var aEff = caster.GetAuraEffectOfRankedSpell(PriestSpells.VOIDFORM_BUFFS, 3, caster.GetGUID());
 
 		if (aEff != null)
 			mod.AddSpellMod(SpellValueMod.BasePoint1, aEff.GetAmount());
 
 		mod.TriggerFlags = TriggerCastFlags.FullMask;
-		caster.CastSpell(caster, PriestSpells.SPELL_PRIEST_LINGERING_INSANITY, mod);
+		caster.CastSpell(caster, PriestSpells.LINGERING_INSANITY, mod);
 	}
 
 	public override void Register()

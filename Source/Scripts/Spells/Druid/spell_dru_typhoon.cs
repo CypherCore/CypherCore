@@ -17,7 +17,7 @@ public class spell_dru_typhoon : SpellScript, IHasSpellEffects
 	private void HandleKnockBack(uint effIndex)
 	{
 		// Glyph of Typhoon
-		if (GetCaster().HasAura(DruidSpells.SPELL_DRUID_GLYPH_OF_TYPHOON))
+		if (GetCaster().HasAura(DruidSpells.GLYPH_OF_TYPHOON))
 			PreventHitDefaultEffect(effIndex);
 	}
 

@@ -9,7 +9,7 @@ using Game.Spells;
 
 namespace Scripts.Spells.Monk;
 
-[Script] // 124255 - Stagger - SPELL_MONK_STAGGER_DAMAGE_AURA
+[Script] // 124255 - Stagger - STAGGER_DAMAGE_AURA
 internal class spell_monk_stagger_damage_aura : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();

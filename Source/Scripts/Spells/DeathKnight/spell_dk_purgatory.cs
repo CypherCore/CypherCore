@@ -23,7 +23,7 @@ public class spell_dk_purgatory : AuraScript, IHasAuraEffects
 			var removeMode = GetTargetApplication().GetRemoveMode();
 
 			if (removeMode == AuraRemoveMode.Expire)
-				_player.CastSpell(_player, DeathKnightSpells.SPELL_DK_PURGATORY_INSTAKILL, true);
+				_player.CastSpell(_player, DeathKnightSpells.PURGATORY_INSTAKILL, true);
 		}
 	}
 

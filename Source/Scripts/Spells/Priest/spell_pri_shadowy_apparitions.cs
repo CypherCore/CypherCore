@@ -17,12 +17,12 @@ public class spell_pri_shadowy_apparitions : AuraScript, IHasAuraEffects, IAuraC
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(PriestSpells.SPELL_PRIEST_SHADOWY_APPARITION_MISSILE, PriestSpells.SPELL_PRIEST_SHADOW_WORD_PAIN);
+		return ValidateSpellInfo(PriestSpells.SHADOWY_APPARITION_MISSILE, PriestSpells.SHADOW_WORD_PAIN);
 	}
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
-		if (eventInfo.GetSpellInfo().Id == PriestSpells.SPELL_PRIEST_SHADOW_WORD_PAIN)
+		if (eventInfo.GetSpellInfo().Id == PriestSpells.SHADOW_WORD_PAIN)
 			if ((eventInfo.GetHitMask() & ProcFlagsHit.Critical) != 0)
 				return true;
 
@@ -33,8 +33,8 @@ public class spell_pri_shadowy_apparitions : AuraScript, IHasAuraEffects, IAuraC
 	{
 		if (GetTarget() && eventInfo.GetActionTarget())
 		{
-			GetTarget().CastSpell(eventInfo.GetActionTarget(), PriestSpells.SPELL_PRIEST_SHADOWY_APPARITION_MISSILE, true);
-			GetTarget().SendPlaySpellVisual(eventInfo.GetActionTarget().GetPosition(), GetCaster().GetOrientation(), MiscSpells.SPELL_VISUAL_SHADOWY_APPARITION, 0, 0, MiscSpells.SHADOWY_APPARITION_TRAVEL_SPEED, false);
+			GetTarget().CastSpell(eventInfo.GetActionTarget(), PriestSpells.SHADOWY_APPARITION_MISSILE, true);
+			GetTarget().SendPlaySpellVisual(eventInfo.GetActionTarget().GetPosition(), GetCaster().GetOrientation(), MiscSpells.VISUAL_SHADOWY_APPARITION, 0, 0, MiscSpells.SHADOWY_APPARITION_TRAVEL_SPEED, false);
 		}
 	}
 

@@ -15,7 +15,7 @@ public class spell_rog_fan_of_knives_SpellScript : SpellScript, ISpellOnHit, ISp
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(RogueSpells.SPELL_ROGUE_FAN_OF_KNIVES);
+		return ValidateSpellInfo(RogueSpells.FAN_OF_KNIVES);
 	}
 
 	public override bool Load()

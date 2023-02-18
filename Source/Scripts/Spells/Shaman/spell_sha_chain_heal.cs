@@ -21,7 +21,7 @@ namespace Scripts.Spells.Shaman
 
 		public override bool Validate(SpellInfo UnnamedParameter)
 		{
-			if (Global.SpellMgr.GetSpellInfo(ShamanSpells.SPELL_SHAMAN_HIGH_TIDE, Difficulty.None) != null)
+			if (Global.SpellMgr.GetSpellInfo(ShamanSpells.HIGH_TIDE, Difficulty.None) != null)
 				return false;
 
 			return true;
@@ -35,7 +35,7 @@ namespace Scripts.Spells.Shaman
 		private void SelectAdditionalTargets(List<WorldObject> targets)
 		{
 			var caster   = GetCaster();
-			var highTide = caster.GetAuraEffect(ShamanSpells.SPELL_SHAMAN_HIGH_TIDE, 1);
+			var highTide = caster.GetAuraEffect(ShamanSpells.HIGH_TIDE, 1);
 
 			if (highTide == null)
 				return;

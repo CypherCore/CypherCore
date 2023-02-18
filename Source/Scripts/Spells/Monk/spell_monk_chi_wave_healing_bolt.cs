@@ -21,7 +21,7 @@ public class spell_monk_chi_wave_healing_bolt : SpellScript, ISpellOnHit
 			var target = GetHitUnit();
 
 			if (target != null)
-				_player.CastSpell(target, MonkSpells.SPELL_MONK_CHI_WAVE_HEAL, true);
+				_player.CastSpell(target, MonkSpells.CHI_WAVE_HEAL, true);
 		}
 	}
 }

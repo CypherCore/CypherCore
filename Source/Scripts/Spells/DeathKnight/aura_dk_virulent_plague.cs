@@ -31,7 +31,7 @@ public class aura_dk_virulent_plague : AuraScript, IHasAuraEffects
 			var caster = GetCaster();
 
 			if (caster != null)
-				caster.CastSpell(GetTarget(), DeathKnightSpells.SPELL_DK_VIRULENT_ERUPTION, true);
+				caster.CastSpell(GetTarget(), DeathKnightSpells.VIRULENT_ERUPTION, true);
 		}
 	}
 

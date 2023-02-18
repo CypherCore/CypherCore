@@ -16,12 +16,12 @@ public class spell_hun_explosive_shot_detonate : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint UnnamedParameter)
 	{
-		var at = GetCaster().GetAreaTrigger(HunterSpells.SPELL_HUNTER_EXPLOSIVE_SHOT);
+		var at = GetCaster().GetAreaTrigger(HunterSpells.EXPLOSIVE_SHOT);
 
 		if (at != null)
 		{
-			GetCaster().RemoveAurasDueToSpell(HunterSpells.SPELL_HUNTER_EXPLOSIVE_SHOT);
-			GetCaster().CastSpell(at.GetPosition(), HunterSpells.SPELL_HUNTER_EXPLOSIVE_SHOT_DAMAGE, true);
+			GetCaster().RemoveAurasDueToSpell(HunterSpells.EXPLOSIVE_SHOT);
+			GetCaster().CastSpell(at.GetPosition(), HunterSpells.EXPLOSIVE_SHOT_DAMAGE, true);
 			at.Remove();
 		}
 	}

@@ -20,8 +20,8 @@ namespace Scripts.Spells.Shaman
 
 		public struct UsedSpells
 		{
-			public const uint SPELL_SHAMAN_EARTHQUAKE_DAMAGE = 77478;
-			public const uint SPELL_SHAMAN_EARTHQUAKE_STUN = 77505;
+			public const uint EARTHQUAKE_DAMAGE = 77478;
+			public const uint EARTHQUAKE_STUN = 77505;
 		}
 
 		public at_sha_earthquake_totem(AreaTrigger areatrigger) : base(areatrigger)
@@ -54,7 +54,7 @@ namespace Scripts.Spells.Shaman
 				PhasingHandler.InheritPhaseShift(tempSumm, caster);
 
 				tempSumm.CastSpell(caster,
-				                   UsedSpells.SPELL_SHAMAN_EARTHQUAKE_DAMAGE,
+				                   UsedSpells.EARTHQUAKE_DAMAGE,
 				                   new CastSpellExtraArgs(TriggerCastFlags.FullMask)
 					                   .AddSpellMod(SpellValueMod.BasePoint0, (int)(caster.GetTotalSpellPowerValue(SpellSchoolMask.Normal, false) * 0.3)));
 			}

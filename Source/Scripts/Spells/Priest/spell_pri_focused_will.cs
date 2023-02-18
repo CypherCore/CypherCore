@@ -17,7 +17,7 @@ public class spell_pri_focused_will : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (Global.SpellMgr.GetSpellInfo(PriestSpells.SPELL_PRIEST_FOCUSED_WILL_BUFF, Difficulty.None) != null)
+		if (Global.SpellMgr.GetSpellInfo(PriestSpells.FOCUSED_WILL_BUFF, Difficulty.None) != null)
 			return false;
 
 		return true;
@@ -32,7 +32,7 @@ public class spell_pri_focused_will : AuraScript, IHasAuraEffects
 
 		if (eventInfo.GetDamageInfo().GetAttackType() == WeaponAttackType.BaseAttack || eventInfo.GetDamageInfo().GetAttackType() == WeaponAttackType.OffAttack)
 		{
-			caster.CastSpell(caster, PriestSpells.SPELL_PRIEST_FOCUSED_WILL_BUFF, true);
+			caster.CastSpell(caster, PriestSpells.FOCUSED_WILL_BUFF, true);
 
 			return true;
 		}

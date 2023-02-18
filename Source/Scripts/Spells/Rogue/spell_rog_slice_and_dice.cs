@@ -17,7 +17,7 @@ public class spell_rog_slice_and_dice : SpellScript, ISpellAfterHit
 
 		if (_player != null)
 		{
-			var sliceAndDice = _player.GetAura(RogueSpells.SPELL_ROGUE_SLICE_AND_DICE);
+			var sliceAndDice = _player.GetAura(RogueSpells.SLICE_AND_DICE);
 
 			if (sliceAndDice != null)
 			{

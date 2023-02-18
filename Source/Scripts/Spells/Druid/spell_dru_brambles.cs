@@ -10,7 +10,7 @@ using Game.Spells;
 
 namespace Scripts.Spells.Druid
 {
-	[Script] // 203953 - Brambles - SPELL_DRUID_BRAMBLES_PASSIVE
+	[Script] // 203953 - Brambles - BRAMBLES_PASSIVE
 	internal class spell_dru_brambles : AuraScript, IHasAuraEffects
 	{
 		public List<IAuraEffectHandler> AuraEffects { get; } = new();

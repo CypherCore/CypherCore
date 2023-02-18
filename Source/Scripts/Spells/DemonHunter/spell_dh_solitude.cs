@@ -22,7 +22,7 @@ public class spell_dh_solitude : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (Global.SpellMgr.GetSpellInfo(DemonHunterSpells.SPELL_DH_SOLITUDE_BUFF, Difficulty.None) != null)
+		if (Global.SpellMgr.GetSpellInfo(DemonHunterSpells.SOLITUDE_BUFF, Difficulty.None) != null)
 			return false;
 
 		return true;
@@ -44,10 +44,10 @@ public class spell_dh_solitude : AuraScript, IHasAuraEffects
 		Cell.VisitGrid(caster, searcher, range);
 		allies.Remove(caster);
 
-		if (allies.Count == 0 && !caster.HasAura(DemonHunterSpells.SPELL_DH_SOLITUDE_BUFF))
-			caster.CastSpell(caster, DemonHunterSpells.SPELL_DH_SOLITUDE_BUFF, true);
+		if (allies.Count == 0 && !caster.HasAura(DemonHunterSpells.SOLITUDE_BUFF))
+			caster.CastSpell(caster, DemonHunterSpells.SOLITUDE_BUFF, true);
 		else if (allies.Count > 0)
-			caster.RemoveAurasDueToSpell(DemonHunterSpells.SPELL_DH_SOLITUDE_BUFF);
+			caster.RemoveAurasDueToSpell(DemonHunterSpells.SOLITUDE_BUFF);
 	}
 
 	public override void Register()

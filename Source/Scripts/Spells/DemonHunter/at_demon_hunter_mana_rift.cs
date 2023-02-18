@@ -23,7 +23,7 @@ public class at_demon_hunter_mana_rift : AreaTriggerAI
 		if (caster == null || unit == null)
 			return;
 
-		var spellProto = Global.SpellMgr.GetSpellInfo(DemonHunterSpells.SPELL_DH_MANA_RIFT_SPELL, Difficulty.None);
+		var spellProto = Global.SpellMgr.GetSpellInfo(DemonHunterSpells.MANA_RIFT_SPELL, Difficulty.None);
 
 		if (spellProto == null)
 			return;
@@ -37,7 +37,7 @@ public class at_demon_hunter_mana_rift : AreaTriggerAI
 				args.AddSpellMod(SpellValueMod.BasePoint0, hpBp);
 				args.AddSpellMod(SpellValueMod.BasePoint0, manaBp);
 				args.SetTriggerFlags(TriggerCastFlags.FullMask);
-				caster.CastSpell(unit, DemonHunterSpells.SPELL_DH_MANA_RIFT_DAMAGE, args);
+				caster.CastSpell(unit, DemonHunterSpells.MANA_RIFT_DAMAGE, args);
 			}
 	}
 }

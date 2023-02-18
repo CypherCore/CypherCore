@@ -21,8 +21,6 @@ namespace Scripts.Spells.Warlock
 		public const uint CASTING_CIRCLE = 221703;
 		public const uint CHANNEL_DEMONFIRE_ACTIVATOR = 228312;
 		public const uint CHANNEL_DEMONFIRE_DAMAGE = 196448;
-        public const uint CHANNEL_DEMONFIRE_RANGE = 196449;
-        public const uint CHAOS_BOLT = 116858;
 		public const uint COMMAND_DEMON_OVERRIDER = 119904;
 		public const uint COMPOUNDING_HORROR = 199281;
 		public const uint COMPOUNDING_HORROR_DAMAGE = 231489;
@@ -101,7 +99,7 @@ namespace Scripts.Spells.Warlock
 		public const uint FEAR_BUFF = 118699;
 		public const uint FEAR_EFFECT = 118699;
 		public const uint FELGUARD_FELSTORM = 89751;
-		public const uint FELHUNTER_SPELL_LOCK = 19647;
+		public const uint FELHUNTER_LOCK = 19647;
 		public const uint FEL_FIREBOLT = 104318;
 		public const uint FEL_LORD_CLEAVE = 213688;
 		public const uint FEL_SYNERGY_HEAL = 54181;
@@ -162,6 +160,8 @@ namespace Scripts.Spells.Warlock
 		public const uint INFERNAL_FURNACE = 211119;
 		public const uint INFERNAL_METEOR_STRIKE = 171017;
 		public const uint INFERNO_AURA = 270545;
+		public const uint INQUISITORS_GAZE = 386344;
+		public const uint INQUISITORS_GAZE_EFFECT = 388068;
 		public const uint INTERNAL_COMBUSTION_DMG = 266136;
 		public const uint INTERNAL_COMBUSTION_TALENT_AURA = 266134;
 		public const uint ITEM_S12_TIER_4 = 131632;
@@ -176,7 +176,7 @@ namespace Scripts.Spells.Warlock
 		public const uint METAMORPHOSIS = 103958;
 		public const uint METAMORPHOSIS_ADDITIONAL_AURA = 54879;
 		public const uint METAMORPHOSIS_ADDITIONAL_AURA_2 = 54817;
-		public const uint METAMORPHOSIS_SPELL_REPLACEMENTS = 103965;
+		public const uint METAMORPHOSIS_REPLACEMENTS = 103965;
 		public const uint MOLTEN_CORE = 122355;
 		public const uint MOLTEN_CORE_AURA = 122351;
 		public const uint NETHER_TALENT = 91713;
@@ -266,8 +266,6 @@ namespace Scripts.Spells.Warlock
 		public const uint SOUL_SWAP_OVERRIDE = 86211;
 		public const uint SOW_THE_SEEDS = 196226;
 		public const uint SPAWN_PURPLE_DEMONIC_GATEWAY = 113890;
-		public const uint SPELL_INQUISITORS_GAZE = 386344;
-		public const uint SPELL_INQUISITORS_GAZE_EFFECT = 388068;
 		public const uint STOLEN_POWER = 211530;
 		public const uint STOLEN_POWER_BUFF = 211583;
 		public const uint STOLEN_POWER_COUNTER = 211529;
@@ -308,6 +306,8 @@ namespace Scripts.Spells.Warlock
 		public const uint WILD_IMP_SUMMON = 104317;
 		public const uint WRATH_OF_CONSUMPTION_PROC = 199646;
 		public const uint WRITHE_IN_AGONY = 196102;
+        public const uint CHANNEL_DEMONFIRE_RANGE = 196449;
+        public const uint CHAOS_BOLT = 116858;
         public const uint NPC_WARLOCK_PET_IMP = 416;
         public const uint PYROGENICS_AURA = 387096;
         public const uint SEED_OF_CURRUPTION = 27243;

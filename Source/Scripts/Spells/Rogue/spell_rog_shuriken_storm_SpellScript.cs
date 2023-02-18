@@ -17,7 +17,7 @@ public class spell_rog_shuriken_storm_SpellScript : SpellScript, ISpellOnHit, IS
 	{
 		var caster = GetCaster();
 
-		if (caster.HasAuraType(AuraType.ModStealth) || caster.HasAura(RogueSpells.SPELL_ROGUE_SHADOW_DANCE))
+		if (caster.HasAuraType(AuraType.ModStealth) || caster.HasAura(RogueSpells.SHADOW_DANCE))
 			_stealthed = true;
 
 		return true;
@@ -25,7 +25,7 @@ public class spell_rog_shuriken_storm_SpellScript : SpellScript, ISpellOnHit, IS
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(RogueSpells.SPELL_ROGUE_SHURIKEN_STORM);
+		return ValidateSpellInfo(RogueSpells.SHURIKEN_STORM);
 	}
 
 	public void AfterHit()

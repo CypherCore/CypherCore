@@ -25,14 +25,14 @@ namespace Scripts.Spells.Shaman
 
 			if (caster.IsValidAttackTarget(unit))
 			{
-				caster.CastSpell(unit, TotemSpells.SPELL_TOTEM_VOODOO_EFFECT, true);
-				caster.CastSpell(unit, TotemSpells.SPELL_TOTEM_VOODOO_COOLDOWN, true);
+				caster.CastSpell(unit, TotemSpells.TOTEM_VOODOO_EFFECT, true);
+				caster.CastSpell(unit, TotemSpells.TOTEM_VOODOO_COOLDOWN, true);
 			}
 		}
 
 		public override void OnUnitExit(Unit unit)
 		{
-			unit.RemoveAurasDueToSpell(TotemSpells.SPELL_TOTEM_VOODOO_EFFECT, at.GetCasterGuid());
+			unit.RemoveAurasDueToSpell(TotemSpells.TOTEM_VOODOO_EFFECT, at.GetCasterGuid());
 		}
 	}
 }

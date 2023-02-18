@@ -229,7 +229,7 @@ namespace Scripts.World.NpcSpecial
 //        void Reset()
 //        {
 //            me->SetControlled(true, UNIT_STATE_STUNNED);//disable rotate
-//            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);//imune to knock aways like blast wave
+//            me->ApplySpellImmune(0, IMMUNITY_EFFECT, EFFECT_KNOCK_BACK, true);//imune to knock aways like blast wave
 
 //            resetTimer = 5000;
 //        }
@@ -247,7 +247,7 @@ namespace Scripts.World.NpcSpecial
 //            resetTimer = 5000;
 //            damage = 0;
 
-//            if (doneBy->HasAura(SPELL_SEAL_OF_COMMAND))
+//            if (doneBy->HasAura(SEAL_OF_COMMAND))
 //                if (doneBy->ToPlayer())
 //                    doneBy->ToPlayer()->KilledMonsterCredit(44175, 0);
 //        }
@@ -261,17 +261,17 @@ namespace Scripts.World.NpcSpecial
 //        {
 //            switch (Spell->Id)
 //            {
-//                case SPELL_MOONFIRE:
-//                case SPELL_CHARGE:
-//                case SPELL_STEADY_SHOT:
-//                case SPELL_EVISCERATION:
-//                case SPELL_SHADOW_WORD_PAIN_1:
-//                case SPELL_SHADOW_WORD_PAIN_2:
-//                case SPELL_FROST_NOVA:
-//                case SPELL_CORRUPTION_1:
-//                case SPELL_CORRUPTION_2:
-//                case SPELL_CORRUPTION_3:
-//                case SPELL_TIGER_PALM:
+//                case MOONFIRE:
+//                case CHARGE:
+//                case STEADY_SHOT:
+//                case EVISCERATION:
+//                case SHADOW_WORD_PAIN_1:
+//                case SHADOW_WORD_PAIN_2:
+//                case FROST_NOVA:
+//                case CORRUPTION_1:
+//                case CORRUPTION_2:
+//                case CORRUPTION_3:
+//                case TIGER_PALM:
 //                    if (Caster->ToPlayer())
 //                        Caster->ToPlayer()->KilledMonsterCredit(44175, 0);
 //                    break;

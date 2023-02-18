@@ -35,12 +35,12 @@ public class spell_dru_rake : SpellScript, IHasSpellEffects
 			return;
 
 		// While stealthed or have Incarnation: King of the Jungle aura, deal 100% increased damage
-		if (_stealthed || caster.HasAura(ShapeshiftFormSpells.SPELL_DRUID_INCARNATION_KING_OF_JUNGLE))
+		if (_stealthed || caster.HasAura(ShapeshiftFormSpells.INCARNATION_KING_OF_JUNGLE))
 			SetHitDamage(GetHitDamage() * 2);
 
 		// Only stun if the caster was in stealth
 		if (_stealthed)
-			caster.CastSpell(target, RakeSpells.SPELL_DRUID_RAKE_STUN, true);
+			caster.CastSpell(target, RakeSpells.RAKE_STUN, true);
 	}
 
 	public override void Register()

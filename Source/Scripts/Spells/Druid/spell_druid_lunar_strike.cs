@@ -17,14 +17,14 @@ public class spell_druid_lunar_strike : SpellScript, IHasSpellEffects
 
 	private struct Spells
 	{
-		public static readonly uint SPELL_DRUID_LUNAR_STRIKE = 194153;
-		public static readonly uint SPELL_DRUID_WARRIOR_OF_ELUNE = 202425;
-		public static readonly uint SPELL_DRUID_NATURES_BALANCE = 202430;
+		public static readonly uint LUNAR_STRIKE = 194153;
+		public static readonly uint WARRIOR_OF_ELUNE = 202425;
+		public static readonly uint NATURES_BALANCE = 202430;
 	}
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(MoonfireSpells.SPELL_DRUID_MOONFIRE_DAMAGE, Spells.SPELL_DRUID_WARRIOR_OF_ELUNE, Spells.SPELL_DRUID_LUNAR_STRIKE, Spells.SPELL_DRUID_NATURES_BALANCE);
+		return ValidateSpellInfo(MoonfireSpells.MOONFIRE_DAMAGE, Spells.WARRIOR_OF_ELUNE, Spells.LUNAR_STRIKE, Spells.NATURES_BALANCE);
 	}
 
 	private void HandleHitTarget(uint UnnamedParameter)
@@ -38,9 +38,9 @@ public class spell_druid_lunar_strike : SpellScript, IHasSpellEffects
 		if (currentTarget != explTarget)
 			SetHitDamage(GetHitDamage() * GetSpellInfo().GetEffect(2).BasePoints / 100);
 
-		if (GetCaster().HasAura(Spells.SPELL_DRUID_NATURES_BALANCE))
+		if (GetCaster().HasAura(Spells.NATURES_BALANCE))
 		{
-			var moonfireDOT = currentTarget.GetAura(MoonfireSpells.SPELL_DRUID_MOONFIRE_DAMAGE, GetCaster().GetGUID());
+			var moonfireDOT = currentTarget.GetAura(MoonfireSpells.MOONFIRE_DAMAGE, GetCaster().GetGUID());
 
 			if (moonfireDOT != null)
 			{
@@ -54,13 +54,13 @@ public class spell_druid_lunar_strike : SpellScript, IHasSpellEffects
 			}
 		}
 
-		if (GetCaster() && RandomHelper.randChance(20) && GetCaster().HasAura(DruidSpells.SPELL_DRU_ECLIPSE))
-			GetCaster().CastSpell(null, DruidSpells.SPELL_DRU_SOLAR_EMPOWEREMENT, true);
+		if (GetCaster() && RandomHelper.randChance(20) && GetCaster().HasAura(DruidSpells.ECLIPSE))
+			GetCaster().CastSpell(null, DruidSpells.SOLAR_EMPOWEREMENT, true);
 	}
 
 	private void HandleHit(uint UnnamedParameter)
 	{
-		var WarriorOfElune = GetCaster().GetAura(Spells.SPELL_DRUID_WARRIOR_OF_ELUNE);
+		var WarriorOfElune = GetCaster().GetAura(Spells.WARRIOR_OF_ELUNE);
 
 		if (WarriorOfElune != null)
 		{
@@ -68,7 +68,7 @@ public class spell_druid_lunar_strike : SpellScript, IHasSpellEffects
 			WarriorOfElune.GetEffect(0).SetAmount(amount - 1);
 
 			if (amount == -102)
-				GetCaster().RemoveAurasDueToSpell(Spells.SPELL_DRUID_WARRIOR_OF_ELUNE);
+				GetCaster().RemoveAurasDueToSpell(Spells.WARRIOR_OF_ELUNE);
 		}
 	}
 

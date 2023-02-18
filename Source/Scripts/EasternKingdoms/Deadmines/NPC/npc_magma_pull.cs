@@ -59,7 +59,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
                     foreach (var item in players)
                     {
-                        item.AddAura(boss_vanessa_vancleef.Spells.SPELL_EFFECT_1, item);
+                        item.AddAura(boss_vanessa_vancleef.Spells.EFFECT_1, item);
                         item.NearTeleportTo(-205.7569f, -579.0972f, 42.98623f, 2.3f);
                     }
 

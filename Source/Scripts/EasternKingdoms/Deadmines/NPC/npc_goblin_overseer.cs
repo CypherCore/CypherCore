@@ -33,7 +33,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
                 if (target != null)
                 {
-                    DoCast(target, boss_vanessa_vancleef.Spells.SPELL_MOTIVATE);
+                    DoCast(target, boss_vanessa_vancleef.Spells.MOTIVATE);
                 }
                 MotivateTimer = RandomHelper.URand(8000, 11000);
             }
@@ -44,7 +44,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
             if (HealthBelowPct(50) && !_threat)
             {
-                DoCast(me, boss_vanessa_vancleef.Spells.SPELL_THREATENING);
+                DoCast(me, boss_vanessa_vancleef.Spells.THREATENING);
                 _threat = true;
             }
 

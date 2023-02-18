@@ -28,13 +28,13 @@ public class at_dh_darkness : AreaTriggerAI
 		if (caster == null || unit == null)
 			return;
 
-		if (caster.IsFriendlyTo(unit) && !unit.HasAura(DemonHunterSpells.SPELL_DH_DARKNESS_ABSORB))
+		if (caster.IsFriendlyTo(unit) && !unit.HasAura(DemonHunterSpells.DARKNESS_ABSORB))
 		{
 			entered = true;
 
 			if (entered)
 			{
-				caster.CastSpell(unit, DemonHunterSpells.SPELL_DH_DARKNESS_ABSORB, true);
+				caster.CastSpell(unit, DemonHunterSpells.DARKNESS_ABSORB, true);
 				entered = false;
 			}
 		}
@@ -47,7 +47,7 @@ public class at_dh_darkness : AreaTriggerAI
 		if (caster == null || unit == null)
 			return;
 
-		if (unit.HasAura(DemonHunterSpells.SPELL_DH_DARKNESS_ABSORB))
-			unit.RemoveAurasDueToSpell(DemonHunterSpells.SPELL_DH_DARKNESS_ABSORB, caster.GetGUID());
+		if (unit.HasAura(DemonHunterSpells.DARKNESS_ABSORB))
+			unit.RemoveAurasDueToSpell(DemonHunterSpells.DARKNESS_ABSORB, caster.GetGUID());
 	}
 }

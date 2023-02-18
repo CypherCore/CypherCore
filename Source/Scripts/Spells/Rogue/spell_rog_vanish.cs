@@ -10,7 +10,7 @@ using Game.Spells;
 
 namespace Scripts.Spells.Rogue;
 
-[Script] // 1856 - Vanish - SPELL_ROGUE_VANISH
+[Script] // 1856 - Vanish - VANISH
 internal class spell_rog_vanish : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();

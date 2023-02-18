@@ -20,9 +20,9 @@ public class spell_rog_true_bearing_AuraScript : AuraScript, IHasAuraEffects
 	{
 		var finishers = new List<uint>()
 		                {
-			                (uint)TrueBearingIDs.SPELL_ROGUE_BETWEEN_THE_EYES,
-			                (uint)RogueSpells.SPELL_ROGUE_ROLL_THE_BONES,
-			                (uint)RogueSpells.SPELL_ROGUE_EVISCERATE
+			                (uint)TrueBearingIDs.BETWEEN_THE_EYES,
+			                (uint)RogueSpells.ROLL_THE_BONES,
+			                (uint)RogueSpells.EVISCERATE
 		                };
 
 		foreach (var finisher in finishers)
@@ -43,17 +43,17 @@ public class spell_rog_true_bearing_AuraScript : AuraScript, IHasAuraEffects
 
 		var spellIds = new List<uint>()
 		               {
-			               (uint)RogueSpells.SPELL_ROGUE_ADRENALINE_RUSH,
-			               (uint)RogueSpells.SPELL_ROGUE_SPRINT,
-			               (uint)TrueBearingIDs.SPELL_ROGUE_BETWEEN_THE_EYES,
-			               (uint)TrueBearingIDs.SPELL_ROGUE_VANISH,
-			               (uint)TrueBearingIDs.SPELL_ROGUE_BLIND,
-			               (uint)TrueBearingIDs.SPELL_ROGUE_CLOAK_OF_SHADOWS,
-			               (uint)TrueBearingIDs.SPELL_ROGUE_RIPOSTE,
-			               (uint)TrueBearingIDs.SPELL_ROGUE_GRAPPLING_HOOK,
-			               (uint)RogueSpells.SPELL_ROGUE_KILLING_SPREE,
-			               (uint)TrueBearingIDs.SPELL_ROGUE_MARKED_FOR_DEATH,
-			               (uint)TrueBearingIDs.SPELL_ROGUE_DEATH_FROM_ABOVE
+			               (uint)RogueSpells.ADRENALINE_RUSH,
+			               (uint)RogueSpells.SPRINT,
+			               (uint)TrueBearingIDs.BETWEEN_THE_EYES,
+			               (uint)TrueBearingIDs.VANISH,
+			               (uint)TrueBearingIDs.BLIND,
+			               (uint)TrueBearingIDs.CLOAK_OF_SHADOWS,
+			               (uint)TrueBearingIDs.RIPOSTE,
+			               (uint)TrueBearingIDs.GRAPPLING_HOOK,
+			               (uint)RogueSpells.KILLING_SPREE,
+			               (uint)TrueBearingIDs.MARKED_FOR_DEATH,
+			               (uint)TrueBearingIDs.DEATH_FROM_ABOVE
 		               };
 
 		foreach (var spell in spellIds)

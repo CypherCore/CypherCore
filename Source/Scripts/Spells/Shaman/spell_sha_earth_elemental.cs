@@ -17,7 +17,7 @@ namespace Scripts.Spells.Shaman
 
 		private void HandleSummon(uint UnnamedParameter)
 		{
-			GetCaster().CastSpell(GetHitUnit(), ShamanSpells.SPELL_SHAMAN_EARTH_ELEMENTAL_SUMMON, true);
+			GetCaster().CastSpell(GetHitUnit(), ShamanSpells.EARTH_ELEMENTAL_SUMMON, true);
 		}
 
 		public override void Register()

@@ -17,7 +17,7 @@ public class spell_dh_bloodlet : AuraScript, IHasAuraEffects
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
-		if (eventInfo.GetSpellInfo().Id == DemonHunterSpells.SPELL_DH_THROW_GLAIVE)
+		if (eventInfo.GetSpellInfo().Id == DemonHunterSpells.THROW_GLAIVE)
 			return true;
 
 		return false;
@@ -36,7 +36,7 @@ public class spell_dh_bloodlet : AuraScript, IHasAuraEffects
 		var dmgPerTick = (float)dmg / 5.0f;
 
 		// Any remaining damage must be added
-		var dot = target.GetAuraEffect(DemonHunterSpells.SPELL_DH_BLOODLET_DOT, 0, caster.GetGUID());
+		var dot = target.GetAuraEffect(DemonHunterSpells.BLOODLET_DOT, 0, caster.GetGUID());
 
 		if (dot != null)
 			dmgPerTick += (dot.GetAmount() * (dot.GetTotalTicks() - dot.GetTickNumber())) / 5;
@@ -44,7 +44,7 @@ public class spell_dh_bloodlet : AuraScript, IHasAuraEffects
 		var args = new CastSpellExtraArgs();
 		args.AddSpellMod(SpellValueMod.BasePoint0, (int)dmgPerTick);
 		args.SetTriggerFlags(TriggerCastFlags.FullMask);
-		caster.CastSpell(target, DemonHunterSpells.SPELL_DH_BLOODLET_DOT, args);
+		caster.CastSpell(target, DemonHunterSpells.BLOODLET_DOT, args);
 	}
 
 	public override void Register()

@@ -20,9 +20,9 @@ public class at_monk_chi_burst : AreaTriggerAI
 			return;
 
 		if (at.GetCaster().IsValidAssistTarget(target))
-			at.GetCaster().CastSpell(target, MonkSpells.SPELL_MONK_CHI_BURST_HEAL, true);
+			at.GetCaster().CastSpell(target, MonkSpells.CHI_BURST_HEAL, true);
 
 		if (at.GetCaster().IsValidAttackTarget(target))
-			at.GetCaster().CastSpell(target, MonkSpells.SPELL_MONK_CHI_BURST_DAMAGE, true);
+			at.GetCaster().CastSpell(target, MonkSpells.CHI_BURST_DAMAGE, true);
 	}
 }

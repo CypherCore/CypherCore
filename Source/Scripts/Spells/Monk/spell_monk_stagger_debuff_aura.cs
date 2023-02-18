@@ -9,7 +9,7 @@ using Game.Spells;
 
 namespace Scripts.Spells.Monk;
 
-[Script] // 124273, 124274, 124275 - Light/Moderate/Heavy Stagger - SPELL_MONK_STAGGER_LIGHT / SPELL_MONK_STAGGER_MODERATE / SPELL_MONK_STAGGER_HEAVY
+[Script] // 124273, 124274, 124275 - Light/Moderate/Heavy Stagger - STAGGER_LIGHT / STAGGER_MODERATE / STAGGER_HEAVY
 internal class spell_monk_stagger_debuff_aura : AuraScript, IHasAuraEffects
 {
 	private float _period;

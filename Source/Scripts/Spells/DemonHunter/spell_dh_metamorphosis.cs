@@ -15,7 +15,7 @@ public class spell_dh_metamorphosis : SpellScript, ISpellBeforeCast
 {
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (!Global.SpellMgr.HasSpellInfo(DemonHunterSpells.SPELL_DH_METAMORPHOSIS_HAVOC, Difficulty.None) || !Global.SpellMgr.HasSpellInfo(DemonHunterSpells.SPELL_DH_METAMORPHOSIS_JUMP, Difficulty.None) || !Global.SpellMgr.HasSpellInfo(DemonHunterSpells.SPELL_DH_METAMORPHOSIS_STUN, Difficulty.None))
+		if (!Global.SpellMgr.HasSpellInfo(DemonHunterSpells.METAMORPHOSIS_HAVOC, Difficulty.None) || !Global.SpellMgr.HasSpellInfo(DemonHunterSpells.METAMORPHOSIS_JUMP, Difficulty.None) || !Global.SpellMgr.HasSpellInfo(DemonHunterSpells.METAMORPHOSIS_STUN, Difficulty.None))
 			return false;
 
 		return true;
@@ -36,15 +36,15 @@ public class spell_dh_metamorphosis : SpellScript, ISpellBeforeCast
 		var dest = GetExplTargetDest();
 
 		if (dest != null)
-			player.CastSpell(new Position(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ()), DemonHunterSpells.SPELL_DH_METAMORPHOSIS_JUMP, true);
+			player.CastSpell(new Position(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ()), DemonHunterSpells.METAMORPHOSIS_JUMP, true);
 
-		if (player.HasAura(DemonHunterSpells.SPELL_DH_DEMON_REBORN)) // Remove CD of Eye Beam, Chaos Nova and Blur
+		if (player.HasAura(DemonHunterSpells.DEMON_REBORN)) // Remove CD of Eye Beam, Chaos Nova and Blur
 		{
-			player.GetSpellHistory().ResetCooldown(DemonHunterSpells.SPELL_DH_CHAOS_NOVA, true);
-			player.GetSpellHistory().ResetCooldown(DemonHunterSpells.SPELL_DH_BLUR, true);
-			player.GetSpellHistory().AddCooldown(DemonHunterSpells.SPELL_DH_BLUR_BUFF, 0, TimeSpan.FromMinutes(1));
-			player.GetSpellHistory().ResetCooldown(DemonHunterSpells.SPELL_DH_BLUR_BUFF, true);
-			player.GetSpellHistory().ResetCooldown(DemonHunterSpells.SPELL_DH_EYE_BEAM, true);
+			player.GetSpellHistory().ResetCooldown(DemonHunterSpells.CHAOS_NOVA, true);
+			player.GetSpellHistory().ResetCooldown(DemonHunterSpells.BLUR, true);
+			player.GetSpellHistory().AddCooldown(DemonHunterSpells.BLUR_BUFF, 0, TimeSpan.FromMinutes(1));
+			player.GetSpellHistory().ResetCooldown(DemonHunterSpells.BLUR_BUFF, true);
+			player.GetSpellHistory().ResetCooldown(DemonHunterSpells.EYE_BEAM, true);
 		}
 	}
 }

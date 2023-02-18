@@ -17,7 +17,7 @@ public class spell_soar : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(EvokerSpells.SPELL_EVOKER_SOAR_RACIAL, EvokerSpells.SPELL_SKYWARD_ASCENT, EvokerSpells.SPELL_SURGE_FORWARD);
+		return ValidateSpellInfo(EvokerSpells.SOAR_RACIAL, EvokerSpells.SKYWARD_ASCENT, EvokerSpells.SURGE_FORWARD);
 	}
 
 	private void HandleOnHit(uint UnnamedParameter)
@@ -32,8 +32,8 @@ public class spell_soar : SpellScript, IHasSpellEffects
 
 		var player = GetHitPlayer();
 		// Add "Skyward Ascent" and "Surge Forward" to the caster's spellbook
-		player.LearnSpell(EvokerSpells.SPELL_SKYWARD_ASCENT, false);
-		player.LearnSpell(EvokerSpells.SPELL_SURGE_FORWARD, false);
+		player.LearnSpell(EvokerSpells.SKYWARD_ASCENT, false);
+		player.LearnSpell(EvokerSpells.SURGE_FORWARD, false);
 	}
 
 	public override void Register()

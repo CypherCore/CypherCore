@@ -23,8 +23,8 @@ namespace Scripts.Spells.Shaman
 
 			if (caster != null)
 			{
-				caster.CastSpell(caster, ShamanSpells.SPELL_SHAMAN_STORMBRINGER_PROC, true);
-				caster.GetSpellHistory().ResetCooldown(ShamanSpells.SPELL_SHAMAN_STORMSTRIKE, true);
+				caster.CastSpell(caster, ShamanSpells.STORMBRINGER_PROC, true);
+				caster.GetSpellHistory().ResetCooldown(ShamanSpells.STORMSTRIKE, true);
 			}
 		}
 	}

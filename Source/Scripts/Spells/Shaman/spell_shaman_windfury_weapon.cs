@@ -18,7 +18,7 @@ namespace Scripts.Spells.Shaman
 
 		public override bool Validate(SpellInfo UnnamedParameter)
 		{
-			return Global.SpellMgr.GetSpellInfo(ShamanSpells.SPELL_SHAMAN_WINDFURY_WEAPON_PASSIVE, Difficulty.None) != null;
+			return Global.SpellMgr.GetSpellInfo(ShamanSpells.WINDFURY_WEAPON_PASSIVE, Difficulty.None) != null;
 		}
 
 		private void HandleDummy(uint UnnamedParameter)
@@ -27,7 +27,7 @@ namespace Scripts.Spells.Shaman
 
 			if (caster != null)
 			{
-				var auraEffect = caster.GetAuraEffect(ShamanSpells.SPELL_SHAMAN_WINDFURY_WEAPON_PASSIVE, 0);
+				var auraEffect = caster.GetAuraEffect(ShamanSpells.WINDFURY_WEAPON_PASSIVE, 0);
 
 				if (auraEffect != null)
 					auraEffect.SetAmount(GetEffectValue());

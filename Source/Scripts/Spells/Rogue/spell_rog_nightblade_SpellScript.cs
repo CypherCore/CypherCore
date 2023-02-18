@@ -22,7 +22,7 @@ public class spell_rog_nightblade_SpellScript : SpellScript, IHasSpellEffects
 		if (caster == null || target == null)
 			return;
 
-		target.RemoveAurasDueToSpell(RogueSpells.SPELL_ROGUE_NIGHTBLADE, caster.GetGUID());
+		target.RemoveAurasDueToSpell(RogueSpells.NIGHTBLADE, caster.GetGUID());
 	}
 
 	public override void Register()
