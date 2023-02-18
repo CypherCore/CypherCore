@@ -45,6 +45,8 @@ namespace Scripts.Spells.Warlock
 
 			foreach (var target in targets)
 			{
+				if (target == null) continue;
+
 				var finalAmount = MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount());
 
 				if (finalAmount > 0)

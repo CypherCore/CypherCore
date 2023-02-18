@@ -16,7 +16,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(157736)]
 	public class spell_warlock_immolate_dot : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void HandlePeriodic(AuraEffect UnnamedParameter)
 		{

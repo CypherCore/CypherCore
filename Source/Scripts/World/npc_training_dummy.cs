@@ -9,6 +9,8 @@ using Game.AI;
 using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
+using Scripts.World.NpcSpecial;
+using static System.Net.Mime.MediaTypeNames;
 using static Scripts.EasternKingdoms.Deadmines.Bosses.boss_glubtok;
 
 namespace Scripts.World.NpcSpecial
@@ -162,12 +164,14 @@ namespace Scripts.World.NpcSpecial
 
         public npc_training_dummy(Creature creature) : base(creature)
         {
-            creature.SetHealth(1);
+            creature.SetControlled(true, UnitState.Stunned);
+            creature.SetControlled(true, UnitState.Root);
+            creature.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.KnockBack, true);
         }
 
         public override void JustEnteredCombat(Unit who)
         {
-            _combatTimer[who.GetGUID()] = TimeSpan.FromSeconds(5);
+            _combatTimer[who.GetGUID()] = TimeSpan.FromSeconds(15);
         }
 
         public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
@@ -178,7 +182,7 @@ namespace Scripts.World.NpcSpecial
                 damageType == DamageEffectType.DOT)
                 return;
 
-            _combatTimer[attacker.GetGUID()] = TimeSpan.FromSeconds(5);
+            _combatTimer[attacker.GetGUID()] = TimeSpan.FromSeconds(15);
         }
 
         public override void UpdateAI(uint diff)
@@ -199,8 +203,105 @@ namespace Scripts.World.NpcSpecial
                 }
             }
 
-            if (me.GetHealth() != 1)
-                me.SetHealth(1);
+        }
+
+        public override void Reset()
+        {
+            me.SetControlled(true, UnitState.Stunned);
+            me.SetControlled(true, UnitState.Root);
+            me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.KnockBack, true);
+            base.Reset();
         }
     }
+
+//    class npc_training_dummy_start_zones : public CreatureScript
+//{
+//public:
+//    npc_training_dummy_start_zones() : CreatureScript("npc_training_dummy_start_zones") { }
+
+//    struct npc_training_dummy_start_zonesAI : Scripted_NoMovementAI
+//    {
+//        npc_training_dummy_start_zonesAI(Creature* creature) : Scripted_NoMovementAI(creature)
+//        { }
+
+//        uint32 resetTimer;
+
+//        void Reset()
+//        {
+//            me->SetControlled(true, UNIT_STATE_STUNNED);//disable rotate
+//            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);//imune to knock aways like blast wave
+
+//            resetTimer = 5000;
+//        }
+
+//        void EnterEvadeMode()
+//        {
+//            if (!_EnterEvadeMode())
+//                return;
+
+//            Reset();
+//        }
+
+//        void DamageTaken(Unit* doneBy, uint32& damage)
+//        {
+//            resetTimer = 5000;
+//            damage = 0;
+
+//            if (doneBy->HasAura(SPELL_SEAL_OF_COMMAND))
+//                if (doneBy->ToPlayer())
+//                    doneBy->ToPlayer()->KilledMonsterCredit(44175, 0);
+//        }
+
+//        void EnterCombat(Unit* /*who*/)
+//        {
+//            return;
+//        }
+
+//        void SpellHit(Unit* Caster, const SpellInfo* Spell)
+//        {
+//            switch (Spell->Id)
+//            {
+//                case SPELL_MOONFIRE:
+//                case SPELL_CHARGE:
+//                case SPELL_STEADY_SHOT:
+//                case SPELL_EVISCERATION:
+//                case SPELL_SHADOW_WORD_PAIN_1:
+//                case SPELL_SHADOW_WORD_PAIN_2:
+//                case SPELL_FROST_NOVA:
+//                case SPELL_CORRUPTION_1:
+//                case SPELL_CORRUPTION_2:
+//                case SPELL_CORRUPTION_3:
+//                case SPELL_TIGER_PALM:
+//                    if (Caster->ToPlayer())
+//                        Caster->ToPlayer()->KilledMonsterCredit(44175, 0);
+//                    break;
+//                default:
+//                    break;
+//            }
+//}
+
+//void UpdateAI(uint32 const diff)
+//{
+//    if (!UpdateVictim())
+//        return;
+
+//    if (!me->HasUnitState(UNIT_STATE_STUNNED))
+//        me->SetControlled(true, UNIT_STATE_STUNNED);//disable rotate
+
+//    if (resetTimer <= diff)
+//    {
+//        EnterEvadeMode();
+//        resetTimer = 5000;
+//    }
+//    else
+//        resetTimer -= diff;
+//}
+//void MoveInLineOfSight(Unit* /*who*/) { return; }
+//    };
+
+//CreatureAI* GetAI(Creature* creature) const
+//    {
+//        return new npc_training_dummy_start_zonesAI(creature);
+//    }
+//};
 }
