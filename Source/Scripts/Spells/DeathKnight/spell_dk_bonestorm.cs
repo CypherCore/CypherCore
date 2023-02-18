@@ -13,7 +13,7 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(194844)]
 public class spell_dk_bonestorm : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	private int m_ExtraSpellCost;

@@ -14,7 +14,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(205598)]
 public class spell_dh_awaken_the_demon : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{

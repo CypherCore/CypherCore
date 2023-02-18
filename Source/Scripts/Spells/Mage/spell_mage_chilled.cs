@@ -12,7 +12,7 @@ namespace Scripts.Spells.Mage;
 [SpellScript(205708)]
 public class spell_mage_chilled : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void HandleApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{

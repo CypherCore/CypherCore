@@ -12,7 +12,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(200389)]
 public class spell_dru_cultivation : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
 	{

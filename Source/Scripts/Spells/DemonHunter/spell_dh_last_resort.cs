@@ -13,7 +13,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(209258)]
 public class spell_dh_last_resort : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	public override bool Validate(SpellInfo UnnamedParameter)

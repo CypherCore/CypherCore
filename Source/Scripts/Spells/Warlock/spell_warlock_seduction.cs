@@ -16,7 +16,7 @@ namespace Scripts.Spells.Warlock
 	             })]
 	public class spell_warlock_seduction : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 		{

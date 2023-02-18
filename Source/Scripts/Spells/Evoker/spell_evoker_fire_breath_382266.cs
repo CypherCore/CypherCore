@@ -12,7 +12,7 @@ namespace Scripts.Spells.Evoker;
 [SpellScript(382266)]
 public class spell_evoker_fire_breath_382266 : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private enum eSpells
 	{

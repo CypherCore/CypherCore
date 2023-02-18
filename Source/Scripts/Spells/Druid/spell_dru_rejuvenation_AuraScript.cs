@@ -12,7 +12,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(774)]
 public class spell_dru_rejuvenation_AuraScript : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	//Posible Fixed

@@ -13,7 +13,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(78203)]
 public class spell_pri_shadowy_apparitions : AuraScript, IHasAuraEffects, IAuraCheckProc
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

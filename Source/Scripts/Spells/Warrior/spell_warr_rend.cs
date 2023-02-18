@@ -13,7 +13,7 @@ namespace Scripts.Spells.Warrior
 	[SpellScript(94009)]
 	public class spell_warr_rend : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
 		{

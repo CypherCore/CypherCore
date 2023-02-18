@@ -13,7 +13,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(201471)]
 public class spell_dh_artifact_inner_demons : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	private void OnProc(AuraEffect UnnamedParameter, ProcEventInfo eventInfo)

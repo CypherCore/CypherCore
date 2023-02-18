@@ -13,7 +13,7 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(196782)]
 public class aura_dk_outbreak_periodic : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void HandleDummyTick(AuraEffect UnnamedParameter)
 	{

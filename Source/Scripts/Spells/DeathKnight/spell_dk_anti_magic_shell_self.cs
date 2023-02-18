@@ -12,7 +12,7 @@ namespace Scripts.Spells.DeathKnight;
 
 public class spell_dk_anti_magic_shell_self : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	private int absorbPct;

@@ -12,7 +12,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(257044)]
 public class spell_hun_rapid_fire : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void OnTick(AuraEffect aurEff)
 	{

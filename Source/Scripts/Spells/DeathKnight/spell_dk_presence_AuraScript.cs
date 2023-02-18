@@ -15,7 +15,7 @@ namespace Scripts.Spells.DeathKnight;
              })]
 public class spell_dk_presence_AuraScript : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

@@ -12,7 +12,7 @@ namespace Scripts.Spells.Mage;
 [SpellScript(5143)]
 public class spell_mage_arcane_missiles : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{

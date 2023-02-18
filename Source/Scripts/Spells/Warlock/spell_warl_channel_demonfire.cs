@@ -15,7 +15,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(196447)]
 	public class spell_warl_channel_demonfire : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void HandlePeriodic(AuraEffect UnnamedParameter)
 		{

@@ -14,7 +14,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(263648)]
 public class spell_dh_soul_barrier : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void CalcAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
 	{

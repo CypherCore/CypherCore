@@ -12,7 +12,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(197908)]
 public class spell_monk_mana_tea_AuraScript : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void OnTick(AuraEffect UnnamedParameter)
 	{

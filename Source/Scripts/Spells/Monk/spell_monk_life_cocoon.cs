@@ -12,7 +12,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(116849)]
 public class spell_monk_life_cocoon : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void CalcAbsorb(AuraEffect UnnamedParameter, ref int amount, ref bool canBeRecalculated)
 	{

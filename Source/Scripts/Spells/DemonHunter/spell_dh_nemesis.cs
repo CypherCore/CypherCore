@@ -12,7 +12,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(206491)]
 public class spell_dh_nemesis : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void HandleAfterRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{

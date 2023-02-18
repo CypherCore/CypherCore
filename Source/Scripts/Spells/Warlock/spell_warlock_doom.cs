@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warlock
 	// 603 - Doom
 	public class spell_warlock_doom : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void PeriodicTick(AuraEffect aurEff)
 		{

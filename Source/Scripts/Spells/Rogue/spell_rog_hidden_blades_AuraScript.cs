@@ -12,7 +12,7 @@ namespace Scripts.Spells.Rogue;
 [SpellScript(270061)]
 public class spell_rog_hidden_blades_AuraScript : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	private byte _stacks;

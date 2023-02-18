@@ -13,7 +13,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(MonkSpells.SPELL_MONK_RISING_THUNDER)]
 public class spell_monk_rising_thunder : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

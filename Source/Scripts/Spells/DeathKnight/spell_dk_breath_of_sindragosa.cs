@@ -12,7 +12,7 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(152279)]
 public class spell_dk_breath_of_sindragosa : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void OnTick(AuraEffect UnnamedParameter)
 	{

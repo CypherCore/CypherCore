@@ -28,7 +28,7 @@ public class spell_mage_fire_mage_passive : AuraScript, IHasAuraEffects
 
 	private readonly SpellModifier mod = null;
 
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void HandleApply(AuraEffect aurEffect, AuraEffectHandleModes UnnamedParameter)
 	{

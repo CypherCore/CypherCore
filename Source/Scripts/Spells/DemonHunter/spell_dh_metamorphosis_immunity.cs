@@ -12,7 +12,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(201453)]
 public class spell_dh_metamorphosis_immunity : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	private void HandleRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)

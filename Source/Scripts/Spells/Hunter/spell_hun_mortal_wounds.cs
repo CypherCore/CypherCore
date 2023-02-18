@@ -14,7 +14,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(201075)]
 public class spell_hun_mortal_wounds : AuraScript, IHasAuraEffects, IAuraCheckProc
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	public bool CheckProc(ProcEventInfo eventInfo)

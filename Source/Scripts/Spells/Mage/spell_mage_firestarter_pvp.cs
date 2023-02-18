@@ -14,7 +14,7 @@ namespace Scripts.Spells.Mage;
 [SpellScript(203283)]
 public class spell_mage_firestarter_pvp : AuraScript, IAuraCheckProc, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{

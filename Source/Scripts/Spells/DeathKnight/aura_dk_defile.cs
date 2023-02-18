@@ -12,7 +12,7 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(152280)]
 public class aura_dk_defile : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void HandlePeriodic(AuraEffect UnnamedParameter)
 	{

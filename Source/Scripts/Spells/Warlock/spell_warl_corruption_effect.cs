@@ -13,7 +13,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(146739)]
 	public class spell_warl_corruption_effect : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		public override bool Validate(SpellInfo UnnamedParameter)
 		{

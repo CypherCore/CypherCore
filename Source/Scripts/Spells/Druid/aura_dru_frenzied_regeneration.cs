@@ -13,7 +13,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(22842)]
 public class aura_dru_frenzied_regeneration : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
 	{

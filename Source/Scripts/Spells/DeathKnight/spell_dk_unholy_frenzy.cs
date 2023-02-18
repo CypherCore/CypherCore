@@ -13,7 +13,7 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(207289)]
 public class spell_dk_unholy_frenzy : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	private void HandleApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)

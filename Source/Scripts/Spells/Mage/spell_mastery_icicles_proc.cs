@@ -48,7 +48,7 @@ public class spell_mastery_icicles_proc : AuraScript, IAuraCheckProc, IHasAuraEf
 		148017, 148018, 148019, 148020, 148021
 	};
 
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{

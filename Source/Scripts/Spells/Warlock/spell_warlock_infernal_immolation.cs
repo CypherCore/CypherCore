@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warlock
 	// 19483 - Immolation
 	public class spell_warlock_infernal_immolation : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 		private void PeriodicTick(AuraEffect UnnamedParameter)

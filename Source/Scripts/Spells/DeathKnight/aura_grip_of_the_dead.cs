@@ -12,7 +12,7 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(273980)]
 public class aura_grip_of_the_dead : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	private void OnTick(AuraEffect UnnamedParameter)

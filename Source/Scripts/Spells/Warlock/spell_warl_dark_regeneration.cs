@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(108359)]
 	public class spell_warl_dark_regeneration : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void HandleApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 		{

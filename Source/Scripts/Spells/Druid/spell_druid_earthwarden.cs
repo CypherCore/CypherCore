@@ -14,7 +14,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(203974)]
 public class spell_druid_earthwarden : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private struct Spells
 	{

@@ -13,7 +13,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(209426)]
 public class spell_dh_darkness_absorb : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)

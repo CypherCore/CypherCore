@@ -12,7 +12,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(125174)]
 public class spell_monk_touch_of_karma_buff : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

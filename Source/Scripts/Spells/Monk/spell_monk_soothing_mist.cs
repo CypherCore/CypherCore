@@ -14,7 +14,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(115175)]
 public class spell_monk_soothing_mist : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)

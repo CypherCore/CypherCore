@@ -13,7 +13,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(48181)]
 	public class aura_warl_haunt : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void HandleRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 		{

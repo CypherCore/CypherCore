@@ -12,7 +12,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(145108)]
 public class spell_dru_ysera_gift : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void HandlePeriodic(AuraEffect aurEff)
 	{

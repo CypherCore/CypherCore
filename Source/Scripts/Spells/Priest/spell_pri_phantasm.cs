@@ -13,7 +13,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(47569)]
 public class spell_pri_phantasm : AuraScript, IHasAuraEffects, IAuraCheckProc
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public bool CheckProc(ProcEventInfo UnnamedParameter)
 	{

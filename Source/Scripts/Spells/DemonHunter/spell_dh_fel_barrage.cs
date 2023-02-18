@@ -12,7 +12,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(211053)]
 public class spell_dh_fel_barrage : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	private int _charges = 1;

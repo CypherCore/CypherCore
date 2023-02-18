@@ -13,7 +13,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(104773)]
 	internal class spell_warlock_unending_resolve : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void PreventEffectIfCastingCircle(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 		{

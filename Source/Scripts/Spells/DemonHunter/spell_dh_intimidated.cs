@@ -13,7 +13,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(206891)]
 public class spell_dh_intimidated : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	private readonly List<ObjectGuid> _uniqueTargets = new();

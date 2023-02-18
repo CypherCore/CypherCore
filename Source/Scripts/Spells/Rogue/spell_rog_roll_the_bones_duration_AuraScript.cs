@@ -15,7 +15,7 @@ namespace Scripts.Spells.Rogue;
              })]
 public class spell_rog_roll_the_bones_duration_AuraScript : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void AfterApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{

@@ -12,7 +12,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(191241)]
 public class spell_hun_sticky_bomb : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void HandleEffectRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{

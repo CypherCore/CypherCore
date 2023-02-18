@@ -12,7 +12,7 @@ namespace Scripts.Spells.Mage;
 [SpellScript(195391)]
 public class spell_mage_jouster_buff : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
 	{

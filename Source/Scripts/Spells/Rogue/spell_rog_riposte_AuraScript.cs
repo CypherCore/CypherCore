@@ -13,7 +13,7 @@ namespace Scripts.Spells.Rogue;
 [SpellScript(199754)]
 public class spell_rog_riposte_AuraScript : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	private void HandleProc(AuraEffect UnnamedParameter, ProcEventInfo procInfo)

@@ -13,7 +13,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(196301)]
 	public class spell_warlock_artifact_devourer_of_life : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void OnProc(AuraEffect aurEff, ProcEventInfo UnnamedParameter)
 		{

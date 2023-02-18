@@ -13,7 +13,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(199532)]
 public class spell_hun_killer_cobra : AuraScript, IHasAuraEffects, IAuraCheckProc
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	public bool CheckProc(ProcEventInfo eventInfo)

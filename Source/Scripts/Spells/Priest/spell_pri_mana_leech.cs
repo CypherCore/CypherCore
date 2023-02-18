@@ -13,7 +13,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(28305)]
 public class spell_pri_mana_leech : AuraScript, IHasAuraEffects, IAuraCheckProc
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public spell_pri_mana_leech()
 	{

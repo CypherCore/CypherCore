@@ -13,7 +13,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(213017)]
 public class spell_dh_artifact_fueled_by_pain : AuraScript, IHasAuraEffects, IAuraCheckProc
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void OnProc(AuraEffect aurEff, ProcEventInfo UnnamedParameter)
 	{

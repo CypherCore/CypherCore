@@ -13,7 +13,7 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(170205)]
 public class spell_dk_item_t17_frost_4p_driver_periodic : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private struct eSpells
 	{

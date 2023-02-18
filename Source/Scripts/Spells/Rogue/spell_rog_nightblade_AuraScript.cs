@@ -14,7 +14,7 @@ namespace Scripts.Spells.Rogue;
 [SpellScript(195452)]
 public class spell_rog_nightblade_AuraScript : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	private int _cp;

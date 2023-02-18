@@ -12,7 +12,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(274902)]
 public class spell_dru_photosynthesis : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{

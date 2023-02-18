@@ -25,7 +25,7 @@ namespace Scripts.Spells.Warrior
 	[SpellScript(2565)]
 	public class spell_warr_shield_block_AuraScript : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		public override bool Validate(SpellInfo UnnamedParameter)
 		{

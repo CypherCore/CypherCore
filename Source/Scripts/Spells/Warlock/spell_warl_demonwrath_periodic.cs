@@ -13,7 +13,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(193440)]
 	public class spell_warl_demonwrath_periodic : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void HandlePeriodic(AuraEffect UnnamedParameter)
 		{

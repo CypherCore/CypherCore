@@ -13,7 +13,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(139)]
 public class spell_pri_renew : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public override bool Load()
 	{

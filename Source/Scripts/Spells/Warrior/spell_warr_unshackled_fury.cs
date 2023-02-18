@@ -13,7 +13,7 @@ namespace Scripts.Spells.Warrior
 	[SpellScript(76856)]
 	public class spell_warr_unshackled_fury : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
 		{

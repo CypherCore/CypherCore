@@ -14,7 +14,7 @@ namespace Scripts.Spells.Warrior
 	[SpellScript(200860)]
 	public class spell_warr_unrivaled_strenght : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void HandleProc(AuraEffect aurEff, ProcEventInfo UnnamedParameter)
 		{

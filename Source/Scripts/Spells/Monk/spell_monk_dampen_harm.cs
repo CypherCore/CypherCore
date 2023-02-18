@@ -13,7 +13,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(122278)]
 public class spell_monk_dampen_harm : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 	private int healthPct;
 
 	public override bool Load()

@@ -13,7 +13,7 @@ namespace Scripts.Spells.Rogue;
 [SpellScript(196912)]
 public class spell_rog_shadow_techniques_AuraScript : AuraScript, IHasAuraEffects, IAuraCheckProc
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{

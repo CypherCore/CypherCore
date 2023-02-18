@@ -13,7 +13,7 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(206967)]
 public class spell_dk_will_of_the_necropolis : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

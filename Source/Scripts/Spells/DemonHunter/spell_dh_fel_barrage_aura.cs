@@ -13,7 +13,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(222703)]
 public class spell_dh_fel_barrage_aura : AuraScript, IHasAuraEffects, IAuraCheckProc
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	//Blade Dance    //Chaos Strike   //Fel Barrage
 	readonly List<uint> _removeSpellIds = new()

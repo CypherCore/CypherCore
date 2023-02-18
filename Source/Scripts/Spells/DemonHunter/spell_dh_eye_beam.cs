@@ -12,7 +12,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(198013)]
 public class spell_dh_eye_beam : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	private bool _firstTick = true;

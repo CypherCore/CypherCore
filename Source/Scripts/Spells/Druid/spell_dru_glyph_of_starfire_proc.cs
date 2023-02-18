@@ -13,7 +13,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(54845)]
 public class spell_dru_glyph_of_starfire_proc : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)

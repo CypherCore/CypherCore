@@ -13,7 +13,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(111400)]
 	public class aura_warl_burning_rush : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void OnTick(AuraEffect UnnamedParameter)
 		{

@@ -12,7 +12,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(MonkSpells.SPELL_MONK_FISTS_OF_FURY)]
 public class spell_monk_fists_of_fury : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void HandlePeriodic(AuraEffect aurEff)
 	{

@@ -12,7 +12,7 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(253593)]
 public class aura_inexorable_assault : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	private void OnPeriodic(AuraEffect UnnamedParameter)

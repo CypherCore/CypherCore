@@ -14,7 +14,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(212580)]
 	public class spell_warlock_eye_of_the_observer : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void OnProc(AuraEffect UnnamedParameter, ProcEventInfo eventInfo)
 		{

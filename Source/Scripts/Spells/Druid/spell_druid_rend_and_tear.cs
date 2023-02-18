@@ -13,7 +13,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(204053)]
 public class spell_druid_rend_and_tear : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private struct Spells
 	{

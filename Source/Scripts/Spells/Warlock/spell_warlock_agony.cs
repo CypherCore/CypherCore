@@ -13,7 +13,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(980)]
 	public class spell_warlock_agony : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void HandleDummyPeriodic(AuraEffect auraEffect)
 		{

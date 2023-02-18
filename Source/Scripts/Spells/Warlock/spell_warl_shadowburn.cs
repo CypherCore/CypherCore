@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(17877)]
 	public class spell_warl_shadowburn : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void HandleRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 		{

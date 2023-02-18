@@ -13,7 +13,7 @@ namespace Scripts.Spells.Warrior
 	[SpellScript(18499)]
 	public class spell_warr_berzerker_rage : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void HandleRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 		{

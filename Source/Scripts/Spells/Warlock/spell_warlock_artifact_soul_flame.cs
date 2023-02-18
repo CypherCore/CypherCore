@@ -15,7 +15,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(199471)]
 	public class spell_warlock_artifact_soul_flame : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void OnProc(AuraEffect UnnamedParameter, ProcEventInfo eventInfo)
 		{

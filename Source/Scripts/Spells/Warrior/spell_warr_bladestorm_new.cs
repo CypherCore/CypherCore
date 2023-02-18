@@ -13,7 +13,7 @@ namespace Scripts.Spells.Warrior
 	[SpellScript(222634)]
 	public class spell_warr_bladestorm_new : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		public override bool Validate(SpellInfo UnnamedParameter)
 		{

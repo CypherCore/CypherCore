@@ -12,7 +12,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(162264)]
 public class spell_demon_hunter_metamorphosis_buffs : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{

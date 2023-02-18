@@ -17,7 +17,7 @@ namespace Scripts.Spells.Warlock
 	{
 		private int _refund = 0;
 
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		public bool CheckProc(ProcEventInfo eventInfo)
 		{

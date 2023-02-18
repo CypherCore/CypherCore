@@ -15,7 +15,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(199921)]
 public class aura_trailblazer : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 	DelayedCastEvent _event;
 	TimeSpan _ts;
 

@@ -13,7 +13,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(208771)]
 public class spell_pri_smite_absorb : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void HandleAbsorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref uint absorbAmount)
 	{

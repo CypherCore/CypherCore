@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(17767)]
 	public class spell_warl_shadow_bulwark : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
 		{

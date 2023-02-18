@@ -13,7 +13,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(224509)]
 public class spell_dh_frailty : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 	uint _damage = 0;
 
 	private void OnProc(AuraEffect aurEff, ProcEventInfo eventInfo)

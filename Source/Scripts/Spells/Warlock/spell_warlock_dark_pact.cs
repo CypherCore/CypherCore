@@ -13,7 +13,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(108416)]
 	public class spell_warlock_dark_pact : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
 		{

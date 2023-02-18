@@ -13,7 +13,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(116680)]
 public class bfa_spell_focused_thunder_talent_thunder_focus_tea : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{

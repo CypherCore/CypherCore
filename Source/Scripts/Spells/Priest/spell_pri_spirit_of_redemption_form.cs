@@ -12,7 +12,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(27827)]
 public class spell_pri_spirit_of_redemption_form : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private struct eSpells
 	{

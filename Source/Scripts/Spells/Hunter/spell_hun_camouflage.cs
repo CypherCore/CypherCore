@@ -13,7 +13,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(199483)]
 public class spell_hun_camouflage : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)

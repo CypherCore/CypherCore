@@ -12,7 +12,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(186265)]
 public class spell_hun_aspect_of_the_turtle : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{

@@ -12,7 +12,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(125883)]
 public class spell_monk_zen_flight_check_AuraScript : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public override bool Load()
 	{

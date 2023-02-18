@@ -12,7 +12,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(107427)]
 public class spell_monk_roll_trigger : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void CalcSpeed(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
 	{

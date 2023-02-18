@@ -13,7 +13,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(233494)]
 	public class spell_warlock_contagion : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void PeriodicTick(AuraEffect UnnamedParameter)
 		{

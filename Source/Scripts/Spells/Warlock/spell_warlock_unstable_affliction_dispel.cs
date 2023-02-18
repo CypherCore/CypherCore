@@ -15,7 +15,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(233490)]
 	public class spell_warlock_unstable_affliction_dispel : AuraScript, IHasAuraEffects, IAuraOnDispel
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		public void OnDispel(DispelInfo dispelInfo)
 		{

@@ -13,7 +13,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(194386)]
 public class aura_hun_volley : AuraScript, IHasAuraEffects, IAuraCheckProc
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public bool CheckProc(ProcEventInfo UnnamedParameter)
 	{

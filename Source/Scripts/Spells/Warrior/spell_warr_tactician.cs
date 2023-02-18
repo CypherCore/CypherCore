@@ -14,7 +14,7 @@ namespace Scripts.Spells.Warrior
 	[SpellScript(184783)]
 	public class spell_warr_tactician : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void HandleEffectProc(AuraEffect UnnamedParameter, ProcEventInfo procInfo)
 		{

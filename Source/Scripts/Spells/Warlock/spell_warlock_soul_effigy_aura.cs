@@ -15,7 +15,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(205247)]
 	public class spell_warlock_soul_effigy_aura : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void OnProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 		{

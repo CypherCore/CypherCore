@@ -13,7 +13,7 @@ namespace Scripts.Spells.Warrior
 	[SpellScript(215556)]
 	public class aura_warr_war_machine : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void OnApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 		{

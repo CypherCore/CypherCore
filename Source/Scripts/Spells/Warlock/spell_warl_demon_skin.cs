@@ -14,7 +14,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(219272)]
 	public class spell_warl_demon_skin : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void PeriodicTick(AuraEffect aurEff)
 		{

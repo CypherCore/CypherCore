@@ -13,7 +13,7 @@ namespace Scripts.Spells.Warrior
 	[SpellScript(214871)]
 	internal class spell_warr_odyns_fury : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void Absorb(AuraEffect UnnamedParameter, DamageInfo UnnamedParameter2, ref uint absorbAmount)
 		{

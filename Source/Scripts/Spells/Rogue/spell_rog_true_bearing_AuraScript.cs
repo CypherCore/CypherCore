@@ -14,7 +14,7 @@ namespace Scripts.Spells.Rogue;
 [SpellScript(193359)]
 public class spell_rog_true_bearing_AuraScript : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{

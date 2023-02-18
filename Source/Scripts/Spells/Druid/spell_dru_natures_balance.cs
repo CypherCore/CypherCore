@@ -14,7 +14,7 @@ namespace Scripts.Spells.Druid
 	[SpellScript(202430)]
 	public class spell_dru_natures_balance : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private struct Spells
 		{

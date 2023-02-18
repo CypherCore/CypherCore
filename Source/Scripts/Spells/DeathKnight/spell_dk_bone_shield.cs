@@ -14,7 +14,7 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(195181)]
 public class spell_dk_bone_shield : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
 	{

@@ -14,7 +14,7 @@ namespace Scripts.Spells.Mage;
 [SpellScript(155148)]
 public class spell_mage_kindling : AuraScript, IHasAuraEffects, IAuraCheckProc
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{

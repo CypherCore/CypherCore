@@ -13,7 +13,7 @@ namespace Scripts.Spells.Mage;
 [SpellScript(389794)]
 public class spell_mage_snowdrift : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void OnTick(AuraEffect aurEff)
 	{

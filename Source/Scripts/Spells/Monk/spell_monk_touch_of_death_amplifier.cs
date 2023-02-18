@@ -13,7 +13,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(271233)]
 public class spell_monk_touch_of_death_amplifier : AuraScript, IHasAuraEffects, IAuraCheckProc
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

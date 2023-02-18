@@ -17,7 +17,7 @@ public class spell_dru_primal_vitality : AuraScript, IHasAuraEffects
 	private const int SPELL_DRUID_PRIMAL_VITALITY_EFFECT = 202812;
 	private const int SPELL_DRUID_PROWL = 5215;
 
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{

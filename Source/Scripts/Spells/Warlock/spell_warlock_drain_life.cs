@@ -13,7 +13,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(234153)]
 	public class spell_warlock_drain_life : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void PeriodicTick(AuraEffect UnnamedParameter)
 		{

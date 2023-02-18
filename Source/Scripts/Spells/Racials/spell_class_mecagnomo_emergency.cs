@@ -15,7 +15,7 @@ namespace Scripts.Spells.Racials
 	[SpellScript(312916)]
 	public class spell_class_mecagnomo_emergency : AuraScript, IAuraCheckProc, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 		{
@@ -55,7 +55,7 @@ namespace Scripts.Spells.Racials
 	[SpellScript(313015)]
 	public class spell_class_mecagnomo_emergency2 : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 		private void HandleHit(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)

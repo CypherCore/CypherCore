@@ -13,7 +13,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(116645)]
 public class spell_monk_teachings_of_the_monastery_passive : AuraScript, IHasAuraEffects, IAuraCheckProc
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

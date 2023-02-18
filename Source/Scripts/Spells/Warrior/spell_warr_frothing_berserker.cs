@@ -14,7 +14,7 @@ namespace Scripts.Spells.Warrior
 	[SpellScript(215571)]
 	public class spell_warr_frothing_berserker : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void HandleProc(AuraEffect UnnamedParameter, ProcEventInfo UnnamedParameter2)
 		{

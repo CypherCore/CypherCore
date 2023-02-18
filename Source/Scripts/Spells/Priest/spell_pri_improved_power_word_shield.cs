@@ -12,7 +12,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(14769)]
 public class spell_pri_improved_power_word_shield : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void HandleEffectCalcSpellMod(AuraEffect aurEff, ref SpellModifier spellMod)
 	{

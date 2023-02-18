@@ -14,7 +14,7 @@ namespace Scripts.Spells.DeathKnight;
 [SpellScript(77535)]
 public class spell_dk_blood_shield : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private struct eSpells
 	{

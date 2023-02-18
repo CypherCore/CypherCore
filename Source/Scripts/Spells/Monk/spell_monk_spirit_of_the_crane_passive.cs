@@ -13,7 +13,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(210802)]
 public class spell_monk_spirit_of_the_crane_passive : AuraScript, IHasAuraEffects, IAuraCheckProc
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

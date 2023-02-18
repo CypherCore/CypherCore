@@ -14,7 +14,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(205178)]
 	public class spell_warlock_soul_effigy_target : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void PeriodicTick(AuraEffect UnnamedParameter)
 		{

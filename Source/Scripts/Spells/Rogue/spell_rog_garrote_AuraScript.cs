@@ -12,7 +12,7 @@ namespace Scripts.Spells.Rogue;
 [SpellScript(703)]
 public class spell_rog_garrote_AuraScript : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

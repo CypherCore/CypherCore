@@ -16,7 +16,7 @@ namespace Scripts.Spells.Priest;
              })]
 public class spell_pri_penance_triggered : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

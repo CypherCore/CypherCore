@@ -12,7 +12,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(152175)]
 public class spell_monk_whirling_dragon_punch : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void OnTick(AuraEffect UnnamedParameter)
 	{

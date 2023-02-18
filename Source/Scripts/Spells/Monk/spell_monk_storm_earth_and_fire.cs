@@ -12,7 +12,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(137639)]
 public class spell_monk_storm_earth_and_fire : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void HandleApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{

@@ -13,7 +13,7 @@ namespace Scripts.Spells.Mage;
 [SpellScript(390218)]
 public class spell_mage_overflowing_energy : AuraScript, IAuraCheckProc, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{

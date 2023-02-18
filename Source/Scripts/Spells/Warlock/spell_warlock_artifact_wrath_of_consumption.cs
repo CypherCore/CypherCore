@@ -14,7 +14,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(199472)]
 	public class spell_warlock_artifact_wrath_of_consumption : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void OnProc(AuraEffect UnnamedParameter, ProcEventInfo UnnamedParameter2)
 		{

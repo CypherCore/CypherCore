@@ -13,7 +13,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(108446)]
 	public class spell_warlock_soul_link : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void HandleSplit(AuraEffect UnnamedParameter, DamageInfo UnnamedParameter2, ref uint splitAmount)
 		{

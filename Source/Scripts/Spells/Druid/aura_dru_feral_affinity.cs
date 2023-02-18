@@ -12,7 +12,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(202157)]
 public class aura_dru_feral_affinity : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	private readonly List<uint> LearnedSpells = new()

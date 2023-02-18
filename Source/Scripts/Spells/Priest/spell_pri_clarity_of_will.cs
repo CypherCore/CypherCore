@@ -12,7 +12,7 @@ namespace Scripts.Spells.Priest;
 [SpellScript(152118)]
 public class spell_pri_clarity_of_will : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool UnnamedParameter)
 	{

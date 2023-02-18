@@ -12,7 +12,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(155228)]
 public class spell_hun_lone_wolf : AuraScript, IHasAuraEffects, IAuraOnUpdate
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	internal static uint[] g_BuffSpells =
 	{

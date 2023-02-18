@@ -14,7 +14,7 @@ namespace Scripts.Spells.Rogue;
 [SpellScript(185314)]
 public class spell_rog_deepening_shadows_AuraScript : AuraScript, IHasAuraEffects, IAuraCheckProc
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	private int _cp;

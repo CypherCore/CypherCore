@@ -14,7 +14,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(207811)]
 public class spell_dh_nether_bond_periodic : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
 	private Unit m_BondUnit;

@@ -13,7 +13,7 @@ namespace Scripts.Spells.DemonHunter;
 [SpellScript(206478)]
 public class spell_dh_demonic_appetite : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void OnProc(AuraEffect UnnamedParameter, ProcEventInfo UnnamedParameter2)
 	{

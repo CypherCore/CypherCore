@@ -13,7 +13,7 @@ namespace Scripts.Spells.Hunter;
 [SpellScript(118455)]
 public class spell_hun_beast_cleave_proc : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void OnProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{

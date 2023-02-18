@@ -13,7 +13,7 @@ namespace Scripts.Spells.Rogue;
 [SpellScript(31230)]
 public class spell_rog_cheat_death_AuraScript : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

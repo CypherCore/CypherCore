@@ -18,7 +18,7 @@ namespace Scripts.Spells.Warrior
 	{
 		private int m_ExtraSpellCost;
 
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		public override bool Load()
 		{

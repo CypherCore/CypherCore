@@ -13,7 +13,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(122470)]
 public class spell_monk_touch_of_karma : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool UnnamedParameter)
 	{

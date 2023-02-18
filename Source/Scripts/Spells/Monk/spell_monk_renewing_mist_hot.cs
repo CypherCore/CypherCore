@@ -12,7 +12,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(119611)]
 public class spell_monk_renewing_mist_hot : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{

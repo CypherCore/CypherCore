@@ -13,7 +13,7 @@ namespace Scripts.Spells.Monk;
 [SpellScript(122280)]
 public class spell_monk_healing_elixirs_aura : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void OnProc(AuraEffect UnnamedParameter, ProcEventInfo eventInfo)
 	{

@@ -12,7 +12,7 @@ namespace Scripts.Spells.Mage;
 [SpellScript(190319)]
 public class spell_mage_combustion : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private void CalcAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
 	{

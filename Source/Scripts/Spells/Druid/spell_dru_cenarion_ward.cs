@@ -13,7 +13,7 @@ namespace Scripts.Spells.Druid;
 [SpellScript(102351)]
 public class spell_dru_cenarion_ward : AuraScript, IHasAuraEffects
 {
-	public List<IAuraEffectHandler> AuraEffects => new();
+	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 	private struct Spells
 	{

@@ -15,7 +15,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(WarlockSpells.HAVOC)]
 	internal class spell_warl_havoc : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void HandleProc(AuraEffect aurEff, ProcEventInfo procInfo)
 		{

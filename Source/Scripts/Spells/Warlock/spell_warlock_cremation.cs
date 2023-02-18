@@ -14,7 +14,7 @@ namespace Scripts.Spells.Warlock
 	[SpellScript(212282)]
 	public class spell_warlock_cremation : AuraScript, IHasAuraEffects
 	{
-		public List<IAuraEffectHandler> AuraEffects => new();
+		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void OnProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 		{
