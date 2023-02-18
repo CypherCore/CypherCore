@@ -1663,49 +1663,50 @@ namespace Game.Entities
             cell.Visit(pair, searcher, GetMap(), this, maxSearchRange);
         }
 
-        public void GetAlliesWithinRange(List<Creature> creatureList, float maxSearchRange, bool includeSelf = true)
+        public void GetAlliesWithinRange(List<Unit> unitList, float maxSearchRange, bool includeSelf = true)
         {
-            GetCreatureListInGrid(creatureList, maxSearchRange);
+            CellCoord pair = new CellCoord((uint)GetPositionX(), (uint)GetPositionY());
+            Cell cell = new Cell(pair);
+            cell.SetNoCreate();
 
-            creatureList.RemoveIf((creature) =>
+            AllFriendlyUnitsInRange check = new AllFriendlyUnitsInRange(ToUnit(), maxSearchRange);
+            UnitListSearcher searcher = new UnitListSearcher(this, unitList, check, GridType.All);
+
+            cell.Visit(pair, searcher, GetMap(), this, maxSearchRange);
+
+            if (!includeSelf)
+                unitList.Remove(ToUnit());
+        }
+
+        public void GetAlliesWithinRangeWithOwnedAura(List<Unit> unitList, float maxSearchRange, uint auraId, bool includeSelf = true)
+        {
+            GetAlliesWithinRange(unitList, maxSearchRange, includeSelf);
+
+            unitList.RemoveIf((creature) =>
             {
-                if (creature == this)
-                    return !includeSelf;
-
-                return !IsFriendlyTo(creature);
+                return !creature.HasAura(auraId, GetGUID());
             });
         }
 
-        public void GetAlliesWithOwnedAura(List<Creature> creatureList, float maxSearchRange, uint auraId, bool includeSelf = true)
+        public void GetEnemiesWithinRange(List<Unit> unitList, float maxSearchRange)
         {
-            GetCreatureListInGrid(creatureList, maxSearchRange);
+            CellCoord pair = new CellCoord((uint)GetPositionX(), (uint)GetPositionY());
+            Cell cell = new Cell(pair);
+            cell.SetNoCreate();
 
-            creatureList.RemoveIf((creature) =>
-            {
-                if (creature == this)
-                    return !includeSelf;
+            AllAttackableUnitsInRange check = new AllAttackableUnitsInRange(ToUnit(), maxSearchRange);
+            UnitListSearcher searcher = new UnitListSearcher(this, unitList, check, GridType.All);
 
-                return !IsFriendlyTo(creature) || !creature.HasAura(auraId, GetGUID());
-            });
+            cell.Visit(pair, searcher, GetMap(), this, maxSearchRange);
         }
 
-        public void GetEnemiesWithinRange(List<Creature> creatureList, float maxSearchRange)
+        public void GetEnemiesWithinRangeWithOwnedAura(List<Unit> unitList, float maxSearchRange, uint auraId)
         {
-            GetCreatureListInGrid(creatureList, maxSearchRange);
+            GetEnemiesWithinRange(unitList, maxSearchRange);
 
-            creatureList.RemoveIf((creature) =>
+            unitList.RemoveIf((unit) =>
             {
-                return IsFriendlyTo(creature);
-            });
-        }
-
-        public void GetEnemiesWithOwnedAura(List<Creature> creatureList, float maxSearchRange, uint auraId)
-        {
-            GetCreatureListInGrid(creatureList, maxSearchRange);
-
-            creatureList.RemoveIf((creature) =>
-            {
-                return IsFriendlyTo(creature) || !creature.HasAura(auraId, GetGUID());
+                return !unit.HasAura(auraId, GetGUID());
             });
         }
 

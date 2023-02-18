@@ -60,7 +60,7 @@ public class spell_hun_barrage : SpellScript, IHasSpellEffects, ISpellOnHit
 		if (!target.HasAura(HunterSpells.SPELL_HUNTER_BARRAGE, player.GetGUID()))
 			dmg /= 2;
 
-		dmg = player.SpellDamageBonusDone(target, GetSpellInfo(), dmg, DamageEffectType.Direct, GetEffectInfo(0));
+		dmg = player.SpellDamageBonusDone(target, GetSpellInfo(), dmg, DamageEffectType.Direct, GetEffectInfo(0), 1, GetSpell());
 		dmg = target.SpellDamageBonusTaken(player, GetSpellInfo(), dmg, DamageEffectType.Direct);
 
 		// Barrage now deals only 80% of normal damage against player-controlled targets.

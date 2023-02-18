@@ -70,7 +70,7 @@ internal class spell_pri_prayer_of_mending_jump : SpellScript, IHasSpellEffects
 
 		if (origCaster)
 		{
-			var                basePoints = origCaster.SpellHealingBonusDone(target, _spellInfoHeal, (uint)_healEffectDummy.CalcValue(origCaster), DamageEffectType.Heal, _healEffectDummy);
+			var                basePoints = origCaster.SpellHealingBonusDone(target, _spellInfoHeal, (uint)_healEffectDummy.CalcValue(origCaster), DamageEffectType.Heal, _healEffectDummy, 1, GetSpell());
 			CastSpellExtraArgs args       = new(TriggerCastFlags.FullMask);
 			args.AddSpellMod(SpellValueMod.AuraStack, GetEffectValue());
 			args.AddSpellMod(SpellValueMod.BasePoint0, (int)basePoints);

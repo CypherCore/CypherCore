@@ -18,7 +18,7 @@ namespace Scripts.Spells.Warlock
 		private void HandleHit(uint effIndex)
 		{
 			var caster = GetCaster();
-			var heal   = caster.SpellHealingBonusDone(caster, GetSpellInfo(), (uint)caster.CountPctFromMaxHealth(GetSpellInfo().GetEffect(effIndex).BasePoints), DamageEffectType.Heal, GetEffectInfo());
+			var heal   = caster.SpellHealingBonusDone(caster, GetSpellInfo(), (uint)caster.CountPctFromMaxHealth(GetSpellInfo().GetEffect(effIndex).BasePoints), DamageEffectType.Heal, GetEffectInfo(), 1, GetSpell());
 			heal /= 100; // 0.5%
 			heal =  caster.SpellHealingBonusTaken(caster, GetSpellInfo(), heal, DamageEffectType.Heal);
 			SetHitHeal((int)heal);

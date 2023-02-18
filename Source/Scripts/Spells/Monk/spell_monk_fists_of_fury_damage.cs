@@ -26,7 +26,7 @@ public class spell_monk_fists_of_fury_damage : SpellScript, IHasSpellEffects
 			return;
 
 		var l_Damage = l_Player.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 5.25f;
-		l_Damage = l_Player.SpellDamageBonusDone(l_Target, GetSpellInfo(), l_Damage, DamageEffectType.Direct, GetSpellInfo().GetEffect(0));
+		l_Damage = l_Player.SpellDamageBonusDone(l_Target, GetSpellInfo(), l_Damage, DamageEffectType.Direct, GetSpellInfo().GetEffect(0), 1, GetSpell());
 		l_Damage = l_Target.SpellDamageBonusTaken(l_Player, GetSpellInfo(), l_Damage, DamageEffectType.Direct);
 
 		SetHitDamage(l_Damage);

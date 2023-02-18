@@ -32,7 +32,8 @@ namespace Framework.Constants
         AfterCast,
         CalcCritChance,
         OnPrecast,
-        CalcCastTime
+        CalcCastTime,
+        CalcMultiplier
     }
 
     // AuraScript interface - enum used for runtime checks of script function calls

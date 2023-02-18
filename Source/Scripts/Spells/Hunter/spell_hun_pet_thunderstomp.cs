@@ -26,7 +26,7 @@ public class spell_hun_pet_thunderstomp : SpellScript, IHasSpellEffects
 
 		var dmg = 1.5f * (owner.m_unitData.RangedAttackPower * 0.250f);
 
-		dmg = caster.SpellDamageBonusDone(target, GetSpellInfo(), dmg, DamageEffectType.Direct, GetEffectInfo(0));
+		dmg = caster.SpellDamageBonusDone(target, GetSpellInfo(), dmg, DamageEffectType.Direct, GetEffectInfo(0), 1, GetSpell());
 		dmg = target.SpellDamageBonusTaken(caster, GetSpellInfo(), dmg, DamageEffectType.Direct);
 
 		SetHitDamage(dmg);

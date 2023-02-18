@@ -7616,6 +7616,17 @@ namespace Game.Spells
             return castTime;
         }
 
+        public float CallSpellCalculateMultiplierHandlers(float multiplier)
+        {
+            foreach (ISpellScript script in GetSpellScripts<ISpellCalculateMultiplier>())
+            {
+                script._PrepareScriptCall(SpellScriptHookType.CalcMultiplier);
+                multiplier = ((ISpellCalculateMultiplier)script).CalcMultiplier(multiplier);
+                script._FinishScriptCall();
+            }
+            return multiplier;
+        }
+
         bool CallScriptEffectHandlers(uint effIndex, SpellEffectHandleMode mode)
         {
             // execute script effect handler hooks and check if effects was prevented

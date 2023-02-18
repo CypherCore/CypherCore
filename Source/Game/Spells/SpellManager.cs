@@ -2440,7 +2440,7 @@ namespace Game.Entities
                     effect.ImplicitTarget[1] = effectsResult.Read<short>(33);
 
                     var existingSpellBounds = _GetSpellInfo(spellId);
-                    if (existingSpellBounds == null || existingSpellBounds.Count == 0)
+                    if (existingSpellBounds.Empty())
                     {
                         Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} effext index {effect.EffectIndex} references a regular spell loaded from file. Adding serverside effects to existing spells is not allowed.");
                         continue;
@@ -2995,7 +2995,7 @@ namespace Game.Entities
             foreach (uint spellId in spellIds)
             {
                 var range = _GetSpellInfo(spellId);
-                if (range == null || range.Count == 0)
+                if (range.Empty())
                 {
                     Log.outError(LogFilter.ServerLoading, $"Spell info correction specified for non-existing spell {spellId}");
                     continue;

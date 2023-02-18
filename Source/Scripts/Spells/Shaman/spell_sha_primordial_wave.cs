@@ -19,23 +19,11 @@ namespace Scripts.Spells.Shaman
                 return;
 
             if (player.IsFriendlyTo(victim))
-            {
-                uint amount = GetSpell().StandardVariance(player.GetTotalSpellPowerValue(SpellSchoolMask.Shadow, true) * 0.65);
-                var healInfo = new HealInfo(player, victim, amount, GetSpellInfo(), SpellSchoolMask.Shadow);
-                victim.HealBySpell(healInfo, IsHitCrit());
-            }
+                player.CastSpell(victim, ShamanSpells.PrimordialWaveHealing, true);
             else
             {
-                uint amount = GetSpell().StandardVariance(player.GetTotalSpellPowerValue(SpellSchoolMask.Shadow, false) * 0.65);
-                var damageInfo = new SpellNonMeleeDamage(player, victim,
-                    GetSpellInfo(), new(), SpellSchoolMask.Shadow);
-                damageInfo.damage = IsHitCrit() ? amount * 2 : amount;
-
-                victim.DealSpellDamage(damageInfo, true);
+                player.CastSpell(victim, ShamanSpells.PrimordialWaveDamage, true);
                 player.AddAura(ShamanSpells.FlameShock, victim);
-
-                if (!victim.IsInCombatWith(player))
-                    victim.SetInCombatWith(player);
             }
 
             player.AddAura(ShamanSpells.PrimordialWaveAura, player);
