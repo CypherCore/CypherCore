@@ -20,14 +20,15 @@ namespace Scripts.Spells.Warlock
 		private void HandlePeriodic(AuraEffect UnnamedParameter)
 		{
 			var caster = GetCaster();
+			var rangeInfoSpell = Global.SpellMgr.GetSpellInfo(WarlockSpells.CHANNEL_DEMONFIRE_RANGE);
 
 			if (caster == null)
 				return;
 
 			var enemies  = new List<Unit>();
-			var check    = new AnyUnfriendlyUnitInObjectRangeCheck(caster, caster, 100.0f, new UnitAuraCheck<Unit>(false, WarlockSpells.IMMOLATE_DOT, caster.GetGUID()).Invoke);
+			var check    = new AnyUnfriendlyUnitInObjectRangeCheck(caster, caster, rangeInfoSpell.GetMaxRange(), new UnitAuraCheck<Unit>(true, WarlockSpells.IMMOLATE_DOT, caster.GetGUID()).Invoke);
 			var searcher = new UnitListSearcher(caster, enemies, check, GridType.All);
-			Cell.VisitGrid(caster, searcher, 100.0f);
+			Cell.VisitGrid(caster, searcher, rangeInfoSpell.GetMaxRange());
 
 			if (enemies.Count == 0)
 				return;
