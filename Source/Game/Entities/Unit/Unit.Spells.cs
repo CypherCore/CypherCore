@@ -7,6 +7,7 @@ using Game.AI;
 using Game.BattleGrounds;
 using Game.Networking.Packets;
 using Game.Scripting;
+using Game.Scripting.Interfaces.ISpell;
 using Game.Scripting.Interfaces.IUnit;
 using Game.Spells;
 using Game.Spells.Events;
@@ -217,7 +218,7 @@ namespace Game.Entities
                 MathFunctions.AddPct(ref DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)spellProto.Mechanic));
 
             if (spell != null)
-                DoneTotalMod = spell.CallSpellCalculateMultiplierHandlers(DoneTotalMod);
+                spell.ForEachSpellScript<ISpellCalculateMultiplier>(a => DoneTotalMod = a.CalcMultiplier(DoneTotalMod));
 
             // Custom scripted damage. Need to figure out how to move this.
             if (spellProto.SpellFamilyName == SpellFamilyNames.Warlock)
@@ -533,7 +534,7 @@ namespace Game.Entities
                     MathFunctions.AddPct(ref DoneTotalMod, MathFunctions.CalculatePct((float)healingDonePctVsTargetHealth.GetAmount(), healthPctDiff));
 
             if (spell != null)
-                DoneTotalMod = spell.CallSpellCalculateMultiplierHandlers(DoneTotalMod);
+                spell.ForEachSpellScript<ISpellCalculateMultiplier>(a => DoneTotalMod = a.CalcMultiplier(DoneTotalMod));
 
             return DoneTotalMod;
         }
