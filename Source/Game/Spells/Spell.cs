@@ -7619,11 +7619,8 @@ namespace Game.Spells
         public float CallSpellCalculateMultiplierHandlers(float multiplier)
         {
             foreach (ISpellScript script in GetSpellScripts<ISpellCalculateMultiplier>())
-            {
-                script._PrepareScriptCall(SpellScriptHookType.CalcMultiplier);
                 multiplier = ((ISpellCalculateMultiplier)script).CalcMultiplier(multiplier);
-                script._FinishScriptCall();
-            }
+
             return multiplier;
         }
 

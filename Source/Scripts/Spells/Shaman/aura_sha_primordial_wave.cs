@@ -20,6 +20,9 @@ namespace Scripts.Spells.Shaman
 
         public void AfterCast()
         {
+            if (GetSpell().IsTriggered())
+                return;
+
             var player = GetCaster().ToPlayer();
 
             if (player == null || !player.HasAura(ShamanSpells.PrimordialWaveAura))
