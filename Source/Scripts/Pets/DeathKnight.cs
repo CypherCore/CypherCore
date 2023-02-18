@@ -41,17 +41,15 @@ namespace Scripts.Pets
 
                 // Find victim of Summon Gargoyle spell
                 List<Unit> targets = new();
-                var u_check = new AnyUnfriendlyUnitInObjectRangeCheck(me, me, 30.0f);
+                var u_check = new AnyUnfriendlyUnitInObjectRangeCheck(me, me, 30.0f, target => target.HasAura(SpellIds.SummonGargoyle1, ownerGuid));
                 var searcher = new UnitListSearcher(me, targets, u_check, GridType.All);
                 Cell.VisitGrid(me, searcher, 30.0f);
 
                 foreach (var target in targets)
-                    if (target.HasAura(SpellIds.SummonGargoyle1, ownerGuid))
-                    {
-                        me.Attack(target, false);
-
-                        break;
-                    }
+                {
+                    me.Attack(target, false);
+                    break;
+                }
             }
 
             public override void JustDied(Unit killer)

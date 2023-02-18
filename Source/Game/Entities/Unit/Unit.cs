@@ -932,24 +932,25 @@ namespace Game.Entities
 
         public Unit SelectNearbyTarget(Unit exclude = null, float dist = SharedConst.NominalMeleeRange)
         {
+            bool AddUnit(Unit u)
+            {
+                if (GetVictim() == u)
+                    return false;
+
+                if (exclude == u)
+                    return false;
+
+                // remove not LoS targets
+                if (!IsWithinLOSInMap(u) || u.IsTotem() || u.IsSpiritService() || u.IsCritter())
+                    return false;
+
+                return true;
+            }
+
             List<Unit> targets = new();
-            var u_check = new AnyUnfriendlyUnitInObjectRangeCheck(this, this, dist);
+            var u_check = new AnyUnfriendlyUnitInObjectRangeCheck(this, this, dist, AddUnit);
             var searcher = new UnitListSearcher(this, targets, u_check, GridType.All);
             Cell.VisitGrid(this, searcher, dist);
-
-            // remove current target
-            if (GetVictim())
-                targets.Remove(GetVictim());
-
-            if (exclude)
-                targets.Remove(exclude);
-
-            // remove not LoS targets
-            foreach (var unit in targets)
-            {
-                if (!IsWithinLOSInMap(unit) || unit.IsTotem() || unit.IsSpiritService() || unit.IsCritter())
-                    targets.Remove(unit);
-            }
 
             // no appropriate targets
             if (targets.Empty())

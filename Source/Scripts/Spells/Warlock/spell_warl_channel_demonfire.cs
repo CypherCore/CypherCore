@@ -25,10 +25,9 @@ namespace Scripts.Spells.Warlock
 				return;
 
 			var enemies  = new List<Unit>();
-			var check    = new AnyUnfriendlyUnitInObjectRangeCheck(caster, caster, 100.0f);
+			var check    = new AnyUnfriendlyUnitInObjectRangeCheck(caster, caster, 100.0f, new UnitAuraCheck<Unit>(false, WarlockSpells.IMMOLATE_DOT, caster.GetGUID()).Invoke);
 			var searcher = new UnitListSearcher(caster, enemies, check, GridType.All);
 			Cell.VisitGrid(caster, searcher, 100.0f);
-			enemies.RemoveIf(new UnitAuraCheck<Unit>(false, WarlockSpells.IMMOLATE_DOT, caster.GetGUID()));
 
 			if (enemies.Count == 0)
 				return;

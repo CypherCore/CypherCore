@@ -1676,15 +1676,12 @@ namespace Game.Spells
             if (apply)
             {
                 List<Unit> targets = new();
-                var u_check = new AnyUnfriendlyUnitInObjectRangeCheck(target, target, target.GetMap().GetVisibilityRange());
+                var u_check = new AnyUnfriendlyUnitInObjectRangeCheck(target, target, target.GetMap().GetVisibilityRange(), u => u.HasUnitState(UnitState.Casting));
                 var searcher = new UnitListSearcher(target, targets, u_check, GridType.All);
 
                 Cell.VisitGrid(target, searcher, target.GetMap().GetVisibilityRange());
                 foreach (var unit in targets)
                 {
-                    if (!unit.HasUnitState(UnitState.Casting))
-                        continue;
-
                     for (var i = CurrentSpellTypes.Generic; i < CurrentSpellTypes.Max; i++)
                     {
                         if (unit.GetCurrentSpell(i) != null
