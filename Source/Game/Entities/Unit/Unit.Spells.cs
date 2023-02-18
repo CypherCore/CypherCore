@@ -5,6 +5,7 @@ using Framework.Constants;
 using Framework.Dynamic;
 using Game.AI;
 using Game.BattleGrounds;
+using Game.DataStorage;
 using Game.Networking.Packets;
 using Game.Scripting;
 using Game.Scripting.Interfaces.ISpell;
@@ -3258,8 +3259,8 @@ namespace Game.Entities
         public void RemoveAura(uint spellId)
         {
             if (m_appliedAuras.TryGetValue(spellId, out var auras) && auras.Count > 0)
-                foreach (var aura in auras)
-                    RemoveAura(aura);
+                for (int i = auras.Count - 1; i >= 0; i--)
+                    RemoveAura(auras[i]);
         }
 
         public void RemoveAura<T>(T spellId) where T : struct, System.Enum
