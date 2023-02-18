@@ -4686,24 +4686,24 @@ namespace Game.Entities
         //Extra Shit
         public SpellEffectHandler GetSpellEffectHandler(SpellEffectName eff)
         {
-            if (!SpellEffectsHandlers.ContainsKey(eff))
+            if (!SpellEffectsHandlers.TryGetValue(eff, out var eh))
             {
                 Log.outError(LogFilter.Spells, "No defined handler for SpellEffect {0}", eff);
                 return SpellEffectsHandlers[SpellEffectName.None];
             }
 
-            return SpellEffectsHandlers[eff];
+            return eh;
         }
 
         public AuraEffectHandler GetAuraEffectHandler(AuraType type)
         {
-            if (!AuraEffectHandlers.ContainsKey(type))
+            if (!AuraEffectHandlers.TryGetValue(type, out var eh))
             {
                 Log.outError(LogFilter.Spells, "No defined handler for AuraEffect {0}", type);
                 return AuraEffectHandlers[AuraType.None];
             }
 
-            return AuraEffectHandlers[type];
+            return eh;
         }
 
         public SkillRangeType GetSkillRangeType(SkillRaceClassInfoRecord rcEntry)

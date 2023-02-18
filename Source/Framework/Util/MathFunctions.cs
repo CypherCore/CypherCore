@@ -145,24 +145,24 @@ public static class MathFunctions
 
     public static int CalculatePct(int value, float pct)
     {
-        return (int)(value * Convert.ToSingle(pct) / 100.0f);
+        return (int)(value * (pct / 100.0f));
     }
     public static uint CalculatePct(uint value, float pct)
     {
-        return (uint)(value * Convert.ToSingle(pct) / 100.0f);
+        return (uint)(value * (pct / 100.0f));
     }
     public static float CalculatePct(float value, float pct)
     {
-        return value * pct / 100.0f;
+        return value * (pct / 100.0f);
     }
     public static ulong CalculatePct(ulong value, float pct)
     {
-        return (ulong)(value * pct / 100.0f);
+        return (ulong)(value * (pct / 100.0f));
     }
 
     public static float GetPctOf(float value, float max)
     {
-        return value / max * 100.0f;
+        return (value / max) * 100.0f;
     }
 
     public static int RoundToInterval(ref int num, dynamic floor, dynamic ceil)
