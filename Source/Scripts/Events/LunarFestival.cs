@@ -400,7 +400,7 @@ namespace Scripts.m_Events.LunarFestival
             if (spellInfo.Id == SpellIds.EluneCandle)
             {
                 if (me.HasAura(SpellIds.OmenStarfall))
-                    me.RemoveAurasDueToSpell(SpellIds.OmenStarfall);
+                    me.RemoveAura(SpellIds.OmenStarfall);
 
                 _scheduler.RescheduleGroup(1, TimeSpan.FromSeconds(14), TimeSpan.FromSeconds(16));
             }

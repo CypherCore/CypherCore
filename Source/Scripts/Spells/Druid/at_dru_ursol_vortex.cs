@@ -24,7 +24,7 @@ public class at_dru_ursol_vortex : AreaTriggerAI
 
 	public override void OnUnitExit(Unit target)
 	{
-		target.RemoveAurasDueToSpell(DruidSpells.URSOL_VORTEX_DEBUFF);
+		target.RemoveAura(DruidSpells.URSOL_VORTEX_DEBUFF);
 
 		if (!_hasPull && target.IsValidAttackTarget(at.GetCaster()))
 		{

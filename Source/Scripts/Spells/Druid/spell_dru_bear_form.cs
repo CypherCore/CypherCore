@@ -34,10 +34,10 @@ public class spell_dru_bear_form : AuraScript, IHasAuraEffects
 		if (caster == null)
 			return;
 
-		caster.RemoveAurasDueToSpell(BearFormSpells.BEARFORM_OVERRIDE);
+		caster.RemoveAura(BearFormSpells.BEARFORM_OVERRIDE);
 
 		if (caster.HasSpell(BearFormSpells.STAMPEDING_ROAR))
-			caster.RemoveAurasDueToSpell(BearFormSpells.STAMPEDING_ROAR_BEAR_OVERRIDE);
+			caster.RemoveAura(BearFormSpells.STAMPEDING_ROAR_BEAR_OVERRIDE);
 	}
 
 	public override void Register()

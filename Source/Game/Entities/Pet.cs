@@ -1228,7 +1228,7 @@ namespace Game.Entities
             else
                 petSpell.state = PetSpellState.Removed;
 
-            RemoveAurasDueToSpell(spellId);
+            RemoveAura(spellId);
 
             if (learnPrev)
             {

@@ -54,7 +54,7 @@ internal class spell_item_trinket_stack : AuraScript, IHasAuraEffects
 			return;
 
 		// if right amount, Remove the aura and cast real trigger
-		caster.RemoveAurasDueToSpell(_stackSpell);
+		caster.RemoveAura(_stackSpell);
 		var target = eventInfo.GetActionTarget();
 
 		if (target)
@@ -63,6 +63,6 @@ internal class spell_item_trinket_stack : AuraScript, IHasAuraEffects
 
 	private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		GetTarget().RemoveAurasDueToSpell(_stackSpell);
+		GetTarget().RemoveAura(_stackSpell);
 	}
 }

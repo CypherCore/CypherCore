@@ -35,7 +35,7 @@ namespace Scripts.Spells.Druid
 
 		private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 		{
-			GetTarget().RemoveAurasDueToSpell(DruidSpellIds.GlyphOfStarsVisual);
+			GetTarget().RemoveAura(DruidSpellIds.GlyphOfStarsVisual);
 		}
 	}
 }

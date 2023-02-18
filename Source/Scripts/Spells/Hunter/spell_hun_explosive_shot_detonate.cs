@@ -20,7 +20,7 @@ public class spell_hun_explosive_shot_detonate : SpellScript, IHasSpellEffects
 
 		if (at != null)
 		{
-			GetCaster().RemoveAurasDueToSpell(HunterSpells.EXPLOSIVE_SHOT);
+			GetCaster().RemoveAura(HunterSpells.EXPLOSIVE_SHOT);
 			GetCaster().CastSpell(at.GetPosition(), HunterSpells.EXPLOSIVE_SHOT_DAMAGE, true);
 			at.Remove();
 		}

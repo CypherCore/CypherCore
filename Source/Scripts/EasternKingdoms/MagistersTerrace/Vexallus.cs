@@ -168,7 +168,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.Vexallus
             if (killer)
                 killer.CastSpell(killer, SpellIds.EnergyFeedback, true);
 
-            me.RemoveAurasDueToSpell(SpellIds.PureEnergyPassive);
+            me.RemoveAura(SpellIds.PureEnergyPassive);
         }
     }
 }

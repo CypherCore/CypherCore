@@ -36,6 +36,6 @@ public class at_mage_rune_of_power : AreaTriggerAI
 	public override void OnUnitExit(Unit unit)
 	{
 		if (unit.HasAura(UsingSpells.RUNE_OF_POWER_AURA))
-			unit.RemoveAurasDueToSpell(UsingSpells.RUNE_OF_POWER_AURA);
+			unit.RemoveAura(UsingSpells.RUNE_OF_POWER_AURA);
 	}
 }

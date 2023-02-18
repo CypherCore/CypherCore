@@ -205,7 +205,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
             if (Drinking && DrinkInturrupted)
             {
                 Drinking = false;
-                me.RemoveAurasDueToSpell(SpellIds.Drink);
+                me.RemoveAura(SpellIds.Drink);
                 me.SetStandState(UnitStandStateType.Stand);
                 me.SetPower(PowerType.Mana, me.GetMaxPower(PowerType.Mana) - 32000);
                 DoCast(me, SpellIds.Potion, new CastSpellExtraArgs(false));

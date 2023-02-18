@@ -163,7 +163,7 @@ namespace Scripts.m_Events.LoveIsInTheAir
 
         private void HandleScript(uint effIndex)
         {
-            GetHitUnit().RemoveAurasDueToSpell((uint)GetEffectValue());
+            GetHitUnit().RemoveAura((uint)GetEffectValue());
         }
     }
 
@@ -258,7 +258,7 @@ namespace Scripts.m_Events.LoveIsInTheAir
 
         private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            GetTarget().RemoveAurasDueToSpell((uint)GetEffectInfo(0).CalcValue());
+            GetTarget().RemoveAura((uint)GetEffectInfo(0).CalcValue());
         }
     }
 
@@ -280,7 +280,7 @@ namespace Scripts.m_Events.LoveIsInTheAir
 
         private void HandleScript(uint effIndex)
         {
-            GetHitUnit().RemoveAurasDueToSpell(SpellIds.ServiceUniform);
+            GetHitUnit().RemoveAura(SpellIds.ServiceUniform);
         }
     }
 
@@ -303,7 +303,7 @@ namespace Scripts.m_Events.LoveIsInTheAir
 
         private void HandleScript(uint effIndex)
         {
-            GetCaster().RemoveAurasDueToSpell((uint)GetEffectValue());
+            GetCaster().RemoveAura((uint)GetEffectValue());
         }
     }
 }

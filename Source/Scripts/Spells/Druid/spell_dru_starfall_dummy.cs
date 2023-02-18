@@ -37,7 +37,7 @@ namespace Scripts.Spells.Druid
 				var spellInfo = GetTriggeringSpell();
 
 				if (spellInfo != null)
-					caster.RemoveAurasDueToSpell(spellInfo.Id);
+					caster.RemoveAura(spellInfo.Id);
 
 				return;
 			}

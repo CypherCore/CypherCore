@@ -36,7 +36,7 @@ public class spell_mage_pyroblast_clearcasting_driver : AuraScript, IAuraCheckPr
 		if ((eventInfo.GetHitMask() & ProcFlagsHit.Normal) != 0)
 		{
 			if (caster.HasAura(MageSpells.HEATING_UP))
-				caster.RemoveAurasDueToSpell(MageSpells.HEATING_UP);
+				caster.RemoveAura(MageSpells.HEATING_UP);
 
 			return;
 		}
@@ -57,7 +57,7 @@ public class spell_mage_pyroblast_clearcasting_driver : AuraScript, IAuraCheckPr
 
 		if (caster.HasAura(MageSpells.HEATING_UP) && !caster.HasAura(MageSpells.HOT_STREAK) && !procCheck)
 		{
-			caster.RemoveAurasDueToSpell(MageSpells.HEATING_UP);
+			caster.RemoveAura(MageSpells.HEATING_UP);
 			caster.CastSpell(caster, MageSpells.HOT_STREAK, true);
 		}
 	}

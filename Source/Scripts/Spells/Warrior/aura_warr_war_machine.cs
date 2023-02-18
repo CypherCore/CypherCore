@@ -28,7 +28,7 @@ namespace Scripts.Spells.Warrior
 			var caster = GetCaster();
 
 			if (caster != null)
-				caster.RemoveAurasDueToSpell(WarriorSpells.WAR_MACHINE_AURA);
+				caster.RemoveAura(WarriorSpells.WAR_MACHINE_AURA);
 		}
 
 		public override void Register()

@@ -322,7 +322,7 @@ namespace Game.Entities
 
             if (!GetCombatManager().HasPvPCombat())
             { 
-                RemoveAurasDueToSpell(PlayerConst.SpellPvpRulesEnabled);
+                RemoveAura(PlayerConst.SpellPvpRulesEnabled);
                 UpdateItemLevelAreaBasedScaling();
             }
             else

@@ -26,6 +26,6 @@ internal class spell_item_jom_gabbar : AuraScript, IHasAuraEffects
 
 	private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
 	{
-		GetTarget().RemoveAurasDueToSpell(effect.GetSpellEffectInfo().TriggerSpell);
+		GetTarget().RemoveAura(effect.GetSpellEffectInfo().TriggerSpell);
 	}
 }

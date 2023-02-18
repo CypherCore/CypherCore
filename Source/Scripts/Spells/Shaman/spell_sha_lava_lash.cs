@@ -21,7 +21,7 @@ namespace Scripts.Spells.Shaman
 		{
 			GetCaster().CastSpell(GetHitUnit(), ShamanSpells.LAVA_LASH_SPREAD_FLAME_SHOCK, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.MaxTargets, GetEffectValue()));
 
-			GetCaster().RemoveAurasDueToSpell(ShamanSpells.HOT_HAND);
+			GetCaster().RemoveAura(ShamanSpells.HOT_HAND);
 
 			var target = GetHitUnit();
 

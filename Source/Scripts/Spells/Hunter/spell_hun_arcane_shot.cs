@@ -22,7 +22,7 @@ public class spell_hun_arcane_shot : SpellScript, ISpellOnHit
 		{
 			caster.CastSpell(target, HunterSpells.HUNTERS_MARK_AURA, true);
 			caster.CastSpell(caster, HunterSpells.HUNTERS_MARK_AURA_2, true);
-			caster.RemoveAurasDueToSpell(HunterSpells.MARKING_TARGETS);
+			caster.RemoveAura(HunterSpells.MARKING_TARGETS);
 		}
 
 		if (caster.HasAura(HunterSpells.LETHAL_SHOTS) && RandomHelper.randChance(20))

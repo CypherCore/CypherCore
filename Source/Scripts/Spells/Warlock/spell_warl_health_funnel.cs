@@ -40,8 +40,8 @@ namespace Scripts.Spells.Warlock
 		private void RemoveEffect(AuraEffect aurEff, AuraEffectHandleModes mode)
 		{
 			var target = GetTarget();
-			target.RemoveAurasDueToSpell(WarlockSpells.IMPROVED_HEALTH_FUNNEL_BUFF_R1);
-			target.RemoveAurasDueToSpell(WarlockSpells.IMPROVED_HEALTH_FUNNEL_BUFF_R2);
+			target.RemoveAura(WarlockSpells.IMPROVED_HEALTH_FUNNEL_BUFF_R1);
+			target.RemoveAura(WarlockSpells.IMPROVED_HEALTH_FUNNEL_BUFF_R2);
 		}
 
 		private void OnPeriodic(AuraEffect aurEff)

@@ -35,11 +35,11 @@ public class spell_dru_regrowth : SpellScript, IHasSpellEffects
 				clearcasting.GetEffect(0).SetAmount(amount - 1);
 
 				if (amount == -102)
-					GetCaster().RemoveAurasDueToSpell(DruidSpells.CLEARCASTING);
+					GetCaster().RemoveAura(DruidSpells.CLEARCASTING);
 			}
 			else
 			{
-				GetCaster().RemoveAurasDueToSpell(DruidSpells.CLEARCASTING);
+				GetCaster().RemoveAura(DruidSpells.CLEARCASTING);
 			}
 		}
 	}

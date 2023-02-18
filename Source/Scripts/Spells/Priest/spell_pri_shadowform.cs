@@ -26,7 +26,7 @@ public class spell_pri_shadowform : AuraScript, IHasAuraEffects
 
 	private void HandleEffectRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
-		GetTarget().RemoveAurasDueToSpell(GetTarget().HasAura(PriestSpells.GLYPH_OF_SHADOW) ? PriestSpells.SHADOWFORM_VISUAL_WITH_GLYPH : PriestSpells.SHADOWFORM_VISUAL_WITHOUT_GLYPH);
+		GetTarget().RemoveAura(GetTarget().HasAura(PriestSpells.GLYPH_OF_SHADOW) ? PriestSpells.SHADOWFORM_VISUAL_WITH_GLYPH : PriestSpells.SHADOWFORM_VISUAL_WITHOUT_GLYPH);
 	}
 
 	public override void Register()

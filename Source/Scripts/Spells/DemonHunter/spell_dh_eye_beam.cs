@@ -47,7 +47,7 @@ public class spell_dh_eye_beam : AuraScript, IHasAuraEffects
 		var caster = GetCaster();
 
 		if (caster != null)
-			caster.RemoveAurasDueToSpell(DemonHunterSpells.EYE_BEAM_VISUAL);
+			caster.RemoveAura(DemonHunterSpells.EYE_BEAM_VISUAL);
 	}
 
 	private void HandleApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)

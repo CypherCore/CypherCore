@@ -39,6 +39,6 @@ public class at_rog_smoke_bombAI : AreaTriggerAI
 			return;
 
 		if (unit.HasAura(RogueSpells.SMOKE_BOMB_AURA))
-			unit.RemoveAurasDueToSpell(RogueSpells.SMOKE_BOMB_AURA);
+			unit.RemoveAura(RogueSpells.SMOKE_BOMB_AURA);
 	}
 }

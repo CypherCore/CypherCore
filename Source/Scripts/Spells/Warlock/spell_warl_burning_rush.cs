@@ -40,7 +40,7 @@ namespace Scripts.Spells.Warlock
 		public void AfterHit()
 		{
 			if (_isRemove)
-				GetCaster().RemoveAurasDueToSpell(WarlockSpells.BURNING_RUSH);
+				GetCaster().RemoveAura(WarlockSpells.BURNING_RUSH);
 		}
 	}
 }

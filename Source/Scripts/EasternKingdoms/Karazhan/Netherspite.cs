@@ -377,8 +377,8 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
 
         private void SwitchToPortalPhase()
         {
-            me.RemoveAurasDueToSpell(SpellIds.BanishRoot);
-            me.RemoveAurasDueToSpell(SpellIds.BanishVisual);
+            me.RemoveAura(SpellIds.BanishRoot);
+            me.RemoveAura(SpellIds.BanishVisual);
             SummonPortals();
             PhaseTimer = 60000;
             PortalPhase = true;
@@ -389,8 +389,8 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
 
         private void SwitchToBanishPhase()
         {
-            me.RemoveAurasDueToSpell(SpellIds.Empowerment);
-            me.RemoveAurasDueToSpell(SpellIds.NetherburnAura);
+            me.RemoveAura(SpellIds.Empowerment);
+            me.RemoveAura(SpellIds.NetherburnAura);
             DoCast(me, SpellIds.BanishVisual, new CastSpellExtraArgs(true));
             DoCast(me, SpellIds.BanishRoot, new CastSpellExtraArgs(true));
             DestroyPortals();
@@ -399,7 +399,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
             Talk(TextIds.EmotePhaseBanish);
 
             for (byte i = 0; i < 3; ++i)
-                me.RemoveAurasDueToSpell(MiscConst.NetherBuff[i]);
+                me.RemoveAura(MiscConst.NetherBuff[i]);
         }
 
         private void HandleDoors(bool open) // Massive Door switcher

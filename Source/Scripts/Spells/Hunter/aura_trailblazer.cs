@@ -37,7 +37,7 @@ public class aura_trailblazer : AuraScript, IHasAuraEffects
 	private void RescheduleBuff()
 	{
 		var caster = GetCaster();
-		caster.RemoveAurasDueToSpell(HunterSpells.TRAILBLAZER_BUFF);
+		caster.RemoveAura(HunterSpells.TRAILBLAZER_BUFF);
 
 		if (_event == null)
 		{

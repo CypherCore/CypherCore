@@ -112,14 +112,14 @@ namespace Game.BattleGrounds.Zones
                         Player player = Global.ObjAccessor.FindPlayer(m_FlagKeepers[0]);
                         if (player)
                         {
-                            player.RemoveAurasDueToSpell(WSGSpellId.FocusedAssault);
+                            player.RemoveAura(WSGSpellId.FocusedAssault);
                             player.CastSpell(player, WSGSpellId.BrutalAssault, true);
                         }
 
                         player = Global.ObjAccessor.FindPlayer(m_FlagKeepers[1]);
                         if (player)
                         {
-                            player.RemoveAurasDueToSpell(WSGSpellId.FocusedAssault);
+                            player.RemoveAura(WSGSpellId.FocusedAssault);
                             player.CastSpell(player, WSGSpellId.BrutalAssault, true);
                         }
                         _flagDebuffState = 2;
@@ -134,15 +134,15 @@ namespace Game.BattleGrounds.Zones
                     Player player = Global.ObjAccessor.FindPlayer(m_FlagKeepers[0]);
                     if (player)
                     {
-                        player.RemoveAurasDueToSpell(WSGSpellId.FocusedAssault);
-                        player.RemoveAurasDueToSpell(WSGSpellId.BrutalAssault);
+                        player.RemoveAura(WSGSpellId.FocusedAssault);
+                        player.RemoveAura(WSGSpellId.BrutalAssault);
                     }
 
                     player = Global.ObjAccessor.FindPlayer(m_FlagKeepers[1]);
                     if (player)
                     {
-                        player.RemoveAurasDueToSpell(WSGSpellId.FocusedAssault);
-                        player.RemoveAurasDueToSpell(WSGSpellId.BrutalAssault);
+                        player.RemoveAura(WSGSpellId.FocusedAssault);
+                        player.RemoveAura(WSGSpellId.BrutalAssault);
                     }
 
                     _flagSpellForceTimer = 0; //reset timer.
@@ -259,11 +259,11 @@ namespace Game.BattleGrounds.Zones
                                                                                    // horde flag in base (but not respawned yet)
                 _flagState[TeamId.Horde] = WSGFlagState.WaitRespawn;
                 // Drop Horde Flag from Player
-                player.RemoveAurasDueToSpell(WSGSpellId.WarsongFlag);
+                player.RemoveAura(WSGSpellId.WarsongFlag);
                 if (_flagDebuffState == 1)
-                    player.RemoveAurasDueToSpell(WSGSpellId.FocusedAssault);
+                    player.RemoveAura(WSGSpellId.FocusedAssault);
                 else if (_flagDebuffState == 2)
-                    player.RemoveAurasDueToSpell(WSGSpellId.BrutalAssault);
+                    player.RemoveAura(WSGSpellId.BrutalAssault);
 
                 if (GetTeamScore(TeamId.Alliance) < WSGTimerOrScore.MaxTeamScore)
                     AddPoint(Team.Alliance, 1);
@@ -278,11 +278,11 @@ namespace Game.BattleGrounds.Zones
                                                                                    // alliance flag in base (but not respawned yet)
                 _flagState[TeamId.Alliance] = WSGFlagState.WaitRespawn;
                 // Drop Alliance Flag from Player
-                player.RemoveAurasDueToSpell(WSGSpellId.SilverwingFlag);
+                player.RemoveAura(WSGSpellId.SilverwingFlag);
                 if (_flagDebuffState == 1)
-                    player.RemoveAurasDueToSpell(WSGSpellId.FocusedAssault);
+                    player.RemoveAura(WSGSpellId.FocusedAssault);
                 else if (_flagDebuffState == 2)
-                    player.RemoveAurasDueToSpell(WSGSpellId.BrutalAssault);
+                    player.RemoveAura(WSGSpellId.BrutalAssault);
 
                 if (GetTeamScore(TeamId.Horde) < WSGTimerOrScore.MaxTeamScore)
                     AddPoint(Team.Horde, 1);
@@ -352,7 +352,7 @@ namespace Game.BattleGrounds.Zones
                     if (GetFlagPickerGUID(TeamId.Horde) == player.GetGUID())
                     {
                         SetHordeFlagPicker(ObjectGuid.Empty);
-                        player.RemoveAurasDueToSpell(WSGSpellId.WarsongFlag);
+                        player.RemoveAura(WSGSpellId.WarsongFlag);
                     }
                 }
                 else
@@ -363,7 +363,7 @@ namespace Game.BattleGrounds.Zones
                     if (GetFlagPickerGUID(TeamId.Alliance) == player.GetGUID())
                     {
                         SetAllianceFlagPicker(ObjectGuid.Empty);
-                        player.RemoveAurasDueToSpell(WSGSpellId.SilverwingFlag);
+                        player.RemoveAura(WSGSpellId.SilverwingFlag);
                     }
                 }
                 return;
@@ -378,11 +378,11 @@ namespace Game.BattleGrounds.Zones
                 if (GetFlagPickerGUID(TeamId.Horde) == player.GetGUID())
                 {
                     SetHordeFlagPicker(ObjectGuid.Empty);
-                    player.RemoveAurasDueToSpell(WSGSpellId.WarsongFlag);
+                    player.RemoveAura(WSGSpellId.WarsongFlag);
                     if (_flagDebuffState == 1)
-                        player.RemoveAurasDueToSpell(WSGSpellId.FocusedAssault);
+                        player.RemoveAura(WSGSpellId.FocusedAssault);
                     else if (_flagDebuffState == 2)
-                        player.RemoveAurasDueToSpell(WSGSpellId.BrutalAssault);
+                        player.RemoveAura(WSGSpellId.BrutalAssault);
                     _flagState[TeamId.Horde] = WSGFlagState.OnGround;
                     player.CastSpell(player, WSGSpellId.WarsongFlagDropped, true);
                     set = true;
@@ -395,11 +395,11 @@ namespace Game.BattleGrounds.Zones
                 if (GetFlagPickerGUID(TeamId.Alliance) == player.GetGUID())
                 {
                     SetAllianceFlagPicker(ObjectGuid.Empty);
-                    player.RemoveAurasDueToSpell(WSGSpellId.SilverwingFlag);
+                    player.RemoveAura(WSGSpellId.SilverwingFlag);
                     if (_flagDebuffState == 1)
-                        player.RemoveAurasDueToSpell(WSGSpellId.FocusedAssault);
+                        player.RemoveAura(WSGSpellId.FocusedAssault);
                     else if (_flagDebuffState == 2)
-                        player.RemoveAurasDueToSpell(WSGSpellId.BrutalAssault);
+                        player.RemoveAura(WSGSpellId.BrutalAssault);
                     _flagState[TeamId.Alliance] = WSGFlagState.OnGround;
                     player.CastSpell(player, WSGSpellId.SilverwingFlagDropped, true);
                     set = true;

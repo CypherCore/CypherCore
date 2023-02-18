@@ -652,10 +652,10 @@ namespace Game.BattleFields
                 RemoveAurasFromPlayer(player);
             }
 
-            player.RemoveAurasDueToSpell(WGSpells.HordeControlsFactoryPhaseShift);
-            player.RemoveAurasDueToSpell(WGSpells.AllianceControlsFactoryPhaseShift);
-            player.RemoveAurasDueToSpell(WGSpells.HordeControlPhaseShift);
-            player.RemoveAurasDueToSpell(WGSpells.AllianceControlPhaseShift);
+            player.RemoveAura(WGSpells.HordeControlsFactoryPhaseShift);
+            player.RemoveAura(WGSpells.AllianceControlsFactoryPhaseShift);
+            player.RemoveAura(WGSpells.HordeControlPhaseShift);
+            player.RemoveAura(WGSpells.AllianceControlPhaseShift);
             UpdateTenacity();
         }
 
@@ -664,10 +664,10 @@ namespace Game.BattleFields
             if (!m_isActive)
                 RemoveAurasFromPlayer(player);
 
-            player.RemoveAurasDueToSpell(WGSpells.HordeControlsFactoryPhaseShift);
-            player.RemoveAurasDueToSpell(WGSpells.AllianceControlsFactoryPhaseShift);
-            player.RemoveAurasDueToSpell(WGSpells.HordeControlPhaseShift);
-            player.RemoveAurasDueToSpell(WGSpells.AllianceControlPhaseShift);
+            player.RemoveAura(WGSpells.HordeControlsFactoryPhaseShift);
+            player.RemoveAura(WGSpells.AllianceControlsFactoryPhaseShift);
+            player.RemoveAura(WGSpells.HordeControlPhaseShift);
+            player.RemoveAura(WGSpells.AllianceControlPhaseShift);
         }
 
         public override void OnPlayerEnterZone(Player player)
@@ -917,14 +917,14 @@ namespace Game.BattleFields
 
         private void RemoveAurasFromPlayer(Player player)
         {
-            player.RemoveAurasDueToSpell(WGSpells.Recruit);
-            player.RemoveAurasDueToSpell(WGSpells.Corporal);
-            player.RemoveAurasDueToSpell(WGSpells.Lieutenant);
-            player.RemoveAurasDueToSpell(WGSpells.TowerControl);
-            player.RemoveAurasDueToSpell(WGSpells.SpiritualImmunity);
-            player.RemoveAurasDueToSpell(WGSpells.Tenacity);
-            player.RemoveAurasDueToSpell(WGSpells.EssenceOfWintergrasp);
-            player.RemoveAurasDueToSpell(WGSpells.WintergraspRestrictedFlightArea);
+            player.RemoveAura(WGSpells.Recruit);
+            player.RemoveAura(WGSpells.Corporal);
+            player.RemoveAura(WGSpells.Lieutenant);
+            player.RemoveAura(WGSpells.TowerControl);
+            player.RemoveAura(WGSpells.SpiritualImmunity);
+            player.RemoveAura(WGSpells.Tenacity);
+            player.RemoveAura(WGSpells.EssenceOfWintergrasp);
+            player.RemoveAura(WGSpells.WintergraspRestrictedFlightArea);
         }
 
         // Update vehicle Count WorldState to player
@@ -965,7 +965,7 @@ namespace Game.BattleFields
 
                     if (player)
                         if (player.GetLevel() >= m_MinLevel)
-                            player.RemoveAurasDueToSpell(WGSpells.Tenacity);
+                            player.RemoveAura(WGSpells.Tenacity);
                 }
 
                 foreach (var guid in _vehicles[_tenacityTeam])
@@ -973,7 +973,7 @@ namespace Game.BattleFields
                     Creature creature = GetCreature(guid);
 
                     if (creature)
-                        creature.RemoveAurasDueToSpell(WGSpells.TenacityVehicle);
+                        creature.RemoveAura(WGSpells.TenacityVehicle);
                 }
             }
 

@@ -175,7 +175,7 @@ namespace Game.Chat
             if (visibleArg.Value)
             {
                 if (_player.HasAura(VISUAL_AURA, ObjectGuid.Empty))
-                    _player.RemoveAurasDueToSpell(VISUAL_AURA);
+                    _player.RemoveAura(VISUAL_AURA);
 
                 _player.SetGMVisible(true);
                 _player.UpdateObjectVisibility();

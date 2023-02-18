@@ -55,7 +55,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
                     {
                         case 0:
                             me.TextEmote(boss_vanessa_vancleef.VANESSA_NIGHTMARE_1, null, true);
-                            me.RemoveAurasDueToSpell(boss_vanessa_vancleef.Spells.SITTING);
+                            me.RemoveAura(boss_vanessa_vancleef.Spells.SITTING);
                             PongTimer = 2000;
                             Phase++;
                             break;

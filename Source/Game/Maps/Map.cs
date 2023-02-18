@@ -4464,7 +4464,7 @@ namespace Game.Maps
                                 bool bReverse = step.script.RemoveAura.Flags.HasAnyFlag(eScriptFlags.RemoveauraReverse);
                                 Unit unit = _GetScriptUnit(bReverse ? source : target, bReverse, step.script);
                                 if (unit)
-                                    unit.RemoveAurasDueToSpell(step.script.RemoveAura.SpellID);
+                                    unit.RemoveAura(step.script.RemoveAura.SpellID);
                                 break;
                             }
                         case ScriptCommands.CastSpell:

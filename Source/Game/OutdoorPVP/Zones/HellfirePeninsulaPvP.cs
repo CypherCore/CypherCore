@@ -80,9 +80,9 @@ namespace Game.PvP
         {
             // remove buffs
             if (player.GetTeam() == Team.Alliance)
-                player.RemoveAurasDueToSpell(OutdoorPvPHPSpells.AllianceBuff);
+                player.RemoveAura(OutdoorPvPHPSpells.AllianceBuff);
             else
-                player.RemoveAurasDueToSpell(OutdoorPvPHPSpells.HordeBuff);
+                player.RemoveAura(OutdoorPvPHPSpells.HordeBuff);
 
             base.HandlePlayerLeaveZone(player, zone);
         }

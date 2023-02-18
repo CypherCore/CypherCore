@@ -182,7 +182,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
                 me.AttackStop();
                 me.SetReactState(ReactStates.Passive);
                 me.InterruptNonMeleeSpells(true);
-                me.RemoveAurasDueToSpell(DungeonMode(SpellIds.PowerFeedback, SpellIds.HPowerFeedback));
+                me.RemoveAura(DungeonMode(SpellIds.PowerFeedback, SpellIds.HPowerFeedback));
                 summons.DespawnAll();
                 DoCastAOE(SpellIds.ClearFlight);
                 Talk(TextIds.SayDeath);
@@ -313,8 +313,8 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
                         break;
                     }
                 case SpellIds.ClearFlight:
-                    unitTarget.RemoveAurasDueToSpell(SpellIds.GravityLapseFly);
-                    unitTarget.RemoveAurasDueToSpell(DungeonMode(SpellIds.GravityLapse, SpellIds.HGravityLapse));
+                    unitTarget.RemoveAura(SpellIds.GravityLapseFly);
+                    unitTarget.RemoveAura(DungeonMode(SpellIds.GravityLapse, SpellIds.HGravityLapse));
 
                     break;
                 default:

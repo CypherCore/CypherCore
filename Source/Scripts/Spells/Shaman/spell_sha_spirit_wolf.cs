@@ -37,7 +37,7 @@ internal class spell_sha_spirit_wolf : AuraScript, IHasAuraEffects
 
 	private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		GetTarget().RemoveAurasDueToSpell(ShamanSpells.SpiritWolfPeriodic);
-		GetTarget().RemoveAurasDueToSpell(ShamanSpells.SpiritWolfAura);
+		GetTarget().RemoveAura(ShamanSpells.SpiritWolfPeriodic);
+		GetTarget().RemoveAura(ShamanSpells.SpiritWolfAura);
 	}
 }

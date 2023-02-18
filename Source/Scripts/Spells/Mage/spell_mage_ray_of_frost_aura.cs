@@ -38,6 +38,6 @@ internal class spell_mage_ray_of_frost_aura : AuraScript, IHasAuraEffects
 	{
 		var caster = GetCaster();
 
-		caster?.RemoveAurasDueToSpell(MageSpells.RayOfFrostFingersOfFrost);
+		caster?.RemoveAura(MageSpells.RayOfFrostFingersOfFrost);
 	}
 }

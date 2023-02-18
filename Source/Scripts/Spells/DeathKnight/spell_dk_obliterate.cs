@@ -18,7 +18,7 @@ public class spell_dk_obliterate : SpellScript, IHasSpellEffects
 
 	private void HandleHit(uint UnnamedParameter)
 	{
-		GetCaster().RemoveAurasDueToSpell(DeathKnightSpells.KILLING_MACHINE);
+		GetCaster().RemoveAura(DeathKnightSpells.KILLING_MACHINE);
 
 		if (GetCaster().HasAura(DeathKnightSpells.ICECAP))
 			if (GetCaster().GetSpellHistory().HasCooldown(DeathKnightSpells.PILLAR_OF_FROST))

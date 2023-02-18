@@ -33,7 +33,7 @@ namespace Scripts.Spells.Druid
 
 		private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 		{
-			GetTarget().RemoveAurasDueToSpell(DruidSpellIds.SavageRoar);
+			GetTarget().RemoveAura(DruidSpellIds.SavageRoar);
 		}
 	}
 }

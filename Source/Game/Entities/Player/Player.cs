@@ -2622,7 +2622,7 @@ namespace Game.Entities
                     break;
                 case GossipOptionNpc.EnableXPGain:
                     PlayerTalkClass.SendCloseGossip();
-                    RemoveAurasDueToSpell(PlayerConst.SpellExperienceEliminated);
+                    RemoveAura(PlayerConst.SpellExperienceEliminated);
                     RemovePlayerFlag(PlayerFlags.NoXPGain);
                     break;
                 case GossipOptionNpc.SpecializationMaster:
@@ -3973,8 +3973,8 @@ namespace Game.Entities
             RemovePlayerFlag(PlayerFlags.IsOutOfBounds);
 
             // This must be called always even on Players with race != RACE_NIGHTELF in case of faction change
-            RemoveAurasDueToSpell(20584);                       // speed bonuses
-            RemoveAurasDueToSpell(8326);                            // SPELL_AURA_GHOST
+            RemoveAura(20584);                       // speed bonuses
+            RemoveAura(8326);                            // SPELL_AURA_GHOST
 
             if (GetSession().IsARecruiter() || (GetSession().GetRecruiterId() != 0))
                 SetDynamicFlag(UnitDynFlags.ReferAFriend);
@@ -4499,7 +4499,7 @@ namespace Game.Entities
 
             Pet pet = GetPet();
             if (pet != null)
-                pet.RemoveAurasDueToSpell(petSpell.GetAura(pet.GetEntry()));
+                pet.RemoveAura(petSpell.GetAura(pet.GetEntry()));
         }
 
         public bool InArena()
@@ -4773,13 +4773,13 @@ namespace Game.Entities
                 {
                     RemovePlayerFlag(PlayerFlags.WarModeActive);
                     CastSpell(this, auraInside, true);
-                    RemoveAurasDueToSpell(auraOutside);
+                    RemoveAura(auraOutside);
                 }
                 else
                 {
                     SetPlayerFlag(PlayerFlags.WarModeActive);
                     CastSpell(this, auraOutside, true);
-                    RemoveAurasDueToSpell(auraInside);
+                    RemoveAura(auraInside);
                 }
                 SetWarModeLocal(true);
                 SetPvpFlag(UnitPVPStateFlags.PvP);
@@ -4787,8 +4787,8 @@ namespace Game.Entities
             else
             {
                 SetWarModeLocal(false);
-                RemoveAurasDueToSpell(auraOutside);
-                RemoveAurasDueToSpell(auraInside);
+                RemoveAura(auraOutside);
+                RemoveAura(auraInside);
                 RemovePlayerFlag(PlayerFlags.WarModeActive);
                 RemovePvpFlag(UnitPVPStateFlags.PvP);
             }

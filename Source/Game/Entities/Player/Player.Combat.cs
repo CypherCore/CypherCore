@@ -243,7 +243,7 @@ namespace Game.Entities
                     CastSpell((Unit)null, m_titanGripPenaltySpellId, true);
             }
             else
-                RemoveAurasDueToSpell(m_titanGripPenaltySpellId);
+                RemoveAura(m_titanGripPenaltySpellId);
         }
 
         bool IsTwoHandUsed()

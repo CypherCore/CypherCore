@@ -36,12 +36,12 @@ internal class spell_item_shadowmourne_soul_fragment : AuraScript, IHasAuraEffec
 
 				break;
 			case 6:
-				target.RemoveAurasDueToSpell(ItemSpellIds.ShadowmourneVisualLow);
+				target.RemoveAura(ItemSpellIds.ShadowmourneVisualLow);
 				target.CastSpell(target, ItemSpellIds.ShadowmourneVisualHigh, true);
 
 				break;
 			case 10:
-				target.RemoveAurasDueToSpell(ItemSpellIds.ShadowmourneVisualHigh);
+				target.RemoveAura(ItemSpellIds.ShadowmourneVisualHigh);
 				target.CastSpell(target, ItemSpellIds.ShadowmourneChaosBaneBuff, true);
 
 				break;
@@ -53,7 +53,7 @@ internal class spell_item_shadowmourne_soul_fragment : AuraScript, IHasAuraEffec
 	private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
 		var target = GetTarget();
-		target.RemoveAurasDueToSpell(ItemSpellIds.ShadowmourneVisualLow);
-		target.RemoveAurasDueToSpell(ItemSpellIds.ShadowmourneVisualHigh);
+		target.RemoveAura(ItemSpellIds.ShadowmourneVisualLow);
+		target.RemoveAura(ItemSpellIds.ShadowmourneVisualHigh);
 	}
 }

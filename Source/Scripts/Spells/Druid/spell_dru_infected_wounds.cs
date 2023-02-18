@@ -20,7 +20,7 @@ public class spell_dru_infected_wounds : SpellScript, IHasSpellEffects
 			return;
 
 		if (GetCaster().HasAura(GetSpellInfo().Id))
-			GetCaster().RemoveAurasDueToSpell(GetSpellInfo().Id);
+			GetCaster().RemoveAura(GetSpellInfo().Id);
 	}
 
 	public override void Register()

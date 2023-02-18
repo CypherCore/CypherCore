@@ -620,7 +620,7 @@ namespace Game.BattleGrounds.Zones
                 if (IsFlagPickedup() && GetFlagPickerGUID() == player.GetGUID())
                 {
                     SetFlagPicker(ObjectGuid.Empty);
-                    player.RemoveAurasDueToSpell(EotSMisc.SpellNetherstormFlag);
+                    player.RemoveAura(EotSMisc.SpellNetherstormFlag);
                 }
                 return;
             }
@@ -632,7 +632,7 @@ namespace Game.BattleGrounds.Zones
                 return;
 
             SetFlagPicker(ObjectGuid.Empty);
-            player.RemoveAurasDueToSpell(EotSMisc.SpellNetherstormFlag);
+            player.RemoveAura(EotSMisc.SpellNetherstormFlag);
             m_FlagState = EotSFlagState.OnGround;
             m_FlagsTimer = EotSMisc.FlagRespawnTime;
             player.CastSpell(player, BattlegroundConst.SpellRecentlyDroppedFlag, true);
@@ -800,7 +800,7 @@ namespace Game.BattleGrounds.Zones
 
             SetFlagPicker(ObjectGuid.Empty);
             m_FlagState = EotSFlagState.WaitRespawn;
-            player.RemoveAurasDueToSpell(EotSMisc.SpellNetherstormFlag);
+            player.RemoveAura(EotSMisc.SpellNetherstormFlag);
 
             player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.PvPActive);
 

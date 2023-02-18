@@ -66,7 +66,7 @@ namespace Game.DungeonFinding
                 if (!group)
                 {
                     Global.LFGMgr.LeaveLfg(player.GetGUID());
-                    player.RemoveAurasDueToSpell(SharedConst.LFGSpellLuckOfTheDraw);
+                    player.RemoveAura(SharedConst.LFGSpellLuckOfTheDraw);
                     player.TeleportTo(player.GetHomebind());
                     Log.outError(LogFilter.Lfg, "LFGPlayerScript.OnMapChanged, Player {0} ({1}) is in LFG dungeon map but does not have a valid group! Teleporting to homebind.",
                         player.GetName(), player.GetGUID().ToString());
@@ -96,7 +96,7 @@ namespace Game.DungeonFinding
                         player.GetName(), player.GetGUID().ToString());
                 }
 
-                player.RemoveAurasDueToSpell(SharedConst.LFGSpellLuckOfTheDraw);
+                player.RemoveAura(SharedConst.LFGSpellLuckOfTheDraw);
             }
         }
     }
@@ -178,7 +178,7 @@ namespace Game.DungeonFinding
                     players >= SharedConst.LFGKickVotesNeeded)
                     player.CastSpell(player, SharedConst.LFGSpellDungeonDeserter, true);
                 else if (method == RemoveMethod.KickLFG)
-                    player.RemoveAurasDueToSpell(SharedConst.LFGSpellDungeonCooldown);
+                    player.RemoveAura(SharedConst.LFGSpellDungeonCooldown);
                 //else if (state == LFG_STATE_BOOT)
                 // Update internal kick cooldown of kicked
 

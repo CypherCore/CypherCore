@@ -99,7 +99,7 @@ namespace Game.Entities
             // if RewSpellCast = -1 we remove aura do to SrcSpell from player.
             if (spell_id == -1 && src_spell_id != 0)
             {
-                RemoveAurasDueToSpell(src_spell_id);
+                RemoveAura(src_spell_id);
                 return;
             }
 
@@ -1990,7 +1990,7 @@ namespace Game.Entities
                         CastSpell(this, spellId, true);
 
                 foreach (var spellId in aurasToRemove)
-                    RemoveAurasDueToSpell(spellId);
+                    RemoveAura(spellId);
             }
 
             UpdateVisibleGameobjectsOrSpellClicks();

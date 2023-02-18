@@ -35,7 +35,7 @@ public class spell_dh_fel_rush : SpellScript, IHasSpellEffects
 		{
 			if (!caster.IsFalling() || caster.IsInWater())
 			{
-				caster.RemoveAurasDueToSpell(DemonHunterSpells.GLIDE);
+				caster.RemoveAura(DemonHunterSpells.GLIDE);
 				caster.CastSpell(caster, DemonHunterSpells.FEL_RUSH_DASH, true);
 
 				if (GetHitUnit())
@@ -56,7 +56,7 @@ public class spell_dh_fel_rush : SpellScript, IHasSpellEffects
 		if (caster != null)
 			if (caster.IsFalling())
 			{
-				caster.RemoveAurasDueToSpell(DemonHunterSpells.GLIDE);
+				caster.RemoveAura(DemonHunterSpells.GLIDE);
 				caster.SetDisableGravity(true);
 				caster.CastSpell(caster, DemonHunterSpells.FEL_RUSH_AIR, true);
 

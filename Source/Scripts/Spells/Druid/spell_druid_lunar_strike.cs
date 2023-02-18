@@ -68,7 +68,7 @@ public class spell_druid_lunar_strike : SpellScript, IHasSpellEffects
 			WarriorOfElune.GetEffect(0).SetAmount(amount - 1);
 
 			if (amount == -102)
-				GetCaster().RemoveAurasDueToSpell(Spells.WARRIOR_OF_ELUNE);
+				GetCaster().RemoveAura(Spells.WARRIOR_OF_ELUNE);
 		}
 	}
 

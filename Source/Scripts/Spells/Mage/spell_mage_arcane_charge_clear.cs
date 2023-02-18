@@ -27,6 +27,6 @@ internal class spell_mage_arcane_charge_clear : SpellScript, IHasSpellEffects
 
 	private void RemoveArcaneCharge(uint effIndex)
 	{
-		GetHitUnit().RemoveAurasDueToSpell(MageSpells.ArcaneCharge);
+		GetHitUnit().RemoveAura(MageSpells.ArcaneCharge);
 	}
 }

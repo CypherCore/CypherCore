@@ -47,7 +47,7 @@ internal class spell_item_anger_capacitor : AuraScript, IHasAuraEffects
 		    motes.GetStackAmount() < _stackAmount)
 			return;
 
-		caster.RemoveAurasDueToSpell(ItemSpellIds.MoteOfAnger);
+		caster.RemoveAura(ItemSpellIds.MoteOfAnger);
 		var spellId = ItemSpellIds.ManifestAngerMainHand;
 		var player  = caster.ToPlayer();
 
@@ -61,6 +61,6 @@ internal class spell_item_anger_capacitor : AuraScript, IHasAuraEffects
 
 	private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		GetTarget().RemoveAurasDueToSpell(ItemSpellIds.MoteOfAnger);
+		GetTarget().RemoveAura(ItemSpellIds.MoteOfAnger);
 	}
 }

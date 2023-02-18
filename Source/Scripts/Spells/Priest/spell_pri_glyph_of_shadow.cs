@@ -29,7 +29,7 @@ public class spell_pri_glyph_of_shadow : AuraScript, IHasAuraEffects
 		if (caster == null)
 			return;
 
-		caster.RemoveAurasDueToSpell(PriestSpells.SHADOWFORM_VISUAL_WITHOUT_GLYPH);
+		caster.RemoveAura(PriestSpells.SHADOWFORM_VISUAL_WITHOUT_GLYPH);
 		caster.CastSpell(caster, PriestSpells.SHADOWFORM_VISUAL_WITH_GLYPH, true);
 	}
 
@@ -40,7 +40,7 @@ public class spell_pri_glyph_of_shadow : AuraScript, IHasAuraEffects
 		if (caster == null)
 			return;
 
-		caster.RemoveAurasDueToSpell(PriestSpells.SHADOWFORM_VISUAL_WITH_GLYPH);
+		caster.RemoveAura(PriestSpells.SHADOWFORM_VISUAL_WITH_GLYPH);
 		caster.CastSpell(caster, PriestSpells.SHADOWFORM_VISUAL_WITHOUT_GLYPH, true);
 	}
 

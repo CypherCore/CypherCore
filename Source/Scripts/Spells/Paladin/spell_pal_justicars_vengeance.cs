@@ -38,7 +38,7 @@ namespace Scripts.Spells.Paladin
 
             if (caster.HasAura(PaladinSpells.DivinePurposeTriggerred))
             {
-                caster.RemoveAurasDueToSpell(PaladinSpells.DivinePurposeTriggerred);
+                caster.RemoveAura(PaladinSpells.DivinePurposeTriggerred);
             }
 
             if (caster.HasAura(PaladinSpells.FIST_OF_JUSTICE_RETRI))

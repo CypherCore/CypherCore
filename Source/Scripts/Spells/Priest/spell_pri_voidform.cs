@@ -19,7 +19,7 @@ public class spell_pri_voidform : AuraScript, IHasAuraEffects
 		var caster = GetCaster();
 
 		if (caster != null)
-			caster.RemoveAurasDueToSpell(PriestSpells.LINGERING_INSANITY);
+			caster.RemoveAura(PriestSpells.LINGERING_INSANITY);
 	}
 
 	private void HandlePeriodic(AuraEffect aurEff)
@@ -72,7 +72,7 @@ public class spell_pri_voidform : AuraScript, IHasAuraEffects
 			return;
 
 		for (uint i = 0; i < 4; ++i)
-			caster.RemoveAurasDueToSpell(PriestSpells.VOIDFORM_TENTACLES + i);
+			caster.RemoveAura(PriestSpells.VOIDFORM_TENTACLES + i);
 
 		var haste = aurEff.GetAmount();
 		var mod   = new CastSpellExtraArgs();

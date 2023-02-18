@@ -90,6 +90,6 @@ public class spell_hun_dire_beast : SpellScript, ISpellAfterCast, ISpellOnHit
 
 		if (player != null)
 			if (player.HasAura(HunterSpells.WILD_CALL_AURA))
-				player.RemoveAurasDueToSpell(HunterSpells.WILD_CALL_AURA);
+				player.RemoveAura(HunterSpells.WILD_CALL_AURA);
 	}
 }

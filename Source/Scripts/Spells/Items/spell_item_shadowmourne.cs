@@ -52,6 +52,6 @@ internal class spell_item_shadowmourne : AuraScript, IAuraCheckProc, IHasAuraEff
 
 	private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		GetTarget().RemoveAurasDueToSpell(ItemSpellIds.ShadowmourneSoulFragment);
+		GetTarget().RemoveAura(ItemSpellIds.ShadowmourneSoulFragment);
 	}
 }

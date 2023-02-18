@@ -41,6 +41,6 @@ internal class spell_item_power_circle : AuraScript, IAuraCheckAreaTarget, IHasA
 
 	private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		GetTarget().RemoveAurasDueToSpell(ItemSpellIds.LimitlessPower);
+		GetTarget().RemoveAura(ItemSpellIds.LimitlessPower);
 	}
 }

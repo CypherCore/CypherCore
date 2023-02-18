@@ -691,7 +691,7 @@ namespace Game.Entities
             uint spellid = gameObj.GetSpellId();
             if (spellid != 0)
             {
-                RemoveAurasDueToSpell(spellid);
+                RemoveAura(spellid);
 
                 SpellInfo createBySpell = Global.SpellMgr.GetSpellInfo(spellid, GetMap().GetDifficultyID());
                 // Need activate spell use for owner

@@ -92,7 +92,7 @@ public class spell_dk_bone_shield : AuraScript, IHasAuraEffects
 			}
 			else
 			{
-				target.RemoveAurasDueToSpell(219788);
+				target.RemoveAura(219788);
 			}
 		}
 	}

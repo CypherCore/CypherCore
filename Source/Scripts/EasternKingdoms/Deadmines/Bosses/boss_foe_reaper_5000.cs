@@ -261,7 +261,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                 if (HarvestTarget != null)
                 {
                     //DoCast(HarvestTarget, IsHeroic() ? HARVEST_SWEEP_H : HARVEST_SWEEP);
-                    me.RemoveAurasDueToSpell(eSpell.HARVEST_AURA);
+                    me.RemoveAura(eSpell.HARVEST_AURA);
                     _events.ScheduleEvent(BossEvents.EVENT_START_ATTACK, TimeSpan.FromMilliseconds(1000));
                 }
             }
@@ -309,12 +309,12 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                         me.RemoveUnitFlag(UnitFlags.NonAttackable);
                         me.RemoveUnitFlag(UnitFlags.ImmuneToPc);
                         me.RemoveUnitFlag(UnitFlags.Stunned);
-                        me.RemoveAurasDueToSpell(eSpell.ENERGIZED);
+                        me.RemoveAura(eSpell.ENERGIZED);
                         _events.ScheduleEvent(BossEvents.EVENT_SRO, TimeSpan.FromMilliseconds(1000));
                         break;
 
                     case BossEvents.EVENT_SRO:
-                        me.RemoveAurasDueToSpell(DMSharedSpells.OFFLINE);
+                        me.RemoveAura(DMSharedSpells.OFFLINE);
 
                         Player victim = me.FindNearestPlayer(40.0f);
                         if (victim != null)
@@ -324,7 +324,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                         break;
 
                     case BossEvents.EVENT_START_ATTACK:
-                        me.RemoveAurasDueToSpell(eSpell.HARVEST_AURA);
+                        me.RemoveAura(eSpell.HARVEST_AURA);
                         me.SetSpeed(UnitMoveType.Run, 2.0f);
                         Player victim2 = me.FindNearestPlayer(40.0f);
                         if (victim2 != null)

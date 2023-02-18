@@ -288,7 +288,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                                 if (razor)
                                 {
                                     SetData(BWLMisc.DataEggEvent, (uint)EncounterState.Done);
-                                    razor.RemoveAurasDueToSpell(42013); // MindControl
+                                    razor.RemoveAura(42013); // MindControl
                                     DoRemoveAurasDueToSpellOnPlayers(42013, true, true);
                                 }
 

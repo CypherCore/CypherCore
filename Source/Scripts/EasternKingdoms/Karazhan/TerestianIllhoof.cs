@@ -66,11 +66,11 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
                                 });
 
             _scheduler.Schedule(TimeSpan.FromSeconds(3),
-                                task =>
+                                (Action<Framework.Dynamic.TaskContext>)(                                task =>
                                 {
-                                    me.RemoveAurasDueToSpell(SpellIds.BrokenPact);
+                                    me.RemoveAura(SpellIds.BrokenPact);
                                     DoCastAOE(SpellIds.SummonImp, new CastSpellExtraArgs(true));
-                                });
+                                }));
 
             _scheduler.Schedule(TimeSpan.FromSeconds(30),
                                 task =>
@@ -108,11 +108,11 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
         {
             if (spellInfo.Id == SpellIds.BrokenPact)
                 _scheduler.Schedule(TimeSpan.FromSeconds(32),
-                                    task =>
+                                    (Action<Framework.Dynamic.TaskContext>)(                                    task =>
                                     {
-                                        me.RemoveAurasDueToSpell(SpellIds.BrokenPact);
+                                        me.RemoveAura(SpellIds.BrokenPact);
                                         DoCastAOE(SpellIds.SummonImp, new CastSpellExtraArgs(true));
-                                    });
+                                    }));
         }
 
         public override void KilledUnit(Unit victim)
@@ -187,7 +187,7 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
             Unit sacrifice = Global.ObjAccessor.GetUnit(me, _sacrificeGUID);
 
             if (sacrifice)
-                sacrifice.RemoveAurasDueToSpell(SpellIds.Sacrifice);
+                sacrifice.RemoveAura(SpellIds.Sacrifice);
         }
     }
 

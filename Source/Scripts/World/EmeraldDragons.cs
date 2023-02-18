@@ -410,7 +410,7 @@ namespace Scripts.World.EmeraldDragons
 
         public override void Reset()
         {
-            me.RemoveAurasDueToSpell(SpellIds.Shade);
+            me.RemoveAura(SpellIds.Shade);
 
             Initialize();
             base.Reset();
@@ -483,7 +483,7 @@ namespace Scripts.World.EmeraldDragons
                     _banished = false;
 
                     me.RemoveUnitFlag(UnitFlags.Uninteractible | UnitFlags.NonAttackable);
-                    me.RemoveAurasDueToSpell(SpellIds.Shade);
+                    me.RemoveAura(SpellIds.Shade);
                     me.SetReactState(ReactStates.Aggressive);
                 }
                 // _banishtimer has not expired, and we still have active shades:

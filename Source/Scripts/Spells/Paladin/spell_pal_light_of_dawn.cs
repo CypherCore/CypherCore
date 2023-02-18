@@ -36,7 +36,7 @@ namespace Scripts.Spells.Paladin
 
                 if (caster.HasAura(PaladinSpells.DIVINE_PURPOSE_HOLY_AURA_2))
                 {
-                    caster.RemoveAurasDueToSpell(PaladinSpells.DIVINE_PURPOSE_HOLY_AURA_2);
+                    caster.RemoveAura(PaladinSpells.DIVINE_PURPOSE_HOLY_AURA_2);
                 }
             }
         }

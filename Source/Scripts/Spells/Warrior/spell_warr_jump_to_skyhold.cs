@@ -40,7 +40,7 @@ namespace Scripts.Spells.Warrior
 				arrivalCast.Target  = caster.GetGUID();
 				caster.GetMotionMaster().MoveJump(pos_x, pos_y, pos_z, caster.GetOrientation(), 20.0f, 20.0f, EventId.Jump, false, arrivalCast);
 
-				caster.RemoveAurasDueToSpell(WarriorSpells.JUMP_TO_SKYHOLD_AURA);
+				caster.RemoveAura(WarriorSpells.JUMP_TO_SKYHOLD_AURA);
 			}
 		}
 

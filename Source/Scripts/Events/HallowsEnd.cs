@@ -106,7 +106,7 @@ namespace Scripts.m_Events.HallowsEnd
         private void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             uint spell = GetTarget().GetNativeGender() == Gender.Female ? SpellIds.CandyFemaleDefiasPirate : SpellIds.CandyMaleDefiasPirate;
-            GetTarget().RemoveAurasDueToSpell(spell);
+            GetTarget().RemoveAura(spell);
         }
     }
 

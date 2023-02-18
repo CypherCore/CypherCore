@@ -114,7 +114,7 @@ namespace Scripts.Pets
 
             private void HandleScriptEffect(uint effIndex)
             {
-                GetHitUnit().RemoveAurasDueToSpell(SpellIds.LichPetAura);
+                GetHitUnit().RemoveAura(SpellIds.LichPetAura);
             }
         }
 

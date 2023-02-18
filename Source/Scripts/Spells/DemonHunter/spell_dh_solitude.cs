@@ -47,7 +47,7 @@ public class spell_dh_solitude : AuraScript, IHasAuraEffects
 		if (allies.Count == 0 && !caster.HasAura(DemonHunterSpells.SOLITUDE_BUFF))
 			caster.CastSpell(caster, DemonHunterSpells.SOLITUDE_BUFF, true);
 		else if (allies.Count > 0)
-			caster.RemoveAurasDueToSpell(DemonHunterSpells.SOLITUDE_BUFF);
+			caster.RemoveAura(DemonHunterSpells.SOLITUDE_BUFF);
 	}
 
 	public override void Register()

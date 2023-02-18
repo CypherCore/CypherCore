@@ -19,7 +19,7 @@ public class spell_mage_enhanced_pyrotechnics : AuraScript
 			if ((eventInfo.GetHitMask() & ProcFlagsHit.Critical) != 0)
 			{
 				if (caster.HasAura(MageSpells.ENHANCED_PYROTECHNICS_AURA))
-					caster.RemoveAurasDueToSpell(MageSpells.ENHANCED_PYROTECHNICS_AURA);
+					caster.RemoveAura(MageSpells.ENHANCED_PYROTECHNICS_AURA);
 
 				return false;
 			}

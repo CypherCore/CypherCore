@@ -23,7 +23,7 @@ public class spell_mage_pyroblast : SpellScript, IHasSpellEffects
 
 		if (caster.HasAura(MageSpells.HOT_STREAK))
 		{
-			caster.RemoveAurasDueToSpell(MageSpells.HOT_STREAK);
+			caster.RemoveAura(MageSpells.HOT_STREAK);
 
 			if (caster.HasAura(MageSpells.PYROMANIAC))
 			{
@@ -33,7 +33,7 @@ public class spell_mage_pyroblast : SpellScript, IHasSpellEffects
 					if (RandomHelper.randChance(pyromaniacEff0.GetAmount()))
 					{
 						if (caster.HasAura(MageSpells.HEATING_UP))
-							caster.RemoveAurasDueToSpell(MageSpells.HEATING_UP);
+							caster.RemoveAura(MageSpells.HEATING_UP);
 
 						caster.CastSpell(caster, MageSpells.HOT_STREAK, true);
 					}

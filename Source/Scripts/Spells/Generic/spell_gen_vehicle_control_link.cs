@@ -21,6 +21,6 @@ internal class spell_gen_vehicle_control_link : AuraScript, IHasAuraEffects
 
 	private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		GetTarget().RemoveAurasDueToSpell(GenericSpellIds.SiegeTankControl); //aurEff.GetAmount()
+		GetTarget().RemoveAura(GenericSpellIds.SiegeTankControl); //aurEff.GetAmount()
 	}
 }

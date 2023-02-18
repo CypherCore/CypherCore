@@ -796,7 +796,7 @@ namespace Game.Spells
                 if (aurEff != null)
                 {
                     damageAmount += aurEff.GetAmount();
-                    unitCaster.RemoveAurasDueToSpell(45062);
+                    unitCaster.RemoveAura(45062);
                 }
 
                 addhealth += damageAmount;
@@ -2998,7 +2998,7 @@ namespace Game.Spells
                 if (activeGlyphBindableSpells.Contains(m_misc.SpellId))
                 {
                     replacedGlyph = i;
-                    player.RemoveAurasDueToSpell(CliDB.GlyphPropertiesStorage.LookupByKey(glyphs[i]).SpellID);
+                    player.RemoveAura(CliDB.GlyphPropertiesStorage.LookupByKey(glyphs[i]).SpellID);
                     break;
                 }
             }
@@ -4702,7 +4702,7 @@ namespace Game.Spells
             if (unitTarget == null)
                 return;
             // there may be need of specifying casterguid of removed auras
-            unitTarget.RemoveAurasDueToSpell(effectInfo.TriggerSpell);
+            unitTarget.RemoveAura(effectInfo.TriggerSpell);
         }
 
         [SpellEffectHandler(SpellEffectName.DamageFromMaxHealthPCT)]

@@ -744,7 +744,7 @@ namespace Game.AI
                                 if (aur != null)
                                     aur.ModCharges(-(int)e.Action.removeAura.charges, AuraRemoveMode.Expire);
                             }
-                            target.ToUnit().RemoveAurasDueToSpell(e.Action.removeAura.spell);
+                            target.ToUnit().RemoveAura(e.Action.removeAura.spell);
                         }
                         else
                             target.ToUnit().RemoveAllAuras();

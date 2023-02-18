@@ -113,15 +113,15 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Garr
             // Separation Anxiety - Periodically check if Garr is nearby
             // ...and enrage if he is not.
             _scheduler.Schedule(TimeSpan.FromSeconds(3),
-                                task =>
+                                (Action<Framework.Dynamic.TaskContext>)(                                task =>
                                 {
                                     if (!me.FindNearestCreature(MCCreatureIds.Garr, 20.0f))
                                         DoCastSelf(SpellIds.SeparationAnxiety);
                                     else if (me.HasAura(SpellIds.SeparationAnxiety))
-                                        me.RemoveAurasDueToSpell(SpellIds.SeparationAnxiety);
+                                        me.RemoveAura(SpellIds.SeparationAnxiety);
 
                                     task.Repeat();
-                                });
+                                }));
         }
     }
 }

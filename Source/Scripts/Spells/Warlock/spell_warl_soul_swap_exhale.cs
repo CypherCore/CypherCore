@@ -77,11 +77,11 @@ namespace Scripts.Spells.Warlock
 				GetCaster().AddAura(itr, GetHitUnit());
 
 				if (!hasGlyph && swapSource)
-					swapSource.RemoveAurasDueToSpell(itr);
+					swapSource.RemoveAura(itr);
 			}
 
 			// Remove Soul Swap Exhale buff
-			GetCaster().RemoveAurasDueToSpell(WarlockSpells.SOUL_SWAP_OVERRIDE);
+			GetCaster().RemoveAura(WarlockSpells.SOUL_SWAP_OVERRIDE);
 
 			if (hasGlyph) // Add a cooldown on Soul Swap if caster has the glyph
 				GetCaster().CastSpell(GetCaster(), WarlockSpells.SOUL_SWAP_CD_MARKER, false);

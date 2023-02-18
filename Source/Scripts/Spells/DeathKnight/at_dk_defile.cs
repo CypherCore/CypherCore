@@ -29,6 +29,6 @@ public class at_dk_defile : AreaTriggerAI
 
 	public override void OnUnitExit(Unit unit)
 	{
-		unit.RemoveAurasDueToSpell(DeathKnightSpells.DEFILE_DUMMY);
+		unit.RemoveAura(DeathKnightSpells.DEFILE_DUMMY);
 	}
 }

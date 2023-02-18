@@ -342,7 +342,7 @@ namespace Game.Entities
             RemoveSpecializationSpells();
 
             foreach (uint glyphId in GetGlyphs(GetActiveTalentGroup()))
-                RemoveAurasDueToSpell(CliDB.GlyphPropertiesStorage.LookupByKey(glyphId).SpellID);
+                RemoveAura(CliDB.GlyphPropertiesStorage.LookupByKey(glyphId).SpellID);
 
             SetActiveTalentGroup(spec.OrderIndex);
             SetPrimarySpecialization(spec.Id);

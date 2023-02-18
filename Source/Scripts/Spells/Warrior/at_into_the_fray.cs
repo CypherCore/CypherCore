@@ -43,7 +43,7 @@ namespace Scripts.Spells.Warrior
 				}
 				else
 				{
-					caster.RemoveAurasDueToSpell(WarriorSpells.INTO_THE_FRAY);
+					caster.RemoveAura(WarriorSpells.INTO_THE_FRAY);
 				}
 			}
 			else

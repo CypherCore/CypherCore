@@ -31,6 +31,6 @@ internal class spell_q11396_11399_scourging_crystal_controller_dummy : SpellScri
 
 		if (target)
 			if (target.IsTypeId(TypeId.Unit))
-				target.RemoveAurasDueToSpell(QuestSpellIds.ForceShieldArcanePurpleX3);
+				target.RemoveAura(QuestSpellIds.ForceShieldArcanePurpleX3);
 	}
 }

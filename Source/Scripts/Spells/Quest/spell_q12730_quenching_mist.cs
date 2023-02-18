@@ -26,6 +26,6 @@ internal class spell_q12730_quenching_mist : AuraScript, IHasAuraEffects
 
 	private void HandleEffectPeriodic(AuraEffect aurEff)
 	{
-		GetTarget().RemoveAurasDueToSpell(QuestSpellIds.FlickeringFlames);
+		GetTarget().RemoveAura(QuestSpellIds.FlickeringFlames);
 	}
 }

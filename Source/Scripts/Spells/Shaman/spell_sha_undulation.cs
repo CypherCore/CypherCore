@@ -28,7 +28,7 @@ namespace Scripts.Spells.Shaman
 			else
 			{
 				variableStore.Set("spell_sha_undulation", count + 1);
-				GetCaster().RemoveAurasDueToSpell(ShamanSpells.UNDULATION_PROC);
+				GetCaster().RemoveAura(ShamanSpells.UNDULATION_PROC);
 			}
 		}
 	}

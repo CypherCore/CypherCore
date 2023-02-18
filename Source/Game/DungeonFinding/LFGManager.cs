@@ -1390,7 +1390,7 @@ namespace Game.DungeonFinding
                     continue;
                 }
 
-                player.RemoveAurasDueToSpell(SharedConst.LFGSpellDungeonCooldown);
+                player.RemoveAura(SharedConst.LFGSpellDungeonCooldown);
 
                 LFGDungeonData dungeonDone = GetLFGDungeon(dungeonId);
                 uint mapId = dungeonDone != null ? dungeonDone.map : 0;

@@ -4014,7 +4014,7 @@ namespace Game.Entities
                 if (item != null)
                     RemoveAurasDueToItemSpell(spellInfo.Id, item.GetGUID());  // un-apply all spells, not only at-equipped
                 else
-                    RemoveAurasDueToSpell(spellInfo.Id);           // un-apply spell (item set case)
+                    RemoveAura(spellInfo.Id);           // un-apply spell (item set case)
             }
         }
 
@@ -5593,7 +5593,7 @@ namespace Game.Entities
                             CastSpell(this, PlayerConst.SpellIdHeartEssenceActionBarOverride, args);
                         }
                         else
-                            RemoveAurasDueToSpell(PlayerConst.SpellIdHeartEssenceActionBarOverride);
+                            RemoveAura(PlayerConst.SpellIdHeartEssenceActionBarOverride);
                     }
                 }
             }

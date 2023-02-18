@@ -357,7 +357,7 @@ namespace Game.BattleGrounds.Zones
                     {
                         Player p = Global.ObjAccessor.FindPlayer(pair.Key);
                         if (p)
-                            p.RemoveAurasDueToSpell(BattlegroundConst.SpellPreparation);
+                            p.RemoveAura(BattlegroundConst.SpellPreparation);
                     }
                 }
                 if (TotalTime >= 30000)

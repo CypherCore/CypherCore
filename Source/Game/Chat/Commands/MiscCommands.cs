@@ -1886,7 +1886,7 @@ namespace Game.Chat
                 // Remove Freeze spell (allowing movement and spells)
                 // Player Flags + Neutral faction removal is now
                 // handled on the Freeze Spell AuraScript (OnRemove)
-                player.RemoveAurasDueToSpell(9454);
+                player.RemoveAura(9454);
             }
             else
             {

@@ -31,7 +31,7 @@ public class playerscript_mage_arcane : ScriptObjectAutoAdd, IPlayerOnAfterModif
 		}
 		else
 		{
-			player.RemoveAurasDueToSpell(MageSpells.ARCANE_CHARGE);
+			player.RemoveAura(MageSpells.ARCANE_CHARGE);
 		}
 
 		if (player.HasAura(MageSpells.RULE_OF_THREES))

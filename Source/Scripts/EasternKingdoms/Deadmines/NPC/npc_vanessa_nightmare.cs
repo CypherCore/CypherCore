@@ -467,8 +467,8 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
                                 foreach (var item in players)
                                 {
-                                    item.RemoveAurasDueToSpell(DMSharedSpells.NIGHTMARE_ELIXIR);
-                                    item.RemoveAurasDueToSpell(boss_vanessa_vancleef.Spells.EFFECT_1);
+                                    item.RemoveAura(DMSharedSpells.NIGHTMARE_ELIXIR);
+                                    item.RemoveAura(boss_vanessa_vancleef.Spells.EFFECT_1);
                                     item.TextEmote(boss_vanessa_vancleef.VANESSA_NIGHTMARE_13, null, true);
                                 }
                                 me.SummonCreature(DMCreatures.NPC_VANESSA_BOSS, -79.44965f, -819.8351f, 39.89838f, 0.01745329f, TempSummonType.CorpseTimedDespawn, TimeSpan.FromMilliseconds(120000));

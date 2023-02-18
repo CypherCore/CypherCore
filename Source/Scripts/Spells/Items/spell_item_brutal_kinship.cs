@@ -26,6 +26,6 @@ internal class spell_item_brutal_kinship : AuraScript, IHasAuraEffects
 
 	private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
 	{
-		GetTarget().RemoveAurasDueToSpell(effect.GetSpellEffectInfo().TriggerSpell);
+		GetTarget().RemoveAura(effect.GetSpellEffectInfo().TriggerSpell);
 	}
 }

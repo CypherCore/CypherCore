@@ -39,7 +39,7 @@ namespace Scripts.Spells.Paladin
             caster.CastSpell(caster, PaladinSpells.LIGHT_OF_THE_MARTYR_DAMAGE, (int)dmg);
 
             if (caster.HasAura(PaladinSpells.FERVENT_MARTYR_BUFF))
-                caster.RemoveAurasDueToSpell(PaladinSpells.FERVENT_MARTYR_BUFF);
+                caster.RemoveAura(PaladinSpells.FERVENT_MARTYR_BUFF);
         }
 
         public override void Register()

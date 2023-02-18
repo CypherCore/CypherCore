@@ -26,7 +26,10 @@ namespace Scripts.Spells.Warlock
 		public const uint COMPOUNDING_HORROR_DAMAGE = 231489;
 		public const uint CONFLAGRATE = 17962;
 		public const uint CONFLAGRATE_FIRE_AND_BRIMSTONE = 108685;
-		public const uint CONTAGION = 196105;
+		public const uint CONFLAGRATION_OF_CHAOS = 387108;
+        public const uint CONFLAGRATION_OF_CHAOS_CONFLAGRATE = 387109;
+        public const uint CONFLAGRATION_OF_CHAOS_SHADOWBURN = 387110;
+        public const uint CONTAGION = 196105;
 		public const uint CONTAGION_DEBUFF = 233494;
 		public const uint CORRUPTION = 172;
 		public const uint CORRUPTION_DAMAGE = 146739;

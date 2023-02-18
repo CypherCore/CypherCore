@@ -38,7 +38,7 @@ public class spell_druid_earthwarden_triggered : AuraScript, IHasAuraEffects
 			var earthwarden = Global.SpellMgr.AssertSpellInfo(Spells.EARTHWARDEN, Difficulty.None);
 
 			absorbAmount = MathFunctions.CalculatePct(dmgInfo.GetDamage(), earthwarden.GetEffect(0).BasePoints);
-			GetCaster().RemoveAurasDueToSpell(Spells.EARTHWARDEN_TRIGGERED);
+			GetCaster().RemoveAura(Spells.EARTHWARDEN_TRIGGERED);
 		}
 	}
 

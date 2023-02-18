@@ -31,7 +31,7 @@ namespace Scripts.Spells.Warlock
 
 			SetHitDamage(damage * stacks);
 
-			caster.RemoveAurasDueToSpell(WarlockSpells.COMPOUNDING_HORROR);
+			caster.RemoveAura(WarlockSpells.COMPOUNDING_HORROR);
 		}
 
 		public override void Register()

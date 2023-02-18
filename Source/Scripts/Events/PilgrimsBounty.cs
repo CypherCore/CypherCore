@@ -208,7 +208,7 @@ namespace Scripts.m_Events.PilgrimsBounty
             if (aura != null)
             {
                 if (aura.GetStackAmount() == 1)
-                    caster.RemoveAurasDueToSpell((uint)aura.GetSpellInfo().GetEffect(0).CalcValue());
+                    caster.RemoveAura((uint)aura.GetSpellInfo().GetEffect(0).CalcValue());
 
                 aura.ModStackAmount(-1);
             }
@@ -263,7 +263,7 @@ namespace Scripts.m_Events.PilgrimsBounty
                     case 40:
                         caster.GetAI().Talk(EmoteIds.TurkeyTriumph, target);
                         target.CastSpell(target, SpellIds.KillCounterVisualMax, true);
-                        target.RemoveAurasDueToSpell(GetSpellInfo().Id);
+                        target.RemoveAura(GetSpellInfo().Id);
 
                         break;
                     default:
@@ -328,11 +328,11 @@ namespace Scripts.m_Events.PilgrimsBounty
                 (pie != null && pie.GetStackAmount() == 5))
             {
                 target.CastSpell(target, SpellIds.TheSpiritOfSharing, true);
-                target.RemoveAurasDueToSpell(SpellIds.TurkeyHelpins);
-                target.RemoveAurasDueToSpell(SpellIds.CranberryHelpins);
-                target.RemoveAurasDueToSpell(SpellIds.StuffingHelpins);
-                target.RemoveAurasDueToSpell(SpellIds.SweetPotatoHelpins);
-                target.RemoveAurasDueToSpell(SpellIds.PieHelpins);
+                target.RemoveAura(SpellIds.TurkeyHelpins);
+                target.RemoveAura(SpellIds.CranberryHelpins);
+                target.RemoveAura(SpellIds.StuffingHelpins);
+                target.RemoveAura(SpellIds.SweetPotatoHelpins);
+                target.RemoveAura(SpellIds.PieHelpins);
             }
         }
     }
@@ -502,7 +502,7 @@ namespace Scripts.m_Events.PilgrimsBounty
         private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            target.RemoveAurasDueToSpell((uint)aurEff.GetAmount());
+            target.RemoveAura((uint)aurEff.GetAmount());
             HandlePlate(target, false);
         }
 
@@ -527,7 +527,7 @@ namespace Scripts.m_Events.PilgrimsBounty
                             if (apply)
                                 target.CastSpell(plate, _triggeredSpellId, true);
                             else
-                                plate.RemoveAurasDueToSpell(_triggeredSpellId);
+                                plate.RemoveAura(_triggeredSpellId);
                         }
                     }
                 }

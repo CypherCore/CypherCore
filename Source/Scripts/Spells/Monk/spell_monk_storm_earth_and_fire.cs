@@ -24,7 +24,7 @@ public class spell_monk_storm_earth_and_fire : AuraScript, IHasAuraEffects
 
 	private void HandleRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
-		GetTarget().RemoveAurasDueToSpell(StormEarthAndFireSpells.SEF_STORM_VISUAL);
+		GetTarget().RemoveAura(StormEarthAndFireSpells.SEF_STORM_VISUAL);
 
 		var fireSpirit = GetTarget().GetSummonedCreatureByEntry(StormEarthAndFireSpells.NPC_FIRE_SPIRIT);
 

@@ -30,6 +30,6 @@ internal class spell_gen_tournament_pennant : AuraScript, IHasAuraEffects
 
 		if (caster)
 			if (!caster.GetVehicleBase())
-				caster.RemoveAurasDueToSpell(GetId());
+				caster.RemoveAura(GetId());
 	}
 }

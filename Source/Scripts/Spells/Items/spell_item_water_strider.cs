@@ -26,6 +26,6 @@ internal class spell_item_water_strider : AuraScript, IHasAuraEffects
 
 	private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
 	{
-		GetTarget().RemoveAurasDueToSpell(GetSpellInfo().GetEffect(1).TriggerSpell);
+		GetTarget().RemoveAura(GetSpellInfo().GetEffect(1).TriggerSpell);
 	}
 }

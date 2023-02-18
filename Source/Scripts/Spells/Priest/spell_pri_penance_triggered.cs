@@ -30,7 +30,7 @@ public class spell_pri_penance_triggered : AuraScript, IHasAuraEffects
 		if (caster != null)
 			if (caster.HasAura(PriestSpells.POWER_OF_THE_DARK_SIDE_AURA))
 			{
-				caster.RemoveAurasDueToSpell(PriestSpells.POWER_OF_THE_DARK_SIDE_AURA);
+				caster.RemoveAura(PriestSpells.POWER_OF_THE_DARK_SIDE_AURA);
 				caster.CastSpell(caster, PriestSpells.POWER_OF_THE_DARK_SIDE_MARKER, true);
 			}
 	}

@@ -32,7 +32,7 @@ namespace Scripts.Spells.Druid
 
 		private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 		{
-			GetTarget().RemoveAurasDueToSpell(DruidSpellIds.LunarInspirationOverride);
+			GetTarget().RemoveAura(DruidSpellIds.LunarInspirationOverride);
 		}
 	}
 }

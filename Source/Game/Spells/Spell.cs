@@ -22,7 +22,6 @@ using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IPlayer;
 using Game.Scripting.Interfaces.ISpell;
-using static Game.AI.SmartEvent;
 
 namespace Game.Spells
 {
@@ -2315,7 +2314,7 @@ namespace Game.Spells
                 foreach (var id in spellTriggered)
                 {
                     if (id < 0)
-                        unit.RemoveAurasDueToSpell((uint)-id);
+                        unit.RemoveAura((uint)-id);
                     else
                         unit.CastSpell(unit, (uint)id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(m_caster.GetGUID()).SetTriggeringSpell(this));
                 }
@@ -2900,7 +2899,7 @@ namespace Game.Spells
                     {
                         unitCaster = m_caster.ToUnit();
                         if (unitCaster != null)
-                            unitCaster.RemoveAurasDueToSpell((uint)-spellId);
+                            unitCaster.RemoveAura((uint)-spellId);
                     }
                     else
                         m_caster.CastSpell(m_targets.GetUnitTarget() ?? m_caster, (uint)spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetTriggeringSpell(this));

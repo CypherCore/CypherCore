@@ -44,7 +44,7 @@ namespace Game.Arenas
             {
                 Player player = _GetPlayer(pair, "BattlegroundDS::StartingEventOpenDoors");
                 if (player)
-                    player.RemoveAurasDueToSpell(DalaranSewersSpells.DemonicCircle);
+                    player.RemoveAura(DalaranSewersSpells.DemonicCircle);
             }
         }
 
@@ -58,7 +58,7 @@ namespace Game.Arenas
                 case 5347:
                 case 5348:
                     // Remove effects of Demonic Circle Summon
-                    player.RemoveAurasDueToSpell(DalaranSewersSpells.DemonicCircle);
+                    player.RemoveAura(DalaranSewersSpells.DemonicCircle);
 
                     // Someone has get back into the pipes and the knockback has already been performed,
                     // so we reset the knockback count for kicking the player again into the arena.

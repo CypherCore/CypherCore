@@ -28,7 +28,7 @@ namespace Scripts.Spells.Paladin
 
             if (caster.HasAura(PaladinSpells.GRAND_CRUSADER_PROC))
             {
-                caster.RemoveAurasDueToSpell(PaladinSpells.GRAND_CRUSADER_PROC);
+                caster.RemoveAura(PaladinSpells.GRAND_CRUSADER_PROC);
             }
 
             int damage = GetHitDamage();

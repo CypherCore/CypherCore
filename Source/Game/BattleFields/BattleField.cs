@@ -873,7 +873,7 @@ namespace Game.BattleFields
 
             Player player = Global.ObjAccessor.FindPlayer(playerGuid);
             if (player)
-                player.RemoveAurasDueToSpell(BattlegroundConst.SpellWaitingForResurrect);
+                player.RemoveAura(BattlegroundConst.SpellWaitingForResurrect);
         }
 
         public void Resurrect()

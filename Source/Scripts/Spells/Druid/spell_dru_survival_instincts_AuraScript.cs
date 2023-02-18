@@ -32,7 +32,7 @@ namespace Scripts.Spells.Druid
 
 		private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 		{
-			GetTarget().RemoveAurasDueToSpell(DruidSpellIds.SurvivalInstincts);
+			GetTarget().RemoveAura(DruidSpellIds.SurvivalInstincts);
 		}
 	}
 }

@@ -38,7 +38,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
         {
             DoZoneInCombat();
             me.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc);
-            me.RemoveAurasDueToSpell(DMSharedSpells.OFFLINE);
+            me.RemoveAura(DMSharedSpells.OFFLINE);
             _events.ScheduleEvent(boss_vanessa_vancleef.BossEvents.EVENT_SPIRIT_STRIKE, TimeSpan.FromMilliseconds(6000));
         }
 

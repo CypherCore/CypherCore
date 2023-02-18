@@ -42,7 +42,7 @@ namespace Scripts.Spells.Warrior
 					caster.SetPower(PowerType.Rage, m_powerTaken + 20);
 
 			caster.VariableStorage.Remove("spell_warr_execute_damages::multiplier");
-			caster.RemoveAurasDueToSpell(WarriorSpells.SUDDEN_DEATH);
+			caster.RemoveAura(WarriorSpells.SUDDEN_DEATH);
 		}
 	}
 }

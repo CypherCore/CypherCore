@@ -61,6 +61,6 @@ internal class spell_rog_killing_spree_AuraScript : AuraScript, IHasAuraEffects
 
 	private void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		GetTarget().RemoveAurasDueToSpell(RogueSpells.KillingSpreeDmgBuff);
+		GetTarget().RemoveAura(RogueSpells.KillingSpreeDmgBuff);
 	}
 }

@@ -303,7 +303,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
                 case CreatureIds.Decimator:
                 case CreatureIds.Annihilator:
                     me.InterruptNonMeleeSpells(true);
-                    me.RemoveAurasDueToSpell(SpellIds.ApocalypseDrive);
+                    me.RemoveAura(SpellIds.ApocalypseDrive);
                     me.RemoveUnitFlag(UnitFlags.Uninteractible);
 
                     if (summon.GetEntry() == CreatureIds.Annihilator)
@@ -475,7 +475,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             Unit annihilation = at.GetCaster();
 
             if (annihilation)
-                annihilation.RemoveAurasDueToSpell(SpellIds.AnnihilationWarning);
+                annihilation.RemoveAura(SpellIds.AnnihilationWarning);
         }
 
         public override void OnUnitExit(Unit unit)

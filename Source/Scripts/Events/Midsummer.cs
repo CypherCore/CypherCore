@@ -161,7 +161,7 @@ namespace Scripts.m_Events.Midsummer
 
         private void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            GetTarget().RemoveAurasDueToSpell(SpellIds.RibbonPolePeriodicVisual);
+            GetTarget().RemoveAura(SpellIds.RibbonPolePeriodicVisual);
         }
 
         private void PeriodicTick(AuraEffect aurEff)

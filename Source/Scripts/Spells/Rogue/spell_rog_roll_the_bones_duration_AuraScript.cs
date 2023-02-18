@@ -28,7 +28,7 @@ public class spell_rog_roll_the_bones_duration_AuraScript : AuraScript, IHasAura
 
 		if (rtb == null)
 		{
-			caster.RemoveAurasDueToSpell(GetSpellInfo().Id); //sometimes it remains on the caster after relog incorrectly.
+			caster.RemoveAura(GetSpellInfo().Id); //sometimes it remains on the caster after relog incorrectly.
 
 			return;
 		}

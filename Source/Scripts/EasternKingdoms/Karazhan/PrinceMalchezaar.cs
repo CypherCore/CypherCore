@@ -261,7 +261,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
                     ClearWeapons();
 
                     //remove thrash
-                    me.RemoveAurasDueToSpell(SpellIds.ThrashAura);
+                    me.RemoveAura(SpellIds.ThrashAura);
 
                     Talk(TextIds.SayAxeToss2);
 

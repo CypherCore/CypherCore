@@ -252,7 +252,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
 
             foreach (var item in players)
             {
-                item.RemoveAurasDueToSpell(eSpells.FOG_AURA);
+                item.RemoveAura(eSpells.FOG_AURA);
             }
 
         }
@@ -356,7 +356,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                     case BossEvents.EVENT_PHASE_TWO:
                         _events.CancelEvent(BossEvents.EVENT_GO_FOR_THROAT);
                         _events.CancelEvent(BossEvents.EVENT_SWIPE);
-                        me.RemoveAurasDueToSpell(eSpells.THIRST_FOR_BLOOD);
+                        me.RemoveAura(eSpells.THIRST_FOR_BLOOD);
                         me.SetVisible(false);
                         _events.ScheduleEvent(BossEvents.EVENT_FLEE_TO_FROG, TimeSpan.FromMilliseconds(100));
 

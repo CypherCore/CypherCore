@@ -419,7 +419,7 @@ namespace Game.BattleGrounds
                             // Correctly display EnemyUnitFrame
                             player.SetArenaFaction((byte)player.GetBGTeam());
 
-                            player.RemoveAurasDueToSpell(BattlegroundConst.SpellArenaPreparation);
+                            player.RemoveAura(BattlegroundConst.SpellArenaPreparation);
                             player.ResetAllPowers();
                             if (!player.IsGameMaster())
                             {
@@ -445,7 +445,7 @@ namespace Game.BattleGrounds
                         Player player = Global.ObjAccessor.FindPlayer(guid);
                         if (player)
                         {
-                            player.RemoveAurasDueToSpell(BattlegroundConst.SpellPreparation);
+                            player.RemoveAura(BattlegroundConst.SpellPreparation);
                             player.ResetAllPowers();
                         }
                     }
@@ -1315,20 +1315,20 @@ namespace Game.BattleGrounds
 
         public void RemovePlayerFromResurrectQueue(ObjectGuid player_guid)
         {
-            m_ReviveQueue.RemoveIfMatching((pair) =>
+            m_ReviveQueue.RemoveIfMatching((Func<KeyValuePair<ObjectGuid, ObjectGuid>, bool>)((pair) =>
             {
                 if (pair.Value == player_guid)
                 {
                     Player player = Global.ObjAccessor.FindPlayer(player_guid);
 
                     if (player)
-                        player.RemoveAurasDueToSpell(BattlegroundConst.SpellWaitingForResurrect);
+                        player.RemoveAura(BattlegroundConst.SpellWaitingForResurrect);
 
                     return true;
                 }
 
                 return false;
-            });
+            }));
         }
 
         public void RelocateDeadPlayers(ObjectGuid guideGuid)

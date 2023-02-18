@@ -16,7 +16,7 @@ public class DelayedAuraRemoveEvent : BasicEvent
 
 	public override bool Execute(ulong UnnamedParameter, uint UnnamedParameter2)
 	{
-		_owner.RemoveAurasDueToSpell(_spellId);
+		_owner.RemoveAura(_spellId);
 
 		return true;
 	}

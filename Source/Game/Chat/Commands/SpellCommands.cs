@@ -96,7 +96,7 @@ namespace Game.Chat
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo != null)
             {
-                target.RemoveAurasDueToSpell(spellInfo.Id);
+                target.RemoveAura(spellInfo.Id);
                 return true;
             }
 

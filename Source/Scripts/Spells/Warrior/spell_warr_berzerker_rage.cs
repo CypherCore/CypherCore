@@ -18,7 +18,7 @@ namespace Scripts.Spells.Warrior
 		private void HandleRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 		{
 			var caster = GetCaster();
-			caster.RemoveAurasDueToSpell(WarriorSpells.UNCHACKLED_FURY);
+			caster.RemoveAura(WarriorSpells.UNCHACKLED_FURY);
 		}
 
 		public override void Register()

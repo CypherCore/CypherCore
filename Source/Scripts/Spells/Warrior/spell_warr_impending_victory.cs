@@ -19,7 +19,7 @@ namespace Scripts.Spells.Warrior
 		{
 			var caster = GetCaster();
 			caster.CastSpell(caster, WarriorSpells.IMPENDING_VICTORY_HEAL, true);
-			caster.RemoveAurasDueToSpell(WarriorSpells.VICTORIOUS);
+			caster.RemoveAura(WarriorSpells.VICTORIOUS);
 		}
 	}
 }

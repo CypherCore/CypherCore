@@ -1241,7 +1241,7 @@ namespace Game.Spells
                 {
                     // some auras remove at aura remove
                     if (spellArea.flags.HasAnyFlag(SpellAreaFlag.AutoRemove) && !spellArea.IsFitToRequirements((Player)target, zone, area))
-                        target.RemoveAurasDueToSpell(spellArea.spellId);
+                        target.RemoveAura(spellArea.spellId);
                     // some auras applied at aura apply
                     else if (spellArea.flags.HasAnyFlag(SpellAreaFlag.AutoCast))
                     {
@@ -1278,7 +1278,7 @@ namespace Game.Spells
                         foreach (var spell in spellTriggered)
                         {
                             if (spell < 0)
-                                target.RemoveAurasDueToSpell((uint)-spell);
+                                target.RemoveAura((uint)-spell);
                             else if (removeMode != AuraRemoveMode.Death)
                                 target.CastSpell(target, (uint)spell, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
                                     .SetOriginalCaster(GetCasterGUID())
@@ -1434,7 +1434,7 @@ namespace Game.Spells
                                     if (apply)
                                         owner.CastSpell(owner, 34471, new CastSpellExtraArgs(GetEffect(0)));
                                     else
-                                        owner.RemoveAurasDueToSpell(34471);
+                                        owner.RemoveAura(34471);
                                 }
                             }
                             break;
@@ -1467,7 +1467,7 @@ namespace Game.Spells
                                 if (apply)
                                     target.CastSpell(target, 71166, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(GetCastId()));
                                 else
-                                    target.RemoveAurasDueToSpell(71166);
+                                    target.RemoveAura(71166);
                             }
                             break;
                     }
@@ -1486,9 +1486,9 @@ namespace Game.Spells
                         else
                         {
                             if (target != caster)
-                                caster.RemoveAurasDueToSpell(GetId());
+                                caster.RemoveAura(GetId());
                             else
-                                caster.RemoveAurasDueToSpell(100001);
+                                caster.RemoveAura(100001);
                         }
                     }
                     break;

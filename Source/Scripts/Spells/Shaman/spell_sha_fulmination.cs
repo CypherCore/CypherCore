@@ -77,7 +77,7 @@ namespace Scripts.Spells.Shaman
 						damage = target.SpellDamageBonusTaken(caster, triggerSpell, damage, DamageEffectType.SpellDirect);
 
 						caster.CastSpell(target, ShamanSpells.FULMINATION, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)(int)damage));
-						caster.RemoveAurasDueToSpell(ShamanSpells.FULMINATION_INFO);
+						caster.RemoveAura(ShamanSpells.FULMINATION_INFO);
 
 						var t18_4p = caster.GetAuraEffect(ShamanSpells.ITEM_T18_ELEMENTAL_4P_BONUS, 0);
 

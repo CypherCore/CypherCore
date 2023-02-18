@@ -615,7 +615,7 @@ namespace Game.Maps
             if (!player)
                 return;
 
-            player.RemoveAurasDueToSpell(spell);
+            player.RemoveAura(spell);
 
             if (!includePets)
                 return;
@@ -627,7 +627,7 @@ namespace Game.Maps
                 {
                     Creature summon = instance.GetCreature(summonGUID);
                     if (summon != null)
-                        summon.RemoveAurasDueToSpell(spell);
+                        summon.RemoveAura(spell);
                 }
             }
 
@@ -639,7 +639,7 @@ namespace Game.Maps
                 Unit controlled = player.m_Controlled[i];
                 if (controlled != null)
                     if (controlled.IsInWorld && controlled.IsCreature())
-                        controlled.RemoveAurasDueToSpell(spell);
+                        controlled.RemoveAura(spell);
             }
         }
 

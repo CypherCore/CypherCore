@@ -58,7 +58,7 @@ namespace Scripts.Pets
                 Unit owner = me.GetOwner();
 
                 if (owner)
-                    owner.RemoveAurasDueToSpell(SpellIds.SummonGargoyle2);
+                    owner.RemoveAura(SpellIds.SummonGargoyle2);
             }
 
             // Fly away when dismissed

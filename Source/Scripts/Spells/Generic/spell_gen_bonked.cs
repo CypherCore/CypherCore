@@ -31,7 +31,7 @@ internal class spell_gen_bonked : SpellScript, IHasSpellEffects
 				return;
 
 			target.CastSpell(target, GenericSpellIds.FormSwordDefeat, true);
-			target.RemoveAurasDueToSpell(GenericSpellIds.Bonked);
+			target.RemoveAura(GenericSpellIds.Bonked);
 
 			aura = target.GetAura(GenericSpellIds.Onguard);
 

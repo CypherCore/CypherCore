@@ -67,8 +67,8 @@ internal class spell_rog_stealth : AuraScript, IHasAuraEffects
 		// Premeditation
 		target.RemoveAura(RogueSpells.PremeditationAura);
 
-		target.RemoveAurasDueToSpell(RogueSpells.ShadowFocusEffect);
-		target.RemoveAurasDueToSpell(RogueSpells.StealthStealthAura);
-		target.RemoveAurasDueToSpell(RogueSpells.StealthShapeshiftAura);
+		target.RemoveAura(RogueSpells.ShadowFocusEffect);
+		target.RemoveAura(RogueSpells.StealthStealthAura);
+		target.RemoveAura(RogueSpells.StealthShapeshiftAura);
 	}
 }

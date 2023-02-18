@@ -325,7 +325,7 @@ namespace Game.Entities
                     {
                         uint mastery = specialization.MasterySpellID[j];
                         if (mastery != 0)
-                            RemoveAurasDueToSpell(mastery);
+                            RemoveAura(mastery);
                     }
                 }
             }
@@ -1862,7 +1862,7 @@ namespace Game.Entities
                         CastSpell(this, (uint)spellId, new CastSpellExtraArgs().SetCastItem(item));
                 }
                 else
-                    RemoveAurasDueToSpell((uint)spellId);
+                    RemoveAura((uint)spellId);
             }
         }
 
@@ -2317,7 +2317,7 @@ namespace Game.Entities
             {
                 if (spellInfo != null && spellInfo.IsPassive() && spellInfo.HasEffect(SpellEffectName.TitanGrip))
                 {
-                    RemoveAurasDueToSpell(m_titanGripPenaltySpellId);
+                    RemoveAura(m_titanGripPenaltySpellId);
                     SetCanTitanGrip(false);
                 }
             }

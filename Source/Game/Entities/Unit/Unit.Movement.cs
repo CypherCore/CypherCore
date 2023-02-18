@@ -865,7 +865,7 @@ namespace Game.Entities
             if (curLiquid != _lastLiquid)
             {
                 if (_lastLiquid != null && _lastLiquid.SpellID != 0)
-                    RemoveAurasDueToSpell(_lastLiquid.SpellID);
+                    RemoveAura(_lastLiquid.SpellID);
 
                 Player player = GetCharmerOrOwnerPlayerOrPlayerItself();
 

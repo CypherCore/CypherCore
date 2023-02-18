@@ -39,7 +39,7 @@ namespace Scripts.Spells.Paladin
 
         public override void OnUnitExit(Unit unit)
         {
-            unit.RemoveAurasDueToSpell(PaladinSpells.AURA_OF_SACRIFICE_ALLY);
+            unit.RemoveAura(PaladinSpells.AURA_OF_SACRIFICE_ALLY);
         }
     }
 }

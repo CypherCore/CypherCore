@@ -33,7 +33,7 @@ public class spell_druid_pulverize : SpellScript, IHasSpellEffects
 
 		if (target != null)
 		{
-			target.RemoveAurasDueToSpell(Spells.TRASH_DOT_TWO_STACKS_MARKER);
+			target.RemoveAura(Spells.TRASH_DOT_TWO_STACKS_MARKER);
 			GetCaster().CastSpell(target, Spells.PULVERIZE_DAMAGE_REDUCTION_BUFF, true);
 		}
 	}

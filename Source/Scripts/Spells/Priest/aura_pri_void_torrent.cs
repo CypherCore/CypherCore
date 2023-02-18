@@ -21,7 +21,7 @@ public class aura_pri_void_torrent : AuraScript, IHasAuraEffects
 
 	private void HandleRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
-		GetTarget().RemoveAurasDueToSpell(PriestSpells.VOID_TORRENT_PREVENT_REGEN);
+		GetTarget().RemoveAura(PriestSpells.VOID_TORRENT_PREVENT_REGEN);
 	}
 
 	public override void Register()

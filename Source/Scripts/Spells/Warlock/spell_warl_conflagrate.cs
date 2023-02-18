@@ -33,9 +33,21 @@ namespace Scripts.Spells.Warlock
 
             caster.ModifyPower(PowerType.SoulShards, 75);
 
+            ConflagrationOfChaos(caster, target);
             Backdraft(caster);
             RoaringBlaze(caster, target);
             Decimation(caster, target);
+        }
+
+        private void ConflagrationOfChaos(Unit caster, Unit target)
+        {
+            caster.RemoveAura(WarlockSpells.CONFLAGRATION_OF_CHAOS_CONFLAGRATE);
+
+            if (caster.TryGetAura(WarlockSpells.CONFLAGRATION_OF_CHAOS, out var conflagrate))
+            {
+                if (RandomHelper.randChance(conflagrate.GetEffect(0).GetBaseAmount()))
+                    caster.CastSpell(WarlockSpells.CONFLAGRATION_OF_CHAOS_CONFLAGRATE, true);
+            }
         }
 
         private void Decimation(Unit caster, Unit target)

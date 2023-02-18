@@ -196,11 +196,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
             base.JustEngagedWith(who);
 
             _scheduler.Schedule(TimeSpan.FromSeconds(0),
-                                task =>
+                                (Action<Framework.Dynamic.TaskContext>)(                                task =>
                                 {
                                     // Remove old vulnerabilty spell
                                     if (CurrentVurln_Spell != 0)
-                                        me.RemoveAurasDueToSpell(CurrentVurln_Spell);
+                                        me.RemoveAura(CurrentVurln_Spell);
 
                                     // Cast new random vulnerabilty on self
                                     uint spell = RandomHelper.RAND(SpellIds.FireVulnerability, SpellIds.FrostVulnerability, SpellIds.ShadowVulnerability, SpellIds.NatureVulnerability, SpellIds.ArcaneVulnerability);
@@ -208,7 +208,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                                     CurrentVurln_Spell = spell;
                                     Talk(TextIds.EmoteShimmer);
                                     task.Repeat(TimeSpan.FromSeconds(45));
-                                });
+                                }));
 
             _scheduler.Schedule(TimeSpan.FromSeconds(30),
                                 task =>
