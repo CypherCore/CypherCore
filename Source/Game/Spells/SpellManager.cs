@@ -635,7 +635,7 @@ namespace Game.Entities
             return null;
         }
 
-        Dictionary<Difficulty, SpellInfo> _emptyDiffDict;
+        Dictionary<Difficulty, SpellInfo> _emptyDiffDict = new();
 
         Dictionary<Difficulty, SpellInfo> _GetSpellInfo(uint spellId)
         {
