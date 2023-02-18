@@ -43,7 +43,8 @@ namespace Scripts.Spells.Warlock
 		public const uint DARK_SOUL_MISERY = 113860;
 		public const uint DEADWIND_HARVERST = 216708;
 		public const uint DECIMATE_AURA = 108869;
-		public const uint DEMONBOLT = 157695;
+		public const uint DECIMATION = 387176;
+        public const uint DEMONBOLT = 157695;
 		public const uint DEMONBOLT_ENERGIZE = 280127;
 		public const uint DEMONIC_CALL = 114925;
 		public const uint DEMONIC_CALLING = 205145;

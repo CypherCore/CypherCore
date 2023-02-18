@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using Framework.Constants;
+using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -21,18 +22,23 @@ namespace Scripts.Spells.Warlock
 		}
 
 		private void HandleOnHitTarget(uint UnnamedParameter)
-		{
-			var target = GetHitUnit();
-			var caster = GetCaster();
+        {
+            var target = GetHitUnit();
+            var caster = GetCaster();
 
             if (target != null)
-				if (!caster.HasAura(WarlockSpells.FIRE_AND_BRIMSTONE))
-					if (target != GetExplTargetUnit())
-					{
-						PreventHitDamage();
-						return;
-					}
+                if (!caster.HasAura(WarlockSpells.FIRE_AND_BRIMSTONE))
+                    if (target != GetExplTargetUnit())
+                    {
+                        PreventHitDamage();
+                        return;
+                    }
 
+            RoaringBlaze(target, caster);
+        }
+
+        private void RoaringBlaze(Unit target, Unit caster)
+        {
             if (caster.HasAura(WarlockSpells.ROARING_BLAZE))
             {
                 var aur = target.GetAura(WarlockSpells.IMMOLATE_DOT, caster.GetGUID());
@@ -40,13 +46,13 @@ namespace Scripts.Spells.Warlock
 
                 if (aur != null && dmgEff != null)
                 {
-					var dmg = GetHitDamage();
-					SetHitDamage(MathFunctions.AddPct(ref dmg, dmgEff.BasePoints));
+                    var dmg = GetHitDamage();
+                    SetHitDamage(MathFunctions.AddPct(ref dmg, dmgEff.BasePoints));
                 }
             }
         }
 
-		public override void Register()
+        public override void Register()
 		{
 			SpellEffects.Add(new EffectHandler(HandleOnHitMainTarget, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 			SpellEffects.Add(new EffectHandler(HandleOnHitTarget, 1, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));

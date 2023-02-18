@@ -3846,6 +3846,13 @@ namespace Game.Entities
             return 0;
         }
 
+        public bool TryGetAura<T>(T spellId, out Aura aura) where T : struct, System.Enum
+        {
+            aura = GetAura(spellId);
+
+            return aura != null;
+        }
+
         public Aura GetAura<T>(T spellId) where T : struct, System.Enum
         {
             return GetAura(Convert.ToUInt32(spellId));
@@ -3854,6 +3861,12 @@ namespace Game.Entities
         public Aura GetAura<T>(T spellId, ObjectGuid casterGUID, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0) where T : struct, System.Enum
         {
             return GetAura(Convert.ToUInt32(spellId), casterGUID, itemCasterGUID, reqEffMask);
+        }
+
+        public bool TryGetAura(uint spellId, out Aura aura)
+        {
+            aura = GetAura(spellId);
+            return aura != null;
         }
 
         public Aura GetAura(uint spellId)
