@@ -23,12 +23,27 @@ namespace Scripts.Spells.Warlock
 		private void HandleOnHitTarget(uint UnnamedParameter)
 		{
 			var target = GetHitUnit();
+			var caster = GetCaster();
 
-			if (target != null)
-				if (!GetCaster().HasAura(WarlockSpells.FIRE_AND_BRIMSTONE))
+            if (target != null)
+				if (!caster.HasAura(WarlockSpells.FIRE_AND_BRIMSTONE))
 					if (target != GetExplTargetUnit())
+					{
 						PreventHitDamage();
-		}
+						return;
+					}
+
+            if (caster.HasAura(WarlockSpells.ROARING_BLAZE))
+            {
+                var aur = target.GetAura(WarlockSpells.IMMOLATE_DOT, caster.GetGUID());
+
+                if (aur != null)
+                {
+					var dmg = GetHitDamage();
+					SetHitDamage(MathFunctions.AddPct(ref dmg, 25));
+                }
+            }
+        }
 
 		public override void Register()
 		{

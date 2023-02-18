@@ -2,6 +2,7 @@
 // Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using System.Collections.Generic;
+using Bgs.Protocol.Notification.V1;
 using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
@@ -29,7 +30,7 @@ namespace Scripts.Spells.Warlock
 			if (aur != null)
 				aur.RefreshDuration();
 
-			if (GetAura() != null)
+            if (GetAura() != null && caster.HasAura(WarlockSpells.ROARING_BLAZE))
 			{
 				var damage = GetEffect(0).GetAmount();
 				MathFunctions.AddPct(ref damage, 25);
@@ -47,8 +48,6 @@ namespace Scripts.Spells.Warlock
 				return;
 
 			caster.CastSpell(caster, WarlockSpells.CHANNEL_DEMONFIRE_ACTIVATOR, true);
-
-			// GetAura()->VariableStorage.Remove("Spells.AffectedByRoaringBlaze");
 		}
 
 		private void HandleRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
