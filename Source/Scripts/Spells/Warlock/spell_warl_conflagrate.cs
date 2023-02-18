@@ -41,11 +41,12 @@ namespace Scripts.Spells.Warlock
 				if (aur != null)
 				{
 					var aurEff = aur.GetEffect(0);
+					var dmgEff = Global.SpellMgr.GetSpellInfo(WarlockSpells.ROARING_BLASE_DMG_PCT, Difficulty.None)?.GetEffect(0);
 
-					if (aurEff != null)
+					if (aurEff != null && dmgEff != null)
 					{
 						var damage = aurEff.GetAmount();
-						aurEff.SetAmount(MathFunctions.AddPct(ref damage, 25));
+						aurEff.SetAmount(MathFunctions.AddPct(ref damage, dmgEff.BasePoints));
 						aur.SetNeedClientUpdateForTargets();
 					}
 				}

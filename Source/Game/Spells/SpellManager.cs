@@ -18,6 +18,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using static Game.ScriptNameContainer;
 
 namespace Game.Entities
 {
@@ -611,33 +612,37 @@ namespace Game.Entities
             return GetSpellInfo(Convert.ToUInt32(spellId), difficulty);
         }
 
-        public SpellInfo GetSpellInfo(uint spellId, Difficulty difficulty)
+        public SpellInfo GetSpellInfo(uint spellId, Difficulty difficulty = Difficulty.None)
         {
-            var list = mSpellInfoMap.LookupByKey(spellId);
+            if (mSpellInfoMap.TryGetValue(spellId, out var diffDict) && diffDict.TryGetValue(difficulty, out var spellInfo))
+                return spellInfo;
 
-            var index = list.FindIndex(spellInfo => spellInfo.Difficulty == difficulty);
-            if (index != -1)
-                return list[index];
-
-            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
-            if (difficultyEntry != null)
+            if (diffDict != null)
             {
-                do
+                DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
+                if (difficultyEntry != null)
                 {
-                    index = list.FindIndex(spellInfo => spellInfo.Difficulty == (Difficulty)difficultyEntry.FallbackDifficultyID);
-                    if (index != -1)
-                        return list[index];
+                    do
+                    {
+                        if (diffDict.TryGetValue((Difficulty)difficultyEntry.FallbackDifficultyID, out spellInfo))
+                            return spellInfo;
 
-                    difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficultyEntry.FallbackDifficultyID);
-                } while (difficultyEntry != null);
+                        difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficultyEntry.FallbackDifficultyID);
+                    } while (difficultyEntry != null);
+                }
             }
 
             return null;
         }
 
-        List<SpellInfo> _GetSpellInfo(uint spellId)
+        Dictionary<Difficulty, SpellInfo> _emptyDiffDict;
+
+        Dictionary<Difficulty, SpellInfo> _GetSpellInfo(uint spellId)
         {
-            return mSpellInfoMap.LookupByKey(spellId);
+            if (mSpellInfoMap.TryGetValue(spellId, out var diffDict))
+                return diffDict;
+
+            return _emptyDiffDict;
         }
 
         public SpellInfo AssertSpellInfo(uint spellId, Difficulty difficulty)
@@ -649,20 +654,21 @@ namespace Game.Entities
 
         public void ForEachSpellInfo(Action<SpellInfo> callback)
         {
-            foreach (SpellInfo spellInfo in mSpellInfoMap.Values)
-                callback(spellInfo);
+            foreach (var kvp in mSpellInfoMap.Values)
+                foreach (var spellInfo in kvp.Values)
+                    callback(spellInfo);
         }
 
         public void ForEachSpellInfoDifficulty(uint spellId, Action<SpellInfo> callback)
         {
-            foreach (SpellInfo spellInfo in _GetSpellInfo(spellId))
-                callback(spellInfo);
+            foreach (SpellInfo spellInfo in _GetSpellInfo(spellId).Values)
+                    callback(spellInfo);
         }
 
         void UnloadSpellInfoChains()
         {
             foreach (var pair in mSpellChains)
-                foreach (SpellInfo spellInfo in _GetSpellInfo(pair.Key))
+                foreach (SpellInfo spellInfo in _GetSpellInfo(pair.Key).Values)
                     spellInfo.ChainEntry = null;
 
             mSpellChains.Clear();
@@ -704,7 +710,7 @@ namespace Game.Entities
                 mSpellChains[pair.Key].next = next;
                 mSpellChains[pair.Key].last = next;
                 mSpellChains[pair.Key].rank = 1;
-                foreach (SpellInfo difficultyInfo in _GetSpellInfo(pair.Key))
+                foreach (SpellInfo difficultyInfo in _GetSpellInfo(pair.Key).Values)
                     difficultyInfo.ChainEntry = mSpellChains[pair.Key];
 
                 if (!mSpellChains.ContainsKey(pair.Value))
@@ -715,7 +721,7 @@ namespace Game.Entities
                 mSpellChains[pair.Value].next = null;
                 mSpellChains[pair.Value].last = next;
                 mSpellChains[pair.Value].rank = 2;
-                foreach (SpellInfo difficultyInfo in _GetSpellInfo(pair.Value))
+                foreach (SpellInfo difficultyInfo in _GetSpellInfo(pair.Value).Values)
                     difficultyInfo.ChainEntry = mSpellChains[pair.Value];
 
                 byte rank = 3;
@@ -740,7 +746,7 @@ namespace Game.Entities
                     mSpellChains[nextPair.Value].next = null;
                     mSpellChains[nextPair.Value].last = last;
                     mSpellChains[nextPair.Value].rank = rank++;
-                    foreach (SpellInfo difficultyInfo in _GetSpellInfo(nextPair.Value))
+                    foreach (SpellInfo difficultyInfo in _GetSpellInfo(nextPair.Value).Values)
                         difficultyInfo.ChainEntry = mSpellChains[nextPair.Value];
 
                     // fill 'last'
@@ -821,7 +827,8 @@ namespace Game.Entities
 
             // search auto-learned skills and add its to map also for use in unlearn spells/talents
             uint dbc_count = 0;
-            foreach (var entry in mSpellInfoMap.Values)
+            foreach (var kvp in mSpellInfoMap.Values)
+            foreach (var entry in kvp.Values)
             {
                 if (entry.Difficulty != Difficulty.None)
                     continue;
@@ -907,7 +914,8 @@ namespace Game.Entities
 
             // search auto-learned spells and add its to map also for use in unlearn spells/talents
             uint dbc_count = 0;
-            foreach (var entry in mSpellInfoMap.Values)
+            foreach (var kvp in mSpellInfoMap.Values)
+            foreach (var entry in kvp.Values)
             {
                 if (entry.Difficulty != Difficulty.None)
                     continue;
@@ -1452,7 +1460,8 @@ namespace Game.Entities
             count = 0;
             oldMSTime = Time.GetMSTime();
 
-            foreach (SpellInfo spellInfo in mSpellInfoMap.Values)
+            foreach (var kvp in mSpellInfoMap.Values)
+            foreach (SpellInfo spellInfo in kvp.Values)
             {
                 // Data already present in DB, overwrites default proc
                 if (mSpellProcMap.ContainsKey((spellInfo.Id, spellInfo.Difficulty)))
@@ -1864,7 +1873,8 @@ namespace Game.Entities
             Log.outInfo(LogFilter.ServerLoading, "Loading summonable creature templates...");
 
             // different summon spells
-            foreach (var spellEntry in mSpellInfoMap.Values)
+            foreach (var kvp in mSpellInfoMap.Values)
+            foreach (var spellEntry in kvp.Values)
             {
                 if (spellEntry.Difficulty != Difficulty.None)
                 {
@@ -2360,7 +2370,7 @@ namespace Game.Entities
                 //second key = id
 
 
-                mSpellInfoMap.Add(spellNameEntry.Id, new SpellInfo(spellNameEntry, data.Key.difficulty, data.Value));
+                AddSpellInfo(new SpellInfo(spellNameEntry, data.Key.difficulty, data.Value));
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo store in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
@@ -2368,9 +2378,9 @@ namespace Game.Entities
 
         public void UnloadSpellInfoImplicitTargetConditionLists()
         {
-            foreach (var spell in mSpellInfoMap.Values)
-                spell._UnloadImplicitTargetConditionLists();
-
+            foreach (var kvp in mSpellInfoMap.Values)
+                foreach (var spell in kvp.Values)
+                    spell._UnloadImplicitTargetConditionLists();
         }
 
         public void LoadSpellInfoServerside()
@@ -2430,7 +2440,7 @@ namespace Game.Entities
                     effect.ImplicitTarget[1] = effectsResult.Read<short>(33);
 
                     var existingSpellBounds = _GetSpellInfo(spellId);
-                    if (existingSpellBounds == null)
+                    if (existingSpellBounds == null || existingSpellBounds.Count == 0)
                     {
                         Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} effext index {effect.EffectIndex} references a regular spell loaded from file. Adding serverside effects to existing spells is not allowed.");
                         continue;
@@ -2598,7 +2608,7 @@ namespace Game.Entities
                     spellInfo.SchoolMask = (SpellSchoolMask)spellsResult.Read<uint>(79);
                     spellInfo.ChargeCategoryId = spellsResult.Read<uint>(80);
 
-                    mSpellInfoMap.Add(spellId, spellInfo);
+                    AddSpellInfo(spellInfo);
 
                 } while (spellsResult.NextRow());
             }
@@ -2629,7 +2639,7 @@ namespace Game.Entities
                         continue;
                     }
 
-                    foreach (SpellInfo spellInfo in spells)
+                    foreach (SpellInfo spellInfo in spells.Values)
                     {
                         if (attributes.HasAnyFlag((uint)SpellCustomAttributes.ShareDamage))
                         {
@@ -2651,8 +2661,9 @@ namespace Game.Entities
             List<uint> talentSpells = new();
             foreach (var talentInfo in CliDB.TalentStorage.Values)
                 talentSpells.Add(talentInfo.SpellID);
-
-            foreach (var spellInfo in mSpellInfoMap.Values)
+            
+            foreach (var kvp in mSpellInfoMap.Values)
+            foreach (var spellInfo in kvp.Values)
             {
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
                 {
@@ -2754,7 +2765,7 @@ namespace Game.Entities
                                     if (enchant.Effect[s] != ItemEnchantmentType.CombatSpell)
                                         continue;
 
-                                    foreach (SpellInfo procInfo in _GetSpellInfo(enchant.EffectArg[s]))
+                                    foreach (SpellInfo procInfo in _GetSpellInfo(enchant.EffectArg[s]).Values)
                                     {
 
                                         // if proced directly from enchantment, not via proc aura
@@ -2928,7 +2939,8 @@ namespace Game.Entities
             }
 
             // addition for binary spells, omit spells triggering other spells
-            foreach (var spellInfo in mSpellInfoMap.Values)
+            foreach (var kvp in mSpellInfoMap.Values)
+            foreach (var spellInfo in kvp.Values)
             {
                 if (!spellInfo.HasAttribute(SpellCustomAttributes.BinarySpell))
                 {
@@ -2971,7 +2983,7 @@ namespace Game.Entities
             foreach (var liquid in CliDB.LiquidTypeStorage.Values)
             {
                 if (liquid.SpellID != 0)
-                    foreach (SpellInfo spellInfo in _GetSpellInfo(liquid.SpellID))
+                    foreach (SpellInfo spellInfo in _GetSpellInfo(liquid.SpellID).Values)
                         spellInfo.AttributesCu |= SpellCustomAttributes.AuraCannotBeSaved;
             }
 
@@ -2983,13 +2995,13 @@ namespace Game.Entities
             foreach (uint spellId in spellIds)
             {
                 var range = _GetSpellInfo(spellId);
-                if (range == null)
+                if (range == null || range.Count == 0)
                 {
                     Log.outError(LogFilter.ServerLoading, $"Spell info correction specified for non-existing spell {spellId}");
                     continue;
                 }
 
-                foreach (SpellInfo spellInfo in range)
+                foreach (SpellInfo spellInfo in range.Values)
                     fix(spellInfo);
             }
         }
@@ -4373,8 +4385,8 @@ namespace Game.Entities
             {
                 spellInfo.AttributesEx &= ~SpellAttr1.IsChannelled;
             });
-
-            foreach (var spellInfo in mSpellInfoMap.Values)
+            foreach (var kvp in mSpellInfoMap.Values)
+            foreach (var spellInfo in kvp.Values)
             {
                 // Fix range for trajectory triggered spell
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
@@ -4382,7 +4394,7 @@ namespace Game.Entities
                     if (spellEffectInfo.IsEffect() && (spellEffectInfo.TargetA.GetTarget() == Targets.DestTraj || spellEffectInfo.TargetB.GetTarget() == Targets.DestTraj))
                     {
                         // Get triggered spell if any
-                        foreach (SpellInfo spellInfoTrigger in _GetSpellInfo(spellEffectInfo.TriggerSpell))
+                        foreach (SpellInfo spellInfoTrigger in _GetSpellInfo(spellEffectInfo.TriggerSpell).Values)
                         {
                             float maxRangeMain = spellInfo.GetMaxRange();
                             float maxRangeTrigger = spellInfoTrigger.GetMaxRange();
@@ -4449,7 +4461,8 @@ namespace Game.Entities
         {
             uint oldMSTime = Time.GetMSTime();
 
-            foreach (SpellInfo spellInfo in mSpellInfoMap.Values)
+            foreach (var kvp in mSpellInfoMap.Values)
+            foreach (SpellInfo spellInfo in kvp.Values)
             {
                 // AuraState depends on SpellSpecific
                 spellInfo._LoadSpellSpecific();
@@ -4463,7 +4476,8 @@ namespace Game.Entities
         {
             uint oldMSTime = Time.GetMSTime();
 
-            foreach (SpellInfo spellInfo in mSpellInfoMap.Values)
+            foreach (var kvp in mSpellInfoMap.Values)
+            foreach (SpellInfo spellInfo in kvp.Values)
             {
                 if (spellInfo == null)
                     continue;
@@ -4478,7 +4492,8 @@ namespace Game.Entities
         {
             uint oldMSTime = Time.GetMSTime();
 
-            foreach (SpellInfo spellInfo in mSpellInfoMap.Values)
+            foreach (var kvp in mSpellInfoMap.Values)
+            foreach (SpellInfo spellInfo in kvp.Values)
             {
                 if (spellInfo == null)
                     continue;
@@ -4665,16 +4680,7 @@ namespace Game.Entities
         // SpellInfo object management
         public bool HasSpellInfo(uint spellId, Difficulty difficulty)
         {
-            var list = mSpellInfoMap.LookupByKey(spellId);
-            if (list.Count == 0)
-                return false;
-
-            return list.Any(spellInfo => spellInfo.Difficulty == difficulty);
-        }
-
-        public MultiMap<uint, SpellInfo> GetSpellInfoStorage()
-        {
-            return mSpellInfoMap;
+            return mSpellInfoMap.TryGetValue(spellId, out var kvp) && kvp.ContainsKey(difficulty);
         }
 
         //Extra Shit
@@ -4771,6 +4777,17 @@ namespace Game.Entities
             return mSpellTotemModel.LookupByKey(Tuple.Create(spellId, (byte)race));
         }
 
+        void AddSpellInfo(SpellInfo spellInfo)
+        {
+            if (!mSpellInfoMap.TryGetValue(spellInfo.Id, out var diffDict))
+            {
+                diffDict = new Dictionary<Difficulty, SpellInfo>();
+                mSpellInfoMap[spellInfo.Id] = diffDict;
+            }
+
+            diffDict[spellInfo.Difficulty] = spellInfo; 
+        }
+
         #region Fields
         Dictionary<uint, SpellChainNode> mSpellChains = new();
         MultiMap<uint, uint> mSpellsReqSpell = new();
@@ -4796,7 +4813,7 @@ namespace Game.Entities
         MultiMap<uint, SkillLineAbilityRecord> mSkillLineAbilityMap = new();
         Dictionary<uint, MultiMap<uint, uint>> mPetLevelupSpellMap = new();
         Dictionary<uint, PetDefaultSpellsEntry> mPetDefaultSpellsMap = new();           // only spells not listed in related mPetLevelupSpellMap entry
-        MultiMap<uint, SpellInfo> mSpellInfoMap = new();
+        Dictionary<uint, Dictionary<Difficulty, SpellInfo>> mSpellInfoMap = new();
         Dictionary<Tuple<uint, byte>, uint> mSpellTotemModel = new();
 
         public delegate void AuraEffectHandler(AuraEffect effect, AuraApplication aurApp, AuraEffectHandleModes mode, bool apply);

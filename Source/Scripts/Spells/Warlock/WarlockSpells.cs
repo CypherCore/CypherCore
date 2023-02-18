@@ -231,7 +231,8 @@ namespace Scripts.Spells.Warlock
 		public const uint SEED_OF_CORRUPTION_DETONATION = 27285;
 		public const uint INTERNAL_COMBUSTION_DMG = 266136;
 		public const uint ROARING_BLAZE = 205184;
-		public const uint SEED_OF_CURRUPTION = 27243;
+		public const uint ROARING_BLASE_DMG_PCT = 265931;
+        public const uint SEED_OF_CURRUPTION = 27243;
 		public const uint SEED_OF_CURRUPTION_DAMAGE = 27285;
 		public const uint T16_4P_INTERNAL_CD = 145165;
 		public const uint SHADOW_BOLT = 686;

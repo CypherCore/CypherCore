@@ -36,11 +36,12 @@ namespace Scripts.Spells.Warlock
             if (caster.HasAura(WarlockSpells.ROARING_BLAZE))
             {
                 var aur = target.GetAura(WarlockSpells.IMMOLATE_DOT, caster.GetGUID());
+                var dmgEff = Global.SpellMgr.GetSpellInfo(WarlockSpells.ROARING_BLASE_DMG_PCT, Difficulty.None)?.GetEffect(0);
 
-                if (aur != null)
+                if (aur != null && dmgEff != null)
                 {
 					var dmg = GetHitDamage();
-					SetHitDamage(MathFunctions.AddPct(ref dmg, 25));
+					SetHitDamage(MathFunctions.AddPct(ref dmg, dmgEff.BasePoints));
                 }
             }
         }

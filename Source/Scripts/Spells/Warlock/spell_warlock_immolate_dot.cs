@@ -32,11 +32,16 @@ namespace Scripts.Spells.Warlock
 
             if (GetAura() != null && caster.HasAura(WarlockSpells.ROARING_BLAZE))
 			{
-				var damage = GetEffect(0).GetAmount();
-				MathFunctions.AddPct(ref damage, 25);
+                var dmgEff = Global.SpellMgr.GetSpellInfo(WarlockSpells.ROARING_BLASE_DMG_PCT, Difficulty.None)?.GetEffect(0);
 
-				GetEffect(0).SetAmount(damage);
-				GetAura().SetNeedClientUpdateForTargets();
+				if (dmgEff != null)
+				{
+					var damage = GetEffect(0).GetAmount();
+					MathFunctions.AddPct(ref damage, dmgEff.BasePoints);
+
+					GetEffect(0).SetAmount(damage);
+					GetAura().SetNeedClientUpdateForTargets();
+				}
 			}
 		}
 
