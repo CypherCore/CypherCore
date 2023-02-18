@@ -29,7 +29,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
         {
             if (AxeHeadTimer <= diff)
             {
-                DoCastVictim(boss_vanessa_vancleef.Spells.SPELL_AXE_HEAD);
+                DoCastVictim(boss_vanessa_vancleef.Spells.AXE_HEAD);
                 AxeHeadTimer = RandomHelper.URand(18000, 21000);
             }
             else
@@ -39,7 +39,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
             if (HealthBelowPct(35) && !below)
             {
-                DoCast(me, boss_vanessa_vancleef.Spells.SPELL_ENRAGE);
+                DoCast(me, boss_vanessa_vancleef.Spells.ENRAGE);
                 below = true;
             }
 

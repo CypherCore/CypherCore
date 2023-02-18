@@ -24,11 +24,11 @@ public class spell_monk_breath_of_fire : SpellScript, ISpellAfterHit
 				if (target != null)
 				{
 					// if Dizzying Haze is on the target, they will burn for an additionnal damage over 8s
-					if (target.HasAura(MonkSpells.SPELL_MONK_DIZZYING_HAZE))
-						_player.CastSpell(target, MonkSpells.SPELL_MONK_BREATH_OF_FIRE_DOT, true);
+					if (target.HasAura(MonkSpells.DIZZYING_HAZE))
+						_player.CastSpell(target, MonkSpells.BREATH_OF_FIRE_DOT, true);
 
-					if (target.HasAura(MonkSpells.SPELL_MONK_KEG_SMASH_AURA))
-						_player.CastSpell(target, MonkSpells.SPELL_MONK_BREATH_OF_FIRE_DOT, true);
+					if (target.HasAura(MonkSpells.KEG_SMASH_AURA))
+						_player.CastSpell(target, MonkSpells.BREATH_OF_FIRE_DOT, true);
 				}
 			}
 		}

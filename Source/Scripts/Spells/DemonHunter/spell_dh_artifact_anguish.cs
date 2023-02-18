@@ -23,7 +23,7 @@ public class spell_dh_artifact_anguish : AuraScript, IHasAuraEffects
 		if (caster == null || target == null)
 			return;
 
-		caster.CastSpell(target, DemonHunterSpells.SPELL_DH_ANGUISH_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.AuraStack, GetStackAmount()));
+		caster.CastSpell(target, DemonHunterSpells.ANGUISH_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.AuraStack, GetStackAmount()));
 	}
 
 	public override void Register()

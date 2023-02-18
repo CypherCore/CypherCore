@@ -19,7 +19,7 @@ public class spell_dk_icy_touch : SpellScript, ISpellOnHit
 			if (caster.HasAura(152281))
 				caster.CastSpell(target, 155159, true);
 			else
-				caster.CastSpell(target, DeathKnightSpells.SPELL_DK_FROST_FEVER, true);
+				caster.CastSpell(target, DeathKnightSpells.FROST_FEVER, true);
 		}
 	}
 }

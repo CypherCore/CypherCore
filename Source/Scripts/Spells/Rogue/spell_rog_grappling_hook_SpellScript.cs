@@ -13,7 +13,7 @@ public class spell_rog_grappling_hook_SpellScript : SpellScript, ISpellOnHit
 {
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo((uint)TrueBearingIDs.SPELL_ROGUE_GRAPPLING_HOOK, RogueSpells.SPELL_ROGUE_GRAPPLING_HOOK_TRIGGER);
+		return ValidateSpellInfo((uint)TrueBearingIDs.GRAPPLING_HOOK, RogueSpells.GRAPPLING_HOOK_TRIGGER);
 	}
 
 	public void OnHit()
@@ -24,6 +24,6 @@ public class spell_rog_grappling_hook_SpellScript : SpellScript, ISpellOnHit
 		if (caster == null || dest == null)
 			return;
 
-		caster.CastSpell(new Position(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ()), RogueSpells.SPELL_ROGUE_GRAPPLING_HOOK_TRIGGER, true);
+		caster.CastSpell(new Position(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ()), RogueSpells.GRAPPLING_HOOK_TRIGGER, true);
 	}
 }

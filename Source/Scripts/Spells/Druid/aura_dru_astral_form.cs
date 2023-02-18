@@ -19,19 +19,19 @@ public class aura_dru_astral_form : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(DruidSpells.SPELL_DRUID_GLYPH_OF_STARS);
+		return ValidateSpellInfo(DruidSpells.GLYPH_OF_STARS);
 	}
 
 	private void AfterApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
 		var target = GetTarget();
 
-		if (target.HasAura(DruidSpells.SPELL_DRUID_GLYPH_OF_STARS))
+		if (target.HasAura(DruidSpells.GLYPH_OF_STARS))
 		{
 			target.SetDisplayId(target.GetNativeDisplayId());
-			target.AddAura(DruidSpells.SPELL_DRUID_BLUE_COLOR, target);
-			target.AddAura(DruidSpells.SPELL_DRUID_SHADOWY_GHOST, target);
-			target.CastSpell(target, (uint)Global.SpellMgr.GetSpellInfo(DruidSpells.SPELL_DRUID_GLYPH_OF_STARS, Difficulty.None).GetEffect(0).BasePoints, true);
+			target.AddAura(DruidSpells.BLUE_COLOR, target);
+			target.AddAura(DruidSpells.SHADOWY_GHOST, target);
+			target.CastSpell(target, (uint)Global.SpellMgr.GetSpellInfo(DruidSpells.GLYPH_OF_STARS, Difficulty.None).GetEffect(0).BasePoints, true);
 		}
 	}
 
@@ -39,12 +39,12 @@ public class aura_dru_astral_form : AuraScript, IHasAuraEffects
 	{
 		var target = GetTarget();
 
-		if (target.HasAura(ShapeshiftFormSpells.SPELL_DRUID_MOONKIN_FORM) || target.HasAura(DruidSpells.SPELL_DRUID_CHOSEN_OF_ELUNE))
+		if (target.HasAura(ShapeshiftFormSpells.MOONKIN_FORM) || target.HasAura(DruidSpells.CHOSEN_OF_ELUNE))
 			return;
 
-		target.RemoveAura((uint)Global.SpellMgr.GetSpellInfo(DruidSpells.SPELL_DRUID_GLYPH_OF_STARS, Difficulty.None).GetEffect(0).BasePoints);
-		target.RemoveAura(DruidSpells.SPELL_DRUID_BLUE_COLOR);
-		target.RemoveAura(DruidSpells.SPELL_DRUID_SHADOWY_GHOST);
+		target.RemoveAura((uint)Global.SpellMgr.GetSpellInfo(DruidSpells.GLYPH_OF_STARS, Difficulty.None).GetEffect(0).BasePoints);
+		target.RemoveAura(DruidSpells.BLUE_COLOR);
+		target.RemoveAura(DruidSpells.SHADOWY_GHOST);
 	}
 
 	public override void Register()

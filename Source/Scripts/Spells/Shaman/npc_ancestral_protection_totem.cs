@@ -17,7 +17,7 @@ namespace Scripts.Spells.Shaman
 
 		public override void Reset()
 		{
-			me.CastSpell(me, TotemSpells.SPELL_TOTEM_ANCESTRAL_PROTECTION_AT, true);
+			me.CastSpell(me, TotemSpells.TOTEM_ANCESTRAL_PROTECTION_AT, true);
 		}
 	}
 }

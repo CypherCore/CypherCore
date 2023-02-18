@@ -21,13 +21,13 @@ public class spell_dk_epidemic : SpellScript, IHasSpellEffects
 
 		if (target != null)
 		{
-			var aura = target.GetAura(DeathKnightSpells.SPELL_DK_VIRULENT_PLAGUE, GetCaster().GetGUID());
+			var aura = target.GetAura(DeathKnightSpells.VIRULENT_PLAGUE, GetCaster().GetGUID());
 
 			if (aura != null)
 			{
 				target.RemoveAura(aura);
-				GetCaster().CastSpell(target, DeathKnightSpells.SPELL_DK_EPIDEMIC_DAMAGE_SINGLE, true);
-				GetCaster().CastSpell(target, DeathKnightSpells.SPELL_DK_EPIDEMIC_DAMAGE_AOE, true);
+				GetCaster().CastSpell(target, DeathKnightSpells.EPIDEMIC_DAMAGE_SINGLE, true);
+				GetCaster().CastSpell(target, DeathKnightSpells.EPIDEMIC_DAMAGE_AOE, true);
 			}
 		}
 

@@ -22,7 +22,7 @@ public class spell_hun_intimidation : SpellScript, IHasSpellEffects
 		if (caster == null || target == null)
 			return;
 
-		caster.CastSpell(target, HunterSpells.SPELL_HUNTER_INTIMIDATION_STUN, true);
+		caster.CastSpell(target, HunterSpells.INTIMIDATION_STUN, true);
 	}
 
 	public override void Register()

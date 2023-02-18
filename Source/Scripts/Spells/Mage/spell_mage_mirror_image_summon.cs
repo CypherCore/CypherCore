@@ -20,9 +20,9 @@ public class spell_mage_mirror_image_summon : SpellScript, IHasSpellEffects
 
 		if (caster != null)
 		{
-			caster.CastSpell(caster, MageSpells.SPELL_MAGE_MIRROR_IMAGE_LEFT, true);
-			caster.CastSpell(caster, MageSpells.SPELL_MAGE_MIRROR_IMAGE_FRONT, true);
-			caster.CastSpell(caster, MageSpells.SPELL_MAGE_MIRROR_IMAGE_RIGHT, true);
+			caster.CastSpell(caster, MageSpells.MIRROR_IMAGE_LEFT, true);
+			caster.CastSpell(caster, MageSpells.MIRROR_IMAGE_FRONT, true);
+			caster.CastSpell(caster, MageSpells.MIRROR_IMAGE_RIGHT, true);
 		}
 	}
 

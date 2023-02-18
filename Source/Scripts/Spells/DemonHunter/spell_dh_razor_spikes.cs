@@ -15,7 +15,7 @@ public class spell_dh_razor_spikes : AuraScript, IAuraCheckProc
 {
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(DemonHunterSpells.SPELL_DH_RAZOR_SPIKES_SLOW);
+		return ValidateSpellInfo(DemonHunterSpells.RAZOR_SPIKES_SLOW);
 	}
 
 	public bool CheckProc(ProcEventInfo eventInfo)
@@ -36,8 +36,8 @@ public class spell_dh_razor_spikes : AuraScript, IAuraCheckProc
 			if (!caster.IsValidAttackTarget(target))
 				return false;
 
-			if (caster.HasAura(DemonHunterSpells.SPELL_DH_DEMON_SPIKES_BUFF))
-				caster.m_Events.AddEventAtOffset(() => { caster.CastSpell(target, DemonHunterSpells.SPELL_DH_RAZOR_SPIKES_SLOW, true); }, TimeSpan.FromMilliseconds(750));
+			if (caster.HasAura(DemonHunterSpells.DEMON_SPIKES_BUFF))
+				caster.m_Events.AddEventAtOffset(() => { caster.CastSpell(target, DemonHunterSpells.RAZOR_SPIKES_SLOW, true); }, TimeSpan.FromMilliseconds(750));
 
 			return true;
 		}

@@ -37,11 +37,11 @@ public class aura_trailblazer : AuraScript, IHasAuraEffects
 	private void RescheduleBuff()
 	{
 		var caster = GetCaster();
-		caster.RemoveAurasDueToSpell(HunterSpells.SPELL_HUNTER_TRAILBLAZER_BUFF);
+		caster.RemoveAurasDueToSpell(HunterSpells.TRAILBLAZER_BUFF);
 
 		if (_event == null)
 		{
-			_event = new DelayedCastEvent(caster, caster, HunterSpells.SPELL_HUNTER_TRAILBLAZER_BUFF, new CastSpellExtraArgs(true));
+			_event = new DelayedCastEvent(caster, caster, HunterSpells.TRAILBLAZER_BUFF, new CastSpellExtraArgs(true));
 			_ts    = TimeSpan.FromSeconds(GetSpellInfo().GetEffect(0).BasePoints);
 		}
 		else
@@ -49,7 +49,7 @@ public class aura_trailblazer : AuraScript, IHasAuraEffects
 			caster.m_Events.ScheduleAbortOnFirstMatchingEvent(e =>
 			{
 				if (e is DelayedCastEvent dce)
-					return dce.SpellId == HunterSpells.SPELL_HUNTER_TRAILBLAZER_BUFF;
+					return dce.SpellId == HunterSpells.TRAILBLAZER_BUFF;
 
 				return false;
             });

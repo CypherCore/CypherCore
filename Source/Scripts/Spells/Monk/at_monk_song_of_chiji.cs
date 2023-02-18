@@ -25,6 +25,6 @@ public class at_monk_song_of_chiji : AreaTriggerAI
 			return;
 
 		if (unit != caster && caster.IsValidAttackTarget(unit))
-			caster.CastSpell(unit, MonkSpells.SPELL_MONK_SONG_OF_CHIJI, true);
+			caster.CastSpell(unit, MonkSpells.SONG_OF_CHIJI, true);
 	}
 }

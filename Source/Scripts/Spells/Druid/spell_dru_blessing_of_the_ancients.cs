@@ -17,8 +17,8 @@ public class spell_dru_blessing_of_the_ancients : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint UnnamedParameter)
 	{
-		var removeAura = GetCaster().HasAura(DruidSpells.SPELL_DRUID_BLESSING_OF_ELUNE) ? (uint)DruidSpells.SPELL_DRUID_BLESSING_OF_ELUNE : (uint)DruidSpells.SPELL_DRUID_BLESSING_OF_ANSHE;
-		var addAura    = GetCaster().HasAura(DruidSpells.SPELL_DRUID_BLESSING_OF_ELUNE) ? (uint)DruidSpells.SPELL_DRUID_BLESSING_OF_ANSHE : (uint)DruidSpells.SPELL_DRUID_BLESSING_OF_ELUNE;
+		var removeAura = GetCaster().HasAura(DruidSpells.BLESSING_OF_ELUNE) ? (uint)DruidSpells.BLESSING_OF_ELUNE : (uint)DruidSpells.BLESSING_OF_ANSHE;
+		var addAura    = GetCaster().HasAura(DruidSpells.BLESSING_OF_ELUNE) ? (uint)DruidSpells.BLESSING_OF_ANSHE : (uint)DruidSpells.BLESSING_OF_ELUNE;
 
 		GetCaster().RemoveAurasDueToSpell(removeAura);
 		GetCaster().CastSpell(null, addAura, true);

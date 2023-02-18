@@ -23,8 +23,8 @@ public class at_demon_hunter_demonic_trample : AreaTriggerAI
 
 		if (caster.IsValidAttackTarget(unit))
 		{
-			caster.CastSpell(unit, DemonHunterSpells.SPELL_DH_DEMONIC_TRAMPLE_STUN, true);
-			caster.CastSpell(unit, DemonHunterSpells.SPELL_DH_DEMONIC_TRAMPLE_DAMAGE, true);
+			caster.CastSpell(unit, DemonHunterSpells.DEMONIC_TRAMPLE_STUN, true);
+			caster.CastSpell(unit, DemonHunterSpells.DEMONIC_TRAMPLE_DAMAGE, true);
 		}
 	}
 }

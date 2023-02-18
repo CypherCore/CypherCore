@@ -17,7 +17,7 @@ public class spell_rog_cheat_death_AuraScript : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(RogueSpells.SPELL_ROGUE_CHEAT_DEATH_COOLDOWN);
+		return ValidateSpellInfo(RogueSpells.CHEAT_DEATH_COOLDOWN);
 	}
 
 	public override bool Load()
@@ -35,7 +35,7 @@ public class spell_rog_cheat_death_AuraScript : AuraScript, IHasAuraEffects
 	{
 		var target = GetTarget().ToPlayer();
 
-		if (target.HasAura(CheatDeath.SPELL_ROGUE_CHEAT_DEATH_DMG_REDUC))
+		if (target.HasAura(CheatDeath.CHEAT_DEATH_DMG_REDUC))
 		{
 			absorbAmount = MathFunctions.CalculatePct(dmgInfo.GetDamage(), 85);
 
@@ -43,16 +43,16 @@ public class spell_rog_cheat_death_AuraScript : AuraScript, IHasAuraEffects
 		}
 		else
 		{
-			if (dmgInfo.GetDamage() < target.GetHealth() || target.HasAura(RogueSpells.SPELL_ROGUE_CHEAT_DEATH_COOLDOWN))
+			if (dmgInfo.GetDamage() < target.GetHealth() || target.HasAura(RogueSpells.CHEAT_DEATH_COOLDOWN))
 				return;
 
 			var health7 = target.CountPctFromMaxHealth(7);
 			target.SetHealth(1);
 			var healInfo = new HealInfo(target, target, (uint)health7, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
 			target.HealBySpell(healInfo);
-			target.CastSpell(target, CheatDeath.SPELL_ROGUE_CHEAT_DEATH_ANIM, true);
-			target.CastSpell(target, CheatDeath.SPELL_ROGUE_CHEAT_DEATH_DMG_REDUC, true);
-			target.CastSpell(target, RogueSpells.SPELL_ROGUE_CHEAT_DEATH_COOLDOWN, true);
+			target.CastSpell(target, CheatDeath.CHEAT_DEATH_ANIM, true);
+			target.CastSpell(target, CheatDeath.CHEAT_DEATH_DMG_REDUC, true);
+			target.CastSpell(target, RogueSpells.CHEAT_DEATH_COOLDOWN, true);
 			absorbAmount = dmgInfo.GetDamage();
 		}
 	}

@@ -16,17 +16,17 @@ namespace Scripts.Spells.Hunter;
 public class spell_hun_ancient_hysteria : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();
-	readonly UnitAuraCheck<WorldObject> _ins = new(true, AncientHysteriaSpells.SPELL_HUNTER_INSANITY);
-	readonly UnitAuraCheck<WorldObject> _dis = new(true, AncientHysteriaSpells.SPELL_MAGE_TEMPORAL_DISPLACEMENT);
-	readonly UnitAuraCheck<WorldObject> _ex = new(true, AncientHysteriaSpells.SPELL_SHAMAN_EXHAUSTION);
-	readonly UnitAuraCheck<WorldObject> _sa = new(true, AncientHysteriaSpells.SPELL_SHAMAN_SATED);
+	readonly UnitAuraCheck<WorldObject> _ins = new(true, AncientHysteriaSpells.INSANITY);
+	readonly UnitAuraCheck<WorldObject> _dis = new(true, AncientHysteriaSpells.TEMPORAL_DISPLACEMENT);
+	readonly UnitAuraCheck<WorldObject> _ex = new(true, AncientHysteriaSpells.EXHAUSTION);
+	readonly UnitAuraCheck<WorldObject> _sa = new(true, AncientHysteriaSpells.SATED);
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (!Global.SpellMgr.HasSpellInfo(AncientHysteriaSpells.SPELL_HUNTER_INSANITY, Difficulty.None) ||
-		    !Global.SpellMgr.HasSpellInfo(AncientHysteriaSpells.SPELL_MAGE_TEMPORAL_DISPLACEMENT, Difficulty.None) ||
-		    !Global.SpellMgr.HasSpellInfo(AncientHysteriaSpells.SPELL_SHAMAN_EXHAUSTION, Difficulty.None) ||
-		    !Global.SpellMgr.HasSpellInfo(AncientHysteriaSpells.SPELL_SHAMAN_SATED, Difficulty.None))
+		if (!Global.SpellMgr.HasSpellInfo(AncientHysteriaSpells.INSANITY, Difficulty.None) ||
+		    !Global.SpellMgr.HasSpellInfo(AncientHysteriaSpells.TEMPORAL_DISPLACEMENT, Difficulty.None) ||
+		    !Global.SpellMgr.HasSpellInfo(AncientHysteriaSpells.EXHAUSTION, Difficulty.None) ||
+		    !Global.SpellMgr.HasSpellInfo(AncientHysteriaSpells.SATED, Difficulty.None))
 			return false;
 
 		return true;
@@ -45,7 +45,7 @@ public class spell_hun_ancient_hysteria : SpellScript, IHasSpellEffects
 		var target = GetHitUnit();
 
 		if (target != null)
-			target.CastSpell(target, AncientHysteriaSpells.SPELL_HUNTER_INSANITY, true);
+			target.CastSpell(target, AncientHysteriaSpells.INSANITY, true);
 	}
 
 	public override void Register()

@@ -13,7 +13,7 @@ public class spell_hun_mongoose_bite : SpellScript, ISpellAfterHit
 {
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (Global.SpellMgr.GetSpellInfo(HunterSpells.SPELL_HUNTER_MONGOOSE_BITE, Difficulty.None) != null)
+		if (Global.SpellMgr.GetSpellInfo(HunterSpells.MONGOOSE_BITE, Difficulty.None) != null)
 			return false;
 
 		return true;
@@ -22,14 +22,14 @@ public class spell_hun_mongoose_bite : SpellScript, ISpellAfterHit
 	public void AfterHit()
 	{
 		var dur = 0;
-		var aur = GetCaster().GetAura(HunterSpells.SPELL_HUNTER_MONGOOSE_FURY);
+		var aur = GetCaster().GetAura(HunterSpells.MONGOOSE_FURY);
 
 		if (aur != null)
 			dur = aur.GetDuration();
 
-		GetCaster().CastSpell(GetCaster(), HunterSpells.SPELL_HUNTER_MONGOOSE_FURY, true);
+		GetCaster().CastSpell(GetCaster(), HunterSpells.MONGOOSE_FURY, true);
 
-		aur = GetCaster().GetAura(HunterSpells.SPELL_HUNTER_MONGOOSE_FURY);
+		aur = GetCaster().GetAura(HunterSpells.MONGOOSE_FURY);
 
 		if (aur != null)
 			if (dur != 0)

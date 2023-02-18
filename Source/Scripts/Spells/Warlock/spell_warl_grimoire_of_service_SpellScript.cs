@@ -18,20 +18,20 @@ namespace Scripts.Spells.Warlock
 	{
 		public enum eServiceSpells
 		{
-			SPELL_IMP_SINGE_MAGIC = 89808,
-			SPELL_VOIDWALKER_SUFFERING = 17735,
-			SPELL_SUCCUBUS_SEDUCTION = 6358,
-			SPELL_FELHUNTER_SPELL_LOCK = 19647,
-			SPELL_FELGUARD_AXE_TOSS = 89766
+			IMP_SINGE_MAGIC = 89808,
+			VOIDWALKER_SUFFERING = 17735,
+			SUCCUBUS_SEDUCTION = 6358,
+			FELHUNTER_LOCK = 19647,
+			FELGUARD_AXE_TOSS = 89766
 		}
 
 		public override bool Validate(SpellInfo UnnamedParameter)
 		{
-			return SpellManager.Instance.GetSpellInfo((uint)eServiceSpells.SPELL_FELGUARD_AXE_TOSS, Difficulty.None) != null ||
-			       SpellManager.Instance.GetSpellInfo((uint)eServiceSpells.SPELL_FELHUNTER_SPELL_LOCK, Difficulty.None) != null ||
-			       SpellManager.Instance.GetSpellInfo((uint)eServiceSpells.SPELL_IMP_SINGE_MAGIC, Difficulty.None) != null ||
-			       SpellManager.Instance.GetSpellInfo((uint)eServiceSpells.SPELL_SUCCUBUS_SEDUCTION, Difficulty.None) != null ||
-			       SpellManager.Instance.GetSpellInfo((uint)eServiceSpells.SPELL_VOIDWALKER_SUFFERING, Difficulty.None) != null;
+			return SpellManager.Instance.GetSpellInfo((uint)eServiceSpells.FELGUARD_AXE_TOSS, Difficulty.None) != null ||
+			       SpellManager.Instance.GetSpellInfo((uint)eServiceSpells.FELHUNTER_LOCK, Difficulty.None) != null ||
+			       SpellManager.Instance.GetSpellInfo((uint)eServiceSpells.IMP_SINGE_MAGIC, Difficulty.None) != null ||
+			       SpellManager.Instance.GetSpellInfo((uint)eServiceSpells.SUCCUBUS_SEDUCTION, Difficulty.None) != null ||
+			       SpellManager.Instance.GetSpellInfo((uint)eServiceSpells.VOIDWALKER_SUFFERING, Difficulty.None) != null;
 		}
 
 		public void OnSummon(Creature creature)
@@ -47,23 +47,23 @@ namespace Scripts.Spells.Warlock
 			switch (GetSpellInfo().Id)
 			{
 				case WarlockSpells.GRIMOIRE_IMP: // Imp
-					creature.CastSpell(caster, (uint)eServiceSpells.SPELL_IMP_SINGE_MAGIC, true);
+					creature.CastSpell(caster, (uint)eServiceSpells.IMP_SINGE_MAGIC, true);
 
 					break;
 				case WarlockSpells.GRIMOIRE_VOIDWALKER: // Voidwalker
-					creature.CastSpell(target, (uint)eServiceSpells.SPELL_VOIDWALKER_SUFFERING, true);
+					creature.CastSpell(target, (uint)eServiceSpells.VOIDWALKER_SUFFERING, true);
 
 					break;
 				case WarlockSpells.GRIMOIRE_SUCCUBUS: // Succubus
-					creature.CastSpell(target, (uint)eServiceSpells.SPELL_SUCCUBUS_SEDUCTION, true);
+					creature.CastSpell(target, (uint)eServiceSpells.SUCCUBUS_SEDUCTION, true);
 
 					break;
 				case WarlockSpells.GRIMOIRE_FELHUNTER: // Felhunter
-					creature.CastSpell(target, (uint)eServiceSpells.SPELL_FELHUNTER_SPELL_LOCK, true);
+					creature.CastSpell(target, (uint)eServiceSpells.FELHUNTER_LOCK, true);
 
 					break;
 				case WarlockSpells.GRIMOIRE_FELGUARD: // Felguard
-					creature.CastSpell(target, (uint)eServiceSpells.SPELL_FELGUARD_AXE_TOSS, true);
+					creature.CastSpell(target, (uint)eServiceSpells.FELGUARD_AXE_TOSS, true);
 
 					break;
 			}

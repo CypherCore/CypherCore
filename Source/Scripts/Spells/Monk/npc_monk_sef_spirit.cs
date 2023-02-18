@@ -23,9 +23,9 @@ public class npc_monk_sef_spirit : ScriptedAI
 		me.SetLevel(summoner.ToUnit().GetLevel());
 		me.SetMaxHealth(summoner.ToUnit().GetMaxHealth() / 3);
 		me.SetFullHealth();
-		summoner.CastSpell(me, MonkSpells.SPELL_MONK_TRANSCENDENCE_CLONE_TARGET, true);
-		me.CastSpell(me, me.GetEntry() == StormEarthAndFireSpells.NPC_FIRE_SPIRIT ? StormEarthAndFireSpells.SPELL_MONK_SEF_FIRE_VISUAL : StormEarthAndFireSpells.SPELL_MONK_SEF_EARTH_VISUAL, true);
-		me.CastSpell(me, StormEarthAndFireSpells.SPELL_MONK_SEF_SUMMONS_STATS, true);
+		summoner.CastSpell(me, MonkSpells.TRANSCENDENCE_CLONE_TARGET, true);
+		me.CastSpell(me, me.GetEntry() == StormEarthAndFireSpells.NPC_FIRE_SPIRIT ? StormEarthAndFireSpells.SEF_FIRE_VISUAL : StormEarthAndFireSpells.SEF_EARTH_VISUAL, true);
+		me.CastSpell(me, StormEarthAndFireSpells.SEF_SUMMONS_STATS, true);
 		var attackPower = summoner.ToUnit().m_unitData.AttackPower / 100 * 45.0f;
 		var spellPower  = summoner.ToUnit().SpellBaseDamageBonusDone(SpellSchoolMask.Nature) / 100 * 45.0f;
 
@@ -33,7 +33,7 @@ public class npc_monk_sef_spirit : ScriptedAI
 
 		if (target != null)
 		{
-			me.CastSpell(target, StormEarthAndFireSpells.SPELL_MONK_SEF_CHARGE, true);
+			me.CastSpell(target, StormEarthAndFireSpells.SEF_CHARGE, true);
 		}
 		else
 		{

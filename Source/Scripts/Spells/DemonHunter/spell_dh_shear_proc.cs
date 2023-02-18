@@ -25,20 +25,20 @@ public class spell_dh_shear_proc : AuraScript, IHasAuraEffects
 
 		var procChance = 100;
 
-		if (eventInfo.GetSpellInfo().Id == DemonHunterSpells.SPELL_DH_SHEAR)
+		if (eventInfo.GetSpellInfo().Id == DemonHunterSpells.SHEAR)
 		{
 			procChance =  15;
-			procChance += caster.GetAuraEffectAmount(ShatteredSoulsSpells.SPELL_DH_SHATTER_THE_SOULS, 0);
+			procChance += caster.GetAuraEffectAmount(ShatteredSoulsSpells.SHATTER_THE_SOULS, 0);
 		}
 
 		/*
 			if (RandomHelper.randChance(procChance))
-			    caster->CastSpell(caster, SPELL_DH_SHATTERED_SOULS_MISSILE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)SPELL_DH_LESSER_SOUL_SHARD));
+			    caster->CastSpell(caster, SHATTERED_SOULS_MISSILE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)LESSER_SOUL_SHARD));
 			*/
 
-		if (caster.GetSpellHistory().HasCooldown(DemonHunterSpells.SPELL_DH_FELBLADE))
-			if (RandomHelper.randChance(caster.GetAuraEffectAmount(DemonHunterSpells.SPELL_DH_SHEAR_PROC, 3)))
-				caster.GetSpellHistory().ResetCooldown(DemonHunterSpells.SPELL_DH_FELBLADE);
+		if (caster.GetSpellHistory().HasCooldown(DemonHunterSpells.FELBLADE))
+			if (RandomHelper.randChance(caster.GetAuraEffectAmount(DemonHunterSpells.SHEAR_PROC, 3)))
+				caster.GetSpellHistory().ResetCooldown(DemonHunterSpells.FELBLADE);
 	}
 
 	public override void Register()

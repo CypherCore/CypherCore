@@ -52,7 +52,7 @@ public class spell_mastery_icicles_proc : AuraScript, IAuraCheckProc, IHasAuraEf
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
-		var _spellCanProc = (eventInfo.GetSpellInfo().Id == MageSpells.SPELL_MAGE_FROSTBOLT || eventInfo.GetSpellInfo().Id == MageSpells.SPELL_MAGE_FROSTBOLT_TRIGGER);
+		var _spellCanProc = (eventInfo.GetSpellInfo().Id == MageSpells.FROSTBOLT || eventInfo.GetSpellInfo().Id == MageSpells.FROSTBOLT_TRIGGER);
 
 		if (_spellCanProc)
 			return true;
@@ -81,7 +81,7 @@ public class spell_mastery_icicles_proc : AuraScript, IAuraCheckProc, IHasAuraEf
 		{
 			var icilesAddSecond = false;
 
-			if (caster.HasAura(MageSpells.SPELL_MAGE_ICE_NINE))
+			if (caster.HasAura(MageSpells.ICE_NINE))
 				if (RandomHelper.randChance(20))
 					icilesAddSecond = true;
 
@@ -131,12 +131,12 @@ public class spell_mastery_icicles_proc : AuraScript, IAuraCheckProc, IHasAuraEf
 				{
 					var basePoints = currentIcicleAuraEffect.GetAmount();
 
-					if (caster.HasAura(MageSpells.SPELL_MAGE_BLACK_ICE))
+					if (caster.HasAura(MageSpells.BLACK_ICE))
 						if (RandomHelper.randChance(20))
 							basePoints *= 2;
 
 					player.CastSpell(target, IcicleHits[smallestIcicle], true);
-					player.CastSpell(target, MageSpells.SPELL_MAGE_ICICLE_DAMAGE, new CastSpellExtraArgs(SpellValueMod.BasePoint0, basePoints));
+					player.CastSpell(target, MageSpells.ICICLE_DAMAGE, new CastSpellExtraArgs(SpellValueMod.BasePoint0, basePoints));
 					player.RemoveAura(IcicleAuras[smallestIcicle]);
 				}
 
@@ -161,15 +161,15 @@ public class spell_mastery_icicles_proc : AuraScript, IAuraCheckProc, IHasAuraEf
 						if (effect != null)
 							effect.SetAmount(hitDamage);
 
-						player.AddAura(MageSpells.SPELL_MAGE_ICICLE_AURA, player);
+						player.AddAura(MageSpells.ICICLE_AURA, player);
 
-						if (caster.HasSpell(MageSpells.SPELL_MAGE_GLACIAL_SPIKE))
+						if (caster.HasSpell(MageSpells.GLACIAL_SPIKE))
 						{
-							var glacialSpikeProc = player.GetAura(MageSpells.SPELL_MAGE_ICICLE_AURA);
+							var glacialSpikeProc = player.GetAura(MageSpells.ICICLE_AURA);
 
 							if (glacialSpikeProc != null)
 								if (glacialSpikeProc.GetStackAmount() == 5)
-									player.CastSpell(player, MageSpells.SPELL_MAGE_GLACIAL_SPIKE_PROC, true);
+									player.CastSpell(player, MageSpells.GLACIAL_SPIKE_PROC, true);
 						}
 					}
 
@@ -202,12 +202,12 @@ public class spell_mastery_icicles_proc : AuraScript, IAuraCheckProc, IHasAuraEf
 				{
 					var basePoints = currentIcicleAuraEffect.GetAmount();
 
-					if (caster.HasAura(MageSpells.SPELL_MAGE_BLACK_ICE))
+					if (caster.HasAura(MageSpells.BLACK_ICE))
 						if (RandomHelper.randChance(20))
 							basePoints *= 2;
 
 					player.CastSpell(target, IcicleHits[smallestIcicle], true);
-					player.CastSpell(target, MageSpells.SPELL_MAGE_ICICLE_DAMAGE, new CastSpellExtraArgs(SpellValueMod.BasePoint0, basePoints));
+					player.CastSpell(target, MageSpells.ICICLE_DAMAGE, new CastSpellExtraArgs(SpellValueMod.BasePoint0, basePoints));
 					player.RemoveAura(IcicleAuras[smallestIcicle]);
 				}
 
@@ -232,15 +232,15 @@ public class spell_mastery_icicles_proc : AuraScript, IAuraCheckProc, IHasAuraEf
 						if (effect != null)
 							effect.SetAmount(hitDamage);
 
-						player.AddAura(MageSpells.SPELL_MAGE_ICICLE_AURA, player);
+						player.AddAura(MageSpells.ICICLE_AURA, player);
 
-						if (caster.HasSpell(MageSpells.SPELL_MAGE_GLACIAL_SPIKE))
+						if (caster.HasSpell(MageSpells.GLACIAL_SPIKE))
 						{
-							var glacialSpikeProc = player.GetAura(MageSpells.SPELL_MAGE_ICICLE_AURA);
+							var glacialSpikeProc = player.GetAura(MageSpells.ICICLE_AURA);
 
 							if (glacialSpikeProc != null)
 								if (glacialSpikeProc.GetStackAmount() == 5)
-									player.CastSpell(player, MageSpells.SPELL_MAGE_GLACIAL_SPIKE_PROC, true);
+									player.CastSpell(player, MageSpells.GLACIAL_SPIKE_PROC, true);
 						}
 					}
 

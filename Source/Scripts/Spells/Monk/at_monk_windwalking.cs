@@ -24,12 +24,12 @@ public class at_monk_windwalking : AreaTriggerAI
 		if (!caster.ToPlayer())
 			return;
 
-		var aur = unit.GetAura(MonkSpells.SPELL_MONK_WINDWALKER_AURA);
+		var aur = unit.GetAura(MonkSpells.WINDWALKER_AURA);
 
 		if (aur != null)
 			aur.SetDuration(-1);
 		else if (caster.IsFriendlyTo(unit))
-			caster.CastSpell(unit, MonkSpells.SPELL_MONK_WINDWALKER_AURA, true);
+			caster.CastSpell(unit, MonkSpells.WINDWALKER_AURA, true);
 	}
 
 	public override void OnUnitExit(Unit unit)
@@ -42,10 +42,10 @@ public class at_monk_windwalking : AreaTriggerAI
 		if (!caster.ToPlayer())
 			return;
 
-		if (unit.HasAura(MonkSpells.SPELL_MONK_WINDWALKING) && unit != caster) // Don't remove from other WW monks.
+		if (unit.HasAura(MonkSpells.WINDWALKING) && unit != caster) // Don't remove from other WW monks.
 			return;
 
-		var aur = unit.GetAura(MonkSpells.SPELL_MONK_WINDWALKER_AURA, caster.GetGUID());
+		var aur = unit.GetAura(MonkSpells.WINDWALKER_AURA, caster.GetGUID());
 
 		if (aur != null)
 		{
@@ -70,10 +70,10 @@ public class at_monk_windwalking : AreaTriggerAI
 
 			if (unit != null)
 			{
-				if (unit.HasAura(MonkSpells.SPELL_MONK_WINDWALKING) && unit != caster) // Don't remove from other WW monks.
+				if (unit.HasAura(MonkSpells.WINDWALKING) && unit != caster) // Don't remove from other WW monks.
 					continue;
 
-				var aur = unit.GetAura(MonkSpells.SPELL_MONK_WINDWALKER_AURA, caster.GetGUID());
+				var aur = unit.GetAura(MonkSpells.WINDWALKER_AURA, caster.GetGUID());
 
 				if (aur != null)
 				{

@@ -22,7 +22,7 @@ public class spell_pri_mana_leech : AuraScript, IHasAuraEffects, IAuraCheckProc
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (Global.SpellMgr.GetSpellInfo(PriestSpells.SPELL_PRIEST_MANA_LEECH_PROC, Difficulty.None) != null)
+		if (Global.SpellMgr.GetSpellInfo(PriestSpells.MANA_LEECH_PROC, Difficulty.None) != null)
 			return false;
 
 		return true;
@@ -38,7 +38,7 @@ public class spell_pri_mana_leech : AuraScript, IHasAuraEffects, IAuraCheckProc
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo UnnamedParameter)
 	{
 		PreventDefaultAction();
-		GetTarget().CastSpell(_procTarget, PriestSpells.SPELL_PRIEST_MANA_LEECH_PROC, aurEff);
+		GetTarget().CastSpell(_procTarget, PriestSpells.MANA_LEECH_PROC, aurEff);
 	}
 
 	public override void Register()

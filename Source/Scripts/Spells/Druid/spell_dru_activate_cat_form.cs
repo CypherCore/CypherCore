@@ -19,7 +19,7 @@ public class spell_dru_activate_cat_form : SpellScript, ISpellOnHit
 		if (caster == null)
 			return;
 
-		if (!caster.HasAura(ShapeshiftFormSpells.SPELL_DRUID_CAT_FORM))
-			caster.CastSpell(caster, ShapeshiftFormSpells.SPELL_DRUID_CAT_FORM, true);
+		if (!caster.HasAura(ShapeshiftFormSpells.CAT_FORM))
+			caster.CastSpell(caster, ShapeshiftFormSpells.CAT_FORM, true);
 	}
 }

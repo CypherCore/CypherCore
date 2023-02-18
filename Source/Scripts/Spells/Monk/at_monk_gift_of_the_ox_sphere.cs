@@ -19,8 +19,8 @@ public class at_monk_gift_of_the_ox_sphere : AreaTriggerAI
 
 	public enum SpellsUsed
 	{
-		SPELL_MONK_GIFT_OF_THE_OX_HEAL = 178173,
-		SPELL_MONK_HEALING_SPHERE_COOLDOWN = 224863
+		GIFT_OF_THE_OX_HEAL = 178173,
+		HEALING_SPHERE_COOLDOWN = 224863
 	}
 
 	public override void OnUpdate(uint diff)
@@ -38,7 +38,7 @@ public class at_monk_gift_of_the_ox_sphere : AreaTriggerAI
 		if (caster != null)
 			if (unit == caster && pickupDelay == 0)
 			{
-				caster.CastSpell(caster, SpellsUsed.SPELL_MONK_GIFT_OF_THE_OX_HEAL, true);
+				caster.CastSpell(caster, SpellsUsed.GIFT_OF_THE_OX_HEAL, true);
 				at.Remove();
 			}
 	}
@@ -49,7 +49,7 @@ public class at_monk_gift_of_the_ox_sphere : AreaTriggerAI
 		var caster = at.GetCaster();
 
 		if (caster != null)
-			if (caster.HasAura(SpellsUsed.SPELL_MONK_HEALING_SPHERE_COOLDOWN))
-				caster.RemoveAura(SpellsUsed.SPELL_MONK_HEALING_SPHERE_COOLDOWN);
+			if (caster.HasAura(SpellsUsed.HEALING_SPHERE_COOLDOWN))
+				caster.RemoveAura(SpellsUsed.HEALING_SPHERE_COOLDOWN);
 	}
 }

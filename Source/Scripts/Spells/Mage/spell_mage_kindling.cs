@@ -18,7 +18,7 @@ public class spell_mage_kindling : AuraScript, IHasAuraEffects, IAuraCheckProc
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
-		return eventInfo.GetSpellInfo().Id == MageSpells.SPELL_MAGE_FIREBALL || eventInfo.GetSpellInfo().Id == MageSpells.SPELL_MAGE_FIRE_BLAST || eventInfo.GetSpellInfo().Id == MageSpells.SPELL_MAGE_PHOENIX_FLAMES;
+		return eventInfo.GetSpellInfo().Id == MageSpells.FIREBALL || eventInfo.GetSpellInfo().Id == MageSpells.FIRE_BLAST || eventInfo.GetSpellInfo().Id == MageSpells.PHOENIX_FLAMES;
 	}
 
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo UnnamedParameter)
@@ -28,7 +28,7 @@ public class spell_mage_kindling : AuraScript, IHasAuraEffects, IAuraCheckProc
 		if (caster == null)
 			return;
 
-		caster.GetSpellHistory().ModifyCooldown(MageSpells.SPELL_MAGE_COMBUSTION, TimeSpan.FromSeconds(aurEff.GetAmount() * -1));
+		caster.GetSpellHistory().ModifyCooldown(MageSpells.COMBUSTION, TimeSpan.FromSeconds(aurEff.GetAmount() * -1));
 	}
 
 	public override void Register()

@@ -23,7 +23,7 @@ public class spell_dh_artifact_fiery_demise : AuraScript, IHasAuraEffects
 		if (caster == null || target == null || !caster.IsValidAttackTarget(target))
 			return;
 
-		caster.CastSpell(target, ShatteredSoulsSpells.SPELL_DH_FIERY_DEMISE_DEBUFF, aurEff.GetAmount());
+		caster.CastSpell(target, ShatteredSoulsSpells.FIERY_DEMISE_DEBUFF, aurEff.GetAmount());
 	}
 
 	public override void Register()

@@ -30,7 +30,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
             Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
             if (target != null)
             {
-                DoCast(target, boss_vanessa_vancleef.Spells.SPELL_CHARGE);
+                DoCast(target, boss_vanessa_vancleef.Spells.CHARGE);
             }
         }
 
@@ -38,7 +38,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
         {
             if (BloodBathTimer <= diff)
             {
-                DoCastVictim(boss_vanessa_vancleef.Spells.SPELL_BLOODBATH);
+                DoCastVictim(boss_vanessa_vancleef.Spells.BLOODBATH);
                 BloodBathTimer = RandomHelper.URand(8000, 11000);
             }
             else
@@ -48,7 +48,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
             if (RecklessnessTimer <= diff)
             {
-                DoCast(me, boss_vanessa_vancleef.Spells.SPELL_BLOODBATH);
+                DoCast(me, boss_vanessa_vancleef.Spells.BLOODBATH);
                 RecklessnessTimer = 20000;
             }
             else

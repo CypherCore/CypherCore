@@ -20,7 +20,7 @@ namespace Scripts.Spells.Shaman
 
 		public struct SpellsUsed
 		{
-			public const uint SPELL_SHAMAN_ANCESTRAL_PROTECTION_TOTEM_AURA = 207498;
+			public const uint ANCESTRAL_PROTECTION_TOTEM_AURA = 207498;
 		}
 
 		public override void OnCreate()
@@ -37,7 +37,7 @@ namespace Scripts.Spells.Shaman
 
 				if (caster.IsFriendlyTo(target) || target == caster.GetOwner())
 					if (!target.IsTotem())
-						caster.CastSpell(target, SpellsUsed.SPELL_SHAMAN_ANCESTRAL_PROTECTION_TOTEM_AURA, true);
+						caster.CastSpell(target, SpellsUsed.ANCESTRAL_PROTECTION_TOTEM_AURA, true);
 			}
 		}
 
@@ -53,7 +53,7 @@ namespace Scripts.Spells.Shaman
 				if (unit.IsTotem())
 					return;
 				else
-					caster.CastSpell(unit, SpellsUsed.SPELL_SHAMAN_ANCESTRAL_PROTECTION_TOTEM_AURA, true);
+					caster.CastSpell(unit, SpellsUsed.ANCESTRAL_PROTECTION_TOTEM_AURA, true);
 			}
 		}
 
@@ -64,8 +64,8 @@ namespace Scripts.Spells.Shaman
 			if (caster == null || unit == null)
 				return;
 
-			if (unit.HasAura(SpellsUsed.SPELL_SHAMAN_ANCESTRAL_PROTECTION_TOTEM_AURA) && unit.GetAura(SpellsUsed.SPELL_SHAMAN_ANCESTRAL_PROTECTION_TOTEM_AURA).GetCaster() == caster)
-				unit.RemoveAura(SpellsUsed.SPELL_SHAMAN_ANCESTRAL_PROTECTION_TOTEM_AURA);
+			if (unit.HasAura(SpellsUsed.ANCESTRAL_PROTECTION_TOTEM_AURA) && unit.GetAura(SpellsUsed.ANCESTRAL_PROTECTION_TOTEM_AURA).GetCaster() == caster)
+				unit.RemoveAura(SpellsUsed.ANCESTRAL_PROTECTION_TOTEM_AURA);
 		}
 
 		public override void OnRemove()
@@ -80,8 +80,8 @@ namespace Scripts.Spells.Shaman
 				var target = ObjectAccessor.Instance.GetUnit(caster, itr);
 
 				if (!target.IsTotem())
-					if (target.HasAura(SpellsUsed.SPELL_SHAMAN_ANCESTRAL_PROTECTION_TOTEM_AURA))
-						target.RemoveAura(SpellsUsed.SPELL_SHAMAN_ANCESTRAL_PROTECTION_TOTEM_AURA);
+					if (target.HasAura(SpellsUsed.ANCESTRAL_PROTECTION_TOTEM_AURA))
+						target.RemoveAura(SpellsUsed.ANCESTRAL_PROTECTION_TOTEM_AURA);
 			}
 		}
 	}

@@ -17,7 +17,7 @@ public class spell_monk_whirling_dragon_punch : AuraScript, IHasAuraEffects
 	private void OnTick(AuraEffect UnnamedParameter)
 	{
 		if (GetCaster())
-			GetCaster().CastSpell(GetCaster(), MonkSpells.SPELL_MONK_WHIRLING_DRAGON_PUNCH_DAMAGE, true);
+			GetCaster().CastSpell(GetCaster(), MonkSpells.WHIRLING_DRAGON_PUNCH_DAMAGE, true);
 	}
 
 	public override void Register()

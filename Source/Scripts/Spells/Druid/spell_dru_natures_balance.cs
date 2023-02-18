@@ -18,12 +18,12 @@ namespace Scripts.Spells.Druid
 
 		private struct Spells
 		{
-			public const uint SPELL_DRUID_NATURES_BALANCE = 202430;
+			public const uint NATURES_BALANCE = 202430;
 		}
 
 		public override bool Validate(SpellInfo UnnamedParameter)
 		{
-			return ValidateSpellInfo(Spells.SPELL_DRUID_NATURES_BALANCE);
+			return ValidateSpellInfo(Spells.NATURES_BALANCE);
 		}
 
 		private void HandlePeriodic(AuraEffect aurEff)
@@ -35,7 +35,7 @@ namespace Scripts.Spells.Druid
 
 			if (caster.IsInCombat())
 			{
-				var amount = Math.Max(caster.GetAuraEffect(Spells.SPELL_DRUID_NATURES_BALANCE, 0).GetAmount(), 0);
+				var amount = Math.Max(caster.GetAuraEffect(Spells.NATURES_BALANCE, 0).GetAmount(), 0);
 
 				// don't regen when permanent aura target has full power
 				if (caster.GetPower(PowerType.LunarPower) == caster.GetMaxPower(PowerType.LunarPower))

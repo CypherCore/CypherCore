@@ -26,7 +26,7 @@ public class at_mage_meteor_burn : AreaTriggerAI
 			return;
 
 		if (caster.IsValidAttackTarget(unit))
-			caster.CastSpell(unit, MageSpells.SPELL_MAGE_METEOR_BURN, true);
+			caster.CastSpell(unit, MageSpells.METEOR_BURN, true);
 	}
 
 	public override void OnUnitExit(Unit unit)
@@ -39,7 +39,7 @@ public class at_mage_meteor_burn : AreaTriggerAI
 		if (caster.GetTypeId() != TypeId.Player)
 			return;
 
-		var meteor = unit.GetAura(MageSpells.SPELL_MAGE_METEOR_BURN, caster.GetGUID());
+		var meteor = unit.GetAura(MageSpells.METEOR_BURN, caster.GetGUID());
 
 		if (meteor != null)
 			meteor.SetDuration(0);

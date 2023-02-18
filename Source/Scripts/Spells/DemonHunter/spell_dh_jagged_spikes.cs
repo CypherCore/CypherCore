@@ -27,11 +27,11 @@ public class spell_dh_jagged_spikes : AuraScript, IHasAuraEffects
 		if (caster.IsFriendlyTo(target))
 			return;
 
-		var pct    = caster.GetAuraEffectAmount(DemonHunterSpells.SPELL_DH_JAGGED_SPIKES, 0);
+		var pct    = caster.GetAuraEffectAmount(DemonHunterSpells.JAGGED_SPIKES, 0);
 		var damage = eventInfo.GetDamageInfo().GetDamage();
 		MathFunctions.ApplyPct(ref damage, pct);
 
-		caster.CastSpell(target, DemonHunterSpells.SPELL_DH_JAGGED_SPIKES_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)damage));
+		caster.CastSpell(target, DemonHunterSpells.JAGGED_SPIKES_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)damage));
 	}
 
 	public override void Register()

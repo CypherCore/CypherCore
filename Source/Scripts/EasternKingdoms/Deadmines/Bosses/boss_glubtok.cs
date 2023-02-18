@@ -65,28 +65,28 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
 
         public struct Spells
         {
-            public const uint SPELL_FIRE_BLOSSOM = 88129;
-            public const uint SPELL_FIRE_BLOSSOM_VISUAL = 88164;
-            public const uint SPELL_FROST_BLOSSOM = 88169;
-            public const uint SPELL_FROST_BLOSSOM_VISUAL = 88165;
-            public const uint SPELL_TELEPORT_VISUAL = 88002;
-            public const uint SPELL_ARCANE_POWER = 88009;
-            public const uint SPELL_FIST_OF_FLAME = 87859;
-            public const uint SPELL_FIST_OF_FROST = 87861;
-            public const uint SPELL_BLINK = 87925;
+            public const uint FIRE_BLOSSOM = 88129;
+            public const uint FIRE_BLOSSOM_VISUAL = 88164;
+            public const uint FROST_BLOSSOM = 88169;
+            public const uint FROST_BLOSSOM_VISUAL = 88165;
+            public const uint TELEPORT_VISUAL = 88002;
+            public const uint ARCANE_POWER = 88009;
+            public const uint FIST_OF_FLAME = 87859;
+            public const uint FIST_OF_FROST = 87861;
+            public const uint BLINK = 87925;
 
-            public const uint SPELL_BLOSSOM_TARGETTING = 88140;
+            public const uint BLOSSOM_TARGETTING = 88140;
 
-            public const uint SPELL_ARCANE_FIRE = 88007;
-            public const uint SPELL_ARCANE_FIRE_BEAM = 88072;
-            public const uint SPELL_ARCANE_FROST_BEAM = 88093;
-            public const uint SPELL_TRIGGER_FIRE_WALL = 91398;
-            public const uint SPELL_FIRE_WALL_TRIGGERED = 91397;
+            public const uint ARCANE_FIRE = 88007;
+            public const uint ARCANE_FIRE_BEAM = 88072;
+            public const uint ARCANE_FROST_BEAM = 88093;
+            public const uint TRIGGER_FIRE_WALL = 91398;
+            public const uint FIRE_WALL_TRIGGERED = 91397;
 
-            public const uint SPELL_ARCANE_OVERLOAD_INITIAL = 88183;
-            public const uint SPELL_FEIGN_DEATH = 70628;
-            public const uint SPELL_ARCANE_OVERLOAD_SUICIDE = 88185;
-            public const uint SPELL_ARCANE_OVERLOAD_BOOM = 90520;
+            public const uint ARCANE_OVERLOAD_INITIAL = 88183;
+            public const uint FEIGN_DEATH = 70628;
+            public const uint ARCANE_OVERLOAD_SUICIDE = 88185;
+            public const uint ARCANE_OVERLOAD_BOOM = 90520;
         }
 
         public struct Creatures
@@ -188,7 +188,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                 float o;
                 Phase2Pos.GetPosition(out x, out y, out z, out o);
                 me.NearTeleportTo(x, y, z, o);
-                DoCast(Spells.SPELL_TELEPORT_VISUAL);
+                DoCast(Spells.TELEPORT_VISUAL);
                 ResetThreatList();
                 _events.ScheduleEvent(BossEvents.EVENT_TRANSITION_SAY_1, TimeSpan.FromMilliseconds(4000));
                 _events.ScheduleEvent(BossEvents.EVENT_TRANSITION_SAY_2, TimeSpan.FromMilliseconds(6000));
@@ -201,7 +201,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                 {
                     _platter.GetAI().DoAction(Actions.ACTION_STOP_FIREWALL);
                     _events.Reset();
-                    DoCast(me, Spells.SPELL_ARCANE_OVERLOAD_INITIAL, new CastSpellExtraArgs(true));
+                    DoCast(me, Spells.ARCANE_OVERLOAD_INITIAL, new CastSpellExtraArgs(true));
                     SummonBeams();
                     Talk(Texts.SAY_DEATH);
                     _dying = true;
@@ -252,14 +252,14 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                     pos1 = GenerateTargetForBeamBunny(true);
                     pos2 = GenerateTargetForBeamBunny(true);
                     pos3 = GenerateTargetForBeamBunny(true);
-                    spellID = Spells.SPELL_ARCANE_FIRE_BEAM;
+                    spellID = Spells.ARCANE_FIRE_BEAM;
                 }
                 else
                 {
                     pos1 = GenerateTargetForBeamBunny(false);
                     pos2 = GenerateTargetForBeamBunny(false);
                     pos3 = GenerateTargetForBeamBunny(false);
-                    spellID = Spells.SPELL_ARCANE_FROST_BEAM;
+                    spellID = Spells.ARCANE_FROST_BEAM;
                 }
 
                 Creature dummy = me.SummonCreature(Creatures.NPC_BEAM_BUNNY, pos1.X, pos1.Y, pos1.Z, 0.0f, TempSummonType.TimedDespawn, TimeSpan.FromMilliseconds(7000));
@@ -290,9 +290,9 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
             if (id == (uint)Points.POINT_FALL_GROUND)
             {
                 me.SetUnitFlag(UnitFlags.ImmuneToPc);
-                DoCast(Spells.SPELL_FEIGN_DEATH);
-                me.CastWithDelay(TimeSpan.FromMilliseconds(2000), me, Spells.SPELL_ARCANE_OVERLOAD_SUICIDE, true);
-                me.CastWithDelay(TimeSpan.FromMilliseconds(1000), me, Spells.SPELL_ARCANE_OVERLOAD_BOOM, true);
+                DoCast(Spells.FEIGN_DEATH);
+                me.CastWithDelay(TimeSpan.FromMilliseconds(2000), me, Spells.ARCANE_OVERLOAD_SUICIDE, true);
+                me.CastWithDelay(TimeSpan.FromMilliseconds(1000), me, Spells.ARCANE_OVERLOAD_BOOM, true);
             }
         }
 
@@ -331,12 +331,12 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                     case BossEvents.EVENT_ELEMENTAL_FISTS:
                         if (_lastElement == false)
                         {
-                            DoCast(Spells.SPELL_FIST_OF_FROST);
+                            DoCast(Spells.FIST_OF_FROST);
                             Talk(Texts.SAY_FISTS_OF_FROST);
                         }
                         else
                         {
-                            DoCast(Spells.SPELL_FIST_OF_FLAME);
+                            DoCast(Spells.FIST_OF_FLAME);
                             Talk(Texts.SAY_FISTS_OF_FLAME);
                         }
                         me.SetReactState(ReactStates.Aggressive);
@@ -349,7 +349,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
 
                         if (random != null)
                         {
-                            DoCast(random, Spells.SPELL_BLINK);
+                            DoCast(random, Spells.BLINK);
                             me.SetReactState(ReactStates.Passive);
                             me.AttackStop();
                             me.SetFacingToObject(random);
@@ -370,7 +370,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                         {
                             me.AddUnitState(UnitState.CannotTurn);
                             Talk(Texts.SAY_ARCANE_POWER);
-                            DoCast(Spells.SPELL_ARCANE_POWER);
+                            DoCast(Spells.ARCANE_POWER);
                             SummonBeams();
 
                             MoveSplineInit init = new MoveSplineInit(me);
@@ -400,14 +400,14 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                             if (RandomHelper.randChance(50))
                             {
                                 targetEntry = (uint)Creatures.NPC_FROST_BLOSSOM_DUMMY;
-                                targetSpellID = (uint)Spells.SPELL_FROST_BLOSSOM;
-                                indicatorSpellID = (uint)Spells.SPELL_FROST_BLOSSOM_VISUAL;
+                                targetSpellID = (uint)Spells.FROST_BLOSSOM;
+                                indicatorSpellID = (uint)Spells.FROST_BLOSSOM_VISUAL;
                             }
                             else
                             {
                                 targetEntry = (uint)Creatures.NPC_FIRE_BLOSSOM_DUMMY;
-                                targetSpellID = (uint)Spells.SPELL_FIRE_BLOSSOM;
-                                indicatorSpellID = (uint)Spells.SPELL_FIRE_BLOSSOM_VISUAL;
+                                targetSpellID = (uint)Spells.FIRE_BLOSSOM;
+                                indicatorSpellID = (uint)Spells.FIRE_BLOSSOM_VISUAL;
                             }
 
                             var cList = me.GetCreatureListWithEntryInGrid(targetEntry, 100.0f);

@@ -15,7 +15,7 @@ public class spell_mage_arcane_blast : SpellScript, ISpellOnCast
 
 		if (caster != null)
 		{
-			var threes = caster.GetAura(MageSpells.SPELL_MAGE_RULE_OF_THREES_BUFF);
+			var threes = caster.GetAura(MageSpells.RULE_OF_THREES_BUFF);
 
 			if (threes != null)
 				threes.Remove();

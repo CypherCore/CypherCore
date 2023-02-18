@@ -13,6 +13,6 @@ public class spell_dh_fel_rush_specless : SpellScript, ISpellOnCast
 	{
 		var caster = GetCaster();
 
-		caster.CastSpell(DemonHunterSpells.SPELL_DH_FEL_RUSH, true);
+		caster.CastSpell(DemonHunterSpells.FEL_RUSH, true);
 	}
 }

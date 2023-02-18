@@ -44,7 +44,7 @@ public class spell_monk_touch_of_death : AuraScript, IHasAuraEffects
 			if (GetTarget().GetTypeId() == TypeId.Player)
 				damage /= 2;
 
-			caster.CastSpell(GetTarget(), MonkSpells.SPELL_MONK_TOUCH_OF_DEATH_DAMAGE, new CastSpellExtraArgs().AddSpellMod(SpellValueMod.BasePoint0, (int)damage));
+			caster.CastSpell(GetTarget(), MonkSpells.TOUCH_OF_DEATH_DAMAGE, new CastSpellExtraArgs().AddSpellMod(SpellValueMod.BasePoint0, (int)damage));
 		}
 	}
 

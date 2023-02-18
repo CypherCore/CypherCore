@@ -16,7 +16,7 @@ public class spell_hun_barbed_shot : SpellScript, ISpellOnCast
 
 		if (caster != null)
 		{
-			caster.CastSpell(caster, HunterSpells.SPELL_BARBED_SHOT_PLAYERAURA, true);
+			caster.CastSpell(caster, HunterSpells.BARBED_SHOT_PLAYERAURA, true);
 
 			if (caster.IsPlayer())
 			{
@@ -27,7 +27,7 @@ public class spell_hun_barbed_shot : SpellScript, ISpellOnCast
 					if (!pet)
 						return;
 
-					caster.CastSpell(pet, HunterSpells.SPELL_BARBED_SHOT_PETAURA, true);
+					caster.CastSpell(pet, HunterSpells.BARBED_SHOT_PETAURA, true);
 				}
 			}
 		}

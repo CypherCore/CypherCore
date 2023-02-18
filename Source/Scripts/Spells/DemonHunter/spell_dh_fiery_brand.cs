@@ -17,7 +17,7 @@ public class spell_dh_fiery_brand : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(DemonHunterSpells.SPELL_DH_FIERY_BRAND_DOT, DemonHunterSpells.SPELL_DH_FIERY_BRAND_MARKER);
+		return ValidateSpellInfo(DemonHunterSpells.FIERY_BRAND_DOT, DemonHunterSpells.FIERY_BRAND_MARKER);
 	}
 
 	private void HandleDamage(uint UnnamedParameter)
@@ -25,7 +25,7 @@ public class spell_dh_fiery_brand : SpellScript, IHasSpellEffects
 		var target = GetHitUnit();
 
 		if (target != null)
-			GetCaster().CastSpell(target, DemonHunterSpells.SPELL_DH_FIERY_BRAND_DOT, true);
+			GetCaster().CastSpell(target, DemonHunterSpells.FIERY_BRAND_DOT, true);
 	}
 
 	public override void Register()

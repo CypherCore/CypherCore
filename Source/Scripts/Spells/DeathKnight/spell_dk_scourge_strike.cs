@@ -23,21 +23,21 @@ public class spell_dk_scourge_strike : SpellScript, IHasSpellEffects
 
 		if (target != null)
 		{
-			var festeringWoundAura = target.GetAura(DeathKnightSpells.SPELL_DK_FESTERING_WOUND, GetCaster().GetGUID());
+			var festeringWoundAura = target.GetAura(DeathKnightSpells.FESTERING_WOUND, GetCaster().GetGUID());
 
 			if (festeringWoundAura != null)
 			{
-				if (caster.HasAura(DeathKnightSpells.SPELL_DK_UNHOLY_FRENZY))
-					caster.CastSpell(caster, DeathKnightSpells.SPELL_DK_UNHOLY_FRENZY_BUFF, true);
+				if (caster.HasAura(DeathKnightSpells.UNHOLY_FRENZY))
+					caster.CastSpell(caster, DeathKnightSpells.UNHOLY_FRENZY_BUFF, true);
 
-				var pestilentPustulesAura = caster.GetAura(DeathKnightSpells.SPELL_DK_PESTILENT_PUSTULES);
+				var pestilentPustulesAura = caster.GetAura(DeathKnightSpells.PESTILENT_PUSTULES);
 
 				if (pestilentPustulesAura != null)
 					if (festeringWoundAura.GetStackAmount() >= pestilentPustulesAura.GetSpellInfo().GetEffect(0).BasePoints)
 						caster.ModifyPower(PowerType.Runes, 1);
 
 				var festeringWoundBurst = 1;
-				var castiragorAura      = caster.GetAura(DeathKnightSpells.SPELL_DK_CASTIGATOR);
+				var castiragorAura      = caster.GetAura(DeathKnightSpells.CASTIGATOR);
 
 				if (castiragorAura != null)
 					festeringWoundBurst += castiragorAura.GetSpellInfo().GetEffect(1).BasePoints;
@@ -46,7 +46,7 @@ public class spell_dk_scourge_strike : SpellScript, IHasSpellEffects
 
 				for (byte i = 0; i < festeringWoundBurst; ++i)
 				{
-					caster.CastSpell(target, DeathKnightSpells.SPELL_DK_FESTERING_WOUND_DAMAGE, true);
+					caster.CastSpell(target, DeathKnightSpells.FESTERING_WOUND_DAMAGE, true);
 					festeringWoundAura.ModStackAmount(-1);
 				}
 			}

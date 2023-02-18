@@ -18,11 +18,11 @@ public class spell_dk_desecrated_ground : AuraScript, IHasAuraEffects
 	{
 		if (GetCaster())
 		{
-			var dynObj = GetCaster().GetDynObject(DeathKnightSpells.SPELL_DK_DESECRATED_GROUND);
+			var dynObj = GetCaster().GetDynObject(DeathKnightSpells.DESECRATED_GROUND);
 
 			if (dynObj != null)
 				if (GetCaster().GetDistance(dynObj) <= 8.0f)
-					GetCaster().CastSpell(GetCaster(), DeathKnightSpells.SPELL_DK_DESECRATED_GROUND_IMMUNE, true);
+					GetCaster().CastSpell(GetCaster(), DeathKnightSpells.DESECRATED_GROUND_IMMUNE, true);
 		}
 	}
 

@@ -18,7 +18,7 @@ namespace Scripts.Spells.Shaman
 		public override void Reset()
 		{
 			if (me.GetOwner())
-				me.CastSpell(me.GetOwner(), TotemSpells.SPELL_TOTEM_CLOUDBURST_EFFECT, true);
+				me.CastSpell(me.GetOwner(), TotemSpells.TOTEM_CLOUDBURST_EFFECT, true);
 		}
 	}
 }

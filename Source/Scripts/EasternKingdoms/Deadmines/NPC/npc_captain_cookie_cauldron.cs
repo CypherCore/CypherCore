@@ -25,8 +25,8 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
         public override void Reset()
         {
-            DoCast(me, eSpell.SPELL_CAULDRON_VISUAL, new Game.Spells.CastSpellExtraArgs(true));
-            DoCast(me, eSpell.SPELL_CAULDRON_FIRE);
+            DoCast(me, eSpell.CAULDRON_VISUAL, new Game.Spells.CastSpellExtraArgs(true));
+            DoCast(me, eSpell.CAULDRON_FIRE);
             me.SetUnitFlag(UnitFlags.Stunned);
         }
     }

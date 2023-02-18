@@ -16,6 +16,6 @@ public class at_dk_decomposing_aura : AreaTriggerAI
 
 	public override void OnUnitExit(Unit unit)
 	{
-		unit.RemoveAurasDueToSpell(DeathKnightSpells.SPELL_DK_DECOMPOSING_AURA_DAMAGE, at.GetCasterGuid());
+		unit.RemoveAurasDueToSpell(DeathKnightSpells.DECOMPOSING_AURA_DAMAGE, at.GetCasterGuid());
 	}
 }

@@ -17,7 +17,7 @@ public class spell_dru_ursols_vortex : SpellScript, IHasSpellEffects
 
 	private struct Spells
 	{
-		public static readonly uint SPELL_DRUID_URSOLS_VORTEX_SLOW = 127797;
+		public static readonly uint URSOLS_VORTEX_SLOW = 127797;
 	}
 
 
@@ -26,7 +26,7 @@ public class spell_dru_ursols_vortex : SpellScript, IHasSpellEffects
 		var caster = GetCaster();
 
 		if (caster != null)
-			caster.AddAura(Spells.SPELL_DRUID_URSOLS_VORTEX_SLOW, GetHitUnit());
+			caster.AddAura(Spells.URSOLS_VORTEX_SLOW, GetHitUnit());
 	}
 
 	public override void Register()

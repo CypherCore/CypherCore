@@ -22,7 +22,7 @@ public class spell_dh_fracture : SpellScript, IHasSpellEffects
 			return;
 
 		//  for (uint8 i = 0; i < 2; ++i)
-		//caster->CastCustomSpell(SPELL_DH_SHATTERED_SOULS_MISSILE, SpellValueMod.BasePoint0, SPELL_DH_LESSER_SOUL_SHARD, caster, true);
+		//caster->CastCustomSpell(SHATTERED_SOULS_MISSILE, SpellValueMod.BasePoint0, LESSER_SOUL_SHARD, caster, true);
 	}
 
 	public override void Register()

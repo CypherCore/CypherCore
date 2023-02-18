@@ -18,7 +18,7 @@ namespace Scripts.Spells.Shaman
 		private void HandleKnockBack(uint effIndex)
 		{
 			// Glyph of Thunderstorm
-			if (GetCaster().HasAura(ShamanSpells.SPELL_SHAMAN_GLYPH_OF_THUNDERSTORM))
+			if (GetCaster().HasAura(ShamanSpells.GLYPH_OF_THUNDERSTORM))
 				PreventHitDefaultEffect(effIndex);
 		}
 

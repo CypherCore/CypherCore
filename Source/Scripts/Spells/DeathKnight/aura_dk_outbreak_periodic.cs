@@ -26,7 +26,7 @@ public class aura_dk_outbreak_periodic : AuraScript, IHasAuraEffects
 
 			foreach (var unit in friendlyUnits)
 				if (!unit.HasUnitFlag(UnitFlags.ImmuneToPc) && unit.IsInCombatWith(caster))
-					caster.CastSpell(unit, DeathKnightSpells.SPELL_DK_VIRULENT_PLAGUE, true);
+					caster.CastSpell(unit, DeathKnightSpells.VIRULENT_PLAGUE, true);
 		}
 	}
 

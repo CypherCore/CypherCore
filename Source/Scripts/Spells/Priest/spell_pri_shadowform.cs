@@ -16,17 +16,17 @@ public class spell_pri_shadowform : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(PriestSpells.SPELL_PRIEST_SHADOWFORM_VISUAL_WITHOUT_GLYPH, PriestSpells.SPELL_PRIEST_SHADOWFORM_VISUAL_WITH_GLYPH);
+		return ValidateSpellInfo(PriestSpells.SHADOWFORM_VISUAL_WITHOUT_GLYPH, PriestSpells.SHADOWFORM_VISUAL_WITH_GLYPH);
 	}
 
 	private void HandleEffectApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
-		GetTarget().CastSpell(GetTarget(), GetTarget().HasAura(PriestSpells.SPELL_PRIEST_GLYPH_OF_SHADOW) ? PriestSpells.SPELL_PRIEST_SHADOWFORM_VISUAL_WITH_GLYPH : PriestSpells.SPELL_PRIEST_SHADOWFORM_VISUAL_WITHOUT_GLYPH, true);
+		GetTarget().CastSpell(GetTarget(), GetTarget().HasAura(PriestSpells.GLYPH_OF_SHADOW) ? PriestSpells.SHADOWFORM_VISUAL_WITH_GLYPH : PriestSpells.SHADOWFORM_VISUAL_WITHOUT_GLYPH, true);
 	}
 
 	private void HandleEffectRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 	{
-		GetTarget().RemoveAurasDueToSpell(GetTarget().HasAura(PriestSpells.SPELL_PRIEST_GLYPH_OF_SHADOW) ? PriestSpells.SPELL_PRIEST_SHADOWFORM_VISUAL_WITH_GLYPH : PriestSpells.SPELL_PRIEST_SHADOWFORM_VISUAL_WITHOUT_GLYPH);
+		GetTarget().RemoveAurasDueToSpell(GetTarget().HasAura(PriestSpells.GLYPH_OF_SHADOW) ? PriestSpells.SHADOWFORM_VISUAL_WITH_GLYPH : PriestSpells.SHADOWFORM_VISUAL_WITHOUT_GLYPH);
 	}
 
 	public override void Register()

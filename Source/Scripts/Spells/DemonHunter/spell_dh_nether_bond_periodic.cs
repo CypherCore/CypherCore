@@ -54,8 +54,8 @@ public class spell_dh_nether_bond_periodic : AuraScript, IHasAuraEffects
 			targetHealBp   = m_BondUnit.CountPctFromMaxHealth(healthPct) - m_BondUnit.GetHealth();
 		}
 
-		caster.CastSpell(caster, DemonHunterSpells.SPELL_DH_NETHER_BOND_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, casterDamageBp).AddSpellMod(SpellValueMod.BasePoint1, casterHealBp));
-		caster.CastSpell(m_BondUnit, DemonHunterSpells.SPELL_DH_NETHER_BOND_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, targetDamageBp).AddSpellMod(SpellValueMod.BasePoint1, targetHealBp));
+		caster.CastSpell(caster, DemonHunterSpells.NETHER_BOND_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, casterDamageBp).AddSpellMod(SpellValueMod.BasePoint1, casterHealBp));
+		caster.CastSpell(m_BondUnit, DemonHunterSpells.NETHER_BOND_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, targetDamageBp).AddSpellMod(SpellValueMod.BasePoint1, targetHealBp));
 	}
 
 	private Unit GetBondUnit()
@@ -71,7 +71,7 @@ public class spell_dh_nether_bond_periodic : AuraScript, IHasAuraEffects
 		Cell.VisitGrid(caster, search, 100.0f);
 
 		foreach (var u in units)
-			if (u.HasAura(DemonHunterSpells.SPELL_DH_NETHER_BOND, caster.GetGUID()))
+			if (u.HasAura(DemonHunterSpells.NETHER_BOND, caster.GetGUID()))
 				return u;
 
 		return null;

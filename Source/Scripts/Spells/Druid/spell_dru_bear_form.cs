@@ -21,10 +21,10 @@ public class spell_dru_bear_form : AuraScript, IHasAuraEffects
 		if (caster == null)
 			return;
 
-		caster.CastSpell(caster, BearFormSpells.SPELL_DRUID_BEARFORM_OVERRIDE, true);
+		caster.CastSpell(caster, BearFormSpells.BEARFORM_OVERRIDE, true);
 
-		if (caster.HasSpell(BearFormSpells.SPELL_DRUID_STAMPEDING_ROAR))
-			caster.CastSpell(caster, BearFormSpells.SPELL_DRUID_STAMPEDING_ROAR_BEAR_OVERRIDE, true);
+		if (caster.HasSpell(BearFormSpells.STAMPEDING_ROAR))
+			caster.CastSpell(caster, BearFormSpells.STAMPEDING_ROAR_BEAR_OVERRIDE, true);
 	}
 
 	private void OnRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
@@ -34,10 +34,10 @@ public class spell_dru_bear_form : AuraScript, IHasAuraEffects
 		if (caster == null)
 			return;
 
-		caster.RemoveAurasDueToSpell(BearFormSpells.SPELL_DRUID_BEARFORM_OVERRIDE);
+		caster.RemoveAurasDueToSpell(BearFormSpells.BEARFORM_OVERRIDE);
 
-		if (caster.HasSpell(BearFormSpells.SPELL_DRUID_STAMPEDING_ROAR))
-			caster.RemoveAurasDueToSpell(BearFormSpells.SPELL_DRUID_STAMPEDING_ROAR_BEAR_OVERRIDE);
+		if (caster.HasSpell(BearFormSpells.STAMPEDING_ROAR))
+			caster.RemoveAurasDueToSpell(BearFormSpells.STAMPEDING_ROAR_BEAR_OVERRIDE);
 	}
 
 	public override void Register()

@@ -48,7 +48,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
                 return true;
             }
 
-            pPlayer.CastSpell(pPlayer, (pPlayer.GetMap().IsHeroic() ? eSpell.SPELL_NAUSEATED_H : eSpell.SPELL_NAUSEATED), true);
+            pPlayer.CastSpell(pPlayer, (pPlayer.GetMap().IsHeroic() ? eSpell.NAUSEATED_H : eSpell.NAUSEATED), true);
 
             me.DespawnOrUnsummon();
             return true;

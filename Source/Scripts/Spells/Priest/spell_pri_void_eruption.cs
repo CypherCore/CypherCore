@@ -18,7 +18,7 @@ public class spell_pri_void_eruption : SpellScript, IHasSpellEffects, ISpellOnCa
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(PriestSpells.SPELL_PRIEST_VOID_ERUPTION, PriestSpells.SPELL_PRIEST_VOID_ERUPTION_DAMAGE);
+		return ValidateSpellInfo(PriestSpells.VOID_ERUPTION, PriestSpells.VOID_ERUPTION_DAMAGE);
 	}
 
 	private void FilterTargets(List<WorldObject> targets)
@@ -35,7 +35,7 @@ public class spell_pri_void_eruption : SpellScript, IHasSpellEffects, ISpellOnCa
 			                 if (targ == null)
 				                 return true;
 
-			                 return !(targ.HasAura(PriestSpells.SPELL_PRIEST_SHADOW_WORD_PAIN, caster.GetGUID()) || targ.HasAura(PriestSpells.SPELL_PRIEST_VAMPIRIC_TOUCH, caster.GetGUID()));
+			                 return !(targ.HasAura(PriestSpells.SHADOW_WORD_PAIN, caster.GetGUID()) || targ.HasAura(PriestSpells.VAMPIRIC_TOUCH, caster.GetGUID()));
 		                 });
 	}
 
@@ -53,7 +53,7 @@ public class spell_pri_void_eruption : SpellScript, IHasSpellEffects, ISpellOnCa
 			return;
 
 		var spellid = RandomHelper.RandShort() % 2; //there are two animations which should be random
-		caster.CastSpell(target, PriestSpells.SPELL_PRIEST_VOID_ERUPTION_DAMAGE + spellid, true);
+		caster.CastSpell(target, PriestSpells.VOID_ERUPTION_DAMAGE + spellid, true);
 	}
 
 	public void OnCast()
@@ -63,10 +63,10 @@ public class spell_pri_void_eruption : SpellScript, IHasSpellEffects, ISpellOnCa
 		if (caster == null)
 			return;
 
-		caster.CastSpell(caster, PriestSpells.SPELL_PRIEST_VOIDFORM_BUFFS, true);
+		caster.CastSpell(caster, PriestSpells.VOIDFORM_BUFFS, true);
 
-		if (!caster.HasAura(PriestSpells.SPELL_PRIEST_SHADOWFORM_STANCE))
-			caster.CastSpell(caster, PriestSpells.SPELL_PRIEST_SHADOWFORM_STANCE, true);
+		if (!caster.HasAura(PriestSpells.SHADOWFORM_STANCE))
+			caster.CastSpell(caster, PriestSpells.SHADOWFORM_STANCE, true);
 	}
 
 	public override void Register()

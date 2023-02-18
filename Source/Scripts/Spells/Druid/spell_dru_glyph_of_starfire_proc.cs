@@ -19,7 +19,7 @@ public class spell_dru_glyph_of_starfire_proc : AuraScript, IHasAuraEffects
 	private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
 		PreventDefaultAction();
-		GetTarget().CastSpell(eventInfo.GetProcTarget(), DruidSpells.SPELL_DRUID_GLYPH_OF_STARFIRE, true);
+		GetTarget().CastSpell(eventInfo.GetProcTarget(), DruidSpells.GLYPH_OF_STARFIRE, true);
 	}
 
 	public override void Register()

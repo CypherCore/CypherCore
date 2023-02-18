@@ -17,8 +17,8 @@ public class spell_dru_swiftmend : SpellScript, IHasSpellEffects
 
 	private struct Spells
 	{
-		public static readonly uint SPELL_DRUID_SOUL_OF_THE_FOREST = 158478;
-		public static readonly uint SPELL_DRUID_SOUL_OF_THE_FOREST_TRIGGERED = 114108;
+		public static readonly uint SOUL_OF_THE_FOREST = 158478;
+		public static readonly uint SOUL_OF_THE_FOREST_TRIGGERED = 114108;
 	}
 
 
@@ -27,8 +27,8 @@ public class spell_dru_swiftmend : SpellScript, IHasSpellEffects
 		var caster = GetCaster();
 
 		if (caster != null)
-			if (caster.HasAura(Spells.SPELL_DRUID_SOUL_OF_THE_FOREST))
-				caster.AddAura(Spells.SPELL_DRUID_SOUL_OF_THE_FOREST_TRIGGERED, caster);
+			if (caster.HasAura(Spells.SOUL_OF_THE_FOREST))
+				caster.AddAura(Spells.SOUL_OF_THE_FOREST_TRIGGERED, caster);
 	}
 
 	public override void Register()

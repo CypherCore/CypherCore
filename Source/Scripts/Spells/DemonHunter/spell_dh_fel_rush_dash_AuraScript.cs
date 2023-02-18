@@ -23,7 +23,7 @@ public class spell_dh_fel_rush_dash_AuraScript : AuraScript, IHasAuraEffects
 			caster.m_Events
 			      .AddEventAtOffset(() =>
 			                        {
-				                        if (!caster.HasAura(DemonHunterSpells.SPELL_DH_FEL_RUSH_AIR))
+				                        if (!caster.HasAura(DemonHunterSpells.FEL_RUSH_AIR))
 					                        caster.SetDisableGravity(false);
 			                        },
 			                        TimeSpan.FromMilliseconds(100));

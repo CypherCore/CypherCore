@@ -24,7 +24,7 @@ public class spell_rog_roll_the_bones_duration_AuraScript : AuraScript, IHasAura
 		if (caster == null)
 			return;
 
-		var rtb = caster.GetAura(RogueSpells.SPELL_ROGUE_ROLL_THE_BONES);
+		var rtb = caster.GetAura(RogueSpells.ROLL_THE_BONES);
 
 		if (rtb == null)
 		{

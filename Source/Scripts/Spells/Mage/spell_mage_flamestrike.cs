@@ -21,21 +21,21 @@ public class spell_mage_flamestrike : SpellScript, ISpellAfterCast, IHasSpellEff
 		if (caster == null)
 			return;
 
-		if (caster.HasAura(MageSpells.SPELL_MAGE_HOT_STREAK))
+		if (caster.HasAura(MageSpells.HOT_STREAK))
 		{
-			caster.RemoveAurasDueToSpell(MageSpells.SPELL_MAGE_HOT_STREAK);
+			caster.RemoveAurasDueToSpell(MageSpells.HOT_STREAK);
 
-			if (caster.HasAura(MageSpells.SPELL_MAGE_PYROMANIAC))
+			if (caster.HasAura(MageSpells.PYROMANIAC))
 			{
-				var pyromaniacEff0 = caster.GetAuraEffect(MageSpells.SPELL_MAGE_PYROMANIAC, 0);
+				var pyromaniacEff0 = caster.GetAuraEffect(MageSpells.PYROMANIAC, 0);
 
 				if (pyromaniacEff0 != null)
 					if (RandomHelper.randChance(pyromaniacEff0.GetAmount()))
 					{
-						if (caster.HasAura(MageSpells.SPELL_MAGE_HEATING_UP))
-							caster.RemoveAurasDueToSpell(MageSpells.SPELL_MAGE_HEATING_UP);
+						if (caster.HasAura(MageSpells.HEATING_UP))
+							caster.RemoveAurasDueToSpell(MageSpells.HEATING_UP);
 
-						caster.CastSpell(caster, MageSpells.SPELL_MAGE_HOT_STREAK, true);
+						caster.CastSpell(caster, MageSpells.HOT_STREAK, true);
 					}
 			}
 		}
@@ -49,8 +49,8 @@ public class spell_mage_flamestrike : SpellScript, ISpellAfterCast, IHasSpellEff
 		if (caster == null || dest == null)
 			return;
 
-		if (caster.HasAura(MageSpells.SPELL_MAGE_FLAME_PATCH))
-			caster.CastSpell(dest.GetPosition(), MageSpells.SPELL_MAGE_FLAME_PATCH_TRIGGER, true);
+		if (caster.HasAura(MageSpells.FLAME_PATCH))
+			caster.CastSpell(dest.GetPosition(), MageSpells.FLAME_PATCH_TRIGGER, true);
 	}
 
 	public override void Register()

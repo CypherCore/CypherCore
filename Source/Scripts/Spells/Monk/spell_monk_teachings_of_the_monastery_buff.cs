@@ -17,15 +17,15 @@ public class spell_monk_teachings_of_the_monastery_buff : AuraScript, IHasAuraEf
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(MonkSpells.SPELL_MONK_TEACHINGS_OF_THE_MONASTERY_PASSIVE, MonkSpells.SPELL_MONK_BLACKOUT_KICK_TRIGGERED, MonkSpells.SPELL_MONK_BLACKOUT_KICK);
+		return ValidateSpellInfo(MonkSpells.TEACHINGS_OF_THE_MONASTERY_PASSIVE, MonkSpells.BLACKOUT_KICK_TRIGGERED, MonkSpells.BLACKOUT_KICK);
 	}
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
-		if (!GetTarget().HasAura(MonkSpells.SPELL_MONK_TEACHINGS_OF_THE_MONASTERY_PASSIVE))
+		if (!GetTarget().HasAura(MonkSpells.TEACHINGS_OF_THE_MONASTERY_PASSIVE))
 			return false;
 
-		if (eventInfo.GetSpellInfo().Id != MonkSpells.SPELL_MONK_BLACKOUT_KICK)
+		if (eventInfo.GetSpellInfo().Id != MonkSpells.BLACKOUT_KICK)
 			return false;
 
 		return true;
@@ -38,7 +38,7 @@ public class spell_monk_teachings_of_the_monastery_buff : AuraScript, IHasAuraEf
 		if (monasteryBuff != null)
 		{
 			for (byte i = 0; i < monasteryBuff.GetStackAmount(); ++i)
-				GetTarget().CastSpell(eventInfo.GetProcTarget(), MonkSpells.SPELL_MONK_BLACKOUT_KICK_TRIGGERED);
+				GetTarget().CastSpell(eventInfo.GetProcTarget(), MonkSpells.BLACKOUT_KICK_TRIGGERED);
 
 			monasteryBuff.Remove();
 		}

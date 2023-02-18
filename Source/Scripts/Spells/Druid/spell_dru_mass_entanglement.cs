@@ -18,6 +18,6 @@ public class spell_dru_mass_entanglement : SpellScript, ISpellOnCast
 
 		if (targetList.Count != 0)
 			foreach (var targets in targetList)
-				GetCaster().AddAura(DruidSpells.SPELL_DRU_MASS_ENTANGLEMENT, targets);
+				GetCaster().AddAura(DruidSpells.MASS_ENTANGLEMENT, targets);
 	}
 }

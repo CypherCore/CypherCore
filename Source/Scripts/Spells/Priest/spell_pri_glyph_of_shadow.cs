@@ -16,7 +16,7 @@ public class spell_pri_glyph_of_shadow : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (Global.SpellMgr.GetSpellInfo(PriestSpells.SPELL_PRIEST_SHADOWFORM_VISUAL_WITH_GLYPH, Difficulty.None) != null)
+		if (Global.SpellMgr.GetSpellInfo(PriestSpells.SHADOWFORM_VISUAL_WITH_GLYPH, Difficulty.None) != null)
 			return false;
 
 		return true;
@@ -29,8 +29,8 @@ public class spell_pri_glyph_of_shadow : AuraScript, IHasAuraEffects
 		if (caster == null)
 			return;
 
-		caster.RemoveAurasDueToSpell(PriestSpells.SPELL_PRIEST_SHADOWFORM_VISUAL_WITHOUT_GLYPH);
-		caster.CastSpell(caster, PriestSpells.SPELL_PRIEST_SHADOWFORM_VISUAL_WITH_GLYPH, true);
+		caster.RemoveAurasDueToSpell(PriestSpells.SHADOWFORM_VISUAL_WITHOUT_GLYPH);
+		caster.CastSpell(caster, PriestSpells.SHADOWFORM_VISUAL_WITH_GLYPH, true);
 	}
 
 	private void HandleRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
@@ -40,8 +40,8 @@ public class spell_pri_glyph_of_shadow : AuraScript, IHasAuraEffects
 		if (caster == null)
 			return;
 
-		caster.RemoveAurasDueToSpell(PriestSpells.SPELL_PRIEST_SHADOWFORM_VISUAL_WITH_GLYPH);
-		caster.CastSpell(caster, PriestSpells.SPELL_PRIEST_SHADOWFORM_VISUAL_WITHOUT_GLYPH, true);
+		caster.RemoveAurasDueToSpell(PriestSpells.SHADOWFORM_VISUAL_WITH_GLYPH);
+		caster.CastSpell(caster, PriestSpells.SHADOWFORM_VISUAL_WITHOUT_GLYPH, true);
 	}
 
 	public override void Register()

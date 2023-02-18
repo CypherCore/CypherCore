@@ -22,6 +22,6 @@ public class at_dru_lunar_beam : AreaTriggerAI
 	public override void OnPeriodicProc()
 	{
 		if (at.GetCaster())
-			at.GetCaster().CastSpell(at.GetPosition(), DruidSpells.SPELL_DRU_LUNAR_BEAM_DAMAGE_HEAL, true);
+			at.GetCaster().CastSpell(at.GetPosition(), DruidSpells.LUNAR_BEAM_DAMAGE_HEAL, true);
 	}
 }

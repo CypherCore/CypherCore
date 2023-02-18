@@ -77,7 +77,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
                             me.SetUnitFlag(UnitFlags.Stunned);
                             if (UiTimer <= diff)
                             {
-                                me.CastSpell(victim, IsHeroic() ? DMSpells.SPELL_THROW_H : DMSpells.SPELL_THROW);
+                                me.CastSpell(victim, IsHeroic() ? DMSpells.THROW_H : DMSpells.THROW);
                                 UiTimer = 2000;
                             }
                             else

@@ -18,7 +18,7 @@ namespace Scripts.Spells.Shaman
 
 		public override void Reset()
 		{
-			me.CastSpell(null, TotemSpells.SPELL_TOTEM_VOODOO_AT, true);
+			me.CastSpell(null, TotemSpells.TOTEM_VOODOO_AT, true);
 		}
 	}
 }

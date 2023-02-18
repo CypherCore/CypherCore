@@ -21,8 +21,8 @@ namespace Scripts.Spells.Warrior
 			if (killer.GetClass() != Class.Warrior)
 				return;
 
-			if (!killer.HasAura(WarriorSpells.SPELL_WARRRIOR_WAR_MACHINE_BUFF) && killer.HasAura(WarriorSpells.WAR_MACHINE))
-				killer.CastSpell(null, WarriorSpells.SPELL_WARRRIOR_WAR_MACHINE_BUFF, true);
+			if (!killer.HasAura(WarriorSpells.WARRRIOR_WAR_MACHINE_BUFF) && killer.HasAura(WarriorSpells.WAR_MACHINE))
+				killer.CastSpell(null, WarriorSpells.WARRRIOR_WAR_MACHINE_BUFF, true);
 		}
 
 		public void OnCreatureKill(Player killer, Creature killed)
@@ -30,8 +30,8 @@ namespace Scripts.Spells.Warrior
 			if (killer.GetClass() != Class.Warrior)
 				return;
 
-			if (!killer.HasAura(WarriorSpells.SPELL_WARRRIOR_WAR_MACHINE_BUFF) && killer.HasAura(WarriorSpells.WAR_MACHINE))
-				killer.CastSpell(null, WarriorSpells.SPELL_WARRRIOR_WAR_MACHINE_BUFF, true);
+			if (!killer.HasAura(WarriorSpells.WARRRIOR_WAR_MACHINE_BUFF) && killer.HasAura(WarriorSpells.WAR_MACHINE))
+				killer.CastSpell(null, WarriorSpells.WARRRIOR_WAR_MACHINE_BUFF, true);
 		}
 	}
 }

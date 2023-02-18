@@ -13,17 +13,17 @@ public class spell_dru_rejuvenation : SpellScript, ISpellBeforeHit, ISpellAfterH
 {
 	public struct Spells
 	{
-		public static uint SPELL_DRUID_CULTIVATION = 200390;
-		public static uint SPELL_DRUID_CULTIVATION_HOT = 200389;
-		public static uint SPELL_DRUID_GERMINATION = 155675;
-		public static uint SPELL_DRUID_GERMINATION_HOT = 155777;
-		public static uint SPELL_DRUID_ABUNDANCE = 207383;
-		public static uint SPELL_DRUID_ABUNDANCE_BUFF = 207640;
+		public static uint CULTIVATION = 200390;
+		public static uint CULTIVATION_HOT = 200389;
+		public static uint GERMINATION = 155675;
+		public static uint GERMINATION_HOT = 155777;
+		public static uint ABUNDANCE = 207383;
+		public static uint ABUNDANCE_BUFF = 207640;
 	}
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(Spells.SPELL_DRUID_GERMINATION, Spells.SPELL_DRUID_GERMINATION_HOT, Spells.SPELL_DRUID_ABUNDANCE, Spells.SPELL_DRUID_ABUNDANCE_BUFF);
+		return ValidateSpellInfo(Spells.GERMINATION, Spells.GERMINATION_HOT, Spells.ABUNDANCE, Spells.ABUNDANCE_BUFF);
 	}
 
 	private int m_RejuvenationAura = 0;
@@ -41,22 +41,22 @@ public class spell_dru_rejuvenation : SpellScript, ISpellBeforeHit, ISpellAfterH
 		if (target == null)
 			return;
 
-		var RejuvenationAura = target.GetAura(DruidSpells.SPELL_DRUID_REJUVENATION, caster.GetGUID());
+		var RejuvenationAura = target.GetAura(DruidSpells.REJUVENATION, caster.GetGUID());
 
 		if (RejuvenationAura != null && m_RejuvenationAura > 0)
 			RejuvenationAura.SetDuration(m_RejuvenationAura);
 
-		var NewRejuvenationAuraEffect = target.GetAuraEffect(DruidSpells.SPELL_DRUID_REJUVENATION, 0);
+		var NewRejuvenationAuraEffect = target.GetAuraEffect(DruidSpells.REJUVENATION, 0);
 
 		if (NewRejuvenationAuraEffect != null)
-			if (caster.HasAura(SoulOfTheForestSpells.SPELL_DRUID_SOUL_OF_THE_FOREST_RESTO))
+			if (caster.HasAura(SoulOfTheForestSpells.SOUL_OF_THE_FOREST_RESTO))
 			{
 				NewRejuvenationAuraEffect.SetAmount(NewRejuvenationAuraEffect.GetAmount() * 2);
-				caster.RemoveAura(SoulOfTheForestSpells.SPELL_DRUID_SOUL_OF_THE_FOREST_RESTO);
+				caster.RemoveAura(SoulOfTheForestSpells.SOUL_OF_THE_FOREST_RESTO);
 			}
 
 		if (caster.HasAura(207383))
-			caster.CastSpell(caster, Spells.SPELL_DRUID_ABUNDANCE, true);
+			caster.CastSpell(caster, Spells.ABUNDANCE, true);
 	}
 
 	public void BeforeHit(SpellMissInfo missInfo)
@@ -71,15 +71,15 @@ public class spell_dru_rejuvenation : SpellScript, ISpellBeforeHit, ISpellAfterH
 		if (target == null)
 			return;
 
-		if (caster.HasAura(SoulOfTheForestSpells.SPELL_DRUID_SOUL_OF_THE_FOREST_RESTO))
+		if (caster.HasAura(SoulOfTheForestSpells.SOUL_OF_THE_FOREST_RESTO))
 			//      NewRejuvenationAuraEffect->SetAmount(NewRejuvenationAuraEffect->GetAmount() * 2);
 			SetHitHeal(GetHitHeal() * 2);
 
-		//      caster->RemoveAura(SPELL_DRUID_SOUL_OF_THE_FOREST_RESTO);
+		//      caster->RemoveAura(SOUL_OF_THE_FOREST_RESTO);
 		///Germination
-		if (caster.HasAura(155675) && target.HasAura(DruidSpells.SPELL_DRUID_REJUVENATION, caster.GetGUID()))
+		if (caster.HasAura(155675) && target.HasAura(DruidSpells.REJUVENATION, caster.GetGUID()))
 		{
-			var RejuvenationAura = target.GetAura(DruidSpells.SPELL_DRUID_REJUVENATION, caster.GetGUID());
+			var RejuvenationAura = target.GetAura(DruidSpells.REJUVENATION, caster.GetGUID());
 
 			if (RejuvenationAura == null)
 				return;
@@ -101,7 +101,7 @@ public class spell_dru_rejuvenation : SpellScript, ISpellBeforeHit, ISpellAfterH
 
 					if (GerminationDuration > RejuvenationDuration)
 					{
-						caster.AddAura(DruidSpells.SPELL_DRUID_REJUVENATION, target);
+						caster.AddAura(DruidSpells.REJUVENATION, target);
 					}
 					else
 					{

@@ -17,7 +17,7 @@ public class spell_dk_soul_reaper : AuraScript, IHasAuraEffects
 	private void HandlePeriodic(AuraEffect UnnamedParameter)
 	{
 		if (GetCaster() && GetTarget() && GetTarget().IsDead())
-			GetCaster().CastSpell(DeathKnightSpells.SPELL_DK_SOUL_REAPER_MOD_HASTE, true);
+			GetCaster().CastSpell(DeathKnightSpells.SOUL_REAPER_MOD_HASTE, true);
 	}
 
 	public override void Register()

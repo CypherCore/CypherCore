@@ -30,7 +30,7 @@ public class spell_hun_kill_command : SpellScript, IHasSpellEffects, ISpellCheck
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (Global.SpellMgr.GetSpellInfo(HunterSpells.SPELL_HUNTER_KILL_COMMAND, Difficulty.None) != null)
+		if (Global.SpellMgr.GetSpellInfo(HunterSpells.KILL_COMMAND, Difficulty.None) != null)
 			return false;
 
 		return true;
@@ -71,7 +71,7 @@ public class spell_hun_kill_command : SpellScript, IHasSpellEffects, ISpellCheck
 				var target = GetExplTargetUnit();
 				var player = GetCaster().ToPlayer();
 
-				pet.CastSpell(GetExplTargetUnit(), HunterSpells.SPELL_HUNTER_KILL_COMMAND_TRIGGER, true);
+				pet.CastSpell(GetExplTargetUnit(), HunterSpells.KILL_COMMAND_TRIGGER, true);
 
 				if (pet.GetVictim())
 				{
@@ -82,7 +82,7 @@ public class spell_hun_kill_command : SpellScript, IHasSpellEffects, ISpellCheck
 				{
 					pet.ToCreature().GetAI().AttackStart(GetExplTargetUnit());
 				}
-				//pet->CastSpell(GetExplTargetUnit(), SPELL_HUNTER_KILL_COMMAND_CHARGE, true);
+				//pet->CastSpell(GetExplTargetUnit(), KILL_COMMAND_CHARGE, true);
 
 				//191384 Aspect of the Beast
 				if (GetCaster().HasAura(sspell.AspectoftheBeast))

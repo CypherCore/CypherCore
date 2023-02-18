@@ -44,7 +44,7 @@ public class spell_dk_anti_magic_shell_self : AuraScript, IHasAuraEffects
 		args.AddSpellMod(SpellValueMod.BasePoint0, (int)energizeAmount);
 		args.SetTriggerFlags(TriggerCastFlags.FullMask);
 		args.SetTriggeringAura(aurEff);
-		target.CastSpell(target, DeathKnightSpells.SPELL_DK_RUNIC_POWER_ENERGIZE, args);
+		target.CastSpell(target, DeathKnightSpells.RUNIC_POWER_ENERGIZE, args);
 	}
 
 	public override void Register()

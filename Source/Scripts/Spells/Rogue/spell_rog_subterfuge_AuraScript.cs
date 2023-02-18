@@ -22,7 +22,7 @@ public class spell_rog_subterfuge_AuraScript : AuraScript, IHasAuraEffects
 		if (caster == null)
 			return;
 
-		caster.CastSpell(caster, RogueSpells.SPELL_ROGUE_STEALTH_SHAPESHIFT_AURA, true);
+		caster.CastSpell(caster, RogueSpells.STEALTH_SHAPESHIFT_AURA, true);
 	}
 
 	private void HandleRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
@@ -32,7 +32,7 @@ public class spell_rog_subterfuge_AuraScript : AuraScript, IHasAuraEffects
 		if (caster == null)
 			return;
 
-		caster.RemoveAurasDueToSpell(RogueSpells.SPELL_ROGUE_STEALTH_SHAPESHIFT_AURA);
+		caster.RemoveAurasDueToSpell(RogueSpells.STEALTH_SHAPESHIFT_AURA);
 	}
 
 	public override void Register()

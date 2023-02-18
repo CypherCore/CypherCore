@@ -52,7 +52,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
             if (IsHeroic())
             {
-                me.AddAura(eSpells.SPELL_CONDENSATION, me);
+                me.AddAura(eSpells.CONDENSATION, me);
             }
         }
 
@@ -78,19 +78,19 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
             _events.Update(diff);
 
-            if (me.HasAura(eSpells.SPELL_CONDENSE) && !_form_1)
+            if (me.HasAura(eSpells.CONDENSE) && !_form_1)
             {
                 _events.ScheduleEvent(VaporEvents.EVENT_CONDENSING_VAPOR, TimeSpan.FromMilliseconds(2000));
                 _form_1 = true;
             }
-            else if (me.HasAura(eSpells.SPELL_CONDENSE_2) && !_form_2)
+            else if (me.HasAura(eSpells.CONDENSE_2) && !_form_2)
             {
                 me.SetDisplayId(25654);
                 _events.CancelEvent(VaporEvents.EVENT_CONDENSING_VAPOR);
                 _events.ScheduleEvent(VaporEvents.EVENT_SWIRLING_VAPOR, TimeSpan.FromMilliseconds(2000));
                 _form_2 = true;
             }
-            else if (me.HasAura(eSpells.SPELL_CONDENSE_3) && !_form_3)
+            else if (me.HasAura(eSpells.CONDENSE_3) && !_form_3)
             {
                 me.SetDisplayId(36455);
                 _events.CancelEvent(VaporEvents.EVENT_SWIRLING_VAPOR);
@@ -104,19 +104,19 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
                 switch (eventId)
                 {
                     case VaporEvents.EVENT_CONDENSING_VAPOR:
-                        DoCastVictim(eSpells.SPELL_CONDENSING_VAPOR);
+                        DoCastVictim(eSpells.CONDENSING_VAPOR);
                         _events.ScheduleEvent(VaporEvents.EVENT_SWIRLING_VAPOR, TimeSpan.FromMilliseconds(3500));
                         break;
                     case VaporEvents.EVENT_SWIRLING_VAPOR:
-                        DoCastVictim(eSpells.SPELL_SWIRLING_VAPOR);
+                        DoCastVictim(eSpells.SWIRLING_VAPOR);
                         _events.ScheduleEvent(VaporEvents.EVENT_SWIRLING_VAPOR, TimeSpan.FromMilliseconds(3500));
                         break;
                     case VaporEvents.EVENT_FREEZING_VAPOR:
-                        DoCastVictim(eSpells.SPELL_FREEZING_VAPOR);
+                        DoCastVictim(eSpells.FREEZING_VAPOR);
                         _events.ScheduleEvent(VaporEvents.EVENT_COALESCE, TimeSpan.FromMilliseconds(5000));
                         break;
                     case VaporEvents.EVENT_COALESCE:
-                        DoCastVictim(eSpells.SPELL_COALESCE);
+                        DoCastVictim(eSpells.COALESCE);
                         break;
                 }
             }

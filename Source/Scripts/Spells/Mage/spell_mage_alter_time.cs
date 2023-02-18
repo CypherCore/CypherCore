@@ -23,14 +23,14 @@ public class spell_mage_alter_time : SpellScript, IHasSpellEffects
 			return;
 
 		// Check if the spell has been cast before
-		var alterTime = target.GetAura(MageSpells.SPELL_ALTER_TIME);
+		var alterTime = target.GetAura(MageSpells.ALTER_TIME);
 
 		if (alterTime != null)
 		{
 			// Check if the target has moved a long distance
 			if (target.GetDistance(alterTime.GetCaster()) > 50.0f)
 			{
-				target.RemoveAura(MageSpells.SPELL_ALTER_TIME);
+				target.RemoveAura(MageSpells.ALTER_TIME);
 
 				return;
 			}
@@ -38,7 +38,7 @@ public class spell_mage_alter_time : SpellScript, IHasSpellEffects
 			// Check if the target has died
 			if (target.IsDead())
 			{
-				target.RemoveAura(MageSpells.SPELL_ALTER_TIME);
+				target.RemoveAura(MageSpells.ALTER_TIME);
 
 				return;
 			}
@@ -46,13 +46,13 @@ public class spell_mage_alter_time : SpellScript, IHasSpellEffects
 			// Return the target to their location and health from when the spell was first cast
 			target.SetHealth(alterTime.GetEffect(0).GetAmount());
 			target.NearTeleportTo(alterTime.GetCaster().GetPositionX(), alterTime.GetCaster().GetPositionY(), alterTime.GetCaster().GetPositionZ(), alterTime.GetCaster().GetOrientation());
-			target.RemoveAura(MageSpells.SPELL_ALTER_TIME);
+			target.RemoveAura(MageSpells.ALTER_TIME);
 		}
 		else
 		{
 			// Save the target's current location and health
-			caster.AddAura(MageSpells.SPELL_ALTER_TIME, target);
-			target.SetAuraStack(MageSpells.SPELL_ALTER_TIME, target, (uint)target.GetHealth());
+			caster.AddAura(MageSpells.ALTER_TIME, target);
+			target.SetAuraStack(MageSpells.ALTER_TIME, target, (uint)target.GetHealth());
 		}
 	}
 

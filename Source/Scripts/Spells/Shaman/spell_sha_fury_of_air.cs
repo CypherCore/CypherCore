@@ -25,7 +25,7 @@ namespace Scripts.Spells.Shaman
 			if (caster.GetPower(PowerType.Maelstrom) >= 5)
 				caster.SetPower(PowerType.Maelstrom, caster.GetPower(PowerType.Maelstrom) - 5);
 			else
-				caster.RemoveAura(ShamanSpells.SPELL_SHAMAN_FURY_OF_AIR);
+				caster.RemoveAura(ShamanSpells.FURY_OF_AIR);
 		}
 
 		public override void Register()

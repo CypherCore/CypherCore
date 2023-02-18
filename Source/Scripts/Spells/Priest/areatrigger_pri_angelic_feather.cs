@@ -8,7 +8,7 @@ using Game.Scripting;
 
 namespace Scripts.Spells.Priest;
 
-[Script] // Angelic Feather areatrigger - created by SPELL_PRIEST_ANGELIC_FEATHER_AREATRIGGER
+[Script] // Angelic Feather areatrigger - created by ANGELIC_FEATHER_AREATRIGGER
 internal class areatrigger_pri_angelic_feather : AreaTriggerAI
 {
 	public areatrigger_pri_angelic_feather(AreaTrigger areatrigger) : base(areatrigger)

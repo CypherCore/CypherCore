@@ -32,11 +32,11 @@ public class spell_dh_awaken_the_demon : AuraScript, IHasAuraEffects
 
 		if (caster.GetHealth() - eventInfo.GetDamageInfo().GetDamage() < threshold1)
 		{
-			if (caster.HasAura(DemonHunterSpells.SPELL_DH_AWAKEN_THE_DEMON_CD))
+			if (caster.HasAura(DemonHunterSpells.AWAKEN_THE_DEMON_CD))
 				return;
 
-			caster.CastSpell(caster, DemonHunterSpells.SPELL_DH_AWAKEN_THE_DEMON_CD, true);
-			var aur = caster.GetAura(DemonHunterSpells.SPELL_DH_METAMORPHOSIS_HAVOC);
+			caster.CastSpell(caster, DemonHunterSpells.AWAKEN_THE_DEMON_CD, true);
+			var aur = caster.GetAura(DemonHunterSpells.METAMORPHOSIS_HAVOC);
 
 			if (aur != null)
 			{
@@ -45,7 +45,7 @@ public class spell_dh_awaken_the_demon : AuraScript, IHasAuraEffects
 				return;
 			}
 
-			aur = caster.AddAura(DemonHunterSpells.SPELL_DH_METAMORPHOSIS_HAVOC, caster);
+			aur = caster.AddAura(DemonHunterSpells.METAMORPHOSIS_HAVOC, caster);
 
 			if (aur != null)
 				aur.SetDuration(duration * Time.InMilliseconds);
@@ -54,7 +54,7 @@ public class spell_dh_awaken_the_demon : AuraScript, IHasAuraEffects
 		// Check only if we are above the second threshold and we are falling under it just now
 		if (caster.GetHealth() > threshold2 && caster.GetHealth() - eventInfo.GetDamageInfo().GetDamage() < threshold2)
 		{
-			var aur = caster.GetAura(DemonHunterSpells.SPELL_DH_METAMORPHOSIS_HAVOC);
+			var aur = caster.GetAura(DemonHunterSpells.METAMORPHOSIS_HAVOC);
 
 			if (aur != null)
 			{

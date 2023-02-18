@@ -14,7 +14,7 @@ namespace Scripts.Spells.Monk;
 
 [SpellScript(new uint[]
              {
-	             MonkSpells.SPELL_MONK_CHI_WAVE_DAMAGE, MonkSpells.SPELL_MONK_CHI_WAVE_HEAL
+	             MonkSpells.CHI_WAVE_DAMAGE, MonkSpells.CHI_WAVE_HEAL
              })]
 public class spell_monk_chi_wave_target_selector : SpellScript, IHasSpellEffects
 {

@@ -22,14 +22,14 @@ public class spell_mage_arcane_missiles : AuraScript, IHasAuraEffects
 			return;
 
 		//@TODO: Remove when proc system can handle arcane missiles.....
-		caster.RemoveAura(MageSpells.SPELL_MAGE_CLEARCASTING_BUFF);
-		caster.RemoveAura(MageSpells.SPELL_MAGE_CLEARCASTING_EFFECT);
-		var pvpClearcast = caster.GetAura(MageSpells.SPELL_MAGE_CLEARCASTING_PVP_STACK_EFFECT);
+		caster.RemoveAura(MageSpells.CLEARCASTING_BUFF);
+		caster.RemoveAura(MageSpells.CLEARCASTING_EFFECT);
+		var pvpClearcast = caster.GetAura(MageSpells.CLEARCASTING_PVP_STACK_EFFECT);
 
 		if (pvpClearcast != null)
 			pvpClearcast.ModStackAmount(-1);
 
-		caster.RemoveAura(MageSpells.SPELL_MAGE_RULE_OF_THREES_BUFF);
+		caster.RemoveAura(MageSpells.RULE_OF_THREES_BUFF);
 	}
 
 	public override void Register()

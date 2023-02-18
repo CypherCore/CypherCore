@@ -21,9 +21,9 @@ public class spell_mage_chilled : AuraScript, IHasAuraEffects
 		if (caster == null)
 			return;
 
-		if (caster.HasAura(MageSpells.SPELL_MAGE_BONE_CHILLING))
+		if (caster.HasAura(MageSpells.BONE_CHILLING))
 			//@TODO REDUCE BONE CHILLING DAMAGE PER STACK TO 0.5% from 1%
-			caster.CastSpell(caster, MageSpells.SPELL_MAGE_BONE_CHILLING_BUFF, true);
+			caster.CastSpell(caster, MageSpells.BONE_CHILLING_BUFF, true);
 	}
 
 	public override void Register()

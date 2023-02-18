@@ -51,6 +51,6 @@ public class at_dh_artifact_inner_demons : AreaTriggerAI
 		if (caster == null)
 			return;
 
-		caster.CastSpell(at, DemonHunterSpells.SPELL_DH_INNER_DEMONS_DAMAGE, true);
+		caster.CastSpell(at, DemonHunterSpells.INNER_DEMONS_DAMAGE, true);
 	}
 }

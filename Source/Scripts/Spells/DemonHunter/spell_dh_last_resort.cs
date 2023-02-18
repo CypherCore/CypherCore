@@ -18,7 +18,7 @@ public class spell_dh_last_resort : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (Global.SpellMgr.GetSpellInfo(DemonHunterSpells.SPELL_DH_LAST_RESORT_DEBUFF, Difficulty.None) != null)
+		if (Global.SpellMgr.GetSpellInfo(DemonHunterSpells.LAST_RESORT_DEBUFF, Difficulty.None) != null)
 			return false;
 
 		return true;
@@ -39,7 +39,7 @@ public class spell_dh_last_resort : AuraScript, IHasAuraEffects
 		if (dmgInfo.GetDamage() < target.GetHealth())
 			return;
 
-		if (target.HasAura(DemonHunterSpells.SPELL_DH_LAST_RESORT_DEBUFF))
+		if (target.HasAura(DemonHunterSpells.LAST_RESORT_DEBUFF))
 			return;
 
 		var healthPct = GetSpellInfo().GetEffect(1).IsEffect() ? GetSpellInfo().GetEffect(1).BasePoints : 0;
@@ -47,8 +47,8 @@ public class spell_dh_last_resort : AuraScript, IHasAuraEffects
 		var healInfo = new HealInfo(target, target, target.CountPctFromMaxHealth(healthPct), GetSpellInfo(), (SpellSchoolMask)GetSpellInfo().SchoolMask);
 		target.HealBySpell(healInfo);
 		// We use AddAura instead of CastSpell, since if the spell is on cooldown, it will not be casted
-		target.AddAura(DemonHunterSpells.SPELL_DH_METAMORPHOSIS_VENGEANCE, target);
-		target.CastSpell(target, DemonHunterSpells.SPELL_DH_LAST_RESORT_DEBUFF, true);
+		target.AddAura(DemonHunterSpells.METAMORPHOSIS_VENGEANCE, target);
+		target.CastSpell(target, DemonHunterSpells.LAST_RESORT_DEBUFF, true);
 
 		absorbAmount = dmgInfo.GetDamage();
 	}

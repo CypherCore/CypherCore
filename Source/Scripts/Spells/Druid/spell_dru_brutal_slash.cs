@@ -23,7 +23,7 @@ public class spell_dru_brutal_slash : SpellScript, ISpellOnHit
 		// This prevent awarding multiple Combo Points when multiple targets hit with Brutal Slash AoE
 		if (_awardComboPoint)
 			// Awards the caster 1 Combo Point (get value from the spell data)
-			caster.ModifyPower(PowerType.ComboPoints, Global.SpellMgr.GetSpellInfo(DruidSpells.SPELL_DRUID_SWIPE_CAT, Difficulty.None).GetEffect(0).BasePoints);
+			caster.ModifyPower(PowerType.ComboPoints, Global.SpellMgr.GetSpellInfo(DruidSpells.SWIPE_CAT, Difficulty.None).GetEffect(0).BasePoints);
 
 		_awardComboPoint = false;
 	}

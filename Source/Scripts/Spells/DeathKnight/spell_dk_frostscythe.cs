@@ -16,12 +16,12 @@ public class spell_dk_frostscythe : SpellScript, IHasSpellEffects
 
 	private void HandleHit(uint UnnamedParameter)
 	{
-		if (GetCaster().HasAura(DeathKnightSpells.SPELL_DK_INEXORABLE_ASSAULT_STACK))
-			GetCaster().CastSpell(GetHitUnit(), DeathKnightSpells.SPELL_DK_INEXORABLE_ASSAULT_DAMAGE, true);
+		if (GetCaster().HasAura(DeathKnightSpells.INEXORABLE_ASSAULT_STACK))
+			GetCaster().CastSpell(GetHitUnit(), DeathKnightSpells.INEXORABLE_ASSAULT_DAMAGE, true);
 
-		if (GetCaster().HasAura(DeathKnightSpells.SPELL_DK_KILLING_MACHINE))
+		if (GetCaster().HasAura(DeathKnightSpells.KILLING_MACHINE))
 		{
-			GetCaster().RemoveAura(DeathKnightSpells.SPELL_DK_KILLING_MACHINE);
+			GetCaster().RemoveAura(DeathKnightSpells.KILLING_MACHINE);
 			SetHitDamage(GetHitDamage() * 4);
 		}
 	}

@@ -25,7 +25,7 @@ public class playerScript_monk_earth_fire_storm : ScriptObjectAutoAdd, IPlayerOn
 
 		var spellInfo = spell.GetSpellInfo();
 
-		if (player.HasAura(StormEarthAndFireSpells.SPELL_MONK_SEF) && !spellInfo.IsPositive())
+		if (player.HasAura(StormEarthAndFireSpells.SEF) && !spellInfo.IsPositive())
 		{
 			var target = ObjectAccessor.Instance.GetUnit(player, player.GetTarget());
 
@@ -49,7 +49,7 @@ public class playerScript_monk_earth_fire_storm : ScriptObjectAutoAdd, IPlayerOn
 			}
 		}
 
-		if (player.HasAura(StormEarthAndFireSpells.SPELL_MONK_SEF) && spellInfo.IsPositive())
+		if (player.HasAura(StormEarthAndFireSpells.SEF) && spellInfo.IsPositive())
 		{
 			var GetTarget = player.GetSelectedUnit();
 

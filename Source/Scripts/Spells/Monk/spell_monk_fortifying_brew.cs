@@ -19,7 +19,7 @@ public class spell_monk_fortifying_brew : SpellScript, IHasSpellEffects
 		var caster = GetCaster();
 
 		if (caster != null && caster.GetTypeId() == TypeId.Player)
-			caster.CastSpell(caster, MonkSpells.SPELL_MONK_FORTIFYING_BREW, true);
+			caster.CastSpell(caster, MonkSpells.FORTIFYING_BREW, true);
 	}
 
 	public override void Register()

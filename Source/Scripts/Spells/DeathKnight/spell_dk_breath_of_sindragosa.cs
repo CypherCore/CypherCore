@@ -31,7 +31,7 @@ public class spell_dk_breath_of_sindragosa : AuraScript, IHasAuraEffects
                 l_Caster->ToPlayer()->SendPowerUpdate(PowerType.RunicPower, l_Caster->GetPower(PowerType.RunicPower));*/
 
 		if (l_Caster.GetPower(PowerType.RunicPower) <= 130)
-			l_Caster.RemoveAura(DeathKnightSpells.SPELL_DK_BREATH_OF_SINDRAGOSA);
+			l_Caster.RemoveAura(DeathKnightSpells.BREATH_OF_SINDRAGOSA);
 	}
 
 	public override void Register()

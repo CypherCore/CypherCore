@@ -26,7 +26,7 @@ namespace Scripts.Spells.Shaman
 			if (caster == null || attacker == null)
 				return;
 
-			caster.CastSpell(attacker, ShamanSpells.SPELL_SHAMAN_FLAMETONGUE_ATTACK, true);
+			caster.CastSpell(attacker, ShamanSpells.FLAMETONGUE_ATTACK, true);
 		}
 
 		public override void Register()

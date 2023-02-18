@@ -19,7 +19,7 @@ public class spell_dh_eye_beam : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (!Global.SpellMgr.HasSpellInfo(DemonHunterSpells.SPELL_DH_EYE_BEAM, Difficulty.None) || !Global.SpellMgr.HasSpellInfo(DemonHunterSpells.SPELL_DH_EYE_BEAM_DAMAGE, Difficulty.None))
+		if (!Global.SpellMgr.HasSpellInfo(DemonHunterSpells.EYE_BEAM, Difficulty.None) || !Global.SpellMgr.HasSpellInfo(DemonHunterSpells.EYE_BEAM_DAMAGE, Difficulty.None))
 			return false;
 
 		return true;
@@ -32,8 +32,8 @@ public class spell_dh_eye_beam : AuraScript, IHasAuraEffects
 		if (caster != null)
 			if (!_firstTick)
 			{
-				caster.CastSpell(caster, DemonHunterSpells.SPELL_DH_EYE_BEAM_DAMAGE, true);
-				var energize = caster.GetAuraEffectAmount(DemonHunterSpells.SPELL_DH_BLIND_FURY, 2);
+				caster.CastSpell(caster, DemonHunterSpells.EYE_BEAM_DAMAGE, true);
+				var energize = caster.GetAuraEffectAmount(DemonHunterSpells.BLIND_FURY, 2);
 
 				if (energize != 0)
 					caster.ModifyPower(PowerType.Fury, energize * 2.0f / 50.0f);
@@ -47,7 +47,7 @@ public class spell_dh_eye_beam : AuraScript, IHasAuraEffects
 		var caster = GetCaster();
 
 		if (caster != null)
-			caster.RemoveAurasDueToSpell(DemonHunterSpells.SPELL_DH_EYE_BEAM_VISUAL);
+			caster.RemoveAurasDueToSpell(DemonHunterSpells.EYE_BEAM_VISUAL);
 	}
 
 	private void HandleApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
@@ -56,17 +56,17 @@ public class spell_dh_eye_beam : AuraScript, IHasAuraEffects
 
 		if (caster != null)
 		{
-			if (!caster.HasAura(DemonHunterSpells.SPELL_DH_DEMONIC))
-				caster.CastSpell(caster, DemonHunterSpells.SPELL_DH_EYE_BEAM_VISUAL, true);
+			if (!caster.HasAura(DemonHunterSpells.DEMONIC))
+				caster.CastSpell(caster, DemonHunterSpells.EYE_BEAM_VISUAL, true);
 
-			if (caster.HasAura(DemonHunterSpells.SPELL_DH_DEMONIC))
+			if (caster.HasAura(DemonHunterSpells.DEMONIC))
 			{
-				var aur = caster.GetAura(DemonHunterSpells.SPELL_DH_METAMORPHOSIS_HAVOC);
+				var aur = caster.GetAura(DemonHunterSpells.METAMORPHOSIS_HAVOC);
 
 				if (aur != null)
 					aur.ModDuration(8 * Time.InMilliseconds);
 				else
-					aur = caster.AddAura(DemonHunterSpells.SPELL_DH_METAMORPHOSIS_HAVOC, caster);
+					aur = caster.AddAura(DemonHunterSpells.METAMORPHOSIS_HAVOC, caster);
 
 				if (aur != null)
 					aur.SetDuration(10 * Time.InMilliseconds);

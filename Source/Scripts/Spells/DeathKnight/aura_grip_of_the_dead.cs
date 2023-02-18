@@ -24,7 +24,7 @@ public class aura_grip_of_the_dead : AuraScript, IHasAuraEffects
 			var caster = GetCaster();
 
 			if (caster != null)
-				caster.CastSpell(target, DeathKnightSpells.SPELL_DK_GRIP_OF_THE_DEAD_SLOW, true);
+				caster.CastSpell(target, DeathKnightSpells.GRIP_OF_THE_DEAD_SLOW, true);
 		}
 	}
 

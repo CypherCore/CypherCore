@@ -18,12 +18,12 @@ namespace Scripts.Spells.Shaman
 
 		public override bool Validate(SpellInfo UnnamedParameter)
 		{
-			return ValidateSpellInfo(ShamanSpells.SPELL_SHAMAN_MAELSTROM_WEAPON_POWER);
+			return ValidateSpellInfo(ShamanSpells.MAELSTROM_WEAPON_POWER);
 		}
 
 		public bool CheckProc(ProcEventInfo info)
 		{
-			return info.GetDamageInfo().GetAttackType() == WeaponAttackType.BaseAttack || info.GetDamageInfo().GetAttackType() == WeaponAttackType.OffAttack || info.GetSpellInfo().Id == ShamanSpells.SPELL_SHAMAN_WINDFURY_ATTACK;
+			return info.GetDamageInfo().GetAttackType() == WeaponAttackType.BaseAttack || info.GetDamageInfo().GetAttackType() == WeaponAttackType.OffAttack || info.GetSpellInfo().Id == ShamanSpells.WINDFURY_ATTACK;
 		}
 
 		public void HandleEffectProc(AuraEffect UnnamedParameter, ProcEventInfo UnnamedParameter2)
@@ -31,7 +31,7 @@ namespace Scripts.Spells.Shaman
 			var caster = GetCaster();
 
 			if (caster != null)
-				caster.CastSpell(caster, ShamanSpells.SPELL_SHAMAN_MAELSTROM_WEAPON_POWER, true);
+				caster.CastSpell(caster, ShamanSpells.MAELSTROM_WEAPON_POWER, true);
 		}
 
 		public override void Register()

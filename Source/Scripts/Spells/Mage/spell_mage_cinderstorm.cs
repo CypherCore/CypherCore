@@ -22,9 +22,9 @@ public class spell_mage_cinderstorm : SpellScript, IHasSpellEffects
 		if (caster == null || target == null)
 			return;
 
-		if (target.HasAura(MageSpells.SPELL_MAGE_IGNITE_DOT))
+		if (target.HasAura(MageSpells.IGNITE_DOT))
 		{
-			//    int32 pct = Global.SpellMgr->GetSpellInfo(SPELL_MAGE_CINDERSTORM, Difficulty.None)->GetEffect(0).CalcValue(caster);
+			//    int32 pct = Global.SpellMgr->GetSpellInfo(CINDERSTORM, Difficulty.None)->GetEffect(0).CalcValue(caster);
 			var dmg = GetHitDamage();
 			// MathFunctions.AddPct(ref dmg, pct);
 			SetHitDamage(dmg);

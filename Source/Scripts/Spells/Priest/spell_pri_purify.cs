@@ -29,8 +29,8 @@ public class spell_pri_purify : SpellScript, IHasSpellEffects
 	{
 		if (GetHitUnit().IsFriendlyTo(GetCaster()))
 		{
-			GetCaster().CastSpell(GetHitUnit(), PriestSpells.SPELL_PRIEST_DISPEL_MAGIC_HOSTILE, true);
-			GetCaster().CastSpell(GetHitUnit(), PriestSpells.SPELL_PRIEST_CURE_DISEASE, true);
+			GetCaster().CastSpell(GetHitUnit(), PriestSpells.DISPEL_MAGIC_HOSTILE, true);
+			GetCaster().CastSpell(GetHitUnit(), PriestSpells.CURE_DISEASE, true);
 		}
 	}
 

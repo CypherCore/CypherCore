@@ -24,18 +24,18 @@ public class playerscript_mage_arcane : ScriptObjectAutoAdd, IPlayerOnAfterModif
 		// Decreasing power seems weird clientside does not always match serverside power amount (client stays at 1, server is at 0)
 		if (newValue != 0)
 		{
-			var arcaneCharge = player.GetAura(MageSpells.SPELL_ARCANE_CHARGE);
+			var arcaneCharge = player.GetAura(MageSpells.ARCANE_CHARGE);
 
 			if (arcaneCharge != null)
 				arcaneCharge.SetStackAmount((byte)newValue);
 		}
 		else
 		{
-			player.RemoveAurasDueToSpell(MageSpells.SPELL_ARCANE_CHARGE);
+			player.RemoveAurasDueToSpell(MageSpells.ARCANE_CHARGE);
 		}
 
-		if (player.HasAura(MageSpells.SPELL_MAGE_RULE_OF_THREES))
+		if (player.HasAura(MageSpells.RULE_OF_THREES))
 			if (newValue == 3 && oldValue == 2)
-				player.CastSpell(player, MageSpells.SPELL_MAGE_RULE_OF_THREES_BUFF, true);
+				player.CastSpell(player, MageSpells.RULE_OF_THREES_BUFF, true);
 	}
 }

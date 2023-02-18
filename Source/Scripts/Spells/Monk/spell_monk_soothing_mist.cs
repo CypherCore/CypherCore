@@ -25,7 +25,7 @@ public class spell_monk_soothing_mist : AuraScript, IHasAuraEffects
 		var target = GetTarget();
 
 		if (target != null)
-			target.CastSpell(target, MonkSpells.SPELL_MONK_SOOTHING_MIST_VISUAL, true);
+			target.CastSpell(target, MonkSpells.SOOTHING_MIST_VISUAL, true);
 
 		var player = GetCaster().ToPlayer();
 
@@ -66,7 +66,7 @@ public class spell_monk_soothing_mist : AuraScript, IHasAuraEffects
 
 						if (statue.GetOwner() != null && statue.GetOwner().GetGUID() == player.GetGUID())
 							if (statue.GetOwner() && statue.GetOwner().GetGUID() == player.GetGUID())
-								statue.CastSpell(statue.GetOwner().ToPlayer().GetSelectedUnit(), MonkSpells.SPELL_SERPENT_STATUE_SOOTHING_MIST, false);
+								statue.CastSpell(statue.GetOwner().ToPlayer().GetSelectedUnit(), MonkSpells.SERPENT_STATUE_SOOTHING_MIST, false);
 					}
 			}
 	}
@@ -79,7 +79,7 @@ public class spell_monk_soothing_mist : AuraScript, IHasAuraEffects
 			if (GetTarget())
 				// 25% to give 1 chi per tick
 				if (RandomHelper.randChance(25))
-					caster.CastSpell(caster, MonkSpells.SPELL_MONK_SOOTHING_MIST_ENERGIZE, true);
+					caster.CastSpell(caster, MonkSpells.SOOTHING_MIST_ENERGIZE, true);
 	}
 
 	private void OnRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
@@ -89,8 +89,8 @@ public class spell_monk_soothing_mist : AuraScript, IHasAuraEffects
 			var target = GetTarget();
 
 			if (target != null)
-				if (target.HasAura(MonkSpells.SPELL_MONK_SOOTHING_MIST_VISUAL))
-					target.RemoveAura(MonkSpells.SPELL_MONK_SOOTHING_MIST_VISUAL);
+				if (target.HasAura(MonkSpells.SOOTHING_MIST_VISUAL))
+					target.RemoveAura(MonkSpells.SOOTHING_MIST_VISUAL);
 		}
 	}
 

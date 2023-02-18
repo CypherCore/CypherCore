@@ -13,7 +13,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
     public class boss_captain_cookie : BossAI
     {
         public const int POINT_MOVE = 1;
-        public static readonly uint[] ThrowFoodSpells = { eSpell.SPELL_THROW_FOOD_TARGETING_CORN, eSpell.SPELL_THROW_FOOD_TARGETING_ROTTEN_CORN, eSpell.SPELL_THROW_FOOD_TARGETING_MELON, eSpell.SPELL_THROW_FOOD_TARGETING_ROTTEN_MELON, eSpell.SPELL_THROW_FOOD_TARGETING_STEAK, eSpell.SPELL_THROW_FOOD_TARGETING_ROTTEN_STEAK, eSpell.SPELL_THROW_FOOD_TARGETING_MYSTERY_MEAT, eSpell.SPELL_THROW_FOOD_TARGETING_ROTTEN_MM, eSpell.SPELL_THROW_FOOD_TARGETING_LOAF, eSpell.SPELL_THROW_FOOD_TARGETING_ROTTEN_LOAF, eSpell.SPELL_THROW_FOOD_TARGETING_BUN, eSpell.SPELL_THROW_FOOD_TARGETING_ROTTEN_BUN };
+        public static readonly uint[] ThrowFoodSpells = { eSpell.THROW_FOOD_TARGETING_CORN, eSpell.THROW_FOOD_TARGETING_ROTTEN_CORN, eSpell.THROW_FOOD_TARGETING_MELON, eSpell.THROW_FOOD_TARGETING_ROTTEN_MELON, eSpell.THROW_FOOD_TARGETING_STEAK, eSpell.THROW_FOOD_TARGETING_ROTTEN_STEAK, eSpell.THROW_FOOD_TARGETING_MYSTERY_MEAT, eSpell.THROW_FOOD_TARGETING_ROTTEN_MM, eSpell.THROW_FOOD_TARGETING_LOAF, eSpell.THROW_FOOD_TARGETING_ROTTEN_LOAF, eSpell.THROW_FOOD_TARGETING_BUN, eSpell.THROW_FOOD_TARGETING_ROTTEN_BUN };
         public static readonly Position NotePos = new Position(-74.3611f, -820.014f, 40.3714f, 0.0f);
         public static readonly Position[] CookiesPos =
         {
@@ -24,50 +24,50 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
 
         public struct eSpell
         {
-            public const uint SPELL_WHO_IS_THAT = 89339;
-            public const uint SPELL_SETIATED = 89267;
-            public const uint SPELL_SETIATED_H = 92834;
-            public const uint SPELL_NAUSEATED = 89732;
-            public const uint SPELL_NAUSEATED_H = 92066;
-            public const uint SPELL_ROTTEN_AURA = 89734;
-            public const uint SPELL_ROTTEN_AURA_H = 95513;
-            public const uint SPELL_ROTTEN_AURA_DMG = 89734;
-            public const uint SPELL_ROTTEN_AURA_DMG_H = 92065;
-            public const uint SPELL_CAULDRON = 89250;
-            public const uint SPELL_CAULDRON_VISUAL = 89251;
-            public const uint SPELL_CAULDRON_FIRE = 89252;
+            public const uint WHO_IS_THAT = 89339;
+            public const uint SETIATED = 89267;
+            public const uint SETIATED_H = 92834;
+            public const uint NAUSEATED = 89732;
+            public const uint NAUSEATED_H = 92066;
+            public const uint ROTTEN_AURA = 89734;
+            public const uint ROTTEN_AURA_H = 95513;
+            public const uint ROTTEN_AURA_DMG = 89734;
+            public const uint ROTTEN_AURA_DMG_H = 92065;
+            public const uint CAULDRON = 89250;
+            public const uint CAULDRON_VISUAL = 89251;
+            public const uint CAULDRON_FIRE = 89252;
 
 
-            public const uint SPELL_THROW_FOOD_TARGETING_CORN = 89268;
-            public const uint SPELL_THROW_FOOD_TARGETING_ROTTEN_CORN = 89740;
-            public const uint SPELL_THROW_FOOD_TARGETING_MELON = 90561;
-            public const uint SPELL_THROW_FOOD_TARGETING_ROTTEN_MELON = 90582;
-            public const uint SPELL_THROW_FOOD_TARGETING_STEAK = 90562;
-            public const uint SPELL_THROW_FOOD_TARGETING_ROTTEN_STEAK = 90583;
-            public const uint SPELL_THROW_FOOD_TARGETING_MYSTERY_MEAT = 90563;
-            public const uint SPELL_THROW_FOOD_TARGETING_ROTTEN_MM = 90584;
-            public const uint SPELL_THROW_FOOD_TARGETING_LOAF = 90564;
-            public const uint SPELL_THROW_FOOD_TARGETING_ROTTEN_LOAF = 90585;
-            public const uint SPELL_THROW_FOOD_TARGETING_BUN = 90565;
-            public const uint SPELL_THROW_FOOD_TARGETING_ROTTEN_BUN = 90586;
+            public const uint THROW_FOOD_TARGETING_CORN = 89268;
+            public const uint THROW_FOOD_TARGETING_ROTTEN_CORN = 89740;
+            public const uint THROW_FOOD_TARGETING_MELON = 90561;
+            public const uint THROW_FOOD_TARGETING_ROTTEN_MELON = 90582;
+            public const uint THROW_FOOD_TARGETING_STEAK = 90562;
+            public const uint THROW_FOOD_TARGETING_ROTTEN_STEAK = 90583;
+            public const uint THROW_FOOD_TARGETING_MYSTERY_MEAT = 90563;
+            public const uint THROW_FOOD_TARGETING_ROTTEN_MM = 90584;
+            public const uint THROW_FOOD_TARGETING_LOAF = 90564;
+            public const uint THROW_FOOD_TARGETING_ROTTEN_LOAF = 90585;
+            public const uint THROW_FOOD_TARGETING_BUN = 90565;
+            public const uint THROW_FOOD_TARGETING_ROTTEN_BUN = 90586;
 
 
-            public const uint SPELL_THROW_FOOD = 89263;
-            public const uint SPELL_THROW_FOOD_FORCE = 89269;
-            public const uint SPELL_THROW_FOOD_BACK = 89264;
-            public const uint SPELL_THROW_FOOD_01 = 90557;
-            public const uint SPELL_THROW_FOOD_02 = 90560;
-            public const uint SPELL_THROW_FOOD_03 = 90603;
-            public const uint SPELL_THROW_FOOD_04 = 89739;
-            public const uint SPELL_THROW_FOOD_05 = 90605;
-            public const uint SPELL_THROW_FOOD_06 = 90556;
-            public const uint SPELL_THROW_FOOD_07 = 90680;
-            public const uint SPELL_THROW_FOOD_08 = 90559;
-            public const uint SPELL_THROW_FOOD_09 = 90602;
-            public const uint SPELL_THROW_FOOD_10 = 89263;
-            public const uint SPELL_THROW_FOOD_11 = 90604;
-            public const uint SPELL_THROW_FOOD_12 = 90555;
-            public const uint SPELL_THROW_FOOD_13 = 90606;
+            public const uint THROW_FOOD = 89263;
+            public const uint THROW_FOOD_FORCE = 89269;
+            public const uint THROW_FOOD_BACK = 89264;
+            public const uint THROW_FOOD_01 = 90557;
+            public const uint THROW_FOOD_02 = 90560;
+            public const uint THROW_FOOD_03 = 90603;
+            public const uint THROW_FOOD_04 = 89739;
+            public const uint THROW_FOOD_05 = 90605;
+            public const uint THROW_FOOD_06 = 90556;
+            public const uint THROW_FOOD_07 = 90680;
+            public const uint THROW_FOOD_08 = 90559;
+            public const uint THROW_FOOD_09 = 90602;
+            public const uint THROW_FOOD_10 = 89263;
+            public const uint THROW_FOOD_11 = 90604;
+            public const uint THROW_FOOD_12 = 90555;
+            public const uint THROW_FOOD_13 = 90606;
         }
 
         public struct Adds
@@ -121,7 +121,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
         {
             _Reset();
             me.SetReactState(ReactStates.Aggressive);
-            DoCast(eSpell.SPELL_WHO_IS_THAT);
+            DoCast(eSpell.WHO_IS_THAT);
             me.SetUnitFlag(UnitFlags.Uninteractible);
         }
 
@@ -142,7 +142,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
 
         public override void JustEnteredCombat(Unit who)
         {
-            me.RemoveAura(eSpell.SPELL_WHO_IS_THAT);
+            me.RemoveAura(eSpell.WHO_IS_THAT);
             me.RemoveUnitFlag(UnitFlags.Uninteractible);
             me.AttackStop();
             me.SetReactState(ReactStates.Passive);
@@ -197,7 +197,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                         me.GetMotionMaster().MovePoint(POINT_MOVE, MovePos);
                         break;
                     case BossEvents.EVENT_CAULDRON_1:
-                        me.CastSpell(CookiesPos[0].GetPositionX(), CookiesPos[0].GetPositionY(), CookiesPos[0].GetPositionZ(), eSpell.SPELL_CAULDRON, true);
+                        me.CastSpell(CookiesPos[0].GetPositionX(), CookiesPos[0].GetPositionY(), CookiesPos[0].GetPositionZ(), eSpell.CAULDRON, true);
                         _events.ScheduleEvent(BossEvents.EVENT_CAULDRON_2, TimeSpan.FromMilliseconds(2000));
                         break;
                     case BossEvents.EVENT_CAULDRON_2:

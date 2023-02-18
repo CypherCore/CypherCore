@@ -25,7 +25,7 @@ public class spell_rog_deepening_shadows_AuraScript : AuraScript, IHasAuraEffect
 
 		if (caster != null)
 		{
-			var maxcp = caster.HasAura(RogueSpells.SPELL_ROGUE_DEEPER_STRATAGEM) ? 6 : 5;
+			var maxcp = caster.HasAura(RogueSpells.DEEPER_STRATAGEM) ? 6 : 5;
 			_cp = Math.Min(caster.GetPower(PowerType.ComboPoints) + 1, maxcp);
 		}
 
@@ -42,8 +42,8 @@ public class spell_rog_deepening_shadows_AuraScript : AuraScript, IHasAuraEffect
 		if (caster == null)
 			return;
 
-		if (GetCaster().HasAura(RogueSpells.SPELL_ROGUE_DEEPENING_SHADOWS))
-			GetCaster().GetSpellHistory().ModifyCooldown(RogueSpells.SPELL_ROGUE_SHADOW_DANCE, TimeSpan.FromMilliseconds(_cp * -3000));
+		if (GetCaster().HasAura(RogueSpells.DEEPENING_SHADOWS))
+			GetCaster().GetSpellHistory().ModifyCooldown(RogueSpells.SHADOW_DANCE, TimeSpan.FromMilliseconds(_cp * -3000));
 	}
 
 	public override void Register()

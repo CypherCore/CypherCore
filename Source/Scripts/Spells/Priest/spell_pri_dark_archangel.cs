@@ -19,18 +19,18 @@ public class spell_pri_dark_archangel : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(PriestSpells.SPELL_PRIEST_DARK_ARCHANGEL_BUFF);
+		return ValidateSpellInfo(PriestSpells.DARK_ARCHANGEL_BUFF);
 	}
 
 	private void FilterTargets(List<WorldObject> targets)
 	{
 		targets.Remove(GetCaster());
-		targets.RemoveIf(new UnitAuraCheck<WorldObject>(false, PriestSpells.SPELL_PRIEST_ATONEMENT_AURA, GetCaster().GetGUID()));
+		targets.RemoveIf(new UnitAuraCheck<WorldObject>(false, PriestSpells.ATONEMENT_AURA, GetCaster().GetGUID()));
 	}
 
 	private void HandleScriptEffect(uint UnnamedParameter)
 	{
-		GetCaster().CastSpell(GetHitUnit(), PriestSpells.SPELL_PRIEST_DARK_ARCHANGEL_BUFF, true);
+		GetCaster().CastSpell(GetHitUnit(), PriestSpells.DARK_ARCHANGEL_BUFF, true);
 	}
 
 	public override void Register()

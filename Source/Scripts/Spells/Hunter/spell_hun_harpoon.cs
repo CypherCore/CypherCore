@@ -17,7 +17,7 @@ public class spell_hun_harpoon : SpellScript, IHasSpellEffects, ISpellAfterCast,
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (!Global.SpellMgr.HasSpellInfo(HunterSpells.SPELL_HUNTER_HARPOON, Difficulty.None) || !Global.SpellMgr.HasSpellInfo(HunterSpells.SPELL_HUNTER_HARPOON_ROOT, Difficulty.None))
+		if (!Global.SpellMgr.HasSpellInfo(HunterSpells.HARPOON, Difficulty.None) || !Global.SpellMgr.HasSpellInfo(HunterSpells.HARPOON_ROOT, Difficulty.None))
 			return false;
 
 		return true;
@@ -31,7 +31,7 @@ public class spell_hun_harpoon : SpellScript, IHasSpellEffects, ISpellAfterCast,
 		if (player == null || target == null)
 			return;
 
-		player.CastSpell(target, HunterSpells.SPELL_HUNTER_HARPOON_ROOT, true);
+		player.CastSpell(target, HunterSpells.HARPOON_ROOT, true);
 	}
 
 	private void HandleDummy(uint UnnamedParameter)
@@ -56,8 +56,8 @@ public class spell_hun_harpoon : SpellScript, IHasSpellEffects, ISpellAfterCast,
 		var player = GetCaster().ToPlayer();
 
 		if (player != null)
-			if (player.HasSpell(HunterSpells.SPELL_HUNTER_POSTHAST))
-				player.CastSpell(player, HunterSpells.SPELL_HUNTER_POSTHAST_SPEED, true);
+			if (player.HasSpell(HunterSpells.POSTHAST))
+				player.CastSpell(player, HunterSpells.POSTHAST_SPEED, true);
 	}
 
 	public override void Register()

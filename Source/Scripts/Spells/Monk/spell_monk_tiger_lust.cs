@@ -17,7 +17,7 @@ public class spell_monk_tiger_lust : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return Global.SpellMgr.GetSpellInfo(TigerLust.SPELL_MONK_TIGER_LUST, Difficulty.None) != null;
+		return Global.SpellMgr.GetSpellInfo(TigerLust.TIGER_LUST, Difficulty.None) != null;
 	}
 
 	private void HandleDummy(uint UnnamedParameter)

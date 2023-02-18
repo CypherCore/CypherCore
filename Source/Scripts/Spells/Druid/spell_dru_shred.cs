@@ -18,7 +18,7 @@ public class spell_dru_shred : SpellScript, ISpellOnHit, ISpellCalcCritChance
 		if (caster.HasAuraType(AuraType.ModStealth))
 			m_stealthed = true;
 
-		if (caster.HasAura(ShapeshiftFormSpells.SPELL_DRUID_INCARNATION_KING_OF_JUNGLE))
+		if (caster.HasAura(ShapeshiftFormSpells.INCARNATION_KING_OF_JUNGLE))
 			m_incarnation = true;
 
 		m_casterLevel = caster.GetLevelForTarget(caster);
@@ -49,7 +49,7 @@ public class spell_dru_shred : SpellScript, ISpellOnHit, ISpellCalcCritChance
 		// If caster is level >= 56, While stealthed or have Incarnation: King of the Jungle aura,
 		// deals 50% increased damage (get value from the spell data)
 		if ((caster.HasAura(231057)) && (m_stealthed || m_incarnation))
-			MathFunctions.AddPct(ref damage, Global.SpellMgr.GetSpellInfo(DruidSpells.SPELL_DRUID_SHRED, Difficulty.None).GetEffect(2).BasePoints);
+			MathFunctions.AddPct(ref damage, Global.SpellMgr.GetSpellInfo(DruidSpells.SHRED, Difficulty.None).GetEffect(2).BasePoints);
 
 		SetHitDamage(damage);
 	}

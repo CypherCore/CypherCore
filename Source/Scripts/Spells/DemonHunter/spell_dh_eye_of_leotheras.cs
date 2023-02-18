@@ -15,7 +15,7 @@ public class spell_dh_eye_of_leotheras : AuraScript, IAuraCheckProc
 {
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (Global.SpellMgr.GetSpellInfo(DemonHunterSpells.SPELL_DH_EYE_OF_LEOTHERAS_DAMAGE, Difficulty.None) != null)
+		if (Global.SpellMgr.GetSpellInfo(DemonHunterSpells.EYE_OF_LEOTHERAS_DAMAGE, Difficulty.None) != null)
 			return false;
 
 		return true;
@@ -42,7 +42,7 @@ public class spell_dh_eye_of_leotheras : AuraScript, IAuraCheckProc
 			GetAura().RefreshDuration();
 
 
-			caster.m_Events.AddEventAtOffset(() => { caster.CastSpell(unitTarget, DemonHunterSpells.SPELL_DH_EYE_OF_LEOTHERAS_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)bp)); }, TimeSpan.FromMilliseconds(100));
+			caster.m_Events.AddEventAtOffset(() => { caster.CastSpell(unitTarget, DemonHunterSpells.EYE_OF_LEOTHERAS_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)bp)); }, TimeSpan.FromMilliseconds(100));
 
 			return true;
 		}

@@ -14,12 +14,12 @@ public class spell_hun_beast_cleave : SpellScript, ISpellAfterCast
 		var player = GetCaster().ToPlayer();
 
 		if (player != null)
-			if (player.HasAura(HunterSpells.SPELL_HUNTER_BEAST_CLEAVE_AURA))
+			if (player.HasAura(HunterSpells.BEAST_CLEAVE_AURA))
 			{
 				var pet = player.GetPet();
 
 				if (pet != null)
-					player.CastSpell(pet, HunterSpells.SPELL_HUNTER_BEAST_CLEAVE_PROC, true);
+					player.CastSpell(pet, HunterSpells.BEAST_CLEAVE_PROC, true);
 			}
 	}
 }

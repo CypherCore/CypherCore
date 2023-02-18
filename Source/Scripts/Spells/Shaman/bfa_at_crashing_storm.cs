@@ -46,7 +46,7 @@ namespace Scripts.Spells.Shaman
 				if (targetList.Count != 0)
 					foreach (Player player in targetList)
 						if (!player.IsGameMaster())
-							caster.CastSpell(player, ShamanSpells.SPELL_CRASHING_STORM_TALENT_DAMAGE, true);
+							caster.CastSpell(player, ShamanSpells.CRASHING_STORM_TALENT_DAMAGE, true);
 			}
 		}
 	}

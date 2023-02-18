@@ -30,7 +30,7 @@ namespace Scripts.Spells.Shaman
 			if (totem == null)
 				return;
 
-			totem.CastSpell(GetTargetApplication().GetTarget(), TotemSpells.SPELL_TOTEM_TOTEMIC_REVIVAL, true);
+			totem.CastSpell(GetTargetApplication().GetTarget(), TotemSpells.TOTEM_TOTEMIC_REVIVAL, true);
 			totem.KillSelf();
 		}
 

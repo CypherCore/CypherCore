@@ -21,7 +21,7 @@ namespace Scripts.Spells.Shaman
 
 		public override bool Validate(SpellInfo UnnamedParameter)
 		{
-			if (Global.SpellMgr.GetSpellInfo(ShamanSpells.SPELL_SHAMAN_ANCESTRAL_AWAKENING_PROC, Difficulty.None) != null)
+			if (Global.SpellMgr.GetSpellInfo(ShamanSpells.ANCESTRAL_AWAKENING_PROC, Difficulty.None) != null)
 				return false;
 
 			return true;
@@ -41,7 +41,7 @@ namespace Scripts.Spells.Shaman
 
 		private void HandleDummy(uint UnnamedParameter)
 		{
-			GetCaster().CastSpell(GetHitUnit(), ShamanSpells.SPELL_SHAMAN_ANCESTRAL_AWAKENING_PROC, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)GetEffectValue()));
+			GetCaster().CastSpell(GetHitUnit(), ShamanSpells.ANCESTRAL_AWAKENING_PROC, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)GetEffectValue()));
 		}
 
 		public override void Register()

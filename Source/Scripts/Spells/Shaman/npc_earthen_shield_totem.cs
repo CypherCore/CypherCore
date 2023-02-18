@@ -17,7 +17,7 @@ namespace Scripts.Spells.Shaman
 
 		public override void Reset()
 		{
-			me.CastSpell(me, ShamanSpells.SPELL_SHAMAN_AT_EARTHEN_SHIELD_TOTEM, true);
+			me.CastSpell(me, ShamanSpells.AT_EARTHEN_SHIELD_TOTEM, true);
 		}
 	}
 }

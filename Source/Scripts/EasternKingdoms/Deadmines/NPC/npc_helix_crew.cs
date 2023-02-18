@@ -42,7 +42,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
                 Unit player = SelectTarget(SelectTargetMethod.Random, 0, 200, true);
                 if (player != null)
                 {
-                    DoCast(player, eSpels.SPELL_THROW_BOMB);
+                    DoCast(player, eSpels.THROW_BOMB);
                     ThrowBombTimer = 5000;
                 }
             }

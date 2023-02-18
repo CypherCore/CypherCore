@@ -23,8 +23,8 @@ namespace Scripts.Spells.Shaman
 			if (caster == null || target == null)
 				return;
 
-			if (caster.HasAura(ShamanSpells.SPELL_SEARING_ASSAULT_TALENT))
-				caster.CastSpell(target, ShamanSpells.SPELL_SEARING_ASSULAT_TALENT_PROC, true);
+			if (caster.HasAura(ShamanSpells.SEARING_ASSAULT_TALENT))
+				caster.CastSpell(target, ShamanSpells.SEARING_ASSULAT_TALENT_PROC, true);
 		}
 	}
 }

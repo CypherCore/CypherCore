@@ -22,8 +22,8 @@ public class spell_pri_holy_word_chastise : SpellScript, IHasSpellEffects
 		if (caster == null || target == null)
 			return;
 
-		if (caster.HasAura(PriestSpells.SPELL_PRIEST_CENSURE))
-			caster.CastSpell(target, PriestSpells.SPELL_PRIEST_HOLY_WORD_CHASTISE_STUN, true);
+		if (caster.HasAura(PriestSpells.CENSURE))
+			caster.CastSpell(target, PriestSpells.HOLY_WORD_CHASTISE_STUN, true);
 	}
 
 	public override void Register()

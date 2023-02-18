@@ -25,7 +25,7 @@ namespace Scripts.Spells.Shaman
 				var owner = tempSum.GetOwner();
 
 				if (owner != null)
-					if (owner.HasAura(ShamanSpells.SPELL_SHAMAN_FERAL_SPIRIT_ENERGIZE_DUMMY))
+					if (owner.HasAura(ShamanSpells.FERAL_SPIRIT_ENERGIZE_DUMMY))
 						if (owner.GetPower(PowerType.Maelstrom) <= 95)
 							owner.ModifyPower(PowerType.Maelstrom, +5);
 			}

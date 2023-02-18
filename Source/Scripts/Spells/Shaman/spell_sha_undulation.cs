@@ -23,12 +23,12 @@ namespace Scripts.Spells.Shaman
 			if (count >= 3)
 			{
 				variableStore.Remove("spell_sha_undulation");
-				GetCaster().CastSpell(null, ShamanSpells.SPELL_SHAMAN_UNDULATION_PROC, true);
+				GetCaster().CastSpell(null, ShamanSpells.UNDULATION_PROC, true);
 			}
 			else
 			{
 				variableStore.Set("spell_sha_undulation", count + 1);
-				GetCaster().RemoveAurasDueToSpell(ShamanSpells.SPELL_SHAMAN_UNDULATION_PROC);
+				GetCaster().RemoveAurasDueToSpell(ShamanSpells.UNDULATION_PROC);
 			}
 		}
 	}

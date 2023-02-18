@@ -21,8 +21,8 @@ public class spell_dh_felblade : SpellScript, IHasSpellEffects
 
 		if (GetCaster().GetDistance2d(GetHitUnit()) <= 15.0f)
 		{
-			GetCaster().CastSpell(GetHitUnit(), DemonHunterSpells.SPELL_DH_FELBLADE_CHARGE, true);
-			GetCaster().CastSpell(GetHitUnit(), DemonHunterSpells.SPELL_DH_FELBLADE_DAMAGE, true);
+			GetCaster().CastSpell(GetHitUnit(), DemonHunterSpells.FELBLADE_CHARGE, true);
+			GetCaster().CastSpell(GetHitUnit(), DemonHunterSpells.FELBLADE_DAMAGE, true);
 		}
 	}
 

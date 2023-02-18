@@ -18,7 +18,7 @@ public class spell_hun_killer_cobra : AuraScript, IHasAuraEffects, IAuraCheckPro
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
-		if (eventInfo.GetSpellInfo().Id == HunterSpells.SPELL_HUNTER_COBRA_SHOT)
+		if (eventInfo.GetSpellInfo().Id == HunterSpells.COBRA_SHOT)
 			return true;
 
 		return false;
@@ -31,9 +31,9 @@ public class spell_hun_killer_cobra : AuraScript, IHasAuraEffects, IAuraCheckPro
 		var caster = GetCaster();
 
 		if (caster != null)
-			if (caster.HasAura(HunterSpells.SPELL_HUNTER_BESTIAL_WRATH))
-				if (caster.GetSpellHistory().HasCooldown(HunterSpells.SPELL_HUNTER_KILL_COMMAND))
-					caster.GetSpellHistory().ResetCooldown(HunterSpells.SPELL_HUNTER_KILL_COMMAND, true);
+			if (caster.HasAura(HunterSpells.BESTIAL_WRATH))
+				if (caster.GetSpellHistory().HasCooldown(HunterSpells.KILL_COMMAND))
+					caster.GetSpellHistory().ResetCooldown(HunterSpells.KILL_COMMAND, true);
 	}
 
 	public override void Register()

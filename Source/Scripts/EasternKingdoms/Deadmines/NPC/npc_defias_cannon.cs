@@ -122,7 +122,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
                         Creature target = ObjectAccessor.GetCreature(me, TargetGUID);
 
                         if (target != null)
-                            me.CastSpell(target, DMSpells.SPELL_CANNONBALL);
+                            me.CastSpell(target, DMSpells.CANNONBALL);
                     }
                     CannonBlast_Timer = (uint)RandomHelper.IRand(3000, 5000);
                 }

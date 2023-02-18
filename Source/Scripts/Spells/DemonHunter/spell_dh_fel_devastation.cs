@@ -24,7 +24,7 @@ public class spell_dh_fel_devastation : AuraScript, IHasAuraEffects
 		if (aurEff.GetTickNumber() == 1)
 			return;
 
-		caster.CastSpell(caster, DemonHunterSpells.SPELL_DH_FEL_DEVASTATION_DAMAGE, true);
+		caster.CastSpell(caster, DemonHunterSpells.FEL_DEVASTATION_DAMAGE, true);
 	}
 
 	public override void Register()

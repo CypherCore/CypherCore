@@ -31,7 +31,7 @@ public class spell_rog_shadow_techniques_AuraScript : AuraScript, IHasAuraEffect
 			return;
 
 		if (RandomHelper.randChance(40))
-			caster.CastSpell(caster, RogueSpells.SPELL_ROGUE_SHADOW_TENCHNIQUES_POWER, true);
+			caster.CastSpell(caster, RogueSpells.SHADOW_TENCHNIQUES_POWER, true);
 	}
 
 	public override void Register()

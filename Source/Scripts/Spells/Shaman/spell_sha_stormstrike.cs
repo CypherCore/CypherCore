@@ -17,11 +17,11 @@ namespace Scripts.Spells.Shaman
 			if (target == null)
 				return;
 
-			if (GetCaster().HasAura(ShamanSpells.SPELL_SHAMAN_CRASHING_STORM_DUMMY) && GetCaster().HasAura(ShamanSpells.SPELL_SHAMAN_CRASH_LIGTHNING_AURA))
-				GetCaster().CastSpell(target, ShamanSpells.SPELL_SHAMAN_CRASHING_LIGHTNING_DAMAGE, true);
+			if (GetCaster().HasAura(ShamanSpells.CRASHING_STORM_DUMMY) && GetCaster().HasAura(ShamanSpells.CRASH_LIGTHNING_AURA))
+				GetCaster().CastSpell(target, ShamanSpells.CRASHING_LIGHTNING_DAMAGE, true);
 
-			if (GetCaster() && GetCaster().HasAura(ShamanSpells.SPELL_SHAMAN_CRASH_LIGTHNING_AURA))
-				GetCaster().CastSpell(null, ShamanSpells.SPELL_SHAMAN_CRASH_LIGHTNING_PROC, true);
+			if (GetCaster() && GetCaster().HasAura(ShamanSpells.CRASH_LIGTHNING_AURA))
+				GetCaster().CastSpell(null, ShamanSpells.CRASH_LIGHTNING_PROC, true);
 		}
 	}
 }

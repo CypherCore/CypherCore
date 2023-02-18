@@ -22,9 +22,9 @@ public class bfa_spell_focused_thunder_talent_thunder_focus_tea : AuraScript, IH
 		if (caster == null)
 			return;
 
-		if (caster.HasAura(MonkSpells.SPELL_FOCUSED_THUNDER_TALENT))
+		if (caster.HasAura(MonkSpells.FOCUSED_THUNDER_TALENT))
 		{
-			var thunder = caster.GetAura(MonkSpells.SPELL_MONK_THUNDER_FOCUS_TEA);
+			var thunder = caster.GetAura(MonkSpells.THUNDER_FOCUS_TEA);
 
 			if (thunder != null)
 				thunder.SetStackAmount(2);

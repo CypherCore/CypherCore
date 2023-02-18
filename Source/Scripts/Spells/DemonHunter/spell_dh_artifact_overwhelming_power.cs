@@ -21,8 +21,8 @@ public class spell_dh_artifact_overwhelming_power : AuraScript, IHasAuraEffects
 		if (caster == null)
 			return;
 
-		if (RandomHelper.randChance(caster.GetAuraEffectAmount(DemonHunterSpells.SPELL_DH_OVERWHELMING_POWER, 0)))
-			caster.CastSpell(caster, ShatteredSoulsSpells.SPELL_DH_SHATTERED_SOULS_MISSILE, SpellValueMod.BasePoint0, (int)ShatteredSoulsSpells.SPELL_DH_LESSER_SOUL_SHARD, true);
+		if (RandomHelper.randChance(caster.GetAuraEffectAmount(DemonHunterSpells.OVERWHELMING_POWER, 0)))
+			caster.CastSpell(caster, ShatteredSoulsSpells.SHATTERED_SOULS_MISSILE, SpellValueMod.BasePoint0, (int)ShatteredSoulsSpells.LESSER_SOUL_SHARD, true);
 	}
 
 	public override void Register()

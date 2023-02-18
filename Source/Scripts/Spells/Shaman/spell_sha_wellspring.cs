@@ -18,7 +18,7 @@ namespace Scripts.Spells.Shaman
 			if (caster == null || target == null)
 				return;
 
-			caster.CastSpell(target, ShamanSpells.SPELL_SHAMAN_WELLSPRING_MISSILE, true);
+			caster.CastSpell(target, ShamanSpells.WELLSPRING_MISSILE, true);
 		}
 	}
 }

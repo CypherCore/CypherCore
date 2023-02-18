@@ -38,7 +38,7 @@ public class spell_hun_glaive_toss_damage : SpellScript, IHasSpellEffects, ISpel
 		GetCaster().GetAnyUnitListInRange(targetList, radius);
 
 		foreach (var itr in targetList)
-			if (itr.HasAura(HunterSpells.SPELL_HUNTER_GLAIVE_TOSS_AURA))
+			if (itr.HasAura(HunterSpells.GLAIVE_TOSS_AURA))
 			{
 				mainTargetGUID = itr.GetGUID();
 
@@ -71,7 +71,7 @@ public class spell_hun_glaive_toss_damage : SpellScript, IHasSpellEffects, ISpel
 		GetCaster().GetAnyUnitListInRange(targetList, radius);
 
 		foreach (var itr in targetList)
-			if (itr.HasAura(HunterSpells.SPELL_HUNTER_GLAIVE_TOSS_AURA))
+			if (itr.HasAura(HunterSpells.GLAIVE_TOSS_AURA))
 			{
 				mainTargetGUID = itr.GetGUID();
 

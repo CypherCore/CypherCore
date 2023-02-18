@@ -22,7 +22,7 @@ namespace Scripts.Spells.Shaman
 
 		public struct TotemData
 		{
-			public const uint SPELL_TO_CAST = TotemSpells.SPELL_TOTEM_SKYFURY_EFFECT;
+			public const uint TO_CAST = TotemSpells.TOTEM_SKYFURY_EFFECT;
 			public const uint RANGE = 40;
 			public const uint DELAY = 500;
 		}
@@ -60,10 +60,10 @@ namespace Scripts.Spells.Shaman
 				if (!itr)
 					continue;
 
-				if (!itr.HasAura(TotemSpells.SPELL_TOTEM_SKYFURY_EFFECT))
+				if (!itr.HasAura(TotemSpells.TOTEM_SKYFURY_EFFECT))
 				{
-					me.CastSpell(itr, TotemSpells.SPELL_TOTEM_SKYFURY_EFFECT, true);
-					var aura = itr.GetAura(TotemSpells.SPELL_TOTEM_SKYFURY_EFFECT);
+					me.CastSpell(itr, TotemSpells.TOTEM_SKYFURY_EFFECT, true);
+					var aura = itr.GetAura(TotemSpells.TOTEM_SKYFURY_EFFECT);
 
 					if (aura != null)
 						aura.SetDuration(m_buffDuration);

@@ -28,7 +28,7 @@ public class spell_dk_blood_mirror : AuraScript, IHasAuraEffects
 		var target = GetTarget();
 
 		if (caster != null && target != null)
-			caster.CastSpell(target, DeathKnightSpells.SPELL_DK_BLOOD_MIRROR_DAMAGE, (int)absorbAmount, true);
+			caster.CastSpell(target, DeathKnightSpells.BLOOD_MIRROR_DAMAGE, (int)absorbAmount, true);
 	}
 
 	public override void Register()

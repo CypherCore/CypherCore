@@ -42,7 +42,7 @@ public class spell_dru_predatory_swiftness : SpellScript, ISpellCheckCast, ISpel
 		var player = GetCaster().ToPlayer();
 
 		if (player != null)
-			if (player.HasAura(PredatorySwiftnessSpells.SPELL_DRUID_PREDATORY_SWIFTNESS) && RandomHelper.randChance(20 * _cp))
-				player.CastSpell(player, PredatorySwiftnessSpells.SPELL_DRUID_PREDATORY_SWIFTNESS_AURA, true);
+			if (player.HasAura(PredatorySwiftnessSpells.PREDATORY_SWIFTNESS) && RandomHelper.randChance(20 * _cp))
+				player.CastSpell(player, PredatorySwiftnessSpells.PREDATORY_SWIFTNESS_AURA, true);
 	}
 }

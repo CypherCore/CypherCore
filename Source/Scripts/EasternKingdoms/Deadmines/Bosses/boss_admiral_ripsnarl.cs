@@ -29,24 +29,24 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
 
         public struct eSpells
         {
-            public const uint SPELL_GO_FOR_THE_THROAT = 88836;
-            public const uint SPELL_GO_FOR_THE_THROAT_H = 91863;
-            public const uint SPELL_SWIPE = 88839;
-            public const uint SPELL_SWIPE_H = 91859;
-            public const uint SPELL_THIRST_FOR_BLOOD = 88736;
-            public const uint SPELL_STEAM_AURA = 95503;
-            public const uint SPELL_FOG_AURA = 89247;
-            public const uint SPELL_BUNNY_AURA = 88755;
-            public const uint SPELL_FOG = 88768;
-            public const uint SPELL_SUMMON_VAPOR = 88831;
-            public const uint SPELL_CONDENSE = 92016;
-            public const uint SPELL_CONDENSE_2 = 92020;
-            public const uint SPELL_CONDENSE_3 = 92029;
-            public const uint SPELL_CONDENSATION = 92013;
-            public const uint SPELL_FREEZING_VAPOR = 92011;
-            public const uint SPELL_COALESCE = 92042;
-            public const uint SPELL_SWIRLING_VAPOR = 92007;
-            public const uint SPELL_CONDENSING_VAPOR = 92008;
+            public const uint GO_FOR_THE_THROAT = 88836;
+            public const uint GO_FOR_THE_THROAT_H = 91863;
+            public const uint SWIPE = 88839;
+            public const uint SWIPE_H = 91859;
+            public const uint THIRST_FOR_BLOOD = 88736;
+            public const uint STEAM_AURA = 95503;
+            public const uint FOG_AURA = 89247;
+            public const uint BUNNY_AURA = 88755;
+            public const uint FOG = 88768;
+            public const uint SUMMON_VAPOR = 88831;
+            public const uint CONDENSE = 92016;
+            public const uint CONDENSE_2 = 92020;
+            public const uint CONDENSE_3 = 92029;
+            public const uint CONDENSATION = 92013;
+            public const uint FREEZING_VAPOR = 92011;
+            public const uint COALESCE = 92042;
+            public const uint SWIRLING_VAPOR = 92007;
+            public const uint CONDENSING_VAPOR = 92008;
         }
 
         public struct eAchievementMisc
@@ -80,8 +80,8 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
             public const uint SAY_KILL = 1;
             public const uint SAY_FOG_1 = 2;
             public const uint SAY_FOG_2 = 3;
-            public const uint SAY_SPELL_1 = 4;
-            public const uint SAY_SPELL_2 = 5;
+            public const uint SAY_1 = 4;
+            public const uint SAY_2 = 5;
             public const uint SAY_AUUUU = 6;
             public const uint SAY_AGGRO = 7;
         }
@@ -252,7 +252,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
 
             foreach (var item in players)
             {
-                item.RemoveAurasDueToSpell(eSpells.SPELL_FOG_AURA);
+                item.RemoveAurasDueToSpell(eSpells.FOG_AURA);
             }
 
         }
@@ -331,32 +331,32 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                         Unit victim = me.GetVictim();
                         if (victim != null)
                         {
-                            me.CastSpell(victim, IsHeroic() ? eSpells.SPELL_SWIPE_H : eSpells.SPELL_SWIPE);
+                            me.CastSpell(victim, IsHeroic() ? eSpells.SWIPE_H : eSpells.SWIPE);
                         }
                         _events.ScheduleEvent(BossEvents.EVENT_SWIPE, TimeSpan.FromMilliseconds(3000));
                         break;
 
                     case BossEvents.EVENT_UPDATE_FOG:
-                        instance.DoCastSpellOnPlayers(eSpells.SPELL_FOG_AURA);
+                        instance.DoCastSpellOnPlayers(eSpells.FOG_AURA);
                         break;
 
                     case BossEvents.EVENT_GO_FOR_THROAT:
                         Unit target = SelectTarget(SelectTargetMethod.Random, 1, 100, true);
                         if (target != null)
                         {
-                            DoCast(target, eSpells.SPELL_GO_FOR_THE_THROAT);
+                            DoCast(target, eSpells.GO_FOR_THE_THROAT);
                         }
                         _events.ScheduleEvent(BossEvents.EVENT_GO_FOR_THROAT, TimeSpan.FromMilliseconds(10000));
                         break;
 
                     case BossEvents.EVENT_THIRST_FOR_BLOOD:
-                        DoCast(me, eSpells.SPELL_THIRST_FOR_BLOOD);
+                        DoCast(me, eSpells.THIRST_FOR_BLOOD);
                         break;
 
                     case BossEvents.EVENT_PHASE_TWO:
                         _events.CancelEvent(BossEvents.EVENT_GO_FOR_THROAT);
                         _events.CancelEvent(BossEvents.EVENT_SWIPE);
-                        me.RemoveAurasDueToSpell(eSpells.SPELL_THIRST_FOR_BLOOD);
+                        me.RemoveAurasDueToSpell(eSpells.THIRST_FOR_BLOOD);
                         me.SetVisible(false);
                         _events.ScheduleEvent(BossEvents.EVENT_FLEE_TO_FROG, TimeSpan.FromMilliseconds(100));
 
@@ -369,8 +369,8 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                             Unit victim2 = me.GetVictim();
                             if (victim2 != null)
                             {
-                                Talk(Says.SAY_SPELL_1);
-                                me.CastSpell(victim2, eSpells.SPELL_GO_FOR_THE_THROAT);
+                                Talk(Says.SAY_1);
+                                me.CastSpell(victim2, eSpells.GO_FOR_THE_THROAT);
                             }
                         }
                         break;
@@ -398,7 +398,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                             Unit target1 = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
                             if (target1 != null)
                             {
-                                me.CastSpell(target1, eSpells.SPELL_SUMMON_VAPOR);
+                                me.CastSpell(target1, eSpells.SUMMON_VAPOR);
                             }
                         }
                         _events.RescheduleEvent(BossEvents.EVENT_SUMMON_VAPOR, TimeSpan.FromMilliseconds(3500));

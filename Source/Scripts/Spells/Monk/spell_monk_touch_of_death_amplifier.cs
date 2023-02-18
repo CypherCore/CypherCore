@@ -17,7 +17,7 @@ public class spell_monk_touch_of_death_amplifier : AuraScript, IHasAuraEffects, 
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(MonkSpells.SPELL_MONK_TOUCH_OF_DEATH, MonkSpells.SPELL_MONK_TOUCH_OF_DEATH_AMPLIFIER);
+		return ValidateSpellInfo(MonkSpells.TOUCH_OF_DEATH, MonkSpells.TOUCH_OF_DEATH_AMPLIFIER);
 	}
 
 	public bool CheckProc(ProcEventInfo eventInfo)
@@ -27,11 +27,11 @@ public class spell_monk_touch_of_death_amplifier : AuraScript, IHasAuraEffects, 
 
 	private void HandleProc(AuraEffect UnnamedParameter, ProcEventInfo eventInfo)
 	{
-		var aurEff = GetTarget().GetAuraEffect(MonkSpells.SPELL_MONK_TOUCH_OF_DEATH, 0);
+		var aurEff = GetTarget().GetAuraEffect(MonkSpells.TOUCH_OF_DEATH, 0);
 
 		if (aurEff != null)
 		{
-			var aurEffAmplifier = eventInfo.GetActor().GetAuraEffect(MonkSpells.SPELL_MONK_TOUCH_OF_DEATH_AMPLIFIER, 0);
+			var aurEffAmplifier = eventInfo.GetActor().GetAuraEffect(MonkSpells.TOUCH_OF_DEATH_AMPLIFIER, 0);
 
 			if (aurEffAmplifier != null)
 			{

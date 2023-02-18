@@ -9,7 +9,7 @@ using Game.Spells;
 
 namespace Scripts.Spells.Druid
 {
-	[Script] // 192090 - Thrash (Aura) - SPELL_DRUID_THRASH_BEAR_AURA
+	[Script] // 192090 - Thrash (Aura) - THRASH_BEAR_AURA
 	internal class spell_dru_thrash_AuraScript : AuraScript, IHasAuraEffects
 	{
 		public List<IAuraEffectHandler> AuraEffects { get; } = new();

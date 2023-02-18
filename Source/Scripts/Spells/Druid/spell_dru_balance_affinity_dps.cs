@@ -25,11 +25,11 @@ public class spell_dru_balance_affinity_dps : AuraScript, IHasAuraEffects
 
 		if (player != null)
 		{
-			player.AddTemporarySpell(ShapeshiftFormSpells.SPELL_DRUID_MOONKIN_FORM);
-			player.AddTemporarySpell(BalanceAffinitySpells.SPELL_DRUID_STARSURGE);
-			player.AddTemporarySpell(BalanceAffinitySpells.SPELL_DRUID_LUNAR_STRIKE);
-			player.AddTemporarySpell(BalanceAffinitySpells.SPELL_DRUID_SOLAR_WRATH);
-			player.AddTemporarySpell(BalanceAffinitySpells.SPELL_DRUID_SUNFIRE);
+			player.AddTemporarySpell(ShapeshiftFormSpells.MOONKIN_FORM);
+			player.AddTemporarySpell(BalanceAffinitySpells.STARSURGE);
+			player.AddTemporarySpell(BalanceAffinitySpells.LUNAR_STRIKE);
+			player.AddTemporarySpell(BalanceAffinitySpells.SOLAR_WRATH);
+			player.AddTemporarySpell(BalanceAffinitySpells.SUNFIRE);
 		}
 	}
 
@@ -44,11 +44,11 @@ public class spell_dru_balance_affinity_dps : AuraScript, IHasAuraEffects
 
 		if (player != null)
 		{
-			player.RemoveTemporarySpell(ShapeshiftFormSpells.SPELL_DRUID_MOONKIN_FORM);
-			player.RemoveTemporarySpell(BalanceAffinitySpells.SPELL_DRUID_STARSURGE);
-			player.RemoveTemporarySpell(BalanceAffinitySpells.SPELL_DRUID_LUNAR_STRIKE);
-			player.RemoveTemporarySpell(BalanceAffinitySpells.SPELL_DRUID_SOLAR_WRATH);
-			player.RemoveTemporarySpell(BalanceAffinitySpells.SPELL_DRUID_SUNFIRE);
+			player.RemoveTemporarySpell(ShapeshiftFormSpells.MOONKIN_FORM);
+			player.RemoveTemporarySpell(BalanceAffinitySpells.STARSURGE);
+			player.RemoveTemporarySpell(BalanceAffinitySpells.LUNAR_STRIKE);
+			player.RemoveTemporarySpell(BalanceAffinitySpells.SOLAR_WRATH);
+			player.RemoveTemporarySpell(BalanceAffinitySpells.SUNFIRE);
 		}
 	}
 

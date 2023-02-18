@@ -23,7 +23,7 @@ public class spell_dh_artifact_fueled_by_pain : AuraScript, IHasAuraEffects, IAu
 			return;
 
 		var duration = aurEff.GetAmount() * Time.InMilliseconds;
-		var aur      = caster.AddAura(DemonHunterSpells.SPELL_DH_METAMORPHOSIS_VENGEANCE, caster);
+		var aur      = caster.AddAura(DemonHunterSpells.METAMORPHOSIS_VENGEANCE, caster);
 
 		if (aur != null)
 		{
@@ -34,7 +34,7 @@ public class spell_dh_artifact_fueled_by_pain : AuraScript, IHasAuraEffects, IAu
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
-		return eventInfo.GetSpellInfo() != null && (eventInfo.GetSpellInfo().Id == ShatteredSoulsSpells.SPELL_DH_SOUL_FRAGMENT_HEAL_VENGEANCE || eventInfo.GetSpellInfo().Id == ShatteredSoulsSpells.SPELL_DH_LESSER_SOUL_SHARD_HEAL);
+		return eventInfo.GetSpellInfo() != null && (eventInfo.GetSpellInfo().Id == ShatteredSoulsSpells.SOUL_FRAGMENT_HEAL_VENGEANCE || eventInfo.GetSpellInfo().Id == ShatteredSoulsSpells.LESSER_SOUL_SHARD_HEAL);
 	}
 
 	public override void Register()

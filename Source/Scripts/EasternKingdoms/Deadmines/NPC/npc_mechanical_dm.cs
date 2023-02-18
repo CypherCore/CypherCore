@@ -38,7 +38,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
         {
             DoZoneInCombat();
             me.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc);
-            me.RemoveAurasDueToSpell(DMSharedSpells.SPELL_OFFLINE);
+            me.RemoveAurasDueToSpell(DMSharedSpells.OFFLINE);
             _events.ScheduleEvent(boss_vanessa_vancleef.BossEvents.EVENT_SPIRIT_STRIKE, TimeSpan.FromMilliseconds(6000));
         }
 
@@ -52,7 +52,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
             foreach (var item in players)
             {
-                item.AddAura(boss_vanessa_vancleef.Spells.SPELL_EFFECT_1, item);
+                item.AddAura(boss_vanessa_vancleef.Spells.EFFECT_1, item);
             }
 
             me.TextEmote(boss_vanessa_vancleef.VANESSA_NIGHTMARE_14, null, true);
@@ -78,7 +78,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
                 switch (eventId)
                 {
                     case boss_vanessa_vancleef.BossEvents.EVENT_SPIRIT_STRIKE:
-                        DoCastVictim(boss_vanessa_vancleef.Spells.SPELL_SPIRIT_STRIKE);
+                        DoCastVictim(boss_vanessa_vancleef.Spells.SPIRIT_STRIKE);
                         _events.ScheduleEvent(boss_vanessa_vancleef.BossEvents.EVENT_SPIRIT_STRIKE, TimeSpan.FromMilliseconds(RandomHelper.URand(5000, 7000)));
                         break;
                 }

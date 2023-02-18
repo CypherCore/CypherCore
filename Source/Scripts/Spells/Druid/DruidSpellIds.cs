@@ -27,8 +27,8 @@ namespace Scripts.Spells.Druid
 		public static uint EclipseSolarAura = 48517;
 		public static uint EclipseSolarSpellCnt = 326053;
 		public static uint Exhilarate = 28742;
-		public static uint FormAquaticPassive = 276012;
 		public static uint FormAquatic = 1066;
+		public static uint FormAquaticPassive = 276012;
 		public static uint FormFlight = 33943;
 		public static uint FormStag = 165961;
 		public static uint FormSwiftFlight = 40120;
@@ -44,9 +44,9 @@ namespace Scripts.Spells.Druid
 		public static uint IdolOfFeralShadows = 34241;
 		public static uint IdolOfWorship = 60774;
 		public static uint IncarnationKingOfTheJungle = 102543;
+		public static uint Infusion = 37238;
 		public static uint Innervate = 29166;
 		public static uint InnervateRank2 = 326228;
-		public static uint Infusion = 37238;
 		public static uint Languish = 71023;
 		public static uint LifebloomFinalHeal = 33778;
 		public static uint LunarInspirationOverride = 155627;
@@ -60,9 +60,9 @@ namespace Scripts.Spells.Druid
 		public static uint SkullBashInterrupt = 93985;
 		public static uint SunfireDamage = 164815;
 		public static uint SurvivalInstincts = 50322;
-		public static uint TravelForm = 783;
 		public static uint ThrashBear = 77758;
 		public static uint ThrashBearAura = 192090;
 		public static uint ThrashCat = 106830;
+		public static uint TravelForm = 783;
 	}
 }

@@ -13,7 +13,7 @@ public class spell_dh_spirit_bomb : SpellScript, ISpellOnHit, ISpellCheckCast
 {
 	readonly uint[] _ids = new uint[]
 	                       {
-		                       ShatteredSoulsSpells.SPELL_DH_LESSER_SOUL_SHARD, ShatteredSoulsSpells.SPELL_DH_SHATTERED_SOULS, ShatteredSoulsSpells.SPELL_DH_SHATTERED_SOULS_DEMON
+		                       ShatteredSoulsSpells.LESSER_SOUL_SHARD, ShatteredSoulsSpells.SHATTERED_SOULS, ShatteredSoulsSpells.SHATTERED_SOULS_DEMON
 	                       };
 
 	private bool TryCastDamage(Unit caster, Unit target, uint spellId)
@@ -22,7 +22,7 @@ public class spell_dh_spirit_bomb : SpellScript, ISpellOnHit, ISpellCheckCast
 
 		if (at != null)
 		{
-			caster.CastSpell(target, DemonHunterSpells.SPELL_DH_SPIRIT_BOMB_DAMAGE, true);
+			caster.CastSpell(target, DemonHunterSpells.SPIRIT_BOMB_DAMAGE, true);
 			at.Remove();
 
 			return true;
@@ -52,7 +52,7 @@ public class spell_dh_spirit_bomb : SpellScript, ISpellOnHit, ISpellCheckCast
 		if (caster == null)
 			return SpellCastResult.CantDoThatRightNow;
 
-		if (!caster.GetAreaTrigger(ShatteredSoulsSpells.SPELL_DH_LESSER_SOUL_SHARD) && !caster.GetAreaTrigger(ShatteredSoulsSpells.SPELL_DH_SHATTERED_SOULS) && !caster.GetAreaTrigger(ShatteredSoulsSpells.SPELL_DH_SHATTERED_SOULS_DEMON))
+		if (!caster.GetAreaTrigger(ShatteredSoulsSpells.LESSER_SOUL_SHARD) && !caster.GetAreaTrigger(ShatteredSoulsSpells.SHATTERED_SOULS) && !caster.GetAreaTrigger(ShatteredSoulsSpells.SHATTERED_SOULS_DEMON))
 			return SpellCastResult.CantDoThatRightNow;
 
 		return SpellCastResult.SpellCastOk;

@@ -13,7 +13,7 @@ namespace Scripts.Spells.Shaman
 	{
 		public bool CheckProc(ProcEventInfo eventInfo)
 		{
-			if (eventInfo.GetSpellInfo().Id == ShamanSpells.SPELL_SHAMAN_STORMSTRIKE_MAIN || eventInfo.GetSpellInfo().Id == ShamanSpells.SPELL_SHAMAN_LAVA_LASH)
+			if (eventInfo.GetSpellInfo().Id == ShamanSpells.STORMSTRIKE_MAIN || eventInfo.GetSpellInfo().Id == ShamanSpells.LAVA_LASH)
 				return true;
 
 			return false;

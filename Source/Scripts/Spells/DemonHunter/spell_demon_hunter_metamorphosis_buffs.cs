@@ -21,7 +21,7 @@ public class spell_demon_hunter_metamorphosis_buffs : AuraScript, IHasAuraEffect
 		if (caster == null)
 			return;
 
-		caster.RemoveAura(DemonHunterSpells.SPELL_DH_DEMONIC_ORIGINS_BUFF);
+		caster.RemoveAura(DemonHunterSpells.DEMONIC_ORIGINS_BUFF);
 	}
 
 	private void OnRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
@@ -31,8 +31,8 @@ public class spell_demon_hunter_metamorphosis_buffs : AuraScript, IHasAuraEffect
 		if (caster == null)
 			return;
 
-		if (caster.HasAura(DemonHunterSpells.SPELL_DH_DEMONIC_ORIGINS))
-			caster.CastSpell(caster, DemonHunterSpells.SPELL_DH_DEMONIC_ORIGINS_BUFF, true);
+		if (caster.HasAura(DemonHunterSpells.DEMONIC_ORIGINS))
+			caster.CastSpell(caster, DemonHunterSpells.DEMONIC_ORIGINS_BUFF, true);
 	}
 
 	public override void Register()

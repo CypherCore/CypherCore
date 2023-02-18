@@ -16,8 +16,8 @@ public class spell_pri_mind_blast : SpellScript, IHasSpellEffects
 
 	private void HandleOnHit(uint UnnamedParameter)
 	{
-		if (GetCaster().HasAura(PriestSpells.SPELL_PRIEST_SHADOWY_INSIGHTS))
-			GetCaster().RemoveAurasDueToSpell(PriestSpells.SPELL_PRIEST_SHADOWY_INSIGHTS);
+		if (GetCaster().HasAura(PriestSpells.SHADOWY_INSIGHTS))
+			GetCaster().RemoveAurasDueToSpell(PriestSpells.SHADOWY_INSIGHTS);
 	}
 
 	public override void Register()

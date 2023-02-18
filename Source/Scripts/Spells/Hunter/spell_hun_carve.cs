@@ -17,7 +17,7 @@ public class spell_hun_carve : SpellScript, ISpellOnHit
 		if (caster == null || target == null)
 			return;
 
-		if (caster.HasSpell(HunterSpells.SPELL_HUNTER_SERPENT_STING))
-			caster.CastSpell(target, HunterSpells.SPELL_HUNTER_SERPENT_STING_DAMAGE, true);
+		if (caster.HasSpell(HunterSpells.SERPENT_STING))
+			caster.CastSpell(target, HunterSpells.SERPENT_STING_DAMAGE, true);
 	}
 }

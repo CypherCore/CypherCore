@@ -17,10 +17,10 @@ public class spell_dh_artifact_demon_speed : SpellScript, ISpellOnCast
 		if (caster == null)
 			return;
 
-		var aurEff = caster.GetAuraEffect(DemonHunterSpells.SPELL_DH_DEMON_SPEED, 0);
+		var aurEff = caster.GetAuraEffect(DemonHunterSpells.DEMON_SPEED, 0);
 
 		if (aurEff != null)
 			for (byte i = 0; i < aurEff.GetAmount(); ++i)
-				caster.GetSpellHistory().RestoreCharge(Global.SpellMgr.GetSpellInfo(DemonHunterSpells.SPELL_DH_FEL_RUSH, Difficulty.None).ChargeCategoryId);
+				caster.GetSpellHistory().RestoreCharge(Global.SpellMgr.GetSpellInfo(DemonHunterSpells.FEL_RUSH, Difficulty.None).ChargeCategoryId);
 	}
 }

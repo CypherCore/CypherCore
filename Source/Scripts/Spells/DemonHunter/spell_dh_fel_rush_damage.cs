@@ -47,8 +47,8 @@ public class spell_dh_fel_rush_damage : SpellScript, IHasSpellEffects, ISpellOnH
 		var caster = GetCaster();
 
 		if (caster != null)
-			if (caster.HasAura(DemonHunterSpells.SPELL_DH_FEL_MASTERY) && _targetHit)
-				caster.CastSpell(caster, DemonHunterSpells.SPELL_DH_FEL_MASTERY_FURY, true);
+			if (caster.HasAura(DemonHunterSpells.FEL_MASTERY) && _targetHit)
+				caster.CastSpell(caster, DemonHunterSpells.FEL_MASTERY_FURY, true);
 	}
 
 	public void OnHit()

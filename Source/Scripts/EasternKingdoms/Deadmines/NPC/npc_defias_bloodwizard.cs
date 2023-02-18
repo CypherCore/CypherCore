@@ -28,7 +28,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
         {
             if (BloodboltTimer <= diff)
             {
-                DoCastVictim(boss_vanessa_vancleef.Spells.SPELL_BLOODBOLT);
+                DoCastVictim(boss_vanessa_vancleef.Spells.BLOODBOLT);
                 BloodboltTimer = RandomHelper.URand(6400, 8000);
             }
             else
@@ -41,7 +41,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
                 Creature Enforcer = me.FindNearestCreature(DMCreatures.NPC_DEFIAS_SHADOWGUARD, 100.0f, true);
                 if (Enforcer != null)
                 {
-                    DoCast(Enforcer, boss_vanessa_vancleef.Spells.SPELL_BLOODWASH);
+                    DoCast(Enforcer, boss_vanessa_vancleef.Spells.BLOODWASH);
                 }
                 BloodWashTimer = RandomHelper.URand(15000, 21000);
             }
@@ -52,7 +52,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
             if (RagezoneTimer <= diff)
             {
-                DoCastVictim(boss_vanessa_vancleef.Spells.SPELL_RAGEZONE);
+                DoCastVictim(boss_vanessa_vancleef.Spells.RAGEZONE);
                 RagezoneTimer = RandomHelper.URand(11000, 15000);
             }
             else

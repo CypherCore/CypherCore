@@ -37,7 +37,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
         {
             if (SinisterTimer <= diff)
             {
-                DoCastVictim(boss_vanessa_vancleef.Spells.SPELL_SINISTER);
+                DoCastVictim(boss_vanessa_vancleef.Spells.SINISTER);
                 SinisterTimer = RandomHelper.URand(5000, 7000);
             }
             else
@@ -47,7 +47,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
             if (WhirlingBladesTimer <= diff)
             {
-                DoCast(me, boss_vanessa_vancleef.Spells.SPELL_BLADES);
+                DoCast(me, boss_vanessa_vancleef.Spells.BLADES);
                 WhirlingBladesTimer = RandomHelper.URand(6400, 8200);
             }
             else
@@ -57,7 +57,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
             if (HealthBelowPct(35) && !Below)
             {
-                DoCast(me, boss_vanessa_vancleef.Spells.SPELL_EVASION);
+                DoCast(me, boss_vanessa_vancleef.Spells.EVASION);
                 Below = true;
             }
             if (ShadowstepTimer <= diff)
@@ -65,7 +65,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
                 if (target != null)
                 {
-                    DoCast(target, boss_vanessa_vancleef.Spells.SPELL_SHADOWSTEP);
+                    DoCast(target, boss_vanessa_vancleef.Spells.SHADOWSTEP);
                 }
                 ShadowstepTimer = RandomHelper.URand(6400, 8200);
             }

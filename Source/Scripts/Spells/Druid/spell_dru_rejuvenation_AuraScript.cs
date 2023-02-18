@@ -22,26 +22,26 @@ public class spell_dru_rejuvenation_AuraScript : AuraScript, IHasAuraEffects
 	// {
 	//     return ValidateSpellInfo(
 	//         {
-	//             SPELL_DRUID_CULTIVATION,
-	//             SPELL_DRUID_CULTIVATION_HOT,
-	//             SPELL_DRUID_ABUNDANCE,
-	//             SPELL_DRUID_ABUNDANCE_BUFF,
+	//             CULTIVATION,
+	//             CULTIVATION_HOT,
+	//             ABUNDANCE,
+	//             ABUNDANCE_BUFF,
 	//         });
 	// }
 	//
 	// void AfterRemove(AuraEffect const* aurEff, AuraEffectHandleModes mode)
 	// {
 	//     if (Unit* caster = GetCaster())
-	//         if (caster->HasAura(SPELL_DRUID_ABUNDANCE))
-	//             if (Aura* abundanceBuff = caster->GetAura(SPELL_DRUID_ABUNDANCE_BUFF))
+	//         if (caster->HasAura(ABUNDANCE))
+	//             if (Aura* abundanceBuff = caster->GetAura(ABUNDANCE_BUFF))
 	//                 abundanceBuff->ModStackAmount(-1);
 	// }
 	//
 	// void OnPeriodic(AuraEffect const* aurEff)
 	// {
 	//     if (Unit* target = GetTarget())
-	//         if (GetCaster()->HasAura(SPELL_DRUID_CULTIVATION) && !target->HasAura(SPELL_DRUID_CULTIVATION_HOT) && target->HealthBelowPct(Global.SpellMgr->GetSpellInfo//(SPELL_DRUID_CULTIVATION)->GetEffect(0).BasePoints))
-	//             GetCaster()->CastSpell(target, SPELL_DRUID_CULTIVATION_HOT, true);
+	//         if (GetCaster()->HasAura(CULTIVATION) && !target->HasAura(CULTIVATION_HOT) && target->HealthBelowPct(Global.SpellMgr->GetSpellInfo//(CULTIVATION)->GetEffect(0).BasePoints))
+	//             GetCaster()->CastSpell(target, CULTIVATION_HOT, true);
 	// }
 	//
 	// void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& canBeRecalculated)
@@ -66,10 +66,10 @@ public class spell_dru_rejuvenation_AuraScript : AuraScript, IHasAuraEffects
 
 		if (l_Caster != null)
 			///If soul of the forest is activated we increase the heal by 100%
-			if (l_Caster.HasAura(SoulOfTheForestSpells.SPELL_DRUID_SOUL_OF_THE_FOREST_RESTO) && !l_Caster.HasAura(DruidSpells.SPELL_DRUID_REJUVENATION))
+			if (l_Caster.HasAura(SoulOfTheForestSpells.SOUL_OF_THE_FOREST_RESTO) && !l_Caster.HasAura(DruidSpells.REJUVENATION))
 			{
 				amount *= 2;
-				l_Caster.RemoveAura(SoulOfTheForestSpells.SPELL_DRUID_SOUL_OF_THE_FOREST_RESTO);
+				l_Caster.RemoveAura(SoulOfTheForestSpells.SOUL_OF_THE_FOREST_RESTO);
 			}
 	}
 

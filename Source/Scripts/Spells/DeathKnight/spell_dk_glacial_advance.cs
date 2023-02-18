@@ -29,7 +29,7 @@ public class spell_dk_glacial_advance : SpellScript, IHasSpellEffects
 			                                 {
 				                                 var targetPosition = new Position(castPosition);
 				                                 caster.MovePosition(targetPosition, dist, 0.0f);
-				                                 caster.CastSpell(targetPosition, DeathKnightSpells.SPELL_DK_GLACIAL_ADVANCE_DAMAGE, true);
+				                                 caster.CastSpell(targetPosition, DeathKnightSpells.GLACIAL_ADVANCE_DAMAGE, true);
 			                                 },
 			                                 TimeSpan.FromMilliseconds(dist / 1.5f * 50.0f));
 	}

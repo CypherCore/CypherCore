@@ -15,7 +15,7 @@ namespace Scripts.Spells.Shaman
 	{
 		public override bool Validate(SpellInfo UnnamedParameter)
 		{
-			return ValidateSpellInfo(Resurgence.SPELL_WATER_SHIELD, Resurgence.SPELL_RESURGENCE, Resurgence.SPELL_RESURGENCE_PROC);
+			return ValidateSpellInfo(Resurgence.WATER_SHIELD, Resurgence.RESURGENCE, Resurgence.RESURGENCE_PROC);
 		}
 
 		// Spell cannot proc if caster doesn't have aura 52127
@@ -24,7 +24,7 @@ namespace Scripts.Spells.Shaman
 			var target = procInfo.GetActor();
 
 			if (target != null)
-				return target.HasAura(Resurgence.SPELL_WATER_SHIELD);
+				return target.HasAura(Resurgence.WATER_SHIELD);
 
 			return false;
 		}
@@ -48,20 +48,20 @@ namespace Scripts.Spells.Shaman
 						switch (damageInfo.GetSpellInfo().Id)
 						{
 							// 100% on Healing Wave and Greater Healing Wave
-							case Resurgence.SPELL_HEALING_WAVE:
-							case Resurgence.SPELL_GREATER_HEALING_WAVE:
+							case Resurgence.HEALING_WAVE:
+							case Resurgence.GREATER_HEALING_WAVE:
 								break;
 
 							// 60% on Riptide, Healing Surge and Unleash Life
-							case Resurgence.SPELL_RIPTIDE:
-							case Resurgence.SPELL_HEALING_SURGE:
-							case Resurgence.SPELL_UNLEASH_LIFE:
+							case Resurgence.RIPTIDE:
+							case Resurgence.HEALING_SURGE:
+							case Resurgence.UNLEASH_LIFE:
 								healAmount *= 0.6f;
 
 								break;
 
 							// 33% on Chain Heal
-							case Resurgence.SPELL_CHAIN_HEAL:
+							case Resurgence.CHAIN_HEAL:
 								healAmount *= 0.33f;
 
 								break;
@@ -75,7 +75,7 @@ namespace Scripts.Spells.Shaman
 								return;
 						} //switch damageInfo->GetSpellInfo()->Id
 
-						target.CastSpell(target, Resurgence.SPELL_RESURGENCE_PROC, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)healAmount));
+						target.CastSpell(target, Resurgence.RESURGENCE_PROC, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)healAmount));
 					} // if procInfo.GetDamageInfo()
 				}     // if target->CalculateSpellDamage()
 			}         // if procInfo.GetActor()

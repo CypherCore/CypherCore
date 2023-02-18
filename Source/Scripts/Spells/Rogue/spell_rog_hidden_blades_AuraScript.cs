@@ -25,7 +25,7 @@ public class spell_rog_hidden_blades_AuraScript : AuraScript, IHasAuraEffects
 		{
 			if (_stacks != 20)
 			{
-				caster.AddAura(RogueSpells.SPELL_ROGUE_HIDDEN_BLADES_BUFF, caster);
+				caster.AddAura(RogueSpells.HIDDEN_BLADES_BUFF, caster);
 				_stacks++;
 			}
 

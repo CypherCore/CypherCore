@@ -27,8 +27,8 @@ public class spell_pri_renew : AuraScript, IHasAuraEffects
 		if (caster != null)
 		{
 			// Reduse the GCD of Holy Word: Sanctify by 2 seconds
-			if (caster.GetSpellHistory().HasCooldown(PriestSpells.SPELL_PRIEST_HOLY_WORD_SANCTIFY))
-				caster.GetSpellHistory().ModifyCooldown(PriestSpells.SPELL_PRIEST_HOLY_WORD_SANCTIFY, TimeSpan.FromSeconds(-2 * Time.InMilliseconds));
+			if (caster.GetSpellHistory().HasCooldown(PriestSpells.HOLY_WORD_SANCTIFY))
+				caster.GetSpellHistory().ModifyCooldown(PriestSpells.HOLY_WORD_SANCTIFY, TimeSpan.FromSeconds(-2 * Time.InMilliseconds));
 
 			// Divine Touch
 			var empoweredRenewAurEff = caster.GetAuraEffect(PriestSpellIcons.PRIEST_ICON_ID_DIVINE_TOUCH_TALENT, 0);
@@ -42,7 +42,7 @@ public class spell_pri_renew : AuraScript, IHasAuraEffects
 				args.AddSpellMod(SpellValueMod.BasePoint0, (int)basepoints0);
 				args.SetTriggerFlags(TriggerCastFlags.FullMask);
 				args.SetTriggeringAura(aurEff);
-				caster.CastSpell(GetTarget(), PriestSpells.SPELL_PRIEST_DIVINE_TOUCH, args);
+				caster.CastSpell(GetTarget(), PriestSpells.DIVINE_TOUCH, args);
 			}
 		}
 	}

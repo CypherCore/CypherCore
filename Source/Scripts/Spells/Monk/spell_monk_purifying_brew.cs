@@ -19,13 +19,13 @@ public class spell_monk_purifying_brew : SpellScript, ISpellOnHit
 
 			if (_player != null)
 			{
-				var staggerAmount = _player.GetAura(MonkSpells.SPELL_MONK_LIGHT_STAGGER);
+				var staggerAmount = _player.GetAura(MonkSpells.LIGHT_STAGGER);
 
 				if (staggerAmount == null)
-					staggerAmount = _player.GetAura(MonkSpells.SPELL_MONK_MODERATE_STAGGER);
+					staggerAmount = _player.GetAura(MonkSpells.MODERATE_STAGGER);
 
 				if (staggerAmount == null)
-					staggerAmount = _player.GetAura(MonkSpells.SPELL_MONK_HEAVY_STAGGER);
+					staggerAmount = _player.GetAura(MonkSpells.HEAVY_STAGGER);
 
 				if (staggerAmount != null)
 				{

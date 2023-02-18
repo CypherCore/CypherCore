@@ -18,7 +18,7 @@ public class spell_mage_ebonbolt_damage : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(MageSpells.SPELL_MAGE_SPLITTING_ICE);
+		return ValidateSpellInfo(MageSpells.SPLITTING_ICE);
 	}
 
 	private void DoEffectHitTarget(uint UnnamedParameter)
@@ -30,7 +30,7 @@ public class spell_mage_ebonbolt_damage : SpellScript, IHasSpellEffects
 		if (hitUnit == null || primaryTarget == default)
 			return;
 
-		var eff1 = Global.SpellMgr.GetSpellInfo(MageSpells.SPELL_MAGE_SPLITTING_ICE, Difficulty.None).GetEffect(1).CalcValue();
+		var eff1 = Global.SpellMgr.GetSpellInfo(MageSpells.SPLITTING_ICE, Difficulty.None).GetEffect(1).CalcValue();
 
 		if (eff1 != 0)
 			if (hitUnit.GetGUID() != primaryTarget)

@@ -37,8 +37,8 @@ public class spell_mage_snowdrift : AuraScript, IHasAuraEffects
 		if (aurEff.GetTickNumber() >= 3)
 		{
 			// Apply Frozen in Ice and stun for 4 sec
-			target.CastSpell(target, MageSpells.SPELL_FROZEN_IN_ICE, true);
-			target.RemoveAura(MageSpells.SPELL_SNOWDRIFT);
+			target.CastSpell(target, MageSpells.FROZEN_IN_ICE, true);
+			target.RemoveAura(MageSpells.SNOWDRIFT);
 		}
 	}
 

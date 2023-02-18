@@ -17,7 +17,7 @@ public class bfa_spell_blackout_kick_spirit_of_the_crane_talent : SpellScript, I
 		if (caster == null)
 			return;
 
-		if (caster.HasAura(MonkSpells.SPELL_SPIRIT_OF_THE_CRANE))
+		if (caster.HasAura(MonkSpells.SPIRIT_OF_THE_CRANE))
 			caster.SetPower(PowerType.Mana, caster.GetPower(PowerType.Mana) + ((caster.GetMaxPower(PowerType.Mana) * 0.65f) / 100));
 	}
 }

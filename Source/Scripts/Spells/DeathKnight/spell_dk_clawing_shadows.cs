@@ -17,6 +17,6 @@ public class spell_dk_clawing_shadows : SpellScript, ISpellOnHit
 		if (caster == null || target == null)
 			return;
 
-		caster.CastSpell(target, DeathKnightSpells.SPELL_DK_FESTERING_WOUND_DAMAGE, true);
+		caster.CastSpell(target, DeathKnightSpells.FESTERING_WOUND_DAMAGE, true);
 	}
 }

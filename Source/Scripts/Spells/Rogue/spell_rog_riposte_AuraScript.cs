@@ -30,7 +30,7 @@ public class spell_rog_riposte_AuraScript : AuraScript, IHasAuraEffects
 		if (target == null)
 			return;
 
-		caster.CastSpell(target, RogueSpells.SPELL_ROGUE_RIPOSTE_DAMAGE, true);
+		caster.CastSpell(target, RogueSpells.RIPOSTE_DAMAGE, true);
 	}
 
 	public override void Register()

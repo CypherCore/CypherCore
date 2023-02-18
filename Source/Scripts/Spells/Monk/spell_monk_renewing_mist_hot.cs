@@ -16,7 +16,7 @@ public class spell_monk_renewing_mist_hot : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(MonkSpells.SPELL_MONK_RENEWING_MIST_JUMP, MonkSpells.SPELL_MONK_RENEWING_MIST);
+		return ValidateSpellInfo(MonkSpells.RENEWING_MIST_JUMP, MonkSpells.RENEWING_MIST);
 	}
 
 	private void HandlePeriodicHeal(AuraEffect UnnamedParameter)
@@ -27,13 +27,13 @@ public class spell_monk_renewing_mist_hot : AuraScript, IHasAuraEffects
 			return;
 
 		if (GetTarget().IsFullHealth())
-			caster.CastSpell(GetTarget(), MonkSpells.SPELL_MONK_RENEWING_MIST_JUMP, true);
+			caster.CastSpell(GetTarget(), MonkSpells.RENEWING_MIST_JUMP, true);
 	}
 
 	private void CalcAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
 	{
 		var caster         = GetCaster();
-		var counteractAura = caster.GetAura(MonkSpells.SPELL_MONK_COUNTERACT_MAGIC);
+		var counteractAura = caster.GetAura(MonkSpells.COUNTERACT_MAGIC);
 
 		if (counteractAura != null)
 		{

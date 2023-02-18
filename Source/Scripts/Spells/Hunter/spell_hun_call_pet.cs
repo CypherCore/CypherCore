@@ -15,6 +15,6 @@ public class spell_hun_call_pet : SpellScript, ISpellCheckCast
 {
 	public SpellCastResult CheckCast()
 	{
-		return GetCaster().HasAura(HunterSpells.SPELL_HUNTER_LONE_WOLF) ? SpellCastResult.SpellUnavailable : SpellCastResult.SpellCastOk;
+		return GetCaster().HasAura(HunterSpells.LONE_WOLF) ? SpellCastResult.SpellUnavailable : SpellCastResult.SpellCastOk;
 	}
 }

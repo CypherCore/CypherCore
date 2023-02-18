@@ -17,16 +17,16 @@ public class spell_evo_living_flame_damage : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(EvokerSpells.SPELL_EVOKER_ENERGIZING_FLAME, EvokerSpells.SPELL_EVOKER_LIVING_FLAME);
+		return ValidateSpellInfo(EvokerSpells.ENERGIZING_FLAME, EvokerSpells.LIVING_FLAME);
 	}
 
 	private void HandleManaRestored(uint UnnamedParameter)
 	{
-		var auraEffect = GetCaster().GetAuraEffect(EvokerSpells.SPELL_EVOKER_ENERGIZING_FLAME, 0);
+		var auraEffect = GetCaster().GetAuraEffect(EvokerSpells.ENERGIZING_FLAME, 0);
 
 		if (auraEffect != null)
 		{
-			var spellInfo = Global.SpellMgr.AssertSpellInfo(EvokerSpells.SPELL_EVOKER_LIVING_FLAME, GetCastDifficulty());
+			var spellInfo = Global.SpellMgr.AssertSpellInfo(EvokerSpells.LIVING_FLAME, GetCastDifficulty());
 
 			var cost = spellInfo.CalcPowerCost(PowerType.Mana, false, GetCaster(), GetSpellInfo().GetSchoolMask(), null);
 

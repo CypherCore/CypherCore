@@ -36,7 +36,7 @@ public class at_hun_sentinelAI : AreaTriggerAI
 		if (caster != null)
 		{
 			var targetList = new List<Unit>();
-			var radius     = Global.SpellMgr.GetSpellInfo(HunterSpells.SPELL_HUNTER_SENTINEL, Difficulty.None).GetEffect(0).CalcRadius(caster);
+			var radius     = Global.SpellMgr.GetSpellInfo(HunterSpells.SENTINEL, Difficulty.None).GetEffect(0).CalcRadius(caster);
 
 			var l_Check    = new AnyUnitInObjectRangeCheck(at, radius);
 			var l_Searcher = new UnitListSearcher(at, targetList, l_Check, GridType.All);
@@ -45,8 +45,8 @@ public class at_hun_sentinelAI : AreaTriggerAI
 			foreach (var l_Unit in targetList)
 
 			{
-				caster.CastSpell(l_Unit, HunterSpells.SPELL_HUNTER_HUNTERS_MARK_AURA, true);
-				caster.CastSpell(caster, HunterSpells.SPELL_HUNTER_HUNTERS_MARK_AURA_2, true);
+				caster.CastSpell(l_Unit, HunterSpells.HUNTERS_MARK_AURA, true);
+				caster.CastSpell(caster, HunterSpells.HUNTERS_MARK_AURA_2, true);
 
 				timeInterval -= 6000;
 			}
@@ -60,7 +60,7 @@ public class at_hun_sentinelAI : AreaTriggerAI
 		if (caster != null)
 		{
 			var targetList = new List<Unit>();
-			var radius     = Global.SpellMgr.GetSpellInfo(HunterSpells.SPELL_HUNTER_SENTINEL, Difficulty.None).GetEffect(0).CalcRadius(caster);
+			var radius     = Global.SpellMgr.GetSpellInfo(HunterSpells.SENTINEL, Difficulty.None).GetEffect(0).CalcRadius(caster);
 
 			var l_Check    = new AnyUnitInObjectRangeCheck(at, radius);
 			var l_Searcher = new UnitListSearcher(at, targetList, l_Check, GridType.All);
@@ -69,8 +69,8 @@ public class at_hun_sentinelAI : AreaTriggerAI
 			foreach (var l_Unit in targetList)
 				if (l_Unit != caster && caster.IsValidAttackTarget(l_Unit))
 				{
-					caster.CastSpell(l_Unit, HunterSpells.SPELL_HUNTER_HUNTERS_MARK_AURA, true);
-					caster.CastSpell(caster, HunterSpells.SPELL_HUNTER_HUNTERS_MARK_AURA_2, true);
+					caster.CastSpell(l_Unit, HunterSpells.HUNTERS_MARK_AURA, true);
+					caster.CastSpell(caster, HunterSpells.HUNTERS_MARK_AURA_2, true);
 
 					timeInterval -= 6000;
 				}

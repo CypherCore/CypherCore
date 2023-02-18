@@ -16,6 +16,6 @@ public class npc_monk_xuen : ScriptedAI
 
 	public override void IsSummonedBy(WorldObject UnnamedParameter)
 	{
-		me.CastSpell(me, MonkSpells.SPELL_MONK_XUEN_AURA, true);
+		me.CastSpell(me, MonkSpells.XUEN_AURA, true);
 	}
 }

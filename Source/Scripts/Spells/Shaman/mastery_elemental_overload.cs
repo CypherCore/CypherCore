@@ -22,27 +22,27 @@ namespace Scripts.Spells.Shaman
 			if (player.GetPrimarySpecialization() != TalentSpecialization.ShamanElemental)
 				return;
 
-			if (player.HasAura(ShamanSpells.SPELL_SHAMAN_MASTERY_ELEMENTAL_OVERLOAD) && RandomHelper.randChance(15))
+			if (player.HasAura(ShamanSpells.MASTERY_ELEMENTAL_OVERLOAD) && RandomHelper.randChance(15))
 			{
 				var spellInfo = spell.GetSpellInfo();
 
 				if (spellInfo != null)
 					switch (spell.GetSpellInfo().Id)
 					{
-						case ShamanSpells.SPELL_SHAMAN_LIGHTNING_BOLT_ELEM:
-							player.CastSpell(player.GetSelectedUnit(), ShamanSpells.SPELL_SHAMAN_LIGHTNING_BOLT_ELEM, true);
+						case ShamanSpells.LIGHTNING_BOLT_ELEM:
+							player.CastSpell(player.GetSelectedUnit(), ShamanSpells.LIGHTNING_BOLT_ELEM, true);
 
 							break;
-						case ShamanSpells.SPELL_SHAMAN_ELEMENTAL_BLAST:
-							player.CastSpell(player.GetSelectedUnit(), ShamanSpells.SPELL_SHAMAN_ELEMENTAL_BLAST, true);
+						case ShamanSpells.ELEMENTAL_BLAST:
+							player.CastSpell(player.GetSelectedUnit(), ShamanSpells.ELEMENTAL_BLAST, true);
 
 							break;
-						case ShamanSpells.SPELL_SHAMAN_LAVA_BURST:
-							player.CastSpell(player.GetSelectedUnit(), ShamanSpells.SPELL_SHAMAN_LAVA_BURST, true);
+						case ShamanSpells.LAVA_BURST:
+							player.CastSpell(player.GetSelectedUnit(), ShamanSpells.LAVA_BURST, true);
 
 							break;
-						case ShamanSpells.SPELL_SHAMAN_CHAIN_LIGHTNING:
-							player.CastSpell(player.GetSelectedUnit(), ShamanSpells.SPELL_SHAMAN_LAVA_BURST, true);
+						case ShamanSpells.CHAIN_LIGHTNING:
+							player.CastSpell(player.GetSelectedUnit(), ShamanSpells.LAVA_BURST, true);
 
 							break;
 					}

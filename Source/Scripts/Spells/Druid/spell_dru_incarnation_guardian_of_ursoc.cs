@@ -14,7 +14,7 @@ public class spell_dru_incarnation_guardian_of_ursoc : SpellScript, ISpellOnCast
 		var player = GetCaster().ToPlayer();
 
 		if (player != null)
-			if (!player.HasAura(ShapeshiftFormSpells.SPELL_DRUID_BEAR_FORM))
-				player.CastSpell(player, ShapeshiftFormSpells.SPELL_DRUID_BEAR_FORM, true);
+			if (!player.HasAura(ShapeshiftFormSpells.BEAR_FORM))
+				player.CastSpell(player, ShapeshiftFormSpells.BEAR_FORM, true);
 	}
 }

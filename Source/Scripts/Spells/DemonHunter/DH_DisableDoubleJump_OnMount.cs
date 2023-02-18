@@ -20,13 +20,13 @@ public class DH_DisableDoubleJump_OnMount : ScriptObjectAutoAdd, IPlayerOnSpellC
 
 	public void OnSpellCast(Player player, Spell spell, bool skipCheck)
 	{
-		if (player.GetClass() == Class.DemonHunter && player.HasAura(DemonHunterSpells.SPELL_DH_DOUBLE_JUMP) && spell.GetSpellInfo().GetEffect(0).ApplyAuraName == AuraType.Mounted)
+		if (player.GetClass() == Class.DemonHunter && player.HasAura(DemonHunterSpells.DOUBLE_JUMP) && spell.GetSpellInfo().GetEffect(0).ApplyAuraName == AuraType.Mounted)
 			player.SetCanDoubleJump(false);
 	}
 
 	public void OnUpdate(Player player, uint diff)
 	{
-		if (player.GetClass() == Class.DemonHunter && player.HasAura(DemonHunterSpells.SPELL_DH_DOUBLE_JUMP) && !player.IsMounted() && !player.HasExtraUnitMovementFlag(MovementFlag2.CanDoubleJump))
+		if (player.GetClass() == Class.DemonHunter && player.HasAura(DemonHunterSpells.DOUBLE_JUMP) && !player.IsMounted() && !player.HasExtraUnitMovementFlag(MovementFlag2.CanDoubleJump))
 			player.SetCanDoubleJump(true);
 	}
 }

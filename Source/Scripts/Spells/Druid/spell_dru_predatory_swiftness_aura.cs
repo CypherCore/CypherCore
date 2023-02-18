@@ -14,7 +14,7 @@ public class spell_dru_predatory_swiftness_aura : SpellScript, ISpellAfterHit
 		var player = GetCaster().ToPlayer();
 
 		if (player != null)
-			if (player.HasAura(PredatorySwiftnessSpells.SPELL_DRUID_PREDATORY_SWIFTNESS_AURA))
-				player.RemoveAurasDueToSpell(PredatorySwiftnessSpells.SPELL_DRUID_PREDATORY_SWIFTNESS_AURA);
+			if (player.HasAura(PredatorySwiftnessSpells.PREDATORY_SWIFTNESS_AURA))
+				player.RemoveAurasDueToSpell(PredatorySwiftnessSpells.PREDATORY_SWIFTNESS_AURA);
 	}
 }

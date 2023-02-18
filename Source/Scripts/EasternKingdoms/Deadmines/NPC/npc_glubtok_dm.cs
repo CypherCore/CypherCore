@@ -48,7 +48,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
             foreach (var item in players)
             {
-                item.AddAura(boss_vanessa_vancleef.Spells.SPELL_EFFECT_1, item);
+                item.AddAura(boss_vanessa_vancleef.Spells.EFFECT_1, item);
             }
 
             me.TextEmote(boss_vanessa_vancleef.VANESSA_NIGHTMARE_14, null, true);
@@ -89,12 +89,12 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
                         Player pPlayer = me.FindNearestPlayer(200.0f, true);
                         if (pPlayer != null)
                         {
-                            DoCast(pPlayer, boss_vanessa_vancleef.Spells.SPELL_ICYCLE);
+                            DoCast(pPlayer, boss_vanessa_vancleef.Spells.ICYCLE);
                         }
                         _events.ScheduleEvent(boss_vanessa_vancleef.BossEvents.EVENT_ICYCLE_AOE, TimeSpan.FromMilliseconds(RandomHelper.URand(6000, 8000)));
                         break;
                     case boss_vanessa_vancleef.BossEvents.EVENT_SPIRIT_STRIKE:
-                        DoCastVictim(boss_vanessa_vancleef.Spells.SPELL_SPIRIT_STRIKE);
+                        DoCastVictim(boss_vanessa_vancleef.Spells.SPIRIT_STRIKE);
                         _events.ScheduleEvent(boss_vanessa_vancleef.BossEvents.EVENT_SPIRIT_STRIKE, TimeSpan.FromMilliseconds(RandomHelper.URand(5000, 7000)));
                         break;
                 }

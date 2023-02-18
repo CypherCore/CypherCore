@@ -30,7 +30,7 @@ public class spell_hun_throwing_axes : SpellScript, ISpellOnCast
 					                                 Unit target = ObjectAccessor.GetCreature(caster, targetGUID);
 
 					                                 if (target != null)
-						                                 caster.CastSpell(target, HunterSpells.SPELL_HUNTER_THOWING_AXES_DAMAGE, false);
+						                                 caster.CastSpell(target, HunterSpells.THOWING_AXES_DAMAGE, false);
 				                                 }
 			                                 },
 			                                 TimeSpan.FromMilliseconds(500 * i));

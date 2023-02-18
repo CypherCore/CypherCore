@@ -18,7 +18,7 @@ namespace Scripts.Spells.Shaman
 			if (caster == null)
 				return;
 
-			var flamet = caster.GetAura(ShamanSpells.SPELL_FLAMETONGUE_AURA);
+			var flamet = caster.GetAura(ShamanSpells.FLAMETONGUE_AURA);
 
 			if (flamet != null)
 				SetHitDamage((int)(caster.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.2f));

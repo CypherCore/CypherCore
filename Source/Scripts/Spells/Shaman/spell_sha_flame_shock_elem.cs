@@ -58,10 +58,10 @@ namespace Scripts.Spells.Shaman
 			if (caster == null)
 				return;
 
-			if (caster.HasAura(ShamanSpells.SPELL_SHAMAN_LAVA_SURGE) && RandomHelper.randChance(15))
+			if (caster.HasAura(ShamanSpells.LAVA_SURGE) && RandomHelper.randChance(15))
 			{
-				caster.CastSpell(null, ShamanSpells.SPELL_SHAMAN_LAVA_SURGE_CAST_TIME);
-				caster.GetSpellHistory().ResetCooldown(ShamanSpells.SPELL_SHAMAN_LAVA_BURST, true);
+				caster.CastSpell(null, ShamanSpells.LAVA_SURGE_CAST_TIME);
+				caster.GetSpellHistory().ResetCooldown(ShamanSpells.LAVA_BURST, true);
 			}
 		}
 

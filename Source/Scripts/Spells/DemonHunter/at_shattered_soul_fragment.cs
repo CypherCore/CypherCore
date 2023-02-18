@@ -24,7 +24,7 @@ public class at_shattered_soul_fragment : AreaTriggerAI
 		{
 			case 10665:
 				if (at.GetCaster().ToPlayer().GetPrimarySpecialization() == TalentSpecialization.DemonHunterHavoc)
-					at.GetCaster().CastSpell(at.GetCaster(), ShatteredSoulsSpells.SPELL_DH_SOUL_FRAGMENT_HEAL_25_HAVOC, true);
+					at.GetCaster().CastSpell(at.GetCaster(), ShatteredSoulsSpells.SOUL_FRAGMENT_HEAL_25_HAVOC, true);
 
 				at.Remove();
 
@@ -32,7 +32,7 @@ public class at_shattered_soul_fragment : AreaTriggerAI
 
 			case 10666:
 				if (at.GetCaster().ToPlayer().GetPrimarySpecialization() == TalentSpecialization.DemonHunterHavoc)
-					at.GetCaster().CastSpell(at.GetCaster(), ShatteredSoulsSpells.SPELL_DH_SOUL_FRAGMENT_HEAL_25_HAVOC, true);
+					at.GetCaster().CastSpell(at.GetCaster(), ShatteredSoulsSpells.SOUL_FRAGMENT_HEAL_25_HAVOC, true);
 
 				at.Remove();
 

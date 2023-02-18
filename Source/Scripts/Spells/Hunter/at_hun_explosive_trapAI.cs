@@ -17,7 +17,7 @@ public class at_hun_explosive_trapAI : AreaTriggerAI
 
 	public enum UsedSpells
 	{
-		SPELL_HUNTER_EXPLOSIVE_TRAP_DAMAGE = 13812
+		EXPLOSIVE_TRAP_DAMAGE = 13812
 	}
 
 	public at_hun_explosive_trapAI(AreaTrigger areatrigger) : base(areatrigger)
@@ -48,7 +48,7 @@ public class at_hun_explosive_trapAI : AreaTriggerAI
 					tempSumm.SetFaction(caster.GetFaction());
 					tempSumm.SetSummonerGUID(caster.GetGUID());
 					PhasingHandler.InheritPhaseShift(tempSumm, caster);
-					caster.CastSpell(tempSumm, UsedSpells.SPELL_HUNTER_EXPLOSIVE_TRAP_DAMAGE, true);
+					caster.CastSpell(tempSumm, UsedSpells.EXPLOSIVE_TRAP_DAMAGE, true);
 					at.Remove();
 				}
 			}
@@ -74,7 +74,7 @@ public class at_hun_explosive_trapAI : AreaTriggerAI
 				tempSumm.SetFaction(caster.GetFaction());
 				tempSumm.SetSummonerGUID(caster.GetGUID());
 				PhasingHandler.InheritPhaseShift(tempSumm, caster);
-				caster.CastSpell(tempSumm, UsedSpells.SPELL_HUNTER_EXPLOSIVE_TRAP_DAMAGE, true);
+				caster.CastSpell(tempSumm, UsedSpells.EXPLOSIVE_TRAP_DAMAGE, true);
 				at.Remove();
 			}
 		}

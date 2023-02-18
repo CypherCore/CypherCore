@@ -22,7 +22,7 @@ public class at_mage_blizzard : AreaTriggerAI
 
 	public struct UsingSpells
 	{
-		public const uint SPELL_MAGE_BLIZZARD_DAMAGE = 190357;
+		public const uint BLIZZARD_DAMAGE = 190357;
 	}
 
 	public override void OnCreate()
@@ -51,7 +51,7 @@ public class at_mage_blizzard : AreaTriggerAI
 			tempSumm.SetFaction(caster.GetFaction());
 			tempSumm.SetSummonerGUID(caster.GetGUID());
 			PhasingHandler.InheritPhaseShift(tempSumm, caster);
-			caster.CastSpell(tempSumm, UsingSpells.SPELL_MAGE_BLIZZARD_DAMAGE, true);
+			caster.CastSpell(tempSumm, UsingSpells.BLIZZARD_DAMAGE, true);
 		}
 
 		timeInterval -= 1000;

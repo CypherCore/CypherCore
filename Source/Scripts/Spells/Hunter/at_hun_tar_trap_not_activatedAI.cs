@@ -17,7 +17,7 @@ public class at_hun_tar_trap_not_activatedAI : AreaTriggerAI
 
 	public enum UsedSpells
 	{
-		SPELL_HUNTER_ACTIVATE_TAR_TRAP = 187700
+		ACTIVATE_TAR_TRAP = 187700
 	}
 
 	public at_hun_tar_trap_not_activatedAI(AreaTrigger areatrigger) : base(areatrigger)
@@ -48,7 +48,7 @@ public class at_hun_tar_trap_not_activatedAI : AreaTriggerAI
 					tempSumm.SetFaction(caster.GetFaction());
 					tempSumm.SetSummonerGUID(caster.GetGUID());
 					PhasingHandler.InheritPhaseShift(tempSumm, caster);
-					caster.CastSpell(tempSumm, UsedSpells.SPELL_HUNTER_ACTIVATE_TAR_TRAP, true);
+					caster.CastSpell(tempSumm, UsedSpells.ACTIVATE_TAR_TRAP, true);
 					at.Remove();
 				}
 			}
@@ -74,7 +74,7 @@ public class at_hun_tar_trap_not_activatedAI : AreaTriggerAI
 				tempSumm.SetFaction(caster.GetFaction());
 				tempSumm.SetSummonerGUID(caster.GetGUID());
 				PhasingHandler.InheritPhaseShift(tempSumm, caster);
-				caster.CastSpell(tempSumm, UsedSpells.SPELL_HUNTER_ACTIVATE_TAR_TRAP, true);
+				caster.CastSpell(tempSumm, UsedSpells.ACTIVATE_TAR_TRAP, true);
 				at.Remove();
 			}
 		}

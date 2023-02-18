@@ -27,26 +27,26 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
 
         public struct eSpell
         {
-            public const uint SPELL_ENERGIZE = 89132;
-            public const uint SPELL_ENERGIZED = 91733; // -> 89200;
-            public const uint SPELL_ON_FIRE = 91737;
-            public const uint SPELL_COSMETIC_STAND = 88906;
+            public const uint ENERGIZE = 89132;
+            public const uint ENERGIZED = 91733; // -> 89200;
+            public const uint ON_FIRE = 91737;
+            public const uint COSMETIC_STAND = 88906;
 
             // BOSS spells
-            public const uint SPELL_OVERDRIVE = 88481; // 88484
-            public const uint SPELL_HARVEST = 88495;
-            public const uint SPELL_HARVEST_AURA = 88497;
+            public const uint OVERDRIVE = 88481; // 88484
+            public const uint HARVEST = 88495;
+            public const uint HARVEST_AURA = 88497;
 
-            public const uint SPELL_HARVEST_SWEEP = 88521;
-            public const uint SPELL_HARVEST_SWEEP_H = 91718;
+            public const uint HARVEST_SWEEP = 88521;
+            public const uint HARVEST_SWEEP_H = 91718;
 
-            public const uint SPELL_REAPER_STRIKE = 88490;
-            public const uint SPELL_REAPER_STRIKE_H = 91717;
+            public const uint REAPER_STRIKE = 88490;
+            public const uint REAPER_STRIKE_H = 91717;
 
-            public const uint SPELL_SAFETY_REST_OFFLINE = 88522;
-            public const uint SPELL_SAFETY_REST_OFFLINE_H = 91720;
+            public const uint SAFETY_REST_OFFLINE = 88522;
+            public const uint SAFETY_REST_OFFLINE_H = 91720;
 
-            public const uint SPELL_SUMMON_MOLTEN_SLAG = 91839;
+            public const uint SUMMON_MOLTEN_SLAG = 91839;
         }
 
         public struct eAchievementMisc
@@ -243,7 +243,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                 return;
             }
 
-            if (spell.Id == eSpell.SPELL_ENERGIZE)
+            if (spell.Id == eSpell.ENERGIZE)
             {
                 if (_step == 3)
                 {
@@ -260,8 +260,8 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                 Creature HarvestTarget = me.FindNearestCreature(DMCreatures.NPC_HARVEST_TARGET, 200.0f, true);
                 if (HarvestTarget != null)
                 {
-                    //DoCast(HarvestTarget, IsHeroic() ? SPELL_HARVEST_SWEEP_H : SPELL_HARVEST_SWEEP);
-                    me.RemoveAurasDueToSpell(eSpell.SPELL_HARVEST_AURA);
+                    //DoCast(HarvestTarget, IsHeroic() ? HARVEST_SWEEP_H : HARVEST_SWEEP);
+                    me.RemoveAurasDueToSpell(eSpell.HARVEST_AURA);
                     _events.ScheduleEvent(BossEvents.EVENT_START_ATTACK, TimeSpan.FromMilliseconds(1000));
                 }
             }
@@ -296,7 +296,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                 {
                     case BossEvents.EVENT_START:
                         Talk(eSays.SAY_EVENT_START);
-                        me.AddAura(eSpell.SPELL_ENERGIZED, me);
+                        me.AddAura(eSpell.ENERGIZED, me);
                         me.TextEmote(MONSTER_START, null, true);
                         _events.ScheduleEvent(BossEvents.EVENT_START_2, TimeSpan.FromMilliseconds(5000));
                         break;
@@ -309,12 +309,12 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                         me.RemoveUnitFlag(UnitFlags.NonAttackable);
                         me.RemoveUnitFlag(UnitFlags.ImmuneToPc);
                         me.RemoveUnitFlag(UnitFlags.Stunned);
-                        me.RemoveAurasDueToSpell(eSpell.SPELL_ENERGIZED);
+                        me.RemoveAurasDueToSpell(eSpell.ENERGIZED);
                         _events.ScheduleEvent(BossEvents.EVENT_SRO, TimeSpan.FromMilliseconds(1000));
                         break;
 
                     case BossEvents.EVENT_SRO:
-                        me.RemoveAurasDueToSpell(DMSharedSpells.SPELL_OFFLINE);
+                        me.RemoveAurasDueToSpell(DMSharedSpells.OFFLINE);
 
                         Player victim = me.FindNearestPlayer(40.0f);
                         if (victim != null)
@@ -324,7 +324,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                         break;
 
                     case BossEvents.EVENT_START_ATTACK:
-                        me.RemoveAurasDueToSpell(eSpell.SPELL_HARVEST_AURA);
+                        me.RemoveAurasDueToSpell(eSpell.HARVEST_AURA);
                         me.SetSpeed(UnitMoveType.Run, 2.0f);
                         Player victim2 = me.FindNearestPlayer(40.0f);
                         if (victim2 != null)
@@ -340,7 +340,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                         }
 
                         me.TextEmote("|TInterface\\Icons\\ability_whirlwind.blp:20|tFoe Reaper 5000 begins to activate |cFFFF0000|Hspell:91716|h[Overdrive]|h|r!", null, true);
-                        me.AddAura(eSpell.SPELL_OVERDRIVE, me);
+                        me.AddAura(eSpell.OVERDRIVE, me);
                         me.SetSpeed(UnitMoveType.Run, 4.0f);
                         _events.ScheduleEvent(BossEvents.EVENT_SWITCH_TARGET, TimeSpan.FromMilliseconds(1500));
                         _events.ScheduleEvent(BossEvents.EVENT_OVERDRIVE, TimeSpan.FromMilliseconds(45000));
@@ -353,7 +353,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                             me.Attack(victim3, true);
                         }
 
-                        if (me.HasAura(eSpell.SPELL_OVERDRIVE))
+                        if (me.HasAura(eSpell.OVERDRIVE))
                         {
                             _events.ScheduleEvent(BossEvents.EVENT_SWITCH_TARGET, TimeSpan.FromMilliseconds(1500));
                         }
@@ -368,7 +368,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                         Unit target = SelectTarget(SelectTargetMethod.Random, 0, 150, true);
                         if (target != null)
                         {
-                            me.CastSpell(target, eSpell.SPELL_HARVEST);
+                            me.CastSpell(target, eSpell.HARVEST);
                         }
 
                         _events.RescheduleEvent(BossEvents.EVENT_HARVEST_SWEAP, TimeSpan.FromMilliseconds(5500));
@@ -397,7 +397,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
                         {
                             if (me.IsWithinDist(victim4, 25.0f))
                             {
-                                DoCast(victim4, IsHeroic() ? eSpell.SPELL_REAPER_STRIKE_H : eSpell.SPELL_REAPER_STRIKE);
+                                DoCast(victim4, IsHeroic() ? eSpell.REAPER_STRIKE_H : eSpell.REAPER_STRIKE);
                             }
                         }
                         _events.ScheduleEvent(BossEvents.EVENT_REAPER_STRIKE, TimeSpan.FromMilliseconds(RandomHelper.URand(9000, 12000)));
@@ -405,13 +405,13 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
 
                     case BossEvents.EVENT_MOLTEN_SLAG:
                         me.TextEmote(MONSTER_SLAG, null, true);
-                        me.CastSpell(-213.21f, -576.85f, 20.97f, eSpell.SPELL_SUMMON_MOLTEN_SLAG, false);
+                        me.CastSpell(-213.21f, -576.85f, 20.97f, eSpell.SUMMON_MOLTEN_SLAG, false);
                         _events.ScheduleEvent(BossEvents.EVENT_MOLTEN_SLAG, TimeSpan.FromMilliseconds(20000));
                         break;
 
                     case BossEvents.EVENT_SAFETY_OFFLINE:
                         Talk(eSays.SAY_EVENT_SRO);
-                        DoCast(me, IsHeroic() ? eSpell.SPELL_SAFETY_REST_OFFLINE_H : eSpell.SPELL_SAFETY_REST_OFFLINE);
+                        DoCast(me, IsHeroic() ? eSpell.SAFETY_REST_OFFLINE_H : eSpell.SAFETY_REST_OFFLINE);
                         break;
                 }
 

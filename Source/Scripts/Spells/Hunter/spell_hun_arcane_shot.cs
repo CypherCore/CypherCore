@@ -18,19 +18,19 @@ public class spell_hun_arcane_shot : SpellScript, ISpellOnHit
 		if (caster == null || target == null)
 			return;
 
-		if (caster.HasAura(HunterSpells.SPELL_HUNTER_MARKING_TARGETS))
+		if (caster.HasAura(HunterSpells.MARKING_TARGETS))
 		{
-			caster.CastSpell(target, HunterSpells.SPELL_HUNTER_HUNTERS_MARK_AURA, true);
-			caster.CastSpell(caster, HunterSpells.SPELL_HUNTER_HUNTERS_MARK_AURA_2, true);
-			caster.RemoveAurasDueToSpell(HunterSpells.SPELL_HUNTER_MARKING_TARGETS);
+			caster.CastSpell(target, HunterSpells.HUNTERS_MARK_AURA, true);
+			caster.CastSpell(caster, HunterSpells.HUNTERS_MARK_AURA_2, true);
+			caster.RemoveAurasDueToSpell(HunterSpells.MARKING_TARGETS);
 		}
 
-		if (caster.HasAura(HunterSpells.SPELL_HUNTER_LETHAL_SHOTS) && RandomHelper.randChance(20))
-			if (caster.GetSpellHistory().HasCooldown(HunterSpells.SPELL_HUNTER_RAPID_FIRE))
-				caster.GetSpellHistory().ModifyCooldown(HunterSpells.SPELL_HUNTER_RAPID_FIRE, TimeSpan.FromSeconds(-5000));
+		if (caster.HasAura(HunterSpells.LETHAL_SHOTS) && RandomHelper.randChance(20))
+			if (caster.GetSpellHistory().HasCooldown(HunterSpells.RAPID_FIRE))
+				caster.GetSpellHistory().ModifyCooldown(HunterSpells.RAPID_FIRE, TimeSpan.FromSeconds(-5000));
 
-		if (caster.HasAura(HunterSpells.SPELL_HUNTER_CALLING_THE_SHOTS))
-			if (caster.GetSpellHistory().HasCooldown(HunterSpells.SPELL_HUNTER_TRUESHOT))
-				caster.GetSpellHistory().ModifyCooldown(HunterSpells.SPELL_HUNTER_TRUESHOT, TimeSpan.FromSeconds(-2500));
+		if (caster.HasAura(HunterSpells.CALLING_THE_SHOTS))
+			if (caster.GetSpellHistory().HasCooldown(HunterSpells.TRUESHOT))
+				caster.GetSpellHistory().ModifyCooldown(HunterSpells.TRUESHOT, TimeSpan.FromSeconds(-2500));
 	}
 }

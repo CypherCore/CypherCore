@@ -19,12 +19,12 @@ public class spell_pri_purge_the_wicked_selector : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(PriestSpells.SPELL_PRIEST_PURGE_THE_WICKED_DOT, PriestSpells.SPELL_PRIEST_PURGE_THE_WICKED);
+		return ValidateSpellInfo(PriestSpells.PURGE_THE_WICKED_DOT, PriestSpells.PURGE_THE_WICKED);
 	}
 
 	private void FilterTargets(List<WorldObject> targets)
 	{
-		targets.RemoveIf(new UnitAuraCheck<WorldObject>(true, PriestSpells.SPELL_PRIEST_PURGE_THE_WICKED_DOT, GetCaster().GetGUID()));
+		targets.RemoveIf(new UnitAuraCheck<WorldObject>(true, PriestSpells.PURGE_THE_WICKED_DOT, GetCaster().GetGUID()));
 		targets.Sort(new ObjectDistanceOrderPred(GetExplTargetUnit()));
 
 		if (targets.Count > 1)
@@ -33,7 +33,7 @@ public class spell_pri_purge_the_wicked_selector : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(uint UnnamedParameter)
 	{
-		GetCaster().AddAura(PriestSpells.SPELL_PRIEST_PURGE_THE_WICKED_DOT, GetHitUnit());
+		GetCaster().AddAura(PriestSpells.PURGE_THE_WICKED_DOT, GetHitUnit());
 	}
 
 	public override void Register()

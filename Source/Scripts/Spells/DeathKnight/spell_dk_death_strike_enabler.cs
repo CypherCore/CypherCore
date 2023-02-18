@@ -11,7 +11,7 @@ using Game.Spells;
 
 namespace Scripts.Spells.DeathKnight;
 
-[Script] // 89832 - Death Strike Enabler - SPELL_DK_DEATH_STRIKE_ENABLER
+[Script] // 89832 - Death Strike Enabler - DEATH_STRIKE_ENABLER
 internal class spell_dk_death_strike_enabler : AuraScript, IAuraCheckProc, IHasAuraEffects
 {
 	// Amount of seconds we calculate Damage over

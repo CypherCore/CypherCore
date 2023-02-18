@@ -24,7 +24,7 @@ internal class spell_gen_arena_drink : AuraScript, IHasAuraEffects
 		if (spellInfo.GetEffects().Empty() ||
 		    !spellInfo.GetEffect(0).IsAura(AuraType.ModPowerRegen))
 		{
-			Log.outError(LogFilter.Spells, "Aura {GetId()} structure has been changed - first aura is no longer SPELL_AURA_MOD_POWER_REGEN");
+			Log.outError(LogFilter.Spells, "Aura {GetId()} structure has been changed - first aura is no longer AURA_MOD_POWER_REGEN");
 
 			return false;
 		}
@@ -41,7 +41,7 @@ internal class spell_gen_arena_drink : AuraScript, IHasAuraEffects
 
 	private void CalcPeriodic(AuraEffect aurEff, ref bool isPeriodic, ref int amplitude)
 	{
-		// Get SPELL_AURA_MOD_POWER_REGEN aura from spell
+		// Get AURA_MOD_POWER_REGEN aura from spell
 		var regen = GetAura().GetEffect(0);
 
 		if (regen == null)

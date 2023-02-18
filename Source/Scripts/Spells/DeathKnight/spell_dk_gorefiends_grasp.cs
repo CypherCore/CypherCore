@@ -50,8 +50,8 @@ public class spell_dk_gorefiends_grasp : SpellScript, IHasSpellEffects
 
 				foreach (var itr in gripList)
 				{
-					itr.CastSpell(target, DeathKnightSpells.SPELL_DK_DEATH_GRIP_ONLY_JUMP, true);
-					itr.CastSpell(target, DeathKnightSpells.SPELL_DK_GOREFIENDS_GRASP_GRIP_VISUAL, true);
+					itr.CastSpell(target, DeathKnightSpells.DEATH_GRIP_ONLY_JUMP, true);
+					itr.CastSpell(target, DeathKnightSpells.GOREFIENDS_GRASP_GRIP_VISUAL, true);
 				}
 			}
 		}

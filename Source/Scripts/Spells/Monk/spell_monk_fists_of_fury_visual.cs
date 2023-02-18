@@ -9,7 +9,7 @@ using Game.Spells;
 
 namespace Scripts.Spells.Monk;
 
-[SpellScript(MonkSpells.SPELL_MONK_FISTS_OF_FURY)]
+[SpellScript(MonkSpells.FISTS_OF_FURY)]
 public class spell_monk_fists_of_fury_visual : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();

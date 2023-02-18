@@ -18,12 +18,12 @@ public class spell_pri_shadowy_insight : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(PriestSpells.SPELL_PRIEST_MIND_BLAST);
+		return ValidateSpellInfo(PriestSpells.MIND_BLAST);
 	}
 
 	private void HandleProc(AuraEffect UnnamedParameter, ProcEventInfo UnnamedParameter2)
 	{
-		GetTarget().GetSpellHistory().ResetCharges(Global.SpellMgr.AssertSpellInfo(PriestSpells.SPELL_PRIEST_MIND_BLAST, Difficulty.None).ChargeCategoryId);
+		GetTarget().GetSpellHistory().ResetCharges(Global.SpellMgr.AssertSpellInfo(PriestSpells.MIND_BLAST, Difficulty.None).ChargeCategoryId);
 	}
 
 	public override void Register()

@@ -9,7 +9,7 @@ using Game.Spells;
 
 namespace Scripts.Spells.Druid
 {
-	[Script] // 329910 - Eclipse out of combat - SPELL_DRUID_ECLIPSE_OOC
+	[Script] // 329910 - Eclipse out of combat - ECLIPSE_OOC
 	internal class spell_dru_eclipse_ooc : AuraScript, IHasAuraEffects
 	{
 		public List<IAuraEffectHandler> AuraEffects { get; } = new();

@@ -34,7 +34,7 @@ namespace Scripts.Spells.Druid
 		{
 			var player = GetTarget().ToPlayer();
 
-			// Outdoor check already passed - Travel Form (dummy) has SPELL_ATTR0_OUTDOORS_ONLY attribute.
+			// Outdoor check already passed - Travel Form (dummy) has ATTR0_OUTDOORS_ONLY attribute.
 			var triggeredSpellId = spell_dru_travel_form_AuraScript.GetFormSpellId(player, GetCastDifficulty(), false);
 
 			player.CastSpell(player, triggeredSpellId, new CastSpellExtraArgs(aurEff));

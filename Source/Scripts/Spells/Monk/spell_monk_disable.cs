@@ -17,7 +17,7 @@ public class spell_monk_disable : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(MonkSpells.SPELL_MONK_DISABLE, MonkSpells.SPELL_MONK_DISABLE_ROOT);
+		return ValidateSpellInfo(MonkSpells.DISABLE, MonkSpells.DISABLE_ROOT);
 	}
 
 	private void OnHitTarget(uint UnnamedParameter)
@@ -26,7 +26,7 @@ public class spell_monk_disable : SpellScript, IHasSpellEffects
 
 		if (target != null)
 			if (target.HasAuraType(AuraType.ModDecreaseSpeed))
-				GetCaster().CastSpell(target, MonkSpells.SPELL_MONK_DISABLE_ROOT, true);
+				GetCaster().CastSpell(target, MonkSpells.DISABLE_ROOT, true);
 	}
 
 	public override void Register()

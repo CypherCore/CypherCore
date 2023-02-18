@@ -26,9 +26,9 @@ public class spell_dru_maim : SpellScript, ISpellAfterCast, ISpellOnTakePower
 		if (target == null)
 			return;
 
-		GetCaster().CastSpell(target, MaimSpells.SPELL_DRUID_MAIM_STUN, true);
+		GetCaster().CastSpell(target, MaimSpells.MAIM_STUN, true);
 
-		var maimStun = target.GetAura(MaimSpells.SPELL_DRUID_MAIM_STUN, GetCaster().GetGUID());
+		var maimStun = target.GetAura(MaimSpells.MAIM_STUN, GetCaster().GetGUID());
 
 		if (maimStun != null)
 			maimStun.SetDuration(_usedComboPoints * 1000);

@@ -44,7 +44,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
                 if (victim != null)
                 {
-                    me.CastSpell(victim, IsHeroic() ? DMSpells.SPELL_EYE_GOUGE_H : DMSpells.SPELL_EYE_GOUGE);
+                    me.CastSpell(victim, IsHeroic() ? DMSpells.EYE_GOUGE_H : DMSpells.EYE_GOUGE);
                 }
                 UiTimerEyeGouge = RandomHelper.URand(9000, 12000);
                 return;
@@ -60,7 +60,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
                 if (victim != null)
                 {
-                    me.CastSpell(victim, IsHeroic() ? DMSpells.SPELL_EYE_PECK_H : DMSpells.SPELL_EYE_PECK);
+                    me.CastSpell(victim, IsHeroic() ? DMSpells.EYE_PECK_H : DMSpells.EYE_PECK);
                 }
                 IiTimerEyePeck = RandomHelper.URand(16000, 19000);
                 return;

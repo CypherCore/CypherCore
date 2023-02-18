@@ -21,7 +21,7 @@ public class spell_pri_spirit_shell : SpellScript, ISpellOnHit
 			var target = GetHitUnit();
 
 			if (target != null)
-				if (_player.HasAura(PriestSpells.SPELL_PRIEST_SPIRIT_SHELL_AURA))
+				if (_player.HasAura(PriestSpells.SPIRIT_SHELL_AURA))
 				{
 					var bp = GetHitHeal();
 
@@ -38,7 +38,7 @@ public class spell_pri_spirit_shell : SpellScript, ISpellOnHit
 						var args = new CastSpellExtraArgs();
 						args.AddSpellMod(SpellValueMod.BasePoint0, (int)bp);
 						args.SetTriggerFlags(TriggerCastFlags.FullMask);
-						_player.CastSpell(target, PriestSpells.SPELL_PRIEST_SPIRIT_SHELL_ABSORPTION, args);
+						_player.CastSpell(target, PriestSpells.SPIRIT_SHELL_ABSORPTION, args);
 					}
 				}
 		}

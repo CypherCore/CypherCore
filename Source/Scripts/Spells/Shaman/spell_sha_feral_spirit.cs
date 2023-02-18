@@ -19,7 +19,7 @@ namespace Scripts.Spells.Shaman
 		{
 			var caster = GetCaster();
 
-			caster.CastSpell(GetHitUnit(), ShamanSpells.SPELL_SHAMAN_FERAL_SPIRIT_SUMMON, true);
+			caster.CastSpell(GetHitUnit(), ShamanSpells.FERAL_SPIRIT_SUMMON, true);
 		}
 
 		public override void Register()

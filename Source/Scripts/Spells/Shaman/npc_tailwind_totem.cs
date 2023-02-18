@@ -22,7 +22,7 @@ namespace Scripts.Spells.Shaman
 
 			me.m_Events.AddRepeatEventAtOffset(() =>
 			                                   {
-				                                   me.CastSpell(me, TotemSpells.SPELL_TOTEM_TAIL_WIND_EFFECT, true);
+				                                   me.CastSpell(me, TotemSpells.TOTEM_TAIL_WIND_EFFECT, true);
 
 				                                   return time;
 			                                   },

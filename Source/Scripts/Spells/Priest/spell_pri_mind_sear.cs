@@ -17,7 +17,7 @@ public class spell_pri_mind_sear : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		if (Global.SpellMgr.GetSpellInfo(PriestSpells.SPELL_PRIEST_MIND_SEAR_INSANITY, Difficulty.None) != null)
+		if (Global.SpellMgr.GetSpellInfo(PriestSpells.MIND_SEAR_INSANITY, Difficulty.None) != null)
 			return false;
 
 		return true;
@@ -25,7 +25,7 @@ public class spell_pri_mind_sear : SpellScript, IHasSpellEffects
 
 	private void HandleInsanity(uint UnnamedParameter)
 	{
-		GetCaster().CastSpell(GetCaster(), PriestSpells.SPELL_PRIEST_MIND_SEAR_INSANITY, true);
+		GetCaster().CastSpell(GetCaster(), PriestSpells.MIND_SEAR_INSANITY, true);
 	}
 
 	public override void Register()

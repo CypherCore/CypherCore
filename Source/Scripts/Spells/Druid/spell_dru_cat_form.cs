@@ -9,7 +9,7 @@ using Game.Spells;
 
 namespace Scripts.Spells.Druid
 {
-	[Script] // 768 - CatForm - SPELL_DRUID_CAT_FORM
+	[Script] // 768 - CatForm - CAT_FORM
 	internal class spell_dru_cat_form : AuraScript, IHasAuraEffects
 	{
 		public List<IAuraEffectHandler> AuraEffects { get; } = new();

@@ -16,8 +16,8 @@ public class spell_monk_transcendence : SpellScript, ISpellOnSummon
 	public void OnSummon(Creature creature)
 	{
 		DespawnSpirit(GetCaster());
-		GetCaster().CastSpell(creature, MonkSpells.SPELL_MONK_TRANSCENDENCE_CLONE_TARGET, true);
-		creature.CastSpell(creature, MonkSpells.SPELL_MONK_TRANSCENDENCE_VISUAL, true);
+		GetCaster().CastSpell(creature, MonkSpells.TRANSCENDENCE_CLONE_TARGET, true);
+		creature.CastSpell(creature, MonkSpells.TRANSCENDENCE_VISUAL, true);
 		creature.SetAIAnimKitId(2223); // Sniff Data
 		creature.SetDisableGravity(true);
 		creature.SetControlled(true, UnitState.Root);

@@ -48,7 +48,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
                 return true;
             }
 
-            player.CastSpell(player, (player.GetMap().IsHeroic() ? eSpell.SPELL_SETIATED_H : eSpell.SPELL_SETIATED), true);
+            player.CastSpell(player, (player.GetMap().IsHeroic() ? eSpell.SETIATED_H : eSpell.SETIATED), true);
 
             me.DespawnOrUnsummon();
             return true;

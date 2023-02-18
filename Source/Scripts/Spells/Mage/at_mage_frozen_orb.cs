@@ -48,10 +48,10 @@ public class at_mage_frozen_orb : AreaTriggerAI
 					if (unit != null)
 						if (caster.IsValidAttackTarget(unit))
 						{
-							if (caster.HasAura(MageSpells.SPELL_MAGE_FINGERS_OF_FROST_AURA))
-								caster.CastSpell(caster, MageSpells.SPELL_MAGE_FINGERS_OF_FROST_VISUAL_UI, true);
+							if (caster.HasAura(MageSpells.FINGERS_OF_FROST_AURA))
+								caster.CastSpell(caster, MageSpells.FINGERS_OF_FROST_VISUAL_UI, true);
 
-							caster.CastSpell(caster, MageSpells.SPELL_MAGE_FINGERS_OF_FROST_AURA, true);
+							caster.CastSpell(caster, MageSpells.FINGERS_OF_FROST_AURA, true);
 
 							// at->UpdateTimeToTarget(8000); TODO
 							procDone = true;
@@ -60,7 +60,7 @@ public class at_mage_frozen_orb : AreaTriggerAI
 						}
 				}
 
-			caster.CastSpell(at.GetPosition(), MageSpells.SPELL_MAGE_FROZEN_ORB_DAMAGE, true);
+			caster.CastSpell(at.GetPosition(), MageSpells.FROZEN_ORB_DAMAGE, true);
 			damageInterval = 500;
 		}
 		else

@@ -17,12 +17,12 @@ namespace Scripts.Spells.Warrior
 
 
 		public const uint RAVAGER_DISPLAYID = 55644;
-		public const uint SPELL_RAVAGER_VISUAL = 153709;
+		public const uint RAVAGER_VISUAL = 153709;
 
 		public override void IsSummonedBy(WorldObject summoner)
 		{
 			me.SetDisplayId(RAVAGER_DISPLAYID);
-			me.CastSpell(me, SPELL_RAVAGER_VISUAL, true);
+			me.CastSpell(me, RAVAGER_VISUAL, true);
 			me.SetReactState(ReactStates.Passive);
 			me.AddUnitState(UnitState.Root);
 			me.SetUnitFlag(UnitFlags.Uninteractible | UnitFlags.CanSwim | UnitFlags.PlayerControlled);

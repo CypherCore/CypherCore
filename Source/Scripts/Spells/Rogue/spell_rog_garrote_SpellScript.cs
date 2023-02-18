@@ -15,7 +15,7 @@ public class spell_rog_garrote_SpellScript : SpellScript, ISpellOnHit
 
 	public override bool Validate(SpellInfo UnnamedParameter)
 	{
-		return ValidateSpellInfo(RogueSpells.SPELL_ROGUE_GARROTE_DOT, RogueSpells.SPELL_ROGUE_GARROTE_SILENCE);
+		return ValidateSpellInfo(RogueSpells.GARROTE_DOT, RogueSpells.GARROTE_SILENCE);
 	}
 
 	public override bool Load()
@@ -32,6 +32,6 @@ public class spell_rog_garrote_SpellScript : SpellScript, ISpellOnHit
 		var target = GetExplTargetUnit();
 
 		if (_stealthed)
-			caster.CastSpell(target, RogueSpells.SPELL_ROGUE_GARROTE_SILENCE, true);
+			caster.CastSpell(target, RogueSpells.GARROTE_SILENCE, true);
 	}
 }

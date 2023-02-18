@@ -40,7 +40,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
             Phase = 0;
             PongTimer = 2000;
 
-            me.AddAura(boss_vanessa_vancleef.Spells.SPELL_SITTING, me);
+            me.AddAura(boss_vanessa_vancleef.Spells.SITTING, me);
             me.SetSpeed(UnitMoveType.Walk, 1.0f);
             me.AddUnitMovementFlag(MovementFlag.Walking);
         }
@@ -55,7 +55,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
                     {
                         case 0:
                             me.TextEmote(boss_vanessa_vancleef.VANESSA_NIGHTMARE_1, null, true);
-                            me.RemoveAurasDueToSpell(boss_vanessa_vancleef.Spells.SPELL_SITTING);
+                            me.RemoveAurasDueToSpell(boss_vanessa_vancleef.Spells.SITTING);
                             PongTimer = 2000;
                             Phase++;
                             break;
@@ -92,7 +92,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
                                 foreach (var item in players)
                                 {
-                                    me.CastSpell(item, boss_vanessa_vancleef.Spells.SPELL_NOXIOUS_CONCOCTION, true);
+                                    me.CastSpell(item, boss_vanessa_vancleef.Spells.NOXIOUS_CONCOCTION, true);
                                 }
 
                                 PongTimer = 2000;
@@ -120,8 +120,8 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
                                 foreach (var item in players)
                                 {
-                                    me.CastSpell(item, DMSharedSpells.SPELL_NIGHTMARE_ELIXIR, true);
-                                    me.CastSpell(item, boss_vanessa_vancleef.Spells.SPELL_BLACKOUT, true);
+                                    me.CastSpell(item, DMSharedSpells.NIGHTMARE_ELIXIR, true);
+                                    me.CastSpell(item, boss_vanessa_vancleef.Spells.BLACKOUT, true);
 
                                 }
                                 me.TextEmote(boss_vanessa_vancleef.VANESSA_NIGHTMARE_2, null, true);
@@ -139,7 +139,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
                                 foreach (var item in players)
                                 {
-                                    me.CastSpell(item, boss_vanessa_vancleef.Spells.SPELL_BLACKOUT, true);
+                                    me.CastSpell(item, boss_vanessa_vancleef.Spells.BLACKOUT, true);
                                 }
 
                                 // me.SummonCreature(DMCreatures.NPC_TRAP_BUNNY, -65.93f, -820.33f, 40.98f, 0, TempSummonType.ManualDespawn);

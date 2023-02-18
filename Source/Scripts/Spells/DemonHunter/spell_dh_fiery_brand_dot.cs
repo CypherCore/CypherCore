@@ -19,16 +19,16 @@ public class spell_dh_fiery_brand_dot : AuraScript, IHasAuraEffects
 	{
 		var caster = GetCaster();
 
-		if (caster == null || !caster.HasAura(DemonHunterSpells.SPELL_DH_BURNING_ALIVE))
+		if (caster == null || !caster.HasAura(DemonHunterSpells.BURNING_ALIVE))
 			return;
 
 		var unitList = new List<Unit>();
 		GetTarget().GetAnyUnitListInRange(unitList, 8.0f);
 
 		foreach (var target in unitList)
-			if (!target.HasAura(DemonHunterSpells.SPELL_DH_FIERY_BRAND_DOT) && !target.HasAura(DemonHunterSpells.SPELL_DH_FIERY_BRAND_MARKER) && !caster.IsFriendlyTo(target))
+			if (!target.HasAura(DemonHunterSpells.FIERY_BRAND_DOT) && !target.HasAura(DemonHunterSpells.FIERY_BRAND_MARKER) && !caster.IsFriendlyTo(target))
 			{
-				caster.CastSpell(target, DemonHunterSpells.SPELL_DH_FIERY_BRAND_MARKER, true);
+				caster.CastSpell(target, DemonHunterSpells.FIERY_BRAND_MARKER, true);
 
 				break;
 			}

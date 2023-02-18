@@ -20,7 +20,7 @@ public class spell_dh_soul_fragment_heals : SpellScript, IHasSpellEffects
 
 	private void HandleHit(uint effIndex)
 	{
-		if (!GetCaster().HasAura(DemonHunterSpells.SPELL_DH_DEMONIC_APPETITE))
+		if (!GetCaster().HasAura(DemonHunterSpells.DEMONIC_APPETITE))
 			PreventHitDefaultEffect(effIndex);
 	}
 
@@ -31,12 +31,12 @@ public class spell_dh_soul_fragment_heals : SpellScript, IHasSpellEffects
 		if (caster == null)
 			return;
 
-		var reductionTime = caster.GetAuraEffectAmount(DemonHunterSpells.SPELL_DH_FEAST_ON_THE_SOULS, 0);
+		var reductionTime = caster.GetAuraEffectAmount(DemonHunterSpells.FEAST_ON_THE_SOULS, 0);
 
 		if (reductionTime != 0)
 		{
-			caster.GetSpellHistory().ModifyCooldown(DemonHunterSpells.SPELL_DH_CHAOS_NOVA, TimeSpan.FromSeconds(-reductionTime));
-			caster.GetSpellHistory().ModifyCooldown(DemonHunterSpells.SPELL_DH_EYE_BEAM, TimeSpan.FromSeconds(-reductionTime));
+			caster.GetSpellHistory().ModifyCooldown(DemonHunterSpells.CHAOS_NOVA, TimeSpan.FromSeconds(-reductionTime));
+			caster.GetSpellHistory().ModifyCooldown(DemonHunterSpells.EYE_BEAM, TimeSpan.FromSeconds(-reductionTime));
 		}
 	}
 
