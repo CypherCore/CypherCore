@@ -83,7 +83,7 @@ public class spell_dh_reverse_magic : SpellScript, ISpellOnCast
 							var amount = auraEffect.GetAmount();
 
 							if (auraEffect.GetAuraType() == AuraType.PeriodicDamage || auraEffect.GetAuraType() == AuraType.PeriodicDamagePercent)
-								amount = (int)caster.SpellDamageBonusDone(unit, aura.GetSpellInfo(), amount, DamageEffectType.DOT, aura.GetSpellInfo().GetEffects()[(int)i], auraEffect.GetBase().GetStackAmount());
+								amount = (int)caster.SpellDamageBonusDone(unit, aura.GetSpellInfo(), amount, DamageEffectType.DOT, aura.GetSpellInfo().GetEffects()[(int)i], auraEffect.GetBase().GetStackAmount(), GetSpell());
 
 							//targetAura->GetEffect(i)->VariableStorage.Set("DontRecalculatePerodics", true);
 							targetAura.GetEffect(i).SetAmount(amount);

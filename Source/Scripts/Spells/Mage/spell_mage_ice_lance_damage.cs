@@ -10,12 +10,20 @@ using Game.Scripting.Interfaces.ISpell;
 
 namespace Scripts.Spells.Mage;
 
-[Script] // 228598 - Ice Lance
-internal class spell_mage_ice_lance_damage : SpellScript, IHasSpellEffects
+[SpellScript(228598)] // 228598 - Ice Lance
+internal class spell_mage_ice_lance_damage : SpellScript, IHasSpellEffects, ISpellCalculateMultiplier
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	public override void Register()
+    public float CalcMultiplier(float multiplier)
+    {
+        if (GetSpell().unitTarget.HasAuraState(AuraStateType.Frozen, GetSpellInfo(), GetCaster()))
+            multiplier *= 3.0f;
+
+		return multiplier;
+    }
+
+    public override void Register()
 	{
 		SpellEffects.Add(new EffectHandler(ApplyDamageMultiplier, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
 	}

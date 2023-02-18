@@ -109,7 +109,7 @@ public class spell_hun_pet_basic_attack : SpellScript, IHasSpellEffects, ISpellC
 
 				if (target != null)
 				{
-					dmg = pet.SpellDamageBonusDone(target, GetSpellInfo(), dmg, DamageEffectType.Direct, GetEffectInfo(0));
+					dmg = pet.SpellDamageBonusDone(target, GetSpellInfo(), dmg, DamageEffectType.Direct, GetEffectInfo(0), 1, GetSpell());
 					dmg = target.SpellDamageBonusTaken(pet, GetSpellInfo(), dmg, DamageEffectType.Direct);
 				}
 

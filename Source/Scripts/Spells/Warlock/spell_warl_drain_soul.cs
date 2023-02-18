@@ -1,37 +1,24 @@
-﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
-// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
-
-using System.Collections.Generic;
-using Framework.Constants;
+﻿using Framework.Constants;
 using Game.Scripting;
-using Game.Scripting.Interfaces.IAura;
+using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Scripts.Spells.Warlock
 {
-	[Script] // 198590 - Drain Soul
-	internal class spell_warl_drain_soul : AuraScript, IHasAuraEffects
-	{
-		public List<IAuraEffectHandler> AuraEffects { get; } = new();
+    [SpellScript(198590)] // 198590 - Drain Soul
+    internal class spell_warl_drain_soul : SpellScript, ISpellCalculateMultiplier
+    {
+        public float CalcMultiplier(float multiplier)
+        {
+            if (GetCaster().HasAuraState(AuraStateType.Wounded20Percent))
+                multiplier *= 2;
 
-		public override bool Validate(SpellInfo spellInfo)
-		{
-			return ValidateSpellInfo(WarlockSpells.DRAIN_SOUL_ENERGIZE);
-		}
-
-		public override void Register()
-		{
-			AuraEffects.Add(new AuraEffectApplyHandler(HandleRemove, 0, AuraType.PeriodicDamage, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
-		}
-
-		private void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-		{
-			if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Death)
-				return;
-
-			var caster = GetCaster();
-
-			caster?.CastSpell(caster, WarlockSpells.DRAIN_SOUL_ENERGIZE, true);
-		}
-	}
+            return multiplier;
+        }
+    }
 }

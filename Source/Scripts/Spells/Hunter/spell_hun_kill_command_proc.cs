@@ -32,7 +32,7 @@ public class spell_hun_kill_command_proc : SpellScript, IHasSpellEffects
 
 		dmg *= lowNerf;
 
-		dmg = caster.SpellDamageBonusDone(target, GetSpellInfo(), dmg, DamageEffectType.Direct, GetEffectInfo(0));
+		dmg = caster.SpellDamageBonusDone(target, GetSpellInfo(), dmg, DamageEffectType.Direct, GetEffectInfo(0), 1, GetSpell());
 		dmg = target.SpellDamageBonusTaken(caster, GetSpellInfo(), dmg, DamageEffectType.Direct);
 
 		SetHitDamage(dmg);

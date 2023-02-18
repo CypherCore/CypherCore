@@ -241,7 +241,9 @@ namespace Scripts.Spells.Shaman
 		public const uint WindfuryAttack = 25504;
 		public const uint WindfuryEnchantment = 334302;
 		public const uint WindRush = 192082;
-        public const uint PrimordialWave = 327163;
+        public const uint PrimordialWave = 375982;
+        public const uint PrimordialWaveDamage = 375984;
+        public const uint PrimordialWaveHealing = 375985;
         public const uint PrimordialWaveAura = 375986;
         public const uint HealingWave = 77472;
 

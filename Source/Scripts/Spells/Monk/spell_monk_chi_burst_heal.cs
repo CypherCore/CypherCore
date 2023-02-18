@@ -33,7 +33,7 @@ public class spell_monk_chi_burst_heal : SpellScript, IHasSpellEffects
 			return;
 
 		var damage = caster.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 4.125f;
-		damage = caster.SpellDamageBonusDone(unit, spellInfo, damage, DamageEffectType.Heal, effectInfo);
+		damage = caster.SpellDamageBonusDone(unit, spellInfo, damage, DamageEffectType.Heal, effectInfo, 1, GetSpell());
 		damage = unit.SpellDamageBonusTaken(caster, spellInfo, damage, DamageEffectType.Heal);
 
 		SetHitHeal(damage);

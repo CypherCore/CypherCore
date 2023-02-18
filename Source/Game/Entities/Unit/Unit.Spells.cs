@@ -62,12 +62,12 @@ namespace Game.Entities
             return DoneAdvertisedBenefit;
         }
 
-        public uint SpellDamageBonusDone(Unit victim, SpellInfo spellProto, float pdamage, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, uint stack = 1)
+        public uint SpellDamageBonusDone(Unit victim, SpellInfo spellProto, float pdamage, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, uint stack = 1, Spell spell = null)
         {
-            return SpellDamageBonusDone(victim, spellProto, (uint)pdamage, damagetype, spellEffectInfo, stack);
+            return SpellDamageBonusDone(victim, spellProto, (uint)pdamage, damagetype, spellEffectInfo, stack, spell);
         }
 
-        public uint SpellDamageBonusDone(Unit victim, SpellInfo spellProto, uint pdamage, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, uint stack = 1)
+        public uint SpellDamageBonusDone(Unit victim, SpellInfo spellProto, uint pdamage, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, uint stack = 1, Spell spell = null)
         {
             if (spellProto == null || victim == null || damagetype == DamageEffectType.Direct)
                 return pdamage;
@@ -81,11 +81,11 @@ namespace Game.Entities
             {
                 Unit owner = GetOwner();
                 if (owner != null)
-                    return owner.SpellDamageBonusDone(victim, spellProto, pdamage, damagetype, spellEffectInfo, stack);
+                    return owner.SpellDamageBonusDone(victim, spellProto, pdamage, damagetype, spellEffectInfo, stack, spell);
             }
 
             int DoneTotal = 0;
-            float DoneTotalMod = SpellDamagePctDone(victim, spellProto, damagetype, spellEffectInfo);
+            float DoneTotalMod = SpellDamagePctDone(victim, spellProto, damagetype, spellEffectInfo, spell);
 
             // Done fixed damage bonus auras
             int DoneAdvertisedBenefit = SpellBaseDamageBonusDone(spellProto.GetSchoolMask());
@@ -150,7 +150,7 @@ namespace Game.Entities
             return (uint)Math.Max(tmpDamage, 0.0f);
         }
 
-        public float SpellDamagePctDone(Unit victim, SpellInfo spellProto, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo)
+        public float SpellDamagePctDone(Unit victim, SpellInfo spellProto, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, Spell spell = null)
         {
             if (spellProto == null || !victim || damagetype == DamageEffectType.Direct)
                 return 1.0f;
@@ -168,7 +168,7 @@ namespace Game.Entities
             {
                 Unit owner = GetOwner();
                 if (owner != null)
-                    return owner.SpellDamagePctDone(victim, spellProto, damagetype, spellEffectInfo);
+                    return owner.SpellDamagePctDone(victim, spellProto, damagetype, spellEffectInfo, spell);
             }
 
             // Done total percent damage auras
@@ -216,30 +216,19 @@ namespace Game.Entities
             else if (spellProto.Mechanic != 0)
                 MathFunctions.AddPct(ref DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)spellProto.Mechanic));
 
-            // Custom scripted damage
-            switch (spellProto.SpellFamilyName)
+            if (spell != null)
+                DoneTotalMod = spell.CallSpellCalculateMultiplierHandlers(DoneTotalMod);
+
+            // Custom scripted damage. Need to figure out how to move this.
+            if (spellProto.SpellFamilyName == SpellFamilyNames.Warlock)
             {
-                case SpellFamilyNames.Mage:
-                    // Ice Lance (no unique family flag)
-                    if (spellProto.Id == 228598)
-                        if (victim.HasAuraState(AuraStateType.Frozen, spellProto, this))
-                            DoneTotalMod *= 3.0f;
-
-                    break;
-                case SpellFamilyNames.Warlock:
-                    // Shadow Bite (30% increase from each dot)
-                    if (spellProto.SpellFamilyFlags[1].HasAnyFlag<uint>(0x00400000) && IsPet())
-                    {
-                        uint count = victim.GetDoTsByCaster(GetOwnerGUID());
-                        if (count != 0)
-                            MathFunctions.AddPct(ref DoneTotalMod, 30 * count);
-                    }
-
-                    // Drain Soul - increased damage for targets under 20% HP
-                    if (spellProto.Id == 198590)
-                        if (HasAuraState(AuraStateType.Wounded20Percent))
-                            DoneTotalMod *= 2;
-                    break;
+                // Shadow Bite (30% increase from each dot)
+                if (spellProto.SpellFamilyFlags[1].HasAnyFlag<uint>(0x00400000) && IsPet())
+                {
+                    uint count = victim.GetDoTsByCaster(GetOwnerGUID());
+                    if (count != 0)
+                        MathFunctions.AddPct(ref DoneTotalMod, 30 * count);
+                }
             }
 
             return DoneTotalMod;
@@ -393,14 +382,14 @@ namespace Game.Entities
             return damage;
         }
 
-        public uint SpellHealingBonusDone(Unit victim, SpellInfo spellProto, uint healamount, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, uint stack = 1)
+        public uint SpellHealingBonusDone(Unit victim, SpellInfo spellProto, uint healamount, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, uint stack = 1, Spell spell = null)
         {
             // For totems get healing bonus from owner (statue isn't totem in fact)
             if (IsTypeId(TypeId.Unit) && IsTotem())
             {
                 Unit owner = GetOwner();
                 if (owner)
-                    return owner.SpellHealingBonusDone(victim, spellProto, healamount, damagetype, spellEffectInfo, stack);
+                    return owner.SpellHealingBonusDone(victim, spellProto, healamount, damagetype, spellEffectInfo, stack, spell);
             }
 
             // No bonus healing for potion spells
@@ -408,7 +397,7 @@ namespace Game.Entities
                 return healamount;
 
             int DoneTotal = 0;
-            float DoneTotalMod = SpellHealingPctDone(victim, spellProto);
+            float DoneTotalMod = SpellHealingPctDone(victim, spellProto, spell);
 
             // done scripted mod (take it from owner)
             Unit owner1 = GetOwner() ?? this;
@@ -493,7 +482,7 @@ namespace Game.Entities
             return (uint)Math.Max(heal, 0.0f);
         }
 
-        public float SpellHealingPctDone(Unit victim, SpellInfo spellProto)
+        public float SpellHealingPctDone(Unit victim, SpellInfo spellProto, Spell spell = null)
         {
             // For totems get healing bonus from owner
             if (IsCreature() && IsTotem())
@@ -542,6 +531,9 @@ namespace Game.Entities
             foreach (AuraEffect healingDonePctVsTargetHealth in GetAuraEffectsByType(AuraType.ModHealingDonePctVersusTargetHealth))
                 if (healingDonePctVsTargetHealth.IsAffectingSpell(spellProto))
                     MathFunctions.AddPct(ref DoneTotalMod, MathFunctions.CalculatePct((float)healingDonePctVsTargetHealth.GetAmount(), healthPctDiff));
+
+            if (spell != null)
+                DoneTotalMod = spell.CallSpellCalculateMultiplierHandlers(DoneTotalMod);
 
             return DoneTotalMod;
         }
