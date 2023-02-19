@@ -238,7 +238,7 @@ namespace Game.Entities
 
             // remove expired auras - do that after updates(used in scripts?)
             foreach (var pair in toRemove)
-                RemoveOwnedAura(pair, AuraRemoveMode.Expire);
+                RemoveOwnedAura(pair.GetId(), pair, AuraRemoveMode.Expire);
 
             foreach (var aura in m_visibleAurasToUpdate.ToArray())
                 aura.ClientUpdate();
