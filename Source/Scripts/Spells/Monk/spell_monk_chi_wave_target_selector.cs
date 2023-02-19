@@ -58,7 +58,7 @@ public class spell_monk_chi_wave_target_selector : SpellScript, IHasSpellEffects
 		targets.Add(target);
 	}
 
-	private void HandleDummy(uint UnnamedParameter)
+	private void HandleDummy(int effIndex)
 	{
 		if (GetEffectValue() != 0) // Ran out of bounces
 			return;

@@ -16,7 +16,7 @@ public class spell_dk_death_siphon : SpellScript, IHasSpellEffects
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
 
-	private void HandleScriptEffect(uint UnnamedParameter)
+	private void HandleScriptEffect(int effIndex)
 	{
 		var _player = GetCaster().ToPlayer();
 

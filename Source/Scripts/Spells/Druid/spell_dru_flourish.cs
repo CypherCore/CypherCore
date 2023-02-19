@@ -15,7 +15,7 @@ public class spell_dru_flourish : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleHit(uint UnnamedParameter)
+	private void HandleHit(int effIndex)
 	{
 		if (!GetCaster() || !GetHitUnit())
 			return;

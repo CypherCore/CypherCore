@@ -14,7 +14,7 @@ public class spell_hun_explosive_shot_detonate : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleDummy(uint UnnamedParameter)
+	private void HandleDummy(int effIndex)
 	{
 		var at = GetCaster().GetAreaTrigger(HunterSpells.EXPLOSIVE_SHOT);
 

@@ -44,7 +44,7 @@ public class spell_dk_howling_blast : SpellScript, IHasSpellEffects
 		                 });
 	}
 
-	private void HandleFrostFever(uint UnnamedParameter)
+	private void HandleFrostFever(int effIndex)
 	{
 		var caster = GetCaster();
 
@@ -52,12 +52,12 @@ public class spell_dk_howling_blast : SpellScript, IHasSpellEffects
 			caster.CastSpell(GetHitUnit(), DeathKnightSpells.FROST_FEVER);
 	}
 
-	private void HandleAreaDamage(uint UnnamedParameter)
+	private void HandleAreaDamage(int effIndex)
 	{
 		GetCaster().CastSpell(GetExplTargetUnit(), DeathKnightSpells.HOWLING_BLAST_AREA_DAMAGE, new CastSpellExtraArgs().SetCustomArg(GetExplTargetUnit().GetGUID()));
 	}
 
-	private void HandleSpellVisual(uint UnnamedParameter)
+	private void HandleSpellVisual(int effIndex)
 	{
 		if (!GetSpell().m_customArg.has_value())
 			return;

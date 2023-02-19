@@ -21,7 +21,7 @@ namespace Scripts.Spells.Warrior
 			return ValidateSpellInfo(WarriorSpells.RENEWED_FURY, WarriorSpells.VENGEANCE_FOCUSED_RAGE);
 		}
 
-		private void HandleDummy(uint UnnamedParameter)
+		private void HandleDummy(int effIndex)
 		{
 			var caster = GetCaster();
 

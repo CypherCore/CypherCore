@@ -20,7 +20,7 @@ public class spell_soar : SpellScript, IHasSpellEffects
 		return ValidateSpellInfo(EvokerSpells.SOAR_RACIAL, EvokerSpells.SKYWARD_ASCENT, EvokerSpells.SURGE_FORWARD);
 	}
 
-	private void HandleOnHit(uint UnnamedParameter)
+	private void HandleOnHit(int effIndex)
 	{
 		var caster = GetCaster();
 

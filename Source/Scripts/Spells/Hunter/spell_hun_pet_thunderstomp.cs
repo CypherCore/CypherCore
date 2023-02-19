@@ -15,7 +15,7 @@ public class spell_hun_pet_thunderstomp : SpellScript, IHasSpellEffects
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
 
-	private void HandleDamage(uint UnnamedParameter)
+	private void HandleDamage(int effIndex)
 	{
 		var caster = GetCaster();
 		var owner  = GetCaster().GetOwner();

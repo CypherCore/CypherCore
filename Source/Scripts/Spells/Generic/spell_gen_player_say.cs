@@ -26,7 +26,7 @@ internal class spell_gen_player_say : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(uint effIndex)
+	private void HandleScript(int effIndex)
 	{
 		// Note: Target here is always player; caster here is gameobject, creature or player (self cast)
 		var target = GetHitUnit();

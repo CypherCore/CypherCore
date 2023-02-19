@@ -14,7 +14,7 @@ public class spell_dk_frostscythe : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleHit(uint UnnamedParameter)
+	private void HandleHit(int effIndex)
 	{
 		if (GetCaster().HasAura(DeathKnightSpells.INEXORABLE_ASSAULT_STACK))
 			GetCaster().CastSpell(GetHitUnit(), DeathKnightSpells.INEXORABLE_ASSAULT_DAMAGE, true);

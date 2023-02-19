@@ -14,7 +14,7 @@ public class spell_mage_cinderstorm : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleDamage(uint UnnamedParameter)
+	private void HandleDamage(int effIndex)
 	{
 		var caster = GetCaster();
 		var target = GetHitUnit();

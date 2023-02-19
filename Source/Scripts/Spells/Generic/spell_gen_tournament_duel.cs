@@ -25,7 +25,7 @@ internal class spell_gen_tournament_duel : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScriptEffect(uint effIndex)
+	private void HandleScriptEffect(int effIndex)
 	{
 		var rider = GetCaster().GetCharmer();
 

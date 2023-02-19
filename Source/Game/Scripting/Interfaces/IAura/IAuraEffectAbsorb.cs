@@ -19,7 +19,7 @@ namespace Game.Scripting.Interfaces.IAura
 
         private readonly AuraEffectAbsorbDelegate _fn;
 
-        public AuraEffectAbsorbHandler(AuraEffectAbsorbDelegate fn, uint effectIndex, bool overkill = false, AuraScriptHookType hookType = AuraScriptHookType.EffectAbsorb) : base(effectIndex, overkill ? AuraType.SchoolAbsorbOverkill : AuraType.SchoolAbsorb, hookType)
+        public AuraEffectAbsorbHandler(AuraEffectAbsorbDelegate fn, int effectIndex, bool overkill = false, AuraScriptHookType hookType = AuraScriptHookType.EffectAbsorb) : base(effectIndex, overkill ? AuraType.SchoolAbsorbOverkill : AuraType.SchoolAbsorb, hookType)
         {
             _fn = fn;
 

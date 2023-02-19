@@ -29,7 +29,7 @@ namespace Scripts.Spells.Paladin
             SpellEffects.Add(new EffectHandler(HandleAoEHit, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleAoEHit(uint effIndex)
+        private void HandleAoEHit(int effIndex)
         {
             if (GetCaster().HasAura(PaladinSpells.ConsecrationProtectionAura))
                 GetCaster().CastSpell(GetHitUnit(), PaladinSpells.HammerOfTheRighteousAoe);

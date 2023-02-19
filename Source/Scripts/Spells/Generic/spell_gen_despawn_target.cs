@@ -19,7 +19,7 @@ internal class spell_gen_despawn_target : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleDespawn, SpellConst.EffectAll, SpellEffectName.Any, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDespawn(uint effIndex)
+	private void HandleDespawn(int effIndex)
 	{
 		if (GetEffectInfo().IsEffect(SpellEffectName.Dummy) ||
 		    GetEffectInfo().IsEffect(SpellEffectName.ScriptEffect))

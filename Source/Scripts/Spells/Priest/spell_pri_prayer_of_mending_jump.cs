@@ -63,7 +63,7 @@ internal class spell_pri_prayer_of_mending_jump : SpellScript, IHasSpellEffects
 		}
 	}
 
-	private void HandleJump(uint effIndex)
+	private void HandleJump(int effIndex)
 	{
 		var origCaster = GetOriginalCaster(); // the one that started the prayer of mending chain
 		var target     = GetHitUnit();        // the Target we decided the aura should Jump to

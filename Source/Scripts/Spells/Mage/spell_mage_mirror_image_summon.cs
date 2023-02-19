@@ -14,7 +14,7 @@ public class spell_mage_mirror_image_summon : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleDummy(uint UnnamedParameter)
+	private void HandleDummy(int effIndex)
 	{
 		var caster = GetCaster();
 

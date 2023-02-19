@@ -19,7 +19,7 @@ internal class spell_q12372_destabilize_azure_dragonshrine_dummy : SpellScript, 
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		if (GetHitCreature())
 		{

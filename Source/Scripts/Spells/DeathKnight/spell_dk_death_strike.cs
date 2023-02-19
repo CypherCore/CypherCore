@@ -31,7 +31,7 @@ internal class spell_dk_death_strike : SpellScript, ISpellAfterCast, IHasSpellEf
 
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		var caster = GetCaster();
 

@@ -25,7 +25,7 @@ internal class spell_rog_sinister_strike : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleDummy, 2, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		var damagePerCombo = GetHitDamage();
 		var t5             = GetCaster().GetAuraEffect(RogueSpells.T52pSetBonus, 0);

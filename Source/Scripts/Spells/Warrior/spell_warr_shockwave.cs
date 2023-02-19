@@ -43,7 +43,7 @@ namespace Scripts.Spells.Warrior
 
 		public List<ISpellEffect> SpellEffects { get; } = new();
 
-		private void HandleStun(uint effIndex)
+		private void HandleStun(int effIndex)
 		{
 			GetCaster().CastSpell(GetHitUnit(), WarriorSpells.SHOCKWAVE_STUN, true);
 			++_targetCount;

@@ -25,7 +25,7 @@ internal class spell_dk_festering_strike : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScriptEffect, 2, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScriptEffect(uint effIndex)
+	private void HandleScriptEffect(int effIndex)
 	{
 		GetCaster().CastSpell(GetHitUnit(), DeathKnightSpells.FesteringWound, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.AuraStack, GetEffectValue()));
 	}

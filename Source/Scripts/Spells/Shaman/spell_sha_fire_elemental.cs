@@ -15,7 +15,7 @@ namespace Scripts.Spells.Shaman
 	{
 		public List<ISpellEffect> SpellEffects { get; } = new();
 
-		private void HandleSummon(uint UnnamedParameter)
+		private void HandleSummon(int effIndex)
 		{
 			GetCaster().CastSpell(GetHitUnit(), ShamanSpells.FIRE_ELEMENTAL_SUMMON, true);
 		}

@@ -31,7 +31,7 @@ namespace Scripts.Spells.Paladin
             SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ApplyAura, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleDummy(uint effIndex)
+        private void HandleDummy(int effIndex)
         {
             Unit target = GetHitUnit();
 

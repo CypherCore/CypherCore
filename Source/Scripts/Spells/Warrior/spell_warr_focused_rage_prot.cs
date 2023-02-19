@@ -35,7 +35,7 @@ namespace Scripts.Spells.Warrior
 			return true;
 		}
 
-		private void HandleDummy(uint UnnamedParameter)
+		private void HandleDummy(int effIndex)
 		{
 			var caster = GetCaster();
 

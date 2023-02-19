@@ -14,7 +14,7 @@ public class spell_monk_black_ox_brew : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleHit(uint UnnamedParameter)
+	private void HandleHit(int effIndex)
 	{
 		var caster = GetCaster();
 

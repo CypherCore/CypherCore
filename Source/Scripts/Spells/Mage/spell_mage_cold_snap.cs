@@ -30,7 +30,7 @@ internal class spell_mage_cold_snap : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHit));
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		foreach (var spellId in SpellsToReset)
 			GetCaster().GetSpellHistory().ResetCooldown(spellId, true);

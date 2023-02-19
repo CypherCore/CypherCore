@@ -5494,7 +5494,7 @@ namespace Game.Entities
                     if (artifactPowerRank.AuraPointsOverride != 0)
                     {
                         foreach (var spellEffectInfo in spellInfo.GetEffects())
-                            args.AddSpellMod(SpellValueMod.BasePoint0 + (int)spellEffectInfo.EffectIndex, (int)artifactPowerRank.AuraPointsOverride);
+                            args.AddSpellMod(SpellValueMod.BasePoint0 + spellEffectInfo.EffectIndex, (int)artifactPowerRank.AuraPointsOverride);
                     }
 
                     CastSpell(this, artifactPowerRank.SpellID, args);

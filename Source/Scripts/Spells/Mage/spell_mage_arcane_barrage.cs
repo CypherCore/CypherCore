@@ -45,13 +45,13 @@ internal class spell_mage_arcane_barrage : SpellScript, ISpellAfterCast, IHasSpe
 
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleEffectHitTarget(uint effIndex)
+	private void HandleEffectHitTarget(int effIndex)
 	{
 		if (GetHitUnit().GetGUID() != _primaryTarget)
 			SetHitDamage(MathFunctions.CalculatePct(GetHitDamage(), GetEffectInfo(1).CalcValue(GetCaster())));
 	}
 
-	private void MarkPrimaryTarget(uint effIndex)
+	private void MarkPrimaryTarget(int effIndex)
 	{
 		_primaryTarget = GetHitUnit().GetGUID();
 	}

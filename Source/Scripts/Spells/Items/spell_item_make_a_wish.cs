@@ -30,7 +30,7 @@ internal class spell_item_make_a_wish : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		var caster  = GetCaster();
 		var spellId = ItemSpellIds.MrPinchysGift;

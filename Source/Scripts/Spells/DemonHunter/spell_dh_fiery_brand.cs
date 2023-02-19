@@ -20,7 +20,7 @@ public class spell_dh_fiery_brand : SpellScript, IHasSpellEffects
 		return ValidateSpellInfo(DemonHunterSpells.FIERY_BRAND_DOT, DemonHunterSpells.FIERY_BRAND_MARKER);
 	}
 
-	private void HandleDamage(uint UnnamedParameter)
+	private void HandleDamage(int effIndex)
 	{
 		var target = GetHitUnit();
 

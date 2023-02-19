@@ -25,7 +25,7 @@ internal class spell_item_eggnog : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScript, 2, SpellEffectName.Inebriate, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(uint effIndex)
+	private void HandleScript(int effIndex)
 	{
 		if (RandomHelper.randChance(40))
 			GetCaster().CastSpell(GetHitUnit(), RandomHelper.randChance(50) ? ItemSpellIds.EggNogReindeer : ItemSpellIds.EggNogSnowman, GetCastItem());

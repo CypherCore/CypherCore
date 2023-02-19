@@ -33,7 +33,7 @@ internal class spell_item_universal_remote_SpellScript : SpellScript, IHasSpellE
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		var target = GetHitUnit();
 

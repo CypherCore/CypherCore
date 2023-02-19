@@ -31,7 +31,7 @@ internal class spell_gen_oracle_wolvar_reputation : SpellScript, IHasSpellEffect
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		var player    = GetCaster().ToPlayer();
 		var factionId = (uint)GetEffectInfo().CalcValue();

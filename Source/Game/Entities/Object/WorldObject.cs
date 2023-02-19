@@ -1891,7 +1891,7 @@ namespace Game.Entities
             return spellInfo.GetMinRange(!IsHostileTo(target));
         }
 
-        public double ApplyEffectModifiers(SpellInfo spellInfo, uint effIndex, double value)
+        public double ApplyEffectModifiers(SpellInfo spellInfo, int effIndex, double value)
         {
             Player modOwner = GetSpellModOwner();
             if (modOwner != null)

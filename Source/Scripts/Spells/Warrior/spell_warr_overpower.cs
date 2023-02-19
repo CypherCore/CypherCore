@@ -15,7 +15,7 @@ namespace Scripts.Spells.Warrior
 	{
 		public List<ISpellEffect> SpellEffects { get; } = new();
 
-		private void HandleEffect(uint UnnamedParameter)
+		private void HandleEffect(int effIndex)
 		{
 			if (!GetCaster())
 				return;

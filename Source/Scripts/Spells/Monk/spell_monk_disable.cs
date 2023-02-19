@@ -20,7 +20,7 @@ public class spell_monk_disable : SpellScript, IHasSpellEffects
 		return ValidateSpellInfo(MonkSpells.DISABLE, MonkSpells.DISABLE_ROOT);
 	}
 
-	private void OnHitTarget(uint UnnamedParameter)
+	private void OnHitTarget(int effIndex)
 	{
 		var target = GetExplTargetUnit();
 

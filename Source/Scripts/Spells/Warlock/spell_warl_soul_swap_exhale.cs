@@ -49,7 +49,7 @@ namespace Scripts.Spells.Warlock
 
 		public List<ISpellEffect> SpellEffects { get; } = new();
 
-		private void onEffectHit(uint effIndex)
+		private void onEffectHit(int effIndex)
 		{
 			GetCaster().CastSpell(GetCaster(), WarlockSpells.SOUL_SWAP_MOD_COST, true);
 			var hasGlyph = GetCaster().HasAura(WarlockSpells.GLYPH_OF_SOUL_SWAP);

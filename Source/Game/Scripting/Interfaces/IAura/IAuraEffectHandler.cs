@@ -7,7 +7,7 @@ namespace Game.Scripting.Interfaces.IAura
 {
     public interface IAuraEffectHandler
     {
-        uint EffectIndex { get; }
+        int EffectIndex { get; }
 
         AuraType AuraType { get; }
 
@@ -16,14 +16,14 @@ namespace Game.Scripting.Interfaces.IAura
 
     public class AuraEffectHandler : IAuraEffectHandler
     {
-        public AuraEffectHandler(uint effectIndex, AuraType auraType, AuraScriptHookType hookType)
+        public AuraEffectHandler(int effectIndex, AuraType auraType, AuraScriptHookType hookType)
         {
             EffectIndex = effectIndex;
             AuraType = auraType;
             HookType = hookType;
         }
 
-        public uint EffectIndex { get; private set; }
+        public int EffectIndex { get; private set; }
 
         public AuraType AuraType { get; private set; }
 

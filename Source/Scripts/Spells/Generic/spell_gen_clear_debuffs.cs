@@ -19,7 +19,7 @@ internal class spell_gen_clear_debuffs : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(uint effIndex)
+	private void HandleScript(int effIndex)
 	{
 		var target = GetHitUnit();
 

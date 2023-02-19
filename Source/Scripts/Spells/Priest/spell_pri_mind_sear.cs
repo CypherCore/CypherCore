@@ -23,7 +23,7 @@ public class spell_pri_mind_sear : SpellScript, IHasSpellEffects
 		return true;
 	}
 
-	private void HandleInsanity(uint UnnamedParameter)
+	private void HandleInsanity(int effIndex)
 	{
 		GetCaster().CastSpell(GetCaster(), PriestSpells.MIND_SEAR_INSANITY, true);
 	}

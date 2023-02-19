@@ -28,7 +28,7 @@ public class spell_dh_soul_cleave_damage : SpellScript, IHasSpellEffects, ISpell
 		SetHitDamage(dmg);
 	}
 
-	private void HandleDamage(uint UnnamedParameter)
+	private void HandleDamage(int effIndex)
 	{
 		var caster = GetCaster();
 

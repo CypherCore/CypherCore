@@ -644,9 +644,9 @@ namespace Game.Spells
             // register target/effect on aura
             AuraApplication aurApp = spellAura.GetApplicationOfTarget(unitTarget.GetGUID());
             if (aurApp == null)
-                aurApp = unitTarget._CreateAuraApplication(spellAura, 1u << (int)effectInfo.EffectIndex);
+                aurApp = unitTarget._CreateAuraApplication(spellAura, 1u << effectInfo.EffectIndex);
             else
-                aurApp.UpdateApplyEffectMask(aurApp.GetEffectsToApply() | 1u << (int)effectInfo.EffectIndex, false);
+                aurApp.UpdateApplyEffectMask(aurApp.GetEffectsToApply() | 1u << effectInfo.EffectIndex, false);
         }
 
         [SpellEffectHandler(SpellEffectName.UnlearnSpecialization)]
@@ -1066,7 +1066,7 @@ namespace Game.Spells
                 return;
 
             // only handle at last effect
-            for (uint i = effectInfo.EffectIndex + 1; i < m_spellInfo.GetEffects().Count; ++i)
+            for (int i = effectInfo.EffectIndex + 1; i < m_spellInfo.GetEffects().Count; ++i)
                 if (m_spellInfo.GetEffect(i).IsEffect(SpellEffectName.PersistentAreaAura))
                     return;
 
@@ -2545,7 +2545,7 @@ namespace Game.Spells
                         && curSpellInfo.CanBeInterrupted(m_caster, unitTarget))
                     {
                         int duration = m_spellInfo.GetDuration();
-                        duration = unitTarget.ModSpellDuration(m_spellInfo, unitTarget, duration, false, 1u << (int)effectInfo.EffectIndex);
+                        duration = unitTarget.ModSpellDuration(m_spellInfo, unitTarget, duration, false, 1u << effectInfo.EffectIndex);
                         unitTarget.GetSpellHistory().LockSpellSchool(curSpellInfo.GetSchoolMask(), TimeSpan.FromMilliseconds(duration));
                         m_hitMask |= ProcFlagsHit.Interrupt;
                         SendSpellInterruptLog(unitTarget, curSpellInfo.Id);
@@ -2977,7 +2977,7 @@ namespace Game.Spells
             if (gameObjTarget == null)
                 return;
 
-            gameObjTarget.ActivateObject((GameObjectActions)effectInfo.MiscValue, effectInfo.MiscValueB, m_caster, m_spellInfo.Id, (int)effectInfo.EffectIndex);
+            gameObjTarget.ActivateObject((GameObjectActions)effectInfo.MiscValue, effectInfo.MiscValueB, m_caster, m_spellInfo.Id, effectInfo.EffectIndex);
         }
 
         [SpellEffectHandler(SpellEffectName.ApplyGlyph)]
@@ -5406,7 +5406,7 @@ namespace Game.Spells
                 return false;
 
             foreach (SpellEffectInfo spellEffectInfo in spell.GetSpellInfo().GetEffects())
-                if ((target.EffectMask & (1 << (int)spellEffectInfo.EffectIndex)) != 0 && spellEffectInfo.IsUnitOwnedAuraEffect())
+                if ((target.EffectMask & (1 << spellEffectInfo.EffectIndex)) != 0 && spellEffectInfo.IsUnitOwnedAuraEffect())
                     return true;
 
             return false;

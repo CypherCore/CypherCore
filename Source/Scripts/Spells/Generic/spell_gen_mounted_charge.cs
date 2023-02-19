@@ -31,7 +31,7 @@ internal class spell_gen_mounted_charge : SpellScript, IHasSpellEffects
 			SpellEffects.Add(new EffectHandler(HandleChargeEffect, 0, SpellEffectName.Charge, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScriptEffect(uint effIndex)
+	private void HandleScriptEffect(int effIndex)
 	{
 		var target = GetHitUnit();
 
@@ -104,7 +104,7 @@ internal class spell_gen_mounted_charge : SpellScript, IHasSpellEffects
 		}
 	}
 
-	private void HandleChargeEffect(uint effIndex)
+	private void HandleChargeEffect(int effIndex)
 	{
 		uint spellId;
 

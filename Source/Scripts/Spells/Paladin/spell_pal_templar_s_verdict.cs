@@ -29,7 +29,7 @@ namespace Scripts.Spells.Paladin
             SpellEffects.Add(new EffectHandler(HandleHitTarget, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void HandleHitTarget(uint effIndex)
+        private void HandleHitTarget(int effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), PaladinSpells.TemplarVerdictDamage, true);
         }

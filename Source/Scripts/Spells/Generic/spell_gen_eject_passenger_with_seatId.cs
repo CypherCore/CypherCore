@@ -27,7 +27,7 @@ internal class spell_gen_eject_passenger_with_seatId : SpellScript, IHasSpellEff
 		SpellEffects.Add(new EffectHandler(EjectPassenger, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void EjectPassenger(uint effIndex)
+	private void EjectPassenger(int effIndex)
 	{
 		var vehicle = GetHitUnit().GetVehicleKit();
 

@@ -25,7 +25,7 @@ internal class spell_pri_power_word_solace : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(RestoreMana, 1, SpellEffectName.Dummy, SpellScriptHookType.Launch));
 	}
 
-	private void RestoreMana(uint effIndex)
+	private void RestoreMana(int effIndex)
 	{
 		GetCaster()
 			.CastSpell(GetCaster(),

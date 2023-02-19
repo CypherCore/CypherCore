@@ -40,7 +40,7 @@ internal class spell_generic_quest_update_entry : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleDummy, _effIndex, _spellEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		var creatureTarget = GetHitCreature();
 

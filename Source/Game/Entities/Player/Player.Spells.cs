@@ -2675,7 +2675,7 @@ namespace Game.Entities
 
                                     float basePoints = Global.DB2Mgr.GetCurveValueAt((uint)traitDefinitionEffectPoint.CurveID, rank);
                                     if (traitDefinitionEffectPoint.GetOperationType() == TraitPointsOperationType.Multiply)
-                                        basePoints *= spellInfo.GetEffect((uint)traitDefinitionEffectPoint.EffectIndex).CalcBaseValue(this, null, 0, -1);
+                                        basePoints *= spellInfo.GetEffect(traitDefinitionEffectPoint.EffectIndex).CalcBaseValue(this, null, 0, -1);
 
                                     args.AddSpellMod(SpellValueMod.BasePoint0 + traitDefinitionEffectPoint.EffectIndex, (int)basePoints);
                                 }
@@ -3559,7 +3559,7 @@ namespace Game.Entities
                             foreach (var spellEffectInfo in spellInfo.GetEffects())
                             {
                                 if (spellEffectInfo.IsEffect())
-                                    args.AddSpellMod(SpellValueMod.BasePoint0 + (int)spellEffectInfo.EffectIndex, MathFunctions.CalculatePct(spellEffectInfo.CalcValue(this), effectPct));
+                                    args.AddSpellMod(SpellValueMod.BasePoint0 + spellEffectInfo.EffectIndex, MathFunctions.CalculatePct(spellEffectInfo.CalcValue(this), effectPct));
                             }
                         }
 

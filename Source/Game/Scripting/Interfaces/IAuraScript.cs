@@ -16,7 +16,7 @@ namespace Game.Scripting.Interfaces
         ObjectGuid GetCasterGUID();
         int GetDuration();
         AuraEffect GetEffect(byte effIndex);
-        SpellEffectInfo GetEffectInfo(uint effIndex);
+        SpellEffectInfo GetEffectInfo(int effIndex);
         GameObject GetGObjCaster();
         uint GetId();
         int GetMaxDuration();

@@ -25,7 +25,7 @@ namespace Scripts.Spells.Druid
 			SpellEffects.Add(new EffectHandler(HandleOnHitTarget, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
 		}
 
-		private void HandleOnHitTarget(uint effIndex)
+		private void HandleOnHitTarget(int effIndex)
 		{
 			var hitUnit = GetHitUnit();
 

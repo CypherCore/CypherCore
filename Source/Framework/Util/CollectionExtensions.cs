@@ -186,7 +186,7 @@ namespace System.Collections.Generic
             Array.Clear(array, 0, array.Length);
         }
 
-        public static void EnsureWritableListIndex<T>(this List<T> list, uint index, T defaultValue)
+        public static void EnsureWritableListIndex<T>(this List<T> list, int index, T defaultValue)
         {
             while (list.Count <= index)
                 list.Add(defaultValue);

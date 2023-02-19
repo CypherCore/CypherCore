@@ -19,7 +19,7 @@ internal class spell_q12919_gymers_throw : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(uint effIndex)
+	private void HandleScript(int effIndex)
 	{
 		var caster = GetCaster();
 

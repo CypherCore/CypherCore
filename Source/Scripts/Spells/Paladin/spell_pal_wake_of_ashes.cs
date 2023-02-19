@@ -20,7 +20,7 @@ namespace Scripts.Spells.Paladin
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
-        private void HandleDamages(uint UnnamedParameter)
+        private void HandleDamages(int effIndex)
         {
             Creature target = GetHitCreature();
             if (target != null)

@@ -23,7 +23,7 @@ namespace Scripts.Spells.Shaman
 			return true;
 		}
 
-		private void HandleHeal(uint UnnamedParameter)
+		private void HandleHeal(int effIndex)
 		{
 			if (l_TargetCount != 0)
 				SetHitHeal(GetHitHeal() / l_TargetCount);

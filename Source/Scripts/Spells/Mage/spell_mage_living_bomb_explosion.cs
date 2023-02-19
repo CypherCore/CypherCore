@@ -32,7 +32,7 @@ internal class spell_mage_living_bomb_explosion : SpellScript, IHasSpellEffects
 		targets.Remove(GetExplTargetWorldObject());
 	}
 
-	private void HandleSpread(uint effIndex)
+	private void HandleSpread(int effIndex)
 	{
 		if (GetSpellValue().EffectBasePoints[0] > 0)
 			GetCaster().CastSpell(GetHitUnit(), MageSpells.LivingBombPeriodic, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint2, 0));

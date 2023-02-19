@@ -15,7 +15,7 @@ public class spell_dk_remorseless_winter_damage : SpellScript, IHasSpellEffects
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
 
-	private void HandleOnHit(uint UnnamedParameter)
+	private void HandleOnHit(int effIndex)
 	{
 		var unit = GetHitUnit();
 

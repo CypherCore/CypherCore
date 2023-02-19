@@ -16,7 +16,7 @@ public class spell_dk_glacial_advance : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleHit(uint UnnamedParameter)
+	private void HandleHit(int effIndex)
 	{
 		var caster = GetCaster();
 
