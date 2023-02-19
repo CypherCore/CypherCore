@@ -110,7 +110,9 @@ namespace Scripts.Spells.Warlock
 		public const uint FIREBOLT_BONUS = 231795;
 		public const uint FIRE_AND_BRIMSTONE = 196408;
 		public const uint FLAMESHADOW = 37379;
-		public const uint GEN_REPLENISHMENT = 57669;
+        public const uint FLASHPOINT = 387259;
+        public const uint FLASHPOINT_AURA = 387263;
+        public const uint GEN_REPLENISHMENT = 57669;
 		public const uint GLYPH_OF_CONFLAGRATE = 56235;
 		public const uint GLYPH_OF_DEMON_TRAINING = 56249;
 		public const uint GLYPH_OF_FEAR = 56244;

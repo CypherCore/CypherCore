@@ -19,33 +19,51 @@ namespace Scripts.Spells.Warlock
 		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void HandlePeriodic(AuraEffect UnnamedParameter)
+        {
+            var caster = GetCaster();
+
+            if (caster == null)
+                return;
+
+			Flashpoint(caster);
+            ChannelDemonfire(caster);
+            RoaringBlaze(caster);
+        }
+
+		private void Flashpoint(Unit caster)
 		{
-			var caster = GetCaster();
+			var target = GetTarget();
 
-			if (caster == null)
-				return;
-
-			var aur = caster.GetAura(WarlockSpells.CHANNEL_DEMONFIRE_ACTIVATOR);
-
-			if (aur != null)
-				aur.RefreshDuration();
-
-            if (GetAura() != null && caster.HasAura(WarlockSpells.ROARING_BLAZE))
-			{
-                var dmgEff = Global.SpellMgr.GetSpellInfo(WarlockSpells.ROARING_BLASE_DMG_PCT, Difficulty.None)?.GetEffect(0);
-
-				if (dmgEff != null)
-				{
-					var damage = GetEffect(0).GetAmount();
-					MathFunctions.AddPct(ref damage, dmgEff.BasePoints);
-
-					GetEffect(0).SetAmount(damage);
-					GetAura().SetNeedClientUpdateForTargets();
-				}
-			}
+			if (target != null && caster.TryGetAura(WarlockSpells.FLASHPOINT, out var fp) && target.HealthAbovePct(fp.GetEffect(1).GetBaseAmount()))
+				caster.CastSpell(caster, WarlockSpells.FLASHPOINT_AURA, true);
 		}
 
-		private void HandleApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
+        private void ChannelDemonfire(Unit caster)
+        {
+            var aur = caster.GetAura(WarlockSpells.CHANNEL_DEMONFIRE_ACTIVATOR);
+
+            if (aur != null)
+                aur.RefreshDuration();
+        }
+
+        private void RoaringBlaze(Unit caster)
+        {
+            if (GetAura() != null && caster.HasAura(WarlockSpells.ROARING_BLAZE))
+            {
+                var dmgEff = Global.SpellMgr.GetSpellInfo(WarlockSpells.ROARING_BLASE_DMG_PCT, Difficulty.None)?.GetEffect(0);
+
+                if (dmgEff != null)
+                {
+                    var damage = GetEffect(0).GetAmount();
+                    MathFunctions.AddPct(ref damage, dmgEff.BasePoints);
+
+                    GetEffect(0).SetAmount(damage);
+                    GetAura().SetNeedClientUpdateForTargets();
+                }
+            }
+        }
+
+        private void HandleApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 		{
 			var caster = GetCaster();
 
