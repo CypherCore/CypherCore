@@ -2905,6 +2905,9 @@ namespace Game.Entities
             if (victim.GetStandState() != 0 && victim.IsPlayer())
                 victim.SetStandState(UnitStandStateType.Stand);
 
+            if (player != null && player.GetPrimarySpecialization() == TalentSpecialization.DruidBear)
+                    victim.SaveDamageHistory(damage);
+
             return damage;
         }
 
