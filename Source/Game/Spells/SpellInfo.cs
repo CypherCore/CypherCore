@@ -22,18 +22,17 @@ namespace Game.Spells
             Id = spellName.Id;
             Difficulty = difficulty;
 
-            foreach (SpellEffectRecord spellEffect in data.Effects)
+            foreach (var spellEffect in data.Effects)
             {
-                if (spellEffect == null)
-                    continue;
-
-                _effects.EnsureWritableListIndex(spellEffect.EffectIndex, new SpellEffectInfo(this));
-                _effects[spellEffect.EffectIndex] = new SpellEffectInfo(this, spellEffect);
+                _effects.EnsureWritableListIndex(spellEffect.Key, new SpellEffectInfo(this));
+                _effects[spellEffect.Key] = new SpellEffectInfo(this, spellEffect.Value);
             }
 
             // Correct EffectIndex for blank effects
             for (int i = 0; i < _effects.Count; ++i)
                 _effects[i].EffectIndex = i;
+
+            NegativeEffects = new BitSet(_effects.Count);
 
             SpellName = spellName.Name;
 
@@ -257,6 +256,8 @@ namespace Game.Spells
             // Correct EffectIndex for blank effects
             for (int i = 0; i < _effects.Count; ++i)
                 _effects[i].EffectIndex = i;
+
+            NegativeEffects = new BitSet(effects.Count);
         }
 
         public bool HasEffect(SpellEffectName effect)
@@ -3974,7 +3975,7 @@ namespace Game.Spells
         public SpellAttr13 AttributesEx13 { get; set; }
         public SpellAttr14 AttributesEx14 { get; set; }
         public SpellCustomAttributes AttributesCu { get; set; }
-        public BitSet NegativeEffects { get; set; } = new BitSet(SpellConst.MaxEffects);
+        public BitSet NegativeEffects { get; set; }
         public ulong Stances { get; set; }
         public ulong StancesNot { get; set; }
         public SpellCastTargetFlags Targets { get; set; }

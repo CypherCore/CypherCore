@@ -483,20 +483,17 @@ namespace Game.Entities
             {
                 do
                 {
-                    uint effectIndex = effectResult.Read<byte>(4);
-                    if (effectIndex < SpellConst.MaxEffects)
-                    {
-                        casterGuid.SetRawValue(effectResult.Read<byte[]>(0));
-                        itemGuid.SetRawValue(effectResult.Read<byte[]>(1));
+                    int effectIndex = effectResult.Read<byte>(4);
+                    casterGuid.SetRawValue(effectResult.Read<byte[]>(0));
+                    itemGuid.SetRawValue(effectResult.Read<byte[]>(1));
 
-                        AuraKey key = new(casterGuid, itemGuid, effectResult.Read<uint>(2), effectResult.Read<uint>(3));
-                        if (!effectInfo.ContainsKey(key))
-                            effectInfo[key] = new AuraLoadEffectInfo();
+                    AuraKey key = new(casterGuid, itemGuid, effectResult.Read<uint>(2), effectResult.Read<uint>(3));
+                    if (!effectInfo.ContainsKey(key))
+                        effectInfo[key] = new AuraLoadEffectInfo();
 
-                        AuraLoadEffectInfo info = effectInfo[key];
-                        info.Amounts[effectIndex] = effectResult.Read<int>(5);
-                        info.BaseAmounts[effectIndex] = effectResult.Read<int>(6);
-                    }
+                    AuraLoadEffectInfo info = effectInfo[key];
+                    info.Amounts[effectIndex] = effectResult.Read<int>(5);
+                    info.BaseAmounts[effectIndex] = effectResult.Read<int>(6);
                 }
                 while (effectResult.NextRow());
             }
@@ -1918,22 +1915,19 @@ namespace Game.Entities
                 stmt.AddValue(index, aura.GetCastItemLevel());
                 trans.Append(stmt);
 
-                foreach (AuraEffect effect in aura.GetAuraEffects())
+                foreach (var effect in aura.GetAuraEffects())
                 {
-                    if (effect != null)
-                    {
-                        index = 0;
-                        stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_AURA_EFFECT);
-                        stmt.AddValue(index++, GetGUID().GetCounter());
-                        stmt.AddValue(index++, key.Caster.GetRawValue());
-                        stmt.AddValue(index++, key.Item.GetRawValue());
-                        stmt.AddValue(index++, key.SpellId);
-                        stmt.AddValue(index++, key.EffectMask);
-                        stmt.AddValue(index++, effect.GetEffIndex());
-                        stmt.AddValue(index++, effect.GetAmount());
-                        stmt.AddValue(index++, effect.GetBaseAmount());
-                        trans.Append(stmt);
-                    }
+                    index = 0;
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_AURA_EFFECT);
+                    stmt.AddValue(index++, GetGUID().GetCounter());
+                    stmt.AddValue(index++, key.Caster.GetRawValue());
+                    stmt.AddValue(index++, key.Item.GetRawValue());
+                    stmt.AddValue(index++, key.SpellId);
+                    stmt.AddValue(index++, key.EffectMask);
+                    stmt.AddValue(index++, effect.Value.GetEffIndex());
+                    stmt.AddValue(index++, effect.Value.GetAmount());
+                    stmt.AddValue(index++, effect.Value.GetBaseAmount());
+                    trans.Append(stmt);
                 }
             }
         }

@@ -289,13 +289,10 @@ namespace Game.Networking.Packets
 
                 if (aurApp.GetFlags().HasAnyFlag(AuraFlags.Scalable))
                 {
-                    foreach (AuraEffect aurEff in aurApp.GetBase().GetAuraEffects())
+                    foreach (var aurEff in aurApp.GetBase().GetAuraEffects())
                     {
-                        if (aurEff == null)
-                            continue;
-
-                        if (aurApp.HasEffect(aurEff.GetEffIndex()))
-                            aura.Points.Add((float)aurEff.GetAmount());
+                        if (aurApp.HasEffect(aurEff.Value.GetEffIndex()))
+                            aura.Points.Add((float)aurEff.Value.GetAmount());
                     }
                 }
 
@@ -329,14 +326,9 @@ namespace Game.Networking.Packets
 
                     if (aurApp.GetFlags().HasAnyFlag(AuraFlags.Scalable))
                     {
-                        foreach (AuraEffect aurEff in aurApp.GetBase().GetAuraEffects())
-                        {
-                            if (aurEff == null)
-                                continue;
-
-                            if (aurApp.HasEffect(aurEff.GetEffIndex()))
-                                aura.Points.Add((float)aurEff.GetAmount());
-                        }
+                        foreach (var aurEff in aurApp.GetBase().GetAuraEffects())
+                            if (aurApp.HasEffect(aurEff.Value.GetEffIndex()))
+                                aura.Points.Add((float)aurEff.Value.GetAmount());
                     }
 
                     MemberStats.PetStats.Auras.Add(aura);

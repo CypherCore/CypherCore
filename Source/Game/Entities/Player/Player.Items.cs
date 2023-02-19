@@ -5475,13 +5475,10 @@ namespace Game.Entities
                 {
                     if (apply)
                     {
-                        foreach (AuraEffect auraEffect in powerAura.GetBase().GetAuraEffects())
+                        foreach (var auraEffect in powerAura.GetBase().GetAuraEffects())
                         {
-                            if (auraEffect == null)
-                                continue;
-
-                            if (powerAura.HasEffect(auraEffect.GetEffIndex()))
-                                auraEffect.ChangeAmount((int)(artifactPowerRank.AuraPointsOverride != 0 ? artifactPowerRank.AuraPointsOverride : auraEffect.GetSpellEffectInfo().CalcValue()));
+                            if (powerAura.HasEffect(auraEffect.Value.GetEffIndex()))
+                                auraEffect.Value.ChangeAmount((int)(artifactPowerRank.AuraPointsOverride != 0 ? artifactPowerRank.AuraPointsOverride : auraEffect.Value.GetSpellEffectInfo().CalcValue()));
                         }
                     }
                     else

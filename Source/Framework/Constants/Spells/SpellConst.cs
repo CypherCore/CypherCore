@@ -7,7 +7,6 @@ namespace Framework.Constants
 {
     public struct SpellConst
     {
-        public const int MaxEffects = 32;
         public const uint MaxEffectMask = 0xFFFFFFFF;
         public const int MaxReagents = 8;
         public const int MaxTotems = 2;
