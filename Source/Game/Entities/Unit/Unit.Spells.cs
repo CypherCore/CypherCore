@@ -3841,12 +3841,6 @@ namespace Game.Entities
             return aurApp?.GetBase();
         }
 
-        public Aura GetAura(Func<Aura, bool> predicate)
-        {
-            AuraApplication aurApp = GetAuraApplication(predicate);
-            return aurApp?.GetBase();
-        }
-        
         public uint BuildAuraStateUpdateForTarget(Unit target)
         {
             uint auraStates = m_unitData.AuraState & ~(uint)AuraStateType.PerCasterAuraStateMask;

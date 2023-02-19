@@ -249,11 +249,34 @@ namespace System.Collections.Generic
             list.Add(val);
         }
 
+        public static void Add<T, V>(this IDictionary<T, HashSet<V>> dict, T key, V val)
+        {
+            if (dict == null) throw new ArgumentNullException();
+
+            if (!dict.TryGetValue(key, out var list))
+            {
+                list = new HashSet<V>();
+                dict.Add(key, list);
+            }
+            list.Add(val);
+        }
+
         public static void AddToList<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, TKey key, TValue value)
         {
             if (!dict.TryGetValue(key, out var val))
             {
                 val = new List<TValue>();
+                dict.Add(key, val);
+            }
+
+            val.Add(value);
+        }
+
+        public static void AddToList<TKey, TValue>(this IDictionary<TKey, HashSet<TValue>> dict, TKey key, TValue value)
+        {
+            if (!dict.TryGetValue(key, out var val))
+            {
+                val = new HashSet<TValue>();
                 dict.Add(key, val);
             }
 
@@ -315,6 +338,21 @@ namespace System.Collections.Generic
         }
 
         public static bool Remove<TKey, TValue>(this IDictionary<TKey, List<TValue>> dict, TKey key, TValue value)
+        {
+            if (!dict.TryGetValue(key, out var valList))
+                return false;
+
+            bool val = valList.Remove(value);
+            if (!val)
+                return false;
+
+            if (valList.Empty())
+                dict.Remove(key);
+
+            return true;
+        }
+
+        public static bool Remove<TKey, TValue>(this IDictionary<TKey, HashSet<TValue>> dict, TKey key, TValue value)
         {
             if (!dict.TryGetValue(key, out var valList))
                 return false;
@@ -511,6 +549,22 @@ namespace System.Collections.Generic
         {
             foreach (var val in toRemove)
                 dict.Remove(val);
+        }
+
+        public static void Add<TKey1, TKey2, TVal>(this Dictionary<TKey1, Dictionary<TKey2, TVal>> dict, TKey1 key1, TKey2 key2, TVal newVal)
+        {
+            if (!dict.TryGetValue(key1, out var innerDict))
+            {
+                innerDict = new Dictionary<TKey2, TVal>();
+                dict[key1] = innerDict;
+            }
+
+            innerDict[key2] = newVal;
+        }
+
+        public static bool ContainsKey<TKey1, TKey2, TVal>(this Dictionary<TKey1, Dictionary<TKey2, TVal>> dict, TKey1 key1, TKey2 key2)
+        {
+            return dict.TryGetValue(key1, out var innerDict) && innerDict.ContainsKey(key2);
         }
 
         public static ManyToOneLookup<TKey, TValue> ToManyToOneLookup<TKey, TValue>(this IEnumerable<TValue> source, Func<TValue, TKey> keySelector, IEqualityComparer<TKey> keyComparer = null, IEqualityComparer<TValue> valueComparer = null)

@@ -61,6 +61,8 @@ namespace Game.Spells
         bool _needClientUpdate;
         uint _effectMask;
 
+        public Guid Guid { get; } = Guid.NewGuid();
+
         public AuraApplication(Unit target, Unit caster, Aura aura, uint effMask)
         {
             _target = target;

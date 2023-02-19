@@ -434,17 +434,15 @@ namespace Game.Entities
 
         public SpellProcEntry GetSpellProcEntry(SpellInfo spellInfo)
         {
-            SpellProcEntry procEntry = mSpellProcMap.LookupByKey((spellInfo.Id, spellInfo.Difficulty));
-            if (procEntry != null)
+            if (mSpellProcMap.TryGetValue(spellInfo.Id, out var diffdict) && diffdict.TryGetValue(spellInfo.Difficulty, out var procEntry))
                 return procEntry;
 
             DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(spellInfo.Difficulty);
-            if (difficulty != null)
+            if (difficulty != null && diffdict != null)
             {
                 do
                 {
-                    procEntry = mSpellProcMap.LookupByKey((spellInfo.Id, (Difficulty)difficulty.FallbackDifficultyID));
-                    if (procEntry != null)
+                    if (diffdict.TryGetValue((Difficulty)difficulty.FallbackDifficultyID, out  procEntry))
                         return procEntry;
 
                     difficulty = CliDB.DifficultyStorage.LookupByKey(difficulty.FallbackDifficultyID);
@@ -1363,7 +1361,7 @@ namespace Game.Entities
 
                     while (spellInfo != null)
                     {
-                        if (mSpellProcMap.ContainsKey((spellInfo.Id, spellInfo.Difficulty)))
+                        if (!mSpellProcMap.ContainsKey(spellInfo.Id, spellInfo.Difficulty))
                         {
                             Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_proc` has duplicate entry in the table", spellInfo.Id);
                             break;
@@ -1440,7 +1438,7 @@ namespace Game.Entities
                             procEntry.AttributesMask &= ProcAttributes.AllAllowed;
                         }
 
-                        mSpellProcMap.Add((spellInfo.Id, spellInfo.Difficulty), procEntry);
+                        mSpellProcMap.Add(spellInfo.Id, spellInfo.Difficulty, procEntry);
                         ++count;
 
                         if (allRanks)
@@ -1464,7 +1462,7 @@ namespace Game.Entities
             foreach (SpellInfo spellInfo in kvp.Values)
             {
                 // Data already present in DB, overwrites default proc
-                if (mSpellProcMap.ContainsKey((spellInfo.Id, spellInfo.Difficulty)))
+                if (mSpellProcMap.ContainsKey(spellInfo.Id, spellInfo.Difficulty))
                     continue;
 
                 // Nothing to do if no flags set
@@ -1582,7 +1580,7 @@ namespace Game.Entities
                 procEntry.Cooldown = spellInfo.ProcCooldown;
                 procEntry.Charges = spellInfo.ProcCharges;
 
-                mSpellProcMap[(spellInfo.Id, spellInfo.Difficulty)] = procEntry;
+                mSpellProcMap.Add(spellInfo.Id, spellInfo.Difficulty, procEntry);
                 ++count;
             }
 
@@ -4800,7 +4798,7 @@ namespace Game.Entities
         Dictionary<SpellGroup, SpellGroupStackRule> mSpellGroupStack = new();
         MultiMap<SpellGroup, AuraType> mSpellSameEffectStack = new();
         List<ServersideSpellName> mServersideSpellNames = new();
-        Dictionary<(uint id, Difficulty difficulty), SpellProcEntry> mSpellProcMap = new();
+        Dictionary<uint, Dictionary<Difficulty, SpellProcEntry>> mSpellProcMap = new();
         Dictionary<uint, SpellThreatEntry> mSpellThreatMap = new();
         Dictionary<uint, PetAura> mSpellPetAuraMap = new();
         MultiMap<(SpellLinkedType, uint), int> mSpellLinkedMap = new();

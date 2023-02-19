@@ -58,9 +58,6 @@ public class spell_monk_renewing_mist_hot : AuraScript, IHasAuraEffects
 
 					if (effInfo != null)
 						MathFunctions.AddPct(ref amount, effInfo.GetAmount());
-
-					{
-					}
 				}
 			}
 		}

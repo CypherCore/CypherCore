@@ -1,34 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using Game.Entities;
-using Game.Networking.Packets;
-using Google.Protobuf.WellKnownTypes;
-using static Game.AI.SmartEvent;
 
 namespace Game.Spells.Auras
 {
     public class AuraCollection
     {
         protected Dictionary<Guid, Aura> _auras = new();
-        protected MultiMap<uint, Guid> _aurasBySpellId = new();
-        protected MultiMap<ObjectGuid, Guid> _byCasterGuid  = new();
+        protected MultiMapHashSet<uint, Guid> _aurasBySpellId = new();
+        protected MultiMapHashSet<ObjectGuid, Guid> _byCasterGuid  = new();
         protected HashSet<Guid> _isSingleTarget  = new();
-        protected MultiMap<uint, Guid> _labelMap  = new();
+        protected MultiMapHashSet<uint, Guid> _labelMap  = new();
         protected HashSet<Guid> _canBeSaved  = new();
         protected HashSet<Guid> _isgroupBuff  = new();
         protected HashSet<Guid> _isPassive  = new();
         protected HashSet<Guid> _isDeathPersistant  = new();
         protected HashSet<Guid> _isRequiringDeadTarget  = new();
-        protected MultiMap<AuraObjectType, Guid> _typeMap  = new();
+        protected MultiMapHashSet<AuraObjectType, Guid> _typeMap  = new();
 
         public void Add(Aura aura)
         {
             lock (_auras)
             {
+                if (_auras.ContainsKey(aura.Guid))
+                    return;
+
                 _auras[aura.Guid] = aura;
                 _aurasBySpellId.Add(aura.GetId(), aura.Guid);
 
@@ -79,11 +76,22 @@ namespace Game.Spells.Auras
                 foreach (var label in aura.GetSpellInfo().Labels)
                     _labelMap.Remove(label, aura.Guid);
 
-                _canBeSaved.Remove(aura.Guid);
-                _isgroupBuff.Remove(aura.Guid);
-                _isPassive.Remove(aura.Guid);
-                _isDeathPersistant.Remove(aura.Guid);
-                _isRequiringDeadTarget.Remove(aura.Guid);
+                if (aura.CanBeSaved())
+                    _canBeSaved.Remove(aura.Guid);
+
+                if (aura.GetSpellInfo().IsGroupBuff())
+                    _isgroupBuff.Remove(aura.Guid);
+
+                if (aura.IsPassive())
+                    _isPassive.Remove(aura.Guid);
+
+                if (aura.IsDeathPersistent())
+                    _isDeathPersistant.Remove(aura.Guid);
+
+                if (aura.GetSpellInfo().IsRequiringDeadTarget())
+                    _isRequiringDeadTarget.Remove(aura.Guid);
+
+
                 _typeMap.Remove(aura.GetAuraType(), aura.Guid);
             }
         }
@@ -141,7 +149,7 @@ namespace Game.Spells.Auras
         public class AuraQuery
         {
             AuraCollection _collection;
-            int _queryCount = 0;
+            bool _hasLoaded = false;
 
             public HashSet<Guid> Results { get; } = new();
 
@@ -156,7 +164,6 @@ namespace Game.Spells.Auras
                     if (_collection._aurasBySpellId.TryGetValue(spellId, out var result))
                         Sync(result);
 
-                _queryCount++;
                 return this;
             }
 
@@ -166,7 +173,6 @@ namespace Game.Spells.Auras
                     if (!caster.IsEmpty() && _collection._byCasterGuid.TryGetValue(caster, out var result))
                         Sync(result);
 
-                _queryCount++;
                 return this;
             }
 
@@ -176,7 +182,6 @@ namespace Game.Spells.Auras
                     if (_collection._labelMap.TryGetValue(label, out var result))
                         Sync(result);
 
-                _queryCount++;
                 return this;
             }
 
@@ -186,7 +191,6 @@ namespace Game.Spells.Auras
                     if (_collection._typeMap.TryGetValue(label, out var result))
                         Sync(result);
 
-                _queryCount++;
                 return this;
             }
 
@@ -195,7 +199,6 @@ namespace Game.Spells.Auras
                 lock (_collection._auras)
                     Sync(_collection._isSingleTarget, t);
 
-                _queryCount++;
                 return this;
             }
 
@@ -204,7 +207,6 @@ namespace Game.Spells.Auras
                 lock (_collection._auras)
                     Sync(_collection._canBeSaved, t);
 
-                _queryCount++;
                 return this;
             }
 
@@ -213,7 +215,6 @@ namespace Game.Spells.Auras
                 lock (_collection._auras)
                     Sync(_collection._isgroupBuff, t);
 
-                _queryCount++;
                 return this;
             }
 
@@ -222,7 +223,6 @@ namespace Game.Spells.Auras
                 lock (_collection._auras)
                     Sync(_collection._isPassive, t);
 
-                _queryCount++;
                 return this;
             }
 
@@ -231,7 +231,6 @@ namespace Game.Spells.Auras
                 lock (_collection._auras)
                     Sync(_collection._isDeathPersistant, t);
 
-                _queryCount++;
                 return this;
             }
 
@@ -240,7 +239,6 @@ namespace Game.Spells.Auras
                 lock (_collection._auras)
                     Sync(_collection._isRequiringDeadTarget, t);
 
-                _queryCount++;
                 return this;
             }
 
@@ -276,25 +274,17 @@ namespace Game.Spells.Auras
                 return this;
             }
 
-            private void Sync(List<Guid> collection)
+            private void Sync(HashSet<Guid> collection, bool contains = true)
             {
-                if (_queryCount == 0)
+                if (_hasLoaded)
                 {
-                    foreach (var a in collection)
-                        Results.Add(a);
-                }
-                else
-                    Results.RemoveWhere(r => !collection.Contains(r));
-            }
+                    if (collection != null && collection.Count != 0 && contains)
+                        foreach (var a in collection)
+                            Results.Add(a);
 
-            private void Sync(HashSet<Guid> collection, bool contains)
-            {
-                if (_queryCount == 0)
-                {
-                    foreach (var a in collection)
-                        Results.Add(a);
+                    _hasLoaded = true;
                 }
-                else
+                else if (Results.Count != 0)
                     Results.RemoveWhere(r => collection.Contains(r) != contains);
             }
         }
