@@ -9,19 +9,20 @@ using Game.Spells;
 
 namespace Scripts.Spells.Warlock
 {
-	[SpellScript(17877)]
+    [SpellScript(WarlockSpells.SHADOWBURN)]
 	public class spell_warl_shadowburn : AuraScript, IHasAuraEffects
 	{
 		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 		private void HandleRemove(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)
 		{
-			if (GetCaster())
+			var caster = GetCaster();
+			if (caster)
 			{
 				var removeMode = GetTargetApplication().GetRemoveMode();
 
 				if (removeMode == AuraRemoveMode.Death)
-					GetCaster().SetPower(PowerType.SoulShards, GetCaster().GetPower(PowerType.SoulShards) + 50);
+					caster.CastSpell(WarlockSpells.SHADOWBURN_ENERGIZE, true);
 			}
 		}
 

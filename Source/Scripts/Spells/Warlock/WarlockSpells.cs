@@ -224,8 +224,9 @@ namespace Scripts.Spells.Warlock
 		public const uint SEED_OF_CURRUPTION_DAMAGE = 27285;
 		public const uint SHADOWBOLT = 686;
 		public const uint SHADOWBURN = 17877;
-		public const uint SHADOWBURN_ENERGIZE = 125882;
-		public const uint SHADOWFLAME = 37378;
+		public const uint SHADOWBURN_ENERGIZE = 245731;
+        public const uint SHADOWBURN_ENERGIZE_FULL = 29341;
+        public const uint SHADOWFLAME = 37378;
 		public const uint SHADOWY_INSPIRATION = 196269;
 		public const uint SHADOWY_INSPIRATION_EFFECT = 196606;
 		public const uint SHADOW_BOLT = 686;
