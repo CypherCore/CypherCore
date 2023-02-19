@@ -1515,7 +1515,7 @@ namespace Framework.Constants
         IgnoreAuraInterruptFlags = 0x100,   //! Will Ignore Interruptible Aura'S At Cast
         IgnoreSetFacing = 0x200,   //! Will Not Adjust Facing To Target (If Any)
         IgnoreShapeshift = 0x400,   //! Will Ignore Shapeshift Checks
-        IgnoreCasterAurastate = 0x800,   //! Will Ignore Caster Aura States Including Combat Requirements And Death State
+        // reuse
         DisallowProcEvents = 0x1000,   //! Disallows proc events from triggered spell (default)
         IgnoreCasterMountedOrOnVehicle = 0x2000,   //! Will Ignore Mounted/On Vehicle Restrictions
         // reuse                                        = 0x4000,
@@ -1528,6 +1528,7 @@ namespace Framework.Constants
         // debug flags (used with .cast triggered commands)
         IgnoreEquippedItemRequirement = 0x80000, //! Will ignore equipped item requirements
         IgnoreTargetCheck = 0x100000, //! Will ignore most target checks (mostly DBC target checks)
+        IgnoreCasterAurastate = 0x200000,   //! Will Ignore Caster Aura States Including Combat Requirements And Death State
         FullDebugMask = 0xFFFFFFFF
     }
 
