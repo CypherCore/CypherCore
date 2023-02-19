@@ -2211,11 +2211,9 @@ namespace Game.Entities
             RemoveOwnedAura(spellId, GetGUID());
 
             // remove pet auras
-            for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+            foreach (var petAur in Global.SpellMgr.GetPetAuras(spellId).Values)
             {
-                PetAura petSpell = Global.SpellMgr.GetPetAura(spellId, i);
-                if (petSpell != null)
-                    RemovePetAura(petSpell);
+                RemovePetAura(petAur);
             }
 
             // update free primary prof.points (if not overflow setting, can be in case GM use before .learn prof. learning)

@@ -68,14 +68,14 @@ public class spell_dh_reverse_magic : SpellScript, ISpellOnCast
 
 				if (targetAura != null)
 				{
-					for (int i = 0; i < SpellConst.MaxEffects; ++i)
+					foreach (var aurEff in targetAura.GetAuraEffects())
 					{
 						targetAura.SetMaxDuration(aura.GetMaxDuration());
 						targetAura.SetDuration(aura.GetDuration());
 
-						if (targetAura.GetEffect(i) != null && aura.GetEffect(i) != null)
+						if (aura.GetEffect(aurEff.Key) != null)
 						{
-							var auraEffect = unit.GetAuraEffect(aura.GetId(), i);
+							var auraEffect = unit.GetAuraEffect(aura.GetId(), aurEff.Key);
 
 							if (auraEffect == null)
 								continue;
@@ -83,11 +83,11 @@ public class spell_dh_reverse_magic : SpellScript, ISpellOnCast
 							var amount = auraEffect.GetAmount();
 
 							if (auraEffect.GetAuraType() == AuraType.PeriodicDamage || auraEffect.GetAuraType() == AuraType.PeriodicDamagePercent)
-								amount = (int)caster.SpellDamageBonusDone(unit, aura.GetSpellInfo(), amount, DamageEffectType.DOT, aura.GetSpellInfo().GetEffects()[i], auraEffect.GetBase().GetStackAmount(), GetSpell());
+								amount = (int)caster.SpellDamageBonusDone(unit, aura.GetSpellInfo(), amount, DamageEffectType.DOT, aura.GetSpellInfo().GetEffects()[aurEff.Key], auraEffect.GetBase().GetStackAmount(), GetSpell());
 
-							//targetAura->GetEffect(i)->VariableStorage.Set("DontRecalculatePerodics", true);
-							targetAura.GetEffect(i).SetAmount(amount);
-							targetAura.GetEffect(i).SetPeriodicTimer(auraEffect.GetPeriodicTimer());
+                            //targetAura->GetEffect(i)->VariableStorage.Set("DontRecalculatePerodics", true);
+                            aurEff.Value.SetAmount(amount);
+                            aurEff.Value.SetPeriodicTimer(auraEffect.GetPeriodicTimer());
 						}
 					}
 

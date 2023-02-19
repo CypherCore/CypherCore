@@ -390,7 +390,7 @@ namespace Game.Spells
                 return;
             // reapply some passive spells after add/remove related spellmods
             // Warning: it is a dead loop if 2 auras each other amount-shouldn't happen
-            BitSet recalculateEffectMask = new(SpellConst.MaxEffects);
+            BitSet recalculateEffectMask = new(Math.Max(GetBase().GetAuraEffects().Count(), 5));
             switch ((SpellModOp)GetMiscValue())
             {
                 case SpellModOp.Points:
@@ -5004,8 +5004,8 @@ namespace Game.Spells
                 if (triggerCaster != null)
                 {
                     CastSpellExtraArgs args = new(this);
-                    for (int i = 0; i < SpellConst.MaxEffects; ++i)
-                        args.AddSpellMod(SpellValueMod.BasePoint0 + i, GetAmount());
+                    foreach(var effect in triggeredSpellInfo.GetEffects())
+                        args.AddSpellMod(SpellValueMod.BasePoint0 + effect.EffectIndex, GetAmount());
 
                     triggerCaster.CastSpell(target, triggerSpellId, args);
                     Log.outDebug(LogFilter.Spells, "AuraEffect.HandlePeriodicTriggerSpellWithValueAuraTick: Spell {0} Trigger {1}", GetId(), triggeredSpellInfo.Id);

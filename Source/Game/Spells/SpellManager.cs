@@ -548,7 +548,15 @@ namespace Game.Entities
 
         public PetAura GetPetAura(uint spell_id, byte eff)
         {
-            return mSpellPetAuraMap.LookupByKey((spell_id << 8) + eff);
+            if (mSpellPetAuraMap.ContainsKey(spell_id))
+                return mSpellPetAuraMap[spell_id].LookupByKey(eff);
+
+            return null;
+        }
+
+        public Dictionary<int, PetAura> GetPetAuras(uint spell_id)
+        {
+            return mSpellPetAuraMap.LookupByKey(spell_id);
         }
 
         public SpellEnchantProcEntry GetSpellEnchantProcEvent(uint enchId)
@@ -1657,7 +1665,7 @@ namespace Game.Entities
                 uint pet = result.Read<uint>(2);
                 uint aura = result.Read<uint>(3);
 
-                var petAura = mSpellPetAuraMap.LookupByKey((spell << 8) + eff);
+                var petAura = GetPetAura(spell, eff);
                 if (petAura != null)
                     petAura.AddAura(pet, aura);
                 else
@@ -1688,7 +1696,11 @@ namespace Game.Entities
                     }
 
                     PetAura pa = new(pet, aura, spellInfo.GetEffect(eff).TargetA.GetTarget() == Targets.UnitPet, spellInfo.GetEffect(eff).CalcValue());
-                    mSpellPetAuraMap[(spell << 8) + eff] = pa;
+
+                    if (!mSpellPetAuraMap.ContainsKey(spell))
+                        mSpellPetAuraMap[spell] = new();
+
+                    mSpellPetAuraMap[spell][eff] = pa;
                 }
                 ++count;
             } while (result.NextRow());
@@ -2177,7 +2189,6 @@ namespace Game.Entities
 
             foreach (var effect in CliDB.SpellEffectStorage.Values)
             {
-                Cypher.Assert(effect.EffectIndex < SpellConst.MaxEffects, $"MAX_SPELL_EFFECTS must be at least {effect.EffectIndex}");
                 Cypher.Assert(effect.Effect < (int)SpellEffectName.TotalSpellEffects, $"TOTAL_SPELL_EFFECTS must be at least {effect.Effect}");
                 Cypher.Assert(effect.EffectAura < (int)AuraType.Total, $"TOTAL_AURAS must be at least {effect.EffectAura}");
                 Cypher.Assert(effect.ImplicitTarget[0] < (int)Targets.TotalSpellTargets, $"TOTAL_SPELL_TARGETS must be at least {effect.ImplicitTarget[0]}");
@@ -2313,9 +2324,9 @@ namespace Game.Entities
                             if (data.Value.Cooldowns == null)
                                 data.Value.Cooldowns = fallbackData.Cooldowns;
 
-                            for (var i = 0; i < data.Value.Effects.Length; ++i)
-                                if (data.Value.Effects[i] == null)
-                                    data.Value.Effects[i] = fallbackData.Effects[i];
+                            foreach (var fallbackEff in fallbackData.Effects)
+                                if (!data.Value.Effects.ContainsKey(fallbackEff.Key))
+                                    data.Value.Effects[fallbackEff.Key] = fallbackEff.Value;
 
                             if (data.Value.EquippedItems == null)
                                 data.Value.EquippedItems = fallbackData.EquippedItems;
@@ -2447,12 +2458,6 @@ namespace Game.Entities
                     if (difficulty != Difficulty.None && !CliDB.DifficultyStorage.HasRecord((uint)difficulty))
                     {
                         Log.outError(LogFilter.Sql, $"Serverside spell {spellId} effect index {effect.EffectIndex} references non-existing difficulty {difficulty}, skipped");
-                        continue;
-                    }
-
-                    if (effect.EffectIndex >= SpellConst.MaxEffects)
-                    {
-                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has more than {SpellConst.MaxEffects} effects, effect at index {effect.EffectIndex} skipped");
                         continue;
                     }
 
@@ -4800,7 +4805,7 @@ namespace Game.Entities
         List<ServersideSpellName> mServersideSpellNames = new();
         Dictionary<uint, Dictionary<Difficulty, SpellProcEntry>> mSpellProcMap = new();
         Dictionary<uint, SpellThreatEntry> mSpellThreatMap = new();
-        Dictionary<uint, PetAura> mSpellPetAuraMap = new();
+        Dictionary<uint, Dictionary<int, PetAura>> mSpellPetAuraMap = new();
         MultiMap<(SpellLinkedType, uint), int> mSpellLinkedMap = new();
         Dictionary<uint, SpellEnchantProcEntry> mSpellEnchantProcEventMap = new();
         MultiMap<uint, SpellArea> mSpellAreaMap = new();
@@ -4853,7 +4858,7 @@ namespace Game.Entities
         public SpellCategoriesRecord Categories;
         public SpellClassOptionsRecord ClassOptions;
         public SpellCooldownsRecord Cooldowns;
-        public SpellEffectRecord[] Effects = new SpellEffectRecord[SpellConst.MaxEffects];
+        public Dictionary<int, SpellEffectRecord> Effects = new();
         public SpellEquippedItemsRecord EquippedItems;
         public SpellInterruptsRecord Interrupts;
         public List<SpellLabelRecord> Labels = new();

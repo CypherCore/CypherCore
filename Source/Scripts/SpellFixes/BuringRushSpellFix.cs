@@ -19,7 +19,7 @@ namespace Scripts.SpellFixes
 
         public void ApplySpellFix(SpellInfo spellInfo)
         {
-            spellInfo.NegativeEffects = new BitSet(SpellConst.MaxEffects); // no negitive effects for burning rush
+            spellInfo.NegativeEffects = new BitSet(spellInfo.GetEffects().Count); // no negitive effects for burning rush
         }
     }
 }

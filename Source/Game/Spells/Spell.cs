@@ -22,6 +22,7 @@ using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IPlayer;
 using Game.Scripting.Interfaces.ISpell;
+using static Game.AI.SmartEvent;
 
 namespace Game.Spells
 {
@@ -98,11 +99,10 @@ namespace Game.Spells
             m_canReflect = caster.IsUnit() && m_spellInfo.DmgClass == SpellDmgClass.Magic && !m_spellInfo.HasAttribute(SpellAttr0.IsAbility)
                 && !m_spellInfo.HasAttribute(SpellAttr1.NoReflection) && !m_spellInfo.HasAttribute(SpellAttr0.NoImmunities)
                 && !m_spellInfo.IsPassive();
-
             CleanupTargetList();
 
-            for (var i = 0; i < SpellConst.MaxEffects; ++i)
-                m_destTargets[i] = new SpellDestination(m_caster);
+            foreach (var effect in m_spellInfo.GetEffects())
+                m_destTargets[effect.EffectIndex] = new SpellDestination(m_caster);
 
             m_targets = new SpellCastTargets();
             m_appliedMods = new List<Aura>();
@@ -2229,14 +2229,11 @@ namespace Game.Spells
                                     {
                                         int origDuration = hitInfo.AuraDuration;
                                         hitInfo.AuraDuration = 0;
-                                        foreach (AuraEffect auraEff in hitInfo.HitAura.GetAuraEffects())
+                                        foreach (var auraEff in hitInfo.HitAura.GetAuraEffects())
                                         {
-                                            if (auraEff != null)
-                                            {
-                                                int period = auraEff.GetPeriod();
+                                                int period = auraEff.Value.GetPeriod();
                                                 if (period != 0)  // period is hastened by UNIT_MOD_CAST_SPEED
                                                     hitInfo.AuraDuration = Math.Max(Math.Max(origDuration / period, 1) * period, hitInfo.AuraDuration);
-                                            }
                                         }
 
                                         // if there is no periodic effect
@@ -7432,14 +7429,14 @@ namespace Game.Spells
                 {
                     uint mask = 0;
                     if (se.EffectIndex == SpellConst.EffectAll || se.EffectIndex == SpellConst.EffectFirstFound)
-                    {
-                        for (byte i = 0; i < SpellConst.MaxEffects; ++i)
                         {
+                            foreach (var effInfo in m_spellInfo.GetEffects())
+                            {
                             if (se.EffectIndex == SpellConst.EffectFirstFound && mask != 0)
                                 break;
 
-                            if (CheckSpellEffectHandler(se, i))
-                                AddSpellEffect(i, script, se);
+                            if (CheckSpellEffectHandler(se, effInfo))
+                                AddSpellEffect(effInfo.EffectIndex, script, se);
                         }
                     }
                     else
@@ -7454,13 +7451,13 @@ namespace Game.Spells
                     uint mask = 0;
                     if (th.EffectIndex == SpellConst.EffectAll || th.EffectIndex == SpellConst.EffectFirstFound)
                     {
-                        for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+                        foreach (var effInfo in m_spellInfo.GetEffects())
                         {
                             if (th.EffectIndex == SpellConst.EffectFirstFound && mask != 0)
                                 break;
 
-                            if (CheckTargetHookEffect(th, i))
-                                AddSpellEffect(i, script, th);
+                            if (CheckTargetHookEffect(th, effInfo))
+                                AddSpellEffect(effInfo.EffectIndex, script, th);
                         }
                     }
                     else
@@ -7477,24 +7474,33 @@ namespace Game.Spells
                 return false;
 
             SpellEffectInfo spellEffectInfo = m_spellInfo.GetEffect(effIndex);
+            return CheckSpellEffectHandler(se, spellEffectInfo);
+        }
+
+        private bool CheckSpellEffectHandler(ISpellEffectHandler se, SpellEffectInfo spellEffectInfo)
+        {
             if (spellEffectInfo.Effect == 0 && se.EffectName == 0)
                 return true;
 
-                if (spellEffectInfo.Effect == 0)
-                    return false;
+            if (spellEffectInfo.Effect == 0)
+                return false;
 
             return se.EffectName == SpellEffectName.Any || spellEffectInfo.Effect == se.EffectName;
         }
 
         public bool CheckTargetHookEffect(ITargetHookHandler th, int effIndexToCheck)
         {
-            if (th.TargetType == 0)
-                return false;
-
             if (m_spellInfo.GetEffects().Count <= effIndexToCheck)
                 return false;
 
-            SpellEffectInfo spellEffectInfo = m_spellInfo.GetEffect(effIndexToCheck);
+            return CheckTargetHookEffect(th, m_spellInfo.GetEffect(effIndexToCheck));
+        }
+
+        public bool CheckTargetHookEffect(ITargetHookHandler th, SpellEffectInfo spellEffectInfo)
+        {
+            if (th.TargetType == 0)
+                return false;
+
             if (spellEffectInfo.TargetA.GetTarget() != th.TargetType && spellEffectInfo.TargetB.GetTarget() != th.TargetType)
                 return false;
 
@@ -8199,7 +8205,7 @@ namespace Game.Spells
         bool m_executedCurrently;
         internal bool m_needComboPoints;
         uint m_applyMultiplierMask;
-        float[] m_damageMultipliers = new float[SpellConst.MaxEffects];
+        Dictionary<int, float> m_damageMultipliers = new();
 
         // Current targets, to be used in SpellEffects (MUST BE USED ONLY IN SPELL EFFECTS)
         public Unit unitTarget;
@@ -8241,7 +8247,7 @@ namespace Game.Spells
         List<ItemTargetInfo> m_UniqueItemInfo = new();
         List<CorpseTargetInfo> m_UniqueCorpseTargetInfo = new();
 
-        SpellDestination[] m_destTargets = new SpellDestination[SpellConst.MaxEffects];
+        Dictionary<int, SpellDestination> m_destTargets = new();
 
         List<HitTriggerSpell> m_hitTriggerSpells = new();
 
@@ -8446,7 +8452,7 @@ namespace Game.Spells
         // info set at PreprocessTarget, used by DoTargetSpellHit
         public DiminishingGroup DRGroup;
         public int AuraDuration;
-        public int[] AuraBasePoints = new int[SpellConst.MaxEffects];
+        public Dictionary<int, int> AuraBasePoints = new();
         public bool Positive = true;
         public UnitAura HitAura;
 
@@ -8896,7 +8902,7 @@ namespace Game.Spells
             DurationMul = 1;
         }
 
-        public int[] EffectBasePoints = new int[SpellConst.MaxEffects];
+        public Dictionary<int, int> EffectBasePoints = new();
         public uint CustomBasePointsMask;
         public uint MaxAffectedTargets;
         public float RadiusMod;

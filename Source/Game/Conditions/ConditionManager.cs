@@ -714,11 +714,12 @@ namespace Game
                     if (commonMask != 0)
                     {
                         byte firstEffIndex = 0;
-                        for (; firstEffIndex < SpellConst.MaxEffects; ++firstEffIndex)
+                        int effectCount = spellInfo.GetEffects().Count;
+                        for (; firstEffIndex < effectCount; ++firstEffIndex)
                             if (((1 << firstEffIndex) & effectMask) != 0)
                                 break;
 
-                        if (firstEffIndex >= spellInfo.GetEffects().Count)
+                        if (firstEffIndex >= effectCount)
                             return;
 
                         // get shared data
@@ -741,7 +742,7 @@ namespace Game
                             // add new list, create new shared mask
                             sharedList = new List<Condition>();
                             bool assigned = false;
-                            for (int i = firstEffIndex; i < spellInfo.GetEffects().Count; ++i)
+                            for (int i = firstEffIndex; i < effectCount; ++i)
                             {
                                 if (((1 << i) & commonMask) != 0)
                                 {
@@ -1284,12 +1285,6 @@ namespace Game
                     if (!Global.SpellMgr.HasSpellInfo(cond.ConditionValue1, Difficulty.None))
                     {
                         Log.outDebug(LogFilter.Sql, "{0} has non existing spell (Id: {1}), skipped", cond.ToString(), cond.ConditionValue1);
-                        return false;
-                    }
-
-                    if (cond.ConditionValue2 >= SpellConst.MaxEffects)
-                    {
-                        Log.outDebug(LogFilter.Sql, $"{cond.ToString(true)} has non existing effect index ({cond.ConditionValue2}) (must be 0..{SpellConst.MaxEffects - 1}), skipped");
                         return false;
                     }
                     break;

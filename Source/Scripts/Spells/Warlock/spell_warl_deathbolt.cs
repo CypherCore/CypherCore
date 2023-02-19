@@ -36,12 +36,12 @@ namespace Scripts.Spells.Warlock
 					var effects = aura.Value.GetBase().GetAuraEffects();
 
 					foreach (var iter in effects)
-						if (iter.GetAuraType() == AuraType.PeriodicDamage)
+						if (iter.Value.GetAuraType() == AuraType.PeriodicDamage)
 						{
 							var valToUse = 0;
 
 							if (spell.Id == WarlockSpells.CORRUPTION_DOT)
-								valToUse = iter.GetRemainingAmount(GetSpellInfo().GetEffect(2).BasePoints * 1000);
+								valToUse = iter.Value.GetRemainingAmount(GetSpellInfo().GetEffect(2).BasePoints * 1000);
 
 							damage += valToUse * GetSpellInfo().GetEffect(1).BasePoints / 100;
 						}
