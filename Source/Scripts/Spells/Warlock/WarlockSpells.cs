@@ -91,8 +91,6 @@ namespace Scripts.Spells.Warlock
 		public const uint DRAIN_SOUL_ENERGIZE = 205292;
 		public const uint DREADSTALKER_CHARGE = 334713;
 		public const uint ERADICATION = 196412;
-		public const uint ERADICATION_AURA = 196412;
-		public const uint ERADICATION_DEBUF = 196414;
 		public const uint ERADICATION_DEBUFF = 196414;
 		public const uint ESSENCE_DRAIN = 221711;
 		public const uint ESSENCE_DRAIN_DEBUFF = 221715;

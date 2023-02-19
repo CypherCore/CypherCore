@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warlock
     {
         public void CalcCritChance(Unit victim, ref float chance)
         {
-            if(GetCaster()?.TryGetAura(WarlockSpells.SHADOWBURN, out var shadowburn) == true)
+            if (victim.TryGetAura(WarlockSpells.SHADOWBURN, out var shadowburn) == true && victim.HealthBelowPct(shadowburn.GetEffect(1).GetBaseAmount() + 5))
 				chance += shadowburn.GetEffect(2).GetBaseAmount();
         }
 
@@ -24,7 +24,14 @@ namespace Scripts.Spells.Warlock
             if (caster == null || target == null)
                 return;
 
+            Eradication(caster, target);
             ConflagrationOfChaos(caster, target);
+        }
+
+        private void Eradication(Unit caster, Unit target)
+        {
+            if (caster.TryGetAura(WarlockSpells.ERADICATION, out var err))
+                caster.CastSpell(target, WarlockSpells.ERADICATION_DEBUFF, err.GetEffect(1).GetBaseAmount(), true);
         }
 
         private void ConflagrationOfChaos(Unit caster, Unit target)

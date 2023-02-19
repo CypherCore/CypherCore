@@ -50,8 +50,15 @@ namespace Scripts.Spells.Warlock
             if (target == null)
                 return;
 
+            Eradication(p, target);
             InternalCombustion(p, target);
             CryHavoc(p, target);
+        }
+
+        private void Eradication(Unit caster, Unit target)
+        {
+            if (caster.HasAura(WarlockSpells.ERADICATION))
+                caster.CastSpell(target, WarlockSpells.ERADICATION_DEBUFF, true);
         }
 
         private void CryHavoc(Player p, Unit target)
