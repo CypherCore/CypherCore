@@ -5939,8 +5939,7 @@ namespace Game.Spells
                 return;
 
             // Refresh applications
-            foreach (Aura aura in aurApp.GetTarget().GetAuraQuery().HasLabel((uint)GetMiscValue()).GetResults())
-                aura.ApplyForTargets();
+            aurApp.GetTarget().GetAuraQuery().HasLabel((uint)GetMiscValue()).ForEachResult(aura => aura.ApplyForTargets());
         }
 
         [AuraEffectHandler(AuraType.ForceBeathBar)]

@@ -961,12 +961,8 @@ namespace Game.Entities
             trans.Append(stmt);
 
             byte index;
-            foreach (var aura in GetAuraQuery().CanBeSaved().GetResults())
+            foreach (var aura in GetAuraQuery().CanBeSaved().AlsoMatches(a => !IsPetAura(a)).GetResults())
             {
-                // check if the aura has to be saved
-                if (IsPetAura(aura))
-                    continue;
-
                 uint recalculateMask;
                 AuraKey key = aura.GenerateKey(out recalculateMask);
 

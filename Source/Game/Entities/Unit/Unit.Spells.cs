@@ -1949,19 +1949,16 @@ namespace Game.Entities
 
         public void DelayOwnedAuras(uint spellId, ObjectGuid caster, int delaytime)
         {
-            var range = m_ownedAuras.Query().HasSpellId(spellId).GetResults();
+            var range = m_ownedAuras.Query().HasSpellId(spellId).HasCasterGuid(caster).GetResults();
             foreach (var aura in range)
             {
-                if (caster.IsEmpty() || aura.GetCasterGUID() == caster)
-                {
-                    if (aura.GetDuration() < delaytime)
-                        aura.SetDuration(0);
-                    else
-                        aura.SetDuration(aura.GetDuration() - delaytime);
+                if (aura.GetDuration() < delaytime)
+                    aura.SetDuration(0);
+                else
+                    aura.SetDuration(aura.GetDuration() - delaytime);
 
-                    // update for out of range group members (on 1 slot use)
-                    aura.SetNeedClientUpdateForTargets();
-                }
+                // update for out of range group members (on 1 slot use)
+                aura.SetNeedClientUpdateForTargets();
             }
         }
 
@@ -2835,15 +2832,10 @@ namespace Game.Entities
         {
             List<DispelableAura> dispelList = new();
 
-
-            foreach (var aura in m_ownedAuras.Auras)
+            foreach (var aura in m_ownedAuras.Query().IsPassive().GetResults())
             {
                 AuraApplication aurApp = aura.GetApplicationOfTarget(GetGUID());
                 if (aurApp == null)
-                    continue;
-
-                // don't try to remove passive auras
-                if (aura.IsPassive())
                     continue;
 
                 if (Convert.ToBoolean(aura.GetSpellInfo().GetDispelMask() & dispelMask))
