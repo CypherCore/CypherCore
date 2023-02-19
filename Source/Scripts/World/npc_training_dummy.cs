@@ -167,6 +167,7 @@ namespace Scripts.World.NpcSpecial
             creature.SetControlled(true, UnitState.Stunned);
             creature.SetControlled(true, UnitState.Root);
             creature.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.KnockBack, true);
+            creature.SetUnitFlag3(UnitFlags3.UnconsciousOnDeath);
         }
 
         public override void JustEnteredCombat(Unit who)
@@ -176,10 +177,7 @@ namespace Scripts.World.NpcSpecial
 
         public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
-            damage = 0;
-
-            if (!attacker ||
-                damageType == DamageEffectType.DOT)
+            if (!attacker)
                 return;
 
             _combatTimer[attacker.GetGUID()] = TimeSpan.FromSeconds(15);

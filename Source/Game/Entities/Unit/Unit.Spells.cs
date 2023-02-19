@@ -2090,7 +2090,7 @@ namespace Game.Entities
 
             // Call default DealDamage
             CleanDamage cleanDamage = new(damageInfo.cleanDamage, damageInfo.absorb, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
-            DealDamage(this, victim, damageInfo.damage, cleanDamage, DamageEffectType.SpellDirect, damageInfo.schoolMask, damageInfo.Spell, durabilityLoss);
+            damageInfo.damage = DealDamage(this, victim, damageInfo.damage, cleanDamage, DamageEffectType.SpellDirect, damageInfo.schoolMask, damageInfo.Spell, durabilityLoss);
         }
 
         public void SendSpellNonMeleeDamageLog(SpellNonMeleeDamage log)

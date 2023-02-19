@@ -55,22 +55,15 @@ namespace Game.Scripting
                 if (!existing)
                 {
                     lock (_scriptMap)
-                    {
                         _scriptMap[id] = script;
-                    }
 
                     Global.ScriptMgr.IncrementScriptCount();
-                }
-                else
-                {
-                    // If the script is already assigned . delete it!
-                    Log.outWarn(LogFilter.Scripts, "Script '{0}' already assigned with the same script Name, so the script can't work.", script.GetName());
                 }
             }
             else
             {
                 // The script uses a script Name from database, but isn't assigned to anything.
-                Log.outWarn(LogFilter.Sql, "Script named '{0}' does not have a script Name assigned in database.", script.GetName());
+                Log.outError(LogFilter.ServerLoading, "Script named '{0}' does not have a script Name assigned in database.", script.GetName());
             }
         }
 

@@ -287,7 +287,7 @@ namespace Game.Chat
             // flat melee damage without resistence/etc reduction
             if (string.IsNullOrEmpty(schoolStr))
             {
-                Unit.DealDamage(attacker, target, damage_, null, DamageEffectType.Direct, SpellSchoolMask.Normal, null, false);
+                damage_ = Unit.DealDamage(attacker, target, damage_, null, DamageEffectType.Direct, SpellSchoolMask.Normal, null, false);
                 if (target != attacker)
                     attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, SpellSchoolMask.Normal, damage_, 0, 0, VictimState.Hit, 0);
                 return true;
@@ -317,7 +317,7 @@ namespace Game.Chat
                 uint absorb = dmgInfo.GetAbsorb();
                 uint resist = dmgInfo.GetResist();
                 Unit.DealDamageMods(attacker, target, ref damage_, ref absorb);
-                Unit.DealDamage(attacker, target, damage_, null, DamageEffectType.Direct, schoolmask, null, false);
+                damage_ = Unit.DealDamage(attacker, target, damage_, null, DamageEffectType.Direct, schoolmask, null, false);
                 attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, schoolmask, damage_, absorb, resist, VictimState.Hit, 0);
                 return true;
             }

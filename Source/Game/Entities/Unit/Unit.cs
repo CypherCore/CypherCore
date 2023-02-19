@@ -2547,7 +2547,7 @@ namespace Game.Entities
                 attacker?.GetAI()?.DamageDealt(victim, ref tmpDamage, damagetype);
 
                 // Hook for OnDamage Event
-                Global.ScriptMgr.ForEach<IUnitOnDamage>(p => p.OnDamage(attacker, victim, ref damage));
+                Global.ScriptMgr.ForEach<IUnitOnDamage>(p => p.OnDamage(attacker, victim, ref tmpDamage));
 
                 // if any script modified damage, we need to also apply the same modification to unscaled damage value
                 if (tmpDamage != damageTaken)
@@ -2898,7 +2898,7 @@ namespace Game.Entities
             if (victim.IsPlayer())
             {
                 player = victim.ToPlayer();
-                ScriptManager.Instance.ForEach<IPlayerOnTakeDamage>(player.GetClass(), a => a.OnPlayerTakeDamage(player, damage, damageSchoolMask));
+                ScriptManager.Instance.ForEach<IPlayerOnTakeDamage>(player.GetClass(), a => a.OnPlayerTakeDamage(player, damageTaken, damageSchoolMask));
             }
 
             // make player victims stand up automatically
@@ -2906,9 +2906,9 @@ namespace Game.Entities
                 victim.SetStandState(UnitStandStateType.Stand);
 
             if (player != null && player.GetPrimarySpecialization() == TalentSpecialization.DruidBear)
-                    victim.SaveDamageHistory(damage);
+                    victim.SaveDamageHistory(damageTaken);
 
-            return damage;
+            return damageTaken;
         }
 
         void DealMeleeDamage(CalcDamageInfo damageInfo, bool durabilityLoss)
@@ -2953,7 +2953,7 @@ namespace Game.Entities
 
             // Call default DealDamage
             CleanDamage cleanDamage = new(damageInfo.CleanDamage, damageInfo.Absorb, damageInfo.AttackType, damageInfo.HitOutCome);
-            DealDamage(this, victim, damageInfo.Damage, cleanDamage, DamageEffectType.Direct, (SpellSchoolMask)damageInfo.DamageSchoolMask, null, durabilityLoss);
+            damageInfo.Damage = DealDamage(this, victim, damageInfo.Damage, cleanDamage, DamageEffectType.Direct, (SpellSchoolMask)damageInfo.DamageSchoolMask, null, durabilityLoss);
 
             // If this is a creature and it attacks from behind it has a probability to daze it's victim
             if ((damageInfo.HitOutCome == MeleeHitOutcome.Crit || damageInfo.HitOutCome == MeleeHitOutcome.Crushing || damageInfo.HitOutCome == MeleeHitOutcome.Normal || damageInfo.HitOutCome == MeleeHitOutcome.Glancing) &&
@@ -3712,7 +3712,7 @@ namespace Game.Entities
 
                     SpellNonMeleeDamage log = new(damageInfo.GetAttacker(), caster, itr.GetSpellInfo(), itr.GetBase().GetSpellVisual(), damageInfo.GetSchoolMask(), itr.GetBase().GetCastId());
                     CleanDamage cleanDamage = new(splitDamage, 0, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
-                    DealDamage(damageInfo.GetAttacker(), caster, splitDamage, cleanDamage, DamageEffectType.Direct, damageInfo.GetSchoolMask(), itr.GetSpellInfo(), false);
+                    splitDamage = DealDamage(damageInfo.GetAttacker(), caster, splitDamage, cleanDamage, DamageEffectType.Direct, damageInfo.GetSchoolMask(), itr.GetSpellInfo(), false);
                     log.damage = splitDamage;
                     log.originalDamage = splitDamage;
                     log.absorb = split_absorb;
