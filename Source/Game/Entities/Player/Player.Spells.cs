@@ -1705,10 +1705,8 @@ namespace Game.Entities
 
         void RemoveItemDependentAurasAndCasts(Item pItem)
         {
-            GetOwnedAuras().CallOnMatch((pair) =>
+            GetOwnedAurasList().CallOnMatch((aura) =>
             {
-                Aura aura = pair.Value;
-
                 // skip not self applied auras
                 SpellInfo spellInfo = aura.GetSpellInfo();
                 if (aura.GetCasterGUID() != GetGUID())
@@ -1986,8 +1984,8 @@ namespace Game.Entities
         {
             // remove auras from spells with area limitations
             // use m_zoneUpdateId for speed: UpdateArea called from UpdateZone or instead UpdateZone in both cases m_zoneUpdateId up-to-date
-            GetOwnedAuras().CallOnMatch((pair) => pair.Value.GetSpellInfo().CheckLocation(GetMapId(), m_zoneUpdateId, newArea, this) != SpellCastResult.SpellCastOk,
-                                        (pair) => RemoveOwnedAura(pair));
+            GetOwnedAurasList().CallOnMatch((aura) => aura.GetSpellInfo().CheckLocation(GetMapId(), m_zoneUpdateId, newArea, this) != SpellCastResult.SpellCastOk,
+                                        (pair) => RemoveOwnedAura(pair.GetSpellInfo().Id, pair));
 
             // some auras applied at subzone enter
             var saBounds = Global.SpellMgr.GetSpellAreaForAreaMapBounds(newArea);

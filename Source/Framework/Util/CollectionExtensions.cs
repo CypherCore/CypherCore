@@ -442,6 +442,17 @@ namespace System.Collections.Generic
             return matches;
         }
 
+        public static void CallOnMatch<T>(this List<T> list, Func<T, bool> pred, Action<T> action)
+        {
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+                var item = list[i];
+                if (pred(item))
+                    action(item);
+            }
+
+        }
+
         /// <summary>
         ///     Calls the action for each matching pred. Allows the action to be safely modify this map without getting enumeration exceptions
         /// </summary>

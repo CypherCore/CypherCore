@@ -3820,10 +3820,8 @@ namespace Game.Spells
 
             List<KeyValuePair<uint, ObjectGuid>> dispel_list = new();
 
-            var auras = unitTarget.GetOwnedAuras();
-            foreach (var pair in auras.KeyValueList)
+            foreach (var aura in unitTarget.GetOwnedAurasList())
             {
-                Aura aura = pair.Value;
                 if (aura.GetApplicationOfTarget(unitTarget.GetGUID()) == null)
                     continue;
 
@@ -4263,11 +4261,11 @@ namespace Game.Spells
 
             // Create dispel mask by dispel type
             uint dispelMask = SpellInfo.GetDispelMask((DispelType)effectInfo.MiscValue);
-            var auras = unitTarget.GetOwnedAuras();
-            foreach (var map in auras.KeyValueList)
+    
+            foreach (var aura in unitTarget.GetOwnedAurasList())
             {
-                Aura aura = map.Value;
                 AuraApplication aurApp = aura.GetApplicationOfTarget(unitTarget.GetGUID());
+
                 if (aurApp == null)
                     continue;
 

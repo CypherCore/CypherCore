@@ -838,9 +838,9 @@ namespace Game.Spells
         public int GetBaseAmount() { return m_baseAmount; }
         public int GetPeriod() { return _period; }
 
-        public int GetMiscValueB() { return GetSpellEffectInfo().MiscValueB; }
-        public int GetMiscValue() { return GetSpellEffectInfo().MiscValue; }
-        public AuraType GetAuraType() { return GetSpellEffectInfo().ApplyAuraName; }
+        public int GetMiscValueB() { return _effectInfo.MiscValueB; }
+        public int GetMiscValue() { return _effectInfo.MiscValue; }
+        public AuraType GetAuraType() { return _effectInfo.ApplyAuraName; }
         public int GetAmount() { return _amount; }
         public bool HasAmount() { return _amount != 0; }
         public void SetAmount(float amount) { SetAmount((int)amount); }
@@ -5938,13 +5938,8 @@ namespace Game.Spells
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
-            List<Aura> suppressedAuras = new();
-            foreach (var appliedAura in aurApp.GetTarget().GetOwnedAuras().KeyValueList)
-                if (appliedAura.Value.GetSpellInfo().HasLabel((uint)GetMiscValue()))
-                    suppressedAuras.Add(appliedAura.Value);
-
             // Refresh applications
-            foreach (Aura aura in suppressedAuras)
+            foreach (Aura aura in aurApp.GetTarget().GetAuraQuery().HasLabel((uint)GetMiscValue()).GetResults())
                 aura.ApplyForTargets();
         }
 

@@ -330,6 +330,7 @@ namespace Game.Spells
     public class Aura
     {
         const int UPDATE_TARGET_MAP_INTERVAL = 500;
+        public Guid Guid { get; } = Guid.NewGuid();
 
         public Aura(AuraCreateInfo createInfo)
         {
@@ -1166,7 +1167,7 @@ namespace Game.Spells
         public bool HasEffectType(AuraType type)
         {
             foreach (var eff in GetAuraEffects())
-                if (eff != null && HasEffect(eff.GetEffIndex()) && eff.GetAuraType() == type)
+                if (eff != null && eff.GetAuraType() == type)
                     return true;
 
             return false;

@@ -64,7 +64,7 @@ public class spell_dh_reverse_magic : SpellScript, ISpellOnCast
 						continue;
 				}
 
-				var targetAura = unit.AddAura(aura.GetSpellInfo().Id, caster);
+				var targetAura = unit.AddAura(aura.GetId(), caster);
 
 				if (targetAura != null)
 				{
@@ -75,7 +75,7 @@ public class spell_dh_reverse_magic : SpellScript, ISpellOnCast
 
 						if (targetAura.GetEffect(i) != null && aura.GetEffect(i) != null)
 						{
-							var auraEffect = unit.GetAuraEffect(aura.GetSpellInfo().Id, i);
+							var auraEffect = unit.GetAuraEffect(aura.GetId(), i);
 
 							if (auraEffect == null)
 								continue;
@@ -94,7 +94,7 @@ public class spell_dh_reverse_magic : SpellScript, ISpellOnCast
 					targetAura.SetNeedClientUpdateForTargets();
 				}
 
-				auraListToRemove.Add(new auraData(aura.GetSpellInfo().Id, caster.GetGUID()));
+				auraListToRemove.Add(new auraData(aura.GetId(), caster.GetGUID()));
 			}
 
 			foreach (var aura in auraListToRemove)

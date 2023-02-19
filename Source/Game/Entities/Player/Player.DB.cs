@@ -1896,12 +1896,8 @@ namespace Game.Entities
             trans.Append(stmt);
 
             byte index;
-            foreach (var pair in GetOwnedAuras().KeyValueList)
+            foreach (var aura in GetAuraQuery().CanBeSaved().GetResults())
             {
-                Aura aura = pair.Value;
-                if (!aura.CanBeSaved())
-                    continue;
-
                 uint recalculateMask;
                 AuraKey key = aura.GenerateKey(out recalculateMask);
 

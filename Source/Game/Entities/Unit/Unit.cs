@@ -219,21 +219,26 @@ namespace Game.Entities
                 }
             }
 
-            foreach (var app in GetOwnedAuras().KeyValueList)
+            List<Aura> toRemove = new();
+            foreach (var aura in m_ownedAuras.Auras)
             {
-                Aura i_aura = app.Value;
-                if (i_aura == null)
+                if (aura == null)
                     continue;
 
-                i_aura.UpdateOwner(diff, this);
+                aura.UpdateOwner(diff, this);
+
+                if (aura.IsExpired())
+                    toRemove.Add(aura);
+
+                if (aura.GetSpellInfo().IsChanneled() &&
+                    aura.GetCasterGUID() != GetGUID() && 
+                    !Global.ObjAccessor.GetWorldObject(this, aura.GetCasterGUID()))
+                    toRemove.Add(aura);
             }
 
             // remove expired auras - do that after updates(used in scripts?)
-            //GetOwnedAuras().CallOnMatch((pair) => (pair.Value != null && pair.Value.IsExpired()) || // it expired
-            //                                      (pair.Value.GetSpellInfo().IsChanneled() && pair.Value.GetCasterGUID() != GetGUID() && !Global.ObjAccessor.GetWorldObject(this, pair.Value.GetCasterGUID())), // OR object no longer in same map
-            //                                      (pair) => RemoveOwnedAura(pair, AuraRemoveMode.Expire)); // then remove.
-
-            GetOwnedAuras().CallOnMatch((pair) => pair.Value != null && pair.Value.IsExpired(), (pair) => RemoveOwnedAura(pair, AuraRemoveMode.Expire));
+            foreach (var pair in toRemove)
+                RemoveOwnedAura(pair, AuraRemoveMode.Expire);
 
             foreach (var aura in m_visibleAurasToUpdate.ToArray())
                 aura.ClientUpdate();
