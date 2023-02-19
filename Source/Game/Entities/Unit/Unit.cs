@@ -2410,16 +2410,33 @@ namespace Game.Entities
 
         public static uint DealDamage(Unit attacker, Unit victim, uint damage, CleanDamage cleanDamage = null, DamageEffectType damagetype = DamageEffectType.Direct, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal, SpellInfo spellProto = null, bool durabilityLoss = true)
         {
-            UnitAI victimAI = victim.GetAI();
-            if (victimAI != null)
-                victimAI.DamageTaken(attacker, ref damage, damagetype, spellProto);
+            uint damageDone = damage;
+            uint damageTaken = damage;
+            if (attacker != null)
+                damageTaken = (uint)(damage / victim.GetHealthMultiplierForTarget(attacker));
 
-            UnitAI attackerAI = attacker ? attacker.GetAI() : null;
-            if (attackerAI != null)
-                attackerAI.DamageDealt(victim, ref damage, damagetype);
+            // call script hooks
+            {
+                uint tmpDamage = damageTaken;
 
-            // Hook for OnDamage Event
-            Global.ScriptMgr.OnDamage(attacker, victim, ref damage);
+                victim.GetAI()?.DamageTaken(attacker, ref tmpDamage, damagetype, spellProto);
+
+                attacker?.GetAI()?.DamageDealt(victim, ref tmpDamage, damagetype);
+
+                // Hook for OnDamage Event
+                Global.ScriptMgr.OnDamage(attacker, victim, ref tmpDamage);
+
+                // if any script modified damage, we need to also apply the same modification to unscaled damage value
+                if (tmpDamage != damageTaken)
+                {
+                    if (attacker)
+                        damageDone = (uint)(tmpDamage * victim.GetHealthMultiplierForTarget(attacker));
+                    else
+                        damageDone = tmpDamage;
+
+                    damageTaken = tmpDamage;
+                }
+            }
 
             // Signal to pets that their owner was attacked - except when DOT.
             if (attacker != victim && damagetype != DamageEffectType.DOT)
@@ -2451,7 +2468,7 @@ namespace Game.Entities
                 else
                     victim.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Damage);
 
-                if (damage == 0 && damagetype != DamageEffectType.DOT && cleanDamage != null && cleanDamage.absorbed_damage != 0)
+                if (damageTaken == 0 && damagetype != DamageEffectType.DOT && cleanDamage != null && cleanDamage.absorbed_damage != 0)
                 {
                     if (victim != attacker && victim.IsPlayer())
                     {
@@ -2482,7 +2499,7 @@ namespace Game.Entities
 
                     SpellInfo spell = aura.GetSpellInfo();
 
-                    uint share = MathFunctions.CalculatePct(damage, aura.GetAmount());
+                    uint share = MathFunctions.CalculatePct(damageDone, aura.GetAmount());
 
                     // @todo check packets if damage is done by victim, or by attacker of victim
                     DealDamageMods(attacker, shareDamageTarget, ref share);
@@ -2500,7 +2517,7 @@ namespace Game.Entities
                 attacker.RewardRage(rage);
             }
 
-            if (damage == 0)
+            if (damageDone == 0)
                 return 0;
 
             uint health = (uint)victim.GetHealth();
@@ -2508,18 +2525,18 @@ namespace Game.Entities
             // duel ends when player has 1 or less hp
             bool duel_hasEnded = false;
             bool duel_wasMounted = false;
-            if (victim.IsPlayer() && victim.ToPlayer().duel != null && damage >= (health - 1))
+            if (victim.IsPlayer() && victim.ToPlayer().duel != null && damageTaken >= (health - 1))
             {
                 if (!attacker)
                     return 0;
 
                 // prevent kill only if killed in duel and killed by opponent or opponent controlled creature
                 if (victim.ToPlayer().duel.Opponent == attacker.GetControllingPlayer())
-                    damage = health - 1;
+                    damageTaken = health - 1;
 
                 duel_hasEnded = true;
             }
-            else if (victim.IsVehicle() && damage >= (health - 1) && victim.GetCharmer() != null && victim.GetCharmer().IsTypeId(TypeId.Player))
+            else if (victim.IsVehicle() && damageTaken >= (health - 1) && victim.GetCharmer() != null && victim.GetCharmer().IsTypeId(TypeId.Player))
             {
                 Player victimRider = victim.GetCharmer().ToPlayer();
                 if (victimRider != null && victimRider.duel != null && victimRider.duel.IsMounted)
@@ -2529,7 +2546,7 @@ namespace Game.Entities
 
                     // prevent kill only if killed in duel and killed by opponent or opponent controlled creature
                     if (victimRider.duel.Opponent == attacker.GetControllingPlayer())
-                        damage = health - 1;
+                        damageTaken = health - 1;
 
                     duel_wasMounted = true;
                     duel_hasEnded = true;
@@ -2546,32 +2563,29 @@ namespace Game.Entities
                     {
                         Battleground bg = killer.GetBattleground();
                         if (bg != null)
-                            bg.UpdatePlayerScore(killer, ScoreType.DamageDone, damage);
+                            bg.UpdatePlayerScore(killer, ScoreType.DamageDone, damageDone);
                     }
 
-                    killer.UpdateCriteria(CriteriaType.DamageDealt, health > damage ? damage : health, 0, 0, victim);
-                    killer.UpdateCriteria(CriteriaType.HighestDamageDone, damage);
+                    killer.UpdateCriteria(CriteriaType.DamageDealt, health > damageDone ? damageDone : health, 0, 0, victim);
+                    killer.UpdateCriteria(CriteriaType.HighestDamageDone, damageDone);
                 }
             }
 
             if (victim.IsPlayer())
-                victim.ToPlayer().UpdateCriteria(CriteriaType.HighestDamageTaken, damage);
-
-            if (attacker != null)
-                damage = (uint)(damage / victim.GetHealthMultiplierForTarget(attacker));
+                victim.ToPlayer().UpdateCriteria(CriteriaType.HighestDamageTaken, damageTaken);
 
             if (victim.GetTypeId() != TypeId.Player && (!victim.IsControlledByPlayer() || victim.IsVehicle()))
             {
                 victim.ToCreature().SetTappedBy(attacker);
 
                 if (attacker == null || attacker.IsControlledByPlayer())
-                    victim.ToCreature().LowerPlayerDamageReq(health < damage ? health : damage);
+                    victim.ToCreature().LowerPlayerDamageReq(health < damageTaken ? health : damageTaken);
             }
 
             bool killed = false;
             bool skipSettingDeathState = false;
 
-            if (health <= damage)
+            if (health <= damageTaken)
             {
                 killed = true;
 
@@ -2581,7 +2595,7 @@ namespace Game.Entities
                 if (damagetype != DamageEffectType.NoDamage && damagetype != DamageEffectType.Self && victim.HasAuraType(AuraType.SchoolAbsorbOverkill))
                 {
                     var vAbsorbOverkill = victim.GetAuraEffectsByType(AuraType.SchoolAbsorbOverkill);
-                    DamageInfo damageInfo = new(attacker, victim, damage, spellProto, damageSchoolMask, damagetype, cleanDamage != null ? cleanDamage.attackType : WeaponAttackType.BaseAttack);
+                    DamageInfo damageInfo = new(attacker, victim, damageTaken, spellProto, damageSchoolMask, damagetype, cleanDamage != null ? cleanDamage.attackType : WeaponAttackType.BaseAttack);
 
                     foreach (var absorbAurEff in vAbsorbOverkill)
                     {
@@ -2594,7 +2608,7 @@ namespace Game.Entities
                             continue;
 
                         // cannot absorb over limit
-                        if (damage >= victim.CountPctFromMaxHealth(100 + absorbAurEff.GetMiscValueB()))
+                        if (damageTaken >= victim.CountPctFromMaxHealth(100 + absorbAurEff.GetMiscValueB()))
                             continue;
 
                         // get amount which can be still absorbed by the aura
@@ -2636,7 +2650,7 @@ namespace Game.Entities
                         }
                     }
 
-                    damage = damageInfo.GetDamage();
+                    damageTaken = damageInfo.GetDamage();
                 }
             }
 
@@ -2648,9 +2662,9 @@ namespace Game.Entities
             else
             {
                 if (victim.IsTypeId(TypeId.Player))
-                    victim.ToPlayer().UpdateCriteria(CriteriaType.TotalDamageTaken, damage);
+                    victim.ToPlayer().UpdateCriteria(CriteriaType.TotalDamageTaken, damageTaken);
 
-                victim.ModifyHealth(-(int)damage);
+                victim.ModifyHealth(-(int)damageTaken);
 
                 if (damagetype == DamageEffectType.Direct || damagetype == DamageEffectType.SpellDirect)
                     victim.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.NonPeriodicDamage, spellProto);
@@ -2658,11 +2672,11 @@ namespace Game.Entities
                 if (!victim.IsTypeId(TypeId.Player))
                 {
                     // Part of Evade mechanics. DoT's and Thorns / Retribution Aura do not contribute to this
-                    if (damagetype != DamageEffectType.DOT && damage > 0 && !victim.GetOwnerGUID().IsPlayer() && (spellProto == null || !spellProto.HasAura(AuraType.DamageShield)))
+                    if (damagetype != DamageEffectType.DOT && damageTaken > 0 && !victim.GetOwnerGUID().IsPlayer() && (spellProto == null || !spellProto.HasAura(AuraType.DamageShield)))
                         victim.ToCreature().SetLastDamagedTime(GameTime.GetGameTime() + SharedConst.MaxAggroResetTime);
 
                     if (attacker != null && (spellProto == null || !spellProto.HasAttribute(SpellAttr4.NoHarmfulThreat)))
-                        victim.GetThreatManager().AddThreat(attacker, damage, spellProto);
+                        victim.GetThreatManager().AddThreat(attacker, damageTaken, spellProto);
                 }
                 else                                                // victim is a player
                 {
@@ -2695,7 +2709,7 @@ namespace Game.Entities
                             {
                                 bool isCastInterrupted()
                                 {
-                                    if (damage == 0)
+                                    if (damageTaken == 0)
                                         return spell.m_spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.ZeroDamageCancels);
 
                                     if (victim.IsPlayer() && spell.m_spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.DamageCancelsPlayerOnly))
@@ -2709,7 +2723,7 @@ namespace Game.Entities
 
                                 bool isCastDelayed()
                                 {
-                                    if (damage == 0)
+                                    if (damageTaken == 0)
                                         return false;
 
                                     if (victim.IsPlayer() && spell.m_spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.DamagePushbackPlayerOnly))
@@ -2729,7 +2743,7 @@ namespace Game.Entities
                         }
                     }
 
-                    if (damage != 0 && victim.IsPlayer())
+                    if (damageTaken != 0 && victim.IsPlayer())
                     {
                         Spell spell1 = victim.GetCurrentSpell(CurrentSpellTypes.Channeled);
                         if (spell1 != null)
@@ -2762,7 +2776,7 @@ namespace Game.Entities
             if (victim.GetStandState() != 0 && victim.IsPlayer())
                 victim.SetStandState(UnitStandStateType.Stand);
 
-            return damage;
+            return damageTaken;
         }
 
         void DealMeleeDamage(CalcDamageInfo damageInfo, bool durabilityLoss)
