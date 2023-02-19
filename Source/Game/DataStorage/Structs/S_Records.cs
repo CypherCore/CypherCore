@@ -190,15 +190,6 @@ namespace Game.DataStorage
         public string TextureFilename;
     }
 
-    public sealed class SpellKeyboundOverrideRecord
-    {
-        public uint ID;
-        public string Function;
-        public sbyte Type;
-        public uint Data;
-        public uint Flags;
-    }
-
     public sealed class SpellAuraOptionsRecord
     {
         public uint Id;
@@ -413,6 +404,15 @@ namespace Game.DataStorage
         public byte[] RtOperandType = new byte[5];
         public byte[] RtOperand = new byte[5];
         public byte[] Logic = new byte[5];
+    }
+
+    public sealed class SpellKeyboundOverrideRecord
+    {
+        public uint Id;
+        public string Function;
+        public sbyte Type;
+        public uint Data;
+        public int Flags;
     }
 
     public sealed class SpellLabelRecord

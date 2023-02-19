@@ -427,6 +427,13 @@ namespace Game
                 Environment.Exit(1);
             }
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading GameObject models...");
+            if (!GameObjectModel.LoadGameObjectModelList())
+            {
+                Log.outFatal(LogFilter.ServerLoading, "Unable to load gameobject models (part of vmaps), objects using WMO models will crash the client - server shutting down!");
+                Environment.Exit(1);
+            }
+
             Log.outInfo(LogFilter.ServerLoading, "Loading hotfix blobs...");
             Global.DB2Mgr.LoadHotfixBlob(m_availableDbcLocaleMask);
 
@@ -500,13 +507,6 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading languages words...");
             Global.LanguageMgr.LoadLanguagesWords();
-
-            Log.outInfo(LogFilter.ServerLoading, "Loading GameObject models...");
-            if (!GameObjectModel.LoadGameObjectModelList())
-            {
-                Log.outFatal(LogFilter.ServerLoading, "Unable to load gameobject models, objects using WMO models will crash the client - server shutting down!");                
-                Environment.Exit(1);
-            }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Instance Template...");
             Global.ObjectMgr.LoadInstanceTemplate();

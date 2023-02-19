@@ -1158,6 +1158,18 @@ namespace Game.Networking.Packets
             IsFavorite = _worldPacket.HasBit();
         }
     }
+
+    class KeyboundOverride : ClientPacket
+    {
+        public KeyboundOverride(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            OverrideID = _worldPacket.ReadUInt16();
+        }
+
+        public ushort OverrideID;
+    }
     
     //Structs
     public struct SpellLogPowerData
@@ -1230,18 +1242,6 @@ namespace Game.Networking.Packets
         int SpellPower;
         uint Armor;
         List<SpellLogPowerData> PowerData = new();
-    }
-
-    class KeyboundOverride : ClientPacket
-    {
-        public KeyboundOverride(WorldPacket packet) : base(packet) { }
-
-        public override void Read()
-        {
-            OverrideID = _worldPacket.ReadUInt16();
-        }
-
-        public ushort OverrideID;
     }
 
     class ContentTuningParams

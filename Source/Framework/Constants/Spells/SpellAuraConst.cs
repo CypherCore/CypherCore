@@ -413,7 +413,7 @@ namespace Framework.Constants
         OverrideSpellVisual = 403,
         OverrideAttackPowerBySpPct = 404,
         ModRatingPct = 405,
-        KeyboundOverride = 406,  // NYI
+        KeyboundOverride = 406,
         ModFear2 = 407,
         SetActionButtonSpellCount = 408,
         CanTurnWhileFalling = 409,
