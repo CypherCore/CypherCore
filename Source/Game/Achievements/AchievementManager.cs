@@ -767,7 +767,7 @@ namespace Game.Achievements
 
                     CompletedAchievementData ca = _completedAchievements[achievementid];
                     ca.Date = achievementResult.Read<long>(1);
-                    var guids = new StringArray(achievementResult.Read<string>(2), ' ');
+                    var guids = new StringArray(achievementResult.Read<string>(2), ',');
                     if (!guids.IsEmpty())
                     {
                         for (int i = 0; i < guids.Length; ++i)
