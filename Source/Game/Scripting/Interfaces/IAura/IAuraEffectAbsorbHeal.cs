@@ -19,7 +19,7 @@ namespace Game.Scripting.Interfaces.IAura
 
         private readonly AuraEffectAbsorbHealDelegate _fn;
 
-        public AuraEffectAbsorbHealHandler(AuraEffectAbsorbHealDelegate fn, uint effectIndex, AuraType auraType, AuraScriptHookType hookType) : base(effectIndex, auraType, hookType)
+        public AuraEffectAbsorbHealHandler(AuraEffectAbsorbHealDelegate fn, int effectIndex, AuraType auraType, AuraScriptHookType hookType) : base(effectIndex, auraType, hookType)
         {
             _fn = fn;
 

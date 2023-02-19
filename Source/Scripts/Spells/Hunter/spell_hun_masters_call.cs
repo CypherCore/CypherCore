@@ -69,12 +69,12 @@ internal class spell_hun_masters_call : SpellScript, ISpellCheckCast, IHasSpellE
 
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		GetCaster().ToPlayer().GetPet().CastSpell(GetHitUnit(), (uint)GetEffectValue(), true);
 	}
 
-	private void HandleScriptEffect(uint effIndex)
+	private void HandleScriptEffect(int effIndex)
 	{
 		GetHitUnit().CastSpell((Unit)null, HunterSpells.MastersCallTriggered, true);
 	}

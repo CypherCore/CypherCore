@@ -25,7 +25,7 @@ internal class spell_q12308_escape_from_silverbrook : SpellScript, IHasSpellEffe
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		GetCaster().CastSpell(GetCaster(), QuestSpellIds.SummonWorgen, true);
 	}

@@ -36,7 +36,7 @@ internal class spell_rog_shadowstrike : SpellScript, ISpellCheckCast, IHasSpellE
 
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleEnergize(uint effIndex)
+	private void HandleEnergize(int effIndex)
 	{
 		var caster = GetCaster();
 

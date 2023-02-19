@@ -42,7 +42,7 @@ internal class spell_item_taunt_flag_targeting : SpellScript, IHasSpellEffects
 		targets.RandomResize(1);
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		// we *really* want the unit implementation here
 		// it sends a packet like seen on sniff

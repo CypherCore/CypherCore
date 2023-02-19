@@ -33,7 +33,7 @@ namespace Scripts.Spells.Warlock
 
 		public List<ISpellEffect> SpellEffects { get; } = new();
 
-		private void HandleDummy(uint effIndex)
+		private void HandleDummy(int effIndex)
 		{
 			SetHitDamage(GetHitDamage() + MathFunctions.CalculatePct(GetHitDamage(), GetCaster().ToPlayer().m_activePlayerData.SpellCritPercentage));
 		}

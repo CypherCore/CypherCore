@@ -39,7 +39,7 @@ internal class spell_gen_profession_research : SpellScript, ISpellCheckCast, IHa
 
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleScript(uint effIndex)
+	private void HandleScript(int effIndex)
 	{
 		var caster  = GetCaster().ToPlayer();
 		var spellId = GetSpellInfo().Id;

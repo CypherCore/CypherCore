@@ -26,7 +26,7 @@ public class spell_dru_rake : SpellScript, IHasSpellEffects
 		return true;
 	}
 
-	private void HandleOnHit(uint UnnamedParameter)
+	private void HandleOnHit(int effIndex)
 	{
 		var caster = GetCaster();
 		var target = GetExplTargetUnit();

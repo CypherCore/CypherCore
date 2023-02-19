@@ -18,7 +18,7 @@ namespace Game.Scripting.Interfaces.IAura
 
         private readonly AuraEffectSplitDelegate _fn;
 
-        public AuraEffectSplitHandler(AuraEffectSplitDelegate fn, uint effectIndex) : base(effectIndex, AuraType.SplitDamagePct, AuraScriptHookType.EffectSplit)
+        public AuraEffectSplitHandler(AuraEffectSplitDelegate fn, int effectIndex) : base(effectIndex, AuraType.SplitDamagePct, AuraScriptHookType.EffectSplit)
         {
             _fn = fn;
         }

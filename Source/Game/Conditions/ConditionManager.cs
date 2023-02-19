@@ -662,7 +662,7 @@ namespace Game
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
                 {
                     // additional checks by condition type
-                    if ((conditionEffMask & (1 << (int)spellEffectInfo.EffectIndex)) != 0)
+                    if ((conditionEffMask & (1 << spellEffectInfo.EffectIndex)) != 0)
                     {
                         switch (cond.ConditionType)
                         {
@@ -694,15 +694,15 @@ namespace Game
                     }
 
                     // check if effect is already a part of some shared mask
-                    if (sharedMasks.Any(mask => !!Convert.ToBoolean(mask & (1 << (int)spellEffectInfo.EffectIndex))))
+                    if (sharedMasks.Any(mask => !!Convert.ToBoolean(mask & (1 << spellEffectInfo.EffectIndex))))
                         continue;
 
                     // build new shared mask with found effect
-                    uint sharedMask = (uint)(1 << (int)spellEffectInfo.EffectIndex);
+                    uint sharedMask = (uint)(1 << spellEffectInfo.EffectIndex);
                     List<Condition> cmp = spellEffectInfo.ImplicitTargetConditions;
-                    for (uint effIndex = spellEffectInfo.EffectIndex + 1; effIndex < spellInfo.GetEffects().Count; ++effIndex)
+                    for (int effIndex = spellEffectInfo.EffectIndex + 1; effIndex < spellInfo.GetEffects().Count; ++effIndex)
                         if (spellInfo.GetEffect(effIndex).ImplicitTargetConditions == cmp)
-                            sharedMask |= (uint)(1 << (int)effIndex);
+                            sharedMask |= (uint)(1 << effIndex);
 
                     sharedMasks.Add(sharedMask);
                 }
@@ -741,9 +741,9 @@ namespace Game
                             // add new list, create new shared mask
                             sharedList = new List<Condition>();
                             bool assigned = false;
-                            for (uint i = firstEffIndex; i < spellInfo.GetEffects().Count; ++i)
+                            for (int i = firstEffIndex; i < spellInfo.GetEffects().Count; ++i)
                             {
-                                if (((1 << (int)i) & commonMask) != 0)
+                                if (((1 << i) & commonMask) != 0)
                                 {
                                     spellInfo.GetEffect(i).ImplicitTargetConditions = sharedList;
                                     assigned = true;
@@ -1033,7 +1033,7 @@ namespace Game
 
                     foreach (SpellEffectInfo spellEffectInfo in spellInfo.GetEffects())
                     {
-                        if (((1 << (int)spellEffectInfo.EffectIndex) & cond.SourceGroup) == 0)
+                        if (((1 << spellEffectInfo.EffectIndex) & cond.SourceGroup) == 0)
                             continue;
 
                         if (spellEffectInfo.ChainTargets > 0)
@@ -1081,7 +1081,7 @@ namespace Game
                         }
 
                         Log.outDebug(LogFilter.Sql, "SourceEntry {0} SourceGroup {1} in `condition` table - spell {2} does not have implicit targets of types: _AREA_, _CONE_, _NEARBY_, _CHAIN_ for effect {3}, SourceGroup needs correction, ignoring.", cond.SourceEntry, origGroup, cond.SourceEntry, spellEffectInfo.EffectIndex);
-                        cond.SourceGroup &= ~(1u << (int)spellEffectInfo.EffectIndex);
+                        cond.SourceGroup &= ~(1u << spellEffectInfo.EffectIndex);
                     }
                     // all effects were removed, no need to add the condition at all
                     if (cond.SourceGroup == 0)

@@ -14,7 +14,7 @@ public class spell_dru_tranquility_heal : SpellScript, IHasSpellEffects
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
 
-	private void HandleHeal(uint UnnamedParameter)
+	private void HandleHeal(int effIndex)
 	{
 		if (!GetCaster())
 			return;

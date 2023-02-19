@@ -40,7 +40,7 @@ internal class spell_item_defibrillate : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Resurrect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(uint effIndex)
+	private void HandleScript(int effIndex)
 	{
 		if (RandomHelper.randChance(_chance))
 		{

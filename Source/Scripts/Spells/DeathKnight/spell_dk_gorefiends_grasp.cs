@@ -16,7 +16,7 @@ public class spell_dk_gorefiends_grasp : SpellScript, IHasSpellEffects
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
 
-	private void HandleScript(uint UnnamedParameter)
+	private void HandleScript(int effIndex)
 	{
 		var _player = GetCaster().ToPlayer();
 

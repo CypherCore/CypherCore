@@ -26,7 +26,7 @@ internal class spell_mage_alter_time_active : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(RemoveAlterTimeAura, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
 	}
 
-	private void RemoveAlterTimeAura(uint effIndex)
+	private void RemoveAlterTimeAura(int effIndex)
 	{
 		var unit = GetCaster();
 		unit.RemoveAura(MageSpells.AlterTimeAura, ObjectGuid.Empty, 0, AuraRemoveMode.Expire);

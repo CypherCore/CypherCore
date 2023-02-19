@@ -19,7 +19,7 @@ internal class spell_gen_throw_shield : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScriptEffect, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScriptEffect(uint effIndex)
+	private void HandleScriptEffect(int effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
 		GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue(), true);

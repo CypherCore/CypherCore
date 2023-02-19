@@ -29,19 +29,19 @@ namespace Scripts.Spells.Druid
 			SpellEffects.Add(new EffectHandler(HandleHitTargetDmg, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
 		}
 
-		private void HandleHitTargetBurn(uint effIndex)
+		private void HandleHitTargetBurn(int effIndex)
 		{
 			var newValue = (int)((float)GetEffectValue() * _damageMultiplier);
 			SetEffectValue(newValue);
 		}
 
-		private void HandleHitTargetDmg(uint effIndex)
+		private void HandleHitTargetDmg(int effIndex)
 		{
 			var newValue = (int)((float)GetHitDamage() * (1.0f + _damageMultiplier));
 			SetHitDamage(newValue);
 		}
 
-		private void HandleLaunchTarget(uint effIndex)
+		private void HandleLaunchTarget(int effIndex)
 		{
 			var caster = GetCaster();
 

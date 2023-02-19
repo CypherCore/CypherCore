@@ -31,7 +31,7 @@ public class spell_pri_purge_the_wicked_selector : SpellScript, IHasSpellEffects
 			targets.Resize(1);
 	}
 
-	private void HandleDummy(uint UnnamedParameter)
+	private void HandleDummy(int effIndex)
 	{
 		GetCaster().AddAura(PriestSpells.PURGE_THE_WICKED_DOT, GetHitUnit());
 	}

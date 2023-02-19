@@ -14,7 +14,7 @@ public class spell_dru_skull_bash_charge : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleCharge(uint effIndex)
+	private void HandleCharge(int effIndex)
 	{
 		if (!GetCaster())
 			return;

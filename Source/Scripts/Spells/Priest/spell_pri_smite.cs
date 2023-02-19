@@ -21,7 +21,7 @@ public class spell_pri_smite : SpellScript, IHasSpellEffects, ISpellAfterCast
 		return ValidateSpellInfo(PriestSpells.SMITE_ABSORB);
 	}
 
-	private void HandleHit(uint UnnamedParameter)
+	private void HandleHit(int effIndex)
 	{
 		var caster = GetCaster().ToPlayer();
 		var target = GetHitUnit();

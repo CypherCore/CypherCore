@@ -19,7 +19,7 @@ namespace Scripts.Spells.Warlock
 			SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 		}
 
-		private void HandleHit(uint effIndex)
+		private void HandleHit(int effIndex)
 		{
 			var swapVictim = GetCaster();
 			var warlock    = GetHitUnit();

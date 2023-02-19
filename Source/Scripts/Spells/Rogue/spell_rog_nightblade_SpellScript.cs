@@ -14,7 +14,7 @@ public class spell_rog_nightblade_SpellScript : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleLaunch(uint UnnamedParameter)
+	private void HandleLaunch(int effIndex)
 	{
 		var caster = GetCaster();
 		var target = GetHitUnit();

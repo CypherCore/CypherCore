@@ -20,7 +20,7 @@ public class spell_mage_fire_on : SpellScript, IHasSpellEffects
 		return ValidateSpellInfo(MageSpells.FIRE_ON, MageSpells.FIRE_BLAST);
 	}
 
-	private void HandleDummy(uint UnnamedParameter)
+	private void HandleDummy(int effIndex)
 	{
 		var caster = GetCaster();
 		var target = GetHitUnit();

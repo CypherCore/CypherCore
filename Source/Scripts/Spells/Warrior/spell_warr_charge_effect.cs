@@ -26,7 +26,7 @@ namespace Scripts.Spells.Warrior
 			SpellEffects.Add(new EffectHandler(HandleCharge, 0, SpellEffectName.Charge, SpellScriptHookType.LaunchTarget));
 		}
 
-		private void HandleCharge(uint effIndex)
+		private void HandleCharge(int effIndex)
 		{
 			var caster = GetCaster();
 			var target = GetHitUnit();

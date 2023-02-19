@@ -15,7 +15,7 @@ namespace Scripts.Spells.Warlock
 	{
 		public List<ISpellEffect> SpellEffects { get; } = new();
 
-		private void HandleHit(uint UnnamedParameter)
+		private void HandleHit(int effIndex)
 		{
 			// "Increases damage dealt by your Wild Imps' Firebolt by 10%."
 			var owner = GetCaster().GetOwner();

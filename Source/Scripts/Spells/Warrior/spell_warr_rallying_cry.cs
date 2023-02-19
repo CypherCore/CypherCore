@@ -30,7 +30,7 @@ namespace Scripts.Spells.Warrior
 			SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 		}
 
-		private void HandleScript(uint effIndex)
+		private void HandleScript(int effIndex)
 		{
 			CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
 			args.AddSpellMod(SpellValueMod.BasePoint0, (int)GetHitUnit().CountPctFromMaxHealth(GetEffectValue()));

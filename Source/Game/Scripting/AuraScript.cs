@@ -115,7 +115,7 @@ namespace Game.Scripting
             return _aura.GetSpellInfo();
         }
 
-        public SpellEffectInfo GetEffectInfo(uint effIndex)
+        public SpellEffectInfo GetEffectInfo(int effIndex)
         {
             return _aura.GetSpellInfo().GetEffect(effIndex);
         }

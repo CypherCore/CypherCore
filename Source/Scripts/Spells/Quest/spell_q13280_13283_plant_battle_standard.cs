@@ -19,7 +19,7 @@ internal class spell_q13280_13283_plant_battle_standard : SpellScript, IHasSpell
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		var caster           = GetCaster();
 		var target           = GetHitUnit();

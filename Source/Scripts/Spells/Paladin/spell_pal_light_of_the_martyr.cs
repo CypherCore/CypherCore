@@ -31,7 +31,7 @@ namespace Scripts.Spells.Paladin
             return true;
         }
 
-        private void HandleOnHit(uint UnnamedParameter)
+        private void HandleOnHit(int effIndex)
         {
             Unit caster = GetCaster();
 

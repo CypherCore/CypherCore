@@ -29,7 +29,7 @@ internal class spell_gen_netherbloom : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(uint effIndex)
+	private void HandleScript(int effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
 		var target = GetHitUnit();

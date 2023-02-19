@@ -38,7 +38,7 @@ namespace Scripts.Spells.Paladin
             return SpellCastResult.Success;
         }
 
-        private void HandleDummy(uint effIndex)
+        private void HandleDummy(int effIndex)
         {
             uint ChargeCategoryId = Global.SpellMgr.GetSpellInfo(PaladinSpells.SHIELD_OF_THE_RIGHTEOUS, Difficulty.None).ChargeCategoryId;
             SpellHistory spellHistory = GetCaster().GetSpellHistory();

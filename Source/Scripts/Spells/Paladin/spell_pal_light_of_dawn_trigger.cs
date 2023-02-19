@@ -35,7 +35,7 @@ namespace Scripts.Spells.Paladin
             targets.RandomResize(limit);
         }
 
-        private void HandleOnHit(uint UnnamedParameter)
+        private void HandleOnHit(int effIndex)
         {
             int dmg = GetHitHeal();
             dmg += (int)(GetCaster().m_unitData.AttackPower * 1.8f);

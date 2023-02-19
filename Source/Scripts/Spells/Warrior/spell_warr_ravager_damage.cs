@@ -15,7 +15,7 @@ namespace Scripts.Spells.Warrior
 	{
 		public List<ISpellEffect> SpellEffects { get; } = new();
 
-		private void HandleOnHitTarget(uint UnnamedParameter)
+		private void HandleOnHitTarget(int effIndex)
 		{
 			if (!_alreadyProc)
 			{

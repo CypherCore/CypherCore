@@ -28,7 +28,7 @@ internal class spell_gen_whisper_to_controller_random : SpellScript, IHasSpellEf
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(uint effIndex)
+	private void HandleScript(int effIndex)
 	{
 		// Same for all spells
 		if (!RandomHelper.randChance(20))

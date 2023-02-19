@@ -25,7 +25,7 @@ internal class spell_item_red_rider_air_rifle : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(uint effIndex)
+	private void HandleScript(int effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
 		var caster = GetCaster();

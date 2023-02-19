@@ -16,7 +16,7 @@ public class spell_dk_obliterate : SpellScript, IHasSpellEffects
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
 
-	private void HandleHit(uint UnnamedParameter)
+	private void HandleHit(int effIndex)
 	{
 		GetCaster().RemoveAura(DeathKnightSpells.KILLING_MACHINE);
 

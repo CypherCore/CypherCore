@@ -18,7 +18,7 @@ namespace Scripts.Spells.Shaman
 
 		private uint m_TargetSize = 0;
 
-		private void OnEffectHeal(uint UnnamedParameter)
+		private void OnEffectHeal(int effIndex)
 		{
 			SetHitHeal((int)(GetHitHeal() / m_TargetSize));
 		}

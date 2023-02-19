@@ -20,7 +20,7 @@ public class spell_monk_tiger_lust : SpellScript, IHasSpellEffects
 		return Global.SpellMgr.GetSpellInfo(TigerLust.TIGER_LUST, Difficulty.None) != null;
 	}
 
-	private void HandleDummy(uint UnnamedParameter)
+	private void HandleDummy(int effIndex)
 	{
 		var target = GetHitUnit();
 

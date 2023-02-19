@@ -19,7 +19,7 @@ internal class spell_gen_decimatus_transformation_sickness : SpellScript, IHasSp
 		SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(uint effIndex)
+	private void HandleScript(int effIndex)
 	{
 		var target = GetHitUnit();
 

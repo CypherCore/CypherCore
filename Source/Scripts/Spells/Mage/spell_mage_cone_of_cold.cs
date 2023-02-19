@@ -25,7 +25,7 @@ internal class spell_mage_cone_of_cold : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleSlow, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleSlow(uint effIndex)
+	private void HandleSlow(int effIndex)
 	{
 		GetCaster().CastSpell(GetHitUnit(), MageSpells.ConeOfColdSlow, true);
 	}

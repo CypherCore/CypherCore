@@ -28,7 +28,7 @@ public class spell_pri_dark_archangel : SpellScript, IHasSpellEffects
 		targets.RemoveIf(new UnitAuraCheck<WorldObject>(false, PriestSpells.ATONEMENT_AURA, GetCaster().GetGUID()));
 	}
 
-	private void HandleScriptEffect(uint UnnamedParameter)
+	private void HandleScriptEffect(int effIndex)
 	{
 		GetCaster().CastSpell(GetHitUnit(), PriestSpells.DARK_ARCHANGEL_BUFF, true);
 	}

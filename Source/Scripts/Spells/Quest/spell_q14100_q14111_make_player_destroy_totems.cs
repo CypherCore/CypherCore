@@ -25,7 +25,7 @@ internal class spell_q14100_q14111_make_player_destroy_totems : SpellScript, IHa
 		SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScriptEffect(uint effIndex)
+	private void HandleScriptEffect(int effIndex)
 	{
 		var player = GetHitPlayer();
 

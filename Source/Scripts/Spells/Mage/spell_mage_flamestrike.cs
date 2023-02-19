@@ -14,7 +14,7 @@ public class spell_mage_flamestrike : SpellScript, ISpellAfterCast, IHasSpellEff
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleOnHit(uint UnnamedParameter)
+	private void HandleOnHit(int effIndex)
 	{
 		var caster = GetCaster();
 

@@ -121,7 +121,7 @@ namespace Game.Spells
                 bool negativeFound = false;
                 foreach (var spellEffectInfo in GetBase().GetSpellInfo().GetEffects())
                 {
-                    if (((1 << (int)spellEffectInfo.EffectIndex) & effMask) != 0 && !GetBase().GetSpellInfo().IsPositiveEffect(spellEffectInfo.EffectIndex))
+                    if (((1 << spellEffectInfo.EffectIndex) & effMask) != 0 && !GetBase().GetSpellInfo().IsPositiveEffect(spellEffectInfo.EffectIndex))
                     {
                         negativeFound = true;
                         break;
@@ -136,7 +136,7 @@ namespace Game.Spells
                 bool positiveFound = false;
                 foreach (var spellEffectInfo in GetBase().GetSpellInfo().GetEffects())
                 {
-                    if (((1 << (int)spellEffectInfo.EffectIndex) & effMask) != 0 && GetBase().GetSpellInfo().IsPositiveEffect(spellEffectInfo.EffectIndex))
+                    if (((1 << spellEffectInfo.EffectIndex) & effMask) != 0 && GetBase().GetSpellInfo().IsPositiveEffect(spellEffectInfo.EffectIndex))
                     {
                         positiveFound = true;
                         break;
@@ -145,13 +145,13 @@ namespace Game.Spells
                 _flags |= positiveFound ? AuraFlags.Positive : AuraFlags.Negative;
             }
 
-            bool effectNeedsAmount(AuraEffect effect) => effect != null && (GetEffectsToApply() & (1 << (int)effect.GetEffIndex())) != 0 && Aura.EffectTypeNeedsSendingAmount(effect.GetAuraType());
+            bool effectNeedsAmount(AuraEffect effect) => effect != null && (GetEffectsToApply() & (1 << effect.GetEffIndex())) != 0 && Aura.EffectTypeNeedsSendingAmount(effect.GetAuraType());
 
             if (GetBase().GetSpellInfo().HasAttribute(SpellAttr8.AuraSendAmount) || GetBase().GetAuraEffects().Any(effectNeedsAmount))
                 _flags |= AuraFlags.Scalable;
         }
 
-        public void _HandleEffect(uint effIndex, bool apply)
+        public void _HandleEffect(int effIndex, bool apply)
         {
             AuraEffect aurEff = GetBase().GetEffect(effIndex);
             if (aurEff == null)
@@ -161,19 +161,19 @@ namespace Game.Spells
             }
             Cypher.Assert(aurEff != null);
             Cypher.Assert(HasEffect(effIndex) == (!apply));
-            Cypher.Assert(Convert.ToBoolean((1 << (int)effIndex) & _effectsToApply));
+            Cypher.Assert(Convert.ToBoolean((1 << effIndex) & _effectsToApply));
             Log.outDebug(LogFilter.Spells, "AuraApplication._HandleEffect: {0}, apply: {1}: amount: {2}", aurEff.GetAuraType(), apply, aurEff.GetAmount());
 
             if (apply)
             {
-                Cypher.Assert(!Convert.ToBoolean(_effectMask & (1 << (int)effIndex)));
-                _effectMask |= (uint)(1 << (int)effIndex);
+                Cypher.Assert(!Convert.ToBoolean(_effectMask & (1 << effIndex)));
+                _effectMask |= (uint)(1 << effIndex);
                 aurEff.HandleEffect(this, AuraEffectHandleModes.Real, true);
             }
             else
             {
-                Cypher.Assert(Convert.ToBoolean(_effectMask & (1 << (int)effIndex)));
-                _effectMask &= ~(uint)(1 << (int)effIndex);
+                Cypher.Assert(Convert.ToBoolean(_effectMask & (1 << effIndex)));
+                _effectMask &= ~(uint)(1 << effIndex);
                 aurEff.HandleEffect(this, AuraEffectHandleModes.Real, false);
             }
             SetNeedClientUpdate();
@@ -195,9 +195,9 @@ namespace Game.Spells
             }
 
             // update real effects only if they were applied already
-            for (uint i = 0; i < SpellConst.MaxEffects; ++i)
+            for (int i = 0; i < SpellConst.MaxEffects; ++i)
             {
-                if (HasEffect(i) && (removeEffMask & (1 << (int)i)) != 0)
+                if (HasEffect(i) && (removeEffMask & (1 << i)) != 0)
                     _HandleEffect(i, false);
             }
 
@@ -205,9 +205,9 @@ namespace Game.Spells
 
             if (canHandleNewEffects)
             {
-                for (uint i = 0; i < SpellConst.MaxEffects; ++i)
+                for (int i = 0; i < SpellConst.MaxEffects; ++i)
                 {
-                    if ((addEffMask & (1 << (int)i)) != 0)
+                    if ((addEffMask & (1 << i)) != 0)
                         _HandleEffect(i, true);
                 }
             }
@@ -311,10 +311,10 @@ namespace Game.Spells
         public byte GetSlot() { return _slot; }
         public AuraFlags GetFlags() { return _flags; }
         public uint GetEffectMask() { return _effectMask; }
-        public bool HasEffect(uint effect)
+        public bool HasEffect(int effect)
         {
             Cypher.Assert(effect < SpellConst.MaxEffects);
-            return Convert.ToBoolean(_effectMask & (1 << (int)effect));
+            return Convert.ToBoolean(_effectMask & (1 << effect));
         }
         public bool IsPositive() { return _flags.HasAnyFlag(AuraFlags.Positive); }
         bool IsSelfcasted() { return _flags.HasAnyFlag(AuraFlags.NoCaster); }
@@ -389,7 +389,7 @@ namespace Game.Spells
 
             foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
             {
-                if ((effMask & (1 << (int)spellEffectInfo.EffectIndex)) != 0)
+                if ((effMask & (1 << spellEffectInfo.EffectIndex)) != 0)
                     _effects[spellEffectInfo.EffectIndex] = new AuraEffect(this, spellEffectInfo, baseAmount != null ? baseAmount[spellEffectInfo.EffectIndex] : null, caster);
             }
         }
@@ -526,7 +526,7 @@ namespace Game.Spells
                     // check target immunities (for existing targets)
                     foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
                         if (app.Value.GetTarget().IsImmunedToSpellEffect(GetSpellInfo(), spellEffectInfo, caster, true))
-                            existing &= ~(uint)(1 << (int)spellEffectInfo.EffectIndex);
+                            existing &= ~(uint)(1 << spellEffectInfo.EffectIndex);
 
                     targets[app.Value.GetTarget()] = existing;
 
@@ -550,7 +550,7 @@ namespace Game.Spells
                     // check target immunities (for new targets)
                     foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
                         if (unit.IsImmunedToSpellEffect(GetSpellInfo(), spellEffectInfo, caster))
-                            targets[unit] &= ~(uint)(1 << (int)spellEffectInfo.EffectIndex);
+                            targets[unit] &= ~(uint)(1 << spellEffectInfo.EffectIndex);
 
                     if (targets[unit] == 0 || unit.IsImmunedToSpell(GetSpellInfo(), caster) || !CanBeAppliedOn(unit))
                         addUnit = false;
@@ -632,13 +632,13 @@ namespace Game.Spells
         }
 
         // targets have to be registered and not have effect applied yet to use this function
-        public void _ApplyEffectForTargets(uint effIndex)
+        public void _ApplyEffectForTargets(int effIndex)
         {
             // prepare list of aura targets
             List<Unit> targetList = new();
             foreach (var app in m_applications.Values)
             {
-                if (Convert.ToBoolean(app.GetEffectsToApply() & (1 << (int)effIndex)) && !app.HasEffect(effIndex))
+                if (Convert.ToBoolean(app.GetEffectsToApply() & (1 << effIndex)) && !app.HasEffect(effIndex))
                     targetList.Add(app.GetTarget());
             }
 
@@ -1156,7 +1156,7 @@ namespace Game.Spells
                     continue;
 
                 effect.SetAmount(amount[effect.GetEffIndex()]);
-                effect.SetCanBeRecalculated(Convert.ToBoolean(recalculateMask & (1 << (int)effect.GetEffIndex())));
+                effect.SetCanBeRecalculated(Convert.ToBoolean(recalculateMask & (1 << effect.GetEffIndex())));
                 effect.CalculatePeriodic(caster, false, true);
                 effect.CalculateSpellMod();
                 effect.RecalculateAmount(caster);
@@ -1997,7 +1997,7 @@ namespace Game.Spells
                     }
         }
 
-        private bool CheckAuraEffectHandler(IAuraEffectHandler ae, uint effIndex)
+        private bool CheckAuraEffectHandler(IAuraEffectHandler ae, int effIndex)
         {
             if (m_spellInfo.GetEffects().Count <= effIndex)
                 return false;
@@ -2015,7 +2015,7 @@ namespace Game.Spells
         static List<IAuraScript> _dummy = new();
         static List<(IAuraScript, IAuraEffectHandler)> _dummyAuraEffects = new();
         readonly Dictionary<Type, List<IAuraScript>> m_auraScriptsByType = new Dictionary<Type, List<IAuraScript>>();
-        Dictionary<uint, Dictionary<AuraScriptHookType, List<(IAuraScript, IAuraEffectHandler)>>> _effectHandlers = new Dictionary<uint, Dictionary<AuraScriptHookType, List<(IAuraScript, IAuraEffectHandler)>>>();
+        Dictionary<int, Dictionary<AuraScriptHookType, List<(IAuraScript, IAuraEffectHandler)>>> _effectHandlers = new Dictionary<int, Dictionary<AuraScriptHookType, List<(IAuraScript, IAuraEffectHandler)>>>();
 
         public List<IAuraScript> GetAuraScripts<T>() where T : IAuraScript
         {
@@ -2031,7 +2031,7 @@ namespace Game.Spells
                 action.Invoke(script);
         }
 
-        private void AddAuraEffect(uint index, IAuraScript script, IAuraEffectHandler effect)
+        private void AddAuraEffect(int index, IAuraScript script, IAuraEffectHandler effect)
         {
             if (!_effectHandlers.TryGetValue(index, out var effecTypes))
             {
@@ -2048,7 +2048,7 @@ namespace Game.Spells
             effects.Add((script, effect));
         }
 
-        public List<(IAuraScript, IAuraEffectHandler)> GetEffectScripts(AuraScriptHookType h, uint index)
+        public List<(IAuraScript, IAuraEffectHandler)> GetEffectScripts(AuraScriptHookType h, int index)
         {
             if (_effectHandlers.TryGetValue(index, out var effDict) &&
                 effDict.TryGetValue(h, out List<(IAuraScript, IAuraEffectHandler)> scripts))
@@ -2535,11 +2535,11 @@ namespace Game.Spells
         public bool IsSingleTarget() { return m_isSingleTarget; }
         public void SetIsSingleTarget(bool val) { m_isSingleTarget = val; }
 
-        public bool HasEffect(uint index)
+        public bool HasEffect(int index)
         {
             return GetEffect(index) != null;
         }
-        public AuraEffect GetEffect(uint index)
+        public AuraEffect GetEffect(int index)
         {
             if (index >= _effects.Length)
                 return null;
@@ -2551,7 +2551,7 @@ namespace Game.Spells
             uint effMask = 0;
             foreach (AuraEffect aurEff in GetAuraEffects())
                 if (aurEff != null)
-                    effMask |= (uint)(1 << (int)aurEff.GetEffIndex());
+                    effMask |= (uint)(1 << aurEff.GetEffIndex());
 
             return effMask;
         }
@@ -2587,14 +2587,14 @@ namespace Game.Spells
                     foreach (var spellEffectInfo in spellProto.GetEffects())
                     {
                         if (spellEffectInfo.IsUnitOwnedAuraEffect())
-                            effMask |= (1u << (int)spellEffectInfo.EffectIndex);
+                            effMask |= (1u << spellEffectInfo.EffectIndex);
                     }
                     break;
                 case TypeId.DynamicObject:
                     foreach (var spellEffectInfo in spellProto.GetEffects())
                     {
                         if (spellEffectInfo.Effect == SpellEffectName.PersistentAreaAura)
-                            effMask |= (1u << (int)spellEffectInfo.EffectIndex);
+                            effMask |= (1u << spellEffectInfo.EffectIndex);
                     }
                     break;
                 default:
@@ -2899,7 +2899,7 @@ namespace Game.Spells
                     if (!targets.ContainsKey(unit))
                         targets[unit] = 0;
 
-                    targets[unit] |= 1u << (int)spellEffectInfo.EffectIndex;
+                    targets[unit] |= 1u << spellEffectInfo.EffectIndex;
                 }
             }
         }
@@ -2909,8 +2909,8 @@ namespace Game.Spells
             // only valid for non-area auras
             foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
             {
-                if ((effMask & (1u << (int)spellEffectInfo.EffectIndex)) != 0 && !spellEffectInfo.IsEffect(SpellEffectName.ApplyAura))
-                    effMask &= ~(1u << (int)spellEffectInfo.EffectIndex);
+                if ((effMask & (1u << spellEffectInfo.EffectIndex)) != 0 && !spellEffectInfo.IsEffect(SpellEffectName.ApplyAura))
+                    effMask &= ~(1u << spellEffectInfo.EffectIndex);
             }
 
             if (effMask == 0)
@@ -2981,7 +2981,7 @@ namespace Game.Spells
                     if (!targets.ContainsKey(unit))
                         targets[unit] = 0;
 
-                    targets[unit] |= 1u << (int)spellEffectInfo.EffectIndex;
+                    targets[unit] |= 1u << spellEffectInfo.EffectIndex;
                 }
             }
         }

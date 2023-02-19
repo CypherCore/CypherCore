@@ -21,7 +21,7 @@ internal class spell_q11010_q11102_q11023_choose_loc : SpellScript, IHasSpellEff
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		var caster = GetCaster();
 		// Check for player that is in 65 y range

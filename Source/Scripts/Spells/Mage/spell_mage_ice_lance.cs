@@ -28,12 +28,12 @@ internal class spell_mage_ice_lance : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleOnHit, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void IndexTarget(uint effIndex)
+	private void IndexTarget(int effIndex)
 	{
 		_orderedTargets.Add(GetHitUnit().GetGUID());
 	}
 
-	private void HandleOnHit(uint effIndex)
+	private void HandleOnHit(int effIndex)
 	{
 		var caster = GetCaster();
 		var target = GetHitUnit();

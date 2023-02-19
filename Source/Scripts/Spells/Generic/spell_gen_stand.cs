@@ -19,7 +19,7 @@ internal class spell_gen_stand : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(uint eff)
+	private void HandleScript(int eff)
 	{
 		var target = GetHitCreature();
 

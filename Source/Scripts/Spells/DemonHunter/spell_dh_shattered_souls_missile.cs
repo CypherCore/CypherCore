@@ -15,7 +15,7 @@ public class spell_dh_shattered_souls_missile : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleHit(uint effIndex)
+	private void HandleHit(int effIndex)
 	{
 		PreventHitDefaultEffect(effIndex);
 		var caster = GetCaster();

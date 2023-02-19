@@ -25,7 +25,7 @@ internal class spell_rog_symbols_of_death : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.ApplyAura, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleEffectHitTarget(uint effIndex)
+	private void HandleEffectHitTarget(int effIndex)
 	{
 		if (GetCaster().HasAura(RogueSpells.SymbolsOfDeathRank2))
 			GetCaster().CastSpell(GetCaster(), RogueSpells.SymbolsOfDeathCritAura, true);

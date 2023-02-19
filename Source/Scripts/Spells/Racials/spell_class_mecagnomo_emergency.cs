@@ -75,13 +75,13 @@ namespace Scripts.Spells.Racials
 	{
 		public List<ISpellEffect> SpellEffects { get; } = new();
 
-		private void HandleHit(uint effIndex)
+		private void HandleHit(int effIndex)
 		{
 			if (!GetCaster().HasAura(313015))
 				PreventHitDefaultEffect(effIndex);
 		}
 
-		private void HandleHeal(uint effIndex)
+		private void HandleHeal(int effIndex)
 		{
 			var caster = GetCaster();
 			var heal   = caster.GetMaxHealth() * 25.0f / 100.0f;

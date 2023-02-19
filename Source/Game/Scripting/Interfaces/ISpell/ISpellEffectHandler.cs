@@ -9,16 +9,16 @@ namespace Game.Scripting.Interfaces.ISpell
     {
         SpellEffectName EffectName { get; }
 
-        void CallEffect(uint effIndex);
+        void CallEffect(int effIndex);
     }
 
     public class EffectHandler : SpellEffect, ISpellEffectHandler
     {
-        public delegate void SpellEffectFn(uint index);
+        public delegate void SpellEffectFn(int index);
 
         private readonly SpellEffectFn _callEffect;
 
-        public EffectHandler(SpellEffectFn callEffect, uint effectIndex, SpellEffectName spellEffectName, SpellScriptHookType hookType) : base(effectIndex, hookType)
+        public EffectHandler(SpellEffectFn callEffect, int effectIndex, SpellEffectName spellEffectName, SpellScriptHookType hookType) : base(effectIndex, hookType)
         {
             EffectName = spellEffectName;
             _callEffect = callEffect;
@@ -26,7 +26,7 @@ namespace Game.Scripting.Interfaces.ISpell
 
         public SpellEffectName EffectName { get; private set; }
 
-        public void CallEffect(uint effIndex)
+        public void CallEffect(int effIndex)
         {
             _callEffect(EffectIndex);
         }

@@ -28,7 +28,7 @@ public class spell_druid_solar_wrath : SpellScript, IHasSpellEffects
 		return ValidateSpellInfo(Spells.SUNFIRE_DOT, Spells.SOLAR_WRATH, Spells.NATURES_BALANCE);
 	}
 
-	private void HandleHitTarget(uint UnnamedParameter)
+	private void HandleHitTarget(int effIndex)
 	{
 		var target = GetHitUnit();
 

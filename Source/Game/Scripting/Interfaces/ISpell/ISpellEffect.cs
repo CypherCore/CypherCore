@@ -7,20 +7,20 @@ namespace Game.Scripting.Interfaces.ISpell
 {
     public interface ISpellEffect
     {
-        uint EffectIndex { get; }
+        int EffectIndex { get; }
 
         SpellScriptHookType HookType { get; }
     }
 
     public class SpellEffect : ISpellEffect
     {
-        public SpellEffect(uint effectIndex, SpellScriptHookType hookType)
+        public SpellEffect(int effectIndex, SpellScriptHookType hookType)
         {
             EffectIndex = effectIndex;
             HookType = hookType;
         }
 
-        public uint EffectIndex { get; private set; }
+        public int EffectIndex { get; private set; }
 
         public SpellScriptHookType HookType { get; private set; }
     }

@@ -41,7 +41,7 @@ internal class spell_dk_army_transform : SpellScript, ISpellCheckCast, IHasSpell
 
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		GetCaster().CastSpell(GetCaster(), DeathKnightSpells.ArmyTransforms.SelectRandom(), true);
 	}

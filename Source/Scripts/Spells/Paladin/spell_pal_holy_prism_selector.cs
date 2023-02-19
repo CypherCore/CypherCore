@@ -41,7 +41,7 @@ namespace Scripts.Spells.Paladin
             SpellEffects.Add(new EffectHandler(HandleScript, 2, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
-        private void SaveTargetGuid(uint effIndex)
+        private void SaveTargetGuid(int effIndex)
         {
             _targetGUID = GetHitUnit().GetGUID();
         }
@@ -72,7 +72,7 @@ namespace Scripts.Spells.Paladin
             targets.AddRange(_sharedTargets);
         }
 
-        private void HandleScript(uint effIndex)
+        private void HandleScript(int effIndex)
         {
             Unit initialTarget = Global.ObjAccessor.GetUnit(GetCaster(), _targetGUID);
 

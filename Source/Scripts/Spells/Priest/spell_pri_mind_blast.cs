@@ -14,7 +14,7 @@ public class spell_pri_mind_blast : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleOnHit(uint UnnamedParameter)
+	private void HandleOnHit(int effIndex)
 	{
 		if (GetCaster().HasAura(PriestSpells.SHADOWY_INSIGHTS))
 			GetCaster().RemoveAura(PriestSpells.SHADOWY_INSIGHTS);

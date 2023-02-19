@@ -26,7 +26,7 @@ internal class spell_q12527_zuldrak_rat : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScriptEffect, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScriptEffect(uint effIndex)
+	private void HandleScriptEffect(int effIndex)
 	{
 		if (GetHitAura() != null &&
 		    GetHitAura().GetStackAmount() >= GetSpellInfo().StackAmount)

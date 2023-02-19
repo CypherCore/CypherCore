@@ -19,7 +19,7 @@ internal class spell_gen_landmine_knockback_achievement : SpellScript, IHasSpell
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(uint effIndex)
+	private void HandleScript(int effIndex)
 	{
 		var target = GetHitPlayer();
 

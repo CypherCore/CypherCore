@@ -14,7 +14,7 @@ public class spell_dru_maul_bear : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void OnHit(uint UnnamedParameter)
+	private void OnHit(int effIndex)
 	{
 		var caster = GetCaster();
 		var target = GetHitUnit();

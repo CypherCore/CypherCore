@@ -3109,7 +3109,7 @@ namespace Game.Achievements
                     return false;
                 }
                 case ModifierTreeType.PlayerHasAuraWithEffectIndex: // 262
-                    if (referencePlayer.GetAuraEffect(reqValue, (uint)secondaryAsset) == null)
+                    if (referencePlayer.GetAuraEffect(reqValue, secondaryAsset) == null)
                         return false;
                     break;
                 case ModifierTreeType.PlayerLootSpecializationMatchesRole: // 263
@@ -4616,7 +4616,7 @@ namespace Game.Achievements
         public struct AuraStruct
         {
             public uint SpellId;
-            public uint EffectIndex;
+            public int EffectIndex;
         }
         // criteria_data_TYPE_VALUE             = 8
         public struct ValueStruct

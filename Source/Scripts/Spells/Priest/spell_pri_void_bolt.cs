@@ -14,7 +14,7 @@ public class spell_pri_void_bolt : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleEffectScriptEffect(uint UnnamedParameter)
+	private void HandleEffectScriptEffect(int effIndex)
 	{
 		var voidBoltDurationBuffAura = GetCaster().GetAura(PriestSpells.VOID_BOLT_DURATION);
 

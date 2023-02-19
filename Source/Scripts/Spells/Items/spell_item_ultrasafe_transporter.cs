@@ -30,7 +30,7 @@ internal class spell_item_ultrasafe_transporter : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(uint effIndex)
+	private void HandleScript(int effIndex)
 	{
 		if (!RandomHelper.randChance(50)) // 50% success
 			return;

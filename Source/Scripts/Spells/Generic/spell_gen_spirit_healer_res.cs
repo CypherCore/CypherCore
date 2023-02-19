@@ -25,7 +25,7 @@ internal class spell_gen_spirit_healer_res : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		var originalCaster = GetOriginalCaster().ToPlayer();
 		var target         = GetHitUnit();

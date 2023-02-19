@@ -30,7 +30,7 @@ internal class spell_item_dimensional_ripper_everlook : SpellScript, IHasSpellEf
 		SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleScript(uint effIndex)
+	private void HandleScript(int effIndex)
 	{
 		var r = RandomHelper.IRand(0, 119);
 

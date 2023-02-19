@@ -24,7 +24,7 @@ namespace Scripts.Spells.Shaman
 			return true;
 		}
 
-		private void HandleDamage(uint UnnamedParameter)
+		private void HandleDamage(int effIndex)
 		{
 			var caster = GetCaster();
 			var target = GetHitUnit();

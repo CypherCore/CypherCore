@@ -14,7 +14,7 @@ public class spell_monk_tiger_palm : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleHit(uint UnnamedParameter)
+	private void HandleHit(int effIndex)
 	{
 		var powerStrikes = GetCaster().GetAura(MonkSpells.POWER_STRIKES_AURA);
 

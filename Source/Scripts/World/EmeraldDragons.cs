@@ -564,7 +564,7 @@ namespace Scripts.World.EmeraldDragons
                               });
         }
 
-        private void HandleEffect(uint effIndex)
+        private void HandleEffect(int effIndex)
         {
             PreventHitDefaultEffect(effIndex);
             GetHitUnit().CastSpell(GetHitUnit(), SpellIds.AuraOfNature, true);

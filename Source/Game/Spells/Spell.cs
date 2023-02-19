@@ -270,7 +270,7 @@ namespace Game.Spells
                 {
                     if (m_spellInfo.HasAttribute(SpellAttr1.RequireAllTargets))
                     {
-                        bool noTargetFound = !m_UniqueTargetInfo.Any(target => (target.EffectMask & 1 << (int)spellEffectInfo.EffectIndex) != 0);
+                        bool noTargetFound = !m_UniqueTargetInfo.Any(target => (target.EffectMask & 1 << spellEffectInfo.EffectIndex) != 0);
 
                         if (noTargetFound)
                         {
@@ -281,7 +281,7 @@ namespace Game.Spells
                     }
                     if (m_spellInfo.HasAttribute(SpellAttr2.FailOnAllTargetsImmune))
                     {
-                        bool anyNonImmuneTargetFound = m_UniqueTargetInfo.Any(target => (target.EffectMask & 1 << (int)spellEffectInfo.EffectIndex) != 0 && target.MissCondition != SpellMissInfo.Immune && target.MissCondition != SpellMissInfo.Immune2);
+                        bool anyNonImmuneTargetFound = m_UniqueTargetInfo.Any(target => (target.EffectMask & 1 << spellEffectInfo.EffectIndex) != 0 && target.MissCondition != SpellMissInfo.Immune && target.MissCondition != SpellMissInfo.Immune2);
 
                         if (!anyNonImmuneTargetFound)
                         {
@@ -302,7 +302,7 @@ namespace Game.Spells
                         return;
                     }
 
-                    uint mask = (1u << (int)spellEffectInfo.EffectIndex);
+                    uint mask = (1u << spellEffectInfo.EffectIndex);
                     foreach (var ihit in m_UniqueTargetInfo)
                     {
                         if (Convert.ToBoolean(ihit.EffectMask & mask))
@@ -354,7 +354,7 @@ namespace Game.Spells
             if (targetType.GetTarget() == 0)
                 return;
 
-            uint effectMask = (1u << (int)spellEffectInfo.EffectIndex);
+            uint effectMask = (1u << spellEffectInfo.EffectIndex);
             // set the same target list for all effects
             // some spells appear to need this, however this requires more research
             switch (targetType.GetSelectionCategory())
@@ -370,14 +370,14 @@ namespace Game.Spells
 
                     var effects = GetSpellInfo().GetEffects();
                     // choose which targets we can select at once
-                    for (int j = (int)spellEffectInfo.EffectIndex + 1; j < effects.Count; ++j)
+                    for (int j = spellEffectInfo.EffectIndex + 1; j < effects.Count; ++j)
                     {
                         if (effects[j].IsEffect() &&
                             spellEffectInfo.TargetA.GetTarget() == effects[j].TargetA.GetTarget() &&
                             spellEffectInfo.TargetB.GetTarget() == effects[j].TargetB.GetTarget() &&
                             spellEffectInfo.ImplicitTargetConditions == effects[j].ImplicitTargetConditions &&
                             spellEffectInfo.CalcRadius(m_caster) == effects[j].CalcRadius(m_caster) &&
-                            CheckScriptEffectImplicitTargets(spellEffectInfo.EffectIndex, (uint)j))
+                            CheckScriptEffectImplicitTargets(spellEffectInfo.EffectIndex, j))
                         {
                             effectMask |= 1u << j;
                         }
@@ -494,7 +494,7 @@ namespace Game.Spells
                         // unit target may be no longer avalible - teleported out of map for example
                         Unit unitTarget = target ? target.ToUnit() : null;
                         if (unitTarget)
-                            AddUnitTarget(unitTarget, 1u << (int)spellEffectInfo.EffectIndex);
+                            AddUnitTarget(unitTarget, 1u << spellEffectInfo.EffectIndex);
                         else
                             Log.outDebug(LogFilter.Spells, "SPELL: cannot find channel spell target for spell ID {0}, effect {1}", m_spellInfo.Id, spellEffectInfo.EffectIndex);
                     }
@@ -772,7 +772,7 @@ namespace Game.Spells
                     // find last added target for this effect
                     foreach (var target in m_UniqueTargetInfo)
                     {
-                        if (Convert.ToBoolean(target.EffectMask & (1 << (int)spellEffectInfo.EffectIndex)))
+                        if (Convert.ToBoolean(target.EffectMask & (1 << spellEffectInfo.EffectIndex)))
                         {
                             referer = Global.ObjAccessor.GetUnit(m_caster, target.TargetGUID);
                             break;
@@ -1217,11 +1217,11 @@ namespace Game.Spells
             if (target)
             {
                 if (target.IsUnit())
-                    AddUnitTarget(target.ToUnit(), 1u << (int)spellEffectInfo.EffectIndex, checkIfValid);
+                    AddUnitTarget(target.ToUnit(), 1u << spellEffectInfo.EffectIndex, checkIfValid);
                 else if (target.IsGameObject())
-                    AddGOTarget(target.ToGameObject(), 1u << (int)spellEffectInfo.EffectIndex);
+                    AddGOTarget(target.ToGameObject(), 1u << spellEffectInfo.EffectIndex);
                 else if (target.IsCorpse())
-                    AddCorpseTarget(target.ToCorpse(), 1u << (int)spellEffectInfo.EffectIndex);
+                    AddCorpseTarget(target.ToCorpse(), 1u << spellEffectInfo.EffectIndex);
             }
         }
 
@@ -1235,17 +1235,17 @@ namespace Game.Spells
             if (target != null)
             {
                 if (target.IsUnit())
-                    AddUnitTarget(target.ToUnit(), 1u << (int)spellEffectInfo.EffectIndex, true, false);
+                    AddUnitTarget(target.ToUnit(), 1u << spellEffectInfo.EffectIndex, true, false);
                 else if (target.IsGameObject())
-                    AddGOTarget(target.ToGameObject(), 1u << (int)spellEffectInfo.EffectIndex);
+                    AddGOTarget(target.ToGameObject(), 1u << spellEffectInfo.EffectIndex);
                 else if (target.IsCorpse())
-                    AddCorpseTarget(target.ToCorpse(), 1u << (int)spellEffectInfo.EffectIndex);
+                    AddCorpseTarget(target.ToCorpse(), 1u << spellEffectInfo.EffectIndex);
 
-                SelectImplicitChainTargets(spellEffectInfo, targetType, target, 1u << (int)spellEffectInfo.EffectIndex);
+                SelectImplicitChainTargets(spellEffectInfo, targetType, target, 1u << spellEffectInfo.EffectIndex);
             }
             // Script hook can remove object target and we would wrongly land here
             else if (item != null)
-                AddItemTarget(item, 1u << (int)spellEffectInfo.EffectIndex);
+                AddItemTarget(item, 1u << spellEffectInfo.EffectIndex);
         }
 
         void SelectImplicitChainTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, WorldObject target, uint effMask)
@@ -1258,8 +1258,8 @@ namespace Game.Spells
             if (maxTargets > 1)
             {
                 // mark damage multipliers as used
-                for (int k = (int)spellEffectInfo.EffectIndex; k < m_spellInfo.GetEffects().Count; ++k)
-                    if (Convert.ToBoolean(effMask & (1 << (int)k)))
+                for (int k = spellEffectInfo.EffectIndex; k < m_spellInfo.GetEffects().Count; ++k)
+                    if (Convert.ToBoolean(effMask & (1 << k)))
                         m_damageMultipliers[spellEffectInfo.EffectIndex] = 1.0f;
 
                 m_applyMultiplierMask |= effMask;
@@ -1525,7 +1525,7 @@ namespace Game.Spells
                     {
                         Item itemTarget = m_targets.GetItemTarget();
                         if (itemTarget != null)
-                            AddItemTarget(itemTarget, (uint)(1 << (int)spellEffectInfo.EffectIndex));
+                            AddItemTarget(itemTarget, (uint)(1 << spellEffectInfo.EffectIndex));
                         return;
                     }
                     if (Convert.ToBoolean(targetMask & SpellCastTargetFlags.GameobjectMask))
@@ -1545,11 +1545,11 @@ namespace Game.Spells
             if (target != null)
             {
                 if (target.IsUnit())
-                    AddUnitTarget(target.ToUnit(), 1u << (int)spellEffectInfo.EffectIndex, false);
+                    AddUnitTarget(target.ToUnit(), 1u << spellEffectInfo.EffectIndex, false);
                 else if (target.IsGameObject())
-                    AddGOTarget(target.ToGameObject(), 1u << (int)spellEffectInfo.EffectIndex);
+                    AddGOTarget(target.ToGameObject(), 1u << spellEffectInfo.EffectIndex);
                 else if (target.IsCorpse())
-                    AddCorpseTarget(target.ToCorpse(), 1u << (int)spellEffectInfo.EffectIndex);
+                    AddCorpseTarget(target.ToCorpse(), 1u << spellEffectInfo.EffectIndex);
             }
         }
 
@@ -1798,7 +1798,7 @@ namespace Game.Spells
         {
             foreach (var spellEffectInfo in m_spellInfo.GetEffects())
                 if (!spellEffectInfo.IsEffect() || !CheckEffectTarget(target, spellEffectInfo, losPosition))
-                    effectMask &= ~(1u << (int)spellEffectInfo.EffectIndex);
+                    effectMask &= ~(1u << spellEffectInfo.EffectIndex);
 
             // no effects left
             if (effectMask == 0)
@@ -1811,7 +1811,7 @@ namespace Game.Spells
             // Check for effect immune skip if immuned
             foreach (var spellEffectInfo in m_spellInfo.GetEffects())
                 if (target.IsImmunedToSpellEffect(m_spellInfo, spellEffectInfo, m_caster))
-                    effectMask &= ~(1u << (int)spellEffectInfo.EffectIndex);
+                    effectMask &= ~(1u << spellEffectInfo.EffectIndex);
 
             ObjectGuid targetGUID = target.GetGUID();
 
@@ -1900,7 +1900,7 @@ namespace Game.Spells
         {
             foreach (var spellEffectInfo in m_spellInfo.GetEffects())
                 if (!spellEffectInfo.IsEffect() || !CheckEffectTarget(go, spellEffectInfo))
-                    effectMask &= ~(1u << (int)spellEffectInfo.EffectIndex);
+                    effectMask &= ~(1u << spellEffectInfo.EffectIndex);
 
             // no effects left
             if (effectMask == 0)
@@ -1952,7 +1952,7 @@ namespace Game.Spells
         {
             foreach (var spellEffectInfo in m_spellInfo.GetEffects())
                 if (!spellEffectInfo.IsEffect() || !CheckEffectTarget(item, spellEffectInfo))
-                    effectMask &= ~(1u << (int)spellEffectInfo.EffectIndex);
+                    effectMask &= ~(1u << spellEffectInfo.EffectIndex);
 
             // no effects left
             if (effectMask == 0)
@@ -1980,7 +1980,7 @@ namespace Game.Spells
         {
             foreach (SpellEffectInfo spellEffectInfo in m_spellInfo.GetEffects())
                 if (!spellEffectInfo.IsEffect())
-                    effectMask &= ~(1u << (int)spellEffectInfo.EffectIndex);
+                    effectMask &= ~(1u << spellEffectInfo.EffectIndex);
 
             // no effects left
             if (effectMask == 0)
@@ -2028,29 +2028,29 @@ namespace Game.Spells
             m_UniqueCorpseTargetInfo.Add(target);
         }
 
-        void AddDestTarget(SpellDestination dest, uint effIndex)
+        void AddDestTarget(SpellDestination dest, int effIndex)
         {
             m_destTargets[effIndex] = dest;
         }
 
-        public long GetUnitTargetCountForEffect(uint effect)
+        public long GetUnitTargetCountForEffect(int effect)
         {
-            return m_UniqueTargetInfo.Count(targetInfo => targetInfo.MissCondition == SpellMissInfo.None && (targetInfo.EffectMask & (1 << (int)effect)) != 0);
+            return m_UniqueTargetInfo.Count(targetInfo => targetInfo.MissCondition == SpellMissInfo.None && (targetInfo.EffectMask & (1 << effect)) != 0);
         }
 
-        public long GetGameObjectTargetCountForEffect(uint effect)
+        public long GetGameObjectTargetCountForEffect(int effect)
         {
-            return m_UniqueGOTargetInfo.Count(targetInfo => (targetInfo.EffectMask & (1 << (int)effect)) != 0);
+            return m_UniqueGOTargetInfo.Count(targetInfo => (targetInfo.EffectMask & (1 << effect)) != 0);
         }
 
-        public long GetItemTargetCountForEffect(uint effect)
+        public long GetItemTargetCountForEffect(int effect)
         {
-            return m_UniqueItemInfo.Count(targetInfo => (targetInfo.EffectMask & (1 << (int)effect)) != 0);
+            return m_UniqueItemInfo.Count(targetInfo => (targetInfo.EffectMask & (1 << effect)) != 0);
         }
 
-        public long GetCorpseTargetCountForEffect(uint effect)
+        public long GetCorpseTargetCountForEffect(int effect)
         {
-            return m_UniqueCorpseTargetInfo.Count(targetInfo => (targetInfo.EffectMask & (1u << (int)effect)) != 0);
+            return m_UniqueCorpseTargetInfo.Count(targetInfo => (targetInfo.EffectMask & (1u << effect)) != 0);
         }
 
         public SpellMissInfo PreprocessSpellHit(Unit unit, TargetInfo hitInfo)
@@ -2128,7 +2128,7 @@ namespace Game.Spells
             {
                 foreach (var spellEffectInfo in m_spellInfo.GetEffects())
                 {
-                    hitInfo.AuraBasePoints[spellEffectInfo.EffectIndex] = (m_spellValue.CustomBasePointsMask & (1 << (int)spellEffectInfo.EffectIndex)) != 0 ?
+                    hitInfo.AuraBasePoints[spellEffectInfo.EffectIndex] = (m_spellValue.CustomBasePointsMask & (1 << spellEffectInfo.EffectIndex)) != 0 ?
                     m_spellValue.EffectBasePoints[spellEffectInfo.EffectIndex] :
                     spellEffectInfo.CalcBaseValue(m_originalCaster, unit, m_castItemEntry, m_castItemLevel);
                 }
@@ -2154,7 +2154,7 @@ namespace Game.Spells
                     foreach (var spellEffectInfo in m_spellInfo.GetEffects())
                     {
                         // mod duration only for effects applying aura!
-                        if ((hitInfo.EffectMask & (1 << (int)spellEffectInfo.EffectIndex)) != 0 &&
+                        if ((hitInfo.EffectMask & (1 << spellEffectInfo.EffectIndex)) != 0 &&
                             spellEffectInfo.IsUnitOwnedAuraEffect() && !m_spellInfo.IsPositiveEffect(spellEffectInfo.EffectIndex))
                         {
                             hitInfo.Positive = false;
@@ -2176,7 +2176,7 @@ namespace Game.Spells
 
         public void DoSpellEffectHit(Unit unit, SpellEffectInfo spellEffectInfo, TargetInfo hitInfo)
         {
-            uint aura_effmask = Aura.BuildEffectMaskForOwner(m_spellInfo, 1u << (int)spellEffectInfo.EffectIndex, unit);
+            uint aura_effmask = Aura.BuildEffectMaskForOwner(m_spellInfo, 1u << spellEffectInfo.EffectIndex, unit);
             if (aura_effmask != 0)
             {
                 WorldObject caster = m_caster;
@@ -2331,7 +2331,7 @@ namespace Game.Spells
             uint channelAuraMask = 0;
             foreach (var spellEffectInfo in m_spellInfo.GetEffects())
                 if (spellEffectInfo.IsEffect(SpellEffectName.ApplyAura))
-                    channelAuraMask |= 1u << (int)spellEffectInfo.EffectIndex;
+                    channelAuraMask |= 1u << spellEffectInfo.EffectIndex;
 
             channelAuraMask &= channelTargetEffectMask;
 
@@ -2752,7 +2752,7 @@ namespace Game.Spells
                     uint aura_effmask = 0;
                     foreach (var spellEffectInfo in m_spellInfo.GetEffects())
                         if (spellEffectInfo.IsUnitOwnedAuraEffect())
-                            aura_effmask |= 1u << (int)spellEffectInfo.EffectIndex;
+                            aura_effmask |= 1u << spellEffectInfo.EffectIndex;
 
                     if (aura_effmask != 0)
                     {
@@ -2977,7 +2977,7 @@ namespace Game.Spells
             foreach (var spellEffectInfo in m_spellInfo.GetEffects())
             {
                 foreach (TargetInfoBase target in targetContainer)
-                    if ((target.EffectMask & (1 << (int)spellEffectInfo.EffectIndex)) != 0)
+                    if ((target.EffectMask & (1 << spellEffectInfo.EffectIndex)) != 0)
                         target.DoTargetSpellHit(this, spellEffectInfo);
             }
 
@@ -4214,8 +4214,8 @@ namespace Game.Spells
                 }
 
                 foreach (var spellEffectInfo in m_spellInfo.GetEffects())
-                    if (spellEffectInfo.Effect == SpellEffectName.ApplyAura && (explicitTargetEffectMask & (1u << (int)spellEffectInfo.EffectIndex)) != 0)
-                        channelAuraMask |= 1u << (int)spellEffectInfo.EffectIndex;
+                    if (spellEffectInfo.Effect == SpellEffectName.ApplyAura && (explicitTargetEffectMask & (1u << spellEffectInfo.EffectIndex)) != 0)
+                        channelAuraMask |= 1u << spellEffectInfo.EffectIndex;
 
                 foreach (TargetInfo target in m_UniqueTargetInfo)
                 {
@@ -5615,9 +5615,9 @@ namespace Game.Spells
                 }
 
                 if (spellEffectInfo.IsAura())
-                    approximateAuraEffectMask |= 1u << (int)spellEffectInfo.EffectIndex;
+                    approximateAuraEffectMask |= 1u << spellEffectInfo.EffectIndex;
                 else if (spellEffectInfo.IsEffect())
-                    nonAuraEffectMask |= 1u << (int)spellEffectInfo.EffectIndex;
+                    nonAuraEffectMask |= 1u << spellEffectInfo.EffectIndex;
             }
 
             foreach (var spellEffectInfo in m_spellInfo.GetEffects())
@@ -5744,7 +5744,7 @@ namespace Game.Spells
                 // check if target already has the same type, but more powerful aura
                 if (!m_spellInfo.HasAttribute(SpellAttr4.AuraNeverBounces)
                     && (nonAuraEffectMask == 0 || m_spellInfo.HasAttribute(SpellAttr4.AuraBounceFailsSpell))
-                    && (approximateAuraEffectMask & (1 << (int)spellEffectInfo.EffectIndex)) != 0
+                    && (approximateAuraEffectMask & (1 << spellEffectInfo.EffectIndex)) != 0
                     && !m_spellInfo.IsTargetingArea())
                 {
                     Unit target = m_targets.GetUnitTarget();
@@ -7186,13 +7186,13 @@ namespace Game.Spells
             foreach (var spellEffectInfo in m_spellInfo.GetEffects())
             {
                 float multiplier = 1.0f;
-                if ((m_applyMultiplierMask & (1 << (int)spellEffectInfo.EffectIndex)) != 0)
+                if ((m_applyMultiplierMask & (1 << spellEffectInfo.EffectIndex)) != 0)
                     multiplier = spellEffectInfo.CalcDamageMultiplier(m_originalCaster, this);
 
                 foreach (TargetInfo target in m_UniqueTargetInfo)
                 {
                     uint mask = target.EffectMask;
-                    if ((mask & (1 << (int)spellEffectInfo.EffectIndex)) == 0)
+                    if ((mask & (1 << spellEffectInfo.EffectIndex)) == 0)
                         continue;
 
                     DoEffectOnLaunchTarget(target, multiplier, spellEffectInfo);
@@ -7268,7 +7268,7 @@ namespace Game.Spells
                 }
             }
 
-            if ((m_applyMultiplierMask & (1 << (int)spellEffectInfo.EffectIndex)) != 0)
+            if ((m_applyMultiplierMask & (1 << spellEffectInfo.EffectIndex)) != 0)
             {
                 m_damage = (int)(m_damage * m_damageMultipliers[spellEffectInfo.EffectIndex]);
                 m_healing = (int)(m_healing * m_damageMultipliers[spellEffectInfo.EffectIndex]);
@@ -7471,7 +7471,7 @@ namespace Game.Spells
                 }
         }
 
-        private bool CheckSpellEffectHandler(ISpellEffectHandler se, uint effIndex)
+        private bool CheckSpellEffectHandler(ISpellEffectHandler se, int effIndex)
         {
             if (m_spellInfo.GetEffects().Count <= effIndex)
                 return false;
@@ -7486,7 +7486,7 @@ namespace Game.Spells
             return se.EffectName == SpellEffectName.Any || spellEffectInfo.Effect == se.EffectName;
         }
 
-        public bool CheckTargetHookEffect(ITargetHookHandler th, uint effIndexToCheck)
+        public bool CheckTargetHookEffect(ITargetHookHandler th, int effIndexToCheck)
         {
             if (th.TargetType == 0)
                 return false;
@@ -7615,7 +7615,7 @@ namespace Game.Spells
             return castTime;
         }
 
-        bool CallScriptEffectHandlers(uint effIndex, SpellEffectHandleMode mode)
+        bool CallScriptEffectHandlers(int effIndex, SpellEffectHandleMode mode)
         {
             // execute script effect handler hooks and check if effects was prevented
             bool preventDefault = false;
@@ -7654,7 +7654,7 @@ namespace Game.Spells
             return preventDefault;
         }
 
-        private static bool ProcessScript(uint effIndex, bool preventDefault, ISpellScript script, ISpellEffect effect, SpellScriptHookType hookType)
+        private static bool ProcessScript(int effIndex, bool preventDefault, ISpellScript script, ISpellEffect effect, SpellScriptHookType hookType)
         {
             script._InitHit();
 
@@ -7671,7 +7671,7 @@ namespace Game.Spells
             return preventDefault;
         }
 
-        void CallScriptSuccessfulDispel(uint effIndex)
+        void CallScriptSuccessfulDispel(int effIndex)
         {
             foreach (var script in GetEffectScripts(SpellScriptHookType.EffectSuccessfulDispel, effIndex))
             {
@@ -7727,7 +7727,7 @@ namespace Game.Spells
             }
         }
 
-        void CallScriptObjectAreaTargetSelectHandlers(List<WorldObject> targets, uint effIndex, SpellImplicitTargetInfo targetType)
+        void CallScriptObjectAreaTargetSelectHandlers(List<WorldObject> targets, int effIndex, SpellImplicitTargetInfo targetType)
         {
             foreach (var script in GetEffectScripts(SpellScriptHookType.ObjectAreaTargetSelect, effIndex))
             {
@@ -7741,7 +7741,7 @@ namespace Game.Spells
             }
         }
 
-        void CallScriptObjectTargetSelectHandlers(ref WorldObject target, uint effIndex, SpellImplicitTargetInfo targetType)
+        void CallScriptObjectTargetSelectHandlers(ref WorldObject target, int effIndex, SpellImplicitTargetInfo targetType)
         {
             foreach (var script in GetEffectScripts(SpellScriptHookType.ObjectTargetSelect, effIndex))
             {
@@ -7755,7 +7755,7 @@ namespace Game.Spells
             }
         }
 
-        void CallScriptDestinationTargetSelectHandlers(ref SpellDestination target, uint effIndex, SpellImplicitTargetInfo targetType)
+        void CallScriptDestinationTargetSelectHandlers(ref SpellDestination target, int effIndex, SpellImplicitTargetInfo targetType)
         {
             foreach (var script in GetEffectScripts(SpellScriptHookType.DestinationTargetSelect, effIndex))
             {
@@ -7781,7 +7781,7 @@ namespace Game.Spells
             }
         }
 
-        bool CheckScriptEffectImplicitTargets(uint effIndex, uint effIndexToCheck)
+        bool CheckScriptEffectImplicitTargets(int effIndex, int effIndexToCheck)
         {
             // Skip if there are not any script
             if (m_loadedScripts.Empty())
@@ -7947,7 +7947,7 @@ namespace Game.Spells
         readonly Dictionary<Type, List<ISpellScript>> m_spellScriptsByType = new Dictionary<Type, List<ISpellScript>>();
         static List<ISpellScript> _dummy = new();
         static List<(ISpellScript, ISpellEffect)> _dummySpellEffects = new();
-        Dictionary<uint, Dictionary<SpellScriptHookType, List<(ISpellScript, ISpellEffect)>>> _effectHandlers = new Dictionary<uint, Dictionary<SpellScriptHookType, List<(ISpellScript, ISpellEffect)>>>();
+        Dictionary<int, Dictionary<SpellScriptHookType, List<(ISpellScript, ISpellEffect)>>> _effectHandlers = new Dictionary<int, Dictionary<SpellScriptHookType, List<(ISpellScript, ISpellEffect)>>>();
 
         public List<ISpellScript> GetSpellScripts<T>() where T : ISpellScript
         {
@@ -7963,7 +7963,7 @@ namespace Game.Spells
                 action.Invoke(script);
         }
 
-        public List<(ISpellScript, ISpellEffect)> GetEffectScripts(SpellScriptHookType h, uint index)
+        public List<(ISpellScript, ISpellEffect)> GetEffectScripts(SpellScriptHookType h, int index)
         {
             if (_effectHandlers.TryGetValue(index, out var effDict) &&
                 effDict.TryGetValue(h, out List<(ISpellScript, ISpellEffect)> scripts))
@@ -7973,7 +7973,7 @@ namespace Game.Spells
         }
 
   
-        private void AddSpellEffect(uint index, ISpellScript script, ISpellEffect effect)
+        private void AddSpellEffect(int index, ISpellScript script, ISpellEffect effect)
         {
             if (!_effectHandlers.TryGetValue(index, out var effecTypes))
             {
@@ -8022,7 +8022,7 @@ namespace Game.Spells
 
         int CalculateDamage(SpellEffectInfo spellEffectInfo, Unit target, out float variance)
         {
-            bool needRecalculateBasePoints = (m_spellValue.CustomBasePointsMask & (1 << (int)spellEffectInfo.EffectIndex)) == 0;
+            bool needRecalculateBasePoints = (m_spellValue.CustomBasePointsMask & (1 << spellEffectInfo.EffectIndex)) == 0;
             return m_caster.CalculateSpellDamage(out variance, target, spellEffectInfo, needRecalculateBasePoints ? null : m_spellValue.EffectBasePoints[spellEffectInfo.EffectIndex], m_castItemEntry, m_castItemLevel);
         }
 
@@ -8564,10 +8564,10 @@ namespace Game.Spells
                         positive = false;
                     else if (spell.m_healing == 0)
                     {
-                        for (uint i = 0; i < spell.m_spellInfo.GetEffects().Count; ++i)
+                        for (int i = 0; i < spell.m_spellInfo.GetEffects().Count; ++i)
                         {
                             // in case of immunity, check all effects to choose correct procFlags, as none has technically hit
-                            if (EffectMask != 0 && (EffectMask & (1 << (int)i)) == 0)
+                            if (EffectMask != 0 && (EffectMask & (1 << i)) == 0)
                                 continue;
 
                             if (!spell.m_spellInfo.IsPositiveEffect(i))
@@ -8795,9 +8795,9 @@ namespace Game.Spells
                     {
                         // only apply unapplied effects (for reapply case)
                         uint effMask = EffectMask & aurApp.GetEffectsToApply();
-                        for (uint i = 0; i < spell.m_spellInfo.GetEffects().Count; ++i)
-                            if ((effMask & (1 << (int)i)) != 0 && aurApp.HasEffect(i))
-                                effMask &= ~(1u << (int)i);
+                        for (int i = 0; i < spell.m_spellInfo.GetEffects().Count; ++i)
+                            if ((effMask & (1 << i)) != 0 && aurApp.HasEffect(i))
+                                effMask &= ~(1u << i);
 
                         if (effMask != 0)
                             _spellHitTarget._ApplyAura(aurApp, effMask);

@@ -14,7 +14,7 @@ public class spell_pri_prayer_of_mending_heal : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleHeal(uint UnnamedParameter)
+	private void HandleHeal(int effIndex)
 	{
 		var caster = GetOriginalCaster();
 

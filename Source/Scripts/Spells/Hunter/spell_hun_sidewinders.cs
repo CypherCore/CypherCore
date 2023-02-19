@@ -14,7 +14,7 @@ public class spell_hun_sidewinders : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	private void HandleDummy(uint UnnamedParameter)
+	private void HandleDummy(int effIndex)
 	{
 		var caster = GetCaster();
 
@@ -27,7 +27,7 @@ public class spell_hun_sidewinders : SpellScript, IHasSpellEffects
 		}
 	}
 
-	private void HandleDummy1(uint UnnamedParameter)
+	private void HandleDummy1(int effIndex)
 	{
 		var caster = GetCaster();
 

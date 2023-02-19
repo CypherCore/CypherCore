@@ -15,7 +15,7 @@ public class spell_demon_hunter_mana_break : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();
 
-	public void HandleHit(uint UnnamedParameter)
+	public void HandleHit(int effIndex)
 	{
 		var caster = GetCaster();
 		var target = GetHitUnit();

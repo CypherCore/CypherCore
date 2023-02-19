@@ -25,7 +25,7 @@ public class spell_pri_purify : SpellScript, IHasSpellEffects
 		return SpellCastResult.SpellCastOk;
 	}
 
-	private void AfterEffectHit(uint UnnamedParameter)
+	private void AfterEffectHit(int effIndex)
 	{
 		if (GetHitUnit().IsFriendlyTo(GetCaster()))
 		{

@@ -26,7 +26,7 @@ public class spell_dh_immolation_aura_damage : SpellScript, IHasSpellEffects
 		return ValidateSpellInfo(DemonHunterSpells.CHARRED_FLESH, DemonHunterSpells.FIERY_BRAND_DOT, DemonHunterSpells.FIERY_BRAND_MARKER);
 	}
 
-	private void HandleHit(uint UnnamedParameter)
+	private void HandleHit(int effIndex)
 	{
 		var target = GetHitUnit();
 

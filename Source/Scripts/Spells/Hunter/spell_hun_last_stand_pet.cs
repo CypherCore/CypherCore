@@ -25,7 +25,7 @@ internal class spell_hun_last_stand_pet : SpellScript, IHasSpellEffects
 		SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 	}
 
-	private void HandleDummy(uint effIndex)
+	private void HandleDummy(int effIndex)
 	{
 		var                caster = GetCaster();
 		CastSpellExtraArgs args   = new(TriggerCastFlags.FullMask);

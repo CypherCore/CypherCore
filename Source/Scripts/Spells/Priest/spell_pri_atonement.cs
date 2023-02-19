@@ -76,7 +76,7 @@ public class spell_pri_atonement : AuraScript, IAuraCheckProc, IHasAuraEffects
 			12.0f, 12.0f, 10.0f, 8.0f, 7.0f, 6.0f, 5.0f, 5.0f, 4.0f, 4.0f, 3.0f
 		};
 
-		foreach (uint effectIndex in new[]
+		foreach (int effectIndex in new[]
 		                             {
 			                             0, 1, 2
 		                             })
