@@ -1190,6 +1190,10 @@ namespace Framework.Database
                 "RtOperandType1, RtOperandType2, RtOperandType3, RtOperandType4, RtOperandType5, RtOperand1, RtOperand2, RtOperand3, RtOperand4, RtOperand5, " +
                 "Logic1, Logic2, Logic3, Logic4, Logic5 FROM spell_item_enchantment_condition WHERE (`VerifiedBuild` > 0) = ?");
 
+            // SpellKeyboundOverride.db2
+            PrepareStatement(HotfixStatements.SEL_SPELL_KEYBOUND_OVERRIDE, "SELECT ID, `Function`, Type, Data, Flags FROM spell_keybound_override" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
+
             // SpellLabel.db2
             PrepareStatement(HotfixStatements.SEL_SPELL_LABEL, "SELECT ID, LabelID, SpellID FROM spell_label WHERE (`VerifiedBuild` > 0) = ?");
 
@@ -2101,6 +2105,8 @@ namespace Framework.Database
         SEL_SPELL_ITEM_ENCHANTMENT_LOCALE,
 
         SEL_SPELL_ITEM_ENCHANTMENT_CONDITION,
+
+        SEL_SPELL_KEYBOUND_OVERRIDE,
 
         SEL_SPELL_LABEL,
 

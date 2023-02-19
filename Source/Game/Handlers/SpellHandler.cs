@@ -701,5 +701,19 @@ namespace Game
         {
             GetPlayer().SendSpellCategoryCooldowns();
         }
+
+        [WorldPacketHandler(ClientOpcodes.KeyboundOverride, Processing = PacketProcessing.ThreadSafe)]
+        void HandleKeyboundOverride(KeyboundOverride keyboundOverride)
+        {
+            Player player = GetPlayer();
+            if (!player.HasAuraTypeWithMiscvalue(AuraType.KeyboundOverride, keyboundOverride.OverrideID))
+                return;
+
+            SpellKeyboundOverrideRecord spellKeyboundOverride = CliDB.SpellKeyboundOverrideStorage.LookupByKey(keyboundOverride.OverrideID);
+            if (spellKeyboundOverride == null)
+                return;
+
+            player.CastSpell(player, spellKeyboundOverride.Data);
+        }
     }
 }

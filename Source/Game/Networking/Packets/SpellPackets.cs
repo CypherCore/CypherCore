@@ -1158,6 +1158,18 @@ namespace Game.Networking.Packets
             IsFavorite = _worldPacket.HasBit();
         }
     }
+
+    class KeyboundOverride : ClientPacket
+    {
+        public KeyboundOverride(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            OverrideID = _worldPacket.ReadUInt16();
+        }
+
+        public ushort OverrideID;
+    }
     
     //Structs
     public struct SpellLogPowerData

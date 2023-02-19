@@ -380,6 +380,15 @@ namespace Game.DataStorage
         public byte[] Logic = new byte[5];
     }
 
+    public sealed class SpellKeyboundOverrideRecord
+    {
+        public uint Id;
+        public string Function;
+        public sbyte Type;
+        public uint Data;
+        public int Flags;
+    }
+
     public sealed class SpellLabelRecord
     {
         public uint Id;
