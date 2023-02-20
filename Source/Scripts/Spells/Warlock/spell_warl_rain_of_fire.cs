@@ -34,8 +34,8 @@ namespace Scripts.Spells.Warlock
 			var caster = GetCaster();
 			var hasPyro = caster.HasAura(WarlockSpells.PYROGENICS);
 
-			var              rainOfFireAreaTriggers = GetTarget().GetAreaTriggers(WarlockSpells.RAIN_OF_FIRE);
-			List<ObjectGuid> targetsInRainOfFire    = new();
+			var rainOfFireAreaTriggers = GetTarget().GetAreaTriggers(WarlockSpells.RAIN_OF_FIRE);
+			List<ObjectGuid> targetsInRainOfFire = new();
 
 			foreach (var rainOfFireAreaTrigger in rainOfFireAreaTriggers)
 			{
@@ -50,12 +50,12 @@ namespace Scripts.Spells.Warlock
 				if (insideTarget)
 					if (!GetTarget().IsFriendlyTo(insideTarget))
 					{
-                        GetTarget().CastSpell(insideTarget, WarlockSpells.RAIN_OF_FIRE_DAMAGE, true);
+						GetTarget().CastSpell(insideTarget, WarlockSpells.RAIN_OF_FIRE_DAMAGE, true);
 
 						if (hasPyro && !insideTarget.HasAura(WarlockSpells.PYROGENICS_AURA))
 						{
 							_auraUnits.Add(insideTarget);
-							caster.CastSpell(insideTarget, WarlockSpells.PYROGENICS_AURA, true);
+							caster.AddAura(WarlockSpells.PYROGENICS_AURA, insideTarget);
 						}
 					}
 			}
