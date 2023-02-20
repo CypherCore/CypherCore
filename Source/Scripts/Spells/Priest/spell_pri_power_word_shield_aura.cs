@@ -9,7 +9,7 @@ using Game.Spells;
 
 namespace Scripts.Spells.Priest;
 
-[Script] // 17 - Power Word: Shield Aura
+[SpellScript(17)] // 17 - Power Word: Shield Aura
 internal class spell_pri_power_word_shield_aura : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();

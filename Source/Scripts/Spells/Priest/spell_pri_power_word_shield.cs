@@ -8,7 +8,7 @@ using Game.Spells;
 
 namespace Scripts.Spells.Priest;
 
-[Script] // 17 - Power Word: Shield
+[SpellScript(17)]  // 17 - Power Word: Shield
 internal class spell_pri_power_word_shield : SpellScript, ISpellCheckCast, ISpellAfterHit
 {
 	public void AfterHit()

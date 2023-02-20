@@ -586,7 +586,7 @@ namespace Game.Entities
                     CalcDamageInfo damageInfo;
                     CalculateMeleeDamage(victim, out damageInfo, attType);
                     // Send log damage message to client
-                    DealDamageMods(damageInfo.Attacker, victim, ref damageInfo.Damage, ref damageInfo.Absorb);
+                    CheckEvade(damageInfo.Attacker, victim, ref damageInfo.Damage, ref damageInfo.Absorb);
                     SendAttackStateUpdate(damageInfo);
 
                     _lastDamagedTargetGuid = victim.GetGUID();
@@ -1107,6 +1107,8 @@ namespace Game.Entities
             // Script Hook For CalculateMeleeDamage -- Allow scripts to change the Damage pre class mitigation calculations
             var t = damageInfo.Target;
             var a = damageInfo.Attacker;
+            ScaleDamage(a, t, ref damage);
+
             Global.ScriptMgr.ForEach<IUnitModifyMeleeDamage>(p => p.ModifyMeleeDamage(t, a, ref damage));
 
             // Calculate armor reduction

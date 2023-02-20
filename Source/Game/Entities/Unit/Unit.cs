@@ -2516,18 +2516,28 @@ namespace Game.Entities
             }
         }
 
-        public static void DealDamageMods(Unit attacker, Unit victim, ref uint damage, ref uint absorb)
+        public static bool CheckEvade(Unit attacker, Unit victim, ref uint damage, ref uint absorb)
         {
             if (victim == null || !victim.IsAlive() || victim.HasUnitState(UnitState.InFlight)
-                || (victim.IsTypeId(TypeId.Unit) && victim.ToCreature().IsEvadingAttacks()))
+              || (victim.IsTypeId(TypeId.Unit) && victim.ToCreature().IsEvadingAttacks()))
             {
                 absorb += damage;
                 damage = 0;
-                return;
+                return true;
             }
+            return false;
+        }
 
+        public static void ScaleDamage(Unit attacker, Unit victim, ref uint damage)
+        {
             if (attacker != null)
                 damage = (uint)(damage * attacker.GetDamageMultiplierForTarget(victim));
+        }
+
+        public static void DealDamageMods(Unit attacker, Unit victim, ref uint damage, ref uint absorb)
+        {
+            if (!CheckEvade(attacker, victim, ref damage, ref absorb))
+                ScaleDamage(attacker, victim, ref damage);
         }
 
         public static uint DealDamage(Unit attacker, Unit victim, uint damage, CleanDamage cleanDamage = null, DamageEffectType damagetype = DamageEffectType.Direct, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal, SpellInfo spellProto = null, bool durabilityLoss = true)
@@ -2894,10 +2904,11 @@ namespace Game.Entities
                 }
             }
 
+            // logging uses damageDone
             if (victim.IsPlayer())
             {
                 player = victim.ToPlayer();
-                ScriptManager.Instance.ForEach<IPlayerOnTakeDamage>(player.GetClass(), a => a.OnPlayerTakeDamage(player, damageTaken, damageSchoolMask));
+                ScriptManager.Instance.ForEach<IPlayerOnTakeDamage>(player.GetClass(), a => a.OnPlayerTakeDamage(player, damageDone, damageSchoolMask));
             }
 
             // make player victims stand up automatically
@@ -2905,9 +2916,9 @@ namespace Game.Entities
                 victim.SetStandState(UnitStandStateType.Stand);
 
             if (player != null && player.GetPrimarySpecialization() == TalentSpecialization.DruidBear)
-                    victim.SaveDamageHistory(damageTaken);
+                    victim.SaveDamageHistory(damageDone);
 
-            return damageTaken;
+            return damageDone;
         }
 
         void DealMeleeDamage(CalcDamageInfo damageInfo, bool durabilityLoss)
