@@ -10,7 +10,7 @@ namespace Game.Spells.Auras
 {
     public class AuraApplicationCollection
     {
-        protected Dictionary<Guid, AuraApplication> _auras = new();
+        protected Dictionary<Guid, AuraApplication> _auras = new(); // To keep this thread safe we have the guid as the key to all auras, The aura may be removed while preforming a query.
         protected MultiMapHashSet<uint, Guid> _aurasBySpellId = new();
         protected MultiMapHashSet<ObjectGuid, Guid> _byCasterGuid  = new();
         protected MultiMapHashSet<ObjectGuid, Guid> _byCastItemGuid = new();
@@ -227,7 +227,7 @@ namespace Game.Spells.Auras
             AuraApplicationCollection _collection;
             bool _hasLoaded = false;
 
-            public HashSet<Guid> Results { get; } = new();
+            public HashSet<Guid> Results { get; private set; } = new();
 
             internal AuraApplicationQuery(AuraApplicationCollection auraCollection)
             {
@@ -522,15 +522,21 @@ namespace Game.Spells.Auras
 
             public AuraApplicationQuery ForEachResult(Action<AuraApplication> action)
             {
-                foreach (var ar in Results)
-                    action(_collection._auras[ar]);
+                foreach (var aura in Results)
+                    if (_collection._auras.TryGetValue(aura, out var result))
+                        action(result);
 
-                _hasLoaded = true;
                 return this;
             }
 
             public AuraApplicationQuery AlsoMatches(Func<AuraApplication, bool> predicate)
             {
+                if (!_hasLoaded)
+                {
+                    lock (_collection._auras)
+                        Results = _collection._auras.Keys.ToHashSet();
+                }
+
                 Results.RemoveWhere(g =>
                 {
                     if (_collection._auras.TryGetValue(g, out var result))

@@ -2230,7 +2230,7 @@ namespace Game.Entities
         public void RemoveAllAurasRequiringDeadTarget()
         {
             m_appliedAuras.Query().IsPassive(false).IsRequiringDeadTarget().Execute(_UnapplyAura, AuraRemoveMode.Default);
-            m_ownedAuras.Query().IsRequiringDeadTarget().IsPassive(false).Execute(RemoveOwnedAura);
+            m_ownedAuras.Query().IsPassive(false).IsRequiringDeadTarget().Execute(RemoveOwnedAura);
         }
 
         public AuraEffect IsScriptOverriden(SpellInfo spell, int script)
