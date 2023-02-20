@@ -80,7 +80,8 @@ namespace Scripts.Spells.Warlock
 		public const uint DESTRUCTION_PASSIVE = 137046;
 		public const uint DEVOURER_OF_LIFE_PROC = 215165;
 		public const uint DEVOUR_MAGIC_HEAL = 19658;
-		public const uint DIMENSIONAL_RIFT = 196586;
+		public const uint DIABOLIC_EMBERS = 387173;
+        public const uint DIMENSIONAL_RIFT = 196586;
 		public const uint DISRUPTED_NETHER = 114736;
 		public const uint DOOM = 603;
 		public const uint DOOMGUARD_SHADOW_LOCK = 171138;
@@ -161,7 +162,8 @@ namespace Scripts.Spells.Warlock
 		public const uint IMPROVED_SOUL_FIRE_STATE = 85385;
 		public const uint IMP_CAUTERIZE_MASTER = 119899;
 		public const uint INCINERATE = 29722;
-		public const uint INFERNAL_FURNACE = 211119;
+        public const uint INCINERATE_ENERGIZE = 244670;
+        public const uint INFERNAL_FURNACE = 211119;
 		public const uint INFERNAL_METEOR_STRIKE = 171017;
 		public const uint INFERNO_AURA = 270545;
 		public const uint INQUISITORS_GAZE = 386344;

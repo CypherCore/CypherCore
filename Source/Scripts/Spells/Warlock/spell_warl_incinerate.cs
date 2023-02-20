@@ -18,8 +18,11 @@ namespace Scripts.Spells.Warlock
         int _brimstoneDamage = 0;
 		private void HandleOnHitMainTarget(int UnnamedParameter)
 		{
-			GetCaster().ModifyPower(PowerType.SoulShards, 20);
-		}
+			GetCaster().CastSpell(WarlockSpells.INCINERATE_ENERGIZE, true);
+
+            if (IsHitCrit())
+                GetCaster().ModifyPower(PowerType.SoulShards, 20);
+        }
 
 		private void HandleOnHitTarget(int UnnamedParameter)
         {
@@ -29,8 +32,15 @@ namespace Scripts.Spells.Warlock
             if (target == null || caster == null)
                 return;
 
+            DiabolicEmbers(target);
             FireAndBrimstone(target, caster);
             RoaringBlaze(target, caster);
+        }
+
+        private void DiabolicEmbers(Unit caster)
+        {
+            if (caster.HasAura(WarlockSpells.DIABOLIC_EMBERS))
+                caster.CastSpell(WarlockSpells.INCINERATE_ENERGIZE, true);
         }
 
         private void FireAndBrimstone(Unit target, Unit caster)
