@@ -159,7 +159,7 @@ namespace Game.Scripting
             }
 
             scriptReg.AddScript(script);
-            _scriptByType.AddUniqueToList(iface, script);
+            _scriptByType.AddIf(iface, script, (existing, newSc) => existing.GetName() != newSc.GetName());
 
             if (IOHelpers.DoesTypeSupportInterface(iface, typeof(IScriptObject)))
                 _scriptStorage[iface] = scriptReg;
@@ -172,7 +172,7 @@ namespace Game.Scripting
                     _scriptClassByType[iface] = classDict;
                 }
 
-                classDict.AddUniqueToList(((IClassRescriction)script).PlayerClass, script);
+                classDict.AddIf(((IClassRescriction)script).PlayerClass, script, (existing, newSc) => existing.GetName() != newSc.GetName());
             }
 
             foreach (var f in iface.GetInterfaces())
