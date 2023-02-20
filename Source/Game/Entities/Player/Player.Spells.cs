@@ -2211,7 +2211,7 @@ namespace Game.Entities
             RemoveOwnedAura(spellId, GetGUID());
 
             // remove pet auras
-            foreach (var petAur in Global.SpellMgr.GetPetAuras(spellId).Values)
+            foreach (var petAur in Global.SpellMgr.GetPetAuras(spellId)?.Values)
             {
                 RemovePetAura(petAur);
             }

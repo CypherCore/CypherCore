@@ -176,8 +176,12 @@ namespace WorldServer
             if (halfMaxCoreStuckTime == 0)
                 halfMaxCoreStuckTime = uint.MaxValue;
 
+#if DEBUG
             ulong loops = 0;
             ulong total = 0;
+            ulong max = 0;
+            ulong min = 0;
+#endif
             while (!Global.WorldMgr.IsStopped)
             {
                 var realCurrTime = Time.GetMSTime();
@@ -200,11 +204,19 @@ namespace WorldServer
                 loops++;
                 total += diff;
 
+                if (diff > max)
+                    max = diff;
+
+                if (diff < min) 
+                    min = diff;
+
                 if (loops % 2000 == 0)
                 {
-                    Console.WriteLine("Avg: " + total / loops + ", Num loops: " + loops + ", Total Ticks: " + total);
+                    Console.WriteLine($"Avg: {total / loops}, Max {max}, Min {min}, Num loops: {loops}, Total Ticks: {total}");
                     total = 0;
-                    loops= 0;
+                    loops = 0;
+                    max = 0;
+                    min = 0;
                 }
 #endif
             }
