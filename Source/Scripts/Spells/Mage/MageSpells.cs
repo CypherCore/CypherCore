@@ -55,7 +55,9 @@ namespace Scripts.Spells.Mage
 		public const uint SerpentForm = 32817;
 		public const uint ShamanExhaustion = 57723;
 		public const uint ShamanSated = 57724;
-		public const uint SheepForm = 32820;
+		public const uint ShiftingPower = 382440;
+        public const uint ShiftingPowerDamageProc = 382445;
+        public const uint SheepForm = 32820;
 		public const uint SquirrelForm = 32813;
 		public const uint TemporalDisplacement = 80354;
 		public const uint ThermalVoid = 155149;
