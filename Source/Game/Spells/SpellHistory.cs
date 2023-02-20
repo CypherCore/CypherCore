@@ -1059,6 +1059,14 @@ namespace Game.Spells
             }
         }
 
+        public HashSet<uint> SpellsOnCooldown
+        {
+            get
+            {
+                return _spellCooldowns.Keys.ToHashSet();
+            }
+        }
+
         Unit _owner;
         Dictionary<uint, CooldownEntry> _spellCooldowns = new();
         Dictionary<uint, CooldownEntry> _spellCooldownsBeforeDuel = new();
