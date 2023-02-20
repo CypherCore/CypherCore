@@ -212,7 +212,7 @@ namespace WorldServer
 
                 if (loops % 2000 == 0)
                 {
-                    Console.WriteLine($"Avg: {total / loops}, Max {max}, Min {min}, Num loops: {loops}, Total Ticks: {total}");
+                    Console.WriteLine($"Avg: {total / loops}, Max: {max}, Min: {min}, Num loops: {loops}, Total: {total}");
                     total = 0;
                     loops = 0;
                     max = 0;

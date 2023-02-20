@@ -28,6 +28,21 @@ namespace Game.Maps
 {
     public class Map : IDisposable
     {
+        public Dictionary<uint, Dictionary<uint, Grid>> Grids { get { return _grids; } }
+
+        public IEnumerable<uint> GridXKeys()
+        {
+            return _grids.Keys.ToArray();
+        }
+
+        public IEnumerable<uint> GridYKeys(uint x)
+        {
+            if (_grids.TryGetValue(x, out var yGrid))
+                return yGrid.Keys.ToArray();
+
+            return Enumerable.Empty<uint>();
+        }
+
         public Map(uint id, long expiry, uint instanceId, Difficulty spawnmode)
         {
             i_mapRecord = CliDB.MapStorage.LookupByKey(id);
@@ -37,17 +52,6 @@ namespace Game.Maps
             m_VisibilityNotifyPeriod = SharedConst.DefaultVisibilityNotifyPeriod;
             i_gridExpiry = expiry;
             m_terrain = Global.TerrainMgr.LoadTerrain(id);
-
-            for (uint x = 0; x < MapConst.MaxGrids; ++x)
-            {
-                i_grids[x] = new Grid[MapConst.MaxGrids];
-                for (uint y = 0; y < MapConst.MaxGrids; ++y)
-                {
-                    //z code
-                    SetGrid(null, x, y);
-                }
-            }
-
             _zonePlayerCountMap.Clear();
 
             //lets initialize visibility distance for map
@@ -778,11 +782,12 @@ namespace Game.Maps
 
         void ProcessRelocationNotifies(uint diff)
         {
-            for (uint x = 0; x < MapConst.MaxGrids; ++x)
+            var xKeys = GridXKeys();
+            foreach (var x in xKeys)
             {
-                for (uint y = 0; y < MapConst.MaxGrids; ++y)
+                foreach (var y in GridYKeys(x))
                 {
-                    Grid grid = GetGrid(x, y);
+                    var grid = GetGrid(x, y);
                     if (grid == null)
                         continue;
 
@@ -820,11 +825,11 @@ namespace Game.Maps
             }
             var reset = new ResetNotifier(GridType.All);
 
-            for (uint x = 0; x < MapConst.MaxGrids; ++x)
+            foreach (var x in xKeys)
             {
-                for (uint y = 0; y < MapConst.MaxGrids; ++y)
+                foreach (var y in GridYKeys(x))
                 {
-                    Grid grid = GetGrid(x, y);
+                    var grid = GetGrid(x, y);
                     if (grid == null)
                         continue;
 
@@ -1522,7 +1527,7 @@ namespace Game.Maps
             }
 
             Cypher.Assert(i_objectsToRemove.Empty());
-            SetGrid(null, x, y);
+            _grids.Remove(x, y);
 
             int gx = (int)((MapConst.MaxGrids - 1) - x);
             int gy = (int)((MapConst.MaxGrids - 1) - y);
@@ -1555,9 +1560,9 @@ namespace Game.Maps
             creaturesToMove.Clear();
             _gameObjectsToMove.Clear();
 
-            for (uint x = 0; x < MapConst.MaxGrids; ++x)
+            foreach (var x in GridXKeys())
             {
-                for (uint y = 0; y < MapConst.MaxGrids; ++y)
+                foreach (var y in GridYKeys(x))
                 {
                     var grid = GetGrid(x, y);
                     if (grid == null)
@@ -1871,7 +1876,8 @@ namespace Game.Maps
                 Log.outError(LogFilter.Maps, "Map.setNGrid Invalid grid coordinates found: {0}, {1}!", x, y);
                 return;
             }
-            i_grids[x][y] = grid;
+
+            _grids.Add(x, y, grid);
         }
 
         void SendObjectUpdates()
@@ -2490,11 +2496,11 @@ namespace Game.Maps
             // This isn't really bother us, since as soon as we have instanced BG-s, the whole map unloads as the BG gets ended
             if (!IsBattlegroundOrArena())
             {
-                for (uint x = 0; x < MapConst.MaxGrids; ++x)
+                foreach (var xkvp in _grids)
                 {
-                    for (uint y = 0; y < MapConst.MaxGrids; ++y)
+                    foreach (var ykvp in xkvp.Value)
                     {
-                        Grid grid = GetGrid(x, y);
+                        Grid grid = ykvp.Value;
                         if (grid != null)
                             grid.Update(this, diff);
                     }
@@ -3512,7 +3518,10 @@ namespace Game.Maps
             if (x > MapConst.MaxGrids || y > MapConst.MaxGrids)
                 return null;
 
-            return i_grids[x][y];
+            if (_grids.TryGetValue(x, out var ygrid) && ygrid.TryGetValue(y, out var grid))
+                return grid;
+
+            return null;
         }
 
         private bool IsGridObjectDataLoaded(uint x, uint y)
@@ -4763,7 +4772,7 @@ namespace Game.Maps
         Dictionary<uint, uint> _zonePlayerCountMap = new();
 
         List<Transport> _transports = new();
-        Grid[][] i_grids = new Grid[MapConst.MaxGrids][];
+        Dictionary<uint, Dictionary<uint, Grid>> _grids = new();
         MapRecord i_mapRecord;
         List<WorldObject> i_objectsToRemove = new();
         Dictionary<WorldObject, bool> i_objectsToSwitch = new();

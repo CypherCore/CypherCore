@@ -570,6 +570,17 @@ namespace System.Collections.Generic
             innerDict[key2] = newVal;
         }
 
+        public static void Remove<TKey1, TKey2, TVal>(this Dictionary<TKey1, Dictionary<TKey2, TVal>> dict, TKey1 key1, TKey2 key2)
+        {
+            if (dict.TryGetValue(key1, out var innerDict))
+            {
+                innerDict.Remove(key2);
+
+                if (innerDict.Count == 0)
+                    dict.Remove(key1);
+            }
+        }
+
         public static bool ContainsKey<TKey1, TKey2, TVal>(this Dictionary<TKey1, Dictionary<TKey2, TVal>> dict, TKey1 key1, TKey2 key2)
         {
             return dict.TryGetValue(key1, out var innerDict) && innerDict.ContainsKey(key2);

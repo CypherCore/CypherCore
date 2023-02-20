@@ -30,7 +30,7 @@ namespace Game
         bool LoadMapData(string basePath, uint mapId)
         {
             // we already have this map loaded?
-            if (loadedMMaps.ContainsKey(mapId) && loadedMMaps[mapId] != null)
+            if (loadedMMaps.TryGetValue(mapId, out var mmap) && mmap != null)
                 return true;
 
             // load and init dtNavMesh - read parameters from file
@@ -157,8 +157,7 @@ namespace Game
         public bool UnloadMap(uint mapId, int x, int y)
         {
             // check if we have this map loaded
-            MMapData mmap = GetMMapData(mapId);
-            if (mmap == null)
+            if (!loadedMMaps.TryGetValue(mapId, out var mmap))
             {
                 // file may not exist, therefore not loaded
                 Log.outDebug(LogFilter.Maps, "MMAP:unloadMap: Asked to unload not loaded navmesh map. {0:D4}{1:D2}{2:D2}.mmtile", mapId, x, y);
@@ -229,8 +228,7 @@ namespace Game
         public bool UnloadMapInstance(uint mapId, uint instanceId)
         {
             // check if we have this map loaded
-            MMapData mmap = GetMMapData(mapId);
-            if (mmap == null)
+            if (!loadedMMaps.TryGetValue(mapId, out var mmap))
             {
                 // file may not exist, therefore not loaded
                 Log.outDebug(LogFilter.Maps, "MMAP:unloadMapInstance: Asked to unload not loaded navmesh map {0}", mapId);
@@ -251,8 +249,7 @@ namespace Game
 
         public Detour.dtNavMesh GetNavMesh(uint mapId)
         {
-            MMapData mmap = GetMMapData(mapId);
-            if (mmap == null)
+            if (!loadedMMaps.TryGetValue(mapId, out var mmap))
                 return null;
 
             return mmap.navMesh;
@@ -260,8 +257,7 @@ namespace Game
 
         public Detour.dtNavMeshQuery GetNavMeshQuery(uint mapId, uint instanceId)
         {
-            MMapData mmap = GetMMapData(mapId);
-            if (mmap == null)
+            if (!loadedMMaps.TryGetValue(mapId, out var mmap))
                 return null;
 
             return mmap.navMeshQueries.LookupByKey(instanceId);
