@@ -702,9 +702,9 @@ namespace Game.Maps
                 return null;
 
             List<uint> lKeys = Rotations.Keys.ToList();
-            int reqIndex = lKeys.IndexOf(time) - 1;
+            int reqIndex = lKeys.IndexOf(time) - 1; // indexof returns -1 if index is not found, - 1 from that is -2
 
-            if (reqIndex != -1)
+            if (reqIndex != -2)
                 return Rotations[lKeys[reqIndex]];
 
             return Rotations.LastOrDefault().Value;
