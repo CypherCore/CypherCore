@@ -388,8 +388,6 @@ namespace Game.Entities
         Unit m_attacker;
         Unit m_victim;
         uint m_damage;
-        uint m_damageDone;
-        uint m_damageTaken;
         uint m_originalDamage;
         SpellInfo m_spellInfo;
         SpellSchoolMask m_schoolMask;
