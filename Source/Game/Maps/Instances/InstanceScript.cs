@@ -406,7 +406,7 @@ namespace Game.Maps
                     }
                 }
 
-                foreach (var guid in bossInfo.minion.ToArray())
+                foreach (var guid in bossInfo.minion.ToList())
                 {
                     Creature minion = instance.GetCreature(guid);
                     if (minion)

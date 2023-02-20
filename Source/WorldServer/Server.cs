@@ -178,9 +178,10 @@ namespace WorldServer
 
 #if DEBUG
             ulong loops = 0;
-            ulong total = 0;
-            ulong max = 0;
-            ulong min = 0;
+            TimeSpan total = TimeSpan.Zero;
+            TimeSpan max = TimeSpan.Zero;
+            TimeSpan min = TimeSpan.Zero;
+            var stopwatch = new Stopwatch();
 #endif
             while (!Global.WorldMgr.IsStopped)
             {
@@ -197,26 +198,31 @@ namespace WorldServer
                     Thread.Sleep(TimeSpan.FromMilliseconds(sleepTime));
                     continue;
                 }
-
+#if DEBUG
+                stopwatch.Restart();
+#endif
                 Global.WorldMgr.Update(diff);
+#if DEBUG
+                stopwatch.Stop();
+#endif
                 realPrevTime = realCurrTime;
 #if DEBUG
                 loops++;
-                total += diff;
+                total += stopwatch.Elapsed;
 
-                if (diff > max)
-                    max = diff;
+                if (stopwatch.Elapsed > max)
+                    max = stopwatch.Elapsed;
 
-                if (diff < min) 
-                    min = diff;
+                if (stopwatch.Elapsed < min) 
+                    min = stopwatch.Elapsed;
 
                 if (loops % 2000 == 0)
                 {
-                    Console.WriteLine($"Avg: {total / loops}, Max: {max}, Min: {min}, Num loops: {loops}, Total: {total}");
-                    total = 0;
+                    Console.WriteLine($"Avg: {(total / loops).TotalMilliseconds}ms, Max: {max.TotalMilliseconds}ms, Min: {min.TotalMilliseconds}ms, Num loops: {loops}, Total: {total.TotalMilliseconds}ms");
+                    total = TimeSpan.Zero;
                     loops = 0;
-                    max = 0;
-                    min = 0;
+                    max = TimeSpan.Zero;
+                    min = TimeSpan.Zero;
                 }
 #endif
             }

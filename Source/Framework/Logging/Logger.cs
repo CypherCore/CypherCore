@@ -1,14 +1,37 @@
 ﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
 // Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Bgs.Protocol.Channel.V1;
 
 class Logger
 {
+    ConcurrentQueue<LogMessage> _logQueue = new ConcurrentQueue<LogMessage>();
+    AutoResetEvent _logTrigger = new AutoResetEvent(false);
+
     public Logger(string _name, LogLevel _level)
     {
         name = _name;
         level = _level;
+
+        Task.Run(() =>
+        {
+            while (true)
+            {
+                _logTrigger.WaitOne(500);
+
+                while (_logQueue.Count > 0)
+                {
+                    if (_logQueue.TryDequeue(out var logMessage) && logMessage != null)
+                        foreach (var appender in appenders.Values)
+                            appender.Write(logMessage);
+                }
+            }
+          
+        });
     }
 
     public void addAppender(byte id, Appender appender)
@@ -41,8 +64,8 @@ class Logger
         if (level == 0 || level > message.level || string.IsNullOrEmpty(message.text))
             return;
 
-        foreach (var appender in appenders.Values)
-            appender.Write(message);
+        _logQueue.Enqueue(message);
+        _logTrigger.Set();
     }
 
     string name;

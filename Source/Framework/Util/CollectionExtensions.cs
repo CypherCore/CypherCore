@@ -526,7 +526,7 @@ namespace System.Collections.Generic
 
         public static void RemoveAllMatchingKeys<TKey, TValue>(this IDictionary<TKey, TValue> dict, Func<TKey, bool> pred)
         {
-            foreach (var key in dict.Keys.ToArray())
+            foreach (var key in dict.Keys.ToList())
                 if (pred.Invoke(key))
                     dict.Remove(key);
         }

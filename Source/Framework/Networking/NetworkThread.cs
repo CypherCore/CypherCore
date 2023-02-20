@@ -2,6 +2,7 @@
 // Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace Framework.Networking
@@ -58,7 +59,7 @@ namespace Framework.Networking
             if (_newSockets.Empty())
                 return;
 
-            foreach (var socket in _newSockets.ToArray())
+            foreach (var socket in _newSockets.ToList())
             {
                 if (!socket.IsOpen())
                 {

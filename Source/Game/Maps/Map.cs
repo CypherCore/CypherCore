@@ -32,13 +32,13 @@ namespace Game.Maps
 
         public IEnumerable<uint> GridXKeys()
         {
-            return _grids.Keys.ToArray();
+            return _grids.Keys.ToList();
         }
 
         public IEnumerable<uint> GridYKeys(uint x)
         {
             if (_grids.TryGetValue(x, out var yGrid))
-                return yGrid.Keys.ToArray();
+                return yGrid.Keys.ToList();
 
             return Enumerable.Empty<uint>();
         }
