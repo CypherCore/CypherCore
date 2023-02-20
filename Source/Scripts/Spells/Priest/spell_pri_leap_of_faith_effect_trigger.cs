@@ -17,7 +17,7 @@ internal class spell_pri_leap_of_faith_effect_trigger : SpellScript, IHasSpellEf
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.LeapOfFaithEffect);
+		return ValidateSpellInfo(PriestSpells.LEAP_OF_FAITH_EFFECT);
 	}
 
 	public override void Register()

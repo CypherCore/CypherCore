@@ -16,7 +16,7 @@ internal class spell_pri_mind_bomb : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.MindBombStun);
+		return ValidateSpellInfo(PriestSpells.MIND_BOMB_STUN);
 	}
 
 	public override void Register()
@@ -28,6 +28,6 @@ internal class spell_pri_mind_bomb : AuraScript, IHasAuraEffects
 	{
 		if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Death ||
 		    GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Expire)
-			GetCaster()?.CastSpell(GetTarget().GetPosition(), PriestSpells.MindBombStun, new CastSpellExtraArgs(true));
+			GetCaster()?.CastSpell(GetTarget().GetPosition(), PriestSpells.MIND_BOMB_STUN, new CastSpellExtraArgs(true));
 	}
 }

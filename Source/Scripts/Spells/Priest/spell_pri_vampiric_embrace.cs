@@ -16,7 +16,7 @@ internal class spell_pri_vampiric_embrace : AuraScript, IAuraCheckProc, IHasAura
 {
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.VampiricEmbraceHeal);
+		return ValidateSpellInfo(PriestSpells.VAMPIRIC_EMBRACE_HEAL);
 	}
 
 	public bool CheckProc(ProcEventInfo eventInfo)
@@ -47,6 +47,6 @@ internal class spell_pri_vampiric_embrace : AuraScript, IAuraCheckProc, IHasAura
 		CastSpellExtraArgs args = new(aurEff);
 		args.AddSpellMod(SpellValueMod.BasePoint0, teamHeal);
 		args.AddSpellMod(SpellValueMod.BasePoint1, selfHeal);
-		GetTarget().CastSpell((Unit)null, PriestSpells.VampiricEmbraceHeal, args);
+		GetTarget().CastSpell((Unit)null, PriestSpells.VAMPIRIC_EMBRACE_HEAL, args);
 	}
 }

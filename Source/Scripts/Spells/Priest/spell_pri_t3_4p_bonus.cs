@@ -17,7 +17,7 @@ internal class spell_pri_t3_4p_bonus : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.ArmorOfFaith);
+		return ValidateSpellInfo(PriestSpells.ARMOR_OF_FAITH);
 	}
 
 	public override void Register()
@@ -28,6 +28,6 @@ internal class spell_pri_t3_4p_bonus : AuraScript, IHasAuraEffects
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
 		PreventDefaultAction();
-		eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), PriestSpells.ArmorOfFaith, new CastSpellExtraArgs(aurEff));
+		eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), PriestSpells.ARMOR_OF_FAITH, new CastSpellExtraArgs(aurEff));
 	}
 }

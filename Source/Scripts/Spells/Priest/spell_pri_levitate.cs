@@ -17,7 +17,7 @@ internal class spell_pri_levitate : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.LevitateEffect);
+		return ValidateSpellInfo(PriestSpells.LEVITATE_EFFECT);
 	}
 
 	public override void Register()
@@ -27,6 +27,6 @@ internal class spell_pri_levitate : SpellScript, IHasSpellEffects
 
 	private void HandleDummy(int effIndex)
 	{
-		GetCaster().CastSpell(GetHitUnit(), PriestSpells.LevitateEffect, true);
+		GetCaster().CastSpell(GetHitUnit(), PriestSpells.LEVITATE_EFFECT, true);
 	}
 }

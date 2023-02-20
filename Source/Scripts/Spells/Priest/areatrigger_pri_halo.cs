@@ -23,9 +23,9 @@ internal class areatrigger_pri_halo : AreaTriggerAI
 		if (caster != null)
 		{
 			if (caster.IsValidAttackTarget(unit))
-				caster.CastSpell(unit, PriestSpells.HaloDamage, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress));
+				caster.CastSpell(unit, PriestSpells.HALO_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress));
 			else if (caster.IsValidAssistTarget(unit))
-				caster.CastSpell(unit, PriestSpells.HaloHeal, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress));
+				caster.CastSpell(unit, PriestSpells.HALO_HEAL, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress));
 		}
 	}
 }

@@ -18,7 +18,7 @@ internal class spell_pri_guardian_spirit : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.GuardianSpiritHeal) && spellInfo.GetEffects().Count > 1;
+		return ValidateSpellInfo(PriestSpells.GUARDIAN_SPIRIT_HEAL) && spellInfo.GetEffects().Count > 1;
 	}
 
 	public override bool Load()
@@ -52,7 +52,7 @@ internal class spell_pri_guardian_spirit : AuraScript, IHasAuraEffects
 		Remove(AuraRemoveMode.EnemySpell);
 		CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
 		args.AddSpellMod(SpellValueMod.BasePoint0, healAmount);
-		target.CastSpell(target, PriestSpells.GuardianSpiritHeal, args);
+		target.CastSpell(target, PriestSpells.GUARDIAN_SPIRIT_HEAL, args);
 		absorbAmount = dmgInfo.GetDamage();
 	}
 }

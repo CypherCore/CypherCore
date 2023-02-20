@@ -18,7 +18,7 @@ public class spell_pri_atonement : AuraScript, IAuraCheckProc, IHasAuraEffects
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.AtonementHeal, PriestSpells.SinsOfTheMany) && spellInfo.GetEffects().Count > 1 && Global.SpellMgr.GetSpellInfo(PriestSpells.SinsOfTheMany, Difficulty.None).GetEffects().Count > 2;
+		return ValidateSpellInfo(PriestSpells.ATONEMENT_HEAL, PriestSpells.SINS_OF_THE_MANY) && spellInfo.GetEffects().Count > 1 && Global.SpellMgr.GetSpellInfo(PriestSpells.SINS_OF_THE_MANY, Difficulty.None).GetEffects().Count > 2;
 	}
 
 	public bool CheckProc(ProcEventInfo eventInfo)
@@ -53,20 +53,20 @@ public class spell_pri_atonement : AuraScript, IAuraCheckProc, IHasAuraEffects
 		CastSpellExtraArgs args       = new(aurEff);
 		args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
 
-		_appliedAtonements.RemoveAll(targetGuid =>
+        _appliedAtonements.RemoveAll((Predicate<ObjectGuid>)(targetGuid =>
 		                             {
 			                             var target = Global.ObjAccessor.GetUnit(GetTarget(), targetGuid);
 
 			                             if (target)
 			                             {
 				                             if (target.GetExactDist(GetTarget()) < GetEffectInfo(1).CalcValue())
-					                             GetTarget().CastSpell(target, PriestSpells.AtonementHeal, args);
+                                                 GetTarget().CastSpell(target, (uint)PriestSpells.ATONEMENT_HEAL, args);
 
 				                             return false;
 			                             }
 
 			                             return true;
-		                             });
+		                             }));
 	}
 
 	private void UpdateSinsOfTheManyValue()
@@ -81,7 +81,7 @@ public class spell_pri_atonement : AuraScript, IAuraCheckProc, IHasAuraEffects
 			                             0, 1, 2
 		                             })
 		{
-			var sinOfTheMany = GetUnitOwner().GetAuraEffect(PriestSpells.SinsOfTheMany, effectIndex);
+			var sinOfTheMany = GetUnitOwner().GetAuraEffect(PriestSpells.SINS_OF_THE_MANY, effectIndex);
 
 			sinOfTheMany?.ChangeAmount((int)damageByStack[Math.Min(_appliedAtonements.Count, damageByStack.Length - 1)]);
 		}

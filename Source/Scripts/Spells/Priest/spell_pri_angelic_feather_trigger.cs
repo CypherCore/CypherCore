@@ -17,7 +17,7 @@ internal class spell_pri_angelic_feather_trigger : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.AngelicFeatherAreatrigger);
+		return ValidateSpellInfo(PriestSpells.ANGELIC_FEATHER_AREATRIGGER);
 	}
 
 	public override void Register()
@@ -33,13 +33,13 @@ internal class spell_pri_angelic_feather_trigger : SpellScript, IHasSpellEffects
 		// Caster is prioritary
 		if (GetCaster().IsWithinDist2d(destPos, radius))
 		{
-			GetCaster().CastSpell(GetCaster(), PriestSpells.AngelicFeatherAura, true);
+			GetCaster().CastSpell(GetCaster(), PriestSpells.ANGELIC_FEATHER_AURA, true);
 		}
 		else
 		{
 			CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
 			args.CastDifficulty = GetCastDifficulty();
-			GetCaster().CastSpell(destPos, PriestSpells.AngelicFeatherAreatrigger, args);
+			GetCaster().CastSpell(destPos, PriestSpells.ANGELIC_FEATHER_AREATRIGGER, args);
 		}
 	}
 }

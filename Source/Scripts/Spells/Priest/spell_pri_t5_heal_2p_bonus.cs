@@ -15,7 +15,7 @@ internal class spell_pri_t5_heal_2p_bonus : AuraScript, IAuraCheckProc, IHasAura
 {
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.ItemEfficiency);
+		return ValidateSpellInfo(PriestSpells.ITEM_EFFICIENCY);
 	}
 
 	public bool CheckProc(ProcEventInfo eventInfo)
@@ -45,6 +45,6 @@ internal class spell_pri_t5_heal_2p_bonus : AuraScript, IAuraCheckProc, IHasAura
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
 		PreventDefaultAction();
-		GetTarget().CastSpell(GetTarget(), PriestSpells.ItemEfficiency, new CastSpellExtraArgs(aurEff));
+		GetTarget().CastSpell(GetTarget(), PriestSpells.ITEM_EFFICIENCY, new CastSpellExtraArgs(aurEff));
 	}
 }

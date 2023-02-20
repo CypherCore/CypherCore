@@ -19,7 +19,7 @@ internal class spell_pri_power_word_radiance : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.Atonement, PriestSpells.AtonementTriggered, PriestSpells.Trinity) && spellInfo.GetEffects().Count > 3;
+		return ValidateSpellInfo(PriestSpells.ATONEMENT, PriestSpells.ATONEMENT_TRIGGERED, PriestSpells.TRINITY) && spellInfo.GetEffects().Count > 3;
 	}
 
 	public override void Register()
@@ -57,13 +57,13 @@ internal class spell_pri_power_word_radiance : SpellScript, IHasSpellEffects
 	{
 		var caster = GetCaster();
 
-		if (caster.HasAura(PriestSpells.Trinity))
+		if (caster.HasAura(PriestSpells.TRINITY))
 			return;
 
 		var durationPct = GetEffectInfo(3).CalcValue(caster);
 
-		if (caster.HasAura(PriestSpells.Atonement))
-			caster.CastSpell(GetHitUnit(), PriestSpells.AtonementTriggered, new CastSpellExtraArgs(SpellValueMod.DurationPct, durationPct).SetTriggerFlags(TriggerCastFlags.FullMask));
+		if (caster.HasAura(PriestSpells.ATONEMENT))
+			caster.CastSpell(GetHitUnit(), PriestSpells.ATONEMENT_TRIGGERED, new CastSpellExtraArgs(SpellValueMod.DurationPct, durationPct).SetTriggerFlags(TriggerCastFlags.FullMask));
 	}
 
 	private Tuple<bool, bool> MakeSortTuple(WorldObject obj)
@@ -76,7 +76,7 @@ internal class spell_pri_power_word_radiance : SpellScript, IHasSpellEffects
 	{
 		var unit = obj.ToUnit();
 
-		return unit != null && !unit.HasAura(PriestSpells.AtonementTriggered, GetCaster().GetGUID());
+		return unit != null && !unit.HasAura(PriestSpells.ATONEMENT_TRIGGERED, GetCaster().GetGUID());
 	}
 
 	// Returns true if obj is a unit and is injured

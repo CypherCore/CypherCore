@@ -17,7 +17,7 @@ internal class spell_pri_power_of_the_dark_side_damage_bonus : SpellScript, IHas
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.PowerOfTheDarkSide);
+		return ValidateSpellInfo(PriestSpells.POWER_OF_THE_DARK_SIDE);
 	}
 
 	public override void Register()
@@ -27,7 +27,7 @@ internal class spell_pri_power_of_the_dark_side_damage_bonus : SpellScript, IHas
 
 	private void HandleLaunchTarget(int effIndex)
 	{
-		var powerOfTheDarkSide = GetCaster().GetAuraEffect(PriestSpells.PowerOfTheDarkSide, 0);
+		var powerOfTheDarkSide = GetCaster().GetAuraEffect(PriestSpells.POWER_OF_THE_DARK_SIDE, 0);
 
 		if (powerOfTheDarkSide != null)
 		{

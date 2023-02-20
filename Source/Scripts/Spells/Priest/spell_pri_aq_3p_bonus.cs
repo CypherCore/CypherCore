@@ -17,7 +17,7 @@ internal class spell_pri_aq_3p_bonus : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.OracularHeal);
+		return ValidateSpellInfo(PriestSpells.ORACULAR_HEAL);
 	}
 
 	public override void Register()
@@ -41,6 +41,6 @@ internal class spell_pri_aq_3p_bonus : AuraScript, IHasAuraEffects
 
 		CastSpellExtraArgs args = new(aurEff);
 		args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(healInfo.GetHeal(), 10));
-		caster.CastSpell(caster, PriestSpells.OracularHeal, args);
+		caster.CastSpell(caster, PriestSpells.ORACULAR_HEAL, args);
 	}
 }

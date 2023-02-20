@@ -17,7 +17,7 @@ internal class spell_pri_spirit_of_redemption : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.SpiritOfRedemption);
+		return ValidateSpellInfo(PriestSpells.SPIRIT_OF_REDEMPTION);
 	}
 
 	public override void Register()
@@ -28,7 +28,7 @@ internal class spell_pri_spirit_of_redemption : AuraScript, IHasAuraEffects
 	private void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
 	{
 		var target = GetTarget();
-		target.CastSpell(target, PriestSpells.SpiritOfRedemption, new CastSpellExtraArgs(aurEff));
+		target.CastSpell(target, PriestSpells.SPIRIT_OF_REDEMPTION, new CastSpellExtraArgs(aurEff));
 		target.SetFullHealth();
 
 		absorbAmount = dmgInfo.GetDamage();

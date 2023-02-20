@@ -16,22 +16,22 @@ internal class spell_pri_power_word_shield_aura : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.BodyAndSoul,
-		                         PriestSpells.BodyAndSoulSpeed,
-		                         PriestSpells.StrengthOfSoul,
-		                         PriestSpells.StrengthOfSoulEffect,
-		                         PriestSpells.RenewedHope,
-		                         PriestSpells.RenewedHopeEffect,
-		                         PriestSpells.VoidShield,
-		                         PriestSpells.VoidShieldEffect,
-		                         PriestSpells.Atonement,
-		                         PriestSpells.Trinity,
-		                         PriestSpells.AtonementTriggered,
-		                         PriestSpells.AtonementTriggeredPowerTrinity,
-		                         PriestSpells.ShieldDisciplinePassive,
-		                         PriestSpells.ShieldDisciplineEnergize,
-		                         PriestSpells.Rapture,
-		                         PriestSpells.MasteryGrace);
+		return ValidateSpellInfo(PriestSpells.BODY_AND_SOUL,
+		                         PriestSpells.BODY_AND_SOUL_SPEED,
+		                         PriestSpells.STRENGTH_OF_SOUL,
+		                         PriestSpells.STRENGTH_OF_SOUL_EFFECT,
+		                         PriestSpells.RENEWED_HOPE,
+		                         PriestSpells.RENEWED_HOPE_EFFECT,
+		                         PriestSpells.VOID_SHIELD,
+		                         PriestSpells.VOID_SHIELD_EFFECT,
+		                         PriestSpells.ATONEMENT,
+		                         PriestSpells.TRINITY,
+		                         PriestSpells.ATONEMENT_TRIGGERED,
+		                         PriestSpells.ATONEMENT_TRIGGERED_POWER_TRINITY,
+		                         PriestSpells.SHIELD_DISCIPLINE_PASSIVE,
+		                         PriestSpells.SHIELD_DISCIPLINE_ENERGIZE,
+		                         PriestSpells.RAPTURE,
+		                         PriestSpells.MASTERY_GRACE);
 	}
 
 	public override void Register()
@@ -57,15 +57,15 @@ internal class spell_pri_power_word_shield_aura : AuraScript, IHasAuraEffects
 			{
 				MathFunctions.AddPct(ref amountF, player.GetRatingBonusValue(CombatRating.VersatilityDamageDone));
 
-				var mastery = caster.GetAuraEffect(PriestSpells.MasteryGrace, 0);
+				var mastery = caster.GetAuraEffect(PriestSpells.MASTERY_GRACE, 0);
 
 				if (mastery != null)
-					if (GetUnitOwner().HasAura(PriestSpells.AtonementTriggered) ||
-					    GetUnitOwner().HasAura(PriestSpells.AtonementTriggeredPowerTrinity))
+					if (GetUnitOwner().HasAura(PriestSpells.ATONEMENT_TRIGGERED) ||
+					    GetUnitOwner().HasAura(PriestSpells.ATONEMENT_TRIGGERED_POWER_TRINITY))
 						MathFunctions.AddPct(ref amountF, mastery.GetAmount());
 			}
 
-			var rapture = caster.GetAuraEffect(PriestSpells.Rapture, 1);
+			var rapture = caster.GetAuraEffect(PriestSpells.RAPTURE, 1);
 
 			if (rapture != null)
 				MathFunctions.AddPct(ref amountF, rapture.GetAmount());
@@ -82,31 +82,31 @@ internal class spell_pri_power_word_shield_aura : AuraScript, IHasAuraEffects
 		if (!caster)
 			return;
 
-		if (caster.HasAura(PriestSpells.BodyAndSoul))
-			caster.CastSpell(target, PriestSpells.BodyAndSoulSpeed, true);
+		if (caster.HasAura(PriestSpells.BODY_AND_SOUL))
+			caster.CastSpell(target, PriestSpells.BODY_AND_SOUL_SPEED, true);
 
-		if (caster.HasAura(PriestSpells.StrengthOfSoul))
-			caster.CastSpell(target, PriestSpells.StrengthOfSoulEffect, true);
+		if (caster.HasAura(PriestSpells.STRENGTH_OF_SOUL))
+			caster.CastSpell(target, PriestSpells.STRENGTH_OF_SOUL_EFFECT, true);
 
-		if (caster.HasAura(PriestSpells.RenewedHope))
-			caster.CastSpell(target, PriestSpells.RenewedHopeEffect, true);
+		if (caster.HasAura(PriestSpells.RENEWED_HOPE))
+			caster.CastSpell(target, PriestSpells.RENEWED_HOPE_EFFECT, true);
 
-		if (caster.HasAura(PriestSpells.VoidShield) &&
+		if (caster.HasAura(PriestSpells.VOID_SHIELD) &&
 		    caster == target)
-			caster.CastSpell(target, PriestSpells.VoidShieldEffect, true);
+			caster.CastSpell(target, PriestSpells.VOID_SHIELD_EFFECT, true);
 
-		if (caster.HasAura(PriestSpells.Atonement))
-			caster.CastSpell(target, caster.HasAura(PriestSpells.Trinity) ? PriestSpells.AtonementTriggeredPowerTrinity : PriestSpells.AtonementTriggered, true);
+		if (caster.HasAura(PriestSpells.ATONEMENT))
+			caster.CastSpell(target, caster.HasAura(PriestSpells.TRINITY) ? PriestSpells.ATONEMENT_TRIGGERED_POWER_TRINITY : PriestSpells.ATONEMENT_TRIGGERED, true);
 	}
 
 	private void HandleOnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		GetTarget().RemoveAura(PriestSpells.StrengthOfSoulEffect);
+		GetTarget().RemoveAura(PriestSpells.STRENGTH_OF_SOUL_EFFECT);
 		var caster = GetCaster();
 
 		if (caster)
 			if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.EnemySpell &&
-			    caster.HasAura(PriestSpells.ShieldDisciplinePassive))
-				caster.CastSpell(caster, PriestSpells.ShieldDisciplineEnergize, true);
+			    caster.HasAura(PriestSpells.SHIELD_DISCIPLINE_PASSIVE))
+				caster.CastSpell(caster, PriestSpells.SHIELD_DISCIPLINE_ENERGIZE, true);
 	}
 }
