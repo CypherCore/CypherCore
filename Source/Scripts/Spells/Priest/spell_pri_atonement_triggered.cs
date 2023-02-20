@@ -16,7 +16,7 @@ internal class spell_pri_atonement_triggered : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.Atonement);
+		return ValidateSpellInfo(PriestSpells.ATONEMENT);
 	}
 
 	public override void Register()
@@ -31,7 +31,7 @@ internal class spell_pri_atonement_triggered : AuraScript, IHasAuraEffects
 
 		if (caster)
 		{
-			var atonement = caster.GetAura(PriestSpells.Atonement);
+			var atonement = caster.GetAura(PriestSpells.ATONEMENT);
 
 			if (atonement != null)
 			{
@@ -48,7 +48,7 @@ internal class spell_pri_atonement_triggered : AuraScript, IHasAuraEffects
 
 		if (caster)
 		{
-			var atonement = caster.GetAura(PriestSpells.Atonement);
+			var atonement = caster.GetAura(PriestSpells.ATONEMENT);
 
 			if (atonement != null)
 			{

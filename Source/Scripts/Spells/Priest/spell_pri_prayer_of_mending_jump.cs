@@ -21,12 +21,12 @@ internal class spell_pri_prayer_of_mending_jump : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.PrayerOfMendingHeal, PriestSpells.PrayerOfMendingAura) && Global.SpellMgr.GetSpellInfo(PriestSpells.PrayerOfMendingHeal, Difficulty.None).GetEffect(0) != null;
+		return ValidateSpellInfo(PriestSpells.PRAYER_OF_MENDING_HEAL, PriestSpells.PRAYER_OF_MENDING_AURA) && Global.SpellMgr.GetSpellInfo(PriestSpells.PRAYER_OF_MENDING_HEAL, Difficulty.None).GetEffect(0) != null;
 	}
 
 	public override bool Load()
 	{
-		_spellInfoHeal   = Global.SpellMgr.GetSpellInfo(PriestSpells.PrayerOfMendingHeal, Difficulty.None);
+		_spellInfoHeal   = Global.SpellMgr.GetSpellInfo(PriestSpells.PRAYER_OF_MENDING_HEAL, Difficulty.None);
 		_healEffectDummy = _spellInfoHeal.GetEffect(0);
 
 		return true;
@@ -74,7 +74,7 @@ internal class spell_pri_prayer_of_mending_jump : SpellScript, IHasSpellEffects
 			CastSpellExtraArgs args       = new(TriggerCastFlags.FullMask);
 			args.AddSpellMod(SpellValueMod.AuraStack, GetEffectValue());
 			args.AddSpellMod(SpellValueMod.BasePoint0, (int)basePoints);
-			origCaster.CastSpell(target, PriestSpells.PrayerOfMendingAura, args);
+			origCaster.CastSpell(target, PriestSpells.PRAYER_OF_MENDING_AURA, args);
 		}
 	}
 }

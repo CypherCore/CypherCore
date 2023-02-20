@@ -16,7 +16,7 @@ internal class spell_pri_sins_of_the_many : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.SinsOfTheMany);
+		return ValidateSpellInfo(PriestSpells.SINS_OF_THE_MANY);
 	}
 
 	public override void Register()
@@ -27,11 +27,11 @@ internal class spell_pri_sins_of_the_many : AuraScript, IHasAuraEffects
 
 	private void HandleOnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		GetTarget().CastSpell(GetTarget(), PriestSpells.SinsOfTheMany, true);
+		GetTarget().CastSpell(GetTarget(), PriestSpells.SINS_OF_THE_MANY, true);
 	}
 
 	private void HandleOnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
-		GetTarget().RemoveAura(PriestSpells.SinsOfTheMany);
+		GetTarget().RemoveAura(PriestSpells.SINS_OF_THE_MANY);
 	}
 }

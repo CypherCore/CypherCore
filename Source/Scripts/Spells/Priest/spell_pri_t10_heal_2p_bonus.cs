@@ -17,7 +17,7 @@ internal class spell_pri_t10_heal_2p_bonus : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.BlessedHealing);
+		return ValidateSpellInfo(PriestSpells.BLESSED_HEALING);
 	}
 
 	public override void Register()
@@ -35,7 +35,7 @@ internal class spell_pri_t10_heal_2p_bonus : AuraScript, IHasAuraEffects
 		    healInfo.GetHeal() == 0)
 			return;
 
-		var spellInfo = Global.SpellMgr.GetSpellInfo(PriestSpells.BlessedHealing, GetCastDifficulty());
+		var spellInfo = Global.SpellMgr.GetSpellInfo(PriestSpells.BLESSED_HEALING, GetCastDifficulty());
 		var amount    = (int)MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
 		amount /= (int)spellInfo.GetMaxTicks();
 
@@ -44,6 +44,6 @@ internal class spell_pri_t10_heal_2p_bonus : AuraScript, IHasAuraEffects
 
 		CastSpellExtraArgs args = new(aurEff);
 		args.AddSpellMod(SpellValueMod.BasePoint0, amount);
-		caster.CastSpell(target, PriestSpells.BlessedHealing, args);
+		caster.CastSpell(target, PriestSpells.BLESSED_HEALING, args);
 	}
 }

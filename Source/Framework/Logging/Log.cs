@@ -284,8 +284,8 @@ public class Log
 
     static Logger GetLoggerByType(LogFilter type)
     {
-        if (loggers.ContainsKey(type))
-            return loggers[type];
+        if (loggers.TryGetValue(type, out var logger))
+            return logger;
 
         string typeString = type.ToString();
 

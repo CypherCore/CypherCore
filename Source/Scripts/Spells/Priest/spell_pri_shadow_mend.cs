@@ -13,7 +13,7 @@ internal class spell_pri_shadow_mend : SpellScript, ISpellAfterHit
 {
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.Atonement, PriestSpells.AtonementTriggered, PriestSpells.Trinity, PriestSpells.MasochismTalent, PriestSpells.MasochismPeriodicHeal, PriestSpells.ShadowMendPeriodicDummy);
+		return ValidateSpellInfo(PriestSpells.ATONEMENT, PriestSpells.ATONEMENT_TRIGGERED, PriestSpells.TRINITY, PriestSpells.MASOCHISM_TALENT, PriestSpells.MASOCHISM_PERIODIC_HEAL, PriestSpells.SHADOW_MEND_PERIODIC_DUMMY);
 	}
 
 	public void AfterHit()
@@ -27,15 +27,15 @@ internal class spell_pri_shadow_mend : SpellScript, ISpellAfterHit
 			var periodicAmount            = GetHitHeal() / 20;
 			var damageForAuraRemoveAmount = periodicAmount * 10;
 
-			if (caster.HasAura(PriestSpells.Atonement) &&
-			    !caster.HasAura(PriestSpells.Trinity))
-				caster.CastSpell(target, PriestSpells.AtonementTriggered, new CastSpellExtraArgs(GetSpell()));
+			if (caster.HasAura(PriestSpells.ATONEMENT) &&
+			    !caster.HasAura(PriestSpells.TRINITY))
+				caster.CastSpell(target, PriestSpells.ATONEMENT_TRIGGERED, new CastSpellExtraArgs(GetSpell()));
 
 			// Handle Masochism talent
-			if (caster.HasAura(PriestSpells.MasochismTalent) &&
+			if (caster.HasAura(PriestSpells.MASOCHISM_TALENT) &&
 			    caster.GetGUID() == target.GetGUID())
 			{
-				caster.CastSpell(caster, PriestSpells.MasochismPeriodicHeal, new CastSpellExtraArgs(GetSpell()).AddSpellMod(SpellValueMod.BasePoint0, periodicAmount));
+				caster.CastSpell(caster, PriestSpells.MASOCHISM_PERIODIC_HEAL, new CastSpellExtraArgs(GetSpell()).AddSpellMod(SpellValueMod.BasePoint0, periodicAmount));
 			}
 			else if (target.IsInCombat() &&
 			         periodicAmount != 0)
@@ -44,7 +44,7 @@ internal class spell_pri_shadow_mend : SpellScript, ISpellAfterHit
 				args.SetTriggeringSpell(GetSpell());
 				args.AddSpellMod(SpellValueMod.BasePoint0, periodicAmount);
 				args.AddSpellMod(SpellValueMod.BasePoint1, damageForAuraRemoveAmount);
-				caster.CastSpell(target, PriestSpells.ShadowMendPeriodicDummy, args);
+				caster.CastSpell(target, PriestSpells.SHADOW_MEND_PERIODIC_DUMMY, args);
 			}
 		}
 	}

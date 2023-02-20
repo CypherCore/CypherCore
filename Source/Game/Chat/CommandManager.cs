@@ -100,8 +100,8 @@ namespace Game.Chat
 
             foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.NonPublic))
             {
-                var commandAttributes = method.GetCustomAttributes<CommandAttribute>(false).ToArray();
-                if (commandAttributes.Length == 0)
+                var commandAttributes = method.GetCustomAttributes<CommandAttribute>(false).ToList();
+                if (commandAttributes.Count == 0)
                     continue;
 
                 foreach (var commandAttribute in commandAttributes)

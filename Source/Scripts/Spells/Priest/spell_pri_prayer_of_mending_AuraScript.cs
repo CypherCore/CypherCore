@@ -17,7 +17,7 @@ internal class spell_pri_prayer_of_mending_AuraScript : AuraScript, IHasAuraEffe
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.PrayerOfMendingHeal, PriestSpells.PrayerOfMendingJump);
+		return ValidateSpellInfo(PriestSpells.PRAYER_OF_MENDING_HEAL, PriestSpells.PRAYER_OF_MENDING_JUMP);
 	}
 
 	public override void Register()
@@ -35,7 +35,7 @@ internal class spell_pri_prayer_of_mending_AuraScript : AuraScript, IHasAuraEffe
 		if (caster != null)
 		{
 			// Cast the spell to heal the owner
-			caster.CastSpell(target, PriestSpells.PrayerOfMendingHeal, new CastSpellExtraArgs(aurEff));
+			caster.CastSpell(target, PriestSpells.PRAYER_OF_MENDING_HEAL, new CastSpellExtraArgs(aurEff));
 
 			// Only cast Jump if stack is higher than 0
 			int stackAmount = GetStackAmount();
@@ -45,7 +45,7 @@ internal class spell_pri_prayer_of_mending_AuraScript : AuraScript, IHasAuraEffe
 				CastSpellExtraArgs args = new(aurEff);
 				args.OriginalCaster = caster.GetGUID();
 				args.AddSpellMod(SpellValueMod.BasePoint0, stackAmount - 1);
-				target.CastSpell(target, PriestSpells.PrayerOfMendingJump, args);
+				target.CastSpell(target, PriestSpells.PRAYER_OF_MENDING_JUMP, args);
 			}
 
 			Remove();

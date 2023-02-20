@@ -18,7 +18,7 @@ internal class spell_pri_holy_words : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.Heal, PriestSpells.FlashHeal, PriestSpells.PrayerOfHealing, PriestSpells.Renew, PriestSpells.Smite, PriestSpells.HolyWordChastise, PriestSpells.HolyWordSanctify, PriestSpells.HolyWordSerenity) && Global.SpellMgr.GetSpellInfo(PriestSpells.HolyWordSerenity, Difficulty.None).GetEffects().Count > 1 && Global.SpellMgr.GetSpellInfo(PriestSpells.HolyWordSanctify, Difficulty.None).GetEffects().Count > 3 && Global.SpellMgr.GetSpellInfo(PriestSpells.HolyWordChastise, Difficulty.None).GetEffects().Count > 1;
+		return ValidateSpellInfo(PriestSpells.HEAL, PriestSpells.FLASH_HEAL, PriestSpells.PRAYER_OF_HEALING, PriestSpells.RENEW, PriestSpells.SMITE, PriestSpells.HOLY_WORD_CHASTISE, PriestSpells.HOLY_WORD_SANCTIFY, PriestSpells.HOLY_WORD_SERENITY) && Global.SpellMgr.GetSpellInfo(PriestSpells.HOLY_WORD_SERENITY, Difficulty.None).GetEffects().Count > 1 && Global.SpellMgr.GetSpellInfo(PriestSpells.HOLY_WORD_SANCTIFY, Difficulty.None).GetEffects().Count > 3 && Global.SpellMgr.GetSpellInfo(PriestSpells.HOLY_WORD_CHASTISE, Difficulty.None).GetEffects().Count > 1;
 	}
 
 	public override void Register()
@@ -38,25 +38,25 @@ internal class spell_pri_holy_words : AuraScript, IHasAuraEffects
 
 		switch (spellInfo.Id)
 		{
-			case PriestSpells.Heal:
-			case PriestSpells.FlashHeal: // reduce Holy Word: Serenity cd by 6 seconds
-				targetSpellId       = PriestSpells.HolyWordSerenity;
+			case PriestSpells.HEAL:
+			case PriestSpells.FLASH_HEAL: // reduce Holy Word: Serenity cd by 6 seconds
+				targetSpellId       = PriestSpells.HOLY_WORD_SERENITY;
 				cdReductionEffIndex = 1;
 
 				// cdReduction = sSpellMgr.GetSpellInfo(HOLY_WORD_SERENITY, GetCastDifficulty()).GetEffect(EFFECT_1).CalcValue(player);
 				break;
-			case PriestSpells.PrayerOfHealing: // reduce Holy Word: Sanctify cd by 6 seconds
-				targetSpellId       = PriestSpells.HolyWordSanctify;
+			case PriestSpells.PRAYER_OF_HEALING: // reduce Holy Word: Sanctify cd by 6 seconds
+				targetSpellId       = PriestSpells.HOLY_WORD_SANCTIFY;
 				cdReductionEffIndex = 2;
 
 				break;
-			case PriestSpells.Renew: // reuce Holy Word: Sanctify cd by 2 seconds
-				targetSpellId       = PriestSpells.HolyWordSanctify;
+			case PriestSpells.RENEW: // reuce Holy Word: Sanctify cd by 2 seconds
+				targetSpellId       = PriestSpells.HOLY_WORD_SANCTIFY;
 				cdReductionEffIndex = 3;
 
 				break;
-			case PriestSpells.Smite: // reduce Holy Word: Chastise cd by 4 seconds
-				targetSpellId       = PriestSpells.HolyWordChastise;
+			case PriestSpells.SMITE: // reduce Holy Word: Chastise cd by 4 seconds
+				targetSpellId       = PriestSpells.HOLY_WORD_CHASTISE;
 				cdReductionEffIndex = 1;
 
 				break;

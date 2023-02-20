@@ -65,10 +65,10 @@ namespace System.Collections.Generic
 
         public static KeyValuePair<TKey, TValue> Find<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key)
         {
-            if (!dict.ContainsKey(key))
+            if (!dict.TryGetValue(key, out var val))
                 return default;
 
-            return new KeyValuePair<TKey, TValue>(key, dict[key]);
+            return new KeyValuePair<TKey, TValue>(key, val);
         }
 
         public static bool ContainsKey<TKey, TValue>(this IDictionary<TKey, TValue> dict, object key)
@@ -201,6 +201,17 @@ namespace System.Collections.Generic
             }
 
             list.Add(item);
+        }
+
+        public static K GetOrAdd<T, K>(this Dictionary<T, K> dict, T key, Func<K> addKey)
+        {
+            if (!dict.TryGetValue(key, out var item))
+            {
+                item = addKey();
+                dict.Add(key, item);
+            }
+
+            return item;
         }
 
         public static void RemoveIf<T>(this LinkedList<T> values, Func<T, bool> func)
@@ -526,7 +537,7 @@ namespace System.Collections.Generic
 
         public static void RemoveAllMatchingKeys<TKey, TValue>(this IDictionary<TKey, TValue> dict, Func<TKey, bool> pred)
         {
-            foreach (var key in dict.Keys.ToArray())
+            foreach (var key in dict.Keys.ToList())
                 if (pred.Invoke(key))
                     dict.Remove(key);
         }
@@ -568,6 +579,17 @@ namespace System.Collections.Generic
             }
 
             innerDict[key2] = newVal;
+        }
+
+        public static void Remove<TKey1, TKey2, TVal>(this Dictionary<TKey1, Dictionary<TKey2, TVal>> dict, TKey1 key1, TKey2 key2)
+        {
+            if (dict.TryGetValue(key1, out var innerDict))
+            {
+                innerDict.Remove(key2);
+
+                if (innerDict.Count == 0)
+                    dict.Remove(key1);
+            }
         }
 
         public static bool ContainsKey<TKey1, TKey2, TVal>(this Dictionary<TKey1, Dictionary<TKey2, TVal>> dict, TKey1 key1, TKey2 key2)

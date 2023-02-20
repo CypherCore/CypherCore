@@ -554,9 +554,13 @@ namespace Game.Entities
             return null;
         }
 
+        static Dictionary<int, PetAura> _defaultPetAuras = new();
         public Dictionary<int, PetAura> GetPetAuras(uint spell_id)
         {
-            return mSpellPetAuraMap.LookupByKey(spell_id);
+            if (mSpellPetAuraMap.TryGetValue(spell_id, out var auras))
+                return auras;
+
+            return _defaultPetAuras;
         }
 
         public SpellEnchantProcEntry GetSpellEnchantProcEvent(uint enchId)

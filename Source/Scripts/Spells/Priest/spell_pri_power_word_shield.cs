@@ -17,13 +17,13 @@ internal class spell_pri_power_word_shield : SpellScript, ISpellCheckCast, ISpel
 		var target = GetHitUnit();
 
 		if (target != null)
-			if (!caster.HasAura(PriestSpells.Rapture))
-				caster.CastSpell(target, PriestSpells.WeakenedSoul, true);
+			if (!caster.HasAura(PriestSpells.RAPTURE))
+				caster.CastSpell(target, PriestSpells.WEAKENED_SOUL, true);
 	}
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.WeakenedSoul);
+		return ValidateSpellInfo(PriestSpells.WEAKENED_SOUL);
 	}
 
 	public SpellCastResult CheckCast()
@@ -32,8 +32,8 @@ internal class spell_pri_power_word_shield : SpellScript, ISpellCheckCast, ISpel
 		var target = GetExplTargetUnit();
 
 		if (target != null)
-			if (!caster.HasAura(PriestSpells.Rapture))
-				if (target.HasAura(PriestSpells.WeakenedSoul, caster.GetGUID()))
+			if (!caster.HasAura(PriestSpells.RAPTURE))
+				if (target.HasAura(PriestSpells.WEAKENED_SOUL, caster.GetGUID()))
 					return SpellCastResult.BadTargets;
 
 		return SpellCastResult.SpellCastOk;

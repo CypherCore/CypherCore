@@ -46,7 +46,7 @@ internal class spell_rog_roll_the_bones : SpellScript, IHasSpellEffects
 			}
 		}
 
-		var possibleBuffs = Spells.Shuffle().ToArray();
+		var possibleBuffs = Spells.Shuffle().ToList();
 
 		// https://www.icy-veins.com/wow/outlaw-rogue-pve-dps-rotation-cooldowns-abilities
 		// 1 Roll the Bones buff  : 100.0 % chance;

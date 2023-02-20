@@ -63,9 +63,9 @@ internal class areatrigger_pri_divine_star : AreaTriggerAI
 			if (!_affectedUnits.Contains(unit.GetGUID()))
 			{
 				if (caster.IsValidAttackTarget(unit))
-					caster.CastSpell(unit, PriestSpells.DivineStarDamage, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress));
+					caster.CastSpell(unit, PriestSpells.DIVINE_STAR_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress));
 				else if (caster.IsValidAssistTarget(unit))
-					caster.CastSpell(unit, PriestSpells.DivineStarHeal, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress));
+					caster.CastSpell(unit, PriestSpells.DIVINE_STAR_HEAL, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress));
 
 				_affectedUnits.Add(unit.GetGUID());
 			}
@@ -80,9 +80,9 @@ internal class areatrigger_pri_divine_star : AreaTriggerAI
 			if (!_affectedUnits.Contains(unit.GetGUID()))
 			{
 				if (caster.IsValidAttackTarget(unit))
-					caster.CastSpell(unit, PriestSpells.DivineStarDamage, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress));
+					caster.CastSpell(unit, PriestSpells.DIVINE_STAR_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress));
 				else if (caster.IsValidAssistTarget(unit))
-					caster.CastSpell(unit, PriestSpells.DivineStarHeal, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress));
+					caster.CastSpell(unit, PriestSpells.DIVINE_STAR_HEAL, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress));
 
 				_affectedUnits.Add(unit.GetGUID());
 			}

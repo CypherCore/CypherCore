@@ -8,7 +8,7 @@ namespace Game.Spells.Auras
 {
     public class AuraCollection
     {
-        protected Dictionary<Guid, Aura> _auras = new();
+        protected Dictionary<Guid, Aura> _auras = new(); // To keep this thread safe we have the guid as the key to all auras, The aura may be removed while preforming a query.
         protected MultiMapHashSet<uint, Guid> _aurasBySpellId = new();
         protected MultiMapHashSet<ObjectGuid, Guid> _byCasterGuid  = new();
         protected MultiMapHashSet<bool, Guid> _isSingleTarget  = new();
@@ -141,7 +141,7 @@ namespace Game.Spells.Auras
             AuraCollection _collection;
             bool _hasLoaded = false;
 
-            public HashSet<Guid> Results { get; } = new();
+            public HashSet<Guid> Results { get; private set; } = new();
 
             internal AuraQuery(AuraCollection auraCollection)
             {
@@ -154,6 +154,7 @@ namespace Game.Spells.Auras
                     if (_collection._aurasBySpellId.TryGetValue(spellId, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -163,6 +164,7 @@ namespace Game.Spells.Auras
                     if (!caster.IsEmpty() && _collection._byCasterGuid.TryGetValue(caster, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -172,6 +174,7 @@ namespace Game.Spells.Auras
                     if (_collection._labelMap.TryGetValue(label, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -181,6 +184,7 @@ namespace Game.Spells.Auras
                     if (_collection._typeMap.TryGetValue(label, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -190,6 +194,7 @@ namespace Game.Spells.Auras
                     if (_collection._isSingleTarget.TryGetValue(t, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -199,6 +204,7 @@ namespace Game.Spells.Auras
                     if (_collection._canBeSaved.TryGetValue(t, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -208,6 +214,7 @@ namespace Game.Spells.Auras
                     if (_collection._isgroupBuff.TryGetValue(t, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -217,6 +224,7 @@ namespace Game.Spells.Auras
                     if (_collection._isPassive.TryGetValue(t, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -226,6 +234,7 @@ namespace Game.Spells.Auras
                     if (_collection._isDeathPersistant.TryGetValue(t, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -235,6 +244,7 @@ namespace Game.Spells.Auras
                     if (!Id.IsEmpty() && _collection._byCastId.TryGetValue(Id, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -244,6 +254,7 @@ namespace Game.Spells.Auras
                     if (_collection._isRequiringDeadTarget.TryGetValue(t, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -253,6 +264,7 @@ namespace Game.Spells.Auras
                     if (_collection._auras.TryGetValue(aura, out var result))
                         action(result.GetSpellInfo().Id, result, auraRemoveMode);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -265,14 +277,21 @@ namespace Game.Spells.Auras
 
             public AuraQuery ForEachResult(Action<Aura> action)
             {
-                foreach (var ar in Results)
-                    action(_collection._auras[ar]);
+                foreach (var aura in Results)
+                    if (_collection._auras.TryGetValue(aura, out var result))
+                        action(result);
 
                 return this;
             }
 
             public AuraQuery AlsoMatches(Func<Aura, bool> predicate)
             {
+                if (!_hasLoaded)
+                {
+                    lock (_collection._auras)
+                        Results = _collection._auras.Keys.ToHashSet();
+                }
+
                 Results.RemoveWhere(g =>
                 {
                     if (_collection._auras.TryGetValue(g, out var result))
@@ -280,18 +299,18 @@ namespace Game.Spells.Auras
 
                     return true;
                 });
+
+                _hasLoaded = true;
                 return this;
             }
 
             private void Sync(HashSet<Guid> collection)
             {
-                if (_hasLoaded)
+                if (!_hasLoaded)
                 {
                     if (collection != null && collection.Count != 0)
                         foreach (var a in collection)
                             Results.Add(a);
-
-                    _hasLoaded = true;
                 }
                 else if (Results.Count != 0)
                     Results.RemoveWhere(r => !collection.Contains(r));

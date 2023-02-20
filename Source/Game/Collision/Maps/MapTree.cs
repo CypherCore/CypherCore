@@ -132,9 +132,8 @@ namespace Game.Collision
                                 Log.outError(LogFilter.Server, "StaticMapTree.LoadMapTile() : could not acquire WorldModel [{0}, {1}]", tileX, tileY);
 
                             // update tree
-                            if (iSpawnIndices.ContainsKey(spawn.Id))
+                            if (iSpawnIndices.TryGetValue(spawn.Id, out var referencedVal))
                             {
-                                uint referencedVal = iSpawnIndices[spawn.Id];
                                 if (!iLoadedSpawns.ContainsKey(referencedVal))
                                 {
                                     if (referencedVal >= iNTreeValues)

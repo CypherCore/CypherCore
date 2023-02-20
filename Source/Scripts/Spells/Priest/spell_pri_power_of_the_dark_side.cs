@@ -16,7 +16,7 @@ internal class spell_pri_power_of_the_dark_side : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.PowerOfTheDarkSideTint);
+		return ValidateSpellInfo(PriestSpells.POWER_OF_THE_DARK_SIDE_TINT);
 	}
 
 	public override void Register()
@@ -29,13 +29,13 @@ internal class spell_pri_power_of_the_dark_side : AuraScript, IHasAuraEffects
 	{
 		var caster = GetCaster();
 
-		caster?.CastSpell(caster, PriestSpells.PowerOfTheDarkSideTint, true);
+		caster?.CastSpell(caster, PriestSpells.POWER_OF_THE_DARK_SIDE_TINT, true);
 	}
 
 	private void HandleOnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
 		var caster = GetCaster();
 
-		caster?.RemoveAura(PriestSpells.PowerOfTheDarkSideTint);
+		caster?.RemoveAura(PriestSpells.POWER_OF_THE_DARK_SIDE_TINT);
 	}
 }

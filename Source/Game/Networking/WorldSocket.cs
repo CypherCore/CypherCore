@@ -8,7 +8,11 @@ using Framework.IO;
 using Framework.Networking;
 using Game.Networking.Packets;
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Game.Networking
 {
@@ -45,6 +49,9 @@ namespace Game.Networking
 
         AsyncCallbackProcessor<QueryCallback> _queryProcessor = new();
         string _ipCountry;
+        ConcurrentQueue<ServerPacket> _sendQueue = new();
+        AutoResetEvent _queueTrigger = new AutoResetEvent(false);
+        Task _packetThread;
 
         public WorldSocket(Socket socket) : base(socket)
         {
@@ -56,13 +63,16 @@ namespace Game.Networking
 
             _headerBuffer = new SocketBuffer(HeaderSize);
             _packetBuffer = new SocketBuffer(0);
+            _packetThread = Task.Run(SendPacketThread);
         }
 
         public override void Dispose()
         {
             _worldSession = null;
-            _queryProcessor = null;
             _serverChallenge = null;
+            _sendQueue.Clear();
+            _queueTrigger.Set();
+            _queryProcessor = null;
             _sessionKey = null;
             _compressionStream = null;
 
@@ -350,52 +360,74 @@ namespace Game.Networking
 
         public void SendPacket(ServerPacket packet)
         {
-            if (!IsOpen())
+            if (!IsOpen() || _serverChallenge == null)
                 return;
 
-            packet.LogPacket(_worldSession);
-            packet.WritePacketData();
-            Log.outTrace(LogFilter.Network, "Received opcode: {0} ({1})", (ServerOpcodes)packet.GetOpcode(), (uint)packet.GetOpcode());
+            _sendQueue.Enqueue(packet); // no need to block the main thread.
+            _queueTrigger.Set();
+        }
 
-            var data = packet.GetData();
-            ServerOpcodes opcode = packet.GetOpcode();
-            PacketLog.Write(data, (uint)opcode, GetRemoteIpAddress(), _connectType, false);
-
-            ByteBuffer buffer = new();
-
-            int packetSize = data.Length;
-            if (packetSize > 0x400 && _worldCrypt.IsInitialized)
+        public void SendPacketThread()
+        {
+            while (_serverChallenge != null)
             {
-                buffer.WriteInt32(packetSize + 2);
-                buffer.WriteUInt32(ZLib.adler32(ZLib.adler32(0x9827D8F1, BitConverter.GetBytes((ushort)opcode), 2), data, (uint)packetSize));
+                _queueTrigger.WaitOne(500); // unlock every so often to check anyway because I am paranoid
 
-                byte[] compressedData;
-                uint compressedSize = CompressPacket(data, opcode, out compressedData);
-                buffer.WriteUInt32(ZLib.adler32(0x9827D8F1, compressedData, compressedSize)); 
-                buffer.WriteBytes(compressedData, compressedSize);
+                while (_sendQueue.Count > 0)
+                    if (_sendQueue.TryDequeue(out var packet) && packet != null)
+                    {
+                        try
+                        {
+                            packet.LogPacket(_worldSession);
+                            packet.WritePacketData();
+                            Log.outTrace(LogFilter.Network, "Received opcode: {0} ({1})", (ServerOpcodes)packet.GetOpcode(), (uint)packet.GetOpcode());
 
-                packetSize = (int)(compressedSize + 12);
-                opcode = ServerOpcodes.CompressedPacket;
+                            var data = packet.GetData();
+                            ServerOpcodes opcode = packet.GetOpcode();
+                            PacketLog.Write(data, (uint)opcode, GetRemoteIpAddress(), _connectType, false);
 
-                data = buffer.GetData();
+                            ByteBuffer buffer = new();
+
+                            int packetSize = data.Length;
+                            if (packetSize > 0x400 && _worldCrypt.IsInitialized)
+                            {
+                                buffer.WriteInt32(packetSize + 2);
+                                buffer.WriteUInt32(ZLib.adler32(ZLib.adler32(0x9827D8F1, BitConverter.GetBytes((ushort)opcode), 2), data, (uint)packetSize));
+
+                                byte[] compressedData;
+                                uint compressedSize = CompressPacket(data, opcode, out compressedData);
+                                buffer.WriteUInt32(ZLib.adler32(0x9827D8F1, compressedData, compressedSize));
+                                buffer.WriteBytes(compressedData, compressedSize);
+
+                                packetSize = (int)(compressedSize + 12);
+                                opcode = ServerOpcodes.CompressedPacket;
+
+                                data = buffer.GetData();
+                            }
+
+                            buffer = new ByteBuffer();
+                            buffer.WriteUInt16((ushort)opcode);
+                            buffer.WriteBytes(data);
+                            packetSize += 2 /*opcode*/;
+
+                            data = buffer.GetData();
+
+                            PacketHeader header = new();
+                            header.Size = packetSize;
+                            _worldCrypt.Encrypt(ref data, ref header.Tag);
+
+                            ByteBuffer byteBuffer = new();
+                            header.Write(byteBuffer);
+                            byteBuffer.WriteBytes(data);
+
+                            AsyncWrite(byteBuffer.GetData()); // LIES not async.
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.outException(ex);
+                        }
+                    }
             }
-
-            buffer = new ByteBuffer();
-            buffer.WriteUInt16((ushort)opcode);
-            buffer.WriteBytes(data);
-            packetSize += 2 /*opcode*/;
-
-            data = buffer.GetData();
-
-            PacketHeader header = new();
-            header.Size = packetSize;
-            _worldCrypt.Encrypt(ref data, ref header.Tag);
-
-            ByteBuffer byteBuffer = new();
-            header.Write(byteBuffer);
-            byteBuffer.WriteBytes(data);
-
-            AsyncWrite(byteBuffer.GetData());
         }
 
         public void SetWorldSession(WorldSession session)

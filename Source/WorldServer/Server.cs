@@ -176,8 +176,13 @@ namespace WorldServer
             if (halfMaxCoreStuckTime == 0)
                 halfMaxCoreStuckTime = uint.MaxValue;
 
+#if DEBUG
             ulong loops = 0;
-            ulong total = 0;
+            TimeSpan total = TimeSpan.Zero;
+            TimeSpan max = TimeSpan.Zero;
+            TimeSpan min = TimeSpan.MaxValue;
+            var stopwatch = new Stopwatch();
+#endif
             while (!Global.WorldMgr.IsStopped)
             {
                 var realCurrTime = Time.GetMSTime();
@@ -193,18 +198,31 @@ namespace WorldServer
                     Thread.Sleep(TimeSpan.FromMilliseconds(sleepTime));
                     continue;
                 }
-
+#if DEBUG
+                stopwatch.Restart();
+#endif
                 Global.WorldMgr.Update(diff);
+#if DEBUG
+                stopwatch.Stop();
+#endif
                 realPrevTime = realCurrTime;
 #if DEBUG
                 loops++;
-                total += diff;
+                total += stopwatch.Elapsed;
+
+                if (stopwatch.Elapsed > max)
+                    max = stopwatch.Elapsed;
+
+                if (stopwatch.Elapsed < min && stopwatch.Elapsed != TimeSpan.Zero) 
+                    min = stopwatch.Elapsed;
 
                 if (loops % 2000 == 0)
                 {
-                    Console.WriteLine("Avg: " + total / loops + ", Num loops: " + loops + ", Total Ticks: " + total);
-                    total = 0;
-                    loops= 0;
+                    Console.WriteLine($"Avg: {(total / loops).TotalMilliseconds}ms, Max: {max.TotalMilliseconds}ms, Min: {min.TotalMilliseconds}ms, Num loops: {loops}, Total: {total.TotalMilliseconds}ms");
+                    total = TimeSpan.Zero;
+                    loops = 0;
+                    max = TimeSpan.Zero;
+                    min = TimeSpan.MaxValue;
                 }
 #endif
             }

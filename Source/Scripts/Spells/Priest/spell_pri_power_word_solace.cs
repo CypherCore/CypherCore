@@ -17,7 +17,7 @@ internal class spell_pri_power_word_solace : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.PowerWordSolaceEnergize);
+		return ValidateSpellInfo(PriestSpells.POWER_WORD_SOLACE_ENERGIZE);
 	}
 
 	public override void Register()
@@ -29,7 +29,7 @@ internal class spell_pri_power_word_solace : SpellScript, IHasSpellEffects
 	{
 		GetCaster()
 			.CastSpell(GetCaster(),
-			           PriestSpells.PowerWordSolaceEnergize,
+			           PriestSpells.POWER_WORD_SOLACE_ENERGIZE,
 			           new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetTriggeringSpell(GetSpell())
 			                                                                        .AddSpellMod(SpellValueMod.BasePoint0, GetEffectValue() / 100));
 	}

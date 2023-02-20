@@ -16,7 +16,7 @@ internal class spell_pri_penance_channeled : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.PowerOfTheDarkSide);
+		return ValidateSpellInfo(PriestSpells.POWER_OF_THE_DARK_SIDE);
 	}
 
 	public override void Register()
@@ -28,6 +28,6 @@ internal class spell_pri_penance_channeled : AuraScript, IHasAuraEffects
 	{
 		var caster = GetCaster();
 
-		caster?.RemoveAura(PriestSpells.PowerOfTheDarkSide);
+		caster?.RemoveAura(PriestSpells.POWER_OF_THE_DARK_SIDE);
 	}
 }

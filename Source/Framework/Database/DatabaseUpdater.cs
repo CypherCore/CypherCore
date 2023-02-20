@@ -388,8 +388,8 @@ namespace Framework.Database
                     Log.outFatal(LogFilter.SqlUpdates, $"DBUpdater: {directory} Exception: {ex}");
                 }
 
-                string[] files = Directory.GetFiles(directory, "*.sql").OrderBy(p => p).ToArray();
-                for (int i = 0; i < files.Length; i++)
+                var files = Directory.GetFiles(directory, "*.sql").OrderBy(p => p).ToList();
+                for (int i = 0; i < files.Count; i++)
                 {
                     yield return new FileEntry(files[i], state);
                 }

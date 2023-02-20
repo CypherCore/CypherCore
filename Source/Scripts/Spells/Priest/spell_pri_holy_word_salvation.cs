@@ -24,7 +24,7 @@ public class spell_pri_holy_word_salvation : SpellScript, ISpellAfterCast
 			{
 				caster.CastSpell(friendPlayers, PriestSpells.RENEW, true);
 
-				var prayer = friendPlayers.GetAura(PriestSpells.PrayerOfMendingAura);
+				var prayer = friendPlayers.GetAura(PriestSpells.PRAYER_OF_MENDING_AURA);
 
 				if (prayer != null)
 					prayer.ModStackAmount(eff.BasePoints);

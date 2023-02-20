@@ -58,7 +58,7 @@ namespace Scripts.Spells.Warlock
         private void Eradication(Unit caster, Unit target)
         {
             if (caster.HasAura(WarlockSpells.ERADICATION))
-                caster.CastSpell(target, WarlockSpells.ERADICATION_DEBUFF, true);
+                caster.AddAura(WarlockSpells.ERADICATION_DEBUFF, target);
         }
 
         private void CryHavoc(Player p, Unit target)

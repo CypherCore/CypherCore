@@ -15,7 +15,7 @@ internal class spell_pri_vampiric_touch : AuraScript, IAfterAuraDispel, IAuraChe
 {
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.VampiricTouchDispel, PriestSpells.GenReplenishment);
+		return ValidateSpellInfo(PriestSpells.VAMPIRIC_TOUCH_DISPEL, PriestSpells.GEN_REPLENISHMENT);
 	}
 
 	public void HandleDispel(DispelInfo dispelInfo)
@@ -35,7 +35,7 @@ internal class spell_pri_vampiric_touch : AuraScript, IAfterAuraDispel, IAuraChe
 					// backfire Damage
 					CastSpellExtraArgs args = new(aurEff);
 					args.AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount() * 8);
-					caster.CastSpell(target, PriestSpells.VampiricTouchDispel, args);
+					caster.CastSpell(target, PriestSpells.VAMPIRIC_TOUCH_DISPEL, args);
 				}
 			}
 		}
@@ -56,6 +56,6 @@ internal class spell_pri_vampiric_touch : AuraScript, IAfterAuraDispel, IAuraChe
 	private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 	{
 		PreventDefaultAction();
-		eventInfo.GetProcTarget().CastSpell((Unit)null, PriestSpells.GenReplenishment, new CastSpellExtraArgs(aurEff));
+		eventInfo.GetProcTarget().CastSpell((Unit)null, PriestSpells.GEN_REPLENISHMENT, new CastSpellExtraArgs(aurEff));
 	}
 }

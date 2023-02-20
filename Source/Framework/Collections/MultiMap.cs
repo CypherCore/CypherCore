@@ -222,7 +222,7 @@ namespace System.Collections.Generic
         {
             get
             {
-                foreach (var key in _interalStorage.Keys.ToArray()) // this allows it to be safely enumerated off of and have items removed.
+                foreach (var key in _interalStorage.Keys.ToList()) // this allows it to be safely enumerated off of and have items removed.
                 {
                     var val = _interalStorage[key];
 

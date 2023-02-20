@@ -15,7 +15,7 @@ internal class spell_pri_shadow_mend_periodic_damage : AuraScript, IAuraCheckPro
 {
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.ShadowMendDamage);
+		return ValidateSpellInfo(PriestSpells.SHADOW_MEND_DAMAGE);
 	}
 
 	public bool CheckProc(ProcEventInfo eventInfo)
@@ -37,7 +37,7 @@ internal class spell_pri_shadow_mend_periodic_damage : AuraScript, IAuraCheckPro
 		args.SetOriginalCaster(GetCasterGUID());
 		args.SetTriggeringAura(aurEff);
 		args.AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount());
-		GetTarget().CastSpell(GetTarget(), PriestSpells.ShadowMendDamage, args);
+		GetTarget().CastSpell(GetTarget(), PriestSpells.SHADOW_MEND_DAMAGE, args);
 	}
 
 	private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)

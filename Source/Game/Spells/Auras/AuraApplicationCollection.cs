@@ -10,7 +10,7 @@ namespace Game.Spells.Auras
 {
     public class AuraApplicationCollection
     {
-        protected Dictionary<Guid, AuraApplication> _auras = new();
+        protected Dictionary<Guid, AuraApplication> _auras = new(); // To keep this thread safe we have the guid as the key to all auras, The aura may be removed while preforming a query.
         protected MultiMapHashSet<uint, Guid> _aurasBySpellId = new();
         protected MultiMapHashSet<ObjectGuid, Guid> _byCasterGuid  = new();
         protected MultiMapHashSet<ObjectGuid, Guid> _byCastItemGuid = new();
@@ -227,7 +227,7 @@ namespace Game.Spells.Auras
             AuraApplicationCollection _collection;
             bool _hasLoaded = false;
 
-            public HashSet<Guid> Results { get; } = new();
+            public HashSet<Guid> Results { get; private set; } = new();
 
             internal AuraApplicationQuery(AuraApplicationCollection auraCollection)
             {
@@ -240,6 +240,7 @@ namespace Game.Spells.Auras
                     if (_collection._aurasBySpellId.TryGetValue(spellId, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -258,7 +259,8 @@ namespace Game.Spells.Auras
 
                     SyncOr(guids);
                 }
-
+                
+                _hasLoaded = true;
                 return this;
             }
 
@@ -268,6 +270,7 @@ namespace Game.Spells.Auras
                     if (!caster.IsEmpty() && _collection._byCasterGuid.TryGetValue(caster, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -277,6 +280,7 @@ namespace Game.Spells.Auras
                     if (!item.IsEmpty() && _collection._byCastItemGuid.TryGetValue(item, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -286,6 +290,7 @@ namespace Game.Spells.Auras
                     if (!Id.IsEmpty() && _collection._byCastId.TryGetValue(Id, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -295,6 +300,7 @@ namespace Game.Spells.Auras
                     if (owner != null && _collection._byOwner.TryGetValue(owner, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -303,6 +309,7 @@ namespace Game.Spells.Auras
                 lock (_collection._auras)
                     SyncOr(_collection._isPassive.LookupByKey(true), _collection._isPerm.LookupByKey(true));
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -312,6 +319,7 @@ namespace Game.Spells.Auras
                     if (_collection._labelMap.TryGetValue(label, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -321,6 +329,7 @@ namespace Game.Spells.Auras
                     if (_collection._deminishGroup.TryGetValue(group, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -331,6 +340,7 @@ namespace Game.Spells.Auras
                     if (_collection._typeMap.TryGetValue(auraType, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -340,6 +350,7 @@ namespace Game.Spells.Auras
                     if (_collection._casterAuraState.TryGetValue(state, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -349,6 +360,7 @@ namespace Game.Spells.Auras
                     if (_collection._dispelType.TryGetValue(dispellType, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -358,6 +370,7 @@ namespace Game.Spells.Auras
                     if (_collection._spellFamily.TryGetValue(spellFamily, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -367,6 +380,7 @@ namespace Game.Spells.Auras
                     if (_collection._effectIndex.TryGetValue(effectIndex, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -376,6 +390,7 @@ namespace Game.Spells.Auras
                     if (_collection._isSingleTarget.TryGetValue(t, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -385,6 +400,7 @@ namespace Game.Spells.Auras
                     if (_collection._isPositive.TryGetValue(t, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -394,6 +410,7 @@ namespace Game.Spells.Auras
                     if (_collection._canBeSaved.TryGetValue(t, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -403,6 +420,7 @@ namespace Game.Spells.Auras
                     if (_collection._isgroupBuff.TryGetValue(t, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -412,6 +430,7 @@ namespace Game.Spells.Auras
                     if (_collection._isPassive.TryGetValue(t, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -421,6 +440,7 @@ namespace Game.Spells.Auras
                     if (_collection._isDeathPersistant.TryGetValue(t, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -430,6 +450,7 @@ namespace Game.Spells.Auras
                     if (_collection._isRequiringDeadTarget.TryGetValue(t, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -439,6 +460,7 @@ namespace Game.Spells.Auras
                     if (_collection._isPlayer.TryGetValue(t, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -447,6 +469,7 @@ namespace Game.Spells.Auras
                 lock (_collection._auras)
                     Sync(_collection._hasNegitiveFlag, t);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -456,6 +479,7 @@ namespace Game.Spells.Auras
                     if (_collection._isPerm.TryGetValue(t, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -465,6 +489,7 @@ namespace Game.Spells.Auras
                     if (_collection._onlyIndoors.TryGetValue(t, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -474,6 +499,7 @@ namespace Game.Spells.Auras
                     if (_collection._onlyOutdoors.TryGetValue(t, out var result))
                         Sync(result);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -483,6 +509,7 @@ namespace Game.Spells.Auras
                     if (_collection._auras.TryGetValue(aura, out var result))
                         action(result, auraRemoveMode);
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -495,14 +522,21 @@ namespace Game.Spells.Auras
 
             public AuraApplicationQuery ForEachResult(Action<AuraApplication> action)
             {
-                foreach (var ar in Results)
-                    action(_collection._auras[ar]);
+                foreach (var aura in Results)
+                    if (_collection._auras.TryGetValue(aura, out var result))
+                        action(result);
 
                 return this;
             }
 
             public AuraApplicationQuery AlsoMatches(Func<AuraApplication, bool> predicate)
             {
+                if (!_hasLoaded)
+                {
+                    lock (_collection._auras)
+                        Results = _collection._auras.Keys.ToHashSet();
+                }
+
                 Results.RemoveWhere(g =>
                 {
                     if (_collection._auras.TryGetValue(g, out var result))
@@ -511,6 +545,7 @@ namespace Game.Spells.Auras
                     return true;
                 });
 
+                _hasLoaded = true;
                 return this;
             }
 
@@ -521,8 +556,6 @@ namespace Game.Spells.Auras
                     if (collection != null && collection.Count != 0)
                         foreach (var a in collection)
                             Results.Add(a);
-
-                    _hasLoaded = true;
                 }
                 else if (Results.Count != 0)
                     Results.RemoveWhere(r => collection.Contains(r) != contains);
@@ -536,8 +569,6 @@ namespace Game.Spells.Auras
                         if (collection != null && collection.Count != 0)
                             foreach (var a in collection)
                                 Results.Add(a);
-
-                    _hasLoaded = true;
                 }
                 else if (Results.Count != 0)
                 {

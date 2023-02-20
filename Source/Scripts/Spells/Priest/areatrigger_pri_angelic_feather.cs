@@ -22,7 +22,7 @@ internal class areatrigger_pri_angelic_feather : AreaTriggerAI
 
 		if (caster)
 		{
-			var areaTriggers = caster.GetAreaTriggers(PriestSpells.AngelicFeatherAreatrigger);
+			var areaTriggers = caster.GetAreaTriggers(PriestSpells.ANGELIC_FEATHER_AREATRIGGER);
 
 			if (areaTriggers.Count >= 3)
 				areaTriggers.First().SetDuration(0);
@@ -37,7 +37,7 @@ internal class areatrigger_pri_angelic_feather : AreaTriggerAI
 			if (caster.IsFriendlyTo(unit))
 			{
 				// If Target already has aura, increase duration to max 130% of initial duration
-				caster.CastSpell(unit, PriestSpells.AngelicFeatherAura, true);
+				caster.CastSpell(unit, PriestSpells.ANGELIC_FEATHER_AURA, true);
 				at.SetDuration(0);
 			}
 	}

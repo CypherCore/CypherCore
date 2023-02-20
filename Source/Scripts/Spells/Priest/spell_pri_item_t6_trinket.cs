@@ -18,7 +18,7 @@ internal class spell_pri_item_t6_trinket : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.DivineBlessing, PriestSpells.DivineWrath);
+		return ValidateSpellInfo(PriestSpells.DIVINE_BLESSING, PriestSpells.DIVINE_WRATH);
 	}
 
 	public override void Register()
@@ -32,9 +32,9 @@ internal class spell_pri_item_t6_trinket : AuraScript, IHasAuraEffects
 		var caster = eventInfo.GetActor();
 
 		if (eventInfo.GetSpellTypeMask().HasAnyFlag(ProcFlagsSpellType.Heal))
-			caster.CastSpell((Unit)null, PriestSpells.DivineBlessing, true);
+			caster.CastSpell((Unit)null, PriestSpells.DIVINE_BLESSING, true);
 
 		if (eventInfo.GetSpellTypeMask().HasAnyFlag(ProcFlagsSpellType.Damage))
-			caster.CastSpell((Unit)null, PriestSpells.DivineWrath, true);
+			caster.CastSpell((Unit)null, PriestSpells.DIVINE_WRATH, true);
 	}
 }

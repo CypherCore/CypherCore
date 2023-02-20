@@ -15,7 +15,7 @@ internal class spell_pri_penance : SpellScript, ISpellCheckCast, IHasSpellEffect
 {
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.PenanceChannelDamage, PriestSpells.PenanceChannelHealing);
+		return ValidateSpellInfo(PriestSpells.PENANCE_CHANNEL_DAMAGE, PriestSpells.PENANCE_CHANNEL_HEALING);
 	}
 
 	public SpellCastResult CheckCast()
@@ -51,9 +51,9 @@ internal class spell_pri_penance : SpellScript, ISpellCheckCast, IHasSpellEffect
 		if (target)
 		{
 			if (caster.IsFriendlyTo(target))
-				caster.CastSpell(target, PriestSpells.PenanceChannelHealing, new CastSpellExtraArgs().SetTriggeringSpell(GetSpell()));
+				caster.CastSpell(target, PriestSpells.PENANCE_CHANNEL_HEALING, new CastSpellExtraArgs().SetTriggeringSpell(GetSpell()));
 			else
-				caster.CastSpell(target, PriestSpells.PenanceChannelDamage, new CastSpellExtraArgs().SetTriggeringSpell(GetSpell()));
+				caster.CastSpell(target, PriestSpells.PENANCE_CHANNEL_DAMAGE, new CastSpellExtraArgs().SetTriggeringSpell(GetSpell()));
 		}
 	}
 }

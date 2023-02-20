@@ -18,7 +18,7 @@ internal class spell_pri_rapture : SpellScript, ISpellAfterCast, IHasSpellEffect
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(PriestSpells.PowerWordShield);
+		return ValidateSpellInfo(PriestSpells.POWER_WORD_SHIELD);
 	}
 
 	public void AfterCast()
@@ -27,7 +27,7 @@ internal class spell_pri_rapture : SpellScript, ISpellAfterCast, IHasSpellEffect
 		var target = Global.ObjAccessor.GetUnit(caster, _raptureTarget);
 
 		if (target != null)
-			caster.CastSpell(target, PriestSpells.PowerWordShield, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnorePowerAndReagentCost | TriggerCastFlags.IgnoreCastInProgress).SetTriggeringSpell(GetSpell()));
+			caster.CastSpell(target, PriestSpells.POWER_WORD_SHIELD, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnorePowerAndReagentCost | TriggerCastFlags.IgnoreCastInProgress).SetTriggeringSpell(GetSpell()));
 	}
 
 	public override void Register()
