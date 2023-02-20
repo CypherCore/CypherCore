@@ -261,6 +261,9 @@ namespace Game.Entities
 
         public void RemoveValue(int index)
         {
+            if (_values.Count <= index)
+                return;
+
             // remove by shifting entire container - client might rely on values being sorted for certain fields
             _values.RemoveAt(index);
             for (int i = index; i < _values.Count; ++i)
