@@ -180,7 +180,7 @@ namespace WorldServer
             ulong loops = 0;
             TimeSpan total = TimeSpan.Zero;
             TimeSpan max = TimeSpan.Zero;
-            TimeSpan min = TimeSpan.Zero;
+            TimeSpan min = TimeSpan.MaxValue;
             var stopwatch = new Stopwatch();
 #endif
             while (!Global.WorldMgr.IsStopped)
@@ -213,7 +213,7 @@ namespace WorldServer
                 if (stopwatch.Elapsed > max)
                     max = stopwatch.Elapsed;
 
-                if (stopwatch.Elapsed < min) 
+                if (stopwatch.Elapsed < min && stopwatch.Elapsed != TimeSpan.Zero) 
                     min = stopwatch.Elapsed;
 
                 if (loops % 2000 == 0)
@@ -222,7 +222,7 @@ namespace WorldServer
                     total = TimeSpan.Zero;
                     loops = 0;
                     max = TimeSpan.Zero;
-                    min = TimeSpan.Zero;
+                    min = TimeSpan.MaxValue;
                 }
 #endif
             }
