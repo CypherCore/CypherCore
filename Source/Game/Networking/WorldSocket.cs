@@ -75,7 +75,6 @@ namespace Game.Networking
             _queryProcessor = null;
             _sessionKey = null;
             _compressionStream = null;
-            _packetThread.Dispose();
 
             base.Dispose();
         }
