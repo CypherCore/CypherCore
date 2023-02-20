@@ -2626,7 +2626,7 @@ namespace Game.Entities
 
         public bool HasAura<T>(T spellId) where T : struct, System.Enum
         {
-            return GetAuraApplication(Convert.ToUInt32(spellId)) != null;
+            return GetAuraApplication(Convert.ToUInt32(spellId)).Any();
         }
 
         public bool HasAura<T>(T spellId, ObjectGuid casterGUID, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0) where T : struct, System.Enum
@@ -2636,7 +2636,7 @@ namespace Game.Entities
 
         public bool HasAura(uint spellId)
         {
-            return GetAuraApplication(spellId) != null;
+            return GetAuraApplication(spellId).Any();
         }
 
         public bool HasAura(uint spellId, ObjectGuid casterGUID, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)

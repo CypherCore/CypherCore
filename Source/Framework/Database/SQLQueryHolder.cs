@@ -29,10 +29,10 @@ namespace Framework.Database
 
         public SQLResult GetResult(T index)
         {
-            if (!_results.ContainsKey(index))
+            if (!_results.TryGetValue(index, out var result))
                 return new SQLResult();
 
-            return _results[index];
+            return result;
         }
     }
 

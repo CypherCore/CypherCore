@@ -90,52 +90,52 @@ namespace Game.Cache
 
         public void UpdateCharacterGender(ObjectGuid guid, byte gender)
         {
-            if (!_characterCacheStore.ContainsKey(guid))
+            if (!_characterCacheStore.TryGetValue(guid, out var p))
                 return;
 
-            _characterCacheStore[guid].Sex = (Gender)gender;
+            p.Sex = (Gender)gender;
         }
         
         public void UpdateCharacterLevel(ObjectGuid guid, byte level)
         {
-            if (!_characterCacheStore.ContainsKey(guid))
+            if (!_characterCacheStore.TryGetValue(guid, out var p))
                 return;
 
-            _characterCacheStore[guid].Level = level;
+            p.Level = level;
         }
 
         public void UpdateCharacterAccountId(ObjectGuid guid, uint accountId)
         {
-            if (!_characterCacheStore.ContainsKey(guid))
+            if (!_characterCacheStore.TryGetValue(guid, out var p))
                 return;
 
-            _characterCacheStore[guid].AccountId = accountId;
+            p.AccountId = accountId;
         }
 
         public void UpdateCharacterGuildId(ObjectGuid guid, ulong guildId)
         {
-            if (!_characterCacheStore.ContainsKey(guid))
+            if (!_characterCacheStore.TryGetValue(guid, out var p))
                 return;
 
-            _characterCacheStore[guid].GuildId = guildId;
+            p.GuildId = guildId;
         }
 
         public void UpdateCharacterArenaTeamId(ObjectGuid guid, byte slot, uint arenaTeamId)
         {
-            if (!_characterCacheStore.ContainsKey(guid))
+            if (!_characterCacheStore.TryGetValue(guid, out var p))
                 return;
 
-            _characterCacheStore[guid].ArenaTeamId[slot] = arenaTeamId;
+            p.ArenaTeamId[slot] = arenaTeamId;
         }
 
         public void UpdateCharacterInfoDeleted(ObjectGuid guid, bool deleted, string name = null)
         {
-            if (!_characterCacheStore.ContainsKey(guid))
+            if (!_characterCacheStore.TryGetValue(guid, out var p))
                 return;
 
-            _characterCacheStore[guid].IsDeleted = deleted;
+            p.IsDeleted = deleted;
             if (!name.IsEmpty())
-                _characterCacheStore[guid].Name = name;
+                p.Name = name;
         }
 
         public bool HasCharacterCacheEntry(ObjectGuid guid)

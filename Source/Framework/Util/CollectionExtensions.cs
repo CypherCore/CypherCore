@@ -65,10 +65,10 @@ namespace System.Collections.Generic
 
         public static KeyValuePair<TKey, TValue> Find<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key)
         {
-            if (!dict.ContainsKey(key))
+            if (!dict.TryGetValue(key, out var val))
                 return default;
 
-            return new KeyValuePair<TKey, TValue>(key, dict[key]);
+            return new KeyValuePair<TKey, TValue>(key, val);
         }
 
         public static bool ContainsKey<TKey, TValue>(this IDictionary<TKey, TValue> dict, object key)
@@ -201,6 +201,17 @@ namespace System.Collections.Generic
             }
 
             list.Add(item);
+        }
+
+        public static K GetOrAdd<T, K>(this Dictionary<T, K> dict, T key, Func<K> addKey)
+        {
+            if (!dict.TryGetValue(key, out var item))
+            {
+                item = addKey();
+                dict.Add(key, item);
+            }
+
+            return item;
         }
 
         public static void RemoveIf<T>(this LinkedList<T> values, Func<T, bool> func)

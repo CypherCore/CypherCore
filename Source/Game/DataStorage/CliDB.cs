@@ -373,11 +373,7 @@ namespace Game.DataStorage
             Global.DB2Mgr.LoadStores();
 
             foreach (var entry in TaxiPathStorage.Values)
-            {
-                if (!TaxiPathSetBySource.ContainsKey(entry.FromTaxiNode))
-                    TaxiPathSetBySource.Add(entry.FromTaxiNode, new Dictionary<uint, TaxiPathBySourceAndDestination>());
-                TaxiPathSetBySource[entry.FromTaxiNode][entry.ToTaxiNode] = new TaxiPathBySourceAndDestination(entry.Id, entry.Cost);
-            }
+                TaxiPathSetBySource.Add(entry.FromTaxiNode, entry.ToTaxiNode, new TaxiPathBySourceAndDestination(entry.Id, entry.Cost));
 
             uint pathCount = TaxiPathStorage.GetNumRows();
 

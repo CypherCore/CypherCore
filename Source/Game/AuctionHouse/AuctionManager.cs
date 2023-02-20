@@ -281,11 +281,7 @@ namespace Game
 
         public bool PendingAuctionAdd(Player player, uint auctionHouseId, uint auctionId, ulong deposit)
         {
-            if (!_pendingAuctionsByPlayer.ContainsKey(player.GetGUID()))
-                _pendingAuctionsByPlayer[player.GetGUID()] = new PlayerPendingAuctions();
-
-
-            var pendingAuction = _pendingAuctionsByPlayer[player.GetGUID()];
+            var pendingAuction = _pendingAuctionsByPlayer.GetOrAdd(player.GetGUID(), () => new PlayerPendingAuctions());
             // Get deposit so far
             ulong totalDeposit = 0;
             foreach (PendingAuctionInfo thisAuction in pendingAuction.Auctions)
@@ -419,10 +415,7 @@ namespace Game
         {
             DateTime now = GameTime.Now();
 
-            if (!_playerThrottleObjects.ContainsKey(player.GetGUID()))
-                _playerThrottleObjects[player.GetGUID()] = new PlayerThrottleObject();
-
-            var throttleObject = _playerThrottleObjects[player.GetGUID()];
+            var throttleObject = _playerThrottleObjects.GetOrAdd(player.GetGUID(), () => new PlayerThrottleObject());
             if (now > throttleObject.PeriodEnd)
             {
                 throttleObject.PeriodEnd = now + TimeSpan.FromMinutes(1);

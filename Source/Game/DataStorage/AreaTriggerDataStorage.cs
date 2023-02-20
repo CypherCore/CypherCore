@@ -331,10 +331,13 @@ namespace Game.DataStorage
 
                     // Add the trigger to a map::cell map, which is later used by GridLoader to query
                     CellCoord cellCoord = GridDefines.ComputeCellCoord(spawn.SpawnPoint.GetPositionX(), spawn.SpawnPoint.GetPositionY());
-                    if (!_areaTriggerSpawnsByLocation.ContainsKey((spawn.MapId, cellCoord.GetId())))
-                        _areaTriggerSpawnsByLocation[(spawn.MapId, cellCoord.GetId())] = new SortedSet<ulong>();
+                    if (!_areaTriggerSpawnsByLocation.TryGetValue((spawn.MapId, cellCoord.GetId()), out var val))
+                    {
+                        val = new SortedSet<ulong>();
+                        _areaTriggerSpawnsByLocation[(spawn.MapId, cellCoord.GetId())] = val;
+                    }
 
-                    _areaTriggerSpawnsByLocation[(spawn.MapId, cellCoord.GetId())].Add(spawnId);
+                    val.Add(spawnId);
 
                     // add the position to the map
                     _areaTriggerSpawnsBySpawnId[spawnId] = spawn;
