@@ -3,30 +3,29 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
 
 namespace Scripts.Spells.Mage
 {
-    internal class spell_mage_shifting_power : SpellScript, IHasSpellEffects
+    [SpellScript(MageSpells.ShiftingPowerDamageProc)]
+    internal class spell_mage_shifting_power : SpellScript, ISpellOnCast
     {
-        // The amount of cooldown reduction in seconds
-        public List<ISpellEffect> SpellEffects { get; } = new();
-
-        public override bool Validate(SpellInfo spellInfo)
+        public void OnCast()
         {
-            return ValidateSpellInfo(MageSpells.ShiftingPower);
-        }
-        public static void HandleSpellEffect(Player caster)
-        {
+            var caster = GetCaster();
 
-            // Get a list of all spells with a cooldown - Need method to grab all spells with a cooldown, not sure how to implement currently
-            List<Spell> spellsOnCooldown = new List<Spell>();
-
-            // Reduce the cooldown of each spell by the specified amount, once the list is made this loop will reduce all of their Recovery Times by 3 seconds due to the -3000 base points in the spell ID 382440
-            foreach (Spell spell in spellsOnCooldown)
+            if (caster != null && caster.TryGetAura(MageSpells.ShiftingPower, out var aura))
             {
-                //spellInfo.RecoveryTime += ShiftingPower.GetSpellInfo().GetEffect(1).BasePoints() * Time.InMilliseconds;
+                //creating a list of all spells in casters spell history
+                var spellHistory = caster.GetSpellHistory();
+                System.TimeSpan mod = new System.TimeSpan(0, 0, (aura.GetSpellInfo().GetEffect(1).BasePoints / 1000));
+                // looping over all spells that have cooldowns
+                foreach (var spell in spellHistory.SpellsOnCooldown)
+                {
+                    spellHistory.ModifyCooldown(spell, mod);
+                }
             }
         }
     }
