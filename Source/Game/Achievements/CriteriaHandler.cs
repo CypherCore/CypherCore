@@ -1795,7 +1795,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case ModifierTreeType.PlayerHasAuraWithLabel: // 107
-                    if (!referencePlayer.HasAura(aura => aura.GetSpellInfo().HasLabel(reqValue)))
+                    if (!referencePlayer.GetAuraQuery().HasLabel(reqValue).Results.Any())
                         return false;
                     break;
                 case ModifierTreeType.PlayersRealmWorldState: // 108
@@ -3508,40 +3508,31 @@ namespace Game.Achievements
                 case ModifierTreeType.PlayerAuraWithLabelStackCountEqualOrGreaterThan: // 335
                 {
                     uint count = 0;
-                    referencePlayer.HasAura(aura =>
-                    {
-                        if (aura.GetSpellInfo().HasLabel((uint)secondaryAsset))
-                            count += aura.GetStackAmount();
-                        return false;
-                    });
+                    referencePlayer.GetAuraQuery().HasLabel((uint)secondaryAsset).ForEachResult(aura => count += aura.GetStackAmount());
+          
                     if (count < reqValue)
                         return false;
+
                     break;
                 }
                 case ModifierTreeType.PlayerAuraWithLabelStackCountEqual: // 336
                 {
                     uint count = 0;
-                    referencePlayer.HasAura(aura =>
-                    {
-                        if (aura.GetSpellInfo().HasLabel((uint)secondaryAsset))
-                            count += aura.GetStackAmount();
-                        return false;
-                    });
+                    referencePlayer.GetAuraQuery().HasLabel((uint)secondaryAsset).ForEachResult(aura => count += aura.GetStackAmount());
+
                     if (count != reqValue)
                         return false;
+
                     break;
                 }
                 case ModifierTreeType.PlayerAuraWithLabelStackCountEqualOrLessThan: // 337
                 {
                     uint count = 0;
-                    referencePlayer.HasAura(aura =>
-                    {
-                        if (aura.GetSpellInfo().HasLabel((uint)secondaryAsset))
-                            count += aura.GetStackAmount();
-                        return false;
-                    });
+                    referencePlayer.GetAuraQuery().HasLabel((uint)secondaryAsset).ForEachResult(aura => count += aura.GetStackAmount());
+
                     if (count > reqValue)
                         return false;
+
                     break;
                 }
                 case ModifierTreeType.PlayerIsInCrossFactionGroup: // 338

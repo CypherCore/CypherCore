@@ -583,7 +583,7 @@ namespace Game.Chat.Commands
 
                 var auras = unit.GetAppliedAuras();
                 handler.SendSysMessage(CypherStrings.CommandTargetListauras, unit.GetAppliedAurasCount());
-                foreach (var (_, aurApp) in auras.KeyValueList)
+                foreach (var aurApp in auras)
                 {
                     Aura aura = aurApp.GetBase();
                     string name = aura.GetSpellInfo().SpellName[handler.GetSessionDbcLocale()];

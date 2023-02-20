@@ -26,7 +26,7 @@ public class spell_pri_penance_heal_damage : SpellScript, IHasSpellEffects
 	private void HandleDummy(int effIndex)
 	{
 		if (GetCaster().GetAuraEffect(PriestSpells.CONTRITION, 0) != null)
-			foreach (var auApp in GetCaster().GetAppliedAuras().LookupByKey(PriestSpells.ATONEMENT_AURA))
+			foreach (var auApp in GetCaster().GetAppliedAurasQuery().HasSpellId(PriestSpells.ATONEMENT_AURA).GetResults())
 				GetCaster().CastSpell(auApp.GetTarget(), PriestSpells.CONTRITION_HEAL, true);
 
 		var powerOfTheDarkSide = GetCaster().GetAuraEffect(PriestSpells.POWER_OF_THE_DARK_SIDE_MARKER, 0);

@@ -37,14 +37,11 @@ public class spell_monk_renewing_mist_hot : AuraScript, IHasAuraEffects
 
 		if (counteractAura != null)
 		{
-			var appliedAuras = GetUnitOwner().GetAppliedAuras();
+			var appliedAuras = GetUnitOwner().GetAppliedAurasQuery();
 
-			foreach (var kvp in appliedAuras.KeyValueList)
+			foreach (var kvp in appliedAuras.IsPositive(false).GetResults())
 			{
-				var baseAura = kvp.Value.GetBase();
-
-				if (baseAura.GetSpellInfo().IsPositive())
-					continue;
+				var baseAura = kvp.GetBase();
 
 				if ((baseAura.GetSpellInfo().GetSchoolMask() & SpellSchoolMask.Shadow) == 0)
 					continue;

@@ -42,8 +42,8 @@ namespace Scripts.Spells.Paladin
             {
                 if (caster.IsWithinMeleeRange(target))
                 {
-                    caster.CastSpell(null, PaladinSpells.JUDGMENT_OF_LIGHT_HEAL, true);
-                    target.RemoveAura(PaladinSpells.JUDGMENT_OF_LIGHT_TARGET_DEBUFF, ObjectGuid.Empty, 0, AuraRemoveMode.EnemySpell);
+                    caster.CastSpell(PaladinSpells.JUDGMENT_OF_LIGHT_HEAL, true);
+                    target.RemoveAura(PaladinSpells.JUDGMENT_OF_LIGHT_TARGET_DEBUFF, AuraRemoveMode.EnemySpell);
                 }
             }
         }

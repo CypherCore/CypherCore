@@ -171,13 +171,16 @@ namespace Game.Spells
                 Cypher.Assert(!Convert.ToBoolean(_effectMask & (1 << effIndex)));
                 _effectMask |= (uint)(1 << effIndex);
                 aurEff.HandleEffect(this, AuraEffectHandleModes.Real, true);
+                EffectIndexs.Add(effIndex);
             }
             else
             {
                 Cypher.Assert(Convert.ToBoolean(_effectMask & (1 << effIndex)));
                 _effectMask &= ~(uint)(1 << effIndex);
                 aurEff.HandleEffect(this, AuraEffectHandleModes.Real, false);
+                EffectIndexs.Remove(effIndex);
             }
+
             SetNeedClientUpdate();
         }
 
@@ -308,6 +311,7 @@ namespace Game.Spells
         public byte GetSlot() { return _slot; }
         public AuraFlags GetFlags() { return _flags; }
         public uint GetEffectMask() { return _effectMask; }
+        public HashSet<int> EffectIndexs { get; } = new HashSet<int>();
         public bool HasEffect(int effect)
         {
             return Convert.ToBoolean(_effectMask & (1 << effect));
@@ -568,9 +572,9 @@ namespace Game.Spells
                     {
                         // check if not stacking aura already on target
                         // this one prevents unwanted usefull buff loss because of stacking and prevents overriding auras periodicaly by 2 near area aura owners
-                        foreach (var iter in unit.GetAppliedAuras().KeyValueList)
+                        foreach (var iter in unit.GetAppliedAuras())
                         {
-                            Aura aura = iter.Value.GetBase();
+                            Aura aura = iter.GetBase();
                             if (!CanStackWith(aura))
                             {
                                 addUnit = false;
@@ -1270,7 +1274,7 @@ namespace Game.Spells
                             if (id < 0)
                                 target.ApplySpellImmune(GetId(), SpellImmunity.Id, (uint)-id, false);
                             else
-                                target.RemoveAura((uint)id, GetCasterGUID(), 0, removeMode);
+                                target.RemoveAura((uint)id, GetCasterGUID(), removeMode);
                         }
                     }
                 }

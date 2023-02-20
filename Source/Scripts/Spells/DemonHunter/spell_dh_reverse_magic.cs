@@ -30,11 +30,11 @@ public class spell_dh_reverse_magic : SpellScript, ISpellOnCast
 		foreach (var unit in allies)
 		{
 			var auraListToRemove = new SortedSet<auraData>();
-			var AuraList         = unit.GetAppliedAuras();
+			var AuraList         = unit.GetAppliedAurasQuery();
 
-			foreach (var iter in AuraList.KeyValueList)
+			foreach (var iter in AuraList.IsPositive(false).GetResults())
 			{
-				var aura = iter.Value.GetBase();
+				var aura = iter.GetBase();
 
 				if (aura == null)
 					continue;
@@ -45,9 +45,6 @@ public class spell_dh_reverse_magic : SpellScript, ISpellOnCast
 					continue;
 
 				if (!caster.IsWithinDist(unit, 40.0f))
-					continue;
-
-				if (aura.GetSpellInfo().IsPositive())
 					continue;
 
 				if (aura.GetSpellInfo().Dispel != DispelType.Magic)

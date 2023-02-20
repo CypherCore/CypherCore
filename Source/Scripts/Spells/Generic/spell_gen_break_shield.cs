@@ -63,31 +63,27 @@ internal class spell_gen_break_shield : SpellScript, IHasSpellEffects
 			}
 			case 1: // On damaging spells, for removing a defend layer
 			{
-				var auras = target.GetAppliedAuras();
+				var auras = target.GetAppliedAurasQuery();
 
-				foreach (var pair in auras.KeyValueList)
+				foreach (var pair in auras.HasSpellIds(62552, 62719, 64100, 66482).GetResults())
 				{
-					var aura = pair.Value.GetBase();
+					var aura = pair.GetBase();
 
 					if (aura != null)
-						if (aura.GetId() == 62552 ||
-						    aura.GetId() == 62719 ||
-						    aura.GetId() == 64100 ||
-						    aura.GetId() == 66482)
+					{
+						aura.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
+						// Remove dummys from rider (Necessary for updating visual shields)
+						var rider = target.GetCharmer();
+
+						if (rider)
 						{
-							aura.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
-							// Remove dummys from rider (Necessary for updating visual shields)
-							var rider = target.GetCharmer();
+							var defend = rider.GetAura(aura.GetId());
 
-							if (rider)
-							{
-								var defend = rider.GetAura(aura.GetId());
-
-								defend?.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
-							}
-
-							break;
+							defend?.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
 						}
+
+						break;
+					}
 				}
 
 				break;

@@ -22,15 +22,14 @@ namespace Scripts.Spells.Warlock
 		private void HandleHit(int effIndex)
 		{
 			var swapVictim = GetCaster();
-			var warlock    = GetHitUnit();
+			var warlock = GetHitUnit();
 
 			if (!warlock ||
-			    !swapVictim)
+				!swapVictim)
 				return;
 
-			var                           appliedAuras     = swapVictim.GetAppliedAuras();
-			spell_warl_soul_swap_override swapSpellScript  = null;
-			var                           swapOverrideAura = warlock.GetAura(WarlockSpells.SOUL_SWAP_OVERRIDE);
+			spell_warl_soul_swap_override swapSpellScript = null;
+			var swapOverrideAura = warlock.GetAura(WarlockSpells.SOUL_SWAP_OVERRIDE);
 
 			if (swapOverrideAura != null)
 				swapSpellScript = swapOverrideAura.GetScript<spell_warl_soul_swap_override>();
@@ -40,14 +39,13 @@ namespace Scripts.Spells.Warlock
 
 			var classMask = GetEffectInfo().SpellClassMask;
 
-			foreach (var itr in appliedAuras.KeyValueList)
+            var appliedAuras = swapVictim.GetAppliedAurasQuery();
+            foreach (var itr in appliedAuras.HasCasterGuid(warlock.GetGUID()).HasSpellFamily(SpellFamilyNames.Warlock).GetResults())
 			{
-				var spellProto = itr.Value.GetBase().GetSpellInfo();
+				var spellProto = itr.GetBase().GetSpellInfo();
 
-				if (itr.Value.GetBase().GetCaster() == warlock)
-					if (spellProto.SpellFamilyName == SpellFamilyNames.Warlock &&
-					    (spellProto.SpellFamilyFlags & classMask))
-						swapSpellScript.AddDot(itr.Key);
+				if (spellProto.SpellFamilyFlags & classMask)
+					swapSpellScript.AddDot(itr.GetBase().GetId());
 			}
 
 			swapSpellScript.SetOriginalSwapSource(swapVictim);

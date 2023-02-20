@@ -89,7 +89,7 @@ namespace Game.Entities
         MultiMap<AuraStateType, AuraApplication> m_auraStateAuras = new();        // Used for improve performance of aura state checks on aura apply/remove
         SortedSet<AuraApplication> m_visibleAuras = new(new VisibleAuraSlotCompare());
         SortedSet<AuraApplication> m_visibleAurasToUpdate = new(new VisibleAuraSlotCompare());
-        MultiMap<uint, AuraApplication> m_appliedAuras = new();
+        AuraApplicationCollection m_appliedAuras = new();
         AuraCollection m_ownedAuras = new();
         List<Aura> m_scAuras = new();
         protected float[][] m_auraFlatModifiersGroup = new float[(int)UnitMods.End][];

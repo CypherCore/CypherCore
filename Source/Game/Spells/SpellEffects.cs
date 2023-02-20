@@ -3836,7 +3836,7 @@ namespace Game.Spells
 
             while (!dispel_list.Empty())
             {
-                unitTarget.RemoveAura(dispel_list[0].Key, dispel_list[0].Value, 0, AuraRemoveMode.EnemySpell);
+                unitTarget.RemoveAura(dispel_list[0].Key, dispel_list[0].Value, AuraRemoveMode.EnemySpell);
                 dispel_list.RemoveAt(0);
             }
         }
@@ -5043,7 +5043,7 @@ namespace Game.Spells
             if (!unitTarget)
                 return;
 
-            unitTarget.RemoveAppliedAuras(aurApp => aurApp.GetBase().GetSpellInfo().HasLabel((uint)effectInfo.MiscValue));
+            unitTarget.GetAppliedAurasQuery().HasLabel((uint)effectInfo.MiscValue).Execute(unitTarget.RemoveAura);
         }
 
         [SpellEffectHandler(SpellEffectName.CreateGarrison)]

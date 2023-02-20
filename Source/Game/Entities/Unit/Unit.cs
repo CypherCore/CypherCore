@@ -1547,7 +1547,6 @@ namespace Game.Entities
             Cypher.Assert(!aura.IsAppliedOnTarget(GetGUID()), "Unit._CreateAuraApplication: aura musn't be applied on target");
 
             SpellInfo aurSpellInfo = aura.GetSpellInfo();
-            uint aurId = aurSpellInfo.Id;
 
             // ghost spell check, allow apply any auras at player loading in ghost mode (will be cleanup after load)
             if (!IsAlive() && !aurSpellInfo.IsDeathPersistent() &&
@@ -1557,7 +1556,7 @@ namespace Game.Entities
             Unit caster = aura.GetCaster();
 
             AuraApplication aurApp = new(this, caster, aura, effMask);
-            m_appliedAuras.Add(aurId, aurApp);
+            m_appliedAuras.Add(aurApp);
 
             if (aurSpellInfo.HasAnyAuraInterruptFlag())
             {

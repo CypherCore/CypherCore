@@ -488,7 +488,15 @@ namespace System.Collections.Generic
                 if (pred(item))
                     action(item);
             }
+        }
 
+        public static void CallOnMatch<T>(this HashSet<T> list, Func<T, bool> pred, Action<T> action)
+        {
+            foreach (var item in list)
+            {
+                if (pred(item))
+                    action(item);
+            }
         }
 
         /// <summary>

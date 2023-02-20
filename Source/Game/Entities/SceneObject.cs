@@ -7,6 +7,7 @@ using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Entities
 {
@@ -70,7 +71,8 @@ namespace Game.Entities
             if (!_createdBySpellCast.IsEmpty())
             {
                 // search for a dummy aura on creator
-                Aura linkedAura = creator.GetAura(_createdBySpellCast.GetEntry(), aura => aura.GetCastId() == _createdBySpellCast);
+                
+                Aura linkedAura = creator.GetAuraQuery().HasSpellId(_createdBySpellCast.GetEntry()).HasCastId(_createdBySpellCast).GetResults().FirstOrDefault();
                 if (linkedAura == null)
                     return true;
             }

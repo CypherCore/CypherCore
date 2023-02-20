@@ -61,15 +61,13 @@ internal class spell_item_mad_alchemists_potion : SpellScript, ISpellAfterCast
 		{
 			var Auras = target.GetAppliedAuras();
 
-			foreach (var pair in Auras.KeyValueList)
+			foreach (var pair in Auras)
 			{
-				var spell_id = pair.Value.GetBase().GetId();
+				var spell_id = pair.GetBase().GetId();
 
-				if (Global.SpellMgr.IsSpellMemberOfSpellGroup(spell_id, chosenSpellGroup) &&
-				    spell_id != chosenElixir)
+				if (Global.SpellMgr.IsSpellMemberOfSpellGroup(spell_id, chosenSpellGroup) && spell_id != chosenElixir)
 				{
 					useElixir = false;
-
 					break;
 				}
 			}

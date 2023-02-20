@@ -25,15 +25,15 @@ namespace Scripts.Spells.Warlock
 		private int CalculateDamage()
 		{
 			var damage = 0;
-			var auras  = GetHitUnit().GetAppliedAuras();
+			var auras  = GetHitUnit().GetAppliedAurasQuery();
 
-			foreach (var aura in auras.KeyValueList)
+			foreach (var aura in auras.HasSpellFamily(SpellFamilyNames.Warlock).GetResults())
 			{
-				var spell = aura.Value.GetBase().GetSpellInfo();
+				var spell = aura.GetBase().GetSpellInfo();
 
 				if (spell.SpellFamilyName == SpellFamilyNames.Warlock && (spell.SpellFamilyFlags & new FlagArray128(502, 8110, 300000, 0))) // out of Mastery : Potent Afflictions
 				{
-					var effects = aura.Value.GetBase().GetAuraEffects();
+					var effects = aura.GetBase().GetAuraEffects();
 
 					foreach (var iter in effects)
 						if (iter.Value.GetAuraType() == AuraType.PeriodicDamage)

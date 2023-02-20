@@ -15,6 +15,7 @@ using System.Linq;
 using System.Collections;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IUnit;
+using static Game.Entities.GameObjectTemplate;
 
 namespace Game.Spells
 {
@@ -421,26 +422,24 @@ namespace Game.Spells
                     triggeredBy = this;
 
                 ObjectGuid guid = target.GetGUID();
-                var auras = target.GetAppliedAuras();
-                foreach (var iter in auras.KeyValueList)
+
+                // only passive and permament auras-active auras should have amount set on spellcast and not be affected
+                // if aura is cast by others, it will not be affected
+                target.GetAppliedAurasQuery().HasCasterGuid(guid).IsPassiveOrPerm().AlsoMatches(arApp => arApp.GetBase().GetSpellInfo().IsAffectedBySpellMod(m_spellmod)).ForEachResult(arApp =>
                 {
-                    Aura aura = iter.Value.GetBase();
-                    // only passive and permament auras-active auras should have amount set on spellcast and not be affected
-                    // if aura is cast by others, it will not be affected
-                    if ((aura.IsPassive() || aura.IsPermanent()) && aura.GetCasterGUID() == guid && aura.GetSpellInfo().IsAffectedBySpellMod(m_spellmod))
+                    Aura aura = arApp.GetBase();
+
+                    for (int i = 0; i < recalculateEffectMask.Count; ++i)
                     {
-                        for (int i = 0; i < recalculateEffectMask.Count; ++i)
+                        if (recalculateEffectMask[i])
                         {
-                            if (recalculateEffectMask[i])
-                            {
-                                AuraEffect aurEff = aura.GetEffect(i);
-                                if (aurEff != null)
-                                    if (aurEff != triggeredBy)
-                                        aurEff.RecalculateAmount(triggeredBy);
-                            }
+                            AuraEffect aurEff = aura.GetEffect(i);
+                            if (aurEff != null)
+                                if (aurEff != triggeredBy)
+                                    aurEff.RecalculateAmount(triggeredBy);
                         }
                     }
-                }
+                });
             }
         }
 
@@ -813,14 +812,14 @@ namespace Game.Spells
 
                 target.GetAppliedAuras().CallOnMatch((app) =>
                 {
-                    if (app.Value == null)
+                    if (app == null)
                         return false;
 
                     // Use the new aura to see on what stance the target will be
                     ulong newStance = newAura != null ? (1ul << (newAura.GetMiscValue() - 1)) : 0;
 
                     // If the stances are not compatible with the spell, remove it
-                    if (app.Value.GetBase().IsRemovedOnShapeLost(target) && !Convert.ToBoolean(app.Value.GetBase().GetSpellInfo().Stances & newStance))
+                    if (app.GetBase().IsRemovedOnShapeLost(target) && !Convert.ToBoolean(app.GetBase().GetSpellInfo().Stances & newStance))
                         return true;
 
                     return false;

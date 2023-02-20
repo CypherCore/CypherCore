@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Game.Entities;
+using static Game.AI.SmartEvent;
 
 namespace Game.Spells.Auras
 {
@@ -10,13 +11,14 @@ namespace Game.Spells.Auras
         protected Dictionary<Guid, Aura> _auras = new();
         protected MultiMapHashSet<uint, Guid> _aurasBySpellId = new();
         protected MultiMapHashSet<ObjectGuid, Guid> _byCasterGuid  = new();
-        protected HashSet<Guid> _isSingleTarget  = new();
+        protected MultiMapHashSet<bool, Guid> _isSingleTarget  = new();
         protected MultiMapHashSet<uint, Guid> _labelMap  = new();
-        protected HashSet<Guid> _canBeSaved  = new();
-        protected HashSet<Guid> _isgroupBuff  = new();
-        protected HashSet<Guid> _isPassive  = new();
-        protected HashSet<Guid> _isDeathPersistant  = new();
-        protected HashSet<Guid> _isRequiringDeadTarget  = new();
+        protected MultiMapHashSet<bool, Guid> _canBeSaved  = new();
+        protected MultiMapHashSet<bool, Guid> _isgroupBuff  = new();
+        protected MultiMapHashSet<bool, Guid> _isPassive  = new();
+        protected MultiMapHashSet<bool, Guid> _isDeathPersistant  = new();
+        protected MultiMapHashSet<bool, Guid> _isRequiringDeadTarget  = new();
+        protected MultiMapHashSet<ObjectGuid, Guid> _byCastId = new();
         protected MultiMapHashSet<AuraObjectType, Guid> _typeMap  = new();
 
         public void Add(Aura aura)
@@ -34,27 +36,21 @@ namespace Game.Spells.Auras
                 if (!casterGuid.IsEmpty())
                     _byCasterGuid.Add(casterGuid, aura.Guid);
 
-                if (aura.IsSingleTarget())
-                    _isSingleTarget.Add(aura.Guid);
+                _isSingleTarget.Add(aura.IsSingleTarget(), aura.Guid);
 
                 foreach (var label in aura.GetSpellInfo().Labels)
                     _labelMap.Add(label, aura.Guid);
 
-                if (aura.CanBeSaved())
-                    _canBeSaved.Add(aura.Guid);
+                var castId = aura.GetCastId();
 
-                if (aura.GetSpellInfo().IsGroupBuff())
-                    _isgroupBuff.Add(aura.Guid);
+                if (!castId.IsEmpty())
+                    _byCastId.Add(castId, aura.Guid);
 
-                if (aura.IsPassive())
-                    _isPassive.Add(aura.Guid);
-
-                if (aura.IsDeathPersistent())
-                    _isDeathPersistant.Add(aura.Guid);
-
-                if (aura.GetSpellInfo().IsRequiringDeadTarget())
-                    _isRequiringDeadTarget.Add(aura.Guid);
-
+                _canBeSaved.Add(aura.CanBeSaved(), aura.Guid);
+                _isgroupBuff.Add(aura.GetSpellInfo().IsGroupBuff(), aura.Guid);
+                _isPassive.Add(aura.IsPassive(), aura.Guid);
+                _isDeathPersistant.Add(aura.IsDeathPersistent(), aura.Guid);
+                _isRequiringDeadTarget.Add(aura.GetSpellInfo().IsRequiringDeadTarget(), aura.Guid);
                 _typeMap.Add(aura.GetAuraType(), aura.Guid);
             }
         }
@@ -71,27 +67,21 @@ namespace Game.Spells.Auras
                 if (!casterGuid.IsEmpty())
                     _byCasterGuid.Remove(casterGuid, aura.Guid);
 
-                _isSingleTarget.Remove(aura.Guid);
+                _isSingleTarget.Remove(aura.IsSingleTarget(), aura.Guid);
 
                 foreach (var label in aura.GetSpellInfo().Labels)
                     _labelMap.Remove(label, aura.Guid);
 
-                if (aura.CanBeSaved())
-                    _canBeSaved.Remove(aura.Guid);
+                var castId = aura.GetCastId();
 
-                if (aura.GetSpellInfo().IsGroupBuff())
-                    _isgroupBuff.Remove(aura.Guid);
+                if (!castId.IsEmpty())
+                    _byCastId.Remove(castId, aura.Guid);
 
-                if (aura.IsPassive())
-                    _isPassive.Remove(aura.Guid);
-
-                if (aura.IsDeathPersistent())
-                    _isDeathPersistant.Remove(aura.Guid);
-
-                if (aura.GetSpellInfo().IsRequiringDeadTarget())
-                    _isRequiringDeadTarget.Remove(aura.Guid);
-
-
+                _canBeSaved.Remove(aura.CanBeSaved(), aura.Guid);
+                _isgroupBuff.Remove(aura.GetSpellInfo().IsGroupBuff(), aura.Guid);
+                _isPassive.Remove(aura.IsPassive(), aura.Guid);
+                _isDeathPersistant.Remove(aura.IsDeathPersistent(), aura.Guid);
+                _isRequiringDeadTarget.Remove(aura.GetSpellInfo().IsRequiringDeadTarget(), aura.Guid);
                 _typeMap.Remove(aura.GetAuraType(), aura.Guid);
             }
         }
@@ -197,7 +187,8 @@ namespace Game.Spells.Auras
             public AuraQuery IsSingleTarget(bool t = true)
             {
                 lock (_collection._auras)
-                    Sync(_collection._isSingleTarget, t);
+                    if (_collection._isSingleTarget.TryGetValue(t, out var result))
+                        Sync(result);
 
                 return this;
             }
@@ -205,7 +196,8 @@ namespace Game.Spells.Auras
             public AuraQuery CanBeSaved(bool t = true)
             {
                 lock (_collection._auras)
-                    Sync(_collection._canBeSaved, t);
+                    if (_collection._canBeSaved.TryGetValue(t, out var result))
+                        Sync(result);
 
                 return this;
             }
@@ -213,7 +205,8 @@ namespace Game.Spells.Auras
             public AuraQuery IsGroupBuff(bool t = true)
             {
                 lock (_collection._auras)
-                    Sync(_collection._isgroupBuff, t);
+                    if (_collection._isgroupBuff.TryGetValue(t, out var result))
+                        Sync(result);
 
                 return this;
             }
@@ -221,7 +214,8 @@ namespace Game.Spells.Auras
             public AuraQuery IsPassive(bool t = true)
             {
                 lock (_collection._auras)
-                    Sync(_collection._isPassive, t);
+                    if (_collection._isPassive.TryGetValue(t, out var result))
+                        Sync(result);
 
                 return this;
             }
@@ -229,7 +223,17 @@ namespace Game.Spells.Auras
             public AuraQuery IsDeathPersistant(bool t = true)
             {
                 lock (_collection._auras)
-                    Sync(_collection._isDeathPersistant, t);
+                    if (_collection._isDeathPersistant.TryGetValue(t, out var result))
+                        Sync(result);
+
+                return this;
+            }
+
+            public AuraQuery HasCastId(ObjectGuid Id)
+            {
+                lock (_collection._auras)
+                    if (!Id.IsEmpty() && _collection._byCastId.TryGetValue(Id, out var result))
+                        Sync(result);
 
                 return this;
             }
@@ -237,7 +241,8 @@ namespace Game.Spells.Auras
             public AuraQuery IsRequiringDeadTarget(bool t = true)
             {
                 lock (_collection._auras)
-                    Sync(_collection._isRequiringDeadTarget, t);
+                    if (_collection._isRequiringDeadTarget.TryGetValue(t, out var result))
+                        Sync(result);
 
                 return this;
             }
@@ -245,11 +250,8 @@ namespace Game.Spells.Auras
             public AuraQuery Execute(Action<uint, Aura, AuraRemoveMode> action, AuraRemoveMode auraRemoveMode = AuraRemoveMode.Default)
             {
                 foreach (var aura in Results)
-                {
-                    var obj = _collection._auras[aura];
-
-                    action(obj.GetSpellInfo().Id, obj, auraRemoveMode);
-                }
+                    if (_collection._auras.TryGetValue(aura, out var result))
+                        action(result.GetSpellInfo().Id, result, auraRemoveMode);
 
                 return this;
             }
@@ -257,7 +259,8 @@ namespace Game.Spells.Auras
             public IEnumerable<Aura> GetResults()
             {
                 foreach (var aura in Results)
-                    yield return _collection._auras[aura];
+                    if (_collection._auras.TryGetValue(aura, out var result))
+                        yield return result;
             }
 
             public AuraQuery ForEachResult(Action<Aura> action)
@@ -270,22 +273,28 @@ namespace Game.Spells.Auras
 
             public AuraQuery AlsoMatches(Func<Aura, bool> predicate)
             {
-                Results.RemoveWhere(g => !predicate(_collection._auras[g]));
+                Results.RemoveWhere(g =>
+                {
+                    if (_collection._auras.TryGetValue(g, out var result))
+                        return !predicate(result);
+
+                    return true;
+                });
                 return this;
             }
 
-            private void Sync(HashSet<Guid> collection, bool contains = true)
+            private void Sync(HashSet<Guid> collection)
             {
                 if (_hasLoaded)
                 {
-                    if (collection != null && collection.Count != 0 && contains)
+                    if (collection != null && collection.Count != 0)
                         foreach (var a in collection)
                             Results.Add(a);
 
                     _hasLoaded = true;
                 }
                 else if (Results.Count != 0)
-                    Results.RemoveWhere(r => collection.Contains(r) != contains);
+                    Results.RemoveWhere(r => !collection.Contains(r));
             }
         }
     }

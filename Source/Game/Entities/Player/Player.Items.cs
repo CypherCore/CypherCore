@@ -3987,15 +3987,8 @@ namespace Game.Entities
 
                 if (formChange)                                    // check aura active state from other form
                 {
-                    var range = GetAppliedAuras();
-                    foreach (var pair in range.KeyValueList)
-                    {
-                        if (pair.Key != spellInfo.Id)
-                            continue;
-
-                        if (item == null || pair.Value.GetBase().GetCastItemGUID() == item.GetGUID())
-                            return;
-                    }
+                    if (GetAppliedAurasQuery().HasSpellId(spellInfo.Id).HasCastItemGuid(item.GetGUID()).Results.Any())
+                        return;
                 }
 
                 Log.outDebug(LogFilter.Player, "WORLD: cast {0} Equip spellId - {1}", (item != null ? "item" : "itemset"), spellInfo.Id);

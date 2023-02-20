@@ -501,25 +501,8 @@ namespace Game.Entities
                 duel.Initiator.RemoveGameObject(obj, true);
 
             //remove auras
-            var itsAuras = opponent.GetAppliedAuras();
-            itsAuras.CallOnMatch((pair) =>
-            {
-                Aura aura = pair.Value.GetBase();
-                if (!pair.Value.IsPositive() && aura.GetCasterGUID() == GetGUID() && aura.GetApplyTime() >= duel.StartTime)
-                    return true;
-                return false;
-            }, (pair) => opponent.RemoveAura(pair));
-
-            var myAuras = GetAppliedAuras();
-            myAuras.CallOnMatch((pair) =>
-            {
-                Aura aura = pair.Value.GetBase();
-
-                if (!pair.Value.IsPositive() && aura.GetCasterGUID() == opponent.GetGUID() && aura.GetApplyTime() >= duel.StartTime)
-                    return true;
-
-                return false;
-            }, (pair) => RemoveAura(pair));
+            opponent.GetAppliedAurasQuery().HasCasterGuid(GetGUID()).IsPositive(false).AlsoMatches(appAur => appAur.GetBase().GetApplyTime() >= duel.StartTime).Execute(RemoveAura);
+            GetAppliedAurasQuery().HasCasterGuid(opponent.GetGUID()).IsPositive(false).AlsoMatches(appAur => appAur.GetBase().GetApplyTime() >= duel.StartTime).Execute(RemoveAura);
 
             // cleanup combo points
             ClearComboPoints();

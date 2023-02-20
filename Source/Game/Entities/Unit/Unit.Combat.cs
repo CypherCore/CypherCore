@@ -26,8 +26,8 @@ namespace Game.Entities
     {
         public virtual void AtEnterCombat()
         {
-            foreach (var pair in GetAppliedAuras().KeyValueList)
-                pair.Value.GetBase().CallScriptEnterLeaveCombatHandlers(pair.Value, true);
+            foreach (var pair in GetAppliedAuras())
+                pair.GetBase().CallScriptEnterLeaveCombatHandlers(pair, true);
 
             Spell spell = GetCurrentSpell(CurrentSpellTypes.Generic);
             if (spell != null)
@@ -42,8 +42,8 @@ namespace Game.Entities
 
         public virtual void AtExitCombat()
         {
-            foreach (var pair in GetAppliedAuras().KeyValueList)
-                pair.Value.GetBase().CallScriptEnterLeaveCombatHandlers(pair.Value, false);
+            foreach (var pair in GetAppliedAuras())
+                pair.GetBase().CallScriptEnterLeaveCombatHandlers(pair, false);
 
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.LeavingCombat);
         }
@@ -156,11 +156,8 @@ namespace Game.Entities
 
         public virtual void OnCombatExit()
         {
-            foreach (var pair in GetAppliedAuras().KeyValueList)
-            {
-                AuraApplication aurApp = pair.Value;
+            foreach (var aurApp in GetAppliedAuras())
                 aurApp.GetBase().CallScriptEnterLeaveCombatHandlers(aurApp, false);
-            }
         }
 
         public bool CanHaveThreatList() { return m_threatManager.CanHaveThreatList(); }

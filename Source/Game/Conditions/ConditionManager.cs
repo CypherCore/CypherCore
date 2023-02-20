@@ -2546,19 +2546,40 @@ namespace Game
                 case UnitConditionVariable.ComboPoints:
                     return unit.GetPower(PowerType.ComboPoints);
                 case UnitConditionVariable.HasHelpfulAuraSpell:
-                    return unit.GetAuraApplication((uint)value, aurApp => !aurApp.GetFlags().HasFlag(AuraFlags.Negative)) != null ? value : 0;
+                    return unit.GetAppliedAurasQuery()
+                                    .HasSpellId((uint)value)
+                                    .HasNegitiveFlag(false)
+                                    .GetResults().Any() ? value : 0;
                 case UnitConditionVariable.HasHelpfulAuraDispelType:
-                    return unit.GetAuraApplication(aurApp => !aurApp.GetFlags().HasFlag(AuraFlags.Negative) && (int)aurApp.GetBase().GetSpellInfo().Dispel == value) != null ? value : 0;
+                    return unit.GetAppliedAurasQuery()
+                                    .HasDispelType((DispelType)value)
+                                    .HasNegitiveFlag(false)
+                                    .GetResults().Any() ? value : 0;
                 case UnitConditionVariable.HasHelpfulAuraMechanic:
-                    return unit.GetAuraApplication(aurApp => !aurApp.GetFlags().HasFlag(AuraFlags.Negative) && (aurApp.GetBase().GetSpellInfo().GetSpellMechanicMaskByEffectMask(aurApp.GetEffectMask()) & (1ul << value)) != 0) != null ? value : 0;
+                    return unit.GetAppliedAurasQuery()
+                                    .HasNegitiveFlag(false)
+                                    .AlsoMatches(aurApp => (aurApp.GetBase().GetSpellInfo().GetSpellMechanicMaskByEffectMask(aurApp.GetEffectMask()) & (1ul << value)) != 0)
+                                    .GetResults().Any() ? value : 0;
                 case UnitConditionVariable.HasHarmfulAuraSpell:
-                    return unit.GetAuraApplication((uint)value, aurApp => aurApp.GetFlags().HasFlag(AuraFlags.Negative)) != null ? value : 0;
+                    return unit.GetAppliedAurasQuery()
+                                    .HasSpellId((uint)value)
+                                    .HasNegitiveFlag()
+                                    .GetResults().Any() ? value : 0;
                 case UnitConditionVariable.HasHarmfulAuraDispelType:
-                    return unit.GetAuraApplication(aurApp => aurApp.GetFlags().HasFlag(AuraFlags.Negative) && (int)aurApp.GetBase().GetSpellInfo().Dispel == value) != null ? value : 0;
+                    return unit.GetAppliedAurasQuery()
+                                    .HasDispelType((DispelType)value)
+                                    .HasNegitiveFlag()
+                                    .GetResults().Any() ? value : 0;
                 case UnitConditionVariable.HasHarmfulAuraMechanic:
-                    return unit.GetAuraApplication(aurApp => aurApp.GetFlags().HasFlag(AuraFlags.Negative) && (aurApp.GetBase().GetSpellInfo().GetSpellMechanicMaskByEffectMask(aurApp.GetEffectMask()) & (1ul << value)) != 0) != null ? value : 0;
+                    return unit.GetAppliedAurasQuery()
+                                    .HasNegitiveFlag()
+                                    .AlsoMatches(aurApp => (aurApp.GetBase().GetSpellInfo().GetSpellMechanicMaskByEffectMask(aurApp.GetEffectMask()) & (1ul << value)) != 0)
+                                    .GetResults().Any() ? value : 0;
                 case UnitConditionVariable.HasHarmfulAuraSchool:
-                    return unit.GetAuraApplication(aurApp => aurApp.GetFlags().HasFlag(AuraFlags.Negative) && ((int)aurApp.GetBase().GetSpellInfo().GetSchoolMask() & (1 << value)) != 0) != null ? value : 0;
+                    return unit.GetAppliedAurasQuery()
+                                    .HasNegitiveFlag()
+                                    .AlsoMatches(aurApp => ((int)aurApp.GetBase().GetSpellInfo().GetSchoolMask() & (1 << value)) != 0)
+                                    .GetResults().Any() ? value : 0;
                 case UnitConditionVariable.DamagePhysicalPct:
                     break;
                 case UnitConditionVariable.DamageHolyPct:
@@ -2742,10 +2763,10 @@ namespace Game
                 case UnitConditionVariable.HasHelpfulAuraEffect:
                     return (value >= 0 && value < (int)AuraType.Total && unit.GetAuraEffectsByType((AuraType)value).Any(aurEff => !aurEff.GetBase().GetApplicationOfTarget(unit.GetGUID()).GetFlags().HasFlag(AuraFlags.Negative))) ? 1 : 0;
                 case UnitConditionVariable.HasHelpfulAuraSchool:
-                    return unit.GetAuraApplication(aurApp =>
-                    {
-                        return !aurApp.GetFlags().HasFlag(AuraFlags.Negative) && ((int)aurApp.GetBase().GetSpellInfo().GetSchoolMask() & (1 << value)) != 0;
-                    }) != null ? value : 0;
+                    return unit.GetAppliedAurasQuery()
+                                    .HasNegitiveFlag()
+                                    .AlsoMatches(aurApp => ((int)aurApp.GetBase().GetSpellInfo().GetSchoolMask() & (1 << value)) != 0)
+                                    .GetResults().Any() ? 1 : 0;
                 default:
                     break;
             }

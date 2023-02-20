@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using Framework.Constants;
 using Game.Entities;
+using static Game.AI.SmartTarget;
 
 namespace Game.Spells.Auras
 {
@@ -14,15 +16,19 @@ namespace Game.Spells.Auras
         protected MultiMapHashSet<ObjectGuid, Guid> _byCastItemGuid = new();
         protected MultiMapHashSet<ObjectGuid, Guid> _byCastId = new();
         protected MultiMapHashSet<WorldObject, Guid> _byOwner = new();
-        protected HashSet<Guid> _isSingleTarget  = new();
+        protected MultiMapHashSet<bool, Guid> _isSingleTarget  = new();
         protected MultiMapHashSet<uint, Guid> _labelMap  = new();
-        protected HashSet<Guid> _canBeSaved  = new();
-        protected HashSet<Guid> _isgroupBuff  = new();
-        protected HashSet<Guid> _isPassive  = new();
-        protected HashSet<Guid> _isDeathPersistant  = new();
-        protected HashSet<Guid> _isRequiringDeadTarget  = new();
-        protected HashSet<Guid> _isNotPlayer = new();
-        protected HashSet<Guid> _isPerm = new();
+        protected MultiMapHashSet<bool, Guid> _canBeSaved  = new();
+        protected MultiMapHashSet<bool, Guid> _isgroupBuff  = new();
+        protected MultiMapHashSet<bool, Guid> _isPassive  = new();
+        protected MultiMapHashSet<bool, Guid> _isDeathPersistant  = new();
+        protected MultiMapHashSet<bool, Guid> _isRequiringDeadTarget  = new();
+        protected MultiMapHashSet<bool, Guid> _isPlayer = new();
+        protected MultiMapHashSet<bool, Guid> _isPerm = new();
+        protected MultiMapHashSet<bool, Guid> _isPositive = new();
+        protected MultiMapHashSet<bool, Guid> _onlyIndoors = new();
+        protected MultiMapHashSet<bool, Guid> _onlyOutdoors = new();
+        protected MultiMapHashSet<SpellFamilyNames, Guid> _spellFamily = new();
         protected MultiMapHashSet<AuraObjectType, Guid> _typeMap  = new();
         protected MultiMapHashSet<int, Guid> _effectIndex = new();
         protected MultiMapHashSet<DiminishingGroup, Guid> _deminishGroup = new();
@@ -41,7 +47,7 @@ namespace Game.Spells.Auras
                 var si = aura.GetSpellInfo();
                 _auras[auraApp.Guid] = auraApp;
                 _aurasBySpellId.Add(aura.GetId(), auraApp.Guid);
-              
+
                 var casterGuid = aura.GetCasterGUID();
 
                 if (!casterGuid.IsEmpty())
@@ -50,26 +56,18 @@ namespace Game.Spells.Auras
                 if (!aura.GetCastItemGUID().IsEmpty())
                     _byCastItemGuid.Add(aura.GetCastItemGUID(), auraApp.Guid);
 
-                if (aura.IsSingleTarget())
-                    _isSingleTarget.Add(auraApp.Guid);
+                _isSingleTarget.Add(aura.IsSingleTarget(), auraApp.Guid);
 
                 foreach (var label in aura.GetSpellInfo().Labels)
                     _labelMap.Add(label, auraApp.Guid);
 
-                if (aura.CanBeSaved())
-                    _canBeSaved.Add(auraApp.Guid);
 
-                if (aura.GetSpellInfo().IsGroupBuff())
-                    _isgroupBuff.Add(auraApp.Guid);
-
-                if (aura.IsPassive())
-                    _isPassive.Add(auraApp.Guid);
-
-                if (aura.IsDeathPersistent())
-                    _isDeathPersistant.Add(auraApp.Guid);
-
-                if (aura.GetSpellInfo().IsRequiringDeadTarget())
-                    _isRequiringDeadTarget.Add(auraApp.Guid);
+                _canBeSaved.Add(aura.CanBeSaved(), auraApp.Guid);
+                _isgroupBuff.Add(aura.GetSpellInfo().IsGroupBuff(), auraApp.Guid);
+                _isPassive.Add(aura.IsPassive(), auraApp.Guid);
+                _isDeathPersistant.Add(aura.IsDeathPersistent(), auraApp.Guid);
+                _isRequiringDeadTarget.Add(aura.GetSpellInfo().IsRequiringDeadTarget(), auraApp.Guid);
+                _isPositive.Add(auraApp.IsPositive(), auraApp.Guid);
 
                 var owner = aura.GetOwner();
 
@@ -81,8 +79,10 @@ namespace Game.Spells.Auras
                 if (!castId.IsEmpty())
                     _byCastId.Add(castId, auraApp.Guid);
 
-                if (!aura.GetCaster().IsPlayer())
-                    _isNotPlayer.Add(auraApp.Guid);
+                var caster = aura.GetCaster();
+
+                if (caster != null)
+                    _isPlayer.Add(caster.IsPlayer(), auraApp.Guid);
 
                 _deminishGroup.Add(si.GetDiminishingReturnsGroupForSpell(), auraApp.Guid);
                 _casterAuraState.Add(si.CasterAuraState, auraApp.Guid);
@@ -94,48 +94,51 @@ namespace Game.Spells.Auras
                 if (flags.HasFlag(AuraFlags.Negative))
                     _hasNegitiveFlag.Add(auraApp.Guid);
 
-                if (aura.IsPermanent())
-                    _isPerm.Add(auraApp.Guid);
+                _isPerm.Add(aura.IsPermanent(), auraApp.Guid);
+
+                foreach (var eff in auraApp.EffectIndexs)
+                    _effectIndex.Add(eff, auraApp.Guid);
+
+                _onlyIndoors.Add(si.HasAttribute(SpellAttr0.OnlyIndoors), auraApp.Guid);
+                _onlyOutdoors.Add(si.HasAttribute(SpellAttr0.OnlyOutdoors), auraApp.Guid);
+                _spellFamily.Add(si.SpellFamilyName, auraApp.Guid);
             }
         }
 
-        public void Remove(AuraApplication auraApp)
+        public bool Remove(AuraApplication auraApp)
         {
+            bool removed = false;
+
             lock (_auras)
             {
                 var aura = auraApp.GetBase();
                 var si = aura.GetSpellInfo();
-                _auras.Remove(auraApp.Guid);
+                removed = _auras.Remove(auraApp.Guid);
                 _aurasBySpellId.Remove(aura.GetId(), aura.Guid);
 
-                if (!aura.GetCaster().IsPlayer())
-                    _isNotPlayer.Remove(auraApp.Guid);
+                var caster = aura.GetCaster();
+
+                if (caster != null)
+                    _isPlayer.Remove(aura.GetCaster().IsPlayer(), auraApp.Guid);
 
                 _deminishGroup.Remove(si.GetDiminishingReturnsGroupForSpell(), auraApp.Guid);
                 _casterAuraState.Remove(si.CasterAuraState, auraApp.Guid);
                 _typeMap.Remove(aura.GetAuraType(), auraApp.Guid);
                 _dispelType.Remove(si.Dispel, auraApp.Guid);
-
-                if (aura.CanBeSaved())
-                    _canBeSaved.Remove(auraApp.Guid);
-
-                if (aura.GetSpellInfo().IsGroupBuff())
-                    _isgroupBuff.Remove(auraApp.Guid);
-
-                if (aura.IsPassive())
-                    _isPassive.Remove(auraApp.Guid);
-
-                if (aura.IsDeathPersistent())
-                    _isDeathPersistant.Remove(auraApp.Guid);
-
-                if (aura.GetSpellInfo().IsRequiringDeadTarget())
-                    _isRequiringDeadTarget.Remove(auraApp.Guid);
+                _canBeSaved.Remove(aura.CanBeSaved(), auraApp.Guid);
+                _isgroupBuff.Remove(aura.GetSpellInfo().IsGroupBuff(), auraApp.Guid);
+                _isPassive.Remove(aura.IsPassive(), auraApp.Guid);
+                _isDeathPersistant.Remove(aura.IsDeathPersistent(), auraApp.Guid);
+                _isRequiringDeadTarget.Remove(aura.GetSpellInfo().IsRequiringDeadTarget(), auraApp.Guid);
+                _onlyIndoors.Remove(si.HasAttribute(SpellAttr0.OnlyIndoors), auraApp.Guid);
+                _onlyOutdoors.Remove(si.HasAttribute(SpellAttr0.OnlyOutdoors), auraApp.Guid);
+                _spellFamily.Remove(si.SpellFamilyName, auraApp.Guid);
+                _isPositive.Remove(auraApp.IsPositive(), auraApp.Guid);
 
                 if (!aura.GetCastItemGUID().IsEmpty())
                     _byCastItemGuid.Remove(aura.GetCastItemGUID(), auraApp.Guid);
 
-                if (aura.IsSingleTarget())
-                    _isSingleTarget.Remove(auraApp.Guid);
+                _isSingleTarget.Remove(aura.IsSingleTarget(), auraApp.Guid);
 
                 foreach (var label in aura.GetSpellInfo().Labels)
                     _labelMap.Remove(label, auraApp.Guid);
@@ -160,9 +163,13 @@ namespace Game.Spells.Auras
                 if (flags.HasFlag(AuraFlags.Negative))
                     _hasNegitiveFlag.Remove(auraApp.Guid);
 
-                if (aura.IsPermanent())
-                    _isPerm.Remove(auraApp.Guid);
+                _isPerm.Remove(aura.IsPermanent(), auraApp.Guid);
+
+                foreach (var eff in auraApp.EffectIndexs)
+                    _effectIndex.Remove(eff, auraApp.Guid);
             }
+
+            return removed;
         }
 
         public AuraApplication GetByGuid(Guid guid)
@@ -236,6 +243,25 @@ namespace Game.Spells.Auras
                 return this;
             }
 
+            public AuraApplicationQuery HasSpellIds(params uint[] spellId)
+            {
+                lock (_collection._auras)
+                {
+                    HashSet<Guid>[] guids = new HashSet<Guid>[spellId.Length];
+                    int i = 0;
+
+                    foreach (var id in spellId)
+                    {
+                        guids[i] = _collection._aurasBySpellId.LookupByKey(spellId);
+                        i++;
+                    }
+
+                    SyncOr(guids);
+                }
+
+                return this;
+            }
+
             public AuraApplicationQuery HasCasterGuid(ObjectGuid caster)
             {
                 lock (_collection._auras)
@@ -272,6 +298,14 @@ namespace Game.Spells.Auras
                 return this;
             }
 
+            public AuraApplicationQuery IsPassiveOrPerm()
+            {
+                lock (_collection._auras)
+                    SyncOr(_collection._isPassive.LookupByKey(true), _collection._isPerm.LookupByKey(true));
+
+                return this;
+            }
+
             public AuraApplicationQuery HasLabel(uint label)
             {
                 lock (_collection._auras)
@@ -281,7 +315,7 @@ namespace Game.Spells.Auras
                 return this;
             }
 
-            public AuraApplicationQuery HasDeminishGroup(DiminishingGroup group)
+            public AuraApplicationQuery HasDiminishGroup(DiminishingGroup group)
             {
                 lock (_collection._auras)
                     if (_collection._deminishGroup.TryGetValue(group, out var result))
@@ -318,10 +352,38 @@ namespace Game.Spells.Auras
                 return this;
             }
 
+            public AuraApplicationQuery HasSpellFamily(SpellFamilyNames spellFamily)
+            {
+                lock (_collection._auras)
+                    if (_collection._spellFamily.TryGetValue(spellFamily, out var result))
+                        Sync(result);
+
+                return this;
+            }
+
+            public AuraApplicationQuery HasEffectIndex(int effectIndex)
+            {
+                lock (_collection._auras)
+                    if (_collection._effectIndex.TryGetValue(effectIndex, out var result))
+                        Sync(result);
+
+                return this;
+            }
+
             public AuraApplicationQuery IsSingleTarget(bool t = true)
             {
                 lock (_collection._auras)
-                    Sync(_collection._isSingleTarget, t);
+                    if (_collection._isSingleTarget.TryGetValue(t, out var result))
+                        Sync(result);
+
+                return this;
+            }
+
+            public AuraApplicationQuery IsPositive(bool t = true)
+            {
+                lock (_collection._auras)
+                    if (_collection._isPositive.TryGetValue(t, out var result))
+                        Sync(result);
 
                 return this;
             }
@@ -329,7 +391,8 @@ namespace Game.Spells.Auras
             public AuraApplicationQuery CanBeSaved(bool t = true)
             {
                 lock (_collection._auras)
-                    Sync(_collection._canBeSaved, t);
+                    if (_collection._canBeSaved.TryGetValue(t, out var result))
+                        Sync(result);
 
                 return this;
             }
@@ -337,7 +400,8 @@ namespace Game.Spells.Auras
             public AuraApplicationQuery IsGroupBuff(bool t = true)
             {
                 lock (_collection._auras)
-                    Sync(_collection._isgroupBuff, t);
+                    if (_collection._isgroupBuff.TryGetValue(t, out var result))
+                        Sync(result);
 
                 return this;
             }
@@ -345,7 +409,8 @@ namespace Game.Spells.Auras
             public AuraApplicationQuery IsPassive(bool t = true)
             {
                 lock (_collection._auras)
-                    Sync(_collection._isPassive, t);
+                    if (_collection._isPassive.TryGetValue(t, out var result))
+                        Sync(result);
 
                 return this;
             }
@@ -353,7 +418,8 @@ namespace Game.Spells.Auras
             public AuraApplicationQuery IsDeathPersistant(bool t = true)
             {
                 lock (_collection._auras)
-                    Sync(_collection._isDeathPersistant, t);
+                    if (_collection._isDeathPersistant.TryGetValue(t, out var result))
+                        Sync(result);
 
                 return this;
             }
@@ -361,15 +427,17 @@ namespace Game.Spells.Auras
             public AuraApplicationQuery IsRequiringDeadTarget(bool t = true)
             {
                 lock (_collection._auras)
-                    Sync(_collection._isRequiringDeadTarget, t);
+                    if (_collection._isRequiringDeadTarget.TryGetValue(t, out var result))
+                        Sync(result);
 
                 return this;
             }
 
-            public AuraApplicationQuery IsNotPlayer(bool t = true)
+            public AuraApplicationQuery IsPlayer(bool t = true)
             {
                 lock (_collection._auras)
-                    Sync(_collection._isNotPlayer, t);
+                    if (_collection._isPlayer.TryGetValue(t, out var result))
+                        Sync(result);
 
                 return this;
             }
@@ -385,19 +453,35 @@ namespace Game.Spells.Auras
             public AuraApplicationQuery IsPermanent(bool t = true)
             {
                 lock (_collection._auras)
-                    Sync(_collection._isPerm, t);
+                    if (_collection._isPerm.TryGetValue(t, out var result))
+                        Sync(result);
 
                 return this;
             }
 
-            public AuraApplicationQuery Execute(Action<uint, AuraApplication, AuraRemoveMode> action, AuraRemoveMode auraRemoveMode = AuraRemoveMode.Default)
+            public AuraApplicationQuery OnlyIndoors(bool t = true)
+            {
+                lock (_collection._auras)
+                    if (_collection._onlyIndoors.TryGetValue(t, out var result))
+                        Sync(result);
+
+                return this;
+            }
+
+            public AuraApplicationQuery OnlyOutdoors(bool t = true)
+            {
+                lock (_collection._auras)
+                    if (_collection._onlyOutdoors.TryGetValue(t, out var result))
+                        Sync(result);
+
+                return this;
+            }
+
+            public AuraApplicationQuery Execute(Action<AuraApplication, AuraRemoveMode> action, AuraRemoveMode auraRemoveMode = AuraRemoveMode.Default)
             {
                 foreach (var aura in Results)
-                {
-                    var obj = _collection._auras[aura];
-
-                    action(obj.GetBase().GetSpellInfo().Id, obj, auraRemoveMode);
-                }
+                    if (_collection._auras.TryGetValue(aura, out var result))
+                        action(result, auraRemoveMode);
 
                 return this;
             }
@@ -405,7 +489,8 @@ namespace Game.Spells.Auras
             public IEnumerable<AuraApplication> GetResults()
             {
                 foreach (var aura in Results)
-                    yield return _collection._auras[aura];
+                    if (_collection._auras.TryGetValue(aura, out var result))   
+                        yield return result;
             }
 
             public AuraApplicationQuery ForEachResult(Action<AuraApplication> action)
@@ -418,7 +503,14 @@ namespace Game.Spells.Auras
 
             public AuraApplicationQuery AlsoMatches(Func<AuraApplication, bool> predicate)
             {
-                Results.RemoveWhere(g => !predicate(_collection._auras[g]));
+                Results.RemoveWhere(g =>
+                {
+                    if (_collection._auras.TryGetValue(g, out var result))
+                        return !predicate(result);
+
+                    return true;
+                });
+
                 return this;
             }
 
@@ -426,7 +518,7 @@ namespace Game.Spells.Auras
             {
                 if (!_hasLoaded)
                 {
-                    if (collection != null && collection.Count != 0 && contains)
+                    if (collection != null && collection.Count != 0)
                         foreach (var a in collection)
                             Results.Add(a);
 
@@ -434,6 +526,32 @@ namespace Game.Spells.Auras
                 }
                 else if (Results.Count != 0)
                     Results.RemoveWhere(r => collection.Contains(r) != contains);
+            }
+
+            private void SyncOr(params HashSet<Guid>[] collections)
+            {
+                if (!_hasLoaded)
+                {
+                    foreach (var collection in collections)
+                        if (collection != null && collection.Count != 0)
+                            foreach (var a in collection)
+                                Results.Add(a);
+
+                    _hasLoaded = true;
+                }
+                else if (Results.Count != 0)
+                {
+                    Results.RemoveWhere(r =>
+                    {
+                        bool contained = false;
+
+                        foreach (var a in collections)
+                            if (a != null && a.Count != 0 && a.Contains(r)) 
+                                contained = true;
+
+                        return !contained;
+                    });
+                }
             }
         }
     }

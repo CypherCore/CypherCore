@@ -691,13 +691,14 @@ namespace Game.Maps
 
                 { // Update any creatures that own auras the player has applications of
                     List<Unit> toVisit = new();
-                    foreach (var pair in player.GetAppliedAuras().KeyValueList)
+                    player.GetAppliedAurasQuery().IsPlayer(false).ForEachResult(aur =>
                     {
-                        Unit caster = pair.Value.GetBase().GetCaster();
+                        Unit caster = aur.GetBase().GetCaster();
                         if (caster != null)
-                            if (!caster.IsPlayer() && !caster.IsWithinDistInMap(player, GetVisibilityRange(), false))
+                            if (!caster.IsWithinDistInMap(player, GetVisibilityRange(), false))
                                 toVisit.Add(caster);
-                    }
+                    });
+
                     foreach (Unit unit in toVisit)
                         VisitNearbyCellsOf(unit, update);
                 }
