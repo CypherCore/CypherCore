@@ -678,20 +678,25 @@ namespace Game.Maps
 
     public class TransportAnimation
     {
-        public Dictionary<uint, TransportAnimationRecord> Path = new();
-        public Dictionary<uint, TransportRotationRecord> Rotations = new();
+        public Dictionary<uint, TransportAnimationRecord> Path { get; } = new();
+        public Dictionary<uint, TransportRotationRecord> Rotations { get; } = new();
         public uint TotalTime;
+
+        List<uint> _path;
+        List<uint> _rotation;
 
         public TransportAnimationRecord GetPrevAnimNode(uint time)
         {
             if (Path.Empty())
                 return null;
 
-            List<uint> lKeys = Path.Keys.ToList();
-            int reqIndex = lKeys.IndexOf(time);
+            if (_path == null)
+                _path = Path.Keys.ToList();
 
-            if (reqIndex != -1)
-                return Path[lKeys[reqIndex - 1]];
+            int reqIndex = _path.IndexOf(time) - 1;
+
+            if (reqIndex != -2 && reqIndex != -1)
+                return Path[_path[reqIndex]];
 
             return Path.LastOrDefault().Value;
         }
@@ -701,11 +706,13 @@ namespace Game.Maps
             if (Rotations.Empty())
                 return null;
 
-            List<uint> lKeys = Rotations.Keys.ToList();
-            int reqIndex = lKeys.IndexOf(time) - 1; // indexof returns -1 if index is not found, - 1 from that is -2
+            if (_rotation == null)
+                _rotation = Rotations.Keys.ToList();
 
-            if (reqIndex != -2)
-                return Rotations[lKeys[reqIndex]];
+            int reqIndex = _rotation.IndexOf(time) - 1; // indexof returns -1 if index is not found, - 1 from that is -2
+
+            if (reqIndex != -2 && reqIndex != -1)
+                return Rotations[_rotation[reqIndex]];
 
             return Rotations.LastOrDefault().Value;
         }
