@@ -46,6 +46,7 @@ INSERT INTO areatrigger_create_properties
 (Id, AreaTriggerId, MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, AnimId, AnimKitId, DecalPropertiesId, TimeToTarget, TimeToTargetScale, Shape, ShapeData0, ShapeData1, ShapeData2, ShapeData3, ShapeData4, ShapeData5, ShapeData6, ShapeData7, ScriptName, VerifiedBuild)
 VALUES(4485, 9225, 0, 0, 0, 0, -1, 0, 0, 0, 10000, 0, 8.0, 8.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 'at_dk_death_and_decay', 47067);
 
+DELETE FROM areatrigger_template WHERE Id IN (25740);
 INSERT INTO areatrigger_template
 (Id, IsServerSide, `Type`, Flags, Data0, Data1, Data2, Data3, Data4, Data5, Data6, Data7, VerifiedBuild)
 VALUES(25740, 0, 4, 4, 8.0, 8.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 43340);
