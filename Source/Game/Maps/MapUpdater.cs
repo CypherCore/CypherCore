@@ -43,6 +43,7 @@ namespace Game.Maps
 
         public void ScheduleUpdate(Map map, uint diff)
         {
+            Interlocked.Increment(ref _workCount);
             _queue.Enqueue(new MapUpdateRequest(map, diff));
             _resetEvent.Set();
         }
@@ -57,8 +58,6 @@ namespace Game.Maps
                 {
                     if (!_queue.TryDequeue(out MapUpdateRequest request) || request == null)
                         continue;
-
-                    Interlocked.Increment(ref _workCount);
 
                     Task.Run(() =>
                     {
