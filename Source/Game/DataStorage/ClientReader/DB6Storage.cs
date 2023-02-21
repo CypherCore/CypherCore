@@ -32,15 +32,17 @@ namespace Game.DataStorage
     {
         WDCHeader _header;
         string _tableName = typeof(T).Name;
+        string _db2name;
 
-        public void LoadData(string fullFileName)
+        public void LoadData(string fullFileName, string db2Name)
         {
             if (!File.Exists(fullFileName))
             {
                 Log.outError(LogFilter.ServerLoading, $"File {fullFileName} not found.");
                 return;
             }
-
+            
+            _db2name = db2Name;
             DBReader reader = new();
             using (var stream = new FileStream(fullFileName, FileMode.Open))
             {
@@ -422,7 +424,7 @@ namespace Game.DataStorage
 
         public string GetName()
         {
-            return _tableName;
+            return string.IsNullOrEmpty(_db2name) ? _tableName : _db2name;
         }
     }
 }

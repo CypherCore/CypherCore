@@ -8683,7 +8683,7 @@ namespace Game.Spells
                         if (p != null)
                             Global.ScriptMgr.ForEach<IPlayerOnDealDamage>(p.GetClass(), d => d.OnDamage(p, spell.unitTarget, ref damageInfo.damage, spell.m_spellInfo));
                         
-                        //Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
+                        Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
 
                         hitMask |= Unit.CreateProcHitMask(damageInfo, MissCondition);
                         procVictim.Or(ProcFlags.TakeAnyDamage);

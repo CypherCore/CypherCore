@@ -1,3 +1,6 @@
+-- Copyright Forged Wow LLC
+-- Licensed under GPL v3.0 https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE 
+
 DROP TABLE IF EXISTS `trait_system`;
 CREATE TABLE `trait_system` (
   `ID` INT NOT NULL,

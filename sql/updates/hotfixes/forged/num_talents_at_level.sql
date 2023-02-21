@@ -1,4 +1,6 @@
-DELETE FROM `num_talents_at_level` WHERE `ID` IN (124, 125, 126, 127, 128, 129, 130, 131, 132, 133) AND `VerifiedBuild` = 45745;
+-- Copyright Forged Wow LLC
+-- Licensed under GPL v3.0 https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE 
+DELETE FROM `num_talents_at_level` WHERE `ID` IN (124, 125, 126, 127, 128, 129, 130, 131, 132, 133);
 
 INSERT INTO `num_talents_at_level` (`ID`, `NumTalents`, `NumTalentsDeathKnight`, `NumTalentsDemonHunter`, `VerifiedBuild`) VALUES 
 (124, 72, 72, 72, 45745),

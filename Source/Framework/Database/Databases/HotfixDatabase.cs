@@ -1133,6 +1133,9 @@ namespace Framework.Database
             // SpecSetMember.db2
             PrepareStatement(HotfixStatements.SEL_SPEC_SET_MEMBER, "SELECT ID, ChrSpecializationID, SpecSetID FROM spec_set_member WHERE (`VerifiedBuild` > 0) = ?");
 
+            // Spell.db2
+            PrepareStatement(HotfixStatements.SEL_SPELL, "SELECT ID, NameSubtext, Description, AuraDescription FROM spell WHERE (`VerifiedBuild` > 0) = ?");
+
             // SpellAuraOptions.db2
             PrepareStatement(HotfixStatements.SEL_SPELL_AURA_OPTIONS, "SELECT ID, DifficultyID, CumulativeAura, ProcCategoryRecovery, ProcChance, ProcCharges, " +
                 "SpellProcsPerMinuteID, ProcTypeMask1, ProcTypeMask2, SpellID FROM spell_aura_options WHERE (`VerifiedBuild` > 0) = ?");

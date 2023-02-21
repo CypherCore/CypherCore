@@ -225,7 +225,9 @@ namespace WorldServer
 
                 if (loops % 2000 == 0)
                 {
+                    Console.ForegroundColor = ConsoleColor.Magenta;
                     Console.WriteLine($"Avg: {(total / loops).TotalMilliseconds}ms, Max: {max.TotalMilliseconds}ms, Min: {min.TotalMilliseconds}ms, Num loops: {loops}, Total: {total.TotalMilliseconds}ms");
+                    Console.ForegroundColor = ConsoleColor.Green;
                     total = TimeSpan.Zero;
                     loops = 0;
                     max = TimeSpan.Zero;

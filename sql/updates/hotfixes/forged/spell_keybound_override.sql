@@ -1,3 +1,6 @@
+-- Copyright Forged Wow LLC
+-- Licensed under GPL v3.0 https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE 
+
 -- --------------------------------------------------------
 -- Host:                         127.0.0.1
 -- Server version:               8.0.31 - MySQL Community Server - GPL
