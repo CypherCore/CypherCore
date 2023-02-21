@@ -55,6 +55,11 @@ namespace Game.Entities
             return null;
         }
 
+        public override float GetDamageMultiplierForTarget(WorldObject target)
+        {
+            return 1.0f;
+        }
+
         public override void Update(uint diff)
         {
             base.Update(diff);

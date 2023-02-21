@@ -724,20 +724,20 @@ namespace Game.DataStorage
             do
             {
                 uint tableHash = result.Read<uint>(0);
+                int recordId = result.Read<int>(1);
+                string localeName = result.Read<string>(2);
+
                 var storeItr = _storage.LookupByKey(tableHash);
                 if (storeItr != null)
                 {
-                    Log.outError(LogFilter.Sql, $"Table hash 0x{tableHash:X} points to a loaded DB2 store {storeItr.GetName()}, fill related table instead of hotfix_blob");
+                    Log.outWarn(LogFilter.Sql, $"Table hash 0x{tableHash:X}({tableHash}) points to a loaded DB2 store {storeItr.GetName()} {recordId}:{localeName}, fill related table instead of hotfix_blob");
                     continue;
                 }
-
-                int recordId = result.Read<int>(1);
-                string localeName = result.Read<string>(2);
 
                 Locale locale = localeName.ToEnum<Locale>();
                 if (!SharedConst.IsValidLocale(locale))
                 {
-                    Log.outError(LogFilter.Sql, $"`hotfix_blob` contains invalid locale: {localeName} at TableHash: 0x{tableHash:X} and RecordID: {recordId}");
+                    Log.outWarn(LogFilter.Sql, $"`hotfix_blob` contains invalid locale: {localeName} at TableHash: 0x{tableHash:X} and RecordID: {recordId}");
                     continue;
                 }
 
@@ -2364,7 +2364,7 @@ namespace Game.DataStorage
         }
 
         delegate bool AllowedHotfixOptionalData(byte[] data);
-
+        internal Dictionary<uint, IDB2Storage> Storage => _storage;
         Dictionary<uint, IDB2Storage> _storage = new();
         MultiMap<int, HotfixRecord> _hotfixData = new();
         Dictionary<(uint tableHash, int recordId), byte[]>[] _hotfixBlob = new Dictionary<(uint tableHash, int recordId), byte[]>[(int)Locale.Total];

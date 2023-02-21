@@ -19,6 +19,7 @@ namespace Scripts.Spells.Paladin
     [Script]
     public class absolution : ScriptObjectAutoAdd, IPlayerOnSpellCast
     {
+        public Class PlayerClass { get; } = Class.Paladin;
         public absolution() : base("absolution")
         {
         }

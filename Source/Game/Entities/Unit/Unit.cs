@@ -3727,6 +3727,8 @@ namespace Game.Entities
                     log.damage = splitDamage;
                     log.originalDamage = splitDamage;
                     log.absorb = split_absorb;
+                    log.HitInfo |= (int)SpellHitType.Split;
+
                     caster.SendSpellNonMeleeDamageLog(log);
 
                     // break 'Fear' and similar auras

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
 using System.IO;
+using Game.Entities;
 
 namespace Game.DataStorage
 {
@@ -34,7 +35,7 @@ namespace Game.DataStorage
             DB6Storage<T> ReadDB2<T>(string fileName, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale = 0) where T : new()
             {
                 DB6Storage<T> storage = new();
-                storage.LoadData($"{db2Path}/{defaultLocale}/{fileName}");
+                storage.LoadData($"{db2Path}/{defaultLocale}/{fileName}", fileName);
                 storage.LoadHotfixData(availableDb2Locales, preparedStatement, preparedStatementLocale);
 
                 Global.DB2Mgr.AddDB2(storage.GetTableHash(), storage);
@@ -275,6 +276,7 @@ namespace Game.DataStorage
             SoundKitStorage = ReadDB2<SoundKitRecord>("SoundKit.db2", HotfixStatements.SEL_SOUND_KIT);
             SpecializationSpellsStorage = ReadDB2<SpecializationSpellsRecord>("SpecializationSpells.db2", HotfixStatements.SEL_SPECIALIZATION_SPELLS, HotfixStatements.SEL_SPECIALIZATION_SPELLS_LOCALE);
             SpecSetMemberStorage = ReadDB2<SpecSetMemberRecord>("SpecSetMember.db2", HotfixStatements.SEL_SPEC_SET_MEMBER);
+            SpellStorage = ReadDB2<SpellRecord>("Spell.db2", HotfixStatements.SEL_SPELL);
             SpellNameStorage = ReadDB2<SpellNameRecord>("SpellName.db2", HotfixStatements.SEL_SPELL_NAME, HotfixStatements.SEL_SPELL_NAME_LOCALE);
             SpellAuraOptionsStorage = ReadDB2<SpellAuraOptionsRecord>("SpellAuraOptions.db2", HotfixStatements.SEL_SPELL_AURA_OPTIONS);
             SpellAuraRestrictionsStorage = ReadDB2<SpellAuraRestrictionsRecord>("SpellAuraRestrictions.db2", HotfixStatements.SEL_SPELL_AURA_RESTRICTIONS);
@@ -371,7 +373,11 @@ namespace Game.DataStorage
             CharBaseInfoStorage = ReadDB2<CharBaseInfo>("CharBaseInfo.db2", HotfixStatements.SEL_CHAR_BASE_INFO);
 
             Global.DB2Mgr.LoadStores();
-
+#if DEBUG
+            Log.outInfo(LogFilter.ServerLoading, $"DB2  TableHash");
+            foreach (var kvp in DB2Manager.Instance.Storage)
+                Log.outInfo(LogFilter.ServerLoading, $"{kvp.Value.GetName()}    {kvp.Key}");
+#endif
             foreach (var entry in TaxiPathStorage.Values)
                 TaxiPathSetBySource.Add(entry.FromTaxiNode, entry.ToTaxiNode, new TaxiPathBySourceAndDestination(entry.Id, entry.Cost));
 

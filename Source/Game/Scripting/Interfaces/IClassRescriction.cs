@@ -12,6 +12,6 @@ namespace Game.Scripting.Interfaces
 {
     public interface IClassRescriction
     {
-        Class PlayerClass { get { return Class.None; } }
+        Class PlayerClass { get; }
     }
 }

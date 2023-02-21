@@ -216,7 +216,9 @@ namespace Scripts.Spells.Warlock
 		public const uint RAIN_OF_FIRE = 5740;
 		public const uint RAIN_OF_FIRE_DAMAGE = 42223;
 		public const uint RAIN_OF_FIRE_ENERGIZE = 270548;
-		public const uint ROARING_BLASE_DMG_PCT = 265931;
+		public const uint RITUAL_OF_RUIN = 387156;
+		public const uint RITUAL_OF_RUIN_FREE_CAST_AURA = 387157;
+        public const uint ROARING_BLASE_DMG_PCT = 265931;
 		public const uint ROARING_BLAZE = 205184;
 		public const uint ROT_AND_DECAY = 212371;
 		public const uint SEED_OF_CORRUPTION = 27243;

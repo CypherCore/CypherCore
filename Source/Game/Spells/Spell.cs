@@ -1894,6 +1894,7 @@ namespace Game.Spells
 
             // Add target to list
             m_UniqueTargetInfo.Add(targetInfo);
+            m_UniqueTargetInfo_Orgi.Add(targetInfo);
         }
 
         void AddGOTarget(GameObject go, uint effectMask)
@@ -3099,6 +3100,7 @@ namespace Game.Spells
             // now recheck units targeting correctness (need before any effects apply to prevent adding immunity at first effect not allow apply second spell effect and similar cases)
             {
                 List<TargetInfo> delayedTargets = new();
+
                 m_UniqueTargetInfo.RemoveAll(target =>
                 {
                     if (single_missile || target.TimeDelay <= offset)
@@ -8241,6 +8243,7 @@ namespace Game.Spells
         // *****************************************
         // Targets store structures and data
         public List<TargetInfo> m_UniqueTargetInfo = new();
+        public List<TargetInfo> m_UniqueTargetInfo_Orgi = new();
         uint m_channelTargetEffectMask;                        // Mask req. alive targets
 
         List<GOTargetInfo> m_UniqueGOTargetInfo = new();
@@ -8663,6 +8666,7 @@ namespace Game.Spells
                     hasDamage = true;
                     // Fill base damage struct (unitTarget - is real spell target)
                     SpellNonMeleeDamage damageInfo = new(caster, spell.unitTarget, spell.m_spellInfo, spell.m_SpellVisual, spell.m_spellSchoolMask, spell.m_castId);
+
                     // Check damage immunity
                     if (spell.unitTarget.IsImmunedToDamage(spell.m_spellInfo))
                     {

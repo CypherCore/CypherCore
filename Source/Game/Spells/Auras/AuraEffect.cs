@@ -5214,7 +5214,7 @@ namespace Game.Spells
             log.resist = resist;
             log.periodicLog = true;
             if (crit)
-                log.HitInfo |= HitInfo.CriticalHit;
+                log.HitInfo |= (int)SpellHitType.Crit;
 
             // Set trigger flag
             ProcFlagsInit procAttacker = new ProcFlagsInit(ProcFlags.DealHarmfulPeriodic);

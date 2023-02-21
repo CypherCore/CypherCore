@@ -455,7 +455,7 @@ namespace Game.Scripting
             Unit hitUnit = GetHitUnit();
             if (hitUnit != null)
             {
-                var targetInfo = _spell.m_UniqueTargetInfo.Find(targetInfo => targetInfo.TargetGUID == hitUnit.GetGUID());
+                var targetInfo = _spell.m_UniqueTargetInfo_Orgi.Find(targetInfo => targetInfo.TargetGUID == hitUnit.GetGUID());
                 Cypher.Assert(targetInfo != null);
                 return targetInfo.IsCrit;
             }

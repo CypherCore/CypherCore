@@ -10,7 +10,7 @@ using Game.Spells;
 
 namespace Scripts.Spells.Warlock
 {
-	[SpellScript(5740)] // 5740 - Rain of Fire Updated 7.1.5
+    [SpellScript(5740)] // 5740 - Rain of Fire Updated 7.1.5
 	internal class spell_warl_rain_of_fire : AuraScript, IHasAuraEffects, IAuraOnRemove
     {
 		public List<IAuraEffectHandler> AuraEffects { get; } = new();

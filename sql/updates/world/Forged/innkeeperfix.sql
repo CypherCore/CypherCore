@@ -1,3 +1,6 @@
+-- Copyright Forged Wow LLC
+-- Licensed under GPL v3.0 https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE 
+
 update creature_template SET npcflag = 65536 WHERE subname LIKE "%Innkeeper"
 AND npcflag = 0;
 

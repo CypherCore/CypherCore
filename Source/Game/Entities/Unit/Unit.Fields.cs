@@ -486,6 +486,9 @@ namespace Game.Entities
             schoolMask = _schoolMask;
             castId = _castId;
             preHitHealth = (uint)_target.GetHealth();
+
+            if (_attacker == _target)
+                HitInfo |= (int)SpellHitType.VictimIsAttacker;
         }
 
         public Unit target;
@@ -500,7 +503,7 @@ namespace Game.Entities
         public uint resist;
         public bool periodicLog;
         public uint blocked;
-        public HitInfo HitInfo;
+        public int HitInfo;
         // Used for help
         public uint cleanDamage;
         public bool fullBlock;

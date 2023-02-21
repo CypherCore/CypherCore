@@ -3212,15 +3212,25 @@ namespace Game.Entities
         public bool IsSceneObject() { return GetTypeId() == TypeId.SceneObject; }
 
         public Creature ToCreature() { return IsCreature() ? (this as Creature) : null; }
+        public bool TryGetAsCreature(out Creature creature) { creature = ToCreature(); return creature != null; }
         public Player ToPlayer() { return IsPlayer() ? (this as Player) : null; }
+        public bool TryGetAsPlayer(out Player player) { player = ToPlayer(); return player != null; }
         public GameObject ToGameObject() { return IsGameObject() ? (this as GameObject) : null; }
+        public bool TryGetAsGameObject(out GameObject gameObject) { gameObject = ToGameObject(); return gameObject != null; }
         public Item ToItem() { return IsItem() ? (this as Item) : null; }
+        public bool TryGetAsItem(out Item item) { item = ToItem(); return item != null; }
         public Unit ToUnit() { return IsUnit() ? (this as Unit) : null; }
+        public bool TryGetAsUnit(out Unit unit) { unit = ToUnit(); return unit != null; }
         public Corpse ToCorpse() { return IsCorpse() ? (this as Corpse) : null; }
+        public bool TryGetAsCorpse(out Corpse corpse) { corpse = ToCorpse(); return corpse != null; }
         public DynamicObject ToDynamicObject() { return IsDynObject() ? (this as DynamicObject) : null; }
+        public bool TryGetAsDynamicObject(out DynamicObject dynObj) { dynObj = ToDynamicObject(); return dynObj != null; }
         public AreaTrigger ToAreaTrigger() { return IsAreaTrigger() ? (this as AreaTrigger) : null; }
+        public bool TryGetAsAreaTrigger(out AreaTrigger areaTrigger) { areaTrigger = ToAreaTrigger(); return areaTrigger != null; }
         public Conversation ToConversation() { return IsConversation() ? (this as Conversation) : null; }
+        public bool TryGetAsConversation(out Conversation conversation) { conversation = ToConversation(); return conversation != null; }
         public SceneObject ToSceneObject() { return IsSceneObject() ? (this as SceneObject) : null; }
+        public bool TryGetAsSceneObject(out SceneObject sceneObject) { sceneObject = ToSceneObject(); return sceneObject != null; }
 
         public virtual uint GetLevelForTarget(WorldObject target) { return 1; }
 
