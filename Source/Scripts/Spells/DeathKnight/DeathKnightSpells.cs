@@ -65,10 +65,7 @@ namespace Scripts.Spells.DeathKnight
 		public const uint DARK_TRANSFORMATION = 63560;
 		public const uint DEATH_AND_DECAY_DAMAGE = 52212;
 		public const uint DEATH_AND_DECAY_SLOW = 143375;
-		public const uint DEATH_COIL_BARRIER = 115635;
-		public const uint DEATH_COIL_DAMAGE = 47632;
-		public const uint DEATH_COIL_HEAL = 47633;
-		public const uint DEATH_GRIP = 49576;
+        public const uint DEATH_GRIP = 49576;
 		public const uint DEATH_GRIP_ONLY_JUMP = 146599;
 		public const uint DEATH_GRIP_PULL = 49575;
 		public const uint DEATH_GRIP_TAUNT = 57603;
@@ -98,16 +95,12 @@ namespace Scripts.Spells.DeathKnight
 		public const uint EPIDEMIC = 207317;
 		public const uint EPIDEMIC_DAMAGE_AOE = 215969;
 		public const uint EPIDEMIC_DAMAGE_SINGLE = 212739;
-		public const uint FESTERING_WOUND = 194310;
 		public const uint FESTERING_WOUND_DAMAGE = 194311;
 		public const uint FROST = 137006;
 		public const uint FROSTSCYTHE = 207230;
 		public const uint FROST_FEVER = 55095;
 		public const uint FROST_PRESENCE = 48266;
-		public const uint FesteringWound = 194310;
-		public const uint Frost = 137006;
-		public const uint FrostFever = 55095;
-		public const uint FrostScythe = 207230;
+		public const uint FESTERING_WOUND = 194310;
 		public const uint GEIST_TRANSFORM = 121916;
 		public const uint GHOUL_AS_GUARDIAN = 46585;
 		public const uint GHOUL_AS_PET = 52150;
@@ -132,7 +125,6 @@ namespace Scripts.Spells.DeathKnight
 		public const uint GlyphOfFoulMenagerie = 58642;
 		public const uint GlyphOfTheGeist = 58640;
 		public const uint GlyphOfTheSkeleton = 146652;
-		public const uint HARBINGER_OF_THE_DOOM = 276023;
 		public const uint HEART_STRIKE = 206930;
 		public const uint HOWLING_BLAST = 49184;
 		public const uint HOWLING_BLAST_AREA_DAMAGE = 237680;
@@ -221,9 +213,37 @@ namespace Scripts.Spells.DeathKnight
 		public const uint spell_dk_raise_dead_GHOUL = 52150;
 		public const uint spell_dk_soul_reaper = 343294;
 
-		public static uint[] ArmyTransforms =
+        public const uint HARBINGER_OF_THE_DOOM = 276023;
+        public const uint DEATH_COIL_SUDDEN_DOOM_AURA = 81340;
+        public const uint DEATH_COIL_SUDDEN_DOOM = 49530;
+        public const uint DEATH_COIL_BARRIER = 115635;
+        public const uint DEATH_COIL_DAMAGE = 47632;
+        public const uint DEATH_COIL_HEAL = 47633;
+        public const uint DEATH_COIL_ROTTENTOUCH = 390275;
+        public const uint DEATH_COIL_ROTTENTOUCH_AURA = 390276;
+		public const uint DEATH_COIL_DEVASTATION = 390270;
+        public const uint DEATH_COIL_DEVASTATION_DOT = 390271;
+
+        public const uint GHOUL_CLAW = 91776;
+		public const uint GHOUL_GNAW = 91800;
+		public const uint GHOUL_LEAP = 91809;
+		public const uint GHOUL_HUDDLE = 91838;
+		public const uint DT_GHOUL_CLAW = 91778;
+        public const uint DT_GHOUL_GNAW = 91797;
+        public const uint DT_GHOUL_LEAP = 91802;
+        public const uint DT_GHOUL_HUDDLE = 91837;
+        public const uint DT_COMMANDER = 390260;
+        public const uint DT_COMMANDER_BUFF = 390264;
+
+        public static uint[] ArmyTransforms =
 		{
 			ArmyFleshBeastTransform, ArmyGeistTransform, ArmyNorthrendSkeletonTransform, ArmySkeletonTransform, ArmySpikedGhoulTransform, ArmySuperZombieTransform
 		};
-	}
+
+        internal struct DKNPCS
+        {
+            public const uint GARGOYLE = 27829;
+            public const uint AOTD_GHOUL = 24207;
+        }
+    }
 }

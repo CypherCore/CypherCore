@@ -17,7 +17,7 @@ internal class spell_dk_rime : AuraScript, IHasAuraEffects
 
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return spellInfo.GetEffects().Count > 1 && ValidateSpellInfo(DeathKnightSpells.FrostScythe);
+		return spellInfo.GetEffects().Count > 1 && ValidateSpellInfo(DeathKnightSpells.FROSTSCYTHE);
 	}
 
 	public override void Register()
@@ -29,7 +29,7 @@ internal class spell_dk_rime : AuraScript, IHasAuraEffects
 	{
 		var chance = (float)GetSpellInfo().GetEffect(1).CalcValue(GetTarget());
 
-		if (eventInfo.GetSpellInfo().Id == DeathKnightSpells.FrostScythe)
+		if (eventInfo.GetSpellInfo().Id == DeathKnightSpells.FROSTSCYTHE)
 			chance /= 2.0f;
 
 		return RandomHelper.randChance(chance);

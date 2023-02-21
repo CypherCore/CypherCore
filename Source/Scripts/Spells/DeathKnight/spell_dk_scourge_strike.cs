@@ -31,7 +31,6 @@ public class spell_dk_scourge_strike : SpellScript, IHasSpellEffects
 					caster.CastSpell(caster, DeathKnightSpells.UNHOLY_FRENZY_BUFF, true);
 
 				var pestilentPustulesAura = caster.GetAura(DeathKnightSpells.PESTILENT_PUSTULES);
-
 				if (pestilentPustulesAura != null)
 					if (festeringWoundAura.GetStackAmount() >= pestilentPustulesAura.GetSpellInfo().GetEffect(0).BasePoints)
 						caster.ModifyPower(PowerType.Runes, 1);
