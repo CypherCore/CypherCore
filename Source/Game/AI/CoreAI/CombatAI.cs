@@ -158,11 +158,12 @@ namespace Game.AI
                 return;
 
             _events.Update(diff);
-
-            if (me.GetVictim().HasBreakableByDamageCrowdControlAura(me))
-            {
-                me.InterruptNonMeleeSpells(false);
-                return;
+            if (me.GetVictim() != null) {
+                if (me.GetVictim().HasBreakableByDamageCrowdControlAura(me))
+                {
+                    me.InterruptNonMeleeSpells(false);
+                    return;
+                }
             }
 
             if (me.HasUnitState(UnitState.Casting))

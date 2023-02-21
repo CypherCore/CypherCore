@@ -16,7 +16,7 @@ internal class spell_dk_death_strike : SpellScript, ISpellAfterCast, IHasSpellEf
 {
 	public override bool Validate(SpellInfo spellInfo)
 	{
-		return ValidateSpellInfo(DeathKnightSpells.DeathStrikeEnabler, DeathKnightSpells.DeathStrikeHeal, DeathKnightSpells.BloodShieldMastery, DeathKnightSpells.BloodShieldAbsorb, DeathKnightSpells.RecentlyUsedDeathStrike, DeathKnightSpells.Frost, DeathKnightSpells.DeathStrikeOffhand) && spellInfo.GetEffects().Count > 2;
+		return ValidateSpellInfo(DeathKnightSpells.DeathStrikeEnabler, DeathKnightSpells.DeathStrikeHeal, DeathKnightSpells.BloodShieldMastery, DeathKnightSpells.BloodShieldAbsorb, DeathKnightSpells.RecentlyUsedDeathStrike, DeathKnightSpells.FROST, DeathKnightSpells.DeathStrikeOffhand) && spellInfo.GetEffects().Count > 2;
 	}
 
 	public void AfterCast()
@@ -52,7 +52,7 @@ internal class spell_dk_death_strike : SpellScript, ISpellAfterCast, IHasSpellEf
 			if (aurEff != null)
 				caster.CastSpell(caster, DeathKnightSpells.BloodShieldAbsorb, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(heal, aurEff.GetAmount())));
 
-			if (caster.HasAura(DeathKnightSpells.Frost))
+			if (caster.HasAura(DeathKnightSpells.FROST))
 				caster.CastSpell(GetHitUnit(), DeathKnightSpells.DeathStrikeOffhand, true);
 		}
 	}

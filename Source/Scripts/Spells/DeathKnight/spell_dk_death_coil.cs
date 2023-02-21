@@ -17,7 +17,7 @@ internal class spell_dk_death_coil : SpellScript, IHasSpellEffects
 
 	public override bool Validate(SpellInfo spell)
 	{
-		return ValidateSpellInfo(DeathKnightSpells.DeathCoilDamage, DeathKnightSpells.Unholy, DeathKnightSpells.UnholyVigor);
+		return ValidateSpellInfo(DeathKnightSpells.DEATH_COIL_DAMAGE, DeathKnightSpells.Unholy, DeathKnightSpells.UnholyVigor);
 	}
 
 	public override void Register()
@@ -28,10 +28,29 @@ internal class spell_dk_death_coil : SpellScript, IHasSpellEffects
 	private void HandleDummy(int effIndex)
 	{
 		var caster = GetCaster();
-		caster.CastSpell(GetHitUnit(), DeathKnightSpells.DeathCoilDamage, true);
-		var unholyAura = caster.GetAuraEffect(DeathKnightSpells.Unholy, 6);
+		if (caster != null) {
+			var target = GetHitUnit();
+			if (target != null) {
+				if (target.IsFriendlyTo(caster) && target.GetCreatureType() == CreatureType.Undead) {
+					caster.CastSpell(GetHitUnit(), DeathKnightSpells.DEATH_COIL_HEAL, true);
+				} else {
+					var spell = caster.CastSpell(GetHitUnit(), DeathKnightSpells.DEATH_COIL_DAMAGE, true);
+				}
 
-		if (unholyAura != null) // can be any effect, just here to send SpellFailedDontReport on failure
-			caster.CastSpell(caster, DeathKnightSpells.UnholyVigor, new CastSpellExtraArgs(unholyAura));
+				var unholyAura = caster.GetAuraEffect(DeathKnightSpells.Unholy, 6);
+				if (unholyAura != null) // can be any effect, just here to send SpellFailedDontReport on failure
+					caster.CastSpell(caster, DeathKnightSpells.UnholyVigor, new CastSpellExtraArgs(unholyAura));
+
+				var suddenDoom = caster.GetAura(DeathKnightSpells.DEATH_COIL_SUDDEN_DOOM_AURA);
+				if (suddenDoom != null)
+				{
+					suddenDoom.ModStackAmount(-1);
+                    if (caster.HasAura(DeathKnightSpells.DEATH_COIL_ROTTENTOUCH))
+                    {
+                        caster.AddAura(DeathKnightSpells.DEATH_COIL_ROTTENTOUCH_AURA, target);
+                    }
+                }
+			}
+		}
 	}
 }

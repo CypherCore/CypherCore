@@ -23,7 +23,7 @@ public class spell_dk_crimsom_scourge : AuraScript, IAuraCheckProc, IHasAuraEffe
 		return true;
 	}
 
-	private void HandleProc(AuraEffect UnnamedParameter, ProcEventInfo UnnamedParameter2)
+	private void HandleProc(AuraEffect UnnamedParameter, ProcEventInfo UnnamedParameter2)	
 	{
 		var caster = GetCaster();
 

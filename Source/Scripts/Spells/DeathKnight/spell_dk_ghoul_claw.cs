@@ -8,7 +8,7 @@ using Game.Scripting.Interfaces.ISpell;
 namespace Scripts.Spells.DeathKnight;
 
 [SpellScript(47468)]
-public class spell_dk_ghoul_claw : SpellScript, ISpellOnHit
+public class spell_dk_ghoul_claw : SpellScript, ISpellOnHit, ISpellAfterHit
 {
 	public void OnHit()
 	{
@@ -19,10 +19,25 @@ public class spell_dk_ghoul_claw : SpellScript, ISpellOnHit
 			return;
 
 		Unit owner = caster.GetOwner().ToPlayer();
-
-		if (owner != null)
-			if (owner.HasAura(DeathKnightSpells.INFECTED_CLAWS))
-				if (RandomHelper.randChance(30))
-					caster.CastSpell(target, DeathKnightSpells.FESTERING_WOUND_DAMAGE, true);
+		if (owner != null) {
+			var infectedClaws = owner.GetAura(DeathKnightSpells.INFECTED_CLAWS);
+			if (infectedClaws != null)
+				if (RandomHelper.randChance(infectedClaws.GetSpellInfo().GetEffect(0).BasePoints))
+					owner.CastSpell(target, DeathKnightSpells.FESTERING_WOUND, true);
+		}
 	}
+
+	public void AfterHit(){
+        var caster = GetCaster();
+        var target = GetExplTargetUnit();
+
+        if (caster == null || target == null)
+            return;
+
+        Unit owner = caster.GetOwner().ToPlayer();
+        if (owner != null)
+        {
+			caster.CastSpell(target, caster.HasAura(DeathKnightSpells.DARK_TRANSFORMATION) ? DeathKnightSpells.DT_GHOUL_CLAW : DeathKnightSpells.GHOUL_CLAW, true);
+        }
+    }
 }
