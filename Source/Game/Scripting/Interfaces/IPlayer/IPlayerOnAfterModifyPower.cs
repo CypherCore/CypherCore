@@ -6,7 +6,7 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.IPlayer
 {
-    public interface IPlayerOnAfterModifyPower : IScriptObject
+    public interface IPlayerOnAfterModifyPower : IScriptObject, IClassRescriction
     {
         void OnAfterModifyPower(Player player, PowerType power, int oldValue, int newValue, bool regen);
     }

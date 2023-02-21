@@ -12,7 +12,8 @@ namespace Scripts.Spells.DeathKnight;
 [Script]
 public class spell_dk_runic_empowerment : ScriptObjectAutoAdd, IPlayerOnModifyPower
 {
-	public spell_dk_runic_empowerment() : base("spell_dk_runic_empowerment")
+    public Class PlayerClass { get; } = Class.Deathknight;
+    public spell_dk_runic_empowerment() : base("spell_dk_runic_empowerment")
 	{
 	}
 

@@ -14,7 +14,7 @@ using Game.Scripting.Interfaces.ISpell;
 namespace Scripts.Spells.Warlock
 {
 	[SpellScript(116858)] // 116858 - Chaos Bolt
-	internal class spell_warl_chaos_bolt : SpellScript, IHasSpellEffects, ISpellCalcCritChance, ISpellOnHit
+	internal class spell_warl_chaos_bolt : SpellScript, IHasSpellEffects, ISpellCalcCritChance, ISpellOnHit, ISpellOnCast
 	{
 		public override bool Load()
 		{
@@ -142,6 +142,11 @@ namespace Scripts.Spells.Warlock
                 immolationAura.ModDuration(-duration);
                 p.CastSpell(target, WarlockSpells.INTERNAL_COMBUSTION_DMG, Math.Max(duration / Time.InMilliseconds, 1) * dmgPerTick, true);
             }
+        }
+
+        public void OnCast()
+        {
+            GetCaster()?.RemoveAura(WarlockSpells.RITUAL_OF_RUIN_FREE_CAST_AURA);
         }
     }
 }

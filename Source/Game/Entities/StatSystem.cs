@@ -638,11 +638,11 @@ namespace Game.Entities
                 val = maxPower;
 
             int oldPower = m_unitData.Power[(int)powerIndex];
-
-            if (IsPlayer())
+            
+            if (TryGetAsPlayer(out var player))
             {
                 var newVal = val;
-                Global.ScriptMgr.ForEach<IPlayerOnModifyPower>(p => p.OnModifyPower(ToPlayer(), powerType, newVal, ref val, isRegen));
+                Global.ScriptMgr.ForEach<IPlayerOnModifyPower>(player.GetClass(), p => p.OnModifyPower(player, powerType, oldPower, ref val, isRegen));
                 val = newVal;
             }
 
@@ -661,7 +661,6 @@ namespace Game.Entities
             // group update
             if (IsTypeId(TypeId.Player))
             {
-                Player player = ToPlayer();
                 if (player.GetGroup())
                     player.SetGroupUpdateFlag(GroupUpdateFlags.CurPower);
             }
@@ -673,7 +672,7 @@ namespace Game.Entities
             }*/
 
             if (IsPlayer())
-                Global.ScriptMgr.ForEach<IPlayerOnAfterModifyPower>(p => p.OnAfterModifyPower(ToPlayer(), powerType, oldPower, val, isRegen));
+                Global.ScriptMgr.ForEach<IPlayerOnAfterModifyPower>(player.GetClass(), p => p.OnAfterModifyPower(player, powerType, oldPower, val, isRegen));
         }
         public void SetFullPower(PowerType powerType) { SetPower(powerType, GetMaxPower(powerType)); }
         public int GetPower(PowerType powerType)

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,6 +18,8 @@ namespace Game.Maps
         uint _workCount = 0;
         volatile bool _cancelationToken;
         int _numThreads;
+        Exception _exc = null;
+
         public MapUpdater(int numThreads)
         {
             _numThreads = numThreads;
@@ -39,10 +42,19 @@ namespace Game.Maps
         {
             while (_workCount > 0)
                 _mapUpdateComplete.WaitOne();
+
+            CheckForExcpetion();
+        }
+
+        private void CheckForExcpetion()
+        {
+            if (_exc != null)
+                throw new Exception("Error while processing map!", _exc);
         }
 
         public void ScheduleUpdate(Map map, uint diff)
         {
+            CheckForExcpetion();
             Interlocked.Increment(ref _workCount);
             _queue.Enqueue(new MapUpdateRequest(map, diff));
             _resetEvent.Set();
@@ -68,6 +80,7 @@ namespace Game.Maps
                         catch (Exception ex)
                         {
                             Log.outException(ex);
+                            _exc = ex;
                         }
                         finally
                         {

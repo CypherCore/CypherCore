@@ -14,6 +14,7 @@ namespace Game.DungeonFinding
 {
     class LFGPlayerScript : ScriptObjectAutoAdd, IPlayerOnLogout, IPlayerOnLogin, IPlayerOnMapChanged
     {
+        public Class PlayerClass { get; } = Class.None;
         public LFGPlayerScript() : base("LFGPlayerScript") { }
 
         // Player Hooks

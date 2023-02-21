@@ -993,16 +993,16 @@ namespace Game.Entities
                     hitMask |= ProcFlagsHit.Absorb;
 
                 // Don't set hit/crit hitMask if damage is nullified
-                bool damageNullified = damageInfo.HitInfo.HasAnyFlag(HitInfo.FullAbsorb | HitInfo.FullResist) || hitMask.HasAnyFlag(ProcFlagsHit.FullBlock);
+                bool damageNullified = damageInfo.HitInfo.HasAnyFlag((int)HitInfo.FullAbsorb | (int)HitInfo.FullResist) || hitMask.HasAnyFlag(ProcFlagsHit.FullBlock);
                 if (!damageNullified)
                 {
                     // On crit
-                    if (damageInfo.HitInfo.HasAnyFlag(HitInfo.CriticalHit))
+                    if (damageInfo.HitInfo.HasAnyFlag((int)SpellHitType.Crit))
                         hitMask |= ProcFlagsHit.Critical;
                     else
                         hitMask |= ProcFlagsHit.Normal;
                 }
-                else if (damageInfo.HitInfo.HasAnyFlag(HitInfo.FullResist))
+                else if (damageInfo.HitInfo.HasAnyFlag((int)HitInfo.FullResist))
                     hitMask |= ProcFlagsHit.FullResist;
             }
 
@@ -1988,7 +1988,7 @@ namespace Game.Entities
                     {
                         if (crit)
                         {
-                            damageInfo.HitInfo |= HitInfo.CriticalHit;
+                            damageInfo.HitInfo |= (int)SpellHitType.Crit;
 
                             // Calculate crit bonus
                             uint crit_bonus = (uint)damage;
@@ -2033,7 +2033,7 @@ namespace Game.Entities
                         // If crit add critical bonus
                         if (crit)
                         {
-                            damageInfo.HitInfo |= HitInfo.CriticalHit;
+                            damageInfo.HitInfo |= (int)SpellHitType.Crit;
                             damage = (int)SpellCriticalDamageBonus(this, spellInfo, (uint)damage, victim);
                         }
 
@@ -2062,10 +2062,10 @@ namespace Game.Entities
             damageInfo.resist = dmgInfo.GetResist();
 
             if (damageInfo.absorb != 0)
-                damageInfo.HitInfo |= (damageInfo.damage - damageInfo.absorb == 0 ? HitInfo.FullAbsorb : HitInfo.PartialAbsorb);
+                damageInfo.HitInfo |= (damageInfo.damage - damageInfo.absorb == 0 ? (int)HitInfo.FullAbsorb : (int)HitInfo.PartialAbsorb);
 
             if (damageInfo.resist != 0)
-                damageInfo.HitInfo |= (damageInfo.damage - damageInfo.resist == 0 ? HitInfo.FullResist : HitInfo.PartialResist);
+                damageInfo.HitInfo |= (damageInfo.damage - damageInfo.resist == 0 ? (int)HitInfo.FullResist : (int)HitInfo.PartialResist);
 
             damageInfo.damage = dmgInfo.GetDamage();
         }

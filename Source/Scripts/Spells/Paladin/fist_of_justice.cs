@@ -18,6 +18,7 @@ namespace Scripts.Spells.Paladin
     [Script]
     public class fist_of_justice : ScriptObjectAutoAdd, IPlayerOnModifyPower
     {
+        public Class PlayerClass { get; } = Class.Paladin;
         public fist_of_justice() : base("fist_of_justice")
         {
         }

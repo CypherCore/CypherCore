@@ -12,7 +12,8 @@ namespace Scripts.Spells.Monk;
 [Script]
 public class spell_monk_gift_of_the_ox_aura : ScriptObjectAutoAdd, IPlayerOnTakeDamage
 {
-	public spell_monk_gift_of_the_ox_aura() : base("spell_monk_gift_of_the_ox_aura")
+    public Class PlayerClass { get; } = Class.Monk;
+    public spell_monk_gift_of_the_ox_aura() : base("spell_monk_gift_of_the_ox_aura")
 	{
 	}
 

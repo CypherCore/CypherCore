@@ -1403,6 +1403,7 @@ namespace Framework.Constants
         Reflect = 11
     }
 
+    [Flags]
     public enum SpellHitType
     {
         CritDebu = 0x1,
