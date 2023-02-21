@@ -1884,13 +1884,14 @@ namespace Game.Maps
         {
             Dictionary<Player, UpdateData> update_players = new();
 
-            while (!_updateObjects.Empty())
-            {
-                WorldObject obj = _updateObjects[0];
-                Cypher.Assert(obj.IsInWorld);
-                _updateObjects.RemoveAt(0);
-                obj.BuildUpdate(update_players);
-            }
+            lock (_updateObjects)
+                while (!_updateObjects.Empty())
+                {
+                    WorldObject obj = _updateObjects[0];
+                    Cypher.Assert(obj.IsInWorld);
+                    _updateObjects.RemoveAt(0);
+                    obj.BuildUpdate(update_players);
+                }
 
             UpdateObject packet;
             foreach (var iter in update_players)
@@ -3820,13 +3821,15 @@ namespace Game.Maps
 
         public void AddUpdateObject(WorldObject obj)
         {
-            if (obj != null)
-                _updateObjects.Add(obj);
+            lock (_updateObjects)
+                if (obj != null)
+                    _updateObjects.Add(obj);
         }
 
         public void RemoveUpdateObject(WorldObject obj)
         {
-            _updateObjects.Remove(obj);
+            lock (_updateObjects)
+                _updateObjects.Remove(obj);
         }
 
         public static implicit operator bool(Map map)

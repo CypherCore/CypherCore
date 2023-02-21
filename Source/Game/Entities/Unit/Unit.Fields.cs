@@ -21,7 +21,6 @@ namespace Game.Entities
         //AI
         protected Stack<UnitAI> i_AIs = new();
         protected UnitAI i_AI;
-        bool m_aiLocked;
 
         //Movement
         protected float[] m_speed_rate = new float[(int)UnitMoveType.Max];

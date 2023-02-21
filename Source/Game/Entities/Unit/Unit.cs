@@ -1207,22 +1207,22 @@ namespace Game.Entities
 
         public virtual UnitAI GetAI() { return i_AI; }
 
-        public UnitAI GetTopAI() { return i_AIs.Count == 0 ? null : i_AIs.Peek(); }
+        public UnitAI GetTopAI() { lock (i_AIs) return i_AIs.Count == 0 ? null : i_AIs.Peek(); }
 
         public void AIUpdateTick(uint diff)
         {
             UnitAI ai = GetAI();
             if (ai != null)
             {
-                m_aiLocked = true;
-                ai.UpdateAI(diff);
-                m_aiLocked = false;
+                lock (i_AIs)
+                    ai.UpdateAI(diff);
             }
         }
 
         public void PushAI(UnitAI newAI)
         {
-            i_AIs.Push(newAI);
+            lock (i_AIs)
+                i_AIs.Push(newAI);
         }
 
         public void SetAI(UnitAI newAI)
@@ -1233,22 +1233,23 @@ namespace Game.Entities
 
         public bool PopAI()
         {
-            if (i_AIs.Count != 0)
-            {
-                i_AIs.Pop();
-                return true;
-            }
-            else
-                return false;
+            lock (i_AIs)
+                if (i_AIs.Count != 0)
+                {
+                    i_AIs.Pop();
+                    return true;
+                }
+                else
+                    return false;
         }
 
         public void RefreshAI()
         {
-            Cypher.Assert(!m_aiLocked, "Tried to change current AI during UpdateAI()");
-            if (i_AIs.Count == 0)
-                i_AI = null;
-            else
-                i_AI = i_AIs.Peek();
+            lock (i_AIs)
+                if (i_AIs.Count == 0)
+                    i_AI = null;
+                else
+                    i_AI = i_AIs.Peek();
         }
 
         public void ScheduleAIChange()
