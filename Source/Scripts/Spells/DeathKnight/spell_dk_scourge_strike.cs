@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Framework.Constants;
+using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
@@ -14,7 +15,6 @@ namespace Scripts.Spells.DeathKnight;
 public class spell_dk_scourge_strike : SpellScript, IHasSpellEffects
 {
 	public List<ISpellEffect> SpellEffects { get; } = new();
-
 
 	private void HandleOnHit(int effIndex)
 	{
@@ -52,8 +52,19 @@ public class spell_dk_scourge_strike : SpellScript, IHasSpellEffects
 		}
 	}
 
-	public override void Register()
+    private void GetTargetUnit(List<WorldObject> targets)
+    {
+        if (!GetCaster().HasAura(DeathKnightSpells.DEATH_AND_DECAY_CLEAVE))
+		{
+            targets.RemoveIf((WorldObject target) => {
+                return GetExplTargetUnit() != target;
+            });
+        }
+    }
+
+    public override void Register()
 	{
 		SpellEffects.Add(new EffectHandler(HandleOnHit, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-	}
+        SpellEffects.Add(new ObjectAreaTargetSelectHandler(GetTargetUnit, 1, Targets.UnitDestAreaEnemy));
+    }
 }
