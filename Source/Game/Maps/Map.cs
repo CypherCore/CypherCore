@@ -3820,7 +3820,8 @@ namespace Game.Maps
 
         public void AddUpdateObject(WorldObject obj)
         {
-            _updateObjects.Add(obj);
+            if (obj != null)
+                _updateObjects.Add(obj);
         }
 
         public void RemoveUpdateObject(WorldObject obj)

@@ -79,20 +79,22 @@ namespace Game.AI
         public void OnReset()
         {
             ResetBaseObject();
-            foreach (var holder in _events)
-            {
-                if (!holder.Event.event_flags.HasAnyFlag(SmartEventFlags.DontReset))
-                {
-                    InitTimer(holder);
-                    holder.RunOnce = false;
-                }
 
-                if (holder.Priority != SmartScriptHolder.DefaultPriority)
+            lock (_events)
+                foreach (var holder in _events)
                 {
-                    holder.Priority = SmartScriptHolder.DefaultPriority;
-                    _eventSortingRequired = true;
+                    if (!holder.Event.event_flags.HasAnyFlag(SmartEventFlags.DontReset))
+                    {
+                        InitTimer(holder);
+                        holder.RunOnce = false;
+                    }
+
+                    if (holder.Priority != SmartScriptHolder.DefaultPriority)
+                    {
+                        holder.Priority = SmartScriptHolder.DefaultPriority;
+                        _eventSortingRequired = true;
+                    }
                 }
-            }
 
             ProcessEventsFor(SmartEvents.Reset);
             LastInvoker.Clear();
@@ -109,16 +111,17 @@ namespace Game.AI
             }
             else
             {
-                foreach (var Event in _events)
-                {
-                    SmartEvents eventType = Event.GetEventType();
-                    if (eventType == SmartEvents.Link)//special handling
-                        continue;
+                lock (_events)
+                    foreach (var Event in _events)
+                    {
+                        SmartEvents eventType = Event.GetEventType();
+                        if (eventType == SmartEvents.Link)//special handling
+                            continue;
 
-                    if (eventType == e)
-                        if (Global.ConditionMgr.IsObjectMeetingSmartEventConditions(Event.EntryOrGuid, Event.EventId, Event.SourceType, unit, GetBaseObject()))
-                            ProcessEvent(Event, unit, var0, var1, bvar, spell, gob, varString);
-                }
+                        if (eventType == e)
+                            if (Global.ConditionMgr.IsObjectMeetingSmartEventConditions(Event.EntryOrGuid, Event.EventId, Event.SourceType, unit, GetBaseObject()))
+                                ProcessEvent(Event, unit, var0, var1, bvar, spell, gob, varString);
+                    }
             }
 
             --_nestedEventsCounter;
@@ -3764,8 +3767,9 @@ namespace Game.AI
         {
             if (!_installEvents.Empty())
             {
-                foreach (var holder in _installEvents)
-                    _events.Add(holder);//must be before UpdateTimers
+                lock (_events)
+                    foreach (var holder in _installEvents)
+                        _events.Add(holder);//must be before UpdateTimers
 
                 _installEvents.Clear();
             }
@@ -3802,13 +3806,15 @@ namespace Game.AI
 
             if (_eventSortingRequired)
             {
-                SortEvents(_events);
+                lock (_events)
+                    SortEvents(_events);
                 _eventSortingRequired = false;
             }
 
-            foreach (var holder in _events)
-                UpdateTimer(holder, diff);
-
+            lock (_events)
+                foreach (var holder in _events)
+                    UpdateTimer(holder, diff);
+    
             if (!_storedEvents.Empty())
                 foreach (var holder in _storedEvents)
                     UpdateTimer(holder, diff);
@@ -3904,25 +3910,27 @@ namespace Game.AI
                     // TODO: fix it for new maps and difficulties
                     switch (obj.GetMap().GetDifficultyID())
                     {
-
-
                         case Difficulty.Normal:
                         case Difficulty.Raid10N:
                             if (holder.Event.event_flags.HasAnyFlag(SmartEventFlags.Difficulty0))
-                                _events.Add(holder);
+                                lock (_events)
+                                    _events.Add(holder);
                             break;
                         case Difficulty.Heroic:
                         case Difficulty.Raid25N:
                             if (holder.Event.event_flags.HasAnyFlag(SmartEventFlags.Difficulty1))
-                                _events.Add(holder);
+                                lock (_events)
+                                    _events.Add(holder);
                             break;
                         case Difficulty.Raid10HC:
                             if (holder.Event.event_flags.HasAnyFlag(SmartEventFlags.Difficulty2))
-                                _events.Add(holder);
+                                lock (_events)
+                                    _events.Add(holder);
                             break;
                         case Difficulty.Raid25HC:
                             if (holder.Event.event_flags.HasAnyFlag(SmartEventFlags.Difficulty3))
-                                _events.Add(holder);
+                                lock (_events)
+                                    _events.Add(holder);
                             break;
                         default:
                             break;
@@ -3931,7 +3939,9 @@ namespace Game.AI
                 }
 
                 _allEventFlags |= holder.Event.event_flags;
-                _events.Add(holder);//NOTE: 'world(0)' events still get processed in ANY instance mode
+
+                lock (_events)
+                    _events.Add(holder);//NOTE: 'world(0)' events still get processed in ANY instance mode
             }
         }
 
@@ -4054,8 +4064,9 @@ namespace Game.AI
 
             GetScript(); //load copy of script
 
-            foreach (var holder in _events)
-                InitTimer(holder); //calculate timers for first Time use
+            lock (_events)
+                foreach (var holder in _events)
+                    InitTimer(holder); //calculate timers for first Time use
 
             ProcessEventsFor(SmartEvents.AiInit);
             InstallEvents();

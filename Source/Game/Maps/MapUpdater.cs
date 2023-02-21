@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
 // Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
+using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,13 +13,13 @@ namespace Game.Maps
         AutoResetEvent _mapUpdateComplete = new AutoResetEvent(false);
         AutoResetEvent _resetEvent = new AutoResetEvent(false);
         ConcurrentQueue<MapUpdateRequest> _queue = new();
-
+        uint _workCount = 0;
         volatile bool _cancelationToken;
-
+        int _numThreads;
         public MapUpdater(int numThreads)
         {
-            for (var i = 0; i < numThreads; ++i)
-                Task.Run(WorkerThread);
+            _numThreads = numThreads;
+            Task.Run(Dispatcher);
         }
 
         public void Deactivate()
@@ -35,7 +36,7 @@ namespace Game.Maps
 
         public void Wait()
         {
-            while (_queue.Count > 0)
+            while (_workCount > 0)
                 _mapUpdateComplete.WaitOne();
         }
 
@@ -45,21 +46,38 @@ namespace Game.Maps
             _resetEvent.Set();
         }
 
-        void WorkerThread()
+        void Dispatcher()
         {
             while (!_cancelationToken)
             {
-                _resetEvent.WaitOne(500);
+                _resetEvent.WaitOne(100);
 
-                while (_queue.Count > 0)
+                while (_queue.Count > 0 && _workCount < _numThreads)
                 {
                     if (!_queue.TryDequeue(out MapUpdateRequest request) || request == null)
                         continue;
 
-                    request.Call();
-                }
+                    Interlocked.Increment(ref _workCount);
 
-                _mapUpdateComplete.Set();
+                    Task.Run(() =>
+                    {
+                        try
+                        {
+                            request.Call();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.outException(ex);
+                        }
+                        finally
+                        {
+                            Interlocked.Decrement(ref _workCount);
+
+                            if (_workCount == 0)
+                                _mapUpdateComplete.Set();
+                        }
+                    });
+                }
             }
         }
     }
