@@ -870,7 +870,7 @@ namespace Game
             Values[WorldCfg.ShowKickInWorld] = GetDefaultValue("ShowKickInWorld", false);
             Values[WorldCfg.ShowMuteInWorld] = GetDefaultValue("ShowMuteInWorld", false);
             Values[WorldCfg.ShowBanInWorld] = GetDefaultValue("ShowBanInWorld", false);
-            Values[WorldCfg.Numthreads] = GetDefaultValue("MapUpdate.Threads", 1);
+            Values[WorldCfg.Numthreads] = GetDefaultValue("MapUpdate.Threads", 10);
             Values[WorldCfg.MaxResultsLookupCommands] = GetDefaultValue("Command.LookupMaxResults", 0);
 
             // Warden

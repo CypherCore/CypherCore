@@ -3,6 +3,7 @@
 
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Game.Maps
 {
@@ -12,17 +13,12 @@ namespace Game.Maps
         AutoResetEvent _resetEvent = new AutoResetEvent(false);
         ConcurrentQueue<MapUpdateRequest> _queue = new();
 
-        Thread[] _workerThreads;
         volatile bool _cancelationToken;
 
         public MapUpdater(int numThreads)
         {
-            _workerThreads = new Thread[numThreads];
             for (var i = 0; i < numThreads; ++i)
-            {
-                _workerThreads[i] = new Thread(WorkerThread);
-                _workerThreads[i].Start();
-            }
+                Task.Run(WorkerThread);
         }
 
         public void Deactivate()
@@ -31,11 +27,10 @@ namespace Game.Maps
 
             Wait();
 
+            // ensure we are all clear and tasks exit.
             _queue.Clear();
-
             _mapUpdateComplete.Set();
-            foreach (var thread in _workerThreads)
-                thread.Join(1000); // only time we do this is on shutdown. Give a timeout to gracefully join
+            _resetEvent.Set();
         }
 
         public void Wait()
@@ -52,7 +47,7 @@ namespace Game.Maps
 
         void WorkerThread()
         {
-            while (true)
+            while (!_cancelationToken)
             {
                 _resetEvent.WaitOne(500);
 
@@ -60,9 +55,6 @@ namespace Game.Maps
                 {
                     if (!_queue.TryDequeue(out MapUpdateRequest request) || request == null)
                         continue;
-
-                    if (_cancelationToken)
-                        return;
 
                     request.Call();
                 }

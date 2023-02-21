@@ -509,9 +509,9 @@ AddonChannel = 1
 #
 #    MapUpdate.Threads
 #        Description: Number of threads to update maps.
-#        Default:     1
+#        Default:     10
 
-MapUpdate.Threads = 1
+MapUpdate.Threads = 10
 
 #
 #    CleanCharacterDB

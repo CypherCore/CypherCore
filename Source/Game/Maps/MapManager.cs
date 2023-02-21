@@ -27,11 +27,10 @@ namespace Game.Entities
 
         public void Initialize()
         {
-            //todo needs alot of support for threadsafe.
             int num_threads = WorldConfig.GetIntValue(WorldCfg.Numthreads);
-            // Start mtmaps if needed.
+           
             if (num_threads > 0)
-                m_updater = new MapUpdater(WorldConfig.GetIntValue(WorldCfg.Numthreads));
+                m_updater = new MapUpdater(num_threads);
         }
 
         public void InitializeVisibilityDistanceInfo()

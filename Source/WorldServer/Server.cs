@@ -93,7 +93,14 @@ namespace WorldServer
                 commandThread.Start();
             }
 
-            WorldUpdateLoop();
+            try
+            {
+                WorldUpdateLoop();
+            }
+            catch (Exception ex)
+            {
+                Log.outException(ex);
+            }
 
             try
             {

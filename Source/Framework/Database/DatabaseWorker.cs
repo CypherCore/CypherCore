@@ -15,7 +15,6 @@ namespace Framework.Database
 
     class DatabaseWorker<T>
     {
-        Thread _workerThread;
         volatile bool _cancelationToken;
         AutoResetEvent _resetEvent = new AutoResetEvent(false);
         ConcurrentQueue<(ISqlOperation, Action<bool>)> _queue = new();
@@ -25,8 +24,7 @@ namespace Framework.Database
         {
             _mySqlBase = mySqlBase;
             _cancelationToken = false;
-            _workerThread = new Thread(WorkerThread);
-            _workerThread.Start();
+            Task.Run(WorkerThread);
         }
 
         void WorkerThread()

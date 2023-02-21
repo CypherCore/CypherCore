@@ -283,7 +283,7 @@ namespace Framework.Dynamic
             return RescheduleGroup(group, RandomHelper.RandTime(min, max));
         }
 
-        internal TaskScheduler InsertTask(Task task)
+        internal TaskScheduler InsertTask(TaskSchedulerTask task)
         {
             _task_holder.Push(task);
             return this;
@@ -291,7 +291,7 @@ namespace Framework.Dynamic
 
         internal TaskScheduler ScheduleAt(DateTime end, TimeSpan time, Action<TaskContext> task)
         {
-            return InsertTask(new Task(end + time, time, task));
+            return InsertTask(new TaskSchedulerTask(end + time, time, task));
         }
 
         /// <summary>
@@ -305,7 +305,7 @@ namespace Framework.Dynamic
         /// <returns></returns>
         internal TaskScheduler ScheduleAt(DateTime end, TimeSpan time, uint group, Action<TaskContext> task)
         {
-            return InsertTask(new Task(end + time, time, group, 0, task));
+            return InsertTask(new TaskSchedulerTask(end + time, time, group, 0, task));
         }
 
         void Dispatch(success_t callback = null)
@@ -368,9 +368,9 @@ namespace Framework.Dynamic
         public delegate void success_t();
     }
 
-    public class Task : IComparable<Task>
+    public class TaskSchedulerTask : IComparable<TaskSchedulerTask>
     {
-        public Task(DateTime end, TimeSpan duration, uint group, uint repeated, Action<TaskContext> task)
+        public TaskSchedulerTask(DateTime end, TimeSpan duration, uint group, uint repeated, Action<TaskContext> task)
         {
             _end = end;
             _duration = duration;
@@ -379,14 +379,14 @@ namespace Framework.Dynamic
             _task = task;
         }
 
-        public Task(DateTime end, TimeSpan duration, Action<TaskContext> task)
+        public TaskSchedulerTask(DateTime end, TimeSpan duration, Action<TaskContext> task)
         {
             _end = end;
             _duration = duration;
             _task = task;
         }
 
-        public int CompareTo(Task other)
+        public int CompareTo(TaskSchedulerTask other)
         {
             return _end.CompareTo(other._end);
         }
@@ -414,7 +414,7 @@ namespace Framework.Dynamic
         /// Pushes the task in the container
         /// </summary>
         /// <param name="task"></param>
-        public void Push(Task task)
+        public void Push(TaskSchedulerTask task)
         {
             if (!container.Add(task))
             {
@@ -426,14 +426,14 @@ namespace Framework.Dynamic
         /// Pops the task out of the container
         /// </summary>
         /// <returns></returns>
-        public Task Pop()
+        public TaskSchedulerTask Pop()
         {
-            Task result = container.First();
+            TaskSchedulerTask result = container.First();
             container.Remove(result);
             return result;
         }
 
-        public Task First()
+        public TaskSchedulerTask First()
         {
             return container.First();
         }
@@ -443,14 +443,14 @@ namespace Framework.Dynamic
             container.Clear();
         }
 
-        public void RemoveIf(Predicate<Task> filter)
+        public void RemoveIf(Predicate<TaskSchedulerTask> filter)
         {
             container.RemoveWhere(filter);
         }
 
-        public void ModifyIf(Func<Task, bool> filter)
+        public void ModifyIf(Func<TaskSchedulerTask, bool> filter)
         {
-            List<Task> cache = new();
+            List<TaskSchedulerTask> cache = new();
             foreach (var task in container.Where(filter))
             {
                 if (filter(task))
@@ -469,12 +469,12 @@ namespace Framework.Dynamic
             return container.Empty();
         }
 
-        SortedSet<Task> container = new();
+        SortedSet<TaskSchedulerTask> container = new();
     }
 
     public class TaskContext
     {
-        public TaskContext(Task task, TaskScheduler owner)
+        public TaskContext(TaskSchedulerTask task, TaskScheduler owner)
         {
             _task = task;
             _owner = owner;
@@ -801,7 +801,7 @@ namespace Framework.Dynamic
         }
 
         // Associated task
-        Task _task;
+        TaskSchedulerTask _task;
 
         // Owner
         TaskScheduler _owner;
