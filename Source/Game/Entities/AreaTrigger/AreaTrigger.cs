@@ -501,10 +501,11 @@ namespace Game.Entities
 
             foreach (Unit unit in newTargetList)
             {
-                if (!exitUnits.Remove(unit.GetGUID())) // erase(key_type) returns number of elements erased
+                if (!exitUnits.Remove(unit.GetGUID())) { // erase(key_type) returns number of elements erased
                     enteringUnits.Add(unit);
-
-                _insideUnits.Add(unit.GetGUID());
+                } else {
+                    _insideUnits.Add(unit.GetGUID());
+                }
             }
 
             // Handle after _insideUnits have been reinserted so we can use GetInsideUnits() in hooks
@@ -518,9 +519,7 @@ namespace Game.Entities
 
                     player.UpdateQuestObjectiveProgress(QuestObjectiveType.AreaTriggerEnter, (int)GetEntry(), 1);
                 }
-
                 DoActions(unit);
-
                 _ai.OnUnitEnter(unit);
             }
 
