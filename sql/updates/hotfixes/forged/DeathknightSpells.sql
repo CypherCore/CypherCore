@@ -21,56 +21,56 @@ INSERT INTO `hotfix_data` (`Id`, `UniqueId`, `TableHash`, `RecordId`, `Status`, 
 
 -- These are missing skill line and spellid fields, they cannot be null.
 
--- DELETE FROM skill_line_ability WHERE ID IN (23712, 23713, 23714, 23715, 23716, 23717, 23718, 23719, 26341, 31464, 33877, 33898);
--- INSERT INTO skill_line_ability
--- (RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
--- VALUES(0, NULL, NULL, 23712, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
--- INSERT INTO skill_line_ability
--- (RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
--- VALUES(0, NULL, NULL, 23713, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
--- INSERT INTO skill_line_ability
--- (RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
--- VALUES(0, NULL, NULL, 23714, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
--- INSERT INTO skill_line_ability
--- (RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
--- VALUES(0, NULL, NULL, 23715, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
--- INSERT INTO skill_line_ability
--- (RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
--- VALUES(0, NULL, NULL, 23716, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
--- INSERT INTO skill_line_ability
--- (RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
--- VALUES(0, NULL, NULL, 23717, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
--- INSERT INTO skill_line_ability
--- (RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
--- VALUES(0, NULL, NULL, 23718, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
--- INSERT INTO skill_line_ability
--- (RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
--- VALUES(0, NULL, NULL, 23719, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
--- INSERT INTO skill_line_ability
--- (RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
--- VALUES(0, NULL, NULL, 26341, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
--- INSERT INTO skill_line_ability
--- (RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
--- VALUES(0, NULL, NULL, 31464, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
--- INSERT INTO skill_line_ability
--- (RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
--- VALUES(0, NULL, NULL, 33877, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
--- INSERT INTO skill_line_ability
--- (RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
--- VALUES(0, NULL, NULL, 33898, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
+DELETE FROM skill_line_ability WHERE ID IN (23712, 23713, 23714, 23715, 23716, 23717, 23718, 23719, 26341, 31464, 33877, 33898);
+INSERT INTO skill_line_ability
+(RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
+VALUES(0, NULL, NULL, 23712, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
+INSERT INTO skill_line_ability
+(RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
+VALUES(0, NULL, NULL, 23713, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
+INSERT INTO skill_line_ability
+(RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
+VALUES(0, NULL, NULL, 23714, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
+INSERT INTO skill_line_ability
+(RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
+VALUES(0, NULL, NULL, 23715, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
+INSERT INTO skill_line_ability
+(RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
+VALUES(0, NULL, NULL, 23716, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
+INSERT INTO skill_line_ability
+(RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
+VALUES(0, NULL, NULL, 23717, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
+INSERT INTO skill_line_ability
+(RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
+VALUES(0, NULL, NULL, 23718, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
+INSERT INTO skill_line_ability
+(RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
+VALUES(0, NULL, NULL, 23719, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
+INSERT INTO skill_line_ability
+(RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
+VALUES(0, NULL, NULL, 26341, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
+INSERT INTO skill_line_ability
+(RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
+VALUES(0, NULL, NULL, 31464, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
+INSERT INTO skill_line_ability
+(RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
+VALUES(0, NULL, NULL, 33877, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
+INSERT INTO skill_line_ability
+(RaceMask, AbilityVerb, AbilityAllVerb, ID, SkillLine, Spell, MinSkillLineRank, ClassMask, SupercedesSpell, AcquireMethod, TrivialSkillLineRankHigh, TrivialSkillLineRankLow, Flags, NumSkillUps, UniqueBit, TradeSkillCategoryID, SkillupSkillLineID, VerifiedBuild)
+VALUES(0, NULL, NULL, 33898, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 45745);
 
 -- skill_line_ability table hash 4282664694
--- DELETE FROM `hotfix_data` WHERE `Id`=68943 AND `TableHash`=4282664694;
--- INSERT INTO `hotfix_data` (`Id`, `UniqueId`, `TableHash`, `RecordId`, `Status`, `VerifiedBuild`) VALUES
--- (68943, 3734412021, 4282664694, 23712, 1, 45745),
--- (68943, 3734412021, 4282664694, 23713, 1, 45745),
--- (68943, 3734412021, 4282664694, 23714, 1, 45745),
--- (68943, 3734412021, 4282664694, 23715, 1, 45745),
--- (68943, 3734412021, 4282664694, 23716, 1, 45745),
--- (68943, 3734412021, 4282664694, 23717, 1, 45745),
--- (68943, 3734412021, 4282664694, 23718, 1, 45745),
--- (68943, 3734412021, 4282664694, 23719, 1, 45745),
--- (68943, 3734412021, 4282664694, 26341, 1, 45745),
--- (68943, 3734412021, 4282664694, 31464, 1, 45745),
--- (68943, 3734412021, 4282664694, 33877, 1, 45745),
--- (68943, 3734412021, 4282664694, 33898, 1, 45745);
+DELETE FROM `hotfix_data` WHERE `Id`=68943 AND `TableHash`=4282664694;
+INSERT INTO `hotfix_data` (`Id`, `UniqueId`, `TableHash`, `RecordId`, `Status`, `VerifiedBuild`) VALUES
+(68943, 3734412021, 4282664694, 23712, 1, 45745),
+(68943, 3734412021, 4282664694, 23713, 1, 45745),
+(68943, 3734412021, 4282664694, 23714, 1, 45745),
+(68943, 3734412021, 4282664694, 23715, 1, 45745),
+(68943, 3734412021, 4282664694, 23716, 1, 45745),
+(68943, 3734412021, 4282664694, 23717, 1, 45745),
+(68943, 3734412021, 4282664694, 23718, 1, 45745),
+(68943, 3734412021, 4282664694, 23719, 1, 45745),
+(68943, 3734412021, 4282664694, 26341, 1, 45745),
+(68943, 3734412021, 4282664694, 31464, 1, 45745),
+(68943, 3734412021, 4282664694, 33877, 1, 45745),
+(68943, 3734412021, 4282664694, 33898, 1, 45745);
