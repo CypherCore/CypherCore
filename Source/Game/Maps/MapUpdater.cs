@@ -12,6 +12,7 @@ namespace Game.Maps
     {
         AutoResetEvent _mapUpdateComplete = new AutoResetEvent(false);
         AutoResetEvent _resetEvent = new AutoResetEvent(false);
+        AutoResetEvent _queueChanged = new AutoResetEvent(false);
         ConcurrentQueue<MapUpdateRequest> _queue = new();
         uint _workCount = 0;
         volatile bool _cancelationToken;
@@ -52,7 +53,7 @@ namespace Game.Maps
             {
                 _resetEvent.WaitOne(100);
 
-                while (_queue.Count > 0 && _workCount < _numThreads)
+                while (_queue.Count > 0)
                 {
                     if (!_queue.TryDequeue(out MapUpdateRequest request) || request == null)
                         continue;
@@ -72,11 +73,15 @@ namespace Game.Maps
                         finally
                         {
                             Interlocked.Decrement(ref _workCount);
+                            _queueChanged.Set();
 
                             if (_workCount == 0)
                                 _mapUpdateComplete.Set();
                         }
                     });
+
+                    while (_workCount >= _numThreads)
+                        _queueChanged.WaitOne(100);
                 }
             }
         }
