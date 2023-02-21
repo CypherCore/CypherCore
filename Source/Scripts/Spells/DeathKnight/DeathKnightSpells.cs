@@ -1,6 +1,9 @@
 ﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
 // Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
+using Game.Entities;
+using System.Collections.Generic;
+
 namespace Scripts.Spells.DeathKnight
 {
 	internal struct DeathKnightSpells
@@ -234,6 +237,11 @@ namespace Scripts.Spells.DeathKnight
         public const uint DT_GHOUL_HUDDLE = 91837;
         public const uint DT_COMMANDER = 390260;
         public const uint DT_COMMANDER_BUFF = 390264;
+
+		public const uint UNHOLY_AURA = 377445;
+        public const uint DEATH_AND_DECAY_CLEAVE = 188290;
+
+        public List<WorldObject> saveTargets;
 
         public static uint[] ArmyTransforms =
 		{
