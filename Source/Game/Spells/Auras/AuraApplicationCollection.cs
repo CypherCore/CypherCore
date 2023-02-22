@@ -114,7 +114,7 @@ namespace Game.Spells.Auras
                 var aura = auraApp.GetBase();
                 var si = aura.GetSpellInfo();
                 removed = _auras.Remove(auraApp.Guid);
-                _aurasBySpellId.Remove(aura.GetId(), aura.Guid);
+                _aurasBySpellId.Remove(aura.GetId(), auraApp.Guid);
 
                 var caster = aura.GetCaster();
 
