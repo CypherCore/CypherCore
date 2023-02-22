@@ -22,7 +22,7 @@ public class spell_dk_anti_magic_barrier : AuraScript, IHasAuraEffects
 		return true;
 	}
 
-	private void CalcAmount(AuraEffect aurEff, ref float amount, ref bool UnnamedParameter)
+	private void CalcAmount(AuraEffect aurEff, ref double amount, ref bool UnnamedParameter)
 	{
 		var caster = GetCaster();
 

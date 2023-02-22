@@ -16,7 +16,7 @@ internal class spell_mage_firestarter : SpellScript, ISpellCalcCritChance
 		return ValidateSpellInfo(MageSpells.Firestarter);
 	}
 
-	public void CalcCritChance(Unit victim, ref float critChance)
+	public void CalcCritChance(Unit victim, ref double critChance)
 	{
 		var aurEff = GetCaster().GetAuraEffect(MageSpells.Firestarter, 0);
 

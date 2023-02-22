@@ -15,13 +15,13 @@ public class spell_dk_blood_mirror : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
-	private void CalcAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+	private void CalcAmount(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
 	{
 		amount = -1;
 	}
 
 
-	private void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref float absorbAmount)
+	private void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref double absorbAmount)
 	{
 		absorbAmount = dmgInfo.GetDamage() * ((uint)aurEff.GetBaseAmount() / 100);
 		var caster = GetCaster();

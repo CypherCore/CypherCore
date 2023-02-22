@@ -23,7 +23,7 @@ public class spell_dk_death_siphon : SpellScript, IHasSpellEffects
 		if (_player != null)
 			if (GetHitUnit())
 			{
-				float bp   = GetHitDamage();
+				double bp   = GetHitDamage();
 				var   args = new CastSpellExtraArgs();
 				args.AddSpellMod(SpellValueMod.BasePoint0, (int)bp);
 				args.SetTriggerFlags(TriggerCastFlags.FullMask);

@@ -19,7 +19,7 @@ internal class spell_dk_death_pact : AuraScript, IHasAuraEffects
 		AuraEffects.Add(new AuraEffectCalcAmountHandler(HandleCalcAmount, 1, AuraType.SchoolHealAbsorb));
 	}
 
-	private void HandleCalcAmount(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
+	private void HandleCalcAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
 	{
 		var caster = GetCaster();
 

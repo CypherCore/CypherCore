@@ -33,7 +33,7 @@ namespace Scripts.Spells.Warlock
 
 			MathFunctions.AddPct(ref absorb, caster.GetAuraEffectAmount(WarlockSpells.ARENA_DAMPENING, 0));
 
-			float threshold = caster.CountPctFromMaxHealth(GetEffect(1).GetAmount());
+			double threshold = caster.CountPctFromMaxHealth(GetEffect(1).GetAmount());
 			absorb = Math.Min(absorb, threshold);
 
 			if (soulLeechShield != null)

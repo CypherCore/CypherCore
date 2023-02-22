@@ -15,7 +15,7 @@ namespace Scripts.Spells.Warlock
 	public class spell_warl_incinerate : SpellScript, IHasSpellEffects
 	{
 		public List<ISpellEffect> SpellEffects { get; } = new();
-        float _brimstoneDamage = 0;
+        double _brimstoneDamage = 0;
 		private void HandleOnHitMainTarget(int UnnamedParameter)
 		{
 			GetCaster().CastSpell(WarlockSpells.INCINERATE_ENERGIZE, true);

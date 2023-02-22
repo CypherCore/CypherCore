@@ -14,7 +14,7 @@ namespace Scripts.Spells.Druid
 	[Script] // 22568 - Ferocious Bite
 	internal class spell_dru_ferocious_bite : SpellScript, IHasSpellEffects
 	{
-		private float _damageMultiplier = 0.0f;
+		private double _damageMultiplier = 0.0f;
 		public List<ISpellEffect> SpellEffects { get; } = new();
 
 		public override bool Validate(SpellInfo spellInfo)
@@ -31,13 +31,13 @@ namespace Scripts.Spells.Druid
 
 		private void HandleHitTargetBurn(int effIndex)
 		{
-			var newValue = (int)((float)GetEffectValue() * _damageMultiplier);
+			var newValue = (int)((double)GetEffectValue() * _damageMultiplier);
 			SetEffectValue(newValue);
 		}
 
 		private void HandleHitTargetDmg(int effIndex)
 		{
-			var newValue = (int)((float)GetHitDamage() * (1.0f + _damageMultiplier));
+			var newValue = (int)((double)GetHitDamage() * (1.0f + _damageMultiplier));
 			SetHitDamage(newValue);
 		}
 
@@ -51,8 +51,8 @@ namespace Scripts.Spells.Druid
 
 			if (auraEffect != null)
 			{
-				var multiplier = 1.0f + (float)auraEffect.GetAmount() / 100.0f;
-				maxExtraConsumedPower = (int)((float)maxExtraConsumedPower * multiplier);
+				var multiplier = 1.0f + (double)auraEffect.GetAmount() / 100.0f;
+				maxExtraConsumedPower = (int)((double)maxExtraConsumedPower * multiplier);
 				SetEffectValue(maxExtraConsumedPower);
 			}
 

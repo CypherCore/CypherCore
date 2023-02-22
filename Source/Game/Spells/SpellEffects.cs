@@ -152,7 +152,7 @@ namespace Game.Spells
                 if (unitCaster != null)
                 {
                     var bonus = unitCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, damage, DamageEffectType.SpellDirect, effectInfo, 1, this);
-                    damage = bonus + (uint)(bonus * variance);
+                    damage = bonus + (bonus * variance);
                     damage = unitTarget.SpellDamageBonusTaken(unitCaster, m_spellInfo, damage, DamageEffectType.SpellDirect);
                 }
 
@@ -487,7 +487,7 @@ namespace Game.Spells
             if (creature != null)
                 runSpeed *= creature.GetCreatureTemplate().SpeedRun;
 
-            float multiplier = effInfo.Amplitude;
+            float multiplier = (float)effInfo.Amplitude;
             if (multiplier <= 0.0f)
                 multiplier = 1.0f;
 
@@ -691,14 +691,14 @@ namespace Game.Spells
                 damage = unitTarget.SpellDamageBonusTaken(unitCaster, m_spellInfo, damage, DamageEffectType.SpellDirect);
             }
 
-            int newDamage = -(unitTarget.ModifyPower(powerType, -damage));
+            double newDamage = -(unitTarget.ModifyPower(powerType, -damage));
 
             // Don't restore from self drain
-            float gainMultiplier = 0.0f;
+            double gainMultiplier = 0.0f;
             if (unitCaster != null && unitCaster != unitTarget)
             {
                 gainMultiplier = effectInfo.CalcValueMultiplier(unitCaster, this);
-                int gain = (int)(newDamage * gainMultiplier);
+                var gain = newDamage * gainMultiplier;
 
                 unitCaster.EnergizeBySpell(unitCaster, m_spellInfo, gain, powerType);
             }
@@ -758,15 +758,15 @@ namespace Game.Spells
             if (unitTarget == null || !unitTarget.IsAlive() || unitTarget.GetPowerType() != powerType || damage < 0)
                 return;
 
-            int newDamage = -(unitTarget.ModifyPower(powerType, -damage));
+            double newDamage = -(unitTarget.ModifyPower(powerType, -damage));
 
             // NO - Not a typo - EffectPowerBurn uses effect value multiplier - not effect damage multiplier
-            float dmgMultiplier = effectInfo.CalcValueMultiplier(GetUnitCasterForEffectHandlers(), this);
+            var dmgMultiplier = effectInfo.CalcValueMultiplier(GetUnitCasterForEffectHandlers(), this);
 
             // add log data before multiplication (need power amount, not damage)
             ExecuteLogEffectTakeTargetPower(effectInfo.Effect, unitTarget, powerType, (uint)newDamage, 0.0f);
 
-            newDamage = (int)(newDamage * dmgMultiplier);
+            newDamage = newDamage * dmgMultiplier;
 
             m_damage += newDamage;
         }
@@ -793,7 +793,7 @@ namespace Game.Spells
             if (m_spellInfo.Id == 45064)
             {
                 // Amount of heal - depends from stacked Holy Energy
-                float damageAmount = 0;
+                double damageAmount = 0;
                 AuraEffect aurEff = unitCaster.GetAuraEffect(45062, 0);
                 if (aurEff != null)
                 {
@@ -830,7 +830,7 @@ namespace Game.Spells
             if (unitTarget == null || !unitTarget.IsAlive() || damage < 0)
                 return;
 
-            var heal = (float)unitTarget.CountPctFromMaxHealth(damage);
+            var heal = (double)unitTarget.CountPctFromMaxHealth(damage);
             Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster)
             {
@@ -884,7 +884,7 @@ namespace Game.Spells
 
             Log.outDebug(LogFilter.Spells, "HealthLeech :{0}", damage);
 
-            float healMultiplier = effectInfo.CalcValueMultiplier(unitCaster, this);
+            var healMultiplier = effectInfo.CalcValueMultiplier(unitCaster, this);
 
             m_damage += damage;
 
@@ -931,7 +931,7 @@ namespace Game.Spells
             // this is bad, should be done using spell_loot_template (and conditions)
 
             // the chance of getting a perfect result
-            float perfectCreateChance = 0.0f;
+            double perfectCreateChance = 0.0f;
             // the resulting perfect item if successful
             uint perfectItemType = itemId;
             // get perfection capability and chance
@@ -942,7 +942,7 @@ namespace Game.Spells
             // init items_count to 1, since 1 item will be created regardless of specialization
             int items_count = 1;
             // the chance to create additional items
-            float additionalCreateChance = 0.0f;
+            double additionalCreateChance = 0.0f;
             // the maximum number of created additional items
             byte additionalMaxNum = 0;
             // get the chance and maximum number for creating extra items
@@ -1841,8 +1841,8 @@ namespace Game.Spells
                     creature._loot.FillLoot(lootid, LootStorage.Pickpocketing, player, true);
 
                 // Generate extra money for pick pocket loot
-                uint a = RandomHelper.URand(0, creature.GetLevel() / 2);
-                uint b = RandomHelper.URand(0, player.GetLevel() / 2);
+                var a = RandomHelper.URand(0, creature.GetLevel() / 2);
+                var b = RandomHelper.URand(0, player.GetLevel() / 2);
                 creature._loot.gold = (uint)(10 * (a + b) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
             }
             else if (creature._loot != null)
@@ -2382,9 +2382,9 @@ namespace Game.Spells
             }
 
             // some spell specific modifiers
-            float totalDamagePercentMod = 1.0f;                    // applied to final bonus+weapon damage
-            float fixed_bonus = 0;
-            float spell_bonus = 0;                                  // bonus specific for spell
+            double totalDamagePercentMod = 1.0f;                    // applied to final bonus+weapon damage
+            double fixed_bonus = 0;
+            double spell_bonus = 0;                                  // bonus specific for spell
 
             switch (m_spellInfo.SpellFamilyName)
             {
@@ -2400,7 +2400,7 @@ namespace Game.Spells
             }
 
             bool normalized = false;
-            float weaponDamagePercentMod = 1.0f;
+            double weaponDamagePercentMod = 1.0f;
             foreach (var spellEffectInfo in m_spellInfo.GetEffects())
             {
                 switch (spellEffectInfo.Effect)
@@ -2441,14 +2441,14 @@ namespace Game.Spells
                         break;
                 }
 
-                float weapon_total_pct = unitCaster.GetPctModifierValue(unitMod, UnitModifierPctType.Total);
+                var weapon_total_pct = unitCaster.GetPctModifierValue(unitMod, UnitModifierPctType.Total);
                 if (fixed_bonus != 0)
                     fixed_bonus = fixed_bonus * weapon_total_pct;
                 if (spell_bonus != 0)
                     spell_bonus = spell_bonus * weapon_total_pct;
             }
 
-            float weaponDamage = unitCaster.CalculateDamage(m_attackType, normalized, addPctMods);
+            var weaponDamage = unitCaster.CalculateDamage(m_attackType, normalized, addPctMods);
 
             // Sequence is important
             foreach (var spellEffectInfo in m_spellInfo.GetEffects())
@@ -3622,7 +3622,7 @@ namespace Game.Spells
 
             float ratio = 0.1f;
             float speedxy = effectInfo.MiscValue * ratio;
-            float speedz = damage * ratio;
+            double speedz = damage * ratio;
             if (speedxy < 0.01f && speedz < 0.01f)
                 return;
 
@@ -3637,7 +3637,7 @@ namespace Game.Spells
             else //if (effectInfo.Effect == SPELL_EFFECT_KNOCK_BACK)
                 origin = new(m_caster.GetPosition());
 
-            unitTarget.KnockbackFrom(origin, speedxy, speedz);
+            unitTarget.KnockbackFrom(origin, speedxy, (float)speedz);
 
             Unit.ProcSkillsAndAuras(GetUnitCasterForEffectHandlers(), unitTarget, new ProcFlagsInit(ProcFlags.None), new ProcFlagsInit(ProcFlags.None, ProcFlags2.Knockback), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Hit, ProcFlagsHit.None, null, null, null);
         }
@@ -3652,9 +3652,9 @@ namespace Game.Spells
                 return;
 
             float speedxy = effectInfo.MiscValue / 10.0f;
-            float speedz = damage / 10.0f;
+            double speedz = damage / 10.0f;
             // Disengage
-            unitTarget.JumpTo(speedxy, speedz, effectInfo.PositionFacing);
+            unitTarget.JumpTo(speedxy, (float)speedz, effectInfo.PositionFacing);
 
             // changes fall time
             if (m_caster.GetTypeId() == TypeId.Player)

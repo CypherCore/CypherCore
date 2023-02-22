@@ -5,6 +5,6 @@ namespace Game.Scripting.Interfaces.IFormula
 {
     public interface IFormulaOnGroupRateCaclulation : IScriptObject
     {
-        void OnGroupRateCalculation(float rate, uint count, bool isRaid);
+        void OnGroupRateCalculation(double rate, uint count, bool isRaid);
     }
 }

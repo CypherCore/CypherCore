@@ -46,7 +46,7 @@ namespace Scripts.Spells.Paladin
                 healInfo.GetHeal() == 0)
                 return;
 
-            float heal = MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
+            double heal = MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
 
             var auras = GetCaster().GetSingleCastAuras();
 

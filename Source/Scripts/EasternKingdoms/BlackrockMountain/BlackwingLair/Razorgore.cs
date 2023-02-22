@@ -79,7 +79,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Razorgore
                 DoChangePhase();
         }
 
-        public override void DamageTaken(Unit who, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit who, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             // @todo this is wrong - razorgore should still take Damage, he should just nuke the whole room and respawn if he dies during P1
             if (!secondPhase)

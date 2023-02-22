@@ -32,8 +32,8 @@ public class spell_dh_bloodlet : AuraScript, IHasAuraEffects
 			return;
 
 		var basePoints = GetSpellInfo().GetEffect(0).BasePoints;
-		var dmg        = (eventInfo.GetDamageInfo().GetDamage() * (float)basePoints) / 100.0f;
-		var dmgPerTick = (float)dmg / 5.0f;
+		var dmg        = (eventInfo.GetDamageInfo().GetDamage() * (double)basePoints) / 100.0f;
+		var dmgPerTick = (double)dmg / 5.0f;
 
 		// Any remaining damage must be added
 		var dot = target.GetAuraEffect(DemonHunterSpells.BLOODLET_DOT, 0, caster.GetGUID());

@@ -37,7 +37,7 @@ internal class spell_gen_war_mode_enlisted : AuraScript, IHasAuraEffects
 			AuraEffects.Add(new AuraEffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.Dummy));
 	}
 
-	private void CalcWarModeBonus(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
+	private void CalcWarModeBonus(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
 	{
 		var target = GetUnitOwner().ToPlayer();
 

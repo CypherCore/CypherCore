@@ -24,12 +24,12 @@ public class spell_dh_last_resort : AuraScript, IHasAuraEffects
 		return true;
 	}
 
-	private void CalcAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+	private void CalcAmount(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
 	{
 		amount = -1;
 	}
 
-	private void HandleAbsorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref float absorbAmount)
+	private void HandleAbsorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref double absorbAmount)
 	{
 		var target = GetTarget();
 

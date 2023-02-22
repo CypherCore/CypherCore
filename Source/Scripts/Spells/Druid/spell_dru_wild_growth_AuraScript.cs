@@ -32,10 +32,10 @@ namespace Scripts.Spells.Druid
 				return;
 
 			// calculate from base Damage, not from aurEff.GetAmount() (already modified)
-			float damage = caster.CalculateSpellDamage(GetUnitOwner(), aurEff.GetSpellEffectInfo());
+			double damage = caster.CalculateSpellDamage(GetUnitOwner(), aurEff.GetSpellEffectInfo());
 
 			// Wild Growth = first tick gains a 6% bonus, reduced by 2% each tick
-			var reduction = 2.0f;
+			double reduction = 2.0f;
 			var bonus     = caster.GetAuraEffect(DruidSpellIds.RestorationT102PBonus, 0);
 
 			if (bonus != null)
@@ -44,7 +44,7 @@ namespace Scripts.Spells.Druid
 			reduction *= (aurEff.GetTickNumber() - 1);
 
 			MathFunctions.AddPct(ref damage, 6.0f - reduction);
-			aurEff.SetAmount((int)damage);
+			aurEff.SetAmount(damage);
 		}
 	}
 }

@@ -26,12 +26,12 @@ public class spell_druid_rend_and_tear : AuraScript, IHasAuraEffects
 		return ValidateSpellInfo(Spells.REND_AND_TEAR, Spells.TRASH_DOT);
 	}
 
-	private void CalculateAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+	private void CalculateAmount(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
 	{
 		amount = -1;
 	}
 
-	private void Absorb(AuraEffect auraEffect, DamageInfo dmgInfo, ref float absorbAmount)
+	private void Absorb(AuraEffect auraEffect, DamageInfo dmgInfo, ref double absorbAmount)
 	{
 		var caster   = GetCaster();
 		var attacker = dmgInfo.GetAttacker();

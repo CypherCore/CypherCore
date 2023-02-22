@@ -22,7 +22,7 @@ public class spell_dh_annihilation : SpellScript, ISpellBeforeHit
 				return;
 
 			var   attackPower = caster.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) + 28.7f;
-			float damage      = GetHitDamage();
+			double damage      = GetHitDamage();
 
 			SetHitDamage(damage + attackPower);
 

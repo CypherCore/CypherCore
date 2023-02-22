@@ -15,7 +15,7 @@ public class spell_monk_touch_of_karma : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
-	private void CalculateAmount(AuraEffect aurEff, ref float amount, ref bool UnnamedParameter)
+	private void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool UnnamedParameter)
 	{
 		var caster = GetCaster();
 
@@ -32,7 +32,7 @@ public class spell_monk_touch_of_karma : AuraScript, IHasAuraEffects
 		}
 	}
 
-	private void OnAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref float UnnamedParameter)
+	private void OnAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref double UnnamedParameter)
 	{
 		var caster = GetCaster();
 

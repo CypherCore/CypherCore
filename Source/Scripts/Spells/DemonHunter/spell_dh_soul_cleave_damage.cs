@@ -23,8 +23,8 @@ public class spell_dh_soul_cleave_damage : SpellScript, IHasSpellEffects, ISpell
 		if (caster == null)
 			return;
 
-		float dmg = GetHitDamage() * 2;
-		dmg *= caster.VariableStorage.GetValue<float>("lastSoulCleaveMod", 0);
+		double dmg = GetHitDamage() * 2;
+		dmg *= caster.VariableStorage.GetValue<double>("lastSoulCleaveMod", 0);
 		SetHitDamage(dmg);
 	}
 
@@ -36,7 +36,7 @@ public class spell_dh_soul_cleave_damage : SpellScript, IHasSpellEffects, ISpell
 			return;
 
 		var dmg = GetHitDamage() * 2;
-		dmg = (int)((float)dmg * (((float)m_ExtraSpellCost + 300.0f) / 600.0f));
+		dmg = (int)((double)dmg * (((double)m_ExtraSpellCost + 300.0f) / 600.0f));
 		SetHitDamage(dmg);
 
 		caster.SetPower(PowerType.Pain, caster.GetPower(PowerType.Pain) - m_ExtraSpellCost);

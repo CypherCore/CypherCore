@@ -13,6 +13,6 @@ namespace Game.Scripting.Interfaces.ISpell
         /// </summary>
         /// <param name="multiplier"></param>
         /// <returns></returns>
-        public float CalcMultiplier(float multiplier);
+        public double CalcMultiplier(double multiplier);
     }
 }

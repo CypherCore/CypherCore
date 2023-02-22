@@ -1852,13 +1852,13 @@ namespace Game.Entities
 
             return null;
         }
-        public float CalculateSpellDamage(Unit target, SpellEffectInfo spellEffectInfo, float? basePoints = null, uint castItemId = 0, int itemLevel = -1)
+        public double CalculateSpellDamage(Unit target, SpellEffectInfo spellEffectInfo, double? basePoints = null, uint castItemId = 0, int itemLevel = -1)
         {
             return CalculateSpellDamage(out _, target, spellEffectInfo, basePoints, castItemId, itemLevel);
         }
 
         // function uses real base points (typically value - 1)
-        public float CalculateSpellDamage(out float variance, Unit target, SpellEffectInfo spellEffectInfo, float? basePoints = null, uint castItemId = 0, int itemLevel = -1)
+        public double CalculateSpellDamage(out double variance, Unit target, SpellEffectInfo spellEffectInfo, double? basePoints = null, uint castItemId = 0, int itemLevel = -1)
         {
             variance = 0.0f;
 
@@ -1893,7 +1893,7 @@ namespace Game.Entities
             return spellInfo.GetMinRange(!IsHostileTo(target));
         }
 
-        public float ApplyEffectModifiers(SpellInfo spellInfo, int effIndex, float value)
+        public double ApplyEffectModifiers(SpellInfo spellInfo, int effIndex, double value)
         {
             Player modOwner = GetSpellModOwner();
             if (modOwner != null)
@@ -2057,7 +2057,7 @@ namespace Game.Entities
                 duration = (int)(duration * unitCaster.m_modAttackSpeedPct[(int)WeaponAttackType.RangedAttack]);
         }
 
-        public virtual float MeleeSpellMissChance(Unit victim, WeaponAttackType attType, SpellInfo spellInfo)
+        public virtual double MeleeSpellMissChance(Unit victim, WeaponAttackType attType, SpellInfo spellInfo)
         {
             return 0.0f;
         }
@@ -2076,7 +2076,7 @@ namespace Game.Entities
             if (spellInfo.HasAttribute(SpellAttr3.NoAvoidance))
                 return SpellMissInfo.None;
 
-            float missChance;
+            double missChance;
             if (spellInfo.HasAttribute(SpellAttr7.NoAttackMiss))
             {
                 missChance = 0.0f;
@@ -2093,7 +2093,7 @@ namespace Game.Entities
                 int levelBasedHitDiff = leveldif;
 
                 // Base hit chance from attacker and victim levels
-                float modHitChance = 100;
+                double modHitChance = 100;
                 if (levelBasedHitDiff >= 0)
                 {
                     if (!victim.IsPlayer())
@@ -2124,7 +2124,7 @@ namespace Game.Entities
                     modHitChance += victim.GetTotalAuraModifierByMiscMask(AuraType.ModAttackerSpellHitChance, (int)schoolMask);
                 }
 
-                float HitChance = modHitChance;
+                var HitChance = modHitChance;
                 // Increase hit chance from attacker SPELL_AURA_MOD_SPELL_HIT_CHANCE and attacker ratings
                 Unit unit = ToUnit();
                 if (unit != null)
@@ -2135,7 +2135,7 @@ namespace Game.Entities
                 missChance = 100.0f - HitChance;
             }
 
-            float tmp = missChance * 100.0f;
+            var tmp = missChance * 100.0f;
 
             int rand = RandomHelper.IRand(0, 9999);
             if (tmp > 0 && rand < tmp)
@@ -2494,14 +2494,14 @@ namespace Game.Entities
             return CastSpell(target, spellId, args);
         }
 
-        public SpellCastResult CastSpell(WorldObject target, uint spellId, float bp0Val, bool triggered = false)
+        public SpellCastResult CastSpell(WorldObject target, uint spellId, double bp0Val, bool triggered = false)
         {
             CastSpellExtraArgs args = new(triggered);
             args.SpellValueOverrides[SpellValueMod.BasePoint0] = bp0Val;
             return CastSpell(target, spellId, args);
         }
 
-        public SpellCastResult CastSpell(WorldObject target, uint spellId, SpellValueMod spellValueMod, float bp0Val, bool triggered = false)
+        public SpellCastResult CastSpell(WorldObject target, uint spellId, SpellValueMod spellValueMod, double bp0Val, bool triggered = false)
         {
             CastSpellExtraArgs args = new(triggered);
             args.SpellValueOverrides[spellValueMod] = bp0Val;
@@ -2556,7 +2556,7 @@ namespace Game.Entities
 
             Spell spell = new(this, info, args.TriggerFlags, args.OriginalCaster, args.OriginalCastId);
             foreach (var pair in args.SpellValueOverrides)
-                spell.SetSpellValue(pair.Key, pair.Value);
+                spell.SetSpellValue(pair.Key, (float)pair.Value);
 
             spell.m_CastItem = args.CastItem;
             if (args.OriginalCastItemLevel.HasValue)

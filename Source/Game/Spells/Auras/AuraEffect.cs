@@ -21,7 +21,7 @@ namespace Game.Spells
 {
     public class AuraEffect
     {
-        public AuraEffect(Aura baseAura, SpellEffectInfo spellEfffectInfo, float? baseAmount, Unit caster)
+        public AuraEffect(Aura baseAura, SpellEffectInfo spellEfffectInfo, double? baseAmount, Unit caster)
         {
             auraBase = baseAura;
             m_spellInfo = baseAura.GetSpellInfo();
@@ -58,10 +58,10 @@ namespace Game.Spells
             }
         }
 
-        public float CalculateAmount(Unit caster)
+        public double CalculateAmount(Unit caster)
         {
             // default amount calculation
-            float amount = 0;
+            double amount = 0;
 
             if (!m_spellInfo.HasAttribute(SpellAttr8.MasteryAffectPoints) || MathFunctions.fuzzyEq(GetSpellEffectInfo().BonusCoefficient, 0.0f))
                 amount = GetSpellEffectInfo().CalcValue(caster, m_baseAmount, GetBase().GetOwner().ToUnit(), GetBase().GetCastItemId(), GetBase().GetCastItemLevel());
@@ -109,7 +109,7 @@ namespace Game.Spells
             if (GetSpellInfo().HasAttribute(SpellAttr10.RollingPeriodic))
             {
                 var periodicAuras = GetBase().GetUnitOwner().GetAuraEffectsByType(GetAuraType());
-                amount = periodicAuras.Aggregate(0f, (val, aurEff) =>
+                amount = periodicAuras.Aggregate(0d, (val, aurEff) =>
                 {
                     if (aurEff.GetCasterGUID() == GetCasterGUID() && aurEff.GetId() == GetId() && aurEff.GetEffIndex() == GetEffIndex() && aurEff.GetTotalTicks() > 0)
                         val += aurEff.GetAmount() * aurEff.GetRemainingTicks() / aurEff.GetTotalTicks();
@@ -288,7 +288,7 @@ namespace Game.Spells
             }
             GetBase().CallScriptEffectCalcSpellModHandlers(this, ref m_spellmod);
         }
-        public void ChangeAmount(float newAmount, bool mark = true, bool onStackOrReapply = false, AuraEffect triggeredBy = null)
+        public void ChangeAmount(double newAmount, bool mark = true, bool onStackOrReapply = false, AuraEffect triggeredBy = null)
         {
             // Reapply if amount change
             AuraEffectHandleModes handleMask = 0;
@@ -469,7 +469,7 @@ namespace Game.Spells
             }
         }
 
-        public float GetCritChanceFor(Unit caster, Unit target)
+        public double GetCritChanceFor(Unit caster, Unit target)
         {
             return target.SpellCritChanceTaken(caster, null, this, GetSpellInfo().GetSchoolMask(), CalcPeriodicCritChance(caster), GetSpellInfo().GetAttackType());
         }
@@ -834,23 +834,24 @@ namespace Game.Spells
         public SpellInfo GetSpellInfo() { return m_spellInfo; }
         public uint GetId() { return m_spellInfo.Id; }
         public int GetEffIndex() { return _effectInfo.EffectIndex; }
-        public float GetBaseAmount() { return m_baseAmount; }
+        public double GetBaseAmount() { return m_baseAmount; }
         public int GetPeriod() { return _period; }
 
         public int GetMiscValueB() { return _effectInfo.MiscValueB; }
         public int GetMiscValue() { return _effectInfo.MiscValue; }
         public AuraType GetAuraType() { return _effectInfo.ApplyAuraName; }
-        public float GetAmount() { return _amount; }
+        public double GetAmount() { return _amount; }
+        public float AmountAsFloat { get { return (float)_amount; } }
         public int AmountAsInt { get { return (int)_amount; } }
         public uint AmountAsUInt { get { return (uint)_amount; } }
         public ulong AmountAsULong { get { return (ulong)_amount; } }
         public long AmountAsLong { get { return (long)_amount; } }
         public bool HasAmount() { return _amount != 0; }
-        public void SetAmount(float amount) { _amount = amount; m_canBeRecalculated = false; }
-        public void SetAmount(long amount) { SetAmount((float)amount); }
-        public void SetAmount(int amount) { SetAmount((float)amount); }
-        public void SetAmount(uint amount) { SetAmount((float)amount); }
-        public float? GetEstimatedAmount() { return _estimatedAmount; }
+        public void SetAmount(double amount) { _amount = amount; m_canBeRecalculated = false; }
+        public void SetAmount(long amount) { SetAmount((double)amount); }
+        public void SetAmount(int amount) { SetAmount((double)amount); }
+        public void SetAmount(uint amount) { SetAmount((double)amount); }
+        public double? GetEstimatedAmount() { return _estimatedAmount; }
 
         public int GetPeriodicTimer() { return _periodicTimer; }
         public void SetPeriodicTimer(int periodicTimer) { _periodicTimer = periodicTimer; }
@@ -877,12 +878,12 @@ namespace Game.Spells
         public uint GetTickNumber() { return _ticksDone; }
         public uint GetRemainingTicks() { return GetTotalTicks() - _ticksDone; }
 
-        public float GetRemainingAmount(int maxDurationIfPermanent = 0)
+        public double GetRemainingAmount(int maxDurationIfPermanent = 0)
         {
-            return GetRemainingAmount((float)maxDurationIfPermanent);   
+            return GetRemainingAmount((double)maxDurationIfPermanent);   
         }
 
-        public float GetRemainingAmount(float maxDurationIfPermanent = 0)
+        public double GetRemainingAmount(double maxDurationIfPermanent = 0)
         {
             var ticks = GetTotalTicks();
             if (!GetBase().IsPermanent())
@@ -918,9 +919,9 @@ namespace Game.Spells
         SpellEffectInfo _effectInfo;
         SpellModifier m_spellmod;
 
-        public float m_baseAmount;
-        float _amount;
-        float? _estimatedAmount;   // for periodic damage and healing auras this will include damage done bonuses
+        public double m_baseAmount;
+        double _amount;
+        double? _estimatedAmount;   // for periodic damage and healing auras this will include damage done bonuses
 
         // periodic stuff
         int _periodicTimer;
@@ -2062,7 +2063,7 @@ namespace Game.Spells
                 return;
 
             SkillType prot = (SkillType)GetMiscValue();
-            float points = GetAmount();
+            double points = GetAmount();
 
             if (prot == SkillType.Defense)
                 return;
@@ -2992,7 +2993,7 @@ namespace Game.Spells
                         target.ApplyStatPctModifier(UnitMods.Armor, UnitModifierPctType.Base, GetAmount());
                     else
                     {
-                        float amount = target.GetTotalAuraMultiplierByMiscMask(AuraType.ModBaseResistancePct, (uint)SpellSchoolMask.Normal);
+                        double amount = target.GetTotalAuraMultiplierByMiscMask(AuraType.ModBaseResistancePct, (uint)SpellSchoolMask.Normal);
                         target.SetStatPctModifier(UnitMods.Armor, UnitModifierPctType.Base, amount);
                     }
                 }
@@ -3007,7 +3008,7 @@ namespace Game.Spells
                             target.ApplyStatPctModifier(UnitMods.ResistanceStart + x, UnitModifierPctType.Base, GetAmount());
                         else
                         {
-                            float amount = target.GetTotalAuraMultiplierByMiscMask(AuraType.ModBaseResistancePct, 1u << x);
+                            double amount = target.GetTotalAuraMultiplierByMiscMask(AuraType.ModBaseResistancePct, 1u << x);
                             target.SetStatPctModifier(UnitMods.ResistanceStart + x, UnitModifierPctType.Base, amount);
                         }
                     }
@@ -3027,7 +3028,7 @@ namespace Game.Spells
             {
                 if (Convert.ToBoolean(GetMiscValue() & (1 << i)))
                 {
-                    float amount = target.GetTotalAuraMultiplierByMiscMask(AuraType.ModResistancePct, 1u << i);
+                    double amount = target.GetTotalAuraMultiplierByMiscMask(AuraType.ModResistancePct, 1u << i);
                     if (target.GetPctModifierValue(UnitMods.ResistanceStart + i, UnitModifierPctType.Total) == amount)
                         continue;
 
@@ -3107,7 +3108,7 @@ namespace Game.Spells
                 {
                     if (spellGroupVal != 0)
                     {
-                        target.HandleStatFlatModifier((UnitMods.StatStart + (int)i), UnitModifierFlatType.Total, (float)spellGroupVal, !apply);
+                        target.HandleStatFlatModifier((UnitMods.StatStart + (int)i), UnitModifierFlatType.Total, (double)spellGroupVal, !apply);
                         if (target.IsTypeId(TypeId.Player) || target.IsPet())
                             target.UpdateStatBuffMod(i);
                     }
@@ -3145,7 +3146,7 @@ namespace Game.Spells
                         target.ApplyStatPctModifier(UnitMods.StatStart + i, UnitModifierPctType.Base, GetAmount());
                     else
                     {
-                        float amount = target.GetTotalAuraMultiplier(AuraType.ModPercentStat, aurEff =>
+                        double amount = target.GetTotalAuraMultiplier(AuraType.ModPercentStat, aurEff =>
                         {
                             if (aurEff.GetMiscValue() == i || aurEff.GetMiscValue() == -1)
                                 return true;
@@ -3224,7 +3225,7 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             // save current health state
-            float healthPct = target.GetHealthPct();
+            double healthPct = target.GetHealthPct();
             bool zeroHealth = !target.IsAlive();
 
             // players in corpse state may mean two different states:
@@ -3237,7 +3238,7 @@ namespace Game.Spells
             {
                 if (Convert.ToBoolean(GetMiscValueB() & 1 << i) || GetMiscValueB() == 0) // 0 is also used for all stats
                 {
-                    float amount = target.GetTotalAuraMultiplier(AuraType.ModTotalStatPercentage, aurEff =>
+                    double amount = target.GetTotalAuraMultiplier(AuraType.ModTotalStatPercentage, aurEff =>
                     {
                         if ((aurEff.GetMiscValueB() & 1 << i) != 0 || aurEff.GetMiscValueB() == 0)
                             return true;
@@ -3345,7 +3346,7 @@ namespace Game.Spells
             if (!target)
                 return;
 
-            target.ApplyModOverrideSpellPowerByAPPercent(GetAmount(), apply);
+            target.ApplyModOverrideSpellPowerByAPPercent(AmountAsFloat, apply);
             target.UpdateSpellDamageAndHealingBonus();
         }
 
@@ -3359,7 +3360,7 @@ namespace Game.Spells
             if (!target)
                 return;
 
-            target.ApplyModOverrideAPBySpellPowerPercent(GetAmount(), apply);
+            target.ApplyModOverrideAPBySpellPowerPercent(AmountAsFloat, apply);
             target.UpdateAttackPowerAndDamage();
             target.UpdateAttackPowerAndDamage(true);
         }
@@ -3373,7 +3374,7 @@ namespace Game.Spells
             Player target = aurApp.GetTarget().ToPlayer();
             if (target)
             {
-                target.SetVersatilityBonus(target.GetTotalAuraModifier(AuraType.ModVersatility));
+                target.SetVersatilityBonus((float)target.GetTotalAuraModifier(AuraType.ModVersatility));
                 target.UpdateHealingDonePercentMod();
                 target.UpdateVersatilityDamageDone();
             }
@@ -3462,7 +3463,7 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
 
-            float percent = target.GetHealthPct();
+            double percent = target.GetHealthPct();
 
             target.HandleStatFlatModifier(UnitMods.Health, UnitModifierFlatType.Total, GetAmount(), apply);
 
@@ -3507,7 +3508,7 @@ namespace Game.Spells
                 target.ApplyStatPctModifier(unitMod, UnitModifierPctType.Total, GetAmount());
             else
             {
-                float amount = target.GetTotalAuraMultiplier(AuraType.ModIncreaseEnergyPercent, aurEff =>
+                double amount = target.GetTotalAuraMultiplier(AuraType.ModIncreaseEnergyPercent, aurEff =>
                     {
                         if (aurEff.GetMiscValue() == (int)powerType)
                             return true;
@@ -3538,12 +3539,12 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             // Unit will keep hp% after MaxHealth being modified if unit is alive.
-            float percent = target.GetHealthPct();
+            double percent = target.GetHealthPct();
             if (apply)
                 target.ApplyStatPctModifier(UnitMods.Health, UnitModifierPctType.Total, GetAmount());
             else
             {
-                float amount = target.GetTotalAuraMultiplier(AuraType.ModIncreaseHealthPercent) * target.GetTotalAuraMultiplier(AuraType.ModIncreaseHealthPercent2);
+                double amount = target.GetTotalAuraMultiplier(AuraType.ModIncreaseHealthPercent) * target.GetTotalAuraMultiplier(AuraType.ModIncreaseHealthPercent2);
                 target.SetStatPctModifier(UnitMods.Health, UnitModifierPctType.Total, amount);
             }
 
@@ -3566,7 +3567,7 @@ namespace Game.Spells
                 target.ApplyStatPctModifier(UnitMods.Health, UnitModifierPctType.Base, GetAmount());
             else
             {
-                float amount = target.GetTotalAuraMultiplier(AuraType.ModBaseHealthPct);
+                double amount = target.GetTotalAuraMultiplier(AuraType.ModBaseHealthPct);
                 target.SetStatPctModifier(UnitMods.Health, UnitModifierPctType.Base, amount);
             }
         }
@@ -3583,7 +3584,7 @@ namespace Game.Spells
                 target.ApplyStatPctModifier(UnitMods.Mana, UnitModifierPctType.Base, GetAmount());
             else
             {
-                float amount = target.GetTotalAuraMultiplier(AuraType.ModBaseManaPct);
+                double amount = target.GetTotalAuraMultiplier(AuraType.ModBaseManaPct);
                 target.SetStatPctModifier(UnitMods.Mana, UnitModifierPctType.Base, amount);
             }
         }
@@ -3594,7 +3595,7 @@ namespace Game.Spells
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
 
-            aurApp.GetTarget().ApplyModManaCostMultiplier(GetAmount() / 100.0f, apply);
+            aurApp.GetTarget().ApplyModManaCostMultiplier(AmountAsFloat / 100.0f, apply);
         }
 
         [AuraEffectHandler(AuraType.ModPowerDisplay)]
@@ -3657,7 +3658,7 @@ namespace Game.Spells
                 target.ApplyStatPctModifier(unitMod, UnitModifierPctType.Total, GetAmount());
             else
             {
-                float amount = target.GetTotalAuraMultiplier(AuraType.ModMaxPowerPct, aurEff =>
+                double amount = target.GetTotalAuraMultiplier(AuraType.ModMaxPowerPct, aurEff =>
                 {
                     if (aurEff.GetMiscValue() == (int)powerType)
                         return true;
@@ -4042,7 +4043,7 @@ namespace Game.Spells
                 target.ApplyStatPctModifier(UnitMods.AttackPower, UnitModifierPctType.Total, GetAmount());
             else
             {
-                float amount = target.GetTotalAuraMultiplier(AuraType.ModAttackPowerPct);
+                double amount = target.GetTotalAuraMultiplier(AuraType.ModAttackPowerPct);
                 target.SetStatPctModifier(UnitMods.AttackPower, UnitModifierPctType.Total, amount);
             }
         }
@@ -4063,7 +4064,7 @@ namespace Game.Spells
                 target.ApplyStatPctModifier(UnitMods.AttackPowerRanged, UnitModifierPctType.Total, GetAmount());
             else
             {
-                float amount = target.GetTotalAuraMultiplier(AuraType.ModRangedAttackPowerPct);
+                double amount = target.GetTotalAuraMultiplier(AuraType.ModRangedAttackPowerPct);
                 target.SetStatPctModifier(UnitMods.AttackPowerRanged, UnitModifierPctType.Total, amount);
             }
         }
@@ -4124,8 +4125,8 @@ namespace Game.Spells
                     if (Convert.ToBoolean(GetMiscValue() & (1 << (int)i)))
                     {
                         // only aura type modifying PLAYER_FIELD_MOD_DAMAGE_DONE_PCT
-                        float amount = thisPlayer.GetTotalAuraMultiplierByMiscMask(AuraType.ModDamagePercentDone, 1u << (int)i);
-                        thisPlayer.SetModDamageDonePercent(i, amount);
+                        var amount = thisPlayer.GetTotalAuraMultiplierByMiscMask(AuraType.ModDamagePercentDone, 1u << (int)i);
+                        thisPlayer.SetModDamageDonePercent(i, (float)amount);
                     }
                 }
             }
@@ -4167,7 +4168,7 @@ namespace Game.Spells
                 target.ApplyBaseModPctValue(BaseModGroup.ShieldBlockValue, GetAmount());
             else
             {
-                float amount = target.GetTotalAuraMultiplier(AuraType.ModShieldBlockvaluePct);
+                double amount = target.GetTotalAuraMultiplier(AuraType.ModShieldBlockvaluePct);
                 target.SetBaseModPctValue(BaseModGroup.ShieldBlockValue, amount);
             }
         }
@@ -4758,7 +4759,7 @@ namespace Game.Spells
 
             var effectAmount = GetAmount();
             uint triggerSpell = GetSpellEffectInfo().TriggerSpell;
-            float powerAmountPct = MathFunctions.GetPctOf(target.GetPower((PowerType)GetMiscValue()), target.GetMaxPower((PowerType)GetMiscValue()));
+            double powerAmountPct = MathFunctions.GetPctOf(target.GetPower((PowerType)GetMiscValue()), target.GetMaxPower((PowerType)GetMiscValue()));
 
             switch ((AuraTriggerOnPowerChangeDirection)GetMiscValueB())
             {
@@ -4787,7 +4788,7 @@ namespace Game.Spells
 
             var effectAmount = GetAmount();
             uint triggerSpell = GetSpellEffectInfo().TriggerSpell;
-            float powerAmount = target.GetPower((PowerType)GetMiscValue());
+            double powerAmount = target.GetPower((PowerType)GetMiscValue());
 
             switch ((AuraTriggerOnPowerChangeDirection)GetMiscValueB())
             {
@@ -5073,7 +5074,7 @@ namespace Game.Spells
                             case 72854: // Unbound Plague
                             case 72855: // Unbound Plague
                             case 72856: // Unbound Plague
-                                damage *= (float)Math.Pow(1.25f, _ticksDone);
+                                damage *= (double)Math.Pow(1.25f, _ticksDone);
                                 break;
                             default:
                                 break;
@@ -5096,7 +5097,7 @@ namespace Game.Spells
                 }
                 case AuraType.PeriodicDamagePercent:
                     // ceil obtained value, it may happen that 10 ticks for 10% damage may not kill owner
-                    damage = (float)Math.Ceiling(MathFunctions.CalculatePct((float)target.GetMaxHealth(), damage));
+                    damage = (double)Math.Ceiling(MathFunctions.CalculatePct((double)target.GetMaxHealth(), damage));
                     damage = target.SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DamageEffectType.DOT);
                     break;
                 default:
@@ -5110,7 +5111,7 @@ namespace Game.Spells
             // Calculate armor mitigation
             if (Unit.IsDamageReducedByArmor(GetSpellInfo().GetSchoolMask(), GetSpellInfo()))
             {
-                float damageReducedArmor = Unit.CalcArmorReducedDamage(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetAttackType(), GetBase().GetCasterLevel());
+                double damageReducedArmor = Unit.CalcArmorReducedDamage(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetAttackType(), GetBase().GetCasterLevel());
                 cleanDamage.mitigated_damage += damage - damageReducedArmor;
                 damage = damageReducedArmor;
             }
@@ -5130,8 +5131,8 @@ namespace Game.Spells
             Unit.CalcAbsorbResist(damageInfo);
             damage = damageInfo.GetDamage();
 
-            float absorb = damageInfo.GetAbsorb();
-            float resist = damageInfo.GetResist();
+            double absorb = damageInfo.GetAbsorb();
+            double resist = damageInfo.GetResist();
             Unit.DealDamageMods(caster, target, ref damage, ref absorb);
 
             // Set trigger flag
@@ -5178,7 +5179,7 @@ namespace Game.Spells
             uint stackAmountForBonuses = !GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack) ? GetBase().GetStackAmount() : 1u;
 
             // ignore negative values (can be result apply spellmods to aura damage
-            float damage = Math.Max(GetAmount(), 0);
+            double damage = Math.Max(GetAmount(), 0);
 
             if (caster)
                 damage = caster.SpellDamageBonusDone(target, GetSpellInfo(), damage, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses);
@@ -5192,7 +5193,7 @@ namespace Game.Spells
             // Calculate armor mitigation
             if (Unit.IsDamageReducedByArmor(GetSpellInfo().GetSchoolMask(), GetSpellInfo()))
             {
-                float damageReducedArmor = Unit.CalcArmorReducedDamage(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetAttackType(), GetBase().GetCasterLevel());
+                double damageReducedArmor = Unit.CalcArmorReducedDamage(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetAttackType(), GetBase().GetCasterLevel());
                 cleanDamage.mitigated_damage += damage - damageReducedArmor;
                 damage = damageReducedArmor;
             }
@@ -5203,7 +5204,7 @@ namespace Game.Spells
                     damage = target.CalculateAOEAvoidance(damage, (uint)m_spellInfo.SchoolMask, GetBase().GetCastItemGUID());
             }
 
-            float dmg = damage;
+            double dmg = damage;
             if (!GetSpellInfo().HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers) && caster != null && caster.CanApplyResilience())
                 Unit.ApplyResilience(target, ref dmg);
 
@@ -5212,8 +5213,8 @@ namespace Game.Spells
             DamageInfo damageInfo = new(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetSchoolMask(), DamageEffectType.DOT, GetSpellInfo().GetAttackType());
             Unit.CalcAbsorbResist(damageInfo);
 
-            float absorb = damageInfo.GetAbsorb();
-            float resist = damageInfo.GetResist();
+            double absorb = damageInfo.GetAbsorb();
+            double resist = damageInfo.GetResist();
 
             // SendSpellNonMeleeDamageLog expects non-absorbed/non-resisted damage
             SpellNonMeleeDamage log = new(caster, target, GetSpellInfo(), GetBase().GetSpellVisual(), GetSpellInfo().GetSchoolMask(), GetBase().GetCastId());
@@ -5236,16 +5237,16 @@ namespace Game.Spells
                 procVictim.Or(ProcFlags.TakeAnyDamage);
             }
 
-            float new_damage = Unit.DealDamage(caster, target, damage, cleanDamage, DamageEffectType.DOT, GetSpellInfo().GetSchoolMask(), GetSpellInfo(), false);
+            double new_damage = Unit.DealDamage(caster, target, damage, cleanDamage, DamageEffectType.DOT, GetSpellInfo().GetSchoolMask(), GetSpellInfo(), false);
             Unit.ProcSkillsAndAuras(caster, target, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.Hit, hitMask, null, damageInfo, null);
 
             // process caster heal from now on (must be in world)
             if (!caster || !caster.IsAlive())
                 return;
 
-            float gainMultiplier = GetSpellEffectInfo().CalcValueMultiplier(caster);
+            double gainMultiplier = GetSpellEffectInfo().CalcValueMultiplier(caster);
 
-            float heal = caster.SpellHealingBonusDone(caster, GetSpellInfo(), (new_damage * gainMultiplier), DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses);
+            double heal = caster.SpellHealingBonusDone(caster, GetSpellInfo(), (new_damage * gainMultiplier), DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses);
             heal = caster.SpellHealingBonusTaken(caster, GetSpellInfo(), heal, DamageEffectType.DOT);
 
             HealInfo healInfo = new(caster, caster, heal, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
@@ -5268,7 +5269,7 @@ namespace Game.Spells
                 return;
             }
 
-            float damage = Math.Max(GetAmount(), 0);
+            double damage = Math.Max(GetAmount(), 0);
             // do not kill health donator
             if (caster.GetHealth() < damage)
                 damage = caster.GetHealth() - 1;
@@ -5278,7 +5279,7 @@ namespace Game.Spells
             caster.ModifyHealth(-damage);
             Log.outDebug(LogFilter.Spells, "PeriodicTick: donator {0} target {1} damage {2}.", caster.GetEntry(), target.GetEntry(), damage);
 
-            float gainMultiplier = GetSpellEffectInfo().CalcValueMultiplier(caster);
+            double gainMultiplier = GetSpellEffectInfo().CalcValueMultiplier(caster);
 
             damage = damage * gainMultiplier;
 
@@ -5321,7 +5322,7 @@ namespace Game.Spells
             Log.outDebug(LogFilter.Spells, "PeriodicTick: {0} (TypeId: {1}) heal of {2} (TypeId: {3}) for {4} health inflicted by {5}",
                 GetCasterGUID().ToString(), GetCaster().GetTypeId(), target.GetGUID().ToString(), target.GetTypeId(), damage, GetId());
 
-            float heal = damage;
+            double heal = damage;
 
             HealInfo healInfo = new(caster, target, heal, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
             Unit.CalcHealAbsorb(healInfo);
@@ -5363,14 +5364,14 @@ namespace Game.Spells
                 return;
 
             // ignore negative values (can be result apply spellmods to aura damage
-            float drainAmount = Math.Max(GetAmount(), 0);
+            double drainAmount = Math.Max(GetAmount(), 0);
 
-            float drainedAmount = -target.ModifyPower(powerType, -drainAmount);
-            float gainMultiplier = GetSpellEffectInfo().CalcValueMultiplier(caster);
+            double drainedAmount = -target.ModifyPower(powerType, -drainAmount);
+            double gainMultiplier = GetSpellEffectInfo().CalcValueMultiplier(caster);
 
             SpellPeriodicAuraLogInfo pInfo = new(this, drainedAmount, drainAmount, 0, 0, 0, gainMultiplier, false);
 
-            float gainAmount = drainedAmount * gainMultiplier;
+            double gainAmount = drainedAmount * gainMultiplier;
             int gainedAmount = 0;
             if (gainAmount != 0)
             {
@@ -5383,7 +5384,7 @@ namespace Game.Spells
             // Drain Mana
             if (caster.GetGuardianPet() != null && m_spellInfo.SpellFamilyName == SpellFamilyNames.Warlock && m_spellInfo.SpellFamilyFlags[0].HasAnyFlag<uint>(0x00000010))
             {
-                float manaFeedVal = 0;
+                double manaFeedVal = 0;
                 AuraEffect aurEff = GetBase().GetEffect(1);
                 if (aurEff != null)
                     manaFeedVal = aurEff.GetAmount();
@@ -5423,7 +5424,7 @@ namespace Game.Spells
                 return;
 
             // ignore negative values (can be result apply spellmods to aura damage
-            float amount = Math.Max(GetAmount(), 0) * target.GetMaxPower(powerType) / 100;
+            double amount = Math.Max(GetAmount(), 0) * target.GetMaxPower(powerType) / 100;
 
             SpellPeriodicAuraLogInfo pInfo = new(this, amount, amount, 0, 0, 0, 0.0f, false);
 
@@ -5452,7 +5453,7 @@ namespace Game.Spells
                 return;
 
             // ignore negative values (can be result apply spellmods to aura damage
-            float amount = Math.Max(GetAmount(), 0);
+            double amount = Math.Max(GetAmount(), 0);
 
             SpellPeriodicAuraLogInfo pInfo = new(this, amount, amount, 0, 0, 0, 0.0f, false);
             int gain = target.ModifyPower(powerType, amount);
@@ -5477,11 +5478,11 @@ namespace Game.Spells
             }
 
             // ignore negative values (can be result apply spellmods to aura damage
-            float damage = Math.Max(GetAmount(), 0);
+            double damage = Math.Max(GetAmount(), 0);
 
-            float gain = -target.ModifyPower(powerType, -damage);
+            double gain = -target.ModifyPower(powerType, -damage);
 
-            float dmgMultiplier = GetSpellEffectInfo().CalcValueMultiplier(caster);
+            double dmgMultiplier = GetSpellEffectInfo().CalcValueMultiplier(caster);
 
             SpellInfo spellProto = GetSpellInfo();
             // maybe has to be sent different to client, but not by SMSG_PERIODICAURALOG
@@ -5519,7 +5520,7 @@ namespace Game.Spells
             return true;
         }
 
-        float CalcPeriodicCritChance(Unit caster)
+        double CalcPeriodicCritChance(Unit caster)
         {
             if (!caster || !CanPeriodicTickCrit())
                 return 0.0f;
@@ -5528,13 +5529,13 @@ namespace Game.Spells
             if (!modOwner)
                 return 0.0f;
 
-            float critChance = modOwner.SpellCritChanceDone(null, this, GetSpellInfo().GetSchoolMask(), GetSpellInfo().GetAttackType());
+            double critChance = modOwner.SpellCritChanceDone(null, this, GetSpellInfo().GetSchoolMask(), GetSpellInfo().GetAttackType());
             return Math.Max(0.0f, critChance);
         }
 
         void HandleBreakableCCAuraProc(AuraApplication aurApp, ProcEventInfo eventInfo)
         {
-            float damageLeft = (GetAmount() - eventInfo.GetDamageInfo().GetDamage());
+            double damageLeft = (GetAmount() - eventInfo.GetDamageInfo().GetDamage());
 
             if (damageLeft <= 0)
                 aurApp.GetTarget().RemoveAura(aurApp);
@@ -5600,7 +5601,7 @@ namespace Game.Spells
             }
 
             SpellNonMeleeDamage damageInfo = new(target, triggerTarget, GetSpellInfo(), GetBase().GetSpellVisual(), GetSpellInfo().SchoolMask, GetBase().GetCastId());
-            float damage = target.SpellDamageBonusDone(triggerTarget, GetSpellInfo(), GetAmount(), DamageEffectType.SpellDirect, GetSpellEffectInfo());
+            double damage = target.SpellDamageBonusDone(triggerTarget, GetSpellInfo(), GetAmount(), DamageEffectType.SpellDirect, GetSpellEffectInfo());
             damage = triggerTarget.SpellDamageBonusTaken(target, GetSpellInfo(), damage, DamageEffectType.SpellDirect);
             target.CalculateSpellDamageTaken(damageInfo, damage, GetSpellInfo());
             Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);

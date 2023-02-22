@@ -60,7 +60,7 @@ public class spell_dru_rejuvenation_AuraScript : AuraScript, IHasAuraEffects
 		public static readonly uint GlyphofRejuvenationEffect = 96206;
 	}
 
-	private void HandleCalculateAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+	private void HandleCalculateAmount(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
 	{
 		var l_Caster = GetCaster();
 

@@ -22,7 +22,7 @@ namespace Scripts.Spells.Warlock
 			if (caster == null)
 				return;
 
-			var soulShardAgonyTick = caster.VariableStorage.GetValue<float>("SoulShardAgonyTick", RandomHelper.FRand(0.0f, 99.0f));
+			var soulShardAgonyTick = caster.VariableStorage.GetValue<double>("SoulShardAgonyTick", RandomHelper.FRand(0.0f, 99.0f));
 			soulShardAgonyTick += 16.0f;
 
 			if (soulShardAgonyTick >= 100.0f)

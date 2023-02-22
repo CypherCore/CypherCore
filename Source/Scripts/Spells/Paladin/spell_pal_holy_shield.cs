@@ -25,7 +25,7 @@ namespace Scripts.Spells.Paladin
             return (eventInfo.GetHitMask() & ProcFlagsHit.Block) != 0;
         }
 
-        private void HandleCalcAmount(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
+        private void HandleCalcAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
         {
             amount = 0;
         }

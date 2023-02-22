@@ -20,7 +20,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
 
         private bool _damaged = false;
 
-        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (_damaged)
             {

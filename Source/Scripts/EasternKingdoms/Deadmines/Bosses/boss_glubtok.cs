@@ -173,7 +173,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
             summon.GetAI().AttackStart(me.GetVictim());
         }
 
-        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (!_phase2 && me.HealthBelowPctDamaged(50, damage) && !me.HasUnitState(UnitState.Casting))
             {

@@ -86,15 +86,15 @@ namespace Game.Entities
 
             return 1.0f / value;
         }
-        public float GetRatingBonusValue(CombatRating cr)
+        public double GetRatingBonusValue(CombatRating cr)
         {
-            float baseResult = ApplyRatingDiminishing(cr, m_activePlayerData.CombatRatings[(int)cr] * GetRatingMultiplier(cr));
+            var baseResult = ApplyRatingDiminishing(cr, m_activePlayerData.CombatRatings[(int)cr] * GetRatingMultiplier(cr));
             if (cr != CombatRating.ResiliencePlayerDamage)
                 return baseResult;
-            return (float)(1.0f - Math.Pow(0.99f, baseResult)) * 100.0f;
+            return (1.0f - Math.Pow(0.99f, baseResult)) * 100.0f;
         }
 
-        void GetDodgeFromAgility(float diminishing, float nondiminishing)
+        void GetDodgeFromAgility(double diminishing, double nondiminishing)
         {
             /*// Table for base dodge values
             float[] dodge_base =
@@ -148,7 +148,7 @@ namespace Game.Entities
             */
         }
 
-        float ApplyRatingDiminishing(CombatRating cr, float bonusValue)
+        double ApplyRatingDiminishing(CombatRating cr, double bonusValue)
         {
             uint diminishingCurveId = 0;
             switch (cr)
@@ -196,7 +196,7 @@ namespace Game.Entities
             }
 
             if (diminishingCurveId != 0)
-                return Global.DB2Mgr.GetCurveValueAt(diminishingCurveId, bonusValue);
+                return Global.DB2Mgr.GetCurveValueAt(diminishingCurveId, (float)bonusValue);
 
             return bonusValue;
         }

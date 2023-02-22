@@ -27,12 +27,12 @@ internal class spell_monk_roll_aura : AuraScript, IHasAuraEffects
 		AuraEffects.Add(new AuraEffectApplyHandler(RestoreRunBackSpeed, 4, AuraType.UseNormalMovementSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
 	}
 
-	private void CalcMovementAmount(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
+	private void CalcMovementAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
 	{
 		amount += 100;
 	}
 
-	private void CalcImmunityAmount(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
+	private void CalcImmunityAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
 	{
 		amount -= 100;
 	}

@@ -175,7 +175,7 @@ namespace Scripts.World.NpcSpecial
             _combatTimer[who.GetGUID()] = TimeSpan.FromSeconds(15);
         }
 
-        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (!attacker)
                 return;

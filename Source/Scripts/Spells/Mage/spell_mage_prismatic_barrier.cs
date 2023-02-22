@@ -19,7 +19,7 @@ internal class spell_mage_prismatic_barrier : AuraScript, IHasAuraEffects
 		AuraEffects.Add(new AuraEffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
 	}
 
-	private void CalculateAmount(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
+	private void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
 	{
 		canBeRecalculated = false;
 		var caster = GetCaster();

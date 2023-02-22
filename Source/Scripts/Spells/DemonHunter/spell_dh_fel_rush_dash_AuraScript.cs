@@ -29,7 +29,7 @@ public class spell_dh_fel_rush_dash_AuraScript : AuraScript, IHasAuraEffects
 			                        TimeSpan.FromMilliseconds(100));
 	}
 
-	private void CalcSpeed(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+	private void CalcSpeed(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
 	{
 		amount = 1250;
 		RefreshDuration();

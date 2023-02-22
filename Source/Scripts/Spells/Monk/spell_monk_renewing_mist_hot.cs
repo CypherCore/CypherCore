@@ -30,7 +30,7 @@ public class spell_monk_renewing_mist_hot : AuraScript, IHasAuraEffects
 			caster.CastSpell(GetTarget(), MonkSpells.RENEWING_MIST_JUMP, true);
 	}
 
-	private void CalcAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+	private void CalcAmount(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
 	{
 		var caster         = GetCaster();
 		var counteractAura = caster.GetAura(MonkSpells.COUNTERACT_MAGIC);

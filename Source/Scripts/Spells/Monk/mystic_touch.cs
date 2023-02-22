@@ -18,7 +18,7 @@ public class mystic_touch : ScriptObjectAutoAdd, IPlayerOnDealDamage
 	{
 	}
 
-	public void OnDamage(Player caster, Unit target, ref float damage, SpellInfo spellProto)
+	public void OnDamage(Player caster, Unit target, ref double damage, SpellInfo spellProto)
 	{
 		var player = caster.ToPlayer();
 

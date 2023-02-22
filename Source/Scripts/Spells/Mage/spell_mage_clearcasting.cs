@@ -22,7 +22,7 @@ public class spell_mage_clearcasting : AuraScript, IAuraCheckProc, IHasAuraEffec
 
 		if (eff0 != 0)
 		{
-			float reqManaToSpent = 0;
+			double reqManaToSpent = 0;
 			var manaUsed       = 0;
 
 			// For each ${$c*100/$s1} mana you spend, you have a 1% chance

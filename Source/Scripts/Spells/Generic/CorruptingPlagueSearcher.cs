@@ -8,11 +8,11 @@ namespace Scripts.Spells.Generic;
 
 internal class CorruptingPlagueSearcher : ICheck<Unit>
 {
-	private readonly float _distance;
+	private readonly double _distance;
 
 	private readonly Unit _unit;
 
-	public CorruptingPlagueSearcher(Unit obj, float distance)
+	public CorruptingPlagueSearcher(Unit obj, double distance)
 	{
 		_unit     = obj;
 		_distance = distance;

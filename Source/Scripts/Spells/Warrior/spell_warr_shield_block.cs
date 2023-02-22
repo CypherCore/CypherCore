@@ -32,7 +32,7 @@ namespace Scripts.Spells.Warrior
 			return Global.SpellMgr.GetSpellInfo(WarriorSpells.SHIELD_BLOCKC_TRIGGERED, Difficulty.None) != null;
 		}
 
-		private void CalculateAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+		private void CalculateAmount(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
 		{
 			var caster = GetCaster();
 

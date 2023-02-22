@@ -229,7 +229,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             }
         }
 
-        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (me.HealthBelowPctDamaged(_apocalypseDriveHealthLimit[_apocalypseDriveCount], damage))
             {
@@ -878,7 +878,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             else if ((lastCannonEntry == CreatureIds.Decimator && annihilator) ||
                      (annihilator && !decimator))
             {
-                byte count = (byte)(caster.GetMap().GetDifficultyID() == Difficulty.MythicRaid ? MiscConst.MaxTargetsSize : Math.Max(MiscConst.MinTargetsSize, Math.Ceiling((float)caster.GetMap().GetPlayersCountExceptGMs() / 5)));
+                byte count = (byte)(caster.GetMap().GetDifficultyID() == Difficulty.MythicRaid ? MiscConst.MaxTargetsSize : Math.Max(MiscConst.MinTargetsSize, Math.Ceiling((double)caster.GetMap().GetPlayersCountExceptGMs() / 5)));
 
                 for (byte i = 0; i < count; i++)
                 {

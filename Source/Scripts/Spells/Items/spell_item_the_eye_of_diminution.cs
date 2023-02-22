@@ -19,7 +19,7 @@ internal class spell_item_the_eye_of_diminution : AuraScript, IHasAuraEffects
 		AuraEffects.Add(new AuraEffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModThreat));
 	}
 
-	private void CalculateAmount(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
+	private void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
 	{
 		var diff = (int)GetUnitOwner().GetLevel() - 60;
 

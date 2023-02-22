@@ -37,7 +37,7 @@ internal class spell_rog_restless_blades : AuraScript, IHasAuraEffects
 
 		if (spentCP.HasValue)
 		{
-			var cdExtra = (int)-((float)(aurEff.GetAmount() * spentCP.Value) * 0.1f);
+			var cdExtra = (int)-((double)(aurEff.GetAmount() * spentCP.Value) * 0.1f);
 
 			var history = GetTarget().GetSpellHistory();
 

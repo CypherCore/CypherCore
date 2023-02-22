@@ -177,7 +177,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.TombOfSeven
                                 });
         }
 
-        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (!_voidwalkers &&
                 !HealthAbovePct(50))

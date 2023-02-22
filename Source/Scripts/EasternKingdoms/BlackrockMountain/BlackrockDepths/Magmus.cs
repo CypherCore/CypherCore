@@ -57,7 +57,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Magmus
                                 });
         }
 
-        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (me.HealthBelowPctDamaged(50, damage) &&
                 phase == Phases.One)

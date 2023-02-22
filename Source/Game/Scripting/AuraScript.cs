@@ -184,7 +184,7 @@ namespace Game.Scripting
             return _aura.GetDuration();
         }
 
-        public void SetDuration(float duration, bool withMods = false)
+        public void SetDuration(double duration, bool withMods = false)
         {
             _aura.SetDuration(duration, withMods);
         }

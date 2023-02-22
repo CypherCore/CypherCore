@@ -173,7 +173,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
             _DespawnAtEvade();
         }
 
-        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             // Checking for lethal Damage first so we trigger the outro phase without triggering phase two in case of oneshot attacks
             if (damage >= me.GetHealth() &&
@@ -387,7 +387,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
         {
         }
 
-        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (damage >= me.GetHealth())
             {

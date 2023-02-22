@@ -237,7 +237,7 @@ namespace Scripts.World.EmeraldDragons
         }
 
         // Summon druid spirits on 75%, 50% and 25% health
-        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (!HealthAbovePct(100 - 25 * _stage))
             {
@@ -285,7 +285,7 @@ namespace Scripts.World.EmeraldDragons
             base.JustEngagedWith(who);
         }
 
-        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (!HealthAbovePct(100 - 25 * _stage))
             {
@@ -379,7 +379,7 @@ namespace Scripts.World.EmeraldDragons
             base.JustEngagedWith(who);
         }
 
-        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (!HealthAbovePct(100 - 25 * _stage))
             {
@@ -441,7 +441,7 @@ namespace Scripts.World.EmeraldDragons
             --_shades;
         }
 
-        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             // At 75, 50 or 25 percent health, we need to activate the shades and go "banished"
             // Note: _stage holds the amount of times they have been summoned

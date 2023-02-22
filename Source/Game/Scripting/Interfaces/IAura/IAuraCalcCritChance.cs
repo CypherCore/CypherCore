@@ -9,12 +9,12 @@ namespace Game.Scripting.Interfaces.IAura
 {
     public interface IAuraCalcCritChance : IAuraEffectHandler
     {
-        void CalcCritChance(AuraEffect aura, Unit victim, ref float critChance);
+        void CalcCritChance(AuraEffect aura, Unit victim, ref double critChance);
     }
 
     public class AuraEffectCalcCritChanceHandler : AuraEffectHandler, IAuraCalcCritChance
     {
-        public delegate void AuraEffectCalcCritChanceFnType(AuraEffect aura, Unit victim, ref float critChance);
+        public delegate void AuraEffectCalcCritChanceFnType(AuraEffect aura, Unit victim, ref double critChance);
 
         private readonly AuraEffectCalcCritChanceFnType _fn;
 
@@ -23,7 +23,7 @@ namespace Game.Scripting.Interfaces.IAura
             _fn = fn;
         }
 
-        public void CalcCritChance(AuraEffect aura, Unit victim, ref float critChance)
+        public void CalcCritChance(AuraEffect aura, Unit victim, ref double critChance)
         {
             _fn(aura, victim, ref critChance);
         }

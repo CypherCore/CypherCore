@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warrior
 	[SpellScript(71)]
 	public class spell_warr_defensive_stance : AuraScript, IAuraOnProc
 	{
-		private float _damageTaken = 0;
+		private double _damageTaken = 0;
 
 		public void OnProc(ProcEventInfo eventInfo)
 		{

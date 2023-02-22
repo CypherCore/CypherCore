@@ -21,7 +21,7 @@ namespace Scripts.Spells.Warlock
 			return GetCaster().IsPlayer();
 		}
 
-		public void CalcCritChance(Unit victim, ref float critChance)
+		public void CalcCritChance(Unit victim, ref double critChance)
 		{
 			critChance = 100.0f;
 		}

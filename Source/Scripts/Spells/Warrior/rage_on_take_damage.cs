@@ -17,7 +17,7 @@ namespace Scripts.Spells.Warrior
 		{
 		}
 
-		public void OnPlayerTakeDamage(Player player, float amount, SpellSchoolMask schoolMask)
+		public void OnPlayerTakeDamage(Player player, double amount, SpellSchoolMask schoolMask)
 		{
 			var rage = player.GetPower(PowerType.Rage);
 			var mod  = 30;

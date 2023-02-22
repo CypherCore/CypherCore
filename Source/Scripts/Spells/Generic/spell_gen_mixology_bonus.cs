@@ -12,7 +12,7 @@ namespace Scripts.Spells.Generic;
 [Script]
 internal class spell_gen_mixology_bonus : AuraScript, IHasAuraEffects
 {
-	private float bonus;
+	private double bonus;
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
 	public override bool Validate(SpellInfo spellInfo)
@@ -36,7 +36,7 @@ internal class spell_gen_mixology_bonus : AuraScript, IHasAuraEffects
 			bonus = value;
 	}
 
-	private void CalculateAmount(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
+	private void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
 	{
 		if (GetCaster().HasAura((uint)RequiredMixologySpells.Mixology) &&
 		    GetCaster().HasSpell(GetEffectInfo(0).TriggerSpell))

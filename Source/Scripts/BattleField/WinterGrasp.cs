@@ -946,9 +946,9 @@ namespace Game.BattleFields
                 hordePlayers != 0)
             {
                 if (alliancePlayers < hordePlayers)
-                    newStack = (int)((((float)hordePlayers / alliancePlayers) - 1) * 4); // positive, should cast on alliance
+                    newStack = (int)((((double)hordePlayers / alliancePlayers) - 1) * 4); // positive, should cast on alliance
                 else if (alliancePlayers > hordePlayers)
-                    newStack = (int)((1 - ((float)alliancePlayers / hordePlayers)) * 4); // negative, should cast on horde
+                    newStack = (int)((1 - ((double)alliancePlayers / hordePlayers)) * 4); // negative, should cast on horde
             }
 
             if (newStack == _tenacityStack)

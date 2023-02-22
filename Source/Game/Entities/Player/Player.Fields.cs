@@ -131,8 +131,8 @@ namespace Game.Entities
 
         //Combat
         int[] baseRatingValue = new int[(int)CombatRating.Max];
-        float[] m_auraBaseFlatMod = new float[(int)BaseModGroup.End];
-        float[] m_auraBasePctMod = new float[(int)BaseModGroup.End];
+        double[] m_auraBaseFlatMod = new double[(int)BaseModGroup.End];
+        double[] m_auraBasePctMod = new double[(int)BaseModGroup.End];
         public DuelInfo duel;
         bool m_canParry;
         bool m_canBlock;
@@ -228,7 +228,7 @@ namespace Game.Entities
         List<LootRoll> m_lootRolls = new();                                     // loot rolls waiting for answer
 
         CUFProfile[] _CUFProfiles = new CUFProfile[PlayerConst.MaxCUFProfiles];
-        float[] m_powerFraction = new float[(int)PowerType.MaxPerClass];
+        double[] m_powerFraction = new double[(int)PowerType.MaxPerClass];
         int[] m_MirrorTimer = new int[3];
 
         TimeTracker m_groupUpdateTimer;

@@ -34,13 +34,13 @@ internal class spell_pri_guardian_spirit : AuraScript, IHasAuraEffects
 		AuraEffects.Add(new AuraEffectAbsorbHandler(Absorb, 1, false, AuraScriptHookType.EffectAbsorb));
 	}
 
-	private void CalculateAmount(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
+	private void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
 	{
 		// Set absorbtion amount to unlimited
 		amount = -1;
 	}
 
-	private void Absorb(AuraEffect aurEff, DamageInfo dmgInfo, ref float absorbAmount)
+	private void Absorb(AuraEffect aurEff, DamageInfo dmgInfo, ref double absorbAmount)
 	{
 		var target = GetTarget();
 

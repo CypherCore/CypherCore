@@ -58,7 +58,7 @@ namespace Scripts.Spells.Shaman
             }
         }
 
-        public float CalcMultiplier(float multiplier)
+        public double CalcMultiplier(double multiplier)
         {
             var player = GetCaster().ToPlayer();
 
@@ -71,19 +71,19 @@ namespace Scripts.Spells.Shaman
             if (spec == TalentSpecialization.ShamanElemental && spellId == ShamanSpells.LavaBurst)
             {
                 var primordialWave = SpellManager.Instance.GetSpellInfo(ShamanSpells.PrimordialWave);
-                float pct = primordialWave.GetEffect(2).BasePoints * 0.01f;
+                double pct = primordialWave.GetEffect(2).BasePoints * 0.01f;
                 multiplier *= 1f + pct;
             }
             else if (spec == TalentSpecialization.ShamanEnhancement && spellId == ShamanSpells.LightningBolt)
             {
                 var primordialWave = SpellManager.Instance.GetSpellInfo(ShamanSpells.PrimordialWave);
-                float pct = primordialWave.GetEffect(3).BasePoints * 0.01f;
+                double pct = primordialWave.GetEffect(3).BasePoints * 0.01f;
                 multiplier *= 1f + pct;
             }
             else if (spec == TalentSpecialization.ShamanRestoration && spellId == ShamanSpells.HealingWave)
             {
                 var primordialWave = SpellManager.Instance.GetSpellInfo(ShamanSpells.PrimordialWave);
-                float pct = primordialWave.GetEffect(1).BasePoints * 0.01f;
+                double pct = primordialWave.GetEffect(1).BasePoints * 0.01f;
                 multiplier *= 1f + pct;
             }
 

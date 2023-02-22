@@ -14,7 +14,7 @@ namespace Scripts.Spells.Generic;
 [Script]
 internal class spell_gen_absorb0_hitlimit1 : AuraScript, IHasAuraEffects
 {
-	private float limit;
+	private double limit;
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
 	public override bool Load()
@@ -30,7 +30,7 @@ internal class spell_gen_absorb0_hitlimit1 : AuraScript, IHasAuraEffects
 		AuraEffects.Add(new AuraEffectAbsorbHandler(Absorb, 0, false, AuraScriptHookType.EffectAbsorb));
 	}
 
-	private void Absorb(AuraEffect aurEff, DamageInfo dmgInfo, ref float absorbAmount)
+	private void Absorb(AuraEffect aurEff, DamageInfo dmgInfo, ref double absorbAmount)
 	{
 		absorbAmount = Math.Min(limit, absorbAmount);
 	}

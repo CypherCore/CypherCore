@@ -15,7 +15,7 @@ public class aura_dru_frenzied_regeneration : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
-	private void CalculateAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+	private void CalculateAmount(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
 	{
 		var frenzied = GetCaster().GetAura(22842);
 

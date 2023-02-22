@@ -14,7 +14,7 @@ public class spell_pri_clarity_of_will : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
-	private void CalculateAmount(AuraEffect aurEff, ref float amount, ref bool UnnamedParameter)
+	private void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool UnnamedParameter)
 	{
 		var caster = aurEff.GetCaster();
 

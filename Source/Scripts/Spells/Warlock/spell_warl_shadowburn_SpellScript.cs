@@ -10,7 +10,7 @@ namespace Scripts.Spells.Warlock
     [SpellScript(WarlockSpells.SHADOWBURN)]
     public class spell_warl_shadowburn_SpellScript : SpellScript, ISpellCalcCritChance, ISpellOnHit, ISpellOnCast
     {
-        public void CalcCritChance(Unit victim, ref float chance)
+        public void CalcCritChance(Unit victim, ref double chance)
         {
             if (victim.TryGetAura(WarlockSpells.SHADOWBURN, out var shadowburn) == true && victim.HealthBelowPct(shadowburn.GetEffect(1).GetBaseAmount() + 5))
 				chance += shadowburn.GetEffect(2).GetBaseAmount();

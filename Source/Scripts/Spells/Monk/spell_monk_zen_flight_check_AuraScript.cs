@@ -19,7 +19,7 @@ public class spell_monk_zen_flight_check_AuraScript : AuraScript, IHasAuraEffect
 		return GetCaster() && GetCaster().GetTypeId() == TypeId.Player;
 	}
 
-	private void CalculateAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+	private void CalculateAmount(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
 	{
 		if (!GetCaster())
 			return;

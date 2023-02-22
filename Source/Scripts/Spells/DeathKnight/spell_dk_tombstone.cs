@@ -15,7 +15,7 @@ public class spell_dk_tombstone : AuraScript, IHasAuraEffects
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
-	private void CalcAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+	private void CalcAmount(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
 	{
 		amount = 0;
 		var caster = GetCaster();

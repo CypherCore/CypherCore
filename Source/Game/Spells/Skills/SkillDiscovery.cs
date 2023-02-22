@@ -38,7 +38,7 @@ namespace Game.Spells
                 uint spellId = result.Read<uint>(0);
                 int reqSkillOrSpell = result.Read<int>(1);
                 uint reqSkillValue = result.Read<uint>(2);
-                float chance = result.Read<float>(3);
+                double chance = result.Read<double>(3);
 
                 if (chance <= 0)                                    // chance
                 {
@@ -132,14 +132,14 @@ namespace Game.Spells
             var bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(spellId);
             uint skillvalue = !bounds.Empty() ? (uint)player.GetSkillValue((SkillType)bounds.FirstOrDefault().SkillLine) : 0;
 
-            float full_chance = 0;
+            double full_chance = 0;
             foreach (var item_iter in tab)
                 if (item_iter.reqSkillValue <= skillvalue)
                     if (!player.HasSpell(item_iter.spellId))
                         full_chance += item_iter.chance;
 
-            float rate = full_chance / 100.0f;
-            float roll = (float)RandomHelper.randChance() * rate;                      // roll now in range 0..full_chance
+            double rate = full_chance / 100.0f;
+            double roll = (double)RandomHelper.randChance() * rate;                      // roll now in range 0..full_chance
 
             foreach (var item_iter in tab)
             {
@@ -230,7 +230,7 @@ namespace Game.Spells
 
     public class SkillDiscoveryEntry
     {
-        public SkillDiscoveryEntry(uint _spellId = 0, uint req_skill_val = 0, float _chance = 0)
+        public SkillDiscoveryEntry(uint _spellId = 0, uint req_skill_val = 0, double _chance = 0)
         {
             spellId = _spellId;
             reqSkillValue = req_skill_val;
@@ -239,6 +239,6 @@ namespace Game.Spells
 
         public uint spellId;                                        // discavered spell
         public uint reqSkillValue;                                  // skill level limitation
-        public float chance;                                         // chance
+        public double chance;                                         // chance
     }
 }

@@ -30,13 +30,13 @@ namespace Scripts.Spells.Warrior
 			return true;
 		}
 
-		private void CalcAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+		private void CalcAmount(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
 		{
 			var caster = GetCaster();
 
 			if (caster != null)
 			{
-				amount = (int)((float)(22.3f * caster.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack)) * ((float)(m_ExtraSpellCost + 200) / 600.0f));
+				amount = (int)((double)(22.3f * caster.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack)) * ((double)(m_ExtraSpellCost + 200) / 600.0f));
 				var m_newRage = caster.GetPower(PowerType.Rage) - m_ExtraSpellCost;
 
 				if (m_newRage < 0)
@@ -48,7 +48,7 @@ namespace Scripts.Spells.Warrior
 			}
 		}
 
-		private void OnAbsorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref float UnnamedParameter2)
+		private void OnAbsorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref double UnnamedParameter2)
 		{
 			var caster = GetCaster();
 

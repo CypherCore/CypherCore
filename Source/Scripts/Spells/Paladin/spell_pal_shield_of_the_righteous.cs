@@ -35,13 +35,13 @@ namespace Scripts.Spells.Paladin
                     previousDuration = aur.GetDuration();
                 }
 
-                float dmg = GetHitDamage();
+                double dmg = GetHitDamage();
                 dmg += dmg / 5;
                 SetHitDamage(dmg); //damage is increased by 20%
 
-                float mastery = player.m_activePlayerData.Mastery;
+                double mastery = player.m_activePlayerData.Mastery;
 
-                float reduction = ((-25 - mastery / 2.0f) * 120.0f) / 100.0f; //damage reduction is increased by 20%
+                double reduction = ((-25 - mastery / 2.0f) * 120.0f) / 100.0f; //damage reduction is increased by 20%
                 player.CastSpell(player, PaladinSpells.SHIELD_OF_THE_RIGHTEOUS_PROC, (int)reduction);
 
                 aur = player.GetAura(PaladinSpells.SHIELD_OF_THE_RIGHTEOUS_PROC);

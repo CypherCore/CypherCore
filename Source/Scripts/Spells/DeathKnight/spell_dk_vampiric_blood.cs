@@ -19,7 +19,7 @@ internal class spell_dk_vampiric_blood : AuraScript, IHasAuraEffects
 		AuraEffects.Add(new AuraEffectCalcAmountHandler(CalculateAmount, 1, AuraType.ModIncreaseHealth2));
 	}
 
-	private void CalculateAmount(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
+	private void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
 	{
 		amount = (int)GetUnitOwner().CountPctFromMaxHealth(amount);
 	}

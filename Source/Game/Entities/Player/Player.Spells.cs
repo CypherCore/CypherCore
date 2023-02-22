@@ -1884,7 +1884,7 @@ namespace Game.Entities
                     return;
             }
 
-            float amount = 0.0f;
+            double amount = 0.0f;
             amount += GetTotalAuraModifier(AuraType.ModWeaponCritPercent, auraEffect => CheckAttackFitToAuraRequirement(attackType, auraEffect));
 
             // these auras don't have item requirement (only Combat Expertise in 3.3.5a)
@@ -2671,7 +2671,7 @@ namespace Game.Entities
                                     if (traitDefinitionEffectPoint.EffectIndex >= spellInfo.GetEffects().Count)
                                         continue;
 
-                                    float basePoints = Global.DB2Mgr.GetCurveValueAt((uint)traitDefinitionEffectPoint.CurveID, rank);
+                                    double basePoints = Global.DB2Mgr.GetCurveValueAt((uint)traitDefinitionEffectPoint.CurveID, rank);
                                     if (traitDefinitionEffectPoint.GetOperationType() == TraitPointsOperationType.Multiply)
                                         basePoints *= spellInfo.GetEffect(traitDefinitionEffectPoint.EffectIndex).CalcBaseValue(this, null, 0, -1);
 
@@ -2886,29 +2886,36 @@ namespace Game.Entities
 
         public void ApplySpellMod(SpellInfo spellInfo, SpellModOp op, ref int basevalue, Spell spell = null)
         {
-            float val = basevalue;
+            double val = basevalue;
             ApplySpellMod(spellInfo, op, ref val, spell);
             basevalue = (int)val;
         }
 
         public void ApplySpellMod(SpellInfo spellInfo, SpellModOp op, ref uint basevalue, Spell spell = null)
         {
-            float val = basevalue;
+            double val = basevalue;
             ApplySpellMod(spellInfo, op, ref val, spell);
             basevalue = (uint)val;
         }
 
         public void ApplySpellMod(SpellInfo spellInfo, SpellModOp op, ref float basevalue, Spell spell = null)
         {
-            float totalmul = 1.0f;
-            float totalflat = 0;
+            double val = basevalue;
+            ApplySpellMod(spellInfo, op, ref val, spell);
+            basevalue = (float)val;
+        }
+
+        public void ApplySpellMod(SpellInfo spellInfo, SpellModOp op, ref double basevalue, Spell spell = null)
+        {
+            double totalmul = 1.0f;
+            double totalflat = 0;
 
             GetSpellModValues(spellInfo, op, spell, basevalue, ref totalflat, ref totalmul);
 
             basevalue = (basevalue + totalflat) * totalmul;
         }
 
-        public void GetSpellModValues<T>(SpellInfo spellInfo, SpellModOp op, Spell spell, T baseValue, ref float flat, ref float pct) where T : IComparable
+        public void GetSpellModValues<T>(SpellInfo spellInfo, SpellModOp op, Spell spell, T baseValue, ref double flat, ref double pct) where T : IComparable
         {
             flat = 0;
             pct = 1.0f;
@@ -2928,7 +2935,7 @@ namespace Game.Entities
                         if (!IsAffectedBySpellmod(spellInfo, mod, spell))
                             continue;
 
-                        if (baseValue.CompareTo(10000) < 0 && mod.value <= -100)
+                        if (baseValue.CompareTo(10000d) < 0 && mod.value <= -100)
                         {
                             modInstantSpell = mod;
                             break;
@@ -2942,7 +2949,7 @@ namespace Game.Entities
                             if (!IsAffectedBySpellmod(spellInfo, mod, spell))
                                 continue;
 
-                            if (baseValue.CompareTo(10000) < 0 && mod.value.ModifierValue <= -1.0f)
+                            if (baseValue.CompareTo(10000d) < 0 && mod.value.ModifierValue <= -1.0f)
                             {
                                 modInstantSpell = mod;
                                 break;
@@ -3006,7 +3013,7 @@ namespace Game.Entities
                 if (!IsAffectedBySpellmod(spellInfo, mod, spell))
                     continue;
 
-                float value = mod.value;
+                var value = mod.value;
                 if (value == 0)
                     continue;
 
@@ -3019,7 +3026,7 @@ namespace Game.Entities
                 if (!IsAffectedBySpellmod(spellInfo, mod, spell))
                     continue;
 
-                float value = mod.value.ModifierValue;
+                var value = mod.value.ModifierValue;
                 if (value == 0)
                     continue;
 
@@ -3036,14 +3043,14 @@ namespace Game.Entities
                 if (baseValue + (dynamic)flat == 0)
                     continue;
 
-                float value = mod.value;
+                var value = mod.value;
                 if (value == 0)
                     continue;
 
                 // special case (skip > 10sec spell casts for instant cast setting)
                 if (op == SpellModOp.ChangeCastTime)
                 {
-                    if (baseValue.CompareTo(10000) > 0 && value <= -100)
+                    if (baseValue.CompareTo(10000d) > 0 && value <= -100)
                         continue;
                 }
 
@@ -3060,14 +3067,14 @@ namespace Game.Entities
                 if (baseValue + (dynamic)flat == 0)
                     continue;
 
-                float value = mod.value.ModifierValue;
+                var value = mod.value.ModifierValue;
                 if (value == 1.0f)
                     continue;
 
                 // special case (skip > 10sec spell casts for instant cast setting)
                 if (op == SpellModOp.ChangeCastTime)
                 {
-                    if (baseValue.CompareTo(10000) > 0 && value <= -1.0f)
+                    if (baseValue.CompareTo(10000d) > 0 && value <= -1.0f)
                         continue;
                 }
 
@@ -3275,7 +3282,7 @@ namespace Game.Entities
 
         public uint GetRuneBaseCooldown()
         {
-            float cooldown = RuneCooldowns.Base;
+            double cooldown = RuneCooldowns.Base;
 
             var regenAura = GetAuraEffectsByType(AuraType.ModPowerRegenPercent);
             foreach (var i in regenAura)
@@ -3283,7 +3290,7 @@ namespace Game.Entities
                     cooldown *= 1.0f - i.GetAmount() / 100.0f;
 
             // Runes cooldown are now affected by player's haste from equipment ...
-            float hastePct = GetRatingBonusValue(CombatRating.HasteMelee);
+            var hastePct = GetRatingBonusValue(CombatRating.HasteMelee);
 
             // ... and some auras.
             hastePct += GetTotalAuraModifier(AuraType.ModMeleeHaste);

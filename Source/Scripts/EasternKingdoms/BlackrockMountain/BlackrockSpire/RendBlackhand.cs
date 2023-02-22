@@ -87,10 +87,10 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.RendBlackhand
     internal class Wave
     {
         public uint entry;
-        public float o_pos;
-        public float x_pos;
-        public float y_pos;
-        public float z_pos;
+        public double o_pos;
+        public double x_pos;
+        public double y_pos;
+        public double z_pos;
 
         public Wave(uint _entry, float x, float y, float z, float o)
         {

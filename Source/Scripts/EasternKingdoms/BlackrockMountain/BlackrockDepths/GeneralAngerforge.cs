@@ -63,7 +63,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.GeneralAnger
                                 });
         }
 
-        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (me.HealthBelowPctDamaged(20, damage) &&
                 phase == Phases.One)

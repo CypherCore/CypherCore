@@ -72,7 +72,7 @@ namespace Scripts.Spells.Shaman
 						var triggerSpell  = Global.SpellMgr.AssertSpellInfo(aura.GetSpellInfo().GetEffect(0).TriggerSpell, Difficulty.None);
 						var triggerEffect = triggerSpell.GetEffect(0);
 
-						float damage;
+						double damage;
 						damage = caster.SpellDamageBonusDone(target, triggerSpell, triggerEffect.CalcValue(caster), DamageEffectType.SpellDirect, triggerEffect, stacks - 1);
 						damage = target.SpellDamageBonusTaken(caster, triggerSpell, damage, DamageEffectType.SpellDirect);
 

@@ -46,7 +46,7 @@ public class dh_shattered_souls : ScriptObjectAutoAdd, IPlayerOnCreatureKill
 
 		if (soulBarrier != null)
 		{
-			var amount = soulBarrier.GetAmount() + ((float)(Global.SpellMgr.GetSpellInfo(DemonHunterSpells.SOUL_BARRIER, Difficulty.None).GetEffect(1).BasePoints) / 100.0f) * player.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack);
+			var amount = soulBarrier.GetAmount() + ((double)(Global.SpellMgr.GetSpellInfo(DemonHunterSpells.SOUL_BARRIER, Difficulty.None).GetEffect(1).BasePoints) / 100.0f) * player.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack);
 			soulBarrier.SetAmount(amount);
 		}
 	}

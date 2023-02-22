@@ -55,9 +55,9 @@ namespace Scripts.Pets
                 {
                     bool isLordSummon = me.GetEntry() == 108452;
 
-                    float spellPower = player.SpellBaseDamageBonusDone(SpellSchoolMask.Fire);
-                    float dmg = MathFunctions.CalculatePct(spellPower, isLordSummon ? 30 : 50);
-                    float diff = MathFunctions.CalculatePct(dmg, 10);
+                    double spellPower = player.SpellBaseDamageBonusDone(SpellSchoolMask.Fire);
+                    double dmg = MathFunctions.CalculatePct(spellPower, isLordSummon ? 30 : 50);
+                    double diff = MathFunctions.CalculatePct(dmg, 10);
 
                     me.SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, dmg - diff);
                     me.SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, dmg + diff);
@@ -69,11 +69,11 @@ namespace Scripts.Pets
                     if (player.HasAura(WarlockSpells.LORD_OF_THE_FLAMES) &&
                         !player.HasAura(WarlockSpells.LORD_OF_THE_FLAMES_CD))
                     {
-                        List<float> angleOffsets = new()
+                        List<double> angleOffsets = new()
                                                            {
-                                                               (float)Math.PI / 2.0f,
-                                                               (float)Math.PI,
-                                                               3.0f * (float)Math.PI / 2.0f
+                                                               (double)Math.PI / 2.0f,
+                                                               (double)Math.PI,
+                                                               3.0f * (double)Math.PI / 2.0f
                                                            };
 
                         for (uint i = 0; i < 3; ++i)

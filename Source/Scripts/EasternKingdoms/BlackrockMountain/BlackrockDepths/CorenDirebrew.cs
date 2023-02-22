@@ -196,7 +196,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
             }
         }
 
-        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (me.HealthBelowPctDamaged(66, damage) &&
                 phase == DirebrewPhases.One)

@@ -7,6 +7,6 @@ namespace Game.Scripting.Interfaces.ITransport
 {
     public interface ITransportOnRelocate : IScriptObject
     {
-        void OnRelocate(Transport transport, uint mapId, float x, float y, float z);
+        void OnRelocate(Transport transport, uint mapId, double x, double y, double z);
     }
 }

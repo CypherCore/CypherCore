@@ -45,7 +45,7 @@ namespace Scripts.Spells.Paladin
 
         private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            float value = aurEff.GetAmount() * 100 * _baseHolyPowerCost.Amount;
+            double value = aurEff.GetAmount() * 100 * _baseHolyPowerCost.Amount;
 
             GetTarget().GetSpellHistory().ModifyCooldown(PaladinSpells.AvengingWrath, TimeSpan.FromMilliseconds(-value));
             GetTarget().GetSpellHistory().ModifyCooldown(PaladinSpells.GuardianOfAcientKings, TimeSpan.FromMilliseconds(-value));

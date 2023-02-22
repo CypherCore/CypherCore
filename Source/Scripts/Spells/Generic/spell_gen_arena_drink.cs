@@ -52,7 +52,7 @@ internal class spell_gen_arena_drink : AuraScript, IHasAuraEffects
 			isPeriodic = false;
 	}
 
-	private void CalcAmount(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
+	private void CalcAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
 	{
 		var regen = GetAura().GetEffect(0);
 

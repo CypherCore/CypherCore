@@ -16,12 +16,12 @@ public class spell_dk_bone_shield : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
-	private void CalculateAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+	private void CalculateAmount(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
 	{
 		amount = -1;
 	}
 
-	private void Absorb(AuraEffect aurEffd, DamageInfo dmgInfo, ref float absorbAmount)
+	private void Absorb(AuraEffect aurEffd, DamageInfo dmgInfo, ref double absorbAmount)
 	{
 		absorbAmount = 0;
 		var target = GetTarget();

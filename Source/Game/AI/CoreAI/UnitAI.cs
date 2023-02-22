@@ -514,10 +514,10 @@ namespace Game.AI
         public virtual void OnDespawn() { }
 
         // Called at any Damage to any victim (before damage apply)
-        public virtual void DamageDealt(Unit victim, ref float damage, DamageEffectType damageType) { }
-        public virtual void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null) { }
-        public virtual void HealReceived(Unit by, float addhealth) { }
-        public virtual void HealDone(Unit to, float addhealth) { }
+        public virtual void DamageDealt(Unit victim, ref double damage, DamageEffectType damageType) { }
+        public virtual void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null) { }
+        public virtual void HealReceived(Unit by, double addhealth) { }
+        public virtual void HealDone(Unit to, double addhealth) { }
         public virtual void SpellInterrupted(uint spellId, uint unTimeMs) { }
 
         /// <summary>

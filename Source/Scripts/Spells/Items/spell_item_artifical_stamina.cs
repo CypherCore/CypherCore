@@ -29,7 +29,7 @@ internal class spell_item_artifical_stamina : AuraScript, IHasAuraEffects
 		AuraEffects.Add(new AuraEffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModTotalStatPercentage));
 	}
 
-	private void CalculateAmount(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
+	private void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
 	{
 		var artifact = GetOwner().ToPlayer().GetItemByGuid(GetAura().GetCastItemGUID());
 

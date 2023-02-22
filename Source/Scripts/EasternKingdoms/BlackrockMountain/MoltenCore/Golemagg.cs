@@ -58,7 +58,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Golemagg
                                 });
         }
 
-        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (!HealthBelowPct(10) ||
                 me.HasAura(SpellIds.Enrage))
@@ -108,7 +108,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Golemagg
                                 });
         }
 
-        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (HealthAbovePct(50) ||
                 _instance == null)

@@ -260,7 +260,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
             return (Math.Abs((xn - xp) * yh + (yp - yn) * xh - xn * yp + xp * yn) / dist(xn, yn, xp, yp) < 1.5f);
         }
 
-        private float dist(float xa, float ya, float xb, float yb) // auxiliary method for distance
+        private double dist(float xa, float ya, float xb, float yb) // auxiliary method for distance
         {
             return MathF.Sqrt((xa - xb) * (xa - xb) + (ya - yb) * (ya - yb));
         }

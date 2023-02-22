@@ -262,7 +262,7 @@ namespace Scripts.EasternKingdoms.Deadmines.Bosses
             //}
         }
 
-        public override void DamageTaken(Unit done_by, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit done_by, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             Player player = done_by.ToPlayer();
             if (player != null)

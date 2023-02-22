@@ -15,7 +15,7 @@ namespace Scripts.Spells.Warlock
 	{
 		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
-		private void CalculateAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+		private void CalculateAmount(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
 		{
 			var sacrifiedHealth = GetCaster().CountPctFromCurHealth(GetSpellInfo().GetEffect(1).BasePoints);
 			GetCaster().ModifyHealth((long)sacrifiedHealth * -1);

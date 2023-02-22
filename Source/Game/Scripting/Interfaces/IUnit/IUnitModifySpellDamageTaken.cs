@@ -8,6 +8,6 @@ namespace Game.Scripting.Interfaces.IUnit
 {
     public interface IUnitModifySpellDamageTaken : IScriptObject
     {
-        void ModifySpellDamageTaken(Unit target, Unit attacker, ref float damage, SpellInfo spellInfo);
+        void ModifySpellDamageTaken(Unit target, Unit attacker, ref double damage, SpellInfo spellInfo);
     }
 }

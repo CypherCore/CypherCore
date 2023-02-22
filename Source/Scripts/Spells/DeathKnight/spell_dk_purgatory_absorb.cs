@@ -15,12 +15,12 @@ public class spell_dk_purgatory_absorb : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
-	private void CalculateAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+	private void CalculateAmount(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
 	{
 		amount = -1;
 	}
 
-	private void Absorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref float absorbAmount)
+	private void Absorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref double absorbAmount)
 	{
 		var target = GetTarget();
 
@@ -38,7 +38,7 @@ public class spell_dk_purgatory_absorb : AuraScript, IHasAuraEffects
 		if (target.ToPlayer().HasAura(DeathKnightSpells.PERDITION))
 			return;
 
-		float bp   = dmgInfo.GetDamage();
+		double bp   = dmgInfo.GetDamage();
 		var   args = new CastSpellExtraArgs();
 		args.AddSpellMod(SpellValueMod.BasePoint0, (int)bp);
 		args.SetTriggerFlags(TriggerCastFlags.FullMask);
