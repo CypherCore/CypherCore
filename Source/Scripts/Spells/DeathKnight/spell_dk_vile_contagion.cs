@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
 // Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
+using Bgs.Protocol.Notification.V1;
 using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
@@ -21,18 +22,23 @@ internal class spell_dk_vile_contagion : SpellScript, ISpellOnHit
 	public void OnHit()
 	{
 		var target = GetHitUnit();
-		var exclude = target;
+		List<Unit> exclude = new();
+		exclude.Add(target);
 		if (target != null) {
 			var pustules = target.GetAura(DeathKnightSpells.FESTERING_WOUND);
 			if(pustules != null) {
 				var stacks = pustules.GetStackAmount();
 				var jumps = 7;
                 for (int i = 0; i < jumps; i++){
-					var bounce = target.SelectNearbyTarget(exclude, 8f);
+					var bounce = target.SelectNearbyAllyUnit(exclude, 8f);
                     GetCaster().CastSpell(bounce, DeathKnightSpells.FESTERING_WOUND, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.AuraStack, stacks));
-                    exclude = target.SelectNearbyTarget(target, 8f);
+                    exclude.Add(bounce);
                 }
 			}
 		}
 	}
+
+
+	// List<WorldObject> targets = new();
+	// SearchChainTargets(targets, (uint) maxTargets - 1, target, targetType.GetObjectType(), targetType.GetCheckType(), spellEffectInfo, targetType.GetTarget() == Targets.UnitChainhealAlly);
 }

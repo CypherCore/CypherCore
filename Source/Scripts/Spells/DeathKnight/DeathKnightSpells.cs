@@ -155,7 +155,6 @@ namespace Scripts.Spells.DeathKnight
 		public const uint OUTBREAK_PERIODIC = 196782;
 		public const uint PERDITION = 123981;
 		public const uint PESTILENCE = 277234;
-		public const uint PESTILENT_PUSTULES = 194917;
 		public const uint PILLAR_OF_FROST = 51271;
 		public const uint PLAGUE_LEECH = 123693;
 		public const uint PURGATORY = 114556;
@@ -240,6 +239,12 @@ namespace Scripts.Spells.DeathKnight
 
 		public const uint UNHOLY_AURA = 377445;
         public const uint DEATH_AND_DECAY_CLEAVE = 188290;
+		public const uint DEATH_ROT_AURA = 377540;
+        public const uint REPLENISHING_WOUNDS = 377585;
+        public const uint BURSTING_SORES = 207264;
+        public const uint BURSTING_SORES_DAMAGE = 207267;
+        public const uint PESTILENT_PUSTULES = 194917;
+        public const uint PESTILENT_PUSTULES_RUNE = 220211;
 
         public List<WorldObject> saveTargets;
 

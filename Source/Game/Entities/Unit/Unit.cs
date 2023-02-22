@@ -965,6 +965,19 @@ namespace Game.Entities
             return targets.SelectRandom();
         }
 
+        public Unit SelectNearbyAllyUnit(List<Unit> exclude, float dist = SharedConst.NominalMeleeRange) {
+            List<Unit> targets = new();
+            var u_check = new AnyFriendlyUnitInObjectRangeCheck(this, this, dist);
+            var searcher = new UnitListSearcher(this, targets, u_check, GridType.All);
+            Cell.VisitGrid(this, searcher, dist);
+
+            // no appropriate targets
+            targets.RemoveAll(k => exclude.Contains(k));
+            if (targets.Empty())
+                return null;
+            return targets.SelectRandom();
+        }
+
         public void EnterVehicle(Unit baseUnit, sbyte seatId = -1)
         {
             CastSpellExtraArgs args = new(TriggerCastFlags.IgnoreCasterMountedOrOnVehicle);

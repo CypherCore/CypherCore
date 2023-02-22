@@ -8,6 +8,7 @@ using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
+using Scripts.Spells.DemonHunter;
 
 namespace Scripts.Spells.DeathKnight;
 
@@ -27,43 +28,24 @@ public class spell_dk_scourge_strike : SpellScript, IHasSpellEffects
 
 			if (festeringWoundAura != null)
 			{
-				if (caster.HasAura(DeathKnightSpells.UNHOLY_FRENZY))
-					caster.CastSpell(caster, DeathKnightSpells.UNHOLY_FRENZY_BUFF, true);
+				festeringWoundAura.ModStackAmount(-1);
+                caster.CastSpell(target, DeathKnightSpells.FESTERING_WOUND_DAMAGE, true);
+                if (caster.HasAura(DeathKnightSpells.BURSTING_SORES))
+					caster.CastSpell(target, DeathKnightSpells.BURSTING_SORES_DAMAGE, true);
 
-				var pestilentPustulesAura = caster.GetAura(DeathKnightSpells.PESTILENT_PUSTULES);
-				if (pestilentPustulesAura != null)
-					if (festeringWoundAura.GetStackAmount() >= pestilentPustulesAura.GetSpellInfo().GetEffect(0).BasePoints)
-						caster.ModifyPower(PowerType.Runes, 1);
-
-				double festeringWoundBurst = 1f;
-				var castiragorAura      = caster.GetAura(DeathKnightSpells.CASTIGATOR);
-
-				if (castiragorAura != null)
-					festeringWoundBurst += castiragorAura.GetSpellInfo().GetEffect(1).BasePoints;
-
-				festeringWoundBurst = Math.Min(festeringWoundBurst, festeringWoundAura.GetStackAmount());
-
-				for (byte i = 0; i < festeringWoundBurst; ++i)
-				{
-					caster.CastSpell(target, DeathKnightSpells.FESTERING_WOUND_DAMAGE, true);
-					festeringWoundAura.ModStackAmount(-1);
-				}
 			}
 		}
 	}
 
-    private void GetTargetUnit(List<WorldObject> targets)
-    {
-        if (!GetCaster().HasAura(DeathKnightSpells.DEATH_AND_DECAY_CLEAVE))
-		{
+    private void GetTargetUnit(List<WorldObject> targets) {
+        if (!GetCaster().HasAura(DeathKnightSpells.DEATH_AND_DECAY_CLEAVE)) {
             targets.RemoveIf((WorldObject target) => {
                 return GetExplTargetUnit() != target;
             });
         }
     }
 
-    public override void Register()
-	{
+    public override void Register() {
 		SpellEffects.Add(new EffectHandler(HandleOnHit, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         SpellEffects.Add(new ObjectAreaTargetSelectHandler(GetTargetUnit, 1, Targets.UnitDestAreaEnemy));
     }
