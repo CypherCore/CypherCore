@@ -29,6 +29,9 @@ VALUES(55090, 'spell_dk_scourge_strike');
 INSERT INTO spell_script_names
 (spell_id, ScriptName)
 VALUES(70890, 'spell_dk_scourge_strike_trigger');
+INSERT INTO spell_script_names
+(spell_id, ScriptName)
+VALUES(390279, 'spell_dk_vile_contagion');
 
 DELETE FROM spell_proc WHERE SpellId IN (390270, 390259);
 INSERT INTO spell_proc
