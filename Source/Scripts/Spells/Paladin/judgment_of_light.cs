@@ -22,7 +22,7 @@ namespace Scripts.Spells.Paladin
         {
         }
 
-        public void OnDamage(Unit caster, Unit target, ref uint damage)
+        public void OnDamage(Unit caster, Unit target, ref float damage)
         {
             Player player = caster.ToPlayer();
             if (player != null)

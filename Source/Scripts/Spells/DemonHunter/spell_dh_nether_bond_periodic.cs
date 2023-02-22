@@ -34,10 +34,10 @@ public class spell_dh_nether_bond_periodic : AuraScript, IHasAuraEffects
 		if (m_BondUnit == null)
 			return;
 
-		ulong casterHealBp   = 0;
-		ulong casterDamageBp = 0;
-		ulong targetHealBp   = 0;
-		ulong targetDamageBp = 0;
+		long casterHealBp   = 0;
+		long casterDamageBp = 0;
+		long targetHealBp   = 0;
+		long targetDamageBp = 0;
 
 		var casterHp  = caster.GetHealthPct();
 		var targetHp  = m_BondUnit.GetHealthPct();

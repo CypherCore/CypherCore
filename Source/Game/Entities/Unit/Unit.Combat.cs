@@ -637,7 +637,7 @@ namespace Game.Entities
             return victim;
         }
 
-        public void SendAttackStateUpdate(HitInfo HitInfo, Unit target, SpellSchoolMask damageSchoolMask, uint Damage, uint AbsorbDamage, uint Resist, VictimState TargetState, uint BlockedAmount)
+        public void SendAttackStateUpdate(HitInfo HitInfo, Unit target, SpellSchoolMask damageSchoolMask, float Damage, float AbsorbDamage, float Resist, VictimState TargetState, uint BlockedAmount)
         {
             CalcDamageInfo dmgInfo = new();
             dmgInfo.HitInfo = HitInfo;
@@ -1104,7 +1104,7 @@ namespace Game.Entities
                 return;
             }
 
-            uint damage = 0;
+            float damage = 0;
             damage += CalculateDamage(damageInfo.AttackType, false, true);
             // Add melee damage bonus
             damage = MeleeDamageBonusDone(damageInfo.Target, damage, damageInfo.AttackType, DamageEffectType.Direct, null, null, (SpellSchoolMask)damageInfo.DamageSchoolMask);
@@ -1199,8 +1199,8 @@ namespace Game.Entities
 
                     damageInfo.OriginalDamage = damageInfo.Damage;
                     float reducePercent = 1.0f - leveldif * 0.1f;
-                    damageInfo.CleanDamage += damageInfo.Damage - (uint)(reducePercent * damageInfo.Damage);
-                    damageInfo.Damage = (uint)(reducePercent * damageInfo.Damage);
+                    damageInfo.CleanDamage += damageInfo.Damage - (reducePercent * damageInfo.Damage);
+                    damageInfo.Damage = reducePercent * damageInfo.Damage;
                     break;
                 case MeleeHitOutcome.Crushing:
                     damageInfo.HitInfo |= HitInfo.Crushing;
@@ -1218,13 +1218,13 @@ namespace Game.Entities
             if (!damageInfo.HitInfo.HasAnyFlag(HitInfo.Miss))
                 damageInfo.HitInfo |= HitInfo.AffectsVictim;
 
-            int resilienceReduction = (int)damageInfo.Damage;
+            var resilienceReduction = damageInfo.Damage;
             if (CanApplyResilience())
                 ApplyResilience(victim, ref resilienceReduction);
 
-            resilienceReduction = (int)damageInfo.Damage - resilienceReduction;
-            damageInfo.Damage -= (uint)resilienceReduction;
-            damageInfo.CleanDamage += (uint)resilienceReduction;
+            resilienceReduction = damageInfo.Damage - resilienceReduction;
+            damageInfo.Damage -= resilienceReduction;
+            damageInfo.CleanDamage += resilienceReduction;
 
             // Calculate absorb resist
             if (damageInfo.Damage > 0)

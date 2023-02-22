@@ -17,7 +17,7 @@ namespace Scripts.Spells.Shaman
 
 		public int CalcCastTime(int castTime)
 		{
-			var requiredMaelstrom = GetEffectInfo(2).BasePoints;
+			var requiredMaelstrom = (int)GetEffectInfo(2).BasePoints;
 
 			if (GetCaster().GetPower(PowerType.Maelstrom) >= requiredMaelstrom)
 			{

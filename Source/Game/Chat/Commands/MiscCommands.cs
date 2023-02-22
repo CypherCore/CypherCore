@@ -272,13 +272,13 @@ namespace Game.Chat
             if (!target.IsAlive())
                 return true;
 
-            if (!int.TryParse(str, out int damage_int))
+            if (!float.TryParse(str, out float damage_int))
                 return false;
 
             if (damage_int <= 0)
                 return true;
 
-            uint damage_ = (uint)damage_int;
+            float damage_ = damage_int;
 
             string schoolStr = args.NextString();
 
@@ -314,8 +314,8 @@ namespace Game.Chat
 
                 damage_ = dmgInfo.GetDamage();
 
-                uint absorb = dmgInfo.GetAbsorb();
-                uint resist = dmgInfo.GetResist();
+                var absorb = dmgInfo.GetAbsorb();
+                var resist = dmgInfo.GetResist();
                 Unit.DealDamageMods(attacker, target, ref damage_, ref absorb);
                 damage_ = Unit.DealDamage(attacker, target, damage_, null, DamageEffectType.Direct, schoolmask, null, false);
                 attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, schoolmask, damage_, absorb, resist, VictimState.Hit, 0);

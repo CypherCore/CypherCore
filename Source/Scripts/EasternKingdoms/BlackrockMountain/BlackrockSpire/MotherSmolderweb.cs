@@ -53,7 +53,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.MotherSmolder
             _JustDied();
         }
 
-        public override void DamageTaken(Unit done_by, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit done_by, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (me.GetHealth() <= damage)
                 DoCast(me, SpellIds.SummonSpireSpiderling, new CastSpellExtraArgs(true));

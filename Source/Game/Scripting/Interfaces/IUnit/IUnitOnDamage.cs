@@ -7,6 +7,6 @@ namespace Game.Scripting.Interfaces.IUnit
 {
     public interface IUnitOnDamage : IScriptObject
     {
-        void OnDamage(Unit attacker, Unit victim, ref uint damage);
+        void OnDamage(Unit attacker, Unit victim, ref float damage);
     }
 }

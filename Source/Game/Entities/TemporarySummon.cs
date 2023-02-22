@@ -1078,7 +1078,7 @@ namespace Game.Entities
             SetUpdateFieldStatValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MaxDamage), maxdamage);
         }
 
-        void SetBonusDamage(int damage)
+        void SetBonusDamage(float damage)
         {
             m_bonusSpellDamage = damage;
             Player playerOwner = GetOwner().ToPlayer();
@@ -1086,10 +1086,10 @@ namespace Game.Entities
                 playerOwner.SetPetSpellPower((uint)damage);
         }
 
-        public int GetBonusDamage() { return m_bonusSpellDamage; }
+        public float GetBonusDamage() { return m_bonusSpellDamage; }
         public float GetBonusStatFromOwner(Stats stat) { return m_statFromOwner[(int)stat]; }
 
-        int m_bonusSpellDamage;
+        float m_bonusSpellDamage;
         float[] m_statFromOwner = new float[(int)Stats.Max];
     }
 

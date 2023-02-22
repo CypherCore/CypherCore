@@ -35,7 +35,7 @@ namespace Scripts.Spells.Paladin
                     previousDuration = aur.GetDuration();
                 }
 
-                int dmg = GetHitDamage();
+                float dmg = GetHitDamage();
                 dmg += dmg / 5;
                 SetHitDamage(dmg); //damage is increased by 20%
 

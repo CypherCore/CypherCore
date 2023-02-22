@@ -26,7 +26,7 @@ internal class spell_gen_vehicle_scaling : AuraScript, IHasAuraEffects
 		AuraEffects.Add(new AuraEffectCalcAmountHandler(CalculateAmount, 2, AuraType.ModIncreaseHealthPercent));
 	}
 
-	private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+	private void CalculateAmount(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
 	{
 		var    caster = GetCaster();
 		float  factor;

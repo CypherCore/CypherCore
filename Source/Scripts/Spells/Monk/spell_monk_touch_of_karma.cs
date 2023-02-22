@@ -15,7 +15,7 @@ public class spell_monk_touch_of_karma : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
-	private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool UnnamedParameter)
+	private void CalculateAmount(AuraEffect aurEff, ref float amount, ref bool UnnamedParameter)
 	{
 		var caster = GetCaster();
 
@@ -25,14 +25,14 @@ public class spell_monk_touch_of_karma : AuraScript, IHasAuraEffects
 
 			if (GetAura().GetSpellInfo().GetEffect(2).CalcValue() != 0)
 			{
-				amount = (int)caster.CountPctFromMaxHealth(effInfo);
+				amount = caster.CountPctFromMaxHealth(effInfo);
 
 				aurEff.SetAmount(amount);
 			}
 		}
 	}
 
-	private void OnAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint UnnamedParameter)
+	private void OnAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref float UnnamedParameter)
 	{
 		var caster = GetCaster();
 
@@ -44,10 +44,10 @@ public class spell_monk_touch_of_karma : AuraScript, IHasAuraEffects
 			{
 				var periodicDamage = dmgInfo.GetDamage() / Global.SpellMgr.GetSpellInfo(MonkSpells.TOUCH_OF_KARMA_DAMAGE, Difficulty.None).GetMaxTicks();
 				//  periodicDamage += int32(aurApp->GetTarget()->GetRemainingPeriodicAmount(GetCasterGUID(), TOUCH_OF_KARMA_DAMAGE, AuraType.PeriodicDamage));
-				caster.CastSpell(aurApp.GetTarget(), MonkSpells.TOUCH_OF_KARMA_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)periodicDamage).SetTriggeringAura(aurEff));
+				caster.CastSpell(aurApp.GetTarget(), MonkSpells.TOUCH_OF_KARMA_DAMAGE, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, periodicDamage).SetTriggeringAura(aurEff));
 
 				if (caster.HasAura(MonkSpells.GOOD_KARMA_TALENT))
-					caster.CastSpell(caster, MonkSpells.GOOD_KARMA_TALENT_HEAL, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)periodicDamage).SetTriggeringAura(aurEff));
+					caster.CastSpell(caster, MonkSpells.GOOD_KARMA_TALENT_HEAL, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, periodicDamage).SetTriggeringAura(aurEff));
 			}
 	}
 

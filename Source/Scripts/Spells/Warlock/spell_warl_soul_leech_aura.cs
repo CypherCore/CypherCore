@@ -27,7 +27,7 @@ namespace Scripts.Spells.Warlock
 				return false;
 
 			var basePoints = GetSpellInfo().GetEffect(0).BasePoints;
-			var absorb     = (int)(((eventInfo.GetDamageInfo() != null ? eventInfo.GetDamageInfo().GetDamage() : 0) * basePoints) / 100.0f);
+			var absorb     = ((eventInfo.GetDamageInfo() != null ? eventInfo.GetDamageInfo().GetDamage() : 0) * basePoints) / 100.0f;
 
 			// Add remaining amount if already applied
 			var aur = caster.GetAura(WarlockSpells.SOUL_LEECH_ABSORB);

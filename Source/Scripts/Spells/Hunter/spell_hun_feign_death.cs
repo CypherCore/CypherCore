@@ -14,7 +14,7 @@ public class spell_hun_feign_death : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
-	private ulong health;
+	private long health;
 	private int focus;
 
 	private void HandleEffectApply(AuraEffect UnnamedParameter, AuraEffectHandleModes UnnamedParameter2)

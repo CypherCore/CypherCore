@@ -211,7 +211,9 @@ namespace Scripts.Spells.Warlock
 		public const uint PHANTOMATIC_SINGULARITY_DAMAGE = 205246;
 		public const uint PLANESWALKER = 196675;
 		public const uint PLANESWALKER_BUFF = 196674;
-		public const uint POWER_TRIP = 196605;
+		public const uint POWER_OVERWHELMING = 387279;
+        public const uint POWER_OVERWHELMING_AURA = 387283;
+        public const uint POWER_TRIP = 196605;
 		public const uint POWER_TRIP_ENERGIZE = 216125;
 		public const uint PRIEST_SHADOW_WORD_DEATH = 32409;
 		public const uint PVP_4P_BONUS = 143395;

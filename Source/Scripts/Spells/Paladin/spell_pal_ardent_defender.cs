@@ -38,12 +38,12 @@ namespace Scripts.Spells.Paladin
             return GetUnitOwner().IsPlayer();
         }
 
-        public void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
+        public void CalculateAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
         {
             amount = -1;
         }
 
-        public void Absorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        public void Absorb(AuraEffect aurEff, DamageInfo dmgInfo, ref float absorbAmount)
         {
             absorbAmount = MathFunctions.CalculatePct(dmgInfo.GetDamage(), absorbPct);
 
@@ -64,7 +64,7 @@ namespace Scripts.Spells.Paladin
             AuraEffects.Add(new AuraEffectAbsorbHandler(Absorb, 1));
         }
 
-        private int absorbPct;
-        private int healPct;
+        private float absorbPct;
+        private float healPct;
     }
 }

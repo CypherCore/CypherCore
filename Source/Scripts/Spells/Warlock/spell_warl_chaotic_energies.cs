@@ -20,7 +20,7 @@ namespace Scripts.Spells.Warlock
 			AuraEffects.Add(new AuraEffectAbsorbHandler(HandleAbsorb, 2, false, AuraScriptHookType.EffectAbsorb));
 		}
 
-		private void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+		private void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref float absorbAmount)
 		{
 			var auraEffect = GetEffect(1);
 

@@ -229,7 +229,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             _scheduler.Schedule(TimeSpan.FromSeconds(15),
                                 task =>
                                 {
-                                    ulong health = me.GetHealth();
+                                    long health = me.GetHealth();
                                     Unit target = me;
 
                                     for (byte i = 0; i < _auiLackeyGUID.Length; ++i)

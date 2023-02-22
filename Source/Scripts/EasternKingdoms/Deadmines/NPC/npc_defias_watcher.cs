@@ -79,7 +79,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
             }
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (!me || damage <= 0 || Status == true)
             {

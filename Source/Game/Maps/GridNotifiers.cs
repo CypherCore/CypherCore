@@ -1905,7 +1905,7 @@ namespace Game.Maps
 
         Unit i_obj;
         float i_range;
-        ulong i_hp;
+        long i_hp;
     }
 
     class MostHPPercentMissingInRange : ICheck<Unit>

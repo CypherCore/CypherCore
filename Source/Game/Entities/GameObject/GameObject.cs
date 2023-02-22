@@ -2733,6 +2733,11 @@ namespace Game.Entities
             return null;
         }
 
+        public void ModifyHealth(float change, WorldObject attackerOrHealer = null, uint spellId = 0)
+        {
+            ModifyHealth((int)change, attackerOrHealer, spellId);
+        }
+
         public void ModifyHealth(int change, WorldObject attackerOrHealer = null, uint spellId = 0)
         {
             if (m_goValue.Building.MaxHealth == 0 || change == 0)

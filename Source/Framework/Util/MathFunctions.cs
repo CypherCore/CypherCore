@@ -160,6 +160,11 @@ public static class MathFunctions
         return (ulong)(value * (pct / 100.0f));
     }
 
+    public static long CalculatePct(long value, float pct)
+    {
+        return (long)(value * (pct / 100.0f));
+    }
+
     public static float GetPctOf(float value, float max)
     {
         return (value / max) * 100.0f;

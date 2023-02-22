@@ -55,9 +55,9 @@ namespace Scripts.Pets
                 {
                     bool isLordSummon = me.GetEntry() == 108452;
 
-                    int spellPower = player.SpellBaseDamageBonusDone(SpellSchoolMask.Fire);
-                    int dmg = MathFunctions.CalculatePct(spellPower, isLordSummon ? 30 : 50);
-                    int diff = MathFunctions.CalculatePct(dmg, 10);
+                    float spellPower = player.SpellBaseDamageBonusDone(SpellSchoolMask.Fire);
+                    float dmg = MathFunctions.CalculatePct(spellPower, isLordSummon ? 30 : 50);
+                    float diff = MathFunctions.CalculatePct(dmg, 10);
 
                     me.SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, dmg - diff);
                     me.SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, dmg + diff);

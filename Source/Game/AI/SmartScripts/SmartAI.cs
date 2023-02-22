@@ -671,9 +671,9 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.OnSpellStart, null, 0, 0, false, spellInfo);
         }
         
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
-            GetScript().ProcessEventsFor(SmartEvents.Damaged, attacker, damage);
+            GetScript().ProcessEventsFor(SmartEvents.Damaged, attacker, (uint)damage);
 
             if (!IsAIControlled()) // don't allow players to use unkillable units
                 return;
@@ -682,9 +682,9 @@ namespace Game.AI
                 damage = (uint)(me.GetHealth() - _invincibilityHpLevel);  // damage should not be nullified, because of player damage req.
         }
 
-        public override void HealReceived(Unit by, uint addhealth)
+        public override void HealReceived(Unit by, float addhealth)
         {
-            GetScript().ProcessEventsFor(SmartEvents.ReceiveHeal, by, addhealth);
+            GetScript().ProcessEventsFor(SmartEvents.ReceiveHeal, by, (uint)addhealth);
         }
 
         public override void ReceiveEmote(Player player, TextEmotes emoteId)
@@ -697,9 +697,9 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.JustSummoned, summoner.ToUnit(), 0, 0, false, null, summoner.ToGameObject());
         }
 
-        public override void DamageDealt(Unit victim, ref uint damage, DamageEffectType damageType)
+        public override void DamageDealt(Unit victim, ref float damage, DamageEffectType damageType)
         {
-            GetScript().ProcessEventsFor(SmartEvents.DamagedTarget, victim, damage);
+            GetScript().ProcessEventsFor(SmartEvents.DamagedTarget, victim, (uint)damage);
         }
 
         public override void SummonedCreatureDespawn(Creature summon)

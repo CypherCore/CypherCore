@@ -31,8 +31,8 @@ namespace Scripts.Spells.Shaman
 
 			if (overcharge != null)
 			{
-				_maxTakenPower    = overcharge.GetSpellInfo().GetEffect(0).BasePoints;
-				_maxDamagePercent = overcharge.GetSpellInfo().GetEffect(1).BasePoints;
+				_maxTakenPower    = (int)overcharge.GetSpellInfo().GetEffect(0).BasePoints;
+				_maxDamagePercent = (int)overcharge.GetSpellInfo().GetEffect(1).BasePoints;
 			}
 
 			_takenPower = powerCost.Amount = Math.Min(GetCaster().GetPower(PowerType.Maelstrom), _maxTakenPower);
@@ -42,7 +42,7 @@ namespace Scripts.Spells.Shaman
 		{
 			if (_maxTakenPower > 0)
 			{
-				var increasedDamagePercent = MathFunctions.CalculatePct(_maxDamagePercent, (float)_takenPower / (float)_maxTakenPower * 100.0f);
+				var increasedDamagePercent = MathFunctions.CalculatePct(_maxDamagePercent, _takenPower / _maxTakenPower * 100.0f);
 				var hitDamage              = MathFunctions.CalculatePct(GetHitDamage(), 100 + increasedDamagePercent);
 				SetHitDamage(hitDamage);
 			}

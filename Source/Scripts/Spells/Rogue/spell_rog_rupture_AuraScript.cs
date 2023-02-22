@@ -25,7 +25,7 @@ internal class spell_rog_rupture_AuraScript : AuraScript, IHasAuraEffects
 		AuraEffects.Add(new AuraEffectApplyHandler(OnEffectRemoved, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
 	}
 
-	private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+	private void CalculateAmount(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
 	{
 		var caster = GetCaster();
 

@@ -46,12 +46,12 @@ internal class spell_monk_stagger : AuraScript, IHasAuraEffects
 		return null;
 	}
 
-	private void AbsorbNormal(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+	private void AbsorbNormal(AuraEffect aurEff, DamageInfo dmgInfo, ref float absorbAmount)
 	{
 		Absorb(dmgInfo, 1.0f);
 	}
 
-	private void AbsorbMagic(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+	private void AbsorbMagic(AuraEffect aurEff, DamageInfo dmgInfo, ref float absorbAmount)
 	{
 		var effect = GetEffect(4);
 

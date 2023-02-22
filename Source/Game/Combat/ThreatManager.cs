@@ -615,7 +615,7 @@ namespace Game.Combat
 
         public void UpdateMyTempModifiers()
         {
-            int mod = 0;
+            float mod = 0;
             foreach (AuraEffect eff in _owner.GetAuraEffectsByType(AuraType.ModTotalThreat))
                 mod += eff.GetAmount();
 
@@ -624,7 +624,7 @@ namespace Game.Combat
 
             foreach (var pair in _threatenedByMe)
             {
-                pair.Value.TempModifier = mod;
+                pair.Value.TempModifier = (int)mod;
                 pair.Value.ListNotifyChanged();
             }
         }
@@ -785,7 +785,7 @@ namespace Game.Combat
         public Dictionary<ObjectGuid, ThreatReference> GetThreatenedByMeList() { return _threatenedByMe; }
 
         // Modify target's threat by +percent%
-        public void ModifyThreatByPercent(Unit target, int percent)
+        public void ModifyThreatByPercent(Unit target, float percent)
         {
             if (percent != 0)
                 ScaleThreat(target, 0.01f * (100f + percent));

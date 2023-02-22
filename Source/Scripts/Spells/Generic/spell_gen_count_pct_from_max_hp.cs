@@ -10,7 +10,7 @@ namespace Scripts.Spells.Generic;
 [Script("spell_gen_50pct_count_pct_from_max_hp", 50)]
 internal class spell_gen_count_pct_from_max_hp : SpellScript, ISpellOnHit
 {
-	private int _damagePct;
+	private float _damagePct;
 
 	public spell_gen_count_pct_from_max_hp(int damagePct)
 	{
@@ -22,6 +22,6 @@ internal class spell_gen_count_pct_from_max_hp : SpellScript, ISpellOnHit
 		if (_damagePct == 0)
 			_damagePct = GetHitDamage();
 
-		SetHitDamage((int)GetHitUnit().CountPctFromMaxHealth(_damagePct));
+		SetHitDamage(GetHitUnit().CountPctFromMaxHealth(_damagePct));
 	}
 }

@@ -1,16 +1,12 @@
 ﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
 // Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
 
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
-using Game.Scripting.Interfaces.IAura;
 using Game.Scripting;
+using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Scripts.Spells.Paladin
 {
@@ -50,7 +46,7 @@ namespace Scripts.Spells.Paladin
                 healInfo.GetHeal() == 0)
                 return;
 
-            uint heal = MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
+            float heal = MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
 
             var auras = GetCaster().GetSingleCastAuras();
 

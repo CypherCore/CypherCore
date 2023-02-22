@@ -15,7 +15,7 @@ public class spell_dk_tombstone : AuraScript, IHasAuraEffects
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
-	private void CalcAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
+	private void CalcAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
 	{
 		amount = 0;
 		var caster = GetCaster();
@@ -27,7 +27,7 @@ public class spell_dk_tombstone : AuraScript, IHasAuraEffects
 			if (aura != null)
 			{
 				int stack    = aura.GetStackAmount();
-				var maxStack = GetSpellInfo().GetEffect(4).CalcValue(caster);
+				var maxStack = (int)GetSpellInfo().GetEffect(4).CalcValue(caster);
 
 				if (stack > maxStack)
 					stack = maxStack;

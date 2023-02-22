@@ -23,7 +23,7 @@ namespace Scripts.Spells.Paladin
         private int absorb;
         private int currentAbsorb;
 
-        private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool canBeRecalculated)
+        private void CalculateAmount(AuraEffect UnnamedParameter, ref float amount, ref bool canBeRecalculated)
         {
             Unit caster = GetCaster();
             if (caster != null)
@@ -36,7 +36,7 @@ namespace Scripts.Spells.Paladin
             }
         }
 
-        private void Absorb(AuraEffect aura, DamageInfo damageInfo, ref uint absorbAmount)
+        private void Absorb(AuraEffect aura, DamageInfo damageInfo, ref float absorbAmount)
         {
             Unit caster = GetCaster();
             if (caster == null)

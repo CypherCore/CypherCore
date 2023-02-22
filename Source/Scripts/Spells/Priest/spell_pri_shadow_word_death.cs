@@ -20,7 +20,7 @@ public class spell_pri_shadow_word_death : SpellScript, IHasSpellEffects
 
 		if (target != null)
 		{
-			if (target.GetHealth() < (ulong)GetHitDamage())
+			if (target.GetHealth() < GetHitDamage())
 				GetCaster().CastSpell(GetCaster(), PriestSpells.SHADOW_WORD_DEATH_ENERGIZE_KILL, true);
 			else
 				GetCaster().ModifyPower(PowerType.Insanity, GetSpellInfo().GetEffect(2).BasePoints);

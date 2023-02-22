@@ -15,7 +15,7 @@ namespace Scripts.Spells.Warlock
 	{
 		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
-		private void HandleSplit(AuraEffect UnnamedParameter, DamageInfo UnnamedParameter2, ref uint splitAmount)
+		private void HandleSplit(AuraEffect UnnamedParameter, DamageInfo UnnamedParameter2, ref float splitAmount)
 		{
 			var pet = GetUnitOwner();
 

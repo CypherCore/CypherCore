@@ -19,30 +19,30 @@ namespace Scripts.Spells.Warlock
 		private void OnProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 		{
 			uint procSpellId = 0;
-			var  spellInfo   = eventInfo.GetDamageInfo().GetSpellInfo();
+			var spellInfo = eventInfo.GetDamageInfo().GetSpellInfo();
 
 			if (spellInfo != null)
 				procSpellId = spellInfo.Id;
 
-			var  chance           = 0;
+			float chance = 0;
 			uint triggeredSpellId = 0;
 
 			switch (procSpellId)
 			{
 				case WarlockSpells.CONFLAGRATE:
 				case WarlockSpells.CONFLAGRATE_FIRE_AND_BRIMSTONE:
-					chance           = aurEff.GetSpellInfo().GetEffect(3).BasePoints;
+					chance = aurEff.GetSpellInfo().GetEffect(3).BasePoints;
 					triggeredSpellId = 145075; // Destructive Influence
 
 					break;
 				case WarlockSpells.UNSTABLE_AFFLICTION:
-					chance           = aurEff.GetSpellInfo().GetEffect(1).BasePoints;
+					chance = aurEff.GetSpellInfo().GetEffect(1).BasePoints;
 					triggeredSpellId = 145082; // Empowered Grasp
 
 					break;
 				case WarlockSpells.SOUL_FIRE:
 				case WarlockSpells.SOUL_FIRE_METAMORPHOSIS:
-					chance           = aurEff.GetSpellInfo().GetEffect(3).BasePoints;
+					chance = aurEff.GetSpellInfo().GetEffect(3).BasePoints;
 					triggeredSpellId = 145085; // Fiery Wrath
 
 					break;

@@ -26,12 +26,12 @@ public class spell_druid_earthwarden_triggered : AuraScript, IHasAuraEffects
 		return ValidateSpellInfo(Spells.EARTHWARDEN, Spells.EARTHWARDEN_TRIGGERED);
 	}
 
-	private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
+	private void CalculateAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
 	{
 		amount = -1;
 	}
 
-	private void Absorb(AuraEffect auraEffect, DamageInfo dmgInfo, ref uint absorbAmount)
+	private void Absorb(AuraEffect auraEffect, DamageInfo dmgInfo, ref float absorbAmount)
 	{
 		if (dmgInfo.GetDamageType() == DamageEffectType.Direct)
 		{

@@ -14,6 +14,7 @@ using Game.Scripting.Interfaces.ISpell;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using static Game.Maps.InstanceScriptDataReader;
 
 namespace Game.Spells
@@ -383,7 +384,7 @@ namespace Game.Spells
             return null;
         }
 
-        public void _InitEffects(uint effMask, Unit caster, Dictionary<int, int> baseAmount)
+        public void _InitEffects(uint effMask, Unit caster, Dictionary<int, float> baseAmount)
         {
             // shouldn't be in constructor - functions in AuraEffect.AuraEffect use polymorphism
             _effects = new();
@@ -774,7 +775,7 @@ namespace Game.Spells
             return maxDuration;
         }
 
-        public void SetDuration(uint duration, bool withMods = false)
+        public void SetDuration(float duration, bool withMods = false)
         {
             SetDuration((int)duration, withMods);
         }
@@ -802,6 +803,11 @@ namespace Game.Spells
         public void ModDuration(int duration, bool withMods = false)
         {
             SetDuration(GetDuration() + duration, withMods);
+        }
+
+        public void ModDuration(float duration, bool withMods = false)
+        {
+            SetDuration((int)duration, withMods);
         }
 
         public void RefreshDuration(bool withMods = false)
@@ -944,6 +950,11 @@ namespace Game.Spells
                     modOwner.ApplySpellMod(m_spellInfo, SpellModOp.MaxAuraStacks, ref maxStackAmount);
             }
             return maxStackAmount;
+        }
+
+        public bool ModStackAmount(float num, AuraRemoveMode removeMode = AuraRemoveMode.Default, bool resetPeriodicTimer = true)
+        {
+            return ModStackAmount((int)num, removeMode, resetPeriodicTimer);
         }
 
         public bool ModStackAmount(int num, AuraRemoveMode removeMode = AuraRemoveMode.Default, bool resetPeriodicTimer = true)
@@ -1126,7 +1137,7 @@ namespace Game.Spells
             return key;
         }
 
-        public void SetLoadedState(int maxduration, int duration, int charges, byte stackamount, uint recalculateMask, Dictionary<int, int> amount)
+        public void SetLoadedState(int maxduration, int duration, int charges, byte stackamount, uint recalculateMask, Dictionary<int, float> amount)
         {
             m_maxDuration = maxduration;
             m_duration = duration;
@@ -2177,7 +2188,7 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectCalcAmountHandlers(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        public void CallScriptEffectCalcAmountHandlers(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
         {
             foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectCalcAmount, aurEff.GetEffIndex()))
             {
@@ -2225,7 +2236,7 @@ namespace Game.Spells
             }
         }
         
-        public void CallScriptEffectAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref uint absorbAmount, ref bool defaultPrevented)
+        public void CallScriptEffectAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref float absorbAmount, ref bool defaultPrevented)
         {
             foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectAbsorb, aurEff.GetEffIndex()))
             {
@@ -2238,7 +2249,7 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectAfterAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref uint absorbAmount)
+        public void CallScriptEffectAfterAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref float absorbAmount)
         {
             foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectAfterAbsorb, aurEff.GetEffIndex()))
             {
@@ -2250,7 +2261,7 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, HealInfo healInfo, ref uint absorbAmount, ref bool defaultPrevented)
+        public void CallScriptEffectAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, HealInfo healInfo, ref float absorbAmount, ref bool defaultPrevented)
         {
             foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectAbsorbHeal, aurEff.GetEffIndex()))
             {
@@ -2263,7 +2274,7 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectAfterAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, HealInfo healInfo, ref uint absorbAmount)
+        public void CallScriptEffectAfterAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, HealInfo healInfo, ref float absorbAmount)
         {
             foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectAfterAbsorb, aurEff.GetEffIndex()))
             {
@@ -2275,7 +2286,7 @@ namespace Game.Spells
             }
         }
         
-        public void CallScriptEffectManaShieldHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref uint absorbAmount, ref bool defaultPrevented)
+        public void CallScriptEffectManaShieldHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref float absorbAmount, ref bool defaultPrevented)
         {
             foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectManaShield, aurEff.GetEffIndex()))
             {
@@ -2287,7 +2298,7 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectAfterManaShieldHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref uint absorbAmount)
+        public void CallScriptEffectAfterManaShieldHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref float absorbAmount)
         {
             foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectAfterManaShield, aurEff.GetEffIndex()))
             {
@@ -2299,7 +2310,7 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectSplitHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref uint splitAmount)
+        public void CallScriptEffectSplitHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref float splitAmount)
         {
             foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectSplit, aurEff.GetEffIndex()))
             {
@@ -2483,6 +2494,7 @@ namespace Game.Spells
 
         public long GetApplyTime() { return m_applyTime; }
         public int GetMaxDuration() { return m_maxDuration; }
+        public void SetMaxDuration(float duration) { SetMaxDuration((int)duration); }
         public void SetMaxDuration(int duration) { m_maxDuration = duration; }
         public int CalcMaxDuration() { return CalcMaxDuration(GetCaster()); }
         public int GetDuration() { return m_duration; }
@@ -3035,15 +3047,15 @@ namespace Game.Spells
 
     public class AuraLoadEffectInfo
     {
-        public Dictionary<int, int> Amounts = new();
-        public Dictionary<int, int> BaseAmounts = new();
+        public Dictionary<int, float> Amounts = new();
+        public Dictionary<int, float> BaseAmounts = new();
     }
 
     public class AuraCreateInfo
     {
         public ObjectGuid CasterGUID;
         public Unit Caster;
-        public Dictionary<int, int> BaseAmount;
+        public Dictionary<int, float> BaseAmount;
         public ObjectGuid CastItemGUID;
         public uint CastItemId = 0;
         public int CastItemLevel = -1;
@@ -3075,7 +3087,7 @@ namespace Game.Spells
 
         public void SetCasterGUID(ObjectGuid guid) { CasterGUID = guid; }
         public void SetCaster(Unit caster) { Caster = caster; }
-        public void SetBaseAmount(Dictionary<int, int> bp) { BaseAmount = bp; }
+        public void SetBaseAmount(Dictionary<int, float> bp) { BaseAmount = bp; }
         public void SetCastItem(ObjectGuid guid, uint itemId, int itemLevel) { CastItemGUID = guid; CastItemId = itemId; CastItemLevel = itemLevel; }
         public void SetPeriodicReset(bool reset) { ResetPeriodicTimer = reset; }
         public void SetOwnerEffectMask(uint effMask) { _targetEffectMask = effMask; }

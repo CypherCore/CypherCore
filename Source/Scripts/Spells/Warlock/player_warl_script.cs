@@ -8,15 +8,16 @@ using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.IPlayer;
+using static Game.AI.SmartAction;
 
 namespace Scripts.Spells.Warlock
 {
     [Script]
-    internal class aura_warl_ritual_of_ruin : ScriptObjectAutoAdd, IPlayerOnModifyPower
+    internal class player_warl_script : ScriptObjectAutoAdd, IPlayerOnModifyPower
     {
         public Class PlayerClass { get; } = Class.Warlock;
 
-        public aura_warl_ritual_of_ruin() : base("aura_warl_ritual_of_ruin")
+        public player_warl_script() : base("player_warl_script")
         {
         }
 
@@ -27,11 +28,28 @@ namespace Scripts.Spells.Warlock
 
             var shardCost = oldValue - newValue;
 
-            if (shardCost <= 0)
+            PowerOverwhelming(player, shardCost);
+            RitualOfRuin(player, shardCost);
+        }
+
+        private static void PowerOverwhelming(Player player, int shardCost)
+        {
+            if (shardCost <= 0 || !player.HasAura(WarlockSpells.POWER_OVERWHELMING))
+                return;
+
+            var cost = shardCost / 10;
+
+            for (int i = 0; i < cost; i++)
+                player.AddAura(WarlockSpells.POWER_OVERWHELMING_AURA, player);
+        }
+
+        private static void RitualOfRuin(Player player, int shardCost)
+        {
+            if (shardCost <= 0 || !player.HasAura(WarlockSpells.RITUAL_OF_RUIN))
                 return;
 
             var soulShardsSpent = player.VariableStorage.GetValue(WarlockSpells.RITUAL_OF_RUIN.ToString(), 0) + shardCost;
-            var needed = Global.SpellMgr.GetSpellInfo(WarlockSpells.RITUAL_OF_RUIN).GetEffect(0).BasePoints * 10; // each soul shard is 10
+            var needed = (int)Global.SpellMgr.GetSpellInfo(WarlockSpells.RITUAL_OF_RUIN).GetEffect(0).BasePoints * 10; // each soul shard is 10
 
             if (soulShardsSpent > needed)
             {

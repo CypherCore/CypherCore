@@ -12,7 +12,7 @@ namespace Scripts.Spells.Warrior
 	[SpellScript(71)]
 	public class spell_warr_defensive_stance : AuraScript, IAuraOnProc
 	{
-		private uint _damageTaken = 0;
+		private float _damageTaken = 0;
 
 		public void OnProc(ProcEventInfo eventInfo)
 		{
@@ -26,7 +26,7 @@ namespace Scripts.Spells.Warrior
 			if (_damageTaken <= 0)
 				return;
 
-			var rageAmount = (int)((50.0f * (float)_damageTaken) / (float)caster.GetMaxHealth());
+			var rageAmount = (int)((50.0f * _damageTaken) / caster.GetMaxHealth());
 			caster.ModifyPower(PowerType.Rage, 10 * rageAmount);
 		}
 	}

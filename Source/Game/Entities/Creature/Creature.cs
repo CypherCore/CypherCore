@@ -358,7 +358,7 @@ namespace Game.Entities
                 SelectLevel();
             else if (!IsGuardian())
             {
-                ulong previousHealth = GetHealth();
+                var previousHealth = GetHealth();
                 UpdateLevelDependantStats(); // We still re-initialize level dependant stats on entry update
                 if (previousHealth > 0)
                     SetHealth(previousHealth);
@@ -670,19 +670,19 @@ namespace Game.Entities
             if (!CanRegenerateHealth())
                 return;
 
-            ulong curValue = GetHealth();
-            ulong maxValue = GetMaxHealth();
+            var curValue = GetHealth();
+            var maxValue = GetMaxHealth();
 
             if (curValue >= maxValue)
                 return;
 
-            long addvalue;
+            float addvalue;
 
             // Not only pet, but any controlled creature (and not polymorphed)
             if (!GetCharmerOrOwnerGUID().IsEmpty() && !IsPolymorphed())
             {
                 float HealthIncreaseRate = WorldConfig.GetFloatValue(WorldCfg.RateHealth);
-                addvalue = (uint)(0.015f * GetMaxHealth() * HealthIncreaseRate);
+                addvalue = 0.015f * GetMaxHealth() * HealthIncreaseRate;
             }
             else
                 addvalue = (long)maxValue / 3;
@@ -1479,6 +1479,11 @@ namespace Game.Entities
             }
         }
 
+        public void LowerPlayerDamageReq(float unDamage)
+        {
+            LowerPlayerDamageReq((ulong)unDamage);
+        }
+
         public void LowerPlayerDamageReq(ulong unDamage)
         {
             if (m_PlayerDamageReq != 0)
@@ -1606,13 +1611,13 @@ namespace Game.Entities
             if (_regenerateHealthLock)
                 return;
 
-            ulong curhealth;
+            long curhealth;
             if (m_creatureData != null && !_regenerateHealth)
             {
                 curhealth = m_creatureData.curhealth;
                 if (curhealth != 0)
                 {
-                    curhealth = (uint)(curhealth * GetHealthMod(GetCreatureTemplate().Rank));
+                    curhealth = (long)(curhealth * GetHealthMod(GetCreatureTemplate().Rank));
                     if (curhealth < 1)
                         curhealth = 1;
                 }

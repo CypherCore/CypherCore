@@ -52,6 +52,11 @@ namespace Game.Entities
             m_questObjectiveCriteriaMgr.ResetCriteria(failEvent, failAsset, evenIfCriteriaComplete);
         }
 
+        public void UpdateCriteria(CriteriaType type, float miscValue1, float miscValue2 = 0, float miscValue3 = 0, WorldObject refe = null)
+        {
+            UpdateCriteria(type, (ulong)miscValue1, (ulong)miscValue2, (ulong)miscValue3, refe);
+        }
+
         public void UpdateCriteria(CriteriaType type, ulong miscValue1 = 0, ulong miscValue2 = 0, ulong miscValue3 = 0, WorldObject refe = null)
         {
             m_achievementSys.UpdateCriteria(type, miscValue1, miscValue2, miscValue3, refe, this);

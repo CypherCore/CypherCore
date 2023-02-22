@@ -77,15 +77,15 @@ namespace Scripts.Spells.Warrior
 			}
 		}
 
-		public int CalculateCount(Player p, int rage)
+		public int CalculateCount(Player p, float rage)
 		{
 			if (RageSpent.TryGetValue(p, out var spentRage))
 			{
-				var rageMod = (int)Math.Floor(spentRage / (decimal)rage);
+				var rageMod = (int)Math.Floor(spentRage / rage);
 
 				if (rageMod > 0)
 				{
-					RageSpent[p] = (rageMod * rage) - spentRage;
+					RageSpent[p] = (rageMod * (int)rage) - spentRage;
 
 					return rageMod;
 				}

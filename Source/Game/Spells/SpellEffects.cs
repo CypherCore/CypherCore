@@ -71,10 +71,8 @@ namespace Game.Spells
             if (player.IsResurrectRequested())       // already have one active request
                 return;
 
-            int health = damage;
-            int mana = effectInfo.MiscValue;
             ExecuteLogEffectResurrect(effectInfo.Effect, player);
-            player.SetResurrectRequestData(m_caster, (uint)health, (uint)mana, 0);
+            player.SetResurrectRequestData(m_caster, (uint)damage, (uint)effectInfo.MiscValue, 0);
             SendResurrectRequest(player);
         }
 
@@ -114,16 +112,16 @@ namespace Game.Spells
 
             // CalcAbsorbResist already in Player::EnvironmentalDamage
             if (unitTarget.IsTypeId(TypeId.Player))
-                unitTarget.ToPlayer().EnvironmentalDamage(EnviromentalDamage.Fire, (uint)damage);
+                unitTarget.ToPlayer().EnvironmentalDamage(EnviromentalDamage.Fire, damage);
             else
             {
                 Unit unitCaster = GetUnitCasterForEffectHandlers();
-                DamageInfo damageInfo = new(unitCaster, unitTarget, (uint)damage, m_spellInfo, m_spellInfo.GetSchoolMask(), DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
+                DamageInfo damageInfo = new(unitCaster, unitTarget, damage, m_spellInfo, m_spellInfo.GetSchoolMask(), DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
                 Unit.CalcAbsorbResist(damageInfo);
 
                 SpellNonMeleeDamage log = new(unitCaster, unitTarget, m_spellInfo, m_SpellVisual, m_spellInfo.GetSchoolMask(), m_castId);
                 log.damage = damageInfo.GetDamage();
-                log.originalDamage = (uint)damage;
+                log.originalDamage = damage;
                 log.absorb = damageInfo.GetAbsorb();
                 log.resist = damageInfo.GetResist();
 
@@ -147,15 +145,15 @@ namespace Game.Spells
 
                     // divide to all targets
                     if (count != 0)
-                        damage /= (int)count;
+                        damage /= count;
                 }
 
                 Unit unitCaster = GetUnitCasterForEffectHandlers();
                 if (unitCaster != null)
                 {
-                    uint bonus = unitCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo, 1, this);
-                    damage = (int)(bonus + (uint)(bonus * variance));
-                    damage = (int)unitTarget.SpellDamageBonusTaken(unitCaster, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect);
+                    var bonus = unitCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, damage, DamageEffectType.SpellDirect, effectInfo, 1, this);
+                    damage = bonus + (uint)(bonus * variance);
+                    damage = unitTarget.SpellDamageBonusTaken(unitCaster, m_spellInfo, damage, DamageEffectType.SpellDirect);
                 }
 
                 m_damage += damage;
@@ -688,9 +686,9 @@ namespace Game.Spells
             // add spell damage bonus
             if (unitCaster != null)
             {
-                uint bonus = unitCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo, 1, this);
-                damage = (int)(bonus + (uint)(bonus * variance));
-                damage = (int)unitTarget.SpellDamageBonusTaken(unitCaster, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect);
+                var bonus = unitCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, damage, DamageEffectType.SpellDirect, effectInfo, 1, this);
+                damage = bonus + (bonus * variance);
+                damage = unitTarget.SpellDamageBonusTaken(unitCaster, m_spellInfo, damage, DamageEffectType.SpellDirect);
             }
 
             int newDamage = -(unitTarget.ModifyPower(powerType, -damage));
@@ -788,14 +786,14 @@ namespace Game.Spells
             if (unitCaster == null)
                 return;
 
-            int addhealth = damage;
+            var addhealth = damage;
 
             // Vessel of the Naaru (Vial of the Sunwell trinket)
             ///@todo: move this to scripts
             if (m_spellInfo.Id == 45064)
             {
                 // Amount of heal - depends from stacked Holy Energy
-                int damageAmount = 0;
+                float damageAmount = 0;
                 AuraEffect aurEff = unitCaster.GetAuraEffect(45062, 0);
                 if (aurEff != null)
                 {
@@ -807,17 +805,17 @@ namespace Game.Spells
             }
             // Death Pact - return pct of max health to caster
             else if (m_spellInfo.SpellFamilyName == SpellFamilyNames.Deathknight && m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x00080000u))
-                addhealth = (int)unitCaster.SpellHealingBonusDone(unitTarget, m_spellInfo, (uint)unitCaster.CountPctFromMaxHealth(damage), DamageEffectType.Heal, effectInfo, 1, this);
+                addhealth = unitCaster.SpellHealingBonusDone(unitTarget, m_spellInfo, unitCaster.CountPctFromMaxHealth(damage), DamageEffectType.Heal, effectInfo, 1, this);
             else
             {
-                uint bonus = unitCaster.SpellHealingBonusDone(unitTarget, m_spellInfo, (uint)addhealth, DamageEffectType.Heal, effectInfo, 1, this);
-                addhealth = (int)(bonus + (uint)(bonus * variance));
+                var bonus = unitCaster.SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, DamageEffectType.Heal, effectInfo, 1, this);
+                addhealth = (bonus + (bonus * variance));
             }
 
-            addhealth = (int)unitTarget.SpellHealingBonusTaken(unitCaster, m_spellInfo, (uint)addhealth, DamageEffectType.Heal);
+            addhealth = (int)unitTarget.SpellHealingBonusTaken(unitCaster, m_spellInfo, addhealth, DamageEffectType.Heal);
 
             // Remove Grievious bite if fully healed
-            if (unitTarget.HasAura(48920) && ((uint)(unitTarget.GetHealth() + (ulong)addhealth) >= unitTarget.GetMaxHealth()))
+            if (unitTarget.HasAura(48920) && ((unitTarget.GetHealth() + addhealth) >= unitTarget.GetMaxHealth()))
                 unitTarget.RemoveAura(48920);
 
             m_healing += addhealth;
@@ -832,7 +830,7 @@ namespace Game.Spells
             if (unitTarget == null || !unitTarget.IsAlive() || damage < 0)
                 return;
 
-            uint heal = (uint)unitTarget.CountPctFromMaxHealth(damage);
+            var heal = (float)unitTarget.CountPctFromMaxHealth(damage);
             Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster)
             {
@@ -840,7 +838,7 @@ namespace Game.Spells
                 heal = unitTarget.SpellHealingBonusTaken(unitCaster, m_spellInfo, heal, DamageEffectType.Heal);
             }
 
-            m_healing += (int)heal;
+            m_healing += heal;
         }
 
         [SpellEffectHandler(SpellEffectName.HealMechanical)]
@@ -853,15 +851,16 @@ namespace Game.Spells
                 return;
 
             Unit unitCaster = GetUnitCasterForEffectHandlers();
-            uint heal = (uint)damage;
+            var heal = damage;
             if (unitCaster)
                 heal = unitCaster.SpellHealingBonusDone(unitTarget, m_spellInfo, heal, DamageEffectType.Heal, effectInfo, 1, this);
 
-            heal += (uint)(heal * variance);
+            heal += heal * variance;
+
             if (unitCaster)
                 heal = unitTarget.SpellHealingBonusTaken(unitCaster, m_spellInfo, heal, DamageEffectType.Heal);
 
-            m_healing += (int)heal;
+            m_healing += heal;
         }
 
         [SpellEffectHandler(SpellEffectName.HealthLeech)]
@@ -876,12 +875,12 @@ namespace Game.Spells
             Unit unitCaster = GetUnitCasterForEffectHandlers();
             uint bonus = 0;
             if (unitCaster != null)
-                unitCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo, 1, this);
+                unitCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, damage, DamageEffectType.SpellDirect, effectInfo, 1, this);
 
-            damage = (int)(bonus + (uint)(bonus * variance));
+            damage = bonus + (bonus * variance);
 
             if (unitCaster != null)
-                damage = (int)unitTarget.SpellDamageBonusTaken(unitCaster, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect);
+                damage = unitTarget.SpellDamageBonusTaken(unitCaster, m_spellInfo, damage, DamageEffectType.SpellDirect);
 
             Log.outDebug(LogFilter.Spells, "HealthLeech :{0}", damage);
 
@@ -889,13 +888,13 @@ namespace Game.Spells
 
             m_damage += damage;
 
-            DamageInfo damageInfo = new(unitCaster, unitTarget, (uint)damage, m_spellInfo, m_spellInfo.GetSchoolMask(), DamageEffectType.Direct, WeaponAttackType.BaseAttack);
+            DamageInfo damageInfo = new(unitCaster, unitTarget, damage, m_spellInfo, m_spellInfo.GetSchoolMask(), DamageEffectType.Direct, WeaponAttackType.BaseAttack);
             Unit.CalcAbsorbResist(damageInfo);
-            uint absorb = damageInfo.GetAbsorb();
-            damage -= (int)absorb;
+            var absorb = damageInfo.GetAbsorb();
+            damage -= absorb;
 
             // get max possible damage, don't count overkill for heal
-            uint healthGain = (uint)(-unitTarget.GetHealthGain(-damage) * healMultiplier);
+            var healthGain = (-unitTarget.GetHealthGain(-damage) * healMultiplier);
 
             if (unitCaster != null && unitCaster.IsAlive())
             {
@@ -1622,7 +1621,7 @@ namespace Game.Spells
 
                     // The spell that this effect will trigger. It has SPELL_AURA_CONTROL_VEHICLE
                     uint spellId = SharedConst.VehicleSpellRideHardcoded;
-                    int basePoints = effectInfo.CalcValue();
+                    var basePoints = effectInfo.CalcValue();
                     if (basePoints > SharedConst.MaxVehicleSeats)
                     {
                         SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)basePoints, GetCastDifficulty());
@@ -1932,7 +1931,7 @@ namespace Game.Spells
             if (tier == null)
                 return;
             ushort skillval = unitTarget.ToPlayer().GetPureSkillValue((SkillType)skillid);
-            unitTarget.ToPlayer().SetSkill(skillid, (uint)damage, Math.Max(skillval, (ushort)1), tier.Value[damage - 1]);
+            unitTarget.ToPlayer().SetSkill(skillid, (uint)damage, Math.Max(skillval, (ushort)1), tier.Value[(int)damage - 1]);
         }
 
         [SpellEffectHandler(SpellEffectName.PlayMovie)]
@@ -2384,8 +2383,8 @@ namespace Game.Spells
 
             // some spell specific modifiers
             float totalDamagePercentMod = 1.0f;                    // applied to final bonus+weapon damage
-            int fixed_bonus = 0;
-            int spell_bonus = 0;                                  // bonus specific for spell
+            float fixed_bonus = 0;
+            float spell_bonus = 0;                                  // bonus specific for spell
 
             switch (m_spellInfo.SpellFamilyName)
             {
@@ -2444,12 +2443,12 @@ namespace Game.Spells
 
                 float weapon_total_pct = unitCaster.GetPctModifierValue(unitMod, UnitModifierPctType.Total);
                 if (fixed_bonus != 0)
-                    fixed_bonus = (int)(fixed_bonus * weapon_total_pct);
+                    fixed_bonus = fixed_bonus * weapon_total_pct;
                 if (spell_bonus != 0)
-                    spell_bonus = (int)(spell_bonus * weapon_total_pct);
+                    spell_bonus = spell_bonus * weapon_total_pct;
             }
 
-            uint weaponDamage = unitCaster.CalculateDamage(m_attackType, normalized, addPctMods);
+            float weaponDamage = unitCaster.CalculateDamage(m_attackType, normalized, addPctMods);
 
             // Sequence is important
             foreach (var spellEffectInfo in m_spellInfo.GetEffects())
@@ -2461,25 +2460,25 @@ namespace Game.Spells
                     case SpellEffectName.WeaponDamage:
                     case SpellEffectName.WeaponDamageNoSchool:
                     case SpellEffectName.NormalizedWeaponDmg:
-                        weaponDamage += (uint)fixed_bonus;
+                        weaponDamage += fixed_bonus;
                         break;
                     case SpellEffectName.WeaponPercentDamage:
-                        weaponDamage = (uint)(weaponDamage * weaponDamagePercentMod);
+                        weaponDamage = weaponDamage * weaponDamagePercentMod;
                         break;
                     default:
                         break;                                      // not weapon damage effect, just skip
                 }
             }
 
-            weaponDamage += (uint)spell_bonus;
-            weaponDamage = (uint)(weaponDamage * totalDamagePercentMod);
+            weaponDamage += spell_bonus;
+            weaponDamage = weaponDamage * totalDamagePercentMod;
 
             // prevent negative damage
             weaponDamage = Math.Max(weaponDamage, 0);
 
             // Add melee damage bonuses (also check for negative)
             weaponDamage = unitCaster.MeleeDamageBonusDone(unitTarget, weaponDamage, m_attackType, DamageEffectType.SpellDirect, m_spellInfo, effectInfo);
-            m_damage += (int)unitTarget.MeleeDamageBonusTaken(unitCaster, weaponDamage, m_attackType, DamageEffectType.SpellDirect, m_spellInfo);
+            m_damage += unitTarget.MeleeDamageBonusTaken(unitCaster, weaponDamage, m_attackType, DamageEffectType.SpellDirect, m_spellInfo);
         }
 
         [SpellEffectHandler(SpellEffectName.Threat)]
@@ -3055,7 +3054,7 @@ namespace Game.Spells
                 uint enchant_id = (uint)effectInfo.MiscValue;
                 int duration = m_spellInfo.GetDuration();          //Try duration index first ..
                 if (duration == 0)
-                    duration = damage;//+1;            //Base points after ..
+                    duration = (int)damage;//+1;            //Base points after ..
                 if (duration == 0)
                     duration = 10 * Time.InMilliseconds;                                  //10 seconds for enchants which don't have listed duration
 
@@ -3108,7 +3107,7 @@ namespace Game.Spells
 
             Player player = unitTarget.ToPlayer();
             byte currentDrunk = player.GetDrunkValue();
-            int drunkMod = damage;
+            var drunkMod = damage;
             if (currentDrunk + drunkMod > 100)
             {
                 currentDrunk = 100;
@@ -3331,7 +3330,7 @@ namespace Game.Spells
 
             Player player = unitTarget.ToPlayer();
 
-            int repChange = damage;
+            int repChange = (int)damage;
 
             int factionId = effectInfo.MiscValue;
 
@@ -4731,7 +4730,7 @@ namespace Game.Spells
             if (!CliDB.CurrencyTypesStorage.ContainsKey(effectInfo.MiscValue))
                 return;
 
-            unitTarget.ToPlayer().ModifyCurrency((uint)effectInfo.MiscValue, damage, CurrencyGainSource.Spell, CurrencyDestroyReason.Spell);
+            unitTarget.ToPlayer().ModifyCurrency((uint)effectInfo.MiscValue, (int)damage, CurrencyGainSource.Spell, CurrencyDestroyReason.Spell);
         }
 
         [SpellEffectHandler(SpellEffectName.CastButton)]
@@ -5476,8 +5475,8 @@ namespace Game.Spells
                 return;
 
             PvPCredit packet = new();
-            packet.Honor = damage;
-            packet.OriginalHonor = damage;
+            packet.Honor = (int)damage;
+            packet.OriginalHonor = (int)damage;
 
             Player playerTarget = unitTarget.ToPlayer();
             playerTarget.AddHonorXP((uint)damage);
@@ -5751,7 +5750,7 @@ namespace Game.Spells
             if (m_customArg is not TraitConfigPacket)
                 return;
 
-            target.UpdateTraitConfig(m_customArg as TraitConfigPacket, damage, false);
+            target.UpdateTraitConfig(m_customArg as TraitConfigPacket, (int)damage, false);
         }
 
         [SpellEffectHandler(SpellEffectName.ChangePartyMembers)]

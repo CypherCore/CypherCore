@@ -15,12 +15,12 @@ public class spell_dk_purgatory_absorb : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
-	private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
+	private void CalculateAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
 	{
 		amount = -1;
 	}
 
-	private void Absorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref uint absorbAmount)
+	private void Absorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref float absorbAmount)
 	{
 		var target = GetTarget();
 

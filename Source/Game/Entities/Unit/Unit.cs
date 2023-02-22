@@ -1881,7 +1881,7 @@ namespace Game.Entities
 
         public void RecalculateObjectScale()
         {
-            int scaleAuras = GetTotalAuraModifier(AuraType.ModScale) + GetTotalAuraModifier(AuraType.ModScale2);
+            float scaleAuras = GetTotalAuraModifier(AuraType.ModScale) + GetTotalAuraModifier(AuraType.ModScale2);
             float scale = GetNativeObjectScale() + MathFunctions.CalculatePct(1.0f, scaleAuras);
             float scaleMin = IsPlayer() ? 0.1f : 0.01f;
             SetObjectScale(Math.Max(scale, scaleMin));
@@ -2512,7 +2512,7 @@ namespace Game.Entities
 
         void StartReactiveTimer(ReactiveType reactive) { m_reactiveTimer[reactive] = 4000; }
 
-        public static void DealDamageMods(Unit attacker, Unit victim, ref uint damage)
+        public static void DealDamageMods(Unit attacker, Unit victim, ref float damage)
         {
             if (victim == null || !victim.IsAlive() || victim.HasUnitState(UnitState.InFlight)
                 || (victim.IsTypeId(TypeId.Unit) && victim.ToCreature().IsInEvadeMode()))
@@ -2521,7 +2521,7 @@ namespace Game.Entities
             }
         }
 
-        public static bool CheckEvade(Unit attacker, Unit victim, ref uint damage, ref uint absorb)
+        public static bool CheckEvade(Unit attacker, Unit victim, ref float damage, ref float absorb)
         {
             if (victim == null || !victim.IsAlive() || victim.HasUnitState(UnitState.InFlight)
               || (victim.IsTypeId(TypeId.Unit) && victim.ToCreature().IsEvadingAttacks()))
@@ -2533,28 +2533,28 @@ namespace Game.Entities
             return false;
         }
 
-        public static void ScaleDamage(Unit attacker, Unit victim, ref uint damage)
+        public static void ScaleDamage(Unit attacker, Unit victim, ref float damage)
         {
             if (attacker != null)
                 damage = (uint)(damage * attacker.GetDamageMultiplierForTarget(victim));
         }
 
-        public static void DealDamageMods(Unit attacker, Unit victim, ref uint damage, ref uint absorb)
+        public static void DealDamageMods(Unit attacker, Unit victim, ref float damage, ref float absorb)
         {
             if (!CheckEvade(attacker, victim, ref damage, ref absorb))
                 ScaleDamage(attacker, victim, ref damage);
         }
 
-        public static uint DealDamage(Unit attacker, Unit victim, uint damage, CleanDamage cleanDamage = null, DamageEffectType damagetype = DamageEffectType.Direct, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal, SpellInfo spellProto = null, bool durabilityLoss = true)
+        public static float DealDamage(Unit attacker, Unit victim, float damage, CleanDamage cleanDamage = null, DamageEffectType damagetype = DamageEffectType.Direct, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal, SpellInfo spellProto = null, bool durabilityLoss = true)
         {
-            uint damageDone = damage;
-            uint damageTaken = damage;
+            var damageDone = damage;
+            var damageTaken = damage;
             if (attacker != null)
-                damageTaken = (uint)(damage / victim.GetHealthMultiplierForTarget(attacker));
+                damageTaken = (damage / victim.GetHealthMultiplierForTarget(attacker));
 
             // call script hooks
             {
-                uint tmpDamage = damageTaken;
+                var tmpDamage = damageTaken;
 
                 victim.GetAI()?.DamageTaken(attacker, ref tmpDamage, damagetype, spellProto);
 
@@ -2636,7 +2636,7 @@ namespace Game.Entities
 
                     SpellInfo spell = aura.GetSpellInfo();
 
-                    uint share = MathFunctions.CalculatePct(damageDone, aura.GetAmount());
+                    var share = MathFunctions.CalculatePct(damageDone, aura.GetAmount());
 
                     // @todo check packets if damage is done by victim, or by attacker of victim
                     DealDamageMods(attacker, shareDamageTarget, ref share);
@@ -2700,7 +2700,7 @@ namespace Game.Entities
                     {
                         Battleground bg = killer.GetBattleground();
                         if (bg != null)
-                            bg.UpdatePlayerScore(killer, ScoreType.DamageDone, damageDone);
+                            bg.UpdatePlayerScore(killer, ScoreType.DamageDone, (uint)damageDone);
                     }
 
                     killer.UpdateCriteria(CriteriaType.DamageDealt, health > damageDone ? damageDone : health, 0, 0, victim);
@@ -2749,19 +2749,19 @@ namespace Game.Entities
                             continue;
 
                         // get amount which can be still absorbed by the aura
-                        int currentAbsorb = absorbAurEff.GetAmount();
+                        var currentAbsorb = absorbAurEff.GetAmount();
                         // aura with infinite absorb amount - let the scripts handle absorbtion amount, set here to 0 for safety
                         if (currentAbsorb < 0)
                             currentAbsorb = 0;
 
-                        uint tempAbsorb = (uint)currentAbsorb;
+                        var tempAbsorb = currentAbsorb;
 
                         // This aura type is used both by Spirit of Redemption (death not really prevented, must grant all credit immediately) and Cheat Death (death prevented)
                         // repurpose PreventDefaultAction for this
                         bool deathFullyPrevented = false;
 
                         absorbAurEff.GetBase().CallScriptEffectAbsorbHandlers(absorbAurEff, aurApp, damageInfo, ref tempAbsorb, ref deathFullyPrevented);
-                        currentAbsorb = (int)tempAbsorb;
+                        currentAbsorb = tempAbsorb;
 
                         // absorb must be smaller than the damage itself
                         currentAbsorb = MathFunctions.RoundToInterval(ref currentAbsorb, 0, (int)damageInfo.GetDamage());
@@ -2780,8 +2780,8 @@ namespace Game.Entities
                             absorbLog.Caster = baseAura.GetCasterGUID();
                             absorbLog.AbsorbedSpellID = spellProto != null ? spellProto.Id : 0;
                             absorbLog.AbsorbSpellID = baseAura.GetId();
-                            absorbLog.Absorbed = currentAbsorb;
-                            absorbLog.OriginalDamage = damageInfo.GetOriginalDamage();
+                            absorbLog.Absorbed = (int)currentAbsorb;
+                            absorbLog.OriginalDamage = (uint)damageInfo.GetOriginalDamage();
                             absorbLog.LogData.Initialize(victim);
                             victim.SendCombatLogMessage(absorbLog);
                         }
@@ -2985,7 +2985,7 @@ namespace Game.Entities
                 uint victimDefense = victim.GetMaxSkillValueForLevel(this);
                 uint attackerMeleeSkill = GetMaxSkillValueForLevel();
 
-                chance *= attackerMeleeSkill / (float)victimDefense * 0.16f;
+                chance *= attackerMeleeSkill / victimDefense * 0.16f;
 
                 // -probability is between 0% and 40%
                 MathFunctions.RoundToInterval(ref chance, 0.0f, 40.0f);
@@ -3025,7 +3025,7 @@ namespace Game.Entities
                         continue;
                     }
 
-                    uint damage = (uint)dmgShield.GetAmount();
+                    float damage = dmgShield.GetAmount();
                     Unit caster = dmgShield.GetCaster();
                     if (caster)
                     {
@@ -3043,11 +3043,11 @@ namespace Game.Entities
                     damageShield.Attacker = victim.GetGUID();
                     damageShield.Defender = GetGUID();
                     damageShield.SpellID = spellInfo.Id;
-                    damageShield.TotalDamage = damage;
+                    damageShield.TotalDamage = (uint)damage;
                     damageShield.OriginalDamage = (int)damageInfo.OriginalDamage;
                     damageShield.OverKill = (uint)Math.Max(damage - GetHealth(), 0);
                     damageShield.SchoolMask = (uint)spellInfo.SchoolMask;
-                    damageShield.LogAbsorbed = damageInfo1.GetAbsorb();
+                    damageShield.LogAbsorbed = (uint)damageInfo1.GetAbsorb();
 
                     DealDamage(victim, this, damage, null, DamageEffectType.SpellDirect, spellInfo.GetSchoolMask(), spellInfo, true);
                     damageShield.LogData.Initialize(this);
@@ -3055,6 +3055,11 @@ namespace Game.Entities
                     victim.SendCombatLogMessage(damageShield);
                 }
             }
+        }
+
+        public long ModifyHealth(float dval)
+        {
+            return ModifyHealth((long)dval);
         }
 
         public long ModifyHealth(long dVal)
@@ -3089,7 +3094,7 @@ namespace Game.Entities
             {
                 HealthUpdate packet = new();
                 packet.Guid = GetGUID();
-                packet.Health = (long)GetHealth();
+                packet.Health = GetHealth();
 
                 Player player = GetCharmerOrOwnerPlayerOrPlayerItself();
                 if (player)
@@ -3097,6 +3102,11 @@ namespace Game.Entities
             }
 
             return gain;
+        }
+
+        public long GetHealthGain(float dVal)
+        {
+            return GetHealthGain((long)dVal);
         }
 
         public long GetHealthGain(long dVal)
@@ -3124,13 +3134,13 @@ namespace Game.Entities
             return gain;
         }
 
-        void TriggerOnHealthChangeAuras(ulong oldVal, ulong newVal)
+        void TriggerOnHealthChangeAuras(long oldVal, long newVal)
         {
             foreach (AuraEffect effect in GetAuraEffectsByType(AuraType.TriggerSpellOnHealthPct))
             {
-                int triggerHealthPct = effect.GetAmount();
+                var triggerHealthPct = effect.GetAmount();
                 uint triggerSpell = effect.GetSpellEffectInfo().TriggerSpell;
-                ulong threshold = CountPctFromMaxHealth(triggerHealthPct);
+                long threshold = CountPctFromMaxHealth(triggerHealthPct);
 
                 switch ((AuraTriggerOnHealthChangeDirection)effect.GetMiscValue())
                 {
@@ -3399,7 +3409,7 @@ namespace Game.Entities
                 RemovePvpFlag(UnitPVPStateFlags.PvP);
         }
 
-        static uint CalcSpellResistedDamage(Unit attacker, Unit victim, uint damage, SpellSchoolMask schoolMask, SpellInfo spellInfo)
+        static uint CalcSpellResistedDamage(Unit attacker, Unit victim, float damage, SpellSchoolMask schoolMask, SpellInfo spellInfo)
         {
             // Magic damage, check for resists
             if (!Convert.ToBoolean(schoolMask & SpellSchoolMask.Magic))
@@ -3435,7 +3445,7 @@ namespace Game.Entities
             float damageResisted = damage * resistance / 10f;
             if (damageResisted > 0.0f) // if any damage was resisted
             {
-                int ignoredResistance = 0;
+                float ignoredResistance = 0;
 
                 if (attacker != null)
                     ignoredResistance += attacker.GetTotalAuraModifierByMiscMask(AuraType.ModIgnoreTargetResist, (int)schoolMask);
@@ -3446,7 +3456,7 @@ namespace Game.Entities
                 // Spells with melee and magic school mask, decide whether resistance or armor absorb is higher
                 if (spellInfo != null && spellInfo.HasAttribute(SpellCustomAttributes.SchoolmaskNormalWithMagic))
                 {
-                    uint damageAfterArmor = CalcArmorReducedDamage(attacker, victim, damage, spellInfo, spellInfo.GetAttackType());
+                    float damageAfterArmor = CalcArmorReducedDamage(attacker, victim, damage, spellInfo, spellInfo.GetAttackType());
                     float armorReduction = damage - damageAfterArmor;
 
                     // pick the lower one, the weakest resistance counts
@@ -3547,7 +3557,7 @@ namespace Game.Entities
                     continue;
 
                 // get amount which can be still absorbed by the aura
-                int currentAbsorb = absorbAurEff.GetAmount();
+                float currentAbsorb = absorbAurEff.GetAmount();
                 // aura with infinite absorb amount - let the scripts handle absorbtion amount, set here to 0 for safety
                 if (currentAbsorb < 0)
                     currentAbsorb = 0;
@@ -3555,7 +3565,7 @@ namespace Game.Entities
                 if (!absorbAurEff.GetSpellInfo().HasAttribute(SpellAttr6.AbsorbCannotBeIgnore))
                     damageInfo.ModifyDamage(-absorbIgnoringDamage);
 
-                uint tempAbsorb = (uint)currentAbsorb;
+                float tempAbsorb = currentAbsorb;
 
                 bool defaultPrevented = false;
 
@@ -3567,7 +3577,7 @@ namespace Game.Entities
                     // absorb must be smaller than the damage itself
                     currentAbsorb = MathFunctions.RoundToInterval(ref currentAbsorb, 0, damageInfo.GetDamage());
 
-                    damageInfo.AbsorbDamage((uint)currentAbsorb);
+                    damageInfo.AbsorbDamage(currentAbsorb);
 
                     tempAbsorb = (uint)currentAbsorb;
                     absorbAurEff.GetBase().CallScriptEffectAfterAbsorbHandlers(absorbAurEff, aurApp, damageInfo, ref tempAbsorb);
@@ -3594,8 +3604,8 @@ namespace Game.Entities
                     absorbLog.Caster = absorbAurEff.GetBase().GetCasterGUID();
                     absorbLog.AbsorbedSpellID = damageInfo.GetSpellInfo() != null ? damageInfo.GetSpellInfo().Id : 0;
                     absorbLog.AbsorbSpellID = absorbAurEff.GetId();
-                    absorbLog.Absorbed = currentAbsorb;
-                    absorbLog.OriginalDamage = damageInfo.GetOriginalDamage();
+                    absorbLog.Absorbed = (int)currentAbsorb;
+                    absorbLog.OriginalDamage = (uint)damageInfo.GetOriginalDamage();
                     absorbLog.LogData.Initialize(damageInfo.GetVictim());
                     damageInfo.GetVictim().SendCombatLogMessage(absorbLog);
                 }
@@ -3617,7 +3627,7 @@ namespace Game.Entities
                     continue;
 
                 // get amount which can be still absorbed by the aura
-                int currentAbsorb = absorbAurEff.GetAmount();
+                float currentAbsorb = absorbAurEff.GetAmount();
                 // aura with infinite absorb amount - let the scripts handle absorbtion amount, set here to 0 for safety
                 if (currentAbsorb < 0)
                     currentAbsorb = 0;
@@ -3625,7 +3635,7 @@ namespace Game.Entities
                 if (!absorbAurEff.GetSpellInfo().HasAttribute(SpellAttr6.AbsorbCannotBeIgnore))
                     damageInfo.ModifyDamage(-absorbIgnoringDamage);
 
-                uint tempAbsorb = (uint)currentAbsorb;
+                float tempAbsorb = currentAbsorb;
 
                 bool defaultPrevented = false;
 
@@ -3637,7 +3647,7 @@ namespace Game.Entities
                     // absorb must be smaller than the damage itself
                     currentAbsorb = MathFunctions.RoundToInterval(ref currentAbsorb, 0, damageInfo.GetDamage());
 
-                    int manaReduction = currentAbsorb;
+                    float manaReduction = currentAbsorb;
 
                     // lower absorb amount by talents
                     float manaMultiplier = absorbAurEff.GetSpellEffectInfo().CalcValueMultiplier(absorbAurEff.GetCaster());
@@ -3674,8 +3684,8 @@ namespace Game.Entities
                     absorbLog.Caster = absorbAurEff.GetBase().GetCasterGUID();
                     absorbLog.AbsorbedSpellID = damageInfo.GetSpellInfo() != null ? damageInfo.GetSpellInfo().Id : 0;
                     absorbLog.AbsorbSpellID = absorbAurEff.GetId();
-                    absorbLog.Absorbed = currentAbsorb;
-                    absorbLog.OriginalDamage = damageInfo.GetOriginalDamage();
+                    absorbLog.Absorbed = (int)currentAbsorb;
+                    absorbLog.OriginalDamage = (uint)damageInfo.GetOriginalDamage();
                     absorbLog.LogData.Initialize(damageInfo.GetVictim());
                     damageInfo.GetVictim().SendCombatLogMessage(absorbLog);
                 }
@@ -3706,7 +3716,7 @@ namespace Game.Entities
                     if (!caster || (caster == damageInfo.GetVictim()) || !caster.IsInWorld || !caster.IsAlive())
                         continue;
 
-                    uint splitDamage = MathFunctions.CalculatePct(damageInfo.GetDamage(), itr.GetAmount());
+                    float splitDamage = MathFunctions.CalculatePct(damageInfo.GetDamage(), itr.GetAmount());
 
                     itr.GetBase().CallScriptEffectSplitHandlers(itr, aurApp, damageInfo, ref splitDamage);
 
@@ -3722,7 +3732,7 @@ namespace Game.Entities
                         continue;
                     }
 
-                    uint split_absorb = 0;
+                    float split_absorb = 0;
                     DealDamageMods(damageInfo.GetAttacker(), caster, ref splitDamage, ref split_absorb);
 
                     SpellNonMeleeDamage log = new(damageInfo.GetAttacker(), caster, itr.GetSpellInfo(), itr.GetBase().GetSpellVisual(), damageInfo.GetSchoolMask(), itr.GetBase().GetCastId());
@@ -3763,17 +3773,17 @@ namespace Game.Entities
                     continue;
 
                 // get amount which can be still absorbed by the aura
-                int currentAbsorb = absorbAurEff.GetAmount();
+                var currentAbsorb = absorbAurEff.GetAmount();
                 // aura with infinite absorb amount - let the scripts handle absorbtion amount, set here to 0 for safety
                 if (currentAbsorb < 0)
                     currentAbsorb = 0;
 
-                uint tempAbsorb = (uint)currentAbsorb;
+                float tempAbsorb = currentAbsorb;
 
                 bool defaultPrevented = false;
 
                 absorbAurEff.GetBase().CallScriptEffectAbsorbHandlers(absorbAurEff, aurApp, healInfo, ref tempAbsorb, ref defaultPrevented);
-                currentAbsorb = (int)tempAbsorb;
+                currentAbsorb = tempAbsorb;
 
                 if (!defaultPrevented)
                 {
@@ -3782,7 +3792,7 @@ namespace Game.Entities
 
                     healInfo.AbsorbHeal((uint)currentAbsorb);
 
-                    tempAbsorb = (uint)currentAbsorb;
+                    tempAbsorb = currentAbsorb;
                     absorbAurEff.GetBase().CallScriptEffectAfterAbsorbHandlers(absorbAurEff, aurApp, healInfo, ref tempAbsorb);
 
                     // Check if our aura is using amount to count heal
@@ -3804,7 +3814,7 @@ namespace Game.Entities
                     absorbLog.AbsorbCaster = absorbAurEff.GetBase().GetCasterGUID();
                     absorbLog.AbsorbedSpellID = (int)(healInfo.GetSpellInfo() != null ? healInfo.GetSpellInfo().Id : 0);
                     absorbLog.AbsorbSpellID = (int)absorbAurEff.GetId();
-                    absorbLog.Absorbed = currentAbsorb;
+                    absorbLog.Absorbed = (int)currentAbsorb;
                     absorbLog.OriginalHeal = (int)healInfo.GetOriginalHeal();
                     healInfo.GetTarget().SendMessageToSet(absorbLog, true);
                 }
@@ -3828,7 +3838,7 @@ namespace Game.Entities
             }
         }
 
-        public static uint CalcArmorReducedDamage(Unit attacker, Unit victim, uint damage, SpellInfo spellInfo, WeaponAttackType attackType = WeaponAttackType.Max, uint attackerLevel = 0)
+        public static float CalcArmorReducedDamage(Unit attacker, Unit victim, float damage, SpellInfo spellInfo, WeaponAttackType attackType = WeaponAttackType.Max, uint attackerLevel = 0)
         {
             float armor = victim.GetArmor();
 
@@ -3837,7 +3847,7 @@ namespace Game.Entities
                 armor *= victim.GetArmorMultiplierForTarget(attacker);
 
                 // bypass enemy armor by SPELL_AURA_BYPASS_ARMOR_FOR_CASTER
-                int armorBypassPct = 0;
+                float armorBypassPct = 0;
                 var reductionAuras = victim.GetAuraEffectsByType(AuraType.BypassArmorForCaster);
                 foreach (var eff in reductionAuras)
                     if (eff.GetCasterGUID() == attacker.GetGUID())
@@ -3899,10 +3909,10 @@ namespace Game.Entities
                 return damage;
 
             float mitigation = Math.Min(armor / (armor + armorConstant), 0.85f);
-            return (uint)Math.Max(damage * (1.0f - mitigation), 0.0f);
+            return Math.Max(damage * (1.0f - mitigation), 0.0f);
         }
 
-        public uint MeleeDamageBonusDone(Unit victim, uint damage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null, SpellEffectInfo spellEffectInfo = null, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal)
+        public float MeleeDamageBonusDone(Unit victim, float damage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null, SpellEffectInfo spellEffectInfo = null, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal)
         {
             if (victim == null || damage == 0)
                 return 0;
@@ -3910,7 +3920,7 @@ namespace Game.Entities
             uint creatureTypeMask = victim.GetCreatureTypeMask();
 
             // Done fixed damage bonus auras
-            int DoneFlatBenefit = 0;
+            float DoneFlatBenefit = 0;
 
             // ..done
             DoneFlatBenefit += GetTotalAuraModifierByMiscMask(AuraType.ModDamageDoneCreature, (int)creatureTypeMask);
@@ -3919,7 +3929,7 @@ namespace Game.Entities
             // SPELL_AURA_MOD_DAMAGE_DONE included in weapon damage
 
             // ..done (base at attack power for marked target and base at attack power for creature type)
-            int APbonus = 0;
+            float APbonus = 0;
 
             if (attType == WeaponAttackType.RangedAttack)
             {
@@ -4006,15 +4016,15 @@ namespace Game.Entities
             damageF = (damageF + DoneFlatBenefit) * DoneTotalMod;
 
             // bonus result can be negative
-            return (uint)Math.Max(damageF, 0.0f);
+            return Math.Max(damageF, 0.0f);
         }
 
-        public uint MeleeDamageBonusTaken(Unit attacker, uint pdamage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal)
+        public float MeleeDamageBonusTaken(Unit attacker, float pdamage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal)
         {
             if (pdamage == 0)
                 return 0;
 
-            int TakenFlatBenefit = 0;
+            float TakenFlatBenefit = 0;
 
             // ..taken
             TakenFlatBenefit += GetTotalAuraModifierByMiscMask(AuraType.ModDamageTaken, (int)attacker.GetMeleeDamageSchoolMask());
@@ -4112,11 +4122,11 @@ namespace Game.Entities
             }
 
             float tmpDamage = (float)(pdamage + TakenFlatBenefit) * TakenTotalMod;
-            return (uint)Math.Max(tmpDamage, 0.0f);
+            return Math.Max(tmpDamage, 0.0f);
         }
 
 
-        public void SaveDamageHistory(uint damage)
+        public void SaveDamageHistory(float damage)
         {
             var currentTime = GameTime.GetDateAndTime();
             var maxPastTime = currentTime - MAX_DAMAGE_HISTORY_DURATION;
@@ -4127,11 +4137,11 @@ namespace Game.Entities
             _damageTakenHistory[currentTime] += damage;
         }
 
-        public uint GetDamageOverLastSeconds(uint seconds)
+        public float GetDamageOverLastSeconds(uint seconds)
         {
             var maxPastTime = GameTime.GetDateAndTime() - TimeSpan.FromSeconds(seconds);
 
-            uint damageOverLastSeconds = 0;
+            float damageOverLastSeconds = 0;
             foreach(var itr in _damageTakenHistory)
             {
                 if (itr.Key >= maxPastTime)
@@ -4252,7 +4262,7 @@ namespace Game.Entities
         // threatmanager will NOT null check your pointers for you - misuse = crash
         public ThreatManager GetThreatManager() { return m_threatManager; }
 
-        public int GetTotalSpellPowerValue(SpellSchoolMask mask, bool heal)
+        public float GetTotalSpellPowerValue(SpellSchoolMask mask, bool heal)
         {
             if (!IsPlayer())
             {

@@ -30,7 +30,7 @@ namespace Scripts.EasternKingdoms.Deadmines.NPC
             UiTimer = 2000;
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             base.DamageTaken(attacker, ref damage, damageType, spellInfo);
 

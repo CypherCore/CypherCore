@@ -15,7 +15,7 @@ public class FireBreath : SpellScript, ISpellOnHit
 
 		if (target != null)
 		{
-			var damage    = (ulong)GetHitDamage();
+			var damage    = GetHitDamage();
 			var maxHealth = target.GetMaxHealth();
 
 			if (target.GetHealth() + damage > maxHealth)

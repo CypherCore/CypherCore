@@ -116,7 +116,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
             }
         }
 
-        public override void DamageTaken(Unit done_by, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit done_by, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (!done_by ||
                 done_by.GetGUID() != Malchezaar)
@@ -133,7 +133,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
         };
 
         private readonly ObjectGuid[] axes = new ObjectGuid[2];
-        private readonly ulong[] enfeeble_health = new ulong[5];
+        private readonly long[] enfeeble_health = new long[5];
         private readonly ObjectGuid[] enfeeble_targets = new ObjectGuid[5];
 
         private readonly List<ObjectGuid> infernals = new();

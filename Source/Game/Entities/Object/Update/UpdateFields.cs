@@ -1156,8 +1156,8 @@ namespace Game.Entities
         public UpdateField<byte> Sex = new(0, 28);
         public UpdateField<byte> DisplayPower = new(0, 29);
         public UpdateField<uint> OverrideDisplayPowerID = new(0, 30);
-        public UpdateField<ulong> Health = new(0, 31);
-        public UpdateField<ulong> MaxHealth = new(32, 33);
+        public UpdateField<long> Health = new(0, 31);
+        public UpdateField<long> MaxHealth = new(32, 33);
         public UpdateField<uint> Level = new(32, 34);
         public UpdateField<int> EffectiveLevel = new(32, 35);
         public UpdateField<uint> ContentTuningID = new(32, 36);
@@ -1298,7 +1298,7 @@ namespace Game.Entities
             data.WriteUInt8(Sex);
             data.WriteUInt8(DisplayPower);
             data.WriteUInt32(OverrideDisplayPowerID);
-            data.WriteUInt64(Health);
+            data.Write(Health);
             for (int i = 0; i < 7; ++i)
             {
                 data.WriteInt32(Power[i]);
@@ -1312,7 +1312,7 @@ namespace Game.Entities
                     data.WriteFloat(PowerRegenInterruptedFlatModifier[i]);
                 }
             }
-            data.WriteUInt64(MaxHealth);
+            data.Write(MaxHealth);
             data.WriteUInt32(Level);
             data.WriteInt32(EffectiveLevel);
             data.WriteUInt32(ContentTuningID);
@@ -1660,14 +1660,14 @@ namespace Game.Entities
                 }
                 if (changesMask[31])
                 {
-                    data.WriteUInt64(Health);
+                    data.Write(Health);
                 }
             }
             if (changesMask[32])
             {
                 if (changesMask[33])
                 {
-                    data.WriteUInt64(MaxHealth);
+                    data.Write(MaxHealth);
                 }
                 if (changesMask[34])
                 {
@@ -3336,20 +3336,20 @@ namespace Game.Entities
     public class SpellFlatModByLabel
     {
         public int ModIndex;
-        public int ModifierValue;
+        public float ModifierValue;
         public int LabelID;
 
         public void WriteCreate(WorldPacket data, Player owner, Player receiver)
         {
             data.WriteInt32(ModIndex);
-            data.WriteInt32(ModifierValue);
+            data.WriteFloat(ModifierValue);
             data.WriteInt32(LabelID);
         }
 
         public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
         {
             data.WriteInt32(ModIndex);
-            data.WriteInt32(ModifierValue);
+            data.WriteFloat(ModifierValue);
             data.WriteInt32(LabelID);
         }
     }

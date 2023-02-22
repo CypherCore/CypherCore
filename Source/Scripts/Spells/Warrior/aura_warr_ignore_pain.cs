@@ -30,7 +30,7 @@ namespace Scripts.Spells.Warrior
 			return true;
 		}
 
-		private void CalcAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
+		private void CalcAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
 		{
 			var caster = GetCaster();
 
@@ -48,14 +48,14 @@ namespace Scripts.Spells.Warrior
 			}
 		}
 
-		private void OnAbsorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref uint UnnamedParameter2)
+		private void OnAbsorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref float UnnamedParameter2)
 		{
 			var caster = GetCaster();
 
 			if (caster != null)
 			{
 				var spell = new SpellNonMeleeDamage(caster, caster, GetSpellInfo(), new SpellCastVisual(0, 0), SpellSchoolMask.Normal);
-				spell.damage      = (uint)(dmgInfo.GetDamage() - dmgInfo.GetDamage() * 0.9f);
+				spell.damage = dmgInfo.GetDamage() - dmgInfo.GetDamage() * 0.9f;
 				spell.cleanDamage = spell.damage;
 				caster.DealSpellDamage(spell, false);
 				caster.SendSpellNonMeleeDamageLog(spell);

@@ -14,7 +14,7 @@ public class spell_pri_clarity_of_will : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
-	private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool UnnamedParameter)
+	private void CalculateAmount(AuraEffect aurEff, ref float amount, ref bool UnnamedParameter)
 	{
 		var caster = aurEff.GetCaster();
 
@@ -25,7 +25,7 @@ public class spell_pri_clarity_of_will : AuraScript, IHasAuraEffects
 			if (player != null)
 			{
 				var absorbamount = 9.0f * player.SpellBaseHealingBonusDone(GetSpellInfo().GetSchoolMask());
-				amount += (int)absorbamount;
+				amount += absorbamount;
 			}
 		}
 	}

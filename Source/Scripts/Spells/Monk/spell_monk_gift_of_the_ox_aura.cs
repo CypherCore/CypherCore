@@ -24,11 +24,11 @@ public class spell_monk_gift_of_the_ox_aura : ScriptObjectAutoAdd, IPlayerOnTake
 
 	public List<uint> spellsToCast = new()
 	                                 {
-		                                 (uint)MonkSpells.GIFT_OF_THE_OX_AT_RIGHT,
-		                                 (uint)MonkSpells.GIFT_OF_THE_OX_AT_LEFT
+		                                 MonkSpells.GIFT_OF_THE_OX_AT_RIGHT,
+		                                 MonkSpells.GIFT_OF_THE_OX_AT_LEFT
 	                                 };
 
-	public void OnPlayerTakeDamage(Player victim, uint damage, SpellSchoolMask UnnamedParameter)
+	public void OnPlayerTakeDamage(Player victim, float damage, SpellSchoolMask UnnamedParameter)
 	{
 		if (damage == 0 || victim == null)
 			return;

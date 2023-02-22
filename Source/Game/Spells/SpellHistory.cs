@@ -378,7 +378,7 @@ namespace Game.Spells
                         categoryCooldown = TimeSpan.FromMilliseconds(categoryCooldown.TotalMilliseconds * _owner.m_unitData.ModHasteRegen);
                     }
 
-                    int cooldownMod = _owner.GetTotalAuraModifier(AuraType.ModCooldown);
+                    var cooldownMod = _owner.GetTotalAuraModifier(AuraType.ModCooldown);
                     if (cooldownMod != 0)
                     {
                         // Apply SPELL_AURA_MOD_COOLDOWN only to own spells
@@ -394,7 +394,7 @@ namespace Game.Spells
                     // Note: This aura applies its modifiers to all cooldowns of spells with set category, not to category cooldown only
                     if (categoryId != 0)
                     {
-                        int categoryModifier = _owner.GetTotalAuraModifierByMiscValue(AuraType.ModSpellCategoryCooldown, (int)categoryId);
+                        var categoryModifier = _owner.GetTotalAuraModifierByMiscValue(AuraType.ModSpellCategoryCooldown, (int)categoryId);
                         if (categoryModifier != 0)
                         {
                             if (cooldown > TimeSpan.Zero)
@@ -906,7 +906,7 @@ namespace Game.Spells
             if (chargeCategoryEntry == null)
                 return 0;
 
-            int recoveryTime = chargeCategoryEntry.ChargeRecoveryTime;
+            float recoveryTime = chargeCategoryEntry.ChargeRecoveryTime;
             recoveryTime += _owner.GetTotalAuraModifierByMiscValue(AuraType.ChargeRecoveryMod, (int)chargeCategoryId);
 
             float recoveryTimeF = recoveryTime;

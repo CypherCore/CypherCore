@@ -15,17 +15,17 @@ public class aura_dru_frenzied_regeneration : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
-	private void CalculateAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
+	private void CalculateAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
 	{
 		var frenzied = GetCaster().GetAura(22842);
 
 		if (frenzied != null)
 			frenzied.GetMaxDuration();
 
-		ulong healAmount    = MathFunctions.CalculatePct(GetCaster().GetDamageOverLastSeconds(5), 50);
-		var   minHealAmount = MathFunctions.CalculatePct(GetCaster().GetMaxHealth(), 5);
+		var healAmount = MathFunctions.CalculatePct(GetCaster().GetDamageOverLastSeconds(5), 50);
+		var minHealAmount = MathFunctions.CalculatePct(GetCaster().GetMaxHealth(), 5);
 		healAmount = Math.Max(healAmount, minHealAmount);
-		amount     = (int)healAmount;
+		amount = healAmount;
 	}
 
 	public override void Register()

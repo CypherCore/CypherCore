@@ -5671,7 +5671,7 @@ namespace Game.Spells
                             if (target.GetOwner() != null && target.GetOwner().IsTypeId(TypeId.Player))
                                 return SpellCastResult.TargetIsPlayerControlled;
 
-                            int damage = CalculateDamage(spellEffectInfo, target);
+                            var damage = CalculateDamage(spellEffectInfo, target);
                             if (damage != 0 && target.GetLevelForTarget(m_caster) > damage)
                                 return SpellCastResult.Highlevel;
                         }
@@ -6237,7 +6237,7 @@ namespace Game.Spells
                 // health as power used - need check health amount
                 if (cost.Power == PowerType.Health)
                 {
-                    if (unitCaster.GetHealth() <= (ulong)cost.Amount)
+                    if (unitCaster.GetHealth() <= cost.Amount)
                         return SpellCastResult.CasterAurastate;
                     continue;
                 }
@@ -6837,7 +6837,7 @@ namespace Game.Spells
 
             //check pushback reduce
             int delaytime = 500;                                  // spellcasting delay is normally 500ms
-            int delayReduce = 100;                                // must be initialized to 100 for percent modifiers
+            float delayReduce = 100;                                // must be initialized to 100 for percent modifiers
 
             Player player = unitCaster.GetSpellModOwner();
             if (player != null)
@@ -6881,7 +6881,7 @@ namespace Game.Spells
             int duration = ((m_channeledDuration > 0) ? m_channeledDuration : m_spellInfo.GetDuration());
 
             int delaytime = MathFunctions.CalculatePct(duration, 25); // channeling delay is normally 25% of its time per hit
-            int delayReduce = 100;                                    // must be initialized to 100 for percent modifiers
+            float delayReduce = 100;                                    // must be initialized to 100 for percent modifiers
 
             Player player = unitCaster.GetSpellModOwner();
             if (player != null)
@@ -7024,7 +7024,7 @@ namespace Game.Spells
                         return false;
                     if (!target.GetCharmerGUID().IsEmpty())
                         return false;
-                    int damage = CalculateDamage(spellEffectInfo, target);
+                    var damage = CalculateDamage(spellEffectInfo, target);
                     if (damage != 0)
                         if (target.GetLevelForTarget(m_caster) > damage)
                             return false;
@@ -7331,7 +7331,7 @@ namespace Game.Spells
                             // skill bonus provided by casting spell (mostly item spells)
                             // add the effect base points modifier from the spell cast (cheat lock / skeleton key etc.)
                             if (effect.TargetA.GetTarget() == Targets.GameobjectItemTarget || effect.TargetB.GetTarget() == Targets.GameobjectItemTarget)
-                                skillValue += effect.CalcValue();
+                                skillValue += (int)effect.CalcValue();
 
                             if (skillValue < reqSkillValue)
                                 return SpellCastResult.LowCastlevel;
@@ -7353,7 +7353,7 @@ namespace Game.Spells
             return SpellCastResult.SpellCastOk;
         }
 
-        public void SetSpellValue(SpellValueMod mod, int value)
+        public void SetSpellValue(SpellValueMod mod, float value)
         {
             if (mod < SpellValueMod.End)
             {
@@ -7365,22 +7365,22 @@ namespace Game.Spells
             switch (mod)
             {
                 case SpellValueMod.RadiusMod:
-                    m_spellValue.RadiusMod = (float)value / 10000;
+                    m_spellValue.RadiusMod = value / 10000;
                     break;
                 case SpellValueMod.MaxTargets:
                     m_spellValue.MaxAffectedTargets = (uint)value;
                     break;
                 case SpellValueMod.AuraStack:
-                    m_spellValue.AuraStackAmount = value;
+                    m_spellValue.AuraStackAmount = (int)value;
                     break;
                 case SpellValueMod.CritChance:
                     m_spellValue.CriticalChance = value / 100.0f; // @todo ugly /100 remove when basepoints are double
                     break;
                 case SpellValueMod.DurationPct:
-                    m_spellValue.DurationMul = (float)value / 100.0f;
+                    m_spellValue.DurationMul = value / 100.0f;
                     break;
                 case SpellValueMod.Duration:
-                    m_spellValue.Duration = value;
+                    m_spellValue.Duration = (int)value;
                     break;
             }
         }
@@ -7849,9 +7849,9 @@ namespace Game.Spells
                 {
                     // calculate the chance using spell base amount, because aura amount is not updated on combo-points change
                     // this possibly needs fixing
-                    int auraBaseAmount = aurEff.GetBaseAmount();
+                    var auraBaseAmount = aurEff.GetBaseAmount();
                     // proc chance is stored in effect amount
-                    int chance = unitCaster.CalculateSpellDamage(null, aurEff.GetSpellEffectInfo(), auraBaseAmount);
+                    var chance = unitCaster.CalculateSpellDamage(null, aurEff.GetSpellEffectInfo(), auraBaseAmount);
                     chance *= aurEff.GetBase().GetStackAmount();
 
                     // build trigger and add to the list
@@ -8023,12 +8023,12 @@ namespace Game.Spells
             return SpellCastResult.SpellCastOk;
         }
 
-        int CalculateDamage(SpellEffectInfo spellEffectInfo, Unit target)
+        float CalculateDamage(SpellEffectInfo spellEffectInfo, Unit target)
         {
             return CalculateDamage(spellEffectInfo, target, out _);
         }
 
-        int CalculateDamage(SpellEffectInfo spellEffectInfo, Unit target, out float variance)
+        float CalculateDamage(SpellEffectInfo spellEffectInfo, Unit target, out float variance)
         {
             bool needRecalculateBasePoints = (m_spellValue.CustomBasePointsMask & (1 << spellEffectInfo.EffectIndex)) == 0;
             return m_caster.CalculateSpellDamage(out variance, target, spellEffectInfo, needRecalculateBasePoints ? null : m_spellValue.EffectBasePoints[spellEffectInfo.EffectIndex], m_castItemEntry, m_castItemLevel);
@@ -8215,7 +8215,7 @@ namespace Game.Spells
         public GameObject gameObjTarget;
         public Corpse corpseTarget;
         public WorldLocation destTarget;
-        public int damage;
+        public float damage;
         public SpellMissInfo targetMissInfo;
         public float variance;
         SpellEffectHandleMode effectHandleMode;
@@ -8228,8 +8228,8 @@ namespace Game.Spells
         GameObject focusObject;
 
         // Damage and healing in effects need just calculate
-        public int m_damage;           // Damge   in effects count here
-        public int m_healing;          // Healing in effects count here
+        public float m_damage;           // Damge   in effects count here
+        public float m_healing;          // Healing in effects count here
 
         // ******************************************
         // Spell trigger system
@@ -8313,7 +8313,7 @@ namespace Game.Spells
 
     public struct HitTriggerSpell
     {
-        public HitTriggerSpell(SpellInfo spellInfo, SpellInfo auraSpellInfo, int procChance)
+        public HitTriggerSpell(SpellInfo spellInfo, SpellInfo auraSpellInfo, float procChance)
         {
             triggeredSpell = spellInfo;
             triggeredByAura = auraSpellInfo;
@@ -8323,7 +8323,7 @@ namespace Game.Spells
         public SpellInfo triggeredSpell;
         public SpellInfo triggeredByAura;
         // ubyte triggeredByEffIdx          This might be needed at a later stage - No need known for now
-        public int chance;
+        public float chance;
     }
 
     public enum SpellEffectHandleMode
@@ -8443,8 +8443,8 @@ namespace Game.Spells
     {
         public ObjectGuid TargetGUID;
         public ulong TimeDelay;
-        public int Damage;
-        public int Healing;
+        public float Damage;
+        public float Healing;
 
         public SpellMissInfo MissCondition;
         public SpellMissInfo ReflectResult;
@@ -8455,7 +8455,7 @@ namespace Game.Spells
         // info set at PreprocessTarget, used by DoTargetSpellHit
         public DiminishingGroup DRGroup;
         public int AuraDuration;
-        public Dictionary<int, int> AuraBasePoints = new();
+        public Dictionary<int, float> AuraBasePoints = new();
         public bool Positive = true;
         public UnitAura HitAura;
 
@@ -8642,7 +8642,7 @@ namespace Game.Spells
                 if (spell.m_healing > 0)
                 {
                     hasHealing = true;
-                    int addhealth = spell.m_healing;
+                    var addhealth = spell.m_healing;
                     if (IsCrit)
                     {
                         hitMask |= ProcFlagsHit.Critical;
@@ -8906,7 +8906,7 @@ namespace Game.Spells
             DurationMul = 1;
         }
 
-        public Dictionary<int, int> EffectBasePoints = new();
+        public Dictionary<int, float> EffectBasePoints = new();
         public uint CustomBasePointsMask;
         public uint MaxAffectedTargets;
         public float RadiusMod;
@@ -8941,7 +8941,7 @@ namespace Game.Spells
             mask = new FlagArray128();
         }
 
-        public int value;
+        public float value;
         public FlagArray128 mask;
     }
 
@@ -9419,7 +9419,7 @@ namespace Game.Spells
         public Difficulty CastDifficulty;
         public ObjectGuid OriginalCastId = ObjectGuid.Empty;
         public int? OriginalCastItemLevel;
-        public Dictionary<SpellValueMod, int> SpellValueOverrides = new();
+        public Dictionary<SpellValueMod, float> SpellValueOverrides = new();
         public object CustomArg;
 
         public CastSpellExtraArgs() { }
@@ -9457,7 +9457,7 @@ namespace Game.Spells
             CastDifficulty = castDifficulty;
         }
 
-        public CastSpellExtraArgs(SpellValueMod mod, int val)
+        public CastSpellExtraArgs(SpellValueMod mod, float val)
         {
             SpellValueOverrides.Add(mod, val);
         }
@@ -9480,7 +9480,7 @@ namespace Game.Spells
             return this;
         }
 
-        public CastSpellExtraArgs SetSpellValueMod(SpellValueMod mod, int val)
+        public CastSpellExtraArgs SetSpellValueMod(SpellValueMod mod, float val)
         {
             SpellValueOverrides[mod] = val;
             return this;
@@ -9524,15 +9524,9 @@ namespace Game.Spells
             return this;
         }
 
-        public CastSpellExtraArgs AddSpellMod(SpellValueMod mod, int val)
-        {
-            SpellValueOverrides[mod] = val;
-            return this;
-        }
-
         public CastSpellExtraArgs AddSpellMod(SpellValueMod mod, float val)
         {
-            SpellValueOverrides[mod] = (int)val;
+            SpellValueOverrides[mod] = val;
             return this;
         }
 

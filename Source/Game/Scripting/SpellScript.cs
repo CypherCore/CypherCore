@@ -374,7 +374,7 @@ namespace Game.Scripting
 
         // setter/getter for for Damage done by spell to Target of spell hit
         // returns Damage calculated before hit, and real dmg done after hit
-        public int GetHitDamage()
+        public float GetHitDamage()
         {
             if (!IsInTargetHook())
             {
@@ -385,16 +385,6 @@ namespace Game.Scripting
         }
 
         public void SetHitDamage(float damage)
-        {
-            SetHitDamage((int)damage);
-        }
-
-        public void SetHitDamage(uint damage)
-        {
-            SetHitDamage((int)damage);
-        }
-
-        public void SetHitDamage(int damage)
         {
             if (!IsInModifiableHook())
             {
@@ -408,7 +398,7 @@ namespace Game.Scripting
 
         // setter/getter for for heal done by spell to Target of spell hit
         // returns healing calculated before hit, and real dmg done after hit
-        public int GetHitHeal()
+        public float GetHitHeal()
         {
             if (!IsInTargetHook())
             {
@@ -419,16 +409,6 @@ namespace Game.Scripting
         }
 
         public void SetHitHeal(float heal)
-        {
-            SetHitHeal((int)heal);
-        }
-
-        public void SetHitHeal(uint heal)
-        {
-            SetHitHeal((int)heal);
-        }
-
-        public void SetHitHeal(int heal)
         {
             if (!IsInModifiableHook())
             {
@@ -538,7 +518,7 @@ namespace Game.Scripting
         }
 
         // method avalible only in EffectHandler method
-        public int GetEffectValue()
+        public float GetEffectValue()
         {
             if (!IsInEffectHook())
             {
@@ -548,7 +528,7 @@ namespace Game.Scripting
             return _spell.damage;
         }
 
-        public void SetEffectValue(int value)
+        public void SetEffectValue(float value)
         {
             if (!IsInEffectHook())
             {

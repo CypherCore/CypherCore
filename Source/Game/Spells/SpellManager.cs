@@ -348,7 +348,7 @@ namespace Game.Entities
             }
         }
 
-        public bool AddSameEffectStackRuleSpellGroups(SpellInfo spellInfo, AuraType auraType, int amount, Dictionary<SpellGroup, int> groups)
+        public bool AddSameEffectStackRuleSpellGroups(SpellInfo spellInfo, AuraType auraType, float amount, Dictionary<SpellGroup, float> groups)
         {
             uint spellId = spellInfo.GetFirstRankSpell().Id;
             var spellGroupList = GetSpellSpellGroupMapBounds(spellId);
@@ -367,7 +367,7 @@ namespace Game.Entities
                         groups.Add(group, amount);
                     else
                     {
-                        int curr_amount = groups[group];
+                        float curr_amount = groups[group];
                         // Take absolute value because this also counts for the highest negative aura
                         if (Math.Abs(curr_amount) < Math.Abs(amount))
                             groups[group] = amount;
@@ -617,10 +617,18 @@ namespace Game.Entities
             return mSpellAreaForAreaMap.LookupByKey(area_id);
         }
 
-        public SpellInfo GetSpellInfo<T>(T spellId, Difficulty difficulty) where T : struct, System.Enum
+        public SpellInfo GetSpellInfo<T>(T spellId, Difficulty difficulty = Difficulty.None) where T : struct, System.Enum
         {
             return GetSpellInfo(Convert.ToUInt32(spellId), difficulty);
         }
+        public bool TryGetSpellInfo<T>(T spellId, out SpellInfo spellInfo) where T : struct, System.Enum
+        { spellInfo = GetSpellInfo(spellId); return spellInfo != null; }
+
+        public bool TryGetSpellInfo<T>(T spellId, Difficulty difficulty, out SpellInfo spellInfo) where T : struct, System.Enum
+        { spellInfo = GetSpellInfo(spellId, difficulty); return spellInfo != null; }
+
+        public bool TryGetSpellInfo(uint spellId, out SpellInfo spellInfo) { spellInfo = GetSpellInfo(spellId); return spellInfo != null; }
+        public bool TryGetSpellInfo(uint spellId, Difficulty difficulty, out SpellInfo spellInfo) { spellInfo = GetSpellInfo(spellId, difficulty); return spellInfo != null; }
 
         public SpellInfo GetSpellInfo(uint spellId, Difficulty difficulty = Difficulty.None)
         {
@@ -5037,10 +5045,10 @@ namespace Game.Entities
             damage = 0;
         }
 
-        public PetAura(uint petEntry, uint aura, bool _removeOnChangePet, int _damage)
+        public PetAura(uint petEntry, uint aura, bool _removeOnChangePet, float _damage)
         {
             removeOnChangePet = _removeOnChangePet;
-            damage = _damage;
+            damage = (int)_damage;
 
             auras[petEntry] = aura;
         }

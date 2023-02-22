@@ -26,13 +26,13 @@ namespace Scripts.Spells.Druid
 			AuraEffects.Add(new AuraEffectAbsorbHandler(HandleAfterAbsorb, 0, false, AuraScriptHookType.EffectAfterAbsorb));
 		}
 
-		private void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+		private void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref float absorbAmount)
 		{
 			// Prevent Removal
 			PreventDefaultAction();
 		}
 
-		private void HandleAfterAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+		private void HandleAfterAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref float absorbAmount)
 		{
 			// reflect back Damage to the Attacker
 			var target   = GetTarget();

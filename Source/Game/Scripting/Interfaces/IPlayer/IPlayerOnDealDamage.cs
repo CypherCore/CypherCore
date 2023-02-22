@@ -13,6 +13,6 @@ namespace Game.Scripting.Interfaces.IPlayer
 {
     public interface IPlayerOnDealDamage : IScriptObject, IClassRescriction
     {
-        void OnDamage(Player caster, Unit target, ref uint damage, SpellInfo spellProto);
+        void OnDamage(Player caster, Unit target, ref float damage, SpellInfo spellProto);
     }
 }

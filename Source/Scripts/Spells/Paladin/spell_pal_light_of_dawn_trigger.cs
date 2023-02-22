@@ -37,8 +37,8 @@ namespace Scripts.Spells.Paladin
 
         private void HandleOnHit(int effIndex)
         {
-            int dmg = GetHitHeal();
-            dmg += (int)(GetCaster().m_unitData.AttackPower * 1.8f);
+            float dmg = GetHitHeal();
+            dmg += GetCaster().m_unitData.AttackPower * 1.8f;
 
             SetHitHeal(dmg);
         }

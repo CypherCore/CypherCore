@@ -342,9 +342,9 @@ namespace Game.Entities
                 var cooldownInfo = cooldowns.CategoryCooldowns.Find(p => p.Category == categoryId);
 
                 if (cooldownInfo == null)
-                    cooldowns.CategoryCooldowns.Add(new SpellCategoryCooldown.CategoryCooldownInfo(categoryId, -aurEff.GetAmount()));
+                    cooldowns.CategoryCooldowns.Add(new SpellCategoryCooldown.CategoryCooldownInfo(categoryId, -(int)aurEff.GetAmount()));
                 else
-                    cooldownInfo.ModCooldown -= aurEff.GetAmount();
+                    cooldownInfo.ModCooldown -= (int)aurEff.GetAmount();
             }
 
             SendPacket(cooldowns);
@@ -2675,7 +2675,7 @@ namespace Game.Entities
                                     if (traitDefinitionEffectPoint.GetOperationType() == TraitPointsOperationType.Multiply)
                                         basePoints *= spellInfo.GetEffect(traitDefinitionEffectPoint.EffectIndex).CalcBaseValue(this, null, 0, -1);
 
-                                    args.AddSpellMod(SpellValueMod.BasePoint0 + traitDefinitionEffectPoint.EffectIndex, (int)basePoints);
+                                    args.AddSpellMod(SpellValueMod.BasePoint0 + traitDefinitionEffectPoint.EffectIndex, basePoints);
                                 }
                             }
                         }
@@ -2886,45 +2886,29 @@ namespace Game.Entities
 
         public void ApplySpellMod(SpellInfo spellInfo, SpellModOp op, ref int basevalue, Spell spell = null)
         {
-            float totalmul = 1.0f;
-            int totalflat = 0;
-
-            GetSpellModValues(spellInfo, op, spell, basevalue, ref totalflat, ref totalmul);
-
-            basevalue = (int)(((float)basevalue + totalflat) * totalmul);
+            float val = basevalue;
+            ApplySpellMod(spellInfo, op, ref val, spell);
+            basevalue = (int)val;
         }
 
         public void ApplySpellMod(SpellInfo spellInfo, SpellModOp op, ref uint basevalue, Spell spell = null)
         {
-            float totalmul = 1.0f;
-            int totalflat = 0;
-
-            GetSpellModValues(spellInfo, op, spell, basevalue, ref totalflat, ref totalmul);
-
-            basevalue = (uint)(((float)basevalue + totalflat) * totalmul);
+            float val = basevalue;
+            ApplySpellMod(spellInfo, op, ref val, spell);
+            basevalue = (uint)val;
         }
 
         public void ApplySpellMod(SpellInfo spellInfo, SpellModOp op, ref float basevalue, Spell spell = null)
         {
             float totalmul = 1.0f;
-            int totalflat = 0;
+            float totalflat = 0;
 
             GetSpellModValues(spellInfo, op, spell, basevalue, ref totalflat, ref totalmul);
 
-            basevalue = (float)(basevalue + totalflat) * totalmul;
+            basevalue = (basevalue + totalflat) * totalmul;
         }
 
-        public void ApplySpellMod(SpellInfo spellInfo, SpellModOp op, ref double basevalue, Spell spell = null)
-        {
-            float totalmul = 1.0f;
-            int totalflat = 0;
-
-            GetSpellModValues(spellInfo, op, spell, basevalue, ref totalflat, ref totalmul);
-
-            basevalue = (double)(basevalue + totalflat) * totalmul;
-        }
-
-        public void GetSpellModValues<T>(SpellInfo spellInfo, SpellModOp op, Spell spell, T baseValue, ref int flat, ref float pct) where T : IComparable
+        public void GetSpellModValues<T>(SpellInfo spellInfo, SpellModOp op, Spell spell, T baseValue, ref float flat, ref float pct) where T : IComparable
         {
             flat = 0;
             pct = 1.0f;
@@ -3022,7 +3006,7 @@ namespace Game.Entities
                 if (!IsAffectedBySpellmod(spellInfo, mod, spell))
                     continue;
 
-                int value = mod.value;
+                float value = mod.value;
                 if (value == 0)
                     continue;
 
@@ -3035,7 +3019,7 @@ namespace Game.Entities
                 if (!IsAffectedBySpellmod(spellInfo, mod, spell))
                     continue;
 
-                int value = mod.value.ModifierValue;
+                float value = mod.value.ModifierValue;
                 if (value == 0)
                     continue;
 
@@ -3052,7 +3036,7 @@ namespace Game.Entities
                 if (baseValue + (dynamic)flat == 0)
                     continue;
 
-                int value = mod.value;
+                float value = mod.value;
                 if (value == 0)
                     continue;
 

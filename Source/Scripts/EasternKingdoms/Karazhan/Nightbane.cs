@@ -137,7 +137,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
             SetupGroundPhase();
         }
 
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (phase == NightbanePhases.Fly)
             {

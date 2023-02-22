@@ -16,7 +16,7 @@ public class spell_dh_soul_barrier : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
-	private void CalcAmount(AuraEffect UnnamedParameter, ref int amount, ref bool UnnamedParameter2)
+	private void CalcAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
 	{
 		var caster = GetCaster();
 
@@ -94,7 +94,7 @@ public class spell_dh_soul_barrier : AuraScript, IHasAuraEffects
 				app.ClientUpdate();
 	}
 
-	private void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+	private void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref float absorbAmount)
 	{
 		var caster = GetCaster();
 

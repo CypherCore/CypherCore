@@ -16,7 +16,7 @@ namespace Scripts.Spells.Shaman
 		{
 		}
 
-		public override void DamageDealt(Unit UnnamedParameter, ref uint UnnamedParameter2, DamageEffectType UnnamedParameter3)
+		public override void DamageDealt(Unit UnnamedParameter, ref float damage, DamageEffectType UnnamedParameter3)
 		{
 			var tempSum = me.ToTempSummon();
 

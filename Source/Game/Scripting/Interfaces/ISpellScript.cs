@@ -18,7 +18,7 @@ namespace Game.Scripting.Interfaces
         long GetCorpseTargetCountForEffect(int effect);
         SpellEffectInfo GetEffectInfo();
         SpellEffectInfo GetEffectInfo(int effIndex);
-        int GetEffectValue();
+        float GetEffectValue();
         float GetEffectVariance();
         WorldLocation GetExplTargetDest();
         GameObject GetExplTargetGObj();
@@ -30,10 +30,10 @@ namespace Game.Scripting.Interfaces
         Aura GetHitAura(bool dynObjAura = false);
         Corpse GetHitCorpse();
         Creature GetHitCreature();
-        int GetHitDamage();
+        float GetHitDamage();
         WorldLocation GetHitDest();
         GameObject GetHitGObj();
-        int GetHitHeal();
+        float GetHitHeal();
         Item GetHitItem();
         Player GetHitPlayer();
         Unit GetHitUnit();
@@ -55,11 +55,11 @@ namespace Game.Scripting.Interfaces
         void PreventHitEffect(int effIndex);
         void SelectRandomInjuredTargets(List<WorldObject> targets, uint maxTargets, bool prioritizePlayers);
         void SetCustomCastResultMessage(SpellCustomErrors result);
-        void SetEffectValue(int value);
+        void SetEffectValue(float value);
         void SetEffectVariance(float variance);
         void SetExplTargetDest(WorldLocation loc);
-        void SetHitDamage(int damage);
-        void SetHitHeal(int heal);
+        void SetHitDamage(float damage);
+        void SetHitHeal(float heal);
         void _FinishScriptCall();
         void _InitHit();
         bool _IsDefaultEffectPrevented(int effIndex);

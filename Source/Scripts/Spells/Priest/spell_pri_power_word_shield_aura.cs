@@ -41,7 +41,7 @@ internal class spell_pri_power_word_shield_aura : AuraScript, IHasAuraEffects
 		AuraEffects.Add(new AuraEffectApplyHandler(HandleOnRemove, 0, AuraType.SchoolAbsorb, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
 	}
 
-	private void CalculateAmount(AuraEffect auraEffect, ref int amount, ref bool canBeRecalculated)
+	private void CalculateAmount(AuraEffect auraEffect, ref float amount, ref bool canBeRecalculated)
 	{
 		canBeRecalculated = false;
 
@@ -70,7 +70,7 @@ internal class spell_pri_power_word_shield_aura : AuraScript, IHasAuraEffects
 			if (rapture != null)
 				MathFunctions.AddPct(ref amountF, rapture.GetAmount());
 
-			amount = (int)amountF;
+			amount = amountF;
 		}
 	}
 

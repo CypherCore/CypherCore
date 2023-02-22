@@ -1190,8 +1190,8 @@ namespace Game.Networking.Packets
     {
         public void Initialize(Unit unit)
         {
-            Health = (long)unit.GetHealth();
-            AttackPower = (int)unit.GetTotalAttackPowerValue(unit.GetClass() == Class.Hunter ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack);
+            Health = unit.GetHealth();
+            AttackPower = unit.GetTotalAttackPowerValue(unit.GetClass() == Class.Hunter ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack);
             SpellPower = unit.SpellBaseDamageBonusDone(SpellSchoolMask.Spell);
             Armor = unit.GetArmor();
             PowerData.Add(new SpellLogPowerData((int)unit.GetPowerType(), unit.GetPower(unit.GetPowerType()), 0));
@@ -1202,8 +1202,8 @@ namespace Game.Networking.Packets
             Unit unitCaster = spell.GetCaster().ToUnit();
             if (unitCaster != null)
             {
-                Health = (long)unitCaster.GetHealth();
-                AttackPower = (int)unitCaster.GetTotalAttackPowerValue(unitCaster.GetClass() == Class.Hunter ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack);
+                Health = unitCaster.GetHealth();
+                AttackPower = unitCaster.GetTotalAttackPowerValue(unitCaster.GetClass() == Class.Hunter ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack);
                 SpellPower = unitCaster.SpellBaseDamageBonusDone(SpellSchoolMask.Spell);
                 Armor = unitCaster.GetArmor();
                 PowerType primaryPowerType = unitCaster.GetPowerType();
@@ -1223,8 +1223,8 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteInt64(Health);
-            data.WriteInt32(AttackPower);
-            data.WriteInt32(SpellPower);
+            data.WriteInt32((int)AttackPower);
+            data.WriteInt32((int)SpellPower);
             data.WriteUInt32(Armor);
             data.WriteBits(PowerData.Count, 9);
             data.FlushBits();
@@ -1238,8 +1238,8 @@ namespace Game.Networking.Packets
         }
 
         long Health;
-        int AttackPower;
-        int SpellPower;
+        float AttackPower;
+        float SpellPower;
         uint Armor;
         List<SpellLogPowerData> PowerData = new();
     }

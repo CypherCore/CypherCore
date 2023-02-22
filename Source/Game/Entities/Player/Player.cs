@@ -2098,31 +2098,31 @@ namespace Game.Entities
                 !HasAuraType(AuraType.Fly) && !IsImmunedToDamage(SpellSchoolMask.Normal))
             {
                 //Safe fall, fall height reduction
-                int safe_fall = GetTotalAuraModifier(AuraType.SafeFall);
+                float safe_fall = GetTotalAuraModifier(AuraType.SafeFall);
 
                 float damageperc = 0.018f * (z_diff - safe_fall) - 0.2426f;
 
                 if (damageperc > 0)
                 {
-                    uint damage = (uint)(damageperc * GetMaxHealth() * WorldConfig.GetFloatValue(WorldCfg.RateDamageFall));
+                    float damage = damageperc * GetMaxHealth() * WorldConfig.GetFloatValue(WorldCfg.RateDamageFall);
 
                     float height = movementInfo.Pos.posZ;
                     UpdateGroundPositionZ(movementInfo.Pos.posX, movementInfo.Pos.posY, ref height);
 
-                    damage = (uint)(damage * GetTotalAuraMultiplier(AuraType.ModifyFallDamagePct));
+                    damage = damage * GetTotalAuraMultiplier(AuraType.ModifyFallDamagePct);
 
                     if (damage > 0)
                     {
                         //Prevent fall damage from being more than the player maximum health
                         if (damage > GetMaxHealth())
-                            damage = (uint)GetMaxHealth();
+                            damage = GetMaxHealth();
 
                         // Gust of Wind
                         if (HasAura(43621))
-                            damage = (uint)GetMaxHealth() / 2;
+                            damage = GetMaxHealth() / 2;
 
                         uint original_health = (uint)GetHealth();
-                        uint final_damage = EnvironmentalDamage(EnviromentalDamage.Fall, damage);
+                        float final_damage = EnvironmentalDamage(EnviromentalDamage.Fall, damage);
 
                         // recheck alive, might have died of EnvironmentalDamage, avoid cases when player die in fact like Spirit of Redemption case
                         if (IsAlive() && final_damage < original_health)
@@ -3583,7 +3583,7 @@ namespace Game.Entities
             return (!IsTargetableForAttack(false));
         }
 
-        public uint EnvironmentalDamage(EnviromentalDamage type, uint damage)
+        public float EnvironmentalDamage(EnviromentalDamage type, float damage)
         {
             if (IsImmuneToEnvironmentalDamage())
                 return 0;
@@ -3591,8 +3591,8 @@ namespace Game.Entities
             damage = (uint)(damage * GetTotalAuraMultiplier(AuraType.ModEnvironmentalDamageTaken));
 
             // Absorb, resist some environmental damage type
-            uint absorb = 0;
-            uint resist = 0;
+            float absorb = 0;
+            float resist = 0;
             var dmgSchool = GetEnviormentDamageType(type);
             switch (type)
             {
@@ -3614,7 +3614,7 @@ namespace Game.Entities
             packet.Absorbed = (int)absorb;
             packet.Resisted = (int)resist;
 
-            uint final_damage = DealDamage(this, this, damage, null, DamageEffectType.Self, dmgSchool, null, false);
+            float final_damage = DealDamage(this, this, damage, null, DamageEffectType.Self, dmgSchool, null, false);
             packet.LogData.Initialize(this);
 
             SendCombatLogMessage(packet);
@@ -6509,7 +6509,7 @@ namespace Game.Entities
                 newDrunkValue = 100;
 
             // select drunk percent or total SPELL_AURA_MOD_FAKE_INEBRIATE amount, whichever is higher for visibility updates
-            int drunkPercent = Math.Max(newDrunkValue, GetTotalAuraModifier(AuraType.ModFakeInebriate));
+            float drunkPercent = Math.Max(newDrunkValue, GetTotalAuraModifier(AuraType.ModFakeInebriate));
             if (drunkPercent != 0)
             {
                 m_invisibilityDetect.AddFlag(InvisibilityType.Drunk);

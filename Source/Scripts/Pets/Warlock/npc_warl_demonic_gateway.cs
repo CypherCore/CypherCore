@@ -100,7 +100,7 @@ namespace Scripts.Pets
                         target.CastSpell(target, WarlockSpells.PLANESWALKER_BUFF, true);
 
                     // Item - Warlock PvP Set 4P Bonus: "Your allies can use your Demonic Gateway again 15 sec sooner"
-                    int amount = owner.GetAuraEffect(WarlockSpells.PVP_4P_BONUS, 0).GetAmount();
+                    var amount = owner.GetAuraEffect(WarlockSpells.PVP_4P_BONUS, 0).GetAmount();
 
                     if (amount > 0)
                     {

@@ -45,7 +45,7 @@ namespace Scripts.Spells.Druid
 				                  return true;
 			                  });
 
-			var maxTargets = GetEffectInfo(2).CalcValue(GetCaster());
+			var maxTargets = (int)GetEffectInfo(2).CalcValue(GetCaster());
 
 			if (targets.Count > maxTargets)
 			{

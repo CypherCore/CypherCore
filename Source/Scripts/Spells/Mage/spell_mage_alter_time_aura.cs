@@ -13,7 +13,7 @@ namespace Scripts.Spells.Mage;
 [Script] // 342246 - Alter Time Aura
 internal class spell_mage_alter_time_aura : AuraScript, IHasAuraEffects
 {
-	private ulong _health;
+	private long _health;
 	private Position _pos;
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();
 

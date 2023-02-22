@@ -31,7 +31,7 @@ namespace Scripts.Spells.Paladin
                 caster.RemoveAura(PaladinSpells.GRAND_CRUSADER_PROC);
             }
 
-            int damage = GetHitDamage();
+            var damage = GetHitDamage();
 
             if (caster.HasAura(PaladinSpells.FIRST_AVENGER))
             {

@@ -122,7 +122,7 @@ namespace Scripts.Spells.Warlock
             var dmgPerTick = (int)estAmount.Value;
 
             var duration = immolationAura.GetDuration();
-            var modDur = internalCombustion.GetEffect(0).m_baseAmount * Time.InMilliseconds;
+            var modDur = (int)(internalCombustion.GetEffect(0).m_baseAmount * Time.InMilliseconds);
 
             if (modDur <= 0)
                 modDur = Time.InMilliseconds;
