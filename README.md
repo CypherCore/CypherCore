@@ -1,12 +1,12 @@
 ![](Forged_Logo.png)
 <h1 align="center"> </h1>
 
-[![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/)
+[![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE)
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/ForgedWoW/ForgedCore/dotnet.yml)](https://github.com/ForgedWoW/ForgedCore/actions)
 
 [![GitHub last commit](https://img.shields.io/github/last-commit/ForgedWoW/ForgedCore)](https://github.com/ForgedWoW/ForgedCore/commits/master)
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/w/ForgedWoW/ForgedCore)](https://github.com/ForgedWoW/ForgedCore/commits/master)
-[![PR's Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat)](git-client://clone?repo=https%3A%2F%2Fgithub.com%2FForgedWoW%2FForgedCore) 
+[![PR's Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat)](https://github.com/ForgedWoW/ForgedCore/pulls) 
 
 Forged Core is an open source branch of CypherCore.
 Forge Core is the core of the Forged WoW Server and aims to be the most complete and up to date core.
