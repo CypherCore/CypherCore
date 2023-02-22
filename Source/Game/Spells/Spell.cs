@@ -7407,7 +7407,7 @@ namespace Game.Spells
                 {
                     foreach (var iFace in script.GetType().GetInterfaces())
                     {
-                        if (iFace.Name == nameof(ISpellScript) || iFace.Name == nameof(ISpellScript) || iFace.Name == nameof(IBaseSpellScript))
+                        if (iFace.Name == nameof(ISpellScript) || iFace.Name == nameof(IBaseSpellScript))
                             continue;
 
                         if (!m_spellScriptsByType.TryGetValue(iFace, out var spellScripts))
