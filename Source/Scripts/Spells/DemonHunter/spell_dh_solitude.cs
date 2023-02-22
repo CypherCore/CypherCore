@@ -37,7 +37,7 @@ public class spell_dh_solitude : AuraScript, IHasAuraEffects
 		if (caster == null || !GetSpellInfo().GetEffect(1).IsEffect())
 			return;
 
-		var range    = GetSpellInfo().GetEffect(1).BasePoints;
+		var range    = (float)GetSpellInfo().GetEffect(1).BasePoints;
 		var allies   = new List<Unit>();
 		var check    = new AnyFriendlyUnitInObjectRangeCheck(caster, caster, range, true);
 		var searcher = new UnitListSearcher(caster, allies, check, GridType.All);

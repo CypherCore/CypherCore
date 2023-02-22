@@ -656,7 +656,7 @@ namespace Game.Entities
                         {
                             if (pInfo == null)
                                 SetCreateHealth(30 + 30 * petlevel);
-                            float bonusDmg = GetOwner().SpellBaseDamageBonusDone(SpellSchoolMask.Nature) * 0.15f;
+                                    var bonusDmg = GetOwner().SpellBaseDamageBonusDone(SpellSchoolMask.Nature) * 0.15f;
                             SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel * 2.5f - ((float)petlevel / 2) + bonusDmg);
                             SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, petlevel * 2.5f + ((float)petlevel / 2) + bonusDmg);
                             break;
@@ -793,7 +793,7 @@ namespace Game.Entities
 
         public override bool UpdateStats(Stats stat)
         {
-            float value = GetTotalStatValue(stat);
+            var value = GetTotalStatValue(stat);
             UpdateStatBuffMod(stat);
             float ownersBonus = 0.0f;
 
@@ -875,14 +875,14 @@ namespace Game.Entities
         {
             if (school > SpellSchools.Normal)
             {
-                float baseValue = GetFlatModifierValue(UnitMods.ResistanceStart + (int)school, UnitModifierFlatType.Base);
-                float bonusValue = GetTotalAuraModValue(UnitMods.ResistanceStart + (int)school) - baseValue;
+                var baseValue = GetFlatModifierValue(UnitMods.ResistanceStart + (int)school, UnitModifierFlatType.Base);
+                var bonusValue = GetTotalAuraModValue(UnitMods.ResistanceStart + (int)school) - baseValue;
 
                 // hunter and warlock pets gain 40% of owner's resistance
                 if (IsPet())
                 {
-                    baseValue += (float)MathFunctions.CalculatePct(m_owner.GetResistance(school), 40);
-                    bonusValue += (float)MathFunctions.CalculatePct(m_owner.GetBonusResistanceMod(school), 40);
+                    baseValue += MathFunctions.CalculatePct(m_owner.GetResistance(school), 40);
+                    bonusValue += MathFunctions.CalculatePct(m_owner.GetBonusResistanceMod(school), 40);
                 }
 
                 SetResistance(school, (int)baseValue);
@@ -903,8 +903,8 @@ namespace Game.Entities
             else if (IsPet())
                 bonus_armor = GetOwner().GetArmor();
 
-            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base);
-            float baseValue = value;
+            var value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base);
+            var baseValue = value;
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
             value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total) + bonus_armor;
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
@@ -943,7 +943,7 @@ namespace Game.Entities
                     break;
             }
 
-            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetCreateHealth();
+            var value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetCreateHealth();
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
             value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total) + stamina * multiplicator;
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
@@ -958,7 +958,7 @@ namespace Game.Entities
 
             UnitMods unitMod = UnitMods.PowerStart + (int)power;
 
-            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetCreatePowerValue(power);
+            var value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetCreatePowerValue(power);
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
             value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
@@ -972,7 +972,7 @@ namespace Game.Entities
                 return;
 
             float val;
-            float bonusAP = 0.0f;
+            double bonusAP = 0.0f;
             UnitMods unitMod = UnitMods.AttackPower;
 
             if (GetEntry() == ENTRY_IMP)                                   // imp's attack power
@@ -1024,11 +1024,11 @@ namespace Game.Entities
             SetStatFlatModifier(UnitMods.AttackPower, UnitModifierFlatType.Base, val + bonusAP);
 
             //in BASE_VALUE of UNIT_MOD_ATTACK_POWER for creatures we store data of meleeattackpower field in DB
-            float base_attPower = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) * GetPctModifierValue(unitMod, UnitModifierPctType.Base);
-            float attPowerMultiplier = GetPctModifierValue(unitMod, UnitModifierPctType.Total) - 1.0f;
+            var base_attPower = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) * GetPctModifierValue(unitMod, UnitModifierPctType.Base);
+            var attPowerMultiplier = GetPctModifierValue(unitMod, UnitModifierPctType.Total) - 1.0f;
 
             SetAttackPower((int)base_attPower);
-            SetAttackPowerMultiplier(attPowerMultiplier);
+            SetAttackPowerMultiplier((float)attPowerMultiplier);
 
             //automatically update weapon damage after attack power modification
             UpdateDamagePhysical(WeaponAttackType.BaseAttack);
@@ -1061,21 +1061,21 @@ namespace Game.Entities
 
             UnitMods unitMod = UnitMods.DamageMainHand;
 
-            float att_speed = GetBaseAttackTime(WeaponAttackType.BaseAttack) / 1000.0f;
+            double att_speed = GetBaseAttackTime(WeaponAttackType.BaseAttack) / 1000.0f;
 
-            float base_value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetTotalAttackPowerValue(attType, false) / 3.5f * att_speed + bonusDamage;
-            float base_pct = GetPctModifierValue(unitMod, UnitModifierPctType.Base);
-            float total_value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
-            float total_pct = GetPctModifierValue(unitMod, UnitModifierPctType.Total);
+            var base_value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetTotalAttackPowerValue(attType, false) / 3.5f * att_speed + bonusDamage;
+            var base_pct = GetPctModifierValue(unitMod, UnitModifierPctType.Base);
+            var total_value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
+            var total_pct = GetPctModifierValue(unitMod, UnitModifierPctType.Total);
 
-            float weapon_mindamage = GetWeaponDamageRange(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage);
-            float weapon_maxdamage = GetWeaponDamageRange(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage);
+            var weapon_mindamage = GetWeaponDamageRange(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage);
+            var weapon_maxdamage = GetWeaponDamageRange(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage);
 
-            float mindamage = ((base_value + weapon_mindamage) * base_pct + total_value) * total_pct;
-            float maxdamage = ((base_value + weapon_maxdamage) * base_pct + total_value) * total_pct;
+            var mindamage = ((base_value + weapon_mindamage) * base_pct + total_value) * total_pct;
+            var maxdamage = ((base_value + weapon_maxdamage) * base_pct + total_value) * total_pct;
 
-            SetUpdateFieldStatValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MinDamage), mindamage);
-            SetUpdateFieldStatValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MaxDamage), maxdamage);
+            SetUpdateFieldStatValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MinDamage), (float)mindamage);
+            SetUpdateFieldStatValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MaxDamage), (float)maxdamage);
         }
 
         void SetBonusDamage(float damage)

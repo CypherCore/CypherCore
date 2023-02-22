@@ -86,7 +86,7 @@ public class spell_hun_pet_basic_attack : SpellScript, IHasSpellEffects, ISpellC
 					return;
 
 				// (1.5 * 1 * 1 * (Ranged attack power * 0.333) * (1 + $versadmg))
-				var dmg = owner.m_unitData.RangedAttackPower * 0.333f;
+				double dmg = owner.m_unitData.RangedAttackPower * 0.333f;
 
 				var CostModifier = Global.SpellMgr.GetSpellInfo(HunterSpells.BASIC_ATTACK_COST_MODIFIER, Difficulty.None);
 				var SpikedCollar = Global.SpellMgr.GetSpellInfo(HunterSpells.SPIKED_COLLAR, Difficulty.None);

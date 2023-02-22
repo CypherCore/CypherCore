@@ -7,6 +7,6 @@ namespace Game.Scripting.Interfaces.ISpell
 {
     public interface ISpellCalculateResistAbsorb : ISpellScript
     {
-        void CalculateResistAbsorb(DamageInfo damageInfo, ref uint resistAmount, ref int absorbAmount);
+        void CalculateResistAbsorb(DamageInfo damageInfo, ref double resistAmount, ref double absorbAmount);
     }
 }

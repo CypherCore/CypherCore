@@ -50,9 +50,26 @@ public class RandomHelper
     {
         return rand.Next(minValue, maxValue);
     }
+
+    public static double DRand(double minValue, double maxValue)
+    {
+        return rand.Next((int)minValue, (int)maxValue);
+    }
+
+    public static long LRand(dynamic minValue, dynamic maxValue)
+    {
+        return rand.Next(Convert.ToInt32(minValue), Convert.ToInt32(maxValue));
+    }
+
     public static uint URand(dynamic minValue, dynamic maxValue)
     {
         return (uint)rand.Next(Convert.ToInt32(minValue), Convert.ToInt32(maxValue));
+    }
+
+    public static double FRand(double min, double max)
+    {
+        Cypher.Assert(max >= min);
+        return (rand.NextDouble() * (max - min) + min);
     }
 
     public static float FRand(float min, float max)

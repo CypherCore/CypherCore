@@ -83,7 +83,7 @@ namespace Scripts.Pets
 
                         if (!enemy.HasBreakableByDamageCrowdControlAura() &&
                             me.CanCreatureAttack(enemy) &&
-                            me.IsWithinDistInMap(enemy, me.GetAttackDistance(enemy)))
+                            me.IsWithinDistInMap(enemy, (float)me.GetAttackDistance(enemy)))
                             targets.Add(enemy);
                     }
 

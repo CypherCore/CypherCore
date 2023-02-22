@@ -23,7 +23,7 @@ public class spell_dh_shear_proc : AuraScript, IHasAuraEffects
 		if (caster == null || eventInfo.GetSpellInfo() != null)
 			return;
 
-		var procChance = 100f;
+		double procChance = 100f;
 
 		if (eventInfo.GetSpellInfo().Id == DemonHunterSpells.SHEAR)
 		{

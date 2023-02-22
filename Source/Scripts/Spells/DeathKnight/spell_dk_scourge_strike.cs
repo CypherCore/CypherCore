@@ -35,7 +35,7 @@ public class spell_dk_scourge_strike : SpellScript, IHasSpellEffects
 					if (festeringWoundAura.GetStackAmount() >= pestilentPustulesAura.GetSpellInfo().GetEffect(0).BasePoints)
 						caster.ModifyPower(PowerType.Runes, 1);
 
-				var festeringWoundBurst = 1f;
+				double festeringWoundBurst = 1f;
 				var castiragorAura      = caster.GetAura(DeathKnightSpells.CASTIGATOR);
 
 				if (castiragorAura != null)

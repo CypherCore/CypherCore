@@ -116,28 +116,28 @@ namespace Game
 
                     foreach (var pl in playersNear)
                     {
-                        ulong goldMod = MathFunctions.CalculatePct(goldPerPlayer, pl.GetTotalAuraModifierByMiscValue(AuraType.ModMoneyGain, 1));
+                        var goldMod = MathFunctions.CalculatePct(goldPerPlayer, pl.GetTotalAuraModifierByMiscValue(AuraType.ModMoneyGain, 1));
 
                         pl.ModifyMoney((long)(goldPerPlayer + goldMod));
                         pl.UpdateCriteria(CriteriaType.MoneyLootedFromCreatures, goldPerPlayer);
 
                         LootMoneyNotify packet = new();
                         packet.Money = goldPerPlayer;
-                        packet.MoneyMod = goldMod;
+                        packet.MoneyMod = (ulong)goldMod;
                         packet.SoleLooter = playersNear.Count <= 1 ? true : false;
                         pl.SendPacket(packet);
                     }
                 }
                 else
                 {
-                    ulong goldMod = MathFunctions.CalculatePct(loot.gold, player.GetTotalAuraModifierByMiscValue(AuraType.ModMoneyGain, 1));
+                    var goldMod = MathFunctions.CalculatePct(loot.gold, player.GetTotalAuraModifierByMiscValue(AuraType.ModMoneyGain, 1));
 
                     player.ModifyMoney((long)(loot.gold + goldMod));
                     player.UpdateCriteria(CriteriaType.MoneyLootedFromCreatures, loot.gold);
 
                     LootMoneyNotify packet = new();
                     packet.Money = loot.gold;
-                    packet.MoneyMod = goldMod;
+                    packet.MoneyMod = (ulong)goldMod;
                     packet.SoleLooter = true; // "You loot..."
                     SendPacket(packet);
                 }

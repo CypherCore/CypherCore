@@ -303,7 +303,7 @@ namespace Game.Entities
 
             DurabilityPointsLoss(item, pDurabilityLoss);
         }
-        public void DurabilityPointsLossAll(float points, bool inventory)
+        public void DurabilityPointsLossAll(double points, bool inventory)
         {
             for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; i++)
             {
@@ -335,7 +335,7 @@ namespace Game.Entities
                 }
             }
         }
-        public void DurabilityPointsLoss(Item item, float points)
+        public void DurabilityPointsLoss(Item item, double points)
         {
             if (HasAuraType(AuraType.PreventDurabilityLoss))
                 return;
@@ -3528,9 +3528,9 @@ namespace Game.Entities
                 price = (ulong)Math.Floor(price * GetReputationPriceDiscount(creature));
                 price = pProto.GetBuyPrice() > 0 ? Math.Max(1ul, price) : price;
 
-                float priceMod = GetTotalAuraModifier(AuraType.ModVendorItemsPrices);
+                double priceMod = GetTotalAuraModifier(AuraType.ModVendorItemsPrices);
                 if (priceMod != 0)
-                    price -= MathFunctions.CalculatePct(price, priceMod);
+                    price -= (ulong)MathFunctions.CalculatePct(price, priceMod);
 
                 if (!HasEnoughMoney(price))
                 {
