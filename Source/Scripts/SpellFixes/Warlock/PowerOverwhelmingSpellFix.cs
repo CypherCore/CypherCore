@@ -8,7 +8,7 @@ using Game.Scripting.Interfaces.ISpellManager;
 using Game.Spells;
 using Scripts.Spells.Warlock;
 
-namespace Scripts.SpellFixes
+namespace Scripts.SpellFixes.Warlock
 {
     public class PowerOverwhelmingSpellFix : ISpellManagerSpellLateFix
     {
