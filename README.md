@@ -2,10 +2,10 @@
 <h1 align="center"> </h1>
 
 [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/ForgedWoW/ForgedCore/dotnet.yml)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/ForgedWoW/ForgedCore/dotnet.yml)](https://github.com/ForgedWoW/ForgedCore/actions)
 
-![GitHub last commit](https://img.shields.io/github/last-commit/ForgedWoW/ForgedCore)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/w/ForgedWoW/ForgedCore)
+[![GitHub last commit](https://img.shields.io/github/last-commit/ForgedWoW/ForgedCore)](https://github.com/ForgedWoW/ForgedCore/commits/master)
+[![GitHub commit activity](https://img.shields.io/github/commit-activity/w/ForgedWoW/ForgedCore)](https://github.com/ForgedWoW/ForgedCore/commits/master)
 [![PR's Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat)](git-client://clone?repo=https%3A%2F%2Fgithub.com%2FForgedWoW%2FForgedCore) 
 
 Forged Core is an open source branch of CypherCore.
@@ -37,7 +37,7 @@ The current support game version is: 10.0.5.48069
 * Must use Arctium WoW Client Launcher [Download](https://arctium.io/wow)
 
 ### Support / General Info
-* Check out our Discord ![Discord](https://img.shields.io/discord/920073768162963477)
+* Check out our Discord [![Discord](https://img.shields.io/discord/920073768162963477)](https://discord.gg/forgedwow)
 * Check out Trinity Core Wiki as a few steps are the same [Here](https://trinitycore.atlassian.net/wiki/spaces/tc/pages/2130077/Installation+Guide)
 
 ### Legal
