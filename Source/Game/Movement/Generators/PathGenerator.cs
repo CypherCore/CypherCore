@@ -890,8 +890,8 @@ namespace Game.Movement
 
         NavTerrainFlag GetNavTerrain(float x, float y, float z)
         {
-            LiquidData data = new();
-            ZLiquidStatus liquidStatus = _source.GetMap().GetLiquidStatus(_source.GetPhaseShift(), x, y, z, LiquidHeaderTypeFlags.AllLiquids, data, _source.GetCollisionHeight());
+            LiquidData data;
+            ZLiquidStatus liquidStatus = _source.GetMap().GetLiquidStatus(_source.GetPhaseShift(), x, y, z, LiquidHeaderTypeFlags.AllLiquids, out data, _source.GetCollisionHeight());
             if (liquidStatus == ZLiquidStatus.NoWater)
                 return NavTerrainFlag.Ground;
 

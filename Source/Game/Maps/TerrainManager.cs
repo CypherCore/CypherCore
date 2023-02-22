@@ -549,8 +549,10 @@ namespace Game.Maps
             }
         }
 
-        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, uint mapId, float x, float y, float z, LiquidHeaderTypeFlags ReqLiquidType, LiquidData data = null, float collisionHeight = MapConst.DefaultCollesionHeight)
+        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, uint mapId, float x, float y, float z, LiquidHeaderTypeFlags ReqLiquidType, out LiquidData data, float collisionHeight = MapConst.DefaultCollesionHeight)
         {
+            data = null;
+
             ZLiquidStatus result = ZLiquidStatus.NoWater;
             float liquid_level = MapConst.InvalidHeight;
             float ground_level = MapConst.InvalidHeight;
@@ -567,45 +569,44 @@ namespace Game.Maps
                 if (liquid_level > ground_level && MathFunctions.fuzzyGe(z, ground_level - MapConst.GroundHeightTolerance))
                 {
                     // All ok in water . store data
-                    if (data != null)
+                    data = new();
+
+                    // hardcoded in client like this
+                    if (GetId() == 530 && liquid_type == 2)
+                        liquid_type = 15;
+
+                    uint liquidFlagType = 0;
+                    var liq = CliDB.LiquidTypeStorage.LookupByKey(liquid_type);
+                    if (liq != null)
+                        liquidFlagType = liq.SoundBank;
+
+                    if (liquid_type != 0 && liquid_type < 21)
                     {
-                        // hardcoded in client like this
-                        if (GetId() == 530 && liquid_type == 2)
-                            liquid_type = 15;
-
-                        uint liquidFlagType = 0;
-                        var liq = CliDB.LiquidTypeStorage.LookupByKey(liquid_type);
-                        if (liq != null)
-                            liquidFlagType = liq.SoundBank;
-
-                        if (liquid_type != 0 && liquid_type < 21)
+                        var area = CliDB.AreaTableStorage.LookupByKey(GetAreaId(phaseShift, mapId, x, y, z));
+                        if (area != null)
                         {
-                            var area = CliDB.AreaTableStorage.LookupByKey(GetAreaId(phaseShift, mapId, x, y, z));
-                            if (area != null)
+                            uint overrideLiquid = area.LiquidTypeID[liquidFlagType];
+                            if (overrideLiquid == 0 && area.ParentAreaID != 0)
                             {
-                                uint overrideLiquid = area.LiquidTypeID[liquidFlagType];
-                                if (overrideLiquid == 0 && area.ParentAreaID != 0)
-                                {
-                                    area = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
-                                    if (area != null)
-                                        overrideLiquid = area.LiquidTypeID[liquidFlagType];
-                                }
+                                area = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
+                                if (area != null)
+                                    overrideLiquid = area.LiquidTypeID[liquidFlagType];
+                            }
 
-                                var liq1 = CliDB.LiquidTypeStorage.LookupByKey(overrideLiquid);
-                                if (liq1 != null)
-                                {
-                                    liquid_type = overrideLiquid;
-                                    liquidFlagType = liq1.SoundBank;
-                                }
+                            var liq1 = CliDB.LiquidTypeStorage.LookupByKey(overrideLiquid);
+                            if (liq1 != null)
+                            {
+                                liquid_type = overrideLiquid;
+                                liquidFlagType = liq1.SoundBank;
                             }
                         }
-
-                        data.level = liquid_level;
-                        data.depth_level = ground_level;
-
-                        data.entry = liquid_type;
-                        data.type_flags = (LiquidHeaderTypeFlags)(1 << (int)liquidFlagType);
                     }
+
+                    data.level = liquid_level;
+                    data.depth_level = ground_level;
+
+                    data.entry = liquid_type;
+                    data.type_flags = (LiquidHeaderTypeFlags)(1 << (int)liquidFlagType);
 
                     float delta = liquid_level - z;
 
@@ -630,18 +631,16 @@ namespace Game.Maps
                     // Not override LIQUID_MAP_ABOVE_WATER with LIQUID_MAP_NO_WATER:
                     if (map_result != ZLiquidStatus.NoWater && (map_data.level > ground_level))
                     {
-                        if (data != null)
-                        {
-                            // hardcoded in client like this
-                            if (GetId() == 530 && map_data.entry == 2)
-                                map_data.entry = 15;
+                        // hardcoded in client like this
+                        if (GetId() == 530 && map_data.entry == 2)
+                            map_data.entry = 15;
 
-                            data = map_data;
-                        }
+                        data = map_data;
                         return map_result;
                     }
                 }
             }
+
             return result;
         }
 
@@ -845,16 +844,14 @@ namespace Game.Maps
             return 0;
         }
 
-        public bool IsInWater(PhaseShift phaseShift, uint mapId, float x, float y, float pZ, LiquidData data = null)
+        public bool IsInWater(PhaseShift phaseShift, uint mapId, float x, float y, float pZ, out LiquidData data)
         {
-            LiquidData liquid_status = new();
-            LiquidData liquid_ptr = data != null ? data : liquid_status;
-            return (GetLiquidStatus(phaseShift, mapId, x, y, pZ, LiquidHeaderTypeFlags.AllLiquids, liquid_ptr) & (ZLiquidStatus.InWater | ZLiquidStatus.UnderWater)) != 0;
+            return (GetLiquidStatus(phaseShift, mapId, x, y, pZ, LiquidHeaderTypeFlags.AllLiquids, out data) & (ZLiquidStatus.InWater | ZLiquidStatus.UnderWater)) != 0;
         }
 
         public bool IsUnderWater(PhaseShift phaseShift, uint mapId, float x, float y, float z)
         {
-            return (GetLiquidStatus(phaseShift, mapId, x, y, z, LiquidHeaderTypeFlags.Water | LiquidHeaderTypeFlags.Ocean) & ZLiquidStatus.UnderWater) != 0;
+            return (GetLiquidStatus(phaseShift, mapId, x, y, z, LiquidHeaderTypeFlags.Water | LiquidHeaderTypeFlags.Ocean, out _) & ZLiquidStatus.UnderWater) != 0;
         }
 
         public float GetWaterOrGroundLevel(PhaseShift phaseShift, uint mapId, float x, float y, float z, ref float ground, bool swim = false, float collisionHeight = MapConst.DefaultCollesionHeight, DynamicMapTree dynamicMapTree = null)
@@ -868,8 +865,8 @@ namespace Game.Maps
 
                 ground = ground_z;
 
-                LiquidData liquid_status = new();
-                ZLiquidStatus res = GetLiquidStatus(phaseShift, mapId, x, y, ground_z, LiquidHeaderTypeFlags.AllLiquids, liquid_status, collisionHeight);
+                LiquidData liquid_status;
+                ZLiquidStatus res = GetLiquidStatus(phaseShift, mapId, x, y, ground_z, LiquidHeaderTypeFlags.AllLiquids, out liquid_status, collisionHeight);
                 switch (res)
                 {
                     case ZLiquidStatus.AboveWater:
