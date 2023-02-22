@@ -11,7 +11,7 @@ using Framework.Constants;
 using Game.Scripting.Interfaces.ISpellManager;
 using Game.Spells;
 
-namespace Scripts.SpellFixes
+namespace Scripts.SpellFixes.Warlock
 {
     public class BuringRushSpellFix : ISpellManagerSpellLateFix
     {

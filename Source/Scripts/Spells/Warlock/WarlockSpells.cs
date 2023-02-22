@@ -183,7 +183,13 @@ namespace Scripts.Spells.Warlock
 		public const uint LORD_OF_THE_FLAMES = 224103;
 		public const uint LORD_OF_THE_FLAMES_CD = 226802;
 		public const uint LORD_OF_THE_FLAMES_SUMMON = 224105;
-		public const uint MAYHEM = 387506;
+        public const uint MADNESS_OF_THE_AZJAQIR = 387400;
+        public const uint MADNESS_OF_THE_AZJAQIR_PROC_AURA = 337169;
+        public const uint MADNESS_OF_THE_AZJAQIR_AURA_VALUES = 337170;
+        public const uint MADNESS_OF_THE_AZJAQIR_CHAOS_BOLT_AURA = 387409;
+        public const uint MADNESS_OF_THE_AZJAQIR_RAIN_OF_FIRE_AURA = 387413;
+        public const uint MADNESS_OF_THE_AZJAQIR_SHADOWBURN_AURA = 387414;
+        public const uint MAYHEM = 387506;
 		public const uint METAMORPHOSIS = 103958;
 		public const uint METAMORPHOSIS_ADDITIONAL_AURA = 54879;
 		public const uint METAMORPHOSIS_ADDITIONAL_AURA_2 = 54817;
