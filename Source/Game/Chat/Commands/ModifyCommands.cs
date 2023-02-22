@@ -18,7 +18,7 @@ namespace Game.Chat
         static bool HandleModifyHPCommand(CommandHandler handler, int hp)
         {
             Player target = handler.GetSelectedPlayerOrSelf();
-            int maxHp = 1;
+            int maxHp = hp;
             if (CheckModifyResources(handler, target, ref hp, ref maxHp))
             {
                 NotifyModification(handler, target, CypherStrings.YouChangeHp, CypherStrings.YoursHpChanged, hp, maxHp);
@@ -33,7 +33,7 @@ namespace Game.Chat
         static bool HandleModifyManaCommand(CommandHandler handler, int mana)
         {
             Player target = handler.GetSelectedPlayerOrSelf();
-            int maxMana = 1;
+            int maxMana = mana;
             if (CheckModifyResources(handler, target, ref mana, ref maxMana))
             {
                 NotifyModification(handler, target, CypherStrings.YouChangeMana, CypherStrings.YoursManaChanged, mana, maxMana);
@@ -50,7 +50,7 @@ namespace Game.Chat
         {
             Player target = handler.GetSelectedPlayerOrSelf();
             byte energyMultiplier = 10;
-            int maxEnergy = 1;
+            int maxEnergy = energy;
             if (CheckModifyResources(handler, target, ref energy, ref maxEnergy, energyMultiplier))
             {
                 NotifyModification(handler, target, CypherStrings.YouChangeEnergy, CypherStrings.YoursEnergyChanged, energy / energyMultiplier, maxEnergy / energyMultiplier);
@@ -66,7 +66,7 @@ namespace Game.Chat
         {
             Player target = handler.GetSelectedPlayerOrSelf();
             byte rageMultiplier = 10;
-            int maxRage = 1;
+            int maxRage = rage;
             if (CheckModifyResources(handler, target, ref rage, ref maxRage, rageMultiplier))
             {
                 NotifyModification(handler, target, CypherStrings.YouChangeRage, CypherStrings.YoursRageChanged, rage / rageMultiplier, maxRage / rageMultiplier);
@@ -82,7 +82,7 @@ namespace Game.Chat
         {
             Player target = handler.GetSelectedPlayerOrSelf();
             byte runeMultiplier = 10;
-            int maxRune = 1;
+            int maxRune = rune;
             if (CheckModifyResources(handler, target, ref rune, ref maxRune, runeMultiplier))
             {
                 NotifyModification(handler, target, CypherStrings.YouChangeRunicPower, CypherStrings.YoursRunicPowerChanged, rune / runeMultiplier, maxRune / runeMultiplier);
