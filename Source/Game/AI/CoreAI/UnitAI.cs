@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Game.AI
 {
-    public class UnitAI
+    public class UnitAI : IUnitAI
     {
         static Dictionary<(uint id, Difficulty difficulty), AISpellInfoType> _aiSpellInfo = new();
 
@@ -74,6 +74,11 @@ namespace Game.AI
                 me.AttackerStateUpdate(victim, WeaponAttackType.OffAttack);
                 me.ResetAttackTimer(WeaponAttackType.OffAttack);
             }
+        }
+
+        public virtual void OnMeleeAttack(CalcDamageInfo damageInfo, WeaponAttackType attType, bool extra)
+        {
+
         }
 
         public bool DoSpellAttackIfReady(uint spellId)
@@ -252,64 +257,64 @@ namespace Game.AI
                     target = me.GetVictim();
                     break;
                 case AITarget.Enemy:
-                {
-                    var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, me.GetMap().GetDifficultyID());
-                    if (spellInfo != null)
                     {
-                        DefaultTargetSelector targetSelectorInner = new(me, spellInfo.GetMaxRange(false), false, true, 0);
-                        bool targetSelector(Unit candidate)
+                        var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, me.GetMap().GetDifficultyID());
+                        if (spellInfo != null)
                         {
-                            if (!candidate.IsPlayer())
+                            DefaultTargetSelector targetSelectorInner = new(me, spellInfo.GetMaxRange(false), false, true, 0);
+                            bool targetSelector(Unit candidate)
                             {
-                                if (spellInfo.HasAttribute(SpellAttr3.OnlyOnPlayer))
+                                if (!candidate.IsPlayer())
+                                {
+                                    if (spellInfo.HasAttribute(SpellAttr3.OnlyOnPlayer))
+                                        return false;
+
+                                    if (spellInfo.HasAttribute(SpellAttr5.NotOnPlayerControlledNpc) && candidate.IsControlledByPlayer())
+                                        return false;
+                                }
+                                else if (spellInfo.HasAttribute(SpellAttr5.NotOnPlayer))
                                     return false;
 
-                                if (spellInfo.HasAttribute(SpellAttr5.NotOnPlayerControlledNpc) && candidate.IsControlledByPlayer())
-                                    return false;
-                            }
-                            else if (spellInfo.HasAttribute(SpellAttr5.NotOnPlayer))
-                                return false;
-
-                            return targetSelectorInner.Invoke(candidate);
-                        };
-                        target = SelectTarget(SelectTargetMethod.Random, 0, targetSelector);
+                                return targetSelectorInner.Invoke(candidate);
+                            };
+                            target = SelectTarget(SelectTargetMethod.Random, 0, targetSelector);
+                        }
+                        break;
                     }
-                    break;
-                }
                 case AITarget.Ally:
                 case AITarget.Buff:
                     target = me;
                     break;
                 case AITarget.Debuff:
-                {
-                    var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, me.GetMap().GetDifficultyID());
-                    if (spellInfo != null)
                     {
-                        float range = spellInfo.GetMaxRange(false);
-
-                        DefaultTargetSelector targetSelectorInner = new(me, range, false, true, -(int)spellId);
-                        bool targetSelector(Unit candidate)
+                        var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, me.GetMap().GetDifficultyID());
+                        if (spellInfo != null)
                         {
-                            if (!candidate.IsPlayer())
+                            float range = spellInfo.GetMaxRange(false);
+
+                            DefaultTargetSelector targetSelectorInner = new(me, range, false, true, -(int)spellId);
+                            bool targetSelector(Unit candidate)
                             {
-                                if (spellInfo.HasAttribute(SpellAttr3.OnlyOnPlayer))
+                                if (!candidate.IsPlayer())
+                                {
+                                    if (spellInfo.HasAttribute(SpellAttr3.OnlyOnPlayer))
+                                        return false;
+
+                                    if (spellInfo.HasAttribute(SpellAttr5.NotOnPlayerControlledNpc) && candidate.IsControlledByPlayer())
+                                        return false;
+                                }
+                                else if (spellInfo.HasAttribute(SpellAttr5.NotOnPlayer))
                                     return false;
 
-                                if (spellInfo.HasAttribute(SpellAttr5.NotOnPlayerControlledNpc) && candidate.IsControlledByPlayer())
-                                    return false;
-                            }
-                            else if (spellInfo.HasAttribute(SpellAttr5.NotOnPlayer))
-                                return false;
-
-                            return targetSelectorInner.Invoke(candidate);
-                        };
-                        if (!spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.NotVictim) && targetSelector(me.GetVictim()))
-                            target = me.GetVictim();
-                        else
-                            target = SelectTarget(SelectTargetMethod.Random, 0, targetSelector);
+                                return targetSelectorInner.Invoke(candidate);
+                            };
+                            if (!spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.NotVictim) && targetSelector(me.GetVictim()))
+                                target = me.GetVictim();
+                            else
+                                target = SelectTarget(SelectTargetMethod.Random, 0, targetSelector);
+                        }
+                        break;
                     }
-                    break;
-                }
             }
 
             if (target != null)

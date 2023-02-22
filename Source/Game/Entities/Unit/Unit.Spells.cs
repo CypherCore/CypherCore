@@ -1851,11 +1851,11 @@ namespace Game.Entities
             Unit victim = healInfo.GetTarget();
             uint addhealth = healInfo.GetHeal();
 
-            UnitAI victimAI = victim.GetAI();
+            IUnitAI victimAI = victim.GetAI();
             if (victimAI != null)
                 victimAI.HealReceived(healer, addhealth);
 
-            UnitAI healerAI = healer != null ? healer.GetAI() : null;
+            IUnitAI healerAI = healer != null ? healer.GetAI() : null;
             if (healerAI != null)
                 healerAI.HealDone(victim, addhealth);
 

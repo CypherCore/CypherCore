@@ -7,22 +7,26 @@ using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces.IUnit;
 using Scripts.Spells.Warlock;
 
 namespace Scripts.Pets
 {
     namespace Warlock
     {
-        [CreatureScript(47319)]
+
+        [CreatureScript(89)]
         public class npc_warlock_infernal : ScriptedAI
         {
             public Position spawnPos = new();
 
             public npc_warlock_infernal(Creature creature) : base(creature)
             {
-                Unit owner = me.GetOwner();
-                if (owner == null)
+                if (!me.TryGetOwner(out var owner))
                     return;
+
+                if (owner.TryGetAsPlayer(out var player) && player.HasAura(WarlockSpells.INFERNAL_BRAND))
+                    me.AddAura(WarlockSpells.INFERNAL_BRAND_INFERNAL_AURA, me);
 
                 creature.SetLevel(owner.GetLevel());
                 creature.UpdateLevelDependantStats();
@@ -47,42 +51,35 @@ namespace Scripts.Pets
                 me.SetReactState(ReactStates.Passive);
 
                 // melee Damage
-                Unit owner = me.GetOwner();
-
-                if (me.GetOwner())
+                if (me.TryGetOwner(out var owner) && owner.TryGetAsPlayer(out var player))
                 {
-                    Player player = owner.ToPlayer();
+                    bool isLordSummon = me.GetEntry() == 108452;
 
-                    if (owner.ToPlayer())
+                    int spellPower = player.SpellBaseDamageBonusDone(SpellSchoolMask.Fire);
+                    int dmg = MathFunctions.CalculatePct(spellPower, isLordSummon ? 30 : 50);
+                    int diff = MathFunctions.CalculatePct(dmg, 10);
+
+                    me.SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, dmg - diff);
+                    me.SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, dmg + diff);
+
+
+                    if (isLordSummon)
+                        return;
+
+                    if (player.HasAura(WarlockSpells.LORD_OF_THE_FLAMES) &&
+                        !player.HasAura(WarlockSpells.LORD_OF_THE_FLAMES_CD))
                     {
-                        bool isLordSummon = me.GetEntry() == 108452;
-
-                        int spellPower = player.SpellBaseDamageBonusDone(SpellSchoolMask.Fire);
-                        int dmg = MathFunctions.CalculatePct(spellPower, isLordSummon ? 30 : 50);
-                        int diff = MathFunctions.CalculatePct(dmg, 10);
-
-                        me.SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, dmg - diff);
-                        me.SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, dmg + diff);
-
-
-                        if (isLordSummon)
-                            return;
-
-                        if (player.HasAura(WarlockSpells.LORD_OF_THE_FLAMES) &&
-                            !player.HasAura(WarlockSpells.LORD_OF_THE_FLAMES_CD))
-                        {
-                            List<float> angleOffsets = new()
+                        List<float> angleOffsets = new()
                                                            {
                                                                (float)Math.PI / 2.0f,
                                                                (float)Math.PI,
                                                                3.0f * (float)Math.PI / 2.0f
                                                            };
 
-                            for (uint i = 0; i < 3; ++i)
-                                player.CastSpell(me, WarlockSpells.LORD_OF_THE_FLAMES_SUMMON, true);
+                        for (uint i = 0; i < 3; ++i)
+                            player.CastSpell(me, WarlockSpells.LORD_OF_THE_FLAMES_SUMMON, true);
 
-                            player.CastSpell(player, WarlockSpells.LORD_OF_THE_FLAMES_CD, true);
-                        }
+                        player.CastSpell(player, WarlockSpells.LORD_OF_THE_FLAMES_CD, true);
                     }
                 }
             }
@@ -102,6 +99,15 @@ namespace Scripts.Pets
                 }
 
                 DoMeleeAttackIfReady();
+            }
+
+            public override void OnMeleeAttack(CalcDamageInfo damageInfo, WeaponAttackType attType, bool extra)
+            {
+                if (me != damageInfo.Attacker || !me.TryGetOwner(out var owner))
+                    return;
+
+                if (owner.TryGetAsPlayer(out var player) && player.HasAura(WarlockSpells.INFERNAL_BRAND))
+                    me.AddAura(WarlockSpells.INFERNAL_BRAND_ENEMY_AURA, damageInfo.Target);
             }
         }
     }

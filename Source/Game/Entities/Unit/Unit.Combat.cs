@@ -587,6 +587,12 @@ namespace Game.Entities
                     CalculateMeleeDamage(victim, out damageInfo, attType);
                     // Send log damage message to client
                     CheckEvade(damageInfo.Attacker, victim, ref damageInfo.Damage, ref damageInfo.Absorb);
+
+                    if (TryGetAI(out var aI))
+                        aI.OnMeleeAttack(damageInfo, attType, extra);   
+
+                    Global.ScriptMgr.ForEach<IUnitOnMeleeAttack>(s => s.OnMeleeAttack(damageInfo, attType, extra));
+
                     SendAttackStateUpdate(damageInfo);
 
                     _lastDamagedTargetGuid = victim.GetGUID();

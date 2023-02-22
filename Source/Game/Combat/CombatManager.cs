@@ -224,7 +224,7 @@ namespace Game.Combat
 
             if (UpdateOwnerCombatState())
             {
-                UnitAI ownerAI = _owner.GetAI();
+                IUnitAI ownerAI = _owner.GetAI();
                 if (ownerAI != null)
                     ownerAI.JustExitedCombat();
             }
@@ -268,7 +268,7 @@ namespace Game.Combat
 
         public static void NotifyAICombat(Unit me, Unit other)
         {
-            UnitAI ai = me.GetAI();
+            IUnitAI ai = me.GetAI();
             if (ai != null)
                 ai.JustEnteredCombat(other);
         }
@@ -373,13 +373,13 @@ namespace Game.Combat
             // ...and if that happened, also notify the AI of it...
             if (needFirstAI)
             {
-                UnitAI firstAI = first.GetAI();
+                IUnitAI firstAI = first.GetAI();
                 if (firstAI != null)
                     firstAI.JustExitedCombat();
             }
             if (needSecondAI)
             {
-                UnitAI secondAI = second.GetAI();
+                IUnitAI secondAI = second.GetAI();
                 if (secondAI != null)
                     secondAI.JustExitedCombat();
             }
@@ -410,7 +410,7 @@ namespace Game.Combat
             Suppress(who);
             if (who.GetCombatManager().UpdateOwnerCombatState())
             {
-                UnitAI ai = who.GetAI();
+                IUnitAI ai = who.GetAI();
                 if (ai != null)
                     ai.JustExitedCombat();
             }

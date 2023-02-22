@@ -695,7 +695,7 @@ namespace Game.AI
             Unit charmer = me.GetCharmer();
             if (charmer)
             {
-                UnitAI charmerAI = charmer.GetAI();
+                IUnitAI charmerAI = charmer.GetAI();
                 if (charmerAI != null)
                     return charmerAI.SelectTarget(SelectTargetMethod.Random, 0, new ValidTargetSelectPredicate(this));
 
@@ -1363,9 +1363,9 @@ namespace Game.AI
 
     struct ValidTargetSelectPredicate : ICheck<Unit>
     {
-        UnitAI _ai;
+        IUnitAI _ai;
 
-        public ValidTargetSelectPredicate(UnitAI ai)
+        public ValidTargetSelectPredicate(IUnitAI ai)
         {
             _ai = ai;
         }

@@ -19,8 +19,8 @@ namespace Game.Entities
     public partial class Unit
     {
         //AI
-        protected Stack<UnitAI> i_AIs = new();
-        protected UnitAI i_AI;
+        protected Stack<IUnitAI> i_AIs = new();
+        protected IUnitAI i_AI;
 
         //Movement
         protected float[] m_speed_rate = new float[(int)UnitMoveType.Max];

@@ -309,7 +309,9 @@ namespace Game.Scripting
                                         activatedObj = Activator.CreateInstance(type, new object[] { name }.Combine(attribute.Args)) as IScriptObject;
                                 }
 
-              
+                            if (activatedObj != null && IOHelpers.DoesTypeSupportInterface(activatedObj.GetType(), typeof(IScriptAutoAdd)))
+                                Global.ScriptMgr.AddScript(activatedObj);
+
                             if (registers.TryGetValue(attribute.GetType(), out var reg))
                                 reg.Register(attribute, activatedObj, name);
                         }

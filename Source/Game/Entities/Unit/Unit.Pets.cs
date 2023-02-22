@@ -37,7 +37,7 @@ namespace Game.Entities
         {
             if (IsCharmed())
             {
-                UnitAI newAI = null;
+                IUnitAI newAI = null;
                 if (IsPlayer())
                 {
                     Unit charmer = GetCharmer();
@@ -75,7 +75,7 @@ namespace Game.Entities
                 RestoreDisabledAI();
                 // Hack: this is required because we want to call OnCharmed(true) on the restored AI
                 RefreshAI();
-                UnitAI ai = GetAI();
+                IUnitAI ai = GetAI();
                 if (ai != null)
                     ai.OnCharmed(true);
             }
@@ -422,7 +422,7 @@ namespace Game.Entities
             if (!IsPlayer() || !charmer.IsPlayer())
             {
                 // AI will schedule its own change if appropriate
-                UnitAI ai = GetAI();
+                IUnitAI ai = GetAI();
                 if (ai != null)
                     ai.OnCharmed(false);
                 else
@@ -527,7 +527,7 @@ namespace Game.Entities
 
             if (!IsPlayer() || charmer.IsCreature())
             {
-                UnitAI charmedAI = GetAI();
+                IUnitAI charmedAI = GetAI();
                 if (charmedAI != null)
                     charmedAI.OnCharmed(false); // AI will potentially schedule a charm ai update
                 else

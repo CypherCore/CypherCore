@@ -479,7 +479,7 @@ namespace Game.Entities
             if (IsInWorld)
             {
                 m_duringRemoveFromWorld = true;
-                UnitAI ai = GetAI();
+                IUnitAI ai = GetAI();
                 if (ai != null)
                     ai.OnDespawn();
 
@@ -1205,13 +1205,17 @@ namespace Game.Entities
 
         public bool IsAIEnabled() { return i_AI != null; }
 
-        public virtual UnitAI GetAI() { return i_AI; }
+        public virtual IUnitAI GetAI() { return i_AI; }
 
-        public UnitAI GetTopAI() { lock (i_AIs) return i_AIs.Count == 0 ? null : i_AIs.Peek(); }
+        public IUnitAI GetBaseAI() { return i_AI; }
+
+        public bool TryGetAI(out IUnitAI ai) { ai = GetBaseAI(); return ai != null; }    
+
+        public IUnitAI GetTopAI() { lock (i_AIs) return i_AIs.Count == 0 ? null : i_AIs.Peek(); }
 
         public void AIUpdateTick(uint diff)
         {
-            UnitAI ai = GetAI();
+            IUnitAI ai = GetAI();
             if (ai != null)
             {
                 lock (i_AIs)
@@ -1219,13 +1223,13 @@ namespace Game.Entities
             }
         }
 
-        public void PushAI(UnitAI newAI)
+        public void PushAI(IUnitAI newAI)
         {
             lock (i_AIs)
                 i_AIs.Push(newAI);
         }
 
-        public void SetAI(UnitAI newAI)
+        public void SetAI(IUnitAI newAI)
         {
             PushAI(newAI);
             RefreshAI();
@@ -1284,7 +1288,7 @@ namespace Game.Entities
 
         bool HasScheduledAIChange()
         {
-            UnitAI ai = GetAI();
+            IUnitAI ai = GetAI();
             if (ai != null)
                 return ai is ScheduledChangeAI;
             else

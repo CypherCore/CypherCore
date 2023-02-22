@@ -165,6 +165,9 @@ namespace Scripts.Spells.Warlock
 		public const uint IMP_CAUTERIZE_MASTER = 119899;
 		public const uint INCINERATE = 29722;
         public const uint INCINERATE_ENERGIZE = 244670;
+		public const uint INFERNAL_BRAND = 387475;
+        public const uint INFERNAL_BRAND_ENEMY_AURA = 387476;
+        public const uint INFERNAL_BRAND_INFERNAL_AURA = 387476;
         public const uint INFERNAL_FURNACE = 211119;
 		public const uint INFERNAL_METEOR_STRIKE = 171017;
 		public const uint INFERNO_AURA = 270545;

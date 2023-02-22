@@ -1955,7 +1955,7 @@ namespace Game.Entities
                     //Re-initialize reactstate that could be altered by movementgenerators
                     InitializeReactState();
 
-                    UnitAI ai = GetAI();
+                    IUnitAI ai = GetAI();
                     if (ai != null) // reset the AI to be sure no dirty or uninitialized values will be used till next tick
                         ai.Reset();
 
