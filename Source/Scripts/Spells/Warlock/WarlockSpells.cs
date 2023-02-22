@@ -40,7 +40,9 @@ namespace Scripts.Spells.Warlock
 		public const uint CRY_HAVOC_DMG = 387547;
 		public const uint CURSE_OF_DOOM_EFFECT = 18662;
 		public const uint CURSE_OF_SHADOWS_DAMAGE = 236615;
-		public const uint DARK_REGENERATION = 108359;
+		public const uint CRASHING_CHAOS = 387355;
+        public const uint CRASHING_CHAOS_AURA = 387356;
+        public const uint DARK_REGENERATION = 108359;
 		public const uint DARK_SOUL_INSTABILITY = 113858;
 		public const uint DARK_SOUL_KNOWLEDGE = 113861;
 		public const uint DARK_SOUL_MISERY = 113860;

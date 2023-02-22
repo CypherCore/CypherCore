@@ -8,7 +8,7 @@ using Game.Scripting.Interfaces.ISpell;
 namespace Scripts.Spells.Warlock
 {
     [SpellScript(WarlockSpells.SHADOWBURN)]
-    public class spell_warl_shadowburn_SpellScript : SpellScript, ISpellCalcCritChance, ISpellOnHit
+    public class spell_warl_shadowburn_SpellScript : SpellScript, ISpellCalcCritChance, ISpellOnHit, ISpellOnCast
     {
         public void CalcCritChance(Unit victim, ref float chance)
         {
@@ -43,6 +43,11 @@ namespace Scripts.Spells.Warlock
                 if (RandomHelper.randChance(conflagrate.GetEffect(0).GetBaseAmount()))
                     caster.CastSpell(WarlockSpells.CONFLAGRATION_OF_CHAOS_SHADOWBURN, true);
             }
+        }
+
+        public void OnCast()
+        {
+            GetCaster()?.RemoveAuraApplicationCount(WarlockSpells.CRASHING_CHAOS_AURA);
         }
     }
 }

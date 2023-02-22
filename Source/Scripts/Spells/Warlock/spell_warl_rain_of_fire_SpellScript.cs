@@ -12,6 +12,7 @@ namespace Scripts.Spells.Warlock
         public void OnCast()
         {
             GetCaster()?.RemoveAura(WarlockSpells.RITUAL_OF_RUIN_FREE_CAST_AURA);
+            GetCaster()?.RemoveAuraApplicationCount(WarlockSpells.CRASHING_CHAOS_AURA);
         }
     }
 }

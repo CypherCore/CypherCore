@@ -3172,6 +3172,11 @@ namespace Game.Entities
             m_appliedAuras.Query().HasSpellId(spellId).Execute(RemoveAura);
         }
 
+        public void RemoveAuraApplicationCount(uint spellId, ushort count = 1)
+        {
+            m_ownedAuras.Query().HasSpellId(spellId).ForEachResult(aura => aura.ModStackAmount(-count));
+        }
+
         public void RemoveAura(KeyValuePair<uint, AuraApplication> appMap, AuraRemoveMode mode = AuraRemoveMode.Default)
         {
             RemoveAura(appMap.Value, mode);
