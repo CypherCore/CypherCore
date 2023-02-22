@@ -3342,14 +3342,14 @@ namespace Game.Entities
         public void WriteCreate(WorldPacket data, Player owner, Player receiver)
         {
             data.WriteInt32(ModIndex);
-            data.WriteFloat(ModifierValue);
+            data.WriteInt32((int)ModifierValue);
             data.WriteInt32(LabelID);
         }
 
         public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
         {
             data.WriteInt32(ModIndex);
-            data.WriteFloat(ModifierValue);
+            data.WriteInt32((int)ModifierValue);
             data.WriteInt32(LabelID);
         }
     }
