@@ -1521,12 +1521,12 @@ namespace Game.Maps
 
         public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, LiquidHeaderTypeFlags reqLiquidType, float collisionHeight = MapConst.DefaultCollesionHeight)
         {
-            return m_terrain.GetLiquidStatus(phaseShift, GetId(), x, y, z, reqLiquidType, null, collisionHeight);
+            return m_terrain.GetLiquidStatus(phaseShift, GetId(), x, y, z, reqLiquidType, out _, collisionHeight);
         }
 
-        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, LiquidHeaderTypeFlags reqLiquidType, LiquidData data, float collisionHeight = MapConst.DefaultCollesionHeight)
+        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, LiquidHeaderTypeFlags reqLiquidType, out LiquidData data, float collisionHeight = MapConst.DefaultCollesionHeight)
         {
-            return m_terrain.GetLiquidStatus(phaseShift, GetId(), x, y, z, reqLiquidType, data, collisionHeight);
+            return m_terrain.GetLiquidStatus(phaseShift, GetId(), x, y, z, reqLiquidType, out data, collisionHeight);
         }
 
         private bool GetAreaInfo(PhaseShift phaseShift, float x, float y, float z, out uint mogpflags, out int adtId, out int rootId, out int groupId)
@@ -1594,9 +1594,9 @@ namespace Game.Maps
             return m_terrain.GetWaterLevel(phaseShift, GetId(), x, y);
         }
 
-        public bool IsInWater(PhaseShift phaseShift, float x, float y, float z, LiquidData data)
+        public bool IsInWater(PhaseShift phaseShift, float x, float y, float z, out LiquidData data)
         {
-            return m_terrain.IsInWater(phaseShift, GetId(), x, y, z, data);
+            return m_terrain.IsInWater(phaseShift, GetId(), x, y, z, out data);
         }
 
         public bool IsUnderWater(PhaseShift phaseShift, float x, float y, float z)
