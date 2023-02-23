@@ -3651,7 +3651,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, m_cinematic);
                 stmt.AddValue(index++, m_PlayedTimeTotal);
                 stmt.AddValue(index++, m_PlayedTimeLevel);
-                stmt.AddValue(index++, finiteAlways(_restMgr.GetRestBonus(RestTypes.XP)));
+                stmt.AddValue(index++, finiteAlways((float)_restMgr.GetRestBonus(RestTypes.XP)));
                 stmt.AddValue(index++, GameTime.GetGameTime());
                 stmt.AddValue(index++, (HasPlayerFlag(PlayerFlags.Resting) ? 1 : 0));
                 //save, far from tavern/city
@@ -3791,7 +3791,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, m_cinematic);
                 stmt.AddValue(index++, m_PlayedTimeTotal);
                 stmt.AddValue(index++, m_PlayedTimeLevel);
-                stmt.AddValue(index++, finiteAlways(_restMgr.GetRestBonus(RestTypes.XP)));
+                stmt.AddValue(index++, finiteAlways((float)_restMgr.GetRestBonus(RestTypes.XP)));
                 stmt.AddValue(index++, GameTime.GetGameTime());
                 stmt.AddValue(index++, (HasPlayerFlag(PlayerFlags.Resting) ? 1 : 0));
                 //save, far from tavern/city
@@ -3879,7 +3879,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, m_activePlayerData.Honor);
                 stmt.AddValue(index++, GetHonorLevel());
                 stmt.AddValue(index++, m_activePlayerData.RestInfo[(int)RestTypes.Honor].StateID);
-                stmt.AddValue(index++, finiteAlways(_restMgr.GetRestBonus(RestTypes.Honor)));
+                stmt.AddValue(index++, finiteAlways((float)_restMgr.GetRestBonus(RestTypes.Honor)));
                 stmt.AddValue(index++, Global.RealmMgr.GetMinorMajorBugfixVersionForBuild(Global.WorldMgr.GetRealm().Build));
 
                 // Index

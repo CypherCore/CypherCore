@@ -45,9 +45,9 @@ namespace Scripts.Spells.Warrior
 			if (l_SpellInfo == null || l_SpellInfoDamage == null)
 				return;
 
-			float l_Damage = MathFunctions.CalculatePct(p_ProcInfo.GetDamageInfo().GetDamage(), aurEff.GetBaseAmount());
+			double l_Damage = MathFunctions.CalculatePct(p_ProcInfo.GetDamageInfo().GetDamage(), aurEff.GetBaseAmount());
 
-			float l_PreviousTotalDamage = 0;
+			double l_PreviousTotalDamage = 0;
 
 			var l_PreviousBloodBath = l_Target.GetAuraEffect(eSpells.BLOOD_BATH_DAMAGE, 0, l_Caster.GetGUID());
 

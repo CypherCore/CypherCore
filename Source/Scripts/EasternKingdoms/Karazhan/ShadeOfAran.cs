@@ -463,7 +463,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
                 DoMeleeAttackIfReady();
         }
 
-        public override void DamageTaken(Unit pAttacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit pAttacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (!DrinkInturrupted &&
                 Drinking &&

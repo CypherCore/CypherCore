@@ -892,7 +892,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
         private bool IsChasing;
         private uint SwipeTimer;
-        private float TempThreat;
+        private double TempThreat;
 
         public boss_bigbadwolf(Creature creature) : base(creature)
         {
@@ -1095,7 +1095,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             }
         }
 
-        public override void DamageTaken(Unit done_by, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit done_by, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (damage < me.GetHealth())
                 return;
@@ -1399,7 +1399,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             me.DespawnOrUnsummon();
         }
 
-        public override void DamageTaken(Unit done_by, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit done_by, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (damage < me.GetHealth())
                 return;

@@ -7,6 +7,6 @@ namespace Game.Scripting.Interfaces.IUnit
 {
     public interface IUnitModifyPeriodicDamageAurasTick : IScriptObject
     {
-        void ModifyPeriodicDamageAurasTick(Unit target, Unit attacker, ref float damage);
+        void ModifyPeriodicDamageAurasTick(Unit target, Unit attacker, ref double damage);
     }
 }

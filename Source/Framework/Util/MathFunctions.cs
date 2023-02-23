@@ -67,6 +67,16 @@ public static class MathFunctions
     }
     #endregion
 
+    static double eps(double a, double b)
+    {
+        double aa = Math.Abs(a) + 1.0f;
+        if (double.IsPositiveInfinity(aa))
+            return 0.0000005f;
+       
+        return 0.0000005f * aa;
+    }
+
+
     static double eps(float a, float b)
     {
         float aa = Math.Abs(a) + 1.0f;
@@ -87,6 +97,11 @@ public static class MathFunctions
     }
 
     #region Fuzzy
+
+    public static bool fuzzyEq(double a, double b)
+    {
+        return (a == b) || (Math.Abs(a - b) <= eps(a, b));
+    }
     public static bool fuzzyEq(float a, float b)
     {
         return (a == b) || (Math.Abs(a - b) <= eps(a, b));
@@ -107,11 +122,25 @@ public static class MathFunctions
     {
         return a < b + eps(a, b);
     }
+    public static bool fuzzyLe(double a, double b)
+    {
+        return a < b + eps(a, b);
+    }
     public static bool fuzzyGe(float a, float b)
     {
         return a > b - eps(a, b);
     }
     #endregion
+
+    public static double ApplyPct(ref double Base, double pct)
+    {
+        return Base = CalculatePct(Base, pct);
+    }
+
+    public static int ApplyPct(ref int Base, double pct)
+    {
+        return Base = CalculatePct(Base, pct);
+    }
 
     public static int ApplyPct(ref int Base, float pct)
     {
@@ -124,6 +153,27 @@ public static class MathFunctions
     public static float ApplyPct(ref float Base, float pct)
     {
         return Base = CalculatePct(Base, pct);
+    }
+
+    public static float AddPct(ref float value, double pct)
+    {
+        return value += (float)CalculatePct(value, pct);
+    }
+    public static uint AddPct(ref uint value, double pct)
+    {
+        return value += CalculatePct(value, pct);
+    }
+    public static int AddPct(ref int value, double pct)
+    {
+        return value += CalculatePct(value, pct);
+    }
+    public static long AddPct(ref long value, double pct)
+    {
+        return value += CalculatePct(value, pct);
+    }
+    public static double AddPct(ref double value, double pct)
+    {
+        return value += CalculatePct(value, pct);
     }
 
     public static long AddPct(ref long value, float pct)
@@ -141,6 +191,40 @@ public static class MathFunctions
     public static float AddPct(ref float value, float pct)
     {
         return value += CalculatePct(value, pct);
+    }
+
+    public static int CalculatePct(int value, double pct)
+    {
+        return (int)(value * (pct / 100.0f));
+    }
+    public static uint CalculatePct(uint value, double pct)
+    {
+        return (uint)(value * (pct / 100.0f));
+    }
+
+    public static long CalculatePct(long value, double pct)
+    {
+        return (long)(value * (pct / 100.0f));
+    }
+
+    public static double CalculatePct(double value, double pct)
+    {
+        return (value * (pct / 100.0f));
+    }
+
+    public static ulong CalculatePct(ulong value, double pct)
+    {
+        return (ulong)(value * (pct / 100.0f));
+    }
+
+    public static double CalculatePct(float value, double pct)
+    {
+        return (value * (pct / 100.0f));
+    }
+
+    public static double CalculatePct(double value, float pct)
+    {
+        return (value * (pct / 100.0f));
     }
 
     public static int CalculatePct(int value, float pct)
@@ -170,6 +254,17 @@ public static class MathFunctions
         return (value / max) * 100.0f;
     }
 
+    public static double GetPctOf(double value, int max)
+    {
+        return (value / max) * 100.0f;
+    }
+
+    public static int GetPctOf(int value, int max)
+    {
+        return (int)((value / max) * 100.0f);
+    }
+
+
     public static int RoundToInterval(ref int num, dynamic floor, dynamic ceil)
     {
         return num = (int)Math.Min(Math.Max(num, floor), ceil);
@@ -181,6 +276,18 @@ public static class MathFunctions
     public static float RoundToInterval(ref float num, dynamic floor, dynamic ceil)
     {
         return num = Math.Min(Math.Max(num, floor), ceil);
+    }
+
+    public static double RoundToInterval(ref double num, dynamic floor, dynamic ceil)
+    {
+        return num = Math.Min(Math.Max(num, floor), ceil);
+    }
+
+    public static void ApplyPercentModFloatVar(ref double value, double val, bool apply)
+    {
+        if (val == -100.0f)     // prevent set var to zero
+            val = -99.99f;
+        value *= (apply ? (100.0f + val) / 100.0f : 100.0f / (100.0f + val));
     }
 
     public static void ApplyPercentModFloatVar(ref float value, float val, bool apply)

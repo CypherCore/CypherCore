@@ -107,7 +107,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
                                 });
         }
 
-        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             // Attumen does not die until he mounts Midnight, let health fall to 1 and prevent further Damage.
             if (damage >= me.GetHealth() &&
@@ -302,7 +302,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
             me.SetReactState(ReactStates.Defensive);
         }
 
-        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             // Midnight never dies, let health fall to 1 and prevent further Damage.
             if (damage >= me.GetHealth())

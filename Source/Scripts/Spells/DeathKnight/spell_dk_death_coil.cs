@@ -44,10 +44,8 @@ internal class spell_dk_death_coil : SpellScript, IHasSpellEffects
 				var suddenDoom = caster.GetAura(DeathKnightSpells.DEATH_COIL_SUDDEN_DOOM_AURA);
 				if (suddenDoom != null)
 				{
-					suddenDoom.ModStackAmount(-1);
-                    if (caster.HasAura(DeathKnightSpells.DEATH_COIL_ROTTENTOUCH))
-                    {
-                        caster.AddAura(DeathKnightSpells.DEATH_COIL_ROTTENTOUCH_AURA, target);
+                    if (caster.HasAura(DeathKnightSpells.DEATH_COIL_ROTTENTOUCH)){
+                        caster.CastSpell(target, DeathKnightSpells.DEATH_COIL_ROTTENTOUCH_AURA, true);
                     }
                 }
 			}

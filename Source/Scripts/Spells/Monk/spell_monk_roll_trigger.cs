@@ -14,7 +14,7 @@ public class spell_monk_roll_trigger : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
-	private void CalcSpeed(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+	private void CalcSpeed(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
 	{
 		var caster = GetCaster();
 
@@ -25,7 +25,7 @@ public class spell_monk_roll_trigger : AuraScript, IHasAuraEffects
 			amount = 277;
 	}
 
-	private void CalcSpeed2(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+	private void CalcSpeed2(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
 	{
 		var caster = GetCaster();
 

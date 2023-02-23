@@ -14,7 +14,7 @@ namespace Scripts.Spells.Monk;
 public class spell_monk_dampen_harm : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
-	private float healthPct;
+	private double healthPct;
 
 	public override bool Load()
 	{
@@ -23,12 +23,12 @@ public class spell_monk_dampen_harm : AuraScript, IHasAuraEffects
 		return GetUnitOwner().ToPlayer();
 	}
 
-	private void CalculateAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+	private void CalculateAmount(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
 	{
 		amount = -1;
 	}
 
-	private void Absorb(AuraEffect auraEffect, DamageInfo dmgInfo, ref float absorbAmount)
+	private void Absorb(AuraEffect auraEffect, DamageInfo dmgInfo, ref double absorbAmount)
 	{
 		var target = GetTarget();
 		var health = target.CountPctFromMaxHealth(healthPct);

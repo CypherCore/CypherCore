@@ -2114,7 +2114,7 @@ namespace Game.Spells
                 uint damageImmunityMask = 0;
 
                 int miscVal = effect.MiscValue;
-                float amount = effect.CalcValue();
+                double amount = effect.CalcValue();
 
                 ImmunityInfo immuneInfo = effect.GetImmunityInfo();
 
@@ -2819,7 +2819,7 @@ namespace Game.Spells
             }
 
             // Base powerCost
-            float powerCost = 0;
+            double powerCost = 0;
             if (!optionalCost)
             {
                 powerCost = power.ManaCost;
@@ -2913,7 +2913,7 @@ namespace Game.Spells
                     speed = unitCaster.GetBaseAttackTime(slot);
                 }
 
-                powerCost += (int)speed / 100;
+                powerCost += speed / 100;
             }
 
             if (power.PowerType != PowerType.Health)
@@ -2973,8 +2973,8 @@ namespace Game.Spells
                     else
                     {
                         // optional cost ignores flat modifiers
-                        float flatMod = 0;
-                        float pctMod = 1.0f;
+                        double flatMod = 0;
+                        double pctMod = 1.0f;
                         modOwner.GetSpellModValues(this, mod, spell, powerCost, ref flatMod, ref pctMod);
                         powerCost = (powerCost * pctMod);
                     }
@@ -2993,7 +2993,7 @@ namespace Game.Spells
             }
 
             if (power.PowerType == PowerType.Mana)
-                powerCost = (int)((float)powerCost * (1.0f + unitCaster.m_unitData.ManaCostMultiplier));
+                powerCost = (int)((double)powerCost * (1.0f + unitCaster.m_unitData.ManaCostMultiplier));
 
             // power cost cannot become negative if initially positive
             if (initiallyNegative != (powerCost < 0))
@@ -3045,12 +3045,12 @@ namespace Game.Spells
             return costs;
         }
 
-        float CalcPPMHasteMod(SpellProcsPerMinuteModRecord mod, Unit caster)
+        double CalcPPMHasteMod(SpellProcsPerMinuteModRecord mod, Unit caster)
         {
-            float haste = caster.m_unitData.ModHaste;
-            float rangedHaste = caster.m_unitData.ModRangedHaste;
-            float spellHaste = caster.m_unitData.ModSpellHaste;
-            float regenHaste = caster.m_unitData.ModHasteRegen;
+            double haste = caster.m_unitData.ModHaste;
+            double rangedHaste = caster.m_unitData.ModRangedHaste;
+            double spellHaste = caster.m_unitData.ModSpellHaste;
+            double regenHaste = caster.m_unitData.ModHasteRegen;
 
             switch (mod.Param)
             {
@@ -3071,15 +3071,15 @@ namespace Game.Spells
             return 0.0f;
         }
 
-        float CalcPPMCritMod(SpellProcsPerMinuteModRecord mod, Unit caster)
+        double CalcPPMCritMod(SpellProcsPerMinuteModRecord mod, Unit caster)
         {
             Player player = caster.ToPlayer();
             if (player == null)
                 return 0.0f;
 
-            float crit = player.m_activePlayerData.CritPercentage;
-            float rangedCrit = player.m_activePlayerData.RangedCritPercentage;
-            float spellCrit = player.m_activePlayerData.SpellCritPercentage;
+            double crit = player.m_activePlayerData.CritPercentage;
+            double rangedCrit = player.m_activePlayerData.RangedCritPercentage;
+            double spellCrit = player.m_activePlayerData.SpellCritPercentage;
 
             switch (mod.Param)
             {
@@ -3098,22 +3098,22 @@ namespace Game.Spells
             return 0.0f;
         }
 
-        float CalcPPMItemLevelMod(SpellProcsPerMinuteModRecord mod, int itemLevel)
+        double CalcPPMItemLevelMod(SpellProcsPerMinuteModRecord mod, int itemLevel)
         {
             if (itemLevel == mod.Param)
                 return 0.0f;
 
-            float itemLevelPoints = ItemEnchantmentManager.GetRandomPropertyPoints((uint)itemLevel, ItemQuality.Rare, InventoryType.Chest, 0);
-            float basePoints = ItemEnchantmentManager.GetRandomPropertyPoints(mod.Param, ItemQuality.Rare, InventoryType.Chest, 0);
+            double itemLevelPoints = ItemEnchantmentManager.GetRandomPropertyPoints((uint)itemLevel, ItemQuality.Rare, InventoryType.Chest, 0);
+            double basePoints = ItemEnchantmentManager.GetRandomPropertyPoints(mod.Param, ItemQuality.Rare, InventoryType.Chest, 0);
             if (itemLevelPoints == basePoints)
                 return 0.0f;
 
             return ((itemLevelPoints / basePoints) - 1.0f) * mod.Coeff;
         }
 
-        public float CalcProcPPM(Unit caster, int itemLevel)
+        public double CalcProcPPM(Unit caster, int itemLevel)
         {
-            float ppm = ProcBasePPM;
+            double ppm = ProcBasePPM;
             if (!caster)
                 return ppm;
 
@@ -3368,8 +3368,8 @@ namespace Game.Spells
             visited.Add(Tuple.Create(spellInfo, effect.EffectIndex));
 
             //We need scaling level info for some auras that compute bp 0 or positive but should be debuffs
-            float bpScalePerLevel = effect.RealPointsPerLevel;
-            float bp = effect.CalcValue();
+            double bpScalePerLevel = effect.RealPointsPerLevel;
+            double bp = effect.CalcValue();
             switch (spellInfo.SpellFamilyName)
             {
                 case SpellFamilyNames.Generic:
@@ -4154,19 +4154,18 @@ namespace Game.Spells
             return IsAreaAuraEffect() || Effect == SpellEffectName.ApplyAura || Effect == SpellEffectName.ApplyAuraOnPet;
         }
 
-        public float CalcValue(WorldObject caster = null, float? bp = null, Unit target = null, uint castItemId = 0, int itemLevel = -1)
+        public double CalcValue(WorldObject caster = null, double? bp = null, Unit target = null, uint castItemId = 0, int itemLevel = -1)
         {
             return CalcValue(out _, caster, bp, target, castItemId, itemLevel);
         }
 
-        public float CalcValue(out float variance, WorldObject caster = null, float? bp = null, Unit target = null, uint castItemId = 0, int itemLevel = -1)
+        public double CalcValue(out double variance, WorldObject caster = null, double? bp = null, Unit target = null, uint castItemId = 0, int itemLevel = -1)
         {
             variance = 0.0f;
-            float basePointsPerLevel = RealPointsPerLevel;
-            // TODO: this needs to be a float, not rounded
-            float basePoints = CalcBaseValue(caster, target, castItemId, itemLevel);
-            float value = bp.HasValue ? bp.Value : basePoints;
-            float comboDamage = PointsPerResource;
+            double basePointsPerLevel = RealPointsPerLevel;
+            double basePoints = CalcBaseValue(caster, target, castItemId, itemLevel);
+            double value = bp.HasValue ? bp.Value : basePoints;
+            double comboDamage = PointsPerResource;
 
             Unit casterUnit = null;
             if (caster != null)
@@ -4174,8 +4173,8 @@ namespace Game.Spells
 
             if (Scaling.Variance != 0)
             {
-                float delta = Math.Abs(Scaling.Variance * 0.5f);
-                float valueVariance = RandomHelper.FRand(-delta, delta);
+                double delta = Math.Abs(Scaling.Variance * 0.5f);
+                double valueVariance = RandomHelper.FRand(-delta, delta);
                 value += basePoints * valueVariance;
                 variance = valueVariance;
             }
@@ -4219,7 +4218,7 @@ namespace Game.Spells
             return value;
         }
 
-        public float CalcBaseValue(WorldObject caster, Unit target, uint itemId, int itemLevel)
+        public double CalcBaseValue(WorldObject caster, Unit target, uint itemId, int itemLevel)
         {
             if (Scaling.Coefficient != 0.0f)
             {
@@ -4238,7 +4237,7 @@ namespace Game.Spells
                 if (_spellInfo.Scaling.MaxScalingLevel != 0 && _spellInfo.Scaling.MaxScalingLevel < level)
                     level = _spellInfo.Scaling.MaxScalingLevel;
 
-                float tempValue = 0.0f;
+                double tempValue = 0.0f;
                 if (level > 0)
                 {
                     if (Scaling.Class == 0)
@@ -4295,7 +4294,7 @@ namespace Game.Spells
             }
             else
             {
-                float tempValue = BasePoints;
+                double tempValue = BasePoints;
                 ExpectedStatType stat = GetScalingExpectedStat();
                 if (stat != ExpectedStatType.None)
                 {
@@ -4317,18 +4316,18 @@ namespace Game.Spells
             }
         }
 
-        public float CalcValueMultiplier(WorldObject caster, Spell spell = null)
+        public double CalcValueMultiplier(WorldObject caster, Spell spell = null)
         {
-            float multiplier = Amplitude;
+            double multiplier = Amplitude;
             Player modOwner = (caster != null ? caster.GetSpellModOwner() : null);
             if (modOwner != null)
                 modOwner.ApplySpellMod(_spellInfo, SpellModOp.Amplitude, ref multiplier, spell);
             return multiplier;
         }
 
-        public float CalcDamageMultiplier(WorldObject caster, Spell spell = null)
+        public double CalcDamageMultiplier(WorldObject caster, Spell spell = null)
         {
-            float multiplierPercent = ChainAmplitude * 100.0f;
+            double multiplierPercent = ChainAmplitude * 100.0f;
             Player modOwner = (caster != null ? caster.GetSpellModOwner() : null);
             if (modOwner != null)
                 modOwner.ApplySpellMod(_spellInfo, SpellModOp.ChainAmplitude, ref multiplierPercent, spell);
@@ -4834,12 +4833,12 @@ namespace Game.Spells
         public SpellEffectName Effect;
         public AuraType ApplyAuraName;
         public uint ApplyAuraPeriod;
-        public float BasePoints;
-        public float RealPointsPerLevel;
-        public float PointsPerResource;
-        public float Amplitude;
-        public float ChainAmplitude;
-        public float BonusCoefficient;
+        public double BasePoints;
+        public double RealPointsPerLevel;
+        public double PointsPerResource;
+        public double Amplitude;
+        public double ChainAmplitude;
+        public double BonusCoefficient;
         public int MiscValue;
         public int MiscValueB;
         public Mechanics Mechanic;
@@ -4852,7 +4851,7 @@ namespace Game.Spells
         public uint ItemType;
         public uint TriggerSpell;
         public FlagArray128 SpellClassMask;
-        public float BonusCoefficientFromAP;
+        public double BonusCoefficientFromAP;
         public List<Condition> ImplicitTargetConditions;
         public SpellEffectAttributes EffectAttributes;
         public ScalingInfo Scaling;
@@ -4863,9 +4862,9 @@ namespace Game.Spells
         public struct ScalingInfo
         {
             public int Class;
-            public float Coefficient;
-            public float Variance;
-            public float ResourceCoefficient;
+            public double Coefficient;
+            public double Variance;
+            public double ResourceCoefficient;
         }
     }
 

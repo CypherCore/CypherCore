@@ -384,7 +384,7 @@ namespace Game.Spells
             return null;
         }
 
-        public void _InitEffects(uint effMask, Unit caster, Dictionary<int, float> baseAmount)
+        public void _InitEffects(uint effMask, Unit caster, Dictionary<int, double> baseAmount)
         {
             // shouldn't be in constructor - functions in AuraEffect.AuraEffect use polymorphism
             _effects = new();
@@ -775,7 +775,7 @@ namespace Game.Spells
             return maxDuration;
         }
 
-        public void SetDuration(float duration, bool withMods = false)
+        public void SetDuration(double duration, bool withMods = false)
         {
             SetDuration((int)duration, withMods);
         }
@@ -805,7 +805,7 @@ namespace Game.Spells
             SetDuration(GetDuration() + duration, withMods);
         }
 
-        public void ModDuration(float duration, bool withMods = false)
+        public void ModDuration(double duration, bool withMods = false)
         {
             SetDuration((int)duration, withMods);
         }
@@ -952,7 +952,7 @@ namespace Game.Spells
             return maxStackAmount;
         }
 
-        public bool ModStackAmount(float num, AuraRemoveMode removeMode = AuraRemoveMode.Default, bool resetPeriodicTimer = true)
+        public bool ModStackAmount(double num, AuraRemoveMode removeMode = AuraRemoveMode.Default, bool resetPeriodicTimer = true)
         {
             return ModStackAmount((int)num, removeMode, resetPeriodicTimer);
         }
@@ -1137,7 +1137,7 @@ namespace Game.Spells
             return key;
         }
 
-        public void SetLoadedState(int maxduration, int duration, int charges, byte stackamount, uint recalculateMask, Dictionary<int, float> amount)
+        public void SetLoadedState(int maxduration, int duration, int charges, byte stackamount, uint recalculateMask, Dictionary<int, double> amount)
         {
             m_maxDuration = maxduration;
             m_duration = duration;
@@ -1392,7 +1392,7 @@ namespace Game.Spells
                                 AuraEffect aurEff = aura.GetEffect(0);
                                 if (aurEff != null)
                                 {
-                                    float multiplier = aurEff.GetAmount();
+                                    double multiplier = aurEff.GetAmount();
                                     CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
                                     args.SetOriginalCastId(GetCastId());
                                     args.AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(caster.GetMaxPower(PowerType.Mana), multiplier));
@@ -1862,9 +1862,9 @@ namespace Game.Spells
             return 0;
         }
 
-        float CalcProcChance(SpellProcEntry procEntry, ProcEventInfo eventInfo)
+        double CalcProcChance(SpellProcEntry procEntry, ProcEventInfo eventInfo)
         {
-            float chance = procEntry.Chance;
+            double chance = procEntry.Chance;
             // calculate chances depending on unit with caster's data
             // so talents modifying chances and judgements will have properly calculated proc chance
             Unit caster = GetCaster();
@@ -1914,17 +1914,17 @@ namespace Game.Spells
             ConsumeProcCharges(Global.SpellMgr.GetSpellProcEntry(GetSpellInfo()));
         }
 
-        public float CalcPPMProcChance(Unit actor)
+        public double CalcPPMProcChance(Unit actor)
         {
             // Formula see http://us.battle.net/wow/en/forum/topic/8197741003#1
-            float ppm = m_spellInfo.CalcProcPPM(actor, GetCastItemLevel());
-            float averageProcInterval = 60.0f / ppm;
+            double ppm = m_spellInfo.CalcProcPPM(actor, GetCastItemLevel());
+            double averageProcInterval = 60.0f / ppm;
 
             var currentTime = GameTime.Now();
             float secondsSinceLastAttempt = Math.Min((float)(currentTime - m_lastProcAttemptTime).TotalSeconds, 10.0f);
             float secondsSinceLastProc = Math.Min((float)(currentTime - m_lastProcSuccessTime).TotalSeconds, 1000.0f);
 
-            float chance = Math.Max(1.0f, 1.0f + ((secondsSinceLastProc / averageProcInterval - 1.5f) * 3.0f)) * ppm * secondsSinceLastAttempt / 60.0f;
+            double chance = Math.Max(1.0f, 1.0f + ((secondsSinceLastProc / averageProcInterval - 1.5f) * 3.0f)) * ppm * secondsSinceLastAttempt / 60.0f;
             MathFunctions.RoundToInterval(ref chance, 0.0f, 1.0f);
             return chance * 100.0f;
         }
@@ -2188,7 +2188,7 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectCalcAmountHandlers(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
+        public void CallScriptEffectCalcAmountHandlers(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
         {
             foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectCalcAmount, aurEff.GetEffIndex()))
             {
@@ -2224,7 +2224,7 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectCalcCritChanceHandlers(AuraEffect aurEff, AuraApplication aurApp, Unit victim, ref float critChance)
+        public void CallScriptEffectCalcCritChanceHandlers(AuraEffect aurEff, AuraApplication aurApp, Unit victim, ref double critChance)
         {
             foreach (var loadedScript in GetEffectScripts(AuraScriptHookType.EffectCalcCritChance, aurEff.GetEffIndex()))
             {
@@ -2236,7 +2236,7 @@ namespace Game.Spells
             }
         }
         
-        public void CallScriptEffectAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref float absorbAmount, ref bool defaultPrevented)
+        public void CallScriptEffectAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref double absorbAmount, ref bool defaultPrevented)
         {
             foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectAbsorb, aurEff.GetEffIndex()))
             {
@@ -2249,7 +2249,7 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectAfterAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref float absorbAmount)
+        public void CallScriptEffectAfterAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref double absorbAmount)
         {
             foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectAfterAbsorb, aurEff.GetEffIndex()))
             {
@@ -2261,7 +2261,7 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, HealInfo healInfo, ref float absorbAmount, ref bool defaultPrevented)
+        public void CallScriptEffectAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, HealInfo healInfo, ref double absorbAmount, ref bool defaultPrevented)
         {
             foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectAbsorbHeal, aurEff.GetEffIndex()))
             {
@@ -2274,7 +2274,7 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectAfterAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, HealInfo healInfo, ref float absorbAmount)
+        public void CallScriptEffectAfterAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, HealInfo healInfo, ref double absorbAmount)
         {
             foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectAfterAbsorb, aurEff.GetEffIndex()))
             {
@@ -2286,7 +2286,7 @@ namespace Game.Spells
             }
         }
         
-        public void CallScriptEffectManaShieldHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref float absorbAmount, ref bool defaultPrevented)
+        public void CallScriptEffectManaShieldHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref double absorbAmount, ref bool defaultPrevented)
         {
             foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectManaShield, aurEff.GetEffIndex()))
             {
@@ -2298,7 +2298,7 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectAfterManaShieldHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref float absorbAmount)
+        public void CallScriptEffectAfterManaShieldHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref double absorbAmount)
         {
             foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectAfterManaShield, aurEff.GetEffIndex()))
             {
@@ -2310,7 +2310,7 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectSplitHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref float splitAmount)
+        public void CallScriptEffectSplitHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref double splitAmount)
         {
             foreach (var auraScript in GetEffectScripts(AuraScriptHookType.EffectSplit, aurEff.GetEffIndex()))
             {
@@ -2494,7 +2494,7 @@ namespace Game.Spells
 
         public long GetApplyTime() { return m_applyTime; }
         public int GetMaxDuration() { return m_maxDuration; }
-        public void SetMaxDuration(float duration) { SetMaxDuration((int)duration); }
+        public void SetMaxDuration(double duration) { SetMaxDuration((int)duration); }
         public void SetMaxDuration(int duration) { m_maxDuration = duration; }
         public int CalcMaxDuration() { return CalcMaxDuration(GetCaster()); }
         public int GetDuration() { return m_duration; }
@@ -3047,15 +3047,15 @@ namespace Game.Spells
 
     public class AuraLoadEffectInfo
     {
-        public Dictionary<int, float> Amounts = new();
-        public Dictionary<int, float> BaseAmounts = new();
+        public Dictionary<int, double> Amounts = new();
+        public Dictionary<int, double> BaseAmounts = new();
     }
 
     public class AuraCreateInfo
     {
         public ObjectGuid CasterGUID;
         public Unit Caster;
-        public Dictionary<int, float> BaseAmount;
+        public Dictionary<int, double> BaseAmount;
         public ObjectGuid CastItemGUID;
         public uint CastItemId = 0;
         public int CastItemLevel = -1;
@@ -3087,7 +3087,7 @@ namespace Game.Spells
 
         public void SetCasterGUID(ObjectGuid guid) { CasterGUID = guid; }
         public void SetCaster(Unit caster) { Caster = caster; }
-        public void SetBaseAmount(Dictionary<int, float> bp) { BaseAmount = bp; }
+        public void SetBaseAmount(Dictionary<int, double> bp) { BaseAmount = bp; }
         public void SetCastItem(ObjectGuid guid, uint itemId, int itemLevel) { CastItemGUID = guid; CastItemId = itemId; CastItemLevel = itemLevel; }
         public void SetPeriodicReset(bool reset) { ResetPeriodicTimer = reset; }
         public void SetOwnerEffectMask(uint effMask) { _targetEffectMask = effMask; }

@@ -12,7 +12,7 @@ namespace Scripts.Spells.Monk;
 [Script] // 124273, 124274, 124275 - Light/Moderate/Heavy Stagger - STAGGER_LIGHT / STAGGER_MODERATE / STAGGER_HEAVY
 internal class spell_monk_stagger_debuff_aura : AuraScript, IHasAuraEffects
 {
-	private float _period;
+	private double _period;
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
 	public override bool Validate(SpellInfo spellInfo)
@@ -22,7 +22,7 @@ internal class spell_monk_stagger_debuff_aura : AuraScript, IHasAuraEffects
 
 	public override bool Load()
 	{
-		_period = (float)Global.SpellMgr.GetSpellInfo(MonkSpells.StaggerDamageAura, GetCastDifficulty()).GetEffect(0).ApplyAuraPeriod;
+		_period = (double)Global.SpellMgr.GetSpellInfo(MonkSpells.StaggerDamageAura, GetCastDifficulty()).GetEffect(0).ApplyAuraPeriod;
 
 		return true;
 	}
@@ -36,8 +36,8 @@ internal class spell_monk_stagger_debuff_aura : AuraScript, IHasAuraEffects
 	private void OnReapply(AuraEffect aurEff, AuraEffectHandleModes mode)
 	{
 		// Calculate Damage per tick
-		float total   = aurEff.GetAmount();
-		var   perTick = total * _period / (float)GetDuration(); // should be same as GetMaxDuration() TODO: verify
+		double total   = aurEff.GetAmount();
+		var   perTick = total * _period / (double)GetDuration(); // should be same as GetMaxDuration() TODO: verify
 
 		// Set amount on effect for tooltip
 		var effInfo = GetAura().GetEffect(0);
@@ -57,7 +57,7 @@ internal class spell_monk_stagger_debuff_aura : AuraScript, IHasAuraEffects
 		GetTarget().RemoveAura(MonkSpells.StaggerDamageAura);
 	}
 
-	private void CastOrChangeTickDamage(float tickDamage)
+	private void CastOrChangeTickDamage(double tickDamage)
 	{
 		var unit       = GetTarget();
 		var auraDamage = unit.GetAura(MonkSpells.StaggerDamageAura);

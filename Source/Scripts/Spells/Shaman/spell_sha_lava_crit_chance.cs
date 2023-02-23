@@ -18,7 +18,7 @@ internal class spell_sha_lava_crit_chance : SpellScript, ISpellCalcCritChance
 		return ValidateSpellInfo(ShamanSpells.LavaBurstRank2, ShamanSpells.FlameShock);
 	}
 
-	public void CalcCritChance(Unit victim, ref float critChance)
+	public void CalcCritChance(Unit victim, ref double critChance)
 	{
 		var caster = GetCaster();
 

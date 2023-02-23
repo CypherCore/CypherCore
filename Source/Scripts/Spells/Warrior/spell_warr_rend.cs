@@ -15,7 +15,7 @@ namespace Scripts.Spells.Warrior
 	{
 		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
-		private void CalculateAmount(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
+		private void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
 		{
 			var caster = GetCaster();
 

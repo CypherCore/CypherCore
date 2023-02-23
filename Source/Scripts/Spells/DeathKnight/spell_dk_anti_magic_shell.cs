@@ -13,8 +13,8 @@ namespace Scripts.Spells.DeathKnight;
 [Script] // 48707 - Anti-Magic Shell
 internal class spell_dk_anti_magic_shell : AuraScript, IHasAuraEffects
 {
-	private float absorbedAmount;
-	private float absorbPct;
+	private double absorbedAmount;
+	private double absorbPct;
 	private long maxHealth;
 
 	public spell_dk_anti_magic_shell()
@@ -47,12 +47,12 @@ internal class spell_dk_anti_magic_shell : AuraScript, IHasAuraEffects
 		AuraEffects.Add(new AuraEffectApplyHandler(HandleEffectRemove, 0, AuraType.SchoolAbsorb, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
 	}
 
-	private void CalculateAmount(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
+	private void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
 	{
 		amount = (int)MathFunctions.CalculatePct(maxHealth, absorbPct);
 	}
 
-	private void Trigger(AuraEffect aurEff, DamageInfo dmgInfo, ref float absorbAmount)
+	private void Trigger(AuraEffect aurEff, DamageInfo dmgInfo, ref double absorbAmount)
 	{
 		absorbedAmount += absorbAmount;
 

@@ -13,8 +13,8 @@ namespace Game.AI
         void AttackStart(Unit victim);
         void AttackStartCaster(Unit victim, float dist);
         bool CanAIAttack(Unit victim);
-        void DamageDealt(Unit victim, ref float damage, DamageEffectType damageType);
-        void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null);
+        void DamageDealt(Unit victim, ref double damage, DamageEffectType damageType);
+        void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null);
         void DoAction(int action);
         SpellCastResult DoCast(uint spellId);
         SpellCastResult DoCast(Unit victim, uint spellId, CastSpellExtraArgs args = null);
@@ -26,8 +26,8 @@ namespace Game.AI
         uint GetData(uint id = 0);
         string GetDebugInfo();
         ObjectGuid GetGUID(int id = 0);
-        void HealDone(Unit to, float addhealth);
-        void HealReceived(Unit by, float addhealth);
+        void HealDone(Unit to, double addhealth);
+        void HealReceived(Unit by, double addhealth);
         void InitializeAI();
         void JustEnteredCombat(Unit who);
         void JustExitedCombat();

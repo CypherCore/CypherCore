@@ -22,7 +22,7 @@ public class spell_dh_fel_rush_dash_ground : AuraScript, IHasAuraEffects
 			caster.SetDisableGravity(false);
 	}
 
-	private void CalcSpeed(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+	private void CalcSpeed(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
 	{
 		amount = 1250;
 		RefreshDuration();

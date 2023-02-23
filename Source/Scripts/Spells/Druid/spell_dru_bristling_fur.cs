@@ -33,7 +33,7 @@ namespace Scripts.Spells.Druid
 			if (damageInfo != null)
 			{
 				var target = GetTarget();
-				var rage   = (uint)(target.GetMaxPower(PowerType.Rage) * (float)damageInfo.GetDamage() / (float)target.GetMaxHealth());
+				var rage   = (uint)(target.GetMaxPower(PowerType.Rage) * (double)damageInfo.GetDamage() / (double)target.GetMaxHealth());
 
 				if (rage > 0)
 					target.CastSpell(target, DruidSpellIds.BristlingFurGainRage, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)rage));

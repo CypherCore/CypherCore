@@ -78,7 +78,7 @@ namespace Scripts.Spells.Shaman
 			SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitCasterAreaRaid));
 		}
 
-		private readonly SortedDictionary<ObjectGuid, float> targets = new();
-		private float averagePercentage;
+		private readonly SortedDictionary<ObjectGuid, double> targets = new();
+		private double averagePercentage;
 	}
 }

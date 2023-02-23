@@ -25,7 +25,7 @@ internal class spell_rog_rupture_AuraScript : AuraScript, IHasAuraEffects
 		AuraEffects.Add(new AuraEffectApplyHandler(OnEffectRemoved, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
 	}
 
-	private void CalculateAmount(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
+	private void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
 	{
 		var caster = GetCaster();
 
@@ -33,7 +33,7 @@ internal class spell_rog_rupture_AuraScript : AuraScript, IHasAuraEffects
 		{
 			canBeRecalculated = false;
 
-			float[] attackpowerPerCombo =
+			double[] attackpowerPerCombo =
 			{
 				0.0f, 0.015f, // 1 point:  ${($m1 + $b1*1 + 0.015 * $AP) * 4} Damage over 8 secs
 				0.024f,       // 2 points: ${($m1 + $b1*2 + 0.024 * $AP) * 5} Damage over 10 secs
@@ -73,8 +73,8 @@ internal class spell_rog_rupture_AuraScript : AuraScript, IHasAuraEffects
 		if (cost == null)
 			return;
 
-		var pct         = (float)aura.GetDuration() / (float)aura.GetMaxDuration();
-		var extraAmount = (int)((float)cost.Amount * pct);
+		var pct         = (double)aura.GetDuration() / (double)aura.GetMaxDuration();
+		var extraAmount = (int)((double)cost.Amount * pct);
 		caster.ModifyPower(PowerType.Energy, extraAmount);
 	}
 }

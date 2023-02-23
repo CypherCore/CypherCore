@@ -45,7 +45,7 @@ public class spell_hun_harpoon : SpellScript, IHasSpellEffects, ISpellAfterCast,
 		var pTarget = target.GetWorldLocation();
 
 		float speedXY;
-		float speedZ;
+        float speedZ;
 		speedZ  = 1.8f;
 		speedXY = player.GetExactDist2d(pTarget) * 10.0f / speedZ;
 		player.GetMotionMaster().MoveJump(pTarget, speedXY, speedZ, EventId.Jump);

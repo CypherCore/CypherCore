@@ -22,9 +22,9 @@ namespace Scripts.Spells.Warlock
 			SetHitDamage(CalculateDamage());
 		}
 
-		private float CalculateDamage()
+		private double CalculateDamage()
 		{
-			float damage = 0;
+			double damage = 0;
 			var auras  = GetHitUnit().GetAppliedAurasQuery();
 
 			foreach (var aura in auras.HasSpellFamily(SpellFamilyNames.Warlock).GetResults())
@@ -38,7 +38,7 @@ namespace Scripts.Spells.Warlock
 					foreach (var iter in effects)
 						if (iter.Value.GetAuraType() == AuraType.PeriodicDamage)
 						{
-							var valToUse = 0f;
+							double valToUse = 0f;
 
 							if (spell.Id == WarlockSpells.CORRUPTION_DOT)
 								valToUse = iter.Value.GetRemainingAmount(GetSpellInfo().GetEffect(2).BasePoints * 1000);

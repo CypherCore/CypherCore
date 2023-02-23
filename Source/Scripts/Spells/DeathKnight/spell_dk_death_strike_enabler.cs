@@ -15,7 +15,7 @@ namespace Scripts.Spells.DeathKnight;
 internal class spell_dk_death_strike_enabler : AuraScript, IAuraCheckProc, IHasAuraEffects
 {
 	// Amount of seconds we calculate Damage over
-	private float[] _damagePerSecond = new float[5];
+	private double[] _damagePerSecond = new double[5];
 
 	public bool CheckProc(ProcEventInfo eventInfo)
 	{
@@ -38,7 +38,7 @@ internal class spell_dk_death_strike_enabler : AuraScript, IAuraCheckProc, IHasA
 		_damagePerSecond[0] = 0;
 	}
 
-	private void HandleCalcAmount(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
+	private void HandleCalcAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
 	{
 		canBeRecalculated = true;
 		amount            = Enumerable.Range(1, _damagePerSecond.Length).Sum();

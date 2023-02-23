@@ -671,7 +671,7 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.OnSpellStart, null, 0, 0, false, spellInfo);
         }
         
-        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             GetScript().ProcessEventsFor(SmartEvents.Damaged, attacker, (uint)damage);
 
@@ -682,7 +682,7 @@ namespace Game.AI
                 damage = (uint)(me.GetHealth() - _invincibilityHpLevel);  // damage should not be nullified, because of player damage req.
         }
 
-        public override void HealReceived(Unit by, float addhealth)
+        public override void HealReceived(Unit by, double addhealth)
         {
             GetScript().ProcessEventsFor(SmartEvents.ReceiveHeal, by, (uint)addhealth);
         }
@@ -697,7 +697,7 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.JustSummoned, summoner.ToUnit(), 0, 0, false, null, summoner.ToGameObject());
         }
 
-        public override void DamageDealt(Unit victim, ref float damage, DamageEffectType damageType)
+        public override void DamageDealt(Unit victim, ref double damage, DamageEffectType damageType)
         {
             GetScript().ProcessEventsFor(SmartEvents.DamagedTarget, victim, (uint)damage);
         }

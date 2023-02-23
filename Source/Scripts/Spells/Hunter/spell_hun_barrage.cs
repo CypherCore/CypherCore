@@ -50,12 +50,12 @@ public class spell_hun_barrage : SpellScript, IHasSpellEffects, ISpellOnHit
 		if (player == null || target == null)
 			return;
 
-		var minDamage = 0.0f;
-		var maxDamage = 0.0f;
+		double minDamage = 0.0f;
+		double maxDamage = 0.0f;
 
 		player.CalculateMinMaxDamage(WeaponAttackType.RangedAttack, true, true, out minDamage, out maxDamage);
 
-        float dmg = (minDamage + maxDamage) / 2 * 0.8f;
+        double dmg = (minDamage + maxDamage) / 2 * 0.8f;
 
 		if (!target.HasAura(HunterSpells.BARRAGE, player.GetGUID()))
 			dmg /= 2;

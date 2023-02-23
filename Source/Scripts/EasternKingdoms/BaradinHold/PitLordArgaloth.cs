@@ -58,7 +58,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.PitLordArgaloth
             _DespawnAtEvade();
         }
 
-        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (me.HealthBelowPctDamaged(33, damage) ||
                 me.HealthBelowPctDamaged(66, damage))

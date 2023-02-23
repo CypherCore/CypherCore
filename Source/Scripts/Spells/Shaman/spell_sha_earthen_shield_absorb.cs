@@ -16,7 +16,7 @@ namespace Scripts.Spells.Shaman
 	{
 		public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
-		private void CalcAbsorb(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+		private void CalcAbsorb(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
 		{
 			if (!GetCaster())
 				return;
@@ -24,7 +24,7 @@ namespace Scripts.Spells.Shaman
 			amount = (int)GetCaster().GetHealth();
 		}
 
-		private void HandleAbsorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref float absorbAmount)
+		private void HandleAbsorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref double absorbAmount)
 		{
 			var caster = GetCaster();
 

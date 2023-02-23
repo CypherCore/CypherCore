@@ -116,7 +116,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
             }
         }
 
-        public override void DamageTaken(Unit done_by, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit done_by, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (!done_by ||
                 done_by.GetGUID() != Malchezaar)

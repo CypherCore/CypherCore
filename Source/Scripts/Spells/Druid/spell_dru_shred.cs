@@ -26,7 +26,7 @@ public class spell_dru_shred : SpellScript, ISpellOnHit, ISpellCalcCritChance
 		return true;
 	}
 
-	public void CalcCritChance(Unit victim, ref float chance)
+	public void CalcCritChance(Unit victim, ref double chance)
 	{
 		// If caster is level >= 56, While stealthed or have Incarnation: King of the Jungle aura,
 		// Double the chance to critically strike

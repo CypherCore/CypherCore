@@ -21,7 +21,7 @@ namespace Scripts.Spells.Warlock
 			return GetCaster().IsPlayer();
 		}
 
-		public void CalcCritChance(Unit victim, ref float critChance)
+		public void CalcCritChance(Unit victim, ref double critChance)
 		{
 			critChance = 100.0f;
 		}
@@ -50,9 +50,16 @@ namespace Scripts.Spells.Warlock
             if (target == null)
                 return;
 
+            MadnessOfTheAzjaqir(p);
             Eradication(p, target);
             InternalCombustion(p, target);
             CryHavoc(p, target);
+        }
+
+        private void MadnessOfTheAzjaqir(Unit caster)
+        {
+            if (caster.HasAura(WarlockSpells.MADNESS_OF_THE_AZJAQIR) && Global.SpellMgr.TryGetSpellInfo(WarlockSpells.MADNESS_OF_THE_AZJAQIR_AURA_VALUES, out var av))
+                caster.AddAura(WarlockSpells.MADNESS_OF_THE_AZJAQIR_CHAOS_BOLT_AURA, caster);
         }
 
         private void Eradication(Unit caster, Unit target)

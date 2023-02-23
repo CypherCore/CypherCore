@@ -29,7 +29,7 @@ internal class spell_item_artifical_damage : AuraScript, IHasAuraEffects
 		AuraEffects.Add(new AuraEffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModDamagePercentDone));
 	}
 
-	private void CalculateAmount(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
+	private void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
 	{
 		var artifact = GetOwner().ToPlayer().GetItemByGuid(GetAura().GetCastItemGUID());
 

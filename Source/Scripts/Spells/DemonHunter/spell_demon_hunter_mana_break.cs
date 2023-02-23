@@ -23,13 +23,13 @@ public class spell_demon_hunter_mana_break : SpellScript, IHasSpellEffects
 		if (caster == null || target == null)
 			return;
 
-		var damage   = (float)GetSpellInfo().GetEffect(1).BasePoints;
+		var damage   = (double)GetSpellInfo().GetEffect(1).BasePoints;
 		var powerPct = target.GetPowerPct(PowerType.Mana);
 
 		if (powerPct >= 1.0f)
 			damage += (100.0f - powerPct) / 10.0f * GetSpellInfo().GetEffect(2).BasePoints;
 
-		damage = Math.Max((float)GetHitUnit().CountPctFromMaxHealth(GetSpellInfo().GetEffect(1).BasePoints), (float)damage);
+		damage = Math.Max((double)GetHitUnit().CountPctFromMaxHealth(GetSpellInfo().GetEffect(1).BasePoints), (double)damage);
 
 		SetHitDamage(damage);
 	}

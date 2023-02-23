@@ -617,7 +617,7 @@ namespace Game.Entities
             }
         }
 
-        public void SetBaseWeaponDamage(WeaponAttackType attType, WeaponDamageRange damageRange, float value) { m_weaponDamage[(int)attType][(int)damageRange] = value; }
+        public void SetBaseWeaponDamage(WeaponAttackType attType, WeaponDamageRange damageRange, double value) { m_weaponDamage[(int)attType][(int)damageRange] = value; }
 
         public Unit GetMeleeHitRedirectTarget(Unit victim, SpellInfo spellInfo = null)
         {
@@ -637,7 +637,7 @@ namespace Game.Entities
             return victim;
         }
 
-        public void SendAttackStateUpdate(HitInfo HitInfo, Unit target, SpellSchoolMask damageSchoolMask, float Damage, float AbsorbDamage, float Resist, VictimState TargetState, uint BlockedAmount)
+        public void SendAttackStateUpdate(HitInfo HitInfo, Unit target, SpellSchoolMask damageSchoolMask, double Damage, double AbsorbDamage, double Resist, VictimState TargetState, uint BlockedAmount)
         {
             CalcDamageInfo dmgInfo = new();
             dmgInfo.HitInfo = HitInfo;
@@ -666,7 +666,7 @@ namespace Game.Entities
 
             SubDamage subDmg = new();
             subDmg.SchoolMask = (int)damageInfo.DamageSchoolMask;   // School of sub damage
-            subDmg.FDamage = damageInfo.Damage;                // sub damage
+            subDmg.FDamage = (float)damageInfo.Damage;                // sub damage
             subDmg.Damage = (int)damageInfo.Damage;                 // Sub Damage
             subDmg.Absorbed = (int)damageInfo.Absorb;
             subDmg.Resisted = (int)damageInfo.Resist;
@@ -1104,7 +1104,7 @@ namespace Game.Entities
                 return;
             }
 
-            float damage = 0;
+            double damage = 0;
             damage += CalculateDamage(damageInfo.AttackType, false, true);
             // Add melee damage bonus
             damage = MeleeDamageBonusDone(damageInfo.Target, damage, damageInfo.AttackType, DamageEffectType.Direct, null, null, (SpellSchoolMask)damageInfo.DamageSchoolMask);
@@ -1157,7 +1157,7 @@ namespace Game.Entities
                     damageInfo.Damage *= 2;
 
                     // Increase crit damage from SPELL_AURA_MOD_CRIT_DAMAGE_BONUS
-                    float mod = (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, damageInfo.DamageSchoolMask) - 1.0f) * 100;
+                    var mod = (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, damageInfo.DamageSchoolMask) - 1.0f) * 100;
 
                     if (mod != 0)
                         MathFunctions.AddPct(ref damageInfo.Damage, mod);
@@ -1360,17 +1360,17 @@ namespace Game.Entities
             return MeleeHitOutcome.Normal;
         }
 
-        public uint CalculateDamage(WeaponAttackType attType, bool normalized, bool addTotalPct)
+        public double CalculateDamage(WeaponAttackType attType, bool normalized, bool addTotalPct)
         {
-            float minDamage;
-            float maxDamage;
+            double minDamage;
+            double maxDamage;
 
             if (normalized || !addTotalPct)
             {
                 CalculateMinMaxDamage(attType, normalized, addTotalPct, out minDamage, out maxDamage);
                 if (IsInFeralForm() && attType == WeaponAttackType.BaseAttack)
                 {
-                    CalculateMinMaxDamage(WeaponAttackType.OffAttack, normalized, addTotalPct, out float minOffhandDamage, out float maxOffhandDamage);
+                    CalculateMinMaxDamage(WeaponAttackType.OffAttack, normalized, addTotalPct, out double minOffhandDamage, out double maxOffhandDamage);
                     minDamage += minOffhandDamage;
                     maxDamage += maxOffhandDamage;
                 }
@@ -1412,7 +1412,7 @@ namespace Game.Entities
             return RandomHelper.URand(minDamage, maxDamage);
         }
 
-        public float GetWeaponDamageRange(WeaponAttackType attType, WeaponDamageRange type)
+        public double GetWeaponDamageRange(WeaponAttackType attType, WeaponDamageRange type)
         {
             if (attType == WeaponAttackType.OffAttack && !HaveOffhandWeapon())
                 return 0.0f;
@@ -1420,7 +1420,7 @@ namespace Game.Entities
             return m_weaponDamage[(int)attType][(int)type];
         }
 
-        public float GetAPMultiplier(WeaponAttackType attType, bool normalized)
+        public double GetAPMultiplier(WeaponAttackType attType, bool normalized)
         {
             if (!IsTypeId(TypeId.Player) || (IsInFeralForm() && !normalized))
                 return GetBaseAttackTime(attType) / 1000.0f;
@@ -1458,11 +1458,11 @@ namespace Game.Entities
             }
         }
 
-        public float GetTotalAttackPowerValue(WeaponAttackType attType, bool includeWeapon = true)
+        public double GetTotalAttackPowerValue(WeaponAttackType attType, bool includeWeapon = true)
         {
             if (attType == WeaponAttackType.RangedAttack)
             {
-                float ap = m_unitData.RangedAttackPower + m_unitData.RangedAttackPowerModPos + m_unitData.RangedAttackPowerModNeg;
+                double ap = m_unitData.RangedAttackPower + m_unitData.RangedAttackPowerModPos + m_unitData.RangedAttackPowerModNeg;
                 if (includeWeapon)
                     ap += Math.Max(m_unitData.MainHandWeaponAttackPower, m_unitData.RangedWeaponAttackPower);
                 if (ap < 0)
@@ -1471,7 +1471,7 @@ namespace Game.Entities
             }
             else
             {
-                float ap = m_unitData.AttackPower + m_unitData.AttackPowerModPos + m_unitData.AttackPowerModNeg;
+                double ap = m_unitData.AttackPower + m_unitData.AttackPowerModPos + m_unitData.AttackPowerModNeg;
                 if (includeWeapon)
                 {
                     if (attType == WeaponAttackType.BaseAttack)
@@ -1500,7 +1500,7 @@ namespace Game.Entities
             float dz = pos.GetPositionZ() - obj.GetPositionZ();
             float distsq = (dx * dx) + (dy * dy) + (dz * dz);
 
-            float maxdist = GetMeleeRange(obj) + GetTotalAuraModifier(AuraType.ModAutoAttackRange);
+            var maxdist = GetMeleeRange(obj) + GetTotalAuraModifier(AuraType.ModAutoAttackRange);
 
             return distsq <= maxdist * maxdist;
         }
@@ -1535,26 +1535,26 @@ namespace Game.Entities
 
         public virtual bool CheckAttackFitToAuraRequirement(WeaponAttackType attackType, AuraEffect aurEff) { return true; }
 
-        public void ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply)
+        public void ApplyAttackTimePercentMod(WeaponAttackType att, double val, bool apply)
         {
-            float remainingTimePct = m_attackTimer[(int)att] / (m_baseAttackSpeed[(int)att] * m_modAttackSpeedPct[(int)att]);
+            var remainingTimePct = m_attackTimer[(int)att] / (m_baseAttackSpeed[(int)att] * m_modAttackSpeedPct[(int)att]);
             if (val > 0.0f)
             {
                 MathFunctions.ApplyPercentModFloatVar(ref m_modAttackSpeedPct[(int)att], val, !apply);
 
                 if (att == WeaponAttackType.BaseAttack)
-                    ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModHaste), val, !apply);
+                    ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModHaste), (float)val, !apply);
                 else if (att == WeaponAttackType.RangedAttack)
-                    ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModRangedHaste), val, !apply);
+                    ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModRangedHaste), (float)val, !apply);
             }
             else
             {
                 MathFunctions.ApplyPercentModFloatVar(ref m_modAttackSpeedPct[(int)att], -val, apply);
 
                 if (att == WeaponAttackType.BaseAttack)
-                    ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModHaste), -val, apply);
+                    ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModHaste), -(float)val, apply);
                 else if (att == WeaponAttackType.RangedAttack)
-                    ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModRangedHaste), -val, apply);
+                    ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModRangedHaste), -(float)val, apply);
             }
 
             UpdateAttackTimeField(att);

@@ -77,7 +77,7 @@ namespace Scripts.Spells.Warrior
 			}
 		}
 
-		public int CalculateCount(Player p, float rage)
+		public int CalculateCount(Player p, double rage)
 		{
 			if (RageSpent.TryGetValue(p, out var spentRage))
 			{

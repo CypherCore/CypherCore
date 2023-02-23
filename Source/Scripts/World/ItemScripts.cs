@@ -232,8 +232,8 @@ namespace Scripts.World.ItemScripts
             if (victim.GetLevel() > 60)
             {
                 // gives ~0.1% proc chance at lvl 70
-                float lvlPenaltyFactor = 9.93f;
-                float failureChance = (victim.GetLevelForTarget(player) - 60) * lvlPenaltyFactor;
+                double lvlPenaltyFactor = 9.93f;
+                double failureChance = (victim.GetLevelForTarget(player) - 60) * lvlPenaltyFactor;
 
                 // base ppm chance was already rolled, only roll success chance
                 return !RandomHelper.randChance(failureChance);

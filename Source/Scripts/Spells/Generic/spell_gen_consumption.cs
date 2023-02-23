@@ -26,7 +26,7 @@ internal class spell_gen_consumption : SpellScript, IHasSpellEffects
 		if (caster == null)
 			return;
 
-		var damage         = 0f;
+		double damage = 0f;
 		var createdBySpell = Global.SpellMgr.GetSpellInfo(caster.m_unitData.CreatedBySpell, GetCastDifficulty());
 
 		if (createdBySpell != null)

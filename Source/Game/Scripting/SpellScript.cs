@@ -374,7 +374,7 @@ namespace Game.Scripting
 
         // setter/getter for for Damage done by spell to Target of spell hit
         // returns Damage calculated before hit, and real dmg done after hit
-        public float GetHitDamage()
+        public double GetHitDamage()
         {
             if (!IsInTargetHook())
             {
@@ -384,7 +384,7 @@ namespace Game.Scripting
             return _spell.m_damage;
         }
 
-        public void SetHitDamage(float damage)
+        public void SetHitDamage(double damage)
         {
             if (!IsInModifiableHook())
             {
@@ -398,7 +398,7 @@ namespace Game.Scripting
 
         // setter/getter for for heal done by spell to Target of spell hit
         // returns healing calculated before hit, and real dmg done after hit
-        public float GetHitHeal()
+        public double GetHitHeal()
         {
             if (!IsInTargetHook())
             {
@@ -408,7 +408,7 @@ namespace Game.Scripting
             return _spell.m_healing;
         }
 
-        public void SetHitHeal(float heal)
+        public void SetHitHeal(double heal)
         {
             if (!IsInModifiableHook())
             {
@@ -518,7 +518,7 @@ namespace Game.Scripting
         }
 
         // method avalible only in EffectHandler method
-        public float GetEffectValue()
+        public double GetEffectValue()
         {
             if (!IsInEffectHook())
             {
@@ -528,7 +528,7 @@ namespace Game.Scripting
             return _spell.damage;
         }
 
-        public void SetEffectValue(float value)
+        public void SetEffectValue(double value)
         {
             if (!IsInEffectHook())
             {
@@ -539,7 +539,7 @@ namespace Game.Scripting
             _spell.damage = value;
         }
 
-        public float GetEffectVariance()
+        public double GetEffectVariance()
         {
             if (!IsInEffectHook())
             {
@@ -550,7 +550,7 @@ namespace Game.Scripting
             return _spell.variance;
         }
 
-        public void SetEffectVariance(float variance)
+        public void SetEffectVariance(double variance)
         {
             if (!IsInEffectHook())
             {

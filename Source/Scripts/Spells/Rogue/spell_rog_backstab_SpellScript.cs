@@ -36,8 +36,8 @@ internal class spell_rog_backstab_SpellScript : SpellScript, IHasSpellEffects
 
 		if (hitUnit.IsInBack(caster))
 		{
-			var currDamage = (float)GetHitDamage();
-			MathFunctions.AddPct(ref currDamage, (float)GetEffectInfo(3).CalcValue(caster));
+			var currDamage = (double)GetHitDamage();
+			MathFunctions.AddPct(ref currDamage, (double)GetEffectInfo(3).CalcValue(caster));
 			SetHitDamage((int)currDamage);
 		}
 	}

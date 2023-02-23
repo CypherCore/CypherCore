@@ -26,7 +26,7 @@ namespace Scripts.Spells.Warlock
 			AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 2, AuraType.Dummy, AuraScriptHookType.EffectProc));
 		}
 
-		private void CalculateBuffer(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
+		private void CalculateBuffer(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
 		{
 			var caster = GetCaster();
 

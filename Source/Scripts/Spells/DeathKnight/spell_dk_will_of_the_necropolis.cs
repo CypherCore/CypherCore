@@ -23,12 +23,12 @@ public class spell_dk_will_of_the_necropolis : AuraScript, IHasAuraEffects
 		return true;
 	}
 
-	private void CalculateAmount(AuraEffect UnnamedParameter, ref float p_Amount, ref bool UnnamedParameter2)
+	private void CalculateAmount(AuraEffect UnnamedParameter, ref double p_Amount, ref bool UnnamedParameter2)
 	{
 		p_Amount = -1;
 	}
 
-	private void Absorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref float absorbAmount)
+	private void Absorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref double absorbAmount)
 	{
 		absorbAmount = 0;
 

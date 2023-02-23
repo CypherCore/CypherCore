@@ -107,7 +107,7 @@ namespace Game.AI
         /// <param name="victim"></param>
         /// <param name="amount"></param>
         /// <param name="who"></param>
-        public void AddThreat(Unit victim, float amount, Unit who = null)
+        public void AddThreat(Unit victim, double amount, Unit who = null)
         {
             if (!victim)
                 return;
@@ -169,7 +169,7 @@ namespace Game.AI
         /// <param name="victim"></param>
         /// <param name="who"></param>
         /// <returns></returns>
-        public float GetThreat(Unit victim, Unit who = null)
+        public double GetThreat(Unit victim, Unit who = null)
         {
             if (!victim)
                 return 0.0f;

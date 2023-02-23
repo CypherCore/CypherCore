@@ -14,7 +14,7 @@ public class spell_monk_life_cocoon : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
-	private void CalcAbsorb(AuraEffect UnnamedParameter, ref float amount, ref bool canBeRecalculated)
+	private void CalcAbsorb(AuraEffect UnnamedParameter, ref double amount, ref bool canBeRecalculated)
 	{
 		if (!GetCaster())
 			return;

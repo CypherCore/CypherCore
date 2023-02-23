@@ -87,7 +87,6 @@ namespace Scripts.Spells.DeathKnight
 		public const uint DESECRATED_GROUND = 118009;
 		public const uint DESECRATED_GROUND_IMMUNE = 115018;
 		public const uint DeathAndDecayDamage = 52212;
-		public const uint DeathCoilDamage = 47632;
 		public const uint DeathGripDummy = 243912;
 		public const uint DeathGripJump = 49575;
 		public const uint DeathGripTaunt = 51399;
@@ -218,6 +217,7 @@ namespace Scripts.Spells.DeathKnight
         public const uint HARBINGER_OF_THE_DOOM = 276023;
         public const uint DEATH_COIL_SUDDEN_DOOM_AURA = 81340;
         public const uint DEATH_COIL_SUDDEN_DOOM = 49530;
+        public const uint DEATH_COIL = 47541;
         public const uint DEATH_COIL_BARRIER = 115635;
         public const uint DEATH_COIL_DAMAGE = 47632;
         public const uint DEATH_COIL_HEAL = 47633;

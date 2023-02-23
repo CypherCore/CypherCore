@@ -26,7 +26,7 @@ internal class spell_mage_blazing_barrier : AuraScript, IHasAuraEffects
 		AuraEffects.Add(new AuraEffectProcHandler(HandleProc, 1, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
 	}
 
-	private void CalculateAmount(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
+	private void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
 	{
 		canBeRecalculated = false;
 		var caster = GetCaster();

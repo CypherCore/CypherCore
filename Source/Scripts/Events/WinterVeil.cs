@@ -120,8 +120,8 @@ namespace Scripts.m_Events.WinterVeil
 
             if (caster.HasAuraType(AuraType.Mounted))
             {
-                float flyspeed = caster.GetSpeedRate(UnitMoveType.Flight);
-                float speed = caster.GetSpeedRate(UnitMoveType.Run);
+                double flyspeed = caster.GetSpeedRate(UnitMoveType.Flight);
+                double speed = caster.GetSpeedRate(UnitMoveType.Run);
 
                 caster.RemoveAurasByType(AuraType.Mounted);
                 //5 different spells used depending on mounted speed and if Mount can fly or not

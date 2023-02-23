@@ -436,9 +436,9 @@ namespace Game.Entities
 
         public void UpdateSpeed(UnitMoveType mtype)
         {
-            float main_speed_mod = 0;
-            float stack_bonus = 1.0f;
-            float non_stack_bonus = 1.0f;
+            double main_speed_mod = 0;
+            double stack_bonus = 1.0f;
+            double non_stack_bonus = 1.0f;
 
             switch (mtype)
             {
@@ -478,7 +478,7 @@ namespace Game.Entities
                             stack_bonus = GetTotalAuraMultiplier(AuraType.ModVehicleSpeedAlways);
 
                             // for some spells this mod is applied on vehicle owner
-                            float owner_speed_mod = 0;
+                            double owner_speed_mod = 0;
 
                             Unit owner = GetCharmer();
                             if (owner != null)
@@ -507,7 +507,7 @@ namespace Game.Entities
             }
 
             // now we ready for speed calculation
-            float speed = Math.Max(non_stack_bonus, stack_bonus);
+            var speed = Math.Max(non_stack_bonus, stack_bonus);
             if (main_speed_mod != 0)
                 MathFunctions.AddPct(ref speed, main_speed_mod);
 
@@ -523,7 +523,7 @@ namespace Game.Entities
 
                         // Normalize speed by 191 aura SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED if need
                         // @todo possible affect only on MOVE_RUN
-                        float normalization = GetMaxPositiveAuraModifier(AuraType.UseNormalMovementSpeed);
+                        var normalization = GetMaxPositiveAuraModifier(AuraType.UseNormalMovementSpeed);
                         if (normalization != 0)
                         {
                             Creature creature1 = ToCreature();
@@ -535,7 +535,7 @@ namespace Game.Entities
                             }
 
                             // Use speed from aura
-                            float max_speed = normalization / (IsControlledByPlayer() ? SharedConst.playerBaseMoveSpeed[(int)mtype] : SharedConst.baseMoveSpeed[(int)mtype]);
+                            var max_speed = normalization / (IsControlledByPlayer() ? SharedConst.playerBaseMoveSpeed[(int)mtype] : SharedConst.baseMoveSpeed[(int)mtype]);
                             if (speed > max_speed)
                                 speed = max_speed;
                         }
@@ -543,10 +543,10 @@ namespace Game.Entities
                         if (mtype == UnitMoveType.Run)
                         {
                             // force minimum speed rate @ aura 437 SPELL_AURA_MOD_MINIMUM_SPEED_RATE
-                            float minSpeedMod1 = GetMaxPositiveAuraModifier(AuraType.ModMinimumSpeedRate);
+                            var minSpeedMod1 = GetMaxPositiveAuraModifier(AuraType.ModMinimumSpeedRate);
                             if (minSpeedMod1 != 0)
                             {
-                                float minSpeed = minSpeedMod1 / (IsControlledByPlayer() ? SharedConst.playerBaseMoveSpeed[(int)mtype] : SharedConst.baseMoveSpeed[(int)mtype]);
+                                var minSpeed = minSpeedMod1 / (IsControlledByPlayer() ? SharedConst.playerBaseMoveSpeed[(int)mtype] : SharedConst.baseMoveSpeed[(int)mtype]);
                                 if (speed < minSpeed)
                                     speed = minSpeed;
                             }
@@ -578,23 +578,23 @@ namespace Game.Entities
             }
 
             // Apply strongest slow aura mod to speed
-            float slow = GetMaxNegativeAuraModifier(AuraType.ModDecreaseSpeed);
+            var slow = GetMaxNegativeAuraModifier(AuraType.ModDecreaseSpeed);
             if (slow != 0)
                 MathFunctions.AddPct(ref speed, slow);
 
-            float minSpeedMod = GetMaxPositiveAuraModifier(AuraType.ModMinimumSpeed);
+            var minSpeedMod = GetMaxPositiveAuraModifier(AuraType.ModMinimumSpeed);
             if (minSpeedMod != 0)
             {
                 float baseMinSpeed = 1.0f;
                 if (!GetOwnerGUID().IsPlayer() && !IsHunterPet() && GetTypeId() == TypeId.Unit)
                     baseMinSpeed = ToCreature().GetCreatureTemplate().SpeedRun;
 
-                float min_speed = MathFunctions.CalculatePct(baseMinSpeed, minSpeedMod);
+                var min_speed = MathFunctions.CalculatePct(baseMinSpeed, minSpeedMod);
                 if (speed < min_speed)
                     speed = min_speed;
             }
 
-            SetSpeedRate(mtype, speed);
+            SetSpeedRate(mtype, (float)speed);
         }
 
         public virtual bool UpdatePosition(Position obj, bool teleport = false)
@@ -1629,7 +1629,7 @@ namespace Game.Entities
 
         public void UpdateMovementForcesModMagnitude()
         {
-            float modMagnitude = GetTotalAuraMultiplier(AuraType.ModMovementForceMagnitude);
+            var modMagnitude = (float)GetTotalAuraMultiplier(AuraType.ModMovementForceMagnitude);
 
             Player movingPlayer = GetPlayerMovingMe();
             if (movingPlayer != null)

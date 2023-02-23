@@ -26,7 +26,7 @@ namespace Scripts.Spells.Druid
 			AuraEffects.Add(new AuraEffectCalcAmountHandler(CalculateAmount, 0, AuraType.PeriodicDamage));
 		}
 
-		private void CalculateAmount(AuraEffect aurEff, ref float amount, ref bool canBeRecalculated)
+		private void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
 		{
 			canBeRecalculated = false;
 

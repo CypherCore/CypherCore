@@ -15,7 +15,7 @@ public class spell_dru_cenarion_ward_hot : AuraScript, IHasAuraEffects
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
-	private void CalculateAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+	private void CalculateAmount(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
 	{
 		if (!GetCaster())
 			return;

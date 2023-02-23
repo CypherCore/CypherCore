@@ -15,7 +15,7 @@ namespace Scripts.Spells.Shaman
 	{
 		public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
-		private void CalculateAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+		private void CalculateAmount(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
 		{
 			amount = -1;
 		}

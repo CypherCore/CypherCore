@@ -10,7 +10,7 @@ namespace Game.Entities
         Player _player;
         long _restTime;
         uint _innAreaTriggerId;
-        float[] _restBonus = new float[(int)RestTypes.Max];
+        double[] _restBonus = new double[(int)RestTypes.Max];
         RestFlag _restFlagMask;
 
         public RestMgr(Player player)
@@ -18,7 +18,7 @@ namespace Game.Entities
             _player = player;
         }
 
-        public void SetRestBonus(RestTypes restType, float restBonus)
+        public void SetRestBonus(RestTypes restType, double restBonus)
         {
             uint next_level_xp;
             bool affectedByRaF = false;
@@ -71,13 +71,13 @@ namespace Game.Entities
             _player.SetRestState(restType, newRestState);
         }
 
-        public void AddRestBonus(RestTypes restType, float restBonus)
+        public void AddRestBonus(RestTypes restType, double restBonus)
         {
             // Don't add extra rest bonus to max level players. Note: Might need different condition in next expansion for honor XP (PLAYER_LEVEL_MIN_HONOR perhaps).
             if (_player.GetLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
                 restBonus = 0;
 
-            float totalRestBonus = GetRestBonus(restType) + restBonus;
+            double totalRestBonus = GetRestBonus(restType) + restBonus;
             SetRestBonus(restType, totalRestBonus);
         }
 
@@ -108,14 +108,14 @@ namespace Game.Entities
             }
         }
 
-        public uint GetRestBonusFor(RestTypes restType, uint xp)
+        public double GetRestBonusFor(RestTypes restType, uint xp)
         {
-            uint rested_bonus = (uint)GetRestBonus(restType); // xp for each rested bonus
+            var rested_bonus = GetRestBonus(restType); // xp for each rested bonus
 
             if (rested_bonus > xp) // max rested_bonus == xp or (r+x) = 200% xp
                 rested_bonus = xp;
 
-            uint rested_loss = rested_bonus;
+            var rested_loss = rested_bonus;
             if (restType == RestTypes.XP)
                MathFunctions.AddPct(ref rested_loss, _player.GetTotalAuraModifier(AuraType.ModRestedXpConsumption));
 
@@ -161,7 +161,7 @@ namespace Game.Entities
             }
         }
 
-        public float GetRestBonus(RestTypes restType) { return _restBonus[(int)restType]; }
+        public double GetRestBonus(RestTypes restType) { return _restBonus[(int)restType]; }
         public bool HasRestFlag(RestFlag restFlag) { return (_restFlagMask & restFlag) != 0; }
         public uint GetInnTriggerId() { return _innAreaTriggerId; }
     }

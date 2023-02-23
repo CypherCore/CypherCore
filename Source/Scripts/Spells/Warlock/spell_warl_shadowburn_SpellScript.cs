@@ -10,7 +10,7 @@ namespace Scripts.Spells.Warlock
     [SpellScript(WarlockSpells.SHADOWBURN)]
     public class spell_warl_shadowburn_SpellScript : SpellScript, ISpellCalcCritChance, ISpellOnHit, ISpellOnCast
     {
-        public void CalcCritChance(Unit victim, ref float chance)
+        public void CalcCritChance(Unit victim, ref double chance)
         {
             if (victim.TryGetAura(WarlockSpells.SHADOWBURN, out var shadowburn) == true && victim.HealthBelowPct(shadowburn.GetEffect(1).GetBaseAmount() + 5))
 				chance += shadowburn.GetEffect(2).GetBaseAmount();
@@ -26,6 +26,13 @@ namespace Scripts.Spells.Warlock
 
             Eradication(caster, target);
             ConflagrationOfChaos(caster, target);
+            MadnessOfTheAzjaqir(caster);
+        }
+
+        private void MadnessOfTheAzjaqir(Unit caster)
+        {
+            if (caster.HasAura(WarlockSpells.MADNESS_OF_THE_AZJAQIR))
+                caster.AddAura(WarlockSpells.MADNESS_OF_THE_AZJAQIR_SHADOWBURN_AURA, caster);
         }
 
         private void Eradication(Unit caster, Unit target)

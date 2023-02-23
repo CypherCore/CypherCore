@@ -43,7 +43,7 @@ public class spell_dh_soul_cleave : SpellScript, IHasSpellEffects
 		fragments.Add(caster.GetAreaTriggers(ShatteredSoulsSpells.SHATTERED_SOULS));
 		fragments.Add(caster.GetAreaTriggers(ShatteredSoulsSpells.SHATTERED_SOULS_DEMON));
 		fragments.Add(caster.GetAreaTriggers(ShatteredSoulsSpells.LESSER_SOUL_SHARD));
-		var range = GetEffectInfo().BasePoints;
+		var range = (float)GetEffectInfo().BasePoints;
 
 		foreach (var vec in fragments)
 		{
@@ -88,7 +88,7 @@ public class spell_dh_soul_cleave : SpellScript, IHasSpellEffects
 
 					if (soulBarrier != null)
 					{
-						var amount = soulBarrier.GetAmount() + ((float)(Global.SpellMgr.GetSpellInfo(DemonHunterSpells.SOUL_BARRIER, Difficulty.None).GetEffect(1).BasePoints) / 100.0f) * caster.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack);
+						var amount = soulBarrier.GetAmount() + ((double)(Global.SpellMgr.GetSpellInfo(DemonHunterSpells.SOUL_BARRIER, Difficulty.None).GetEffect(1).BasePoints) / 100.0f) * caster.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack);
 						soulBarrier.SetAmount(amount);
 					}
 

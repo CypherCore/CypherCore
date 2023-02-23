@@ -84,9 +84,9 @@ namespace Scripts.Spells.Racials
 		private void HandleHeal(int effIndex)
 		{
 			var caster = GetCaster();
-			var heal   = caster.GetMaxHealth() * 25.0f / 100.0f;
+			double heal   = caster.GetMaxHealth() * 25.0f / 100.0f;
 			//caster->SpellHealingBonusDone(caster, GetSpellInfo(), caster->CountPctFromMaxHealth(GetSpellInfo()->GetEffect(effIndex)->BasePoints), DamageEffectType.Heal, GetEffectInfo());
-			heal = caster.SpellHealingBonusTaken(caster, GetSpellInfo(), (uint)heal, DamageEffectType.Heal);
+			heal = caster.SpellHealingBonusTaken(caster, GetSpellInfo(), heal, DamageEffectType.Heal);
 			SetHitHeal((int)heal);
 			caster.CastSpell(caster, 313015, true);
 

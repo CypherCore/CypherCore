@@ -51,7 +51,7 @@ internal class spell_sha_mastery_elemental_overload : AuraScript, IHasAuraEffect
 		if (GetTriggeredSpellId(spellInfo.Id) == 0)
 			return false;
 
-		float chance = aurEff.GetAmount(); // Mastery % amount
+		double chance = aurEff.GetAmount(); // Mastery % amount
 
 		if (spellInfo.Id == ShamanSpells.ChainLightning)
 			chance /= 3.0f;

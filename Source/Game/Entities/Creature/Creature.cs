@@ -457,7 +457,7 @@ namespace Game.Entities
                         // Delay respawn if spawn group is not active
                         if (m_creatureData != null && !GetMap().IsSpawnGroupActive(m_creatureData.spawnGroupData.groupId))
                         {
-                            m_respawnTime = now + RandomHelper.URand(4, 7);
+                            m_respawnTime = now + RandomHelper.LRand(4, 7);
                             break; // Will be rechecked on next Update call after delay expires
                         }
 
@@ -474,7 +474,7 @@ namespace Game.Entities
                             {
                                 // else copy time from master and add a little
                                 long baseRespawnTime = Math.Max(linkedRespawnTime, now);
-                                long offset = RandomHelper.URand(5, Time.Minute);
+                                long offset = RandomHelper.LRand(5, Time.Minute);
 
                                 // linked guid can be a boss, uses std::numeric_limits<time_t>::max to never respawn in that instance
                                 // we shall inherit it instead of adding and causing an overflow
@@ -625,7 +625,7 @@ namespace Game.Entities
             if (curValue >= maxValue)
                 return;
 
-            float addvalue;
+            double addvalue;
 
             switch (power)
             {
@@ -676,7 +676,7 @@ namespace Game.Entities
             if (curValue >= maxValue)
                 return;
 
-            float addvalue;
+            double addvalue;
 
             // Not only pet, but any controlled creature (and not polymorphed)
             if (!GetCharmerOrOwnerGUID().IsEmpty() && !IsPolymorphed())
@@ -685,10 +685,10 @@ namespace Game.Entities
                 addvalue = 0.015f * GetMaxHealth() * HealthIncreaseRate;
             }
             else
-                addvalue = (long)maxValue / 3;
+                addvalue = maxValue / 3;
 
             // Apply modifiers (if any).
-            addvalue *= (int)GetTotalAuraMultiplier(AuraType.ModHealthRegenPercent);
+            addvalue *= GetTotalAuraMultiplier(AuraType.ModHealthRegenPercent);
             addvalue += GetTotalAuraModifier(AuraType.ModRegen) * SharedConst.CreatureRegenInterval / (5 * Time.InMilliseconds);
 
             ModifyHealth(addvalue);
@@ -1479,7 +1479,7 @@ namespace Game.Entities
             }
         }
 
-        public void LowerPlayerDamageReq(float unDamage)
+        public void LowerPlayerDamageReq(double unDamage)
         {
             LowerPlayerDamageReq((ulong)unDamage);
         }
@@ -1764,7 +1764,7 @@ namespace Game.Entities
                 if (!_IsTargetAcceptable(who))
                     return false;
 
-                if (IsNeutralToAll() || !IsWithinDistInMap(who, GetAttackDistance(who) + m_CombatDistance))
+                if (IsNeutralToAll() || !IsWithinDistInMap(who, (float)GetAttackDistance(who) + m_CombatDistance))
                     return false;
             }
 
@@ -1774,7 +1774,7 @@ namespace Game.Entities
             return IsWithinLOSInMap(who);
         }
 
-        public float GetAttackDistance(Unit player)
+        public double GetAttackDistance(Unit player)
         {
             float aggroRate = WorldConfig.GetFloatValue(WorldCfg.RateCreatureAggro);
             if (aggroRate == 0)
@@ -1794,7 +1794,7 @@ namespace Game.Entities
             float baseAggroDistance = 20.0f - GetCombatReach();
 
             // + - 1 yard for each level difference between player and creature
-            float aggroRadius = baseAggroDistance + (float)levelDifference;
+            double aggroRadius = baseAggroDistance + levelDifference;
 
             // detect range auras
             if ((creatureLevel + 5) <= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
@@ -2928,7 +2928,7 @@ namespace Game.Entities
                     levelDiff = -25;
 
                 // The base aggro radius for mob of same level
-                float aggroRadius = 20;
+                double aggroRadius = 20;
 
                 // Aggro Radius varies with level difference at a rate of roughly 1 yard/level
                 aggroRadius -= levelDiff;
@@ -2948,7 +2948,7 @@ namespace Game.Entities
                 if (aggroRadius < 10)
                     aggroRadius = 10;
 
-                return (aggroRadius);
+                return (float)(aggroRadius);
             }
 
             // Default

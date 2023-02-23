@@ -30,7 +30,7 @@ public class spell_monk_spirit_of_the_crane_passive : AuraScript, IHasAuraEffect
 
 	private void HandleProc(AuraEffect UnnamedParameter, ProcEventInfo UnnamedParameter2)
 	{
-		// TODO: Basepoints can be float now... this is 1 but needs to be lower.
+		// TODO: Basepoints can be double now... this is 1 but needs to be lower.
 		GetTarget().CastSpell(GetTarget(), MonkSpells.SPIRIT_OF_THE_CRANE_MANA, true);
 	}
 

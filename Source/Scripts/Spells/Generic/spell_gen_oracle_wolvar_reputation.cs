@@ -35,7 +35,7 @@ internal class spell_gen_oracle_wolvar_reputation : SpellScript, IHasSpellEffect
 	{
 		var player    = GetCaster().ToPlayer();
 		var factionId = (uint)GetEffectInfo().CalcValue();
-		var repChange = GetEffectInfo(1).CalcValue();
+		double repChange = GetEffectInfo(1).CalcValue();
 
 		var factionEntry = CliDB.FactionStorage.LookupByKey(factionId);
 

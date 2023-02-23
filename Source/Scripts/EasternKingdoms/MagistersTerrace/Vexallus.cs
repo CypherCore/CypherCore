@@ -103,7 +103,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.Vexallus
             summons.Summon(summoned);
         }
 
-        public override void DamageTaken(Unit who, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit who, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (_enraged)
                 return;

@@ -1525,11 +1525,11 @@ namespace Game.Entities
                         noBonuses = true;
             }
 
-            float percent = 100.0f;
+            double percent = 100.0f;
 
             if (!noBonuses)
             {
-                float repMod = noQuestBonus ? 0.0f : GetTotalAuraModifier(AuraType.ModReputationGain);
+                var repMod = noQuestBonus ? 0.0f : GetTotalAuraModifier(AuraType.ModReputationGain);
 
                 // faction specific auras only seem to apply to kills
                 if (source == ReputationSource.Kill)
@@ -2098,13 +2098,13 @@ namespace Game.Entities
                 !HasAuraType(AuraType.Fly) && !IsImmunedToDamage(SpellSchoolMask.Normal))
             {
                 //Safe fall, fall height reduction
-                float safe_fall = GetTotalAuraModifier(AuraType.SafeFall);
+                var safe_fall = GetTotalAuraModifier(AuraType.SafeFall);
 
-                float damageperc = 0.018f * (z_diff - safe_fall) - 0.2426f;
+                var damageperc = 0.018f * (z_diff - safe_fall) - 0.2426f;
 
                 if (damageperc > 0)
                 {
-                    float damage = damageperc * GetMaxHealth() * WorldConfig.GetFloatValue(WorldCfg.RateDamageFall);
+                    double damage = damageperc * GetMaxHealth() * WorldConfig.GetFloatValue(WorldCfg.RateDamageFall);
 
                     float height = movementInfo.Pos.posZ;
                     UpdateGroundPositionZ(movementInfo.Pos.posX, movementInfo.Pos.posY, ref height);
@@ -2121,8 +2121,8 @@ namespace Game.Entities
                         if (HasAura(43621))
                             damage = GetMaxHealth() / 2;
 
-                        uint original_health = (uint)GetHealth();
-                        float final_damage = EnvironmentalDamage(EnviromentalDamage.Fall, damage);
+                        var original_health = GetHealth();
+                        double final_damage = EnvironmentalDamage(EnviromentalDamage.Fall, damage);
 
                         // recheck alive, might have died of EnvironmentalDamage, avoid cases when player die in fact like Spirit of Redemption case
                         if (IsAlive() && final_damage < original_health)
@@ -3350,7 +3350,7 @@ namespace Game.Entities
             if (powerType == null)
                 return;
 
-            float addvalue;
+            double addvalue;
 
             if (!IsInCombat())
             {
@@ -3478,18 +3478,18 @@ namespace Game.Entities
         }
         void RegenerateHealth()
         {
-            uint curValue = (uint)GetHealth();
-            uint maxValue = (uint)GetMaxHealth();
+            var curValue = GetHealth();
+            var maxValue = GetMaxHealth();
 
             if (curValue >= maxValue)
                 return;
 
             float HealthIncreaseRate = WorldConfig.GetFloatValue(WorldCfg.RateHealth);
-            float addValue = 0.0f;
+            double addValue = 0.0f;
 
             // polymorphed case
             if (IsPolymorphed())
-                addValue = (float)GetMaxHealth() / 3;
+                addValue = GetMaxHealth() / 3;
             // normal regen case (maybe partly in combat case)
             else if (!IsInCombat() || HasAuraType(AuraType.ModRegenDuringCombat))
             {
@@ -3518,7 +3518,7 @@ namespace Game.Entities
             if (addValue < 0)
                 addValue = 0;
 
-            ModifyHealth((int)addValue);
+            ModifyHealth(addValue);
         }
         public void ResetAllPowers()
         {
@@ -3583,16 +3583,16 @@ namespace Game.Entities
             return (!IsTargetableForAttack(false));
         }
 
-        public float EnvironmentalDamage(EnviromentalDamage type, float damage)
+        public double EnvironmentalDamage(EnviromentalDamage type, double damage)
         {
             if (IsImmuneToEnvironmentalDamage())
                 return 0;
 
-            damage = (uint)(damage * GetTotalAuraMultiplier(AuraType.ModEnvironmentalDamageTaken));
+            damage = damage * GetTotalAuraMultiplier(AuraType.ModEnvironmentalDamageTaken);
 
             // Absorb, resist some environmental damage type
-            float absorb = 0;
-            float resist = 0;
+            double absorb = 0;
+            double resist = 0;
             var dmgSchool = GetEnviormentDamageType(type);
             switch (type)
             {
@@ -3614,7 +3614,7 @@ namespace Game.Entities
             packet.Absorbed = (int)absorb;
             packet.Resisted = (int)resist;
 
-            float final_damage = DealDamage(this, this, damage, null, DamageEffectType.Self, dmgSchool, null, false);
+            var final_damage = DealDamage(this, this, damage, null, DamageEffectType.Self, dmgSchool, null, false);
             packet.LogData.Initialize(this);
 
             SendCombatLogMessage(packet);
@@ -6336,7 +6336,7 @@ namespace Game.Entities
             if (IsMaxLevel())
                 return;
 
-            uint bonus_xp;
+            double bonus_xp;
             bool recruitAFriend = GetsRecruitAFriendBonus(true);
 
             // RaF does NOT stack with rested experience
@@ -6354,7 +6354,7 @@ namespace Game.Entities
             SendPacket(packet);
 
             uint nextLvlXP = GetXPForNextLevel();
-            uint newXP = GetXP() + xp + bonus_xp;
+            uint newXP = GetXP() + xp + (uint)bonus_xp;
 
             while (newXP >= nextLvlXP && !IsMaxLevel())
             {
@@ -6370,7 +6370,7 @@ namespace Game.Entities
             SetXP(newXP);
         }
 
-        public void HandleBaseModFlatValue(BaseModGroup modGroup, float amount, bool apply)
+        public void HandleBaseModFlatValue(BaseModGroup modGroup, double amount, bool apply)
         {
             if (modGroup >= BaseModGroup.End)
             {
@@ -6381,7 +6381,7 @@ namespace Game.Entities
             UpdateBaseModGroup(modGroup);
         }
 
-        public void ApplyBaseModPctValue(BaseModGroup modGroup, float pct)
+        public void ApplyBaseModPctValue(BaseModGroup modGroup, double pct)
         {
             if (modGroup >= BaseModGroup.End)
             {
@@ -6393,7 +6393,7 @@ namespace Game.Entities
             UpdateBaseModGroup(modGroup);
         }
 
-        public void SetBaseModFlatValue(BaseModGroup modGroup, float val)
+        public void SetBaseModFlatValue(BaseModGroup modGroup, double val)
         {
             if (m_auraBaseFlatMod[(int)modGroup] == val)
                 return;
@@ -6402,7 +6402,7 @@ namespace Game.Entities
             UpdateBaseModGroup(modGroup);
         }
 
-        public void SetBaseModPctValue(BaseModGroup modGroup, float val)
+        public void SetBaseModPctValue(BaseModGroup modGroup, double val)
         {
             if (m_auraBasePctMod[(int)modGroup] == val)
                 return;
@@ -6478,7 +6478,7 @@ namespace Game.Entities
             }
         }
 
-        float GetBaseModValue(BaseModGroup modGroup, BaseModType modType)
+        double GetBaseModValue(BaseModGroup modGroup, BaseModType modType)
         {
             if (modGroup >= BaseModGroup.End || modType >= BaseModType.End)
             {
@@ -6489,7 +6489,7 @@ namespace Game.Entities
             return (modType == BaseModType.FlatMod ? m_auraBaseFlatMod[(int)modGroup] : m_auraBasePctMod[(int)modGroup]);
         }
 
-        float GetTotalBaseModValue(BaseModGroup modGroup)
+        double GetTotalBaseModValue(BaseModGroup modGroup)
         {
             if (modGroup >= BaseModGroup.End)
             {
@@ -6509,7 +6509,7 @@ namespace Game.Entities
                 newDrunkValue = 100;
 
             // select drunk percent or total SPELL_AURA_MOD_FAKE_INEBRIATE amount, whichever is higher for visibility updates
-            float drunkPercent = Math.Max(newDrunkValue, GetTotalAuraModifier(AuraType.ModFakeInebriate));
+            var drunkPercent = Math.Max(newDrunkValue, GetTotalAuraModifier(AuraType.ModFakeInebriate));
             if (drunkPercent != 0)
             {
                 m_invisibilityDetect.AddFlag(InvisibilityType.Drunk);

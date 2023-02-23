@@ -15,7 +15,7 @@ public class spell_pri_smite_absorb : AuraScript, IHasAuraEffects
 {
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
-	private void HandleAbsorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref float absorbAmount)
+	private void HandleAbsorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref double absorbAmount)
 	{
 		var caster   = GetCaster();
 		var attacker = dmgInfo.GetAttacker();

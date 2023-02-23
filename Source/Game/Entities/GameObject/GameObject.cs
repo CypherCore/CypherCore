@@ -2733,7 +2733,7 @@ namespace Game.Entities
             return null;
         }
 
-        public void ModifyHealth(float change, WorldObject attackerOrHealer = null, uint spellId = 0)
+        public void ModifyHealth(double change, WorldObject attackerOrHealer = null, uint spellId = 0)
         {
             ModifyHealth((int)change, attackerOrHealer, spellId);
         }

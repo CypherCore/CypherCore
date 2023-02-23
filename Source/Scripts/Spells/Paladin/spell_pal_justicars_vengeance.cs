@@ -29,7 +29,7 @@ namespace Scripts.Spells.Paladin
 
             if (target.HasAuraType(AuraType.ModStun) || target.HasAuraWithMechanic(1 << (int)Mechanics.Stun))
             {
-                float damage = GetHitDamage();
+                double damage = GetHitDamage();
                 MathFunctions.AddPct(ref damage, 50);
 
                 SetHitDamage(damage);

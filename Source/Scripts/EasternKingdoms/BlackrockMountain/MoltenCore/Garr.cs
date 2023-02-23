@@ -75,7 +75,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Garr
             ScheduleTasks();
         }
 
-        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             var health10pct = me.CountPctFromMaxHealth(10);
             var health = me.GetHealth();

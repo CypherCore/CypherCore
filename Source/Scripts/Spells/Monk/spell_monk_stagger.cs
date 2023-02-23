@@ -46,12 +46,12 @@ internal class spell_monk_stagger : AuraScript, IHasAuraEffects
 		return null;
 	}
 
-	private void AbsorbNormal(AuraEffect aurEff, DamageInfo dmgInfo, ref float absorbAmount)
+	private void AbsorbNormal(AuraEffect aurEff, DamageInfo dmgInfo, ref double absorbAmount)
 	{
 		Absorb(dmgInfo, 1.0f);
 	}
 
-	private void AbsorbMagic(AuraEffect aurEff, DamageInfo dmgInfo, ref float absorbAmount)
+	private void AbsorbMagic(AuraEffect aurEff, DamageInfo dmgInfo, ref double absorbAmount)
 	{
 		var effect = GetEffect(4);
 
@@ -61,7 +61,7 @@ internal class spell_monk_stagger : AuraScript, IHasAuraEffects
 		Absorb(dmgInfo, effect.GetAmount() / 100.0f);
 	}
 
-	private void Absorb(DamageInfo dmgInfo, float multiplier)
+	private void Absorb(DamageInfo dmgInfo, double multiplier)
 	{
 		// Prevent default Action (which would remove the aura)
 		PreventDefaultAction();
@@ -98,7 +98,7 @@ internal class spell_monk_stagger : AuraScript, IHasAuraEffects
 		}
 	}
 
-	private void AddAndRefreshStagger(float amount)
+	private void AddAndRefreshStagger(double amount)
 	{
 		var target      = GetTarget();
 		var auraStagger = FindExistingStaggerEffect(target);
@@ -131,10 +131,10 @@ internal class spell_monk_stagger : AuraScript, IHasAuraEffects
 		}
 	}
 
-	private uint GetStaggerSpellId(Unit unit, float amount)
+	private uint GetStaggerSpellId(Unit unit, double amount)
 	{
-		const float StaggerHeavy    = 0.6f;
-		const float StaggerModerate = 0.3f;
+		const double StaggerHeavy    = 0.6f;
+		const double StaggerModerate = 0.3f;
 
 		var staggerPct = amount / unit.GetMaxHealth();
 
@@ -143,7 +143,7 @@ internal class spell_monk_stagger : AuraScript, IHasAuraEffects
 		                                         MonkSpells.StaggerLight;
 	}
 
-	private void AddNewStagger(Unit unit, uint staggerSpellId, float staggerAmount)
+	private void AddNewStagger(Unit unit, uint staggerSpellId, double staggerAmount)
 	{
 		// We only set the total stagger amount. The amount per tick will be set by the stagger spell script
 		unit.CastSpell(unit, staggerSpellId, new CastSpellExtraArgs(SpellValueMod.BasePoint1, (int)staggerAmount).SetTriggerFlags(TriggerCastFlags.FullMask));

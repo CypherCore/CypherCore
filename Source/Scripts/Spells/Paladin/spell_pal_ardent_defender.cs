@@ -38,12 +38,12 @@ namespace Scripts.Spells.Paladin
             return GetUnitOwner().IsPlayer();
         }
 
-        public void CalculateAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+        public void CalculateAmount(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
         {
             amount = -1;
         }
 
-        public void Absorb(AuraEffect aurEff, DamageInfo dmgInfo, ref float absorbAmount)
+        public void Absorb(AuraEffect aurEff, DamageInfo dmgInfo, ref double absorbAmount)
         {
             absorbAmount = MathFunctions.CalculatePct(dmgInfo.GetDamage(), absorbPct);
 
@@ -53,7 +53,7 @@ namespace Scripts.Spells.Paladin
                 return;
             }
 
-            float healAmount = target.CountPctFromMaxHealth(healPct);
+            double healAmount = target.CountPctFromMaxHealth(healPct);
             target.CastSpell(target, PaladinSpells.ARDENT_DEFENDER_HEAL, (int)healAmount);
             aurEff.GetBase().Remove();
         }
@@ -64,7 +64,7 @@ namespace Scripts.Spells.Paladin
             AuraEffects.Add(new AuraEffectAbsorbHandler(Absorb, 1));
         }
 
-        private float absorbPct;
-        private float healPct;
+        private double absorbPct;
+        private double healPct;
     }
 }

@@ -28,7 +28,7 @@ public class spell_monk_expel_harm : SpellScript, ISpellOnHit
 			foreach (var itr in targetList)
 				if (_player.IsValidAttackTarget(itr))
 				{
-					float bp   = MathFunctions.CalculatePct((-GetHitDamage()), 50);
+					double bp   = MathFunctions.CalculatePct((-GetHitDamage()), 50);
 					var   args = new CastSpellExtraArgs();
 					args.AddSpellMod(SpellValueMod.BasePoint0, (int)bp);
 					args.SetTriggerFlags(TriggerCastFlags.FullMask);

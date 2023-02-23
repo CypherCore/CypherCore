@@ -114,7 +114,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Curator
                                 });
         }
 
-        public override void DamageTaken(Unit attacker, ref float damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        public override void DamageTaken(Unit attacker, ref double damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             if (!HealthAbovePct(15) &&
                 !_infused)

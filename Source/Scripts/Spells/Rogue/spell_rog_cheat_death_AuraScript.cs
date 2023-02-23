@@ -25,13 +25,13 @@ public class spell_rog_cheat_death_AuraScript : AuraScript, IHasAuraEffects
 		return GetUnitOwner().GetTypeId() == TypeId.Player;
 	}
 
-	private void CalculateAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
+	private void CalculateAmount(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
 	{
 		// Set absorbtion amount to unlimited
 		amount = -1;
 	}
 
-	private void Absorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref float absorbAmount)
+	private void Absorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref double absorbAmount)
 	{
 		var target = GetTarget().ToPlayer();
 
