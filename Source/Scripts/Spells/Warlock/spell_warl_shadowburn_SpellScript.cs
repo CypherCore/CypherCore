@@ -26,6 +26,13 @@ namespace Scripts.Spells.Warlock
 
             Eradication(caster, target);
             ConflagrationOfChaos(caster, target);
+            MadnessOfTheAzjaqir(caster);
+        }
+
+        private void MadnessOfTheAzjaqir(Unit caster)
+        {
+            if (caster.HasAura(WarlockSpells.MADNESS_OF_THE_AZJAQIR))
+                caster.AddAura(WarlockSpells.MADNESS_OF_THE_AZJAQIR_SHADOWBURN_AURA, caster);
         }
 
         private void Eradication(Unit caster, Unit target)
