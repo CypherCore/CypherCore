@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// Copyright (c) Forged WoW LLC <https://github.com/ForgedWoW/ForgedCore>
+// Licensed under GPL-3.0 license. See <https://github.com/ForgedWoW/ForgedCore/blob/master/LICENSE> for full information.
+
 using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
-using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.IPlayer;
-using static Game.AI.SmartAction;
 
 namespace Scripts.Spells.Warlock
 {

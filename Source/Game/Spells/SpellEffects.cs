@@ -17,6 +17,7 @@ using Game.Movement;
 using Game.Networking.Packets;
 using Game.Scripting.Interfaces.IPlayer;
 using Game.Scripting.Interfaces.IQuest;
+using Game.Scripting.Interfaces.ISpell;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -1125,29 +1126,8 @@ namespace Game.Spells
             PowerType power = (PowerType)effectInfo.MiscValue;
             if (unitTarget.GetMaxPower(power) == 0)
                 return;
-
-            // Some level depends spells
-            switch (m_spellInfo.Id)
-            {
-                case 24571:                                         // Blood Fury
-                                                                    // Instantly increases your rage by ${(300-10*$max(0,$PL-60))/10}.
-                    damage -= 10 * (int)Math.Max(0, Math.Min(30, unitCaster.GetLevel() - 60));
-                    break;
-                case 24532:                                         // Burst of Energy
-                                                                    // Instantly increases your energy by ${60-4*$max(0,$min(15,$PL-60))}.
-                    damage -= 4 * (int)Math.Max(0, Math.Min(15, unitCaster.GetLevel() - 60));
-                    break;
-                case 67490:                                         // Runic Mana Injector (mana gain increased by 25% for engineers - 3.2.0 patch change)
-                {
-                    Player player = unitCaster.ToPlayer();
-                    if (player != null)
-                        if (player.HasSkill(SkillType.Engineering))
-                            MathFunctions.AddPct(ref damage, 25);
-                    break;
-                }
-                default:
-                    break;
-            }
+            
+            ForEachSpellScript<ISpellEnergizedBySpell>(a => a.EnergizeBySpell(unitTarget, m_spellInfo, ref damage, power));
 
             unitCaster.EnergizeBySpell(unitTarget, m_spellInfo, damage, power);
         }
