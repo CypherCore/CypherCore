@@ -21,7 +21,7 @@ namespace Scripts.Spells.Warlock
 			GetCaster().CastSpell(WarlockSpells.INCINERATE_ENERGIZE, true);
 
             if (IsHitCrit())
-                GetCaster().ModifyPower(PowerType.SoulShards, 20);
+                GetCaster().ModifyPower(PowerType.SoulShards, 10);
         }
 
 		private void HandleOnHitTarget(int UnnamedParameter)

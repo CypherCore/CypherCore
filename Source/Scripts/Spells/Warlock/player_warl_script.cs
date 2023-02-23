@@ -51,6 +51,9 @@ namespace Scripts.Spells.Warlock
             var soulShardsSpent = player.VariableStorage.GetValue(WarlockSpells.RITUAL_OF_RUIN.ToString(), 0) + shardCost;
             var needed = (int)Global.SpellMgr.GetSpellInfo(WarlockSpells.RITUAL_OF_RUIN).GetEffect(0).BasePoints * 10; // each soul shard is 10
 
+            if (player.TryGetAura(WarlockSpells.MASTER_RITUALIST, out var masterRitualist))
+                needed += masterRitualist.GetEffect(0).AmountAsInt; // note this number is negitive so we add it.
+
             if (soulShardsSpent > needed)
             {
                 player.AddAura(WarlockSpells.RITUAL_OF_RUIN_FREE_CAST_AURA, player);
