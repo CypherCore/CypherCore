@@ -16,7 +16,7 @@ namespace Scripts.Spells.Paladin
     [SpellScript(84963)]
     public class spell_pal_inquisition : SpellScript, ISpellOnTakePower, ISpellAfterHit
     {
-        private double m_powerTaken = 0.0f;
+        private float m_powerTaken = 0.0f;
 
         public void TakePower(SpellPowerCost powerCost)
         {

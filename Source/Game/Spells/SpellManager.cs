@@ -348,7 +348,7 @@ namespace Game.Entities
             }
         }
 
-        public bool AddSameEffectStackRuleSpellGroups(SpellInfo spellInfo, AuraType auraType, double amount, Dictionary<SpellGroup, double> groups)
+        public bool AddSameEffectStackRuleSpellGroups(SpellInfo spellInfo, AuraType auraType, float amount, Dictionary<SpellGroup, float> groups)
         {
             uint spellId = spellInfo.GetFirstRankSpell().Id;
             var spellGroupList = GetSpellSpellGroupMapBounds(spellId);
@@ -367,7 +367,7 @@ namespace Game.Entities
                         groups.Add(group, amount);
                     else
                     {
-                        double curr_amount = groups[group];
+                        float curr_amount = groups[group];
                         // Take absolute value because this also counts for the highest negative aura
                         if (Math.Abs(curr_amount) < Math.Abs(amount))
                             groups[group] = amount;
@@ -5045,10 +5045,10 @@ namespace Game.Entities
             damage = 0;
         }
 
-        public PetAura(uint petEntry, uint aura, bool _removeOnChangePet, double _damage)
+        public PetAura(uint petEntry, uint aura, bool _removeOnChangePet, float _damage)
         {
             removeOnChangePet = _removeOnChangePet;
-            damage = _damage;
+            damage = (int)_damage;
 
             auras[petEntry] = aura;
         }
@@ -5076,14 +5076,14 @@ namespace Game.Entities
             return removeOnChangePet;
         }
 
-        public double GetDamage()
+        public int GetDamage()
         {
             return damage;
         }
 
         Dictionary<uint, uint> auras = new();
         bool removeOnChangePet;
-        double damage;
+        int damage;
     }
 
     public class SpellEnchantProcEntry

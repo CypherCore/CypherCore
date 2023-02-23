@@ -241,7 +241,7 @@ namespace Scripts.m_Events.Midsummer
                 return;
 
             Position spellDest = GetExplTargetDest();
-            double distance = GetCaster().GetExactDist2d(spellDest.GetPositionX(), spellDest.GetPositionY());
+            float distance = GetCaster().GetExactDist2d(spellDest.GetPositionX(), spellDest.GetPositionY());
 
             uint torchSpellID = 0;
             uint torchShadowSpellID = 0;

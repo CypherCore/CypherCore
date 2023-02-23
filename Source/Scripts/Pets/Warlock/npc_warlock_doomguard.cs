@@ -20,7 +20,7 @@ namespace Scripts.Pets
         public class npc_warlock_doomguard : SmartAI
         {
             public EventMap events = new();
-            public double maxDistance;
+            public float maxDistance;
 
             public npc_warlock_doomguard(Creature creature) : base(creature)
             {

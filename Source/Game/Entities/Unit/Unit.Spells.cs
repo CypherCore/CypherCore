@@ -29,7 +29,7 @@ namespace Game.Entities
         public void SetInstantCast(bool set) { _instantCast = set; }
         public bool CanInstantCast() { return _instantCast; }
 
-        public double SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
+        public float SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
         {
             Player thisPlayer = ToPlayer();
             if (thisPlayer)
@@ -39,7 +39,7 @@ namespace Game.Entities
                     return (int)(MathFunctions.CalculatePct(GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), overrideSP) + 0.5f);
             }
 
-            var DoneAdvertisedBenefit = GetTotalAuraModifierByMiscMask(AuraType.ModDamageDone, (int)schoolMask);
+            float DoneAdvertisedBenefit = GetTotalAuraModifierByMiscMask(AuraType.ModDamageDone, (int)schoolMask);
 
             if (IsTypeId(TypeId.Player))
             {
@@ -65,7 +65,7 @@ namespace Game.Entities
             return DoneAdvertisedBenefit;
         }
 
-        public double SpellDamageBonusDone(Unit victim, SpellInfo spellProto, double pdamage, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, uint stack = 1, Spell spell = null)
+        public float SpellDamageBonusDone(Unit victim, SpellInfo spellProto, float pdamage, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, uint stack = 1, Spell spell = null)
         {
             if (spellProto == null || victim == null || damagetype == DamageEffectType.Direct)
                 return pdamage;
@@ -82,11 +82,11 @@ namespace Game.Entities
                     return owner.SpellDamageBonusDone(victim, spellProto, pdamage, damagetype, spellEffectInfo, stack, spell);
             }
 
-            double DoneTotal = 0;
-            var DoneTotalMod = SpellDamagePctDone(victim, spellProto, damagetype, spellEffectInfo, spell);
+            float DoneTotal = 0;
+            float DoneTotalMod = SpellDamagePctDone(victim, spellProto, damagetype, spellEffectInfo, spell);
 
             // Done fixed damage bonus auras
-            var DoneAdvertisedBenefit = SpellBaseDamageBonusDone(spellProto.GetSchoolMask());
+            float DoneAdvertisedBenefit = SpellBaseDamageBonusDone(spellProto.GetSchoolMask());
             // modify spell power by victim's SPELL_AURA_MOD_DAMAGE_TAKEN auras (eg Amplify/Dampen Magic)
             DoneAdvertisedBenefit += victim.GetTotalAuraModifierByMiscMask(AuraType.ModDamageTaken, (int)spellProto.GetSchoolMask());
 
@@ -98,7 +98,7 @@ namespace Game.Entities
             // Check for table values
             if (spellEffectInfo.BonusCoefficientFromAP > 0.0f)
             {
-                var ApCoeffMod = spellEffectInfo.BonusCoefficientFromAP;
+                float ApCoeffMod = spellEffectInfo.BonusCoefficientFromAP;
                 Player modOwner = GetSpellModOwner();
                 if (modOwner)
                 {
@@ -126,7 +126,7 @@ namespace Game.Entities
             }
 
             // Default calculation
-            var coeff = spellEffectInfo.BonusCoefficient;
+            float coeff = spellEffectInfo.BonusCoefficient;
             if (DoneAdvertisedBenefit != 0)
             {
                 Player modOwner1 = GetSpellModOwner();
@@ -139,7 +139,7 @@ namespace Game.Entities
                 DoneTotal += (DoneAdvertisedBenefit * coeff * stack);
             }
 
-            var tmpDamage = (pdamage + DoneTotal) * DoneTotalMod;
+            float tmpDamage = (pdamage + DoneTotal) * DoneTotalMod;
             // apply spellmod to Done damage (flat and pct)
             Player _modOwner = GetSpellModOwner();
             if (_modOwner != null)
@@ -148,7 +148,7 @@ namespace Game.Entities
             return Math.Max(tmpDamage, 0.0f);
         }
 
-        public double SpellDamagePctDone(Unit victim, SpellInfo spellProto, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, Spell spell = null)
+        public float SpellDamagePctDone(Unit victim, SpellInfo spellProto, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, Spell spell = null)
         {
             if (spellProto == null || !victim || damagetype == DamageEffectType.Direct)
                 return 1.0f;
@@ -170,7 +170,7 @@ namespace Game.Entities
             }
 
             // Done total percent damage auras
-            double DoneTotalMod = 1.0f;
+            float DoneTotalMod = 1.0f;
 
             // Pet damage?
             if (IsTypeId(TypeId.Unit) && !IsPet())
@@ -181,7 +181,7 @@ namespace Game.Entities
             if (modOwner)
                 MathFunctions.AddPct(ref DoneTotalMod, modOwner.GetRatingBonusValue(CombatRating.VersatilityDamageDone) + modOwner.GetTotalAuraModifier(AuraType.ModVersatility));
 
-            double maxModDamagePercentSchool = 0.0f;
+            float maxModDamagePercentSchool = 0.0f;
             Player thisPlayer = ToPlayer();
             if (thisPlayer)
             {
@@ -232,12 +232,12 @@ namespace Game.Entities
             return DoneTotalMod;
         }
 
-        public double SpellDamageBonusTaken(Unit caster, SpellInfo spellProto, double pdamage, DamageEffectType damagetype)
+        public float SpellDamageBonusTaken(Unit caster, SpellInfo spellProto, float pdamage, DamageEffectType damagetype)
         {
             if (spellProto == null || damagetype == DamageEffectType.Direct)
                 return pdamage;
 
-            double TakenTotalMod = 1.0f;
+            float TakenTotalMod = 1.0f;
 
             // Mod damage from spell mechanic
             ulong mechanicMask = spellProto.GetAllEffectsMechanicMask();
@@ -264,7 +264,7 @@ namespace Game.Entities
                 if (modOwner)
                 {
                     // only 50% of SPELL_AURA_MOD_VERSATILITY for damage reduction
-                    var versaBonus = modOwner.GetTotalAuraModifier(AuraType.ModVersatility) / 2.0f;
+                    float versaBonus = modOwner.GetTotalAuraModifier(AuraType.ModVersatility) / 2.0f;
                     MathFunctions.AddPct(ref TakenTotalMod, -(modOwner.GetRatingBonusValue(CombatRating.VersatilityDamageTaken) + versaBonus));
                 }
 
@@ -298,7 +298,7 @@ namespace Game.Entities
             // Sanctified Wrath (bypass damage reduction)
             if (caster != null && TakenTotalMod < 1.0f)
             {
-                var damageReduction = 1.0f - TakenTotalMod;
+                float damageReduction = 1.0f - TakenTotalMod;
                 var casterIgnoreResist = caster.GetAuraEffectsByType(AuraType.ModIgnoreTargetResist);
                 foreach (AuraEffect aurEff in casterIgnoreResist)
                 {
@@ -311,11 +311,11 @@ namespace Game.Entities
                 TakenTotalMod = 1.0f - damageReduction;
             }
 
-            var tmpDamage = pdamage * TakenTotalMod;
+            float tmpDamage = pdamage * TakenTotalMod;
             return Math.Max(tmpDamage, 0.0f);
         }
 
-        public double SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
+        public float SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
         {
             Player thisPlayer = ToPlayer();
             if (thisPlayer != null)
@@ -325,7 +325,7 @@ namespace Game.Entities
                     return (MathFunctions.CalculatePct(GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), overrideSP) + 0.5f);
             }
 
-            var advertisedBenefit = GetTotalAuraModifier(AuraType.ModHealingDone, aurEff =>
+            float advertisedBenefit = GetTotalAuraModifier(AuraType.ModHealingDone, aurEff =>
             {
                 if (aurEff.GetMiscValue() == 0 || (aurEff.GetMiscValue() & (int)schoolMask) != 0)
                     return true;
@@ -354,10 +354,10 @@ namespace Game.Entities
             return advertisedBenefit;
         }
 
-        public static double SpellCriticalHealingBonus(Unit caster, SpellInfo spellProto, double damage, Unit victim)
+        public static float SpellCriticalHealingBonus(Unit caster, SpellInfo spellProto, float damage, Unit victim)
         {
             // Calculate critical bonus
-            var crit_bonus = damage;
+            float crit_bonus = damage;
 
             // adds additional damage to critBonus (from talents)
             if (caster != null)
@@ -375,7 +375,7 @@ namespace Game.Entities
             return damage;
         }
 
-        public double SpellHealingBonusDone(Unit victim, SpellInfo spellProto, double healamount, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, uint stack = 1, Spell spell = null)
+        public float SpellHealingBonusDone(Unit victim, SpellInfo spellProto, float healamount, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, uint stack = 1, Spell spell = null)
         {
             // For totems get healing bonus from owner (statue isn't totem in fact)
             if (IsTypeId(TypeId.Unit) && IsTotem())
@@ -389,8 +389,8 @@ namespace Game.Entities
             if (spellProto.SpellFamilyName == SpellFamilyNames.Potion)
                 return healamount;
 
-            double DoneTotal = 0;
-            var DoneTotalMod = SpellHealingPctDone(victim, spellProto, spell);
+            float DoneTotal = 0;
+            float DoneTotalMod = SpellHealingPctDone(victim, spellProto, spell);
 
             // done scripted mod (take it from owner)
             Unit owner1 = GetOwner() ?? this;
@@ -411,7 +411,7 @@ namespace Game.Entities
             }
 
             // Done fixed damage bonus auras
-            var DoneAdvertisedBenefit = SpellBaseHealingBonusDone(spellProto.GetSchoolMask());
+            float DoneAdvertisedBenefit = SpellBaseHealingBonusDone(spellProto.GetSchoolMask());
             // modify spell power by victim's SPELL_AURA_MOD_HEALING auras (eg Amplify/Dampen Magic)
             DoneAdvertisedBenefit += victim.GetTotalAuraModifierByMiscMask(AuraType.ModHealing, (int)spellProto.GetSchoolMask());
 
@@ -421,11 +421,11 @@ namespace Game.Entities
                 DoneAdvertisedBenefit += ((Guardian)this).GetBonusDamage();
 
             // Check for table values
-            var coeff = spellEffectInfo.BonusCoefficient;
+            float coeff = spellEffectInfo.BonusCoefficient;
             if (spellEffectInfo.BonusCoefficientFromAP > 0.0f)
             {
                 WeaponAttackType attType = (spellProto.IsRangedWeaponSpell() && spellProto.DmgClass != SpellDmgClass.Melee) ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack;
-                var APbonus = victim.GetTotalAuraModifier(attType == WeaponAttackType.BaseAttack ? AuraType.MeleeAttackPowerAttackerBonus : AuraType.RangedAttackPowerAttackerBonus);
+                float APbonus = victim.GetTotalAuraModifier(attType == WeaponAttackType.BaseAttack ? AuraType.MeleeAttackPowerAttackerBonus : AuraType.RangedAttackPowerAttackerBonus);
                 APbonus += GetTotalAttackPowerValue(attType);
 
                 DoneTotal += (spellEffectInfo.BonusCoefficientFromAP * stack * APbonus);
@@ -465,7 +465,7 @@ namespace Game.Entities
                     DoneTotal = 0;
             }
 
-            var heal = (healamount + DoneTotal) * DoneTotalMod;
+            float heal = (healamount + DoneTotal) * DoneTotalMod;
 
             // apply spellmod to Done amount
             Player _modOwner = GetSpellModOwner();
@@ -475,7 +475,7 @@ namespace Game.Entities
             return Math.Max(heal, 0.0f);
         }
 
-        public double SpellHealingPctDone(Unit victim, SpellInfo spellProto, Spell spell = null)
+        public float SpellHealingPctDone(Unit victim, SpellInfo spellProto, Spell spell = null)
         {
             // For totems get healing bonus from owner
             if (IsCreature() && IsTotem())
@@ -500,7 +500,7 @@ namespace Game.Entities
             Player thisPlayer = ToPlayer();
             if (thisPlayer != null)
             {
-                double maxModDamagePercentSchool = 0.0f;
+                float maxModDamagePercentSchool = 0.0f;
                 for (int i = 0; i < (int)SpellSchools.Max; ++i)
                     if (((int)spellProto.GetSchoolMask() & (1 << i)) != 0)
                         maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, thisPlayer.m_activePlayerData.ModHealingDonePercent[i]);
@@ -508,7 +508,7 @@ namespace Game.Entities
                 return maxModDamagePercentSchool;
             }
 
-            double DoneTotalMod = 1.0f;
+            float DoneTotalMod = 1.0f;
 
             // bonus against aurastate
             DoneTotalMod *= GetTotalAuraMultiplier(AuraType.ModDamageDoneVersusAurastate, aurEff =>
@@ -531,16 +531,16 @@ namespace Game.Entities
             return DoneTotalMod;
         }
 
-        public double SpellHealingBonusTaken(Unit caster, SpellInfo spellProto, double healamount, DamageEffectType damagetype)
+        public float SpellHealingBonusTaken(Unit caster, SpellInfo spellProto, float healamount, DamageEffectType damagetype)
         {
-            double TakenTotalMod = 1.0f;
+            float TakenTotalMod = 1.0f;
 
             // Healing taken percent
-            var minval = GetMaxNegativeAuraModifier(AuraType.ModHealingPct);
+            float minval = GetMaxNegativeAuraModifier(AuraType.ModHealingPct);
             if (minval != 0)
                 MathFunctions.AddPct(ref TakenTotalMod, minval);
 
-            var maxval = GetMaxPositiveAuraModifier(AuraType.ModHealingPct);
+            float maxval = GetMaxPositiveAuraModifier(AuraType.ModHealingPct);
             if (maxval != 0)
                 MathFunctions.AddPct(ref TakenTotalMod, maxval);
 
@@ -556,11 +556,11 @@ namespace Game.Entities
             if (damagetype == DamageEffectType.DOT)
             {
                 // Healing over time taken percent
-                var minval_hot = GetMaxNegativeAuraModifier(AuraType.ModHotPct);
+                float minval_hot = GetMaxNegativeAuraModifier(AuraType.ModHotPct);
                 if (minval_hot != 0)
                     MathFunctions.AddPct(ref TakenTotalMod, minval_hot);
 
-                var maxval_hot = GetMaxPositiveAuraModifier(AuraType.ModHotPct);
+                float maxval_hot = GetMaxPositiveAuraModifier(AuraType.ModHotPct);
                 if (maxval_hot != 0)
                     MathFunctions.AddPct(ref TakenTotalMod, maxval_hot);
             }
@@ -580,11 +580,11 @@ namespace Game.Entities
                 });
             }
 
-            var heal = healamount * TakenTotalMod;
+            float heal = healamount * TakenTotalMod;
             return Math.Max(heal, 0.0f);
         }
 
-        public double SpellCritChanceDone(Spell spell, AuraEffect aurEff, SpellSchoolMask schoolMask, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
+        public float SpellCritChanceDone(Spell spell, AuraEffect aurEff, SpellSchoolMask schoolMask, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
         {
             SpellInfo spellInfo = spell != null ? spell.GetSpellInfo() : aurEff.GetSpellInfo();
             //! Mobs can't crit with spells. (Except player controlled)
@@ -595,7 +595,7 @@ namespace Game.Entities
             if (spell != null && !spellInfo.HasAttribute(SpellCustomAttributes.CanCrit))
                 return 0.0f;
 
-            double crit_chance = 0.0f;
+            float crit_chance = 0.0f;
             switch (spellInfo.DmgClass)
             {
                 case SpellDmgClass.Magic:
@@ -627,14 +627,14 @@ namespace Game.Entities
             return Math.Max(crit_chance, 0.0f);
         }
 
-        public double SpellCritChanceTaken(Unit caster, Spell spell, AuraEffect aurEff, SpellSchoolMask schoolMask, double doneChance, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
+        public float SpellCritChanceTaken(Unit caster, Spell spell, AuraEffect aurEff, SpellSchoolMask schoolMask, float doneChance, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
         {
             SpellInfo spellInfo = spell != null ? spell.GetSpellInfo() : aurEff.GetSpellInfo();
             // not critting spell
             if (spell != null && !spellInfo.HasAttribute(SpellCustomAttributes.CanCrit))
                 return 0.0f;
 
-            var crit_chance = doneChance;
+            float crit_chance = doneChance;
             switch (spellInfo.DmgClass)
             {
                 case SpellDmgClass.Magic:
@@ -739,9 +739,9 @@ namespace Game.Entities
 
             int roll = RandomHelper.IRand(0, 9999);
 
-            var missChance = MeleeSpellMissChance(victim, attType, spellInfo) * 100.0f;
+            int missChance = (int)(MeleeSpellMissChance(victim, attType, spellInfo) * 100.0f);
             // Roll miss
-            var tmp = missChance;
+            float tmp = missChance;
             if (roll < tmp)
                 return SpellMissInfo.Miss;
 
@@ -1163,7 +1163,7 @@ namespace Game.Entities
             SendCombatLogMessage(data);
         }
 
-        public void EnergizeBySpell(Unit victim, SpellInfo spellInfo, double damage, PowerType powerType)
+        public void EnergizeBySpell(Unit victim, SpellInfo spellInfo, float damage, PowerType powerType)
         {
             EnergizeBySpell(victim, spellInfo, (int)damage, powerType);
         }
@@ -1779,11 +1779,11 @@ namespace Game.Entities
             return false;
         }
 
-        public static double SpellCriticalDamageBonus(Unit caster, SpellInfo spellProto, double damage, Unit victim = null)
+        public static float SpellCriticalDamageBonus(Unit caster, SpellInfo spellProto, float damage, Unit victim = null)
         {
             // Calculate critical bonus
             var crit_bonus = damage * 2;
-            double crit_mod = 0.0f;
+            float crit_mod = 0.0f;
 
             if (caster != null)
             {
@@ -1844,7 +1844,7 @@ namespace Game.Entities
             uint gain = 0;
             Unit healer = healInfo.GetHealer();
             Unit victim = healInfo.GetTarget();
-            double addhealth = healInfo.GetHeal();
+            float addhealth = healInfo.GetHeal();
 
             IUnitAI victimAI = victim.GetAI();
             if (victimAI != null)
@@ -1909,7 +1909,7 @@ namespace Game.Entities
             SendCombatLogMessage(spellHealLog);
         }
 
-        public double HealBySpell(HealInfo healInfo, bool critical = false)
+        public float HealBySpell(HealInfo healInfo, bool critical = false)
         {
             // calculate heal absorb and reduce healing
             CalcHealAbsorb(healInfo);
@@ -1917,11 +1917,6 @@ namespace Game.Entities
 
             SendHealSpellLog(healInfo, critical);
             return healInfo.GetEffectiveHeal();
-        }
-
-        public void ApplyCastTimePercentMod(double val, bool apply)
-        {
-            ApplyCastTimePercentMod((float)val, apply);
         }
 
         public void ApplyCastTimePercentMod(float val, bool apply)
@@ -1960,7 +1955,7 @@ namespace Game.Entities
             }
         }
 
-        public void CalculateSpellDamageTaken(SpellNonMeleeDamage damageInfo, double damage, SpellInfo spellInfo, WeaponAttackType attackType = WeaponAttackType.BaseAttack, bool crit = false, bool blocked = false, Spell spell = null)
+        public void CalculateSpellDamageTaken(SpellNonMeleeDamage damageInfo, float damage, SpellInfo spellInfo, WeaponAttackType attackType = WeaponAttackType.BaseAttack, bool crit = false, bool blocked = false, Spell spell = null)
         {
             if (damage < 0)
                 return;
@@ -1996,8 +1991,8 @@ namespace Game.Entities
                                 modOwner.ApplySpellMod(spellInfo, SpellModOp.CritDamageAndHealing, ref crit_bonus);
                             damage += (int)crit_bonus;
 
-                                // Increase crit damage from SPELL_AURA_MOD_CRIT_DAMAGE_BONUS
-                                double critPctDamageMod = (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, (uint)spellInfo.GetSchoolMask()) - 1.0f) * 100;
+                            // Increase crit damage from SPELL_AURA_MOD_CRIT_DAMAGE_BONUS
+                            float critPctDamageMod = (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, (uint)spellInfo.GetSchoolMask()) - 1.0f) * 100;
 
                             if (critPctDamageMod != 0)
                                 MathFunctions.AddPct(ref damage, (int)critPctDamageMod);
@@ -2586,7 +2581,7 @@ namespace Game.Entities
                     }
                     else    // This can happen during Player._LoadAuras
                     {
-                        Dictionary<int, double> bp = new();
+                        Dictionary<int, float> bp = new();
                         foreach (var spellEffectInfo in spellEntry.GetEffects())
                             bp[spellEffectInfo.EffectIndex] = spellEffectInfo.BasePoints;
 
@@ -2961,8 +2956,8 @@ namespace Game.Entities
         {
             foreach (var aura in m_ownedAuras.Query().HasSpellId(spellId).HasCasterGuid(casterGUID).GetResults())
             {
-                Dictionary<int, double> damage = new();
-                Dictionary<int, double> baseDamage = new();
+                Dictionary<int, float> damage = new();
+                Dictionary<int, float> baseDamage = new();
                 uint effMask = 0;
                 uint recalculateMask = 0;
                 Unit caster = aura.GetCaster();
@@ -3679,7 +3674,7 @@ namespace Game.Entities
             }).GetResults().FirstOrDefault();
         }
 
-        public double GetAuraEffectAmount(uint spellId, byte effIndex)
+        public float GetAuraEffectAmount(uint spellId, byte effIndex)
         {
             AuraEffect aurEff = GetAuraEffect(spellId, effIndex);
             if (aurEff != null)
@@ -3869,7 +3864,7 @@ namespace Game.Entities
                         if (auraEff == null)
                             continue;
 
-                        double bp;
+                        float bp;
                         if (createInfo.BaseAmount != null)
                             bp = createInfo.BaseAmount[spellEffectInfo.EffectIndex];
                         else
@@ -3911,9 +3906,9 @@ namespace Game.Entities
 
             m_appliedAuras.AuraApplications.CallOnMatch((app) => !aura.CanStackWith(app.GetBase()), (app) => RemoveAura(app, AuraRemoveMode.Default));
         }
-        public double GetHighestExclusiveSameEffectSpellGroupValue(AuraEffect aurEff, AuraType auraType, bool checkMiscValue = false, int miscValue = 0)
+        public float GetHighestExclusiveSameEffectSpellGroupValue(AuraEffect aurEff, AuraType auraType, bool checkMiscValue = false, int miscValue = 0)
         {
-            double val = 0;
+            float val = 0;
             var spellGroupList = Global.SpellMgr.GetSpellSpellGroupMapBounds(aurEff.GetSpellInfo().GetFirstRankSpell().Id);
             foreach (var spellGroup in spellGroupList)
             {
@@ -3946,7 +3941,7 @@ namespace Game.Entities
             return true;
         }
 
-        public bool IsHighestExclusiveAuraEffect(SpellInfo spellInfo, AuraType auraType, double effectAmount, uint auraEffectMask, bool removeOtherAuraApplications = false)
+        public bool IsHighestExclusiveAuraEffect(SpellInfo spellInfo, AuraType auraType, float effectAmount, uint auraEffectMask, bool removeOtherAuraApplications = false)
         {
             var auras = GetAuraEffectsByType(auraType);
             foreach (AuraEffect existingAurEff in auras)
@@ -4006,15 +4001,15 @@ namespace Game.Entities
             return m_modAuras.LookupByKey(type);
         }
 
-        public double GetTotalAuraModifier(AuraType auraType)
+        public float GetTotalAuraModifier(AuraType auraType)
         {
             return GetTotalAuraModifier(auraType, aurEff => true);
         }
 
-        public double GetTotalAuraModifier(AuraType auraType, Func<AuraEffect, bool> predicate)
+        public float GetTotalAuraModifier(AuraType auraType, Func<AuraEffect, bool> predicate)
         {
-            Dictionary<SpellGroup, double> sameEffectSpellGroup = new();
-            double modifier = 0;
+            Dictionary<SpellGroup, float> sameEffectSpellGroup = new();
+            float modifier = 0;
 
             var mTotalAuraList = GetAuraEffectsByType(auraType);
             foreach (AuraEffect aurEff in mTotalAuraList)
@@ -4035,19 +4030,19 @@ namespace Game.Entities
             return modifier;
         }
 
-        public double GetTotalAuraMultiplier(AuraType auraType)
+        public float GetTotalAuraMultiplier(AuraType auraType)
         {
             return GetTotalAuraMultiplier(auraType, aurEff => true);
         }
 
-        public double GetTotalAuraMultiplier(AuraType auraType, Func<AuraEffect, bool> predicate)
+        public float GetTotalAuraMultiplier(AuraType auraType, Func<AuraEffect, bool> predicate)
         {
             var mTotalAuraList = GetAuraEffectsByType(auraType);
             if (mTotalAuraList.Empty())
                 return 1.0f;
 
-            Dictionary<SpellGroup, double> sameEffectSpellGroup = new();
-            double multiplier = 1.0f;
+            Dictionary<SpellGroup, float> sameEffectSpellGroup = new();
+            float multiplier = 1.0f;
 
             foreach (var aurEff in mTotalAuraList)
             {
@@ -4067,18 +4062,18 @@ namespace Game.Entities
             return multiplier;
         }
 
-        public double GetMaxPositiveAuraModifier(AuraType auraType)
+        public float GetMaxPositiveAuraModifier(AuraType auraType)
         {
             return GetMaxPositiveAuraModifier(auraType, aurEff => true);
         }
 
-        public double GetMaxPositiveAuraModifier(AuraType auraType, Func<AuraEffect, bool> predicate)
+        public float GetMaxPositiveAuraModifier(AuraType auraType, Func<AuraEffect, bool> predicate)
         {
             var mTotalAuraList = GetAuraEffectsByType(auraType);
             if (mTotalAuraList.Empty())
                 return 0;
 
-            double modifier = 0;
+            float modifier = 0;
             foreach (var aurEff in mTotalAuraList)
             {
                 if (predicate(aurEff))
@@ -4088,18 +4083,18 @@ namespace Game.Entities
             return modifier;
         }
 
-        public double GetMaxNegativeAuraModifier(AuraType auraType)
+        public float GetMaxNegativeAuraModifier(AuraType auraType)
         {
             return GetMaxNegativeAuraModifier(auraType, aurEff => true);
         }
 
-        public double GetMaxNegativeAuraModifier(AuraType auraType, Func<AuraEffect, bool> predicate)
+        public float GetMaxNegativeAuraModifier(AuraType auraType, Func<AuraEffect, bool> predicate)
         {
             var mTotalAuraList = GetAuraEffectsByType(auraType);
             if (mTotalAuraList.Empty())
                 return 0;
 
-            double modifier = 0;
+            float modifier = 0;
             foreach (var aurEff in mTotalAuraList)
                 if (predicate(aurEff))
                     modifier = Math.Min(modifier, aurEff.GetAmount());
@@ -4107,7 +4102,7 @@ namespace Game.Entities
             return modifier;
         }
 
-        public double GetTotalAuraModifierByMiscMask(AuraType auraType, int miscMask)
+        public float GetTotalAuraModifierByMiscMask(AuraType auraType, int miscMask)
         {
             return GetTotalAuraModifier(auraType, aurEff =>
             {
@@ -4117,7 +4112,7 @@ namespace Game.Entities
             });
         }
 
-        public double GetTotalAuraMultiplierByMiscMask(AuraType auraType, uint miscMask)
+        public float GetTotalAuraMultiplierByMiscMask(AuraType auraType, uint miscMask)
         {
             return GetTotalAuraMultiplier(auraType, aurEff =>
             {
@@ -4127,7 +4122,7 @@ namespace Game.Entities
             });
         }
 
-        public double GetMaxPositiveAuraModifierByMiscMask(AuraType auraType, uint miscMask, AuraEffect except = null)
+        public float GetMaxPositiveAuraModifierByMiscMask(AuraType auraType, uint miscMask, AuraEffect except = null)
         {
             return GetMaxPositiveAuraModifier(auraType, aurEff =>
             {
@@ -4137,7 +4132,7 @@ namespace Game.Entities
             });
         }
 
-        public double GetMaxNegativeAuraModifierByMiscMask(AuraType auraType, uint miscMask)
+        public float GetMaxNegativeAuraModifierByMiscMask(AuraType auraType, uint miscMask)
         {
             return GetMaxNegativeAuraModifier(auraType, aurEff =>
             {
@@ -4147,7 +4142,7 @@ namespace Game.Entities
             });
         }
 
-        public double GetTotalAuraModifierByMiscValue(AuraType auraType, int miscValue)
+        public float GetTotalAuraModifierByMiscValue(AuraType auraType, int miscValue)
         {
             return GetTotalAuraModifier(auraType, aurEff =>
             {
@@ -4157,7 +4152,7 @@ namespace Game.Entities
             });
         }
 
-        public double GetTotalAuraMultiplierByMiscValue(AuraType auraType, int miscValue)
+        public float GetTotalAuraMultiplierByMiscValue(AuraType auraType, int miscValue)
         {
             return GetTotalAuraMultiplier(auraType, aurEff =>
             {
@@ -4167,7 +4162,7 @@ namespace Game.Entities
             });
         }
 
-        double GetMaxPositiveAuraModifierByMiscValue(AuraType auraType, int miscValue)
+        float GetMaxPositiveAuraModifierByMiscValue(AuraType auraType, int miscValue)
         {
             return GetMaxPositiveAuraModifier(auraType, aurEff =>
             {
@@ -4177,7 +4172,7 @@ namespace Game.Entities
             });
         }
 
-        public double GetMaxNegativeAuraModifierByMiscValue(AuraType auraType, int miscValue)
+        public float GetMaxNegativeAuraModifierByMiscValue(AuraType auraType, int miscValue)
         {
             return GetMaxNegativeAuraModifier(auraType, aurEff =>
             {
@@ -4194,7 +4189,7 @@ namespace Game.Entities
             else
                 m_modAuras.Remove(aurEff.GetAuraType(), aurEff);
         }
-        public double GetTotalAuraModValue(UnitMods unitMod)
+        public float GetTotalAuraModValue(UnitMods unitMod)
         {
             if (unitMod >= UnitMods.End)
             {
@@ -4202,7 +4197,7 @@ namespace Game.Entities
                 return 0.0f;
             }
 
-            var value = MathFunctions.CalculatePct(GetFlatModifierValue(unitMod, UnitModifierFlatType.Base), Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
+            float value = MathFunctions.CalculatePct(GetFlatModifierValue(unitMod, UnitModifierFlatType.Base), Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
             value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);

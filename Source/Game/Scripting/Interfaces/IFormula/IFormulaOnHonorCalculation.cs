@@ -5,6 +5,6 @@ namespace Game.Scripting.Interfaces.IFormula
 {
     public interface IFormulaOnHonorCalculation : IScriptObject
     {
-        void OnHonorCalculation(double honor, uint level, double multiplier);
+        void OnHonorCalculation(float honor, uint level, float multiplier);
     }
 }

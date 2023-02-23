@@ -23,7 +23,7 @@ namespace Scripts.Spells.Warrior
 		{
 			m_powerTaken = powerCost.Amount;
 			var   requiredAmount = powerCost.Amount - powerCost.Amount;
-			double dmgMultiplier  = powerCost.Amount / (requiredAmount != 0 ? requiredAmount : 1);
+			float dmgMultiplier  = powerCost.Amount / (requiredAmount != 0 ? requiredAmount : 1);
 			GetCaster().VariableStorage.Set("spell_warr_execute_damages::multiplier", dmgMultiplier);
 		}
 

@@ -35,8 +35,8 @@ internal class spell_monk_stagger_damage_aura : AuraScript, IHasAuraEffects
 
 			if (auraEff != null)
 			{
-				double total      = auraEff.GetAmount();
-				double tickDamage = aurEff.GetAmount();
+				float total      = auraEff.GetAmount();
+				float tickDamage = aurEff.GetAmount();
 				auraEff.ChangeAmount((int)(total - tickDamage));
 			}
 		}

@@ -24,7 +24,7 @@ namespace Scripts.Spells.Warlock
 			if (spellInfo != null)
 				procSpellId = spellInfo.Id;
 
-			double chance = 0;
+			float chance = 0;
 			uint triggeredSpellId = 0;
 
 			switch (procSpellId)

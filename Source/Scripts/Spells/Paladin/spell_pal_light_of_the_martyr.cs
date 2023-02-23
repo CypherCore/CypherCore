@@ -35,7 +35,7 @@ namespace Scripts.Spells.Paladin
         {
             Unit caster = GetCaster();
 
-            double dmg = (GetHitHeal() * 50.0f) / 100.0f;
+            float dmg = (GetHitHeal() * 50.0f) / 100.0f;
             caster.CastSpell(caster, PaladinSpells.LIGHT_OF_THE_MARTYR_DAMAGE, (int)dmg);
 
             if (caster.HasAura(PaladinSpells.FERVENT_MARTYR_BUFF))

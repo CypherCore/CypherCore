@@ -16,12 +16,12 @@ public class spell_dh_darkness_absorb : AuraScript, IHasAuraEffects
 	public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
 
-	private void CalculateAmount(AuraEffect UnnamedParameter, ref double amount, ref bool UnnamedParameter2)
+	private void CalculateAmount(AuraEffect UnnamedParameter, ref float amount, ref bool UnnamedParameter2)
 	{
 		amount = -1;
 	}
 
-	private void OnAbsorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref double absorbAmount)
+	private void OnAbsorb(AuraEffect UnnamedParameter, DamageInfo dmgInfo, ref float absorbAmount)
 	{
 		var caster = GetCaster();
 

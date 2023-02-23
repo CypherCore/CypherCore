@@ -15,13 +15,13 @@ namespace Scripts.Spells.Warlock
 	public class spell_warl_incinerate : SpellScript, IHasSpellEffects
 	{
 		public List<ISpellEffect> SpellEffects { get; } = new();
-        double _brimstoneDamage = 0;
+        float _brimstoneDamage = 0;
 		private void HandleOnHitMainTarget(int UnnamedParameter)
 		{
 			GetCaster().CastSpell(WarlockSpells.INCINERATE_ENERGIZE, true);
 
             if (IsHitCrit())
-                GetCaster().ModifyPower(PowerType.SoulShards, 10);
+                GetCaster().ModifyPower(PowerType.SoulShards, 20);
         }
 
 		private void HandleOnHitTarget(int UnnamedParameter)

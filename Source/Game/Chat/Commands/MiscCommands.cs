@@ -272,13 +272,13 @@ namespace Game.Chat
             if (!target.IsAlive())
                 return true;
 
-            if (!double.TryParse(str, out double damage_int))
+            if (!float.TryParse(str, out float damage_int))
                 return false;
 
             if (damage_int <= 0)
                 return true;
 
-            double damage_ = damage_int;
+            float damage_ = damage_int;
 
             string schoolStr = args.NextString();
 

@@ -15,7 +15,7 @@ namespace Scripts.Spells.Warrior
 	{
 		public List<IAuraEffectHandler> AuraEffects { get; } = new List<IAuraEffectHandler>();
 
-		private void Absorb(AuraEffect UnnamedParameter, DamageInfo UnnamedParameter2, ref double absorbAmount)
+		private void Absorb(AuraEffect UnnamedParameter, DamageInfo UnnamedParameter2, ref float absorbAmount)
 		{
 			absorbAmount = 0;
 		}

@@ -12,7 +12,7 @@ namespace Scripts.Spells.Items;
 [Script]
 internal class spell_item_nitro_boosts_backfire : AuraScript, IHasAuraEffects
 {
-	private double lastZ = MapConst.InvalidHeight;
+	private float lastZ = MapConst.InvalidHeight;
 	public List<IAuraEffectHandler> AuraEffects { get; } = new();
 
 	public override bool Validate(SpellInfo spell)

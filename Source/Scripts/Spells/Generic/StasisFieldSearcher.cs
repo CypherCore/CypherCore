@@ -8,10 +8,10 @@ namespace Scripts.Spells.Generic;
 
 internal class StasisFieldSearcher : ICheck<Unit>
 {
-	private readonly double _distance;
+	private readonly float _distance;
 	private readonly Unit _unit;
 
-	public StasisFieldSearcher(Unit obj, double distance)
+	public StasisFieldSearcher(Unit obj, float distance)
 	{
 		_unit     = obj;
 		_distance = distance;

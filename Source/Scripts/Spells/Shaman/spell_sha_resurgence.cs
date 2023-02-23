@@ -31,7 +31,7 @@ namespace Scripts.Spells.Shaman
 
 		public void OnProc(ProcEventInfo procInfo)
 		{
-			double healAmount = 0.0f;
+			var healAmount = 0.0f;
 			var target     = procInfo.GetActor();
 
 			if (target != null)

@@ -1238,8 +1238,8 @@ namespace Game.Networking.Packets
         }
 
         long Health;
-        double AttackPower;
-        double SpellPower;
+        float AttackPower;
+        float SpellPower;
         uint Armor;
         List<SpellLogPowerData> PowerData = new();
     }
@@ -1450,10 +1450,10 @@ namespace Game.Networking.Packets
                 data.WriteFloat(TimeMod.Value);
 
             foreach (var point in Points)
-                data.WriteFloat((float)point);
+                data.WriteFloat(point);
 
             foreach (var point in EstimatedPoints)
-                data.WriteFloat((float)point);
+                data.WriteFloat(point);
         }
 
         public ObjectGuid CastID;
@@ -1469,8 +1469,8 @@ namespace Game.Networking.Packets
         public int? Duration;
         public int? Remaining;
         float? TimeMod;
-        public List<double> Points = new();
-        public List<double> EstimatedPoints = new();
+        public List<float> Points = new();
+        public List<float> EstimatedPoints = new();
     }
 
     public struct AuraInfo
@@ -1921,12 +1921,12 @@ namespace Game.Networking.Packets
 
     public struct SpellModifierData
     {
-        public double ModifierValue;
+        public float ModifierValue;
         public byte ClassIndex;
 
         public void Write(WorldPacket data)
         {
-            data.WriteFloat((float)ModifierValue);
+            data.WriteFloat(ModifierValue);
             data.WriteUInt8(ClassIndex);
         }
     }

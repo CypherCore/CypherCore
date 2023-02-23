@@ -38,7 +38,7 @@ namespace Scripts.Spells.Shaman
 
 			if (l_Owner != null)
 			{
-				double l_Amount = p_AurEff.GetAmount();
+				float l_Amount = p_AurEff.GetAmount();
 
 				if (p_AurEff.GetAmount() != 0)
 				{

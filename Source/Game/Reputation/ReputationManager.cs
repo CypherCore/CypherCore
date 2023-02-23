@@ -381,7 +381,7 @@ namespace Game
             return SetReputation(factionEntry, standing, true, spillOverOnly, noSpillover);
         }
 
-        public bool SetReputation(FactionRecord factionEntry, double standing)
+        public bool SetReputation(FactionRecord factionEntry, float standing)
         {
             return SetReputation(factionEntry, (int)standing);
         }

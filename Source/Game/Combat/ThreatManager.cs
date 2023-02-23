@@ -28,8 +28,8 @@ namespace Game.Combat
         ThreatReference _fixateRef;
 
         Dictionary<ObjectGuid, ThreatReference> _threatenedByMe = new(); // these refs are entries for myself on other units' threat lists
-        public double[] _singleSchoolModifiers = new double[(int)SpellSchools.Max]; // most spells are single school - we pre-calculate these and store them
-        public volatile Dictionary<SpellSchoolMask, double> _multiSchoolModifiers = new(); // these are calculated on demand
+        public float[] _singleSchoolModifiers = new float[(int)SpellSchools.Max]; // most spells are single school - we pre-calculate these and store them
+        public volatile Dictionary<SpellSchoolMask, float> _multiSchoolModifiers = new(); // these are calculated on demand
 
         public List<Tuple<ObjectGuid, uint>> _redirectInfo = new(); // current redirection targets and percentages (updated from registry in ThreatManager::UpdateRedirectInfo)
         public Dictionary<uint, Dictionary<ObjectGuid, uint>> _redirectRegistry = new(); // spellid . (victim . pct); all redirection effects on us (removal individually managed by spell scripts because blizzard is dumb)
@@ -134,7 +134,7 @@ namespace Game.Combat
 
         public bool IsThreatenedBy(Unit who, bool includeOffline = false) { return IsThreatenedBy(who.GetGUID(), includeOffline); }
 
-        public double GetThreat(Unit who, bool includeOffline = false)
+        public float GetThreat(Unit who, bool includeOffline = false)
         {
             var refe = _myThreatListEntries.LookupByKey(who.GetGUID());
             if (refe == null)
@@ -189,7 +189,7 @@ namespace Game.Combat
             }
         }
 
-        public void AddThreat(Unit target, double amount, SpellInfo spell = null, bool ignoreModifiers = false, bool ignoreRedirects = false)
+        public void AddThreat(Unit target, float amount, SpellInfo spell = null, bool ignoreModifiers = false, bool ignoreRedirects = false)
         {
             // step 1: we can shortcut if the spell has one of the NO_THREAT attrs set - nothing will happen
             if (spell != null)
@@ -250,7 +250,7 @@ namespace Game.Combat
                 var redirInfo = target.GetThreatManager()._redirectInfo;
                 if (!redirInfo.Empty())
                 {
-                    var origAmount = amount;
+                    float origAmount = amount;
                     // intentional iteration by index - there's a nested AddThreat call further down that might cause AI calls which might modify redirect info through spells
                     for (var i = 0; i < redirInfo.Count; ++i)
                     {
@@ -265,7 +265,7 @@ namespace Game.Combat
 
                         if (redirTarget)
                         {
-                            var amountRedirected = MathFunctions.CalculatePct(origAmount, pair.Item2);
+                            float amountRedirected = MathFunctions.CalculatePct(origAmount, pair.Item2);
                             AddThreat(redirTarget, amountRedirected, spell, true, true);
                             amount -= amountRedirected;
                         }
@@ -313,7 +313,7 @@ namespace Game.Combat
                 ProcessAIUpdates();
         }
 
-        void ScaleThreat(Unit target, double factor)
+        void ScaleThreat(Unit target, float factor)
         {
             var refe = _myThreatListEntries.LookupByKey(target.GetGUID());
             if (refe != null)
@@ -517,7 +517,7 @@ namespace Game.Combat
             return (a.GetThreat() * aWeight < b.GetThreat());
         }
 
-        public static double CalculateModifiedThreat(double threat, Unit victim, SpellInfo spell)
+        public static float CalculateModifiedThreat(float threat, Unit victim, SpellInfo spell)
         {
             // modifiers by spell
             if (spell != null)
@@ -560,12 +560,12 @@ namespace Game.Combat
                     break;
                 default:
                 {
-                    if (victimMgr._multiSchoolModifiers.TryGetValue(mask, out double value))
+                    if (victimMgr._multiSchoolModifiers.TryGetValue(mask, out float value))
                     {
                         threat *= value;
                         break;
                     }
-                    var mod = victim.GetTotalAuraMultiplierByMiscMask(AuraType.ModThreat, (uint)mask);
+                    float mod = victim.GetTotalAuraMultiplierByMiscMask(AuraType.ModThreat, (uint)mask);
                     victimMgr._multiSchoolModifiers[mask] = mod;
                     threat *= mod;
                     break;
@@ -574,7 +574,7 @@ namespace Game.Combat
             return threat;
         }
 
-        public void ForwardThreatForAssistingMe(Unit assistant, double baseAmount, SpellInfo spell = null, bool ignoreModifiers = false)
+        public void ForwardThreatForAssistingMe(Unit assistant, float baseAmount, SpellInfo spell = null, bool ignoreModifiers = false)
         {
             if (spell != null && (spell.HasAttribute(SpellAttr1.NoThreat) || spell.HasAttribute(SpellAttr4.NoHelpfulThreat))) // shortcut, none of the calls would do anything
                 return;
@@ -595,7 +595,7 @@ namespace Game.Combat
 
             if (!canBeThreatened.Empty()) // targets under CC cannot gain assist threat - split evenly among the rest
             {
-                var perTarget = baseAmount / canBeThreatened.Count;
+                float perTarget = baseAmount / canBeThreatened.Count;
                 foreach (Creature threatened in canBeThreatened)
                     threatened.GetThreatManager().AddThreat(assistant, perTarget, spell, ignoreModifiers);
             }
@@ -615,7 +615,7 @@ namespace Game.Combat
 
         public void UpdateMyTempModifiers()
         {
-            double mod = 0;
+            float mod = 0;
             foreach (AuraEffect eff in _owner.GetAuraEffectsByType(AuraType.ModTotalThreat))
                 mod += eff.GetAmount();
 
@@ -785,7 +785,7 @@ namespace Game.Combat
         public Dictionary<ObjectGuid, ThreatReference> GetThreatenedByMeList() { return _threatenedByMe; }
 
         // Modify target's threat by +percent%
-        public void ModifyThreatByPercent(Unit target, double percent)
+        public void ModifyThreatByPercent(Unit target, float percent)
         {
             if (percent != 0)
                 ScaleThreat(target, 0.01f * (100f + percent));
@@ -816,7 +816,7 @@ namespace Game.Combat
         public ThreatManager _mgr;
         Unit _victim;
         public OnlineState Online;
-        double _baseAmount;
+        float _baseAmount;
         public int TempModifier; // Temporary effects (auras with SPELL_AURA_MOD_TOTAL_THREAT) - set from victim's threatmanager in ThreatManager::UpdateMyTempModifiers
         TauntState _taunted;
 
@@ -828,7 +828,7 @@ namespace Game.Combat
             Online = OnlineState.Offline;
         }
 
-        public void AddThreat(double amount)
+        public void AddThreat(float amount)
         {
             if (amount == 0.0f)
                 return;
@@ -838,7 +838,7 @@ namespace Game.Combat
             _mgr.NeedClientUpdate = true;
         }
 
-        public void ScaleThreat(double factor)
+        public void ScaleThreat(float factor)
         {
             if (factor == 1.0f)
                 return;
@@ -945,7 +945,7 @@ namespace Game.Combat
 
         public Creature GetOwner() { return _owner; }
         public Unit GetVictim() { return _victim; }
-        public double GetThreat() { return Math.Max(_baseAmount + TempModifier, 0.0f); }
+        public float GetThreat() { return Math.Max(_baseAmount + (float)TempModifier, 0.0f); }
         public OnlineState GetOnlineState() { return Online; }
         public bool IsOnline() { return Online >= OnlineState.Online; }
         public bool IsAvailable() { return Online > OnlineState.Offline; }

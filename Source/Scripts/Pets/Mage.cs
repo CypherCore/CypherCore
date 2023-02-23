@@ -148,7 +148,7 @@ namespace Scripts.Pets
                 if (mgr.HasPvPCombat())
                 {
                     // select pvp Target
-                    double minDistance = 0.0f;
+                    float minDistance = 0.0f;
 
                     foreach (var pair in mgr.GetPvPCombatRefs())
                     {
@@ -160,7 +160,7 @@ namespace Scripts.Pets
                         if (!CanAIAttack(target))
                             continue;
 
-                        double dist = owner.GetDistance(target);
+                        float dist = owner.GetDistance(target);
 
                         if (!selectedTarget ||
                             dist < minDistance)
@@ -174,7 +174,7 @@ namespace Scripts.Pets
                 if (!selectedTarget)
                 {
                     // select pve Target
-                    double maxThreat = 0.0f;
+                    float maxThreat = 0.0f;
 
                     foreach (var pair in mgr.GetPvECombatRefs())
                     {
@@ -183,7 +183,7 @@ namespace Scripts.Pets
                         if (!CanAIAttack(target))
                             continue;
 
-                        double threat = target.GetThreatManager().GetThreat(owner);
+                        float threat = target.GetThreatManager().GetThreat(owner);
 
                         if (threat >= maxThreat)
                         {

@@ -906,10 +906,10 @@ namespace Game.Spells
             if (chargeCategoryEntry == null)
                 return 0;
 
-            double recoveryTime = chargeCategoryEntry.ChargeRecoveryTime;
+            float recoveryTime = chargeCategoryEntry.ChargeRecoveryTime;
             recoveryTime += _owner.GetTotalAuraModifierByMiscValue(AuraType.ChargeRecoveryMod, (int)chargeCategoryId);
 
-            double recoveryTimeF = recoveryTime;
+            float recoveryTimeF = recoveryTime;
             recoveryTimeF *= _owner.GetTotalAuraMultiplierByMiscValue(AuraType.ChargeRecoveryMultiplier, (int)chargeCategoryId);
 
             if (_owner.HasAuraType(AuraType.ChargeRecoveryAffectedByHaste))
