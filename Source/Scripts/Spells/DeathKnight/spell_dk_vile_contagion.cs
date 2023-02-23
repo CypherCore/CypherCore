@@ -37,8 +37,4 @@ internal class spell_dk_vile_contagion : SpellScript, ISpellOnHit
 			}
 		}
 	}
-
-
-	// List<WorldObject> targets = new();
-	// SearchChainTargets(targets, (uint) maxTargets - 1, target, targetType.GetObjectType(), targetType.GetCheckType(), spellEffectInfo, targetType.GetTarget() == Targets.UnitChainhealAlly);
 }
