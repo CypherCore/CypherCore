@@ -10481,6 +10481,8 @@ namespace Game
                     return 50;
                 case Expansion.ShadowLands:
                     return 60;
+                case Expansion.Dragonflight:
+                    return 70;
                 default:
                     break;
             }
