@@ -15,7 +15,7 @@ namespace Game.Chat.Commands
     class LearnCommands
     {
         [Command("", CypherStrings.CommandLearnHelp, RBACPermissions.CommandLearn)]
-        static bool HandleLearnCommand(CommandHandler handler, uint spellId, string allRanksStr)
+        static bool HandleLearnCommand(CommandHandler handler, uint spellId, [OptionalArg] string allRanksStr)
         {
             Player targetPlayer = handler.GetSelectedPlayerOrSelf();
             if (!targetPlayer)
@@ -314,7 +314,7 @@ namespace Game.Chat.Commands
         }
 
         [CommandNonGroup("unlearn", CypherStrings.CommandUnlearnHelp, RBACPermissions.CommandUnlearn)]
-        static bool HandleUnLearnCommand(CommandHandler handler, uint spellId, string allRanksStr)
+        static bool HandleUnLearnCommand(CommandHandler handler, uint spellId, [OptionalArg] string allRanksStr)
         {
             Player target = handler.GetSelectedPlayer();
             if (!target)

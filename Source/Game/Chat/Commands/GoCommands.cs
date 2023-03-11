@@ -388,7 +388,7 @@ namespace Game.Chat.Commands
                 z = Math.Max(terrain.GetStaticHeight(PhasingHandler.EmptyPhaseShift, mapId, x, y, MapConst.MaxHeight), terrain.GetWaterLevel(PhasingHandler.EmptyPhaseShift, mapId, x, y));
             }
 
-            return DoTeleport(handler, new Position(x, y, z.Value, o.Value), mapId);
+            return DoTeleport(handler, new Position(x, y, z.Value, o.GetValueOrDefault()), mapId);
         }
 
         //teleport at coordinates
