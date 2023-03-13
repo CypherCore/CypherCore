@@ -545,10 +545,10 @@ namespace Game.Movement
                 Add(new FollowMovementGenerator(target, SharedConst.PetFollowDist, new ChaseAngle(SharedConst.PetFollowAngle)));
         }
 
-        public void MoveRandom(float wanderDistance = 0.0f)
+        public void MoveRandom(float wanderDistance = 0.0f, TimeSpan? duration = null)
         {
             if (_owner.IsTypeId(TypeId.Unit))
-                Add(new RandomMovementGenerator(wanderDistance), MovementSlot.Default);
+                Add(new RandomMovementGenerator(wanderDistance, duration), MovementSlot.Default);
         }
 
         public void MoveFollow(Unit target, float dist, float angle = 0.0f, MovementSlot slot = MovementSlot.Active) { MoveFollow(target, dist, new ChaseAngle(angle), slot); }

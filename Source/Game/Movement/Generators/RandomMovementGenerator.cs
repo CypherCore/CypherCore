@@ -9,7 +9,14 @@ namespace Game.Movement
 {
     public class RandomMovementGenerator : MovementGeneratorMedium<Creature>
     {
-        public RandomMovementGenerator(float spawnDist = 0.0f)
+        PathGenerator _path;
+        TimeTracker _timer;
+        TimeTracker _duration;
+        Position _reference;
+        float _wanderDistance;
+        uint _wanderSteps;
+
+        public RandomMovementGenerator(float spawnDist = 0.0f, TimeSpan? duration = null)
         {
             _timer = new TimeTracker();
             _reference = new();
@@ -19,6 +26,8 @@ namespace Game.Movement
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Roaming;
+            if (duration.HasValue)
+                _duration = new TimeTracker(duration.Value);
         }
 
         public override void DoInitialize(Creature owner)
@@ -56,6 +65,17 @@ namespace Game.Movement
             if (HasFlag(MovementGeneratorFlags.Finalized | MovementGeneratorFlags.Paused))
                 return true;
 
+            if (_duration != null)
+            {
+                _duration.Update(diff);
+                if (_duration.Passed())
+                {
+                    RemoveFlag(MovementGeneratorFlags.Transitory);
+                    AddFlag(MovementGeneratorFlags.InformEnabled);
+                    return false;
+                }
+            }
+
             if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
             {
                 AddFlag(MovementGeneratorFlags.Interrupted);
@@ -90,6 +110,10 @@ namespace Game.Movement
                 // TODO: Research if this modification is needed, which most likely isnt
                 owner.SetWalk(false);
             }
+
+            if (movementInform && HasFlag(MovementGeneratorFlags.InformEnabled))
+                if (owner.IsAIEnabled())
+                    owner.GetAI().MovementInform(MovementGeneratorType.Random, 0);
         }
 
         public override void Pause(uint timer = 0)
@@ -197,11 +221,5 @@ namespace Game.Movement
         {
             return MovementGeneratorType.Random;
         }
-
-        PathGenerator _path;
-        TimeTracker _timer;
-        Position _reference;
-        float _wanderDistance;
-        uint _wanderSteps;
     }
 }
