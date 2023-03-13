@@ -938,7 +938,7 @@ namespace Game.Scripting
         public void FinishCast(SpellCastResult result, int? param1 = null, int? param2 = null)
         {
             m_spell.SendCastResult(result, param1, param2);
-            m_spell.Finish(result == SpellCastResult.SpellCastOk);
+            m_spell.Finish(result);
         }
 
         public void SetCustomCastResultMessage(SpellCustomErrors result)

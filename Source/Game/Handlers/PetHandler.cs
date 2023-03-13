@@ -374,7 +374,7 @@ namespace Game
                         if (!pet.GetSpellHistory().HasCooldown(spellid))
                             pet.GetSpellHistory().ResetCooldown(spellid, true);
 
-                        spell.Finish(false);
+                        spell.Finish(result);
                         spell.Dispose();
 
                         // reset specific flags in case of spell fail. AI will reset other flags
@@ -730,7 +730,7 @@ namespace Game
                 if (!caster.GetSpellHistory().HasCooldown(spellInfo.Id))
                     caster.GetSpellHistory().ResetCooldown(spellInfo.Id, true);
 
-                spell.Finish(false);
+                spell.Finish(result);
                 spell.Dispose();
             }
         }

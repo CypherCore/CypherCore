@@ -1687,7 +1687,7 @@ namespace Game.Spells
 
                 // prevent interrupt message
                 if (GetCasterGUID() == target.GetGUID() && target.GetCurrentSpell(CurrentSpellTypes.Generic) != null)
-                    target.FinishSpell(CurrentSpellTypes.Generic, false);
+                    target.FinishSpell(CurrentSpellTypes.Generic, SpellCastResult.Interrupted);
                 target.InterruptNonMeleeSpells(true);
 
                 // stop handling the effect if it was removed by linked event
