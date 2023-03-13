@@ -5569,7 +5569,7 @@ namespace Game.Entities
             // cleanup unit flags (will be re-applied if need at aura load).
             RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.RemoveClientControl | UnitFlags.NotAttackable1 |
             UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc | UnitFlags.Looting |
-            UnitFlags.PetInCombat | UnitFlags.Silenced | UnitFlags.Pacified |
+            UnitFlags.PetInCombat | UnitFlags.Pacified |
             UnitFlags.Stunned | UnitFlags.InCombat | UnitFlags.Disarmed |
             UnitFlags.Confused | UnitFlags.Fleeing | UnitFlags.Uninteractible |
             UnitFlags.Skinnable | UnitFlags.Mount | UnitFlags.OnTaxi);

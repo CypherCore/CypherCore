@@ -923,6 +923,12 @@ namespace Game.Entities
             return base.GetCastSpellXSpellVisualId(spellInfo);
         }
 
+        public bool IsSilenced(SpellSchoolMask schoolMask) { return (m_unitData.SilencedSchoolMask & (uint)schoolMask) != 0; }
+
+        public void SetSilencedSchoolMask(SpellSchoolMask schoolMask) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.SilencedSchoolMask), (uint)schoolMask); }
+
+        public void ReplaceAllSilencedSchoolMask(SpellSchoolMask schoolMask) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.SilencedSchoolMask), (uint)schoolMask); }
+        
         public SpellHistory GetSpellHistory() { return _spellHistory; }
 
         public static ProcFlagsHit CreateProcHitMask(SpellNonMeleeDamage damageInfo, SpellMissInfo missCondition)

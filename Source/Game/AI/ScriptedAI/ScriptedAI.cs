@@ -258,7 +258,7 @@ namespace Game.AI
                 return null;
 
             //Silenced so we can't cast
-            if (me.HasUnitFlag(UnitFlags.Silenced))
+            if (me.IsSilenced(school != 0 ? school : SpellSchoolMask.Magic))
                 return null;
 
             //Using the extended script system we first create a list of viable spells
