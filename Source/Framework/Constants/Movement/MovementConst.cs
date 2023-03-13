@@ -107,6 +107,19 @@ namespace Framework.Constants
         public const uint SmartEscortLastOCCPoint = 0xFFFFFF;
     }
 
+    public enum MovementWalkRunSpeedSelectionMode
+    {
+        Default,
+        ForceRun,
+        ForceWalk
+    }
+
+    public enum MovementStopReason
+    {
+        Finished,       // Movement finished either by arriving at location or successfully continuing it for requested duration
+        Interrupted
+    }
+
     public enum RotateDirection
     {
         Left,

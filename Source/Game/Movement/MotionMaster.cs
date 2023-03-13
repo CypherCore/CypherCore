@@ -597,17 +597,15 @@ namespace Game.Movement
                 Add(new FleeingMovementGenerator<Player>(enemy.GetGUID()));
         }
 
-        public void MovePoint(uint id, Position pos, bool generatePath = true, float? finalOrient = null)
+        public void MovePoint(uint id, Position pos, bool generatePath = true, float? finalOrient = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null)
         {
-            MovePoint(id, pos.posX, pos.posY, pos.posZ, generatePath, finalOrient);
+            MovePoint(id, pos.posX, pos.posY, pos.posZ, generatePath, finalOrient, speed, speedSelectionMode, closeEnoughDistance);
         }
 
-        public void MovePoint(uint id, float x, float y, float z, bool generatePath = true, float? finalOrient = null)
+        public void MovePoint(uint id, float x, float y, float z, bool generatePath = true, float? finalOrient = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null)
         {
-            if (_owner.IsTypeId(TypeId.Player))
-                Add(new PointMovementGenerator<Player>(id, x, y, z, generatePath, 0.0f, finalOrient));
-            else
-                Add(new PointMovementGenerator<Creature>(id, x, y, z, generatePath, 0.0f, finalOrient));
+            Log.outDebug(LogFilter.Movement, $"MotionMaster::MovePoint: '{_owner.GetGUID()}', targeted point Id: {id} (X: {x}, Y: {y}, Z: {z})");
+            Add(new PointMovementGenerator(id, x, y, z, generatePath, speed, finalOrient, null, null, speedSelectionMode, closeEnoughDistance));
         }
 
         public void MoveCloserAndStop(uint id, Unit target, float distance)
@@ -667,20 +665,11 @@ namespace Game.Movement
                 return;
             */
 
-            if (_owner.IsTypeId(TypeId.Player))
-            {
-                PointMovementGenerator<Player> movement = new(id, x, y, z, generatePath, speed, null, target, spellEffectExtraData);
-                movement.Priority = MovementGeneratorPriority.Highest;
-                movement.BaseUnitState = UnitState.Charging;
-                Add(movement);
-            }
-            else
-            {
-                PointMovementGenerator<Creature> movement = new(id, x, y, z, generatePath, speed, null, target, spellEffectExtraData);
-                movement.Priority = MovementGeneratorPriority.Highest;
-                movement.BaseUnitState = UnitState.Charging;
-                Add(movement);
-            }
+            Log.outDebug(LogFilter.Movement, $"MotionMaster::MoveCharge: '{_owner.GetGUID()}', charging point Id: {id} (X: {x}, Y: {y}, Z: {z})");
+            PointMovementGenerator movement = new PointMovementGenerator(id, x, y, z, generatePath, speed, null, target, spellEffectExtraData);
+            movement.Priority = MovementGeneratorPriority.Highest;
+            movement.BaseUnitState = UnitState.Charging;
+            Add(movement);
         }
 
         public void MoveCharge(PathGenerator path, float speed = SPEED_CHARGE, Unit target = null, SpellEffectExtraData spellEffectExtraData = null)
