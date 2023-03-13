@@ -1259,8 +1259,6 @@ namespace Game.Entities
 
         public void _LoadMail(SQLResult mailsResult, SQLResult mailItemsResult, SQLResult artifactResult, SQLResult azeriteItemResult, SQLResult azeriteItemMilestonePowersResult, SQLResult azeriteItemUnlockedEssencesResult, SQLResult azeriteEmpoweredItemResult)
         {
-            m_mail.Clear();
-
             Dictionary<ulong, Mail> mailById = new();
 
             if (!mailsResult.IsEmpty())
