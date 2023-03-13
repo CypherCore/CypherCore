@@ -1129,7 +1129,61 @@ namespace Game.Entities
             }
         }
 
-        void CancelSpellMissiles(uint spellId, bool reverseMissile = false)
+        public void SendPlaySpellVisual(Unit target, uint spellVisualId, ushort missReason, ushort reflectStatus, float travelSpeed, bool speedAsTime = false)
+        {
+            PlaySpellVisual playSpellVisual = new();
+            playSpellVisual.Source = GetGUID();
+            playSpellVisual.Target = target.GetGUID();
+            playSpellVisual.TargetPosition = target.GetPosition();
+            playSpellVisual.SpellVisualID = spellVisualId;
+            playSpellVisual.TravelSpeed = travelSpeed;
+            playSpellVisual.MissReason = missReason;
+            playSpellVisual.ReflectStatus = reflectStatus;
+            playSpellVisual.SpeedAsTime = speedAsTime;
+            SendMessageToSet(playSpellVisual, true);
+        }
+
+        public void SendPlaySpellVisual(Position targetPosition, float launchDelay, uint spellVisualId, ushort missReason, ushort reflectStatus, float travelSpeed, bool speedAsTime = false)
+        {
+            PlaySpellVisual playSpellVisual = new();
+            playSpellVisual.Source = GetGUID();
+            playSpellVisual.TargetPosition = targetPosition;
+            playSpellVisual.LaunchDelay = launchDelay;
+            playSpellVisual.SpellVisualID = spellVisualId;
+            playSpellVisual.TravelSpeed = travelSpeed;
+            playSpellVisual.MissReason = missReason;
+            playSpellVisual.ReflectStatus = reflectStatus;
+            playSpellVisual.SpeedAsTime = speedAsTime;
+            SendMessageToSet(playSpellVisual, true);
+        }
+
+        public void SendCancelSpellVisual(uint id)
+        {
+            CancelSpellVisual cancelSpellVisual = new();
+            cancelSpellVisual.Source = GetGUID();
+            cancelSpellVisual.SpellVisualID = id;
+            SendMessageToSet(cancelSpellVisual, true);
+        }
+
+        public void SendPlaySpellVisualKit(uint id, uint type, uint duration)
+        {
+            PlaySpellVisualKit playSpellVisualKit = new();
+            playSpellVisualKit.Unit = GetGUID();
+            playSpellVisualKit.KitRecID = id;
+            playSpellVisualKit.KitType = type;
+            playSpellVisualKit.Duration = duration;
+            SendMessageToSet(playSpellVisualKit, true);
+        }
+
+        public void SendCancelSpellVisualKit(uint id)
+        {
+            CancelSpellVisualKit cancelSpellVisualKit = new();
+            cancelSpellVisualKit.Source = GetGUID();
+            cancelSpellVisualKit.SpellVisualKitID = id;
+            SendMessageToSet(cancelSpellVisualKit, true);
+        }
+
+        public void CancelSpellMissiles(uint spellId, bool reverseMissile = false)
         {
             bool hasMissile = false;
             foreach (var pair in m_Events.GetEvents())
