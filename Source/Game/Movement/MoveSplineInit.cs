@@ -196,6 +196,19 @@ namespace Game.Movement
             unit.SendMessageToSet(packet, true);
         }
 
+        public void SetFacing(Vector3 spot)
+        {
+            TransportPathTransform transform = new(unit, args.TransformForTransport);
+            Vector3 finalSpot = transform.Calc(spot);
+            args.facing.f = new Vector3(finalSpot.X, finalSpot.Y, finalSpot.Z);
+            args.facing.type = MonsterMoveType.FacingSpot;
+        }
+        
+        public void SetFacing(float x, float y, float z)
+        {
+            SetFacing(new Vector3(x, y, z));
+        }
+
         public void SetFacing(Unit target)
         {
             args.facing.angle = unit.GetAbsoluteAngle(target);
@@ -309,14 +322,6 @@ namespace Game.Movement
             args.flags.EnableAnimation();
         }
 
-        public void SetFacing(Vector3 spot)
-        {
-            TransportPathTransform transform = new(unit, args.TransformForTransport);
-            Vector3 finalSpot = transform.Calc(spot);
-            args.facing.f = new Vector3(finalSpot.X, finalSpot.Y, finalSpot.Z);
-            args.facing.type = MonsterMoveType.FacingSpot;
-        }
-
         public void DisableTransportPathTransformations() { args.TransformForTransport = false; }
 
         public void SetSpellEffectExtraData(SpellEffectExtraData spellEffectExtraData)
@@ -338,6 +343,7 @@ namespace Game.Movement
             _owner = owner;
             _transformForTransport = transformForTransport;
         }
+
         public Vector3 Calc(Vector3 input)
         {
             float x = input.X;

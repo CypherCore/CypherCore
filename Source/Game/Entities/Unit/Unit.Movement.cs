@@ -218,6 +218,23 @@ namespace Game.Entities
             init.Launch();
         }
 
+        void SetFacingToPoint(Position point, bool force = true)
+        {
+            // do not face when already moving
+            if (!force && (!IsStopped() || !MoveSpline.Finalized()))
+                return;
+
+            /// @todo figure out under what conditions creature will move towards object instead of facing it where it currently is.
+            MoveSplineInit init = new(this);
+            init.MoveTo(GetPositionX(), GetPositionY(), GetPositionZ(), false);
+            if (GetTransport() != null)
+                init.DisableTransportPathTransformations(); // It makes no sense to target global orientation
+            init.SetFacing(point.GetPositionX(), point.GetPositionY(), point.GetPositionZ());
+
+            //GetMotionMaster()->LaunchMoveSpline(std::move(init), EVENT_FACE, MOTION_PRIORITY_HIGHEST);
+            init.Launch();
+        }
+        
         public void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = false, bool forceDestination = false)
         {
             var initializer = (MoveSplineInit init) =>
