@@ -1129,7 +1129,7 @@ namespace Game.Entities
             }
         }
 
-        public void SendPlaySpellVisual(Unit target, uint spellVisualId, ushort missReason, ushort reflectStatus, float travelSpeed, bool speedAsTime = false)
+        public void SendPlaySpellVisual(Unit target, uint spellVisualId, ushort missReason, ushort reflectStatus, float travelSpeed, bool speedAsTime = false, float launchDelay = 0f)
         {
             PlaySpellVisual playSpellVisual = new();
             playSpellVisual.Source = GetGUID();
@@ -1140,20 +1140,21 @@ namespace Game.Entities
             playSpellVisual.MissReason = missReason;
             playSpellVisual.ReflectStatus = reflectStatus;
             playSpellVisual.SpeedAsTime = speedAsTime;
+            playSpellVisual.LaunchDelay = launchDelay;
             SendMessageToSet(playSpellVisual, true);
         }
 
-        public void SendPlaySpellVisual(Position targetPosition, float launchDelay, uint spellVisualId, ushort missReason, ushort reflectStatus, float travelSpeed, bool speedAsTime = false)
+        public void SendPlaySpellVisual(Position targetPosition, uint spellVisualId, ushort missReason, ushort reflectStatus, float travelSpeed, bool speedAsTime = false, float launchDelay = 0f)
         {
             PlaySpellVisual playSpellVisual = new();
             playSpellVisual.Source = GetGUID();
             playSpellVisual.TargetPosition = targetPosition;
-            playSpellVisual.LaunchDelay = launchDelay;
             playSpellVisual.SpellVisualID = spellVisualId;
             playSpellVisual.TravelSpeed = travelSpeed;
             playSpellVisual.MissReason = missReason;
             playSpellVisual.ReflectStatus = reflectStatus;
             playSpellVisual.SpeedAsTime = speedAsTime;
+            playSpellVisual.LaunchDelay = launchDelay;
             SendMessageToSet(playSpellVisual, true);
         }
 
