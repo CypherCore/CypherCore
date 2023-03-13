@@ -17,12 +17,13 @@ namespace Game.Movement
         ChaseAngle _angle;
 
         TimeTracker _checkTimer;
+        TimeTracker _duration;
         PathGenerator _path;
         Position _lastTargetPosition;
 
         AbstractFollower _abstractFollower;
 
-        public FollowMovementGenerator(Unit target, float range, ChaseAngle angle)
+        public FollowMovementGenerator(Unit target, float range, ChaseAngle angle, TimeSpan? duration)
         {
             _abstractFollower = new AbstractFollower(target);
             _range = range;
@@ -32,6 +33,9 @@ namespace Game.Movement
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Follow;
+
+            if (duration.HasValue)
+                _duration = new(duration.Value);
 
             _checkTimer = new(CHECK_INTERVAL);
         }
@@ -63,6 +67,17 @@ namespace Game.Movement
             Unit target = _abstractFollower.GetTarget();
             if (target == null || !target.IsInWorld)
                 return false;
+
+            if (_duration != null)
+            {
+                _duration.Update(diff);
+                if (_duration.Passed())
+                {
+                    owner.StopMoving();
+                    DoMovementInform(owner, target);
+                    return false;
+                }
+            }
 
             if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
             {

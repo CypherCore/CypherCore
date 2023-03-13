@@ -542,7 +542,7 @@ namespace Game.Movement
             if (target == null)
                 Add(new HomeMovementGenerator<Creature>());
             else
-                Add(new FollowMovementGenerator(target, SharedConst.PetFollowDist, new ChaseAngle(SharedConst.PetFollowAngle)));
+                Add(new FollowMovementGenerator(target, SharedConst.PetFollowDist, new ChaseAngle(SharedConst.PetFollowAngle), null));
         }
 
         public void MoveRandom(float wanderDistance = 0.0f, TimeSpan? duration = null)
@@ -551,15 +551,15 @@ namespace Game.Movement
                 Add(new RandomMovementGenerator(wanderDistance, duration), MovementSlot.Default);
         }
 
-        public void MoveFollow(Unit target, float dist, float angle = 0.0f, MovementSlot slot = MovementSlot.Active) { MoveFollow(target, dist, new ChaseAngle(angle), slot); }
+        public void MoveFollow(Unit target, float dist, float angle = 0.0f, TimeSpan? duration = null, MovementSlot slot = MovementSlot.Active) { MoveFollow(target, dist, new ChaseAngle(angle), duration, slot); }
 
-        public void MoveFollow(Unit target, float dist, ChaseAngle angle, MovementSlot slot = MovementSlot.Active)
+        public void MoveFollow(Unit target, float dist, ChaseAngle angle, TimeSpan? duration = null, MovementSlot slot = MovementSlot.Active)
         {
             // Ignore movement request if target not exist
             if (!target || target == _owner)
                 return;
 
-            Add(new FollowMovementGenerator(target, dist, angle), slot);
+            Add(new FollowMovementGenerator(target, dist, angle, duration), slot);
         }
 
         public void MoveChase(Unit target, float dist, float angle = 0.0f) { MoveChase(target, new ChaseRange(dist), new ChaseAngle(angle)); }
