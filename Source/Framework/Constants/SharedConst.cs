@@ -314,6 +314,7 @@ namespace Framework.Constants
 
             return SpellSchools.Normal;
         }
+
         public static SkillType SkillByQuestSort(int sort)
         {
             switch ((QuestSort)sort)
@@ -343,57 +344,54 @@ namespace Framework.Constants
             }
             return SkillType.None;
         }
-        public static SkillType SkillByLockType(LockType locktype)
+
+        public static SkillType SkillByLockType(LockType locktype) => locktype switch
         {
-            switch (locktype)
-            {
-                case LockType.Herbalism:
-                    return SkillType.Herbalism;
-                case LockType.Mining:
-                    return SkillType.Mining;
-                case LockType.Fishing:
-                    return SkillType.Fishing;
-                case LockType.Inscription:
-                    return SkillType.Inscription;
-                case LockType.Archaeology:
-                    return SkillType.Archaeology;
-                case LockType.LumberMill:
-                    return SkillType.Logging;
-                case LockType.ClassicHerbalism:
-                    return SkillType.ClassicHerbalism;
-                case LockType.OutlandHerbalism:
-                    return SkillType.OutlandHerbalism;
-                case LockType.NorthrendHerbalism:
-                    return SkillType.NorthrendHerbalism;
-                case LockType.CataclysmHerbalism:
-                    return SkillType.CataclysmHerbalism;
-                case LockType.PandariaHerbalism:
-                    return SkillType.PandariaHerbalism;
-                case LockType.DraenorHerbalism:
-                    return SkillType.DraenorHerbalism;
-                case LockType.LegionHerbalism:
-                    return SkillType.LegionHerbalism;
-                case LockType.KulTiranHerbalism:
-                    return SkillType.KulTiranHerbalism;
-                case LockType.ClassicMining:
-                    return SkillType.ClassicMining;
-                case LockType.OutlandMining:
-                    return SkillType.OutlandMining;
-                case LockType.NorthrendMining:
-                    return SkillType.NorthrendMining;
-                case LockType.CataclysmMining:
-                    return SkillType.CataclysmMining;
-                case LockType.PandariaMining:
-                    return SkillType.PandariaMining;
-                case LockType.DraenorMining:
-                    return SkillType.DraenorMining;
-                case LockType.LegionMining:
-                    return SkillType.LegionMining;
-                case LockType.KulTiranMining:
-                    return SkillType.KulTiranMining;
-            }
-            return SkillType.None;
-        }
+            LockType.Herbalism or LockType.ElusiveHerbalism => SkillType.Herbalism,
+            LockType.Mining or LockType.Mining2 or LockType.ElusiveMining => SkillType.Mining,
+            LockType.Fishing => SkillType.Fishing,
+            LockType.Inscription => SkillType.Inscription,
+            LockType.Archaeology => SkillType.Archaeology,
+            LockType.LumberMill => SkillType.Logging,
+            LockType.Skinning => SkillType.Skinning,
+            LockType.ClassicHerbalism => SkillType.ClassicHerbalism,
+            LockType.OutlandHerbalism => SkillType.OutlandHerbalism,
+            LockType.NorthrendHerbalism => SkillType.NorthrendHerbalism,
+            LockType.CataclysmHerbalism => SkillType.CataclysmHerbalism,
+            LockType.PandariaHerbalism => SkillType.PandariaHerbalism,
+            LockType.DraenorHerbalism => SkillType.DraenorHerbalism,
+            LockType.LegionHerbalism => SkillType.LegionHerbalism,
+            LockType.KulTiranHerbalism => SkillType.KulTiranHerbalism,
+            LockType.ClassicMining => SkillType.ClassicMining,
+            LockType.OutlandMining => SkillType.OutlandMining,
+            LockType.NorthrendMining => SkillType.NorthrendMining,
+            LockType.CataclysmMining => SkillType.CataclysmMining,
+            LockType.PandariaMining => SkillType.PandariaMining,
+            LockType.DraenorMining => SkillType.DraenorMining,
+            LockType.LegionMining => SkillType.LegionMining,
+            LockType.KulTiranMining => SkillType.KulTiranMining,
+            LockType.LegionSkinning => SkillType.LegionSkinning,
+            LockType.ShadowlandsHerbalism => SkillType.ShadowlandsHerbalism,
+            LockType.ShadowlandsMining => SkillType.ShadowlandsMining,
+            LockType.CovenantNightFae => SkillType.CovenantNightFae,
+            LockType.CovenantVenthyr => SkillType.CovenantVenthyr,
+            LockType.CovenantKyrian => SkillType.CovenantKyrian,
+            LockType.CovenantNecrolord => SkillType.CovenantNecrolord,
+            LockType.Engineering => SkillType.Engineering,
+            LockType.DragonIslesHerbalism or LockType.DragonIslesHerbalism25 => SkillType.DragonIslesHerbalism,
+            LockType.Enchanting => SkillType.Enchanting,
+            LockType.DragonIslesAlchemy25 => SkillType.DragonIslesAlchemy,
+            LockType.DragonIslesBlacksmithing25 => SkillType.DragonIslesBlacksmithing,
+            LockType.DragonIslesEnchanting25 => SkillType.DragonIslesEnchanting,
+            LockType.DragonIslesEngineering25 => SkillType.DragonIslesEngineering,
+            LockType.DragonIslesInscription25 => SkillType.DragonIslesInscription,
+            LockType.DragonIslesJewelcrafting25 => SkillType.DragonIslesJewelcrafting,
+            LockType.DragonIslesLeatherworking25 => SkillType.DragonIslesLeatherworking,
+            LockType.DragonIslesSkinning25 => SkillType.DragonIslesSkinning,
+            LockType.DragonIslesTailoring25 => SkillType.DragonIslesTailoring,
+            LockType.DragonIslesMining or LockType.DragonIslesMining25 => SkillType.DragonIslesMining,
+            _ => SkillType.None
+        };
 
         public static bool IsValidLocale(Locale locale)
         {
