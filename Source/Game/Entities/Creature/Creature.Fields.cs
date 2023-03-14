@@ -21,9 +21,17 @@ namespace Game.Entities
         long _lastDamagedTime; // Part of Evade mechanics
         MultiMap<byte, byte> m_textRepeat = new();
 
+        CreatureStaticFlags _staticFlags;
+        CreatureStaticFlags2 _staticFlags2;
+        CreatureStaticFlags3 _staticFlags3;
+        CreatureStaticFlags4 _staticFlags4;
+        CreatureStaticFlags5 _staticFlags5;
+        CreatureStaticFlags6 _staticFlags6;
+        CreatureStaticFlags7 _staticFlags7;
+        CreatureStaticFlags8 _staticFlags8;
+
         // Regenerate health
         bool _regenerateHealth; // Set on creation
-        bool _regenerateHealthLock; // Dynamically set
 
         bool _isMissingCanSwimFlagOutOfCombat;
 

@@ -265,6 +265,253 @@ namespace Framework.Constants
     }
 
     [Flags]
+    public enum CreatureStaticFlags : uint
+    {
+        Mountable = 0x00000001,
+        NoXp = 0x00000002, // CreatureFlagExtraNoXp
+        NoLoot = 0x00000004,
+        Unkillable = 0x00000008,
+        Tameable = 0x00000010, // CreatureTypeFlagTameable
+        ImmuneToPc = 0x00000020, // UnitFlagImmuneToPc
+        ImmuneToNpc = 0x00000040, // UnitFlagImmuneToNpc
+        CanWieldLoot = 0x00000080,
+        Sessile = 0x00000100, // CreatureTemplateMovement.Rooted = 1
+        Uninteractible = 0x00000200, // UnitFlagUninteractible
+        NoAutomaticRegen = 0x00000400, // Creatures With That Flag Uses No UnitFlag2RegeneratePower
+        DespawnInstantly = 0x00000800, // Creature Instantly Disappear When Killed
+        CorpseRaid = 0x00001000,
+        CreatorLoot = 0x00002000, // Lootable Only By Creator(Engineering Dummies)
+        NoDefense = 0x00004000,
+        NoSpellDefense = 0x00008000,
+        BossMob = 0x00010000, // CreatureTypeFlagBossMob, Original Description: Raid Boss Mob
+        CombatPing = 0x00020000,
+        Aquatic = 0x00040000, // Aka Water Only, CreatureTemplateMovement.Ground = 0
+        Amphibious = 0x00080000, // CreatureTemplateMovement.Swim = 1
+        NoMeleeFlee = 0x00100000, // Prevents Melee(Does Not Prevent Chasing, Does Not Make Creature Passive). Not Sure What 'Flee' Means But Another Flag Is Named NoMeleeApproach
+        VisibleToGhosts = 0x00200000, // CreatureTypeFlagVisibleToGhosts
+        PvpEnabling = 0x00400000, // Old UnitFlagPvpEnabling, Now UnitBytes2OffsetPvpFlag From UnitFieldBytes2
+        DoNotPlayWoundAnim = 0x00800000, // CreatureTypeFlagDoNotPlayWoundAnim
+        NoFactionTooltip = 0x01000000, // CreatureTypeFlagNoFactionTooltip
+        IgnoreCombat = 0x02000000, // Actually Only Changes React State To Passive
+        OnlyAttackPvpEnabling = 0x04000000, // "Only Attack Targets That Are Pvp Enabling"
+        CallsGuards = 0x08000000, // Creature Will Summon A Guard If Player Is Within Its Aggro Range (Even If Creature Doesn'T Attack Per Se)
+        CanSwim = 0x10000000, // Unitflags 0x8000 UnitFlagCanSwim
+        Floating = 0x20000000, // CreatureTemplateMovement.Flight = 1
+        MoreAudible = 0x40000000, // CreatureTypeFlagMoreAudible
+        LargeAoi = 0x80000000  // Unitflags2 0x200000
+    }
+
+    [Flags]
+    public enum CreatureStaticFlags2 : uint
+    {
+        NoPetScaling = 0x00000001,
+        ForcePartyMembersIntoCombat = 0x00000002, // Original Description: Force Raid Combat
+        LockTappersToRaidOnDeath = 0x00000004, // "Lock Tappers To Raid On Death", Toggleable By 'Set "RaidLockOnDeath" Flag For Unit(S)' Action, CreatureFlagExtraInstanceBind
+        SpellAttackable = 0x00000008, // CreatureTypeFlagSpellAttackable, Original Description(Not Valid Anymore?): No Harmful Vertex Coloring
+        NoCrushingBlows = 0x00000010, // CreatureFlagExtraNoCrushingBlows
+        NoOwnerThreat = 0x00000020,
+        NoWoundedSlowdown = 0x00000040,
+        UseCreatorBonuses = 0x00000080,
+        IgnoreFeignDeath = 0x00000100, // CreatureFlagExtraIgnoreFeignDeath
+        IgnoreSanctuary = 0x00000200,
+        ActionTriggersWhileCharmed = 0x00000400,
+        InteractWhileDead = 0x00000800, // CreatureTypeFlagInteractWhileDead
+        NoInterruptSchoolCooldown = 0x00001000,
+        ReturnSoulShardToMasterOfPet = 0x00002000,
+        SkinWithHerbalism = 0x00004000, // CreatureTypeFlagSkinWithHerbalism
+        SkinWithMining = 0x00008000, // CreatureTypeFlagSkinWithMining
+        AlertContentTeamOnDeath = 0x00010000,
+        AlertContentTeamAt90PctHp = 0x00020000,
+        AllowMountedCombat = 0x00040000, // CreatureTypeFlagAllowMountedCombat
+        PvpEnablingOoc = 0x00080000,
+        NoDeathMessage = 0x00100000, // CreatureTypeFlagNoDeathMessage
+        IgnorePathingFailure = 0x00200000,
+        FullSpellList = 0x00400000,
+        DoesNotReduceReputationForRaids = 0x00800000,
+        IgnoreMisdirection = 0x01000000,
+        HideBody = 0x02000000, // UnitFlag2HideBody
+        SpawnDefensive = 0x04000000,
+        ServerOnly = 0x08000000,
+        CanSafeFall = 0x10000000, // Original Description: No Collision
+        CanAssist = 0x20000000, // CreatureTypeFlagCanAssist, Original Description: Player Can Heal/Buff
+        NoSkillGains = 0x40000000, // CreatureFlagExtraNoSkillGains
+        NoPetBar = 0x80000000  // CreatureTypeFlagNoPetBar
+    }
+
+    [Flags]
+    public enum CreatureStaticFlags3 : uint
+    {
+        NoDamageHistory = 0x00000001,
+        DontPvpEnableOwner = 0x00000002,
+        DoNotFadeIn = 0x00000004, // UnitFlag2DoNotFadeIn
+        MaskUid = 0x00000008, // CreatureTypeFlagMaskUid, Original Description: Non-Unique In Combat Log
+        SkinWithEngineering = 0x00000010, // CreatureTypeFlagSkinWithEngineering
+        NoAggroOnLeash = 0x00000020,
+        NoFriendlyAreaAuras = 0x00000040,
+        ExtendedCorpseDuration = 0x00000080,
+        CannotSwim = 0x00000100, // UnitFlagCannotSwim
+        TameableExotic = 0x00000200, // CreatureTypeFlagTameableExotic
+        GiganticAoi = 0x00000400, // Since Mop, Creatures With That Flag Have Unitflags2 0x400000
+        InfiniteAoi = 0x00000800, // Since Mop, Creatures With That Flag Have Unitflags2 0x40000000
+        CannotPenetrateWater = 0x00001000, // Waterwalking
+        NoNamePlate = 0x00002000, // CreatureTypeFlagNoNamePlate
+        ChecksLiquids = 0x00004000,
+        NoThreatFeedback = 0x00008000,
+        UseModelCollisionSize = 0x00010000, // CreatureTypeFlagUseModelCollisionSize
+        AttackerIgnoresFacing = 0x00020000, // In 3.3.5 Used Only By Rocket Propelled Warhead
+        AllowInteractionWhileInCombat = 0x00040000, // CreatureTypeFlagAllowInteractionWhileInCombat
+        SpellClickForPartyOnly = 0x00080000,
+        FactionLeader = 0x00100000,
+        ImmuneToPlayerBuffs = 0x00200000,
+        CollideWithMissiles = 0x00400000, // CreatureTypeFlagCollideWithMissiles
+        CanBeMultitapped = 0x00800000, // Original Description: Do Not Tap (Credit To Threat List)
+        DoNotPlayMountedAnimations = 0x01000000, // CreatureTypeFlagDoNotPlayMountedAnimations, Original Description: Disable Dodge, Parry And Block Animations
+        CannotTurn = 0x02000000, // UnitFlag2CannotTurn
+        EnemyCheckIgnoresLos = 0x04000000,
+        ForeverCorpseDuration = 0x08000000, // 7 Days
+        PetsAttackWith3dPathing = 0x10000000, // "Pets Attack With 3d Pathing (Kologarn)"
+        LinkAll = 0x20000000, // CreatureTypeFlagLinkAll
+        AiCanAutoTakeoffInCombat = 0x40000000,
+        AiCanAutoLandInCombat = 0x80000000
+    }
+
+    [Flags]
+    public enum CreatureStaticFlags4 : uint
+    {
+        NoBirthAnim = 0x00000001, // SmsgUpdateObject'S "Nobirthanim"
+        TreatAsPlayerForDiminishingReturns = 0x00000002, // Primarily Used By Toc Champions
+        TreatAsPlayerForPvpDebuffDuration = 0x00000004, // Primarily Used By Toc Champions
+        InteractOnlyWithCreator = 0x00000008, // CreatureTypeFlagInteractOnlyWithCreator, Original Description: Only Display Gossip For Summoner
+        DoNotPlayUnitEventSounds = 0x00000010, // CreatureTypeFlagDoNotPlayUnitEventSounds, Original Description: No Death Scream
+        HasNoShadowBlob = 0x00000020, // CreatureTypeFlagHasNoShadowBlob, Original Description(Wrongly Linked Type Flag Or Behavior Was Changed?): Can Be Healed By Enemies
+        DealsTripleDamageToPcControlledPets = 0x00000040,
+        NoNpcDamageBelow85ptc = 0x00000080,
+        ObeysTauntDiminishingReturns = 0x00000100, // CreatureFlagExtraObeysTauntDiminishingReturns
+        NoMeleeApproach = 0x00000200,
+        UpdateCreatureRecordWhenInstanceChangesDifficulty = 0x00000400, // Used Only By Snobold Vassal
+        CannotDaze = 0x00000800, // "Cannot Daze (Combat Stun)"
+        FlatHonorAward = 0x00001000,
+        IgnoreLosWhenCastingOnMe = 0x00002000, // "Other Objects Can Ignore Line Of Sight Requirements When Casting Spells On Me", Used Only By Ice Tomb In 3.3.5
+        GiveQuestKillCreditWhileOffline = 0x00004000,
+        TreatAsRaidUnitForHelpfulSpells = 0x00008000, // CreatureTypeFlagTreatAsRaidUnit, "Treat As Raid Unit For Helpful Spells (Instances Only)", Used By Valithria Dreamwalker
+        DontRepositionIfMeleeTargetIsTooClose = 0x00010000, // "Don'T Reposition Because Melee Target Is Too Close"
+        PetOrGuardianAiDontGoBehindTarget = 0x00020000,
+        MinuteLootRollTimer = 0x00040000, // Used By Lich King
+        ForceGossip = 0x00080000, // CreatureTypeFlagForceGossip
+        DontRepositionWithFriendsInCombat = 0x00100000,
+        DoNotSheathe = 0x00200000, // CreatureTypeFlagDoNotSheathe, Original Description: Manual Sheathing Control
+        IgnoreSpellMinRangeRestrictions = 0x00400000, // Unitflags2 0x8000000, Original Description: Attacker Ignores Minimum Ranges
+        SuppressInstanceWideReleaseInCombat = 0x00800000,
+        PreventSwim = 0x01000000, // Unitflags2 0x1000000, Original Description: Ai Will Only Swim If Target Swims
+        HideInCombatLog = 0x02000000, // Unitflags2 0x2000000, Original Description: Don'T Generate Combat Log When Engaged With Npc'S
+        AllowNpcCombatWhileUninteractible = 0x04000000,
+        PreferNpcsWhenSearchingForEnemies = 0x08000000,
+        OnlyGenerateInitialThreat = 0x10000000,
+        DoNotTargetOnInteraction = 0x20000000, // CreatureTypeFlagDoNotTargetOnInteraction, Original Description: Doesn'T Change Target On Right Click
+        DoNotRenderObjectName = 0x40000000, // CreatureTypeFlagDoNotRenderObjectName, Original Description: Hide Name In World Frame
+        QuestBoss = 0x80000000  // CreatureTypeFlagQuestBoss
+    }
+
+    [Flags]
+    public enum CreatureStaticFlags5 : uint
+    {
+        UntargetableByClient = 0x00000001, // Unitflags2 0x4000000 UnitFlag2UntargetableByClient
+        ForceSelfMounting = 0x00000002,
+        UninteractibleIfHostile = 0x00000004, // Unitflags2 0x10000000
+        DisablesXpAward = 0x00000008,
+        DisableAiPrediction = 0x00000010,
+        NoLeavecombatStateRestore = 0x00000020,
+        BypassInteractInterrupts = 0x00000040,
+        BackArc240Degree = 0x00000080,
+        InteractWhileHostile = 0x00000100, // Unitflags2 0x4000 UnitFlag2InteractWhileHostile
+        DontDismissOnFlyingMount = 0x00000200,
+        PredictivePowerRegen = 0x00000400, // CreatureTypeflags2Unk1
+        HideLevelInfoInTooltip = 0x00000800, // CreatureTypeflags2Unk2
+        HideHealthBarUnderTooltip = 0x00001000, // CreatureTypeflags2Unk3
+        SuppressHighlightWhenTargetedOrMousedOver = 0x00002000, // Unitflags2 0x80000
+        AiPreferPathableTargets = 0x00004000,
+        FrequentAreaTriggerChecks = 0x00008000,
+        AssignKillCreditToEncounterList = 0x00010000,
+        NeverEvade = 0x00020000,
+        AiCantPathOnSteepSlopes = 0x00040000,
+        AiIgnoreLosToMeleeTarget = 0x00080000,
+        NoTextInChatBubble = 0x00100000, // "Never Display Emote Or Chat Text In A Chat Bubble", CreatureTypeflags2Unk4
+        CloseInOnUnpathableTarget = 0x00200000, // "Ai Pets Close In On Unpathable Target"
+        DontGoBehindMe = 0x00400000, // "Pet/Guardian Ai Don'T Go Behind Me (Use On Target)"
+        NoDeathThud = 0x00800000, // CreatureTypeflags2Unk5
+        ClientLocalCreature = 0x01000000,
+        CanDropLootWhileInAChallengeModeInstance = 0x02000000,
+        HasSafeLocation = 0x04000000,
+        NoHealthRegen = 0x08000000,
+        NoPowerRegen = 0x10000000,
+        NoPetUnitFrame = 0x20000000,
+        NoInteractOnLeftClick = 0x40000000, // CreatureTypeflags2Unk6
+        GiveCriteriaKillCreditWhenCharmed = 0x80000000
+    }
+
+    [Flags]
+    public enum CreatureStaticFlags6 : uint
+    {
+        DoNotAutoResummon = 0x00000001, // "Do Not Auto-Resummon This Companion Creature"
+        ReplaceVisibleUnitIfAvailable = 0x00000002, // "Smooth Phasing: Replace Visible Unit If Available"
+        IgnoreRealmCoalescingHidingCode = 0x00000004, // "Ignore The Realm Coalescing Hiding Code (Always Show)"
+        TapsToFaction = 0x00000008,
+        OnlyQuestgiverForSummoner = 0x00000010,
+        AiCombatReturnPrecise = 0x00000020,
+        HomeRealmOnlyLoot = 0x00000040,
+        NoInteractResponse = 0x00000080, // Tflag2Unk7
+        NoInitialPower = 0x00000100,
+        DontCancelChannelOnMasterMounting = 0x00000200,
+        CanToggleBetweenDeathAndPersonalLoot = 0x00000400,
+        AlwaysStandOnTopOfTarget = 0x00000800, // "Always, Always Tries To Stand Right On Top Of His Move To Target. Always!!", Toggleable By 'Set "Always Stand On Target" Flag For Unit(S)' Or Not Same?
+        UnconsciousOnDeath = 0x00001000,
+        DontReportToLocalDefenseChannelOnDeath = 0x00002000,
+        PreferUnengagedMonsters = 0x00004000, // "Prefer Unengaged Monsters When Picking A Target"
+        UsePvpPowerAndResilience = 0x00008000, // "Use Pvp Power And Resilience When Players Attack This Creature"
+        DontClearDebuffsOnLeaveCombat = 0x00010000,
+        PersonalLootHasFullSecurity = 0x00020000, // "Personal Loot Has Full Security (Guaranteed Push/Mail Delivery)"
+        TripleSpellVisuals = 0x00040000,
+        UseGarrisonOwnerLevel = 0x00080000,
+        ImmediateAoiUpdateOnSpawn = 0x00100000,
+        UiCanGetPosition = 0x00200000,
+        SeamlessTransferProhibited = 0x00400000,
+        AlwaysUseGroupLootMethod = 0x00800000,
+        NoBossKillBanner = 0x01000000,
+        ForceTriggeringPlayerLootOnly = 0x02000000,
+        ShowBossFrameWhileUninteractable = 0x04000000,
+        ScalesToPlayerLevel = 0x08000000,
+        AiDontLeaveMeleeForRangedWhenTargetGetsRooted = 0x10000000,
+        DontUseCombatReachForChaining = 0x20000000,
+        DoNotPlayProceduralWoundAnim = 0x40000000,
+        ApplyProceduralWoundAnimToBase = 0x80000000  // Tflag2Unk14
+    }
+
+    [Flags]
+    public enum CreatureStaticFlags7
+    {
+        ImportantNpc = 0x00000001,
+        ImportantQuestNpc = 0x00000002,
+        LargeNameplate = 0x00000004,
+        TrivialPet = 0x00000008,
+        AiEnemiesDontBackupWhenIGetRooted = 0x00000010,
+        NoAutomaticCombatAnchor = 0x00000020,
+        OnlyTargetableByCreator = 0x00000040,
+        TreatAsPlayerForIsplayercontrolled = 0x00000080,
+        GenerateNoThreatOrDamage = 0x00000100,
+        InteractOnlyOnQuest = 0x00000200,
+        DisableKillCreditForOfflinePlayers = 0x00000400,
+        AiAdditionalPathing = 0x00080000,
+    }
+
+    [Flags]
+    public enum CreatureStaticFlags8
+    {
+        ForceCloseInOnPathFailBehavior = 0x00000002,
+        Use2dChasingCalculation = 0x00000020,
+        UseFastClassicHeartbeat = 0x00000040,
+    }
+
+    [Flags]
     public enum CreatureFlagsExtra : uint
     {
         InstanceBind = 0x01,       // Creature Kill Bind Instance With Killer And Killer'S Group

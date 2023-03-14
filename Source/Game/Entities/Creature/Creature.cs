@@ -1129,6 +1129,15 @@ namespace Game.Entities
             SetHomePosition(GetPosition());
         }
 
+        public bool HasFlag(CreatureStaticFlags flag) { return _staticFlags.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags2 flag) { return _staticFlags2.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags3 flag) { return _staticFlags3.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags4 flag) { return _staticFlags4.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags5 flag) { return _staticFlags5.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags6 flag) { return _staticFlags6.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags7 flag) { return _staticFlags7.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags8 flag) { return _staticFlags8.HasFlag(flag); }
+
         public uint GetTrainerId()
         {
             if (_trainerId.HasValue)
@@ -1141,7 +1150,7 @@ namespace Game.Entities
         {
             _trainerId = trainerId;
         }
-        
+
         public override bool IsMovementPreventedByCasting()
         {
             // first check if currently a movement allowed channel is active and we're not casting
@@ -1150,7 +1159,7 @@ namespace Game.Entities
             {
                 if (spell.GetState() != SpellState.Finished && spell.IsChannelActive())
                     if (spell.CheckMovement() != SpellCastResult.SpellCastOk)
-                            return true;
+                        return true;
             }
 
             if (HasSpellFocus())
@@ -1208,7 +1217,7 @@ namespace Game.Entities
 
         public bool IsTappedBy(Player player)
         {
-            return m_tapList.Contains(player.GetGUID()); 
+            return m_tapList.Contains(player.GetGUID());
         }
 
         public override Loot GetLootForPlayer(Player player)
@@ -1247,7 +1256,7 @@ namespace Game.Entities
         public HashSet<ObjectGuid> GetTapList() { return m_tapList; }
         public void SetTapList(HashSet<ObjectGuid> tapList) { m_tapList = tapList; }
         public bool HasLootRecipient() { return !m_tapList.Empty(); }
-        
+
         public void SaveToDB()
         {
             // this should only be used when the creature has already been loaded
@@ -1615,7 +1624,7 @@ namespace Game.Entities
 
         public void SetSpawnHealth()
         {
-            if (_regenerateHealthLock)
+            if (_staticFlags5.HasFlag(CreatureStaticFlags5.NoHealthRegen))
                 return;
 
             ulong curhealth;
@@ -1852,7 +1861,7 @@ namespace Game.Entities
                     else
                         m_respawnTime = GameTime.GetGameTime() + respawnDelay;
                 }
-                
+
                 SaveRespawnTime();
 
                 ReleaseSpellFocus(null, false);               // remove spellcast focus
@@ -1864,7 +1873,7 @@ namespace Game.Entities
 
                 SetMountDisplayId(0); // if creature is mounted on a virtual mount, remove it at death
 
-                SetActive(false);                
+                SetActive(false);
                 SetNoSearchAssistance(false);
 
                 //Dismiss group if is leader
@@ -2765,7 +2774,7 @@ namespace Game.Entities
         }
 
         public string[] GetStringIds() { return m_stringIds; }
-        
+
         public VendorItemData GetVendorItems()
         {
             return Global.ObjectMgr.GetNpcVendorItemList(GetEntry());
@@ -2967,7 +2976,7 @@ namespace Game.Entities
         {
             return GetCreatureTemplate().Scale;
         }
-        
+
         public override void SetObjectScale(float scale)
         {
             base.SetObjectScale(scale);
@@ -3153,9 +3162,9 @@ namespace Game.Entities
         {
             return GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Guard);
         }
-        
+
         public bool CanWalk() { return GetMovementTemplate().IsGroundAllowed(); }
-        public override bool CanFly()  { return GetMovementTemplate().IsFlightAllowed() || IsFlying(); }
+        public override bool CanFly() { return GetMovementTemplate().IsFlightAllowed() || IsFlying(); }
         bool CanHover() { return GetMovementTemplate().Ground == CreatureGroundMovementType.Hover || IsHovering(); }
 
         public bool IsDungeonBoss() { return (GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.DungeonBoss)); }
@@ -3306,7 +3315,7 @@ namespace Game.Entities
                 return false;
             return true;
         }
-        
+
         public LootModes GetLootMode() { return m_LootMode; }
         public bool HasLootMode(LootModes lootMode) { return Convert.ToBoolean(m_LootMode & lootMode); }
         public void SetLootMode(LootModes lootMode) { m_LootMode = lootMode; }
@@ -3318,7 +3327,7 @@ namespace Game.Entities
         public void SetNoSearchAssistance(bool val) { m_AlreadySearchedAssistance = val; }
         public bool HasSearchedAssistance() { return m_AlreadySearchedAssistance; }
         public bool CanIgnoreFeignDeath() { return GetCreatureTemplate().FlagsExtra.HasFlag(CreatureFlagsExtra.IgnoreFeighDeath); }
-        
+
         public override MovementGeneratorType GetDefaultMovementType() { return DefaultMovementType; }
         public void SetDefaultMovementType(MovementGeneratorType mgt) { DefaultMovementType = mgt; }
 
@@ -3340,8 +3349,14 @@ namespace Game.Entities
                 m_combatPulseTime = delay;
         }
 
-        public bool CanRegenerateHealth() { return !_regenerateHealthLock && _regenerateHealth; }
-        public void SetRegenerateHealth(bool value) { _regenerateHealthLock = !value; }
+        public bool CanRegenerateHealth() { return !_staticFlags5.HasFlag(CreatureStaticFlags5.NoHealthRegen) && _regenerateHealth; }
+        public void SetRegenerateHealth(bool value)
+        {
+            if (!value)
+                _staticFlags5 |= CreatureStaticFlags5.NoHealthRegen;
+            else
+                _staticFlags5 &= ~CreatureStaticFlags5.NoHealthRegen;
+        }
 
         public void SetHomePosition(float x, float y, float z, float o)
         {
