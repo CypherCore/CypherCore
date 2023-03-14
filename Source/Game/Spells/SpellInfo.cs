@@ -993,7 +993,7 @@ namespace Game.Spells
             if (HasAttribute(SpellAttr1.ExcludeCaster) && caster == target)
                 return SpellCastResult.BadTargets;
 
-            // check visibility - ignore stealth for implicit (area) targets
+            // check visibility - ignore invisibility/stealth for implicit (area) targets
             if (!HasAttribute(SpellAttr6.IgnorePhaseShift) && !caster.CanSeeOrDetect(target, Implicit))
                 return SpellCastResult.BadTargets;
 

@@ -3648,9 +3648,9 @@ namespace Game.Entities
             return false;
         }
 
-        public override bool IsNeverVisibleFor(WorldObject seer)
+        public override bool IsNeverVisibleFor(WorldObject seer, bool allowServersideObjects = false)
         {
-            if (base.IsNeverVisibleFor(seer))
+            if (base.IsNeverVisibleFor(seer, allowServersideObjects))
                 return true;
 
             if (GetSession().PlayerLogout() || GetSession().PlayerLoading())

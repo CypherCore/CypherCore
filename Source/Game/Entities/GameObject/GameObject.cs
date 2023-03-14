@@ -1279,12 +1279,12 @@ namespace Game.Entities
             }
         }
 
-        public override bool IsNeverVisibleFor(WorldObject seer)
+        public override bool IsNeverVisibleFor(WorldObject seer, bool allowServersideObjects = false)
         {
             if (base.IsNeverVisibleFor(seer))
                 return true;
 
-            if (GetGoInfo().GetServerOnly() != 0)
+            if (GetGoInfo().GetServerOnly() != 0 && !allowServersideObjects)
                 return true;
 
             if (GetDisplayId() == 0)

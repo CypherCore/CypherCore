@@ -1159,12 +1159,12 @@ namespace Game.Entities
 
         public SmoothPhasing GetSmoothPhasing() { return _smoothPhasing; }
 
-        public bool CanSeeOrDetect(WorldObject obj, bool ignoreStealth = false, bool distanceCheck = false, bool checkAlert = false)
+        public bool CanSeeOrDetect(WorldObject obj, bool implicitDetect = false, bool distanceCheck = false, bool checkAlert = false)
         {
             if (this == obj)
                 return true;
 
-            if (obj.IsNeverVisibleFor(this) || CanNeverSee(obj))
+            if (obj.IsNeverVisibleFor(this, implicitDetect) || CanNeverSee(obj))
                 return false;
 
             if (obj.IsAlwaysVisibleFor(this) || CanAlwaysSee(obj))
@@ -1256,7 +1256,7 @@ namespace Game.Entities
             if (obj.IsInvisibleDueToDespawn(this))
                 return false;
 
-            if (!CanDetect(obj, ignoreStealth, checkAlert))
+            if (!CanDetect(obj, implicitDetect, checkAlert))
                 return false;
 
             return true;
@@ -1269,7 +1269,7 @@ namespace Game.Entities
 
         public virtual bool CanAlwaysSee(WorldObject obj) { return false; }
 
-        bool CanDetect(WorldObject obj, bool ignoreStealth, bool checkAlert = false)
+        bool CanDetect(WorldObject obj, bool implicitDetect, bool checkAlert = false)
         {
             WorldObject seer = this;
 
@@ -1295,10 +1295,10 @@ namespace Game.Entities
             if (obj.IsAlwaysDetectableFor(seer))
                 return true;
 
-            if (!ignoreStealth && !seer.CanDetectInvisibilityOf(obj))
+            if (!implicitDetect && !seer.CanDetectInvisibilityOf(obj))
                 return false;
 
-            if (!ignoreStealth && !seer.CanDetectStealthOf(obj, checkAlert))
+            if (!implicitDetect && !seer.CanDetectStealthOf(obj, checkAlert))
                 return false;
 
             return true;
@@ -3076,7 +3076,7 @@ namespace Game.Entities
         public virtual float GetCollisionHeight() { return 0.0f; }
         public float GetMidsectionHeight() { return GetCollisionHeight() / 2.0f; }
 
-        public virtual bool IsNeverVisibleFor(WorldObject seer) { return !IsInWorld || IsDestroyedObject(); }
+        public virtual bool IsNeverVisibleFor(WorldObject seer, bool allowServersideObjects = false) { return !IsInWorld || IsDestroyedObject(); }
         public virtual bool IsAlwaysVisibleFor(WorldObject seer) { return false; }
         public virtual bool IsInvisibleDueToDespawn(WorldObject seer) { return false; }
         public virtual bool IsAlwaysDetectableFor(WorldObject seer) { return false; }

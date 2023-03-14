@@ -1044,9 +1044,9 @@ namespace Game.Entities
 
         public bool IsServerSide() { return _areaTriggerTemplate.Id.IsServerSide; }
 
-        public override bool IsNeverVisibleFor(WorldObject seer)
+        public override bool IsNeverVisibleFor(WorldObject seer, bool allowServersideObjects = false)
         {
-            return base.IsNeverVisibleFor(seer) || IsServerSide();
+            return base.IsNeverVisibleFor(seer) || (IsServerSide() && !allowServersideObjects);
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
