@@ -2425,35 +2425,13 @@ namespace Game.Entities
                         case GossipOptionNpc.CemeterySelect:
                             canTalk = false;                               // Deprecated
                             break;
-                        case GossipOptionNpc.GuildBanker:
-                        case GossipOptionNpc.Spellclick:
-                        case GossipOptionNpc.WorldPvPQueue:
-                        case GossipOptionNpc.LFGDungeon:
-                        case GossipOptionNpc.ArtifactRespec:
-                        case GossipOptionNpc.QueueScenario:
-                        case GossipOptionNpc.GarrisonArchitect:
-                        case GossipOptionNpc.GarrisonMissionNpc:
-                        case GossipOptionNpc.ShipmentCrafter:
-                        case GossipOptionNpc.GarrisonTradeskillNpc:
-                        case GossipOptionNpc.GarrisonRecruitment:
-                        case GossipOptionNpc.AdventureMap:
-                        case GossipOptionNpc.GarrisonTalent:
-                        case GossipOptionNpc.ContributionCollector:
-                        case GossipOptionNpc.IslandsMissionNpc:
-                        case GossipOptionNpc.UIItemInteraction:
-                        case GossipOptionNpc.WorldMap:
-                        case GossipOptionNpc.Soulbind:
-                        case GossipOptionNpc.ChromieTimeNpc:
-                        case GossipOptionNpc.CovenantPreviewNpc:
-                        case GossipOptionNpc.RuneforgeLegendaryCrafting:
-                        case GossipOptionNpc.NewPlayerGuide:
-                        case GossipOptionNpc.RuneforgeLegendaryUpgrade:
-                        case GossipOptionNpc.CovenantRenownNpc:
-                            break;                                         // NYI
                         default:
-                            Log.outError(LogFilter.Sql, $"Creature entry {creature.GetEntry()} has an unknown gossip option icon {gossipMenuItem.OptionNpc} for menu {gossipMenuItem.MenuID}.");
-                            canTalk = false;
-                            break;
+                            if (gossipMenuItem.OptionNpc >= GossipOptionNpc.Max)
+                            {
+                                Log.outError(LogFilter.Sql, $"Creature entry {creature.GetEntry()} has an unknown gossip option icon {gossipMenuItem.OptionNpc} for menu {gossipMenuItem.MenuID}.");
+                                canTalk = false;
+                            }
+                            break;                                         // NYI
                     }
                 }
                 else if (go != null)
