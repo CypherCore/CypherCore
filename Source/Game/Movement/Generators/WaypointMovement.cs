@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,29 +12,69 @@ namespace Game.Movement
 {
     public class WaypointMovementGenerator : MovementGeneratorMedium<Creature>
     {
-        public WaypointMovementGenerator(uint pathId = 0, bool repeating = true)
+        TimeTracker _nextMoveTime;
+        uint _pathId;
+        bool _repeating;
+        bool _loadedFromDB;
+
+        WaypointPath _path;
+        int _currentNode;
+
+        TimeTracker _duration;
+        float? _speed;
+        MovementWalkRunSpeedSelectionMode _speedSelectionMode;
+        (TimeSpan min, TimeSpan max)? _waitTimeRangeAtPathEnd;
+        float? _wanderDistanceAtPathEnds;
+        bool _followPathBackwardsFromEndToStart;
+        bool _isReturningToStart;
+        bool _generatePath;
+
+        public WaypointMovementGenerator(uint pathId = 0, bool repeating = true, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
+            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool followPathBackwardsFromEndToStart = false, bool generatePath = true)
+
         {
             _nextMoveTime = new TimeTracker(0);
             _pathId = pathId;
             _repeating = repeating;
             _loadedFromDB = true;
+            _speed = speed;
+            _speedSelectionMode = speedSelectionMode;
+            _waitTimeRangeAtPathEnd = waitTimeRangeAtPathEnd;
+            _wanderDistanceAtPathEnds = wanderDistanceAtPathEnds;
+            _followPathBackwardsFromEndToStart = followPathBackwardsFromEndToStart;
+            _isReturningToStart = false;
+            _generatePath = generatePath;
 
             Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Roaming;
+
+            if (duration.HasValue)
+                _duration = new(duration.Value);
         }
 
-        public WaypointMovementGenerator(WaypointPath path, bool repeating = true)
+        public WaypointMovementGenerator(WaypointPath path, bool repeating = true, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
+            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool followPathBackwardsFromEndToStart = false, bool generatePath = true)
         {
             _nextMoveTime = new TimeTracker(0);
             _repeating = repeating;
             _path = path;
+            _speed = speed;
+            _speedSelectionMode = speedSelectionMode;
+            _waitTimeRangeAtPathEnd = waitTimeRangeAtPathEnd;
+            _wanderDistanceAtPathEnds = wanderDistanceAtPathEnds;
+            _followPathBackwardsFromEndToStart = followPathBackwardsFromEndToStart;
+            _isReturningToStart = false;
+            _generatePath = generatePath;
 
             Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Roaming;
+
+            if (duration.HasValue)
+                _duration = new(duration.Value);
         }
 
         public override void Pause(uint timer = 0)
@@ -124,6 +165,17 @@ namespace Game.Movement
 
             if (HasFlag(MovementGeneratorFlags.Finalized | MovementGeneratorFlags.Paused) || _path == null || _path.nodes.Empty())
                 return true;
+
+            if (_duration != null)
+            {
+                _duration.Update(diff);
+                if (_duration.Passed())
+                {
+                    RemoveFlag(MovementGeneratorFlags.Transitory);
+                    AddFlag(MovementGeneratorFlags.InformEnabled);
+                    return false;
+                }
+            }
 
             if (owner.HasUnitState(UnitState.NotMove | UnitState.LostControl) || owner.IsMovementPreventedByCasting())
             {
@@ -228,11 +280,25 @@ namespace Game.Movement
                 return;
 
             Cypher.Assert(_currentNode < _path.nodes.Count, $"WaypointMovementGenerator.OnArrived: tried to reference a node id ({_currentNode}) which is not included in path ({_path.id})");
-            WaypointNode waypoint = _path.nodes.ElementAt((int)_currentNode);
+            WaypointNode waypoint = _path.nodes.ElementAt(_currentNode);
             if (waypoint.delay != 0)
             {
                 owner.ClearUnitState(UnitState.RoamingMove);
                 _nextMoveTime.Reset(waypoint.delay);
+            }
+
+            if (_waitTimeRangeAtPathEnd.HasValue && _followPathBackwardsFromEndToStart
+    && ((_isReturningToStart && _currentNode == 0) || (!_isReturningToStart && _currentNode == _path.nodes.Count - 1)))
+            {
+                owner.ClearUnitState(UnitState.RoamingMove);
+                TimeSpan waitTime = RandomHelper.RandTime(_waitTimeRangeAtPathEnd.Value.min, _waitTimeRangeAtPathEnd.Value.max);
+                if (_duration != null)
+                    _duration.Update(waitTime); // count the random movement time as part of waypoing movement action
+
+                if (_wanderDistanceAtPathEnds.HasValue)
+                    owner.GetMotionMaster().MoveRandom(_wanderDistanceAtPathEnds.Value, waitTime, MovementSlot.Active);
+                else
+                    _nextMoveTime.Reset(waitTime);
             }
 
             if (waypoint.eventId != 0 && RandomHelper.URand(0, 99) < waypoint.eventChance)
@@ -335,7 +401,7 @@ namespace Game.Movement
 
             //! Do not use formationDest here, MoveTo requires transport offsets due to DisableTransportPathTransformations() call
             //! but formationDest contains global coordinates
-            init.MoveTo(waypoint.x, waypoint.y, waypoint.z);
+            init.MoveTo(waypoint.x, waypoint.y, waypoint.z, _generatePath);
 
             if (waypoint.orientation.HasValue && waypoint.delay != 0)
                 init.SetFacing(waypoint.orientation.Value);
@@ -356,6 +422,23 @@ namespace Game.Movement
                     break;
             }
 
+            switch (_speedSelectionMode) // overrides move type from each waypoint if set
+            {
+                case MovementWalkRunSpeedSelectionMode.Default:
+                    break;
+                case MovementWalkRunSpeedSelectionMode.ForceRun:
+                    init.SetWalk(false);
+                    break;
+                case MovementWalkRunSpeedSelectionMode.ForceWalk:
+                    init.SetWalk(true);
+                    break;
+                default:
+                    break;
+            }
+
+            if (_speed.HasValue)
+                init.SetVelocity(_speed.Value);
+
             init.Launch();
 
             // inform formation
@@ -367,7 +450,27 @@ namespace Game.Movement
             if ((_currentNode == _path.nodes.Count - 1) && !_repeating)
                 return false;
 
-            _currentNode = (_currentNode + 1) % _path.nodes.Count;
+            if (!_followPathBackwardsFromEndToStart || _path.nodes.Count < 2)
+                _currentNode = (_currentNode + 1) % _path.nodes.Count;
+            else
+            {
+                if (!_isReturningToStart)
+                {
+                    if (++_currentNode >= _path.nodes.Count)
+                    {
+                        _currentNode -= 2;
+                        _isReturningToStart = true;
+                    }
+                }
+                else
+                {
+                    if (_currentNode-- == 0)
+                    {
+                        _currentNode = 1;
+                        _isReturningToStart = false;
+                    }
+                }
+            }
             return true;
         }
 
@@ -375,7 +478,7 @@ namespace Game.Movement
         {
             return $"Current Node: {_currentNode}\n{base.GetDebugInfo()}";
         }
-        
+
         bool UpdateTimer(uint diff)
         {
             _nextMoveTime.Update(diff);
@@ -390,13 +493,5 @@ namespace Game.Movement
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Waypoint; }
 
         public override void UnitSpeedChanged() { AddFlag(MovementGeneratorFlags.SpeedUpdatePending); }
-
-        TimeTracker _nextMoveTime;
-        uint _pathId;
-        bool _repeating;
-        bool _loadedFromDB;
-
-        WaypointPath _path;
-        int _currentNode;
     }
 }

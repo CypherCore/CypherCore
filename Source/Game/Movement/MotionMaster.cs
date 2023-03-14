@@ -545,10 +545,10 @@ namespace Game.Movement
                 Add(new FollowMovementGenerator(target, SharedConst.PetFollowDist, new ChaseAngle(SharedConst.PetFollowAngle), null));
         }
 
-        public void MoveRandom(float wanderDistance = 0.0f, TimeSpan? duration = null)
+        public void MoveRandom(float wanderDistance = 0.0f, TimeSpan? duration = null, MovementSlot slot = MovementSlot.Default)
         {
             if (_owner.IsTypeId(TypeId.Unit))
-                Add(new RandomMovementGenerator(wanderDistance, duration), MovementSlot.Default);
+                Add(new RandomMovementGenerator(wanderDistance, duration), slot);
         }
 
         public void MoveFollow(Unit target, float dist, float angle = 0.0f, TimeSpan? duration = null, MovementSlot slot = MovementSlot.Active) { MoveFollow(target, dist, new ChaseAngle(angle), duration, slot); }
@@ -996,17 +996,21 @@ namespace Game.Movement
             Add(new DistractMovementGenerator(timer, orientation));
         }
 
-        public void MovePath(uint pathId, bool repeatable)
+        public void MovePath(uint pathId, bool repeatable, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
+            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool followPathBackwardsFromEndToStart = false, bool generatePath = true)
         {
             if (pathId == 0)
                 return;
 
-            Add(new WaypointMovementGenerator(pathId, repeatable), MovementSlot.Default);
+            Log.outDebug(LogFilter.Movement, $"MotionMaster::MovePath: '{_owner.GetGUID()}', starts moving over path Id: {pathId} (repeatable: {repeatable})");
+            Add(new WaypointMovementGenerator(pathId, repeatable, duration, speed, speedSelectionMode, waitTimeRangeAtPathEnd, wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, generatePath), MovementSlot.Default);
         }
 
-        public void MovePath(WaypointPath path, bool repeatable)
+        public void MovePath(WaypointPath path, bool repeatable, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
+            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool followPathBackwardsFromEndToStart = false, bool generatePath = true)
         {
-            Add(new WaypointMovementGenerator(path, repeatable), MovementSlot.Default);
+            Log.outDebug(LogFilter.Movement, $"MotionMaster::MovePath: '{_owner.GetGUID()}', starts moving over path Id: {path.id} (repeatable: {repeatable})");
+            Add(new WaypointMovementGenerator(path, repeatable, duration, speed, speedSelectionMode, waitTimeRangeAtPathEnd, wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, generatePath), MovementSlot.Default);
         }
 
         public void MoveRotate(uint id, uint time, RotateDirection direction)
