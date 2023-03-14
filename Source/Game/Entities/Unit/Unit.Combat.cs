@@ -756,7 +756,7 @@ namespace Game.Entities
                     {
                         if (dungeonEncounter != null)
                         {
-                            creature.m_personalLoot = LootManager.GenerateDungeonEncounterPersonalLoot(dungeonEncounter.Id, creature.GetCreatureTemplate().LootId,
+                            creature.m_personalLoot = LootManager.GenerateDungeonEncounterPersonalLoot(dungeonEncounter.Id, creature.GetLootId(),
                                 LootStorage.Creature, LootType.Corpse, creature, creature.GetCreatureTemplate().MinGold, creature.GetCreatureTemplate().MaxGold,
                                 (ushort)creature.GetLootMode(), creature.GetMap().GetDifficultyLootItemContext(), tappers);
                         }
@@ -767,7 +767,7 @@ namespace Game.Entities
 
                             Loot loot = new(creature.GetMap(), creature.GetGUID(), LootType.Corpse, dungeonEncounter != null ? group : null);
 
-                            uint lootid = creature.GetCreatureTemplate().LootId;
+                            uint lootid = creature.GetLootId();
                             if (lootid != 0)
                                 loot.FillLoot(lootid, LootStorage.Creature, looter, dungeonEncounter != null, false, creature.GetLootMode(), creature.GetMap().GetDifficultyLootItemContext());
 
@@ -794,7 +794,7 @@ namespace Game.Entities
                             if (dungeonEncounter != null)
                                 loot.SetDungeonEncounterId(dungeonEncounter.Id);
 
-                            uint lootid = creature.GetCreatureTemplate().LootId;
+                            uint lootid = creature.GetLootId();
                             if (lootid != 0)
                                 loot.FillLoot(lootid, LootStorage.Creature, tapper, true, false, creature.GetLootMode(), creature.GetMap().GetDifficultyLootItemContext());
 

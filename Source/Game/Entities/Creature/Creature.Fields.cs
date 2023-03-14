@@ -55,6 +55,7 @@ namespace Game.Entities
 
         bool DisableReputationGain;
 
+        uint? _lootId;
         LootModes m_LootMode;                                  // Bitmask (default: LOOT_MODE_DEFAULT) that determines what loot will be lootable
 
         // Waypoint path

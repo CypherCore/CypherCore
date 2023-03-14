@@ -1189,9 +1189,24 @@ namespace Game.Entities
         {
             _pickpocketLootRestore = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.CreaturePickpocketRefill);
         }
+
         public void ResetPickPocketRefillTimer() { _pickpocketLootRestore = 0; }
+
         public bool CanGeneratePickPocketLoot() { return _pickpocketLootRestore <= GameTime.GetGameTime(); }
 
+        public uint GetLootId()
+        {
+            if (_lootId.HasValue)
+                return _lootId.Value;
+
+            return GetCreatureTemplate().LootId;
+        }
+
+        public void SetLootId(uint? lootId)
+        {
+            _lootId = lootId;
+        }
+        
         public void SetTappedBy(Unit unit, bool withGroup = true)
         {
             // set the player whose group should receive the right
