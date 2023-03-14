@@ -400,6 +400,7 @@ public enum LogFilter
     CommandsRA,
     Condition,
     Conversation,
+    GameObject,
     Garrison,
     Gameevent,
     Guild,

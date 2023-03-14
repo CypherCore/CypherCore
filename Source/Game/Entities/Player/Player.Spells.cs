@@ -47,6 +47,11 @@ namespace Game.Entities
 
         public ushort GetSkillValue(SkillType skill)
         {
+            return GetSkillValue((uint)skill);
+        }
+
+        public ushort GetSkillValue(uint skill)
+        {
             if (skill == 0)
                 return 0;
 
@@ -63,6 +68,11 @@ namespace Game.Entities
         }
 
         ushort GetMaxSkillValue(SkillType skill)
+        {
+            return GetMaxSkillValue((uint)skill);
+        }
+
+        ushort GetMaxSkillValue(uint skill)
         {
             if (skill == 0)
                 return 0;
@@ -81,12 +91,17 @@ namespace Game.Entities
 
         public ushort GetPureSkillValue(SkillType skill)
         {
+            return GetPureSkillValue((uint)skill);
+        }
+
+        public ushort GetPureSkillValue(uint skill)
+        {
             if (skill == 0)
                 return 0;
 
             SkillInfo skillInfo = m_activePlayerData.Skill;
 
-            var skillStatusData = mSkillStatus.LookupByKey((uint)skill);
+            var skillStatusData = mSkillStatus.LookupByKey(skill);
             if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || skillInfo.SkillRank[skillStatusData.Pos] == 0)
                 return 0;
 
@@ -1374,29 +1389,67 @@ namespace Game.Entities
             return (byte)(SkillValue / 31);
         }
 
-        public bool UpdateFishingSkill()
+        public bool UpdateFishingSkill(int expansion)
         {
-            Log.outDebug(LogFilter.Player, "UpdateFishingSkill");
+            Log.outDebug(LogFilter.Player, $"Player::UpdateFishingSkill: Player '{GetName()}' ({GetGUID()}) Expansion: {expansion}");
 
-            uint SkillValue = GetPureSkillValue(SkillType.Fishing);
-
-            if (SkillValue >= GetMaxSkillValue(SkillType.Fishing))
+            uint fishingSkill = GetProfessionSkillForExp(SkillType.Fishing, expansion);
+            if (fishingSkill == 0 || !HasSkill(fishingSkill))
                 return false;
 
-            byte stepsNeededToLevelUp = GetFishingStepsNeededToLevelUp(SkillValue);
+            uint skillValue = GetPureSkillValue(fishingSkill);
+
+            if (skillValue >= GetMaxSkillValue(fishingSkill))
+                return false;
+
+            byte stepsNeededToLevelUp = GetFishingStepsNeededToLevelUp(skillValue);
             ++m_fishingSteps;
 
             if (m_fishingSteps >= stepsNeededToLevelUp)
             {
                 m_fishingSteps = 0;
 
-                uint gathering_skill_gain = WorldConfig.GetUIntValue(WorldCfg.SkillGainGathering);
-                return UpdateSkillPro(SkillType.Fishing, 100 * 10, gathering_skill_gain);
+                uint gatheringSkillGain = WorldConfig.GetUIntValue(WorldCfg.SkillGainGathering);
+                return UpdateSkillPro(fishingSkill, 100 * 10, gatheringSkillGain);
             }
 
             return false;
         }
 
+        public uint GetProfessionSkillForExp(SkillType skill, int expansion)
+        {
+            return GetProfessionSkillForExp((uint)skill, expansion);
+        }
+
+        public uint GetProfessionSkillForExp(uint skill, int expansion)
+        {
+            SkillLineRecord skillEntry = CliDB.SkillLineStorage.LookupByKey(skill);
+            if (skillEntry == null)
+                return 0;
+
+            if (skillEntry.ParentSkillLineID != 0 || (skillEntry.CategoryID != SkillCategory.Profession && skillEntry.CategoryID != SkillCategory.Secondary))
+                return 0;
+
+            // The value -3 from ContentTuning refers to the current expansion
+            if (expansion < 0)
+                expansion = (int)PlayerConst.CurrentExpansion;
+
+            var childSkillLines = Global.DB2Mgr.GetSkillLinesForParentSkill(skillEntry.Id);
+            if (childSkillLines != null)
+            {
+                foreach (var childSkillLine in childSkillLines)
+                {
+                    // Values of ParentTierIndex in SkillLine.db2 start at 4 (Classic) and increase by one for each expansion skillLine
+                    // Subtract 4 (BASE_PARENT_TIER_INDEX) from this value to obtain the expansion of the skillLine
+                    int skillLineExpansion = childSkillLine.ParentTierIndex - 4;
+                    if (expansion == skillLineExpansion)
+                        return childSkillLine.Id;
+                }
+            }
+
+            return 0;
+        }
+        
         int SkillGainChance(uint SkillValue, uint GrayLevel, uint GreenLevel, uint YellowLevel)
         {
             if (SkillValue >= GrayLevel)

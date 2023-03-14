@@ -8703,10 +8703,6 @@ namespace Game
         {
             return _spellClickInfoStorage.LookupByKey(creature_id);
         }
-        public int GetFishingBaseSkillLevel(uint entry)
-        {
-            return _fishingBaseForAreaStorage.LookupByKey(entry);
-        }
         public SkillTiersEntry GetSkillTier(uint skillTierId)
         {
             return _skillTiers.LookupByKey(skillTierId);
@@ -10453,12 +10449,52 @@ namespace Game
         {
             return _baseXPTable.ContainsKey(level) ? _baseXPTable[level] : 0;
         }
+
         public uint GetXPForLevel(uint level)
         {
             if (level < _playerXPperLevel.Length)
                 return _playerXPperLevel[level];
             return 0;
         }
+
+        public int GetFishingBaseSkillLevel(AreaTableRecord areaEntry)
+        {
+            if (areaEntry == null)
+                return 0;
+
+            // Get level for the area
+            var level = _fishingBaseForAreaStorage.LookupByKey(areaEntry.Id);
+            if (level != 0)
+                return level;
+
+            // If there is no data for the current area and it has a parent area, get data from the last (recursive)
+            var parentAreaEntry = CliDB.AreaTableStorage.LookupByKey(areaEntry.ParentAreaID);
+            if (parentAreaEntry != null)
+                return GetFishingBaseSkillLevel(parentAreaEntry);
+
+            Log.outError(LogFilter.Sql, $"Fishable areaId {areaEntry.Id} is not properly defined in `skill_fishing_base_level`.");
+
+            return 0;
+        }
+
+        public ContentTuningRecord GetContentTuningForArea(AreaTableRecord areaEntry)
+        {
+            if (areaEntry == null)
+                return null;
+
+            // Get ContentTuning for the area
+            var contentTuning = CliDB.ContentTuningStorage.LookupByKey(areaEntry.ContentTuningID);
+            if (contentTuning != null)
+                return contentTuning;
+
+            // If there is no data for the current area and it has a parent area, get data from the last (recursive)
+            var parentAreaEntry = CliDB.AreaTableStorage.LookupByKey(areaEntry.ParentAreaID);
+            if (parentAreaEntry != null)
+                return GetContentTuningForArea(parentAreaEntry);
+
+            return null;
+        }
+        
         public uint GetMaxLevelForExpansion(Expansion expansion)
         {
             switch (expansion)
@@ -10488,6 +10524,7 @@ namespace Game
             }
             return 0;
         }
+
         CellObjectGuids CreateCellObjectGuids(uint mapid, Difficulty difficulty, uint cellid)
         {
             var key = (mapid, difficulty);
@@ -10500,6 +10537,7 @@ namespace Game
 
             return mapObjectGuidsStore[key][cellid];
         }
+
         public CellObjectGuids GetCellObjectGuids(uint mapid, Difficulty difficulty, uint cellid)
         {
             var key = (mapid, difficulty);
@@ -10509,11 +10547,13 @@ namespace Game
 
             return null;
         }
+
         public Dictionary<uint, CellObjectGuids> GetMapObjectGuids(uint mapid, Difficulty difficulty)
         {
             var key = (mapid, difficulty);
             return mapObjectGuidsStore.LookupByKey(key);
         }
+
         public PageText GetPageText(uint pageEntry)
         {
             return _pageTextStorage.LookupByKey(pageEntry);

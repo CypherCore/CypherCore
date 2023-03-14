@@ -1999,34 +1999,36 @@ namespace Game.Entities
 
                             SendUpdateToPlayer(player);
 
-                            uint zone, subzone;
-                            GetZoneAndAreaId(out zone, out subzone);
-
-                            int zone_skill = Global.ObjectMgr.GetFishingBaseSkillLevel(subzone);
-                            if (zone_skill == 0)
-                                zone_skill = Global.ObjectMgr.GetFishingBaseSkillLevel(zone);
-
-                            //provide error, no fishable zone or area should be 0
-                            if (zone_skill == 0)
-                                Log.outError(LogFilter.Sql, "Fishable areaId {0} are not properly defined in `skill_fishing_base_level`.", subzone);
-
-                            int skill = player.GetSkillValue(SkillType.Fishing);
-
-                            int chance;
-                            if (skill < zone_skill)
+                            AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(GetAreaId());
+                            if (areaEntry == null)
                             {
-                                chance = (int)(Math.Pow((double)skill / zone_skill, 2) * 100);
+                                Log.outError(LogFilter.GameObject, $"Gameobject '{GetEntry()}' ({GetGUID()}) spawned in unknown area (x: {GetPositionX()} y: {GetPositionY()} z: {GetPositionZ()} map: {GetMapId()})");
+                                break;
+                            }
+
+                            // Update the correct fishing skill according to the area's ContentTuning
+                            ContentTuningRecord areaContentTuning = Global.ObjectMgr.GetContentTuningForArea(areaEntry);
+                            if (areaContentTuning == null)
+                                break;
+
+                            player.UpdateFishingSkill(areaContentTuning.ExpansionID);
+
+                            // Send loot
+                            int areaFishingLevel = Global.ObjectMgr.GetFishingBaseSkillLevel(areaEntry);
+
+                            uint playerFishingSkill = player.GetProfessionSkillForExp(SkillType.Fishing, areaContentTuning.ExpansionID);
+                            int playerFishingLevel = player.GetSkillValue(playerFishingSkill);
+
+                            int roll = RandomHelper.IRand(1, 100);
+                            int chance = 100;
+                            if (playerFishingLevel < areaFishingLevel)
+                            {
+                                chance = (int)Math.Pow((double)playerFishingLevel / areaFishingLevel, 2) * 100;
                                 if (chance < 1)
                                     chance = 1;
                             }
-                            else
-                                chance = 100;
 
-                            int roll = RandomHelper.IRand(1, 100);
-
-                            Log.outDebug(LogFilter.Server, "Fishing check (skill: {0} zone min skill: {1} chance {2} roll: {3}", skill, zone_skill, chance, roll);
-
-                            player.UpdateFishingSkill();
+                            Log.outDebug(LogFilter.Misc, $"Fishing check (skill {playerFishingSkill} level: {playerFishingLevel} area skill level: {areaFishingLevel} chance {chance} roll: {roll}");
 
                             // @todo find reasonable value for fishing hole search
                             GameObject fishingPool = LookupFishingHoleAround(20.0f + SharedConst.ContactDistance);
