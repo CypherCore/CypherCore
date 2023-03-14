@@ -306,6 +306,8 @@ namespace Game.Entities
             for (byte i = 0; i < SharedConst.MaxCreatureSpells; ++i)
                 m_spells[i] = GetCreatureTemplate().Spells[i];
 
+            _staticFlags.ApplyFlag(CreatureStaticFlags.NoXp, cInfo.CreatureType == CreatureType.Critter || IsPet() || IsTotem() || cInfo.FlagsExtra.HasFlag(CreatureFlagsExtra.NoXP));
+
             return true;
         }
 
@@ -1029,11 +1031,10 @@ namespace Game.Entities
 
         public bool CanGiveExperience()
         {
-            return !IsCritter()
-                && !IsPet()
-                && !IsTotem()
-                && !GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoXP);
+            return !_staticFlags.HasFlag(CreatureStaticFlags.NoXp);
         }
+
+        public void SetCanGiveExperience(bool xpEnabled) { _staticFlags.ApplyFlag(CreatureStaticFlags.NoXp, !xpEnabled); }
 
         public override bool IsEngaged()
         {
