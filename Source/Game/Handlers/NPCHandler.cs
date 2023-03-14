@@ -52,7 +52,7 @@ namespace Game
                 return;
             }
 
-            uint trainerId = Global.ObjectMgr.GetCreatureDefaultTrainer(npc.GetEntry());
+            uint trainerId = npc.GetTrainerId();
             if (trainerId != 0)
                 SendTrainerList(npc, trainerId);
             else

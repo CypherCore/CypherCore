@@ -1128,6 +1128,19 @@ namespace Game.Entities
             // exited position so it won't run away (home) and evade if it's hostile
             SetHomePosition(GetPosition());
         }
+
+        public uint GetTrainerId()
+        {
+            if (_trainerId.HasValue)
+                return _trainerId.Value;
+
+            return Global.ObjectMgr.GetCreatureDefaultTrainer(GetEntry());
+        }
+
+        public void SetTrainerId(uint? trainerId)
+        {
+            _trainerId = trainerId;
+        }
         
         public override bool IsMovementPreventedByCasting()
         {
