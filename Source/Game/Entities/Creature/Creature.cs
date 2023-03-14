@@ -3187,6 +3187,14 @@ namespace Game.Entities
         public override void SetImmuneToPC(bool apply) { SetImmuneToPC(apply, HasReactState(ReactStates.Passive)); }
         public override void SetImmuneToNPC(bool apply) { SetImmuneToNPC(apply, HasReactState(ReactStates.Passive)); }
 
+        void SetUnkillable(bool unkillable)
+        {
+            if (unkillable)
+                _staticFlags |= CreatureStaticFlags.Unkillable;
+            else
+                _staticFlags &= ~CreatureStaticFlags.Unkillable;
+        }
+
         public bool IsInEvadeMode() { return HasUnitState(UnitState.Evade); }
         public bool IsEvadingAttacks() { return IsInEvadeMode() || CanNotReachTarget(); }
 

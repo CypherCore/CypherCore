@@ -2591,6 +2591,10 @@ namespace Game.Entities
 
                 duel_hasEnded = true;
             }
+            else if (victim.IsCreature() && damageTaken >= health && victim.ToCreature().HasFlag(CreatureStaticFlags.Unkillable))
+            {
+                damageTaken = health - 1;
+            }
             else if (victim.IsVehicle() && damageTaken >= (health - 1) && victim.GetCharmer() != null && victim.GetCharmer().IsTypeId(TypeId.Player))
             {
                 Player victimRider = victim.GetCharmer().ToPlayer();
