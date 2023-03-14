@@ -2007,7 +2007,7 @@ namespace Game.Entities
                             }
 
                             // Update the correct fishing skill according to the area's ContentTuning
-                            ContentTuningRecord areaContentTuning = Global.ObjectMgr.GetContentTuningForArea(areaEntry);
+                            ContentTuningRecord areaContentTuning = Global.DB2Mgr.GetContentTuningForArea(areaEntry);
                             if (areaContentTuning == null)
                                 break;
 

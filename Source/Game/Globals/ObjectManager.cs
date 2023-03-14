@@ -10476,24 +10476,6 @@ namespace Game
 
             return 0;
         }
-
-        public ContentTuningRecord GetContentTuningForArea(AreaTableRecord areaEntry)
-        {
-            if (areaEntry == null)
-                return null;
-
-            // Get ContentTuning for the area
-            var contentTuning = CliDB.ContentTuningStorage.LookupByKey(areaEntry.ContentTuningID);
-            if (contentTuning != null)
-                return contentTuning;
-
-            // If there is no data for the current area and it has a parent area, get data from the last (recursive)
-            var parentAreaEntry = CliDB.AreaTableStorage.LookupByKey(areaEntry.ParentAreaID);
-            if (parentAreaEntry != null)
-                return GetContentTuningForArea(parentAreaEntry);
-
-            return null;
-        }
         
         public uint GetMaxLevelForExpansion(Expansion expansion)
         {

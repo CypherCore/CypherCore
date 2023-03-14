@@ -866,6 +866,24 @@ namespace Game.DataStorage
             return false;
         }
 
+        public ContentTuningRecord GetContentTuningForArea(AreaTableRecord areaEntry)
+        {
+            if (areaEntry == null)
+                return null;
+
+            // Get ContentTuning for the area
+            var contentTuning = ContentTuningStorage.LookupByKey(areaEntry.ContentTuningID);
+            if (contentTuning != null)
+                return contentTuning;
+
+            // If there is no data for the current area and it has a parent area, get data from the last (recursive)
+            var parentAreaEntry = AreaTableStorage.LookupByKey(areaEntry.ParentAreaID);
+            if (parentAreaEntry != null)
+                return GetContentTuningForArea(parentAreaEntry);
+
+            return null;
+        }
+
         public List<ArtifactPowerRecord> GetArtifactPowers(byte artifactId)
         {
             return _artifactPowers.LookupByKey(artifactId);
