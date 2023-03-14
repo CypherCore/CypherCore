@@ -55,11 +55,10 @@ namespace Game.AI
             base.OnCharmed(isNew);
         }
 
-        public void DoZoneInCombat(Creature creature = null)
-        {
-            if (!creature)
-                creature = me;
+        public void DoZoneInCombat() { DoZoneInCombat(me); }
 
+        public static void DoZoneInCombat(Creature creature)
+        {
             Map map = creature.GetMap();
             if (!map.IsDungeon()) // use IsDungeon instead of Instanceable, in case Battlegrounds will be instantiated
             {

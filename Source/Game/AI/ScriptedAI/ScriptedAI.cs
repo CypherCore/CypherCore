@@ -771,7 +771,7 @@ namespace Game.AI
                 Creature summon = ObjectAccessor.GetCreature(_me, id);
                 if (summon && summon.IsAIEnabled() && (entry == 0 || summon.GetEntry() == entry))
                 {
-                    summon.GetAI().DoZoneInCombat(null);
+                    summon.GetAI().DoZoneInCombat();
                 }
             }
         }
