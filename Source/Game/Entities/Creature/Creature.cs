@@ -1129,14 +1129,14 @@ namespace Game.Entities
             SetHomePosition(GetPosition());
         }
 
-        public bool HasFlag(CreatureStaticFlags flag) { return _staticFlags.HasFlag(flag); }
-        public bool HasFlag(CreatureStaticFlags2 flag) { return _staticFlags2.HasFlag(flag); }
-        public bool HasFlag(CreatureStaticFlags3 flag) { return _staticFlags3.HasFlag(flag); }
-        public bool HasFlag(CreatureStaticFlags4 flag) { return _staticFlags4.HasFlag(flag); }
-        public bool HasFlag(CreatureStaticFlags5 flag) { return _staticFlags5.HasFlag(flag); }
-        public bool HasFlag(CreatureStaticFlags6 flag) { return _staticFlags6.HasFlag(flag); }
-        public bool HasFlag(CreatureStaticFlags7 flag) { return _staticFlags7.HasFlag(flag); }
-        public bool HasFlag(CreatureStaticFlags8 flag) { return _staticFlags8.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags flag)  { return _staticFlags.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags2 flag)  { return _staticFlags.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags3 flag)  { return _staticFlags.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags4 flag)  { return _staticFlags.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags5 flag)  { return _staticFlags.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags6 flag)  { return _staticFlags.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags7 flag)  { return _staticFlags.HasFlag(flag); }
+        public bool HasFlag(CreatureStaticFlags8 flag)  { return _staticFlags.HasFlag(flag); }
 
         public uint GetTrainerId()
         {
@@ -1624,7 +1624,7 @@ namespace Game.Entities
 
         public void SetSpawnHealth()
         {
-            if (_staticFlags5.HasFlag(CreatureStaticFlags5.NoHealthRegen))
+            if (_staticFlags.HasFlag(CreatureStaticFlags5.NoHealthRegen))
                 return;
 
             ulong curhealth;
@@ -3187,13 +3187,7 @@ namespace Game.Entities
         public override void SetImmuneToPC(bool apply) { SetImmuneToPC(apply, HasReactState(ReactStates.Passive)); }
         public override void SetImmuneToNPC(bool apply) { SetImmuneToNPC(apply, HasReactState(ReactStates.Passive)); }
 
-        void SetUnkillable(bool unkillable)
-        {
-            if (unkillable)
-                _staticFlags |= CreatureStaticFlags.Unkillable;
-            else
-                _staticFlags &= ~CreatureStaticFlags.Unkillable;
-        }
+        void SetUnkillable(bool unkillable) { _staticFlags.ApplyFlag(CreatureStaticFlags.Unkillable, unkillable); }
 
         public bool IsInEvadeMode() { return HasUnitState(UnitState.Evade); }
         public bool IsEvadingAttacks() { return IsInEvadeMode() || CanNotReachTarget(); }
@@ -3357,15 +3351,9 @@ namespace Game.Entities
                 m_combatPulseTime = delay;
         }
 
-        public bool CanRegenerateHealth() { return !_staticFlags5.HasFlag(CreatureStaticFlags5.NoHealthRegen) && _regenerateHealth; }
-        public void SetRegenerateHealth(bool value)
-        {
-            if (!value)
-                _staticFlags5 |= CreatureStaticFlags5.NoHealthRegen;
-            else
-                _staticFlags5 &= ~CreatureStaticFlags5.NoHealthRegen;
-        }
-
+        bool CanRegenerateHealth() { return !_staticFlags.HasFlag(CreatureStaticFlags5.NoHealthRegen) && _regenerateHealth; }
+        public void SetRegenerateHealth(bool value) { _staticFlags.ApplyFlag(CreatureStaticFlags5.NoHealthRegen, !value); }
+        
         public void SetHomePosition(float x, float y, float z, float o)
         {
             m_homePosition.Relocate(x, y, z, o);
