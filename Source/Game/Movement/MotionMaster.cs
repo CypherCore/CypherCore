@@ -581,14 +581,14 @@ namespace Game.Movement
                 Add(new ConfusedMovementGenerator<Creature>());
         }
 
-        public void MoveFleeing(Unit enemy, uint time)
+        public void MoveFleeing(Unit enemy, TimeSpan time = default)
         {
             if (!enemy)
                 return;
 
             if (_owner.IsCreature())
             {
-                if (time != 0)
+                if (time != TimeSpan.Zero)
                     Add(new TimedFleeingMovementGenerator(enemy.GetGUID(), time));
                 else
                     Add(new FleeingMovementGenerator<Creature>(enemy.GetGUID()));

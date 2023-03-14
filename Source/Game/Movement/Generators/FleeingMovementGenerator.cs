@@ -197,7 +197,7 @@ namespace Game.Movement
 
     public class TimedFleeingMovementGenerator : FleeingMovementGenerator<Creature>
     {
-        public TimedFleeingMovementGenerator(ObjectGuid fright, uint time) : base(fright)
+        public TimedFleeingMovementGenerator(ObjectGuid fright, TimeSpan time) : base(fright)
         {
             _totalFleeTime = new TimeTracker(time);
         }
