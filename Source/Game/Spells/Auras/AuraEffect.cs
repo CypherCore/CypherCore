@@ -4787,7 +4787,17 @@ namespace Game.Spells
             if (!mode.HasFlag(AuraEffectHandleModes.Real) || apply || aurApp.GetRemoveMode() != AuraRemoveMode.Expire)
                 return;
 
-            aurApp.GetTarget().CastSpell(aurApp.GetTarget(), GetSpellEffectInfo().TriggerSpell, new CastSpellExtraArgs(this));
+            Unit caster = aurApp.GetTarget();
+
+            // MiscValue (Caster):
+            // 0 - Aura target
+            // 1 - Aura caster
+            // 2 - ? Aura target is always TARGET_UNIT_CASTER so we consider the same behavior as MiscValue 1
+            uint casterType = (uint)GetMiscValue();
+            if (casterType > 0)
+                caster = GetCaster();
+            
+            caster?.CastSpell(aurApp.GetTarget(), GetSpellEffectInfo().TriggerSpell, new CastSpellExtraArgs(this));
         }
 
         [AuraEffectHandler(AuraType.OpenStable)]
