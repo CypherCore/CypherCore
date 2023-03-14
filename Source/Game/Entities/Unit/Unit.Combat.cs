@@ -258,8 +258,14 @@ namespace Game.Entities
 
             Creature creature = ToCreature();
             // creatures cannot attack while evading
-            if (creature != null && creature.IsInEvadeMode())
-                return false;
+            if (creature != null)
+            {
+                if (creature.IsInEvadeMode())
+                    return false;
+
+                if (!creature.CanMelee())
+                    meleeAttack = false;
+            }
 
             // nobody can attack GM in GM-mode
             if (victim.IsTypeId(TypeId.Player))

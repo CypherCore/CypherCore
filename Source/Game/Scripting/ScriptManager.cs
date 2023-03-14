@@ -1295,9 +1295,9 @@ namespace Game.Scripting
             return ScriptMap.Empty();
         }
 
-        public List<TValue> GetStorage()
+        public ICollection<TValue> GetStorage()
         {
-            return ScriptMap.Values.ToList();
+            return ScriptMap.Values;
         }
 
         public void Unload()

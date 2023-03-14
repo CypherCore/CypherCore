@@ -44,7 +44,6 @@ namespace Game.AI
 
         bool _run;
         bool _evadeDisabled;
-        bool _canAutoAttack;
         bool _canCombatMove;
         uint _invincibilityHpLevel;
 
@@ -62,7 +61,6 @@ namespace Game.AI
         {
             _escortInvokerCheckTimer = 1000;
             _run = true;
-            _canAutoAttack = true;
             _canCombatMove = true;
 
             _hasConditions = Global.ConditionMgr.HasConditionsForNotGroupedEntry(ConditionSourceType.CreatureTemplateVehicle, creature.GetEntry());
@@ -338,9 +336,8 @@ namespace Game.AI
 
             if (!hasVictim)
                 return;
-
-            if (_canAutoAttack)
-                DoMeleeAttackIfReady();
+            
+            DoMeleeAttackIfReady();
         }
 
         bool IsEscortInvokerInRange()
@@ -629,11 +626,11 @@ namespace Game.AI
             if (!IsAIControlled())
             {
                 if (who != null)
-                    me.Attack(who, _canAutoAttack);
+                    me.Attack(who, true);
                 return;
             }
 
-            if (who != null && me.Attack(who, _canAutoAttack))
+            if (who != null && me.Attack(who, true))
             {
                 me.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
                 me.PauseMovement();
@@ -1074,7 +1071,6 @@ namespace Game.AI
         public bool HasEscortState(SmartEscortState escortState) { return (_escortState & escortState) != 0; }
         public void AddEscortState(SmartEscortState escortState) { _escortState |= escortState; }
         public void RemoveEscortState(SmartEscortState escortState) { _escortState &= ~escortState; }
-        public void SetAutoAttack(bool on) { _canAutoAttack = on; }
 
         public bool CanCombatMove() { return _canCombatMove; }
 

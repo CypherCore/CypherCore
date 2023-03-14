@@ -287,7 +287,7 @@ namespace Framework.Constants
         CombatPing = 0x00020000,
         Aquatic = 0x00040000, // Aka Water Only, CreatureTemplateMovement.Ground = 0
         Amphibious = 0x00080000, // CreatureTemplateMovement.Swim = 1
-        NoMeleeFlee = 0x00100000, // Prevents Melee(Does Not Prevent Chasing, Does Not Make Creature Passive). Not Sure What 'Flee' Means But Another Flag Is Named NoMeleeApproach
+        NoMelee = 0x00100000, // Prevents Melee(Does Not Prevent Chasing, Does Not Make Creature Passive). Not Sure What 'Flee' Means But Another Flag Is Named NoMeleeApproach
         VisibleToGhosts = 0x00200000, // CreatureTypeFlagVisibleToGhosts
         PvpEnabling = 0x00400000, // Old UnitFlagPvpEnabling, Now UnitBytes2OffsetPvpFlag From UnitFieldBytes2
         DoNotPlayWoundAnim = 0x00800000, // CreatureTypeFlagDoNotPlayWoundAnim

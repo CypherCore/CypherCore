@@ -54,7 +54,7 @@ namespace Game.AI
 
         public void DoMeleeAttackIfReady()
         {
-            if (me.HasUnitState(UnitState.Casting))
+            if (me.HasUnitState(UnitState.Casting) || (me.IsCreature() && !me.ToCreature().CanMelee()))
                 return;
 
             Unit victim = me.GetVictim();
