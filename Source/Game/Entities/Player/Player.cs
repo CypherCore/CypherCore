@@ -2698,7 +2698,7 @@ namespace Game.Entities
             switch (source.GetTypeId())
             {
                 case TypeId.Unit:
-                    return source.ToCreature().GetCreatureTemplate().GossipMenuId;
+                    return source.ToCreature().GetGossipMenuId();
                 case TypeId.GameObject:
                     return source.ToGameObject().GetGoInfo().GetGossipMenuId();
                 default:
