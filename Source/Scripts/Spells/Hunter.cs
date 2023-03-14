@@ -450,7 +450,7 @@ namespace Scripts.Spells.Hunter
             Creature target = GetExplTargetUnit().ToCreature();
             if (target)
             {
-                if (target.GetLevel() > caster.GetLevel())
+                if (target.GetLevelForTarget(caster) > caster.GetLevel())
                     return SpellCastResult.Highlevel;
 
                 // use SMSG_PET_TAME_FAILURE?
