@@ -703,6 +703,9 @@ namespace Game.Entities
                     if (tapper != null)
                         tappers.Add(tapper);
                 }
+
+                if (!creature.CanHaveLoot())
+                    isRewardAllowed = false;
             }
 
             // Exploit fix
@@ -900,7 +903,7 @@ namespace Game.Entities
                     else
                         creature.AllLootRemovedFromCorpse();
 
-                    if (LootStorage.Skinning.HaveLootFor(creature.GetCreatureTemplate().SkinLootId))
+                    if (creature.CanHaveLoot() && LootStorage.Skinning.HaveLootFor(creature.GetCreatureTemplate().SkinLootId))
                     {
                         creature.SetDynamicFlag(UnitDynFlags.CanSkin);
                         creature.SetUnitFlag(UnitFlags.Skinnable);

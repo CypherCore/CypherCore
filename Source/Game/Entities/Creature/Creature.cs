@@ -1270,6 +1270,10 @@ namespace Game.Entities
         public void SetTapList(HashSet<ObjectGuid> tapList) { m_tapList = tapList; }
         public bool HasLootRecipient() { return !m_tapList.Empty(); }
 
+        public bool CanHaveLoot() { return !_staticFlags.HasFlag(CreatureStaticFlags.NoLoot); }
+
+        public void SetCanHaveLoot(bool canHaveLoot) { _staticFlags.ApplyFlag(CreatureStaticFlags.NoLoot, !canHaveLoot); }
+        
         public void SaveToDB()
         {
             // this should only be used when the creature has already been loaded
