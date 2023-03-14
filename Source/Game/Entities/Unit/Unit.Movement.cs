@@ -721,7 +721,7 @@ namespace Game.Entities
                 SendMessageToSet(packet, true);
             }
 
-            if (IsCreature() && updateAnimTier && IsAlive() && !HasUnitState(UnitState.Root) && !ToCreature().GetMovementTemplate().IsRooted())
+            if (IsCreature() && updateAnimTier && IsAlive() && !HasUnitState(UnitState.Root) && !ToCreature().IsTemplateRooted())
             {
                 if (IsGravityDisabled())
                     SetAnimTier(AnimTier.Fly);
@@ -1096,7 +1096,7 @@ namespace Game.Entities
                 SendMessageToSet(packet, true);
             }
 
-            if (IsCreature() && updateAnimTier && IsAlive() && !HasUnitState(UnitState.Root) && !ToCreature().GetMovementTemplate().IsRooted())
+            if (IsCreature() && updateAnimTier && IsAlive() && !HasUnitState(UnitState.Root) && !ToCreature().IsTemplateRooted())
             {
                 if (IsGravityDisabled())
                     SetAnimTier(AnimTier.Fly);
@@ -1224,7 +1224,7 @@ namespace Game.Entities
                         SetStunned(false);
                         break;
                     case UnitState.Root:
-                        if (HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2) || HasAuraType(AuraType.ModRootDisableGravity) || GetVehicle() != null || (IsCreature() && ToCreature().GetMovementTemplate().IsRooted()))
+                        if (HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2) || HasAuraType(AuraType.ModRootDisableGravity) || GetVehicle() != null || (IsCreature() && ToCreature().IsTemplateRooted()))
                             return;
 
                         ClearUnitState(state);

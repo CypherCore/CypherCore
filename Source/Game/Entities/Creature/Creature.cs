@@ -410,7 +410,6 @@ namespace Game.Entities
 
             SetIsCombatDisallowed(cInfo.FlagsExtra.HasFlag(CreatureFlagsExtra.CannotEnterCombat));
 
-            LoadTemplateRoot();
             InitializeMovementFlags();
 
             LoadCreaturesAddon();
@@ -1684,8 +1683,15 @@ namespace Game.Entities
 
         void LoadTemplateRoot()
         {
-            if (GetMovementTemplate().IsRooted())
-                SetControlled(true, UnitState.Root);
+            SetTemplateRooted(GetMovementTemplate().IsRooted());
+        }
+
+        public bool IsTemplateRooted() { return _staticFlags.HasFlag(CreatureStaticFlags.Sessile); }
+        
+        public void SetTemplateRooted(bool rooted)
+        {
+            _staticFlags.ApplyFlag(CreatureStaticFlags.Sessile, rooted);
+            SetControlled(rooted, UnitState.Root);
         }
 
         public override bool HasQuest(uint questId)
@@ -2521,6 +2527,8 @@ namespace Game.Entities
 
         void InitializeMovementFlags()
         {
+            LoadTemplateRoot();
+
             // It does the same, for now
             UpdateMovementFlags();
         }
