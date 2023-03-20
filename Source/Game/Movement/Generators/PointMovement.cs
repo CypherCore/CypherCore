@@ -60,25 +60,29 @@ namespace Game.Movement
             owner.AddUnitState(UnitState.RoamingMove);
 
             MoveSplineInit init = new(owner);
-            if (_generatePath)
+
+            new Action(() =>
             {
-                PathGenerator path = new(owner);
-                bool result = path.CalculatePath(_destination.posX, _destination.posY, _destination.posZ, false);
-                if (result && !path.GetPathType().HasFlag(PathType.NoPath))
+                if (_generatePath)
                 {
-                    if (_closeEnoughDistance.HasValue)
-                        path.ShortenPathUntilDist(_destination, _closeEnoughDistance.Value);
+                    PathGenerator path = new(owner);
+                    bool result = path.CalculatePath(_destination.posX, _destination.posY, _destination.posZ, false);
+                    if (result && !path.GetPathType().HasFlag(PathType.NoPath))
+                    {
+                        if (_closeEnoughDistance.HasValue)
+                            path.ShortenPathUntilDist(_destination, _closeEnoughDistance.Value);
 
-                    init.MovebyPath(path.GetPath());
-                    return;
+                        init.MovebyPath(path.GetPath());
+                        return;
+                    }
                 }
-            }
 
-            Position dest = _destination;
-            if (_closeEnoughDistance.HasValue)
-                owner.MovePosition(dest, Math.Min(_closeEnoughDistance.Value, dest.GetExactDist(owner)), MathF.PI + owner.GetRelativeAngle(dest));
+                Position dest = _destination;
+                if (_closeEnoughDistance.HasValue)
+                    owner.MovePosition(dest, Math.Min(_closeEnoughDistance.Value, dest.GetExactDist(owner)), MathF.PI + owner.GetRelativeAngle(dest));
 
-            init.MoveTo(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ(), false);
+                init.MoveTo(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ(), false);
+            })();
 
             if (_speed.HasValue)
                 init.SetVelocity(_speed.Value);

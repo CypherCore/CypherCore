@@ -283,7 +283,7 @@ namespace Game.Entities
             }
             else if (PetSaveMode.FirstActiveSlot <= slot && slot <= PetSaveMode.LastActiveSlot)
             {
-                var activePetIndex = Array.FindIndex(petStable.ActivePets, pet => pet?.PetNumber == petnumber);
+                var activePetIndex = Array.FindIndex(petStable.ActivePets, pet => pet?.PetNumber == petInfo.PetNumber);
 
                 Cypher.Assert(activePetIndex != -1);
 

@@ -98,9 +98,6 @@ namespace Game.Spells
 
             for (var i = 0; i < SpellConst.MaxEffects; ++i)
                 m_destTargets[i] = new SpellDestination(m_caster);
-
-            m_targets = new SpellCastTargets();
-            m_appliedMods = new List<Aura>();
         }
 
         public virtual void Dispose()
@@ -7964,11 +7961,11 @@ namespace Game.Spells
         public SpellMisc m_misc;
         public object m_customArg;
         public SpellCastVisual m_SpellVisual;
-        public SpellCastTargets m_targets;
+        public SpellCastTargets m_targets = new();
         public sbyte m_comboPointGain;
         public SpellCustomErrors m_customError;
 
-        public List<Aura> m_appliedMods;
+        public List<Aura> m_appliedMods = new();
 
         WorldObject m_caster;
         public SpellValue m_spellValue;

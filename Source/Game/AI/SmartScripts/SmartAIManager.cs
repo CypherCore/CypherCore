@@ -649,7 +649,7 @@ namespace Game.AI
                 SmartEvents.OnSpellFailed => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
                 SmartEvents.OnSpellStart => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
                 SmartEvents.OnDespawn => 0,
-            _ => Marshal.SizeOf(typeof(SmartEvent.Raw)),
+                _ => Marshal.SizeOf(typeof(SmartEvent.Raw)),
             };
 
             int rawCount = Marshal.SizeOf(typeof(SmartEvent.Raw)) / sizeof(uint);
