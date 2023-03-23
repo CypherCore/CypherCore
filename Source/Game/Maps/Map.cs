@@ -4801,7 +4801,7 @@ namespace Game.Maps
             player.AddInstanceEnterTime(GetInstanceId(), GameTime.GetGameTime());
 
             MapDb2Entries entries = new(GetEntry(), GetMapDifficulty());
-            if (entries.MapDifficulty.HasResetSchedule() && i_instanceLock != null && i_instanceLock.GetData().CompletedEncountersMask != 0)
+            if (entries.MapDifficulty.HasResetSchedule() && i_instanceLock != null && !i_instanceLock.IsNew())
             {
                 if (!entries.MapDifficulty.IsUsingEncounterLocks())
                 {
@@ -4890,7 +4890,7 @@ namespace Game.Maps
             if (i_data == null)
                 return;
 
-            if (i_instanceLock == null || i_instanceLock.GetInstanceId() == 0)
+            if (i_instanceLock == null || i_instanceLock.IsNew())
             {
                 i_data.Create();
                 return;
@@ -4926,7 +4926,7 @@ namespace Game.Maps
         public InstanceResetResult Reset(InstanceResetMethod method)
         {
             // raids can be reset if no boss was killed
-            if (method != InstanceResetMethod.Expire && i_instanceLock != null && i_instanceLock.GetData().CompletedEncountersMask != 0)
+            if (method != InstanceResetMethod.Expire && i_instanceLock != null && !i_instanceLock.IsNew())
                 return InstanceResetResult.CannotReset;
 
             if (HavePlayers())
@@ -5015,7 +5015,7 @@ namespace Game.Maps
                         playerCompletedEncounters = playerLock.GetData().CompletedEncountersMask | (1u << updateSaveDataEvent.DungeonEncounter.Bit);
                     }
 
-                    bool isNewLock = playerLock == null || playerLock.GetData().CompletedEncountersMask == 0 || playerLock.IsExpired();
+                    bool isNewLock = playerLock == null || playerLock.IsNew() || playerLock.IsExpired();
 
                     InstanceLock newLock = Global.InstanceLockMgr.UpdateInstanceLockForPlayer(trans, player.GetGUID(), entries, new InstanceLockUpdateEvent(GetInstanceId(), i_data.UpdateBossStateSaveData(oldData, updateSaveDataEvent),
                         instanceCompletedEncounters, updateSaveDataEvent.DungeonEncounter, i_data.GetEntranceLocationForCompletedEncounters(playerCompletedEncounters)));
@@ -5058,7 +5058,7 @@ namespace Game.Maps
                     if (playerLock != null)
                         oldData = playerLock.GetData().Data;
 
-                    bool isNewLock = playerLock == null || playerLock.GetData().CompletedEncountersMask == 0 || playerLock.IsExpired();
+                    bool isNewLock = playerLock == null || playerLock.IsNew() || playerLock.IsExpired();
 
                     InstanceLock newLock = Global.InstanceLockMgr.UpdateInstanceLockForPlayer(trans, player.GetGUID(), entries, new InstanceLockUpdateEvent(GetInstanceId(), i_data.UpdateAdditionalSaveData(oldData, updateSaveDataEvent),
                         instanceCompletedEncounters, null, null));
@@ -5082,7 +5082,7 @@ namespace Game.Maps
             MapDb2Entries entries = new(GetEntry(), GetMapDifficulty());
             InstanceLock playerLock = Global.InstanceLockMgr.FindActiveInstanceLock(player.GetGUID(), entries);
 
-            bool isNewLock = playerLock == null || playerLock.GetData().CompletedEncountersMask == 0 || playerLock.IsExpired();
+            bool isNewLock = playerLock == null || playerLock.IsNew() || playerLock.IsExpired();
 
             SQLTransaction trans = new();
 

@@ -70,7 +70,7 @@ namespace Game.Entities
             // some instances only have one difficulty
             Global.DB2Mgr.GetDownscaledMapDifficultyData(mapId, ref difficulty);
 
-            Log.outDebug(LogFilter.Maps, $"MapInstanced::CreateInstance: {(instanceLock?.GetInstanceId() != 0 ? "" : "new ")}map instance {instanceId} for {mapId} created with difficulty {difficulty}");
+            Log.outDebug(LogFilter.Maps, $"MapInstanced::CreateInstance: {(instanceLock?.IsNew() == true ? "new" : " ")} map instance {instanceId} for {mapId} created with difficulty {difficulty}");
 
             InstanceMap map = new InstanceMap(mapId, i_gridCleanUpDelay, instanceId, difficulty, team, instanceLock);
             Cypher.Assert(map.IsDungeon());

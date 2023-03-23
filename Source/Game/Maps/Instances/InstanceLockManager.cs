@@ -110,7 +110,7 @@ namespace Game.Maps
                 return TransferAbortReason.None;
             }
 
-            if (!entries.MapDifficulty.IsUsingEncounterLocks() && playerInstanceLock.GetInstanceId() != 0 && playerInstanceLock.GetInstanceId() != instanceLock.GetInstanceId())
+            if (!entries.MapDifficulty.IsUsingEncounterLocks() && playerInstanceLock.IsNew() && playerInstanceLock.GetInstanceId() != instanceLock.GetInstanceId())
                 return TransferAbortReason.LockedToDifferentInstance;
 
             return TransferAbortReason.None;
@@ -167,11 +167,13 @@ namespace Game.Maps
                 SharedInstanceLockData sharedData = new();
                 _instanceLockDataById[instanceId] = sharedData;
                 instanceLock = new SharedInstanceLock(entries.MapDifficulty.MapID, (Difficulty)entries.MapDifficulty.DifficultyID,
-                    GetNextResetTime(entries), 0, sharedData);
+                    GetNextResetTime(entries), instanceId, sharedData);
             }
             else
                 instanceLock = new InstanceLock(entries.MapDifficulty.MapID, (Difficulty)entries.MapDifficulty.DifficultyID,
-                    GetNextResetTime(entries), 0);
+                    GetNextResetTime(entries), instanceId);
+
+            instanceLock.SetIsNew(true);
 
             if (!_temporaryInstanceLocksByPlayer.ContainsKey(playerGuid))
                 _temporaryInstanceLocksByPlayer[playerGuid] = new Dictionary<InstanceLockKey, InstanceLock>();
@@ -237,7 +239,7 @@ namespace Game.Maps
             {
                 if (entries.IsInstanceIdBound())
                 {
-                    Cypher.Assert(instanceLock.GetInstanceId() == 0 || instanceLock.GetInstanceId() == updateEvent.InstanceId);
+                    Cypher.Assert(instanceLock.GetInstanceId() == updateEvent.InstanceId);
                     var sharedDataItr = _instanceLockDataById.LookupByKey(updateEvent.InstanceId);
                     Cypher.Assert(sharedDataItr != null);
                     Cypher.Assert(sharedDataItr == (instanceLock as SharedInstanceLock).GetSharedData());
@@ -246,6 +248,7 @@ namespace Game.Maps
                 instanceLock.SetInstanceId(updateEvent.InstanceId);
             }
 
+            instanceLock.SetIsNew(false);
             instanceLock.GetData().Data = updateEvent.NewData;
             if (updateEvent.CompletedEncounter != null)
             {
@@ -325,6 +328,9 @@ namespace Game.Maps
             if (_unloading)
                 return;
 
+            if (!_instanceLockDataById.ContainsKey(instanceId))
+                return;
+
             _instanceLockDataById.Remove(instanceId);
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_INSTANCE);
             stmt.AddValue(0, instanceId);
@@ -379,6 +385,9 @@ namespace Game.Maps
                     continue;
 
                 if (difficulty.HasValue && difficulty.Value != playerLockPair.Value.GetDifficultyId())
+                    continue;
+
+                if (playerLockPair.Value.IsExpired())
                     continue;
 
                 locksReset.Add(playerLockPair.Value);
@@ -470,6 +479,7 @@ namespace Game.Maps
         bool _extended;
         InstanceLockData _data = new();
         bool _isInUse;
+        bool _isNew;
 
         public InstanceLock(uint mapId, Difficulty difficultyId, DateTime expiryTime, uint instanceId)
         {
@@ -523,6 +533,10 @@ namespace Game.Maps
         public bool IsInUse() { return _isInUse; }
 
         public void SetInUse(bool inUse) { _isInUse = inUse; }
+
+        public bool IsNew() { return _isNew; }
+
+        public void SetIsNew(bool isNew) { _isNew = isNew; }
     }
 
     class SharedInstanceLockData : InstanceLockData
