@@ -15,11 +15,9 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Unit = _worldPacket.ReadPackedGuid();
-            IsSoftInteract = _worldPacket.HasBit();
         }
 
         public ObjectGuid Unit;
-        public bool IsSoftInteract;
     }
 
     public class LootResponse : ServerPacket
@@ -69,6 +67,9 @@ namespace Game.Networking.Packets
 
     class LootItemPkt : ClientPacket
     {
+        public List<LootRequest> Loot = new();
+        public bool IsSoftInteract;
+
         public LootItemPkt(WorldPacket packet) : base(packet) { }
 
         public override void Read()
@@ -85,9 +86,9 @@ namespace Game.Networking.Packets
 
                 Loot.Add(loot);
             }
-        }
 
-        public List<LootRequest> Loot = new();
+            IsSoftInteract = _worldPacket.HasBit();
+        }
     }
 
     class MasterLootItem : ClientPacket
@@ -142,9 +143,14 @@ namespace Game.Networking.Packets
 
     class LootMoney : ClientPacket
     {
+        public bool IsSoftInteract;
+
         public LootMoney(WorldPacket packet) : base(packet) { }
 
-        public override void Read() { }
+        public override void Read()
+        {
+            IsSoftInteract = _worldPacket.HasBit();
+        }
     }
 
     class LootMoneyNotify : ServerPacket

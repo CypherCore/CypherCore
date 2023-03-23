@@ -17,7 +17,7 @@ namespace Game.DataStorage
         public LocalizedString InfoName;
         public sbyte Type;
         public int Modifiers;
-        public int Profession;
+        public ushort Profession;
     }
 
     public sealed class QuestLineXQuestRecord

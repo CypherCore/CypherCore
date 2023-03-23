@@ -15,11 +15,12 @@ namespace Game.DataStorage
 
     public sealed class LanguagesRecord
     {
-        public uint Id;
         public LocalizedString Name;
+        public uint Id;
         public int Flags;
         public int UiTextureKitID;
         public int UiTextureKitElementCount;
+        public int LearningCurveID;
     }
 
     public sealed class LFGDungeonsRecord

@@ -69,7 +69,7 @@ namespace Game.DataStorage
         public string AllianceName;
         public string Description;
         public string Tooltip;
-        public byte GarrTypeID;
+        public sbyte GarrTypeID;
         public sbyte BuildingType;
         public uint HordeGameObjectID;
         public uint AllianceGameObjectID;
@@ -118,7 +118,7 @@ namespace Game.DataStorage
         public string HordeSourceText;
         public string AllianceSourceText;
         public string TitleName;
-        public byte GarrTypeID;
+        public sbyte GarrTypeID;
         public sbyte GarrFollowerTypeID;
         public int HordeCreatureID;
         public int AllianceCreatureID;
@@ -167,7 +167,7 @@ namespace Game.DataStorage
         public LocalizedString Description;
         public Vector2 MapPos;
         public Vector2 WorldPos;
-        public byte GarrTypeID;
+        public sbyte GarrTypeID;
         public byte GarrMissionTypeID;
         public sbyte GarrFollowerTypeID;
         public byte MaxFollowers;
@@ -248,7 +248,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public string Name;
-        public byte GarrTypeID;
+        public sbyte GarrTypeID;
         public int ClassID;
         public sbyte MaxTiers;
         public sbyte UiOrder;

@@ -828,7 +828,7 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_LANGUAGE_WORDS, "SELECT ID, Word, LanguageID FROM language_words WHERE (`VerifiedBuild` > 0) = ?");
 
             // Languages.db2
-            PrepareStatement(HotfixStatements.SEL_LANGUAGES, "SELECT ID, Name, Flags, UiTextureKitID, UiTextureKitElementCount FROM languages" +
+            PrepareStatement(HotfixStatements.SEL_LANGUAGES, "SELECT Name, ID, Flags, UiTextureKitID, UiTextureKitElementCount, LearningCurveID FROM languages" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_LANGUAGES_LOCALE, "SELECT ID, Name_lang FROM languages_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
 

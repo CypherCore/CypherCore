@@ -199,11 +199,11 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt32(Id);
+            _worldPacket.WriteUInt32(Flags);
             _worldPacket.WriteVector3(Pos);
             _worldPacket.WriteUInt32(Icon);
             _worldPacket.WriteUInt32(Importance);
             _worldPacket.WriteUInt32(WMOGroupID);
-            _worldPacket.WriteBits(Flags, 14);
             _worldPacket.WriteBits(Name.GetByteCount(), 6);
             _worldPacket.FlushBits();
             _worldPacket.WriteString(Name);

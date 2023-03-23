@@ -1113,8 +1113,6 @@ namespace Game
 
             // START OF DUMMY VALUES
             features.ComplaintStatus = (byte)ComplaintStatus.EnabledWithAutoIgnore;
-            features.TwitterPostThrottleLimit = 60;
-            features.TwitterPostThrottleCooldown = 20;
             features.CfgRealmID = 2;
             features.CfgRealmRecID = 0;
             features.TokenPollTimeSeconds = 300;

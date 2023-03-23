@@ -391,6 +391,7 @@ namespace Game.Networking.Packets
                 RideTicket.Read(data);
 
                 GroupFinderActivityID = data.ReadUInt32();
+                Unknown1007 = data.ReadUInt8();
                 LastTitleAuthorGuid = data.ReadPackedGuid();
                 LastDescriptionAuthorGuid = data.ReadPackedGuid();
                 LastVoiceChatAuthorGuid = data.ReadPackedGuid();
@@ -408,6 +409,7 @@ namespace Game.Networking.Packets
 
             public RideTicket RideTicket;
             public uint GroupFinderActivityID;
+            public byte Unknown1007;
             public ObjectGuid LastTitleAuthorGuid;
             public ObjectGuid LastDescriptionAuthorGuid;
             public ObjectGuid LastVoiceChatAuthorGuid;

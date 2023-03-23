@@ -77,7 +77,7 @@ namespace Game
             {
                 TraitCostRecord traitCostEntry = CliDB.TraitCostStorage.LookupByKey(traitNodeXTraitCostEntry.TraitCostID);
                 if (traitCostEntry != null)
-                    nodeCosts.Add(traitNodeXTraitCostEntry.TraitNodeID, traitCostEntry);
+                    nodeCosts.Add((uint)traitNodeXTraitCostEntry.TraitNodeID, traitCostEntry);
             }
 
             MultiMap<int, TraitNodeEntryRecord> nodeEntries = new();

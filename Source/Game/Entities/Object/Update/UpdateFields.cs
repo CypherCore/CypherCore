@@ -2596,11 +2596,11 @@ namespace Game.Entities
         public UpdateField<int> CovenantID = new(32, 34);
         public UpdateField<int> SoulbindID = new(32, 35);
         public UpdateField<DungeonScoreSummary> DungeonScore = new(32, 36);
-        public UpdateFieldArray<QuestLog> QuestLog = new(125, 37, 38);
-        public UpdateFieldArray<VisibleItem> VisibleItems = new(19, 163, 164);
-        public UpdateFieldArray<float> AvgItemLevel = new(6, 183, 184);
+        public UpdateFieldArray<QuestLog> QuestLog = new(175, 37, 38);
+        public UpdateFieldArray<VisibleItem> VisibleItems = new(19, 213, 214);
+        public UpdateFieldArray<float> AvgItemLevel = new(6, 233, 234);
 
-        public PlayerData() : base(0, TypeId.Player, 190) { }
+        public PlayerData() : base(0, TypeId.Player, 240) { }
 
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
         {
@@ -2622,10 +2622,9 @@ namespace Game.Entities
             data.WriteInt32(GuildTimeStamp);
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.PartyMember))
             {
-                for (int i = 0; i < 125; ++i)
-                {
+                for (int i = 0; i < 175; ++i)
                     QuestLog[i].WriteCreate(data, owner, receiver);
-                }
+
                 data.WriteInt32(QuestSessionQuestLog.Size());
             }
             for (int i = 0; i < 19; ++i)
@@ -2681,7 +2680,7 @@ namespace Game.Entities
 
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
         {
-            UpdateMask allowedMaskForTarget = new(188, new[] { 0xFFFFFFEDu, 0x0000001Fu, 0x00000000u, 0x00000000u, 0x00000000u, 0x3FFFFFF8u });
+            UpdateMask allowedMaskForTarget = new(188, new[] { 0xFFFFFFEDu, 0x0000001Fu, 0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0xFFE00000u, 0x0000FFFFu });
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
         }
@@ -2689,20 +2688,20 @@ namespace Game.Entities
         public void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.PartyMember))
-                allowedMaskForTarget.OR(new UpdateMask(188, new[] { 0x00000012u, 0xFFFFFFE0u, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0x00000007u }));
+                allowedMaskForTarget.OR(new UpdateMask(188, new[] { 0x00000012u, 0xFFFFFFE0u, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0x001FFFFFu, 0x00000000u }));
         }
 
         public void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
         {
-            UpdateMask allowedMaskForTarget = new(188, new[] { 0xFFFFFFEDu, 0x0000001Fu, 0x00000000u, 0x00000000u, 0x00000000u, 0x3FFFFFF8u });
+            UpdateMask allowedMaskForTarget = new(188, new[] { 0xFFFFFFEDu, 0x0000001Fu, 0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0xFFE00000u, 0x0000FFFFu });
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             changesMask.AND(allowedMaskForTarget);
         }
 
         public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Player owner, Player receiver)
         {
-            data.WriteBits(changesMask.GetBlocksMask(0), 6);
-            for (uint i = 0; i < 6; ++i)
+            data.WriteBits(changesMask.GetBlocksMask(0), 8);
+            for (uint i = 0; i < 8; ++i)
                 if (changesMask.GetBlock(i) != 0)
                     data.WriteBits(changesMask.GetBlock(i), 32);
 
@@ -2914,7 +2913,7 @@ namespace Game.Entities
             }
             if (changesMask[37])
             {
-                for (int i = 0; i < 125; ++i)
+                for (int i = 0; i < 175; ++i)
                 {
                     if (changesMask[38 + i])
                     {
@@ -2925,7 +2924,7 @@ namespace Game.Entities
                     }
                 }
             }
-            if (changesMask[163])
+            if (changesMask[214])
             {
                 for (int i = 0; i < 19; ++i)
                 {
@@ -2935,11 +2934,11 @@ namespace Game.Entities
                     }
                 }
             }
-            if (changesMask[183])
+            if (changesMask[233])
             {
                 for (int i = 0; i < 6; ++i)
                 {
-                    if (changesMask[184 + i])
+                    if (changesMask[234 + i])
                     {
                         data.WriteFloat(AvgItemLevel[i]);
                     }

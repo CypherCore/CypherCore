@@ -419,13 +419,13 @@ namespace Game.DataStorage
             }
 
             // Check loaded DB2 files proper version
-            if (!AreaTableStorage.ContainsKey(14618) ||               // last area added in 10.0.5 (47660)
-                !CharTitlesStorage.ContainsKey(753) ||                // last char title added in 10.0.5 (47660)
-                !GemPropertiesStorage.ContainsKey(4028) ||            // last gem property added in 10.0.5 (47660)
-                !ItemStorage.ContainsKey(203716) ||                   // last item added in 10.0.5 (47660)
-                !ItemExtendedCostStorage.ContainsKey(7882) ||         // last item extended cost added in 10.0.5 (47660)
-                !MapStorage.ContainsKey(2582) ||                      // last map added in 10.0.5 (47660)
-                !SpellNameStorage.ContainsKey(401848))                // last spell added in 10.0.5 (47660)
+            if (!AreaTableStorage.ContainsKey(14720) ||               // last area added in 10.0.7 (48520)
+                !CharTitlesStorage.ContainsKey(762) ||                // last char title added in 10.0.7 (48520)
+                !GemPropertiesStorage.ContainsKey(4059) ||            // last gem property added in 10.0.7 (48520)
+                !ItemStorage.ContainsKey(205244) ||                   // last item added in 10.0.7 (48520)
+                !ItemExtendedCostStorage.ContainsKey(8043) ||         // last item extended cost added in 10.0.7 (48520)
+                !MapStorage.ContainsKey(2616) ||                      // last map added in 10.0.7 (48520)
+                !SpellNameStorage.ContainsKey(409033))                // last spell added in 10.0.7 (48520)
             {
                 Log.outFatal(LogFilter.ServerLoading, "You have _outdated_ DB2 files. Please extract correct versions from current using client.");
                 Environment.Exit(1);

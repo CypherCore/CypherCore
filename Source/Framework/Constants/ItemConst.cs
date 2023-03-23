@@ -58,7 +58,14 @@ namespace Framework.Constants
             SocketColor.RelicWater,
             SocketColor.RelicLife,
             SocketColor.RelicWind,
-            SocketColor.RelicHoly
+            SocketColor.RelicHoly,
+            SocketColor.PunchcardRed,
+            SocketColor.PunchcardYellow,
+            SocketColor.PunchcardBlue,
+            SocketColor.Domination,
+            SocketColor.Cypher,
+            SocketColor.Tinker,
+            SocketColor.Primordial
         };
 
         public static ItemModifier[] AppearanceModifierSlotBySpec =
@@ -194,6 +201,13 @@ namespace Framework.Constants
         RelicLife = 0x04000,
         RelicWind = 0x08000,
         RelicHoly = 0x10000,
+        PunchcardRed = 0x20000,
+        PunchcardYellow = 0x40000,
+        PunchcardBlue = 0x80000,
+        Domination = 0x100000,
+        Cypher = 0x200000,
+        Tinker = 0x400000,
+        Primordial = 0x800000,
 
         Standard = (Red | Yellow | Blue)
     }

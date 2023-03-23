@@ -249,7 +249,7 @@ namespace Game.DataStorage
     public sealed class TraitNodeXTraitCostRecord
     {
         public uint Id;
-        public uint TraitNodeID;
+        public int TraitNodeID;
         public int TraitCostID;
     }
 

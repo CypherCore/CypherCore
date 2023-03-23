@@ -24,9 +24,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(RAFSystem.MaxRecruitMonths);
             _worldPacket.WriteUInt32(RAFSystem.MaxRecruitmentUses);
             _worldPacket.WriteUInt32(RAFSystem.DaysInCycle);
-
-            _worldPacket.WriteUInt32(TwitterPostThrottleLimit);
-            _worldPacket.WriteUInt32(TwitterPostThrottleCooldown);
+            _worldPacket.WriteUInt32(RAFSystem.Unknown1007);
 
             _worldPacket.WriteUInt32(TokenPollTimeSeconds);
             _worldPacket.WriteUInt32(KioskSessionMinutes);
@@ -61,7 +59,6 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(RestrictedAccount);
             _worldPacket.WriteBit(CommerceSystemEnabled);
             _worldPacket.WriteBit(TutorialsEnabled);
-            _worldPacket.WriteBit(TwitterEnabled);
 
             _worldPacket.WriteBit(Unk67);
             _worldPacket.WriteBit(WillKickFromWorld);
@@ -140,8 +137,6 @@ namespace Game.Networking.Packets
         public uint CfgRealmID;
         public byte ComplaintStatus;
         public int CfgRealmRecID;
-        public uint TwitterPostThrottleLimit;
-        public uint TwitterPostThrottleCooldown;
         public uint TokenPollTimeSeconds;
         public long TokenBalanceAmount;
         public uint BpayStoreProductDeliveryDelay;
@@ -155,7 +150,6 @@ namespace Game.Networking.Packets
         public bool ItemRestorationButtonEnabled;
         public bool CharUndeleteEnabled; // Implemented
         public bool BpayStoreDisabledByParentalControls;
-        public bool TwitterEnabled;
         public bool CommerceSystemEnabled;
         public bool Unk67;
         public bool WillKickFromWorld;
@@ -237,9 +231,10 @@ namespace Game.Networking.Packets
             public uint MaxRecruitMonths;
             public uint MaxRecruitmentUses;
             public uint DaysInCycle;
+            public uint Unknown1007;
         }
     }
-    
+
     public class FeatureSystemStatusGlueScreen : ServerPacket
     {
         public FeatureSystemStatusGlueScreen() : base(ServerOpcodes.FeatureSystemStatusGlueScreen) { }
@@ -272,6 +267,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(LaunchETA.HasValue);
             _worldPacket.WriteBit(AddonsDisabled);
             _worldPacket.WriteBit(Unused1000);
+
+            _worldPacket.WriteBit(AccountSaveDataExportEnabled);
+            _worldPacket.WriteBit(AccountLockedByExport);
+
             _worldPacket.FlushBits();
 
             if (EuropaTicketSystemStatus.HasValue)
@@ -292,6 +291,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt16(MaxPlayerNameQueriesPerPacket);
             _worldPacket.WriteInt16(PlayerNameQueryTelemetryInterval);
             _worldPacket.WriteUInt32((uint)PlayerNameQueryInterval.TotalSeconds);
+            _worldPacket.WriteInt32(DebugTimeEvents.Count);
+            _worldPacket.WriteInt32(Unused1007);
 
             if (LaunchETA.HasValue)
                 _worldPacket.WriteInt32(LaunchETA.Value);
@@ -301,6 +302,9 @@ namespace Game.Networking.Packets
 
             foreach (GameRuleValuePair gameRuleValue in GameRuleValues)
                 gameRuleValue.Write(_worldPacket);
+
+            foreach (DebugTimeEventInfo debugTimeEventInfo in DebugTimeEvents)
+                debugTimeEventInfo.Write(_worldPacket);
         }
 
         public bool BpayStoreAvailable; // NYI
@@ -322,6 +326,8 @@ namespace Game.Networking.Packets
         public bool Unknown901CheckoutRelated; // NYI
         public bool AddonsDisabled;
         public bool Unused1000;
+        public bool AccountSaveDataExportEnabled;
+        public bool AccountLockedByExport;
         public EuropaTicketConfig? EuropaTicketSystemStatus;
         public List<int> LiveRegionCharacterCopySourceRegions = new();
         public uint TokenPollTimeSeconds;     // NYI
@@ -339,6 +345,8 @@ namespace Game.Networking.Packets
         public short PlayerNameQueryTelemetryInterval = 600;
         public TimeSpan PlayerNameQueryInterval = TimeSpan.FromSeconds(10);
         public int? LaunchETA;
+        public List<DebugTimeEventInfo> DebugTimeEvents = new();
+        public int Unused1007;
     }
 
     public class MOTD : ServerPacket
@@ -427,6 +435,21 @@ namespace Game.Networking.Packets
         {
             data.WriteInt32(Rule);
             data.WriteInt32(Value);
+        }
+    }
+
+    public struct DebugTimeEventInfo
+    {
+        public uint TimeEvent;
+        public string Text;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(TimeEvent);
+            data.WriteBits(Text.GetByteCount(), 7);
+            data.FlushBits();
+
+            data.WriteString(Text);
         }
     }
 }

@@ -14,6 +14,8 @@ namespace Game.Networking.Packets
         public uint Offset;
         public byte MinLevel = 1;
         public byte MaxLevel = SharedConst.MaxLevel;
+        public byte Unused1007_1;
+        public byte Unused1007_2;
         public AuctionHouseFilterMask Filters;
         public byte[] KnownPets;
         public sbyte MaxPetLevel;
@@ -30,6 +32,8 @@ namespace Game.Networking.Packets
             Offset = _worldPacket.ReadUInt32();
             MinLevel = _worldPacket.ReadUInt8();
             MaxLevel = _worldPacket.ReadUInt8();
+            Unused1007_1 = _worldPacket.ReadUInt8();
+            Unused1007_2= _worldPacket.ReadUInt8();
             Filters = (AuctionHouseFilterMask)_worldPacket.ReadUInt32();
             uint knownPetSize = _worldPacket.ReadUInt32();
             MaxPetLevel = _worldPacket.ReadInt8();

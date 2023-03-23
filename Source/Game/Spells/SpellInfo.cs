@@ -4824,6 +4824,8 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.None), // 302 SPELL_EFFECT_GATHERING
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 303 SPELL_EFFECT_CREATE_TRAIT_TREE_CONFIG
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 304 SPELL_EFFECT_CHANGE_ACTIVE_COMBAT_TRAIT_CONFIG
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 305 SPELL_EFFECT_305
+            new StaticData(SpellEffectImplicitTargetTypes.None, SpellTargetObjectTypes.None), // 306 SPELL_EFFECT_306
         };
 
         #region Fields

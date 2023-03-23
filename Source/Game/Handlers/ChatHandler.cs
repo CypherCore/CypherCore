@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Chat;
 using Game.DataStorage;
 using Game.Entities;
@@ -249,26 +248,26 @@ namespace Game
                     GetPlayer().Whisper(msg, lang, receiver);
                     break;
                 case ChatMsg.Party:
+                {
+                    // if player is in Battleground, he cannot say to Battlegroundmembers by /p
+                    Group group = GetPlayer().GetOriginalGroup();
+                    if (!group)
                     {
-                        // if player is in Battleground, he cannot say to Battlegroundmembers by /p
-                        Group group = GetPlayer().GetOriginalGroup();
-                        if (!group)
-                        {
-                            group = GetPlayer().GetGroup();
-                            if (!group || group.IsBGGroup())
-                                return;
-                        }
-
-                        if (group.IsLeader(GetPlayer().GetGUID()))
-                            type = ChatMsg.PartyLeader;
-
-                        Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, group);
-
-                        ChatPkt data = new();
-                        data.Initialize(type, lang, sender, null, msg);
-                        group.BroadcastPacket(data, false, group.GetMemberGroup(GetPlayer().GetGUID()));
+                        group = GetPlayer().GetGroup();
+                        if (!group || group.IsBGGroup())
+                            return;
                     }
-                    break;
+
+                    if (group.IsLeader(GetPlayer().GetGUID()))
+                        type = ChatMsg.PartyLeader;
+
+                    Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, group);
+
+                    ChatPkt data = new();
+                    data.Initialize(type, lang, sender, null, msg);
+                    group.BroadcastPacket(data, false, group.GetMemberGroup(GetPlayer().GetGUID()));
+                }
+                break;
                 case ChatMsg.Guild:
                     if (GetPlayer().GetGuildId() != 0)
                     {
@@ -294,35 +293,35 @@ namespace Game
                     }
                     break;
                 case ChatMsg.Raid:
-                    {
-                        Group group = GetPlayer().GetGroup();
-                        if (!group || !group.IsRaidGroup() || group.IsBGGroup())
-                            return;
+                {
+                    Group group = GetPlayer().GetGroup();
+                    if (!group || !group.IsRaidGroup() || group.IsBGGroup())
+                        return;
 
-                        if (group.IsLeader(GetPlayer().GetGUID()))
-                            type = ChatMsg.RaidLeader;
+                    if (group.IsLeader(GetPlayer().GetGUID()))
+                        type = ChatMsg.RaidLeader;
 
-                        Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, group);
+                    Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, group);
 
-                        ChatPkt data = new();
-                        data.Initialize(type, lang, sender, null, msg);
-                        group.BroadcastPacket(data, false);
-                    }
-                    break;
+                    ChatPkt data = new();
+                    data.Initialize(type, lang, sender, null, msg);
+                    group.BroadcastPacket(data, false);
+                }
+                break;
                 case ChatMsg.RaidWarning:
-                    {
-                        Group group = GetPlayer().GetGroup();
-                        if (!group || !(group.IsRaidGroup() || WorldConfig.GetBoolValue(WorldCfg.ChatPartyRaidWarnings)) || !(group.IsLeader(GetPlayer().GetGUID()) || group.IsAssistant(GetPlayer().GetGUID())) || group.IsBGGroup())
-                            return;
+                {
+                    Group group = GetPlayer().GetGroup();
+                    if (!group || !(group.IsRaidGroup() || WorldConfig.GetBoolValue(WorldCfg.ChatPartyRaidWarnings)) || !(group.IsLeader(GetPlayer().GetGUID()) || group.IsAssistant(GetPlayer().GetGUID())) || group.IsBGGroup())
+                        return;
 
-                        Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, group);
+                    Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, group);
 
-                        ChatPkt data = new();
-                        //in Battleground, raid warning is sent only to players in Battleground - code is ok
-                        data.Initialize(ChatMsg.RaidWarning, lang, sender, null, msg);
-                        group.BroadcastPacket(data, false);
-                    }
-                    break;
+                    ChatPkt data = new();
+                    //in Battleground, raid warning is sent only to players in Battleground - code is ok
+                    data.Initialize(ChatMsg.RaidWarning, lang, sender, null, msg);
+                    group.BroadcastPacket(data, false);
+                }
+                break;
                 case ChatMsg.Channel:
                     if (!HasPermission(RBACPermissions.SkipCheckChatChannelReq))
                     {
@@ -340,21 +339,21 @@ namespace Game
                     }
                     break;
                 case ChatMsg.InstanceChat:
-                    {
-                        Group group = GetPlayer().GetGroup();
-                        if (!group)
-                            return;
+                {
+                    Group group = GetPlayer().GetGroup();
+                    if (!group)
+                        return;
 
-                        if (group.IsLeader(GetPlayer().GetGUID()))
-                            type = ChatMsg.InstanceChatLeader;
+                    if (group.IsLeader(GetPlayer().GetGUID()))
+                        type = ChatMsg.InstanceChatLeader;
 
-                        Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, group);
+                    Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, group);
 
-                        ChatPkt packet = new();
-                        packet.Initialize(type, lang, sender, null, msg);
-                        group.BroadcastPacket(packet, false);
-                        break;
-                    }
+                    ChatPkt packet = new();
+                    packet.Initialize(type, lang, sender, null, msg);
+                    group.BroadcastPacket(packet, false);
+                    break;
+                }
                 default:
                     Log.outError(LogFilter.ChatSystem, "CHAT: unknown message type {0}, lang: {1}", type, lang);
                     break;
@@ -415,27 +414,27 @@ namespace Game
                 case ChatMsg.Party:
                 case ChatMsg.Raid:
                 case ChatMsg.InstanceChat:
+                {
+                    Group group = null;
+                    int subGroup = -1;
+                    if (type != ChatMsg.InstanceChat)
+                        group = sender.GetOriginalGroup();
+
+                    if (!group)
                     {
-                        Group group = null;
-                        int subGroup = -1;
-                        if (type != ChatMsg.InstanceChat)
-                            group = sender.GetOriginalGroup();
-
+                        group = sender.GetGroup();
                         if (!group)
-                        {
-                            group = sender.GetGroup();
-                            if (!group)
-                                break;
+                            break;
 
-                            if (type == ChatMsg.Party)
-                                subGroup = sender.GetSubGroup();
-                        }
-
-                        ChatPkt data = new();
-                        data.Initialize(type, isLogged ? Language.AddonLogged : Language.Addon, sender, null, text, 0, "", Locale.enUS, prefix);
-                        group.BroadcastAddonMessagePacket(data, prefix, true, subGroup, sender.GetGUID());
-                        break;
+                        if (type == ChatMsg.Party)
+                            subGroup = sender.GetSubGroup();
                     }
+
+                    ChatPkt data = new();
+                    data.Initialize(type, isLogged ? Language.AddonLogged : Language.Addon, sender, null, text, 0, "", Locale.enUS, prefix);
+                    group.BroadcastAddonMessagePacket(data, prefix, true, subGroup, sender.GetGUID());
+                    break;
+                }
                 case ChatMsg.Channel:
                     Channel chn = channelGuid.HasValue ? ChannelManager.GetChannelForPlayerByGuid(channelGuid.Value, sender) : ChannelManager.GetChannelForPlayerByNamePart(target, sender);
                     if (chn != null)
@@ -625,5 +624,26 @@ namespace Game
             SendPacket(new ChatRestricted(restriction));
         }
 
+        [WorldPacketHandler(ClientOpcodes.ChatCanLocalWhisperTargetRequest)]
+        void HandleChatCanLocalWhisperTargetRequest(CanLocalWhisperTargetRequest canLocalWhisperTargetRequest)
+        {
+            ChatWhisperTargetStatus status = ChatWhisperTargetStatus.CanWhisper;
+
+            Player sender = GetPlayer();
+            Player receiver = Global.ObjAccessor.FindConnectedPlayer(canLocalWhisperTargetRequest.WhisperTarget);
+            if (!receiver || (!receiver.IsAcceptWhispers() && receiver.GetSession().HasPermission(RBACPermissions.CanFilterWhispers) && !receiver.IsInWhisperWhiteList(sender.GetGUID())))
+                status = ChatWhisperTargetStatus.Offline;
+            else
+            {
+                if (!receiver.IsInWhisperWhiteList(sender.GetGUID()) && !receiver.IsGameMasterAcceptingWhispers())
+                    if (GetPlayer().GetEffectiveTeam() != receiver.GetEffectiveTeam() && !HasPermission(RBACPermissions.TwoSideInteractionChat))
+                        status = ChatWhisperTargetStatus.WrongFaction;
+            }
+
+            CanLocalWhisperTargetResponse canLocalWhisperTargetResponse = new();
+            canLocalWhisperTargetResponse.WhisperTarget = canLocalWhisperTargetRequest.WhisperTarget;
+            canLocalWhisperTargetResponse.Status = status;
+            SendPacket(canLocalWhisperTargetResponse);
+        }
     }
 }

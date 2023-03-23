@@ -13,11 +13,9 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Guid = _worldPacket.ReadPackedGuid();
-            IsSoftInteract = _worldPacket.HasBit();
         }
 
         public ObjectGuid Guid;
-        public bool IsSoftInteract;
     }
 
     public class GameObjReportUse : ClientPacket
@@ -27,11 +25,9 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Guid = _worldPacket.ReadPackedGuid();
-            IsSoftInteract = _worldPacket.HasBit();
         }
 
         public ObjectGuid Guid;
-        public bool IsSoftInteract;
     }
 
     class GameObjectDespawn : ServerPacket

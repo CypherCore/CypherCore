@@ -513,7 +513,7 @@ namespace Game.DataStorage
         public int MinAmount;
         public int MaxAmount;
         public int ContainerIconID;
-        public int ContainerQuality;
+        public sbyte ContainerQuality;
         public int OnLootSpellVisualKitID;
         public uint CurrencyTypesID;
     }

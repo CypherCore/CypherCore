@@ -460,6 +460,32 @@ namespace Game.Networking.Packets
         public byte Reason;
     }
 
+    class CanLocalWhisperTargetRequest : ClientPacket
+    {
+        public ObjectGuid WhisperTarget;
+
+        public CanLocalWhisperTargetRequest(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            WhisperTarget = _worldPacket.ReadPackedGuid();
+        }
+    }
+
+    class CanLocalWhisperTargetResponse : ServerPacket
+    {
+        public ObjectGuid WhisperTarget;
+        public ChatWhisperTargetStatus Status;
+
+        public CanLocalWhisperTargetResponse() : base(ServerOpcodes.ChatCanLocalWhisperTargetResponse) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(WhisperTarget);
+            _worldPacket.WriteInt32((int)Status);
+        }
+    }
+    
     public class ChatAddonMessageParams
     {
         public void Read(WorldPacket data)

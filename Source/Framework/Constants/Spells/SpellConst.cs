@@ -2481,6 +2481,9 @@ namespace Framework.Constants
         Gathering = 302,
         CreateTraitTreeConfig = 303, // Miscvalue[0] = Traittreeid
         ChangeActiveCombatTraitConfig = 304,
+        Unk305 = 305,
+        Unk306 = 306,
+
         TotalSpellEffects
     }
 

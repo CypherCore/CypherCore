@@ -966,12 +966,10 @@ namespace Game.Networking.Packets
         {
             SpellClickUnitGuid = _worldPacket.ReadPackedGuid();
             TryAutoDismount = _worldPacket.HasBit();
-            IsSoftInteract = _worldPacket.HasBit();
         }
 
         public ObjectGuid SpellClickUnitGuid;
         public bool TryAutoDismount;
-        public bool IsSoftInteract;
     }
 
     class ResyncRunes : ServerPacket
