@@ -2642,10 +2642,6 @@ namespace Game.Entities
                 }
             }
 
-            Creature creatureAttacker = ToCreature();
-            if (creatureAttacker && creatureAttacker.GetCreatureTemplate().TypeFlags.HasFlag(CreatureTypeFlags.TreatAsRaidUnit))
-                return false;
-
             if (playerAffectingAttacker && playerAffectingTarget)
                 if (playerAffectingAttacker.duel != null && playerAffectingAttacker.duel.Opponent == playerAffectingTarget && playerAffectingAttacker.duel.State == DuelState.InProgress)
                     return true;
@@ -2738,7 +2734,7 @@ namespace Game.Entities
             }
 
             // can't assist non-friendly targets
-            if (GetReactionTo(target) < ReputationRank.Neutral && target.GetReactionTo(this) < ReputationRank.Neutral && (!ToCreature() || !ToCreature().GetCreatureTemplate().TypeFlags.HasFlag(CreatureTypeFlags.TreatAsRaidUnit)))
+            if (GetReactionTo(target) < ReputationRank.Neutral && target.GetReactionTo(this) < ReputationRank.Neutral && (!ToCreature() || !ToCreature().HasFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells)))
                 return false;
 
             // PvP case
@@ -2774,7 +2770,7 @@ namespace Game.Entities
                     {
                         Creature creatureTarget = target.ToCreature();
                         if (creatureTarget != null)
-                            return (creatureTarget.GetCreatureTemplate().TypeFlags.HasFlag(CreatureTypeFlags.TreatAsRaidUnit) || creatureTarget.GetCreatureTemplate().TypeFlags.HasFlag(CreatureTypeFlags.CanAssist));
+                            return creatureTarget.HasFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells) || creatureTarget.GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.CanAssist);
                     }
                 }
             }

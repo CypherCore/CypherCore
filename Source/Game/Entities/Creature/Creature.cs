@@ -307,6 +307,7 @@ namespace Game.Entities
                 m_spells[i] = GetCreatureTemplate().Spells[i];
 
             _staticFlags.ApplyFlag(CreatureStaticFlags.NoXp, cInfo.CreatureType == CreatureType.Critter || IsPet() || IsTotem() || cInfo.FlagsExtra.HasFlag(CreatureFlagsExtra.NoXP));
+            _staticFlags.ApplyFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells, cInfo.TypeFlags.HasFlag(CreatureTypeFlags.TreatAsRaidUnit));
 
             return true;
         }
