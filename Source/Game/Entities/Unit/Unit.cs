@@ -4091,6 +4091,17 @@ namespace Game.Entities
                 UpdateDamagePctDoneMods(attackType);
         }
 
+        public void AddWorldEffect(int worldEffectId) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.WorldEffects), worldEffectId); }
+
+        public void RemoveWorldEffect(int worldEffectId)
+        {
+            int index = m_unitData.WorldEffects.FindIndex(worldEffectId);
+            if (index >= 0)
+                RemoveDynamicUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.WorldEffects), index);
+        }
+
+        public void ClearWorldEffects() { ClearDynamicUpdateFieldValues(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.WorldEffects)); }
+
         public CombatManager GetCombatManager() { return m_combatManager; }
 
         // Exposes the threat manager directly - be careful when interfacing with this
