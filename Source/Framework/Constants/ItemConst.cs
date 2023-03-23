@@ -358,6 +358,21 @@ namespace Framework.Constants
         TransmogSecondaryAppearanceSpec4 = 35,
         TransmogSecondaryAppearanceSpec5 = 36,
         SoulbindConduitRank = 37,
+        CraftingQualityId = 38,
+        CraftingSkillLineAbilityId = 39,
+        CraftingDataId = 40,
+        CraftingSkillReagents = 41,
+        CraftingSkillWatermark = 42,
+        CraftingReagentSlot0 = 43,
+        CraftingReagentSlot1 = 44,
+        CraftingReagentSlot2 = 45,
+        CraftingReagentSlot3 = 46,
+        CraftingReagentSlot4 = 47,
+        CraftingReagentSlot5 = 48,
+        CraftingReagentSlot6 = 49,
+        CraftingReagentSlot7 = 50,
+        CraftingReagentSlot8 = 51,
+        CraftingReagentSlot9 = 52,
 
         Max
     }
