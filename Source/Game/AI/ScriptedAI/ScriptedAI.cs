@@ -197,7 +197,10 @@ namespace Game.AI
             if (reset)
             {
                 who.LoadCreaturesAddon();
-                who.SetTappedBy(null);
+
+                if (!me.IsTapListNotClearedOnEvade())
+                    who.SetTappedBy(null);
+
                 who.ResetPlayerDamageReq();
                 who.SetLastDamagedTime(0);
                 who.SetCannotReachTarget(false);

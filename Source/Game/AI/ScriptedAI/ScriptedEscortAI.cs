@@ -121,7 +121,9 @@ namespace Game.AI
         {
             me.RemoveAllAuras();
             me.CombatStop(true);
-            me.SetTappedBy(null);
+
+            if (!me.IsTapListNotClearedOnEvade())
+                me.SetTappedBy(null);
 
             EngagementOver();
 

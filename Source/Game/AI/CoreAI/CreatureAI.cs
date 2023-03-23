@@ -294,7 +294,10 @@ namespace Game.AI
 
             // sometimes bosses stuck in combat?
             me.CombatStop(true);
-            me.SetTappedBy(null);
+
+            if (!me.IsTapListNotClearedOnEvade())
+                me.SetTappedBy(null);
+            
             me.ResetPlayerDamageReq();
             me.SetLastDamagedTime(0);
             me.SetCannotReachTarget(false);

@@ -1205,6 +1205,15 @@ namespace Game.Entities
         {
             _lootId = lootId;
         }
+
+        public void SetDontClearTapListOnEvade(bool dontClear)
+        {
+            // only temporary summons are allowed to not clear their tap list
+            if (m_spawnId == 0)
+                m_dontClearTapListOnEvade = dontClear;
+        }
+
+        public bool IsTapListNotClearedOnEvade() { return m_dontClearTapListOnEvade; }
         
         public void SetTappedBy(Unit unit, bool withGroup = true)
         {
