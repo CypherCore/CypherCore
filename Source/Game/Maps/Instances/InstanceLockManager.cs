@@ -97,9 +97,6 @@ namespace Game.Maps
 
         public TransferAbortReason CanJoinInstanceLock(ObjectGuid playerGuid, MapDb2Entries entries, InstanceLock instanceLock)
         {
-            if (!entries.MapDifficulty.HasResetSchedule())
-                return TransferAbortReason.None;
-
             InstanceLock playerInstanceLock = FindActiveInstanceLock(playerGuid, entries);
             if (playerInstanceLock == null)
                 return TransferAbortReason.None;
@@ -136,6 +133,9 @@ namespace Game.Maps
 
         public InstanceLock FindActiveInstanceLock(ObjectGuid playerGuid, MapDb2Entries entries, bool ignoreTemporary, bool ignoreExpired)
         {
+            if (!entries.MapDifficulty.HasResetSchedule())
+                return null;
+
             InstanceLock instanceLock = FindInstanceLock(_instanceLocksByPlayer, playerGuid, entries);
 
             // Ignore expired and not extended locks
