@@ -2337,7 +2337,9 @@ namespace Game.Entities
 
                     Player player = user.ToPlayer();
 
-                    player.SendPacket(new EnableBarberShop());
+                    EnableBarberShop enableBarberShop = new();
+                    enableBarberShop.CustomizationScope = (byte)info.BarberChair.CustomizationScope;
+                    player.SendPacket(enableBarberShop);
 
                     // fallback, will always work
                     player.TeleportTo(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation(), (TeleportToOptions.NotLeaveTransport | TeleportToOptions.NotLeaveCombat | TeleportToOptions.NotUnSummonPet));

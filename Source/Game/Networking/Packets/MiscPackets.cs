@@ -777,9 +777,14 @@ namespace Game.Networking.Packets
 
     public class EnableBarberShop : ServerPacket
     {
+        public byte CustomizationScope;
+
         public EnableBarberShop() : base(ServerOpcodes.EnableBarberShop) { }
 
-        public override void Write() { }
+        public override void Write() 
+        {
+            _worldPacket.WriteUInt8(CustomizationScope);
+        }
     }
 
     class PhaseShiftChange : ServerPacket
