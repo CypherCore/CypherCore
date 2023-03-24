@@ -215,7 +215,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(Prefix.GetByteCount(), 5);
             _worldPacket.WriteBits(Channel.GetByteCount(), 7);
             _worldPacket.WriteBits(ChatText.GetByteCount(), 12);
-            _worldPacket.WriteBits((byte)_ChatFlags, 14);
+            _worldPacket.WriteBits((byte)_ChatFlags, 15);
             _worldPacket.WriteBit(HideChatLog);
             _worldPacket.WriteBit(FakeSenderName);
             _worldPacket.WriteBit(Unused_801.HasValue);

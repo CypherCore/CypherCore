@@ -678,8 +678,8 @@ namespace Game.Maps
 
     public class TransportAnimation
     {
-        public Dictionary<uint, TransportAnimationRecord> Path = new();
-        public Dictionary<uint, TransportRotationRecord> Rotations = new();
+        public SortedList<uint, TransportAnimationRecord> Path = new();
+        public SortedList<uint, TransportRotationRecord> Rotations = new();
         public uint TotalTime;
 
         public TransportAnimationRecord GetPrevAnimNode(uint time)
@@ -687,11 +687,9 @@ namespace Game.Maps
             if (Path.Empty())
                 return null;
 
-            List<uint> lKeys = Path.Keys.ToList();
-            int reqIndex = lKeys.IndexOf(time);
-
+            int reqIndex = Path.IndexOfKey(time);
             if (reqIndex != -1)
-                return Path[lKeys[reqIndex - 1]];
+                return Path.GetValueAtIndex(reqIndex - 1);
 
             return Path.LastOrDefault().Value;
         }
@@ -701,11 +699,9 @@ namespace Game.Maps
             if (Rotations.Empty())
                 return null;
 
-            List<uint> lKeys = Rotations.Keys.ToList();
-            int reqIndex = lKeys.IndexOf(time) - 1;
-
+            int reqIndex = Rotations.IndexOfKey(time);
             if (reqIndex != -1)
-                return Rotations[lKeys[reqIndex]];
+                return Rotations.GetValueAtIndex(reqIndex - 1);
 
             return Rotations.LastOrDefault().Value;
         }
