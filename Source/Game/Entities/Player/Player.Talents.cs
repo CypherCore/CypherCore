@@ -961,7 +961,7 @@ namespace Game.Entities
             TraitConfig editedConfig = m_activePlayerData.TraitConfigs[editedIndex];
 
             // remove traits not found in new config
-            List<int> entryIndicesToRemove = new();
+            SortedSet<int> entryIndicesToRemove = new(Comparer<int>.Create((a, b) => -a.CompareTo(b)));
             for (int i = 0; i < editedConfig.Entries.Size(); ++i)
             {
                 TraitEntry oldEntry = editedConfig.Entries[i];

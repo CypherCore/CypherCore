@@ -98,7 +98,7 @@ namespace Game
                     if (newEntry.Rank != 0)
                         traitEntry.Rank = newEntry.Rank;
                     else
-                        newConfigState.Entries.RemoveAll(TraitEntrytraitEntry => traitEntry.TraitNodeID == newEntry.TraitNodeID && traitEntry.TraitNodeEntryID == newEntry.TraitNodeEntryID);
+                        newConfigState.Entries.RemoveAll(traitEntry => traitEntry.TraitNodeID == newEntry.TraitNodeID && traitEntry.TraitNodeEntryID == newEntry.TraitNodeEntryID);
                 }
                 else
                     newConfigState.Entries.Add(newEntry);
