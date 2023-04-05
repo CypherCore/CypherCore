@@ -1167,22 +1167,10 @@ namespace Game.Entities
 
         public override bool IsMovementPreventedByCasting()
         {
-            // first check if currently a movement allowed channel is active and we're not casting
-            Spell spell = GetCurrentSpell(CurrentSpellTypes.Channeled);
-            if (spell != null)
-            {
-                if (spell.GetState() != SpellState.Finished && spell.IsChannelActive())
-                    if (spell.CheckMovement() != SpellCastResult.SpellCastOk)
-                        return true;
-            }
+            if (!base.IsMovementPreventedByCasting() && !HasSpellFocus())
+                return false;
 
-            if (HasSpellFocus())
-                return true;
-
-            if (HasUnitState(UnitState.Casting))
-                return true;
-
-            return false;
+            return true;
         }
 
         public void StartPickPocketRefillTimer()

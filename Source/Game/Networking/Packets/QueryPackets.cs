@@ -391,7 +391,7 @@ namespace Game.Networking.Packets
         }
 
         public int MissingQuestCount;
-        public uint[] MissingQuestPOIs = new uint[125];
+        public uint[] MissingQuestPOIs = new uint[175];
     }
 
     public class QuestPOIQueryResponse : ServerPacket
