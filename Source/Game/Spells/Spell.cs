@@ -7809,6 +7809,12 @@ namespace Game.Spells
             if (IsTriggered())
                 return SpellCastResult.SpellCastOk;
 
+            // Creatures (not controlled) give priority to spell casting over movement.
+            // We assume that the casting is always valid and the current movement
+            // is stopped by Unit:IsmovementPreventedByCasting to prevent casting interruption.
+            if (m_caster.IsCreature() && !m_caster.ToCreature().IsControlledByPlayer())
+                return SpellCastResult.SpellCastOk;
+
             Unit unitCaster = m_caster.ToUnit();
             if (unitCaster != null)
             {
