@@ -1305,20 +1305,25 @@ namespace Game.Entities
             return false;
         }
 
-        public bool UpdateGatherSkill(uint SkillId, uint SkillValue, uint RedLevel, uint Multiplicator = 1, WorldObject obj = null)
+        public bool UpdateGatherSkill(uint skillId, uint skillValue, uint redLevel, uint multiplicator = 1, WorldObject obj = null)
         {
-            return UpdateGatherSkill((SkillType)SkillId, SkillValue, RedLevel, Multiplicator, obj);
+            return UpdateGatherSkill((SkillType)skillId, skillValue, redLevel, multiplicator, obj);
         }
 
-        public bool UpdateGatherSkill(SkillType SkillId, uint SkillValue, uint RedLevel, uint Multiplicator = 1, WorldObject obj = null)
+        public bool UpdateGatherSkill(SkillType skillId, uint skillValue, uint redLevel, uint multiplicator = 1, WorldObject obj = null)
         {
-            Log.outDebug(LogFilter.Player, "UpdateGatherSkill(SkillId {0} SkillLevel {1} RedLevel {2})", SkillId, SkillValue, RedLevel);
+            Log.outDebug(LogFilter.Player, $"UpdateGatherSkill(SkillId {skillId} SkillLevel {skillValue} RedLevel {redLevel})");
 
-            uint gathering_skill_gain = WorldConfig.GetUIntValue(WorldCfg.SkillGainGathering);
+            SkillLineRecord skillEntry = CliDB.SkillLineStorage.LookupByKey(skillId);
+            if (skillEntry == null)
+                return false;
 
-            uint grayLevel = RedLevel + 100;
-            uint greenLevel = RedLevel + 50;
-            uint yellowLevel = RedLevel + 25;
+            uint gatheringSkillGain = WorldConfig.GetUIntValue(WorldCfg.SkillGainGathering);
+
+            uint baseSkillLevelStep = 30;
+            uint yellowLevel = redLevel + baseSkillLevelStep;
+            uint greenLevel = yellowLevel + baseSkillLevelStep;
+            uint grayLevel = greenLevel + baseSkillLevelStep;
 
             GameObject go = obj?.ToGameObject();
             if (go != null)
@@ -1333,46 +1338,20 @@ namespace Game.Entities
             }
 
             // For skinning and Mining chance decrease with level. 1-74 - no decrease, 75-149 - 2 times, 225-299 - 8 times
-            switch (SkillId)
+            switch ((SkillType)skillEntry.ParentSkillLineID)
             {
                 case SkillType.Herbalism:
-                case SkillType.ClassicHerbalism:
-                case SkillType.OutlandHerbalism:
-                case SkillType.NorthrendHerbalism:
-                case SkillType.CataclysmHerbalism:
-                case SkillType.PandariaHerbalism:
-                case SkillType.DraenorHerbalism:
-                case SkillType.LegionHerbalism:
-                case SkillType.KulTiranHerbalism:
-                case SkillType.Jewelcrafting:
-                case SkillType.Inscription:
-                    return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, grayLevel, greenLevel, yellowLevel) * (int)Multiplicator, gathering_skill_gain);
+                    return UpdateSkillPro(skillId, SkillGainChance(skillValue, grayLevel, greenLevel, yellowLevel) * (int)multiplicator, gatheringSkillGain);
                 case SkillType.Skinning:
-                case SkillType.ClassicSkinning:
-                case SkillType.OutlandSkinning:
-                case SkillType.NorthrendSkinning:
-                case SkillType.CataclysmSkinning:
-                case SkillType.PandariaSkinning:
-                case SkillType.DraenorSkinning:
-                case SkillType.LegionSkinning:
-                case SkillType.KulTiranSkinning:
                     if (WorldConfig.GetIntValue(WorldCfg.SkillChanceSkinningSteps) == 0)
-                        return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, grayLevel, greenLevel, yellowLevel) * (int)Multiplicator, gathering_skill_gain);
+                        return UpdateSkillPro(skillId, SkillGainChance(skillValue, grayLevel, greenLevel, yellowLevel) * (int)multiplicator, gatheringSkillGain);
                     else
-                        return UpdateSkillPro(SkillId, (int)(SkillGainChance(SkillValue, grayLevel, greenLevel, yellowLevel) * Multiplicator) >> (int)(SkillValue / WorldConfig.GetIntValue(WorldCfg.SkillChanceSkinningSteps)), gathering_skill_gain);
+                        return UpdateSkillPro(skillId, (int)(SkillGainChance(skillValue, grayLevel, greenLevel, yellowLevel) * multiplicator) >> (int)(skillValue / WorldConfig.GetIntValue(WorldCfg.SkillChanceSkinningSteps)), gatheringSkillGain);
                 case SkillType.Mining:
-                case SkillType.ClassicMining:
-                case SkillType.OutlandMining:
-                case SkillType.NorthrendMining:
-                case SkillType.CataclysmMining:
-                case SkillType.PandariaMining:
-                case SkillType.DraenorMining:
-                case SkillType.LegionMining:
-                case SkillType.KulTiranMining:
                     if (WorldConfig.GetIntValue(WorldCfg.SkillChanceMiningSteps) == 0)
-                        return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, grayLevel, greenLevel, yellowLevel) * (int)Multiplicator, gathering_skill_gain);
+                        return UpdateSkillPro(skillId, SkillGainChance(skillValue, grayLevel, greenLevel, yellowLevel) * (int)multiplicator, gatheringSkillGain);
                     else
-                        return UpdateSkillPro(SkillId, (int)(SkillGainChance(SkillValue, grayLevel, greenLevel, yellowLevel) * Multiplicator) >> (int)(SkillValue / WorldConfig.GetIntValue(WorldCfg.SkillChanceMiningSteps)), gathering_skill_gain);
+                        return UpdateSkillPro(skillId, (int)(SkillGainChance(skillValue, grayLevel, greenLevel, yellowLevel) * multiplicator) >> (int)(skillValue / WorldConfig.GetIntValue(WorldCfg.SkillChanceMiningSteps)), gatheringSkillGain);
             }
             return false;
         }

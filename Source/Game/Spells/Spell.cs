@@ -5180,14 +5180,6 @@ namespace Game.Spells
                         if (loot != null && (!loot.IsLooted() || loot.loot_type == LootType.Skinning))
                             return SpellCastResult.TargetNotLooted;
 
-                        SkillType skill = creature.GetCreatureTemplate().GetRequiredLootSkill();
-
-                        ushort skillValue = m_caster.ToPlayer().GetSkillValue(skill);
-                        uint TargetLevel = m_targets.GetUnitTarget().GetLevelForTarget(m_caster);
-                        int ReqValue = (int)(skillValue < 100 ? (TargetLevel - 10) * 10 : TargetLevel * 5);
-                        if (ReqValue > skillValue)
-                            return SpellCastResult.LowCastlevel;
-
                         break;
                     }
                     case SpellEffectName.OpenLock:

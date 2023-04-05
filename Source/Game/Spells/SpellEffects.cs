@@ -3450,6 +3450,7 @@ namespace Game.Spells
             loot.FillLoot(creature.GetCreatureTemplate().SkinLootId, LootStorage.Skinning, player, true);
             player.SendLoot(loot);
 
+            // This formula is still used (10.0.5.48526)
             if (skill == SkillType.Skinning)
             {
                 int reqValue;
@@ -3478,12 +3479,20 @@ namespace Game.Spells
                 else
                     reqValue = 900;
 
-                // TODO: Specialize skillid for each expansion
-                // new db field?
-                // tied to one of existing expansion fields in creature_template?
+                ContentTuningRecord contentTuning = CliDB.ContentTuningStorage.LookupByKey(creature.GetContentTuning());
+                if (contentTuning == null)
+                    return;
 
-                // Double chances for elites
-                m_caster.ToPlayer().UpdateGatherSkill(skill, (uint)damage, (uint)reqValue, (uint)(creature.IsElite() ? 2 : 1));
+                uint skinningSkill = player.GetProfessionSkillForExp(skill, contentTuning.ExpansionID);
+                if (skinningSkill == 0)
+                    return;
+
+                uint pureSkillValue = player.GetPureSkillValue(skinningSkill);
+                if (pureSkillValue != 0)
+                {
+                    // Double chances for elites
+                    player.UpdateGatherSkill(skinningSkill, pureSkillValue, (uint)reqValue, creature.IsElite() ? 2 : 1u);
+                }
             }
         }
 
