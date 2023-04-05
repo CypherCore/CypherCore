@@ -1197,7 +1197,7 @@ namespace Game.Entities
             //lets remove flag for delayed teleports
             SetCanDelayTeleport(false);
 
-            bool canHaveNextQuest = !quest.HasFlag(QuestFlags.AutoComplete) ? !questGiver.IsPlayer() : true;
+            bool canHaveNextQuest = !quest.HasFlag(QuestFlags.AutoComplete) ? questGiver != null && !questGiver.IsPlayer() : true;
             if (canHaveNextQuest)
             {
                 switch (questGiver.GetTypeId())
