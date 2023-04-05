@@ -1,9 +1,9 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Dynamic;
 using Game.DataStorage;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -16,7 +16,7 @@ namespace Game.Movement
             path_Idx_offset = 0;
             velocity = 0.0f;
             parabolic_amplitude = 0.0f;
-            time_perc = 0.0f;
+            effect_start_time_percent = 0.0f;
             splineId = 0;
             initialOrientation = 0.0f;
             HasVelocity = false;
@@ -30,7 +30,8 @@ namespace Game.Movement
         public float velocity;
         public float parabolic_amplitude;
         public float vertical_acceleration;
-        public float time_perc;
+        public float effect_start_time_percent; // fraction of total spline duration
+        public TimeSpan effect_start_time;  // absolute value
         public uint splineId;
         public float initialOrientation;
         public SpellEffectExtraData spellEffectExtra;
@@ -59,7 +60,7 @@ namespace Game.Movement
                 return false;
             if (!CHECK(velocity >= 0.01f, true))
                 return false;
-            if (!CHECK(time_perc >= 0.0f && time_perc <= 1.0f, true))
+            if (!CHECK(effect_start_time_percent >= 0.0f && effect_start_time_percent <= 1.0f, true))
                 return false;
             if (!CHECK(_checkPathLengths(), false))
                 return false;

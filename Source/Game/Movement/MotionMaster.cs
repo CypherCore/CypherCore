@@ -632,12 +632,24 @@ namespace Game.Movement
             }
         }
 
-        public void MoveLand(uint id, Position pos, float? velocity = null)
+        public void MoveLand(uint id, Position pos, uint? tierTransitionId = null, float? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default)
         {
             var initializer = (MoveSplineInit init) =>
             {
                 init.MoveTo(pos, false);
-                init.SetAnimation(AnimTier.Ground);
+                init.SetAnimation(AnimTier.Ground, tierTransitionId.GetValueOrDefault(0));
+                switch (speedSelectionMode)
+                {
+                    case MovementWalkRunSpeedSelectionMode.ForceRun:
+                        init.SetWalk(false);
+                        break;
+                    case MovementWalkRunSpeedSelectionMode.ForceWalk:
+                        init.SetWalk(true);
+                        break;
+                    case MovementWalkRunSpeedSelectionMode.Default:
+                    default:
+                        break;
+                }
                 if (velocity.HasValue)
                     init.SetVelocity(velocity.Value);
             };
@@ -645,12 +657,24 @@ namespace Game.Movement
             Add(new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, id));
         }
 
-        public void MoveTakeoff(uint id, Position pos, float? velocity = null)
+        public void MoveTakeoff(uint id, Position pos, uint? tierTransitionId = null, float? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default)
         {
             var initializer = (MoveSplineInit init) =>
             {
                 init.MoveTo(pos, false);
-                init.SetAnimation(AnimTier.Hover);
+                init.SetAnimation(AnimTier.Hover, tierTransitionId.GetValueOrDefault(0));
+                switch (speedSelectionMode)
+                {
+                    case MovementWalkRunSpeedSelectionMode.ForceRun:
+                        init.SetWalk(false);
+                        break;
+                    case MovementWalkRunSpeedSelectionMode.ForceWalk:
+                        init.SetWalk(true);
+                        break;
+                    case MovementWalkRunSpeedSelectionMode.Default:
+                    default:
+                        break;
+                }
                 if (velocity.HasValue)
                     init.SetVelocity(velocity.Value);
             };

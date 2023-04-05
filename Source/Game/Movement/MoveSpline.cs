@@ -55,12 +55,16 @@ namespace Game.Movement
             // spline initialized, duration known and i able to compute parabolic acceleration
             if (args.flags.HasFlag(SplineFlag.Parabolic | SplineFlag.Animation | SplineFlag.FadeObject))
             {
-                effect_start_time = (int)(Duration() * args.time_perc);
-                if (args.flags.HasFlag(SplineFlag.Parabolic) && effect_start_time < Duration())
+                int spline_duration = Duration();
+                effect_start_time = (int)(spline_duration * args.effect_start_time_percent + args.effect_start_time.TotalMilliseconds);
+                if (effect_start_time > spline_duration)
+                    effect_start_time = spline_duration;
+
+                if (args.flags.HasFlag(SplineFlag.Parabolic) && effect_start_time < spline_duration)
                 {
                     if (args.parabolic_amplitude != 0.0f)
                     {
-                        float f_duration = MSToSec((uint)(Duration() - effect_start_time));
+                        float f_duration = MSToSec((uint)(spline_duration - effect_start_time));
                         vertical_acceleration = args.parabolic_amplitude * 8.0f / (f_duration * f_duration);
                     }
                     else if (args.vertical_acceleration != 0.0f)

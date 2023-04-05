@@ -300,7 +300,7 @@ namespace Game.Movement
 
         public void SetParabolic(float amplitude, float time_shift)
         {
-            args.time_perc = time_shift;
+            args.effect_start_time_percent = time_shift;
             args.parabolic_amplitude = amplitude;
             args.vertical_acceleration = 0.0f;
             args.flags.EnableParabolic();
@@ -308,16 +308,18 @@ namespace Game.Movement
 
         public void SetParabolicVerticalAcceleration(float vertical_acceleration, float time_shift)
         {
-            args.time_perc = time_shift;
+            args.effect_start_time_percent = time_shift;
             args.parabolic_amplitude = 0.0f;
             args.vertical_acceleration = vertical_acceleration;
             args.flags.EnableParabolic();
         }
 
-        public void SetAnimation(AnimTier anim)
+        public void SetAnimation(AnimTier anim, uint tierTransitionId = 0, TimeSpan transitionStartTime = default)
         {
-            args.time_perc = 0.0f;
+            args.effect_start_time_percent = 0.0f;
+            args.effect_start_time = transitionStartTime;
             args.animTier = new();
+            args.animTier.TierTransitionId = tierTransitionId;
             args.animTier.AnimTier = (byte)anim;
             args.flags.EnableAnimation();
         }
