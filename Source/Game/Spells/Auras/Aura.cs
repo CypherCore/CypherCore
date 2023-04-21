@@ -1884,20 +1884,23 @@ namespace Game.Spells
 
         public void TriggerProcOnEvent(uint procEffectMask, AuraApplication aurApp, ProcEventInfo eventInfo)
         {
-            bool prevented = CallScriptProcHandlers(aurApp, eventInfo);
-            if (!prevented)
+            if (procEffectMask != 0)
             {
-                for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+                bool prevented = CallScriptProcHandlers(aurApp, eventInfo);
+                if (!prevented)
                 {
-                    if (!Convert.ToBoolean(procEffectMask & (1 << i)))
-                        continue;
+                    for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+                    {
+                        if (!Convert.ToBoolean(procEffectMask & (1 << i)))
+                            continue;
 
-                    // OnEffectProc / AfterEffectProc hooks handled in AuraEffect.HandleProc()
-                    if (aurApp.HasEffect(i))
-                        GetEffect(i).HandleProc(aurApp, eventInfo);
+                        // OnEffectProc / AfterEffectProc hooks handled in AuraEffect.HandleProc()
+                        if (aurApp.HasEffect(i))
+                            GetEffect(i).HandleProc(aurApp, eventInfo);
+                    }
+
+                    CallScriptAfterProcHandlers(aurApp, eventInfo);
                 }
-
-                CallScriptAfterProcHandlers(aurApp, eventInfo);
             }
 
             ConsumeProcCharges(Global.SpellMgr.GetSpellProcEntry(GetSpellInfo()));

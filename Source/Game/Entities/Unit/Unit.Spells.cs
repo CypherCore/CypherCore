@@ -1544,7 +1544,7 @@ namespace Game.Entities
                         if (procEntry != null)
                         {
                             aurApp.GetBase().PrepareProcChargeDrop(procEntry, eventInfo);
-                            aurApp.GetBase().ConsumeProcCharges(procEntry);
+                            aurasTriggeringProc.Add(Tuple.Create(0u, aurApp));
                         }
                     }
 
