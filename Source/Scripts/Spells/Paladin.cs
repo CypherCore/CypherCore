@@ -40,6 +40,7 @@ namespace Scripts.Spells.Paladin
         public const uint DivineSteedBloodelf = 221886;
         public const uint DivineSteedTauren = 221885;
         public const uint DivineSteedZandalariTroll = 294133;
+        public const uint DivineSteedLfDraenei = 363608;
         public const uint DivineStormDamage = 224239;
         public const uint EnduringLight = 40471;
         public const uint EnduringJudgement = 40472;
@@ -422,7 +423,7 @@ namespace Scripts.Spells.Paladin
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.DivineSteedHuman, SpellIds.DivineSteedDwarf, SpellIds.DivineSteedDraenei, SpellIds.DivineSteedDarkIronDwarf, SpellIds.DivineSteedBloodelf, SpellIds.DivineSteedTauren, SpellIds.DivineSteedZandalariTroll);
+            return ValidateSpellInfo(SpellIds.DivineSteedHuman, SpellIds.DivineSteedDwarf, SpellIds.DivineSteedDraenei, SpellIds.DivineSteedDarkIronDwarf, SpellIds.DivineSteedBloodelf, SpellIds.DivineSteedTauren, SpellIds.DivineSteedZandalariTroll, SpellIds.DivineSteedLfDraenei);
         }
 
         void HandleOnCast()
@@ -439,8 +440,10 @@ namespace Scripts.Spells.Paladin
                     spellId = SpellIds.DivineSteedDwarf;
                     break;
                 case Race.Draenei:
-                case Race.LightforgedDraenei:
                     spellId = SpellIds.DivineSteedDraenei;
+                    break;
+                case Race.LightforgedDraenei:
+                    spellId = SpellIds.DivineSteedLfDraenei;
                     break;
                 case Race.DarkIronDwarf:
                     spellId = SpellIds.DivineSteedDarkIronDwarf;
