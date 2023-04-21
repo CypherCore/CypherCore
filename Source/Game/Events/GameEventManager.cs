@@ -1334,22 +1334,14 @@ namespace Game
                             tuple.Item2.equipement_id_prev = creature.GetCurrentEquipmentId();
                             tuple.Item2.modelid_prev = creature.GetDisplayId();
                             creature.LoadEquipment(tuple.Item2.equipment_id, true);
-                            if (tuple.Item2.modelid > 0 && tuple.Item2.modelid_prev != tuple.Item2.modelid &&
-                                Global.ObjectMgr.GetCreatureModelInfo(tuple.Item2.modelid) != null)
-                            {
-                                creature.SetDisplayId(tuple.Item2.modelid);
-                                creature.SetNativeDisplayId(tuple.Item2.modelid);
-                            }
+                            if (tuple.Item2.modelid > 0 && tuple.Item2.modelid_prev != tuple.Item2.modelid && Global.ObjectMgr.GetCreatureModelInfo(tuple.Item2.modelid) != null)
+                                creature.SetDisplayId(tuple.Item2.modelid, true);
                         }
                         else
                         {
                             creature.LoadEquipment(tuple.Item2.equipement_id_prev, true);
-                            if (tuple.Item2.modelid_prev > 0 && tuple.Item2.modelid_prev != tuple.Item2.modelid &&
-                                Global.ObjectMgr.GetCreatureModelInfo(tuple.Item2.modelid_prev) != null)
-                            {
-                                creature.SetDisplayId(tuple.Item2.modelid_prev);
-                                creature.SetNativeDisplayId(tuple.Item2.modelid_prev);
-                            }
+                            if (tuple.Item2.modelid_prev > 0 && tuple.Item2.modelid_prev != tuple.Item2.modelid && Global.ObjectMgr.GetCreatureModelInfo(tuple.Item2.modelid_prev) != null)
+                                creature.SetDisplayId(tuple.Item2.modelid_prev, true);
                         }
                     }
                 });

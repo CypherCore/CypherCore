@@ -196,16 +196,12 @@ namespace Game.Chat
         [Command("scale", RBACPermissions.CommandModifyScale)]
         static bool HandleModifyScaleCommand(CommandHandler handler, StringArguments args)
         {
-            float Scale;
+            float scale;
             Unit target = handler.GetSelectedUnit();
-            if (CheckModifySpeed(args, handler, target, out Scale, 0.1f, 10.0f, false))
+            if (CheckModifySpeed(args, handler, target, out scale, 0.1f, 10.0f, false))
             {
-                NotifyModification(handler, target, CypherStrings.YouChangeSize, CypherStrings.YoursSizeChanged, Scale);
-                Creature creatureTarget = target.ToCreature();
-                if (creatureTarget)
-                    creatureTarget.SetDisplayId(creatureTarget.GetDisplayId(), Scale);
-                else
-                    target.SetObjectScale(Scale);
+                NotifyModification(handler, target, CypherStrings.YouChangeSize, CypherStrings.YoursSizeChanged, scale);
+                target.SetObjectScale(scale);
                 return true;
             }
             return false;

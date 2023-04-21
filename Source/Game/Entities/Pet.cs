@@ -203,8 +203,7 @@ namespace Game.Entities
 
             GetCharmInfo().SetPetNumber(petInfo.PetNumber, IsPermanentPetFor(owner));
 
-            SetDisplayId(petInfo.DisplayId);
-            SetNativeDisplayId(petInfo.DisplayId);
+            SetDisplayId(petInfo.DisplayId, true);
             uint petlevel = petInfo.Level;
             ReplaceAllNpcFlags(NPCFlags.None);
             ReplaceAllNpcFlags2(NPCFlags2.None);
@@ -1492,9 +1491,9 @@ namespace Game.Entities
             return base.GetNativeObjectScale();
         }
 
-        public override void SetDisplayId(uint modelId, float displayScale = 1f)
+        public override void SetDisplayId(uint modelId, bool setNative = false)
         {
-            base.SetDisplayId(modelId, displayScale);
+            base.SetDisplayId(modelId, setNative);
 
             if (!IsControlled())
                 return;

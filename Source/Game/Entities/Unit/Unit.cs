@@ -1870,16 +1870,34 @@ namespace Game.Entities
 
         public virtual float GetNativeObjectScale() { return 1.0f; }
 
+        public float GetDisplayScale() { return m_unitData.DisplayScale; }
+        
         public uint GetDisplayId() { return m_unitData.DisplayID; }
 
-        public virtual void SetDisplayId(uint modelId, float displayScale = 1f)
+        public virtual void SetDisplayId(uint displayId, bool setNative = false)
         {
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayID), modelId);
+            float displayScale = SharedConst.DefaultPlayerDisplayScale;
+
+            if (IsCreature() && !IsPet())
+            {
+                CreatureModel model = ToCreature().GetCreatureTemplate().GetModelWithDisplayId(displayId);
+                if (model != null)
+                    displayScale = model.DisplayScale;
+            }
+
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayID), displayId);
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayScale), displayScale);
+
+            if (setNative)
+            {
+                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NativeDisplayID), displayId);
+                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NativeXDisplayScale), displayScale);
+            }
+
             // Set Gender by modelId
-            CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelInfo(modelId);
-            if (minfo != null)
-                SetGender((Gender)minfo.gender);
+            CreatureModelInfo modelInfo = Global.ObjectMgr.GetCreatureModelInfo(displayId);
+            if (modelInfo != null)
+                SetGender((Gender)modelInfo.gender);
         }
 
         public void RestoreDisplayId(bool ignorePositiveAurasPreventingMounting = false)
@@ -1944,11 +1962,6 @@ namespace Game.Entities
             SetDisplayId(GetNativeDisplayId());
         }
         public uint GetNativeDisplayId() { return m_unitData.NativeDisplayID; }
-        public void SetNativeDisplayId(uint displayId, float displayScale = 1f)
-        {
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NativeDisplayID), displayId);
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NativeXDisplayScale), displayScale);
-        }
         public float GetNativeDisplayScale() { return m_unitData.NativeXDisplayScale; }
 
         public bool IsMounted()

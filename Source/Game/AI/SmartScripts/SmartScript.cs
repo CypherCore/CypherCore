@@ -282,7 +282,7 @@ namespace Game.AI
                                 if (ci != null)
                                 {
                                     CreatureModel model = ObjectManager.ChooseDisplayId(ci);
-                                    target.ToCreature().SetDisplayId(model.CreatureDisplayID, model.DisplayScale);
+                                    target.ToCreature().SetDisplayId(model.CreatureDisplayID);
                                     Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_MORPH_TO_ENTRY_OR_MODEL: Creature entry {0}, GuidLow {1} set displayid to {2}",
                                         target.GetEntry(), target.GetGUID().ToString(), model.CreatureDisplayID);
                                 }

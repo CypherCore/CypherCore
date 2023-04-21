@@ -5056,8 +5056,7 @@ namespace Game.Entities
                 return;
             }
 
-            SetDisplayId(model.DisplayID);
-            SetNativeDisplayId(model.DisplayID);
+            SetDisplayId(model.DisplayID, true);
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StateAnimID), Global.DB2Mgr.GetEmptyAnimStateID());
         }
 

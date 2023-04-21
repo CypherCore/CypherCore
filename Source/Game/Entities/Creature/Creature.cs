@@ -264,8 +264,7 @@ namespace Game.Entities
                 return false;
             }
 
-            SetDisplayId(model.CreatureDisplayID, model.DisplayScale);
-            SetNativeDisplayId(model.CreatureDisplayID, model.DisplayScale);
+            SetDisplayId(model.CreatureDisplayID, true);
 
             // Load creature equipment
             if (data == null)
@@ -2003,10 +2002,7 @@ namespace Game.Entities
 
                     CreatureModel display = new(GetNativeDisplayId(), GetNativeDisplayScale(), 1.0f);
                     if (Global.ObjectMgr.GetCreatureModelRandomGender(ref display, GetCreatureTemplate()) != null)
-                    {
-                        SetDisplayId(display.CreatureDisplayID, display.DisplayScale);
-                        SetNativeDisplayId(display.CreatureDisplayID, display.DisplayScale);
-                    }
+                        SetDisplayId(display.CreatureDisplayID, true);
 
                     GetMotionMaster().InitializeDefault();
 
@@ -3023,20 +3019,20 @@ namespace Game.Entities
             CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelInfo(GetDisplayId());
             if (minfo != null)
             {
-                SetBoundingRadius((IsPet() ? 1.0f : minfo.BoundingRadius) * scale);
-                SetCombatReach((IsPet() ? SharedConst.DefaultPlayerCombatReach : minfo.CombatReach) * scale);
+                SetBoundingRadius((IsPet() ? 1.0f : minfo.BoundingRadius) * scale * GetDisplayScale());
+                SetCombatReach((IsPet() ? SharedConst.DefaultPlayerCombatReach : minfo.CombatReach) * scale * GetDisplayScale());
             }
         }
 
-        public override void SetDisplayId(uint modelId, float displayScale = 1f)
+        public override void SetDisplayId(uint modelId, bool setNative = false)
         {
-            base.SetDisplayId(modelId, displayScale);
+            base.SetDisplayId(modelId, setNative);
 
-            CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelInfo(modelId);
-            if (minfo != null)
+            CreatureModelInfo modelInfo = Global.ObjectMgr.GetCreatureModelInfo(modelId);
+            if (modelInfo != null)
             {
-                SetBoundingRadius((IsPet() ? 1.0f : minfo.BoundingRadius) * GetObjectScale());
-                SetCombatReach((IsPet() ? SharedConst.DefaultPlayerCombatReach : minfo.CombatReach) * GetObjectScale());
+                SetBoundingRadius((IsPet() ? 1.0f : modelInfo.BoundingRadius) * GetObjectScale() * GetDisplayScale());
+                SetCombatReach((IsPet() ? SharedConst.DefaultPlayerCombatReach : modelInfo.CombatReach) * GetObjectScale() * GetDisplayScale());
             }
         }
 
@@ -3044,7 +3040,7 @@ namespace Game.Entities
         {
             CreatureModel model = GetCreatureTemplate().GetModelByIdx(modelIdx);
             if (model != null)
-                SetDisplayId(model.CreatureDisplayID, model.DisplayScale);
+                SetDisplayId(model.CreatureDisplayID);
         }
 
         public override void SetTarget(ObjectGuid guid)

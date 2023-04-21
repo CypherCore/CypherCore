@@ -157,10 +157,7 @@ namespace Game.Entities
 
                                 uint display = pet.PacketInfo.DisplayID;
                                 if (display != 0)
-                                {
-                                    minion.SetDisplayId(display);
-                                    minion.SetNativeDisplayId(display);
-                                }
+                                    minion.SetDisplayId(display, true);
                             }
                         }
                     }
