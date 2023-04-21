@@ -1082,7 +1082,7 @@ namespace Scripts.Spells.Items
             OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
-    
+
     [Script] // 46203 - Goblin Weather Machine
     class spell_item_goblin_weather_machine : SpellScript
     {
@@ -1192,7 +1192,7 @@ namespace Scripts.Spells.Items
         Player _player;
 
         public PartyTimeEmoteEvent(Player player)
-        { 
+        {
             _player = player;
         }
 
@@ -1258,7 +1258,7 @@ namespace Scripts.Spells.Items
             AfterEffectApply.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Transform, AuraEffectHandleModes.Real));
         }
     }
-    
+
     [Script] // 59915 - Discerning Eye of the Beast Dummy
     class spell_item_discerning_eye_beast_dummy : AuraScript
     {
@@ -1379,7 +1379,7 @@ namespace Scripts.Spells.Items
             OnEffectHit.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
-    
+
     // http://www.wowhead.com/item=47499 Flask of the North
     [Script] // 67019 Flask of the North
     class spell_item_flask_of_the_north : SpellScript
@@ -1569,7 +1569,7 @@ namespace Scripts.Spells.Items
             OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
-    
+
     [Script] // 40971 - Bonus Healing (Crystal Spire of Karabor)
     class spell_item_crystal_spire_of_karabor : AuraScript
     {
@@ -2917,7 +2917,7 @@ namespace Scripts.Spells.Items
             OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
-    
+
     [Script]
     class spell_item_nitro_boosts : SpellScript
     {
@@ -3977,6 +3977,106 @@ namespace Scripts.Spells.Items
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 2, SpellEffectName.Inebriate));
+        }
+    }
+
+    enum AmalgamsSeventhSpineSpellIds
+    {
+        FragileEchoesMonk = 225281,
+        FragileEchoesShaman = 225292,
+        FragileEchoesPriestDiscipline = 225294,
+        FragileEchoesPaladin = 225297,
+        FragileEchoesDruid = 225298,
+        FragileEchoesPriestHoly = 225366,
+        FragileEchoEnergize = 215270,
+    }
+
+    [Script] // 215266
+    class spell_item_amalgams_seventh_spine : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo((uint)AmalgamsSeventhSpineSpellIds.FragileEchoesMonk, (uint)AmalgamsSeventhSpineSpellIds.FragileEchoesShaman, (uint)AmalgamsSeventhSpineSpellIds.FragileEchoesPriestDiscipline,
+                (uint)AmalgamsSeventhSpineSpellIds.FragileEchoesPaladin, (uint)AmalgamsSeventhSpineSpellIds.FragileEchoesDruid, (uint)AmalgamsSeventhSpineSpellIds.FragileEchoesPriestHoly);
+        }
+
+        void ForcePeriodic(AuraEffect aurEff, ref bool isPeriodic, ref int amplitude)
+        {
+            // simulate heartbeat timer
+            isPeriodic = true;
+            amplitude = 5000;
+        }
+
+        void UpdateSpecAura(AuraEffect aurEff)
+        {
+            PreventDefaultAction();
+            Player target = GetTarget().ToPlayer();
+            if (!target)
+                return;
+
+            void updateAuraIfInCorrectSpec(TalentSpecialization spec, AmalgamsSeventhSpineSpellIds aura)
+            {
+                if (target.GetPrimarySpecialization() != (uint)spec)
+                    target.RemoveAurasDueToSpell((uint)aura);
+                else if (!target.HasAura((uint)aura))
+                    target.CastSpell(target, (uint)aura, new CastSpellExtraArgs(aurEff));
+            };
+
+            switch (target.GetClass())
+            {
+                case Class.Monk:
+                    updateAuraIfInCorrectSpec(TalentSpecialization.MonkMistweaver, AmalgamsSeventhSpineSpellIds.FragileEchoesMonk);
+                    break;
+                case Class.Shaman:
+                    updateAuraIfInCorrectSpec(TalentSpecialization.ShamanRestoration, AmalgamsSeventhSpineSpellIds.FragileEchoesShaman);
+                    break;
+                case Class.Priest:
+                    updateAuraIfInCorrectSpec(TalentSpecialization.PriestDiscipline, AmalgamsSeventhSpineSpellIds.FragileEchoesPriestDiscipline);
+                    updateAuraIfInCorrectSpec(TalentSpecialization.PriestHoly, AmalgamsSeventhSpineSpellIds.FragileEchoesPriestHoly);
+                    break;
+                case Class.Paladin:
+                    updateAuraIfInCorrectSpec(TalentSpecialization.PaladinHoly, AmalgamsSeventhSpineSpellIds.FragileEchoesPaladin);
+                    break;
+                case Class.Druid:
+                    updateAuraIfInCorrectSpec(TalentSpecialization.DruidRestoration, AmalgamsSeventhSpineSpellIds.FragileEchoesDruid);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public override void Register()
+        {
+            DoEffectCalcPeriodic.Add(new EffectCalcPeriodicHandler(ForcePeriodic, 0, AuraType.Dummy));
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(UpdateSpecAura, 0, AuraType.Dummy));
+        }
+    }
+
+    [Script] // 215267
+    class spell_item_amalgams_seventh_spine_mana_restore : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo((uint)AmalgamsSeventhSpineSpellIds.FragileEchoEnergize);
+        }
+
+        void TriggerManaRestoration(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
+                return;
+
+            Unit caster = GetCaster();
+            if (!caster)
+                return;
+
+            AuraEffect trinketEffect = caster.GetAuraEffect(aurEff.GetSpellEffectInfo().TriggerSpell, 0);
+            if (trinketEffect != null)
+                caster.CastSpell(caster, (uint)AmalgamsSeventhSpineSpellIds.FragileEchoEnergize, new CastSpellExtraArgs(aurEff).AddSpellMod(SpellValueMod.BasePoint0, trinketEffect.GetAmount()));
+        }
+
+        public override void Register()
+        {
+            AfterEffectRemove.Add(new EffectApplyHandler(TriggerManaRestoration, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
 }
