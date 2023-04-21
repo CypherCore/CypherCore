@@ -86,6 +86,7 @@ namespace Game
         void HandleLootMoney(LootMoney lootMoney)
         {
             Player player = GetPlayer();
+            List<Loot> forceLootRelease = new();
 
             foreach (var lootView in player.GetAELootView())
             {
@@ -150,8 +151,11 @@ namespace Game
 
                 // Delete container if empty
                 if (loot.IsLooted() && guid.IsItem())
-                    player.GetSession().DoLootRelease(loot);
+                    forceLootRelease.Add(loot);
             }
+
+            foreach (Loot loot in forceLootRelease)
+                player.GetSession().DoLootRelease(loot);
         }
 
         class AELootCreatureCheck : ICheck<Creature>
