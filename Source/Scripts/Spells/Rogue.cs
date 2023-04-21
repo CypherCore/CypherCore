@@ -47,6 +47,7 @@ namespace Scripts.Spells.Rogue
         public const uint SymbolsOfDeathCritAura = 227151;
         public const uint SymbolsOfDeathRank2 = 328077;
         public const uint TrueBearing = 193359;
+        public const uint TurnTheTablesBuff = 198027;
         public const uint Vanish = 1856;
         public const uint VanishAura = 11327;
         public const uint TricksOfTheTrade = 57934;
@@ -210,6 +211,56 @@ namespace Scripts.Spells.Rogue
         byte _stackAmount = 0;
     }
 
+    [Script] // 32645 - Envenom
+    class spell_rog_envenom : SpellScript
+    {
+        void CalculateDamage(uint effIndex)
+        {
+            int damagePerCombo = GetHitDamage();
+            AuraEffect t5 = GetCaster().GetAuraEffect(SpellIds.T52pSetBonus, 0);
+            if (t5 != null)
+                damagePerCombo += t5.GetAmount();
+
+            int finalDamage = damagePerCombo;
+            var costs = GetSpell().GetPowerCost();
+            var c = costs.Find(cost => cost.Power == PowerType.ComboPoints);
+            if (c != null)
+                finalDamage *= c.Amount;
+
+            SetHitDamage(finalDamage);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(CalculateDamage, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+
+    [Script] // 196819 - Eviscerate
+    class spell_rog_eviscerate : SpellScript
+    {
+        void CalculateDamage(uint effIndex)
+        {
+            int damagePerCombo = GetHitDamage();
+            AuraEffect t5 = GetCaster().GetAuraEffect(SpellIds.T52pSetBonus, 0);
+            if (t5 != null)
+                damagePerCombo += t5.GetAmount();
+
+            int finalDamage = damagePerCombo;
+            var costs = GetSpell().GetPowerCost();
+            var c = costs.Find(cost => cost.Power == PowerType.ComboPoints);
+            if (c != null)
+                finalDamage *= c.Amount;
+
+            SetHitDamage(finalDamage);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(CalculateDamage, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+    
     [Script] // 193358 - Grand Melee
     class spell_rog_grand_melee : AuraScript
     {
@@ -251,6 +302,29 @@ namespace Scripts.Spells.Rogue
         }
     }
 
+    // 198031 - Honor Among Thieves
+    [Script] /// 7.1.5
+    class spell_rog_honor_among_thieves : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.HonorAmongThievesEnergize);
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+
+            Unit target = GetTarget();
+            target.CastSpell(target, SpellIds.HonorAmongThievesEnergize, new CastSpellExtraArgs(aurEff));
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+        }
+    }
+    
     [Script] // 51690 - Killing Spree
     class spell_rog_killing_spree_SpellScript : SpellScript
     {
@@ -696,56 +770,6 @@ namespace Scripts.Spells.Rogue
         }
     }
 
-    [Script] // 1856 - Vanish - SPELL_ROGUE_VANISH
-    class spell_rog_vanish : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.VanishAura, SpellIds.StealthShapeshiftAura);
-        }
-
-        void OnLaunchTarget(uint effIndex)
-        {
-            PreventHitDefaultEffect(effIndex);
-
-            Unit target = GetHitUnit();
-
-            target.RemoveAurasByType(AuraType.ModStalked);
-            if (!target.IsPlayer())
-                return;
-
-            if (target.HasAura(SpellIds.VanishAura))
-                return;
-
-            target.CastSpell(target, SpellIds.VanishAura, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
-            target.CastSpell(target, SpellIds.StealthShapeshiftAura, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
-        }
-
-        public override void Register()
-        {
-            OnEffectLaunchTarget.Add(new EffectHandler(OnLaunchTarget, 1, SpellEffectName.TriggerSpell));
-        }
-    }
-
-    [Script] // 11327 - Vanish
-    class spell_rog_vanish_aura : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.Stealth);
-        }
-
-        void HandleEffectRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            GetTarget().CastSpell(GetTarget(), SpellIds.Stealth, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
-        }
-
-        public override void Register()
-        {
-            AfterEffectRemove.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
-        }
-    }
-
     [Script] // 57934 - Tricks of the Trade
     class spell_rog_tricks_of_the_trade_aura : AuraScript
     {
@@ -821,29 +845,95 @@ namespace Scripts.Spells.Rogue
         }
     }
 
-    // 198031 - Honor Among Thieves
-    [Script] /// 7.1.5
-    class spell_rog_honor_among_thieves_AuraScript : AuraScript
+    [Script] // 198020 - Turn the Tables (PvP Talent)
+    class spell_rog_turn_the_tables : AuraScript
     {
-        public override bool Validate(SpellInfo spellInfo)
+        bool CheckForStun(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            return ValidateSpellInfo(SpellIds.HonorAmongThievesEnergize);
-        }
-
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-
-            Unit target = GetTarget();
-            target.CastSpell(target, SpellIds.HonorAmongThievesEnergize, new CastSpellExtraArgs(aurEff));
+            return eventInfo.GetProcSpell() && eventInfo.GetProcSpell().GetSpellInfo().HasAura(AuraType.ModStun);
         }
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckForStun, 0, AuraType.ProcTriggerSpell));
         }
     }
 
+    [Script] // 198023 - Turn the Tables (periodic)
+    class spell_rog_turn_the_tables_periodic_check : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.TurnTheTablesBuff);
+        }
+
+        void CheckForStun(AuraEffect aurEff)
+        {
+            Unit target = GetTarget();
+            if (!target.HasAuraType(AuraType.ModStun))
+            {
+                target.CastSpell(target, SpellIds.TurnTheTablesBuff, new CastSpellExtraArgs(aurEff));
+                PreventDefaultAction();
+                Remove();
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(CheckForStun, 0, AuraType.PeriodicDummy));
+        }
+    }
+
+    [Script] // 1856 - Vanish - SPELL_ROGUE_VANISH
+    class spell_rog_vanish : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.VanishAura, SpellIds.StealthShapeshiftAura);
+        }
+
+        void OnLaunchTarget(uint effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+
+            Unit target = GetHitUnit();
+
+            target.RemoveAurasByType(AuraType.ModStalked);
+            if (!target.IsPlayer())
+                return;
+
+            if (target.HasAura(SpellIds.VanishAura))
+                return;
+
+            target.CastSpell(target, SpellIds.VanishAura, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
+            target.CastSpell(target, SpellIds.StealthShapeshiftAura, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
+        }
+
+        public override void Register()
+        {
+            OnEffectLaunchTarget.Add(new EffectHandler(OnLaunchTarget, 1, SpellEffectName.TriggerSpell));
+        }
+    }
+
+    [Script] // 11327 - Vanish
+    class spell_rog_vanish_aura : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.Stealth);
+        }
+
+        void HandleEffectRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().CastSpell(GetTarget(), SpellIds.Stealth, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
+        }
+
+        public override void Register()
+        {
+            AfterEffectRemove.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+    
     [Script] // 196819 - Eviscerate
     class spell_rog_eviscerate_SpellScript : SpellScript
     {
