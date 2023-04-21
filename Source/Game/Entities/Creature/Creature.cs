@@ -1425,16 +1425,11 @@ namespace Game.Entities
 
         public void SelectLevel()
         {
-            CreatureTemplate cInfo = GetCreatureTemplate();
-
-            // level
-            var minMaxLevels = cInfo.GetMinMaxLevel();
-            int minlevel = Math.Min(minMaxLevels[0], minMaxLevels[1]);
-            int maxlevel = Math.Max(minMaxLevels[0], minMaxLevels[1]);
-            int level = (minlevel == maxlevel ? minlevel : RandomHelper.IRand(minlevel, maxlevel));
-            SetLevel((uint)level);
-
+            // Level
             ApplyLevelScaling();
+            int levelWithDelta = m_unitData.ScalingLevelMax + m_unitData.ScalingLevelDelta;
+            byte level = (byte)MathFunctions.RoundToInterval(ref levelWithDelta, 1, SharedConst.StrongMaxLevel);
+            SetLevel(level);
 
             UpdateLevelDependantStats();
         }

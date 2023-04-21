@@ -22,9 +22,7 @@ namespace Game.Entities
         public string TitleAlt;
         public string IconName;
         public uint GossipMenuId;
-        public short Minlevel;
         public Dictionary<Difficulty, CreatureLevelScaling> scalingStorage = new();
-        public short Maxlevel;
         public int HealthScalingExpansion;
         public uint RequiredExpansion;
         public uint VignetteID; // @todo Read Vignette.db2
@@ -143,15 +141,6 @@ namespace Game.Entities
             }
 
             return CreatureModel.DefaultVisibleModel;
-        }
-
-        public int[] GetMinMaxLevel()
-        {
-            return new[]
-            {
-                HealthScalingExpansion != (int)Expansion.LevelCurrent ? Minlevel : Minlevel + SharedConst.MaxLevel,
-                HealthScalingExpansion != (int)Expansion.LevelCurrent ? Maxlevel : Maxlevel + SharedConst.MaxLevel
-            };
         }
 
         public int GetHealthScalingExpansion()
