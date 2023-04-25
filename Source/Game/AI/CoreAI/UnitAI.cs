@@ -62,6 +62,10 @@ namespace Game.AI
             if (!me.IsWithinMeleeRange(victim))
                 return;
 
+            // Check that the victim is in front of the unit
+            if (!me.HasInArc(2 * MathF.PI / 3, victim))
+                return;
+
             //Make sure our attack is ready and we aren't currently casting before checking distance
             if (me.IsAttackReady())
             {
