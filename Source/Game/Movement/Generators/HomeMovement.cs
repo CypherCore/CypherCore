@@ -65,6 +65,7 @@ namespace Game.AI
 
                 owner.SetSpawnHealth();
                 owner.LoadCreaturesAddon();
+                owner.LoadCreaturesSparringHealth();
                 if (owner.IsVehicle())
                     owner.GetVehicleKit().Reset(true);
 

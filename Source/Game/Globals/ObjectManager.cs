@@ -2691,6 +2691,44 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creature model based info in {1} ms", count, Time.GetMSTimeDiffToNow(time));
         }
+
+        public void LoadCreatureTemplateSparring()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            //                                         0      1
+            SQLResult result = DB.World.Query("SELECT Entry, NoNPCDamageBelowHealthPct FROM creature_template_sparring");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature template sparring definitions. DB table `creature_template_sparring` is empty.");
+                return;
+            }
+
+            uint count = 0;
+            do
+            {
+                uint entry = result.Read<uint>(0);
+                float noNPCDamageBelowHealthPct = result.Read<float>(1);
+
+                if (GetCreatureTemplate(entry) == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Creature template (Entry: {entry}) does not exist but has a record in `creature_template_sparring`");
+                    continue;
+                }
+
+                if (noNPCDamageBelowHealthPct <= 0 || noNPCDamageBelowHealthPct > 100)
+                {
+                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid NoNPCDamageBelowHealthPct ({noNPCDamageBelowHealthPct}) defined in `creature_template_sparring`. Skipping");
+                    continue;
+                }
+                _creatureTemplateSparringStorage.Add(entry, noNPCDamageBelowHealthPct);
+
+                ++count;
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template sparring rows in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+
         public void LoadCreatureScalingData()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -5345,14 +5383,22 @@ namespace Game
 
             return true;
         }
+
         public VendorItemData GetNpcVendorItemList(uint entry)
         {
             return cacheVendorItemStorage.LookupByKey(entry);
         }
+
+        public List<float> GetCreatureTemplateSparringValues(uint entry)
+        {
+            return _creatureTemplateSparringStorage.LookupByKey(entry);
+        }
+        
         public CreatureMovementData GetCreatureMovementOverride(ulong spawnId)
         {
             return creatureMovementOverrides.LookupByKey(spawnId);
         }
+
         public EquipmentInfo GetEquipmentInfo(uint entry, int id)
         {
             var equip = equipmentInfoStorage.LookupByKey(entry);
@@ -11022,6 +11068,7 @@ namespace Game
         Dictionary<ulong, CreatureAddon> creatureAddonStorage = new();
         MultiMap<uint, uint> creatureQuestItemStorage = new();
         Dictionary<uint, CreatureAddon> creatureTemplateAddonStorage = new();
+        MultiMap<uint, float> _creatureTemplateSparringStorage = new();
         Dictionary<ulong, CreatureMovementData> creatureMovementOverrides = new();
         MultiMap<uint, Tuple<uint, EquipmentInfo>> equipmentInfoStorage = new();
         Dictionary<ObjectGuid, ObjectGuid> linkedRespawnStorage = new();

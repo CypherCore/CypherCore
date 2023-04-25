@@ -490,8 +490,6 @@ namespace Game.AI
                 me.ScheduleAIChange();
         }
 
-        public virtual bool ShouldSparWith(Unit target) { return false; }
-
         public virtual void DoAction(int action) { }
         public virtual uint GetData(uint id = 0) { return 0; }
         public virtual void SetData(uint id, uint value) { }

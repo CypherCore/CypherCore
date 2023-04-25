@@ -564,6 +564,15 @@ namespace Game.Entities
                     CalculateMeleeDamage(victim, out damageInfo, attType);
                     // Send log damage message to client
                     DealDamageMods(damageInfo.Attacker, victim, ref damageInfo.Damage, ref damageInfo.Absorb);
+
+                    // sparring
+                    Creature victimCreature = victim.ToCreature();
+                    if (victimCreature != null)
+                    {
+                        if (victimCreature.ShouldFakeDamageFrom(damageInfo.Attacker))
+                            damageInfo.HitInfo |= HitInfo.FakeDamage;
+                    }
+
                     SendAttackStateUpdate(damageInfo);
 
                     _lastDamagedTargetGuid = victim.GetGUID();

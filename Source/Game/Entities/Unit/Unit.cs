@@ -2489,6 +2489,11 @@ namespace Game.Entities
             {
                 uint tmpDamage = damageTaken;
 
+                // sparring
+                Creature victimCreature = victim.ToCreature();
+                if (victimCreature != null)
+                    tmpDamage = victimCreature.CalculateDamageForSparring(attacker, tmpDamage);
+
                 victim.GetAI()?.DamageTaken(attacker, ref tmpDamage, damagetype, spellProto);
 
                 attacker?.GetAI()?.DamageDealt(victim, ref tmpDamage, damagetype);
@@ -3651,6 +3656,14 @@ namespace Game.Entities
 
                     uint split_absorb = 0;
                     DealDamageMods(damageInfo.GetAttacker(), caster, ref splitDamage, ref split_absorb);
+
+                    // sparring
+                    Creature victimCreature = damageInfo.GetVictim().ToCreature();
+                    if (victimCreature != null)
+                    {
+                        if (victimCreature.ShouldFakeDamageFrom(damageInfo.GetAttacker()))
+                            damageInfo.ModifyDamage((int)(damageInfo.GetDamage() * -1));
+                    }
 
                     SpellNonMeleeDamage log = new(damageInfo.GetAttacker(), caster, itr.GetSpellInfo(), itr.GetBase().GetSpellVisual(), damageInfo.GetSchoolMask(), itr.GetBase().GetCastId());
                     CleanDamage cleanDamage = new(splitDamage, 0, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);

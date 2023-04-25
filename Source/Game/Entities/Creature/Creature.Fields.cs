@@ -30,6 +30,7 @@ namespace Game.Entities
 
         uint _gossipMenuId;
         uint? _trainerId;
+        float _sparringHealthPct;
 
         public ulong m_PlayerDamageReq;
         public float m_SightDistance;

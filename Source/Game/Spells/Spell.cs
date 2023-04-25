@@ -8475,6 +8475,11 @@ namespace Game.Spells
 
                         spell.m_damage = (int)damageInfo.damage;
 
+                        // sparring
+                        Creature victimCreature = damageInfo.target.ToCreature();
+                        if (victimCreature != null)
+                            damageInfo.damage = victimCreature.CalculateDamageForSparring(damageInfo.attacker, damageInfo.damage);
+
                         caster.DealSpellDamage(damageInfo, true);
 
                         // Send log damage message to client
