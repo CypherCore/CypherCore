@@ -884,6 +884,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Gossip menu addon...");
             Global.ObjectMgr.LoadGossipMenuAddon();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading Creature Template Gossip...");
+            Global.ObjectMgr.LoadCreatureTemplateGossip();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading Creature trainers...");
             Global.ObjectMgr.LoadCreatureTrainers();                         // must be after LoadGossipMenuItems
 

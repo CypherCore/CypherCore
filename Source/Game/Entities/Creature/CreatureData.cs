@@ -21,7 +21,7 @@ namespace Game.Entities
         public string SubName;
         public string TitleAlt;
         public string IconName;
-        public uint GossipMenuId;
+        public List<uint> GossipMenuIds = new();
         public Dictionary<Difficulty, CreatureLevelScaling> scalingStorage = new();
         public int HealthScalingExpansion;
         public uint RequiredExpansion;

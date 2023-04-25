@@ -1822,34 +1822,33 @@ namespace Game
             creature.SubName = fields.Read<string>(8);
             creature.TitleAlt = fields.Read<string>(9);
             creature.IconName = fields.Read<string>(10);
-            creature.GossipMenuId = fields.Read<uint>(11);
-            creature.HealthScalingExpansion = fields.Read<int>(12);
-            creature.RequiredExpansion = fields.Read<uint>(13);
-            creature.VignetteID = fields.Read<uint>(14);
-            creature.Faction = fields.Read<uint>(15);
-            creature.Npcflag = fields.Read<ulong>(16);
-            creature.SpeedWalk = fields.Read<float>(17);
-            creature.SpeedRun = fields.Read<float>(18);
-            creature.Scale = fields.Read<float>(19);
-            creature.Rank = (CreatureEliteType)fields.Read<uint>(20);
-            creature.DmgSchool = fields.Read<uint>(21);
-            creature.BaseAttackTime = fields.Read<uint>(22);
-            creature.RangeAttackTime = fields.Read<uint>(23);
-            creature.BaseVariance = fields.Read<float>(24);
-            creature.RangeVariance = fields.Read<float>(25);
-            creature.UnitClass = fields.Read<uint>(26);
-            creature.UnitFlags = (UnitFlags)fields.Read<uint>(27);
-            creature.UnitFlags2 = fields.Read<uint>(28);
-            creature.UnitFlags3 = fields.Read<uint>(29);
-            creature.DynamicFlags = fields.Read<uint>(30);
-            creature.Family = (CreatureFamily)fields.Read<uint>(31);
-            creature.TrainerClass = (Class)fields.Read<byte>(32);
-            creature.CreatureType = (CreatureType)fields.Read<byte>(33);
-            creature.TypeFlags = (CreatureTypeFlags)fields.Read<uint>(34);
-            creature.TypeFlags2 = fields.Read<uint>(35);
-            creature.LootId = fields.Read<uint>(36);
-            creature.PickPocketId = fields.Read<uint>(37);
-            creature.SkinLootId = fields.Read<uint>(38);
+            creature.HealthScalingExpansion = fields.Read<int>(11);
+            creature.RequiredExpansion = fields.Read<uint>(12);
+            creature.VignetteID = fields.Read<uint>(13);
+            creature.Faction = fields.Read<uint>(14);
+            creature.Npcflag = fields.Read<ulong>(15);
+            creature.SpeedWalk = fields.Read<float>(16);
+            creature.SpeedRun = fields.Read<float>(17);
+            creature.Scale = fields.Read<float>(18);
+            creature.Rank = (CreatureEliteType)fields.Read<uint>(19);
+            creature.DmgSchool = fields.Read<uint>(20);
+            creature.BaseAttackTime = fields.Read<uint>(21);
+            creature.RangeAttackTime = fields.Read<uint>(22);
+            creature.BaseVariance = fields.Read<float>(23);
+            creature.RangeVariance = fields.Read<float>(24);
+            creature.UnitClass = fields.Read<uint>(25);
+            creature.UnitFlags = (UnitFlags)fields.Read<uint>(26);
+            creature.UnitFlags2 = fields.Read<uint>(27);
+            creature.UnitFlags3 = fields.Read<uint>(28);
+            creature.DynamicFlags = fields.Read<uint>(29);
+            creature.Family = (CreatureFamily)fields.Read<uint>(30);
+            creature.TrainerClass = (Class)fields.Read<byte>(31);
+            creature.CreatureType = (CreatureType)fields.Read<byte>(32);
+            creature.TypeFlags = (CreatureTypeFlags)fields.Read<uint>(33);
+            creature.TypeFlags2 = fields.Read<uint>(34);
+            creature.LootId = fields.Read<uint>(35);
+            creature.PickPocketId = fields.Read<uint>(36);
+            creature.SkinLootId = fields.Read<uint>(37);
 
             for (var i = (int)SpellSchools.Holy; i < (int)SpellSchools.Max; ++i)
                 creature.Resistance[i] = 0;
@@ -1857,54 +1856,96 @@ namespace Game
             for (var i = 0; i < SharedConst.MaxCreatureSpells; ++i)
                 creature.Spells[i] = 0;
 
-            creature.VehicleId = fields.Read<uint>(39);
-            creature.MinGold = fields.Read<uint>(40);
-            creature.MaxGold = fields.Read<uint>(41);
-            creature.AIName = fields.Read<string>(42);
-            creature.MovementType = fields.Read<uint>(43);
+            creature.VehicleId = fields.Read<uint>(38);
+            creature.MinGold = fields.Read<uint>(39);
+            creature.MaxGold = fields.Read<uint>(40);
+            creature.AIName = fields.Read<string>(41);
+            creature.MovementType = fields.Read<uint>(42);
+
+            if (!fields.IsNull(43))
+                creature.Movement.Ground = (CreatureGroundMovementType)fields.Read<byte>(43);
 
             if (!fields.IsNull(44))
-                creature.Movement.Ground = (CreatureGroundMovementType)fields.Read<byte>(44);
+                creature.Movement.Swim = fields.Read<bool>(44);
 
             if (!fields.IsNull(45))
-                creature.Movement.Swim = fields.Read<bool>(45);
+                creature.Movement.Flight = (CreatureFlightMovementType)fields.Read<byte>(45);
 
             if (!fields.IsNull(46))
-                creature.Movement.Flight = (CreatureFlightMovementType)fields.Read<byte>(46);
+                creature.Movement.Rooted = fields.Read<bool>(46);
 
             if (!fields.IsNull(47))
-                creature.Movement.Rooted = fields.Read<bool>(47);
+                creature.Movement.Chase = (CreatureChaseMovementType)fields.Read<byte>(47);
 
             if (!fields.IsNull(48))
-                creature.Movement.Chase = (CreatureChaseMovementType)fields.Read<byte>(48);
+                creature.Movement.Random = (CreatureRandomMovementType)fields.Read<byte>(48);
 
             if (!fields.IsNull(49))
-                creature.Movement.Random = (CreatureRandomMovementType)fields.Read<byte>(49);
+                creature.Movement.InteractionPauseTimer = fields.Read<uint>(49);
 
-            if (!fields.IsNull(50))
-                creature.Movement.InteractionPauseTimer = fields.Read<uint>(50);
-
-            creature.HoverHeight = fields.Read<float>(51);
-            creature.ModHealth = fields.Read<float>(52);
-            creature.ModHealthExtra = fields.Read<float>(53);
-            creature.ModMana = fields.Read<float>(54);
-            creature.ModManaExtra = fields.Read<float>(55);
-            creature.ModArmor = fields.Read<float>(56);
-            creature.ModDamage = fields.Read<float>(57);
-            creature.ModExperience = fields.Read<float>(58);
-            creature.RacialLeader = fields.Read<bool>(59);
-            creature.MovementId = fields.Read<uint>(60);
-            creature.CreatureDifficultyID = fields.Read<int>(61);
-            creature.WidgetSetID = fields.Read<int>(62);
-            creature.WidgetSetUnitConditionID = fields.Read<int>(63);
-            creature.RegenHealth = fields.Read<bool>(64);
-            creature.MechanicImmuneMask = fields.Read<ulong>(65);
-            creature.SpellSchoolImmuneMask = fields.Read<uint>(66);
-            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(67);
-            creature.ScriptID = GetScriptId(fields.Read<string>(68));
-            creature.StringId = fields.Read<string>(69);
+            creature.HoverHeight = fields.Read<float>(50);
+            creature.ModHealth = fields.Read<float>(51);
+            creature.ModHealthExtra = fields.Read<float>(52);
+            creature.ModMana = fields.Read<float>(53);
+            creature.ModManaExtra = fields.Read<float>(54);
+            creature.ModArmor = fields.Read<float>(55);
+            creature.ModDamage = fields.Read<float>(56);
+            creature.ModExperience = fields.Read<float>(57);
+            creature.RacialLeader = fields.Read<bool>(58);
+            creature.MovementId = fields.Read<uint>(59);
+            creature.CreatureDifficultyID = fields.Read<int>(60);
+            creature.WidgetSetID = fields.Read<int>(61);
+            creature.WidgetSetUnitConditionID = fields.Read<int>(62);
+            creature.RegenHealth = fields.Read<bool>(63);
+            creature.MechanicImmuneMask = fields.Read<ulong>(64);
+            creature.SpellSchoolImmuneMask = fields.Read<uint>(65);
+            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(66);
+            creature.ScriptID = GetScriptId(fields.Read<string>(67));
+            creature.StringId = fields.Read<string>(68);
 
             creatureTemplateStorage[entry] = creature;
+        }
+
+        public void LoadCreatureTemplateGossip()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            //                                               0           1
+            SQLResult result = DB.World.Query("SELECT CreatureID, MenuID FROM creature_template_gossip");
+            if (result == null)
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature template gossip definitions. DB table `creature_template_gossip` is empty.");
+                return;
+            }
+
+            uint count = 0;
+
+            do
+            {
+                uint creatureID = result.Read<uint>(0);
+                uint menuID = result.Read<uint>(1);
+
+                var creatureTemplate = creatureTemplateStorage.LookupByKey(creatureID);
+                if (creatureTemplate == null)
+                {
+                    Log.outError(LogFilter.Sql, $"creature_template_gossip has gossip definitions for creature {creatureID} but this creature doesn't exist");
+                    continue;
+                }
+
+                var menuBounds = GetGossipMenusMapBounds(menuID);
+                if (menuBounds.Empty())
+                {
+                    Log.outError(LogFilter.Sql, $"creature_template_gossip has gossip definitions for menu id {menuID} but this menu doesn't exist");
+                    continue;
+                }
+
+                creatureTemplate.GossipMenuIds.Add(menuID);
+
+                ++count;
+
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template gossip menus in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         void LoadCreatureTemplateResistances()
@@ -3004,9 +3045,9 @@ namespace Game
 
             cInfo.ModDamage *= Creature._GetDamageMod(cInfo.Rank);
 
-            if (cInfo.GossipMenuId != 0 && !cInfo.Npcflag.HasAnyFlag((ulong)NPCFlags.Gossip))
-                Log.outInfo(LogFilter.Sql, $"Creature (Entry: {cInfo.Entry}) has assigned gossip menu {cInfo.GossipMenuId}, but npcflag does not include UNIT_NPC_FLAG_GOSSIP.");
-            else if (cInfo.GossipMenuId == 0 && cInfo.Npcflag.HasAnyFlag((ulong)NPCFlags.Gossip))
+            if (!cInfo.GossipMenuIds.Empty() && !cInfo.Npcflag.HasAnyFlag((uint)NPCFlags.Gossip))
+                Log.outInfo(LogFilter.Sql, $"Creature (Entry: {cInfo.Entry}) has assigned gossip menu, but npcflag does not include UNIT_NPC_FLAG_GOSSIP.");
+            else if (cInfo.GossipMenuIds.Empty() && cInfo.Npcflag.HasAnyFlag((uint)NPCFlags.Gossip))
                 Log.outInfo(LogFilter.Sql, $"Creature (Entry: {cInfo.Entry}) has npcflag UNIT_NPC_FLAG_GOSSIP, but gossip menu is unassigned.");
         }
         void CheckCreatureMovement(string table, ulong id, CreatureMovementData creatureMovement)

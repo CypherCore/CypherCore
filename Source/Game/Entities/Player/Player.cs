@@ -21,11 +21,12 @@ using Game.Maps;
 using Game.Misc;
 using Game.Networking;
 using Game.Networking.Packets;
-using Game.PvP;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
+using static Global;
 
 namespace Game.Entities
 {
@@ -92,7 +93,7 @@ namespace Game.Entities
             m_isActive = true;
             m_ControlledByPlayer = true;
 
-            Global.WorldMgr.IncreasePlayerCount();
+            WorldMgr.IncreasePlayerCount();
 
             _cinematicMgr = new CinematicManager(this);
 
@@ -142,7 +143,7 @@ namespace Game.Entities
 
             ClearResurrectRequestData();
 
-            Global.WorldMgr.DecreasePlayerCount();
+            WorldMgr.DecreasePlayerCount();
 
             base.Dispose();
         }
@@ -154,7 +155,7 @@ namespace Game.Entities
 
             SetName(createInfo.Name);
 
-            PlayerInfo info = Global.ObjectMgr.GetPlayerInfo(createInfo.RaceId, createInfo.ClassId);
+            PlayerInfo info = ObjectMgr.GetPlayerInfo(createInfo.RaceId, createInfo.ClassId);
             if (info == null)
             {
                 Log.outError(LogFilter.Player, "PlayerCreate: Possible hacking-attempt: Account {0} tried creating a character named '{1}' with an invalid race/class pair ({2}/{3}) - refusing to do so.",
@@ -184,7 +185,7 @@ namespace Game.Entities
 
             Relocate(position.Loc);
 
-            SetMap(Global.MapMgr.CreateMap(position.Loc.GetMapId(), this));
+            SetMap(MapMgr.CreateMap(position.Loc.GetMapId(), this));
 
             if (position.TransportGuid.HasValue)
             {
@@ -313,7 +314,7 @@ namespace Game.Entities
             }
             // all item positions resolved
 
-            ChrSpecializationRecord defaultSpec = Global.DB2Mgr.GetDefaultChrSpecializationForClass(GetClass());
+            ChrSpecializationRecord defaultSpec = DB2Mgr.GetDefaultChrSpecializationForClass(GetClass());
             if (defaultSpec != null)
             {
                 SetActiveTalentGroup(defaultSpec.OrderIndex);
@@ -531,7 +532,7 @@ namespace Game.Entities
                 if (diff >= m_nextSave)
                 {
                     // m_nextSave reset in SaveToDB call
-                    Global.ScriptMgr.OnPlayerSave(this);
+                    ScriptMgr.OnPlayerSave(this);
                     SaveToDB();
                     Log.outDebug(LogFilter.Player, "Player '{0}' (GUID: {1}) saved", GetName(), GetGUID().ToString());
                 }
@@ -717,8 +718,8 @@ namespace Game.Entities
                 ClearComboPoints();
                 GetSession().DoLootReleaseAll();
                 m_lootRolls.Clear();
-                Global.OutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
-                Global.BattleFieldMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
+                OutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
+                BattleFieldMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
             }
 
             // Remove items from world before self - player must be found in Item.RemoveFromObjectUpdate
@@ -1053,14 +1054,14 @@ namespace Game.Entities
             for (uint i = 0; i < SharedConst.MaxCreatureSpells; ++i)
             {
                 uint spellId = vehicle.m_spells[i];
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
+                SpellInfo spellInfo = SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
                 if (spellInfo == null)
                     continue;
 
                 if (spellInfo.HasAttribute(SpellAttr5.NotAvailableWhileCharmed))
                     continue;
 
-                if (!Global.ConditionMgr.IsObjectMeetingVehicleSpellConditions(vehicle.GetEntry(), spellId, this, vehicle))
+                if (!ConditionMgr.IsObjectMeetingVehicleSpellConditions(vehicle.GetEntry(), spellId, this, vehicle))
                 {
                     Log.outDebug(LogFilter.Condition, "VehicleSpellInitialize: conditions not met for Vehicle entry {0} spell {1}", vehicle.ToCreature().GetEntry(), spellId);
                     continue;
@@ -1337,7 +1338,7 @@ namespace Game.Entities
 
             uint maxQuantity = currency.MaxQty;
             if (currency.MaxQtyWorldStateID != 0)
-                maxQuantity = (uint)Global.WorldStateMgr.GetValue(currency.MaxQtyWorldStateID, GetMap());
+                maxQuantity = (uint)WorldStateMgr.GetValue(currency.MaxQtyWorldStateID, GetMap());
 
             uint increasedCap = 0;
             if (currency.GetFlags().HasFlag(CurrencyTypesFlags.DynamicMaximum))
@@ -1392,14 +1393,14 @@ namespace Game.Entities
             switch ((ActionButtonType)type)
             {
                 case ActionButtonType.Spell:
-                    if (!Global.SpellMgr.HasSpellInfo((uint)action, Difficulty.None))
+                    if (!SpellMgr.HasSpellInfo((uint)action, Difficulty.None))
                     {
                         Log.outError(LogFilter.Player, $"Player::IsActionButtonDataValid: Spell action {action} not added into button {button} for player {GetName()} ({GetGUID()}): spell not exist");
                         return false;
                     }
                     break;
                 case ActionButtonType.Item:
-                    if (Global.ObjectMgr.GetItemTemplate((uint)action) == null)
+                    if (ObjectMgr.GetItemTemplate((uint)action) == null)
                     {
                         Log.outError(LogFilter.Player, $"Player::IsActionButtonDataValid: Item action {action} not added into button {button} for player {GetName()} ({GetGUID()}): item not exist");
                         return false;
@@ -1548,7 +1549,7 @@ namespace Game.Entities
                 return 0;
 
             // Multiply result with the faction specific rate
-            RepRewardRate repData = Global.ObjectMgr.GetRepRewardRate((uint)faction);
+            RepRewardRate repData = ObjectMgr.GetRepRewardRate((uint)faction);
             if (repData != null)
             {
                 float repRate = 0.0f;
@@ -1598,7 +1599,7 @@ namespace Game.Entities
             if (victim.ToCreature().IsReputationGainDisabled())
                 return;
 
-            ReputationOnKillEntry Rep = Global.ObjectMgr.GetReputationOnKilEntry(victim.ToCreature().GetCreatureTemplate().Entry);
+            ReputationOnKillEntry Rep = ObjectMgr.GetReputationOnKilEntry(victim.ToCreature().GetCreatureTemplate().Entry);
             if (Rep == null)
                 return;
 
@@ -1610,12 +1611,12 @@ namespace Game.Entities
                 Map map = GetMap();
                 if (map.IsNonRaidDungeon())
                 {
-                    LFGDungeonsRecord dungeon = Global.DB2Mgr.GetLfgDungeon(map.GetId(), map.GetDifficultyID());
+                    LFGDungeonsRecord dungeon = DB2Mgr.GetLfgDungeon(map.GetId(), map.GetDifficultyID());
                     if (dungeon != null)
                     {
-                        var dungeonLevels = Global.DB2Mgr.GetContentTuningData(dungeon.ContentTuningID, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                        var dungeonLevels = DB2Mgr.GetContentTuningData(dungeon.ContentTuningID, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
                         if (dungeonLevels.HasValue)
-                            if (dungeonLevels.Value.TargetLevelMax == Global.ObjectMgr.GetMaxLevelForExpansion(Expansion.WrathOfTheLichKing))
+                            if (dungeonLevels.Value.TargetLevelMax == ObjectMgr.GetMaxLevelForExpansion(Expansion.WrathOfTheLichKing))
                                 ChampioningFaction = GetChampioningFaction();
                     }
                 }
@@ -1716,7 +1717,7 @@ namespace Game.Entities
                 return false;
             }
 
-            if (!GetSession().HasPermission(RBACPermissions.SkipCheckDisableMap) && Global.DisableMgr.IsDisabledFor(DisableType.Map, mapid, this))
+            if (!GetSession().HasPermission(RBACPermissions.SkipCheckDisableMap) && DisableMgr.IsDisabledFor(DisableType.Map, mapid, this))
             {
                 Log.outError(LogFilter.Maps, "Player (GUID: {0}, name: {1}) tried to enter a forbidden map {2}", GetGUID().ToString(), GetName(), mapid);
                 SendTransferAborted(mapid, TransferAbortReason.MapNotAllowed);
@@ -2148,7 +2149,7 @@ namespace Game.Entities
 
             SummonRequest summonRequest = new();
             summonRequest.SummonerGUID = summoner.GetGUID();
-            summonRequest.SummonerVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
+            summonRequest.SummonerVirtualRealmAddress = WorldMgr.GetVirtualRealmAddress();
             summonRequest.AreaID = (int)summoner.GetZoneId();
             SendPacket(summonRequest);
 
@@ -2299,7 +2300,7 @@ namespace Game.Entities
                     pet.SetFaction(GetFaction());
 
                 // restore FFA PvP Server state
-                if (Global.WorldMgr.IsFFAPvPRealm())
+                if (WorldMgr.IsFFAPvPRealm())
                     SetPvpFlag(UnitPVPStateFlags.FFAPvp);
 
                 // restore FFA PvP area state, remove not allowed for GM mounts
@@ -2356,7 +2357,7 @@ namespace Game.Entities
 
             menu.GetGossipMenu().SetMenuId(menuId);
 
-            var menuItemBounds = Global.ObjectMgr.GetGossipMenuItemsMapBounds(menuId);
+            var menuItemBounds = ObjectMgr.GetGossipMenuItemsMapBounds(menuId);
 
             if (source.IsTypeId(TypeId.Unit))
             {
@@ -2369,7 +2370,7 @@ namespace Game.Entities
 
             foreach (var gossipMenuItem in menuItemBounds)
             {
-                if (!Global.ConditionMgr.IsObjectMeetToConditions(this, source, gossipMenuItem.Conditions))
+                if (!ConditionMgr.IsObjectMeetToConditions(this, source, gossipMenuItem.Conditions))
                     continue;
 
                 bool canTalk = true;
@@ -2528,7 +2529,7 @@ namespace Game.Entities
                     GetSession().SendTaxiMenu(source.ToCreature());
                     break;
                 case GossipOptionNpc.Trainer:
-                    GetSession().SendTrainerList(source.ToCreature(), Global.ObjectMgr.GetCreatureTrainerForGossipOption(source.GetEntry(), menuId, item.OrderIndex));
+                    GetSession().SendTrainerList(source.ToCreature(), ObjectMgr.GetCreatureTrainerForGossipOption(source.GetEntry(), menuId, item.OrderIndex));
                     break;
                 case GossipOptionNpc.SpiritHealer:
                     source.CastSpell(source.ToCreature(), 17251, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(GetGUID()));
@@ -2540,7 +2541,7 @@ namespace Game.Entities
                     break;
                 case GossipOptionNpc.Battlemaster:
                 {
-                    BattlegroundTypeId bgTypeId = Global.BattlegroundMgr.GetBattleMasterBG(source.GetEntry());
+                    BattlegroundTypeId bgTypeId = BattlegroundMgr.GetBattleMasterBG(source.GetEntry());
 
                     if (bgTypeId == BattlegroundTypeId.None)
                     {
@@ -2548,7 +2549,7 @@ namespace Game.Entities
                         return;
                     }
 
-                    Global.BattlegroundMgr.SendBattlegroundList(this, guid, bgTypeId);
+                    BattlegroundMgr.SendBattlegroundList(this, guid, bgTypeId);
                     break;
                 }
                 case GossipOptionNpc.Auctioneer:
@@ -2619,7 +2620,7 @@ namespace Game.Entities
             {
                 if (item.GossipNpcOptionID.HasValue)
                 {
-                    GossipMenuAddon addon = Global.ObjectMgr.GetGossipMenuAddon(menuId);
+                    GossipMenuAddon addon = ObjectMgr.GetGossipMenuAddon(menuId);
 
                     GossipOptionNPCInteraction npcInteraction = new();
                     npcInteraction.GossipGUID = source.GetGUID();
@@ -2673,7 +2674,7 @@ namespace Game.Entities
             if (source == null)
                 return SharedConst.DefaultGossipMessage;
 
-            return GetGossipTextId(GetDefaultGossipMenuForSource(source), source);
+            return GetGossipTextId(GetGossipMenuForSource(source), source);
         }
 
         public uint GetGossipTextId(uint menuId, WorldObject source)
@@ -2683,22 +2684,48 @@ namespace Game.Entities
             if (menuId == 0)
                 return textId;
 
-            var menuBounds = Global.ObjectMgr.GetGossipMenusMapBounds(menuId);
+            var menuBounds = ObjectMgr.GetGossipMenusMapBounds(menuId);
 
             foreach (var menu in menuBounds)
             {
-                if (Global.ConditionMgr.IsObjectMeetToConditions(this, source, menu.Conditions))
+                // continue if only checks menuid instead of text
+                if (menu.TextId == 0)
+                    continue;
+
+                if (ConditionMgr.IsObjectMeetToConditions(this, source, menu.Conditions))
                     textId = menu.TextId;
             }
 
             return textId;
         }
-        public static uint GetDefaultGossipMenuForSource(WorldObject source)
+
+        public uint GetGossipMenuForSource(WorldObject source)
         {
             switch (source.GetTypeId())
             {
                 case TypeId.Unit:
-                    return source.ToCreature().GetGossipMenuId();
+                {
+                    uint menuIdToShow = source.ToCreature().GetGossipMenuId();
+
+                    // if menu id is set by script
+                    if (menuIdToShow != 0)
+                        return menuIdToShow;
+
+                    // otherwise pick from db based on conditions
+                    foreach (uint menuId in source.ToCreature().GetCreatureTemplate().GossipMenuIds)
+                    {
+                        var menuBounds = ObjectMgr.GetGossipMenusMapBounds(menuId);
+
+                        foreach (var itr in menuBounds)
+                        {
+                            if (!ConditionMgr.IsObjectMeetToConditions(this, source, itr.Conditions))
+                                continue;
+
+                            menuIdToShow = menuId;
+                        }
+                    }
+                    return menuIdToShow;
+                }
                 case TypeId.GameObject:
                     return source.ToGameObject().GetGoInfo().GetGossipMenuId();
                 default:
@@ -3008,7 +3035,7 @@ namespace Game.Entities
             packet.AreaID = zoneId;
             packet.SubareaID = areaId;
 
-            Global.WorldStateMgr.FillInitialWorldStates(packet, GetMap(), areaId);
+            WorldStateMgr.FillInitialWorldStates(packet, GetMap(), areaId);
 
             SendPacket(packet);
         }
@@ -3308,7 +3335,7 @@ namespace Game.Entities
             int curValue = GetPower(power);
 
             // TODO: updating haste should update UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER for certain power types
-            PowerTypeRecord powerType = Global.DB2Mgr.GetPowerTypeEntry(power);
+            PowerTypeRecord powerType = DB2Mgr.GetPowerTypeEntry(power);
             if (powerType == null)
                 return;
 
@@ -3511,7 +3538,7 @@ namespace Game.Entities
         {
             ObjectGuid selectionGUID = GetTarget();
             if (!selectionGUID.IsEmpty())
-                return Global.ObjAccessor.GetUnit(this, selectionGUID);
+                return ObjAccessor.GetUnit(this, selectionGUID);
             return null;
         }
 
@@ -3519,7 +3546,7 @@ namespace Game.Entities
         {
             ObjectGuid selectionGUID = GetTarget();
             if (!selectionGUID.IsEmpty())
-                return Global.ObjAccessor.GetPlayer(this, selectionGUID);
+                return ObjAccessor.GetPlayer(this, selectionGUID);
             return null;
         }
 
@@ -3714,7 +3741,7 @@ namespace Game.Entities
             StopMirrorTimers();                                     //disable timers(bars)
 
             // OnPlayerRepop hook
-            Global.ScriptMgr.OnPlayerRepop(this);
+            ScriptMgr.OnPlayerRepop(this);
         }
 
         public void StopMirrorTimers()
@@ -3953,7 +3980,7 @@ namespace Game.Entities
             uint newzone, newarea;
             GetZoneAndAreaId(out newzone, out newarea);
             UpdateZone(newzone, newarea);
-            Global.OutdoorPvPMgr.HandlePlayerResurrects(this, newzone);
+            OutdoorPvPMgr.HandlePlayerResurrects(this, newzone);
 
             if (InBattleground())
             {
@@ -4128,11 +4155,11 @@ namespace Game.Entities
                 ClosestGrave = bg.GetClosestGraveYard(this);
             else
             {
-                BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(GetMap(), GetZoneId());
+                BattleField bf = BattleFieldMgr.GetBattlefieldToZoneId(GetMap(), GetZoneId());
                 if (bf != null)
                     ClosestGrave = bf.GetClosestGraveYard(this);
                 else
-                    ClosestGrave = Global.ObjectMgr.GetClosestGraveYard(this, GetTeam(), this);
+                    ClosestGrave = ObjectMgr.GetClosestGraveYard(this, GetTeam(), this);
             }
 
             // stop countdown until repop
@@ -4300,7 +4327,7 @@ namespace Game.Entities
             }
 
             Map map = GetMap();
-            uint petNumber = Global.ObjectMgr.GeneratePetNumber();
+            uint petNumber = ObjectMgr.GeneratePetNumber();
             if (!pet.Create(map.GenerateLowGuid(HighGuid.Pet), map, entry, petNumber))
             {
                 Log.outError(LogFilter.Server, "no such creature entry {0}", entry);
@@ -4368,7 +4395,7 @@ namespace Game.Entities
             {
                 //returning of reagents only for players, so best done here
                 uint spellId = pet ? pet.m_unitData.CreatedBySpell : m_oldpetspell;
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
+                SpellInfo spellInfo = SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
 
                 if (spellInfo != null)
                 {
@@ -4485,12 +4512,12 @@ namespace Game.Entities
 
         public void SendPlayerChoice(ObjectGuid sender, int choiceId)
         {
-            PlayerChoice playerChoice = Global.ObjectMgr.GetPlayerChoice(choiceId);
+            PlayerChoice playerChoice = ObjectMgr.GetPlayerChoice(choiceId);
             if (playerChoice == null)
                 return;
 
             Locale locale = GetSession().GetSessionDbLocaleIndex();
-            PlayerChoiceLocale playerChoiceLocale = locale != Locale.enUS ? Global.ObjectMgr.GetPlayerChoiceLocale(choiceId) : null;
+            PlayerChoiceLocale playerChoiceLocale = locale != Locale.enUS ? ObjectMgr.GetPlayerChoiceLocale(choiceId) : null;
 
             PlayerTalkClass.GetInteractionData().Reset();
             PlayerTalkClass.GetInteractionData().SourceGuid = sender;
@@ -4810,7 +4837,7 @@ namespace Game.Entities
             if (amount == 0)
                 return true;
 
-            Global.ScriptMgr.OnPlayerMoneyChanged(this, amount);
+            ScriptMgr.OnPlayerMoneyChanged(this, amount);
 
             if (amount < 0)
                 SetMoney((ulong)(GetMoney() > (ulong)-amount ? (long)GetMoney() + amount : 0));
@@ -4880,7 +4907,7 @@ namespace Game.Entities
                 RemovePlayerFlag(PlayerFlags.GuildLevelEnabled);
             }
 
-            Global.CharacterCacheStorage.UpdateCharacterGuildId(GetGUID(), guildId);
+            CharacterCacheStorage.UpdateCharacterGuildId(GetGUID(), guildId);
         }
         public void SetGuildRank(byte rankId) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.GuildRankID), rankId); }
         public uint GetGuildRank() { return m_playerData.GuildRankID; }
@@ -4891,12 +4918,12 @@ namespace Game.Entities
         public Guild GetGuild()
         {
             ulong guildId = GetGuildId();
-            return guildId != 0 ? Global.GuildMgr.GetGuildById(guildId) : null;
+            return guildId != 0 ? GuildMgr.GetGuildById(guildId) : null;
         }
         public ulong GetGuildIdInvited() { return m_GuildIdInvited; }
         public string GetGuildName()
         {
-            return GetGuildId() != 0 ? Global.GuildMgr.GetGuildById(GetGuildId()).GetName() : "";
+            return GetGuildId() != 0 ? GuildMgr.GetGuildById(GetGuildId()).GetName() : "";
         }
 
         public void SetFreePrimaryProfessions(uint profs) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), profs); }
@@ -4910,9 +4937,9 @@ namespace Game.Entities
             if (guild != null)
                 guild.UpdateMemberData(this, GuildMemberData.Level, level);
 
-            PlayerLevelInfo info = Global.ObjectMgr.GetPlayerLevelInfo(GetRace(), GetClass(), level);
+            PlayerLevelInfo info = ObjectMgr.GetPlayerLevelInfo(GetRace(), GetClass(), level);
 
-            Global.ObjectMgr.GetPlayerClassLevelInfo(GetClass(), level, out uint basemana);
+            ObjectMgr.GetPlayerClassLevelInfo(GetClass(), level, out uint basemana);
 
             LevelUpInfo packet = new();
             packet.Level = level;
@@ -4930,12 +4957,12 @@ namespace Game.Entities
             for (Stats i = Stats.Strength; i < Stats.Max; ++i)
                 packet.StatDelta[(int)i] = info.stats[(int)i] - (int)GetCreateStat(i);
 
-            packet.NumNewTalents = (int)(Global.DB2Mgr.GetNumTalentsAtLevel(level, GetClass()) - Global.DB2Mgr.GetNumTalentsAtLevel(oldLevel, GetClass()));
-            packet.NumNewPvpTalentSlots = Global.DB2Mgr.GetPvpTalentNumSlotsAtLevel(level, GetClass()) - Global.DB2Mgr.GetPvpTalentNumSlotsAtLevel(oldLevel, GetClass());
+            packet.NumNewTalents = (int)(DB2Mgr.GetNumTalentsAtLevel(level, GetClass()) - DB2Mgr.GetNumTalentsAtLevel(oldLevel, GetClass()));
+            packet.NumNewPvpTalentSlots = DB2Mgr.GetPvpTalentNumSlotsAtLevel(level, GetClass()) - DB2Mgr.GetPvpTalentNumSlotsAtLevel(oldLevel, GetClass());
 
             SendPacket(packet);
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NextLevelXP), Global.ObjectMgr.GetXPForLevel(level));
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NextLevelXP), ObjectMgr.GetXPForLevel(level));
 
             //update level, max level of skills
             m_PlayedTimeLevel = 0;                   // Level Played Time reset
@@ -4979,7 +5006,7 @@ namespace Game.Entities
             if (pet)
                 pet.SynchronizeLevelWithOwner();
 
-            MailLevelReward mailReward = Global.ObjectMgr.GetMailLevelReward(level, (uint)SharedConst.GetMaskForRace(GetRace()));
+            MailLevelReward mailReward = ObjectMgr.GetMailLevelReward(level, (uint)SharedConst.GetMaskForRace(GetRace()));
             if (mailReward != null)
             {
                 //- TODO: Poor design of mail system
@@ -4993,7 +5020,7 @@ namespace Game.Entities
 
             PushQuests();
 
-            Global.ScriptMgr.OnPlayerLevelChanged(this, (byte)oldLevel);
+            ScriptMgr.OnPlayerLevelChanged(this, (byte)oldLevel);
         }
 
         public bool CanParry()
@@ -5049,7 +5076,7 @@ namespace Game.Entities
 
         public void InitDisplayIds()
         {
-            ChrModelRecord model = Global.DB2Mgr.GetChrModel(GetRace(), GetNativeGender());
+            ChrModelRecord model = DB2Mgr.GetChrModel(GetRace(), GetNativeGender());
             if (model == null)
             {
                 Log.outError(LogFilter.Player, $"Player {GetGUID()} has incorrect race/gender pair. Can't init display ids.");
@@ -5057,7 +5084,7 @@ namespace Game.Entities
             }
 
             SetDisplayId(model.DisplayID, true);
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StateAnimID), Global.DB2Mgr.GetEmptyAnimStateID());
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StateAnimID), DB2Mgr.GetEmptyAnimStateID());
         }
 
         //Creature
@@ -5195,7 +5222,7 @@ namespace Game.Entities
             ActiveGlyphs activeGlyphs = new();
             foreach (uint glyphId in GetGlyphs(GetActiveTalentGroup()))
             {
-                List<uint> bindableSpells = Global.DB2Mgr.GetGlyphBindableSpells(glyphId);
+                List<uint> bindableSpells = DB2Mgr.GetGlyphBindableSpells(glyphId);
                 foreach (uint bindableSpell in bindableSpells)
                     if (HasSpell(bindableSpell) && !m_overrideSpells.ContainsKey(bindableSpell))
                         activeGlyphs.Glyphs.Add(new GlyphBinding(bindableSpell, (ushort)glyphId));
@@ -5359,7 +5386,7 @@ namespace Game.Entities
 
             if (!GetPlayerSharingQuest().IsEmpty())
             {
-                Quest quest = Global.ObjectMgr.GetQuestTemplate(GetSharedQuestID());
+                Quest quest = ObjectMgr.GetQuestTemplate(GetSharedQuestID());
                 if (quest != null)
                     PlayerTalkClass.SendQuestGiverQuestDetails(quest, GetGUID(), true, false);
                 else
@@ -5371,7 +5398,7 @@ namespace Game.Entities
 
         public void RemoveSocial()
         {
-            Global.SocialMgr.RemovePlayerSocial(GetGUID());
+            SocialMgr.RemovePlayerSocial(GetGUID());
             m_social = null;
         }
 
@@ -5413,17 +5440,17 @@ namespace Game.Entities
                 _RemoveAllStatBonuses();
 
             uint basemana;
-            Global.ObjectMgr.GetPlayerClassLevelInfo(GetClass(), GetLevel(), out basemana);
+            ObjectMgr.GetPlayerClassLevelInfo(GetClass(), GetLevel(), out basemana);
 
-            PlayerLevelInfo info = Global.ObjectMgr.GetPlayerLevelInfo(GetRace(), GetClass(), GetLevel());
+            PlayerLevelInfo info = ObjectMgr.GetPlayerLevelInfo(GetRace(), GetClass(), GetLevel());
 
-            int exp_max_lvl = (int)Global.ObjectMgr.GetMaxLevelForExpansion(GetSession().GetExpansion());
+            int exp_max_lvl = (int)ObjectMgr.GetMaxLevelForExpansion(GetSession().GetExpansion());
             int conf_max_lvl = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
             if (exp_max_lvl == SharedConst.DefaultMaxLevel || exp_max_lvl >= conf_max_lvl)
                 SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.MaxLevel), conf_max_lvl);
             else
                 SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.MaxLevel), exp_max_lvl);
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NextLevelXP), Global.ObjectMgr.GetXPForLevel(GetLevel()));
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NextLevelXP), ObjectMgr.GetXPForLevel(GetLevel()));
             if (m_activePlayerData.XP >= m_activePlayerData.NextLevelXP)
                 SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.XP), m_activePlayerData.NextLevelXP - 1);
 
@@ -5913,7 +5940,7 @@ namespace Game.Entities
                 uint arenaTeamId = GetArenaTeamId(arenaSlot);
                 if (arenaTeamId != 0)
                 {
-                    ArenaTeam arenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(arenaTeamId);
+                    ArenaTeam arenaTeam = ArenaTeamMgr.GetArenaTeamById(arenaTeamId);
                     arenaTeam.FinishWeek();                              // set played this week etc values to 0 in memory, too
                     arenaTeam.SaveToDB();                                // save changes
                     arenaTeam.NotifyStatsChanged();                      // notify the players of the changes
@@ -5972,7 +5999,7 @@ namespace Game.Entities
 
                 UpdateCriteria(CriteriaType.RevealWorldMapOverlay, GetAreaId());
 
-                var areaLevels = Global.DB2Mgr.GetContentTuningData(areaEntry.ContentTuningID, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                var areaLevels = DB2Mgr.GetContentTuningData(areaEntry.ContentTuningID, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
                 if (areaLevels.HasValue)
                 {
                     if (IsMaxLevel())
@@ -5986,7 +6013,7 @@ namespace Game.Entities
                         uint XP;
                         if (diff < -5)
                         {
-                            XP = (uint)(Global.ObjectMgr.GetBaseXP(GetLevel() + 5) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                            XP = (uint)(ObjectMgr.GetBaseXP(GetLevel() + 5) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
                         }
                         else if (diff > 5)
                         {
@@ -5994,16 +6021,16 @@ namespace Game.Entities
                             if (exploration_percent < 0)
                                 exploration_percent = 0;
 
-                            XP = (uint)(Global.ObjectMgr.GetBaseXP(areaLevel) * exploration_percent / 100 * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                            XP = (uint)(ObjectMgr.GetBaseXP(areaLevel) * exploration_percent / 100 * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
                         }
                         else
                         {
-                            XP = (uint)(Global.ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                            XP = (uint)(ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
                         }
 
                         if (WorldConfig.GetIntValue(WorldCfg.MinDiscoveredScaledXpRatio) != 0)
                         {
-                            uint minScaledXP = (uint)(Global.ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore)) * WorldConfig.GetUIntValue(WorldCfg.MinDiscoveredScaledXpRatio) / 100;
+                            uint minScaledXP = (uint)(ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore)) * WorldConfig.GetUIntValue(WorldCfg.MinDiscoveredScaledXpRatio) / 100;
                             XP = Math.Max(minScaledXP, XP);
                         }
 
@@ -6021,7 +6048,7 @@ namespace Game.Entities
 
         public void SendSysMessage(CypherStrings str, params object[] args)
         {
-            string input = Global.ObjectMgr.GetCypherString(str);
+            string input = ObjectMgr.GetCypherString(str);
             string pattern = @"%(\d+(\.\d+)?)?(d|f|s|u)";
 
             int count = 0;
@@ -6057,7 +6084,7 @@ namespace Game.Entities
         #region Chat
         public override void Say(string text, Language language, WorldObject obj = null)
         {
-            Global.ScriptMgr.OnPlayerChat(this, ChatMsg.Say, language, text);
+            ScriptMgr.OnPlayerChat(this, ChatMsg.Say, language, text);
 
             SendChatMessageToSetInRange(ChatMsg.Say, language, text, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay));
         }
@@ -6081,7 +6108,7 @@ namespace Game.Entities
         }
         public override void Yell(string text, Language language, WorldObject obj = null)
         {
-            Global.ScriptMgr.OnPlayerChat(this, ChatMsg.Yell, language, text);
+            ScriptMgr.OnPlayerChat(this, ChatMsg.Yell, language, text);
 
             ChatPkt data = new();
             data.Initialize(ChatMsg.Yell, language, this, this, text);
@@ -6093,7 +6120,7 @@ namespace Game.Entities
         }
         public override void TextEmote(string text, WorldObject obj = null, bool something = false)
         {
-            Global.ScriptMgr.OnPlayerChat(this, ChatMsg.Emote, Language.Universal, text);
+            ScriptMgr.OnPlayerChat(this, ChatMsg.Emote, Language.Universal, text);
 
             ChatPkt data = new();
             data.Initialize(ChatMsg.Emote, Language.Universal, this, this, text);
@@ -6105,7 +6132,7 @@ namespace Game.Entities
         }
         public void WhisperAddon(string text, string prefix, bool isLogged, Player receiver)
         {
-            Global.ScriptMgr.OnPlayerChat(this, ChatMsg.Whisper, isLogged ? Language.AddonLogged : Language.Addon, text, receiver);
+            ScriptMgr.OnPlayerChat(this, ChatMsg.Whisper, isLogged ? Language.AddonLogged : Language.Addon, text, receiver);
 
             if (!receiver.GetSession().IsAddonRegistered(prefix))
                 return;
@@ -6123,7 +6150,7 @@ namespace Game.Entities
 
             //Player rPlayer = Global.ObjAccessor.FindPlayer(receiver);
 
-            Global.ScriptMgr.OnPlayerChat(this, ChatMsg.Whisper, language, text, target);
+            ScriptMgr.OnPlayerChat(this, ChatMsg.Whisper, language, text, target);
 
             ChatPkt data = new();
             data.Initialize(ChatMsg.Whisper, language, this, this, text);
@@ -6163,7 +6190,7 @@ namespace Game.Entities
 
             Locale locale = target.GetSession().GetSessionDbLocaleIndex();
             ChatPkt packet = new();
-            packet.Initialize(ChatMsg.Whisper, Language.Universal, this, target, Global.DB2Mgr.GetBroadcastTextValue(bct, locale, GetGender()));
+            packet.Initialize(ChatMsg.Whisper, Language.Universal, this, target, DB2Mgr.GetBroadcastTextValue(bct, locale, GetGender()));
             target.SendPacket(packet);
         }
         public bool CanUnderstandLanguage(Language language)
@@ -6171,7 +6198,7 @@ namespace Game.Entities
             if (IsGameMaster())
                 return true;
 
-            foreach (var languageDesc in Global.LanguageMgr.GetLanguageDescById(language))
+            foreach (var languageDesc in LanguageMgr.GetLanguageDescById(language))
                 if (languageDesc.SkillId != 0 && HasSkill((SkillType)languageDesc.SkillId))
                     return true;
 
@@ -6267,7 +6294,7 @@ namespace Game.Entities
 
             uint level = GetLevel();
 
-            Global.ScriptMgr.OnGivePlayerXP(this, xp, victim);
+            ScriptMgr.OnGivePlayerXP(this, xp, victim);
 
             // XP to money conversion processed in Player.RewardQuest
             if (IsMaxLevel())
@@ -6586,7 +6613,7 @@ namespace Game.Entities
                 uint path, cost;
 
                 lastnode = nodes[i];
-                Global.ObjectMgr.GetTaxiPath(prevnode, lastnode, out path, out cost);
+                ObjectMgr.GetTaxiPath(prevnode, lastnode, out path, out cost);
 
                 if (path == 0)
                 {
@@ -6616,7 +6643,7 @@ namespace Game.Entities
             if (node.Flags.HasAnyFlag(TaxiNodeFlags.UseFavoriteMount) && preferredMountDisplay != 0)
                 mount_display_id = preferredMountDisplay;
             else
-                mount_display_id = Global.ObjectMgr.GetTaxiMountDisplayId(sourcenode, GetTeam(), npc == null || (sourcenode == 315 && GetClass() == Class.Deathknight));
+                mount_display_id = ObjectMgr.GetTaxiMountDisplayId(sourcenode, GetTeam(), npc == null || (sourcenode == 315 && GetClass() == Class.Deathknight));
 
             // in spell case allow 0 model
             if ((mount_display_id == 0 && spellid == 0) || sourcepath == 0)
@@ -6704,7 +6731,7 @@ namespace Game.Entities
 
             Log.outDebug(LogFilter.Unit, "WORLD: Restart character {0} taxi flight", GetGUID().ToString());
 
-            uint mountDisplayId = Global.ObjectMgr.GetTaxiMountDisplayId(sourceNode, GetTeam(), true);
+            uint mountDisplayId = ObjectMgr.GetTaxiMountDisplayId(sourceNode, GetTeam(), true);
             if (mountDisplayId == 0)
                 return;
 
@@ -6848,7 +6875,7 @@ namespace Game.Entities
                 return true;
 
             // GMs are visible for higher gms (or players are visible for gms)
-            if (!Global.AccountMgr.IsPlayerAccount(u.GetSession().GetSecurity()))
+            if (!AccountMgr.IsPlayerAccount(u.GetSession().GetSecurity()))
                 return GetSession().GetSecurity() <= u.GetSession().GetSecurity();
 
             // non faction visibility non-breakable for non-GMs
@@ -6876,7 +6903,7 @@ namespace Game.Entities
             long racemask = SharedConst.GetMaskForRace(GetRace());
             uint classmask = GetClassMask();
 
-            var bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(spell_id);
+            var bounds = SpellMgr.GetSkillLineAbilityMapBounds(spell_id);
 
             if (bounds.Empty())
                 return true;
@@ -6892,7 +6919,7 @@ namespace Game.Entities
                     continue;
 
                 // skip wrong class and race skill saved in SkillRaceClassInfo.dbc
-                if (Global.DB2Mgr.GetSkillRaceClassInfo(_spell_idx.SkillLine, GetRace(), GetClass()) == null)
+                if (DB2Mgr.GetSkillRaceClassInfo(_spell_idx.SkillLine, GetRace(), GetClass()) == null)
                     continue;
 
                 return true;
@@ -6999,7 +7026,7 @@ namespace Game.Entities
         {
             ObjectGuid guid = m_activePlayerData.FarsightObject;
             if (!guid.IsEmpty())
-                return Global.ObjAccessor.GetObjectByTypeMask(this, guid, TypeMask.Seer);
+                return ObjAccessor.GetObjectByTypeMask(this, guid, TypeMask.Seer);
 
             return null;
         }
@@ -7118,7 +7145,7 @@ namespace Game.Entities
                 offItem.DeleteFromInventoryDB(trans);                   // deletes item from character's inventory
                 offItem.SaveToDB(trans);                                // recursive and not have transaction guard into self, item not in inventory and can be save standalone
 
-                string subject = Global.ObjectMgr.GetCypherString(CypherStrings.NotEquippedItem);
+                string subject = ObjectMgr.GetCypherString(CypherStrings.NotEquippedItem);
                 new MailDraft(subject, "There were problems with equipping one or several items").AddItem(offItem).SendMailTo(trans, this, new MailSender(this, MailStationery.Gm), MailCheckMask.Copied);
 
                 DB.Characters.CommitTransaction(trans);

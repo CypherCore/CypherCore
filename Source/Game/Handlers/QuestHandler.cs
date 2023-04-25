@@ -68,7 +68,7 @@ namespace Game
             if (creature.GetAI().OnGossipHello(_player))
                 return;
 
-            GetPlayer().PrepareGossipMenu(creature, creature.GetGossipMenuId(), true);
+            GetPlayer().PrepareGossipMenu(creature, _player.GetGossipMenuForSource(creature), true);
             GetPlayer().SendPreparedGossip(creature);
         }
 

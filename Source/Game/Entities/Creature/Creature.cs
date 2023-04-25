@@ -1140,13 +1140,10 @@ namespace Game.Entities
 
         public uint GetGossipMenuId()
         {
-            if (_gossipMenuId.HasValue)
-                return _gossipMenuId.Value;
-
-            return GetCreatureTemplate().GossipMenuId;
+            return _gossipMenuId;
         }
 
-        public void SetGossipMenuId(uint? gossipMenuId)
+        public void SetGossipMenuId(uint gossipMenuId)
         {
             _gossipMenuId = gossipMenuId;
         }
