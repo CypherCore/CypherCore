@@ -283,7 +283,7 @@ namespace Game.AI
                 {
                     Log.outDebug(LogFilter.ScriptsAi, $"EscortAI::MovementInform has returned to original position before combat ({me.GetGUID()})");
 
-                    me.SetWalk(!_running);
+                    me.SetWalk(false);
                     RemoveEscortState(EscortState.Returning);
 
                 }
@@ -310,7 +310,12 @@ namespace Game.AI
             }
         }
 
-        public void AddWaypoint(uint id, float x, float y, float z, float orientation, TimeSpan waitTime)
+        void AddWaypoint(uint id, float x, float y, float z, bool run)
+        {
+            AddWaypoint(id, x, y, z, 0.0f, TimeSpan.Zero, run);
+        }
+
+        public void AddWaypoint(uint id, float x, float y, float z, float orientation = 0, TimeSpan waitTime = default, bool run = false)
         {
             GridDefines.NormalizeMapCoord(ref x);
             GridDefines.NormalizeMapCoord(ref y);
@@ -321,48 +326,38 @@ namespace Game.AI
             waypoint.y = y;
             waypoint.z = z;
             waypoint.orientation = orientation;
-            waypoint.moveType = _running ? WaypointMoveType.Run : WaypointMoveType.Walk;
+            waypoint.moveType = run ? WaypointMoveType.Run : WaypointMoveType.Walk;
             waypoint.delay = (uint)waitTime.TotalMilliseconds;
             waypoint.eventId = 0;
             waypoint.eventChance = 100;
             _path.nodes.Add(waypoint);
-
-            _manualPath = true;
         }
 
-        void FillPointMovementListForCreature()
+        void ResetPath()
         {
-            WaypointPath path = Global.WaypointMgr.GetPath(me.GetEntry());
+            _path.nodes.Clear();
+        }
+
+        public void LoadPath(uint pathId)
+        {
+            WaypointPath path = Global.WaypointMgr.GetPath(pathId);
             if (path == null)
-                return;
-
-            foreach (WaypointNode value in path.nodes)
             {
-                WaypointNode node = value;
-                GridDefines.NormalizeMapCoord(ref node.x);
-                GridDefines.NormalizeMapCoord(ref node.y);
-                node.moveType = _running ? WaypointMoveType.Run : WaypointMoveType.Walk;
-
-                _path.nodes.Add(node);
-            }
-        }
-
-        public void SetRun(bool on = true)
-        {
-            if (on == _running)
+                Log.outError(LogFilter.ScriptsAi, $"EscortAI::LoadPath: (script: {me.GetScriptName()}) path {pathId} is invalid ({me.GetGUID()})");
                 return;
-
-            foreach (var node in _path.nodes)
-                node.moveType = on ? WaypointMoveType.Run : WaypointMoveType.Walk;
-
-            me.SetWalk(!on);
-
-            _running = on;
+            }
+            _path = path;
         }
 
         /// todo get rid of this many variables passed in function.
-        public void Start(bool isActiveAttacker = true, bool run = false, ObjectGuid playerGUID = default, Quest quest = null, bool instantRespawn = false, bool canLoopPath = false, bool resetWaypoints = true)
+        public void Start(bool isActiveAttacker = true, ObjectGuid playerGUID = default, Quest quest = null, bool instantRespawn = false, bool canLoopPath = false)
         {
+            if (_path.nodes.Empty())
+            {
+                Log.outError(LogFilter.ScriptsAi, $"EscortAI::Start: (script: {me.GetScriptName()}) path is empty ({me.GetGUID()})");
+                return;
+            }
+
             // Queue respawn from the point it starts
             CreatureData cdata = me.GetCreatureData();
             if (cdata != null)
@@ -382,11 +377,6 @@ namespace Game.AI
                 Log.outError(LogFilter.ScriptsAi, $"EscortAI::Start: (script: {me.GetScriptName()} attempts to Start while already escorting ({me.GetGUID()})");
                 return;
             }
-
-            _running = run;
-
-            if (!_manualPath && resetWaypoints)
-                FillPointMovementListForCreature();
 
             if (_path.nodes.Empty())
             {
@@ -416,10 +406,7 @@ namespace Game.AI
                 me.SetImmuneToNPC(false);
             }
 
-            Log.outDebug(LogFilter.ScriptsAi, $"EscortAI::Start: (script: {me.GetScriptName()}, started with {_path.nodes.Count} waypoints. ActiveAttacker = {_activeAttacker}, Run = {_running}, Player = {_playerGUID} ({me.GetGUID()})");
-
-            // set initial speed
-            me.SetWalk(!_running);
+            Log.outDebug(LogFilter.ScriptsAi, $"EscortAI::Start: (script: {me.GetScriptName()}, started with {_path.nodes.Count} waypoints. ActiveAttacker = {_activeAttacker}, Player = {_playerGUID} ({me.GetGUID()})");
 
             _started = false;
             AddEscortState(EscortState.Escorting);
@@ -474,12 +461,10 @@ namespace Game.AI
         WaypointPath _path;
 
         bool _activeAttacker;      // obsolete, determined by faction.
-        bool _running;             // all creatures are walking by default (has flag MOVEMENTFLAG_WALK)
         bool _instantRespawn;      // if creature should respawn instantly after escort over (if not, database respawntime are used)
         bool _returnToStart;       // if creature can walk same path (loop) without despawn. Not for regular escort quests.
         bool _despawnAtEnd;
         bool _despawnAtFar;
-        bool _manualPath;
         bool _hasImmuneToNPCFlags;
         bool _started;
         bool _ended;

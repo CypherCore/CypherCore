@@ -1179,7 +1179,8 @@ namespace Scripts.World.NpcSpecial
                                 break;
                         }
 
-                        Start(false, true);
+                        LoadPath((me.GetEntry() << 3) | 2);
+                        Start(false);
                     }
                     else
                         EnterEvadeMode();                       //something went wrong

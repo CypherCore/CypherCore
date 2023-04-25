@@ -180,69 +180,7 @@ namespace Game.Scripting
 
         public void LoadDatabase()
         {
-            LoadScriptWaypoints();
             LoadScriptSplineChains();
-        }
-
-        void LoadScriptWaypoints()
-        {
-            uint oldMSTime = Time.GetMSTime();
-
-            // Drop Existing Waypoint list
-            _waypointStore.Clear();
-
-            ulong entryCount = 0;
-
-            // Load Waypoints
-            SQLResult result = DB.World.Query("SELECT COUNT(entry) FROM script_waypoint GROUP BY entry");
-            if (!result.IsEmpty())
-                entryCount = result.Read<uint>(0);
-
-            Log.outInfo(LogFilter.ServerLoading, $"Loading Script Waypoints for {entryCount} creature(s)...");
-
-            //                                0       1         2           3           4           5
-            result = DB.World.Query("SELECT entry, pointid, location_x, location_y, location_z, waittime FROM script_waypoint ORDER BY pointid");
-
-            if (result.IsEmpty())
-            {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Script Waypoints. DB table `script_waypoint` is empty.");
-                return;
-            }
-
-            uint count = 0;
-
-            do
-            {
-                uint entry = result.Read<uint>(0);
-                uint id = result.Read<uint>(1);
-                float x = result.Read<float>(2);
-                float y = result.Read<float>(3);
-                float z = result.Read<float>(4);
-                uint waitTime = result.Read<uint>(5);
-
-                CreatureTemplate info = Global.ObjectMgr.GetCreatureTemplate(entry);
-                if (info == null)
-                {
-                    Log.outError(LogFilter.Sql, $"SystemMgr: DB table script_waypoint has waypoint for non-existant creature entry {entry}");
-                    continue;
-                }
-
-                if (info.ScriptID == 0)
-                    Log.outError(LogFilter.Sql, $"SystemMgr: DB table script_waypoint has waypoint for creature entry {entry}, but creature does not have ScriptName defined and then useless.");
-
-                if (!_waypointStore.ContainsKey(entry))
-                    _waypointStore[entry] = new WaypointPath();
-
-                WaypointPath path = _waypointStore[entry];
-                path.id = entry;
-                path.nodes.Add(new WaypointNode(id, x, y, z, null, waitTime));
-
-                ++count;
-            }
-            while (result.NextRow());
-
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Script Waypoint nodes in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
-
         }
 
         void LoadScriptSplineChains()
@@ -327,11 +265,6 @@ namespace Game.Scripting
         public void FillSpellSummary()
         {
             UnitAI.FillAISpellInfo();
-        }
-
-        public WaypointPath GetPath(uint creatureEntry)
-        {
-            return _waypointStore.LookupByKey(creatureEntry);
         }
         
         public List<SplineChainLink> GetSplineChain(Creature who, ushort chainId)
@@ -1220,8 +1153,6 @@ namespace Game.Scripting
         uint _ScriptCount;
         public Dictionary<uint, SpellSummary> spellSummaryStorage = new();
         Hashtable ScriptStorage = new();
-
-        Dictionary<uint, WaypointPath> _waypointStore = new();
         
         // creature entry + chain ID
         MultiMap<Tuple<uint, ushort>, SplineChainLink> m_mSplineChainsMap = new(); // spline chains
