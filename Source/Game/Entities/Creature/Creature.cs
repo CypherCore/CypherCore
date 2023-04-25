@@ -1584,6 +1584,9 @@ namespace Game.Entities
             if (GetSparringHealthPct() == 0)
                 return damage;
 
+            if (attacker == null)
+                return damage;
+
             if (!attacker.IsCreature() || attacker.IsCharmedOwnedByPlayerOrPlayer() || IsCharmedOwnedByPlayerOrPlayer())
                 return damage;
 
