@@ -4755,7 +4755,7 @@ namespace Scripts.Spells.Generic
             OnEffectApply.Add(new EffectApplyHandler(UpdateReviveBattlePetCooldown, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
-    
+
     [Script] // 45313 - Anchor Here
     class spell_gen_anchor_here : SpellScript
     {
@@ -4888,6 +4888,87 @@ namespace Scripts.Spells.Generic
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+
+    enum SkinningLearningSpell
+    {
+        Classic = 265856,
+        Outland = 265858,
+        Northrend = 265860,
+        Cataclysm = 265862,
+        Pandaria = 265864,
+        Draenor = 265866,
+        Legion = 265868,
+        KulTiran = 265870,
+        Zandalari = 265872,
+        Shadowlands = 308570,
+        DragonIsles = 366263
+    }
+
+    [Script] // 8613 - Skinning
+    class spell_gen_skinning : SpellScript
+    {
+        public override bool Validate(SpellInfo spell)
+        {
+            return ValidateSpellInfo((uint)SkinningLearningSpell.Outland, (uint)SkinningLearningSpell.Northrend, (uint)SkinningLearningSpell.Cataclysm, (uint)SkinningLearningSpell.Pandaria, (uint)SkinningLearningSpell.Draenor,
+                (uint)SkinningLearningSpell.KulTiran, (uint)SkinningLearningSpell.Zandalari, (uint)SkinningLearningSpell.Shadowlands, (uint)SkinningLearningSpell.DragonIsles);
+        }
+
+        void HandleSkinningEffect(uint effIndex)
+        {
+            Player player = GetCaster().ToPlayer();
+            if (!player)
+                return;
+
+            var contentTuning = CliDB.ContentTuningStorage.LookupByKey(GetHitUnit().GetContentTuning());
+            if (contentTuning == null)
+                return;
+
+            uint skinningSkill = player.GetProfessionSkillForExp(SkillType.Skinning, contentTuning.ExpansionID);
+            if (skinningSkill == 0)
+                return;
+
+            // Autolearning missing skinning skill (Dragonflight)
+            SkinningLearningSpell getSkinningLearningSpellBySkill()
+            {
+                switch ((SkillType)skinningSkill)
+                {
+                    case SkillType.OutlandSkinning:
+                        return SkinningLearningSpell.Outland;
+                    case SkillType.NorthrendSkinning:
+                        return SkinningLearningSpell.Northrend;
+                    case SkillType.CataclysmSkinning:
+                        return SkinningLearningSpell.Cataclysm;
+                    case SkillType.PandariaSkinning:
+                        return SkinningLearningSpell.Pandaria;
+                    case SkillType.DraenorSkinning:
+                        return SkinningLearningSpell.Draenor;
+                    case SkillType.KulTiranSkinning:
+                        return player.GetTeam() == Team.Alliance ? SkinningLearningSpell.KulTiran : SkinningLearningSpell.Zandalari;
+                    case SkillType.ShadowlandsSkinning:
+                        return SkinningLearningSpell.Shadowlands;
+                    case SkillType.DragonIslesSkinning:
+                        return SkinningLearningSpell.DragonIsles;
+                    case SkillType.ClassicSkinning:         // Trainer only
+                    case SkillType.LegionSkinning:                 // Quest only
+                    default: break;
+                }
+
+                return 0;
+            }
+
+            if (!player.HasSkill(skinningSkill))
+            {
+                uint spellId = (uint)getSkinningLearningSpellBySkill();
+                if (spellId != 0)
+                    player.CastSpell(null, spellId, true);
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleSkinningEffect, 0, SpellEffectName.Skinning));
         }
     }
 

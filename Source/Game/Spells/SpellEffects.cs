@@ -3450,6 +3450,10 @@ namespace Game.Spells
             loot.FillLoot(creature.GetCreatureTemplate().SkinLootId, LootStorage.Skinning, player, true);
             player.SendLoot(loot);
 
+            if (!Global.SpellMgr.IsPartOfSkillLine(skill, m_spellInfo.Id))
+                return;
+
+            // Skill gain for skinning
             // This formula is still used (10.0.5.48526)
             if (skill == SkillType.Skinning)
             {
