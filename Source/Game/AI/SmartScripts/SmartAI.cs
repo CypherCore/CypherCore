@@ -33,7 +33,6 @@ namespace Game.AI
         SmartEscortState _escortState;
         uint _escortNPCFlags;
         uint _escortInvokerCheckTimer;
-        WaypointPath _path = new();
         uint _currentWaypointNode;
         bool _waypointReached;
         uint _waypointPauseTimer;
@@ -71,20 +70,16 @@ namespace Game.AI
             return !_isCharmed;
         }
 
-        public void StartPath(bool run = false, uint pathId = 0, bool repeat = false, Unit invoker = null, uint nodeId = 1)
+        public void StartPath(uint pathId = 0, bool repeat = false, Unit invoker = null, uint nodeId = 1)
         {
             if (HasEscortState(SmartEscortState.Escorting))
                 StopPath();
 
-            SetRun(run);
+            if (pathId == 0)
+                return;
 
-            if (pathId != 0)
-            {
-                if (!LoadPath(pathId))
-                    return;
-            }
-
-            if (_path.nodes.Empty())
+            WaypointPath path = LoadPath(pathId);
+            if (path == null)
                 return;
 
             _currentWaypointNode = nodeId;
@@ -101,32 +96,23 @@ namespace Game.AI
                 me.ReplaceAllNpcFlags(NPCFlags.None);
             }
 
-            me.GetMotionMaster().MovePath(_path, _repeatWaypointPath);
+            me.GetMotionMaster().MovePath(path, _repeatWaypointPath);
         }
 
-        bool LoadPath(uint entry)
+        WaypointPath LoadPath(uint entry)
         {
             if (HasEscortState(SmartEscortState.Escorting))
-                return false;
+                return null;
 
-            WaypointPath path = Global.SmartAIMgr.GetPath(entry);
+            WaypointPath path = Global.WaypointMgr.GetPath(entry);
             if (path == null || path.nodes.Empty())
             {
                 GetScript().SetPathId(0);
-                return false;
-            }
-
-            _path.id = path.id;
-            _path.nodes.AddRange(path.nodes);
-            foreach (WaypointNode waypoint in _path.nodes)
-            {
-                GridDefines.NormalizeMapCoord(ref waypoint.x);
-                GridDefines.NormalizeMapCoord(ref waypoint.y);
-                waypoint.moveType = _run ? WaypointMoveType.Run : WaypointMoveType.Walk;
+                return null;
             }
 
             GetScript().SetPathId(entry);
-            return true;
+            return path;
         }
 
         public void PausePath(uint delay, bool forced)
@@ -217,7 +203,7 @@ namespace Game.AI
         public void EndPath(bool fail = false)
         {
             RemoveEscortState(SmartEscortState.Escorting | SmartEscortState.Paused | SmartEscortState.Returning);
-            _path.nodes.Clear();
+
             _waypointPauseTimer = 0;
 
             if (_escortNPCFlags != 0)
@@ -280,7 +266,7 @@ namespace Game.AI
             if (_repeatWaypointPath)
             {
                 if (IsAIControlled())
-                    StartPath(_run, GetScript().GetPathId(), _repeatWaypointPath);
+                    StartPath(GetScript().GetPathId(), _repeatWaypointPath);
             }
             else if (pathid == GetScript().GetPathId()) // if it's not the same pathid, our script wants to start another path; don't override it
                 GetScript().SetPathId(0);
@@ -403,7 +389,8 @@ namespace Game.AI
             }
             else if (HasEscortState(SmartEscortState.Escorting) && me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Waypoint)
             {
-                if (_currentWaypointNode == _path.nodes.Count)
+                WaypointPath path = Global.WaypointMgr.GetPath(pathId);
+                if (path != null && _currentWaypointNode == path.nodes.Count)
                     _waypointPathEnded = true;
                 else
                     SetRun(_run);
@@ -736,7 +723,7 @@ namespace Game.AI
             if (!charmed && !me.IsInEvadeMode())
             {
                 if (_repeatWaypointPath)
-                    StartPath(_run, GetScript().GetPathId(), true);
+                    StartPath(GetScript().GetPathId(), true);
                 else
                     me.SetWalk(!_run);
 
@@ -789,9 +776,6 @@ namespace Game.AI
         {
             me.SetWalk(!run);
             _run = run;
-
-            foreach (var node in _path.nodes)
-                node.moveType = run ? WaypointMoveType.Run : WaypointMoveType.Walk;
         }
 
         public void SetDisableGravity(bool disable = true)

@@ -46,11 +46,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.RendBlackhand
 
     struct MiscConst
     {
-        public const uint NefariusPath1 = 1379670;
-        public const uint NefariusPath2 = 1379671;
-        public const uint NefariusPath3 = 1379672;
-        public const uint RendPath1 = 1379680;
-        public const uint RendPath2 = 1379681;
+        public const uint NefariusPath1 = 11037360;
+        public const uint NefariusPath2 = 11037368;
+        public const uint NefariusPath3 = 11037376;
+        public const uint RendPath1 = 11037440;
+        public const uint RendPath2 = 11037448;
 
         public static Wave[] Wave2 = // 22 sec
         {

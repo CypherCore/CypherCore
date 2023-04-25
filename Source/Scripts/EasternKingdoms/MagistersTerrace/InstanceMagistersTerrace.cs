@@ -72,7 +72,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
 
         public const uint SayKalecgosSpawn = 0;
 
-        public const uint PathKalecgosFlight = 248440;
+        public const uint PathKalecgosFlight = 1987520;
 
         public static ObjectData[] creatureData =
         {

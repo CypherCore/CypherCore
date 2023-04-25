@@ -367,14 +367,14 @@ namespace Scripts.World.Areatriggers
                 stormforgedMonitor.SetWalk(false);
                 /// The npc would search an alternative way to get to the last waypoint without this unit state.
                 stormforgedMonitor.AddUnitState(UnitState.IgnorePathfinding);
-                stormforgedMonitor.GetMotionMaster().MovePath(CreatureIds.StormforgedMonitor * 100, false);
+                stormforgedMonitor.GetMotionMaster().MovePath((CreatureIds.StormforgedMonitor * 100) << 3, false);
             }
 
             stormforgedEradictor = player.SummonCreature(CreatureIds.StormforgedEradictor, Misc.StormforgedEradictorPosition, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(60));
             if (stormforgedEradictor)
             {
                 stormforgedEradictorGUID = stormforgedEradictor.GetGUID();
-                stormforgedEradictor.GetMotionMaster().MovePath(CreatureIds.StormforgedEradictor * 100, false);
+                stormforgedEradictor.GetMotionMaster().MovePath((CreatureIds.StormforgedEradictor * 100) << 3, false);
             }
 
             return true;

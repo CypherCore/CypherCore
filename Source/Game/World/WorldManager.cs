@@ -899,9 +899,6 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Waypoints...");
             Global.WaypointMgr.Load();
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading SmartAI Waypoints...");
-            Global.SmartAIMgr.LoadWaypointFromDB();
-
             Log.outInfo(LogFilter.ServerLoading, "Loading Creature Formations...");
             FormationMgr.LoadCreatureFormations();
 

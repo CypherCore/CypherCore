@@ -17,7 +17,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.GizrulTheSlav
 
     struct PathIds
     {
-        public const uint Gizrul = 402450;
+        public const uint Gizrul = 3219600;
     }
 
     [Script]

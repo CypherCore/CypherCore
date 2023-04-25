@@ -18,7 +18,6 @@ namespace Game.AI
     public class SmartAIManager : Singleton<SmartAIManager>
     {
         MultiMap<int, SmartScriptHolder>[] _eventMap = new MultiMap<int, SmartScriptHolder>[(int)SmartScriptType.Max];
-        Dictionary<uint, WaypointPath> _waypointStore = new();
 
         SmartAIManager()
         {
@@ -310,65 +309,6 @@ namespace Game.AI
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} SmartAI scripts in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
-        }
-
-        public void LoadWaypointFromDB()
-        {
-            uint oldMSTime = Time.GetMSTime();
-
-            _waypointStore.Clear();
-
-            PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_SMARTAI_WP);
-            SQLResult result = DB.World.Query(stmt);
-
-            if (result.IsEmpty())
-            {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 SmartAI Waypoint Paths. DB table `waypoints` is empty.");
-
-                return;
-            }
-
-            uint count = 0;
-            uint total = 0;
-            uint lastEntry = 0;
-            uint lastId = 1;
-
-            do
-            {
-                uint entry = result.Read<uint>(0);
-                uint id = result.Read<uint>(1);
-                float x = result.Read<float>(2);
-                float y = result.Read<float>(3);
-                float z = result.Read<float>(4);
-                float? o = null;
-                if (!result.IsNull(5))
-                    o = result.Read<float>(5);
-                uint delay = result.Read<uint>(6);
-
-                if (lastEntry != entry)
-                {
-                    lastId = 1;
-                    ++count;
-                }
-
-                if (lastId != id)
-                    Log.outError(LogFilter.Sql, $"SmartWaypointMgr.LoadFromDB: Path entry {entry}, unexpected point id {id}, expected {lastId}.");
-
-                ++lastId;
-
-                if (!_waypointStore.ContainsKey(entry))
-                    _waypointStore[entry] = new WaypointPath();
-
-                WaypointPath path = _waypointStore[entry];
-                path.id = entry;
-                path.nodes.Add(new WaypointNode(id, x, y, z, o, delay));
-
-                lastEntry = entry;
-                ++total;
-            }
-            while (result.NextRow());
-
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} SmartAI waypoint paths (total {total} waypoints) in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         static bool EventHasInvoker(SmartEvents smartEvent)
@@ -1662,7 +1602,7 @@ namespace Game.AI
                     break;
                 case SmartActions.WpStart:
                 {
-                    WaypointPath path = GetPath(e.Action.wpStart.pathID);
+                    WaypointPath path = Global.WaypointMgr.GetPath(e.Action.wpStart.pathID);
                     if (path == null || path.nodes.Empty())
                     {
                         Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent WaypointPath id {e.Action.wpStart.pathID}, skipped.");
@@ -2334,11 +2274,6 @@ namespace Game.AI
             }
 
             return temp;
-        }
-
-        public WaypointPath GetPath(uint id)
-        {
-            return _waypointStore.LookupByKey(id);
         }
 
         public static SmartScriptHolder FindLinkedSourceEvent(List<SmartScriptHolder> list, uint eventId)

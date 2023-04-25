@@ -23,7 +23,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Gyth
     {
         public const uint NefariusPath2 = 1379671;
         public const uint NefariusPath3 = 1379672;
-        public const uint GythPath1 = 1379681;
+        public const uint GythPath1 = 11037448;
     }
 
     [Script]
