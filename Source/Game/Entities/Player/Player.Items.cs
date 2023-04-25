@@ -4061,7 +4061,7 @@ namespace Game.Entities
             }
         }
 
-        void ApplyAllAzeriteEmpoweredItemMods(bool apply)
+        public void ApplyAllAzeriteEmpoweredItemMods(bool apply)
         {
             for (byte i = 0; i < InventorySlots.BagEnd; ++i)
             {

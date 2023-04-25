@@ -96,7 +96,7 @@ namespace Game.Networking.Packets
         public byte Slot;
     }
 
-    class PlayerAzeriteItemEquippedStatusChanged : ServerPacket
+    public class PlayerAzeriteItemEquippedStatusChanged : ServerPacket
     {
         public PlayerAzeriteItemEquippedStatusChanged() : base(ServerOpcodes.PlayerAzeriteItemEquippedStatusChanged) { }
 

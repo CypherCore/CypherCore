@@ -7,6 +7,7 @@ using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Loots;
+using Game.Networking.Packets;
 using Game.Scripting;
 using Game.Spells;
 using System;
@@ -3991,7 +3992,7 @@ namespace Scripts.Spells.Items
         FragileEchoEnergize = 215270,
     }
 
-    [Script] // 215266
+    [Script] // 215266 - Fragile Echoes
     class spell_item_amalgams_seventh_spine : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -4052,7 +4053,7 @@ namespace Scripts.Spells.Items
         }
     }
 
-    [Script] // 215267
+    [Script] // 215267 - Fragile Echo
     class spell_item_amalgams_seventh_spine_mana_restore : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -4077,6 +4078,53 @@ namespace Scripts.Spells.Items
         public override void Register()
         {
             AfterEffectRemove.Add(new EffectApplyHandler(TriggerManaRestoration, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script] // 228445 - March of the Legion
+    class spell_item_set_march_of_the_legion : AuraScript
+    {
+        bool IsDemon(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetProcTarget() && eventInfo.GetProcTarget().GetCreatureType() == CreatureType.Demon;
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(IsDemon, 0, AuraType.ProcTriggerSpell));
+        }
+    }
+
+    [Script] // 277253 - Heart of Azeroth
+    class spell_item_heart_of_azeroth : AuraScript
+    {
+        void SetEquippedFlag(AuraEffect effect, AuraEffectHandleModes mode)
+        {
+            SetState(true);
+        }
+
+        void ClearEquippedFlag(AuraEffect effect, AuraEffectHandleModes mode)
+        {
+            SetState(false);
+        }
+
+        void SetState(bool equipped)
+        {
+            Player target = GetTarget().ToPlayer();
+            if (target != null)
+            {
+                target.ApplyAllAzeriteEmpoweredItemMods(equipped);
+
+                PlayerAzeriteItemEquippedStatusChanged statusChanged = new();
+                statusChanged.IsHeartEquipped = equipped;
+                target.SendPacket(statusChanged);
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectApply.Add(new EffectApplyHandler(SetEquippedFlag, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            OnEffectRemove.Add(new EffectApplyHandler(ClearEquippedFlag, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
 }
