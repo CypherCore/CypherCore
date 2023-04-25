@@ -58,7 +58,6 @@ namespace Game.Entities
         public string AIName;
         public uint MovementType;
         public CreatureMovementData Movement = new();
-        public float HoverHeight;
         public float ModHealth;
         public float ModHealthExtra;
         public float ModMana;

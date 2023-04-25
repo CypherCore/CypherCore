@@ -228,7 +228,6 @@ namespace Game.Entities
             }
 
             SetUnitFlag2(UnitFlags2.RegeneratePower);
-            SetHoverHeight(1.0f);            // default for players in 3.0.3
 
             SetWatchedFactionIndex(0xFFFFFFFF);
 

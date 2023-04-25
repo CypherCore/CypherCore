@@ -2918,7 +2918,6 @@ namespace Game.Entities
             }
 
             SetObjectScale(1.0f);
-            SetHoverHeight(1.0f);
 
             // load achievements before anything else to prevent multiple gains for the same achievement/criteria on every loading (as loading does call UpdateAchievementCriteria)
             m_achievementSys.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.Achievements), holder.GetResult(PlayerLoginQueryLoad.CriteriaProgress));

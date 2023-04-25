@@ -1894,10 +1894,12 @@ namespace Game.Entities
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NativeXDisplayScale), displayScale);
             }
 
-            // Set Gender by modelId
+            // Set Gender by ModelInfo
             CreatureModelInfo modelInfo = Global.ObjectMgr.GetCreatureModelInfo(displayId);
             if (modelInfo != null)
                 SetGender((Gender)modelInfo.gender);
+
+            CalculateHoverHeight();
         }
 
         public void RestoreDisplayId(bool ignorePositiveAurasPreventingMounting = false)
@@ -1972,6 +1974,32 @@ namespace Game.Entities
         public void SetMountDisplayId(uint mountDisplayId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MountDisplayID), mountDisplayId); }
         uint GetCosmeticMountDisplayId() { return m_unitData.CosmeticMountDisplayID; }
         public void SetCosmeticMountDisplayId(uint mountDisplayId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CosmeticMountDisplayID), mountDisplayId); }
+
+        void CalculateHoverHeight()
+        {
+            float hoverHeight = SharedConst.DefaultPlayerHoverHeight;
+            float displayScale = SharedConst.DefaultPlayerDisplayScale;
+
+            uint displayId = IsMounted() ? GetMountDisplayId() : GetDisplayId();
+
+            // Get DisplayScale for creatures
+            if (IsCreature())
+            {
+                CreatureModel model = ToCreature().GetCreatureTemplate().GetModelWithDisplayId(displayId);
+                if (model != null)
+                    displayScale = model.DisplayScale;
+            }
+
+            var displayInfo = CliDB.CreatureDisplayInfoStorage.LookupByKey(displayId);
+            if (displayInfo != null)
+            {
+                var modelData = CliDB.CreatureModelDataStorage.LookupByKey(displayInfo.ModelID);
+                if (modelData != null)
+                    hoverHeight = modelData.HoverHeight * modelData.ModelScale * displayInfo.CreatureModelScale * displayScale;
+            }
+
+            SetHoverHeight(hoverHeight != 0 ? hoverHeight : SharedConst.DefaultPlayerHoverHeight);
+        }
 
         public virtual float GetFollowAngle() { return MathFunctions.PiOver2; }
 

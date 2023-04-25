@@ -1410,6 +1410,8 @@ namespace Game.Entities
 
             SetUnitFlag(UnitFlags.Mount);
 
+            CalculateHoverHeight();
+
             Player player = ToPlayer();
             if (player != null)
             {
@@ -1460,6 +1462,8 @@ namespace Game.Entities
             Player thisPlayer = ToPlayer();
             if (thisPlayer != null)
                 thisPlayer.SendMovementSetCollisionHeight(thisPlayer.GetCollisionHeight(), UpdateCollisionHeightReason.Mount);
+
+            CalculateHoverHeight();
 
             // dismount as a vehicle
             if (IsTypeId(TypeId.Player) && GetVehicleKit() != null)
