@@ -4095,6 +4095,40 @@ namespace Scripts.Spells.Items
         }
     }
 
+    [Script] // 234113 - Arrogance (used by item 142171 - Seal of Darkshire Nobility)
+    class spell_item_seal_of_darkshire_nobility : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return spellInfo.GetEffects().Count > 1
+                && ValidateSpellInfo(spellInfo.GetEffect(1).TriggerSpell);
+        }
+
+        bool CheckCooldownAura(ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetProcTarget() && !eventInfo.GetProcTarget().HasAura(GetEffectInfo(1).TriggerSpell, GetTarget().GetGUID());
+        }
+
+        public override void Register()
+        {
+            DoCheckProc.Add(new CheckProcHandler(CheckCooldownAura));
+        }
+    }
+
+    [Script] // 247625 - March of the Legion
+    class spell_item_lightblood_elixir : AuraScript
+    {
+        bool IsDemon(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetProcTarget() && eventInfo.GetProcTarget().GetCreatureType() == CreatureType.Demon;
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(IsDemon, 0, AuraType.ProcTriggerSpell));
+        }
+    }
+    
     [Script] // 277253 - Heart of Azeroth
     class spell_item_heart_of_azeroth : AuraScript
     {
