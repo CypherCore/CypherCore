@@ -292,10 +292,13 @@ namespace Game
             SetFactionStanding setFactionStanding = new();
             setFactionStanding.BonusFromAchievementSystem = 0.0f;
 
-            int standing = faction.VisualStandingIncrease != 0 ? faction.VisualStandingIncrease : faction.Standing;
+            int getStandingForPacket(FactionState state)
+            {
+                return state.VisualStandingIncrease != 0 ? state.VisualStandingIncrease : state.Standing;
+            }
 
             if (faction != null)
-                setFactionStanding.Faction.Add(new FactionStandingData((int)faction.ReputationListID, standing));
+                setFactionStanding.Faction.Add(new FactionStandingData((int)faction.ReputationListID, getStandingForPacket(faction)));
 
             foreach (var state in _factions.Values)
             {
@@ -303,10 +306,7 @@ namespace Game
                 {
                     state.needSend = false;
                     if (faction == null || state.ReputationListID != faction.ReputationListID)
-                    {
-                        standing = state.VisualStandingIncrease != 0 ? state.VisualStandingIncrease : state.Standing;
-                        setFactionStanding.Faction.Add(new FactionStandingData((int)state.ReputationListID, standing));
-                    }
+                        setFactionStanding.Faction.Add(new FactionStandingData((int)state.ReputationListID, getStandingForPacket(state)));
                 }
             }
 
