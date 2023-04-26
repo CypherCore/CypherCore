@@ -1287,7 +1287,7 @@ namespace Game.Entities
             if (GetGoInfo().GetServerOnly() != 0 && !allowServersideObjects)
                 return true;
 
-            if (GetDisplayId() == 0)
+            if (GetDisplayId() == 0 && GetGoInfo().IsDisplayMandatory())
                 return true;
 
             return false;

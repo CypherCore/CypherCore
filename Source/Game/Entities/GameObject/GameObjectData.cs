@@ -712,6 +712,12 @@ namespace Game.Entities
             }
         }
 
+        public bool IsDisplayMandatory() => type switch
+        {
+            GameObjectTypes.SpellFocus or GameObjectTypes.Multi or GameObjectTypes.SiegeableMulti => false,
+            _ => true
+        };
+        
         public void InitializeQueryData()
         {
             QueryData = new QueryGameObjectResponse();
