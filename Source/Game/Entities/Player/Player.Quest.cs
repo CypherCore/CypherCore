@@ -2439,7 +2439,7 @@ namespace Game.Entities
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
 
                 if (!QuestObjective.CanAlwaysBeProgressedInRaid(objectiveType))
-                    if (GetGroup() && GetGroup().IsRaidGroup() && quest.IsAllowedInRaid(GetMap().GetDifficultyID()))
+                    if (GetGroup() && GetGroup().IsRaidGroup() && !quest.IsAllowedInRaid(GetMap().GetDifficultyID()))
                         continue;
 
                 ushort logSlot = objectiveStatusData.QuestStatusPair.Status.Slot;
