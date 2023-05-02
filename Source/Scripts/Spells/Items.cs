@@ -4205,4 +4205,23 @@ namespace Scripts.Spells.Items
             AfterHit.Add(new HitHandler(TriggerAdditionalDamage));
         }
     }
+
+    [Script] // 295175 - Spiteful Binding
+    class spell_item_grips_of_forsaken_sanity : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return spellInfo.GetEffects().Count > 1;
+        }
+
+        bool CheckHealth(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetActor().GetHealthPct() >= (float)GetEffectInfo(1).CalcValue();
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckHealth, 0, AuraType.ProcTriggerSpell));
+        }
+    }
 }

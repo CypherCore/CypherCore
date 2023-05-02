@@ -44,6 +44,9 @@ namespace Scripts.Spells.Azerite
         // Echoing Blades
         public const uint EchoingBladesTrait = 287649;
 
+        // Hour of Reaping
+
+        public const uint DHSoulBarrier = 263648;
     }
 
     [Script]
@@ -438,6 +441,31 @@ namespace Scripts.Spells.Azerite
         }
     }
 
+    [Script] // 288882 - Hour of Reaping
+    class spell_item_hour_of_reaping : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.DHSoulBarrier);
+        }
+
+        bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return GetStackAmount() == GetAura().CalcMaxStackAmount();
+        }
+
+        void TriggerSoulBarrier(AuraEffect aurEff, ProcEventInfo procInfo)
+        {
+            GetTarget().CastSpell(GetTarget(), SpellIds.DHSoulBarrier, new CastSpellExtraArgs(aurEff));
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
+            AfterEffectProc.Add(new EffectProcHandler(TriggerSoulBarrier, 0, AuraType.Dummy));
+        }
+    }
+    
     [Script] // 277253 - Heart of Azeroth
     class spell_item_heart_of_azeroth : AuraScript
     {
