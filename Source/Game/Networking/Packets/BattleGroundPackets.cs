@@ -461,7 +461,7 @@ namespace Game.Networking.Packets
                 bracket.Write(_worldPacket);
         }
 
-        BracketInfo[] Bracket = new BracketInfo[6];
+        BracketInfo[] Bracket = new BracketInfo[7];
     }
 
     class PVPMatchInitialize : ServerPacket
