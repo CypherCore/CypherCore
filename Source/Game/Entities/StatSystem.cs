@@ -852,9 +852,7 @@ namespace Game.Entities
             float chance = critDone;
 
             // flat aura mods
-            if (attackType == WeaponAttackType.RangedAttack)
-                chance += GetTotalAuraModifier(AuraType.ModAttackerRangedCritChance);
-            else
+            if (attackType != WeaponAttackType.RangedAttack)
                 chance += GetTotalAuraModifier(AuraType.ModAttackerMeleeCritChance);
 
             chance += GetTotalAuraModifier(AuraType.ModCritChanceVersusTargetHealth, aurEff => !HealthBelowPct(aurEff.GetMiscValueB()));

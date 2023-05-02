@@ -195,7 +195,7 @@ namespace Framework.Constants
         ModAttackerRangedHitChance = 185,
         ModAttackerSpellHitChance = 186,
         ModAttackerMeleeCritChance = 187,
-        ModAttackerRangedCritChance = 188,
+        ModUIHealingRange = 188,
         ModRating = 189,
         ModFactionReputationGain = 190,
         UseNormalMovementSpeed = 191,

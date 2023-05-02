@@ -3661,7 +3661,6 @@ namespace Game.Spells
                     case AuraType.ModAttackerRangedHitChance:
                     case AuraType.ModAttackerSpellHitChance:
                     case AuraType.ModAttackerMeleeCritChance:
-                    case AuraType.ModAttackerRangedCritChance:
                     case AuraType.ModAttackerSpellAndWeaponCritChance:
                     case AuraType.Dummy:
                     case AuraType.PeriodicDummy:
