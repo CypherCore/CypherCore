@@ -413,6 +413,13 @@ namespace Scripts.Spells.Items
         // Eggnog
         public const uint EggNogReindeer = 21936;
         public const uint EggNogSnowman = 21980;
+
+        // HighfathersMachination
+        public const uint HighfathersTimekeepingHeal = 253288;
+
+        //SeepingScourgewing
+        public const uint ShadowStrikeAoeCheck = 255861;
+        public const uint IsolatedStrike = 255609;
     }
 
     struct TextIds
@@ -4128,37 +4135,74 @@ namespace Scripts.Spells.Items
             DoCheckEffectProc.Add(new CheckEffectProcHandler(IsDemon, 0, AuraType.ProcTriggerSpell));
         }
     }
-    
-    [Script] // 277253 - Heart of Azeroth
-    class spell_item_heart_of_azeroth : AuraScript
+
+    [Script] // 253287 - Highfather's Timekeeping
+    class spell_item_highfathers_machination : AuraScript
     {
-        void SetEquippedFlag(AuraEffect effect, AuraEffectHandleModes mode)
+        public override bool Validate(SpellInfo spellInfo)
         {
-            SetState(true);
+            return ValidateSpellInfo(SpellIds.HighfathersTimekeepingHeal);
         }
 
-        void ClearEquippedFlag(AuraEffect effect, AuraEffectHandleModes mode)
+        bool CheckHealth(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            SetState(false);
+            return eventInfo.GetDamageInfo() != null && GetTarget().HealthBelowPctDamaged(aurEff.GetAmount(), eventInfo.GetDamageInfo().GetDamage());
         }
 
-        void SetState(bool equipped)
+        void Heal(AuraEffect aurEff, ProcEventInfo procInfo)
         {
-            Player target = GetTarget().ToPlayer();
-            if (target != null)
-            {
-                target.ApplyAllAzeriteEmpoweredItemMods(equipped);
-
-                PlayerAzeriteItemEquippedStatusChanged statusChanged = new();
-                statusChanged.IsHeartEquipped = equipped;
-                target.SendPacket(statusChanged);
-            }
+            PreventDefaultAction();
+            Unit caster = GetCaster();
+            if (caster != null)
+                caster.CastSpell(GetTarget(), SpellIds.HighfathersTimekeepingHeal, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
         {
-            OnEffectApply.Add(new EffectApplyHandler(SetEquippedFlag, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
-            OnEffectRemove.Add(new EffectApplyHandler(ClearEquippedFlag, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckHealth, 0, AuraType.Dummy));
+            OnEffectProc.Add(new EffectProcHandler(Heal, 0, AuraType.Dummy));
+        }
+    }
+
+    [Script] // 253323 - Shadow Strike
+    class spell_item_seeping_scourgewing : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ShadowStrikeAoeCheck);
+        }
+
+        void TriggerIsolatedStrikeCheck(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.ShadowStrikeAoeCheck,
+                new CastSpellExtraArgs(aurEff).SetTriggeringSpell(eventInfo.GetProcSpell()));
+        }
+
+        public override void Register()
+        {
+            AfterEffectProc.Add(new EffectProcHandler(TriggerIsolatedStrikeCheck, 0, AuraType.ProcTriggerSpell));
+        }
+    }
+
+    [Script] // 255861 - Shadow Strike
+    class spell_item_seeping_scourgewing_aoe_check : SpellScript
+    {
+        void TriggerAdditionalDamage()
+        {
+            if (GetUnitTargetCountForEffect(0) > 1)
+                return;
+
+            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+            args.OriginalCastId = GetSpell().m_originalCastId;
+            if (GetSpell().m_castItemLevel >= 0)
+                args.OriginalCastItemLevel = GetSpell().m_castItemLevel;
+
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.IsolatedStrike, args);
+        }
+
+        public override void Register()
+        {
+            AfterHit.Add(new HitHandler(TriggerAdditionalDamage));
         }
     }
 }
