@@ -436,32 +436,6 @@ namespace Game
             else
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 class expansion requirements. DB table `class_expansion_requirement` is empty.");
         }
-        public void LoadRealmNames()
-        {
-            uint oldMSTime = Time.GetMSTime();
-            _realmNameStorage.Clear();
-
-            //                                         0   1
-            SQLResult result = DB.Login.Query("SELECT id, name FROM `realmlist`");
-            if (result.IsEmpty())
-            {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 realm names. DB table `realmlist` is empty.");
-                return;
-            }
-
-            uint count = 0;
-            do
-            {
-                uint realm = result.Read<uint>(0);
-                string realmName = result.Read<string>(1);
-
-                _realmNameStorage[realm] = realmName;
-
-                ++count;
-            }
-            while (result.NextRow());
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} realm names in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
-        }
 
         public string GetCypherString(uint entry, Locale locale = Locale.enUS)
         {
@@ -482,21 +456,6 @@ namespace Game
             return GetCypherString((uint)cmd, locale);
         }
 
-        public string GetRealmName(uint realm)
-        {
-            return _realmNameStorage.LookupByKey(realm);
-        }
-        public bool GetRealmName(uint realmId, ref string name, ref string normalizedName)
-        {
-            var realmName = _realmNameStorage.LookupByKey(realmId);
-            if (realmName != null)
-            {
-                name = realmName;
-                normalizedName = realmName.Normalize();
-                return true;
-            }
-            return false;
-        }
         public Dictionary<byte, RaceUnlockRequirement> GetRaceUnlockRequirements() { return _raceUnlockRequirementStorage; }
         public RaceUnlockRequirement GetRaceUnlockRequirement(Race race) { return _raceUnlockRequirementStorage.LookupByKey((byte)race); }
         public List<RaceClassAvailability> GetClassExpansionRequirements() { return _classExpansionRequirementStorage; }
@@ -11000,7 +10959,6 @@ namespace Game
 
         Dictionary<byte, RaceUnlockRequirement> _raceUnlockRequirementStorage = new();
         List<RaceClassAvailability> _classExpansionRequirementStorage = new();
-        Dictionary<uint, string> _realmNameStorage = new();
 
         //Quest
         Dictionary<uint, Quest> _questTemplates = new();
