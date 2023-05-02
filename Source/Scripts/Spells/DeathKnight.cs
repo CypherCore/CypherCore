@@ -40,8 +40,11 @@ namespace Scripts.Spells.DeathKnight
         public const uint GlyphOfFoulMenagerie = 58642;
         public const uint GlyphOfTheGeist = 58640;
         public const uint GlyphOfTheSkeleton = 146652;
+        public const uint KillingMachineProc = 51124;
         public const uint MarkOfBloodHeal = 206945;
         public const uint NecrosisEffect = 216974;
+        public const uint Obliteration = 281238;
+        public const uint ObliterationRuneEnergize = 281327;
         public const uint RaiseDeadSummon = 52150;
         public const uint RecentlyUsedDeathStrike = 180612;
         public const uint RunicPowerEnergize = 49088;
@@ -639,6 +642,32 @@ namespace Scripts.Spells.DeathKnight
         }
     }
 
+    [Script] // 207256 - Obliteration
+    class spell_dk_obliteration : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.Obliteration, SpellIds.ObliterationRuneEnergize, SpellIds.KillingMachineProc)
+                && Global.SpellMgr.GetSpellInfo(SpellIds.Obliteration, Difficulty.None).GetEffects().Count > 1;
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            Unit target = GetTarget();
+            target.CastSpell(target, SpellIds.KillingMachineProc, new CastSpellExtraArgs(aurEff));
+
+            AuraEffect oblitaration = target.GetAuraEffect(SpellIds.Obliteration, 1);
+            if (oblitaration != null)
+                if (RandomHelper.randChance(oblitaration.GetAmount()))
+                    target.CastSpell(target, SpellIds.ObliterationRuneEnergize, new CastSpellExtraArgs(aurEff));
+        }
+
+        public override void Register()
+        {
+            AfterEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+        }
+    }
+    
     [Script] // 121916 - Glyph of the Geist (Unholy)
     class spell_dk_pet_geist_transform : SpellScript
     {

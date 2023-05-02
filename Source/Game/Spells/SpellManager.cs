@@ -4341,8 +4341,17 @@ namespace Game.Entities
                 });
             });
 
+            ApplySpellFix(new[] { 265057 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    // Fix incorrect spell id (it has self in TriggerSpell)
+                    spellEffectInfo.TriggerSpell = 16403;
+                });
+            });
+
             // Ray of Frost (Fingers of Frost charges)
-            ApplySpellFix(new []{ 269748 }, spellInfo =>
+            ApplySpellFix(new[] { 269748 }, spellInfo =>
             {
                 spellInfo.AttributesEx &= ~SpellAttr1.IsChannelled;
             });

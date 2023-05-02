@@ -17,7 +17,7 @@ namespace Scripts.Spells.Azerite
         public const uint StrengthInNumbersBuff = 271550;
 
         // Blessedportents        
-            public const uint BlessedPortentsTrait = 267889;
+        public const uint BlessedPortentsTrait = 267889;
         public const uint BlessedPortentsHeal = 280052;
 
         // Concentratedmending        
@@ -34,6 +34,44 @@ namespace Scripts.Spells.Azerite
 
         // Bluroftalons
         public const uint HunterCoordinatedAssault = 266779;
+
+        // Tradewinds
+        public const uint TradewindsAllyBuff = 281844;
+
+        // Bastion of Might
+        public const uint WarriorIgnorePain = 190456;
+
+        // Echoing Blades
+        public const uint EchoingBladesTrait = 287649;
+
+    }
+
+    [Script]
+    class spell_azerite_gen_aura_calc_from_2nd_effect_triggered_spell : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return spellInfo.GetEffects().Count > 1 && ValidateSpellInfo(spellInfo.GetEffect(1).TriggerSpell);
+        }
+
+        void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        {
+            Unit caster = GetCaster();
+            if (caster != null)
+            {
+                AuraEffect trait = caster.GetAuraEffect(GetEffectInfo(1).TriggerSpell, 0);
+                if (trait != null)
+                {
+                    amount = trait.GetAmount();
+                    canBeRecalculated = false;
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModRating));
+        }
     }
 
     [Script] // 270658 - Azerite Fortification
@@ -280,6 +318,123 @@ namespace Scripts.Spells.Azerite
         public override void Register()
         {
             DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckHealthPct, 0, AuraType.ProcTriggerSpell));
+        }
+    }
+
+    [Script] // 280409 - Blood Rite
+    class spell_item_blood_rite : AuraScript
+    {
+        void HandleProc(AuraEffect aurEff, ProcEventInfo procInfo)
+        {
+            RefreshDuration();
+        }
+
+        public override void Register()
+        {
+            AfterEffectProc.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy));
+        }
+    }
+
+    [Script] // 281843 - Tradewinds
+    class spell_item_tradewinds : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.TradewindsAllyBuff);
+        }
+
+        void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            AuraEffect trait = GetTarget().GetAuraEffect(GetEffectInfo(1).TriggerSpell, 1);
+            if (trait != null)
+                GetTarget().CastSpell((WorldObject)null, SpellIds.TradewindsAllyBuff,
+                    new CastSpellExtraArgs(aurEff).AddSpellMod(SpellValueMod.BasePoint0, trait.GetAmount()));
+        }
+
+        public override void Register()
+        {
+            AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.ModRating, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script] // 287379 - Bastion of Might
+    class spell_item_bastion_of_might : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.WarriorIgnorePain);
+        }
+
+        void TriggerIgnorePain()
+        {
+            GetCaster().CastSpell(GetCaster(), SpellIds.WarriorIgnorePain, GetSpell());
+        }
+
+        public override void Register()
+        {
+            AfterHit.Add(new HitHandler(TriggerIgnorePain));
+        }
+    }
+
+    [Script] // 287650 - Echoing Blades
+    class spell_item_echoing_blades : AuraScript
+    {
+        void PrepareProc(ProcEventInfo eventInfo)
+        {
+            if (eventInfo.GetProcSpell())
+            {
+                if (eventInfo.GetProcSpell().m_castId != _lastFanOfKnives)
+                    GetEffect(0).RecalculateAmount();
+
+                _lastFanOfKnives = eventInfo.GetProcSpell().m_castId;
+            }
+        }
+
+        bool CheckFanOfKnivesCounter(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return aurEff.GetAmount() > 0;
+        }
+
+        void ReduceCounter(AuraEffect aurEff, ProcEventInfo procInfo)
+        {
+            aurEff.SetAmount(aurEff.GetAmount() - 1);
+        }
+
+        public override void Register()
+        {
+            DoPrepareProc.Add(new AuraProcHandler(PrepareProc));
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckFanOfKnivesCounter, 0, AuraType.ProcTriggerSpell));
+            AfterEffectProc.Add(new EffectProcHandler(ReduceCounter, 0, AuraType.ProcTriggerSpell));
+        }
+
+        ObjectGuid _lastFanOfKnives;
+    }
+
+    [Script] // 287653 - Echoing Blades
+    class spell_item_echoing_blades_damage : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.EchoingBladesTrait)
+            && Global.SpellMgr.GetSpellInfo(SpellIds.EchoingBladesTrait, Difficulty.None).GetEffects().Count > 2;
+        }
+
+        void CalculateDamage(uint effIndex)
+        {
+            AuraEffect trait = GetCaster().GetAuraEffect(SpellIds.EchoingBladesTrait, 2);
+            if (trait != null)
+            SetHitDamage(trait.GetAmount() * 2);
+        }
+
+        void ForceCritical(Unit victim, ref float critChance)
+        {
+            critChance = 100.0f;
+        }
+
+        public override void Register()
+        {
+            OnEffectLaunchTarget.Add(new EffectHandler(CalculateDamage, 0, SpellEffectName.SchoolDamage));
+            OnCalcCritChance.Add(new OnCalcCritChanceHandler(ForceCritical));
         }
     }
 

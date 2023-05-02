@@ -1692,7 +1692,7 @@ namespace Game.Scripting
         public int GetDuration() { return m_aura.GetDuration(); }
         public void SetDuration(int duration, bool withMods = false) { m_aura.SetDuration(duration, withMods); }
         // sets duration to maxduration
-        void RefreshDuration() { m_aura.RefreshDuration(); }
+        public void RefreshDuration() { m_aura.RefreshDuration(); }
         long GetApplyTime() { return m_aura.GetApplyTime(); }
         public int GetMaxDuration() { return m_aura.GetMaxDuration(); }
         public void SetMaxDuration(int duration) { m_aura.SetMaxDuration(duration); }
