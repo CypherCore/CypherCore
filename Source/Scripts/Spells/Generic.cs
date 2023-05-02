@@ -1866,6 +1866,7 @@ namespace Scripts.Spells.Generic
      * and UNIT_FLAG_PREVENT_EMOTES_FROM_CHAT_TEXT. Some auras can apply only 2 flags
      * 
      * spell_gen_feign_death_all_flags applies all 3 flags
+     * spell_gen_feign_death_all_flags_uninteractible applies all 3 flags and additionally sets UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_UNINTERACTIBLE
      * spell_gen_feign_death_no_dyn_flag applies no UNIT_DYNFLAG_DEAD (does not make the creature appear dead)
      * spell_gen_feign_death_no_prevent_emotes applies no UNIT_FLAG_PREVENT_EMOTES_FROM_CHAT_TEXT
      * 
@@ -1907,6 +1908,36 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script]
+    class spell_gen_feign_death_all_flags_uninteractible : AuraScript
+    {
+        void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+            target.SetUnitFlag3(UnitFlags3.FakeDead);
+            target.SetUnitFlag2(UnitFlags2.FeignDeath);
+            target.SetUnitFlag(UnitFlags.PreventEmotesFromChatText | UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc | UnitFlags.Uninteractible);
+
+            target.ToCreature()?.SetReactState(ReactStates.Passive);
+        }
+
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+            target.RemoveUnitFlag3(UnitFlags3.FakeDead);
+            target.RemoveUnitFlag2(UnitFlags2.FeignDeath);
+            target.RemoveUnitFlag(UnitFlags.PreventEmotesFromChatText | UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc | UnitFlags.Uninteractible);
+
+            target.ToCreature()?.InitializeReactState();
+        }
+
+        public override void Register()
+        {
+            OnEffectApply.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+    
     // 35357 - Spawn Feign Death
     [Script] // 51329 - Feign Death
     class spell_gen_feign_death_no_dyn_flag : AuraScript
