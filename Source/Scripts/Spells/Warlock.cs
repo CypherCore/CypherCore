@@ -41,6 +41,12 @@ namespace Scripts.Spells.Warlock
         public const uint UnstableAfflictionDispel = 31117;
         public const uint Shadowflame = 37378;
         public const uint Flameshadow = 37379;
+        public const uint SummonSuccubus = 712;
+        public const uint SummonIncubus = 365349;
+        public const uint StrengthenPactSuccubus = 366323;
+        public const uint StrengthenPactIncubus = 366325;
+        public const uint SuccubusPact = 365360;
+        public const uint IncubusPact = 365355;
 
         public const uint GenReplenishment = 57669;
         public const uint PriestShadowWordDeath = 32409;
@@ -94,7 +100,7 @@ namespace Scripts.Spells.Warlock
             OnCalcCritChance.Add(new OnCalcCritChanceHandler(CalcCritChance));
         }
     }
-    
+
     [Script] // 77220 - Mastery: Chaotic Energies
     class spell_warl_chaotic_energies : AuraScript
     {
@@ -260,7 +266,7 @@ namespace Scripts.Spells.Warlock
             AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.PeriodicDamage, AuraEffectHandleModes.Real));
         }
     }
-    
+
     [Script] // 48181 - Haunt
     class spell_warl_haunt : SpellScript
     {
@@ -364,7 +370,67 @@ namespace Scripts.Spells.Warlock
             OnEffectHitTarget.Add(new EffectHandler(HandleOnEffectHit, 0, SpellEffectName.SchoolDamage));
         }
     }
-    
+
+    // 366330 - Random Sayaad
+    class spell_warl_random_sayaad : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.SuccubusPact, SpellIds.IncubusPact);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            Unit caster = GetCaster();
+
+            caster.RemoveAurasDueToSpell(SpellIds.SuccubusPact);
+            caster.RemoveAurasDueToSpell(SpellIds.IncubusPact);
+
+            Player player = GetCaster().ToPlayer();
+            if (!player)
+                return;
+
+            Pet pet = player.GetPet();
+            if (pet != null)
+            {
+                if (pet.IsPetSayaad())
+                    pet.DespawnOrUnsummon();
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    // 366323 - Strengthen Pact - Succubus
+    // 366325 - Strengthen Pact - Incubus
+    // 366222 - Summon Sayaad
+    class spell_warl_sayaad_precast_disorientation : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SharedConst.PetSummoningDisorientation);
+        }
+
+        // Note: this is a special case in which the warlock's minion pet must also cast Summon Disorientation at the beginning since this is only handled by SPELL_EFFECT_SUMMON_PET in Spell::CheckCast.
+        public override void OnPrecast()
+        {
+            Player player = GetCaster().ToPlayer();
+            if (!player)
+                return;
+
+            Pet pet = player.GetPet();
+            if (pet != null)
+                pet.CastSpell(pet, SharedConst.PetSummoningDisorientation, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                    .SetOriginalCaster(pet.GetGUID())
+                    .SetTriggeringSpell(GetSpell()));
+        }
+
+        public override void Register() { }
+    }
+
     [Script] // 6358 - Seduction (Special Ability)
     class spell_warl_seduction : SpellScript
     {
@@ -425,7 +491,7 @@ namespace Scripts.Spells.Warlock
 
             amount = caster.SpellBaseDamageBonusDone(GetSpellInfo().GetSchoolMask()) * GetEffectInfo(0).CalcValue(caster) / 100;
         }
-        
+
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
@@ -518,7 +584,7 @@ namespace Scripts.Spells.Warlock
             AfterCast.Add(new CastHandler(HandleAfterCast));
         }
     }
-    
+
     [Script] // 86121 - Soul Swap
     class spell_warl_soul_swap : SpellScript
     {
@@ -679,6 +745,69 @@ namespace Scripts.Spells.Warlock
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    // 366323 - Strengthen Pact - Succubus
+    class spell_warl_strengthen_pact_succubus : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.SuccubusPact, SpellIds.SummonSuccubus);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            Unit caster = GetCaster();
+
+            caster.CastSpell((WorldObject)null, SpellIds.SuccubusPact, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
+            caster.CastSpell((WorldObject)null, SpellIds.SummonSuccubus, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    // 366325 - Strengthen Pact - Incubus
+    class spell_warl_strengthen_pact_incubus : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.IncubusPact, SpellIds.SummonIncubus);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            Unit caster = GetCaster();
+
+            caster.CastSpell((WorldObject)null, SpellIds.IncubusPact, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
+            caster.CastSpell((WorldObject)null, SpellIds.SummonIncubus, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    // 366222 - Summon Sayaad
+    class spell_warl_summon_sayaad : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.SummonSuccubus, SpellIds.SummonIncubus);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            GetCaster().CastSpell((WorldObject)null, RandomHelper.randChance(50) ? SpellIds.SummonSuccubus : SpellIds.SummonIncubus, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 

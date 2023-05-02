@@ -207,6 +207,7 @@ namespace Framework.Constants
         public const int MaxActivePets = 5;
         public const int MaxPetStables = 200;
         public const uint CallPetSpellId = 883;
+        public const uint PetSummoningDisorientation = 32752;
         public const float PetFollowDist = 1.0f;
         public const float PetFollowAngle = MathF.PI;
         public const int MaxSpellCharm = 4;
