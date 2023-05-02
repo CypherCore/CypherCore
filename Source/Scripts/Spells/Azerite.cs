@@ -465,6 +465,25 @@ namespace Scripts.Spells.Azerite
             AfterEffectProc.Add(new EffectProcHandler(TriggerSoulBarrier, 0, AuraType.Dummy));
         }
     }
+
+    [Script] // 304086  - Azerite Fortification
+    class spell_item_conflict_wearer_on_stun_proc : AuraScript
+    {
+        bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            Spell procSpell = eventInfo.GetProcSpell();
+            if (procSpell == null)
+                return false;
+
+            return procSpell.GetSpellInfo().HasAura(AuraType.ModStun)
+                || procSpell.GetSpellInfo().HasAura(AuraType.ModStunDisableGravity);
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.ProcTriggerSpell));
+        }
+    }
     
     [Script] // 277253 - Heart of Azeroth
     class spell_item_heart_of_azeroth : AuraScript

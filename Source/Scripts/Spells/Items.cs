@@ -4224,4 +4224,18 @@ namespace Scripts.Spells.Items
             DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckHealth, 0, AuraType.ProcTriggerSpell));
         }
     }
+
+    [Script] // 302385 - Resurrect Health
+    class spell_item_zanjir_scaleguard_greatcloak : AuraScript
+    {
+        bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetSpellInfo() != null && eventInfo.GetSpellInfo().HasEffect(SpellEffectName.Resurrect);
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.ProcTriggerSpell));
+        }
+    }
 }
