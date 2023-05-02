@@ -337,8 +337,36 @@ namespace Game.Spells
 
         public void RecalculateDelayMomentForDst()
         {
-            m_delayMoment = CalculateDelayMomentForDst(0.0f);
-            m_caster.m_Events.ModifyEventTime(_spellEvent, TimeSpan.FromMilliseconds(GetDelayStart() + m_delayMoment));
+            UpdateDelayMomentForDst(CalculateDelayMomentForDst(0.0f));
+        }
+
+        void UpdateDelayMomentForDst(ulong hitDelay)
+        {
+            m_delayMoment = hitDelay;
+
+            if (GetDelayStart() != 0)
+                m_caster.m_Events.ModifyEventTime(_spellEvent, TimeSpan.FromMilliseconds(GetDelayStart() + m_delayMoment));
+        }
+
+        void UpdateDelayMomentForUnitTarget(Unit unit, ulong hitDelay)
+        {
+            var itr = m_UniqueTargetInfo.Find(targetInfo => targetInfo.TargetGUID == unit.GetGUID());
+
+            ulong oldDelay = itr.TimeDelay;
+            itr.TimeDelay = hitDelay;
+
+            if (hitDelay != 0 && (m_delayMoment == 0 || m_delayMoment > hitDelay))
+                m_delayMoment = hitDelay;
+            else if (m_delayMoment != 0 && oldDelay < hitDelay)
+            {
+                // if new hit delay is greater than old delay for this target we must check all other spell targets to see if m_delayMoment can be increased
+                var minDelay = m_UniqueTargetInfo.Min(targetInfo => targetInfo.TimeDelay);
+
+                m_delayMoment = minDelay;
+            }
+
+            if (GetDelayStart() != 0)
+                m_caster.m_Events.ModifyEventTime(_spellEvent, TimeSpan.FromMilliseconds(GetDelayStart() + m_delayMoment));
         }
 
         void SelectEffectImplicitTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, ref uint processedEffectMask)
@@ -3054,7 +3082,9 @@ namespace Game.Spells
                 return 0;
             }
 
+            // when spell has a single missile we hit all targets (except caster) at the same time
             bool single_missile = m_targets.HasDst();
+            bool ignoreTargetInfoTimeDelay = single_missile;
             ulong next_time = 0;
 
             if (!m_launchHandled)
@@ -3065,21 +3095,13 @@ namespace Game.Spells
 
                 HandleLaunchPhase();
                 m_launchHandled = true;
-                if (m_delayMoment > offset)
-                {
-                    if (single_missile)
-                        return m_delayMoment;
-
-                    next_time = m_delayMoment;
-                    if ((m_UniqueTargetInfo.Count > 2 || (m_UniqueTargetInfo.Count == 1 && m_UniqueTargetInfo[0].TargetGUID == m_caster.GetGUID())) || !m_UniqueGOTargetInfo.Empty())
-                    {
-                        offset = 0; // if LaunchDelay was present then the only target that has timeDelay = 0 is m_caster - and that is the only target we want to process now
-                    }
-                }
             }
 
-            if (single_missile && offset == 0)
-                return m_delayMoment;
+            if (m_delayMoment > offset)
+            {
+                ignoreTargetInfoTimeDelay = false;
+                next_time = m_delayMoment;
+            }
 
             Player modOwner = m_caster.GetSpellModOwner();
             if (modOwner != null)
@@ -3087,7 +3109,7 @@ namespace Game.Spells
 
             PrepareTargetProcessing();
 
-            if (!m_immediateHandled && offset != 0)
+            if (!m_immediateHandled && m_delayMoment <= offset)
             {
                 _handle_immediate_phase();
                 m_immediateHandled = true;
@@ -3098,13 +3120,13 @@ namespace Game.Spells
                 List<TargetInfo> delayedTargets = new();
                 m_UniqueTargetInfo.RemoveAll(target =>
                 {
-                    if (single_missile || target.TimeDelay <= offset)
+                    if (ignoreTargetInfoTimeDelay || target.TimeDelay <= offset)
                     {
                         target.TimeDelay = offset;
                         delayedTargets.Add(target);
                         return true;
                     }
-                    else if (next_time == 0 || target.TimeDelay < next_time)
+                    else if (!single_missile && (next_time == 0 || target.TimeDelay < next_time))
                         next_time = target.TimeDelay;
                     return false;
                 });
@@ -3117,13 +3139,13 @@ namespace Game.Spells
                 List<GOTargetInfo> delayedGOTargets = new();
                 m_UniqueGOTargetInfo.RemoveAll(goTarget =>
                 {
-                    if (single_missile || goTarget.TimeDelay <= offset)
+                    if (ignoreTargetInfoTimeDelay || goTarget.TimeDelay <= offset)
                     {
                         goTarget.TimeDelay = offset;
                         delayedGOTargets.Add(goTarget);
                         return true;
                     }
-                    else if (next_time == 0 || goTarget.TimeDelay < next_time)
+                    else if (!single_missile && (next_time == 0 || goTarget.TimeDelay < next_time))
                         next_time = goTarget.TimeDelay;
                     return false;
                 });
@@ -9070,7 +9092,7 @@ namespace Game.Spells
                         if (m_Spell.m_spellInfo.LaunchDelay != 0)
                             Cypher.Assert(n_offset == (ulong)Math.Floor(m_Spell.m_spellInfo.LaunchDelay * 1000.0f));
                         else
-                            Cypher.Assert(n_offset == m_Spell.GetDelayMoment());
+                            Cypher.Assert(n_offset == m_Spell.GetDelayMoment(), $"{n_offset} == {m_Spell.GetDelayMoment()}");
 
                         // re-plan the event for the delay moment
                         m_Spell.GetCaster().m_Events.AddEvent(this, TimeSpan.FromMilliseconds(e_time + n_offset), false);

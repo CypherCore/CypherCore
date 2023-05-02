@@ -920,6 +920,15 @@ namespace Game.Movement
             return (p1 - p2).LengthSquared();
         }
 
+        public float GetPathLength()
+        {
+            float length = 0.0f;
+            for (var i = 0; i < _pathPoints.Length - 1; ++i)
+                length += (_pathPoints[i + 1] - _pathPoints[i]).Length();
+
+            return length;
+        }
+        
         public void ShortenPathUntilDist(Position pos, float dist) { ShortenPathUntilDist(new Vector3(pos.posX, pos.posY, pos.posZ), dist); }
 
         public void ShortenPathUntilDist(Vector3 target, float dist)

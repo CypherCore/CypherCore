@@ -192,7 +192,9 @@ namespace Game.Movement
 
         public void MovementInform(Unit owner)
         {
-            owner.ToCreature()?.GetAI()?.MovementInform(MovementGeneratorType.Point, _movementId);
+            // deliver EVENT_CHARGE to scripts, EVENT_CHARGE_PREPATH is just internal implementation detail of this movement generator
+            uint movementId = _movementId == EventId.ChargePrepath ? EventId.Charge : _movementId;
+            owner.ToCreature()?.GetAI()?.MovementInform(MovementGeneratorType.Point, movementId);
         }
 
         public override void UnitSpeedChanged()

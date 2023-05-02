@@ -702,6 +702,8 @@ namespace Game.Movement
 
             MoveCharge(dest.X, dest.Y, dest.Z, SPEED_CHARGE, EventId.ChargePrepath);
 
+            // If this is ever changed to not happen immediately then all spell effect handlers that use this must be updated
+
             // Charge movement is not started when using EVENT_CHARGE_PREPATH
             MoveSplineInit init = new(_owner);
             init.MovebyPath(path.GetPath());
