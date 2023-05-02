@@ -754,17 +754,17 @@ namespace Game.Entities
                 rotatedPoints.Add(new Vector3(x, y, z));
             }
 
-            InitSplines(rotatedPoints, timeToTarget);
+            InitSplines(rotatedPoints.ToArray(), timeToTarget);
         }
 
-        public void InitSplines(List<Vector3> splinePoints, uint timeToTarget)
+        public void InitSplines(Vector3[] splinePoints, uint timeToTarget)
         {
-            if (splinePoints.Count < 2)
+            if (splinePoints.Length < 2)
                 return;
 
             _movementTime = 0;
 
-            _spline.InitSpline(splinePoints.ToArray(), splinePoints.Count, EvaluationMode.Linear);
+            _spline.InitSpline(splinePoints, splinePoints.Length, EvaluationMode.Linear);
             _spline.InitLengths();
 
             // should be sent in object create packets only
