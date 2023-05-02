@@ -933,56 +933,6 @@ namespace Scripts.Spells.Rogue
             AfterEffectRemove.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
-    
-    [Script] // 196819 - Eviscerate
-    class spell_rog_eviscerate_SpellScript : SpellScript
-    {
-        void CalculateDamage(uint effIndex)
-        {
-            int damagePerCombo = GetHitDamage();
-            AuraEffect t5 = GetCaster().GetAuraEffect(SpellIds.T52pSetBonus, 0);
-            if (t5 != null)
-                damagePerCombo += t5.GetAmount();
-
-            int finalDamage = damagePerCombo;
-            var costs = GetSpell().GetPowerCost();
-            var c = costs.Find(cost => cost.Power == PowerType.ComboPoints);
-                if (c != null)
-                    finalDamage *= c.Amount;
-
-                SetHitDamage(finalDamage);
-            }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(CalculateDamage, 0, SpellEffectName.SchoolDamage));
-        }
-    }
-
-    [Script] // 32645 - Envenom
-    class spell_rog_envenom_SpellScript : SpellScript
-    {
-        void CalculateDamage(uint effIndex)
-        {
-            int damagePerCombo = GetHitDamage();
-            AuraEffect t5 = GetCaster().GetAuraEffect(SpellIds.T52pSetBonus, 0);
-            if (t5 != null)
-                damagePerCombo += t5.GetAmount();
-
-            int finalDamage = damagePerCombo;
-            var costs = GetSpell().GetPowerCost();
-            var c = costs.Find(cost => cost.Power == PowerType.ComboPoints);
-            if (c != null)
-                finalDamage *= c.Amount;
-
-            SetHitDamage(finalDamage);
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(CalculateDamage, 0, SpellEffectName.SchoolDamage));
-        }
-    }
 
     [Script] // 79134 - Venomous Wounds - SPELL_ROGUE_VENOMOUS_WOUNDS
     class spell_rog_venomous_wounds : AuraScript
