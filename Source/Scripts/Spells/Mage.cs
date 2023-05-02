@@ -61,7 +61,6 @@ namespace Scripts.Spells.Mage
         public const uint SerpentForm = 32817;
         public const uint SheepForm = 32820;
         public const uint SquirrelForm = 32813;
-        public const uint TemporalDisplacement = 80354;
         public const uint WorgenForm = 32819;
         public const uint IceLanceTrigger = 228598;
         public const uint ThermalVoid = 155149;
@@ -69,12 +68,6 @@ namespace Scripts.Spells.Mage
         public const uint ChainReactionDummy = 278309;
         public const uint ChainReaction = 278310;
         public const uint TouchOfTheMagiExplode = 210833;
-
-        //Misc
-        public const uint HunterInsanity = 95809;
-        public const uint ShamanExhaustion = 57723;
-        public const uint ShamanSated = 57724;
-        public const uint PetNetherwindsFatigued = 160455;
     }
 
     // 110909 - Alter Time Aura
@@ -1180,36 +1173,6 @@ namespace Scripts.Spells.Mage
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleDamage, 1, SpellEffectName.SchoolDamage));
-        }
-    }
-    
-    [Script] // 80353 - Time Warp
-    class spell_mage_time_warp : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.TemporalDisplacement, SpellIds.HunterInsanity, SpellIds.ShamanExhaustion, SpellIds.ShamanSated, SpellIds.PetNetherwindsFatigued);
-        }
-
-        void RemoveInvalidTargets(List<WorldObject> targets)
-        {
-            targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.TemporalDisplacement));
-            targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.HunterInsanity));
-            targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.ShamanExhaustion));
-            targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.ShamanSated));
-        }
-
-        void ApplyDebuff()
-        {
-            Unit target = GetHitUnit();
-            if (target)
-                target.CastSpell(target, SpellIds.TemporalDisplacement, true);
-        }
-
-        public override void Register()
-        {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(RemoveInvalidTargets, SpellConst.EffectAll, Targets.UnitCasterAreaRaid));
-            AfterHit.Add(new HitHandler(ApplyDebuff));
         }
     }
 

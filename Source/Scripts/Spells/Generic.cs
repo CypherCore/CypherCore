@@ -324,6 +324,13 @@ namespace Scripts.Spells.Generic
         public const uint ZealOfTheBurningBlade = 274740;
         public const uint FerocityOfTheFrostwolf = 274741;
         public const uint MightOfTheBlackrock = 274742;
+
+        // BloodlustExhaustionSpell
+        public const uint ShamanSated = 57724; // Bloodlust
+        public const uint ShamanExhaustion = 57723; // Heroism, Drums
+        public const uint MageTemporalDisplacement = 80354;
+        public const uint HunterFatigued = 264689;
+        public const uint EvokerExhaustion = 390435;
     }
 
     struct CreatureIds
@@ -4969,6 +4976,67 @@ namespace Scripts.Spells.Generic
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleSkinningEffect, 0, SpellEffectName.Skinning));
+        }
+    }
+
+             // 2825 - Bloodlust
+             // 32182 - Heroism
+             // 80353 - Time Warp
+             // 264667 - Primal Rage
+             // 390386 - Fury of the Aspects
+             // 146555 - Drums of Rage
+             // 178207 - Drums of Fury
+             // 230935 - Drums of the Mountain
+             // 256740 - Drums of the Maelstrom
+             // 309658 - Drums of Deathly Ferocity
+             // 381301 - Feral Hide Drums
+    [Script("spell_sha_bloodlust", SpellIds.ShamanSated)]
+    [Script("spell_sha_heroism", SpellIds.ShamanExhaustion)]
+    [Script("spell_mage_time_warp", SpellIds.MageTemporalDisplacement)]
+    [Script("spell_hun_primal_rage", SpellIds.HunterFatigued)]
+    [Script("spell_evo_fury_of_the_aspects", SpellIds.EvokerExhaustion)]
+    [Script("spell_item_bloodlust_drums", SpellIds.ShamanExhaustion)]
+    class spell_gen_bloodlust : SpellScript
+    {
+        uint _exhaustionSpellId;
+
+        public spell_gen_bloodlust(uint exhaustionSpellId)
+        {
+            _exhaustionSpellId = exhaustionSpellId;
+        }
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ShamanSated, SpellIds.ShamanExhaustion, SpellIds.MageTemporalDisplacement, SpellIds.HunterFatigued, SpellIds.EvokerExhaustion);
+        }
+
+        void FilterTargets(List<WorldObject> targets)
+        {
+            targets.RemoveAll(target =>
+            {
+                Unit unit = target.ToUnit();
+                if (unit == null)
+                    return true;
+
+                return unit.HasAura(SpellIds.ShamanSated)
+                    || unit.HasAura(SpellIds.ShamanExhaustion)
+                    || unit.HasAura(SpellIds.MageTemporalDisplacement)
+                    || unit.HasAura(SpellIds.HunterFatigued)
+                    || unit.HasAura(SpellIds.EvokerExhaustion);
+            });
+        }
+
+        void HandleHit(uint effIndex)
+        {
+            Unit target = GetHitUnit();
+            target.CastSpell(target, _exhaustionSpellId, true);
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitCasterAreaRaid));
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitCasterAreaRaid));
+            OnEffectHitTarget.Add(new EffectHandler(HandleHit, 0, SpellEffectName.ApplyAura));
         }
     }
 

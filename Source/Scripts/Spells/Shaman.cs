@@ -40,7 +40,6 @@ namespace Scripts.Spells.Shaman
         public const uint ElementalBlastOverload = 120588;
         public const uint ElementalMastery = 16166;
         public const uint EnergySurge = 40465;
-        public const uint Exhaustion = 57723;
         public const uint FlameShock = 188389;
         public const uint FlametongueAttack = 10444;
         public const uint FlametongueWeaponEnchant = 334294;
@@ -74,7 +73,6 @@ namespace Scripts.Spells.Shaman
         public const uint PathOfFlamesSpread = 210621;
         public const uint PathOfFlamesTalent = 201909;
         public const uint PowerSurge = 40466;
-        public const uint Sated = 57724;
         public const uint SpiritWolfTalent = 260878;
         public const uint SpiritWolfPeriodic = 260882;
         public const uint SpiritWolfAura = 260881;
@@ -89,11 +87,6 @@ namespace Scripts.Spells.Shaman
         public const uint WindfuryAttack = 25504;
         public const uint WindfuryEnchantment = 334302;
         public const uint WindRush = 192082;
-
-        //Misc
-        public const uint HunterInsanity = 95809;
-        public const uint MageTemporalDisplacement = 80354;
-        public const uint PetNetherwindsFatigued = 160455;
     }
 
     struct CreatureIds
@@ -188,36 +181,6 @@ namespace Scripts.Spells.Shaman
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(ResizeTargets, 0, Targets.UnitDestAreaAlly));
-        }
-    }
-
-    [Script] // 2825 - Bloodlust
-    class spell_sha_bloodlust : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.Sated, SpellIds.HunterInsanity, SpellIds.MageTemporalDisplacement, SpellIds.PetNetherwindsFatigued);
-        }
-
-        void RemoveInvalidTargets(List<WorldObject> targets)
-        {
-            targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.Sated));
-            targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.HunterInsanity));
-            targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.MageTemporalDisplacement));
-        }
-
-        void ApplyDebuff()
-        {
-            Unit target = GetHitUnit();
-            if (target)
-                target.CastSpell(target, SpellIds.Sated, true);
-        }
-
-        public override void Register()
-        {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(RemoveInvalidTargets, 0, Targets.UnitCasterAreaRaid));
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(RemoveInvalidTargets, 1, Targets.UnitCasterAreaRaid));
-            AfterHit.Add(new HitHandler(ApplyDebuff));
         }
     }
 
@@ -704,36 +667,6 @@ namespace Scripts.Spells.Shaman
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(SelectTargets, 0, Targets.UnitDestAreaAlly));
-        }
-    }
-
-    [Script] // 32182 - Heroism
-    class spell_sha_heroism : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.Exhaustion, SpellIds.HunterInsanity, SpellIds.MageTemporalDisplacement, SpellIds.PetNetherwindsFatigued);
-        }
-
-        void RemoveInvalidTargets(List<WorldObject> targets)
-        {
-            targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.Exhaustion));
-            targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.HunterInsanity));
-            targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.MageTemporalDisplacement));
-        }
-
-        void ApplyDebuff()
-        {
-            Unit target = GetHitUnit();
-            if (target)
-                target.CastSpell(target, SpellIds.Exhaustion, true);
-        }
-
-        public override void Register()
-        {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(RemoveInvalidTargets, 0, Targets.UnitCasterAreaRaid));
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(RemoveInvalidTargets, 1, Targets.UnitCasterAreaRaid));
-            AfterHit.Add(new HitHandler(ApplyDebuff));
         }
     }
 
