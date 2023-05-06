@@ -1027,4 +1027,49 @@ namespace Game.Entities
             return ObjectGuidFactory.CreateWorldLayer(arg1, arg2, arg3, arg4);
         }
     }
+
+    public class Legacy
+    {
+        public enum LegacyTypeId
+        {
+            Object          = 0,
+            Item            = 1,
+            Container       = 2,
+            Unit            = 3,
+            Player          = 4,
+            GameObject      = 5,
+            DynamicObject   = 6,
+            Corpse          = 7,
+            AreaTrigger     = 8,
+            SceneObject     = 9,
+            Conversation    = 10,
+            Max
+        }
+
+        public static uint ConvertLegacyTypeID(uint legacyTypeID) => (LegacyTypeId)legacyTypeID switch
+        {
+            LegacyTypeId.Object => (uint)TypeId.Object,
+            LegacyTypeId.Item => (uint)TypeId.Item,
+            LegacyTypeId.Container => (uint)TypeId.Container,
+            LegacyTypeId.Unit => (uint)TypeId.Unit,
+            LegacyTypeId.Player => (uint)TypeId.Player,
+            LegacyTypeId.GameObject => (uint)TypeId.GameObject,
+            LegacyTypeId.DynamicObject => (uint)TypeId.DynamicObject,
+            LegacyTypeId.Corpse => (uint)TypeId.Corpse,
+            LegacyTypeId.AreaTrigger => (uint)TypeId.AreaTrigger,
+            LegacyTypeId.SceneObject => (uint)TypeId.SceneObject,
+            LegacyTypeId.Conversation => (uint)TypeId.Conversation,
+            _ => (uint)TypeId.Object
+        };
+
+        public static uint ConvertLegacyTypeMask(uint legacyTypeMask)
+        {
+            uint typeMask = 0;
+            for (uint i = (uint)LegacyTypeId.Object; i < (uint)LegacyTypeId.Max; i = i + 1)
+                if ((legacyTypeMask & (1 << (int)i)) != 0)
+                    typeMask |= 1u << (int)ConvertLegacyTypeID(i);
+
+            return typeMask;
+        }
+    }
 }

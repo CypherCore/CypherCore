@@ -1499,6 +1499,12 @@ namespace Game
                     }
                     break;
                 }
+                case ConditionTypes.ObjectEntryGuidLegacy:
+                {
+                    cond.ConditionType = ConditionTypes.ObjectEntryGuid;
+                    cond.ConditionValue1 = Legacy.ConvertLegacyTypeID(cond.ConditionValue1);
+                    goto case ConditionTypes.ObjectEntryGuid;
+                }
                 case ConditionTypes.ObjectEntryGuid:
                 {
                     switch ((TypeId)cond.ConditionValue1)
@@ -1564,6 +1570,10 @@ namespace Game
                     }
                     break;
                 }
+                case ConditionTypes.TypeMaskLegacy:
+                    cond.ConditionType = ConditionTypes.TypeMask;
+                    cond.ConditionValue1 = Legacy.ConvertLegacyTypeMask(cond.ConditionValue1);
+                    goto case ConditionTypes.TypeMask;
                 case ConditionTypes.TypeMask:
                 {
                     if (cond.ConditionValue1 == 0 || Convert.ToBoolean(cond.ConditionValue1 & ~(uint)(TypeMask.Unit | TypeMask.Player | TypeMask.GameObject | TypeMask.Corpse)))

@@ -371,7 +371,7 @@ namespace Scripts.Spells.Warlock
         }
     }
 
-    // 366330 - Random Sayaad
+    [Script] // 366330 - Random Sayaad
     class spell_warl_random_sayaad : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -406,7 +406,7 @@ namespace Scripts.Spells.Warlock
 
     // 366323 - Strengthen Pact - Succubus
     // 366325 - Strengthen Pact - Incubus
-    // 366222 - Summon Sayaad
+    [Script] // 366222 - Summon Sayaad
     class spell_warl_sayaad_precast_disorientation : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -748,7 +748,7 @@ namespace Scripts.Spells.Warlock
         }
     }
 
-    // 366323 - Strengthen Pact - Succubus
+    [Script] // 366323 - Strengthen Pact - Succubus
     class spell_warl_strengthen_pact_succubus : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -770,7 +770,7 @@ namespace Scripts.Spells.Warlock
         }
     }
 
-    // 366325 - Strengthen Pact - Incubus
+    [Script] // 366325 - Strengthen Pact - Incubus
     class spell_warl_strengthen_pact_incubus : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -792,7 +792,7 @@ namespace Scripts.Spells.Warlock
         }
     }
 
-    // 366222 - Summon Sayaad
+    [Script] // 366222 - Summon Sayaad
     class spell_warl_summon_sayaad : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
