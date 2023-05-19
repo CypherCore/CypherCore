@@ -254,7 +254,7 @@ namespace Framework.Database
 
             // ChrCustomizationChoice.db2
             PrepareStatement(HotfixStatements.SEL_CHR_CUSTOMIZATION_CHOICE, "SELECT Name, ID, ChrCustomizationOptionID, ChrCustomizationReqID, " +
-                "ChrCustomizationVisReqID, SortOrder, UiOrderIndex, Flags, AddedInPatch, SwatchColor1, SwatchColor2 FROM chr_customization_choice" +
+                "ChrCustomizationVisReqID, SortOrder, UiOrderIndex, Flags, AddedInPatch, SoundKitID, SwatchColor1, SwatchColor2 FROM chr_customization_choice" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_CHR_CUSTOMIZATION_CHOICE_LOCALE, "SELECT ID, Name_lang FROM chr_customization_choice_locale" +
                 " WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
@@ -266,8 +266,8 @@ namespace Framework.Database
             // ChrCustomizationElement.db2
             PrepareStatement(HotfixStatements.SEL_CHR_CUSTOMIZATION_ELEMENT, "SELECT ID, ChrCustomizationChoiceID, RelatedChrCustomizationChoiceID, " +
                 "ChrCustomizationGeosetID, ChrCustomizationSkinnedModelID, ChrCustomizationMaterialID, ChrCustomizationBoneSetID, " +
-                "ChrCustomizationCondModelID, ChrCustomizationDisplayInfoID, ChrCustItemGeoModifyID, ChrCustomizationVoiceID FROM chr_customization_element" +
-                " WHERE (`VerifiedBuild` > 0) = ?");
+                "ChrCustomizationCondModelID, ChrCustomizationDisplayInfoID, ChrCustItemGeoModifyID, ChrCustomizationVoiceID, AnimKitID" +
+                " FROM chr_customization_element WHERE (`VerifiedBuild` > 0) = ?");
 
             // ChrCustomizationOption.db2
             PrepareStatement(HotfixStatements.SEL_CHR_CUSTOMIZATION_OPTION, "SELECT Name, ID, SecondaryID, Flags, ChrModelID, SortIndex, ChrCustomizationCategoryID, " +
@@ -329,7 +329,7 @@ namespace Framework.Database
 
             // ContentTuning.db2
             PrepareStatement(HotfixStatements.SEL_CONTENT_TUNING, "SELECT ID, Flags, ExpansionID, MinLevel, MaxLevel, MinLevelType, MaxLevelType, TargetLevelDelta, " +
-                "TargetLevelMaxDelta, TargetLevelMin, TargetLevelMax, MinItemLevel FROM content_tuning WHERE (`VerifiedBuild` > 0) = ?");
+                "TargetLevelMaxDelta, TargetLevelMin, TargetLevelMax, MinItemLevel, QuestXpMultiplier FROM content_tuning WHERE (`VerifiedBuild` > 0) = ?");
 
             // ContentTuningXExpected.db2
             PrepareStatement(HotfixStatements.SEL_CONTENT_TUNING_X_EXPECTED, "SELECT ID, ExpectedStatModID, MinMythicPlusSeasonID, MaxMythicPlusSeasonID, " +
@@ -659,7 +659,8 @@ namespace Framework.Database
 
             // ItemBonusTreeNode.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_BONUS_TREE_NODE, "SELECT ID, ItemContext, ChildItemBonusTreeID, ChildItemBonusListID, ChildItemLevelSelectorID, " +
-                "ChildItemBonusListGroupID, IblGroupPointsModSetID, ParentItemBonusTreeID FROM item_bonus_tree_node WHERE (`VerifiedBuild` > 0) = ?");
+                "ChildItemBonusListGroupID, IblGroupPointsModSetID, Unknown1010_1, Unknown1010_2, ParentItemBonusTreeID FROM item_bonus_tree_node" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
 
             // ItemChildEquipment.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_CHILD_EQUIPMENT, "SELECT ID, ParentItemID, ChildItemID, ChildItemEquipSlot FROM item_child_equipment" +
@@ -914,7 +915,8 @@ namespace Framework.Database
                 " WHERE (`VerifiedBuild` > 0) = ?");
 
             // Movie.db2
-            PrepareStatement(HotfixStatements.SEL_MOVIE, "SELECT ID, Volume, KeyID, AudioFileDataID, SubtitleFileDataID FROM movie WHERE (`VerifiedBuild` > 0) = ?");
+            PrepareStatement(HotfixStatements.SEL_MOVIE, "SELECT ID, Volume, KeyID, AudioFileDataID, SubtitleFileDataID, SubtitleFileFormat FROM movie" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
 
             // NameGen.db2
             PrepareStatement(HotfixStatements.SEL_NAME_GEN, "SELECT ID, Name, RaceID, Sex FROM name_gen WHERE (`VerifiedBuild` > 0) = ?");

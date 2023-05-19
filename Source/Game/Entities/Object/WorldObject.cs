@@ -265,6 +265,7 @@ namespace Game.Entities
                 bool HasSpline = unit.IsSplineEnabled();
                 bool HasInertia = unit.m_movementInfo.inertia.HasValue;
                 bool HasAdvFlying = unit.m_movementInfo.advFlying.HasValue;
+                bool HasStandingOnGameObjectGUID = unit.m_movementInfo.standingOnGameObjectGUID.HasValue;
 
                 data.WritePackedGuid(GetGUID());                                         // MoverGUID
 
@@ -287,6 +288,7 @@ namespace Game.Entities
                 //for (public uint i = 0; i < RemoveForcesIDs.Count; ++i)
                 //    *data << ObjectGuid(RemoveForcesIDs);
 
+                data.WriteBit(HasStandingOnGameObjectGUID);                    // HasStandingOnGameObjectGUID
                 data.WriteBit(!unit.m_movementInfo.transport.guid.IsEmpty());  // HasTransport
                 data.WriteBit(HasFall);                                        // HasFall
                 data.WriteBit(HasSpline);                                      // HasSpline - marks that the unit uses spline movement
@@ -296,6 +298,9 @@ namespace Game.Entities
 
                 if (!unit.m_movementInfo.transport.guid.IsEmpty())
                     MovementExtensions.WriteTransportInfo(data, unit.m_movementInfo.transport);
+
+                if (HasStandingOnGameObjectGUID)
+                    data.WritePackedGuid(unit.m_movementInfo.standingOnGameObjectGUID.Value);
 
                 if (HasInertia)
                 {
@@ -3774,6 +3779,7 @@ namespace Game.Entities
         public JumpInfo jump;
         public float stepUpStartElevation { get; set; }
         public AdvFlying? advFlying;
+        public ObjectGuid? standingOnGameObjectGUID;
 
         public MovementInfo()
         {

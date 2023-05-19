@@ -19,6 +19,7 @@ namespace Framework.Constants
         Need = 0x02,
         Greed = 0x04,
         Disenchant = 0x08,
+        Transmog = 0x10,
 
         AllNoDisenchant = 0x07,
         AllMask = 0x0f

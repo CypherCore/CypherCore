@@ -1430,6 +1430,7 @@ namespace Game.Entities
             public uint turnpersonallootsecurityoff;             // 22 turn personal loot security off, enum { false, true, }; Default: false
             public uint ClearObjectVignetteonOpening;            // 23 Clear Object Vignette on Opening, enum { false, true, }; Default: false
             public uint InteractRadiusOverride;                  // 24 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint Overrideminimaptrackingicon;             // 25 Override minimap tracking icon, References: UiTextureAtlasMember, NoValue = 0
         }
 
         public struct challengemodereward

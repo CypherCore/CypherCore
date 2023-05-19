@@ -122,6 +122,7 @@ namespace Game.DataStorage
         public ushort UiOrderIndex;
         public int Flags;
         public int AddedInPatch;
+        public int SoundKitID;
         public int[] SwatchColor = new int[2];
     }
 
@@ -147,6 +148,7 @@ namespace Game.DataStorage
         public int ChrCustomizationDisplayInfoID;
         public int ChrCustItemGeoModifyID;
         public int ChrCustomizationVoiceID;
+        public int AnimKitID;
     }
 
     public sealed class ChrCustomizationOptionRecord
@@ -329,6 +331,7 @@ namespace Game.DataStorage
         public int TargetLevelMin;
         public int TargetLevelMax;
         public int MinItemLevel;
+        public float QuestXpMultiplier;
 
         public ContentTuningFlag GetFlags() { return (ContentTuningFlag)Flags; }
 
@@ -606,7 +609,7 @@ namespace Game.DataStorage
         public Vector2 Pos;
         public Vector2 PreSLSquishPos;
         public uint Id;
-        public ushort CurveID;
+        public uint CurveID;
         public byte OrderIndex;
     }
 }

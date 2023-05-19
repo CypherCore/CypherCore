@@ -3684,19 +3684,8 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetDrunkValue());
                 stmt.AddValue(index++, GetHealth());
 
-                int storedPowers = 0;
-                for (PowerType powerType = 0; powerType < PowerType.Max; ++powerType)
-                {
-                    if (GetPowerIndex(powerType) != (int)PowerType.Max)
-                    {
-                        stmt.AddValue(index++, m_unitData.Power[storedPowers]);
-                        if (++storedPowers >= (int)PowerType.MaxPerClass)
-                            break;
-                    }
-                }
-
-                for (; storedPowers < (int)PowerType.MaxPerClass; ++storedPowers)
-                    stmt.AddValue(index++, 0);
+                for (int i = 0; i < (int)PowerType.MaxPerClass; ++i)
+                    stmt.AddValue(index++, m_unitData.Power[i]);
 
                 stmt.AddValue(index++, GetSession().GetLatency());
                 stmt.AddValue(index++, GetActiveTalentGroup());
@@ -3830,19 +3819,8 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetDrunkValue());
                 stmt.AddValue(index++, GetHealth());
 
-                int storedPowers = 0;
-                for (PowerType powerType = 0; powerType < PowerType.Max; ++powerType)
-                {
-                    if (GetPowerIndex(powerType) != (int)PowerType.Max)
-                    {
-                        stmt.AddValue(index++, m_unitData.Power[storedPowers]);
-                        if (++storedPowers >= (int)PowerType.MaxPerClass)
-                            break;
-                    }
-                }
-
-                for (; storedPowers < (int)PowerType.MaxPerClass; ++storedPowers)
-                    stmt.AddValue(index++, 0);
+                for (int i = 0; i < (int)PowerType.MaxPerClass; ++i)
+                    stmt.AddValue(index++, m_unitData.Power[i]);
 
                 stmt.AddValue(index++, GetSession().GetLatency());
                 stmt.AddValue(index++, GetActiveTalentGroup());

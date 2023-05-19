@@ -43,8 +43,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(WindowInfo.HasValue);
             _worldPacket.FlushBits();
 
-            _worldPacket.WriteInt32(CanLandNodes.Length);
-            _worldPacket.WriteInt32(CanUseNodes.Length);
+            _worldPacket.WriteInt32(CanLandNodes.Length / 8);  // client reads this in uint64 blocks, size is ensured to be divisible by 8 in TaxiMask constructor
+            _worldPacket.WriteInt32(CanUseNodes.Length / 8);  // client reads this in uint64 blocks, size is ensured to be divisible by 8 in TaxiMask constructor
 
             if (WindowInfo.HasValue)
             {

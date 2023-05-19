@@ -216,12 +216,12 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             PetGuid = _worldPacket.ReadPackedGuid();
-            Flags = _worldPacket.ReadUInt32();
+            Flags = _worldPacket.ReadUInt16();
             ControlType = (FlagsControlType)_worldPacket.ReadBits<byte>(2);
         }
 
         public ObjectGuid PetGuid;
-        public uint Flags;
+        public ushort Flags;
         public FlagsControlType ControlType;
     }
 

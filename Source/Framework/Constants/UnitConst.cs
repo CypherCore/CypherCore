@@ -154,6 +154,12 @@ namespace Framework.Constants
         Fury,
         Pain,
         Essence,
+        RuneBlood,
+        RuneFrost,
+        RuneUnholy,
+        AlternateQuest,
+        AlternateEncounter,
+        AlternateMount,
         Armor, // ARMOR..RESISTANCE_ARCANE must be in existed order, it's accessed by index values of SpellSchools enum.
         ResistanceHoly,
         ResistanceFire,
@@ -173,8 +179,9 @@ namespace Framework.Constants
         ResistanceStart = Armor,
         ResistanceEnd = ResistanceArcane + 1,
         PowerStart = Mana,
-        PowerEnd = Essence + 1
+        PowerEnd = AlternateMount + 1
     }
+
     public enum UnitModifierFlatType
     {
         Base = 0,
@@ -182,12 +189,14 @@ namespace Framework.Constants
         Total = 2,
         End = 3
     }
+
     public enum UnitModifierPctType
     {
         Base = 0,
         Total = 1,
         End = 2
     }
+
     public enum VictimState
     {
         Intact = 0, // set when attacker misses

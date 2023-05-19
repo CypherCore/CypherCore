@@ -83,8 +83,7 @@ namespace Game.Networking.Packets
                 data.ReadPackedGuid();
             }
 
-            // ResetBitReader
-
+            bool hasStandingOnGameObjectGUID = data.HasBit();
             bool hasTransport = data.HasBit();
             bool hasFall = data.HasBit();
             bool hasSpline = data.HasBit(); // todo 6.x read this infos
@@ -96,6 +95,9 @@ namespace Game.Networking.Packets
 
             if (hasTransport)
                 ReadTransportInfo(data, ref movementInfo.transport);
+
+            if (hasStandingOnGameObjectGUID)
+                movementInfo.standingOnGameObjectGUID = data.ReadPackedGuid();
 
             if (hasInertia)
             {
@@ -143,6 +145,7 @@ namespace Game.Networking.Packets
             bool hasSpline = false; // todo 6.x send this infos
             bool hasInertia = movementInfo.inertia.HasValue;
             bool hasAdvFlying = movementInfo.advFlying.HasValue;
+            bool hasStandingOnGameObjectGUID = movementInfo.standingOnGameObjectGUID.HasValue;
 
             data.WritePackedGuid(movementInfo.Guid);
             data.WriteUInt32((uint)movementInfo.GetMovementFlags());
@@ -167,6 +170,7 @@ namespace Game.Networking.Packets
                 _worldPacket << ObjectGuid;
             }*/
 
+            data.WriteBit(hasStandingOnGameObjectGUID);
             data.WriteBit(hasTransportData);
             data.WriteBit(hasFallData);
             data.WriteBit(hasSpline);
@@ -178,6 +182,9 @@ namespace Game.Networking.Packets
 
             if (hasTransportData)
                 WriteTransportInfo(data, movementInfo.transport);
+
+            if (hasStandingOnGameObjectGUID)
+                data.WritePackedGuid(movementInfo.standingOnGameObjectGUID.Value);
 
             if (hasInertia)
             {

@@ -5395,6 +5395,43 @@ namespace Game.Entities
             GetSceneMgr().TriggerDelayedScenes();
         }
 
+        public void AddSpellCategoryCooldownMod(int spellCategoryId, int mod)
+        {
+            int categoryIndex = m_activePlayerData.CategoryCooldownMods.FindIndexIf(mod => mod.SpellCategoryID == spellCategoryId);
+
+            if (categoryIndex < 0)
+            {
+                CategoryCooldownMod newMod = new();
+                newMod.SpellCategoryID = spellCategoryId;
+                newMod.ModCooldown = -mod;
+
+                AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CategoryCooldownMods), newMod);
+            }
+            else
+            {
+                CategoryCooldownMod g = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CategoryCooldownMods, categoryIndex);
+                SetUpdateFieldValue(ref g.ModCooldown, m_activePlayerData.CategoryCooldownMods[categoryIndex].ModCooldown - mod);
+            }
+        }
+
+        public void RemoveSpellCategoryCooldownMod(int spellCategoryId, int mod)
+        {
+            int categoryIndex = m_activePlayerData.CategoryCooldownMods.FindIndexIf(mod => mod.SpellCategoryID == spellCategoryId);
+
+            if (categoryIndex < 0)
+                return;
+
+            if (m_activePlayerData.CategoryCooldownMods[categoryIndex].ModCooldown + mod == 0)
+            {
+                RemoveDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CategoryCooldownMods), categoryIndex);
+            }
+            else
+            {
+                CategoryCooldownMod g = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CategoryCooldownMods, categoryIndex);
+                SetUpdateFieldValue(ref g.ModCooldown, m_activePlayerData.CategoryCooldownMods[categoryIndex].ModCooldown + mod);
+            }
+        }
+
         public void RemoveSocial()
         {
             SocialMgr.RemovePlayerSocial(GetGUID());

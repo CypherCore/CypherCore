@@ -140,6 +140,13 @@ namespace Game.Entities
                 case UnitMods.ArcaneCharges:
                 case UnitMods.Fury:
                 case UnitMods.Pain:
+                case UnitMods.Essence:
+                case UnitMods.RuneBlood:
+                case UnitMods.RuneFrost:
+                case UnitMods.RuneUnholy:
+                case UnitMods.AlternateQuest:
+                case UnitMods.AlternateEncounter:
+                case UnitMods.AlternateMount:
                     UpdateMaxPower((PowerType)(unitMod - UnitMods.PowerStart));
                     break;
                 case UnitMods.ResistanceHoly:

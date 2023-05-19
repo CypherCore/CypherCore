@@ -106,7 +106,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(QuantityGainSource.HasValue);
             _worldPacket.WriteBit(QuantityLostSource.HasValue);
             _worldPacket.WriteBit(FirstCraftOperationID.HasValue);
-            _worldPacket.WriteBit(LastSpendTime.HasValue);
+            _worldPacket.WriteBit(NextRechargeTime.HasValue);
+            _worldPacket.WriteBit(RechargeCycleStartTime.HasValue);
             _worldPacket.FlushBits();
 
             if (WeeklyQuantity.HasValue)
@@ -133,8 +134,11 @@ namespace Game.Networking.Packets
             if (FirstCraftOperationID.HasValue)
                 _worldPacket.WriteUInt32(FirstCraftOperationID.Value);
 
-            if (LastSpendTime.HasValue)
-                _worldPacket.WriteInt64(LastSpendTime.Value);
+            if (NextRechargeTime.HasValue)
+                _worldPacket.WriteInt64(NextRechargeTime.Value);
+
+            if (RechargeCycleStartTime.HasValue)
+                _worldPacket.WriteInt64(RechargeCycleStartTime.Value);
         }
 
         public uint Type;
@@ -149,7 +153,8 @@ namespace Game.Networking.Packets
         public CurrencyGainSource? QuantityGainSource;
         public CurrencyDestroyReason? QuantityLostSource;
         public uint? FirstCraftOperationID;
-        public long? LastSpendTime;
+        public long? NextRechargeTime;
+        public long? RechargeCycleStartTime;
         public bool SuppressChatLog;
     }
 
@@ -197,7 +202,8 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteBit(data.TrackedQuantity.HasValue);
                 _worldPacket.WriteBit(data.MaxQuantity.HasValue);
                 _worldPacket.WriteBit(data.TotalEarned.HasValue);
-                _worldPacket.WriteBit(data.LastSpendTime.HasValue);
+                _worldPacket.WriteBit(data.NextRechargeTime.HasValue);
+                _worldPacket.WriteBit(data.RechargeCycleStartTime.HasValue);
                 _worldPacket.WriteBits(data.Flags, 5);
                 _worldPacket.FlushBits();
 
@@ -211,8 +217,10 @@ namespace Game.Networking.Packets
                     _worldPacket.WriteInt32(data.MaxQuantity.Value);
                 if (data.TotalEarned.HasValue)
                     _worldPacket.WriteInt32(data.TotalEarned.Value);
-                if (data.LastSpendTime.HasValue)
-                    _worldPacket.WriteInt64(data.LastSpendTime.Value);
+                if (data.NextRechargeTime.HasValue)
+                    _worldPacket.WriteInt64(data.NextRechargeTime.Value);
+                if (data.RechargeCycleStartTime.HasValue)
+                    _worldPacket.WriteInt64(data.RechargeCycleStartTime.Value);
             }
         }
 
@@ -227,7 +235,8 @@ namespace Game.Networking.Packets
             public uint? TrackedQuantity;
             public int? MaxQuantity;
             public int? TotalEarned;
-            public long? LastSpendTime;
+            public long? NextRechargeTime;
+            public long? RechargeCycleStartTime;
             public byte Flags;
         }
     }
@@ -1387,10 +1396,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(IsFullUpdate);
             _worldPacket.WriteInt32(Mounts.Count);
 
-            foreach (var spell in Mounts)
+            foreach (var (spellId, flags) in Mounts)
             {
-                _worldPacket.WriteUInt32(spell.Key);
-                _worldPacket.WriteBits(spell.Value, 2);
+                _worldPacket.WriteUInt32(spellId);
+                _worldPacket.WriteBits(flags, 4);
             }
 
             _worldPacket.FlushBits();

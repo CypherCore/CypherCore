@@ -1350,6 +1350,7 @@ namespace Framework.Constants
         YouCanOnlyDoThisWhileMidair = 638, // You Can Only Do This While Midair.
         YouCannotDoThatWhileAirborne = 639, // You Cannot Do That While Airborne.
         PocopocIsUnavailableOnQuestline = 640, // Pocopoc Is Unavailable To Summon During The Questline A Means To An End.
+        CannontCastThatWithAuraOfReckoningTalent = 650, // You cannot cast that while Aura of Reckoning is talented.
         RequiresSulfuronSlammer = 711, // Requires Sulfuron Slammer
         NotReadyYet = 788, // Not Ready Yet.
         QualityOfTieredMedallionSettingIsTooLow = 789, // The Quality Of Your Tiered Medallion Setting Is Too Low To Add Another Socket To This Item.
@@ -1386,6 +1387,23 @@ namespace Framework.Constants
         ThereIsNoMoreRoomOnThatHandhold = 820, // There Is No More Room On That Handhold.
         YouMustUnblockThisSpotByCompletingADailyQuest = 821, // You Must Unblock This Spot By Completing A Daily Quest.
         YouMustBeCloserToAnIceHoleToDoThat = 822, // You Must Be Closer To An Ice Hole To Do That.
+        ShadowflameIsTooStrongToBear = 823, // The Shadowflame Is Too Strong To Bear.
+        SomeoneHasAlreadyOverloadedThis = 824, // Someone Has Already Overloaded This.
+        RequiresNokhudTrainingCourse = 825, // Requires Nokhud Training Course.
+        ThisRecipeIsCurrentlyDisabled = 826, // This Recipe Is Currently Disabled. Please Try Again Later.
+        YouDoNotHaveTheCorrectBattlePetSummoned = 827, // You Do Not Have The Correct Battle Pet Summoned.
+        YouAlreadyHaveAtLeastOneConjuredPhial = 828, // You Already Have At Least One Conjured Phial.
+        MarkedTooManyTreasuresInTheForbiddenReach = 830, // You Have Already Marked Too Many Treasures In The Forbidden Reach. Collect A Few Before Unsealing More Forbidden Reach Treasure Scrolls.
+        RequiresADjaradinPillarShard = 831, // Requires A Djaradin Pillar Shard.
+        RequiresAResilientStone = 832, // Requires A Resilient Stone.
+        MyrritCannotCarryAnyMoreMaps = 835, // Myrrit Cannot Carry Any More Maps. Go On A Dig With Him!
+        RequiresNiffenCaveDiveKeyandShieldDisabled = 850, // Requires Niffen Cave Dive Key And Shield Disabled.
+        ElusiveCreatureBaitWasRecentlyUsed = 851, // You Cannot Lure Anything In This Area For A Few Minutes. Elusive Creature Bait Was Recently Used.
+        YouDontHaveTheSwirlingMojoStone = 999, // You Don'T Have The Swirling Mojo Stone Equipped.
+        YouMustBeNearADragonflightOathstone = 1000, // You Must Be Near One Of The Five Dragonflight Oathstones In The Dragon Isles.
+        CanOnlyUseThisItemWhileAirborne = 1001, // You Can Only Use This Item While Airborne.
+        YouMustBeInVisageForm = 2222, // You Must Be In Visage Form To Do This.
+        TooCloseToAnotherMoltenRitual = 2424, // You Can'T Begin A Molten Ritual This Close To Another One.
     }
 
     public enum SpellMissInfo
@@ -2483,6 +2501,14 @@ namespace Framework.Constants
         ChangeActiveCombatTraitConfig = 304,
         Unk305 = 305,
         Unk306 = 306,
+        Unk307 = 307,
+        CancelPreloadWorld = 308,
+        PreloadWorld = 309,
+        Unk310 = 310,
+        EnsureWorldLoaded = 311,
+        Unk312 = 312,
+        ChangeItemBonuses2 = 313, // MiscValue[0] = ItemBonusTreeID to preserve
+        AddSocketBonus = 314, // MiscValue[0] = required ItemBonusTreeID
 
         TotalSpellEffects
     }

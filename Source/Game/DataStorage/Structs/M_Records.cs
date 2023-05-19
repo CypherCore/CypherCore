@@ -227,5 +227,6 @@ namespace Game.DataStorage
         public byte KeyID;
         public uint AudioFileDataID;
         public uint SubtitleFileDataID;
+        public int SubtitleFileFormat;
     }
 }

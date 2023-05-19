@@ -278,6 +278,7 @@ namespace Game.Loots
 
                 FillPacket(startLootRoll.Item);
                 startLootRoll.Item.UIType = LootSlotType.RollOngoing;
+                startLootRoll.DungeonEncounterID = m_loot.GetDungeonEncounterId();
 
                 player.SendPacket(startLootRoll);
             }
@@ -299,6 +300,7 @@ namespace Game.Loots
             lootAllPassed.LootObj = m_loot.GetGUID();
             FillPacket(lootAllPassed.Item);
             lootAllPassed.Item.UIType = LootSlotType.AllowLoot;
+            lootAllPassed.DungeonEncounterID = m_loot.GetDungeonEncounterId();
             lootAllPassed.Write();
 
             foreach (var (playerGuid, roll) in m_rollVoteMap)
@@ -325,6 +327,7 @@ namespace Game.Loots
             lootRoll.Autopassed = false;
             FillPacket(lootRoll.Item);
             lootRoll.Item.UIType = LootSlotType.RollOngoing;
+            lootRoll.DungeonEncounterID = m_loot.GetDungeonEncounterId();
             lootRoll.Write();
 
             foreach (var (playerGuid, roll) in m_rollVoteMap)
@@ -381,6 +384,7 @@ namespace Game.Loots
             lootRollWon.RollType = rollType;
             FillPacket(lootRollWon.Item);
             lootRollWon.Item.UIType = LootSlotType.Locked;
+            lootRollWon.DungeonEncounterID = m_loot.GetDungeonEncounterId();
             lootRollWon.MainSpec = true;    // offspec rolls not implemented
             lootRollWon.Write();
 

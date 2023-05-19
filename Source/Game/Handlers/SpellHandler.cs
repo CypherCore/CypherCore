@@ -696,12 +696,6 @@ namespace Game
             }
         }
 
-        [WorldPacketHandler(ClientOpcodes.RequestCategoryCooldowns, Processing = PacketProcessing.Inplace)]
-        void HandleRequestCategoryCooldowns(RequestCategoryCooldowns requestCategoryCooldowns)
-        {
-            GetPlayer().SendSpellCategoryCooldowns();
-        }
-
         [WorldPacketHandler(ClientOpcodes.KeyboundOverride, Processing = PacketProcessing.ThreadSafe)]
         void HandleKeyboundOverride(KeyboundOverride keyboundOverride)
         {

@@ -718,6 +718,9 @@ namespace Game.Networking.Packets
 
                 if (MmrChange.HasValue)
                     data.WriteInt32(MmrChange.Value);
+
+                if (PostMatchMMR.HasValue)
+                    data.WriteUInt32(PostMatchMMR.Value);
             }
 
             public ObjectGuid PlayerGUID;
@@ -731,6 +734,7 @@ namespace Game.Networking.Packets
             public int? RatingChange;
             public uint? PreMatchMMR;
             public int? MmrChange;
+            public uint? PostMatchMMR;
             public List<PVPMatchPlayerPVPStat> Stats = new();
             public int PrimaryTalentTree;
             public int Sex;

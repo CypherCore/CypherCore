@@ -551,7 +551,7 @@ namespace Game.Networking.Packets
             attackRoundInfo.WriteInt8(ContentTuning.TargetScalingLevelDelta);
             attackRoundInfo.WriteFloat(ContentTuning.PlayerItemLevel);
             attackRoundInfo.WriteFloat(ContentTuning.TargetItemLevel);
-            attackRoundInfo.WriteUInt16(ContentTuning.ScalingHealthItemLevelCurveID);
+            attackRoundInfo.WriteUInt32(ContentTuning.ScalingHealthItemLevelCurveID);
             attackRoundInfo.WriteUInt32((uint)ContentTuning.Flags);
             attackRoundInfo.WriteUInt32(ContentTuning.PlayerContentTuningID);
             attackRoundInfo.WriteUInt32(ContentTuning.TargetContentTuningID);

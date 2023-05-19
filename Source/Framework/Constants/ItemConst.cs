@@ -152,8 +152,17 @@ namespace Framework.Constants
         OffensiveSlot3 = 213,
         OffensiveSlot4 = 214,
         UtilitySlot1 = 215,
-        DefensiveSlot1 = 216,
-        MobilitySlot1 = 217
+        UtilitySlot2 = 216,
+        UtilitySlot3 = 217,
+        UtilitySlot4 = 218,
+        DefensiveSlot1 = 219,
+        DefensiveSlot2 = 220,
+        DefensiveSlot3 = 221,
+        DefensiveSlot4 = 222,
+        WeaponSlot1 = 223,
+        WeaponSlot2 = 224,
+        WeaponSlot3 = 225,
+        WeaponSlot4 = 226,
     }
 
     public struct EquipmentSlot
@@ -387,6 +396,12 @@ namespace Framework.Constants
         CraftingReagentSlot7 = 50,
         CraftingReagentSlot8 = 51,
         CraftingReagentSlot9 = 52,
+        CraftingReagentSlot10 = 53,
+        CraftingReagentSlot11 = 54,
+        CraftingReagentSlot12 = 55,
+        CraftingReagentSlot13 = 56,
+        CraftingReagentSlot14 = 57,
+
 
         Max
     }

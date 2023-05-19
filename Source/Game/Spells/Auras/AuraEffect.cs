@@ -5633,9 +5633,14 @@ namespace Game.Spells
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
-            Player player = aurApp.GetTarget().ToPlayer();
-            if (player)
-                player.SendSpellCategoryCooldowns();
+            Player target = aurApp.GetTarget().ToPlayer();
+            if (target == null)
+                return;
+
+            if (apply)
+                target.AddSpellCategoryCooldownMod(GetMiscValue(), GetAmount());
+            else
+                target.RemoveSpellCategoryCooldownMod(GetMiscValue(), GetAmount());
         }
 
         [AuraEffectHandler(AuraType.ShowConfirmationPrompt)]
