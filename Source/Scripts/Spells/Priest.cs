@@ -74,10 +74,14 @@ namespace Scripts.Spells.Priest
         public const uint PrayerOfMendingHeal = 33110;
         public const uint PrayerOfMendingJump = 155793;
         public const uint PrayerOfHealing = 596;
+        public const uint PurgeTheWicked = 204197;
+        public const uint PurgeTheWickedDummy = 204215;
+        public const uint PurgeTheWickedPeriodic = 204213;
         public const uint Rapture = 47536;
         public const uint Renew = 139;
         public const uint RenewedHope = 197469;
         public const uint RenewedHopeEffect = 197470;
+        public const uint RevelInPurity = 373003;
         public const uint ShadowMendDamage = 186439;
         public const uint ShadowMendPeriodicDummy = 187464;
         public const uint ShieldDisciplineEnergize = 47755;
@@ -1203,6 +1207,105 @@ namespace Scripts.Spells.Priest
         }
     }
 
+    // 204197 - Purge the Wicked
+    [Script] // Called by Penance - 47540, Dark Reprimand - 400169
+    class spell_pri_purge_the_wicked : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.PurgeTheWickedPeriodic, SpellIds.PurgeTheWickedDummy);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            Unit target = GetHitUnit();
+
+            if (target.HasAura(SpellIds.PurgeTheWickedPeriodic, caster.GetGUID()))
+                caster.CastSpell(target, SpellIds.PurgeTheWickedDummy, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress));
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 204215 - Purge the Wicked
+    class spell_pri_purge_the_wicked_dummy : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.PurgeTheWickedPeriodic, SpellIds.RevelInPurity)
+                && Global.SpellMgr.GetSpellInfo(SpellIds.RevelInPurity, Difficulty.None)?.GetEffects().Count > 1;
+        }
+
+        void FilterTargets(List<WorldObject> targets)
+        {
+            Unit caster = GetCaster();
+            Unit explTarget = GetExplTargetUnit();
+
+            targets.RemoveAll(obj =>
+            {
+                // Note: we must remove any non-unit target, the explicit target and any other target that may be under any crowd control aura.
+                Unit target = obj.ToUnit();
+                return !target || target == explTarget || target.HasBreakableByDamageCrowdControlAura();
+            });
+
+            if (targets.Empty())
+                return;
+
+            // Note: there's no SPELL_EFFECT_DUMMY with BasePoints 1 in any of the spells related to use as reference so we hardcode the value.
+            uint spreadCount = 1;
+
+            //     Less than zero –x is less than y.
+            //     Zero –x equals y.
+            //     Greater than zero –x is greater than y.
+
+            // Note: we must sort our list of targets whose priority is 1) aura, 2) distance, and 3) duration.
+            targets.Sort((lhs, rhs) =>
+            {
+                Unit targetA = lhs.ToUnit();
+                Unit targetB = rhs.ToUnit();
+
+                Aura auraA = targetA.GetAura(SpellIds.PurgeTheWickedPeriodic, caster.GetGUID());
+                Aura auraB = targetB.GetAura(SpellIds.PurgeTheWickedPeriodic, caster.GetGUID());
+
+                if (auraA == null)
+                {
+                    if (auraB != null)
+                        return 1;
+                    return explTarget.GetExactDist(targetA).CompareTo(explTarget.GetExactDist(targetB));
+                }
+                if (auraB == null)
+                    return -1;
+
+                return auraA.GetDuration().CompareTo(auraB.GetDuration());
+            });
+
+            // Note: Revel in Purity talent.
+            if (caster.HasAura(SpellIds.RevelInPurity))
+                spreadCount += (uint)Global.SpellMgr.GetSpellInfo(SpellIds.RevelInPurity, Difficulty.None)?.GetEffect(1).CalcValue(GetCaster());
+
+            if (targets.Count > spreadCount)
+                targets.Resize(spreadCount);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            Unit target = GetHitUnit();
+
+            caster.CastSpell(target, SpellIds.PurgeTheWickedPeriodic, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress));
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitDestAreaEnemy));
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 1, SpellEffectName.Dummy));
+        }
+    }
+    
     [Script] // 47536 - Rapture
     class spell_pri_rapture : SpellScript
     {
