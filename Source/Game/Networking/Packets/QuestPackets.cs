@@ -959,17 +959,13 @@ namespace Game.Networking.Packets
     {
         public uint SpellID;
         public uint PlayerConditionID;
-
-        public QuestCompleteDisplaySpell(uint spellID, uint playerConditionID)
-        {
-            SpellID = spellID;
-            PlayerConditionID = playerConditionID;
-        }
+        public int Type;
 
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(SpellID);
             data.WriteUInt32(PlayerConditionID);
+            data.WriteInt32(Type);
         }
     }
 

@@ -43,6 +43,19 @@ namespace Framework.Constants
         KillPlayersSameFaction = 0x80
     }
 
+    public enum QuestCompleteSpellType
+    {
+        LegacyBehavior = 0,
+        Follower = 1,
+        Tradeskill = 2,
+        Ability = 3,
+        Aura = 4,
+        Spell = 5,
+        Unlock = 6,
+        Companion = 7,
+        Max
+    }
+
     public struct QuestSlotOffsets
     {
         public const int Id = 0;

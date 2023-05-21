@@ -122,6 +122,7 @@ namespace Game
         {
             uint spellId = fields.Read<uint>(1);
             uint playerConditionId = fields.Read<uint>(2);
+            QuestCompleteSpellType type = (QuestCompleteSpellType)fields.Read<uint>(3);
 
             if (!Global.SpellMgr.HasSpellInfo(spellId, Difficulty.None))
             {
@@ -135,7 +136,13 @@ namespace Game
                 playerConditionId = 0;
             }
 
-            RewardDisplaySpell.Add(new QuestRewardDisplaySpell(spellId, playerConditionId));
+            if (type >= QuestCompleteSpellType.Max)
+            {
+                Log.outError(LogFilter.Sql, $"Table `quest_reward_display_spell` invalid type value ({type}) set for quest {Id} and spell {spellId}. Set to 0.");
+                type = QuestCompleteSpellType.LegacyBehavior;
+            }
+
+            RewardDisplaySpell.Add(new QuestRewardDisplaySpell(spellId, playerConditionId, type));
         }
 
         public void LoadRewardChoiceItems(SQLFields fields)
@@ -630,7 +637,13 @@ namespace Game
             response.Info.RewardMoneyMultiplier = RewardMoneyMultiplier;
             response.Info.RewardBonusMoney = RewardBonusMoney;
             foreach (QuestRewardDisplaySpell displaySpell in RewardDisplaySpell)
-                response.Info.RewardDisplaySpell.Add(new QuestCompleteDisplaySpell(displaySpell.SpellId, displaySpell.PlayerConditionId));
+            {
+                QuestCompleteDisplaySpell rewardDisplaySpell = new();
+                rewardDisplaySpell.SpellID = displaySpell.SpellId;
+                rewardDisplaySpell.PlayerConditionID = displaySpell.PlayerConditionId;
+                rewardDisplaySpell.Type = (int)displaySpell.Type;
+                response.Info.RewardDisplaySpell.Add(rewardDisplaySpell);
+            }
 
             response.Info.RewardSpell = RewardSpell;
 
@@ -966,11 +979,13 @@ namespace Game
     {    
         public uint SpellId;
         public uint PlayerConditionId;
+        public QuestCompleteSpellType Type;
 
-        public QuestRewardDisplaySpell(uint spellId, uint playerConditionId)
+        public QuestRewardDisplaySpell(uint spellId, uint playerConditionId, QuestCompleteSpellType type)
         {
             SpellId = spellId;
             PlayerConditionId = playerConditionId;
+            Type = type;
         }
     }
 

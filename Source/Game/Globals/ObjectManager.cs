@@ -7198,8 +7198,8 @@ namespace Game
 
 
             // Load `quest_reward_display_spell`
-            //                               0        1        2
-            result = DB.World.Query("SELECT QuestID, SpellID, PlayerConditionID FROM quest_reward_display_spell ORDER BY QuestID ASC, Idx ASC");
+            //                               0        1        2                  3
+            result = DB.World.Query("SELECT QuestID, SpellID, PlayerConditionID, Type FROM quest_reward_display_spell ORDER BY QuestID ASC, Idx ASC");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest reward display spells. DB table `quest_reward_display_spell` is empty.");
