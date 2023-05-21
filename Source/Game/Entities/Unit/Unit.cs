@@ -821,7 +821,7 @@ namespace Game.Entities
         public bool IsBanker() { return HasNpcFlag(NPCFlags.Banker); }
         public bool IsInnkeeper() { return HasNpcFlag(NPCFlags.Innkeeper); }
         public bool IsSpiritHealer() { return HasNpcFlag(NPCFlags.SpiritHealer); }
-        public bool IsSpiritGuide() { return HasNpcFlag(NPCFlags.SpiritGuide); }
+        public bool IsAreaSpiritHealer() { return HasNpcFlag(NPCFlags.AreaSpiritHealer); }
         public bool IsTabardDesigner() { return HasNpcFlag(NPCFlags.TabardDesigner); }
         public bool IsAuctioner() { return HasNpcFlag(NPCFlags.Auctioneer); }
         public bool IsArmorer() { return HasNpcFlag(NPCFlags.Repair); }
@@ -831,9 +831,9 @@ namespace Game.Entities
             return HasNpcFlag(NPCFlags.Vendor | NPCFlags.Trainer | NPCFlags.FlightMaster |
                 NPCFlags.Petitioner | NPCFlags.BattleMaster | NPCFlags.Banker |
                 NPCFlags.Innkeeper | NPCFlags.SpiritHealer |
-                NPCFlags.SpiritGuide | NPCFlags.TabardDesigner | NPCFlags.Auctioneer);
+                NPCFlags.AreaSpiritHealer | NPCFlags.TabardDesigner | NPCFlags.Auctioneer);
         }
-        public bool IsSpiritService() { return HasNpcFlag(NPCFlags.SpiritHealer | NPCFlags.SpiritGuide); }
+        public bool IsSpiritService() { return HasNpcFlag(NPCFlags.SpiritHealer | NPCFlags.AreaSpiritHealer); }
         public bool IsCritter() { return GetCreatureType() == CreatureType.Critter; }
         public bool IsInFlight() { return HasUnitState(UnitState.InFlight); }
 

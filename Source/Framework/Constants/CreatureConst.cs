@@ -190,8 +190,8 @@ namespace Framework.Constants
         VendorReagent = 0x800,     // 100%
         Repair = 0x1000,     // 100%
         FlightMaster = 0x2000,     // 100%
-        SpiritHealer = 0x4000,     // Guessed
-        SpiritGuide = 0x8000,     // Guessed
+        SpiritHealer = 0x4000,     // 100%
+        AreaSpiritHealer = 0x8000,     // 100%
         Innkeeper = 0x10000,     // 100%
         Banker = 0x20000,     // 100%
         Petitioner = 0x40000,     // 100% 0xc0000 = Guild Petitions, 0x40000 = Arena Team Petitions
@@ -216,6 +216,7 @@ namespace Framework.Constants
         ItemUpgradeMaster = 0x01,
         GarrisonArchitect = 0x02,
         Steering = 0x04,
+        AreaSpiritHealerIndividual = 0x08,
         ShipmentCrafter = 0x10,
         GarrisonMissionNpc = 0x20,
         TradeskillNpc = 0x40,

@@ -139,7 +139,7 @@ namespace Game
             unit.SetHomePosition(unit.GetPosition());
 
             // If spiritguide, no need for gossip menu, just put player into resurrect queue
-            if (unit.IsSpiritGuide())
+            if (unit.IsAreaSpiritHealer())
             {
                 Battleground bg = GetPlayer().GetBattleground();
                 if (bg)
