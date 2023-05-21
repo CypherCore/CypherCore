@@ -845,6 +845,8 @@ namespace Game.BattleGrounds
                 player.RemoveAura(BattlegroundConst.SpellMercenaryShapeshift);
                 player.RemovePlayerFlagEx(PlayerFlagsEx.MercenaryMode);
 
+                player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.LeaveArenaOrBattleground);
+
                 if (!player.IsAlive())                              // resurrect on exit
                 {
                     player.ResurrectPlayer(1.0f);
