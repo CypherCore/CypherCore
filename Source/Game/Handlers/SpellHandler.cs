@@ -291,9 +291,6 @@ namespace Game
                 return;
             }
 
-            if (spellInfo.IsPassive())
-                return;
-
             Unit caster = mover;
             if (caster.IsTypeId(TypeId.Unit) && !caster.ToCreature().HasSpell(spellInfo.Id))
             {
@@ -335,6 +332,9 @@ namespace Game
 
             // Check possible spell cast overrides
             spellInfo = caster.GetCastSpellInfo(spellInfo);
+
+            if (spellInfo.IsPassive())
+                return;
 
             // can't use our own spells when we're in possession of another unit,
             if (GetPlayer().IsPossessing())
