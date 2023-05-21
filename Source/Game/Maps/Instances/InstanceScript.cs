@@ -372,6 +372,8 @@ namespace Game.Maps
                         case EncounterState.Fail:
                             ResetCombatResurrections();
                             SendEncounterEnd();
+
+                            instance.DoOnPlayers(player => player.AtEndOfEncounter());
                             break;
                         case EncounterState.Done:
                             ResetCombatResurrections();
@@ -382,6 +384,8 @@ namespace Game.Maps
                                 DoUpdateCriteria(CriteriaType.DefeatDungeonEncounter, dungeonEncounter.Id);
                                 SendBossKillCredit(dungeonEncounter.Id);
                             }
+
+                            instance.DoOnPlayers(player => player.AtEndOfEncounter());
                             break;
                         default:
                             break;
