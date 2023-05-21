@@ -514,6 +514,9 @@ namespace Game.Entities
                     RemoveAura(pair);
             }
 
+            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.DuelEnd);
+            opponent.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.DuelEnd);
+
             // cleanup combo points
             ClearComboPoints();
             opponent.ClearComboPoints();
