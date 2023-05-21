@@ -1127,6 +1127,8 @@ namespace Game.Entities
                 else
                     ToTempSummon().UnSummon(2000); // Approximation
             }
+
+            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.AbandonVehicle);
         }
 
         public void SendPlaySpellVisual(Unit target, uint spellVisualId, ushort missReason, ushort reflectStatus, float travelSpeed, bool speedAsTime = false, float launchDelay = 0f)
