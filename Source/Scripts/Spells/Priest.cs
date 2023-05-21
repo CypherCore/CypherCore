@@ -84,6 +84,7 @@ namespace Scripts.Spells.Priest
         public const uint RevelInPurity = 373003;
         public const uint ShadowMendDamage = 186439;
         public const uint ShadowMendPeriodicDummy = 187464;
+        public const uint ShadowWordPain = 589;
         public const uint ShieldDisciplineEnergize = 47755;
         public const uint ShieldDisciplinePassive = 197045;
         public const uint SinsOfTheMany = 280398;
@@ -700,6 +701,38 @@ namespace Scripts.Spells.Priest
         }
     }
 
+    [Script] // 390686 - Painful Punishment
+    class spell_pri_painful_punishment : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ShadowWordPain, SpellIds.PurgeTheWickedPeriodic);
+        }
+
+        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            Unit caster = eventInfo.GetActor();
+            Unit target = eventInfo.GetActionTarget();
+            if (caster == null || target == null)
+                return;
+
+            int additionalDuration = aurEff.GetAmount();
+
+            Aura shadowWordPain = target.GetOwnedAura(SpellIds.ShadowWordPain, caster.GetGUID());
+            if (shadowWordPain != null)
+                shadowWordPain.SetDuration(shadowWordPain.GetDuration() + additionalDuration);
+
+            Aura purgeTheWicked = target.GetOwnedAura(SpellIds.PurgeTheWickedPeriodic, caster.GetGUID());
+            if (purgeTheWicked != null)
+                purgeTheWicked.SetDuration(purgeTheWicked.GetDuration() + additionalDuration);
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
+        }
+    }
+    
     [Script("spell_pri_penance", SpellIds.PenanceChannelDamage, SpellIds.PenanceChannelHealing)] // 47540 - Penance
     [Script("spell_pri_dark_reprimand", SpellIds.DarkReprimandChannelDamage, SpellIds.DarkReprimandChannelHealing)] // 400169 - Dark Reprimand
     class spell_pri_penance : SpellScript
