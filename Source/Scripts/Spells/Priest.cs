@@ -28,6 +28,11 @@ namespace Scripts.Spells.Priest
         public const uint BlessedHealing = 70772;
         public const uint BodyAndSoul = 64129;
         public const uint BodyAndSoulSpeed = 65081;
+        public const uint DarkReprimand = 400169;
+        public const uint DarkReprimandChannelDamage = 373129;
+        public const uint DarkReprimandChannelHealing = 400171;
+        public const uint DarkReprimandDamage = 373130;
+        public const uint DarkReprimandHealing = 400187;
         public const uint DivineBlessing = 40440;
         public const uint DivineStarHoly = 110744;
         public const uint DivineStarShadow = 122121;
@@ -691,17 +696,28 @@ namespace Scripts.Spells.Priest
         }
     }
 
-    [Script] // 47540 - Penance
+    [Script("spell_pri_penance", SpellIds.PenanceChannelDamage, SpellIds.PenanceChannelHealing)] // 47540 - Penance
+    [Script("spell_pri_dark_reprimand", SpellIds.DarkReprimandChannelDamage, SpellIds.DarkReprimandChannelHealing)] // 400169 - Dark Reprimand
     class spell_pri_penance : SpellScript
     {
+        uint _damageSpellId;
+        uint _healingSpellId;
+
+        spell_pri_penance(uint damageSpellId, uint healingSpellId)
+        {
+            _damageSpellId = damageSpellId;
+            _healingSpellId = healingSpellId;
+        }
+
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.PenanceChannelDamage, SpellIds.PenanceChannelHealing);
+            return ValidateSpellInfo(_damageSpellId, _healingSpellId);
         }
 
         SpellCastResult CheckCast()
         {
             Unit caster = GetCaster();
+
             Unit target = GetExplTargetUnit();
             if (target)
             {
@@ -720,13 +736,14 @@ namespace Scripts.Spells.Priest
         void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
+
             Unit target = GetHitUnit();
             if (target)
             {
                 if (caster.IsFriendlyTo(target))
-                    caster.CastSpell(target, SpellIds.PenanceChannelHealing, new CastSpellExtraArgs().SetTriggeringSpell(GetSpell()));
+                    caster.CastSpell(target, _healingSpellId, new CastSpellExtraArgs().SetTriggeringSpell(GetSpell()));
                 else
-                    caster.CastSpell(target, SpellIds.PenanceChannelDamage, new CastSpellExtraArgs().SetTriggeringSpell(GetSpell()));
+                    caster.CastSpell(target, _damageSpellId, new CastSpellExtraArgs().SetTriggeringSpell(GetSpell()));
             }
         }
 
@@ -737,8 +754,9 @@ namespace Scripts.Spells.Priest
         }
     }
 
-    [Script] // 47758 - Penance (Channel Damage), 47757 - Penance (Channel Healing)
-    class spell_pri_penance_channeled : AuraScript
+    // 47758 - Penance (Channel Damage), 47757 - Penance (Channel Healing)
+    [Script] // 373129 - Dark Reprimand (Channel Damage), 400171 - Dark Reprimand (Channel Healing)
+    class spell_pri_penance_or_dark_reprimand_channeled : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -787,7 +805,8 @@ namespace Scripts.Spells.Priest
         }
     }
 
-    [Script] // 47666 - Penance (Damage)
+    // 47666 - Penance (Damage)
+    [Script] // 373130 - Dark Reprimand (Damage)
     class spell_pri_power_of_the_dark_side_damage_bonus : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -816,7 +835,8 @@ namespace Scripts.Spells.Priest
         }
     }
 
-    [Script] // 47750 - Penance (Healing)
+    // 47750 - Penance (Healing)
+    [Script] // 400187 - Dark Reprimand (Healing)
     class spell_pri_power_of_the_dark_side_healing_bonus : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
