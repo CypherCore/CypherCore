@@ -38,8 +38,12 @@ namespace Scripts.Spells.Priest
         public const uint DivineWrath = 40441;
         public const uint FlashHeal = 2061;
         public const uint GuardianSpiritHeal = 48153;
-        public const uint HaloDamage = 120696;
-        public const uint HaloHeal = 120692;
+        public const uint HaloHoly = 120517;
+        public const uint HaloShadow = 120644;
+        public const uint HaloHolyDamage = 120696;
+        public const uint HaloHolyHeal = 120692;
+        public const uint HaloShadowDamage = 390964;
+        public const uint HaloShadowHeal = 390971;
         public const uint Heal = 2060;
         public const uint HolyWordChastise = 88625;
         public const uint HolyWordSanctify = 34861;
@@ -506,7 +510,25 @@ namespace Scripts.Spells.Priest
         }
     }
 
-    [Script] // 120517 - Halo
+    [Script] // 120644 - Halo (Shadow)
+    class spell_pri_halo_shadow : SpellScript
+    {
+        void HandleHitTarget(uint effIndex)
+        {
+            Unit caster = GetCaster();
+
+            if ((int)caster.GetPowerType() != GetEffectInfo().MiscValue)
+                PreventHitDefaultEffect(effIndex);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleHitTarget, 1, SpellEffectName.Energize));
+        }
+    }
+    
+    // 120517 - Halo (Holy)
+    [Script] // 120644 - Halo (Shadow)
     class areatrigger_pri_halo : AreaTriggerAI
     {
         public areatrigger_pri_halo(AreaTrigger areatrigger) : base(areatrigger) { }
@@ -517,9 +539,11 @@ namespace Scripts.Spells.Priest
             if (caster != null)
             {
                 if (caster.IsValidAttackTarget(unit))
-                    caster.CastSpell(unit, SpellIds.HaloDamage, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress));
+                    caster.CastSpell(unit, at.GetSpellId() == SpellIds.HaloShadow ? SpellIds.HaloShadowDamage : SpellIds.HaloHolyDamage,
+                        new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress));
                 else if (caster.IsValidAssistTarget(unit))
-                    caster.CastSpell(unit, SpellIds.HaloHeal, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress));
+                    caster.CastSpell(unit, at.GetSpellId() == SpellIds.HaloShadow ? SpellIds.HaloShadowHeal : SpellIds.HaloHolyHeal,
+                        new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress));
             }
         }
     }
