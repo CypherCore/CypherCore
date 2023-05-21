@@ -591,7 +591,7 @@ namespace Game.Entities
                 Unit.ProcSkillsAndAuras(this, null, new ProcFlagsInit(ProcFlags.EncounterStart), new ProcFlagsInit(), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
         }
 
-        void AtEndOfEncounter()
+        public void AtEndOfEncounter()
         {
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.EndOfEncounter);
         }

@@ -4748,6 +4748,7 @@ namespace Game.Entities
                     RemovePlayerFlag(PlayerFlags.WarModeActive);
                     CastSpell(this, auraInside, true);
                     RemoveAurasDueToSpell(auraOutside);
+                    RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.WarModeLeave);
                 }
                 else
                 {
@@ -4765,6 +4766,7 @@ namespace Game.Entities
                 RemoveAurasDueToSpell(auraInside);
                 RemovePlayerFlag(PlayerFlags.WarModeActive);
                 RemovePvpFlag(UnitPVPStateFlags.PvP);
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.WarModeLeave);
             }
         }
 
