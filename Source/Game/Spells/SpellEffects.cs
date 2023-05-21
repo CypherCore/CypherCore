@@ -42,7 +42,6 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.Attack)]
         [SpellEffectHandler(SpellEffectName.ThreatAll)]
         [SpellEffectHandler(SpellEffectName.Effect112)]
-        [SpellEffectHandler(SpellEffectName.TeleportGraveyard)]
         [SpellEffectHandler(SpellEffectName.Effect122)]
         [SpellEffectHandler(SpellEffectName.Effect175)]
         [SpellEffectHandler(SpellEffectName.Effect178)]

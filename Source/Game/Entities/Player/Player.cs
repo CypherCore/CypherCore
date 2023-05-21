@@ -3371,7 +3371,13 @@ namespace Game.Entities
                 WorldCfg.RatePowerArcaneCharges,
                 WorldCfg.RatePowerFury,
                 WorldCfg.RatePowerPain,
-                0 // todo add config for Essence power
+                0, // todo add config for Essence power
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
             };
 
             if (RatesForPower[(int)power] != 0)

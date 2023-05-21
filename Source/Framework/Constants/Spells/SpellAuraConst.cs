@@ -544,6 +544,7 @@ namespace Framework.Constants
         Unk534 = 534,
         Unk535 = 535,
         IgnoreSpellCreatureTypeRequirements = 536,
+        Unk537 = 537,
         Total
     }
 
