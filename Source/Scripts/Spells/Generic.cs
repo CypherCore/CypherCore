@@ -1937,7 +1937,7 @@ namespace Scripts.Spells.Generic
             OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
-    
+
     // 35357 - Spawn Feign Death
     [Script] // 51329 - Feign Death
     class spell_gen_feign_death_no_dyn_flag : AuraScript
@@ -5010,17 +5010,17 @@ namespace Scripts.Spells.Generic
         }
     }
 
-             // 2825 - Bloodlust
-             // 32182 - Heroism
-             // 80353 - Time Warp
-             // 264667 - Primal Rage
-             // 390386 - Fury of the Aspects
-             // 146555 - Drums of Rage
-             // 178207 - Drums of Fury
-             // 230935 - Drums of the Mountain
-             // 256740 - Drums of the Maelstrom
-             // 309658 - Drums of Deathly Ferocity
-             // 381301 - Feral Hide Drums
+    // 2825 - Bloodlust
+    // 32182 - Heroism
+    // 80353 - Time Warp
+    // 264667 - Primal Rage
+    // 390386 - Fury of the Aspects
+    // 146555 - Drums of Rage
+    // 178207 - Drums of Fury
+    // 230935 - Drums of the Mountain
+    // 256740 - Drums of the Maelstrom
+    // 309658 - Drums of Deathly Ferocity
+    // 381301 - Feral Hide Drums
     [Script("spell_sha_bloodlust", SpellIds.ShamanSated)]
     [Script("spell_sha_heroism", SpellIds.ShamanExhaustion)]
     [Script("spell_mage_time_warp", SpellIds.MageTemporalDisplacement)]
@@ -5068,6 +5068,112 @@ namespace Scripts.Spells.Generic
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitCasterAreaRaid));
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitCasterAreaRaid));
             OnEffectHitTarget.Add(new EffectHandler(HandleHit, 0, SpellEffectName.ApplyAura));
+        }
+    }
+
+    // AoE resurrections by spirit guides
+    [Script] // 22012 - Spirit Heal
+    class spell_gen_spirit_heal_aoe : SpellScript
+    {
+        void FilterTargets(List<WorldObject> targets)
+        {
+            Unit caster = GetCaster();
+            targets.RemoveAll(target =>
+            {
+                Player playerTarget = target.ToPlayer();
+                if (playerTarget != null)
+                    return !playerTarget.CanAcceptAreaSpiritHealFrom(caster);
+
+                return true;
+            });
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaAlly));
+        }
+    }
+
+    // Personal resurrections in battlegrounds
+    [Script] // 156758 - Spirit Heal
+    class spell_gen_spirit_heal_personal : AuraScript
+    {
+        uint SPELL_SPIRIT_HEAL_EFFECT = 156763;
+
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
+                return;
+
+            Player targetPlayer = GetTarget().ToPlayer();
+            if (targetPlayer == null)
+                return;
+
+            Unit caster = GetCaster();
+            if (caster == null)
+                return;
+
+            if (targetPlayer.CanAcceptAreaSpiritHealFrom(caster))
+                caster.CastSpell(targetPlayer, SPELL_SPIRIT_HEAL_EFFECT);
+        }
+
+        public override void Register()
+        {
+            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+
+    class RecastSpiritHealChannelEvent : BasicEvent
+    {
+        Unit _caster;
+
+        public RecastSpiritHealChannelEvent(Unit caster)
+        {
+            _caster = caster;
+        }
+
+        public override bool Execute(ulong e_time, uint p_time)
+        {
+            if (_caster.GetChannelSpellId() == 0)
+                _caster.CastSpell(null, BattlegroundConst.SpellSpiritHealChannelAoE, false);
+
+            return true;
+        }
+    }
+
+    [Script] // 22011 - Spirit Heal Channel
+    class spell_gen_spirit_heal_channel : AuraScript
+    {
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
+                return;
+
+            Unit target = GetTarget();
+            target.m_Events.AddEventAtOffset(new RecastSpiritHealChannelEvent(target), TimeSpan.FromSeconds(1));
+        }
+
+        public override void Register()
+        {
+            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script] // 2584 - Waiting to Resurrect
+    class spell_gen_waiting_to_resurrect : AuraScript
+    {
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Player targetPlayer = GetTarget().ToPlayer();
+            if (targetPlayer == null)
+                return;
+
+            targetPlayer.SetAreaSpiritHealer(null);
+        }
+
+        public override void Register()
+        {
+            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
 

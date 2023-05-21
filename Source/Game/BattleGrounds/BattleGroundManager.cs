@@ -452,19 +452,6 @@ namespace Game.BattleGrounds
                 Log.outError(LogFilter.Battleground, $"BattlegroundMgr.SendToBattleground: Instance {instanceId} (bgType {bgTypeId}) not found while trying to teleport player {player.GetName()}");
         }
 
-        public void SendAreaSpiritHealerQuery(Player player, Battleground bg, ObjectGuid guid)
-        {
-            uint time = 30000 - bg.GetLastResurrectTime();      // resurrect every 30 seconds
-            if (time == 0xFFFFFFFF)
-                time = 0;
-
-            AreaSpiritHealerTime areaSpiritHealerTime = new();
-            areaSpiritHealerTime.HealerGuid = guid;
-            areaSpiritHealerTime.TimeLeft = time;
-
-            player.SendPacket(areaSpiritHealerTime);
-        }
-
         bool IsArenaType(BattlegroundTypeId bgTypeId)
         {
             return bgTypeId == BattlegroundTypeId.AA || bgTypeId == BattlegroundTypeId.BE || bgTypeId == BattlegroundTypeId.NA

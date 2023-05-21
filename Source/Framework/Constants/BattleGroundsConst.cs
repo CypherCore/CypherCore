@@ -62,8 +62,10 @@ namespace Framework.Constants
         public const sbyte PlayerPositionArenaSlot5 = 6;
 
         //Spells
+        public const uint SpellSpiritHealChannelAoE = 22011;                // used for AoE resurrections
+        public const uint SpellSpiritHealPlayerAura = 156758;               // individual player timers for resurrection
+        public const uint SpellSpiritHealChannelSelf = 305122;               // channel visual for individual area spirit healers
         public const uint SpellWaitingForResurrect = 2584;                 // Waiting To Resurrect
-        public const uint SpellSpiritHealChannel = 22011;                // Spirit Heal Channel
         public const uint SpellSpiritHealChannelVisual = 3060;
         public const uint SpellSpiritHeal = 22012;                // Spirit Heal
         public const uint SpellResurrectionVisual = 24171;                // Resurrection Impact Visual
@@ -81,6 +83,7 @@ namespace Framework.Constants
         public const uint SpellMercenaryAlliance1 = 193863;
         public const uint SpellMercenaryAllianceReactions = 195843;
         public const uint SpellMercenaryShapeshift = 193970;
+        public const uint SpellPetSummoned = 6962; // used after resurrection
     }
 
     public enum BattlegroundEventFlags

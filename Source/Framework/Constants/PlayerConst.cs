@@ -62,6 +62,8 @@ namespace Framework.Constants
         public const uint SpellExperienceEliminated = 206662;
 
         public const uint CurrencyMaxCapAncientMana = 2000;
+
+        public const float MaxAreaSpiritHealerRange = 20.0f;
     }
 
     public struct MoneyConstants

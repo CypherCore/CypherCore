@@ -55,6 +55,7 @@ namespace Game.Entities
         long m_lastHonorUpdateTime;
         uint m_contestedPvPTimer;
         bool _usePvpItemLevels;
+        ObjectGuid _areaSpiritHealerGUID;
 
         //Groups/Raids
         GroupReference m_group = new();

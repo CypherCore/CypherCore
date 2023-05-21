@@ -138,16 +138,10 @@ namespace Game
                 unit.PauseMovement(pause);
             unit.SetHomePosition(unit.GetPosition());
 
-            // If spiritguide, no need for gossip menu, just put player into resurrect queue
             if (unit.IsAreaSpiritHealer())
             {
-                Battleground bg = GetPlayer().GetBattleground();
-                if (bg)
-                {
-                    bg.AddPlayerToResurrectQueue(unit.GetGUID(), GetPlayer().GetGUID());
-                    Global.BattlegroundMgr.SendAreaSpiritHealerQuery(GetPlayer(), bg, unit.GetGUID());
-                    return;
-                }
+                _player.SetAreaSpiritHealer(unit);
+                _player.SendAreaSpiritHealerTime(unit);
             }
 
             _player.PlayerTalkClass.ClearMenus();

@@ -10,6 +10,7 @@ using Game.Entities;
 using Game.Groups;
 using Game.Networking;
 using Game.Networking.Packets;
+using Game.Spells;
 using System;
 using System.Collections.Generic;
 
@@ -618,39 +619,53 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AreaSpiritHealerQuery)]
         void HandleAreaSpiritHealerQuery(AreaSpiritHealerQuery areaSpiritHealerQuery)
         {
-            Creature unit = ObjectAccessor.GetCreature(GetPlayer(), areaSpiritHealerQuery.HealerGuid);
-            if (!unit)
+            Player player = GetPlayer();
+            Creature spiritHealer = ObjectAccessor.GetCreature(player, areaSpiritHealerQuery.HealerGuid);
+            if (spiritHealer == null)
                 return;
 
-            if (!unit.IsSpiritService())                            // it's not spirit service
+            if (!spiritHealer.IsAreaSpiritHealer())
                 return;
 
-            Battleground bg = GetPlayer().GetBattleground();
-            if (bg != null)
-                Global.BattlegroundMgr.SendAreaSpiritHealerQuery(GetPlayer(), bg, areaSpiritHealerQuery.HealerGuid);
+            if (_player.GetExactDist(spiritHealer) > PlayerConst.MaxAreaSpiritHealerRange)
+                return;
 
-            BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(GetPlayer().GetMap(), GetPlayer().GetZoneId());
-            if (bf != null)
-                bf.SendAreaSpiritHealerQuery(GetPlayer(), areaSpiritHealerQuery.HealerGuid);
+            if (spiritHealer.IsAreaSpiritHealerIndividual())
+            {
+                Aura aura = player.GetAura(BattlegroundConst.SpellSpiritHealPlayerAura);
+                if (aura != null)
+                {
+                    player.SendAreaSpiritHealerTime(spiritHealer.GetGUID(), aura.GetDuration());
+                }
+                else
+                {
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(BattlegroundConst.SpellSpiritHealPlayerAura, Difficulty.None);
+                    if (spellInfo != null)
+                    {
+                        spiritHealer.CastSpell(player, BattlegroundConst.SpellSpiritHealPlayerAura);
+                        player.SendAreaSpiritHealerTime(spiritHealer.GetGUID(), spellInfo.GetDuration());
+                        spiritHealer.CastSpell(null, BattlegroundConst.SpellSpiritHealChannelSelf);
+                    }
+                }
+            }
+            else
+                _player.SendAreaSpiritHealerTime(spiritHealer);
         }
 
         [WorldPacketHandler(ClientOpcodes.AreaSpiritHealerQueue)]
         void HandleAreaSpiritHealerQueue(AreaSpiritHealerQueue areaSpiritHealerQueue)
         {
-            Creature unit = ObjectAccessor.GetCreature(GetPlayer(), areaSpiritHealerQueue.HealerGuid);
-            if (!unit)
+            Creature spiritHealer = ObjectAccessor.GetCreature(GetPlayer(), areaSpiritHealerQueue.HealerGuid);
+            if (spiritHealer == null)
                 return;
 
-            if (!unit.IsSpiritService())                            // it's not spirit service
+            if (!spiritHealer.IsAreaSpiritHealer())
                 return;
 
-            Battleground bg = GetPlayer().GetBattleground();
-            if (bg)
-                bg.AddPlayerToResurrectQueue(areaSpiritHealerQueue.HealerGuid, GetPlayer().GetGUID());
+            if (_player.GetExactDist(spiritHealer) > PlayerConst.MaxAreaSpiritHealerRange)
+                return;
 
-            BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(GetPlayer().GetMap(), GetPlayer().GetZoneId());
-            if (bf != null)
-                bf.AddPlayerToResurrectQueue(areaSpiritHealerQueue.HealerGuid, GetPlayer().GetGUID());
+            _player.SetAreaSpiritHealer(spiritHealer);
         }
 
         [WorldPacketHandler(ClientOpcodes.HearthAndResurrect)]

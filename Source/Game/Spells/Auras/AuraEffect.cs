@@ -4317,18 +4317,6 @@ namespace Game.Spells
                         case SpellFamilyNames.Generic:
                             switch (GetId())
                             {
-                                case 2584: // Waiting to Resurrect
-                                    // Waiting to resurrect spell cancel, we must remove player from resurrect queue
-                                    if (target.IsTypeId(TypeId.Player))
-                                    {
-                                        Battleground bg = target.ToPlayer().GetBattleground();
-                                        if (bg)
-                                            bg.RemovePlayerFromResurrectQueue(target.GetGUID());
-                                        BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(target.GetMap(), target.GetZoneId());
-                                        if (bf != null)
-                                            bf.RemovePlayerFromResurrectQueue(target.GetGUID());
-                                    }
-                                    break;
                                 case 36730:                                     // Flame Strike
                                     target.CastSpell(target, 36731, new CastSpellExtraArgs(this));
                                     break;

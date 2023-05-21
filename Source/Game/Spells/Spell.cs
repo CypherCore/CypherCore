@@ -7960,6 +7960,8 @@ namespace Game.Spells
 
         public SpellInfo GetTriggeredByAuraSpell() { return m_triggeredByAuraSpell; }
 
+        public int GetTimer() { return m_timer; }
+        
         public static implicit operator bool(Spell spell)
         {
             return spell != null;

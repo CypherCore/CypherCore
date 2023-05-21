@@ -427,6 +427,9 @@ namespace Game.Entities
         {
             if (IsAIEnabled() && triggerJustAppeared && m_deathState != DeathState.Dead)
             {
+                if (IsAreaSpiritHealer() && !IsAreaSpiritHealerIndividual())
+                    CastSpell(null, BattlegroundConst.SpellSpiritHealChannelAoE, false);
+
                 if (m_respawnCompatibilityMode && VehicleKit != null)
                     VehicleKit.Reset();
 
@@ -1127,6 +1130,19 @@ namespace Game.Entities
             // if the creature exits a vehicle, set it's home position to the
             // exited position so it won't run away (home) and evade if it's hostile
             SetHomePosition(GetPosition());
+        }
+
+        public void SummonGraveyardTeleporter()
+        {
+            if (!IsAreaSpiritHealer())
+                return;
+
+            uint npcEntry = GetFaction() == (uint)FactionTemplates.AllianceGeneric ? 26350 : 26351u;
+
+            // maybe NPC is summoned with these spells:
+            // ID - 24237 Summon Alliance Graveyard Teleporter (SERVERSIDE)
+            // ID - 46894 Summon Horde Graveyard Teleporter (SERVERSIDE)
+            SummonCreature(npcEntry, GetPosition(), TempSummonType.TimedDespawn, TimeSpan.FromSeconds(1), 0, 0);
         }
 
         public bool HasFlag(CreatureStaticFlags flag)  { return _staticFlags.HasFlag(flag); }

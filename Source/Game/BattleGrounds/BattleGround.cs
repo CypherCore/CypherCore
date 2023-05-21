@@ -117,7 +117,6 @@ namespace Game.BattleGrounds
                     }
                     else
                     {
-                        _ProcessRessurect(diff);
                         if (Global.BattlegroundMgr.GetPrematureFinishTime() != 0 && (GetPlayersCountByTeam(Team.Alliance) < GetMinPlayersPerTeam() || GetPlayersCountByTeam(Team.Horde) < GetMinPlayersPerTeam()))
                             _ProcessProgress(diff);
                         else if (m_PrematureCountDown)
@@ -211,61 +210,6 @@ namespace Game.BattleGrounds
                         m_OfflineQueue.RemoveAt(0);                 // remove from offline queue
                     }
                 }
-            }
-        }
-
-        void _ProcessRessurect(uint diff)
-        {
-            // *********************************************************
-            // ***        Battleground RESSURECTION SYSTEM           ***
-            // *********************************************************
-            // this should be handled by spell system
-            m_LastResurrectTime += diff;
-            if (m_LastResurrectTime >= BattlegroundConst.ResurrectionInterval)
-            {
-                if (GetReviveQueueSize() != 0)
-                {
-                    Creature sh = null;
-                    foreach (var pair in m_ReviveQueue)
-                    {
-                        Player player = Global.ObjAccessor.FindPlayer(pair.Value);
-                        if (!player)
-                            continue;
-
-                        if (!sh && player.IsInWorld)
-                        {
-                            sh = player.GetMap().GetCreature(pair.Key);
-                            // only for visual effect
-                            if (sh)
-                                // Spirit Heal, effect 117
-                                sh.CastSpell(sh, BattlegroundConst.SpellSpiritHeal, true);
-                        }
-
-                        // Resurrection visual
-                        player.CastSpell(player, BattlegroundConst.SpellResurrectionVisual, true);
-                        m_ResurrectQueue.Add(pair.Value);
-                    }
-
-                    m_ReviveQueue.Clear();
-                    m_LastResurrectTime = 0;
-                }
-                else
-                    // queue is clear and time passed, just update last resurrection time
-                    m_LastResurrectTime = 0;
-            }
-            else if (m_LastResurrectTime > 500)    // Resurrect players only half a second later, to see spirit heal effect on NPC
-            {
-                foreach (var guid in m_ResurrectQueue)
-                {
-                    Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (!player)
-                        continue;
-                    player.ResurrectPlayer(1.0f);
-                    player.CastSpell(player, 6962, true);
-                    player.CastSpell(player, BattlegroundConst.SpellSpiritHealMana, true);
-                    player.SpawnCorpseBones(false);
-                }
-                m_ResurrectQueue.Clear();
             }
         }
 
@@ -835,8 +779,6 @@ namespace Game.BattleGrounds
             if (PlayerScores.ContainsKey(guid))
                 PlayerScores.Remove(guid);
 
-            RemovePlayerFromResurrectQueue(guid);
-
             Player player = Global.ObjAccessor.FindPlayer(guid);
             if (player)
             { 
@@ -940,7 +882,6 @@ namespace Game.BattleGrounds
             SetStatus(BattlegroundStatus.WaitQueue);
             SetElapsedTime(0);
             SetRemainingTime(0);
-            SetLastResurrectTime(0);
             m_Events = 0;
 
             if (m_InvitedAlliance > 0 || m_InvitedHorde > 0)
@@ -960,7 +901,6 @@ namespace Game.BattleGrounds
         public void StartBattleground()
         {
             SetElapsedTime(0);
-            SetLastResurrectTime(0);
             // add BG to free slot queue
             AddToBGFreeSlotQueue();
 
@@ -1313,56 +1253,6 @@ namespace Game.BattleGrounds
             return true;
         }
 
-        public void AddPlayerToResurrectQueue(ObjectGuid npc_guid, ObjectGuid player_guid)
-        {
-            m_ReviveQueue.Add(npc_guid, player_guid);
-
-            Player player = Global.ObjAccessor.FindPlayer(player_guid);
-            if (!player)
-                return;
-
-            player.CastSpell(player, BattlegroundConst.SpellWaitingForResurrect, true);
-        }
-
-        public void RemovePlayerFromResurrectQueue(ObjectGuid player_guid)
-        {
-            foreach (var pair in m_ReviveQueue.KeyValueList)
-            {
-                if (pair.Value == player_guid)
-                {
-                    m_ReviveQueue.Remove(pair);
-                    Player player = Global.ObjAccessor.FindPlayer(player_guid);
-                    if (player)
-                        player.RemoveAurasDueToSpell(BattlegroundConst.SpellWaitingForResurrect);
-                    return;
-                }
-
-            }
-        }
-
-        public void RelocateDeadPlayers(ObjectGuid guideGuid)
-        {
-            // Those who are waiting to resurrect at this node are taken to the closest own node's graveyard
-            List<ObjectGuid> ghostList = m_ReviveQueue[guideGuid];
-            if (!ghostList.Empty())
-            {
-                WorldSafeLocsEntry closestGrave = null;
-                foreach (var guid in ghostList)
-                {
-                    Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (!player)
-                        continue;
-
-                    if (closestGrave == null)
-                        closestGrave = GetClosestGraveYard(player);
-
-                    if (closestGrave != null)
-                        player.TeleportTo(closestGrave.Loc);
-                }
-                ghostList.Clear();
-            }
-        }
-
         public bool AddObject(int type, uint entry, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3, uint respawnTime = 0, GameObjectState goState = GameObjectState.Ready)
         {
             Map map = FindBgMap();
@@ -1602,20 +1492,9 @@ namespace Game.BattleGrounds
         {
             uint entry = (uint)(teamIndex == TeamId.Alliance ? BattlegroundCreatures.A_SpiritGuide : BattlegroundCreatures.H_SpiritGuide);
 
-            Creature creature = AddCreature(entry, type, x, y, z, o);
-            if (creature)
-            {
-                creature.SetDeathState(DeathState.Dead);
-                creature.AddChannelObject(creature.GetGUID());
-                // aura
-                //todo Fix display here
-                // creature.SetVisibleAura(0, SPELL_SPIRIT_HEAL_CHANNEL);
-                // casting visual effect
-                creature.SetChannelSpellId(BattlegroundConst.SpellSpiritHealChannel);
-                creature.SetChannelVisual(new SpellCastVisual(BattlegroundConst.SpellSpiritHealChannelVisual, 0));
-                //creature.CastSpell(creature, SPELL_SPIRIT_HEAL_CHANNEL, true);
+            if (AddCreature(entry, type, x, y, z, o) != null)
                 return true;
-            }
+
             Log.outError(LogFilter.Battleground, $"Battleground.AddSpiritGuide: cannot create spirit guide (type: {type}, entry: {entry}) for BG (map: {GetMapId()}, instance id: {m_InstanceID})!");
             EndNow();
             return false;
@@ -1965,7 +1844,6 @@ namespace Game.BattleGrounds
         public uint GetClientInstanceID() { return m_ClientInstanceID; }
         public uint GetElapsedTime() { return m_StartTime; }
         public uint GetRemainingTime() { return (uint)m_EndTime; }
-        public uint GetLastResurrectTime() { return m_LastResurrectTime; }
 
         int GetStartDelayTime() { return m_StartDelayTime; }
         public ArenaTypes GetArenaType() { return m_ArenaType; }
@@ -1980,7 +1858,6 @@ namespace Game.BattleGrounds
         public void SetClientInstanceID(uint InstanceID) { m_ClientInstanceID = InstanceID; }
         public void SetElapsedTime(uint Time) { m_StartTime = Time; }
         public void SetRemainingTime(uint Time) { m_EndTime = (int)Time; }
-        public void SetLastResurrectTime(uint Time) { m_LastResurrectTime = Time; }
         public void SetRated(bool state) { m_IsRated = state; }
         public void SetArenaType(ArenaTypes type) { m_ArenaType = type; }
         public void SetWinner(PvPTeamId winnerTeamId) { _winnerTeamId = winnerTeamId; }
@@ -2118,7 +1995,6 @@ namespace Game.BattleGrounds
         uint m_ResetStatTimer;
         uint m_ValidStartPositionTimer;
         int m_EndTime;                                    // it is set to 120000 when bg is ending and it decreases itself
-        uint m_LastResurrectTime;
         ArenaTypes m_ArenaType;                                 // 2=2v2, 3=3v3, 5=5v5
         bool m_InBGFreeSlotQueue;                         // used to make sure that BG is only once inserted into the BattlegroundMgr.BGFreeSlotQueue[bgTypeId] deque
         bool m_SetDeleteThis;                             // used for safe deletion of the bg after end / all players leave
@@ -2130,7 +2006,6 @@ namespace Game.BattleGrounds
         uint m_LastPlayerPositionBroadcast;
 
         // Player lists
-        List<ObjectGuid> m_ResurrectQueue = new();               // Player GUID
         List<ObjectGuid> m_OfflineQueue = new();                  // Player GUID
 
         // Invited counters are useful for player invitation to BG - do not allow, if BG is started to one faction to have 2 more players than another faction

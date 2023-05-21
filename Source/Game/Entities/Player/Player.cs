@@ -3938,6 +3938,8 @@ namespace Game.Entities
 
         public void ResurrectPlayer(float restore_percent, bool applySickness = false)
         {
+            SetAreaSpiritHealer(null);
+
             DeathReleaseLoc packet = new();
             packet.MapID = -1;
             SendPacket(packet);
@@ -4021,6 +4023,44 @@ namespace Game.Entities
             }
         }
 
+        ObjectGuid GetSpiritHealerGUID() { return _areaSpiritHealerGUID; }
+        
+        public bool CanAcceptAreaSpiritHealFrom(Unit spiritHealer) { return spiritHealer.GetGUID() == _areaSpiritHealerGUID; }
+        
+        public void SetAreaSpiritHealer(Creature creature)
+        {
+            if (!creature)
+            {
+                _areaSpiritHealerGUID = ObjectGuid.Empty;
+                RemoveAurasDueToSpell(BattlegroundConst.SpellWaitingForResurrect);
+                return;
+            }
+
+            if (!creature.IsAreaSpiritHealer())
+                return;
+
+            _areaSpiritHealerGUID = creature.GetGUID();
+            CastSpell(null, BattlegroundConst.SpellWaitingForResurrect);
+        }
+
+        public void SendAreaSpiritHealerTime(Unit spiritHealer)
+        {
+            int timeLeft = 0;
+            Spell spell = spiritHealer.GetCurrentSpell(CurrentSpellTypes.Channeled);
+            if (spell != null)
+                timeLeft = spell.GetTimer();
+
+            SendAreaSpiritHealerTime(spiritHealer.GetGUID(), timeLeft);
+        }
+
+        public void SendAreaSpiritHealerTime(ObjectGuid spiritHealerGUID, int timeLeft)
+        {
+            AreaSpiritHealerTime areaSpiritHealerTime = new();
+            areaSpiritHealerTime.HealerGuid = spiritHealerGUID;
+            areaSpiritHealerTime.TimeLeft = (uint)timeLeft;
+            SendPacket(areaSpiritHealerTime);
+        }
+        
         public void KillPlayer()
         {
             if (IsFlying() && GetTransport() == null)

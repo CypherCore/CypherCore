@@ -31,8 +31,6 @@ namespace Game.BattleFields
             m_uiKickDontAcceptTimer = 1000;
             m_uiKickAfkPlayersTimer = 1000;
 
-            m_LastResurectTimer = 30 * Time.InMilliseconds;
-
             m_Map = map;
             m_MapId = map.GetId();
 
@@ -99,7 +97,6 @@ namespace Game.BattleFields
             m_PlayersWillBeKick[player.GetTeamId()].Remove(player.GetGUID());
             m_players[player.GetTeamId()].Remove(player.GetGUID());
             SendRemoveWorldStates(player);
-            RemovePlayerFromResurrectQueue(player.GetGUID());
             OnPlayerLeaveZone(player);
         }
 
@@ -163,17 +160,6 @@ namespace Game.BattleFields
                     if (pair.Value.Update(diff))
                         objective_changed = true;
             }
-
-
-            if (m_LastResurectTimer <= diff)
-            {
-                for (byte i = 0; i < m_GraveyardList.Count; i++)
-                    if (GetGraveyardById(i) != null)
-                        m_GraveyardList[i].Resurrect();
-                m_LastResurectTimer = BattlegroundConst.ResurrectionInterval;
-            }
-            else
-                m_LastResurectTimer -= diff;
 
             return objective_changed;
         }
@@ -597,45 +583,6 @@ namespace Game.BattleFields
             return null;
         }
 
-        public virtual void AddPlayerToResurrectQueue(ObjectGuid npcGuid, ObjectGuid playerGuid)
-        {
-            for (byte i = 0; i < m_GraveyardList.Count; i++)
-            {
-                if (m_GraveyardList[i] == null)
-                    continue;
-
-                if (m_GraveyardList[i].HasNpc(npcGuid))
-                {
-                    m_GraveyardList[i].AddPlayer(playerGuid);
-                    break;
-                }
-            }
-        }
-
-        public void RemovePlayerFromResurrectQueue(ObjectGuid playerGuid)
-        {
-            for (byte i = 0; i < m_GraveyardList.Count; i++)
-            {
-                if (m_GraveyardList[i] == null)
-                    continue;
-
-                if (m_GraveyardList[i].HasPlayer(playerGuid))
-                {
-                    m_GraveyardList[i].RemovePlayer(playerGuid);
-                    break;
-                }
-            }
-        }
-
-        public void SendAreaSpiritHealerQuery(Player player, ObjectGuid guid)
-        {
-            AreaSpiritHealerTime areaSpiritHealerTime = new();
-            areaSpiritHealerTime.HealerGuid = guid;
-            areaSpiritHealerTime.TimeLeft = m_LastResurectTimer;// resurrect every 30 seconds
-
-            player.SendPacket(areaSpiritHealerTime);
-        }
-
         public Creature SpawnCreature(uint entry, Position pos)
         {
             if (Global.ObjectMgr.GetCreatureTemplate(entry) == null)
@@ -810,7 +757,6 @@ namespace Game.BattleFields
 
         // Graveyard variables
         protected List<BfGraveyard> m_GraveyardList = new();                          // Vector witch contain the different GY of the battle
-        uint m_LastResurectTimer;                             // Timer for resurect player every 30 sec
 
         protected uint m_StartGroupingTimer;                            // Timer for invite players in area 15 minute before start battle
         protected bool m_StartGrouping;                                   // bool for know if all players in area has been invited
@@ -856,58 +802,6 @@ namespace Game.BattleFields
             return player.GetDistance2d(safeLoc.Loc.GetPositionX(), safeLoc.Loc.GetPositionY());
         }
 
-        public void AddPlayer(ObjectGuid playerGuid)
-        {
-            if (!m_ResurrectQueue.Contains(playerGuid))
-            {
-                m_ResurrectQueue.Add(playerGuid);
-                Player player = Global.ObjAccessor.FindPlayer(playerGuid);
-                if (player)
-                    player.CastSpell(player, BattlegroundConst.SpellWaitingForResurrect, true);
-            }
-        }
-
-        public void RemovePlayer(ObjectGuid playerGuid)
-        {
-            m_ResurrectQueue.Remove(playerGuid);
-
-            Player player = Global.ObjAccessor.FindPlayer(playerGuid);
-            if (player)
-                player.RemoveAurasDueToSpell(BattlegroundConst.SpellWaitingForResurrect);
-        }
-
-        public void Resurrect()
-        {
-            if (m_ResurrectQueue.Empty())
-                return;
-
-            foreach (var guid in m_ResurrectQueue)
-            {
-                // Get player object from his guid
-                Player player = Global.ObjAccessor.FindPlayer(guid);
-                if (!player)
-                    continue;
-
-                // Check  if the player is in world and on the good graveyard
-                if (player.IsInWorld)
-                {
-                    Creature spirit = m_Bf.GetCreature(m_SpiritGuide[m_ControlTeam]);
-                    if (spirit)
-                        spirit.CastSpell(spirit, BattlegroundConst.SpellSpiritHeal, true);
-                }
-
-                // Resurect player
-                player.CastSpell(player, BattlegroundConst.SpellResurrectionVisual, true);
-                player.ResurrectPlayer(1.0f);
-                player.CastSpell(player, 6962, true);
-                player.CastSpell(player, BattlegroundConst.SpellSpiritHealMana, true);
-
-                player.SpawnCorpseBones(false);
-            }
-
-            m_ResurrectQueue.Clear();
-        }
-
         // For changing graveyard control
         public void GiveControlTo(uint team)
         {
@@ -918,29 +812,11 @@ namespace Game.BattleFields
             if (m_SpiritGuide[team])
                 m_SpiritGuide[team].SetVisible(true);*/
 
+            Creature spiritHealer = m_Bf.GetCreature(m_SpiritGuide[team]);
+            if (spiritHealer != null)
+                spiritHealer.SummonGraveyardTeleporter();
+
             m_ControlTeam = team;
-            // Teleport to other graveyard, player witch were on this graveyard
-            RelocateDeadPlayers();
-        }
-
-        void RelocateDeadPlayers()
-        {
-            WorldSafeLocsEntry closestGrave = null;
-            foreach (var guid in m_ResurrectQueue)
-            {
-                Player player = Global.ObjAccessor.FindPlayer(guid);
-                if (!player)
-                    continue;
-
-                if (closestGrave != null)
-                    player.TeleportTo(closestGrave.Loc);
-                else
-                {
-                    closestGrave = m_Bf.GetClosestGraveYard(player);
-                    if (closestGrave != null)
-                        player.TeleportTo(closestGrave.Loc);
-                }
-            }
         }
 
         public bool HasNpc(ObjectGuid guid)
@@ -955,9 +831,6 @@ namespace Game.BattleFields
             return (m_SpiritGuide[TeamId.Alliance] == guid || m_SpiritGuide[TeamId.Horde] == guid);
         }
 
-        // Check if a player is in this graveyard's ressurect queue
-        public bool HasPlayer(ObjectGuid guid) { return m_ResurrectQueue.Contains(guid); }
-
         // Get the graveyard's ID.
         public uint GetGraveyardId() { return m_GraveyardId; }
 
@@ -966,7 +839,6 @@ namespace Game.BattleFields
         uint m_ControlTeam;
         uint m_GraveyardId;
         ObjectGuid[] m_SpiritGuide = new ObjectGuid[SharedConst.PvpTeamsCount];
-        List<ObjectGuid> m_ResurrectQueue = new();
         protected BattleField m_Bf;
     }
 

@@ -466,6 +466,9 @@ namespace Game.Entities
 
             if (IsInWorld)
             {
+                if (IsAreaSpiritHealer())
+                    ToCreature()?.SummonGraveyardTeleporter();
+
                 m_duringRemoveFromWorld = true;
                 UnitAI ai = GetAI();
                 if (ai != null)
@@ -847,6 +850,7 @@ namespace Game.Entities
                 NPCFlags.AreaSpiritHealer | NPCFlags.TabardDesigner | NPCFlags.Auctioneer);
         }
         public bool IsSpiritService() { return HasNpcFlag(NPCFlags.SpiritHealer | NPCFlags.AreaSpiritHealer); }
+        public bool IsAreaSpiritHealerIndividual() { return HasNpcFlag2(NPCFlags2.AreaSpiritHealerIndividual); }
         public bool IsCritter() { return GetCreatureType() == CreatureType.Critter; }
         public bool IsInFlight() { return HasUnitState(UnitState.InFlight); }
 

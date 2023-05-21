@@ -4221,14 +4221,30 @@ namespace Game.Spells
             Log.outDebug(LogFilter.Spells, "WORLD: SkillEFFECT");
         }
 
-        /* There is currently no need for this effect. We handle it in Battleground.cpp
-           If we would handle the resurrection here, the spiritguide would instantly disappear as the
-           player revives, and so we wouldn't see the spirit heal visual effect on the npc.
-           This is why we use a half sec delay between the visual effect and the resurrection itself */
         void EffectSpiritHeal()
         {
+            Unit caster = GetCaster().ToUnit();
+            if (effectHandleMode == SpellEffectHandleMode.Hit)
+                caster.CastSpell(null, BattlegroundConst.SpellResurrectionVisual, true);
+
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
+
+            Player playerTarget = unitTarget.ToPlayer();
+            if (playerTarget != null)
+            {
+                if (!playerTarget.IsInWorld)
+                    return;
+
+                // skip if player does not want to live
+                if (!playerTarget.CanAcceptAreaSpiritHealFrom(caster))
+                    return;
+
+                playerTarget.ResurrectPlayer(1.0f);
+                playerTarget.CastSpell(playerTarget, BattlegroundConst.SpellPetSummoned, true);
+                playerTarget.CastSpell(playerTarget, BattlegroundConst.SpellSpiritHealMana, true);
+                playerTarget.SpawnCorpseBones(false);
+            }
         }
 
         // remove insignia spell effect

@@ -377,8 +377,6 @@ namespace Game.BattleGrounds.Zones
             //remove bonus honor aura trigger creature when node is lost
             DelCreature(node + 7);//null checks are in DelCreature! 0-6 spirit guides
 
-            RelocateDeadPlayers(BgCreatures[node]);
-
             DelCreature(node);
 
             // buff object isn't despawned
