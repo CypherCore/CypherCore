@@ -583,6 +583,14 @@ namespace Game.Entities
             return GetTransport();
         }
 
+        public void AtStartOfEncounter()
+        {
+            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.StartOfEncounter);
+
+            if (IsAlive())
+                Unit.ProcSkillsAndAuras(this, null, new ProcFlagsInit(ProcFlags.EncounterStart), new ProcFlagsInit(), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+        }
+
         public void _RegisterDynObject(DynamicObject dynObj)
         {
             m_dynObj.Add(dynObj);

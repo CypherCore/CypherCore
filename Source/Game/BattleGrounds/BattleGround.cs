@@ -407,6 +407,13 @@ namespace Game.BattleGrounds
                 SetStatus(BattlegroundStatus.InProgress);
                 SetStartDelayTime(StartDelayTimes[BattlegroundConst.EventIdFourth]);
 
+                foreach (var (guid, _) in GetPlayers())
+                {
+                    Player player = Global.ObjAccessor.FindPlayer(guid);
+                    if (player != null)
+                        player.AtStartOfEncounter();
+                }
+
                 // Remove preparation
                 if (IsArena())
                 {

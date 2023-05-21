@@ -366,11 +366,7 @@ namespace Game.Maps
                             InitializeCombatResurrections(1, resInterval);
                             SendEncounterStart(1, 9, resInterval, resInterval);
 
-                            instance.DoOnPlayers(player =>
-                            {
-                                if (player.IsAlive())
-                                    Unit.ProcSkillsAndAuras(player, null, new ProcFlagsInit(ProcFlags.EncounterStart), new ProcFlagsInit(), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
-                            });
+                            instance.DoOnPlayers(player => player.AtStartOfEncounter());
                             break;
                         }
                         case EncounterState.Fail:
