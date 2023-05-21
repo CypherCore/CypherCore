@@ -5756,6 +5756,15 @@ namespace Game.Spells
 
             target.UpdateTraitConfig(m_customArg as TraitConfigPacket, damage, false);
         }
+
+        [SpellEffectHandler(SpellEffectName.TeleportGraveyard)]
+        void EffectTeleportGraveyard()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            unitTarget.ToPlayer()?.RepopAtGraveyard();
+        }
     }
 
     public class DispelableAura
