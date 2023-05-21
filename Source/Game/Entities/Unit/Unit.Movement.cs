@@ -648,6 +648,9 @@ namespace Game.Entities
             _positionUpdateInfo.Relocated = relocated;
             _positionUpdateInfo.Turned = turn;
 
+            if (IsFalling())
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.Falling);
+
             bool isInWater = IsInWater();
             if (!IsFalling() || isInWater || IsFlying())
                 RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.Ground);
