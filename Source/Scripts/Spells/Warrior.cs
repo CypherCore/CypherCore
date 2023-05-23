@@ -25,6 +25,7 @@ namespace Scripts.Spells.Warrior
         public const uint ColossusSmash = 167105;
         public const uint ColossusSmashEffect = 208086;
         public const uint Execute = 20647;
+        public const uint FueledByViolenceHeal = 383104;
         public const uint GlyphOfTheBlazingTrail = 123779;
         public const uint GlyphOfHeroicLeap = 159708;
         public const uint GlyphOfHeroicLeapBuff = 133278;
@@ -162,6 +163,43 @@ namespace Scripts.Spells.Warrior
         }
     }
 
+    [Script] // 383103  - Fueled by Violence
+    class spell_warr_fueled_by_violence : AuraScript
+    {
+        int _nextHealAmount;
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.FueledByViolenceHeal);
+        }
+
+        void HandleProc(ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+
+            _nextHealAmount += (int)MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), GetEffectInfo(0).CalcValue(GetTarget()));
+        }
+
+        void HandlePeriodic(AuraEffect aurEff)
+        {
+            if (_nextHealAmount == 0)
+                return;
+
+            Unit target = GetTarget();
+            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+            args.AddSpellMod(SpellValueMod.BasePoint0, _nextHealAmount);
+
+            target.CastSpell(target, SpellIds.FueledByViolenceHeal, args);
+            _nextHealAmount = 0;
+        }
+
+        public override void Register()
+        {
+            OnProc.Add(new AuraProcHandler(HandleProc));
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicDummy));
+        }
+    }
+    
     [Script] // 6544 Heroic leap
     class spell_warr_heroic_leap : SpellScript
     {
