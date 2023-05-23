@@ -627,7 +627,7 @@ namespace Game
             if (!spiritHealer.IsAreaSpiritHealer())
                 return;
 
-            if (_player.GetExactDist(spiritHealer) > PlayerConst.MaxAreaSpiritHealerRange)
+            if (!_player.IsWithinDistInMap(spiritHealer, PlayerConst.MaxAreaSpiritHealerRange))
                 return;
 
             if (spiritHealer.IsAreaSpiritHealerIndividual())
@@ -662,7 +662,7 @@ namespace Game
             if (!spiritHealer.IsAreaSpiritHealer())
                 return;
 
-            if (_player.GetExactDist(spiritHealer) > PlayerConst.MaxAreaSpiritHealerRange)
+            if (!_player.IsWithinDistInMap(spiritHealer, PlayerConst.MaxAreaSpiritHealerRange))
                 return;
 
             _player.SetAreaSpiritHealer(spiritHealer);

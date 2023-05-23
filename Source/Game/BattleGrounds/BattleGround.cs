@@ -1888,7 +1888,6 @@ namespace Game.BattleGrounds
         public Dictionary<ObjectGuid, BattlegroundPlayer> GetPlayers() { return m_Players; }
         uint GetPlayersSize() { return (uint)m_Players.Count; }
         uint GetPlayerScoresSize() { return (uint)PlayerScores.Count; }
-        uint GetReviveQueueSize() { return (uint)m_ReviveQueue.Count; }
 
         public void SetBgMap(BattlegroundMap map) { m_Map = map; }
         BattlegroundMap FindBgMap() { return m_Map; }
@@ -1964,8 +1963,6 @@ namespace Game.BattleGrounds
         protected Dictionary<ObjectGuid, BattlegroundScore> PlayerScores = new();                // Player scores
         // Player lists, those need to be accessible by inherited classes
         Dictionary<ObjectGuid, BattlegroundPlayer> m_Players = new();
-        // Spirit Guide guid + Player list GUIDS
-        MultiMap<ObjectGuid, ObjectGuid> m_ReviveQueue = new();
 
         // these are important variables used for starting messages
         BattlegroundEventFlags m_Events;
