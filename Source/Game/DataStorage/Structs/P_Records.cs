@@ -140,6 +140,8 @@ namespace Game.DataStorage
         public float RegenPeace;
         public float RegenCombat;
         public short Flags;
+
+        public PowerTypeFlags GetFlags() { return (PowerTypeFlags)Flags; }
     }
 
     public sealed class PrestigeLevelInfoRecord

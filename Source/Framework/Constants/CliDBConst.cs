@@ -1842,6 +1842,23 @@ namespace Framework.Constants
         MajorFactionRenown = 64
     }
 
+    [Flags]
+    public enum PowerTypeFlags
+    {
+        StopRegenWhileCasting = 0x01,
+        UseRegenInterrupt = 0x02,
+        FillFractionalPowerOnEnergize = 0x08,
+        NoClientPrediction = 0x10,
+        UnitsUseDefaultPowerOnInit = 0x20,
+        NotSetToDefaultOnResurrect = 0x40,
+        IsUsedByNPCs = 0x80,
+        ContinueRegenWhileFatigued = 0x200,
+        RegenAffectedByHaste = 0x400,
+        SetToMaxOnLevelUp = 0x1000,
+        SetToMaxLevelOnInitialLogIn = 0x2000,
+        AllowCostModsForPlayers = 0x4000
+    }
+
     public enum PrestigeLevelInfoFlags : byte
     {
         Disabled = 0x01                      // Prestige levels with this flag won't be included to calculate max prestigelevel.
