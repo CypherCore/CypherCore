@@ -39,6 +39,7 @@ namespace Scripts.Spells.Warrior
         public const uint MortalStrike = 12294;
         public const uint MortalWounds = 213667;
         public const uint RallyingCry = 97463;
+        public const uint ShieldBlockAura = 132404;
         public const uint ShieldChargeEffect = 385953;
         public const uint Shockwave = 46968;
         public const uint ShockwaveStun = 132168;
@@ -456,6 +457,25 @@ namespace Scripts.Spells.Warrior
         }
     }
 
+    [Script] // 2565 - Shield Block
+    class spell_warr_shield_block : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ShieldBlockAura);
+        }
+
+        void HandleHitTarget(uint effIndex)
+        {
+            GetCaster().CastSpell(null, SpellIds.ShieldBlockAura, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleHitTarget, 0, SpellEffectName.Dummy));
+        }
+    }
+    
     [Script] // 385952 - Shield Charge
     class spell_warr_shield_charge : SpellScript
     {
