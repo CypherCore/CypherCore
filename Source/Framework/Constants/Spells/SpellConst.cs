@@ -2638,7 +2638,8 @@ namespace Framework.Constants
         Reflect = 0x800,
         Interrupt = 0x1000,
         FullBlock = 0x2000,
-        MaskAll = 0x0003FFF
+        Dispel = 0x4000,
+        MaskAll = 0x0007FFF
     }
 
     [Flags]

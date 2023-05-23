@@ -1768,6 +1768,8 @@ namespace Game.Spells
             m_caster.SendMessageToSet(spellDispellLog, true);
 
             CallScriptSuccessfulDispel(effectInfo.EffectIndex);
+
+            m_hitMask |= ProcFlagsHit.Dispel;
         }
 
         [SpellEffectHandler(SpellEffectName.DualWield)]
@@ -3836,11 +3838,16 @@ namespace Game.Spells
                         dispel_list.Add(new KeyValuePair<uint, ObjectGuid>(aura.GetId(), aura.GetCasterGUID()));
             }
 
+            if (dispel_list.Empty())
+                return;
+
             while (!dispel_list.Empty())
             {
                 unitTarget.RemoveAura(dispel_list[0].Key, dispel_list[0].Value, 0, AuraRemoveMode.EnemySpell);
                 dispel_list.RemoveAt(0);
             }
+
+            m_hitMask |= ProcFlagsHit.Dispel;
         }
 
         [SpellEffectHandler(SpellEffectName.ResurrectPet)]
@@ -4376,6 +4383,8 @@ namespace Game.Spells
                 spellDispellLog.DispellData.Add(dispellData);
             }
             m_caster.SendMessageToSet(spellDispellLog, true);
+
+            m_hitMask |= ProcFlagsHit.Dispel;
         }
 
         [SpellEffectHandler(SpellEffectName.KillCredit)]
