@@ -122,20 +122,8 @@ namespace Game.Chat.Commands
         }
 
         [Command("money", RBACPermissions.CommandSendMoney, true)]
-        static bool HandleSendMoneyCommand(CommandHandler handler, PlayerIdentifier playerIdentifier, QuotedString subject, QuotedString text, long money)
+        static bool HandleSendMoneyCommand(CommandHandler handler, PlayerIdentifier receiver, QuotedString subject, QuotedString text, long money)
         {
-            // format: name "subject text" "mail text" money
-            if (playerIdentifier == null)
-                playerIdentifier = PlayerIdentifier.FromTarget(handler);
-            if (playerIdentifier == null)
-                return false;
-
-            if (subject.IsEmpty() || text.IsEmpty())
-                return false;
-
-            if (money <= 0)
-                return false;
-
             // from console show not existed sender
             MailSender sender = new(MailMessageType.Normal, handler.GetSession() ? handler.GetSession().GetPlayer().GetGUID().GetCounter() : 0, MailStationery.Gm);
 
@@ -143,11 +131,11 @@ namespace Game.Chat.Commands
 
             new MailDraft(subject, text)
                 .AddMoney((uint)money)
-                .SendMailTo(trans, new MailReceiver(playerIdentifier.GetGUID().GetCounter()), sender);
+                .SendMailTo(trans, new MailReceiver(receiver.GetConnectedPlayer(), receiver.GetGUID().GetCounter()), sender);
 
             DB.Characters.CommitTransaction(trans);
 
-            string nameLink = handler.PlayerLink(playerIdentifier.GetName());
+            string nameLink = handler.PlayerLink(receiver.GetName());
             handler.SendSysMessage(CypherStrings.MailSent, nameLink);
             return true;
         }

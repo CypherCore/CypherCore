@@ -133,40 +133,22 @@ namespace Game.Chat
         }
 
         [Command("list", RBACPermissions.CommandGroupList)]
-        static bool HandleGroupListCommand(CommandHandler handler, StringArguments args)
+        static bool HandleGroupListCommand(CommandHandler handler, PlayerIdentifier target)
         {
-            // Get ALL the variables!
-            Player playerTarget;
-            ObjectGuid guidTarget;
-            string nameTarget;
-            string zoneName = "";
-            string onlineState;
-
-            // Parse the guid to uint32...
-            ObjectGuid parseGUID = ObjectGuid.Create(HighGuid.Player, args.NextUInt64());
-
-            // ... and try to extract a player out of it.
-            if (Global.CharacterCacheStorage.GetCharacterNameByGuid(parseGUID, out nameTarget))
-            {
-                playerTarget = Global.ObjAccessor.FindPlayer(parseGUID);
-                guidTarget = parseGUID;
-            }
-            // If not, we return false and end right away.
-            else if (!handler.ExtractPlayerTarget(args, out playerTarget, out guidTarget, out nameTarget))
-                return false;
+            string zoneName = "<ERROR>";
+            string onlineState = "Offline";
 
             // Next, we need a group. So we define a group variable.
             Group groupTarget = null;
 
             // We try to extract a group from an online player.
-            if (playerTarget)
-                groupTarget = playerTarget.GetGroup();
-
-            // If not, we extract it from the SQL.
-            if (!groupTarget)
+            if (target.IsConnected())
+                groupTarget = target.GetConnectedPlayer().GetGroup();
+            else
             {
+                // If not, we extract it from the SQL.
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_GROUP_MEMBER);
-                stmt.AddValue(0, guidTarget.GetCounter());
+                stmt.AddValue(0, target.GetGUID().GetCounter());
                 SQLResult resultGroup = DB.Characters.Query(stmt);
                 if (!resultGroup.IsEmpty())
                     groupTarget = Global.GroupMgr.GetGroupByDbStoreId(resultGroup.Read<uint>(0));
@@ -175,7 +157,7 @@ namespace Game.Chat
             // If both fails, players simply has no party. Return false.
             if (!groupTarget)
             {
-                handler.SendSysMessage(CypherStrings.GroupNotInGroup, nameTarget);
+                handler.SendSysMessage(CypherStrings.GroupNotInGroup, target.GetName());
                 return false;
             }
 
@@ -227,12 +209,6 @@ namespace Game.Chat
                         if (zone != null)
                             zoneName = zone.AreaName[handler.GetSessionDbcLocale()];
                     }
-                }
-                else
-                {
-                    // ... else, everything is set to offline or neutral values.
-                    zoneName = "<ERROR>";
-                    onlineState = "Offline";
                 }
 
                 // Now we can print those informations for every single member of each group!

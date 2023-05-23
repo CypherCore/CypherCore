@@ -14,88 +14,91 @@ namespace Game.Chat.Commands
         [CommandGroup("add")]
         class DisableAddCommands
         {
-            static bool HandleAddDisables(uint entry, uint flags, string disableComment, CommandHandler handler, DisableType disableType)
+            static bool HandleAddDisables(CommandHandler handler, DisableType disableType, uint entry, uint? flags, Tail disableComment)
             {
-                if (entry == 0)
-                    return false;
-
-                if (disableComment.IsEmpty())
-                    return false;
-
                 switch (disableType)
                 {
                     case DisableType.Spell:
+                    {
+                        if (!Global.SpellMgr.HasSpellInfo(entry, Difficulty.None))
                         {
-                            if (!Global.SpellMgr.HasSpellInfo(entry, Difficulty.None))
-                            {
-                                handler.SendSysMessage(CypherStrings.CommandNospellfound);
-                                return false;
-                            }
-                            break;
+                            handler.SendSysMessage(CypherStrings.CommandNospellfound);
+                            return false;
                         }
+                        break;
+                    }
                     case DisableType.Quest:
+                    {
+                        if (Global.ObjectMgr.GetQuestTemplate(entry) == null)
                         {
-                            if (Global.ObjectMgr.GetQuestTemplate(entry) == null)
-                            {
-                                handler.SendSysMessage(CypherStrings.CommandNoquestfound, entry);
-                                return false;
-                            }
-                            break;
+                            handler.SendSysMessage(CypherStrings.CommandNoquestfound, entry);
+                            return false;
                         }
+                        break;
+                    }
                     case DisableType.Map:
+                    {
+                        if (!CliDB.MapStorage.ContainsKey(entry))
                         {
-                            if (!CliDB.MapStorage.ContainsKey(entry))
-                            {
-                                handler.SendSysMessage(CypherStrings.CommandNomapfound);
-                                return false;
-                            }
-                            break;
+                            handler.SendSysMessage(CypherStrings.CommandNomapfound);
+                            return false;
                         }
+                        break;
+                    }
                     case DisableType.Battleground:
+                    {
+                        if (!CliDB.BattlemasterListStorage.ContainsKey(entry))
                         {
-                            if (!CliDB.BattlemasterListStorage.ContainsKey(entry))
-                            {
-                                handler.SendSysMessage(CypherStrings.CommandNoBattlegroundFound);
-                                return false;
-                            }
-                            break;
+                            handler.SendSysMessage(CypherStrings.CommandNoBattlegroundFound);
+                            return false;
                         }
+                        break;
+                    }
                     case DisableType.Criteria:
+                    {
+                        if (Global.CriteriaMgr.GetCriteria(entry) == null)
                         {
-                            if (Global.CriteriaMgr.GetCriteria(entry) == null)
-                            {
-                                handler.SendSysMessage(CypherStrings.CommandNoAchievementCriteriaFound);
-                                return false;
-                            }
-                            break;
+                            handler.SendSysMessage(CypherStrings.CommandNoAchievementCriteriaFound);
+                            return false;
                         }
+                        break;
+                    }
                     case DisableType.OutdoorPVP:
+                    {
+                        if (entry > (int)OutdoorPvPTypes.Max)
                         {
-                            if (entry > (int)OutdoorPvPTypes.Max)
-                            {
-                                handler.SendSysMessage(CypherStrings.CommandNoOutdoorPvpForund);
-                                return false;
-                            }
-                            break;
+                            handler.SendSysMessage(CypherStrings.CommandNoOutdoorPvpForund);
+                            return false;
                         }
+                        break;
+                    }
                     case DisableType.VMAP:
+                    {
+                        if (!CliDB.MapStorage.ContainsKey(entry))
                         {
-                            if (!CliDB.MapStorage.ContainsKey(entry))
-                            {
-                                handler.SendSysMessage(CypherStrings.CommandNomapfound);
-                                return false;
-                            }
-                            break;
+                            handler.SendSysMessage(CypherStrings.CommandNomapfound);
+                            return false;
                         }
+                        break;
+                    }
                     case DisableType.MMAP:
+                    {
+                        if (!CliDB.MapStorage.ContainsKey(entry))
                         {
-                            if (!CliDB.MapStorage.ContainsKey(entry))
-                            {
-                                handler.SendSysMessage(CypherStrings.CommandNomapfound);
-                                return false;
-                            }
-                            break;
+                            handler.SendSysMessage(CypherStrings.CommandNomapfound);
+                            return false;
                         }
+                        break;
+                    }
+                    case DisableType.LFGMap:
+                    {
+                        if (!CliDB.MapStorage.ContainsKey(entry))
+                        {
+                            handler.SendSysMessage(CypherStrings.CommandNomapfound);
+                            return false;
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -113,7 +116,7 @@ namespace Game.Chat.Commands
                 stmt = WorldDatabase.GetPreparedStatement(WorldStatements.INS_DISABLES);
                 stmt.AddValue(0, entry);
                 stmt.AddValue(1, (byte)disableType);
-                stmt.AddValue(2, flags);
+                stmt.AddValue(2, flags.GetValueOrDefault(0));
                 stmt.AddValue(3, disableComment);
                 DB.World.Execute(stmt);
 
@@ -122,62 +125,59 @@ namespace Game.Chat.Commands
             }
 
             [Command("spell", RBACPermissions.CommandDisableAddSpell, true)]
-            static bool HandleAddDisableSpellCommand(CommandHandler handler, uint entry, uint flags, string disableComment)
+            static bool HandleAddDisableSpellCommand(CommandHandler handler, uint entry, uint? flags, Tail disableComment)
             {
-                return HandleAddDisables(entry, flags, disableComment, handler, DisableType.Spell);
+                return HandleAddDisables(handler, DisableType.Spell, entry, flags, disableComment);
             }
 
             [Command("quest", RBACPermissions.CommandDisableAddQuest, true)]
-            static bool HandleAddDisableQuestCommand(CommandHandler handler, uint entry, uint flags, string disableComment)
+            static bool HandleAddDisableQuestCommand(CommandHandler handler, uint entry, uint? flags, Tail disableComment)
             {
-                return HandleAddDisables(entry, flags, disableComment, handler, DisableType.Quest);
+                return HandleAddDisables(handler, DisableType.Quest, entry, flags, disableComment);
             }
 
             [Command("map", RBACPermissions.CommandDisableAddMap, true)]
-            static bool HandleAddDisableMapCommand(CommandHandler handler, uint entry, uint flags, string disableComment)
+            static bool HandleAddDisableMapCommand(CommandHandler handler, uint entry, uint? flags, Tail disableComment)
             {
-                return HandleAddDisables(entry, flags, disableComment, handler, DisableType.Map);
+                return HandleAddDisables(handler, DisableType.Map, entry, flags, disableComment);
             }
 
             [Command("Battleground", RBACPermissions.CommandDisableAddBattleground, true)]
-            static bool HandleAddDisableBattlegroundCommand(CommandHandler handler, uint entry, uint flags, string disableComment)
+            static bool HandleAddDisableBattlegroundCommand(CommandHandler handler, uint entry, uint flags, Tail disableComment)
             {
-                return HandleAddDisables(entry, flags, disableComment, handler, DisableType.Battleground);
+                return HandleAddDisables(handler, DisableType.Battleground, entry, flags, disableComment);
             }
 
             [Command("criteria", RBACPermissions.CommandDisableAddCriteria, true)]
-            static bool HandleAddDisableCriteriaCommand(CommandHandler handler, uint entry, uint flags, string disableComment)
+            static bool HandleAddDisableCriteriaCommand(CommandHandler handler, uint entry, uint flags, Tail disableComment)
             {
-                return HandleAddDisables(entry, flags, disableComment, handler, DisableType.Criteria);
+                return HandleAddDisables(handler, DisableType.Criteria, entry, flags, disableComment);
             }
 
             [Command("outdoorpvp", RBACPermissions.CommandDisableAddOutdoorpvp, true)]
-            static bool HandleAddDisableOutdoorPvPCommand(CommandHandler handler, uint entry, uint flags, string disableComment)
+            static bool HandleAddDisableOutdoorPvPCommand(CommandHandler handler, uint entry, uint flags, Tail disableComment)
             {
-                return HandleAddDisables(entry, flags, disableComment, handler, DisableType.OutdoorPVP);
+                return HandleAddDisables(handler, DisableType.OutdoorPVP, entry, flags, disableComment);
             }
 
             [Command("vmap", RBACPermissions.CommandDisableAddVmap, true)]
-            static bool HandleAddDisableVmapCommand(CommandHandler handler, uint entry, uint flags, string disableComment)
+            static bool HandleAddDisableVmapCommand(CommandHandler handler, uint entry, uint flags, Tail disableComment)
             {
-                return HandleAddDisables(entry, flags, disableComment, handler, DisableType.VMAP);
+                return HandleAddDisables(handler, DisableType.VMAP, entry, flags, disableComment);
             }
 
             [Command("mmap", RBACPermissions.CommandDisableAddMmap, true)]
-            static bool HandleAddDisableMMapCommand(CommandHandler handler, uint entry, uint flags, string disableComment)
+            static bool HandleAddDisableMMapCommand(CommandHandler handler, uint entry, uint flags, Tail disableComment)
             {
-                return HandleAddDisables(entry, flags, disableComment, handler, DisableType.MMAP);
+                return HandleAddDisables(handler, DisableType.MMAP, entry, flags, disableComment);
             }
         }
 
         [CommandGroup("remove")]
         class DisableRemoveCommands
         {
-            static bool HandleRemoveDisables(uint entry, CommandHandler handler, DisableType disableType)
+            static bool HandleRemoveDisables(CommandHandler handler, DisableType disableType, uint entry)
             {
-                if (entry == 0)
-                    return false;
-
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_DISABLES);
                 stmt.AddValue(0, entry);
                 stmt.AddValue(1, (byte)disableType);
@@ -200,49 +200,49 @@ namespace Game.Chat.Commands
             [Command("spell", RBACPermissions.CommandDisableRemoveSpell, true)]
             static bool HandleRemoveDisableSpellCommand(CommandHandler handler, uint entry)
             {
-                return HandleRemoveDisables(entry, handler, DisableType.Spell);
+                return HandleRemoveDisables(handler, DisableType.Spell, entry);
             }
 
             [Command("quest", RBACPermissions.CommandDisableRemoveQuest, true)]
             static bool HandleRemoveDisableQuestCommand(CommandHandler handler, uint entry)
             {
-                return HandleRemoveDisables(entry, handler, DisableType.Quest);
+                return HandleRemoveDisables(handler, DisableType.Quest, entry);
             }
 
             [Command("map", RBACPermissions.CommandDisableRemoveMap, true)]
             static bool HandleRemoveDisableMapCommand(CommandHandler handler, uint entry)
             {
-                return HandleRemoveDisables(entry, handler, DisableType.Map);
+                return HandleRemoveDisables(handler, DisableType.Map, entry);
             }
 
             [Command("Battleground", RBACPermissions.CommandDisableRemoveBattleground, true)]
             static bool HandleRemoveDisableBattlegroundCommand(CommandHandler handler, uint entry)
             {
-                return HandleRemoveDisables(entry, handler, DisableType.Battleground);
+                return HandleRemoveDisables(handler, DisableType.Battleground, entry);
             }
 
             [Command("criteria", RBACPermissions.CommandDisableRemoveCriteria, true)]
             static bool HandleRemoveDisableCriteriaCommand(CommandHandler handler, uint entry)
             {
-                return HandleRemoveDisables(entry, handler, DisableType.Criteria);
+                return HandleRemoveDisables(handler, DisableType.Criteria, entry);
             }
 
             [Command("outdoorpvp", RBACPermissions.CommandDisableRemoveOutdoorpvp, true)]
             static bool HandleRemoveDisableOutdoorPvPCommand(CommandHandler handler, uint entry)
             {
-                return HandleRemoveDisables(entry, handler, DisableType.OutdoorPVP);
+                return HandleRemoveDisables(handler, DisableType.OutdoorPVP, entry);
             }
 
             [Command("vmap", RBACPermissions.CommandDisableRemoveVmap, true)]
             static bool HandleRemoveDisableVmapCommand(CommandHandler handler, uint entry)
             {
-                return HandleRemoveDisables(entry, handler, DisableType.VMAP);
+                return HandleRemoveDisables(handler, DisableType.VMAP, entry);
             }
 
             [Command("mmap", RBACPermissions.CommandDisableRemoveMmap, true)]
             static bool HandleRemoveDisableMMapCommand(CommandHandler handler, uint entry)
             {
-                return HandleRemoveDisables(entry, handler, DisableType.MMAP);
+                return HandleRemoveDisables(handler, DisableType.MMAP, entry);
             }
         }
     }

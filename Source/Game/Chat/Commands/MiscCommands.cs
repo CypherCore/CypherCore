@@ -213,51 +213,8 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("damage", RBACPermissions.CommandDamage)]
-        static bool HandleDamageCommand(CommandHandler handler, StringArguments args)
+        static bool HandleDamageCommand(CommandHandler handler, uint damage, SpellSchools? school, [OptionalArg]SpellInfo spellInfo)
         {
-            if (args.Empty())
-                return false;
-
-            string str = args.NextString();
-
-            if (str == "go")
-            {
-                ulong guidLow = args.NextUInt64();
-                if (guidLow == 0)
-                {
-                    handler.SendSysMessage(CypherStrings.BadValue);
-                    return false;
-                }
-
-                int damage = args.NextInt32();
-                if (damage == 0)
-                {
-                    handler.SendSysMessage(CypherStrings.BadValue);
-                    return false;
-                }
-                Player player = handler.GetSession().GetPlayer();
-                if (player)
-                {
-                    GameObject go = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
-                    if (!go)
-                    {
-                        handler.SendSysMessage(CypherStrings.CommandObjnotfound, guidLow);
-                        return false;
-                    }
-
-                    if (!go.IsDestructibleBuilding())
-                    {
-                        handler.SendSysMessage(CypherStrings.InvalidGameobjectType);
-                        return false;
-                    }
-
-                    go.ModifyHealth(-damage, player);
-                    handler.SendSysMessage(CypherStrings.GameobjectDamaged, go.GetName(), guidLow, -damage, go.GetGoValue().Building.Health);
-                }
-
-                return true;
-            }
-
             Unit target = handler.GetSelectedUnit();
             if (!target || handler.GetSession().GetPlayer().GetTarget().IsEmpty())
             {
@@ -272,71 +229,69 @@ namespace Game.Chat
             if (!target.IsAlive())
                 return true;
 
-            if (!int.TryParse(str, out int damage_int))
-                return false;
-
-            if (damage_int <= 0)
-                return true;
-
-            uint damage_ = (uint)damage_int;
-
-            string schoolStr = args.NextString();
-
             Player attacker = handler.GetSession().GetPlayer();
 
             // flat melee damage without resistence/etc reduction
-            if (string.IsNullOrEmpty(schoolStr))
+            if (school.HasValue)
             {
-                Unit.DealDamage(attacker, target, damage_, null, DamageEffectType.Direct, SpellSchoolMask.Normal, null, false);
+                Unit.DealDamage(attacker, target, damage, null, DamageEffectType.Direct, SpellSchoolMask.Normal, null, false);
                 if (target != attacker)
-                    attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, SpellSchoolMask.Normal, damage_, 0, 0, VictimState.Hit, 0);
+                    attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, SpellSchoolMask.Normal, damage, 0, 0, VictimState.Hit, 0);
                 return true;
             }
 
-            if (!int.TryParse(schoolStr, out int school) || school >= (int)SpellSchools.Max)
-                return false;
-
-            SpellSchoolMask schoolmask = (SpellSchoolMask)(1 << school);
+            SpellSchoolMask schoolmask = (SpellSchoolMask)(1 << (int)school.Value);
 
             if (Unit.IsDamageReducedByArmor(schoolmask))
-                damage_ = Unit.CalcArmorReducedDamage(handler.GetPlayer(), target, damage_, null, WeaponAttackType.BaseAttack);
-
-            string spellStr = args.NextString();
+                damage = Unit.CalcArmorReducedDamage(handler.GetPlayer(), target, damage, null, WeaponAttackType.BaseAttack);
 
             // melee damage by specific school
-            if (string.IsNullOrEmpty(spellStr))
+            if (spellInfo == null)
             {
-                DamageInfo dmgInfo = new(attacker, target, damage_, null, schoolmask, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
+                DamageInfo dmgInfo = new(attacker, target, damage, null, schoolmask, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
                 Unit.CalcAbsorbResist(dmgInfo);
 
                 if (dmgInfo.GetDamage() == 0)
                     return true;
 
-                damage_ = dmgInfo.GetDamage();
+                damage = dmgInfo.GetDamage();
 
                 uint absorb = dmgInfo.GetAbsorb();
                 uint resist = dmgInfo.GetResist();
-                Unit.DealDamageMods(attacker, target, ref damage_, ref absorb);
-                Unit.DealDamage(attacker, target, damage_, null, DamageEffectType.Direct, schoolmask, null, false);
-                attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, schoolmask, damage_, absorb, resist, VictimState.Hit, 0);
+                Unit.DealDamageMods(attacker, target, ref damage, ref absorb);
+                Unit.DealDamage(attacker, target, damage, null, DamageEffectType.Direct, schoolmask, null, false);
+                attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, schoolmask, damage, absorb, resist, VictimState.Hit, 0);
                 return true;
             }
 
             // non-melee damage
-            // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellid = handler.ExtractSpellIdFromLink(args);
-            if (spellid == 0)
-                return false;
-
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellid, attacker.GetMap().GetDifficultyID());
-            if (spellInfo == null)
-                return false;
 
             SpellNonMeleeDamage damageInfo = new(attacker, target, spellInfo, new SpellCastVisual(spellInfo.GetSpellXSpellVisualId(attacker), 0), spellInfo.SchoolMask);
-            damageInfo.damage = damage_;
+            damageInfo.damage = damage;
             Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
             target.DealSpellDamage(damageInfo, true);
             target.SendSpellNonMeleeDamageLog(damageInfo);
+            return true;
+        }
+
+        [CommandNonGroup("damage go", RBACPermissions.CommandDamage)]
+        static bool HandleDamageGoCommand(CommandHandler handler, ulong spawnId, int damage)
+        {
+            GameObject go = handler.GetObjectFromPlayerMapByDbGuid(spawnId);
+            if (go == null)
+            {
+                handler.SendSysMessage(CypherStrings.CommandObjnotfound, spawnId);
+                return false;
+            }
+
+            if (!go.IsDestructibleBuilding())
+            {
+                handler.SendSysMessage(CypherStrings.InvalidGameobjectType);
+                return false;
+            }
+
+            go.ModifyHealth(-damage, handler.GetSession().GetPlayer());
+            handler.SendSysMessage(CypherStrings.GameobjectDamaged, go.GetName(), spawnId, -damage, go.GetGoValue().Building.Health);
             return true;
         }
 
@@ -1149,26 +1104,19 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("pinfo", RBACPermissions.CommandPinfo, true)]
-        static bool HandlePInfoCommand(CommandHandler handler, StringArguments args)
+        static bool HandlePInfoCommand(CommandHandler handler, [OptionalArg]PlayerIdentifier arg)
         {
-            // Define ALL the player variables!
-            Player target;
-            ObjectGuid targetGuid;
-            string targetName;
-            PreparedStatement stmt;
+            if (arg == null)
+                arg = PlayerIdentifier.FromTargetOrSelf(handler);
 
-            // To make sure we get a target, we convert our guid to an omniversal...
-            ObjectGuid parseGUID = ObjectGuid.Create(HighGuid.Player, args.NextUInt64());
-
-            // ... and make sure we get a target, somehow.
-            if (Global.CharacterCacheStorage.GetCharacterNameByGuid(parseGUID, out targetName))
-            {
-                target = Global.ObjAccessor.FindPlayer(parseGUID);
-                targetGuid = parseGUID;
-            }
-            // if not, then return false. Which shouldn't happen, now should it ?
-            else if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
+            if (arg == null)
                 return false;
+
+            // Define ALL the player variables!
+            Player target = arg.GetConnectedPlayer();
+            ObjectGuid targetGuid = arg.GetGUID();
+            string targetName = arg.GetName();
+            PreparedStatement stmt;
 
             /* The variables we extract for the command. They are
              * default as "does not exist" to prevent problems
