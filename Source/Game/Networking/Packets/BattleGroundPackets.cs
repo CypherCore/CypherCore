@@ -702,6 +702,7 @@ namespace Game.Networking.Packets
                 data.WriteBit(RatingChange.HasValue);
                 data.WriteBit(PreMatchMMR.HasValue);
                 data.WriteBit(MmrChange.HasValue);
+                data.WriteBit(PostMatchMMR.HasValue);
                 data.FlushBits();
 
                 if (Honor.HasValue)
