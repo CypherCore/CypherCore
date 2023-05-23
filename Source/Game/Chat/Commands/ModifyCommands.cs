@@ -192,7 +192,7 @@ namespace Game.Chat
         {
             float scale;
             Unit target = handler.GetSelectedUnit();
-            if (CheckModifySpeed(args, handler, target, out scale, 0.1f, 10.0f, false))
+            if (CheckModifySpeed(handler, args, target, out scale, 0.1f, 10.0f, false))
             {
                 NotifyModification(handler, target, CypherStrings.YouChangeSize, CypherStrings.YoursSizeChanged, scale);
                 target.SetObjectScale(scale);
@@ -712,7 +712,7 @@ namespace Game.Chat
             {
                 float allSpeed;
                 Player target = handler.GetSelectedPlayerOrSelf();
-                if (CheckModifySpeed(args, handler, target, out allSpeed, 0.1f, 50.0f))
+                if (CheckModifySpeed(handler, args, target, out allSpeed, 0.1f, 50.0f))
                 {
                     NotifyModification(handler, target, CypherStrings.YouChangeAspeed, CypherStrings.YoursAspeedChanged, allSpeed);
                     target.SetSpeedRate(UnitMoveType.Walk, allSpeed);
@@ -729,7 +729,7 @@ namespace Game.Chat
             {
                 float swimSpeed;
                 Player target = handler.GetSelectedPlayerOrSelf();
-                if (CheckModifySpeed(args, handler, target, out swimSpeed, 0.1f, 50.0f))
+                if (CheckModifySpeed(handler, args, target, out swimSpeed, 0.1f, 50.0f))
                 {
                     NotifyModification(handler, target, CypherStrings.YouChangeSwimSpeed, CypherStrings.YoursSwimSpeedChanged, swimSpeed);
                     target.SetSpeedRate(UnitMoveType.Swim, swimSpeed);
@@ -743,7 +743,7 @@ namespace Game.Chat
             {
                 float backSpeed;
                 Player target = handler.GetSelectedPlayerOrSelf();
-                if (CheckModifySpeed(args, handler, target, out backSpeed, 0.1f, 50.0f))
+                if (CheckModifySpeed(handler, args, target, out backSpeed, 0.1f, 50.0f))
                 {
                     NotifyModification(handler, target, CypherStrings.YouChangeBackSpeed, CypherStrings.YoursBackSpeedChanged, backSpeed);
                     target.SetSpeedRate(UnitMoveType.RunBack, backSpeed);
@@ -757,7 +757,7 @@ namespace Game.Chat
             {
                 float flySpeed;
                 Player target = handler.GetSelectedPlayerOrSelf();
-                if (CheckModifySpeed(args, handler, target, out flySpeed, 0.1f, 50.0f, false))
+                if (CheckModifySpeed(handler, args, target, out flySpeed, 0.1f, 50.0f, false))
                 {
                     NotifyModification(handler, target, CypherStrings.YouChangeFlySpeed, CypherStrings.YoursFlySpeedChanged, flySpeed);
                     target.SetSpeedRate(UnitMoveType.Flight, flySpeed);
@@ -771,7 +771,7 @@ namespace Game.Chat
             {
                 float Speed;
                 Player target = handler.GetSelectedPlayerOrSelf();
-                if (CheckModifySpeed(args, handler, target, out Speed, 0.1f, 50.0f))
+                if (CheckModifySpeed(handler, args, target, out Speed, 0.1f, 50.0f))
                 {
                     NotifyModification(handler, target, CypherStrings.YouChangeSpeed, CypherStrings.YoursSpeedChanged, Speed);
                     target.SetSpeedRate(UnitMoveType.Run, Speed);
