@@ -27,67 +27,78 @@ namespace Bgs.Protocol.Connection.V1 {
             "CipiZ3MvbG93L3BiL2NsaWVudC9jb25uZWN0aW9uX3NlcnZpY2UucHJvdG8S",
             "GmJncy5wcm90b2NvbC5jb25uZWN0aW9uLnYxGixiZ3MvbG93L3BiL2NsaWVu",
             "dC9jb250ZW50X2hhbmRsZV90eXBlcy5wcm90bxohYmdzL2xvdy9wYi9jbGll",
-            "bnQvcnBjX3R5cGVzLnByb3RvGjliZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxf",
-            "ZXh0ZW5zaW9ucy9tZXNzYWdlX29wdGlvbnMucHJvdG8aN2Jncy9sb3cvcGIv",
-            "Y2xpZW50L2dsb2JhbF9leHRlbnNpb25zL2ZpZWxkX29wdGlvbnMucHJvdG8a",
-            "OGJncy9sb3cvcGIvY2xpZW50L2dsb2JhbF9leHRlbnNpb25zL21ldGhvZF9v",
-            "cHRpb25zLnByb3RvGjliZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5z",
-            "aW9ucy9zZXJ2aWNlX29wdGlvbnMucHJvdG8imwEKDkNvbm5lY3RSZXF1ZXN0",
-            "EioKCWNsaWVudF9pZBgBIAEoCzIXLmJncy5wcm90b2NvbC5Qcm9jZXNzSWQS",
-            "PQoMYmluZF9yZXF1ZXN0GAIgASgLMicuYmdzLnByb3RvY29sLmNvbm5lY3Rp",
-            "b24udjEuQmluZFJlcXVlc3QSHgoQdXNlX2JpbmRsZXNzX3JwYxgDIAEoCDoE",
-            "dHJ1ZSJXCiBDb25uZWN0aW9uTWV0ZXJpbmdDb250ZW50SGFuZGxlcxIzCg5j",
-            "b250ZW50X2hhbmRsZRgBIAMoCzIbLmJncy5wcm90b2NvbC5Db250ZW50SGFu",
-            "ZGxlIrQDCg9Db25uZWN0UmVzcG9uc2USKgoJc2VydmVyX2lkGAEgAigLMhcu",
-            "YmdzLnByb3RvY29sLlByb2Nlc3NJZBIqCgljbGllbnRfaWQYAiABKAsyFy5i",
-            "Z3MucHJvdG9jb2wuUHJvY2Vzc0lkEhMKC2JpbmRfcmVzdWx0GAMgASgNEj8K",
-            "DWJpbmRfcmVzcG9uc2UYBCABKAsyKC5iZ3MucHJvdG9jb2wuY29ubmVjdGlv",
-            "bi52MS5CaW5kUmVzcG9uc2USWgoUY29udGVudF9oYW5kbGVfYXJyYXkYBSAB",
-            "KAsyPC5iZ3MucHJvdG9jb2wuY29ubmVjdGlvbi52MS5Db25uZWN0aW9uTWV0",
-            "ZXJpbmdDb250ZW50SGFuZGxlcxITCgtzZXJ2ZXJfdGltZRgGIAEoBBIfChB1",
-            "c2VfYmluZGxlc3NfcnBjGAcgASgIOgVmYWxzZRJhChtiaW5hcnlfY29udGVu",
-            "dF9oYW5kbGVfYXJyYXkYCCABKAsyPC5iZ3MucHJvdG9jb2wuY29ubmVjdGlv",
-            "bi52MS5Db25uZWN0aW9uTWV0ZXJpbmdDb250ZW50SGFuZGxlcyIoCgxCb3Vu",
-            "ZFNlcnZpY2USDAoEaGFzaBgBIAIoBxIKCgJpZBgCIAIoDSKYAgoLQmluZFJl",
-            "cXVlc3QSLgogZGVwcmVjYXRlZF9pbXBvcnRlZF9zZXJ2aWNlX2hhc2gYASAD",
-            "KAdCBBABGAESUQobZGVwcmVjYXRlZF9leHBvcnRlZF9zZXJ2aWNlGAIgAygL",
-            "MiguYmdzLnByb3RvY29sLmNvbm5lY3Rpb24udjEuQm91bmRTZXJ2aWNlQgIY",
-            "ARJCChBleHBvcnRlZF9zZXJ2aWNlGAMgAygLMiguYmdzLnByb3RvY29sLmNv",
-            "bm5lY3Rpb24udjEuQm91bmRTZXJ2aWNlEkIKEGltcG9ydGVkX3NlcnZpY2UY",
-            "BCADKAsyKC5iZ3MucHJvdG9jb2wuY29ubmVjdGlvbi52MS5Cb3VuZFNlcnZp",
-            "Y2UiMQoMQmluZFJlc3BvbnNlEiEKE2ltcG9ydGVkX3NlcnZpY2VfaWQYASAD",
-            "KA1CBBABGAEijgEKC0VjaG9SZXF1ZXN0EgwKBHRpbWUYASABKAYSGwoMbmV0",
-            "d29ya19vbmx5GAIgASgIOgVmYWxzZRIPCgdwYXlsb2FkGAMgASgMEigKB2Zv",
-            "cndhcmQYBCABKAsyFy5iZ3MucHJvdG9jb2wuUHJvY2Vzc0lkEhkKEWZvcndh",
-            "cmRfY2xpZW50X2lkGAUgASgJIi0KDEVjaG9SZXNwb25zZRIMCgR0aW1lGAEg",
-            "ASgGEg8KB3BheWxvYWQYAiABKAwiJwoRRGlzY29ubmVjdFJlcXVlc3QSEgoK",
-            "ZXJyb3JfY29kZRgBIAIoDSI8ChZEaXNjb25uZWN0Tm90aWZpY2F0aW9uEhIK",
-            "CmVycm9yX2NvZGUYASACKA0SDgoGcmVhc29uGAIgASgJIhAKDkVuY3J5cHRS",
-            "ZXF1ZXN0MoUGChFDb25uZWN0aW9uU2VydmljZRJqCgdDb25uZWN0EiouYmdz",
-            "LnByb3RvY29sLmNvbm5lY3Rpb24udjEuQ29ubmVjdFJlcXVlc3QaKy5iZ3Mu",
-            "cHJvdG9jb2wuY29ubmVjdGlvbi52MS5Db25uZWN0UmVzcG9uc2UiBoL5KwII",
-            "ARJkCgRCaW5kEicuYmdzLnByb3RvY29sLmNvbm5lY3Rpb24udjEuQmluZFJl",
-            "cXVlc3QaKC5iZ3MucHJvdG9jb2wuY29ubmVjdGlvbi52MS5CaW5kUmVzcG9u",
-            "c2UiCYgCAYL5KwIIAhJhCgRFY2hvEicuYmdzLnByb3RvY29sLmNvbm5lY3Rp",
-            "b24udjEuRWNob1JlcXVlc3QaKC5iZ3MucHJvdG9jb2wuY29ubmVjdGlvbi52",
-            "MS5FY2hvUmVzcG9uc2UiBoL5KwIIAxJoCg9Gb3JjZURpc2Nvbm5lY3QSMi5i",
-            "Z3MucHJvdG9jb2wuY29ubmVjdGlvbi52MS5EaXNjb25uZWN0Tm90aWZpY2F0",
-            "aW9uGhkuYmdzLnByb3RvY29sLk5PX1JFU1BPTlNFIgaC+SsCCAQSRAoJS2Vl",
-            "cEFsaXZlEhQuYmdzLnByb3RvY29sLk5vRGF0YRoZLmJncy5wcm90b2NvbC5O",
-            "T19SRVNQT05TRSIGgvkrAggFElYKB0VuY3J5cHQSKi5iZ3MucHJvdG9jb2wu",
-            "Y29ubmVjdGlvbi52MS5FbmNyeXB0UmVxdWVzdBoULmJncy5wcm90b2NvbC5O",
-            "b0RhdGEiCYgCAYL5KwIIBhJlChFSZXF1ZXN0RGlzY29ubmVjdBItLmJncy5w",
-            "cm90b2NvbC5jb25uZWN0aW9uLnYxLkRpc2Nvbm5lY3RSZXF1ZXN0GhkuYmdz",
-            "LnByb3RvY29sLk5PX1JFU1BPTlNFIgaC+SsCCAcaTIL5KywKKmJuZXQucHJv",
-            "dG9jb2wuY29ubmVjdGlvbi5Db25uZWN0aW9uU2VydmljZYL5KwwqCmNvbm5l",
-            "Y3Rpb26K+SsCCAGK+SsCEAFCOwobYm5ldC5wcm90b2NvbC5jb25uZWN0aW9u",
-            "LnYxQhZDb25uZWN0aW9uU2VydmljZVByb3RvgAEAiAEB"));
+            "bnQvcnBjX3R5cGVzLnByb3RvGihiZ3MvbG93L3BiL2NsaWVudC9zZW1hbnRp",
+            "Y192ZXJzaW9uLnByb3RvGjdiZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0",
+            "ZW5zaW9ucy9maWVsZF9vcHRpb25zLnByb3RvGjliZ3MvbG93L3BiL2NsaWVu",
+            "dC9nbG9iYWxfZXh0ZW5zaW9ucy9tZXNzYWdlX29wdGlvbnMucHJvdG8aOGJn",
+            "cy9sb3cvcGIvY2xpZW50L2dsb2JhbF9leHRlbnNpb25zL21ldGhvZF9vcHRp",
+            "b25zLnByb3RvGjliZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9u",
+            "cy9zZXJ2aWNlX29wdGlvbnMucHJvdG8ilQEKFENsaWVudFNka1ZlcnNpb25J",
+            "bmZvEhAKCHNka19uYW1lGAEgASgJEjIKC3Nka192ZXJzaW9uGAIgASgLMh0u",
+            "YmdzLnByb3RvY29sLlNlbWFudGljVmVyc2lvbhI3ChBwcm90b2NvbF92ZXJz",
+            "aW9uGAMgASgLMh0uYmdzLnByb3RvY29sLlNlbWFudGljVmVyc2lvbiLAAgoO",
+            "Q29ubmVjdFJlcXVlc3QSKgoJY2xpZW50X2lkGAEgASgLMhcuYmdzLnByb3Rv",
+            "Y29sLlByb2Nlc3NJZBI9CgxiaW5kX3JlcXVlc3QYAiABKAsyJy5iZ3MucHJv",
+            "dG9jb2wuY29ubmVjdGlvbi52MS5CaW5kUmVxdWVzdBIeChB1c2VfYmluZGxl",
+            "c3NfcnBjGAMgASgIOgR0cnVlElgKDm1ldGVyaW5nX2xldmVsGAQgASgOMiku",
+            "YmdzLnByb3RvY29sLmNvbm5lY3Rpb24udjEuTWV0ZXJpbmdMZXZlbDoVTUVU",
+            "RVJJTkdfTEVWRUxfTEVHQUNZEkkKD2NsaWVudF9zZGtfaW5mbxgFIAEoCzIw",
+            "LmJncy5wcm90b2NvbC5jb25uZWN0aW9uLnYxLkNsaWVudFNka1ZlcnNpb25J",
+            "bmZvIlcKIENvbm5lY3Rpb25NZXRlcmluZ0NvbnRlbnRIYW5kbGVzEjMKDmNv",
+            "bnRlbnRfaGFuZGxlGAEgAygLMhsuYmdzLnByb3RvY29sLkNvbnRlbnRIYW5k",
+            "bGUiwgMKD0Nvbm5lY3RSZXNwb25zZRIqCglzZXJ2ZXJfaWQYASACKAsyFy5i",
+            "Z3MucHJvdG9jb2wuUHJvY2Vzc0lkEioKCWNsaWVudF9pZBgCIAEoCzIXLmJn",
+            "cy5wcm90b2NvbC5Qcm9jZXNzSWQSEwoLYmluZF9yZXN1bHQYAyABKA0SPwoN",
+            "YmluZF9yZXNwb25zZRgEIAEoCzIoLmJncy5wcm90b2NvbC5jb25uZWN0aW9u",
+            "LnYxLkJpbmRSZXNwb25zZRJaChRjb250ZW50X2hhbmRsZV9hcnJheRgFIAEo",
+            "CzI8LmJncy5wcm90b2NvbC5jb25uZWN0aW9uLnYxLkNvbm5lY3Rpb25NZXRl",
+            "cmluZ0NvbnRlbnRIYW5kbGVzEhMKC3NlcnZlcl90aW1lGAYgASgEEh8KEHVz",
+            "ZV9iaW5kbGVzc19ycGMYByABKAg6BWZhbHNlEmEKG2JpbmFyeV9jb250ZW50",
+            "X2hhbmRsZV9hcnJheRgIIAEoCzI8LmJncy5wcm90b2NvbC5jb25uZWN0aW9u",
+            "LnYxLkNvbm5lY3Rpb25NZXRlcmluZ0NvbnRlbnRIYW5kbGVzEgwKBGNpaWQY",
+            "CSABKAkiKAoMQm91bmRTZXJ2aWNlEgwKBGhhc2gYASACKAcSCgoCaWQYAiAC",
+            "KA0imAIKC0JpbmRSZXF1ZXN0Ei4KIGRlcHJlY2F0ZWRfaW1wb3J0ZWRfc2Vy",
+            "dmljZV9oYXNoGAEgAygHQgQQARgBElEKG2RlcHJlY2F0ZWRfZXhwb3J0ZWRf",
+            "c2VydmljZRgCIAMoCzIoLmJncy5wcm90b2NvbC5jb25uZWN0aW9uLnYxLkJv",
+            "dW5kU2VydmljZUICGAESQgoQZXhwb3J0ZWRfc2VydmljZRgDIAMoCzIoLmJn",
+            "cy5wcm90b2NvbC5jb25uZWN0aW9uLnYxLkJvdW5kU2VydmljZRJCChBpbXBv",
+            "cnRlZF9zZXJ2aWNlGAQgAygLMiguYmdzLnByb3RvY29sLmNvbm5lY3Rpb24u",
+            "djEuQm91bmRTZXJ2aWNlIjEKDEJpbmRSZXNwb25zZRIhChNpbXBvcnRlZF9z",
+            "ZXJ2aWNlX2lkGAEgAygNQgQQARgBIo4BCgtFY2hvUmVxdWVzdBIMCgR0aW1l",
+            "GAEgASgGEhsKDG5ldHdvcmtfb25seRgCIAEoCDoFZmFsc2USDwoHcGF5bG9h",
+            "ZBgDIAEoDBIoCgdmb3J3YXJkGAQgASgLMhcuYmdzLnByb3RvY29sLlByb2Nl",
+            "c3NJZBIZChFmb3J3YXJkX2NsaWVudF9pZBgFIAEoCSItCgxFY2hvUmVzcG9u",
+            "c2USDAoEdGltZRgBIAEoBhIPCgdwYXlsb2FkGAIgASgMIicKEURpc2Nvbm5l",
+            "Y3RSZXF1ZXN0EhIKCmVycm9yX2NvZGUYASACKA0iPAoWRGlzY29ubmVjdE5v",
+            "dGlmaWNhdGlvbhISCgplcnJvcl9jb2RlGAEgAigNEg4KBnJlYXNvbhgCIAEo",
+            "CSIQCg5FbmNyeXB0UmVxdWVzdCpKCg1NZXRlcmluZ0xldmVsEhkKFU1FVEVS",
+            "SU5HX0xFVkVMX0xFR0FDWRAAEh4KGk1FVEVSSU5HX0xFVkVMX0NBVEVHT1JJ",
+            "WkVEEAEyiwYKEUNvbm5lY3Rpb25TZXJ2aWNlEmoKB0Nvbm5lY3QSKi5iZ3Mu",
+            "cHJvdG9jb2wuY29ubmVjdGlvbi52MS5Db25uZWN0UmVxdWVzdBorLmJncy5w",
+            "cm90b2NvbC5jb25uZWN0aW9uLnYxLkNvbm5lY3RSZXNwb25zZSIGgvkrAggB",
+            "EmcKBEJpbmQSJy5iZ3MucHJvdG9jb2wuY29ubmVjdGlvbi52MS5CaW5kUmVx",
+            "dWVzdBooLmJncy5wcm90b2NvbC5jb25uZWN0aW9uLnYxLkJpbmRSZXNwb25z",
+            "ZSIMgvkrAggCgvkrAlABEmEKBEVjaG8SJy5iZ3MucHJvdG9jb2wuY29ubmVj",
+            "dGlvbi52MS5FY2hvUmVxdWVzdBooLmJncy5wcm90b2NvbC5jb25uZWN0aW9u",
+            "LnYxLkVjaG9SZXNwb25zZSIGgvkrAggDEmgKD0ZvcmNlRGlzY29ubmVjdBIy",
+            "LmJncy5wcm90b2NvbC5jb25uZWN0aW9uLnYxLkRpc2Nvbm5lY3ROb3RpZmlj",
+            "YXRpb24aGS5iZ3MucHJvdG9jb2wuTk9fUkVTUE9OU0UiBoL5KwIIBBJECglL",
+            "ZWVwQWxpdmUSFC5iZ3MucHJvdG9jb2wuTm9EYXRhGhkuYmdzLnByb3RvY29s",
+            "Lk5PX1JFU1BPTlNFIgaC+SsCCAUSWQoHRW5jcnlwdBIqLmJncy5wcm90b2Nv",
+            "bC5jb25uZWN0aW9uLnYxLkVuY3J5cHRSZXF1ZXN0GhQuYmdzLnByb3RvY29s",
+            "Lk5vRGF0YSIMgvkrAggGgvkrAlABEmUKEVJlcXVlc3REaXNjb25uZWN0Ei0u",
+            "YmdzLnByb3RvY29sLmNvbm5lY3Rpb24udjEuRGlzY29ubmVjdFJlcXVlc3Qa",
+            "GS5iZ3MucHJvdG9jb2wuTk9fUkVTUE9OU0UiBoL5KwIIBxpMgvkrLAoqYm5l",
+            "dC5wcm90b2NvbC5jb25uZWN0aW9uLkNvbm5lY3Rpb25TZXJ2aWNlgvkrDCoK",
+            "Y29ubmVjdGlvbor5KwIIAYr5KwIQAUI6ChpiZ3MucHJvdG9jb2wuY29ubmVj",
+            "dGlvbi52MUIWQ29ubmVjdGlvblNlcnZpY2VQcm90b4ABAIgBAQ=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Bgs.Protocol.ContentHandleTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
-          new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Connection.V1.ConnectRequest), global::Bgs.Protocol.Connection.V1.ConnectRequest.Parser, new[]{ "ClientId", "BindRequest", "UseBindlessRpc" }, null, null, null, null),
+          new pbr::FileDescriptor[] { global::Bgs.Protocol.ContentHandleTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.SemanticVersionReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
+          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Bgs.Protocol.Connection.V1.MeteringLevel), }, null, new pbr::GeneratedClrTypeInfo[] {
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Connection.V1.ClientSdkVersionInfo), global::Bgs.Protocol.Connection.V1.ClientSdkVersionInfo.Parser, new[]{ "SdkName", "SdkVersion", "ProtocolVersion" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Connection.V1.ConnectRequest), global::Bgs.Protocol.Connection.V1.ConnectRequest.Parser, new[]{ "ClientId", "BindRequest", "UseBindlessRpc", "MeteringLevel", "ClientSdkInfo" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Connection.V1.ConnectionMeteringContentHandles), global::Bgs.Protocol.Connection.V1.ConnectionMeteringContentHandles.Parser, new[]{ "ContentHandle" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Connection.V1.ConnectResponse), global::Bgs.Protocol.Connection.V1.ConnectResponse.Parser, new[]{ "ServerId", "ClientId", "BindResult", "BindResponse", "ContentHandleArray", "ServerTime", "UseBindlessRpc", "BinaryContentHandleArray" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Connection.V1.ConnectResponse), global::Bgs.Protocol.Connection.V1.ConnectResponse.Parser, new[]{ "ServerId", "ClientId", "BindResult", "BindResponse", "ContentHandleArray", "ServerTime", "UseBindlessRpc", "BinaryContentHandleArray", "Ciid" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Connection.V1.BoundService), global::Bgs.Protocol.Connection.V1.BoundService.Parser, new[]{ "Hash", "Id" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Connection.V1.BindRequest), global::Bgs.Protocol.Connection.V1.BindRequest.Parser, new[]{ "DeprecatedImportedServiceHash", "DeprecatedExportedService", "ExportedService", "ImportedService" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Connection.V1.BindResponse), global::Bgs.Protocol.Connection.V1.BindResponse.Parser, new[]{ "ImportedServiceId" }, null, null, null, null),
@@ -101,7 +112,244 @@ namespace Bgs.Protocol.Connection.V1 {
     #endregion
 
   }
+  #region Enums
+  public enum MeteringLevel {
+    [pbr::OriginalName("METERING_LEVEL_LEGACY")] Legacy = 0,
+    [pbr::OriginalName("METERING_LEVEL_CATEGORIZED")] Categorized = 1,
+  }
+
+  #endregion
+
   #region Messages
+  public sealed partial class ClientSdkVersionInfo : pb::IMessage<ClientSdkVersionInfo> {
+    private static readonly pb::MessageParser<ClientSdkVersionInfo> _parser = new pb::MessageParser<ClientSdkVersionInfo>(() => new ClientSdkVersionInfo());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<ClientSdkVersionInfo> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[0]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public ClientSdkVersionInfo() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public ClientSdkVersionInfo(ClientSdkVersionInfo other) : this() {
+      sdkName_ = other.sdkName_;
+      sdkVersion_ = other.HasSdkVersion ? other.sdkVersion_.Clone() : null;
+      protocolVersion_ = other.HasProtocolVersion ? other.protocolVersion_.Clone() : null;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public ClientSdkVersionInfo Clone() {
+      return new ClientSdkVersionInfo(this);
+    }
+
+    /// <summary>Field number for the "sdk_name" field.</summary>
+    public const int SdkNameFieldNumber = 1;
+    private readonly static string SdkNameDefaultValue = "";
+
+    private string sdkName_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string SdkName {
+      get { return sdkName_ ?? SdkNameDefaultValue; }
+      set {
+        sdkName_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "sdk_name" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasSdkName {
+      get { return sdkName_ != null; }
+    }
+    /// <summary>Clears the value of the "sdk_name" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearSdkName() {
+      sdkName_ = null;
+    }
+
+    /// <summary>Field number for the "sdk_version" field.</summary>
+    public const int SdkVersionFieldNumber = 2;
+    private global::Bgs.Protocol.SemanticVersion sdkVersion_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Bgs.Protocol.SemanticVersion SdkVersion {
+      get { return sdkVersion_; }
+      set {
+        sdkVersion_ = value;
+      }
+    }
+    /// <summary>Gets whether the sdk_version field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasSdkVersion {
+      get { return sdkVersion_ != null; }
+    }
+    /// <summary>Clears the value of the sdk_version field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearSdkVersion() {
+      sdkVersion_ = null;
+    }
+
+    /// <summary>Field number for the "protocol_version" field.</summary>
+    public const int ProtocolVersionFieldNumber = 3;
+    private global::Bgs.Protocol.SemanticVersion protocolVersion_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Bgs.Protocol.SemanticVersion ProtocolVersion {
+      get { return protocolVersion_; }
+      set {
+        protocolVersion_ = value;
+      }
+    }
+    /// <summary>Gets whether the protocol_version field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasProtocolVersion {
+      get { return protocolVersion_ != null; }
+    }
+    /// <summary>Clears the value of the protocol_version field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearProtocolVersion() {
+      protocolVersion_ = null;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as ClientSdkVersionInfo);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(ClientSdkVersionInfo other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (SdkName != other.SdkName) return false;
+      if (!object.Equals(SdkVersion, other.SdkVersion)) return false;
+      if (!object.Equals(ProtocolVersion, other.ProtocolVersion)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (HasSdkName) hash ^= SdkName.GetHashCode();
+      if (HasSdkVersion) hash ^= SdkVersion.GetHashCode();
+      if (HasProtocolVersion) hash ^= ProtocolVersion.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (HasSdkName) {
+        output.WriteRawTag(10);
+        output.WriteString(SdkName);
+      }
+      if (HasSdkVersion) {
+        output.WriteRawTag(18);
+        output.WriteMessage(SdkVersion);
+      }
+      if (HasProtocolVersion) {
+        output.WriteRawTag(26);
+        output.WriteMessage(ProtocolVersion);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (HasSdkName) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(SdkName);
+      }
+      if (HasSdkVersion) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(SdkVersion);
+      }
+      if (HasProtocolVersion) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(ProtocolVersion);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(ClientSdkVersionInfo other) {
+      if (other == null) {
+        return;
+      }
+      if (other.HasSdkName) {
+        SdkName = other.SdkName;
+      }
+      if (other.HasSdkVersion) {
+        if (!HasSdkVersion) {
+          SdkVersion = new global::Bgs.Protocol.SemanticVersion();
+        }
+        SdkVersion.MergeFrom(other.SdkVersion);
+      }
+      if (other.HasProtocolVersion) {
+        if (!HasProtocolVersion) {
+          ProtocolVersion = new global::Bgs.Protocol.SemanticVersion();
+        }
+        ProtocolVersion.MergeFrom(other.ProtocolVersion);
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            SdkName = input.ReadString();
+            break;
+          }
+          case 18: {
+            if (!HasSdkVersion) {
+              SdkVersion = new global::Bgs.Protocol.SemanticVersion();
+            }
+            input.ReadMessage(SdkVersion);
+            break;
+          }
+          case 26: {
+            if (!HasProtocolVersion) {
+              ProtocolVersion = new global::Bgs.Protocol.SemanticVersion();
+            }
+            input.ReadMessage(ProtocolVersion);
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
   public sealed partial class ConnectRequest : pb::IMessage<ConnectRequest> {
     private static readonly pb::MessageParser<ConnectRequest> _parser = new pb::MessageParser<ConnectRequest>(() => new ConnectRequest());
     private pb::UnknownFieldSet _unknownFields;
@@ -111,7 +359,7 @@ namespace Bgs.Protocol.Connection.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[0]; }
+      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[1]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -132,6 +380,8 @@ namespace Bgs.Protocol.Connection.V1 {
       clientId_ = other.HasClientId ? other.clientId_.Clone() : null;
       bindRequest_ = other.HasBindRequest ? other.bindRequest_.Clone() : null;
       useBindlessRpc_ = other.useBindlessRpc_;
+      meteringLevel_ = other.meteringLevel_;
+      clientSdkInfo_ = other.HasClientSdkInfo ? other.clientSdkInfo_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -206,6 +456,51 @@ namespace Bgs.Protocol.Connection.V1 {
       _hasBits0 &= ~1;
     }
 
+    /// <summary>Field number for the "metering_level" field.</summary>
+    public const int MeteringLevelFieldNumber = 4;
+    private readonly static global::Bgs.Protocol.Connection.V1.MeteringLevel MeteringLevelDefaultValue = global::Bgs.Protocol.Connection.V1.MeteringLevel.Legacy;
+
+    private global::Bgs.Protocol.Connection.V1.MeteringLevel meteringLevel_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Bgs.Protocol.Connection.V1.MeteringLevel MeteringLevel {
+      get { if ((_hasBits0 & 2) != 0) { return meteringLevel_; } else { return MeteringLevelDefaultValue; } }
+      set {
+        _hasBits0 |= 2;
+        meteringLevel_ = value;
+      }
+    }
+    /// <summary>Gets whether the "metering_level" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasMeteringLevel {
+      get { return (_hasBits0 & 2) != 0; }
+    }
+    /// <summary>Clears the value of the "metering_level" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearMeteringLevel() {
+      _hasBits0 &= ~2;
+    }
+
+    /// <summary>Field number for the "client_sdk_info" field.</summary>
+    public const int ClientSdkInfoFieldNumber = 5;
+    private global::Bgs.Protocol.Connection.V1.ClientSdkVersionInfo clientSdkInfo_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Bgs.Protocol.Connection.V1.ClientSdkVersionInfo ClientSdkInfo {
+      get { return clientSdkInfo_; }
+      set {
+        clientSdkInfo_ = value;
+      }
+    }
+    /// <summary>Gets whether the client_sdk_info field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasClientSdkInfo {
+      get { return clientSdkInfo_ != null; }
+    }
+    /// <summary>Clears the value of the client_sdk_info field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearClientSdkInfo() {
+      clientSdkInfo_ = null;
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as ConnectRequest);
@@ -222,6 +517,8 @@ namespace Bgs.Protocol.Connection.V1 {
       if (!object.Equals(ClientId, other.ClientId)) return false;
       if (!object.Equals(BindRequest, other.BindRequest)) return false;
       if (UseBindlessRpc != other.UseBindlessRpc) return false;
+      if (MeteringLevel != other.MeteringLevel) return false;
+      if (!object.Equals(ClientSdkInfo, other.ClientSdkInfo)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -231,6 +528,8 @@ namespace Bgs.Protocol.Connection.V1 {
       if (HasClientId) hash ^= ClientId.GetHashCode();
       if (HasBindRequest) hash ^= BindRequest.GetHashCode();
       if (HasUseBindlessRpc) hash ^= UseBindlessRpc.GetHashCode();
+      if (HasMeteringLevel) hash ^= MeteringLevel.GetHashCode();
+      if (HasClientSdkInfo) hash ^= ClientSdkInfo.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -256,6 +555,14 @@ namespace Bgs.Protocol.Connection.V1 {
         output.WriteRawTag(24);
         output.WriteBool(UseBindlessRpc);
       }
+      if (HasMeteringLevel) {
+        output.WriteRawTag(32);
+        output.WriteEnum((int) MeteringLevel);
+      }
+      if (HasClientSdkInfo) {
+        output.WriteRawTag(42);
+        output.WriteMessage(ClientSdkInfo);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -272,6 +579,12 @@ namespace Bgs.Protocol.Connection.V1 {
       }
       if (HasUseBindlessRpc) {
         size += 1 + 1;
+      }
+      if (HasMeteringLevel) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) MeteringLevel);
+      }
+      if (HasClientSdkInfo) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(ClientSdkInfo);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -298,6 +611,15 @@ namespace Bgs.Protocol.Connection.V1 {
       }
       if (other.HasUseBindlessRpc) {
         UseBindlessRpc = other.UseBindlessRpc;
+      }
+      if (other.HasMeteringLevel) {
+        MeteringLevel = other.MeteringLevel;
+      }
+      if (other.HasClientSdkInfo) {
+        if (!HasClientSdkInfo) {
+          ClientSdkInfo = new global::Bgs.Protocol.Connection.V1.ClientSdkVersionInfo();
+        }
+        ClientSdkInfo.MergeFrom(other.ClientSdkInfo);
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -328,6 +650,17 @@ namespace Bgs.Protocol.Connection.V1 {
             UseBindlessRpc = input.ReadBool();
             break;
           }
+          case 32: {
+            MeteringLevel = (global::Bgs.Protocol.Connection.V1.MeteringLevel) input.ReadEnum();
+            break;
+          }
+          case 42: {
+            if (!HasClientSdkInfo) {
+              ClientSdkInfo = new global::Bgs.Protocol.Connection.V1.ClientSdkVersionInfo();
+            }
+            input.ReadMessage(ClientSdkInfo);
+            break;
+          }
         }
       }
     }
@@ -342,7 +675,7 @@ namespace Bgs.Protocol.Connection.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[1]; }
+      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[2]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -464,7 +797,7 @@ namespace Bgs.Protocol.Connection.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[2]; }
+      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[3]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -490,6 +823,7 @@ namespace Bgs.Protocol.Connection.V1 {
       serverTime_ = other.serverTime_;
       useBindlessRpc_ = other.useBindlessRpc_;
       binaryContentHandleArray_ = other.HasBinaryContentHandleArray ? other.binaryContentHandleArray_.Clone() : null;
+      ciid_ = other.ciid_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -675,6 +1009,29 @@ namespace Bgs.Protocol.Connection.V1 {
       binaryContentHandleArray_ = null;
     }
 
+    /// <summary>Field number for the "ciid" field.</summary>
+    public const int CiidFieldNumber = 9;
+    private readonly static string CiidDefaultValue = "";
+
+    private string ciid_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Ciid {
+      get { return ciid_ ?? CiidDefaultValue; }
+      set {
+        ciid_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "ciid" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasCiid {
+      get { return ciid_ != null; }
+    }
+    /// <summary>Clears the value of the "ciid" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearCiid() {
+      ciid_ = null;
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as ConnectResponse);
@@ -696,6 +1053,7 @@ namespace Bgs.Protocol.Connection.V1 {
       if (ServerTime != other.ServerTime) return false;
       if (UseBindlessRpc != other.UseBindlessRpc) return false;
       if (!object.Equals(BinaryContentHandleArray, other.BinaryContentHandleArray)) return false;
+      if (Ciid != other.Ciid) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -710,6 +1068,7 @@ namespace Bgs.Protocol.Connection.V1 {
       if (HasServerTime) hash ^= ServerTime.GetHashCode();
       if (HasUseBindlessRpc) hash ^= UseBindlessRpc.GetHashCode();
       if (HasBinaryContentHandleArray) hash ^= BinaryContentHandleArray.GetHashCode();
+      if (HasCiid) hash ^= Ciid.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -755,6 +1114,10 @@ namespace Bgs.Protocol.Connection.V1 {
         output.WriteRawTag(66);
         output.WriteMessage(BinaryContentHandleArray);
       }
+      if (HasCiid) {
+        output.WriteRawTag(74);
+        output.WriteString(Ciid);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -786,6 +1149,9 @@ namespace Bgs.Protocol.Connection.V1 {
       }
       if (HasBinaryContentHandleArray) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(BinaryContentHandleArray);
+      }
+      if (HasCiid) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Ciid);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -836,6 +1202,9 @@ namespace Bgs.Protocol.Connection.V1 {
           BinaryContentHandleArray = new global::Bgs.Protocol.Connection.V1.ConnectionMeteringContentHandles();
         }
         BinaryContentHandleArray.MergeFrom(other.BinaryContentHandleArray);
+      }
+      if (other.HasCiid) {
+        Ciid = other.Ciid;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -895,6 +1264,10 @@ namespace Bgs.Protocol.Connection.V1 {
             input.ReadMessage(BinaryContentHandleArray);
             break;
           }
+          case 74: {
+            Ciid = input.ReadString();
+            break;
+          }
         }
       }
     }
@@ -910,7 +1283,7 @@ namespace Bgs.Protocol.Connection.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[3]; }
+      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[4]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1094,7 +1467,7 @@ namespace Bgs.Protocol.Connection.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[4]; }
+      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[5]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1278,7 +1651,7 @@ namespace Bgs.Protocol.Connection.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[5]; }
+      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[6]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1402,7 +1775,7 @@ namespace Bgs.Protocol.Connection.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[6]; }
+      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[7]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1711,7 +2084,7 @@ namespace Bgs.Protocol.Connection.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[7]; }
+      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[8]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1895,7 +2268,7 @@ namespace Bgs.Protocol.Connection.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[8]; }
+      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[9]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2039,7 +2412,7 @@ namespace Bgs.Protocol.Connection.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[9]; }
+      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[10]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2222,7 +2595,7 @@ namespace Bgs.Protocol.Connection.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[10]; }
+      get { return global::Bgs.Protocol.Connection.V1.ConnectionServiceReflection.Descriptor.MessageTypes[11]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

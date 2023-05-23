@@ -28,9 +28,9 @@ namespace Bgs.Protocol.Presence.V1 {
             "Z3MucHJvdG9jb2wucHJlc2VuY2UudjEaJGJncy9sb3cvcGIvY2xpZW50L2Vu",
             "dGl0eV90eXBlcy5wcm90bxomYmdzL2xvdy9wYi9jbGllbnQvcHJlc2VuY2Vf",
             "dHlwZXMucHJvdG8aIWJncy9sb3cvcGIvY2xpZW50L3JwY190eXBlcy5wcm90",
-            "bxo5YmdzL2xvdy9wYi9jbGllbnQvZ2xvYmFsX2V4dGVuc2lvbnMvbWVzc2Fn",
-            "ZV9vcHRpb25zLnByb3RvGjdiZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0",
-            "ZW5zaW9ucy9maWVsZF9vcHRpb25zLnByb3RvGjhiZ3MvbG93L3BiL2NsaWVu",
+            "bxo3YmdzL2xvdy9wYi9jbGllbnQvZ2xvYmFsX2V4dGVuc2lvbnMvZmllbGRf",
+            "b3B0aW9ucy5wcm90bxo5YmdzL2xvdy9wYi9jbGllbnQvZ2xvYmFsX2V4dGVu",
+            "c2lvbnMvbWVzc2FnZV9vcHRpb25zLnByb3RvGjhiZ3MvbG93L3BiL2NsaWVu",
             "dC9nbG9iYWxfZXh0ZW5zaW9ucy9tZXRob2Rfb3B0aW9ucy5wcm90bxo5Ymdz",
             "L2xvdy9wYi9jbGllbnQvZ2xvYmFsX2V4dGVuc2lvbnMvc2VydmljZV9vcHRp",
             "b25zLnByb3RvIvEBChBTdWJzY3JpYmVSZXF1ZXN0EjAKCGFnZW50X2lkGAEg",
@@ -83,7 +83,7 @@ namespace Bgs.Protocol.Presence.V1 {
             "bmNlU2VydmljZYL5KxUqE3ByZXNlbmNlX2FnZ3JlZ2F0b3KC+SsCMAGK+SsC",
             "EAFCA4ABAA=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Bgs.Protocol.EntityTypesReflection.Descriptor, global::Bgs.Protocol.Presence.V1.PresenceTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Bgs.Protocol.EntityTypesReflection.Descriptor, global::Bgs.Protocol.Presence.V1.PresenceTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Presence.V1.SubscribeRequest), global::Bgs.Protocol.Presence.V1.SubscribeRequest.Parser, new[]{ "AgentId", "EntityId", "ObjectId", "Program", "Key" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Presence.V1.UnsubscribeRequest), global::Bgs.Protocol.Presence.V1.UnsubscribeRequest.Parser, new[]{ "AgentId", "EntityId", "ObjectId" }, null, null, null, null),

@@ -43,8 +43,8 @@ namespace Bgs.Protocol {
             "ZWFzb24SJgoiU1VHR0VTVElPTl9SRU1PVkVEX1JFQVNPTl9BUFBST1ZFRBAA",
             "EiYKIlNVR0dFU1RJT05fUkVNT1ZFRF9SRUFTT05fREVDTElORUQQARIlCiFT",
             "VUdHRVNUSU9OX1JFTU9WRURfUkVBU09OX0VYUElSRUQQAhImCiJTVUdHRVNU",
-            "SU9OX1JFTU9WRURfUkVBU09OX0NBTkNFTEVEEANCJQoNYm5ldC5wcm90b2Nv",
-            "bEIUSW52aXRhdGlvblR5cGVzUHJvdG8="));
+            "SU9OX1JFTU9WRURfUkVBU09OX0NBTkNFTEVEEANCJAoMYmdzLnByb3RvY29s",
+            "QhRJbnZpdGF0aW9uVHlwZXNQcm90bw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Bgs.Protocol.EntityTypesReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Bgs.Protocol.InvitationRemovedReason), typeof(global::Bgs.Protocol.SuggestionRemovedReason), }, null, new pbr::GeneratedClrTypeInfo[] {

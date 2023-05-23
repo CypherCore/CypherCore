@@ -48,23 +48,24 @@ namespace Bgs.Protocol.Friends.V1 {
             "KAsyFy5iZ3MucHJvdG9jb2wuQXR0cmlidXRlIpMBCg5TZW50SW52aXRhdGlv",
             "bhIKCgJpZBgBIAEoBhITCgt0YXJnZXRfbmFtZRgCIAEoCRIMCgRyb2xlGAMg",
             "ASgNEioKCWF0dHJpYnV0ZRgEIAMoCzIXLmJncy5wcm90b2NvbC5BdHRyaWJ1",
-            "dGUSFQoNY3JlYXRpb25fdGltZRgFIAEoBBIPCgdwcm9ncmFtGAYgASgHItUB",
+            "dGUSFQoNY3JlYXRpb25fdGltZRgFIAEoBBIPCgdwcm9ncmFtGAYgASgHIvoB",
             "ChZGcmllbmRJbnZpdGF0aW9uUGFyYW1zEhwKDHRhcmdldF9lbWFpbBgBIAEo",
             "CUIGgvkrAggBEiEKEXRhcmdldF9iYXR0bGVfdGFnGAIgASgJQgaC+SsCCAES",
             "JAoEcm9sZRgGIAMoDUIWEAGK+SsGKgQKAggBivkrBioECgIQARIqCglhdHRy",
             "aWJ1dGUYCCADKAsyFy5iZ3MucHJvdG9jb2wuQXR0cmlidXRlEhMKC3Rhcmdl",
-            "dF9uYW1lGAkgASgJEhMKB3Byb2dyYW0YCiABKAdCAhgBItYCChFTdWJzY3Jp",
-            "YmVSZXNwb25zZRIXCgttYXhfZnJpZW5kcxgBIAEoDUICGAESJAoYbWF4X3Jl",
-            "Y2VpdmVkX2ludml0YXRpb25zGAIgASgNQgIYARIgChRtYXhfc2VudF9pbnZp",
-            "dGF0aW9ucxgDIAEoDUICGAESIAoEcm9sZRgEIAMoCzISLmJncy5wcm90b2Nv",
-            "bC5Sb2xlEjAKB2ZyaWVuZHMYBSADKAsyHy5iZ3MucHJvdG9jb2wuZnJpZW5k",
-            "cy52MS5GcmllbmQSSQoUcmVjZWl2ZWRfaW52aXRhdGlvbnMYByADKAsyKy5i",
-            "Z3MucHJvdG9jb2wuZnJpZW5kcy52MS5SZWNlaXZlZEludml0YXRpb24SQQoQ",
-            "c2VudF9pbnZpdGF0aW9ucxgIIAMoCzInLmJncy5wcm90b2NvbC5mcmllbmRz",
-            "LnYxLlNlbnRJbnZpdGF0aW9uIk4KF0FjY2VwdEludml0YXRpb25PcHRpb25z",
-            "EiIKBHJvbGUYASABKA1CFIr5KwYSBAoCCACK+SsGEgQKAhACEg8KB3Byb2dy",
-            "YW0YAiABKAdCLQoYYm5ldC5wcm90b2NvbC5mcmllbmRzLnYxQhFGcmllbmRz",
-            "VHlwZXNQcm90b1AA"));
+            "dF9uYW1lGAkgASgJEhMKB3Byb2dyYW0YCiABKAdCAhgBEiMKE3RhcmdldF9w",
+            "aG9uZV9udW1iZXIYCyABKAlCBoL5KwIIASLWAgoRU3Vic2NyaWJlUmVzcG9u",
+            "c2USFwoLbWF4X2ZyaWVuZHMYASABKA1CAhgBEiQKGG1heF9yZWNlaXZlZF9p",
+            "bnZpdGF0aW9ucxgCIAEoDUICGAESIAoUbWF4X3NlbnRfaW52aXRhdGlvbnMY",
+            "AyABKA1CAhgBEiAKBHJvbGUYBCADKAsyEi5iZ3MucHJvdG9jb2wuUm9sZRIw",
+            "CgdmcmllbmRzGAUgAygLMh8uYmdzLnByb3RvY29sLmZyaWVuZHMudjEuRnJp",
+            "ZW5kEkkKFHJlY2VpdmVkX2ludml0YXRpb25zGAcgAygLMisuYmdzLnByb3Rv",
+            "Y29sLmZyaWVuZHMudjEuUmVjZWl2ZWRJbnZpdGF0aW9uEkEKEHNlbnRfaW52",
+            "aXRhdGlvbnMYCCADKAsyJy5iZ3MucHJvdG9jb2wuZnJpZW5kcy52MS5TZW50",
+            "SW52aXRhdGlvbiJOChdBY2NlcHRJbnZpdGF0aW9uT3B0aW9ucxIiCgRyb2xl",
+            "GAEgASgNQhSK+SsGEgQKAggAivkrBhIECgIQAhIPCgdwcm9ncmFtGAIgASgH",
+            "QiwKF2Jncy5wcm90b2NvbC5mcmllbmRzLnYxQhFGcmllbmRzVHlwZXNQcm90",
+            "b1AA"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.AttributeTypesReflection.Descriptor, global::Bgs.Protocol.EntityTypesReflection.Descriptor, global::Bgs.Protocol.InvitationTypesReflection.Descriptor, global::Bgs.Protocol.RoleTypesReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
@@ -73,7 +74,7 @@ namespace Bgs.Protocol.Friends.V1 {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.ReceivedInvitation), global::Bgs.Protocol.Friends.V1.ReceivedInvitation.Parser, new[]{ "Id", "InviterIdentity", "InviteeIdentity", "InviterName", "InviteeName", "CreationTime", "Program" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.FriendInvitation), global::Bgs.Protocol.Friends.V1.FriendInvitation.Parser, new[]{ "Role", "Attribute" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.SentInvitation), global::Bgs.Protocol.Friends.V1.SentInvitation.Parser, new[]{ "Id", "TargetName", "Role", "Attribute", "CreationTime", "Program" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.FriendInvitationParams), global::Bgs.Protocol.Friends.V1.FriendInvitationParams.Parser, new[]{ "TargetEmail", "TargetBattleTag", "Role", "Attribute", "TargetName", "Program" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.FriendInvitationParams), global::Bgs.Protocol.Friends.V1.FriendInvitationParams.Parser, new[]{ "TargetEmail", "TargetBattleTag", "Role", "Attribute", "TargetName", "Program", "TargetPhoneNumber" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.SubscribeResponse), global::Bgs.Protocol.Friends.V1.SubscribeResponse.Parser, new[]{ "MaxFriends", "MaxReceivedInvitations", "MaxSentInvitations", "Role", "Friends", "ReceivedInvitations", "SentInvitations" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.AcceptInvitationOptions), global::Bgs.Protocol.Friends.V1.AcceptInvitationOptions.Parser, new[]{ "Role", "Program" }, null, null, null, null)
           }));
@@ -1621,6 +1622,7 @@ namespace Bgs.Protocol.Friends.V1 {
       attribute_ = other.attribute_.Clone();
       targetName_ = other.targetName_;
       program_ = other.program_;
+      targetPhoneNumber_ = other.targetPhoneNumber_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1745,6 +1747,29 @@ namespace Bgs.Protocol.Friends.V1 {
       _hasBits0 &= ~1;
     }
 
+    /// <summary>Field number for the "target_phone_number" field.</summary>
+    public const int TargetPhoneNumberFieldNumber = 11;
+    private readonly static string TargetPhoneNumberDefaultValue = "";
+
+    private string targetPhoneNumber_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string TargetPhoneNumber {
+      get { return targetPhoneNumber_ ?? TargetPhoneNumberDefaultValue; }
+      set {
+        targetPhoneNumber_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "target_phone_number" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasTargetPhoneNumber {
+      get { return targetPhoneNumber_ != null; }
+    }
+    /// <summary>Clears the value of the "target_phone_number" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearTargetPhoneNumber() {
+      targetPhoneNumber_ = null;
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as FriendInvitationParams);
@@ -1764,6 +1789,7 @@ namespace Bgs.Protocol.Friends.V1 {
       if(!attribute_.Equals(other.attribute_)) return false;
       if (TargetName != other.TargetName) return false;
       if (Program != other.Program) return false;
+      if (TargetPhoneNumber != other.TargetPhoneNumber) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -1776,6 +1802,7 @@ namespace Bgs.Protocol.Friends.V1 {
       hash ^= attribute_.GetHashCode();
       if (HasTargetName) hash ^= TargetName.GetHashCode();
       if (HasProgram) hash ^= Program.GetHashCode();
+      if (HasTargetPhoneNumber) hash ^= TargetPhoneNumber.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -1807,6 +1834,10 @@ namespace Bgs.Protocol.Friends.V1 {
         output.WriteRawTag(85);
         output.WriteFixed32(Program);
       }
+      if (HasTargetPhoneNumber) {
+        output.WriteRawTag(90);
+        output.WriteString(TargetPhoneNumber);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1828,6 +1859,9 @@ namespace Bgs.Protocol.Friends.V1 {
       }
       if (HasProgram) {
         size += 1 + 4;
+      }
+      if (HasTargetPhoneNumber) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(TargetPhoneNumber);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -1853,6 +1887,9 @@ namespace Bgs.Protocol.Friends.V1 {
       }
       if (other.HasProgram) {
         Program = other.Program;
+      }
+      if (other.HasTargetPhoneNumber) {
+        TargetPhoneNumber = other.TargetPhoneNumber;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -1888,6 +1925,10 @@ namespace Bgs.Protocol.Friends.V1 {
           }
           case 85: {
             Program = input.ReadFixed32();
+            break;
+          }
+          case 90: {
+            TargetPhoneNumber = input.ReadString();
             break;
           }
         }

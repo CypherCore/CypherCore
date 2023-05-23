@@ -26,12 +26,12 @@ namespace Bgs.Protocol.Club.V1 {
           string.Concat(
             "CiNiZ3MvbG93L3BiL2NsaWVudC9jbHViX21lbWJlci5wcm90bxIUYmdzLnBy",
             "b3RvY29sLmNsdWIudjEaJmJncy9sb3cvcGIvY2xpZW50L2NsdWJfbWVtYmVy",
-            "X2lkLnByb3RvGjliZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9u",
-            "cy9tZXNzYWdlX29wdGlvbnMucHJvdG8aNWJncy9sb3cvcGIvY2xpZW50L2Fw",
-            "aS9jbGllbnQvdjIvYXR0cmlidXRlX3R5cGVzLnByb3RvGiFiZ3MvbG93L3Bi",
-            "L2NsaWVudC9jbHViX2VudW0ucHJvdG8aIWJncy9sb3cvcGIvY2xpZW50L3Jw",
-            "Y190eXBlcy5wcm90bxo3YmdzL2xvdy9wYi9jbGllbnQvZ2xvYmFsX2V4dGVu",
-            "c2lvbnMvZmllbGRfb3B0aW9ucy5wcm90bxo4YmdzL2xvdy9wYi9jbGllbnQv",
+            "X2lkLnByb3RvGjViZ3MvbG93L3BiL2NsaWVudC9hcGkvY2xpZW50L3YyL2F0",
+            "dHJpYnV0ZV90eXBlcy5wcm90bxohYmdzL2xvdy9wYi9jbGllbnQvY2x1Yl9l",
+            "bnVtLnByb3RvGiFiZ3MvbG93L3BiL2NsaWVudC9ycGNfdHlwZXMucHJvdG8a",
+            "N2Jncy9sb3cvcGIvY2xpZW50L2dsb2JhbF9leHRlbnNpb25zL2ZpZWxkX29w",
+            "dGlvbnMucHJvdG8aOWJncy9sb3cvcGIvY2xpZW50L2dsb2JhbF9leHRlbnNp",
+            "b25zL21lc3NhZ2Vfb3B0aW9ucy5wcm90bxo4YmdzL2xvdy9wYi9jbGllbnQv",
             "Z2xvYmFsX2V4dGVuc2lvbnMvbWV0aG9kX29wdGlvbnMucHJvdG8aOWJncy9s",
             "b3cvcGIvY2xpZW50L2dsb2JhbF9leHRlbnNpb25zL3NlcnZpY2Vfb3B0aW9u",
             "cy5wcm90byKyAwoGTWVtYmVyEioKAmlkGAEgASgLMh4uYmdzLnByb3RvY29s",
@@ -92,7 +92,7 @@ namespace Bgs.Protocol.Club.V1 {
             "V2hpc3BlckxldmVsOhJXSElTUEVSX0xFVkVMX09QRU4SDAoEbm90ZRgGIAEo",
             "CVAA"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Bgs.Protocol.Club.V1.ClubMemberIdReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.V2.AttributeTypesReflection.Descriptor, global::Bgs.Protocol.Club.V1.ClubEnumReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Bgs.Protocol.Club.V1.ClubMemberIdReflection.Descriptor, global::Bgs.Protocol.V2.AttributeTypesReflection.Descriptor, global::Bgs.Protocol.Club.V1.ClubEnumReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.Member), global::Bgs.Protocol.Club.V1.Member.Parser, new[]{ "Id", "BattleTag", "Role", "Attribute", "JoinTime", "PresenceLevel", "ModeratorMute", "WhisperLevel", "Note", "Active", "Voice" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.MemberResult), global::Bgs.Protocol.Club.V1.MemberResult.Parser, new[]{ "MemberId", "Status" }, null, null, null, null),

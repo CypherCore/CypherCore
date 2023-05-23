@@ -30,10 +30,10 @@ namespace Bgs.Protocol.Channel.V1 {
             "dHRyaWJ1dGVfdHlwZXMucHJvdG8aJGJncy9sb3cvcGIvY2xpZW50L2VudGl0",
             "eV90eXBlcy5wcm90bxolYmdzL2xvdy9wYi9jbGllbnQvYWNjb3VudF90eXBl",
             "cy5wcm90bxooYmdzL2xvdy9wYi9jbGllbnQvaW52aXRhdGlvbl90eXBlcy5w",
-            "cm90bxohYmdzL2xvdy9wYi9jbGllbnQvcnBjX3R5cGVzLnByb3RvGjliZ3Mv",
-            "bG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9ucy9tZXNzYWdlX29wdGlv",
-            "bnMucHJvdG8aN2Jncy9sb3cvcGIvY2xpZW50L2dsb2JhbF9leHRlbnNpb25z",
-            "L2ZpZWxkX29wdGlvbnMucHJvdG8aOGJncy9sb3cvcGIvY2xpZW50L2dsb2Jh",
+            "cm90bxohYmdzL2xvdy9wYi9jbGllbnQvcnBjX3R5cGVzLnByb3RvGjdiZ3Mv",
+            "bG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9ucy9maWVsZF9vcHRpb25z",
+            "LnByb3RvGjliZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9ucy9t",
+            "ZXNzYWdlX29wdGlvbnMucHJvdG8aOGJncy9sb3cvcGIvY2xpZW50L2dsb2Jh",
             "bF9leHRlbnNpb25zL21ldGhvZF9vcHRpb25zLnByb3RvGjliZ3MvbG93L3Bi",
             "L2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9ucy9zZXJ2aWNlX29wdGlvbnMucHJv",
             "dG8iPAoHTWVzc2FnZRIqCglhdHRyaWJ1dGUYASADKAsyFy5iZ3MucHJvdG9j",
@@ -73,7 +73,7 @@ namespace Bgs.Protocol.Channel.V1 {
             "EigKB3Byb2Nlc3MYAyABKAsyFy5iZ3MucHJvdG9jb2wuUHJvY2Vzc0lkOgaC",
             "+SsCEAFQAA=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Bgs.Protocol.Channel.V1.ChannelIdReflection.Descriptor, global::Bgs.Protocol.AttributeTypesReflection.Descriptor, global::Bgs.Protocol.EntityTypesReflection.Descriptor, global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor, global::Bgs.Protocol.InvitationTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Bgs.Protocol.Channel.V1.ChannelIdReflection.Descriptor, global::Bgs.Protocol.AttributeTypesReflection.Descriptor, global::Bgs.Protocol.EntityTypesReflection.Descriptor, global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor, global::Bgs.Protocol.InvitationTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Channel.V1.Message), global::Bgs.Protocol.Channel.V1.Message.Parser, new[]{ "Attribute" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Channel.V1.ListChannelsOptions), global::Bgs.Protocol.Channel.V1.ListChannelsOptions.Parser, new[]{ "StartIndex", "MaxResults", "Name", "Program", "Locale", "CapacityFull", "AttributeFilter", "ChannelType" }, null, null, null, null),

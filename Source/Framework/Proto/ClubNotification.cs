@@ -27,9 +27,9 @@ namespace Bgs.Protocol.Club.V1 {
             "CiliZ3MvbG93L3BiL2NsaWVudC9jbHViX25vdGlmaWNhdGlvbi5wcm90bxIU",
             "YmdzLnByb3RvY29sLmNsdWIudjEaImJncy9sb3cvcGIvY2xpZW50L2NsdWJf",
             "dHlwZXMucHJvdG8aIWJncy9sb3cvcGIvY2xpZW50L3JwY190eXBlcy5wcm90",
-            "bxo5YmdzL2xvdy9wYi9jbGllbnQvZ2xvYmFsX2V4dGVuc2lvbnMvbWVzc2Fn",
-            "ZV9vcHRpb25zLnByb3RvGjdiZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0",
-            "ZW5zaW9ucy9maWVsZF9vcHRpb25zLnByb3RvGjhiZ3MvbG93L3BiL2NsaWVu",
+            "bxo3YmdzL2xvdy9wYi9jbGllbnQvZ2xvYmFsX2V4dGVuc2lvbnMvZmllbGRf",
+            "b3B0aW9ucy5wcm90bxo5YmdzL2xvdy9wYi9jbGllbnQvZ2xvYmFsX2V4dGVu",
+            "c2lvbnMvbWVzc2FnZV9vcHRpb25zLnByb3RvGjhiZ3MvbG93L3BiL2NsaWVu",
             "dC9nbG9iYWxfZXh0ZW5zaW9ucy9tZXRob2Rfb3B0aW9ucy5wcm90bxo5Ymdz",
             "L2xvdy9wYi9jbGllbnQvZ2xvYmFsX2V4dGVuc2lvbnMvc2VydmljZV9vcHRp",
             "b25zLnByb3RvIpYCChVTdWJzY3JpYmVOb3RpZmljYXRpb24SMAoIYWdlbnRf",
@@ -114,7 +114,7 @@ namespace Bgs.Protocol.Club.V1 {
             "OQoEdmlldxgEIAMoCzIrLmJncy5wcm90b2NvbC5jbHViLnYxLlN0cmVhbUFk",
             "dmFuY2VWaWV3VGltZVAAUAE="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Bgs.Protocol.Club.V1.ClubTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Bgs.Protocol.Club.V1.ClubTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.SubscribeNotification), global::Bgs.Protocol.Club.V1.SubscribeNotification.Parser, new[]{ "AgentId", "ClubId", "Club", "View", "Settings", "Member" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.UnsubscribeNotification), global::Bgs.Protocol.Club.V1.UnsubscribeNotification.Parser, new[]{ "AgentId", "ClubId" }, null, null, null, null),

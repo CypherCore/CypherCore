@@ -27,22 +27,31 @@ namespace Bgs.Protocol.Resources.V1 {
             "CihiZ3MvbG93L3BiL2NsaWVudC9yZXNvdXJjZV9zZXJ2aWNlLnByb3RvEhli",
             "Z3MucHJvdG9jb2wucmVzb3VyY2VzLnYxGixiZ3MvbG93L3BiL2NsaWVudC9j",
             "b250ZW50X2hhbmRsZV90eXBlcy5wcm90bxohYmdzL2xvdy9wYi9jbGllbnQv",
-            "cnBjX3R5cGVzLnByb3RvGjliZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0",
-            "ZW5zaW9ucy9tZXNzYWdlX29wdGlvbnMucHJvdG8aN2Jncy9sb3cvcGIvY2xp",
-            "ZW50L2dsb2JhbF9leHRlbnNpb25zL2ZpZWxkX29wdGlvbnMucHJvdG8aOGJn",
+            "cnBjX3R5cGVzLnByb3RvGjdiZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0",
+            "ZW5zaW9ucy9maWVsZF9vcHRpb25zLnByb3RvGjliZ3MvbG93L3BiL2NsaWVu",
+            "dC9nbG9iYWxfZXh0ZW5zaW9ucy9tZXNzYWdlX29wdGlvbnMucHJvdG8aOGJn",
             "cy9sb3cvcGIvY2xpZW50L2dsb2JhbF9leHRlbnNpb25zL21ldGhvZF9vcHRp",
             "b25zLnByb3RvGjliZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9u",
             "cy9zZXJ2aWNlX29wdGlvbnMucHJvdG8iXAoUQ29udGVudEhhbmRsZVJlcXVl",
             "c3QSDwoHcHJvZ3JhbRgBIAIoBxIOCgZzdHJlYW0YAiACKAcSGwoHdmVyc2lv",
-            "bhgDIAEoBzoKMTcwMTcyOTYxOToGgvkrAhABMroBChBSZXNvdXJjZXNTZXJ2",
-            "aWNlEmgKEEdldENvbnRlbnRIYW5kbGUSLy5iZ3MucHJvdG9jb2wucmVzb3Vy",
-            "Y2VzLnYxLkNvbnRlbnRIYW5kbGVSZXF1ZXN0GhsuYmdzLnByb3RvY29sLkNv",
-            "bnRlbnRIYW5kbGUiBoL5KwIIARo8gvkrIwohYm5ldC5wcm90b2NvbC5yZXNv",
-            "dXJjZXMuUmVzb3VyY2VzgvkrCyoJcmVzb3VyY2VzivkrAhABQgOAAQA="));
+            "bhgDIAEoBzoKMTcwMTcyOTYxOToGgvkrAhABIk0KFEdldFRpdGxlSWNvbnNS",
+            "ZXF1ZXN0EhUKCXRpdGxlX2lkcxgBIAMoDUICEAESDQoFdXNhZ2UYAiABKA0S",
+            "DwoHdmVyc2lvbhgDIAEoDSJhChVHZXRUaXRsZUljb25zUmVzcG9uc2USSAoa",
+            "dGl0bGVfaWNvbl9jb250ZW50X2hhbmRsZXMYASADKAsyJC5iZ3MucHJvdG9j",
+            "b2wuVGl0bGVJY29uQ29udGVudEhhbmRsZTK2AgoQUmVzb3VyY2VzU2Vydmlj",
+            "ZRJoChBHZXRDb250ZW50SGFuZGxlEi8uYmdzLnByb3RvY29sLnJlc291cmNl",
+            "cy52MS5Db250ZW50SGFuZGxlUmVxdWVzdBobLmJncy5wcm90b2NvbC5Db250",
+            "ZW50SGFuZGxlIgaC+SsCCAESegoNR2V0VGl0bGVJY29ucxIvLmJncy5wcm90",
+            "b2NvbC5yZXNvdXJjZXMudjEuR2V0VGl0bGVJY29uc1JlcXVlc3QaMC5iZ3Mu",
+            "cHJvdG9jb2wucmVzb3VyY2VzLnYxLkdldFRpdGxlSWNvbnNSZXNwb25zZSIG",
+            "gvkrAggCGjyC+SsjCiFibmV0LnByb3RvY29sLnJlc291cmNlcy5SZXNvdXJj",
+            "ZXOC+SsLKglyZXNvdXJjZXOK+SsCEAFCA4ABAA=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Bgs.Protocol.ContentHandleTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Bgs.Protocol.ContentHandleTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Resources.V1.ContentHandleRequest), global::Bgs.Protocol.Resources.V1.ContentHandleRequest.Parser, new[]{ "Program", "Stream", "Version" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Resources.V1.ContentHandleRequest), global::Bgs.Protocol.Resources.V1.ContentHandleRequest.Parser, new[]{ "Program", "Stream", "Version" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Resources.V1.GetTitleIconsRequest), global::Bgs.Protocol.Resources.V1.GetTitleIconsRequest.Parser, new[]{ "TitleIds", "Usage", "Version" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Resources.V1.GetTitleIconsResponse), global::Bgs.Protocol.Resources.V1.GetTitleIconsResponse.Parser, new[]{ "TitleIconContentHandles" }, null, null, null, null)
           }));
     }
     #endregion
@@ -267,6 +276,333 @@ namespace Bgs.Protocol.Resources.V1 {
           }
           case 29: {
             Version = input.ReadFixed32();
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class GetTitleIconsRequest : pb::IMessage<GetTitleIconsRequest> {
+    private static readonly pb::MessageParser<GetTitleIconsRequest> _parser = new pb::MessageParser<GetTitleIconsRequest>(() => new GetTitleIconsRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    private int _hasBits0;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<GetTitleIconsRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Bgs.Protocol.Resources.V1.ResourceServiceReflection.Descriptor.MessageTypes[1]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public GetTitleIconsRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public GetTitleIconsRequest(GetTitleIconsRequest other) : this() {
+      _hasBits0 = other._hasBits0;
+      titleIds_ = other.titleIds_.Clone();
+      usage_ = other.usage_;
+      version_ = other.version_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public GetTitleIconsRequest Clone() {
+      return new GetTitleIconsRequest(this);
+    }
+
+    /// <summary>Field number for the "title_ids" field.</summary>
+    public const int TitleIdsFieldNumber = 1;
+    private static readonly pb::FieldCodec<uint> _repeated_titleIds_codec
+        = pb::FieldCodec.ForUInt32(10);
+    private readonly pbc::RepeatedField<uint> titleIds_ = new pbc::RepeatedField<uint>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<uint> TitleIds {
+      get { return titleIds_; }
+    }
+
+    /// <summary>Field number for the "usage" field.</summary>
+    public const int UsageFieldNumber = 2;
+    private readonly static uint UsageDefaultValue = 0;
+
+    private uint usage_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint Usage {
+      get { if ((_hasBits0 & 1) != 0) { return usage_; } else { return UsageDefaultValue; } }
+      set {
+        _hasBits0 |= 1;
+        usage_ = value;
+      }
+    }
+    /// <summary>Gets whether the "usage" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasUsage {
+      get { return (_hasBits0 & 1) != 0; }
+    }
+    /// <summary>Clears the value of the "usage" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearUsage() {
+      _hasBits0 &= ~1;
+    }
+
+    /// <summary>Field number for the "version" field.</summary>
+    public const int VersionFieldNumber = 3;
+    private readonly static uint VersionDefaultValue = 0;
+
+    private uint version_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint Version {
+      get { if ((_hasBits0 & 2) != 0) { return version_; } else { return VersionDefaultValue; } }
+      set {
+        _hasBits0 |= 2;
+        version_ = value;
+      }
+    }
+    /// <summary>Gets whether the "version" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasVersion {
+      get { return (_hasBits0 & 2) != 0; }
+    }
+    /// <summary>Clears the value of the "version" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearVersion() {
+      _hasBits0 &= ~2;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as GetTitleIconsRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(GetTitleIconsRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if(!titleIds_.Equals(other.titleIds_)) return false;
+      if (Usage != other.Usage) return false;
+      if (Version != other.Version) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      hash ^= titleIds_.GetHashCode();
+      if (HasUsage) hash ^= Usage.GetHashCode();
+      if (HasVersion) hash ^= Version.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      titleIds_.WriteTo(output, _repeated_titleIds_codec);
+      if (HasUsage) {
+        output.WriteRawTag(16);
+        output.WriteUInt32(Usage);
+      }
+      if (HasVersion) {
+        output.WriteRawTag(24);
+        output.WriteUInt32(Version);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      size += titleIds_.CalculateSize(_repeated_titleIds_codec);
+      if (HasUsage) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Usage);
+      }
+      if (HasVersion) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Version);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(GetTitleIconsRequest other) {
+      if (other == null) {
+        return;
+      }
+      titleIds_.Add(other.titleIds_);
+      if (other.HasUsage) {
+        Usage = other.Usage;
+      }
+      if (other.HasVersion) {
+        Version = other.Version;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10:
+          case 8: {
+            titleIds_.AddEntriesFrom(input, _repeated_titleIds_codec);
+            break;
+          }
+          case 16: {
+            Usage = input.ReadUInt32();
+            break;
+          }
+          case 24: {
+            Version = input.ReadUInt32();
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class GetTitleIconsResponse : pb::IMessage<GetTitleIconsResponse> {
+    private static readonly pb::MessageParser<GetTitleIconsResponse> _parser = new pb::MessageParser<GetTitleIconsResponse>(() => new GetTitleIconsResponse());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<GetTitleIconsResponse> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Bgs.Protocol.Resources.V1.ResourceServiceReflection.Descriptor.MessageTypes[2]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public GetTitleIconsResponse() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public GetTitleIconsResponse(GetTitleIconsResponse other) : this() {
+      titleIconContentHandles_ = other.titleIconContentHandles_.Clone();
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public GetTitleIconsResponse Clone() {
+      return new GetTitleIconsResponse(this);
+    }
+
+    /// <summary>Field number for the "title_icon_content_handles" field.</summary>
+    public const int TitleIconContentHandlesFieldNumber = 1;
+    private static readonly pb::FieldCodec<global::Bgs.Protocol.TitleIconContentHandle> _repeated_titleIconContentHandles_codec
+        = pb::FieldCodec.ForMessage(10, global::Bgs.Protocol.TitleIconContentHandle.Parser);
+    private readonly pbc::RepeatedField<global::Bgs.Protocol.TitleIconContentHandle> titleIconContentHandles_ = new pbc::RepeatedField<global::Bgs.Protocol.TitleIconContentHandle>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<global::Bgs.Protocol.TitleIconContentHandle> TitleIconContentHandles {
+      get { return titleIconContentHandles_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as GetTitleIconsResponse);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(GetTitleIconsResponse other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if(!titleIconContentHandles_.Equals(other.titleIconContentHandles_)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      hash ^= titleIconContentHandles_.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      titleIconContentHandles_.WriteTo(output, _repeated_titleIconContentHandles_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      size += titleIconContentHandles_.CalculateSize(_repeated_titleIconContentHandles_codec);
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(GetTitleIconsResponse other) {
+      if (other == null) {
+        return;
+      }
+      titleIconContentHandles_.Add(other.titleIconContentHandles_);
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            titleIconContentHandles_.AddEntriesFrom(input, _repeated_titleIconContentHandles_codec);
             break;
           }
         }

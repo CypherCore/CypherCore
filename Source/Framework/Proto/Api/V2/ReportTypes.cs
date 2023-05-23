@@ -27,42 +27,40 @@ namespace Bgs.Protocol.Report.V2 {
             "CjJiZ3MvbG93L3BiL2NsaWVudC9hcGkvY2xpZW50L3YyL3JlcG9ydF90eXBl",
             "cy5wcm90bxIWYmdzLnByb3RvY29sLnJlcG9ydC52Mho1YmdzL2xvdy9wYi9j",
             "bGllbnQvYXBpL2NsaWVudC92Mi9hdHRyaWJ1dGVfdHlwZXMucHJvdG8aJWJn",
-            "cy9sb3cvcGIvY2xpZW50L2FjY291bnRfdHlwZXMucHJvdG8aIWJncy9sb3cv",
-            "cGIvY2xpZW50L3JwY190eXBlcy5wcm90bxolYmdzL2xvdy9wYi9jbGllbnQv",
-            "bWVzc2FnZV90eXBlcy5wcm90bxo5YmdzL2xvdy9wYi9jbGllbnQvZ2xvYmFs",
-            "X2V4dGVuc2lvbnMvbWVzc2FnZV9vcHRpb25zLnByb3RvGjdiZ3MvbG93L3Bi",
-            "L2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9ucy9maWVsZF9vcHRpb25zLnByb3Rv",
-            "GjhiZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9ucy9tZXRob2Rf",
-            "b3B0aW9ucy5wcm90bxo5YmdzL2xvdy9wYi9jbGllbnQvZ2xvYmFsX2V4dGVu",
-            "c2lvbnMvc2VydmljZV9vcHRpb25zLnByb3RvIkMKClJlcG9ydEl0ZW0SLQoK",
-            "bWVzc2FnZV9pZBgBIAEoCzIXLmJncy5wcm90b2NvbC5NZXNzYWdlSWRIAEIG",
-            "CgR0eXBlIv8BCgtVc2VyT3B0aW9ucxI1Cgl0YXJnZXRfaWQYASABKAsyIi5i",
-            "Z3MucHJvdG9jb2wuYWNjb3VudC52MS5BY2NvdW50SWQSQAoEdHlwZRgCIAEo",
-            "DjIhLmJncy5wcm90b2NvbC5yZXBvcnQudjIuSXNzdWVUeXBlOg9JU1NVRV9U",
-            "WVBFX1NQQU0SRQoGc291cmNlGAMgASgOMiIuYmdzLnByb3RvY29sLnJlcG9y",
-            "dC52Mi5Vc2VyU291cmNlOhFVU0VSX1NPVVJDRV9PVEhFUhIwCgRpdGVtGAQg",
-            "ASgLMiIuYmdzLnByb3RvY29sLnJlcG9ydC52Mi5SZXBvcnRJdGVtIuwBCgtD",
-            "bHViT3B0aW9ucxIPCgdjbHViX2lkGAEgASgEEhEKCXN0cmVhbV9pZBgCIAEo",
-            "BBJACgR0eXBlGAMgASgOMiEuYmdzLnByb3RvY29sLnJlcG9ydC52Mi5Jc3N1",
-            "ZVR5cGU6D0lTU1VFX1RZUEVfU1BBTRJFCgZzb3VyY2UYBCABKA4yIi5iZ3Mu",
-            "cHJvdG9jb2wucmVwb3J0LnYyLkNsdWJTb3VyY2U6EUNMVUJfU09VUkNFX09U",
-            "SEVSEjAKBGl0ZW0YBSABKAsyIi5iZ3MucHJvdG9jb2wucmVwb3J0LnYyLlJl",
-            "cG9ydEl0ZW0ikwEKDUVudGl0eU9wdGlvbnMSKAoJZW50aXR5X2lkGAEgASgJ",
-            "QhWK+SsGIgQKAggBivkrByIFCgMQyAESKQoLZW50aXR5X3R5cGUYAiABKAlC",
-            "FIr5KwYiBAoCCAGK+SsGIgQKAhBkEi0KCWF0dHJpYnV0ZRgFIAMoCzIaLmJn",
-            "cy5wcm90b2NvbC52Mi5BdHRyaWJ1dGUqjQEKCUlzc3VlVHlwZRITCg9JU1NV",
-            "RV9UWVBFX1NQQU0QABIZChVJU1NVRV9UWVBFX0hBUkFTU01FTlQQARIgChxJ",
-            "U1NVRV9UWVBFX09GRkVOU0lWRV9DT05URU5UEAMSFgoSSVNTVUVfVFlQRV9I",
-            "QUNLSU5HEAQSFgoSSVNTVUVfVFlQRV9CT1RUSU5HEAUqwQEKClVzZXJTb3Vy",
-            "Y2USFQoRVVNFUl9TT1VSQ0VfT1RIRVIQABIXChNVU0VSX1NPVVJDRV9XSElT",
-            "UEVSEAESFwoTVVNFUl9TT1VSQ0VfUFJPRklMRRACEhoKFlVTRVJfU09VUkNF",
-            "X0JBVFRMRV9UQUcQAxIUChBVU0VSX1NPVVJDRV9DSEFUEAQSIQodVVNFUl9T",
-            "T1VSQ0VfRlJJRU5EX0lOVklUQVRJT04QBRIVChFVU0VSX1NPVVJDRV9WT0lD",
-            "RRAGKnQKCkNsdWJTb3VyY2USFQoRQ0xVQl9TT1VSQ0VfT1RIRVIQABIXChND",
-            "TFVCX1NPVVJDRV9NRVNTQUdFEAESGQoVQ0xVQl9TT1VSQ0VfQ0xVQl9OQU1F",
-            "EAISGwoXQ0xVQl9TT1VSQ0VfU1RSRUFNX05BTUUQA0IDgAEA"));
+            "cy9sb3cvcGIvY2xpZW50L2FjY291bnRfdHlwZXMucHJvdG8aJWJncy9sb3cv",
+            "cGIvY2xpZW50L21lc3NhZ2VfdHlwZXMucHJvdG8aN2Jncy9sb3cvcGIvY2xp",
+            "ZW50L2dsb2JhbF9leHRlbnNpb25zL2ZpZWxkX29wdGlvbnMucHJvdG8iQwoK",
+            "UmVwb3J0SXRlbRItCgptZXNzYWdlX2lkGAEgASgLMhcuYmdzLnByb3RvY29s",
+            "Lk1lc3NhZ2VJZEgAQgYKBHR5cGUi/wEKC1VzZXJPcHRpb25zEjUKCXRhcmdl",
+            "dF9pZBgBIAEoCzIiLmJncy5wcm90b2NvbC5hY2NvdW50LnYxLkFjY291bnRJ",
+            "ZBJACgR0eXBlGAIgASgOMiEuYmdzLnByb3RvY29sLnJlcG9ydC52Mi5Jc3N1",
+            "ZVR5cGU6D0lTU1VFX1RZUEVfU1BBTRJFCgZzb3VyY2UYAyABKA4yIi5iZ3Mu",
+            "cHJvdG9jb2wucmVwb3J0LnYyLlVzZXJTb3VyY2U6EVVTRVJfU09VUkNFX09U",
+            "SEVSEjAKBGl0ZW0YBCABKAsyIi5iZ3MucHJvdG9jb2wucmVwb3J0LnYyLlJl",
+            "cG9ydEl0ZW0i6wEKC0NsdWJPcHRpb25zEg8KB2NsdWJfaWQYASABKAQSEQoJ",
+            "c3RyZWFtX2lkGAIgASgEEkAKBHR5cGUYAyABKA4yIS5iZ3MucHJvdG9jb2wu",
+            "cmVwb3J0LnYyLklzc3VlVHlwZToPSVNTVUVfVFlQRV9TUEFNEkQKBnNvdXJj",
+            "ZRgEIAEoDjIiLmJncy5wcm90b2NvbC5yZXBvcnQudjIuQ2x1YlNvdXJjZToQ",
+            "Q0xVQl9TT1VSQ0VfTk9ORRIwCgRpdGVtGAUgASgLMiIuYmdzLnByb3RvY29s",
+            "LnJlcG9ydC52Mi5SZXBvcnRJdGVtIpMBCg1FbnRpdHlPcHRpb25zEigKCWVu",
+            "dGl0eV9pZBgBIAEoCUIVivkrBiIECgIIAYr5KwciBQoDEMgBEikKC2VudGl0",
+            "eV90eXBlGAIgASgJQhSK+SsGIgQKAggBivkrBiIECgIQZBItCglhdHRyaWJ1",
+            "dGUYBSADKAsyGi5iZ3MucHJvdG9jb2wudjIuQXR0cmlidXRlKo0BCglJc3N1",
+            "ZVR5cGUSEwoPSVNTVUVfVFlQRV9TUEFNEAASGQoVSVNTVUVfVFlQRV9IQVJB",
+            "U1NNRU5UEAESIAocSVNTVUVfVFlQRV9PRkZFTlNJVkVfQ09OVEVOVBADEhYK",
+            "EklTU1VFX1RZUEVfSEFDS0lORxAEEhYKEklTU1VFX1RZUEVfQk9UVElORxAF",
+            "KsEBCgpVc2VyU291cmNlEhUKEVVTRVJfU09VUkNFX09USEVSEAASFwoTVVNF",
+            "Ul9TT1VSQ0VfV0hJU1BFUhABEhcKE1VTRVJfU09VUkNFX1BST0ZJTEUQAhIa",
+            "ChZVU0VSX1NPVVJDRV9CQVRUTEVfVEFHEAMSFAoQVVNFUl9TT1VSQ0VfQ0hB",
+            "VBAEEiEKHVVTRVJfU09VUkNFX0ZSSUVORF9JTlZJVEFUSU9OEAUSFQoRVVNF",
+            "Ul9TT1VSQ0VfVk9JQ0UQBirxAQoKQ2x1YlNvdXJjZRIUChBDTFVCX1NPVVJD",
+            "RV9OT05FEAASFwoTQ0xVQl9TT1VSQ0VfTUVTU0FHRRABEhkKFUNMVUJfU09V",
+            "UkNFX0NMVUJfTkFNRRACEhsKF0NMVUJfU09VUkNFX1NUUkVBTV9OQU1FEAMS",
+            "GQoVQ0xVQl9TT1VSQ0VfQlJPQURDQVNUEAQSHwobQ0xVQl9TT1VSQ0VfQ0xV",
+            "Ql9TSE9SVF9OQU1FEAUSIAocQ0xVQl9TT1VSQ0VfQ0xVQl9ERVNDUklQVElP",
+            "ThAGEh4KGkNMVUJfU09VUkNFX1NUUkVBTV9TVUJKRUNUEAdCA4ABAA=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Bgs.Protocol.V2.AttributeTypesReflection.Descriptor, global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.MessageTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Bgs.Protocol.V2.AttributeTypesReflection.Descriptor, global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor, global::Bgs.Protocol.MessageTypesReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Bgs.Protocol.Report.V2.IssueType), typeof(global::Bgs.Protocol.Report.V2.UserSource), typeof(global::Bgs.Protocol.Report.V2.ClubSource), }, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Report.V2.ReportItem), global::Bgs.Protocol.Report.V2.ReportItem.Parser, new[]{ "MessageId" }, new[]{ "Type" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Report.V2.UserOptions), global::Bgs.Protocol.Report.V2.UserOptions.Parser, new[]{ "TargetId", "Type", "Source", "Item" }, null, null, null, null),
@@ -93,10 +91,14 @@ namespace Bgs.Protocol.Report.V2 {
   }
 
   public enum ClubSource {
-    [pbr::OriginalName("CLUB_SOURCE_OTHER")] Other = 0,
+    [pbr::OriginalName("CLUB_SOURCE_NONE")] None = 0,
     [pbr::OriginalName("CLUB_SOURCE_MESSAGE")] Message = 1,
     [pbr::OriginalName("CLUB_SOURCE_CLUB_NAME")] ClubName = 2,
     [pbr::OriginalName("CLUB_SOURCE_STREAM_NAME")] StreamName = 3,
+    [pbr::OriginalName("CLUB_SOURCE_BROADCAST")] Broadcast = 4,
+    [pbr::OriginalName("CLUB_SOURCE_CLUB_SHORT_NAME")] ClubShortName = 5,
+    [pbr::OriginalName("CLUB_SOURCE_CLUB_DESCRIPTION")] ClubDescription = 6,
+    [pbr::OriginalName("CLUB_SOURCE_STREAM_SUBJECT")] StreamSubject = 7,
   }
 
   #endregion
@@ -666,7 +668,7 @@ namespace Bgs.Protocol.Report.V2 {
 
     /// <summary>Field number for the "source" field.</summary>
     public const int SourceFieldNumber = 4;
-    private readonly static global::Bgs.Protocol.Report.V2.ClubSource SourceDefaultValue = global::Bgs.Protocol.Report.V2.ClubSource.Other;
+    private readonly static global::Bgs.Protocol.Report.V2.ClubSource SourceDefaultValue = global::Bgs.Protocol.Report.V2.ClubSource.None;
 
     private global::Bgs.Protocol.Report.V2.ClubSource source_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

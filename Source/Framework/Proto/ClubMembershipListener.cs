@@ -26,9 +26,9 @@ namespace Bgs.Protocol.Club.V1.Membership {
           string.Concat(
             "CjBiZ3MvbG93L3BiL2NsaWVudC9jbHViX21lbWJlcnNoaXBfbGlzdGVuZXIu",
             "cHJvdG8SH2Jncy5wcm90b2NvbC5jbHViLnYxLm1lbWJlcnNoaXAaImJncy9s",
-            "b3cvcGIvY2xpZW50L2NsdWJfdHlwZXMucHJvdG8aOWJncy9sb3cvcGIvY2xp",
-            "ZW50L2dsb2JhbF9leHRlbnNpb25zL21lc3NhZ2Vfb3B0aW9ucy5wcm90bxo3",
-            "YmdzL2xvdy9wYi9jbGllbnQvZ2xvYmFsX2V4dGVuc2lvbnMvZmllbGRfb3B0",
+            "b3cvcGIvY2xpZW50L2NsdWJfdHlwZXMucHJvdG8aN2Jncy9sb3cvcGIvY2xp",
+            "ZW50L2dsb2JhbF9leHRlbnNpb25zL2ZpZWxkX29wdGlvbnMucHJvdG8aOWJn",
+            "cy9sb3cvcGIvY2xpZW50L2dsb2JhbF9leHRlbnNpb25zL21lc3NhZ2Vfb3B0",
             "aW9ucy5wcm90bxo4YmdzL2xvdy9wYi9jbGllbnQvZ2xvYmFsX2V4dGVuc2lv",
             "bnMvbWV0aG9kX29wdGlvbnMucHJvdG8aOWJncy9sb3cvcGIvY2xpZW50L2ds",
             "b2JhbF9leHRlbnNpb25zL3NlcnZpY2Vfb3B0aW9ucy5wcm90byKOAQoVQ2x1",
@@ -60,7 +60,7 @@ namespace Bgs.Protocol.Club.V1.Membership {
             "X2lkGAMgASgLMhouYmdzLnByb3RvY29sLlRpbWVTZXJpZXNJZCJzCihTdHJl",
             "YW1NZW50aW9uQWR2YW5jZVZpZXdUaW1lTm90aWZpY2F0aW9uEjQKCGFnZW50",
             "X2lkGAEgASgLMiIuYmdzLnByb3RvY29sLmFjY291bnQudjEuQWNjb3VudElk",
-            "EhEKCXZpZXdfdGltZRgDIAEoBDKECQoWQ2x1Yk1lbWJlcnNoaXBMaXN0ZW5l",
+            "EhEKCXZpZXdfdGltZRgDIAEoBDKKCQoWQ2x1Yk1lbWJlcnNoaXBMaXN0ZW5l",
             "chJuCgtPbkNsdWJBZGRlZBI2LmJncy5wcm90b2NvbC5jbHViLnYxLm1lbWJl",
             "cnNoaXAuQ2x1YkFkZGVkTm90aWZpY2F0aW9uGhkuYmdzLnByb3RvY29sLk5P",
             "X1JFU1BPTlNFIgyC+SsCCAGC+SsCGAEScgoNT25DbHViUmVtb3ZlZBI4LmJn",
@@ -84,11 +84,11 @@ namespace Bgs.Protocol.Club.V1.Membership {
             "T05TRSIMgvkrAggHgvkrAhgBEpQBCh5PblN0cmVhbU1lbnRpb25BZHZhbmNl",
             "Vmlld1RpbWUSSS5iZ3MucHJvdG9jb2wuY2x1Yi52MS5tZW1iZXJzaGlwLlN0",
             "cmVhbU1lbnRpb25BZHZhbmNlVmlld1RpbWVOb3RpZmljYXRpb24aGS5iZ3Mu",
-            "cHJvdG9jb2wuTk9fUkVTUE9OU0UiDIL5KwIICIL5KwIYARo+gvkrLgosYm5l",
-            "dC5wcm90b2NvbC5jbHViLnYxLkNsdWJNZW1iZXJzaGlwTGlzdGVuZXKK+SsC",
-            "CAGK+SsCGAFCA4ABAA=="));
+            "cHJvdG9jb2wuTk9fUkVTUE9OU0UiDIL5KwIICIL5KwIYARpEgvkrLgosYm5l",
+            "dC5wcm90b2NvbC5jbHViLnYxLkNsdWJNZW1iZXJzaGlwTGlzdGVuZXKC+SsC",
+            "OAGK+SsCCAGK+SsCGAFCA4ABAA=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Bgs.Protocol.Club.V1.ClubTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Bgs.Protocol.Club.V1.ClubTypesReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.Membership.ClubAddedNotification), global::Bgs.Protocol.Club.V1.Membership.ClubAddedNotification.Parser, new[]{ "AgentId", "Membership" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.Membership.ClubRemovedNotification), global::Bgs.Protocol.Club.V1.Membership.ClubRemovedNotification.Parser, new[]{ "AgentId", "MemberId", "ClubId", "Reason" }, null, null, null, null),

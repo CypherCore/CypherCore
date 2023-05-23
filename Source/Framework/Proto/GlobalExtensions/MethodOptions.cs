@@ -27,20 +27,22 @@ namespace Bgs.Protocol {
             "CjhiZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9ucy9tZXRob2Rf",
             "b3B0aW9ucy5wcm90bxIMYmdzLnByb3RvY29sGiBnb29nbGUvcHJvdG9idWYv",
             "ZGVzY3JpcHRvci5wcm90bxoxYmdzL2xvdy9wYi9jbGllbnQvZ2xvYmFsX2V4",
-            "dGVuc2lvbnMvcm91dGluZy5wcm90byKVAgoQQkdTTWV0aG9kT3B0aW9ucxIK",
+            "dGVuc2lvbnMvcm91dGluZy5wcm90byLoAgoQQkdTTWV0aG9kT3B0aW9ucxIK",
             "CgJpZBgBIAEoDRJqChdjbGllbnRfaWRlbnRpdHlfcm91dGluZxgCIAEoDjIn",
             "LmJncy5wcm90b2NvbC5DbGllbnRJZGVudGl0eVJvdXRpbmdUeXBlOiBDTElF",
             "TlRfSURFTlRJVFlfUk9VVElOR19ESVNBQkxFRBIVCg1lbmFibGVfZmFub3V0",
             "GAMgASgIEiEKGWxlZ2FjeV9mYW5vdXRfcmVwbGFjZW1lbnQYBCABKAkSEwoL",
             "Zm9yd2FyZF9rZXkYBSABKAkSEgoKaWRlbXBvdGVudBgGIAEoCBImCh5oYW5k",
-            "bGVfZGVzdGluYXRpb25fdW5yZWFjaGFibGUYByABKAg6WAoObWV0aG9kX29w",
-            "dGlvbnMSHi5nb29nbGUucHJvdG9idWYuTWV0aG9kT3B0aW9ucxiQvwUgASgL",
-            "Mh4uYmdzLnByb3RvY29sLkJHU01ldGhvZE9wdGlvbnNCIwoNYm5ldC5wcm90",
-            "b2NvbEISTWV0aG9kT3B0aW9uc1Byb3Rv"));
+            "bGVfZGVzdGluYXRpb25fdW5yZWFjaGFibGUYByABKAgSHgoWY3VzdG9tX3Jl",
+            "Z2lvbl9yZXNvbHZlchgIIAEoCRIfChdleHBsaWNpdF9yZWdpb25fcm91dGlu",
+            "ZxgJIAEoCBIQCghvYnNvbGV0ZRgKIAEoCDpYCg5tZXRob2Rfb3B0aW9ucxIe",
+            "Lmdvb2dsZS5wcm90b2J1Zi5NZXRob2RPcHRpb25zGJC/BSABKAsyHi5iZ3Mu",
+            "cHJvdG9jb2wuQkdTTWV0aG9kT3B0aW9uc0IiCgxiZ3MucHJvdG9jb2xCEk1l",
+            "dGhvZE9wdGlvbnNQcm90bw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Google.Protobuf.DescriptorReflection.Descriptor, global::Bgs.Protocol.RoutingReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pb::Extension[] { MethodOptionsExtensions.MethodOptions_ }, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.BGSMethodOptions), global::Bgs.Protocol.BGSMethodOptions.Parser, new[]{ "Id", "ClientIdentityRouting", "EnableFanout", "LegacyFanoutReplacement", "ForwardKey", "Idempotent", "HandleDestinationUnreachable" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.BGSMethodOptions), global::Bgs.Protocol.BGSMethodOptions.Parser, new[]{ "Id", "ClientIdentityRouting", "EnableFanout", "LegacyFanoutReplacement", "ForwardKey", "Idempotent", "HandleDestinationUnreachable", "CustomRegionResolver", "ExplicitRegionRouting", "Obsolete" }, null, null, null, null)
           }));
     }
     #endregion
@@ -87,6 +89,9 @@ namespace Bgs.Protocol {
       forwardKey_ = other.forwardKey_;
       idempotent_ = other.idempotent_;
       handleDestinationUnreachable_ = other.handleDestinationUnreachable_;
+      customRegionResolver_ = other.customRegionResolver_;
+      explicitRegionRouting_ = other.explicitRegionRouting_;
+      obsolete_ = other.obsolete_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -261,6 +266,77 @@ namespace Bgs.Protocol {
       _hasBits0 &= ~16;
     }
 
+    /// <summary>Field number for the "custom_region_resolver" field.</summary>
+    public const int CustomRegionResolverFieldNumber = 8;
+    private readonly static string CustomRegionResolverDefaultValue = "";
+
+    private string customRegionResolver_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string CustomRegionResolver {
+      get { return customRegionResolver_ ?? CustomRegionResolverDefaultValue; }
+      set {
+        customRegionResolver_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "custom_region_resolver" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasCustomRegionResolver {
+      get { return customRegionResolver_ != null; }
+    }
+    /// <summary>Clears the value of the "custom_region_resolver" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearCustomRegionResolver() {
+      customRegionResolver_ = null;
+    }
+
+    /// <summary>Field number for the "explicit_region_routing" field.</summary>
+    public const int ExplicitRegionRoutingFieldNumber = 9;
+    private readonly static bool ExplicitRegionRoutingDefaultValue = false;
+
+    private bool explicitRegionRouting_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool ExplicitRegionRouting {
+      get { if ((_hasBits0 & 32) != 0) { return explicitRegionRouting_; } else { return ExplicitRegionRoutingDefaultValue; } }
+      set {
+        _hasBits0 |= 32;
+        explicitRegionRouting_ = value;
+      }
+    }
+    /// <summary>Gets whether the "explicit_region_routing" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasExplicitRegionRouting {
+      get { return (_hasBits0 & 32) != 0; }
+    }
+    /// <summary>Clears the value of the "explicit_region_routing" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearExplicitRegionRouting() {
+      _hasBits0 &= ~32;
+    }
+
+    /// <summary>Field number for the "obsolete" field.</summary>
+    public const int ObsoleteFieldNumber = 10;
+    private readonly static bool ObsoleteDefaultValue = false;
+
+    private bool obsolete_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Obsolete {
+      get { if ((_hasBits0 & 64) != 0) { return obsolete_; } else { return ObsoleteDefaultValue; } }
+      set {
+        _hasBits0 |= 64;
+        obsolete_ = value;
+      }
+    }
+    /// <summary>Gets whether the "obsolete" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasObsolete {
+      get { return (_hasBits0 & 64) != 0; }
+    }
+    /// <summary>Clears the value of the "obsolete" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearObsolete() {
+      _hasBits0 &= ~64;
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as BGSMethodOptions);
@@ -281,6 +357,9 @@ namespace Bgs.Protocol {
       if (ForwardKey != other.ForwardKey) return false;
       if (Idempotent != other.Idempotent) return false;
       if (HandleDestinationUnreachable != other.HandleDestinationUnreachable) return false;
+      if (CustomRegionResolver != other.CustomRegionResolver) return false;
+      if (ExplicitRegionRouting != other.ExplicitRegionRouting) return false;
+      if (Obsolete != other.Obsolete) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -294,6 +373,9 @@ namespace Bgs.Protocol {
       if (HasForwardKey) hash ^= ForwardKey.GetHashCode();
       if (HasIdempotent) hash ^= Idempotent.GetHashCode();
       if (HasHandleDestinationUnreachable) hash ^= HandleDestinationUnreachable.GetHashCode();
+      if (HasCustomRegionResolver) hash ^= CustomRegionResolver.GetHashCode();
+      if (HasExplicitRegionRouting) hash ^= ExplicitRegionRouting.GetHashCode();
+      if (HasObsolete) hash ^= Obsolete.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -335,6 +417,18 @@ namespace Bgs.Protocol {
         output.WriteRawTag(56);
         output.WriteBool(HandleDestinationUnreachable);
       }
+      if (HasCustomRegionResolver) {
+        output.WriteRawTag(66);
+        output.WriteString(CustomRegionResolver);
+      }
+      if (HasExplicitRegionRouting) {
+        output.WriteRawTag(72);
+        output.WriteBool(ExplicitRegionRouting);
+      }
+      if (HasObsolete) {
+        output.WriteRawTag(80);
+        output.WriteBool(Obsolete);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -362,6 +456,15 @@ namespace Bgs.Protocol {
         size += 1 + 1;
       }
       if (HasHandleDestinationUnreachable) {
+        size += 1 + 1;
+      }
+      if (HasCustomRegionResolver) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(CustomRegionResolver);
+      }
+      if (HasExplicitRegionRouting) {
+        size += 1 + 1;
+      }
+      if (HasObsolete) {
         size += 1 + 1;
       }
       if (_unknownFields != null) {
@@ -395,6 +498,15 @@ namespace Bgs.Protocol {
       }
       if (other.HasHandleDestinationUnreachable) {
         HandleDestinationUnreachable = other.HandleDestinationUnreachable;
+      }
+      if (other.HasCustomRegionResolver) {
+        CustomRegionResolver = other.CustomRegionResolver;
+      }
+      if (other.HasExplicitRegionRouting) {
+        ExplicitRegionRouting = other.ExplicitRegionRouting;
+      }
+      if (other.HasObsolete) {
+        Obsolete = other.Obsolete;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -433,6 +545,18 @@ namespace Bgs.Protocol {
           }
           case 56: {
             HandleDestinationUnreachable = input.ReadBool();
+            break;
+          }
+          case 66: {
+            CustomRegionResolver = input.ReadString();
+            break;
+          }
+          case 72: {
+            ExplicitRegionRouting = input.ReadBool();
+            break;
+          }
+          case 80: {
+            Obsolete = input.ReadBool();
             break;
           }
         }

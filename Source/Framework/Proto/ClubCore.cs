@@ -25,96 +25,117 @@ namespace Bgs.Protocol.Club.V1 {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "CiFiZ3MvbG93L3BiL2NsaWVudC9jbHViX2NvcmUucHJvdG8SFGJncy5wcm90",
-            "b2NvbC5jbHViLnYxGiFiZ3MvbG93L3BiL2NsaWVudC9jbHViX2VudW0ucHJv",
-            "dG8aIWJncy9sb3cvcGIvY2xpZW50L2NsdWJfcm9sZS5wcm90bxojYmdzL2xv",
-            "dy9wYi9jbGllbnQvY2x1Yl9tZW1iZXIucHJvdG8aI2Jncy9sb3cvcGIvY2xp",
-            "ZW50L2NsdWJfc3RyZWFtLnByb3RvGjViZ3MvbG93L3BiL2NsaWVudC9hcGkv",
-            "Y2xpZW50L3YyL2F0dHJpYnV0ZV90eXBlcy5wcm90bxooYmdzL2xvdy9wYi9j",
-            "bGllbnQvZXZlbnRfdmlld190eXBlcy5wcm90byIWCghBdmF0YXJJZBIKCgJp",
-            "ZBgBIAEoDSImChNTZXRCcm9hZGNhc3RPcHRpb25zEg8KB2NvbnRlbnQYASAB",
-            "KAkibQoJQnJvYWRjYXN0Eg8KB2NvbnRlbnQYASABKAkSOAoHY3JlYXRvchgC",
-            "IAEoCzInLmJncy5wcm90b2NvbC5jbHViLnYxLk1lbWJlckRlc2NyaXB0aW9u",
-            "EhUKDWNyZWF0aW9uX3RpbWUYAyABKAQiLwoOVW5pcXVlQ2x1YlR5cGUSDwoH",
-            "cHJvZ3JhbRgBIAEoBxIMCgRuYW1lGAIgASgJIqQDChFDbHViQ3JlYXRlT3B0",
-            "aW9ucxIyCgR0eXBlGAEgASgLMiQuYmdzLnByb3RvY29sLmNsdWIudjEuVW5p",
-            "cXVlQ2x1YlR5cGUSLQoJYXR0cmlidXRlGAIgAygLMhouYmdzLnByb3RvY29s",
-            "LnYyLkF0dHJpYnV0ZRIMCgRuYW1lGAMgASgJEhMKC2Rlc2NyaXB0aW9uGAQg",
-            "ASgJEi4KBmF2YXRhchgFIAEoCzIeLmJncy5wcm90b2NvbC5jbHViLnYxLkF2",
-            "YXRhcklkEk8KDXByaXZhY3lfbGV2ZWwYBiABKA4yIi5iZ3MucHJvdG9jb2wu",
-            "Y2x1Yi52MS5Qcml2YWN5TGV2ZWw6FFBSSVZBQ1lfTEVWRUxfQ0xPU0VEEhIK",
-            "CnNob3J0X25hbWUYByABKAkSOQoGbWVtYmVyGAogASgLMikuYmdzLnByb3Rv",
-            "Y29sLmNsdWIudjEuQ3JlYXRlTWVtYmVyT3B0aW9ucxI5CgZzdHJlYW0YCyAB",
-            "KAsyKS5iZ3MucHJvdG9jb2wuY2x1Yi52MS5DcmVhdGVTdHJlYW1PcHRpb25z",
-            "IpYFCgRDbHViEgoKAmlkGAEgASgEEjIKBHR5cGUYAiABKAsyJC5iZ3MucHJv",
-            "dG9jb2wuY2x1Yi52MS5VbmlxdWVDbHViVHlwZRItCglhdHRyaWJ1dGUYAyAD",
-            "KAsyGi5iZ3MucHJvdG9jb2wudjIuQXR0cmlidXRlEgwKBG5hbWUYBCABKAkS",
-            "EwoLZGVzY3JpcHRpb24YBSABKAkSMgoJYnJvYWRjYXN0GAYgASgLMh8uYmdz",
-            "LnByb3RvY29sLmNsdWIudjEuQnJvYWRjYXN0Ei4KBmF2YXRhchgHIAEoCzIe",
-            "LmJncy5wcm90b2NvbC5jbHViLnYxLkF2YXRhcklkEk8KDXByaXZhY3lfbGV2",
-            "ZWwYCCABKA4yIi5iZ3MucHJvdG9jb2wuY2x1Yi52MS5Qcml2YWN5TGV2ZWw6",
-            "FFBSSVZBQ1lfTEVWRUxfQ0xPU0VEElkKEHZpc2liaWxpdHlfbGV2ZWwYCSAB",
-            "KA4yJS5iZ3MucHJvdG9jb2wuY2x1Yi52MS5WaXNpYmlsaXR5TGV2ZWw6GFZJ",
-            "U0lCSUxJVFlfTEVWRUxfUFJJVkFURRIUCgxtZW1iZXJfY291bnQYCiABKA0S",
-            "FQoNY3JlYXRpb25fdGltZRgLIAEoBBI9Cg9zdHJlYW1fcG9zaXRpb24YDCAB",
-            "KAsyJC5iZ3MucHJvdG9jb2wuY2x1Yi52MS5TdHJlYW1Qb3NpdGlvbhIzCghy",
-            "b2xlX3NldBgNIAEoCzIhLmJncy5wcm90b2NvbC5jbHViLnYxLkNsdWJSb2xl",
-            "U2V0EjcKBmxlYWRlchgOIAMoCzInLmJncy5wcm90b2NvbC5jbHViLnYxLk1l",
-            "bWJlckRlc2NyaXB0aW9uEhIKCnNob3J0X25hbWUYDyABKAkitgMKD0NsdWJE",
-            "ZXNjcmlwdGlvbhIKCgJpZBgBIAEoBBIyCgR0eXBlGAIgASgLMiQuYmdzLnBy",
-            "b3RvY29sLmNsdWIudjEuVW5pcXVlQ2x1YlR5cGUSDAoEbmFtZRgDIAEoCRIT",
-            "CgtkZXNjcmlwdGlvbhgEIAEoCRIuCgZhdmF0YXIYBSABKAsyHi5iZ3MucHJv",
-            "dG9jb2wuY2x1Yi52MS5BdmF0YXJJZBJPCg1wcml2YWN5X2xldmVsGAYgASgO",
-            "MiIuYmdzLnByb3RvY29sLmNsdWIudjEuUHJpdmFjeUxldmVsOhRQUklWQUNZ",
-            "X0xFVkVMX0NMT1NFRBJZChB2aXNpYmlsaXR5X2xldmVsGAcgASgOMiUuYmdz",
-            "LnByb3RvY29sLmNsdWIudjEuVmlzaWJpbGl0eUxldmVsOhhWSVNJQklMSVRZ",
-            "X0xFVkVMX1BSSVZBVEUSFAoMbWVtYmVyX2NvdW50GAggASgNEjcKBmxlYWRl",
-            "chgJIAMoCzInLmJncy5wcm90b2NvbC5jbHViLnYxLk1lbWJlckRlc2NyaXB0",
-            "aW9uEhUKDWNyZWF0aW9uX3RpbWUYCiABKAQiRQoIQ2x1YlZpZXcSDwoHY2x1",
-            "Yl9pZBgBIAEoBBIoCgZtYXJrZXIYAiABKAsyGC5iZ3MucHJvdG9jb2wuVmll",
-            "d01hcmtlciL2AgoQQ2x1YlN0YXRlT3B0aW9ucxItCglhdHRyaWJ1dGUYASAD",
-            "KAsyGi5iZ3MucHJvdG9jb2wudjIuQXR0cmlidXRlEgwKBG5hbWUYAiABKAkS",
-            "EwoLZGVzY3JpcHRpb24YAyABKAkSPAoJYnJvYWRjYXN0GAQgASgLMikuYmdz",
-            "LnByb3RvY29sLmNsdWIudjEuU2V0QnJvYWRjYXN0T3B0aW9ucxIuCgZhdmF0",
-            "YXIYBSABKAsyHi5iZ3MucHJvdG9jb2wuY2x1Yi52MS5BdmF0YXJJZBJPCg1w",
-            "cml2YWN5X2xldmVsGAYgASgOMiIuYmdzLnByb3RvY29sLmNsdWIudjEuUHJp",
-            "dmFjeUxldmVsOhRQUklWQUNZX0xFVkVMX0NMT1NFRBI9Cg9zdHJlYW1fcG9z",
-            "aXRpb24YByABKAsyJC5iZ3MucHJvdG9jb2wuY2x1Yi52MS5TdHJlYW1Qb3Np",
-            "dGlvbhISCgpzaG9ydF9uYW1lGAggASgJIoADChNDbHViU3RhdGVBc3NpZ25t",
-            "ZW50Eg8KB2NsdWJfaWQYASABKAQSLQoJYXR0cmlidXRlGAIgAygLMhouYmdz",
-            "LnByb3RvY29sLnYyLkF0dHJpYnV0ZRIMCgRuYW1lGAMgASgJEhMKC2Rlc2Ny",
-            "aXB0aW9uGAQgASgJEjIKCWJyb2FkY2FzdBgFIAEoCzIfLmJncy5wcm90b2Nv",
-            "bC5jbHViLnYxLkJyb2FkY2FzdBIuCgZhdmF0YXIYBiABKAsyHi5iZ3MucHJv",
-            "dG9jb2wuY2x1Yi52MS5BdmF0YXJJZBJPCg1wcml2YWN5X2xldmVsGAcgASgO",
-            "MiIuYmdzLnByb3RvY29sLmNsdWIudjEuUHJpdmFjeUxldmVsOhRQUklWQUNZ",
-            "X0xFVkVMX0NMT1NFRBI9Cg9zdHJlYW1fcG9zaXRpb24YCCABKAsyJC5iZ3Mu",
-            "cHJvdG9jb2wuY2x1Yi52MS5TdHJlYW1Qb3NpdGlvbhISCgpzaG9ydF9uYW1l",
-            "GAkgASgJIoQBCg5TdHJlYW1TZXR0aW5ncxIRCglzdHJlYW1faWQYASABKAQS",
-            "XwoGZmlsdGVyGAIgASgOMi4uYmdzLnByb3RvY29sLmNsdWIudjEuU3RyZWFt",
-            "Tm90aWZpY2F0aW9uRmlsdGVyOh9TVFJFQU1fTk9USUZJQ0FUSU9OX0ZJTFRF",
-            "Ul9OT05FIsEBCgxDbHViU2V0dGluZ3MSNAoGc3RyZWFtGAEgAygLMiQuYmdz",
-            "LnByb3RvY29sLmNsdWIudjEuU3RyZWFtU2V0dGluZ3MSJgoec3RyZWFtX25v",
-            "dGlmaWNhdGlvbl9maWx0ZXJfYWxsGAIgASgIEi0KCWF0dHJpYnV0ZRgDIAMo",
-            "CzIaLmJncy5wcm90b2NvbC52Mi5BdHRyaWJ1dGUSJAoccHVzaF9ub3RpZmlj",
-            "YXRpb25fZmlsdGVyX2FsbBgEIAEoCCKWAQoTQ2x1YlNldHRpbmdzT3B0aW9u",
-            "cxI4CgZzdHJlYW0YASADKAsyJC5iZ3MucHJvdG9jb2wuY2x1Yi52MS5TdHJl",
-            "YW1TZXR0aW5nc0ICGAESNAoIc2V0dGluZ3MYAiABKAsyIi5iZ3MucHJvdG9j",
-            "b2wuY2x1Yi52MS5DbHViU2V0dGluZ3MSDwoHdmVyc2lvbhgDIAEoDSKIAQoW",
-            "Q2x1YlNldHRpbmdzQXNzaWdubWVudBI4CgZzdHJlYW0YASADKAsyJC5iZ3Mu",
-            "cHJvdG9jb2wuY2x1Yi52MS5TdHJlYW1TZXR0aW5nc0ICGAESNAoIc2V0dGlu",
-            "Z3MYAiABKAsyIi5iZ3MucHJvdG9jb2wuY2x1Yi52MS5DbHViU2V0dGluZ3M="));
+            "b2NvbC5jbHViLnYxGiFiZ3MvbG93L3BiL2NsaWVudC9jbHViX3R5cGUucHJv",
+            "dG8aIWJncy9sb3cvcGIvY2xpZW50L2NsdWJfZW51bS5wcm90bxohYmdzL2xv",
+            "dy9wYi9jbGllbnQvY2x1Yl9yb2xlLnByb3RvGiNiZ3MvbG93L3BiL2NsaWVu",
+            "dC9jbHViX21lbWJlci5wcm90bxojYmdzL2xvdy9wYi9jbGllbnQvY2x1Yl9z",
+            "dHJlYW0ucHJvdG8aIGJncy9sb3cvcGIvY2xpZW50L2NsdWJfdGFnLnByb3Rv",
+            "GjViZ3MvbG93L3BiL2NsaWVudC9hcGkvY2xpZW50L3YyL2F0dHJpYnV0ZV90",
+            "eXBlcy5wcm90bxooYmdzL2xvdy9wYi9jbGllbnQvZXZlbnRfdmlld190eXBl",
+            "cy5wcm90byIWCghBdmF0YXJJZBIKCgJpZBgBIAEoDSImChNTZXRCcm9hZGNh",
+            "c3RPcHRpb25zEg8KB2NvbnRlbnQYASABKAkibQoJQnJvYWRjYXN0Eg8KB2Nv",
+            "bnRlbnQYASABKAkSOAoHY3JlYXRvchgCIAEoCzInLmJncy5wcm90b2NvbC5j",
+            "bHViLnYxLk1lbWJlckRlc2NyaXB0aW9uEhUKDWNyZWF0aW9uX3RpbWUYAyAB",
+            "KAQihgUKEUNsdWJDcmVhdGVPcHRpb25zEjIKBHR5cGUYASABKAsyJC5iZ3Mu",
+            "cHJvdG9jb2wuY2x1Yi52MS5VbmlxdWVDbHViVHlwZRItCglhdHRyaWJ1dGUY",
+            "AiADKAsyGi5iZ3MucHJvdG9jb2wudjIuQXR0cmlidXRlEgwKBG5hbWUYAyAB",
+            "KAkSEwoLZGVzY3JpcHRpb24YBCABKAkSLgoGYXZhdGFyGAUgASgLMh4uYmdz",
+            "LnByb3RvY29sLmNsdWIudjEuQXZhdGFySWQSTwoNcHJpdmFjeV9sZXZlbBgG",
+            "IAEoDjIiLmJncy5wcm90b2NvbC5jbHViLnYxLlByaXZhY3lMZXZlbDoUUFJJ",
+            "VkFDWV9MRVZFTF9DTE9TRUQSEgoKc2hvcnRfbmFtZRgHIAEoCRJZChB2aXNp",
+            "YmlsaXR5X2xldmVsGAggASgOMiUuYmdzLnByb3RvY29sLmNsdWIudjEuVmlz",
+            "aWJpbGl0eUxldmVsOhhWSVNJQklMSVRZX0xFVkVMX1BSSVZBVEUSOQoGbWVt",
+            "YmVyGAogASgLMikuYmdzLnByb3RvY29sLmNsdWIudjEuQ3JlYXRlTWVtYmVy",
+            "T3B0aW9ucxI5CgZzdHJlYW0YCyABKAsyKS5iZ3MucHJvdG9jb2wuY2x1Yi52",
+            "MS5DcmVhdGVTdHJlYW1PcHRpb25zEi0KA3RhZxgMIAEoCzIgLmJncy5wcm90",
+            "b2NvbC5jbHViLnYxLlRhZ09wdGlvbnMSNAoQc2VhcmNoX2F0dHJpYnV0ZRgN",
+            "IAMoCzIaLmJncy5wcm90b2NvbC52Mi5BdHRyaWJ1dGUSDgoGbG9jYWxlGA4g",
+            "ASgJEhAKCHRpbWV6b25lGA8gASgJIqAGCgRDbHViEgoKAmlkGAEgASgEEjIK",
+            "BHR5cGUYAiABKAsyJC5iZ3MucHJvdG9jb2wuY2x1Yi52MS5VbmlxdWVDbHVi",
+            "VHlwZRItCglhdHRyaWJ1dGUYAyADKAsyGi5iZ3MucHJvdG9jb2wudjIuQXR0",
+            "cmlidXRlEgwKBG5hbWUYBCABKAkSEwoLZGVzY3JpcHRpb24YBSABKAkSMgoJ",
+            "YnJvYWRjYXN0GAYgASgLMh8uYmdzLnByb3RvY29sLmNsdWIudjEuQnJvYWRj",
+            "YXN0Ei4KBmF2YXRhchgHIAEoCzIeLmJncy5wcm90b2NvbC5jbHViLnYxLkF2",
+            "YXRhcklkEk8KDXByaXZhY3lfbGV2ZWwYCCABKA4yIi5iZ3MucHJvdG9jb2wu",
+            "Y2x1Yi52MS5Qcml2YWN5TGV2ZWw6FFBSSVZBQ1lfTEVWRUxfQ0xPU0VEElkK",
+            "EHZpc2liaWxpdHlfbGV2ZWwYCSABKA4yJS5iZ3MucHJvdG9jb2wuY2x1Yi52",
+            "MS5WaXNpYmlsaXR5TGV2ZWw6GFZJU0lCSUxJVFlfTEVWRUxfUFJJVkFURRIU",
+            "CgxtZW1iZXJfY291bnQYCiABKA0SFQoNY3JlYXRpb25fdGltZRgLIAEoBBI9",
+            "Cg9zdHJlYW1fcG9zaXRpb24YDCABKAsyJC5iZ3MucHJvdG9jb2wuY2x1Yi52",
+            "MS5TdHJlYW1Qb3NpdGlvbhIzCghyb2xlX3NldBgNIAEoCzIhLmJncy5wcm90",
+            "b2NvbC5jbHViLnYxLkNsdWJSb2xlU2V0EjcKBmxlYWRlchgOIAMoCzInLmJn",
+            "cy5wcm90b2NvbC5jbHViLnYxLk1lbWJlckRlc2NyaXB0aW9uEhIKCnNob3J0",
+            "X25hbWUYDyABKAkSNAoQc2VhcmNoX2F0dHJpYnV0ZRgQIAMoCzIaLmJncy5w",
+            "cm90b2NvbC52Mi5BdHRyaWJ1dGUSMAoDdGFnGBEgAygLMiMuYmdzLnByb3Rv",
+            "Y29sLmNsdWIudjEuVGFnSWRlbnRpZmllchIOCgZsb2NhbGUYEiABKAkSEAoI",
+            "dGltZXpvbmUYEyABKAkiigQKD0NsdWJEZXNjcmlwdGlvbhIKCgJpZBgBIAEo",
+            "BBIyCgR0eXBlGAIgASgLMiQuYmdzLnByb3RvY29sLmNsdWIudjEuVW5pcXVl",
+            "Q2x1YlR5cGUSDAoEbmFtZRgDIAEoCRITCgtkZXNjcmlwdGlvbhgEIAEoCRIu",
+            "CgZhdmF0YXIYBSABKAsyHi5iZ3MucHJvdG9jb2wuY2x1Yi52MS5BdmF0YXJJ",
+            "ZBJPCg1wcml2YWN5X2xldmVsGAYgASgOMiIuYmdzLnByb3RvY29sLmNsdWIu",
+            "djEuUHJpdmFjeUxldmVsOhRQUklWQUNZX0xFVkVMX0NMT1NFRBJZChB2aXNp",
+            "YmlsaXR5X2xldmVsGAcgASgOMiUuYmdzLnByb3RvY29sLmNsdWIudjEuVmlz",
+            "aWJpbGl0eUxldmVsOhhWSVNJQklMSVRZX0xFVkVMX1BSSVZBVEUSFAoMbWVt",
+            "YmVyX2NvdW50GAggASgNEjcKBmxlYWRlchgJIAMoCzInLmJncy5wcm90b2Nv",
+            "bC5jbHViLnYxLk1lbWJlckRlc2NyaXB0aW9uEhUKDWNyZWF0aW9uX3RpbWUY",
+            "CiABKAQSEAoIdGltZXpvbmUYCyABKAkSDgoGbG9jYWxlGAwgASgJEjAKA3Rh",
+            "ZxgNIAMoCzIjLmJncy5wcm90b2NvbC5jbHViLnYxLlRhZ0lkZW50aWZpZXIi",
+            "RQoIQ2x1YlZpZXcSDwoHY2x1Yl9pZBgBIAEoBBIoCgZtYXJrZXIYAiABKAsy",
+            "GC5iZ3MucHJvdG9jb2wuVmlld01hcmtlciLgBAoQQ2x1YlN0YXRlT3B0aW9u",
+            "cxItCglhdHRyaWJ1dGUYASADKAsyGi5iZ3MucHJvdG9jb2wudjIuQXR0cmli",
+            "dXRlEgwKBG5hbWUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSPAoJYnJv",
+            "YWRjYXN0GAQgASgLMikuYmdzLnByb3RvY29sLmNsdWIudjEuU2V0QnJvYWRj",
+            "YXN0T3B0aW9ucxIuCgZhdmF0YXIYBSABKAsyHi5iZ3MucHJvdG9jb2wuY2x1",
+            "Yi52MS5BdmF0YXJJZBJPCg1wcml2YWN5X2xldmVsGAYgASgOMiIuYmdzLnBy",
+            "b3RvY29sLmNsdWIudjEuUHJpdmFjeUxldmVsOhRQUklWQUNZX0xFVkVMX0NM",
+            "T1NFRBI9Cg9zdHJlYW1fcG9zaXRpb24YByABKAsyJC5iZ3MucHJvdG9jb2wu",
+            "Y2x1Yi52MS5TdHJlYW1Qb3NpdGlvbhISCgpzaG9ydF9uYW1lGAggASgJElkK",
+            "EHZpc2liaWxpdHlfbGV2ZWwYCSABKA4yJS5iZ3MucHJvdG9jb2wuY2x1Yi52",
+            "MS5WaXNpYmlsaXR5TGV2ZWw6GFZJU0lCSUxJVFlfTEVWRUxfUFJJVkFURRIO",
+            "CgZsb2NhbGUYCiABKAkSEAoIdGltZXpvbmUYCyABKAkSNQoLdGFnX29wdGlv",
+            "bnMYDCABKAsyIC5iZ3MucHJvdG9jb2wuY2x1Yi52MS5UYWdPcHRpb25zEjQK",
+            "EHNlYXJjaF9hdHRyaWJ1dGUYDSADKAsyGi5iZ3MucHJvdG9jb2wudjIuQXR0",
+            "cmlidXRlIvoEChNDbHViU3RhdGVBc3NpZ25tZW50Eg8KB2NsdWJfaWQYASAB",
+            "KAQSLQoJYXR0cmlidXRlGAIgAygLMhouYmdzLnByb3RvY29sLnYyLkF0dHJp",
+            "YnV0ZRIMCgRuYW1lGAMgASgJEhMKC2Rlc2NyaXB0aW9uGAQgASgJEjIKCWJy",
+            "b2FkY2FzdBgFIAEoCzIfLmJncy5wcm90b2NvbC5jbHViLnYxLkJyb2FkY2Fz",
+            "dBIuCgZhdmF0YXIYBiABKAsyHi5iZ3MucHJvdG9jb2wuY2x1Yi52MS5BdmF0",
+            "YXJJZBJPCg1wcml2YWN5X2xldmVsGAcgASgOMiIuYmdzLnByb3RvY29sLmNs",
+            "dWIudjEuUHJpdmFjeUxldmVsOhRQUklWQUNZX0xFVkVMX0NMT1NFRBI9Cg9z",
+            "dHJlYW1fcG9zaXRpb24YCCABKAsyJC5iZ3MucHJvdG9jb2wuY2x1Yi52MS5T",
+            "dHJlYW1Qb3NpdGlvbhISCgpzaG9ydF9uYW1lGAkgASgJElkKEHZpc2liaWxp",
+            "dHlfbGV2ZWwYCiABKA4yJS5iZ3MucHJvdG9jb2wuY2x1Yi52MS5WaXNpYmls",
+            "aXR5TGV2ZWw6GFZJU0lCSUxJVFlfTEVWRUxfUFJJVkFURRIOCgZsb2NhbGUY",
+            "CyABKAkSEAoIdGltZXpvbmUYDCABKAkSMAoDdGFnGA0gAygLMiMuYmdzLnBy",
+            "b3RvY29sLmNsdWIudjEuVGFnSWRlbnRpZmllchI0ChBzZWFyY2hfYXR0cmli",
+            "dXRlGA4gAygLMhouYmdzLnByb3RvY29sLnYyLkF0dHJpYnV0ZRITCgt0YWdf",
+            "Y2xlYXJlZBgPIAEoCCKEAQoOU3RyZWFtU2V0dGluZ3MSEQoJc3RyZWFtX2lk",
+            "GAEgASgEEl8KBmZpbHRlchgCIAEoDjIuLmJncy5wcm90b2NvbC5jbHViLnYx",
+            "LlN0cmVhbU5vdGlmaWNhdGlvbkZpbHRlcjofU1RSRUFNX05PVElGSUNBVElP",
+            "Tl9GSUxURVJfTk9ORSLBAQoMQ2x1YlNldHRpbmdzEjQKBnN0cmVhbRgBIAMo",
+            "CzIkLmJncy5wcm90b2NvbC5jbHViLnYxLlN0cmVhbVNldHRpbmdzEiYKHnN0",
+            "cmVhbV9ub3RpZmljYXRpb25fZmlsdGVyX2FsbBgCIAEoCBItCglhdHRyaWJ1",
+            "dGUYAyADKAsyGi5iZ3MucHJvdG9jb2wudjIuQXR0cmlidXRlEiQKHHB1c2hf",
+            "bm90aWZpY2F0aW9uX2ZpbHRlcl9hbGwYBCABKAgilgEKE0NsdWJTZXR0aW5n",
+            "c09wdGlvbnMSOAoGc3RyZWFtGAEgAygLMiQuYmdzLnByb3RvY29sLmNsdWIu",
+            "djEuU3RyZWFtU2V0dGluZ3NCAhgBEjQKCHNldHRpbmdzGAIgASgLMiIuYmdz",
+            "LnByb3RvY29sLmNsdWIudjEuQ2x1YlNldHRpbmdzEg8KB3ZlcnNpb24YAyAB",
+            "KA0iiAEKFkNsdWJTZXR0aW5nc0Fzc2lnbm1lbnQSOAoGc3RyZWFtGAEgAygL",
+            "MiQuYmdzLnByb3RvY29sLmNsdWIudjEuU3RyZWFtU2V0dGluZ3NCAhgBEjQK",
+            "CHNldHRpbmdzGAIgASgLMiIuYmdzLnByb3RvY29sLmNsdWIudjEuQ2x1YlNl",
+            "dHRpbmdz"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Bgs.Protocol.Club.V1.ClubEnumReflection.Descriptor, global::Bgs.Protocol.Club.V1.ClubRoleReflection.Descriptor, global::Bgs.Protocol.Club.V1.ClubMemberReflection.Descriptor, global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor, global::Bgs.Protocol.V2.AttributeTypesReflection.Descriptor, global::Bgs.Protocol.EventViewTypesReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Bgs.Protocol.Club.V1.ClubTypeReflection.Descriptor, global::Bgs.Protocol.Club.V1.ClubEnumReflection.Descriptor, global::Bgs.Protocol.Club.V1.ClubRoleReflection.Descriptor, global::Bgs.Protocol.Club.V1.ClubMemberReflection.Descriptor, global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor, global::Bgs.Protocol.Club.V1.ClubTagReflection.Descriptor, global::Bgs.Protocol.V2.AttributeTypesReflection.Descriptor, global::Bgs.Protocol.EventViewTypesReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.AvatarId), global::Bgs.Protocol.Club.V1.AvatarId.Parser, new[]{ "Id" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.SetBroadcastOptions), global::Bgs.Protocol.Club.V1.SetBroadcastOptions.Parser, new[]{ "Content" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.Broadcast), global::Bgs.Protocol.Club.V1.Broadcast.Parser, new[]{ "Content", "Creator", "CreationTime" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.UniqueClubType), global::Bgs.Protocol.Club.V1.UniqueClubType.Parser, new[]{ "Program", "Name" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubCreateOptions), global::Bgs.Protocol.Club.V1.ClubCreateOptions.Parser, new[]{ "Type", "Attribute", "Name", "Description", "Avatar", "PrivacyLevel", "ShortName", "Member", "Stream" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.Club), global::Bgs.Protocol.Club.V1.Club.Parser, new[]{ "Id", "Type", "Attribute", "Name", "Description", "Broadcast", "Avatar", "PrivacyLevel", "VisibilityLevel", "MemberCount", "CreationTime", "StreamPosition", "RoleSet", "Leader", "ShortName" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubDescription), global::Bgs.Protocol.Club.V1.ClubDescription.Parser, new[]{ "Id", "Type", "Name", "Description", "Avatar", "PrivacyLevel", "VisibilityLevel", "MemberCount", "Leader", "CreationTime" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubCreateOptions), global::Bgs.Protocol.Club.V1.ClubCreateOptions.Parser, new[]{ "Type", "Attribute", "Name", "Description", "Avatar", "PrivacyLevel", "ShortName", "VisibilityLevel", "Member", "Stream", "Tag", "SearchAttribute", "Locale", "Timezone" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.Club), global::Bgs.Protocol.Club.V1.Club.Parser, new[]{ "Id", "Type", "Attribute", "Name", "Description", "Broadcast", "Avatar", "PrivacyLevel", "VisibilityLevel", "MemberCount", "CreationTime", "StreamPosition", "RoleSet", "Leader", "ShortName", "SearchAttribute", "Tag", "Locale", "Timezone" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubDescription), global::Bgs.Protocol.Club.V1.ClubDescription.Parser, new[]{ "Id", "Type", "Name", "Description", "Avatar", "PrivacyLevel", "VisibilityLevel", "MemberCount", "Leader", "CreationTime", "Timezone", "Locale", "Tag" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubView), global::Bgs.Protocol.Club.V1.ClubView.Parser, new[]{ "ClubId", "Marker" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubStateOptions), global::Bgs.Protocol.Club.V1.ClubStateOptions.Parser, new[]{ "Attribute", "Name", "Description", "Broadcast", "Avatar", "PrivacyLevel", "StreamPosition", "ShortName" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubStateAssignment), global::Bgs.Protocol.Club.V1.ClubStateAssignment.Parser, new[]{ "ClubId", "Attribute", "Name", "Description", "Broadcast", "Avatar", "PrivacyLevel", "StreamPosition", "ShortName" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubStateOptions), global::Bgs.Protocol.Club.V1.ClubStateOptions.Parser, new[]{ "Attribute", "Name", "Description", "Broadcast", "Avatar", "PrivacyLevel", "StreamPosition", "ShortName", "VisibilityLevel", "Locale", "Timezone", "TagOptions", "SearchAttribute" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubStateAssignment), global::Bgs.Protocol.Club.V1.ClubStateAssignment.Parser, new[]{ "ClubId", "Attribute", "Name", "Description", "Broadcast", "Avatar", "PrivacyLevel", "StreamPosition", "ShortName", "VisibilityLevel", "Locale", "Timezone", "Tag", "SearchAttribute", "TagCleared" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.StreamSettings), global::Bgs.Protocol.Club.V1.StreamSettings.Parser, new[]{ "StreamId", "Filter" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubSettings), global::Bgs.Protocol.Club.V1.ClubSettings.Parser, new[]{ "Stream", "StreamNotificationFilterAll", "Attribute", "PushNotificationFilterAll" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubSettingsOptions), global::Bgs.Protocol.Club.V1.ClubSettingsOptions.Parser, new[]{ "Stream", "Settings", "Version" }, null, null, null, null),
@@ -638,190 +659,6 @@ namespace Bgs.Protocol.Club.V1 {
 
   }
 
-  public sealed partial class UniqueClubType : pb::IMessage<UniqueClubType> {
-    private static readonly pb::MessageParser<UniqueClubType> _parser = new pb::MessageParser<UniqueClubType>(() => new UniqueClubType());
-    private pb::UnknownFieldSet _unknownFields;
-    private int _hasBits0;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<UniqueClubType> Parser { get { return _parser; } }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor.MessageTypes[3]; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public UniqueClubType() {
-      OnConstruction();
-    }
-
-    partial void OnConstruction();
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public UniqueClubType(UniqueClubType other) : this() {
-      _hasBits0 = other._hasBits0;
-      program_ = other.program_;
-      name_ = other.name_;
-      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public UniqueClubType Clone() {
-      return new UniqueClubType(this);
-    }
-
-    /// <summary>Field number for the "program" field.</summary>
-    public const int ProgramFieldNumber = 1;
-    private readonly static uint ProgramDefaultValue = 0;
-
-    private uint program_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public uint Program {
-      get { if ((_hasBits0 & 1) != 0) { return program_; } else { return ProgramDefaultValue; } }
-      set {
-        _hasBits0 |= 1;
-        program_ = value;
-      }
-    }
-    /// <summary>Gets whether the "program" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasProgram {
-      get { return (_hasBits0 & 1) != 0; }
-    }
-    /// <summary>Clears the value of the "program" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearProgram() {
-      _hasBits0 &= ~1;
-    }
-
-    /// <summary>Field number for the "name" field.</summary>
-    public const int NameFieldNumber = 2;
-    private readonly static string NameDefaultValue = "";
-
-    private string name_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string Name {
-      get { return name_ ?? NameDefaultValue; }
-      set {
-        name_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
-      }
-    }
-    /// <summary>Gets whether the "name" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasName {
-      get { return name_ != null; }
-    }
-    /// <summary>Clears the value of the "name" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearName() {
-      name_ = null;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override bool Equals(object other) {
-      return Equals(other as UniqueClubType);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(UniqueClubType other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if (Program != other.Program) return false;
-      if (Name != other.Name) return false;
-      return Equals(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override int GetHashCode() {
-      int hash = 1;
-      if (HasProgram) hash ^= Program.GetHashCode();
-      if (HasName) hash ^= Name.GetHashCode();
-      if (_unknownFields != null) {
-        hash ^= _unknownFields.GetHashCode();
-      }
-      return hash;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void WriteTo(pb::CodedOutputStream output) {
-      if (HasProgram) {
-        output.WriteRawTag(13);
-        output.WriteFixed32(Program);
-      }
-      if (HasName) {
-        output.WriteRawTag(18);
-        output.WriteString(Name);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(output);
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int CalculateSize() {
-      int size = 0;
-      if (HasProgram) {
-        size += 1 + 4;
-      }
-      if (HasName) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(Name);
-      }
-      if (_unknownFields != null) {
-        size += _unknownFields.CalculateSize();
-      }
-      return size;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(UniqueClubType other) {
-      if (other == null) {
-        return;
-      }
-      if (other.HasProgram) {
-        Program = other.Program;
-      }
-      if (other.HasName) {
-        Name = other.Name;
-      }
-      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(pb::CodedInputStream input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
-            break;
-          case 13: {
-            Program = input.ReadFixed32();
-            break;
-          }
-          case 18: {
-            Name = input.ReadString();
-            break;
-          }
-        }
-      }
-    }
-
-  }
-
   public sealed partial class ClubCreateOptions : pb::IMessage<ClubCreateOptions> {
     private static readonly pb::MessageParser<ClubCreateOptions> _parser = new pb::MessageParser<ClubCreateOptions>(() => new ClubCreateOptions());
     private pb::UnknownFieldSet _unknownFields;
@@ -831,7 +668,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor.MessageTypes[4]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor.MessageTypes[3]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -856,8 +693,13 @@ namespace Bgs.Protocol.Club.V1 {
       avatar_ = other.HasAvatar ? other.avatar_.Clone() : null;
       privacyLevel_ = other.privacyLevel_;
       shortName_ = other.shortName_;
+      visibilityLevel_ = other.visibilityLevel_;
       member_ = other.HasMember ? other.member_.Clone() : null;
       stream_ = other.HasStream ? other.stream_.Clone() : null;
+      tag_ = other.HasTag ? other.tag_.Clone() : null;
+      searchAttribute_ = other.searchAttribute_.Clone();
+      locale_ = other.locale_;
+      timezone_ = other.timezone_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1011,6 +853,30 @@ namespace Bgs.Protocol.Club.V1 {
       shortName_ = null;
     }
 
+    /// <summary>Field number for the "visibility_level" field.</summary>
+    public const int VisibilityLevelFieldNumber = 8;
+    private readonly static global::Bgs.Protocol.Club.V1.VisibilityLevel VisibilityLevelDefaultValue = global::Bgs.Protocol.Club.V1.VisibilityLevel.Private;
+
+    private global::Bgs.Protocol.Club.V1.VisibilityLevel visibilityLevel_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Bgs.Protocol.Club.V1.VisibilityLevel VisibilityLevel {
+      get { if ((_hasBits0 & 2) != 0) { return visibilityLevel_; } else { return VisibilityLevelDefaultValue; } }
+      set {
+        _hasBits0 |= 2;
+        visibilityLevel_ = value;
+      }
+    }
+    /// <summary>Gets whether the "visibility_level" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasVisibilityLevel {
+      get { return (_hasBits0 & 2) != 0; }
+    }
+    /// <summary>Clears the value of the "visibility_level" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearVisibilityLevel() {
+      _hasBits0 &= ~2;
+    }
+
     /// <summary>Field number for the "member" field.</summary>
     public const int MemberFieldNumber = 10;
     private global::Bgs.Protocol.Club.V1.CreateMemberOptions member_;
@@ -1053,6 +919,83 @@ namespace Bgs.Protocol.Club.V1 {
       stream_ = null;
     }
 
+    /// <summary>Field number for the "tag" field.</summary>
+    public const int TagFieldNumber = 12;
+    private global::Bgs.Protocol.Club.V1.TagOptions tag_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Bgs.Protocol.Club.V1.TagOptions Tag {
+      get { return tag_; }
+      set {
+        tag_ = value;
+      }
+    }
+    /// <summary>Gets whether the tag field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasTag {
+      get { return tag_ != null; }
+    }
+    /// <summary>Clears the value of the tag field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearTag() {
+      tag_ = null;
+    }
+
+    /// <summary>Field number for the "search_attribute" field.</summary>
+    public const int SearchAttributeFieldNumber = 13;
+    private static readonly pb::FieldCodec<global::Bgs.Protocol.V2.Attribute> _repeated_searchAttribute_codec
+        = pb::FieldCodec.ForMessage(106, global::Bgs.Protocol.V2.Attribute.Parser);
+    private readonly pbc::RepeatedField<global::Bgs.Protocol.V2.Attribute> searchAttribute_ = new pbc::RepeatedField<global::Bgs.Protocol.V2.Attribute>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<global::Bgs.Protocol.V2.Attribute> SearchAttribute {
+      get { return searchAttribute_; }
+    }
+
+    /// <summary>Field number for the "locale" field.</summary>
+    public const int LocaleFieldNumber = 14;
+    private readonly static string LocaleDefaultValue = "";
+
+    private string locale_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Locale {
+      get { return locale_ ?? LocaleDefaultValue; }
+      set {
+        locale_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "locale" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasLocale {
+      get { return locale_ != null; }
+    }
+    /// <summary>Clears the value of the "locale" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearLocale() {
+      locale_ = null;
+    }
+
+    /// <summary>Field number for the "timezone" field.</summary>
+    public const int TimezoneFieldNumber = 15;
+    private readonly static string TimezoneDefaultValue = "";
+
+    private string timezone_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Timezone {
+      get { return timezone_ ?? TimezoneDefaultValue; }
+      set {
+        timezone_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "timezone" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasTimezone {
+      get { return timezone_ != null; }
+    }
+    /// <summary>Clears the value of the "timezone" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearTimezone() {
+      timezone_ = null;
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as ClubCreateOptions);
@@ -1073,8 +1016,13 @@ namespace Bgs.Protocol.Club.V1 {
       if (!object.Equals(Avatar, other.Avatar)) return false;
       if (PrivacyLevel != other.PrivacyLevel) return false;
       if (ShortName != other.ShortName) return false;
+      if (VisibilityLevel != other.VisibilityLevel) return false;
       if (!object.Equals(Member, other.Member)) return false;
       if (!object.Equals(Stream, other.Stream)) return false;
+      if (!object.Equals(Tag, other.Tag)) return false;
+      if(!searchAttribute_.Equals(other.searchAttribute_)) return false;
+      if (Locale != other.Locale) return false;
+      if (Timezone != other.Timezone) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -1088,8 +1036,13 @@ namespace Bgs.Protocol.Club.V1 {
       if (HasAvatar) hash ^= Avatar.GetHashCode();
       if (HasPrivacyLevel) hash ^= PrivacyLevel.GetHashCode();
       if (HasShortName) hash ^= ShortName.GetHashCode();
+      if (HasVisibilityLevel) hash ^= VisibilityLevel.GetHashCode();
       if (HasMember) hash ^= Member.GetHashCode();
       if (HasStream) hash ^= Stream.GetHashCode();
+      if (HasTag) hash ^= Tag.GetHashCode();
+      hash ^= searchAttribute_.GetHashCode();
+      if (HasLocale) hash ^= Locale.GetHashCode();
+      if (HasTimezone) hash ^= Timezone.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -1128,6 +1081,10 @@ namespace Bgs.Protocol.Club.V1 {
         output.WriteRawTag(58);
         output.WriteString(ShortName);
       }
+      if (HasVisibilityLevel) {
+        output.WriteRawTag(64);
+        output.WriteEnum((int) VisibilityLevel);
+      }
       if (HasMember) {
         output.WriteRawTag(82);
         output.WriteMessage(Member);
@@ -1135,6 +1092,19 @@ namespace Bgs.Protocol.Club.V1 {
       if (HasStream) {
         output.WriteRawTag(90);
         output.WriteMessage(Stream);
+      }
+      if (HasTag) {
+        output.WriteRawTag(98);
+        output.WriteMessage(Tag);
+      }
+      searchAttribute_.WriteTo(output, _repeated_searchAttribute_codec);
+      if (HasLocale) {
+        output.WriteRawTag(114);
+        output.WriteString(Locale);
+      }
+      if (HasTimezone) {
+        output.WriteRawTag(122);
+        output.WriteString(Timezone);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -1163,11 +1133,24 @@ namespace Bgs.Protocol.Club.V1 {
       if (HasShortName) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(ShortName);
       }
+      if (HasVisibilityLevel) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) VisibilityLevel);
+      }
       if (HasMember) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(Member);
       }
       if (HasStream) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(Stream);
+      }
+      if (HasTag) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Tag);
+      }
+      size += searchAttribute_.CalculateSize(_repeated_searchAttribute_codec);
+      if (HasLocale) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Locale);
+      }
+      if (HasTimezone) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Timezone);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -1205,6 +1188,9 @@ namespace Bgs.Protocol.Club.V1 {
       if (other.HasShortName) {
         ShortName = other.ShortName;
       }
+      if (other.HasVisibilityLevel) {
+        VisibilityLevel = other.VisibilityLevel;
+      }
       if (other.HasMember) {
         if (!HasMember) {
           Member = new global::Bgs.Protocol.Club.V1.CreateMemberOptions();
@@ -1216,6 +1202,19 @@ namespace Bgs.Protocol.Club.V1 {
           Stream = new global::Bgs.Protocol.Club.V1.CreateStreamOptions();
         }
         Stream.MergeFrom(other.Stream);
+      }
+      if (other.HasTag) {
+        if (!HasTag) {
+          Tag = new global::Bgs.Protocol.Club.V1.TagOptions();
+        }
+        Tag.MergeFrom(other.Tag);
+      }
+      searchAttribute_.Add(other.searchAttribute_);
+      if (other.HasLocale) {
+        Locale = other.Locale;
+      }
+      if (other.HasTimezone) {
+        Timezone = other.Timezone;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -1262,6 +1261,10 @@ namespace Bgs.Protocol.Club.V1 {
             ShortName = input.ReadString();
             break;
           }
+          case 64: {
+            VisibilityLevel = (global::Bgs.Protocol.Club.V1.VisibilityLevel) input.ReadEnum();
+            break;
+          }
           case 82: {
             if (!HasMember) {
               Member = new global::Bgs.Protocol.Club.V1.CreateMemberOptions();
@@ -1274,6 +1277,25 @@ namespace Bgs.Protocol.Club.V1 {
               Stream = new global::Bgs.Protocol.Club.V1.CreateStreamOptions();
             }
             input.ReadMessage(Stream);
+            break;
+          }
+          case 98: {
+            if (!HasTag) {
+              Tag = new global::Bgs.Protocol.Club.V1.TagOptions();
+            }
+            input.ReadMessage(Tag);
+            break;
+          }
+          case 106: {
+            searchAttribute_.AddEntriesFrom(input, _repeated_searchAttribute_codec);
+            break;
+          }
+          case 114: {
+            Locale = input.ReadString();
+            break;
+          }
+          case 122: {
+            Timezone = input.ReadString();
             break;
           }
         }
@@ -1291,7 +1313,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor.MessageTypes[5]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor.MessageTypes[4]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1324,6 +1346,10 @@ namespace Bgs.Protocol.Club.V1 {
       roleSet_ = other.HasRoleSet ? other.roleSet_.Clone() : null;
       leader_ = other.leader_.Clone();
       shortName_ = other.shortName_;
+      searchAttribute_ = other.searchAttribute_.Clone();
+      tag_ = other.tag_.Clone();
+      locale_ = other.locale_;
+      timezone_ = other.timezone_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1646,6 +1672,72 @@ namespace Bgs.Protocol.Club.V1 {
       shortName_ = null;
     }
 
+    /// <summary>Field number for the "search_attribute" field.</summary>
+    public const int SearchAttributeFieldNumber = 16;
+    private static readonly pb::FieldCodec<global::Bgs.Protocol.V2.Attribute> _repeated_searchAttribute_codec
+        = pb::FieldCodec.ForMessage(130, global::Bgs.Protocol.V2.Attribute.Parser);
+    private readonly pbc::RepeatedField<global::Bgs.Protocol.V2.Attribute> searchAttribute_ = new pbc::RepeatedField<global::Bgs.Protocol.V2.Attribute>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<global::Bgs.Protocol.V2.Attribute> SearchAttribute {
+      get { return searchAttribute_; }
+    }
+
+    /// <summary>Field number for the "tag" field.</summary>
+    public const int TagFieldNumber = 17;
+    private static readonly pb::FieldCodec<global::Bgs.Protocol.Club.V1.TagIdentifier> _repeated_tag_codec
+        = pb::FieldCodec.ForMessage(138, global::Bgs.Protocol.Club.V1.TagIdentifier.Parser);
+    private readonly pbc::RepeatedField<global::Bgs.Protocol.Club.V1.TagIdentifier> tag_ = new pbc::RepeatedField<global::Bgs.Protocol.Club.V1.TagIdentifier>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<global::Bgs.Protocol.Club.V1.TagIdentifier> Tag {
+      get { return tag_; }
+    }
+
+    /// <summary>Field number for the "locale" field.</summary>
+    public const int LocaleFieldNumber = 18;
+    private readonly static string LocaleDefaultValue = "";
+
+    private string locale_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Locale {
+      get { return locale_ ?? LocaleDefaultValue; }
+      set {
+        locale_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "locale" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasLocale {
+      get { return locale_ != null; }
+    }
+    /// <summary>Clears the value of the "locale" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearLocale() {
+      locale_ = null;
+    }
+
+    /// <summary>Field number for the "timezone" field.</summary>
+    public const int TimezoneFieldNumber = 19;
+    private readonly static string TimezoneDefaultValue = "";
+
+    private string timezone_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Timezone {
+      get { return timezone_ ?? TimezoneDefaultValue; }
+      set {
+        timezone_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "timezone" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasTimezone {
+      get { return timezone_ != null; }
+    }
+    /// <summary>Clears the value of the "timezone" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearTimezone() {
+      timezone_ = null;
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as Club);
@@ -1674,6 +1766,10 @@ namespace Bgs.Protocol.Club.V1 {
       if (!object.Equals(RoleSet, other.RoleSet)) return false;
       if(!leader_.Equals(other.leader_)) return false;
       if (ShortName != other.ShortName) return false;
+      if(!searchAttribute_.Equals(other.searchAttribute_)) return false;
+      if(!tag_.Equals(other.tag_)) return false;
+      if (Locale != other.Locale) return false;
+      if (Timezone != other.Timezone) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -1695,6 +1791,10 @@ namespace Bgs.Protocol.Club.V1 {
       if (HasRoleSet) hash ^= RoleSet.GetHashCode();
       hash ^= leader_.GetHashCode();
       if (HasShortName) hash ^= ShortName.GetHashCode();
+      hash ^= searchAttribute_.GetHashCode();
+      hash ^= tag_.GetHashCode();
+      if (HasLocale) hash ^= Locale.GetHashCode();
+      if (HasTimezone) hash ^= Timezone.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -1762,6 +1862,16 @@ namespace Bgs.Protocol.Club.V1 {
         output.WriteRawTag(122);
         output.WriteString(ShortName);
       }
+      searchAttribute_.WriteTo(output, _repeated_searchAttribute_codec);
+      tag_.WriteTo(output, _repeated_tag_codec);
+      if (HasLocale) {
+        output.WriteRawTag(146, 1);
+        output.WriteString(Locale);
+      }
+      if (HasTimezone) {
+        output.WriteRawTag(154, 1);
+        output.WriteString(Timezone);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1810,6 +1920,14 @@ namespace Bgs.Protocol.Club.V1 {
       size += leader_.CalculateSize(_repeated_leader_codec);
       if (HasShortName) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(ShortName);
+      }
+      size += searchAttribute_.CalculateSize(_repeated_searchAttribute_codec);
+      size += tag_.CalculateSize(_repeated_tag_codec);
+      if (HasLocale) {
+        size += 2 + pb::CodedOutputStream.ComputeStringSize(Locale);
+      }
+      if (HasTimezone) {
+        size += 2 + pb::CodedOutputStream.ComputeStringSize(Timezone);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -1877,6 +1995,14 @@ namespace Bgs.Protocol.Club.V1 {
       leader_.Add(other.leader_);
       if (other.HasShortName) {
         ShortName = other.ShortName;
+      }
+      searchAttribute_.Add(other.searchAttribute_);
+      tag_.Add(other.tag_);
+      if (other.HasLocale) {
+        Locale = other.Locale;
+      }
+      if (other.HasTimezone) {
+        Timezone = other.Timezone;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -1964,6 +2090,22 @@ namespace Bgs.Protocol.Club.V1 {
             ShortName = input.ReadString();
             break;
           }
+          case 130: {
+            searchAttribute_.AddEntriesFrom(input, _repeated_searchAttribute_codec);
+            break;
+          }
+          case 138: {
+            tag_.AddEntriesFrom(input, _repeated_tag_codec);
+            break;
+          }
+          case 146: {
+            Locale = input.ReadString();
+            break;
+          }
+          case 154: {
+            Timezone = input.ReadString();
+            break;
+          }
         }
       }
     }
@@ -1979,7 +2121,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor.MessageTypes[6]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor.MessageTypes[5]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2007,6 +2149,9 @@ namespace Bgs.Protocol.Club.V1 {
       memberCount_ = other.memberCount_;
       leader_ = other.leader_.Clone();
       creationTime_ = other.creationTime_;
+      timezone_ = other.timezone_;
+      locale_ = other.locale_;
+      tag_ = other.tag_.Clone();
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -2233,6 +2378,62 @@ namespace Bgs.Protocol.Club.V1 {
       _hasBits0 &= ~16;
     }
 
+    /// <summary>Field number for the "timezone" field.</summary>
+    public const int TimezoneFieldNumber = 11;
+    private readonly static string TimezoneDefaultValue = "";
+
+    private string timezone_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Timezone {
+      get { return timezone_ ?? TimezoneDefaultValue; }
+      set {
+        timezone_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "timezone" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasTimezone {
+      get { return timezone_ != null; }
+    }
+    /// <summary>Clears the value of the "timezone" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearTimezone() {
+      timezone_ = null;
+    }
+
+    /// <summary>Field number for the "locale" field.</summary>
+    public const int LocaleFieldNumber = 12;
+    private readonly static string LocaleDefaultValue = "";
+
+    private string locale_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Locale {
+      get { return locale_ ?? LocaleDefaultValue; }
+      set {
+        locale_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "locale" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasLocale {
+      get { return locale_ != null; }
+    }
+    /// <summary>Clears the value of the "locale" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearLocale() {
+      locale_ = null;
+    }
+
+    /// <summary>Field number for the "tag" field.</summary>
+    public const int TagFieldNumber = 13;
+    private static readonly pb::FieldCodec<global::Bgs.Protocol.Club.V1.TagIdentifier> _repeated_tag_codec
+        = pb::FieldCodec.ForMessage(106, global::Bgs.Protocol.Club.V1.TagIdentifier.Parser);
+    private readonly pbc::RepeatedField<global::Bgs.Protocol.Club.V1.TagIdentifier> tag_ = new pbc::RepeatedField<global::Bgs.Protocol.Club.V1.TagIdentifier>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<global::Bgs.Protocol.Club.V1.TagIdentifier> Tag {
+      get { return tag_; }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as ClubDescription);
@@ -2256,6 +2457,9 @@ namespace Bgs.Protocol.Club.V1 {
       if (MemberCount != other.MemberCount) return false;
       if(!leader_.Equals(other.leader_)) return false;
       if (CreationTime != other.CreationTime) return false;
+      if (Timezone != other.Timezone) return false;
+      if (Locale != other.Locale) return false;
+      if(!tag_.Equals(other.tag_)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -2272,6 +2476,9 @@ namespace Bgs.Protocol.Club.V1 {
       if (HasMemberCount) hash ^= MemberCount.GetHashCode();
       hash ^= leader_.GetHashCode();
       if (HasCreationTime) hash ^= CreationTime.GetHashCode();
+      if (HasTimezone) hash ^= Timezone.GetHashCode();
+      if (HasLocale) hash ^= Locale.GetHashCode();
+      hash ^= tag_.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -2322,6 +2529,15 @@ namespace Bgs.Protocol.Club.V1 {
         output.WriteRawTag(80);
         output.WriteUInt64(CreationTime);
       }
+      if (HasTimezone) {
+        output.WriteRawTag(90);
+        output.WriteString(Timezone);
+      }
+      if (HasLocale) {
+        output.WriteRawTag(98);
+        output.WriteString(Locale);
+      }
+      tag_.WriteTo(output, _repeated_tag_codec);
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -2358,6 +2574,13 @@ namespace Bgs.Protocol.Club.V1 {
       if (HasCreationTime) {
         size += 1 + pb::CodedOutputStream.ComputeUInt64Size(CreationTime);
       }
+      if (HasTimezone) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Timezone);
+      }
+      if (HasLocale) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Locale);
+      }
+      size += tag_.CalculateSize(_repeated_tag_codec);
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
       }
@@ -2403,6 +2626,13 @@ namespace Bgs.Protocol.Club.V1 {
       if (other.HasCreationTime) {
         CreationTime = other.CreationTime;
       }
+      if (other.HasTimezone) {
+        Timezone = other.Timezone;
+      }
+      if (other.HasLocale) {
+        Locale = other.Locale;
+      }
+      tag_.Add(other.tag_);
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -2460,6 +2690,18 @@ namespace Bgs.Protocol.Club.V1 {
             CreationTime = input.ReadUInt64();
             break;
           }
+          case 90: {
+            Timezone = input.ReadString();
+            break;
+          }
+          case 98: {
+            Locale = input.ReadString();
+            break;
+          }
+          case 106: {
+            tag_.AddEntriesFrom(input, _repeated_tag_codec);
+            break;
+          }
         }
       }
     }
@@ -2475,7 +2717,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor.MessageTypes[7]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor.MessageTypes[6]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2663,7 +2905,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor.MessageTypes[8]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor.MessageTypes[7]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2689,6 +2931,11 @@ namespace Bgs.Protocol.Club.V1 {
       privacyLevel_ = other.privacyLevel_;
       streamPosition_ = other.HasStreamPosition ? other.streamPosition_.Clone() : null;
       shortName_ = other.shortName_;
+      visibilityLevel_ = other.visibilityLevel_;
+      locale_ = other.locale_;
+      timezone_ = other.timezone_;
+      tagOptions_ = other.HasTagOptions ? other.tagOptions_.Clone() : null;
+      searchAttribute_ = other.searchAttribute_.Clone();
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -2863,6 +3110,107 @@ namespace Bgs.Protocol.Club.V1 {
       shortName_ = null;
     }
 
+    /// <summary>Field number for the "visibility_level" field.</summary>
+    public const int VisibilityLevelFieldNumber = 9;
+    private readonly static global::Bgs.Protocol.Club.V1.VisibilityLevel VisibilityLevelDefaultValue = global::Bgs.Protocol.Club.V1.VisibilityLevel.Private;
+
+    private global::Bgs.Protocol.Club.V1.VisibilityLevel visibilityLevel_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Bgs.Protocol.Club.V1.VisibilityLevel VisibilityLevel {
+      get { if ((_hasBits0 & 2) != 0) { return visibilityLevel_; } else { return VisibilityLevelDefaultValue; } }
+      set {
+        _hasBits0 |= 2;
+        visibilityLevel_ = value;
+      }
+    }
+    /// <summary>Gets whether the "visibility_level" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasVisibilityLevel {
+      get { return (_hasBits0 & 2) != 0; }
+    }
+    /// <summary>Clears the value of the "visibility_level" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearVisibilityLevel() {
+      _hasBits0 &= ~2;
+    }
+
+    /// <summary>Field number for the "locale" field.</summary>
+    public const int LocaleFieldNumber = 10;
+    private readonly static string LocaleDefaultValue = "";
+
+    private string locale_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Locale {
+      get { return locale_ ?? LocaleDefaultValue; }
+      set {
+        locale_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "locale" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasLocale {
+      get { return locale_ != null; }
+    }
+    /// <summary>Clears the value of the "locale" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearLocale() {
+      locale_ = null;
+    }
+
+    /// <summary>Field number for the "timezone" field.</summary>
+    public const int TimezoneFieldNumber = 11;
+    private readonly static string TimezoneDefaultValue = "";
+
+    private string timezone_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Timezone {
+      get { return timezone_ ?? TimezoneDefaultValue; }
+      set {
+        timezone_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "timezone" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasTimezone {
+      get { return timezone_ != null; }
+    }
+    /// <summary>Clears the value of the "timezone" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearTimezone() {
+      timezone_ = null;
+    }
+
+    /// <summary>Field number for the "tag_options" field.</summary>
+    public const int TagOptionsFieldNumber = 12;
+    private global::Bgs.Protocol.Club.V1.TagOptions tagOptions_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Bgs.Protocol.Club.V1.TagOptions TagOptions {
+      get { return tagOptions_; }
+      set {
+        tagOptions_ = value;
+      }
+    }
+    /// <summary>Gets whether the tag_options field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasTagOptions {
+      get { return tagOptions_ != null; }
+    }
+    /// <summary>Clears the value of the tag_options field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearTagOptions() {
+      tagOptions_ = null;
+    }
+
+    /// <summary>Field number for the "search_attribute" field.</summary>
+    public const int SearchAttributeFieldNumber = 13;
+    private static readonly pb::FieldCodec<global::Bgs.Protocol.V2.Attribute> _repeated_searchAttribute_codec
+        = pb::FieldCodec.ForMessage(106, global::Bgs.Protocol.V2.Attribute.Parser);
+    private readonly pbc::RepeatedField<global::Bgs.Protocol.V2.Attribute> searchAttribute_ = new pbc::RepeatedField<global::Bgs.Protocol.V2.Attribute>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<global::Bgs.Protocol.V2.Attribute> SearchAttribute {
+      get { return searchAttribute_; }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as ClubStateOptions);
@@ -2884,6 +3232,11 @@ namespace Bgs.Protocol.Club.V1 {
       if (PrivacyLevel != other.PrivacyLevel) return false;
       if (!object.Equals(StreamPosition, other.StreamPosition)) return false;
       if (ShortName != other.ShortName) return false;
+      if (VisibilityLevel != other.VisibilityLevel) return false;
+      if (Locale != other.Locale) return false;
+      if (Timezone != other.Timezone) return false;
+      if (!object.Equals(TagOptions, other.TagOptions)) return false;
+      if(!searchAttribute_.Equals(other.searchAttribute_)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -2898,6 +3251,11 @@ namespace Bgs.Protocol.Club.V1 {
       if (HasPrivacyLevel) hash ^= PrivacyLevel.GetHashCode();
       if (HasStreamPosition) hash ^= StreamPosition.GetHashCode();
       if (HasShortName) hash ^= ShortName.GetHashCode();
+      if (HasVisibilityLevel) hash ^= VisibilityLevel.GetHashCode();
+      if (HasLocale) hash ^= Locale.GetHashCode();
+      if (HasTimezone) hash ^= Timezone.GetHashCode();
+      if (HasTagOptions) hash ^= TagOptions.GetHashCode();
+      hash ^= searchAttribute_.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -2940,6 +3298,23 @@ namespace Bgs.Protocol.Club.V1 {
         output.WriteRawTag(66);
         output.WriteString(ShortName);
       }
+      if (HasVisibilityLevel) {
+        output.WriteRawTag(72);
+        output.WriteEnum((int) VisibilityLevel);
+      }
+      if (HasLocale) {
+        output.WriteRawTag(82);
+        output.WriteString(Locale);
+      }
+      if (HasTimezone) {
+        output.WriteRawTag(90);
+        output.WriteString(Timezone);
+      }
+      if (HasTagOptions) {
+        output.WriteRawTag(98);
+        output.WriteMessage(TagOptions);
+      }
+      searchAttribute_.WriteTo(output, _repeated_searchAttribute_codec);
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -2970,6 +3345,19 @@ namespace Bgs.Protocol.Club.V1 {
       if (HasShortName) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(ShortName);
       }
+      if (HasVisibilityLevel) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) VisibilityLevel);
+      }
+      if (HasLocale) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Locale);
+      }
+      if (HasTimezone) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Timezone);
+      }
+      if (HasTagOptions) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(TagOptions);
+      }
+      size += searchAttribute_.CalculateSize(_repeated_searchAttribute_codec);
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
       }
@@ -3012,6 +3400,22 @@ namespace Bgs.Protocol.Club.V1 {
       if (other.HasShortName) {
         ShortName = other.ShortName;
       }
+      if (other.HasVisibilityLevel) {
+        VisibilityLevel = other.VisibilityLevel;
+      }
+      if (other.HasLocale) {
+        Locale = other.Locale;
+      }
+      if (other.HasTimezone) {
+        Timezone = other.Timezone;
+      }
+      if (other.HasTagOptions) {
+        if (!HasTagOptions) {
+          TagOptions = new global::Bgs.Protocol.Club.V1.TagOptions();
+        }
+        TagOptions.MergeFrom(other.TagOptions);
+      }
+      searchAttribute_.Add(other.searchAttribute_);
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -3064,6 +3468,29 @@ namespace Bgs.Protocol.Club.V1 {
             ShortName = input.ReadString();
             break;
           }
+          case 72: {
+            VisibilityLevel = (global::Bgs.Protocol.Club.V1.VisibilityLevel) input.ReadEnum();
+            break;
+          }
+          case 82: {
+            Locale = input.ReadString();
+            break;
+          }
+          case 90: {
+            Timezone = input.ReadString();
+            break;
+          }
+          case 98: {
+            if (!HasTagOptions) {
+              TagOptions = new global::Bgs.Protocol.Club.V1.TagOptions();
+            }
+            input.ReadMessage(TagOptions);
+            break;
+          }
+          case 106: {
+            searchAttribute_.AddEntriesFrom(input, _repeated_searchAttribute_codec);
+            break;
+          }
         }
       }
     }
@@ -3079,7 +3506,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor.MessageTypes[9]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor.MessageTypes[8]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -3106,6 +3533,12 @@ namespace Bgs.Protocol.Club.V1 {
       privacyLevel_ = other.privacyLevel_;
       streamPosition_ = other.HasStreamPosition ? other.streamPosition_.Clone() : null;
       shortName_ = other.shortName_;
+      visibilityLevel_ = other.visibilityLevel_;
+      locale_ = other.locale_;
+      timezone_ = other.timezone_;
+      tag_ = other.tag_.Clone();
+      searchAttribute_ = other.searchAttribute_.Clone();
+      tagCleared_ = other.tagCleared_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -3304,6 +3737,120 @@ namespace Bgs.Protocol.Club.V1 {
       shortName_ = null;
     }
 
+    /// <summary>Field number for the "visibility_level" field.</summary>
+    public const int VisibilityLevelFieldNumber = 10;
+    private readonly static global::Bgs.Protocol.Club.V1.VisibilityLevel VisibilityLevelDefaultValue = global::Bgs.Protocol.Club.V1.VisibilityLevel.Private;
+
+    private global::Bgs.Protocol.Club.V1.VisibilityLevel visibilityLevel_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Bgs.Protocol.Club.V1.VisibilityLevel VisibilityLevel {
+      get { if ((_hasBits0 & 4) != 0) { return visibilityLevel_; } else { return VisibilityLevelDefaultValue; } }
+      set {
+        _hasBits0 |= 4;
+        visibilityLevel_ = value;
+      }
+    }
+    /// <summary>Gets whether the "visibility_level" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasVisibilityLevel {
+      get { return (_hasBits0 & 4) != 0; }
+    }
+    /// <summary>Clears the value of the "visibility_level" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearVisibilityLevel() {
+      _hasBits0 &= ~4;
+    }
+
+    /// <summary>Field number for the "locale" field.</summary>
+    public const int LocaleFieldNumber = 11;
+    private readonly static string LocaleDefaultValue = "";
+
+    private string locale_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Locale {
+      get { return locale_ ?? LocaleDefaultValue; }
+      set {
+        locale_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "locale" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasLocale {
+      get { return locale_ != null; }
+    }
+    /// <summary>Clears the value of the "locale" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearLocale() {
+      locale_ = null;
+    }
+
+    /// <summary>Field number for the "timezone" field.</summary>
+    public const int TimezoneFieldNumber = 12;
+    private readonly static string TimezoneDefaultValue = "";
+
+    private string timezone_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Timezone {
+      get { return timezone_ ?? TimezoneDefaultValue; }
+      set {
+        timezone_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "timezone" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasTimezone {
+      get { return timezone_ != null; }
+    }
+    /// <summary>Clears the value of the "timezone" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearTimezone() {
+      timezone_ = null;
+    }
+
+    /// <summary>Field number for the "tag" field.</summary>
+    public const int TagFieldNumber = 13;
+    private static readonly pb::FieldCodec<global::Bgs.Protocol.Club.V1.TagIdentifier> _repeated_tag_codec
+        = pb::FieldCodec.ForMessage(106, global::Bgs.Protocol.Club.V1.TagIdentifier.Parser);
+    private readonly pbc::RepeatedField<global::Bgs.Protocol.Club.V1.TagIdentifier> tag_ = new pbc::RepeatedField<global::Bgs.Protocol.Club.V1.TagIdentifier>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<global::Bgs.Protocol.Club.V1.TagIdentifier> Tag {
+      get { return tag_; }
+    }
+
+    /// <summary>Field number for the "search_attribute" field.</summary>
+    public const int SearchAttributeFieldNumber = 14;
+    private static readonly pb::FieldCodec<global::Bgs.Protocol.V2.Attribute> _repeated_searchAttribute_codec
+        = pb::FieldCodec.ForMessage(114, global::Bgs.Protocol.V2.Attribute.Parser);
+    private readonly pbc::RepeatedField<global::Bgs.Protocol.V2.Attribute> searchAttribute_ = new pbc::RepeatedField<global::Bgs.Protocol.V2.Attribute>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<global::Bgs.Protocol.V2.Attribute> SearchAttribute {
+      get { return searchAttribute_; }
+    }
+
+    /// <summary>Field number for the "tag_cleared" field.</summary>
+    public const int TagClearedFieldNumber = 15;
+    private readonly static bool TagClearedDefaultValue = false;
+
+    private bool tagCleared_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool TagCleared {
+      get { if ((_hasBits0 & 8) != 0) { return tagCleared_; } else { return TagClearedDefaultValue; } }
+      set {
+        _hasBits0 |= 8;
+        tagCleared_ = value;
+      }
+    }
+    /// <summary>Gets whether the "tag_cleared" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasTagCleared {
+      get { return (_hasBits0 & 8) != 0; }
+    }
+    /// <summary>Clears the value of the "tag_cleared" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearTagCleared() {
+      _hasBits0 &= ~8;
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as ClubStateAssignment);
@@ -3326,6 +3873,12 @@ namespace Bgs.Protocol.Club.V1 {
       if (PrivacyLevel != other.PrivacyLevel) return false;
       if (!object.Equals(StreamPosition, other.StreamPosition)) return false;
       if (ShortName != other.ShortName) return false;
+      if (VisibilityLevel != other.VisibilityLevel) return false;
+      if (Locale != other.Locale) return false;
+      if (Timezone != other.Timezone) return false;
+      if(!tag_.Equals(other.tag_)) return false;
+      if(!searchAttribute_.Equals(other.searchAttribute_)) return false;
+      if (TagCleared != other.TagCleared) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -3341,6 +3894,12 @@ namespace Bgs.Protocol.Club.V1 {
       if (HasPrivacyLevel) hash ^= PrivacyLevel.GetHashCode();
       if (HasStreamPosition) hash ^= StreamPosition.GetHashCode();
       if (HasShortName) hash ^= ShortName.GetHashCode();
+      if (HasVisibilityLevel) hash ^= VisibilityLevel.GetHashCode();
+      if (HasLocale) hash ^= Locale.GetHashCode();
+      if (HasTimezone) hash ^= Timezone.GetHashCode();
+      hash ^= tag_.GetHashCode();
+      hash ^= searchAttribute_.GetHashCode();
+      if (HasTagCleared) hash ^= TagCleared.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -3387,6 +3946,24 @@ namespace Bgs.Protocol.Club.V1 {
         output.WriteRawTag(74);
         output.WriteString(ShortName);
       }
+      if (HasVisibilityLevel) {
+        output.WriteRawTag(80);
+        output.WriteEnum((int) VisibilityLevel);
+      }
+      if (HasLocale) {
+        output.WriteRawTag(90);
+        output.WriteString(Locale);
+      }
+      if (HasTimezone) {
+        output.WriteRawTag(98);
+        output.WriteString(Timezone);
+      }
+      tag_.WriteTo(output, _repeated_tag_codec);
+      searchAttribute_.WriteTo(output, _repeated_searchAttribute_codec);
+      if (HasTagCleared) {
+        output.WriteRawTag(120);
+        output.WriteBool(TagCleared);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -3419,6 +3996,20 @@ namespace Bgs.Protocol.Club.V1 {
       }
       if (HasShortName) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(ShortName);
+      }
+      if (HasVisibilityLevel) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) VisibilityLevel);
+      }
+      if (HasLocale) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Locale);
+      }
+      if (HasTimezone) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Timezone);
+      }
+      size += tag_.CalculateSize(_repeated_tag_codec);
+      size += searchAttribute_.CalculateSize(_repeated_searchAttribute_codec);
+      if (HasTagCleared) {
+        size += 1 + 1;
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -3464,6 +4055,20 @@ namespace Bgs.Protocol.Club.V1 {
       }
       if (other.HasShortName) {
         ShortName = other.ShortName;
+      }
+      if (other.HasVisibilityLevel) {
+        VisibilityLevel = other.VisibilityLevel;
+      }
+      if (other.HasLocale) {
+        Locale = other.Locale;
+      }
+      if (other.HasTimezone) {
+        Timezone = other.Timezone;
+      }
+      tag_.Add(other.tag_);
+      searchAttribute_.Add(other.searchAttribute_);
+      if (other.HasTagCleared) {
+        TagCleared = other.TagCleared;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -3521,6 +4126,30 @@ namespace Bgs.Protocol.Club.V1 {
             ShortName = input.ReadString();
             break;
           }
+          case 80: {
+            VisibilityLevel = (global::Bgs.Protocol.Club.V1.VisibilityLevel) input.ReadEnum();
+            break;
+          }
+          case 90: {
+            Locale = input.ReadString();
+            break;
+          }
+          case 98: {
+            Timezone = input.ReadString();
+            break;
+          }
+          case 106: {
+            tag_.AddEntriesFrom(input, _repeated_tag_codec);
+            break;
+          }
+          case 114: {
+            searchAttribute_.AddEntriesFrom(input, _repeated_searchAttribute_codec);
+            break;
+          }
+          case 120: {
+            TagCleared = input.ReadBool();
+            break;
+          }
         }
       }
     }
@@ -3536,7 +4165,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor.MessageTypes[10]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor.MessageTypes[9]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -3721,7 +4350,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor.MessageTypes[11]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor.MessageTypes[10]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -3946,7 +4575,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor.MessageTypes[12]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor.MessageTypes[11]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -4154,7 +4783,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor.MessageTypes[13]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor.MessageTypes[12]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

@@ -31,8 +31,8 @@ namespace Bgs.Protocol {
             "EhQKBGhpZ2gYASACKAZCBoL5KwIIAhITCgNsb3cYAiACKAZCBoL5KwIIAjoG",
             "gvkrAggBInsKCElkZW50aXR5EjQKCmFjY291bnRfaWQYASABKAsyFi5iZ3Mu",
             "cHJvdG9jb2wuRW50aXR5SWRCCIr5KwQ6AhABEjkKD2dhbWVfYWNjb3VudF9p",
-            "ZBgCIAEoCzIWLmJncy5wcm90b2NvbC5FbnRpdHlJZEIIivkrBDoCEAJCHAoN",
-            "Ym5ldC5wcm90b2NvbEILRW50aXR5UHJvdG8="));
+            "ZBgCIAEoCzIWLmJncy5wcm90b2NvbC5FbnRpdHlJZEIIivkrBDoCEAJCGwoM",
+            "YmdzLnByb3RvY29sQgtFbnRpdHlQcm90bw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {

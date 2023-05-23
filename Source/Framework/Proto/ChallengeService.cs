@@ -26,24 +26,25 @@ namespace Bgs.Protocol.Challenge.V1 {
           string.Concat(
             "CiliZ3MvbG93L3BiL2NsaWVudC9jaGFsbGVuZ2Vfc2VydmljZS5wcm90bxIZ",
             "YmdzLnByb3RvY29sLmNoYWxsZW5nZS52MRohYmdzL2xvdy9wYi9jbGllbnQv",
-            "cnBjX3R5cGVzLnByb3RvGjliZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0",
-            "ZW5zaW9ucy9tZXNzYWdlX29wdGlvbnMucHJvdG8aN2Jncy9sb3cvcGIvY2xp",
-            "ZW50L2dsb2JhbF9leHRlbnNpb25zL2ZpZWxkX29wdGlvbnMucHJvdG8aOGJn",
+            "cnBjX3R5cGVzLnByb3RvGjdiZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0",
+            "ZW5zaW9ucy9maWVsZF9vcHRpb25zLnByb3RvGjliZ3MvbG93L3BiL2NsaWVu",
+            "dC9nbG9iYWxfZXh0ZW5zaW9ucy9tZXNzYWdlX29wdGlvbnMucHJvdG8aOGJn",
             "cy9sb3cvcGIvY2xpZW50L2dsb2JhbF9leHRlbnNpb25zL21ldGhvZF9vcHRp",
             "b25zLnByb3RvGjliZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9u",
             "cy9zZXJ2aWNlX29wdGlvbnMucHJvdG8iWAoYQ2hhbGxlbmdlRXh0ZXJuYWxS",
             "ZXF1ZXN0EhUKDXJlcXVlc3RfdG9rZW4YASABKAkSFAoMcGF5bG9hZF90eXBl",
             "GAIgASgJEg8KB3BheWxvYWQYAyABKAwiRgoXQ2hhbGxlbmdlRXh0ZXJuYWxS",
             "ZXN1bHQSFQoNcmVxdWVzdF90b2tlbhgBIAEoCRIUCgZwYXNzZWQYAiABKAg6",
-            "BHRydWUyqwIKEUNoYWxsZW5nZUxpc3RlbmVyEm0KE09uRXh0ZXJuYWxDaGFs",
+            "BHRydWUysQIKEUNoYWxsZW5nZUxpc3RlbmVyEm0KE09uRXh0ZXJuYWxDaGFs",
             "bGVuZ2USMy5iZ3MucHJvdG9jb2wuY2hhbGxlbmdlLnYxLkNoYWxsZW5nZUV4",
             "dGVybmFsUmVxdWVzdBoZLmJncy5wcm90b2NvbC5OT19SRVNQT05TRSIGgvkr",
             "AggDEnIKGU9uRXh0ZXJuYWxDaGFsbGVuZ2VSZXN1bHQSMi5iZ3MucHJvdG9j",
             "b2wuY2hhbGxlbmdlLnYxLkNoYWxsZW5nZUV4dGVybmFsUmVzdWx0GhkuYmdz",
-            "LnByb3RvY29sLk5PX1JFU1BPTlNFIgaC+SsCCAQaM4L5KykKJ2JuZXQucHJv",
-            "dG9jb2wuY2hhbGxlbmdlLkNoYWxsZW5nZU5vdGlmeYr5KwIIAUIDgAEA"));
+            "LnByb3RvY29sLk5PX1JFU1BPTlNFIgaC+SsCCAQaOYL5KykKJ2JuZXQucHJv",
+            "dG9jb2wuY2hhbGxlbmdlLkNoYWxsZW5nZU5vdGlmeYL5KwI4AYr5KwIIAUID",
+            "gAEA"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Challenge.V1.ChallengeExternalRequest), global::Bgs.Protocol.Challenge.V1.ChallengeExternalRequest.Parser, new[]{ "RequestToken", "PayloadType", "Payload" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Challenge.V1.ChallengeExternalResult), global::Bgs.Protocol.Challenge.V1.ChallengeExternalResult.Parser, new[]{ "RequestToken", "Passed" }, null, null, null, null)

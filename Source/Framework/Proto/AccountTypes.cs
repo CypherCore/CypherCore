@@ -26,150 +26,151 @@ namespace Bgs.Protocol.Account.V1 {
           string.Concat(
             "CiViZ3MvbG93L3BiL2NsaWVudC9hY2NvdW50X3R5cGVzLnByb3RvEhdiZ3Mu",
             "cHJvdG9jb2wuYWNjb3VudC52MRokYmdzL2xvdy9wYi9jbGllbnQvZW50aXR5",
-            "X3R5cGVzLnByb3RvGiFiZ3MvbG93L3BiL2NsaWVudC9ycGNfdHlwZXMucHJv",
-            "dG8aOWJncy9sb3cvcGIvY2xpZW50L2dsb2JhbF9leHRlbnNpb25zL21lc3Nh",
-            "Z2Vfb3B0aW9ucy5wcm90bxo3YmdzL2xvdy9wYi9jbGllbnQvZ2xvYmFsX2V4",
-            "dGVuc2lvbnMvZmllbGRfb3B0aW9ucy5wcm90bxo4YmdzL2xvdy9wYi9jbGll",
-            "bnQvZ2xvYmFsX2V4dGVuc2lvbnMvbWV0aG9kX29wdGlvbnMucHJvdG8aOWJn",
-            "cy9sb3cvcGIvY2xpZW50L2dsb2JhbF9leHRlbnNpb25zL3NlcnZpY2Vfb3B0",
-            "aW9ucy5wcm90byIpCglBY2NvdW50SWQSFAoCaWQYASACKAdCCIr5KwQSAhAA",
-            "OgaC+SsCCAEiLQoOQWNjb3VudExpY2Vuc2USCgoCaWQYASACKA0SDwoHZXhw",
-            "aXJlcxgCIAEoBCJzChFHYW1lQWNjb3VudEhhbmRsZRIUCgJpZBgBIAIoB0II",
-            "ivkrBBICEAASGQoHcHJvZ3JhbRgCIAIoB0IIivkrBBICEAASJQoGcmVnaW9u",
-            "GAMgAigNQhWK+SsGEgQKAggBivkrBxIFCgMQ/wE6BoL5KwIIASLGAQoQQWNj",
-            "b3VudFJlZmVyZW5jZRIKCgJpZBgBIAEoBxIVCgVlbWFpbBgCIAEoCUIGgvkr",
-            "AggBEjoKBmhhbmRsZRgDIAEoCzIqLmJncy5wcm90b2NvbC5hY2NvdW50LnYx",
-            "LkdhbWVBY2NvdW50SGFuZGxlEhoKCmJhdHRsZV90YWcYBCABKAlCBoL5KwII",
-            "ARIcCgxwaG9uZV9udW1iZXIYBSABKAlCBoL5KwIIARIRCgZyZWdpb24YCiAB",
-            "KA06ATA6BoL5KwIIASKJAQoISWRlbnRpdHkSMwoHYWNjb3VudBgBIAEoCzIi",
-            "LmJncy5wcm90b2NvbC5hY2NvdW50LnYxLkFjY291bnRJZBJACgxnYW1lX2Fj",
-            "Y291bnQYAiABKAsyKi5iZ3MucHJvdG9jb2wuYWNjb3VudC52MS5HYW1lQWNj",
-            "b3VudEhhbmRsZToGgvkrAhABIioKClByb2dyYW1UYWcSDwoHcHJvZ3JhbRgB",
-            "IAEoBxILCgN0YWcYAiABKAciKAoJUmVnaW9uVGFnEg4KBnJlZ2lvbhgBIAEo",
-            "BxILCgN0YWcYAiABKAcizQIKEEFjY291bnRGaWVsZFRhZ3MSHgoWYWNjb3Vu",
-            "dF9sZXZlbF9pbmZvX3RhZxgCIAEoBxIYChBwcml2YWN5X2luZm9fdGFnGAMg",
-            "ASgHEiEKGXBhcmVudGFsX2NvbnRyb2xfaW5mb190YWcYBCABKAcSQQoUZ2Ft",
-            "ZV9sZXZlbF9pbmZvX3RhZ3MYByADKAsyIy5iZ3MucHJvdG9jb2wuYWNjb3Vu",
-            "dC52MS5Qcm9ncmFtVGFnEj0KEGdhbWVfc3RhdHVzX3RhZ3MYCSADKAsyIy5i",
-            "Z3MucHJvdG9jb2wuYWNjb3VudC52MS5Qcm9ncmFtVGFnEj0KEWdhbWVfYWNj",
-            "b3VudF90YWdzGAsgAygLMiIuYmdzLnByb3RvY29sLmFjY291bnQudjEuUmVn",
-            "aW9uVGFnEhsKE3NlY3VyaXR5X3N0YXR1c190YWcYDCABKAcifgoUR2FtZUFj",
-            "Y291bnRGaWVsZFRhZ3MSGwoTZ2FtZV9sZXZlbF9pbmZvX3RhZxgCIAEoBxIa",
-            "ChJnYW1lX3RpbWVfaW5mb190YWcYAyABKAcSFwoPZ2FtZV9zdGF0dXNfdGFn",
-            "GAQgASgHEhQKDHJhZl9pbmZvX3RhZxgFIAEoByKCAgoTQWNjb3VudEZpZWxk",
-            "T3B0aW9ucxISCgphbGxfZmllbGRzGAEgASgIEiAKGGZpZWxkX2FjY291bnRf",
-            "bGV2ZWxfaW5mbxgCIAEoCBIaChJmaWVsZF9wcml2YWN5X2luZm8YAyABKAgS",
-            "IwobZmllbGRfcGFyZW50YWxfY29udHJvbF9pbmZvGAQgASgIEh0KFWZpZWxk",
-            "X2dhbWVfbGV2ZWxfaW5mbxgGIAEoCBIZChFmaWVsZF9nYW1lX3N0YXR1cxgH",
-            "IAEoCBIbChNmaWVsZF9nYW1lX2FjY291bnRzGAggASgIEh0KFWZpZWxkX3Nl",
-            "Y3VyaXR5X3N0YXR1cxgJIAEoCCKdAQoXR2FtZUFjY291bnRGaWVsZE9wdGlv",
-            "bnMSEgoKYWxsX2ZpZWxkcxgBIAEoCBIdChVmaWVsZF9nYW1lX2xldmVsX2lu",
-            "Zm8YAiABKAgSHAoUZmllbGRfZ2FtZV90aW1lX2luZm8YAyABKAgSGQoRZmll",
-            "bGRfZ2FtZV9zdGF0dXMYBCABKAgSFgoOZmllbGRfcmFmX2luZm8YBSABKAgi",
-            "kgMKE1N1YnNjcmliZXJSZWZlcmVuY2USFAoJb2JqZWN0X2lkGAEgASgEOgEw",
-            "EikKCWVudGl0eV9pZBgCIAEoCzIWLmJncy5wcm90b2NvbC5FbnRpdHlJZBJF",
-            "Cg9hY2NvdW50X29wdGlvbnMYAyABKAsyLC5iZ3MucHJvdG9jb2wuYWNjb3Vu",
-            "dC52MS5BY2NvdW50RmllbGRPcHRpb25zEj8KDGFjY291bnRfdGFncxgEIAEo",
-            "CzIpLmJncy5wcm90b2NvbC5hY2NvdW50LnYxLkFjY291bnRGaWVsZFRhZ3MS",
-            "TgoUZ2FtZV9hY2NvdW50X29wdGlvbnMYBSABKAsyMC5iZ3MucHJvdG9jb2wu",
-            "YWNjb3VudC52MS5HYW1lQWNjb3VudEZpZWxkT3B0aW9ucxJIChFnYW1lX2Fj",
-            "Y291bnRfdGFncxgGIAEoCzItLmJncy5wcm90b2NvbC5hY2NvdW50LnYxLkdh",
-            "bWVBY2NvdW50RmllbGRUYWdzEhgKDXN1YnNjcmliZXJfaWQYByABKAQ6ATAi",
-            "jgQKEEFjY291bnRMZXZlbEluZm8SOQoIbGljZW5zZXMYAyADKAsyJy5iZ3Mu",
-            "cHJvdG9jb2wuYWNjb3VudC52MS5BY2NvdW50TGljZW5zZRIYChBkZWZhdWx0",
-            "X2N1cnJlbmN5GAQgASgHEg8KB2NvdW50cnkYBSABKAkSGAoQcHJlZmVycmVk",
-            "X3JlZ2lvbhgGIAEoDRIZCglmdWxsX25hbWUYByABKAlCBoL5KwIIARIaCgpi",
-            "YXR0bGVfdGFnGAggASgJQgaC+SsCCAESDQoFbXV0ZWQYCSABKAgSFQoNbWFu",
-            "dWFsX3JldmlldxgKIAEoCBIYChBhY2NvdW50X3BhaWRfYW55GAsgASgIEmEK",
-            "FWlkZW50aXR5X2NoZWNrX3N0YXR1cxgMIAEoDjIzLmJncy5wcm90b2NvbC5h",
-            "Y2NvdW50LnYxLklkZW50aXR5VmVyaWZpY2F0aW9uU3RhdHVzOg1JREVOVF9O",
-            "T19EQVRBEhUKBWVtYWlsGA0gASgJQgaC+SsCCAESGAoQaGVhZGxlc3NfYWNj",
-            "b3VudBgOIAEoCBIUCgx0ZXN0X2FjY291bnQYDyABKAgSGAoQaXNfc21zX3By",
-            "b3RlY3RlZBgRIAEoCBIhChlyYXRpbmdzX2JvYXJkX21pbmltdW1fYWdlGBIg",
-            "ASgNEhwKDHBob25lX251bWJlchgTIAEoCUIGgvkrAggBIsICCgtQcml2YWN5",
-            "SW5mbxIUCgxpc191c2luZ19yaWQYAyABKAgSIwobaXNfdmlzaWJsZV9mb3Jf",
-            "dmlld19mcmllbmRzGAQgASgIEiQKHGlzX2hpZGRlbl9mcm9tX2ZyaWVuZF9m",
-            "aW5kZXIYBSABKAgSYAoRZ2FtZV9pbmZvX3ByaXZhY3kYBiABKA4yNC5iZ3Mu",
-            "cHJvdG9jb2wuYWNjb3VudC52MS5Qcml2YWN5SW5mby5HYW1lSW5mb1ByaXZh",
-            "Y3k6D1BSSVZBQ1lfRlJJRU5EUxIiChpvbmx5X2FsbG93X2ZyaWVuZF93aGlz",
-            "cGVycxgHIAEoCCJMCg9HYW1lSW5mb1ByaXZhY3kSDgoKUFJJVkFDWV9NRRAA",
-            "EhMKD1BSSVZBQ1lfRlJJRU5EUxABEhQKEFBSSVZBQ1lfRVZFUllPTkUQAiLV",
-            "AQoTUGFyZW50YWxDb250cm9sSW5mbxIQCgh0aW1lem9uZRgDIAEoCRIXCg9t",
-            "aW51dGVzX3Blcl9kYXkYBCABKA0SGAoQbWludXRlc19wZXJfd2VlaxgFIAEo",
-            "DRIZChFjYW5fcmVjZWl2ZV92b2ljZRgGIAEoCBIWCg5jYW5fc2VuZF92b2lj",
-            "ZRgHIAEoCBIVCg1wbGF5X3NjaGVkdWxlGAggAygIEhYKDmNhbl9qb2luX2dy",
-            "b3VwGAkgASgIEhcKD2Nhbl91c2VfcHJvZmlsZRgKIAEoCCJCChdQbGF5U2No",
-            "ZWR1bGVSZXN0cmljdGlvbhIVCg1wbGF5X3NjaGVkdWxlGAEgAygIEhAKCHRp",
-            "bWV6b25lGAIgASgJIvgBCg1HYW1lTGV2ZWxJbmZvEhAKCGlzX3RyaWFsGAQg",
-            "ASgIEhMKC2lzX2xpZmV0aW1lGAUgASgIEhUKDWlzX3Jlc3RyaWN0ZWQYBiAB",
-            "KAgSDwoHaXNfYmV0YRgHIAEoCBIUCgRuYW1lGAggASgJQgaC+SsCCAESDwoH",
-            "cHJvZ3JhbRgJIAEoBxI5CghsaWNlbnNlcxgKIAMoCzInLmJncy5wcm90b2Nv",
-            "bC5hY2NvdW50LnYxLkFjY291bnRMaWNlbnNlEhkKEXJlYWxtX3Blcm1pc3Np",
-            "b25zGAsgASgNEhsKE2xhc3RfbG9nb3V0X3RpbWVfbXMYDCABKAQihQEKDEdh",
-            "bWVUaW1lSW5mbxIeChZpc191bmxpbWl0ZWRfcGxheV90aW1lGAMgASgIEhkK",
-            "EXBsYXlfdGltZV9leHBpcmVzGAUgASgEEhcKD2lzX3N1YnNjcmlwdGlvbhgG",
-            "IAEoCBIhChlpc19yZWN1cnJpbmdfc3Vic2NyaXB0aW9uGAcgASgIIrEBChVH",
-            "YW1lVGltZVJlbWFpbmluZ0luZm8SGQoRbWludXRlc19yZW1haW5pbmcYASAB",
-            "KA0SKAogcGFyZW50YWxfZGFpbHlfbWludXRlc19yZW1haW5pbmcYAiABKA0S",
-            "KQohcGFyZW50YWxfd2Vla2x5X21pbnV0ZXNfcmVtYWluaW5nGAMgASgNEigK",
-            "HHNlY29uZHNfcmVtYWluaW5nX3VudGlsX2tpY2sYBCABKA1CAhgBIpABCgpH",
-            "YW1lU3RhdHVzEhQKDGlzX3N1c3BlbmRlZBgEIAEoCBIRCglpc19iYW5uZWQY",
-            "BSABKAgSGgoSc3VzcGVuc2lvbl9leHBpcmVzGAYgASgEEg8KB3Byb2dyYW0Y",
-            "ByABKAcSEQoJaXNfbG9ja2VkGAggASgIEhkKEWlzX2JhbV91bmxvY2thYmxl",
-            "GAkgASgIIhsKB1JBRkluZm8SEAoIcmFmX2luZm8YASABKAwigQIKD0dhbWVT",
-            "ZXNzaW9uSW5mbxIWCgpzdGFydF90aW1lGAMgASgNQgIYARI+Cghsb2NhdGlv",
-            "bhgEIAEoCzIsLmJncy5wcm90b2NvbC5hY2NvdW50LnYxLkdhbWVTZXNzaW9u",
-            "TG9jYXRpb24SFgoOaGFzX2JlbmVmYWN0b3IYBSABKAgSFAoMaXNfdXNpbmdf",
-            "aWdyGAYgASgIEiAKGHBhcmVudGFsX2NvbnRyb2xzX2FjdGl2ZRgHIAEoCBIW",
-            "Cg5zdGFydF90aW1lX3NlYxgIIAEoBBIuCgZpZ3JfaWQYCSABKAsyHi5iZ3Mu",
-            "cHJvdG9jb2wuYWNjb3VudC52MS5JZ3JJZCJEChVHYW1lU2Vzc2lvblVwZGF0",
-            "ZUluZm8SKwoEY2FpcxgIIAEoCzIdLmJncy5wcm90b2NvbC5hY2NvdW50LnYx",
-            "LkNBSVMiSAoTR2FtZVNlc3Npb25Mb2NhdGlvbhISCgppcF9hZGRyZXNzGAEg",
-            "ASgJEg8KB2NvdW50cnkYAiABKA0SDAoEY2l0eRgDIAEoCSJPCgRDQUlTEhYK",
-            "DnBsYXllZF9taW51dGVzGAEgASgNEhYKDnJlc3RlZF9taW51dGVzGAIgASgN",
-            "EhcKD2xhc3RfaGVhcmRfdGltZRgDIAEoBCJdCg9HYW1lQWNjb3VudExpc3QS",
-            "DgoGcmVnaW9uGAMgASgNEjoKBmhhbmRsZRgEIAMoCzIqLmJncy5wcm90b2Nv",
-            "bC5hY2NvdW50LnYxLkdhbWVBY2NvdW50SGFuZGxlIpkBCg5TZWN1cml0eVN0",
-            "YXR1cxIbChNzbXNfcHJvdGVjdF9lbmFibGVkGAEgASgIEhYKDmVtYWlsX3Zl",
-            "cmlmaWVkGAIgASgIEh0KFWF1dGhlbnRpY2F0b3JfZW5hYmxlZBgDIAEoCBIT",
-            "CgtzcWFfZW5hYmxlZBgEIAEoCBIeChZhdXRoZW50aWNhdG9yX3JlcXVpcmVk",
-            "GAUgASgIIqkECgxBY2NvdW50U3RhdGUSRQoSYWNjb3VudF9sZXZlbF9pbmZv",
-            "GAEgASgLMikuYmdzLnByb3RvY29sLmFjY291bnQudjEuQWNjb3VudExldmVs",
-            "SW5mbxI6Cgxwcml2YWN5X2luZm8YAiABKAsyJC5iZ3MucHJvdG9jb2wuYWNj",
-            "b3VudC52MS5Qcml2YWN5SW5mbxJLChVwYXJlbnRhbF9jb250cm9sX2luZm8Y",
-            "AyABKAsyLC5iZ3MucHJvdG9jb2wuYWNjb3VudC52MS5QYXJlbnRhbENvbnRy",
-            "b2xJbmZvEj8KD2dhbWVfbGV2ZWxfaW5mbxgFIAMoCzImLmJncy5wcm90b2Nv",
-            "bC5hY2NvdW50LnYxLkdhbWVMZXZlbEluZm8SOAoLZ2FtZV9zdGF0dXMYBiAD",
-            "KAsyIy5iZ3MucHJvdG9jb2wuYWNjb3VudC52MS5HYW1lU3RhdHVzEj8KDWdh",
-            "bWVfYWNjb3VudHMYByADKAsyKC5iZ3MucHJvdG9jb2wuYWNjb3VudC52MS5H",
-            "YW1lQWNjb3VudExpc3QSQAoPc2VjdXJpdHlfc3RhdHVzGAggASgLMicuYmdz",
-            "LnByb3RvY29sLmFjY291bnQudjEuU2VjdXJpdHlTdGF0dXMSSwoRZ292ZXJu",
-            "bWVudF9jdXJmZXcYCSABKAsyMC5iZ3MucHJvdG9jb2wuYWNjb3VudC52MS5Q",
-            "bGF5U2NoZWR1bGVSZXN0cmljdGlvbiKTAQoSQWNjb3VudFN0YXRlVGFnZ2Vk",
-            "EjwKDWFjY291bnRfc3RhdGUYASABKAsyJS5iZ3MucHJvdG9jb2wuYWNjb3Vu",
-            "dC52MS5BY2NvdW50U3RhdGUSPwoMYWNjb3VudF90YWdzGAIgASgLMikuYmdz",
-            "LnByb3RvY29sLmFjY291bnQudjEuQWNjb3VudEZpZWxkVGFncyKAAgoQR2Ft",
-            "ZUFjY291bnRTdGF0ZRI/Cg9nYW1lX2xldmVsX2luZm8YASABKAsyJi5iZ3Mu",
-            "cHJvdG9jb2wuYWNjb3VudC52MS5HYW1lTGV2ZWxJbmZvEj0KDmdhbWVfdGlt",
-            "ZV9pbmZvGAIgASgLMiUuYmdzLnByb3RvY29sLmFjY291bnQudjEuR2FtZVRp",
-            "bWVJbmZvEjgKC2dhbWVfc3RhdHVzGAMgASgLMiMuYmdzLnByb3RvY29sLmFj",
-            "Y291bnQudjEuR2FtZVN0YXR1cxIyCghyYWZfaW5mbxgEIAEoCzIgLmJncy5w",
-            "cm90b2NvbC5hY2NvdW50LnYxLlJBRkluZm8iqQEKFkdhbWVBY2NvdW50U3Rh",
-            "dGVUYWdnZWQSRQoSZ2FtZV9hY2NvdW50X3N0YXRlGAEgASgLMikuYmdzLnBy",
-            "b3RvY29sLmFjY291bnQudjEuR2FtZUFjY291bnRTdGF0ZRJIChFnYW1lX2Fj",
-            "Y291bnRfdGFncxgCIAEoCzItLmJncy5wcm90b2NvbC5hY2NvdW50LnYxLkdh",
-            "bWVBY2NvdW50RmllbGRUYWdzIi8KDkF1dGhvcml6ZWREYXRhEgwKBGRhdGEY",
-            "ASABKAkSDwoHbGljZW5zZRgCIAMoDSJ6CgVJZ3JJZBJCCgxnYW1lX2FjY291",
-            "bnQYASABKAsyKi5iZ3MucHJvdG9jb2wuYWNjb3VudC52MS5HYW1lQWNjb3Vu",
-            "dEhhbmRsZUgAEhUKC2V4dGVybmFsX2lkGAIgASgHSAASDgoEdXVpZBgDIAEo",
-            "CUgAQgYKBHR5cGUiNAoKSWdyQWRkcmVzcxIWCg5jbGllbnRfYWRkcmVzcxgB",
-            "IAEoCRIOCgZyZWdpb24YAiABKA0qtQEKGklkZW50aXR5VmVyaWZpY2F0aW9u",
-            "U3RhdHVzEhEKDUlERU5UX05PX0RBVEEQABIRCg1JREVOVF9QRU5ESU5HEAES",
-            "EQoNSURFTlRfT1ZFUl8xOBACEhIKDklERU5UX1VOREVSXzE4EAMSEAoMSURF",
-            "TlRfRkFJTEVEEAQSEQoNSURFTlRfU1VDQ0VTUxAFEhIKDklERU5UX1NVQ0Nf",
-            "TU5MEAYSEQoNSURFTlRfVU5LTk9XThAH"));
+            "X3R5cGVzLnByb3RvGjliZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5z",
+            "aW9ucy9tZXNzYWdlX29wdGlvbnMucHJvdG8aN2Jncy9sb3cvcGIvY2xpZW50",
+            "L2dsb2JhbF9leHRlbnNpb25zL2ZpZWxkX29wdGlvbnMucHJvdG8iKQoJQWNj",
+            "b3VudElkEhQKAmlkGAEgAigHQgiK+SsEEgIQADoGgvkrAggBIi0KDkFjY291",
+            "bnRMaWNlbnNlEgoKAmlkGAEgAigNEg8KB2V4cGlyZXMYAiABKAQicwoRR2Ft",
+            "ZUFjY291bnRIYW5kbGUSFAoCaWQYASACKAdCCIr5KwQSAhAAEhkKB3Byb2dy",
+            "YW0YAiACKAdCCIr5KwQSAhAAEiUKBnJlZ2lvbhgDIAIoDUIVivkrBhIECgII",
+            "AYr5KwcSBQoDEP8BOgaC+SsCCAEixgEKEEFjY291bnRSZWZlcmVuY2USCgoC",
+            "aWQYASABKAcSFQoFZW1haWwYAiABKAlCBoL5KwIIARI6CgZoYW5kbGUYAyAB",
+            "KAsyKi5iZ3MucHJvdG9jb2wuYWNjb3VudC52MS5HYW1lQWNjb3VudEhhbmRs",
+            "ZRIaCgpiYXR0bGVfdGFnGAQgASgJQgaC+SsCCAESHAoMcGhvbmVfbnVtYmVy",
+            "GAUgASgJQgaC+SsCCAESEQoGcmVnaW9uGAogASgNOgEwOgaC+SsCCAEiiQEK",
+            "CElkZW50aXR5EjMKB2FjY291bnQYASABKAsyIi5iZ3MucHJvdG9jb2wuYWNj",
+            "b3VudC52MS5BY2NvdW50SWQSQAoMZ2FtZV9hY2NvdW50GAIgASgLMiouYmdz",
+            "LnByb3RvY29sLmFjY291bnQudjEuR2FtZUFjY291bnRIYW5kbGU6BoL5KwIQ",
+            "ASIqCgpQcm9ncmFtVGFnEg8KB3Byb2dyYW0YASABKAcSCwoDdGFnGAIgASgH",
+            "IigKCVJlZ2lvblRhZxIOCgZyZWdpb24YASABKAcSCwoDdGFnGAIgASgHIs0C",
+            "ChBBY2NvdW50RmllbGRUYWdzEh4KFmFjY291bnRfbGV2ZWxfaW5mb190YWcY",
+            "AiABKAcSGAoQcHJpdmFjeV9pbmZvX3RhZxgDIAEoBxIhChlwYXJlbnRhbF9j",
+            "b250cm9sX2luZm9fdGFnGAQgASgHEkEKFGdhbWVfbGV2ZWxfaW5mb190YWdz",
+            "GAcgAygLMiMuYmdzLnByb3RvY29sLmFjY291bnQudjEuUHJvZ3JhbVRhZxI9",
+            "ChBnYW1lX3N0YXR1c190YWdzGAkgAygLMiMuYmdzLnByb3RvY29sLmFjY291",
+            "bnQudjEuUHJvZ3JhbVRhZxI9ChFnYW1lX2FjY291bnRfdGFncxgLIAMoCzIi",
+            "LmJncy5wcm90b2NvbC5hY2NvdW50LnYxLlJlZ2lvblRhZxIbChNzZWN1cml0",
+            "eV9zdGF0dXNfdGFnGAwgASgHIn4KFEdhbWVBY2NvdW50RmllbGRUYWdzEhsK",
+            "E2dhbWVfbGV2ZWxfaW5mb190YWcYAiABKAcSGgoSZ2FtZV90aW1lX2luZm9f",
+            "dGFnGAMgASgHEhcKD2dhbWVfc3RhdHVzX3RhZxgEIAEoBxIUCgxyYWZfaW5m",
+            "b190YWcYBSABKAciggIKE0FjY291bnRGaWVsZE9wdGlvbnMSEgoKYWxsX2Zp",
+            "ZWxkcxgBIAEoCBIgChhmaWVsZF9hY2NvdW50X2xldmVsX2luZm8YAiABKAgS",
+            "GgoSZmllbGRfcHJpdmFjeV9pbmZvGAMgASgIEiMKG2ZpZWxkX3BhcmVudGFs",
+            "X2NvbnRyb2xfaW5mbxgEIAEoCBIdChVmaWVsZF9nYW1lX2xldmVsX2luZm8Y",
+            "BiABKAgSGQoRZmllbGRfZ2FtZV9zdGF0dXMYByABKAgSGwoTZmllbGRfZ2Ft",
+            "ZV9hY2NvdW50cxgIIAEoCBIdChVmaWVsZF9zZWN1cml0eV9zdGF0dXMYCSAB",
+            "KAginQEKF0dhbWVBY2NvdW50RmllbGRPcHRpb25zEhIKCmFsbF9maWVsZHMY",
+            "ASABKAgSHQoVZmllbGRfZ2FtZV9sZXZlbF9pbmZvGAIgASgIEhwKFGZpZWxk",
+            "X2dhbWVfdGltZV9pbmZvGAMgASgIEhkKEWZpZWxkX2dhbWVfc3RhdHVzGAQg",
+            "ASgIEhYKDmZpZWxkX3JhZl9pbmZvGAUgASgIIpIDChNTdWJzY3JpYmVyUmVm",
+            "ZXJlbmNlEhQKCW9iamVjdF9pZBgBIAEoBDoBMBIpCgllbnRpdHlfaWQYAiAB",
+            "KAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5SWQSRQoPYWNjb3VudF9vcHRpb25z",
+            "GAMgASgLMiwuYmdzLnByb3RvY29sLmFjY291bnQudjEuQWNjb3VudEZpZWxk",
+            "T3B0aW9ucxI/CgxhY2NvdW50X3RhZ3MYBCABKAsyKS5iZ3MucHJvdG9jb2wu",
+            "YWNjb3VudC52MS5BY2NvdW50RmllbGRUYWdzEk4KFGdhbWVfYWNjb3VudF9v",
+            "cHRpb25zGAUgASgLMjAuYmdzLnByb3RvY29sLmFjY291bnQudjEuR2FtZUFj",
+            "Y291bnRGaWVsZE9wdGlvbnMSSAoRZ2FtZV9hY2NvdW50X3RhZ3MYBiABKAsy",
+            "LS5iZ3MucHJvdG9jb2wuYWNjb3VudC52MS5HYW1lQWNjb3VudEZpZWxkVGFn",
+            "cxIYCg1zdWJzY3JpYmVyX2lkGAcgASgEOgEwIhkKBk9wdElucxIPCgNpZHMY",
+            "ASADKARCAhABIo8FChBBY2NvdW50TGV2ZWxJbmZvEjkKCGxpY2Vuc2VzGAMg",
+            "AygLMicuYmdzLnByb3RvY29sLmFjY291bnQudjEuQWNjb3VudExpY2Vuc2US",
+            "GAoQZGVmYXVsdF9jdXJyZW5jeRgEIAEoBxIPCgdjb3VudHJ5GAUgASgJEhgK",
+            "EHByZWZlcnJlZF9yZWdpb24YBiABKA0SGQoJZnVsbF9uYW1lGAcgASgJQgaC",
+            "+SsCCAESGgoKYmF0dGxlX3RhZxgIIAEoCUIGgvkrAggBEg0KBW11dGVkGAkg",
+            "ASgIEhUKDW1hbnVhbF9yZXZpZXcYCiABKAgSGAoQYWNjb3VudF9wYWlkX2Fu",
+            "eRgLIAEoCBJhChVpZGVudGl0eV9jaGVja19zdGF0dXMYDCABKA4yMy5iZ3Mu",
+            "cHJvdG9jb2wuYWNjb3VudC52MS5JZGVudGl0eVZlcmlmaWNhdGlvblN0YXR1",
+            "czoNSURFTlRfTk9fREFUQRIVCgVlbWFpbBgNIAEoCUIGgvkrAggBEhgKEGhl",
+            "YWRsZXNzX2FjY291bnQYDiABKAgSFAoMdGVzdF9hY2NvdW50GA8gASgIEhgK",
+            "EGlzX3Ntc19wcm90ZWN0ZWQYESABKAgSIQoZcmF0aW5nc19ib2FyZF9taW5p",
+            "bXVtX2FnZRgSIAEoDRIcCgxwaG9uZV9udW1iZXIYEyABKAlCBoL5KwIIARIZ",
+            "CgliaXJ0aGRhdGUYFCABKAlCBoL5KwIIARIyCipsZWdhbF9jb3VudHJ5X2Zl",
+            "YXR1cmVfcmVzdHJpY3Rpb25zX2FwcGxpZWQYFSABKAgSMAoHb3B0X2lucxgW",
+            "IAEoCzIfLmJncy5wcm90b2NvbC5hY2NvdW50LnYxLk9wdElucyLCAgoLUHJp",
+            "dmFjeUluZm8SFAoMaXNfdXNpbmdfcmlkGAMgASgIEiMKG2lzX3Zpc2libGVf",
+            "Zm9yX3ZpZXdfZnJpZW5kcxgEIAEoCBIkChxpc19oaWRkZW5fZnJvbV9mcmll",
+            "bmRfZmluZGVyGAUgASgIEmAKEWdhbWVfaW5mb19wcml2YWN5GAYgASgOMjQu",
+            "YmdzLnByb3RvY29sLmFjY291bnQudjEuUHJpdmFjeUluZm8uR2FtZUluZm9Q",
+            "cml2YWN5Og9QUklWQUNZX0ZSSUVORFMSIgoab25seV9hbGxvd19mcmllbmRf",
+            "d2hpc3BlcnMYByABKAgiTAoPR2FtZUluZm9Qcml2YWN5Eg4KClBSSVZBQ1lf",
+            "TUUQABITCg9QUklWQUNZX0ZSSUVORFMQARIUChBQUklWQUNZX0VWRVJZT05F",
+            "EAIi1QEKE1BhcmVudGFsQ29udHJvbEluZm8SEAoIdGltZXpvbmUYAyABKAkS",
+            "FwoPbWludXRlc19wZXJfZGF5GAQgASgNEhgKEG1pbnV0ZXNfcGVyX3dlZWsY",
+            "BSABKA0SGQoRY2FuX3JlY2VpdmVfdm9pY2UYBiABKAgSFgoOY2FuX3NlbmRf",
+            "dm9pY2UYByABKAgSFQoNcGxheV9zY2hlZHVsZRgIIAMoCBIWCg5jYW5fam9p",
+            "bl9ncm91cBgJIAEoCBIXCg9jYW5fdXNlX3Byb2ZpbGUYCiABKAgiQgoXUGxh",
+            "eVNjaGVkdWxlUmVzdHJpY3Rpb24SFQoNcGxheV9zY2hlZHVsZRgBIAMoCBIQ",
+            "Cgh0aW1lem9uZRgCIAEoCSL4AQoNR2FtZUxldmVsSW5mbxIQCghpc190cmlh",
+            "bBgEIAEoCBITCgtpc19saWZldGltZRgFIAEoCBIVCg1pc19yZXN0cmljdGVk",
+            "GAYgASgIEg8KB2lzX2JldGEYByABKAgSFAoEbmFtZRgIIAEoCUIGgvkrAggB",
+            "Eg8KB3Byb2dyYW0YCSABKAcSOQoIbGljZW5zZXMYCiADKAsyJy5iZ3MucHJv",
+            "dG9jb2wuYWNjb3VudC52MS5BY2NvdW50TGljZW5zZRIZChFyZWFsbV9wZXJt",
+            "aXNzaW9ucxgLIAEoDRIbChNsYXN0X2xvZ291dF90aW1lX21zGAwgASgEIoUB",
+            "CgxHYW1lVGltZUluZm8SHgoWaXNfdW5saW1pdGVkX3BsYXlfdGltZRgDIAEo",
+            "CBIZChFwbGF5X3RpbWVfZXhwaXJlcxgFIAEoBBIXCg9pc19zdWJzY3JpcHRp",
+            "b24YBiABKAgSIQoZaXNfcmVjdXJyaW5nX3N1YnNjcmlwdGlvbhgHIAEoCCKx",
+            "AQoVR2FtZVRpbWVSZW1haW5pbmdJbmZvEhkKEW1pbnV0ZXNfcmVtYWluaW5n",
+            "GAEgASgNEigKIHBhcmVudGFsX2RhaWx5X21pbnV0ZXNfcmVtYWluaW5nGAIg",
+            "ASgNEikKIXBhcmVudGFsX3dlZWtseV9taW51dGVzX3JlbWFpbmluZxgDIAEo",
+            "DRIoChxzZWNvbmRzX3JlbWFpbmluZ191bnRpbF9raWNrGAQgASgNQgIYASKQ",
+            "AQoKR2FtZVN0YXR1cxIUCgxpc19zdXNwZW5kZWQYBCABKAgSEQoJaXNfYmFu",
+            "bmVkGAUgASgIEhoKEnN1c3BlbnNpb25fZXhwaXJlcxgGIAEoBBIPCgdwcm9n",
+            "cmFtGAcgASgHEhEKCWlzX2xvY2tlZBgIIAEoCBIZChFpc19iYW1fdW5sb2Nr",
+            "YWJsZRgJIAEoCCIbCgdSQUZJbmZvEhAKCHJhZl9pbmZvGAEgASgMIqgCCg9H",
+            "YW1lU2Vzc2lvbkluZm8SFgoKc3RhcnRfdGltZRgDIAEoDUICGAESPgoIbG9j",
+            "YXRpb24YBCABKAsyLC5iZ3MucHJvdG9jb2wuYWNjb3VudC52MS5HYW1lU2Vz",
+            "c2lvbkxvY2F0aW9uEhYKDmhhc19iZW5lZmFjdG9yGAUgASgIEhQKDGlzX3Vz",
+            "aW5nX2lnchgGIAEoCBIgChhwYXJlbnRhbF9jb250cm9sc19hY3RpdmUYByAB",
+            "KAgSFgoOc3RhcnRfdGltZV9zZWMYCCABKAQSLgoGaWdyX2lkGAkgASgLMh4u",
+            "YmdzLnByb3RvY29sLmFjY291bnQudjEuSWdySWQSEwoLcGxhdGZvcm1faWQY",
+            "CiABKAcSEAoIaWdyX3BhaWQYCyABKAgiRAoVR2FtZVNlc3Npb25VcGRhdGVJ",
+            "bmZvEisKBGNhaXMYCCABKAsyHS5iZ3MucHJvdG9jb2wuYWNjb3VudC52MS5D",
+            "QUlTIkgKE0dhbWVTZXNzaW9uTG9jYXRpb24SEgoKaXBfYWRkcmVzcxgBIAEo",
+            "CRIPCgdjb3VudHJ5GAIgASgNEgwKBGNpdHkYAyABKAkiTwoEQ0FJUxIWCg5w",
+            "bGF5ZWRfbWludXRlcxgBIAEoDRIWCg5yZXN0ZWRfbWludXRlcxgCIAEoDRIX",
+            "Cg9sYXN0X2hlYXJkX3RpbWUYAyABKAQiXQoPR2FtZUFjY291bnRMaXN0Eg4K",
+            "BnJlZ2lvbhgDIAEoDRI6CgZoYW5kbGUYBCADKAsyKi5iZ3MucHJvdG9jb2wu",
+            "YWNjb3VudC52MS5HYW1lQWNjb3VudEhhbmRsZSKZAQoOU2VjdXJpdHlTdGF0",
+            "dXMSGwoTc21zX3Byb3RlY3RfZW5hYmxlZBgBIAEoCBIWCg5lbWFpbF92ZXJp",
+            "ZmllZBgCIAEoCBIdChVhdXRoZW50aWNhdG9yX2VuYWJsZWQYAyABKAgSEwoL",
+            "c3FhX2VuYWJsZWQYBCABKAgSHgoWYXV0aGVudGljYXRvcl9yZXF1aXJlZBgF",
+            "IAEoCCKpBAoMQWNjb3VudFN0YXRlEkUKEmFjY291bnRfbGV2ZWxfaW5mbxgB",
+            "IAEoCzIpLmJncy5wcm90b2NvbC5hY2NvdW50LnYxLkFjY291bnRMZXZlbElu",
+            "Zm8SOgoMcHJpdmFjeV9pbmZvGAIgASgLMiQuYmdzLnByb3RvY29sLmFjY291",
+            "bnQudjEuUHJpdmFjeUluZm8SSwoVcGFyZW50YWxfY29udHJvbF9pbmZvGAMg",
+            "ASgLMiwuYmdzLnByb3RvY29sLmFjY291bnQudjEuUGFyZW50YWxDb250cm9s",
+            "SW5mbxI/Cg9nYW1lX2xldmVsX2luZm8YBSADKAsyJi5iZ3MucHJvdG9jb2wu",
+            "YWNjb3VudC52MS5HYW1lTGV2ZWxJbmZvEjgKC2dhbWVfc3RhdHVzGAYgAygL",
+            "MiMuYmdzLnByb3RvY29sLmFjY291bnQudjEuR2FtZVN0YXR1cxI/Cg1nYW1l",
+            "X2FjY291bnRzGAcgAygLMiguYmdzLnByb3RvY29sLmFjY291bnQudjEuR2Ft",
+            "ZUFjY291bnRMaXN0EkAKD3NlY3VyaXR5X3N0YXR1cxgIIAEoCzInLmJncy5w",
+            "cm90b2NvbC5hY2NvdW50LnYxLlNlY3VyaXR5U3RhdHVzEksKEWdvdmVybm1l",
+            "bnRfY3VyZmV3GAkgASgLMjAuYmdzLnByb3RvY29sLmFjY291bnQudjEuUGxh",
+            "eVNjaGVkdWxlUmVzdHJpY3Rpb24ikwEKEkFjY291bnRTdGF0ZVRhZ2dlZBI8",
+            "Cg1hY2NvdW50X3N0YXRlGAEgASgLMiUuYmdzLnByb3RvY29sLmFjY291bnQu",
+            "djEuQWNjb3VudFN0YXRlEj8KDGFjY291bnRfdGFncxgCIAEoCzIpLmJncy5w",
+            "cm90b2NvbC5hY2NvdW50LnYxLkFjY291bnRGaWVsZFRhZ3MigAIKEEdhbWVB",
+            "Y2NvdW50U3RhdGUSPwoPZ2FtZV9sZXZlbF9pbmZvGAEgASgLMiYuYmdzLnBy",
+            "b3RvY29sLmFjY291bnQudjEuR2FtZUxldmVsSW5mbxI9Cg5nYW1lX3RpbWVf",
+            "aW5mbxgCIAEoCzIlLmJncy5wcm90b2NvbC5hY2NvdW50LnYxLkdhbWVUaW1l",
+            "SW5mbxI4CgtnYW1lX3N0YXR1cxgDIAEoCzIjLmJncy5wcm90b2NvbC5hY2Nv",
+            "dW50LnYxLkdhbWVTdGF0dXMSMgoIcmFmX2luZm8YBCABKAsyIC5iZ3MucHJv",
+            "dG9jb2wuYWNjb3VudC52MS5SQUZJbmZvIqkBChZHYW1lQWNjb3VudFN0YXRl",
+            "VGFnZ2VkEkUKEmdhbWVfYWNjb3VudF9zdGF0ZRgBIAEoCzIpLmJncy5wcm90",
+            "b2NvbC5hY2NvdW50LnYxLkdhbWVBY2NvdW50U3RhdGUSSAoRZ2FtZV9hY2Nv",
+            "dW50X3RhZ3MYAiABKAsyLS5iZ3MucHJvdG9jb2wuYWNjb3VudC52MS5HYW1l",
+            "QWNjb3VudEZpZWxkVGFncyIvCg5BdXRob3JpemVkRGF0YRIMCgRkYXRhGAEg",
+            "ASgJEg8KB2xpY2Vuc2UYAiADKA0ifgoFSWdySWQSRgoMZ2FtZV9hY2NvdW50",
+            "GAEgASgLMiouYmdzLnByb3RvY29sLmFjY291bnQudjEuR2FtZUFjY291bnRI",
+            "YW5kbGVCAhgBSAASFQoLZXh0ZXJuYWxfaWQYAiABKAdIABIOCgR1dWlkGAMg",
+            "ASgJSABCBgoEdHlwZSI0CgpJZ3JBZGRyZXNzEhYKDmNsaWVudF9hZGRyZXNz",
+            "GAEgASgJEg4KBnJlZ2lvbhgCIAEoDSq1AQoaSWRlbnRpdHlWZXJpZmljYXRp",
+            "b25TdGF0dXMSEQoNSURFTlRfTk9fREFUQRAAEhEKDUlERU5UX1BFTkRJTkcQ",
+            "ARIRCg1JREVOVF9PVkVSXzE4EAISEgoOSURFTlRfVU5ERVJfMTgQAxIQCgxJ",
+            "REVOVF9GQUlMRUQQBBIRCg1JREVOVF9TVUNDRVNTEAUSEgoOSURFTlRfU1VD",
+            "Q19NTkwQBhIRCg1JREVOVF9VTktOT1dOEAc="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Bgs.Protocol.EntityTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Bgs.Protocol.EntityTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Bgs.Protocol.Account.V1.IdentityVerificationStatus), }, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Account.V1.AccountId), global::Bgs.Protocol.Account.V1.AccountId.Parser, new[]{ "Id" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Account.V1.AccountLicense), global::Bgs.Protocol.Account.V1.AccountLicense.Parser, new[]{ "Id", "Expires" }, null, null, null, null),
@@ -183,7 +184,8 @@ namespace Bgs.Protocol.Account.V1 {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Account.V1.AccountFieldOptions), global::Bgs.Protocol.Account.V1.AccountFieldOptions.Parser, new[]{ "AllFields", "FieldAccountLevelInfo", "FieldPrivacyInfo", "FieldParentalControlInfo", "FieldGameLevelInfo", "FieldGameStatus", "FieldGameAccounts", "FieldSecurityStatus" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Account.V1.GameAccountFieldOptions), global::Bgs.Protocol.Account.V1.GameAccountFieldOptions.Parser, new[]{ "AllFields", "FieldGameLevelInfo", "FieldGameTimeInfo", "FieldGameStatus", "FieldRafInfo" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Account.V1.SubscriberReference), global::Bgs.Protocol.Account.V1.SubscriberReference.Parser, new[]{ "ObjectId", "EntityId", "AccountOptions", "AccountTags", "GameAccountOptions", "GameAccountTags", "SubscriberId" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Account.V1.AccountLevelInfo), global::Bgs.Protocol.Account.V1.AccountLevelInfo.Parser, new[]{ "Licenses", "DefaultCurrency", "Country", "PreferredRegion", "FullName", "BattleTag", "Muted", "ManualReview", "AccountPaidAny", "IdentityCheckStatus", "Email", "HeadlessAccount", "TestAccount", "IsSmsProtected", "RatingsBoardMinimumAge", "PhoneNumber" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Account.V1.OptIns), global::Bgs.Protocol.Account.V1.OptIns.Parser, new[]{ "Ids" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Account.V1.AccountLevelInfo), global::Bgs.Protocol.Account.V1.AccountLevelInfo.Parser, new[]{ "Licenses", "DefaultCurrency", "Country", "PreferredRegion", "FullName", "BattleTag", "Muted", "ManualReview", "AccountPaidAny", "IdentityCheckStatus", "Email", "HeadlessAccount", "TestAccount", "IsSmsProtected", "RatingsBoardMinimumAge", "PhoneNumber", "Birthdate", "LegalCountryFeatureRestrictionsApplied", "OptIns" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Account.V1.PrivacyInfo), global::Bgs.Protocol.Account.V1.PrivacyInfo.Parser, new[]{ "IsUsingRid", "IsVisibleForViewFriends", "IsHiddenFromFriendFinder", "GameInfoPrivacy", "OnlyAllowFriendWhispers" }, null, new[]{ typeof(global::Bgs.Protocol.Account.V1.PrivacyInfo.Types.GameInfoPrivacy) }, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Account.V1.ParentalControlInfo), global::Bgs.Protocol.Account.V1.ParentalControlInfo.Parser, new[]{ "Timezone", "MinutesPerDay", "MinutesPerWeek", "CanReceiveVoice", "CanSendVoice", "PlaySchedule", "CanJoinGroup", "CanUseProfile" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Account.V1.PlayScheduleRestriction), global::Bgs.Protocol.Account.V1.PlayScheduleRestriction.Parser, new[]{ "PlaySchedule", "Timezone" }, null, null, null, null),
@@ -192,7 +194,7 @@ namespace Bgs.Protocol.Account.V1 {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Account.V1.GameTimeRemainingInfo), global::Bgs.Protocol.Account.V1.GameTimeRemainingInfo.Parser, new[]{ "MinutesRemaining", "ParentalDailyMinutesRemaining", "ParentalWeeklyMinutesRemaining", "SecondsRemainingUntilKick" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Account.V1.GameStatus), global::Bgs.Protocol.Account.V1.GameStatus.Parser, new[]{ "IsSuspended", "IsBanned", "SuspensionExpires", "Program", "IsLocked", "IsBamUnlockable" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Account.V1.RAFInfo), global::Bgs.Protocol.Account.V1.RAFInfo.Parser, new[]{ "RafInfo" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Account.V1.GameSessionInfo), global::Bgs.Protocol.Account.V1.GameSessionInfo.Parser, new[]{ "StartTime", "Location", "HasBenefactor", "IsUsingIgr", "ParentalControlsActive", "StartTimeSec", "IgrId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Account.V1.GameSessionInfo), global::Bgs.Protocol.Account.V1.GameSessionInfo.Parser, new[]{ "StartTime", "Location", "HasBenefactor", "IsUsingIgr", "ParentalControlsActive", "StartTimeSec", "IgrId", "PlatformId", "IgrPaid" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Account.V1.GameSessionUpdateInfo), global::Bgs.Protocol.Account.V1.GameSessionUpdateInfo.Parser, new[]{ "Cais" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Account.V1.GameSessionLocation), global::Bgs.Protocol.Account.V1.GameSessionLocation.Parser, new[]{ "IpAddress", "Country", "City" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Account.V1.CAIS), global::Bgs.Protocol.Account.V1.CAIS.Parser, new[]{ "PlayedMinutes", "RestedMinutes", "LastHeardTime" }, null, null, null, null),
@@ -3426,6 +3428,128 @@ namespace Bgs.Protocol.Account.V1 {
 
   }
 
+  public sealed partial class OptIns : pb::IMessage<OptIns> {
+    private static readonly pb::MessageParser<OptIns> _parser = new pb::MessageParser<OptIns>(() => new OptIns());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<OptIns> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[12]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public OptIns() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public OptIns(OptIns other) : this() {
+      ids_ = other.ids_.Clone();
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public OptIns Clone() {
+      return new OptIns(this);
+    }
+
+    /// <summary>Field number for the "ids" field.</summary>
+    public const int IdsFieldNumber = 1;
+    private static readonly pb::FieldCodec<ulong> _repeated_ids_codec
+        = pb::FieldCodec.ForUInt64(10);
+    private readonly pbc::RepeatedField<ulong> ids_ = new pbc::RepeatedField<ulong>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<ulong> Ids {
+      get { return ids_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as OptIns);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(OptIns other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if(!ids_.Equals(other.ids_)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      hash ^= ids_.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      ids_.WriteTo(output, _repeated_ids_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      size += ids_.CalculateSize(_repeated_ids_codec);
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(OptIns other) {
+      if (other == null) {
+        return;
+      }
+      ids_.Add(other.ids_);
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10:
+          case 8: {
+            ids_.AddEntriesFrom(input, _repeated_ids_codec);
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
   public sealed partial class AccountLevelInfo : pb::IMessage<AccountLevelInfo> {
     private static readonly pb::MessageParser<AccountLevelInfo> _parser = new pb::MessageParser<AccountLevelInfo>(() => new AccountLevelInfo());
     private pb::UnknownFieldSet _unknownFields;
@@ -3435,7 +3559,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[12]; }
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[13]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -3469,6 +3593,9 @@ namespace Bgs.Protocol.Account.V1 {
       isSmsProtected_ = other.isSmsProtected_;
       ratingsBoardMinimumAge_ = other.ratingsBoardMinimumAge_;
       phoneNumber_ = other.phoneNumber_;
+      birthdate_ = other.birthdate_;
+      legalCountryFeatureRestrictionsApplied_ = other.legalCountryFeatureRestrictionsApplied_;
+      optIns_ = other.HasOptIns ? other.optIns_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -3842,6 +3969,74 @@ namespace Bgs.Protocol.Account.V1 {
       phoneNumber_ = null;
     }
 
+    /// <summary>Field number for the "birthdate" field.</summary>
+    public const int BirthdateFieldNumber = 20;
+    private readonly static string BirthdateDefaultValue = "";
+
+    private string birthdate_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Birthdate {
+      get { return birthdate_ ?? BirthdateDefaultValue; }
+      set {
+        birthdate_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "birthdate" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasBirthdate {
+      get { return birthdate_ != null; }
+    }
+    /// <summary>Clears the value of the "birthdate" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearBirthdate() {
+      birthdate_ = null;
+    }
+
+    /// <summary>Field number for the "legal_country_feature_restrictions_applied" field.</summary>
+    public const int LegalCountryFeatureRestrictionsAppliedFieldNumber = 21;
+    private readonly static bool LegalCountryFeatureRestrictionsAppliedDefaultValue = false;
+
+    private bool legalCountryFeatureRestrictionsApplied_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool LegalCountryFeatureRestrictionsApplied {
+      get { if ((_hasBits0 & 1024) != 0) { return legalCountryFeatureRestrictionsApplied_; } else { return LegalCountryFeatureRestrictionsAppliedDefaultValue; } }
+      set {
+        _hasBits0 |= 1024;
+        legalCountryFeatureRestrictionsApplied_ = value;
+      }
+    }
+    /// <summary>Gets whether the "legal_country_feature_restrictions_applied" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasLegalCountryFeatureRestrictionsApplied {
+      get { return (_hasBits0 & 1024) != 0; }
+    }
+    /// <summary>Clears the value of the "legal_country_feature_restrictions_applied" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearLegalCountryFeatureRestrictionsApplied() {
+      _hasBits0 &= ~1024;
+    }
+
+    /// <summary>Field number for the "opt_ins" field.</summary>
+    public const int OptInsFieldNumber = 22;
+    private global::Bgs.Protocol.Account.V1.OptIns optIns_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Bgs.Protocol.Account.V1.OptIns OptIns {
+      get { return optIns_; }
+      set {
+        optIns_ = value;
+      }
+    }
+    /// <summary>Gets whether the opt_ins field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasOptIns {
+      get { return optIns_ != null; }
+    }
+    /// <summary>Clears the value of the opt_ins field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearOptIns() {
+      optIns_ = null;
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as AccountLevelInfo);
@@ -3871,6 +4066,9 @@ namespace Bgs.Protocol.Account.V1 {
       if (IsSmsProtected != other.IsSmsProtected) return false;
       if (RatingsBoardMinimumAge != other.RatingsBoardMinimumAge) return false;
       if (PhoneNumber != other.PhoneNumber) return false;
+      if (Birthdate != other.Birthdate) return false;
+      if (LegalCountryFeatureRestrictionsApplied != other.LegalCountryFeatureRestrictionsApplied) return false;
+      if (!object.Equals(OptIns, other.OptIns)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -3893,6 +4091,9 @@ namespace Bgs.Protocol.Account.V1 {
       if (HasIsSmsProtected) hash ^= IsSmsProtected.GetHashCode();
       if (HasRatingsBoardMinimumAge) hash ^= RatingsBoardMinimumAge.GetHashCode();
       if (HasPhoneNumber) hash ^= PhoneNumber.GetHashCode();
+      if (HasBirthdate) hash ^= Birthdate.GetHashCode();
+      if (HasLegalCountryFeatureRestrictionsApplied) hash ^= LegalCountryFeatureRestrictionsApplied.GetHashCode();
+      if (HasOptIns) hash ^= OptIns.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -3967,6 +4168,18 @@ namespace Bgs.Protocol.Account.V1 {
         output.WriteRawTag(154, 1);
         output.WriteString(PhoneNumber);
       }
+      if (HasBirthdate) {
+        output.WriteRawTag(162, 1);
+        output.WriteString(Birthdate);
+      }
+      if (HasLegalCountryFeatureRestrictionsApplied) {
+        output.WriteRawTag(168, 1);
+        output.WriteBool(LegalCountryFeatureRestrictionsApplied);
+      }
+      if (HasOptIns) {
+        output.WriteRawTag(178, 1);
+        output.WriteMessage(OptIns);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -4020,6 +4233,15 @@ namespace Bgs.Protocol.Account.V1 {
       }
       if (HasPhoneNumber) {
         size += 2 + pb::CodedOutputStream.ComputeStringSize(PhoneNumber);
+      }
+      if (HasBirthdate) {
+        size += 2 + pb::CodedOutputStream.ComputeStringSize(Birthdate);
+      }
+      if (HasLegalCountryFeatureRestrictionsApplied) {
+        size += 2 + 1;
+      }
+      if (HasOptIns) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(OptIns);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -4077,6 +4299,18 @@ namespace Bgs.Protocol.Account.V1 {
       }
       if (other.HasPhoneNumber) {
         PhoneNumber = other.PhoneNumber;
+      }
+      if (other.HasBirthdate) {
+        Birthdate = other.Birthdate;
+      }
+      if (other.HasLegalCountryFeatureRestrictionsApplied) {
+        LegalCountryFeatureRestrictionsApplied = other.LegalCountryFeatureRestrictionsApplied;
+      }
+      if (other.HasOptIns) {
+        if (!HasOptIns) {
+          OptIns = new global::Bgs.Protocol.Account.V1.OptIns();
+        }
+        OptIns.MergeFrom(other.OptIns);
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -4153,6 +4387,21 @@ namespace Bgs.Protocol.Account.V1 {
             PhoneNumber = input.ReadString();
             break;
           }
+          case 162: {
+            Birthdate = input.ReadString();
+            break;
+          }
+          case 168: {
+            LegalCountryFeatureRestrictionsApplied = input.ReadBool();
+            break;
+          }
+          case 178: {
+            if (!HasOptIns) {
+              OptIns = new global::Bgs.Protocol.Account.V1.OptIns();
+            }
+            input.ReadMessage(OptIns);
+            break;
+          }
         }
       }
     }
@@ -4168,7 +4417,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[13]; }
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[14]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -4489,7 +4738,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[14]; }
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[15]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -4898,7 +5147,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[15]; }
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[16]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -5061,7 +5310,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[16]; }
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[17]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -5511,7 +5760,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[17]; }
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[18]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -5778,7 +6027,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[18]; }
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[19]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -6048,7 +6297,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[19]; }
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[20]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -6396,7 +6645,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[20]; }
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[21]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -6538,7 +6787,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[21]; }
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[22]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -6563,6 +6812,8 @@ namespace Bgs.Protocol.Account.V1 {
       parentalControlsActive_ = other.parentalControlsActive_;
       startTimeSec_ = other.startTimeSec_;
       igrId_ = other.HasIgrId ? other.igrId_.Clone() : null;
+      platformId_ = other.platformId_;
+      igrPaid_ = other.igrPaid_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -6736,6 +6987,54 @@ namespace Bgs.Protocol.Account.V1 {
       igrId_ = null;
     }
 
+    /// <summary>Field number for the "platform_id" field.</summary>
+    public const int PlatformIdFieldNumber = 10;
+    private readonly static uint PlatformIdDefaultValue = 0;
+
+    private uint platformId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint PlatformId {
+      get { if ((_hasBits0 & 32) != 0) { return platformId_; } else { return PlatformIdDefaultValue; } }
+      set {
+        _hasBits0 |= 32;
+        platformId_ = value;
+      }
+    }
+    /// <summary>Gets whether the "platform_id" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasPlatformId {
+      get { return (_hasBits0 & 32) != 0; }
+    }
+    /// <summary>Clears the value of the "platform_id" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearPlatformId() {
+      _hasBits0 &= ~32;
+    }
+
+    /// <summary>Field number for the "igr_paid" field.</summary>
+    public const int IgrPaidFieldNumber = 11;
+    private readonly static bool IgrPaidDefaultValue = false;
+
+    private bool igrPaid_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool IgrPaid {
+      get { if ((_hasBits0 & 64) != 0) { return igrPaid_; } else { return IgrPaidDefaultValue; } }
+      set {
+        _hasBits0 |= 64;
+        igrPaid_ = value;
+      }
+    }
+    /// <summary>Gets whether the "igr_paid" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasIgrPaid {
+      get { return (_hasBits0 & 64) != 0; }
+    }
+    /// <summary>Clears the value of the "igr_paid" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearIgrPaid() {
+      _hasBits0 &= ~64;
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as GameSessionInfo);
@@ -6756,6 +7055,8 @@ namespace Bgs.Protocol.Account.V1 {
       if (ParentalControlsActive != other.ParentalControlsActive) return false;
       if (StartTimeSec != other.StartTimeSec) return false;
       if (!object.Equals(IgrId, other.IgrId)) return false;
+      if (PlatformId != other.PlatformId) return false;
+      if (IgrPaid != other.IgrPaid) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -6769,6 +7070,8 @@ namespace Bgs.Protocol.Account.V1 {
       if (HasParentalControlsActive) hash ^= ParentalControlsActive.GetHashCode();
       if (HasStartTimeSec) hash ^= StartTimeSec.GetHashCode();
       if (HasIgrId) hash ^= IgrId.GetHashCode();
+      if (HasPlatformId) hash ^= PlatformId.GetHashCode();
+      if (HasIgrPaid) hash ^= IgrPaid.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -6810,6 +7113,14 @@ namespace Bgs.Protocol.Account.V1 {
         output.WriteRawTag(74);
         output.WriteMessage(IgrId);
       }
+      if (HasPlatformId) {
+        output.WriteRawTag(85);
+        output.WriteFixed32(PlatformId);
+      }
+      if (HasIgrPaid) {
+        output.WriteRawTag(88);
+        output.WriteBool(IgrPaid);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -6838,6 +7149,12 @@ namespace Bgs.Protocol.Account.V1 {
       }
       if (HasIgrId) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(IgrId);
+      }
+      if (HasPlatformId) {
+        size += 1 + 4;
+      }
+      if (HasIgrPaid) {
+        size += 1 + 1;
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -6876,6 +7193,12 @@ namespace Bgs.Protocol.Account.V1 {
           IgrId = new global::Bgs.Protocol.Account.V1.IgrId();
         }
         IgrId.MergeFrom(other.IgrId);
+      }
+      if (other.HasPlatformId) {
+        PlatformId = other.PlatformId;
+      }
+      if (other.HasIgrPaid) {
+        IgrPaid = other.IgrPaid;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -6922,6 +7245,14 @@ namespace Bgs.Protocol.Account.V1 {
             input.ReadMessage(IgrId);
             break;
           }
+          case 85: {
+            PlatformId = input.ReadFixed32();
+            break;
+          }
+          case 88: {
+            IgrPaid = input.ReadBool();
+            break;
+          }
         }
       }
     }
@@ -6936,7 +7267,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[22]; }
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[23]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -7082,7 +7413,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[23]; }
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[24]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -7306,7 +7637,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[24]; }
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[25]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -7532,7 +7863,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[25]; }
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[26]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -7696,7 +8027,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[26]; }
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[27]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -8003,7 +8334,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[27]; }
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[28]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -8384,7 +8715,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[28]; }
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[29]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -8573,7 +8904,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[29]; }
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[30]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -8850,7 +9181,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[30]; }
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[31]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -9039,7 +9370,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[31]; }
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[32]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -9202,7 +9533,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[32]; }
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[33]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -9242,6 +9573,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     /// <summary>Field number for the "game_account" field.</summary>
     public const int GameAccountFieldNumber = 1;
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Bgs.Protocol.Account.V1.GameAccountHandle GameAccount {
       get { return HasGameAccount ? (global::Bgs.Protocol.Account.V1.GameAccountHandle) type_ : null; }
@@ -9251,11 +9583,13 @@ namespace Bgs.Protocol.Account.V1 {
       }
     }
     /// <summary>Gets whether the "game_account" field is set</summary>
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasGameAccount {
       get { return typeCase_ == TypeOneofCase.GameAccount; }
     }
     /// <summary> Clears the value of the oneof if it's currently set to "game_account" </summary>
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearGameAccount() {
       if (HasGameAccount) {
@@ -9467,7 +9801,7 @@ namespace Bgs.Protocol.Account.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[33]; }
+      get { return global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor.MessageTypes[34]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

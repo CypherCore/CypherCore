@@ -27,11 +27,15 @@ namespace Bgs.Protocol {
             "CixiZ3MvbG93L3BiL2NsaWVudC9jb250ZW50X2hhbmRsZV90eXBlcy5wcm90",
             "bxIMYmdzLnByb3RvY29sIk8KDUNvbnRlbnRIYW5kbGUSDgoGcmVnaW9uGAEg",
             "AigHEg0KBXVzYWdlGAIgAigHEgwKBGhhc2gYAyACKAwSEQoJcHJvdG9fdXJs",
-            "GAQgASgJQiMKDWJuZXQucHJvdG9jb2xCEkNvbnRlbnRIYW5kbGVQcm90bw=="));
+            "GAQgASgJIl8KFlRpdGxlSWNvbkNvbnRlbnRIYW5kbGUSEAoIdGl0bGVfaWQY",
+            "ASABKA0SMwoOY29udGVudF9oYW5kbGUYAiABKAsyGy5iZ3MucHJvdG9jb2wu",
+            "Q29udGVudEhhbmRsZUIiCgxiZ3MucHJvdG9jb2xCEkNvbnRlbnRIYW5kbGVQ",
+            "cm90bw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.ContentHandle), global::Bgs.Protocol.ContentHandle.Parser, new[]{ "Region", "Usage", "Hash", "ProtoUrl" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.ContentHandle), global::Bgs.Protocol.ContentHandle.Parser, new[]{ "Region", "Usage", "Hash", "ProtoUrl" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.TitleIconContentHandle), global::Bgs.Protocol.TitleIconContentHandle.Parser, new[]{ "TitleId", "ContentHandle" }, null, null, null, null)
           }));
     }
     #endregion
@@ -295,6 +299,194 @@ namespace Bgs.Protocol {
           }
           case 34: {
             ProtoUrl = input.ReadString();
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class TitleIconContentHandle : pb::IMessage<TitleIconContentHandle> {
+    private static readonly pb::MessageParser<TitleIconContentHandle> _parser = new pb::MessageParser<TitleIconContentHandle>(() => new TitleIconContentHandle());
+    private pb::UnknownFieldSet _unknownFields;
+    private int _hasBits0;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<TitleIconContentHandle> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Bgs.Protocol.ContentHandleTypesReflection.Descriptor.MessageTypes[1]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public TitleIconContentHandle() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public TitleIconContentHandle(TitleIconContentHandle other) : this() {
+      _hasBits0 = other._hasBits0;
+      titleId_ = other.titleId_;
+      contentHandle_ = other.HasContentHandle ? other.contentHandle_.Clone() : null;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public TitleIconContentHandle Clone() {
+      return new TitleIconContentHandle(this);
+    }
+
+    /// <summary>Field number for the "title_id" field.</summary>
+    public const int TitleIdFieldNumber = 1;
+    private readonly static uint TitleIdDefaultValue = 0;
+
+    private uint titleId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint TitleId {
+      get { if ((_hasBits0 & 1) != 0) { return titleId_; } else { return TitleIdDefaultValue; } }
+      set {
+        _hasBits0 |= 1;
+        titleId_ = value;
+      }
+    }
+    /// <summary>Gets whether the "title_id" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasTitleId {
+      get { return (_hasBits0 & 1) != 0; }
+    }
+    /// <summary>Clears the value of the "title_id" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearTitleId() {
+      _hasBits0 &= ~1;
+    }
+
+    /// <summary>Field number for the "content_handle" field.</summary>
+    public const int ContentHandleFieldNumber = 2;
+    private global::Bgs.Protocol.ContentHandle contentHandle_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Bgs.Protocol.ContentHandle ContentHandle {
+      get { return contentHandle_; }
+      set {
+        contentHandle_ = value;
+      }
+    }
+    /// <summary>Gets whether the content_handle field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasContentHandle {
+      get { return contentHandle_ != null; }
+    }
+    /// <summary>Clears the value of the content_handle field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearContentHandle() {
+      contentHandle_ = null;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as TitleIconContentHandle);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(TitleIconContentHandle other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (TitleId != other.TitleId) return false;
+      if (!object.Equals(ContentHandle, other.ContentHandle)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (HasTitleId) hash ^= TitleId.GetHashCode();
+      if (HasContentHandle) hash ^= ContentHandle.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (HasTitleId) {
+        output.WriteRawTag(8);
+        output.WriteUInt32(TitleId);
+      }
+      if (HasContentHandle) {
+        output.WriteRawTag(18);
+        output.WriteMessage(ContentHandle);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (HasTitleId) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(TitleId);
+      }
+      if (HasContentHandle) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(ContentHandle);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(TitleIconContentHandle other) {
+      if (other == null) {
+        return;
+      }
+      if (other.HasTitleId) {
+        TitleId = other.TitleId;
+      }
+      if (other.HasContentHandle) {
+        if (!HasContentHandle) {
+          ContentHandle = new global::Bgs.Protocol.ContentHandle();
+        }
+        ContentHandle.MergeFrom(other.ContentHandle);
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            TitleId = input.ReadUInt32();
+            break;
+          }
+          case 18: {
+            if (!HasContentHandle) {
+              ContentHandle = new global::Bgs.Protocol.ContentHandle();
+            }
+            input.ReadMessage(ContentHandle);
             break;
           }
         }

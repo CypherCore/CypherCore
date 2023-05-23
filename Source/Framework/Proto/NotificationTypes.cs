@@ -29,9 +29,9 @@ namespace Bgs.Protocol.Notification.V1 {
             "ZW50L2FjY291bnRfdHlwZXMucHJvdG8aJ2Jncy9sb3cvcGIvY2xpZW50L2F0",
             "dHJpYnV0ZV90eXBlcy5wcm90bxokYmdzL2xvdy9wYi9jbGllbnQvZW50aXR5",
             "X3R5cGVzLnByb3RvGiFiZ3MvbG93L3BiL2NsaWVudC9ycGNfdHlwZXMucHJv",
-            "dG8aOWJncy9sb3cvcGIvY2xpZW50L2dsb2JhbF9leHRlbnNpb25zL21lc3Nh",
-            "Z2Vfb3B0aW9ucy5wcm90bxo3YmdzL2xvdy9wYi9jbGllbnQvZ2xvYmFsX2V4",
-            "dGVuc2lvbnMvZmllbGRfb3B0aW9ucy5wcm90bxo4YmdzL2xvdy9wYi9jbGll",
+            "dG8aN2Jncy9sb3cvcGIvY2xpZW50L2dsb2JhbF9leHRlbnNpb25zL2ZpZWxk",
+            "X29wdGlvbnMucHJvdG8aOWJncy9sb3cvcGIvY2xpZW50L2dsb2JhbF9leHRl",
+            "bnNpb25zL21lc3NhZ2Vfb3B0aW9ucy5wcm90bxo4YmdzL2xvdy9wYi9jbGll",
             "bnQvZ2xvYmFsX2V4dGVuc2lvbnMvbWV0aG9kX29wdGlvbnMucHJvdG8aOWJn",
             "cy9sb3cvcGIvY2xpZW50L2dsb2JhbF9leHRlbnNpb25zL3NlcnZpY2Vfb3B0",
             "aW9ucy5wcm90byJeCgZUYXJnZXQSPgoIaWRlbnRpdHkYASABKAsyLC5iZ3Mu",
@@ -53,7 +53,7 @@ namespace Bgs.Protocol.Notification.V1 {
             "GAggASgJQgaC+SsCCAESPgoTZm9yd2FyZGluZ19pZGVudGl0eRgKIAEoCzIh",
             "LmJncy5wcm90b2NvbC5hY2NvdW50LnYxLklkZW50aXR5OgaC+SsCCAE="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor, global::Bgs.Protocol.AttributeTypesReflection.Descriptor, global::Bgs.Protocol.EntityTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor, global::Bgs.Protocol.AttributeTypesReflection.Descriptor, global::Bgs.Protocol.EntityTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Notification.V1.Target), global::Bgs.Protocol.Notification.V1.Target.Parser, new[]{ "Identity", "Type" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Notification.V1.TargetIdentity), global::Bgs.Protocol.Notification.V1.TargetIdentity.Parser, new[]{ "Account", "GameAccount" }, null, null, null, null),

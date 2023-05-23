@@ -25,53 +25,55 @@ namespace Bgs.Protocol.Club.V1 {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "CidiZ3MvbG93L3BiL2NsaWVudC9jbHViX2ludml0YXRpb24ucHJvdG8SFGJn",
-            "cy5wcm90b2NvbC5jbHViLnYxGiFiZ3MvbG93L3BiL2NsaWVudC9jbHViX2Nv",
-            "cmUucHJvdG8aI2Jncy9sb3cvcGIvY2xpZW50L2NsdWJfbWVtYmVyLnByb3Rv",
-            "GjViZ3MvbG93L3BiL2NsaWVudC9hcGkvY2xpZW50L3YyL2F0dHJpYnV0ZV90",
-            "eXBlcy5wcm90byIzCghDbHViU2xvdBIMCgRyb2xlGAEgASgNEhkKEWRlZmF1",
-            "bHRfc3RyZWFtX2lkGAIgASgEIqcBChVTZW5kSW52aXRhdGlvbk9wdGlvbnMS",
-            "MQoJdGFyZ2V0X2lkGAEgASgLMh4uYmdzLnByb3RvY29sLmNsdWIudjEuTWVt",
-            "YmVySWQSLAoEc2xvdBgCIAEoCzIeLmJncy5wcm90b2NvbC5jbHViLnYxLkNs",
-            "dWJTbG90Ei0KCWF0dHJpYnV0ZRgDIAMoCzIaLmJncy5wcm90b2NvbC52Mi5B",
-            "dHRyaWJ1dGUijgMKDkNsdWJJbnZpdGF0aW9uEgoKAmlkGAEgASgGEjgKB2lu",
-            "dml0ZXIYAiABKAsyJy5iZ3MucHJvdG9jb2wuY2x1Yi52MS5NZW1iZXJEZXNj",
-            "cmlwdGlvbhI4CgdpbnZpdGVlGAMgASgLMicuYmdzLnByb3RvY29sLmNsdWIu",
-            "djEuTWVtYmVyRGVzY3JpcHRpb24SMwoEY2x1YhgEIAEoCzIlLmJncy5wcm90",
-            "b2NvbC5jbHViLnYxLkNsdWJEZXNjcmlwdGlvbhIsCgRzbG90GAUgASgLMh4u",
-            "YmdzLnByb3RvY29sLmNsdWIudjEuQ2x1YlNsb3QSLQoJYXR0cmlidXRlGAYg",
-            "AygLMhouYmdzLnByb3RvY29sLnYyLkF0dHJpYnV0ZRIVCg1jcmVhdGlvbl90",
-            "aW1lGAcgASgEEhcKD2V4cGlyYXRpb25fdGltZRgIIAEoBBI6CglzdWdnZXN0",
-            "ZXIYCSABKAsyJy5iZ3MucHJvdG9jb2wuY2x1Yi52MS5NZW1iZXJEZXNjcmlw",
-            "dGlvbiKnAQoVU2VuZFN1Z2dlc3Rpb25PcHRpb25zEjEKCXRhcmdldF9pZBgB",
-            "IAEoCzIeLmJncy5wcm90b2NvbC5jbHViLnYxLk1lbWJlcklkEiwKBHNsb3QY",
-            "AiABKAsyHi5iZ3MucHJvdG9jb2wuY2x1Yi52MS5DbHViU2xvdBItCglhdHRy",
-            "aWJ1dGUYAyADKAsyGi5iZ3MucHJvdG9jb2wudjIuQXR0cmlidXRlIrICCg5D",
-            "bHViU3VnZ2VzdGlvbhIKCgJpZBgBIAEoBhIPCgdjbHViX2lkGAIgASgEEjoK",
-            "CXN1Z2dlc3RlchgDIAEoCzInLmJncy5wcm90b2NvbC5jbHViLnYxLk1lbWJl",
-            "ckRlc2NyaXB0aW9uEjoKCXN1Z2dlc3RlZRgEIAEoCzInLmJncy5wcm90b2Nv",
-            "bC5jbHViLnYxLk1lbWJlckRlc2NyaXB0aW9uEiwKBHNsb3QYBSABKAsyHi5i",
-            "Z3MucHJvdG9jb2wuY2x1Yi52MS5DbHViU2xvdBItCglhdHRyaWJ1dGUYBiAD",
-            "KAsyGi5iZ3MucHJvdG9jb2wudjIuQXR0cmlidXRlEhUKDWNyZWF0aW9uX3Rp",
-            "bWUYByABKAQSFwoPZXhwaXJhdGlvbl90aW1lGAggASgEIqkBChNDcmVhdGVU",
-            "aWNrZXRPcHRpb25zEiwKBHNsb3QYASABKAsyHi5iZ3MucHJvdG9jb2wuY2x1",
-            "Yi52MS5DbHViU2xvdBItCglhdHRyaWJ1dGUYAiADKAsyGi5iZ3MucHJvdG9j",
-            "b2wudjIuQXR0cmlidXRlEhwKFGFsbG93ZWRfcmVkZWVtX2NvdW50GAMgASgN",
-            "EhcKD2V4cGlyYXRpb25fdGltZRgEIAEoBCLQAgoKQ2x1YlRpY2tldBIKCgJp",
-            "ZBgBIAEoCRI4CgdjcmVhdG9yGAIgASgLMicuYmdzLnByb3RvY29sLmNsdWIu",
-            "djEuTWVtYmVyRGVzY3JpcHRpb24SMwoEY2x1YhgDIAEoCzIlLmJncy5wcm90",
-            "b2NvbC5jbHViLnYxLkNsdWJEZXNjcmlwdGlvbhIsCgRzbG90GAQgASgLMh4u",
-            "YmdzLnByb3RvY29sLmNsdWIudjEuQ2x1YlNsb3QSLQoJYXR0cmlidXRlGAUg",
-            "AygLMhouYmdzLnByb3RvY29sLnYyLkF0dHJpYnV0ZRIcChRjdXJyZW50X3Jl",
-            "ZGVlbV9jb3VudBgGIAEoDRIcChRhbGxvd2VkX3JlZGVlbV9jb3VudBgHIAEo",
-            "DRIVCg1jcmVhdGlvbl90aW1lGAggASgEEhcKD2V4cGlyYXRpb25fdGltZRgJ",
-            "IAEoBA=="));
+            "cy5wcm90b2NvbC5jbHViLnYxGjdiZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxf",
+            "ZXh0ZW5zaW9ucy9maWVsZF9vcHRpb25zLnByb3RvGiFiZ3MvbG93L3BiL2Ns",
+            "aWVudC9jbHViX2NvcmUucHJvdG8aI2Jncy9sb3cvcGIvY2xpZW50L2NsdWJf",
+            "bWVtYmVyLnByb3RvGjViZ3MvbG93L3BiL2NsaWVudC9hcGkvY2xpZW50L3Yy",
+            "L2F0dHJpYnV0ZV90eXBlcy5wcm90byIzCghDbHViU2xvdBIMCgRyb2xlGAEg",
+            "ASgNEhkKEWRlZmF1bHRfc3RyZWFtX2lkGAIgASgEIqcBChVTZW5kSW52aXRh",
+            "dGlvbk9wdGlvbnMSMQoJdGFyZ2V0X2lkGAEgASgLMh4uYmdzLnByb3RvY29s",
+            "LmNsdWIudjEuTWVtYmVySWQSLAoEc2xvdBgCIAEoCzIeLmJncy5wcm90b2Nv",
+            "bC5jbHViLnYxLkNsdWJTbG90Ei0KCWF0dHJpYnV0ZRgDIAMoCzIaLmJncy5w",
+            "cm90b2NvbC52Mi5BdHRyaWJ1dGUijgMKDkNsdWJJbnZpdGF0aW9uEgoKAmlk",
+            "GAEgASgGEjgKB2ludml0ZXIYAiABKAsyJy5iZ3MucHJvdG9jb2wuY2x1Yi52",
+            "MS5NZW1iZXJEZXNjcmlwdGlvbhI4CgdpbnZpdGVlGAMgASgLMicuYmdzLnBy",
+            "b3RvY29sLmNsdWIudjEuTWVtYmVyRGVzY3JpcHRpb24SMwoEY2x1YhgEIAEo",
+            "CzIlLmJncy5wcm90b2NvbC5jbHViLnYxLkNsdWJEZXNjcmlwdGlvbhIsCgRz",
+            "bG90GAUgASgLMh4uYmdzLnByb3RvY29sLmNsdWIudjEuQ2x1YlNsb3QSLQoJ",
+            "YXR0cmlidXRlGAYgAygLMhouYmdzLnByb3RvY29sLnYyLkF0dHJpYnV0ZRIV",
+            "Cg1jcmVhdGlvbl90aW1lGAcgASgEEhcKD2V4cGlyYXRpb25fdGltZRgIIAEo",
+            "BBI6CglzdWdnZXN0ZXIYCSABKAsyJy5iZ3MucHJvdG9jb2wuY2x1Yi52MS5N",
+            "ZW1iZXJEZXNjcmlwdGlvbiLXAQoVU2VuZFN1Z2dlc3Rpb25PcHRpb25zEjEK",
+            "CXRhcmdldF9pZBgBIAEoCzIeLmJncy5wcm90b2NvbC5jbHViLnYxLk1lbWJl",
+            "cklkEiwKBHNsb3QYAiABKAsyHi5iZ3MucHJvdG9jb2wuY2x1Yi52MS5DbHVi",
+            "U2xvdBItCglhdHRyaWJ1dGUYAyADKAsyGi5iZ3MucHJvdG9jb2wudjIuQXR0",
+            "cmlidXRlEi4KEGpvaW5fY2x1Yl9zb3VyY2UYBCABKA1CFIL5KxAqDkpvaW5D",
+            "bHViU291cmNlIrICCg5DbHViU3VnZ2VzdGlvbhIKCgJpZBgBIAEoBhIPCgdj",
+            "bHViX2lkGAIgASgEEjoKCXN1Z2dlc3RlchgDIAEoCzInLmJncy5wcm90b2Nv",
+            "bC5jbHViLnYxLk1lbWJlckRlc2NyaXB0aW9uEjoKCXN1Z2dlc3RlZRgEIAEo",
+            "CzInLmJncy5wcm90b2NvbC5jbHViLnYxLk1lbWJlckRlc2NyaXB0aW9uEiwK",
+            "BHNsb3QYBSABKAsyHi5iZ3MucHJvdG9jb2wuY2x1Yi52MS5DbHViU2xvdBIt",
+            "CglhdHRyaWJ1dGUYBiADKAsyGi5iZ3MucHJvdG9jb2wudjIuQXR0cmlidXRl",
+            "EhUKDWNyZWF0aW9uX3RpbWUYByABKAQSFwoPZXhwaXJhdGlvbl90aW1lGAgg",
+            "ASgEIqkBChNDcmVhdGVUaWNrZXRPcHRpb25zEiwKBHNsb3QYASABKAsyHi5i",
+            "Z3MucHJvdG9jb2wuY2x1Yi52MS5DbHViU2xvdBItCglhdHRyaWJ1dGUYAiAD",
+            "KAsyGi5iZ3MucHJvdG9jb2wudjIuQXR0cmlidXRlEhwKFGFsbG93ZWRfcmVk",
+            "ZWVtX2NvdW50GAMgASgNEhcKD2V4cGlyYXRpb25fdGltZRgEIAEoBCLQAgoK",
+            "Q2x1YlRpY2tldBIKCgJpZBgBIAEoCRI4CgdjcmVhdG9yGAIgASgLMicuYmdz",
+            "LnByb3RvY29sLmNsdWIudjEuTWVtYmVyRGVzY3JpcHRpb24SMwoEY2x1YhgD",
+            "IAEoCzIlLmJncy5wcm90b2NvbC5jbHViLnYxLkNsdWJEZXNjcmlwdGlvbhIs",
+            "CgRzbG90GAQgASgLMh4uYmdzLnByb3RvY29sLmNsdWIudjEuQ2x1YlNsb3QS",
+            "LQoJYXR0cmlidXRlGAUgAygLMhouYmdzLnByb3RvY29sLnYyLkF0dHJpYnV0",
+            "ZRIcChRjdXJyZW50X3JlZGVlbV9jb3VudBgGIAEoDRIcChRhbGxvd2VkX3Jl",
+            "ZGVlbV9jb3VudBgHIAEoDRIVCg1jcmVhdGlvbl90aW1lGAggASgEEhcKD2V4",
+            "cGlyYXRpb25fdGltZRgJIAEoBFAA"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor, global::Bgs.Protocol.Club.V1.ClubMemberReflection.Descriptor, global::Bgs.Protocol.V2.AttributeTypesReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.Club.V1.ClubCoreReflection.Descriptor, global::Bgs.Protocol.Club.V1.ClubMemberReflection.Descriptor, global::Bgs.Protocol.V2.AttributeTypesReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubSlot), global::Bgs.Protocol.Club.V1.ClubSlot.Parser, new[]{ "Role", "DefaultStreamId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.SendInvitationOptions), global::Bgs.Protocol.Club.V1.SendInvitationOptions.Parser, new[]{ "TargetId", "Slot", "Attribute" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubInvitation), global::Bgs.Protocol.Club.V1.ClubInvitation.Parser, new[]{ "Id", "Inviter", "Invitee", "Club", "Slot", "Attribute", "CreationTime", "ExpirationTime", "Suggester" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.SendSuggestionOptions), global::Bgs.Protocol.Club.V1.SendSuggestionOptions.Parser, new[]{ "TargetId", "Slot", "Attribute" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.SendSuggestionOptions), global::Bgs.Protocol.Club.V1.SendSuggestionOptions.Parser, new[]{ "TargetId", "Slot", "Attribute", "JoinClubSource" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubSuggestion), global::Bgs.Protocol.Club.V1.ClubSuggestion.Parser, new[]{ "Id", "ClubId", "Suggester", "Suggestee", "Slot", "Attribute", "CreationTime", "ExpirationTime" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.CreateTicketOptions), global::Bgs.Protocol.Club.V1.CreateTicketOptions.Parser, new[]{ "Slot", "Attribute", "AllowedRedeemCount", "ExpirationTime" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubTicket), global::Bgs.Protocol.Club.V1.ClubTicket.Parser, new[]{ "Id", "Creator", "Club", "Slot", "Attribute", "CurrentRedeemCount", "AllowedRedeemCount", "CreationTime", "ExpirationTime" }, null, null, null, null)
@@ -944,6 +946,7 @@ namespace Bgs.Protocol.Club.V1 {
   public sealed partial class SendSuggestionOptions : pb::IMessage<SendSuggestionOptions> {
     private static readonly pb::MessageParser<SendSuggestionOptions> _parser = new pb::MessageParser<SendSuggestionOptions>(() => new SendSuggestionOptions());
     private pb::UnknownFieldSet _unknownFields;
+    private int _hasBits0;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pb::MessageParser<SendSuggestionOptions> Parser { get { return _parser; } }
 
@@ -966,9 +969,11 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public SendSuggestionOptions(SendSuggestionOptions other) : this() {
+      _hasBits0 = other._hasBits0;
       targetId_ = other.HasTargetId ? other.targetId_.Clone() : null;
       slot_ = other.HasSlot ? other.slot_.Clone() : null;
       attribute_ = other.attribute_.Clone();
+      joinClubSource_ = other.joinClubSource_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1029,6 +1034,30 @@ namespace Bgs.Protocol.Club.V1 {
       get { return attribute_; }
     }
 
+    /// <summary>Field number for the "join_club_source" field.</summary>
+    public const int JoinClubSourceFieldNumber = 4;
+    private readonly static uint JoinClubSourceDefaultValue = 0;
+
+    private uint joinClubSource_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint JoinClubSource {
+      get { if ((_hasBits0 & 1) != 0) { return joinClubSource_; } else { return JoinClubSourceDefaultValue; } }
+      set {
+        _hasBits0 |= 1;
+        joinClubSource_ = value;
+      }
+    }
+    /// <summary>Gets whether the "join_club_source" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasJoinClubSource {
+      get { return (_hasBits0 & 1) != 0; }
+    }
+    /// <summary>Clears the value of the "join_club_source" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearJoinClubSource() {
+      _hasBits0 &= ~1;
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as SendSuggestionOptions);
@@ -1045,6 +1074,7 @@ namespace Bgs.Protocol.Club.V1 {
       if (!object.Equals(TargetId, other.TargetId)) return false;
       if (!object.Equals(Slot, other.Slot)) return false;
       if(!attribute_.Equals(other.attribute_)) return false;
+      if (JoinClubSource != other.JoinClubSource) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -1054,6 +1084,7 @@ namespace Bgs.Protocol.Club.V1 {
       if (HasTargetId) hash ^= TargetId.GetHashCode();
       if (HasSlot) hash ^= Slot.GetHashCode();
       hash ^= attribute_.GetHashCode();
+      if (HasJoinClubSource) hash ^= JoinClubSource.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -1076,6 +1107,10 @@ namespace Bgs.Protocol.Club.V1 {
         output.WriteMessage(Slot);
       }
       attribute_.WriteTo(output, _repeated_attribute_codec);
+      if (HasJoinClubSource) {
+        output.WriteRawTag(32);
+        output.WriteUInt32(JoinClubSource);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1091,6 +1126,9 @@ namespace Bgs.Protocol.Club.V1 {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(Slot);
       }
       size += attribute_.CalculateSize(_repeated_attribute_codec);
+      if (HasJoinClubSource) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(JoinClubSource);
+      }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
       }
@@ -1115,6 +1153,9 @@ namespace Bgs.Protocol.Club.V1 {
         Slot.MergeFrom(other.Slot);
       }
       attribute_.Add(other.attribute_);
+      if (other.HasJoinClubSource) {
+        JoinClubSource = other.JoinClubSource;
+      }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -1142,6 +1183,10 @@ namespace Bgs.Protocol.Club.V1 {
           }
           case 26: {
             attribute_.AddEntriesFrom(input, _repeated_attribute_codec);
+            break;
+          }
+          case 32: {
+            JoinClubSource = input.ReadUInt32();
             break;
           }
         }

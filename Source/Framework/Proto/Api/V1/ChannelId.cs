@@ -26,18 +26,18 @@ namespace Bgs.Protocol.Channel.V1 {
           string.Concat(
             "CjBiZ3MvbG93L3BiL2NsaWVudC9hcGkvY2xpZW50L3YxL2NoYW5uZWxfaWQu",
             "cHJvdG8SF2Jncy5wcm90b2NvbC5jaGFubmVsLnYxGiFiZ3MvbG93L3BiL2Ns",
-            "aWVudC9ycGNfdHlwZXMucHJvdG8aOWJncy9sb3cvcGIvY2xpZW50L2dsb2Jh",
-            "bF9leHRlbnNpb25zL21lc3NhZ2Vfb3B0aW9ucy5wcm90bxo3YmdzL2xvdy9w",
-            "Yi9jbGllbnQvZ2xvYmFsX2V4dGVuc2lvbnMvZmllbGRfb3B0aW9ucy5wcm90",
+            "aWVudC9ycGNfdHlwZXMucHJvdG8aN2Jncy9sb3cvcGIvY2xpZW50L2dsb2Jh",
+            "bF9leHRlbnNpb25zL2ZpZWxkX29wdGlvbnMucHJvdG8aOWJncy9sb3cvcGIv",
+            "Y2xpZW50L2dsb2JhbF9leHRlbnNpb25zL21lc3NhZ2Vfb3B0aW9ucy5wcm90",
             "bxo4YmdzL2xvdy9wYi9jbGllbnQvZ2xvYmFsX2V4dGVuc2lvbnMvbWV0aG9k",
             "X29wdGlvbnMucHJvdG8aOWJncy9sb3cvcGIvY2xpZW50L2dsb2JhbF9leHRl",
-            "bnNpb25zL3NlcnZpY2Vfb3B0aW9ucy5wcm90byJUCglDaGFubmVsSWQSDAoE",
+            "bnNpb25zL3NlcnZpY2Vfb3B0aW9ucy5wcm90byJkCglDaGFubmVsSWQSDAoE",
             "dHlwZRgBIAEoDRIlCgRob3N0GAIgASgLMhcuYmdzLnByb3RvY29sLlByb2Nl",
-            "c3NJZBIKCgJpZBgDIAEoBzoGgvkrAggB"));
+            "c3NJZBIKCgJpZBgDIAEoBxIOCgZyZWdpb24YBCABKA06BoL5KwIIAQ=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Channel.V1.ChannelId), global::Bgs.Protocol.Channel.V1.ChannelId.Parser, new[]{ "Type", "Host", "Id" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Channel.V1.ChannelId), global::Bgs.Protocol.Channel.V1.ChannelId.Parser, new[]{ "Type", "Host", "Id", "Region" }, null, null, null, null)
           }));
     }
     #endregion
@@ -74,6 +74,7 @@ namespace Bgs.Protocol.Channel.V1 {
       type_ = other.type_;
       host_ = other.HasHost ? other.host_.Clone() : null;
       id_ = other.id_;
+      region_ = other.region_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -151,6 +152,30 @@ namespace Bgs.Protocol.Channel.V1 {
       _hasBits0 &= ~2;
     }
 
+    /// <summary>Field number for the "region" field.</summary>
+    public const int RegionFieldNumber = 4;
+    private readonly static uint RegionDefaultValue = 0;
+
+    private uint region_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint Region {
+      get { if ((_hasBits0 & 4) != 0) { return region_; } else { return RegionDefaultValue; } }
+      set {
+        _hasBits0 |= 4;
+        region_ = value;
+      }
+    }
+    /// <summary>Gets whether the "region" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasRegion {
+      get { return (_hasBits0 & 4) != 0; }
+    }
+    /// <summary>Clears the value of the "region" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearRegion() {
+      _hasBits0 &= ~4;
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as ChannelId);
@@ -167,6 +192,7 @@ namespace Bgs.Protocol.Channel.V1 {
       if (Type != other.Type) return false;
       if (!object.Equals(Host, other.Host)) return false;
       if (Id != other.Id) return false;
+      if (Region != other.Region) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -176,6 +202,7 @@ namespace Bgs.Protocol.Channel.V1 {
       if (HasType) hash ^= Type.GetHashCode();
       if (HasHost) hash ^= Host.GetHashCode();
       if (HasId) hash ^= Id.GetHashCode();
+      if (HasRegion) hash ^= Region.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -201,6 +228,10 @@ namespace Bgs.Protocol.Channel.V1 {
         output.WriteRawTag(29);
         output.WriteFixed32(Id);
       }
+      if (HasRegion) {
+        output.WriteRawTag(32);
+        output.WriteUInt32(Region);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -217,6 +248,9 @@ namespace Bgs.Protocol.Channel.V1 {
       }
       if (HasId) {
         size += 1 + 4;
+      }
+      if (HasRegion) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Region);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -240,6 +274,9 @@ namespace Bgs.Protocol.Channel.V1 {
       }
       if (other.HasId) {
         Id = other.Id;
+      }
+      if (other.HasRegion) {
+        Region = other.Region;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -265,6 +302,10 @@ namespace Bgs.Protocol.Channel.V1 {
           }
           case 29: {
             Id = input.ReadFixed32();
+            break;
+          }
+          case 32: {
+            Region = input.ReadUInt32();
             break;
           }
         }

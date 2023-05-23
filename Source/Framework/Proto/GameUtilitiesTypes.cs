@@ -28,19 +28,19 @@ namespace Bgs.Protocol.GameUtilities.V1 {
             "bxIeYmdzLnByb3RvY29sLmdhbWVfdXRpbGl0aWVzLnYxGidiZ3MvbG93L3Bi",
             "L2NsaWVudC9hdHRyaWJ1dGVfdHlwZXMucHJvdG8aJGJncy9sb3cvcGIvY2xp",
             "ZW50L2VudGl0eV90eXBlcy5wcm90bxohYmdzL2xvdy9wYi9jbGllbnQvcnBj",
-            "X3R5cGVzLnByb3RvGjliZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5z",
-            "aW9ucy9tZXNzYWdlX29wdGlvbnMucHJvdG8aN2Jncy9sb3cvcGIvY2xpZW50",
-            "L2dsb2JhbF9leHRlbnNpb25zL2ZpZWxkX29wdGlvbnMucHJvdG8aOGJncy9s",
+            "X3R5cGVzLnByb3RvGjdiZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5z",
+            "aW9ucy9maWVsZF9vcHRpb25zLnByb3RvGjliZ3MvbG93L3BiL2NsaWVudC9n",
+            "bG9iYWxfZXh0ZW5zaW9ucy9tZXNzYWdlX29wdGlvbnMucHJvdG8aOGJncy9s",
             "b3cvcGIvY2xpZW50L2dsb2JhbF9leHRlbnNpb25zL21ldGhvZF9vcHRpb25z",
             "LnByb3RvGjliZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9ucy9z",
             "ZXJ2aWNlX29wdGlvbnMucHJvdG8idwoPUGxheWVyVmFyaWFibGVzEigKCGlk",
             "ZW50aXR5GAEgAigLMhYuYmdzLnByb3RvY29sLklkZW50aXR5Eg4KBnJhdGlu",
             "ZxgCIAEoARIqCglhdHRyaWJ1dGUYAyADKAsyFy5iZ3MucHJvdG9jb2wuQXR0",
             "cmlidXRlIkAKCkNsaWVudEluZm8SFgoOY2xpZW50X2FkZHJlc3MYASABKAkS",
-            "GgoScHJpdmlsZWdlZF9uZXR3b3JrGAIgASgIQjoKH2JuZXQucHJvdG9jb2wu",
-            "Z2FtZV91dGlsaXRpZXMudjFCF0dhbWVVdGlsaXRpZXNUeXBlc1Byb3Rv"));
+            "GgoScHJpdmlsZWdlZF9uZXR3b3JrGAIgASgIQjkKHmJncy5wcm90b2NvbC5n",
+            "YW1lX3V0aWxpdGllcy52MUIXR2FtZVV0aWxpdGllc1R5cGVzUHJvdG8="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Bgs.Protocol.AttributeTypesReflection.Descriptor, global::Bgs.Protocol.EntityTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Bgs.Protocol.AttributeTypesReflection.Descriptor, global::Bgs.Protocol.EntityTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.GameUtilities.V1.PlayerVariables), global::Bgs.Protocol.GameUtilities.V1.PlayerVariables.Parser, new[]{ "Identity", "Rating", "Attribute" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.GameUtilities.V1.ClientInfo), global::Bgs.Protocol.GameUtilities.V1.ClientInfo.Parser, new[]{ "ClientAddress", "PrivilegedNetwork" }, null, null, null, null)

@@ -48,10 +48,13 @@ namespace Bgs.Protocol.Club.V1 {
             "TF9SRVNUUklDVEVEEAEqiwEKGFN0cmVhbU5vdGlmaWNhdGlvbkZpbHRlchIj",
             "Ch9TVFJFQU1fTk9USUZJQ0FUSU9OX0ZJTFRFUl9OT05FEAASJgoiU1RSRUFN",
             "X05PVElGSUNBVElPTl9GSUxURVJfTUVOVElPThABEiIKHlNUUkVBTV9OT1RJ",
-            "RklDQVRJT05fRklMVEVSX0FMTBAC"));
+            "RklDQVRJT05fRklMVEVSX0FMTBACKncKDkpvaW5DbHViU291cmNlEhkKFUpP",
+            "SU5fQ0xVQl9TT1VSQ0VfTk9ORRAAEiAKHEpPSU5fQ0xVQl9TT1VSQ0VfQ0xV",
+            "Ql9GSU5ERVIQARIoCiRKT0lOX0NMVUJfU09VUkNFX0NMVUJfUkVDT01NRU5E",
+            "QVRJT04QAg=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
-          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Bgs.Protocol.Club.V1.PrivacyLevel), typeof(global::Bgs.Protocol.Club.V1.VisibilityLevel), typeof(global::Bgs.Protocol.Club.V1.ClubRemovedReason), typeof(global::Bgs.Protocol.Club.V1.StreamVoiceLevel), typeof(global::Bgs.Protocol.Club.V1.VoiceMicrophoneState), typeof(global::Bgs.Protocol.Club.V1.PresenceLevel), typeof(global::Bgs.Protocol.Club.V1.WhisperLevel), typeof(global::Bgs.Protocol.Club.V1.StreamNotificationFilter), }, null, null));
+          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Bgs.Protocol.Club.V1.PrivacyLevel), typeof(global::Bgs.Protocol.Club.V1.VisibilityLevel), typeof(global::Bgs.Protocol.Club.V1.ClubRemovedReason), typeof(global::Bgs.Protocol.Club.V1.StreamVoiceLevel), typeof(global::Bgs.Protocol.Club.V1.VoiceMicrophoneState), typeof(global::Bgs.Protocol.Club.V1.PresenceLevel), typeof(global::Bgs.Protocol.Club.V1.WhisperLevel), typeof(global::Bgs.Protocol.Club.V1.StreamNotificationFilter), typeof(global::Bgs.Protocol.Club.V1.JoinClubSource), }, null, null));
     }
     #endregion
 
@@ -106,6 +109,12 @@ namespace Bgs.Protocol.Club.V1 {
     [pbr::OriginalName("STREAM_NOTIFICATION_FILTER_NONE")] None = 0,
     [pbr::OriginalName("STREAM_NOTIFICATION_FILTER_MENTION")] Mention = 1,
     [pbr::OriginalName("STREAM_NOTIFICATION_FILTER_ALL")] All = 2,
+  }
+
+  public enum JoinClubSource {
+    [pbr::OriginalName("JOIN_CLUB_SOURCE_NONE")] None = 0,
+    [pbr::OriginalName("JOIN_CLUB_SOURCE_CLUB_FINDER")] ClubFinder = 1,
+    [pbr::OriginalName("JOIN_CLUB_SOURCE_CLUB_RECOMMENDATION")] ClubRecommendation = 2,
   }
 
   #endregion

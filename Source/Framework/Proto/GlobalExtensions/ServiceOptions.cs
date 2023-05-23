@@ -26,25 +26,26 @@ namespace Bgs.Protocol {
           string.Concat(
             "CjliZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9ucy9zZXJ2aWNl",
             "X29wdGlvbnMucHJvdG8SDGJncy5wcm90b2NvbBogZ29vZ2xlL3Byb3RvYnVm",
-            "L2Rlc2NyaXB0b3IucHJvdG8isAIKEUJHU1NlcnZpY2VPcHRpb25zEhcKD2Rl",
+            "L2Rlc2NyaXB0b3IucHJvdG8i4AIKEUJHU1NlcnZpY2VPcHRpb25zEhcKD2Rl",
             "c2NyaXB0b3JfbmFtZRgBIAEoCRIPCgd2ZXJzaW9uGAQgASgNEhIKCnNoYXJk",
             "X25hbWUYBSABKAkSHwoXcmVzb2x2ZV9jbGllbnRfaW5zdGFuY2UYBiABKAgS",
             "SwoEdHlwZRgHIAEoDjIrLmJncy5wcm90b2NvbC5CR1NTZXJ2aWNlT3B0aW9u",
             "cy5TZXJ2aWNlVHlwZToQU0VSVklDRV9UWVBFX1JQQxIQCghhcGlfdHlwZRgI",
-            "IAEoCSJdCgtTZXJ2aWNlVHlwZRIUChBTRVJWSUNFX1RZUEVfUlBDEAASFgoS",
-            "U0VSVklDRV9UWVBFX0VWRU5UEAESIAocU0VSVklDRV9UWVBFX0VWRU5UX0JS",
-            "T0FEQ0FTVBACIk0KEVNES1NlcnZpY2VPcHRpb25zEg8KB2luYm91bmQYASAB",
-            "KAgSEAoIb3V0Ym91bmQYAiABKAgSFQoNdXNlX2NsaWVudF9pZBgDIAEoCDpb",
-            "Cg9zZXJ2aWNlX29wdGlvbnMSHy5nb29nbGUucHJvdG9idWYuU2VydmljZU9w",
-            "dGlvbnMYkL8FIAEoCzIfLmJncy5wcm90b2NvbC5CR1NTZXJ2aWNlT3B0aW9u",
-            "czpfChNzZGtfc2VydmljZV9vcHRpb25zEh8uZ29vZ2xlLnByb3RvYnVmLlNl",
-            "cnZpY2VPcHRpb25zGJG/BSABKAsyHy5iZ3MucHJvdG9jb2wuU0RLU2Vydmlj",
-            "ZU9wdGlvbnNCJAoNYm5ldC5wcm90b2NvbEITU2VydmljZU9wdGlvbnNQcm90",
-            "bw=="));
+            "IAEoCRIRCglpc19nbG9iYWwYCSABKAgiegoLU2VydmljZVR5cGUSFAoQU0VS",
+            "VklDRV9UWVBFX1JQQxAAEhsKF1NFUlZJQ0VfVFlQRV9SUENfRElSRUNUEAES",
+            "FgoSU0VSVklDRV9UWVBFX0VWRU5UEAISIAocU0VSVklDRV9UWVBFX0VWRU5U",
+            "X0JST0FEQ0FTVBADIk0KEVNES1NlcnZpY2VPcHRpb25zEg8KB2luYm91bmQY",
+            "ASABKAgSEAoIb3V0Ym91bmQYAiABKAgSFQoNdXNlX2NsaWVudF9pZBgDIAEo",
+            "CDpbCg9zZXJ2aWNlX29wdGlvbnMSHy5nb29nbGUucHJvdG9idWYuU2Vydmlj",
+            "ZU9wdGlvbnMYkL8FIAEoCzIfLmJncy5wcm90b2NvbC5CR1NTZXJ2aWNlT3B0",
+            "aW9uczpfChNzZGtfc2VydmljZV9vcHRpb25zEh8uZ29vZ2xlLnByb3RvYnVm",
+            "LlNlcnZpY2VPcHRpb25zGJG/BSABKAsyHy5iZ3MucHJvdG9jb2wuU0RLU2Vy",
+            "dmljZU9wdGlvbnNCIwoMYmdzLnByb3RvY29sQhNTZXJ2aWNlT3B0aW9uc1By",
+            "b3Rv"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Google.Protobuf.DescriptorReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pb::Extension[] { ServiceOptionsExtensions.ServiceOptions_, ServiceOptionsExtensions.SdkServiceOptions }, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.BGSServiceOptions), global::Bgs.Protocol.BGSServiceOptions.Parser, new[]{ "DescriptorName", "Version", "ShardName", "ResolveClientInstance", "Type", "ApiType" }, null, new[]{ typeof(global::Bgs.Protocol.BGSServiceOptions.Types.ServiceType) }, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.BGSServiceOptions), global::Bgs.Protocol.BGSServiceOptions.Parser, new[]{ "DescriptorName", "Version", "ShardName", "ResolveClientInstance", "Type", "ApiType", "IsGlobal" }, null, new[]{ typeof(global::Bgs.Protocol.BGSServiceOptions.Types.ServiceType) }, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.SDKServiceOptions), global::Bgs.Protocol.SDKServiceOptions.Parser, new[]{ "Inbound", "Outbound", "UseClientId" }, null, null, null, null)
           }));
     }
@@ -93,6 +94,7 @@ namespace Bgs.Protocol {
       resolveClientInstance_ = other.resolveClientInstance_;
       type_ = other.type_;
       apiType_ = other.apiType_;
+      isGlobal_ = other.isGlobal_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -242,6 +244,30 @@ namespace Bgs.Protocol {
       apiType_ = null;
     }
 
+    /// <summary>Field number for the "is_global" field.</summary>
+    public const int IsGlobalFieldNumber = 9;
+    private readonly static bool IsGlobalDefaultValue = false;
+
+    private bool isGlobal_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool IsGlobal {
+      get { if ((_hasBits0 & 8) != 0) { return isGlobal_; } else { return IsGlobalDefaultValue; } }
+      set {
+        _hasBits0 |= 8;
+        isGlobal_ = value;
+      }
+    }
+    /// <summary>Gets whether the "is_global" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasIsGlobal {
+      get { return (_hasBits0 & 8) != 0; }
+    }
+    /// <summary>Clears the value of the "is_global" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearIsGlobal() {
+      _hasBits0 &= ~8;
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as BGSServiceOptions);
@@ -261,6 +287,7 @@ namespace Bgs.Protocol {
       if (ResolveClientInstance != other.ResolveClientInstance) return false;
       if (Type != other.Type) return false;
       if (ApiType != other.ApiType) return false;
+      if (IsGlobal != other.IsGlobal) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -273,6 +300,7 @@ namespace Bgs.Protocol {
       if (HasResolveClientInstance) hash ^= ResolveClientInstance.GetHashCode();
       if (HasType) hash ^= Type.GetHashCode();
       if (HasApiType) hash ^= ApiType.GetHashCode();
+      if (HasIsGlobal) hash ^= IsGlobal.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -310,6 +338,10 @@ namespace Bgs.Protocol {
         output.WriteRawTag(66);
         output.WriteString(ApiType);
       }
+      if (HasIsGlobal) {
+        output.WriteRawTag(72);
+        output.WriteBool(IsGlobal);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -335,6 +367,9 @@ namespace Bgs.Protocol {
       }
       if (HasApiType) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(ApiType);
+      }
+      if (HasIsGlobal) {
+        size += 1 + 1;
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -364,6 +399,9 @@ namespace Bgs.Protocol {
       }
       if (other.HasApiType) {
         ApiType = other.ApiType;
+      }
+      if (other.HasIsGlobal) {
+        IsGlobal = other.IsGlobal;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -400,6 +438,10 @@ namespace Bgs.Protocol {
             ApiType = input.ReadString();
             break;
           }
+          case 72: {
+            IsGlobal = input.ReadBool();
+            break;
+          }
         }
       }
     }
@@ -410,8 +452,9 @@ namespace Bgs.Protocol {
     public static partial class Types {
       public enum ServiceType {
         [pbr::OriginalName("SERVICE_TYPE_RPC")] Rpc = 0,
-        [pbr::OriginalName("SERVICE_TYPE_EVENT")] Event = 1,
-        [pbr::OriginalName("SERVICE_TYPE_EVENT_BROADCAST")] EventBroadcast = 2,
+        [pbr::OriginalName("SERVICE_TYPE_RPC_DIRECT")] RpcDirect = 1,
+        [pbr::OriginalName("SERVICE_TYPE_EVENT")] Event = 2,
+        [pbr::OriginalName("SERVICE_TYPE_EVENT_BROADCAST")] EventBroadcast = 3,
       }
 
     }

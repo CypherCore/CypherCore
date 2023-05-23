@@ -30,7 +30,7 @@ namespace Bgs.Protocol {
             "dG9tX3NlbGVjdF9zaGFyZBgBIAEoCBIYChBjdXN0b21fdmFsaWRhdG9yGAIg",
             "ASgIOlsKD21lc3NhZ2Vfb3B0aW9ucxIfLmdvb2dsZS5wcm90b2J1Zi5NZXNz",
             "YWdlT3B0aW9ucxiQvwUgASgLMh8uYmdzLnByb3RvY29sLkJHU01lc3NhZ2VP",
-            "cHRpb25zQiQKDWJuZXQucHJvdG9jb2xCE01lc3NhZ2VPcHRpb25zUHJvdG8="));
+            "cHRpb25zQiMKDGJncy5wcm90b2NvbEITTWVzc2FnZU9wdGlvbnNQcm90bw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Google.Protobuf.DescriptorReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pb::Extension[] { MessageOptionsExtensions.MessageOptions_ }, new pbr::GeneratedClrTypeInfo[] {
