@@ -1172,6 +1172,15 @@ namespace Game.Entities
 
         public void EnergizeBySpell(Unit victim, SpellInfo spellInfo, int damage, PowerType powerType)
         {
+            Player player = victim.ToPlayer();
+            if (player != null)
+            {
+                var powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(powerType);
+                if (powerTypeEntry != null)
+                    if (powerTypeEntry.GetFlags().HasFlag(PowerTypeFlags.UseRegenInterrupt))
+                        player.InterruptPowerRegen(powerType);
+            }
+
             int gain = victim.ModifyPower(powerType, damage, false);
             int overEnergize = damage - gain;
 

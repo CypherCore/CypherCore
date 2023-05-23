@@ -46,6 +46,8 @@ namespace Game.Entities
             if (!GetSession().HasPermission(RBACPermissions.CanFilterWhispers))
                 SetAcceptWhispers(true);
 
+            m_regenInterruptTimestamp = GameTime.Now();
+
             m_zoneUpdateId = 0xffffffff;
             m_nextSave = WorldConfig.GetUIntValue(WorldCfg.IntervalSave);
             m_customizationsChanged = false;
@@ -3342,7 +3344,7 @@ namespace Game.Entities
 
             if (!IsInCombat())
             {
-                if (powerType.RegenInterruptTimeMS != 0 && Time.GetMSTimeDiffToNow(m_combatExitTime) < powerType.RegenInterruptTimeMS)
+                if (powerType.GetFlags().HasFlag(PowerTypeFlags.UseRegenInterrupt) && m_regenInterruptTimestamp + TimeSpan.FromMicroseconds(powerType.RegenInterruptTimeMS) < GameTime.Now())
                     return;
 
                 addvalue = (powerType.RegenPeace + m_unitData.PowerRegenFlatModifier[(int)powerIndex]) * 0.001f * RegenTimer;
@@ -3371,13 +3373,13 @@ namespace Game.Entities
                 WorldCfg.RatePowerArcaneCharges,
                 WorldCfg.RatePowerFury,
                 WorldCfg.RatePowerPain,
-                0, // todo add config for Essence power
-                0,
-                0,
-                0,
-                0,
-                0,
-                0
+                WorldCfg.RatePowerEssence,
+                0, // runes
+                0, // runes
+                0, // runes
+                0, // alternate
+                0, // alternate
+                0, // alternate
             };
 
             if (RatesForPower[(int)power] != 0)
@@ -3470,6 +3472,18 @@ namespace Game.Entities
                 });
             }
         }
+
+        public void InterruptPowerRegen(PowerType power)
+        {
+            uint powerIndex = GetPowerIndex(power);
+            if (powerIndex == (uint)PowerType.Max || powerIndex >= (uint)PowerType.MaxPerClass)
+                return;
+
+            m_regenInterruptTimestamp = GameTime.Now();
+            m_powerFraction[powerIndex] = 0.0f;
+            SendPacket(new InterruptPowerRegen(power));
+        }
+
         void RegenerateHealth()
         {
             uint curValue = (uint)GetHealth();
@@ -5046,7 +5060,9 @@ namespace Game.Entities
 
             // Only health and mana are set to maximum.
             SetFullHealth();
-            SetFullPower(PowerType.Mana);
+            foreach (PowerTypeRecord powerType in CliDB.PowerTypeStorage.Values)
+                if (powerType.GetFlags().HasFlag(PowerTypeFlags.SetToMaxOnLevelUp))
+                    SetFullPower(powerType.PowerTypeEnum);
 
             // update level to hunter/summon pet
             Pet pet = GetPet();

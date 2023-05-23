@@ -1662,7 +1662,7 @@ namespace Game.Entities
             }
         }
 
-        public void UpdateDisplayPower()
+        public PowerType CalculateDisplayPowerType()
         {
             PowerType displayPower = PowerType.Mana;
             switch (GetShapeshiftForm())
@@ -1686,22 +1686,18 @@ namespace Game.Entities
                         AuraEffect powerTypeAura = powerTypeAuras.First();
                         displayPower = (PowerType)powerTypeAura.GetMiscValue();
                     }
-                    else if (GetTypeId() == TypeId.Player)
+                    else
                     {
                         ChrClassesRecord cEntry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
                         if (cEntry != null && cEntry.DisplayPower < PowerType.Max)
                             displayPower = cEntry.DisplayPower;
-                    }
-                    else if (GetTypeId() == TypeId.Unit)
-                    {
+
                         Vehicle vehicle = GetVehicleKit();
                         if (vehicle)
                         {
                             PowerDisplayRecord powerDisplay = CliDB.PowerDisplayStorage.LookupByKey(vehicle.GetVehicleInfo().PowerDisplayID[0]);
                             if (powerDisplay != null)
                                 displayPower = (PowerType)powerDisplay.ActualType;
-                            else if (GetClass() == Class.Rogue)
-                                displayPower = PowerType.Energy;
                         }
                         else
                         {
@@ -1719,7 +1715,12 @@ namespace Game.Entities
                 }
             }
 
-            SetPowerType(displayPower);
+            return displayPower;
+        }
+
+        public void UpdateDisplayPower()
+        {
+            SetPowerType(CalculateDisplayPowerType());
         }
 
         public void SetSheath(SheathState sheathed)

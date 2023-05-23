@@ -1465,22 +1465,22 @@ namespace Game.Entities
             SetHealth(health);
             ResetPlayerDamageReq();
 
-            // mana
-            uint mana = stats.GenerateMana(cInfo);
-            SetCreateMana(mana);
-
-            switch (GetClass())
-            {
-                case Class.Paladin:
-                case Class.Mage:
-                    SetMaxPower(PowerType.Mana, (int)mana);
-                    SetPower(PowerType.Mana, (int)mana);
-                    break;
-                default: // We don't set max power here, 0 makes power bar hidden
-                    break;
-            }
-
             SetStatFlatModifier(UnitMods.Health, UnitModifierFlatType.Base, health);
+
+            // mana
+            PowerType powerType = CalculateDisplayPowerType();
+            SetCreateMana(stats.BaseMana);
+            SetStatPctModifier(UnitMods.PowerStart + (int)powerType, UnitModifierPctType.Base, cInfo.ModMana * cInfo.ModManaExtra);
+            SetPowerType(powerType);
+
+            PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(powerType);
+            if (powerTypeEntry != null)
+            {
+                if (powerTypeEntry.GetFlags().HasFlag(PowerTypeFlags.UnitsUseDefaultPowerOnInit))
+                    SetPower(powerType, powerTypeEntry.DefaultPower);
+                else
+                    SetFullPower(powerType);
+            }
 
             //Damage
             float basedamage = GetBaseDamageForLevel(level);
@@ -1499,7 +1499,7 @@ namespace Game.Entities
             SetStatFlatModifier(UnitMods.AttackPower, UnitModifierFlatType.Base, stats.AttackPower);
             SetStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Base, stats.RangedAttackPower);
 
-            float armor = GetBaseArmorForLevel(level); /// @todo Why is this treated as uint32 when it's a float?
+            float armor = GetBaseArmorForLevel(level);
             SetStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, armor);
         }
 

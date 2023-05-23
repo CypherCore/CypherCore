@@ -14,6 +14,7 @@ using Game.Maps;
 using Game.Misc;
 using Game.Networking.Packets;
 using Game.Spells;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -142,7 +143,7 @@ namespace Game.Entities
         uint m_deathTimer;
         long m_deathExpireTime;
         byte m_swingErrorMsg;
-        uint m_combatExitTime;
+        DateTime m_regenInterruptTimestamp;
         uint m_regenTimerCount;
         uint m_foodEmoteTimerCount;
         uint m_weaponChangeTimer;

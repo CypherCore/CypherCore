@@ -563,12 +563,16 @@ namespace Game.Entities
                     SetStatFlatModifier(UnitMods.ResistanceStart + i, UnitModifierFlatType.Base, cinfo.Resistance[i]);
             }
 
+            PowerType powerType = CalculateDisplayPowerType();
+
             // Health, Mana or Power, Armor
             PetLevelInfo pInfo = Global.ObjectMgr.GetPetLevelInfo(creature_ID, petlevel);
             if (pInfo != null)                                      // exist in DB
             {
                 SetCreateHealth(pInfo.health);
                 SetCreateMana(pInfo.mana);
+
+                SetStatPctModifier(UnitMods.PowerStart + (int)powerType, UnitModifierPctType.Base, 1.0f);
 
                 if (pInfo.armor > 0)
                     SetStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, pInfo.armor);
@@ -583,7 +587,7 @@ namespace Game.Entities
                 ApplyLevelScaling();
 
                 SetCreateHealth((uint)(Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, petlevel, cinfo.GetHealthScalingExpansion(), m_unitData.ContentTuningID, (Class)cinfo.UnitClass) * cinfo.ModHealth * cinfo.ModHealthExtra * GetHealthMod(cinfo.Rank)));
-                SetCreateMana(stats.GenerateMana(cinfo));
+                SetCreateMana(stats.BaseMana);
 
                 SetCreateStat(Stats.Strength, 22);
                 SetCreateStat(Stats.Agility, 22);
@@ -592,17 +596,7 @@ namespace Game.Entities
             }
 
             // Power
-            if (petType == PetType.Hunter) // Hunter pets have focus
-                SetPowerType(PowerType.Focus);
-            else if (IsPetGhoul() || IsPetAbomination()) // DK pets have energy
-            {
-                SetPowerType(PowerType.Energy);
-                SetFullPower(PowerType.Energy);
-            }
-            else if (IsWarlockPet()) // Warlock pets have energy (since 5.x)
-                SetPowerType(PowerType.Energy);
-            else
-                SetPowerType(PowerType.Mana);
+            SetPowerType(powerType);
 
             // Damage
             SetBonusDamage(0);

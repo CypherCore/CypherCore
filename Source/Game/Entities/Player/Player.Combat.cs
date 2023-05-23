@@ -331,7 +331,7 @@ namespace Game.Entities
         {
             base.AtExitCombat();
             UpdatePotionCooldown();
-            m_combatExitTime = Time.GetMSTime();
+            m_regenInterruptTimestamp = GameTime.Now();
         }
 
         public override float GetBlockPercent(uint attackerLevel)

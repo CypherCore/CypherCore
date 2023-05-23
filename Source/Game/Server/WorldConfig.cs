@@ -54,6 +54,7 @@ namespace Game
             SetRegenRate(WorldCfg.RatePowerArcaneCharges, "Rate.ArcaneCharges.Loss");
             SetRegenRate(WorldCfg.RatePowerFury, "Rate.Fury.Loss");
             SetRegenRate(WorldCfg.RatePowerPain, "Rate.Pain.Loss");
+            SetRegenRate(WorldCfg.RatePowerEssence, "Rate.Essence.Loss");
 
             Values[WorldCfg.RateSkillDiscovery] = GetDefaultValue("Rate.Skill.Discovery", 1.0f);
             Values[WorldCfg.RateDropItemPoor] = GetDefaultValue("Rate.Drop.Item.Poor", 1.0f);

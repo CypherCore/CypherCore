@@ -1811,6 +1811,7 @@ namespace Framework.Constants
         RatePowerMaelstrom,
         RatePowerMana,
         RatePowerPain,
+        RatePowerEssence,
         RatePowerRageIncome,
         RatePowerRageLoss,
         RatePowerRunicPowerIncome,

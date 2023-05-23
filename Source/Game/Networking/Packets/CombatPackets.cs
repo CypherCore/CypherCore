@@ -178,6 +178,21 @@ namespace Game.Networking.Packets
         public List<PowerUpdatePower> Powers;
     }
 
+    class InterruptPowerRegen : ServerPacket
+    {
+        public int PowerType;
+
+        public InterruptPowerRegen(PowerType powerType) : base(ServerOpcodes.InterruptPowerRegen, ConnectionType.Instance)
+        {
+            PowerType = (int)powerType;
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(PowerType);
+        }
+    }
+    
     public class SetSheathed : ClientPacket
     {
         public SetSheathed(WorldPacket packet) : base(packet) { }

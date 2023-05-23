@@ -271,16 +271,6 @@ namespace Game.Entities
         public uint BaseMana;
         public uint AttackPower;
         public uint RangedAttackPower;
-
-        // Helpers
-        public uint GenerateMana(CreatureTemplate info)
-        {
-            // Mana can be 0.
-            if (BaseMana == 0)
-                return 0;
-
-            return (uint)Math.Ceiling(BaseMana * info.ModMana * info.ModManaExtra);
-        }
     }
 
     public class CreatureLocale
