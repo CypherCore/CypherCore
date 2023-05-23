@@ -23,7 +23,7 @@ namespace Scripts.Spells.Warrior
         public const uint ChargeRootEffect = 105771;
         public const uint ChargeSlowEffect = 236027;
         public const uint ColossusSmash = 167105;
-        public const uint ColossusSmashEffect = 208086;
+        public const uint ColossusSmashAura = 208086;
         public const uint Execute = 20647;
         public const uint FueledByViolenceHeal = 383104;
         public const uint GlyphOfTheBlazingTrail = 123779;
@@ -31,6 +31,8 @@ namespace Scripts.Spells.Warrior
         public const uint GlyphOfHeroicLeapBuff = 133278;
         public const uint HeroicLeapJump = 178368;
         public const uint IgnorePain = 190456;
+        public const uint InForTheKill = 248621;
+        public const uint InForTheKillHaste = 248622;
         public const uint ImpendingVictory = 202168;
         public const uint ImpendingVictoryHeal = 202166;
         public const uint ImprovedHeroicLeap = 157449;
@@ -178,24 +180,54 @@ namespace Scripts.Spells.Warrior
         }
     }
 
-    [Script] // 167105 - Colossus Smash 7.1.5
-    class spell_warr_colossus_smash_SpellScript : SpellScript
+    // 167105 - Colossus Smash
+    [Script] // 262161 - Warbreaker
+    class spell_warr_colossus_smash : SpellScript
     {
+        bool _bonusHaste;
+
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.ColossusSmashEffect);
+            return ValidateSpellInfo(SpellIds.ColossusSmashAura, SpellIds.InForTheKill, SpellIds.InForTheKillHaste)
+            && Global.SpellMgr.GetSpellInfo(SpellIds.InForTheKill, Difficulty.None).GetEffects().Count > 2;
         }
 
-        void HandleOnHit()
+        void HandleHit()
         {
             Unit target = GetHitUnit();
-            if (target)
-                GetCaster().CastSpell(target, SpellIds.ColossusSmashEffect, true);
+            Unit caster = GetCaster();
+
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.ColossusSmashAura, true);
+
+            if (caster.HasAura(SpellIds.InForTheKill))
+            {
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.InForTheKill, Difficulty.None);
+                if (spellInfo != null)
+                {
+                    if (target.HealthBelowPct(spellInfo.GetEffect(2).CalcValue(caster)))
+                        _bonusHaste = true;
+                }
+            }
+        }
+
+        void HandleAfterCast()
+        {
+            Unit caster = GetCaster();
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.InForTheKill, Difficulty.None);
+            if (spellInfo == null)
+                return;
+
+            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+            args.AddSpellMod(SpellValueMod.BasePoint0, spellInfo.GetEffect(0).CalcValue(caster));
+            if (_bonusHaste)
+                args.AddSpellMod(SpellValueMod.BasePoint0, spellInfo.GetEffect(1).CalcValue(caster));
+            caster.CastSpell(caster, SpellIds.InForTheKillHaste, args);
         }
 
         public override void Register()
         {
-            OnHit.Add(new HitHandler(HandleOnHit));
+            OnHit.Add(new HitHandler(HandleHit));
+            AfterCast.Add(new CastHandler(HandleAfterCast));
         }
     }
 
