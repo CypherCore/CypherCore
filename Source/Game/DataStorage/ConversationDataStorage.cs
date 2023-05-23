@@ -190,16 +190,16 @@ namespace Game.DataStorage
 
             public bool Invoke(ConversationActorTemplate template)
             {
-                if (template.WorldObjectTemplate == null)
+                if (template.WorldObjectTemplate != null)
                     return Invoke(template.WorldObjectTemplate);
 
-                if (template.NoObjectTemplate == null)
+                if (template.NoObjectTemplate != null)
                     return Invoke(template.NoObjectTemplate);
 
-                if (template.ActivePlayerTemplate == null)
+                if (template.ActivePlayerTemplate != null)
                     return Invoke(template.ActivePlayerTemplate);
 
-                if (template.TalkingHeadTemplate == null)
+                if (template.TalkingHeadTemplate != null)
                     return Invoke(template.TalkingHeadTemplate);
 
                 return false;
