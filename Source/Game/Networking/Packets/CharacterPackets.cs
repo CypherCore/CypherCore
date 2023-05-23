@@ -1,6 +1,7 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
 using Framework.Dynamic;
@@ -134,7 +135,7 @@ namespace Game.Networking.Packets
                 ProfessionIds[0] = 0;
                 ProfessionIds[1] = 0;
 
-                StringArguments equipment = new(fields.Read<string>(17));
+                StringArray equipment = new(fields.Read<string>(17), ' ');
                 ListPosition = fields.Read<byte>(19);
                 LastPlayedTime = fields.Read<long>(20);
 
@@ -144,13 +145,16 @@ namespace Game.Networking.Packets
 
                 LastLoginVersion = fields.Read<int>(22);
 
-                for (byte slot = 0; slot < InventorySlots.ReagentBagEnd; ++slot)
+                int equipmentFieldsPerSlot = 5;
+
+                for (var slot = 0; slot < VisualItems.Length && (slot + 1) * equipmentFieldsPerSlot <= equipment.Length; ++slot)
                 {
-                    VisualItems[slot].InvType = (byte)equipment.NextUInt32();
-                    VisualItems[slot].DisplayId = equipment.NextUInt32();
-                    VisualItems[slot].DisplayEnchantId = equipment.NextUInt32();
-                    VisualItems[slot].Subclass = (byte)equipment.NextUInt32();
-                    VisualItems[slot].SecondaryItemModifiedAppearanceID = equipment.NextUInt32();
+                    int visualBase = slot * equipmentFieldsPerSlot;
+                    VisualItems[slot].InvType = byte.Parse(equipment[visualBase + 0]);
+                    VisualItems[slot].DisplayId = uint.Parse(equipment[visualBase + 1]);
+                    VisualItems[slot].DisplayEnchantId = uint.Parse(equipment[visualBase + 2]);
+                    VisualItems[slot].Subclass = byte.Parse(equipment[visualBase + 3]);
+                    VisualItems[slot].SecondaryItemModifiedAppearanceID = uint.Parse(equipment[visualBase + 4]);
                 }
             }
 
