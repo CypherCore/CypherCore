@@ -30,6 +30,7 @@ namespace Scripts.Spells.Warrior
         public const uint GlyphOfHeroicLeap = 159708;
         public const uint GlyphOfHeroicLeapBuff = 133278;
         public const uint HeroicLeapJump = 178368;
+        public const uint IgnorePain = 190456;
         public const uint ImpendingVictory = 202168;
         public const uint ImpendingVictoryHeal = 202166;
         public const uint ImprovedHeroicLeap = 157449;
@@ -73,6 +74,40 @@ namespace Scripts.Spells.Warrior
         }
     }
 
+    [Script] // 384036 - Brutal Vitality
+    class spell_warr_brutal_vitality : AuraScript
+    {
+        uint _damageAmount;
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.IgnorePain);
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            _damageAmount += MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount());
+        }
+
+        void HandleDummyTick(AuraEffect aurEff)
+        {
+            if (_damageAmount == 0)
+                return;
+
+            AuraEffect ignorePainAura = GetTarget().GetAuraEffect(SpellIds.IgnorePain, 0);
+            if (ignorePainAura != null)
+                ignorePainAura.ChangeAmount((int)(ignorePainAura.GetAmount() + _damageAmount));
+
+            _damageAmount = 0;
+        }
+
+        public override void Register()
+        {
+            AfterEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicDummy));
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleDummyTick, 0, AuraType.PeriodicDummy));
+        }
+    }
+    
     [Script] // 100 - Charge
     class spell_warr_charge : SpellScript
     {
