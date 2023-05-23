@@ -864,6 +864,26 @@ namespace Game
                 }
             }
 
+            var graveyard = GetClosestGraveyardInZone(location, team, conditionObject, zoneId);
+            var zoneEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
+            var parentEntry = CliDB.AreaTableStorage.LookupByKey(zoneEntry.ParentAreaID);
+
+            while (graveyard == null && parentEntry != null)
+            {
+                graveyard = GetClosestGraveyardInZone(location, team, conditionObject, parentEntry.Id);
+                if (graveyard == null && parentEntry.ParentAreaID != 0)
+                    parentEntry = CliDB.AreaTableStorage.LookupByKey(parentEntry.ParentAreaID);
+                else // nothing found, cant look further, give up.
+                    parentEntry = null;
+            }
+
+            return graveyard;
+        }
+
+        WorldSafeLocsEntry GetClosestGraveyardInZone(WorldLocation location, Team team, WorldObject conditionObject, uint zoneId)
+        {
+            location.GetPosition(out float x, out float y, out float z);
+            uint MapId = location.GetMapId();
             // Simulate std. algorithm:
             //   found some graveyard associated to (ghost_zone, ghost_map)
             //
@@ -981,6 +1001,7 @@ namespace Game
 
             return entryFar;
         }
+
         public GraveYardData FindGraveYardData(uint id, uint zoneId)
         {
             var range = GraveYardStorage.LookupByKey(zoneId);
@@ -991,6 +1012,7 @@ namespace Game
             }
             return null;
         }
+
         public WorldSafeLocsEntry GetWorldSafeLoc(uint id)
         {
             return _worldSafeLocs.LookupByKey(id);
