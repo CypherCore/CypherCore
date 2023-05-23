@@ -2944,9 +2944,8 @@ namespace Scripts.Spells.Items
         void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
-            AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(caster.GetAreaId());
             bool success = true;
-            if (areaEntry != null && areaEntry.IsFlyable() && !caster.GetMap().IsDungeon())
+            if (!caster.GetMap().IsDungeon())
                 success = RandomHelper.randChance(95);
             caster.CastSpell(caster, success ? SpellIds.NitroBoostsSuccess : SpellIds.NitroBoostsBackfire, new CastSpellExtraArgs(GetCastItem()));
         }

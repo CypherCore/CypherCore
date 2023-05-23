@@ -887,45 +887,69 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum AreaFlags
+    public enum AreaFlags : uint
     {
-        Snow = 0x01,                // Snow (Only Dun Morogh, Naxxramas, Razorfen Downs And Winterspring)
-        Unk1 = 0x02,                // Razorfen Downs, Naxxramas And Acherus: The Ebon Hold (3.3.5a)
-        Unk2 = 0x04,                // Only Used For Areas On Map 571 (Development Before)
-        SlaveCapital = 0x08,                // City And City Subzones
-        Unk3 = 0x10,                // Can'T Find Common Meaning
-        SlaveCapital2 = 0x20,                // Slave Capital City Flag?
-        AllowDuels = 0x40,                // Allow To Duel Here
-        Arena = 0x80,                // Arena, Both Instanced And World Arenas
-        Capital = 0x100,                // Main Capital City Flag
-        City = 0x200,                // Only For One Zone Named "City" (Where It Located?)
-        Outland = 0x400,                // Expansion Zones? (Only Eye Of The Storm Not Have This Flag, But Have 0x4000 Flag)
-        Sanctuary = 0x800,                // Sanctuary Area (Pvp Disabled)
-        NeedFly = 0x1000,                // Unknown
-        Unused1 = 0x2000,                // Unused In 3.3.5a
-        Outland2 = 0x4000,                // Expansion Zones? (Only Circle Of Blood Arena Not Have This Flag, But Have 0x400 Flag)
-        OutdoorPvp = 0x8000,                // Pvp Objective Area? (Death'S Door Also Has This Flag Although It'S No Pvp Object Area)
-        ArenaInstance = 0x10000,                // Used By Instanced Arenas Only
-        Unused2 = 0x20000,                // Unused In 3.3.5a
-        ContestedArea = 0x40000,                // On Pvp Servers These Areas Are Considered Contested, Even Though The Zone It Is Contained In Is A Horde/Alliance Territory.
-        Unk6 = 0x80000,                // Valgarde And Acherus: The Ebon Hold
-        Lowlevel = 0x100000,                // Used For Some Starting Areas With AreaLevel <= 15
-        Town = 0x200000,                // Small Towns With Inn
-        RestZoneHorde = 0x400000,                // Warsong Hold, Acherus: The Ebon Hold, New Agamand Inn, Vengeance Landing Inn, Sunreaver Pavilion (Something To Do With Team?)
-        RestZoneAlliance = 0x800000,                // Valgarde, Acherus: The Ebon Hold, Westguard Inn, Silver Covenant Pavilion (Something To Do With Team?)
-        Combat = 0x1000000,                // "combat" area (Script_GetZonePVPInfo), used
-        Inside = 0x2000000,                // Used For Determinating Spell Related Inside/Outside Questions In Map.Isoutdoors
-        Outside = 0x4000000,                // Used For Determinating Spell Related Inside/Outside Questions In Map.Isoutdoors
-        CanHearthAndResurrect = 0x8000000,                // Can Hearth And Resurrect From Area
-        NoFlyZone = 0x20000000,                // Marks Zones Where You Cannot Fly
-        Unk9 = 0x40000000,
+        EmitBreathParticles = 0x01,
+        BreathParticlesOverrideParent = 0x02,
+        OnMapDungeon = 0x04,
+        AllowTradeChannel = 0x08,
+        EnemiesPvPFlagged = 0x10,
+        AllowResting = 0x20,
+        AllowDueling = 0x40,
+        FreeForAllPvP = 0x80,
+        LinkedChat = 0x100, // Set in cities
+        LinkedChatSpecialArea = 0x200,
+        ForceThisAreaWhenOnDynamicTransport = 0x400,
+        NoPvP = 0x800,
+        NoGhostOnRelease = 0x1000,
+        SubZoneAmbientMultiplier = 0x2000,
+        EnableFlightBoundsOnMap = 0x4000,
+        PVPPOI = 0x8000,
+        NoChatChannels = 0x10000,
+        AreaNotInUse = 0x20000,
+        Contested = 0x40000,
+        NoPlayerSummoning = 0x80000,
+        NoDuelingIfTournamentRealm = 0x100000,
+        PlayersCallGuards = 0x200000,
+        HordeResting = 0x400000,
+        AllianceResting = 0x800000,
+        CombatZone = 0x1000000,
+        ForceIndoors = 0x2000000,
+        ForceOutdoors = 0x4000000,
+        AllowHearthAndRessurectFromArea = 0x08000000,
+        NoLocalDefenseChannel = 0x10000000,
+        OnlyEvaluateGhostBindOnce = 0x20000000,
+        IsSubzone = 0x40000000,
+        DontEvaluateGraveyardFromClient = 0x80000000
     }
 
     [Flags]
     public enum AreaFlags2
     {
-        DontShowSanctuary = 0x200,                // Hides sanctuary status from zone text color (Script_GetZonePVPInfo)
-        CanEnableWarMode = 0x1000,                // Allows enabling war mode
+        ForceMicroDungeonArtMap = 0x01, // Ask Programmer
+        UseSubzonePlayerLoot = 0x02,
+        AllowPetBattleDuelingEvenIfNoDuelingAllowed = 0x04,
+        UseMapTransferLocsForCemeteries = 0x08,
+        IsGarrison = 0x10,
+        UseSubzoneForChatChannel = 0x20,
+        DontRealmCoalesceChatChannel = 0x40,
+        NotExplorable = 0x80, // Don't assign area bit
+        DontUseParentMapForCemeteries = 0x100,
+        DontShowSanctuaryText = 0x200,
+        CrossFactionZoneChat = 0x400,
+        ForceNoResting = 0x800,
+        AllowWarModeToggle = 0x1000
+    }
+
+    [Flags]
+    public enum AreaMountFlags
+    {
+        None = 0x0,
+        AllowGroundMounts = 0x1,
+        AllowFlyingMounts = 0x2,
+        AllowSurfaceSwimmingMounts = 0x4,
+        AllowUnderwaterSwimmingMounts = 0x8,
+        ClientEnforcesMount = 0x10
     }
 
     public enum ArtifactCategory
@@ -1700,14 +1724,6 @@ namespace Framework.Constants
         Anytime = 0,
         Daily = 1,
         Weekly = 2
-    }
-
-    public enum AreaMountFlags
-    {
-        GroundAllowed = 0x1,
-        FlyingAllowed = 0x2,
-        FloatAllowed = 0x4,
-        UnderwaterAllowed = 0x8
     }
 
     public enum ModifierTreeOperator

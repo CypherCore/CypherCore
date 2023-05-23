@@ -5717,11 +5717,9 @@ namespace Game.Spells
                         // allow always ghost flight spells
                         if (m_originalCaster != null && m_originalCaster.IsTypeId(TypeId.Player) && m_originalCaster.IsAlive())
                         {
-                            BattleField Bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(m_originalCaster.GetMap(), m_originalCaster.GetZoneId());
-                            var area = CliDB.AreaTableStorage.LookupByKey(m_originalCaster.GetAreaId());
-                            if (area != null)
-                                if (area.HasFlag(AreaFlags.NoFlyZone) || (Bf != null && !Bf.CanFlyIn()))
-                                    return SpellCastResult.NotHere;
+                            BattleField battleField = Global.BattleFieldMgr.GetBattlefieldToZoneId(m_originalCaster.GetMap(), m_originalCaster.GetZoneId());
+                            if (battleField != null && !battleField.CanFlyIn())
+                                return SpellCastResult.NotHere;
                         }
                         break;
                     }

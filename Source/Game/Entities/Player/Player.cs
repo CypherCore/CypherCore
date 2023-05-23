@@ -2738,10 +2738,10 @@ namespace Game.Entities
 
         public bool CanJoinConstantChannelInZone(ChatChannelsRecord channel, AreaTableRecord zone)
         {
-            if (channel.Flags.HasAnyFlag(ChannelDBCFlags.ZoneDep) && zone.HasFlag(AreaFlags.ArenaInstance))
+            if (channel.Flags.HasAnyFlag(ChannelDBCFlags.ZoneDep) && zone.GetFlags().HasFlag(AreaFlags.NoChatChannels))
                 return false;
 
-            if (channel.Flags.HasAnyFlag(ChannelDBCFlags.CityOnly) && !zone.HasFlag(AreaFlags.Capital))
+            if (channel.Flags.HasAnyFlag(ChannelDBCFlags.CityOnly) && !zone.GetFlags().HasFlag(AreaFlags.AllowTradeChannel))
                 return false;
 
             if (channel.Flags.HasAnyFlag(ChannelDBCFlags.GuildReq) && GetGuildId() != 0)
@@ -4200,7 +4200,7 @@ namespace Game.Entities
 
             bool shouldResurrect = false;
             // Such zones are considered unreachable as a ghost and the player must be automatically revived
-            if ((!IsAlive() && zone != null && zone.HasFlag(AreaFlags.NeedFly)) || GetTransport() != null || GetPositionZ() < GetMap().GetMinHeight(GetPhaseShift(), GetPositionX(), GetPositionY()))
+            if ((!IsAlive() && zone != null && zone.GetFlags().HasFlag(AreaFlags.NoGhostOnRelease)) || GetTransport() != null || GetPositionZ() < GetMap().GetMinHeight(GetPhaseShift(), GetPositionX(), GetPositionY()))
             {
                 shouldResurrect = true;
                 SpawnCorpseBones();
@@ -4787,7 +4787,7 @@ namespace Game.Entities
 
             do
             {
-                if ((area.Flags[1] & (uint)AreaFlags2.CanEnableWarMode) != 0)
+                if (area.GetFlags2().HasFlag(AreaFlags2.AllowWarModeToggle))
                     return true;
 
                 area = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);

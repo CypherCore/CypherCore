@@ -842,19 +842,19 @@ namespace Game.Spells
             // continent limitation (virtual continent)
             if (HasAttribute(SpellAttr4.OnlyFlyingAreas))
             {
-                uint mountFlags = 0;
+                AreaMountFlags mountFlags = 0;
                 if (player && player.HasAuraType(AuraType.MountRestrictions))
                 {
                     foreach (AuraEffect auraEffect in player.GetAuraEffectsByType(AuraType.MountRestrictions))
-                        mountFlags |= (uint)auraEffect.GetMiscValue();
+                        mountFlags |= (AreaMountFlags)auraEffect.GetMiscValue();
                 }
                 else
                 {
                     AreaTableRecord areaTable = CliDB.AreaTableStorage.LookupByKey(area_id);
                     if (areaTable != null)
-                        mountFlags = areaTable.MountFlags;
+                        mountFlags = areaTable.GetMountFlags();
                 }
-                if (!Convert.ToBoolean(mountFlags & (uint)AreaMountFlags.FlyingAllowed))
+                if (!mountFlags.HasFlag(AreaMountFlags.AllowFlyingMounts))
                     return SpellCastResult.IncorrectArea;
 
                 if (player)

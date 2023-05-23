@@ -97,7 +97,7 @@ namespace Game.Entities
 
             AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(newArea);
             bool oldFFAPvPArea = pvpInfo.IsInFFAPvPArea;
-            pvpInfo.IsInFFAPvPArea = area != null && area.HasFlag(AreaFlags.Arena);
+            pvpInfo.IsInFFAPvPArea = area != null && area.GetFlags().HasFlag(AreaFlags.FreeForAllPvP);
             UpdatePvPState(true);
 
             // check if we were in ffa arena and we left
@@ -124,8 +124,8 @@ namespace Game.Entities
             else
                 RemovePvpFlag(UnitPVPStateFlags.Sanctuary);
 
-            AreaFlags areaRestFlag = (GetTeam() == Team.Alliance) ? AreaFlags.RestZoneAlliance : AreaFlags.RestZoneHorde;
-            if (area != null && area.HasFlag(areaRestFlag))
+            AreaFlags areaRestFlag = (GetTeam() == Team.Alliance) ? AreaFlags.AllianceResting : AreaFlags.HordeResting;
+            if (area != null && area.GetFlags().HasFlag(areaRestFlag))
                 _restMgr.SetRestFlag(RestFlag.FactionArea);
             else
                 _restMgr.RemoveRestFlag(RestFlag.FactionArea);
@@ -181,7 +181,7 @@ namespace Game.Entities
 
             UpdateHostileAreaState(zone);
 
-            if (zone.HasFlag(AreaFlags.Capital))                     // Is in a capital city
+            if (zone.GetFlags().HasFlag(AreaFlags.LinkedChat))                     // Is in a capital city
             {
                 if (!pvpInfo.IsInHostileArea || zone.IsSanctuary())
                     _restMgr.SetRestFlag(RestFlag.City);
@@ -226,17 +226,17 @@ namespace Game.Entities
 
             if (area.IsSanctuary()) // sanctuary and arena cannot be overriden
                 pvpInfo.IsInHostileArea = false;
-            else if (area.HasFlag(AreaFlags.Arena))
+            else if (area.GetFlags().HasFlag(AreaFlags.FreeForAllPvP))
                 pvpInfo.IsInHostileArea = true;
             else if (overrideZonePvpType == ZonePVPTypeOverride.None)
             {
                 if (area != null)
                 {
-                    if (InBattleground() || area.HasFlag(AreaFlags.Combat) || (area.PvpCombatWorldStateID != -1 && Global.WorldStateMgr.GetValue(area.PvpCombatWorldStateID, GetMap()) != 0))
+                    if (InBattleground() || area.GetFlags().HasFlag(AreaFlags.CombatZone) || (area.PvpCombatWorldStateID != -1 && Global.WorldStateMgr.GetValue(area.PvpCombatWorldStateID, GetMap()) != 0))
                         pvpInfo.IsInHostileArea = true;
-                    else if (IsWarModeLocalActive() || area.HasFlag(AreaFlags.Unk3))
+                    else if (IsWarModeLocalActive() || area.GetFlags().HasFlag(AreaFlags.EnemiesPvPFlagged))
                     {
-                        if (area.HasFlag(AreaFlags.ContestedArea))
+                        if (area.GetFlags().HasFlag(AreaFlags.Contested))
                             pvpInfo.IsInHostileArea = IsWarModeLocalActive();
                         else
                         {

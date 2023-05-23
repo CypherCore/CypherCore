@@ -479,7 +479,7 @@ namespace Game.Maps
                 data.AreaId = gridAreaId;
                 var areaEntry1 = CliDB.AreaTableStorage.LookupByKey(data.AreaId);
                 if (areaEntry1 != null)
-                    data.outdoors = ((AreaFlags)areaEntry1.Flags[0] & (AreaFlags.Inside | AreaFlags.Outside)) != AreaFlags.Inside;
+                    data.outdoors = areaEntry1.GetFlags().HasFlag(AreaFlags.ForceOutdoors) || !areaEntry1.GetFlags().HasFlag(AreaFlags.ForceIndoors);
             }
 
             if (data.AreaId == 0)

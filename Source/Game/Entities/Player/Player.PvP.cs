@@ -356,7 +356,7 @@ namespace Game.Entities
                     if (area.IsSanctuary())
                         return false;
 
-                    if (area.HasFlag(AreaFlags.Arena))
+                    if (area.GetFlags().HasFlag(AreaFlags.FreeForAllPvP))
                         return true;
 
                     if (Global.BattleFieldMgr.IsWorldPvpArea(area.Id))
