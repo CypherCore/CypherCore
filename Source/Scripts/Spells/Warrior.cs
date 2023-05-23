@@ -24,6 +24,7 @@ namespace Scripts.Spells.Warrior
         public const uint ChargeSlowEffect = 236027;
         public const uint ColossusSmash = 167105;
         public const uint ColossusSmashAura = 208086;
+        public const uint CriticalThinkingEnergize = 392776;
         public const uint Execute = 20647;
         public const uint FueledByViolenceHeal = 383104;
         public const uint GlyphOfTheBlazingTrail = 123779;
@@ -232,6 +233,28 @@ namespace Scripts.Spells.Warrior
         }
     }
 
+    [Script] // 389306 - Critical Thinking
+    class spell_warr_critical_thinking : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.CriticalThinkingEnergize);
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            int? rageCost = eventInfo.GetProcSpell().GetPowerTypeCostAmount(PowerType.Rage);
+            if (rageCost.HasValue)
+                GetTarget().CastSpell((WorldObject)null, SpellIds.CriticalThinkingEnergize, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                    .AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(rageCost.Value, aurEff.GetAmount())));
+        }
+
+        public override void Register()
+        {
+            AfterEffectProc.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy));
+        }
+    }
+    
     [Script] // 383103  - Fueled by Violence
     class spell_warr_fueled_by_violence : AuraScript
     {
