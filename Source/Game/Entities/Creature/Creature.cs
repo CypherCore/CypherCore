@@ -2738,7 +2738,7 @@ namespace Game.Entities
             CreatureLevelScaling scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());
             float baseHealth = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, level, cInfo.GetHealthScalingExpansion(), scaling.ContentTuningID, (Class)cInfo.UnitClass);
 
-            return (ulong)(baseHealth * cInfo.ModHealth * cInfo.ModHealthExtra);
+            return (ulong)Math.Max(baseHealth * cInfo.ModHealth * cInfo.ModHealthExtra, 1.0f);
         }
 
         public override float GetHealthMultiplierForTarget(WorldObject target)
