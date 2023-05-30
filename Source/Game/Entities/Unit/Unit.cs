@@ -597,6 +597,12 @@ namespace Game.Entities
         public void AtEndOfEncounter()
         {
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.EndOfEncounter);
+
+            GetSpellHistory().ResetCooldowns(pair =>
+            {
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pair.Key, Difficulty.None);
+                return spellInfo.HasAttribute(SpellAttr10.ResetCooldownOnEncounterEnd);
+            }, true);
         }
 
         public void _RegisterDynObject(DynamicObject dynObj)
