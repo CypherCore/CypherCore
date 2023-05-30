@@ -777,6 +777,28 @@ namespace Game.Chat
             return true;
         }
 
+        [Command("playercondition", RBACPermissions.CommandDebug)]
+        static bool HandleDebugPlayerConditionCommand(CommandHandler handler, uint playerConditionId)
+        {
+            Player target = handler.GetSelectedPlayerOrSelf();
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.PlayerNotFound);
+                return false;
+            }
+
+            var playerConditionEntry = CliDB.PlayerConditionStorage.LookupByKey(playerConditionId);
+            if (playerConditionEntry == null)
+                return false;
+
+            if (ConditionManager.IsPlayerMeetingCondition(target, playerConditionEntry))
+                handler.SendSysMessage($"PlayerCondition {playerConditionId} met");
+            else
+                handler.SendSysMessage($"PlayerCondition {playerConditionId} not met");
+
+            return true;
+        }
+
         [Command("pvp warmode", RBACPermissions.CommandDebug, true)]
         static bool HandleDebugWarModeBalanceCommand(CommandHandler handler, string command, int? rewardValue)
         {
