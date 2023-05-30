@@ -458,7 +458,7 @@ namespace Game
                 if (dstPet != null)
                 {
                     CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(dstPet.CreatureId);
-                    if (creatureInfo == null || !creatureInfo.IsTameable(_player.CanTameExoticPets()))
+                    if (creatureInfo == null || !creatureInfo.IsTameable(_player.CanTameExoticPets(), creatureInfo.GetDifficulty(Difficulty.None)))
                     {
                         SendPetStableResult(StableResult.CantControlExotic);
                         return;
@@ -484,7 +484,7 @@ namespace Game
                 }
 
                 CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(srcPet.CreatureId);
-                if (creatureInfo == null || !creatureInfo.IsTameable(_player.CanTameExoticPets()))
+                if (creatureInfo == null || !creatureInfo.IsTameable(_player.CanTameExoticPets(), creatureInfo.GetDifficulty(Difficulty.None)))
                 {
                     SendPetStableResult(StableResult.CantControlExotic);
                     return;

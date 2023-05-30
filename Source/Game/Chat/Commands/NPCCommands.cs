@@ -124,7 +124,9 @@ namespace Game.Chat
 
             handler.SendSysMessage(CypherStrings.NpcinfoDynamicFlags, target.GetDynamicFlags());
             handler.SendSysMessage(CypherStrings.CommandRawpawntimes, defRespawnDelayStr, curRespawnDelayStr);
-            handler.SendSysMessage(CypherStrings.NpcinfoLoot, cInfo.LootId, cInfo.PickPocketId, cInfo.SkinLootId);
+
+            CreatureDifficulty creatureDifficulty = target.GetCreatureDifficulty();
+            handler.SendSysMessage(CypherStrings.NpcinfoLoot, creatureDifficulty.LootID, creatureDifficulty.PickPocketLootID, creatureDifficulty.SkinLootID);
             handler.SendSysMessage(CypherStrings.NpcinfoDungeonId, target.GetInstanceId());
 
             CreatureData data = Global.ObjectMgr.GetCreatureData(target.GetSpawnId());
@@ -406,7 +408,7 @@ namespace Game.Chat
 
             CreatureTemplate cInfo = creatureTarget.GetCreatureTemplate();
 
-            if (!cInfo.IsTameable(player.CanTameExoticPets()))
+            if (!cInfo.IsTameable(player.CanTameExoticPets(), creatureTarget.GetCreatureDifficulty()))
             {
                 handler.SendSysMessage(CypherStrings.CreatureNonTameable, cInfo.Entry);
                 return false;

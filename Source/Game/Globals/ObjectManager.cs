@@ -25,14 +25,7 @@ namespace Game
 {
     public sealed class ObjectManager : Singleton<ObjectManager>
     {
-        ObjectManager()
-        {
-            for (var i = 0; i < SharedConst.MaxCreatureDifficulties; ++i)
-            {
-                difficultyEntries[i] = new List<uint>();
-                hasDifficultyEntries[i] = new List<uint>();
-            }
-        }
+        ObjectManager() { }
 
         //Static Methods
         public static bool NormalizePlayerName(ref string name)
@@ -1792,44 +1785,35 @@ namespace Game
             CreatureTemplate creature = new();
             creature.Entry = entry;
 
-            for (var i = 0; i < SharedConst.MaxCreatureDifficulties; ++i)
-                creature.DifficultyEntry[i] = fields.Read<uint>(1 + i);
-
             for (var i = 0; i < 2; ++i)
-                creature.KillCredit[i] = fields.Read<uint>(4 + i);
+                creature.KillCredit[i] = fields.Read<uint>(1 + i);
 
-            creature.Name = fields.Read<string>(6);
-            creature.FemaleName = fields.Read<string>(7);
-            creature.SubName = fields.Read<string>(8);
-            creature.TitleAlt = fields.Read<string>(9);
-            creature.IconName = fields.Read<string>(10);
-            creature.HealthScalingExpansion = fields.Read<int>(11);
-            creature.RequiredExpansion = fields.Read<uint>(12);
-            creature.VignetteID = fields.Read<uint>(13);
-            creature.Faction = fields.Read<uint>(14);
-            creature.Npcflag = fields.Read<ulong>(15);
-            creature.SpeedWalk = fields.Read<float>(16);
-            creature.SpeedRun = fields.Read<float>(17);
-            creature.Scale = fields.Read<float>(18);
-            creature.Rank = (CreatureEliteType)fields.Read<uint>(19);
-            creature.DmgSchool = fields.Read<uint>(20);
-            creature.BaseAttackTime = fields.Read<uint>(21);
-            creature.RangeAttackTime = fields.Read<uint>(22);
-            creature.BaseVariance = fields.Read<float>(23);
-            creature.RangeVariance = fields.Read<float>(24);
-            creature.UnitClass = fields.Read<uint>(25);
-            creature.UnitFlags = (UnitFlags)fields.Read<uint>(26);
-            creature.UnitFlags2 = fields.Read<uint>(27);
-            creature.UnitFlags3 = fields.Read<uint>(28);
-            creature.DynamicFlags = fields.Read<uint>(29);
-            creature.Family = (CreatureFamily)fields.Read<uint>(30);
-            creature.TrainerClass = (Class)fields.Read<byte>(31);
-            creature.CreatureType = (CreatureType)fields.Read<byte>(32);
-            creature.TypeFlags = (CreatureTypeFlags)fields.Read<uint>(33);
-            creature.TypeFlags2 = fields.Read<uint>(34);
-            creature.LootId = fields.Read<uint>(35);
-            creature.PickPocketId = fields.Read<uint>(36);
-            creature.SkinLootId = fields.Read<uint>(37);
+            creature.Name = fields.Read<string>(3);
+            creature.FemaleName = fields.Read<string>(4);
+            creature.SubName = fields.Read<string>(5);
+            creature.TitleAlt = fields.Read<string>(6);
+            creature.IconName = fields.Read<string>(7);
+            creature.RequiredExpansion = fields.Read<uint>(8);
+            creature.VignetteID = fields.Read<uint>(9);
+            creature.Faction = fields.Read<uint>(10);
+            creature.Npcflag = fields.Read<ulong>(11);
+            creature.SpeedWalk = fields.Read<float>(12);
+            creature.SpeedRun = fields.Read<float>(13);
+            creature.Scale = fields.Read<float>(14);
+            creature.Rank = (CreatureEliteType)fields.Read<uint>(15);
+            creature.DmgSchool = fields.Read<uint>(16);
+            creature.BaseAttackTime = fields.Read<uint>(17);
+            creature.RangeAttackTime = fields.Read<uint>(18);
+            creature.BaseVariance = fields.Read<float>(19);
+            creature.RangeVariance = fields.Read<float>(20);
+            creature.UnitClass = fields.Read<uint>(21);
+            creature.UnitFlags = (UnitFlags)fields.Read<uint>(22);
+            creature.UnitFlags2 = fields.Read<uint>(23);
+            creature.UnitFlags3 = fields.Read<uint>(24);
+            creature.DynamicFlags = fields.Read<uint>(25);
+            creature.Family = (CreatureFamily)fields.Read<uint>(26);
+            creature.TrainerClass = (Class)fields.Read<byte>(27);
+            creature.CreatureType = (CreatureType)fields.Read<byte>(28);
 
             for (var i = (int)SpellSchools.Holy; i < (int)SpellSchools.Max; ++i)
                 creature.Resistance[i] = 0;
@@ -1837,51 +1821,42 @@ namespace Game
             for (var i = 0; i < SharedConst.MaxCreatureSpells; ++i)
                 creature.Spells[i] = 0;
 
-            creature.VehicleId = fields.Read<uint>(38);
-            creature.MinGold = fields.Read<uint>(39);
-            creature.MaxGold = fields.Read<uint>(40);
-            creature.AIName = fields.Read<string>(41);
-            creature.MovementType = fields.Read<uint>(42);
+            creature.VehicleId = fields.Read<uint>(29);
+            creature.AIName = fields.Read<string>(30);
+            creature.MovementType = fields.Read<uint>(31);
 
-            if (!fields.IsNull(43))
-                creature.Movement.Ground = (CreatureGroundMovementType)fields.Read<byte>(43);
+            if (!fields.IsNull(32))
+                creature.Movement.Ground = (CreatureGroundMovementType)fields.Read<byte>(32);
 
-            if (!fields.IsNull(44))
-                creature.Movement.Swim = fields.Read<bool>(44);
+            if (!fields.IsNull(33))
+                creature.Movement.Swim = fields.Read<bool>(33);
 
-            if (!fields.IsNull(45))
-                creature.Movement.Flight = (CreatureFlightMovementType)fields.Read<byte>(45);
+            if (!fields.IsNull(34))
+                creature.Movement.Flight = (CreatureFlightMovementType)fields.Read<byte>(34);
 
-            if (!fields.IsNull(46))
-                creature.Movement.Rooted = fields.Read<bool>(46);
+            if (!fields.IsNull(35))
+                creature.Movement.Rooted = fields.Read<bool>(35);
 
-            if (!fields.IsNull(47))
-                creature.Movement.Chase = (CreatureChaseMovementType)fields.Read<byte>(47);
+            if (!fields.IsNull(36))
+                creature.Movement.Chase = (CreatureChaseMovementType)fields.Read<byte>(36);
 
-            if (!fields.IsNull(48))
-                creature.Movement.Random = (CreatureRandomMovementType)fields.Read<byte>(48);
+            if (!fields.IsNull(37))
+                creature.Movement.Random = (CreatureRandomMovementType)fields.Read<byte>(37);
 
-            if (!fields.IsNull(49))
-                creature.Movement.InteractionPauseTimer = fields.Read<uint>(49);
+            if (!fields.IsNull(38))
+                creature.Movement.InteractionPauseTimer = fields.Read<uint>(38);
 
-            creature.ModHealth = fields.Read<float>(50);
-            creature.ModHealthExtra = fields.Read<float>(51);
-            creature.ModMana = fields.Read<float>(52);
-            creature.ModManaExtra = fields.Read<float>(53);
-            creature.ModArmor = fields.Read<float>(54);
-            creature.ModDamage = fields.Read<float>(55);
-            creature.ModExperience = fields.Read<float>(56);
-            creature.RacialLeader = fields.Read<bool>(57);
-            creature.MovementId = fields.Read<uint>(58);
-            creature.CreatureDifficultyID = fields.Read<int>(59);
-            creature.WidgetSetID = fields.Read<int>(60);
-            creature.WidgetSetUnitConditionID = fields.Read<int>(61);
-            creature.RegenHealth = fields.Read<bool>(62);
-            creature.MechanicImmuneMask = fields.Read<ulong>(63);
-            creature.SpellSchoolImmuneMask = fields.Read<uint>(64);
-            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(65);
-            creature.ScriptID = GetScriptId(fields.Read<string>(66));
-            creature.StringId = fields.Read<string>(67);
+            creature.ModExperience = fields.Read<float>(39);
+            creature.RacialLeader = fields.Read<bool>(40);
+            creature.MovementId = fields.Read<uint>(41);
+            creature.WidgetSetID = fields.Read<int>(42);
+            creature.WidgetSetUnitConditionID = fields.Read<int>(43);
+            creature.RegenHealth = fields.Read<bool>(44);
+            creature.MechanicImmuneMask = fields.Read<ulong>(45);
+            creature.SpellSchoolImmuneMask = fields.Read<uint>(46);
+            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(47);
+            creature.ScriptID = GetScriptId(fields.Read<string>(48));
+            creature.StringId = fields.Read<string>(49);
 
             creatureTemplateStorage[entry] = creature;
         }
@@ -2392,8 +2367,8 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            //                                          0              1      2
-            SQLResult result = DB.World.Query("SELECT CreatureEntry, ItemId, Idx FROM creature_questitem ORDER BY Idx ASC");
+            //                                         0              1             2       3
+            SQLResult result = DB.World.Query("SELECT CreatureEntry, DifficultyID, ItemId, Idx FROM creature_questitem ORDER BY Idx ASC");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature quest items. DB table `creature_questitem` is empty.");
@@ -2404,22 +2379,23 @@ namespace Game
             do
             {
                 uint entry = result.Read<uint>(0);
-                uint item = result.Read<uint>(1);
-                uint idx = result.Read<uint>(2);
+                Difficulty difficulty = (Difficulty)result.Read<byte>(1);
+                uint item = result.Read<uint>(2);
+                uint idx = result.Read<uint>(3);
 
                 if (!creatureTemplateStorage.ContainsKey(entry))
                 {
-                    Log.outError(LogFilter.Sql, "Table `creature_questitem` has data for nonexistent creature (entry: {0}, idx: {1}), skipped", entry, idx);
+                    Log.outError(LogFilter.Sql, $"Table `creature_questitem` has data for nonexistent creature (entry: {entry}, difficulty: {difficulty} idx: {idx}), skipped");
                     continue;
                 }
 
                 if (!CliDB.ItemStorage.ContainsKey(item))
                 {
-                    Log.outError(LogFilter.Sql, "Table `creature_questitem` has nonexistent item (ID: {0}) in creature (entry: {1}, idx: {2}), skipped", item, entry, idx);
+                    Log.outError(LogFilter.Sql, $"Table `creature_questitem` has nonexistent item (ID: {item}) in creature (entry: {entry}, difficulty: {difficulty} idx: {idx}), skipped");
                     continue;
                 }
 
-                creatureQuestItemStorage.Add(entry, item);
+                creatureQuestItemStorage.Add((entry, difficulty), item);
 
                 ++count;
             }
@@ -2709,15 +2685,15 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template sparring rows in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
-        public void LoadCreatureScalingData()
+        public void LoadCreatureTemplateDifficulty()
         {
             uint oldMSTime = Time.GetMSTime();
 
-            //                                   0      1             2                     3                     4
-            var result = DB.World.Query("SELECT Entry, DifficultyID, LevelScalingDeltaMin, LevelScalingDeltaMax, ContentTuningID FROM creature_template_scaling ORDER BY Entry");
+            //                                         0      1             2                     3                     4                5                       6               7             8              9               10                    11         12          13      14                15          16       17
+            SQLResult result = DB.World.Query("SELECT Entry, DifficultyID, LevelScalingDeltaMin, LevelScalingDeltaMax, ContentTuningID, HealthScalingExpansion, HealthModifier, ManaModifier, ArmorModifier, DamageModifier, CreatureDifficultyID, TypeFlags, TypeFlags2, LootID, PickPocketLootID, SkinLootID, GoldMin, GoldMax FROM creature_template_difficulty ORDER BY Entry");
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature template scaling definitions. DB table `creature_template_scaling` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature template difficulty definitions. DB table `creature_template_difficulty` is empty.");
                 return;
             }
 
@@ -2730,195 +2706,54 @@ namespace Game
                 var template = creatureTemplateStorage.LookupByKey(entry);
                 if (template == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Creature template (Entry: {entry}) does not exist but has a record in `creature_template_scaling`");
+                    Log.outError(LogFilter.Sql, $"Creature template (Entry: {entry}) does not exist but has a record in `creature_template_difficulty`");
                     continue;
                 }
 
-                CreatureLevelScaling creatureLevelScaling = new();
-                creatureLevelScaling.DeltaLevelMin = result.Read<short>(2);
-                creatureLevelScaling.DeltaLevelMax = result.Read<short>(3);
-                creatureLevelScaling.ContentTuningID = result.Read<uint>(4);
+                CreatureDifficulty creatureDifficulty = new();
+                creatureDifficulty.DeltaLevelMin = result.Read<short>(2);
+                creatureDifficulty.DeltaLevelMax = result.Read<short>(3);
+                creatureDifficulty.ContentTuningID = result.Read<uint>(4);
+                creatureDifficulty.HealthScalingExpansion = result.Read<int>(5);
+                creatureDifficulty.HealthModifier = result.Read<float>(6);
+                creatureDifficulty.ManaModifier = result.Read<float>(7);
+                creatureDifficulty.ArmorModifier = result.Read<float>(8);
+                creatureDifficulty.DamageModifier = result.Read<float>(9);
+                creatureDifficulty.CreatureDifficultyID = result.Read<int>(10);
+                creatureDifficulty.TypeFlags = (CreatureTypeFlags)result.Read<uint>(11);
+                creatureDifficulty.TypeFlags2 = result.Read<uint>(12);
+                creatureDifficulty.LootID = result.Read<uint>(13);
+                creatureDifficulty.PickPocketLootID = result.Read<uint>(14);
+                creatureDifficulty.SkinLootID = result.Read<uint>(15);
+                creatureDifficulty.GoldMin = result.Read<uint>(16);
+                creatureDifficulty.GoldMax = result.Read<uint>(17);
 
-                template.scalingStorage[difficulty] = creatureLevelScaling;
+                // TODO: Check if this still applies
+                creatureDifficulty.DamageModifier *= Creature._GetDamageMod(template.Rank);
 
-                // Assign creature level scaling to creature difficulty entry (if any)
-                // TODO: Drop the use of creature difficulties
-                int difficultyIndex = CreatureTemplate.DifficultyIDToDifficultyEntryIndex((uint)difficulty);
-                if (difficultyIndex != -1)
+                if (creatureDifficulty.HealthScalingExpansion < (int)Expansion.LevelCurrent || creatureDifficulty.HealthScalingExpansion >= (int)Expansion.Max)
                 {
-                    uint difficultyEntry = template.DifficultyEntry[difficultyIndex];
-                    if (difficultyEntry != 0)
-                    {
-                        var difficultyTemplate = creatureTemplateStorage.LookupByKey(difficultyEntry);
-                        if (difficultyTemplate != null)
-                            difficultyTemplate.scalingStorage[difficulty] = creatureLevelScaling;
-                    }
+                    Log.outError(LogFilter.Sql, $"Table `creature_template_difficulty` lists creature (ID: {entry}) with invalid `HealthScalingExpansion` {creatureDifficulty.HealthScalingExpansion}. Ignored and set to 0.");
+                    creatureDifficulty.HealthScalingExpansion = 0;
                 }
+
+                if (creatureDifficulty.GoldMin > creatureDifficulty.GoldMax)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `creature_template_difficulty` lists creature (ID: {entry}) with `GoldMin` {creatureDifficulty.GoldMin} greater than `GoldMax` {creatureDifficulty.GoldMax}, setting `GoldMax` to {creatureDifficulty.GoldMin}.");
+                    creatureDifficulty.GoldMax = creatureDifficulty.GoldMin;
+                }
+
+                template.difficultyStorage[difficulty] = creatureDifficulty;
 
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template scaling data in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template difficulty data in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
         public void CheckCreatureTemplate(CreatureTemplate cInfo)
         {
             if (cInfo == null)
                 return;
-
-            bool ok = true;                                     // bool to allow continue outside this loop
-            for (uint diff = 0; diff < SharedConst.MaxCreatureDifficulties && ok; ++diff)
-            {
-                if (cInfo.DifficultyEntry[diff] == 0)
-                    continue;
-                ok = false;                                     // will be set to true at the end of this loop again
-
-                CreatureTemplate difficultyInfo = GetCreatureTemplate(cInfo.DifficultyEntry[diff]);
-                if (difficultyInfo == null)
-                {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has `difficulty_entry_{1}`={2} but creature entry {3} does not exist.",
-                        cInfo.Entry, diff + 1, cInfo.DifficultyEntry[diff], cInfo.DifficultyEntry[diff]);
-                    continue;
-                }
-
-                bool ok2 = true;
-                for (uint diff2 = 0; diff2 < SharedConst.MaxCreatureDifficulties && ok2; ++diff2)
-                {
-                    ok2 = false;
-                    if (difficultyEntries[diff2].Contains(cInfo.Entry))
-                    {
-                        Log.outError(LogFilter.Sql, "Creature (Entry: {0}) is listed as `difficulty_entry_{1}` of another creature, but itself lists {2} in `difficulty_entry_{3}`.",
-                            cInfo.Entry, diff2 + 1, cInfo.DifficultyEntry[diff], diff + 1);
-                        continue;
-                    }
-
-                    if (difficultyEntries[diff2].Contains(cInfo.DifficultyEntry[diff]))
-                    {
-                        Log.outError(LogFilter.Sql, "Creature (Entry: {0}) already listed as `difficulty_entry_{1}` for another entry.", cInfo.DifficultyEntry[diff], diff2 + 1);
-                        continue;
-                    }
-
-                    if (hasDifficultyEntries[diff2].Contains(cInfo.DifficultyEntry[diff]))
-                    {
-                        Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has `difficulty_entry_{1}`={2} but creature entry {3} has itself a value in `difficulty_entry_{4}`.",
-                            cInfo.Entry, diff + 1, cInfo.DifficultyEntry[diff], cInfo.DifficultyEntry[diff], diff2 + 1);
-                        continue;
-                    }
-                    ok2 = true;
-                }
-                if (!ok2)
-                    continue;
-
-                if (cInfo.HealthScalingExpansion > difficultyInfo.HealthScalingExpansion)
-                {
-                    Log.outError(LogFilter.Sql, "Creature (Id: {0}, Expansion {1}) has different `HealthScalingExpansion` in difficulty {2} mode (Id: {3}, Expansion: {4}).",
-                        cInfo.Entry, cInfo.HealthScalingExpansion, diff + 1, cInfo.DifficultyEntry[diff], difficultyInfo.HealthScalingExpansion);
-                }
-
-                if (cInfo.Faction != difficultyInfo.Faction)
-                {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}, faction: {1}) has different `faction` in difficulty {2} mode (Entry: {3}, faction: {4}).",
-                        cInfo.Entry, cInfo.Faction, diff + 1, cInfo.DifficultyEntry[diff], difficultyInfo.Faction);
-                }
-
-                if (cInfo.UnitClass != difficultyInfo.UnitClass)
-                {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}, class: {1}) has different `unit_class` in difficulty {2} mode (Entry: {3}, class: {4}).",
-                        cInfo.Entry, cInfo.UnitClass, diff + 1, cInfo.DifficultyEntry[diff], difficultyInfo.UnitClass);
-                    continue;
-                }
-
-                if (cInfo.Npcflag != difficultyInfo.Npcflag)
-                {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has different `npcflag` in difficulty {1} mode (Entry: {2}).", cInfo.Entry, diff + 1, cInfo.DifficultyEntry[diff]);
-                    Log.outError(LogFilter.Sql, "Possible FIX: UPDATE `creature_template` SET `npcflag`=`npcflag`^{0} WHERE `entry`={1};", cInfo.Npcflag ^ difficultyInfo.Npcflag, cInfo.DifficultyEntry[diff]);
-                    continue;
-                }
-
-                if (cInfo.DmgSchool != difficultyInfo.DmgSchool)
-                {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}, `dmgschool`: {1}) has different `dmgschool` in difficulty {2} mode (Entry: {3}, `dmgschool`: {4}).",
-                        cInfo.Entry, cInfo.DmgSchool, diff + 1, cInfo.DifficultyEntry[diff], difficultyInfo.DmgSchool);
-                    Log.outError(LogFilter.Sql, "Possible FIX: UPDATE `creature_template` SET `dmgschool`={0} WHERE `entry`={1};", cInfo.DmgSchool, cInfo.DifficultyEntry[diff]);
-                }
-
-                if (cInfo.UnitFlags2 != difficultyInfo.UnitFlags2)
-                {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}, `unit_flags2`: {1}) has different `unit_flags2` in difficulty {2} mode (Entry: {3}, `unit_flags2`: {4}).",
-                        cInfo.Entry, cInfo.UnitFlags2, diff + 1, cInfo.DifficultyEntry[diff], difficultyInfo.UnitFlags2);
-                    Log.outError(LogFilter.Sql, "Possible FIX: UPDATE `creature_template` SET `unit_flags2`=`unit_flags2`^{0} WHERE `entry`={1};", cInfo.UnitFlags2 ^ difficultyInfo.UnitFlags2, cInfo.DifficultyEntry[diff]);
-                }
-
-                if (cInfo.Family != difficultyInfo.Family)
-                {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}, family: {1}) has different `family` in difficulty {2} mode (Entry: {3}, family: {4}).",
-                        cInfo.Entry, cInfo.Family, diff + 1, cInfo.DifficultyEntry[diff], difficultyInfo.Family);
-                }
-
-                if (cInfo.TrainerClass != difficultyInfo.TrainerClass)
-                {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has different `trainer_class` in difficulty {1} mode (Entry: {2}).", cInfo.Entry, diff + 1, cInfo.DifficultyEntry[diff]);
-                    continue;
-                }
-
-                if (cInfo.CreatureType != difficultyInfo.CreatureType)
-                {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}, type: {1}) has different `type` in difficulty {2} mode (Entry: {3}, type: {4}).",
-                        cInfo.Entry, cInfo.CreatureType, diff + 1, cInfo.DifficultyEntry[diff], difficultyInfo.CreatureType);
-                }
-
-                if (cInfo.VehicleId == 0 && difficultyInfo.VehicleId != 0)
-                {
-                    Log.outError(LogFilter.Sql, "Non-vehicle Creature (Entry: {0}, VehicleId: {1}) has `VehicleId` set in difficulty {2} mode (Entry: {3}, VehicleId: {4}).",
-                        cInfo.Entry, cInfo.VehicleId, diff + 1, cInfo.DifficultyEntry[diff], difficultyInfo.VehicleId);
-                }
-
-                if (cInfo.RegenHealth != difficultyInfo.RegenHealth)
-                {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}, RegenHealth: {1}) has different `RegenHealth` in difficulty {2} mode (Entry: {3}, RegenHealth: {4}).",
-                        cInfo.Entry, cInfo.RegenHealth, diff + 1, cInfo.DifficultyEntry[diff], difficultyInfo.RegenHealth);
-                    Log.outError(LogFilter.Sql, "Possible FIX: UPDATE `creature_template` SET `RegenHealth`={0} WHERE `entry`={1};", cInfo.RegenHealth, cInfo.DifficultyEntry[diff]);
-                }
-
-                ulong differenceMask = cInfo.MechanicImmuneMask & (~difficultyInfo.MechanicImmuneMask);
-                if (differenceMask != 0)
-                {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}, mechanic_immune_mask: {1}) has weaker immunities in difficulty {2} mode (Entry: {3}, mechanic_immune_mask: {4}).",
-                        cInfo.Entry, cInfo.MechanicImmuneMask, diff + 1, cInfo.DifficultyEntry[diff], difficultyInfo.MechanicImmuneMask);
-                    Log.outError(LogFilter.Sql, "Possible FIX: UPDATE `creature_template` SET `mechanic_immune_mask`=`mechanic_immune_mask`|{0} WHERE `entry`={1};", differenceMask, cInfo.DifficultyEntry[diff]);
-                }
-
-                differenceMask = (uint)((cInfo.FlagsExtra ^ difficultyInfo.FlagsExtra) & (~CreatureFlagsExtra.InstanceBind));
-                if (differenceMask != 0)
-                {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}, flags_extra: {1}) has different `flags_extra` in difficulty {2} mode (Entry: {3}, flags_extra: {4}).",
-                        cInfo.Entry, cInfo.FlagsExtra, diff + 1, cInfo.DifficultyEntry[diff], difficultyInfo.FlagsExtra);
-                    Log.outError(LogFilter.Sql, "Possible FIX: UPDATE `creature_template` SET `flags_extra`=`flags_extra`^{0} WHERE `entry`={1};", differenceMask, cInfo.DifficultyEntry[diff]);
-                }
-
-                if (difficultyInfo.AIName.IsEmpty())
-                {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}) lists difficulty {1} mode entry {2} with `AIName` filled in. `AIName` of difficulty 0 mode creature is always used instead.",
-                        cInfo.Entry, diff + 1, cInfo.DifficultyEntry[diff]);
-                    continue;
-                }
-
-                if (difficultyInfo.ScriptID != 0)
-                {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}) lists difficulty {1} mode entry {2} with `ScriptName` filled in. `ScriptName` of difficulty 0 mode creature is always used instead.",
-                        cInfo.Entry, diff + 1, cInfo.DifficultyEntry[diff]);
-                    continue;
-                }
-
-                hasDifficultyEntries[diff].Add(cInfo.Entry);
-                difficultyEntries[diff].Add(cInfo.DifficultyEntry[diff]);
-                ok = true;
-            }
-
-            if (cInfo.MinGold > cInfo.MaxGold)
-            {
-                Log.outError(LogFilter.Sql, $"Creature (Entry: {cInfo.Entry}) has `mingold` {cInfo.MinGold} which is greater than `maxgold` {cInfo.MaxGold}, setting `maxgold` to {cInfo.MinGold}.");
-                cInfo.MaxGold = cInfo.MinGold;
-            }
 
             if (!CliDB.FactionTemplateStorage.ContainsKey(cInfo.Faction))
             {
@@ -3009,12 +2844,6 @@ namespace Game
                 cInfo.MovementType = (uint)MovementGeneratorType.Idle;
             }
 
-            if (cInfo.HealthScalingExpansion < (int)Expansion.LevelCurrent || cInfo.HealthScalingExpansion >= (int)Expansion.Max)
-            {
-                Log.outError(LogFilter.Sql, "Table `creature_template` lists creature (Id: {0}) with invalid `HealthScalingExpansion` {1}. Ignored and set to 0.", cInfo.Entry, cInfo.HealthScalingExpansion);
-                cInfo.HealthScalingExpansion = 0;
-            }
-
             if (cInfo.RequiredExpansion > (int)Expansion.Max)
             {
                 Log.outError(LogFilter.Sql, "Table `creature_template` lists creature (Entry: {0}) with `RequiredExpansion` {1}. Ignored and set to 0.", cInfo.Entry, cInfo.RequiredExpansion);
@@ -3054,8 +2883,6 @@ namespace Game
                 Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with `dynamicflags` > 0. Ignored and set to 0.");
                 cInfo.DynamicFlags = 0;
             }
-
-            cInfo.ModDamage *= Creature._GetDamageMod(cInfo.Rank);
 
             if (!cInfo.GossipMenuIds.Empty() && !cInfo.Npcflag.HasAnyFlag((uint)NPCFlags.Gossip))
                 Log.outInfo(LogFilter.Sql, $"Creature (Entry: {cInfo.Entry}) has assigned gossip menu, but npcflag does not include UNIT_NPC_FLAG_GOSSIP.");
@@ -3694,18 +3521,6 @@ namespace Game
                     continue;
                 }
 
-                bool ok = true;
-                for (uint diff = 0; diff < SharedConst.MaxCreatureDifficulties && ok; ++diff)
-                {
-                    if (difficultyEntries[diff].Contains(data.Id))
-                    {
-                        Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0}) that listed as difficulty {1} template (entry: {2}) in `creaturetemplate`, skipped.", guid, diff + 1, data.Id);
-                        ok = false;
-                    }
-                }
-                if (!ok)
-                    continue;
-
                 // -1 random, 0 no equipment,
                 if (data.equipmentId != 0)
                 {
@@ -3934,39 +3749,43 @@ namespace Game
             RemoveSpawnDataFromGrid(data);
         }
 
-        public List<uint> GetCreatureQuestItemList(uint id)
-        {
-            return creatureQuestItemStorage.LookupByKey(id);
-        }
         public CreatureAddon GetCreatureAddon(ulong lowguid)
         {
             return creatureAddonStorage.LookupByKey(lowguid);
         }
+
         public CreatureTemplate GetCreatureTemplate(uint entry)
         {
             return creatureTemplateStorage.LookupByKey(entry);
         }
+
         public CreatureAddon GetCreatureTemplateAddon(uint entry)
         {
             return creatureTemplateAddonStorage.LookupByKey(entry);
         }
+
         public uint GetCreatureDefaultTrainer(uint creatureId)
         {
             return GetCreatureTrainerForGossipOption(creatureId, 0, 0);
         }
+
         public uint GetCreatureTrainerForGossipOption(uint creatureId, uint gossipMenuId, uint gossipOptionIndex)
         {
             return _creatureDefaultTrainers.LookupByKey((creatureId, gossipMenuId, gossipOptionIndex));
         }
+
         public Dictionary<uint, CreatureTemplate> GetCreatureTemplates()
         {
             return creatureTemplateStorage;
         }
+
         public Dictionary<ulong, CreatureData> GetAllCreatureData() { return creatureDataStorage; }
+
         public CreatureData GetCreatureData(ulong spawnId)
         {
             return creatureDataStorage.LookupByKey(spawnId);
         }
+
         public ObjectGuid GetLinkedRespawnGuid(ObjectGuid spawnId)
         {
             var retGuid = linkedRespawnStorage.LookupByKey(spawnId);
@@ -3974,6 +3793,7 @@ namespace Game
                 return ObjectGuid.Empty;
             return retGuid;
         }
+
         public bool SetCreatureLinkedRespawn(ulong guidLow, ulong linkedGuidLow)
         {
             if (guidLow == 0)
@@ -4024,12 +3844,14 @@ namespace Game
             DB.World.Execute(stmt);
             return true;
         }
+
         public CreatureData NewOrExistCreatureData(ulong spawnId)
         {
             if (!creatureDataStorage.ContainsKey(spawnId))
                 creatureDataStorage[spawnId] = new CreatureData();
             return creatureDataStorage[spawnId];
         }
+
         public void DeleteCreatureData(ulong spawnId)
         {
             CreatureData data = GetCreatureData(spawnId);
@@ -4041,6 +3863,7 @@ namespace Game
 
             creatureDataStorage.Remove(spawnId);
         }
+
         public CreatureBaseStats GetCreatureBaseStats(uint level, uint unitClass)
         {
             var stats = creatureBaseStatsStorage.LookupByKey(MathFunctions.MakePair16(level, unitClass));
@@ -4049,6 +3872,7 @@ namespace Game
 
             return new DefaultCreatureBaseStats();
         }
+
         public CreatureModelInfo GetCreatureModelRandomGender(ref CreatureModel model, CreatureTemplate creatureTemplate)
         {
             CreatureModelInfo modelInfo = GetCreatureModelInfo(model.CreatureDisplayID);
@@ -4081,14 +3905,17 @@ namespace Game
 
             return modelInfo;
         }
+
         public CreatureModelInfo GetCreatureModelInfo(uint modelId)
         {
             return creatureModelStorage.LookupByKey(modelId);
         }
+
         public CreatureSummonedData GetCreatureSummonedData(uint entryId)
         {
             return creatureSummonedDataStorage.LookupByKey(entryId);
         }
+
         public NpcText GetNpcText(uint textId)
         {
             return npcTextStorage.LookupByKey(textId);
@@ -4289,6 +4116,7 @@ namespace Game
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} game object templates in {1} ms", _gameObjectTemplateStorage.Count, Time.GetMSTimeDiffToNow(time));
             }
         }
+
         public void LoadGameObjectTemplateAddons()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -4372,6 +4200,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} game object template addons in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
+
         public void LoadGameObjectOverrides()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -4409,6 +4238,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} gameobject faction and flags overrides in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
+
         public void LoadGameObjects()
         {
             var time = Time.GetMSTime();
@@ -4639,6 +4469,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} gameobjects in {1} ms", count, Time.GetMSTimeDiffToNow(time));
         }
+
         public void LoadGameObjectAddons()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -4710,6 +4541,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} gameobject addons in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
+
         public void LoadGameObjectQuestItems()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -4749,6 +4581,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} gameobject quest items in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
+
         public void LoadGameObjectForQuests()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -4814,10 +4647,12 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} GameObjects for quests in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
+
         public void AddGameObjectToGrid(GameObjectData data)
         {
             AddSpawnDataToGrid(data);
         }
+
         public void RemoveGameObjectFromGrid(GameObjectData data)
         {
             RemoveSpawnDataFromGrid(data);
@@ -4827,16 +4662,21 @@ namespace Game
         {
             return _gameObjectAddonStorage.LookupByKey(lowguid);
         }
+
         public List<uint> GetGameObjectQuestItemList(uint id)
         {
             return _gameObjectQuestItemStorage.LookupByKey(id);
         }
+
         MultiMap<uint, uint> GetGameObjectQuestItemMap() { return _gameObjectQuestItemStorage; }
+
         public Dictionary<ulong, GameObjectData> GetAllGameObjectData() { return gameObjectDataStorage; }
+
         public GameObjectData GetGameObjectData(ulong spawnId)
         {
             return gameObjectDataStorage.LookupByKey(spawnId);
         }
+
         public void DeleteGameObjectData(ulong spawnId)
         {
             GameObjectData data = GetGameObjectData(spawnId);
@@ -4848,6 +4688,7 @@ namespace Game
 
             gameObjectDataStorage.Remove(spawnId);
         }
+
         public GameObjectData NewOrExistGameObjectData(ulong spawnId)
         {
             if (!gameObjectDataStorage.ContainsKey(spawnId))
@@ -4855,26 +4696,32 @@ namespace Game
 
             return gameObjectDataStorage[spawnId];
         }
+
         public GameObjectTemplate GetGameObjectTemplate(uint entry)
         {
             return _gameObjectTemplateStorage.LookupByKey(entry);
         }
+
         public GameObjectTemplateAddon GetGameObjectTemplateAddon(uint entry)
         {
             return _gameObjectTemplateAddonStorage.LookupByKey(entry);
         }
+
         public GameObjectOverride GetGameObjectOverride(ulong spawnId)
         {
             return _gameObjectOverrideStorage.LookupByKey(spawnId);
         }
+
         public Dictionary<uint, GameObjectTemplate> GetGameObjectTemplates()
         {
             return _gameObjectTemplateStorage;
         }
+
         public bool IsGameObjectForQuests(uint entry)
         {
             return _gameObjectForQuestStorage.Contains(entry);
         }
+
         void CheckGOLockId(GameObjectTemplate goInfo, uint dataN, uint N)
         {
             if (CliDB.LockStorage.ContainsKey(dataN))
@@ -4882,6 +4729,7 @@ namespace Game
 
             Log.outError(LogFilter.Sql, "Gameobject (Entry: {0} GoType: {1}) have data{2}={3} but lock (Id: {4}) not found.", goInfo.entry, goInfo.type, N, goInfo.Door.open, goInfo.Door.open);
         }
+
         void CheckGOLinkedTrapId(GameObjectTemplate goInfo, uint dataN, uint N)
         {
             GameObjectTemplate trapInfo = GetGameObjectTemplate(dataN);
@@ -4891,6 +4739,7 @@ namespace Game
                     Log.outError(LogFilter.Sql, "Gameobject (Entry: {0} GoType: {1}) have data{2}={3} but GO (Entry {4}) have not GAMEOBJECT_TYPE_TRAP type.", goInfo.entry, goInfo.type, N, dataN, dataN);
             }
         }
+
         void CheckGOSpellId(GameObjectTemplate goInfo, uint dataN, uint N)
         {
             if (Global.SpellMgr.HasSpellInfo(dataN, Difficulty.None))
@@ -4898,6 +4747,7 @@ namespace Game
 
             Log.outError(LogFilter.Sql, "Gameobject (Entry: {0} GoType: {1}) have data{2}={3} but Spell (Entry {4}) not exist.", goInfo.entry, goInfo.type, N, dataN, dataN);
         }
+
         void CheckAndFixGOChairHeightId(GameObjectTemplate goInfo, ref uint dataN, uint N)
         {
             if (dataN <= (UnitStandStateType.SitHighChair - UnitStandStateType.SitLowChair))
@@ -4908,6 +4758,7 @@ namespace Game
             // prevent client and server unexpected work
             dataN = 0;
         }
+
         void CheckGONoDamageImmuneId(GameObjectTemplate goTemplate, uint dataN, uint N)
         {
             // 0/1 correct values
@@ -4916,6 +4767,7 @@ namespace Game
 
             Log.outError(LogFilter.Sql, "Gameobject (Entry: {0} GoType: {1}) have data{2}={3} but expected boolean (0/1) noDamageImmune field value.", goTemplate.entry, goTemplate.type, N, dataN);
         }
+
         void CheckGOConsumable(GameObjectTemplate goInfo, uint dataN, uint N)
         {
             // 0/1 correct values
@@ -5668,16 +5520,6 @@ namespace Game
                             continue;
                         }
                         creatureInfo.FlagsExtra |= CreatureFlagsExtra.DungeonBoss;
-                        for (byte diff = 0; diff < SharedConst.MaxCreatureDifficulties; ++diff)
-                        {
-                            uint diffEntry = creatureInfo.DifficultyEntry[diff];
-                            if (diffEntry != 0)
-                            {
-                                CreatureTemplate diffInfo = GetCreatureTemplate(diffEntry);
-                                if (diffInfo != null)
-                                    diffInfo.FlagsExtra |= CreatureFlagsExtra.DungeonBoss;
-                            }
-                        }
                         break;
                     }
                     case EncounterCreditType.CastSpell:
@@ -8087,6 +7929,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} quests definitions in {1} ms", _questTemplates.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
+
         public void LoadQuestStartersAndEnders()
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading GO Start Quest Data...");
@@ -8098,6 +7941,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Creature End Quest Data...");
             LoadCreatureQuestEnders();
         }
+
         public void LoadGameobjectQuestStarters()
         {
             LoadQuestRelationsHelper(_goQuestRelations, null, "gameobject_queststarter");
@@ -8111,6 +7955,7 @@ namespace Game
                     Log.outError(LogFilter.Sql, "Table `gameobject_queststarter` have data gameobject entry ({0}) for quest {1}, but GO is not GAMEOBJECT_TYPE_QUESTGIVER", pair.Key, pair.Value);
             }
         }
+
         public void LoadGameobjectQuestEnders()
         {
             LoadQuestRelationsHelper(_goQuestInvolvedRelations, _goQuestInvolvedRelationsReverse, "gameobject_questender");
@@ -8124,6 +7969,7 @@ namespace Game
                     Log.outError(LogFilter.Sql, "Table `gameobject_questender` have data gameobject entry ({0}) for quest {1}, but GO is not GAMEOBJECT_TYPE_QUESTGIVER", pair.Key, pair.Value);
             }
         }
+
         public void LoadCreatureQuestStarters()
         {
             LoadQuestRelationsHelper(_creatureQuestRelations, null, "creature_queststarter");
@@ -8137,6 +7983,7 @@ namespace Game
                     Log.outError(LogFilter.Sql, "Table `creature_queststarter` has creature entry ({0}) for quest {1}, but npcflag does not include UNIT_NPC_FLAG_QUESTGIVER", pair.Key, pair.Value);
             }
         }
+
         public void LoadCreatureQuestEnders()
         {
             LoadQuestRelationsHelper(_creatureQuestInvolvedRelations, _creatureQuestInvolvedRelationsReverse, "creature_questender");
@@ -8150,6 +7997,7 @@ namespace Game
                     Log.outError(LogFilter.Sql, "Table `creature_questender` has creature entry ({0}) for quest {1}, but npcflag does not include UNIT_NPC_FLAG_QUESTGIVER", pair.Key, pair.Value);
             }
         }
+
         void LoadQuestRelationsHelper(MultiMap<uint, uint> map, MultiMap<uint, uint> reverseMap, string table)
         {
             uint oldMSTime = Time.GetMSTime();
@@ -8186,6 +8034,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} quest relations from {1} in {2} ms", count, table, Time.GetMSTimeDiffToNow(oldMSTime));
         }
+
         public void LoadQuestPOI()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -8264,6 +8113,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} quest POI definitions in {1} ms", _questPOIStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
+
         public void LoadQuestAreaTriggers()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -8324,6 +8174,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} quest trigger points in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
+
         public void LoadQuestGreetings()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -8381,34 +8232,48 @@ namespace Game
         {
             return _questTemplates.LookupByKey(questId);
         }
+
         public Dictionary<uint, Quest> GetQuestTemplates()
         {
             return _questTemplates;
         }
+
         public List<Quest> GetQuestTemplatesAutoPush()
         {
             return _questTemplatesAutoPush;
         }
+
         public MultiMap<uint, uint> GetGOQuestRelationMapHACK() { return _goQuestRelations; }
+
         public QuestRelationResult GetGOQuestRelations(uint entry) { return GetQuestRelationsFrom(_goQuestRelations, entry, true); }
+
         public QuestRelationResult GetGOQuestInvolvedRelations(uint entry) { return GetQuestRelationsFrom(_goQuestInvolvedRelations, entry, false); }
+
         public List<uint> GetGOQuestInvolvedRelationReverseBounds(uint questId) { return _goQuestInvolvedRelationsReverse.LookupByKey(questId); }
+
         public MultiMap<uint, uint> GetCreatureQuestRelationMapHACK() { return _creatureQuestRelations; }
+
         public QuestRelationResult GetCreatureQuestRelations(uint entry) { return GetQuestRelationsFrom(_creatureQuestRelations, entry, true); }
+
         public QuestRelationResult GetCreatureQuestInvolvedRelations(uint entry) { return GetQuestRelationsFrom(_creatureQuestInvolvedRelations, entry, false); }
+
         public List<uint> GetCreatureQuestInvolvedRelationReverseBounds(uint questId) { return _creatureQuestInvolvedRelationsReverse.LookupByKey(questId); }
+
         public QuestPOIData GetQuestPOIData(uint questId)
         {
             return _questPOIStorage.LookupByKey(questId);
         }
+
         public QuestObjective GetQuestObjective(uint questObjectiveId)
         {
             return _questObjectives.LookupByKey(questObjectiveId);
         }
+
         public List<uint> GetQuestsForAreaTrigger(uint triggerId)
         {
             return _questAreaTriggerStorage.LookupByKey(triggerId);
         }
+
         public QuestGreeting GetQuestGreeting(TypeId type, uint id)
         {
             byte typeIndex;
@@ -8421,6 +8286,7 @@ namespace Game
 
             return _questGreetingStorage[typeIndex].LookupByKey(id);
         }
+
         public QuestGreetingLocale GetQuestGreetingLocale(TypeId type, uint id)
         {
             byte typeIndex;
@@ -8433,12 +8299,28 @@ namespace Game
 
             return _questGreetingLocaleStorage[typeIndex].LookupByKey(id);
         }
+
         public List<uint> GetExclusiveQuestGroupBounds(int exclusiveGroupId)
         {
             return _exclusiveQuestGroups.LookupByKey(exclusiveGroupId);
         }
+
         QuestRelationResult GetQuestRelationsFrom(MultiMap<uint, uint> map, uint key, bool onlyActive) { return new QuestRelationResult(map.LookupByKey(key), onlyActive); }
 
+        public List<uint> GetCreatureQuestItemList(uint creatureEntry, Difficulty difficulty)
+        {
+            var itr = creatureQuestItemStorage.LookupByKey((creatureEntry, difficulty));
+            if (itr != null)
+                return itr;
+
+            // If there is no data for the difficulty, try to get data for the fallback difficulty
+            var difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
+            if (difficultyEntry != null)
+                return GetCreatureQuestItemList(creatureEntry, (Difficulty)difficultyEntry.FallbackDifficultyID);
+
+            return null;
+        }
+        
         //Spells /Skills / Phases
         public void LoadPhases()
         {
@@ -11039,7 +10921,7 @@ namespace Game
         Dictionary<uint, CreatureSummonedData> creatureSummonedDataStorage = new();
         Dictionary<ulong, CreatureData> creatureDataStorage = new();
         Dictionary<ulong, CreatureAddon> creatureAddonStorage = new();
-        MultiMap<uint, uint> creatureQuestItemStorage = new();
+        MultiMap<(uint, Difficulty), uint> creatureQuestItemStorage = new();
         Dictionary<uint, CreatureAddon> creatureTemplateAddonStorage = new();
         MultiMap<uint, float> _creatureTemplateSparringStorage = new();
         Dictionary<ulong, CreatureMovementData> creatureMovementOverrides = new();
@@ -11049,8 +10931,6 @@ namespace Game
         Dictionary<uint, VendorItemData> cacheVendorItemStorage = new();
         Dictionary<uint, Trainer> trainers = new();
         Dictionary<(uint creatureId, uint gossipMenuId, uint gossipOptionIndex), uint> _creatureDefaultTrainers = new();
-        List<uint>[] difficultyEntries = new List<uint>[SharedConst.MaxCreatureDifficulties]; // already loaded difficulty 1 value in creatures, used in CheckCreatureTemplate
-        List<uint>[] hasDifficultyEntries = new List<uint>[SharedConst.MaxCreatureDifficulties]; // already loaded creatures with difficulty 1 values, used in CheckCreatureTemplate
         Dictionary<uint, NpcText> npcTextStorage = new();
 
         //GameObject

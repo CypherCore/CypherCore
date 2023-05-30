@@ -99,31 +99,16 @@ namespace Game
             CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate(packet.CreatureID);
             if (ci != null)
             {
-                if (!WorldConfig.GetBoolValue(WorldCfg.CacheDataQueries))
-                    ci.InitializeQueryData();
+                Difficulty difficulty = _player.GetMap().GetDifficultyID();
 
-                QueryCreatureResponse queryCreatureResponse = ci.QueryData;
-
-                Locale loc = GetSessionDbLocaleIndex();
-                if (loc != Locale.enUS)
+                // Cache only exists for difficulty base
+                if (!WorldConfig.GetBoolValue(WorldCfg.CacheDataQueries) && difficulty == Difficulty.None)
+                    SendPacket(ci.QueryData[(int)GetSessionDbLocaleIndex()]);
+                else
                 {
-                    CreatureLocale creatureLocale = Global.ObjectMgr.GetCreatureLocale(ci.Entry);
-                    if (creatureLocale != null)
-                    {
-                        string name = queryCreatureResponse.Stats.Name[0];
-                        string nameAlt = queryCreatureResponse.Stats.NameAlt[0];
-
-                        ObjectManager.GetLocaleString(creatureLocale.Name, loc, ref name);
-                        ObjectManager.GetLocaleString(creatureLocale.NameAlt, loc, ref nameAlt);
-                        ObjectManager.GetLocaleString(creatureLocale.Title, loc, ref queryCreatureResponse.Stats.Title);
-                        ObjectManager.GetLocaleString(creatureLocale.TitleAlt, loc, ref queryCreatureResponse.Stats.TitleAlt);
-
-                        queryCreatureResponse.Stats.Name[0] = name;
-                        queryCreatureResponse.Stats.NameAlt[0] = nameAlt;
-                    }
+                    var response = ci.BuildQueryData(GetSessionDbLocaleIndex(), difficulty);
+                    SendPacket(response);
                 }
-
-                SendPacket(queryCreatureResponse);
             }
             else
             {

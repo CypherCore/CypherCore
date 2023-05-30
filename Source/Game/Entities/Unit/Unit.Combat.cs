@@ -772,7 +772,7 @@ namespace Game.Entities
                         if (dungeonEncounter != null)
                         {
                             creature.m_personalLoot = LootManager.GenerateDungeonEncounterPersonalLoot(dungeonEncounter.Id, creature.GetLootId(),
-                                LootStorage.Creature, LootType.Corpse, creature, creature.GetCreatureTemplate().MinGold, creature.GetCreatureTemplate().MaxGold,
+                                LootStorage.Creature, LootType.Corpse, creature, creature.GetCreatureDifficulty().GoldMin, creature.GetCreatureDifficulty().GoldMax,
                                 (ushort)creature.GetLootMode(), creature.GetMap().GetDifficultyLootItemContext(), tappers);
                         }
                         else if (!tappers.Empty())
@@ -787,7 +787,7 @@ namespace Game.Entities
                                 loot.FillLoot(lootid, LootStorage.Creature, looter, dungeonEncounter != null, false, creature.GetLootMode(), creature.GetMap().GetDifficultyLootItemContext());
 
                             if (creature.GetLootMode() > 0)
-                                loot.GenerateMoneyLoot(creature.GetCreatureTemplate().MinGold, creature.GetCreatureTemplate().MaxGold);
+                                loot.GenerateMoneyLoot(creature.GetCreatureDifficulty().GoldMin, creature.GetCreatureDifficulty().GoldMax);
 
                             if (group)
                                 loot.NotifyLootList(creature.GetMap());
@@ -814,7 +814,7 @@ namespace Game.Entities
                                 loot.FillLoot(lootid, LootStorage.Creature, tapper, true, false, creature.GetLootMode(), creature.GetMap().GetDifficultyLootItemContext());
 
                             if (creature.GetLootMode() > 0)
-                                loot.GenerateMoneyLoot(creature.GetCreatureTemplate().MinGold, creature.GetCreatureTemplate().MaxGold);
+                                loot.GenerateMoneyLoot(creature.GetCreatureDifficulty().GoldMin, creature.GetCreatureDifficulty().GoldMax);
 
                             creature.m_personalLoot[tapper.GetGUID()] = loot;
                         }
@@ -918,7 +918,7 @@ namespace Game.Entities
                     else
                         creature.AllLootRemovedFromCorpse();
 
-                    if (creature.CanHaveLoot() && LootStorage.Skinning.HaveLootFor(creature.GetCreatureTemplate().SkinLootId))
+                    if (creature.CanHaveLoot() && LootStorage.Skinning.HaveLootFor(creature.GetCreatureDifficulty().SkinLootID))
                     {
                         creature.SetDynamicFlag(UnitDynFlags.CanSkin);
                         creature.SetUnitFlag(UnitFlags.Skinnable);

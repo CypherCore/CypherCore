@@ -606,11 +606,11 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Creature template addons...");
             Global.ObjectMgr.LoadCreatureTemplateAddons();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading Creature template difficulty...");
+            Global.ObjectMgr.LoadCreatureTemplateDifficulty();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading Creature template sparring...");
             Global.ObjectMgr.LoadCreatureTemplateSparring();
-
-            Log.outInfo(LogFilter.ServerLoading, "Loading Creature template scaling...");
-            Global.ObjectMgr.LoadCreatureScalingData();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Reputation Reward Rates...");
             Global.ObjectMgr.LoadReputationRewardRate();

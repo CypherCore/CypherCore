@@ -1402,7 +1402,7 @@ namespace Game.Spells
                     Creature creatureTarget = unitTarget.ToCreature();
                     if (creatureTarget)
                     {
-                        if (!creatureTarget.GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.CollideWithMissiles))
+                        if (!creatureTarget.GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.CollideWithMissiles))
                             continue;
                     }
                 }
@@ -5405,10 +5405,11 @@ namespace Game.Spells
                                 if (info.Item1.Type == PetType.Hunter)
                                 {
                                     CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(info.Item1.CreatureId);
-                                    if (creatureInfo == null || !creatureInfo.IsTameable(playerCaster.CanTameExoticPets()))
+                                    CreatureDifficulty creatureDifficulty = creatureInfo.GetDifficulty(Difficulty.None);
+                                    if (creatureInfo == null || !creatureInfo.IsTameable(playerCaster.CanTameExoticPets(), creatureDifficulty))
                                     {
                                         // if problem in exotic pet
-                                        if (creatureInfo != null && creatureInfo.IsTameable(true))
+                                        if (creatureInfo != null && creatureInfo.IsTameable(true, creatureDifficulty))
                                             playerCaster.SendTameFailure(PetTameResult.CantControlExotic);
                                         else
                                             playerCaster.SendTameFailure(PetTameResult.NoPetAvailable);

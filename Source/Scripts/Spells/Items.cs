@@ -7,7 +7,6 @@ using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Loots;
-using Game.Networking.Packets;
 using Game.Scripting;
 using Game.Spells;
 using System;
@@ -1322,11 +1321,12 @@ namespace Scripts.Spells.Items
             {
                 Player player = GetCaster().ToPlayer();
                 Creature creature = GetTarget().ToCreature();
+                CreatureDifficulty creatureDifficulty = creature.GetCreatureDifficulty();
                 // missing lootid has been reported on startup - just return
-                if (creature.GetCreatureTemplate().SkinLootId == 0)
+                if (creatureDifficulty.SkinLootID == 0)
                     return;
 
-                player.AutoStoreLoot(creature.GetCreatureTemplate().SkinLootId, LootStorage.Skinning, ItemContext.None, true);
+                player.AutoStoreLoot(creatureDifficulty.SkinLootID, LootStorage.Skinning, ItemContext.None, true);
                 creature.DespawnOrUnsummon();
             }
         }

@@ -12,6 +12,7 @@ namespace Game.Entities
     {
         CreatureTemplate m_creatureInfo;
         CreatureData m_creatureData;
+        CreatureDifficulty m_creatureDifficulty;
 
         string[] m_stringIds = new string[3];
         string m_scriptStringId;

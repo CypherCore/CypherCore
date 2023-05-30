@@ -211,53 +211,30 @@ namespace Game.Entities
 
         public bool InitEntry(uint entry, CreatureData data = null)
         {
-            CreatureTemplate normalInfo = Global.ObjectMgr.GetCreatureTemplate(entry);
-            if (normalInfo == null)
+            CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(entry);
+            if (creatureInfo == null)
             {
                 Log.outError(LogFilter.Sql, "Creature.InitEntry creature entry {0} does not exist.", entry);
                 return false;
             }
 
-            // get difficulty 1 mode entry
-            CreatureTemplate cInfo = null;
-            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(GetMap().GetDifficultyID());
-            while (cInfo == null && difficultyEntry != null)
-            {
-                int idx = CreatureTemplate.DifficultyIDToDifficultyEntryIndex(difficultyEntry.Id);
-                if (idx == -1)
-                    break;
-
-                if (normalInfo.DifficultyEntry[idx] != 0)
-                {
-                    cInfo = Global.ObjectMgr.GetCreatureTemplate(normalInfo.DifficultyEntry[idx]);
-                    break;
-                }
-
-                if (difficultyEntry.FallbackDifficultyID == 0)
-                    break;
-
-                difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficultyEntry.FallbackDifficultyID);
-            }
-
-            if (cInfo == null)
-                cInfo = normalInfo;
-
-            SetEntry(entry);                                        // normal entry always
-            m_creatureInfo = cInfo;                                 // map mode related always
+            m_creatureInfo = creatureInfo;
+            SetEntry(entry);
+            m_creatureDifficulty = creatureInfo.GetDifficulty(GetMap().GetDifficultyID());
 
             // equal to player Race field, but creature does not have race
             SetRace(0);
-            SetClass((Class)cInfo.UnitClass);
+            SetClass((Class)creatureInfo.UnitClass);
 
             // Cancel load if no model defined
-            if (cInfo.GetFirstValidModel() == null)
+            if (creatureInfo.GetFirstValidModel() == null)
             {
                 Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has no model defined in table `creature_template`, can't load. ", entry);
                 return false;
             }
 
-            CreatureModel model = ObjectManager.ChooseDisplayId(cInfo, data);
-            CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelRandomGender(ref model, cInfo);
+            CreatureModel model = ObjectManager.ChooseDisplayId(creatureInfo, data);
+            CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelRandomGender(ref model, creatureInfo);
             if (minfo == null)                                             // Cancel load if no model defined
             {
                 Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has invalid model {1} defined in table `creature_template`, can't load.", entry, model.CreatureDisplayID);
@@ -277,7 +254,7 @@ namespace Game.Entities
                 LoadEquipment(data.equipmentId);
             }
 
-            SetName(normalInfo.Name);                              // at normal entry always
+            SetName(creatureInfo.Name);                              // at normal entry always
 
             SetModCastingSpeed(1.0f);
             SetModSpellHaste(1.0f);
@@ -286,25 +263,25 @@ namespace Game.Entities
             SetModHasteRegen(1.0f);
             SetModTimeRate(1.0f);
 
-            SetSpeedRate(UnitMoveType.Walk, cInfo.SpeedWalk);
-            SetSpeedRate(UnitMoveType.Run, cInfo.SpeedRun);
+            SetSpeedRate(UnitMoveType.Walk, creatureInfo.SpeedWalk);
+            SetSpeedRate(UnitMoveType.Run, creatureInfo.SpeedRun);
             SetSpeedRate(UnitMoveType.Swim, 1.0f);      // using 1.0 rate
             SetSpeedRate(UnitMoveType.Flight, 1.0f);    // using 1.0 rate
 
             SetObjectScale(GetNativeObjectScale());
 
-            SetCanDualWield(cInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.UseOffhandAttack));
+            SetCanDualWield(creatureInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.UseOffhandAttack));
 
             // checked at loading
-            DefaultMovementType = (MovementGeneratorType)(data != null ? data.movementType : cInfo.MovementType);
+            DefaultMovementType = (MovementGeneratorType)(data != null ? data.movementType : creatureInfo.MovementType);
             if (m_wanderDistance == 0 && DefaultMovementType == MovementGeneratorType.Random)
                 DefaultMovementType = MovementGeneratorType.Idle;
 
             for (byte i = 0; i < SharedConst.MaxCreatureSpells; ++i)
                 m_spells[i] = GetCreatureTemplate().Spells[i];
 
-            _staticFlags.ApplyFlag(CreatureStaticFlags.NoXp, cInfo.CreatureType == CreatureType.Critter || IsPet() || IsTotem() || cInfo.FlagsExtra.HasFlag(CreatureFlagsExtra.NoXP));
-            _staticFlags.ApplyFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells, cInfo.TypeFlags.HasFlag(CreatureTypeFlags.TreatAsRaidUnit));
+            _staticFlags.ApplyFlag(CreatureStaticFlags.NoXp, creatureInfo.CreatureType == CreatureType.Critter || IsPet() || IsTotem() || creatureInfo.FlagsExtra.HasFlag(CreatureFlagsExtra.NoXP));
+            _staticFlags.ApplyFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells, GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.TreatAsRaidUnit));
 
             return true;
         }
@@ -808,6 +785,8 @@ namespace Game.Entities
                 return false;
             }
 
+            CreatureDifficulty creatureDifficulty = cinfo.GetDifficulty(GetMap().GetDifficultyID());
+
             //! Relocate before CreateFromProto, to initialize coords and allow
             //! returning correct zone id for selecting OutdoorPvP/Battlefield script
             Relocate(pos);
@@ -828,7 +807,7 @@ namespace Game.Entities
             }
 
             // Allow players to see those units while dead, do it here (mayby altered by addon auras)
-            if (cinfo.TypeFlags.HasAnyFlag(CreatureTypeFlags.VisibleToGhosts))
+            if (creatureDifficulty.TypeFlags.HasAnyFlag(CreatureTypeFlags.VisibleToGhosts))
                 m_serverSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive | GhostVisibilityType.Ghost);
 
             if (!CreateFromProto(guidlow, entry, data, vehId))
@@ -1050,7 +1029,7 @@ namespace Game.Entities
         {
             base.AtEngage(target);
 
-            if (!GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.AllowMountedCombat))
+            if (!GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.AllowMountedCombat))
                 Dismount();
 
             RefreshCanSwimFlag();
@@ -1199,7 +1178,7 @@ namespace Game.Entities
             if (_lootId.HasValue)
                 return _lootId.Value;
 
-            return GetCreatureTemplate().LootId;
+            return GetCreatureDifficulty().LootID;
         }
 
         public void SetLootId(uint? lootId)
@@ -1470,7 +1449,7 @@ namespace Game.Entities
             // mana
             PowerType powerType = CalculateDisplayPowerType();
             SetCreateMana(stats.BaseMana);
-            SetStatPctModifier(UnitMods.PowerStart + (int)powerType, UnitModifierPctType.Base, cInfo.ModMana * cInfo.ModManaExtra);
+            SetStatPctModifier(UnitMods.PowerStart + (int)powerType, UnitModifierPctType.Base, GetCreatureDifficulty().ManaModifier);
             SetPowerType(powerType);
 
             PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(powerType);
@@ -2208,7 +2187,7 @@ namespace Game.Entities
             if (IsPet())
                 return false;
 
-            return Convert.ToBoolean(GetCreatureTemplate().TypeFlags & CreatureTypeFlags.BossMob);
+            return GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.BossMob);
         }
 
         // select nearest hostile unit within the given distance (regardless of threat list).
@@ -2462,7 +2441,7 @@ namespace Game.Entities
             }
 
             // dependent from difficulty mode entry
-            return Global.ObjectMgr.GetCreatureTemplateAddon(GetCreatureTemplate().Entry);
+            return Global.ObjectMgr.GetCreatureTemplateAddon(GetEntry());
         }
 
         public bool LoadCreaturesAddon()
@@ -2716,29 +2695,29 @@ namespace Game.Entities
 
         public void ApplyLevelScaling()
         {
-            CreatureLevelScaling scaling = GetCreatureTemplate().GetLevelScaling(GetMap().GetDifficultyID());
-            var levels = Global.DB2Mgr.GetContentTuningData(scaling.ContentTuningID, 0);
+            CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
+            var levels = Global.DB2Mgr.GetContentTuningData(creatureDifficulty.ContentTuningID, 0);
             if (levels.HasValue)
             {
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMin), levels.Value.MinLevel);
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMax), levels.Value.MaxLevel);
             }
 
-            int mindelta = Math.Min(scaling.DeltaLevelMax, scaling.DeltaLevelMin);
-            int maxdelta = Math.Max(scaling.DeltaLevelMax, scaling.DeltaLevelMin);
+            int mindelta = Math.Min(creatureDifficulty.DeltaLevelMax, creatureDifficulty.DeltaLevelMin);
+            int maxdelta = Math.Max(creatureDifficulty.DeltaLevelMax, creatureDifficulty.DeltaLevelMin);
             int delta = mindelta == maxdelta ? mindelta : RandomHelper.IRand(mindelta, maxdelta);
 
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelDelta), delta);
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ContentTuningID), scaling.ContentTuningID);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ContentTuningID), creatureDifficulty.ContentTuningID);
         }
 
         ulong GetMaxHealthByLevel(uint level)
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
-            CreatureLevelScaling scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());
-            float baseHealth = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, level, cInfo.GetHealthScalingExpansion(), scaling.ContentTuningID, (Class)cInfo.UnitClass);
+            CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
+            float baseHealth = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, level, creatureDifficulty.GetHealthScalingExpansion(), creatureDifficulty.ContentTuningID, (Class)cInfo.UnitClass);
 
-            return (ulong)Math.Max(baseHealth * cInfo.ModHealth * cInfo.ModHealthExtra, 1.0f);
+            return (ulong)Math.Max(baseHealth * creatureDifficulty.HealthModifier, 1.0f);
         }
 
         public override float GetHealthMultiplierForTarget(WorldObject target)
@@ -2756,8 +2735,8 @@ namespace Game.Entities
         public float GetBaseDamageForLevel(uint level)
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
-            CreatureLevelScaling scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());
-            return Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureAutoAttackDps, level, cInfo.GetHealthScalingExpansion(), scaling.ContentTuningID, (Class)cInfo.UnitClass);
+            CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
+            return Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureAutoAttackDps, level, creatureDifficulty.GetHealthScalingExpansion(), creatureDifficulty.ContentTuningID, (Class)cInfo.UnitClass);
         }
 
         public override float GetDamageMultiplierForTarget(WorldObject target)
@@ -2773,9 +2752,9 @@ namespace Game.Entities
         float GetBaseArmorForLevel(uint level)
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
-            CreatureLevelScaling scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());
-            float baseArmor = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureArmor, level, cInfo.GetHealthScalingExpansion(), scaling.ContentTuningID, (Class)cInfo.UnitClass);
-            return baseArmor * cInfo.ModArmor;
+            CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
+            float baseArmor = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureArmor, level, creatureDifficulty.GetHealthScalingExpansion(), creatureDifficulty.ContentTuningID, (Class)cInfo.UnitClass);
+            return baseArmor * creatureDifficulty.ArmorModifier;
         }
 
         public override float GetArmorMultiplierForTarget(WorldObject target)
@@ -3317,7 +3296,8 @@ namespace Game.Entities
 
         public CreatureTemplate GetCreatureTemplate() { return m_creatureInfo; }
         public CreatureData GetCreatureData() { return m_creatureData; }
-
+        public CreatureDifficulty GetCreatureDifficulty() { return m_creatureDifficulty; }
+        
         public override bool LoadFromDB(ulong spawnId, Map map, bool addToMap, bool allowDuplicate)
         {
             if (!allowDuplicate)

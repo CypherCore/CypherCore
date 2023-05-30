@@ -454,7 +454,7 @@ namespace Scripts.Spells.Hunter
                     return SpellCastResult.Highlevel;
 
                 // use SMSG_PET_TAME_FAILURE?
-                if (!target.GetCreatureTemplate().IsTameable(caster.CanTameExoticPets()))
+                if (!target.GetCreatureTemplate().IsTameable(caster.CanTameExoticPets(), target.GetCreatureDifficulty()))
                     return SpellCastResult.BadTargets;
 
                 PetStable petStable = caster.GetPetStable();

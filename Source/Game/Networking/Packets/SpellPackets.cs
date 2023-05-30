@@ -1245,32 +1245,32 @@ namespace Game.Networking.Packets
         bool GenerateDataCreatureToPlayer(Creature attacker, Player target)
         {
             CreatureTemplate creatureTemplate = attacker.GetCreatureTemplate();
-            CreatureLevelScaling creatureScaling = creatureTemplate.GetLevelScaling(attacker.GetMap().GetDifficultyID());
+            CreatureDifficulty creatureDifficulty = creatureTemplate.GetDifficulty(attacker.GetMap().GetDifficultyID());
 
             TuningType = ContentTuningType.CreatureToPlayerDamage;
             PlayerLevelDelta = (short)target.m_activePlayerData.ScalingPlayerLevelDelta;
             PlayerItemLevel = (ushort)target.GetAverageItemLevel();
             ScalingHealthItemLevelCurveID = (ushort)target.m_unitData.ScalingHealthItemLevelCurveID;
             TargetLevel = (byte)target.GetLevel();
-            Expansion = (byte)creatureTemplate.HealthScalingExpansion;
+            Expansion = (byte)creatureDifficulty.HealthScalingExpansion;
             TargetScalingLevelDelta = (sbyte)attacker.m_unitData.ScalingLevelDelta;
-            TargetContentTuningID = creatureScaling.ContentTuningID;
+            TargetContentTuningID = creatureDifficulty.ContentTuningID;
             return true;
         }
 
         bool GenerateDataPlayerToCreature(Player attacker, Creature target)
         {
             CreatureTemplate creatureTemplate = target.GetCreatureTemplate();
-            CreatureLevelScaling creatureScaling = creatureTemplate.GetLevelScaling(target.GetMap().GetDifficultyID());
+            CreatureDifficulty creatureDifficulty = creatureTemplate.GetDifficulty(target.GetMap().GetDifficultyID());
 
             TuningType = ContentTuningType.PlayerToCreatureDamage;
             PlayerLevelDelta = (short)attacker.m_activePlayerData.ScalingPlayerLevelDelta;
             PlayerItemLevel = (ushort)attacker.GetAverageItemLevel();
             ScalingHealthItemLevelCurveID = (ushort)target.m_unitData.ScalingHealthItemLevelCurveID;
             TargetLevel = (byte)target.GetLevel();
-            Expansion = (byte)creatureTemplate.HealthScalingExpansion;
+            Expansion = (byte)creatureDifficulty.HealthScalingExpansion;
             TargetScalingLevelDelta = (sbyte)target.m_unitData.ScalingLevelDelta;
-            TargetContentTuningID = creatureScaling.ContentTuningID;
+            TargetContentTuningID = creatureDifficulty.ContentTuningID;
             return true;
         }
 
@@ -1278,15 +1278,15 @@ namespace Game.Networking.Packets
         {
             Creature accessor = target.HasScalableLevels() ? target : attacker;
             CreatureTemplate creatureTemplate = accessor.GetCreatureTemplate();
-            CreatureLevelScaling creatureScaling = creatureTemplate.GetLevelScaling(accessor.GetMap().GetDifficultyID());
+            CreatureDifficulty creatureDifficulty = creatureTemplate.GetDifficulty(accessor.GetMap().GetDifficultyID());
 
             TuningType = ContentTuningType.CreatureToCreatureDamage;
             PlayerLevelDelta = 0;
             PlayerItemLevel = 0;
             TargetLevel = (byte)target.GetLevel();
-            Expansion = (byte)creatureTemplate.HealthScalingExpansion;
+            Expansion = (byte)creatureDifficulty.HealthScalingExpansion;
             TargetScalingLevelDelta = (sbyte)accessor.m_unitData.ScalingLevelDelta;
-            TargetContentTuningID = creatureScaling.ContentTuningID;
+            TargetContentTuningID = creatureDifficulty.ContentTuningID;
             return true;
         }
 

@@ -1819,7 +1819,7 @@ namespace Game.Spells
                 creature.StartPickPocketRefillTimer();
 
                 creature._loot = new Loot(creature.GetMap(), creature.GetGUID(), LootType.Pickpocketing, null);
-                uint lootid = creature.GetCreatureTemplate().PickPocketId;
+                uint lootid = creature.GetCreatureDifficulty().PickPocketLootID;
                 if (lootid != 0)
                     creature._loot.FillLoot(lootid, LootStorage.Pickpocketing, player, true);
 
@@ -3442,13 +3442,13 @@ namespace Game.Spells
             Creature creature = unitTarget.ToCreature();
             int targetLevel = (int)creature.GetLevelForTarget(m_caster);
 
-            SkillType skill = creature.GetCreatureTemplate().GetRequiredLootSkill();
+            SkillType skill = creature.GetCreatureDifficulty().GetRequiredLootSkill();
 
             creature.SetUnitFlag3(UnitFlags3.AlreadySkinned);
             creature.SetDynamicFlag(UnitDynFlags.Lootable);
             Loot loot = new(creature.GetMap(), creature.GetGUID(), LootType.Skinning, null);
             creature.m_personalLoot[player.GetGUID()] = loot;
-            loot.FillLoot(creature.GetCreatureTemplate().SkinLootId, LootStorage.Skinning, player, true);
+            loot.FillLoot(creature.GetCreatureDifficulty().SkinLootID, LootStorage.Skinning, player, true);
             player.SendLoot(loot);
 
             if (!Global.SpellMgr.IsPartOfSkillLine(skill, m_spellInfo.Id))

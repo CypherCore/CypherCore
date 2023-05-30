@@ -2254,7 +2254,7 @@ namespace Game.Entities
             float basePct = GetPctModifierValue(unitMod, UnitModifierPctType.Base) * attackSpeedMulti;
             float totalValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
             float totalPct = addTotalPct ? GetPctModifierValue(unitMod, UnitModifierPctType.Total) : 1.0f;
-            float dmgMultiplier = GetCreatureTemplate().ModDamage; // = ModDamage * _GetDamageMod(rank);
+            float dmgMultiplier = GetCreatureDifficulty().DamageModifier; // = DamageModifier * _GetDamageMod(rank);
 
             minDamage = ((weaponMinDamage + baseValue) * dmgMultiplier * basePct + totalValue) * totalPct;
             maxDamage = ((weaponMaxDamage + baseValue) * dmgMultiplier * basePct + totalValue) * totalPct;

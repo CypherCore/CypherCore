@@ -162,7 +162,7 @@ namespace Game.Entities
             if (petInfo.Type == PetType.Hunter)
             {
                 CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(petInfo.CreatureId);
-                if (creatureInfo == null || !creatureInfo.IsTameable(owner.CanTameExoticPets()))
+                if (creatureInfo == null || !creatureInfo.IsTameable(owner.CanTameExoticPets(), GetCreatureDifficulty()))
                     return false;
             }
 

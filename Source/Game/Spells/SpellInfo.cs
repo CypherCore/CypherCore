@@ -1032,7 +1032,7 @@ namespace Game.Spells
                             if (targetCreature == null)
                                 return SpellCastResult.BadTargets;
 
-                            if (!targetCreature.CanHaveLoot() || !Loots.LootStorage.Pickpocketing.HaveLootFor(targetCreature.GetCreatureTemplate().PickPocketId))
+                            if (!targetCreature.CanHaveLoot() || !Loots.LootStorage.Pickpocketing.HaveLootFor(targetCreature.GetCreatureDifficulty().PickPocketLootID))
                                 return SpellCastResult.TargetNoPockets;
                         }
 
