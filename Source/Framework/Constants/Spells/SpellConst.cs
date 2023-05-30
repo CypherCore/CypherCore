@@ -2830,7 +2830,7 @@ namespace Framework.Constants
         Unk139 = 139,
         DestCasterClumpCentroid = 140, // NYI
         Unk141 = 141,
-        Unk142 = 142,
+        DestNearbyEntryOrDB = 142,
         Unk143 = 143,
         Unk144 = 144,
         Unk145 = 145,

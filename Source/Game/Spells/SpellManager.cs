@@ -1043,7 +1043,13 @@ namespace Game.Entities
                 else
                     st.target_Orientation = spellInfo.GetEffect(effIndex).PositionFacing;
 
-                if (spellInfo.GetEffect(effIndex).TargetA.GetTarget() == Targets.DestDb || spellInfo.GetEffect(effIndex).TargetB.GetTarget() == Targets.DestDb)
+                bool hasTarget(Targets target)
+                {
+                    SpellEffectInfo spellEffectInfo = spellInfo.GetEffect(effIndex);
+                    return spellEffectInfo.TargetA.GetTarget() == target || spellEffectInfo.TargetB.GetTarget() == target;
+                }
+
+                if (hasTarget(Targets.DestDb) || hasTarget(Targets.DestNearbyEntryOrDB))
                 {
                     var key = new KeyValuePair<uint, uint>(spellId, effIndex);
                     mSpellTargetPositions[key] = st;
