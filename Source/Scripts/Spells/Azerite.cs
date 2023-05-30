@@ -6,6 +6,7 @@ using Game.Entities;
 using Game.Networking.Packets;
 using Game.Scripting;
 using Game.Spells;
+using System;
 using System.Collections.Generic;
 
 namespace Scripts.Spells.Azerite
@@ -426,7 +427,7 @@ namespace Scripts.Spells.Azerite
         {
             AuraEffect trait = GetCaster().GetAuraEffect(SpellIds.EchoingBladesTrait, 2);
             if (trait != null)
-            SetHitDamage(trait.GetAmount() * 2);
+                SetHitDamage(trait.GetAmount() * 2);
         }
 
         void ForceCritical(Unit victim, ref float critChance)
@@ -484,7 +485,40 @@ namespace Scripts.Spells.Azerite
             DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.ProcTriggerSpell));
         }
     }
-    
+
+    [Script] // 305723 - Strife (Azerite Essence)
+    class spell_item_conflict_rank3 : AuraScript
+    {
+        bool CheckProc(ProcEventInfo eventInfo)
+        {
+            if (eventInfo.GetHitMask().HasAnyFlag(ProcFlagsHit.Interrupt | ProcFlagsHit.Dispel))
+                return true;
+
+            Spell procSpell = eventInfo.GetProcSpell();
+            if (!procSpell)
+                return false;
+
+            bool isCrowdControl = procSpell.GetSpellInfo().HasAura(AuraType.ModConfuse)
+                || procSpell.GetSpellInfo().HasAura(AuraType.ModFear)
+                || procSpell.GetSpellInfo().HasAura(AuraType.ModStun)
+                || procSpell.GetSpellInfo().HasAura(AuraType.ModPacify)
+                || procSpell.GetSpellInfo().HasAura(AuraType.ModRoot)
+                || procSpell.GetSpellInfo().HasAura(AuraType.ModSilence)
+                || procSpell.GetSpellInfo().HasAura(AuraType.ModPacifySilence)
+                || procSpell.GetSpellInfo().HasAura(AuraType.ModRoot2);
+
+            if (!isCrowdControl)
+                return false;
+
+            return eventInfo.GetActionTarget().HasAura(aura => aura.GetCastId() == procSpell.m_castId);
+        }
+
+        public override void Register()
+        {
+            DoCheckProc.Add(new CheckProcHandler(CheckProc));
+        }
+    }
+
     [Script] // 277253 - Heart of Azeroth
     class spell_item_heart_of_azeroth : AuraScript
     {
@@ -515,6 +549,27 @@ namespace Scripts.Spells.Azerite
         {
             OnEffectApply.Add(new EffectApplyHandler(SetEquippedFlag, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
             OnEffectRemove.Add(new EffectApplyHandler(ClearEquippedFlag, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script] // 315176 - Grasping Tendrils
+    class spell_item_corruption_grasping_tendrils : AuraScript
+    {
+        public override bool Load()
+        {
+            return GetUnitOwner().IsPlayer();
+        }
+
+        void CalcAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        {
+            Player player = GetUnitOwner().ToPlayer();
+            amount = (int)Math.Clamp(10.0f + player.GetRatingBonusValue(CombatRating.Corruption) - player.GetRatingBonusValue(CombatRating.CorruptionResistance), 0.0f, 99.0f);
+            canBeRecalculated = false;
+        }
+
+        public override void Register()
+        {
+            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcAmount, 0, AuraType.ModDecreaseSpeed));
         }
     }
 }

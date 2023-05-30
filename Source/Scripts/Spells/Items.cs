@@ -4237,4 +4237,74 @@ namespace Scripts.Spells.Items
             DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.ProcTriggerSpell));
         }
     }
+
+    // 303358 Venomous Bolt
+    // 303361 Shivering Lance
+    [Script("spell_item_shiver_venom_crossbow", 303559)]
+    [Script("spell_item_shiver_venom_lance", 303562)]
+    class spell_item_shiver_venom_weapon_proc : AuraScript
+    {
+        static uint SPELL_SHIVER_VENOM = 301624;
+
+        uint _additionalProcSpellId;
+
+        public spell_item_shiver_venom_weapon_proc(uint additionalProcSpellId)
+        {
+            _additionalProcSpellId = additionalProcSpellId;
+        }
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SPELL_SHIVER_VENOM, _additionalProcSpellId);
+        }
+
+        void HandleAdditionalProc(AuraEffect aurEff, ProcEventInfo procInfo)
+        {
+            if (procInfo.GetProcTarget().HasAura(SPELL_SHIVER_VENOM))
+                procInfo.GetActor().CastSpell(procInfo.GetProcTarget(), _additionalProcSpellId, new CastSpellExtraArgs(aurEff)
+                    .AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount())
+                    .SetTriggeringSpell(procInfo.GetProcSpell()));
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new EffectProcHandler(HandleAdditionalProc, 1, AuraType.Dummy));
+        }
+    }
+
+    [Script] // 302774 - Arcane Tempest
+    class spell_item_phial_of_the_arcane_tempest_damage : SpellScript
+    {
+        void ModifyStacks()
+        {
+            if (GetUnitTargetCountForEffect(0) != 1 || GetTriggeringSpell() == null)
+                return;
+
+            AuraEffect aurEff = GetCaster().GetAuraEffect(GetTriggeringSpell().Id, 0);
+            if (aurEff != null)
+            {
+                aurEff.GetBase().ModStackAmount(1, AuraRemoveMode.None, false);
+                aurEff.CalculatePeriodic(GetCaster(), false);
+            }
+        }
+
+        public override void Register()
+        {
+            AfterCast.Add(new CastHandler(ModifyStacks));
+        }
+    }
+
+    [Script] // 302769 - Arcane Tempest
+    class spell_item_phial_of_the_arcane_tempest_periodic : AuraScript
+    {
+        void CalculatePeriod(AuraEffect aurEff, ref bool isPeriodic, ref int period)
+        {
+            period -= (GetStackAmount() - 1) * 300;
+        }
+
+        public override void Register()
+        {
+            DoEffectCalcPeriodic.Add(new EffectCalcPeriodicHandler(CalculatePeriod, 0, AuraType.PeriodicTriggerSpell));
+        }
+    }
 }
