@@ -5780,7 +5780,7 @@ namespace Game.Spells
                     List<Creature> nearbyEntries = target.GetCreatureListWithEntryInGrid(summonEntry);
                     foreach (var creature in nearbyEntries)
                     {
-                        if (creature.GetOwner() == target)
+                        if (creature.GetOwnerGUID() == target.GetGUID())
                         {
                             creature.DespawnOrUnsummon();
                             break;
@@ -5790,7 +5790,7 @@ namespace Game.Spells
                             TempSummon tempSummon = creature.ToTempSummon();
                             if (tempSummon)
                             {
-                                if (tempSummon.GetSummoner() == target)
+                                if (tempSummon.GetSummonerGUID() == target.GetGUID())
                                 {
                                     tempSummon.DespawnOrUnsummon();
                                     break;
