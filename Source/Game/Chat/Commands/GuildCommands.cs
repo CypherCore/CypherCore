@@ -90,7 +90,7 @@ namespace Game.Chat
         }
 
         [Command("uninvite", RBACPermissions.CommandGuildUninvite, true)]
-        static bool HandleGuildUninviteCommand(CommandHandler handler, PlayerIdentifier targetIdentifier, QuotedString guildName)
+        static bool HandleGuildUninviteCommand(CommandHandler handler, PlayerIdentifier targetIdentifier)
         {
             if (targetIdentifier == null)
                 targetIdentifier = PlayerIdentifier.FromTargetOrSelf(handler);
