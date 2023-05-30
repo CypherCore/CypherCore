@@ -164,7 +164,7 @@ namespace Game.Entities
             }
         }
 
-        public virtual void InitStats(uint duration)
+        public virtual void InitStats(WorldObject summoner, uint duration)
         {
             Cypher.Assert(!IsPet());
 
@@ -174,13 +174,11 @@ namespace Game.Entities
             if (m_type == TempSummonType.ManualDespawn)
                 m_type = (duration == 0) ? TempSummonType.DeadDespawn : TempSummonType.TimedDespawn;
 
-            Unit owner = GetSummonerUnit();
-            if (owner != null && IsTrigger() && m_spells[0] != 0)
-                if (owner.IsTypeId(TypeId.Player))
-                    m_ControlledByPlayer = true;
-
-            if (owner != null && owner.IsPlayer())
+            if (summoner != null && summoner.IsPlayer())
             {
+                if (IsTrigger() && m_spells[0] != 0)
+                    m_ControlledByPlayer = true;
+            
                 CreatureSummonedData summonedData = Global.ObjectMgr.GetCreatureSummonedData(GetEntry());
                 if (summonedData != null)
                 {
@@ -196,27 +194,28 @@ namespace Game.Entities
             if (m_Properties == null)
                 return;
 
-            if (owner != null)
+            Unit unitSummoner = summoner?.ToUnit();
+            if (unitSummoner != null)
             {
                 int slot = m_Properties.Slot;
                 if (slot > 0)
                 {
-                    if (!owner.m_SummonSlot[slot].IsEmpty() && owner.m_SummonSlot[slot] != GetGUID())
+                    if (!unitSummoner.m_SummonSlot[slot].IsEmpty() && unitSummoner.m_SummonSlot[slot] != GetGUID())
                     {
-                        Creature oldSummon = GetMap().GetCreature(owner.m_SummonSlot[slot]);
+                        Creature oldSummon = GetMap().GetCreature(unitSummoner.m_SummonSlot[slot]);
                         if (oldSummon != null && oldSummon.IsSummon())
                             oldSummon.ToTempSummon().UnSummon();
                     }
-                    owner.m_SummonSlot[slot] = GetGUID();
+                    unitSummoner.m_SummonSlot[slot] = GetGUID();
                 }
 
                 if (!m_Properties.GetFlags().HasFlag(SummonPropertiesFlags.UseCreatureLevel))
-                    SetLevel(owner.GetLevel());
+                    SetLevel(unitSummoner.GetLevel());
             }
 
             uint faction = m_Properties.Faction;
-            if (owner && m_Properties.GetFlags().HasFlag(SummonPropertiesFlags.UseSummonerFaction)) // TODO: Determine priority between faction and flag
-                faction = owner.GetFaction();
+            if (summoner != null && m_Properties.GetFlags().HasFlag(SummonPropertiesFlags.UseSummonerFaction)) // TODO: Determine priority between faction and flag
+                faction = summoner.GetFaction();
 
             if (faction != 0)
                 SetFaction(faction);
@@ -225,18 +224,17 @@ namespace Game.Entities
                 RemoveNpcFlag(NPCFlags.WildBattlePet);
         }
 
-        public virtual void InitSummon()
+        public virtual void InitSummon(WorldObject summoner)
         {
-            WorldObject owner = GetSummoner();
-            if (owner != null)
+            if (summoner != null)
             {
-                if (owner.IsCreature())
-                    owner.ToCreature().GetAI()?.JustSummoned(this);
-                else if (owner.IsGameObject())
-                    owner.ToGameObject().GetAI()?.JustSummoned(this);
+                if (summoner.IsCreature())
+                    summoner.ToCreature().GetAI()?.JustSummoned(this);
+                else if (summoner.IsGameObject())
+                    summoner.ToGameObject().GetAI()?.JustSummoned(this);
 
                 if (IsAIEnabled())
-                    GetAI().IsSummonedBy(owner);
+                    GetAI().IsSummonedBy(summoner);
             }
         }
 
@@ -396,9 +394,9 @@ namespace Game.Entities
             InitCharmInfo();
         }
 
-        public override void InitStats(uint duration)
+        public override void InitStats(WorldObject summoner, uint duration)
         {
-            base.InitStats(duration);
+            base.InitStats(summoner, duration);
 
             SetReactState(ReactStates.Passive);
 
@@ -490,9 +488,9 @@ namespace Game.Entities
             }
         }
 
-        public override void InitStats(uint duration)
+        public override void InitStats(WorldObject summoner, uint duration)
         {
-            base.InitStats(duration);
+            base.InitStats(summoner, duration);
 
             InitStatsForLevel(GetOwner().GetLevel());
 
@@ -502,9 +500,9 @@ namespace Game.Entities
             SetReactState(ReactStates.Aggressive);
         }
 
-        public override void InitSummon()
+        public override void InitSummon(WorldObject summoner)
         {
-            base.InitSummon();
+            base.InitSummon(summoner);
 
             if (GetOwner().IsTypeId(TypeId.Player) && GetOwner().GetMinionGUID() == GetGUID()
                 && GetOwner().GetCharmedGUID().IsEmpty())
@@ -1086,17 +1084,17 @@ namespace Game.Entities
             UnitTypeMask |= UnitTypeMask.Puppet;
         }
 
-        public override void InitStats(uint duration)
+        public override void InitStats(WorldObject summoner, uint duration)
         {
-            base.InitStats(duration);
+            base.InitStats(summoner, duration);
 
             SetLevel(GetOwner().GetLevel());
             SetReactState(ReactStates.Passive);
         }
 
-        public override void InitSummon()
+        public override void InitSummon(WorldObject summoner)
         {
-            base.InitSummon();
+            base.InitSummon(summoner);
             if (!SetCharmedBy(GetOwner(), CharmType.Possess))
                 Cypher.Assert(false);
         }

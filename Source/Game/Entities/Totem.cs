@@ -37,7 +37,7 @@ namespace Game.Entities
 
         }
 
-        public override void InitStats(uint duration)
+        public override void InitStats(WorldObject summoner, uint duration)
         {
             // client requires SMSG_TOTEM_CREATED to be sent before adding to world and before removing old totem
             Player owner = GetOwner().ToPlayer();
@@ -61,7 +61,7 @@ namespace Game.Entities
                     Log.outDebug(LogFilter.Misc, $"Totem with entry {GetEntry()}, does not have a specialized model for spell {m_unitData.CreatedBySpell} and race {owner.GetRace()}. Set to default.");
             }
 
-            base.InitStats(duration);
+            base.InitStats(summoner, duration);
 
             // Get spell cast by totem
             SpellInfo totemSpell = Global.SpellMgr.GetSpellInfo(GetSpell(), GetMap().GetDifficultyID());
@@ -72,7 +72,7 @@ namespace Game.Entities
             m_duration = duration;
         }
 
-        public override void InitSummon()
+        public override void InitSummon(WorldObject summoner)
         {
             if (m_type == TotemType.Passive && GetSpell() != 0)
                 CastSpell(this, GetSpell(), true);

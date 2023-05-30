@@ -3679,7 +3679,7 @@ namespace Game.Maps
 
             summon.SetCreatedBySpell(spellId);
             summon.SetHomePosition(pos);
-            summon.InitStats(duration);
+            summon.InitStats(summoner, duration);
             summon.SetPrivateObjectOwner(privateObjectOwner);
 
             if (smoothPhasingInfo != null)
@@ -3710,7 +3710,7 @@ namespace Game.Maps
                 return null;
             }
 
-            summon.InitSummon();
+            summon.InitSummon(summoner);
 
             // call MoveInLineOfSight for nearby creatures
             AIRelocationNotifier notifier = new(summon);

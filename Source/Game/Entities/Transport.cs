@@ -532,14 +532,14 @@ namespace Game.Entities
             //         because the current GameObjectModel cannot be moved without recreating
             summon.AddUnitState(UnitState.IgnorePathfinding);
 
-            summon.InitStats(duration);
+            summon.InitStats(summoner, duration);
 
             if (!map.AddToMap(summon))
                 return null;
 
             _staticPassengers.Add(summon);
 
-            summon.InitSummon();
+            summon.InitSummon(summoner);
             summon.SetTempSummonType(summonType);
 
             return summon;
