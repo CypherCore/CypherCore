@@ -9241,6 +9241,12 @@ namespace Game.Spells
             Targets.SetDst(dest);
         }
 
+        public CastSpellTargetArg(SpellDestination dest)
+        {
+            Targets = new();
+            Targets.SetDst(dest);
+        }
+        
         public CastSpellTargetArg(SpellCastTargets targets)
         {
             Targets = new();
