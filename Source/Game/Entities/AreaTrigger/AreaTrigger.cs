@@ -256,6 +256,13 @@ namespace Game.Entities
 
             SetObjectScale(1.0f);
 
+            SetUpdateFieldValue(m_areaTriggerData.ModifyValue(m_areaTriggerData.BoundsRadius2D), GetMaxSearchRadius());
+            SetUpdateFieldValue(m_areaTriggerData.ModifyValue(m_areaTriggerData.DecalPropertiesID), 24u); // blue decal, for .debug areatrigger visibility
+
+            ScaleCurve extraScaleCurve = m_areaTriggerData.ModifyValue(m_areaTriggerData.ExtraScaleCurve);
+            SetUpdateFieldValue(extraScaleCurve.ModifyValue(extraScaleCurve.ParameterCurve), (uint)1.0000001f);
+            SetUpdateFieldValue(extraScaleCurve.ModifyValue(extraScaleCurve.OverrideActive), true);
+
             _shape = position.Shape;
             _maxSearchRadius = _shape.GetMaxSearchRadius();
 
@@ -978,6 +985,23 @@ namespace Game.Entities
             _ai = null;
         }
 
+        public override bool IsNeverVisibleFor(WorldObject seer, bool allowServersideObjects)
+        {
+            if (base.IsNeverVisibleFor(seer, allowServersideObjects))
+                return true;
+
+            if (IsServerSide() && !allowServersideObjects)
+            {
+                Player seerPlayer = seer.ToPlayer();
+                if (seerPlayer != null)
+                    return !seerPlayer.IsDebugAreaTriggers;
+
+                return true;
+            }
+
+            return false;
+        }
+        
         public override void BuildValuesCreate(WorldPacket data, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
@@ -1043,11 +1067,6 @@ namespace Game.Entities
         public T GetAI<T>() where T : AreaTriggerAI { return (T)_ai; }
 
         public bool IsServerSide() { return _areaTriggerTemplate.Id.IsServerSide; }
-
-        public override bool IsNeverVisibleFor(WorldObject seer, bool allowServersideObjects = false)
-        {
-            return base.IsNeverVisibleFor(seer) || (IsServerSide() && !allowServersideObjects);
-        }
 
         [System.Diagnostics.Conditional("DEBUG")]
         void DebugVisualizePosition()

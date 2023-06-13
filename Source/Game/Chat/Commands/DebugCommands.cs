@@ -46,6 +46,7 @@ namespace Game.Chat
                 handler.SendSysMessage(CypherStrings.DebugAreatriggerOff);
                 player.IsDebugAreaTriggers = false;
             }
+            player.UpdateObjectVisibility();
             return true;
         }
 
