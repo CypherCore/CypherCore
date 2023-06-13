@@ -11358,7 +11358,7 @@ namespace Game
     public class GraveyardData
     {
         public uint SafeLocId;
-        public List<Condition> Conditions;
+        public List<Condition> Conditions = new();
     }
 
     public class QuestPOIBlobData
