@@ -153,6 +153,8 @@ namespace Game
                 // Clear whisper whitelist
                 _player.ClearWhisperWhiteList();
 
+                _player.FailQuestsWithFlag(QuestFlags.FailOnLogout);
+
                 // empty buyback items and save the player in the database
                 // some save parts only correctly work in case player present in map/player_lists (pets, etc)
                 if (save)

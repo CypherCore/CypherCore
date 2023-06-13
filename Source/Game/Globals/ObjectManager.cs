@@ -1214,15 +1214,12 @@ namespace Game
                             continue;
                         }
 
-                        if (!quest.HasSpecialFlag(QuestSpecialFlags.ExplorationOrEvent))
+                        if (!quest.HasFlag(QuestFlags.CompletionEvent) && !quest.HasFlag(QuestFlags.CompletionAreaTrigger))
                         {
-                            Log.outError(LogFilter.Sql, "Table `{0}` has quest (ID: {1}) in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {2}, but quest not have flag QUEST_SPECIAL_FLAGS_EXPLORATION_OR_EVENT in quest flags. Script command or quest flags wrong. Quest modified to require objective.",
+                            Log.outError(LogFilter.Sql, "Table `{0}` has quest (ID: {1}) in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {2}, but quest not have QUEST_FLAGS_COMPLETION_EVENT or QUEST_FLAGS_COMPLETION_AREA_TRIGGER in quest flags. Script command will do nothing.",
                                 tableName, tmp.QuestExplored.QuestID, tmp.id);
 
-                            // this will prevent quest completing without objective
-                            quest.SetSpecialFlag(QuestSpecialFlags.ExplorationOrEvent);
-
-                            // continue; - quest objective requirement set and command can be allowed
+                            continue;
                         }
 
                         if (tmp.QuestExplored.Distance > SharedConst.DefaultVisibilityDistance)
@@ -7249,7 +7246,7 @@ namespace Game
 
                 // additional quest integrity checks (GO, creaturetemplate and itemtemplate must be loaded already)
 
-                if (qinfo.Type >= QuestType.Max)
+                if (qinfo.Type >= QuestType.MaxDBAllowedQuestTypes)
                     Log.outError(LogFilter.Sql, "Quest {0} has `Method` = {1}, expected values are 0, 1 or 2.", qinfo.Id, qinfo.Type);
 
                 if (Convert.ToBoolean(qinfo.SpecialFlags & ~QuestSpecialFlags.DbAllowed))
@@ -7292,7 +7289,7 @@ namespace Game
                     }
                 }
 
-                if (Convert.ToBoolean(qinfo.Flags & QuestFlags.Tracking))
+                if (Convert.ToBoolean(qinfo.Flags & QuestFlags.TrackingEvent))
                 {
                     // at auto-reward can be rewarded only RewardChoiceItemId[0]
                     for (int j = 1; j < qinfo.RewardChoiceItemId.Length; ++j)
@@ -7878,35 +7875,7 @@ namespace Game
                 }
             }
 
-            // check QUEST_SPECIAL_FLAGS_EXPLORATION_OR_EVENT for spell with SPELL_EFFECT_QUEST_COMPLETE
-            foreach (SpellNameRecord spellNameEntry in CliDB.SpellNameStorage.Values)
-            {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellNameEntry.Id, Difficulty.None);
-                if (spellInfo == null)
-                    continue;
-
-                foreach (var spellEffectInfo in spellInfo.GetEffects())
-                {
-                    if (spellEffectInfo.Effect != SpellEffectName.QuestComplete)
-                        continue;
-
-                    uint questId = (uint)spellEffectInfo.MiscValue;
-                    Quest quest = GetQuestTemplate(questId);
-
-                    // some quest referenced in spells not exist (outdated spells)
-                    if (quest == null)
-                        continue;
-
-                    if (!quest.HasSpecialFlag(QuestSpecialFlags.ExplorationOrEvent))
-                    {
-                        Log.outError(LogFilter.Sql, "Spell (id: {0}) have SPELL_EFFECT_QUEST_COMPLETE for quest {1}, but quest not have flag QUEST_SPECIAL_FLAGS_EXPLORATION_OR_EVENT. " +
-                            "Quest flags must be fixed, quest modified to enable objective.", spellInfo.Id, questId);
-
-                        // this will prevent quest completing without objective
-                        quest.SetSpecialFlag(QuestSpecialFlags.ExplorationOrEvent);
-                    }
-                }
-            }
+            // don't check spells with SPELL_EFFECT_QUEST_COMPLETE, a lot of invalid db2 data
 
             // Make all paragon reward quests repeatable
             foreach (ParagonReputationRecord paragonReputation in CliDB.ParagonReputationStorage.Values)
@@ -8122,35 +8091,30 @@ namespace Game
             {
                 ++count;
 
-                uint trigger_ID = result.Read<uint>(0);
-                uint quest_ID = result.Read<uint>(1);
+                uint triggerId = result.Read<uint>(0);
+                uint questId = result.Read<uint>(1);
 
-                AreaTriggerRecord atEntry = CliDB.AreaTriggerStorage.LookupByKey(trigger_ID);
+                AreaTriggerRecord atEntry = CliDB.AreaTriggerStorage.LookupByKey(triggerId);
                 if (atEntry == null)
                 {
-                    Log.outError(LogFilter.Sql, "Area trigger (ID:{0}) does not exist in `AreaTrigger.dbc`.", trigger_ID);
+                    Log.outError(LogFilter.Sql, "Area trigger (ID:{0}) does not exist in `AreaTrigger.dbc`.", triggerId);
                     continue;
                 }
 
-                Quest quest = GetQuestTemplate(quest_ID);
-
+                Quest quest = GetQuestTemplate(questId);
                 if (quest == null)
                 {
-                    Log.outError(LogFilter.Sql, "Table `areatrigger_involvedrelation` has record (id: {0}) for not existing quest {1}", trigger_ID, quest_ID);
+                    Log.outError(LogFilter.Sql, "Table `areatrigger_involvedrelation` has record (id: {0}) for not existing quest {1}", triggerId, questId);
                     continue;
                 }
 
-                if (!quest.HasSpecialFlag(QuestSpecialFlags.ExplorationOrEvent))
+                if (!quest.HasFlag(QuestFlags.CompletionAreaTrigger) && !quest.HasQuestObjectiveType(QuestObjectiveType.AreaTrigger))
                 {
-                    Log.outError(LogFilter.Sql, "Table `areatrigger_involvedrelation` has record (id: {0}) for not quest {1}, but quest not have flag QUEST_SPECIAL_FLAGS_EXPLORATION_OR_EVENT. Trigger or quest flags must be fixed, quest modified to require objective.", trigger_ID, quest_ID);
-
-                    // this will prevent quest completing without objective
-                    quest.SetSpecialFlag(QuestSpecialFlags.ExplorationOrEvent);
-
-                    // continue; - quest modified to required objective and trigger can be allowed.
+                    Log.outError(LogFilter.Sql, $"Table `areatrigger_involvedrelation` has record (id: {triggerId}) for not quest {questId}, but quest not have flag QUEST_FLAGS_COMPLETION_AREA_TRIGGER and no objective with type QUEST_OBJECTIVE_AREATRIGGER. Trigger is obsolete, skipped.");
+                    continue;
                 }
 
-                _questAreaTriggerStorage.Add(trigger_ID, quest_ID);
+                _questAreaTriggerStorage.Add(triggerId, questId);
 
             } while (result.NextRow());
 

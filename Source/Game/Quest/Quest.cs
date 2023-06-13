@@ -462,7 +462,7 @@ namespace Game
         {
             return (uint)(MaxMoneyValue() * WorldConfig.GetFloatValue(WorldCfg.RateMoneyQuest));
         }
-        
+
         public QuestTagType? GetQuestTag()
         {
             QuestInfoRecord questInfo = CliDB.QuestInfoStorage.LookupByKey(QuestInfoID);
@@ -471,7 +471,7 @@ namespace Game
 
             return null;
         }
-        
+
         public void BuildQuestRewards(QuestRewards rewards, Player player)
         {
             rewards.ChoiceItemCount = GetRewChoiceItemsCount();
@@ -494,7 +494,7 @@ namespace Game
                 if (++displaySpellIndex >= rewards.SpellCompletionDisplayID.Length)
                     break;
             }
-            
+
             rewards.SpellCompletionID = RewardSpell;
             rewards.SkillLineID = RewardSkillId;
             rewards.NumSkillUps = RewardSkillPoints;
@@ -532,7 +532,7 @@ namespace Game
         public uint GetRewMoneyMaxLevel()
         {
             // If Quest has flag to not give money on max level, it's 0
-            if (HasFlag(QuestFlags.NoMoneyFromXp))
+            if (HasFlag(QuestFlags.NoMoneyForXp))
                 return 0;
 
             // Else, return the rewarded copper sum modified by the rate
@@ -544,9 +544,9 @@ namespace Game
             return !WorldConfig.GetBoolValue(WorldCfg.QuestIgnoreAutoAccept) && HasFlag(QuestFlags.AutoAccept);
         }
 
-        public bool IsAutoComplete()
+        public bool IsTurnIn()
         {
-            return !WorldConfig.GetBoolValue(WorldCfg.QuestIgnoreAutoComplete) && Type == QuestType.AutoComplete;
+            return !WorldConfig.GetBoolValue(WorldCfg.QuestIgnoreAutoComplete) && Type == QuestType.TurnIn;
         }
 
         public bool IsRaidQuest(Difficulty difficulty)
@@ -563,7 +563,7 @@ namespace Game
                     break;
             }
 
-            if (Flags.HasAnyFlag(QuestFlags.Raid))
+            if (Flags.HasAnyFlag(QuestFlags.RaidGroupOk))
                 return true;
 
             return false;
@@ -655,7 +655,7 @@ namespace Game
             response.Info.RewardXPDifficulty = RewardXPDifficulty;
             response.Info.RewardXPMultiplier = RewardXPMultiplier;
 
-            if (!HasFlag(QuestFlags.HiddenRewards))
+            if (!HasFlag(QuestFlags.HideReward))
                 response.Info.RewardMoney = (int)(player != null ? player.GetQuestMoneyReward(this) : GetMaxMoneyReward());
 
             response.Info.RewardMoneyDifficulty = RewardMoneyDifficulty;
@@ -699,7 +699,7 @@ namespace Game
                 response.Info.ItemDropQuantity[i] = (int)ItemDropQuantity[i];
             }
 
-            if (!HasFlag(QuestFlags.HiddenRewards))
+            if (!HasFlag(QuestFlags.HideReward))
             {
                 for (byte i = 0; i < SharedConst.QuestRewardItemCount; ++i)
                 {
@@ -780,12 +780,12 @@ namespace Game
         public void SetSpecialFlag(QuestSpecialFlags flag) { SpecialFlags |= flag; }
 
         public bool HasQuestObjectiveType(QuestObjectiveType type) { return _usedQuestObjectiveTypes[(int)type]; }
-        
-        public bool IsAutoPush() { return HasFlagEx(QuestFlagsEx.AutoPush);    }
-        public bool IsWorldQuest() { return HasFlagEx(QuestFlagsEx.IsWorldQuest);}
+
+        public bool IsAutoPush() { return HasFlagEx(QuestFlagsEx.AutoPush); }
+        public bool IsWorldQuest() { return HasFlagEx(QuestFlagsEx.IsWorldQuest); }
 
         // Possibly deprecated flag
-        public bool IsUnavailable() { return HasFlag(QuestFlags.Unavailable); }
+        public bool IsUnavailable() { return HasFlag(QuestFlags.Deprecated); }
 
         // table data accessors:
         public bool IsRepeatable() { return SpecialFlags.HasAnyFlag(QuestSpecialFlags.Repeatable); }
@@ -800,7 +800,8 @@ namespace Game
         }
         public bool IsDailyOrWeekly() { return Flags.HasAnyFlag(QuestFlags.Daily | QuestFlags.Weekly); }
         public bool IsDFQuest() { return SpecialFlags.HasAnyFlag(QuestSpecialFlags.DfQuest); }
-
+        public bool IsPushedToPartyOnAccept() { return HasSpecialFlag(QuestSpecialFlags.AutoPushToParty); }
+        
         public uint GetRewChoiceItemsCount() { return _rewChoiceItemsCount; }
         public uint GetRewItemsCount() { return _rewItemsCount; }
         public uint GetRewCurrencyCount() { return _rewCurrencyCount; }

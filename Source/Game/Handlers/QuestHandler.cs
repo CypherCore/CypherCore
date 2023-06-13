@@ -148,7 +148,7 @@ namespace Game
                 {
                     _player.AddQuestAndCheckCompletion(quest, obj);
 
-                    if (quest.HasFlag(QuestFlags.PartyAccept))
+                    if (quest.IsPushedToPartyOnAccept())
                     {
                         var group = _player.GetGroup();
                         if (group)
@@ -174,6 +174,26 @@ namespace Game
                     }
 
                     _player.PlayerTalkClass.SendCloseGossip();
+
+                    if (quest.HasFlag(QuestFlags.LaunchGossipAccept))
+                    {
+                        void launchGossip(WorldObject worldObject)
+                        {
+                            _player.PlayerTalkClass.ClearMenus();
+                            _player.PrepareGossipMenu(worldObject, _player.GetGossipMenuForSource(worldObject), true);
+                            _player.SendPreparedGossip(worldObject);
+                        }
+
+                        Creature creature = obj.ToCreature();
+                        if (creature != null)
+                            launchGossip(creature);
+                        else
+                        {
+                            GameObject go = obj.ToGameObject();
+                            if (go != null)
+                                launchGossip(go);
+                        }
+                    }
 
                     return;
                 }
@@ -202,7 +222,7 @@ namespace Game
                 if (quest.IsAutoAccept() && GetPlayer().CanAddQuest(quest, true))
                     GetPlayer().AddQuestAndCheckCompletion(quest, obj);
 
-                if (quest.IsAutoComplete())
+                if (quest.IsTurnIn())
                     GetPlayer().PlayerTalkClass.SendQuestGiverRequestItems(quest, obj.GetGUID(), GetPlayer().CanCompleteQuest(quest.Id), true);
                 else
                     GetPlayer().PlayerTalkClass.SendQuestGiverQuestDetails(quest, obj.GetGUID(), true, false);
@@ -331,7 +351,7 @@ namespace Game
             }
 
             if ((!GetPlayer().CanSeeStartQuest(quest) && GetPlayer().GetQuestStatus(packet.QuestID) == QuestStatus.None) ||
-                (GetPlayer().GetQuestStatus(packet.QuestID) != QuestStatus.Complete && !quest.IsAutoComplete()))
+                (GetPlayer().GetQuestStatus(packet.QuestID) != QuestStatus.Complete && !quest.IsTurnIn()))
             {
                 Log.outError(LogFilter.Network, "Error in QuestStatus.Complete: player {0} ({1}) tried to complete quest {2}, but is not allowed to do so (possible packet-hacking or high latency)",
                     GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), packet.QuestID);
@@ -422,35 +442,34 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.QuestConfirmAccept)]
         void HandleQuestConfirmAccept(QuestConfirmAccept packet)
         {
+            if (_player.GetSharedQuestID() != packet.QuestID)
+                return;
+
+            _player.ClearQuestSharingInfo();
             Quest quest = Global.ObjectMgr.GetQuestTemplate(packet.QuestID);
-            if (quest != null)
-            {
-                if (!quest.HasFlag(QuestFlags.PartyAccept))
-                    return;
+            if (quest == null)
+                return;
 
-                Player originalPlayer = Global.ObjAccessor.FindPlayer(GetPlayer().GetPlayerSharingQuest());
-                if (originalPlayer == null)
-                    return;
+            Player originalPlayer = Global.ObjAccessor.FindPlayer(GetPlayer().GetPlayerSharingQuest());
+            if (originalPlayer == null)
+                return;
 
-                if (!GetPlayer().IsInSameRaidWith(originalPlayer))
-                    return;
+            if (!_player.IsInSameRaidWith(originalPlayer))
+                return;
 
-                if (!originalPlayer.IsActiveQuest(packet.QuestID))
-                    return;
+            if (!originalPlayer.IsActiveQuest(packet.QuestID))
+                return;
 
-                if (!GetPlayer().CanTakeQuest(quest, true))
-                    return;
+            if (!_player.CanTakeQuest(quest, true))
+                return;
 
-                if (GetPlayer().CanAddQuest(quest, true))
-                {
-                    GetPlayer().AddQuestAndCheckCompletion(quest, null);                // NULL, this prevent DB script from duplicate running
+            if (!_player.CanAddQuest(quest, true))
+                return;
 
-                    if (quest.SourceSpellID > 0)
-                        _player.CastSpell(_player, quest.SourceSpellID, true);
-                }
-            }
+            _player.AddQuestAndCheckCompletion(quest, null);                // NULL, this prevent DB script from duplicate running
 
-            GetPlayer().ClearQuestSharingInfo();
+            if (quest.SourceSpellID > 0)
+                _player.CastSpell(_player, quest.SourceSpellID, true);
         }
 
         [WorldPacketHandler(ClientOpcodes.QuestGiverCompleteQuest, Processing = PacketProcessing.Inplace)]
@@ -462,9 +481,6 @@ namespace Game
             if (quest == null)
                 return;
 
-            if (autoCompleteMode && !quest.HasFlag(QuestFlags.AutoComplete))
-                return;
-
             WorldObject obj;
             if (autoCompleteMode)
                 obj = GetPlayer();
@@ -474,7 +490,7 @@ namespace Game
             if (!obj)
                 return;
 
-            if (!autoCompleteMode)
+            if (!quest.HasFlag(QuestFlags.AutoComplete))
             {
                 if (!obj.HasInvolvedQuest(packet.QuestID))
                     return;
@@ -666,7 +682,7 @@ namespace Game
 
                 sender.SendPushToPartyResponse(receiver, QuestPushReason.Success);
 
-                if ((quest.IsAutoComplete() && quest.IsRepeatable() && !quest.IsDailyOrWeekly()) || quest.HasFlag(QuestFlags.AutoComplete))
+                if (quest.IsTurnIn() && quest.IsRepeatable() && !quest.IsDailyOrWeekly())
                     receiver.PlayerTalkClass.SendQuestGiverRequestItems(quest, sender.GetGUID(), receiver.CanCompleteRepeatableQuest(quest), true);
                 else
                 {

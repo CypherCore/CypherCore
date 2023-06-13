@@ -650,6 +650,8 @@ namespace Game.Entities
 
                 InitializeSelfResurrectionSpells();
 
+                FailQuestsWithFlag(QuestFlags.CompletionNoDeath);
+
                 UpdateCriteria(CriteriaType.DieOnMap, 1);
                 UpdateCriteria(CriteriaType.DieAnywhere, 1);
                 UpdateCriteria(CriteriaType.DieInInstance, 1);

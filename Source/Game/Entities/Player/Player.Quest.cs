@@ -310,9 +310,9 @@ namespace Game.Entities
                 if (!CanTakeQuest(quest, false))
                     continue;
 
-                if (quest.IsAutoComplete() && (!quest.IsRepeatable() || quest.IsDaily() || quest.IsWeekly() || quest.IsMonthly()))
+                if (quest.IsTurnIn() && (!quest.IsRepeatable() || quest.IsDaily() || quest.IsWeekly() || quest.IsMonthly()))
                     qm.AddMenuItem(questId, 0);
-                else if (quest.IsAutoComplete())
+                else if (quest.IsTurnIn())
                     qm.AddMenuItem(questId, 4);
                 else if (GetQuestStatus(questId) == QuestStatus.None)
                     qm.AddMenuItem(questId, 2);
@@ -347,9 +347,9 @@ namespace Game.Entities
                         if (quest.IsAutoAccept() && CanAddQuest(quest, true) && CanTakeQuest(quest, true))
                             AddQuestAndCheckCompletion(quest, source);
 
-                        if (quest.IsAutoComplete() && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly())
+                        if (quest.IsTurnIn() && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly())
                             PlayerTalkClass.SendQuestGiverRequestItems(quest, source.GetGUID(), CanCompleteRepeatableQuest(quest), true);
-                        else if (quest.IsAutoComplete() && !quest.IsDailyOrWeekly() && !quest.IsMonthly())
+                        else if (quest.IsTurnIn() && !quest.IsDailyOrWeekly() && !quest.IsMonthly())
                             PlayerTalkClass.SendQuestGiverRequestItems(quest, source.GetGUID(), CanRewardQuest(quest, false), true);
                         else
                             PlayerTalkClass.SendQuestGiverQuestDetails(quest, source.GetGUID(), true, false);
@@ -376,7 +376,9 @@ namespace Game.Entities
 
             if (questGiver == this)
             {
-                Cypher.Assert(quest.HasFlag(QuestFlags.AutoComplete));
+                if (!quest.HasFlag(QuestFlags.AutoComplete))
+                    return null;
+
                 return Global.ObjectMgr.GetQuestTemplate(nextQuestID);
             }
 
@@ -453,7 +455,7 @@ namespace Game.Entities
                     return false;                                   // not allow re-complete quest
 
                 // auto complete quest
-                if (qInfo.IsAutoComplete() && CanTakeQuest(qInfo, false))
+                if (qInfo.IsTurnIn() && CanTakeQuest(qInfo, false))
                     return true;
 
                 var q_status = m_QuestStatus.LookupByKey(questId);
@@ -474,7 +476,7 @@ namespace Game.Entities
                         }
                     }
 
-                    if (qInfo.HasSpecialFlag(QuestSpecialFlags.ExplorationOrEvent) && !q_status.Explored)
+                    if ((qInfo.HasFlag(QuestFlags.CompletionEvent) || qInfo.HasFlag(QuestFlags.CompletionAreaTrigger)) && !q_status.Explored)
                         return false;
 
                     if (qInfo.LimitTime != 0 && q_status.Timer == 0)
@@ -512,7 +514,7 @@ namespace Game.Entities
                 return false;
 
             // not auto complete quest and not completed quest (only cheating case, then ignore without message)
-            if (!quest.IsDFQuest() && !quest.IsAutoComplete() && GetQuestStatus(quest.Id) != QuestStatus.Complete)
+            if (!quest.IsDFQuest() && !quest.IsTurnIn() && GetQuestStatus(quest.Id) != QuestStatus.Complete)
                 return false;
 
             // daily quest can't be rewarded (25 daily quest already completed)
@@ -784,7 +786,7 @@ namespace Game.Entities
             {
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.SourceSpellID, GetMap().GetDifficultyID());
                 Unit caster = this;
-                if (questGiver != null && questGiver.IsTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastOnAccept) && !spellInfo.HasTargetType(Targets.UnitCaster) && !spellInfo.HasTargetType(Targets.DestCasterSummon))
+                if (questGiver != null && questGiver.IsTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastAccept) && !spellInfo.HasTargetType(Targets.UnitCaster) && !spellInfo.HasTargetType(Targets.DestCasterSummon))
                 {
                     Unit unit = questGiver.ToUnit();
                     if (unit != null)
@@ -819,7 +821,7 @@ namespace Game.Entities
 
                 Quest qInfo = Global.ObjectMgr.GetQuestTemplate(quest_id);
                 if (qInfo != null)
-                    if (qInfo.HasFlag(QuestFlags.Tracking))
+                    if (qInfo.HasFlag(QuestFlags.TrackingEvent))
                         RewardQuest(qInfo, LootItemType.Item, 0, this, false);
             }
         }
@@ -943,8 +945,13 @@ namespace Game.Entities
                 switch (obj.Type)
                 {
                     case QuestObjectiveType.Item:
-                        DestroyItemCount((uint)obj.ObjectID, (uint)obj.Amount, true);
+                    {
+                        int amountToDestroy = obj.Amount;
+                        if (quest.HasFlag(QuestFlags.RemoveSurplusItems))
+                            amountToDestroy = int.MaxValue;
+                        DestroyItemCount((uint)obj.ObjectID, (uint)amountToDestroy, true);
                         break;
+                    }
                     case QuestObjectiveType.Currency:
                         RemoveCurrency((uint)obj.ObjectID, obj.Amount, CurrencyDestroyReason.QuestTurnin);
                         break;
@@ -958,7 +965,9 @@ namespace Game.Entities
                     if (quest.ItemDrop[i] != 0)
                     {
                         uint count = quest.ItemDropQuantity[i];
-                        DestroyItemCount(quest.ItemDrop[i], count != 0 ? count : 9999, true);
+                        if (count == 0)
+                            count = uint.MaxValue;
+                        DestroyItemCount(quest.ItemDrop[i], count, true);
                     }
                 }
             }
@@ -1117,7 +1126,7 @@ namespace Game.Entities
             {
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardSpell, GetMap().GetDifficultyID());
                 Unit caster = this;
-                if (questGiver != null && questGiver.IsTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastOnComplete) && !spellInfo.HasTargetType(Targets.UnitCaster))
+                if (questGiver != null && questGiver.IsTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastComplete) && !spellInfo.HasTargetType(Targets.UnitCaster))
                 {
                     Unit unit = questGiver.ToUnit();
                     if (unit != null)
@@ -1137,7 +1146,7 @@ namespace Game.Entities
 
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(displaySpell.SpellId, GetMap().GetDifficultyID());
                     Unit caster = this;
-                    if (questGiver && questGiver.IsTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastOnComplete) && !spellInfo.HasTargetType(Targets.UnitCaster))
+                    if (questGiver && questGiver.IsTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastComplete) && !spellInfo.HasTargetType(Targets.UnitCaster))
                     {
                         Unit unit = questGiver.ToUnit();
                         if (unit)
@@ -1170,69 +1179,69 @@ namespace Game.Entities
 
             SendQuestGiverStatusMultiple();
 
-            bool conditionChanged = SendQuestUpdate(questId, false);
+            SendQuestUpdate(questId);
+
+            bool updateVisibility = false;
+            if (quest.HasFlag(QuestFlags.UpdatePhaseshift))
+                updateVisibility = PhasingHandler.OnConditionChange(this, false);
 
             //lets remove flag for delayed teleports
             SetCanDelayTeleport(false);
 
-            bool canHaveNextQuest = !quest.HasFlag(QuestFlags.AutoComplete) ? questGiver != null && !questGiver.IsPlayer() : true;
-            if (canHaveNextQuest)
+            switch (questGiver.GetTypeId())
             {
-                switch (questGiver.GetTypeId())
+                case TypeId.Unit:
+                case TypeId.Player:
                 {
-                    case TypeId.Unit:
-                    case TypeId.Player:
+                    //For AutoSubmition was added plr case there as it almost same exclute AI script cases.
+                    // Send next quest
+                    Quest nextQuest = GetNextQuest(questGiver, quest);
+                    if (nextQuest != null)
                     {
-                        //For AutoSubmition was added plr case there as it almost same exclute AI script cases.
-                        // Send next quest
-                        Quest nextQuest = GetNextQuest(questGiver, quest);
-                        if (nextQuest != null)
+                        // Only send the quest to the player if the conditions are met
+                        if (CanTakeQuest(nextQuest, false))
                         {
-                            // Only send the quest to the player if the conditions are met
-                            if (CanTakeQuest(nextQuest, false))
-                            {
-                                if (nextQuest.IsAutoAccept() && CanAddQuest(nextQuest, true))
-                                    AddQuestAndCheckCompletion(nextQuest, questGiver);
+                            if (nextQuest.IsAutoAccept() && CanAddQuest(nextQuest, true))
+                                AddQuestAndCheckCompletion(nextQuest, questGiver);
 
-                                PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, questGiver.GetGUID(), true, false);
-                            }
+                            PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, questGiver.GetGUID(), true, false);
                         }
-
-                        PlayerTalkClass.ClearMenus();
-                        Creature creatureQGiver = questGiver.ToCreature();
-                        if (creatureQGiver != null)
-                            creatureQGiver.GetAI().OnQuestReward(this, quest, rewardType, rewardId);
-                        break;
                     }
-                    case TypeId.GameObject:
-                    {
-                        // Send next quest
-                        Quest nextQuest = GetNextQuest(questGiver, quest);
-                        if (nextQuest != null)
-                        {
-                            // Only send the quest to the player if the conditions are met
-                            if (CanTakeQuest(nextQuest, false))
-                            {
-                                if (nextQuest.IsAutoAccept() && CanAddQuest(nextQuest, true))
-                                    AddQuestAndCheckCompletion(nextQuest, questGiver);
 
-                                PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, questGiver.GetGUID(), true, false);
-                            }
-                        }
-
-                        PlayerTalkClass.ClearMenus();
-                        questGiver.ToGameObject()?.GetAI()?.OnQuestReward(this, quest, rewardType, rewardId);
-                        break;
-                    }
-                    default:
-                        break;
+                    PlayerTalkClass.ClearMenus();
+                    Creature creatureQGiver = questGiver.ToCreature();
+                    if (creatureQGiver != null)
+                        creatureQGiver.GetAI().OnQuestReward(this, quest, rewardType, rewardId);
+                    break;
                 }
-            }
+                case TypeId.GameObject:
+                {
+                    // Send next quest
+                    Quest nextQuest = GetNextQuest(questGiver, quest);
+                    if (nextQuest != null)
+                    {
+                        // Only send the quest to the player if the conditions are met
+                        if (CanTakeQuest(nextQuest, false))
+                        {
+                            if (nextQuest.IsAutoAccept() && CanAddQuest(nextQuest, true))
+                                AddQuestAndCheckCompletion(nextQuest, questGiver);
+
+                            PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, questGiver.GetGUID(), true, false);
+                        }
+                    }
+
+                    PlayerTalkClass.ClearMenus();
+                    questGiver.ToGameObject()?.GetAI()?.OnQuestReward(this, quest, rewardType, rewardId);
+                    break;
+                }
+                default:
+                    break;
+            }            
 
             Global.ScriptMgr.OnQuestStatusChange(this, questId);
             Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, QuestStatus.Rewarded);
 
-            if (conditionChanged)
+            if (updateVisibility)
                 UpdateObjectVisibility();
         }
 
@@ -1299,6 +1308,21 @@ namespace Game.Entities
             }
         }
 
+        public void FailQuestsWithFlag(QuestFlags flag)
+        {
+            for (ushort slot = 0; slot < SharedConst.MaxQuestLogSize; ++slot)
+            {
+                uint questId = GetQuestSlotQuestId(slot);
+                if (questId == 0)
+                    continue;
+
+                Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
+                if (quest != null)
+                    if (quest.HasFlag(flag))
+                        FailQuest(questId);
+            }
+        }
+        
         public void AbandonQuest(uint questId)
         {
             Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
@@ -1865,7 +1889,7 @@ namespace Game.Entities
 
                 QuestStatus oldStatus = m_QuestStatus[questId].Status;
                 m_QuestStatus[questId].Status = status;
-                if (!quest.IsAutoComplete())
+                if (!quest.IsTurnIn())
                     m_QuestStatusSave[questId] = QuestSaveType.Default;
 
                 Global.ScriptMgr.OnQuestStatusChange(this, questId);
@@ -1922,7 +1946,7 @@ namespace Game.Entities
                 SendQuestUpdate(questId);
         }
 
-        bool SendQuestUpdate(uint questId, bool updateVisiblity = true)
+        void SendQuestUpdate(uint questId)
         {
             var saBounds = Global.SpellMgr.GetSpellAreaForQuestMapBounds(questId);
             if (!saBounds.Empty())
@@ -1970,7 +1994,6 @@ namespace Game.Entities
             }
 
             UpdateVisibleGameobjectsOrSpellClicks();
-            return PhasingHandler.OnConditionChange(this, updateVisiblity);
         }
 
         public QuestGiverStatus GetQuestDialogStatus(WorldObject questgiver)
@@ -2042,7 +2065,7 @@ namespace Game.Entities
                         break;
                 }
 
-                if (quest.IsAutoComplete() && CanTakeQuest(quest, false) && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly())
+                if (quest.IsTurnIn() && CanTakeQuest(quest, false) && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly())
                 {
                     if (GetLevel() <= (GetQuestLevel(quest) + WorldConfig.GetIntValue(WorldCfg.QuestLowLevelHideDiff)))
                         result |= QuestGiverStatus.RepeatableTurnin;

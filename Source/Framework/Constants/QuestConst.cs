@@ -74,11 +74,15 @@ namespace Framework.Constants
 
     public enum QuestType
     {
-        AutoComplete= 0,
-        Disabled = 1,
+        TurnIn= 0,
+        WithMaxLevel = 1,
         Normal = 2,
         Task = 3,
-        Max = 4
+        MaxDBAllowedQuestTypes = 4,
+
+        // values used in quest menu packets
+        InProgress = 4,
+        TaskInProgress = 5
     }
 
     public enum QuestInfos
@@ -428,37 +432,37 @@ namespace Framework.Constants
     public enum QuestFlags : uint
     {
         None = 0x00,
-        StayAlive = 0x01,               // Not Used Currently
-        PartyAccept = 0x02,             // Not Used Currently. If Player In Party, All Players That Can Accept This Quest Will Receive Confirmation Box To Accept Quest Cmsg_Quest_Confirm_Accept/Smsg_Quest_Confirm_Accept
-        Exploration = 0x04,             // Not Used Currently
+        CompletionNoDeath = 0x01,
+        CompletionEvent = 0x02,
+        CompletionAreaTrigger = 0x04,
         Sharable = 0x08,                // Can Be Shared: Player.Cansharequest()
         HasCondition = 0x10,            // Not Used Currently
-        HideRewardPoi = 0x20,           // Not Used Currently: Unsure Of Content
-        Raid = 0x40,                    // Can be completed while in raid
+        HideRewardPoi = 0x20,   // Hides questgiver turn-in minimap icon
+        RaidGroupOk = 0x40,   // Can be completed while in raid
         WarModeRewardsOptIn = 0x80,     // Not Used Currently
-        NoMoneyFromXp = 0x100,          // Not Used Currently: Experience Is Not Converted To Gold At Max Level
-        HiddenRewards = 0x200,          // Items And Money Rewarded Only Sent In Smsg_Questgiver_Offer_Reward (Not In Smsg_Questgiver_Quest_Details Or In Client Quest Log(Smsg_Quest_Query_Response))
-        Tracking = 0x400,               // These Quests Are Automatically Rewarded On Quest Complete And They Will Never Appear In Quest Log Client Side.
+        NoMoneyForXp = 0x100,   // Experience is not converted to gold at max level
+        HideReward = 0x200,   // Items and money rewarded only sent in SMSG_QUESTGIVER_OFFER_REWARD (not in SMSG_QUEST_GIVER_QUEST_DETAILS or in client quest log(SMSG_QUEST_QUERY_RESPONSE))
+        TrackingEvent = 0x400,   // These quests are automatically rewarded on quest complete and they will never appear in quest log client side.
         DeprecateReputation = 0x800,    // Not Used Currently
         Daily = 0x1000,                 // Used To Know Quest Is Daily One
         Pvp = 0x2000,                   // Having This Quest In Log Forces Pvp Flag
-        Unavailable = 0x4000,           // Used On Quests That Are Not Generically Available
+        Deprecated = 0x4000,   // Used on quests that are not generally available
         Weekly = 0x8000,
         AutoComplete = 0x10000,         // Quests with this flag player submit automatically by special button in player gui
         DisplayItemInTracker = 0x20000, // Displays Usable Item In Quest Tracker
-        ObjText = 0x40000,              // Use Objective Text As Complete Text
+        DisableCompletionText = 0x40000,              // Use Objective Text As Complete Text
         AutoAccept = 0x80000,           // The client recognizes this flag as auto-accept.
-        PlayerCastOnAccept = 0x100000,
-        PlayerCastOnComplete = 0x200000,
-        UpdatePhaseShift = 0x400000,
+        PlayerCastAccept = 0x100000,
+        PlayerCastComplete = 0x200000,
+        UpdatePhaseshift = 0x400000,
         SorWhitelist = 0x800000,
         LaunchGossipComplete = 0x1000000,
-        RemoveExtraGetItems = 0x2000000,
-        HideUntilDiscovered = 0x4000000,
+        RemoveSurplusItems = 0x2000000,   // Remove all items from inventory that have the same id as the objective, not just the amount required by quest
+        WellKnown = 0x04000000,
         PortraitInQuestLog = 0x8000000,
         ShowItemWhenCompleted = 0x10000000,
         LaunchGossipAccept = 0x20000000,
-        ItemsGlowWhenDone = 0x40000000,
+        ItemsGlowWhenComplete = 0x40000000,
         FailOnLogout = 0x80000000
     }
 
@@ -524,14 +528,14 @@ namespace Framework.Constants
     {
         None = 0x00,
         // Flags For Set Specialflags In Db If Required But Used Only At Server
-        Repeatable = 0x001,
-        ExplorationOrEvent = 0x002, // If Required Area Explore, Spell Spell_Effect_Quest_Complete Casting, Table `*_Script` Command Script_Command_Quest_Explored Use, Set From Script)
-        AutoAccept = 0x004, // Quest Is To Be Auto-Accepted.
-        DfQuest = 0x008, // Quest Is Used By Dungeon Finder.
-        Monthly = 0x010, // Quest Is Reset At The Begining Of The Month
+        Repeatable = 0x001, // Set by 1 in SpecialFlags from DB
+        AutoPushToParty = 0x002, // Set by 2 in SpecialFlags from DB will make quest be pushed to entire party when one member accepts it
+        AutoAccept = 0x004, // Set by 4 in SpecialFlags in DB if the quest is to be auto-accepted.
+        DfQuest = 0x008, // Set by 8 in SpecialFlags in DB if the quest is used by Dungeon Finder.
+        Monthly = 0x010, // Set by 16 in SpecialFlags in DB if the quest is reset at the begining of the month
         // Room For More Custom Flags
 
-        DbAllowed = Repeatable | ExplorationOrEvent | AutoAccept | DfQuest | Monthly,
+        DbAllowed = Repeatable | AutoAccept | DfQuest | Monthly,
 
         SequencedObjectives = 0x20 // Internal flag computed only
     }

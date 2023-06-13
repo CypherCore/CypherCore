@@ -1461,9 +1461,9 @@ namespace Game.AI
                     Quest qid = Global.ObjectMgr.GetQuestTemplate(e.Action.quest.questId);
                     if (qid != null)
                     {
-                        if (!qid.HasSpecialFlag(QuestSpecialFlags.ExplorationOrEvent))
+                        if (!qid.HasFlag(QuestFlags.CompletionEvent) && !qid.HasFlag(QuestFlags.CompletionAreaTrigger))
                         {
-                            Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} SpecialFlags for Quest entry {e.Action.quest.questId} does not include FLAGS_EXPLORATION_OR_EVENT(2), skipped.");
+                            Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} Flags for Quest entry {e.Action.quest.questId} does not include QUEST_FLAGS_COMPLETION_EVENT or QUEST_FLAGS_COMPLETION_AREA_TRIGGER, skipped.");
                             return false;
                         }
                     }
