@@ -50,6 +50,7 @@ namespace Scripts.Spells.Priest
         public const uint HaloShadowDamage = 390964;
         public const uint HaloShadowHeal = 390971;
         public const uint Heal = 2060;
+        public const uint HolyMendingHeal = 391156;
         public const uint HolyWordChastise = 88625;
         public const uint HolyWordSanctify = 34861;
         public const uint HolyWordSerenity = 2050;
@@ -555,6 +556,31 @@ namespace Scripts.Spells.Priest
                     caster.CastSpell(unit, at.GetSpellId() == SpellIds.HaloShadow ? SpellIds.HaloShadowHeal : SpellIds.HaloHolyHeal,
                         new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress));
             }
+        }
+    }
+
+    [Script] // 391154 - Holy Mending
+    class spell_pri_holy_mending : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.Renew, SpellIds.HolyMendingHeal);
+        }
+
+        bool CheckProc(AuraEffect aurEff, ProcEventInfo procInfo)
+        {
+            return procInfo.GetProcTarget().HasAura(SpellIds.Renew, procInfo.GetActor().GetGUID());
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), SpellIds.HolyMendingHeal, new CastSpellExtraArgs(aurEff));
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.ProcTriggerSpell));
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell));
         }
     }
     
