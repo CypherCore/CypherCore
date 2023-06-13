@@ -411,6 +411,13 @@ namespace Game
 
                     if (quest != null)
                     {
+                        if (quest.HasFlagEx(QuestFlagsEx.NoAbandonOnceBegun))
+                        {
+                            foreach (QuestObjective objective in quest.Objectives)
+                                if (_player.IsQuestObjectiveComplete(packet.Entry, quest, objective))
+                                    return;
+                        }
+
                         if (quest.LimitTime != 0)
                             GetPlayer().RemoveTimedQuest(questId);
 

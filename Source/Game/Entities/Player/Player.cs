@@ -1127,6 +1127,8 @@ namespace Game.Entities
                 gainSource == CurrencyGainSource.PlayerTraitRefund)
                 isGainOnRefund = true;
 
+            bool ignoreCaps = isGainOnRefund || gainSource == CurrencyGainSource.QuestRewardIgnoreCaps || gainSource == CurrencyGainSource.WorldQuestRewardIgnoreCaps;
+
             if (amount > 0 && !isGainOnRefund && gainSource != CurrencyGainSource.Vendor)
             {
                 amount = (int)(amount * GetTotalAuraMultiplierByMiscValue(AuraType.ModCurrencyGain, (int)id));
@@ -1164,16 +1166,18 @@ namespace Game.Entities
                 _currencyStorage.Add(id, playerCurrency);
             }
 
-            // Weekly cap
             uint weeklyCap = GetCurrencyWeeklyCap(currency);
-            if (weeklyCap != 0 && amount > 0 && (playerCurrency.WeeklyQuantity + amount) > weeklyCap)
-                if (!isGainOnRefund) // Ignore weekly cap for refund
+            if (!ignoreCaps) // Ignore weekly cap for refund
+            {
+                // Weekly cap
+                if (weeklyCap != 0 && amount > 0 && (playerCurrency.WeeklyQuantity + amount) > weeklyCap)
                     amount = (int)(weeklyCap - playerCurrency.WeeklyQuantity);
 
-            // Max cap
-            uint maxCap = GetCurrencyMaxQuantity(currency, false, gainSource == CurrencyGainSource.UpdatingVersion);
-            if (maxCap != 0 && amount > 0 && (playerCurrency.Quantity + amount) > maxCap)
-                amount = (int)(maxCap - playerCurrency.Quantity);
+                // Max cap
+                uint maxCap = GetCurrencyMaxQuantity(currency, false, gainSource == CurrencyGainSource.UpdatingVersion);
+                if (maxCap != 0 && amount > 0 && (playerCurrency.Quantity + amount) > maxCap)
+                    amount = (int)(maxCap - playerCurrency.Quantity);
+            }
 
             // Underflow protection
             if (amount < 0 && Math.Abs(amount) > playerCurrency.Quantity)
@@ -1187,7 +1191,7 @@ namespace Game.Entities
 
             playerCurrency.Quantity += (uint)amount;
 
-            if (amount > 0 && !isGainOnRefund) // Ignore total values update for refund
+            if (amount > 0 && !ignoreCaps) // Ignore total values update for refund
             {
                 if (weeklyCap != 0)
                     playerCurrency.WeeklyQuantity += (uint)amount;
@@ -1198,7 +1202,8 @@ namespace Game.Entities
                 if (currency.HasTotalEarned())
                     playerCurrency.EarnedQuantity += (uint)amount;
 
-                UpdateCriteria(CriteriaType.CurrencyGained, id, (ulong)amount);
+                if (!isGainOnRefund)
+                    UpdateCriteria(CriteriaType.CurrencyGained, id, (ulong)amount);
             }
 
             CurrencyChanged(id, amount);

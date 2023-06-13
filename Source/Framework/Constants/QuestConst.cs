@@ -452,62 +452,62 @@ namespace Framework.Constants
         DisplayItemInTracker = 0x20000, // Displays Usable Item In Quest Tracker
         DisableCompletionText = 0x40000,              // Use Objective Text As Complete Text
         AutoAccept = 0x80000,           // The client recognizes this flag as auto-accept.
-        PlayerCastAccept = 0x100000,
-        PlayerCastComplete = 0x200000,
-        UpdatePhaseshift = 0x400000,
-        SorWhitelist = 0x800000,
-        LaunchGossipComplete = 0x1000000,
+        PlayerCastAccept = 0x100000, // Accept Spell Player Cast
+        PlayerCastComplete = 0x200000, // Complete Spell Player Cast
+        UpdatePhaseshift = 0x400000, // Update Phase Shift
+        SorWhitelist = 0x800000, // Scroll of Resurrection Whitelist
+        LaunchGossipComplete = 0x1000000, // Gossip on Quest Completion - Force Gossip
         RemoveSurplusItems = 0x2000000,   // Remove all items from inventory that have the same id as the objective, not just the amount required by quest
-        WellKnown = 0x04000000,
-        PortraitInQuestLog = 0x8000000,
-        ShowItemWhenCompleted = 0x10000000,
-        LaunchGossipAccept = 0x20000000,
-        ItemsGlowWhenComplete = 0x40000000,
-        FailOnLogout = 0x80000000
+        WellKnown = 0x04000000, // Well-Known
+        PortraitInQuestLog = 0x8000000, // Portrait from Log
+        ShowItemWhenCompleted = 0x10000000, // Show Item When Completed
+        LaunchGossipAccept = 0x20000000, // Gossip on Quest Accept - Force Gossip
+        ItemsGlowWhenComplete = 0x40000000, // Items Glow When Done
+        FailOnLogout = 0x80000000 // Fail on Logout
     }
 
     [Flags]
     public enum QuestFlagsEx : uint
     {
         None = 0x00,
-        KeepAdditionalItems = 0x01,
-        SuppressGossipComplete = 0x02,
-        SuppressGossipAccept = 0x04,
-        DisallowPlayerAsQuestgiver = 0x08,
-        DisplayClassChoiceRewards = 0x10,
-        DisplaySpecChoiceRewards = 0x20,
-        RemoveFromLogOnPeriodicReset = 0x40,
-        AccountLevelQuest = 0x80,
-        LegendaryQuest = 0x100,
-        NoGuildXp = 0x200,
-        ResetCacheOnAccept = 0x400,
-        NoAbandonOnceAnyObjectiveComplete = 0x800,
-        RecastAcceptSpellOnLogin = 0x1000,
-        UpdateZoneAuras = 0x2000,
-        NoCreditForProxy = 0x4000,
-        DisplayAsDailyQuest = 0x8000,
-        PartOfQuestLine = 0x10000,
-        QuestForInternalBuildsOnly = 0x20000,
-        SuppressSpellLearnTextLine = 0x40000,
-        DisplayHeaderAsObjectiveForTasks = 0x80000,
-        GarrisonNonOwnersAllowed = 0x100000,
-        RemoveQuestOnWeeklyReset = 0x200000,
-        SuppressFarewellAudioAfterQuestAccept = 0x400000,
-        RewardsBypassWeeklyCapsAndSeasonTotal = 0x800000,
-        IsWorldQuest = 0x1000000,
-        NotIgnorable = 0x2000000,
-        AutoPush = 0x4000000,
-        NoSpellCompleteEffects = 0x8000000,
-        DoNotToastHonorReward = 0x10000000,
-        KeepRepeatableQuestOnFactionChange = 0x20000000,
-        KeepProgressOnFactionChange = 0x40000000,
+        NoItemRemoval = 0x01,   // Keep Additional Items
+        SuppressGossipComplete = 0x02,   // Gossip On Quest Completion - Suppress Gossip
+        SuppressGossipAccept = 0x04,   // Gossip On Quest Accept - Suppress Gossip
+        DenyPlayerQuestgiver = 0x08,   // Disallow Player As Questgiver (Advanced)
+        DisplayClassChoiceRewards = 0x10,   // Choice Reward Filter - Matches Class
+        DisplaySpecChoiceRewards = 0x20,   // Choice Reward Filter - Matches Spec
+        RemoveOnPeriodicReset = 0x40,   // Remove From Log On Periodic Reset
+        Account = 0x80,   // Account-Level Quest
+        Legendary = 0x100,   // Legendary Quest
+        NoGuildXp = 0x200,   // No Guild Xp
+        ResetCacheOnAccept = 0x400,   // Reset Cache On Accept (Internal)
+        NoAbandonOnceBegun = 0x800,   // No Abandon Once Any Objective Complete
+        RecastAcceptSpellOnLogin = 0x1000,   // Recast Accept Spell On Login
+        UpdateZoneAuras = 0x2000,   // Update Zone Auras
+        NoCreditForProxy = 0x4000,   // No Credit For Proxy Creatures
+        DisplayAsDaily = 0x8000,   // Display As Daily Quest
+        DisplayQuestLine = 0x10000,
+        InternalBuildsOnly = 0x20000,   // Quest For Internal Builds Only
+        SuppressSpellLearnText = 0x40000,   // Suppress Spell Learn Text Line (For Followers)
+        DisplayAsObjective = 0x80000,   // Display Header As Objective For Tasks
+        AllowAllInGarrison = 0x100000,   // Garrison Non-Owners Allowed
+        RemoveOnWeeklyReset = 0x200000,   // Remove Quest On Weekly Reset
+        SuppressGreetingsOnAccept = 0x400000,   // Suppress Farewell Audio After Quest Accept
+        RewardsIgnoreCaps = 0x800000,   // Rewards Bypass Weekly Caps And Season Total
+        IsWorldQuest = 0x1000000,   // Is A World Quest
+        NotIgnorable = 0x2000000,   // Not Ignorable
+        AutoPush = 0x4000000,   // Auto Push
+        NoSpellCompleteEffects = 0x8000000,   // No Complete Quest Spell Effect
+        DoNotToastHonorReward = 0x10000000,   // Do Not Toast Honor Reward
+        KeepRepeatableQuestOnFactionChange = 0x20000000,   // Keep Repeatable Quest On Faction Change
+        KeepProgressOnFactionChange = 0x40000000,   // Keep Quest Progress On Faction Change
         PushTeamQuestUsingMapController = 0x80000000
     }
 
     public enum QuestFlagsEx2
     {
         ResetOnGameMilestone = 0x01,
-        NoWarModeBonus = 0x02,
+        WarModeRewardsOptOut = 0x02,
         AwardHighestProfession = 0x04,
         NotReplayable = 0x08,
         NoReplayRewards = 0x10,
@@ -521,7 +521,12 @@ namespace Framework.Constants
         HideTaskOnMainMap = 0x1000,
         HideTaskInTracker = 0x2000,
         SkipDisabledCheck = 0x4000,
-        EnforceMaximumQuestLevel = 0x8000
+        EnforceMaximumQuestLevel = 0x8000,
+        ContentAlert = 0x10000,
+        DisplayTimeRemaining = 0x20000,
+        ClearTaskProgressWhenAbandoned = 0x40000,
+        SuppressGreetingsOnComplete = 0x80000,
+        HideRequiredItemsOnTurnIn = 0x100000
     }
 
     public enum QuestSpecialFlags

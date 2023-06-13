@@ -763,6 +763,9 @@ namespace Game.Entities
                             else if (questStatusData.Status == QuestStatus.Failed)
                                 SetQuestSlotState(slot, QuestSlotStateMask.Fail);
 
+                            if (quest.HasFlagEx(QuestFlagsEx.RecastAcceptSpellOnLogin) && quest.HasFlag(QuestFlags.PlayerCastAccept) && quest.SourceSpellID > 0)
+                                CastSpell(this, quest.SourceSpellID, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
+
                             ++slot;
                         }
 

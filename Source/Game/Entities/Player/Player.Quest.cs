@@ -170,6 +170,24 @@ namespace Game.Entities
 
             m_DFQuests.Clear(); // Dungeon Finder Quests.
 
+            for (ushort slot = 0; slot < SharedConst.MaxQuestLogSize; ++slot)
+            {
+                uint questId = GetQuestSlotQuestId(slot);
+                if (questId == 0)
+                    continue;
+
+                Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
+                if (quest == null || !quest.IsDaily() || !quest.HasFlagEx(QuestFlagsEx.RemoveOnPeriodicReset))
+                    continue;
+
+                SetQuestSlot(slot, 0);
+                AbandonQuest(questId);
+                RemoveActiveQuest(questId);
+
+                if (quest.LimitTime != 0)
+                    RemoveTimedQuest(questId);
+            }
+
             // DB data deleted in caller
             m_DailyQuestChanged = false;
             m_lastDailyQuestTime = 0;
@@ -188,6 +206,24 @@ namespace Game.Entities
                 uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(questId);
                 if (questBit != 0)
                     SetQuestCompletedBit(questBit, false);
+            }
+
+            for (ushort slot = 0; slot < SharedConst.MaxQuestLogSize; ++slot)
+            {
+                uint questId = GetQuestSlotQuestId(slot);
+                if (questId == 0)
+                    continue;
+
+                Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
+                if (quest == null || !quest.IsWeekly() || !quest.HasFlagEx(QuestFlagsEx.RemoveOnWeeklyReset))
+                    continue;
+
+                SetQuestSlot(slot, 0);
+                AbandonQuest(questId);
+                RemoveActiveQuest(questId);
+
+                if (quest.LimitTime != 0)
+                    RemoveTimedQuest(questId);
             }
 
             m_weeklyquests.Clear();
@@ -958,7 +994,7 @@ namespace Game.Entities
                 }
             }
 
-            if (!quest.FlagsEx.HasAnyFlag(QuestFlagsEx.KeepAdditionalItems))
+            if (!quest.FlagsEx.HasAnyFlag(QuestFlagsEx.NoItemRemoval))
             {
                 for (byte i = 0; i < SharedConst.QuestItemDropCount; ++i)
                 {
@@ -994,7 +1030,15 @@ namespace Game.Entities
             }
 
             CurrencyGainSource currencyGainSource = CurrencyGainSource.QuestReward;
-            if (quest.IsDaily())
+
+            if (quest.HasFlagEx(QuestFlagsEx.RewardsIgnoreCaps))
+            {
+                if (quest.IsWorldQuest())
+                    currencyGainSource = CurrencyGainSource.WorldQuestRewardIgnoreCaps;
+
+                currencyGainSource = CurrencyGainSource.QuestRewardIgnoreCaps;
+            }
+            else if (quest.IsDaily())
                 currencyGainSource = CurrencyGainSource.DailyQuestReward;
             else if (quest.IsWeekly())
                 currencyGainSource = CurrencyGainSource.WeeklyQuestReward;
@@ -2050,7 +2094,7 @@ namespace Game.Entities
                     case QuestStatus.Complete:
                         if (quest.GetQuestTag() == QuestTagType.CovenantCalling)
                             result |= quest.HasFlag(QuestFlags.HideRewardPoi) ? QuestGiverStatus.CovenantCallingRewardCompleteNoPOI : QuestGiverStatus.CovenantCallingRewardCompletePOI;
-                        else if (quest.HasFlagEx(QuestFlagsEx.LegendaryQuest))
+                        else if (quest.HasFlagEx(QuestFlagsEx.Legendary))
                             result |= quest.HasFlag(QuestFlags.HideRewardPoi) ? QuestGiverStatus.LegendaryRewardCompleteNoPOI : QuestGiverStatus.LegendaryRewardCompletePOI;
                         else
                             result |= quest.HasFlag(QuestFlags.HideRewardPoi) ? QuestGiverStatus.RewardCompleteNoPOI : QuestGiverStatus.RewardCompletePOI;
@@ -2093,7 +2137,7 @@ namespace Game.Entities
                             {
                                 if (quest.GetQuestTag() == QuestTagType.CovenantCalling)
                                     result |= QuestGiverStatus.CovenantCallingQuest;
-                                else if (quest.HasFlagEx(QuestFlagsEx.LegendaryQuest))
+                                else if (quest.HasFlagEx(QuestFlagsEx.Legendary))
                                     result |= QuestGiverStatus.LegendaryQuest;
                                 else if (quest.IsDaily())
                                     result |= QuestGiverStatus.DailyQuest;
@@ -2448,6 +2492,10 @@ namespace Game.Entities
                 QuestObjective objective = objectiveStatusData.Objective;
                 if (!IsQuestObjectiveCompletable(logSlot, quest, objective))
                     continue;
+
+                if (quest.HasFlagEx(QuestFlagsEx.NoCreditForProxy))
+                    if (objective.Type == QuestObjectiveType.Monster && victimGuid.IsEmpty())
+                        continue;
 
                 bool objectiveWasComplete = IsQuestObjectiveComplete(logSlot, quest, objective);
                 if (!objectiveWasComplete || addCount < 0)
