@@ -1053,7 +1053,7 @@ namespace Scripts.Spells.Quest
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return !spellInfo.GetEffects().Empty() && ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
+            return ValidateSpellEffect(spellInfo.Id, 0) && ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
         }
 
         void HandleEffectDummy(uint effIndex)

@@ -551,7 +551,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return !spellInfo.GetEffects().Empty() && ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
+            return ValidateSpellEffect(spellInfo.Id, 0) && ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
         }
 
         void HandlePeriodic(AuraEffect aurEff)
@@ -697,7 +697,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return !spellInfo.GetEffects().Empty() && ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
+            return ValidateSpellEffect(spellInfo.Id, 0) && ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
         }
 
         void HandleHit(uint effIndex)

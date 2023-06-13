@@ -195,7 +195,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return !spellInfo.GetEffects().Empty() && ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
+            return ValidateSpellEffect(spellInfo.Id, 0) && ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
         }
 
         public override bool Load()

@@ -401,7 +401,7 @@ namespace Scripts.Spells.Monk
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.StaggerDamageAura)
-            && !Global.SpellMgr.GetSpellInfo(SpellIds.StaggerDamageAura, Difficulty.None).GetEffects().Empty();
+            && ValidateSpellEffect(SpellIds.StaggerDamageAura, 0);
         }
 
         public override bool Load()

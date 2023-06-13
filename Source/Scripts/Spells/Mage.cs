@@ -1055,7 +1055,7 @@ namespace Scripts.Spells.Mage
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.RingOfFrostSummon, SpellIds.RingOfFrostFreeze) && !Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, Difficulty.None).GetEffects().Empty();
+            return ValidateSpellInfo(SpellIds.RingOfFrostSummon, SpellIds.RingOfFrostFreeze) && ValidateSpellEffect(SpellIds.RingOfFrostSummon, 0);
         }
 
         void HandleEffectPeriodic(AuraEffect aurEff)
@@ -1111,7 +1111,7 @@ namespace Scripts.Spells.Mage
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.RingOfFrostSummon, SpellIds.RingOfFrostFreeze) && !Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, Difficulty.None).GetEffects().Empty();
+            return ValidateSpellInfo(SpellIds.RingOfFrostSummon, SpellIds.RingOfFrostFreeze) && ValidateSpellEffect(SpellIds.RingOfFrostSummon, 0);
         }
 
         void FilterTargets(List<WorldObject> targets)

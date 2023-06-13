@@ -132,9 +132,7 @@ namespace Scripts.Events.PilgrimsBounty
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return !spellInfo.GetEffects().Empty()
-                && ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue())
-                    && !Global.SpellMgr.GetSpellInfo((uint)spellInfo.GetEffect(0).CalcValue(), Difficulty.None).GetEffects().Empty();
+            return ValidateSpellEffect(spellInfo.Id, 0) && ValidateSpellEffect((uint)spellInfo.GetEffect(0).CalcValue(), 0);
         }
 
         void HandleDummy(uint effIndex)

@@ -183,7 +183,7 @@ namespace Scripts.Spells.Hunter
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return !spellInfo.GetEffects().Empty() && ValidateSpellInfo(SpellIds.MastersCallTriggered, (uint)spellInfo.GetEffect(0).CalcValue());
+            return ValidateSpellEffect(spellInfo.Id, 0) && ValidateSpellInfo(SpellIds.MastersCallTriggered, (uint)spellInfo.GetEffect(0).CalcValue());
         }
 
         public override bool Load()
