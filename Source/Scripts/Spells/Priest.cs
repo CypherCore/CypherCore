@@ -41,6 +41,7 @@ namespace Scripts.Spells.Priest
         public const uint DivineStarShadowDamage = 390845;
         public const uint DivineStarShadowHeal = 390981;
         public const uint DivineWrath = 40441;
+        public const uint EmpoweredRenewHeal = 391359;
         public const uint FlashHeal = 2061;
         public const uint GuardianSpiritHeal = 48153;
         public const uint HaloHoly = 120517;
@@ -500,6 +501,35 @@ namespace Scripts.Spells.Priest
                     task.Repeat(TimeSpan.FromMilliseconds(250));
 
                 });
+        }
+    }
+
+    [Script] // 391339 - Empowered Renew
+    class spell_pri_empowered_renew : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.Renew, SpellIds.EmpoweredRenewHeal)
+                && ValidateSpellEffect(SpellIds.Renew, 0)
+                && Global.SpellMgr.GetSpellInfo(SpellIds.Renew, Difficulty.None).GetEffect(0).IsAura(AuraType.PeriodicHeal);
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            Unit caster = eventInfo.GetActor();
+            Unit target = eventInfo.GetProcTarget();
+
+            SpellInfo renewSpellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.Renew, GetCastDifficulty());
+            SpellEffectInfo renewEffect = renewSpellInfo.GetEffect(0);
+            int estimatedTotalHeal = (int)AuraEffect.CalculateEstimatedfTotalPeriodicAmount(caster, target, renewSpellInfo, renewEffect, renewEffect.CalcValue(caster), 1);
+            int healAmount = MathFunctions.CalculatePct(estimatedTotalHeal, aurEff.GetAmount());
+
+            caster.CastSpell(target, SpellIds.EmpoweredRenewHeal, new CastSpellExtraArgs(aurEff).AddSpellMod(SpellValueMod.BasePoint0, healAmount));
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
         }
     }
     
