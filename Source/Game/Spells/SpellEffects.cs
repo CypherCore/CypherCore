@@ -537,6 +537,23 @@ namespace Game.Spells
             unitCaster.GetMotionMaster().MoveJump(destTarget, speedXY, speedZ, EventId.Jump, !m_targets.GetObjectTargetGUID().IsEmpty(), arrivalCast);
         }
 
+        TeleportToOptions GetTeleportOptions(WorldObject caster, Unit unitTarget, SpellDestination targetDest)
+        {
+            TeleportToOptions options = TeleportToOptions.None;
+            if (caster == unitTarget)
+                options |= TeleportToOptions.Spell;
+
+            if (targetDest.Position.GetMapId() == unitTarget.GetMapId())
+            {
+                options |= TeleportToOptions.NotLeaveCombat | TeleportToOptions.NotUnSummonPet;
+
+                if (unitTarget.GetTransGUID() == targetDest.TransportGUID)
+                    options |= TeleportToOptions.NotLeaveTransport;
+            }
+
+            return options;
+        }
+
         [SpellEffectHandler(SpellEffectName.TeleportUnits)]
         void EffectTeleportUnits()
         {
@@ -568,17 +585,15 @@ namespace Game.Spells
                 uint customLoadingScreenId = (uint)effectInfo.MiscValue;
                 if (customLoadingScreenId != 0)
                     player.SendPacket(new CustomLoadScreen(m_spellInfo.Id, customLoadingScreenId));
-            }
 
-            if (targetDest.GetMapId() == unitTarget.GetMapId())
-                unitTarget.NearTeleportTo(targetDest, unitTarget == m_caster);
-            else if (player != null)
-                player.TeleportTo(targetDest, unitTarget == m_caster ? TeleportToOptions.Spell : 0);
-            else
-            {
-                Log.outError(LogFilter.Spells, "Spell.EffectTeleportUnits - spellId {0} attempted to teleport creature to a different map.", m_spellInfo.Id);
-                return;
+                TeleportToOptions options = GetTeleportOptions(m_caster, unitTarget, m_destTargets[effectInfo.EffectIndex]);
+
+                player.TeleportTo(targetDest, options);
             }
+            else if (targetDest.GetMapId() == unitTarget.GetMapId())
+                unitTarget.NearTeleportTo(targetDest, unitTarget == m_caster);
+            else
+                Log.outError(LogFilter.Spells, "Spell.EffectTeleportUnits - spellId {0} attempted to teleport creature to a different map.", m_spellInfo.Id);
         }
 
         [SpellEffectHandler(SpellEffectName.TeleportWithSpellVisualKitLoadingScreen)]
@@ -612,7 +627,8 @@ namespace Game.Spells
                     playerTarget.SendPacket(new SpellVisualLoadScreen(effectInfo.MiscValueB, effectInfo.MiscValue));
             }
 
-            unitTarget.m_Events.AddEventAtOffset(new DelayedSpellTeleportEvent(unitTarget, targetDest, unitTarget == m_caster ? TeleportToOptions.Spell : 0, m_spellInfo.Id), TimeSpan.FromMilliseconds(effectInfo.MiscValue));
+            TeleportToOptions options = GetTeleportOptions(m_caster, unitTarget, m_destTargets[effectInfo.EffectIndex]);
+            unitTarget.m_Events.AddEventAtOffset(new DelayedSpellTeleportEvent(unitTarget, targetDest, options, m_spellInfo.Id), TimeSpan.FromMilliseconds(effectInfo.MiscValue));
         }
 
         [SpellEffectHandler(SpellEffectName.ApplyAura)]
@@ -5851,16 +5867,14 @@ namespace Game.Spells
 
         public override bool Execute(ulong e_time, uint p_time)
         {
-            if (_targetDest.GetMapId() == _target.GetMapId())
-                _target.NearTeleportTo(_targetDest, (_options & TeleportToOptions.Spell) != 0);
+
+            Player player = _target.ToPlayer();
+            if (player != null)
+                player.TeleportTo(_targetDest, _options);
+            else if (_targetDest.GetMapId() == _target.GetMapId())
+                _target.NearTeleportTo(_targetDest, (_options & TeleportToOptions.Spell) != TeleportToOptions.None);
             else
-            {
-                Player player = _target.ToPlayer();
-                if (player != null)
-                    player.TeleportTo(_targetDest, _options);
-                else
-                    Log.outError(LogFilter.Spells, $"Spell::EffectTeleportUnitsWithVisualLoadingScreen - spellId {_spellId} attempted to teleport creature to a different map.");
-            }
+                Log.outError(LogFilter.Spells, $"Spell::EffectTeleportUnitsWithVisualLoadingScreen - spellId {_spellId} attempted to teleport creature to a different map.");
 
             return true;
         }

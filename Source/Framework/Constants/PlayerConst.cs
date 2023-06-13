@@ -329,8 +329,10 @@ namespace Framework.Constants
         Item = 0x80
     }
 
+    [Flags]
     public enum TeleportToOptions
     {
+        None = 0x00,
         GMMode = 0x01,
         NotLeaveTransport = 0x02,
         NotLeaveCombat = 0x04,
