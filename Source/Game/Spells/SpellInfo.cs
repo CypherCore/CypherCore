@@ -4783,7 +4783,7 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 264 SPELL_EFFECT_REMOVE_GEM
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 265 SPELL_EFFECT_LEARN_AZERITE_ESSENCE_POWER
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 266 SPELL_EFFECT_SET_ITEM_BONUS_LIST_GROUP_ENTRY
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 267 SPELL_EFFECT_CREATE_PRIVATE_CONVERSATION
+            new StaticData(SpellEffectImplicitTargetTypes.Caster,   SpellTargetObjectTypes.Unit), // 267 SPELL_EFFECT_CREATE_PRIVATE_CONVERSATION
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 268 SPELL_EFFECT_APPLY_MOUNT_EQUIPMENT
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 269 SPELL_EFFECT_INCREASE_ITEM_BONUS_LIST_GROUP_STEP
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 270 SPELL_EFFECT_270

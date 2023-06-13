@@ -5628,14 +5628,13 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.CreatePrivateConversation)]
         void EffectCreatePrivateConversation()
         {
-            if (effectHandleMode != SpellEffectHandleMode.Hit)
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            Unit unitCaster = GetUnitCasterForEffectHandlers();
-            if (unitCaster == null || !unitCaster.IsPlayer())
+            if (unitTarget.GetTypeId() != TypeId.Player)
                 return;
 
-            Conversation.CreateConversation((uint)effectInfo.MiscValue, unitCaster, destTarget.GetPosition(), unitCaster.GetGUID(), GetSpellInfo());
+            Conversation.CreateConversation((uint)effectInfo.MiscValue, unitTarget, destTarget.GetPosition(), unitTarget.GetGUID(), GetSpellInfo());
         }
 
         [SpellEffectHandler(SpellEffectName.SendChatMessage)]
