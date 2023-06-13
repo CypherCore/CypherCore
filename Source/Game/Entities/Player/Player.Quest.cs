@@ -368,49 +368,27 @@ namespace Game.Entities
             return m_QuestStatus.ContainsKey(quest_id);
         }
 
-        public Quest GetNextQuest(ObjectGuid guid, Quest quest)
+        public Quest GetNextQuest(WorldObject questGiver, Quest quest)
         {
-            QuestRelationResult quests;
             uint nextQuestID = quest.NextQuestInChain;
+            if (nextQuestID == 0)
+                return null;
 
-            switch (guid.GetHigh())
+            if (questGiver == this)
             {
-                case HighGuid.Player:
-                    Cypher.Assert(quest.HasFlag(QuestFlags.AutoComplete));
-                    return Global.ObjectMgr.GetQuestTemplate(nextQuestID);
-                case HighGuid.Creature:
-                case HighGuid.Pet:
-                case HighGuid.Vehicle:
-                {
-                    Creature creature = ObjectAccessor.GetCreatureOrPetOrVehicle(this, guid);
-                    if (creature != null)
-                        quests = Global.ObjectMgr.GetCreatureQuestRelations(creature.GetEntry());
-                    else
-                        return null;
-                    break;
-                }
-                case HighGuid.GameObject:
-                {
-                    //we should obtain map from GetMap() in 99% of cases. Special case
-                    //only for quests which cast teleport spells on player
-                    Map _map = IsInWorld ? GetMap() : Global.MapMgr.FindMap(GetMapId(), GetInstanceId());
-                    Cypher.Assert(_map != null);
-                    GameObject gameObject = _map.GetGameObject(guid);
-                    if (gameObject != null)
-                        quests = Global.ObjectMgr.GetGOQuestRelations(gameObject.GetEntry());
-                    else
-                        return null;
-                    break;
-                }
-                default:
-                    return null;
+                Cypher.Assert(quest.HasFlag(QuestFlags.AutoComplete));
+                return Global.ObjectMgr.GetQuestTemplate(nextQuestID);
             }
 
-            if (nextQuestID != 0)
-                if (quests.HasQuest(nextQuestID))
-                    return Global.ObjectMgr.GetQuestTemplate(nextQuestID);
+            //we should obtain map pointer from GetMap() in 99% of cases. Special case
+            //only for quests which cast teleport spells on player
+            if (!IsInMap(questGiver))
+                return null;
 
-            return null;
+            if (!questGiver.HasQuest(nextQuestID))
+                return null;
+
+            return Global.ObjectMgr.GetQuestTemplate(nextQuestID);
         }
 
         public bool CanSeeStartQuest(Quest quest)
@@ -1207,7 +1185,7 @@ namespace Game.Entities
                     {
                         //For AutoSubmition was added plr case there as it almost same exclute AI script cases.
                         // Send next quest
-                        Quest nextQuest = GetNextQuest(questGiver.GetGUID(), quest);
+                        Quest nextQuest = GetNextQuest(questGiver, quest);
                         if (nextQuest != null)
                         {
                             // Only send the quest to the player if the conditions are met
@@ -1228,9 +1206,8 @@ namespace Game.Entities
                     }
                     case TypeId.GameObject:
                     {
-                        GameObject questGiverGob = questGiver.ToGameObject();
                         // Send next quest
-                        Quest nextQuest = GetNextQuest(questGiverGob.GetGUID(), quest);
+                        Quest nextQuest = GetNextQuest(questGiver, quest);
                         if (nextQuest != null)
                         {
                             // Only send the quest to the player if the conditions are met
@@ -1239,12 +1216,12 @@ namespace Game.Entities
                                 if (nextQuest.IsAutoAccept() && CanAddQuest(nextQuest, true))
                                     AddQuestAndCheckCompletion(nextQuest, questGiver);
 
-                                PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, questGiverGob.GetGUID(), true, false);
+                                PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, questGiver.GetGUID(), true, false);
                             }
                         }
 
                         PlayerTalkClass.ClearMenus();
-                        questGiverGob.GetAI().OnQuestReward(this, quest, rewardType, rewardId);
+                        questGiver.ToGameObject()?.GetAI()?.OnQuestReward(this, quest, rewardType, rewardId);
                         break;
                     }
                     default:
@@ -2845,12 +2822,14 @@ namespace Game.Entities
             if (questGiver)
             {
                 if (questGiver.IsGossip())
-                    packet.LaunchGossip = true;
-                else if (questGiver.IsQuestGiver())
+                    packet.LaunchGossip = quest.HasFlag(QuestFlags.LaunchGossipComplete);
+
+                if (questGiver.IsQuestGiver())
                     packet.LaunchQuest = (GetQuestDialogStatus(questGiver) & ~QuestGiverStatus.Future) != QuestGiverStatus.None;
-                else if (quest.NextQuestInChain != 0 && !quest.HasFlag(QuestFlags.AutoComplete))
+
+                if (!quest.HasFlag(QuestFlags.AutoComplete))
                 {
-                    Quest rewardQuest = Global.ObjectMgr.GetQuestTemplate(quest.NextQuestInChain);
+                    Quest rewardQuest = GetNextQuest(questGiver, quest);
                     if (rewardQuest != null)
                         packet.UseQuestReward = CanTakeQuest(rewardQuest, false);
                 }
