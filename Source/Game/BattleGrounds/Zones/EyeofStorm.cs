@@ -766,10 +766,10 @@ namespace Game.BattleGrounds.Zones
             if (!BgCreatures[Point].IsEmpty())
                 DelCreature(Point);
 
-            WorldSafeLocsEntry sg = Global.ObjectMgr.GetWorldSafeLoc(EotSMisc.m_CapturingPointTypes[Point].GraveYardId);
+            WorldSafeLocsEntry sg = Global.ObjectMgr.GetWorldSafeLoc(EotSMisc.m_CapturingPointTypes[Point].GraveyardId);
             if (sg == null || !AddSpiritGuide(Point, sg.Loc.GetPositionX(), sg.Loc.GetPositionY(), sg.Loc.GetPositionZ(), 3.124139f, GetTeamIndexByTeamId(Team)))
                 Log.outError(LogFilter.Battleground, "BatteGroundEY: Failed to spawn spirit guide. point: {0}, team: {1}, graveyard_id: {2}",
-                    Point, Team, EotSMisc.m_CapturingPointTypes[Point].GraveYardId);
+                    Point, Team, EotSMisc.m_CapturingPointTypes[Point].GraveyardId);
 
             //    SpawnBGCreature(Point, RESPAWN_IMMEDIATELY);
 
@@ -847,7 +847,7 @@ namespace Game.BattleGrounds.Zones
             return true;
         }
 
-        public override WorldSafeLocsEntry GetClosestGraveYard(Player player)
+        public override WorldSafeLocsEntry GetClosestGraveyard(Player player)
         {
             uint g_id;
             Team team = GetPlayerTeam(player.GetGUID());
@@ -881,9 +881,9 @@ namespace Game.BattleGrounds.Zones
             {
                 if (m_PointOwnedByTeam[i] == team && m_PointState[i] == EotSPointState.UnderControl)
                 {
-                    entry = Global.ObjectMgr.GetWorldSafeLoc(EotSMisc.m_CapturingPointTypes[i].GraveYardId);
+                    entry = Global.ObjectMgr.GetWorldSafeLoc(EotSMisc.m_CapturingPointTypes[i].GraveyardId);
                     if (entry == null)
-                        Log.outError(LogFilter.Battleground, "BattlegroundEY: Graveyard {0} could not be found.", EotSMisc.m_CapturingPointTypes[i].GraveYardId);
+                        Log.outError(LogFilter.Battleground, "BattlegroundEY: Graveyard {0} could not be found.", EotSMisc.m_CapturingPointTypes[i].GraveyardId);
                     else
                     {
                         distance = (entry.Loc.GetPositionX() - plr_x) * (entry.Loc.GetPositionX() - plr_x) + (entry.Loc.GetPositionY() - plr_y) * (entry.Loc.GetPositionY() - plr_y) + (entry.Loc.GetPositionZ() - plr_z) * (entry.Loc.GetPositionZ() - plr_z);
@@ -1011,14 +1011,14 @@ namespace Game.BattleGrounds.Zones
 
     struct BattlegroundEYCapturingPointStruct
     {
-        public BattlegroundEYCapturingPointStruct(int _DespawnNeutralObjectType, int _SpawnObjectTypeAlliance, uint _MessageIdAlliance, int _SpawnObjectTypeHorde, uint _MessageIdHorde, uint _GraveYardId)
+        public BattlegroundEYCapturingPointStruct(int _DespawnNeutralObjectType, int _SpawnObjectTypeAlliance, uint _MessageIdAlliance, int _SpawnObjectTypeHorde, uint _MessageIdHorde, uint _GraveyardId)
         {
             DespawnNeutralObjectType = _DespawnNeutralObjectType;
             SpawnObjectTypeAlliance = _SpawnObjectTypeAlliance;
             MessageIdAlliance = _MessageIdAlliance;
             SpawnObjectTypeHorde = _SpawnObjectTypeHorde;
             MessageIdHorde = _MessageIdHorde;
-            GraveYardId = _GraveYardId;
+            GraveyardId = _GraveyardId;
         }
 
         public int DespawnNeutralObjectType;
@@ -1026,7 +1026,7 @@ namespace Game.BattleGrounds.Zones
         public uint MessageIdAlliance;
         public int SpawnObjectTypeHorde;
         public uint MessageIdHorde;
-        public uint GraveYardId;
+        public uint GraveyardId;
     }
 
     struct EotSMisc

@@ -1714,9 +1714,9 @@ namespace Game.BattleGrounds
             m_BgRaids[GetTeamIndexByTeamId(team)] = bg_raid;
         }
 
-        public virtual WorldSafeLocsEntry GetClosestGraveYard(Player player)
+        public virtual WorldSafeLocsEntry GetClosestGraveyard(Player player)
         {
-            return Global.ObjectMgr.GetClosestGraveYard(player, GetPlayerTeam(player.GetGUID()), player);
+            return Global.ObjectMgr.GetClosestGraveyard(player, GetPlayerTeam(player.GetGUID()), player);
         }
 
         public override void TriggerGameEvent(uint gameEventId, WorldObject source = null, WorldObject target = null)

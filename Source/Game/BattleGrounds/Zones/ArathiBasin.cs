@@ -614,7 +614,7 @@ namespace Game.BattleGrounds.Zones
             base.EndBattleground(winner);
         }
 
-        public override WorldSafeLocsEntry GetClosestGraveYard(Player player)
+        public override WorldSafeLocsEntry GetClosestGraveyard(Player player)
         {
             int teamIndex = GetTeamIndexByTeamId(GetPlayerTeam(player.GetGUID()));
 

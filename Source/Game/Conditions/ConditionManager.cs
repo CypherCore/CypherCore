@@ -148,6 +148,7 @@ namespace Game
                     sourceType == ConditionSourceType.SmartEvent ||
                     sourceType == ConditionSourceType.NpcVendor ||
                     sourceType == ConditionSourceType.Phase ||
+                    sourceType == ConditionSourceType.Graveyard ||
                     sourceType == ConditionSourceType.AreaTrigger ||
                     sourceType == ConditionSourceType.TrainerSpell ||
                     sourceType == ConditionSourceType.ObjectIdVisibility;
@@ -561,6 +562,9 @@ namespace Game
                         case ConditionSourceType.Phase:
                             valid = AddToPhases(cond);
                             break;
+                        case ConditionSourceType.Graveyard:
+                            valid = AddToGraveyardData(cond);
+                            break;
                         case ConditionSourceType.AreaTrigger:
                             areaTriggerConditionContainerStorage.Add(Tuple.Create(cond.SourceGroup, cond.SourceEntry != 0), cond);
                             ++count;
@@ -807,6 +811,19 @@ namespace Game
             return false;
         }
 
+        bool AddToGraveyardData(Condition cond)
+        {
+            GraveyardData graveyard = Global.ObjectMgr.FindGraveyardData((uint)cond.SourceEntry, cond.SourceGroup);
+            if (graveyard != null)
+            {
+                graveyard.Conditions.Add(cond);
+                return true;
+            }
+
+            Log.outError(LogFilter.Sql, $"{cond}, Graveyard {cond.SourceEntry} does not have ghostzone {cond.SourceGroup}.");
+            return false;
+        }
+        
         bool IsSourceTypeValid(Condition cond)
         {
             switch (cond.SourceType)
@@ -1176,9 +1193,9 @@ namespace Game
                 case ConditionSourceType.SmartEvent:
                     break;
                 case ConditionSourceType.Graveyard:
-                    if (Global.ObjectMgr.GetWorldSafeLoc((uint)cond.SourceEntry) == null)
+                    if (Global.ObjectMgr.FindGraveyardData((uint)cond.SourceEntry, cond.SourceGroup) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceEntry in `condition` table, does not exist in WorldSafeLocs.db2, ignoring.");
+                        Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceEntry in `condition` table, does not exist in `graveyard_zone`, ignoring.");
                         return false;
                     }
                     break;

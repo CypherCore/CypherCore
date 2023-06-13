@@ -632,7 +632,7 @@ namespace Game.Entities
 
             if (!ok)
             {
-                WorldSafeLocsEntry loc = Global.ObjectMgr.GetDefaultGraveYard(GetTeam());
+                WorldSafeLocsEntry loc = Global.ObjectMgr.GetDefaultGraveyard(GetTeam());
                 if (loc == null && GetRace() == Race.PandarenNeutral)
                     loc = Global.ObjectMgr.GetWorldSafeLoc(3295); // The Wandering Isle, Starting Area GY
 

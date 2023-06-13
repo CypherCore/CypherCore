@@ -4211,14 +4211,14 @@ namespace Game.Entities
             // Special handle for Battlegroundmaps
             Battleground bg = GetBattleground();
             if (bg)
-                ClosestGrave = bg.GetClosestGraveYard(this);
+                ClosestGrave = bg.GetClosestGraveyard(this);
             else
             {
                 BattleField bf = BattleFieldMgr.GetBattlefieldToZoneId(GetMap(), GetZoneId());
                 if (bf != null)
-                    ClosestGrave = bf.GetClosestGraveYard(this);
+                    ClosestGrave = bf.GetClosestGraveyard(this);
                 else
-                    ClosestGrave = ObjectMgr.GetClosestGraveYard(this, GetTeam(), this);
+                    ClosestGrave = ObjectMgr.GetClosestGraveyard(this, GetTeam(), this);
             }
 
             // stop countdown until repop

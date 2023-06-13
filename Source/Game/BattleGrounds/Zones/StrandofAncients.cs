@@ -640,7 +640,7 @@ namespace Game.BattleGrounds.Zones
         {
         }
 
-        public override WorldSafeLocsEntry GetClosestGraveYard(Player player)
+        public override WorldSafeLocsEntry GetClosestGraveyard(Player player)
         {
             uint safeloc;
 

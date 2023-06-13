@@ -790,7 +790,7 @@ namespace Game.Chat
                 return false;
             }
 
-            if (Global.ObjectMgr.AddGraveYardLink(graveyardId, zoneId, team))
+            if (Global.ObjectMgr.AddGraveyardLink(graveyardId, zoneId, team, true))
                 handler.SendSysMessage(CypherStrings.CommandGraveyardlinked, graveyardId, zoneId);
             else
                 handler.SendSysMessage(CypherStrings.CommandGraveyardalrlinked, graveyardId, zoneId);
@@ -1060,19 +1060,17 @@ namespace Game.Chat
             Player player = handler.GetSession().GetPlayer();
             uint zoneId = player.GetZoneId();
 
-            WorldSafeLocsEntry graveyard = Global.ObjectMgr.GetClosestGraveYard(player, team, null);
+            WorldSafeLocsEntry graveyard = Global.ObjectMgr.GetClosestGraveyard(player, team, null);
             if (graveyard != null)
             {
                 uint graveyardId = graveyard.Id;
 
-                GraveYardData data = Global.ObjectMgr.FindGraveYardData(graveyardId, zoneId);
+                GraveyardData data = Global.ObjectMgr.FindGraveyardData(graveyardId, zoneId);
                 if (data == null)
                 {
                     handler.SendSysMessage(CypherStrings.CommandGraveyarderror, graveyardId);
                     return false;
                 }
-
-                team = (Team)data.team;
 
                 string team_name = handler.GetCypherString(CypherStrings.CommandGraveyardNoteam);
 

@@ -562,7 +562,7 @@ namespace Game.Entities
                 // If map is dungeon find linked graveyard
                 if (GetMap().IsDungeon())
                 {
-                    WorldSafeLocsEntry entry = Global.ObjectMgr.GetClosestGraveYard(this, GetTeam(), this);
+                    WorldSafeLocsEntry entry = Global.ObjectMgr.GetClosestGraveyard(this, GetTeam(), this);
                     if (entry != null)
                         m_bgData.joinPos = entry.Loc;
                     else

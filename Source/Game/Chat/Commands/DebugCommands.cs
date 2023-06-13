@@ -684,14 +684,14 @@ namespace Game.Chat
             {
                 Battleground bg = player.GetBattleground();
                 if (bg)
-                    nearestLoc = bg.GetClosestGraveYard(player);
+                    nearestLoc = bg.GetClosestGraveyard(player);
                 else
                 {
                     BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(player.GetMap(), player.GetZoneId());
                     if (bf != null)
-                        nearestLoc = bf.GetClosestGraveYard(player);
+                        nearestLoc = bf.GetClosestGraveyard(player);
                     else
-                        nearestLoc = Global.ObjectMgr.GetClosestGraveYard(player, player.GetTeam(), player);
+                        nearestLoc = Global.ObjectMgr.GetClosestGraveyard(player, player.GetTeam(), player);
                 }
             }
             else

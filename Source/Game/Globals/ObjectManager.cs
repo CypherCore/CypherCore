@@ -754,10 +754,10 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            GraveYardStorage.Clear();                                  // need for reload case
+            GraveyardStorage.Clear();                                  // need for reload case
 
-            //                                         0       1         2
-            SQLResult result = DB.World.Query("SELECT ID, GhostZone, faction FROM graveyard_zone");
+            //                                         0   1
+            SQLResult result = DB.World.Query("SELECT ID, GhostZone FROM graveyard_zone");
 
             if (result.IsEmpty())
             {
@@ -769,10 +769,8 @@ namespace Game
 
             do
             {
-                ++count;
                 uint safeLocId = result.Read<uint>(0);
                 uint zoneId = result.Read<uint>(1);
-                Team team = (Team)result.Read<uint>(2);
 
                 WorldSafeLocsEntry entry = GetWorldSafeLoc(safeLocId);
                 if (entry == null)
@@ -788,18 +786,15 @@ namespace Game
                     continue;
                 }
 
-                if (team != 0 && team != Team.Horde && team != Team.Alliance)
-                {
-                    Log.outError(LogFilter.Sql, "Table `graveyard_zone` has a record for non player faction ({0}), skipped.", team);
-                    continue;
-                }
-
-                if (!AddGraveYardLink(safeLocId, zoneId, team, false))
+                if (!AddGraveyardLink(safeLocId, zoneId, 0, false))
                     Log.outError(LogFilter.Sql, "Table `graveyard_zone` has a duplicate record for Graveyard (ID: {0}) and Zone (ID: {1}), skipped.", safeLocId, zoneId);
+
+                ++count;
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} graveyard-zone links in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
+
         public void LoadWorldSafeLocs()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -831,7 +826,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {_worldSafeLocs.Count} world locations {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
-        public WorldSafeLocsEntry GetDefaultGraveYard(Team team)
+        public WorldSafeLocsEntry GetDefaultGraveyard(Team team)
         {
             if (team == Team.Horde)
                 return GetWorldSafeLoc(10);
@@ -840,7 +835,7 @@ namespace Game
             else return null;
         }
 
-        public WorldSafeLocsEntry GetClosestGraveYard(WorldLocation location, Team team, WorldObject conditionObject)
+        public WorldSafeLocsEntry GetClosestGraveyard(WorldLocation location, Team team, WorldObject conditionObject)
         {
             float x, y, z;
             location.GetPosition(out x, out y, out z);
@@ -853,7 +848,7 @@ namespace Game
                 if (z > -500)
                 {
                     Log.outError(LogFilter.Server, "ZoneId not found for map {0} coords ({1}, {2}, {3})", MapId, x, y, z);
-                    return GetDefaultGraveYard(team);
+                    return GetDefaultGraveyard(team);
                 }
             }
 
@@ -884,7 +879,7 @@ namespace Game
             //     then check faction
             //   if mapId != graveyard.mapId (ghost in instance) and search any graveyard associated
             //     then check faction
-            var range = GraveYardStorage.LookupByKey(zoneId);
+            var range = GraveyardStorage.LookupByKey(zoneId);
             MapRecord mapEntry = CliDB.MapStorage.LookupByKey(MapId);
 
             ConditionSourceInfo conditionSource = new(conditionObject);
@@ -894,7 +889,7 @@ namespace Game
             {
                 if (zoneId != 0) // zone == 0 can't be fixed, used by bliz for bugged zones
                     Log.outError(LogFilter.Sql, "Table `game_graveyard_zone` incomplete: Zone {0} Team {1} does not have a linked graveyard.", zoneId, team);
-                return GetDefaultGraveYard(team);
+                return GetDefaultGraveyard(team);
             }
 
             // at corpse map
@@ -912,24 +907,36 @@ namespace Game
 
             foreach (var data in range)
             {
-                WorldSafeLocsEntry entry = GetWorldSafeLoc(data.safeLocId);
+                WorldSafeLocsEntry entry = GetWorldSafeLoc(data.SafeLocId);
                 if (entry == null)
                 {
-                    Log.outError(LogFilter.Sql, "Table `game_graveyard_zone` has record for not existing graveyard (WorldSafeLocs.dbc id) {0}, skipped.", data.safeLocId);
+                    Log.outError(LogFilter.Sql, "Table `game_graveyard_zone` has record for not existing graveyard (WorldSafeLocs.dbc id) {0}, skipped.", data.SafeLocId);
                     continue;
                 }
 
-                // skip enemy faction graveyard
-                // team == 0 case can be at call from .neargrave
-                if (data.team != 0 && team != 0 && data.team != (uint)team)
-                    continue;
-
                 if (conditionObject)
                 {
-                    if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.Graveyard, data.safeLocId, conditionSource))
+                    if (!Global.ConditionMgr.IsObjectMeetToConditions(conditionSource, data.Conditions))
                         continue;
 
                     if (entry.Loc.GetMapId() == mapEntry.ParentMapID && !conditionObject.GetPhaseShift().HasVisibleMapId(entry.Loc.GetMapId()))
+                        continue;
+                }
+                else if (team != 0)
+                {
+                    bool teamConditionMet = true;
+                    foreach (Condition cond in data.Conditions)
+                    {
+                        if (cond.ConditionType != ConditionTypes.Team)
+                            continue;
+
+                        if (cond.ConditionValue1 == (uint)team)
+                            continue;
+
+                        teamConditionMet = false;
+                    }
+
+                    if (!teamConditionMet)
                         continue;
                 }
 
@@ -995,12 +1002,12 @@ namespace Game
             return entryFar;
         }
 
-        public GraveYardData FindGraveYardData(uint id, uint zoneId)
+        public GraveyardData FindGraveyardData(uint id, uint zoneId)
         {
-            var range = GraveYardStorage.LookupByKey(zoneId);
+            var range = GraveyardStorage.LookupByKey(zoneId);
             foreach (var data in range)
             {
-                if (data.safeLocId == id)
+                if (data.SafeLocId == id)
                     return data;
             }
             return null;
@@ -1010,22 +1017,22 @@ namespace Game
         {
             return _worldSafeLocs.LookupByKey(id);
         }
+
         public Dictionary<uint, WorldSafeLocsEntry> GetWorldSafeLocs()
         {
             return _worldSafeLocs;
         }
 
-        public bool AddGraveYardLink(uint id, uint zoneId, Team team, bool persist = true)
+        public bool AddGraveyardLink(uint id, uint zoneId, Team team, bool persist = true)
         {
-            if (FindGraveYardData(id, zoneId) != null)
+            if (FindGraveyardData(id, zoneId) != null)
                 return false;
 
             // add link to loaded data
-            GraveYardData data = new();
-            data.safeLocId = id;
-            data.team = (uint)team;
+            GraveyardData data = new();
+            data.SafeLocId = id;
 
-            GraveYardStorage.Add(zoneId, data);
+            GraveyardStorage.Add(zoneId, data);
 
             // add link to DB
             if (persist)
@@ -1034,58 +1041,38 @@ namespace Game
 
                 stmt.AddValue(0, id);
                 stmt.AddValue(1, zoneId);
-                stmt.AddValue(2, (uint)team);
 
                 DB.World.Execute(stmt);
+
+                // Store graveyard condition if team is set
+                if (team != 0)
+                {
+                    PreparedStatement conditionStmt = WorldDatabase.GetPreparedStatement(WorldStatements.INS_CONDITION);
+                    conditionStmt.AddValue(0, (uint)ConditionSourceType.Graveyard); // SourceTypeOrReferenceId
+                    conditionStmt.AddValue(1, zoneId); // SourceGroup
+                    conditionStmt.AddValue(2, id); // SourceEntry
+                    conditionStmt.AddValue(3, 0); // SourceId
+                    conditionStmt.AddValue(4, 0); // ElseGroup
+                    conditionStmt.AddValue(5, (uint)ConditionTypes.Team); // ConditionTypeOrReference
+                    conditionStmt.AddValue(6, 0); // ConditionTarget
+                    conditionStmt.AddValue(7, (uint)team); // ConditionValue1
+                    conditionStmt.AddValue(8, 0); // ConditionValue2
+                    conditionStmt.AddValue(9, 0); // ConditionValue3
+                    conditionStmt.AddValue(10, 0); // NegativeCondition
+                    conditionStmt.AddValue(11, 0); // ErrorType
+                    conditionStmt.AddValue(12, 0); // ErrorTextId
+                    conditionStmt.AddValue(13, ""); // ScriptName
+                    conditionStmt.AddValue(14, ""); // Comment
+
+                    DB.World.Execute(conditionStmt);
+
+                    // reload conditions to make sure everything is loaded as it should be
+                    Global.ConditionMgr.LoadConditions(true);
+                    //Global.ScriptMgr.NotifyScriptIDUpdate();
+                }
             }
 
             return true;
-        }
-        public void RemoveGraveYardLink(uint id, uint zoneId, Team team, bool persist = false)
-        {
-            var range = GraveYardStorage.LookupByKey(zoneId);
-            if (range.Empty())
-            {
-                Log.outError(LogFilter.Sql, "Table `game_graveyard_zone` incomplete: Zone {0} Team {1} does not have a linked graveyard.", zoneId, team);
-                return;
-            }
-
-            bool found = false;
-
-
-            foreach (var data in range)
-            {
-                // skip not matching safezone id
-                if (data.safeLocId != id)
-                    continue;
-
-                // skip enemy faction graveyard at same map (normal area, city, or Battleground)
-                // team == 0 case can be at call from .neargrave
-                if (data.team != 0 && team != 0 && data.team != (uint)team)
-                    continue;
-
-                found = true;
-                break;
-            }
-
-            // no match, return
-            if (!found)
-                return;
-
-            // remove from links
-            GraveYardStorage.Remove(zoneId);
-
-            // remove link from DB
-            if (persist)
-            {
-                PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.DEL_GRAVEYARD_ZONE);
-
-                stmt.AddValue(0, id);
-                stmt.AddValue(1, zoneId);
-                stmt.AddValue(2, (uint)team);
-
-                DB.World.Execute(stmt);
-            }
         }
 
         //Scripts
@@ -10893,7 +10880,7 @@ namespace Game
         Dictionary<(uint mapId, Difficulty difficulty), Dictionary<uint, CellObjectGuids>> mapObjectGuidsStore = new();
         Dictionary<(uint mapId, Difficulty diffuculty, uint phaseId), Dictionary<uint, CellObjectGuids>> mapPersonalObjectGuidsStore = new();
         Dictionary<uint, InstanceTemplate> instanceTemplateStorage = new();
-        public MultiMap<uint, GraveYardData> GraveYardStorage = new();
+        public MultiMap<uint, GraveyardData> GraveyardStorage = new();
         List<ushort> _transportMaps = new();
         Dictionary<uint, SpawnGroupTemplateData> _spawnGroupDataStorage = new();
         MultiMap<uint, SpawnMetadata> _spawnGroupMapStorage = new();
@@ -11402,10 +11389,10 @@ namespace Game
         public WorldLocation Loc;
     }
 
-    public class GraveYardData
+    public class GraveyardData
     {
-        public uint safeLocId;
-        public uint team;
+        public uint SafeLocId;
+        public List<Condition> Conditions;
     }
 
     public class QuestPOIBlobData

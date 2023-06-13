@@ -67,7 +67,7 @@ namespace Game.BattleFields
             Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgAttacker, (int)GetAttackerTeam(), false, m_Map);
             Global.WorldStateMgr.SetValue(WGConst.ClockWorldState[1], (int)(GameTime.GetGameTime() + m_Timer / Time.InMilliseconds), false, m_Map);
 
-            foreach (var gy in WGConst.WGGraveYard)
+            foreach (var gy in WGConst.WGGraveyard)
             {
                 BfGraveyardWG graveyard = new(this);
 

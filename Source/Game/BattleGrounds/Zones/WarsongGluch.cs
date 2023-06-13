@@ -797,7 +797,7 @@ namespace Game.BattleGrounds.Zones
             return true;
         }
 
-        public override WorldSafeLocsEntry GetClosestGraveYard(Player player)
+        public override WorldSafeLocsEntry GetClosestGraveyard(Player player)
         {
             //if status in progress, it returns main graveyards with spiritguides
             //else it will return the graveyard in the flagroom - this is especially good

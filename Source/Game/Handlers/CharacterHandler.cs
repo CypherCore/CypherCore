@@ -5,6 +5,7 @@ using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
 using Game.Cache;
+using Game.Conditions;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
@@ -2403,13 +2404,16 @@ namespace Game
             uint team = (uint)GetPlayer().GetTeam();
 
             List<uint> graveyardIds = new();
-            var range = Global.ObjectMgr.GraveYardStorage.LookupByKey(zoneId);
+            var range = Global.ObjectMgr.GraveyardStorage.LookupByKey(zoneId);
 
             for (uint i = 0; i < range.Count && graveyardIds.Count < 16; ++i) // client max
             {
                 var gYard = range[(int)i];
-                if (gYard.team == 0 || gYard.team == team)
-                    graveyardIds.Add(i);
+                ConditionSourceInfo conditionSource = new(_player);
+                if (!Global.ConditionMgr.IsObjectMeetToConditions(conditionSource, gYard.Conditions))
+                    continue;
+
+                graveyardIds.Add(i);
             }
 
             if (graveyardIds.Empty())

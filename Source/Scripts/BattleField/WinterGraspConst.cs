@@ -16,7 +16,7 @@ namespace Game.BattleFields
         public const byte MaxWorkshops = 6;
 
         #region Data
-        public static BfWGCoordGY[] WGGraveYard =
+        public static BfWGCoordGY[] WGGraveyard =
         {
             new BfWGCoordGY(5104.750f, 2300.940f, 368.579f, 0.733038f, 1329, WGGossipText.GYNE, TeamId.Neutral),
             new BfWGCoordGY(5099.120f, 3466.036f, 368.484f, 5.317802f, 1330, WGGossipText.GYNW, TeamId.Neutral),

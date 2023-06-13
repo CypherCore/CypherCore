@@ -557,7 +557,7 @@ namespace Game.BattleFields
             return null;
         }
 
-        public WorldSafeLocsEntry GetClosestGraveYard(Player player)
+        public WorldSafeLocsEntry GetClosestGraveyard(Player player)
         {
             BfGraveyard closestGY = null;
             float maxdist = -1;
