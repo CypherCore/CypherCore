@@ -2847,7 +2847,7 @@ namespace Game.Entities
                 if (questGiver.IsGossip())
                     packet.LaunchGossip = true;
                 else if (questGiver.IsQuestGiver())
-                    packet.LaunchQuest = true;
+                    packet.LaunchQuest = (GetQuestDialogStatus(questGiver) & ~QuestGiverStatus.Future) != QuestGiverStatus.None;
                 else if (quest.NextQuestInChain != 0 && !quest.HasFlag(QuestFlags.AutoComplete))
                 {
                     Quest rewardQuest = Global.ObjectMgr.GetQuestTemplate(quest.NextQuestInChain);
