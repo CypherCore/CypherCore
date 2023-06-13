@@ -314,6 +314,32 @@ namespace Scripts.Spells.Priest
         }
     }
 
+    [Script] // 204883 - Circle of Healing
+    class spell_pri_circle_of_healing : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellEffect(spellInfo.Id, 1);
+        }
+
+        void FilterTargets(List<WorldObject> targets)
+        {
+            // Note: we must remove one since target is always chosen.
+            uint maxTargets = (uint)(GetSpellInfo().GetEffect(1).CalcValue(GetCaster()) - 1);
+
+            SelectRandomInjuredTargets(targets, maxTargets, true);
+
+            Unit explicitTarget = GetExplTargetUnit();
+            if (explicitTarget != null)
+                targets.Insert(0, explicitTarget);
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaAlly));
+        }
+    }
+    
     [Script] // 64844 - Divine Hymn
     class spell_pri_divine_hymn : SpellScript
     {
