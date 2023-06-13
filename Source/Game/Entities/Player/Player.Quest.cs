@@ -2432,6 +2432,8 @@ namespace Game.Entities
         public void UpdateQuestObjectiveProgress(QuestObjectiveType objectiveType, int objectId, long addCount, ObjectGuid victimGuid = default)
         {
             bool anyObjectiveChangedCompletionState = false;
+            bool updatePhaseShift = false;
+            bool updateZoneAuras = false;
 
             foreach (var objectiveStatusData in m_questObjectiveStatus.LookupByKey((objectiveType, objectId)))
             {
@@ -2535,6 +2537,20 @@ namespace Game.Entities
                     if (objectiveWasComplete != objectiveIsNowComplete)
                         anyObjectiveChangedCompletionState = true;
 
+                    if (objectiveIsNowComplete && objective.CompletionEffect != null)
+                    {
+                        if (objective.CompletionEffect.GameEventId.HasValue)
+                            GameEvents.Trigger(objective.CompletionEffect.GameEventId.Value, this, null);
+                        if (objective.CompletionEffect.SpellId.HasValue)
+                            CastSpell(this, objective.CompletionEffect.SpellId.Value, true);
+                        if (objective.CompletionEffect.ConversationId.HasValue)
+                            Conversation.CreateConversation(objective.CompletionEffect.ConversationId.Value, this, GetPosition(), GetGUID());
+                        if (objective.CompletionEffect.UpdatePhaseShift)
+                            updatePhaseShift = true;
+                        if (objective.CompletionEffect.UpdateZoneAuras)
+                            updateZoneAuras = true;
+                    }
+
                     if (objectiveIsNowComplete && CanCompleteQuest(questId, objective.Id))
                         CompleteQuest(questId);
                     else if (objectiveStatusData.QuestStatusPair.Status.Status == QuestStatus.Complete)
@@ -2545,7 +2561,14 @@ namespace Game.Entities
             if (anyObjectiveChangedCompletionState)
                 UpdateVisibleGameobjectsOrSpellClicks();
 
-            PhasingHandler.OnConditionChange(this);
+            if (updatePhaseShift)
+                PhasingHandler.OnConditionChange(this);
+
+            if (updateZoneAuras)
+            {
+                UpdateZoneDependentAuras(GetZoneId());
+                UpdateAreaDependentAuras(GetAreaId());
+            }
         }
 
         public bool HasQuestForItem(uint itemid)

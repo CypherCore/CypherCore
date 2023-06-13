@@ -235,7 +235,7 @@ namespace Game
 
         public void LoadQuestObjective(SQLFields fields)
         {
-            QuestObjective obj = new();  
+            QuestObjective obj = new();
             obj.QuestID = fields.Read<uint>(0);
             obj.Id = fields.Read<uint>(1);
             obj.Type = (QuestObjectiveType)fields.Read<byte>(2);
@@ -246,6 +246,31 @@ namespace Game
             obj.Flags2 = fields.Read<uint>(7);
             obj.ProgressBarWeight = fields.Read<float>(8);
             obj.Description = fields.Read<string>(9);
+
+            bool hasCompletionEffect = false;
+            for (var i = 10; i < 15; ++i)
+            {
+                if (!fields.IsNull(i))
+                {
+                    hasCompletionEffect = true;
+                    break;
+                }
+            }
+
+            if (hasCompletionEffect)
+            {
+                obj.CompletionEffect = new QuestObjectiveAction();
+                if (!fields.IsNull(10))
+                    obj.CompletionEffect.GameEventId = fields.Read<uint>(10);
+                if (!fields.IsNull(11))
+                    obj.CompletionEffect.SpellId = fields.Read<uint>(11);
+                if (!fields.IsNull(12))
+                    obj.CompletionEffect.ConversationId = fields.Read<uint>(12);
+                if (!fields.IsNull(13))
+                    obj.CompletionEffect.UpdatePhaseShift = fields.Read<bool>(13);
+                if (!fields.IsNull(14))
+                    obj.CompletionEffect.UpdateZoneAuras = fields.Read<bool>(14);
+            }
 
             Objectives.Add(obj);
             _usedQuestObjectiveTypes[(int)obj.Type] = true;
@@ -996,6 +1021,15 @@ namespace Game
         public StringArray Text = new((int)Locale.Total);
     }
 
+    public class QuestObjectiveAction
+    {
+        public uint? GameEventId;
+        public uint? SpellId;
+        public uint? ConversationId;
+        public bool UpdatePhaseShift;
+        public bool UpdateZoneAuras;
+    }
+
     public class QuestObjective
     {
         public uint Id;
@@ -1009,6 +1043,7 @@ namespace Game
         public float ProgressBarWeight;
         public string Description;
         public int[] VisualEffects = Array.Empty<int>();
+        public QuestObjectiveAction CompletionEffect;
 
         public bool IsStoringValue()
         {
