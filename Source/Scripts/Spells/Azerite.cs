@@ -55,7 +55,7 @@ namespace Scripts.Spells.Azerite
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return spellInfo.GetEffects().Count > 1 && ValidateSpellInfo(spellInfo.GetEffect(1).TriggerSpell);
+            return ValidateSpellEffect(spellInfo.Id, 1) && ValidateSpellInfo(spellInfo.GetEffect(1).TriggerSpell);
         }
 
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -420,7 +420,7 @@ namespace Scripts.Spells.Azerite
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.EchoingBladesTrait)
-            && Global.SpellMgr.GetSpellInfo(SpellIds.EchoingBladesTrait, Difficulty.None).GetEffects().Count > 2;
+            && ValidateSpellEffect(SpellIds.EchoingBladesTrait, 2);
         }
 
         void CalculateDamage(uint effIndex)

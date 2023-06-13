@@ -45,6 +45,35 @@ namespace Game.Scripting
             return allValid;
         }
 
+        public bool ValidateSpellEffect(params (uint spellId, uint effectIndex)[] pairs)
+        {
+            bool allValid = true;
+            foreach (var (spellId, effectIndex) in pairs)
+            {
+                if (!ValidateSpellEffect(spellId, effectIndex))
+                    allValid = false;
+            }
+            return allValid;
+        }
+
+        public bool ValidateSpellEffect(uint spellId, uint effectIndex)
+        {
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
+            if (spellInfo == null)
+            {
+                Log.outError(LogFilter.Scripts, $"BaseSpellScript::ValidateSpellEffect: Spell {spellId} does not exist.");
+                return false;
+            }
+
+            if (spellInfo.GetEffects().Count <= effectIndex)
+            {
+                Log.outError(LogFilter.Scripts, $"BaseSpellScript::ValidateSpellEffect: Spell {spellId} does not have EFFECT_{effectIndex}.");
+                return false;
+            }
+
+            return true;
+        }
+
         public void _Register()
         {
             m_currentScriptState = (byte)SpellScriptState.Registration;

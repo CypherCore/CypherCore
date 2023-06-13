@@ -62,7 +62,7 @@ namespace Scripts.Spells.Rogue
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return spellInfo.GetEffects().Count > 3;
+            return ValidateSpellEffect(spellInfo.Id, 3);
         }
 
         void HandleHitDamage(uint effIndex)
@@ -615,7 +615,7 @@ namespace Scripts.Spells.Rogue
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.PremeditationAura, SpellIds.SliceAndDice, SpellIds.PremeditationPassive)
-            && Global.SpellMgr.GetSpellInfo(SpellIds.PremeditationPassive, Difficulty.None).GetEffects().Count > 0;
+            && ValidateSpellEffect(SpellIds.PremeditationPassive, 0);
         }
 
         SpellCastResult HandleCheckCast()

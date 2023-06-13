@@ -3694,7 +3694,7 @@ namespace Scripts.Spells.Items
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return spellInfo.GetEffects().Count > 1;
+            return ValidateSpellEffect(spellInfo.Id, 1);
         }
 
         public override bool Load()
@@ -3720,7 +3720,7 @@ namespace Scripts.Spells.Items
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return spellInfo.GetEffects().Count > 1;
+            return ValidateSpellEffect(spellInfo.Id, 1);
         }
 
         public override bool Load()
@@ -3826,7 +3826,7 @@ namespace Scripts.Spells.Items
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return spellInfo.GetEffects().Count > 1;
+            return ValidateSpellEffect(spellInfo.Id, 1);
         }
 
         void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
@@ -4106,7 +4106,7 @@ namespace Scripts.Spells.Items
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return spellInfo.GetEffects().Count > 1
+            return ValidateSpellEffect(spellInfo.Id, 1)
                 && ValidateSpellInfo(spellInfo.GetEffect(1).TriggerSpell);
         }
 
@@ -4210,7 +4210,7 @@ namespace Scripts.Spells.Items
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return spellInfo.GetEffects().Count > 1;
+            return ValidateSpellEffect(spellInfo.Id, 1);
         }
 
         bool CheckHealth(AuraEffect aurEff, ProcEventInfo eventInfo)

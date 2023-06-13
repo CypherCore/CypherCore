@@ -1349,7 +1349,7 @@ namespace Scripts.Spells.Quest
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return spellInfo.GetEffects().Count > 1
+            return ValidateSpellEffect(spellInfo.Id, 1)
                 && ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue())
                 && Global.ObjectMgr.GetQuestTemplate((uint)spellInfo.GetEffect(1).CalcValue()) != null;
         }

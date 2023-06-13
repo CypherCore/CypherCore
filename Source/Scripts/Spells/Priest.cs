@@ -206,8 +206,7 @@ namespace Scripts.Spells.Priest
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.AtonementHeal, SpellIds.SinsOfTheMany)
-            && spellInfo.GetEffects().Count > 1
-            && Global.SpellMgr.GetSpellInfo(SpellIds.SinsOfTheMany, Difficulty.None).GetEffects().Count > 2;
+            && ValidateSpellEffect((spellInfo.Id, 1), (SpellIds.SinsOfTheMany, 2));
         }
 
         bool CheckProc(ProcEventInfo eventInfo)
@@ -483,7 +482,7 @@ namespace Scripts.Spells.Priest
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.GuardianSpiritHeal) && spellInfo.GetEffects().Count > 1;
+            return ValidateSpellInfo(SpellIds.GuardianSpiritHeal) && ValidateSpellEffect(spellInfo.Id, 1);
         }
 
         public override bool Load()
@@ -564,9 +563,7 @@ namespace Scripts.Spells.Priest
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Heal, SpellIds.FlashHeal, SpellIds.PrayerOfHealing, SpellIds.Renew, SpellIds.Smite, SpellIds.HolyWordChastise, SpellIds.HolyWordSanctify, SpellIds.HolyWordSerenity)
-                && Global.SpellMgr.GetSpellInfo(SpellIds.HolyWordSerenity, Difficulty.None).GetEffects().Count > 1
-                && Global.SpellMgr.GetSpellInfo(SpellIds.HolyWordSanctify, Difficulty.None).GetEffects().Count > 3
-                && Global.SpellMgr.GetSpellInfo(SpellIds.HolyWordChastise, Difficulty.None).GetEffects().Count > 1;
+                && ValidateSpellEffect((SpellIds.HolyWordSerenity, 1), (SpellIds.HolyWordSanctify, 3), (SpellIds.HolyWordChastise, 1));
         }
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -907,7 +904,7 @@ namespace Scripts.Spells.Priest
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementTriggered, SpellIds.Trinity) && spellInfo.GetEffects().Count > 3;
+            return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementTriggered, SpellIds.Trinity) && ValidateSpellEffect(spellInfo.Id, 3);
         }
 
         void OnTargetSelect(List<WorldObject> targets)
@@ -1270,7 +1267,7 @@ namespace Scripts.Spells.Priest
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.PurgeTheWickedPeriodic, SpellIds.RevelInPurity)
-                && Global.SpellMgr.GetSpellInfo(SpellIds.RevelInPurity, Difficulty.None)?.GetEffects().Count > 1;
+                && ValidateSpellEffect(SpellIds.RevelInPurity, 1);
         }
 
         void FilterTargets(List<WorldObject> targets)

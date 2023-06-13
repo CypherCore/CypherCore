@@ -394,7 +394,7 @@ namespace Scripts.Spells.Druid
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.IncarnationKingOfTheJungle)
-            && Global.SpellMgr.GetSpellInfo(SpellIds.IncarnationKingOfTheJungle, Difficulty.None).GetEffects().Count > 1;
+            && ValidateSpellEffect(SpellIds.IncarnationKingOfTheJungle, 1);
         }
 
         void HandleHitTargetBurn(uint effIndex)
@@ -1445,7 +1445,7 @@ namespace Scripts.Spells.Druid
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            if (spellInfo.GetEffects().Count <= 2 || spellInfo.GetEffect(2).IsEffect() || spellInfo.GetEffect(2).CalcValue() <= 0)
+            if (!ValidateSpellEffect(spellInfo.Id, 2) || spellInfo.GetEffect(2).IsEffect() || spellInfo.GetEffect(2).CalcValue() <= 0)
                 return false;
             return true;
         }

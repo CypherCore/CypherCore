@@ -190,7 +190,7 @@ namespace Scripts.Spells.Shaman
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ChainLightningEnergize, SpellIds.MaelstromController)
-                && Global.SpellMgr.GetSpellInfo(SpellIds.MaelstromController, Difficulty.None).GetEffects().Count > 4;
+                && ValidateSpellEffect(SpellIds.MaelstromController, 4);
         }
 
         void HandleScript(uint effIndex)
@@ -213,7 +213,7 @@ namespace Scripts.Spells.Shaman
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ChainLightningOverloadEnergize, SpellIds.MaelstromController)
-                && Global.SpellMgr.GetSpellInfo(SpellIds.MaelstromController, Difficulty.None).GetEffects().Count > 5;
+                && ValidateSpellEffect(SpellIds.MaelstromController, 5);
         }
 
         void HandleScript(uint effIndex)
@@ -273,7 +273,7 @@ namespace Scripts.Spells.Shaman
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return spellInfo.GetEffects().Count > 1;
+            return ValidateSpellEffect(spellInfo.Id, 1);
         }
 
         void FilterTargets(List<WorldObject> targets)
@@ -447,7 +447,7 @@ namespace Scripts.Spells.Shaman
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.EarthquakeKnockingDown) && spellInfo.GetEffects().Count > 1;
+            return ValidateSpellInfo(SpellIds.EarthquakeKnockingDown) && ValidateSpellEffect(spellInfo.Id, 1);
         }
 
         void HandleDamageCalc(uint effIndex)
@@ -491,7 +491,7 @@ namespace Scripts.Spells.Shaman
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ElementalBlastCrit, SpellIds.ElementalBlastHaste, SpellIds.ElementalBlastMastery, SpellIds.MaelstromController)
-                && Global.SpellMgr.GetSpellInfo(SpellIds.MaelstromController, Difficulty.None).GetEffects().Count > 10;
+                && ValidateSpellEffect(SpellIds.MaelstromController, 10);
         }
 
         void HandleEnergize(uint effIndex)
@@ -988,7 +988,7 @@ namespace Scripts.Spells.Shaman
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LightningBoltEnergize, SpellIds.MaelstromController)
-                && Global.SpellMgr.GetSpellInfo(SpellIds.MaelstromController, Difficulty.None).GetEffects().Count > 0;
+                && ValidateSpellEffect(SpellIds.MaelstromController, 0);
         }
 
         void HandleScript(uint effIndex)
@@ -1011,7 +1011,7 @@ namespace Scripts.Spells.Shaman
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LightningBoltOverloadEnergize, SpellIds.MaelstromController)
-                && Global.SpellMgr.GetSpellInfo(SpellIds.MaelstromController, Difficulty.None).GetEffects().Count > 1;
+                && ValidateSpellEffect(SpellIds.MaelstromController, 1);
         }
 
         void HandleScript(uint effIndex)

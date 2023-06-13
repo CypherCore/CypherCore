@@ -184,8 +184,7 @@ namespace Scripts.Spells.Paladin
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.AvengingWrath)
-                && spellInfo.GetEffects().Count >= 1;
+            return ValidateSpellInfo(SpellIds.AvengingWrath) && ValidateSpellEffect(spellInfo.Id, 1);
         }
 
         bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)

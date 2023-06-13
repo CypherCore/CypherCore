@@ -191,7 +191,7 @@ namespace Scripts.Spells.Warrior
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ColossusSmashAura, SpellIds.InForTheKill, SpellIds.InForTheKillHaste)
-            && Global.SpellMgr.GetSpellInfo(SpellIds.InForTheKill, Difficulty.None).GetEffects().Count > 2;
+            && ValidateSpellEffect(SpellIds.InForTheKill, 2);
         }
 
         void HandleHit()
@@ -412,7 +412,7 @@ namespace Scripts.Spells.Warrior
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.Stoicism) && spellInfo.GetEffects().Count > 1;
+            return ValidateSpellInfo(SpellIds.Stoicism) && ValidateSpellEffect(spellInfo.Id, 1);
         }
 
         void HandleProc(ProcEventInfo eventInfo)
@@ -523,10 +523,7 @@ namespace Scripts.Spells.Warrior
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            if (!ValidateSpellInfo(SpellIds.Shockwave, SpellIds.ShockwaveStun))
-                return false;
-
-            return spellInfo.GetEffects().Count > 3;
+            return !ValidateSpellInfo(SpellIds.Shockwave, SpellIds.ShockwaveStun) && ValidateSpellEffect(spellInfo.Id, 3);
         }
 
         public override bool Load()

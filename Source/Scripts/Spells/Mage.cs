@@ -142,7 +142,7 @@ namespace Scripts.Spells.Mage
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.ArcaneBarrageR3, SpellIds.ArcaneBarrageEnergize) && spellInfo.GetEffects().Count > 1;
+            return ValidateSpellInfo(SpellIds.ArcaneBarrageR3, SpellIds.ArcaneBarrageEnergize) && ValidateSpellEffect(spellInfo.Id, 1);
         }
 
         void ConsumeArcaneCharges()
@@ -205,7 +205,7 @@ namespace Scripts.Spells.Mage
             if (!ValidateSpellInfo(SpellIds.ArcaneMage, SpellIds.Reverberate))
                 return false;
 
-            if (spellInfo.GetEffects().Count <= 1)
+            if (!ValidateSpellEffect(spellInfo.Id, 1))
                 return false;
 
             return spellInfo.GetEffect(1).IsEffect(SpellEffectName.SchoolDamage);
@@ -357,7 +357,7 @@ namespace Scripts.Spells.Mage
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return spellInfo.GetEffects().Count > 2 && ValidateSpellInfo(SpellIds.CauterizeDot, SpellIds.Cauterized, spellInfo.GetEffect(2).TriggerSpell);
+            return ValidateSpellEffect(spellInfo.Id, 2) && ValidateSpellInfo(SpellIds.CauterizeDot, SpellIds.Cauterized, spellInfo.GetEffect(2).TriggerSpell);
         }
 
         void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
@@ -611,7 +611,7 @@ namespace Scripts.Spells.Mage
         {
             return ValidateSpellInfo(SpellIds.FireBlast)
                 && CliDB.SpellCategoryStorage.HasRecord(Global.SpellMgr.GetSpellInfo(SpellIds.FireBlast, Difficulty.None).ChargeCategoryId)
-                && spellInfo.GetEffects().Count > 2;
+                && ValidateSpellEffect(spellInfo.Id, 2);
         }
 
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)

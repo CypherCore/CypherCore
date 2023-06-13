@@ -219,7 +219,7 @@ namespace Scripts.Spells.Warlock
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.GlyphOfDemonTraining, SpellIds.DevourMagicHeal) && spellInfo.GetEffects().Count > 1;
+            return ValidateSpellInfo(SpellIds.GlyphOfDemonTraining, SpellIds.DevourMagicHeal) && ValidateSpellEffect(spellInfo.Id, 1);
         }
 
         void OnSuccessfulDispel(uint effIndex)

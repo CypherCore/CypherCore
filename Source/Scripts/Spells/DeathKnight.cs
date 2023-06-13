@@ -118,7 +118,7 @@ namespace Scripts.Spells.DeathKnight
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.RunicPowerEnergize, SpellIds.VolatileShielding) && spellInfo.GetEffects().Count > 1;
+            return ValidateSpellInfo(SpellIds.RunicPowerEnergize, SpellIds.VolatileShielding) && ValidateSpellEffect(spellInfo.Id, 1);
         }
 
         public override bool Load()
@@ -418,7 +418,7 @@ namespace Scripts.Spells.DeathKnight
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.DeathStrikeEnabler, SpellIds.DeathStrikeHeal, SpellIds.BloodShieldMastery, SpellIds.BloodShieldAbsorb, SpellIds.RecentlyUsedDeathStrike, SpellIds.Frost, SpellIds.DeathStrikeOffhand)
-                && spellInfo.GetEffects().Count > 2;
+                && ValidateSpellEffect(spellInfo.Id, 2);
         }
 
         void HandleDummy(uint effIndex)
@@ -519,7 +519,7 @@ namespace Scripts.Spells.DeathKnight
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.CorpseExplosionTriggered) && spellInfo.GetEffects().Count > 2;
+            return ValidateSpellInfo(SpellIds.CorpseExplosionTriggered) && ValidateSpellEffect(spellInfo.Id, 2);
         }
 
         void HandleDamage(uint effIndex)
@@ -648,7 +648,7 @@ namespace Scripts.Spells.DeathKnight
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Obliteration, SpellIds.ObliterationRuneEnergize, SpellIds.KillingMachineProc)
-                && Global.SpellMgr.GetSpellInfo(SpellIds.Obliteration, Difficulty.None).GetEffects().Count > 1;
+                && ValidateSpellEffect(SpellIds.Obliteration, 1);
         }
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -779,7 +779,7 @@ namespace Scripts.Spells.DeathKnight
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return spellInfo.GetEffects().Count > 1 && ValidateSpellInfo(SpellIds.FrostScythe);
+            return ValidateSpellEffect(spellInfo.Id, 1) && ValidateSpellInfo(SpellIds.FrostScythe);
         }
 
         bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
