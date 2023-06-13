@@ -82,6 +82,7 @@ namespace Scripts.Spells.Priest
         public const uint RenewedHope = 197469;
         public const uint RenewedHopeEffect = 197470;
         public const uint RevelInPurity = 373003;
+        public const uint SayYourPrayers = 391186;
         public const uint ShadowMendDamage = 186439;
         public const uint ShadowMendPeriodicDummy = 187464;
         public const uint ShadowWordPain = 589;
@@ -1137,7 +1138,7 @@ namespace Scripts.Spells.Priest
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.PrayerOfMendingHeal, SpellIds.PrayerOfMendingJump);
+            return ValidateSpellInfo(SpellIds.PrayerOfMendingHeal, SpellIds.PrayerOfMendingJump, SpellIds.SayYourPrayers) && ValidateSpellEffect(SpellIds.SayYourPrayers, 0);
         }
 
         void HandleHeal(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1157,7 +1158,15 @@ namespace Scripts.Spells.Priest
                 {
                     CastSpellExtraArgs args = new(aurEff);
                     args.OriginalCaster = caster.GetGUID();
-                    args.AddSpellMod(SpellValueMod.BasePoint0, stackAmount - 1);
+
+                    int newStackAmount = stackAmount - 1;
+                    AuraEffect sayYourPrayers = caster.GetAuraEffect(SpellIds.SayYourPrayers, 0);
+                    if (sayYourPrayers != null)
+                        if (RandomHelper.randChance(sayYourPrayers.GetAmount()))
+                            ++newStackAmount;
+
+                    args.AddSpellMod(SpellValueMod.BasePoint0, newStackAmount);
+
                     target.CastSpell(target, SpellIds.PrayerOfMendingJump, args);
                 }
 
