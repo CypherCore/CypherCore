@@ -118,26 +118,67 @@ namespace Game.Spells
             if (!GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack))
                 amount *= GetBase().GetStackAmount();
 
-            if (caster && GetBase().GetAuraType() == AuraObjectType.Unit)
-            {
-                uint stackAmountForBonuses = !GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack) ? GetBase().GetStackAmount() : 1u;
+            _estimatedAmount = CalculateEstimatedAmount(caster, amount);
 
-                switch (GetAuraType())
-                {
-                    case AuraType.PeriodicDamage:
-                    case AuraType.PeriodicLeech:
-                        _estimatedAmount = caster.SpellDamageBonusDone(GetBase().GetUnitOwner(), GetSpellInfo(), (uint)amount, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses);
-                        break;
-                    case AuraType.PeriodicHeal:
-                        _estimatedAmount = caster.SpellHealingBonusDone(GetBase().GetUnitOwner(), GetSpellInfo(), (uint)amount, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses);
-                        break;
-                    default:
-                        break;
-                }
-            }
             return amount;
         }
 
+        public static float? CalculateEstimatedAmount(Unit caster, Unit target, SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, int amount, byte stack)
+        {
+            uint stackAmountForBonuses = !spellEffectInfo.EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack) ? stack : 1u;
+
+            switch (spellEffectInfo.ApplyAuraName)
+            {
+                case AuraType.PeriodicDamage:
+                case AuraType.PeriodicLeech:
+                    return caster.SpellDamageBonusDone(target, spellInfo, (uint)amount, DamageEffectType.DOT, spellEffectInfo, stackAmountForBonuses);
+                case AuraType.PeriodicHeal:
+                    return caster.SpellHealingBonusDone(target, spellInfo, (uint)amount, DamageEffectType.DOT, spellEffectInfo, stackAmountForBonuses);
+                default:
+                    break;
+            }
+
+            return null;
+        }
+
+        public float? CalculateEstimatedAmount(Unit caster, int amount)
+        {
+            if (!caster || GetBase().GetAuraType() != AuraObjectType.Unit)
+                return null;
+
+            return CalculateEstimatedAmount(caster, GetBase().GetUnitOwner(), GetSpellInfo(), GetSpellEffectInfo(), amount, GetBase().GetStackAmount());
+        }
+
+        public static float CalculateEstimatedfTotalPeriodicAmount(Unit caster, Unit target, SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, float amount, byte stack)
+        {
+            int maxDuration = Aura.CalcMaxDuration(spellInfo, caster);
+            if (maxDuration <= 0)
+                return 0.0f;
+
+            int period = (int)spellEffectInfo.ApplyAuraPeriod;
+            if (period == 0)
+                return 0.0f;
+
+            Player modOwner = caster.GetSpellModOwner();
+            if (modOwner != null)
+                modOwner.ApplySpellMod(spellInfo, SpellModOp.Period, ref period);
+
+            // Haste modifies periodic time of channeled spells
+            if (spellInfo.IsChanneled())
+                caster.ModSpellDurationTime(spellInfo, ref period);
+            else if (spellInfo.HasAttribute(SpellAttr5.SpellHasteAffectsPeriodic))
+                period = (int)(period * caster.m_unitData.ModCastingSpeed);
+
+            if (period == 0)
+                return 0.0f;
+
+            float totalTicks = (float)maxDuration / period;
+            if (spellInfo.HasAttribute(SpellAttr5.ExtraInitialPeriod))
+                totalTicks += 1.0f;
+
+            return totalTicks * CalculateEstimatedAmount(caster, target, spellInfo, spellEffectInfo, (int)amount, stack).GetValueOrDefault(amount);
+        }
+        
         public uint GetTotalTicks()
         {
             uint totalTicks = 0;
