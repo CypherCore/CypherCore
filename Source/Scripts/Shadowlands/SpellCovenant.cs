@@ -34,4 +34,32 @@ namespace Scripts.Shadowlands
             DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.ProcTriggerSpell));
         }
     }
+
+    [Script] // 332753 - Superior Tactics
+    class spell_soulbind_superior_tactics : AuraScript
+    {
+        static uint SPELL_SUPERIOR_TACTICS_COOLDOWN_AURA = 332926;
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SPELL_SUPERIOR_TACTICS_COOLDOWN_AURA);
+        }
+
+        bool CheckProc(AuraEffect aurEff, ProcEventInfo procInfo)
+        {
+            if (GetTarget().HasAura(SPELL_SUPERIOR_TACTICS_COOLDOWN_AURA))
+                return false;
+
+            // only dispels from friendly targets count
+            if (procInfo.GetHitMask().HasFlag(ProcFlagsHit.Dispel) && !procInfo.GetTypeMask().HasFlag(ProcFlags.DealHelpfulAbility | ProcFlags.DealHelpfulSpell | ProcFlags.DealHelpfulPeriodic))
+                return false;
+
+            return true;
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.ProcTriggerSpell));
+        }
+    }
 }
