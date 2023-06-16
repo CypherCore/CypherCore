@@ -1292,7 +1292,7 @@ public static partial class Detour
         ///		reference is invalid.
         public dtMeshTile getTileByRef(dtTileRef tileRef)
         {
-            if (tileRef != 0)
+            if (tileRef == 0)
                 return null;
             uint tileIndex = decodePolyIdTile((dtPolyRef)tileRef);
             uint tileSalt = decodePolyIdSalt((dtPolyRef)tileRef);
