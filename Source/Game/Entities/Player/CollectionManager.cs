@@ -229,6 +229,11 @@ namespace Game.Entities
                 _owner.GetPlayer().AddHeirloom(itemId, (uint)flags);
         }
 
+        public bool HasHeirloom(uint itemId)
+        {
+            return _heirlooms.ContainsKey(itemId);
+        }
+        
         public void UpgradeHeirloom(uint itemId, uint castItem)
         {
             Player player = _owner.GetPlayer();

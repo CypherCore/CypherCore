@@ -5575,6 +5575,16 @@ namespace Game.Spells
                         }
                         break;
                     }
+                    case SpellEffectName.CreateHeirloomItem:
+                    {
+                        if (!m_caster.IsPlayer())
+                            return SpellCastResult.BadTargets;
+
+                        if (!m_caster.ToPlayer().GetSession().GetCollectionMgr().HasHeirloom(m_misc.ItemId))
+                            return SpellCastResult.BadTargets;
+
+                        break;
+                    }
                     case SpellEffectName.GiveArtifactPower:
                     case SpellEffectName.GiveArtifactPowerNoBonus:
                     {
