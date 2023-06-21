@@ -2715,7 +2715,7 @@ namespace Game.Entities
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
             CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
-            float baseHealth = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, level, creatureDifficulty.GetHealthScalingExpansion(), creatureDifficulty.ContentTuningID, (Class)cInfo.UnitClass);
+            float baseHealth = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, level, creatureDifficulty.GetHealthScalingExpansion(), creatureDifficulty.ContentTuningID, (Class)cInfo.UnitClass, 0);
 
             return (ulong)Math.Max(baseHealth * creatureDifficulty.HealthModifier, 1.0f);
         }
@@ -2736,7 +2736,7 @@ namespace Game.Entities
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
             CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
-            return Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureAutoAttackDps, level, creatureDifficulty.GetHealthScalingExpansion(), creatureDifficulty.ContentTuningID, (Class)cInfo.UnitClass);
+            return Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureAutoAttackDps, level, creatureDifficulty.GetHealthScalingExpansion(), creatureDifficulty.ContentTuningID, (Class)cInfo.UnitClass, 0);
         }
 
         public override float GetDamageMultiplierForTarget(WorldObject target)
@@ -2753,7 +2753,7 @@ namespace Game.Entities
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
             CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
-            float baseArmor = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureArmor, level, creatureDifficulty.GetHealthScalingExpansion(), creatureDifficulty.ContentTuningID, (Class)cInfo.UnitClass);
+            float baseArmor = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureArmor, level, creatureDifficulty.GetHealthScalingExpansion(), creatureDifficulty.ContentTuningID, (Class)cInfo.UnitClass, 0);
             return baseArmor * creatureDifficulty.ArmorModifier;
         }
 

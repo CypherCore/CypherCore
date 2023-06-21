@@ -229,4 +229,12 @@ namespace Game.DataStorage
         public uint SubtitleFileDataID;
         public int SubtitleFileFormat;
     }
+
+    public sealed class MythicPlusSeasonRecord
+    {
+        public uint Id;
+        public int MilestoneSeason;
+        public int ExpansionLevel;
+        public int HeroicLFGDungeonMinGear;
+    }
 }

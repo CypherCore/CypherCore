@@ -773,7 +773,7 @@ namespace Game.Entities
                         {
                             creature.m_personalLoot = LootManager.GenerateDungeonEncounterPersonalLoot(dungeonEncounter.Id, creature.GetLootId(),
                                 LootStorage.Creature, LootType.Corpse, creature, creature.GetCreatureDifficulty().GoldMin, creature.GetCreatureDifficulty().GoldMax,
-                                (ushort)creature.GetLootMode(), creature.GetMap().GetDifficultyLootItemContext(), tappers);
+                                (ushort)creature.GetLootMode(), creature.GetMap().GetMapDifficulty(), tappers);
                         }
                         else if (!tappers.Empty())
                         {
@@ -784,7 +784,7 @@ namespace Game.Entities
 
                             uint lootid = creature.GetLootId();
                             if (lootid != 0)
-                                loot.FillLoot(lootid, LootStorage.Creature, looter, dungeonEncounter != null, false, creature.GetLootMode(), creature.GetMap().GetDifficultyLootItemContext());
+                                loot.FillLoot(lootid, LootStorage.Creature, looter, dungeonEncounter != null, false, creature.GetLootMode(), ItemBonusMgr.GetContextForPlayer(creature.GetMap().GetMapDifficulty(), looter));
 
                             if (creature.GetLootMode() > 0)
                                 loot.GenerateMoneyLoot(creature.GetCreatureDifficulty().GoldMin, creature.GetCreatureDifficulty().GoldMax);
@@ -811,7 +811,7 @@ namespace Game.Entities
 
                             uint lootid = creature.GetLootId();
                             if (lootid != 0)
-                                loot.FillLoot(lootid, LootStorage.Creature, tapper, true, false, creature.GetLootMode(), creature.GetMap().GetDifficultyLootItemContext());
+                                loot.FillLoot(lootid, LootStorage.Creature, tapper, true, false, creature.GetLootMode(), ItemBonusMgr.GetContextForPlayer(creature.GetMap().GetMapDifficulty(), tapper));
 
                             if (creature.GetLootMode() > 0)
                                 loot.GenerateMoneyLoot(creature.GetCreatureDifficulty().GoldMin, creature.GetCreatureDifficulty().GoldMax);

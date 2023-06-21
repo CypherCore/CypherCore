@@ -1132,7 +1132,15 @@ namespace Framework.Constants
         SquishUsingItemLevelAsPlayerLevel = 0x4000,
         AlwaysShowPriceInTooltip = 0x8000,
         CosmeticItem = 0x10000,
-        NoSpellEffectTooltipPrefixes = 0x20000
+        NoSpellEffectTooltipPrefixes = 0x20000,
+        IgnoreCosmeticCollectionBehavior = 0x40000,
+        NpcOnly = 0x80000,
+        NotRestorable = 0x100000,
+        DontDisplayAsCraftingReagent = 0x200000,
+        DisplayReagentQualityAsCraftedQuality = 0x400000,
+        NoSalvage = 0x800000,
+        Recraftable = 0x1000000,
+        CcTrinket = 0x2000000,
     }
 
     [Flags]

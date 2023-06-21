@@ -3228,19 +3228,6 @@ namespace Game.Maps
             return Global.DB2Mgr.GetMapDifficultyData(GetId(), GetDifficultyID());
         }
 
-        public ItemContext GetDifficultyLootItemContext()
-        {
-            MapDifficultyRecord mapDifficulty = GetMapDifficulty();
-            if (mapDifficulty != null && mapDifficulty.ItemContext != 0)
-                return (ItemContext)mapDifficulty.ItemContext;
-
-            DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(GetDifficultyID());
-            if (difficulty != null)
-                return (ItemContext)difficulty.ItemContext;
-
-            return ItemContext.None;
-        }
-
         public uint GetId()
         {
             return i_mapRecord.Id;

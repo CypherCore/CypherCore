@@ -585,7 +585,7 @@ namespace Game.Entities
                 ApplyLevelScaling();
 
                 CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
-                SetCreateHealth((uint)Math.Max(Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, petlevel, creatureDifficulty.GetHealthScalingExpansion(), m_unitData.ContentTuningID, (Class)cinfo.UnitClass) * creatureDifficulty.HealthModifier * GetHealthMod(cinfo.Rank), 1.0f));
+                SetCreateHealth((uint)Math.Max(Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, petlevel, creatureDifficulty.GetHealthScalingExpansion(), m_unitData.ContentTuningID, (Class)cinfo.UnitClass, 0) * creatureDifficulty.HealthModifier * GetHealthMod(cinfo.Rank), 1.0f));
                 SetCreateMana(stats.BaseMana);
 
                 SetCreateStat(Stats.Strength, 22);

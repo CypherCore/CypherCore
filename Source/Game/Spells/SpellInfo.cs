@@ -4306,7 +4306,7 @@ namespace Game.Spells
                         expansion = contentTuning.ExpansionID;
 
                     uint level = caster != null && caster.IsUnit() ? caster.ToUnit().GetLevel() : 1;
-                    tempValue = Global.DB2Mgr.EvaluateExpectedStat(stat, level, expansion, 0, Class.None) * BasePoints / 100.0f;
+                    tempValue = Global.DB2Mgr.EvaluateExpectedStat(stat, level, expansion, 0, Class.None, 0) * BasePoints / 100.0f;
                 }
 
                 return (int)Math.Round(tempValue);

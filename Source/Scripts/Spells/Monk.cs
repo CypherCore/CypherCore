@@ -278,7 +278,7 @@ namespace Scripts.Spells.Monk
             Unit target = GetTarget();
             float agility = target.GetStat(Stats.Agility);
             float baseAmount = MathFunctions.CalculatePct(agility, effect.GetAmount());
-            float K = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, target.GetLevel(), -2, 0, target.GetClass());
+            float K = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, target.GetLevel(), -2, 0, target.GetClass(), 0);
 
             float newAmount = (baseAmount / (baseAmount + K));
             newAmount *= multiplier;

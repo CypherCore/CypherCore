@@ -580,6 +580,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Enchant Spells Proc datas...");
             Global.SpellMgr.LoadSpellEnchantProcData();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading item bonus data...");
+            ItemBonusMgr.Load();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading Random item bonus list definitions...");
             ItemEnchantmentManager.LoadItemRandomBonusListTemplates();
 

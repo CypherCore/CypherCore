@@ -773,7 +773,7 @@ namespace Game
                     _player.SetTitle(CliDB.CharTitlesStorage.LookupByKey(reward.TitleId), false);
 
                 if (reward.PackageId != 0)
-                    _player.RewardQuestPackage((uint)reward.PackageId);
+                    _player.RewardQuestPackage((uint)reward.PackageId, ItemContext.None);
 
                 if (reward.SkillLineId != 0 && _player.HasSkill((SkillType)reward.SkillLineId))
                     _player.UpdateSkillPro((uint)reward.SkillLineId, 1000, reward.SkillPointCount);

@@ -1086,26 +1086,19 @@ namespace Game.Entities
                             {
                                 case ItemEnchantmentType.BonusListID:
                                 {
-                                    var bonusesEffect = Global.DB2Mgr.GetItemBonusList(gemEnchant.EffectArg[i]);
-                                    if (bonusesEffect != null)
-                                    {
-                                        foreach (ItemBonusRecord itemBonus in bonusesEffect)
-                                            if (itemBonus.BonusType == ItemBonusType.ItemLevel)
-
-                                                _bonusData.GemItemLevelBonus[slot] += (uint)itemBonus.Value[0];
-                                    }
+                                    foreach (var itemBonus in ItemBonusMgr.GetItemBonuses(gemEnchant.EffectArg[i]))
+                                        if (itemBonus.BonusType == ItemBonusType.ItemLevel)
+                                            _bonusData.GemItemLevelBonus[slot] += (uint)itemBonus.Value[0];
                                     break;
                                 }
                                 case ItemEnchantmentType.BonusListCurve:
                                 {
-                                    uint artifactrBonusListId = Global.DB2Mgr.GetItemBonusListForItemLevelDelta((short)Global.DB2Mgr.GetCurveValueAt((uint)Curves.ArtifactRelicItemLevelBonus, gemBaseItemLevel + gemBonus.ItemLevelBonus));
-                                    if (artifactrBonusListId != 0)
+                                    uint bonusListId = ItemBonusMgr.GetItemBonusListForItemLevelDelta((short)Global.DB2Mgr.GetCurveValueAt((uint)Curves.ArtifactRelicItemLevelBonus, gemBaseItemLevel + gemBonus.ItemLevelBonus));
+                                    if (bonusListId != 0)
                                     {
-                                        var bonusesEffect = Global.DB2Mgr.GetItemBonusList(artifactrBonusListId);
-                                        if (bonusesEffect != null)
-                                            foreach (ItemBonusRecord itemBonus in bonusesEffect)
-                                                if (itemBonus.BonusType == ItemBonusType.ItemLevel)
-                                                    _bonusData.GemItemLevelBonus[slot] += (uint)itemBonus.Value[0];
+                                        foreach (var itemBonus in ItemBonusMgr.GetItemBonuses(bonusListId))
+                                            if (itemBonus.BonusType == ItemBonusType.ItemLevel)
+                                                _bonusData.GemItemLevelBonus[slot] += (uint)itemBonus.Value[0];
                                     }
                                     break;
                                 }
@@ -1195,22 +1188,25 @@ namespace Game.Entities
             owner.SendPacket(itemTimeUpdate);
         }
 
-        public static Item CreateItem(uint item, uint count, ItemContext context, Player player = null)
+        public static Item CreateItem(uint itemEntry, uint count, ItemContext context, Player player = null, bool addDefaultBonuses = true)
         {
             if (count < 1)
                 return null;                                        //don't create item at zero count
 
-            var pProto = Global.ObjectMgr.GetItemTemplate(item);
+            var pProto = Global.ObjectMgr.GetItemTemplate(itemEntry);
             if (pProto != null)
             {
                 if (count > pProto.GetMaxStackSize())
                     count = pProto.GetMaxStackSize();
 
-                Item pItem = Bag.NewItemOrBag(pProto);
-                if (pItem.Create(Global.ObjectMgr.GetGenerator(HighGuid.Item).Generate(), item, context, player))
+                Item item = Bag.NewItemOrBag(pProto);
+                if (item.Create(Global.ObjectMgr.GetGenerator(HighGuid.Item).Generate(), itemEntry, context, player))
                 {
-                    pItem.SetCount(count);
-                    return pItem;
+                    item.SetCount(count);
+                    if (addDefaultBonuses)
+                        item.SetBonuses(ItemBonusMgr.GetBonusListsForItem(itemEntry, new(context)));
+
+                    return item;
                 }
             }
 
@@ -1219,7 +1215,7 @@ namespace Game.Entities
 
         public Item CloneItem(uint count, Player player = null)
         {
-            Item newItem = CreateItem(GetEntry(), count, GetContext(), player);
+            Item newItem = CreateItem(GetEntry(), count, GetContext(), player, false);
             if (newItem == null)
                 return null;
 
@@ -1227,6 +1223,7 @@ namespace Game.Entities
             newItem.SetGiftCreator(GetGiftCreator());
             newItem.ReplaceAllItemFlags((ItemFieldFlags)(m_itemData.DynamicFlags & ~(uint)(ItemFieldFlags.Refundable | ItemFieldFlags.BopTradeable)));
             newItem.SetExpiration(m_itemData.Expiration);
+            newItem.SetBonuses(m_itemData.ItemBonusKey.GetValue().BonusListIDs);
             // player CAN be NULL in which case we must not update random properties because that accesses player's item update queue
             if (player != null)
                 newItem.SetItemRandomBonusList(m_randomBonusListId);
@@ -2072,26 +2069,21 @@ namespace Game.Entities
         }
 
         public List<uint> GetBonusListIDs() { return m_itemData.ItemBonusKey.GetValue().BonusListIDs; }
-        
+
         public void AddBonuses(uint bonusListID)
         {
             var bonusListIDs = GetBonusListIDs();
             if (bonusListIDs.Contains(bonusListID))
                 return;
 
-            var bonuses = Global.DB2Mgr.GetItemBonusList(bonusListID);
-            if (bonuses != null)
-            {
-                ItemBonusKey itemBonusKey = new();
-                itemBonusKey.ItemID = GetEntry();
-                itemBonusKey.BonusListIDs = GetBonusListIDs();
-                itemBonusKey.BonusListIDs.Add(bonusListID);
-                SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemBonusKey), itemBonusKey);
-                foreach (ItemBonusRecord bonus in bonuses)
-                    _bonusData.AddBonus(bonus.BonusType, bonus.Value);
-
-                SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemAppearanceModID), (byte)_bonusData.AppearanceModID);
-            }
+            ItemBonusKey itemBonusKey = new();
+            itemBonusKey.ItemID = GetEntry();
+            itemBonusKey.BonusListIDs = GetBonusListIDs();
+            itemBonusKey.BonusListIDs.Add(bonusListID);
+            SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemBonusKey), itemBonusKey);
+            foreach (var bonus in ItemBonusMgr.GetItemBonuses(bonusListID))
+                _bonusData.AddBonus(bonus.BonusType, bonus.Value);
+            SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemAppearanceModID), (byte)_bonusData.AppearanceModID);
         }
 
         public void SetBonuses(List<uint> bonusListIDs)
@@ -2906,10 +2898,8 @@ namespace Game.Entities
 
         public void AddBonusList(uint bonusListId)
         {
-            var bonuses = Global.DB2Mgr.GetItemBonusList(bonusListId);
-            if (bonuses != null)
-                foreach (ItemBonusRecord bonus in bonuses)
-                    AddBonus(bonus.BonusType, bonus.Value);
+            foreach (var bonus in ItemBonusMgr.GetItemBonuses(bonusListId))
+                AddBonus(bonus.BonusType, bonus.Value);
         }
 
         public void AddBonus(ItemBonusType type, int[] values)

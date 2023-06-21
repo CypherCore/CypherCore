@@ -673,11 +673,7 @@ namespace Game.Loots
                 generatedLoot.context = _itemContext;
                 generatedLoot.count = (byte)Math.Min(count, proto.GetMaxStackSize());
                 generatedLoot.LootListId = (uint)items.Count;
-                if (_itemContext != 0)
-                {
-                    List<uint> bonusListIDs = Global.DB2Mgr.GetDefaultItemBonusTree(generatedLoot.itemid, _itemContext);
-                    generatedLoot.BonusListIDs.AddRange(bonusListIDs);
-                }
+                generatedLoot.BonusListIDs = ItemBonusMgr.GetBonusListsForItem(generatedLoot.itemid, new(_itemContext));
 
                 items.Add(generatedLoot);
                 count -= proto.GetMaxStackSize();

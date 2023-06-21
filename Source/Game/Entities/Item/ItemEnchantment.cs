@@ -32,7 +32,7 @@ namespace Game.Entities
                 uint bonusListId = result.Read<uint>(1);
                 float chance = result.Read<float>(2);
 
-                if (Global.DB2Mgr.GetItemBonusList(bonusListId) == null)
+                if (ItemBonusMgr.GetItemBonuses(bonusListId).Empty())
                 {
                     Log.outError(LogFilter.Sql, $"Bonus list {bonusListId} used in `item_random_bonus_list_template` by id {id} doesn't have exist in ItemBonus.db2");
                     continue;

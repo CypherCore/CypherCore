@@ -337,7 +337,7 @@ namespace Game.Entities
         public override float GetBlockPercent(uint attackerLevel)
         {
             float blockArmor = (float)m_activePlayerData.ShieldBlock;
-            float armorConstant = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, attackerLevel, -2, 0, Class.None);
+            float armorConstant = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, attackerLevel, -2, 0, Class.None, 0);
 
             if ((blockArmor + armorConstant) == 0)
                 return 0;

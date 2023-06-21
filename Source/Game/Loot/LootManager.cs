@@ -52,7 +52,7 @@ namespace Game.Loots
         }
 
         public static Dictionary<ObjectGuid, Loot> GenerateDungeonEncounterPersonalLoot(uint dungeonEncounterId, uint lootId, LootStore store,
-            LootType type, WorldObject lootOwner, uint minMoney, uint maxMoney, ushort lootMode, ItemContext context, List<Player> tappers)
+            LootType type, WorldObject lootOwner, uint minMoney, uint maxMoney, ushort lootMode, MapDifficultyRecord mapDifficulty, List<Player> tappers)
         {
             Dictionary<Player, Loot> tempLoot = new();
 
@@ -62,7 +62,7 @@ namespace Game.Loots
                     continue;
 
                 Loot loot = new(lootOwner.GetMap(), lootOwner.GetGUID(), type, null);
-                loot.SetItemContext(context);
+                loot.SetItemContext(ItemBonusMgr.GetContextForPlayer(mapDifficulty, tapper));
                 loot.SetDungeonEncounterId(dungeonEncounterId);
                 loot.GenerateMoneyLoot(minMoney, maxMoney);
 

@@ -16,6 +16,18 @@ namespace Game.DataStorage
         public uint ChallengeOrigin;
     }
 
+    public sealed class ChallengeModeItemBonusOverrideRecord
+    {
+        public uint Id;
+        public int ItemBonusTreeGroupID;
+        public int DstItemBonusTreeID;
+        public sbyte Type;
+        public int Value;
+        public int MythicPlusSeasonID;
+        public int PvPSeasonID;
+        public uint SrcItemBonusTreeID;
+    }
+
     public sealed class CharTitlesRecord
     {
         public uint Id;
@@ -317,6 +329,15 @@ namespace Game.DataStorage
         public ushort[] Camera = new ushort[8];
     }
 
+    public sealed class ConditionalContentTuningRecord
+    {
+        public uint Id;
+        public int OrderIndex;
+        public int RedirectContentTuningID;
+        public int RedirectFlag;
+        public uint ParentContentTuningID;
+    }
+
     public sealed class ContentTuningRecord
     {
         public uint Id;
@@ -354,6 +375,13 @@ namespace Game.DataStorage
         public int ExpectedStatModID;
         public int MinMythicPlusSeasonID;
         public int MaxMythicPlusSeasonID;
+        public uint ContentTuningID;
+    }
+
+    public sealed class ContentTuningXLabelRecord
+    {
+        public uint Id;
+        public int LabelID;
         public uint ContentTuningID;
     }
 

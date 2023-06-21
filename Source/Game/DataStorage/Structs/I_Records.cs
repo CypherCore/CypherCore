@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using System;
 
 namespace Game.DataStorage
 {
@@ -99,12 +100,14 @@ namespace Game.DataStorage
     public sealed class ItemBonusListGroupEntryRecord
     {
         public uint Id;
-        public uint ItemBonusListGroupID;
+        public int ItemBonusListGroupID;
         public int ItemBonusListID;
         public int ItemLevelSelectorID;
-        public int OrderIndex;
+        public int SequenceValue;
         public int ItemExtendedCostID;
         public int PlayerConditionID;
+        public int Flags;
+        public int ItemLogicalCostGroupID;
     }
 
     public sealed class ItemBonusListLevelDeltaRecord
@@ -120,6 +123,13 @@ namespace Game.DataStorage
         public int ItemID;
     }
 
+    public sealed class ItemBonusTreeRecord
+    {
+        public uint Id;
+        public int Flags;
+        public int InventoryTypeSlotMask;
+    }
+
     public sealed class ItemBonusTreeNodeRecord
     {
         public uint Id;
@@ -129,8 +139,8 @@ namespace Game.DataStorage
         public ushort ChildItemLevelSelectorID;
         public uint ChildItemBonusListGroupID;
         public uint IblGroupPointsModSetID;
-        public int Unknown1010_1;
-        public int Unknown1010_2;
+        public int MinMythicPlusLevel;
+        public int MaxMythicPlusLevel;
         public uint ParentItemBonusTreeID;
     }
 
@@ -151,11 +161,24 @@ namespace Game.DataStorage
         public byte Flags;
     }
 
+    public sealed class ItemContextPickerEntryRecord
+    {
+        public uint Id;
+        public byte ItemCreationContext;
+        public byte OrderIndex;
+        public int PVal;
+        public int LabelID;
+        public uint Flags;
+        public uint PlayerConditionID;
+        public uint ItemContextPickerID;
+    }
+
     public sealed class ItemCurrencyCostRecord
     {
         public uint Id;
         public uint ItemID;
     }
+
     // common struct for:
     // ItemDamageAmmo.dbc
     // ItemDamageOneHand.dbc
@@ -220,12 +243,16 @@ namespace Game.DataStorage
         public ushort AzeriteUnlockMappingSet;
     }
 
-    public sealed class ItemLevelSelectorQualityRecord
+    public sealed class ItemLevelSelectorQualityRecord : IEquatable<ItemLevelSelectorQualityRecord>, IEquatable<ItemQuality>
     {
         public uint Id;
         public uint QualityItemBonusListID;
         public sbyte Quality;
         public uint ParentILSQualitySetID;
+
+        public bool Equals(ItemLevelSelectorQualityRecord other) { return Quality < other.Quality; }
+
+        public bool Equals(ItemQuality quality) { return Quality < (sbyte)quality; }
     }
 
     public sealed class ItemLevelSelectorQualitySetRecord

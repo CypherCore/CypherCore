@@ -178,6 +178,14 @@ namespace Game.DataStorage
         public byte ItemLevelDelta;
     }
 
+    public sealed class PvpSeasonRecord
+    {
+        public uint Id;
+        public int MilestoneSeason;
+        public int AllianceAchievementID;
+        public int HordeAchievementID;
+    }
+
     public sealed class PvpTalentRecord
     {
         public string Description;

@@ -90,10 +90,6 @@ namespace Game.DataStorage
                 _azeriteTierUnlockLevels[key][azeriteTierUnlock.Tier] = azeriteTierUnlock.AzeriteLevel;
             }
 
-            MultiMap<uint, AzeriteUnlockMappingRecord> azeriteUnlockMappings = new();
-            foreach (AzeriteUnlockMappingRecord azeriteUnlockMapping in AzeriteUnlockMappingStorage.Values)
-                azeriteUnlockMappings.Add(azeriteUnlockMapping.AzeriteUnlockMappingSetID, azeriteUnlockMapping);
-
             foreach (BattlemasterListRecord battlemaster in BattlemasterListStorage.Values)
             {
                 if (battlemaster.MaxLevel < battlemaster.MinLevel)
@@ -230,11 +226,17 @@ namespace Game.DataStorage
                 _chrSpecializationsByIndex[storageIndex][chrSpec.OrderIndex] = chrSpec;
             }
 
+            foreach (ConditionalContentTuningRecord conditionalContentTuning in ConditionalContentTuningStorage.Values)
+                _conditionalContentTuning.Add(conditionalContentTuning.ParentContentTuningID, conditionalContentTuning);
+
             foreach (ContentTuningXExpectedRecord contentTuningXExpectedStat in ContentTuningXExpectedStorage.Values)
             {
                 if (ExpectedStatModStorage.ContainsKey(contentTuningXExpectedStat.ExpectedStatModID))
                     _expectedStatModsByContentTuning.Add(contentTuningXExpectedStat.ContentTuningID, contentTuningXExpectedStat);
             }
+
+            foreach (ContentTuningXLabelRecord contentTuningXLabel in ContentTuningXLabelStorage.Values)
+                _contentTuningLabels.Add((contentTuningXLabel.ContentTuningID, contentTuningXLabel.LabelID));
 
             foreach (CurrencyContainerRecord currencyContainer in CurrencyContainerStorage.Values)
                 _currencyContainers.Add(currencyContainer.CurrencyTypesID, currencyContainer);
@@ -283,15 +285,6 @@ namespace Game.DataStorage
             foreach (GlyphRequiredSpecRecord glyphRequiredSpec in GlyphRequiredSpecStorage.Values)
                 _glyphRequiredSpecs.Add(glyphRequiredSpec.GlyphPropertiesID, glyphRequiredSpec.ChrSpecializationID);
 
-            foreach (var bonus in ItemBonusStorage.Values)
-                _itemBonusLists.Add(bonus.ParentItemBonusListID, bonus);
-
-            foreach (ItemBonusListLevelDeltaRecord itemBonusListLevelDelta in ItemBonusListLevelDeltaStorage.Values)
-                _itemLevelDeltaToBonusListContainer[itemBonusListLevelDelta.ItemLevelDelta] = itemBonusListLevelDelta.Id;
-
-            foreach (var bonusTreeNode in ItemBonusTreeNodeStorage.Values)
-                _itemBonusTrees.Add(bonusTreeNode.ParentItemBonusTreeID, bonusTreeNode);
-
             foreach (ItemChildEquipmentRecord itemChildEquipment in ItemChildEquipmentStorage.Values)
             {
                 //ASSERT(_itemChildEquipment.find(itemChildEquipment.ParentItemID) == _itemChildEquipment.end(), "Item must have max 1 child item.");
@@ -311,9 +304,6 @@ namespace Game.DataStorage
             foreach (ItemLimitCategoryConditionRecord condition in ItemLimitCategoryConditionStorage.Values)
                 _itemCategoryConditions.Add(condition.ParentItemLimitCategoryID, condition);
 
-            foreach (ItemLevelSelectorQualityRecord itemLevelSelectorQuality in ItemLevelSelectorQualityStorage.Values)
-                _itemLevelQualitySelectorQualities.Add(itemLevelSelectorQuality.ParentILSQualitySetID, itemLevelSelectorQuality);
-
             foreach (var appearanceMod in ItemModifiedAppearanceStorage.Values)
             {
                 //ASSERT(appearanceMod.ItemID <= 0xFFFFFF);
@@ -325,12 +315,6 @@ namespace Game.DataStorage
 
             foreach (var itemSpecOverride in ItemSpecOverrideStorage.Values)
                 _itemSpecOverrides.Add(itemSpecOverride.ItemID, itemSpecOverride);
-
-            foreach (var itemBonusTreeAssignment in ItemXBonusTreeStorage.Values)
-                _itemToBonusTree.Add(itemBonusTreeAssignment.ItemID, itemBonusTreeAssignment.ItemBonusTreeID);
-
-            foreach (var pair in _azeriteEmpoweredItems)
-                LoadAzeriteEmpoweredItemUnlockMappings(azeriteUnlockMappings, pair.Key);
 
             foreach (JournalTierRecord journalTier in JournalTierStorage.Values)
                 _journalTiersByIndex.Add(journalTier);
@@ -1038,9 +1022,18 @@ namespace Game.DataStorage
             return GetChrSpecializationByIndex(class_, PlayerConst.InitialSpecializationIndex);
         }
 
-        public ContentTuningLevels? GetContentTuningData(uint contentTuningId, uint replacementConditionMask, bool forItem = false)
+        public uint GetRedirectedContentTuningId(uint contentTuningId, uint redirectFlag)
         {
-            ContentTuningRecord contentTuning = ContentTuningStorage.LookupByKey(contentTuningId);
+            foreach (var conditionalContentTuning in _conditionalContentTuning.LookupByKey(contentTuningId))
+                if ((conditionalContentTuning.RedirectFlag & redirectFlag) != 0)
+                    return (uint)conditionalContentTuning.RedirectContentTuningID;
+
+            return contentTuningId;
+        }
+        
+        public ContentTuningLevels? GetContentTuningData(uint contentTuningId, uint redirectFlag, bool forItem = false)
+        {
+            ContentTuningRecord contentTuning = ContentTuningStorage.LookupByKey(GetRedirectedContentTuningId(contentTuningId, redirectFlag));
             if (contentTuning == null)
                 return null;
 
@@ -1077,6 +1070,11 @@ namespace Game.DataStorage
             return levels;
         }
 
+        public bool HasContentTuningLabel(uint contentTuningId, int label)
+        {
+            return _contentTuningLabels.Contains((contentTuningId, label));
+        }
+        
         public string GetCreatureFamilyPetName(CreatureFamily petfamily, Locale locale)
         {
             if (petfamily == CreatureFamily.None)
@@ -1261,20 +1259,26 @@ namespace Game.DataStorage
             return null;
         }
 
-        float ExpectedStatModReducer(float mod, ContentTuningXExpectedRecord contentTuningXExpected, ExpectedStatType stat)
+        float ExpectedStatModReducer(float mod, ContentTuningXExpectedRecord contentTuningXExpected, ExpectedStatType stat, int ActiveMilestoneSeason)
         {
             if (contentTuningXExpected == null)
                 return mod;
 
-            //if (contentTuningXExpected->MinMythicPlusSeasonID)
-            //    if (MythicPlusSeasonEntry const* mythicPlusSeason = sMythicPlusSeasonStore.LookupEntry(contentTuningXExpected->MinMythicPlusSeasonID))
-            //        if (MythicPlusSubSeason < mythicPlusSeason->SubSeason)
-            //            return mod;
+            if (contentTuningXExpected.MinMythicPlusSeasonID != 0)
+            {
+                var mythicPlusSeason = MythicPlusSeasonStorage.LookupByKey(contentTuningXExpected.MinMythicPlusSeasonID);
+                if (mythicPlusSeason != null)
+                if (ActiveMilestoneSeason < mythicPlusSeason.MilestoneSeason)
+                    return mod;
+            }
 
-            //if (contentTuningXExpected->MaxMythicPlusSeasonID)
-            //    if (MythicPlusSeasonEntry const* mythicPlusSeason = sMythicPlusSeasonStore.LookupEntry(contentTuningXExpected->MaxMythicPlusSeasonID))
-            //        if (MythicPlusSubSeason >= mythicPlusSeason->SubSeason)
-            //            return mod;
+            if (contentTuningXExpected.MaxMythicPlusSeasonID != 0)
+            {
+                var mythicPlusSeason = MythicPlusSeasonStorage.LookupByKey(contentTuningXExpected.MaxMythicPlusSeasonID);
+                if (mythicPlusSeason != null)
+                if (ActiveMilestoneSeason >= mythicPlusSeason.MilestoneSeason)
+                    return mod;
+            }
 
             var expectedStatMod = ExpectedStatModStorage.LookupByKey(contentTuningXExpected.ExpectedStatModID);
             switch (stat)
@@ -1300,11 +1304,9 @@ namespace Game.DataStorage
             }
 
             return mod;
-
-            // int32 MythicPlusSubSeason = 0;
         }
 
-        public float EvaluateExpectedStat(ExpectedStatType stat, uint level, int expansion, uint contentTuningId, Class unitClass)
+        public float EvaluateExpectedStat(ExpectedStatType stat, uint level, int expansion, uint contentTuningId, Class unitClass, int mythicPlusMilestoneSeason)
         {
             var expectedStatRecord = _expectedStatsByLevel.LookupByKey(Tuple.Create(level, expansion));
             if (expectedStatRecord == null)
@@ -1338,56 +1340,56 @@ namespace Game.DataStorage
                 case ExpectedStatType.CreatureHealth:
                     value = expectedStatRecord.CreatureHealth;
                     if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
+                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat, mythicPlusMilestoneSeason));
                     if (classMod != null)
                         value *= classMod.CreatureHealthMod;
                     break;
                 case ExpectedStatType.PlayerHealth:
                     value = expectedStatRecord.PlayerHealth;
                     if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
+                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat, mythicPlusMilestoneSeason));
                     if (classMod != null)
                         value *= classMod.PlayerHealthMod;
                     break;
                 case ExpectedStatType.CreatureAutoAttackDps:
                     value = expectedStatRecord.CreatureAutoAttackDps;
                     if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
+                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat, mythicPlusMilestoneSeason));
                     if (classMod != null)
                         value *= classMod.CreatureAutoAttackDPSMod;
                     break;
                 case ExpectedStatType.CreatureArmor:
                     value = expectedStatRecord.CreatureArmor;
                     if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
+                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat, mythicPlusMilestoneSeason));
                     if (classMod != null)
                         value *= classMod.CreatureArmorMod;
                     break;
                 case ExpectedStatType.PlayerMana:
                     value = expectedStatRecord.PlayerMana;
                     if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
+                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat, mythicPlusMilestoneSeason));
                     if (classMod != null)
                         value *= classMod.PlayerManaMod;
                     break;
                 case ExpectedStatType.PlayerPrimaryStat:
                     value = expectedStatRecord.PlayerPrimaryStat;
                     if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
+                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat, mythicPlusMilestoneSeason));
                     if (classMod != null)
                         value *= classMod.PlayerPrimaryStatMod;
                     break;
                 case ExpectedStatType.PlayerSecondaryStat:
                     value = expectedStatRecord.PlayerSecondaryStat;
                     if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
+                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat, mythicPlusMilestoneSeason));
                     if (classMod != null)
                         value *= classMod.PlayerSecondaryStatMod;
                     break;
                 case ExpectedStatType.ArmorConstant:
                     value = expectedStatRecord.ArmorConstant;
                     if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
+                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat, mythicPlusMilestoneSeason));
                     if (classMod != null)
                         value *= classMod.ArmorConstantMod;
                     break;
@@ -1396,7 +1398,7 @@ namespace Game.DataStorage
                 case ExpectedStatType.CreatureSpellDamage:
                     value = expectedStatRecord.CreatureSpellDamage;
                     if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
+                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat, mythicPlusMilestoneSeason));
                     if (classMod != null)
                         value *= classMod.CreatureSpellDamageMod;
                     break;
@@ -1438,169 +1440,6 @@ namespace Game.DataStorage
         public HeirloomRecord GetHeirloomByItemId(uint itemId)
         {
             return _heirlooms.LookupByKey(itemId);
-        }
-
-        public List<ItemBonusRecord> GetItemBonusList(uint bonusListId)
-        {
-            return _itemBonusLists.LookupByKey(bonusListId);
-        }
-
-        public uint GetItemBonusListForItemLevelDelta(short delta)
-        {
-            return _itemLevelDeltaToBonusListContainer.LookupByKey(delta);
-        }
-
-        void VisitItemBonusTree(uint itemBonusTreeId, bool visitChildren, Action<ItemBonusTreeNodeRecord> visitor)
-        {
-            var bonusTreeNodeList = _itemBonusTrees.LookupByKey(itemBonusTreeId);
-            if (bonusTreeNodeList.Empty())
-                return;
-
-            foreach (var bonusTreeNode in bonusTreeNodeList)
-            {
-                visitor(bonusTreeNode);
-                if (visitChildren && bonusTreeNode.ChildItemBonusTreeID != 0)
-                    VisitItemBonusTree(bonusTreeNode.ChildItemBonusTreeID, true, visitor);
-            }
-        }
-
-        public List<uint> GetDefaultItemBonusTree(uint itemId, ItemContext itemContext)
-        {
-            List<uint> bonusListIDs = new();
-
-            ItemSparseRecord proto = ItemSparseStorage.LookupByKey(itemId);
-            if (proto == null)
-                return bonusListIDs;
-
-            var itemIdRange = _itemToBonusTree.LookupByKey(itemId);
-            if (itemIdRange == null)
-                return bonusListIDs;
-
-            ushort itemLevelSelectorId = 0;
-            foreach (var itemBonusTreeId in itemIdRange)
-            {
-                uint matchingNodes = 0;
-                VisitItemBonusTree(itemBonusTreeId, false, bonusTreeNode =>
-                {
-                    if ((ItemContext)bonusTreeNode.ItemContext == ItemContext.None || itemContext == (ItemContext)bonusTreeNode.ItemContext)
-                        ++matchingNodes;
-                });
-
-                if (matchingNodes != 1)
-                    continue;
-
-                VisitItemBonusTree(itemBonusTreeId, true, bonusTreeNode =>
-                {
-                    ItemContext requiredContext = (ItemContext)bonusTreeNode.ItemContext != ItemContext.ForceToNone ? (ItemContext)bonusTreeNode.ItemContext : ItemContext.None;
-                    if ((ItemContext)bonusTreeNode.ItemContext != ItemContext.None && itemContext != requiredContext)
-                        return;
-
-                    if (bonusTreeNode.ChildItemBonusListID != 0)
-                    {
-                        bonusListIDs.Add(bonusTreeNode.ChildItemBonusListID);
-                    }
-                    else if (bonusTreeNode.ChildItemLevelSelectorID != 0)
-                    {
-                        itemLevelSelectorId = bonusTreeNode.ChildItemLevelSelectorID;
-                    }
-                });
-            }
-            ItemLevelSelectorRecord selector = ItemLevelSelectorStorage.LookupByKey(itemLevelSelectorId);
-            if (selector != null)
-            {
-                short delta = (short)(selector.MinItemLevel - proto.ItemLevel);
-
-                uint bonus = GetItemBonusListForItemLevelDelta(delta);
-                if (bonus != 0)
-                    bonusListIDs.Add(bonus);
-
-                ItemLevelSelectorQualitySetRecord selectorQualitySet = ItemLevelSelectorQualitySetStorage.LookupByKey(selector.ItemLevelSelectorQualitySetID);
-                if (selectorQualitySet != null)
-                {
-                    var itemSelectorQualities = _itemLevelQualitySelectorQualities.LookupByKey(selector.ItemLevelSelectorQualitySetID);
-                    if (itemSelectorQualities != null)
-                    {
-                        ItemQuality quality = ItemQuality.Uncommon;
-                        if (selector.MinItemLevel >= selectorQualitySet.IlvlEpic)
-                            quality = ItemQuality.Epic;
-                        else if (selector.MinItemLevel >= selectorQualitySet.IlvlRare)
-                            quality = ItemQuality.Rare;
-
-                        var itemSelectorQuality = itemSelectorQualities.Find(p => p.Quality < (sbyte)quality);
-
-                        if (itemSelectorQuality != null)
-                            bonusListIDs.Add(itemSelectorQuality.QualityItemBonusListID);
-                    }
-                }
-
-                AzeriteUnlockMappingRecord azeriteUnlockMapping = _azeriteUnlockMappings.LookupByKey((proto.Id, itemContext));
-                if (azeriteUnlockMapping != null)
-                {
-                    switch (proto.inventoryType)
-                    {
-                        case InventoryType.Head:
-                            bonusListIDs.Add(azeriteUnlockMapping.ItemBonusListHead);
-                            break;
-                        case InventoryType.Shoulders:
-                            bonusListIDs.Add(azeriteUnlockMapping.ItemBonusListShoulders);
-                            break;
-                        case InventoryType.Chest:
-                        case InventoryType.Robe:
-                            bonusListIDs.Add(azeriteUnlockMapping.ItemBonusListChest);
-                            break;
-                    }
-                }
-            }
-
-            return bonusListIDs;
-        }
-
-        public List<uint> GetAllItemBonusTreeBonuses(uint itemBonusTreeId)
-        {
-            List<uint> bonusListIDs = new();
-            VisitItemBonusTree(itemBonusTreeId, true, bonusTreeNode =>
-            {
-                if (bonusTreeNode.ChildItemBonusListID != 0)
-                    bonusListIDs.Add(bonusTreeNode.ChildItemBonusListID);
-            });
-            return bonusListIDs;
-        }
-
-        void LoadAzeriteEmpoweredItemUnlockMappings(MultiMap<uint, AzeriteUnlockMappingRecord> azeriteUnlockMappingsBySet, uint itemId)
-        {
-            var itemIdRange = _itemToBonusTree.LookupByKey(itemId);
-            if (itemIdRange == null)
-                return;
-
-            foreach (var itemTreeItr in itemIdRange)
-            {
-                VisitItemBonusTree(itemTreeItr, true, bonusTreeNode =>
-                {
-                    if (bonusTreeNode.ChildItemBonusListID == 0 && bonusTreeNode.ChildItemLevelSelectorID != 0)
-                    {
-                        ItemLevelSelectorRecord selector = ItemLevelSelectorStorage.LookupByKey(bonusTreeNode.ChildItemLevelSelectorID);
-                        if (selector == null)
-                            return;
-
-                        var azeriteUnlockMappings = azeriteUnlockMappingsBySet.LookupByKey(selector.AzeriteUnlockMappingSet);
-                        if (azeriteUnlockMappings != null)
-                        {
-                            AzeriteUnlockMappingRecord selectedAzeriteUnlockMapping = null;
-                            foreach (AzeriteUnlockMappingRecord azeriteUnlockMapping in azeriteUnlockMappings)
-                            {
-                                if (azeriteUnlockMapping.ItemLevel > selector.MinItemLevel ||
-                                    (selectedAzeriteUnlockMapping != null && selectedAzeriteUnlockMapping.ItemLevel > azeriteUnlockMapping.ItemLevel))
-                                    continue;
-
-                                selectedAzeriteUnlockMapping = azeriteUnlockMapping;
-                            }
-
-                            if (selectedAzeriteUnlockMapping != null)
-                                _azeriteUnlockMappings[(itemId, (ItemContext)bonusTreeNode.ItemContext)] = selectedAzeriteUnlockMapping;
-                        }
-                    }
-                });
-            }
         }
 
         public ItemChildEquipmentRecord GetItemChildEquipment(uint itemId)
@@ -2383,7 +2222,6 @@ namespace Game.DataStorage
         AzeriteItemMilestonePowerRecord[] _azeriteItemMilestonePowerByEssenceSlot = new AzeriteItemMilestonePowerRecord[SharedConst.MaxAzeriteEssenceSlot];
         MultiMap<uint, AzeritePowerSetMemberRecord> _azeritePowers = new();
         Dictionary<(uint azeriteUnlockSetId, ItemContext itemContext), byte[]> _azeriteTierUnlockLevels = new();
-        Dictionary<(uint itemId, ItemContext itemContext), AzeriteUnlockMappingRecord> _azeriteUnlockMappings = new();
         Dictionary<(int broadcastTextId, CascLocaleBit cascLocaleBit), int> _broadcastTextDurations = new();
         ChrClassUIDisplayRecord[] _uiDisplayByClass = new ChrClassUIDisplayRecord[(int)Class.Max];
         uint[][] _powersByClass = new uint[(int)Class.Max][];
@@ -2393,6 +2231,8 @@ namespace Game.DataStorage
         MultiMap<Tuple<byte, byte>, ChrCustomizationOptionRecord> _chrCustomizationOptionsByRaceAndGender = new();
         Dictionary<uint, MultiMap<uint, uint>> _chrCustomizationRequiredChoices = new();
         ChrSpecializationRecord[][] _chrSpecializationsByIndex = new ChrSpecializationRecord[(int)Class.Max + 1][];
+        MultiMap<uint, ConditionalContentTuningRecord> _conditionalContentTuning = new();
+        List<(uint, int)> _contentTuningLabels = new();
         MultiMap<uint, CurrencyContainerRecord> _currencyContainers = new();
         MultiMap<uint, CurvePointRecord> _curvePoints = new();
         Dictionary<Tuple<uint, byte, byte, byte>, EmotesTextSoundRecord> _emoteTextSounds = new();
@@ -2403,16 +2243,11 @@ namespace Game.DataStorage
         Dictionary<uint, HeirloomRecord> _heirlooms = new();
         MultiMap<uint, uint> _glyphBindableSpells = new();
         MultiMap<uint, uint> _glyphRequiredSpecs = new();
-        MultiMap<uint, ItemBonusRecord> _itemBonusLists = new();
-        Dictionary<short, uint> _itemLevelDeltaToBonusListContainer = new();
-        MultiMap<uint, ItemBonusTreeNodeRecord> _itemBonusTrees = new();
         Dictionary<uint, ItemChildEquipmentRecord> _itemChildEquipment = new();
         ItemClassRecord[] _itemClassByOldEnum = new ItemClassRecord[20];
         List<uint> _itemsWithCurrencyCost = new();
         MultiMap<uint, ItemLimitCategoryConditionRecord> _itemCategoryConditions = new();
-        MultiMap<uint, ItemLevelSelectorQualityRecord> _itemLevelQualitySelectorQualities = new();
         Dictionary<uint, ItemModifiedAppearanceRecord> _itemModifiedAppearancesByItem = new();
-        MultiMap<uint, uint> _itemToBonusTree = new();
         MultiMap<uint, ItemSetSpellRecord> _itemSetSpells = new();
         MultiMap<uint, ItemSpecOverrideRecord> _itemSpecOverrides = new();
         List<JournalTierRecord> _journalTiersByIndex = new();

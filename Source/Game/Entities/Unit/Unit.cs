@@ -3886,7 +3886,7 @@ namespace Game.Entities
             }
 
             // Expansion and ContentTuningID necessary? Does Player get a ContentTuningID too ?
-            float armorConstant = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, attackerLevel, -2, 0, attackerClass);
+            float armorConstant = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, attackerLevel, -2, 0, attackerClass, 0);
             if ((armor + armorConstant) == 0)
                 return damage;
 

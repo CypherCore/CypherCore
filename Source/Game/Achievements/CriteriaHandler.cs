@@ -2736,7 +2736,7 @@ namespace Game.Achievements
                 }
                 case ModifierTreeType.PlayerHasItemWithBonusListFromTreeAndQuality: // 222
                 {
-                    var bonusListIDs = Global.DB2Mgr.GetAllItemBonusTreeBonuses(reqValue);
+                    var bonusListIDs = ItemBonusMgr.GetAllBonusListsForTree(reqValue);
                     if (bonusListIDs.Empty())
                         return false;
 

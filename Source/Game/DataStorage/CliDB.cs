@@ -87,6 +87,7 @@ namespace Game.DataStorage
             BroadcastTextStorage = ReadDB2<BroadcastTextRecord>("BroadcastText.db2", HotfixStatements.SEL_BROADCAST_TEXT, HotfixStatements.SEL_BROADCAST_TEXT_LOCALE);
             BroadcastTextDurationStorage = ReadDB2<BroadcastTextDurationRecord>("BroadcastTextDuration.db2", HotfixStatements.SEL_BROADCAST_TEXT_DURATION);
             CfgRegionsStorage = ReadDB2<Cfg_RegionsRecord>("Cfg_Regions.db2", HotfixStatements.SEL_CFG_REGIONS);
+            ChallengeModeItemBonusOverrideStorage = ReadDB2<ChallengeModeItemBonusOverrideRecord>("ChallengeModeItemBonusOverride.db2", HotfixStatements.SEL_CHALLENGE_MODE_ITEM_BONUS_OVERRIDE);
             CharTitlesStorage = ReadDB2<CharTitlesRecord>("CharTitles.db2", HotfixStatements.SEL_CHAR_TITLES, HotfixStatements.SEL_CHAR_TITLES_LOCALE);
             CharacterLoadoutStorage = ReadDB2<CharacterLoadoutRecord>("CharacterLoadout.db2", HotfixStatements.SEL_CHARACTER_LOADOUT);
             CharacterLoadoutItemStorage = ReadDB2<CharacterLoadoutItemRecord>("CharacterLoadoutItem.db2", HotfixStatements.SEL_CHARACTER_LOADOUT_ITEM);
@@ -106,8 +107,10 @@ namespace Game.DataStorage
             ChrSpecializationStorage = ReadDB2<ChrSpecializationRecord>("ChrSpecialization.db2", HotfixStatements.SEL_CHR_SPECIALIZATION, HotfixStatements.SEL_CHR_SPECIALIZATION_LOCALE);
             CinematicCameraStorage = ReadDB2<CinematicCameraRecord>("CinematicCamera.db2", HotfixStatements.SEL_CINEMATIC_CAMERA);
             CinematicSequencesStorage = ReadDB2<CinematicSequencesRecord>("CinematicSequences.db2", HotfixStatements.SEL_CINEMATIC_SEQUENCES);
+            ConditionalContentTuningStorage = ReadDB2<ConditionalContentTuningRecord>("ConditionalContentTuning.db2", HotfixStatements.SEL_CONDITIONAL_CONTENT_TUNING);
             ContentTuningStorage = ReadDB2<ContentTuningRecord>("ContentTuning.db2", HotfixStatements.SEL_CONTENT_TUNING);
             ContentTuningXExpectedStorage = ReadDB2<ContentTuningXExpectedRecord>("ContentTuningXExpected.db2", HotfixStatements.SEL_CONTENT_TUNING_X_EXPECTED);
+            ContentTuningXLabelStorage = ReadDB2<ContentTuningXLabelRecord>("ContentTuningXLabel.db2", HotfixStatements.SEL_CONTENT_TUNING_X_LABEL);
             ConversationLineStorage = ReadDB2<ConversationLineRecord>("ConversationLine.db2", HotfixStatements.SEL_CONVERSATION_LINE);
             CorruptionEffectsStorage = ReadDB2<CorruptionEffectsRecord>("CorruptionEffects.db2", HotfixStatements.SEL_CORRUPTION_EFFECTS);
             CreatureDisplayInfoStorage = ReadDB2<CreatureDisplayInfoRecord>("CreatureDisplayInfo.db2", HotfixStatements.SEL_CREATURE_DISPLAY_INFO);
@@ -173,10 +176,13 @@ namespace Game.DataStorage
             ItemArmorTotalStorage = ReadDB2<ItemArmorTotalRecord>("ItemArmorTotal.db2", HotfixStatements.SEL_ITEM_ARMOR_TOTAL);
             //ItemBagFamilyStorage = ReadDB2<ItemBagFamilyRecord>("ItemBagFamily.db2", HotfixStatements.SEL_ITEM_BAG_FAMILY, HotfixStatements.SEL_ITEM_BAG_FAMILY_LOCALE);
             ItemBonusStorage = ReadDB2<ItemBonusRecord>("ItemBonus.db2", HotfixStatements.SEL_ITEM_BONUS);
+            ItemBonusListGroupEntryStorage = ReadDB2<ItemBonusListGroupEntryRecord>("ItemBonusListGroupEntry.db2", HotfixStatements.SEL_ITEM_BONUS_LIST_GROUP_ENTRY);
             ItemBonusListLevelDeltaStorage = ReadDB2<ItemBonusListLevelDeltaRecord>("ItemBonusListLevelDelta.db2", HotfixStatements.SEL_ITEM_BONUS_LIST_LEVEL_DELTA);
+            ItemBonusTreeStorage = ReadDB2<ItemBonusTreeRecord>("ItemBonusTree.db2", HotfixStatements.SEL_ITEM_BONUS_TREE);
             ItemBonusTreeNodeStorage = ReadDB2<ItemBonusTreeNodeRecord>("ItemBonusTreeNode.db2", HotfixStatements.SEL_ITEM_BONUS_TREE_NODE);
             ItemChildEquipmentStorage = ReadDB2<ItemChildEquipmentRecord>("ItemChildEquipment.db2", HotfixStatements.SEL_ITEM_CHILD_EQUIPMENT);
             ItemClassStorage = ReadDB2<ItemClassRecord>("ItemClass.db2", HotfixStatements.SEL_ITEM_CLASS, HotfixStatements.SEL_ITEM_CLASS_LOCALE);
+            ItemContextPickerEntryStorage = ReadDB2<ItemContextPickerEntryRecord>("ItemContextPickerEntry.db2", HotfixStatements.SEL_ITEM_CONTEXT_PICKER_ENTRY);
             ItemCurrencyCostStorage = ReadDB2<ItemCurrencyCostRecord>("ItemCurrencyCost.db2", HotfixStatements.SEL_ITEM_CURRENCY_COST);
             ItemDamageAmmoStorage = ReadDB2<ItemDamageRecord>("ItemDamageAmmo.db2", HotfixStatements.SEL_ITEM_DAMAGE_AMMO);
             ItemDamageOneHandStorage = ReadDB2<ItemDamageRecord>("ItemDamageOneHand.db2", HotfixStatements.SEL_ITEM_DAMAGE_ONE_HAND);
@@ -228,6 +234,7 @@ namespace Game.DataStorage
             MountTypeXCapabilityStorage = ReadDB2<MountTypeXCapabilityRecord>("MountTypeXCapability.db2", HotfixStatements.SEL_MOUNT_TYPE_X_CAPABILITY);
             MountXDisplayStorage = ReadDB2<MountXDisplayRecord>("MountXDisplay.db2", HotfixStatements.SEL_MOUNT_X_DISPLAY);
             MovieStorage = ReadDB2<MovieRecord>("Movie.db2", HotfixStatements.SEL_MOVIE);
+            MythicPlusSeasonStorage = ReadDB2<MythicPlusSeasonRecord>("MythicPlusSeason.db2", HotfixStatements.SEL_MYTHIC_PLUS_SEASON);
             NameGenStorage = ReadDB2<NameGenRecord>("NameGen.db2", HotfixStatements.SEL_NAME_GEN);
             NamesProfanityStorage = ReadDB2<NamesProfanityRecord>("NamesProfanity.db2", HotfixStatements.SEL_NAMES_PROFANITY);
             NamesReservedStorage = ReadDB2<NamesReservedRecord>("NamesReserved.db2", HotfixStatements.SEL_NAMES_RESERVED, HotfixStatements.SEL_NAMES_RESERVED_LOCALE);
@@ -243,6 +250,7 @@ namespace Game.DataStorage
             PrestigeLevelInfoStorage = ReadDB2<PrestigeLevelInfoRecord>("PrestigeLevelInfo.db2", HotfixStatements.SEL_PRESTIGE_LEVEL_INFO, HotfixStatements.SEL_PRESTIGE_LEVEL_INFO_LOCALE);
             PvpDifficultyStorage = ReadDB2<PvpDifficultyRecord>("PVPDifficulty.db2", HotfixStatements.SEL_PVP_DIFFICULTY);
             PvpItemStorage = ReadDB2<PvpItemRecord>("PVPItem.db2", HotfixStatements.SEL_PVP_ITEM);
+            PvpSeasonStorage = ReadDB2<PvpSeasonRecord>("PvpSeason.db2", HotfixStatements.SEL_PVP_SEASON);
             PvpTalentStorage = ReadDB2<PvpTalentRecord>("PvpTalent.db2", HotfixStatements.SEL_PVP_TALENT, HotfixStatements.SEL_PVP_TALENT_LOCALE);
             PvpTalentCategoryStorage = ReadDB2<PvpTalentCategoryRecord>("PvpTalentCategory.db2", HotfixStatements.SEL_PVP_TALENT_CATEGORY);
             PvpTalentSlotUnlockStorage = ReadDB2<PvpTalentSlotUnlockRecord>("PvpTalentSlotUnlock.db2", HotfixStatements.SEL_PVP_TALENT_SLOT_UNLOCK);
@@ -511,6 +519,7 @@ namespace Game.DataStorage
         public static DB6Storage<BroadcastTextRecord> BroadcastTextStorage;
         public static DB6Storage<BroadcastTextDurationRecord> BroadcastTextDurationStorage;
         public static DB6Storage<Cfg_RegionsRecord> CfgRegionsStorage;
+        public static DB6Storage<ChallengeModeItemBonusOverrideRecord> ChallengeModeItemBonusOverrideStorage;
         public static DB6Storage<CharTitlesRecord> CharTitlesStorage;
         public static DB6Storage<CharacterLoadoutRecord> CharacterLoadoutStorage;
         public static DB6Storage<CharacterLoadoutItemRecord> CharacterLoadoutItemStorage;
@@ -530,8 +539,10 @@ namespace Game.DataStorage
         public static DB6Storage<ChrSpecializationRecord> ChrSpecializationStorage;
         public static DB6Storage<CinematicCameraRecord> CinematicCameraStorage;
         public static DB6Storage<CinematicSequencesRecord> CinematicSequencesStorage;
+        public static DB6Storage<ConditionalContentTuningRecord> ConditionalContentTuningStorage;
         public static DB6Storage<ContentTuningRecord> ContentTuningStorage;
         public static DB6Storage<ContentTuningXExpectedRecord> ContentTuningXExpectedStorage;
+        public static DB6Storage<ContentTuningXLabelRecord> ContentTuningXLabelStorage;
         public static DB6Storage<ConversationLineRecord> ConversationLineStorage;
         public static DB6Storage<CorruptionEffectsRecord> CorruptionEffectsStorage;
         public static DB6Storage<CreatureDisplayInfoRecord> CreatureDisplayInfoStorage;
@@ -597,8 +608,11 @@ namespace Game.DataStorage
         public static DB6Storage<ItemArmorTotalRecord> ItemArmorTotalStorage;
         //public static DB6Storage<ItemBagFamilyRecord> ItemBagFamilyStorage;
         public static DB6Storage<ItemBonusRecord> ItemBonusStorage;
+        public static DB6Storage<ItemBonusListGroupEntryRecord> ItemBonusListGroupEntryStorage;
         public static DB6Storage<ItemBonusListLevelDeltaRecord> ItemBonusListLevelDeltaStorage;
+        public static DB6Storage<ItemBonusTreeRecord> ItemBonusTreeStorage;
         public static DB6Storage<ItemBonusTreeNodeRecord> ItemBonusTreeNodeStorage;
+        public static DB6Storage<ItemContextPickerEntryRecord> ItemContextPickerEntryStorage;
         public static DB6Storage<ItemClassRecord> ItemClassStorage;
         public static DB6Storage<ItemChildEquipmentRecord> ItemChildEquipmentStorage;
         public static DB6Storage<ItemCurrencyCostRecord> ItemCurrencyCostStorage;
@@ -652,6 +666,7 @@ namespace Game.DataStorage
         public static DB6Storage<MountTypeXCapabilityRecord> MountTypeXCapabilityStorage;
         public static DB6Storage<MountXDisplayRecord> MountXDisplayStorage;
         public static DB6Storage<MovieRecord> MovieStorage;
+        public static DB6Storage<MythicPlusSeasonRecord> MythicPlusSeasonStorage;
         public static DB6Storage<NameGenRecord> NameGenStorage;
         public static DB6Storage<NamesProfanityRecord> NamesProfanityStorage;
         public static DB6Storage<NamesReservedRecord> NamesReservedStorage;
@@ -667,6 +682,7 @@ namespace Game.DataStorage
         public static DB6Storage<PrestigeLevelInfoRecord> PrestigeLevelInfoStorage;
         public static DB6Storage<PvpDifficultyRecord> PvpDifficultyStorage;
         public static DB6Storage<PvpItemRecord> PvpItemStorage;
+        public static DB6Storage<PvpSeasonRecord> PvpSeasonStorage;
         public static DB6Storage<PvpTalentRecord> PvpTalentStorage;
         public static DB6Storage<PvpTalentCategoryRecord> PvpTalentCategoryStorage;
         public static DB6Storage<PvpTalentSlotUnlockRecord> PvpTalentSlotUnlockStorage;

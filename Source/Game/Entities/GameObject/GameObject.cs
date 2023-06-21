@@ -969,10 +969,11 @@ namespace Game.Entities
             Loot fishLoot = new(GetMap(), GetGUID(), LootType.Fishing, null);
 
             uint areaId = GetAreaId();
+            ItemContext itemContext = ItemBonusMgr.GetContextForPlayer(GetMap().GetMapDifficulty(), lootOwner);
             AreaTableRecord areaEntry;
             while ((areaEntry = CliDB.AreaTableStorage.LookupByKey(areaId)) != null)
             {
-                fishLoot.FillLoot(areaId, LootStorage.Fishing, lootOwner, true, true);
+                fishLoot.FillLoot(areaId, LootStorage.Fishing, lootOwner, true, true, LootModes.Default, itemContext);
                 if (!fishLoot.IsLooted())
                     break;
 
@@ -980,7 +981,7 @@ namespace Game.Entities
             }
 
             if (fishLoot.IsLooted())
-                fishLoot.FillLoot(defaultzone, LootStorage.Fishing, lootOwner, true, true);
+                fishLoot.FillLoot(defaultzone, LootStorage.Fishing, lootOwner, true, true, LootModes.Default, itemContext);
 
             return fishLoot;
         }
@@ -992,10 +993,11 @@ namespace Game.Entities
             Loot fishLoot = new(GetMap(), GetGUID(), LootType.FishingJunk, null);
 
             uint areaId = GetAreaId();
+            ItemContext itemContext = ItemBonusMgr.GetContextForPlayer(GetMap().GetMapDifficulty(), lootOwner);
             AreaTableRecord areaEntry;
             while ((areaEntry = CliDB.AreaTableStorage.LookupByKey(areaId)) != null)
             {
-                fishLoot.FillLoot(areaId, LootStorage.Fishing, lootOwner, true, true, LootModes.JunkFish);
+                fishLoot.FillLoot(areaId, LootStorage.Fishing, lootOwner, true, true, LootModes.JunkFish, itemContext);
                 if (!fishLoot.IsLooted())
                     break;
 
@@ -1003,7 +1005,7 @@ namespace Game.Entities
             }
 
             if (fishLoot.IsLooted())
-                fishLoot.FillLoot(defaultzone, LootStorage.Fishing, lootOwner, true, true, LootModes.JunkFish);
+                fishLoot.FillLoot(defaultzone, LootStorage.Fishing, lootOwner, true, true, LootModes.JunkFish, itemContext);
 
             return fishLoot;
         }
@@ -1692,7 +1694,7 @@ namespace Game.Entities
 
                             loot = new Loot(GetMap(), GetGUID(), LootType.Chest, groupRules ? group : null);
                             loot.SetDungeonEncounterId(info.Chest.DungeonEncounter);
-                            loot.FillLoot(info.GetLootId(), LootStorage.Gameobject, player, !groupRules, false, GetLootMode(), GetMap().GetDifficultyLootItemContext());
+                            loot.FillLoot(info.GetLootId(), LootStorage.Gameobject, player, !groupRules, false, GetLootMode(), ItemBonusMgr.GetContextForPlayer(GetMap().GetMapDifficulty(), player));
 
                             if (GetLootMode() > 0)
                             {
@@ -1731,7 +1733,7 @@ namespace Game.Entities
 
                                 m_personalLoot = LootManager.GenerateDungeonEncounterPersonalLoot(info.Chest.DungeonEncounter, info.Chest.chestPersonalLoot,
                                     LootStorage.Gameobject, LootType.Chest, this, addon != null ? addon.Mingold : 0, addon != null ? addon.Maxgold : 0,
-                                    (ushort)GetLootMode(), GetMap().GetDifficultyLootItemContext(), tappers);
+                                    (ushort)GetLootMode(), GetMap().GetMapDifficulty(), tappers);
                             }
                             else
                             {
@@ -1739,7 +1741,7 @@ namespace Game.Entities
                                 m_personalLoot[player.GetGUID()] = loot;
 
                                 loot.SetDungeonEncounterId(info.Chest.DungeonEncounter);
-                                loot.FillLoot(info.Chest.chestPersonalLoot, LootStorage.Gameobject, player, true, false, GetLootMode(), GetMap().GetDifficultyLootItemContext());
+                                loot.FillLoot(info.Chest.chestPersonalLoot, LootStorage.Gameobject, player, true, false, GetLootMode(), ItemBonusMgr.GetContextForPlayer(GetMap().GetMapDifficulty(), player));
 
                                 if (GetLootMode() > 0 && addon != null)
                                     loot.GenerateMoneyLoot(addon.Mingold, addon.Maxgold);
@@ -1752,7 +1754,7 @@ namespace Game.Entities
                         if (info.Chest.chestPushLoot != 0)
                         {
                             Loot pushLoot = new(GetMap(), GetGUID(), LootType.Chest, null);
-                            pushLoot.FillLoot(info.Chest.chestPushLoot, LootStorage.Gameobject, player, true, false, GetLootMode(), GetMap().GetDifficultyLootItemContext());
+                            pushLoot.FillLoot(info.Chest.chestPushLoot, LootStorage.Gameobject, player, true, false, GetLootMode(), ItemBonusMgr.GetContextForPlayer(GetMap().GetMapDifficulty(), player));
                             pushLoot.AutoStore(player, ItemConst.NullBag, ItemConst.NullSlot);
                         }
 
@@ -2268,7 +2270,7 @@ namespace Game.Entities
                     Player player = user.ToPlayer();
 
                     Loot loot = new Loot(GetMap(), GetGUID(), LootType.Fishinghole, null);
-                    loot.FillLoot(GetGoInfo().GetLootId(), LootStorage.Gameobject, player, true);
+                    loot.FillLoot(GetGoInfo().GetLootId(), LootStorage.Gameobject, player, true, false, LootModes.Default, ItemBonusMgr.GetContextForPlayer(GetMap().GetMapDifficulty(), player));
                     m_personalLoot[player.GetGUID()] = loot;
 
                     player.SendLoot(loot);
@@ -2452,7 +2454,7 @@ namespace Game.Entities
                             Loot newLoot = new(GetMap(), GetGUID(), LootType.Chest, null);
                             m_personalLoot[player.GetGUID()] = newLoot;
 
-                            newLoot.FillLoot(info.GatheringNode.chestLoot, LootStorage.Gameobject, player, true, false, GetLootMode(), GetMap().GetDifficultyLootItemContext());
+                            newLoot.FillLoot(info.GatheringNode.chestLoot, LootStorage.Gameobject, player, true, false, GetLootMode(), ItemBonusMgr.GetContextForPlayer(GetMap().GetMapDifficulty(), player));
                         }
 
                         if (info.GatheringNode.triggeredEvent != 0)

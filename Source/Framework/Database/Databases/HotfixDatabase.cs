@@ -212,6 +212,10 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_CFG_REGIONS, "SELECT ID, Tag, RegionID, Raidorigin, RegionGroupMask, ChallengeOrigin FROM cfg_regions" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
 
+            // ChallengeModeItemBonusOverride.db2
+            PrepareStatement(HotfixStatements.SEL_CHALLENGE_MODE_ITEM_BONUS_OVERRIDE, "SELECT ID, ItemBonusTreeGroupID, DstItemBonusTreeID, Type, Value, " +
+                "MythicPlusSeasonID, PvPSeasonID, SrcItemBonusTreeID FROM challenge_mode_item_bonus_override WHERE (`VerifiedBuild` > 0) = ?");
+
             // CharTitles.db2
             PrepareStatement(HotfixStatements.SEL_CHAR_TITLES, "SELECT ID, Name, Name1, MaskID, Flags FROM char_titles WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_CHAR_TITLES_LOCALE, "SELECT ID, Name_lang, Name1_lang FROM char_titles_locale WHERE (`VerifiedBuild` > 0) = ?" +
@@ -327,6 +331,10 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_CINEMATIC_SEQUENCES, "SELECT ID, SoundID, Camera1, Camera2, Camera3, Camera4, Camera5, Camera6, Camera7, Camera8" +
                 " FROM cinematic_sequences WHERE (`VerifiedBuild` > 0) = ?");
 
+            // ConditionalContentTuning.db2
+            PrepareStatement(HotfixStatements.SEL_CONDITIONAL_CONTENT_TUNING, "SELECT ID, OrderIndex, RedirectContentTuningID, RedirectFlag, ParentContentTuningID" +
+                " FROM conditional_content_tuning WHERE (`VerifiedBuild` > 0) = ?");
+
             // ContentTuning.db2
             PrepareStatement(HotfixStatements.SEL_CONTENT_TUNING, "SELECT ID, Flags, ExpansionID, MinLevel, MaxLevel, MinLevelType, MaxLevelType, TargetLevelDelta, " +
                 "TargetLevelMaxDelta, TargetLevelMin, TargetLevelMax, MinItemLevel, QuestXpMultiplier FROM content_tuning WHERE (`VerifiedBuild` > 0) = ?");
@@ -334,6 +342,10 @@ namespace Framework.Database
             // ContentTuningXExpected.db2
             PrepareStatement(HotfixStatements.SEL_CONTENT_TUNING_X_EXPECTED, "SELECT ID, ExpectedStatModID, MinMythicPlusSeasonID, MaxMythicPlusSeasonID, " +
                 "ContentTuningID FROM content_tuning_x_expected WHERE (`VerifiedBuild` > 0) = ?");
+
+            // ContentTuningXLabel.db2
+            PrepareStatement(HotfixStatements.SEL_CONTENT_TUNING_X_LABEL, "SELECT ID, LabelID, ContentTuningID FROM content_tuning_x_label" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
 
             // ConversationLine.db2
             PrepareStatement(HotfixStatements.SEL_CONVERSATION_LINE, "SELECT ID, BroadcastTextID, SpellVisualKitID, AdditionalDuration, NextConversationLineID, " +
@@ -653,13 +665,20 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_ITEM_BONUS, "SELECT ID, Value1, Value2, Value3, Value4, ParentItemBonusListID, Type, OrderIndex FROM item_bonus" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
 
+            // ItemBonusListGroupEntry.db2
+            PrepareStatement(HotfixStatements.SEL_ITEM_BONUS_LIST_GROUP_ENTRY, "SELECT ID, ItemBonusListGroupID, ItemBonusListID, ItemLevelSelectorID, SequenceValue, " +
+                "ItemExtendedCostID, PlayerConditionID, Flags, ItemLogicalCostGroupID FROM item_bonus_list_group_entry WHERE (`VerifiedBuild` > 0) = ?");
+
             // ItemBonusListLevelDelta.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_BONUS_LIST_LEVEL_DELTA, "SELECT ItemLevelDelta, ID FROM item_bonus_list_level_delta" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
 
+            // ItemBonusTree.db2
+            PrepareStatement(HotfixStatements.SEL_ITEM_BONUS_TREE, "SELECT ID, Flags, InventoryTypeSlotMask FROM item_bonus_tree WHERE (`VerifiedBuild` > 0) = ?");
+
             // ItemBonusTreeNode.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_BONUS_TREE_NODE, "SELECT ID, ItemContext, ChildItemBonusTreeID, ChildItemBonusListID, ChildItemLevelSelectorID, " +
-                "ChildItemBonusListGroupID, IblGroupPointsModSetID, Unknown1010_1, Unknown1010_2, ParentItemBonusTreeID FROM item_bonus_tree_node" +
+                "ChildItemBonusListGroupID, IblGroupPointsModSetID, MinMythicPlusLevel, MaxMythicPlusLevel, ParentItemBonusTreeID FROM item_bonus_tree_node" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
 
             // ItemChildEquipment.db2
@@ -669,6 +688,10 @@ namespace Framework.Database
             // ItemClass.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_CLASS, "SELECT ID, ClassName, ClassID, PriceModifier, Flags FROM item_class WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_ITEM_CLASS_LOCALE, "SELECT ID, ClassName_lang FROM item_class_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
+
+            // ItemContextPickerEntry.db2
+            PrepareStatement(HotfixStatements.SEL_ITEM_CONTEXT_PICKER_ENTRY, "SELECT ID, ItemCreationContext, OrderIndex, PVal, LabelID, Flags, PlayerConditionID, " +
+                "ItemContextPickerID FROM item_context_picker_entry WHERE (`VerifiedBuild` > 0) = ?");
 
             // ItemCurrencyCost.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_CURRENCY_COST, "SELECT ID, ItemID FROM item_currency_cost WHERE (`VerifiedBuild` > 0) = ?");
@@ -918,6 +941,10 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_MOVIE, "SELECT ID, Volume, KeyID, AudioFileDataID, SubtitleFileDataID, SubtitleFileFormat FROM movie" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
 
+            // MythicPlusSeason.db2
+            PrepareStatement(HotfixStatements.SEL_MYTHIC_PLUS_SEASON, "SELECT ID, MilestoneSeason, ExpansionLevel, HeroicLFGDungeonMinGear FROM mythic_plus_season" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
+
             // NameGen.db2
             PrepareStatement(HotfixStatements.SEL_NAME_GEN, "SELECT ID, Name, RaceID, Sex FROM name_gen WHERE (`VerifiedBuild` > 0) = ?");
 
@@ -990,6 +1017,10 @@ namespace Framework.Database
 
             // PvpItem.db2
             PrepareStatement(HotfixStatements.SEL_PVP_ITEM, "SELECT ID, ItemID, ItemLevelDelta FROM pvp_item WHERE (`VerifiedBuild` > 0) = ?");
+
+            // PvpSeason.db2
+            PrepareStatement(HotfixStatements.SEL_PVP_SEASON, "SELECT ID, MilestoneSeason, AllianceAchievementID, HordeAchievementID FROM pvp_season" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
 
             // PvpTalent.db2
             PrepareStatement(HotfixStatements.SEL_PVP_TALENT, "SELECT Description, ID, SpecID, SpellID, OverridesSpellID, Flags, ActionBarSpellID, PvpTalentCategoryID, " +
@@ -1646,6 +1677,8 @@ namespace Framework.Database
 
         SEL_CFG_REGIONS,
 
+        SEL_CHALLENGE_MODE_ITEM_BONUS_OVERRIDE,
+
         SEL_CHAR_TITLES,
         SEL_CHAR_TITLES_LOCALE,
 
@@ -1692,9 +1725,13 @@ namespace Framework.Database
 
         SEL_CINEMATIC_SEQUENCES,
 
+        SEL_CONDITIONAL_CONTENT_TUNING,
+
         SEL_CONTENT_TUNING,
 
         SEL_CONTENT_TUNING_X_EXPECTED,
+
+        SEL_CONTENT_TUNING_X_LABEL,
 
         SEL_CONVERSATION_LINE,
 
@@ -1847,7 +1884,11 @@ namespace Framework.Database
 
         SEL_ITEM_BONUS,
 
+        SEL_ITEM_BONUS_LIST_GROUP_ENTRY,
+
         SEL_ITEM_BONUS_LIST_LEVEL_DELTA,
+
+        SEL_ITEM_BONUS_TREE,
 
         SEL_ITEM_BONUS_TREE_NODE,
 
@@ -1855,6 +1896,8 @@ namespace Framework.Database
 
         SEL_ITEM_CLASS,
         SEL_ITEM_CLASS_LOCALE,
+
+        SEL_ITEM_CONTEXT_PICKER_ENTRY,
 
         SEL_ITEM_CURRENCY_COST,
 
@@ -1974,6 +2017,8 @@ namespace Framework.Database
 
         SEL_MOVIE,
 
+        SEL_MYTHIC_PLUS_SEASON,
+
         SEL_NAME_GEN,
 
         SEL_NAMES_PROFANITY,
@@ -2005,6 +2050,8 @@ namespace Framework.Database
         SEL_PVP_DIFFICULTY,
 
         SEL_PVP_ITEM,
+
+        SEL_PVP_SEASON,
 
         SEL_PVP_TALENT,
         SEL_PVP_TALENT_LOCALE,

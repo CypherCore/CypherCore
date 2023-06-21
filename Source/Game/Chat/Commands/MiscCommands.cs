@@ -2096,9 +2096,9 @@ namespace Game.Chat
             if (!context.IsEmpty())
             {
                 itemContext = context.ToEnum<ItemContext>();
-                if (itemContext != ItemContext.None && itemContext < ItemContext.Max)
+                if (itemContext < ItemContext.Max)
                 {
-                    var contextBonuses = Global.DB2Mgr.GetDefaultItemBonusTree(itemId, itemContext);
+                    var contextBonuses = ItemBonusMgr.GetBonusListsForItem(itemId, new(itemContext));
                     bonusListIDs.AddRange(contextBonuses);
                 }
             }
@@ -2156,7 +2156,7 @@ namespace Game.Chat
                 return false;
             }
 
-            Item item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(itemId), null, itemContext, bonusListIDs);
+            Item item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(itemId), null, itemContext, bonusListIDs.Empty() ? null : bonusListIDs);
 
             // remove binding (let GM give it to another player later)
             if (player == playerTarget)
@@ -2208,7 +2208,7 @@ namespace Game.Chat
 
             ItemContext itemContext = ItemContext.None;
             if (context.HasValue)
-                itemContext = (ItemContext)context;
+                itemContext = (ItemContext)context.Value;
 
             Player player = handler.GetSession().GetPlayer();
             Player playerTarget = handler.GetSelectedPlayer();
@@ -2230,13 +2230,13 @@ namespace Game.Chat
                 if (msg == InventoryResult.Ok)
                 {
                     List<uint> bonusListIDsForItem = new(bonusListIDs); // copy, bonuses for each depending on context might be different for each item
-                    if (itemContext != ItemContext.None && itemContext < ItemContext.Max)
+                    if (itemContext < ItemContext.Max)
                     {
-                        var contextBonuses = Global.DB2Mgr.GetDefaultItemBonusTree(template.Value.GetId(), itemContext);
+                        var contextBonuses = ItemBonusMgr.GetBonusListsForItem(template.Value.GetId(), new(itemContext));
                         bonusListIDsForItem.AddRange(contextBonuses);
                     }
 
-                    Item item = playerTarget.StoreNewItem(dest, template.Value.GetId(), true, 0, null, itemContext, bonusListIDsForItem);
+                    Item item = playerTarget.StoreNewItem(dest, template.Value.GetId(), true, 0, null, itemContext, bonusListIDsForItem.Empty() ? null : bonusListIDsForItem);
 
                     // remove binding (let GM give it to another player later)
                     if (player == playerTarget)
@@ -2330,9 +2330,9 @@ namespace Game.Chat
             if (!context.IsEmpty())
             {
                 itemContext = context.ToEnum<ItemContext>();
-                if (itemContext != ItemContext.None && itemContext < ItemContext.Max)
+                if (itemContext < ItemContext.Max)
                 {
-                    var contextBonuses = Global.DB2Mgr.GetDefaultItemBonusTree(itemId, itemContext);
+                    var contextBonuses = ItemBonusMgr.GetBonusListsForItem(itemId, new(itemContext));
                     bonusListIDs.AddRange(contextBonuses);
                 }
             }
@@ -2396,7 +2396,7 @@ namespace Game.Chat
                 return false;
             }
 
-            Item item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(itemId), null, itemContext, bonusListIDs);
+            Item item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(itemId), null, itemContext, bonusListIDs.Empty() ? null : bonusListIDs);
 
             // remove binding (let GM give it to another player later)
             if (player == playerTarget)

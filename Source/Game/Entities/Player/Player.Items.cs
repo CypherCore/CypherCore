@@ -1209,8 +1209,6 @@ namespace Game.Entities
         {
             Log.outDebug(LogFilter.Player, "STORAGE: Creating initial item, itemId = {0}, count = {1}", itemId, amount);
 
-            var bonusListIDs = Global.DB2Mgr.GetDefaultItemBonusTree(itemId, context);
-
             InventoryResult msg;
             // attempt equip by one
             while (amount > 0)
@@ -1219,8 +1217,7 @@ namespace Game.Entities
                 if (msg != InventoryResult.Ok)
                     break;
 
-                Item item = EquipNewItem(eDest, itemId, context, true);
-                item.SetBonuses(bonusListIDs);
+                EquipNewItem(eDest, itemId, context, true);
                 AutoUnequipOffhandIfNeed();
                 --amount;
             }
@@ -1234,7 +1231,7 @@ namespace Game.Entities
             msg = CanStoreNewItem(InventorySlots.Bag0, ItemConst.NullSlot, sDest, itemId, amount);
             if (msg == InventoryResult.Ok)
             {
-                StoreNewItem(sDest, itemId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(itemId), null, context, bonusListIDs);
+                StoreNewItem(sDest, itemId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(itemId), null, context);
                 return true;                                        // stored
             }
 
@@ -1242,18 +1239,20 @@ namespace Game.Entities
             Log.outError(LogFilter.Player, "STORAGE: Can't equip or store initial item {0} for race {1} class {2}, error msg = {3}", itemId, GetRace(), GetClass(), msg);
             return false;
         }
+
         public Item StoreNewItem(List<ItemPosCount> pos, uint itemId, bool update, uint randomBonusListId = 0, List<ObjectGuid> allowedLooters = null, ItemContext context = 0, List<uint> bonusListIDs = null, bool addToCollection = true)
         {
             uint count = 0;
             foreach (var itemPosCount in pos)
                 count += itemPosCount.count;
 
-            Item item = Item.CreateItem(itemId, count, context, this);
+            Item item = Item.CreateItem(itemId, count, context, this, bonusListIDs == null);
             if (item != null)
             {
                 item.SetItemFlag(ItemFieldFlags.NewItem);
 
-                item.SetBonuses(bonusListIDs);
+                if (bonusListIDs != null)
+                    item.SetBonuses(bonusListIDs);
 
                 item = StoreItem(pos, item, update);
 
@@ -6090,7 +6089,7 @@ namespace Game.Entities
             InventoryResult msg = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item.itemid, item.count);
             if (msg == InventoryResult.Ok)
             {
-                Item newitem = StoreNewItem(dest, item.itemid, true, item.randomBonusListId, item.GetAllowedLooters(), item.context, item.BonusListIDs);
+                Item newitem = StoreNewItem(dest, item.itemid, true, item.randomBonusListId, item.GetAllowedLooters(), item.context);
                 if (ffaItem != null)
                 {
                     //freeforall case, notify only one player of the removal

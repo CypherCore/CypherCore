@@ -5162,11 +5162,11 @@ namespace Game
                     return false;
                 }
 
-                foreach (uint bonusList in vItem.BonusListIDs)
+                foreach (uint bonusListId in vItem.BonusListIDs)
                 {
-                    if (Global.DB2Mgr.GetItemBonusList(bonusList) == null)
+                    if (ItemBonusMgr.GetItemBonuses(bonusListId).Empty())
                     {
-                        Log.outError(LogFilter.Sql, "Table `(game_event_)npc_vendor` have Item (Entry: {0}) with invalid bonus {1} for vendor ({2}), ignore", vItem.item, bonusList, vendorentry);
+                        Log.outError(LogFilter.Sql, "Table `(game_event_)npc_vendor` have Item (Entry: {0}) with invalid bonus {1} for vendor ({2}), ignore", vItem.item, bonusListId, vendorentry);
                         return false;
                     }
                 }
