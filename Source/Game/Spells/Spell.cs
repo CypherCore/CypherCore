@@ -7859,7 +7859,7 @@ namespace Game.Spells
             m_caster.ToUnit().GetSpellHistory().CancelGlobalCooldown(m_spellInfo);
         }
 
-        string GetDebugInfo()
+        public string GetDebugInfo()
         {
             return $"Id: {GetSpellInfo().Id} Name: '{GetSpellInfo().SpellName[Global.WorldMgr.GetDefaultDbcLocale()]}' OriginalCaster: {m_originalCasterGUID} State: {GetState()}";
         }
@@ -8014,7 +8014,7 @@ namespace Game.Spells
         {
             return spell != null;
         }
-
+        
         #region Fields
         Dictionary<SpellEffectName, SpellLogEffect> _executeLogEffects = new();
         PathGenerator m_preGeneratedPath;
@@ -9176,6 +9176,8 @@ namespace Game.Spells
         }
 
         public Spell GetSpell() { return m_Spell; }
+
+        public string GetDebugInfo() { return m_Spell.GetDebugInfo(); }
 
         Spell m_Spell;
     }
