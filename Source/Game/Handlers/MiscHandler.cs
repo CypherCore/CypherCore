@@ -187,7 +187,7 @@ namespace Game
             if (Global.ScriptMgr.OnAreaTrigger(player, atEntry, packet.Entered))
                 return;
 
-            if (player.IsAlive())
+            if (player.IsAlive() && packet.Entered)
             {
                 // not using Player.UpdateQuestObjectiveProgress, ObjectID in quest_objectives can be set to -1, areatrigger_involvedrelation then holds correct id
                 List<uint> quests = Global.ObjectMgr.GetQuestsForAreaTrigger(packet.AreaTriggerID);
@@ -236,10 +236,18 @@ namespace Game
             if (Global.ObjectMgr.IsTavernAreaTrigger(packet.AreaTriggerID))
             {
                 // set resting flag we are in the inn
-                player.GetRestMgr().SetRestFlag(RestFlag.Tavern, atEntry.Id);
+                if (packet.Entered)
+                    player.GetRestMgr().SetRestFlag(RestFlag.Tavern, atEntry.Id);
+                else
+                    player.GetRestMgr().RemoveRestFlag(RestFlag.Tavern);
 
                 if (Global.WorldMgr.IsFFAPvPRealm())
-                    player.RemovePvpFlag(UnitPVPStateFlags.FFAPvp);
+                {
+                    if (packet.Entered)
+                        player.RemovePvpFlag(UnitPVPStateFlags.FFAPvp);
+                    else
+                        player.SetPvpFlag(UnitPVPStateFlags.FFAPvp);
+                }
 
                 return;
             }
@@ -253,6 +261,9 @@ namespace Game
                 if (pvp.HandleAreaTrigger(player, packet.AreaTriggerID, packet.Entered))
                     return;
             }
+
+            if (!packet.Entered)
+                return;
 
             AreaTriggerStruct at = Global.ObjectMgr.GetAreaTrigger(packet.AreaTriggerID);
             if (at == null)
