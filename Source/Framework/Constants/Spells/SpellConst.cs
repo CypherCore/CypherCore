@@ -2836,7 +2836,7 @@ namespace Framework.Constants
         Unk145 = 145,
         Unk146 = 146,
         Unk147 = 147,
-        Unk148 = 148,
+        DestDestTargetTowardsCaster = 148,
         Unk149 = 149,
         UnitOwnCritter = 150, // own battle pet from UNIT_FIELD_CRITTER
         Unk151 = 151,

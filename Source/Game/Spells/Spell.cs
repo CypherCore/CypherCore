@@ -1185,6 +1185,18 @@ namespace Game.Spells
                 case Targets.DestDestGround:
                     dest.Position.posZ = m_caster.GetMapHeight(dest.Position.GetPositionX(), dest.Position.GetPositionY(), dest.Position.GetPositionZ());
                     break;
+                case Targets.DestDestTargetTowardsCaster:
+                {
+                    float dist = spellEffectInfo.CalcRadius(m_caster);
+                    Position pos = dest.Position;
+                    float angle = pos.GetAbsoluteAngle(m_caster) - m_caster.GetOrientation();
+
+                    m_caster.MovePositionToFirstCollision(pos, dist, angle);
+                    pos.SetOrientation(m_caster.GetAbsoluteAngle(dest.Position));
+
+                    dest.Relocate(pos);
+                    break;
+                }
                 default:
                 {
                     float angle = targetType.CalcDirectionAngle();
