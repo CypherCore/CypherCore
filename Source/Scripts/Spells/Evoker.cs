@@ -18,6 +18,7 @@ namespace Scripts.Spells.Evoker
         public const uint LivingFlame = 361469;
         public const uint LivingFlameDamage = 361500;
         public const uint LivingFlameHeal = 361509;
+        public const uint PyreDamage = 357212;
         public const uint SoarRacial = 369536;
     }
 
@@ -111,6 +112,25 @@ namespace Scripts.Spells.Evoker
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleHitTarget, 0, SpellEffectName.Dummy));
             OnEffectLaunchTarget.Add(new EffectHandler(HandleLaunchTarget, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 393568 - Pyre
+    class spell_evo_pyre : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.PyreDamage);
+        }
+
+        void HandleDamage(uint effIndex)
+        {
+            GetCaster().CastSpell(GetHitUnit().GetPosition(), SpellIds.PyreDamage, new CastSpellExtraArgs(true));
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDamage, 0, SpellEffectName.Dummy));
         }
     }
 }
