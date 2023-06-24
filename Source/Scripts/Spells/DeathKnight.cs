@@ -510,7 +510,7 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 2, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 1, SpellEffectName.Dummy));
         }
     }
 
