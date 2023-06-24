@@ -445,6 +445,7 @@ namespace Game.Entities
         public uint SkinLootID;
         public uint GoldMin;
         public uint GoldMax;
+        public CreatureStaticFlagsHolder StaticFlags;
 
         public CreatureDifficulty()
         {

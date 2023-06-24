@@ -2673,8 +2673,15 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            //                                         0      1             2                     3                     4                5                       6               7             8              9               10                    11         12          13      14                15          16       17
-            SQLResult result = DB.World.Query("SELECT Entry, DifficultyID, LevelScalingDeltaMin, LevelScalingDeltaMax, ContentTuningID, HealthScalingExpansion, HealthModifier, ManaModifier, ArmorModifier, DamageModifier, CreatureDifficultyID, TypeFlags, TypeFlags2, LootID, PickPocketLootID, SkinLootID, GoldMin, GoldMax FROM creature_template_difficulty ORDER BY Entry");
+            //                                         0      1             2                     3                     4                5
+            SQLResult result = DB.World.Query("SELECT Entry, DifficultyID, LevelScalingDeltaMin, LevelScalingDeltaMax, ContentTuningID, HealthScalingExpansion, " +
+                //6               7             8              9               10                    11         12
+                "HealthModifier, ManaModifier, ArmorModifier, DamageModifier, CreatureDifficultyID, TypeFlags, TypeFlags2, " +
+                //13      14                15          16       17
+                "LootID, PickPocketLootID, SkinLootID, GoldMin, GoldMax," +
+                //18            19            20            21            22            23            24            25
+                "StaticFlags1, StaticFlags2, StaticFlags3, StaticFlags4, StaticFlags5, StaticFlags6, StaticFlags7, StaticFlags8 " +
+                "FROM creature_template_difficulty ORDER BY Entry");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature template difficulty definitions. DB table `creature_template_difficulty` is empty.");
@@ -2711,6 +2718,7 @@ namespace Game
                 creatureDifficulty.SkinLootID = result.Read<uint>(15);
                 creatureDifficulty.GoldMin = result.Read<uint>(16);
                 creatureDifficulty.GoldMax = result.Read<uint>(17);
+                creatureDifficulty.StaticFlags = new(result.Read<uint>(18), result.Read<uint>(19), result.Read<uint>(20), result.Read<uint>(21), result.Read<uint>(22), result.Read<uint>(23), result.Read<uint>(24), result.Read<uint>(25));
 
                 // TODO: Check if this still applies
                 creatureDifficulty.DamageModifier *= Creature._GetDamageMod(template.Rank);

@@ -280,6 +280,8 @@ namespace Game.Entities
             for (byte i = 0; i < SharedConst.MaxCreatureSpells; ++i)
                 m_spells[i] = GetCreatureTemplate().Spells[i];
 
+            ApplyAllStaticFlags(m_creatureDifficulty.StaticFlags);
+
             _staticFlags.ApplyFlag(CreatureStaticFlags.NoXp, creatureInfo.CreatureType == CreatureType.Critter || IsPet() || IsTotem() || creatureInfo.FlagsExtra.HasFlag(CreatureFlagsExtra.NoXP));
             _staticFlags.ApplyFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells, GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.TreatAsRaidUnit));
 
@@ -400,6 +402,12 @@ namespace Game.Entities
             return true;
         }
 
+        void ApplyAllStaticFlags(CreatureStaticFlagsHolder flags)
+        {
+            // Apply all other side effects of flag changes
+            SetTemplateRooted(flags.HasFlag(CreatureStaticFlags.Sessile));
+        }
+        
         public override void Update(uint diff)
         {
             if (IsAIEnabled() && triggerJustAppeared && m_deathState != DeathState.Dead)
