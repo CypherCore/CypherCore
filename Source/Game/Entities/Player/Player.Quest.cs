@@ -1232,55 +1232,27 @@ namespace Game.Entities
             //lets remove flag for delayed teleports
             SetCanDelayTeleport(false);
 
-            switch (questGiver.GetTypeId())
+            if (questGiver != null && questGiver.IsTypeMask(TypeMask.Unit | TypeMask.GameObject))
             {
-                case TypeId.Unit:
-                case TypeId.Player:
+                //For AutoSubmition was added plr case there as it almost same exclute AI script cases.
+                // Send next quest
+                Quest nextQuest = GetNextQuest(questGiver, quest);
+                if (nextQuest != null)
                 {
-                    //For AutoSubmition was added plr case there as it almost same exclute AI script cases.
-                    // Send next quest
-                    Quest nextQuest = GetNextQuest(questGiver, quest);
-                    if (nextQuest != null)
+                    // Only send the quest to the player if the conditions are met
+                    if (CanTakeQuest(nextQuest, false))
                     {
-                        // Only send the quest to the player if the conditions are met
-                        if (CanTakeQuest(nextQuest, false))
-                        {
-                            if (nextQuest.IsAutoAccept() && CanAddQuest(nextQuest, true))
-                                AddQuestAndCheckCompletion(nextQuest, questGiver);
+                        if (nextQuest.IsAutoAccept() && CanAddQuest(nextQuest, true))
+                            AddQuestAndCheckCompletion(nextQuest, questGiver);
 
-                            PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, questGiver.GetGUID(), true, false);
-                        }
+                        PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, questGiver.GetGUID(), true, false);
                     }
-
-                    PlayerTalkClass.ClearMenus();
-                    Creature creatureQGiver = questGiver.ToCreature();
-                    if (creatureQGiver != null)
-                        creatureQGiver.GetAI().OnQuestReward(this, quest, rewardType, rewardId);
-                    break;
                 }
-                case TypeId.GameObject:
-                {
-                    // Send next quest
-                    Quest nextQuest = GetNextQuest(questGiver, quest);
-                    if (nextQuest != null)
-                    {
-                        // Only send the quest to the player if the conditions are met
-                        if (CanTakeQuest(nextQuest, false))
-                        {
-                            if (nextQuest.IsAutoAccept() && CanAddQuest(nextQuest, true))
-                                AddQuestAndCheckCompletion(nextQuest, questGiver);
 
-                            PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, questGiver.GetGUID(), true, false);
-                        }
-                    }
-
-                    PlayerTalkClass.ClearMenus();
-                    questGiver.ToGameObject()?.GetAI()?.OnQuestReward(this, quest, rewardType, rewardId);
-                    break;
-                }
-                default:
-                    break;
-            }            
+                PlayerTalkClass.ClearMenus();
+                questGiver.ToCreature()?.GetAI().OnQuestReward(this, quest, rewardType, rewardId);
+                questGiver.ToGameObject()?.GetAI().OnQuestReward(this, quest, rewardType, rewardId);
+            }           
 
             Global.ScriptMgr.OnQuestStatusChange(this, questId);
             Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, QuestStatus.Rewarded);
