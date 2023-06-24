@@ -402,6 +402,8 @@ namespace Game.Entities
 
         void ApplyAllStaticFlags(CreatureStaticFlagsHolder flags)
         {
+            _staticFlags = flags;
+
             // Apply all other side effects of flag changes
             SetTemplateRooted(flags.HasFlag(CreatureStaticFlags.Sessile));
         }
