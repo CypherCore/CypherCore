@@ -40,7 +40,6 @@ namespace Game.Entities
         public UnitFlags UnitFlags;
         public uint UnitFlags2;
         public uint UnitFlags3;
-        public uint DynamicFlags;
         public CreatureFamily Family;
         public Class TrainerClass;
         public CreatureType CreatureType;
@@ -271,7 +270,6 @@ namespace Game.Entities
         public uint unit_flags;                                  // enum UnitFlags mask values
         public uint unit_flags2;                                 // enum UnitFlags2 mask values
         public uint unit_flags3;                                 // enum UnitFlags3 mask values
-        public uint dynamicflags;
 
         public CreatureData() : base(SpawnObjectType.Creature) { }
     }

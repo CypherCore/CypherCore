@@ -103,13 +103,12 @@ namespace Game
             return cinfo.GetFirstInvisibleModel();
         }
 
-        public static void ChooseCreatureFlags(CreatureTemplate cInfo, out ulong npcFlag, out uint unitFlags, out uint unitFlags2, out uint unitFlags3, out uint dynamicFlags, CreatureData data = null)
+        public static void ChooseCreatureFlags(CreatureTemplate cInfo, out ulong npcFlag, out uint unitFlags, out uint unitFlags2, out uint unitFlags3, CreatureData data = null)
         {
             npcFlag = data != null && data.npcflag != 0 ? data.npcflag : cInfo.Npcflag;
             unitFlags = data != null && data.unit_flags != 0 ? data.unit_flags : (uint)cInfo.UnitFlags;
             unitFlags2 = data != null && data.unit_flags2 != 0 ? data.unit_flags2 : cInfo.UnitFlags2;
             unitFlags3 = data != null && data.unit_flags3 != 0 ? data.unit_flags3 : cInfo.UnitFlags3;
-            dynamicFlags = data != null && data.dynamicflags != 0 ? data.dynamicflags : cInfo.DynamicFlags;
         }
 
         public static ResponseCodes CheckPlayerName(string name, Locale locale, bool create = false)
@@ -1794,10 +1793,9 @@ namespace Game
             creature.UnitFlags = (UnitFlags)fields.Read<uint>(22);
             creature.UnitFlags2 = fields.Read<uint>(23);
             creature.UnitFlags3 = fields.Read<uint>(24);
-            creature.DynamicFlags = fields.Read<uint>(25);
-            creature.Family = (CreatureFamily)fields.Read<uint>(26);
-            creature.TrainerClass = (Class)fields.Read<byte>(27);
-            creature.CreatureType = (CreatureType)fields.Read<byte>(28);
+            creature.Family = (CreatureFamily)fields.Read<uint>(25);
+            creature.TrainerClass = (Class)fields.Read<byte>(26);
+            creature.CreatureType = (CreatureType)fields.Read<byte>(27);
 
             for (var i = (int)SpellSchools.Holy; i < (int)SpellSchools.Max; ++i)
                 creature.Resistance[i] = 0;
@@ -1805,42 +1803,42 @@ namespace Game
             for (var i = 0; i < SharedConst.MaxCreatureSpells; ++i)
                 creature.Spells[i] = 0;
 
-            creature.VehicleId = fields.Read<uint>(29);
-            creature.AIName = fields.Read<string>(30);
-            creature.MovementType = fields.Read<uint>(31);
+            creature.VehicleId = fields.Read<uint>(28);
+            creature.AIName = fields.Read<string>(29);
+            creature.MovementType = fields.Read<uint>(30);
+
+            if (!fields.IsNull(31))
+                creature.Movement.Ground = (CreatureGroundMovementType)fields.Read<byte>(31);
 
             if (!fields.IsNull(32))
-                creature.Movement.Ground = (CreatureGroundMovementType)fields.Read<byte>(32);
+                creature.Movement.Swim = fields.Read<bool>(32);
 
             if (!fields.IsNull(33))
-                creature.Movement.Swim = fields.Read<bool>(33);
+                creature.Movement.Flight = (CreatureFlightMovementType)fields.Read<byte>(33);
 
             if (!fields.IsNull(34))
-                creature.Movement.Flight = (CreatureFlightMovementType)fields.Read<byte>(34);
+                creature.Movement.Rooted = fields.Read<bool>(34);
 
             if (!fields.IsNull(35))
-                creature.Movement.Rooted = fields.Read<bool>(35);
+                creature.Movement.Chase = (CreatureChaseMovementType)fields.Read<byte>(35);
 
             if (!fields.IsNull(36))
-                creature.Movement.Chase = (CreatureChaseMovementType)fields.Read<byte>(36);
+                creature.Movement.Random = (CreatureRandomMovementType)fields.Read<byte>(36);
 
             if (!fields.IsNull(37))
-                creature.Movement.Random = (CreatureRandomMovementType)fields.Read<byte>(37);
+                creature.Movement.InteractionPauseTimer = fields.Read<uint>(37);
 
-            if (!fields.IsNull(38))
-                creature.Movement.InteractionPauseTimer = fields.Read<uint>(38);
-
-            creature.ModExperience = fields.Read<float>(39);
-            creature.RacialLeader = fields.Read<bool>(40);
-            creature.MovementId = fields.Read<uint>(41);
-            creature.WidgetSetID = fields.Read<int>(42);
-            creature.WidgetSetUnitConditionID = fields.Read<int>(43);
-            creature.RegenHealth = fields.Read<bool>(44);
-            creature.MechanicImmuneMask = fields.Read<ulong>(45);
-            creature.SpellSchoolImmuneMask = fields.Read<uint>(46);
-            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(47);
-            creature.ScriptID = GetScriptId(fields.Read<string>(48));
-            creature.StringId = fields.Read<string>(49);
+            creature.ModExperience = fields.Read<float>(38);
+            creature.RacialLeader = fields.Read<bool>(39);
+            creature.MovementId = fields.Read<uint>(40);
+            creature.WidgetSetID = fields.Read<int>(41);
+            creature.WidgetSetUnitConditionID = fields.Read<int>(42);
+            creature.RegenHealth = fields.Read<bool>(43);
+            creature.MechanicImmuneMask = fields.Read<ulong>(44);
+            creature.SpellSchoolImmuneMask = fields.Read<uint>(45);
+            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(46);
+            creature.ScriptID = GetScriptId(fields.Read<string>(47));
+            creature.StringId = fields.Read<string>(48);
 
             creatureTemplateStorage[entry] = creature;
         }
@@ -2870,12 +2868,6 @@ namespace Game
                 cInfo.UnitFlags3 &= (uint)UnitFlags3.Allowed;
             }
 
-            if (cInfo.DynamicFlags != 0)
-            {
-                Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with `dynamicflags` > 0. Ignored and set to 0.");
-                cInfo.DynamicFlags = 0;
-            }
-
             if (!cInfo.GossipMenuIds.Empty() && !cInfo.Npcflag.HasAnyFlag((uint)NPCFlags.Gossip))
                 Log.outInfo(LogFilter.Sql, $"Creature (Entry: {cInfo.Entry}) has assigned gossip menu, but npcflag does not include UNIT_NPC_FLAG_GOSSIP.");
             else if (cInfo.GossipMenuIds.Empty() && cInfo.Npcflag.HasAnyFlag((uint)NPCFlags.Gossip))
@@ -3433,8 +3425,8 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT creature.guid, id, map, position_x, position_y, position_z, orientation, modelid, equipment_id, spawntimesecs, wander_distance, " +
                 //11               12         13       14            15                 16          17           18                19                   20                    21
                 "currentwaypoint, curhealth, curmana, MovementType, spawnDifficulties, eventEntry, poolSpawnId, creature.npcflag, creature.unit_flags, creature.unit_flags2, creature.unit_flags3, " +
-                //   22                     23                      24                25                   26                       27                   28
-                "creature.dynamicflags, creature.phaseUseFlags, creature.phaseid, creature.phasegroup, creature.terrainSwapMap, creature.ScriptName, creature.StringId " +
+                //22                      23                24                   25                       26                   27
+                "creature.phaseUseFlags, creature.phaseid, creature.phasegroup, creature.terrainSwapMap, creature.ScriptName, creature.StringId " +
                 "FROM creature LEFT OUTER JOIN game_event_creature ON creature.guid = game_event_creature.guid LEFT OUTER JOIN pool_members ON pool_members.type = 0 AND creature.guid = pool_members.spawnId");
 
             if (result.IsEmpty())
@@ -3491,13 +3483,13 @@ namespace Game
                 data.unit_flags = result.Read<uint>(19);
                 data.unit_flags2 = result.Read<uint>(20);
                 data.unit_flags3 = result.Read<uint>(21);
-                data.dynamicflags = result.Read<uint>(22);
-                data.PhaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(23);
-                data.PhaseId = result.Read<uint>(24);
-                data.PhaseGroup = result.Read<uint>(25);
-                data.terrainSwapMap = result.Read<int>(26);
-                data.ScriptId = GetScriptId(result.Read<string>(27));
-                data.StringId = result.Read<string>(28);
+
+                data.PhaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(22);
+                data.PhaseId = result.Read<uint>(23);
+                data.PhaseGroup = result.Read<uint>(24);
+                data.terrainSwapMap = result.Read<int>(25);
+                data.ScriptId = GetScriptId(result.Read<string>(26));
+                data.StringId = result.Read<string>(27);
                 data.spawnGroupData = _spawnGroupDataStorage[IsTransportMap(data.MapId) ? 1 : 0u]; // transport spawns default to compatibility group
 
                 var mapEntry = CliDB.MapStorage.LookupByKey(data.MapId);
@@ -3623,12 +3615,6 @@ namespace Game
                 {
                     Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags2` {disallowedUnitFlags3}, removing incorrect flag.");
                     cInfo.UnitFlags3 &= (uint)UnitFlags3.Allowed;
-                }
-
-                if (cInfo.DynamicFlags != 0)
-                {
-                    Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with `dynamicflags` > 0. Ignored and set to 0.");
-                    cInfo.DynamicFlags = 0;
                 }
 
                 if (WorldConfig.GetBoolValue(WorldCfg.CalculateCreatureZoneAreaData))
