@@ -266,7 +266,7 @@ namespace Game.Spells
                 if (spellInfo.NeedsToBeTriggeredByCaster(m_spellInfo) && effectInfo.GetProvidedTargetMask().HasAnyFlag(SpellCastTargetFlags.UnitMask))
                     return;
 
-                if (spellInfo.GetExplicitTargetMask().HasAnyFlag(SpellCastTargetFlags.DestLocation))
+                if (spellInfo.GetExplicitTargetMask().HasAnyFlag(SpellCastTargetFlags.DestLocation) && m_targets.HasDst())
                     targets.SetDst(m_targets);
 
                 Unit target = m_targets.GetUnitTarget();
