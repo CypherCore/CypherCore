@@ -141,7 +141,7 @@ namespace Scripts.Spells.Paladin
             }
         }
 
-        public override void OnCreate()
+        public override void OnCreate(Spell creatingSpell)
         {
             RefreshPeriod();
             _refreshTimer = _period;

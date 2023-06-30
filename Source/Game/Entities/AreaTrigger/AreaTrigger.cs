@@ -70,7 +70,7 @@ namespace Game.Entities
             }
         }
 
-        bool Create(uint areaTriggerCreatePropertiesId, Unit caster, Unit target, SpellInfo spell, Position pos, int duration, SpellCastVisualField spellVisual, ObjectGuid castId, AuraEffect aurEff)
+        bool Create(uint areaTriggerCreatePropertiesId, Unit caster, Unit target, SpellInfo spellInfo, Position pos, int duration, SpellCastVisualField spellVisual, Spell spell, AuraEffect aurEff)
         {
             _targetGuid = target ? target.GetGUID() : ObjectGuid.Empty;
             _aurEff = aurEff;
@@ -106,10 +106,11 @@ namespace Game.Entities
 
             var areaTriggerData = m_values.ModifyValue(m_areaTriggerData);
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.Caster), caster.GetGUID());
-            SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.CreatingEffectGUID), castId);
+            if (spell != null)
+                SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.CreatingEffectGUID), spell.m_castId);
 
-            SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.SpellID), spell.Id);
-            SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.SpellForVisuals), spell.Id);
+            SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.SpellID), spellInfo.Id);
+            SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.SpellForVisuals), spellInfo.Id);
 
             SpellCastVisualField spellCastVisual = areaTriggerData.ModifyValue(m_areaTriggerData.SpellVisual);
             SetUpdateFieldValue(ref spellCastVisual.SpellXSpellVisualID, spellVisual.SpellXSpellVisualID);
@@ -204,15 +205,15 @@ namespace Game.Entities
 
             caster._RegisterAreaTrigger(this);
 
-            _ai.OnCreate();
+            _ai.OnCreate(spell);
 
             return true;
         }
 
-        public static AreaTrigger CreateAreaTrigger(uint areaTriggerCreatePropertiesId, Unit caster, Unit target, SpellInfo spell, Position pos, int duration, SpellCastVisualField spellVisual, ObjectGuid castId = default, AuraEffect aurEff = null)
+        public static AreaTrigger CreateAreaTrigger(uint areaTriggerCreatePropertiesId, Unit caster, Unit target, SpellInfo spellInfo, Position pos, int duration, SpellCastVisualField spellVisual, Spell spell = null, AuraEffect aurEff = null)
         {
             AreaTrigger at = new();
-            if (!at.Create(areaTriggerCreatePropertiesId, caster, target, spell, pos, duration, spellVisual, castId, aurEff))
+            if (!at.Create(areaTriggerCreatePropertiesId, caster, target, spellInfo, pos, duration, spellVisual, spell, aurEff))
                 return null;
 
             return at;
@@ -273,7 +274,7 @@ namespace Game.Entities
 
             AI_Initialize();
 
-            _ai.OnCreate();
+            _ai.OnCreate(null);
 
             return true;
         }

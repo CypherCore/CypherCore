@@ -410,7 +410,7 @@ namespace Scripts.Spells.Shaman
             _period = TimeSpan.FromSeconds(1);
         }
 
-        public override void OnCreate()
+        public override void OnCreate(Spell creatingSpell)
         {
             Unit caster = at.GetCaster();
             if (caster != null)
