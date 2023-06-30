@@ -399,11 +399,16 @@ namespace Scripts.Spells.DeathKnight
     [Script] // 48743 - Death Pact
     class spell_dk_death_pact : AuraScript
     {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellEffect((spellInfo.Id, 2));
+        }
+        
         void HandleCalcAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             Unit caster = GetCaster();
             if (caster)
-                amount = (int)caster.CountPctFromMaxHealth(amount);
+                amount = (int)caster.CountPctFromMaxHealth(GetEffectInfo(2).CalcValue(caster));
         }
 
         public override void Register()
