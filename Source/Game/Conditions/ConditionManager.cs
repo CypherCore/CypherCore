@@ -2340,7 +2340,7 @@ namespace Game
                 if (worldStateExpression == null)
                     return false;
 
-                if (!IsPlayerMeetingExpression(player, worldStateExpression))
+                if (!IsMeetingWorldStateExpression(player.GetMap(), worldStateExpression))
                     return false;
             }
 
@@ -2498,7 +2498,7 @@ namespace Game
             return true;
         }
 
-        public static bool IsPlayerMeetingExpression(Player player, WorldStateExpressionRecord expression)
+        public static bool IsMeetingWorldStateExpression(Map map, WorldStateExpressionRecord expression)
         {
             ByteBuffer buffer = new(expression.Expression.ToByteArray());
             if (buffer.GetSize() == 0)
@@ -2508,12 +2508,12 @@ namespace Game
             if (!enabled)
                 return false;
 
-            bool finalResult = EvalRelOp(buffer, player);
+            bool finalResult = EvalRelOp(buffer, map);
             WorldStateExpressionLogic resultLogic = (WorldStateExpressionLogic)buffer.ReadUInt8();
 
             while (resultLogic != WorldStateExpressionLogic.None)
             {
-                bool secondResult = EvalRelOp(buffer, player);
+                bool secondResult = EvalRelOp(buffer, map);
 
                 switch (resultLogic)
                 {
@@ -2831,7 +2831,7 @@ namespace Game
             return !condition.GetFlags().HasFlag(UnitConditionFlags.LogicOr);
         }
         
-        static int EvalSingleValue(ByteBuffer buffer, Player player)
+        static int EvalSingleValue(ByteBuffer buffer, Map map)
         {
             WorldStateExpressionValueType valueType = (WorldStateExpressionValueType)buffer.ReadUInt8();
             int value = 0;
@@ -2846,19 +2846,19 @@ namespace Game
                 case WorldStateExpressionValueType.WorldState:
                 {
                     uint worldStateId = buffer.ReadUInt32();
-                    value = Global.WorldStateMgr.GetValue((int)worldStateId, player.GetMap());
+                    value = Global.WorldStateMgr.GetValue((int)worldStateId, map);
                     break;
                 }
                 case WorldStateExpressionValueType.Function:
                 {
                     var functionType = (WorldStateExpressionFunctions)buffer.ReadUInt32();
-                    int arg1 = EvalSingleValue(buffer, player);
-                    int arg2 = EvalSingleValue(buffer, player);
+                    int arg1 = EvalSingleValue(buffer, map);
+                    int arg2 = EvalSingleValue(buffer, map);
 
                     if (functionType >= WorldStateExpressionFunctions.Max)
                         return 0;
 
-                    value = WorldStateExpressionFunction(functionType, player, arg1, arg2);
+                    value = WorldStateExpressionFunction(functionType, map, arg1, arg2);
                     break;
                 }
                 default:
@@ -2868,7 +2868,7 @@ namespace Game
             return value;
         }
 
-        static int WorldStateExpressionFunction(WorldStateExpressionFunctions functionType, Player player, int arg1, int arg2)
+        static int WorldStateExpressionFunction(WorldStateExpressionFunctions functionType, Map map, int arg1, int arg2)
         {
             switch (functionType)
             {
@@ -2887,7 +2887,7 @@ namespace Game
                     int currentHour = GameTime.GetDateAndTime().Hour + 1;
                     return currentHour <= 12 ? (currentHour != 0 ? currentHour : 12) : currentHour - 12;
                 case WorldStateExpressionFunctions.OldDifficultyId:
-                    var difficulty = CliDB.DifficultyStorage.LookupByKey(player.GetMap().GetDifficultyID());
+                    var difficulty = CliDB.DifficultyStorage.LookupByKey(map.GetDifficultyID());
                     if (difficulty != null)
                         return difficulty.OldEnumValue;
 
@@ -2905,13 +2905,14 @@ namespace Game
 
                     return (int)(now - raidOrigin) / Time.Week;
                 case WorldStateExpressionFunctions.DifficultyId:
-                    return (int)player.GetMap().GetDifficultyID();
+                    return (int)map.GetDifficultyID();
                 case WorldStateExpressionFunctions.WarModeActive:
-                    return player.HasPlayerFlag(PlayerFlags.WarModeActive) ? 1 : 0;
+                    // check if current zone/map is bound to war mode
+                    return 0;
                 case WorldStateExpressionFunctions.WorldStateExpression:
                     var worldStateExpression = CliDB.WorldStateExpressionStorage.LookupByKey(arg1);
                     if (worldStateExpression != null)
-                        return IsPlayerMeetingExpression(player, worldStateExpression) ? 1 : 0;
+                        return IsMeetingWorldStateExpression(map, worldStateExpression) ? 1 : 0;
 
                     return 0;
                 case WorldStateExpressionFunctions.MersenneRandom:
@@ -2953,15 +2954,15 @@ namespace Game
             }
         }
 
-        static int EvalValue(ByteBuffer buffer, Player player)
+        static int EvalValue(ByteBuffer buffer, Map map)
         {
-            int leftValue = EvalSingleValue(buffer, player);
+            int leftValue = EvalSingleValue(buffer, map);
 
             WorldStateExpressionOperatorType operatorType = (WorldStateExpressionOperatorType)buffer.ReadUInt8();
             if (operatorType == WorldStateExpressionOperatorType.None)
                 return leftValue;
 
-            int rightValue = EvalSingleValue(buffer, player);
+            int rightValue = EvalSingleValue(buffer, map);
 
             switch (operatorType)
             {
@@ -2982,15 +2983,15 @@ namespace Game
             return leftValue;
         }
 
-        static bool EvalRelOp(ByteBuffer buffer, Player player)
+        static bool EvalRelOp(ByteBuffer buffer, Map map)
         {
-            int leftValue = EvalValue(buffer, player);
+            int leftValue = EvalValue(buffer, map);
 
             WorldStateExpressionComparisonType compareLogic = (WorldStateExpressionComparisonType)buffer.ReadUInt8();
             if (compareLogic == WorldStateExpressionComparisonType.None)
                 return leftValue != 0;
 
-            int rightValue = EvalValue(buffer, player);
+            int rightValue = EvalValue(buffer, map);
 
             switch (compareLogic)
             {

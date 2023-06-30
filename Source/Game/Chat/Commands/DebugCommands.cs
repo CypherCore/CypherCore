@@ -1159,7 +1159,7 @@ namespace Game.Chat
             if (wsExpressionEntry == null)
                 return false;
 
-            if (ConditionManager.IsPlayerMeetingExpression(target, wsExpressionEntry))
+            if (ConditionManager.IsMeetingWorldStateExpression(target.GetMap(), wsExpressionEntry))
                 handler.SendSysMessage($"Expression {expressionId} meet");
             else
                 handler.SendSysMessage($"Expression {expressionId} not meet");

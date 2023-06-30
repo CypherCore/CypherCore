@@ -1582,7 +1582,7 @@ namespace Game.Achievements
                 case ModifierTreeType.WorldStateExpression: // 67
                     WorldStateExpressionRecord worldStateExpression = CliDB.WorldStateExpressionStorage.LookupByKey(reqValue);
                     if (worldStateExpression != null)
-                        return ConditionManager.IsPlayerMeetingExpression(referencePlayer, worldStateExpression);
+                        return ConditionManager.IsMeetingWorldStateExpression(referencePlayer.GetMap(), worldStateExpression);
                     return false;
                 case ModifierTreeType.DungeonDifficulty: // 68
                     if (referencePlayer.GetMap().GetDifficultyID() != (Difficulty)reqValue)
