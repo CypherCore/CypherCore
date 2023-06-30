@@ -3374,7 +3374,7 @@ namespace Game.AI
                 case SmartEvents.WaypointStopped:
                 case SmartEvents.WaypointEnded:
                 {
-                    if (_me == null || (e.Event.waypoint.pointID != 0 && var0 != e.Event.waypoint.pointID) || (e.Event.waypoint.pathID != 0 && var1 != e.Event.waypoint.pathID))
+                    if (_me == null || (e.Event.waypoint.pointID != 0xFFFFFFFF && var0 != e.Event.waypoint.pointID) || (e.Event.waypoint.pathID != 0 && var1 != e.Event.waypoint.pathID))
                         return;
                     ProcessAction(e, unit);
                     break;

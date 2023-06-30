@@ -70,7 +70,7 @@ namespace Game.AI
             return !_isCharmed;
         }
 
-        public void StartPath(uint pathId = 0, bool repeat = false, Unit invoker = null, uint nodeId = 1)
+        public void StartPath(uint pathId = 0, bool repeat = false, Unit invoker = null, uint nodeId = 0)
         {
             if (HasEscortState(SmartEscortState.Escorting))
                 StopPath();
@@ -165,22 +165,23 @@ namespace Game.AI
         {
             if (!HasEscortState(SmartEscortState.Escorting))
             {
-                (uint nodeId, uint pathId) waypointInfo = new ();
+                uint nodeId = 0;
+                uint pathId = 0;
                 if (me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Waypoint)
-                    waypointInfo = me.GetCurrentWaypointInfo();
+                    (nodeId, pathId) = me.GetCurrentWaypointInfo();
 
                 if (_despawnState != 2)
                     SetDespawnTime(despawnTime);
 
                 me.GetMotionMaster().MoveIdle();
 
-                if (waypointInfo.Item1 != 0)
-                    GetScript().ProcessEventsFor(SmartEvents.WaypointStopped, null, waypointInfo.Item1, waypointInfo.Item2);
+                if (pathId != 0)
+                    GetScript().ProcessEventsFor(SmartEvents.WaypointStopped, null, nodeId, pathId);
 
                 if (!fail)
                 {
-                    if (waypointInfo.Item1 != 0)
-                        GetScript().ProcessEventsFor(SmartEvents.WaypointEnded, null, waypointInfo.Item1, waypointInfo.Item2);
+                    if (pathId != 0)
+                        GetScript().ProcessEventsFor(SmartEvents.WaypointEnded, null, nodeId, pathId);
                     if (_despawnState == 1)
                         StartDespawn();
                 }
@@ -390,7 +391,7 @@ namespace Game.AI
             else if (HasEscortState(SmartEscortState.Escorting) && me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Waypoint)
             {
                 WaypointPath path = Global.WaypointMgr.GetPath(pathId);
-                if (path != null && _currentWaypointNode == path.nodes.Count)
+                if (path != null && _currentWaypointNode == path.nodes.Last()?.id)
                     _waypointPathEnded = true;
                 else
                     SetRun(_run);
