@@ -4213,34 +4213,41 @@ namespace Game.Entities
                 SpawnCorpseBones();
             }
 
-            WorldSafeLocsEntry ClosestGrave;
+            WorldSafeLocsEntry closestGrave = null;
 
             // Special handle for Battlegroundmaps
             Battleground bg = GetBattleground();
             if (bg)
-                ClosestGrave = bg.GetClosestGraveyard(this);
+                closestGrave = bg.GetClosestGraveyard(this);
             else
             {
-                BattleField bf = BattleFieldMgr.GetBattlefieldToZoneId(GetMap(), GetZoneId());
+                var bf = BattleFieldMgr.GetBattlefieldToZoneId(GetMap(), GetZoneId());
                 if (bf != null)
-                    ClosestGrave = bf.GetClosestGraveyard(this);
+                    closestGrave = bf.GetClosestGraveyard(this);
                 else
-                    ClosestGrave = ObjectMgr.GetClosestGraveyard(this, GetTeam(), this);
+                {
+                    InstanceScript instance = GetInstanceScript();
+                    if (instance != null)
+                        closestGrave = ObjectMgr.GetWorldSafeLoc(instance.GetEntranceLocation());
+                }
             }
+
+            if (closestGrave == null)
+                closestGrave = ObjectMgr.GetClosestGraveyard(this, GetTeam(), this);
 
             // stop countdown until repop
             m_deathTimer = 0;
 
             // if no grave found, stay at the current location
             // and don't show spirit healer location
-            if (ClosestGrave != null)
+            if (closestGrave != null)
             {
-                TeleportTo(ClosestGrave.Loc, shouldResurrect ? TeleportToOptions.ReviveAtTeleport : 0);
+                TeleportTo(closestGrave.Loc, shouldResurrect ? TeleportToOptions.ReviveAtTeleport : 0);
                 if (IsDead())                                        // not send if alive, because it used in TeleportTo()
                 {
                     DeathReleaseLoc packet = new();
-                    packet.MapID = (int)ClosestGrave.Loc.GetMapId();
-                    packet.Loc = ClosestGrave.Loc;
+                    packet.MapID = (int)closestGrave.Loc.GetMapId();
+                    packet.Loc = closestGrave.Loc;
                     SendPacket(packet);
                 }
             }
