@@ -1771,7 +1771,7 @@ namespace Game.Spells
                         if (unitTarget != null)
                         {
                             uint deficit = (uint)(unitTarget.GetMaxHealth() - unitTarget.GetHealth());
-                            if ((deficit > maxHPDeficit || found == null) && chainSource.IsWithinDist(unitTarget, jumpRadius) && chainSource.IsWithinLOSInMap(unitTarget, LineOfSightChecks.All, ModelIgnoreFlags.M2))
+                            if ((deficit > maxHPDeficit || found == null) && chainSource.IsWithinDist(unitTarget, jumpRadius) && IsWithinLOS(chainSource, unitTarget, false, ModelIgnoreFlags.M2))
                             {
                                 found = obj;
                                 maxHPDeficit = deficit;
@@ -1786,10 +1786,10 @@ namespace Game.Spells
                     {
                         if (found == null)
                         {
-                            if (chainSource.IsWithinDist(obj, jumpRadius) && chainSource.IsWithinLOSInMap(obj, LineOfSightChecks.All, ModelIgnoreFlags.M2))
+                            if (chainSource.IsWithinDist(obj, jumpRadius) && IsWithinLOS(chainSource, obj, false, ModelIgnoreFlags.M2))
                                 found = obj;
                         }
-                        else if (chainSource.GetDistanceOrder(obj, found) && chainSource.IsWithinLOSInMap(obj, LineOfSightChecks.All, ModelIgnoreFlags.M2))
+                        else if (chainSource.GetDistanceOrder(obj, found) && IsWithinLOS(chainSource, obj, false, ModelIgnoreFlags.M2))
                             found = obj;
                     }
                 }
@@ -2604,11 +2604,11 @@ namespace Game.Spells
                 Cast(true);
             else
             {
-                // commented out !m_spellInfo->StartRecoveryTime, it forces instant spells with global cooldown to be processed in spell::update
+                // commented out !m_spellInfo.StartRecoveryTime, it forces instant spells with global cooldown to be processed in spell::update
                 // as a result a spell that passed CheckCast and should be processed instantly may suffer from this delayed process
                 // the easiest bug to observe is LoS check in AddUnitTarget, even if spell passed the CheckCast LoS check the situation can change in spell::update
                 // because target could be relocated in the meantime, making the spell fly to the air (no targets can be registered, so no effects processed, nothing in combat log)
-                bool willCastDirectly = m_casttime == 0 && /*!m_spellInfo->StartRecoveryTime && */ GetCurrentContainer() == CurrentSpellTypes.Generic;
+                bool willCastDirectly = m_casttime == 0 && /*!m_spellInfo.StartRecoveryTime && */ GetCurrentContainer() == CurrentSpellTypes.Generic;
 
                 Unit unitCaster = m_caster.ToUnit();
                 if (unitCaster != null)
@@ -4919,7 +4919,7 @@ namespace Game.Spells
                                 losTarget = dynObj;
                         }
 
-                        if (!m_spellInfo.HasAttribute(SpellAttr2.IgnoreLineOfSight) && !Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, (byte)DisableFlags.SpellLOS) && !unitTarget.IsWithinLOSInMap(losTarget, LineOfSightChecks.All, ModelIgnoreFlags.M2))
+                        if (!IsWithinLOS(losTarget, unitTarget, true, ModelIgnoreFlags.M2))
                             return SpellCastResult.LineOfSight;
                     }
                 }
@@ -4927,13 +4927,8 @@ namespace Game.Spells
 
             // Check for line of sight for spells with dest
             if (m_targets.HasDst())
-            {
-                float x, y, z;
-                m_targets.GetDstPos().GetPosition(out x, out y, out z);
-
-                if (!m_spellInfo.HasAttribute(SpellAttr2.IgnoreLineOfSight) && !Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, (byte)DisableFlags.SpellLOS) && !m_caster.IsWithinLOS(x, y, z, LineOfSightChecks.All, ModelIgnoreFlags.M2))
+                if (!IsWithinLOS(m_caster, m_targets.GetDstPos(), ModelIgnoreFlags.M2))
                     return SpellCastResult.LineOfSight;
-            }
 
             // check pet presence
             if (unitCaster != null)
@@ -5218,7 +5213,7 @@ namespace Game.Spells
                                 return SpellCastResult.DontReport;
 
                             // first we must check to see if the target is in LoS. A path can usually be built but LoS matters for charge spells
-                            if (!target.IsWithinLOSInMap(unitCaster)) //Do full LoS/Path check. Don't exclude m2
+                            if (!IsWithinLOS(unitCaster, target, true, ModelIgnoreFlags.Nothing)) //Do full LoS/Path check. Don't exclude m2
                                 return SpellCastResult.LineOfSight;
 
                             float objSize = target.GetCombatReach();
@@ -7097,7 +7092,7 @@ namespace Game.Spells
             }
 
             // check for ignore LOS on the effect itself
-            if (m_spellInfo.HasAttribute(SpellAttr2.IgnoreLineOfSight) || Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, (byte)DisableFlags.SpellLOS))
+            if (m_spellInfo.HasAttribute(SpellAttr2.IgnoreLineOfSight) || Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, DisableFlags.SpellLOS))
                 return true;
 
             // check if gameobject ignores LOS
@@ -7107,7 +7102,7 @@ namespace Game.Spells
                     return true;
 
             // if spell is triggered, need to check for LOS disable on the aura triggering it and inherit that behaviour
-            if (!m_spellInfo.HasAttribute(SpellAttr5.AlwaysLineOfSight) && IsTriggered() && m_triggeredByAuraSpell != null && (m_triggeredByAuraSpell.HasAttribute(SpellAttr2.IgnoreLineOfSight) || Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_triggeredByAuraSpell.Id, null, (byte)DisableFlags.SpellLOS)))
+            if (!m_spellInfo.HasAttribute(SpellAttr5.AlwaysLineOfSight) && IsTriggered() && m_triggeredByAuraSpell != null && (m_triggeredByAuraSpell.HasAttribute(SpellAttr2.IgnoreLineOfSight) || Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_triggeredByAuraSpell.Id, null, DisableFlags.SpellLOS)))
                 return true;
 
             // @todo shit below shouldn't be here, but it's temporary
@@ -7118,7 +7113,7 @@ namespace Game.Spells
                 {
                     if (m_targets.GetCorpseTargetGUID().IsEmpty())
                     {
-                        if (target.IsWithinLOSInMap(m_caster, LineOfSightChecks.All, ModelIgnoreFlags.M2) && target.HasUnitFlag(UnitFlags.Skinnable))
+                        if (IsWithinLOS(m_caster, target, true, ModelIgnoreFlags.M2) && target.HasUnitFlag(UnitFlags.Skinnable))
                             return true;
 
                         return false;
@@ -7134,7 +7129,7 @@ namespace Game.Spells
                     if (!corpse.HasCorpseDynamicFlag(CorpseDynFlags.Lootable))
                         return false;
 
-                    if (!corpse.IsWithinLOSInMap(m_caster, LineOfSightChecks.All, ModelIgnoreFlags.M2))
+                    if (!IsWithinLOS(m_caster, corpse, true, ModelIgnoreFlags.M2))
                         return false;
 
                     break;
@@ -7149,7 +7144,8 @@ namespace Game.Spells
                             caster = m_caster.GetMap().GetGameObject(m_originalCasterGUID);
                         if (!caster)
                             caster = m_caster;
-                        if (target != m_caster && !target.IsWithinLOSInMap(caster, LineOfSightChecks.All, ModelIgnoreFlags.M2))
+
+                        if (target != m_caster && !IsWithinLOS(caster, target, true, ModelIgnoreFlags.M2))
                             return false;
                     }
 
@@ -7716,6 +7712,33 @@ namespace Game.Spells
             }
         }
 
+        bool IsWithinLOS(WorldObject source, WorldObject target, bool targetAsSourceLocation, ModelIgnoreFlags ignoreFlags)
+        {
+            if (m_spellInfo.HasAttribute(SpellAttr2.IgnoreLineOfSight))
+                return true;
+
+            if (Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, DisableFlags.SpellLOS))
+                return true;
+
+            if (target.IsCreature() && target.ToCreature().CanIgnoreLineOfSightWhenCastingOnMe())
+                return true;
+
+            WorldObject src = targetAsSourceLocation ? target : source;
+            WorldObject dst = targetAsSourceLocation ? source : target;
+            return src.IsWithinLOSInMap(dst, LineOfSightChecks.All, ignoreFlags);
+        }
+
+        bool IsWithinLOS(WorldObject source, Position target, ModelIgnoreFlags ignoreFlags)
+        {
+            if (m_spellInfo.HasAttribute(SpellAttr2.IgnoreLineOfSight))
+                return true;
+
+            if (Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, DisableFlags.SpellLOS))
+                return true;
+
+            return source.IsWithinLOS(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ(), LineOfSightChecks.All, ignoreFlags);
+        }
+        
         bool CheckScriptEffectImplicitTargets(uint effIndex, uint effIndexToCheck)
         {
             // Skip if there are not any script

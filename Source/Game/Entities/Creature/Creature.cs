@@ -3289,6 +3289,8 @@ namespace Game.Entities
         public bool CanMelee() { return !_staticFlags.HasFlag(CreatureStaticFlags.NoMelee); }
 
         public void SetCanMelee(bool canMelee) { _staticFlags.ApplyFlag(CreatureStaticFlags.NoMelee, !canMelee); }
+
+        public bool CanIgnoreLineOfSightWhenCastingOnMe() { return _staticFlags.HasFlag(CreatureStaticFlags4.IgnoreLosWhenCastingOnMe); }
         
         public sbyte GetOriginalEquipmentId() { return m_originalEquipmentId; }
         public byte GetCurrentEquipmentId() { return m_equipmentId; }

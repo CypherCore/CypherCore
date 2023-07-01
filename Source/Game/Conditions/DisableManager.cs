@@ -270,7 +270,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Checked {0} quest disables in {1} ms", m_DisableMap[DisableType.Quest].Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public bool IsDisabledFor(DisableType type, uint entry, WorldObject refe, ushort flags = 0)
+        public bool IsDisabledFor(DisableType type, uint entry, WorldObject refe, DisableFlags flags = 0)
         {
             Cypher.Assert(type < DisableType.Max);
             if (!m_DisableMap.ContainsKey(type) || m_DisableMap[type].Empty())
@@ -331,7 +331,7 @@ namespace Game
                     }
                     else if (spellFlags.HasFlag(DisableFlags.SpellDeprecatedSpell))    // call not from spellcast
                         return true;
-                    else if (flags.HasAnyFlag((byte)DisableFlags.SpellLOS))
+                    else if (flags.HasAnyFlag(DisableFlags.SpellLOS))
                         return spellFlags.HasFlag(DisableFlags.SpellLOS);
 
                     break;
@@ -373,13 +373,13 @@ namespace Game
                 case DisableType.MMAP:
                     return true;
                 case DisableType.VMAP:
-                    return flags.HasAnyFlag(data.flags);
+                    return flags.HasAnyFlag((DisableFlags)data.flags);
             }
 
             return false;
         }
 
-        public bool IsVMAPDisabledFor(uint entry, byte flags)
+        public bool IsVMAPDisabledFor(uint entry, DisableFlags flags)
         {
             return IsDisabledFor(DisableType.VMAP, entry, null, flags);
         }
