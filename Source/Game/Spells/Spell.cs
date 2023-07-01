@@ -3104,7 +3104,10 @@ namespace Game.Spells
 
             // consider spell hit for some spells without target, so they may proc on finish phase correctly
             if (m_UniqueTargetInfo.Empty())
+            {
                 m_hitMask = ProcFlagsHit.Normal;
+                m_procSpellType = ProcFlagsSpellType.NoDmgHeal;
+            }
             else
                 DoProcessTargetContainer(m_UniqueTargetInfo);
 
@@ -3295,7 +3298,7 @@ namespace Game.Spells
             }
 
             if (!m_spellInfo.HasAttribute(SpellAttr3.SuppressCasterProcs))
-                Unit.ProcSkillsAndAuras(m_originalCaster, null, procAttacker, new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Finish, m_hitMask, this, null, null);
+                Unit.ProcSkillsAndAuras(m_originalCaster, null, procAttacker, new ProcFlagsInit(ProcFlags.None), m_procSpellType, ProcFlagsSpellPhase.Finish, m_hitMask, this, null, null);
         }
 
         void SendSpellCooldown()
@@ -8131,6 +8134,7 @@ namespace Game.Spells
         internal ProcFlagsInit m_procAttacker;                // Attacker trigger flags
         internal ProcFlagsInit m_procVictim;                  // Victim   trigger flags
         internal ProcFlagsHit m_hitMask;
+        internal ProcFlagsSpellType m_procSpellType;   // for finish procs
 
         // *****************************************
         // Spell target subsystem
@@ -8645,6 +8649,7 @@ namespace Game.Spells
 
                 // set hitmask for finish procs
                 spell.m_hitMask |= hitMask;
+                spell.m_procSpellType |= procSpellType;
 
                 // Do not take combo points on dodge and miss
                 if (MissCondition != SpellMissInfo.None && spell.m_needComboPoints && spell.m_targets.GetUnitTargetGUID() == TargetGUID)
