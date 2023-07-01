@@ -2199,6 +2199,7 @@ namespace Game.Entities
 
             bool cur_active = pSpell.Active;
             bool cur_dependent = pSpell.Dependent;
+            int? traitDefinitionId = pSpell.TraitDefinitionId;
 
             if (disabled)
             {
@@ -2313,6 +2314,13 @@ namespace Game.Entities
                         }
                     }
                 }
+            }
+
+            if (traitDefinitionId.HasValue)
+            {
+                var traitDefinition = CliDB.TraitDefinitionStorage.LookupByKey(traitDefinitionId.Value);
+                if (traitDefinition != null)
+                    RemoveOverrideSpell(traitDefinition.OverridesSpellID, spellId);
             }
 
             m_overrideSpells.Remove(spellId);
