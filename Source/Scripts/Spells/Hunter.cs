@@ -30,6 +30,8 @@ namespace Scripts.Spells.Hunter
         public const uint PetHeartOfThePhoenixDebuff = 55711;
         public const uint PosthasteIncreaseSpeed = 118922;
         public const uint PosthasteTalent = 109215;
+        public const uint RapidFireDamage = 257045;
+        public const uint RapidFireEnergize = 263585;
         public const uint SteadyShotFocus = 77443;
         public const uint T94PGreatness = 68130;
         public const uint DraeneiGiftOfTheNaaru = 59543;
@@ -347,6 +349,46 @@ namespace Scripts.Spells.Hunter
         }
     }
 
+    [Script] // 257044 - Rapid Fire
+    class spell_hun_rapid_fire : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.RapidFireDamage);
+        }
+
+        void HandlePeriodic(AuraEffect aurEff)
+        {
+            Unit caster = GetCaster();
+            if (caster != null)
+                caster.CastSpell(GetTarget(), SpellIds.RapidFireDamage, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodic, 1, AuraType.PeriodicDummy));
+        }
+    }
+
+    [Script] // 257045 - Rapid Fire Damage
+    class spell_hun_rapid_fire_damage : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.RapidFireEnergize);
+        }
+
+        void HandleHit(uint effIndex)
+        {
+            GetCaster().CastSpell(null, SpellIds.RapidFireEnergize, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleHit, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+    
     [Script] // 53480 - Roar of Sacrifice
     class spell_hun_roar_of_sacrifice : AuraScript
     {
