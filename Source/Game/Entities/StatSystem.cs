@@ -724,44 +724,46 @@ namespace Game.Entities
 
         void TriggerOnPowerChangeAuras(PowerType power, int oldVal, int newVal)
         {
-            var effects = GetAuraEffectsByType(AuraType.TriggerSpellOnPowerPct);
-            var effectsAmount = GetAuraEffectsByType(AuraType.TriggerSpellOnPowerAmount);
-            effects.AddRange(effectsAmount);
-
-            foreach (AuraEffect effect in effects)
+            void processAuras(List<AuraEffect> effects)
             {
-                if (effect.GetMiscValue() == (int)power)
+                foreach (AuraEffect effect in effects)
                 {
-                    uint effectAmount = (uint)effect.GetAmount();
-                    uint triggerSpell = effect.GetSpellEffectInfo().TriggerSpell;
-
-                    float oldValueCheck = oldVal;
-                    float newValueCheck = newVal;
-
-                    if (effect.GetAuraType() == AuraType.TriggerSpellOnPowerPct)
+                    if (effect.GetMiscValue() == (int)power)
                     {
-                        int maxPower = GetMaxPower(power);
-                        oldValueCheck = MathFunctions.GetPctOf(oldVal, maxPower);
-                        newValueCheck = MathFunctions.GetPctOf(newVal, maxPower);
-                    }
+                        uint effectAmount = (uint)effect.GetAmount();
+                        uint triggerSpell = effect.GetSpellEffectInfo().TriggerSpell;
 
-                    switch ((AuraTriggerOnPowerChangeDirection)effect.GetMiscValueB())
-                    {
-                        case AuraTriggerOnPowerChangeDirection.Gain:
-                            if (oldValueCheck >= effect.GetAmount() || newValueCheck < effectAmount)
-                                continue;
-                            break;
-                        case AuraTriggerOnPowerChangeDirection.Loss:
-                            if (oldValueCheck <= effect.GetAmount() || newValueCheck > effectAmount)
-                                continue;
-                            break;
-                        default:
-                            break;
-                    }
+                        float oldValueCheck = oldVal;
+                        float newValueCheck = newVal;
 
-                    CastSpell(this, triggerSpell, new CastSpellExtraArgs(effect));
+                        if (effect.GetAuraType() == AuraType.TriggerSpellOnPowerPct)
+                        {
+                            int maxPower = GetMaxPower(power);
+                            oldValueCheck = MathFunctions.GetPctOf(oldVal, maxPower);
+                            newValueCheck = MathFunctions.GetPctOf(newVal, maxPower);
+                        }
+
+                        switch ((AuraTriggerOnPowerChangeDirection)effect.GetMiscValueB())
+                        {
+                            case AuraTriggerOnPowerChangeDirection.Gain:
+                                if (oldValueCheck >= effect.GetAmount() || newValueCheck < effectAmount)
+                                    continue;
+                                break;
+                            case AuraTriggerOnPowerChangeDirection.Loss:
+                                if (oldValueCheck <= effect.GetAmount() || newValueCheck > effectAmount)
+                                    continue;
+                                break;
+                            default:
+                                break;
+                        }
+
+                        CastSpell(this, triggerSpell, new CastSpellExtraArgs(effect));
+                    }
                 }
             }
+
+            processAuras(GetAuraEffectsByType(AuraType.TriggerSpellOnPowerPct));
+            processAuras(GetAuraEffectsByType(AuraType.TriggerSpellOnPowerAmount));
         }
 
         public bool CanApplyResilience()
