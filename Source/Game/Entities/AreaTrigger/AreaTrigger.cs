@@ -430,7 +430,7 @@ namespace Game.Entities
                 extentsZ = _shape.BoxDatas.Extents[2];
             }
 
-            targetList.RemoveAll(unit => !unit.IsWithinBox(boxCenter, extentsX, extentsY, extentsZ));
+            targetList.RemoveAll(unit => !unit.IsWithinBox(boxCenter, extentsX, extentsY, extentsZ / 2));
         }
 
         void SearchUnitInPolygon(List<Unit> targetList)

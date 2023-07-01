@@ -208,7 +208,7 @@ namespace Game.Entities
                 case AreaTriggerTypes.Sphere:
                     return Math.Max(SphereDatas.Radius, SphereDatas.RadiusTarget);
                 case AreaTriggerTypes.Box:
-                    return MathF.Sqrt(BoxDatas.Extents[0] * BoxDatas.Extents[0] / 4 + BoxDatas.Extents[1] * BoxDatas.Extents[1] / 4);
+                    return MathF.Sqrt(BoxDatas.Extents[0] * BoxDatas.Extents[0] + BoxDatas.Extents[1] * BoxDatas.Extents[1]);
                 case AreaTriggerTypes.Cylinder:
                     return Math.Max(CylinderDatas.Radius, CylinderDatas.RadiusTarget);
                 case AreaTriggerTypes.Disk:
