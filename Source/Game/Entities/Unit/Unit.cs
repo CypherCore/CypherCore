@@ -3738,11 +3738,7 @@ namespace Game.Entities
             if (healInfo.GetHeal() == 0)
                 return;
 
-            // Need remove expired auras after
-            bool existExpired = false;
-
-            // absorb without mana cost
-            var vHealAbsorb = healInfo.GetTarget().GetAuraEffectsByType(AuraType.SchoolHealAbsorb);
+            var vHealAbsorb = new List<AuraEffect>(healInfo.GetTarget().GetAuraEffectsByType(AuraType.SchoolHealAbsorb));
             for (var i = 0; i < vHealAbsorb.Count && healInfo.GetHeal() > 0; ++i)
             {
                 AuraEffect absorbAurEff = vHealAbsorb[i];
@@ -3784,7 +3780,7 @@ namespace Game.Entities
                         absorbAurEff.ChangeAmount(absorbAurEff.GetAmount() - currentAbsorb);
                         // Aura cannot absorb anything more - remove it
                         if (absorbAurEff.GetAmount() <= 0)
-                            existExpired = true;
+                            absorbAurEff.GetBase().Remove(AuraRemoveMode.EnemySpell);
                     }
                 }
 
@@ -3799,23 +3795,6 @@ namespace Game.Entities
                     absorbLog.Absorbed = currentAbsorb;
                     absorbLog.OriginalHeal = (int)healInfo.GetOriginalHeal();
                     healInfo.GetTarget().SendMessageToSet(absorbLog, true);
-                }
-            }
-
-            // Remove all expired absorb auras
-            if (existExpired)
-            {
-                for (var i = 0; i < vHealAbsorb.Count;)
-                {
-                    AuraEffect auraEff = vHealAbsorb[i];
-                    ++i;
-                    if (auraEff.GetAmount() <= 0)
-                    {
-                        uint removedAuras = healInfo.GetTarget().m_removedAurasCount;
-                        auraEff.GetBase().Remove(AuraRemoveMode.EnemySpell);
-                        if (removedAuras + 1 < healInfo.GetTarget().m_removedAurasCount)
-                            i = 0;
-                    }
                 }
             }
         }
