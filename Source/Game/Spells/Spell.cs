@@ -84,6 +84,7 @@ namespace Game.Spells
             m_castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, m_caster.GetMapId(), m_spellInfo.Id, m_caster.GetMap().GenerateLowGuid(HighGuid.Cast));
             m_originalCastId = originalCastId;
             m_SpellVisual.SpellXSpellVisualID = caster.GetCastSpellXSpellVisualId(m_spellInfo);
+            m_procChainLength = caster.IsUnit() ? caster.ToUnit().GetProcChainLength() : 0;
 
             //Auto Shot & Shoot (wand)
             m_autoRepeat = m_spellInfo.IsAutoRepeatRangedSpell();
@@ -7991,6 +7992,8 @@ namespace Game.Spells
         public bool IsProcDisabled() { return _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.DisallowProcEvents); }
         public bool IsChannelActive() { return m_caster.IsUnit() && m_caster.ToUnit().GetChannelSpellId() != 0; }
 
+        public int GetProcChainLength() { return m_procChainLength; }
+        
         public bool IsDeletable()
         {
             return !m_referencedFromCurrentSpell && !m_executedCurrently;
@@ -8161,6 +8164,7 @@ namespace Game.Spells
         // we can't store original aura link to prevent access to deleted auras
         // and in same time need aura data and after aura deleting.
         public SpellInfo m_triggeredByAuraSpell;
+        int m_procChainLength;
         #endregion
     }
 

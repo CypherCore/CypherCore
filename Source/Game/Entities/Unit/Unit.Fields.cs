@@ -77,7 +77,8 @@ namespace Game.Entities
         MultiMap<uint, uint>[] m_spellImmune = new MultiMap<uint, uint>[(int)SpellImmunity.Max];
         SpellAuraInterruptFlags m_interruptMask;
         SpellAuraInterruptFlags2 m_interruptMask2;
-        protected int m_procDeep;
+        int m_procDeep;               // tracked for proc system correctness (what spells should proc what)
+        int m_procChainLength;        // tracked to protect against infinite proc loops (hard limit, will disallow procs even if they should happen)
         SpellHistory _spellHistory;
 
         //Auras

@@ -1480,6 +1480,13 @@ namespace Game.Entities
 
         public static void ProcSkillsAndAuras(Unit actor, Unit actionTarget, ProcFlagsInit typeMaskActor, ProcFlagsInit typeMaskActionTarget, ProcFlagsSpellType spellTypeMask, ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
         {
+            int ProcChainHardLimit = 10;
+            if (spell != null && spell.GetProcChainLength() >= ProcChainHardLimit)
+            {
+                Log.outError(LogFilter.Spells, $"Unit::ProcSkillsAndAuras: Possible infinite proc loop detected, current triggering spell {spell.GetDebugInfo()}");
+                return;
+            }
+
             WeaponAttackType attType = damageInfo != null ? damageInfo.GetAttackType() : WeaponAttackType.BaseAttack;
             if (typeMaskActor && actor != null)
                 actor.ProcSkillsAndReactives(false, actionTarget, typeMaskActor, hitMask, attType);
@@ -1625,6 +1632,11 @@ namespace Game.Entities
         {
             Spell triggeringSpell = eventInfo.GetProcSpell();
             bool disableProcs = triggeringSpell && triggeringSpell.IsProcDisabled();
+
+
+            int oldProcChainLength = m_procChainLength;
+            m_procChainLength = Math.Max(m_procChainLength + 1, triggeringSpell != null ? triggeringSpell.GetProcChainLength() : 0);
+
             if (disableProcs)
                 SetCantProc(true);
 
@@ -1638,6 +1650,8 @@ namespace Game.Entities
 
             if (disableProcs)
                 SetCantProc(false);
+
+            m_procChainLength = oldProcChainLength;
         }
 
         void SetCantProc(bool apply)
@@ -3877,6 +3891,8 @@ namespace Game.Entities
 
         public bool CanProc() { return m_procDeep == 0; }
 
+        public int GetProcChainLength() { return m_procChainLength; }
+        
         public void _ApplyAuraEffect(Aura aura, uint effIndex)
         {
             Cypher.Assert(aura != null);

@@ -1518,6 +1518,7 @@ namespace Game.Entities
                 procEntry.SpellPhaseMask = ProcFlagsSpellPhase.Hit;
                 procEntry.HitMask = ProcFlagsHit.None; // uses default proc @see SpellMgr::CanSpellTriggerProcOnEvent
 
+                bool triggersSpell = false;
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
                 {
                     if (!spellEffectInfo.IsAura())
@@ -1543,6 +1544,10 @@ namespace Game.Entities
                             if (spellEffectInfo.CalcValue() <= -100)
                                 procEntry.HitMask = ProcFlagsHit.Miss;
                             break;
+                        case AuraType.ProcTriggerSpell:
+                        case AuraType.ProcTriggerSpellWithValue:
+                            triggersSpell = spellEffectInfo.TriggerSpell != 0;
+                            break;
                         default:
                             continue;
                     }
@@ -1560,6 +1565,20 @@ namespace Game.Entities
                 procEntry.Chance = spellInfo.ProcChance;
                 procEntry.Cooldown = spellInfo.ProcCooldown;
                 procEntry.Charges = spellInfo.ProcCharges;
+
+                if (spellInfo.HasAttribute(SpellAttr3.CanProcFromProcs) && !procEntry.SpellFamilyMask
+                    && procEntry.Chance >= 100
+                    && spellInfo.ProcBasePPM <= 0.0f
+                    && procEntry.Cooldown <= 0
+                    && procEntry.Charges <= 0
+                    && procEntry.ProcFlags.HasFlag(ProcFlags.DealMeleeAbility | ProcFlags.DealRangedAttack | ProcFlags.DealRangedAbility | ProcFlags.DealHelpfulAbility
+                    | ProcFlags.DealHarmfulAbility | ProcFlags.DealHelpfulSpell | ProcFlags.DealHarmfulSpell | ProcFlags.DealHarmfulPeriodic | ProcFlags.DealHelpfulPeriodic)
+                    && triggersSpell)
+                {
+                    Log.outError(LogFilter.Sql, $"Spell Id {spellInfo.Id} has SPELL_ATTR3_CAN_PROC_FROM_PROCS attribute and no restriction on what spells can cause it to proc and no cooldown. " +
+                        "This spell can cause infinite proc loops. Proc data for this spell was not generated, data in `spell_proc` table is required for it to function!");
+                    continue;
+                }
 
                 mSpellProcMap[(spellInfo.Id, spellInfo.Difficulty)] = procEntry;
                 ++count;
