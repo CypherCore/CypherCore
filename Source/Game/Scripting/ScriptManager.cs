@@ -1028,12 +1028,26 @@ namespace Game.Scripting
             RunScript<ConversationScript>(script => script.OnConversationCreate(conversation, creator), conversation.GetScriptId());
         }
 
+        public void OnConversationStart(Conversation conversation)
+        {
+            Cypher.Assert(conversation != null);
+
+            RunScript<ConversationScript>(script => script.OnConversationStart(conversation), conversation.GetScriptId());
+        }
+
         public void OnConversationLineStarted(Conversation conversation, uint lineId, Player sender)
         {
             Cypher.Assert(conversation != null);
             Cypher.Assert(sender != null);
 
             RunScript<ConversationScript>(script => script.OnConversationLineStarted(conversation, lineId, sender), conversation.GetScriptId());
+        }
+
+        public void OnConversationUpdate(Conversation conversation, uint diff)
+        {
+            Cypher.Assert(conversation != null);
+
+            RunScript<ConversationScript>(script => script.OnConversationUpdate(conversation, diff), conversation.GetScriptId());
         }
 
         //SceneScript

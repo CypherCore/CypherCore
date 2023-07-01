@@ -48,6 +48,8 @@ namespace Game.Entities
 
         public override void Update(uint diff)
         {
+            Global.ScriptMgr.OnConversationUpdate(this, diff);
+
             if (GetDuration() > TimeSpan.FromMilliseconds(diff))
             {
                 _duration -= TimeSpan.FromMilliseconds(diff);
@@ -177,6 +179,7 @@ namespace Game.Entities
             if (!GetMap().AddToMap(this))
                 return false;
 
+            Global.ScriptMgr.OnConversationStart(this);
             return true;
         }
 

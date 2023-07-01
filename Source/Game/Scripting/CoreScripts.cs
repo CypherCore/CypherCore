@@ -779,8 +779,14 @@ namespace Game.Scripting
         // Called when Conversation is created but not added to Map yet.
         public virtual void OnConversationCreate(Conversation conversation, Unit creator) { }
 
+        // Called when Conversation is started
+        public virtual void OnConversationStart(Conversation conversation) { }
+
         // Called when player sends CMSG_CONVERSATION_LINE_STARTED with valid conversation guid
         public virtual void OnConversationLineStarted(Conversation conversation, uint lineId, Player sender) { }
+
+        // Called for each update tick
+        public virtual void OnConversationUpdate(Conversation conversation, uint diff) { }
     }
 
     public class SceneScript : ScriptObject
