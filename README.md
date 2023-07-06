@@ -24,7 +24,7 @@ The current support game version is: 10.1.0.50000
 
 ### Support / General Info
 * Check out our Discord [Here](https://discord.gg/tCx3JbJ5qQ)
-* Check out Trinity Core Wiki as a few steps are the same [Here](https://trinitycore.atlassian.net/wiki/spaces/tc/pages/2130077/Installation+Guide)
+* Check out Trinity Core Wiki as a few steps are the same [Here](https://trinitycore.info)
 
 ### Legal
 * Blizzard, Battle.net, World of Warcraft, and all associated logos and designs are trademarks or registered trademarks of Blizzard Entertainment.
