@@ -132,6 +132,7 @@ namespace Game.Entities
                 lineField.UiCameraID = line.UiCameraID;
                 lineField.ActorIndex = line.ActorIdx;
                 lineField.Flags = line.Flags;
+                lineField.ChatType = line.ChatType;
 
                 ConversationLineRecord convoLine = CliDB.ConversationLineStorage.LookupByKey(line.Id); // never null for conversationTemplate->Lines
 

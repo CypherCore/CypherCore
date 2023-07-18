@@ -20,7 +20,7 @@ namespace Game.DataStorage
 
             Dictionary<uint, List<ConversationActorTemplate>> actorsByConversation = new();
 
-            SQLResult lineTemplates = DB.World.Query("SELECT Id, UiCameraID, ActorIdx, Flags FROM conversation_line_template");
+            SQLResult lineTemplates = DB.World.Query("SELECT Id, UiCameraID, ActorIdx, Flags, ChatType FROM conversation_line_template");
             if (!lineTemplates.IsEmpty())
             {
                 uint oldMSTime = Time.GetMSTime();
@@ -40,6 +40,7 @@ namespace Game.DataStorage
                     conversationLine.UiCameraID = lineTemplates.Read<uint>(1);
                     conversationLine.ActorIdx = lineTemplates.Read<byte>(2);
                     conversationLine.Flags = lineTemplates.Read<byte>(3);
+                    conversationLine.ChatType = lineTemplates.Read<byte>(4);
 
                     _conversationLineTemplateStorage[id] = conversationLine;
                 }
@@ -318,6 +319,7 @@ namespace Game.DataStorage
         public uint UiCameraID;  // Link to UiCamera.db2
         public byte ActorIdx;    // Index from conversation_actors
         public byte Flags;
+        public byte ChatType;
     }
 
     public class ConversationTemplate
