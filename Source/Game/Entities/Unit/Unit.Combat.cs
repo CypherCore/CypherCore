@@ -534,15 +534,11 @@ namespace Game.Entities
                 victim = GetMeleeHitRedirectTarget(victim);
 
                 var meleeAttackOverrides = GetAuraEffectsByType(AuraType.OverrideAutoattackWithMeleeSpell);
-                AuraEffect meleeAttackAuraEffect = null;
                 uint meleeAttackSpellId = 0;
                 if (attType == WeaponAttackType.BaseAttack)
                 {
                     if (!meleeAttackOverrides.Empty())
-                    {
-                        meleeAttackAuraEffect = meleeAttackOverrides.First();
-                        meleeAttackSpellId = meleeAttackAuraEffect.GetSpellEffectInfo().TriggerSpell;
-                    }
+                        meleeAttackSpellId = meleeAttackOverrides.First().GetSpellEffectInfo().TriggerSpell;
                 }
                 else
                 {
@@ -552,13 +548,10 @@ namespace Game.Entities
                     });
 
                     if (auraEffect != null)
-                    {
-                        meleeAttackAuraEffect = auraEffect;
-                        meleeAttackSpellId = (uint)meleeAttackAuraEffect.GetSpellEffectInfo().MiscValue;
-                    }
+                        meleeAttackSpellId = (uint)auraEffect.GetSpellEffectInfo().MiscValue;                    
                 }
 
-                if (meleeAttackAuraEffect == null)
+                if (meleeAttackSpellId == 0)
                 {
                     CalcDamageInfo damageInfo;
                     CalculateMeleeDamage(victim, out damageInfo, attType);
@@ -586,7 +579,7 @@ namespace Game.Entities
                 }
                 else
                 {
-                    CastSpell(victim, meleeAttackSpellId, new CastSpellExtraArgs(meleeAttackAuraEffect));
+                    CastSpell(victim, meleeAttackSpellId, true);
 
                     HitInfo hitInfo = HitInfo.AffectsVictim | HitInfo.NoAnimation;
                     if (attType == WeaponAttackType.OffAttack)
