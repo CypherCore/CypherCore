@@ -1118,7 +1118,7 @@ namespace Game.Entities
                     {
                         if (currVal == 0)   // activated skill, mark as new to save into database
                         {
-                            skillStatusData.State = SkillState.New;
+                            skillStatusData.State = skillStatusData.State != SkillState.Deleted ? SkillState.New : SkillState.Changed; // skills marked as SKILL_DELETED already exist in database, mark as changed instead of new
 
                             // Set profession line
                             int freeProfessionSlot = FindEmptyProfessionSlotFor(id);
@@ -1175,8 +1175,7 @@ namespace Game.Entities
                     SetSkillPermBonus(skillStatusData.Pos, 0);
 
                     // mark as deleted so the next save will delete the data from the database
-                    skillStatusData.State = SkillState.Deleted;
-
+                    skillStatusData.State = skillStatusData.State != SkillState.New ? SkillState.Deleted : SkillState.Unchanged; // skills marked as SKILL_NEW don't exist in database (this distinction is not neccessary for deletion but for re-learning the same skill before save to db happens)
 
                     // remove all spells that related to this skill
                     List<SkillLineAbilityRecord> skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill(id);
