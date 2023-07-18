@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.Achievements;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
 using System;
@@ -14,8 +15,9 @@ namespace Game.Scenarios
 {
     public class Scenario : CriteriaHandler
     {
-        public Scenario(ScenarioData scenarioData)
+        public Scenario(Map map, ScenarioData scenarioData)
         {
+            _map = map;
             _data = scenarioData;
             _currentstep = null;
 
@@ -35,7 +37,7 @@ namespace Game.Scenarios
         {
             foreach (ObjectGuid guid in _players)
             {
-                Player player = Global.ObjAccessor.FindPlayer(guid);
+                Player player = Global.ObjAccessor.GetPlayer(_map, guid);
                 if (player)
                     SendBootPlayer(player);
             }
@@ -56,7 +58,7 @@ namespace Game.Scenarios
             {
                 foreach (ObjectGuid guid in _players)
                 {
-                    Player player = Global.ObjAccessor.FindPlayer(guid);
+                    Player player = Global.ObjAccessor.GetPlayer(_map, guid);
                     if (player)
                         player.RewardQuest(quest, LootItemType.Item, 0, null, false);
                 }
@@ -219,7 +221,7 @@ namespace Game.Scenarios
         {
             foreach (ObjectGuid guid in _players)
             {
-                Player player = Global.ObjAccessor.FindPlayer(guid);
+                Player player = Global.ObjAccessor.GetPlayer(_map, guid);
                 if (player)
                     player.SendPacket(data);
             }
@@ -357,6 +359,7 @@ namespace Game.Scenarios
         public override void AfterCriteriaTreeUpdate(CriteriaTree tree, Player referencePlayer) { }
         public override void SendAllData(Player receiver) { }
 
+        protected Map _map;
         List<ObjectGuid> _players = new();
         protected ScenarioData _data;
         ScenarioStepRecord _currentstep;

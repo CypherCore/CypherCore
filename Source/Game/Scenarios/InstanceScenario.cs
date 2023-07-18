@@ -14,11 +14,8 @@ namespace Game.Scenarios
 {
     public class InstanceScenario : Scenario
     {
-        public InstanceScenario(InstanceMap map, ScenarioData scenarioData) : base(scenarioData)
+        public InstanceScenario(InstanceMap map, ScenarioData scenarioData) : base(map, scenarioData)
         {
-            _map = map;
-
-            //ASSERT(_map);
             LoadInstanceData();
 
             var players = map.GetPlayers();
@@ -28,7 +25,7 @@ namespace Game.Scenarios
 
         void LoadInstanceData()
         {
-            InstanceScript instanceScript = _map.GetInstanceScript();
+            InstanceScript instanceScript = _map.ToInstanceMap().GetInstanceScript();
             if (instanceScript == null)
                 return;
 
@@ -105,15 +102,7 @@ namespace Game.Scenarios
 
         public override void SendPacket(ServerPacket data)
         {
-            //Hack  todo fix me
-            if (_map == null)
-            {
-                return;
-            }
-
-            _map.SendToPlayers(data);
+            _map?.SendToPlayers(data);
         }
-
-        InstanceMap _map;
     }
 }
