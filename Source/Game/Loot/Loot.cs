@@ -728,6 +728,12 @@ namespace Game.Loots
             return allLooted;
         }
 
+        public void LootMoney()
+        {
+            gold = 0;
+            _changed = true;
+        }
+
         public LootItem GetItemInSlot(uint lootListId)
         {
             if (lootListId < items.Count)
@@ -902,6 +908,9 @@ namespace Game.Loots
                         if (!lootRoll.TryToStart(map, this, lootListId, maxEnchantingSkill))
                             _rolls.Remove(lootListId);
                     }
+
+                    if (!_rolls.Empty())
+                        _changed = true;
                 }
                 else if (_lootMethod == LootMethod.MasterLoot)
                 {
@@ -973,6 +982,7 @@ namespace Game.Loots
             if (is_looted)
                 return null;
 
+            _changed = true;
             return item;
         }
 
@@ -1064,7 +1074,8 @@ namespace Game.Loots
         }
 
         public bool IsLooted() { return gold == 0 && unlootedCount == 0; }
-
+        public bool IsChanged() { return _changed; }
+        
         public void AddLooter(ObjectGuid guid) { PlayersLooting.Add(guid); }
         public void RemoveLooter(ObjectGuid guid) { PlayersLooting.Remove(guid); }
 
@@ -1099,6 +1110,7 @@ namespace Game.Loots
         ObjectGuid _lootMaster;
         List<ObjectGuid> _allowedLooters = new();
         bool _wasOpened;                                                // true if at least one player received the loot content
+        bool _changed;
         uint _dungeonEncounterId;
     }
 

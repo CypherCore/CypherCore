@@ -709,9 +709,6 @@ namespace Game.Entities
                         case GameObjectTypes.Chest:
                             loot?.Update();
 
-                            foreach (var (_, loot) in m_personalLoot)
-                                loot.Update();
-
                             // Non-consumable chest was partially looted and restock time passed, restock all loot now
                             if (GetGoInfo().Chest.consumable == 0 && GetGoInfo().Chest.chestRestockTime != 0 && GameTime.GetGameTime() >= m_restockTime)
                             {
@@ -720,6 +717,10 @@ namespace Game.Entities
                                 ClearLoot();
                                 UpdateDynamicFlagsForNearbyPlayers();
                             }
+
+                            foreach (var (_, loot) in m_personalLoot)
+                                loot.Update();
+
                             break;
                         case GameObjectTypes.Trap:
                         {
@@ -2897,7 +2898,7 @@ namespace Game.Entities
             GetAI().OnLootStateChanged((uint)state, unit);
 
             // Start restock timer if the chest is partially looted or not looted at all
-            if (GetGoType() == GameObjectTypes.Chest && state == LootState.Activated && GetGoInfo().Chest.chestRestockTime > 0 && m_restockTime == 0)
+            if (GetGoType() == GameObjectTypes.Chest && state == LootState.Activated && GetGoInfo().Chest.chestRestockTime > 0 && m_restockTime == 0 && loot != null && loot.IsChanged())
                 m_restockTime = GameTime.GetGameTime() + GetGoInfo().Chest.chestRestockTime;
 
             // only set collision for doors on SetGoState

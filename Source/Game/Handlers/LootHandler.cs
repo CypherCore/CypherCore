@@ -22,7 +22,6 @@ namespace Game
             Player player = GetPlayer();
             AELootResult aeResult = player.GetAELootView().Count > 1 ? new AELootResult() : null;
 
-            // @todo Implement looting by LootObject guid
             foreach (LootRequest req in packet.Loot)
             {
                 Loot loot = player.GetAELootView().LookupByKey(req.Object);
@@ -143,7 +142,7 @@ namespace Game
                     SendPacket(packet);
                 }
 
-                loot.gold = 0;
+                loot.LootMoney();
 
                 // Delete the money loot record from the DB
                 if (loot.loot_type == LootType.Item)
