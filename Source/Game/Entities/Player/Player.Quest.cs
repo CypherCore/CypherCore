@@ -1261,10 +1261,14 @@ namespace Game.Entities
                 UpdateObjectVisibility();
         }
 
-        public void SetRewardedQuest(uint quest_id)
+        public void SetRewardedQuest(uint questId)
         {
-            m_RewardedQuests.Add(quest_id);
-            m_RewardedQuestsSave[quest_id] = QuestSaveType.Default;
+            m_RewardedQuests.Add(questId);
+            m_RewardedQuestsSave[questId] = QuestSaveType.Default;
+
+            uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(questId);
+            if (questBit != 0)
+                SetQuestCompletedBit(questBit, true);
         }
 
         public void FailQuest(uint questId)
