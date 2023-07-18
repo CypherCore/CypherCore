@@ -220,7 +220,7 @@ namespace Game.Entities
 
             m_creatureInfo = creatureInfo;
             SetEntry(entry);
-            m_creatureDifficulty = creatureInfo.GetDifficulty(GetMap().GetDifficultyID());
+            m_creatureDifficulty = creatureInfo.GetDifficulty(!IsPet() ? GetMap().GetDifficultyID() : Difficulty.None);
 
             // equal to player Race field, but creature does not have race
             SetRace(0);
