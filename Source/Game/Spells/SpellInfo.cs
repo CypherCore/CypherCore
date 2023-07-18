@@ -828,7 +828,7 @@ namespace Game.Spells
                 List<uint> areaGroupMembers = Global.DB2Mgr.GetAreasForGroup((uint)RequiredAreasID);
                 foreach (uint areaId in areaGroupMembers)
                 {
-                    if (areaId == zone_id || areaId == area_id)
+                    if (Global.DB2Mgr.IsInArea(area_id, areaId))
                     {
                         found = true;
                         break;
