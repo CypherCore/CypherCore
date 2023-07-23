@@ -540,7 +540,7 @@ namespace Framework.Constants
         Monthly = 0x010, // Set by 16 in SpecialFlags in DB if the quest is reset at the begining of the month
         // Room For More Custom Flags
 
-        DbAllowed = Repeatable | AutoAccept | DfQuest | Monthly,
+        DbAllowed = Repeatable | AutoPushToParty | AutoAccept | DfQuest | Monthly,
 
         SequencedObjectives = 0x20 // Internal flag computed only
     }
