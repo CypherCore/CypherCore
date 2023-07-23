@@ -4026,7 +4026,7 @@ namespace Game.Entities
                         }
 
                         if (eventId != 0)
-                            GameEvents.Trigger(eventId, _owner, null);
+                            GameEvents.Trigger(eventId, _owner, _owner);
 
                         if (_autoCycleBetweenStopFrames)
                         {

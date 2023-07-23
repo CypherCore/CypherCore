@@ -23,7 +23,8 @@ namespace Game
             if (zoneScript != null)
                 zoneScript.ProcessEvent(target, gameEventId, source);
 
-            Map map = refForMapAndZoneScript.GetMap();
+            Global.ScriptMgr.OnEventTrigger(target, source, gameEventId);
+
             GameObject goTarget = target?.ToGameObject();
             if (goTarget != null)
             {
@@ -36,6 +37,7 @@ namespace Game
             if (sourcePlayer != null)
                 TriggerForPlayer(gameEventId, sourcePlayer);
 
+            Map map = refForMapAndZoneScript.GetMap();
             TriggerForMap(gameEventId, map, source, target);
         }
 

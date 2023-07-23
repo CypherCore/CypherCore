@@ -227,6 +227,7 @@ namespace Framework.Constants
         OnSpellFailed = 84,      // SpellID, CooldownMin, CooldownMax
         OnSpellStart = 85,      // SpellID, CooldownMin, CooldownMax
         OnDespawn = 86,      // NONE
+        SendEventTrigger = 87, // NONE
 
         End
     }

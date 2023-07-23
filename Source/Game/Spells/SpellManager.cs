@@ -1874,30 +1874,30 @@ namespace Game.Entities
             foreach (var spellEntry in mSpellInfoMap.Values)
             {
                 if (spellEntry.Difficulty != Difficulty.None)
+                    continue;
+
+                foreach (var spellEffectInfo in spellEntry.GetEffects())
                 {
-                    foreach (var spellEffectInfo in spellEntry.GetEffects())
+                    if (spellEffectInfo.Effect == SpellEffectName.Summon || spellEffectInfo.Effect == SpellEffectName.SummonPet)
                     {
-                        if (spellEffectInfo.Effect == SpellEffectName.Summon || spellEffectInfo.Effect == SpellEffectName.SummonPet)
+                        int creature_id = spellEffectInfo.MiscValue;
+                        CreatureTemplate cInfo = Global.ObjectMgr.GetCreatureTemplate((uint)creature_id);
+                        if (cInfo == null)
+                            continue;
+
+                        // get default pet spells from creature_template
+                        uint petSpellsId = cInfo.Entry;
+                        if (mPetDefaultSpellsMap.LookupByKey(cInfo.Entry) != null)
+                            continue;
+
+                        PetDefaultSpellsEntry petDefSpells = new();
+                        for (byte j = 0; j < SharedConst.MaxCreatureSpellDataSlots; ++j)
+                            petDefSpells.spellid[j] = cInfo.Spells[j];
+
+                        if (LoadPetDefaultSpells_helper(cInfo, petDefSpells))
                         {
-                            int creature_id = spellEffectInfo.MiscValue;
-                            CreatureTemplate cInfo = Global.ObjectMgr.GetCreatureTemplate((uint)creature_id);
-                            if (cInfo == null)
-                                continue;
-
-                            // get default pet spells from creature_template
-                            uint petSpellsId = cInfo.Entry;
-                            if (mPetDefaultSpellsMap.LookupByKey(cInfo.Entry) != null)
-                                continue;
-
-                            PetDefaultSpellsEntry petDefSpells = new();
-                            for (byte j = 0; j < SharedConst.MaxCreatureSpellDataSlots; ++j)
-                                petDefSpells.spellid[j] = cInfo.Spells[j];
-
-                            if (LoadPetDefaultSpells_helper(cInfo, petDefSpells))
-                            {
-                                mPetDefaultSpellsMap[petSpellsId] = petDefSpells;
-                                ++countCreature;
-                            }
+                            mPetDefaultSpellsMap[petSpellsId] = petDefSpells;
+                            ++countCreature;
                         }
                     }
                 }

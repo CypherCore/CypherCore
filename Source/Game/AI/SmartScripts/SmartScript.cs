@@ -39,6 +39,7 @@ namespace Game.AI
         AreaTrigger _areaTrigger;
         SceneTemplate _sceneTemplate;
         Quest _quest;
+        uint _eventId;
         SmartScriptType _scriptType;
         uint _eventPhase;
 
@@ -3203,6 +3204,7 @@ namespace Game.AI
                 case SmartEvents.FollowCompleted:
                 case SmartEvents.OnSpellclick:
                 case SmartEvents.OnDespawn:
+                case SmartEvents.SendEventTrigger:
                     ProcessAction(e, unit, var0, var1, bvar, spell, gob);
                     break;
                 case SmartEvents.GossipHello:
@@ -3876,7 +3878,7 @@ namespace Game.AI
             e.RunOnce = false;
         }
 
-        void FillScript(List<SmartScriptHolder> e, WorldObject obj, AreaTriggerRecord at, SceneTemplate scene, Quest quest)
+        void FillScript(List<SmartScriptHolder> e, WorldObject obj, AreaTriggerRecord at, SceneTemplate scene, Quest quest, uint eventId = 0)
         {
             if (e.Empty())
             {
@@ -3888,6 +3890,8 @@ namespace Game.AI
                     Log.outDebug(LogFilter.ScriptsAi, $"SmartScript: EventMap for SceneId {scene.SceneId} is empty but is using SmartScript.");
                 if (quest != null)
                     Log.outDebug(LogFilter.ScriptsAi, $"SmartScript: EventMap for Quest {quest.Id} is empty but is using SmartScript.");
+                if (eventId != 0)
+                    Log.outDebug(LogFilter.ScriptsAi, $"SmartScript: EventMap for Event {eventId} is empty but is using SmartScript.");
                 return;
             }
             foreach (var holder in e)
@@ -3934,43 +3938,48 @@ namespace Game.AI
         void GetScript()
         {
             List<SmartScriptHolder> e;
-            if (_me != null)
+            // We must use script type to avoid ambiguities
+            switch (_scriptType)
             {
-                e = Global.SmartAIMgr.GetScript(-((int)_me.GetSpawnId()), _scriptType);
-                if (e.Empty())
-                    e = Global.SmartAIMgr.GetScript((int)_me.GetEntry(), _scriptType);
-                FillScript(e, _me, null, null, null);
-            }
-            else if (_go != null)
-            {
-                e = Global.SmartAIMgr.GetScript(-((int)_go.GetSpawnId()), _scriptType);
-                if (e.Empty())
-                    e = Global.SmartAIMgr.GetScript((int)_go.GetEntry(), _scriptType);
-                FillScript(e, _go, null, null, null);
-            }
-            else if (_trigger != null)
-            {
-                e = Global.SmartAIMgr.GetScript((int)_trigger.Id, _scriptType);
-                FillScript(e, null, _trigger, null, null);
-            }
-            else if (_areaTrigger != null)
-            {
-                e = Global.SmartAIMgr.GetScript((int)_areaTrigger.GetEntry(), _scriptType);
-                FillScript(e, _areaTrigger, null, null, null);
-            }
-            else if (_sceneTemplate != null)
-            {
-                e = Global.SmartAIMgr.GetScript((int)_sceneTemplate.SceneId, _scriptType);
-                FillScript(e, null, null, _sceneTemplate, null);
-            }
-            else if (_quest != null)
-            {
-                e = Global.SmartAIMgr.GetScript((int)_quest.Id, _scriptType);
-                FillScript(e, null, null, null, _quest);
+                case SmartScriptType.Creature:
+                    e = Global.SmartAIMgr.GetScript(-(int)_me.GetSpawnId(), _scriptType);
+                    if (e.Empty())
+                        e = Global.SmartAIMgr.GetScript((int)_me.GetEntry(), _scriptType);
+                    FillScript(e, _me, null, null, null, 0);
+                    break;
+                case SmartScriptType.GameObject:
+                    e = Global.SmartAIMgr.GetScript(-(int)_go.GetSpawnId(), _scriptType);
+                    if (e.Empty())
+                        e = Global.SmartAIMgr.GetScript((int)_go.GetEntry(), _scriptType);
+                    FillScript(e, _go, null, null, null, 0);
+                    break;
+                case SmartScriptType.AreaTriggerEntity:
+                case SmartScriptType.AreaTriggerEntityServerside:
+                    e = Global.SmartAIMgr.GetScript((int)_areaTrigger.GetEntry(), _scriptType);
+                    FillScript(e, _areaTrigger, null, null, null, 0);
+                    break;
+                case SmartScriptType.AreaTrigger:
+                    e = Global.SmartAIMgr.GetScript((int)_trigger.Id, _scriptType);
+                    FillScript(e, null, _trigger, null, null, 0);
+                    break;
+                case SmartScriptType.Scene:
+                    e = Global.SmartAIMgr.GetScript((int)_sceneTemplate.SceneId, _scriptType);
+                    FillScript(e, null, null, _sceneTemplate, null, 0);
+                    break;
+                case SmartScriptType.Quest:
+                    e = Global.SmartAIMgr.GetScript((int)_quest.Id, _scriptType);
+                    FillScript(e, null, null, null, _quest, 0);
+                    break;
+                case SmartScriptType.Event:
+                    e = Global.SmartAIMgr.GetScript((int)_eventId, _scriptType);
+                    FillScript(e, null, null, null, null, _eventId);
+                    break;
+                default:
+                    break;
             }
         }
 
-        public void OnInitialize(WorldObject obj, AreaTriggerRecord at = null, SceneTemplate scene = null, Quest qst = null)
+        public void OnInitialize(WorldObject obj, AreaTriggerRecord at = null, SceneTemplate scene = null, Quest qst = null, uint eventId = 0)
         {
             if (at != null)
             {
@@ -4013,6 +4022,32 @@ namespace Game.AI
                 }
 
                 Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is Quest with id {qst.Id}, triggered by player {_player.GetGUID()}");
+            }
+            else if (eventId != 0)
+            {
+                _scriptType = SmartScriptType.Event;
+                _eventId = eventId;
+
+                if (obj.IsPlayer())
+                {
+                    _player = obj.ToPlayer();
+                    Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is Event {_eventId}, triggered by player {_player.GetGUID()}");
+                }
+                else if (obj.IsCreature())
+                {
+                    _me = obj.ToCreature();
+                    Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is Event {_eventId}, triggered by creature {_me.GetEntry()}");
+                }
+                else if (obj.IsGameObject())
+                {
+                    _go = obj.ToGameObject();
+                    Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is Event {_eventId}, triggered by gameobject {_go.GetEntry()}");
+                }
+                else
+                {
+                    Log.outError(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is Event {_eventId}, missing trigger WorldObject");
+                    return;
+                }
             }
             else if (obj != null) // Handle object based scripts
             {
@@ -4337,6 +4372,7 @@ namespace Game.AI
                         _me = m;
                         _go = null;
                         _areaTrigger = null;
+                        _player = null;
                     }
                 }
 
@@ -4348,6 +4384,7 @@ namespace Game.AI
                         _me = null;
                         _go = o;
                         _areaTrigger = null;
+                        _player = null;
                     }
                 }
             }

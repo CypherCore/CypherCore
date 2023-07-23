@@ -97,6 +97,15 @@ namespace Game.AI
                             }
                             break;
                         }
+                        case SmartScriptType.Event:
+                        {
+                            if (!Global.ObjectMgr.IsValidEvent((uint)temp.EntryOrGuid))
+                            {
+                                Log.outError(LogFilter.Sql, $"SmartAIMgr::LoadSmartAIFromDB: Event id ({temp.EntryOrGuid}) does not exist, skipped loading.");
+                                continue;
+                            }
+                            break;
+                        }
                         case SmartScriptType.Quest:
                         {
                             if (Global.ObjectMgr.GetQuestTemplate((uint)temp.EntryOrGuid) == null)
@@ -360,6 +369,7 @@ namespace Game.AI
                 case SmartEvents.SceneTrigger:
                 case SmartEvents.SceneCancel:
                 case SmartEvents.SceneComplete:
+                case SmartEvents.SendEventTrigger:
                     return true;
                 default:
                     return false;
@@ -589,6 +599,7 @@ namespace Game.AI
                 SmartEvents.OnSpellFailed => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
                 SmartEvents.OnSpellStart => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
                 SmartEvents.OnDespawn => 0,
+                SmartEvents.SendEventTrigger => 0,
                 _ => Marshal.SizeOf(typeof(SmartEvent.Raw)),
             };
 
@@ -1256,6 +1267,7 @@ namespace Game.AI
                     case SmartEvents.SceneCancel:
                     case SmartEvents.SceneComplete:
                     case SmartEvents.SceneTrigger:
+                    case SmartEvents.SendEventTrigger:
                         break;
 
                     //Unused
@@ -2403,6 +2415,7 @@ namespace Game.AI
                 SmartEvents.OnSpellFailed => SmartScriptTypeMaskId.Creature,
                 SmartEvents.OnSpellStart => SmartScriptTypeMaskId.Creature,
                 SmartEvents.OnDespawn => SmartScriptTypeMaskId.Creature,
+                SmartEvents.SendEventTrigger => SmartScriptTypeMaskId.Event,
                 _ => 0,
             };
 

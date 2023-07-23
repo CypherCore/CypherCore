@@ -425,7 +425,7 @@ namespace Game.Scripting
 
         public virtual BattleField GetBattlefield(Map map) { return null; }
     }
-    
+
     public class BattlegroundScript : ScriptObject
     {
         public BattlegroundScript(string name) : base(name)
@@ -572,7 +572,7 @@ namespace Game.Scripting
         // Called when an achievement is completed.
         public virtual void OnCompleted(Player player, AchievementRecord achievement) { }
     }
-    
+
     public class AchievementCriteriaScript : ScriptObject
     {
         public AchievementCriteriaScript(string name) : base(name)
@@ -841,5 +841,18 @@ namespace Game.Scripting
 
         // Called when worldstate changes value, map is optional
         public virtual void OnValueChange(int worldStateId, int oldValue, int newValue, Map map) { }
+    }
+
+    public class EventScript : ScriptObject
+    {
+        public EventScript(string name) : base(name)
+        {
+            Global.ScriptMgr.AddScript(this);
+        }
+
+        public override bool IsDatabaseBound() { return true; }
+
+        // Called when a game event is triggered
+        public virtual void OnTrigger(WorldObject obj, WorldObject invoker, uint eventId) { }
     }
 }

@@ -1105,6 +1105,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} areatrigger scripts in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
+
         void LoadScripts(ScriptsType type)
         {
             uint oldMSTime = Time.GetMSTime();
@@ -1425,6 +1426,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} script definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
+
         public void LoadSpellScripts()
         {
             LoadScripts(ScriptsType.Spell);
@@ -1452,20 +1454,20 @@ namespace Game
                     Log.outError(LogFilter.Sql, $"Table `spell_scripts` - spell {spellId} effect {spellEffIndex} is not SPELL_EFFECT_SCRIPT_EFFECT or SPELL_EFFECT_DUMMY");
             }
         }
-        public void LoadEventScripts()
+        
+        void LoadEventSet()
         {
-            LoadScripts(ScriptsType.Event);
+            _eventStorage.Clear();
 
-            List<uint> evt_scripts = new();
-            // Load all possible script entries from gameobjects
+            // Load all possible event ids from gameobjects
             foreach (var go in _gameObjectTemplateStorage)
             {
                 uint eventId = go.Value.GetEventScriptId();
                 if (eventId != 0)
-                    evt_scripts.Add(eventId);
+                    _eventStorage.Add(eventId);
             }
 
-            // Load all possible script entries from spells
+            // Load all possible event ids from spells
             foreach (SpellNameRecord spellNameEntry in CliDB.SpellNameStorage.Values)
             {
                 SpellInfo spell = Global.SpellMgr.GetSpellInfo(spellNameEntry.Id, Difficulty.None);
@@ -1475,11 +1477,12 @@ namespace Game
                     {
                         if (spellEffectInfo.IsEffect(SpellEffectName.SendEvent))
                             if (spellEffectInfo.MiscValue != 0)
-                                evt_scripts.Add((uint)spellEffectInfo.MiscValue);
+                                _eventStorage.Add((uint)spellEffectInfo.MiscValue);
                     }
                 }
             }
 
+            // Load all possible event ids from taxi path nodes
             foreach (var path_idx in CliDB.TaxiPathNodesByPath)
             {
                 for (uint node_idx = 0; node_idx < path_idx.Value.Length; ++node_idx)
@@ -1487,21 +1490,54 @@ namespace Game
                     TaxiPathNodeRecord node = path_idx.Value[node_idx];
 
                     if (node.ArrivalEventID != 0)
-                        evt_scripts.Add(node.ArrivalEventID);
+                        _eventStorage.Add(node.ArrivalEventID);
 
                     if (node.DepartureEventID != 0)
-                        evt_scripts.Add(node.DepartureEventID);
+                        _eventStorage.Add(node.DepartureEventID);
                 }
             }
+        }
+
+        public void LoadEventScripts()
+        {
+            // Set of valid events referenced in several sources
+            LoadEventSet();
+
+            // Deprecated
+            LoadScripts(ScriptsType.Event);
 
             // Then check if all scripts are in above list of possible script entries
             foreach (var script in sEventScripts)
             {
-                var id = evt_scripts.Find(p => p == script.Key);
-                if (id == 0)
-                    Log.outError(LogFilter.Sql, "Table `event_scripts` has script (Id: {0}) not referring to any gameobject_template type 10 data2 field, type 3 data6 field, type 13 data 2 field or any spell effect {1}",
-                        script.Key, SpellEffectName.SendEvent);
+                if (!IsValidEvent(script.Key))
+                    Log.outError(LogFilter.Sql, $"Table `event_scripts` has script (Id: {script.Key}) not referring to any gameobject_template (type 3 data6 field, type 7 data3 field, type 10 data2 field, type 13 data2 field, type 50 data7 field), any taxi path node or any spell effect {SpellEffectName.SendEvent}");
             }
+
+            uint oldMSTime = Time.GetMSTime();
+
+            _eventScriptStorage.Clear(); // Reload case
+
+            SQLResult result = DB.World.Query("SELECT Id, ScriptName FROM event_script_names");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 event scripts. DB table `event_script_names` is empty.");
+                return;
+            }
+
+            do
+            {
+                uint eventId = result.Read<uint>(0);
+                string scriptName = result.Read<string>(1);
+
+                if (!IsValidEvent(eventId))
+                {
+                    Log.outError(LogFilter.Sql, $"Event (ID: {eventId}) not referring to any gameobject_template (type 3 data6 field, type 7 data3 field, type 10 data2 field, type 13 data2 field, type 50 data7 field), any taxi path node or any spell effect {SpellEffectName.SendEvent}");
+                    continue;
+                }
+                _eventScriptStorage[eventId] = GetScriptId(scriptName);
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_eventScriptStorage.Count} event scripts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         //Load WP Scripts
@@ -1664,10 +1700,17 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Validated {0} scripts in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-
+        public bool IsValidEvent(uint eventId)
+        {
+            return _eventStorage.Contains(eventId);
+        }
         public List<uint> GetSpellScriptsBounds(uint spellId)
         {
             return spellScriptsStorage.LookupByKey(spellId);
+        }
+        public uint GetEventScriptId(uint eventId)
+        {
+            return _eventScriptStorage.LookupByKey(eventId);
         }
         public List<string> GetAllDBScriptNames()
         {
@@ -10834,6 +10877,8 @@ namespace Game
         public Dictionary<uint, MultiMap<uint, ScriptInfo>> sEventScripts = new();
         public Dictionary<uint, MultiMap<uint, ScriptInfo>> sWaypointScripts = new();
         Dictionary<uint, uint> areaTriggerScriptStorage = new();
+        List<uint> _eventStorage = new();
+        Dictionary<uint, uint> _eventScriptStorage = new();
 
         //Maps
         public Dictionary<uint, GameTele> gameTeleStorage = new();

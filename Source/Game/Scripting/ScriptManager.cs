@@ -1110,7 +1110,15 @@ namespace Game.Scripting
 
             RunScript<WorldStateScript>(script => script.OnValueChange(worldStateTemplate.Id, oldValue, newValue, map), worldStateTemplate.ScriptId);
         }
-        
+
+        // EventScript
+        public void OnEventTrigger(WorldObject obj, WorldObject invoker, uint eventId)
+        {
+            Cypher.Assert(invoker != null);
+
+            RunScript<EventScript>(script => script.OnTrigger(obj, invoker, eventId), Global.ObjectMgr.GetEventScriptId(eventId));
+        }
+
         public void ForEach<T>(Action<T> a) where T : ScriptObject
         {
             var reg = GetScriptRegistry<T>();
