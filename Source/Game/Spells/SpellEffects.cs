@@ -3101,22 +3101,18 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Player))
+            if (unitTarget == null || !unitTarget.IsPlayer())
                 return;
 
             Player player = unitTarget.ToPlayer();
-            byte currentDrunk = player.GetDrunkValue();
-            int drunkMod = damage;
-            if (currentDrunk + drunkMod > 100)
-            {
-                currentDrunk = 100;
-                if (RandomHelper.randChance() < 25.0f)
-                    player.CastSpell(player, 67468, new CastSpellExtraArgs().SetTriggeringSpell(this));    // Drunken Vomit
-            }
-            else
-                currentDrunk += (byte)drunkMod;
 
-            player.SetDrunkValue(currentDrunk, m_CastItem != null ? m_CastItem.GetEntry() : 0);
+            byte currentDrunkValue = player.GetDrunkValue();
+            byte drunkValue = (byte)Math.Clamp(damage + currentDrunkValue, 0, 100);
+            if (currentDrunkValue == 100 && currentDrunkValue == drunkValue)
+                if (RandomHelper.randChance(25.0f))
+                    player.CastSpell(player, 67468, new CastSpellExtraArgs().SetTriggeringSpell(this));    // Drunken Vomit
+
+            player.SetDrunkValue(drunkValue, m_CastItem != null ? m_CastItem.GetEntry() : 0);
         }
 
         [SpellEffectHandler(SpellEffectName.FeedPet)]
