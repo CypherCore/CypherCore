@@ -4841,7 +4841,7 @@ namespace Game.Spells
                 return;
 
             if (apply)
-                target.ToPlayer().GetSession().SendStablePet(target.GetGUID());
+                target.ToPlayer().SetStableMaster(target.GetGUID());
 
             // client auto close stable dialog at !apply aura
         }
@@ -5959,6 +5959,28 @@ namespace Game.Spells
             playerTarget.SendMovementSetCollisionHeight(playerTarget.GetCollisionHeight(), UpdateCollisionHeightReason.Force);
         }
 
+        [AuraEffectHandler(AuraType.ModRequiredMountCapabilityFlags)]
+        void HandleModRequiredMountCapabilityFlags(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            Player playerTarget = aurApp.GetTarget().ToPlayer();
+            if (playerTarget == null)
+                return;
+
+            if (apply)
+                playerTarget.SetRequiredMountCapabilityFlag((byte)GetMiscValue());
+            else
+            {
+                int mountCapabilityFlags = 0;
+                foreach (AuraEffect otherAura in playerTarget.GetAuraEffectsByType(GetAuraType()))
+                    mountCapabilityFlags |= otherAura.GetMiscValue();
+
+                playerTarget.ReplaceAllRequiredMountCapabilityFlags((byte)mountCapabilityFlags);
+            }
+        }
+        
         [AuraEffectHandler(AuraType.SuppressItemPassiveEffectBySpellLabel)]
         void HandleSuppressItemPassiveEffectBySpellLabel(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {

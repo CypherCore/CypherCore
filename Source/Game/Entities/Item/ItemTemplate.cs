@@ -3,6 +3,7 @@
 
 using Framework.Constants;
 using Game.DataStorage;
+using Game.Miscellaneous;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -274,7 +275,7 @@ namespace Game.Entities
         public uint GetSellPrice() { return ExtendedData.SellPrice; }
         public InventoryType GetInventoryType() { return ExtendedData.inventoryType; }
         public int GetAllowableClass() { return ExtendedData.AllowableClass; }
-        public long GetAllowableRace() { return ExtendedData.AllowableRace; }
+        public RaceMask<long> GetAllowableRace() { return new RaceMask<long>(ExtendedData.AllowableRace); }
         public uint GetBaseItemLevel() { return ExtendedData.ItemLevel; }
         public int GetBaseRequiredLevel() { return ExtendedData.RequiredLevel; }
         public uint GetRequiredSkill() { return ExtendedData.RequiredSkill; }

@@ -10,6 +10,7 @@ using Game.Entities;
 using Game.Groups;
 using Game.Loots;
 using Game.Maps;
+using Game.Miscellaneous;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -1445,9 +1446,10 @@ namespace Game
                 }
                 case ConditionTypes.Race:
                 {
-                    if (Convert.ToBoolean(cond.ConditionValue1 & ~SharedConst.RaceMaskAllPlayable))
+                    RaceMask<ulong> invalidRaceMask = new RaceMask<ulong>(cond.ConditionValue1 & ~RaceMask.AllPlayable.RawValue);
+                    if (!invalidRaceMask.IsEmpty()) // uint32 works thanks to weird index remapping in racemask
                     {
-                        Log.outError(LogFilter.Sql, "{0} has non existing racemask ({1}), skipped.", cond.ToString(true), cond.ConditionValue1 & ~SharedConst.RaceMaskAllPlayable);
+                        Log.outError(LogFilter.Sql, "{0} has non existing racemask ({1}), skipped.", cond.ToString(true), cond.ConditionValue1 & ~RaceMask.AllPlayable.RawValue);
                         return false;
                     }
                     break;
@@ -2022,7 +2024,8 @@ namespace Game
                 }
             }
 
-            if (condition.RaceMask != 0 && !Convert.ToBoolean(SharedConst.GetMaskForRace(player.GetRace()) & condition.RaceMask))
+            var raceMask = new RaceMask<long>(condition.RaceMask);
+            if (!raceMask.IsEmpty() && raceMask.HasRace(player.GetRace()))
                 return false;
 
             if (condition.ClassMask != 0 && !Convert.ToBoolean(player.GetClassMask() & condition.ClassMask))

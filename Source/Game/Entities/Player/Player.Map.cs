@@ -560,6 +560,19 @@ namespace Game.Entities
 
             return (instanceLock.GetData().CompletedEncountersMask & (1u << dungeonEncounter.Bit)) != 0;
         }
+
+        public bool IsLockedToDungeonEncounter(uint dungeonEncounterId, Difficulty difficulty)
+        {
+            var dungeonEncounter = CliDB.DungeonEncounterStorage.LookupByKey(dungeonEncounterId);
+            if (dungeonEncounter == null)
+                return false;
+
+            InstanceLock instanceLock = Global.InstanceLockMgr.FindActiveInstanceLock(GetGUID(), new MapDb2Entries((uint)dungeonEncounter.MapID, difficulty));
+            if (instanceLock == null)
+                return false;
+
+            return (instanceLock.GetData().CompletedEncountersMask & (1u << dungeonEncounter.Bit)) != 0;
+        }
         
         public override void ProcessTerrainStatusUpdate(ZLiquidStatus oldLiquidStatus, LiquidData newLiquidData)
         {

@@ -133,6 +133,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteBit(SuccessInfo.NumPlayersHorde.HasValue);
                 _worldPacket.WriteBit(SuccessInfo.NumPlayersAlliance.HasValue);
                 _worldPacket.WriteBit(SuccessInfo.ExpansionTrialExpiration.HasValue);
+                _worldPacket.WriteBit(SuccessInfo.NewBuildKeys != null);
                 _worldPacket.FlushBits();
 
                 {
@@ -154,6 +155,15 @@ namespace Game.Networking.Packets
 
                 if(SuccessInfo.ExpansionTrialExpiration.HasValue)
                     _worldPacket.WriteInt64(SuccessInfo.ExpansionTrialExpiration.Value);
+
+                if (SuccessInfo.NewBuildKeys != null)
+                {
+                    for (int i = 0; i < 16; ++i)
+                    {
+                        _worldPacket.WriteUInt8(SuccessInfo.NewBuildKeys.NewBuildKey[i]);
+                        _worldPacket.WriteUInt8(SuccessInfo.NewBuildKeys.SomeKey[i]);
+                    }
+                }
 
                 foreach (VirtualRealmInfo virtualRealm in SuccessInfo.VirtualRealms)
                     virtualRealm.Write(_worldPacket);
@@ -208,6 +218,7 @@ namespace Game.Networking.Packets
             public ushort? NumPlayersHorde; // number of horde players in this realm. @todo implement
             public ushort? NumPlayersAlliance; // number of alliance players in this realm. @todo implement
             public long? ExpansionTrialExpiration; // expansion trial expiration unix timestamp
+            public NewBuild NewBuildKeys;
 
             public struct GameTime
             {
@@ -215,6 +226,12 @@ namespace Game.Networking.Packets
                 public uint TimeRemain;
                 public uint Unknown735;
                 public bool InGameRoom;
+            }
+
+            public class NewBuild
+            {
+                public Array<byte> NewBuildKey = new Array<byte>(16);
+                public Array<byte> SomeKey = new Array<byte>(16);
             }
         }
     }

@@ -6,6 +6,7 @@ using Framework.Constants;
 using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Miscellaneous;
 using Game.Networking.Packets;
 using System;
 using System.Collections;
@@ -101,7 +102,7 @@ namespace Game
             SoundTurnIn = fields.Read<uint>(99);
             AreaGroupID = fields.Read<uint>(100);
             LimitTime = fields.Read<uint>(101);
-            AllowableRaces = (long)fields.Read<ulong>(102);
+            AllowableRaces = new(fields.Read<ulong>(102));
             TreasurePickerID = fields.Read<int>(103);
             Expansion = fields.Read<int>(104);
             ManagedWorldStateID = fields.Read<int>(105);
@@ -472,6 +473,15 @@ namespace Game
             return null;
         }
 
+        public bool IsImportant()
+        {
+            var questInfo = CliDB.QuestInfoStorage.LookupByKey(QuestInfoID);
+            if (questInfo != null)
+                return (questInfo.Modifiers & 0x400) != 0;
+
+            return false;
+        }
+        
         public void BuildQuestRewards(QuestRewards rewards, Player player)
         {
             rewards.ChoiceItemCount = GetRewChoiceItemsCount();
@@ -864,8 +874,8 @@ namespace Game
         public uint SoundAccept { get; set; }
         public uint SoundTurnIn { get; set; }
         public uint AreaGroupID;
-        public uint LimitTime;
-        public long AllowableRaces { get; set; }
+        public long LimitTime;
+        public RaceMask<ulong> AllowableRaces { get; set; }
         public int TreasurePickerID;
         public int Expansion;
         public int ManagedWorldStateID;
@@ -946,6 +956,7 @@ namespace Game
     {
         public ushort Slot = SharedConst.MaxQuestLogSize;
         public QuestStatus Status;
+        public long AcceptTime;
         public uint Timer;
         public bool Explored;
     }

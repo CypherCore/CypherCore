@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.Entities;
+using Game.Miscellaneous;
 using System;
 using System.Collections.Generic;
 
@@ -91,7 +92,7 @@ namespace Game.Networking.Packets
         {
             MinLevel = data.ReadInt32();
             MaxLevel = data.ReadInt32();
-            RaceFilter = data.ReadInt64();
+            RaceFilter = new RaceMask<long>(data.ReadInt64());
             ClassFilter = data.ReadInt32();
 
             uint nameLength = data.ReadBits<uint>(6);
@@ -129,7 +130,7 @@ namespace Game.Networking.Packets
         public string VirtualRealmName;
         public string Guild;
         public string GuildVirtualRealmName;
-        public long RaceFilter;
+        public RaceMask<long> RaceFilter;
         public int ClassFilter = -1;
         public List<string> Words = new();
         public bool ShowEnemies;

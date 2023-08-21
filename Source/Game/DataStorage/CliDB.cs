@@ -107,6 +107,7 @@ namespace Game.DataStorage
             ChrSpecializationStorage = ReadDB2<ChrSpecializationRecord>("ChrSpecialization.db2", HotfixStatements.SEL_CHR_SPECIALIZATION, HotfixStatements.SEL_CHR_SPECIALIZATION_LOCALE);
             CinematicCameraStorage = ReadDB2<CinematicCameraRecord>("CinematicCamera.db2", HotfixStatements.SEL_CINEMATIC_CAMERA);
             CinematicSequencesStorage = ReadDB2<CinematicSequencesRecord>("CinematicSequences.db2", HotfixStatements.SEL_CINEMATIC_SEQUENCES);
+            ConditionalChrModelStorage = ReadDB2<ConditionalChrModelRecord>("ConditionalChrModel.db2", HotfixStatements.SEL_CONDITIONAL_CHR_MODEL);
             ConditionalContentTuningStorage = ReadDB2<ConditionalContentTuningRecord>("ConditionalContentTuning.db2", HotfixStatements.SEL_CONDITIONAL_CONTENT_TUNING);
             ContentTuningStorage = ReadDB2<ContentTuningRecord>("ContentTuning.db2", HotfixStatements.SEL_CONTENT_TUNING);
             ContentTuningXExpectedStorage = ReadDB2<ContentTuningXExpectedRecord>("ContentTuningXExpected.db2", HotfixStatements.SEL_CONTENT_TUNING_X_EXPECTED);
@@ -539,6 +540,7 @@ namespace Game.DataStorage
         public static DB6Storage<ChrSpecializationRecord> ChrSpecializationStorage;
         public static DB6Storage<CinematicCameraRecord> CinematicCameraStorage;
         public static DB6Storage<CinematicSequencesRecord> CinematicSequencesStorage;
+        public static DB6Storage<ConditionalChrModelRecord> ConditionalChrModelStorage;
         public static DB6Storage<ConditionalContentTuningRecord> ConditionalContentTuningStorage;
         public static DB6Storage<ContentTuningRecord> ContentTuningStorage;
         public static DB6Storage<ContentTuningXExpectedRecord> ContentTuningXExpectedStorage;

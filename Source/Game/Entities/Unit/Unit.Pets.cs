@@ -768,10 +768,8 @@ namespace Game.Entities
 
             pet.SetCreatorGUID(GetGUID());
             pet.SetFaction(GetFaction());
-            pet.SetCreatedBySpell(spell_id);
-
-            if (IsTypeId(TypeId.Player))
-                pet.SetUnitFlag(UnitFlags.PlayerControlled);
+            pet.SetCreatedBySpell(spell_id);            
+            pet.SetUnitFlag(UnitFlags.PlayerControlled);
 
             if (!pet.InitStatsForLevel(level))
             {
@@ -790,6 +788,7 @@ namespace Game.Entities
 
             PetStable.PetInfo petInfo = new();
             pet.FillPetInfo(petInfo);
+            player.AddPetToUpdateFields(petInfo, (PetSaveMode)petStable.GetCurrentActivePetIndex(), PetStableFlags.Active);
             petStable.ActivePets[freeActiveSlot] = petInfo;
             return true;
         }

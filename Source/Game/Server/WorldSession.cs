@@ -702,7 +702,7 @@ namespace Game
             _queryHolderProcessor.ProcessReadyCallbacks();
         }
 
-        TransactionCallback AddTransactionCallback(TransactionCallback callback)
+        public TransactionCallback AddTransactionCallback(TransactionCallback callback)
         {
             return _transactionCallbacks.AddCallback(callback);
         }

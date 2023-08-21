@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
+using Game.Miscellaneous;
 using Game.Scenarios;
 using System;
 using System.Collections.Generic;
@@ -159,7 +160,7 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.Race:
                     if (unit != null)
-                        condMeets = Convert.ToBoolean(SharedConst.GetMaskForRace(unit.GetRace()) & ConditionValue1);
+                        condMeets = new RaceMask<uint>(ConditionValue1).HasRace(unit.GetRace());
                     break;
                 case ConditionTypes.Gender:
                     if (player != null)

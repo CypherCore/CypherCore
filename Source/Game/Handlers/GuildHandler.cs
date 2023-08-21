@@ -614,7 +614,7 @@ namespace Game
                 {
                     GuildRewardItem rewardItem = new();
                     rewardItem.ItemID = rewards[i].ItemID;
-                    rewardItem.RaceMask = (uint)rewards[i].RaceMask;
+                    rewardItem.RaceMask = rewards[i].RaceMask;
                     rewardItem.MinGuildLevel = 0;
                     rewardItem.MinGuildRep = rewards[i].MinGuildRep;
                     rewardItem.AchievementsRequired = rewards[i].AchievementsRequired;

@@ -20,7 +20,7 @@ namespace Framework.Constants
 
         public const float TrajectoryMissileSize = 3.0f;
 
-        public const int MaxPowersPerSpell = 4;
+        public const int MaxPowersPerSpell = 5;
 
         public const uint VisualKitFood = 406;
         public const uint VisualKitDrink = 438;
@@ -763,7 +763,9 @@ namespace Framework.Constants
         CantBeRecrafted = 316,
         PassiveReplaced = 317,
         CantFlyHere = 318,
-        Unknown = 319,
+        DragonridingRidingRequirement = 319,
+        ItemModAppearanceGroupAlreadyKnown = 320,
+        Unknown = 321,
 
         // Ok Cast Value - Here In Case A Future Version Removes Success And We Need To Use A Custom Value (Not Sent To Client Either Way)
         SpellCastOk = Success
@@ -1397,8 +1399,11 @@ namespace Framework.Constants
         RequiresADjaradinPillarShard = 831, // Requires A Djaradin Pillar Shard.
         RequiresAResilientStone = 832, // Requires A Resilient Stone.
         MyrritCannotCarryAnyMoreMaps = 835, // Myrrit Cannot Carry Any More Maps. Go On A Dig With Him!
+        SomeGiftsAreBetterLeftUndelivered = 836, // Some gifts are better left undelivered.
         RequiresNiffenCaveDiveKeyandShieldDisabled = 850, // Requires Niffen Cave Dive Key And Shield Disabled.
         ElusiveCreatureBaitWasRecentlyUsed = 851, // You Cannot Lure Anything In This Area For A Few Minutes. Elusive Creature Bait Was Recently Used.
+        MustBeInQuietPlaceWithinCaerDarrow = 852, // Must be in a suitably quiet place within Caer Darrow.
+        YouDontHaveAnyGlimmerOfLightsActive = 856, // You don't have any Glimmer of Lights active.
         YouDontHaveTheSwirlingMojoStone = 999, // You Don'T Have The Swirling Mojo Stone Equipped.
         YouMustBeNearADragonflightOathstone = 1000, // You Must Be Near One Of The Five Dragonflight Oathstones In The Dragon Isles.
         CanOnlyUseThisItemWhileAirborne = 1001, // You Can Only Use This Item While Airborne.
@@ -2500,7 +2505,7 @@ namespace Framework.Constants
         CreateTraitTreeConfig = 303, // Miscvalue[0] = Traittreeid
         ChangeActiveCombatTraitConfig = 304,
         Unk305 = 305,
-        Unk306 = 306,
+        UpdateInteractions = 306,
         Unk307 = 307,
         CancelPreloadWorld = 308,
         PreloadWorld = 309,
@@ -2509,6 +2514,7 @@ namespace Framework.Constants
         Unk312 = 312,
         ChangeItemBonuses2 = 313, // MiscValue[0] = ItemBonusTreeID to preserve
         AddSocketBonus = 314, // MiscValue[0] = required ItemBonusTreeID
+        LearnTransmogAppearanceFromItemModAppearanceGroup = 315, // MiscValue[0] = ItemModAppearanceGroupID (not in db2)
 
         TotalSpellEffects
     }

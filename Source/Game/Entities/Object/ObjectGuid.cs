@@ -113,6 +113,7 @@ namespace Game.Entities
                 case HighGuid.UniqUserClient:
                 case HighGuid.ClientSession:
                 case HighGuid.ClientConnection:
+                case HighGuid.LMMParty:
                     return ObjectGuidFactory.CreateClient(type, 0, arg1, counter);
                 default:
                     return Empty;
@@ -151,10 +152,13 @@ namespace Game.Entities
                 case HighGuid.AILock:
                 case HighGuid.AILockTicket:
                     return ObjectGuidFactory.CreateWorldObject(type, 0, 0, (ushort)mapId, 0, entry, counter);
+                case HighGuid.ToolsClient:
+                    return ObjectGuidFactory.CreateToolsClient(mapId, entry, counter); 
                 default:
                     return Empty;
             }
         }
+
         public static ObjectGuid Create(HighGuid type, SpellCastSource subType, uint mapId, uint entry, ulong counter)
         {
             switch (type)
@@ -164,6 +168,22 @@ namespace Game.Entities
                 default:
                     return Empty;
             }
+        }
+
+        public static ObjectGuid Create(HighGuid type, uint arg1, ushort arg2, byte arg3, uint arg4)
+        {
+            if (type != HighGuid.WorldLayer)
+                return Empty;
+            
+            return ObjectGuidFactory.CreateWorldLayer(arg1, arg2, arg3, arg4);
+        }
+
+        public static ObjectGuid Create(HighGuid type, uint arg2, byte arg3, byte arg4, ulong counter)
+        {
+            if (type != HighGuid.LMMLobby)
+                return Empty;
+
+            return ObjectGuidFactory.CreateLMMLobby(0, arg2, arg3, arg4, counter);
         }
 
         public byte[] GetRawValue()
@@ -541,6 +561,16 @@ namespace Game.Entities
             return new ObjectGuid((ulong)(((ulong)HighGuid.WorldLayer << 58) | ((ulong)(arg1 & 0xFFFFFFFF) << 10) | (ulong)(arg2 & 0x1FFu)), (ulong)(((ulong)(arg3 & 0xFF) << 24) | (ulong)(arg4 & 0x7FFFFF)));
         }
 
+        public static ObjectGuid CreateLMMLobby(uint realmId, uint arg2, byte arg3, byte arg4, ulong counter)
+        {
+            return new ObjectGuid((ulong)(((ulong)HighGuid.LMMLobby << 58)
+                | ((ulong)GetRealmIdForObjectGuid(realmId) << 42)
+                | ((ulong)(arg2 & 0xFFFFFFFF) << 26)
+                | ((ulong)(arg3 & 0xFF) << 18)
+                | ((ulong)(arg4 & 0xFF) << 10)),
+                counter);
+        }
+
         static uint GetRealmIdForObjectGuid(uint realmId)
         {
             if (realmId != 0)
@@ -608,6 +638,11 @@ namespace Game.Entities
             SET_GUID_INFO(HighGuid.Cast, FormatWorldObject, ParseWorldObject);
             SET_GUID_INFO(HighGuid.ClientConnection, FormatClient, ParseClient);
             SET_GUID_INFO(HighGuid.ClubFinder, FormatClubFinder, ParseClubFinder);
+            SET_GUID_INFO(HighGuid.ToolsClient, FormatToolsClient, ParseToolsClient);
+            SET_GUID_INFO(HighGuid.WorldLayer, FormatWorldLayer, ParseWorldLayer);
+            SET_GUID_INFO(HighGuid.ArenaTeam, FormatGuild, ParseGuild);
+            SET_GUID_INFO(HighGuid.LMMParty, FormatClient, ParseClient);
+            SET_GUID_INFO(HighGuid.LMMLobby, FormatLMMLobby, ParseLMMLobby);
         }
 
         static void SET_GUID_INFO(HighGuid type, Func<HighGuid, ObjectGuid, string> format, Func<HighGuid, string, ObjectGuid> parse)
@@ -993,12 +1028,12 @@ namespace Game.Entities
             return ObjectGuidFactory.CreateClubFinder(realmId, typeNum, clubFinderId, dbId);
         }
 
-        string FormatToolsClient(HighGuid typeName, ObjectGuid guid)
+        static string FormatToolsClient(HighGuid typeName, ObjectGuid guid)
         {
             return $"{typeName}-{guid.GetMapId()}-{(uint)(guid.GetLowValue() >> 40) & 0xFFFFFF}-{guid.GetCounter():X10}";
         }
 
-        ObjectGuid ParseToolsClient(HighGuid type, string guidString)
+        static ObjectGuid ParseToolsClient(HighGuid type, string guidString)
         {
             string[] split = guidString.Split('-');
             if (split.Length != 3)
@@ -1010,12 +1045,12 @@ namespace Game.Entities
             return ObjectGuidFactory.CreateToolsClient(mapId, serverId, counter);
         }
 
-        string FormatWorldLayer(HighGuid typeName, ObjectGuid guid)
+        static string FormatWorldLayer(HighGuid typeName, ObjectGuid guid)
         {
             return $"{typeName}-{(uint)((guid.GetHighValue() >> 10) & 0xFFFFFFFF)}-{(uint)(guid.GetHighValue() & 0x1FF)}-{(uint)((guid.GetLowValue() >> 24) & 0xFF)}-{(uint)(guid.GetLowValue() & 0x7FFFFF)}";
         }
 
-        ObjectGuid ParseWorldLayer(HighGuid type, string guidString)
+        static ObjectGuid ParseWorldLayer(HighGuid type, string guidString)
         {
             string[] split = guidString.Split('-');
             if (split.Length != 4)
@@ -1025,6 +1060,23 @@ namespace Game.Entities
                 return ObjectGuid.FromStringFailed;
 
             return ObjectGuidFactory.CreateWorldLayer(arg1, arg2, arg3, arg4);
+        }
+
+        static string FormatLMMLobby(HighGuid typeName, ObjectGuid guid)
+        {
+            return $"{typeName}-{guid.GetRealmId()}-{(uint)(guid.GetHighValue() >> 26) & 0xFFFFFF}-{(uint)(guid.GetHighValue() >> 18) & 0xFF}-{(uint)(guid.GetHighValue() >> 10) & 0xFF}-{guid.GetLowValue():X}";
+        }
+
+        static ObjectGuid ParseLMMLobby(HighGuid type, string guidString)
+        {
+            string[] split = guidString.Split('-');
+            if (split.Length != 5)
+                return ObjectGuid.FromStringFailed;
+
+            if (!uint.TryParse(split[0], out uint realmId) || !uint.TryParse(split[1], out uint arg2) || !byte.TryParse(split[2], out byte arg3) || !byte.TryParse(split[0], out byte arg4) || !ulong.TryParse(split[0], out ulong arg5))
+                return ObjectGuid.FromStringFailed;
+
+            return ObjectGuidFactory.CreateLMMLobby(realmId, arg2, arg3, arg4, arg5);
         }
     }
 

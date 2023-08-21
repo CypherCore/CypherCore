@@ -582,9 +582,6 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.PetAbandon)]
         void HandlePetAbandon(PetAbandon packet)
         {
-            if (!GetPlayer().IsInWorld)
-                return;
-
             // pet/charmed
             Creature pet = ObjectAccessor.GetCreatureOrPetOrVehicle(GetPlayer(), packet.Pet);
             if (pet && pet.ToPet() && pet.ToPet().GetPetType() == PetType.Hunter)

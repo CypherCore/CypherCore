@@ -3,6 +3,7 @@
 
 using Framework.Constants;
 using Framework.Database;
+using Game.Miscellaneous;
 using Game.Networking;
 using System;
 using System.Collections;
@@ -1830,7 +1831,8 @@ namespace Game.DataStorage
             var bounds = _skillRaceClassInfoBySkill.LookupByKey(skill);
             foreach (var skllRaceClassInfo in bounds)
             {
-                if (skllRaceClassInfo.RaceMask != 0 && !Convert.ToBoolean(skllRaceClassInfo.RaceMask & SharedConst.GetMaskForRace(race)))
+                var raceMask = new RaceMask<long>(skllRaceClassInfo.RaceMask);
+                if (!raceMask.IsEmpty() && !raceMask.HasRace(race))
                     continue;
                 if (skllRaceClassInfo.ClassMask != 0 && !Convert.ToBoolean(skllRaceClassInfo.ClassMask & (1 << ((byte)class_ - 1))))
                     continue;

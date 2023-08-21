@@ -1,6 +1,8 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+
 namespace Framework.Constants
 {
     public enum CharmType
@@ -27,6 +29,13 @@ namespace Framework.Constants
         FirstStableSlot = 5,
         LastStableSlot = FirstStableSlot + SharedConst.MaxPetStables, // last in DB stable slot index
         NotInSlot = -1,                       // for avoid conflict with stable size grow will use negative value
+    }
+
+    [Flags]
+    public enum PetStableFlags
+    {
+        Active = 0x1,
+        Inactive = 0x2
     }
 
     public enum PetSpellState
@@ -88,23 +97,6 @@ namespace Framework.Constants
         DeclensionDoesntMatchBaseName = 16
     }
 
-    public enum PetStableinfo : byte
-    {
-        Active = 1,
-        Inactive = 2
-    }
-
-    public enum StableResult
-    {
-        NotEnoughMoney = 1,                              // "you don't have enough money"
-        InvalidSlot = 3,                              // "That slot is locked"
-        StableSuccess = 8,                              // stable success
-        UnstableSuccess = 9,                              // unstable/swap success
-        BuySlotSuccess = 10,                             // buy slot success
-        CantControlExotic = 11,                             // "you are unable to control exotic creatures"
-        InternalError = 12,                             // "Internal pet error"
-    }
-
     public enum PetTameResult
     {
         Ok = 0,
@@ -122,5 +114,16 @@ namespace Framework.Constants
         CantControlExotic = 12,
         InvalidSlot = 13,
         EliteTooHighLevel = 14
+    }
+
+    public enum StableResult
+    {
+        NotEnoughMoney = 1,                              // "you don't have enough money"
+        InvalidSlot = 3,                              // "That slot is locked"
+        StableSuccess = 8,                              // stable success
+        UnstableSuccess = 9,                              // unstable/swap success
+        BuySlotSuccess = 10,                             // buy slot success
+        CantControlExotic = 11,                             // "you are unable to control exotic creatures"
+        InternalError = 12,                             // "Internal pet error"
     }
 }

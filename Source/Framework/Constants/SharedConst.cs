@@ -294,18 +294,6 @@ namespace Framework.Constants
             29, 30, 31, -1, 11, 12, 13, 14
         };
 
-        public static ulong RaceMaskAllPlayable = (ulong)(GetMaskForRace(Race.Human) | GetMaskForRace(Race.Orc) | GetMaskForRace(Race.Dwarf) | GetMaskForRace(Race.NightElf) | GetMaskForRace(Race.Undead)
-            | GetMaskForRace(Race.Tauren) | GetMaskForRace(Race.Gnome) | GetMaskForRace(Race.Troll) | GetMaskForRace(Race.BloodElf) | GetMaskForRace(Race.Draenei)
-            | GetMaskForRace(Race.Goblin) | GetMaskForRace(Race.Worgen) | GetMaskForRace(Race.PandarenNeutral) | GetMaskForRace(Race.PandarenAlliance) | GetMaskForRace(Race.PandarenHorde)
-            | GetMaskForRace(Race.Nightborne) | GetMaskForRace(Race.HighmountainTauren) | GetMaskForRace(Race.VoidElf) | GetMaskForRace(Race.LightforgedDraenei) | GetMaskForRace(Race.ZandalariTroll)
-            | GetMaskForRace(Race.KulTiran) | GetMaskForRace(Race.DarkIronDwarf) | GetMaskForRace(Race.Vulpera) | GetMaskForRace(Race.MagharOrc) | GetMaskForRace(Race.MechaGnome) | GetMaskForRace(Race.DracthyrAlliance) | GetMaskForRace(Race.DracthyrHorde));
-
-        public static ulong RaceMaskAlliance = (ulong)(GetMaskForRace(Race.Human) | GetMaskForRace(Race.Dwarf) | GetMaskForRace(Race.NightElf) | GetMaskForRace(Race.Gnome)
-            | GetMaskForRace(Race.Draenei) | GetMaskForRace(Race.Worgen) | GetMaskForRace(Race.PandarenAlliance) | GetMaskForRace(Race.VoidElf) | GetMaskForRace(Race.LightforgedDraenei)
-            | GetMaskForRace(Race.KulTiran) | GetMaskForRace(Race.DarkIronDwarf) | GetMaskForRace(Race.MechaGnome) | GetMaskForRace(Race.DracthyrAlliance));
-
-        public static ulong RaceMaskHorde = RaceMaskAllPlayable & ~RaceMaskAlliance;
-
         //Todo move these else where
         /// <summary>
         /// Method Const
@@ -417,55 +405,6 @@ namespace Framework.Constants
             CascLocaleBit.ptBR,
             CascLocaleBit.itIT
         };
-
-        static int GetRaceBit(Race raceId)
-        {
-            switch (raceId)
-            {
-                case Race.Human:
-                case Race.Orc:
-                case Race.Dwarf:
-                case Race.NightElf:
-                case Race.Undead:
-                case Race.Tauren:
-                case Race.Gnome:
-                case Race.Troll:
-                case Race.Goblin:
-                case Race.BloodElf:
-                case Race.Draenei:
-                case Race.Worgen:
-                case Race.PandarenNeutral:
-                case Race.PandarenAlliance:
-                case Race.PandarenHorde:
-                case Race.Nightborne:
-                case Race.HighmountainTauren:
-                case Race.VoidElf:
-                case Race.LightforgedDraenei:
-                case Race.ZandalariTroll:
-                case Race.KulTiran:
-                    return (int)raceId - 1;
-                case Race.DarkIronDwarf:
-                    return 11;
-                case Race.Vulpera:
-                    return 12;
-                case Race.MagharOrc:
-                    return 13;
-                case Race.MechaGnome:
-                    return 14;
-                case Race.DracthyrAlliance:
-                    return 16;
-                case Race.DracthyrHorde:
-                    return 15;
-                default:
-                    return -1;
-            }
-        }
-        
-        public static long GetMaskForRace(Race raceId)
-        {
-            int raceBit = GetRaceBit(raceId);
-            return raceBit >= 0 && raceBit < sizeof(long) * 8 ? (1L << raceBit) : 0;
-        }
 
         public static bool IsActivePetSlot(PetSaveMode slot)
         {
@@ -3054,12 +2993,13 @@ namespace Framework.Constants
         CrossFactionGroupJoined = 1114,
         CantTargetUnfriendlyInOverworld = 1115,
         EquipablespellsSlotsFull = 1116,
-        WowLabsPartyErrorTypePartyIsFull = 1117,
-        WowLabsPartyErrorTypeMaxInviteSent = 1118,
-        WowLabsPartyErrorTypePlayerAlreadyInvited = 1119,
-        WowLabsPartyErrorTypePartyInviteInvalid = 1120,
-        WowLabsLobbyMatchmakerErrorEnterQueueFailed = 1121,
-        WowLabsLobbyMatchmakerErrorLeaveQueueFailed = 1122,
+        ItemModAppearanceGroupAlreadyKnown = 1117,
+        WowLabsPartyErrorTypePartyIsFull = 1118,
+        WowLabsPartyErrorTypeMaxInviteSent = 1119,
+        WowLabsPartyErrorTypePlayerAlreadyInvited = 1120,
+        WowLabsPartyErrorTypePartyInviteInvalid = 1121,
+        WowLabsLobbyMatchmakerErrorEnterQueueFailed = 1122,
+        WowLabsLobbyMatchmakerErrorLeaveQueueFailed = 1123,
     }
 
     public enum SceneFlags

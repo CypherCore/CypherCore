@@ -351,6 +351,8 @@ namespace Game.BattleGrounds
                 SetStatus(BattlegroundStatus.InProgress);
                 SetStartDelayTime(StartDelayTimes[BattlegroundConst.EventIdFourth]);
 
+                SendPacketToAll(new PVPMatchSetState(PVPMatchState.Engaged));
+
                 foreach (var (guid, _) in GetPlayers())
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
@@ -954,14 +956,16 @@ namespace Game.BattleGrounds
             {
                 case BattlegroundStatus.None:
                 case BattlegroundStatus.WaitQueue:
-                    pvpMatchInitialize.State = PVPMatchInitialize.MatchState.Inactive;
+                    pvpMatchInitialize.State = PVPMatchState.Inactive;
                     break;
                 case BattlegroundStatus.WaitJoin:
+                    pvpMatchInitialize.State = PVPMatchState.StartUp;
+                    break;
                 case BattlegroundStatus.InProgress:
-                    pvpMatchInitialize.State = PVPMatchInitialize.MatchState.InProgress;
+                    pvpMatchInitialize.State = PVPMatchState.Engaged;
                     break;
                 case BattlegroundStatus.WaitLeave:
-                    pvpMatchInitialize.State = PVPMatchInitialize.MatchState.Complete;
+                    pvpMatchInitialize.State = PVPMatchState.Complete;
                     break;
                 default:
                     break;
@@ -1226,7 +1230,7 @@ namespace Game.BattleGrounds
                 {
                     playerData.IsInWorld = true;
                     playerData.PrimaryTalentTree = (int)player.GetPrimarySpecialization();
-                    playerData.Sex = (int)player.GetGender();
+                    playerData.Sex = (sbyte)player.GetGender();
                     playerData.PlayerRace = player.GetRace();
                     playerData.PlayerClass = (int)player.GetClass();
                     playerData.HonorLevel = (int)player.GetHonorLevel();

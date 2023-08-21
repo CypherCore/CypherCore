@@ -96,6 +96,8 @@ namespace Framework.Constants
         ToolsClient = 50,
         WorldLayer = 51,
         ArenaTeam = 52,
+        LMMParty = 53,
+        LMMLobby = 54,
 
         Count
     }

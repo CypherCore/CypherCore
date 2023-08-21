@@ -1371,6 +1371,43 @@ namespace Game.Networking.Packets
         }
     }
 
+    struct CombatWorldTextViewerInfo
+    {
+        public ObjectGuid ViewerGUID;
+        public byte? ColorType;
+        public byte? ScaleType;
+
+        public void Write(WorldPacket data)
+        {
+            data.WritePackedGuid(ViewerGUID);
+            data.WriteBit(ColorType.HasValue);
+            data.WriteBit(ScaleType.HasValue);
+            data.FlushBits();
+
+            if (ColorType.HasValue)
+                data.WriteUInt8(ColorType.Value);
+
+            if (ScaleType.HasValue)
+                data.WriteUInt8(ScaleType.Value);
+        }
+    }
+
+    public struct SpellSupportInfo
+    {
+        public ObjectGuid CasterGUID;
+        public int SpellID;
+        public int Amount;
+        public float Percentage;
+
+        public void Write(WorldPacket data)
+        {
+            data.WritePackedGuid(CasterGUID);
+            data.WriteInt32(SpellID);
+            data.WriteInt32(Amount);
+            data.WriteFloat(Percentage);
+        }
+    }
+
     public struct SpellCastVisual
     {
         public uint SpellXSpellVisualID;

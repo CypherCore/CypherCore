@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.Entities;
+using Game.Miscellaneous;
 using System;
 using System.Collections.Generic;
 
@@ -53,7 +54,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(QuestGiver.Guid);
-            _worldPacket.WriteUInt32((uint)QuestGiver.Status);
+            _worldPacket.WriteUInt64((ulong)QuestGiver.Status);
         }
 
         public QuestGiverInfo QuestGiver;
@@ -69,7 +70,7 @@ namespace Game.Networking.Packets
             foreach (QuestGiverInfo questGiver in QuestGiver)
             {
                 _worldPacket.WritePackedGuid(questGiver.Guid);
-                _worldPacket.WriteUInt32((uint)questGiver.Status);
+                _worldPacket.WriteUInt64((ulong)questGiver.Status);
             }
         }
 
@@ -190,10 +191,10 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt32(Info.CompleteSoundKitID);
 
                 _worldPacket.WriteUInt32(Info.AreaGroupID);
-                _worldPacket.WriteUInt32(Info.TimeAllowed);
+                _worldPacket.WriteInt64(Info.TimeAllowed);
 
                 _worldPacket.WriteInt32(Info.Objectives.Count);
-                _worldPacket.WriteInt64(Info.AllowableRaces);
+                _worldPacket.WriteUInt64(Info.AllowableRaces.RawValue);
                 _worldPacket.WriteInt32(Info.TreasurePickerID);
                 _worldPacket.WriteInt32(Info.Expansion);
                 _worldPacket.WriteInt32(Info.ManagedWorldStateID);
@@ -1037,7 +1038,7 @@ namespace Game.Networking.Packets
         public float POIx;
         public float POIy;
         public uint POIPriority;
-        public long AllowableRaces = -1;
+        public RaceMask<ulong> AllowableRaces = new (0xFFFFFFFFFFFFFFFF);
         public string LogTitle;
         public string LogDescription;
         public string QuestDescription;
@@ -1059,7 +1060,7 @@ namespace Game.Networking.Packets
         public uint AcceptedSoundKitID;
         public uint CompleteSoundKitID;
         public uint AreaGroupID;
-        public uint TimeAllowed;
+        public long TimeAllowed;
         public int TreasurePickerID;
         public int Expansion;
         public int ManagedWorldStateID;

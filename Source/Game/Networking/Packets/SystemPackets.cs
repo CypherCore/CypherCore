@@ -84,6 +84,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(LFGListCustomRequiresAuthenticator);
             _worldPacket.WriteBit(AddonsDisabled);
             _worldPacket.WriteBit(Unused1000);
+            _worldPacket.WriteBit(ContentTrackingEnabled);
 
             _worldPacket.FlushBits();
 
@@ -176,6 +177,7 @@ namespace Game.Networking.Packets
         public bool LFGListCustomRequiresAuthenticator;
         public bool AddonsDisabled;
         public bool Unused1000;
+        public bool ContentTrackingEnabled;
 
         public SocialQueueConfig QuickJoinConfig;
         public SquelchInfo Squelch;

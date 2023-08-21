@@ -2038,6 +2038,22 @@ namespace Game.Entities
             return (ushort)GetAppearanceModId();
         }
 
+        uint GetVisibleModifiedAppearanceId(Player owner)
+        {
+            uint itemModifiedAppearanceId = GetModifier(ItemConst.AppearanceModifierSlotBySpec[owner.GetActiveTalentGroup()]);
+            if (itemModifiedAppearanceId == 0)
+                itemModifiedAppearanceId = GetModifier(ItemModifier.TransmogAppearanceAllSpecs);
+
+            if (itemModifiedAppearanceId == 0)
+            {
+                var itemModifiedAppearance = GetItemModifiedAppearance();
+                if (itemModifiedAppearance != null)
+                    itemModifiedAppearanceId = itemModifiedAppearance.Id;
+            }
+
+            return itemModifiedAppearanceId;
+        }
+        
         public uint GetVisibleSecondaryModifiedAppearanceId(Player owner)
         {
             uint itemModifiedAppearanceId = GetModifier(ItemConst.SecondaryAppearanceModifierSlotBySpec[owner.GetActiveTalentGroup()]);

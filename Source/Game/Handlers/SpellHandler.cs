@@ -81,7 +81,7 @@ namespace Game
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)effect.SpellID, user.GetMap().GetDifficultyID());
                     if (spellInfo != null)
                     {
-                        if (!spellInfo.CanBeUsedInCombat())
+                        if (!spellInfo.CanBeUsedInCombat(user))
                         {
                             user.SendEquipError(InventoryResult.NotInCombat, item);
                             return;

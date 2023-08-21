@@ -38,8 +38,8 @@ namespace Game.Networking.Packets
             Quantity = _worldPacket.ReadInt32();
             Muid = _worldPacket.ReadUInt32();
             Slot = _worldPacket.ReadUInt32();
+            ItemType = (ItemVendorType)_worldPacket.ReadInt32();
             Item.Read(_worldPacket);
-            ItemType = (ItemVendorType)_worldPacket.ReadBits<int>(3);
         }
 
         public ObjectGuid VendorGUID;

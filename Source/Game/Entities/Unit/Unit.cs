@@ -1431,7 +1431,7 @@ namespace Game.Entities
                             if (displayInfo != null)
                             {
                                 ChrCustomizationReqRecord choiceReq = CliDB.ChrCustomizationReqStorage.LookupByKey(formModelData.Choices[i].ChrCustomizationReqID);
-                                if (choiceReq == null || thisPlayer.GetSession().MeetsChrCustomizationReq(choiceReq, GetClass(), false, thisPlayer.m_playerData.Customizations))
+                                if (choiceReq == null || thisPlayer.GetSession().MeetsChrCustomizationReq(choiceReq, GetRace(), GetClass(), false, thisPlayer.m_playerData.Customizations))
                                     displayIds.Add(displayInfo.DisplayID);
                             }
                         }
@@ -1877,6 +1877,7 @@ namespace Game.Entities
 
         public Race GetRace() { return (Race)(byte)m_unitData.Race; }
         public void SetRace(Race race) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Race), (byte)race); }
+        public ulong GetRaceMask() { return 1UL << ((int)GetRace() - 1); }
         public Class GetClass() { return (Class)(byte)m_unitData.ClassId; }
         public void SetClass(Class classId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ClassId), (byte)classId); }
         public uint GetClassMask() { return (uint)(1 << ((int)GetClass() - 1)); }

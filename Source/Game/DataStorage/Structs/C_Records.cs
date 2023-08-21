@@ -183,6 +183,7 @@ namespace Game.DataStorage
     public sealed class ChrCustomizationReqRecord
     {
         public uint Id;
+        public long RaceMask;
         public string ReqSource;
         public int Flags;
         public int ClassMask;
@@ -327,6 +328,16 @@ namespace Game.DataStorage
         public uint Id;
         public uint SoundID;
         public ushort[] Camera = new ushort[8];
+    }
+
+    public sealed class ConditionalChrModelRecord
+    {
+        public uint Id;
+        public uint ChrModelID;                                      // This is the PK
+        public int ChrCustomizationReqID;
+        public int PlayerConditionID;
+        public int Flags;
+        public int ChrCustomizationCategoryID;
     }
 
     public sealed class ConditionalContentTuningRecord
@@ -512,12 +523,12 @@ namespace Game.DataStorage
         public CriteriaType Type;
         public uint Asset;
         public uint ModifierTreeId;
-        public byte StartEvent;
+        public int StartEvent;
         public uint StartAsset;
         public ushort StartTimer;
-        public byte FailEvent;
+        public int FailEvent;
         public uint FailAsset;
-        public byte Flags;
+        public int Flags;
         public ushort EligibilityWorldStateID;
         public byte EligibilityWorldStateValue;
 
@@ -530,7 +541,7 @@ namespace Game.DataStorage
         public string Description;
         public uint Parent;
         public uint Amount;
-        public sbyte Operator;
+        public int Operator;
         public uint CriteriaID;
         public int OrderIndex;
         public CriteriaTreeFlags Flags;

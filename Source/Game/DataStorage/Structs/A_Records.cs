@@ -122,7 +122,7 @@ namespace Game.DataStorage
         public uint UwIntroSound;
         public byte FactionGroupMask;
         public float AmbientMultiplier;
-        public byte MountFlags;
+        public int MountFlags;
         public short PvpCombatWorldStateID;
         public byte WildBattlePetLevelMin;
         public byte WildBattlePetLevelMax;

@@ -104,7 +104,7 @@ namespace Game.AI
 
                     if (spellInfo.IsPositive())
                     {
-                        if (spellInfo.CanBeUsedInCombat())
+                        if (spellInfo.CanBeUsedInCombat(me))
                         {
                             // Check if we're in combat or commanded to attack
                             if (!me.IsInCombat() && !me.GetCharmInfo().IsCommandAttack())
@@ -160,7 +160,7 @@ namespace Game.AI
                         if (!spellUsed)
                             spell.Dispose();
                     }
-                    else if (me.GetVictim() && CanAttack(me.GetVictim()) && spellInfo.CanBeUsedInCombat())
+                    else if (me.GetVictim() && CanAttack(me.GetVictim()) && spellInfo.CanBeUsedInCombat(me))
                     {
                         Spell spell = new(me, spellInfo, TriggerCastFlags.None);
                         if (spell.CanAutoCast(me.GetVictim()))

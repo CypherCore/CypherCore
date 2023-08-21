@@ -62,6 +62,11 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Absorbed);
             _worldPacket.WriteInt32(Resisted);
             _worldPacket.WriteInt32(ShieldBlock);
+            _worldPacket.WriteInt32(WorldTextViewers.Count);
+            _worldPacket.WriteInt32(Supporters.Count);
+
+            foreach (SpellSupportInfo supportInfo in Supporters)
+                supportInfo.Write(_worldPacket);
 
             _worldPacket.WriteBit(Periodic);
             _worldPacket.WriteBits(Flags, 7);
@@ -69,6 +74,10 @@ namespace Game.Networking.Packets
             WriteLogDataBit();
             _worldPacket.WriteBit(ContentTuning != null);
             FlushBits();
+
+            foreach (CombatWorldTextViewerInfo worldTextViewer in WorldTextViewers)
+                worldTextViewer.Write(_worldPacket);
+
             WriteLogData();
             if (ContentTuning != null)
                 ContentTuning.Write(_worldPacket);
@@ -90,6 +99,8 @@ namespace Game.Networking.Packets
         public int Flags;
         // Optional<SpellNonMeleeDamageLogDebugInfo> DebugInfo;
         public ContentTuningParams ContentTuning;
+        public List<CombatWorldTextViewerInfo> WorldTextViewers = new();
+        public List<SpellSupportInfo> Supporters = new();
     }
 
     class EnvironmentalDamageLog : CombatLogServerPacket
@@ -193,6 +204,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(OriginalHeal);
             _worldPacket.WriteUInt32(OverHeal);
             _worldPacket.WriteUInt32(Absorbed);
+            _worldPacket.WriteInt32(Supporters.Count);
+
+            foreach (SpellSupportInfo supportInfo in Supporters)
+                supportInfo.Write(_worldPacket);
 
             _worldPacket.WriteBit(Crit);
 
@@ -225,6 +240,7 @@ namespace Game.Networking.Packets
         public float? CritRollMade;
         public float? CritRollNeeded;
         public ContentTuningParams ContentTuning;
+        public List<SpellSupportInfo> Supporters = new();
     }
 
     class SpellPeriodicAuraLog : CombatLogServerPacket
@@ -267,6 +283,10 @@ namespace Game.Networking.Packets
                 data.WriteUInt32(SchoolMaskOrPower);
                 data.WriteUInt32(AbsorbedOrAmplitude);
                 data.WriteUInt32(Resisted);
+                data.WriteInt32(Supporters.Count);
+
+                foreach (SpellSupportInfo supportInfo in Supporters)
+                    supportInfo.Write(data);
 
                 data.WriteBit(Crit);
                 data.WriteBit(DebugInfo.HasValue);
@@ -293,6 +313,7 @@ namespace Game.Networking.Packets
             public bool Crit;
             public PeriodicalAuraLogEffectDebugInfo? DebugInfo;
             public ContentTuningParams ContentTuning;
+            public List<SpellSupportInfo> Supporters = new();
         }
     }
 
@@ -594,6 +615,10 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(Caster);
             _worldPacket.WriteInt32(Absorbed);
             _worldPacket.WriteUInt32(OriginalDamage);
+            _worldPacket.WriteInt32(Supporters.Count);
+
+            foreach (SpellSupportInfo supportInfo in Supporters)
+                supportInfo.Write(_worldPacket);
 
             _worldPacket.WriteBit(Unk);
             WriteLogDataBit();
@@ -610,6 +635,7 @@ namespace Game.Networking.Packets
         public int Absorbed;
         public uint OriginalDamage;
         public bool Unk;
+        public List<SpellSupportInfo> Supporters = new();
     }
 
     class SpellHealAbsorbLog : ServerPacket

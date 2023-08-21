@@ -485,15 +485,8 @@ namespace Game.Networking.Packets
                 DeserterPenalty.Write(_worldPacket);
         }
 
-        public enum MatchState
-        {
-            InProgress = 1,
-            Complete = 3,
-            Inactive = 4
-        }
-
         public uint MapID;
-        public MatchState State = MatchState.Inactive;
+        public PVPMatchState State = PVPMatchState.Inactive;
         public long StartTime;
         public int Duration;
         public RatedMatchDeserterPenalty DeserterPenalty;
@@ -503,6 +496,21 @@ namespace Game.Networking.Packets
         public bool AffectsRating;
     }
 
+    class PVPMatchSetState : ServerPacket
+    {
+        public PVPMatchSetState(PVPMatchState state) : base(ServerOpcodes.PvpMatchSetState)
+        {
+            State = state;
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt8((byte)State);
+        }
+
+        PVPMatchState State;
+    }
+    
     class PVPMatchComplete : ServerPacket
     {
         public PVPMatchComplete() : base(ServerOpcodes.PvpMatchComplete, ConnectionType.Instance) { }
@@ -685,7 +693,7 @@ namespace Game.Networking.Packets
                 data.WriteUInt32(HealingDone);
                 data.WriteInt32(Stats.Count);
                 data.WriteInt32(PrimaryTalentTree);
-                data.WriteInt32(Sex);
+                data.WriteInt8(Sex);
                 data.WriteUInt32((uint)PlayerRace);
                 data.WriteInt32(PlayerClass);
                 data.WriteInt32(CreatureID);
@@ -738,7 +746,7 @@ namespace Game.Networking.Packets
             public uint? PostMatchMMR;
             public List<PVPMatchPlayerPVPStat> Stats = new();
             public int PrimaryTalentTree;
-            public int Sex;
+            public sbyte Sex;
             public Race PlayerRace;
             public int PlayerClass;
             public int CreatureID;

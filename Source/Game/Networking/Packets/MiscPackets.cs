@@ -1338,7 +1338,7 @@ namespace Game.Networking.Packets
                     _worldPacket.WriteBit(BonusRoll);
                     Item.Write(_worldPacket);
                     _worldPacket.WriteInt32(LootSpec);
-                    _worldPacket.WriteInt32((int)Gender);
+                    _worldPacket.WriteInt8((sbyte)Gender);
                     break;
                 case DisplayToastType.NewCurrency:
                     _worldPacket.WriteUInt32(CurrencyID);

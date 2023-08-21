@@ -19,6 +19,7 @@ namespace Game.Scenarios
         {
             _map = map;
             _data = scenarioData;
+            _guid = ObjectGuid.Create(HighGuid.Scenario, map.GetId(), scenarioData.Entry.Id, map.GenerateLowGuid(HighGuid.Scenario));
             _currentstep = null;
 
             //ASSERT(_data);
@@ -229,6 +230,7 @@ namespace Game.Scenarios
 
         void BuildScenarioState(ScenarioState scenarioState)
         {
+            scenarioState.ScenarioGUID = _guid;
             scenarioState.ScenarioID = (int)_data.Entry.Id;
             ScenarioStepRecord step = GetStep();
             if (step != null)
@@ -343,6 +345,7 @@ namespace Game.Scenarios
         void SendBootPlayer(Player player)
         {
             ScenarioVacate scenarioBoot = new();
+            scenarioBoot.ScenarioGUID = _guid;
             scenarioBoot.ScenarioID = (int)_data.Entry.Id;
             player.SendPacket(scenarioBoot);
         }
@@ -362,6 +365,7 @@ namespace Game.Scenarios
         protected Map _map;
         List<ObjectGuid> _players = new();
         protected ScenarioData _data;
+        ObjectGuid _guid;
         ScenarioStepRecord _currentstep;
         Dictionary<ScenarioStepRecord, ScenarioStepState> _stepStates = new();
     }

@@ -67,9 +67,9 @@ namespace Framework.Constants
 
     public enum QuestSlotStateMask
     {
-        None = 0x0000,
-        Complete = 0x0001,
-        Fail = 0x0002
+        None = 0x00,
+        Complete = 0x1,
+        Fail = 0x2
     }
 
     public enum QuestType
@@ -402,7 +402,7 @@ namespace Framework.Constants
         Max
     }
 
-    public enum QuestGiverStatus : uint
+    public enum QuestGiverStatus : ulong
     {
         None = 0x00,
         Future = 0x02,
@@ -426,6 +426,16 @@ namespace Framework.Constants
         CovenantCallingQuest = 0x80000,
         CovenantCallingRewardCompleteNoPOI = 0x100000,
         CovenantCallingRewardCompletePOI = 0x200000,
+        TrivialLegendaryQuest = 0x400000,
+        FutureLegendaryQuest = 0x800000,
+        LegendaryReward = 0x1000000,
+        ImportantQuest = 0x2000000,
+        ImportantQuestReward = 0x4000000,
+        TrivialImportantQuest = 0x8000000,
+        ImportantQuestRewardCompleteNoPOI = 0x20000000,
+        ImportantQuestRewardCompletePOI = 0x40000000,
+        TrivialJourneyQuest = 0x80000000,
+        TrivialCovenantCallingQuest = 0x100000000,
     }
 
     [Flags]
@@ -533,10 +543,10 @@ namespace Framework.Constants
     {
         None = 0x00,
         // Flags For Set Specialflags In Db If Required But Used Only At Server
-        Repeatable = 0x001, // Set by 1 in SpecialFlags from DB
-        AutoPushToParty = 0x002, // Set by 2 in SpecialFlags from DB will make quest be pushed to entire party when one member accepts it
-        AutoAccept = 0x004, // Set by 4 in SpecialFlags in DB if the quest is to be auto-accepted.
-        DfQuest = 0x008, // Set by 8 in SpecialFlags in DB if the quest is used by Dungeon Finder.
+        Repeatable = 0x01, // Set by 1 in SpecialFlags from DB
+        AutoPushToParty = 0x02, // Set by 2 in SpecialFlags from DB will make quest be pushed to entire party when one member accepts it
+        AutoAccept = 0x04, // Set by 4 in SpecialFlags in DB if the quest is to be auto-accepted.
+        DfQuest = 0x08, // Set by 8 in SpecialFlags in DB if the quest is used by Dungeon Finder.
         Monthly = 0x010, // Set by 16 in SpecialFlags in DB if the quest is reset at the begining of the month
         // Room For More Custom Flags
 

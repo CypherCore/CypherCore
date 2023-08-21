@@ -4829,7 +4829,7 @@ namespace Game.Spells
                     if (m_spellInfo.ExcludeCasterAuraType != 0 && unitCaster.HasAuraType(m_spellInfo.ExcludeCasterAuraType))
                         return SpellCastResult.CasterAurastate;
 
-                    if (reqCombat && unitCaster.IsInCombat() && !m_spellInfo.CanBeUsedInCombat())
+                    if (reqCombat && unitCaster.IsInCombat() && !m_spellInfo.CanBeUsedInCombat(unitCaster))
                         return SpellCastResult.AffectingCombat;
                 }
 

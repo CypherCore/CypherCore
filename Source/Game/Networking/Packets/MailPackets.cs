@@ -250,6 +250,10 @@ namespace Game.Networking.Packets
                     case MailMessageType.Creature:
                     case MailMessageType.Gameobject:
                     case MailMessageType.Calendar:
+                    case MailMessageType.Blackmarket:
+                    case MailMessageType.CommerceAuction:
+                    case MailMessageType.Auction2:
+                    case MailMessageType.ArtisansConsortium:
                         AltSenderID = (int)mail.sender;
                         break;
                 }
@@ -353,7 +357,7 @@ namespace Game.Networking.Packets
         public MailListEntry(Mail mail, Player player)
         {
             MailID = mail.messageID;
-            SenderType = (byte)mail.messageType;
+            SenderType = mail.messageType;
 
             switch (mail.messageType)
             {
@@ -364,6 +368,10 @@ namespace Game.Networking.Packets
                 case MailMessageType.Gameobject:
                 case MailMessageType.Auction:
                 case MailMessageType.Calendar:
+                case MailMessageType.Blackmarket:
+                case MailMessageType.CommerceAuction:
+                case MailMessageType.Auction2:
+                case MailMessageType.ArtisansConsortium:
                     AltSenderID = (uint)mail.sender;
                     break;
             }
@@ -388,7 +396,7 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt64(MailID);
-            data.WriteUInt8(SenderType);
+            data.WriteUInt32((uint)SenderType);
             data.WriteUInt64(Cod);
             data.WriteInt32(StationeryID);
             data.WriteUInt64(SentMoney);
@@ -397,28 +405,39 @@ namespace Game.Networking.Packets
             data.WriteInt32(MailTemplateID);
             data.WriteInt32(Attachments.Count);
 
-            data.WriteBit(SenderCharacter.HasValue);
-            data.WriteBit(AltSenderID.HasValue);
+            switch (SenderType)
+            {
+                case MailMessageType.Normal:
+                    data.WritePackedGuid(SenderCharacter);
+                    break;
+                case MailMessageType.Auction:
+                case MailMessageType.Creature:
+                case MailMessageType.Gameobject:
+                case MailMessageType.Calendar:
+                case MailMessageType.Blackmarket:
+                case MailMessageType.CommerceAuction:
+                case MailMessageType.Auction2:
+                case MailMessageType.ArtisansConsortium:
+                    data.WriteUInt32(AltSenderID);
+                    break;
+                default:
+                    break;
+            }
+
             data.WriteBits(Subject.GetByteCount(), 8);
             data.WriteBits(Body.GetByteCount(), 13);
             data.FlushBits();
 
             Attachments.ForEach(p => p.Write(data));
 
-            if (SenderCharacter.HasValue)
-                data.WritePackedGuid(SenderCharacter.Value);
-
-            if (AltSenderID.HasValue)
-                data.WriteUInt32(AltSenderID.Value);
-
             data.WriteString(Subject);
             data.WriteString(Body);
         }
 
         public ulong MailID;
-        public byte SenderType;
-        public ObjectGuid? SenderCharacter;
-        public uint? AltSenderID;
+        public MailMessageType SenderType;
+        public ObjectGuid SenderCharacter;
+        public uint AltSenderID;
         public ulong Cod;
         public int StationeryID;
         public ulong SentMoney;

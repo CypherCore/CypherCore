@@ -580,7 +580,7 @@ namespace Game.Chat
             foreach (ChrCustomizationOptionRecord option in options)
             {
                 ChrCustomizationReqRecord optionReq = CliDB.ChrCustomizationReqStorage.LookupByKey(option.ChrCustomizationReqID);
-                if (optionReq != null && !worldSession.MeetsChrCustomizationReq(optionReq, target.GetClass(), false, customizations))
+                if (optionReq != null && !worldSession.MeetsChrCustomizationReq(optionReq, target.GetRace(), target.GetClass(), false, customizations))
                     continue;
 
                 // Loop over the options until the first one fits
@@ -588,7 +588,7 @@ namespace Game.Chat
                 foreach (ChrCustomizationChoiceRecord choiceForOption in choicesForOption)
                 {
                     var choiceReq = CliDB.ChrCustomizationReqStorage.LookupByKey(choiceForOption.ChrCustomizationReqID);
-                    if (choiceReq != null && !worldSession.MeetsChrCustomizationReq(choiceReq, target.GetClass(), false, customizations))
+                    if (choiceReq != null && !worldSession.MeetsChrCustomizationReq(choiceReq, target.GetRace(), target.GetClass(), false, customizations))
                         continue;
 
                     ChrCustomizationChoiceRecord choiceEntry = choicesForOption[0];

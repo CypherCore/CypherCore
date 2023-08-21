@@ -1904,7 +1904,7 @@ namespace Framework.Constants
         MonoValue = 0x400     // Skill always has value 1
     }
 
-    public enum SpellCategoryFlags : sbyte
+    public enum SpellCategoryFlags : int
     {
         CooldownScalesWithWeaponSpeed = 0x01, // unused
         CooldownStartsOnEvent = 0x04,

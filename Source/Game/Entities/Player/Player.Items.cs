@@ -1447,7 +1447,7 @@ namespace Game.Entities
             if (proto.HasFlag(ItemFlags2.FactionAlliance) && GetTeam() != Team.Alliance)
                 return InventoryResult.CantEquipEver;
 
-            if ((proto.GetAllowableClass() & GetClassMask()) == 0 || (proto.GetAllowableRace() & (long)SharedConst.GetMaskForRace(GetRace())) == 0)
+            if ((proto.GetAllowableClass() & GetClassMask()) == 0 || !proto.GetAllowableRace().HasRace(GetRace()))
                 return InventoryResult.CantEquipEver;
 
             if (proto.GetRequiredSkill() != 0)
@@ -2967,7 +2967,7 @@ namespace Game.Entities
                 return InventoryResult.ItemNotFound;
 
             // Used by group, function GroupLoot, to know if a prototype can be used by a player
-            if ((proto.GetAllowableClass() & GetClassMask()) == 0 || (proto.GetAllowableRace() & (long)SharedConst.GetMaskForRace(GetRace())) == 0)
+            if ((proto.GetAllowableClass() & GetClassMask()) == 0 || !proto.GetAllowableRace().HasRace(GetRace()))
                 return InventoryResult.CantEquipEver;
 
             if (proto.GetRequiredSpell() != 0 && !HasSpell(proto.GetRequiredSpell()))
@@ -3002,7 +3002,7 @@ namespace Game.Entities
                 // if current back slot non-empty search oldest or free
                 if (m_items[slot] != null)
                 {
-                    ulong oldest_time = m_activePlayerData.BuybackTimestamp[0];
+                    long oldest_time = m_activePlayerData.BuybackTimestamp[0];
                     uint oldest_slot = InventorySlots.BuyBackStart;
 
                     for (byte i = InventorySlots.BuyBackStart + 1; i < InventorySlots.BuyBackEnd; ++i)
@@ -3014,7 +3014,7 @@ namespace Game.Entities
                             break;
                         }
 
-                        ulong i_time = m_activePlayerData.BuybackTimestamp[i - InventorySlots.BuyBackStart];
+                        long i_time = m_activePlayerData.BuybackTimestamp[i - InventorySlots.BuyBackStart];
                         if (oldest_time > i_time)
                         {
                             oldest_time = i_time;
@@ -3466,7 +3466,7 @@ namespace Game.Entities
             DB.Characters.CommitTransaction(trans);
         }
         public void SetBuybackPrice(uint slot, uint price) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BuybackPrice, (int)slot), price); }
-        public void SetBuybackTimestamp(uint slot, ulong timestamp) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BuybackTimestamp, (int)slot), timestamp); }
+        public void SetBuybackTimestamp(uint slot, long timestamp) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BuybackTimestamp, (int)slot), timestamp); }
 
         public Item GetItemFromBuyBackSlot(uint slot)
         {

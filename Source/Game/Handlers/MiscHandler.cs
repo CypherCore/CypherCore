@@ -465,6 +465,9 @@ namespace Game
         {
             if (_player.PlayerTalkClass.GetInteractionData().SourceGuid == closeInteraction.SourceGuid)
                 _player.PlayerTalkClass.GetInteractionData().Reset();
+
+            if (_player.GetStableMaster() == closeInteraction.SourceGuid)
+                _player.SetStableMaster(ObjectGuid.Empty);
         }
 
         [WorldPacketHandler(ClientOpcodes.ConversationLineStarted)]

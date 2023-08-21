@@ -423,6 +423,12 @@ namespace Game.Entities
             return updateField;
         }
 
+        public OptionalUpdateField<U> ModifyValue<U>(OptionalUpdateField<U> updateField) where U : new()
+        {
+            MarkChanged(updateField);
+            return updateField;
+        }
+
         public UpdateFieldString ModifyValue(UpdateFieldString updateField)
         {
             MarkChanged(updateField);
@@ -459,6 +465,12 @@ namespace Game.Entities
         }
 
         public void MarkChanged<U>(UpdateField<U> updateField) where U : new()
+        {
+            _changesMask.Set(updateField.BlockBit);
+            _changesMask.Set(updateField.Bit);
+        }
+
+        public void MarkChanged<U>(OptionalUpdateField<U> updateField) where U : new()
         {
             _changesMask.Set(updateField.BlockBit);
             _changesMask.Set(updateField.Bit);

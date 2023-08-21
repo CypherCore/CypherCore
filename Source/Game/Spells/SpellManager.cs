@@ -8,6 +8,7 @@ using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.BattlePets;
 using Game.DataStorage;
+using Game.Miscellaneous;
 using Game.Movement;
 using Game.Spells;
 using System;
@@ -1987,7 +1988,7 @@ namespace Game.Entities
                 spellArea.questEndStatus = result.Read<uint>(4);
                 spellArea.questEnd = result.Read<uint>(5);
                 spellArea.auraSpell = result.Read<int>(6);
-                spellArea.raceMask = result.Read<ulong>(7);
+                spellArea.raceMask = new RaceMask<ulong>(result.Read<ulong>(7));
                 spellArea.gender = (Gender)result.Read<uint>(8);
                 spellArea.flags = (SpellAreaFlag)result.Read<byte>(9);
 
@@ -2016,7 +2017,7 @@ namespace Game.Entities
                             continue;
                         if (spellArea.auraSpell != bound.auraSpell)
                             continue;
-                        if ((spellArea.raceMask & bound.raceMask) == 0)
+                        if ((spellArea.raceMask & bound.raceMask).IsEmpty())
                             continue;
                         if (spellArea.gender != bound.gender)
                             continue;
@@ -2107,7 +2108,7 @@ namespace Game.Entities
                     }
                 }
 
-                if (spellArea.raceMask != 0 && (spellArea.raceMask & SharedConst.RaceMaskAllPlayable) == 0)
+                if (!spellArea.raceMask.IsEmpty() && (spellArea.raceMask & RaceMask.AllPlayable).IsEmpty())
                 {
                     Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong race mask ({1}) requirement", spell, spellArea.raceMask);
                     continue;
@@ -4913,7 +4914,7 @@ namespace Game.Entities
         public uint questStart;                                     // quest start (quest must be active or rewarded for spell apply)
         public uint questEnd;                                       // quest end (quest must not be rewarded for spell apply)
         public int auraSpell;                                       // spell aura must be applied for spell apply)if possitive) and it must not be applied in other case
-        public ulong raceMask;                                      // can be applied only to races
+        public RaceMask<ulong> raceMask;                            // can be applied only to races
         public Gender gender;                                       // can be applied only to gender
         public uint questStartStatus;                               // QuestStatus that quest_start must have in order to keep the spell
         public uint questEndStatus;                                 // QuestStatus that the quest_end must have in order to keep the spell (if the quest_end's status is different than this, the spell will be dropped)
@@ -4926,8 +4927,8 @@ namespace Game.Entities
                 if (player == null || gender != player.GetNativeGender())
                     return false;
 
-            if (raceMask != 0)                                // not in expected race
-                if (player == null || !Convert.ToBoolean(raceMask & (ulong)SharedConst.GetMaskForRace(player.GetRace())))
+            if (!raceMask.IsEmpty())                                // not in expected race
+                if (player == null || !raceMask.HasRace(player.GetRace()))
                     return false;
 
             if (areaId != 0)                                  // not in expected zone

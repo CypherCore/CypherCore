@@ -868,6 +868,7 @@ namespace Game.Networking.Packets
             var customizationCount = _worldPacket.ReadUInt32();
             NewSex = _worldPacket.ReadUInt8();
             CustomizedRace = _worldPacket.ReadInt32();
+            CustomizedChrModelID = _worldPacket.ReadInt32();
 
             for (var i = 0; i < customizationCount; ++i)
             {
@@ -884,6 +885,7 @@ namespace Game.Networking.Packets
         public byte NewSex;
         public Array<ChrCustomizationChoice> Customizations = new(125);
         public int CustomizedRace;
+        public int CustomizedChrModelID;
     }
 
     public class BarberShopResult : ServerPacket

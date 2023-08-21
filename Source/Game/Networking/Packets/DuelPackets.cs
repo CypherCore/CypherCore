@@ -14,9 +14,11 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             TargetGUID = _worldPacket.ReadPackedGuid();
+            ToTheDeath = _worldPacket.HasBit();
         }
 
         public ObjectGuid TargetGUID;
+        public bool ToTheDeath;
     }
 
     public class CanDuelResult : ServerPacket
@@ -85,11 +87,14 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(ArbiterGUID);
             _worldPacket.WritePackedGuid(RequestedByGUID);
             _worldPacket.WritePackedGuid(RequestedByWowAccount);
+            _worldPacket.WriteBit(ToTheDeath);
+            _worldPacket.FlushBits();
         }
 
         public ObjectGuid ArbiterGUID;
         public ObjectGuid RequestedByGUID;
         public ObjectGuid RequestedByWowAccount;
+        public bool ToTheDeath;
     }
 
     public class DuelResponse : ClientPacket

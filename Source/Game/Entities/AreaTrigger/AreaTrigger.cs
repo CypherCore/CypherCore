@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.AI;
 using Game.Maps;
 using Game.Movement;
@@ -11,6 +10,7 @@ using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace Game.Entities
@@ -537,6 +537,9 @@ namespace Game.Entities
                     _ai.OnUnitExit(leavingUnit);
                 }
             }
+
+            SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.NumUnitsInside), _insideUnits.Count);
+            SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.NumPlayersInside), _insideUnits.Count(guid => guid.IsPlayer()));
         }
 
         public AreaTriggerTemplate GetTemplate()
@@ -814,6 +817,8 @@ namespace Game.Entities
                 SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTarget), timeToTarget);
                 m_areaTriggerData.ClearChanged(m_areaTriggerData.TimeToTarget);
             });
+
+            SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OrbitPathTarget), orbit.PathTarget.GetValueOrDefault(ObjectGuid.Empty));
 
             _orbitInfo = orbit;
 

@@ -12,6 +12,7 @@ using Game.Loots;
 using Game.Mails;
 using Game.Maps;
 using Game.Misc;
+using Game.Miscellaneous;
 using Game.Movement;
 using Game.Scripting;
 using Game.Spells;
@@ -6048,9 +6049,12 @@ namespace Game
                     if (items.Empty())
                         continue;
 
+                    var raceMask = new RaceMask<long>(characterLoadout.RaceMask);
+
                     for (var raceIndex = Race.Human; raceIndex < Race.Max; ++raceIndex)
                     {
-                        if (!characterLoadout.RaceMask.HasAnyFlag(SharedConst.GetMaskForRace(raceIndex)))
+
+                        if (!raceMask.HasRace(raceIndex))
                             continue;
 
                         var playerInfo = _playerInfo.LookupByKey(Tuple.Create((Race)raceIndex, (Class)characterLoadout.ChrClassID));
@@ -6159,9 +6163,10 @@ namespace Game
                 {
                     if (rcInfo.Availability == 1)
                     {
+                        var raceMask = new RaceMask<long>(rcInfo.RaceMask);
                         for (Race raceIndex = Race.Human; raceIndex < Race.Max; ++raceIndex)
                         {
-                            if (rcInfo.RaceMask == -1 || Convert.ToBoolean(SharedConst.GetMaskForRace(raceIndex) & rcInfo.RaceMask))
+                            if (raceMask.HasRace(raceIndex))
                             {
                                 for (Class classIndex = Class.Warrior; classIndex < Class.Max; ++classIndex)
                                 {
@@ -6194,11 +6199,11 @@ namespace Game
                     uint count = 0;
                     do
                     {
-                        ulong raceMask = result.Read<ulong>(0);
+                        RaceMask<ulong> raceMask = new(result.Read<ulong>(0));
                         uint classMask = result.Read<uint>(1);
                         uint spellId = result.Read<uint>(2);
 
-                        if (raceMask != 0 && !Convert.ToBoolean(raceMask & SharedConst.RaceMaskAllPlayable))
+                        if (!raceMask.IsEmpty() && (raceMask & RaceMask.AllPlayable).IsEmpty())
                         {
                             Log.outError(LogFilter.Sql, "Wrong race mask {0} in `playercreateinfo_spell_custom` table, ignoring.", raceMask);
                             continue;
@@ -6212,7 +6217,7 @@ namespace Game
 
                         for (Race raceIndex = Race.Human; raceIndex < Race.Max; ++raceIndex)
                         {
-                            if (raceMask == 0 || Convert.ToBoolean((ulong)SharedConst.GetMaskForRace(raceIndex) & raceMask))
+                            if (raceMask.IsEmpty() || raceMask.HasRace(raceIndex))
                             {
                                 for (Class classIndex = Class.Warrior; classIndex < Class.Max; ++classIndex)
                                 {
@@ -6252,12 +6257,12 @@ namespace Game
 
                     do
                     {
-                        ulong raceMask = result.Read<ulong>(0);
+                        RaceMask<ulong> raceMask = new(result.Read<ulong>(0));
                         uint classMask = result.Read<uint>(1);
                         uint spellId = result.Read<uint>(2);
                         sbyte playerCreateMode = result.Read<sbyte>(3);
 
-                        if (raceMask != 0 && (raceMask & SharedConst.RaceMaskAllPlayable) == 0)
+                        if (!raceMask.IsEmpty() && (raceMask & RaceMask.AllPlayable).IsEmpty())
                         {
                             Log.outError(LogFilter.Sql, $"Wrong race mask {raceMask} in `playercreateinfo_cast_spell` table, ignoring.");
                             continue;
@@ -6277,7 +6282,7 @@ namespace Game
 
                         for (Race raceIndex = Race.Human; raceIndex < Race.Max; ++raceIndex)
                         {
-                            if (raceMask == 0 || Convert.ToBoolean((ulong)SharedConst.GetMaskForRace(raceIndex) & raceMask))
+                            if (raceMask.IsEmpty() || raceMask.HasRace(raceIndex))
                             {
                                 for (Class classIndex = Class.Warrior; classIndex < Class.Max; ++classIndex)
                                 {
@@ -7387,12 +7392,12 @@ namespace Game
                     }
                 }
                 // AllowableRaces, can be -1/RACEMASK_ALL_PLAYABLE to allow any race
-                if (qinfo.AllowableRaces != -1)
+                if (qinfo.AllowableRaces.RawValue != 0xFFFFFFFFFFFFFFFF)
                 {
-                    if (qinfo.AllowableRaces > 0 && !Convert.ToBoolean(qinfo.AllowableRaces & (long)SharedConst.RaceMaskAllPlayable))
+                    if (!qinfo.AllowableRaces.IsEmpty() && (qinfo.AllowableRaces & RaceMask.AllPlayable).IsEmpty())
                     {
                         Log.outError(LogFilter.Sql, "Quest {0} does not contain any playable races in `RequiredRaces` ({1}), value set to 0 (all races).", qinfo.Id, qinfo.AllowableRaces);
-                        qinfo.AllowableRaces = -1;
+                        qinfo.AllowableRaces = new(0xFFFFFFFFFFFFFFFF);
                     }
                 }
                 // RequiredSkillId, can be 0
@@ -9287,7 +9292,7 @@ namespace Game
             do
             {
                 byte level = result.Read<byte>(0);
-                ulong raceMask = result.Read<ulong>(1);
+                RaceMask<ulong> raceMask = new(result.Read<ulong>(1));
                 uint mailTemplateId = result.Read<uint>(2);
                 uint senderEntry = result.Read<uint>(3);
 
@@ -9297,7 +9302,7 @@ namespace Game
                     continue;
                 }
 
-                if (!Convert.ToBoolean(raceMask & SharedConst.RaceMaskAllPlayable))
+                if ((raceMask & RaceMask.AllPlayable).IsEmpty())
                 {
                     Log.outError(LogFilter.Sql, "Table `mail_level_reward` have raceMask ({0}) for level {1} that not include any player races, ignoring.", raceMask, level);
                     continue;
@@ -10221,14 +10226,14 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} phase names in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
-        public MailLevelReward GetMailLevelReward(uint level, ulong raceMask)
+        public MailLevelReward GetMailLevelReward(uint level, Race race)
         {
             var mailList = _mailLevelRewardStorage.LookupByKey((byte)level);
             if (mailList.Empty())
                 return null;
 
             foreach (var mailReward in mailList)
-                if (Convert.ToBoolean(mailReward.raceMask & raceMask))
+                if (mailReward.raceMask.HasRace(race))
                     return mailReward;
 
             return null;
@@ -11531,14 +11536,14 @@ namespace Game
 
     public class MailLevelReward
     {
-        public MailLevelReward(ulong _raceMask = 0, uint _mailTemplateId = 0, uint _senderEntry = 0)
+        public MailLevelReward(RaceMask<ulong> _raceMask, uint _mailTemplateId = 0, uint _senderEntry = 0)
         {
             raceMask = _raceMask;
             mailTemplateId = _mailTemplateId;
             senderEntry = _senderEntry;
         }
 
-        public ulong raceMask;
+        public RaceMask<ulong> raceMask;
         public uint mailTemplateId;
         public uint senderEntry;
     }

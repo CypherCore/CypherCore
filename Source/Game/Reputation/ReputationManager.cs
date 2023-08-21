@@ -5,6 +5,7 @@ using Framework.Constants;
 using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Miscellaneous;
 using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
@@ -593,7 +594,7 @@ namespace Game
             var factionEntry = CliDB.FactionStorage.LookupByKey(factionTemplateEntry.Faction);
             if (factionEntry.Id != 0)
                 // Never show factions of the opposing team
-                if (!Convert.ToBoolean(factionEntry.ReputationRaceMask[1] & SharedConst.GetMaskForRace(_player.GetRace())) && factionEntry.ReputationBase[1] == SharedConst.ReputationBottom)
+                if (!(new RaceMask<long>(factionEntry.ReputationRaceMask[1]).HasRace(_player.GetRace()) && factionEntry.ReputationBase[1] == SharedConst.ReputationBottom))
                     SetVisible(factionEntry);
         }
 
@@ -798,13 +799,12 @@ namespace Game
             if (factionEntry == null)
                 return -1;
 
-            long raceMask = SharedConst.GetMaskForRace(_player.GetRace());
             short classMask = (short)_player.GetClassMask();
+
             for (int i = 0; i < 4; i++)
             {
-                if ((factionEntry.ReputationRaceMask[i].HasAnyFlag(raceMask) || (factionEntry.ReputationRaceMask[i] == 0 && factionEntry.ReputationClassMask[i] != 0))
-                    && (factionEntry.ReputationClassMask[i].HasAnyFlag(classMask) || factionEntry.ReputationClassMask[i] == 0))
-
+                var raceMask = new RaceMask<long>(factionEntry.ReputationRaceMask[i]);
+                if ((raceMask.HasRace(_player.GetRace()) || (raceMask.IsEmpty() && factionEntry.ReputationClassMask[i] != 0)) && (factionEntry.ReputationClassMask[i].HasAnyFlag(classMask) || factionEntry.ReputationClassMask[i] == 0))
                     return i;
             }
 
@@ -862,13 +862,12 @@ namespace Game
             if (factionEntry == null)
                 return 0;
 
-            long raceMask = SharedConst.GetMaskForRace(race);
             uint classMask = (1u << ((int)playerClass - 1));
 
             for (int i = 0; i < 4; i++)
             {
-                if ((factionEntry.ReputationClassMask[i] == 0 || factionEntry.ReputationClassMask[i].HasAnyFlag((short)classMask))
-                    && (factionEntry.ReputationRaceMask[i] == 0 || factionEntry.ReputationRaceMask[i].HasAnyFlag(raceMask)))
+                var raceMask = new RaceMask<long>(factionEntry.ReputationRaceMask[i]);
+                if ((factionEntry.ReputationClassMask[i] == 0 || factionEntry.ReputationClassMask[i].HasAnyFlag((short)classMask)) && (raceMask.IsEmpty() || raceMask.HasRace(race)))
                     return factionEntry.ReputationBase[i];
             }
 

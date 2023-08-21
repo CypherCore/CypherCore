@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.DataStorage;
+using Game.Miscellaneous;
 using Game.Networking.Packets;
 using Game.Spells;
 using System;
@@ -1627,7 +1628,6 @@ namespace Game.Entities
 
         public void LearnSkillRewardedSpells(uint skillId, uint skillValue, Race race)
         {
-            long raceMask = SharedConst.GetMaskForRace(race);
             uint classMask = GetClassMask();
 
             List<SkillLineAbilityRecord> skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill(skillId);
@@ -1659,7 +1659,8 @@ namespace Game.Entities
                     continue;
 
                 // Check race if set
-                if (ability.RaceMask != 0 && !Convert.ToBoolean(ability.RaceMask & raceMask))
+                var raceMask = new RaceMask<long>(ability.RaceMask);
+                if (!raceMask.IsEmpty() && !raceMask.HasRace(race))
                     continue;
 
                 // Check class if set

@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.Entities;
+using Game.Miscellaneous;
 using System;
 using System.Collections.Generic;
 
@@ -1705,12 +1706,20 @@ namespace Game.Networking.Packets
 
     public class GuildRewardItem
     {
+        public uint ItemID;
+        public uint Unk4;
+        public List<uint> AchievementsRequired = new();
+        public RaceMask<ulong> RaceMask;
+        public int MinGuildLevel;
+        public int MinGuildRep;
+        public ulong Cost;
+
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(ItemID);
             data.WriteUInt32(Unk4);
             data.WriteInt32(AchievementsRequired.Count);
-            data.WriteUInt64(RaceMask);
+            data.WriteUInt64(RaceMask.RawValue);
             data.WriteInt32(MinGuildLevel);
             data.WriteInt32(MinGuildRep);
             data.WriteUInt64(Cost);
@@ -1718,14 +1727,6 @@ namespace Game.Networking.Packets
             foreach (var achievementId in AchievementsRequired)
                 data.WriteUInt32(achievementId);
         }
-
-        public uint ItemID;
-        public uint Unk4;
-        public List<uint> AchievementsRequired = new();
-        public ulong RaceMask;
-        public int MinGuildLevel;
-        public int MinGuildRep;
-        public ulong Cost;
     }
 
     public class GuildBankItemInfo

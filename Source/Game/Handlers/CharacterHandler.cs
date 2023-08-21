@@ -11,6 +11,7 @@ using Game.Entities;
 using Game.Groups;
 using Game.Guilds;
 using Game.Maps;
+using Game.Miscellaneous;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
@@ -85,7 +86,7 @@ namespace Game
 
                             charInfo.Customizations.Clear();
 
-                            if (charInfo.Flags2 != CharacterCustomizeFlags.Customize)
+                            if (!charInfo.Flags2.HasAnyFlag(CharacterCustomizeFlags.Customize | CharacterCustomizeFlags.Faction | CharacterCustomizeFlags.Race))
                             {
                                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
                                 stmt.AddValue(0, (ushort)AtLoginFlags.Customize);
@@ -165,12 +166,16 @@ namespace Game
             SendPacket(charEnum);
         }
 
-        public bool MeetsChrCustomizationReq(ChrCustomizationReqRecord req, Class playerClass, bool checkRequiredDependentChoices, List<ChrCustomizationChoice> selectedChoices)
+        public bool MeetsChrCustomizationReq(ChrCustomizationReqRecord req, Race race, Class playerClass, bool checkRequiredDependentChoices, List<ChrCustomizationChoice> selectedChoices)
         {
             if (!req.GetFlags().HasFlag(ChrCustomizationReqFlag.HasRequirements))
                 return true;
 
             if (req.ClassMask != 0 && (req.ClassMask & (1 << ((int)playerClass - 1))) == 0)
+                return false;
+
+            var raceMask = new RaceMask<long>(req.RaceMask);
+            if (race != Race.None && !raceMask.IsEmpty() && raceMask.RawValue != -1 && !raceMask.HasRace(race))
                 return false;
 
             if (req.AchievementID != 0 /*&& !HasAchieved(req->AchievementID)*/)
@@ -240,7 +245,7 @@ namespace Game
 
                 ChrCustomizationReqRecord req = CliDB.ChrCustomizationReqStorage.LookupByKey(customizationOptionData.ChrCustomizationReqID);
                 if (req != null)
-                    if (!MeetsChrCustomizationReq(req, playerClass, false, customizations))
+                    if (!MeetsChrCustomizationReq(req, race, playerClass, false, customizations))
                         return false;
 
                 var choicesForOption = Global.DB2Mgr.GetCustomiztionChoices(playerChoice.ChrCustomizationOptionID);
@@ -255,7 +260,7 @@ namespace Game
 
                 ChrCustomizationReqRecord reqEntry = CliDB.ChrCustomizationReqStorage.LookupByKey(customizationChoiceData.ChrCustomizationReqID);
                 if (reqEntry != null)
-                    if (!MeetsChrCustomizationReq(reqEntry, playerClass, true, customizations))
+                    if (!MeetsChrCustomizationReq(reqEntry, race, playerClass, true, customizations))
                         return false;
             }
 
@@ -374,8 +379,8 @@ namespace Game
                     return;
                 }
 
-                ulong raceMaskDisabled = WorldConfig.GetUInt64Value(WorldCfg.CharacterCreatingDisabledRacemask);
-                if (Convert.ToBoolean((ulong)SharedConst.GetMaskForRace(charCreate.CreateInfo.RaceId) & raceMaskDisabled))
+                RaceMask<ulong> raceMaskDisabled = new(WorldConfig.GetUInt64Value(WorldCfg.CharacterCreatingDisabledRacemask));
+                if (raceMaskDisabled.HasRace(charCreate.CreateInfo.RaceId))
                 {
                     SendCharCreate(ResponseCodes.CharCreateDisabled);
                     return;
@@ -838,10 +843,6 @@ namespace Game
                 pCurrChar.SetGuildRank(0);
                 pCurrChar.SetGuildLevel(0);
             }
-
-            // Send stable contents to display icons on Call Pet spells
-            if (pCurrChar.HasSpell(SharedConst.CallPetSpellId))
-                SendStablePet(ObjectGuid.Empty);
 
             pCurrChar.GetSession().GetBattlePetMgr().SendJournalLockStatus();
 
@@ -1382,6 +1383,23 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AlterAppearance)]
         void HandleAlterAppearance(AlterApperance packet)
         {
+            if (packet.CustomizedChrModelID != 0)
+            {
+                var conditionalChrModel = CliDB.ConditionalChrModelStorage.LookupByKey(packet.CustomizedChrModelID);
+                if (conditionalChrModel == null)
+                    return;
+
+                var req = CliDB.ChrCustomizationReqStorage.LookupByKey(conditionalChrModel.ChrCustomizationReqID);
+                if (req != null)
+                    if (!MeetsChrCustomizationReq(req, (Race)packet.CustomizedRace, _player.GetClass(), false, packet.Customizations))
+                        return;
+
+                var condition = CliDB.PlayerConditionStorage.LookupByKey(conditionalChrModel.PlayerConditionID);
+                if (condition != null)
+                    if (!ConditionManager.IsPlayerMeetingCondition(_player, condition))
+                        return;
+            }
+
             if (!ValidateAppearance(_player.GetRace(), _player.GetClass(), (Gender)packet.NewSex, packet.Customizations))
                 return;
 
@@ -1766,8 +1784,8 @@ namespace Game
 
             if (!HasPermission(RBACPermissions.SkipCheckCharacterCreationRacemask))
             {
-                ulong raceMaskDisabled = WorldConfig.GetUInt64Value(WorldCfg.CharacterCreatingDisabledRacemask);
-                if (Convert.ToBoolean((ulong)SharedConst.GetMaskForRace(factionChangeInfo.RaceID) & raceMaskDisabled))
+                RaceMask<ulong> raceMaskDisabled = new(WorldConfig.GetUInt64Value(WorldCfg.CharacterCreatingDisabledRacemask));
+                if (raceMaskDisabled.HasRace(factionChangeInfo.RaceID))
                 {
                     SendCharFactionChange(ResponseCodes.CharCreateError, factionChangeInfo);
                     return;
@@ -2078,8 +2096,8 @@ namespace Game
                         var questTemplates = Global.ObjectMgr.GetQuestTemplates();
                         foreach (Quest quest in questTemplates.Values)
                         {
-                            long newRaceMask = (long)(newTeamId == TeamId.Alliance ? SharedConst.RaceMaskAlliance : SharedConst.RaceMaskHorde);
-                            if (quest.AllowableRaces != -1 && !Convert.ToBoolean(quest.AllowableRaces & newRaceMask))
+                            RaceMask<ulong> newRaceMask = newTeamId == TeamId.Alliance ? RaceMask.Alliance : RaceMask.Horde;
+                            if (quest.AllowableRaces.RawValue != unchecked((ulong)-1) && (quest.AllowableRaces & newRaceMask).IsEmpty())
                             {
                                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_QUESTSTATUS_REWARDED_ACTIVE_BY_QUEST);
                                 stmt.AddValue(0, lowGuid);

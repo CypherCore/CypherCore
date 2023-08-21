@@ -9,6 +9,7 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Garrisons;
 using Game.Maps;
+using Game.Miscellaneous;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Scenarios;
@@ -3609,6 +3610,14 @@ namespace Game.Achievements
                         return false;
                     break;
                 }
+                case ModifierTreeType.PlayerSummonedBattlePetSpecies: // 352
+                    if (referencePlayer.m_playerData.CurrentBattlePetSpeciesID != reqValue)
+                        return false;
+                    break;
+                case ModifierTreeType.PlayerSummonedBattlePetIsMaxLevel: // 353
+                    if (referencePlayer.m_unitData.WildBattlePetLevel != SharedConst.MaxBattlePetLevel)
+                        return false;
+                    break;
                 case ModifierTreeType.PlayerHasAtLeastProfPathRanks: // 355
                 {
                     uint ranks = 0;
@@ -3629,6 +3638,50 @@ namespace Game.Achievements
                         return false;
                     break;
                 }
+                case ModifierTreeType.PlayerHasItemTransmogrifiedToItemModifiedAppearance: // 358
+                {
+                    var itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(reqValue);
+
+                    bool bagScanReachedEnd = referencePlayer.ForEachItem(ItemSearchLocation.Inventory, item =>
+                    {
+                        if (item.GetVisibleAppearanceModId(referencePlayer) == itemModifiedAppearance.Id)
+                            return false;
+
+                        if (item.GetEntry() == itemModifiedAppearance.ItemID)
+                            return false;
+
+                        return true;
+                    });
+                    if (bagScanReachedEnd)
+                        return false;
+                    break;
+                }
+                case ModifierTreeType.PlayerHasCompletedDungeonEncounterInDifficulty: // 366
+                    if (!referencePlayer.IsLockedToDungeonEncounter(reqValue, (Difficulty)secondaryAsset))
+                        return false;
+                    break;
+                case ModifierTreeType.PlayerIsBetweenQuests: // 369
+                {
+                    QuestStatus status = referencePlayer.GetQuestStatus(reqValue);
+                    if (status == QuestStatus.None || status == QuestStatus.Failed)
+                        return false;
+                    if (referencePlayer.IsQuestRewarded((uint)secondaryAsset))
+                        return false;
+                    break;
+                }
+                case ModifierTreeType.PlayerScenarioStepID: // 371
+                {
+                    Scenario scenario = referencePlayer.GetScenario();
+                    if (scenario == null)
+                        return false;
+                    if (scenario.GetStep().Id != reqValue)
+                        return false;
+                    break;
+                }
+                case ModifierTreeType.PlayerZPositionBelow: // 374
+                    if (referencePlayer.GetPositionZ() >= reqValue)
+                        return false;
+                    break;
                 default:
                     return false;
             }
@@ -4274,7 +4327,7 @@ namespace Game.Achievements
                             criteria.Id, criteria.Entry.Type, DataType, ClassRace.ClassId);
                         return false;
                     }
-                    if (ClassRace.RaceId != 0 && (SharedConst.GetMaskForRace((Race)ClassRace.RaceId) & (long)SharedConst.RaceMaskAllPlayable) == 0)
+                    if (!RaceMask.AllPlayable.HasRace((Race)ClassRace.RaceId))
                     {
                         Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE ({2}) has non-existing race in value2 ({3}), ignored.",
                             criteria.Id, criteria.Entry.Type, DataType, ClassRace.RaceId);
@@ -4419,7 +4472,7 @@ namespace Game.Achievements
                             criteria.Id, criteria.Entry.Type, DataType, ClassRace.ClassId);
                         return false;
                     }
-                    if (ClassRace.RaceId != 0 && ((ulong)SharedConst.GetMaskForRace((Race)ClassRace.RaceId) & SharedConst.RaceMaskAllPlayable) == 0)
+                    if (ClassRace.RaceId != 0 && !RaceMask.AllPlayable.HasRace((Race)ClassRace.RaceId))
                     {
                         Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE ({2}) has non-existing race in value2 ({3}), ignored.",
                             criteria.Id, criteria.Entry.Type, DataType, ClassRace.RaceId);

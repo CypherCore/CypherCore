@@ -16,7 +16,8 @@ namespace Game.DataStorage
         public UiMapType Type;
         public int BountySetID;
         public uint BountyDisplayLocation;
-        public int VisibilityPlayerConditionID;
+        public int VisibilityPlayerConditionID2; // if not met then map is skipped when evaluating UiMapAssignment
+        public int VisibilityPlayerConditionID;  // if not met then client checks other maps with the same AlternateUiMapGroup, not re-evaluating UiMapAssignment for them
         public sbyte HelpTextPosition;
         public int BkgAtlasID;
         public int AlternateUiMapGroup;

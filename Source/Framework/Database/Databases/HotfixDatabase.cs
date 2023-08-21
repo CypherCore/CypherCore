@@ -281,7 +281,7 @@ namespace Framework.Database
                 " WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
 
             // ChrCustomizationReq.db2
-            PrepareStatement(HotfixStatements.SEL_CHR_CUSTOMIZATION_REQ, "SELECT ID, ReqSource, Flags, ClassMask, AchievementID, QuestID, OverrideArchive, " +
+            PrepareStatement(HotfixStatements.SEL_CHR_CUSTOMIZATION_REQ, "SELECT ID, RaceMask, ReqSource, Flags, ClassMask, AchievementID, QuestID, OverrideArchive, " +
                 "ItemModifiedAppearanceID FROM chr_customization_req WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_CHR_CUSTOMIZATION_REQ_LOCALE, "SELECT ID, ReqSource_lang FROM chr_customization_req_locale WHERE (`VerifiedBuild` > 0) = ?" +
                 " AND locale = ?");
@@ -330,6 +330,10 @@ namespace Framework.Database
             // CinematicSequences.db2
             PrepareStatement(HotfixStatements.SEL_CINEMATIC_SEQUENCES, "SELECT ID, SoundID, Camera1, Camera2, Camera3, Camera4, Camera5, Camera6, Camera7, Camera8" +
                 " FROM cinematic_sequences WHERE (`VerifiedBuild` > 0) = ?");
+
+            // ConditionalChrModel.db2
+            PrepareStatement(HotfixStatements.SEL_CONDITIONAL_CHR_MODEL, "SELECT ID, ChrModelID, ChrCustomizationReqID, PlayerConditionID, Flags, " +
+                "ChrCustomizationCategoryID FROM conditional_chr_model WHERE (`VerifiedBuild` > 0) = ?");
 
             // ConditionalContentTuning.db2
             PrepareStatement(HotfixStatements.SEL_CONDITIONAL_CONTENT_TUNING, "SELECT ID, OrderIndex, RedirectContentTuningID, RedirectFlag, ParentContentTuningID" +
@@ -496,7 +500,8 @@ namespace Framework.Database
 
             // GameobjectDisplayInfo.db2
             PrepareStatement(HotfixStatements.SEL_GAMEOBJECT_DISPLAY_INFO, "SELECT ID, GeoBoxMinX, GeoBoxMinY, GeoBoxMinZ, GeoBoxMaxX, GeoBoxMaxY, GeoBoxMaxZ, " +
-                "FileDataID, ObjectEffectPackageID, OverrideLootEffectScale, OverrideNameScale FROM gameobject_display_info WHERE (`VerifiedBuild` > 0) = ?");
+                "FileDataID, ObjectEffectPackageID, OverrideLootEffectScale, OverrideNameScale, AlternateDisplayType, ClientCreatureDisplayInfoID, " +
+                "ClientItemID FROM gameobject_display_info WHERE (`VerifiedBuild` > 0) = ?");
 
             // Gameobjects.db2
             PrepareStatement(HotfixStatements.SEL_GAMEOBJECTS, "SELECT Name, PosX, PosY, PosZ, Rot1, Rot2, Rot3, Rot4, ID, OwnerID, DisplayID, Scale, TypeID, " +
@@ -1496,7 +1501,8 @@ namespace Framework.Database
 
             // UiMap.db2
             PrepareStatement(HotfixStatements.SEL_UI_MAP, "SELECT Name, ID, ParentUiMapID, Flags, `System`, Type, BountySetID, BountyDisplayLocation, " +
-                "VisibilityPlayerConditionID, HelpTextPosition, BkgAtlasID, AlternateUiMapGroup, ContentTuningID FROM ui_map WHERE (`VerifiedBuild` > 0) = ?");
+                "VisibilityPlayerConditionID2, VisibilityPlayerConditionID, HelpTextPosition, BkgAtlasID, AlternateUiMapGroup, ContentTuningID FROM ui_map" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_UI_MAP_LOCALE, "SELECT ID, Name_lang FROM ui_map_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
 
             // UiMapAssignment.db2
@@ -1724,6 +1730,8 @@ namespace Framework.Database
         SEL_CINEMATIC_CAMERA,
 
         SEL_CINEMATIC_SEQUENCES,
+
+        SEL_CONDITIONAL_CHR_MODEL,
 
         SEL_CONDITIONAL_CONTENT_TUNING,
 

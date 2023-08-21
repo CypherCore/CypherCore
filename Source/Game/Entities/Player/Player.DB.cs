@@ -756,7 +756,7 @@ namespace Game.Entities
 
                             SetQuestSlot(slot, questId);
                             SetQuestSlotEndTime(slot, endTime);
-                            SetQuestSlotAcceptTime(slot, acceptTime);
+                            questStatusData.AcceptTime = acceptTime;
 
                             if (questStatusData.Status == QuestStatus.Complete)
                                 SetQuestSlotState(slot, QuestSlotStateMask.Complete);
@@ -1624,41 +1624,48 @@ namespace Game.Entities
 
             //         0      1        2      3    4           5     6     7        8          9       10      11        12              13       14              15
             // SELECT id, entry, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, abdata, savetime, CreatedBySpell, PetType, specialization FROM character_pet WHERE owner = ?
-            if (!result.IsEmpty())
-            {
-                do
-                {
-                    PetStable.PetInfo petInfo = new();
-                    petInfo.PetNumber = result.Read<uint>(0);
-                    petInfo.CreatureId = result.Read<uint>(1);
-                    petInfo.DisplayId = result.Read<uint>(2);
-                    petInfo.Level = result.Read<byte>(3);
-                    petInfo.Experience = result.Read<uint>(4);
-                    petInfo.ReactState = (ReactStates)result.Read<byte>(5);
-                    PetSaveMode slot = (PetSaveMode)result.Read<short>(6);
-                    petInfo.Name = result.Read<string>(7);
-                    petInfo.WasRenamed = result.Read<bool>(8);
-                    petInfo.Health = result.Read<uint>(9);
-                    petInfo.Mana = result.Read<uint>(10);
-                    petInfo.ActionBar = result.Read<string>(11);
-                    petInfo.LastSaveTime = result.Read<uint>(12);
-                    petInfo.CreatedBySpellId = result.Read<uint>(13);
-                    petInfo.Type = (PetType)result.Read<byte>(14);
-                    petInfo.SpecializationId = result.Read<ushort>(15);
-                    if (slot >= PetSaveMode.FirstActiveSlot && slot < PetSaveMode.LastActiveSlot)
-                        m_petStable.ActivePets[(int)slot] = petInfo;
-                    else if (slot >= PetSaveMode.FirstStableSlot && slot < PetSaveMode.LastStableSlot)
-                        m_petStable.StabledPets[slot - PetSaveMode.FirstStableSlot] = petInfo;
-                    else if (slot == PetSaveMode.NotInSlot)
-                        m_petStable.UnslottedPets.Add(petInfo);
 
-                } while (result.NextRow());
-            }
+            do
+            {
+                PetStable.PetInfo petInfo = new();
+                petInfo.PetNumber = result.Read<uint>(0);
+                petInfo.CreatureId = result.Read<uint>(1);
+                petInfo.DisplayId = result.Read<uint>(2);
+                petInfo.Level = result.Read<byte>(3);
+                petInfo.Experience = result.Read<uint>(4);
+                petInfo.ReactState = (ReactStates)result.Read<byte>(5);
+                PetSaveMode slot = (PetSaveMode)result.Read<short>(6);
+                petInfo.Name = result.Read<string>(7);
+                petInfo.WasRenamed = result.Read<bool>(8);
+                petInfo.Health = result.Read<uint>(9);
+                petInfo.Mana = result.Read<uint>(10);
+                petInfo.ActionBar = result.Read<string>(11);
+                petInfo.LastSaveTime = result.Read<uint>(12);
+                petInfo.CreatedBySpellId = result.Read<uint>(13);
+                petInfo.Type = (PetType)result.Read<byte>(14);
+                petInfo.SpecializationId = result.Read<ushort>(15);
+                if (slot >= PetSaveMode.FirstActiveSlot && slot < PetSaveMode.LastActiveSlot)
+                {
+                    m_petStable.ActivePets[(int)slot] = petInfo;
+
+                    if (m_petStable.ActivePets[(int)slot].Type == PetType.Hunter)
+                        AddPetToUpdateFields(m_petStable.ActivePets[(int)slot], slot, PetStableFlags.Active);
+                }
+                else if (slot >= PetSaveMode.FirstStableSlot && slot < PetSaveMode.LastStableSlot)
+                {
+                    m_petStable.StabledPets[slot - PetSaveMode.FirstStableSlot] = petInfo;
+
+                    if (m_petStable.StabledPets[slot - PetSaveMode.FirstStableSlot].Type == PetType.Hunter)
+                        AddPetToUpdateFields(m_petStable.StabledPets[slot - PetSaveMode.FirstStableSlot], slot, PetStableFlags.Inactive);
+                }
+                else if (slot == PetSaveMode.NotInSlot)
+                    m_petStable.UnslottedPets.Add(petInfo);
+
+            } while (result.NextRow());
 
             if (Pet.GetLoadPetInfo(m_petStable, 0, summonedPetNumber, null).Item1 != null)
                 m_temporaryUnsummonedPetNumber = summonedPetNumber;
         }
-
 
         void _SaveInventory(SQLTransaction trans)
         {
@@ -2121,8 +2128,8 @@ namespace Game.Entities
                         stmt.AddValue(1, save.Key);
                         stmt.AddValue(2, (byte)data.Status);
                         stmt.AddValue(3, data.Explored);
-                        stmt.AddValue(4, (long)GetQuestSlotAcceptTime(data.Slot));
-                        stmt.AddValue(5, (long)GetQuestSlotEndTime(data.Slot));
+                        stmt.AddValue(4, data.AcceptTime);
+                        stmt.AddValue(5, GetQuestSlotEndTime(data.Slot));
                         trans.Append(stmt);
 
                         // Save objectives

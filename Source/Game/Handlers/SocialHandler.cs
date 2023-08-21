@@ -80,7 +80,7 @@ namespace Game
                     continue;
 
                 // check if race matches racemask
-                if (!Convert.ToBoolean(request.RaceFilter & (1 << target.Race)))
+                if (!request.RaceFilter.HasRace((Race)target.Race))
                     continue;
 
                 if (!whoRequest.Areas.Empty())

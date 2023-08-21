@@ -517,7 +517,8 @@ namespace Game.Networking.Packets
     class AuctionHelloResponse : ServerPacket
     {
         public ObjectGuid Guid;
-        public uint DeliveryDelay;
+        public uint PurchasedItemDeliveryDelay;
+        public uint CancelledItemDeliveryDelay;
         public bool OpenForBusiness = true;
 
         public AuctionHelloResponse() : base(ServerOpcodes.AuctionHelloResponse) { }
@@ -525,7 +526,8 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Guid);
-            _worldPacket.WriteUInt32(DeliveryDelay);
+            _worldPacket.WriteUInt32(PurchasedItemDeliveryDelay);
+            _worldPacket.WriteUInt32(CancelledItemDeliveryDelay);
             _worldPacket.WriteBit(OpenForBusiness);
             _worldPacket.FlushBits();
         }

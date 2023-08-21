@@ -97,7 +97,8 @@ namespace Framework.Constants
     public enum ChatWhisperTargetStatus
     {
         CanWhisper = 0,
-        Offline = 1,
-        WrongFaction = 2
+        CanWhisperGuild = 1,
+        Offline = 2,
+        WrongFaction = 3
     }
 }

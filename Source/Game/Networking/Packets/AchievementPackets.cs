@@ -58,6 +58,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(CriteriaID);
             _worldPacket.WriteUInt64(Quantity);
             _worldPacket.WritePackedGuid(PlayerGUID);
+            _worldPacket.WriteUInt32(Unused_10_1_5);
             _worldPacket.WriteUInt32(Flags);
             _worldPacket.WritePackedTime(CurrentTime);
             _worldPacket.WriteInt64(ElapsedTime);
@@ -72,6 +73,7 @@ namespace Game.Networking.Packets
         public uint CriteriaID;
         public ulong Quantity;
         public ObjectGuid PlayerGUID;
+        public uint Unused_10_1_5;
         public uint Flags;
         public long CurrentTime;
         public long ElapsedTime;
@@ -178,6 +180,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt32(0); // this is a hack. this is a packed time written as int64 (progress.DateUpdated)
                 _worldPacket.WriteUInt64(progress.Quantity);
                 _worldPacket.WritePackedGuid(progress.PlayerGUID);
+                _worldPacket.WriteInt32(progress.Unused_10_1_5);
                 _worldPacket.WriteInt32(progress.Flags);
             }
         }
@@ -318,10 +321,11 @@ namespace Game.Networking.Packets
             data.WriteUInt32(Id);
             data.WriteUInt64(Quantity);
             data.WritePackedGuid(Player);
+            data.WriteUInt32(Unused_10_1_5);
+            data.WriteUInt32(Flags);
             data.WritePackedTime(Date);
             data.WriteInt64(TimeFromStart);
             data.WriteInt64(TimeFromCreate);
-            data.WriteBits(Flags, 4);
             data.WriteBit(RafAcceptanceID.HasValue);
             data.FlushBits();
 
@@ -332,6 +336,7 @@ namespace Game.Networking.Packets
         public uint Id;
         public ulong Quantity;
         public ObjectGuid Player;
+        public uint Unused_10_1_5;
         public uint Flags;
         public long Date;
         public long TimeFromStart;
@@ -347,6 +352,7 @@ namespace Game.Networking.Packets
         public long DateUpdated;
         public ulong Quantity;
         public ObjectGuid PlayerGUID;
+        public int Unused_10_1_5;
         public int Flags;
     }
 

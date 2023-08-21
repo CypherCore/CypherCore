@@ -124,32 +124,6 @@ namespace Game.Networking.Packets
         public List<PetSpellHistory> SpellHistory = new();
     }
 
-    class PetStableList : ServerPacket
-    {
-        public PetStableList() : base(ServerOpcodes.PetStableList, ConnectionType.Instance) { }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(StableMaster);
-
-            _worldPacket.WriteInt32(Pets.Count);
-            foreach (PetStableInfo pet in Pets)
-            {
-                _worldPacket.WriteUInt32(pet.PetSlot);
-                _worldPacket.WriteUInt32(pet.PetNumber);
-                _worldPacket.WriteUInt32(pet.CreatureID);
-                _worldPacket.WriteUInt32(pet.DisplayID);
-                _worldPacket.WriteUInt32(pet.ExperienceLevel);
-                _worldPacket.WriteUInt8((byte)pet.PetFlags);
-                _worldPacket.WriteBits(pet.PetName.GetByteCount(), 8);
-                _worldPacket.WriteString(pet.PetName);
-            }
-        }
-
-        public ObjectGuid StableMaster;
-        public List<PetStableInfo> Pets = new();
-    }
-
     class PetStableResult : ServerPacket
     {
         public PetStableResult() : base(ServerOpcodes.PetStableResult, ConnectionType.Instance) { }
@@ -380,17 +354,6 @@ namespace Game.Networking.Packets
         public uint RecoveryTime;
         public float ChargeModRate = 1.0f;
         public sbyte ConsumedCharges;
-    }
-
-    struct PetStableInfo
-    {
-        public uint PetSlot;
-        public uint PetNumber;
-        public uint CreatureID;
-        public uint DisplayID;
-        public uint ExperienceLevel;
-        public PetStableinfo PetFlags;
-        public string PetName;
     }
 
     struct PetRenameData
