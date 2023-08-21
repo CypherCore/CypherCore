@@ -76,6 +76,50 @@ namespace Scripts.Spells.Warlock
         }
     }
 
+    [Script] // 111400 - Burning Rush
+    class spell_warl_burning_rush : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellEffect((spellInfo.Id, 1));
+        }
+
+        SpellCastResult CheckApplyAura()
+        {
+            Unit caster = GetCaster();
+            if (caster.GetHealthPct() <= GetEffectInfo(1).CalcValue(caster))
+            {
+                SetCustomCastResultMessage(SpellCustomErrors.YouDontHaveEnoughHealth);
+                return SpellCastResult.CustomError;
+            }
+
+            return SpellCastResult.SpellCastOk;
+        }
+
+        public override void Register()
+        {
+            OnCheckCast.Add(new CheckCastHandler(CheckApplyAura));
+        }
+    }
+
+    [Script] // 111400 - Burning Rush
+    class spell_warl_burning_rush_aura : AuraScript
+    {
+        void PeriodicTick(AuraEffect aurEff)
+        {
+            if (GetTarget().GetHealthPct() <= aurEff.GetAmount())
+            {
+                PreventDefaultAction();
+                Remove();
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicDamagePercent));
+        }
+    }
+    
     [Script] // 116858 - Chaos Bolt
     class spell_warl_chaos_bolt : SpellScript
     {

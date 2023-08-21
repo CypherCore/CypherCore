@@ -4382,6 +4382,12 @@ namespace Game.Entities
                 spellInfo.AttributesEx &= ~SpellAttr1.IsChannelled;
             });
 
+            // Burning Rush
+            ApplySpellFix(new[] {111400 }, spellInfo =>
+            {
+                spellInfo.AttributesEx4 |= SpellAttr4.AuraIsBuff;
+            });
+
             foreach (var spellInfo in mSpellInfoMap.Values)
             {
                 // Fix range for trajectory triggered spell
