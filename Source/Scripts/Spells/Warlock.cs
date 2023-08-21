@@ -151,6 +151,33 @@ namespace Scripts.Spells.Warlock
         }
     }
 
+    [Script] // 108416 - Dark Pact
+    class spell_warl_dark_pact : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellEffect((spellInfo.Id, 1), (spellInfo.Id, 2));
+        }
+
+        void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        {
+            canBeRecalculated = false;
+            Unit caster = GetCaster();
+            if (caster != null)
+            {
+                float extraAmount = caster.SpellBaseDamageBonusDone(GetSpellInfo().GetSchoolMask()) * 2.5f;
+                ulong absorb = caster.CountPctFromCurHealth(GetEffectInfo(1).CalcValue(caster));
+                caster.SetHealth(caster.GetHealth() - absorb);
+                amount = (int)(MathFunctions.CalculatePct(absorb, GetEffectInfo(2).CalcValue(caster)) + extraAmount);
+            }
+        }
+
+        public override void Register()
+        {
+            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
+        }
+    }
+    
     [Script] // 48018 - Demonic Circle: Summon
     class spell_warl_demonic_circle_summon : AuraScript
     {
