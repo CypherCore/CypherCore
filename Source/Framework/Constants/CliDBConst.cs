@@ -1555,6 +1555,14 @@ namespace Framework.Constants
         StateEmotetalk = 1006,
         StateWainteraction = 1007,
         OneshotTakeOffStart = 1009,
+        OneshotBattleroarNoSound = 1010,
+        StateWaweaponsharpen = 1011,
+        OneshotRollstart = 1012,
+        OneshotRollend = 1013,
+        OneshotWareact02 = 1014,
+        OneshotWathreaten = 1015,
+        Artoffloop = 1016,
+        StateReadyspellomniNosheath = 1017,
     }
 
     public enum GlyphSlotType
