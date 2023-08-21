@@ -66,6 +66,8 @@ namespace Scripts.Spells.Druid
         public const uint RejuvenationT10Proc = 70691;
         public const uint RestorationT102PBonus = 70658;
         public const uint SavageRoar = 62071;
+        public const uint ShootingStars = 202342;
+        public const uint ShootingStarsDamage = 202497;
         public const uint SkullBashCharge = 221514;
         public const uint SkullBashInterrupt = 93985;
         public const uint SunfireDamage = 164815;
@@ -878,6 +880,33 @@ namespace Scripts.Spells.Druid
         }
     }
 
+    // 164815 - Sunfire
+    [Script] // 164812 - Moonfire
+    class spell_dru_shooting_stars : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ShootingStars, SpellIds.ShootingStarsDamage);
+        }
+
+        void OnTick(AuraEffect aurEff)
+        {
+            Unit caster = GetCaster();
+            if (caster != null)
+            {
+                AuraEffect shootingStars = caster.GetAuraEffect(SpellIds.ShootingStars, 0);
+                if (shootingStars != null)
+                    if (RandomHelper.randChance(shootingStars.GetAmount()))
+                        caster.CastSpell(GetTarget(), SpellIds.ShootingStarsDamage, true);
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnTick, 1, AuraType.PeriodicDamage));
+        }
+    }
+    
     [Script] // 106839 - Skull Bash
     class spell_dru_skull_bash : SpellScript
     {
