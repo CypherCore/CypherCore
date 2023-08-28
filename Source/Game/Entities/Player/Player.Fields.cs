@@ -22,7 +22,7 @@ namespace Game.Entities
 {
     public partial class Player
     {
-        public WorldSession GetSession() { return Session; }
+        public WorldSession GetSession() { return _session; }
         public PlayerSocial GetSocial() { return m_social; }
 
         //Gossip
@@ -179,7 +179,7 @@ namespace Game.Entities
         WorldLocation _corpseLocation;
 
         //Core
-        WorldSession Session;
+        WorldSession _session;
 
         public PlayerData m_playerData;
         public ActivePlayerData m_activePlayerData;

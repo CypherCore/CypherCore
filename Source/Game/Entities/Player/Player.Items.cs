@@ -6204,7 +6204,7 @@ namespace Game.Entities
         public void SendLoot(Loot loot, bool aeLooting = false)
         {
             if (!GetLootGUID().IsEmpty() && !aeLooting)
-                Session.DoLootReleaseAll();
+                _session.DoLootReleaseAll();
 
             Log.outDebug(LogFilter.Loot, $"Player::SendLoot: Player: '{GetName()}' ({GetGUID()}), Loot: {loot.GetOwnerGUID()}");
 

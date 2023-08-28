@@ -60,12 +60,9 @@ namespace Game.Entities
             for (byte i = 0; i < (int)WeaponAttackType.Max; ++i)
                 m_weaponDamage[i] = new float[] { 1.0f, 2.0f };
 
-            if (IsTypeId(TypeId.Player))
-            {
-                ModMeleeHitChance = 7.5f;
-                ModRangedHitChance = 7.5f;
-                ModSpellHitChance = 15.0f;
-            }
+            ModMeleeHitChance = 0.0f;
+            ModRangedHitChance = 0.0f;
+            ModSpellHitChance = 0.0f;
             BaseSpellCritChance = 5;
 
             for (byte i = 0; i < (int)UnitMoveType.Max; ++i)

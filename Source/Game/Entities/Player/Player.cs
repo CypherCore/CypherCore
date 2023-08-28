@@ -41,7 +41,11 @@ namespace Game.Entities
             m_playerData = new PlayerData();
             m_activePlayerData = new ActivePlayerData();
 
-            Session = session;
+            _session = session;
+
+            ModMeleeHitChance = 7.5f;
+            ModRangedHitChance = 7.5f;
+            ModSpellHitChance = 15.0f;
 
             // players always accept
             if (!GetSession().HasPermission(RBACPermissions.CanFilterWhispers))
@@ -809,7 +813,7 @@ namespace Game.Entities
         //Network
         public void SendPacket(ServerPacket data)
         {
-            Session.SendPacket(data);
+            _session.SendPacket(data);
         }
 
         public DeclinedName GetDeclinedNames() { return _declinedname; }
@@ -6383,7 +6387,7 @@ namespace Game.Entities
         }
         public void SendSysMessage(string str, params object[] args)
         {
-            new CommandHandler(Session).SendSysMessage(string.Format(str, args));
+            new CommandHandler(_session).SendSysMessage(string.Format(str, args));
         }
         public void SendBuyError(BuyResult msg, Creature creature, uint item)
         {
