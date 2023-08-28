@@ -10,7 +10,7 @@ namespace Framework.Database
             const string BnetAccountInfo = "ba.id, ba.email, ba.locked, ba.lock_country, ba.last_ip, ba.LoginTicketExpiry, bab.unbandate > UNIX_TIMESTAMP() OR bab.unbandate = bab.bandate, bab.unbandate = bab.bandate";
             const string BnetGameAccountInfo = "a.id, a.username, ab.unbandate, ab.unbandate = ab.bandate, aa.SecurityLevel";
 
-            PrepareStatement(LoginStatements.SEL_REALMLIST, "SELECT id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild, Region, Battlegroup FROM realmlist WHERE flag <> 3 ORDER BY name");
+            PrepareStatement(LoginStatements.SEL_REALMLIST, "SELECT id, name, address, localAddress, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild, Region, Battlegroup FROM realmlist WHERE flag <> 3 ORDER BY name");
             PrepareStatement(LoginStatements.DelExpiredIpBans, "DELETE FROM ip_banned WHERE unbandate<>bandate AND unbandate<=UNIX_TIMESTAMP()");
             PrepareStatement(LoginStatements.UpdExpiredAccountBans, "UPDATE account_banned SET active = 0 WHERE active = 1 AND unbandate<>bandate AND unbandate<=UNIX_TIMESTAMP()");
             PrepareStatement(LoginStatements.SelIpInfo, "SELECT unbandate > UNIX_TIMESTAMP() OR unbandate = bandate AS banned, NULL as country FROM ip_banned WHERE ip = ?");

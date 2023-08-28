@@ -94,23 +94,22 @@ public class RealmManager : Singleton<RealmManager>
                 realm.Name = result.Read<string>(1);
                 realm.ExternalAddress = IPAddress.Parse(result.Read<string>(2));
                 realm.LocalAddress = IPAddress.Parse(result.Read<string>(3));
-                realm.LocalSubnetMask = IPAddress.Parse(result.Read<string>(4));
-                realm.Port = result.Read<ushort>(5);
-                RealmType realmType = (RealmType)result.Read<byte>(6);
+                realm.Port = result.Read<ushort>(4);
+                RealmType realmType = (RealmType)result.Read<byte>(5);
                 if (realmType == RealmType.FFAPVP)
                     realmType = RealmType.PVP;
                 if (realmType >= RealmType.MaxType)
                     realmType = RealmType.Normal;
 
                 realm.Type = (byte)realmType;
-                realm.Flags = (RealmFlags)result.Read<byte>(7);
-                realm.Timezone = result.Read<byte>(8);
-                AccountTypes allowedSecurityLevel = (AccountTypes)result.Read<byte>(9);
+                realm.Flags = (RealmFlags)result.Read<byte>(6);
+                realm.Timezone = result.Read<byte>(7);
+                AccountTypes allowedSecurityLevel = (AccountTypes)result.Read<byte>(8);
                 realm.AllowedSecurityLevel = (allowedSecurityLevel <= AccountTypes.Administrator ? allowedSecurityLevel : AccountTypes.Administrator);
-                realm.PopulationLevel = result.Read<float>(10);
-                realm.Build = result.Read<uint>(11);
-                byte region = result.Read<byte>(12);
-                byte battlegroup = result.Read<byte>(13);
+                realm.PopulationLevel = result.Read<float>(9);
+                realm.Build = result.Read<uint>(10);
+                byte region = result.Read<byte>(11);
+                byte battlegroup = result.Read<byte>(12);
 
                 realm.Id = new RealmId(region, battlegroup, realmId);
 

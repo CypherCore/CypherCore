@@ -18,17 +18,15 @@ namespace BNetServer
 {
     public class LoginServiceManager : Singleton<LoginServiceManager>
     {
-        ConcurrentDictionary<(uint ServiceHash, uint MethodId), BnetServiceHandler> serviceHandlers;
-        FormInputs formInputs;
-        IPEndPoint externalAddress;
-        IPEndPoint localAddress;
+        ConcurrentDictionary<(uint ServiceHash, uint MethodId), BnetServiceHandler> serviceHandlers = new();
+        FormInputs formInputs = new();
+        string _externalHostname;
+        IPEndPoint _externalEndpoint;
+        string _localHostname;
+        IPEndPoint _localEndpoint;
         X509Certificate2 certificate;
 
-        LoginServiceManager() 
-        {
-            serviceHandlers = new ConcurrentDictionary<(uint ServiceHash, uint MethodId), BnetServiceHandler>();
-            formInputs = new FormInputs();
-        }
+        LoginServiceManager() { }
 
         public void Initialize()
         {
@@ -46,7 +44,9 @@ namespace BNetServer
                 Log.outError(LogFilter.Network, $"Could not resolve LoginREST.ExternalAddress {configuredAddress}");
                 return;
             }
-            externalAddress = new IPEndPoint(address, port);
+
+            _externalEndpoint = new IPEndPoint(address, port);
+            _externalHostname = $"{configuredAddress}:{port}";
 
             configuredAddress = ConfigMgr.GetDefaultValue("LoginREST.LocalAddress", "127.0.0.1");
             if (!IPAddress.TryParse(configuredAddress, out address))
@@ -55,7 +55,8 @@ namespace BNetServer
                 return;
             }
 
-            localAddress = new IPEndPoint(address, port);
+            _localEndpoint = new IPEndPoint(address, port);
+            _localHostname = $"{configuredAddress}:{port}";
 
             // set up form inputs 
             formInputs.Type = "LOGIN_FORM";
@@ -117,14 +118,22 @@ namespace BNetServer
             return serviceHandlers.LookupByKey((serviceHash, methodId));
         }
 
-        public IPEndPoint GetAddressForClient(IPAddress address)
+        public IPEndPoint GetEndpointForClient(IPAddress address)
         {
             if (IPAddress.IsLoopback(address))
-                return localAddress;
+                return _localEndpoint;
 
-            return externalAddress;
+            return _externalEndpoint;
         }
 
+        public string GetHostnameForClient(IPEndPoint address)
+        {
+            if (IPAddress.IsLoopback(address.Address))
+                return _localHostname;
+
+            return _externalHostname;
+        }
+        
         public FormInputs GetFormInput()
         {
             return formInputs;

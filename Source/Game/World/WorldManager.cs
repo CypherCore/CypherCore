@@ -2438,23 +2438,22 @@ namespace Game
 
         public bool LoadRealmInfo()
         {
-            SQLResult result = DB.Login.Query("SELECT id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild, Region, Battlegroup FROM realmlist WHERE id = {0}", _realm.Id.Index);
+            SQLResult result = DB.Login.Query("SELECT id, name, address, localAddress, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild, Region, Battlegroup FROM realmlist WHERE id = {0}", _realm.Id.Index);
             if (result.IsEmpty())
                 return false;
 
             _realm.SetName(result.Read<string>(1));
             _realm.ExternalAddress = System.Net.IPAddress.Parse(result.Read<string>(2));
             _realm.LocalAddress = System.Net.IPAddress.Parse(result.Read<string>(3));
-            _realm.LocalSubnetMask = System.Net.IPAddress.Parse(result.Read<string>(4));
-            _realm.Port = result.Read<ushort>(5);
-            _realm.Type = result.Read<byte>(6);
-            _realm.Flags = (RealmFlags)result.Read<byte>(7);
-            _realm.Timezone = result.Read<byte>(8);
-            _realm.AllowedSecurityLevel = (AccountTypes)result.Read<byte>(9);
-            _realm.PopulationLevel = result.Read<float>(10);
-            _realm.Id.Region = result.Read<byte>(12);
-            _realm.Id.Site = result.Read<byte>(13);
-            _realm.Build = result.Read<uint>(11);
+            _realm.Port = result.Read<ushort>(4);
+            _realm.Type = result.Read<byte>(5);
+            _realm.Flags = (RealmFlags)result.Read<byte>(6);
+            _realm.Timezone = result.Read<byte>(7);
+            _realm.AllowedSecurityLevel = (AccountTypes)result.Read<byte>(8);
+            _realm.PopulationLevel = result.Read<float>(9);
+            _realm.Build = result.Read<uint>(10);
+            _realm.Id.Region = result.Read<byte>(11);
+            _realm.Id.Site = result.Read<byte>(12);
             return true;
         }
 

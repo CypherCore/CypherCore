@@ -18,7 +18,7 @@ public class Realm : IEquatable<Realm>
 
     public IPEndPoint GetAddressForClient(IPAddress clientAddr)
     {
-        IPAddress realmIp;
+        IPAddress realmIp = ExternalAddress;
 
         // Attempt to send best address for client
         if (IPAddress.IsLoopback(clientAddr))
@@ -32,13 +32,6 @@ public class Realm : IEquatable<Realm>
                 // has all realms available in his local network
                 realmIp = LocalAddress;
             }
-        }
-        else
-        {
-            if (clientAddr.AddressFamily == AddressFamily.InterNetwork && clientAddr.GetNetworkAddress(LocalSubnetMask).Equals(LocalAddress.GetNetworkAddress(LocalSubnetMask)))
-                realmIp = LocalAddress;
-            else
-                realmIp = ExternalAddress;
         }
 
         IPEndPoint endpoint = new(realmIp, Port);
@@ -66,7 +59,6 @@ public class Realm : IEquatable<Realm>
     {
         return other.ExternalAddress.Equals(ExternalAddress)
             && other.LocalAddress.Equals(LocalAddress)
-            && other.LocalSubnetMask.Equals(LocalSubnetMask)
             && other.Port == Port
             && other.Name == Name
             && other.Type == Type
@@ -78,14 +70,13 @@ public class Realm : IEquatable<Realm>
 
     public override int GetHashCode()
     {
-        return new { ExternalAddress, LocalAddress, LocalSubnetMask, Port, Name, Type, Flags, Timezone, AllowedSecurityLevel, PopulationLevel }.GetHashCode();
+        return new { ExternalAddress, LocalAddress, Port, Name, Type, Flags, Timezone, AllowedSecurityLevel, PopulationLevel }.GetHashCode();
     }
 
     public RealmId Id;
     public uint Build;
     public IPAddress ExternalAddress;
     public IPAddress LocalAddress;
-    public IPAddress LocalSubnetMask;
     public ushort Port;
     public string Name;
     public string NormalizedName;

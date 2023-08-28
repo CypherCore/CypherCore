@@ -39,11 +39,11 @@ namespace BNetServer.Networking
             os = logonRequest.Platform;
             build = (uint)logonRequest.ApplicationVersion;
 
-            var endpoint = Global.LoginServiceMgr.GetAddressForClient(GetRemoteIpEndPoint().Address);
+            var hostname = Global.LoginServiceMgr.GetHostnameForClient(GetRemoteIpEndPoint());
 
             ChallengeExternalRequest externalChallenge = new();
             externalChallenge.PayloadType = "web_auth_url";
-            externalChallenge.Payload = ByteString.CopyFromUtf8($"https://{endpoint.Address}:{endpoint.Port}/bnetserver/login/");
+            externalChallenge.Payload = ByteString.CopyFromUtf8($"https://{hostname}/bnetserver/login/");
 
             SendRequest((uint)OriginalHash.ChallengeListener, 3, externalChallenge);
             return BattlenetRpcErrorCode.Ok;
