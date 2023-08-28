@@ -76,6 +76,8 @@ namespace Scripts.Spells.Druid
         public const uint ThrashBear = 77758;
         public const uint ThrashBearAura = 192090;
         public const uint ThrashCat = 106830;
+        public const uint YserasGiftHealParty = 145110;
+        public const uint YserasGiftHealSelf = 145109;
     }
 
     [Script] // 22812 - Barkskin
@@ -557,7 +559,7 @@ namespace Scripts.Spells.Druid
             OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 1, AuraType.ModShapeshift, AuraEffectHandleModes.Real));
         }
     }
-    
+
     [Script] // 210706 - Gore
     class spell_dru_gore : AuraScript
     {
@@ -629,10 +631,10 @@ namespace Scripts.Spells.Druid
             {
                 AuraEffect innervateR2 = caster.GetAuraEffect(SpellIds.InnervateRank2, 0);
                 if (innervateR2 != null)
-                caster.CastSpell(caster, SpellIds.Innervate,
-                    new CastSpellExtraArgs(TriggerCastFlags.IgnoreSpellAndCategoryCD | TriggerCastFlags.IgnoreCastInProgress)
-                    .SetTriggeringSpell(GetSpell())
-                    .AddSpellMod(SpellValueMod.BasePoint0, -innervateR2.GetAmount()));
+                    caster.CastSpell(caster, SpellIds.Innervate,
+                        new CastSpellExtraArgs(TriggerCastFlags.IgnoreSpellAndCategoryCD | TriggerCastFlags.IgnoreCastInProgress)
+                        .SetTriggeringSpell(GetSpell())
+                        .AddSpellMod(SpellValueMod.BasePoint0, -innervateR2.GetAmount()));
             }
         }
 
@@ -737,7 +739,7 @@ namespace Scripts.Spells.Druid
             AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
-    
+
     [Script] //  8921 - Moonfire
     class spell_dru_moonfire : SpellScript
     {
@@ -906,7 +908,7 @@ namespace Scripts.Spells.Druid
             OnEffectPeriodic.Add(new EffectPeriodicHandler(OnTick, 1, AuraType.PeriodicDamage));
         }
     }
-    
+
     [Script] // 106839 - Skull Bash
     class spell_dru_skull_bash : SpellScript
     {
@@ -1085,7 +1087,7 @@ namespace Scripts.Spells.Druid
                 return;
 
             int amount = MathFunctions.CalculatePct(spellPowerCost.Amount, aurEff.GetAmount());
-            CastSpellExtraArgs args = new (aurEff);
+            CastSpellExtraArgs args = new(aurEff);
             args.AddSpellMod(SpellValueMod.BasePoint0, amount);
             caster.CastSpell((Unit)null, SpellIds.Exhilarate, args);
         }
@@ -1466,7 +1468,7 @@ namespace Scripts.Spells.Druid
             OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodic, 1, AuraType.PeriodicDummy));
         }
     }
-    
+
     [Script] // 48438 - Wild Growth
     class spell_dru_wild_growth : SpellScript
     {
@@ -1545,6 +1547,44 @@ namespace Scripts.Spells.Druid
         public override void Register()
         {
             OnEffectUpdatePeriodic.Add(new EffectUpdatePeriodicHandler(HandleTickUpdate, 0, AuraType.PeriodicHeal));
+        }
+    }
+
+    [Script] // 145108 - Ysera's Gift
+    class spell_dru_yseras_gift : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.YserasGiftHealSelf, SpellIds.YserasGiftHealParty);
+        }
+
+        void HandleEffectPeriodic(AuraEffect aurEff)
+        {
+            int healAmount = (int)GetTarget().CountPctFromMaxHealth(aurEff.GetAmount());
+
+            if (!GetTarget().IsFullHealth())
+                GetTarget().CastSpell(GetTarget(), SpellIds.YserasGiftHealSelf, new CastSpellExtraArgs(aurEff).AddSpellMod(SpellValueMod.BasePoint0, healAmount));
+            else
+                GetTarget().CastSpell(GetTarget(), SpellIds.YserasGiftHealParty, new CastSpellExtraArgs(aurEff).AddSpellMod(SpellValueMod.BasePoint0, healAmount));
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+        }
+    }
+
+    [Script] // 145110 - Ysera's Gift (heal)
+    class spell_dru_yseras_gift_group_heal : SpellScript
+    {
+        void SelectTargets(List<WorldObject> targets)
+        {
+            SelectRandomInjuredTargets(targets, 1, true);
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(SelectTargets, 0, Targets.UnitCasterAreaRaid));
         }
     }
 }
