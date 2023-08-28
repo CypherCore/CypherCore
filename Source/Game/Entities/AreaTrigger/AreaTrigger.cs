@@ -120,27 +120,7 @@ namespace Game.Entities
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.BoundsRadius2D), GetMaxSearchRadius());
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.DecalPropertiesID), GetCreateProperties().DecalPropertiesId);
 
-            ScaleCurve extraScaleCurve = areaTriggerData.ModifyValue(m_areaTriggerData.ExtraScaleCurve);
-
-            if (GetCreateProperties().ExtraScale.Structured.StartTimeOffset != 0)
-                SetUpdateFieldValue(extraScaleCurve.ModifyValue(extraScaleCurve.StartTimeOffset), GetCreateProperties().ExtraScale.Structured.StartTimeOffset);
-            if (GetCreateProperties().ExtraScale.Structured.X != 0 || GetCreateProperties().ExtraScale.Structured.Y != 0)
-            {
-                Vector2 point = new(GetCreateProperties().ExtraScale.Structured.X, GetCreateProperties().ExtraScale.Structured.Y);
-                SetUpdateFieldValue(ref extraScaleCurve.ModifyValue(extraScaleCurve.Points, 0), point);
-            }
-            if (GetCreateProperties().ExtraScale.Structured.Z != 0 || GetCreateProperties().ExtraScale.Structured.W != 0)
-            {
-                Vector2 point = new(GetCreateProperties().ExtraScale.Structured.Z, GetCreateProperties().ExtraScale.Structured.W);
-                SetUpdateFieldValue(ref extraScaleCurve.ModifyValue(extraScaleCurve.Points, 1), point);
-            }
-            unsafe
-            {
-                if (GetCreateProperties().ExtraScale.Raw.Data[5] != 0)
-                    SetUpdateFieldValue(extraScaleCurve.ModifyValue(extraScaleCurve.ParameterCurve), GetCreateProperties().ExtraScale.Raw.Data[5]);
-                if (GetCreateProperties().ExtraScale.Structured.OverrideActive != 0)
-                    SetUpdateFieldValue(extraScaleCurve.ModifyValue(extraScaleCurve.OverrideActive), GetCreateProperties().ExtraScale.Structured.OverrideActive != 0);
-            }
+            SetScaleCurve(areaTriggerData.ModifyValue(m_areaTriggerData.ExtraScaleCurve), GetCreateProperties().ExtraScale);
 
             VisualAnim visualAnim = areaTriggerData.ModifyValue(m_areaTriggerData.VisualAnim);
             SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.AnimationDataID), GetCreateProperties().AnimId);
@@ -349,6 +329,92 @@ namespace Game.Entities
             return GetTimeSinceCreated() < GetTimeToTargetScale() ? (float)GetTimeSinceCreated() / GetTimeToTargetScale() : 1.0f;
         }
 
+        float GetScaleCurveValue(ScaleCurve scaleCurve, float x)
+        {
+            Cypher.Assert(scaleCurve.OverrideActive, "ScaleCurve must be active to evaluate it");
+
+            // unpack ParameterCurve
+            if ((scaleCurve.ParameterCurve & 1) != 0)
+                return BitConverter.UInt32BitsToSingle((uint)(scaleCurve.ParameterCurve & ~1));
+
+            Vector2[] points = new Vector2[2];
+            for (var i = 0; i < scaleCurve.Points.GetSize(); ++i)
+                points[i] = new(scaleCurve.Points[i].X, scaleCurve.Points[i].Y);
+
+            CurveInterpolationMode mode = (CurveInterpolationMode)(scaleCurve.ParameterCurve >> 1 & 0x7);
+            int pointCount = (int)(scaleCurve.ParameterCurve >> 24 & 0xFF);
+
+            return Global.DB2Mgr.GetCurveValueAt(mode, points.AsSpan(0, pointCount).ToArray(), x);
+        }
+
+        void SetScaleCurve(ScaleCurve scaleCurve, AreaTriggerScaleCurveTemplate curve)
+        {
+            if (curve == null)
+            {
+                SetUpdateFieldValue(scaleCurve.ModifyValue(scaleCurve.OverrideActive), false);
+                return;
+            }
+
+            SetUpdateFieldValue(scaleCurve.ModifyValue(scaleCurve.OverrideActive), true);
+            SetUpdateFieldValue(scaleCurve.ModifyValue(scaleCurve.StartTimeOffset), curve.StartTimeOffset);
+
+            Position point = null;
+            // ParameterCurve packing information
+            // (not_using_points & 1) | ((interpolation_mode & 0x7) << 1) | ((first_point_offset & 0xFFFFF) << 4) | ((point_count & 0xFF) << 24)
+            //   if not_using_points is set then the entire field is simply read as a float (ignoring that lowest bit)
+            float simpleFloat = curve.Curve;
+            if (simpleFloat != 0)
+            {
+                uint packedCurve = BitConverter.SingleToUInt32Bits(simpleFloat);
+                packedCurve |= 1;
+
+                SetUpdateFieldValue(scaleCurve.ModifyValue(scaleCurve.ParameterCurve), packedCurve);
+
+                // clear points
+                for (var i = 0; i < scaleCurve.Points.GetSize(); ++i)
+                    SetUpdateFieldValue(ref scaleCurve.ModifyValue(scaleCurve.Points, i), point);
+            }
+            else
+            {
+                var curvePoints = curve.CurveTemplate;
+                if (curvePoints != null)
+                {
+                    CurveInterpolationMode mode = curvePoints.Mode;
+                    if (curvePoints.Points[1].X < curvePoints.Points[0].X)
+                        mode = CurveInterpolationMode.Constant;
+
+                    switch (mode)
+                    {
+                        case CurveInterpolationMode.CatmullRom:
+                            // catmullrom requires at least 4 points, impossible here
+                            mode = CurveInterpolationMode.Cosine;
+                            break;
+                        case CurveInterpolationMode.Bezier3:
+                        case CurveInterpolationMode.Bezier4:
+                        case CurveInterpolationMode.Bezier:
+                            // bezier requires more than 2 points, impossible here
+                            mode = CurveInterpolationMode.Linear;
+                            break;
+                        default:
+                            break;
+                    }
+
+                    uint pointCount = 2;
+                    if (mode == CurveInterpolationMode.Constant)
+                        pointCount = 1;
+
+                    uint packedCurve = ((uint)mode << 1) | (pointCount << 24);
+                    SetUpdateFieldValue(scaleCurve.ModifyValue(scaleCurve.ParameterCurve), packedCurve);
+
+                    for (var i = 0; i < curvePoints.Points.Length; ++i)
+                    {
+                        point.Relocate(curvePoints.Points[i].X, curvePoints.Points[i].Y);
+                        SetUpdateFieldValue(ref scaleCurve.ModifyValue(scaleCurve.Points, i), point);
+                    }
+                }
+            }
+        }
+        
         void UpdateTargetList()
         {
             List<Unit> targetList = new();

@@ -877,6 +877,17 @@ namespace Framework.Constants
         RaidRestricted = 4
     }
 
+    public enum CurveInterpolationMode
+    {
+        Linear = 0,
+        Cosine = 1,
+        CatmullRom = 2,
+        Bezier3 = 3,
+        Bezier4 = 4,
+        Bezier = 5,
+        Constant = 6,
+    }
+
     public enum Difficulty : byte
     {
         None = 0,
