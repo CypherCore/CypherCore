@@ -983,12 +983,17 @@ namespace Scripts.Spells.Mage
     [Script] // 235450 - Prismatic Barrier
     class spell_mage_prismatic_barrier : AuraScript
     {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellEffect((spellInfo.Id, 5));
+        }
+
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             canBeRecalculated = false;
             Unit caster = GetCaster();
             if (caster)
-                amount += (int)(caster.SpellBaseHealingBonusDone(GetSpellInfo().GetSchoolMask()) * 7.0f);
+                amount += (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), GetEffectInfo(5).CalcValue(caster));
         }
 
         public override void Register()
