@@ -506,6 +506,13 @@ namespace Game.Entities
             if (HasUnitState(UnitState.CannotAutoattack) && !extra)
                 return;
 
+            if (HasUnitState(UnitState.Casting))
+            {
+                Spell channeledSpell = GetCurrentSpell(CurrentSpellTypes.Channeled);
+                if (channeledSpell == null || !channeledSpell.GetSpellInfo().HasAttribute(SpellAttr5.AllowActionsDuringChannel))
+                    return;
+            }
+
             if (HasAuraType(AuraType.DisableAttackingExceptAbilities))
                 return;
 

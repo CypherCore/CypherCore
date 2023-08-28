@@ -54,8 +54,15 @@ namespace Game.AI
 
         public void DoMeleeAttackIfReady()
         {
-            if (me.HasUnitState(UnitState.Casting) || (me.IsCreature() && !me.ToCreature().CanMelee()))
+            if (me.IsCreature() && !me.ToCreature().CanMelee())
                 return;
+
+            if (me.HasUnitState(UnitState.Casting))
+            {
+                Spell channeledSpell = me.GetCurrentSpell(CurrentSpellTypes.Channeled);
+                if (channeledSpell == null || !channeledSpell.GetSpellInfo().HasAttribute(SpellAttr5.AllowActionsDuringChannel))
+                    return;
+            }
 
             Unit victim = me.GetVictim();
 

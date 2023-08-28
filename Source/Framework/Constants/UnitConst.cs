@@ -500,7 +500,7 @@ namespace Framework.Constants
         Moving = RoamingMove | ConfusedMove | FleeingMove | ChaseMove | FollowMove | FollowFormationMove,
         Controlled = Confused | Stunned | Fleeing,
         LostControl = Controlled | Possessed | Jumping | Charging,
-        CannotAutoattack = Controlled | Charging | Casting,
+        CannotAutoattack = Controlled | Charging,
         Sightless = LostControl | Evade,
         CannotTurn = LostControl | Rotating | Focusing,
         NotMove = Root | Stunned | Died | Distracted,
