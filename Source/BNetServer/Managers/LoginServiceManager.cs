@@ -20,43 +20,42 @@ namespace BNetServer
     {
         ConcurrentDictionary<(uint ServiceHash, uint MethodId), BnetServiceHandler> serviceHandlers = new();
         FormInputs formInputs = new();
-        string _externalHostname;
-        IPEndPoint _externalEndpoint;
-        string _localHostname;
-        IPEndPoint _localEndpoint;
+        string[] _hostnames = new string[2];
+        IPAddress[] _addresses = new IPAddress[2];
+        int _port;
         X509Certificate2 certificate;
+
 
         LoginServiceManager() { }
 
         public void Initialize()
         {
-            int port = ConfigMgr.GetDefaultValue("LoginREST.Port", 8081);
-            if (port < 0 || port > 0xFFFF)
+            _port = ConfigMgr.GetDefaultValue("LoginREST.Port", 8081);
+            if (_port < 0 || _port > 0xFFFF)
             {
-                Log.outError(LogFilter.Network, $"Specified login service port ({port}) out of allowed range (1-65535), defaulting to 8081");
-                port = 8081;
+                Log.outError(LogFilter.Network, $"Specified login service port ({_port}) out of allowed range (1-65535), defaulting to 8081");
+                _port = 8081;
             }
 
-            string configuredAddress = ConfigMgr.GetDefaultValue("LoginREST.ExternalAddress", "127.0.0.1");
-            IPAddress address;
-            if (!IPAddress.TryParse(configuredAddress, out address))
+            _hostnames[0] = ConfigMgr.GetDefaultValue("LoginREST.ExternalAddress", "127.0.0.1");
+            var externalAddress = Dns.GetHostEntry($"{_hostnames[0]}:{_port}", System.Net.Sockets.AddressFamily.InterNetwork);
+            if (externalAddress == null || externalAddress.AddressList.Empty())
             {
-                Log.outError(LogFilter.Network, $"Could not resolve LoginREST.ExternalAddress {configuredAddress}");
+                Log.outError(LogFilter.Network, $"Could not resolve LoginREST.ExternalAddress {_hostnames[0]}");
                 return;
             }
 
-            _externalEndpoint = new IPEndPoint(address, port);
-            _externalHostname = $"{configuredAddress}:{port}";
+            _addresses[0] = externalAddress.AddressList[0];
 
-            configuredAddress = ConfigMgr.GetDefaultValue("LoginREST.LocalAddress", "127.0.0.1");
-            if (!IPAddress.TryParse(configuredAddress, out address))
+            _hostnames[1] = ConfigMgr.GetDefaultValue("LoginREST.LocalAddress", "127.0.0.1");
+            var localAddress = Dns.GetHostEntry($"{_hostnames[1]}:{_port}", System.Net.Sockets.AddressFamily.InterNetwork);
+            if (localAddress == null || localAddress.AddressList.Empty())
             {
-                Log.outError(LogFilter.Network, $"Could not resolve LoginREST.ExternalAddress {configuredAddress}");
+                Log.outError(LogFilter.Network, $"Could not resolve LoginREST.ExternalAddress {_hostnames[1]}");
                 return;
             }
 
-            _localEndpoint = new IPEndPoint(address, port);
-            _localHostname = $"{configuredAddress}:{port}";
+            _addresses[1] = localAddress.AddressList[0];
 
             // set up form inputs 
             formInputs.Type = "LOGIN_FORM";
@@ -118,22 +117,16 @@ namespace BNetServer
             return serviceHandlers.LookupByKey((serviceHash, methodId));
         }
 
-        public IPEndPoint GetEndpointForClient(IPAddress address)
-        {
-            if (IPAddress.IsLoopback(address))
-                return _localEndpoint;
-
-            return _externalEndpoint;
-        }
-
         public string GetHostnameForClient(IPEndPoint address)
         {
             if (IPAddress.IsLoopback(address.Address))
-                return _localHostname;
+                return _hostnames[0];
 
-            return _externalHostname;
+            return _hostnames[1];
         }
-        
+
+        public int GetPort() { return _port; }
+
         public FormInputs GetFormInput()
         {
             return formInputs;

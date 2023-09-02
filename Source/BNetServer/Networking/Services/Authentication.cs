@@ -43,7 +43,7 @@ namespace BNetServer.Networking
 
             ChallengeExternalRequest externalChallenge = new();
             externalChallenge.PayloadType = "web_auth_url";
-            externalChallenge.Payload = ByteString.CopyFromUtf8($"https://{hostname}/bnetserver/login/");
+            externalChallenge.Payload = ByteString.CopyFromUtf8($"https://{Global.LoginServiceMgr.GetHostnameForClient(GetRemoteIpEndPoint())}:{Global.LoginServiceMgr.GetPort()}/bnetserver/login/");
 
             SendRequest((uint)OriginalHash.ChallengeListener, 3, externalChallenge);
             return BattlenetRpcErrorCode.Ok;
