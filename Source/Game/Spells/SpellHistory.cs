@@ -632,6 +632,9 @@ namespace Game.Spells
 
         public bool HasCooldown(SpellInfo spellInfo, uint itemId = 0)
         {
+            if (_owner.HasAuraTypeWithAffectMask(AuraType.IgnoreSpellCooldown, spellInfo))
+                return false;
+
             if (_spellCooldowns.ContainsKey(spellInfo.Id))
                 return true;
 

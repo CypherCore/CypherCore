@@ -1405,7 +1405,8 @@ namespace Game.Entities
                                     continue;
 
                                 if (spellEffectInfo.ApplyAuraName == AuraType.AddPctModifier || spellEffectInfo.ApplyAuraName == AuraType.AddFlatModifier
-                                    || spellEffectInfo.ApplyAuraName == AuraType.AddPctModifierBySpellLabel || spellEffectInfo.ApplyAuraName == AuraType.AddFlatModifierBySpellLabel)
+                                    || spellEffectInfo.ApplyAuraName == AuraType.AddPctModifierBySpellLabel || spellEffectInfo.ApplyAuraName == AuraType.AddFlatModifierBySpellLabel
+                                    || spellEffectInfo.ApplyAuraName == AuraType.IgnoreSpellCooldown)
                                 {
                                     found = true;
                                     break;
@@ -4634,10 +4635,12 @@ namespace Game.Entities
                 case AuraType.ModWeaponCritPercent:
                 case AuraType.ModBlockPercent:
                 case AuraType.ModRoot2:
+                case AuraType.IgnoreSpellCooldown:
                     return true;
             }
             return false;
         }
+
         bool IsAlwaysTriggeredAura(AuraType type)
         {
             switch (type)
@@ -4657,6 +4660,7 @@ namespace Game.Entities
             }
             return false;
         }
+
         ProcFlagsSpellType GetSpellTypeMask(AuraType type)
         {
             switch (type)
