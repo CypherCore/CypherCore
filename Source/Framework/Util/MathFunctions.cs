@@ -76,7 +76,7 @@ public static class MathFunctions
         return 0.0000005f * aa;
     }
 
-    public static float lerp(float a, float b, float f)
+    public static float Lerp(float a, float b, float f)
     {
         return a + (b - a) * f;
     }

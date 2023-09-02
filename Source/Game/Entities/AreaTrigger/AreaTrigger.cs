@@ -475,7 +475,7 @@ namespace Game.Entities
             {
                 if (GetCreateProperties().MorphCurveId != 0)
                 {
-                    radius = MathFunctions.lerp(_shape.SphereDatas.Radius, _shape.SphereDatas.RadiusTarget, Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().MorphCurveId, GetProgress()));
+                    radius = MathFunctions.Lerp(_shape.SphereDatas.Radius, _shape.SphereDatas.RadiusTarget, Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().MorphCurveId, GetProgress()));
                 }
             }
 
@@ -523,10 +523,23 @@ namespace Game.Entities
 
         void SearchUnitInDisk(List<Unit> targetList)
         {
-            SearchUnits(targetList, GetMaxSearchRadius(), false);
-
             float innerRadius = _shape.DiskDatas.InnerRadius;
+            float outerRadius = _shape.DiskDatas.OuterRadius;
             float height = _shape.DiskDatas.Height;
+
+            if (GetTemplate() != null && GetTemplate().HasFlag(AreaTriggerFlags.HasDynamicShape))
+            {
+                float progress = GetProgress();
+                if (GetCreateProperties().MorphCurveId != 0)
+                    progress = Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().MorphCurveId, progress);
+
+                innerRadius = MathFunctions.Lerp(_shape.DiskDatas.InnerRadius, _shape.DiskDatas.InnerRadiusTarget, progress);
+                outerRadius = MathFunctions.Lerp(_shape.DiskDatas.OuterRadius, _shape.DiskDatas.OuterRadiusTarget, progress);
+                height = MathFunctions.Lerp(_shape.DiskDatas.Height, _shape.DiskDatas.HeightTarget, progress);
+            }
+
+            SearchUnits(targetList, outerRadius, false);
+
             float minZ = GetPositionZ() - height;
             float maxZ = GetPositionZ() + height;
 
@@ -946,7 +959,7 @@ namespace Game.Entities
                 // 4.f Defines four quarters
                 blendCurve = MathFunctions.RoundToInterval(ref blendCurve, 1.0f, 4.0f) / 4.0f;
                 float blendProgress = Math.Min(1.0f, pathProgress / blendCurve);
-                radius = MathFunctions.lerp(cmi.BlendFromRadius, cmi.Radius, blendProgress);
+                radius = MathFunctions.Lerp(cmi.BlendFromRadius, cmi.Radius, blendProgress);
             }
 
             // Adapt Path progress depending of circle direction
