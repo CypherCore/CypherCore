@@ -368,6 +368,7 @@ namespace Game.Networking.Packets
         public uint ContentTuningID;
         public int QuestType;
         public bool Repeatable;
+        public bool Important;
         public string QuestTitle;
         public uint QuestFlags;
         public uint QuestFlagsEx;
@@ -381,6 +382,7 @@ namespace Game.Networking.Packets
             data.WriteUInt32(QuestFlagsEx);
 
             data.WriteBit(Repeatable);
+            data.WriteBit(Important);
             data.WriteBits(QuestTitle.GetByteCount(), 9);
             data.FlushBits();
 
