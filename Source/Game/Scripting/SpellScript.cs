@@ -11,11 +11,11 @@ using System.Linq;
 namespace Game.Scripting
 {
     // helper class from which SpellScript and SpellAura derive, use these classes instead
-    public class BaseSpellScript
+    public class SpellScriptBase
     {
         // internal use classes & functions
         // DO NOT OVERRIDE THESE IN SCRIPTS
-        public BaseSpellScript()
+        public SpellScriptBase()
         {
             m_currentScriptState = (byte)SpellScriptState.None;
         }
@@ -93,7 +93,7 @@ namespace Game.Scripting
             m_scriptName = scriptname;
             m_scriptSpellId = spellId;
         }
-        public string _GetScriptName()
+        public string GetScriptName()
         {
             return m_scriptName;
         }
@@ -107,33 +107,33 @@ namespace Game.Scripting
                 _effIndex = effIndex;
             }
 
-            public uint GetAffectedEffectsMask(SpellInfo spellEntry)
+            public uint GetAffectedEffectsMask(SpellInfo spellInfo)
             {
                 uint mask = 0;
-                if ((_effIndex == SpellConst.EffectAll) || (_effIndex == SpellConst.EffectFirstFound))
+                if (_effIndex == SpellConst.EffectAll || _effIndex == SpellConst.EffectFirstFound)
                 {
                     for (byte i = 0; i < SpellConst.MaxEffects; ++i)
                     {
-                        if ((_effIndex == SpellConst.EffectFirstFound) && mask != 0)
+                        if (_effIndex == SpellConst.EffectFirstFound && mask != 0)
                             return mask;
-                        if (CheckEffect(spellEntry, i))
-                            mask |= (1u << i);
+                        if (CheckEffect(spellInfo, i))
+                            mask |= 1u << i;
                     }
                 }
                 else
                 {
-                    if (CheckEffect(spellEntry, _effIndex))
-                        mask |= (1u << (int)_effIndex);
+                    if (CheckEffect(spellInfo, _effIndex))
+                        mask |= 1u << (int)_effIndex;
                 }
                 return mask;
             }
 
-            public bool IsEffectAffected(SpellInfo spellEntry, uint effIndex)
+            public bool IsEffectAffected(SpellInfo spellInfo, uint effIndex)
             {
-                return Convert.ToBoolean(GetAffectedEffectsMask(spellEntry) & (1 << (int)effIndex));
+                return Convert.ToBoolean(GetAffectedEffectsMask(spellInfo) & (1 << (int)effIndex));
             }
 
-            public abstract bool CheckEffect(SpellInfo spellEntry, uint effIndex);
+            public abstract bool CheckEffect(SpellInfo spellInfo, uint effIndex);
 
             uint _effIndex;
         }
@@ -159,7 +159,7 @@ namespace Game.Scripting
         public virtual void Unload() { }
     }
 
-    public class SpellScript : BaseSpellScript
+    public class SpellScript : SpellScriptBase
     {
         // internal use classes & functions
         // DO NOT OVERRIDE THESE IN SCRIPTS
@@ -176,60 +176,63 @@ namespace Game.Scripting
 
         public class CastHandler
         {
-            public CastHandler(SpellCastFnType _pCastHandlerScript) { pCastHandlerScript = _pCastHandlerScript; }
+            SpellCastFnType _callImpl;
+
+            public CastHandler(SpellCastFnType callImpl) { _callImpl = callImpl; }
 
             public void Call()
             {
-                pCastHandlerScript();
+                _callImpl();
             }
-
-            SpellCastFnType pCastHandlerScript;
         }
 
         public class CheckCastHandler
         {
-            public CheckCastHandler(SpellCheckCastFnType checkCastHandlerScript)
+            SpellCheckCastFnType _callImpl;
+
+            public CheckCastHandler(SpellCheckCastFnType callImpl)
             {
-                _checkCastHandlerScript = checkCastHandlerScript;
+                _callImpl = callImpl;
             }
 
             public SpellCastResult Call()
             {
-                return _checkCastHandlerScript();
+                return _callImpl();
             }
-
-            SpellCheckCastFnType _checkCastHandlerScript;
         }
 
         public class OnCalculateResistAbsorbHandler
         {
-            public OnCalculateResistAbsorbHandler(SpellOnResistAbsorbCalculateFnType onResistAbsorbCalculateHandlerScript)
+            SpellOnResistAbsorbCalculateFnType _callImpl;
+
+            public OnCalculateResistAbsorbHandler(SpellOnResistAbsorbCalculateFnType callImpl)
             {
-                _onCalculateResistAbsorbHandlerScript = onResistAbsorbCalculateHandlerScript;
+                _callImpl = callImpl;
             }
 
             public void Call(DamageInfo damageInfo, ref uint resistAmount, ref int absorbAmount)
             {
-                _onCalculateResistAbsorbHandlerScript(damageInfo, ref resistAmount, ref absorbAmount);
+                _callImpl(damageInfo, ref resistAmount, ref absorbAmount);
             }
-
-            SpellOnResistAbsorbCalculateFnType _onCalculateResistAbsorbHandlerScript;
         }
-        
+
         public class EffectHandler : EffectHook
         {
-            public EffectHandler(SpellEffectFnType pEffectHandlerScript, uint effIndex, SpellEffectName effName) : base(effIndex)
+            SpellEffectName _effName;
+            SpellEffectFnType _callImpl;
+
+            public EffectHandler(SpellEffectFnType callImpl, uint effIndex, SpellEffectName effName) : base(effIndex)
             {
-                _pEffectHandlerScript = pEffectHandlerScript;
+                _callImpl = callImpl;
                 _effName = effName;
             }
 
-            public override bool CheckEffect(SpellInfo spellEntry, uint effIndex)
+            public override bool CheckEffect(SpellInfo spellInfo, uint effIndex)
             {
-                if (spellEntry.GetEffects().Count <= effIndex)
+                if (spellInfo.GetEffects().Count <= effIndex)
                     return false;
 
-                SpellEffectInfo spellEffectInfo = spellEntry.GetEffect(effIndex);
+                SpellEffectInfo spellEffectInfo = spellInfo.GetEffect(effIndex);
                 if (spellEffectInfo.Effect == 0 && _effName == 0)
                     return true;
                 if (spellEffectInfo.Effect == 0)
@@ -239,59 +242,61 @@ namespace Game.Scripting
 
             public void Call(uint effIndex)
             {
-                _pEffectHandlerScript(effIndex);
+                _callImpl(effIndex);
             }
-
-            SpellEffectName _effName;
-            SpellEffectFnType _pEffectHandlerScript;
         }
 
         public class BeforeHitHandler
         {
-            public BeforeHitHandler(SpellBeforeHitFnType pBeforeHitHandlerScript)
+            SpellBeforeHitFnType _callImpl;
+
+            public BeforeHitHandler(SpellBeforeHitFnType callImpl)
             {
-                _pBeforeHitHandlerScript = pBeforeHitHandlerScript;
+                _callImpl = callImpl;
             }
 
             public void Call(SpellMissInfo missInfo)
             {
-                _pBeforeHitHandlerScript(missInfo);
+                _callImpl(missInfo);
             }
-
-            SpellBeforeHitFnType _pBeforeHitHandlerScript;
         }
 
         public class HitHandler
         {
-            public HitHandler(SpellHitFnType pHitHandlerScript)
+            SpellHitFnType _callImpl;
+
+            public HitHandler(SpellHitFnType callImpl)
             {
-                _pHitHandlerScript = pHitHandlerScript;
+                _callImpl = callImpl;
             }
 
             public void Call()
             {
-                _pHitHandlerScript();
+                _callImpl();
             }
-
-            SpellHitFnType _pHitHandlerScript;
         }
 
         public class OnCalcCritChanceHandler
         {
-            public OnCalcCritChanceHandler(SpellOnCalcCritChanceFnType onCalcCritChanceHandlerScript)
+            SpellOnCalcCritChanceFnType _callImpl;
+
+            public OnCalcCritChanceHandler(SpellOnCalcCritChanceFnType callImpl)
             {
-                _onCalcCritChanceHandlerScript = onCalcCritChanceHandlerScript;
-            }
-            public void Call(Unit victim, ref float critChance)
-            {
-                _onCalcCritChanceHandlerScript(victim, ref critChance);
+                _callImpl = callImpl;
             }
 
-            SpellOnCalcCritChanceFnType _onCalcCritChanceHandlerScript;
+            public void Call(Unit victim, ref float critChance)
+            {
+                _callImpl(victim, ref critChance);
+            }
         }
 
         public class TargetHook : EffectHook
         {
+            Targets _targetType;
+            bool _area;
+            bool _dest;
+
             public TargetHook(uint effectIndex, Targets targetType, bool area, bool dest = false) : base(effectIndex)
             {
                 _targetType = targetType;
@@ -299,15 +304,15 @@ namespace Game.Scripting
                 _dest = dest;
             }
 
-            public override bool CheckEffect(SpellInfo spellEntry, uint effIndexToCheck)
+            public override bool CheckEffect(SpellInfo spellInfo, uint effIndexToCheck)
             {
                 if (_targetType == 0)
                     return false;
 
-                if (spellEntry.GetEffects().Count <= effIndexToCheck)
+                if (spellInfo.GetEffects().Count <= effIndexToCheck)
                     return false;
 
-                SpellEffectInfo spellEffectInfo = spellEntry.GetEffect(effIndexToCheck);
+                SpellEffectInfo spellEffectInfo = spellInfo.GetEffect(effIndexToCheck);
                 if (spellEffectInfo.TargetA.GetTarget() != _targetType && spellEffectInfo.TargetB.GetTarget() != _targetType)
                     return false;
 
@@ -353,58 +358,51 @@ namespace Game.Scripting
             }
 
             public Targets GetTarget() { return _targetType; }
-
-            Targets _targetType;
-            bool _area;
-            bool _dest;
         }
 
         public class ObjectAreaTargetSelectHandler : TargetHook
         {
-            public ObjectAreaTargetSelectHandler(SpellObjectAreaTargetSelectFnType pObjectAreaTargetSelectHandlerScript, uint effIndex, Targets targetType)
-                : base(effIndex, targetType, true)
+            SpellObjectAreaTargetSelectFnType _callImpl;
+
+            public ObjectAreaTargetSelectHandler(SpellObjectAreaTargetSelectFnType callImpl, uint effIndex, Targets targetType) : base(effIndex, targetType, true)
             {
-                _pObjectAreaTargetSelectHandlerScript = pObjectAreaTargetSelectHandlerScript;
+                _callImpl = callImpl;
             }
 
             public void Call(List<WorldObject> targets)
             {
-                _pObjectAreaTargetSelectHandlerScript(targets);
+                _callImpl(targets);
             }
-
-            SpellObjectAreaTargetSelectFnType _pObjectAreaTargetSelectHandlerScript;
         }
 
         public class ObjectTargetSelectHandler : TargetHook
         {
-            public ObjectTargetSelectHandler(SpellObjectTargetSelectFnType _pObjectTargetSelectHandlerScript, uint _effIndex, Targets _targetType)
-                : base(_effIndex, _targetType, false)
+            SpellObjectTargetSelectFnType _callImpl;
+
+            public ObjectTargetSelectHandler(SpellObjectTargetSelectFnType callImpl, uint _effIndex, Targets _targetType) : base(_effIndex, _targetType, false)
             {
-                pObjectTargetSelectHandlerScript = _pObjectTargetSelectHandlerScript;
+                _callImpl = callImpl;
             }
 
             public void Call(ref WorldObject target)
             {
-                pObjectTargetSelectHandlerScript(ref target);
+                _callImpl(ref target);
             }
-
-            SpellObjectTargetSelectFnType pObjectTargetSelectHandlerScript;
         }
 
         public class DestinationTargetSelectHandler : TargetHook
         {
-            public DestinationTargetSelectHandler(SpellDestinationTargetSelectFnType _DestinationTargetSelectHandlerScript, uint _effIndex, Targets _targetType)
-                : base(_effIndex, _targetType, false, true)
+            SpellDestinationTargetSelectFnType _callImpl;
+
+            public DestinationTargetSelectHandler(SpellDestinationTargetSelectFnType callImpl, uint _effIndex, Targets _targetType) : base(_effIndex, _targetType, false, true)
             {
-                DestinationTargetSelectHandlerScript = _DestinationTargetSelectHandlerScript;
+                _callImpl = callImpl;
             }
 
             public void Call(ref SpellDestination target)
             {
-                DestinationTargetSelectHandlerScript(ref target);
+                _callImpl(ref target);
             }
-
-            SpellDestinationTargetSelectFnType DestinationTargetSelectHandlerScript;
         }
 
         public override bool _Validate(SpellInfo entry)
@@ -439,6 +437,7 @@ namespace Game.Scripting
 
             return base._Validate(entry);
         }
+
         public bool _Load(Spell spell)
         {
             m_spell = spell;
@@ -447,21 +446,27 @@ namespace Game.Scripting
             _FinishScriptCall();
             return load;
         }
+
         public void _InitHit()
         {
             m_hitPreventEffectMask = 0;
             m_hitPreventDefaultEffectMask = 0;
         }
+
         public bool _IsEffectPrevented(uint effIndex) { return Convert.ToBoolean(m_hitPreventEffectMask & (1 << (int)effIndex)); }
+
         public bool _IsDefaultEffectPrevented(uint effIndex) { return Convert.ToBoolean(m_hitPreventDefaultEffectMask & (1 << (int)effIndex)); }
+
         public void _PrepareScriptCall(SpellScriptHookType hookType)
         {
             m_currentScriptState = (byte)hookType;
         }
+
         public void _FinishScriptCall()
         {
             m_currentScriptState = (byte)SpellScriptState.None;
         }
+
         public bool IsInCheckCastHook()
         {
             return m_currentScriptState == (byte)SpellScriptHookType.CheckCast;
@@ -475,37 +480,27 @@ namespace Game.Scripting
                 || m_currentScriptState == (byte)SpellScriptHookType.AfterCast
                 || m_currentScriptState == (byte)SpellScriptHookType.CalcCritChance;
         }
-        
+
         public bool IsInTargetHook()
         {
-            switch ((SpellScriptHookType)m_currentScriptState)
+            return (SpellScriptHookType)m_currentScriptState switch
             {
-                case SpellScriptHookType.LaunchTarget:
-                case SpellScriptHookType.EffectHitTarget:
-                case SpellScriptHookType.EffectSuccessfulDispel:
-                case SpellScriptHookType.BeforeHit:
-                case SpellScriptHookType.Hit:
-                case SpellScriptHookType.AfterHit:
-                    return true;
-            }
-            return false;
+                SpellScriptHookType.LaunchTarget or SpellScriptHookType.EffectHitTarget or SpellScriptHookType.EffectSuccessfulDispel or SpellScriptHookType.BeforeHit or SpellScriptHookType.Hit or SpellScriptHookType.AfterHit => true,
+                _ => false,
+            };
         }
 
         bool IsInModifiableHook()
         {
             // after hit hook executed after damage/healing is already done
             // modifying it at this point has no effect
-            switch ((SpellScriptHookType)m_currentScriptState)
+            return (SpellScriptHookType)m_currentScriptState switch
             {
-                case SpellScriptHookType.LaunchTarget:
-                case SpellScriptHookType.EffectHitTarget:
-                case SpellScriptHookType.BeforeHit:
-                case SpellScriptHookType.Hit:
-                    return true;
-            }
-            return false;
+                SpellScriptHookType.LaunchTarget or SpellScriptHookType.EffectHitTarget or SpellScriptHookType.BeforeHit or SpellScriptHookType.Hit => true,
+                _ => false,
+            };
         }
-        
+
         public bool IsInHitPhase()
         {
             return (m_currentScriptState >= (byte)SpellScriptHookType.EffectHit && m_currentScriptState < (byte)SpellScriptHookType.AfterHit + 1);
@@ -757,7 +752,7 @@ namespace Game.Scripting
             }
             return m_spell.corpseTarget;
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -813,7 +808,7 @@ namespace Game.Scripting
             }
             m_spell.m_healing = heal;
         }
-        void PreventHitHeal() { SetHitHeal(0); }
+        public void PreventHitHeal() { SetHitHeal(0); }
         public Spell GetSpell() { return m_spell; }
 
         /// <summary>
@@ -867,12 +862,10 @@ namespace Game.Scripting
             }
 
             UnitAura unitAura = m_spell.spellAura;
-            if (unitAura != null)
-                unitAura.Remove();
+            unitAura?.Remove();
 
             DynObjAura dynAura = m_spell.dynObjAura;
-            if (dynAura != null)
-                dynAura.Remove();
+            dynAura?.Remove();
         }
 
         // prevents effect execution on current spell hit target
@@ -953,7 +946,7 @@ namespace Game.Scripting
 
             m_spell.variance = variance;
         }
-        
+
         // returns: cast item if present.
         public Item GetCastItem() { return m_spell.m_CastItem; }
 
@@ -1042,7 +1035,7 @@ namespace Game.Scripting
         }
     }
 
-    public class AuraScript : BaseSpellScript
+    public class AuraScript : SpellScriptBase
     {
         // internal use classes & functions
         // DO NOT OVERRIDE THESE IN SCRIPTS
@@ -1066,272 +1059,296 @@ namespace Game.Scripting
 
         public class CheckAreaTargetHandler
         {
-            public CheckAreaTargetHandler(AuraCheckAreaTargetDelegate _pHandlerScript) { pHandlerScript = _pHandlerScript; }
+            AuraCheckAreaTargetDelegate _callImpl;
+
+            public CheckAreaTargetHandler(AuraCheckAreaTargetDelegate callImpl) { _callImpl = callImpl; }
+
             public bool Call(Unit target)
             {
-                return pHandlerScript(target);
+                return _callImpl(target);
             }
-
-            AuraCheckAreaTargetDelegate pHandlerScript;
         }
+
         public class AuraDispelHandler
         {
-            public AuraDispelHandler(AuraDispelDelegate _pHandlerScript) { pHandlerScript = _pHandlerScript; }
+            AuraDispelDelegate _callImpl;
+
+            public AuraDispelHandler(AuraDispelDelegate callImpl) { _callImpl = callImpl; }
+
             public void Call(DispelInfo dispelInfo)
             {
-                pHandlerScript(dispelInfo);
+                _callImpl(dispelInfo);
             }
-
-            AuraDispelDelegate pHandlerScript;
         }
+
         public class EffectBase : EffectHook
         {
-            public EffectBase(uint _effIndex, AuraType _effName)
-                : base(_effIndex)
+            AuraType _effAurName;
+
+            public EffectBase(uint effIndex, AuraType auraType) : base(effIndex)
             {
-                effAurName = _effName;
+                _effAurName = auraType;
             }
 
-            public override bool CheckEffect(SpellInfo spellEntry, uint effIndex)
+            public override bool CheckEffect(SpellInfo spellInfo, uint effIndex)
             {
-                if (spellEntry.GetEffects().Count <= effIndex)
+                if (spellInfo.GetEffects().Count <= effIndex)
                     return false;
 
-                SpellEffectInfo spellEffectInfo = spellEntry.GetEffect(effIndex);
-                if (spellEffectInfo.ApplyAuraName == 0 && effAurName == 0)
+                SpellEffectInfo spellEffectInfo = spellInfo.GetEffect(effIndex);
+                if (spellEffectInfo.ApplyAuraName == 0 && _effAurName == 0)
                     return true;
 
                 if (spellEffectInfo.ApplyAuraName == 0)
                     return false;
 
-                return (effAurName == AuraType.Any) || (spellEffectInfo.ApplyAuraName == effAurName);
+                return (_effAurName == AuraType.Any) || (spellEffectInfo.ApplyAuraName == _effAurName);
             }
-
-            AuraType effAurName;
         }
 
         public class EffectPeriodicHandler : EffectBase
         {
-            public EffectPeriodicHandler(AuraEffectPeriodicDelegate _pEffectHandlerScript, byte _effIndex, AuraType _effName)
-                : base(_effIndex, _effName)
+            AuraEffectPeriodicDelegate _callImpl;
+
+            public EffectPeriodicHandler(AuraEffectPeriodicDelegate callImpl, byte _effIndex, AuraType _effName) : base(_effIndex, _effName)
             {
-                pEffectHandlerScript = _pEffectHandlerScript;
+                _callImpl = callImpl;
             }
+
             public void Call(AuraEffect _aurEff)
             {
-                pEffectHandlerScript(_aurEff);
+                _callImpl(_aurEff);
             }
-            AuraEffectPeriodicDelegate pEffectHandlerScript;
         }
+
         public class EffectUpdatePeriodicHandler : EffectBase
         {
-            public EffectUpdatePeriodicHandler(AuraEffectUpdatePeriodicDelegate _pEffectHandlerScript, byte _effIndex, AuraType _effName)
-                : base(_effIndex, _effName)
-            {
-                pEffectHandlerScript = _pEffectHandlerScript;
-            }
-            public void Call(AuraEffect aurEff) { pEffectHandlerScript(aurEff); }
+            AuraEffectUpdatePeriodicDelegate _callImpl;
 
-            AuraEffectUpdatePeriodicDelegate pEffectHandlerScript;
+            public EffectUpdatePeriodicHandler(AuraEffectUpdatePeriodicDelegate callImpl, byte _effIndex, AuraType _effName) : base(_effIndex, _effName)
+            {
+                _callImpl = callImpl;
+            }
+
+            public void Call(AuraEffect aurEff)
+            {
+                _callImpl(aurEff);
+            }
         }
+
         public class EffectCalcAmountHandler : EffectBase
         {
-            public EffectCalcAmountHandler(AuraEffectCalcAmountDelegate _pEffectHandlerScript, uint _effIndex, AuraType _effName)
-                : base(_effIndex, _effName)
+            public AuraEffectCalcAmountDelegate _callImpl;
+
+            public EffectCalcAmountHandler(AuraEffectCalcAmountDelegate callImpl, uint _effIndex, AuraType _effName) : base(_effIndex, _effName)
             {
-                pEffectHandlerScript = _pEffectHandlerScript;
+                _callImpl = callImpl;
             }
+
             public void Call(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
             {
-                pEffectHandlerScript(aurEff, ref amount, ref canBeRecalculated);
+                _callImpl(aurEff, ref amount, ref canBeRecalculated);
             }
-
-            public AuraEffectCalcAmountDelegate pEffectHandlerScript;
         }
+
         public class EffectCalcPeriodicHandler : EffectBase
         {
-            public EffectCalcPeriodicHandler(AuraEffectCalcPeriodicDelegate _pEffectHandlerScript, byte _effIndex, AuraType _effName)
-                : base(_effIndex, _effName)
+            AuraEffectCalcPeriodicDelegate _callImpl;
+
+            public EffectCalcPeriodicHandler(AuraEffectCalcPeriodicDelegate callImpl, byte _effIndex, AuraType _effName) : base(_effIndex, _effName)
             {
-                pEffectHandlerScript = _pEffectHandlerScript;
+                _callImpl = callImpl;
             }
+
             public void Call(AuraEffect aurEff, ref bool isPeriodic, ref int periodicTimer)
             {
-                pEffectHandlerScript(aurEff, ref isPeriodic, ref periodicTimer);
+                _callImpl(aurEff, ref isPeriodic, ref periodicTimer);
             }
-
-            AuraEffectCalcPeriodicDelegate pEffectHandlerScript;
         }
+
         public class EffectCalcSpellModHandler : EffectBase
         {
-            public EffectCalcSpellModHandler(AuraEffectCalcSpellModDelegate _pEffectHandlerScript, byte _effIndex, AuraType _effName)
-                : base(_effIndex, _effName)
+            AuraEffectCalcSpellModDelegate _callImpl;
+
+            public EffectCalcSpellModHandler(AuraEffectCalcSpellModDelegate callImpl, byte _effIndex, AuraType _effName) : base(_effIndex, _effName)
             {
-                pEffectHandlerScript = _pEffectHandlerScript;
+                _callImpl = callImpl;
             }
+
             public void Call(AuraEffect aurEff, ref SpellModifier spellMod)
             {
-                pEffectHandlerScript(aurEff, ref spellMod);
+                _callImpl(aurEff, ref spellMod);
             }
-
-            AuraEffectCalcSpellModDelegate pEffectHandlerScript;
         }
+
         public class EffectCalcCritChanceHandler : EffectBase
         {
-            public EffectCalcCritChanceHandler(AuraEffectCalcCritChanceFnType effectHandlerScript, byte effIndex, AuraType effName) : base(effIndex, effName)
+            AuraEffectCalcCritChanceFnType _callImpl;
+
+            public EffectCalcCritChanceHandler(AuraEffectCalcCritChanceFnType callImpl, byte effIndex, AuraType effName) : base(effIndex, effName)
             {
-                _effectHandlerScript = effectHandlerScript;
-            }
-            public void Call(AuraEffect aurEff, Unit victim, ref float critChance)
-            {
-                _effectHandlerScript(aurEff, victim, ref critChance);
+                _callImpl = callImpl;
             }
 
-            AuraEffectCalcCritChanceFnType _effectHandlerScript;
+            public void Call(AuraEffect aurEff, Unit victim, ref float critChance)
+            {
+                _callImpl(aurEff, victim, ref critChance);
+            }
         }
+
         public class EffectApplyHandler : EffectBase
         {
-            public EffectApplyHandler(AuraEffectApplicationModeDelegate _pEffectHandlerScript, byte _effIndex, AuraType _effName, AuraEffectHandleModes _mode)
-                : base(_effIndex, _effName)
+            AuraEffectApplicationModeDelegate _callImpl;
+            AuraEffectHandleModes mode;
+
+            public EffectApplyHandler(AuraEffectApplicationModeDelegate callImpl, byte _effIndex, AuraType _effName, AuraEffectHandleModes _mode) : base(_effIndex, _effName)
             {
-                pEffectHandlerScript = _pEffectHandlerScript;
+                _callImpl = callImpl;
                 mode = _mode;
             }
+
             public void Call(AuraEffect _aurEff, AuraEffectHandleModes _mode)
             {
                 if (Convert.ToBoolean(_mode & mode))
-                    pEffectHandlerScript(_aurEff, _mode);
+                    _callImpl(_aurEff, _mode);
             }
-
-            AuraEffectApplicationModeDelegate pEffectHandlerScript;
-            AuraEffectHandleModes mode;
         }
+
         public class EffectAbsorbHandler : EffectBase
         {
-            public EffectAbsorbHandler(AuraEffectAbsorbDelegate _pEffectHandlerScript, byte _effIndex, bool overKill = false)
-                : base(_effIndex, overKill ? AuraType.SchoolAbsorbOverkill : AuraType.SchoolAbsorb)
+            AuraEffectAbsorbDelegate _callImpl;
+
+            public EffectAbsorbHandler(AuraEffectAbsorbDelegate callImpl, byte _effIndex, bool overKill = false) : base(_effIndex, overKill ? AuraType.SchoolAbsorbOverkill : AuraType.SchoolAbsorb)
             {
-                pEffectHandlerScript = _pEffectHandlerScript;
+                _callImpl = callImpl;
             }
 
             public void Call(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
             {
-                pEffectHandlerScript(aurEff, dmgInfo, ref absorbAmount);
+                _callImpl(aurEff, dmgInfo, ref absorbAmount);
             }
-
-            AuraEffectAbsorbDelegate pEffectHandlerScript;
         }
+
         public class EffectAbsorbHealHandler : EffectBase
         {
-            public EffectAbsorbHealHandler(AuraEffectAbsorbHealDelegate _pEffectHandlerScript, byte _effIndex)
-                : base(_effIndex, AuraType.SchoolHealAbsorb)
+            AuraEffectAbsorbHealDelegate _callImpl;
+
+            public EffectAbsorbHealHandler(AuraEffectAbsorbHealDelegate callImpl, byte _effIndex) : base(_effIndex, AuraType.SchoolHealAbsorb)
             {
-                pEffectHandlerScript = _pEffectHandlerScript;
+                _callImpl = callImpl;
             }
 
             public void Call(AuraEffect aurEff, HealInfo healInfo, ref uint absorbAmount)
             {
-                pEffectHandlerScript(aurEff, healInfo, ref absorbAmount);
+                _callImpl(aurEff, healInfo, ref absorbAmount);
             }
-
-            AuraEffectAbsorbHealDelegate pEffectHandlerScript;
         }
+
         public class EffectManaShieldHandler : EffectBase
         {
-            public EffectManaShieldHandler(AuraEffectAbsorbDelegate _pEffectHandlerScript, byte _effIndex)
-                : base(_effIndex, AuraType.ManaShield)
+            AuraEffectAbsorbDelegate _callImpl;
+
+            public EffectManaShieldHandler(AuraEffectAbsorbDelegate callImpl, byte _effIndex) : base(_effIndex, AuraType.ManaShield)
             {
-                pEffectHandlerScript = _pEffectHandlerScript;
+                _callImpl = callImpl;
             }
+
             public void Call(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
             {
-                pEffectHandlerScript(aurEff, dmgInfo, ref absorbAmount);
+                _callImpl(aurEff, dmgInfo, ref absorbAmount);
             }
-
-            AuraEffectAbsorbDelegate pEffectHandlerScript;
         }
+
         public class EffectSplitHandler : EffectBase
         {
-            public EffectSplitHandler(AuraEffectSplitDelegate _pEffectHandlerScript, byte _effIndex)
-                : base(_effIndex, AuraType.SplitDamagePct)
+            AuraEffectSplitDelegate _callImpl;
+
+            public EffectSplitHandler(AuraEffectSplitDelegate callImpl, byte _effIndex) : base(_effIndex, AuraType.SplitDamagePct)
             {
-                pEffectHandlerScript = _pEffectHandlerScript;
+                _callImpl = callImpl;
             }
+
             public void Call(AuraEffect aurEff, DamageInfo dmgInfo, uint splitAmount)
             {
-                pEffectHandlerScript(aurEff, dmgInfo, splitAmount);
+                _callImpl(aurEff, dmgInfo, splitAmount);
             }
-
-            AuraEffectSplitDelegate pEffectHandlerScript;
         }
+
         public class CheckProcHandler
         {
-            public CheckProcHandler(AuraCheckProcDelegate handlerScript)
+            AuraCheckProcDelegate _callImpl;
+
+            public CheckProcHandler(AuraCheckProcDelegate callImpl)
             {
-                _HandlerScript = handlerScript;
-            }
-            public bool Call(ProcEventInfo eventInfo)
-            {
-                return _HandlerScript(eventInfo);
+                _callImpl = callImpl;
             }
 
-            AuraCheckProcDelegate _HandlerScript;
+            public bool Call(ProcEventInfo eventInfo)
+            {
+                return _callImpl(eventInfo);
+            }
         }
+
         public class CheckEffectProcHandler : EffectBase
         {
-            public CheckEffectProcHandler(AuraCheckEffectProcDelegate handlerScript, uint effIndex, AuraType effName) : base(effIndex, effName)
+            AuraCheckEffectProcDelegate _callImpl;
+
+            public CheckEffectProcHandler(AuraCheckEffectProcDelegate callImpl, uint effIndex, AuraType effName) : base(effIndex, effName)
             {
-                _HandlerScript = handlerScript;
+                _callImpl = callImpl;
             }
 
             public bool Call(AuraEffect aurEff, ProcEventInfo eventInfo)
             {
-                return _HandlerScript(aurEff, eventInfo);
+                return _callImpl(aurEff, eventInfo);
             }
-
-            AuraCheckEffectProcDelegate _HandlerScript;
         }
+
         public class AuraProcHandler
         {
-            public AuraProcHandler(AuraProcDelegate handlerScript)
+            AuraProcDelegate _callImpl;
+
+            public AuraProcHandler(AuraProcDelegate callImpl)
             {
-                _HandlerScript = handlerScript;
+                _callImpl = callImpl;
             }
 
             public void Call(ProcEventInfo eventInfo)
             {
-                _HandlerScript(eventInfo);
+                _callImpl(eventInfo);
             }
-
-            AuraProcDelegate _HandlerScript;
         }
+
         public class EffectProcHandler : EffectBase
         {
-            public EffectProcHandler(AuraEffectProcDelegate effectHandlerScript, byte effIndex, AuraType effName) : base(effIndex, effName)
+            AuraEffectProcDelegate _callImpl;
+
+            public EffectProcHandler(AuraEffectProcDelegate callImpl, byte effIndex, AuraType effName) : base(effIndex, effName)
             {
-                _EffectHandlerScript = effectHandlerScript;
+                _callImpl = callImpl;
             }
+
             public void Call(AuraEffect aurEff, ProcEventInfo eventInfo)
             {
-                _EffectHandlerScript(aurEff, eventInfo);
+                _callImpl(aurEff, eventInfo);
             }
-
-            AuraEffectProcDelegate _EffectHandlerScript;
         }
+
         public class EnterLeaveCombatHandler
         {
-            public EnterLeaveCombatHandler(AuraEnterLeaveCombatFnType handlerScript) 
+            AuraEnterLeaveCombatFnType _callImpl;
+
+            public EnterLeaveCombatHandler(AuraEnterLeaveCombatFnType callImpl)
             {
-                _handlerScript = handlerScript;
-            }
-            public void Call(bool isNowInCombat)
-            {
-                _handlerScript(isNowInCombat);
+                _callImpl = callImpl;
             }
 
-            AuraEnterLeaveCombatFnType _handlerScript;
+            public void Call(bool isNowInCombat)
+            {
+                _callImpl(isNowInCombat);
+            }
         }
-        
+
         public AuraScript()
         {
             m_aura = null;
@@ -1468,20 +1485,11 @@ namespace Game.Scripting
         }
         public bool _IsDefaultActionPrevented()
         {
-            switch ((AuraScriptHookType)m_currentScriptState)
+            return (AuraScriptHookType)m_currentScriptState switch
             {
-                case AuraScriptHookType.EffectApply:
-                case AuraScriptHookType.EffectRemove:
-                case AuraScriptHookType.EffectPeriodic:
-                case AuraScriptHookType.EffectAbsorb:
-                case AuraScriptHookType.EffectSplit:
-                case AuraScriptHookType.PrepareProc:
-                case AuraScriptHookType.Proc:
-                case AuraScriptHookType.EffectProc:
-                    return m_defaultActionPrevented;
-                default:
-                    throw new Exception("AuraScript._IsDefaultActionPrevented is called in a wrong place");
-            }
+                AuraScriptHookType.EffectApply or AuraScriptHookType.EffectRemove or AuraScriptHookType.EffectPeriodic or AuraScriptHookType.EffectAbsorb or AuraScriptHookType.EffectSplit or AuraScriptHookType.PrepareProc or AuraScriptHookType.Proc or AuraScriptHookType.EffectProc => m_defaultActionPrevented,
+                _ => throw new Exception("AuraScript._IsDefaultActionPrevented is called in a wrong place"),
+            };
         }
 
         Aura m_aura;
@@ -1707,7 +1715,7 @@ namespace Game.Scripting
         // returns owner if it's unit or unit derived object, null otherwise (only for persistent area auras null is returned)
         public Unit GetUnitOwner() { return m_aura.GetUnitOwner(); }
         // returns owner if it's dynobj, null otherwise
-        DynamicObject GetDynobjOwner() { return m_aura.GetDynobjOwner(); }
+        public DynamicObject GetDynobjOwner() { return m_aura.GetDynobjOwner(); }
 
         // removes aura with remove mode (see AuraRemoveMode enum)
         public void Remove(AuraRemoveMode removeMode = 0) { m_aura.Remove(removeMode); }
@@ -1715,39 +1723,39 @@ namespace Game.Scripting
         public Aura GetAura() { return m_aura; }
 
         // returns type of the aura, may be dynobj owned aura or unit owned aura
-        AuraObjectType GetAuraType() { return m_aura.GetAuraType(); }
+        public AuraObjectType GetAuraType() { return m_aura.GetAuraType(); }
 
         // aura duration manipulation - when duration goes to 0 aura is removed
         public int GetDuration() { return m_aura.GetDuration(); }
         public void SetDuration(int duration, bool withMods = false) { m_aura.SetDuration(duration, withMods); }
         // sets duration to maxduration
         public void RefreshDuration() { m_aura.RefreshDuration(); }
-        long GetApplyTime() { return m_aura.GetApplyTime(); }
+        public long GetApplyTime() { return m_aura.GetApplyTime(); }
         public int GetMaxDuration() { return m_aura.GetMaxDuration(); }
         public void SetMaxDuration(int duration) { m_aura.SetMaxDuration(duration); }
-        int CalcMaxDuration() { return m_aura.CalcMaxDuration(); }
+        public int CalcMaxDuration() { return m_aura.CalcMaxDuration(); }
         // expired - duration just went to 0
         public bool IsExpired() { return m_aura.IsExpired(); }
         // permament - has infinite duration
-        bool IsPermanent() { return m_aura.IsPermanent(); }
+        public bool IsPermanent() { return m_aura.IsPermanent(); }
 
         // charges manipulation - 0 - not charged aura
-        byte GetCharges() { return m_aura.GetCharges(); }
-        void SetCharges(byte charges) { m_aura.SetCharges(charges); }
-        byte CalcMaxCharges() { return m_aura.CalcMaxCharges(); }
-        bool ModCharges(sbyte num, AuraRemoveMode removeMode = AuraRemoveMode.Default) { return m_aura.ModCharges(num, removeMode); }
+        public byte GetCharges() { return m_aura.GetCharges(); }
+        public void SetCharges(byte charges) { m_aura.SetCharges(charges); }
+        public byte CalcMaxCharges() { return m_aura.CalcMaxCharges(); }
+        public bool ModCharges(sbyte num, AuraRemoveMode removeMode = AuraRemoveMode.Default) { return m_aura.ModCharges(num, removeMode); }
         // returns true if last charge dropped
-        bool DropCharge(AuraRemoveMode removeMode = AuraRemoveMode.Default) { return m_aura.DropCharge(removeMode); }
+        public bool DropCharge(AuraRemoveMode removeMode = AuraRemoveMode.Default) { return m_aura.DropCharge(removeMode); }
 
         // stack amount manipulation
         public byte GetStackAmount() { return m_aura.GetStackAmount(); }
-        void SetStackAmount(byte num) { m_aura.SetStackAmount(num); }
+        public void SetStackAmount(byte num) { m_aura.SetStackAmount(num); }
         public bool ModStackAmount(int num, AuraRemoveMode removeMode = AuraRemoveMode.Default) { return m_aura.ModStackAmount(num, removeMode); }
 
         // passive - "working in background", not saved, not removed by immunities, not seen by player
-        bool IsPassive() { return m_aura.IsPassive(); }
+        public bool IsPassive() { return m_aura.IsPassive(); }
         // death persistent - not removed on death
-        bool IsDeathPersistent() { return m_aura.IsDeathPersistent(); }
+        public bool IsDeathPersistent() { return m_aura.IsDeathPersistent(); }
 
         // check if aura has effect of given effindex
         public bool HasEffect(byte effIndex) { return m_aura.HasEffect(effIndex); }
@@ -1755,7 +1763,7 @@ namespace Game.Scripting
         public AuraEffect GetEffect(byte effIndex) { return m_aura.GetEffect(effIndex); }
 
         // check if aura has effect of given aura type
-        bool HasEffectType(AuraType type)
+        public bool HasEffectType(AuraType type)
         {
             return m_aura.HasEffectType(type);
         }

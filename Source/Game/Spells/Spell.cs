@@ -7464,7 +7464,7 @@ namespace Game.Spells
 
             foreach (var script in m_loadedScripts)
             {
-                Log.outDebug(LogFilter.Spells, "Spell.LoadScripts: Script `{0}` for spell `{1}` is loaded now", script._GetScriptName(), m_spellInfo.Id);
+                Log.outDebug(LogFilter.Spells, "Spell.LoadScripts: Script `{0}` for spell `{1}` is loaded now", script.GetScriptName(), m_spellInfo.Id);
                 script.Register();
             }
         }
