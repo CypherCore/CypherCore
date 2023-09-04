@@ -1796,6 +1796,7 @@ namespace Game
                 case ConditionTypes.Charmed:
                 case ConditionTypes.Taxi:
                 case ConditionTypes.Gamemaster:
+                case ConditionTypes.PrivateObject:
                     break;
                 case ConditionTypes.DifficultyId:
                     if (!CliDB.DifficultyStorage.ContainsKey(cond.ConditionValue1))

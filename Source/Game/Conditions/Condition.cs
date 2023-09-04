@@ -435,6 +435,11 @@ namespace Game.Conditions
                     }
                     break;
                 }
+                case ConditionTypes.PrivateObject:
+                {
+                    condMeets = !obj.GetPrivateObjectOwner().IsEmpty();
+                    break;
+                }
                 default:
                     break;
             }
@@ -555,6 +560,9 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.PlayerCondition:
                     mask |= GridMapTypeMask.Player;
+                    break;
+                case ConditionTypes.PrivateObject:
+                    mask |= GridMapTypeMask.All & ~GridMapTypeMask.Player;
                     break;
                 default:
                     Cypher.Assert(false, "Condition.GetSearcherTypeMaskForCondition - missing condition handling!");
