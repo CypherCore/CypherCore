@@ -518,6 +518,12 @@ namespace Game.Entities
 
             if (IsInWorld)
                 RemoveFromWorld();
+            else
+            {
+                // cleanup that must happen even if not in world
+                if (IsVehicle())
+                    RemoveVehicleKit(true);
+            }
 
             // A unit may be in removelist and not in world, but it is still in grid
             // and may have some references during delete
