@@ -79,6 +79,7 @@ namespace Scripts.Spells.Paladin
         public const uint RighteousDefenseTaunt = 31790;
         public const uint RighteousVerdictAura = 267611;
         public const uint SealOfRighteousness = 25742;
+        public const uint ShieldOfVengeanceDamage = 184689;
         public const uint TemplarVerdictDamage = 224266;
         public const uint ZealAura = 269571;
     }
@@ -1165,6 +1166,39 @@ namespace Scripts.Spells.Paladin
         }
     }
 
+    [Script] // 184662 - Shield of Vengeance
+    class spell_pal_shield_of_vengeance : AuraScript
+    {
+        int _initialAmount;
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ShieldOfVengeanceDamage) && ValidateSpellEffect((spellInfo.Id, 1));
+        }
+
+        void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        {
+            amount = (int)MathFunctions.CalculatePct(GetUnitOwner().GetMaxHealth(), GetEffectInfo(1).CalcValue());
+            Player player = GetUnitOwner().ToPlayer();
+            if (player != null)
+                MathFunctions.AddPct(ref amount, player.GetRatingBonusValue(CombatRating.VersatilityDamageDone) + player.GetTotalAuraModifier(AuraType.ModVersatility));
+
+            _initialAmount = amount;
+        }
+
+        void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().CastSpell(GetTarget(), SpellIds.ShieldOfVengeanceDamage,
+                new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, _initialAmount - aurEff.GetAmount()));
+        }
+
+        public override void Register()
+        {
+            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
+            OnEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.SchoolAbsorb, AuraEffectHandleModes.Real));
+        }
+    }
+    
     [Script] // 85256 - Templar's Verdict
     class spell_pal_templar_s_verdict : SpellScript
     {
