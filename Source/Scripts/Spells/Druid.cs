@@ -29,6 +29,7 @@ namespace Scripts.Spells.Druid
         public const uint BramblesRelect = 203958;
         public const uint BristlingFurGainRage = 204031;
         public const uint CatForm = 768;
+        public const uint CuriousBramblepatch = 330670;
         public const uint EarthwardenAura = 203975;
         public const uint EclipseDummy = 79577;
         public const uint EclipseLunarAura = 48518;
@@ -36,6 +37,7 @@ namespace Scripts.Spells.Druid
         public const uint EclipseOoc = 329910;
         public const uint EclipseSolarAura = 48517;
         public const uint EclipseSolarSpellCnt = 326053;
+        public const uint EntanglingRoots = 339;
         public const uint Exhilarate = 28742;
         public const uint FormAquaticPassive = 276012;
         public const uint FormAquatic = 1066;
@@ -61,6 +63,7 @@ namespace Scripts.Spells.Druid
         public const uint LifebloomFinalHeal = 33778;
         public const uint LunarInspirationOverride = 155627;
         public const uint Mangle = 33917;
+        public const uint MassEntanglement = 102359;
         public const uint MoonfireDamage = 164812;
         public const uint Prowl = 5215;
         public const uint RejuvenationT10Proc = 70691;
@@ -390,6 +393,61 @@ namespace Scripts.Spells.Druid
         }
     }
 
+    // 339 - Entangling Roots
+    [Script] // 102359 - Mass Entanglement
+    class spell_dru_entangling_roots : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.CuriousBramblepatch);
+        }
+
+        void HandleCuriousBramblepatch(ref WorldObject target)
+        {
+            if (!GetCaster().HasAura(SpellIds.CuriousBramblepatch))
+                target = null;
+        }
+
+        void HandleCuriousBramblepatchAOE(List<WorldObject> targets)
+        {
+            if (!GetCaster().HasAura(SpellIds.CuriousBramblepatch))
+                targets.Clear();
+        }
+
+        public override void Register()
+        {
+            OnObjectTargetSelect.Add(new ObjectTargetSelectHandler(HandleCuriousBramblepatch, 1, Targets.UnitTargetEnemy));
+            if (m_scriptSpellId == SpellIds.MassEntanglement)
+                OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(HandleCuriousBramblepatchAOE, 1, Targets.UnitDestAreaEnemy));
+        }
+    }
+
+    [Script]
+    class spell_dru_entangling_roots_aura : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.EntanglingRoots, SpellIds.MassEntanglement);
+        }
+
+        bool CheckProc(ProcEventInfo eventInfo)
+        {
+            SpellInfo spellInfo = eventInfo.GetSpellInfo();
+            if (spellInfo != null)
+            {
+                // dont subtract dmg caused by roots from dmg required to break root
+                if (spellInfo.Id == SpellIds.EntanglingRoots || spellInfo.Id == SpellIds.MassEntanglement)
+                    return false;
+            }
+            return true;
+        }
+
+        public override void Register()
+        {
+            DoCheckProc.Add(new CheckProcHandler(CheckProc));
+        }
+    }
+    
     [Script] // 22568 - Ferocious Bite
     class spell_dru_ferocious_bite : SpellScript
     {
