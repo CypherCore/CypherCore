@@ -1141,6 +1141,9 @@ namespace Framework.Constants
         NoSalvage = 0x800000,
         Recraftable = 0x1000000,
         CcTrinket = 0x2000000,
+        KeepThroughFactionChange = 0x4000000,
+        NotMulticraftable = 0x8000000,
+        DontReportLootLogToSelf = 0x10000000,
     }
 
     [Flags]

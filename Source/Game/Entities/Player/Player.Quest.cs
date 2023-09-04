@@ -2074,7 +2074,7 @@ namespace Game.Entities
                         break;
                     case QuestStatus.Incomplete:
                         if (quest.IsImportant())
-                            result |= QuestGiverStatus.ImportantQuestReward;
+                            result |= QuestGiverStatus.ImportantReward;
                         else if (quest.GetQuestTag() == QuestTagType.CovenantCalling)
                             result |= QuestGiverStatus.CovenantCallingReward;
                         else if (quest.HasFlagEx(QuestFlagsEx.Legendary))
@@ -2114,7 +2114,7 @@ namespace Game.Entities
                             if (quest.IsImportant())
                                 result |= isTrivial ? QuestGiverStatus.TrivialImportantQuest : QuestGiverStatus.ImportantQuest;
                             else if (quest.GetQuestTag() == QuestTagType.CovenantCalling)
-                                result |= isTrivial ? QuestGiverStatus.TrivialCovenantCallingQuest : QuestGiverStatus.CovenantCallingQuest;
+                                result |= QuestGiverStatus.CovenantCallingQuest;
                             else if (quest.HasFlagEx(QuestFlagsEx.Legendary))
                                 result |= isTrivial ? QuestGiverStatus.TrivialLegendaryQuest : QuestGiverStatus.LegendaryQuest;
                             else if (quest.IsDaily())
@@ -2122,6 +2122,8 @@ namespace Game.Entities
                             else
                                 result |= isTrivial ? QuestGiverStatus.Trivial : QuestGiverStatus.Quest;
                         }
+                        else if (quest.IsImportant())
+                            result |= QuestGiverStatus.FutureImportantQuest;
                         else if (quest.HasFlagEx(QuestFlagsEx.Legendary))
                             result |= QuestGiverStatus.FutureLegendaryQuest;
                         else

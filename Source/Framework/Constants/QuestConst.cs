@@ -40,7 +40,9 @@ namespace Framework.Constants
         HideCreditMsg = 0x10, // Skip Showing Item Objective Progress
         PreserveQuestItems = 0x20,
         PartOfProgressBar = 0x40, // Hidden Objective Used To Calculate Progress Bar Percent (Quests Are Limited To A Single Progress Bar Objective)
-        KillPlayersSameFaction = 0x80
+        KillPlayersSameFaction = 0x80,
+        NoShareProgress = 0x0100,
+        IgnoreSoulboundItems = 0x0200,
     }
 
     public enum QuestCompleteSpellType
@@ -430,12 +432,13 @@ namespace Framework.Constants
         FutureLegendaryQuest = 0x800000,
         LegendaryReward = 0x1000000,
         ImportantQuest = 0x2000000,
-        ImportantQuestReward = 0x4000000,
+        ImportantReward = 0x4000000,
         TrivialImportantQuest = 0x8000000,
+        FutureImportantQuest = 0x010000000,
         ImportantQuestRewardCompleteNoPOI = 0x20000000,
         ImportantQuestRewardCompletePOI = 0x40000000,
         TrivialJourneyQuest = 0x80000000,
-        TrivialCovenantCallingQuest = 0x100000000,
+        FutureJourneyQuest = 0x100000000,
     }
 
     [Flags]
@@ -536,7 +539,10 @@ namespace Framework.Constants
         DisplayTimeRemaining = 0x20000,
         ClearTaskProgressWhenAbandoned = 0x40000,
         SuppressGreetingsOnComplete = 0x80000,
-        HideRequiredItemsOnTurnIn = 0x100000
+        HideRequiredItemsOnTurnIn = 0x100000,
+        IgnoreSoulboundItems = 0x00200000,
+        DontDeferStartEffects = 0x00400000,
+        HideRequiredItemsPreTurnIn = 0x00800000,
     }
 
     public enum QuestSpecialFlags
