@@ -365,7 +365,7 @@ namespace Game.Entities
 
             // Remove UNIT_FLAG_NOT_SELECTABLE if passenger did not have it before entering vehicle
             if (seat.Value.SeatInfo.HasFlag(VehicleSeatFlags.PassengerNotSelectable) && !seat.Value.Passenger.IsUninteractible)
-                unit.RemoveUnitFlag(UnitFlags.Uninteractible);
+                unit.SetUninteractible(false);
 
             seat.Value.Passenger.Reset();
 
@@ -642,7 +642,7 @@ namespace Game.Entities
 
             Passenger.SetVehicle(Target);
             Seat.Value.Passenger.Guid = Passenger.GetGUID();
-            Seat.Value.Passenger.IsUninteractible = Passenger.HasUnitFlag(UnitFlags.Uninteractible);
+            Seat.Value.Passenger.IsUninteractible = Passenger.IsUninteractible();
             Seat.Value.Passenger.IsGravityDisabled = Passenger.HasUnitMovementFlag(MovementFlag.DisableGravity);
             if (Seat.Value.SeatInfo.CanEnterOrExit())
             {

@@ -43,7 +43,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
             Initialize();
             creature.SetNpcFlag(NPCFlags.Gossip);
             creature.SetFaction((uint)FactionTemplates.Friendly);
-            creature.RemoveUnitFlag(UnitFlags.Uninteractible);
+            creature.SetUninteractible(false);
         }
 
         void Initialize()

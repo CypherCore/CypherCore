@@ -131,7 +131,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Curator
             _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
             {
                 me.SetReactState(ReactStates.Aggressive);
-                me.RemoveUnitFlag(UnitFlags.Uninteractible);
+                me.SetUninteractible(false);
                 DoZoneInCombat();
             });
         }

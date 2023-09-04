@@ -139,7 +139,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
                 Unit CrystalChosen = Global.ObjAccessor.GetUnit(me, CrystalGUID);
                 if (CrystalChosen != null && CrystalChosen.IsAlive())
                 {
-                    CrystalChosen.RemoveUnitFlag(UnitFlags.Uninteractible);
+                    CrystalChosen.SetUninteractible(false);
                     CrystalChosen.CastSpell(me, SpellIds.ManaRage, true);
                     _events.ScheduleEvent(EventIds.Empower, TimeSpan.FromSeconds(10), PhaseIds.Drain);
                 }

@@ -87,7 +87,8 @@ namespace Scripts.World.EmeraldDragons
         public override void Reset()
         {
             base.Reset();
-            me.RemoveUnitFlag(UnitFlags.Uninteractible | UnitFlags.NonAttackable);
+            me.RemoveUnitFlag(UnitFlags.NonAttackable);
+            me.SetUninteractible(false);
             me.SetReactState(ReactStates.Aggressive);
             DoCast(me, SpellIds.MarkOfNatureAura, new CastSpellExtraArgs(true));
 
@@ -439,7 +440,8 @@ namespace Scripts.World.EmeraldDragons
                 _shades += (byte)SpellIds.TaerarShadeSpells.Length;
 
                 DoCast(SpellIds.Shade);
-                me.SetUnitFlag(UnitFlags.Uninteractible | UnitFlags.NonAttackable);
+                me.SetUnitFlag(UnitFlags.NonAttackable);
+                me.SetUninteractible(true);
                 me.SetReactState(ReactStates.Passive);
 
                 ++_stage;
@@ -458,7 +460,8 @@ namespace Scripts.World.EmeraldDragons
                 {
                     _banished = false;
 
-                    me.RemoveUnitFlag(UnitFlags.Uninteractible | UnitFlags.NonAttackable);
+                    me.RemoveUnitFlag(UnitFlags.NonAttackable);
+                    me.SetUninteractible(false);
                     me.RemoveAurasDueToSpell(SpellIds.Shade);
                     me.SetReactState(ReactStates.Aggressive);
                 }

@@ -161,7 +161,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                     //Become unbanished again
                     me.SetReactState(ReactStates.Aggressive);
                     me.SetFaction((uint)FactionTemplates.Monster);
-                    me.RemoveUnitFlag(UnitFlags.Uninteractible);
+                    me.SetUninteractible(false);
                     me.SetEmoteState(Emote.OneshotNone);
                     me.HandleEmoteCommand(Emote.OneshotEmerge);
                     Unit target = SelectTarget(SelectTargetMethod.Random, 0);
@@ -240,7 +240,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                                 //Root self
                                 //DoCast(me, 23973);
                                 me.SetFaction((uint)FactionTemplates.Friendly);
-                                me.SetUnitFlag(UnitFlags.Uninteractible);
+                                me.SetUninteractible(true);
                                 me.SetEmoteState(Emote.StateSubmerged);
                                 me.HandleEmoteCommand(Emote.OneshotSubmerge);
                                 instance.SetData(MCMiscConst.DataRagnarosAdds, 0);

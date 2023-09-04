@@ -378,7 +378,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
                     me.AttackStop();
                     me.SetReactState(ReactStates.Passive);
                     me.RemoveAllAuras();
-                    me.SetUnitFlag(UnitFlags.Uninteractible);
+                    me.SetUninteractible(true);
                     DoCastSelf(SpellIds.EmberBlast);
                     // DoCastSelf(SpellSummonPhoenixEgg); -- We do a manual summon for now. Feel free to move it to spelleffect_dbc
                     Creature egg = DoSummon(CreatureIds.PhoenixEgg, me.GetPosition(), TimeSpan.FromSeconds(0));
@@ -407,7 +407,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
                                 _isInEgg = false;
                                 DoCastSelf(SpellIds.FullHeal);
                                 DoCastSelf(SpellIds.Burn);
-                                me.RemoveUnitFlag(UnitFlags.Uninteractible);
+                                me.SetUninteractible(false);
                                 engageTask.Schedule(TimeSpan.FromSeconds(2), task => me.SetReactState(ReactStates.Aggressive));
                             });
                         });

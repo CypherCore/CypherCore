@@ -89,7 +89,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
             if (spellInfo.Id == SpellIds.InfernalRelay)
             {
                 me.SetDisplayId(me.GetNativeDisplayId());
-                me.SetUnitFlag(UnitFlags.Uninteractible);
+                me.SetUninteractible(true);
 
                 _scheduler.Schedule(TimeSpan.FromSeconds(4), task => DoCast(me, SpellIds.Hellfire));
                 _scheduler.Schedule(TimeSpan.FromSeconds(170), task =>
@@ -402,7 +402,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
                         Creature axe = me.SummonCreature(MiscConst.MalchezarsAxe, me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), 0, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(1));
                         if (axe)
                         {
-                            axe.SetUnitFlag(UnitFlags.Uninteractible);
+                            axe.SetUninteractible(true);
                             axe.SetFaction(me.GetFaction());
                             axes[i] = axe.GetGUID();
                             if (target)

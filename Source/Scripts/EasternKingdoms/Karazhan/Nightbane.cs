@@ -118,7 +118,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
                 phase = NightbanePhases.Intro;
                 me.SetActive(true);
                 me.SetFarVisible(true);
-                me.RemoveUnitFlag(UnitFlags.Uninteractible);
+                me.SetUninteractible(false);
                 me.GetMotionMaster().MoveAlongSplineChain(PointIds.IntroStart, SplineChainIds.IntroStart, false);
                 HandleTerraceDoors(false);
             }

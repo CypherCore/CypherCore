@@ -46,7 +46,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
 
         public override void Reset()
         {
-            me.SetUnitFlag(UnitFlags.Uninteractible);
+            me.SetUninteractible(true);
             me.SetImmuneToPC(true);
             _scheduler.CancelAll();
             // Apply auras on spawn and reset
@@ -172,7 +172,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
                     me.CastSpell(me, SpellIds.EmberseerFullStrength);
                     Talk(TextIds.EmoteFreeOfBonds);
                     Talk(TextIds.YellFreeOfBonds);
-                    me.RemoveUnitFlag(UnitFlags.Uninteractible);
+                    me.SetUninteractible(false);
                     me.SetImmuneToPC(false);
                     _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
                     {

@@ -2408,15 +2408,8 @@ namespace Game.AI
                 case SmartActions.SetUninteractible:
                 {
                     foreach (var target in targets)
-                    {
                         if (IsUnit(target))
-                        {
-                            if (e.Action.setUninteractible.uninteractible != 0)
-                                target.ToUnit().SetUnitFlag(UnitFlags.Uninteractible);
-                            else
-                                target.ToUnit().RemoveUnitFlag(UnitFlags.Uninteractible);
-                        }
-                    }
+                            target.ToUnit().SetUninteractible(e.Action.setUninteractible.uninteractible != 0);
                     break;
                 }
                 case SmartActions.ActivateGameobject:

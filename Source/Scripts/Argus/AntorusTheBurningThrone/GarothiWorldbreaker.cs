@@ -205,7 +205,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
                         _events.Reset();
                     _events.ScheduleEvent(EventIds.ReengagePlayers, TimeSpan.FromSeconds(3.5));
                     HideCannons();
-                    me.RemoveUnitFlag(UnitFlags.Uninteractible);
+                    me.SetUninteractible(false);
                     break;
                 default:
                     break;
@@ -229,14 +229,14 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
                 DoCastSelf(SpellIds.ApocalypseDriveFinalDamage);
                 Talk(TextIds.SayAnnounceApocalypseDrive);
                 Talk(TextIds.SayApocalypseDrive);
-                me.SetUnitFlag(UnitFlags.Uninteractible);
+                me.SetUninteractible(true);
 
                 Creature decimator = instance.GetCreature(DataTypes.Decimator);
                 if (decimator)
                 {
                     instance.SendEncounterUnit(EncounterFrameType.Engage, decimator, 2);
                     decimator.SetUnitFlag(UnitFlags.InCombat);
-                    decimator.RemoveUnitFlag(UnitFlags.Uninteractible);
+                    decimator.SetUninteractible(false);
                 }
 
                 Creature annihilator = instance.GetCreature(DataTypes.Annihilator);
@@ -244,7 +244,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
                 {
                     instance.SendEncounterUnit(EncounterFrameType.Engage, annihilator, 2);
                     annihilator.SetUnitFlag(UnitFlags.InCombat);
-                    annihilator.RemoveUnitFlag(UnitFlags.Uninteractible);
+                    annihilator.SetUninteractible(false);
                 }
                 ++_apocalypseDriveCount;
             }
@@ -279,7 +279,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
                 case CreatureIds.Annihilator:
                     me.InterruptNonMeleeSpells(true);
                     me.RemoveAurasDueToSpell(SpellIds.ApocalypseDrive);
-                    me.RemoveUnitFlag(UnitFlags.Uninteractible);
+                    me.SetUninteractible(false);
 
                     if (summon.GetEntry() == CreatureIds.Annihilator)
                         _searingBarrageSpellId = SpellIds.SearingBarrageAnnihilator;
@@ -411,14 +411,16 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             if (decimator)
             {
                 instance.SendEncounterUnit(EncounterFrameType.Disengage, decimator);
-                decimator.SetUnitFlag(UnitFlags.Uninteractible | UnitFlags.Immune);
+                decimator.SetUninteractible(true);
+                decimator.SetUnitFlag(UnitFlags.Immune);
             }
 
             Creature annihilator = instance.GetCreature(DataTypes.Annihilator);
             if (annihilator)
             {
                 instance.SendEncounterUnit(EncounterFrameType.Disengage, annihilator);
-                annihilator.SetUnitFlag(UnitFlags.Uninteractible | UnitFlags.Immune);
+                annihilator.SetUninteractible(true);
+                annihilator.SetUnitFlag(UnitFlags.Immune);
             }
         }
     }

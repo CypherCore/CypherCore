@@ -150,7 +150,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             creature.InterruptNonMeleeSpells(true);
             creature.RemoveAllAuras();
             creature.SetHealth(0);
-            creature.SetUnitFlag(UnitFlags.Uninteractible);
+            creature.SetUninteractible(true);
             creature.GetMotionMaster().Clear();
             creature.GetMotionMaster().MoveIdle();
             creature.SetStandState(UnitStandStateType.Dead);
@@ -158,7 +158,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
         public static void Resurrect(Creature target)
         {
-            target.RemoveUnitFlag(UnitFlags.Uninteractible);
+            target.SetUninteractible(false);
             target.SetFullHealth();
             target.SetStandState(UnitStandStateType.Stand);
             target.CastSpell(target, SpellIds.ResVisual, true);
@@ -1070,7 +1070,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                     Creature Romulo = ObjectAccessor.GetCreature(me, RomuloGUID);
                     if (Romulo)
                     {
-                        Romulo.RemoveUnitFlag(UnitFlags.Uninteractible);
+                        Romulo.SetUninteractible(false);
                         Romulo.GetMotionMaster().Clear();
                         Romulo.SetDeathState(DeathState.JustDied);
                         Romulo.CombatStop(true);
@@ -1320,7 +1320,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                     Creature Julianne = ObjectAccessor.GetCreature(me, JulianneGUID);
                     if (Julianne)
                     {
-                        Julianne.RemoveUnitFlag(UnitFlags.Uninteractible);
+                        Julianne.SetUninteractible(false);
                         Julianne.GetMotionMaster().Clear();
                         Julianne.SetDeathState(DeathState.JustDied);
                         Julianne.CombatStop(true);

@@ -204,7 +204,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
             if (summon.GetEntry() != BWLCreatureIds.Nefarian)
             {
                 summon.UpdateEntry(CreatureIds.BoneConstruct);
-                summon.SetUnitFlag(UnitFlags.Uninteractible);
+                summon.SetUninteractible(true);
                 summon.SetReactState(ReactStates.Passive);
                 summon.SetStandState(UnitStandStateType.Dead);
             }
@@ -561,7 +561,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                     {
                         creature.Respawn();
                         DoZoneInCombat(creature);
-                        creature.RemoveUnitFlag(UnitFlags.Uninteractible);
+                        creature.SetUninteractible(false);
                         creature.SetReactState(ReactStates.Aggressive);
                         creature.SetStandState(UnitStandStateType.Stand);
                     }

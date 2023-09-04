@@ -3209,6 +3209,16 @@ namespace Game.Entities
 
         public virtual void SetImmuneToNPC(bool apply) { SetImmuneToNPC(apply, false); }
 
+        public bool IsUninteractible() { return HasUnitFlag(UnitFlags.Uninteractible); }
+
+        public void SetUninteractible(bool apply)
+        {
+            if (apply)
+                SetUnitFlag(UnitFlags.Uninteractible);
+            else
+                RemoveUnitFlag(UnitFlags.Uninteractible);
+        }
+
         public virtual float GetBlockPercent(uint attackerLevel) { return 30.0f; }
 
         void UpdateReactives(uint p_time)

@@ -3371,7 +3371,7 @@ namespace Game.Entities
                 {
                     Creature creature = GetMap().GetCreature(guid);
                     // Update fields of triggers, transformed units or unselectable units (values dependent on GM state)
-                    if (creature == null || (!creature.IsTrigger() && !creature.HasAuraType(AuraType.Transform) && !creature.HasUnitFlag(UnitFlags.Uninteractible)))
+                    if (creature == null || (!creature.IsTrigger() && !creature.HasAuraType(AuraType.Transform) && !creature.IsUninteractible()))
                         continue;
 
                     creature.m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayID);

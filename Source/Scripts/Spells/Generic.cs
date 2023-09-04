@@ -1916,7 +1916,9 @@ namespace Scripts.Spells.Generic
             Unit target = GetTarget();
             target.SetUnitFlag3(UnitFlags3.FakeDead);
             target.SetUnitFlag2(UnitFlags2.FeignDeath);
-            target.SetUnitFlag(UnitFlags.PreventEmotesFromChatText | UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc | UnitFlags.Uninteractible);
+            target.SetUnitFlag(UnitFlags.PreventEmotesFromChatText);
+            target.SetImmuneToAll(true);
+            target.SetUninteractible(true);
 
             target.ToCreature()?.SetReactState(ReactStates.Passive);
         }
@@ -1926,7 +1928,9 @@ namespace Scripts.Spells.Generic
             Unit target = GetTarget();
             target.RemoveUnitFlag3(UnitFlags3.FakeDead);
             target.RemoveUnitFlag2(UnitFlags2.FeignDeath);
-            target.RemoveUnitFlag(UnitFlags.PreventEmotesFromChatText | UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc | UnitFlags.Uninteractible);
+            target.RemoveUnitFlag(UnitFlags.PreventEmotesFromChatText);
+            target.SetImmuneToAll(false);
+            target.SetUninteractible(false);
 
             target.ToCreature()?.InitializeReactState();
         }

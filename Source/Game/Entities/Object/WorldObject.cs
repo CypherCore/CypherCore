@@ -2557,7 +2557,7 @@ namespace Game.Entities
             if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetUntargetable)) && unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable2))
                 return false;
 
-            if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.Uninteractible))
+            if (unitTarget != null && unitTarget.IsUninteractible())
                 return false;
 
             Player playerAttacker = ToPlayer();
@@ -2714,7 +2714,7 @@ namespace Game.Entities
             if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetUntargetable)) && unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable2))
                 return false;
 
-            if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.Uninteractible))
+            if (unitTarget != null && unitTarget.IsUninteractible())
                 return false;
 
             // check flags for negative spells

@@ -374,7 +374,7 @@ namespace Game.AI
                         point.SetUnitFlag(UnitFlags.Stunned);
                         point.SetImmuneToAll(true);
                         if (!hasOutOfBoundsNeighbor)
-                            point.SetUnitFlag(UnitFlags.Uninteractible);
+                            point.SetUninteractible(true);
                     }
                     Q.Remove(front);
                 }
