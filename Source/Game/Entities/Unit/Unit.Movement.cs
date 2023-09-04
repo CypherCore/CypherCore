@@ -263,7 +263,7 @@ namespace Game.Entities
                 GetMotionMaster().MoveKnockbackFrom(origin, speedXY, speedZ, spellEffectExtraData);
             else
             {
-                float o = GetPosition() == origin ? GetOrientation() + MathF.PI : origin.GetRelativeAngle(this);
+                float o = GetPosition() == origin ? GetOrientation() + MathF.PI : origin.GetAbsoluteAngle(this);
                 if (speedXY < 0)
                 {
                     speedXY = -speedXY;
