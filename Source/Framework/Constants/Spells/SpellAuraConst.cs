@@ -256,7 +256,7 @@ namespace Framework.Constants
         ModAuraDurationByDispelNotStack = 246,
         CloneCaster = 247,
         ModCombatResultChance = 248,
-        ConvertRune = 249,
+        ModDamagePercentDoneByTargetAuraMechanic = 249,
         ModIncreaseHealth2 = 250,
         ModEnemyDodge = 251,
         ModSpeedSlowAll = 252,

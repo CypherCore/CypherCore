@@ -3966,6 +3966,14 @@ namespace Game.Entities
                 return false;
             });
 
+            // bonus against target aura mechanic
+            DoneTotalMod *= GetTotalAuraMultiplier(AuraType.ModDamagePercentDoneByTargetAuraMechanic, aurEff =>
+            {
+                if (victim.HasAuraWithMechanic(1ul << aurEff.GetMiscValue()))
+                    return true;
+                return false;
+            });
+
             // Add SPELL_AURA_MOD_DAMAGE_DONE_FOR_MECHANIC percent bonus
             if (spellEffectInfo != null && spellEffectInfo.Mechanic != 0)
                 MathFunctions.AddPct(ref DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)spellEffectInfo.Mechanic));
