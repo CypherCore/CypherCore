@@ -2672,6 +2672,10 @@ namespace Game.Entities
             else if (victim.IsCreature() && damageTaken >= health && victim.ToCreature().HasFlag(CreatureStaticFlags.Unkillable))
             {
                 damageTaken = health - 1;
+
+                // If we had damage (aka health was not 1 already) trigger OnHealthDepleted
+                if (damageTaken > 0)
+                    victim.ToCreature().GetAI()?.OnHealthDepleted(attacker, false);
             }
             else if (victim.IsVehicle() && damageTaken >= (health - 1) && victim.GetCharmer() != null && victim.GetCharmer().IsTypeId(TypeId.Player))
             {

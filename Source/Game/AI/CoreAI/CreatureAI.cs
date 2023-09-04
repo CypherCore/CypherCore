@@ -448,6 +448,9 @@ namespace Game.AI
         // Called for reaction when initially engaged - this will always happen _after_ JustEnteredCombat
         public virtual void JustEngagedWith(Unit who) { }
 
+        // Called when the creature reaches 0 health (or 1 if unkillable).
+        public virtual void OnHealthDepleted(Unit attacker, bool isKill) { }
+
         // Called when the creature is killed
         public virtual void JustDied(Unit killer) { }
 

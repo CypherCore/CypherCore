@@ -942,7 +942,10 @@ namespace Game.Entities
                 // Call creature just died function
                 CreatureAI ai = creature.GetAI();
                 if (ai != null)
+                {
+                    ai.OnHealthDepleted(attacker, true);
                     ai.JustDied(attacker);
+                }
 
                 TempSummon summon = creature.ToTempSummon();
                 if (summon != null)
