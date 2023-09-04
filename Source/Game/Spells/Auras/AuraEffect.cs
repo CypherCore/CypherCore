@@ -3,16 +3,17 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
-using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Entities.GameObjectType;
 using Game.Maps;
 using Game.Networking.Packets;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Collections;
+using System.Numerics;
 
 namespace Game.Spells
 {
@@ -5887,6 +5888,21 @@ namespace Game.Spells
             Player target = aurApp.GetTarget().ToPlayer();
             if (target == null)
                 return;
+
+            if (!apply)
+            {
+                GameObject gameObjectCaster = target.GetMap().GetGameObject(GetCasterGUID());
+                if (gameObjectCaster != null)
+                {
+                    if (gameObjectCaster.GetGoType() == GameObjectTypes.NewFlag)
+                    {
+                        gameObjectCaster.HandleCustomTypeCommand(new SetNewFlagState(FlagState.Dropped, target));
+                        GameObject droppedFlag = gameObjectCaster.SummonGameObject(gameObjectCaster.GetGoInfo().NewFlag.FlagDrop, target.GetPosition(), Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(target.GetOrientation(), 0.0f, 0.0f)), TimeSpan.FromSeconds(gameObjectCaster.GetGoInfo().NewFlag.ExpireDuration / 1000), GameObjectSummonType.TimedDespawn);
+                        if (droppedFlag != null)
+                            droppedFlag.SetOwnerGUID(gameObjectCaster.GetGUID());
+                    }
+                }
+            }
 
             BattlegroundMap battlegroundMap = target.GetMap().ToBattlegroundMap();
             if (battlegroundMap == null)

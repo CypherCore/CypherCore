@@ -195,4 +195,14 @@ namespace Framework.Constants
         Moving,
         WaitingOnPauseWaypoint
     }
+
+    // enum for GAMEOBJECT_TYPE_NEW_FLAG
+    // values taken from world state
+    public enum FlagState
+    {
+        InBase = 1,
+        Taken,
+        Dropped,
+        Respawning
+    }
 }

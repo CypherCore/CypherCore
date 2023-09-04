@@ -322,6 +322,9 @@ namespace Game.Entities
                         m_invisibility.AddValue(InvisibilityType.Trap, 300);
                     }
                     break;
+                case GameObjectTypes.NewFlag:
+                    m_goTypeImpl = new GameObjectType.NewFlag(this);
+                    break;
                 case GameObjectTypes.PhaseableMo:
                     RemoveFlag((GameObjectFlags)0xF00);
                     SetFlag((GameObjectFlags)((m_goInfo.PhaseableMO.AreaNameSet & 0xF) << 8));
@@ -824,6 +827,13 @@ namespace Game.Entities
                     else if (!GetOwnerGUID().IsEmpty() || GetSpellId() != 0)
                     {
                         SetRespawnTime(0);
+
+                        if (GetGoType() == GameObjectTypes.NewFlagDrop)
+                        {
+                            GameObject go = GetMap().GetGameObject(GetOwnerGUID());
+                            go?.HandleCustomTypeCommand(new GameObjectType.SetNewFlagState(FlagState.InBase, null));
+                        }
+
                         Delete();
                         return;
                     }
@@ -1292,6 +1302,9 @@ namespace Game.Entities
 
             if (GetDisplayId() == 0 && GetGoInfo().IsDisplayMandatory())
                 return true;
+
+            if (m_goTypeImpl != null)
+                return m_goTypeImpl.IsNeverVisibleFor(seer, allowServersideObjects);
 
             return false;
         }
@@ -2359,7 +2372,48 @@ namespace Game.Entities
                         return;
 
                     spellId = info.NewFlag.pickupSpell;
+                    spellCaster = null;
                     break;
+                }
+                case GameObjectTypes.NewFlagDrop:
+                {
+                    GameObjectTemplate info = GetGoInfo();
+                    if (info == null)
+                        return;
+
+                    if (!user.IsPlayer())
+                        return;
+
+                    GameObject owner = GetMap().GetGameObject(GetOwnerGUID());
+                    if (owner != null)
+                    {
+                        if (owner.GetGoType() == GameObjectTypes.NewFlag)
+                        {
+                            // friendly with enemy flag means you're taking it
+                            bool defenderInteract = !owner.IsFriendlyTo(user);
+                            if (defenderInteract && owner.GetGoInfo().NewFlag.ReturnonDefenderInteract != 0)
+                            {
+                                Delete();
+                                owner.HandleCustomTypeCommand(new GameObjectType.SetNewFlagState(FlagState.InBase, user.ToPlayer()));
+                                return;
+                            }
+                            else
+                            {
+                                // we let the owner cast the spell for now
+                                // so that caster guid is set correctly
+                                SpellCastResult result = owner.CastSpell(user, owner.GetGoInfo().NewFlag.pickupSpell, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
+                                if (result == SpellCastResult.SpellCastOk)
+                                {
+                                    Delete();
+                                    owner.HandleCustomTypeCommand(new GameObjectType.SetNewFlagState(FlagState.Taken, user.ToPlayer()));
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
+                    Delete();
+                    return;
                 }
                 case GameObjectTypes.ItemForge:
                 {
@@ -2525,7 +2579,14 @@ namespace Game.Entities
             if (spellCaster != null)
                 spellCaster.CastSpell(user, spellId, triggered);
             else
-                CastSpell(user, spellId);
+            {
+                SpellCastResult castResult = CastSpell(user, spellId);
+                if (castResult == SpellCastResult.Success)
+                {
+                    if (GetGoType() == GameObjectTypes.NewFlag)
+                        HandleCustomTypeCommand(new GameObjectType.SetNewFlagState(FlagState.Taken, user.ToPlayer()));
+                }
+            }
         }
 
         public void SendCustomAnim(uint anim)
@@ -3017,7 +3078,7 @@ namespace Game.Entities
             setStateLocal.State = (byte)state;
             viewer.SendPacket(setStateLocal);
         }
-        
+
         public void SetDisplayId(uint displayid)
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.DisplayID), displayid);
@@ -3108,7 +3169,7 @@ namespace Game.Entities
 
             return m_personalLoot.LookupByKey(player.GetGUID());
         }
-        
+
         public void SetLinkedTrap(GameObject linkedTrap) { m_linkedTrap = linkedTrap.GetGUID(); }
 
         public GameObject GetLinkedTrap()
@@ -3502,7 +3563,7 @@ namespace Game.Entities
 
             return true;
         }
-        
+
         PerPlayerState GetOrCreatePerPlayerStates(ObjectGuid guid)
         {
             if (m_perPlayerState == null)
@@ -3513,7 +3574,7 @@ namespace Game.Entities
 
             return m_perPlayerState[guid];
         }
-        
+
         public override ushort GetAIAnimKitId() { return _animKitId; }
 
         public uint GetWorldEffectID() { return _worldEffectID; }
@@ -3621,9 +3682,9 @@ namespace Game.Entities
 
         List<ObjectGuid> GetTapList() { return m_tapList; }
         void SetTapList(List<ObjectGuid> tapList) { m_tapList = tapList; }
-        
+
         bool HasLootRecipient() { return !m_tapList.Empty(); }
-        
+
         public override uint GetLevelForTarget(WorldObject target)
         {
             Unit owner = GetOwner();
@@ -3687,7 +3748,7 @@ namespace Game.Entities
             AddToObjectUpdateIfNeeded();
         }
 
-        void HandleCustomTypeCommand(GameObjectTypeBase.CustomCommand command)
+        public void HandleCustomTypeCommand(GameObjectTypeBase.CustomCommand command)
         {
             if (m_goTypeImpl != null)
                 command.Execute(m_goTypeImpl);
@@ -3796,7 +3857,7 @@ namespace Game.Entities
     }
 
     // Base class for GameObject type specific implementations
-    class GameObjectTypeBase
+    public class GameObjectTypeBase
     {
         protected GameObject _owner;
 
@@ -3808,6 +3869,7 @@ namespace Game.Entities
         public virtual void Update(uint diff) { }
         public virtual void OnStateChanged(GameObjectState oldState, GameObjectState newState) { }
         public virtual void OnRelocated() { }
+        public virtual bool IsNeverVisibleFor(WorldObject seer, bool allowServersideObjects) { return false; }
 
         public class CustomCommand
         {
@@ -4256,6 +4318,63 @@ namespace Game.Entities
                 Transport transport = (Transport)type;
                 if (transport != null)
                     transport.SetAutoCycleBetweenStopFrames(_on);
+            }
+        }
+
+        class NewFlag : GameObjectTypeBase
+        {
+            FlagState _state;
+            long _respawnTime;
+
+            public NewFlag(GameObject owner) : base(owner)
+            {
+                _state = FlagState.InBase;
+            }
+
+            public void SetState(FlagState newState, Player player)
+            {
+                FlagState oldState = _state;
+                _state = newState;
+                _owner.UpdateObjectVisibility();
+
+                ZoneScript zoneScript = _owner.GetZoneScript();
+                if (zoneScript != null)
+                    zoneScript.OnFlagStateChange(_owner, oldState, _state, player);
+
+                if (newState == FlagState.Respawning)
+                    _respawnTime = GameTime.GetGameTimeMS() + _owner.GetGoInfo().NewFlag.RespawnTime;
+                else
+                    _respawnTime = 0;
+            }
+
+            public override void Update(uint diff)
+            {
+                if (_state == FlagState.Respawning && GameTime.GetGameTimeMS() >= _respawnTime)
+                    SetState(FlagState.InBase, null);
+            }
+
+            public override bool IsNeverVisibleFor(WorldObject seer, bool allowServersideObjects)
+            {
+                return _state != FlagState.InBase;
+            }
+        }
+
+        class SetNewFlagState : GameObjectTypeBase.CustomCommand
+        {
+            FlagState _state;
+            Player _player;
+
+            public SetNewFlagState(FlagState state, Player player)
+            {
+                _state = state;
+                _player = player;
+            }
+
+            public override void Execute(GameObjectTypeBase type)
+            {
+                NewFlag newFlag = type as NewFlag;
+                if (newFlag != null)
+                    newFlag.SetState(_state, _player);
             }
         }
     }

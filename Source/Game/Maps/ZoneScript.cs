@@ -1,6 +1,7 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Constants;
 using Framework.Dynamic;
 using Game.Entities;
 
@@ -39,6 +40,8 @@ namespace Game.Maps
         public virtual void SetData(uint dataId, uint value) { }
 
         public virtual void ProcessEvent(WorldObject obj, uint eventId, WorldObject invoker) { }
+
+        public virtual void OnFlagStateChange(GameObject flagInBase, FlagState oldValue, FlagState newValue, Player player) { }
 
         protected EventMap _events = new();
     }
