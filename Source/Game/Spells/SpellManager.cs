@@ -3207,7 +3207,7 @@ namespace Game.Entities
             {
                 ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
                 {
-                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards100); // 100yards instead of 50000?!
+                    spellEffectInfo.TargetARadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards100); // 100yards instead of 50000?!
                 });
             });
 
@@ -3403,7 +3403,7 @@ namespace Game.Entities
             {
                 ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
                 {
-                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards10);
+                    spellEffectInfo.TargetARadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards10);
                 });
             });
 
@@ -3514,7 +3514,7 @@ namespace Game.Entities
             {
                 ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
                 {
-                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards200);
+                    spellEffectInfo.TargetARadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards200);
                     spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.UnitSrcAreaEntry);
                 });
             });
@@ -3588,7 +3588,7 @@ namespace Game.Entities
             {
                 ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
                 {
-                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards10);
+                    spellEffectInfo.TargetARadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards10);
                 });
             });
 
@@ -3676,7 +3676,7 @@ namespace Game.Entities
                 // use max radius from 4.3.4
                 ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
                 {
-                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards25);
+                    spellEffectInfo.TargetARadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards25);
                 });
             });
             // ENDOF VIOLET HOLD
@@ -3689,7 +3689,7 @@ namespace Game.Entities
             {
                 ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
                 {
-                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards50000);   // 50000yd
+                    spellEffectInfo.TargetARadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards50000);   // 50000yd
                 });
             });
 
@@ -4008,11 +4008,11 @@ namespace Game.Entities
             {
                 ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
                 {
-                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards200); // 200yd
+                    spellEffectInfo.TargetARadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards200); // 200yd
                 });
                 ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
                 {
-                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards200); // 200yd
+                    spellEffectInfo.TargetARadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards200); // 200yd
                 });
             });
 
@@ -4057,7 +4057,7 @@ namespace Game.Entities
             {
                 ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
                 {
-                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards25); // 25yd
+                    spellEffectInfo.TargetARadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards25); // 25yd
                 });
             });
 
@@ -4073,18 +4073,8 @@ namespace Game.Entities
                 spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(5); // 40yd
                 ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
                 {
-                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards10); // 10yd
+                    spellEffectInfo.TargetARadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards10); // 10yd
             spellEffectInfo.MiscValue = 190;
-                });
-            });
-
-            // Broken Frostmourne
-            ApplySpellFix(new[] { 72405 }, spellInfo =>
-            {
-                spellInfo.AttributesEx |= SpellAttr1.NoThreat;
-                ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
-                {
-                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards20); // 20yd
                 });
             });
             // ENDOF ICECROWN CITADEL SPELLS
@@ -4097,7 +4087,7 @@ namespace Game.Entities
             {
                 ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
                 {
-                    spellEffectInfo.RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards12);
+                    spellEffectInfo.TargetARadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards12);
                 });
             });
 
@@ -4177,7 +4167,7 @@ namespace Game.Entities
                 // Little hack, Increase the radius so it can hit the Cave In Stalkers in the platform.
                 ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
                 {
-                    spellEffectInfo.MaxRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards45);
+                    spellEffectInfo.TargetBRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards45);
                 });
             });
 
@@ -4282,7 +4272,7 @@ namespace Game.Entities
             {
                 ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
                 {
-                    spellEffectInfo.MaxRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards15);
+                    spellEffectInfo.TargetBRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards15);
                 });
             });
 

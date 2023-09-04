@@ -2962,4 +2962,10 @@ namespace Framework.Constants
         ForcedDismount = 9,
         Ok = 10 // never sent
     }
+
+    public enum SpellTargetIndex
+    {
+        TargetA = 0,
+        TargetB = 1
+    }
 }

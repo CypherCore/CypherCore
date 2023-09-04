@@ -243,8 +243,8 @@ namespace Game.Spells
                 if (Convert.ToBoolean(implicitTargetMask & (SpellCastTargetFlags.Gameobject | SpellCastTargetFlags.GameobjectItem)))
                     m_targets.SetTargetFlag(SpellCastTargetFlags.Gameobject);
 
-                SelectEffectImplicitTargets(spellEffectInfo, spellEffectInfo.TargetA, ref processedAreaEffectsMask);
-                SelectEffectImplicitTargets(spellEffectInfo, spellEffectInfo.TargetB, ref processedAreaEffectsMask);
+                SelectEffectImplicitTargets(spellEffectInfo, spellEffectInfo.TargetA, SpellTargetIndex.TargetA, ref processedAreaEffectsMask);
+                SelectEffectImplicitTargets(spellEffectInfo, spellEffectInfo.TargetB, SpellTargetIndex.TargetB, ref processedAreaEffectsMask);
 
                 // Select targets of effect based on effect type
                 // those are used when no valid target could be added for spell effect based on spell target type
@@ -370,7 +370,7 @@ namespace Game.Spells
                 m_caster.m_Events.ModifyEventTime(_spellEvent, TimeSpan.FromMilliseconds(GetDelayStart() + m_delayMoment));
         }
 
-        void SelectEffectImplicitTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, ref uint processedEffectMask)
+        void SelectEffectImplicitTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, SpellTargetIndex targetIndex, ref uint processedEffectMask)
         {
             if (targetType.GetTarget() == 0)
                 return;
@@ -397,7 +397,8 @@ namespace Game.Spells
                             spellEffectInfo.TargetA.GetTarget() == effects[j].TargetA.GetTarget() &&
                             spellEffectInfo.TargetB.GetTarget() == effects[j].TargetB.GetTarget() &&
                             spellEffectInfo.ImplicitTargetConditions == effects[j].ImplicitTargetConditions &&
-                            spellEffectInfo.CalcRadius(m_caster) == effects[j].CalcRadius(m_caster) &&
+                            spellEffectInfo.CalcRadius(m_caster, SpellTargetIndex.TargetA) == effects[j].CalcRadius(m_caster, SpellTargetIndex.TargetA) &&
+                            spellEffectInfo.CalcRadius(m_caster, SpellTargetIndex.TargetB) == effects[j].CalcRadius(m_caster, SpellTargetIndex.TargetB) &&
                             CheckScriptEffectImplicitTargets(spellEffectInfo.EffectIndex, (uint)j))
                         {
                             effectMask |= 1u << j;
@@ -416,13 +417,13 @@ namespace Game.Spells
                     SelectImplicitChannelTargets(spellEffectInfo, targetType);
                     break;
                 case SpellTargetSelectionCategories.Nearby:
-                    SelectImplicitNearbyTargets(spellEffectInfo, targetType, effectMask);
+                    SelectImplicitNearbyTargets(spellEffectInfo, targetType, targetIndex, effectMask);
                     break;
                 case SpellTargetSelectionCategories.Cone:
-                    SelectImplicitConeTargets(spellEffectInfo, targetType, effectMask);
+                    SelectImplicitConeTargets(spellEffectInfo, targetType, targetIndex, effectMask);
                     break;
                 case SpellTargetSelectionCategories.Area:
-                    SelectImplicitAreaTargets(spellEffectInfo, targetType, effectMask);
+                    SelectImplicitAreaTargets(spellEffectInfo, targetType, targetIndex, effectMask);
                     break;
                 case SpellTargetSelectionCategories.Traj:
                     // just in case there is no dest, explanation in SelectImplicitDestDestTargets
@@ -431,7 +432,7 @@ namespace Game.Spells
                     SelectImplicitTrajTargets(spellEffectInfo, targetType);
                     break;
                 case SpellTargetSelectionCategories.Line:
-                    SelectImplicitLineTargets(spellEffectInfo, targetType, effectMask);
+                    SelectImplicitLineTargets(spellEffectInfo, targetType, targetIndex, effectMask);
                     break;
                 case SpellTargetSelectionCategories.Default:
                     switch (targetType.GetObjectType())
@@ -451,13 +452,13 @@ namespace Game.Spells
                             switch (targetType.GetReferenceType())
                             {
                                 case SpellTargetReferenceTypes.Caster:
-                                    SelectImplicitCasterDestTargets(spellEffectInfo, targetType);
+                                    SelectImplicitCasterDestTargets(spellEffectInfo, targetType, targetIndex);
                                     break;
                                 case SpellTargetReferenceTypes.Target:
-                                    SelectImplicitTargetDestTargets(spellEffectInfo, targetType);
+                                    SelectImplicitTargetDestTargets(spellEffectInfo, targetType, targetIndex);
                                     break;
                                 case SpellTargetReferenceTypes.Dest:
-                                    SelectImplicitDestDestTargets(spellEffectInfo, targetType);
+                                    SelectImplicitDestDestTargets(spellEffectInfo, targetType, targetIndex);
                                     break;
                                 default:
                                     Cypher.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target reference type for TARGET_TYPE_OBJECT_DEST");
@@ -563,7 +564,7 @@ namespace Game.Spells
             }
         }
 
-        void SelectImplicitNearbyTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, uint effMask)
+        void SelectImplicitNearbyTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, SpellTargetIndex targetIndex, uint effMask)
         {
             if (targetType.GetReferenceType() != SpellTargetReferenceTypes.Caster)
             {
@@ -642,7 +643,7 @@ namespace Game.Spells
                                     dest = new SpellDestination(st.target_X, st.target_Y, st.target_Z, st.target_Orientation);
                                 else
                                 {
-                                    float randomRadius1 = spellEffectInfo.CalcRadius(m_caster);
+                                    float randomRadius1 = spellEffectInfo.CalcRadius(m_caster, targetIndex);
                                     if (randomRadius1 > 0.0f)
                                         m_caster.MovePositionToFirstCollision(dest.Position, randomRadius1, targetType.CalcDirectionAngle());
                                 }
@@ -668,7 +669,7 @@ namespace Game.Spells
                     {
                         target = m_caster;
                         // radius is only meant to be randomized when using caster fallback
-                        randomRadius = spellEffectInfo.CalcRadius(m_caster);
+                        randomRadius = spellEffectInfo.CalcRadius(m_caster, targetIndex);
                     }
                     break;
                 default:
@@ -749,7 +750,7 @@ namespace Game.Spells
             SelectImplicitChainTargets(spellEffectInfo, targetType, target, effMask);
         }
 
-        void SelectImplicitConeTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, uint effMask)
+        void SelectImplicitConeTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, SpellTargetIndex targetIndex, uint effMask)
         {
             Position coneSrc = new(m_caster);
             float coneAngle = m_spellInfo.ConeAngle;
@@ -780,7 +781,7 @@ namespace Game.Spells
             SpellTargetCheckTypes selectionType = targetType.GetCheckType();
 
             var condList = spellEffectInfo.ImplicitTargetConditions;
-            float radius = spellEffectInfo.CalcRadius(m_caster) * m_spellValue.RadiusMod;
+            float radius = spellEffectInfo.CalcRadius(m_caster, targetIndex) * m_spellValue.RadiusMod;
 
             GridMapTypeMask containerTypeMask = GetSearcherTypeMask(objectType, condList);
             if (containerTypeMask != 0)
@@ -812,7 +813,7 @@ namespace Game.Spells
             }
         }
 
-        void SelectImplicitAreaTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, uint effMask)
+        void SelectImplicitAreaTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, SpellTargetIndex targetIndex, uint effMask)
         {
             WorldObject referer;
             switch (targetType.GetReferenceType())
@@ -866,7 +867,7 @@ namespace Game.Spells
                     return;
             }
 
-            float radius = spellEffectInfo.CalcRadius(m_caster) * m_spellValue.RadiusMod;
+            float radius = spellEffectInfo.CalcRadius(m_caster, targetIndex) * m_spellValue.RadiusMod;
             List<WorldObject> targets = new();
             switch (targetType.GetTarget())
             {
@@ -944,7 +945,7 @@ namespace Game.Spells
             }
         }
 
-        void SelectImplicitCasterDestTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType)
+        void SelectImplicitCasterDestTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, SpellTargetIndex targetIndex)
         {
             SpellDestination dest = new(m_caster);
 
@@ -1016,7 +1017,7 @@ namespace Game.Spells
                     if (unitCaster == null)
                         break;
 
-                    float dist = spellEffectInfo.CalcRadius(unitCaster);
+                    float dist = spellEffectInfo.CalcRadius(unitCaster, targetIndex);
                     float angle = targetType.CalcDirectionAngle();
                     if (targetType.GetTarget() == Targets.DestCasterMovementDirection)
                     {
@@ -1087,7 +1088,7 @@ namespace Game.Spells
                 }
                 default:
                 {
-                    float dist = spellEffectInfo.CalcRadius(m_caster);
+                    float dist = spellEffectInfo.CalcRadius(m_caster, targetIndex);
                     float angl = targetType.CalcDirectionAngle();
                     float objSize = m_caster.GetCombatReach();
 
@@ -1106,7 +1107,7 @@ namespace Game.Spells
                         case Targets.DestCasterBackRight:
                         {
                             float DefaultTotemDistance = 3.0f;
-                            if (!spellEffectInfo.HasRadius() && !spellEffectInfo.HasMaxRadius())
+                            if (!spellEffectInfo.HasRadius(targetIndex))
                                 dist = DefaultTotemDistance;
                             break;
                         }
@@ -1132,7 +1133,7 @@ namespace Game.Spells
             m_targets.SetDst(dest);
         }
 
-        void SelectImplicitTargetDestTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType)
+        void SelectImplicitTargetDestTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, SpellTargetIndex targetIndex)
         {
             WorldObject target = m_targets.GetObjectTarget();
 
@@ -1147,7 +1148,7 @@ namespace Game.Spells
                 default:
                 {
                     float angle = targetType.CalcDirectionAngle();
-                    float dist = spellEffectInfo.CalcRadius(null);
+                    float dist = spellEffectInfo.CalcRadius(null, targetIndex);
                     if (targetType.GetTarget() == Targets.DestRandom)
                         dist *= (float)RandomHelper.NextDouble();
 
@@ -1166,7 +1167,7 @@ namespace Game.Spells
             m_targets.SetDst(dest);
         }
 
-        void SelectImplicitDestDestTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType)
+        void SelectImplicitDestDestTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, SpellTargetIndex targetIndex)
         {
             // set destination to caster if no dest provided
             // can only happen if previous destination target could not be set for some reason
@@ -1188,7 +1189,7 @@ namespace Game.Spells
                     break;
                 case Targets.DestDestTargetTowardsCaster:
                 {
-                    float dist = spellEffectInfo.CalcRadius(m_caster);
+                    float dist = spellEffectInfo.CalcRadius(m_caster, targetIndex);
                     Position pos = dest.Position;
                     float angle = pos.GetAbsoluteAngle(m_caster) - m_caster.GetOrientation();
 
@@ -1201,7 +1202,7 @@ namespace Game.Spells
                 default:
                 {
                     float angle = targetType.CalcDirectionAngle();
-                    float dist = spellEffectInfo.CalcRadius(m_caster);
+                    float dist = spellEffectInfo.CalcRadius(m_caster, targetIndex);
                     if (targetType.GetTarget() == Targets.DestRandom)
                         dist *= (float)RandomHelper.NextDouble();
 
@@ -1455,7 +1456,7 @@ namespace Game.Spells
             }
         }
 
-        void SelectImplicitLineTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, uint effMask)
+        void SelectImplicitLineTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, SpellTargetIndex targetIndex, uint effMask)
         {
             List<WorldObject> targets = new();
             SpellTargetObjectTypes objectType = targetType.GetObjectType();
@@ -1482,7 +1483,7 @@ namespace Game.Spells
             }
 
             var condList = spellEffectInfo.ImplicitTargetConditions;
-            float radius = spellEffectInfo.CalcRadius(m_caster) * m_spellValue.RadiusMod;
+            float radius = spellEffectInfo.CalcRadius(m_caster, targetIndex) * m_spellValue.RadiusMod;
 
             GridMapTypeMask containerTypeMask = GetSearcherTypeMask(objectType, condList);
             if (containerTypeMask != 0)

@@ -1122,7 +1122,7 @@ namespace Scripts.Spells.Mage
         void FilterTargets(List<WorldObject> targets)
         {
             WorldLocation dest = GetExplTargetDest();
-            float outRadius = Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, GetCastDifficulty()).GetEffect(0).CalcRadius();
+            float outRadius = Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, GetCastDifficulty()).GetEffect(0).CalcRadius(null, SpellTargetIndex.TargetB);
             float inRadius = 6.5f;
 
             targets.RemoveAll(target =>

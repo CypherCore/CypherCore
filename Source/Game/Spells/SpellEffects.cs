@@ -2701,7 +2701,7 @@ namespace Game.Spells
                         case 45151:
                         {
                             //Workaround for Range ... should be global for every ScriptEffect
-                            float radius = effectInfo.CalcRadius();
+                            float radius = effectInfo.CalcRadius(null, SpellTargetIndex.TargetB);
                             if (unitTarget != null && unitTarget.IsTypeId(TypeId.Player) && unitTarget.GetDistance(m_caster) >= radius && !unitTarget.HasAura(46394) && unitTarget != m_caster)
                                 unitTarget.CastSpell(unitTarget, 46394, new CastSpellExtraArgs(this));
 
@@ -4078,7 +4078,7 @@ namespace Game.Spells
             if (m_targets.HasDst())
                 destTarget.GetPosition(out fx, out fy, out fz, out fo);
             //FIXME: this can be better check for most objects but still hack
-            else if (effectInfo.HasRadius() && m_spellInfo.Speed == 0)
+            else if (effectInfo.HasRadius(SpellTargetIndex.TargetA) && m_spellInfo.Speed == 0)
             {
                 float dis = effectInfo.CalcRadius(unitCaster);
                 unitCaster.GetClosePoint(out fx, out fy, out fz, SharedConst.DefaultPlayerBoundingRadius, dis);

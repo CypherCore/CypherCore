@@ -4088,8 +4088,8 @@ namespace Game.Spells
                 PositionFacing = effect.EffectPosFacing;
                 TargetA = new SpellImplicitTargetInfo((Targets)effect.ImplicitTarget[0]);
                 TargetB = new SpellImplicitTargetInfo((Targets)effect.ImplicitTarget[1]);
-                RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(effect.EffectRadiusIndex[0]);
-                MaxRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(effect.EffectRadiusIndex[1]);
+                TargetARadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(effect.EffectRadiusIndex[0]);
+                TargetBRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(effect.EffectRadiusIndex[1]);
                 ChainTargets = effect.EffectChainTargets;
                 ItemType = effect.EffectItemType;
                 TriggerSpell = effect.EffectTriggerSpell;
@@ -4332,21 +4332,27 @@ namespace Game.Spells
             return multiplierPercent / 100.0f;
         }
 
-        public bool HasRadius()
+        public bool HasRadius(SpellTargetIndex targetIndex)
         {
-            return RadiusEntry != null;
+            switch (targetIndex)
+            {
+                case SpellTargetIndex.TargetA:
+                    return TargetARadiusEntry != null;
+                case SpellTargetIndex.TargetB:
+                    return TargetBRadiusEntry != null;
+                default:
+                    return false;
+            }
         }
 
-        public bool HasMaxRadius()
+        public float CalcRadius(WorldObject caster = null, SpellTargetIndex targetIndex = SpellTargetIndex.TargetA, Spell spell = null)
         {
-            return MaxRadiusEntry != null;
-        }
-
-        public float CalcRadius(WorldObject caster = null, Spell spell = null)
-        {
-            SpellRadiusRecord entry = RadiusEntry;
-            if (!HasRadius() && HasMaxRadius())
-                entry = MaxRadiusEntry;
+            // TargetA -> TargetARadiusEntry
+            // TargetB -> TargetBRadiusEntry
+            // Aura effects have TargetARadiusEntry == TargetBRadiusEntry (mostly)
+            var entry = TargetARadiusEntry;
+            if (targetIndex == SpellTargetIndex.TargetB && HasRadius(targetIndex))
+                entry = TargetBRadiusEntry;
 
             if (entry == null)
                 return 0.0f;
@@ -4854,8 +4860,8 @@ namespace Game.Spells
         public float PositionFacing;
         public SpellImplicitTargetInfo TargetA = new();
         public SpellImplicitTargetInfo TargetB = new();
-        public SpellRadiusRecord RadiusEntry;
-        public SpellRadiusRecord MaxRadiusEntry;
+        public SpellRadiusRecord TargetARadiusEntry;
+        public SpellRadiusRecord TargetBRadiusEntry;
         public int ChainTargets;
         public uint ItemType;
         public uint TriggerSpell;
