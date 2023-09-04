@@ -3137,7 +3137,7 @@ namespace Game.Entities
             _spellFocusInfo.Spell = focusSpell;
 
             bool noTurnDuringCast = spellInfo.HasAttribute(SpellAttr5.AiDoesntFaceTarget);
-            bool turnDisabled = HasUnitFlag2(UnitFlags2.CannotTurn);
+            bool turnDisabled = CannotTurn();
             // set target, then force send update packet to players if it changed to provide appropriate facing
             ObjectGuid newTarget = (target != null && !noTurnDuringCast && !turnDisabled) ? target.GetGUID() : ObjectGuid.Empty;
             if (GetTarget() != newTarget)
@@ -3181,7 +3181,7 @@ namespace Game.Entities
 
             if (IsPet()) // player pets do not use delay system
             {
-                if (!HasUnitFlag2(UnitFlags2.CannotTurn))
+                if (!CannotTurn())
                     ReacquireSpellFocusTarget();
             }
             else // don't allow re-target right away to prevent visual bugs
@@ -3200,7 +3200,7 @@ namespace Game.Entities
 
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Target), _spellFocusInfo.Target);
 
-            if (!HasUnitFlag2(UnitFlags2.CannotTurn))
+            if (!CannotTurn())
             {
                 if (!_spellFocusInfo.Target.IsEmpty())
                 {

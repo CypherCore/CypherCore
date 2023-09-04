@@ -684,7 +684,17 @@ namespace Game.Entities
             }
         }
 
-        bool IsThreatened()
+        public bool CannotTurn() { return HasUnitFlag2(UnitFlags2.CannotTurn); }
+
+        public void SetCannotTurn(bool apply)
+        {
+            if (apply)
+                SetUnitFlag2(UnitFlags2.CannotTurn);
+            else
+                RemoveUnitFlag2(UnitFlags2.CannotTurn);
+        }
+
+        public bool IsThreatened()
         {
             return !m_threatManager.IsThreatListEmpty();
         }
