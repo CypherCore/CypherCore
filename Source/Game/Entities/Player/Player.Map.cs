@@ -466,6 +466,45 @@ namespace Game.Entities
                 _instanceResetTimes.Add(instanceId, enterTime + Time.Hour);
         }
 
+        public WorldSafeLocsEntry GetInstanceEntrance(uint targetMapId)
+        {
+            WorldSafeLocsEntry entranceLocation = null;
+            MapRecord mapEntry = CliDB.MapStorage.LookupByKey(targetMapId);
+
+            if (mapEntry.Instanceable())
+            {
+                // Check if we can contact the instancescript of the instance for an updated entrance location
+                uint targetInstanceId = Global.MapMgr.FindInstanceIdForPlayer(targetMapId, this);
+                if (targetInstanceId != 0)
+                {
+                    Map map = Global.MapMgr.FindMap(targetMapId, targetInstanceId);
+                    if (map != null)
+                    {
+                        InstanceMap instanceMap = map.ToInstanceMap();
+                        if (instanceMap != null)
+                        {
+                            InstanceScript instanceScript = instanceMap.GetInstanceScript();
+                            if (instanceScript != null)
+                                entranceLocation = Global.ObjectMgr.GetWorldSafeLoc(instanceScript.GetEntranceLocation());
+                        }
+                    }
+                }
+
+                // Finally check with the instancesave for an entrance location if we did not get a valid one from the instancescript
+                if (entranceLocation == null)
+                {
+                    Group group = GetGroup();
+                    Difficulty difficulty = group != null ? group.GetDifficultyID(mapEntry) : GetDifficultyID(mapEntry);
+                    ObjectGuid instanceOwnerGuid = group ? group.GetRecentInstanceOwner(targetMapId) : GetGUID();
+
+                    InstanceLock instanceLock = Global.InstanceLockMgr.FindActiveInstanceLock(instanceOwnerGuid, new MapDb2Entries(mapEntry, Global.DB2Mgr.GetDownscaledMapDifficultyData(targetMapId, ref difficulty)));
+                    if (instanceLock != null)
+                        entranceLocation = Global.ObjectMgr.GetWorldSafeLoc(instanceLock.GetData().EntranceWorldSafeLocId);
+                }
+            }
+            return entranceLocation;
+        }
+
         public void SendDungeonDifficulty(int forcedDifficulty = -1)
         {
             DungeonDifficultySet dungeonDifficultySet = new();

@@ -356,40 +356,8 @@ namespace Game
 
             if (!teleported)
             {
-                WorldSafeLocsEntry entranceLocation = null;
-                MapRecord mapEntry = CliDB.MapStorage.LookupByKey(at.target_mapId);
-                if (mapEntry.Instanceable())
-                {
-                    // Check if we can contact the instancescript of the instance for an updated entrance location
-                    uint targetInstanceId = Global.MapMgr.FindInstanceIdForPlayer(at.target_mapId, _player);
-                    if (targetInstanceId != 0)
-                    {
-                        Map map = Global.MapMgr.FindMap(at.target_mapId, targetInstanceId);
-                        if (map != null)
-                        {
-                            InstanceMap instanceMap = map.ToInstanceMap();
-                            if (instanceMap)
-                            {
-                                InstanceScript instanceScript = instanceMap.GetInstanceScript();
-                                if (instanceScript != null)
-                                    entranceLocation = Global.ObjectMgr.GetWorldSafeLoc(instanceScript.GetEntranceLocation());
-                            }
-                        }
-                    }
-
-                    // Finally check with the instancesave for an entrance location if we did not get a valid one from the instancescript
-                    if (entranceLocation == null)
-                    {
-                        Group group = player.GetGroup();
-                        Difficulty difficulty = group ? group.GetDifficultyID(mapEntry) : player.GetDifficultyID(mapEntry);
-                        ObjectGuid instanceOwnerGuid = group ? group.GetRecentInstanceOwner(at.target_mapId) : player.GetGUID();
-                        InstanceLock instanceLock = Global.InstanceLockMgr.FindActiveInstanceLock(instanceOwnerGuid, new MapDb2Entries(mapEntry, Global.DB2Mgr.GetDownscaledMapDifficultyData(at.target_mapId, ref difficulty)));
-                        if (instanceLock != null)
-                            entranceLocation = Global.ObjectMgr.GetWorldSafeLoc(instanceLock.GetData().EntranceWorldSafeLocId);
-                    }
-                }
-
-                if (entranceLocation != null)
+                WorldSafeLocsEntry entranceLocation = player.GetInstanceEntrance(at.target_mapId);
+                if (entranceLocation != null && player.GetMapId() != at.target_mapId)
                     player.TeleportTo(entranceLocation.Loc, TeleportToOptions.NotLeaveTransport);
                 else
                     player.TeleportTo(at.target_mapId, at.target_X, at.target_Y, at.target_Z, at.target_Orientation, TeleportToOptions.NotLeaveTransport);

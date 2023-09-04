@@ -802,7 +802,15 @@ namespace Game.Entities
                                 {
                                     Player player = caster.ToPlayer();
                                     if (player != null)
+                                    {
+                                        if (player.GetMapId() != safeLoc.Loc.GetMapId())
+                                        {
+                                            WorldSafeLocsEntry instanceEntrance = player.GetInstanceEntrance(safeLoc.Loc.GetMapId());
+                                            if (instanceEntrance != null)
+                                                safeLoc = instanceEntrance;
+                                        }
                                         player.TeleportTo(safeLoc.Loc);
+                                    }
                                 }
                                 break;
                             default:
