@@ -5,6 +5,7 @@ using Framework.Collections;
 using Framework.Constants;
 using Game.Maps;
 using Game.Networking.Packets;
+using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
@@ -531,23 +532,78 @@ namespace Game.Entities
             }
         }
 
-        public uint GetEventScriptId()
+        public List<uint> GetEventScriptSet()
         {
+            List<uint> eventSet = new();
             switch (type)
             {
-                case GameObjectTypes.Goober:
-                    return Goober.eventID;
                 case GameObjectTypes.Chest:
-                    return Chest.triggeredEvent;
+                    eventSet.Add(Chest.triggeredEvent);
+                    break;
                 case GameObjectTypes.Chair:
-                    return Chest.triggeredEvent;
+                    eventSet.Add(Chair.triggeredEvent);
+                    break;
+                case GameObjectTypes.Goober:
+                    eventSet.Add(Goober.eventID);
+                    break;
+                case GameObjectTypes.Transport:
+                    eventSet.Add(Transport.Reached1stfloor);
+                    eventSet.Add(Transport.Reached2ndfloor);
+                    eventSet.Add(Transport.Reached3rdfloor);
+                    eventSet.Add(Transport.Reached4thfloor);
+                    eventSet.Add(Transport.Reached5thfloor);
+                    eventSet.Add(Transport.Reached6thfloor);
+                    eventSet.Add(Transport.Reached7thfloor);
+                    eventSet.Add(Transport.Reached8thfloor);
+                    eventSet.Add(Transport.Reached9thfloor);
+                    eventSet.Add(Transport.Reached10thfloor);
+                    break;
                 case GameObjectTypes.Camera:
-                    return Camera.eventID;
+                    eventSet.Add(Camera.eventID);
+                    break;
+                case GameObjectTypes.MapObjTransport:
+                    eventSet.Add(MoTransport.startEventID);
+                    eventSet.Add(MoTransport.stopEventID);
+                    break;
+                case GameObjectTypes.FlagDrop:
+                    eventSet.Add(FlagDrop.eventID);
+                    break;
+                case GameObjectTypes.ControlZone:
+                    eventSet.Add(ControlZone.CaptureEventHorde);
+                    eventSet.Add(ControlZone.CaptureEventAlliance);
+                    eventSet.Add(ControlZone.ContestedEventHorde);
+                    eventSet.Add(ControlZone.ContestedEventAlliance);
+                    eventSet.Add(ControlZone.ProgressEventHorde);
+                    eventSet.Add(ControlZone.ProgressEventAlliance);
+                    eventSet.Add(ControlZone.NeutralEventHorde);
+                    eventSet.Add(ControlZone.NeutralEventAlliance);
+                    break;
+                case GameObjectTypes.DestructibleBuilding:
+                    eventSet.Add(DestructibleBuilding.IntactEvent);
+                    eventSet.Add(DestructibleBuilding.DamagedEvent);
+                    eventSet.Add(DestructibleBuilding.DestroyedEvent);
+                    eventSet.Add(DestructibleBuilding.RebuildingEvent);
+                    eventSet.Add(DestructibleBuilding.DamageEvent);
+                    break;
+                case GameObjectTypes.CapturePoint:
+                    eventSet.Add(CapturePoint.ContestedEventHorde);
+                    eventSet.Add(CapturePoint.CaptureEventHorde);
+                    eventSet.Add(CapturePoint.DefendedEventHorde);
+                    eventSet.Add(CapturePoint.ContestedEventAlliance);
+                    eventSet.Add(CapturePoint.CaptureEventAlliance);
+                    eventSet.Add(CapturePoint.DefendedEventAlliance);
+                    break;
                 case GameObjectTypes.GatheringNode:
-                    return GatheringNode.triggeredEvent;
+                    eventSet.Add(GatheringNode.triggeredEvent);
+                    break;
                 default:
-                    return 0;
+                    break;
             }
+
+            // Erase invalid value added from unused GameEvents data fields
+            eventSet.Remove(0);
+
+            return eventSet;
         }
 
         public uint GetTrivialSkillHigh() => type switch

@@ -1462,11 +1462,7 @@ namespace Game
 
             // Load all possible event ids from gameobjects
             foreach (var go in _gameObjectTemplateStorage)
-            {
-                uint eventId = go.Value.GetEventScriptId();
-                if (eventId != 0)
-                    _eventStorage.Add(eventId);
-            }
+                _eventStorage.AddRange(go.Value.GetEventScriptSet());
 
             // Load all possible event ids from spells
             foreach (SpellNameRecord spellNameEntry in CliDB.SpellNameStorage.Values)
@@ -1511,7 +1507,7 @@ namespace Game
             foreach (var script in sEventScripts)
             {
                 if (!IsValidEvent(script.Key))
-                    Log.outError(LogFilter.Sql, $"Table `event_scripts` has script (Id: {script.Key}) not referring to any gameobject_template (type 3 data6 field, type 7 data3 field, type 10 data2 field, type 13 data2 field, type 50 data7 field), any taxi path node or any spell effect {SpellEffectName.SendEvent}");
+                    Log.outError(LogFilter.Sql, $"Table `event_scripts` has script (Id: {script.Key}) not referring to any gameobject_template (data field referencing GameEvent), any taxi path node or any spell effect {SpellEffectName.SendEvent}");
             }
 
             uint oldMSTime = Time.GetMSTime();
@@ -1532,7 +1528,7 @@ namespace Game
 
                 if (!IsValidEvent(eventId))
                 {
-                    Log.outError(LogFilter.Sql, $"Event (ID: {eventId}) not referring to any gameobject_template (type 3 data6 field, type 7 data3 field, type 10 data2 field, type 13 data2 field, type 50 data7 field), any taxi path node or any spell effect {SpellEffectName.SendEvent}");
+                    Log.outError(LogFilter.Sql, $"Event (ID: {eventId}) not referring to any gameobject_template (data field referencing GameEvent), any taxi path node or any spell effect {SpellEffectName.SendEvent}");
                     continue;
                 }
                 _eventScriptStorage[eventId] = GetScriptId(scriptName);

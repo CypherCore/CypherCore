@@ -2809,7 +2809,7 @@ namespace Game.Entities
                     break;
                 case GameObjectDestructibleState.Damaged:
                 {
-                    if (GetGoInfo().DestructibleBuilding.DamagedEvent != 0)
+                    if (GetGoInfo().DestructibleBuilding.DamagedEvent != 0 && attackerOrHealer != null)
                         GameEvents.Trigger(GetGoInfo().DestructibleBuilding.DamagedEvent, attackerOrHealer, this);
                     GetAI().Damaged(attackerOrHealer, m_goInfo.DestructibleBuilding.DamagedEvent);
 
@@ -2836,7 +2836,7 @@ namespace Game.Entities
                 }
                 case GameObjectDestructibleState.Destroyed:
                 {
-                    if (GetGoInfo().DestructibleBuilding.DestroyedEvent != 0)
+                    if (GetGoInfo().DestructibleBuilding.DestroyedEvent != 0 && attackerOrHealer != null)
                         GameEvents.Trigger(GetGoInfo().DestructibleBuilding.DestroyedEvent, attackerOrHealer, this);
                     GetAI().Destroyed(attackerOrHealer, m_goInfo.DestructibleBuilding.DestroyedEvent);
 
@@ -2868,7 +2868,7 @@ namespace Game.Entities
                 }
                 case GameObjectDestructibleState.Rebuilding:
                 {
-                    if (GetGoInfo().DestructibleBuilding.RebuildingEvent != 0)
+                    if (GetGoInfo().DestructibleBuilding.RebuildingEvent != 0 && attackerOrHealer != null)
                         GameEvents.Trigger(GetGoInfo().DestructibleBuilding.RebuildingEvent, attackerOrHealer, this);
                     RemoveFlag(GameObjectFlags.Damaged | GameObjectFlags.Destroyed);
 
