@@ -1546,52 +1546,6 @@ namespace Game.BattleGrounds
             SetRemainingTime(0);
         }
 
-        // IMPORTANT NOTICE:
-        // buffs aren't spawned/despawned when players captures anything
-        // buffs are in their positions when Battleground starts
-        public void HandleTriggerBuff(ObjectGuid goGuid)
-        {
-            if (!FindBgMap())
-            {
-                Log.outError(LogFilter.Battleground, $"Battleground::HandleTriggerBuff called with null bg map, {goGuid}");
-                return;
-            }
-
-            GameObject obj = GetBgMap().GetGameObject(goGuid);
-            if (!obj || obj.GetGoType() != GameObjectTypes.Trap || !obj.IsSpawned())
-                return;
-
-            // Change buff type, when buff is used:
-            int index = BgObjects.Length - 1;
-            while (index >= 0 && BgObjects[index] != goGuid)
-                index--;
-            if (index < 0)
-            {
-                Log.outError(LogFilter.Battleground, $"Battleground.HandleTriggerBuff: cannot find buff gameobject ({goGuid}, entry: {obj.GetEntry()}, type: {obj.GetGoType()}) in internal data for BG (map: {GetMapId()}, instance id: {m_InstanceID})!");
-                return;
-            }
-
-            // Randomly select new buff
-            int buff = RandomHelper.IRand(0, 2);
-            uint entry = obj.GetEntry();
-            if (m_BuffChange && entry != Buff_Entries[buff])
-            {
-                // Despawn current buff
-                SpawnBGObject(index, BattlegroundConst.RespawnOneDay);
-                // Set index for new one
-                for (byte currBuffTypeIndex = 0; currBuffTypeIndex < 3; ++currBuffTypeIndex)
-                {
-                    if (entry == Buff_Entries[currBuffTypeIndex])
-                    {
-                        index -= currBuffTypeIndex;
-                        index += buff;
-                    }
-                }
-            }
-
-            SpawnBGObject(index, BattlegroundConst.BuffRespawnTime);
-        }
-
         public virtual void HandleKillPlayer(Player victim, Player killer)
         {
             // Keep in mind that for arena this will have to be changed a bit
@@ -1974,7 +1928,6 @@ namespace Game.BattleGrounds
         // this must be filled inructors!
         public uint[] StartMessageIds = new uint[4];
 
-        public bool m_BuffChange;
         bool m_IsRandom;
 
         public BGHonorMode m_HonorMode;

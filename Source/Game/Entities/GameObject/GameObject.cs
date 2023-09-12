@@ -601,17 +601,9 @@ namespace Game.Entities
 
                             // Type 0 despawns after being triggered, type 1 does not.
                             // @todo This is activation radius. Casting radius must be selected from spell 
-                            float radius;
-                            if (goInfo.Trap.radius == 0f)
-                            {
-                                // Battlegroundgameobjects have data2 == 0 && data5 == 3
-                                if (goInfo.Trap.cooldown != 3)
-                                    break;
-
-                                radius = 3.0f;
-                            }
-                            else
-                                radius = goInfo.Trap.radius / 2.0f;
+                            float radius = goInfo.Trap.radius / 2.0f; // this division seems to date back to when the field was called diameter, don't think it is still relevant.
+                            if (radius == 0f)
+                                break;
 
                             Unit target;
                             // @todo this hack with search required until GO casting not implemented
@@ -753,18 +745,6 @@ namespace Game.Entities
                                     SetLootState(LootState.JustDeactivated);
                                 else if (goInfo.Trap.charges == 0)
                                     SetLootState(LootState.Ready);
-
-                                // Battleground gameobjects have data2 == 0 && data5 == 3
-                                if (goInfo.Trap.radius == 0 && goInfo.Trap.cooldown == 3)
-                                {
-                                    Player player = target.ToPlayer();
-                                    if (player)
-                                    {
-                                        Battleground bg = player.GetBattleground();
-                                        if (bg)
-                                            bg.HandleTriggerBuff(GetGUID());
-                                    }
-                                }
                             }
                             break;
                         }

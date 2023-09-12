@@ -1683,7 +1683,7 @@ namespace Game.Entities
             return searcher.GetTarget();
         }
 
-        GameObject FindNearestGameObjectWithOptions(float range, FindGameObjectOptions options)
+        public GameObject FindNearestGameObjectWithOptions(float range, FindGameObjectOptions options)
         {
             NearestCheckCustomizer checkCustomizer = new(this, range);
             GameObjectWithOptionsInObjectRangeCheck<NearestCheckCustomizer> checker = new(this, checkCustomizer, options);
@@ -4062,13 +4062,13 @@ namespace Game.Entities
         public ObjectGuid? PrivateObjectOwnerGuid;
     }
 
-    class FindGameObjectOptions
+    public class FindGameObjectOptions
     {
         public uint? GameObjectId;
         public string StringId;
 
         public bool? IsSummon;
-        public bool? IsSpawned;
+        public bool? IsSpawned = true; // most searches should be for spawned objects only, to search for "any" just clear this field at call site
 
         public bool IgnorePhases;
         public bool IgnoreNotOwnedPrivateObjects = true;

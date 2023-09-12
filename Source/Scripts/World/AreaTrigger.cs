@@ -109,7 +109,7 @@ namespace Scripts.World.Areatriggers
     }
 
     struct Misc
-    { 
+    {
         //Brewfest
         public const uint AreatriggerTalkCooldown = 5; // In Seconds
 
@@ -394,6 +394,43 @@ namespace Scripts.World.Areatriggers
 
             player.CastSpell(unit, SpellIds.DustInTheStormwind);
             player.KilledMonsterCredit(CreatureIds.KillCreditTeleportStormwind);
+        }
+    }
+
+    [Script]
+    class areatrigger_battleground_buffs : AreaTriggerAI
+    {
+        public areatrigger_battleground_buffs(AreaTrigger areatrigger) : base(areatrigger) { }
+
+        public override void OnUnitEnter(Unit unit)
+        {
+            if (!unit.IsPlayer())
+                return;
+
+            var player = unit.ToPlayer();
+            GameObject buffObject = player.FindNearestGameObjectWithOptions(4.0f, new FindGameObjectOptions() { StringId = "bg_buff_object" });
+            if (buffObject != null)
+            {
+                buffObject.ActivateObject(GameObjectActions.Disturb, 0, player);
+                buffObject.DespawnOrUnsummon();
+            }
+        }
+    }
+
+    [Script]
+    class AreaTrigger_at_battleground_buffs : AreaTriggerScript
+    {
+        public AreaTrigger_at_battleground_buffs() : base("at_battleground_buffs") { }
+
+        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
+        {
+            GameObject buffObject = player.FindNearestGameObjectWithOptions(4.0f, new FindGameObjectOptions() { StringId = "bg_buff_object" });
+            if (buffObject != null)
+            {
+                buffObject.ActivateObject(GameObjectActions.Disturb, 0, player);
+                buffObject.DespawnOrUnsummon();
+            }
+            return true;
         }
     }
 }
