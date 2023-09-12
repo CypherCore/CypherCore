@@ -816,27 +816,6 @@ namespace Game.Spells
         void RefreshTimers(bool resetPeriodicTimer)
         {
             m_maxDuration = CalcMaxDuration();
-            if (m_spellInfo.HasAttribute(SpellAttr8.DontResetPeriodicTimer))
-            {
-                int minPeriod = m_maxDuration;
-                for (byte i = 0; i < SpellConst.MaxEffects; ++i)
-                {
-                    AuraEffect eff = GetEffect(i);
-                    if (eff != null)
-                    {
-                        int period = eff.GetPeriod();
-                        if (period != 0)
-                            minPeriod = Math.Min(period, minPeriod);
-                    }
-                }
-
-                // If only one tick remaining, roll it over into new duration
-                if (GetDuration() <= minPeriod)
-                {
-                    m_maxDuration += GetDuration();
-                    resetPeriodicTimer = false;
-                }
-            }
 
             RefreshDuration();
             Unit caster = GetCaster();
