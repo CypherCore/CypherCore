@@ -28,7 +28,6 @@ namespace Game.Spells
             m_spellInfo = info;
             m_caster = (info.HasAttribute(SpellAttr6.OriginateFromController) && caster.GetCharmerOrOwner() != null ? caster.GetCharmerOrOwner() : caster);
             m_spellValue = new SpellValue(m_spellInfo, caster);
-            m_needComboPoints = m_spellInfo.NeedsComboPoints();
 
             // Get data for type of attack
             m_attackType = info.GetAttackType();
@@ -2527,10 +2526,6 @@ namespace Game.Spells
             if (m_CastItem == null)
                 m_powerCost = m_spellInfo.CalcPowerCost(m_caster, m_spellSchoolMask, this);
 
-            // Set combo point requirement
-            if (Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnoreComboPoints) || m_CastItem != null)
-                m_needComboPoints = false;
-
             int param1 = 0, param2 = 0;
             SpellCastResult result = CheckCast(true, ref param1, ref param2);
             // target is checked in too many locations and with different results to handle each of them
@@ -3256,18 +3251,8 @@ namespace Game.Spells
         {
             Unit unitCaster = m_caster.ToUnit();
             if (unitCaster != null)
-            {
-                // Take for real after all targets are processed
-                if (m_needComboPoints)
-                    unitCaster.ClearComboPoints();
-
-                // Real add combo points from effects
-                if (m_comboPointGain != 0)
-                    unitCaster.AddComboPoints(m_comboPointGain);
-
                 if (m_spellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
                     unitCaster.SetLastExtraAttackSpell(m_spellInfo.Id);
-            }
 
             // Handle procs on finish
             if (!m_originalCaster)
@@ -4795,21 +4780,6 @@ namespace Game.Spells
                     }
                 }
 
-                bool reqCombat = true;
-                var stateAuras = unitCaster.GetAuraEffectsByType(AuraType.AbilityIgnoreAurastate);
-                foreach (var aura in stateAuras)
-                {
-                    if (aura.IsAffectingSpell(m_spellInfo))
-                    {
-                        m_needComboPoints = false;
-                        if (aura.GetMiscValue() == 1)
-                        {
-                            reqCombat = false;
-                            break;
-                        }
-                    }
-                }
-
                 // caster state requirements
                 // not for triggered spells (needed by execute)
                 if (!_triggeredCastFlags.HasFlag(TriggerCastFlags.IgnoreCasterAurastate))
@@ -4830,7 +4800,7 @@ namespace Game.Spells
                     if (m_spellInfo.ExcludeCasterAuraType != 0 && unitCaster.HasAuraType(m_spellInfo.ExcludeCasterAuraType))
                         return SpellCastResult.CasterAurastate;
 
-                    if (reqCombat && unitCaster.IsInCombat() && !m_spellInfo.CanBeUsedInCombat(unitCaster))
+                    if (unitCaster.IsInCombat() && !m_spellInfo.CanBeUsedInCombat(unitCaster))
                         return SpellCastResult.AffectingCombat;
                 }
 
@@ -5842,15 +5812,6 @@ namespace Game.Spells
                 if (!IsTriggered())
                     if (my_trade.GetSpell() != 0)
                         return SpellCastResult.ItemAlreadyEnchanted;
-            }
-
-            // check if caster has at least 1 combo point for spells that require combo points
-            if (m_needComboPoints)
-            {
-                Player plrCaster = m_caster.ToPlayer();
-                if (plrCaster != null)
-                    if (plrCaster.GetComboPoints() == 0)
-                        return SpellCastResult.NoComboPoints;
             }
 
             // all ok
@@ -8074,7 +8035,6 @@ namespace Game.Spells
         public object m_customArg;
         public SpellCastVisual m_SpellVisual;
         public SpellCastTargets m_targets = new();
-        public sbyte m_comboPointGain;
         public SpellCustomErrors m_customError;
 
         public List<Aura> m_appliedMods = new();
@@ -8106,7 +8066,6 @@ namespace Game.Spells
         // These vars are used in both delayed spell system and modified immediate spell system
         bool m_referencedFromCurrentSpell;
         bool m_executedCurrently;
-        internal bool m_needComboPoints;
         uint m_applyMultiplierMask;
         float[] m_damageMultipliers = new float[SpellConst.MaxEffects];
 
@@ -8655,10 +8614,6 @@ namespace Game.Spells
                 // set hitmask for finish procs
                 spell.m_hitMask |= hitMask;
                 spell.m_procSpellType |= procSpellType;
-
-                // Do not take combo points on dodge and miss
-                if (MissCondition != SpellMissInfo.None && spell.m_needComboPoints && spell.m_targets.GetUnitTargetGUID() == TargetGUID)
-                    spell.m_needComboPoints = false;
 
                 // _spellHitTarget can be null if spell is missed in DoSpellHitOnUnit
                 if (MissCondition != SpellMissInfo.Evade && _spellHitTarget && !spell.GetCaster().IsFriendlyTo(unit) && (!spell.IsPositive() || spell.m_spellInfo.HasEffect(SpellEffectName.Dispel)))

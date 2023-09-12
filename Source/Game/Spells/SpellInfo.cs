@@ -548,11 +548,6 @@ namespace Game.Spells
             return IsChanneled() && !ChannelInterruptFlags.HasFlag(SpellAuraInterruptFlags.Moving | SpellAuraInterruptFlags.Turning);
         }
 
-        public bool NeedsComboPoints()
-        {
-            return HasAttribute(SpellAttr1.FinishingMoveDamage | SpellAttr1.FinishingMoveDuration);
-        }
-
         public bool IsNextMeleeSwingSpell()
         {
             return HasAttribute(SpellAttr0.OnNextSwingNoDamage | SpellAttr0.OnNextSwing);
@@ -4193,7 +4188,7 @@ namespace Game.Spells
                 // bonus amount from combo points
                 if (comboDamage != 0)
                 {
-                    uint comboPoints = casterUnit.GetComboPoints();
+                    int comboPoints = casterUnit.GetPower(PowerType.ComboPoints);
                     if (comboPoints != 0)
                         value += comboDamage * comboPoints;
                 }

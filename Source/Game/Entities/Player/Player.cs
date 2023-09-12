@@ -645,8 +645,8 @@ namespace Game.Entities
 
                 // drunken state is cleared on death
                 SetDrunkValue(0);
-                // lost combo points at any target (targeted combo points clear in Unit::setDeathState)
-                ClearComboPoints();
+
+                SetPower(PowerType.ComboPoints, 0);
 
                 ClearResurrectRequestData();
 
@@ -723,7 +723,7 @@ namespace Game.Entities
                 StopCastingCharm();
                 StopCastingBindSight();
                 UnsummonPetTemporaryIfAny();
-                ClearComboPoints();
+                SetPower(PowerType.ComboPoints, 0);
                 GetSession().DoLootReleaseAll();
                 m_lootRolls.Clear();
                 OutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);

@@ -1533,7 +1533,7 @@ namespace Framework.Constants
         IgnoreCastItem = 0x08,   //! Will Not Take Away Cast Item Or Update Related Achievement Criteria
         IgnoreAuraScaling = 0x10,   //! Will Ignore Aura Scaling
         IgnoreCastInProgress = 0x20,   //! Will Not Check If A Current Cast Is In Progress
-        IgnoreComboPoints = 0x40,   //! Will Ignore Combo Point Requirement
+        // reuse = 0x40,   //
         CastDirectly = 0x80,   //! In Spell.Prepare, Will Be Cast Directly Without Setting Containers For Executed Spell
         IgnoreAuraInterruptFlags = 0x100,   //! Will Ignore Interruptible Aura'S At Cast
         IgnoreSetFacing = 0x200,   //! Will Not Adjust Facing To Target (If Any)

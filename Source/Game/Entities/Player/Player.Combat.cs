@@ -518,8 +518,8 @@ namespace Game.Entities
             opponent.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.DuelEnd);
 
             // cleanup combo points
-            ClearComboPoints();
-            opponent.ClearComboPoints();
+            SetPower(PowerType.ComboPoints, 0);
+            opponent.SetPower(PowerType.ComboPoints, 0);
 
             //cleanups
             SetDuelArbiter(ObjectGuid.Empty);

@@ -551,7 +551,7 @@ namespace Scripts.Spells.Rogue
                         0.0375f         // 5 points: ${($m1 + $b1*5 + 0.0375 * $AP) * 8} damage over 16 secs
                 };
 
-                uint cp = caster.GetComboPoints();
+                int cp = caster.GetPower(PowerType.ComboPoints);
                 if (cp > 5)
                     cp = 5;
 

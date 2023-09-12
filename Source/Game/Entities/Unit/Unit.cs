@@ -3343,47 +3343,6 @@ namespace Game.Entities
             return nearMembers[randTarget];
         }
 
-        public uint GetComboPoints() { return (uint)GetPower(PowerType.ComboPoints); }
-
-        public void AddComboPoints(sbyte count, Spell spell = null)
-        {
-            if (count == 0)
-                return;
-
-            sbyte comboPoints = (sbyte)(spell != null ? spell.m_comboPointGain : GetPower(PowerType.ComboPoints));
-
-            comboPoints += count;
-
-            if (comboPoints > 5)
-                comboPoints = 5;
-            else if (comboPoints < 0)
-                comboPoints = 0;
-
-            if (!spell)
-                SetPower(PowerType.ComboPoints, comboPoints);
-            else
-                spell.m_comboPointGain = comboPoints;
-        }
-
-        void GainSpellComboPoints(sbyte count)
-        {
-            if (count == 0)
-                return;
-
-            sbyte cp = (sbyte)GetPower(PowerType.ComboPoints);
-
-            cp += count;
-            if (cp > 5) cp = 5;
-            else if (cp < 0) cp = 0;
-
-            SetPower(PowerType.ComboPoints, cp);
-        }
-
-        public void ClearComboPoints()
-        {
-            SetPower(PowerType.ComboPoints, 0);
-        }
-
         public void ClearAllReactives()
         {
             for (ReactiveType i = 0; i < ReactiveType.Max; ++i)
