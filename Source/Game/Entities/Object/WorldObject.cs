@@ -1683,6 +1683,18 @@ namespace Game.Entities
             return searcher.GetTarget();
         }
 
+        GameObject FindNearestGameObjectWithOptions(float range, FindGameObjectOptions options)
+        {
+            NearestCheckCustomizer checkCustomizer = new(this, range);
+            GameObjectWithOptionsInObjectRangeCheck<NearestCheckCustomizer> checker = new(this, checkCustomizer, options);
+            GameObjectLastSearcher searcher = new(this, checker);
+            if (options.IgnorePhases)
+                searcher.i_phaseShift = PhasingHandler.GetAlwaysVisiblePhaseShift();
+
+            Cell.VisitGridObjects(this, searcher, range);
+            return searcher.GetTarget();
+        }
+
         public GameObject FindNearestUnspawnedGameObject(uint entry, float range)
         {
             NearestUnspawnedGameObjectEntryInObjectRangeCheck checker = new(this, entry, range);
@@ -2834,6 +2846,17 @@ namespace Game.Entities
             return gameobjectList;
         }
 
+        void GetGameObjectListWithOptionsInGrid(List<GameObject> gameObjectContainer, float maxSearchRange, FindGameObjectOptions options)
+        {
+            InRangeCheckCustomizer checkCustomizer = new(this, maxSearchRange);
+            GameObjectWithOptionsInObjectRangeCheck<InRangeCheckCustomizer> check = new(this, checkCustomizer, options);
+            GameObjectListSearcher searcher = new(this, gameObjectContainer, check);
+            if (options.IgnorePhases)
+                searcher.i_phaseShift = PhasingHandler.GetAlwaysVisiblePhaseShift();
+
+            Cell.VisitGridObjects(this, searcher, maxSearchRange);
+        }
+
         public List<Creature> GetCreatureListWithEntryInGrid(uint entry = 0, float maxSearchRange = 250.0f)
         {
             List<Creature> creatureList = new();
@@ -2847,8 +2870,8 @@ namespace Game.Entities
         public List<Creature> GetCreatureListWithOptionsInGrid(float maxSearchRange, FindCreatureOptions options)
         {
             List<Creature> creatureList = new();
-            NoopCheckCustomizer checkCustomizer = new();
-            CreatureWithOptionsInObjectRangeCheck<NoopCheckCustomizer> check = new(this, checkCustomizer, options);
+            InRangeCheckCustomizer checkCustomizer = new(this, maxSearchRange);
+            CreatureWithOptionsInObjectRangeCheck<InRangeCheckCustomizer> check = new(this, checkCustomizer, options);
             CreatureListSearcher searcher = new(this, creatureList, check);
             if (options.IgnorePhases)
                 searcher.i_phaseShift = PhasingHandler.GetAlwaysVisiblePhaseShift();
@@ -4036,6 +4059,22 @@ namespace Game.Entities
         public ObjectGuid? CharmerGuid;
         public ObjectGuid? CreatorGuid;
         public ObjectGuid? DemonCreatorGuid;
+        public ObjectGuid? PrivateObjectOwnerGuid;
+    }
+
+    class FindGameObjectOptions
+    {
+        public uint? GameObjectId;
+        public string StringId;
+
+        public bool? IsSummon;
+        public bool? IsSpawned;
+
+        public bool IgnorePhases;
+        public bool IgnoreNotOwnedPrivateObjects = true;
+        public bool IgnorePrivateObjects;
+
+        public ObjectGuid? OwnerGuid;
         public ObjectGuid? PrivateObjectOwnerGuid;
     }
 }

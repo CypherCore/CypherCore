@@ -360,6 +360,9 @@ namespace Game.Entities
             }
 
             LastUsedScriptID = GetGoInfo().ScriptId;
+
+            m_stringIds[0] = goInfo.StringId;
+
             AIM_Initialize();
 
             if (spawnid != 0)
@@ -1160,6 +1163,8 @@ namespace Game.Entities
             }
 
             m_goData = data;
+
+            m_stringIds[1] = data.StringId;
 
             if (addToMap && !GetMap().AddToMap(this))
                 return false;
@@ -2636,6 +2641,27 @@ namespace Game.Entities
             return GetGoInfo().ScriptId;
         }
 
+        public bool HasStringId(string id)
+        {
+            return m_stringIds.Contains(id);
+        }
+
+        public void SetScriptStringId(string id)
+        {
+            if (!id.IsEmpty())
+            {
+                m_scriptStringId = id;
+                m_stringIds[2] = m_scriptStringId;
+            }
+            else
+            {
+                m_scriptStringId = null;
+                m_stringIds[2] = null;
+            }
+        }
+
+        public string[] GetStringIds() { return m_stringIds; }
+        
         public override string GetName(Locale locale = Locale.enUS)
         {
             if (locale != Locale.enUS)
@@ -3769,6 +3795,8 @@ namespace Game.Entities
         public GameObjectFieldData m_gameObjectData;
         GameObjectTypeBase m_goTypeImpl;
         protected GameObjectValue m_goValue; // TODO: replace with m_goTypeImpl
+        string[] m_stringIds = new string[3];
+        string m_scriptStringId;
         protected GameObjectTemplate m_goInfo;
         protected GameObjectTemplateAddon m_goTemplateAddon;
         GameObjectData m_goData;

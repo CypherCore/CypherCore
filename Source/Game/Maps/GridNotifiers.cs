@@ -1490,7 +1490,7 @@ namespace Game.Maps
 
     public class GameObjectLastSearcher : Notifier
     {
-        PhaseShift i_phaseShift;
+        public PhaseShift i_phaseShift;
         GameObject i_object;
         ICheck<GameObject> i_check;
 
@@ -1518,7 +1518,7 @@ namespace Game.Maps
 
     public class GameObjectListSearcher : Notifier
     {
-        PhaseShift i_phaseShift;
+        public PhaseShift i_phaseShift;
         List<GameObject> i_objects;
         ICheck<GameObject> i_check;
 
@@ -2422,7 +2422,7 @@ namespace Game.Maps
         float i_range;
     }
 
-    public class CreatureWithOptionsInObjectRangeCheck<T> : ICheck<Creature> where T : NoopCheckCustomizer
+    public class CreatureWithOptionsInObjectRangeCheck<T> : ICheck<Creature> where T : InRangeCheckCustomizer
     {
         WorldObject i_obj;
         FindCreatureOptions i_args;
@@ -2482,6 +2482,54 @@ namespace Game.Maps
         }
     }
 
+    class GameObjectWithOptionsInObjectRangeCheck<T> : ICheck<GameObject> where T : InRangeCheckCustomizer
+    {
+        WorldObject _obj;
+        FindGameObjectOptions _args;
+        T _customizer;
+
+        public GameObjectWithOptionsInObjectRangeCheck(WorldObject obj, T customizer, FindGameObjectOptions args)
+        {
+            _obj = obj;
+            _args = args;
+            _customizer = customizer;
+        }
+
+        public bool Invoke(GameObject go)
+        {
+            if (_args.IsSpawned.HasValue && _args.IsSpawned != go.IsSpawned()) // Despawned
+                return false;
+
+            if (go.GetGUID() == _obj.GetGUID())
+                return false;
+
+            if (!_customizer.Test(go))
+                return false;
+
+            if (_args.GameObjectId.HasValue && go.GetEntry() != _args.GameObjectId)
+                return false;
+
+            if (!_args.StringId.IsEmpty() && !go.HasStringId(_args.StringId))
+                return false;
+
+            if (_args.IsSummon.HasValue && (go.GetSpawnId() == 0) != _args.IsSummon)
+                return false;
+
+            if ((_args.OwnerGuid.HasValue && go.GetOwnerGUID() != _args.OwnerGuid)
+                || (_args.PrivateObjectOwnerGuid.HasValue && go.GetPrivateObjectOwner() != _args.PrivateObjectOwnerGuid))
+                return false;
+
+            if (_args.IgnorePrivateObjects && go.IsPrivateObject())
+                return false;
+
+            if (_args.IgnoreNotOwnedPrivateObjects && !go.CheckPrivateObjectOwnerVisibility(_obj))
+                return false;
+
+            _customizer.Update(go);
+            return true;
+        }
+    }
+    
     public class AnyPlayerInObjectRangeCheck : ICheck<Player>
     {
         public AnyPlayerInObjectRangeCheck(WorldObject obj, float range, bool reqAlive = true)
@@ -2933,32 +2981,44 @@ namespace Game.Maps
     }
 
     // CHECK modifiers
-    public class NoopCheckCustomizer
+    public class InRangeCheckCustomizer
     {
-        public virtual bool Test(WorldObject o) { return true; }
+        WorldObject _obj;
+        float _range;
+
+        public InRangeCheckCustomizer(WorldObject obj, float range)
+        {
+            _obj = obj;
+            _range = range;
+        }
+
+        public virtual bool Test(WorldObject obj)
+        {
+            return _obj.IsWithinDist(obj, _range);
+        }
 
         public virtual void Update(WorldObject o) { }
     }
 
-    class NearestCheckCustomizer : NoopCheckCustomizer
+    class NearestCheckCustomizer : InRangeCheckCustomizer
     {
         WorldObject i_obj;
         float i_range;
 
-        public NearestCheckCustomizer(WorldObject obj, float range)
+        public NearestCheckCustomizer(WorldObject obj, float range) : base(obj, range)
         {
             i_obj = obj;
             i_range = range;
         }
 
-        public override bool Test(WorldObject o)
+        public override bool Test(WorldObject obj)
         {
-            return i_obj.IsWithinDist(o, i_range);
+            return i_obj.IsWithinDist(obj, i_range);
         }
 
-        public override void Update(WorldObject o)
+        public override void Update(WorldObject obj)
         {
-            i_range = i_obj.GetDistance(o);
+            i_range = i_obj.GetDistance(obj);
         }
     }
     

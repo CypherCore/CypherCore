@@ -3971,8 +3971,8 @@ namespace Game
                 "Data0, Data1, Data2, Data3, Data4, Data5, Data6, Data7, Data8, Data9, Data10, Data11, Data12, " +
                 //21      22      23      24      25      26      27      28      29      30      31      32      33      34      35      36
                 "Data13, Data14, Data15, Data16, Data17, Data18, Data19, Data20, Data21, Data22, Data23, Data24, Data25, Data26, Data27, Data28, " +
-                //37      38       39     40      41      42      43               44      45
-                "Data29, Data30, Data31, Data32, Data33, Data34, ContentTuningId, AIName, ScriptName FROM gameobject_template");
+                //37      38       39     40      41      42      43               44      45          46
+                "Data29, Data30, Data31, Data32, Data33, Data34, ContentTuningId, AIName, ScriptName, StringId FROM gameobject_template");
 
             if (result.IsEmpty())
             {
@@ -4004,6 +4004,7 @@ namespace Game
                     got.ContentTuningId = result.Read<uint>(43);
                     got.AIName = result.Read<string>(44);
                     got.ScriptId = GetScriptId(result.Read<string>(45));
+                    got.StringId = result.Read<string>(46);
 
                     switch (got.type)
                     {
@@ -4264,8 +4265,8 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT gameobject.guid, id, map, position_x, position_y, position_z, orientation, " +
                 //7          8          9          10         11             12            13     14                 15          16
                 "rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state, spawnDifficulties, eventEntry, poolSpawnId, " +
-                //17             18       19          20              21
-                "phaseUseFlags, phaseid, phasegroup, terrainSwapMap, ScriptName " +
+                //17             18       19          20              21          22
+                "phaseUseFlags, phaseid, phasegroup, terrainSwapMap, ScriptName, StringId " +
                 "FROM gameobject LEFT OUTER JOIN game_event_gameobject ON gameobject.guid = game_event_gameobject.guid " +
                 "LEFT OUTER JOIN pool_members ON pool_members.type = 1 AND gameobject.guid = pool_members.spawnId");
 
@@ -4428,6 +4429,7 @@ namespace Game
                 }
 
                 data.ScriptId = GetScriptId(result.Read<string>(21));
+                data.StringId = result.Read<string>(22);
 
                 if (data.rotation.X < -1.0f || data.rotation.X > 1.0f)
                 {
