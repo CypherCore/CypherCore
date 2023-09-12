@@ -152,7 +152,7 @@ namespace Game.Spells
 
         public static float CalculateEstimatedfTotalPeriodicAmount(Unit caster, Unit target, SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, float amount, byte stack)
         {
-            int maxDuration = Aura.CalcMaxDuration(spellInfo, caster);
+            int maxDuration = Aura.CalcMaxDuration(spellInfo, caster, null);
             if (maxDuration <= 0)
                 return 0.0f;
 

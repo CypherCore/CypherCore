@@ -2792,25 +2792,19 @@ namespace Game.Spells
             if (power.RequiredAuraSpellID != 0 && !unitCaster.HasAura(power.RequiredAuraSpellID))
                 return null;
 
-            SpellPowerCost cost = new();
-
             // Spell drain all exist power on cast (Only paladin lay of Hands)
             if (HasAttribute(SpellAttr1.UseAllMana))
             {
+                if (optionalCost)
+                    return null;
+
                 // If power type - health drain all
                 if (power.PowerType == PowerType.Health)
-                {
-                    cost.Power = PowerType.Health;
-                    cost.Amount = (int)unitCaster.GetHealth();
-                    return cost;
-                }
+                    return new SpellPowerCost() { Power = PowerType.Health, Amount = (int)unitCaster.GetHealth() };
+
                 // Else drain all power
                 if (power.PowerType < PowerType.Max)
-                {
-                    cost.Power = power.PowerType;
-                    cost.Amount = unitCaster.GetPower(cost.Power);
-                    return cost;
-                }
+                    return new SpellPowerCost() { Power = power.PowerType, Amount = unitCaster.GetPower(power.PowerType) };
 
                 Log.outError(LogFilter.Spells, $"SpellInfo.CalcPowerCost: Unknown power type '{power.PowerType}' in spell {Id}");
                 return default;
@@ -2997,9 +2991,7 @@ namespace Game.Spells
             if (initiallyNegative != (powerCost < 0))
                 powerCost = 0;
 
-            cost.Power = power.PowerType;
-            cost.Amount = powerCost;
-            return cost;
+            return new SpellPowerCost() { Power = power.PowerType, Amount = powerCost };
         }
 
         public List<SpellPowerCost> CalcPowerCost(WorldObject caster, SpellSchoolMask schoolMask, Spell spell = null)
@@ -3013,11 +3005,8 @@ namespace Game.Spells
                     if (itr != null)
                         return itr;
 
-                    SpellPowerCost cost = new();
-                    cost.Power = powerType;
-                    cost.Amount = 0;
-                    costs.Add(cost);
-                    return costs.Last();
+                    costs.Add(new SpellPowerCost() { Power = powerType, Amount = 0 });
+                return costs.Last();
                 }
 
                 foreach (SpellPowerRecord power in PowerCosts)

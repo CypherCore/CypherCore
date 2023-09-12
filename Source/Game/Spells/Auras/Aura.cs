@@ -742,10 +742,10 @@ namespace Game.Spells
 
         public int CalcMaxDuration(Unit caster)
         {
-            return CalcMaxDuration(GetSpellInfo(), caster);
+            return CalcMaxDuration(GetSpellInfo(), caster, null);
         }
 
-        public static int CalcMaxDuration(SpellInfo spellInfo, WorldObject caster)
+        public static int CalcMaxDuration(SpellInfo spellInfo, WorldObject caster, List<SpellPowerCost> powerCosts)
         {
             Player modOwner = null;
             int maxDuration;
@@ -753,7 +753,7 @@ namespace Game.Spells
             if (caster != null)
             {
                 modOwner = caster.GetSpellModOwner();
-                maxDuration = caster.CalcSpellDuration(spellInfo);
+                maxDuration = caster.CalcSpellDuration(spellInfo, powerCosts);
             }
             else
                 maxDuration = spellInfo.GetDuration();

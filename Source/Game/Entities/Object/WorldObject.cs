@@ -15,6 +15,7 @@ using Game.Scenarios;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace Game.Entities
@@ -1874,27 +1875,39 @@ namespace Game.Entities
             return value;
         }
 
-        public int CalcSpellDuration(SpellInfo spellInfo)
+        public int CalcSpellDuration(SpellInfo spellInfo, List<SpellPowerCost> powerCosts)
         {
-            int comboPoints = 0;
-            int maxComboPoints = 5;
-            Unit unit = ToUnit();
-            if (unit != null)
-            {
-                comboPoints = unit.GetPower(PowerType.ComboPoints);
-                maxComboPoints = unit.GetMaxPower(PowerType.ComboPoints);
-            }
-
             int minduration = spellInfo.GetDuration();
+            if (minduration <= 0)
+                return minduration;
+
             int maxduration = spellInfo.GetMaxDuration();
+            if (minduration == maxduration)
+                return minduration;
 
-            int duration;
-            if (comboPoints != 0 && minduration != -1 && minduration != maxduration)
-                duration = minduration + ((maxduration - minduration) * comboPoints / maxComboPoints);
-            else
-                duration = minduration;
+            Unit unit = ToUnit();
+            if (unit == null)
+                return minduration;
 
-            return duration;
+            if (powerCosts == null)
+                return minduration;
+
+            // we want only baseline cost here
+            var powerCostRecord = spellInfo.PowerCosts.FirstOrDefault(powerEntry => powerEntry != null && powerEntry.PowerType == PowerType.ComboPoints && (powerEntry.RequiredAuraSpellID == 0 || unit.HasAura(powerEntry.RequiredAuraSpellID)));
+            if (powerCostRecord == null)
+                return minduration;
+
+            var consumedCost = powerCosts.Find(consumed => consumed.Power == PowerType.ComboPoints);
+            if (consumedCost == null)
+                return minduration;
+
+            int baseComboCost = powerCostRecord.ManaCost + (int)powerCostRecord.OptionalCost;
+            var powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(PowerType.ComboPoints);
+            if (powerTypeEntry != null)
+                baseComboCost += MathFunctions.CalculatePct(powerTypeEntry.MaxBasePower, powerCostRecord.PowerCostPct + powerCostRecord.OptionalCostPct);
+
+            float durationPerComboPoint = (float)(maxduration - minduration) / baseComboCost;
+            return minduration + (int)(durationPerComboPoint * consumedCost.Amount);
         }
 
         public int ModSpellDuration(SpellInfo spellInfo, WorldObject target, int duration, bool positive, uint effectMask)

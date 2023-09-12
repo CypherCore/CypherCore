@@ -2239,7 +2239,7 @@ namespace Game.Spells
                     }
                 }
 
-                hitInfo.AuraDuration = Aura.CalcMaxDuration(m_spellInfo, origCaster);
+                hitInfo.AuraDuration = Aura.CalcMaxDuration(m_spellInfo, origCaster, m_powerCost);
 
                 // unit is immune to aura if it was diminished to 0 duration
                 if (!hitInfo.Positive && !unit.ApplyDiminishingToDuration(m_spellInfo, ref hitInfo.AuraDuration, origCaster, diminishLevel))

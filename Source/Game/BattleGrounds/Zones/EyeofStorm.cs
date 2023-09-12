@@ -27,7 +27,6 @@ namespace Game.BattleGrounds.Zones
     {
         public BgEyeofStorm(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
         {
-            m_BuffChange = true;
             BgObjects = new ObjectGuid[EotSObjectTypes.Max];
             BgCreatures= new ObjectGuid[EotSCreaturesTypes.Max];
             m_Points_Trigger[EotSPoints.FelReaver] = EotSPointsTrigger.FelReaverBuff;

@@ -14,7 +14,6 @@ namespace Game.BattleGrounds.Zones
         public BgArathiBasin(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
         {
             m_IsInformedNearVictory = false;
-            m_BuffChange = true;
             BgObjects = new ObjectGuid[ABObjectTypes.Max];
             BgCreatures = new ObjectGuid[ABBattlegroundNodes.AllCount + 5];//+5 for aura triggers
 
