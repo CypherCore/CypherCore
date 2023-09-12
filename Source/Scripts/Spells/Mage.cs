@@ -41,6 +41,7 @@ namespace Scripts.Spells.Mage
         public const uint EverwarmSocks = 320913;
         public const uint FingersOfFrost = 44544;
         public const uint FireBlast = 108853;
+        public const uint FlurryDamage = 228596;
         public const uint Firestarter = 205026;
         public const uint FrostNova = 122;
         public const uint GiraffeForm = 32816;
@@ -68,6 +69,7 @@ namespace Scripts.Spells.Mage
         public const uint ChainReactionDummy = 278309;
         public const uint ChainReaction = 278310;
         public const uint TouchOfTheMagiExplode = 210833;
+        public const uint WintersChill = 228358;
     }
 
     // 110909 - Alter Time Aura
@@ -604,7 +606,7 @@ namespace Scripts.Spells.Mage
         }
     }
 
-    // 205029 - Flame On
+    [Script] // 205029 - Flame On
     class spell_mage_flame_on : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -626,6 +628,75 @@ namespace Scripts.Spells.Mage
         }
     }
 
+    // 44614 - Flurry
+    class spell_mage_flurry : SpellScript
+    {
+        class FlurryEvent : BasicEvent
+        {
+            Unit _caster;
+            ObjectGuid _target;
+            ObjectGuid _originalCastId;
+            int _count;
+
+            public FlurryEvent(Unit caster, ObjectGuid target, ObjectGuid originalCastId, int count)
+            {
+                _caster = caster;
+                _target = target;
+                _originalCastId = originalCastId;
+                _count = count;
+            }
+
+            public override bool Execute(ulong time, uint diff)
+            {
+                Unit target = Global.ObjAccessor.GetUnit(_caster, _target);
+                if (target == null)
+                    return true;
+
+                _caster.CastSpell(target, SpellIds.FlurryDamage, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetOriginalCastId(_originalCastId));
+
+                if ((--_count) == 0)
+                    return true;
+
+                _caster.m_Events.AddEvent(this, TimeSpan.FromMilliseconds(time) + RandomHelper.RandTime(TimeSpan.FromMilliseconds(300), TimeSpan.FromMilliseconds(400)));
+                return false;
+            }
+        }
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.FlurryDamage);
+        }
+
+        void EffectHit(uint effIndex)
+        {
+            GetCaster().m_Events.AddEventAtOffset(new FlurryEvent(GetCaster(), GetHitUnit().GetGUID(), GetSpell().m_castId, GetEffectValue() - 1), RandomHelper.RandTime(TimeSpan.FromMilliseconds(300), TimeSpan.FromMilliseconds(400)));
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(EffectHit, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 228354 - Flurry (damage)
+    class spell_mage_flurry_damage : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.WintersChill);
+        }
+
+        void HandleDamage(uint effIndex)
+        {
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.WintersChill, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDamage, 1, SpellEffectName.SchoolDamage));
+        }
+    }
+    
     [Script] // 116 - Frostbolt
     class spell_mage_frostbolt : SpellScript
     {
