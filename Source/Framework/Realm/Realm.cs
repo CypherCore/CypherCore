@@ -4,8 +4,8 @@
 using Framework.Constants;
 using Framework.Realm;
 using System;
+using System.Collections.Generic;
 using System.Net;
-using System.Net.Sockets;
 
 public class Realm : IEquatable<Realm>
 {
@@ -16,28 +16,13 @@ public class Realm : IEquatable<Realm>
         NormalizedName = NormalizedName.Replace(" ", "");
     }
 
-    public IPEndPoint GetAddressForClient(IPAddress clientAddr)
+    public IPAddress GetAddressForClient(IPAddress clientAddr)
     {
-        IPAddress realmIp = ExternalAddress;
-
         // Attempt to send best address for client
         if (IPAddress.IsLoopback(clientAddr))
-        {
-            // Try guessing if realm is also connected locally
-            if (IPAddress.IsLoopback(LocalAddress) || IPAddress.IsLoopback(ExternalAddress))
-                realmIp = clientAddr;
-            else
-            {
-                // Assume that user connecting from the machine that authserver is located on
-                // has all realms available in his local network
-                realmIp = LocalAddress;
-            }
-        }
+            return Addresses[1];
 
-        IPEndPoint endpoint = new(realmIp, Port);
-
-        // Return external IP
-        return endpoint;
+        return Addresses[0];
     }
 
     public uint GetConfigId()
@@ -57,9 +42,7 @@ public class Realm : IEquatable<Realm>
 
     public bool Equals(Realm other)
     {
-        return other.ExternalAddress.Equals(ExternalAddress)
-            && other.LocalAddress.Equals(LocalAddress)
-            && other.Port == Port
+        return other.Port == Port
             && other.Name == Name
             && other.Type == Type
             && other.Flags == Flags
@@ -70,13 +53,12 @@ public class Realm : IEquatable<Realm>
 
     public override int GetHashCode()
     {
-        return new { ExternalAddress, LocalAddress, Port, Name, Type, Flags, Timezone, AllowedSecurityLevel, PopulationLevel }.GetHashCode();
+        return new { Port, Name, Type, Flags, Timezone, AllowedSecurityLevel, PopulationLevel }.GetHashCode();
     }
 
     public RealmId Id;
     public uint Build;
-    public IPAddress ExternalAddress;
-    public IPAddress LocalAddress;
+    public List<IPAddress> Addresses = new();
     public ushort Port;
     public string Name;
     public string NormalizedName;

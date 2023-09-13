@@ -2443,8 +2443,8 @@ namespace Game
                 return false;
 
             _realm.SetName(result.Read<string>(1));
-            _realm.ExternalAddress = System.Net.IPAddress.Parse(result.Read<string>(2));
-            _realm.LocalAddress = System.Net.IPAddress.Parse(result.Read<string>(3));
+            _realm.Addresses.Add(System.Net.IPAddress.Parse(result.Read<string>(2)));
+            _realm.Addresses.Add(System.Net.IPAddress.Parse(result.Read<string>(3)));
             _realm.Port = result.Read<ushort>(4);
             _realm.Type = result.Read<byte>(5);
             _realm.Flags = (RealmFlags)result.Read<byte>(6);

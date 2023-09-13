@@ -120,9 +120,9 @@ namespace BNetServer
         public string GetHostnameForClient(IPEndPoint address)
         {
             if (IPAddress.IsLoopback(address.Address))
-                return _hostnames[0];
+                return _hostnames[1];
 
-            return _hostnames[1];
+            return _hostnames[0];
         }
 
         public int GetPort() { return _port; }

@@ -92,8 +92,8 @@ public class RealmManager : Singleton<RealmManager>
                 var realm = new Realm();
                 uint realmId = result.Read<uint>(0);
                 realm.Name = result.Read<string>(1);
-                realm.ExternalAddress = IPAddress.Parse(result.Read<string>(2));
-                realm.LocalAddress = IPAddress.Parse(result.Read<string>(3));
+                realm.Addresses.Add(IPAddress.Parse(result.Read<string>(2)));
+                realm.Addresses.Add(IPAddress.Parse(result.Read<string>(3)));
                 realm.Port = result.Read<ushort>(4);
                 RealmType realmType = (RealmType)result.Read<byte>(5);
                 if (realmType == RealmType.FFAPVP)
@@ -120,9 +120,9 @@ public class RealmManager : Singleton<RealmManager>
                     _subRegions.Add(subRegion);
 
                 if (!existingRealms.ContainsKey(realm.Id))
-                    Log.outInfo(LogFilter.Realmlist, "Added realm \"{0}\" at {1}:{2}", realm.Name, realm.ExternalAddress.ToString(), realm.Port);
+                    Log.outInfo(LogFilter.Realmlist, "Added realm \"{0}\" at {1}:{2}", realm.Name, realm.Addresses[0].ToString(), realm.Port);
                 else
-                    Log.outDebug(LogFilter.Realmlist, "Updating realm \"{0}\" at {1}:{2}", realm.Name, realm.ExternalAddress.ToString(), realm.Port);
+                    Log.outDebug(LogFilter.Realmlist, "Updating realm \"{0}\" at {1}:{2}", realm.Name, realm.Addresses[0].ToString(), realm.Port);
 
                 existingRealms.Remove(realm.Id);
             }
