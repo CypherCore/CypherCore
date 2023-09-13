@@ -577,7 +577,7 @@ namespace Game.Spells
                             }
                         }
                     }
-                    
+
                 }
 
                 if (!addUnit)
@@ -994,7 +994,7 @@ namespace Game.Spells
                 && !m_spellInfo.HasAttribute(SpellAttr2.AllowWhileNotShapeshiftedCasterForm)
                 && !m_spellInfo.HasAttribute(SpellAttr0.NotShapeshifted);
         }
-        
+
         public bool CanBeSaved()
         {
             if (IsPassive())
@@ -2113,6 +2113,19 @@ namespace Game.Spells
                         hook.Call(aurEff, victim, ref critChance);
 
                 loadedScript._FinishScriptCall();
+            }
+        }
+
+        public void CallScriptCalcDamageAndHealingHandlers(AuraEffect aurEff, AuraApplication aurApp, Unit victim, ref int damageOrHealing, ref int flatMod, ref float pctMod)
+        {
+            foreach (AuraScript script in m_loadedScripts)
+            {
+                script._PrepareScriptCall(AuraScriptHookType.EffectCalcDamageAndHealing, aurApp);
+                foreach (var effectCalcDamageAndHealing in script.DoEffectCalcDamageAndHealing)
+                    if (effectCalcDamageAndHealing.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
+                        effectCalcDamageAndHealing.Call(aurEff, victim, ref damageOrHealing, ref flatMod, ref pctMod);
+
+                script._FinishScriptCall();
             }
         }
         

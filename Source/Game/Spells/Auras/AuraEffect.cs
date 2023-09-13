@@ -124,7 +124,7 @@ namespace Game.Spells
             return amount;
         }
 
-        public static float? CalculateEstimatedAmount(Unit caster, Unit target, SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, int amount, byte stack)
+        public static float? CalculateEstimatedAmount(Unit caster, Unit target, SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, int amount, byte stack, AuraEffect aurEff)
         {
             uint stackAmountForBonuses = !spellEffectInfo.EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack) ? stack : 1u;
 
@@ -132,9 +132,9 @@ namespace Game.Spells
             {
                 case AuraType.PeriodicDamage:
                 case AuraType.PeriodicLeech:
-                    return caster.SpellDamageBonusDone(target, spellInfo, (uint)amount, DamageEffectType.DOT, spellEffectInfo, stackAmountForBonuses);
+                    return caster.SpellDamageBonusDone(target, spellInfo, amount, DamageEffectType.DOT, spellEffectInfo, stackAmountForBonuses, null, aurEff);
                 case AuraType.PeriodicHeal:
-                    return caster.SpellHealingBonusDone(target, spellInfo, (uint)amount, DamageEffectType.DOT, spellEffectInfo, stackAmountForBonuses);
+                    return caster.SpellHealingBonusDone(target, spellInfo, amount, DamageEffectType.DOT, spellEffectInfo, stackAmountForBonuses, null, aurEff);
                 default:
                     break;
             }
@@ -147,7 +147,7 @@ namespace Game.Spells
             if (!caster || GetBase().GetAuraType() != AuraObjectType.Unit)
                 return null;
 
-            return CalculateEstimatedAmount(caster, GetBase().GetUnitOwner(), GetSpellInfo(), GetSpellEffectInfo(), amount, GetBase().GetStackAmount());
+            return CalculateEstimatedAmount(caster, GetBase().GetUnitOwner(), GetSpellInfo(), GetSpellEffectInfo(), amount, GetBase().GetStackAmount(), this);
         }
 
         public static float CalculateEstimatedfTotalPeriodicAmount(Unit caster, Unit target, SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, float amount, byte stack)
@@ -177,7 +177,7 @@ namespace Game.Spells
             if (spellInfo.HasAttribute(SpellAttr5.ExtraInitialPeriod))
                 totalTicks += 1.0f;
 
-            return totalTicks * CalculateEstimatedAmount(caster, target, spellInfo, spellEffectInfo, (int)amount, stack).GetValueOrDefault(amount);
+            return totalTicks * CalculateEstimatedAmount(caster, target, spellInfo, spellEffectInfo, (int)amount, stack, null).GetValueOrDefault(amount);
         }
         
         public uint GetTotalTicks()
@@ -5070,17 +5070,11 @@ namespace Game.Spells
                 case AuraType.PeriodicDamage:
                 {
                     if (caster != null)
-                        damage = caster.SpellDamageBonusDone(target, GetSpellInfo(), damage, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses);
+                        damage = (uint)caster.SpellDamageBonusDone(target, GetSpellInfo(), (int)damage, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses, null, this);
 
-                    damage = target.SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DamageEffectType.DOT);
+                    damage = (uint)target.SpellDamageBonusTaken(caster, GetSpellInfo(), (int)damage, DamageEffectType.DOT);
 
-                    // There is a Chance to make a Soul Shard when Drain soul does damage
-                    if (caster != null && GetSpellInfo().SpellFamilyName == SpellFamilyNames.Warlock && GetSpellInfo().SpellFamilyFlags[0].HasAnyFlag(0x00004000u))
-                    {
-                        if (caster.IsTypeId(TypeId.Player) && caster.ToPlayer().IsHonorOrXPTarget(target))
-                            caster.CastSpell(caster, 95810, new CastSpellExtraArgs(this));
-                    }
-                    else if (GetSpellInfo().SpellFamilyName == SpellFamilyNames.Generic)
+                    if (GetSpellInfo().SpellFamilyName == SpellFamilyNames.Generic)
                     {
                         switch (GetId())
                         {
@@ -5104,15 +5098,15 @@ namespace Game.Spells
 
                     // Add melee damage bonuses (also check for negative)
                     if (caster != null)
-                        damage = caster.MeleeDamageBonusDone(target, damage, attackType, DamageEffectType.DOT, GetSpellInfo());
+                        damage = (uint)caster.MeleeDamageBonusDone(target, (int)damage, attackType, DamageEffectType.DOT, GetSpellInfo(), GetSpellEffectInfo().Mechanic, GetSpellInfo().GetSchoolMask(), null, this);
 
-                    damage = target.MeleeDamageBonusTaken(caster, damage, attackType, DamageEffectType.DOT, GetSpellInfo());
+                    damage = (uint)target.MeleeDamageBonusTaken(caster, (int)damage, attackType, DamageEffectType.DOT, GetSpellInfo());
                     break;
                 }
                 case AuraType.PeriodicDamagePercent:
                     // ceil obtained value, it may happen that 10 ticks for 10% damage may not kill owner
                     damage = (uint)Math.Ceiling(MathFunctions.CalculatePct((float)target.GetMaxHealth(), (float)damage));
-                    damage = target.SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DamageEffectType.DOT);
+                    damage = (uint)target.SpellDamageBonusTaken(caster, GetSpellInfo(), (int)damage, DamageEffectType.DOT);
                     break;
                 default:
                     break;
@@ -5196,9 +5190,9 @@ namespace Game.Spells
             uint damage = (uint)Math.Max(GetAmount(), 0);
 
             if (caster)
-                damage = caster.SpellDamageBonusDone(target, GetSpellInfo(), damage, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses);
+                damage = (uint)caster.SpellDamageBonusDone(target, GetSpellInfo(), (int)damage, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses, null, this);
 
-            damage = target.SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DamageEffectType.DOT);
+            damage = (uint)target.SpellDamageBonusTaken(caster, GetSpellInfo(), (int)damage, DamageEffectType.DOT);
 
             bool crit = RandomHelper.randChance(GetCritChanceFor(caster, target));
             if (crit)
@@ -5260,8 +5254,8 @@ namespace Game.Spells
 
             float gainMultiplier = GetSpellEffectInfo().CalcValueMultiplier(caster);
 
-            uint heal = caster.SpellHealingBonusDone(caster, GetSpellInfo(), (uint)(new_damage * gainMultiplier), DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses);
-            heal = caster.SpellHealingBonusTaken(caster, GetSpellInfo(), heal, DamageEffectType.DOT);
+            uint heal = (uint)caster.SpellHealingBonusDone(caster, GetSpellInfo(), (int)(new_damage * gainMultiplier), DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses, null, this);
+            heal = (uint)caster.SpellHealingBonusTaken(caster, GetSpellInfo(), (int)heal, DamageEffectType.DOT);
 
             HealInfo healInfo = new(caster, caster, heal, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
             caster.HealBySpell(healInfo);
@@ -5325,9 +5319,9 @@ namespace Game.Spells
             if (GetAuraType() == AuraType.ObsModHealth)
                 damage = (uint)target.CountPctFromMaxHealth((int)damage);
             else if (caster != null)
-                damage = caster.SpellHealingBonusDone(target, GetSpellInfo(), damage, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses);
+                damage = (uint)caster.SpellHealingBonusDone(target, GetSpellInfo(), (int)damage, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses, null, this);
 
-            damage = target.SpellHealingBonusTaken(caster, GetSpellInfo(), damage, DamageEffectType.DOT);
+            damage = (uint)target.SpellHealingBonusTaken(caster, GetSpellInfo(), (int)damage, DamageEffectType.DOT);
 
             bool crit = RandomHelper.randChance(GetCritChanceFor(caster, target));
             if (crit)
@@ -5615,8 +5609,8 @@ namespace Game.Spells
             }
 
             SpellNonMeleeDamage damageInfo = new(target, triggerTarget, GetSpellInfo(), GetBase().GetSpellVisual(), GetSpellInfo().SchoolMask, GetBase().GetCastId());
-            int damage = (int)target.SpellDamageBonusDone(triggerTarget, GetSpellInfo(), (uint)GetAmount(), DamageEffectType.SpellDirect, GetSpellEffectInfo());
-            damage = (int)triggerTarget.SpellDamageBonusTaken(target, GetSpellInfo(), (uint)damage, DamageEffectType.SpellDirect);
+            int damage = target.SpellDamageBonusDone(triggerTarget, GetSpellInfo(), GetAmount(), DamageEffectType.SpellDirect, GetSpellEffectInfo(), 1, null, this);
+            damage = triggerTarget.SpellDamageBonusTaken(target, GetSpellInfo(), damage, DamageEffectType.SpellDirect);
             target.CalculateSpellDamageTaken(damageInfo, damage, GetSpellInfo());
             Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
             target.DealSpellDamage(damageInfo, true);

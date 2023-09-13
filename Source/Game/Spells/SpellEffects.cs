@@ -152,9 +152,9 @@ namespace Game.Spells
                 Unit unitCaster = GetUnitCasterForEffectHandlers();
                 if (unitCaster != null && apply_direct_bonus)
                 {
-                    uint bonus = unitCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
-                    damage = (int)(bonus + (uint)(bonus * variance));
-                    damage = (int)unitTarget.SpellDamageBonusTaken(unitCaster, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect);
+                    int bonus = unitCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, damage, DamageEffectType.SpellDirect, effectInfo, 1, this);
+                    damage = (int)(bonus + (bonus * variance));
+                    damage = unitTarget.SpellDamageBonusTaken(unitCaster, m_spellInfo, damage, DamageEffectType.SpellDirect);
                 }
 
                 m_damage += damage;
@@ -684,9 +684,9 @@ namespace Game.Spells
             // add spell damage bonus
             if (unitCaster != null)
             {
-                uint bonus = unitCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
-                damage = (int)(bonus + (uint)(bonus * variance));
-                damage = (int)unitTarget.SpellDamageBonusTaken(unitCaster, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect);
+                int bonus = unitCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, damage, DamageEffectType.SpellDirect, effectInfo, 1, this);
+                damage = (int)(bonus + (bonus * variance));
+                damage = unitTarget.SpellDamageBonusTaken(unitCaster, m_spellInfo, damage, DamageEffectType.SpellDirect);
             }
 
             int newDamage = -(unitTarget.ModifyPower(powerType, -damage));
@@ -803,14 +803,14 @@ namespace Game.Spells
             }
             // Death Pact - return pct of max health to caster
             else if (m_spellInfo.SpellFamilyName == SpellFamilyNames.Deathknight && m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x00080000u))
-                addhealth = (int)unitCaster.SpellHealingBonusDone(unitTarget, m_spellInfo, (uint)unitCaster.CountPctFromMaxHealth(damage), DamageEffectType.Heal, effectInfo);
+                addhealth = unitCaster.SpellHealingBonusDone(unitTarget, m_spellInfo, (int)unitCaster.CountPctFromMaxHealth(damage), DamageEffectType.Heal, effectInfo, 1, this);
             else
             {
-                uint bonus = unitCaster.SpellHealingBonusDone(unitTarget, m_spellInfo, (uint)addhealth, DamageEffectType.Heal, effectInfo);
-                addhealth = (int)(bonus + (uint)(bonus * variance));
+                int bonus = unitCaster.SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, DamageEffectType.Heal, effectInfo, 1, this);
+                addhealth = (int)(bonus + (bonus * variance));
             }
 
-            addhealth = (int)unitTarget.SpellHealingBonusTaken(unitCaster, m_spellInfo, (uint)addhealth, DamageEffectType.Heal);
+            addhealth = unitTarget.SpellHealingBonusTaken(unitCaster, m_spellInfo, addhealth, DamageEffectType.Heal);
 
             // Remove Grievious bite if fully healed
             if (unitTarget.HasAura(48920) && ((uint)(unitTarget.GetHealth() + (ulong)addhealth) >= unitTarget.GetMaxHealth()))
@@ -828,15 +828,15 @@ namespace Game.Spells
             if (unitTarget == null || !unitTarget.IsAlive() || damage < 0)
                 return;
 
-            uint heal = (uint)unitTarget.CountPctFromMaxHealth(damage);
+            int heal = (int)unitTarget.CountPctFromMaxHealth(damage);
             Unit unitCaster = GetUnitCasterForEffectHandlers();
             if (unitCaster)
             {
-                heal = unitCaster.SpellHealingBonusDone(unitTarget, m_spellInfo, heal, DamageEffectType.Heal, effectInfo);
+                heal = unitCaster.SpellHealingBonusDone(unitTarget, m_spellInfo, heal, DamageEffectType.Heal, effectInfo, 1, this);
                 heal = unitTarget.SpellHealingBonusTaken(unitCaster, m_spellInfo, heal, DamageEffectType.Heal);
             }
 
-            m_healing += (int)heal;
+            m_healing += heal;
         }
 
         [SpellEffectHandler(SpellEffectName.HealMechanical)]
@@ -849,15 +849,15 @@ namespace Game.Spells
                 return;
 
             Unit unitCaster = GetUnitCasterForEffectHandlers();
-            uint heal = (uint)damage;
+            int heal = damage;
             if (unitCaster)
-                heal = unitCaster.SpellHealingBonusDone(unitTarget, m_spellInfo, heal, DamageEffectType.Heal, effectInfo);
+                heal = unitCaster.SpellHealingBonusDone(unitTarget, m_spellInfo, heal, DamageEffectType.Heal, effectInfo, 1, this);
 
-            heal += (uint)(heal * variance);
+            heal += (int)(heal * variance);
             if (unitCaster)
                 heal = unitTarget.SpellHealingBonusTaken(unitCaster, m_spellInfo, heal, DamageEffectType.Heal);
 
-            m_healing += (int)heal;
+            m_healing += heal;
         }
 
         [SpellEffectHandler(SpellEffectName.HealthLeech)]
@@ -872,12 +872,12 @@ namespace Game.Spells
             Unit unitCaster = GetUnitCasterForEffectHandlers();
             uint bonus = 0;
             if (unitCaster != null)
-                unitCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
+                bonus = (uint)unitCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, damage, DamageEffectType.SpellDirect, effectInfo, 1, this);
 
             damage = (int)(bonus + (uint)(bonus * variance));
 
             if (unitCaster != null)
-                damage = (int)unitTarget.SpellDamageBonusTaken(unitCaster, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect);
+                damage = unitTarget.SpellDamageBonusTaken(unitCaster, m_spellInfo, damage, DamageEffectType.SpellDirect);
 
             Log.outDebug(LogFilter.Spells, "HealthLeech :{0}", damage);
 
@@ -895,8 +895,8 @@ namespace Game.Spells
 
             if (unitCaster != null && unitCaster.IsAlive())
             {
-                healthGain = unitCaster.SpellHealingBonusDone(unitCaster, m_spellInfo, healthGain, DamageEffectType.Heal, effectInfo);
-                healthGain = unitCaster.SpellHealingBonusTaken(unitCaster, m_spellInfo, healthGain, DamageEffectType.Heal);
+                healthGain = (uint)unitCaster.SpellHealingBonusDone(unitCaster, m_spellInfo, (int)healthGain, DamageEffectType.Heal, effectInfo, 1, this);
+                healthGain = (uint)unitCaster.SpellHealingBonusTaken(unitCaster, m_spellInfo, (int)healthGain, DamageEffectType.Heal);
 
                 HealInfo healInfo = new(unitCaster, unitCaster, healthGain, m_spellInfo, m_spellSchoolMask);
                 unitCaster.HealBySpell(healInfo);
@@ -2448,6 +2448,7 @@ namespace Game.Spells
             }
 
             uint weaponDamage = unitCaster.CalculateDamage(m_attackType, normalized, addPctMods);
+            Mechanics mechanic = Mechanics.None;
 
             // Sequence is important
             foreach (var spellEffectInfo in m_spellInfo.GetEffects())
@@ -2465,8 +2466,11 @@ namespace Game.Spells
                         weaponDamage = (uint)(weaponDamage * weaponDamagePercentMod);
                         break;
                     default:
-                        break;                                      // not weapon damage effect, just skip
+                        continue;                                      // not weapon damage effect, just skip
                 }
+
+                if (spellEffectInfo.Mechanic != Mechanics.None && mechanic == Mechanics.None)
+                    mechanic = spellEffectInfo.Mechanic;
             }
 
             weaponDamage += (uint)spell_bonus;
@@ -2476,8 +2480,8 @@ namespace Game.Spells
             weaponDamage = Math.Max(weaponDamage, 0);
 
             // Add melee damage bonuses (also check for negative)
-            weaponDamage = unitCaster.MeleeDamageBonusDone(unitTarget, weaponDamage, m_attackType, DamageEffectType.SpellDirect, m_spellInfo, effectInfo);
-            m_damage += (int)unitTarget.MeleeDamageBonusTaken(unitCaster, weaponDamage, m_attackType, DamageEffectType.SpellDirect, m_spellInfo);
+            weaponDamage = (uint)unitCaster.MeleeDamageBonusDone(unitTarget, (int)weaponDamage, m_attackType, DamageEffectType.SpellDirect, m_spellInfo, mechanic, m_spellSchoolMask, this);
+            m_damage += unitTarget.MeleeDamageBonusTaken(unitCaster, (int)weaponDamage, m_attackType, DamageEffectType.SpellDirect, m_spellInfo);
         }
 
         [SpellEffectHandler(SpellEffectName.Threat)]

@@ -164,6 +164,7 @@ namespace Game.Scripting
         // internal use classes & functions
         // DO NOT OVERRIDE THESE IN SCRIPTS
         public delegate SpellCastResult SpellCheckCastFnType();
+        public delegate void DamageAndHealingCalcFnType(Unit victim, ref int damageOrHealing, ref int flatMod, ref float pctMod);
         public delegate void SpellOnResistAbsorbCalculateFnType(DamageInfo damageInfo, ref uint resistAmount, ref int absorbAmount);
         public delegate void SpellEffectFnType(uint index);
         public delegate void SpellBeforeHitFnType(SpellMissInfo missInfo);
@@ -201,6 +202,21 @@ namespace Game.Scripting
             }
         }
 
+        public class DamageAndHealingCalcHandler
+        {
+            DamageAndHealingCalcFnType _callImpl;
+
+            public DamageAndHealingCalcHandler(DamageAndHealingCalcFnType handler)
+            {
+                _callImpl = handler;
+            }
+
+            public void Call(Unit victim, ref int damageOrHealing, ref int flatMod, ref float pctMod)
+            {
+                _callImpl(victim, ref damageOrHealing, ref flatMod, ref pctMod);
+            }
+        }
+        
         public class OnCalculateResistAbsorbHandler
         {
             SpellOnResistAbsorbCalculateFnType _callImpl;
@@ -435,6 +451,27 @@ namespace Game.Scripting
                 if (eff.GetAffectedEffectsMask(entry) == 0)
                     Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnObjectTargetSelect` of SpellScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
 
+            if (!CalcDamage.Empty())
+            {
+                if (!entry.HasEffect(SpellEffectName.SchoolDamage)
+                    && !entry.HasEffect(SpellEffectName.PowerDrain)
+                    && !entry.HasEffect(SpellEffectName.HealthLeech)
+                    && !entry.HasEffect(SpellEffectName.WeaponDamage)
+                    && !entry.HasEffect(SpellEffectName.WeaponDamageNoSchool)
+                    && !entry.HasEffect(SpellEffectName.NormalizedWeaponDmg)
+                    && !entry.HasEffect(SpellEffectName.WeaponPercentDamage))
+                    Log.outError(LogFilter.Scripts, $"Spell `{entry.Id}` script `{m_scriptName}` does not have a damage effect - handler bound to hook `CalcDamage` of SpellScript won't be executed");
+            }
+
+            if (!CalcHealing.Empty())
+            {
+                if (!entry.HasEffect(SpellEffectName.Heal)
+                    && !entry.HasEffect(SpellEffectName.HealPct)
+                    && !entry.HasEffect(SpellEffectName.HealMechanical)
+                    && !entry.HasEffect(SpellEffectName.HealthLeech))
+                    Log.outError(LogFilter.Scripts, $"Spell `{entry.Id}` script `{m_scriptName}` does not have a damage effect - handler bound to hook `CalcHealing` of SpellScript won't be executed");
+            }
+
             return base._Validate(entry);
         }
 
@@ -478,7 +515,9 @@ namespace Game.Scripting
                 || IsInEffectHook()
                 || m_currentScriptState == (byte)SpellScriptHookType.OnCast
                 || m_currentScriptState == (byte)SpellScriptHookType.AfterCast
-                || m_currentScriptState == (byte)SpellScriptHookType.CalcCritChance;
+                || m_currentScriptState == (byte)SpellScriptHookType.CalcCritChance
+                || m_currentScriptState == (byte)SpellScriptHookType.CalcDamage
+                || m_currentScriptState == (byte)SpellScriptHookType.CalcHealing;
         }
 
         public bool IsInTargetHook()
@@ -556,20 +595,32 @@ namespace Game.Scripting
         // where function is void function(SpellDestination target)
         public List<DestinationTargetSelectHandler> OnDestinationTargetSelect = new();
 
+        // where function is void function(Unit victim, ref int damage, ref int flatMod, ref float pctMod)
+        public List<DamageAndHealingCalcHandler> CalcDamage = new();
+
+        // where function is void function(Unit victim, ref int healing, ref int flatMod, ref float pctMod)
+        public List<DamageAndHealingCalcHandler> CalcHealing = new();
+
         // hooks are executed in following order, at specified event of spell:
-        // 1. BeforeCast - executed when spell preparation is finished (when cast bar becomes full) before cast is handled
-        // 2. OnCheckCast - allows to override result of CheckCast function
-        // 3a. OnObjectAreaTargetSelect - executed just before adding selected targets to final target list (for area targets)
-        // 3b. OnObjectTargetSelect - executed just before adding selected target to final target list (for single unit targets)
-        // 4. OnCast - executed just before spell is launched (creates missile) or executed
-        // 5. AfterCast - executed after spell missile is launched and immediate spell actions are done
-        // 6. OnEffectLaunch - executed just before specified effect handler call - when spell missile is launched
-        // 7. OnEffectLaunchTarget - executed just before specified effect handler call - when spell missile is launched - called for each target from spell target map
-        // 8. OnEffectHit - executed just before specified effect handler call - when spell missile hits dest
-        // 9. BeforeHit - executed just before spell hits a target - called for each target from spell target map
-        // 10. OnEffectHitTarget - executed just before specified effect handler call - called for each target from spell target map
-        // 11. OnHit - executed just before spell deals damage and procs auras - when spell hits target - called for each target from spell target map
-        // 12. AfterHit - executed just after spell finishes all it's jobs for target - called for each target from spell target map
+        // 1. OnPrecast - executed during spell preparation (before cast bar starts)
+        // 2. BeforeCast - executed when spell preparation is finished (when cast bar becomes full) before cast is handled
+        // 3. OnCheckCast - allows to override result of CheckCast function
+        // 4a. OnObjectAreaTargetSelect - executed just before adding selected targets to final target list (for area targets)
+        // 4b. OnObjectTargetSelect - executed just before adding selected target to final target list (for single unit targets)
+        // 4c. OnDestinationTargetSelect - executed just before adding selected target to final target list (for destination targets)
+        // 5. OnCast - executed just before spell is launched (creates missile) or executed
+        // 6. AfterCast - executed after spell missile is launched and immediate spell actions are done
+        // 7. OnEffectLaunch - executed just before specified effect handler call - when spell missile is launched
+        // 8. OnCalcCritChance - executed just after specified effect handler call - when spell missile is launched - called for each target from spell target map
+        // 9. OnEffectLaunchTarget - executed just before specified effect handler call - when spell missile is launched - called for each target from spell target map
+        // 10a. CalcDamage - executed during specified effect handler call - when spell missile is launched - called for each target from spell target map
+        // 10b. CalcHealing - executed during specified effect handler call - when spell missile is launched - called for each target from spell target map
+        // 11. OnCalculateResistAbsorb - executed when damage resist/absorbs is calculated - before spell hit target
+        // 12. OnEffectHit - executed just before specified effect handler call - when spell missile hits dest
+        // 13. BeforeHit - executed just before spell hits a target - called for each target from spell target map
+        // 14. OnEffectHitTarget - executed just before specified effect handler call - called for each target from spell target map
+        // 15. OnHit - executed just before spell deals damage and procs auras - when spell hits target - called for each target from spell target map
+        // 16. AfterHit - executed just after spell finishes all it's jobs for target - called for each target from spell target map
 
         //
         // methods allowing interaction with Spell object
@@ -1041,6 +1092,7 @@ namespace Game.Scripting
         // DO NOT OVERRIDE THESE IN SCRIPTS
         public delegate bool AuraCheckAreaTargetDelegate(Unit target);
         public delegate void AuraDispelDelegate(DispelInfo dispelInfo);
+        public delegate void AuraEffectDamageAndHealingCalcFnType(AuraEffect aurEff, Unit victim, ref int damageOrHealing, ref int flatMod, ref float pctMod);
         public delegate void AuraEffectApplicationModeDelegate(AuraEffect aura, AuraEffectHandleModes auraMode);
         public delegate void AuraEffectPeriodicDelegate(AuraEffect aura);
         public delegate void AuraEffectUpdatePeriodicDelegate(AuraEffect aura);
@@ -1196,6 +1248,21 @@ namespace Game.Scripting
             }
         }
 
+        public class EffectCalcDamageAndHealingHandler : EffectBase
+        {
+            AuraEffectDamageAndHealingCalcFnType _callImpl;
+
+            public EffectCalcDamageAndHealingHandler(AuraEffectDamageAndHealingCalcFnType handler, byte effIndex, AuraType auraType) : base(effIndex, auraType)
+            {
+                _callImpl = handler;
+            }
+
+            public void Call(AuraEffect aurEff, Unit victim, ref int damageOrHealing, ref int flatMod, ref float pctMod)
+            {
+                _callImpl(aurEff, victim, ref damageOrHealing, ref flatMod, ref pctMod);
+            }
+        }
+        
         public class EffectApplyHandler : EffectBase
         {
             AuraEffectApplicationModeDelegate _callImpl;
@@ -1410,6 +1477,10 @@ namespace Game.Scripting
                 if (eff.GetAffectedEffectsMask(entry) == 0)
                     Log.outError(LogFilter.Scripts, $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - handler bound to hook `DoEffectCalcCritChance` of AuraScript won't be executed");
 
+            foreach (var hook in DoEffectCalcDamageAndHealing)
+                if (hook.GetAffectedEffectsMask(entry) == 0)
+                    Log.outError(LogFilter.Scripts, $"Spell `{entry.Id}` Effect `{hook}` of script `{m_scriptName}` did not match dbc effect data - handler bound to hook `DoEffectCalcDamageAndHealing` of AuraScript won't be executed");
+
             foreach (var eff in OnEffectAbsorb)
                 if (eff.GetAffectedEffectsMask(entry) == 0)
                     Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnEffectAbsorb` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
@@ -1579,6 +1650,12 @@ namespace Game.Scripting
         // example: DoEffectCalcCritChance += AuraEffectCalcCritChanceFn(class::function, EffectIndexSpecifier, EffectAuraNameSpecifier);
         // where function is: void function (AuraEffect const* aurEff, Unit* victim, float& critChance);
         public List<EffectCalcCritChanceHandler> DoEffectCalcCritChance = new();
+
+        // executed when aura effect calculates damage or healing for dots and hots
+        // example: DoEffectCalcDamageAndHealing += AuraEffectCalcDamageFn(class::function, EffectIndexSpecifier, EffectAuraNameSpecifier);
+        // example: DoEffectCalcDamageAndHealing += AuraEffectCalcHealingFn(class::function, EffectIndexSpecifier, EffectAuraNameSpecifier);
+        // where function is: void(AuraEffect aurEff, Unit victim, ref int damageOrHealing, ref int flatMod, ref float pctMod);
+        public List<EffectCalcDamageAndHealingHandler> DoEffectCalcDamageAndHealing = new();
 
         // executed when absorb aura effect is going to reduce damage
         // example: OnEffectAbsorb += AuraEffectAbsorbFn(class.function, EffectIndexSpecifier);
@@ -1783,6 +1860,8 @@ namespace Game.Scripting
                 case AuraScriptHookType.EffectAfterApply:
                 case AuraScriptHookType.EffectAfterRemove:
                 case AuraScriptHookType.EffectPeriodic:
+                case AuraScriptHookType.EffectCalcCritChance:
+                case AuraScriptHookType.EffectCalcDamageAndHealing:
                 case AuraScriptHookType.EffectAbsorb:
                 case AuraScriptHookType.EffectAfterAbsorb:
                 case AuraScriptHookType.EffectManaShield:

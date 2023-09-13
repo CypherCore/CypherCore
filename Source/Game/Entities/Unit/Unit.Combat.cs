@@ -1103,8 +1103,8 @@ namespace Game.Entities
             uint damage = 0;
             damage += CalculateDamage(damageInfo.AttackType, false, true);
             // Add melee damage bonus
-            damage = MeleeDamageBonusDone(damageInfo.Target, damage, damageInfo.AttackType, DamageEffectType.Direct, null, null, (SpellSchoolMask)damageInfo.DamageSchoolMask);
-            damage = damageInfo.Target.MeleeDamageBonusTaken(this, damage, damageInfo.AttackType, DamageEffectType.Direct, null, (SpellSchoolMask)damageInfo.DamageSchoolMask);
+            damage = (uint)MeleeDamageBonusDone(damageInfo.Target, (int)damage, damageInfo.AttackType, DamageEffectType.Direct, null, default, (SpellSchoolMask)damageInfo.DamageSchoolMask);
+            damage = (uint)damageInfo.Target.MeleeDamageBonusTaken(this, (int)damage, damageInfo.AttackType, DamageEffectType.Direct, null, (SpellSchoolMask)damageInfo.DamageSchoolMask);
 
             // Script Hook For CalculateMeleeDamage -- Allow scripts to change the Damage pre class mitigation calculations
             Global.ScriptMgr.ModifyMeleeDamage(damageInfo.Target, damageInfo.Attacker, ref damage);

@@ -7623,6 +7623,30 @@ namespace Game.Spells
             }
         }
 
+        public void CallScriptCalcDamageHandlers(Unit victim, ref int damage, ref int flatMod, ref float pctMod)
+        {
+            foreach (SpellScript script in m_loadedScripts)
+            {
+                script._PrepareScriptCall(SpellScriptHookType.CalcDamage);
+                foreach (var calcDamage in script.CalcDamage)
+                    calcDamage.Call(victim, ref damage, ref flatMod, ref pctMod);
+
+                script._FinishScriptCall();
+            }
+        }
+
+        public void CallScriptCalcHealingHandlers(Unit victim, ref int healing, ref int flatMod, ref float pctMod)
+        {
+            foreach (SpellScript script in m_loadedScripts)
+            {
+                script._PrepareScriptCall(SpellScriptHookType.CalcHealing);
+                foreach (var calcHealing in script.CalcHealing)
+                    calcHealing.Call(victim, ref healing, ref flatMod, ref pctMod);
+
+                script._FinishScriptCall();
+            }
+        }
+        
         void CallScriptObjectAreaTargetSelectHandlers(List<WorldObject> targets, uint effIndex, SpellImplicitTargetInfo targetType)
         {
             foreach (var script in m_loadedScripts)

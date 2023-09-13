@@ -942,10 +942,10 @@ namespace Scripts.Spells.Priest
             {
                 PreventHitDefaultEffect(effIndex);
 
-                float damageBonus = GetCaster().SpellDamageBonusDone(GetHitUnit(), GetSpellInfo(), (uint)GetEffectValue(), DamageEffectType.SpellDirect, GetEffectInfo());
+                float damageBonus = GetCaster().SpellDamageBonusDone(GetHitUnit(), GetSpellInfo(), GetEffectValue(), DamageEffectType.SpellDirect, GetEffectInfo());
                 float value = damageBonus + damageBonus * GetEffectVariance();
                 value *= 1.0f + (powerOfTheDarkSide.GetAmount() / 100.0f);
-                value = GetHitUnit().SpellDamageBonusTaken(GetCaster(), GetSpellInfo(), (uint)value, DamageEffectType.SpellDirect);
+                value = GetHitUnit().SpellDamageBonusTaken(GetCaster(), GetSpellInfo(), (int)value, DamageEffectType.SpellDirect);
                 SetHitDamage((int)value);
             }
         }
@@ -972,10 +972,10 @@ namespace Scripts.Spells.Priest
             {
                 PreventHitDefaultEffect(effIndex);
 
-                float healingBonus = GetCaster().SpellHealingBonusDone(GetHitUnit(), GetSpellInfo(), (uint)GetEffectValue(), DamageEffectType.Heal, GetEffectInfo());
+                float healingBonus = GetCaster().SpellHealingBonusDone(GetHitUnit(), GetSpellInfo(), GetEffectValue(), DamageEffectType.Heal, GetEffectInfo());
                 float value = healingBonus + healingBonus * GetEffectVariance();
                 value *= 1.0f + (powerOfTheDarkSide.GetAmount() / 100.0f);
-                value = GetHitUnit().SpellHealingBonusTaken(GetCaster(), GetSpellInfo(), (uint)value, DamageEffectType.Heal);
+                value = GetHitUnit().SpellHealingBonusTaken(GetCaster(), GetSpellInfo(), (int)value, DamageEffectType.Heal);
                 SetHitHeal((int)value);
             }
         }
@@ -1212,7 +1212,7 @@ namespace Scripts.Spells.Priest
         void HandleEffectDummy(uint effIndex)
         {
             // Note: we need to increase BasePoints by 1 since it's 4 as default.
-            uint basePoints = GetCaster().SpellHealingBonusDone(GetHitUnit(), _spellInfoHeal, (uint)_healEffectDummy.CalcValue(GetCaster()), DamageEffectType.Heal, _healEffectDummy);
+            uint basePoints = (uint)GetCaster().SpellHealingBonusDone(GetHitUnit(), _spellInfoHeal, _healEffectDummy.CalcValue(GetCaster()), DamageEffectType.Heal, _healEffectDummy);
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.AddSpellMod(SpellValueMod.AuraStack, GetEffectValue());
             args.AddSpellMod(SpellValueMod.BasePoint0, (int)basePoints);
@@ -1338,7 +1338,7 @@ namespace Scripts.Spells.Priest
 
             if (origCaster != null)
             {
-                uint basePoints = origCaster.SpellHealingBonusDone(target, _spellInfoHeal, (uint)_healEffectDummy.CalcValue(origCaster), DamageEffectType.Heal, _healEffectDummy);
+                uint basePoints = (uint)origCaster.SpellHealingBonusDone(target, _spellInfoHeal, _healEffectDummy.CalcValue(origCaster), DamageEffectType.Heal, _healEffectDummy);
                 CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
                 args.AddSpellMod(SpellValueMod.AuraStack, GetEffectValue());
                 args.AddSpellMod(SpellValueMod.BasePoint0, (int)basePoints);

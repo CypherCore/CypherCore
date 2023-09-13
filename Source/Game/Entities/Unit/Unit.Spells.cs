@@ -57,25 +57,38 @@ namespace Game.Entities
             return DoneAdvertisedBenefit;
         }
 
-        public uint SpellDamageBonusDone(Unit victim, SpellInfo spellProto, uint pdamage, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, uint stack = 1)
+        public int SpellDamageBonusDone(Unit victim, SpellInfo spellProto, int pdamage, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, uint stack = 1, Spell spell = null, AuraEffect aurEff = null)
         {
-            if (spellProto == null || victim == null || damagetype == DamageEffectType.Direct)
+            if (spellProto == null || victim == null)
                 return pdamage;
 
+            int DoneTotal = 0;
+            float DoneTotalMod = 1.0f;
+
+            void callDamageScript(ref int dmg, ref int flatMod, ref float pctMod)
+            {
+                if (spell != null)
+                    spell.CallScriptCalcDamageHandlers(victim, ref dmg, ref flatMod, ref pctMod);
+                else if (aurEff != null)
+                    aurEff.GetBase().CallScriptCalcDamageAndHealingHandlers(aurEff, aurEff.GetBase().GetApplicationOfTarget(victim.GetGUID()), victim, ref dmg, ref flatMod, ref pctMod);
+            }
+
             // Some spells don't benefit from done mods
-            if (spellProto.HasAttribute(SpellAttr3.IgnoreCasterModifiers))
-                return pdamage;
+            if (damagetype == DamageEffectType.Direct || spellProto.HasAttribute(SpellAttr3.IgnoreCasterModifiers))
+            {
+                callDamageScript(ref pdamage, ref DoneTotal, ref DoneTotalMod);
+                return (int)Math.Max((float)(pdamage + DoneTotal) * DoneTotalMod, 0.0f);
+            }
 
             // For totems get damage bonus from owner
             if (IsTypeId(TypeId.Unit) && IsTotem())
             {
                 Unit owner = GetOwner();
                 if (owner != null)
-                    return owner.SpellDamageBonusDone(victim, spellProto, pdamage, damagetype, spellEffectInfo, stack);
+                    return owner.SpellDamageBonusDone(victim, spellProto, pdamage, damagetype, spellEffectInfo, stack, spell, aurEff);
             }
 
-            int DoneTotal = 0;
-            float DoneTotalMod = SpellDamagePctDone(victim, spellProto, damagetype, spellEffectInfo);
+            DoneTotalMod = SpellDamagePctDone(victim, spellProto, damagetype, spellEffectInfo);
 
             // Done fixed damage bonus auras
             int DoneAdvertisedBenefit = SpellBaseDamageBonusDone(spellProto.GetSchoolMask());
@@ -114,7 +127,7 @@ namespace Game.Entities
             {
                 // No bonus damage for SPELL_DAMAGE_CLASS_NONE class spells by default
                 if (spellProto.DmgClass == SpellDmgClass.None)
-                    return (uint)Math.Max(pdamage * DoneTotalMod, 0.0f);
+                    return (int)Math.Max(pdamage * DoneTotalMod, 0.0f);
             }
 
             // Default calculation
@@ -131,13 +144,16 @@ namespace Game.Entities
                 DoneTotal += (int)(DoneAdvertisedBenefit * coeff * stack);
             }
 
-            float tmpDamage = (float)((int)pdamage + DoneTotal) * DoneTotalMod;
+            callDamageScript(ref pdamage, ref DoneTotal, ref DoneTotalMod);
+
+            float tmpDamage = (float)(pdamage + DoneTotal) * DoneTotalMod;
+
             // apply spellmod to Done damage (flat and pct)
             Player _modOwner = GetSpellModOwner();
             if (_modOwner != null)
                 _modOwner.ApplySpellMod(spellProto, damagetype == DamageEffectType.DOT ? SpellModOp.PeriodicHealingAndDamage : SpellModOp.HealingAndDamage, ref tmpDamage);
 
-            return (uint)Math.Max(tmpDamage, 0.0f);
+            return (int)Math.Max(tmpDamage, 0.0f);
         }
 
         public float SpellDamagePctDone(Unit victim, SpellInfo spellProto, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo)
@@ -243,7 +259,7 @@ namespace Game.Entities
             return DoneTotalMod;
         }
 
-        public uint SpellDamageBonusTaken(Unit caster, SpellInfo spellProto, uint pdamage, DamageEffectType damagetype)
+        public int SpellDamageBonusTaken(Unit caster, SpellInfo spellProto, int pdamage, DamageEffectType damagetype)
         {
             if (spellProto == null || damagetype == DamageEffectType.Direct)
                 return pdamage;
@@ -323,7 +339,7 @@ namespace Game.Entities
             }
 
             float tmpDamage = pdamage * TakenTotalMod;
-            return (uint)Math.Max(tmpDamage, 0.0f);
+            return (int)Math.Max(tmpDamage, 0.0f);
         }
 
         public uint SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
@@ -386,14 +402,14 @@ namespace Game.Entities
             return damage;
         }
 
-        public uint SpellHealingBonusDone(Unit victim, SpellInfo spellProto, uint healamount, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, uint stack = 1)
+        public int SpellHealingBonusDone(Unit victim, SpellInfo spellProto, int healamount, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, uint stack = 1, Spell spell = null, AuraEffect aurEff = null)
         {
             // For totems get healing bonus from owner (statue isn't totem in fact)
             if (IsTypeId(TypeId.Unit) && IsTotem())
             {
                 Unit owner = GetOwner();
                 if (owner)
-                    return owner.SpellHealingBonusDone(victim, spellProto, healamount, damagetype, spellEffectInfo, stack);
+                    return owner.SpellHealingBonusDone(victim, spellProto, healamount, damagetype, spellEffectInfo, stack, spell, aurEff);
             }
 
             // No bonus healing for potion spells
@@ -406,15 +422,15 @@ namespace Game.Entities
             // done scripted mod (take it from owner)
             Unit owner1 = GetOwner() ?? this;
             var mOverrideClassScript = owner1.GetAuraEffectsByType(AuraType.OverrideClassScripts);
-            foreach (var aurEff in mOverrideClassScript)
+            foreach (var effect in mOverrideClassScript)
             {
-                if (!aurEff.IsAffectingSpell(spellProto))
+                if (!effect.IsAffectingSpell(spellProto))
                     continue;
 
-                switch (aurEff.GetMiscValue())
+                switch (effect.GetMiscValue())
                 {
                     case 3736: // Hateful Totem of the Third Wind / Increased Lesser Healing Wave / LK Arena (4/5/6) Totem of the Third Wind / Savage Totem of the Third Wind
-                        DoneTotal += aurEff.GetAmount();
+                        DoneTotal += effect.GetAmount();
                         break;
                     default:
                         break;
@@ -445,7 +461,7 @@ namespace Game.Entities
             {
                 // No bonus healing for SPELL_DAMAGE_CLASS_NONE class spells by default
                 if (spellProto.DmgClass == SpellDmgClass.None)
-                    return (uint)Math.Max(healamount * DoneTotalMod, 0.0f);
+                    return (int)Math.Max(healamount * DoneTotalMod, 0.0f);
             }
 
             // Default calculation
@@ -476,14 +492,19 @@ namespace Game.Entities
                     DoneTotal = 0;
             }
 
-            float heal = (float)((int)healamount + DoneTotal) * DoneTotalMod;
+            if (spell != null)
+                spell.CallScriptCalcHealingHandlers(victim, ref healamount, ref DoneTotal, ref DoneTotalMod);
+            else if (aurEff != null)
+                aurEff.GetBase().CallScriptCalcDamageAndHealingHandlers(aurEff, aurEff.GetBase().GetApplicationOfTarget(victim.GetGUID()), victim, ref healamount, ref DoneTotal, ref DoneTotalMod);
+
+            float heal = (float)(healamount + DoneTotal) * DoneTotalMod;
 
             // apply spellmod to Done amount
             Player _modOwner = GetSpellModOwner();
             if (_modOwner)
                 _modOwner.ApplySpellMod(spellProto, damagetype == DamageEffectType.DOT ? SpellModOp.PeriodicHealingAndDamage : SpellModOp.HealingAndDamage, ref heal);
 
-            return (uint)Math.Max(heal, 0.0f);
+            return (int)Math.Max(heal, 0.0f);
         }
 
         public float SpellHealingPctDone(Unit victim, SpellInfo spellProto)
@@ -539,7 +560,7 @@ namespace Game.Entities
             return DoneTotalMod;
         }
 
-        public uint SpellHealingBonusTaken(Unit caster, SpellInfo spellProto, uint healamount, DamageEffectType damagetype)
+        public int SpellHealingBonusTaken(Unit caster, SpellInfo spellProto, int healamount, DamageEffectType damagetype)
         {
             float TakenTotalMod = 1.0f;
 
@@ -589,7 +610,7 @@ namespace Game.Entities
             }
 
             float heal = healamount * TakenTotalMod;
-            return (uint)Math.Max(heal, 0.0f);
+            return (int)Math.Max(heal, 0.0f);
         }
 
         public float SpellCritChanceDone(Spell spell, AuraEffect aurEff, SpellSchoolMask schoolMask, WeaponAttackType attackType = WeaponAttackType.BaseAttack)

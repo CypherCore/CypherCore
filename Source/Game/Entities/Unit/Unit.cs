@@ -3023,8 +3023,8 @@ namespace Game.Entities
                     Unit caster = dmgShield.GetCaster();
                     if (caster)
                     {
-                        damage = caster.SpellDamageBonusDone(this, spellInfo, damage, DamageEffectType.SpellDirect, dmgShield.GetSpellEffectInfo());
-                        damage = SpellDamageBonusTaken(caster, spellInfo, damage, DamageEffectType.SpellDirect);
+                        damage = (uint)caster.SpellDamageBonusDone(this, spellInfo, (int)damage, DamageEffectType.SpellDirect, dmgShield.GetSpellEffectInfo());
+                        damage = (uint)SpellDamageBonusTaken(caster, spellInfo, (int)damage, DamageEffectType.SpellDirect);
                     }
 
                     DamageInfo damageInfo1 = new(this, victim, damage, spellInfo, spellInfo.GetSchoolMask(), DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
@@ -3850,7 +3850,7 @@ namespace Game.Entities
             return (uint)Math.Max(damage * (1.0f - mitigation), 0.0f);
         }
 
-        public uint MeleeDamageBonusDone(Unit victim, uint damage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null, SpellEffectInfo spellEffectInfo = null, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal)
+        public int MeleeDamageBonusDone(Unit victim, int damage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null, Mechanics mechanic = default, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal, Spell spell = null, AuraEffect aurEff = null)
         {
             if (victim == null || damage == 0)
                 return 0;
@@ -3944,12 +3944,17 @@ namespace Game.Entities
             });
 
             // Add SPELL_AURA_MOD_DAMAGE_DONE_FOR_MECHANIC percent bonus
-            if (spellEffectInfo != null && spellEffectInfo.Mechanic != 0)
-                MathFunctions.AddPct(ref DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)spellEffectInfo.Mechanic));
+            if (mechanic != Mechanics.None)
+                MathFunctions.AddPct(ref DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)mechanic));
             else if (spellProto != null && spellProto.Mechanic != 0)
                 MathFunctions.AddPct(ref DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)spellProto.Mechanic));
 
-            float damageF = damage;
+            if (spell != null)
+                spell.CallScriptCalcDamageHandlers(victim, ref damage, ref DoneFlatBenefit, ref DoneTotalMod);
+            else if (aurEff != null)
+                aurEff.GetBase().CallScriptCalcDamageAndHealingHandlers(aurEff, aurEff.GetBase().GetApplicationOfTarget(victim.GetGUID()), victim, ref damage, ref DoneFlatBenefit, ref DoneTotalMod);
+
+            float damageF = (float)(damage + DoneFlatBenefit) * DoneTotalMod;
 
             // apply spellmod to Done damage
             if (spellProto != null)
@@ -3959,13 +3964,11 @@ namespace Game.Entities
                     modOwner.ApplySpellMod(spellProto, damagetype == DamageEffectType.DOT ? SpellModOp.PeriodicHealingAndDamage : SpellModOp.HealingAndDamage, ref damageF);
             }
 
-            damageF = (damageF + DoneFlatBenefit) * DoneTotalMod;
-
             // bonus result can be negative
-            return (uint)Math.Max(damageF, 0.0f);
+            return (int)Math.Max(damageF, 0.0f);
         }
 
-        public uint MeleeDamageBonusTaken(Unit attacker, uint pdamage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal)
+        public int MeleeDamageBonusTaken(Unit attacker, int pdamage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal)
         {
             if (pdamage == 0)
                 return 0;
@@ -4068,7 +4071,7 @@ namespace Game.Entities
             }
 
             float tmpDamage = (float)(pdamage + TakenFlatBenefit) * TakenTotalMod;
-            return (uint)Math.Max(tmpDamage, 0.0f);
+            return (int)Math.Max(tmpDamage, 0.0f);
         }
 
         bool IsBlockCritical()
