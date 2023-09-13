@@ -676,7 +676,7 @@ namespace Scripts.Spells.Druid
                 return SpellCastResult.BadTargets;
 
             ChrSpecializationRecord spec = CliDB.ChrSpecializationStorage.LookupByKey(target.GetPrimarySpecialization());
-            if (spec == null || spec.Role != 1)
+            if (spec == null || spec.GetRole() != ChrSpecializationRole.Healer)
                 return SpellCastResult.BadTargets;
 
             return SpellCastResult.SpellCastOk;

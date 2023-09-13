@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Game.DataStorage;
 using Game.Entities;
 using Game.Spells;
 using System;
@@ -393,15 +394,8 @@ namespace Game.AI
             if (!who)
                 return false;
 
-            return who.GetClass() switch
-            {
-                Class.Paladin => who.GetPrimarySpecialization() == (uint)TalentSpecialization.PaladinHoly,
-                Class.Priest => who.GetPrimarySpecialization() == (uint)TalentSpecialization.PriestDiscipline || who.GetPrimarySpecialization() == (uint)TalentSpecialization.PriestHoly,
-                Class.Shaman => who.GetPrimarySpecialization() == (uint)TalentSpecialization.ShamanRestoration,
-                Class.Monk => who.GetPrimarySpecialization() == (uint)TalentSpecialization.MonkMistweaver,
-                Class.Druid => who.GetPrimarySpecialization() == (uint)TalentSpecialization.DruidRestoration,
-                _ => false,
-            };
+            return who.GetPrimarySpecialization() != 0
+                && CliDB.ChrSpecializationStorage.LookupByKey(who.GetPrimarySpecialization()).GetRole() == ChrSpecializationRole.Healer;
         }
 
         bool IsPlayerRangedAttacker(Player who)
@@ -409,36 +403,8 @@ namespace Game.AI
             if (!who)
                 return false;
 
-            switch (who.GetClass())
-            {
-                case Class.Warrior:
-                case Class.Paladin:
-                case Class.Rogue:
-                case Class.Deathknight:
-                default:
-                    return false;
-                case Class.Mage:
-                case Class.Warlock:
-                    return true;
-                case Class.Hunter:
-                    {
-                        // check if we have a ranged weapon equipped
-                        Item rangedSlot = who.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.Ranged);
-
-                        ItemTemplate rangedTemplate = rangedSlot ? rangedSlot.GetTemplate() : null;
-                        if (rangedTemplate != null)
-                            if (Convert.ToBoolean((1 << (int)rangedTemplate.GetSubClass()) & (int)ItemSubClassWeapon.MaskRanged))
-                                return true;
-
-                        return false;
-                    }
-                case Class.Priest:
-                    return who.GetPrimarySpecialization() == (uint)TalentSpecialization.PriestShadow;
-                case Class.Shaman:
-                    return who.GetPrimarySpecialization() == (uint)TalentSpecialization.ShamanElemental;
-                case Class.Druid:
-                    return who.GetPrimarySpecialization() == (uint)TalentSpecialization.DruidBalance;
-            }
+            return who.GetPrimarySpecialization() != 0
+                && CliDB.ChrSpecializationStorage.LookupByKey(who.GetPrimarySpecialization()).GetFlags() == ChrSpecializationFlag.Ranged;
         }
 
         Tuple<Spell, Unit> VerifySpellCast(uint spellId, Unit target)

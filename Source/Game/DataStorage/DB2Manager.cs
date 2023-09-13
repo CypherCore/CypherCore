@@ -216,7 +216,7 @@ namespace Game.DataStorage
                 //ASSERT(chrSpec.OrderIndex < MAX_SPECIALIZATIONS);
 
                 uint storageIndex = chrSpec.ClassID;
-                if (chrSpec.Flags.HasAnyFlag(ChrSpecializationFlag.PetOverrideSpec))
+                if (chrSpec.GetFlags().HasFlag(ChrSpecializationFlag.PetOverrideSpec))
                 {
                     //ASSERT(!chrSpec.ClassID);
                     storageIndex = (int)Class.Max;

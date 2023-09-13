@@ -301,11 +301,14 @@ namespace Game.DataStorage
         public byte OrderIndex;
         public sbyte PetTalentType;
         public sbyte Role;
-        public ChrSpecializationFlag Flags;
+        public uint Flags;
         public int SpellIconFileID;
         public sbyte PrimaryStatPriority;
         public int AnimReplacements;
         public uint[] MasterySpellID = new uint[PlayerConst.MaxMasterySpells];
+
+        public ChrSpecializationFlag GetFlags() { return (ChrSpecializationFlag)Flags; }
+        public ChrSpecializationRole GetRole() { return (ChrSpecializationRole)Role; }
 
         public bool IsPetSpecialization()
         {

@@ -1114,10 +1114,16 @@ namespace Framework.Constants
         Caster = 0x01,
         Ranged = 0x02,
         Melee = 0x04,
-        Unknown = 0x08,
         DualWieldTwoHanded = 0x10,     // Used For Cunitdisplay::Setsheatheinvertedfordualwield
         PetOverrideSpec = 0x20,
         Recommended = 0x40,
+    }
+
+    public enum ChrSpecializationRole
+    {
+        Tank = 0,
+        Healer = 1,
+        Dps = 2
     }
 
     public enum ContentTuningCalcType
