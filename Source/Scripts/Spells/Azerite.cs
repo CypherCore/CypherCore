@@ -423,11 +423,11 @@ namespace Scripts.Spells.Azerite
             && ValidateSpellEffect(SpellIds.EchoingBladesTrait, 2);
         }
 
-        void CalculateDamage(uint effIndex)
+        void CalculateDamage(Unit victim, ref int damage, ref int flatMod, ref float pctMod)
         {
             AuraEffect trait = GetCaster().GetAuraEffect(SpellIds.EchoingBladesTrait, 2);
             if (trait != null)
-                SetHitDamage(trait.GetAmount() * 2);
+                damage = trait.GetAmount() * 2;
         }
 
         void ForceCritical(Unit victim, ref float critChance)
@@ -437,7 +437,7 @@ namespace Scripts.Spells.Azerite
 
         public override void Register()
         {
-            OnEffectLaunchTarget.Add(new EffectHandler(CalculateDamage, 0, SpellEffectName.SchoolDamage));
+            CalcDamage.Add(new DamageAndHealingCalcHandler(CalculateDamage));
             OnCalcCritChance.Add(new OnCalcCritChanceHandler(ForceCritical));
         }
     }

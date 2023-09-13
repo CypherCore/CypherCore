@@ -1398,24 +1398,16 @@ namespace Scripts.Spells.Generic
     [Script] // 64208 - Consumption
     class spell_gen_consumption : SpellScript
     {
-        void HandleDamageCalc(uint effIndex)
+        void CalculateDamage(Unit victim, ref int damage, ref int flatMod, ref float pctMod)
         {
-            Creature caster = GetCaster().ToCreature();
-            if (caster == null)
-                return;
-
-            int damage = 0;
-            SpellInfo createdBySpell = Global.SpellMgr.GetSpellInfo(caster.m_unitData.CreatedBySpell, GetCastDifficulty());
+            SpellInfo createdBySpell = Global.SpellMgr.GetSpellInfo(GetCaster().m_unitData.CreatedBySpell, GetCastDifficulty());
             if (createdBySpell != null)
                 damage = createdBySpell.GetEffect(2).CalcValue();
-
-            if (damage != 0)
-                SetEffectValue(damage);
         }
 
         public override void Register()
         {
-            OnEffectLaunchTarget.Add(new EffectHandler(HandleDamageCalc, 0, SpellEffectName.SchoolDamage));
+            CalcDamage.Add(new DamageAndHealingCalcHandler(CalculateDamage));
         }
     }
 

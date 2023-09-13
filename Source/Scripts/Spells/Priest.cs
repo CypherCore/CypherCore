@@ -935,24 +935,16 @@ namespace Scripts.Spells.Priest
             return ValidateSpellInfo(SpellIds.PowerOfTheDarkSide);
         }
 
-        void HandleLaunchTarget(uint effIndex)
+        void CalculateDamageBonus(Unit victim, ref int damage, ref int flatMod, ref float pctMod)
         {
             AuraEffect powerOfTheDarkSide = GetCaster().GetAuraEffect(SpellIds.PowerOfTheDarkSide, 0);
             if (powerOfTheDarkSide != null)
-            {
-                PreventHitDefaultEffect(effIndex);
-
-                float damageBonus = GetCaster().SpellDamageBonusDone(GetHitUnit(), GetSpellInfo(), GetEffectValue(), DamageEffectType.SpellDirect, GetEffectInfo());
-                float value = damageBonus + damageBonus * GetEffectVariance();
-                value *= 1.0f + (powerOfTheDarkSide.GetAmount() / 100.0f);
-                value = GetHitUnit().SpellDamageBonusTaken(GetCaster(), GetSpellInfo(), (int)value, DamageEffectType.SpellDirect);
-                SetHitDamage((int)value);
-            }
+                MathFunctions.AddPct(ref pctMod, powerOfTheDarkSide.GetAmount());
         }
 
         public override void Register()
         {
-            OnEffectLaunchTarget.Add(new EffectHandler(HandleLaunchTarget, 0, SpellEffectName.SchoolDamage));
+            CalcDamage.Add(new DamageAndHealingCalcHandler(CalculateDamageBonus));
         }
     }
 
@@ -965,24 +957,16 @@ namespace Scripts.Spells.Priest
             return ValidateSpellInfo(SpellIds.PowerOfTheDarkSide);
         }
 
-        void HandleLaunchTarget(uint effIndex)
+        void CalculateHealingBonus(Unit victim, ref int damage, ref int flatMod, ref float pctMod)
         {
             AuraEffect powerOfTheDarkSide = GetCaster().GetAuraEffect(SpellIds.PowerOfTheDarkSide, 0);
             if (powerOfTheDarkSide != null)
-            {
-                PreventHitDefaultEffect(effIndex);
-
-                float healingBonus = GetCaster().SpellHealingBonusDone(GetHitUnit(), GetSpellInfo(), GetEffectValue(), DamageEffectType.Heal, GetEffectInfo());
-                float value = healingBonus + healingBonus * GetEffectVariance();
-                value *= 1.0f + (powerOfTheDarkSide.GetAmount() / 100.0f);
-                value = GetHitUnit().SpellHealingBonusTaken(GetCaster(), GetSpellInfo(), (int)value, DamageEffectType.Heal);
-                SetHitHeal((int)value);
-            }
+                MathFunctions.AddPct(ref pctMod, powerOfTheDarkSide.GetAmount());
         }
 
         public override void Register()
         {
-            OnEffectLaunchTarget.Add(new EffectHandler(HandleLaunchTarget, 0, SpellEffectName.Heal));
+            CalcHealing.Add(new DamageAndHealingCalcHandler(CalculateHealingBonus));
         }
     }
     
