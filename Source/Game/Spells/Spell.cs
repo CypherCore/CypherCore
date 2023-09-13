@@ -4703,7 +4703,7 @@ namespace Game.Spells
                         return SpellCastResult.NotReady;
                 }
 
-                if (!IsIgnoringCooldowns() && m_caster.ToUnit() != null)
+                if (!IsIgnoringCooldowns() && m_caster.ToUnit() != null && (!m_spellInfo.HasAttribute(SpellAttr12.StartCooldownOnCastStart) || strict))
                 {
                     if (!m_caster.ToUnit().GetSpellHistory().IsReady(m_spellInfo, m_castItemEntry))
                     {
