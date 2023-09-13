@@ -4021,7 +4021,7 @@ namespace Scripts.Spells.Items
             if (!target)
                 return;
 
-            void updateAuraIfInCorrectSpec(TalentSpecialization spec, AmalgamsSeventhSpineSpellIds aura)
+            void updateAuraIfInCorrectSpec(ChrSpecialization spec, AmalgamsSeventhSpineSpellIds aura)
             {
                 if (target.GetPrimarySpecialization() != (uint)spec)
                     target.RemoveAurasDueToSpell((uint)aura);
@@ -4032,20 +4032,20 @@ namespace Scripts.Spells.Items
             switch (target.GetClass())
             {
                 case Class.Monk:
-                    updateAuraIfInCorrectSpec(TalentSpecialization.MonkMistweaver, AmalgamsSeventhSpineSpellIds.FragileEchoesMonk);
+                    updateAuraIfInCorrectSpec(ChrSpecialization.MonkMistweaver, AmalgamsSeventhSpineSpellIds.FragileEchoesMonk);
                     break;
                 case Class.Shaman:
-                    updateAuraIfInCorrectSpec(TalentSpecialization.ShamanRestoration, AmalgamsSeventhSpineSpellIds.FragileEchoesShaman);
+                    updateAuraIfInCorrectSpec(ChrSpecialization.ShamanRestoration, AmalgamsSeventhSpineSpellIds.FragileEchoesShaman);
                     break;
                 case Class.Priest:
-                    updateAuraIfInCorrectSpec(TalentSpecialization.PriestDiscipline, AmalgamsSeventhSpineSpellIds.FragileEchoesPriestDiscipline);
-                    updateAuraIfInCorrectSpec(TalentSpecialization.PriestHoly, AmalgamsSeventhSpineSpellIds.FragileEchoesPriestHoly);
+                    updateAuraIfInCorrectSpec(ChrSpecialization.PriestDiscipline, AmalgamsSeventhSpineSpellIds.FragileEchoesPriestDiscipline);
+                    updateAuraIfInCorrectSpec(ChrSpecialization.PriestHoly, AmalgamsSeventhSpineSpellIds.FragileEchoesPriestHoly);
                     break;
                 case Class.Paladin:
-                    updateAuraIfInCorrectSpec(TalentSpecialization.PaladinHoly, AmalgamsSeventhSpineSpellIds.FragileEchoesPaladin);
+                    updateAuraIfInCorrectSpec(ChrSpecialization.PaladinHoly, AmalgamsSeventhSpineSpellIds.FragileEchoesPaladin);
                     break;
                 case Class.Druid:
-                    updateAuraIfInCorrectSpec(TalentSpecialization.DruidRestoration, AmalgamsSeventhSpineSpellIds.FragileEchoesDruid);
+                    updateAuraIfInCorrectSpec(ChrSpecialization.DruidRestoration, AmalgamsSeventhSpineSpellIds.FragileEchoesDruid);
                     break;
                 default:
                     break;

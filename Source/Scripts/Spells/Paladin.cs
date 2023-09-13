@@ -310,7 +310,7 @@ namespace Scripts.Spells.Paladin
             if (caster != null)
             {
                 // 243597 is also being cast as protection, but CreateObject is not sent, either serverside areatrigger for this aura or unused - also no visual is seen
-                if (unit == caster && caster.IsPlayer() && caster.ToPlayer().GetPrimarySpecialization() == (uint)TalentSpecialization.PaladinProtection)
+                if (unit == caster && caster.IsPlayer() && caster.ToPlayer().GetPrimarySpecialization() == (uint)ChrSpecialization.PaladinProtection)
                     caster.CastSpell(caster, SpellIds.ConsecrationProtectionAura);
 
                 if (caster.IsValidAttackTarget(unit))
