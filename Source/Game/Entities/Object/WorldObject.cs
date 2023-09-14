@@ -2960,6 +2960,21 @@ namespace Game.Entities
                 SendMessageToSet(new PlayMusic(musicId), true);
         }
 
+        void PlayObjectSound(uint soundKitId, ObjectGuid targetObjectGUID, Player target = null, int broadcastTextId = 0)
+        {
+            PlayObjectSound pkt = new();
+            pkt.TargetObjectGUID = targetObjectGUID;
+            pkt.SourceObjectGUID = GetGUID();
+            pkt.SoundKitID = soundKitId;
+            pkt.Position = GetPosition();
+            pkt.BroadcastTextID = broadcastTextId;
+
+            if (target)
+                target.SendPacket(pkt);
+            else
+                SendMessageToSet(pkt, true);
+        }
+
         public void DestroyForNearbyPlayers()
         {
             if (!IsInWorld)
