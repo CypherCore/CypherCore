@@ -186,6 +186,13 @@ namespace Game
                         return;
                     }
 
+                    // handle empty bag before CanBeTraded, since that func already has that check
+                    if (item.IsNotEmptyBag())
+                    {
+                        player.SendMailResult(0, MailResponseType.Send, MailResponseResult.EquipError, InventoryResult.DestroyNonemptyBag);
+                        return;
+                    }
+
                     if (!item.CanBeTraded(true))
                     {
                         player.SendMailResult(0, MailResponseType.Send, MailResponseResult.EquipError, InventoryResult.MailBoundItem);
@@ -210,12 +217,6 @@ namespace Game
                     if (sendMail.Info.Cod != 0 && item.IsWrapped())
                     {
                         player.SendMailResult(0, MailResponseType.Send, MailResponseResult.CantSendWrappedCod);
-                        return;
-                    }
-
-                    if (item.IsNotEmptyBag())
-                    {
-                        player.SendMailResult(0, MailResponseType.Send, MailResponseResult.EquipError, InventoryResult.DestroyNonemptyBag);
                         return;
                     }
 
