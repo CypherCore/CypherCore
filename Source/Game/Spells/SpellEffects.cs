@@ -1575,7 +1575,7 @@ namespace Game.Spells
                             {
                                 Position pos;
                                 if (count == 0)
-                                    pos = destTarget;
+                                    pos = destTarget.GetPosition();
                                 else
                                     // randomize position for multiple summons
                                     pos = caster.GetRandomPoint(destTarget, radius);
@@ -4599,7 +4599,7 @@ namespace Game.Spells
             {
                 Position pos;
                 if (count == 0)
-                    pos = destTarget;
+                    pos = destTarget.GetPosition();
                 else
                     // randomize position for multiple summons
                     pos = unitCaster.GetRandomPoint(destTarget, radius);
@@ -4608,12 +4608,8 @@ namespace Game.Spells
                 if (summon == null)
                     return;
 
-                if (summon.HasUnitTypeMask(UnitTypeMask.Guardian))
+                if (summon.IsGuardian())
                 {
-                    uint level = summon.GetLevel();
-                    if (properties != null && !properties.GetFlags().HasFlag(SummonPropertiesFlags.UseCreatureLevel))
-                        level = unitCaster.GetLevel();
-
                     // level of pet summoned using engineering item based at engineering skill level
                     if (m_CastItem && unitCaster.IsPlayer())
                     {
@@ -4624,12 +4620,10 @@ namespace Game.Spells
                             {
                                 ushort skill202 = unitCaster.ToPlayer().GetSkillValue(SkillType.Engineering);
                                 if (skill202 != 0)
-                                    level = skill202 / 5u;
+                                    ((Guardian)summon).InitStatsForLevel((uint)(skill202 / 5));
                             }
                         }
                     }
-
-                    ((Guardian)summon).InitStatsForLevel(level);
                 }
 
                 if (summon.HasUnitTypeMask(UnitTypeMask.Minion) && m_targets.HasDst())

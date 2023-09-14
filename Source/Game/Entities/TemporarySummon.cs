@@ -503,7 +503,7 @@ namespace Game.Entities
         {
             base.InitStats(summoner, duration);
 
-            InitStatsForLevel(GetOwner().GetLevel());
+            InitStatsForLevel(GetLevel()); // level is already initialized in TempSummon::InitStats, so use that
 
             if (GetOwner().IsTypeId(TypeId.Player) && HasUnitTypeMask(UnitTypeMask.ControlableGuardian))
                 GetCharmInfo().InitCharmCreateSpells();
