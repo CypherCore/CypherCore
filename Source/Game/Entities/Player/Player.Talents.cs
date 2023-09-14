@@ -120,14 +120,14 @@ namespace Game.Entities
             if (IsDead())
                 return TalentLearnResult.FailedCantDoThatRightNow;
 
-            if (GetPrimarySpecialization() == 0)
+            if (GetPrimarySpecialization() == ChrSpecialization.None)
                 return TalentLearnResult.FailedNoPrimaryTreeSelected;
 
             TalentRecord talentInfo = CliDB.TalentStorage.LookupByKey(talentId);
             if (talentInfo == null)
                 return TalentLearnResult.FailedUnknown;
 
-            if (talentInfo.SpecID != 0 && talentInfo.SpecID != GetPrimarySpecialization())
+            if (talentInfo.SpecID != 0 && (ChrSpecialization)talentInfo.SpecID != GetPrimarySpecialization())
                 return TalentLearnResult.FailedUnknown;
 
             // prevent learn talent for different class (cheating)
@@ -152,7 +152,7 @@ namespace Game.Entities
                 if (talent.SpecID == 0)
                     bestSlotMatch = talent;
 
-                else if (talent.SpecID == GetPrimarySpecialization())
+                else if ((ChrSpecialization)talent.SpecID == GetPrimarySpecialization())
                 {
                     bestSlotMatch = talent;
                     break;
@@ -167,7 +167,7 @@ namespace Game.Entities
             {
                 foreach (TalentRecord talent in Global.DB2Mgr.GetTalentsByPosition(GetClass(), talentInfo.TierID, c))
                 {
-                    if (talent.SpecID != 0 && talent.SpecID != GetPrimarySpecialization())
+                    if (talent.SpecID != 0 && (ChrSpecialization)talent.SpecID != GetPrimarySpecialization())
                         continue;
 
                     if (!HasTalent(talent.Id, GetActiveTalentGroup()))
@@ -241,16 +241,29 @@ namespace Game.Entities
         }
 
         uint GetTalentResetCost() { return _specializationInfo.ResetTalentsCost; }
+
         void SetTalentResetCost(uint cost) { _specializationInfo.ResetTalentsCost = cost; }
+
         long GetTalentResetTime() { return _specializationInfo.ResetTalentsTime; }
+
         void SetTalentResetTime(long time_) { _specializationInfo.ResetTalentsTime = time_; }
-        public uint GetPrimarySpecialization() { return m_playerData.CurrentSpecID; }
+
+        public ChrSpecialization GetPrimarySpecialization() { return (ChrSpecialization)m_playerData.CurrentSpecID.GetValue(); }
+
         void SetPrimarySpecialization(uint spec) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.CurrentSpecID), spec); }
+
+        public ChrSpecializationRecord GetPrimarySpecializationEntry()
+        {
+            return CliDB.ChrSpecializationStorage.LookupByKey((uint)GetPrimarySpecialization());
+        }
+        
         public byte GetActiveTalentGroup() { return _specializationInfo.ActiveGroup; }
+
         void SetActiveTalentGroup(byte group) { _specializationInfo.ActiveGroup = group; }
 
         // Loot Spec
         public void SetLootSpecId(uint id) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LootSpecID), (ushort)id); }
+
         public uint GetLootSpecId() { return m_activePlayerData.LootSpecID; }
 
         public uint GetDefaultSpecId()
@@ -602,7 +615,7 @@ namespace Game.Entities
         public void SendTalentsInfoData()
         {
             UpdateTalentData packet = new();
-            packet.Info.PrimarySpecialization = GetPrimarySpecialization();
+            packet.Info.PrimarySpecialization = (uint)GetPrimarySpecialization();
 
             for (byte i = 0; i < PlayerConst.MaxSpecializations; ++i)
             {
@@ -711,7 +724,7 @@ namespace Game.Entities
             if (talentInfo == null)
                 return TalentLearnResult.FailedUnknown;
 
-            if (talentInfo.SpecID != GetPrimarySpecialization())
+            if ((ChrSpecialization)talentInfo.SpecID != GetPrimarySpecialization())
                 return TalentLearnResult.FailedUnknown;
 
             if (talentInfo.LevelRequired > GetLevel())

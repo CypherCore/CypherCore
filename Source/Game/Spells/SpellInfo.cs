@@ -3115,7 +3115,7 @@ namespace Game.Spells
                     }
                     case SpellProcsPerMinuteModType.Class:
                     {
-                        if (caster.GetClassMask().HasAnyFlag((uint)mod.Param))
+                        if (caster.GetClassMask().HasAnyFlag(mod.Param))
                             ppm *= 1.0f + mod.Coeff;
                         break;
                     }
@@ -3123,7 +3123,7 @@ namespace Game.Spells
                     {
                         Player plrCaster = caster.ToPlayer();
                         if (plrCaster)
-                            if (plrCaster.GetPrimarySpecialization() == mod.Param)
+                            if (plrCaster.GetPrimarySpecialization() == (ChrSpecialization)mod.Param)
                                 ppm *= 1.0f + mod.Coeff;
                         break;
                     }

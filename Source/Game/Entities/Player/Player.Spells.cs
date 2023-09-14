@@ -299,7 +299,7 @@ namespace Game.Entities
 
         void LearnSpecializationSpells()
         {
-            var specSpells = Global.DB2Mgr.GetSpecializationSpells(GetPrimarySpecialization());
+            var specSpells = Global.DB2Mgr.GetSpecializationSpells((uint)GetPrimarySpecialization());
             if (specSpells != null)
             {
                 for (int j = 0; j < specSpells.Count; ++j)
@@ -1029,7 +1029,7 @@ namespace Game.Entities
 
         public bool CanUseMastery()
         {
-            ChrSpecializationRecord chrSpec = CliDB.ChrSpecializationStorage.LookupByKey(GetPrimarySpecialization());
+            ChrSpecializationRecord chrSpec = GetPrimarySpecializationEntry();
             if (chrSpec != null)
                 return HasSpell(chrSpec.MasterySpellID[0]) || HasSpell(chrSpec.MasterySpellID[1]);
 
@@ -3257,7 +3257,7 @@ namespace Game.Entities
                 {
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(itemSetSpell.SpellID, Difficulty.None);
 
-                    if (itemSetSpell.ChrSpecID != 0 && itemSetSpell.ChrSpecID != GetPrimarySpecialization())
+                    if (itemSetSpell.ChrSpecID != 0 && (ChrSpecialization)itemSetSpell.ChrSpecID != GetPrimarySpecialization())
                         ApplyEquipSpell(spellInfo, null, false, false);  // item set aura is not for current spec
                     else
                     {

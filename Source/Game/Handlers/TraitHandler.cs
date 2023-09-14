@@ -148,7 +148,7 @@ namespace Game
                 while (_player.m_activePlayerData.TraitConfigs.FindIndexIf(traitConfig =>
                 {
                     return (TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat
-                        && traitConfig.ChrSpecializationID == _player.GetPrimarySpecialization()
+                        && traitConfig.ChrSpecializationID == (int)_player.GetPrimarySpecialization()
                         && traitConfig.LocalIdentifier == index;
                 }) >= 0)
                     ++index;
@@ -219,7 +219,7 @@ namespace Game
                 while (_player.m_activePlayerData.TraitConfigs.FindIndexIf(traitConfig =>
                 {
                     return (TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat
-                        && traitConfig.ChrSpecializationID == _player.GetPrimarySpecialization()
+                        && traitConfig.ChrSpecializationID == (int)_player.GetPrimarySpecialization()
                         && traitConfig.LocalIdentifier == freeLocalIdentifier;
                 }) >= 0)
                     ++freeLocalIdentifier;

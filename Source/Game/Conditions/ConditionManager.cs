@@ -2047,7 +2047,7 @@ namespace Game
 
             if (condition.ChrSpecializationIndex >= 0 || condition.ChrSpecializationRole >= 0)
             {
-                ChrSpecializationRecord spec = CliDB.ChrSpecializationStorage.LookupByKey(player.GetPrimarySpecialization());
+                ChrSpecializationRecord spec = CliDB.ChrSpecializationStorage.LookupByKey((uint)player.GetPrimarySpecialization());
                 if (spec != null)
                 {
                     if (condition.ChrSpecializationIndex >= 0 && spec.OrderIndex != condition.ChrSpecializationIndex)
@@ -2742,13 +2742,13 @@ namespace Game
                 case UnitConditionVariable.IsEnemy:
                     return (otherUnit && unit.GetReactionTo(otherUnit) <= ReputationRank.Hostile) ? 1 : 0;
                 case UnitConditionVariable.IsSpecMelee:
-                    return (unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecialization() != 0 && CliDB.ChrSpecializationStorage.LookupByKey(unit.ToPlayer().GetPrimarySpecialization()).GetFlags().HasFlag(ChrSpecializationFlag.Melee)) ? 1 : 0;
+                    return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry() != null && unit.ToPlayer().GetPrimarySpecializationEntry().GetFlags().HasFlag(ChrSpecializationFlag.Melee) ? 1 : 0;
                 case UnitConditionVariable.IsSpecTank:
-                    return (unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecialization() != 0 && CliDB.ChrSpecializationStorage.LookupByKey(unit.ToPlayer().GetPrimarySpecialization()).GetRole() == ChrSpecializationRole.Tank) ? 1 : 0;
+                    return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry() != null && unit.ToPlayer().GetPrimarySpecializationEntry().GetRole() == ChrSpecializationRole.Tank ? 1 : 0;
                 case UnitConditionVariable.IsSpecRanged:
-                    return (unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecialization() != 0 && CliDB.ChrSpecializationStorage.LookupByKey(unit.ToPlayer().GetPrimarySpecialization()).GetFlags().HasFlag(ChrSpecializationFlag.Ranged)) ? 1 : 0;
+                    return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry() != null && unit.ToPlayer().GetPrimarySpecializationEntry().GetFlags().HasFlag(ChrSpecializationFlag.Ranged) ? 1 : 0;
                 case UnitConditionVariable.IsSpecHealer:
-                    return (unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecialization() != 0 && CliDB.ChrSpecializationStorage.LookupByKey(unit.ToPlayer().GetPrimarySpecialization()).GetRole() == ChrSpecializationRole.Healer) ? 1 : 0;
+                    return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry()?.GetRole() == ChrSpecializationRole.Healer ? 1 : 0;
                 case UnitConditionVariable.IsPlayerControlledNPC:
                     return unit.IsCreature() && unit.HasUnitFlag(UnitFlags.PlayerControlled) ? 1 : 0;
                 case UnitConditionVariable.IsDying:

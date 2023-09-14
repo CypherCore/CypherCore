@@ -3112,7 +3112,7 @@ namespace Game.Achievements
                     break;
                 case ModifierTreeType.PlayerLootSpecializationMatchesRole: // 263
                 {
-                    ChrSpecializationRecord spec = CliDB.ChrSpecializationStorage.LookupByKey(referencePlayer.GetPrimarySpecialization());
+                    ChrSpecializationRecord spec = referencePlayer.GetPrimarySpecializationEntry();
                     if (spec == null || spec.Role != reqValue)
                         return false;
                     break;
@@ -3256,7 +3256,7 @@ namespace Game.Achievements
                     return false;
                 }
                 case ModifierTreeType.PlayerSpecialization: // 279
-                    if (referencePlayer.GetPrimarySpecialization() != reqValue)
+                    if (referencePlayer.GetPrimarySpecialization() != (ChrSpecialization)reqValue)
                         return false;
                     break;
                 case ModifierTreeType.PlayerMapOrCosmeticChildMap: // 280

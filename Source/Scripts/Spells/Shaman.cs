@@ -537,7 +537,7 @@ namespace Scripts.Spells.Shaman
             Player player = GetCaster().ToPlayer();
             byte slot = EquipmentSlot.MainHand;
 
-            if (player.GetPrimarySpecialization() == (uint)ChrSpecialization.ShamanEnhancement)
+            if (player.GetPrimarySpecialization() == ChrSpecialization.ShamanEnhancement)
                 slot = EquipmentSlot.OffHand;
 
             Item targetItem = player.GetItemByPos(InventorySlots.Bag0, slot);

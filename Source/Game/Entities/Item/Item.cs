@@ -2503,7 +2503,7 @@ namespace Game.Entities
 
                 eff.SetBonuses.Add(itemSetSpell);
                 // spell cast only if fit form requirement, in other case will cast at form change
-                if (itemSetSpell.ChrSpecID == 0 || itemSetSpell.ChrSpecID == player.GetPrimarySpecialization())
+                if (itemSetSpell.ChrSpecID == 0 || (ChrSpecialization)itemSetSpell.ChrSpecID == player.GetPrimarySpecialization())
                     player.ApplyEquipSpell(spellInfo, null, true);
             }
         }

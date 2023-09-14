@@ -220,7 +220,7 @@ namespace Game.Networking.Packets
         public void Initialize(Player player)
         {
             GUID = player.GetGUID();
-            SpecializationID = player.GetPrimarySpecialization();
+            SpecializationID = (uint)player.GetPrimarySpecialization();
             Name = player.GetName();
             GenderID = (byte)player.GetNativeGender();
             Race = (byte)player.GetRace();

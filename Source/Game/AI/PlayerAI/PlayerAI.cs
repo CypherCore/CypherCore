@@ -377,7 +377,7 @@ namespace Game.AI
     public class PlayerAI : UnitAI
     {
         protected new Player me;
-        uint _selfSpec;
+        ChrSpecialization _selfSpec;
         bool _isSelfHealer;
         bool _isSelfRangedAttacker;
 
@@ -394,8 +394,8 @@ namespace Game.AI
             if (!who)
                 return false;
 
-            return who.GetPrimarySpecialization() != 0
-                && CliDB.ChrSpecializationStorage.LookupByKey(who.GetPrimarySpecialization()).GetRole() == ChrSpecializationRole.Healer;
+            var chrSpec = who.GetPrimarySpecializationEntry();
+            return chrSpec != null && chrSpec.GetRole() == ChrSpecializationRole.Healer;
         }
 
         bool IsPlayerRangedAttacker(Player who)
@@ -403,8 +403,8 @@ namespace Game.AI
             if (!who)
                 return false;
 
-            return who.GetPrimarySpecialization() != 0
-                && CliDB.ChrSpecializationStorage.LookupByKey(who.GetPrimarySpecialization()).GetFlags() == ChrSpecializationFlag.Ranged;
+            var chrSpec = who.GetPrimarySpecializationEntry();
+            return chrSpec != null && chrSpec.GetFlags().HasFlag(ChrSpecializationFlag.Ranged);
         }
 
         Tuple<Spell, Unit> VerifySpellCast(uint spellId, Unit target)
@@ -613,7 +613,7 @@ namespace Game.AI
             return (!who || who == me) ? _isSelfHealer : IsPlayerHealer(who);
         }
         public bool IsRangedAttacker(Player who = null) { return (!who || who == me) ? _isSelfRangedAttacker : IsPlayerRangedAttacker(who); }
-        public uint GetSpec(Player who = null) { return (!who || who == me) ? _selfSpec : who.GetPrimarySpecialization(); }
+        public ChrSpecialization GetSpec(Player who = null) { return (!who || who == me) ? _selfSpec : who.GetPrimarySpecialization(); }
         public void SetIsRangedAttacker(bool state) { _isSelfRangedAttacker = state; } // this allows overriding of the default ranged attacker detection
 
         public virtual Unit SelectAttackTarget() { return me.GetCharmer() ? me.GetCharmer().GetVictim() : null; }

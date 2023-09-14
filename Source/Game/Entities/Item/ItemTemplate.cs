@@ -241,7 +241,7 @@ namespace Game.Entities
 
             uint spec = player.GetLootSpecId();
             if (spec == 0)
-                spec = player.GetPrimarySpecialization();
+                spec = (uint)player.GetPrimarySpecialization();
             if (spec == 0)
                 spec = player.GetDefaultSpecId();
 

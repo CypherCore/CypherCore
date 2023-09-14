@@ -159,7 +159,7 @@ namespace Game.Entities
                     selectedEssences.ModifyValue(selectedEssences.AzeriteEssenceID, i) = selectedEssenceData.AzeriteEssenceId[i];
                 }
 
-                if (owner != null && owner.GetPrimarySpecialization() == selectedEssenceData.SpecializationId)
+                if (owner != null && owner.GetPrimarySpecialization() == (ChrSpecialization)selectedEssenceData.SpecializationId)
                     selectedEssences.ModifyValue(selectedEssences.Enabled).SetValue(true);
 
                 AddDynamicUpdateFieldValue(m_values.ModifyValue(m_azeriteItemData).ModifyValue(m_azeriteItemData.SelectedEssences), selectedEssences);
@@ -167,7 +167,7 @@ namespace Game.Entities
 
             // add selected essences for current spec
             if (owner != null && GetSelectedAzeriteEssences() == null)
-                CreateSelectedAzeriteEssences(owner.GetPrimarySpecialization());
+                CreateSelectedAzeriteEssences((uint)owner.GetPrimarySpecialization());
 
             if (needSave)
             {

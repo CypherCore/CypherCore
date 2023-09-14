@@ -1608,7 +1608,7 @@ namespace Game.Entities
             value += GetRatingBonusValue(CombatRating.Mastery);
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Mastery), value);
 
-            ChrSpecializationRecord chrSpec = CliDB.ChrSpecializationStorage.LookupByKey(GetPrimarySpecialization());
+            ChrSpecializationRecord chrSpec = GetPrimarySpecializationEntry();
             if (chrSpec == null)
                 return;
 
@@ -1982,7 +1982,7 @@ namespace Game.Entities
         Stats GetPrimaryStat()
         {
             byte primaryStatPriority;
-            var specialization = CliDB.ChrSpecializationStorage.LookupByKey(GetPrimarySpecialization());
+            var specialization = GetPrimarySpecializationEntry();
             if (specialization != null)
                 primaryStatPriority = (byte)specialization.PrimaryStatPriority;
             else

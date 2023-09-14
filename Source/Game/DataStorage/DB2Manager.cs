@@ -288,7 +288,7 @@ namespace Game.DataStorage
                 _glyphBindableSpells.Add(glyphBindableSpell.GlyphPropertiesID, (uint)glyphBindableSpell.SpellID);
 
             foreach (GlyphRequiredSpecRecord glyphRequiredSpec in GlyphRequiredSpecStorage.Values)
-                _glyphRequiredSpecs.Add(glyphRequiredSpec.GlyphPropertiesID, glyphRequiredSpec.ChrSpecializationID);
+                _glyphRequiredSpecs.Add(glyphRequiredSpec.GlyphPropertiesID, (ChrSpecialization)glyphRequiredSpec.ChrSpecializationID);
 
             foreach (ItemChildEquipmentRecord itemChildEquipment in ItemChildEquipmentStorage.Values)
             {
@@ -1442,7 +1442,7 @@ namespace Game.DataStorage
             return _glyphBindableSpells.LookupByKey(glyphPropertiesId);
         }
 
-        public List<uint> GetGlyphRequiredSpecs(uint glyphPropertiesId)
+        public List<ChrSpecialization> GetGlyphRequiredSpecs(uint glyphPropertiesId)
         {
             return _glyphRequiredSpecs.LookupByKey(glyphPropertiesId);
         }
@@ -2253,7 +2253,7 @@ namespace Game.DataStorage
         MultiMap<uint, FriendshipRepReactionRecord> _friendshipRepReactions = new();
         Dictionary<uint, HeirloomRecord> _heirlooms = new();
         MultiMap<uint, uint> _glyphBindableSpells = new();
-        MultiMap<uint, uint> _glyphRequiredSpecs = new();
+        MultiMap<uint, ChrSpecialization> _glyphRequiredSpecs = new();
         Dictionary<uint, ItemChildEquipmentRecord> _itemChildEquipment = new();
         ItemClassRecord[] _itemClassByOldEnum = new ItemClassRecord[20];
         List<uint> _itemsWithCurrencyCost = new();

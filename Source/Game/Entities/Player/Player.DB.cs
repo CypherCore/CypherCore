@@ -1137,7 +1137,7 @@ namespace Game.Entities
             int activeConfig = m_activePlayerData.TraitConfigs.FindIndexIf(traitConfig =>
             {
                 return traitConfig.Type == (int)TraitConfigType.Combat
-                    && traitConfig.ChrSpecializationID == GetPrimarySpecialization()
+                    && traitConfig.ChrSpecializationID == (int)GetPrimarySpecialization()
                     && (traitConfig.CombatConfigFlags & (int)TraitCombatConfigFlags.ActiveForSpec) != 0;
             });
 
@@ -3321,7 +3321,7 @@ namespace Game.Entities
             SetNumRespecs(numRespecs);
             SetPrimarySpecialization(primarySpecialization);
             SetActiveTalentGroup(activeTalentGroup);
-            ChrSpecializationRecord primarySpec = CliDB.ChrSpecializationStorage.LookupByKey(GetPrimarySpecialization());
+            ChrSpecializationRecord primarySpec = GetPrimarySpecializationEntry();
             if (primarySpec == null || primarySpec.ClassID != (byte)GetClass() || GetActiveTalentGroup() >= PlayerConst.MaxSpecializations)
                 ResetTalentSpecialization();
 
@@ -3676,7 +3676,7 @@ namespace Game.Entities
                 //save, but in tavern/city
                 stmt.AddValue(index++, GetTalentResetCost());
                 stmt.AddValue(index++, GetTalentResetTime());
-                stmt.AddValue(index++, GetPrimarySpecialization());
+                stmt.AddValue(index++, (uint)GetPrimarySpecialization());
                 stmt.AddValue(index++, (ushort)m_ExtraFlags);
                 stmt.AddValue(index++, 0); // summonedPetNumber
                 stmt.AddValue(index++, (ushort)atLoginFlags);
@@ -3806,7 +3806,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetTalentResetCost());
                 stmt.AddValue(index++, GetTalentResetTime());
                 stmt.AddValue(index++, GetNumRespecs());
-                stmt.AddValue(index++, GetPrimarySpecialization());
+                stmt.AddValue(index++, (uint)GetPrimarySpecialization());
                 stmt.AddValue(index++, (ushort)m_ExtraFlags);
                 PetStable petStable = GetPetStable();
                 if (petStable != null)

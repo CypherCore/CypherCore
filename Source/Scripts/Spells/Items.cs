@@ -4023,7 +4023,7 @@ namespace Scripts.Spells.Items
 
             void updateAuraIfInCorrectSpec(ChrSpecialization spec, AmalgamsSeventhSpineSpellIds aura)
             {
-                if (target.GetPrimarySpecialization() != (uint)spec)
+                if (target.GetPrimarySpecialization() != spec)
                     target.RemoveAurasDueToSpell((uint)aura);
                 else if (!target.HasAura((uint)aura))
                     target.CastSpell(target, (uint)aura, new CastSpellExtraArgs(aurEff));

@@ -153,7 +153,7 @@ namespace Game
                 }
             }
             else
-                azeriteItem.CreateSelectedAzeriteEssences(_player.GetPrimarySpecialization());
+                azeriteItem.CreateSelectedAzeriteEssences((uint)_player.GetPrimarySpecialization());
 
             azeriteItem.SetSelectedAzeriteEssence(azeriteEssenceActivateEssence.Slot, azeriteEssenceActivateEssence.AzeriteEssenceID);
 

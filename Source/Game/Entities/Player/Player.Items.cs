@@ -1481,7 +1481,7 @@ namespace Game.Entities
 
             ArtifactRecord artifact = CliDB.ArtifactStorage.LookupByKey(proto.GetArtifactID());
             if (artifact != null)
-                if (artifact.ChrSpecializationID != GetPrimarySpecialization())
+                if ((ChrSpecialization)artifact.ChrSpecializationID != GetPrimarySpecialization())
                     return InventoryResult.CantUseItem;
 
             return InventoryResult.Ok;
@@ -3829,7 +3829,7 @@ namespace Game.Entities
                 if (spellproto == null)
                     continue;
 
-                if (effectData.ChrSpecializationID != 0 && effectData.ChrSpecializationID != GetPrimarySpecialization())
+                if (effectData.ChrSpecializationID != 0 && (ChrSpecialization)effectData.ChrSpecializationID != GetPrimarySpecialization())
                     continue;
 
                 ApplyEquipSpell(spellproto, item, apply, formChange);
@@ -5495,7 +5495,7 @@ namespace Game.Entities
         {
             if (apply)
             {
-                if (azeritePower.SpecSetID == 0 || Global.DB2Mgr.IsSpecSetMember(azeritePower.SpecSetID, GetPrimarySpecialization()))
+                if (azeritePower.SpecSetID == 0 || Global.DB2Mgr.IsSpecSetMember(azeritePower.SpecSetID, (uint)GetPrimarySpecialization()))
                     CastSpell(this, azeritePower.SpellID, item);
             }
             else

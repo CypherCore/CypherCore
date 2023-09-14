@@ -481,7 +481,7 @@ namespace Game
 
             if (condition.SpecSetID != 0)
             {
-                uint chrSpecializationId = player.GetPrimarySpecialization();
+                uint chrSpecializationId = (uint)player.GetPrimarySpecialization();
                 if (traitConfig.Type == TraitConfigType.Combat)
                     chrSpecializationId = (uint)traitConfig.ChrSpecializationID;
 

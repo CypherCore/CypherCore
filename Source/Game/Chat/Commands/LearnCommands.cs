@@ -207,7 +207,7 @@ namespace Game.Chat.Commands
                     if (playerClass != talentInfo.ClassID)
                         continue;
 
-                    if (talentInfo.SpecID != 0 && player.GetPrimarySpecialization() != talentInfo.SpecID)
+                    if (talentInfo.SpecID != 0 && player.GetPrimarySpecialization() != (ChrSpecialization)talentInfo.SpecID)
                         continue;
 
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);

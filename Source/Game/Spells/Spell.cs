@@ -5111,10 +5111,10 @@ namespace Game.Spells
                             if (!glyphBindableSpells.Contains(m_misc.SpellId))
                                 return SpellCastResult.InvalidGlyph;
 
-                            List<uint> glyphRequiredSpecs = Global.DB2Mgr.GetGlyphRequiredSpecs(glyphId);
+                            List<ChrSpecialization> glyphRequiredSpecs = Global.DB2Mgr.GetGlyphRequiredSpecs(glyphId);
                             if (!glyphRequiredSpecs.Empty())
                             {
-                                if (caster.GetPrimarySpecialization() == 0)
+                                if (caster.GetPrimarySpecialization() == ChrSpecialization.None)
                                     return SpellCastResult.GlyphNoSpec;
 
                                 if (!glyphRequiredSpecs.Contains(caster.GetPrimarySpecialization()))

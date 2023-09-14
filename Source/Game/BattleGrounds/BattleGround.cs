@@ -936,7 +936,6 @@ namespace Game.BattleGrounds
             BattlegroundPlayer bp = new();
             bp.OfflineRemoveTime = 0;
             bp.Team = team;
-            bp.ActiveSpec = (int)player.GetPrimarySpecialization();
             bp.Mercenary = player.IsMercenaryForBattlegroundQueueType(GetQueueId());
 
             bool isInBattleground = IsPlayerInBattleground(player.GetGUID());
@@ -1993,7 +1992,6 @@ namespace Game.BattleGrounds
     {
         public long OfflineRemoveTime;  // for tracking and removing offline players from queue after 5 Time.Minutes
         public Team Team;               // Player's team
-        public int ActiveSpec;          // Player's active spec
         public bool Mercenary;
     }
 }

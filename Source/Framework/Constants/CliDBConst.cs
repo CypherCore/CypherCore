@@ -1128,6 +1128,7 @@ namespace Framework.Constants
 
     public enum ChrSpecialization
     {
+        None = 0,
         MageArcane = 62,
         MageFire = 63,
         MageFrost = 64,
@@ -1165,7 +1166,8 @@ namespace Framework.Constants
         DemonHunterHavoc = 577,
         DemonHunterVengeance = 581,
         EvokerDevastation = 1467,
-        EvokerPreservation = 1468
+        EvokerPreservation = 1468,
+        EvokerAugmentation = 1473
     }
 
     public enum ContentTuningCalcType

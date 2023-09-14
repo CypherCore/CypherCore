@@ -696,7 +696,7 @@ namespace Scripts.Spells.Warrior
 
         void HandleOnProc(AuraEffect aurEff, ProcEventInfo procInfo)
         {
-            if (procInfo.GetActor().GetTypeId() == TypeId.Player && procInfo.GetActor().ToPlayer().GetPrimarySpecialization() == (uint)ChrSpecialization.WarriorFury)
+            if (procInfo.GetActor().GetTypeId() == TypeId.Player && procInfo.GetActor().ToPlayer().GetPrimarySpecialization() == ChrSpecialization.WarriorFury)
                 PreventDefaultAction();
 
             procInfo.GetActor().GetSpellHistory().ResetCooldown(SpellIds.ImpendingVictory, true);
