@@ -1522,6 +1522,9 @@ namespace Game.Entities
                 procEntry.SpellPhaseMask = ProcFlagsSpellPhase.Hit;
                 procEntry.HitMask = ProcFlagsHit.None; // uses default proc @see SpellMgr::CanSpellTriggerProcOnEvent
 
+                if (!procEntry.ProcFlags.HasFlag(ProcFlags.ReqSpellPhaseMask) && procEntry.ProcFlags.HasFlag(ProcFlags2.CastSuccessful))
+                    procEntry.SpellPhaseMask = ProcFlagsSpellPhase.Cast; // set default phase for PROC_FLAG_2_CAST_SUCCESSFUL
+
                 bool triggersSpell = false;
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
                 {
