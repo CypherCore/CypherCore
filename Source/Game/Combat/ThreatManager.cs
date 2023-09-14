@@ -23,7 +23,7 @@ namespace Game.Combat
         uint _updateTimer;
         List<ThreatReference> _sortedThreatList = new();
         Dictionary<ObjectGuid, ThreatReference> _myThreatListEntries = new();
-        List<ThreatReference> _needsAIUpdate = new();
+        List<ObjectGuid> _needsAIUpdate = new();
         ThreatReference _currentVictimRef;
         ThreatReference _fixateRef;
 
@@ -497,12 +497,18 @@ namespace Game.Combat
 
         void ProcessAIUpdates()
         {
-            CreatureAI ai = _owner.ToCreature().GetAI();
-            List<ThreatReference> v = new(_needsAIUpdate); // _needClientUpdate is now empty in case this triggers a recursive call
+            CreatureAI ai = _owner.ToCreature()?.GetAI();
             if (ai == null)
                 return;
-            foreach (ThreatReference refe in v)
-                ai.JustStartedThreateningMe(refe.GetVictim());
+
+            List<ObjectGuid> v = new(_needsAIUpdate); // _needClientUpdate is now empty in case this triggers a recursive call
+
+            foreach (ObjectGuid guid in v)
+            {
+                var refe = _myThreatListEntries.LookupByKey(guid);
+                if (refe != null)
+                    ai.JustStartedThreateningMe(refe.GetVictim());
+            }
         }
 
         // returns true if a is LOWER on the threat list than b
@@ -794,7 +800,7 @@ namespace Game.Combat
         // Resets the specified unit's threat to zero
         public void ResetThreat(Unit target) { ScaleThreat(target, 0.0f); }
 
-        public void RegisterForAIUpdate(ThreatReference refe) { _needsAIUpdate.Add(refe); }
+        public void RegisterForAIUpdate(ObjectGuid guid) { _needsAIUpdate.Add(guid); }
     }
 
     public enum TauntState
@@ -864,7 +870,7 @@ namespace Game.Combat
             {
                 Online = ShouldBeSuppressed() ? OnlineState.Suppressed : OnlineState.Online;
                 ListNotifyChanged();
-                _mgr.RegisterForAIUpdate(this);
+                _mgr.RegisterForAIUpdate(GetVictim().GetGUID());
             }
         }
 
