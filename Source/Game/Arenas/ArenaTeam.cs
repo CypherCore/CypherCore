@@ -672,7 +672,7 @@ namespace Game.Arenas
             }
         }
 
-        public void SaveToDB()
+        public void SaveToDB(bool forceMemberSave = false)
         {
             // Save team and member stats to db
             // Called after a match has ended or when calculating arena_points
@@ -692,7 +692,7 @@ namespace Game.Arenas
             foreach (var member in Members)
             {
                 // Save the effort and go
-                if (member.WeekGames == 0)
+                if (member.WeekGames == 0 && !forceMemberSave)
                     continue;
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ARENA_TEAM_MEMBER);
