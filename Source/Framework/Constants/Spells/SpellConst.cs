@@ -1599,7 +1599,7 @@ namespace Framework.Constants
         Unk16 = 0x8000,
         Unk17 = 0x10000,
         AdjustMissile = 0x20000,
-        NoGCD = 0x40000,
+        NoGCD = 0x40000, // no GCD for spell casts from charm/summon (vehicle spells is an example)
         VisualChain = 0x80000,
         Unk21 = 0x100000,
         RuneList = 0x200000,
@@ -1612,22 +1612,22 @@ namespace Framework.Constants
         Unk29 = 0x10000000,
         Unk30 = 0x20000000,
         HealPrediction = 0x40000000,
-        Unk32 = 0x80000000
+        TriggerPetCooldown = 0x80000000 // causes the cooldown to be stored in pets SpellHistory on client
     }
 
     [System.Flags]
     public enum SpellCastFlagsEx
     {
         None = 0x0,
-        Unknown1 = 0x01,
+        TriggerCooldownOnSpellStart = 0x01,
         Unknown2 = 0x02,
-        Unknown3 = 0x04,
+        DontConsumeCharges = 0x04,
         Unknown4 = 0x08,
-        Unknown5 = 0x10,
+        DelayStartingCooldowns = 0x10, // makes client start cooldown after precalculated delay instead of immediately after SPELL_GO (used by empower spells)
         Unknown6 = 0x20,
         Unknown7 = 0x40,
         Unknown8 = 0x80,
-        Unknown9 = 0x100,
+        IgnorePetCooldown = 0x100, // makes client not automatically start cooldown for pets after SPELL_GO
         IgnoreCooldown = 0x200, // makes client not automatically start cooldown after SPELL_GO
         Unknown11 = 0x400,
         Unknown12 = 0x800,
