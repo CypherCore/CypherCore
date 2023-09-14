@@ -184,10 +184,10 @@ namespace Game.BattleGrounds.Zones
             TriggerGameEvent(8563);
         }
 
-        public override void AddPlayer(Player player)
+        public override void AddPlayer(Player player, BattlegroundQueueTypeId queueId)
         {
             bool isInBattleground = IsPlayerInBattleground(player.GetGUID());
-            base.AddPlayer(player);
+            base.AddPlayer(player, queueId);
             if (!isInBattleground)
                 PlayerScores[player.GetGUID()] = new BattlegroundWGScore(player.GetGUID(), player.GetBGTeam());
         }
@@ -320,7 +320,7 @@ namespace Game.BattleGrounds.Zones
                 UpdateWorldState(WSGWorldStates.FlagStateHorde, 1);
                 UpdateWorldState(WSGWorldStates.StateTimerActive, 0);
 
-                RewardHonorToTeam(Honor[(int)m_HonorMode][(int)WSGRewards.Win], winner);
+                RewardHonorToTeam(Honor[Global.BattlegroundMgr.IsBGWeekend(BattlegroundTypeId.WS) ? 1 : 0][(int)WSGRewards.Win], winner);
                 EndBattleground(winner);
             }
             else

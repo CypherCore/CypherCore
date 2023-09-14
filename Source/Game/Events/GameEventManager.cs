@@ -802,37 +802,6 @@ namespace Game
                 }
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading Game Event Battleground Holiday Data...");
-            {
-                uint oldMSTime = Time.GetMSTime();
-
-                //                                         0           1
-                SQLResult result = DB.World.Query("SELECT EventEntry, BattlegroundID FROM game_event_battleground_holiday");
-                if (result.IsEmpty())
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Battlegroundholidays in game events. DB table `game_event_battleground_holiday` is empty.");
-                else
-                {
-                    uint count = 0;
-                    do
-                    {
-                        ushort eventId = result.Read<byte>(0);
-
-                        if (eventId >= mGameEvent.Length)
-                        {
-                            Log.outError(LogFilter.Sql, "`game_event_battleground_holiday` game event id ({0}) not exist in `game_event`", eventId);
-                            continue;
-                        }
-
-                        mGameEventBattlegroundHolidays[eventId] = result.Read<uint>(1);
-
-                        ++count;
-                    }
-                    while (result.NextRow());
-
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Battlegroundholidays in game events in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
-                }
-            }
-
             Log.outInfo(LogFilter.ServerLoading, "Loading Game Event Pool Data...");
             {
                 uint oldMSTime = Time.GetMSTime();
@@ -915,7 +884,6 @@ namespace Game
                 mGameEventCreatureQuests = new List<Tuple<uint, uint>>[maxEventId];
                 mGameEventGameObjectQuests = new List<Tuple<uint, uint>>[maxEventId];
                 mGameEventVendors = new Dictionary<uint, VendorItem>[maxEventId];
-                mGameEventBattlegroundHolidays = new uint[maxEventId];
                 mGameEventNPCFlags = new List<(ulong guid, ulong npcflag)>[maxEventId];
                 mGameEventModelEquip = new List<Tuple<ulong, ModelEquip>>[maxEventId];
                 for (var i = 0; i < maxEventId; ++i)
@@ -1053,8 +1021,6 @@ namespace Game
             UpdateEventNPCFlags(event_id);
             // remove vendor items
             UpdateEventNPCVendor(event_id, false);
-            // update bg holiday
-            UpdateBattlegroundSettings();
         }
 
         void ApplyNewEvent(ushort event_id)
@@ -1079,8 +1045,6 @@ namespace Game
             UpdateEventNPCFlags(event_id);
             // add vendor items
             UpdateEventNPCVendor(event_id, true);
-            // update bg holiday
-            UpdateBattlegroundSettings();
 
             //! Run SAI scripts with SMART_EVENT_GAME_EVENT_START
             RunSmartAIScripts(event_id, true);
@@ -1124,14 +1088,6 @@ namespace Game
                     }
                 });
             }
-        }
-
-        void UpdateBattlegroundSettings()
-        {
-            Global.BattlegroundMgr.ResetHolidays();
-
-            foreach (ushort activeEventId in m_ActiveEvents)
-                Global.BattlegroundMgr.SetHolidayActive(mGameEventBattlegroundHolidays[activeEventId]);
         }
 
         void UpdateEventNPCVendor(ushort eventId, bool activate)
@@ -1698,7 +1654,6 @@ namespace Game
         List<Tuple<ulong, ModelEquip>>[] mGameEventModelEquip;
         List<uint>[] mGameEventPoolIds;
         GameEventData[] mGameEvent;
-        uint[] mGameEventBattlegroundHolidays;
         Dictionary<uint, GameEventQuestToEventConditionNum> mQuestToEventConditions = new();
         List<(ulong guid, ulong npcflag)>[] mGameEventNPCFlags;
         List<ushort> m_ActiveEvents = new();

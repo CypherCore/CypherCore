@@ -2317,11 +2317,11 @@ namespace Game.Entities
                             {
                                 case 179785:                        // Silverwing Flag
                                 case 179786:                        // Warsong Flag
-                                    if (bg.GetTypeID(true) == BattlegroundTypeId.WS)
+                                    if (bg.GetTypeID() == BattlegroundTypeId.WS)
                                         bg.EventPlayerClickedOnFlag(player, this);
                                     break;
                                 case 184142:                        // Netherstorm Flag
-                                    if (bg.GetTypeID(true) == BattlegroundTypeId.EY)
+                                    if (bg.GetTypeID() == BattlegroundTypeId.EY)
                                         bg.EventPlayerClickedOnFlag(player, this);
                                     break;
                             }

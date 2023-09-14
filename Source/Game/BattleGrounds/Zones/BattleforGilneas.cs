@@ -3,7 +3,8 @@
 
 namespace Game.BattleGrounds.Zones
 {
-    class BattleforGilneas
+    class BgBattleforGilneas : Battleground
     {
+        public BgBattleforGilneas(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate) { }
     }
 }

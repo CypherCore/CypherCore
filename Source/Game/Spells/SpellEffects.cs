@@ -1246,7 +1246,7 @@ namespace Game.Spells
                     Battleground bg = player.GetBattleground();
                     if (bg)
                     {
-                        if (bg.GetTypeID(true) == BattlegroundTypeId.EY)
+                        if (bg.GetTypeID() == BattlegroundTypeId.EY)
                             bg.EventPlayerClickedOnFlag(player, gameObjTarget);
                         return;
                     }

@@ -24,11 +24,8 @@ namespace Game.BattleGrounds
         public Battleground(BattlegroundTemplate battlegroundTemplate)
         {
             _battlegroundTemplate = battlegroundTemplate;
-            m_RandomTypeID = BattlegroundTypeId.None;
             m_Status = BattlegroundStatus.None;
             _winnerTeamId = PvPTeamId.Neutral;
-
-            m_HonorMode = BGHonorMode.Normal;
 
             StartDelayTimes[BattlegroundConst.EventIdFirst] = BattlegroundStartTimeIntervals.Delay2m;
             StartDelayTimes[BattlegroundConst.EventIdSecond] = BattlegroundStartTimeIntervals.Delay1m;
@@ -632,7 +629,7 @@ namespace Game.BattleGrounds
                 stmt.AddValue(0, battlegroundId);
                 stmt.AddValue(1, (byte)GetWinner());
                 stmt.AddValue(2, GetUniqueBracketId());
-                stmt.AddValue(3, (byte)GetTypeID(true));
+                stmt.AddValue(3, (uint)GetTypeID());
                 DB.Characters.Execute(stmt);
             }
 
@@ -702,18 +699,23 @@ namespace Game.BattleGrounds
                 // Reward winner team
                 if (team == winner)
                 {
-                    if (IsRandom() || Global.BattlegroundMgr.IsBGWeekend(GetTypeID()))
+                    BattlegroundPlayer bgPlayer = GetBattlegroundPlayerData(player.GetGUID());
+                    if (bgPlayer != null)
                     {
-                        UpdatePlayerScore(player, ScoreType.BonusHonor, GetBonusHonorFromKill(winnerKills));
-                        if (!player.GetRandomWinner())
+                        if (Global.BattlegroundMgr.IsRandomBattleground((BattlegroundTypeId)bgPlayer.queueTypeId.BattlemasterListId)
+                            || Global.BattlegroundMgr.IsBGWeekend((BattlegroundTypeId)bgPlayer.queueTypeId.BattlemasterListId))
                         {
-                            player.SetRandomWinner(true);
-                            // TODO: win honor xp
+                            UpdatePlayerScore(player, ScoreType.BonusHonor, GetBonusHonorFromKill(winnerKills));
+                            if (!player.GetRandomWinner())
+                            {
+                                player.SetRandomWinner(true);
+                                // TODO: win honor xp
+                            }
                         }
-                    }
-                    else
-                    {
-                        // TODO: lose honor xp
+                        else
+                        {
+                            // TODO: loss honor xp
+                        }
                     }
 
                     player.UpdateCriteria(CriteriaType.WinBattleground, player.GetMapId());
@@ -731,8 +733,13 @@ namespace Game.BattleGrounds
                 }
                 else
                 {
-                    if (IsRandom() || Global.BattlegroundMgr.IsBGWeekend(GetTypeID()))
-                        UpdatePlayerScore(player, ScoreType.BonusHonor, GetBonusHonorFromKill(loserKills));
+                    BattlegroundPlayer bgPlayer = GetBattlegroundPlayerData(player.GetGUID());
+                    if (bgPlayer != null)
+                    {
+                        if (Global.BattlegroundMgr.IsRandomBattleground((BattlegroundTypeId)bgPlayer.queueTypeId.BattlemasterListId)
+                            || Global.BattlegroundMgr.IsBGWeekend((BattlegroundTypeId)bgPlayer.queueTypeId.BattlemasterListId))
+                            UpdatePlayerScore(player, ScoreType.BonusHonor, GetBonusHonorFromKill(loserKills));
+                    }
                 }
 
                 player.ResetAllPowers();
@@ -770,8 +777,10 @@ namespace Game.BattleGrounds
             bool participant = false;
             // Remove from lists/maps
             var bgPlayer = m_Players.LookupByKey(guid);
+            BattlegroundQueueTypeId? bgQueueTypeId = null;
             if (bgPlayer != null)
             {
+                bgQueueTypeId = bgPlayer.queueTypeId;
                 UpdatePlayersCountByTeam(team, true);               // -1 player
                 m_Players.Remove(guid);
                 // check if the player was a participant of the match, or only entered through gm command (goname)
@@ -811,8 +820,6 @@ namespace Game.BattleGrounds
 
             RemovePlayer(player, guid, team);                           // BG subclass specific code
 
-            BattlegroundQueueTypeId bgQueueTypeId = GetQueueId();
-
             if (participant) // if the player was a match participant, remove auras, calc rating, update queue
             {
                 if (player)
@@ -826,15 +833,16 @@ namespace Game.BattleGrounds
                         player.RemovePet(null, PetSaveMode.NotInSlot);
                         player.ResummonPetTemporaryUnSummonedIfAny();
                     }
-                    if (SendPacket)
+                    if (SendPacket && bgQueueTypeId.HasValue)
                     {
                         BattlefieldStatusNone battlefieldStatus;
-                        Global.BattlegroundMgr.BuildBattlegroundStatusNone(out battlefieldStatus, player, player.GetBattlegroundQueueIndex(bgQueueTypeId), player.GetBattlegroundQueueJoinTime(bgQueueTypeId));
+                        Global.BattlegroundMgr.BuildBattlegroundStatusNone(out battlefieldStatus, player, player.GetBattlegroundQueueIndex(bgQueueTypeId.Value), player.GetBattlegroundQueueJoinTime(bgQueueTypeId.Value));
                         player.SendPacket(battlefieldStatus);
                     }
 
                     // this call is important, because player, when joins to Battleground, this method is not called, so it must be called when leaving bg
-                    player.RemoveBattlegroundQueueId(bgQueueTypeId);
+                    if (bgQueueTypeId.HasValue)
+                        player.RemoveBattlegroundQueueId(bgQueueTypeId.Value);
                 }
 
                 // remove from raid group if player is member
@@ -846,11 +854,11 @@ namespace Game.BattleGrounds
                 }
                 DecreaseInvitedCount(team);
                 //we should update Battleground queue, but only if bg isn't ending
-                if (IsBattleground() && GetStatus() < BattlegroundStatus.WaitLeave)
+                if (IsBattleground() && GetStatus() < BattlegroundStatus.WaitLeave && bgQueueTypeId.HasValue)
                 {
                     // a player has left the Battleground, so there are free slots . add to queue
                     AddToBGFreeSlotQueue();
-                    Global.BattlegroundMgr.ScheduleQueueUpdate(0, bgQueueTypeId, GetBracketId());
+                    Global.BattlegroundMgr.ScheduleQueueUpdate(0, bgQueueTypeId.Value, GetBracketId());
                 }
                 // Let others know
                 BattlegroundPlayerLeft playerLeft = new();
@@ -922,7 +930,7 @@ namespace Game.BattleGrounds
                 player.TeleportTo(loc.Loc);
         }
 
-        public virtual void AddPlayer(Player player)
+        public virtual void AddPlayer(Player player, BattlegroundQueueTypeId queueId)
         {
             // remove afk from player
             if (player.IsAFK())
@@ -936,7 +944,8 @@ namespace Game.BattleGrounds
             BattlegroundPlayer bp = new();
             bp.OfflineRemoveTime = 0;
             bp.Team = team;
-            bp.Mercenary = player.IsMercenaryForBattlegroundQueueType(GetQueueId());
+            bp.Mercenary = player.IsMercenaryForBattlegroundQueueType(queueId);
+            bp.queueTypeId = queueId;
 
             bool isInBattleground = IsPlayerInBattleground(player.GetGUID());
             // Add to list/maps
@@ -975,8 +984,9 @@ namespace Game.BattleGrounds
                 pvpMatchInitialize.Duration = (int)(GetElapsedTime() - (int)BattlegroundStartTimeIntervals.Delay2m) / Time.InMilliseconds;
                 pvpMatchInitialize.StartTime = GameTime.GetGameTime() - pvpMatchInitialize.Duration;
             }
+
             pvpMatchInitialize.ArenaFaction = (byte)(player.GetBGTeam() == Team.Horde ? PvPTeamId.Horde : PvPTeamId.Alliance);
-            pvpMatchInitialize.BattlemasterListID = (uint)GetTypeID();
+            pvpMatchInitialize.BattlemasterListID = queueId.BattlemasterListId;
             pvpMatchInitialize.Registered = false;
             pvpMatchInitialize.AffectsRating = IsRated();
 
@@ -1118,7 +1128,7 @@ namespace Game.BattleGrounds
         {
             if (!m_InBGFreeSlotQueue && IsBattleground())
             {
-                Global.BattlegroundMgr.AddToBGFreeSlotQueue(GetQueueId(), this);
+                Global.BattlegroundMgr.AddToBGFreeSlotQueue(this);
                 m_InBGFreeSlotQueue = true;
             }
         }
@@ -1128,7 +1138,7 @@ namespace Game.BattleGrounds
         {
             if (m_InBGFreeSlotQueue)
             {
-                Global.BattlegroundMgr.RemoveFromBGFreeSlotQueue(GetQueueId(), m_InstanceID);
+                Global.BattlegroundMgr.RemoveFromBGFreeSlotQueue(GetMapId(), m_InstanceID);
                 m_InBGFreeSlotQueue = false;
             }
         }
@@ -1647,11 +1657,6 @@ namespace Game.BattleGrounds
             return count;
         }
 
-        public void SetHoliday(bool is_holiday)
-        {
-            m_HonorMode = is_holiday ? BGHonorMode.Holiday : BGHonorMode.Normal;
-        }
-
         int GetObjectType(ObjectGuid guid)
         {
             for (int i = 0; i < BgObjects.Length; ++i)
@@ -1724,9 +1729,9 @@ namespace Game.BattleGrounds
             return _battlegroundTemplate.BattlemasterEntry.Name[Global.WorldMgr.GetDefaultDbcLocale()];
         }
 
-        public BattlegroundTypeId GetTypeID(bool getRandom = false)
+        public BattlegroundTypeId GetTypeID()
         {
-            return getRandom ? m_RandomTypeID : _battlegroundTemplate.Id;
+            return _battlegroundTemplate.Id;
         }
 
         public BattlegroundBracketId GetBracketId()
@@ -1790,12 +1795,16 @@ namespace Game.BattleGrounds
             return _battlegroundTemplate.GetMinPlayersPerTeam();
         }
 
+        public BattlegroundPlayer GetBattlegroundPlayerData(ObjectGuid playerGuid)
+        {
+            return m_Players.LookupByKey(playerGuid);
+        }
+        
         public virtual void StartingEventCloseDoors() { }
         public virtual void StartingEventOpenDoors() { }
 
         public virtual void DestroyGate(Player player, GameObject go) { }
 
-        public BattlegroundQueueTypeId GetQueueId() { return m_queueId; }
         public uint GetInstanceID() { return m_InstanceID; }
         public BattlegroundStatus GetStatus() { return m_Status; }
         public uint GetClientInstanceID() { return m_ClientInstanceID; }
@@ -1805,10 +1814,7 @@ namespace Game.BattleGrounds
         int GetStartDelayTime() { return m_StartDelayTime; }
         public ArenaTypes GetArenaType() { return m_ArenaType; }
         PvPTeamId GetWinner() { return _winnerTeamId; }
-        public bool IsRandom() { return m_IsRandom; }
 
-        public void SetQueueId(BattlegroundQueueTypeId queueId) { m_queueId = queueId; }
-        public void SetRandomTypeID(BattlegroundTypeId TypeID) { m_RandomTypeID = TypeID; }
         //here we can count minlevel and maxlevel for players
         public void SetInstanceID(uint InstanceID) { m_InstanceID = InstanceID; }
         public void SetStatus(BattlegroundStatus Status) { m_Status = Status; }
@@ -1837,7 +1843,6 @@ namespace Game.BattleGrounds
                 ++m_InvitedHorde;
         }
 
-        public void SetRandom(bool isRandom) { m_IsRandom = isRandom; }
         uint GetInvitedCount(Team team) { return (team == Team.Alliance) ? m_InvitedAlliance : m_InvitedHorde; }
 
         public bool IsRated() { return m_IsRated; }
@@ -1927,9 +1932,6 @@ namespace Game.BattleGrounds
         // this must be filled inructors!
         public uint[] StartMessageIds = new uint[4];
 
-        bool m_IsRandom;
-
-        public BGHonorMode m_HonorMode;
         public uint[] m_TeamScores = new uint[SharedConst.PvpTeamsCount];
 
         protected ObjectGuid[] BgObjects;// = new Dictionary<int, ObjectGuid>();
@@ -1938,8 +1940,6 @@ namespace Game.BattleGrounds
         public uint[] Buff_Entries = { BattlegroundConst.SpeedBuff, BattlegroundConst.RegenBuff, BattlegroundConst.BerserkerBuff };
 
         // Battleground
-        BattlegroundQueueTypeId m_queueId;
-        BattlegroundTypeId m_RandomTypeID;
         uint m_InstanceID;                                // Battleground Instance's GUID!
         BattlegroundStatus m_Status;
         uint m_ClientInstanceID;                          // the instance-id which is sent to the client and without any other internal use
@@ -1993,5 +1993,6 @@ namespace Game.BattleGrounds
         public long OfflineRemoveTime;  // for tracking and removing offline players from queue after 5 Time.Minutes
         public Team Team;               // Player's team
         public bool Mercenary;
+        public BattlegroundQueueTypeId queueTypeId;
     }
 }

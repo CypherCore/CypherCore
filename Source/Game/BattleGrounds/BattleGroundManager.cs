@@ -105,7 +105,7 @@ namespace Game.BattleGrounds
             }
         }
 
-        void BuildBattlegroundStatusHeader(BattlefieldStatusHeader header, Battleground bg, Player player, uint ticketId, uint joinTime, BattlegroundQueueTypeId queueId, ArenaTypes arenaType)
+        void BuildBattlegroundStatusHeader(BattlefieldStatusHeader header, Player player, uint ticketId, uint joinTime, BattlegroundQueueTypeId queueId)
         {
             header.Ticket = new RideTicket();
             header.Ticket.RequesterGuid = player.GetGUID();
@@ -113,11 +113,11 @@ namespace Game.BattleGrounds
             header.Ticket.Type = RideType.Battlegrounds;
             header.Ticket.Time = (int)joinTime;
             header.QueueID.Add(queueId.GetPacked());
-            header.RangeMin = (byte)bg.GetMinLevel();
-            header.RangeMax = (byte)bg.GetMaxLevel();
-            header.TeamSize = (byte)(bg.IsArena() ? arenaType : 0);
-            header.InstanceID = bg.GetClientInstanceID();
-            header.RegisteredMatch = bg.IsRated();
+            header.RangeMin = 0; // seems to always be 0
+            header.RangeMax = SharedConst.DefaultMaxLevel; // alwyas max level of current expansion. Might be limited to account
+            header.TeamSize = queueId.TeamSize;
+            header.InstanceID = 0; // seems to always be 0
+            header.RegisteredMatch = queueId.Rated;
             header.TournamentRules = false;
         }
 
@@ -130,19 +130,19 @@ namespace Game.BattleGrounds
             battlefieldStatus.Ticket.Time = (int)joinTime;
         }
 
-        public void BuildBattlegroundStatusNeedConfirmation(out BattlefieldStatusNeedConfirmation battlefieldStatus, Battleground bg, Player player, uint ticketId, uint joinTime, uint timeout, ArenaTypes arenaType)
+        public void BuildBattlegroundStatusNeedConfirmation(out BattlefieldStatusNeedConfirmation battlefieldStatus, Battleground bg, Player player, uint ticketId, uint joinTime, uint timeout, BattlegroundQueueTypeId queueId)
         {
             battlefieldStatus = new BattlefieldStatusNeedConfirmation();
-            BuildBattlegroundStatusHeader(battlefieldStatus.Hdr, bg, player, ticketId, joinTime, bg.GetQueueId(), arenaType);
+            BuildBattlegroundStatusHeader(battlefieldStatus.Hdr, player, ticketId, joinTime, queueId);
             battlefieldStatus.Mapid = bg.GetMapId();
             battlefieldStatus.Timeout = timeout;
             battlefieldStatus.Role = 0;
         }
 
-        public void BuildBattlegroundStatusActive(out BattlefieldStatusActive battlefieldStatus, Battleground bg, Player player, uint ticketId, uint joinTime, ArenaTypes arenaType)
+        public void BuildBattlegroundStatusActive(out BattlefieldStatusActive battlefieldStatus, Battleground bg, Player player, uint ticketId, uint joinTime, BattlegroundQueueTypeId queueId)
         {
             battlefieldStatus = new BattlefieldStatusActive();
-            BuildBattlegroundStatusHeader(battlefieldStatus.Hdr, bg, player, ticketId, joinTime, bg.GetQueueId(), arenaType);
+            BuildBattlegroundStatusHeader(battlefieldStatus.Hdr, player, ticketId, joinTime, queueId);
             battlefieldStatus.ShutdownTimer = bg.GetRemainingTime();
             battlefieldStatus.ArenaFaction = (byte)(player.GetBGTeam() == Team.Horde ? TeamId.Horde : TeamId.Alliance);
             battlefieldStatus.LeftEarly = false;
@@ -150,10 +150,10 @@ namespace Game.BattleGrounds
             battlefieldStatus.Mapid = bg.GetMapId();
         }
 
-        public void BuildBattlegroundStatusQueued(out BattlefieldStatusQueued battlefieldStatus, Battleground bg, Player player, uint ticketId, uint joinTime, BattlegroundQueueTypeId queueId, uint avgWaitTime, ArenaTypes arenaType, bool asGroup)
+        public void BuildBattlegroundStatusQueued(out BattlefieldStatusQueued battlefieldStatus, Player player, uint ticketId, uint joinTime, BattlegroundQueueTypeId queueId, uint avgWaitTime, bool asGroup)
         {
             battlefieldStatus = new BattlefieldStatusQueued();
-            BuildBattlegroundStatusHeader(battlefieldStatus.Hdr, bg, player, ticketId, joinTime, queueId, arenaType);
+            BuildBattlegroundStatusHeader(battlefieldStatus.Hdr, player, ticketId, joinTime, queueId);
             battlefieldStatus.AverageWaitTime = avgWaitTime;
             battlefieldStatus.AsGroup = asGroup;
             battlefieldStatus.SuspendedQueue = false;
@@ -179,7 +179,7 @@ namespace Game.BattleGrounds
             if (instanceId == 0)
                 return null;
 
-            if (bgTypeId != BattlegroundTypeId.None || bgTypeId == BattlegroundTypeId.RB || bgTypeId == BattlegroundTypeId.RandomEpic)
+            if (bgTypeId != BattlegroundTypeId.None || IsRandomBattleground(bgTypeId))
             {
                 var data = bgDataStore.LookupByKey(bgTypeId);
                 return data.m_Battlegrounds.LookupByKey(instanceId);
@@ -192,14 +192,6 @@ namespace Game.BattleGrounds
                 if (bg)
                     return bg;
             }
-
-            return null;
-        }
-
-        public Battleground GetBattlegroundTemplate(BattlegroundTypeId bgTypeId)
-        {
-            if (bgDataStore.ContainsKey(bgTypeId))
-                return bgDataStore[bgTypeId].Template;
 
             return null;
         }
@@ -230,113 +222,90 @@ namespace Game.BattleGrounds
         }
 
         // create a new Battleground that will really be used to play
-        public Battleground CreateNewBattleground(BattlegroundQueueTypeId queueId, PvpDifficultyRecord bracketEntry)
+        public Battleground CreateNewBattleground(BattlegroundQueueTypeId queueId, BattlegroundBracketId bracketId)
         {
             BattlegroundTypeId bgTypeId = GetRandomBG((BattlegroundTypeId)queueId.BattlemasterListId);
 
             // get the template BG
-            Battleground bg_template = GetBattlegroundTemplate(bgTypeId);
+            BattlegroundTemplate bg_template = GetBattlegroundTemplateByTypeId(bgTypeId);
             if (bg_template == null)
             {
-                Log.outError(LogFilter.Battleground, "Battleground: CreateNewBattleground - bg template not found for {0}", bgTypeId);
+                Log.outError(LogFilter.Battleground, $"Battleground: CreateNewBattleground - bg template not found for {bgTypeId}");
                 return null;
             }
 
             if (bgTypeId == BattlegroundTypeId.RB || bgTypeId == BattlegroundTypeId.AA || bgTypeId == BattlegroundTypeId.RandomEpic)
                 return null;
 
+            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketById((uint)bg_template.BattlemasterEntry.MapId[0], bracketId);
+            if (bracketEntry == null)
+            {
+                Log.outError(LogFilter.Battleground, $"Battleground: CreateNewBattleground: bg bracket entry not found for map {bg_template.BattlemasterEntry.MapId[0]} bracket id {bracketId}");
+                return null;
+            }
+ 
+            Battleground bg = null;
             // create a copy of the BG template
-            Battleground bg = bg_template.GetCopy();
+            switch (bgTypeId)
+            {
+                case BattlegroundTypeId.AV:
+                    bg = new BgAlteracValley(bg_template);
+                    break;
+                case BattlegroundTypeId.WS:
+                    bg = new BgWarsongGluch(bg_template);
+                    break;
+                case BattlegroundTypeId.AB:
+                case BattlegroundTypeId.DomAb:
+                    bg = new BgArathiBasin(bg_template);
+                    break;
+                case BattlegroundTypeId.NA:
+                    bg = new BgNagrandArena(bg_template);
+                    break;
+                case BattlegroundTypeId.BE:
+                    bg = new BgBladesEdgeArena(bg_template);
+                    break;
+                case BattlegroundTypeId.EY:
+                    bg = new BgEyeofStorm(bg_template);
+                    break;
+                case BattlegroundTypeId.RL:
+                    bg = new BgRuinsOfLordaernon(bg_template);
+                    break;
+                case BattlegroundTypeId.SA:
+                    bg = new BgStrandOfAncients(bg_template);
+                    break;
+                case BattlegroundTypeId.DS:
+                    bg = new BgDalaranSewers(bg_template);
+                    break;
+                case BattlegroundTypeId.RV:
+                    bg = new BgTheRingOfValor(bg_template);
+                    break;
+                case BattlegroundTypeId.IC:
+                    bg = new BgIsleofConquest(bg_template);
+                    break;
+                case BattlegroundTypeId.TP:
+                    bg = new BgTwinPeaks(bg_template);
+                    break;
+                case BattlegroundTypeId.BFG:
+                    bg = new BgBattleforGilneas(bg_template);
+                    break;
+                case BattlegroundTypeId.RB:
+                case BattlegroundTypeId.AA:
+                case BattlegroundTypeId.RandomEpic:
+                default:
+                    return null;
+            }
 
-            bool isRandom = bgTypeId != (BattlegroundTypeId)queueId.BattlemasterListId && !bg.IsArena();
-
-            bg.SetQueueId(queueId);
             bg.SetBracket(bracketEntry);
             bg.SetInstanceID(Global.MapMgr.GenerateInstanceId());
             bg.SetClientInstanceID(CreateClientVisibleInstanceId((BattlegroundTypeId)queueId.BattlemasterListId, bracketEntry.GetBracketId()));
-            bg.Reset();                     // reset the new bg (set status to status_wait_queue from status_none)
+            // reset the new bg (set status to status_wait_queue from status_none)
+            // this shouldn't be needed anymore as a new Battleground instance is created each time. But some bg sub classes still depend on it.
+            bg.Reset();
             bg.SetStatus(BattlegroundStatus.WaitJoin); // start the joining of the bg
             bg.SetArenaType((ArenaTypes)queueId.TeamSize);
-            bg.SetRandomTypeID(bgTypeId);
             bg.SetRated(queueId.Rated);
-            bg.SetRandom(isRandom);
 
             return bg;
-        }
-
-        // used to create the BG templates
-        bool CreateBattleground(BattlegroundTemplate bgTemplate)
-        {
-            Battleground bg = GetBattlegroundTemplate(bgTemplate.Id);
-            if (!bg)
-            {
-                // Create the BG
-                switch (bgTemplate.Id)
-                {
-                    //case BattlegroundTypeId.AV:
-                    // bg = new BattlegroundAV(bgTemplate);
-                    //break;
-                    case BattlegroundTypeId.WS:
-                        bg = new BgWarsongGluch(bgTemplate);
-                        break;
-                    case BattlegroundTypeId.AB:
-                    case BattlegroundTypeId.DomAb:
-                        bg = new BgArathiBasin(bgTemplate);
-                        break;                        
-                    case BattlegroundTypeId.NA:
-                        bg = new NagrandArena(bgTemplate);
-                        break;
-                    case BattlegroundTypeId.BE:
-                        bg = new BladesEdgeArena(bgTemplate);
-                        break;
-                    case BattlegroundTypeId.EY:
-                        bg = new BgEyeofStorm(bgTemplate);
-                        break;
-                    case BattlegroundTypeId.RL:
-                        bg = new RuinsofLordaeronArena(bgTemplate);
-                        break;
-                    case BattlegroundTypeId.SA:
-                        bg = new BgStrandOfAncients(bgTemplate);
-                        break;
-                    case BattlegroundTypeId.DS:
-                        bg = new DalaranSewersArena(bgTemplate);
-                        break;                        
-                    case BattlegroundTypeId.RV:
-                        bg = new RingofValorArena(bgTemplate);
-                        break;
-                    //case BattlegroundTypeId.IC:
-                    //bg = new BattlegroundIC(bgTemplate);
-                    //break;
-                    case BattlegroundTypeId.AA:
-                        bg = new Battleground(bgTemplate);
-                        break;
-                    case BattlegroundTypeId.RB:
-                        bg = new Battleground(bgTemplate);
-                        bg.SetRandom(true);
-                        break;
-                    /*
-                case BattlegroundTypeId.TP:
-                    bg = new BattlegroundTP(bgTemplate);
-                    break;
-                case BattlegroundTypeId.BFG:
-                    bg = new BattlegroundBFG(bgTemplate);
-                    break;
-                    */
-                    case BattlegroundTypeId.RandomEpic:
-                        bg = new Battleground(bgTemplate);
-                        bg.SetRandom(true);
-                        break;
-                    default:
-                        return false;
-                }
-            }
-
-            if (!bgDataStore.ContainsKey(bg.GetTypeID()))
-                bgDataStore[bg.GetTypeID()] = new BattlegroundData();
-
-            bgDataStore[bg.GetTypeID()].Template = bg;
-
-            return true;
         }
 
         public void LoadBattlegroundTemplates()
@@ -375,7 +344,7 @@ namespace Game.BattleGrounds
                 bgTemplate.ScriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(5));
                 bgTemplate.BattlemasterEntry = bl;
 
-                if (bgTemplate.Id != BattlegroundTypeId.AA && bgTemplate.Id != BattlegroundTypeId.RB && bgTemplate.Id != BattlegroundTypeId.RandomEpic)
+                if (bgTemplate.Id != BattlegroundTypeId.AA && !IsRandomBattleground(bgTemplate.Id))
                 {
                     uint startId = result.Read<uint>(1);
                     WorldSafeLocsEntry start = Global.ObjectMgr.GetWorldSafeLoc(startId);
@@ -400,12 +369,6 @@ namespace Game.BattleGrounds
                         Log.outError(LogFilter.Sql, $"Table `Battleground_template` for Id {bgTemplate.Id} has a non-existed WorldSafeLocs.dbc id {startId} in field `HordeStartLoc`. BG not created.");
                         continue;
                     }
-                }
-
-                if (!CreateBattleground(bgTemplate))
-                {
-                    Log.outError(LogFilter.Battleground, $"Could not create battleground template class ({bgTemplate.Id})!");
-                    continue;
                 }
 
                 _battlegroundTemplates[bgTypeId] = bgTemplate;
@@ -458,6 +421,11 @@ namespace Game.BattleGrounds
                 || bgTypeId == BattlegroundTypeId.DS || bgTypeId == BattlegroundTypeId.RV || bgTypeId == BattlegroundTypeId.RL;
         }
 
+        public bool IsRandomBattleground(BattlegroundTypeId battlemasterListId)
+        {
+            return battlemasterListId == BattlegroundTypeId.RB || battlemasterListId == BattlegroundTypeId.RandomEpic;
+        }
+
         public BattlegroundQueueTypeId BGQueueTypeId(ushort battlemasterListId, BattlegroundQueueIdType type, bool rated, ArenaTypes teamSize)
         {
             return new BattlegroundQueueTypeId(battlemasterListId, (byte)type, rated, (byte)teamSize);
@@ -473,23 +441,6 @@ namespace Game.BattleGrounds
         {
             m_ArenaTesting = !m_ArenaTesting;
             Global.WorldMgr.SendWorldText(m_ArenaTesting ? CypherStrings.DebugArenaOn : CypherStrings.DebugArenaOff);
-        }
-
-        public void ResetHolidays()
-        {
-            for (var i = BattlegroundTypeId.AV; i < BattlegroundTypeId.Max; i++)
-            {
-                Battleground bg = GetBattlegroundTemplate(i);
-                if (bg != null)
-                    bg.SetHoliday(false);
-            }
-        }
-
-        public void SetHolidayActive(uint battlegroundId)
-        {
-            Battleground bg = GetBattlegroundTemplate((BattlegroundTypeId)battlegroundId);
-            if (bg != null)
-                bg.SetHoliday(true);
         }
 
         public bool IsValidQueueId(BattlegroundQueueTypeId bgQueueTypeId)
@@ -521,9 +472,9 @@ namespace Game.BattleGrounds
                 case BattlegroundQueueIdType.ArenaSkirmish:
                     if (battlemasterList.InstanceType != (int)MapTypes.Arena)
                         return false;
-                    if (bgQueueTypeId.Rated)
+                    if (!bgQueueTypeId.Rated)
                         return false;
-                    if (bgQueueTypeId.TeamSize != 0)
+                    if (bgQueueTypeId.TeamSize != (int)ArenaTypes.Team3v3)
                         return false;
                     break;
                 default:
@@ -700,19 +651,19 @@ namespace Game.BattleGrounds
             return BattlegroundTypeId.None;
         }
 
-        public List<Battleground> GetBGFreeSlotQueueStore(BattlegroundQueueTypeId bgTypeId)
+        public List<Battleground> GetBGFreeSlotQueueStore(uint mapId)
         {
-            return m_BGFreeSlotQueue[bgTypeId];
+            return m_BGFreeSlotQueue[mapId];
         }
 
-        public void AddToBGFreeSlotQueue(BattlegroundQueueTypeId bgTypeId, Battleground bg)
+        public void AddToBGFreeSlotQueue(Battleground bg)
         {
-            m_BGFreeSlotQueue.Add(bgTypeId, bg);
+            m_BGFreeSlotQueue.Add(bg.GetMapId(), bg);
         }
 
-        public void RemoveFromBGFreeSlotQueue(BattlegroundQueueTypeId bgTypeId, uint instanceId)
+        public void RemoveFromBGFreeSlotQueue(uint mapId, uint instanceId)
         {
-            var queues = m_BGFreeSlotQueue[bgTypeId];
+            var queues = m_BGFreeSlotQueue[mapId];
             foreach (var bg in queues)
             {
                 if (bg.GetInstanceID() == instanceId)
@@ -750,7 +701,7 @@ namespace Game.BattleGrounds
             return mBattleMastersMap.LookupByKey(entry);
         }
 
-        BattlegroundTemplate GetBattlegroundTemplateByTypeId(BattlegroundTypeId id)
+        public BattlegroundTemplate GetBattlegroundTemplateByTypeId(BattlegroundTypeId id)
         {
             return _battlegroundTemplates.LookupByKey(id);
         }
@@ -762,7 +713,7 @@ namespace Game.BattleGrounds
 
         Dictionary<BattlegroundTypeId, BattlegroundData> bgDataStore = new();
         Dictionary<BattlegroundQueueTypeId, BattlegroundQueue> m_BattlegroundQueues = new();
-        MultiMap<BattlegroundQueueTypeId, Battleground> m_BGFreeSlotQueue = new();
+        MultiMap<uint, Battleground> m_BGFreeSlotQueue = new();
         Dictionary<uint, BattlegroundTypeId> mBattleMastersMap = new();
         Dictionary<BattlegroundTypeId, BattlegroundTemplate> _battlegroundTemplates = new();
         Dictionary<uint, BattlegroundTemplate> _battlegroundMapTemplates = new();

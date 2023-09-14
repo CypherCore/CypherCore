@@ -208,10 +208,10 @@ namespace Game.BattleGrounds.Zones
             TriggerGameEvent(EventStartBattle);
         }
 
-        public override void AddPlayer(Player player)
+        public override void AddPlayer(Player player, BattlegroundQueueTypeId queueId)
         {
             bool isInBattleground = IsPlayerInBattleground(player.GetGUID());
-            base.AddPlayer(player);
+            base.AddPlayer(player, queueId);
             if (!isInBattleground)
                 PlayerScores[player.GetGUID()] = new BattlegroundABScore(player.GetGUID(), player.GetBGTeam());
         }

@@ -3,7 +3,8 @@
 
 namespace Game.BattleGrounds.Zones
 {
-    class SilvershardMines
+    class BgSilvershardMines : Battleground
     {
+        public BgSilvershardMines(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate) { }
     }
 }

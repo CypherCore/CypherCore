@@ -6174,7 +6174,7 @@ namespace Game.Entities
             Battleground bg = GetBattleground();
             if (bg != null)
             {
-                if (bg.GetTypeID(true) == BattlegroundTypeId.AV)
+                if (bg.GetTypeID() == BattlegroundTypeId.AV)
                     bones.loot.FillLoot(1, LootStorage.Creature, this, true);
             }
             // For wintergrasp Quests

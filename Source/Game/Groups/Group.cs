@@ -1151,14 +1151,14 @@ namespace Game.Groups
             }
         }
 
-        public GroupJoinBattlegroundResult CanJoinBattlegroundQueue(Battleground bgOrTemplate, BattlegroundQueueTypeId bgQueueTypeId, uint MinPlayerCount, uint MaxPlayerCount, bool isRated, uint arenaSlot, out ObjectGuid errorGuid)
+        public GroupJoinBattlegroundResult CanJoinBattlegroundQueue(BattlegroundTemplate bgOrTemplate, BattlegroundQueueTypeId bgQueueTypeId, uint MinPlayerCount, uint MaxPlayerCount, bool isRated, uint arenaSlot, out ObjectGuid errorGuid)
         {
             errorGuid = new ObjectGuid();
             // check if this group is LFG group
             if (IsLFGGroup())
                 return GroupJoinBattlegroundResult.LfgCantUseBattleground;
 
-            BattlemasterListRecord bgEntry = CliDB.BattlemasterListStorage.LookupByKey(bgOrTemplate.GetTypeID());
+            BattlemasterListRecord bgEntry = CliDB.BattlemasterListStorage.LookupByKey(bgOrTemplate.Id);
             if (bgEntry == null)
                 return GroupJoinBattlegroundResult.BattlegroundJoinFailed;            // shouldn't happen
 
@@ -1174,7 +1174,7 @@ namespace Game.Groups
             if (!reference)
                 return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
 
-            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bgOrTemplate.GetMapId(), reference.GetLevel());
+            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgOrTemplate.BattlemasterEntry.MapId[0], reference.GetLevel());
             if (bracketEntry == null)
                 return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
 
@@ -1212,13 +1212,13 @@ namespace Game.Groups
                 // don't let join if someone from the group is in bg queue random
                 bool isInRandomBgQueue = member.InBattlegroundQueueForBattlegroundQueueType(Global.BattlegroundMgr.BGQueueTypeId((ushort)BattlegroundTypeId.RB, BattlegroundQueueIdType.Battleground, false, 0))
                     || member.InBattlegroundQueueForBattlegroundQueueType(Global.BattlegroundMgr.BGQueueTypeId((ushort)BattlegroundTypeId.RandomEpic, BattlegroundQueueIdType.Battleground, false, 0));
-                if (bgOrTemplate.GetTypeID() != BattlegroundTypeId.AA && isInRandomBgQueue)
+                if (bgOrTemplate.Id != BattlegroundTypeId.AA && isInRandomBgQueue)
                     return GroupJoinBattlegroundResult.InRandomBg;
                 // don't let join to bg queue random if someone from the group is already in bg queue
-                if ((bgOrTemplate.GetTypeID() == BattlegroundTypeId.RB || bgOrTemplate.GetTypeID() == BattlegroundTypeId.RandomEpic) && member.InBattlegroundQueue(true) && !isInRandomBgQueue)
+                if (Global.BattlegroundMgr.IsRandomBattleground(bgOrTemplate.Id) && member.InBattlegroundQueue(true) && !isInRandomBgQueue)
                     return GroupJoinBattlegroundResult.InNonRandomBg;
                 // check for deserter debuff in case not arena queue
-                if (bgOrTemplate.GetTypeID() != BattlegroundTypeId.AA && member.IsDeserter())
+                if (bgOrTemplate.Id != BattlegroundTypeId.AA && member.IsDeserter())
                     return GroupJoinBattlegroundResult.Deserters;
                 // check if member can join any more Battleground queues
                 if (!member.HasFreeBattlegroundQueueId())

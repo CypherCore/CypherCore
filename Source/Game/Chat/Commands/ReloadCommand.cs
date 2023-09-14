@@ -52,7 +52,7 @@ namespace Game.Chat
         [Command("areatrigger_teleport", RBACPermissions.CommandReloadAreatriggerTeleport, true)]
         static bool HandleReloadAreaTriggerTeleportCommand(CommandHandler handler)
         {
-            Log.outInfo(LogFilter.Server, "Re-Loading AreaTrigger teleport definitions...");
+            Log.outInfo(LogFilter.Server, "Re-Loading Area Trigger Teleports definitions...");
             Global.ObjectMgr.LoadAreaTriggerTeleports();
             handler.SendGlobalGMSysMessage("DB table `areatrigger_teleport` reloaded.");
             return true;

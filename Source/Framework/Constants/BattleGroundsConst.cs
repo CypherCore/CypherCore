@@ -278,13 +278,6 @@ namespace Framework.Constants
         WaitLeave = 4                                 // means some faction has won BG and it is ending
     }
 
-    public enum BGHonorMode
-    {
-        Normal = 0,
-        Holiday,
-        HonorModeNum
-    }
-
     public enum GroupJoinBattlegroundResult
     {
         None = 0,

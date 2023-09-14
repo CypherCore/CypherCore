@@ -3,7 +3,8 @@
 
 namespace Game.BattleGrounds.Zones
 {
-    class TempleofKotmogu
+    class BgTempleofKotmogu : Battleground
     {
+        public BgTempleofKotmogu(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate) { }
     }
 }

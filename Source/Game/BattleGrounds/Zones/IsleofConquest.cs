@@ -3,8 +3,9 @@
  
 namespace Game.BattleGrounds.Zones
 {
-    class IsleofConquest
+    class BgIsleofConquest : Battleground
     {
+        public BgIsleofConquest(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate) { }
     }
 
     public struct ICCreatures

@@ -725,7 +725,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading World locations...");
             Global.ObjectMgr.LoadWorldSafeLocs();                            // must be before LoadAreaTriggerTeleports and LoadGraveyardZones
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading AreaTrigger definitions...");
+            Log.outInfo(LogFilter.ServerLoading, "Loading Area Trigger Teleports definitions...");
             Global.ObjectMgr.LoadAreaTriggerTeleports();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Access Requirements...");

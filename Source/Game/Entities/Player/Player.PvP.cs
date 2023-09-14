@@ -418,10 +418,11 @@ namespace Game.Entities
             return GetBattlegroundQueueIndex(bgQueueTypeId) < SharedConst.MaxPlayerBGQueues;
         }
 
-        public void SetBattlegroundId(uint val, BattlegroundTypeId bgTypeId)
+        public void SetBattlegroundId(uint val, BattlegroundTypeId bgTypeId, BattlegroundQueueTypeId queueId = default)
         {
             m_bgData.bgInstanceID = val;
             m_bgData.bgTypeID = bgTypeId;
+            m_bgData.queueId = queueId;
         }
 
         public uint AddBattlegroundQueueId(BattlegroundQueueTypeId val)
@@ -615,12 +616,12 @@ namespace Game.Entities
 
         public bool IsDeserter() { return HasAura(26013); }
         
-        public bool CanJoinToBattleground(Battleground bg)
+        public bool CanJoinToBattleground(BattlegroundTemplate bg)
         {
             RBACPermissions perm = RBACPermissions.JoinNormalBg;
             if (bg.IsArena())
                 perm = RBACPermissions.JoinArenas;
-            else if (bg.IsRandom())
+            else if (Global.BattlegroundMgr.IsRandomBattleground(bg.Id))
                 perm = RBACPermissions.JoinRandomBg;
 
             return GetSession().HasPermission(perm);
@@ -687,8 +688,8 @@ namespace Game.Entities
         public bool GetBGAccessByLevel(BattlegroundTypeId bgTypeId)
         {
             // get a template bg instead of running one
-            Battleground bg = Global.BattlegroundMgr.GetBattlegroundTemplate(bgTypeId);
-            if (!bg)
+            BattlegroundTemplate bg = Global.BattlegroundMgr.GetBattlegroundTemplateByTypeId(bgTypeId);
+            if (bg == null)
                 return false;
 
             // limit check leel to dbc compatible level range

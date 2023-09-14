@@ -314,7 +314,7 @@ namespace Game
                     if (bg)
                     {
                         if (player.IsInvitedForBattlegroundInstance(player.GetBattlegroundId()))
-                            bg.AddPlayer(player);
+                            bg.AddPlayer(player, player.m_bgData.queueId);
                     }
                 }
             }

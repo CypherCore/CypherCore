@@ -3,7 +3,8 @@
 
 namespace Game.BattleGrounds.Zones
 {
-    class TwinPeaks
+    class BgTwinPeaks : Battleground
     {
+        public BgTwinPeaks(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate) { }
     }
 }

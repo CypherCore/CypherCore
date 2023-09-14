@@ -3,8 +3,8 @@
 
 namespace Game.BattleGrounds.Zones
 {
-    class BgDeepwindGorge : Battleground
+    class BgTheRingOfValor : Battleground
     {
-        public BgDeepwindGorge(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate) { }
+        public BgTheRingOfValor(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate) { }
     }
 }

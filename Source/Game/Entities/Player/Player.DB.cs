@@ -1606,14 +1606,15 @@ namespace Game.Entities
                 return;
 
             // Expecting only one row
-            //        0           1     2      3      4      5      6          7          8        9
-            // SELECT instanceId, team, joinX, joinY, joinZ, joinO, joinMapId, taxiStart, taxiEnd, mountSpell FROM character_Battleground_data WHERE guid = ?
+            //         0           1     2      3      4      5      6          7          8        9           10
+            // SELECT instanceId, team, joinX, joinY, joinZ, joinO, joinMapId, taxiStart, taxiEnd, mountSpell, queueTypeId FROM character_Battleground_data WHERE guid = ?
             m_bgData.bgInstanceID = result.Read<uint>(0);
             m_bgData.bgTeam = result.Read<ushort>(1);
             m_bgData.joinPos = new WorldLocation(result.Read<ushort>(6), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
             m_bgData.taxiPath[0] = result.Read<uint>(7);
             m_bgData.taxiPath[1] = result.Read<uint>(8);
             m_bgData.mountSpell = result.Read<uint>(9);
+            m_bgData.queueId = BattlegroundQueueTypeId.FromPacked(result.Read<ulong>(10));
         }
         void _LoadPetStable(uint summonedPetNumber, SQLResult result)
         {
@@ -2776,6 +2777,7 @@ namespace Game.Entities
             stmt.AddValue(8, m_bgData.taxiPath[0]);
             stmt.AddValue(9, m_bgData.taxiPath[1]);
             stmt.AddValue(10, m_bgData.mountSpell);
+            stmt.AddValue(11, m_bgData.queueId.GetPacked());
             trans.Append(stmt);
         }
 
@@ -3031,16 +3033,18 @@ namespace Game.Entities
                 {
                     map = currentBg.GetBgMap();
 
-                    BattlegroundQueueTypeId bgQueueTypeId = currentBg.GetQueueId();
-                    AddBattlegroundQueueId(bgQueueTypeId);
+                    BattlegroundPlayer bgPlayer = currentBg.GetBattlegroundPlayerData(GetGUID());
+                    if (bgPlayer != null)
+                    {
+                        AddBattlegroundQueueId(bgPlayer.queueTypeId);
+                        m_bgData.bgTypeID = (BattlegroundTypeId)bgPlayer.queueTypeId.BattlemasterListId;
 
-                    m_bgData.bgTypeID = currentBg.GetTypeID();
+                        //join player to Battlegroundgroup
+                        currentBg.EventPlayerLoggedIn(this);
 
-                    //join player to Battlegroundgroup
-                    currentBg.EventPlayerLoggedIn(this);
-
-                    SetInviteForBattlegroundQueueType(bgQueueTypeId, currentBg.GetInstanceID());
-                    SetMercenaryForBattlegroundQueueType(bgQueueTypeId, currentBg.IsPlayerMercenaryInBattleground(GetGUID()));
+                        SetInviteForBattlegroundQueueType(bgPlayer.queueTypeId, currentBg.GetInstanceID());
+                        SetMercenaryForBattlegroundQueueType(bgPlayer.queueTypeId, currentBg.IsPlayerMercenaryInBattleground(GetGUID()));
+                    }
                 }
                 // Bg was not found - go to Entry Point
                 else
@@ -3256,7 +3260,7 @@ namespace Game.Entities
                 m_InstanceValid = false;
 
             if (player_at_bg)
-                map.ToBattlegroundMap().GetBG().AddPlayer(this);
+                map.ToBattlegroundMap().GetBG().AddPlayer(this, m_bgData.queueId);
 
             // randomize first save time in range [CONFIG_INTERVAL_SAVE] around [CONFIG_INTERVAL_SAVE]
             // this must help in case next save after mass player load after server startup

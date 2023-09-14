@@ -3,7 +3,8 @@
 
 namespace Game.BattleGrounds.Zones
 {
-    class AlteracValley
+    class BgAlteracValley : Battleground
     {
+        public BgAlteracValley(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate) { }
     }
 }
