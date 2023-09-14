@@ -120,6 +120,18 @@ namespace System.Collections.Generic
                 list.Resize(size);
         }
 
+        public static void RandomShuffle<T>(this IList<T> array, int first, int count)
+        {
+            for (int n = count; n > 1;)
+            {
+                int k = (int)RandomHelper.Rand32(n);
+                --n;
+                T temp = array[n + first];
+                array[n + first] = array[k + first];
+                array[k + first] = temp;
+            }
+        }
+
         public static T SelectRandom<T>(this IEnumerable<T> source)
         {
             return source.SelectRandom(1).Single();

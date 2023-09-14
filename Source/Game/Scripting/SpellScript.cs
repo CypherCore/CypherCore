@@ -216,7 +216,7 @@ namespace Game.Scripting
                 _callImpl(victim, ref damageOrHealing, ref flatMod, ref pctMod);
             }
         }
-        
+
         public class OnCalculateResistAbsorbHandler
         {
             SpellOnResistAbsorbCalculateFnType _callImpl;
@@ -1025,63 +1025,65 @@ namespace Game.Scripting
             m_spell.m_customError = result;
         }
 
-        public void SelectRandomInjuredTargets(List<WorldObject> targets, uint maxTargets, bool prioritizePlayers)
+        public void SelectRandomInjuredTargets(List<WorldObject> targets, uint maxTargets, bool prioritizePlayers, Unit prioritizeGroupMembersOf = null)
         {
             if (targets.Count <= maxTargets)
                 return;
 
-            //List of all player targets.
-            var tempPlayers = targets.Where(p => p.IsPlayer()).ToList();
+            // Target priority states (bit indices)
+            // higher value means lower selection priority
+            // current list:
+            // * injured player group members
+            // * injured other players
+            // * injured pets of group members
+            // * injured other pets
+            // * full health player group members
+            // * full health other players
+            // * full health pets of group members
+            // * full health other pets
+            int NOT_GROUPED = 0;
+            int NOT_PLAYER = 1;
+            int NOT_INJURED = 2;
+            int END = 3;
 
-            //List of all injured non player targets.
-            var tempInjuredUnits = targets.Where(target => target.IsUnit() && !target.ToUnit().IsFullHealth()).ToList();
+            int[] countsByPriority = new int[1 << END];
 
-            //List of all none injured non player targets.
-            var tempNoneInjuredUnits = targets.Where(target => target.IsUnit() && target.ToUnit().IsFullHealth()).ToList();
+            // categorize each target
+            var tempTargets = targets.Select<WorldObject, (WorldObject, int)>(target =>
+            {
+                int negativePoints = 0;
+                if (prioritizeGroupMembersOf && (!target.IsUnit() || target.ToUnit().IsInRaidWith(prioritizeGroupMembersOf)))
+                    negativePoints |= 1 << NOT_GROUPED;
+
+                if (prioritizePlayers && !target.IsPlayer() && (!target.IsCreature() || !target.ToCreature().HasFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells)))
+                    negativePoints |= 1 << NOT_PLAYER;
+
+                if (!target.IsUnit() || target.ToUnit().IsFullHealth())
+                    negativePoints |= 1 << NOT_INJURED;
+
+                ++countsByPriority[negativePoints];
+                return (target, negativePoints);
+            }).ToList();
+
+            tempTargets.OrderBy(pair => pair.Item2);
+
+            int foundTargets = 0;
+            foreach (int countForPriority in countsByPriority)
+            {
+                if (foundTargets + countForPriority >= maxTargets)
+                {
+                    // shuffle only the lower priority extras
+                    // example: our initial target list had 5 injured and 5 full health units and we want to select 7 targets
+                    //          we always want to select 5 injured and 2 random full health ones
+                    tempTargets.RandomShuffle(foundTargets, foundTargets + countForPriority);
+                    break;
+                }
+
+                foundTargets += countForPriority;
+            }
 
             targets.Clear();
-            if (prioritizePlayers)
-            {
-                if (tempPlayers.Count < maxTargets)
-                {
-                    // not enough players, add nonplayer targets
-                    // prioritize injured nonplayers over full health nonplayers
-
-                    if (tempPlayers.Count + tempInjuredUnits.Count < maxTargets)
-                    {
-                        // not enough players + injured nonplayers
-                        // fill remainder with random full health nonplayers
-                        targets.AddRange(tempPlayers);
-                        targets.AddRange(tempInjuredUnits);
-                        targets.AddRange(tempNoneInjuredUnits.Shuffle());
-                    }
-                    else if (tempPlayers.Count + tempInjuredUnits.Count > maxTargets)
-                    {
-                        // randomize injured nonplayers order
-                        // final list will contain all players + random injured nonplayers
-                        targets.AddRange(tempPlayers);
-                        targets.AddRange(tempInjuredUnits.Shuffle());
-                    }
-
-                    targets.Resize(maxTargets);
-                    return;
-                }
-            }
-
-            var lookupPlayers = tempPlayers.ToLookup(target => !target.ToUnit().IsFullHealth());
-            if (lookupPlayers[true].Count() < maxTargets)
-            {
-                // not enough injured units
-                // fill remainder with full health units
-                targets.AddRange(lookupPlayers[true]);
-                targets.AddRange(lookupPlayers[false].Shuffle());
-            }
-            else if (lookupPlayers[true].Count() > maxTargets)
-            {
-                // select random injured units
-                targets.AddRange(lookupPlayers[true].Shuffle());
-            }
-
+            targets.AddRange(tempTargets.Select(pair => pair.Item1));
             targets.Resize(maxTargets);
         }
     }
