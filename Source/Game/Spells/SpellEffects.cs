@@ -1569,7 +1569,11 @@ namespace Game.Spells
                         {
                             float radius = effectInfo.CalcRadius();
 
-                            TempSummonType summonType = (duration == TimeSpan.Zero) ? TempSummonType.DeadDespawn : TempSummonType.TimedDespawn;
+                            TempSummonType summonType = TempSummonType.TimedDespawn;
+                            if (duration == TimeSpan.Zero)
+                                    summonType = TempSummonType.DeadDespawn;
+                            else if (duration == TimeSpan.FromMilliseconds(-1))
+                                    summonType = TempSummonType.ManualDespawn;
 
                             for (uint count = 0; count < numSummons; ++count)
                             {
