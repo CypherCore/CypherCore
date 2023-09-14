@@ -2364,6 +2364,13 @@ namespace Game.Entities
                     if (!user.IsPlayer())
                         return;
 
+                    GameObjectType.NewFlag newFlag = (GameObjectType.NewFlag)m_goTypeImpl;
+                    if (newFlag == null)
+                        return;
+
+                    if (newFlag.GetState() != FlagState.InBase)
+                        return;
+
                     spellId = info.NewFlag.pickupSpell;
                     spellCaster = null;
                     break;
@@ -2382,6 +2389,13 @@ namespace Game.Entities
                     {
                         if (owner.GetGoType() == GameObjectTypes.NewFlag)
                         {
+                            GameObjectType.NewFlag newFlag = (GameObjectType.NewFlag)m_goTypeImpl;
+                            if (newFlag == null)
+                                return;
+
+                            if (newFlag.GetState() != FlagState.Dropped)
+                                return;
+
                             // friendly with enemy flag means you're taking it
                             bool defenderInteract = !owner.IsFriendlyTo(user);
                             if (defenderInteract && owner.GetGoInfo().NewFlag.ReturnonDefenderInteract != 0)
@@ -4373,6 +4387,8 @@ namespace Game.Entities
             {
                 return _state != FlagState.InBase;
             }
+
+            public FlagState GetState() { return _state; }
         }
 
         class SetNewFlagState : GameObjectTypeBase.CustomCommand
