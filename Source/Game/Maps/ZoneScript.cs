@@ -26,6 +26,9 @@ namespace Game.Maps
         public virtual void OnGameObjectCreate(GameObject go) { }
         public virtual void OnGameObjectRemove(GameObject go) { }
 
+        public virtual void OnAreaTriggerCreate(AreaTrigger areaTrigger) { }
+        public virtual void OnAreaTriggerRemove(AreaTrigger areaTrigger) { }
+
         public virtual void OnUnitDeath(Unit unit) { }
 
         //All-purpose data storage 64 bit

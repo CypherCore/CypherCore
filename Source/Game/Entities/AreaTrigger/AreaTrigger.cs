@@ -38,6 +38,9 @@ namespace Game.Entities
             // Register the AreaTrigger for guid lookup and for caster
             if (!IsInWorld)
             {
+                if (m_zoneScript != null)
+                    m_zoneScript.OnAreaTriggerCreate(this);
+
                 GetMap().GetObjectsStore().Add(GetGUID(), this);
                 if (_spawnId != 0)
                     GetMap().GetAreaTriggerBySpawnIdStore().Add(_spawnId, this);
@@ -51,6 +54,9 @@ namespace Game.Entities
             // Remove the AreaTrigger from the accessor and from all lists of objects in world
             if (IsInWorld)
             {
+                if (m_zoneScript != null)
+                    m_zoneScript.OnAreaTriggerRemove(this);
+
                 _isRemoved = true;
 
                 Unit caster = GetCaster();
@@ -89,6 +95,8 @@ namespace Game.Entities
                 Log.outError(LogFilter.AreaTrigger, $"AreaTrigger (areaTriggerCreatePropertiesId {areaTriggerCreatePropertiesId}) not created. Invalid areatrigger create properties id ({areaTriggerCreatePropertiesId})");
                 return false;
             }
+
+            SetZoneScript();
 
             _areaTriggerTemplate = _areaTriggerCreateProperties.Template;
 
@@ -228,6 +236,8 @@ namespace Game.Entities
                 Log.outError(LogFilter.AreaTrigger, $"AreaTriggerServer (id {areaTriggerTemplate.Id}) not created. Invalid coordinates (X: {GetPositionX()} Y: {GetPositionY()})");
                 return false;
             }
+
+            SetZoneScript();
 
             _areaTriggerTemplate = areaTriggerTemplate;
 
