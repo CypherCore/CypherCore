@@ -123,17 +123,11 @@ namespace Game.Entities
                 APbonus += GetTotalAttackPowerValue(attType);
                 DoneTotal += (int)(stack * ApCoeffMod * APbonus);
             }
-            else
-            {
-                // No bonus damage for SPELL_DAMAGE_CLASS_NONE class spells by default
-                if (spellProto.DmgClass == SpellDmgClass.None)
-                    return (int)Math.Max(pdamage * DoneTotalMod, 0.0f);
-            }
 
             // Default calculation
-            float coeff = spellEffectInfo.BonusCoefficient;
             if (DoneAdvertisedBenefit != 0)
             {
+                float coeff = spellEffectInfo.BonusCoefficient;
                 Player modOwner1 = GetSpellModOwner();
                 if (modOwner1)
                 {
@@ -448,7 +442,6 @@ namespace Game.Entities
                 DoneAdvertisedBenefit += (uint)((Guardian)this).GetBonusDamage();
 
             // Check for table values
-            float coeff = spellEffectInfo.BonusCoefficient;
             if (spellEffectInfo.BonusCoefficientFromAP > 0.0f)
             {
                 WeaponAttackType attType = (spellProto.IsRangedWeaponSpell() && spellProto.DmgClass != SpellDmgClass.Melee) ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack;
@@ -457,16 +450,11 @@ namespace Game.Entities
 
                 DoneTotal += (int)(spellEffectInfo.BonusCoefficientFromAP * stack * APbonus);
             }
-            else if (coeff <= 0.0f) // no AP and no SP coefs, skip
-            {
-                // No bonus healing for SPELL_DAMAGE_CLASS_NONE class spells by default
-                if (spellProto.DmgClass == SpellDmgClass.None)
-                    return (int)Math.Max(healamount * DoneTotalMod, 0.0f);
-            }
 
             // Default calculation
             if (DoneAdvertisedBenefit != 0)
             {
+                float coeff = spellEffectInfo.BonusCoefficient;
                 Player modOwner = GetSpellModOwner();
                 if (modOwner)
                 {
@@ -529,6 +517,9 @@ namespace Game.Entities
             if (spellProto.SpellFamilyName == SpellFamilyNames.Potion)
                 return 1.0f;
 
+            float DoneTotalMod = 1.0f;
+
+            // Healing done percent
             Player thisPlayer = ToPlayer();
             if (thisPlayer != null)
             {
@@ -537,19 +528,16 @@ namespace Game.Entities
                     if (((int)spellProto.GetSchoolMask() & (1 << i)) != 0)
                         maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, thisPlayer.m_activePlayerData.ModHealingDonePercent[i]);
 
-                return maxModDamagePercentSchool;
+                DoneTotalMod *= maxModDamagePercentSchool;
             }
-
-            float DoneTotalMod = 1.0f;
+            else // SPELL_AURA_MOD_HEALING_DONE_PERCENT is included in m_activePlayerData->ModHealingDonePercent for players
+                DoneTotalMod *= GetTotalAuraMultiplier(AuraType.ModHealingDonePercent);
 
             // bonus against aurastate
             DoneTotalMod *= GetTotalAuraMultiplier(AuraType.ModDamageDoneVersusAurastate, aurEff =>
             {
                 return victim.HasAuraState((AuraStateType)aurEff.GetMiscValue());
             });
-
-            // Healing done percent
-            DoneTotalMod *= GetTotalAuraMultiplier(AuraType.ModHealingDonePercent);
 
             // bonus from missing health of target
             float healthPctDiff = 100.0f - victim.GetHealthPct();
