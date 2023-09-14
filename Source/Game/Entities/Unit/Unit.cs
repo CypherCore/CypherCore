@@ -2752,24 +2752,23 @@ namespace Game.Entities
                         if (damageTaken >= victim.CountPctFromMaxHealth(100 + absorbAurEff.GetMiscValueB()))
                             continue;
 
-                        // get amount which can be still absorbed by the aura
-                        int currentAbsorb = absorbAurEff.GetAmount();
-                        // aura with infinite absorb amount - let the scripts handle absorbtion amount, set here to 0 for safety
-                        if (currentAbsorb < 0)
-                            currentAbsorb = 0;
-
-                        uint tempAbsorb = (uint)currentAbsorb;
+                        // absorb all damage by default
+                        uint currentAbsorb = damageInfo.GetDamage();
 
                         // This aura type is used both by Spirit of Redemption (death not really prevented, must grant all credit immediately) and Cheat Death (death prevented)
                         // repurpose PreventDefaultAction for this
                         bool deathFullyPrevented = false;
 
-                        absorbAurEff.GetBase().CallScriptEffectAbsorbHandlers(absorbAurEff, aurApp, damageInfo, ref tempAbsorb, ref deathFullyPrevented);
-                        currentAbsorb = (int)tempAbsorb;
+                        absorbAurEff.GetBase().CallScriptEffectAbsorbHandlers(absorbAurEff, aurApp, damageInfo, ref currentAbsorb, ref deathFullyPrevented);
 
                         // absorb must be smaller than the damage itself
-                        currentAbsorb = MathFunctions.RoundToInterval(ref currentAbsorb, 0, (int)damageInfo.GetDamage());
-                        damageInfo.AbsorbDamage((uint)currentAbsorb);
+                        currentAbsorb = Math.Min(currentAbsorb, damageInfo.GetDamage());
+
+                        // if nothing is absorbed (for example because of a scripted cooldown) then skip this aura and proceed with dying
+                        if (currentAbsorb == 0)
+                            continue;
+
+                        damageInfo.AbsorbDamage(currentAbsorb);
 
                         if (deathFullyPrevented)
                             killed = false;
@@ -2784,7 +2783,7 @@ namespace Game.Entities
                             absorbLog.Caster = baseAura.GetCasterGUID();
                             absorbLog.AbsorbedSpellID = spellProto != null ? spellProto.Id : 0;
                             absorbLog.AbsorbSpellID = baseAura.GetId();
-                            absorbLog.Absorbed = currentAbsorb;
+                            absorbLog.Absorbed = (int)currentAbsorb;
                             absorbLog.OriginalDamage = damageInfo.GetOriginalDamage();
                             absorbLog.LogData.Initialize(victim);
                             victim.SendCombatLogMessage(absorbLog);

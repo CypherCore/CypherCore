@@ -1573,8 +1573,6 @@ namespace Scripts.Spells.Priest
             Unit target = GetTarget();
             target.CastSpell(target, SpellIds.SpiritOfRedemption, new CastSpellExtraArgs(aurEff));
             target.SetFullHealth();
-
-            absorbAmount = dmgInfo.GetDamage();
         }
 
         public override void Register()
