@@ -1761,6 +1761,7 @@ namespace Game
 
             AtLoginFlags atLoginFlags = (AtLoginFlags)result.Read<ushort>(0);
             string knownTitlesStr = result.Read<string>(1);
+            uint groupId = !result.IsNull(2) ? result.Read<uint>(2) : 0;
 
             AtLoginFlags usedLoginFlag = (factionChangeInfo.FactionChange ? AtLoginFlags.ChangeFaction : AtLoginFlags.ChangeRace);
             if (!atLoginFlags.HasAnyFlag(usedLoginFlag))
@@ -1987,6 +1988,13 @@ namespace Game
                             guild.DeleteMember(trans, factionChangeInfo.Guid, false, false, true);
 
                         Player.LeaveAllArenaTeams(factionChangeInfo.Guid);
+                    }
+
+                    if (groupId != 0 && !WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGroup))
+                    {
+                        Group group = Global.GroupMgr.GetGroupByDbStoreId(groupId);
+                        if (group != null)
+                            group.RemoveMember(factionChangeInfo.Guid);
                     }
 
                     if (!HasPermission(RBACPermissions.TwoSideAddFriend))
