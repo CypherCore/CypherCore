@@ -3579,6 +3579,42 @@ namespace Game.Entities
                 || m_goValue.CapturePoint.State == BattlegroundCapturePointState.HordeCaptured;
         }
 
+        FlagState GetFlagState()
+        {
+            if (GetGoType() != GameObjectTypes.NewFlag)
+                return 0;
+
+            GameObjectType.NewFlag newFlag = m_goTypeImpl as GameObjectType.NewFlag;
+            if (newFlag == null)
+                return 0;
+
+            return newFlag.GetState();
+        }
+
+        ObjectGuid GetFlagCarrierGUID()
+        {
+            if (GetGoType() != GameObjectTypes.NewFlag)
+                return ObjectGuid.Empty;
+
+            GameObjectType.NewFlag newFlag = m_goTypeImpl as GameObjectType.NewFlag;
+            if (newFlag == null)
+                return ObjectGuid.Empty;
+
+            return newFlag.GetCarrierGUID();
+        }
+
+        long GetFlagTakenFromBaseTime()
+        {
+            if (GetGoType() != GameObjectTypes.NewFlag)
+                return 0;
+
+            GameObjectType.NewFlag newFlag = m_goTypeImpl as GameObjectType.NewFlag;
+            if (newFlag == null)
+                return 0;
+
+            return newFlag.GetTakenFromBaseTime();
+        }
+
         public bool MeetsInteractCondition(Player user)
         {
             if (m_goInfo.GetConditionID1() == 0)
@@ -4355,6 +4391,8 @@ namespace Game.Entities
         {
             FlagState _state;
             long _respawnTime;
+            ObjectGuid _carrierGUID;
+            long _takenFromBaseTime;
 
             public NewFlag(GameObject owner) : base(owner)
             {
@@ -4365,16 +4403,27 @@ namespace Game.Entities
             {
                 FlagState oldState = _state;
                 _state = newState;
-                _owner.UpdateObjectVisibility();
 
-                ZoneScript zoneScript = _owner.GetZoneScript();
-                if (zoneScript != null)
-                    zoneScript.OnFlagStateChange(_owner, oldState, _state, player);
+                if (player && newState == FlagState.Taken)
+                    _carrierGUID = player.GetGUID();
+                else
+                    _carrierGUID = ObjectGuid.Empty;
+
+                if (newState == FlagState.Taken && oldState == FlagState.InBase)
+                    _takenFromBaseTime = GameTime.GetGameTime();
+                else if (newState == FlagState.InBase || newState == FlagState.Respawning)
+                    _takenFromBaseTime = 0;
+
+                _owner.UpdateObjectVisibility();
 
                 if (newState == FlagState.Respawning)
                     _respawnTime = GameTime.GetGameTimeMS() + _owner.GetGoInfo().NewFlag.RespawnTime;
                 else
                     _respawnTime = 0;
+
+                ZoneScript zoneScript = _owner.GetZoneScript();
+                if (zoneScript != null)
+                    zoneScript.OnFlagStateChange(_owner, oldState, _state, player);
             }
 
             public override void Update(uint diff)
@@ -4389,6 +4438,8 @@ namespace Game.Entities
             }
 
             public FlagState GetState() { return _state; }
+            public ObjectGuid GetCarrierGUID() { return _carrierGUID; }
+            public long GetTakenFromBaseTime() { return _takenFromBaseTime; }
         }
 
         class SetNewFlagState : GameObjectTypeBase.CustomCommand
