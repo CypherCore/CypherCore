@@ -1238,6 +1238,23 @@ namespace Game.Chat
                 return true;
             }
 
+            [Command("objectsound", RBACPermissions.CommandDebug)]
+            static bool HandleDebugPlayObjectSoundCommand(CommandHandler handler, uint soundKitId, int? broadcastTextId)
+            {
+                if (!CliDB.SoundKitStorage.ContainsKey(soundKitId))
+                {
+                    handler.SendSysMessage(CypherStrings.SoundNotExist, soundKitId);
+                    return false;
+                }
+
+                Player player = handler.GetPlayer();
+
+                player.PlayObjectSound(soundKitId, player.GetGUID(), player, broadcastTextId.GetValueOrDefault(0));
+
+                handler.SendSysMessage(CypherStrings.YouHearSound, soundKitId);
+                return true;
+            }
+
             [Command("sound", RBACPermissions.CommandDebug)]
             static bool HandleDebugPlaySoundCommand(CommandHandler handler, uint soundId, uint broadcastTextId)
             {

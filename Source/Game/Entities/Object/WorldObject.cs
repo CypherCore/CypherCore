@@ -2960,7 +2960,7 @@ namespace Game.Entities
                 SendMessageToSet(new PlayMusic(musicId), true);
         }
 
-        void PlayObjectSound(uint soundKitId, ObjectGuid targetObjectGUID, Player target = null, int broadcastTextId = 0)
+        public void PlayObjectSound(uint soundKitId, ObjectGuid targetObjectGUID, Player target = null, int broadcastTextId = 0)
         {
             PlayObjectSound pkt = new();
             pkt.TargetObjectGUID = targetObjectGUID;
