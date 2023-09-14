@@ -376,23 +376,28 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.QuestGiverRequestReward, Processing = PacketProcessing.Inplace)]
         void HandleQuestgiverRequestReward(QuestGiverRequestReward packet)
         {
-            WorldObject obj = Global.ObjAccessor.GetObjectByTypeMask(GetPlayer(), packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject);
-            if (obj == null || !obj.HasInvolvedQuest(packet.QuestID))
+            Quest quest = Global.ObjectMgr.GetQuestTemplate(packet.QuestID);
+            if (quest == null)
                 return;
 
-            // some kind of WPE protection
-            if (!GetPlayer().CanInteractWithQuestGiver(obj))
-                return;
+            if (!quest.HasFlag(QuestFlags.AutoComplete))
+            {
+                WorldObject obj = Global.ObjAccessor.GetObjectByTypeMask(_player, packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject);
+                if (obj == null || !obj.HasInvolvedQuest(packet.QuestID))
+                    return;
+
+                // some kind of WPE protection
+                if (!_player.CanInteractWithQuestGiver(obj))
+                    return;
+            }
 
             if (GetPlayer().CanCompleteQuest(packet.QuestID))
                 GetPlayer().CompleteQuest(packet.QuestID);
 
             if (GetPlayer().GetQuestStatus(packet.QuestID) != QuestStatus.Complete)
                 return;
-
-            Quest quest = Global.ObjectMgr.GetQuestTemplate(packet.QuestID);
-            if (quest != null)
-                GetPlayer().PlayerTalkClass.SendQuestGiverOfferReward(quest, packet.QuestGiverGUID, true);
+            
+            GetPlayer().PlayerTalkClass.SendQuestGiverOfferReward(quest, packet.QuestGiverGUID, true);
         }
 
         [WorldPacketHandler(ClientOpcodes.QuestLogRemoveQuest, Processing = PacketProcessing.Inplace)]
