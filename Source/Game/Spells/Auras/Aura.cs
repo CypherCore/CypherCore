@@ -902,7 +902,7 @@ namespace Game.Spells
 
         public bool IsUsingStacks()
         {
-            return m_spellInfo.StackAmount > 0;
+            return m_spellInfo.StackAmount > 0 || m_stackAmount > 1;
         }
 
         public uint CalcMaxStackAmount()
