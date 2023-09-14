@@ -2393,6 +2393,38 @@ namespace Game.Spells
             }
         }
 
+        void _LoadSqrtTargetLimit(int maxTargets, int numNonDiminishedTargets, uint? maxTargetsEffectValueHolder, uint? numNonDiminishedTargetsEffectValueHolder)
+        {
+            SqrtDamageAndHealingDiminishing.MaxTargets = maxTargets;
+            SqrtDamageAndHealingDiminishing.NumNonDiminishedTargets = numNonDiminishedTargets;
+
+            if (maxTargetsEffectValueHolder.HasValue)
+            {
+                if (maxTargetsEffectValueHolder < GetEffects().Count)
+                {
+                    SpellEffectInfo valueHolder = GetEffect(maxTargetsEffectValueHolder.Value);
+                    int expectedValue = valueHolder.CalcBaseValue(null, null, 0, -1);
+                    if (maxTargets != expectedValue)
+                        Log.outError(LogFilter.Spells, $"SpellInfo::_LoadSqrtTargetLimit(maxTargets): Spell {Id} has different value in effect {maxTargetsEffectValueHolder.Value} than expected, recheck target caps (expected {maxTargets}, got {expectedValue})");
+                }
+                else
+                    Log.outError(LogFilter.Spells, $"SpellInfo::_LoadSqrtTargetLimit(maxTargets): Spell {Id} does not have effect {maxTargetsEffectValueHolder.Value}");
+            }
+
+            if (numNonDiminishedTargetsEffectValueHolder.HasValue)
+            {
+                if (numNonDiminishedTargetsEffectValueHolder < GetEffects().Count)
+                {
+                    SpellEffectInfo valueHolder = GetEffect(numNonDiminishedTargetsEffectValueHolder.Value);
+                    int expectedValue = valueHolder.CalcBaseValue(null, null, 0, -1);
+                    if (numNonDiminishedTargets != expectedValue)
+                        Log.outError(LogFilter.Spells, $"SpellInfo::_LoadSqrtTargetLimit(numNonDiminishedTargets): Spell {Id} has different value in effect {numNonDiminishedTargetsEffectValueHolder.Value} than expected, recheck target caps (expected {numNonDiminishedTargets}, got {expectedValue})");
+                }
+                else
+                    Log.outError(LogFilter.Spells, $"SpellInfo::_LoadSqrtTargetLimit(numNonDiminishedTargets): Spell {Id} does not have effect {numNonDiminishedTargetsEffectValueHolder.Value}");
+            }
+        }
+
         public void ApplyAllSpellImmunitiesTo(Unit target, SpellEffectInfo spellEffectInfo, bool apply)
         {
             ImmunityInfo immuneInfo = spellEffectInfo.GetImmunityInfo();
@@ -2646,7 +2678,7 @@ namespace Game.Spells
 
             return mechanicImmunityMask;
         }
-        
+
         public float GetMinRange(bool positive = false)
         {
             if (RangeEntry == null)
@@ -3001,7 +3033,7 @@ namespace Game.Spells
                         return itr;
 
                     costs.Add(new SpellPowerCost() { Power = powerType, Amount = 0 });
-                return costs.Last();
+                    return costs.Last();
                 }
 
                 foreach (SpellPowerRecord power in PowerCosts)
@@ -3329,7 +3361,7 @@ namespace Game.Spells
 
         bool _isPositiveEffectImpl(SpellInfo spellInfo, SpellEffectInfo effect, List<Tuple<SpellInfo, uint>> visited)
         {
-            if ( !effect.IsEffect())
+            if (!effect.IsEffect())
                 return true;
 
             // attribute may be already set in DB
@@ -3619,7 +3651,7 @@ namespace Game.Spells
                                 if (_isPositiveTarget(spellTriggeredEffect) && !_isPositiveEffectImpl(spellTriggeredProto, spellTriggeredEffect, visited))
                                     return false;
                             }
-                        }                        
+                        }
                         break;
                     case AuraType.PeriodicTriggerSpell:
                     case AuraType.ModStun:
@@ -3972,8 +4004,8 @@ namespace Game.Spells
         public uint ExcludeCasterAuraSpell { get; set; }
         public uint ExcludeTargetAuraSpell { get; set; }
         public AuraType CasterAuraType { get; set; }
-        public AuraType TargetAuraType  { get; set; }
-        public AuraType ExcludeCasterAuraType  { get; set; }
+        public AuraType TargetAuraType { get; set; }
+        public AuraType ExcludeCasterAuraType { get; set; }
         public AuraType ExcludeTargetAuraType { get; set; }
         public SpellCastTimesRecord CastTimeEntry { get; set; }
         public uint RecoveryTime { get; set; }
@@ -4032,6 +4064,8 @@ namespace Game.Spells
         public uint ExplicitTargetMask { get; set; }
         public SpellChainNode ChainEntry { get; set; }
 
+        public SqrtDamageAndHealingDiminishingStruct SqrtDamageAndHealingDiminishing;
+
         List<SpellEffectInfo> _effects = new();
         List<SpellXSpellVisualRecord> _visuals = new();
         SpellSpecificType _spellSpecific;
@@ -4047,6 +4081,12 @@ namespace Game.Spells
             public uint MaxScalingLevel;
             public uint ScalesFromItemLevel;
         }
+
+        public struct SqrtDamageAndHealingDiminishingStruct
+        {
+            public int MaxTargets;               // The amount of targets after the damage decreases by the Square Root AOE formula
+            public int NumNonDiminishedTargets;  // The amount of targets that still take the full amount before the damage decreases by the Square Root AOE formula
+        }        
     }
 
     public class SpellEffectInfo

@@ -255,11 +255,16 @@ namespace Game.Spells
             }
 
             SpellCastTargets targets = new();
+            int? targetCount = null;
+            int? targetIndex = null;
             if (effectHandleMode == SpellEffectHandleMode.LaunchTarget)
             {
                 if (!spellInfo.NeedsToBeTriggeredByCaster(m_spellInfo))
                     return;
+
                 targets.SetUnitTarget(unitTarget);
+                targetCount = (int)GetUnitTargetCountForEffect(effectInfo.EffectIndex);
+                targetIndex = GetUnitTargetIndexForEffect(unitTarget.GetGUID(), effectInfo.EffectIndex);
             }
             else //if (effectHandleMode == SpellEffectHandleMode.Launch)
             {
@@ -320,6 +325,12 @@ namespace Game.Spells
                     for (int i = 0; i < SpellConst.MaxEffects; ++i)
                         args.AddSpellMod(SpellValueMod.BasePoint0 + i, value);
 
+                if (targetCount.HasValue)
+                    args.AddSpellMod(SpellValueMod.ParentSpellTargetCount, targetCount.Value);
+
+                if (targetIndex.HasValue)
+                    args.AddSpellMod(SpellValueMod.ParentSpellTargetIndex, targetIndex.Value);
+
                 caster.CastSpell(targets, triggerSpell, args);
             }, delay);
         }
@@ -348,11 +359,16 @@ namespace Game.Spells
             }
 
             SpellCastTargets targets = new();
+            int? targetCount = null;
+            int? targetIndex = null;
             if (effectHandleMode == SpellEffectHandleMode.HitTarget)
             {
                 if (!spellInfo.NeedsToBeTriggeredByCaster(m_spellInfo))
                     return;
+
                 targets.SetUnitTarget(unitTarget);
+                targetCount = (int)GetUnitTargetCountForEffect(effectInfo.EffectIndex);
+                targetIndex = GetUnitTargetIndexForEffect(unitTarget.GetGUID(), effectInfo.EffectIndex);
             }
             else //if (effectHandleMode == SpellEffectHandleMode.Hit)
             {
@@ -380,6 +396,12 @@ namespace Game.Spells
             if (effectInfo.Effect == SpellEffectName.TriggerMissileSpellWithValue)
                 for (int i = 0; i < SpellConst.MaxEffects; ++i)
                     args.AddSpellMod(SpellValueMod.BasePoint0 + i, damage);
+
+            if (targetCount.HasValue)
+                args.AddSpellMod(SpellValueMod.ParentSpellTargetCount, targetCount.Value);
+
+            if (targetIndex.HasValue)
+                args.AddSpellMod(SpellValueMod.ParentSpellTargetIndex, targetIndex.Value);
 
             // original caster guid only for GO cast
             m_caster.CastSpell(targets, spellInfo.Id, args);

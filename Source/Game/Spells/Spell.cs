@@ -2108,6 +2108,23 @@ namespace Game.Spells
             m_destTargets[effIndex] = dest;
         }
 
+        int GetUnitTargetIndexForEffect(ObjectGuid target, uint effect)
+        {
+            int index = 0;
+            foreach (TargetInfo uniqueTargetInfo in m_UniqueTargetInfo)
+            {
+                if (uniqueTargetInfo.MissCondition == SpellMissInfo.None && (uniqueTargetInfo.EffectMask & (1 << (int)effect)) != 0)
+                {
+                    if (uniqueTargetInfo.TargetGUID == target)
+                        break;
+
+                    ++index;
+                }
+            }
+
+            return index;
+        }
+
         public long GetUnitTargetCountForEffect(uint effect)
         {
             return m_UniqueTargetInfo.Count(targetInfo => targetInfo.MissCondition == SpellMissInfo.None && (targetInfo.EffectMask & (1 << (int)effect)) != 0);
@@ -7277,16 +7294,42 @@ namespace Game.Spells
 
             if (m_originalCaster != null && m_damage > 0)
             {
-                if (spellEffectInfo.IsTargetingArea() || spellEffectInfo.IsAreaAuraEffect() || spellEffectInfo.IsEffect(SpellEffectName.PersistentAreaAura) || m_spellInfo.HasAttribute(SpellAttr5.TreatAsAreaEffect))
+                bool isAoeTarget = spellEffectInfo.IsTargetingArea() || spellEffectInfo.IsAreaAuraEffect() || spellEffectInfo.IsEffect(SpellEffectName.PersistentAreaAura);
+                if (isAoeTarget || m_spellInfo.HasAttribute(SpellAttr5.TreatAsAreaEffect))
                 {
                     m_damage = unit.CalculateAOEAvoidance(m_damage, (uint)m_spellInfo.SchoolMask, m_originalCaster.GetGUID());
 
                     if (m_originalCaster.IsPlayer())
                     {
-                        // cap damage of player AOE
-                        long targetAmount = GetUnitTargetCountForEffect(spellEffectInfo.EffectIndex);
-                        if (targetAmount > 20)
-                            m_damage = (int)(m_damage * 20 / targetAmount);
+                        long targetCount = !isAoeTarget && m_spellValue.ParentSpellTargetCount.HasValue ? m_spellValue.ParentSpellTargetCount.Value : GetUnitTargetCountForEffect(spellEffectInfo.EffectIndex);
+                        int targetIndex = !isAoeTarget && m_spellValue.ParentSpellTargetIndex.HasValue ? m_spellValue.ParentSpellTargetIndex.Value : GetUnitTargetIndexForEffect(targetInfo.TargetGUID, spellEffectInfo.EffectIndex);
+
+                        // sqrt target cap damage calculation
+                        if (m_spellInfo.SqrtDamageAndHealingDiminishing.MaxTargets != 0
+                            && targetCount > m_spellInfo.SqrtDamageAndHealingDiminishing.MaxTargets
+                            && targetIndex >= m_spellInfo.SqrtDamageAndHealingDiminishing.NumNonDiminishedTargets)
+                            m_damage = (int)(m_damage * Math.Sqrt((float)m_spellInfo.SqrtDamageAndHealingDiminishing.MaxTargets / Math.Min(SpellConst.AoeDamageTargetCap, targetCount)));
+                        if (targetCount > SpellConst.AoeDamageTargetCap)
+                            m_damage = (int)(m_damage * SpellConst.AoeDamageTargetCap / targetCount);
+                    }
+                }
+            }
+
+            if (m_originalCaster && m_healing > 0)
+            {
+                bool isAoeTarget = spellEffectInfo.IsTargetingArea() || spellEffectInfo.IsAreaAuraEffect() || spellEffectInfo.IsEffect(SpellEffectName.PersistentAreaAura);
+                if (isAoeTarget || m_spellInfo.HasAttribute(SpellAttr5.TreatAsAreaEffect))
+                {
+                    if (m_originalCaster.IsPlayer())
+                    {
+                        long targetCount = !isAoeTarget && m_spellValue.ParentSpellTargetCount.HasValue ? m_spellValue.ParentSpellTargetCount.Value : GetUnitTargetCountForEffect(spellEffectInfo.EffectIndex);
+                        int targetIndex = !isAoeTarget && m_spellValue.ParentSpellTargetIndex.HasValue ? m_spellValue.ParentSpellTargetIndex.Value : GetUnitTargetIndexForEffect(targetInfo.TargetGUID, spellEffectInfo.EffectIndex);
+
+                        // sqrt target cap healing calculation
+                        if (m_spellInfo.SqrtDamageAndHealingDiminishing.MaxTargets != 0
+                            && targetCount > m_spellInfo.SqrtDamageAndHealingDiminishing.MaxTargets
+                            && targetIndex >= m_spellInfo.SqrtDamageAndHealingDiminishing.NumNonDiminishedTargets)
+                            m_healing = (int)(m_healing * Math.Sqrt((float)m_spellInfo.SqrtDamageAndHealingDiminishing.MaxTargets / Math.Min(SpellConst.AoeDamageTargetCap, targetCount)));
                     }
 
                 }
@@ -7406,6 +7449,12 @@ namespace Game.Spells
                     break;
                 case SpellValueMod.Duration:
                     m_spellValue.Duration = value;
+                    break;
+                case SpellValueMod.ParentSpellTargetCount:
+                    m_spellValue.ParentSpellTargetCount = value;
+                    break;
+                case SpellValueMod.ParentSpellTargetIndex:
+                    m_spellValue.ParentSpellTargetIndex = value;
                     break;
             }
         }
@@ -8796,6 +8845,8 @@ namespace Game.Spells
         public float DurationMul;
         public float CriticalChance;
         public int? Duration;
+        public int? ParentSpellTargetCount;
+        public int? ParentSpellTargetIndex;
     }
 
     // Spell modifier (used for modify other spells)

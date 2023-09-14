@@ -20,6 +20,8 @@ namespace Framework.Constants
 
         public const float TrajectoryMissileSize = 3.0f;
 
+        public const int AoeDamageTargetCap = 20;
+
         public const int MaxPowersPerSpell = 5;
 
         public const uint VisualKitFood = 406;

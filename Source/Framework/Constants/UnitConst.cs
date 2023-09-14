@@ -406,7 +406,9 @@ namespace Framework.Constants
         AuraStack,
         CritChance,
         DurationPct,
-        Duration
+        Duration,
+        ParentSpellTargetCount,
+        ParentSpellTargetIndex
     }
 
     public enum CombatRating
