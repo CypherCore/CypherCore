@@ -527,8 +527,8 @@ namespace Game
                 return;
 
             Creature totem = ObjectAccessor.GetCreature(GetPlayer(), _player.m_SummonSlot[slotId]);
-            if (totem != null && totem.IsTotem())// && totem.GetGUID() == packet.TotemGUID)  Unknown why blizz doesnt send the guid when you right click it.
-                totem.ToTotem().UnSummon();
+            if (totem != null && totem.IsTotem() && (totemDestroyed.TotemGUID.IsEmpty() || totem.GetGUID() == totemDestroyed.TotemGUID))
+                totem.DespawnOrUnsummon();
         }
 
         [WorldPacketHandler(ClientOpcodes.SelfRes)]

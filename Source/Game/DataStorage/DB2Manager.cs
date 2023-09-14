@@ -1892,7 +1892,7 @@ namespace Game.DataStorage
             return _talentsByPosition[(int)class_][tier][column];
         }
 
-        public bool IsTotemCategoryCompatibleWith(uint itemTotemCategoryId, uint requiredTotemCategoryId)
+        public bool IsTotemCategoryCompatibleWith(uint itemTotemCategoryId, uint requiredTotemCategoryId, bool requireAllTotems = true)
         {
             if (requiredTotemCategoryId == 0)
                 return true;
@@ -1909,7 +1909,8 @@ namespace Game.DataStorage
             if (itemEntry.TotemCategoryType != reqEntry.TotemCategoryType)
                 return false;
 
-            return (itemEntry.TotemCategoryMask & reqEntry.TotemCategoryMask) == reqEntry.TotemCategoryMask;
+            int sharedMask = itemEntry.TotemCategoryMask & reqEntry.TotemCategoryMask;
+            return requireAllTotems ? sharedMask == reqEntry.TotemCategoryMask : sharedMask != 0;
         }
 
         public bool IsToyItem(uint toy)

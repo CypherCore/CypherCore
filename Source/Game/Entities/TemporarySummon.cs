@@ -4,9 +4,11 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.DataStorage;
+using Game.Maps;
+using Game.Spells;
 using System;
 using System.Collections.Generic;
-using Game.Maps;
+using System.Linq;
 
 namespace Game.Entities
 {
@@ -199,7 +201,10 @@ namespace Game.Entities
             if (unitSummoner != null)
             {
                 int slot = m_Properties.Slot;
-                if (slot > 0)
+                if (slot == (int)SummonSlot.Any)
+                    slot = FindUsableTotemSlot(unitSummoner);
+
+                if (slot != 0)
                 {
                     if (!unitSummoner.m_SummonSlot[slot].IsEmpty() && unitSummoner.m_SummonSlot[slot] != GetGUID())
                     {
@@ -335,16 +340,13 @@ namespace Game.Entities
             if (!IsInWorld)
                 return;
 
-            if (m_Properties != null)
+            if (m_Properties != null && m_Properties.Slot != 0)
             {
-                int slot = m_Properties.Slot;
-                if (slot > 0)
-                {
-                    Unit owner = GetSummonerUnit();
-                    if (owner != null)
-                        if (owner.m_SummonSlot[slot] == GetGUID())
-                            owner.m_SummonSlot[slot].Clear();
-                }
+                Unit owner = GetSummonerUnit();
+                if (owner != null)
+                    foreach (ObjectGuid summonSlot in owner.m_SummonSlot)
+                        if (summonSlot == GetGUID())
+                            summonSlot.Clear();
             }
 
             if (!GetOwnerGUID().IsEmpty())
@@ -353,6 +355,62 @@ namespace Game.Entities
             base.RemoveFromWorld();
         }
 
+        public int FindUsableTotemSlot(Unit summoner)
+        {
+            var list = summoner.m_SummonSlot[new Range((int)SummonSlot.Totem, SharedConst.MaxTotemSlot)].ToList();
+
+            // first try exact guid match
+            var totemSlot = list.FindIndex(otherTotemGuid => otherTotemGuid == GetGUID());
+
+            // then a slot that shares totem category with this new summon
+            if (totemSlot == -1)
+                totemSlot = list.FindIndex(IsSharingTotemSlotWith);
+
+            // any empty slot...?
+            if (totemSlot == -1)
+                totemSlot = list.FindIndex(otherTotemGuid => otherTotemGuid.IsEmpty());
+
+            // if no usable slot was found, try used slot by a summon with the same creature id
+            // we must not despawn unrelated summons
+            if (totemSlot == -1)
+                totemSlot = list.FindIndex(otherTotemGuid => GetEntry() == otherTotemGuid.GetEntry());
+
+            // if no slot was found, this summon gets no slot and will not be stored in m_SummonSlot
+            if (totemSlot == -1)
+                return 0;
+
+            return totemSlot;
+        }
+
+        bool IsSharingTotemSlotWith(ObjectGuid objectGuid)
+        {
+            Creature otherSummon = GetMap().GetCreature(objectGuid);
+            if (!otherSummon)
+                return false;
+
+            SpellInfo mySummonSpell = Global.SpellMgr.GetSpellInfo(m_unitData.CreatedBySpell, Difficulty.None);
+            if (mySummonSpell == null)
+                return false;
+
+            SpellInfo otherSummonSpell = Global.SpellMgr.GetSpellInfo(otherSummon.m_unitData.CreatedBySpell, Difficulty.None);
+            if (otherSummonSpell == null)
+                return false;
+
+            foreach (var myTotemCategory in mySummonSpell.TotemCategory)
+                if (myTotemCategory != 0)
+                    foreach (var otherTotemCategory in otherSummonSpell.TotemCategory)
+                        if (otherTotemCategory != 0 && Global.DB2Mgr.IsTotemCategoryCompatibleWith(myTotemCategory, otherTotemCategory, false))
+                            return true;
+
+            foreach (int myTotemId in mySummonSpell.Totem)
+                if (myTotemId != 0)
+                    foreach (int otherTotemId in otherSummonSpell.Totem)
+                        if (otherTotemId != 0 && myTotemId == otherTotemId)
+                            return true;
+
+            return false;
+        }
+        
         public override string GetDebugInfo()
         {
             return $"{base.GetDebugInfo()}\nTempSummonType : {GetSummonType()} Summoner: {GetSummonerGUID()} Timer: {GetTimer()}";

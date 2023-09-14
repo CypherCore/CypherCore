@@ -44,11 +44,15 @@ namespace Game.Entities
             Player owner = GetOwner().ToPlayer();
             if (owner)
             {
-                if (m_Properties.Slot >= (int)SummonSlot.Totem && m_Properties.Slot < SharedConst.MaxTotemSlot)
+                int slot = m_Properties.Slot;
+                if (slot == (int)SummonSlot.Any)
+                    slot = FindUsableTotemSlot(owner);
+
+                if (slot >= (int)SummonSlot.Totem && slot < SharedConst.MaxTotemSlot)
                 {
                     TotemCreated packet = new();
                     packet.Totem = GetGUID();
-                    packet.Slot = (byte)(m_Properties.Slot - (int)SummonSlot.Totem);
+                    packet.Slot = (byte)(slot - (int)SummonSlot.Totem);
                     packet.Duration = duration;
                     packet.SpellID = m_unitData.CreatedBySpell;
                     owner.ToPlayer().SendPacket(packet);
