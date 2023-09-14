@@ -46,6 +46,9 @@ namespace Game.Maps
 
         public virtual void OnFlagStateChange(GameObject flagInBase, FlagState oldValue, FlagState newValue, Player player) { }
 
+        public virtual bool CanCaptureFlag(AreaTrigger areaTrigger, Player player) { return false; }
+        public virtual void OnCaptureFlag(AreaTrigger areaTrigger, Player player) { }
+
         protected EventMap _events = new();
     }
 }
