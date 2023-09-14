@@ -5883,7 +5883,7 @@ namespace Game.Spells
             if (target == null)
                 return;
 
-            if (!apply)
+            if (!apply && aurApp.GetRemoveMode() != AuraRemoveMode.Default)
             {
                 GameObject gameObjectCaster = target.GetMap().GetGameObject(GetCasterGUID());
                 if (gameObjectCaster != null)
