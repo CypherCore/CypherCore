@@ -5525,7 +5525,10 @@ namespace Game.Spells
             if (GetSpellInfo().HasAttribute(SpellAttr2.CantCrit))
                 return false;
 
-            return true;
+            if (GetSpellInfo().HasAttribute(SpellAttr8.PeriodicCanCrit))
+                return true;
+
+            return false;
         }
 
         float CalcPeriodicCritChance(Unit caster)

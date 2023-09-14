@@ -1933,7 +1933,7 @@ namespace Framework.Constants
         Unk6 = 0x40, // 6
         Unk7 = 0x80, // 7
         AffectPartyAndRaid = 0x100, // 8
-        DontResetPeriodicTimer = 0x200, // 9 Periodic Auras With This Flag Keep Old Periodic Timer When Refreshing At Close To One Tick Remaining (Kind Of Anti Dot Clipping)
+        PeriodicCanCrit = 0x200, // 9
         NameChangedDuringTransofrm = 0x400, // 10
         Unk11 = 0x800, // 11
         AuraSendAmount = 0x1000, // 12 Aura Must Have Flag AflagAnyEffectAmountSent To Send Amount
