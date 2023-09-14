@@ -63,10 +63,10 @@ namespace Game.Entities
                 if (caster)
                     caster._UnregisterAreaTrigger(this);
 
+                _ai.OnRemove();
+
                 // Handle removal of all units, calling OnUnitExit & deleting auras if needed
                 HandleUnitEnterExit(new List<Unit>());
-
-                _ai.OnRemove();
 
                 base.RemoveFromWorld();
                 if (_spawnId != 0)
