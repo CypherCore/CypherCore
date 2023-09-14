@@ -2629,7 +2629,7 @@ namespace Game.Spells
                 {
                     // stealth must be removed at cast starting (at show channel bar)
                     // skip triggered spell (item equip spell casting and other not explicit character casts/item uses)
-                    if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreAuraInterruptFlags) && !m_spellInfo.HasAttribute(SpellAttr2.NotAnAction))
+                    if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreCastInProgress) && !m_spellInfo.HasAttribute(SpellAttr2.NotAnAction))
                         unitCaster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Action, m_spellInfo);
 
                     // Do not register as current spell when requested to ignore cast in progress
@@ -3044,7 +3044,7 @@ namespace Game.Spells
             if (!hitMask.HasAnyFlag(ProcFlagsHit.Critical))
                 hitMask |= ProcFlagsHit.Normal;
 
-            if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreAuraInterruptFlags) && !m_spellInfo.HasAttribute(SpellAttr2.NotAnAction))
+            if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreCastInProgress) && !m_spellInfo.HasAttribute(SpellAttr2.NotAnAction))
                 m_originalCaster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ActionDelayed, m_spellInfo);
 
             if (!m_spellInfo.HasAttribute(SpellAttr3.SuppressCasterProcs))

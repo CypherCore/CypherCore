@@ -1537,10 +1537,10 @@ namespace Framework.Constants
         IgnoreCastInProgress = 0x20,   //! Will Not Check If A Current Cast Is In Progress
         // reuse = 0x40,   //
         CastDirectly = 0x80,   //! In Spell.Prepare, Will Be Cast Directly Without Setting Containers For Executed Spell
-        IgnoreAuraInterruptFlags = 0x100,   //! Will Ignore Interruptible Aura'S At Cast
+        // reuse = 0x100,   //
         IgnoreSetFacing = 0x200,   //! Will Not Adjust Facing To Target (If Any)
         IgnoreShapeshift = 0x400,   //! Will Ignore Shapeshift Checks
-        // reuse
+        // reuse = 0x800,   //
         DisallowProcEvents = 0x1000,   //! Disallows proc events from triggered spell (default)
         IgnoreCasterMountedOrOnVehicle = 0x2000,   //! Will Ignore Mounted/On Vehicle Restrictions
         // reuse                                        = 0x4000,
