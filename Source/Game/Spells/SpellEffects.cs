@@ -1309,9 +1309,11 @@ namespace Game.Spells
                     if (gameObjTarget != null)
                     {
                         // Allow one skill-up until respawned
-                        if (!gameObjTarget.IsInSkillupList(player.GetGUID()) &&
-                            player.UpdateGatherSkill(skillId, pureSkillValue, (uint)reqSkillValue, 1, gameObjTarget))
+                        if (!gameObjTarget.IsInSkillupList(player.GetGUID()))
+                        {
+                            player.UpdateGatherSkill((uint)skillId, pureSkillValue, (uint)reqSkillValue, 1, gameObjTarget);
                             gameObjTarget.AddToSkillupList(player.GetGUID());
+                        }
                     }
                     else if (itemTarget != null)
                     {
