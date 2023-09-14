@@ -1441,7 +1441,7 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.Summon)]
         void EffectSummonType()
         {
-            if (effectHandleMode != SpellEffectHandleMode.Hit)
+            if (effectHandleMode != SpellEffectHandleMode.Launch)
                 return;
 
             uint entry = (uint)effectInfo.MiscValue;
