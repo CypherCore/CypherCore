@@ -324,6 +324,12 @@ namespace Game.Entities
                     break;
                 case GameObjectTypes.NewFlag:
                     m_goTypeImpl = new GameObjectType.NewFlag(this);
+                    if (map.Instanceable())
+                        SetActive(true);
+                    break;
+                case GameObjectTypes.NewFlagDrop:
+                    if (map.Instanceable())
+                        SetActive(true);
                     break;
                 case GameObjectTypes.PhaseableMo:
                     RemoveFlag((GameObjectFlags)0xF00);
@@ -335,6 +341,8 @@ namespace Game.Entities
                     m_goValue.CapturePoint.LastTeamCapture = TeamId.Neutral;
                     m_goValue.CapturePoint.State = BattlegroundCapturePointState.Neutral;
                     UpdateCapturePoint();
+                    if (map.Instanceable())
+                        SetActive(true);
                     break;
                 default:
                     SetGoAnimProgress(animProgress);
