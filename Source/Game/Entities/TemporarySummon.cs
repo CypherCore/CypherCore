@@ -60,6 +60,7 @@ namespace Game.Entities
                 return;
             }
 
+            TimeSpan msDiff = TimeSpan.FromMilliseconds(diff);
             switch (m_type)
             {
                 case TempSummonType.ManualDespawn:
@@ -67,26 +68,26 @@ namespace Game.Entities
                     break;
                 case TempSummonType.TimedDespawn:
                 {
-                    if (m_timer <= diff)
+                    if (m_timer <= msDiff)
                     {
                         UnSummon();
                         return;
                     }
 
-                    m_timer -= diff;
+                    m_timer -= msDiff;
                     break;
                 }
                 case TempSummonType.TimedDespawnOutOfCombat:
                 {
                     if (!IsInCombat())
                     {
-                        if (m_timer <= diff)
+                        if (m_timer <= msDiff)
                         {
                             UnSummon();
                             return;
                         }
 
-                        m_timer -= diff;
+                        m_timer -= msDiff;
                     }
                     else if (m_timer != m_lifetime)
                         m_timer = m_lifetime;
@@ -98,13 +99,13 @@ namespace Game.Entities
                 {
                     if (m_deathState == DeathState.Corpse)
                     {
-                        if (m_timer <= diff)
+                        if (m_timer <= msDiff)
                         {
                             UnSummon();
                             return;
                         }
 
-                        m_timer -= diff;
+                        m_timer -= msDiff;
                     }
                     break;
                 }
@@ -129,13 +130,13 @@ namespace Game.Entities
 
                     if (!IsInCombat())
                     {
-                        if (m_timer <= diff)
+                        if (m_timer <= msDiff)
                         {
                             UnSummon();
                             return;
                         }
                         else
-                            m_timer -= diff;
+                            m_timer -= msDiff;
                     }
                     else if (m_timer != m_lifetime)
                         m_timer = m_lifetime;
@@ -145,13 +146,13 @@ namespace Game.Entities
                 {
                     if (!IsInCombat() && IsAlive())
                     {
-                        if (m_timer <= diff)
+                        if (m_timer <= msDiff)
                         {
                             UnSummon();
                             return;
                         }
                         else
-                            m_timer -= diff;
+                            m_timer -= msDiff;
                     }
                     else if (m_timer != m_lifetime)
                         m_timer = m_lifetime;
@@ -164,7 +165,7 @@ namespace Game.Entities
             }
         }
 
-        public virtual void InitStats(WorldObject summoner, uint duration)
+        public virtual void InitStats(WorldObject summoner, TimeSpan duration)
         {
             Cypher.Assert(!IsPet());
 
@@ -172,7 +173,7 @@ namespace Game.Entities
             m_lifetime = duration;
 
             if (m_type == TempSummonType.ManualDespawn)
-                m_type = (duration == 0) ? TempSummonType.DeadDespawn : TempSummonType.TimedDespawn;
+                m_type = (duration == TimeSpan.Zero) ? TempSummonType.DeadDespawn : TempSummonType.TimedDespawn;
 
             if (summoner != null && summoner.IsPlayer())
             {
@@ -363,7 +364,7 @@ namespace Game.Entities
 
         TempSummonType GetSummonType() { return m_type; }
 
-        public uint GetTimer() { return m_timer; }
+        public TimeSpan GetTimer() { return m_timer; }
 
         public uint? GetCreatureIdVisibleToSummoner() { return m_creatureIdVisibleToSummoner; }
         public uint? GetDisplayIdVisibleToSummoner() { return m_displayIdVisibleToSummoner; }
@@ -373,8 +374,8 @@ namespace Game.Entities
 
         public SummonPropertiesRecord m_Properties;
         TempSummonType m_type;
-        uint m_timer;
-        uint m_lifetime;
+        TimeSpan m_timer;
+        TimeSpan m_lifetime;
         ObjectGuid m_summonerGUID;
         uint? m_creatureIdVisibleToSummoner;
         uint? m_displayIdVisibleToSummoner;
@@ -394,7 +395,7 @@ namespace Game.Entities
             InitCharmInfo();
         }
 
-        public override void InitStats(WorldObject summoner, uint duration)
+        public override void InitStats(WorldObject summoner, TimeSpan duration)
         {
             base.InitStats(summoner, duration);
 
@@ -488,7 +489,7 @@ namespace Game.Entities
             }
         }
 
-        public override void InitStats(WorldObject summoner, uint duration)
+        public override void InitStats(WorldObject summoner, TimeSpan duration)
         {
             base.InitStats(summoner, duration);
 
@@ -1085,7 +1086,7 @@ namespace Game.Entities
             UnitTypeMask |= UnitTypeMask.Puppet;
         }
 
-        public override void InitStats(WorldObject summoner, uint duration)
+        public override void InitStats(WorldObject summoner, TimeSpan duration)
         {
             base.InitStats(summoner, duration);
 
@@ -1135,7 +1136,7 @@ namespace Game.Entities
         public uint entry;        // Entry of summoned creature
         public Position pos;        // Position, where should be creature spawned
         public TempSummonType type; // Summon type, see TempSummonType for available types
-        public uint time;         // Despawn time, usable only with certain temp summon types
+        public TimeSpan time;         // Despawn time, usable only with certain temp summon types
     }
 
     enum PetEntry

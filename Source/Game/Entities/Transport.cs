@@ -431,7 +431,7 @@ namespace Game.Entities
             return go;
         }
 
-        public TempSummon SummonPassenger(uint entry, Position pos, TempSummonType summonType, SummonPropertiesRecord properties = null, uint duration = 0, Unit summoner = null, uint spellId = 0, uint vehId = 0)
+        public TempSummon SummonPassenger(uint entry, Position pos, TempSummonType summonType, SummonPropertiesRecord properties = null, TimeSpan duration = default, Unit summoner = null, uint spellId = 0, uint vehId = 0)
         {
             Map map = GetMap();
             if (map == null)

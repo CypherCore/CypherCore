@@ -1470,7 +1470,7 @@ namespace Game.Spells
                 if (caster.IsPlayer() && m_originalCaster.ToPlayer().GetGroup())
                     privateObjectOwner = caster.ToPlayer().GetGroup().GetGUID();
 
-            int duration = m_spellInfo.CalcDuration(caster);
+            TimeSpan duration = TimeSpan.FromMilliseconds(m_spellInfo.CalcDuration(caster));
 
             Unit unitCaster = GetUnitCasterForEffectHandlers();
 
@@ -1532,7 +1532,7 @@ namespace Game.Spells
                             if (unitCaster == null)
                                 return;
 
-                            summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, unitCaster, m_spellInfo.Id);
+                            summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, duration, unitCaster, m_spellInfo.Id);
                             break;
                         }
                         case SummonTitle.LightWell:
@@ -1541,7 +1541,7 @@ namespace Game.Spells
                             if (unitCaster == null)
                                 return;
 
-                            summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
+                            summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
                             if (summon == null || !summon.IsTotem())
                                 return;
 
@@ -1557,7 +1557,7 @@ namespace Game.Spells
                             if (unitCaster == null)
                                 return;
 
-                            summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
+                            summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
                             if (summon == null || !summon.HasUnitTypeMask(UnitTypeMask.Minion))
                                 return;
 
@@ -1569,7 +1569,7 @@ namespace Game.Spells
                         {
                             float radius = effectInfo.CalcRadius();
 
-                            TempSummonType summonType = (duration == 0) ? TempSummonType.DeadDespawn : TempSummonType.TimedDespawn;
+                            TempSummonType summonType = (duration == TimeSpan.Zero) ? TempSummonType.DeadDespawn : TempSummonType.TimedDespawn;
 
                             for (uint count = 0; count < numSummons; ++count)
                             {
@@ -1580,7 +1580,7 @@ namespace Game.Spells
                                     // randomize position for multiple summons
                                     pos = caster.GetRandomPoint(destTarget, radius);
 
-                                summon = caster.GetMap().SummonCreature(entry, pos, properties, (uint)duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
+                                summon = caster.GetMap().SummonCreature(entry, pos, properties, duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
                                 if (summon == null)
                                     continue;
 
@@ -1602,7 +1602,7 @@ namespace Game.Spells
                     if (unitCaster == null)
                         return;
 
-                    summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
+                    summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
                     break;
                 }
                 case SummonCategory.Vehicle:
@@ -1612,7 +1612,7 @@ namespace Game.Spells
 
                     // Summoning spells (usually triggered by npc_spellclick) that spawn a vehicle and that cause the clicker
                     // to cast a ride vehicle spell on the summoned unit.
-                    summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, unitCaster, m_spellInfo.Id);
+                    summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, duration, unitCaster, m_spellInfo.Id);
                     if (summon == null || !summon.IsVehicle())
                         return;
 
@@ -4590,7 +4590,7 @@ namespace Game.Spells
 
             // in another case summon new
             float radius = 5.0f;
-            int duration = m_spellInfo.CalcDuration(m_originalCaster);
+            TimeSpan duration = TimeSpan.FromMilliseconds(m_spellInfo.CalcDuration(m_originalCaster));
 
             //TempSummonType summonType = (duration == 0) ? TempSummonType.DeadDespawn : TempSummonType.TimedDespawn;
             Map map = unitCaster.GetMap();
@@ -4604,7 +4604,7 @@ namespace Game.Spells
                     // randomize position for multiple summons
                     pos = unitCaster.GetRandomPoint(destTarget, radius);
 
-                TempSummon summon = map.SummonCreature(entry, pos, properties, (uint)duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
+                TempSummon summon = map.SummonCreature(entry, pos, properties, duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
                 if (summon == null)
                     return;
 

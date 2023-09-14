@@ -1239,7 +1239,7 @@ namespace Game.Entities
             petSpells.PetGUID = vehicle.GetGUID();
             petSpells.CreatureFamily = 0;                          // Pet Family (0 for all vehicles)
             petSpells.Specialization = 0;
-            petSpells.TimeLimit = vehicle.IsSummon() ? vehicle.ToTempSummon().GetTimer() : 0;
+            petSpells.TimeLimit = (uint)(vehicle.IsSummon() ? vehicle.ToTempSummon().GetTimer().TotalMilliseconds : 0);
             petSpells.ReactState = vehicle.GetReactState();
             petSpells.CommandState = CommandStates.Follow;
             petSpells.Flag = 0x8;

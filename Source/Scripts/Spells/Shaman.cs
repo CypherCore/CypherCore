@@ -588,8 +588,8 @@ namespace Scripts.Spells.Shaman
                 WorldLocation dest = GetExplTargetDest();
                 if (dest != null)
                 {
-                    int duration = GetSpellInfo().CalcDuration(GetOriginalCaster());
-                    TempSummon summon = GetCaster().GetMap().SummonCreature(CreatureIds.HealingRainInvisibleStalker, dest, null, (uint)duration, GetOriginalCaster());
+                    TimeSpan duration = TimeSpan.FromMilliseconds(GetSpellInfo().CalcDuration(GetOriginalCaster()));
+                    TempSummon summon = GetCaster().GetMap().SummonCreature(CreatureIds.HealingRainInvisibleStalker, dest, null, duration, GetOriginalCaster());
                     if (summon == null)
                         return;
 

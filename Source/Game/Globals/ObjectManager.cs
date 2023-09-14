@@ -9426,7 +9426,7 @@ namespace Game
                     continue;
                 }
 
-                data.time = result.Read<uint>(9);
+                data.time = TimeSpan.FromMilliseconds(result.Read<uint>(9));
 
                 Tuple<uint, SummonerType, byte> key = Tuple.Create(summonerId, summonerType, group);
                 _tempSummonDataStorage.Add(key, data);

@@ -26,18 +26,19 @@ namespace Game.Entities
                 return;
             }
 
-            if (m_duration <= diff)
+            if (m_duration <= TimeSpan.FromMilliseconds(diff))
             {
                 UnSummon();                                         // remove self
                 return;
             }
-            else
-                m_duration -= diff;
+
+            m_duration -= TimeSpan.FromMilliseconds(diff);
+
             base.Update(diff);
 
         }
 
-        public override void InitStats(WorldObject summoner, uint duration)
+        public override void InitStats(WorldObject summoner, TimeSpan duration)
         {
             // client requires SMSG_TOTEM_CREATED to be sent before adding to world and before removing old totem
             Player owner = GetOwner().ToPlayer();
@@ -156,9 +157,9 @@ namespace Game.Entities
 
         public uint GetSpell(byte slot = 0) { return m_spells[slot]; }
 
-        public uint GetTotemDuration() { return m_duration; }
+        public TimeSpan GetTotemDuration() { return m_duration; }
 
-        public void SetTotemDuration(uint duration) { m_duration = duration; }
+        public void SetTotemDuration(TimeSpan duration) { m_duration = duration; }
 
         public TotemType GetTotemType() { return m_type; }
 
@@ -174,7 +175,7 @@ namespace Game.Entities
         public override void UpdateDamagePhysical(WeaponAttackType attType) { }
 
         TotemType m_type;
-        uint m_duration;
+        TimeSpan m_duration;
     }
 
     public enum TotemType

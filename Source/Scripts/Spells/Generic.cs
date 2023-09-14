@@ -4735,7 +4735,7 @@ namespace Scripts.Spells.Generic
 
                 Unit caster = GetCaster();
                 var properties = CliDB.SummonPropertiesStorage.LookupByKey((uint)GetEffectInfo().MiscValueB);
-                uint duration = (uint)GetSpellInfo().CalcDuration(caster);
+                TimeSpan duration = TimeSpan.FromMilliseconds(GetSpellInfo().CalcDuration(caster));
                 Position pos = GetHitDest().GetPosition();
 
                 Creature summon = caster.GetMap().SummonCreature(creatureId, pos, properties, duration, caster, GetSpellInfo().Id);

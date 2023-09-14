@@ -1544,7 +1544,7 @@ namespace Game.Entities
             Map map = GetMap();
             if (map != null)
             {
-                TempSummon summon = map.SummonCreature(entry, pos, null, (uint)despawnTime.TotalMilliseconds, this, spellId, vehId, privateObjectOwner);
+                TempSummon summon = map.SummonCreature(entry, pos, null, despawnTime, this, spellId, vehId, privateObjectOwner);
                 if (summon != null)
                 {
                     summon.SetTempSummonType(despawnType);
@@ -1560,7 +1560,7 @@ namespace Game.Entities
             Map map = GetMap();
             if (map != null)
             {
-                TempSummon summon = map.SummonCreature(GetEntry(), pos, null, (uint)despawnTime.TotalMilliseconds, privateObjectOwner, spellId, vehId, privateObjectOwner.GetGUID(), new SmoothPhasingInfo(GetGUID(), true, true));
+                TempSummon summon = map.SummonCreature(GetEntry(), pos, null, despawnTime, privateObjectOwner, spellId, vehId, privateObjectOwner.GetGUID(), new SmoothPhasingInfo(GetGUID(), true, true));
                 if (summon != null)
                 {
                     summon.SetTempSummonType(despawnType);
@@ -1648,7 +1648,7 @@ namespace Game.Entities
 
             foreach (var tempSummonData in data)
             {
-                TempSummon summon = SummonCreature(tempSummonData.entry, tempSummonData.pos, tempSummonData.type, TimeSpan.FromMilliseconds(tempSummonData.time));
+                TempSummon summon = SummonCreature(tempSummonData.entry, tempSummonData.pos, tempSummonData.type, tempSummonData.time);
                 if (summon)
                     list.Add(summon);
             }

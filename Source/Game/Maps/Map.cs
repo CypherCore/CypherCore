@@ -3572,7 +3572,7 @@ namespace Game.Maps
             }
         }
 
-        public TempSummon SummonCreature(uint entry, Position pos, SummonPropertiesRecord properties = null, uint duration = 0, WorldObject summoner = null, uint spellId = 0, uint vehId = 0, ObjectGuid privateObjectOwner = default, SmoothPhasingInfo smoothPhasingInfo = null)
+        public TempSummon SummonCreature(uint entry, Position pos, SummonPropertiesRecord properties = null, TimeSpan duration = default, WorldObject summoner = null, uint spellId = 0, uint vehId = 0, ObjectGuid privateObjectOwner = default, SmoothPhasingInfo smoothPhasingInfo = null)
         {
             var mask = UnitTypeMask.Summon;
             if (properties != null)

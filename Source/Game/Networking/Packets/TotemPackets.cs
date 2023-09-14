@@ -3,6 +3,7 @@
 
 using Framework.Constants;
 using Game.Entities;
+using System;
 
 namespace Game.Networking.Packets
 {
@@ -28,7 +29,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt8(Slot);
             _worldPacket.WritePackedGuid(Totem);
-            _worldPacket.WriteUInt32(Duration);
+            _worldPacket.WriteUInt32((uint)Duration.TotalMilliseconds);
             _worldPacket.WriteUInt32(SpellID);
             _worldPacket.WriteFloat(TimeMod);
             _worldPacket.WriteBit(CannotDismiss);
@@ -37,7 +38,7 @@ namespace Game.Networking.Packets
 
         public ObjectGuid Totem;
         public uint SpellID;
-        public uint Duration;
+        public TimeSpan Duration;
         public byte Slot;
         public float TimeMod = 1.0f;
         public bool CannotDismiss;
