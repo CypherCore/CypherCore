@@ -1212,21 +1212,26 @@ namespace Game.Entities
             SendMessageToSet(cancelSpellVisualKit, true);
         }
 
-        public void CancelSpellMissiles(uint spellId, bool reverseMissile = false)
+        public void CancelSpellMissiles(uint spellId, bool reverseMissile = false, bool abortSpell = false)
         {
             bool hasMissile = false;
-            foreach (var pair in m_Events.GetEvents())
+            if (abortSpell)
             {
-                Spell spell = Spell.ExtractSpellFromEvent(pair.Value);
-                if (spell != null)
+                foreach (var pair in m_Events.GetEvents())
                 {
-                    if (spell.GetSpellInfo().Id == spellId)
+                    Spell spell = Spell.ExtractSpellFromEvent(pair.Value);
+                    if (spell != null)
                     {
-                        pair.Value.ScheduleAbort();
-                        hasMissile = true;
+                        if (spell.GetSpellInfo().Id == spellId)
+                        {
+                            pair.Value.ScheduleAbort();
+                            hasMissile = true;
+                        }
                     }
                 }
             }
+            else
+                hasMissile = true;
 
             if (hasMissile)
             {
