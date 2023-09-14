@@ -366,10 +366,20 @@ namespace Game.Entities
 
         public TimeSpan GetTimer() { return m_timer; }
 
+        public void RefreshTimer() { m_timer = m_lifetime; }
+
+        public void ModifyTimer(TimeSpan mod)
+        {
+            m_timer += mod;
+            m_lifetime += mod;
+        }
+
         public uint? GetCreatureIdVisibleToSummoner() { return m_creatureIdVisibleToSummoner; }
+
         public uint? GetDisplayIdVisibleToSummoner() { return m_displayIdVisibleToSummoner; }
         
         public bool CanFollowOwner() { return m_canFollowOwner; }
+
         public void SetCanFollowOwner(bool can) { m_canFollowOwner = can; }
 
         public SummonPropertiesRecord m_Properties;
