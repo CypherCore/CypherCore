@@ -2951,6 +2951,7 @@ namespace Game.Entities
         }
 
         public virtual byte GetPetAutoSpellSize() { return 4; }
+
         public virtual uint GetPetAutoSpellOnPos(byte pos)
         {
             if (pos >= SharedConst.MaxSpellCharm || GetCharmInfo() == null || GetCharmInfo().GetCharmSpell(pos).GetActiveState() != ActiveStates.Enabled)
@@ -2972,7 +2973,7 @@ namespace Game.Entities
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellID, GetMap().GetDifficultyID());
                 if (spellInfo != null)
                 {
-                    if (spellInfo.GetRecoveryTime() == 0 && spellInfo.RangeEntry.Id != 1 /*Self*/ && spellInfo.RangeEntry.Id != 2 /*Combat Range*/ && spellInfo.GetMaxRange() > range)
+                    if (spellInfo.GetRecoveryTime() == 0 && spellInfo.RangeEntry != null && spellInfo.RangeEntry.Id != 1 /*Self*/ && spellInfo.RangeEntry.Id != 2 /*Combat Range*/ && spellInfo.GetMaxRange() > range)
                         range = spellInfo.GetMaxRange();
                 }
             }
