@@ -27,8 +27,8 @@ namespace Game.Movement
             uint mapId = PhasingHandler.GetTerrainMapId(_source.GetPhaseShift(), _source.GetMapId(), _source.GetMap().GetTerrain(), _source.GetPositionX(), _source.GetPositionY());
             if (Global.DisableMgr.IsPathfindingEnabled(_source.GetMapId()))
             {
-                _navMesh = Global.MMapMgr.GetNavMesh(mapId);
-                _navMeshQuery = Global.MMapMgr.GetNavMeshQuery(mapId, _source.GetInstanceId());
+                _navMeshQuery = Global.MMapMgr.GetNavMeshQuery(mapId, _source.GetMapId(), _source.GetInstanceId());
+                _navMesh = _navMeshQuery?.getAttachedNavMesh() ?? Global.MMapMgr.GetNavMesh(mapId);
             }
             CreateFilter();
         }

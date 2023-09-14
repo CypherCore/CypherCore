@@ -56,7 +56,7 @@ namespace Game.Maps
 
             Global.TransportMgr.CreateTransportsForMap(this);
 
-            Global.MMapMgr.LoadMapInstance(Global.WorldMgr.GetDataPath(), GetId(), i_InstanceId);
+            m_terrain.LoadMMapInstance(GetId(), GetInstanceId());
 
             _worldStateValues = Global.WorldStateMgr.GetInitialWorldStatesForMap(this);
 
@@ -88,7 +88,7 @@ namespace Game.Maps
             Global.OutdoorPvPMgr.DestroyOutdoorPvPForMap(this);
             Global.BattleFieldMgr.DestroyBattlefieldsForMap(this);
 
-            Global.MMapMgr.UnloadMapInstance(GetId(), i_InstanceId);
+            m_terrain.UnloadMMapInstance(GetId(), GetInstanceId());
         }
 
         public void LoadAllCells()
