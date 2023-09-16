@@ -176,6 +176,8 @@ namespace Game.Entities
                 return false;
             }
 
+            owner.SetTemporaryUnsummonedPetNumber(0);
+
             Map map = owner.GetMap();
             ulong guid = map.GenerateLowGuid(HighGuid.Pet);
 
@@ -290,9 +292,6 @@ namespace Game.Entities
 
                 Cypher.Assert(activePetIndex != -1);
 
-                // Check that we either have no pet (unsummoned by player) or it matches temporarily unsummoned pet by server (for example on flying mount)
-                Cypher.Assert(!petStable.CurrentPetIndex.HasValue || petStable.CurrentPetIndex == activePetIndex);
-
                 petStable.SetCurrentActivePetIndex((uint)activePetIndex);
             }
 
@@ -384,6 +383,9 @@ namespace Game.Entities
                         }
                     }
 
+                    if (owner.IsMounted())
+                        owner.DisablePetControlsOnMount(ReactStates.Passive, CommandStates.Follow);
+
                     // must be after SetMinion (owner guid check)
                     LoadTemplateImmunities();
                     m_loading = false;
@@ -458,7 +460,7 @@ namespace Game.Entities
                 string actionBar = GenerateActionBarData();
 
                 Cypher.Assert(owner.GetPetStable().GetCurrentPet() != null && owner.GetPetStable().GetCurrentPet().PetNumber == GetCharmInfo().GetPetNumber());
-                FillPetInfo(owner.GetPetStable().GetCurrentPet());
+                FillPetInfo(owner.GetPetStable().GetCurrentPet(), owner.GetTemporaryPetReactState());
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PET);
                 stmt.AddValue(0, GetCharmInfo().GetPetNumber());
@@ -467,7 +469,7 @@ namespace Game.Entities
                 stmt.AddValue(3, GetNativeDisplayId());
                 stmt.AddValue(4, GetLevel());
                 stmt.AddValue(5, m_unitData.PetExperience);
-                stmt.AddValue(6, (byte)GetReactState());
+                stmt.AddValue(6, (byte)owner.GetTemporaryPetReactState().GetValueOrDefault(GetReactState()));
                 stmt.AddValue(7, (owner.GetPetStable().GetCurrentActivePetIndex().HasValue ? (short)owner.GetPetStable().GetCurrentActivePetIndex().Value : (short)PetSaveMode.NotInSlot));
                 stmt.AddValue(8, GetName());
                 stmt.AddValue(9, HasPetFlag(UnitPetFlags.CanBeRenamed) ? 0 : 1);
@@ -492,14 +494,14 @@ namespace Game.Entities
             }
         }
 
-        public void FillPetInfo(PetStable.PetInfo petInfo)
+        public void FillPetInfo(PetStable.PetInfo petInfo, ReactStates? forcedReactState = null)
         {
             petInfo.PetNumber = GetCharmInfo().GetPetNumber();
             petInfo.CreatureId = GetEntry();
             petInfo.DisplayId = GetNativeDisplayId();
             petInfo.Level = (byte)GetLevel();
             petInfo.Experience = m_unitData.PetExperience;
-            petInfo.ReactState = GetReactState();
+            petInfo.ReactState = forcedReactState.GetValueOrDefault(GetReactState());
             petInfo.Name = GetName();
             petInfo.WasRenamed = !HasPetFlag(UnitPetFlags.CanBeRenamed);
             petInfo.Health = (uint)GetHealth();

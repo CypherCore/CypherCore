@@ -92,7 +92,6 @@ namespace Game.DataStorage
         public uint LowResScreenFileDataID;
         public int Flags;
         public uint SpellTextureBlobFileDataID;
-        public uint RolesMask;
         public uint ArmorTypeMask;
         public int CharStartKitUnknown901;
         public int MaleCharacterCreationVisualFallback;
@@ -114,6 +113,7 @@ namespace Game.DataStorage
         public byte ClassColorR;
         public byte ClassColorG;
         public byte ClassColorB;
+        public byte RolesMask;
     }
 
     public sealed class ChrClassesXPowerTypesRecord
@@ -161,6 +161,7 @@ namespace Game.DataStorage
         public int ChrCustItemGeoModifyID;
         public int ChrCustomizationVoiceID;
         public int AnimKitID;
+        public int ParticleColorID;
     }
 
     public sealed class ChrCustomizationOptionRecord
@@ -481,6 +482,8 @@ namespace Game.DataStorage
         public float[] GeoBox = new float[6];
         public uint Flags;
         public uint FileDataID;
+        public float WalkSpeed;
+        public float RunSpeed;
         public uint BloodID;
         public uint FootprintTextureID;
         public float FootprintTextureLength;

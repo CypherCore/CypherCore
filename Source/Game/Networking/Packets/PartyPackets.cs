@@ -8,6 +8,7 @@ using Game.Groups;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace Game.Networking.Packets
 {
@@ -39,8 +40,9 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadUInt8();
+            bool hasPartyIndex = _worldPacket.HasBit();
 
+            _worldPacket.ResetBitPos();
             uint targetNameLen = _worldPacket.ReadBits<uint>(9);
             uint targetRealmLen = _worldPacket.ReadBits<uint>(9);
 
@@ -49,9 +51,11 @@ namespace Game.Networking.Packets
 
             TargetName = _worldPacket.ReadString(targetNameLen);
             TargetRealm = _worldPacket.ReadString(targetRealmLen);
+            if (hasPartyIndex)
+                PartyIndex = _worldPacket.ReadUInt8();
         }
 
-        public byte PartyIndex;
+        public byte? PartyIndex;
         public uint ProposedRoles;
         public string TargetName;
         public string TargetRealm;
@@ -70,7 +74,7 @@ namespace Game.Networking.Packets
             InviterGUID = inviter.GetGUID();
             InviterBNetAccountId = inviter.GetSession().GetAccountGUID();
 
-            ProposedRoles = proposedRoles;
+            ProposedRoles = (byte)proposedRoles;
 
             var realm = Global.WorldMgr.GetRealm();
             InviterRealm = new VirtualRealmInfo(realm.Id.GetAddress(), true, false, realm.Name, realm.NormalizedName);
@@ -91,7 +95,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(InviterGUID);
             _worldPacket.WritePackedGuid(InviterBNetAccountId);
             _worldPacket.WriteUInt16(Unk1);
-            _worldPacket.WriteUInt32(ProposedRoles);
+            _worldPacket.WriteUInt8(ProposedRoles);
             _worldPacket.WriteInt32(LfgSlots.Count);
             _worldPacket.WriteInt32(LfgCompletedMask);
 
@@ -119,7 +123,7 @@ namespace Game.Networking.Packets
         public bool IsXRealm;
 
         // Lfg
-        public uint ProposedRoles;
+        public byte ProposedRoles;
         public int LfgCompletedMask;
         public List<int> LfgSlots = new();
     }
@@ -130,18 +134,21 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadUInt8();
-
+            bool hasPartyIndex = _worldPacket.HasBit();
             Accept = _worldPacket.HasBit();
 
             bool hasRolesDesired = _worldPacket.HasBit();
+
+            if (hasPartyIndex)
+                PartyIndex = _worldPacket.ReadUInt8();
+
             if (hasRolesDesired)
-                RolesDesired = _worldPacket.ReadUInt32();
+                RolesDesired = _worldPacket.ReadUInt8();
         }
 
-        public byte PartyIndex;
+        public byte? PartyIndex;
         public bool Accept;
-        public uint? RolesDesired;
+        public byte? RolesDesired;
     }
 
     class PartyUninvite : ClientPacket
@@ -150,14 +157,18 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadUInt8();
+            bool hasPartyIndex = _worldPacket.HasBit();
+            byte reasonLen = _worldPacket.ReadBits<byte>(8);
+
             TargetGUID = _worldPacket.ReadPackedGuid();
 
-            byte reasonLen = _worldPacket.ReadBits<byte>(8);
+            if (hasPartyIndex)
+                PartyIndex = _worldPacket.ReadUInt8();
+
             Reason = _worldPacket.ReadString(reasonLen);
         }
 
-        public byte PartyIndex;
+        public byte? PartyIndex;
         public ObjectGuid TargetGUID;
         public string Reason;
     }
@@ -192,11 +203,13 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadUInt8();
+            bool hasPartyIndex = _worldPacket.HasBit();
             TargetGUID = _worldPacket.ReadPackedGuid();
+            if (hasPartyIndex)
+                PartyIndex = _worldPacket.ReadUInt8();
         }
 
-        public byte PartyIndex;
+        public byte? PartyIndex;
         public ObjectGuid TargetGUID;
     }
 
@@ -265,8 +278,8 @@ namespace Game.Networking.Packets
             MemberStats.PositionZ = (short)(player.GetPositionZ());
 
             MemberStats.SpecID = (ushort)player.GetPrimarySpecialization();
-            MemberStats.PartyType[0] = (sbyte)(player.m_playerData.PartyType & 0xF);
-            MemberStats.PartyType[1] = (sbyte)(player.m_playerData.PartyType >> 4);
+            MemberStats.PartyType[0] = player.m_playerData.PartyType[0];
+            MemberStats.PartyType[1] = player.m_playerData.PartyType[1];
             MemberStats.WmoGroupID = 0;
             MemberStats.WmoDoodadPlacementID = 0;
 
@@ -356,11 +369,13 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadInt8();
+            bool hasPartyIndex = _worldPacket.HasBit();
             TargetGUID = _worldPacket.ReadPackedGuid();
+            if (hasPartyIndex)
+                PartyIndex = _worldPacket.ReadUInt8();
         }
 
-        public sbyte PartyIndex;
+        public byte? PartyIndex;
         public ObjectGuid TargetGUID;
     }
 
@@ -370,14 +385,16 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadInt8();
+            bool hasPartyIndex = _worldPacket.HasBit();
             TargetGUID = _worldPacket.ReadPackedGuid();
-            Role = _worldPacket.ReadInt32();
+            Role = _worldPacket.ReadUInt8();
+            if (hasPartyIndex)
+                PartyIndex = _worldPacket.ReadUInt8();
         }
 
-        public sbyte PartyIndex;
+        public byte? PartyIndex;
         public ObjectGuid TargetGUID;
-        public int Role;
+        public byte Role;
     }
 
     class RoleChangedInform : ServerPacket
@@ -386,18 +403,18 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt8(PartyIndex);
+            _worldPacket.WriteUInt8(PartyIndex);
             _worldPacket.WritePackedGuid(From);
             _worldPacket.WritePackedGuid(ChangedUnit);
-            _worldPacket.WriteInt32(OldRole);
-            _worldPacket.WriteInt32(NewRole);
+            _worldPacket.WriteUInt8(OldRole);
+            _worldPacket.WriteUInt8(NewRole);
         }
 
-        public sbyte PartyIndex;
+        public byte PartyIndex;
         public ObjectGuid From;
         public ObjectGuid ChangedUnit;
-        public int OldRole;
-        public int NewRole;
+        public byte OldRole;
+        public byte NewRole;
     }
 
     class LeaveGroup : ClientPacket
@@ -406,10 +423,11 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadInt8();
+            if (_worldPacket.HasBit())
+                PartyIndex = _worldPacket.ReadUInt8();
         }
 
-        public sbyte PartyIndex;
+        public byte? PartyIndex;
     }
 
     class GroupDestroyed : ServerPacket
@@ -425,13 +443,15 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadInt8();
+            bool hasPartyIndex = _worldPacket.HasBit();
             LootMethod = (LootMethod)_worldPacket.ReadUInt8();
             LootMasterGUID = _worldPacket.ReadPackedGuid();
             LootThreshold = (ItemQuality)_worldPacket.ReadUInt32();
+            if (hasPartyIndex)
+                PartyIndex = _worldPacket.ReadUInt8();
         }
 
-        public sbyte PartyIndex;
+        public byte? PartyIndex;
         public ObjectGuid LootMasterGUID;
         public LootMethod LootMethod;
         public ItemQuality LootThreshold;
@@ -443,12 +463,14 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
+            bool hasPartyIndex = _worldPacket.HasBit();
             PositionX = _worldPacket.ReadFloat();
             PositionY = _worldPacket.ReadFloat();
-            PartyIndex = _worldPacket.ReadInt8();
+            if (hasPartyIndex)
+                PartyIndex = _worldPacket.ReadUInt8();
         }
 
-        public sbyte PartyIndex;
+        public byte? PartyIndex;
         public float PositionX;
         public float PositionY;
     }
@@ -475,12 +497,14 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadInt8();
+            bool hasPartyIndex = _worldPacket.HasBit();
             Target = _worldPacket.ReadPackedGuid();
             Symbol = _worldPacket.ReadInt8();
+            if (hasPartyIndex)
+                PartyIndex = _worldPacket.ReadUInt8();
         }
 
-        public sbyte PartyIndex;
+        public byte? PartyIndex;
         public ObjectGuid Target;
         public sbyte Symbol;
     }
@@ -542,10 +566,11 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadInt8();
+            if (_worldPacket.HasBit())
+                PartyIndex = _worldPacket.ReadUInt8();
         }
 
-        public sbyte PartyIndex;
+        public byte? PartyIndex;
     }
 
     class SetAssistantLeader : ClientPacket
@@ -554,13 +579,15 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadUInt8();
-            Target = _worldPacket.ReadPackedGuid();
+            bool hasPartyIndex = _worldPacket.HasBit();
             Apply = _worldPacket.HasBit();
+            Target = _worldPacket.ReadPackedGuid();
+            if (hasPartyIndex)
+                PartyIndex = _worldPacket.ReadUInt8();
         }
 
         public ObjectGuid Target;
-        public byte PartyIndex;
+        public byte? PartyIndex;
         public bool Apply;
     }
 
@@ -570,14 +597,16 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadUInt8();
+            bool hasPartyIndex = _worldPacket.HasBit();
+            Set = _worldPacket.HasBit();
             Assignment = _worldPacket.ReadUInt8();
             Target = _worldPacket.ReadPackedGuid();
-            Set = _worldPacket.HasBit();
+            if (hasPartyIndex)
+                PartyIndex = _worldPacket.ReadUInt8();
         }
 
         public byte Assignment;
-        public byte PartyIndex;
+        public byte? PartyIndex;
         public ObjectGuid Target;
         public bool Set;
     }
@@ -588,10 +617,11 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadInt8();
+            if (_worldPacket.HasBit())
+                PartyIndex = _worldPacket.ReadUInt8();
         }
 
-        public sbyte PartyIndex;
+        public byte? PartyIndex;
     }
 
     class ReadyCheckStarted : ServerPacket
@@ -618,11 +648,12 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadUInt8();
             IsReady = _worldPacket.HasBit();
+            if (_worldPacket.HasBit())
+                PartyIndex = _worldPacket.ReadUInt8();
         }
 
-        public byte PartyIndex;
+        public byte? PartyIndex;
         public bool IsReady;
     }
 
@@ -683,10 +714,11 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadInt8();
+            if (_worldPacket.HasBit())
+                PartyIndex = _worldPacket.ReadUInt8();
         }
 
-        public sbyte PartyIndex;
+        public byte? PartyIndex;
     }
 
     class RolePollInform : ServerPacket
@@ -775,11 +807,13 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadUInt8();
+            bool hasPartyIndex = _worldPacket.HasBit();
             EveryoneIsAssistant = _worldPacket.HasBit();
+            if (hasPartyIndex)
+                PartyIndex = _worldPacket.ReadUInt8();
         }
 
-        public byte PartyIndex;
+        public byte? PartyIndex;
         public bool EveryoneIsAssistant;
     }
 
@@ -790,12 +824,13 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             TargetGUID = _worldPacket.ReadPackedGuid();
-            PartyIndex = _worldPacket.ReadInt8();
             NewSubGroup = _worldPacket.ReadUInt8();
+            if (_worldPacket.HasBit())
+                PartyIndex = _worldPacket.ReadUInt8();
         }
 
         public ObjectGuid TargetGUID;
-        public sbyte PartyIndex;
+        public byte? PartyIndex;
         public byte NewSubGroup;
     }
 
@@ -805,14 +840,16 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadInt8();
+            bool hasPartyIndex = _worldPacket.HasBit();
             FirstTarget = _worldPacket.ReadPackedGuid();
             SecondTarget = _worldPacket.ReadPackedGuid();
+            if (hasPartyIndex)
+                PartyIndex = _worldPacket.ReadUInt8();
         }
 
         public ObjectGuid FirstTarget;
         public ObjectGuid SecondTarget;
-        public sbyte PartyIndex;
+        public byte? PartyIndex;
     }
 
     class ClearRaidMarker : ClientPacket
@@ -893,7 +930,113 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
         }
     }
-    
+
+    class SetRestrictPingsToAssistants : ClientPacket
+    {
+        public byte? PartyIndex;
+        public bool RestrictPingsToAssistants;
+
+        public SetRestrictPingsToAssistants(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            bool hasPartyIndex = _worldPacket.HasBit();
+            RestrictPingsToAssistants = _worldPacket.HasBit();
+            if (hasPartyIndex)
+                PartyIndex = _worldPacket.ReadUInt8();
+        }
+    }
+
+    class SendPingUnit : ClientPacket
+    {
+        public ObjectGuid SenderGUID;
+        public ObjectGuid TargetGUID;
+        public PingSubjectType Type = PingSubjectType.Max;
+        public uint PinFrameID;
+
+        public SendPingUnit(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            SenderGUID = _worldPacket.ReadPackedGuid();
+            TargetGUID = _worldPacket.ReadPackedGuid();
+            Type = (PingSubjectType)_worldPacket.ReadUInt8();
+            PinFrameID = _worldPacket.ReadUInt32();
+        }
+    }
+
+    class ReceivePingUnit : ServerPacket
+    {
+        public ObjectGuid SenderGUID;
+        public ObjectGuid TargetGUID;
+        public PingSubjectType Type = PingSubjectType.Max;
+        public uint PinFrameID;
+
+        public ReceivePingUnit() : base(ServerOpcodes.ReceivePingUnit) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(SenderGUID);
+            _worldPacket.WritePackedGuid(TargetGUID);
+            _worldPacket.WriteUInt8((byte)Type);
+            _worldPacket.WriteUInt32(PinFrameID);
+        }
+    }
+
+    class SendPingWorldPoint : ClientPacket
+    {
+        public ObjectGuid SenderGUID;
+        public uint MapID;
+        public Vector3 Point;
+        public PingSubjectType Type = PingSubjectType.Max;
+        public uint PinFrameID;
+
+        public SendPingWorldPoint(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            SenderGUID = _worldPacket.ReadPackedGuid();
+            MapID = _worldPacket.ReadUInt32();
+            Point = _worldPacket.ReadVector3();
+            Type = (PingSubjectType)_worldPacket.ReadUInt8();
+            PinFrameID = _worldPacket.ReadUInt32();
+        }
+    }
+
+    class ReceivePingWorldPoint : ServerPacket
+    {
+        public ObjectGuid SenderGUID;
+        public uint MapID = 0;
+        public Vector3 Point;
+        public PingSubjectType Type = PingSubjectType.Max;
+        public uint PinFrameID;
+
+        public ReceivePingWorldPoint() : base(ServerOpcodes.ReceivePingWorldPoint) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(SenderGUID);
+            _worldPacket.WriteUInt32(MapID);
+            _worldPacket.WriteVector3(Point);
+            _worldPacket.WriteUInt8((byte)Type);
+            _worldPacket.WriteUInt32(PinFrameID);
+        }
+    }
+
+    class CancelPingPin : ServerPacket
+    {
+        public ObjectGuid SenderGUID;
+        public uint PinFrameID;
+
+        public CancelPingPin() : base(ServerOpcodes.CancelPingPin) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(SenderGUID);
+            _worldPacket.WriteUInt32(PinFrameID);
+        }
+    }
+
     //Structs
     public struct PartyMemberPhase
     {
@@ -931,7 +1074,7 @@ namespace Game.Networking.Packets
     }
 
     class PartyMemberAuraStates
-    {      
+    {
         public int SpellID;
         public ushort Flags;
         public uint ActiveFlags;
@@ -993,7 +1136,7 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             for (byte i = 0; i < 2; i++)
-                data.WriteInt8(PartyType[i]);
+                data.WriteUInt8(PartyType[i]);
 
             data.WriteInt16((short)Status);
             data.WriteUInt8(PowerType);
@@ -1053,7 +1196,7 @@ namespace Game.Networking.Packets
         public ushort SpecID;
         public ushort WmoGroupID;
         public uint WmoDoodadPlacementID;
-        public sbyte[] PartyType = new sbyte[2];
+        public byte[] PartyType = new byte[2];
         public CTROptions ChromieTime;
         public DungeonScoreSummary DungeonScore = new();
     }

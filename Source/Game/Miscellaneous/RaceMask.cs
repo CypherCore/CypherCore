@@ -5,32 +5,32 @@ using Framework.Constants;
 using System.Runtime.InteropServices;
 
 namespace Game.Miscellaneous
-{ 
+{
     public struct RaceMask
     {
-        public static RaceMask<ulong> AllPlayable = new RaceMask<ulong>(
+        public static RaceMask<ulong> AllPlayable = new RaceMask<ulong>((ulong)(
             RaceMask<ulong>.GetMaskForRace(Race.Human) | RaceMask<ulong>.GetMaskForRace(Race.Orc) | RaceMask<ulong>.GetMaskForRace(Race.Dwarf) | RaceMask<ulong>.GetMaskForRace(Race.NightElf) |
             RaceMask<ulong>.GetMaskForRace(Race.Undead) | RaceMask<ulong>.GetMaskForRace(Race.Tauren) | RaceMask<ulong>.GetMaskForRace(Race.Gnome) | RaceMask<ulong>.GetMaskForRace(Race.Troll) |
             RaceMask<ulong>.GetMaskForRace(Race.BloodElf) | RaceMask<ulong>.GetMaskForRace(Race.Draenei) | RaceMask<ulong>.GetMaskForRace(Race.Goblin) | RaceMask<ulong>.GetMaskForRace(Race.Worgen) |
             RaceMask<ulong>.GetMaskForRace(Race.PandarenNeutral) | RaceMask<ulong>.GetMaskForRace(Race.PandarenAlliance) | RaceMask<ulong>.GetMaskForRace(Race.PandarenHorde) | RaceMask<ulong>.GetMaskForRace(Race.Nightborne) |
             RaceMask<ulong>.GetMaskForRace(Race.HighmountainTauren) | RaceMask<ulong>.GetMaskForRace(Race.VoidElf) | RaceMask<ulong>.GetMaskForRace(Race.LightforgedDraenei) | RaceMask<ulong>.GetMaskForRace(Race.ZandalariTroll) |
             RaceMask<ulong>.GetMaskForRace(Race.KulTiran) | RaceMask<ulong>.GetMaskForRace(Race.DarkIronDwarf) | RaceMask<ulong>.GetMaskForRace(Race.Vulpera) | RaceMask<ulong>.GetMaskForRace(Race.MagharOrc) |
-            RaceMask<ulong>.GetMaskForRace(Race.MechaGnome) | RaceMask<ulong>.GetMaskForRace(Race.DracthyrAlliance) | RaceMask<ulong>.GetMaskForRace(Race.DracthyrHorde));
+            RaceMask<ulong>.GetMaskForRace(Race.MechaGnome) | RaceMask<ulong>.GetMaskForRace(Race.DracthyrAlliance) | RaceMask<ulong>.GetMaskForRace(Race.DracthyrHorde)));
+        
+        public static RaceMask<ulong> Neutral = new RaceMask<ulong>((ulong)RaceMask<ulong>.GetMaskForRace(Race.PandarenNeutral));
 
-        public static RaceMask<ulong> Neutral = new(RaceMask<ulong>.GetMaskForRace(Race.PandarenNeutral));
-
-        public static RaceMask<ulong> Alliance = new(
+        public static RaceMask<ulong> Alliance = new RaceMask<ulong>((ulong)(
            RaceMask<ulong>.GetMaskForRace(Race.Human) | RaceMask<ulong>.GetMaskForRace(Race.Dwarf) | RaceMask<ulong>.GetMaskForRace(Race.NightElf) |
            RaceMask<ulong>.GetMaskForRace(Race.Gnome) | RaceMask<ulong>.GetMaskForRace(Race.Draenei) | RaceMask<ulong>.GetMaskForRace(Race.Worgen) |
            RaceMask<ulong>.GetMaskForRace(Race.PandarenAlliance) | RaceMask<ulong>.GetMaskForRace(Race.VoidElf) | RaceMask<ulong>.GetMaskForRace(Race.LightforgedDraenei) |
-           RaceMask<ulong>.GetMaskForRace(Race.KulTiran) | RaceMask<ulong>.GetMaskForRace(Race.DarkIronDwarf) | RaceMask<ulong>.GetMaskForRace(Race.MechaGnome) | RaceMask<ulong>.GetMaskForRace(Race.DracthyrAlliance));
+           RaceMask<ulong>.GetMaskForRace(Race.KulTiran) | RaceMask<ulong>.GetMaskForRace(Race.DarkIronDwarf) | RaceMask<ulong>.GetMaskForRace(Race.MechaGnome) | RaceMask<ulong>.GetMaskForRace(Race.DracthyrAlliance)));
 
-        public static RaceMask<ulong> Horde = new(AllPlayable.RawValue & ~(Neutral | Alliance).RawValue);
+        public static RaceMask<ulong> Horde = new RaceMask<ulong>((ulong)(AllPlayable.RawValue & (~(Neutral | Alliance).RawValue)));
     }
 
-    public struct RaceMask<T> where T : unmanaged
+    public struct RaceMask<T>
     {
-        public T RawValue;
+        public dynamic RawValue;
 
         public RaceMask(T rawValue)
         {
@@ -39,26 +39,21 @@ namespace Game.Miscellaneous
 
         public bool HasRace(Race raceId)
         {
-            return ((dynamic)RawValue & GetMaskForRace(raceId)) != 0;
+            return (RawValue & GetMaskForRace(raceId)) != 0;
         }
 
         public bool IsEmpty()
         {
-            return RawValue == (dynamic)0;
+            return RawValue == 0;
         }
 
-        public static RaceMask<T> operator &(RaceMask<T> left, RaceMask<T> right) { return new RaceMask<T>((dynamic)left.RawValue & right.RawValue); }
-        public static RaceMask<T> operator |(RaceMask<T> left, RaceMask<T> right) { return new RaceMask<T>((dynamic)left.RawValue | right.RawValue); }
-
-        public static explicit operator T(RaceMask<T> raceMask)
-        {
-            return raceMask.RawValue;
-        }
+        public static RaceMask<T> operator &(RaceMask<T> left, RaceMask<T> right) { return new RaceMask<T>(left.RawValue & right.RawValue); }
+        public static RaceMask<T> operator |(RaceMask<T> left, RaceMask<T> right) { return new RaceMask<T>(left.RawValue | right.RawValue); }
 
         public static dynamic GetMaskForRace(Race raceId)
         {
             int raceBit = GetRaceBit(raceId);
-            return (raceBit >= 0 && (uint)raceBit < Marshal.SizeOf<T>() * 8 ? (1 << raceBit) : 0);
+            return (T)(dynamic)(raceBit >= 0 && (uint)raceBit < Marshal.SizeOf<T>() * 8 ? (1 << raceBit) : 0);
         }
 
         static int GetRaceBit(Race raceId)

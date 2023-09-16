@@ -47,187 +47,187 @@ namespace Game.Entities
         [FieldOffset(64)]
         public uint ScriptId;
 
-        [FieldOffset(68)]
+        [FieldOffset(72)]
         public string StringId;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public door Door;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public button Button;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public questgiver QuestGiver;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public chest Chest;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public binder Binder;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public generic Generic;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public trap Trap;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public chair Chair;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public spellFocus SpellFocus;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public text Text;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public goober Goober;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public transport Transport;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public areadamage AreaDamage;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public camera Camera;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public moTransport MoTransport;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public duelflag DuelFlag;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public fishingnode FishingNode;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public ritual Ritual;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public mailbox MailBox;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public guardpost GuardPost;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public spellcaster SpellCaster;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public meetingstone MeetingStone;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public flagstand FlagStand;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public fishinghole FishingHole;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public flagdrop FlagDrop;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public controlzone ControlZone;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public auraGenerator AuraGenerator;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public dungeonDifficulty DungeonDifficulty;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public barberChair BarberChair;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public destructiblebuilding DestructibleBuilding;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public guildbank GuildBank;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public trapDoor TrapDoor;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public newflag NewFlag;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public newflagdrop NewFlagDrop;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public garrisonbuilding GarrisonBuilding;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public garrisonplot GarrisonPlot;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public clientcreature ClientCreature;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public clientitem ClientItem;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public capturepoint CapturePoint;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public phaseablemo PhaseableMO;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public garrisonmonument GarrisonMonument;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public garrisonshipment GarrisonShipment;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public garrisonmonumentplaque GarrisonMonumentPlaque;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public itemforge ItemForge;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public uilink UILink;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public keystonereceptacle KeystoneReceptacle;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public gatheringnode GatheringNode;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public challengemodereward ChallengeModeReward;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public multi Multi;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public siegeableMulti SiegeableMulti;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public siegeableMO SiegeableMO;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public pvpReward PvpReward;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public playerchoicechest PlayerChoiceChest;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public legendaryforge LegendaryForge;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public garrtalenttree GarrTalentTree;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public weeklyrewardchest WeeklyRewardChest;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public clientmodel ClientModel;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public craftingTable CraftingTable;
 
-        [FieldOffset(72)]
+        [FieldOffset(80)]
         public raw Raw;
 
-        [FieldOffset(208)]
+        [FieldOffset(224)]
         public QueryGameObjectResponse QueryData;
 
         // helpers

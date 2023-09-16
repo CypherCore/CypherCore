@@ -283,7 +283,7 @@ public RealmBuildInfo GetBuildInfo(uint build)
             addressFamily.Id = 1;
 
             var address = new Address();
-            address.Ip = realm.GetAddressForClient(clientAddress).Address.ToString();
+            address.Ip = realm.GetAddressForClient(clientAddress).ToString();
             address.Port = realm.Port;
             addressFamily.Addresses.Add(address);
             serverAddresses.Families.Add(addressFamily);

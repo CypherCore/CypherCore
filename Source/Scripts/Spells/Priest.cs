@@ -824,7 +824,7 @@ namespace Scripts.Spells.Priest
         uint _damageSpellId;
         uint _healingSpellId;
 
-        spell_pri_penance(uint damageSpellId, uint healingSpellId)
+        public spell_pri_penance(uint damageSpellId, uint healingSpellId)
         {
             _damageSpellId = damageSpellId;
             _healingSpellId = healingSpellId;
@@ -862,9 +862,9 @@ namespace Scripts.Spells.Priest
             if (target)
             {
                 if (caster.IsFriendlyTo(target))
-                    caster.CastSpell(target, _healingSpellId, new CastSpellExtraArgs().SetTriggeringSpell(GetSpell()));
+                    caster.CastSpell(target, _healingSpellId, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreSpellAndCategoryCD).SetTriggeringSpell(GetSpell()));
                 else
-                    caster.CastSpell(target, _damageSpellId, new CastSpellExtraArgs().SetTriggeringSpell(GetSpell()));
+                    caster.CastSpell(target, _damageSpellId, new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreSpellAndCategoryCD).SetTriggeringSpell(GetSpell()));
             }
         }
 

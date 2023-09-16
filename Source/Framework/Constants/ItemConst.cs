@@ -1274,6 +1274,7 @@ namespace Framework.Constants
         ReagentBagWrongSlot = 115,// Reagent Bags can only be placed in the reagent bag slot.
         SlotOnlyReagentBag = 116,// Only Reagent Bags can be placed in the reagent bag slot.
         ReagentBagItemType = 117,// Only Reagents can be placed in Reagent Bags.
+        CantBulkSellItemWithRefund = 118// Items that can be refunded can't be bulk sold.
     }
 
     public enum BuyResult
@@ -1297,7 +1298,10 @@ namespace Framework.Constants
         YouDontOwnThatItem = 4, // You don't own that item.
         Unk = 5,       // Nothing Appears...
         OnlyEmptyBag = 6, // You can only do that with empty bags.
-        CantSellToThisMerchant = 7        // You cannot sell items to this merchant.
+        CantSellToThisMerchant = 7,        // You cannot sell items to this merchant.
+        MustRepairDurability = 8,       // DESCRIPTION You must repair that item's durability to use it.
+        VendorRefuseScappableAzerite = 9,       // DESCRIPTION The merchant doesn't want that item. Bring it to the Scrapper to extract Titan Residuum.
+        InternalBagError = 10,      // DESCRIPTION Internal Bag Error
     }
 
     public enum EnchantmentSlot

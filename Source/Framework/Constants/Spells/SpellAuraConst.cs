@@ -549,6 +549,8 @@ namespace Framework.Constants
         AllowMountInCombat = 539,
         ModSupportStat = 540, // NYI
         ModRequiredMountCapabilityFlags = 541,
+        Unk542 = 542,
+        Unk543 = 543,
         Total
     }
 

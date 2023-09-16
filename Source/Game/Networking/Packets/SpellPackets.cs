@@ -1753,11 +1753,9 @@ namespace Game.Networking.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteBits((byte)Reason, 4);
+            data.WriteUInt8((byte)Reason);
             if (Reason == SpellMissInfo.Reflect)
-                data.WriteBits(ReflectStatus, 4);
-
-            data.FlushBits();
+                data.WriteUInt8((byte)ReflectStatus);
         }
 
         public SpellMissInfo Reason;
@@ -1805,18 +1803,6 @@ namespace Game.Networking.Packets
         }
     }
 
-    public struct SpellAmmo
-    {
-        public int DisplayID;
-        public sbyte InventoryType;
-
-        public void Write(WorldPacket data)
-        {
-            data.WriteInt32(DisplayID);
-            data.WriteInt8(InventoryType);
-        }
-    }
-
     public struct CreatureImmunities
     {
         public uint School;
@@ -1861,7 +1847,7 @@ namespace Game.Networking.Packets
 
             MissileTrajectory.Write(data);
 
-            data.WriteInt32(Ammo.DisplayID);
+            data.WriteInt32(AmmoDisplayID);
             data.WriteUInt8(DestLocSpellCastIndex);
 
             Immunities.Write(data);
@@ -1876,9 +1862,6 @@ namespace Game.Networking.Packets
             data.WriteBits(TargetPoints.Count, 16);
             data.FlushBits();
 
-            foreach (SpellMissStatus missStatus in MissStatus)
-                missStatus.Write(data);
-
             Target.Write(data);
 
             foreach (ObjectGuid hitTarget in HitTargets)
@@ -1889,6 +1872,9 @@ namespace Game.Networking.Packets
 
             foreach (SpellHitStatus hitStatus in HitStatus)
                 hitStatus.Write(data);
+
+            foreach (SpellMissStatus missStatus in MissStatus)
+                missStatus.Write(data);
 
             foreach (SpellPowerData power in RemainingPower)
                 power.Write(data);
@@ -1917,7 +1903,7 @@ namespace Game.Networking.Packets
         public List<SpellPowerData> RemainingPower = new();
         public RuneData RemainingRunes;
         public MissileTrajectoryResult MissileTrajectory;
-        public SpellAmmo Ammo;
+        public int AmmoDisplayID;
         public byte DestLocSpellCastIndex;
         public List<TargetLocation> TargetPoints = new();
         public CreatureImmunities Immunities;

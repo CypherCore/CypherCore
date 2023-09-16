@@ -95,7 +95,13 @@ namespace Game.DataStorage
         public bool IsDynamicDifficultyMap() { return GetFlags().HasFlag(MapFlags.DynamicDifficulty); }
         public bool IsFlexLocking() { return GetFlags().HasFlag(MapFlags.FlexibleRaidLocking); }
         public bool IsGarrison() { return GetFlags().HasFlag(MapFlags.Garrison); }
-        public bool IsSplitByFaction() { return Id == 609 || Id == 2175 || Id == 2570; }
+        public bool IsSplitByFaction()
+        {
+            return Id == 609 || // Acherus (DeathKnight Start)
+            Id == 1265 ||   // Assault on the Dark Portal (WoD Intro)
+            Id == 2175 ||   // Exiles Reach - NPE
+            Id == 2570;     // Forbidden Reach (Dracthyr/Evoker Start)
+        }
 
         public MapFlags GetFlags() { return (MapFlags)Flags[0]; }
         public MapFlags2 GetFlags2() { return (MapFlags2)Flags[1]; }

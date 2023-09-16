@@ -85,6 +85,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(AddonsDisabled);
             _worldPacket.WriteBit(Unused1000);
             _worldPacket.WriteBit(ContentTrackingEnabled);
+            _worldPacket.WriteBit(IsSellAllJunkEnabled);
 
             _worldPacket.FlushBits();
 
@@ -178,6 +179,7 @@ namespace Game.Networking.Packets
         public bool AddonsDisabled;
         public bool Unused1000;
         public bool ContentTrackingEnabled;
+        public bool IsSellAllJunkEnabled;
 
         public SocialQueueConfig QuickJoinConfig;
         public SquelchInfo Squelch;
@@ -272,6 +274,10 @@ namespace Game.Networking.Packets
 
             _worldPacket.WriteBit(AccountSaveDataExportEnabled);
             _worldPacket.WriteBit(AccountLockedByExport);
+            _worldPacket.WriteBit(!RealmHiddenAlert.IsEmpty());
+
+            if (!RealmHiddenAlert.IsEmpty())
+                _worldPacket.WriteBits(RealmHiddenAlert.GetByteCount() + 1, 11);
 
             _worldPacket.FlushBits();
 
@@ -298,6 +304,9 @@ namespace Game.Networking.Packets
 
             if (LaunchETA.HasValue)
                 _worldPacket.WriteInt32(LaunchETA.Value);
+
+            if (!RealmHiddenAlert.IsEmpty())
+                _worldPacket.WriteString(RealmHiddenAlert);
 
             foreach (var sourceRegion in LiveRegionCharacterCopySourceRegions)
                 _worldPacket.WriteInt32(sourceRegion);
@@ -349,6 +358,7 @@ namespace Game.Networking.Packets
         public int? LaunchETA;
         public List<DebugTimeEventInfo> DebugTimeEvents = new();
         public int Unused1007;
+        public string RealmHiddenAlert;
     }
 
     public class MOTD : ServerPacket

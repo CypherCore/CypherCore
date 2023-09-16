@@ -138,6 +138,9 @@ namespace Game
             if (opcode == ClientOpcodes.MoveFallLand || opcode == ClientOpcodes.MoveStartSwim || opcode == ClientOpcodes.MoveSetFly)
                 mover.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.LandingOrFlight); // Parachutes
 
+            if (opcode == ClientOpcodes.MoveSetFly || opcode == ClientOpcodes.MoveSetAdvFly)
+                _player.UnsummonPetTemporaryIfAny(); // always do the pet removal on current client activeplayer only
+
             movementInfo.Guid = mover.GetGUID();
             movementInfo.Time = AdjustClientMovementTime(movementInfo.Time);
             mover.m_movementInfo = movementInfo;

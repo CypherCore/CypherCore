@@ -337,6 +337,23 @@ namespace Game.Networking.Packets
 
         public byte Result;
     }
+
+    class PetMode : ServerPacket
+    {
+        public ObjectGuid PetGUID;
+        public ReactStates ReactState;
+        public CommandStates CommandState;
+        public byte Flag;
+
+        public PetMode() : base(ServerOpcodes.PetMode, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(PetGUID);
+            _worldPacket.WriteUInt16((ushort)((int)CommandState | Flag << 8));
+            _worldPacket.WriteUInt8((byte)ReactState);
+        }
+    }
     
     //Structs
     public class PetSpellCooldown

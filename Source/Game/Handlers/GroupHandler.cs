@@ -82,17 +82,11 @@ namespace Game
                 return;
             }
 
-            Group group = invitingPlayer.GetGroup();
-            if (group != null && group.IsBGGroup())
-                group = invitingPlayer.GetOriginalGroup();
-
+            Group group = invitingPlayer.GetGroup(packet.PartyIndex);
             if (group == null)
                 group = invitingPlayer.GetGroupInvite();
 
-            Group group2 = invitedPlayer.GetGroup();
-            if (group2 != null && group2.IsBGGroup())
-                group2 = invitedPlayer.GetOriginalGroup();
-
+            Group group2 = invitedPlayer.GetGroup(packet.PartyIndex);
             PartyInvite partyInvite;
             // player already in another group or invited
             if (group2 || invitedPlayer.GetGroupInvite())
@@ -161,7 +155,10 @@ namespace Game
         void HandlePartyInviteResponse(PartyInviteResponse packet)
         {
             Group group = GetPlayer().GetGroupInvite();
-            if (!group)
+            if (group == null)
+                return;
+
+            if (packet.PartyIndex != 0 && group.GetGroupCategory() != (GroupCategory)packet.PartyIndex)
                 return;
 
             if (packet.Accept)
@@ -235,14 +232,14 @@ namespace Game
                 return;
             }
 
-            PartyResult res = GetPlayer().CanUninviteFromGroup(packet.TargetGUID);
+            PartyResult res = GetPlayer().CanUninviteFromGroup(packet.TargetGUID, packet.PartyIndex);
             if (res != PartyResult.Ok)
             {
                 SendPartyResult(PartyOperation.UnInvite, "", res);
                 return;
             }
 
-            Group grp = GetPlayer().GetGroup();
+            Group grp = GetPlayer().GetGroup(packet.PartyIndex);
             // grp is checked already above in CanUninviteFromGroup()
             Cypher.Assert(grp);
 
@@ -265,7 +262,7 @@ namespace Game
         void HandleSetPartyLeader(SetPartyLeader packet)
         {
             Player player = Global.ObjAccessor.FindConnectedPlayer(packet.TargetGUID);
-            Group group = GetPlayer().GetGroup();
+            Group group = GetPlayer().GetGroup(packet.PartyIndex);
 
             if (!group || !player)
                 return;
@@ -274,7 +271,7 @@ namespace Game
                 return;
 
             // Everything's fine, accepted.
-            group.ChangeLeader(packet.TargetGUID, packet.PartyIndex);
+            group.ChangeLeader(packet.TargetGUID);
             group.SendUpdate();
         }
 
@@ -283,12 +280,12 @@ namespace Game
         {
             RoleChangedInform roleChangedInform = new();
 
-            Group group = GetPlayer().GetGroup();
+            Group group = GetPlayer().GetGroup(packet.PartyIndex);
             byte oldRole = (byte)(group ? group.GetLfgRoles(packet.TargetGUID) : 0);
             if (oldRole == packet.Role)
                 return;
 
-            roleChangedInform.PartyIndex = packet.PartyIndex;
+            roleChangedInform.PartyIndex = (byte)group.GetGroupCategory();
             roleChangedInform.From = GetPlayer().GetGUID();
             roleChangedInform.ChangedUnit = packet.TargetGUID;
             roleChangedInform.OldRole = oldRole;
@@ -306,7 +303,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.LeaveGroup)]
         void HandleLeaveGroup(LeaveGroup packet)
         {
-            Group grp = GetPlayer().GetGroup();
+            Group grp = GetPlayer().GetGroup(packet.PartyIndex);
             Group grpInvite = GetPlayer().GetGroupInvite();
             if (grp == null && grpInvite == null)
                 return;
@@ -338,7 +335,7 @@ namespace Game
         {
             // not allowed to change
             /*
-            Group group = GetPlayer().GetGroup();
+            Group group = GetPlayer().GetGroup(packet.PartyIndex);
             if (!group)
                  return;
 
@@ -376,14 +373,15 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MinimapPing)]
         void HandleMinimapPing(MinimapPingClient packet)
         {
-            if (!GetPlayer().GetGroup())
+            Group group = GetPlayer().GetGroup(packet.PartyIndex);
+            if (group == null)
                 return;
 
             MinimapPing minimapPing = new();
             minimapPing.Sender = GetPlayer().GetGUID();
             minimapPing.PositionX = packet.PositionX;
             minimapPing.PositionY = packet.PositionY;
-            GetPlayer().GetGroup().BroadcastPacket(minimapPing, true, -1, GetPlayer().GetGUID());
+            group.BroadcastPacket(minimapPing, true, -1, GetPlayer().GetGUID());
         }
 
         [WorldPacketHandler(ClientOpcodes.RandomRoll)]
@@ -398,12 +396,12 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.UpdateRaidTarget)]
         void HandleUpdateRaidTarget(UpdateRaidTarget packet)
         {
-            Group group = GetPlayer().GetGroup();
-            if (!group)
+            Group group = GetPlayer().GetGroup(packet.PartyIndex);
+            if (group == null)
                 return;
 
             if (packet.Symbol == -1)                  // target icon request
-                group.SendTargetIconList(this, packet.PartyIndex);
+                group.SendTargetIconList(this);
             else                                        // target icon update
             {
                 if (group.IsRaidGroup() && !group.IsLeader(GetPlayer().GetGUID()) && !group.IsAssistant(GetPlayer().GetGUID()))
@@ -416,7 +414,7 @@ namespace Game
                         return;
                 }
 
-                group.SetTargetIcon((byte)packet.Symbol, packet.Target, GetPlayer().GetGUID(), packet.PartyIndex);
+                group.SetTargetIcon((byte)packet.Symbol, packet.Target, GetPlayer().GetGUID());
             }
         }
 
@@ -447,20 +445,20 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RequestPartyJoinUpdates)]
         void HandleRequestPartyJoinUpdates(RequestPartyJoinUpdates packet)
         {
-            Group group = GetPlayer().GetGroup();
-            if (!group)
+            Group group = GetPlayer().GetGroup(packet.PartyIndex);
+            if (group == null)
                 return;
 
-            group.SendTargetIconList(this, packet.PartyIndex);
-            group.SendRaidMarkersChanged(this, packet.PartyIndex);
+            group.SendTargetIconList(this);
+            group.SendRaidMarkersChanged(this);
         }
 
         [WorldPacketHandler(ClientOpcodes.ChangeSubGroup, Processing = PacketProcessing.ThreadUnsafe)]
         void HandleChangeSubGroup(ChangeSubGroup packet)
         {
             // we will get correct for group here, so we don't have to check if group is BG raid
-            Group group = GetPlayer().GetGroup();
-            if (!group)
+            Group group = GetPlayer().GetGroup(packet.PartyIndex);
+            if (group == null)
                 return;
 
             if (packet.NewSubGroup >= MapConst.MaxRaidSubGroups)
@@ -479,8 +477,8 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SwapSubGroups, Processing = PacketProcessing.ThreadUnsafe)]
         void HandleSwapSubGroups(SwapSubGroups packet)
         {
-            Group group = GetPlayer().GetGroup();
-            if (!group)
+            Group group = GetPlayer().GetGroup(packet.PartyIndex);
+            if (group == null)
                 return;
 
             ObjectGuid senderGuid = GetPlayer().GetGUID();
@@ -493,8 +491,8 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SetAssistantLeader)]
         void HandleSetAssistantLeader(SetAssistantLeader packet)
         {
-            Group group = GetPlayer().GetGroup();
-            if (!group)
+            Group group = GetPlayer().GetGroup(packet.PartyIndex);
+            if (group == null)
                 return;
 
             if (!group.IsLeader(GetPlayer().GetGUID()))
@@ -506,8 +504,8 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SetPartyAssignment)]
         void HandleSetPartyAssignment(SetPartyAssignment packet)
         {
-            Group group = GetPlayer().GetGroup();
-            if (!group)
+            Group group = GetPlayer().GetGroup(packet.PartyIndex);
+            if (group == null)
                 return;
 
             ObjectGuid senderGuid = GetPlayer().GetGUID();
@@ -532,8 +530,8 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.DoReadyCheck)]
         void HandleDoReadyCheckOpcode(DoReadyCheck packet)
         {
-            Group group = GetPlayer().GetGroup();
-            if (!group)
+            Group group = GetPlayer().GetGroup(packet.PartyIndex);
+            if (group == null)
                 return;
 
             /** error handling **/
@@ -541,14 +539,14 @@ namespace Game
                 return;
 
             // everything's fine, do it
-            group.StartReadyCheck(GetPlayer().GetGUID(), packet.PartyIndex, TimeSpan.FromMilliseconds(MapConst.ReadycheckDuration));
+            group.StartReadyCheck(GetPlayer().GetGUID(), TimeSpan.FromMilliseconds(MapConst.ReadycheckDuration));
         }
 
         [WorldPacketHandler(ClientOpcodes.ReadyCheckResponse, Processing = PacketProcessing.Inplace)]
         void HandleReadyCheckResponseOpcode(ReadyCheckResponseClient packet)
         {
-            Group group = GetPlayer().GetGroup();
-            if (!group)
+            Group group = GetPlayer().GetGroup(packet.PartyIndex);
+            if (group == null)
                 return;
 
             // everything's fine, do it
@@ -596,8 +594,8 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.InitiateRolePoll)]
         void HandleInitiateRolePoll(InitiateRolePoll packet)
         {
-            Group group = GetPlayer().GetGroup();
-            if (!group)
+            Group group = GetPlayer().GetGroup(packet.PartyIndex);
+            if (group == null)
                 return;
 
             ObjectGuid guid = GetPlayer().GetGUID();
@@ -606,15 +604,15 @@ namespace Game
 
             RolePollInform rolePollInform = new();
             rolePollInform.From = guid;
-            rolePollInform.PartyIndex = packet.PartyIndex;
+            rolePollInform.PartyIndex = (sbyte)group.GetGroupCategory();
             group.BroadcastPacket(rolePollInform, true);
         }
 
         [WorldPacketHandler(ClientOpcodes.SetEveryoneIsAssistant)]
         void HandleSetEveryoneIsAssistant(SetEveryoneIsAssistant packet)
         {
-            Group group = GetPlayer().GetGroup();
-            if (!group)
+            Group group = GetPlayer().GetGroup(packet.PartyIndex);
+            if (group == null)
                 return;
 
             if (!group.IsLeader(GetPlayer().GetGUID()))
@@ -627,13 +625,100 @@ namespace Game
         void HandleClearRaidMarker(ClearRaidMarker packet)
         {
             Group group = GetPlayer().GetGroup();
-            if (!group)
+            if (group == null)
                 return;
 
             if (group.IsRaidGroup() && !group.IsLeader(GetPlayer().GetGUID()) && !group.IsAssistant(GetPlayer().GetGUID()))
                 return;
 
             group.DeleteRaidMarker(packet.MarkerId);
+        }
+
+        bool CanSendPing(Player player, PingSubjectType type, ref Group group)
+        {
+            if (type >= PingSubjectType.Max)
+                return false;
+
+            if (!player.GetSession().CanSpeak())
+                return false;
+
+            group = player.GetGroup();
+            if (!group)
+                return false;
+
+            if (group.IsRestrictPingsToAssistants() && !group.IsLeader(player.GetGUID()) && !group.IsAssistant(player.GetGUID()))
+                return false;
+
+            return true;
+        }
+
+        [WorldPacketHandler(ClientOpcodes.SetRestrictPingsToAssistants)]
+        void HandleSetRestrictPingsToAssistants(SetRestrictPingsToAssistants setRestrictPingsToAssistants)
+        {
+            Group group = GetPlayer().GetGroup(setRestrictPingsToAssistants.PartyIndex);
+            if (!group)
+                return;
+
+            if (!group.IsLeader(GetPlayer().GetGUID()))
+                return;
+
+            group.SetRestrictPingsToAssistants(setRestrictPingsToAssistants.RestrictPingsToAssistants);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.SendPingUnit)]
+        void HandleSendPingUnit(SendPingUnit pingUnit)
+        {
+            Group group = null;
+            if (!CanSendPing(_player, pingUnit.Type, ref group))
+                return;
+
+            Unit target = Global.ObjAccessor.GetUnit(_player, pingUnit.TargetGUID);
+            if (!target || !_player.HaveAtClient(target))
+                return;
+
+            ReceivePingUnit broadcastPingUnit = new();
+            broadcastPingUnit.SenderGUID = _player.GetGUID();
+            broadcastPingUnit.TargetGUID = pingUnit.TargetGUID;
+            broadcastPingUnit.Type = pingUnit.Type;
+            broadcastPingUnit.PinFrameID = pingUnit.PinFrameID;
+            broadcastPingUnit.Write();
+
+            for (GroupReference itr = group.GetFirstMember(); itr != null; itr = itr.Next())
+            {
+                Player member = itr.GetSource();
+                if (_player == member || !_player.IsInMap(member))
+                    continue;
+
+                member.SendPacket(broadcastPingUnit);
+            }
+        }
+
+        [WorldPacketHandler(ClientOpcodes.SendPingWorldPoint)]
+        void HandleSendPingWorldPoint(SendPingWorldPoint pingWorldPoint)
+        {
+            Group group = null;
+            if (!CanSendPing(_player, pingWorldPoint.Type, ref group))
+                return;
+
+            if (_player.GetMapId() != pingWorldPoint.MapID)
+                return;
+
+            ReceivePingWorldPoint broadcastPingWorldPoint = new();
+            broadcastPingWorldPoint.SenderGUID = _player.GetGUID();
+            broadcastPingWorldPoint.MapID = pingWorldPoint.MapID;
+            broadcastPingWorldPoint.Point = pingWorldPoint.Point;
+            broadcastPingWorldPoint.Type = pingWorldPoint.Type;
+            broadcastPingWorldPoint.PinFrameID = pingWorldPoint.PinFrameID;
+            broadcastPingWorldPoint.Write();
+
+            for (GroupReference itr = group.GetFirstMember(); itr != null; itr = itr.Next())
+            {
+                Player member = itr.GetSource();
+                if (_player == member || !_player.IsInMap(member))
+                    continue;
+
+                member.SendPacket(broadcastPingWorldPoint);
+            }
         }
     }
 }

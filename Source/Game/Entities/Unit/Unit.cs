@@ -589,17 +589,38 @@ namespace Game.Entities
             return GetTransport();
         }
 
-        public void AtStartOfEncounter()
+        public void AtStartOfEncounter(EncounterType type)
         {
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.StartOfEncounter);
+
+            switch (type)
+            {
+                case EncounterType.DungeonEncounter:
+                    RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.StartOfDungeonEncounter);
+                    break;
+                case EncounterType.MythicPlusRun:
+                    RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.StartOfMythicPlusRun);
+                    break;
+                default:
+                    break;
+            }
 
             if (IsAlive())
                 Unit.ProcSkillsAndAuras(this, null, new ProcFlagsInit(ProcFlags.EncounterStart), new ProcFlagsInit(), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
         }
 
-        public void AtEndOfEncounter()
+        public void AtEndOfEncounter(EncounterType type)
         {
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.EndOfEncounter);
+
+            switch (type)
+            {
+                case EncounterType.DungeonEncounter:
+                    RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.EndOfDungeonEncounter);
+                    break;
+                default:
+                    break;
+            }
 
             GetSpellHistory().ResetCooldowns(pair =>
             {

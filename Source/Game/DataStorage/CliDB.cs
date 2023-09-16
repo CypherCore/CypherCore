@@ -34,7 +34,13 @@ namespace Game.DataStorage
             DB6Storage<T> ReadDB2<T>(string fileName, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale = 0) where T : new()
             {
                 DB6Storage<T> storage = new();
-                storage.LoadData($"{db2Path}/{defaultLocale}/{fileName}");
+                if (!storage.LoadData($"{db2Path}/{defaultLocale}/{fileName}"))
+                {
+                    Log.outError(LogFilter.ServerLoading, "Error loading DB2 files");
+                    Environment.Exit(1);
+                    return null;
+                }
+
                 storage.LoadHotfixData(availableDb2Locales, preparedStatement, preparedStatementLocale);
 
                 Global.DB2Mgr.AddDB2(storage.GetTableHash(), storage);

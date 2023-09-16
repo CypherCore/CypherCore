@@ -106,10 +106,10 @@ namespace Game
 
         public static void ChooseCreatureFlags(CreatureTemplate cInfo, out ulong npcFlag, out uint unitFlags, out uint unitFlags2, out uint unitFlags3, CreatureData data = null)
         {
-            npcFlag = data != null && data.npcflag != 0 ? data.npcflag : cInfo.Npcflag;
-            unitFlags = data != null && data.unit_flags != 0 ? data.unit_flags : (uint)cInfo.UnitFlags;
-            unitFlags2 = data != null && data.unit_flags2 != 0 ? data.unit_flags2 : cInfo.UnitFlags2;
-            unitFlags3 = data != null && data.unit_flags3 != 0 ? data.unit_flags3 : cInfo.UnitFlags3;
+            npcFlag = data != null && data.npcflag.HasValue ? data.npcflag.Value : cInfo.Npcflag;
+            unitFlags = data != null && data.unit_flags.HasValue ? data.unit_flags.Value : (uint)cInfo.UnitFlags;
+            unitFlags2 = data != null && data.unit_flags2.HasValue ? data.unit_flags2.Value : cInfo.UnitFlags2;
+            unitFlags3 = data != null && data.unit_flags3.HasValue ? data.unit_flags3.Value : cInfo.UnitFlags3;
         }
 
         public static ResponseCodes CheckPlayerName(string name, Locale locale, bool create = false)
@@ -3519,10 +3519,15 @@ namespace Game
                 data.SpawnDifficulties = ParseSpawnDifficulties(result.Read<string>(15), "creature", guid, data.MapId, spawnMasks.LookupByKey(data.MapId));
                 short gameEvent = result.Read<short>(16);
                 data.poolId = result.Read<uint>(17);
-                data.npcflag = result.Read<ulong>(18);
-                data.unit_flags = result.Read<uint>(19);
-                data.unit_flags2 = result.Read<uint>(20);
-                data.unit_flags3 = result.Read<uint>(21);
+
+                if (!result.IsNull(18))
+                    data.npcflag = result.Read<ulong>(18);
+                if (!result.IsNull(19))
+                    data.unit_flags = result.Read<uint>(19);
+                if (!result.IsNull(20))
+                    data.unit_flags2 = result.Read<uint>(20);
+                if (!result.IsNull(21))
+                    data.unit_flags3 = result.Read<uint>(21);
 
                 data.PhaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(22);
                 data.PhaseId = result.Read<uint>(23);
@@ -3636,25 +3641,34 @@ namespace Game
                     }
                 }
 
-                uint disallowedUnitFlags = (uint)(cInfo.UnitFlags & ~UnitFlags.Allowed);
-                if (disallowedUnitFlags != 0)
+                if (data.unit_flags.HasValue)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags` {disallowedUnitFlags}, removing incorrect flag.");
-                    cInfo.UnitFlags &= UnitFlags.Allowed;
+                    uint disallowedUnitFlags = (data.unit_flags.Value & ~(uint)UnitFlags.Allowed);
+                    if (disallowedUnitFlags != 0)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags` {disallowedUnitFlags}, removing incorrect flag.");
+                        data.unit_flags = data.unit_flags & (uint)UnitFlags.Allowed;
+                    }
                 }
 
-                uint disallowedUnitFlags2 = (cInfo.UnitFlags2 & ~(uint)UnitFlags2.Allowed);
-                if (disallowedUnitFlags2 != 0)
+                if (data.unit_flags2.HasValue)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags2` {disallowedUnitFlags2}, removing incorrect flag.");
-                    cInfo.UnitFlags2 &= (uint)UnitFlags2.Allowed;
+                    uint disallowedUnitFlags2 = (data.unit_flags2.Value & ~(uint)UnitFlags2.Allowed);
+                    if (disallowedUnitFlags2 != 0)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags2` {disallowedUnitFlags2}, removing incorrect flag.");
+                        data.unit_flags2 = data.unit_flags2 & (uint)UnitFlags2.Allowed;
+                    }
                 }
 
-                uint disallowedUnitFlags3 = (cInfo.UnitFlags3 & ~(uint)UnitFlags3.Allowed);
-                if (disallowedUnitFlags3 != 0)
+                if (data.unit_flags3.HasValue)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags2` {disallowedUnitFlags3}, removing incorrect flag.");
-                    cInfo.UnitFlags3 &= (uint)UnitFlags3.Allowed;
+                    uint disallowedUnitFlags3 = (data.unit_flags3.Value & ~(uint)UnitFlags3.Allowed);
+                    if (disallowedUnitFlags3 != 0)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags2` {disallowedUnitFlags3}, removing incorrect flag.");
+                        data.unit_flags3 = data.unit_flags3 & (uint)UnitFlags3.Allowed;
+                    }
                 }
 
                 if (WorldConfig.GetBoolValue(WorldCfg.CalculateCreatureZoneAreaData))
@@ -4798,7 +4812,7 @@ namespace Game
                 goInfo.entry, goInfo.type, N, dataN);
         }
 
-        List<Difficulty> ParseSpawnDifficulties(string difficultyString, string table, ulong spawnId, uint mapId, List<Difficulty> mapDifficulties)
+        public List<Difficulty> ParseSpawnDifficulties(string difficultyString, string table, ulong spawnId, uint mapId, List<Difficulty> mapDifficulties)
         {
             List<Difficulty> difficulties = new();
             StringArray tokens = new(difficultyString, ',');

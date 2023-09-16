@@ -122,6 +122,7 @@ namespace Game.Entities
         PetStable m_petStable;
         public List<PetAura> m_petAuras = new();
         uint m_temporaryUnsummonedPetNumber;
+        ReactStates? m_temporaryPetReactState;
         uint m_lastpetnumber;
 
         // Player summoning

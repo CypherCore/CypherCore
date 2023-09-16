@@ -32,12 +32,12 @@ namespace Game.DataStorage
         WDCHeader _header;
         string _tableName = typeof(T).Name;
 
-        public void LoadData(string fullFileName)
+        public bool LoadData(string fullFileName)
         {
             if (!File.Exists(fullFileName))
             {
                 Log.outError(LogFilter.ServerLoading, $"File {fullFileName} not found.");
-                return;
+                return false;
             }
 
             DBReader reader = new();
@@ -46,7 +46,7 @@ namespace Game.DataStorage
                 if (!reader.Load(stream))
                 {
                     Log.outError(LogFilter.ServerLoading, $"Error loading {fullFileName}.");
-                    return;
+                    return false;
                 }
             }
 
@@ -54,6 +54,8 @@ namespace Game.DataStorage
 
             foreach (var b in reader.Records)
                 Add((uint)b.Key, b.Value.As<T>());
+
+            return true;
         }
 
         public void LoadHotfixData(BitSet availableDb2Locales, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale)

@@ -2050,14 +2050,14 @@ namespace Framework.Constants
         DontDismissWhenEncounterIsAborted = 0x80000000  // NYI
     }
 
-    public enum TaxiNodeFlags : ushort
+    public enum TaxiNodeFlags : int
     {
         Alliance = 0x1,
         Horde = 0x2,
         UseFavoriteMount = 0x10
     }
 
-    public enum TaxiPathNodeFlags : byte
+    public enum TaxiPathNodeFlags : int
     {
         Teleport = 0x1,
         Stop = 0x2

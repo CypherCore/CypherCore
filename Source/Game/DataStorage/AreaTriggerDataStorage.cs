@@ -270,20 +270,25 @@ namespace Game.DataStorage
 
         public void LoadAreaTriggerSpawns()
         {
+            // build single time for check spawnmask
+            MultiMap<uint, Difficulty> spawnMasks = new();
+            foreach (var mapDifficulty in CliDB.MapDifficultyStorage.Values)
+                spawnMasks.Add(mapDifficulty.MapID, (Difficulty)mapDifficulty.DifficultyID);
+
             uint oldMSTime = Time.GetMSTime();
             // Load area trigger positions (to put them on the server)
-            //                                            0        1              2             3      4     5     6     7            8              9        10
-            SQLResult templates = DB.World.Query("SELECT SpawnId, AreaTriggerId, IsServerSide, MapId, PosX, PosY, PosZ, Orientation, PhaseUseFlags, PhaseId, PhaseGroup, " +
-                //11     12          13          14          15          16          17          18          19          20
-                "Shape, ShapeData0, ShapeData1, ShapeData2, ShapeData3, ShapeData4, ShapeData5, ShapeData6, ShapeData7, ScriptName FROM `areatrigger`");
-            if (!templates.IsEmpty())
+            //                                         0        1              2             3      4                  5     6     7     8            9              10       11
+            SQLResult result = DB.World.Query("SELECT SpawnId, AreaTriggerId, IsServerSide, MapId, SpawnDifficulties, PosX, PosY, PosZ, Orientation, PhaseUseFlags, PhaseId, PhaseGroup, " +
+                //12     13          14          15          16          17          18          19          20          21               22
+                "Shape, ShapeData0, ShapeData1, ShapeData2, ShapeData3, ShapeData4, ShapeData5, ShapeData6, ShapeData7, SpellForVisuals, ScriptName FROM `areatrigger`");
+            if (!result.IsEmpty())
             {
                 do
                 {
-                    ulong spawnId = templates.Read<ulong>(0);
-                    AreaTriggerId areaTriggerId = new(templates.Read<uint>(1), templates.Read<byte>(2) == 1);
-                    WorldLocation location = new(templates.Read<uint>(3), templates.Read<float>(4), templates.Read<float>(5), templates.Read<float>(6), templates.Read<float>(7));
-                    AreaTriggerTypes shape = (AreaTriggerTypes)templates.Read<byte>(11);
+                    ulong spawnId = result.Read<ulong>(0);
+                    AreaTriggerId areaTriggerId = new(result.Read<uint>(1), result.Read<byte>(2) == 1);
+                    WorldLocation location = new(result.Read<uint>(3), result.Read<float>(5), result.Read<float>(6), result.Read<float>(7), result.Read<float>(8));
+                    AreaTriggerTypes shape = (AreaTriggerTypes)result.Read<byte>(12);
 
                     if (GetAreaTriggerTemplate(areaTriggerId) == null)
                     {
@@ -303,36 +308,60 @@ namespace Game.DataStorage
                         continue;
                     }
 
+                    var difficulties = Global.ObjectMgr.ParseSpawnDifficulties(result.Read<string>(4), "areatrigger", spawnId, location.GetMapId(), spawnMasks[location.GetMapId()]);
+                    if (difficulties.Empty())
+                    {
+                        Log.outDebug(LogFilter.Sql, $"Table `areatrigger` has areatrigger (GUID: {spawnId}) that is not spawned in any difficulty, skipped.");
+                        continue;
+                    }
+
                     AreaTriggerSpawn spawn = new();
                     spawn.SpawnId = spawnId;
                     spawn.MapId = location.GetMapId();
                     spawn.TriggerId = areaTriggerId;
                     spawn.SpawnPoint = new Position(location);
 
-                    spawn.PhaseUseFlags = (PhaseUseFlagsValues)templates.Read<byte>(8);
-                    spawn.PhaseId = templates.Read<uint>(9);
-                    spawn.PhaseGroup = templates.Read<uint>(10);
+                    spawn.PhaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(9);
+                    spawn.PhaseId = result.Read<uint>(10);
+                    spawn.PhaseGroup = result.Read<uint>(11);
 
                     spawn.Shape.TriggerType = shape;
                     unsafe
                     {
                         for (var i = 0; i < SharedConst.MaxAreatriggerEntityData; ++i)
-                            spawn.Shape.DefaultDatas.Data[i] = templates.Read<float>(12 + i);
+                            spawn.Shape.DefaultDatas.Data[i] = result.Read<float>(13 + i);
                     }
 
-                    spawn.ScriptId = Global.ObjectMgr.GetScriptId(templates.Read<string>(20));
+                    if (!result.IsNull(21))
+                    {
+                        spawn.SpellForVisuals = result.Read<uint>(21);
+                        if (!Global.SpellMgr.HasSpellInfo(spawn.SpellForVisuals.Value, Difficulty.None))
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `areatrigger` has listed areatrigger SpawnId: {spawnId} with invalid SpellForVisual {spawn.SpellForVisuals}, set to none.");
+                            spawn.SpellForVisuals = null;
+                        }
+                    }
+
+                    spawn.ScriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(22));
                     spawn.spawnGroupData = Global.ObjectMgr.GetLegacySpawnGroup();
 
                     // Add the trigger to a map::cell map, which is later used by GridLoader to query
                     CellCoord cellCoord = GridDefines.ComputeCellCoord(spawn.SpawnPoint.GetPositionX(), spawn.SpawnPoint.GetPositionY());
-                    if (!_areaTriggerSpawnsByLocation.ContainsKey((spawn.MapId, cellCoord.GetId())))
-                        _areaTriggerSpawnsByLocation[(spawn.MapId, cellCoord.GetId())] = new SortedSet<ulong>();
 
-                    _areaTriggerSpawnsByLocation[(spawn.MapId, cellCoord.GetId())].Add(spawnId);
+                    foreach (Difficulty difficulty in difficulties)
+                    {
+                        if (!_areaTriggerSpawnsByLocation.ContainsKey((spawn.MapId, difficulty)))
+                            _areaTriggerSpawnsByLocation[(spawn.MapId, difficulty)] = new Dictionary<uint, SortedSet<ulong>>();
+
+                        if (!_areaTriggerSpawnsByLocation[(spawn.MapId, difficulty)].ContainsKey(cellCoord.GetId()))
+                            _areaTriggerSpawnsByLocation[(spawn.MapId, difficulty)][cellCoord.GetId()] = new SortedSet<ulong>();
+
+                        _areaTriggerSpawnsByLocation[(spawn.MapId, difficulty)][cellCoord.GetId()].Add(spawnId);
+                    }
 
                     // add the position to the map
                     _areaTriggerSpawnsBySpawnId[spawnId] = spawn;
-                } while (templates.NextRow());
+                } while (result.NextRow());
             }
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {_areaTriggerSpawnsBySpawnId.Count} areatrigger spawns in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
@@ -348,9 +377,13 @@ namespace Game.DataStorage
             return _areaTriggerCreateProperties.LookupByKey(spellMiscValue);
         }
 
-        public SortedSet<ulong> GetAreaTriggersForMapAndCell(uint mapId, uint cellId)
+        public SortedSet<ulong> GetAreaTriggersForMapAndCell(uint mapId, Difficulty difficulty, uint cellId)
         {
-            return _areaTriggerSpawnsByLocation.LookupByKey((mapId, cellId));
+            var atForMapAndDifficulty = _areaTriggerSpawnsByLocation.LookupByKey((mapId, difficulty));
+            if (atForMapAndDifficulty != null)
+                return atForMapAndDifficulty.LookupByKey(cellId);
+
+            return null;
         }
 
         public AreaTriggerSpawn GetAreaTriggerSpawn(ulong spawnId)
@@ -358,7 +391,7 @@ namespace Game.DataStorage
             return _areaTriggerSpawnsBySpawnId.LookupByKey(spawnId);
         }
 
-        Dictionary<(uint mapId, uint cellId), SortedSet<ulong>> _areaTriggerSpawnsByLocation = new();
+        Dictionary<(uint, Difficulty), Dictionary<uint, SortedSet<ulong>>> _areaTriggerSpawnsByLocation = new();
         Dictionary<ulong, AreaTriggerSpawn> _areaTriggerSpawnsBySpawnId = new();
         Dictionary<AreaTriggerId, AreaTriggerTemplate> _areaTriggerTemplateStore = new();
         Dictionary<uint, AreaTriggerCreateProperties> _areaTriggerCreateProperties = new();

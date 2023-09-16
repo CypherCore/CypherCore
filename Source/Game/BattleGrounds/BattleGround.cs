@@ -354,7 +354,7 @@ namespace Game.BattleGrounds
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
                     if (player != null)
-                        player.AtStartOfEncounter();
+                        player.AtStartOfEncounter(EncounterType.Battleground);
                 }
 
                 // Remove preparation
@@ -805,7 +805,7 @@ namespace Game.BattleGrounds
                 player.RemoveAura(BattlegroundConst.SpellMercenaryShapeshift);
                 player.RemovePlayerFlagEx(PlayerFlagsEx.MercenaryMode);
 
-                player.AtEndOfEncounter();
+                player.AtEndOfEncounter(EncounterType.Battleground);
 
                 player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.LeaveArenaOrBattleground);
 

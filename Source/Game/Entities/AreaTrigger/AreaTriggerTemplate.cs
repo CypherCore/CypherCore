@@ -292,6 +292,7 @@ namespace Game.Entities
     {
         public AreaTriggerId TriggerId;
         public AreaTriggerShapeInfo Shape = new();
+        public uint? SpellForVisuals;
 
         public AreaTriggerSpawn() : base(SpawnObjectType.AreaTrigger) { }
     }

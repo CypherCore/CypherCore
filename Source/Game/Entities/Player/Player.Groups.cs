@@ -35,9 +35,9 @@ namespace Game.Entities
             return nearMembers[randTarget];
         }
 
-        public PartyResult CanUninviteFromGroup(ObjectGuid guidMember = default)
+        public PartyResult CanUninviteFromGroup(ObjectGuid guidMember, byte? partyIndex)
         {
-            Group grp = GetGroup();
+            Group grp = GetGroup(partyIndex);
             if (!grp)
                 return PartyResult.NotInGroup;
 
@@ -58,7 +58,7 @@ namespace Game.Entities
                     return PartyResult.PartyLfgBootDungeonComplete;
 
                 Player player = Global.ObjAccessor.FindConnectedPlayer(guidMember);
-                if (!player.m_lootRolls.Empty())
+                if (player != null && !player.m_lootRolls.Empty())
                     return PartyResult.PartyLfgBootLootRolls;
 
                 // @todo Should also be sent when anyone has recently left combat, with an aprox ~5 seconds timer.
@@ -150,6 +150,23 @@ namespace Game.Entities
 
             return false;
         }
+
+        public Group GetGroup(byte? partyIndex)
+        {
+            Group group = GetGroup();
+            if (!partyIndex.HasValue)
+                return group;
+
+            GroupCategory category = (GroupCategory)partyIndex;
+            if (group != null && group.GetGroupCategory() == category)
+                return group;
+
+            Group originalGroup = GetOriginalGroup();
+            if (originalGroup && originalGroup.GetGroupCategory() == category)
+                return originalGroup;
+
+            return null;
+        }
         
         public void SetGroup(Group group, byte subgroup = 0)
         {
@@ -167,10 +184,7 @@ namespace Game.Entities
         public void SetPartyType(GroupCategory category, GroupType type)
         {
             Cypher.Assert(category < GroupCategory.Max);
-            byte value = m_playerData.PartyType;
-            value &= (byte)~((byte)0xFF << ((byte)category * 4));
-            value |= (byte)((byte)type << ((byte)category * 4));
-            SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PartyType), value);
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PartyType, (int)category), (byte)type);
         }
 
         public void ResetGroupUpdateSequenceIfNeeded(Group group)
@@ -207,12 +221,19 @@ namespace Game.Entities
         }
 
         public Group GetGroupInvite() { return m_groupInvite; }
+
         public void SetGroupInvite(Group group) { m_groupInvite = group; }
+
         public Group GetGroup() { return m_group.GetTarget(); }
+
         public GroupReference GetGroupRef() { return m_group; }
+
         public byte GetSubGroup() { return m_group.GetSubGroup(); }
+
         public GroupUpdateFlags GetGroupUpdateFlag() { return m_groupUpdateMask; }
+
         public void SetGroupUpdateFlag(GroupUpdateFlags flag) { m_groupUpdateMask |= flag; }
+
         public void RemoveGroupUpdateFlag(GroupUpdateFlags flag) { m_groupUpdateMask &= ~flag; }
 
         public Group GetOriginalGroup() { return m_originalGroup.GetTarget(); }

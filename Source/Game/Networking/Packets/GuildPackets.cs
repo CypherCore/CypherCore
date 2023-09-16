@@ -532,8 +532,8 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt32(RankID);
-            _worldPacket.WriteInt32(WithdrawGoldLimit);
             _worldPacket.WriteInt32(Flags);
+            _worldPacket.WriteInt32(WithdrawGoldLimit);
             _worldPacket.WriteInt32(NumTabs);
             _worldPacket.WriteInt32(Tab.Count);
 

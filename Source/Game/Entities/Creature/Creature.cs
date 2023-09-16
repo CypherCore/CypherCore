@@ -1315,10 +1315,11 @@ namespace Game.Entities
             CreatureData data = Global.ObjectMgr.NewOrExistCreatureData(m_spawnId);
 
             uint displayId = GetNativeDisplayId();
-            ulong npcflag = ((ulong)m_unitData.NpcFlags[1] << 32) | m_unitData.NpcFlags[0];
-            uint unitFlags = m_unitData.Flags;
-            uint unitFlags2 = m_unitData.Flags2;
-            uint unitFlags3 = m_unitData.Flags3;
+            ulong spawnNpcFlags = ((ulong)m_unitData.NpcFlags[1] << 32) | m_unitData.NpcFlags[0];
+            ulong? npcflag = null;
+            uint? unitFlags = null;
+            uint? unitFlags2 = null;
+            uint? unitFlags3 = null;
 
             // check if it's a custom model and if not, use 0 for displayId
             CreatureTemplate cinfo = GetCreatureTemplate();
@@ -1328,17 +1329,17 @@ namespace Game.Entities
                     if (displayId != 0 && displayId == model.CreatureDisplayID)
                         displayId = 0;
 
-                if (npcflag == (uint)cinfo.Npcflag)
-                    npcflag = 0;
+                if (spawnNpcFlags != cinfo.Npcflag)
+                    npcflag = spawnNpcFlags;
 
-                if (unitFlags == (uint)cinfo.UnitFlags)
-                    unitFlags = 0;
+                if (m_unitData.Flags == (uint)cinfo.UnitFlags)
+                    unitFlags = m_unitData.Flags;
 
-                if (unitFlags2 == cinfo.UnitFlags2)
-                    unitFlags2 = 0;
+                if (m_unitData.Flags2 == cinfo.UnitFlags2)
+                    unitFlags2 = m_unitData.Flags2;
 
-                if (unitFlags3 == cinfo.UnitFlags3)
-                    unitFlags3 = 0;
+                if (m_unitData.Flags3 == cinfo.UnitFlags3)
+                    unitFlags3 = m_unitData.Flags3;
             }
 
             if (data.SpawnId == 0)
@@ -1408,10 +1409,25 @@ namespace Game.Entities
             stmt.AddValue(index++, GetHealth());
             stmt.AddValue(index++, GetPower(PowerType.Mana));
             stmt.AddValue(index++, (byte)GetDefaultMovementType());
-            stmt.AddValue(index++, npcflag);
-            stmt.AddValue(index++, unitFlags);
-            stmt.AddValue(index++, unitFlags2);
-            stmt.AddValue(index++, unitFlags3);
+            if (npcflag.HasValue)
+                stmt.AddValue(index++, npcflag.Value);
+            else
+                stmt.AddNull(index++);
+
+            if (unitFlags.HasValue)
+                stmt.AddValue(index++, unitFlags.Value);
+            else
+                stmt.AddNull(index++);
+
+            if (unitFlags2.HasValue)
+                stmt.AddValue(index++, unitFlags2.Value);
+            else
+                stmt.AddNull(index++);
+
+            if (unitFlags3.HasValue)
+                stmt.AddValue(index++, unitFlags3.Value);
+            else
+                stmt.AddNull(index++);
             trans.Append(stmt);
 
             DB.World.CommitTransaction(trans);

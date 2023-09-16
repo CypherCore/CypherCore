@@ -38,24 +38,24 @@ namespace BNetServer
             }
 
             _hostnames[0] = ConfigMgr.GetDefaultValue("LoginREST.ExternalAddress", "127.0.0.1");
-            var externalAddress = Dns.GetHostEntry($"{_hostnames[0]}:{_port}", System.Net.Sockets.AddressFamily.InterNetwork);
-            if (externalAddress == null || externalAddress.AddressList.Empty())
+            var externalAddress = Dns.GetHostAddresses(_hostnames[0], System.Net.Sockets.AddressFamily.InterNetwork);
+            if (externalAddress == null || externalAddress.Empty())
             {
                 Log.outError(LogFilter.Network, $"Could not resolve LoginREST.ExternalAddress {_hostnames[0]}");
                 return;
             }
 
-            _addresses[0] = externalAddress.AddressList[0];
+            _addresses[0] = externalAddress[0];
 
             _hostnames[1] = ConfigMgr.GetDefaultValue("LoginREST.LocalAddress", "127.0.0.1");
-            var localAddress = Dns.GetHostEntry($"{_hostnames[1]}:{_port}", System.Net.Sockets.AddressFamily.InterNetwork);
-            if (localAddress == null || localAddress.AddressList.Empty())
+            var localAddress = Dns.GetHostAddresses(_hostnames[1], System.Net.Sockets.AddressFamily.InterNetwork);
+            if (localAddress == null || localAddress.Empty())
             {
                 Log.outError(LogFilter.Network, $"Could not resolve LoginREST.ExternalAddress {_hostnames[1]}");
                 return;
             }
 
-            _addresses[1] = localAddress.AddressList[0];
+            _addresses[1] = localAddress[0];
 
             // set up form inputs 
             formInputs.Type = "LOGIN_FORM";

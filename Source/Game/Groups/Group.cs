@@ -141,7 +141,7 @@ namespace Game.Groups
                 stmt.AddValue(index++, m_targetIcons[5].GetRawValue());
                 stmt.AddValue(index++, m_targetIcons[6].GetRawValue());
                 stmt.AddValue(index++, m_targetIcons[7].GetRawValue());
-                stmt.AddValue(index++, (byte)m_groupFlags);
+                stmt.AddValue(index++, (ushort)m_groupFlags);
                 stmt.AddValue(index++, (byte)m_dungeonDifficulty);
                 stmt.AddValue(index++, (byte)m_raidDifficulty);
                 stmt.AddValue(index++, (byte)m_legacyRaidDifficulty);
@@ -181,7 +181,7 @@ namespace Game.Groups
             for (byte i = 0; i < MapConst.TargetIconsCount; ++i)
                 m_targetIcons[i].SetRawValue(field.Read<byte[]>(4 + i));
 
-            m_groupFlags = (GroupFlags)field.Read<byte>(12);
+            m_groupFlags = (GroupFlags)field.Read<ushort>(12);
             if (m_groupFlags.HasAnyFlag(GroupFlags.Raid))
                 _initRaidSubGroupsCounter();
 
@@ -210,6 +210,9 @@ namespace Game.Groups
                 return;
             }
 
+            if (m_groupFlags.HasFlag(GroupFlags.EveryoneAssistant))
+                memberFlags |= (byte)GroupMemberFlags.Assistant;
+
             member.name = character.Name;
             member.race = character.RaceId;
             member._class = (byte)character.ClassId;
@@ -234,7 +237,7 @@ namespace Game.Groups
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_TYPE);
 
-                stmt.AddValue(0, (byte)m_groupFlags);
+                stmt.AddValue(0, (ushort)m_groupFlags);
                 stmt.AddValue(1, m_dbStoreId);
 
                 DB.Characters.Execute(stmt);
@@ -253,7 +256,7 @@ namespace Game.Groups
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_TYPE);
 
-                stmt.AddValue(0, (byte)m_groupFlags);
+                stmt.AddValue(0, (ushort)m_groupFlags);
                 stmt.AddValue(1, m_dbStoreId);
 
                 DB.Characters.Execute(stmt);
@@ -275,7 +278,7 @@ namespace Game.Groups
             if (m_memberSlots.Count > 5)
                 return; // What message error should we send?
 
-            m_groupFlags = GroupFlags.None;
+            m_groupFlags &= ~GroupFlags.Raid;
 
             m_subGroupsCounts = null;
 
@@ -283,7 +286,7 @@ namespace Game.Groups
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_TYPE);
 
-                stmt.AddValue(0, (byte)m_groupFlags);
+                stmt.AddValue(0, (ushort)m_groupFlags);
                 stmt.AddValue(1, m_dbStoreId);
 
                 DB.Characters.Execute(stmt);
@@ -631,7 +634,7 @@ namespace Game.Groups
             }
         }
 
-        public void ChangeLeader(ObjectGuid newLeaderGuid, sbyte partyIndex = 0)
+        public void ChangeLeader(ObjectGuid newLeaderGuid)
         {
             var slot = _getMemberSlot(newLeaderGuid);
             if (slot == null)
@@ -673,7 +676,7 @@ namespace Game.Groups
 
             GroupNewLeader groupNewLeader = new();
             groupNewLeader.Name = m_leaderName;
-            groupNewLeader.PartyIndex = partyIndex;
+            groupNewLeader.PartyIndex = (sbyte)GetGroupCategory();
             BroadcastPacket(groupNewLeader, true);
         }
 
@@ -743,7 +746,7 @@ namespace Game.Groups
             Global.GroupMgr.RemoveGroup(this);
         }
 
-        public void SetTargetIcon(byte symbol, ObjectGuid target, ObjectGuid changedBy, sbyte partyIndex)
+        public void SetTargetIcon(byte symbol, ObjectGuid target, ObjectGuid changedBy)
         {
             if (symbol >= MapConst.TargetIconsCount)
                 return;
@@ -752,25 +755,25 @@ namespace Game.Groups
             if (!target.IsEmpty())
                 for (byte i = 0; i < MapConst.TargetIconsCount; ++i)
                     if (m_targetIcons[i] == target)
-                        SetTargetIcon(i, ObjectGuid.Empty, changedBy, partyIndex);
+                        SetTargetIcon(i, ObjectGuid.Empty, changedBy);
 
             m_targetIcons[symbol] = target;
 
             SendRaidTargetUpdateSingle updateSingle = new();
-            updateSingle.PartyIndex = partyIndex;
+            updateSingle.PartyIndex = (sbyte)GetGroupCategory();
             updateSingle.Target = target;
             updateSingle.ChangedBy = changedBy;
             updateSingle.Symbol = (sbyte)symbol;
             BroadcastPacket(updateSingle, true);
         }
 
-        public void SendTargetIconList(WorldSession session, sbyte partyIndex)
+        public void SendTargetIconList(WorldSession session)
         {
             if (session == null)
                 return;
 
             SendRaidTargetUpdateAll updateAll = new();
-            updateAll.PartyIndex = partyIndex;
+            updateAll.PartyIndex = (sbyte)GetGroupCategory();
             for (byte i = 0; i < MapConst.TargetIconsCount; i++)
                 updateAll.TargetIcons.Add(i, m_targetIcons[i]);
 
@@ -1435,7 +1438,7 @@ namespace Game.Groups
                 EndReadyCheck();
         }
 
-        public void StartReadyCheck(ObjectGuid starterGuid, sbyte partyIndex, TimeSpan duration)
+        public void StartReadyCheck(ObjectGuid starterGuid, TimeSpan duration)
         {
             if (m_readyCheckStarted)
                 return;
@@ -1453,7 +1456,7 @@ namespace Game.Groups
 
             ReadyCheckStarted readyCheckStarted = new();
             readyCheckStarted.PartyGUID = m_guid;
-            readyCheckStarted.PartyIndex = partyIndex;
+            readyCheckStarted.PartyIndex = (sbyte)GetGroupCategory();
             readyCheckStarted.InitiatorGUID = starterGuid;
             readyCheckStarted.Duration = (uint)duration.TotalMilliseconds;
             BroadcastPacket(readyCheckStarted, false);
@@ -1554,11 +1557,11 @@ namespace Game.Groups
             SendRaidMarkersChanged();
         }
 
-        public void SendRaidMarkersChanged(WorldSession session = null, sbyte partyIndex = 0)
+        public void SendRaidMarkersChanged(WorldSession session = null)
         {
             RaidMarkersChanged packet = new();
 
-            packet.PartyIndex = partyIndex;
+            packet.PartyIndex = (sbyte)GetGroupCategory();
             packet.ActiveMarkers = m_activeMarkers;
 
             for (byte i = 0; i < MapConst.RaidMarkersCount; i++)
@@ -1842,6 +1845,41 @@ namespace Game.Groups
 
             foreach (MemberSlot member in m_memberSlots)
                 ToggleGroupMemberFlag(member, GroupMemberFlags.Assistant, apply);
+
+            if (!IsBGGroup() && !IsBFGroup())
+            {
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_TYPE);
+
+                stmt.AddValue(0, (ushort)m_groupFlags);
+                stmt.AddValue(1, m_dbStoreId);
+
+                DB.Characters.Execute(stmt);
+            }
+
+            SendUpdate();
+        }
+
+        public bool IsRestrictPingsToAssistants()
+        {
+            return m_groupFlags.HasFlag(GroupFlags.RestrictPings);
+        }
+
+        public void SetRestrictPingsToAssistants(bool restrictPingsToAssistants)
+        {
+            if (restrictPingsToAssistants)
+                m_groupFlags |= GroupFlags.RestrictPings;
+            else
+                m_groupFlags &= ~GroupFlags.RestrictPings;
+
+            if (!IsBGGroup() && !IsBFGroup())
+            {
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_TYPE);
+
+                stmt.AddValue(0, (ushort)m_groupFlags);
+                stmt.AddValue(1, m_dbStoreId);
+
+                DB.Characters.Execute(stmt);
+            }
 
             SendUpdate();
         }

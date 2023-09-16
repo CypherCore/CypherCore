@@ -121,7 +121,7 @@ namespace Scripts.Smart
     {
         public SmartEventTrigger() : base("SmartEventTrigger") { }
 
-        void OnTrigger(WorldObject obj, WorldObject invoker, uint eventId)
+        public override void OnTrigger(WorldObject obj, WorldObject invoker, uint eventId)
         {
             Log.outDebug(LogFilter.ScriptsAi, $"Event {eventId} is using SmartEventTrigger script");
             SmartScript script = new();

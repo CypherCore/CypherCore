@@ -265,7 +265,7 @@ namespace Game
             foreach (var dungeonId in updateData.dungeons)
                 lfgUpdateStatus.Slots.Add(Global.LFGMgr.GetLFGDungeonEntry(dungeonId));
 
-            lfgUpdateStatus.RequestedRoles = (uint)Global.LFGMgr.GetRoles(_player.GetGUID());
+            lfgUpdateStatus.RequestedRoles = (byte)Global.LFGMgr.GetRoles(_player.GetGUID());
             //lfgUpdateStatus.SuspendedPlayers;
             lfgUpdateStatus.IsParty = party;
             lfgUpdateStatus.NotifyUI = true;
@@ -480,7 +480,7 @@ namespace Game
             foreach (var pair in proposal.players)
             {
                 var proposalPlayer = new LFGProposalUpdatePlayer();
-                proposalPlayer.Roles = (uint)pair.Value.role;
+                proposalPlayer.Roles = (byte)pair.Value.role;
                 proposalPlayer.Me = (pair.Key == playerGuid);
                 proposalPlayer.MyParty = !pair.Value.group.IsEmpty() && pair.Value.group == proposal.group;
                 proposalPlayer.SameParty = !pair.Value.group.IsEmpty() && pair.Value.group == guildGuid;

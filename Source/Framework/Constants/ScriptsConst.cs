@@ -71,4 +71,11 @@ namespace Framework.Constants
         //Apply,
         //Remove
     }
+
+    public enum EncounterType
+    {
+        DungeonEncounter,
+        Battleground,
+        MythicPlusRun
+    }
 }

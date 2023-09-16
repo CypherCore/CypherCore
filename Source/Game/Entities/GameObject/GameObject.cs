@@ -716,7 +716,7 @@ namespace Game.Entities
                             loot?.Update();
 
                             // Non-consumable chest was partially looted and restock time passed, restock all loot now
-                            if (GetGoInfo().Chest.consumable == 0 && GetGoInfo().Chest.chestRestockTime != 0 && GameTime.GetGameTime() >= m_restockTime)
+                            if (GetGoInfo().Chest.consumable == 0 && m_restockTime != 0 && GameTime.GetGameTime() >= m_restockTime)
                             {
                                 m_restockTime = 0;
                                 m_lootState = LootState.Ready;
@@ -2361,7 +2361,11 @@ namespace Game.Entities
                     if (info == null)
                         return;
 
-                    if (!user.IsPlayer())
+                    Player player = user.ToPlayer();
+                    if (player == null)
+                        return;
+
+                    if (!player.CanUseBattlegroundObject(this))
                         return;
 
                     GameObjectType.NewFlag newFlag = (GameObjectType.NewFlag)m_goTypeImpl;
@@ -2384,12 +2388,15 @@ namespace Game.Entities
                     if (!user.IsPlayer())
                         return;
 
+                    if (!user.IsAlive())
+                        return;
+
                     GameObject owner = GetMap().GetGameObject(GetOwnerGUID());
                     if (owner != null)
                     {
                         if (owner.GetGoType() == GameObjectTypes.NewFlag)
                         {
-                            GameObjectType.NewFlag newFlag = (GameObjectType.NewFlag)m_goTypeImpl;
+                            GameObjectType.NewFlag newFlag = (GameObjectType.NewFlag)owner.m_goTypeImpl;
                             if (newFlag == null)
                                 return;
 

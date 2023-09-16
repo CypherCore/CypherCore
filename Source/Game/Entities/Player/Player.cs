@@ -109,8 +109,8 @@ namespace Game.Entities
             m_questObjectiveCriteriaMgr = new QuestObjectiveCriteriaManager(this);
             m_sceneMgr = new SceneMgr(this);
 
-            m_bgBattlegroundQueueID[0] = new BgBattlegroundQueueID_Rec();
-            m_bgBattlegroundQueueID[1] = new BgBattlegroundQueueID_Rec();
+            for (var i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
+                m_bgBattlegroundQueueID[i] = new BgBattlegroundQueueID_Rec();
 
             m_bgData = new BGData();
 
@@ -1057,6 +1057,55 @@ namespace Game.Entities
         public void SetLastPetNumber(uint petnumber) { m_lastpetnumber = petnumber; }
         public uint GetTemporaryUnsummonedPetNumber() { return m_temporaryUnsummonedPetNumber; }
         public void SetTemporaryUnsummonedPetNumber(uint petnumber) { m_temporaryUnsummonedPetNumber = petnumber; }
+
+        public ReactStates? GetTemporaryPetReactState() { return m_temporaryPetReactState; }
+        
+        public void DisablePetControlsOnMount(ReactStates reactState, CommandStates commandState)
+        {
+            Pet pet = GetPet();
+            if (pet == null)
+                return;
+
+            m_temporaryPetReactState = pet.GetReactState();
+            pet.SetReactState(reactState);
+            CharmInfo charmInfo = pet.GetCharmInfo();
+            if (charmInfo != null)
+                charmInfo.SetCommandState(commandState);
+
+            pet.GetMotionMaster().MoveFollow(this, SharedConst.PetFollowDist, pet.GetFollowAngle());
+
+            PetMode petMode = new();
+            petMode.PetGUID = pet.GetGUID();
+            petMode.ReactState = reactState;
+            petMode.CommandState = commandState;
+            petMode.Flag = 0;
+            SendPacket(petMode);
+        }
+
+        public void EnablePetControlsOnDismount()
+        {
+            Pet pet = GetPet();
+            if (pet != null)
+            {
+                PetMode petMode = new();
+                petMode.PetGUID = pet.GetGUID();
+                if (m_temporaryPetReactState.HasValue)
+                {
+                    petMode.ReactState = m_temporaryPetReactState.Value;
+                    pet.SetReactState(m_temporaryPetReactState.Value);
+                }
+
+                CharmInfo charmInfo = pet.GetCharmInfo();
+                if (charmInfo != null)
+                    petMode.CommandState = charmInfo.GetCommandState();
+
+                petMode.Flag = 0;
+                SendPacket(petMode);
+            }
+
+            m_temporaryPetReactState = null;
+        }
+
         public void UnsummonPetTemporaryIfAny()
         {
             Pet pet = GetPet();
@@ -1091,7 +1140,7 @@ namespace Game.Entities
 
         public bool IsPetNeedBeTemporaryUnsummoned()
         {
-            return !IsInWorld || !IsAlive() || IsMounted();
+            return !IsInWorld || !IsAlive() || HasUnitMovementFlag(MovementFlag.Flying) || HasExtraUnitMovementFlag2(MovementFlags3.AdvFlying);
         }
 
         public void SendRemoveControlBar()
@@ -6400,8 +6449,8 @@ namespace Game.Entities
         public void SendSellError(SellResult msg, Creature creature, ObjectGuid guid)
         {
             SellResponse sellResponse = new();
-            sellResponse.VendorGUID = (creature ? creature.GetGUID() : ObjectGuid.Empty);
-            sellResponse.ItemGUID = guid;
+            sellResponse.VendorGUID = creature ? creature.GetGUID() : ObjectGuid.Empty;
+            sellResponse.ItemGUIDs.Add(guid);
             sellResponse.Reason = msg;
             SendPacket(sellResponse);
         }

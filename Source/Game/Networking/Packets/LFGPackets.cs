@@ -16,18 +16,21 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             QueueAsGroup = _worldPacket.HasBit();
+            bool hasPartyIndex = _worldPacket.HasBit();
             Unknown = _worldPacket.HasBit();
-            PartyIndex = _worldPacket.ReadUInt8();
             Roles = (LfgRoles)_worldPacket.ReadUInt32();
-
             var slotsCount = _worldPacket.ReadInt32();
+
+            if (hasPartyIndex)
+                PartyIndex = _worldPacket.ReadUInt8();
+
             for (var i = 0; i < slotsCount; ++i) // Slots
                 Slots.Add(_worldPacket.ReadUInt32());
         }
 
         public bool QueueAsGroup;
-        bool Unknown;       // Always false in 7.2.5
-        public byte PartyIndex;
+        public bool Unknown;       // Always false in 7.2.5
+        public byte? PartyIndex;
         public LfgRoles Roles;
         public List<uint> Slots = new();
     }
@@ -68,12 +71,14 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
+            bool hasPartyIndex = _worldPacket.HasBit();
             RolesDesired = (LfgRoles)_worldPacket.ReadUInt32();
-            PartyIndex = _worldPacket.ReadUInt8();
+            if (hasPartyIndex)
+                PartyIndex = _worldPacket.ReadUInt8();
         }
 
         public LfgRoles RolesDesired;
-        public byte PartyIndex;
+        public byte? PartyIndex;
     }
 
     class DFBootPlayerVote : ClientPacket
@@ -107,10 +112,11 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Player = _worldPacket.HasBit();
-            PartyIndex = _worldPacket.ReadUInt8();
+            if (_worldPacket.HasBit())
+                PartyIndex = _worldPacket.ReadUInt8();
         }
 
-        public byte PartyIndex;
+        public byte? PartyIndex;
         public bool Player;
     }
 
@@ -163,7 +169,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8(SubType);
             _worldPacket.WriteUInt8(Reason);
             _worldPacket.WriteInt32(Slots.Count);
-            _worldPacket.WriteUInt32(RequestedRoles);
+            _worldPacket.WriteUInt8(RequestedRoles);
             _worldPacket.WriteInt32(SuspendedPlayers.Count);
             _worldPacket.WriteUInt32(QueueMapID);
 
@@ -186,7 +192,7 @@ namespace Game.Networking.Packets
         public byte SubType;
         public byte Reason;
         public List<uint> Slots = new();
-        public uint RequestedRoles;
+        public byte RequestedRoles;
         public List<ObjectGuid> SuspendedPlayers = new();
         public uint QueueMapID;
         public bool NotifyUI;
@@ -204,7 +210,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Player);
-            _worldPacket.WriteUInt32((uint)RoleMask);
+            _worldPacket.WriteUInt8((byte)RoleMask);
             _worldPacket.WriteBit(Accepted);
             _worldPacket.FlushBits();
         }
@@ -497,7 +503,7 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(Mask);
+            data.WriteUInt8(Mask);
             data.WriteUInt32(RewardMoney);
             data.WriteUInt32(RewardXP);
             data.WriteInt32(Item.Count);
@@ -544,7 +550,7 @@ namespace Game.Networking.Packets
                 data.WriteInt32(Honor.Value);
         }
 
-        public uint Mask;
+        public byte Mask;
         public uint RewardMoney;
         public uint RewardXP;
         public List<LfgPlayerQuestRewardItem> Item = new();
@@ -608,7 +614,7 @@ namespace Game.Networking.Packets
 
     public class LFGRoleCheckUpdateMember
     {
-        public LFGRoleCheckUpdateMember(ObjectGuid guid, uint rolesDesired, byte level, bool roleCheckComplete)
+        public LFGRoleCheckUpdateMember(ObjectGuid guid, byte rolesDesired, byte level, bool roleCheckComplete)
         {
             Guid = guid;
             RolesDesired = rolesDesired;
@@ -619,14 +625,14 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WritePackedGuid(Guid);
-            data.WriteUInt32(RolesDesired);
+            data.WriteUInt8(RolesDesired);
             data.WriteUInt8(Level);
             data.WriteBit(RoleCheckComplete);
             data.FlushBits();
         }
 
         public ObjectGuid Guid;
-        public uint RolesDesired;
+        public byte RolesDesired;
         public byte Level;
         public bool RoleCheckComplete;
     }
@@ -723,7 +729,7 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(Roles);
+            data.WriteUInt8(Roles);
             data.WriteBit(Me);
             data.WriteBit(SameParty);
             data.WriteBit(MyParty);
@@ -732,7 +738,7 @@ namespace Game.Networking.Packets
             data.FlushBits();
         }
 
-        public uint Roles;
+        public byte Roles;
         public bool Me;
         public bool SameParty;
         public bool MyParty;

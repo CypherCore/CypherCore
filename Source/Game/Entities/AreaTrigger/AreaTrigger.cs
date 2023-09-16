@@ -246,13 +246,26 @@ namespace Game.Entities
             SetEntry(areaTriggerTemplate.Id.Id);
 
             SetObjectScale(1.0f);
+            SetDuration(-1);
 
             SetUpdateFieldValue(m_areaTriggerData.ModifyValue(m_areaTriggerData.BoundsRadius2D), GetMaxSearchRadius());
-            SetUpdateFieldValue(m_areaTriggerData.ModifyValue(m_areaTriggerData.DecalPropertiesID), 24u); // blue decal, for .debug areatrigger visibility
+            if (position.SpellForVisuals.HasValue)
+            {
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(position.SpellForVisuals.Value, Difficulty.None);
+                SetUpdateFieldValue(m_areaTriggerData.ModifyValue(m_areaTriggerData.SpellForVisuals), position.SpellForVisuals.Value);
 
-            ScaleCurve extraScaleCurve = m_areaTriggerData.ModifyValue(m_areaTriggerData.ExtraScaleCurve);
-            SetUpdateFieldValue(extraScaleCurve.ModifyValue(extraScaleCurve.ParameterCurve), (uint)1.0000001f);
-            SetUpdateFieldValue(extraScaleCurve.ModifyValue(extraScaleCurve.OverrideActive), true);
+                SpellCastVisualField spellCastVisual = m_areaTriggerData.ModifyValue(m_areaTriggerData.SpellVisual);
+                SetUpdateFieldValue(ref spellCastVisual.SpellXSpellVisualID, spellInfo.GetSpellXSpellVisualId());
+                SetUpdateFieldValue(ref spellCastVisual.ScriptVisualID, 0u);
+            }
+
+            if (IsServerSide())
+                SetUpdateFieldValue(m_areaTriggerData.ModifyValue(m_areaTriggerData.DecalPropertiesID), 24u); // blue decal, for .debug areatrigger visibility
+
+            SetScaleCurve(m_areaTriggerData.ModifyValue(m_areaTriggerData.ExtraScaleCurve), new AreaTriggerScaleCurveTemplate());
+
+            VisualAnim visualAnim = m_areaTriggerData.ModifyValue(m_areaTriggerData.VisualAnim);
+            SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.AnimationDataID), -1);
 
             _shape = position.Shape;
             _maxSearchRadius = _shape.GetMaxSearchRadius();
@@ -289,16 +302,16 @@ namespace Game.Entities
                 }
                 else
                     UpdateSplinePosition(diff);
+            }
 
-                if (GetDuration() != -1)
+            if (GetDuration() != -1)
+            {
+                if (GetDuration() > diff)
+                    _UpdateDuration((int)(_duration - diff));
+                else
                 {
-                    if (GetDuration() > diff)
-                        _UpdateDuration((int)(_duration - diff));
-                    else
-                    {
-                        Remove(); // expired
-                        return;
-                    }
+                    Remove(); // expired
+                    return;
                 }
             }
 
@@ -368,7 +381,7 @@ namespace Game.Entities
             SetUpdateFieldValue(scaleCurve.ModifyValue(scaleCurve.OverrideActive), true);
             SetUpdateFieldValue(scaleCurve.ModifyValue(scaleCurve.StartTimeOffset), curve.StartTimeOffset);
 
-            Position point = null;
+            Position point = new Position();
             // ParameterCurve packing information
             // (not_using_points & 1) | ((interpolation_mode & 0x7) << 1) | ((first_point_offset & 0xFFFFF) << 4) | ((point_count & 0xFF) << 24)
             //   if not_using_points is set then the entire field is simply read as a float (ignoring that lowest bit)

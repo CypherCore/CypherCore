@@ -175,7 +175,7 @@ namespace Game.Entities
             m_lifetime = duration;
 
             if (m_type == TempSummonType.ManualDespawn)
-                m_type = (duration == TimeSpan.Zero) ? TempSummonType.DeadDespawn : TempSummonType.TimedDespawn;
+                m_type = (duration <= TimeSpan.Zero) ? TempSummonType.DeadDespawn : TempSummonType.TimedDespawn;
 
             if (summoner != null && summoner.IsPlayer())
             {

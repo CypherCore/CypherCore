@@ -1430,23 +1430,8 @@ namespace Game.Entities
                     }
                 }
 
-                // unsummon pet
-                Pet pet = player.GetPet();
-                if (pet != null)
-                {
-                    Battleground bg = ToPlayer().GetBattleground();
-                    // don't unsummon pet in arena but SetFlag UNIT_FLAG_STUNNED to disable pet's interface
-                    if (bg && bg.IsArena())
-                        pet.SetUnitFlag(UnitFlags.Stunned);
-                    else
-                        player.UnsummonPetTemporaryIfAny();
-                }
-
-                // if we have charmed npc, stun him also (everywhere)
-                Unit charm = player.GetCharmed();
-                if (charm)
-                    if (charm.GetTypeId() == TypeId.Unit)
-                        charm.SetUnitFlag(UnitFlags.Stunned);
+                // disable pet controls
+                player.DisablePetControlsOnMount(ReactStates.Passive, CommandStates.Follow);
 
                 player.SendMovementSetCollisionHeight(player.GetCollisionHeight(), UpdateCollisionHeightReason.Mount);
             }
@@ -1483,20 +1468,8 @@ namespace Game.Entities
             Player player = ToPlayer();
             if (player != null)
             {
-                Pet pPet = player.GetPet();
-                if (pPet != null)
-                {
-                    if (pPet.HasUnitFlag(UnitFlags.Stunned) && !pPet.HasUnitState(UnitState.Stunned))
-                        pPet.RemoveUnitFlag(UnitFlags.Stunned);
-                }
-                else
-                    player.ResummonPetTemporaryUnSummonedIfAny();
-
-                // if we have charmed npc, remove stun also
-                Unit charm = player.GetCharmed();
-                if (charm)
-                    if (charm.GetTypeId() == TypeId.Unit && charm.HasUnitFlag(UnitFlags.Stunned) && !charm.HasUnitState(UnitState.Stunned))
-                        charm.RemoveUnitFlag(UnitFlags.Stunned);
+                player.EnablePetControlsOnDismount();
+                player.ResummonPetTemporaryUnSummonedIfAny();
             }
         }
 

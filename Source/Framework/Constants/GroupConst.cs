@@ -61,6 +61,7 @@ namespace Framework.Constants
         EveryoneAssistant = 0x040, // Script_IsEveryoneAssistant()
         GuildGroup = 0x100,
         CrossFaction = 0x200,
+        RestrictPings = 0x400,
 
         MaskBgRaid = FakeRaid | Raid
     }
@@ -150,6 +151,18 @@ namespace Framework.Constants
     {
         Home = 0,
         Instance = 1,
+
+        Max
+    }
+
+    public enum PingSubjectType
+    {
+        Attack = 0,
+        Warning = 1,
+        Assist = 2,
+        OnMyWay = 3,
+        AlertThreat = 4,
+        AlertNotThreat = 5,
 
         Max
     }

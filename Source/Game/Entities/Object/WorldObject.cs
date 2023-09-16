@@ -2638,8 +2638,12 @@ namespace Game.Entities
             if (IsFriendlyTo(target) || target.IsFriendlyTo(this))
                 return false;
 
-            Player playerAffectingAttacker = unit != null && unit.HasUnitFlag(UnitFlags.PlayerControlled) ? GetAffectingPlayer() : go != null ? GetAffectingPlayer() : null;
+            Player playerAffectingAttacker = (unit != null && unit.HasUnitFlag(UnitFlags.PlayerControlled)) || go != null ? GetAffectingPlayer() : null;
             Player playerAffectingTarget = unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) ? unitTarget.GetAffectingPlayer() : null;
+
+            // Pets of mounted players are immune to NPCs
+            if (playerAffectingAttacker == null && unitTarget != null && unitTarget.IsPet() && playerAffectingTarget != null && playerAffectingTarget.IsMounted())
+                return false;
 
             // Not all neutral creatures can be attacked (even some unfriendly faction does not react aggresive to you, like Sporaggar)
             if ((playerAffectingAttacker && !playerAffectingTarget) || (!playerAffectingAttacker && playerAffectingTarget))

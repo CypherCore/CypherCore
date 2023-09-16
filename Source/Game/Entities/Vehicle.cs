@@ -188,6 +188,15 @@ namespace Game.Entities
             // We just remove the aura and the unapply handler will make the target leave the vehicle.
             // We don't need to iterate over Seats
             _me.RemoveAurasByType(AuraType.ControlVehicle);
+
+            // Aura script might cause the vehicle to be despawned in the middle of handling SPELL_AURA_CONTROL_VEHICLE removal
+            // In that case, aura effect has already been unregistered but passenger may still be found in Seats
+            foreach (var (_, seat) in Seats)
+            {
+                Unit passenger = Global.ObjAccessor.GetUnit(_me, seat.Passenger.Guid);
+                if (passenger != null)
+                    passenger._ExitVehicle();
+            }
         }
 
         public bool HasEmptySeat(sbyte seatId)

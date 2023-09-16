@@ -754,14 +754,16 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
+            bool hasPartyIndex = _worldPacket.HasBit();
             Min = _worldPacket.ReadUInt32();
             Max = _worldPacket.ReadUInt32();
-            PartyIndex = _worldPacket.ReadUInt8();
+            if (hasPartyIndex)
+                PartyIndex = _worldPacket.ReadUInt8();
         }
 
         public uint Min;
         public uint Max;
-        public byte PartyIndex;
+        public byte? PartyIndex;
     }
 
     public class RandomRoll : ServerPacket

@@ -169,7 +169,10 @@ namespace Framework.Constants
         TouchingGround = 0x40000, // NYI
         ChromieTime = 0x80000, // NYI
         SplineFlightOrFreeFlight = 0x100000, // NYI
-        ProcOrPeriodicAttacking = 0x200000  // NYI
+        ProcOrPeriodicAttacking = 0x200000,  // NYI
+        StartOfMythicPlusRun = 0x400000, // Implemented in Unit::AtStartOfEncounter
+        StartOfDungeonEncounter = 0x800000, // Implemented in Unit::AtStartOfEncounter - Similar to StartOfEncounter (but only with bosses, not m+ run or battleground)
+        EndOfDungeonEncounter = 0x1000000, // Implemented in Unit::AtEndOfEncounter - Similar to EndOfEncounter (but only with bosses, not m+ run or battleground)
     }
 
     // Enum with EffectRadiusIndex and their actual radius

@@ -224,7 +224,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt8((sbyte)BagResult);
+            _worldPacket.WriteInt32((int)BagResult);
             _worldPacket.WritePackedGuid(Item[0]);
             _worldPacket.WritePackedGuid(Item[1]);
             _worldPacket.WriteUInt8(ContainerBSlot); // bag type subclass, used with EQUIP_ERR_EVENT_AUTOEQUIP_BIND_CONFIRM and EQUIP_ERR_WRONG_BAG_TYPE_2
@@ -389,12 +389,14 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(VendorGUID);
-            _worldPacket.WritePackedGuid(ItemGUID);
-            _worldPacket.WriteUInt8((byte)Reason);
+            _worldPacket.WriteInt32(ItemGUIDs.Count);
+            _worldPacket.WriteInt32((int)Reason);
+            foreach (ObjectGuid itemGuid in ItemGUIDs)
+                _worldPacket.WritePackedGuid(itemGuid);
         }
 
         public ObjectGuid VendorGUID;
-        public ObjectGuid ItemGUID;
+        public List<ObjectGuid> ItemGUIDs = new();
         public SellResult Reason = SellResult.Unk;
     }
 

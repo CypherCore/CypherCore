@@ -120,7 +120,7 @@ namespace Game.Maps
         public override void Visit(IList<AreaTrigger> objs)
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
-            SortedSet<ulong> areaTriggers = Global.AreaTriggerDataStorage.GetAreaTriggersForMapAndCell(i_map.GetId(), cellCoord.GetId());
+            SortedSet<ulong> areaTriggers = Global.AreaTriggerDataStorage.GetAreaTriggersForMapAndCell(i_map.GetId(), i_map.GetDifficultyID(), cellCoord.GetId());
             if (areaTriggers == null)
                 return;
 

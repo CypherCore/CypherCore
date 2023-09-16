@@ -3860,9 +3860,10 @@ namespace Game.Spells
                 }
             }
 
-            UpdateSpellCastDataAmmo(castData.Ammo);
+            if (castFlags.HasFlag(SpellCastFlags.Projectile))
+                castData.AmmoDisplayID = (int)GetSpellCastDataAmmo();
 
-            if (castFlags.HasAnyFlag(SpellCastFlags.Immunity))
+            if (castFlags.HasFlag(SpellCastFlags.Immunity))
             {
                 castData.Immunities.School = schoolImmunityMask;
                 castData.Immunities.Value = (uint)mechanicImmunityMask;
@@ -4010,7 +4011,7 @@ namespace Game.Spells
                 m_channelTargetEffectMask = 0;
         }
 
-        void UpdateSpellCastDataAmmo(SpellAmmo ammo)
+        uint GetSpellCastDataAmmo()
         {
             InventoryType ammoInventoryType = 0;
             uint ammoDisplayID = 0;
@@ -4084,8 +4085,7 @@ namespace Game.Spells
                 }
             }
 
-            ammo.DisplayID = (int)ammoDisplayID;
-            ammo.InventoryType = (sbyte)ammoInventoryType;
+            return ammoDisplayID;
         }
 
         void SendSpellExecuteLog()

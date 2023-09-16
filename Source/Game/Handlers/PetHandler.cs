@@ -40,6 +40,9 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.PetAction)]
         void HandlePetAction(PetAction packet)
         {
+            if (_player.IsMounted())
+                return;
+
             ObjectGuid guid1 = packet.PetGUID;         //pet guid
             ObjectGuid guid2 = packet.TargetGUID;      //tag guid
 

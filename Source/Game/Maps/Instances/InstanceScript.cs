@@ -366,14 +366,14 @@ namespace Game.Maps
                             InitializeCombatResurrections(1, resInterval);
                             SendEncounterStart(1, 9, resInterval, resInterval);
 
-                            instance.DoOnPlayers(player => player.AtStartOfEncounter());
+                            instance.DoOnPlayers(player => player.AtStartOfEncounter(EncounterType.DungeonEncounter));
                             break;
                         }
                         case EncounterState.Fail:
                             ResetCombatResurrections();
                             SendEncounterEnd();
 
-                            instance.DoOnPlayers(player => player.AtEndOfEncounter());
+                            instance.DoOnPlayers(player => player.AtEndOfEncounter(EncounterType.DungeonEncounter));
                             break;
                         case EncounterState.Done:
                             ResetCombatResurrections();
@@ -385,7 +385,7 @@ namespace Game.Maps
                                 SendBossKillCredit(dungeonEncounter.Id);
                             }
 
-                            instance.DoOnPlayers(player => player.AtEndOfEncounter());
+                            instance.DoOnPlayers(player => player.AtEndOfEncounter(EncounterType.DungeonEncounter));
                             break;
                         default:
                             break;
