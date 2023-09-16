@@ -80,7 +80,7 @@ namespace BNetServer
             input.Label = "Log In";
             formInputs.Inputs.Add(input);
 
-            certificate = new X509Certificate2("BNetServer.pfx");
+            certificate = new X509Certificate2(ConfigMgr.GetDefaultValue("CertificatesFile", "./BNetServer.pfx"));
 
             Assembly currentAsm = Assembly.GetExecutingAssembly();
             foreach (var type in currentAsm.GetTypes())

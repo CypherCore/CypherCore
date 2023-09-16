@@ -40,6 +40,14 @@ LoginREST.TicketDuration=3600
 BindIP = "0.0.0.0"
 
 #
+#    CertificatesFile
+#        Description: Certificates file.
+#        Example:     "/etc/ssl/certs/BNetServer.pfx"
+#        Default:     "./BNetServer.pfx"
+
+CertificatesFile = "./BNetServer.pfx"
+
+#
 #    RealmsStateUpdateDelay
 #        Description: Time (in seconds) between realm list updates.
 #        Default:     10
