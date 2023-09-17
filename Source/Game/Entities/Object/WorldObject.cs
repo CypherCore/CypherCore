@@ -33,7 +33,7 @@ namespace Game.Entities
             ObjectTypeId = TypeId.Object;
             ObjectTypeMask = TypeMask.Object;
 
-            m_values = new UpdateFieldHolder(this);
+            m_values = new UpdateFieldHolder();
 
             m_movementInfo = new MovementInfo();
             m_updateFlag.Clear();

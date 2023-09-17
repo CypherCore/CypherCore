@@ -13,7 +13,7 @@ using System.Numerics;
 
 namespace Game.Entities
 {
-    public class ObjectFieldData : BaseUpdateData<WorldObject>
+    public class ObjectFieldData : HasChangesMask
     {
         public UpdateField<uint> EntryId = new(0, 1);
         public UpdateField<uint> DynamicFlags = new(0, 2);
@@ -170,7 +170,7 @@ namespace Game.Entities
         }
     }
 
-    public class ItemEnchantment : BaseUpdateData<Item>
+    public class ItemEnchantment : HasChangesMask
     {
         public UpdateField<uint> ID = new(0, 1);
         public UpdateField<uint> Duration = new(0, 2);
@@ -245,7 +245,7 @@ namespace Game.Entities
         }
     }
 
-    public class ItemModList : BaseUpdateData<Item>
+    public class ItemModList : HasChangesMask
     {
         public DynamicUpdateField<ItemMod> Values = new(-1, 0);
 
@@ -318,7 +318,7 @@ namespace Game.Entities
         }
     }
 
-    public class SocketedGem : BaseUpdateData<Item>
+    public class SocketedGem : HasChangesMask
     {
         public UpdateField<uint> ItemId = new(0, 1);
         public UpdateField<byte> Context = new(0, 2);
@@ -378,7 +378,7 @@ namespace Game.Entities
         }
     }
 
-    public class ItemData : BaseUpdateData<Item>
+    public class ItemData : HasChangesMask
     {
         public DynamicUpdateField<ArtifactPower> ArtifactPowers = new(0, 1);
         public DynamicUpdateField<SocketedGem> Gems = new(0, 2);
@@ -650,7 +650,7 @@ namespace Game.Entities
         }
     }
 
-    public class ContainerData : BaseUpdateData<Bag>
+    public class ContainerData : HasChangesMask
     {
         public UpdateField<uint> NumSlots = new(0, 1);
         public UpdateFieldArray<ObjectGuid> Slots = new(36, 2, 3);
@@ -706,7 +706,7 @@ namespace Game.Entities
         }
     }
 
-    public class AzeriteEmpoweredItemData : BaseUpdateData<Item>
+    public class AzeriteEmpoweredItemData : HasChangesMask
     {
         public UpdateFieldArray<int> Selections = new(5, 0, 1);
 
@@ -769,7 +769,7 @@ namespace Game.Entities
         }
     }
 
-    public class SelectedAzeriteEssences : BaseUpdateData<AzeriteItem>
+    public class SelectedAzeriteEssences : HasChangesMask
     {
         public UpdateField<bool> Enabled = new(0, 1);
         public UpdateField<uint> SpecializationID = new(0, 2);
@@ -836,7 +836,7 @@ namespace Game.Entities
         }
     }
 
-    public class AzeriteItemData : BaseUpdateData<AzeriteItem>
+    public class AzeriteItemData : HasChangesMask
     {
         public UpdateField<bool> Enabled = new(0, 1);
         public DynamicUpdateField<UnlockedAzeriteEssence> UnlockedEssences = new(0, 2);
@@ -1043,7 +1043,7 @@ namespace Game.Entities
         }
     }
 
-    public class VisibleItem : BaseUpdateData<Unit>
+    public class VisibleItem : HasChangesMask
     {
         public UpdateField<uint> ItemID = new(0, 1);
         public UpdateField<uint> SecondaryItemModifiedAppearanceID = new(0, 2);
@@ -1118,7 +1118,7 @@ namespace Game.Entities
         }
     }
 
-    public class UnitData : BaseUpdateData<Unit>
+    public class UnitData : HasChangesMask
     {
         static int ChangeMaskLength = 217;
 
@@ -2406,7 +2406,7 @@ namespace Game.Entities
         }
     }
 
-    public class QuestLog : BaseUpdateData<Player>
+    public class QuestLog : HasChangesMask
     {
         static int changeMaskLength = 30;
 
@@ -2483,7 +2483,7 @@ namespace Game.Entities
         }
     }
 
-    public class ArenaCooldown : BaseUpdateData<Player>
+    public class ArenaCooldown : HasChangesMask
     {
         public UpdateField<int> SpellID = new(0, 1);
         public UpdateField<int> Charges = new(0, 2);
@@ -2582,7 +2582,7 @@ namespace Game.Entities
         }
     }
 
-    public class PlayerData : BaseUpdateData<Player>
+    public class PlayerData : HasChangesMask
     {
         public UpdateField<bool> HasQuestSession = new(0, 1);
         public UpdateField<bool> HasLevelLink = new(0, 2);
@@ -3055,7 +3055,7 @@ namespace Game.Entities
         bool IsQuestLogChangesMaskSkipped() { return false; } // bandwidth savings aren't worth the cpu time
     }
 
-    public class SkillInfo : BaseUpdateData<Player>
+    public class SkillInfo : HasChangesMask
     {
         public UpdateFieldArray<ushort> SkillLineID = new(256, 0, 1);
         public UpdateFieldArray<ushort> SkillStep = new(256, 0, 257);
@@ -3144,7 +3144,7 @@ namespace Game.Entities
         }
     }
 
-    public class RestInfo : BaseUpdateData<Player>
+    public class RestInfo : HasChangesMask
     {
         public UpdateField<uint> Threshold = new(0, 1);
         public UpdateField<byte> StateID = new(0, 2);
@@ -3187,7 +3187,7 @@ namespace Game.Entities
         }
     }
 
-    public class PVPInfo : BaseUpdateData<Player>
+    public class PVPInfo : HasChangesMask
     {
         public UpdateField<bool> Disqualified = new(0, 1);
         public UpdateField<sbyte> Bracket = new(0, 2);
@@ -3415,7 +3415,7 @@ namespace Game.Entities
         }
     }
 
-    public class CompletedProject : BaseUpdateData<Player>
+    public class CompletedProject : HasChangesMask
     {
         public UpdateField<uint> ProjectID = new(0, 1);
         public UpdateField<long> FirstCompleted = new(0, 2);
@@ -3465,7 +3465,7 @@ namespace Game.Entities
         }
     }
 
-    public class ResearchHistory : BaseUpdateData<Player>
+    public class ResearchHistory : HasChangesMask
     {
         public DynamicUpdateField<CompletedProject> CompletedProjects = new(0, 1);
 
@@ -3584,7 +3584,7 @@ namespace Game.Entities
         }
     }
 
-    public class ActivePlayerUnk901 : BaseUpdateData<Player>
+    public class ActivePlayerUnk901 : HasChangesMask
     {
         public UpdateField<ObjectGuid> Field_0 = new(0, 1);
         public UpdateField<int> Field_10 = new(0, 2);
@@ -3627,7 +3627,7 @@ namespace Game.Entities
         }
     }
 
-    public class QuestSession : BaseUpdateData<Player>
+    public class QuestSession : HasChangesMask
     {
         public UpdateField<ObjectGuid> Owner = new(0, 1);
         public UpdateFieldArray<ulong> QuestCompleted = new(875, 2, 3);
@@ -3682,7 +3682,7 @@ namespace Game.Entities
         }
     }
 
-    public class ReplayedQuest : BaseUpdateData<Player>
+    public class ReplayedQuest : HasChangesMask
     {
         public UpdateField<int> QuestID = new(0, 1);
         public UpdateField<uint> ReplayTime = new(0, 2);
@@ -3757,7 +3757,7 @@ namespace Game.Entities
         }
     }
 
-    public class TraitConfig : BaseUpdateData<Player>
+    public class TraitConfig : HasChangesMask
     {
         public DynamicUpdateField<TraitEntry> Entries = new(0, 1);
         public UpdateField<int> ID = new(0, 2);
@@ -3906,7 +3906,7 @@ namespace Game.Entities
         }
     }
 
-    public class CraftingOrderItem : BaseUpdateData<Player>
+    public class CraftingOrderItem : HasChangesMask
     {
         public UpdateField<ulong> Field_0 = new(-1, 0);
         public UpdateField<ObjectGuid> ItemGUID = new(-1, 1);
@@ -3991,7 +3991,7 @@ namespace Game.Entities
         }
     }
 
-    public class CraftingOrderData : BaseUpdateData<Player>
+    public class CraftingOrderData : HasChangesMask
     {
         public DynamicUpdateField<CraftingOrderItem> Reagents = new(0, 1);
         public UpdateField<int> Field_0 = new(0, 2);
@@ -4209,7 +4209,7 @@ namespace Game.Entities
         }
     }
 
-    public class CraftingOrder : BaseUpdateData<Player>
+    public class CraftingOrder : HasChangesMask
     {
         public DynamicUpdateField<ItemEnchantData> Enchantments = new(-1, 0);
         public DynamicUpdateField<ItemGemData> Gems = new(-1, 1);
@@ -4369,7 +4369,7 @@ namespace Game.Entities
         }
     }
 
-    public class StablePetInfo : BaseUpdateData<Player>
+    public class StablePetInfo : HasChangesMask
     {
         public UpdateField<uint> PetSlot = new(0, 1);
         public UpdateField<uint> PetNumber = new(0, 2);
@@ -4451,7 +4451,7 @@ namespace Game.Entities
         }
     }
 
-    public class StableInfo : BaseUpdateData<Player>
+    public class StableInfo : HasChangesMask
     {
         public DynamicUpdateField<StablePetInfo> Pets = new(0, 1);
         public UpdateField<ObjectGuid> StableMaster = new(0, 2);
@@ -4514,7 +4514,7 @@ namespace Game.Entities
         }
     }
 
-    public class CollectableSourceTrackedData : BaseUpdateData<Player>
+    public class CollectableSourceTrackedData : HasChangesMask
     {
         public UpdateField<int> TargetType = new(0, 1);
         public UpdateField<int> TargetID = new(0, 2);
@@ -4579,7 +4579,7 @@ namespace Game.Entities
         }
     }
     
-    public class ActivePlayerData : BaseUpdateData<Player>
+    public class ActivePlayerData : HasChangesMask
     {
         public static int ExploredZonesSize;
         public static int ExploredZonesBits;
@@ -6401,7 +6401,7 @@ namespace Game.Entities
         }
     }
 
-    public class GameObjectFieldData : BaseUpdateData<GameObject>
+    public class GameObjectFieldData : HasChangesMask
     {
         public UpdateField<List<uint>> StateWorldEffectIDs = new(0, 1);
         public DynamicUpdateField<int> EnableDoodadSets = new(0, 2);
@@ -6670,7 +6670,7 @@ namespace Game.Entities
         }
     }
 
-    public class DynamicObjectData : BaseUpdateData<DynamicObject>
+    public class DynamicObjectData : HasChangesMask
     {
         public UpdateField<ObjectGuid> Caster = new(0, 1);
         public UpdateField<byte> Type = new(0, 2);
@@ -6742,7 +6742,7 @@ namespace Game.Entities
         }
     }
 
-    public class CorpseData : BaseUpdateData<Corpse>
+    public class CorpseData : HasChangesMask
     {
         public DynamicUpdateField<ChrCustomizationChoice> Customizations = new(0, 1);
         public UpdateField<uint> DynamicFlags = new(0, 2);
@@ -6895,7 +6895,7 @@ namespace Game.Entities
         }
     }
 
-    public class ScaleCurve : BaseUpdateData<AreaTrigger>
+    public class ScaleCurve : HasChangesMask
     {
         public UpdateField<bool> OverrideActive = new(0, 1);
         public UpdateField<uint> StartTimeOffset = new(0, 2);
@@ -6967,7 +6967,7 @@ namespace Game.Entities
         }
     }
 
-    public class VisualAnim : BaseUpdateData<AreaTrigger>
+    public class VisualAnim : HasChangesMask
     {
         public UpdateField<bool> Field_C = new(0, 1);
         public UpdateField<int> AnimationDataID = new(0, 2);
@@ -7029,7 +7029,7 @@ namespace Game.Entities
         }
     }
 
-    public class AreaTriggerFieldData : BaseUpdateData<AreaTrigger>
+    public class AreaTriggerFieldData : HasChangesMask
     {
         public UpdateField<bool> HeightIgnoresScale = new(0, 1);
         public UpdateField<bool> Field_261 = new(0, 2);
@@ -7242,7 +7242,7 @@ namespace Game.Entities
         }
     }
 
-    public class SceneObjectData : BaseUpdateData<WorldObject>
+    public class SceneObjectData : HasChangesMask
     {
         public UpdateField<int> ScriptPackageID = new(0, 1);
         public UpdateField<uint> RndSeedVal = new(0, 2);
@@ -7374,7 +7374,7 @@ namespace Game.Entities
         }
     }
 
-    public class ConversationData : BaseUpdateData<Conversation>
+    public class ConversationData : HasChangesMask
     {
         public UpdateField<bool> DontPlayBroadcastTextSounds = new(0, 1);
         public UpdateField<List<ConversationLine>> Lines = new(0, 2);
