@@ -141,7 +141,7 @@ namespace Game.Chat
         }
 
         [Command("unbind", RBACPermissions.CommandInstanceUnbind)]
-        static bool HandleInstanceUnbindCommand(CommandHandler handler, [VariantArg(typeof(uint), typeof(string))] object mapArg, uint? difficultyArg)
+        static bool HandleInstanceUnbindCommand(CommandHandler handler, [VariantArg<uint, string>] object mapArg, uint? difficultyArg)
         {
             Player player = handler.GetSelectedPlayer();
             if (player == null)

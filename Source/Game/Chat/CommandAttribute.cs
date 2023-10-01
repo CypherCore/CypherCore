@@ -3,6 +3,7 @@
 
 using Framework.Constants;
 using System;
+using System.Numerics;
 
 namespace Game.Chat
 {
@@ -66,7 +67,6 @@ namespace Game.Chat
     [AttributeUsage(AttributeTargets.Parameter)]
     public class OptionalArgAttribute : Attribute { }
 
-    [AttributeUsage(AttributeTargets.Parameter)]
     public class VariantArgAttribute : Attribute
     {
         public Type[] Types { get; set; }
@@ -75,5 +75,29 @@ namespace Game.Chat
         {
             Types = types;
         }
+    }
+
+    [AttributeUsage(AttributeTargets.Parameter)]
+    public class VariantArg<T1> : VariantArgAttribute
+    {
+        public VariantArg() : base(typeof(T1)) { }
+    }
+
+    [AttributeUsage(AttributeTargets.Parameter)]
+    public class VariantArg<T1, T2> : VariantArgAttribute
+    {
+        public VariantArg() : base(typeof(T1), typeof(T2)) { }
+    }
+
+    [AttributeUsage(AttributeTargets.Parameter)]
+    public class VariantArg<T1, T2, T3> : VariantArgAttribute
+    {
+        public VariantArg() : base(typeof(T1), typeof(T2), typeof(T3)) { }
+    }
+
+    [AttributeUsage(AttributeTargets.Parameter)]
+    public class VariantArg<T1, T2, T3, T4> : VariantArgAttribute
+    {
+        public VariantArg() : base(typeof(T1), typeof(T2), typeof(T3), typeof(T4)) { }
     }
 }

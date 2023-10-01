@@ -167,7 +167,7 @@ namespace Game.Chat
         }
 
         [Command("info", RBACPermissions.CommandGuildInfo, true)]
-        static bool HandleGuildInfoCommand(CommandHandler handler, [OptionalArg][VariantArg(typeof(ulong), typeof(string))] dynamic guildIdentifier)
+        static bool HandleGuildInfoCommand(CommandHandler handler, [OptionalArg][VariantArg<ulong, string>] dynamic guildIdentifier)
         {
             Guild guild = null;
 

@@ -223,7 +223,7 @@ namespace Game.Chat
         class TeleNameCommands
         {
             [Command("", RBACPermissions.CommandTeleName, true)]
-            static bool HandleTeleNameCommand(CommandHandler handler, [OptionalArg] PlayerIdentifier player, [VariantArg(typeof(GameTele), typeof(string))] object where)
+            static bool HandleTeleNameCommand(CommandHandler handler, [OptionalArg] PlayerIdentifier player, [VariantArg<GameTele, string>] object where)
             {
                 if (player == null)
                     player = PlayerIdentifier.FromTargetOrSelf(handler);

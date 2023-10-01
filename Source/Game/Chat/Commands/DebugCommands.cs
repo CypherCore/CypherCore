@@ -440,7 +440,7 @@ namespace Game.Chat
         }
 
         [Command("instancespawn", RBACPermissions.CommandDebug)]
-        static bool HandleDebugInstanceSpawns(CommandHandler handler, [VariantArg(typeof(uint), typeof(string))] object optArg)
+        static bool HandleDebugInstanceSpawns(CommandHandler handler, [VariantArg<uint, string>] object optArg)
         {
             Player player = handler.GetPlayer();
             if (player == null)
