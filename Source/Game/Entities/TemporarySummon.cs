@@ -1131,7 +1131,7 @@ namespace Game.Entities
             SetUpdateFieldStatValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MaxDamage), maxdamage);
         }
 
-        void SetBonusDamage(int damage)
+        public void SetBonusDamage(int damage)
         {
             m_bonusSpellDamage = damage;
             Player playerOwner = GetOwner().ToPlayer();

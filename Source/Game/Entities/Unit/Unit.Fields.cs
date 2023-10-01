@@ -39,7 +39,7 @@ namespace Game.Entities
         protected float[][] m_weaponDamage = new float[(int)WeaponAttackType.Max][];
 
         uint[] m_baseAttackSpeed = new uint[(int)WeaponAttackType.Max];
-        internal float[] m_modAttackSpeedPct = new float[(int)WeaponAttackType.Max];
+        public float[] m_modAttackSpeedPct = new float[(int)WeaponAttackType.Max];
         protected uint[] m_attackTimer = new uint[(int)WeaponAttackType.Max];
         bool _isCombatDisallowed;
 

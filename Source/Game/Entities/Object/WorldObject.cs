@@ -2423,25 +2423,9 @@ namespace Game.Entities
             return my_faction.IsNeutralToAll();
         }
 
-        public SpellCastResult CastSpell(WorldObject target, uint spellId, bool triggered = false)
+        public SpellCastResult CastSpell(CastSpellTargetArg targets, uint spellId)
         {
-            CastSpellExtraArgs args = new(triggered);
-            return CastSpell(target, spellId, args);
-        }
-
-        public SpellCastResult CastSpell(SpellCastTargets targets, uint spellId, CastSpellExtraArgs args)
-        {
-            return CastSpell(new CastSpellTargetArg(targets), spellId, args);
-        }
-
-        public SpellCastResult CastSpell(WorldObject target, uint spellId, CastSpellExtraArgs args)
-        {
-            return CastSpell(new CastSpellTargetArg(target), spellId, args);
-        }
-
-        public SpellCastResult CastSpell(Position dest, uint spellId, CastSpellExtraArgs args)
-        {
-            return CastSpell(new CastSpellTargetArg(dest), spellId, args);
+            return CastSpell(targets, spellId, new CastSpellExtraArgs());
         }
 
         public SpellCastResult CastSpell(CastSpellTargetArg targets, uint spellId, CastSpellExtraArgs args)
@@ -3366,7 +3350,8 @@ namespace Game.Entities
         {
             return obj1 && obj2 && IsInBetween(obj1.GetPosition(), obj2.GetPosition(), size);
         }
-        bool IsInBetween(Position pos1, Position pos2, float size)
+
+        public bool IsInBetween(Position pos1, Position pos2, float size)
         {
             float dist = GetExactDist2d(pos1);
 

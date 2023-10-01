@@ -5366,7 +5366,7 @@ namespace Game.Spells
                                     Pet pet = unitCaster.ToPlayer().GetPet();
                                     if (pet != null)
                                     {
-                                        pet.CastSpell(pet, SharedConst.PetSummoningDisorientation, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                                        pet.CastSpell(pet, SharedConst.SpellPetSummoningDisorientation, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
                                             .SetOriginalCaster(pet.GetGUID())
                                             .SetTriggeringSpell(this));
                                     }
@@ -9339,6 +9339,31 @@ namespace Game.Spells
             Targets = new();
             Targets = targets;
         }
+
+        public static implicit operator CastSpellTargetArg(WorldObject target)
+        {
+            return new CastSpellTargetArg(target);
+        }
+
+        public static implicit operator CastSpellTargetArg(Item itemTarget)
+        {
+            return new CastSpellTargetArg(itemTarget);
+        }
+
+        public static implicit operator CastSpellTargetArg(Position dest)
+        {
+            return new CastSpellTargetArg(dest);
+        }
+
+        public static implicit operator CastSpellTargetArg(SpellDestination dest)
+        {
+            return new CastSpellTargetArg(dest);
+        }
+
+        public static implicit operator CastSpellTargetArg(SpellCastTargets targets)
+        {
+            return new CastSpellTargetArg(targets);
+        }
     }
 
     public class CastSpellExtraArgs
@@ -9455,6 +9480,18 @@ namespace Game.Spells
             CustomArg = customArg;
             return this;
         }
+
+        public static implicit operator CastSpellExtraArgs(bool triggered) => new CastSpellExtraArgs(triggered);
+        
+        public static implicit operator CastSpellExtraArgs(TriggerCastFlags trigger) => new CastSpellExtraArgs(trigger);
+        
+        public static implicit operator CastSpellExtraArgs(Item item) => new CastSpellExtraArgs(item);
+        
+        public static implicit operator CastSpellExtraArgs(Spell triggeringSpell) => new CastSpellExtraArgs(triggeringSpell);
+        
+        public static implicit operator CastSpellExtraArgs(AuraEffect eff) => new CastSpellExtraArgs(eff);
+        
+        public static implicit operator CastSpellExtraArgs(Difficulty castDifficulty) => new CastSpellExtraArgs(castDifficulty);
     }
 
     public class SpellLogEffect
