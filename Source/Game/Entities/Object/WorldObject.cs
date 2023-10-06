@@ -2453,7 +2453,7 @@ namespace Game.Entities
 
             if (spell.m_CastItem == null && info.HasAttribute(SpellAttr2.RetainItemCast))
             {
-                if (args.TriggeringSpell)
+                if (args.TriggeringSpell != null)
                     spell.m_CastItem = args.TriggeringSpell.m_CastItem;
                 else if (args.TriggeringAura != null && !args.TriggeringAura.GetBase().GetCastItemGUID().IsEmpty())
                 {

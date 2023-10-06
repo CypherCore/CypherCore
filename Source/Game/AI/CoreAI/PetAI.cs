@@ -37,7 +37,7 @@ namespace Game.AI
             if (me.GetVictim() && me.GetVictim().IsAlive())
             {
                 // is only necessary to stop casting, the pet must not exit combat
-                if (!me.GetCurrentSpell(CurrentSpellTypes.Channeled) && // ignore channeled spells (Pin, Seduction)
+                if (me.GetCurrentSpell(CurrentSpellTypes.Channeled) == null && // ignore channeled spells (Pin, Seduction)
                     (me.GetVictim() && me.GetVictim().HasBreakableByDamageCrowdControlAura(me)))
                 {
                     me.InterruptNonMeleeSpells(false);

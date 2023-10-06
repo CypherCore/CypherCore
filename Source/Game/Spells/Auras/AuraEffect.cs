@@ -637,7 +637,7 @@ namespace Game.Spells
                     break;
                 case AuraType.ModCastingSpeedNotStack:
                     // skip melee hits and instant cast spells
-                    if (!eventInfo.GetProcSpell() || eventInfo.GetProcSpell().GetCastTime() == 0)
+                    if (eventInfo.GetProcSpell() == null || eventInfo.GetProcSpell().GetCastTime() == 0)
                         return false;
                     break;
                 case AuraType.ModSchoolMaskDamageFromCaster:
@@ -651,7 +651,7 @@ namespace Game.Spells
                 {
                     // Skip melee hits and spells with wrong school or zero cost
                     if (spellInfo == null || !Convert.ToBoolean((int)spellInfo.GetSchoolMask() & GetMiscValue()) // School Check
-                        || !eventInfo.GetProcSpell())
+                        || eventInfo.GetProcSpell() == null)
                         return false;
 
                     // Costs Check
@@ -1963,7 +1963,7 @@ namespace Game.Spells
                 for (var i = CurrentSpellTypes.Melee; i < CurrentSpellTypes.Max; ++i)
                 {
                     Spell spell = target.GetCurrentSpell(i);
-                    if (spell)
+                    if (spell != null)
                         if (spell.m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.NoActions))
                             // Stop spells on prepare or casting state
                             target.InterruptSpell(i, false);

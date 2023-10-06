@@ -1000,7 +1000,7 @@ namespace Game.Entities
                 return;
 
             // Call not from spell cast, send cooldown event for item spells if no in combat
-            if (!spell)
+            if (spell == null)
             {
                 // spell/item pair let set proper cooldown (except not existed charged spell cooldown spellmods for potions)
                 ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(m_lastPotionId);
@@ -2946,7 +2946,7 @@ namespace Game.Entities
             pct = 1.0f;
 
             // Drop charges for triggering spells instead of triggered ones
-            if (m_spellModTakingSpell)
+            if (m_spellModTakingSpell != null)
                 spell = m_spellModTakingSpell;
 
             switch (op)
@@ -3114,7 +3114,7 @@ namespace Game.Entities
                 return false;
 
             // First time this aura applies a mod to us and is out of charges
-            if (spell && mod.ownerAura.IsUsingCharges() && mod.ownerAura.GetCharges() == 0 && !spell.m_appliedMods.Contains(mod.ownerAura))
+            if (spell != null && mod.ownerAura.IsUsingCharges() && mod.ownerAura.GetCharges() == 0 && !spell.m_appliedMods.Contains(mod.ownerAura))
                 return false;
 
             switch (mod.op)

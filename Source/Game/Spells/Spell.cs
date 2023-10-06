@@ -106,7 +106,7 @@ namespace Game.Spells
             for (var i = 0; i < m_loadedScripts.Count; ++i)
                 m_loadedScripts[i]._Unload();
 
-            if (m_referencedFromCurrentSpell && m_selfContainer && m_selfContainer == this)
+            if (m_referencedFromCurrentSpell && m_selfContainer != null && m_selfContainer == this)
             {
                 // Clean the reference to avoid later crash.
                 // If this error is repeating, we may have to add an ASSERT to better track down how we get into this case.
@@ -2722,13 +2722,13 @@ namespace Game.Spells
             if (modOwner)
             {
                 lastSpellMod = modOwner.m_spellModTakingSpell;
-                if (lastSpellMod)
+                if (lastSpellMod != null)
                     modOwner.SetSpellModTakingSpell(lastSpellMod, false);
             }
 
             _cast(skipCheck);
 
-            if (lastSpellMod)
+            if (lastSpellMod != null)
                 modOwner.SetSpellModTakingSpell(lastSpellMod, true);
         }
 
@@ -8085,11 +8085,6 @@ namespace Game.Spells
         public SpellInfo GetTriggeredByAuraSpell() { return m_triggeredByAuraSpell; }
 
         public int GetTimer() { return m_timer; }
-        
-        public static implicit operator bool(Spell spell)
-        {
-            return spell != null;
-        }
         
         #region Fields
         Dictionary<SpellEffectName, SpellLogEffect> _executeLogEffects = new();

@@ -283,12 +283,6 @@ namespace Game.Scripting
         public void IncrementScriptCount() { ++_ScriptCount; }
         public uint GetScriptCount() { return _ScriptCount; }
 
-        //Reloading
-        public void Reload()
-        {
-
-        }
-
         //Unloading
         public void Unload()
         {

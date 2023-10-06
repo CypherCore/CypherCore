@@ -476,10 +476,10 @@ namespace Game
                 trader.ModifyMoney(-(long)his_trade.GetMoney());
                 trader.ModifyMoney((long)my_trade.GetMoney());
 
-                if (my_spell)
+                if (my_spell != null)
                     my_spell.Prepare(my_targets);
 
-                if (his_spell)
+                if (his_spell != null)
                     his_spell.Prepare(his_targets);
 
                 // cleanup

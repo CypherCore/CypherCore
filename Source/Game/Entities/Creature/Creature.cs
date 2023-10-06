@@ -3178,7 +3178,7 @@ namespace Game.Entities
                 return false;
             }
 
-            if (focusSpell)
+            if (focusSpell != null)
                 return focusSpell == _spellFocusInfo.Spell;
             else
                 return _spellFocusInfo.Spell != null || _spellFocusInfo.Delay != 0;
@@ -3186,11 +3186,11 @@ namespace Game.Entities
 
         public void ReleaseSpellFocus(Spell focusSpell = null, bool withDelay = true)
         {
-            if (!_spellFocusInfo.Spell)
+            if (_spellFocusInfo.Spell == null)
                 return;
 
             // focused to something else
-            if (focusSpell && focusSpell != _spellFocusInfo.Spell)
+            if (focusSpell != null && focusSpell != _spellFocusInfo.Spell)
                 return;
 
             if (_spellFocusInfo.Spell.GetSpellInfo().HasAttribute(SpellAttr5.AiDoesntFaceTarget))

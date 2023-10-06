@@ -733,7 +733,7 @@ namespace Game.Entities
             }
 
             // call script handlers
-            if (spell)
+            if (spell != null)
                 spell.CallScriptCalcCritChanceHandlers(this, ref crit_chance);
             else
                 aurEff.GetBase().CallScriptEffectCalcCritChanceHandlers(aurEff, aurEff.GetBase().GetApplicationOfTarget(GetGUID()), this, ref crit_chance);
@@ -1620,7 +1620,7 @@ namespace Game.Entities
                 Player modOwner = GetSpellModOwner();
                 if (modOwner)
                 {
-                    if (modOwner != this && spell)
+                    if (modOwner != this && spell != null)
                     {
                         List<AuraApplication> modAuras = new();
                         foreach (var itr in modOwner.GetAppliedAuras())
@@ -1648,7 +1648,7 @@ namespace Game.Entities
         void TriggerAurasProcOnEvent(ProcEventInfo eventInfo, List<Tuple<uint, AuraApplication>> aurasTriggeringProc)
         {
             Spell triggeringSpell = eventInfo.GetProcSpell();
-            bool disableProcs = triggeringSpell && triggeringSpell.IsProcDisabled();
+            bool disableProcs = triggeringSpell != null && triggeringSpell.IsProcDisabled();
 
 
             int oldProcChainLength = m_procChainLength;
@@ -1746,7 +1746,7 @@ namespace Game.Entities
                 }
                 case CurrentSpellTypes.AutoRepeat:
                 {
-                    if (GetCurrentSpell(CSpellType) && GetCurrentSpell(CSpellType).GetState() == SpellState.Idle)
+                    if (GetCurrentSpell(CSpellType) != null && GetCurrentSpell(CSpellType).GetState() == SpellState.Idle)
                         GetCurrentSpell(CSpellType).SetState(SpellState.Finished);
 
                     // only Auto Shoot does not break anything
@@ -1780,9 +1780,7 @@ namespace Game.Entities
 
             // generic spells are cast when they are not finished and not delayed
             var currentSpell = GetCurrentSpell(CurrentSpellTypes.Generic);
-            if (currentSpell &&
-                    (currentSpell.GetState() != SpellState.Finished) &&
-                    (withDelayed || currentSpell.GetState() != SpellState.Delayed))
+            if (currentSpell != null && (currentSpell.GetState() != SpellState.Finished) && (withDelayed || currentSpell.GetState() != SpellState.Delayed))
             {
                 if (!skipInstant || currentSpell.GetCastTime() != 0)
                 {
@@ -1790,17 +1788,18 @@ namespace Game.Entities
                         return true;
                 }
             }
+
             currentSpell = GetCurrentSpell(CurrentSpellTypes.Channeled);
             // channeled spells may be delayed, but they are still considered cast
-            if (!skipChanneled && currentSpell &&
-                (currentSpell.GetState() != SpellState.Finished))
+            if (!skipChanneled && currentSpell != null && (currentSpell.GetState() != SpellState.Finished))
             {
                 if (!isAutoshoot || !currentSpell.m_spellInfo.HasAttribute(SpellAttr2.DoNotResetCombatTimers))
                     return true;
             }
+
             currentSpell = GetCurrentSpell(CurrentSpellTypes.AutoRepeat);
             // autorepeat spells may be finished or delayed, but they are still considered cast
-            if (!skipAutorepeat && currentSpell)
+            if (!skipAutorepeat && currentSpell != null)
                 return true;
 
             return false;

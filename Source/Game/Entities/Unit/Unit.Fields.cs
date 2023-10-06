@@ -198,7 +198,7 @@ namespace Game.Entities
 
         public SpellInfo GetSpellInfo()
         {
-            if (_spell)
+            if (_spell != null)
                 return _spell.GetSpellInfo();
             if (_damageInfo != null)
                 return _damageInfo.GetSpellInfo();
@@ -209,7 +209,7 @@ namespace Game.Entities
         }
         public SpellSchoolMask GetSchoolMask()
         {
-            if (_spell)
+            if (_spell != null)
                 return _spell.GetSpellInfo().GetSchoolMask();
             if (_damageInfo != null)
                 return _damageInfo.GetSchoolMask();

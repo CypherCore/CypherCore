@@ -468,7 +468,7 @@ namespace Game.Entities
             // check power requirement
             if (procEntry.AttributesMask.HasAnyFlag(ProcAttributes.ReqPowerCost))
             {
-                if (!eventInfo.GetProcSpell())
+                if (eventInfo.GetProcSpell() == null)
                     return false;
 
                 var costs = eventInfo.GetProcSpell().GetPowerCost();

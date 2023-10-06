@@ -1696,7 +1696,7 @@ namespace Game.Spells
 
             // check spell triggering us
             Spell spell = eventInfo.GetProcSpell();
-            if (spell)
+            if (spell != null)
             {
                 // Do not allow auras to proc from effect triggered from itself
                 if (spell.IsTriggeredByAura(m_spellInfo))
