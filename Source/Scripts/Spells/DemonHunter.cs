@@ -1,13 +1,17 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Framework.Dynamic;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+
+using static Global;
 
 namespace Scripts.Spells.DemonHunter
 {
@@ -133,6 +137,7 @@ namespace Scripts.Spells.DemonHunter
         public const uint SoulCleave = 228477;
         public const uint SoulCleaveDmg = 228478;
         public const uint SoulFragmentCounter = 203981;
+        public const uint SoulFurnaceDamageBuff = 391172;
         public const uint SoulRending = 204909;
         public const uint SpiritBombDamage = 218677;
         public const uint SpiritBombHeal = 227255;
@@ -141,16 +146,6 @@ namespace Scripts.Spells.DemonHunter
         public const uint UncontainedFel = 209261;
         public const uint VengefulRetreat = 198813;
         public const uint VengefulRetreatTrigger = 198793;
-    }
-
-    struct AreaTriggerIds
-    {
-        public const uint ShatteredSoulsHavoc = 8352;
-        public const uint ShatteredSoulsHavocDemon = 11231;
-        public const uint ShatteredSoulsVengeance = 11266;
-        public const uint ShatteredSoulsVengeanceDemon = 10693;
-        public const uint SoulFragmentHavoc = 12929;
-        public const uint SoulFragmentVengeance = 10665;
     }
 
     [Script] // 197125 - Chaos Strike
@@ -172,7 +167,7 @@ namespace Scripts.Spells.DemonHunter
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell));
+            OnEffectProc.Add(new(HandleEffectProc, 0, AuraType.ProcTriggerSpell));
         }
     }
 
@@ -182,6 +177,7 @@ namespace Scripts.Spells.DemonHunter
         ObjectGuid _firstTargetGUID;
 
         public ObjectGuid GetFirstTarget() { return _firstTargetGUID; }
+
         public void SetFirstTarget(ObjectGuid targetGuid) { _firstTargetGUID = targetGuid; }
 
         public override void Register() { }
@@ -211,9 +207,9 @@ namespace Scripts.Spells.DemonHunter
             // Prefer the selected target if he is one of the enemies
             if (targetList.Count > 1 && !selectedTarget.IsEmpty())
             {
-                var foundObj = targetList.Find(obj => obj.GetGUID() == selectedTarget);
-                if (foundObj != null)
-                    firstTargetGUID = foundObj.GetGUID();
+                var obj = targetList.Find(obj => obj.GetGUID() == selectedTarget);
+                if (obj != null)
+                    firstTargetGUID = obj.GetGUID();
             }
 
             if (firstTargetGUID.IsEmpty())
@@ -226,7 +222,7 @@ namespace Scripts.Spells.DemonHunter
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(DecideFirstTarget, 0, Targets.UnitSrcAreaEnemy));
+            OnObjectAreaTargetSelect.Add(new(DecideFirstTarget, 0, Targets.UnitSrcAreaEnemy));
         }
     }
 
@@ -259,13 +255,10 @@ namespace Scripts.Spells.DemonHunter
 
         public override void Register()
         {
-            OnHit.Add(new HitHandler(HandleHitTarget));
+            OnHit.Add(new(HandleHitTarget));
         }
     }
 
-    // 204596 - Sigil of Flame
-    // 207684 - Sigil of Misery
-    // 202137 - Sigil of Silence
     [Script("areatrigger_dh_sigil_of_silence", SpellIds.SigilOfSilenceAoe)]
     [Script("areatrigger_dh_sigil_of_misery", SpellIds.SigilOfMiseryAoe)]
     [Script("areatrigger_dh_sigil_of_flame", SpellIds.SigilOfFlameAoe)]
@@ -282,7 +275,7 @@ namespace Scripts.Spells.DemonHunter
         {
             Unit caster = at.GetCaster();
             if (caster != null)
-                caster.CastSpell(at.GetPosition(), _trigger, new CastSpellExtraArgs());
+                caster.CastSpell(at.GetPosition(), _trigger);
         }
     }
 
@@ -299,14 +292,14 @@ namespace Scripts.Spells.DemonHunter
             WorldLocation loc = GetExplTargetDest();
             if (loc != null)
             {
-                GetCaster().CastSpell(GetHitUnit(), SpellIds.SigilOfChainsSlow, new CastSpellExtraArgs(true));
-                GetHitUnit().CastSpell(loc.GetPosition(), SpellIds.SigilOfChainsGrip, new CastSpellExtraArgs(true));
+                GetCaster().CastSpell(GetHitUnit(), SpellIds.SigilOfChainsSlow, true);
+                GetHitUnit().CastSpell(loc.GetPosition(), SpellIds.SigilOfChainsGrip, true);
             }
         }
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffectName.Dummy));
         }
     }
 
@@ -320,8 +313,8 @@ namespace Scripts.Spells.DemonHunter
             Unit caster = at.GetCaster();
             if (caster != null)
             {
-                caster.CastSpell(at.GetPosition(), SpellIds.SigilOfChainsVisual, new CastSpellExtraArgs());
-                caster.CastSpell(at.GetPosition(), SpellIds.SigilOfChainsTargetSelect, new CastSpellExtraArgs());
+                caster.CastSpell(at.GetPosition(), SpellIds.SigilOfChainsVisual);
+                caster.CastSpell(at.GetPosition(), SpellIds.SigilOfChainsTargetSelect);
             }
         }
     }
@@ -349,20 +342,20 @@ namespace Scripts.Spells.DemonHunter
         void HandleCast()
         {
             Player caster = GetCaster().ToPlayer();
-            if (!caster)
+            if (caster == null)
                 return;
 
             caster.CastSpell(caster, SpellIds.GlideKnockback, true);
             caster.CastSpell(caster, SpellIds.GlideDuration, true);
 
-            caster.GetSpellHistory().StartCooldown(Global.SpellMgr.GetSpellInfo(SpellIds.VengefulRetreatTrigger, GetCastDifficulty()), 0, null, false, TimeSpan.FromMilliseconds(250));
-            caster.GetSpellHistory().StartCooldown(Global.SpellMgr.GetSpellInfo(SpellIds.FelRush, GetCastDifficulty()), 0, null, false, TimeSpan.FromMilliseconds(250));
+            caster.GetSpellHistory().StartCooldown(SpellMgr.GetSpellInfo(SpellIds.VengefulRetreatTrigger, GetCastDifficulty()), 0, null, false, TimeSpan.FromMilliseconds(250));
+            caster.GetSpellHistory().StartCooldown(SpellMgr.GetSpellInfo(SpellIds.FelRush, GetCastDifficulty()), 0, null, false, TimeSpan.FromMilliseconds(250));
         }
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
-            BeforeCast.Add(new CastHandler(HandleCast));
+            OnCheckCast.Add(new(CheckCast));
+            BeforeCast.Add(new(HandleCast));
         }
     }
 
@@ -381,7 +374,7 @@ namespace Scripts.Spells.DemonHunter
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.FeatherFall, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new(OnRemove, 0, AuraType.FeatherFall, AuraEffectHandleModes.Real));
         }
     }
 
@@ -400,7 +393,55 @@ namespace Scripts.Spells.DemonHunter
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script] // 391166 - Soul Furnace
+    class spell_dh_soul_furnace : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.SoulFurnaceDamageBuff);
+        }
+
+        void CalculateSpellMod(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            if (GetStackAmount() == GetAura().CalcMaxStackAmount())
+            {
+                GetTarget().CastSpell(GetTarget(), SpellIds.SoulFurnaceDamageBuff, true);
+                Remove();
+            }
+        }
+
+        public override void Register()
+        {
+            AfterEffectApply.Add(new(CalculateSpellMod, 0, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask));
+        }
+    }
+
+    [Script] // 339424 - Soul Furnace
+    class spell_dh_soul_furnace_conduit : AuraScript
+    {
+        void CalculateSpellMod(AuraEffect aurEff, ref SpellModifier spellMod)
+        {
+            if (aurEff.GetAmount() == 10)
+            {
+                if (spellMod == null)
+                {
+                    spellMod = new SpellModifierByClassMask(GetAura());
+                    spellMod.op = SpellModOp.HealingAndDamage;
+                    spellMod.type = SpellModType.Pct;
+                    spellMod.spellId = GetId();
+                    (spellMod as SpellModifierByClassMask).mask = new FlagArray128(0x80000000);
+                    (spellMod as SpellModifierByClassMask).value = GetEffect(1).GetAmount() + 1;
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            DoEffectCalcSpellMod.Add(new(CalculateSpellMod, 0, AuraType.Dummy));
         }
     }
 }

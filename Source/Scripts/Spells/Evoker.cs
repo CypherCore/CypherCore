@@ -1,12 +1,14 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Framework.Dynamic;
 using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using static Global;
 
 namespace Scripts.Spells.Evoker
 {
@@ -18,8 +20,11 @@ namespace Scripts.Spells.Evoker
         public const uint LivingFlame = 361469;
         public const uint LivingFlameDamage = 361500;
         public const uint LivingFlameHeal = 361509;
+        public const uint PermeatingChillTalent = 370897;
         public const uint PyreDamage = 357212;
         public const uint SoarRacial = 369536;
+
+        public const uint LabelEvokerBlue = 1465;
     }
 
     [Script] // 362969 - Azure Strike (blue)
@@ -34,7 +39,21 @@ namespace Scripts.Spells.Evoker
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitDestAreaEnemy));
+            OnObjectAreaTargetSelect.Add(new(FilterTargets, 1, Targets.UnitDestAreaEnemy));
+        }
+    }
+
+    [Script] // 370455 - Charged Blast
+    class spell_evo_charged_blast : AuraScript
+    {
+        bool CheckProc(ProcEventInfo procInfo)
+        {
+            return procInfo.GetSpellInfo() != null && procInfo.GetSpellInfo().HasLabel(SpellIds.LabelEvokerBlue);
+        }
+
+        public override void Register()
+        {
+            DoCheckProc.Add(new(CheckProc));
         }
     }
 
@@ -64,14 +83,14 @@ namespace Scripts.Spells.Evoker
 
             caster.CastSpell(caster, SpellIds.GlideKnockback, true);
 
-            caster.GetSpellHistory().StartCooldown(Global.SpellMgr.GetSpellInfo(SpellIds.Hover, GetCastDifficulty()), 0, null, false, TimeSpan.FromMilliseconds(250));
-            caster.GetSpellHistory().StartCooldown(Global.SpellMgr.GetSpellInfo(SpellIds.SoarRacial, GetCastDifficulty()), 0, null, false, TimeSpan.FromMilliseconds(250));
+            caster.GetSpellHistory().StartCooldown(SpellMgr.GetSpellInfo(SpellIds.Hover, GetCastDifficulty()), 0, null, false, TimeSpan.FromMilliseconds(250));
+            caster.GetSpellHistory().StartCooldown(SpellMgr.GetSpellInfo(SpellIds.SoarRacial, GetCastDifficulty()), 0, null, false, TimeSpan.FromMilliseconds(250));
         }
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
-            OnCast.Add(new CastHandler(HandleCast));
+            OnCheckCast.Add(new(CheckCast));
+            OnCast.Add(new(HandleCast));
         }
     }
 
@@ -110,8 +129,38 @@ namespace Scripts.Spells.Evoker
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleHitTarget, 0, SpellEffectName.Dummy));
-            OnEffectLaunchTarget.Add(new EffectHandler(HandleLaunchTarget, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleHitTarget, 0, SpellEffectName.Dummy));
+            OnEffectLaunchTarget.Add(new(HandleLaunchTarget, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 381773 - Permeating Chill
+    class spell_evo_permeating_chill : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.PermeatingChillTalent);
+        }
+
+        bool CheckProc(ProcEventInfo procInfo)
+        {
+            SpellInfo spellInfo = procInfo.GetSpellInfo();
+            if (spellInfo == null)
+                return false;
+
+            if (spellInfo.HasLabel(SpellIds.LabelEvokerBlue))
+                return false;
+
+            if (!procInfo.GetActor().HasAura(SpellIds.PermeatingChillTalent))
+                if (spellInfo.IsAffected(SpellFamilyNames.Evoker, new FlagArray128(0x40, 0, 0, 0))) // disintegrate
+                    return false;
+
+            return true;
+        }
+
+        public override void Register()
+        {
+            DoCheckProc.Add(new(CheckProc));
         }
     }
 
@@ -125,12 +174,12 @@ namespace Scripts.Spells.Evoker
 
         void HandleDamage(uint effIndex)
         {
-            GetCaster().CastSpell(GetHitUnit().GetPosition(), SpellIds.PyreDamage, new CastSpellExtraArgs(true));
+            GetCaster().CastSpell(GetHitUnit().GetPosition(), SpellIds.PyreDamage, true);
         }
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDamage, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleDamage, 0, SpellEffectName.Dummy));
         }
     }
 }

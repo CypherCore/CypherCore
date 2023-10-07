@@ -1,17 +1,17 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
-using System;
-using System.Collections.Generic;
+using static Global;
 
 namespace Scripts.Spells.Monk
 {
     struct SpellIds
     {
+        public const uint CalmingCoalescence = 388220;
         public const uint CracklingJadeLightningChannel = 117952;
         public const uint CracklingJadeLightningChiProc = 123333;
         public const uint CracklingJadeLightningKnockback = 117962;
@@ -21,6 +21,7 @@ namespace Scripts.Spells.Monk
         public const uint ProvokeSingleTarget = 116189;
         public const uint ProvokeAoe = 118635;
         public const uint NoFeatherFall = 79636;
+        public const uint OpenPalmStrikesTalent = 392970;
         public const uint RollBackward = 109131;
         public const uint RollForward = 107427;
         public const uint SoothingMist = 115175;
@@ -30,6 +31,27 @@ namespace Scripts.Spells.Monk
         public const uint StaggerLight = 124275;
         public const uint StaggerModerate = 124274;
         public const uint SurgingMistHeal = 116995;
+    }
+
+    struct MonkUtility
+    {
+        // Utility for stagger scripts
+        public static Aura FindExistingStaggerEffect(Unit unit)
+        {
+            Aura auraLight = unit.GetAura(SpellIds.StaggerLight);
+            if (auraLight != null)
+                return auraLight;
+
+            Aura auraModerate = unit.GetAura(SpellIds.StaggerModerate);
+            if (auraModerate != null)
+                return auraModerate;
+
+            Aura auraHeavy = unit.GetAura(SpellIds.StaggerHeavy);
+            if (auraHeavy != null)
+                return auraHeavy;
+
+            return null;
+        }
     }
 
     [Script] // 117952 - Crackling Jade Lightning
@@ -43,23 +65,25 @@ namespace Scripts.Spells.Monk
         void OnTick(AuraEffect aurEff)
         {
             Unit caster = GetCaster();
-            if (caster)
+            if (caster != null)
                 if (caster.HasAura(SpellIds.StanceOfTheSpiritedCrane))
-                    caster.CastSpell(caster, SpellIds.CracklingJadeLightningChiProc, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
+                    caster.CastSpell(caster, SpellIds.CracklingJadeLightningChiProc, TriggerCastFlags.FullMask);
         }
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnTick, 0, AuraType.PeriodicDamage));
+            OnEffectPeriodic.Add(new(OnTick, 0, AuraType.PeriodicDamage));
         }
     }
 
     [Script] // 117959 - Crackling Jade Lightning
-    class spell_monk_crackling_jade_lightning_knockback_proc_aura : AuraScript
+    class spell_monk_crackling_jade_lightning_knockback_proc : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.CracklingJadeLightningKnockback, SpellIds.CracklingJadeLightningKnockbackCd);
+            return ValidateSpellInfo(SpellIds.CracklingJadeLightningKnockback,
+                SpellIds.CracklingJadeLightningKnockbackCd
+           );
         }
 
         bool CheckProc(ProcEventInfo eventInfo)
@@ -71,7 +95,7 @@ namespace Scripts.Spells.Monk
                 return false;
 
             Spell currentChanneledSpell = GetTarget().GetCurrentSpell(CurrentSpellTypes.Channeled);
-            if (!currentChanneledSpell || currentChanneledSpell.GetSpellInfo().Id != SpellIds.CracklingJadeLightningChannel)
+            if (currentChanneledSpell == null || currentChanneledSpell.GetSpellInfo().Id != SpellIds.CracklingJadeLightningChannel)
                 return false;
 
             return true;
@@ -79,14 +103,65 @@ namespace Scripts.Spells.Monk
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            GetTarget().CastSpell(eventInfo.GetActor(), SpellIds.CracklingJadeLightningKnockback, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
-            GetTarget().CastSpell(GetTarget(), SpellIds.CracklingJadeLightningKnockbackCd, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
+            GetTarget().CastSpell(eventInfo.GetActor(), SpellIds.CracklingJadeLightningKnockback, TriggerCastFlags.FullMask);
+            GetTarget().CastSpell(GetTarget(), SpellIds.CracklingJadeLightningKnockbackCd, TriggerCastFlags.FullMask);
         }
 
         public override void Register()
         {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            DoCheckProc.Add(new(CheckProc));
+            OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
+        }
+    }
+
+    [Script] // 116849 - Life Cocoon
+    class spell_monk_life_cocoon : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.CalmingCoalescence);
+        }
+
+        void CalculateAbsorb(uint effIndex)
+        {
+            int absorb = (int)GetCaster().CountPctFromMaxHealth(GetEffectValue());
+            Player player = GetCaster().ToPlayer();
+            if (player != null)
+                MathFunctions.AddPct(ref absorb, player.GetRatingBonusValue(CombatRating.VersatilityHealingDone));
+
+            AuraEffect calmingCoalescence = GetCaster().GetAuraEffect(SpellIds.CalmingCoalescence, 0, GetCaster().GetGUID());
+            if (calmingCoalescence != null)
+            {
+                MathFunctions.AddPct(ref absorb, calmingCoalescence.GetAmount());
+                calmingCoalescence.GetBase().Remove();
+            }
+
+            GetSpell().SetSpellValue(SpellValueMod.BasePoint0, absorb);
+        }
+
+        public override void Register()
+        {
+            OnEffectLaunch.Add(new(CalculateAbsorb, 2, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 392972 - Open Palm Strikes
+    class spell_monk_open_palm_strikes : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellEffect((SpellIds.OpenPalmStrikesTalent, 1));
+        }
+
+        bool CheckProc(AuraEffect aurEff, ProcEventInfo procInfo)
+        {
+            AuraEffect talent = GetTarget().GetAuraEffect(SpellIds.OpenPalmStrikesTalent, 1);
+            return talent != null && RandomHelper.randChance(talent.GetAmount());
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new(CheckProc, 0, AuraType.ProcTriggerSpell));
         }
     }
 
@@ -105,7 +180,7 @@ namespace Scripts.Spells.Monk
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicDummy));
+            OnEffectPeriodic.Add(new(HandlePeriodic, 0, AuraType.PeriodicDummy));
         }
     }
 
@@ -124,10 +199,10 @@ namespace Scripts.Spells.Monk
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
         }
     }
-    
+
     [Script] // 115546 - Provoke
     class spell_monk_provoke : SpellScript
     {
@@ -135,16 +210,18 @@ namespace Scripts.Spells.Monk
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            if (!spellInfo.GetExplicitTargetMask().HasAnyFlag(SpellCastTargetFlags.UnitMask)) // ensure GetExplTargetUnit() will return something meaningful during CheckCast
+            if (!spellInfo.GetExplicitTargetMask().HasFlag(SpellCastTargetFlags.UnitMask)) // ensure GetExplTargetUnit() will return something meaningful during CheckCast
                 return false;
-            return ValidateSpellInfo(SpellIds.ProvokeSingleTarget, SpellIds.ProvokeAoe);
+            return ValidateSpellInfo(SpellIds.ProvokeSingleTarget,
+                SpellIds.ProvokeAoe
+           );
         }
 
         SpellCastResult CheckExplicitTarget()
         {
             if (GetExplTargetUnit().GetEntry() != BlackOxStatusEntry)
             {
-                SpellInfo singleTarget = Global.SpellMgr.GetSpellInfo(SpellIds.ProvokeSingleTarget, GetCastDifficulty());
+                SpellInfo singleTarget = SpellMgr.GetSpellInfo(SpellIds.ProvokeSingleTarget, GetCastDifficulty());
                 SpellCastResult singleTargetExplicitResult = singleTarget.CheckExplicitTarget(GetCaster(), GetExplTargetUnit());
                 if (singleTargetExplicitResult != SpellCastResult.SpellCastOk)
                     return singleTargetExplicitResult;
@@ -166,8 +243,8 @@ namespace Scripts.Spells.Monk
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckExplicitTarget));
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            OnCheckCast.Add(new(CheckExplicitTarget));
+            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
@@ -189,20 +266,20 @@ namespace Scripts.Spells.Monk
         void HandleDummy(uint effIndex)
         {
             GetCaster().CastSpell(GetCaster(), GetCaster().HasUnitMovementFlag(MovementFlag.Backward) ? SpellIds.RollBackward : SpellIds.RollForward,
-               new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress));
+                TriggerCastFlags.IgnoreCastInProgress);
             GetCaster().CastSpell(GetCaster(), SpellIds.NoFeatherFall, true);
         }
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            OnCheckCast.Add(new(CheckCast));
+            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     // 107427 - Roll
     [Script] // 109131 - Roll (backward)
-    class spell_monk_roll_aura : AuraScript
+    class spell_monk_roll_AuraScript : AuraScript
     {
         void CalcMovementAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
@@ -227,17 +304,17 @@ namespace Scripts.Spells.Monk
         public override void Register()
         {
             // Values need manual correction
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcMovementAmount, 0, AuraType.ModSpeedNoControl));
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcMovementAmount, 2, AuraType.ModMinimumSpeed));
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcImmunityAmount, 5, AuraType.MechanicImmunity));
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcImmunityAmount, 6, AuraType.MechanicImmunity));
+            DoEffectCalcAmount.Add(new(CalcMovementAmount, 0, AuraType.ModSpeedNoControl));
+            DoEffectCalcAmount.Add(new(CalcMovementAmount, 2, AuraType.ModMinimumSpeed));
+            DoEffectCalcAmount.Add(new(CalcImmunityAmount, 5, AuraType.MechanicImmunity));
+            DoEffectCalcAmount.Add(new(CalcImmunityAmount, 6, AuraType.MechanicImmunity));
 
             // This is a special aura that sets backward run speed equal to forward speed
-            AfterEffectApply.Add(new EffectApplyHandler(ChangeRunBackSpeed, 4, AuraType.UseNormalMovementSpeed, AuraEffectHandleModes.Real));
-            AfterEffectRemove.Add(new EffectApplyHandler(RestoreRunBackSpeed, 4, AuraType.UseNormalMovementSpeed, AuraEffectHandleModes.Real));
+            AfterEffectApply.Add(new(ChangeRunBackSpeed, 4, AuraType.UseNormalMovementSpeed, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new(RestoreRunBackSpeed, 4, AuraType.UseNormalMovementSpeed, AuraEffectHandleModes.Real));
         }
     }
-    
+
     [Script] // 115069 - Stagger
     class spell_monk_stagger : AuraScript
     {
@@ -257,19 +334,18 @@ namespace Scripts.Spells.Monk
             if (effect == null)
                 return;
 
-            Absorb(dmgInfo, effect.GetAmount() / 100.0f);
+            Absorb(dmgInfo, (float)(effect.GetAmount()) / 100.0f);
         }
 
         void Absorb(DamageInfo dmgInfo, float multiplier)
         {
-            // Prevent default action (which would remove the aura)
+            // Prevent default action (which would Remove the aura)
             PreventDefaultAction();
 
-            // make sure damage doesn't come from stagger damage spell SPELL_MONK_STAGGER_DAMAGE_AURA
+            // make sure damage doesn't come from stagger damage spell SpellIds.StaggerDamageAura
             SpellInfo dmgSpellInfo = dmgInfo.GetSpellInfo();
-            if (dmgSpellInfo != null)
-                if (dmgSpellInfo.Id == SpellIds.StaggerDamageAura)
-                    return;
+            if (dmgSpellInfo != null && dmgSpellInfo.Id == SpellIds.StaggerDamageAura)
+                return;
 
             AuraEffect effect = GetEffect(0);
             if (effect == null)
@@ -277,14 +353,14 @@ namespace Scripts.Spells.Monk
 
             Unit target = GetTarget();
             float agility = target.GetStat(Stats.Agility);
-            float baseAmount = MathFunctions.CalculatePct(agility, effect.GetAmount());
-            float K = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, target.GetLevel(), -2, 0, target.GetClass(), 0);
+            float baseAmount = MathFunctions.CalculatePct(agility, (float)(effect.GetAmount()));
+            float K = DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, target.GetLevel(), -2, 0, target.GetClass(), 0);
 
             float newAmount = (baseAmount / (baseAmount + K));
             newAmount *= multiplier;
 
             // Absorb X percentage of the damage
-            float absorbAmount = dmgInfo.GetDamage() * newAmount;
+            float absorbAmount = (float)(dmgInfo.GetDamage()) * newAmount;
             if (absorbAmount > 0)
             {
                 dmgInfo.AbsorbDamage((uint)absorbAmount);
@@ -296,14 +372,14 @@ namespace Scripts.Spells.Monk
 
         public override void Register()
         {
-            OnEffectAbsorb.Add(new EffectAbsorbHandler(AbsorbNormal, 1));
-            OnEffectAbsorb.Add(new EffectAbsorbHandler(AbsorbMagic, 2));
+            OnEffectAbsorb.Add(new(AbsorbNormal, 1));
+            OnEffectAbsorb.Add(new(AbsorbMagic, 2));
         }
 
         void AddAndRefreshStagger(float amount)
         {
             Unit target = GetTarget();
-            Aura auraStagger = FindExistingStaggerEffect(target);
+            Aura auraStagger = MonkUtility.FindExistingStaggerEffect(target);
             if (auraStagger != null)
             {
                 AuraEffect effStaggerRemaining = auraStagger.GetEffect(1);
@@ -315,7 +391,7 @@ namespace Scripts.Spells.Monk
                 if (spellId == effStaggerRemaining.GetSpellInfo().Id)
                 {
                     auraStagger.RefreshDuration();
-                    effStaggerRemaining.ChangeAmount((int)newAmount, false, true /* reapply */);
+                    effStaggerRemaining.ChangeAmount((int)newAmount, false, true);
                 }
                 else
                 {
@@ -330,10 +406,10 @@ namespace Scripts.Spells.Monk
 
         uint GetStaggerSpellId(Unit unit, float amount)
         {
-            const float StaggerHeavy = 0.6f;
-            const float StaggerModerate = 0.3f;
+            float StaggerHeavy = 0.6f;
+            float StaggerModerate = 0.3f;
 
-            float staggerPct = amount / unit.GetMaxHealth();
+            float staggerPct = amount / (float)(unit.GetMaxHealth());
             return (staggerPct >= StaggerHeavy) ? SpellIds.StaggerHeavy :
                 (staggerPct >= StaggerModerate) ? SpellIds.StaggerModerate :
                 SpellIds.StaggerLight;
@@ -344,27 +420,10 @@ namespace Scripts.Spells.Monk
             // We only set the total stagger amount. The amount per tick will be set by the stagger spell script
             unit.CastSpell(unit, staggerSpellId, new CastSpellExtraArgs(SpellValueMod.BasePoint1, (int)staggerAmount).SetTriggerFlags(TriggerCastFlags.FullMask));
         }
-
-        public static Aura FindExistingStaggerEffect(Unit unit)
-        {
-            Aura auraLight = unit.GetAura(SpellIds.StaggerLight);
-            if (auraLight != null)
-                return auraLight;
-
-            Aura auraModerate = unit.GetAura(SpellIds.StaggerModerate);
-            if (auraModerate != null)
-                return auraModerate;
-
-            Aura auraHeavy = unit.GetAura(SpellIds.StaggerHeavy);
-            if (auraHeavy != null)
-                return auraHeavy;
-
-            return null;
-        }
     }
 
-    [Script] // 124255 - Stagger - SPELL_MONK_STAGGER_DAMAGE_AURA
-    class spell_monk_stagger_damage_aura : AuraScript
+    [Script] // 124255 - Stagger - SpellIds.StaggerDamageAura
+    class spell_monk_stagger_damage : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -374,14 +433,14 @@ namespace Scripts.Spells.Monk
         void OnPeriodicDamage(AuraEffect aurEff)
         {
             // Update our light/medium/heavy stagger with the correct stagger amount left
-            Aura auraStagger = spell_monk_stagger.FindExistingStaggerEffect(GetTarget());
+            Aura auraStagger = MonkUtility.FindExistingStaggerEffect(GetTarget());
             if (auraStagger != null)
             {
                 AuraEffect auraEff = auraStagger.GetEffect(1);
                 if (auraEff != null)
                 {
-                    float total = auraEff.GetAmount();
-                    float tickDamage = aurEff.GetAmount();
+                    float total = (float)(auraEff.GetAmount());
+                    float tickDamage = (float)(aurEff.GetAmount());
                     auraEff.ChangeAmount((int)(total - tickDamage));
                 }
             }
@@ -389,32 +448,31 @@ namespace Scripts.Spells.Monk
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodicDamage, 0, AuraType.PeriodicDamage));
+            OnEffectPeriodic.Add(new(OnPeriodicDamage, 0, AuraType.PeriodicDamage));
         }
     }
 
-    [Script] // 124273, 124274, 124275 - Light/Moderate/Heavy Stagger - SPELL_MONK_STAGGER_LIGHT / SPELL_MONK_STAGGER_MODERATE / SPELL_MONK_STAGGER_HEAVY
-    class spell_monk_stagger_debuff_aura : AuraScript
+    [Script] // 124273, 124274, 124275 - Light/Moderate/Heavy Stagger - SpellIds.StaggerLight / SpellIds.StaggerModerate / SpellIds.StaggerHeavy
+    class spell_monk_stagger_debuff : AuraScript
     {
         float _period;
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.StaggerDamageAura)
-            && ValidateSpellEffect(SpellIds.StaggerDamageAura, 0);
+            return ValidateSpellInfo(SpellIds.StaggerDamageAura) && ValidateSpellEffect((SpellIds.StaggerDamageAura, 0));
         }
 
         public override bool Load()
         {
-            _period = (float)Global.SpellMgr.GetSpellInfo(SpellIds.StaggerDamageAura, GetCastDifficulty()).GetEffect(0).ApplyAuraPeriod;
+            _period = (float)(SpellMgr.GetSpellInfo(SpellIds.StaggerDamageAura, GetCastDifficulty()).GetEffect(0).ApplyAuraPeriod);
             return true;
         }
 
         void OnReapply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // Calculate damage per tick
-            float total = aurEff.GetAmount();
-            float perTick = total * _period / (float)GetDuration(); // should be same as GetMaxDuration() TODO: verify
+            float total = (float)(aurEff.GetAmount());
+            float perTick = total * _period / (float)(GetDuration()); // should be same as GetMaxDuration() Todo: verify
 
             // Set amount on effect for tooltip
             AuraEffect effInfo = GetAura().GetEffect(0);
@@ -436,8 +494,8 @@ namespace Scripts.Spells.Monk
 
         public override void Register()
         {
-            AfterEffectApply.Add(new EffectApplyHandler(OnReapply, 1, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask));
-            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
+            AfterEffectApply.Add(new(OnReapply, 1, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask));
+            AfterEffectRemove.Add(new(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
 
         void CastOrChangeTickDamage(float tickDamage)

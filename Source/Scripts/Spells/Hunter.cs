@@ -1,4 +1,4 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
@@ -6,7 +6,7 @@ using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
 using System;
-using System.Collections.Generic;
+using static Global;
 
 namespace Scripts.Spells.Hunter
 {
@@ -21,10 +21,15 @@ namespace Scripts.Spells.Hunter
         public const uint ExhilarationPet = 128594;
         public const uint ExhilarationR2 = 231546;
         public const uint ExplosiveShotDamage = 212680;
-        public const uint Lonewolf = 155228;
+        public const uint LatentPoisonStack = 378015;
+        public const uint LatentPoisonDamage = 378016;
+        public const uint LatentPoisonInjectorsStack = 336903;
+        public const uint LatentPoisonInjectorsDamage = 336904;
+        public const uint LoneWolf = 155228;
         public const uint MastersCallTriggered = 62305;
         public const uint Misdirection = 34477;
         public const uint MisdirectionProc = 35079;
+        public const uint MultiShotFocus = 213363;
         public const uint PetLastStandTriggered = 53479;
         public const uint PetHeartOfThePhoenixTriggered = 54114;
         public const uint PetHeartOfThePhoenixDebuff = 55711;
@@ -34,8 +39,9 @@ namespace Scripts.Spells.Hunter
         public const uint RapidFireEnergize = 263585;
         public const uint SteadyShotFocus = 77443;
         public const uint T94PGreatness = 68130;
-        public const uint DraeneiGiftOfTheNaaru = 59543;
+        public const uint T292PMarksmanshipDamage = 394371;
         public const uint RoarOfSacrificeTriggered = 67481;
+        public const uint DraeneiGiftOfTheNaaru = 59543;
     }
 
     [Script] // 131894 - A Murder of Crows
@@ -49,6 +55,7 @@ namespace Scripts.Spells.Hunter
         void HandleDummyTick(AuraEffect aurEff)
         {
             Unit target = GetTarget();
+
             Unit caster = GetCaster();
             if (caster != null)
                 caster.CastSpell(target, SpellIds.AMurderOfCrowsDamage, true);
@@ -71,8 +78,8 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleDummyTick, 0, AuraType.PeriodicDummy));
-            OnEffectRemove.Add(new EffectApplyHandler(RemoveEffect, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
+            OnEffectPeriodic.Add(new(HandleDummyTick, 0, AuraType.PeriodicDummy));
+            OnEffectRemove.Add(new(RemoveEffect, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
         }
     }
 
@@ -92,7 +99,26 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(HandleOnRemove, 0, AuraType.ModIncreaseSpeed, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new(HandleOnRemove, 0, AuraType.ModIncreaseSpeed, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script] // 378750 - Cobra Sting
+    class spell_hun_cobra_sting : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellEffect((spellInfo.Id, 1));
+        }
+
+        bool RollProc(AuraEffect aurEff, ProcEventInfo procInfo)
+        {
+            return RandomHelper.randChance(GetEffect(1).GetAmount());
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new(RollProc, 0, AuraType.ProcTriggerSpell));
         }
     }
 
@@ -101,18 +127,18 @@ namespace Scripts.Spells.Hunter
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.ExhilarationR2, SpellIds.Lonewolf);
+            return ValidateSpellInfo(SpellIds.ExhilarationR2, SpellIds.LoneWolf);
         }
 
         void HandleOnHit()
         {
-            if (GetCaster().HasAura(SpellIds.ExhilarationR2) && !GetCaster().HasAura(SpellIds.Lonewolf))
+            if (GetCaster().HasAura(SpellIds.ExhilarationR2) && !GetCaster().HasAura(SpellIds.LoneWolf))
                 GetCaster().CastSpell(null, SpellIds.ExhilarationPet, true);
         }
 
         public override void Register()
         {
-            OnHit.Add(new HitHandler(HandleOnHit));
+            OnHit.Add(new(HandleOnHit));
         }
     }
 
@@ -126,12 +152,14 @@ namespace Scripts.Spells.Hunter
 
         void HandlePeriodic(AuraEffect aurEff)
         {
-            GetCaster()?.CastSpell(GetTarget(), SpellIds.ExplosiveShotDamage, true);
+            Unit caster = GetCaster();
+            if (caster != null)
+                caster.CastSpell(GetTarget(), SpellIds.ExplosiveShotDamage, true);
         }
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicDummy));
+            OnEffectPeriodic.Add(new(HandlePeriodic, 0, AuraType.PeriodicDummy));
         }
     }
 
@@ -152,12 +180,11 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
         }
     }
 
-    // 53478 - Last Stand Pet
-    [Script]
+    [Script] // 53478 - Last Stand Pet
     class spell_hun_last_stand_pet : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -175,17 +202,109 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
-    // 53271 - Masters Call
-    [Script]
+    [Script] // 378016 - Latent Poison
+    class spell_hun_latent_poison_damage : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.LatentPoisonStack);
+        }
+
+        void CalculateDamage()
+        {
+            Aura stack = GetHitUnit().GetAura(SpellIds.LatentPoisonStack, GetCaster().GetGUID());
+            if (stack != null)
+            {
+                SetHitDamage(GetHitDamage() * stack.GetStackAmount());
+                stack.Remove();
+            }
+        }
+
+        public override void Register()
+        {
+            OnHit.Add(new(CalculateDamage));
+        }
+    }
+
+    // 19434 - Aimed Shot
+    // 186270 - Raptor Strike
+    // 217200 - Barbed Shot
+    [Script] // 259387 - Mongoose Bite
+    class spell_hun_latent_poison_trigger : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.LatentPoisonStack, SpellIds.LatentPoisonDamage);
+        }
+
+        void TriggerDamage()
+        {
+            if (GetHitUnit().HasAura(SpellIds.LatentPoisonStack, GetCaster().GetGUID()))
+                GetCaster().CastSpell(GetHitUnit(), SpellIds.LatentPoisonDamage, GetSpell());
+        }
+
+        public override void Register()
+        {
+            AfterHit.Add(new(TriggerDamage));
+        }
+    }
+
+    [Script] // 336904 - Latent Poison Injectors
+    class spell_hun_latent_poison_injectors_damage : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.LatentPoisonInjectorsStack);
+        }
+
+        void CalculateDamage()
+        {
+            Aura stack = GetHitUnit().GetAura(SpellIds.LatentPoisonInjectorsStack, GetCaster().GetGUID());
+            if (stack != null)
+            {
+                SetHitDamage(GetHitDamage() * stack.GetStackAmount());
+                stack.Remove();
+            }
+        }
+
+        public override void Register()
+        {
+            OnHit.Add(new(CalculateDamage));
+        }
+    }
+
+    // 186270 - Raptor Strike
+    [Script] // 259387 - Mongoose Bite
+    class spell_hun_latent_poison_injectors_trigger : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.LatentPoisonInjectorsStack, SpellIds.LatentPoisonInjectorsDamage);
+        }
+
+        void TriggerDamage()
+        {
+            if (GetHitUnit().HasAura(SpellIds.LatentPoisonInjectorsStack, GetCaster().GetGUID()))
+                GetCaster().CastSpell(GetHitUnit(), SpellIds.LatentPoisonInjectorsDamage, GetSpell());
+        }
+
+        public override void Register()
+        {
+            AfterHit.Add(new(TriggerDamage));
+        }
+    }
+
+    [Script] // 53271 - Masters Call
     class spell_hun_masters_call : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellEffect(spellInfo.Id, 0) && ValidateSpellInfo(SpellIds.MastersCallTriggered, (uint)spellInfo.GetEffect(0).CalcValue());
+            return ValidateSpellEffect((spellInfo.Id, 0))
+            && ValidateSpellInfo(SpellIds.MastersCallTriggered, (uint)spellInfo.GetEffect(0).CalcValue());
         }
 
         public override bool Load()
@@ -196,26 +315,28 @@ namespace Scripts.Spells.Hunter
         SpellCastResult DoCheckCast()
         {
             Guardian pet = GetCaster().ToPlayer().GetGuardianPet();
-            if (pet == null || !pet.IsPet() || !pet.IsAlive())
+            Cypher.Assert(pet != null); // checked in Spell.CheckCast
+
+            if (!pet.IsPet() || !pet.IsAlive())
                 return SpellCastResult.NoPet;
 
-            // Do a mini Spell::CheckCasterAuras on the pet, no other way of doing this
+            // Do a mini Spell.CheckCasterAuras on the pet, no other way of doing this
             SpellCastResult result = SpellCastResult.SpellCastOk;
             UnitFlags unitflag = (UnitFlags)(uint)pet.m_unitData.Flags;
             if (!pet.GetCharmerGUID().IsEmpty())
                 result = SpellCastResult.Charmed;
-            else if (unitflag.HasAnyFlag(UnitFlags.Stunned))
+            else if (unitflag.HasFlag(UnitFlags.Stunned))
                 result = SpellCastResult.Stunned;
-            else if (unitflag.HasAnyFlag(UnitFlags.Fleeing))
+            else if (unitflag.HasFlag(UnitFlags.Fleeing))
                 result = SpellCastResult.Fleeing;
-            else if (unitflag.HasAnyFlag(UnitFlags.Confused))
+            else if (unitflag.HasFlag(UnitFlags.Confused))
                 result = SpellCastResult.Confused;
 
             if (result != SpellCastResult.SpellCastOk)
                 return result;
 
             Unit target = GetExplTargetUnit();
-            if (!target)
+            if (target == null)
                 return SpellCastResult.BadTargets;
 
             if (!pet.IsWithinLOSInMap(target))
@@ -231,19 +352,19 @@ namespace Scripts.Spells.Hunter
 
         void HandleScriptEffect(uint effIndex)
         {
-            GetHitUnit().CastSpell((Unit)null, SpellIds.MastersCallTriggered, true);
+            GetHitUnit().CastSpell(null, SpellIds.MastersCallTriggered, true);
         }
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(DoCheckCast));
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 1, SpellEffectName.ScriptEffect));
+            OnCheckCast.Add(new(DoCheckCast));
+
+            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleScriptEffect, 1, SpellEffectName.ScriptEffect));
         }
     }
 
-    // 34477 - Misdirection
-    [Script]
+    [Script] // 34477 - Misdirection
     class spell_hun_misdirection : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -263,18 +384,17 @@ namespace Scripts.Spells.Hunter
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            GetTarget().CastSpell(GetTarget(), SpellIds.MisdirectionProc, new CastSpellExtraArgs(aurEff));
+            GetTarget().CastSpell(GetTarget(), SpellIds.MisdirectionProc, aurEff);
         }
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy));
+            AfterEffectRemove.Add(new(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
+            OnEffectProc.Add(new(HandleProc, 1, AuraType.Dummy));
         }
     }
 
-    // 35079 - Misdirection (Proc)
-    [Script]
+    [Script] // 35079 - Misdirection (Proc)
     class spell_hun_misdirection_proc : AuraScript
     {
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -284,12 +404,37 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
 
-    // 55709 - Pet Heart of the Phoenix
-    [Script]
+    [Script] // 2643 - Multi-Shot
+    class spell_hun_multi_shot : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.MultiShotFocus);
+        }
+
+        public override bool Load()
+        {
+            return GetCaster().IsPlayer();
+        }
+
+        void HandleOnHit()
+        {
+            // We need to check hunter's spec because it doesn't generate focus on other specs than Mm
+            if (GetCaster().ToPlayer().GetPrimarySpecialization() == ChrSpecialization.HunterMarksmanship)
+                GetCaster().CastSpell(GetCaster(), SpellIds.MultiShotFocus, true);
+        }
+
+        public override void Register()
+        {
+            OnHit.Add(new(HandleOnHit));
+        }
+    }
+
+    [Script] // 55709 - Pet Heart of the Phoenix
     class spell_hun_pet_heart_of_the_phoenix : SpellScript
     {
         public override bool Load()
@@ -308,7 +453,7 @@ namespace Scripts.Spells.Hunter
         {
             Unit caster = GetCaster();
             Unit owner = caster.GetOwner();
-            if (owner)
+            if (owner != null)
             {
                 if (!caster.HasAura(SpellIds.PetHeartOfThePhoenixDebuff))
                 {
@@ -322,7 +467,7 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
@@ -345,7 +490,7 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            AfterCast.Add(new CastHandler(HandleAfterCast));
+            AfterCast.Add(new(HandleAfterCast));
         }
     }
 
@@ -366,7 +511,7 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodic, 1, AuraType.PeriodicDummy));
+            OnEffectPeriodic.Add(new(HandlePeriodic, 1, AuraType.PeriodicDummy));
         }
     }
 
@@ -385,10 +530,10 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleHit, 0, SpellEffectName.SchoolDamage));
+            OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffectName.SchoolDamage));
         }
     }
-    
+
     [Script] // 53480 - Roar of Sacrifice
     class spell_hun_roar_of_sacrifice : AuraScript
     {
@@ -400,10 +545,10 @@ namespace Scripts.Spells.Hunter
         bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             DamageInfo damageInfo = eventInfo.GetDamageInfo();
-            if (damageInfo == null || !Convert.ToBoolean((int)damageInfo.GetSchoolMask() & aurEff.GetMiscValue()))
+            if (damageInfo == null || (damageInfo.GetSchoolMask() & (SpellSchoolMask)aurEff.GetMiscValue()) == 0)
                 return false;
 
-            if (!GetCaster())
+            if (GetCaster() == null)
                 return false;
 
             return true;
@@ -420,24 +565,23 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 1, AuraType.Dummy));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy));
+            DoCheckEffectProc.Add(new(CheckProc, 1, AuraType.Dummy));
+            OnEffectProc.Add(new(HandleProc, 1, AuraType.Dummy));
         }
     }
 
-    // 37506 - Scatter Shot
-    [Script]
+    [Script] // 37506 - Scatter Shot
     class spell_hun_scatter_shot : SpellScript
     {
         public override bool Load()
         {
-            return GetCaster().IsTypeId(TypeId.Player);
+            return GetCaster().IsPlayer();
         }
 
         void HandleDummy(uint effIndex)
         {
             Player caster = GetCaster().ToPlayer();
-            // break auto Shot and varhit
+            // break var Shot and autohit
             caster.InterruptSpell(CurrentSpellTypes.AutoRepeat);
             caster.AttackStop();
             caster.SendAttackSwingCancelAttack();
@@ -445,12 +589,11 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
-    // 56641 - Steady Shot
-    [Script]
+    [Script] // 56641 - Steady Shot
     class spell_hun_steady_shot : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -460,7 +603,7 @@ namespace Scripts.Spells.Hunter
 
         public override bool Load()
         {
-            return GetCaster().IsTypeId(TypeId.Player);
+            return GetCaster().IsPlayer();
         }
 
         void HandleOnHit()
@@ -470,15 +613,14 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            OnHit.Add(new HitHandler(HandleOnHit));
+            OnHit.Add(new(HandleOnHit));
         }
     }
 
-    // 1515 - Tame Beast
-    [Script]
+    [Script] // 1515 - Tame Beast
     class spell_hun_tame_beast : SpellScript
     {
-        static uint[] CallPetSpellIds = { 883, 83242, 83243, 83244, 83245, };
+        uint[] CallPetSpellIds = { 883, 83242, 83243, 83244, 83245, };
 
         SpellCastResult CheckCast()
         {
@@ -486,16 +628,16 @@ namespace Scripts.Spells.Hunter
             if (caster == null)
                 return SpellCastResult.DontReport;
 
-            if (!GetExplTargetUnit())
+            if (GetExplTargetUnit() == null)
                 return SpellCastResult.BadImplicitTargets;
 
             Creature target = GetExplTargetUnit().ToCreature();
-            if (target)
+            if (target != null)
             {
                 if (target.GetLevelForTarget(caster) > caster.GetLevel())
                     return SpellCastResult.Highlevel;
 
-                // use SMSG_PET_TAME_FAILURE?
+                // use SmsgPetTameFailure?
                 if (!target.GetCreatureTemplate().IsTameable(caster.CanTameExoticPets(), target.GetCreatureDifficulty()))
                     return SpellCastResult.BadTargets;
 
@@ -537,7 +679,7 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
+            OnCheckCast.Add(new(CheckCast));
         }
     }
 
@@ -551,7 +693,7 @@ namespace Scripts.Spells.Hunter
 
         bool CheckProc(ProcEventInfo eventInfo)
         {
-            if (eventInfo.GetActor().IsTypeId(TypeId.Player) && eventInfo.GetActor().ToPlayer().GetPet())
+            if (eventInfo.GetActor().IsPlayer() && eventInfo.GetActor().ToPlayer().GetPet() != null)
                 return true;
             return false;
         }
@@ -561,13 +703,41 @@ namespace Scripts.Spells.Hunter
             PreventDefaultAction();
             Unit caster = eventInfo.GetActor();
 
-            caster.CastSpell(caster.ToPlayer().GetPet(), SpellIds.T94PGreatness, new CastSpellExtraArgs(aurEff));
+            caster.CastSpell(caster.ToPlayer().GetPet(), SpellIds.T94PGreatness, aurEff);
         }
 
         public override void Register()
         {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell));
+            DoCheckProc.Add(new(CheckProc));
+            OnEffectProc.Add(new(HandleProc, 0, AuraType.ProcTriggerSpell));
+        }
+    }
+
+    [Script] // 394366 - Find The Mark
+    class spell_hun_t29_2p_marksmanship_bonus : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellEffect((SpellIds.T292PMarksmanshipDamage, 0))
+                && SpellMgr.GetSpellInfo(SpellIds.T292PMarksmanshipDamage, Difficulty.None).GetMaxTicks() != 0;
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+
+            Unit caster = eventInfo.GetActor();
+            uint ticks = SpellMgr.GetSpellInfo(SpellIds.T292PMarksmanshipDamage, Difficulty.None).GetMaxTicks();
+            uint damage = MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetOriginalDamage(), aurEff.GetAmount()) / ticks;
+
+            caster.CastSpell(eventInfo.GetActionTarget(), SpellIds.T292PMarksmanshipDamage, new CastSpellExtraArgs(aurEff)
+                .SetTriggeringSpell(eventInfo.GetProcSpell())
+                .AddSpellMod(SpellValueMod.BasePoint0, (int)damage));
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
         }
     }
 }
