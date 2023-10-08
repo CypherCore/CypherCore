@@ -52,7 +52,7 @@ namespace Game.Chat
                     groupTarget = Global.GroupMgr.GetGroupByDbStoreId(resultGroup.Read<uint>(0));
             }
 
-            if (!groupTarget)
+            if (groupTarget == null)
             {
                 handler.SendSysMessage(CypherStrings.LfgNotInGroup, player.GetName());
                 return false;
@@ -63,9 +63,9 @@ namespace Game.Chat
 
             foreach (var slot in groupTarget.GetMemberSlots())
             {
-                Player p = Global.ObjAccessor.FindPlayer(slot.guid);
-                if (p)
-                    PrintPlayerInfo(handler, p);
+                Player groupPlayer = Global.ObjAccessor.FindPlayer(slot.guid);
+                if (groupPlayer != null)
+                    PrintPlayerInfo(handler, groupPlayer);
                 else
                     handler.SendSysMessage("{0} is offline.", slot.name);
             }
@@ -102,7 +102,7 @@ namespace Game.Chat
 
         static void PrintPlayerInfo(CommandHandler handler, Player player)
         {
-            if (!player)
+            if (player == null)
                 return;
 
             ObjectGuid guid = player.GetGUID();

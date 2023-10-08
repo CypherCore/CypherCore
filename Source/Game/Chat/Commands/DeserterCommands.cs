@@ -52,7 +52,7 @@ namespace Game.Chat.Commands
         static bool HandleDeserterAdd(CommandHandler handler, uint time, bool isInstance)
         {
             Player player = handler.GetSelectedPlayer();
-            if (!player)
+            if (player == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
@@ -72,7 +72,7 @@ namespace Game.Chat.Commands
         static bool HandleDeserterRemove(CommandHandler handler, bool isInstance)
         {
             Player player = handler.GetSelectedPlayer();
-            if (!player)
+            if (player == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;

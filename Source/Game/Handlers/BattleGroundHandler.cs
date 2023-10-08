@@ -22,7 +22,7 @@ namespace Game
         void HandleBattlemasterHello(Hello hello)
         {
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(hello.Unit, NPCFlags.BattleMaster, NPCFlags2.None);
-            if (!unit)
+            if (unit == null)
                 return;
 
             // Stop the npc if moving
@@ -198,7 +198,7 @@ namespace Game
                 for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.Next())
                 {
                     Player member = refe.GetSource();
-                    if (!member)
+                    if (member == null)
                         continue;   // this should never happen
 
                     if (err != 0)
@@ -226,7 +226,7 @@ namespace Game
         void HandlePVPLogData(PVPLogDataRequest packet)
         {
             Battleground bg = GetPlayer().GetBattleground();
-            if (!bg)
+            if (bg == null)
                 return;
 
             // Prevent players from sending BuildPvpLogDataPacket in an arena except for when sent in Battleground.EndBattleground.
@@ -366,7 +366,7 @@ namespace Game
                 // this is still needed here if Battleground"jumping" shouldn't add deserter debuff
                 // also this is required to prevent stuck at old Battlegroundafter SetBattlegroundId set to new
                 Battleground currentBg = GetPlayer().GetBattleground();
-                if (currentBg)
+                if (currentBg != null)
                     currentBg.RemovePlayerAtLeave(GetPlayer().GetGUID(), false, true);
 
                 // set the destination instance id
@@ -411,7 +411,7 @@ namespace Game
             if (GetPlayer().IsInCombat())
             {
                 Battleground bg = GetPlayer().GetBattleground();
-                if (bg)
+                if (bg != null)
                     if (bg.GetStatus() != BattlegroundStatus.WaitLeave)
                         return;
             }
@@ -455,7 +455,7 @@ namespace Game
                 if (ginfo.IsInvitedToBGInstanceGUID != 0)
                 {
                     bg = Global.BattlegroundMgr.GetBattleground(ginfo.IsInvitedToBGInstanceGUID, bgTypeId);
-                    if (!bg)
+                    if (bg == null)
                         continue;
 
                     BattlefieldStatusNeedConfirmation battlefieldStatus;
@@ -512,7 +512,7 @@ namespace Game
 
             Group grp = GetPlayer().GetGroup();
             // no group found, error
-            if (!grp)
+            if (grp == null)
                 return;
             if (grp.GetLeaderGUID() != GetPlayer().GetGUID())
                 return;
@@ -549,7 +549,7 @@ namespace Game
             for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.Next())
             {
                 Player member = refe.GetSource();
-                if (!member)
+                if (member == null)
                     continue;
 
                 if (err != 0)
@@ -584,7 +584,7 @@ namespace Game
         void HandleReportPvPAFK(ReportPvPPlayerAFK reportPvPPlayerAFK)
         {
             Player reportedPlayer = Global.ObjAccessor.FindPlayer(reportPvPPlayerAFK.Offender);
-            if (!reportedPlayer)
+            if (reportedPlayer == null)
             {
                 Log.outDebug(LogFilter.Battleground, "WorldSession.HandleReportPvPAFK: player not found");
                 return;

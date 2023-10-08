@@ -315,12 +315,12 @@ namespace Game.Conditions
                 case ConditionTypes.CreatureType:
                 {
                     Creature creature = obj.ToCreature();
-                    if (creature)
+                    if (creature != null)
                         condMeets = (uint)creature.GetCreatureTemplate().CreatureType == ConditionValue1;
                     break;
                 }
                 case ConditionTypes.InWater:
-                    if (unit)
+                    if (unit != null)
                         condMeets = unit.IsInWater();
                     break;
                 case ConditionTypes.TerrainSwap:
@@ -328,7 +328,7 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.StandState:
                 {
-                    if (unit)
+                    if (unit != null)
                     {
                         if (ConditionValue1 == 0)
                             condMeets = (unit.GetStandState() == (UnitStandStateType)ConditionValue2);
@@ -341,35 +341,35 @@ namespace Game.Conditions
                 }
                 case ConditionTypes.DailyQuestDone:
                 {
-                    if (player)
+                    if (player != null)
                         condMeets = player.IsDailyQuestDone(ConditionValue1);
                     break;
                 }
                 case ConditionTypes.Charmed:
                 {
-                    if (unit)
+                    if (unit != null)
                         condMeets = unit.IsCharmed();
                     break;
                 }
                 case ConditionTypes.PetType:
                 {
-                    if (player)
+                    if (player != null)
                     {
                         Pet pet = player.GetPet();
-                        if (pet)
+                        if (pet != null)
                             condMeets = (((1 << (int)pet.GetPetType()) & ConditionValue1) != 0);
                     }
                     break;
                 }
                 case ConditionTypes.Taxi:
                 {
-                    if (player)
+                    if (player != null)
                         condMeets = player.IsInFlight();
                     break;
                 }
                 case ConditionTypes.Queststate:
                 {
-                    if (player)
+                    if (player != null)
                     {
                         if (
                             (Convert.ToBoolean(ConditionValue2 & (1 << (int)QuestStatus.None)) && (player.GetQuestStatus(ConditionValue1) == QuestStatus.None)) ||
@@ -384,7 +384,7 @@ namespace Game.Conditions
                 }
                 case ConditionTypes.ObjectiveProgress:
                 {
-                    if (player)
+                    if (player != null)
                     {
                         QuestObjective questObj = Global.ObjectMgr.GetQuestObjective(ConditionValue1);
                         if (questObj == null)

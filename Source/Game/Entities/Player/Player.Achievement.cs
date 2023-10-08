@@ -67,7 +67,7 @@ namespace Game.Entities
                 scenario.UpdateCriteria(type, miscValue1, miscValue2, miscValue3, refe, this);
 
             Guild guild = Global.GuildMgr.GetGuildById(GetGuildId());
-            if (guild)
+            if (guild != null)
                 guild.UpdateCriteria(type, miscValue1, miscValue2, miscValue3, refe, this);
         }
 

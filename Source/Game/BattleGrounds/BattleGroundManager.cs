@@ -189,7 +189,7 @@ namespace Game.BattleGrounds
             {
                 var bgs = it.Value.m_Battlegrounds;
                 var bg = bgs.LookupByKey(instanceId);
-                if (bg)
+                if (bg != null)
                     return bg;
             }
 
@@ -402,7 +402,7 @@ namespace Game.BattleGrounds
         public void SendToBattleground(Player player, uint instanceId, BattlegroundTypeId bgTypeId)
         {
             Battleground bg = GetBattleground(instanceId, bgTypeId);
-            if (bg)
+            if (bg != null)
             {
                 uint mapid = bg.GetMapId();
                 Team team = player.GetBGTeam();
@@ -676,7 +676,7 @@ namespace Game.BattleGrounds
 
         public void AddBattleground(Battleground bg)
         {
-            if (bg)
+            if (bg != null)
                 bgDataStore[bg.GetTypeID()].m_Battlegrounds[bg.GetInstanceID()] = bg;
         }
 

@@ -17,7 +17,7 @@ namespace Game.Chat.Commands
         static bool HandleTitlesCurrentCommand(CommandHandler handler, uint titleId)
         {
             Player target = handler.GetSelectedPlayer();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
@@ -48,7 +48,7 @@ namespace Game.Chat.Commands
         static bool HandleTitlesAddCommand(CommandHandler handler, uint titleId)
         {
             Player target = handler.GetSelectedPlayer();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
@@ -79,7 +79,7 @@ namespace Game.Chat.Commands
         static bool HandleTitlesRemoveCommand(CommandHandler handler, uint titleId)
         {
             Player target = handler.GetSelectedPlayer();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
@@ -120,7 +120,7 @@ namespace Game.Chat.Commands
             static bool HandleTitlesSetMaskCommand(CommandHandler handler, ulong mask)
             {
                 Player target = handler.GetSelectedPlayer();
-                if (!target)
+                if (target == null)
                 {
                     handler.SendSysMessage(CypherStrings.NoCharSelected);
                     return false;

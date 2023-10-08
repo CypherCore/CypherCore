@@ -163,7 +163,7 @@ namespace Game
             }
 
             Player player = Global.ObjAccessor.FindPlayerByName(packet.CharName);
-            if (!player)
+            if (player == null)
             {
                 SendNotification(CypherStrings.PlayerNotExistOrOffline, packet.CharName);
                 return;

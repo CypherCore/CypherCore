@@ -589,7 +589,7 @@ namespace Game.Networking.Packets
             if (characterInfo == null)
                 return false;
 
-            if (player)
+            if (player != null)
             {
                 Cypher.Assert(player.GetGUID() == guid);
 

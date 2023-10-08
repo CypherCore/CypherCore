@@ -114,7 +114,7 @@ namespace Game.Entities
                 if (minion.IsGuardianPet())
                 {
                     Guardian oldPet = GetGuardianPet();
-                    if (oldPet)
+                    if (oldPet != null)
                     {
                         if (oldPet != minion && (oldPet.IsPet() || minion.IsPet() || oldPet.GetEntry() != minion.GetEntry()))
                         {
@@ -257,7 +257,7 @@ namespace Game.Entities
 
         public bool SetCharmedBy(Unit charmer, CharmType type, AuraApplication aurApp = null)
         {
-            if (!charmer)
+            if (charmer == null)
                 return false;
 
             // dismount players when charmed
@@ -268,7 +268,7 @@ namespace Game.Entities
                 charmer.RemoveAurasByType(AuraType.Mounted);
 
             Cypher.Assert(type != CharmType.Possess || charmer.IsTypeId(TypeId.Player));
-            Cypher.Assert((type == CharmType.Vehicle) == (GetVehicleKit() && GetVehicleKit().IsControllableVehicle()));
+            Cypher.Assert((type == CharmType.Vehicle) == (GetVehicleKit() != null && GetVehicleKit().IsControllableVehicle()));
 
             Log.outDebug(LogFilter.Unit, "SetCharmedBy: charmer {0} (GUID {1}), charmed {2} (GUID {3}), type {4}.", charmer.GetEntry(), charmer.GetGUID().ToString(), GetEntry(), GetGUID().ToString(), type);
 
@@ -297,7 +297,7 @@ namespace Game.Entities
             Player playerCharmer = charmer.ToPlayer();
 
             // Charmer stop charming
-            if (playerCharmer)
+            if (playerCharmer != null)
             {
                 playerCharmer.StopCastingCharm();
                 playerCharmer.StopCastingBindSight();
@@ -340,7 +340,7 @@ namespace Game.Entities
             charmer.SetCharm(this, true);
 
             Player player = ToPlayer();
-            if (player)
+            if (player != null)
             {
                 if (player.IsAFK())
                     player.ToggleAFK();
@@ -369,7 +369,7 @@ namespace Game.Entities
                     GetCharmInfo().InitCharmCreateSpells();
             }
 
-            if (playerCharmer)
+            if (playerCharmer != null)
             {
                 switch (type)
                 {
@@ -433,12 +433,12 @@ namespace Game.Entities
             if (!IsCharmed())
                 return;
 
-            if (charmer)
+            if (charmer != null)
                 Cypher.Assert(charmer == GetCharmer());
             else
                 charmer = GetCharmer();
 
-            Cypher.Assert(charmer);
+            Cypher.Assert(charmer != null);
 
             CharmType type;
             if (HasUnitState(UnitState.Possessed))
@@ -473,7 +473,7 @@ namespace Game.Entities
             m_combatManager.RevalidateCombat();
 
             Player playerCharmer = charmer.ToPlayer();
-            if (playerCharmer)
+            if (playerCharmer != null)
             {
                 switch (type)
                 {
@@ -512,7 +512,7 @@ namespace Game.Entities
             if (player != null)
                 player.SetClientControl(this, true);
 
-            if (playerCharmer && this != charmer.GetFirstControlled())
+            if (playerCharmer != null && this != charmer.GetFirstControlled())
                 playerCharmer.SendRemoveControlBar();
 
             // a guardian should always have charminfo
@@ -607,7 +607,7 @@ namespace Game.Entities
                     charm.SetUnitFlag(UnitFlags.PlayerControlled);
                     charm.ToPlayer().UpdatePvPState();
                 }
-                else if (player)
+                else if (player != null)
                 {
                     charm.m_ControlledByPlayer = true;
                     charm.SetUnitFlag(UnitFlags.PlayerControlled);
@@ -637,7 +637,7 @@ namespace Game.Entities
         {
             // Sequence: charmed, pet, other guardians
             Unit unit = GetCharmed();
-            if (!unit)
+            if (unit == null)
             {
                 ObjectGuid guid = GetMinionGUID();
                 if (!guid.IsEmpty())
@@ -685,7 +685,7 @@ namespace Game.Entities
         public void SendPetActionFeedback(PetActionFeedback msg, uint spellId)
         {
             Unit owner = GetOwner();
-            if (!owner || !owner.IsTypeId(TypeId.Player))
+            if (owner == null || !owner.IsTypeId(TypeId.Player))
                 return;
 
             PetActionFeedbackPacket petActionFeedback = new();
@@ -697,7 +697,7 @@ namespace Game.Entities
         public void SendPetTalk(PetTalk pettalk)
         {
             Unit owner = GetOwner();
-            if (!owner || !owner.IsTypeId(TypeId.Player))
+            if (owner == null || !owner.IsTypeId(TypeId.Player))
                 return;
 
             PetActionSound petActionSound = new();
@@ -709,7 +709,7 @@ namespace Game.Entities
         public void SendPetAIReaction(ObjectGuid guid)
         {
             Unit owner = GetOwner();
-            if (!owner || !owner.IsTypeId(TypeId.Player))
+            if (owner == null || !owner.IsTypeId(TypeId.Player))
                 return;
 
             AIReaction packet = new();

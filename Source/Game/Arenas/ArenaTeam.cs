@@ -77,7 +77,7 @@ namespace Game.Arenas
             // Get player name and class either from db or character cache
             CharacterCacheEntry characterInfo;
             Player player = Global.ObjAccessor.FindPlayer(playerGuid);
-            if (player)
+            if (player != null)
             {
                 playerClass = player.GetClass();
                 playerName = player.GetName();
@@ -91,7 +91,7 @@ namespace Game.Arenas
                 return false;
 
             // Check if player is already in a similar arena team
-            if ((player && player.GetArenaTeamId(GetSlot()) != 0) || Global.CharacterCacheStorage.GetCharacterArenaTeamIdByGuid(playerGuid, GetArenaType()) != 0)
+            if ((player != null && player.GetArenaTeamId(GetSlot()) != 0) || Global.CharacterCacheStorage.GetCharacterArenaTeamIdByGuid(playerGuid, GetArenaType()) != 0)
             {
                 Log.outDebug(LogFilter.Arena, "Arena: {0} {1} already has an arena team of type {2}", playerGuid.ToString(), playerName, GetArenaType());
                 return false;
@@ -144,7 +144,7 @@ namespace Game.Arenas
             DB.Characters.Execute(stmt);
 
             // Inform player if online
-            if (player)
+            if (player != null)
             {
                 player.SetInArenaTeam(teamId, GetSlot(), GetArenaType());
                 player.SetArenaTeamIdInvited(0);
@@ -254,7 +254,7 @@ namespace Game.Arenas
         {
             // Disable remove/promote buttons
             Player oldCaptain = Global.ObjAccessor.FindPlayer(GetCaptain());
-            if (oldCaptain)
+            if (oldCaptain != null)
                 oldCaptain.SetArenaTeamInfoField(GetSlot(), ArenaTeamInfoType.Member, 1);
 
             // Set new captain
@@ -268,10 +268,10 @@ namespace Game.Arenas
 
             // Enable remove/promote buttons
             Player newCaptain = Global.ObjAccessor.FindPlayer(guid);
-            if (newCaptain)
+            if (newCaptain != null)
             {
                 newCaptain.SetArenaTeamInfoField(GetSlot(), ArenaTeamInfoType.Member, 0);
-                if (oldCaptain)
+                if (oldCaptain != null)
                 {
                     Log.outDebug(LogFilter.Arena, "Player: {0} [GUID: {1}] promoted player: {2} [GUID: {3}] to leader of arena team [Id: {4}, Name: {5}] [Type: {6}].",
                         oldCaptain.GetName(), oldCaptain.GetGUID().ToString(), newCaptain.GetName(),
@@ -295,7 +295,7 @@ namespace Game.Arenas
 
             // Remove arena team info from player data
             Player player = Global.ObjAccessor.FindPlayer(guid);
-            if (player)
+            if (player != null)
             {
                 // delete all info regarding this team
                 for (uint i = 0; i < (int)ArenaTeamInfoType.End; ++i)
@@ -319,7 +319,7 @@ namespace Game.Arenas
             if (session != null)
             {
                 Player player = session.GetPlayer();
-                if (player)
+                if (player != null)
                     Log.outDebug(LogFilter.Arena, "Player: {0} [GUID: {1}] disbanded arena team type: {2} [Id: {3}, Name: {4}].", player.GetName(), player.GetGUID().ToString(), GetArenaType(), GetId(), GetName());
             }
 
@@ -387,7 +387,7 @@ namespace Game.Arenas
             foreach (var member in Members)
             {
                 Player player = Global.ObjAccessor.FindPlayer(member.Guid);
-                if (player)
+                if (player != null)
                     SendStats(player.GetSession());
             }
         }
@@ -397,7 +397,7 @@ namespace Game.Arenas
             foreach (var member in Members)
             {
                 Player player = Global.ObjAccessor.FindPlayer(member.Guid);
-                if (player)
+                if (player != null)
                     player.SendPacket(packet);
             }
         }
@@ -441,7 +441,7 @@ namespace Game.Arenas
 
         public uint GetAverageMMR(Group group)
         {
-            if (!group)
+            if (group == null)
                 return 0;
 
             uint matchMakerRating = 0;
@@ -449,7 +449,7 @@ namespace Game.Arenas
             foreach (var member in Members)
             {
                 // Skip if player is not online
-                if (!Global.ObjAccessor.FindPlayer(member.Guid))
+                if (Global.ObjAccessor.FindPlayer(member.Guid) == null)
                     continue;
 
                 // Skip if player is not a member of group
@@ -545,7 +545,7 @@ namespace Game.Arenas
                 foreach (var member in Members)
                 {
                     Player player = Global.ObjAccessor.FindPlayer(member.Guid);
-                    if (player)
+                    if (player != null)
                         player.UpdateCriteria(CriteriaType.EarnTeamArenaRating, stats.Rating, type);
                 }
             }
@@ -740,7 +740,7 @@ namespace Game.Arenas
             foreach (var member in Members)
             {
                 Player player = Global.ObjAccessor.FindPlayer(member.Guid);
-                if (player)
+                if (player != null)
                     if (player.GetMap().IsBattleArena())
                         return true;
             }
@@ -816,7 +816,7 @@ namespace Game.Arenas
             else
                 PersonalRating += (ushort)mod;
 
-            if (player)
+            if (player != null)
             {
                 player.SetArenaTeamInfoField(ArenaTeam.GetSlotByType(type), ArenaTeamInfoType.PersonalRating, PersonalRating);
                 player.UpdateCriteria(CriteriaType.EarnPersonalArenaRating, PersonalRating, type);

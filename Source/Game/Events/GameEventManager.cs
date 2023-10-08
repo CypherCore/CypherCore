@@ -1155,7 +1155,7 @@ namespace Game
                         {
                             GameObject go = GameObject.CreateGameObjectFromDB(guid, map, false);
                             // @todo find out when it is add to map
-                            if (go)
+                            if (go != null)
                             {
                                 // @todo find out when it is add to map
                                 if (go.IsSpawnedByDefault())

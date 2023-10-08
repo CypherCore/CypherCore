@@ -22,7 +22,7 @@ namespace Game
             }
 
             Item item = GetPlayer().GetItemByPos(packet.Bag, packet.Slot);
-            if (!item)
+            if (item == null)
                 return;
 
             List<ItemPosCount> dest = new();
@@ -48,7 +48,7 @@ namespace Game
         void HandleBankerActivate(Hello packet)
         {
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Banker, NPCFlags2.None);
-            if (!unit)
+            if (unit == null)
             {
                 Log.outError(LogFilter.Network, "HandleBankerActivate: {0} not found or you can not interact with him.", packet.Unit.ToString());
                 return;
@@ -70,7 +70,7 @@ namespace Game
             }
 
             Item item = GetPlayer().GetItemByPos(packet.Bag, packet.Slot);
-            if (!item)
+            if (item == null)
                 return;
 
             if (Player.IsBankPos(packet.Bag, packet.Slot))                 // moving from bank to inventory
@@ -85,7 +85,7 @@ namespace Game
 
                 GetPlayer().RemoveItem(packet.Bag, packet.Slot, true);
                 Item storedItem = GetPlayer().StoreItem(dest, item, true);
-                if (storedItem)
+                if (storedItem != null)
                     GetPlayer().ItemAddedQuestCheck(storedItem.GetEntry(), storedItem.GetCount());
             }
             else                                                    // moving from inventory to bank
@@ -213,7 +213,7 @@ namespace Game
             }
 
             Item item = _player.GetItemByPos(autoBankReagent.PackSlot, autoBankReagent.Slot);
-            if (!item)
+            if (item == null)
                 return;
 
             List<ItemPosCount> dest = new();
@@ -250,7 +250,7 @@ namespace Game
             }
 
             Item pItem = _player.GetItemByPos(autoStoreBankReagent.Slot, autoStoreBankReagent.PackSlot);
-            if (!pItem)
+            if (pItem == null)
                 return;
 
             if (Player.IsReagentBankPos(autoStoreBankReagent.Slot, autoStoreBankReagent.PackSlot))

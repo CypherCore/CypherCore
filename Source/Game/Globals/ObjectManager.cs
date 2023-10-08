@@ -842,7 +842,7 @@ namespace Game
             uint MapId = location.GetMapId();
 
             // search for zone associated closest graveyard
-            uint zoneId = Global.TerrainMgr.GetZoneId(conditionObject ? conditionObject.GetPhaseShift() : PhasingHandler.EmptyPhaseShift, MapId, x, y, z);
+            uint zoneId = Global.TerrainMgr.GetZoneId(conditionObject != null ? conditionObject.GetPhaseShift() : PhasingHandler.EmptyPhaseShift, MapId, x, y, z);
             if (zoneId == 0)
             {
                 if (z > -500)
@@ -914,7 +914,7 @@ namespace Game
                     continue;
                 }
 
-                if (conditionObject)
+                if (conditionObject != null)
                 {
                     if (!Global.ConditionMgr.IsObjectMeetToConditions(conditionSource, data.Conditions))
                         continue;
@@ -1949,7 +1949,7 @@ namespace Game
                     continue;
                 }
 
-                if (!creatureTemplateStorage.TryGetValue(creatureID, out CreatureTemplate creatureTemplate))
+                if (creatureTemplateStorage.TryGetValue(creatureID, out CreatureTemplate creatureTemplate))
                 {
                     Log.outError(LogFilter.Sql, $"creature_template_resistance has resistance definitions for creature {creatureID} but this creature doesn't exist");
                     continue;
@@ -1989,7 +1989,7 @@ namespace Game
                     continue;
                 }
 
-                if (!creatureTemplateStorage.TryGetValue(creatureID, out CreatureTemplate creatureTemplate))
+                if (creatureTemplateStorage.TryGetValue(creatureID, out CreatureTemplate creatureTemplate))
                 {
                     Log.outError(LogFilter.Sql, $"creature_template_spell has spell definitions for creature {creatureID} but this creature doesn't exist");
                     continue;
@@ -2071,7 +2071,7 @@ namespace Game
                     continue;
                 }
 
-                if (!creatureSummonedDataStorage.ContainsKey(creatureId))
+                if (creatureSummonedDataStorage.ContainsKey(creatureId))
                     creatureSummonedDataStorage[creatureId] = new();
 
                 CreatureSummonedData summonedData = creatureSummonedDataStorage[creatureId];
@@ -2405,7 +2405,7 @@ namespace Game
                 uint item = result.Read<uint>(2);
                 uint idx = result.Read<uint>(3);
 
-                if (!creatureTemplateStorage.ContainsKey(entry))
+                if (creatureTemplateStorage.ContainsKey(entry))
                 {
                     Log.outError(LogFilter.Sql, $"Table `creature_questitem` has data for nonexistent creature (entry: {entry}, difficulty: {difficulty} idx: {idx}), skipped");
                     continue;
@@ -2597,7 +2597,7 @@ namespace Game
                 for (byte unitClass = 1; unitClass <= SharedConst.MaxUnitClasses; ++unitClass)
                 {
                     uint unitClassMask = 1u << (unitClass - 1);
-                    if (!creatureBaseStatsStorage.ContainsKey(MathFunctions.MakePair16(unitLevel, unitClassMask)))
+                    if (creatureBaseStatsStorage.ContainsKey(MathFunctions.MakePair16(unitLevel, unitClassMask)))
                         Log.outError(LogFilter.Sql, $"Missing base stats for creature class {unitClassMask} level {unitLevel}");
                 }
             }
@@ -3879,7 +3879,7 @@ namespace Game
 
         public CreatureData NewOrExistCreatureData(ulong spawnId)
         {
-            if (!creatureDataStorage.ContainsKey(spawnId))
+            if (creatureDataStorage.ContainsKey(spawnId))
                 creatureDataStorage[spawnId] = new CreatureData();
             return creatureDataStorage[spawnId];
         }
@@ -9564,7 +9564,7 @@ namespace Game
             do
             {
                 ulong receiver = result.Read<ulong>(3);
-                if (serverUp && Global.ObjAccessor.FindConnectedPlayer(ObjectGuid.Create(HighGuid.Player, receiver)))
+                if (serverUp && Global.ObjAccessor.FindConnectedPlayer(ObjectGuid.Create(HighGuid.Player, receiver)) != null)
                     continue;
 
                 Mail m = new();

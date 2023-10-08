@@ -256,7 +256,7 @@ namespace Game
 
         public void AddAItem(Item item)
         {
-            Cypher.Assert(item);
+            Cypher.Assert(item != null);
             Cypher.Assert(!_itemsByGuid.ContainsKey(item.GetGUID()));
             _itemsByGuid[item.GetGUID()] = item;
         }
@@ -1263,7 +1263,7 @@ namespace Game
                     if (auctionItem.GetCount() >= remainingQuantity)
                     {
                         Item clonedItem = auctionItem.CloneItem(remainingQuantity, player);
-                        if (!clonedItem)
+                        if (clonedItem == null)
                         {
                             player.GetSession().SendAuctionCommandResult(0, AuctionCommand.PlaceBid, AuctionResult.CommodityPurchaseFailed, delayForNextAction);
                             return false;
@@ -1366,9 +1366,9 @@ namespace Game
             Player oldBidder = Global.ObjAccessor.FindConnectedPlayer(auction.Bidder);
 
             // old bidder exist
-            if ((oldBidder || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Bidder)))// && !sAuctionBotConfig.IsBotChar(auction.Bidder))
+            if ((oldBidder != null || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Bidder)))// && !sAuctionBotConfig.IsBotChar(auction.Bidder))
             {
-                if (oldBidder)
+                if (oldBidder != null)
                 {
                     AuctionOutbidNotification packet = new();
                     packet.BidAmount = newBidAmount;
@@ -1388,14 +1388,14 @@ namespace Game
         public void SendAuctionWon(AuctionPosting auction, Player bidder, SQLTransaction trans)
         {
             uint bidderAccId;
-            if (!bidder)
+            if (bidder == null)
                 bidder = Global.ObjAccessor.FindConnectedPlayer(auction.Bidder); // try lookup bidder when called from .Update
 
             // data for gm.log
             string bidderName = "";
             bool logGmTrade= auction.ServerFlags.HasFlag(AuctionPostingServerFlag.GmLogBuyer);
 
-            if (bidder)
+            if (bidder != null)
             {
                 bidderAccId = bidder.GetSession().GetAccountId();
                 bidderName = bidder.GetName();
@@ -1437,7 +1437,7 @@ namespace Game
                     mail.AddItem(item);
                 }
 
-                if (bidder)
+                if (bidder != null)
                 {
                     AuctionWonNotification packet = new();
                     packet.Info.Initialize(auction, auction.Items[0]);
@@ -1460,17 +1460,17 @@ namespace Game
         //call this method to send mail to auction owner, when auction is successful, it does not clear ram
         public void SendAuctionSold(AuctionPosting auction, Player owner, SQLTransaction trans)
         {
-            if (!owner)
+            if (owner == null)
                 owner = Global.ObjAccessor.FindConnectedPlayer(auction.Owner);
 
             // owner exist
-            if ((owner || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Owner)))// && !sAuctionBotConfig.IsBotChar(auction.Owner))
+            if ((owner != null || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Owner)))// && !sAuctionBotConfig.IsBotChar(auction.Owner))
             {
                 ulong auctionHouseCut = CalculateAuctionHouseCut(auction.BidAmount);
                 ulong profit = auction.BidAmount + auction.Deposit - auctionHouseCut;
 
                 //FIXME: what do if owner offline
-                if (owner)
+                if (owner != null)
                 {
                     owner.UpdateCriteria(CriteriaType.MoneyEarnedFromAuctions, profit);
                     owner.UpdateCriteria(CriteriaType.HighestAuctionSale, auction.BidAmount);
@@ -1489,9 +1489,9 @@ namespace Game
         {
             Player owner = Global.ObjAccessor.FindConnectedPlayer(auction.Owner);
             // owner exist
-            if ((owner || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Owner)))// && !sAuctionBotConfig.IsBotChar(auction.Owner))
+            if ((owner != null || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Owner)))// && !sAuctionBotConfig.IsBotChar(auction.Owner))
             {
-                if (owner)
+                if (owner != null)
                     owner.GetSession().SendAuctionClosedNotification(auction, 0.0f, false);
 
                 int itemIndex = 0;
@@ -1533,7 +1533,7 @@ namespace Game
             Player bidder = Global.ObjAccessor.FindConnectedPlayer(auction.Bidder);
 
             // bidder exist
-            if ((bidder || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Bidder)))// && !sAuctionBotConfig.IsBotChar(auction.Bidder))
+            if ((bidder != null || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Bidder)))// && !sAuctionBotConfig.IsBotChar(auction.Bidder))
                 new MailDraft(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Removed, auction), "")
                 .AddMoney(auction.BidAmount)
                 .SendMailTo(trans, new MailReceiver(bidder, auction.Bidder), new MailSender(this), MailCheckMask.Copied);
@@ -1541,11 +1541,11 @@ namespace Game
 
         public void SendAuctionInvoice(AuctionPosting auction, Player owner, SQLTransaction trans)
         {
-            if (!owner)
+            if (owner == null)
                 owner = Global.ObjAccessor.FindConnectedPlayer(auction.Owner);
 
             // owner exist (online or offline)
-            if ((owner || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Owner)))// && !sAuctionBotConfig.IsBotChar(auction.Owner))
+            if ((owner != null || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Owner)))// && !sAuctionBotConfig.IsBotChar(auction.Owner))
             {
                 ByteBuffer tempBuffer = new();
                 tempBuffer.WritePackedTime(GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.MailDeliveryDelay));

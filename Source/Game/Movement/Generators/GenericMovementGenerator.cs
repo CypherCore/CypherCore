@@ -56,7 +56,7 @@ namespace Game.Movement
 
         public override bool Update(Unit owner, uint diff)
         {
-            if (!owner || HasFlag(MovementGeneratorFlags.Finalized))
+            if (owner == null || HasFlag(MovementGeneratorFlags.Finalized))
                 return false;
 
             // Cyclic splines never expire, so update the duration only if it's not cyclic

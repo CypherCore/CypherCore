@@ -97,7 +97,7 @@ namespace Game.Chat
         static bool HandleModifyFactionCommand(CommandHandler handler, uint? factionid, uint? flag, ulong? npcflag, uint? dyflag)
         {
             Creature target = handler.GetSelectedCreature();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.SelectCreature);
                 return false;
@@ -157,7 +157,7 @@ namespace Game.Chat
                 mark = 65535;
 
             Player target = handler.GetSelectedPlayerOrSelf();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
@@ -211,7 +211,7 @@ namespace Game.Chat
             }
 
             Player target = handler.GetSelectedPlayerOrSelf();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
@@ -235,7 +235,7 @@ namespace Game.Chat
         static bool HandleModifyMoneyCommand(CommandHandler handler, StringArguments args)
         {
             Player target = handler.GetSelectedPlayerOrSelf();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
@@ -298,7 +298,7 @@ namespace Game.Chat
                 return false;
 
             Player target = handler.GetSelectedPlayerOrSelf();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;
@@ -328,7 +328,7 @@ namespace Game.Chat
                 drunklevel = 100;
 
             Player target = handler.GetSelectedPlayerOrSelf();
-            if (target)
+            if (target != null)
                 target.SetDrunkValue(drunklevel);
 
             return true;
@@ -341,7 +341,7 @@ namespace Game.Chat
                 return false;
 
             Player target = handler.GetSelectedPlayerOrSelf();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;
@@ -470,7 +470,7 @@ namespace Game.Chat
                 return false;
 
             Player target = handler.GetSelectedPlayerOrSelf();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
@@ -529,7 +529,7 @@ namespace Game.Chat
                 return false;
 
             Player target = handler.GetSelectedPlayerOrSelf();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;
@@ -617,7 +617,7 @@ namespace Game.Chat
                 return false;
 
             Player target = handler.GetSelectedPlayerOrSelf();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
 
@@ -652,7 +652,7 @@ namespace Game.Chat
             }
 
             Player target = handler.GetSelectedPlayerOrSelf();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
@@ -686,7 +686,7 @@ namespace Game.Chat
         static bool HandleDeMorphCommand(CommandHandler handler)
         {
             Unit target = handler.GetSelectedUnit();
-            if (!target)
+            if (target == null)
                 target = handler.GetSession().GetPlayer();
 
             // check online security
@@ -784,7 +784,7 @@ namespace Game.Chat
         static void NotifyModification(CommandHandler handler, Unit target, CypherStrings resourceMessage, CypherStrings resourceReportMessage, params object[] args)
         {
             Player player = target.ToPlayer();
-            if (player)
+            if (player != null)
             {
                 handler.SendSysMessage(resourceMessage, new object[] { handler.GetNameLink(player) }.Combine(args));
                 if (handler.NeedReportToTarget(player))
@@ -806,7 +806,7 @@ namespace Game.Chat
                 return false;
             }
 
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
@@ -826,14 +826,14 @@ namespace Game.Chat
                 return false;
             }
 
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
             }
 
             Player player = target.ToPlayer();
-            if (player)
+            if (player != null)
             {
                 // check online security
                 if (handler.HasLowerSecurity(player, ObjectGuid.Empty))

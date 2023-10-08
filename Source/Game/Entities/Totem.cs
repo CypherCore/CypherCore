@@ -42,7 +42,7 @@ namespace Game.Entities
         {
             // client requires SMSG_TOTEM_CREATED to be sent before adding to world and before removing old totem
             Player owner = GetOwner().ToPlayer();
-            if (owner)
+            if (owner != null)
             {
                 int slot = m_Properties.Slot;
                 if (slot == (int)SummonSlot.Any)
@@ -121,12 +121,12 @@ namespace Game.Entities
                     GetSpellHistory().SendCooldownEvent(spell, 0, null, false);
 
                 Group group = owner.GetGroup();
-                if (group)
+                if (group != null)
                 {
                     for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                     {
                         Player target = refe.GetSource();
-                        if (target && target.IsInMap(owner) && group.SameSubGroup(owner, target))
+                        if (target != null && target.IsInMap(owner) && group.SameSubGroup(owner, target))
                             target.RemoveAurasDueToSpell(GetSpell(), GetGUID());
                     }
                 }

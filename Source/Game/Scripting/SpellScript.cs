@@ -1052,7 +1052,7 @@ namespace Game.Scripting
             var tempTargets = targets.Select<WorldObject, (WorldObject, int)>(target =>
             {
                 int negativePoints = 0;
-                if (prioritizeGroupMembersOf && (!target.IsUnit() || target.ToUnit().IsInRaidWith(prioritizeGroupMembersOf)))
+                if (prioritizeGroupMembersOf != null && (!target.IsUnit() || target.ToUnit().IsInRaidWith(prioritizeGroupMembersOf)))
                     negativePoints |= 1 << NOT_GROUPED;
 
                 if (prioritizePlayers && !target.IsPlayer() && (!target.IsCreature() || !target.ToCreature().HasFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells)))

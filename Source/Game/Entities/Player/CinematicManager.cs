@@ -68,7 +68,7 @@ namespace Game.Entities
 
                     player.GetMap().LoadGridForActiveObject(pos.GetPositionX(), pos.GetPositionY(), player);
                     m_CinematicObject = player.SummonCreature(1, pos.posX, pos.posY, pos.posZ, 0.0f, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(5));
-                    if (m_CinematicObject)
+                    if (m_CinematicObject != null)
                     {
                         m_CinematicObject.SetActive(true);
                         player.SetViewpoint(m_CinematicObject, true);
@@ -89,10 +89,10 @@ namespace Game.Entities
             m_cinematicCamera = null;
             m_activeCinematic = null;
             m_activeCinematicCameraIndex = -1;
-            if (m_CinematicObject)
+            if (m_CinematicObject != null)
             {
                 WorldObject vpObject = player.GetViewpoint();
-                if (vpObject)
+                if (vpObject != null)
                     if (vpObject == m_CinematicObject)
                         player.SetViewpoint(m_CinematicObject, false);
 
@@ -170,7 +170,7 @@ namespace Game.Entities
 
             // Advance (at speed) to this position. The remote sight object is used
             // to send update information to player in cinematic
-            if (m_CinematicObject && interPosition.IsPositionValid())
+            if (m_CinematicObject != null && interPosition.IsPositionValid())
                 m_CinematicObject.MonsterMoveWithSpeed(interPosition.posX, interPosition.posY, interPosition.posZ, 500.0f, false, true);
 
             // If we never received an end packet 10 seconds after the final timestamp then force an end

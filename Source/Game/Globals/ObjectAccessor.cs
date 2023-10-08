@@ -153,7 +153,7 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
     public Player GetPlayer(Map m, ObjectGuid guid)
     {
         Player player = _players.LookupByKey(guid);
-        if (player)
+        if (player != null)
             if (player.IsInWorld && player.GetMap() == m)
                 return player;
 
@@ -181,12 +181,12 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
     public Player FindPlayer(ObjectGuid guid)
     {
         Player player = FindConnectedPlayer(guid);
-        return player && player.IsInWorld ? player : null;
+        return player != null && player.IsInWorld ? player : null;
     }
     public Player FindPlayerByName(string name)
     {
         Player player = PlayerNameMapHolder.Find(name);
-        if (!player || !player.IsInWorld)
+        if (player == null || !player.IsInWorld)
             return null;
 
         return player;

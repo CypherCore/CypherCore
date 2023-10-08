@@ -40,7 +40,7 @@ namespace Game.Entities
             if (_unit.IsTypeId(TypeId.Unit))
             {
                 Creature creature = _unit.ToCreature();
-                if (creature)
+                if (creature != null)
                     creature.SetReactState(_oldReactState);
             }
         }

@@ -90,7 +90,7 @@ namespace Game.AI
             // Do not use AddEscortState, removing everything from previous
             _escortState = SmartEscortState.Escorting;
 
-            if (invoker && invoker.IsPlayer())
+            if (invoker != null && invoker.IsPlayer())
             {
                 _escortNPCFlags = (uint)me.GetNpcFlags();
                 me.ReplaceAllNpcFlags(NPCFlags.None);
@@ -226,7 +226,7 @@ namespace Game.AI
                         player.FailQuest(EscortQuestID);
 
                     Group group = player.GetGroup();
-                    if (group)
+                    if (group != null)
                     {
                         for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                         {
@@ -234,7 +234,7 @@ namespace Game.AI
                             if (!groupGuy.IsInMap(player))
                                 continue;
 
-                            if (!fail && groupGuy.IsAtGroupRewardDistance(me) && !groupGuy.GetCorpse())
+                            if (!fail && groupGuy.IsAtGroupRewardDistance(me) && groupGuy.GetCorpse() == null)
                                 groupGuy.AreaExploredOrEventHappens(EscortQuestID);
                             else if (fail)
                                 groupGuy.FailQuest(EscortQuestID);
@@ -340,7 +340,7 @@ namespace Game.AI
                         return true;
 
                     Group group = player.GetGroup();
-                    if (group)
+                    if (group != null)
                     {
                         for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                         {
@@ -458,7 +458,7 @@ namespace Game.AI
             else
             {
                 Unit target = !_followGuid.IsEmpty() ? Global.ObjAccessor.GetUnit(me, _followGuid) : null;
-                if (target)
+                if (target != null)
                 {
                     me.GetMotionMaster().MoveFollow(target, _followDist, _followAngle);
                     // evade is not cleared in MoveFollow, so we can't keep it
@@ -832,7 +832,7 @@ namespace Game.AI
             {
                 if (on)
                 {
-                    if (!me.HasReactState(ReactStates.Passive) && me.GetVictim() && !me.GetMotionMaster().HasMovementGenerator(movement =>
+                    if (!me.HasReactState(ReactStates.Passive) && me.GetVictim() != null && !me.GetMotionMaster().HasMovementGenerator(movement =>
                     {
                         return movement.GetMovementGeneratorType() == MovementGeneratorType.Chase && movement.Mode == MovementGeneratorMode.Default && movement.Priority == MovementGeneratorPriority.Normal;
                     }))
@@ -1013,7 +1013,7 @@ namespace Game.AI
             {
                 if (_followArrivedTimer < diff)
                 {
-                    if (me.FindNearestCreature(_followArrivedEntry, SharedConst.InteractionDistance, true))
+                    if (me.FindNearestCreature(_followArrivedEntry, SharedConst.InteractionDistance, true) != null)
                     {
                         StopFollow(true);
                         return;

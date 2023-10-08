@@ -608,7 +608,7 @@ namespace Game.Spells
                 return true;
 
             // item dependent spell
-            if (item && item.IsFitToSpellRequirements(this))
+            if (item != null && item.IsFitToSpellRequirements(this))
                 return true;
 
             return false;
@@ -839,7 +839,7 @@ namespace Game.Spells
             if (HasAttribute(SpellAttr4.OnlyFlyingAreas))
             {
                 AreaMountFlags mountFlags = 0;
-                if (player && player.HasAuraType(AuraType.MountRestrictions))
+                if (player != null && player.HasAuraType(AuraType.MountRestrictions))
                 {
                     foreach (AuraEffect auraEffect in player.GetAuraEffectsByType(AuraType.MountRestrictions))
                         mountFlags |= (AreaMountFlags)auraEffect.GetMiscValue();
@@ -853,7 +853,7 @@ namespace Game.Spells
                 if (!mountFlags.HasFlag(AreaMountFlags.AllowFlyingMounts))
                     return SpellCastResult.IncorrectArea;
 
-                if (player)
+                if (player != null)
                 {
                     uint mapToCheck = map_id;
                     MapRecord mapEntry1 = CliDB.MapStorage.LookupByKey(map_id);
@@ -917,7 +917,7 @@ namespace Game.Spells
                         return SpellCastResult.RequiresArea;
 
                     Battleground bg = player.GetBattleground();
-                    return bg && bg.GetStatus() == BattlegroundStatus.WaitJoin ? SpellCastResult.SpellCastOk : SpellCastResult.RequiresArea;
+                    return bg != null && bg.GetStatus() == BattlegroundStatus.WaitJoin ? SpellCastResult.SpellCastOk : SpellCastResult.RequiresArea;
                 }
                 case 32724:         // Gold Team (Alliance)
                 case 32725:         // Green Team (Alliance)
@@ -939,12 +939,12 @@ namespace Game.Spells
                         return SpellCastResult.RequiresArea;
 
                     Battleground bg = player.GetBattleground();
-                    return bg && bg.GetStatus() == BattlegroundStatus.WaitJoin ? SpellCastResult.SpellCastOk : SpellCastResult.RequiresArea;
+                    return bg != null && bg.GetStatus() == BattlegroundStatus.WaitJoin ? SpellCastResult.SpellCastOk : SpellCastResult.RequiresArea;
                 }
             }
 
             // aura limitations
-            if (player)
+            if (player != null)
             {
                 foreach (var effectInfo in _effects)
                 {
@@ -1140,10 +1140,10 @@ namespace Game.Spells
             if (HasAttribute(SpellAttr8.BattleResurrection))
             {
                 Map map = caster.GetMap();
-                if (map)
+                if (map != null)
                 {
                     InstanceMap iMap = map.ToInstanceMap();
-                    if (iMap)
+                    if (iMap != null)
                     {
                         InstanceScript instance = iMap.GetInstanceScript();
                         if (instance != null)
@@ -1203,7 +1203,7 @@ namespace Game.Spells
                 return SpellCastResult.SpellCastOk;
 
             Vehicle vehicle = caster.GetVehicle();
-            if (vehicle)
+            if (vehicle != null)
             {
                 VehicleSeatFlags checkMask = 0;
                 foreach (var effectInfo in _effects)
@@ -2706,10 +2706,10 @@ namespace Game.Spells
         {
             int duration = GetDuration();
 
-            if (caster)
+            if (caster != null)
             {
                 Player modOwner = caster.GetSpellModOwner();
-                if (modOwner)
+                if (modOwner != null)
                     modOwner.ApplySpellMod(this, SpellModOp.Duration, ref duration);
             }
 
@@ -2813,7 +2813,7 @@ namespace Game.Spells
         {
             // gameobject casts don't use power
             Unit unitCaster = caster.ToUnit();
-            if (!unitCaster)
+            if (unitCaster == null)
                 return null;
 
             if (power.RequiredAuraSpellID != 0 && !unitCaster.HasAura(power.RequiredAuraSpellID))
@@ -3128,7 +3128,7 @@ namespace Game.Spells
         public float CalcProcPPM(Unit caster, int itemLevel)
         {
             float ppm = ProcBasePPM;
-            if (!caster)
+            if (caster == null)
                 return ppm;
 
             foreach (SpellProcsPerMinuteModRecord mod in ProcPPMMods)
@@ -3154,7 +3154,7 @@ namespace Game.Spells
                     case SpellProcsPerMinuteModType.Spec:
                     {
                         Player plrCaster = caster.ToPlayer();
-                        if (plrCaster)
+                        if (plrCaster != null)
                             if (plrCaster.GetPrimarySpecialization() == (ChrSpecialization)mod.Param)
                                 ppm *= 1.0f + mod.Coeff;
                         break;
@@ -3291,12 +3291,12 @@ namespace Game.Spells
             {
                 var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(visual.CasterPlayerConditionID);
                 if (playerCondition != null)
-                    if (!caster || !caster.IsPlayer() || !ConditionManager.IsPlayerMeetingCondition(caster.ToPlayer(), playerCondition))
+                    if (caster == null || !caster.IsPlayer() || !ConditionManager.IsPlayerMeetingCondition(caster.ToPlayer(), playerCondition))
                         continue;
 
                 var unitCondition = CliDB.UnitConditionStorage.LookupByKey(visual.CasterUnitConditionID);
                 if (unitCondition != null)
-                    if (!caster || !caster.IsUnit() || !ConditionManager.IsUnitMeetingCondition(caster.ToUnit(), viewer?.ToUnit(), unitCondition))
+                    if (caster == null || !caster.IsUnit() || !ConditionManager.IsUnitMeetingCondition(caster.ToUnit(), viewer?.ToUnit(), unitCondition))
                         continue;
 
                 return visual.Id;
@@ -4245,7 +4245,7 @@ namespace Game.Spells
             if (Scaling.Coefficient != 0.0f)
             {
                 uint level = _spellInfo.SpellLevel;
-                if (target && _spellInfo.IsPositiveEffect(EffectIndex) && (Effect == SpellEffectName.ApplyAura))
+                if (target != null && _spellInfo.IsPositiveEffect(EffectIndex) && (Effect == SpellEffectName.ApplyAura))
                     level = target.GetLevel();
                 else if (caster != null && caster.IsUnit())
                     level = caster.ToUnit().GetLevel();

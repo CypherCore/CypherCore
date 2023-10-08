@@ -15,7 +15,7 @@ namespace Game
         {
             Player player = Global.ObjAccessor.FindPlayer(packet.TargetGUID);
 
-            if (!player)
+            if (player == null)
                 return;
 
             CanDuelResult response = new();

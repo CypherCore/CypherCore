@@ -129,14 +129,14 @@ namespace Game.Entities
                             // 2.4. _maxNotGrayMember - maximum level of alive group member within reward distance,
                             //      for whom victim is not gray;
                             uint grayLevel = Formulas.GetGrayLevel(lvl);
-                            if (_victim.GetLevelForTarget(member) > grayLevel && (!_maxNotGrayMember || _maxNotGrayMember.GetLevel() < lvl))
+                            if (_victim.GetLevelForTarget(member) > grayLevel && (_maxNotGrayMember == null || _maxNotGrayMember.GetLevel() < lvl))
                                 _maxNotGrayMember = member;
                         }
                     }
                 }
                 // 2.5. _isFullXP - flag identifying that for all group members victim is not gray,
                 //      so 100% XP will be rewarded (50% otherwise).
-                _isFullXP = _maxNotGrayMember && (_maxLevel == _maxNotGrayMember.GetLevel());
+                _isFullXP = _maxNotGrayMember != null && (_maxLevel == _maxNotGrayMember.GetLevel());
             }
             else
                 _count = 1;
@@ -185,7 +185,7 @@ namespace Game.Entities
                 // 4.2.3. Give XP to player.
                 player.GiveXP(xp, _victim, _groupRate);
                 Pet pet = player.GetPet();
-                if (pet)
+                if (pet != null)
                     // 4.2.4. If player has pet, reward pet with XP (100% for single player, 50% for group case).
                     pet.GivePetXP(player.GetGroup() != null ? xp / 2 : xp);
             }
@@ -264,7 +264,7 @@ namespace Game.Entities
                     for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                     {
                         Player member = refe.GetSource();
-                        if (member)
+                        if (member != null)
                         {
                             // Killer may not be at reward distance, check directly
                             if (killer == member || member.IsAtGroupRewardDistance(_victim))

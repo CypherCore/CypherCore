@@ -168,10 +168,10 @@ namespace Game.Networking.Packets
             SlashCmd = chatType;
             _Language = language;
 
-            if (sender)
+            if (sender != null)
                 SetSender(sender, locale);
 
-            if (receiver)
+            if (receiver != null)
                 SetReceiver(receiver, locale);
 
             SenderVirtualAddress = Global.WorldMgr.GetVirtualRealmAddress();
@@ -187,11 +187,11 @@ namespace Game.Networking.Packets
             SenderGUID = sender.GetGUID();
 
             Creature creatureSender = sender.ToCreature();
-            if (creatureSender)
+            if (creatureSender != null)
                 SenderName = creatureSender.GetName(locale);
 
             Player playerSender = sender.ToPlayer();
-            if (playerSender)
+            if (playerSender != null)
             {
                 SenderAccountGUID = playerSender.GetSession().GetAccountGUID();
                 _ChatFlags = playerSender.GetChatFlags();
@@ -205,7 +205,7 @@ namespace Game.Networking.Packets
             TargetGUID = receiver.GetGUID();
 
             Creature creatureReceiver = receiver.ToCreature();
-            if (creatureReceiver)
+            if (creatureReceiver != null)
                 TargetName = creatureReceiver.GetName(locale);
         }
 

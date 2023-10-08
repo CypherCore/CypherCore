@@ -61,7 +61,7 @@ namespace Game.Networking.Packets
         public SAttackStop(Unit attacker, Unit victim) : base(ServerOpcodes.AttackStop, ConnectionType.Instance)
         {
             Attacker = attacker.GetGUID();
-            if (victim)
+            if (victim != null)
             {
                 Victim = victim.GetGUID();
                 NowDead = !victim.IsAlive(); // using isAlive instead of isDead to catch JUST_DIED death states as well

@@ -225,7 +225,7 @@ namespace Game.Chat
             var go_search = new UnitListSearcher(obj, creatureList, go_check);
 
             Cell.VisitGridObjects(obj, go_search, radius);
-            if (!creatureList.Empty())
+            if (creatureList.Empty())
             {
                 handler.SendSysMessage("Found {0} Creatures.", creatureList.Count);
 

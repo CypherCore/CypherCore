@@ -160,7 +160,7 @@ namespace Game.Movement
 
         public override bool DoUpdate(Creature owner, uint diff)
         {
-            if (!owner || !owner.IsAlive())
+            if (owner == null || !owner.IsAlive())
                 return true;
 
             if (HasFlag(MovementGeneratorFlags.Finalized | MovementGeneratorFlags.Paused) || _path == null || _path.nodes.Empty())
@@ -363,7 +363,7 @@ namespace Game.Movement
                             trans.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
                             owner.SetHomePosition(x, y, z, o);
                         }
-                        // else if (vehicle) - this should never happen, vehicle offsets are const
+                        // else if (vehicle != null) - this should never happen, vehicle offsets are const
                     }
 
                     AddFlag(MovementGeneratorFlags.Finalized);

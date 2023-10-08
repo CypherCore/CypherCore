@@ -66,7 +66,7 @@ namespace Game
         void HandleLogoutCancel(LogoutCancel packet)
         {
             // Player have already logged out serverside, too late to cancel
-            if (!GetPlayer())
+            if (GetPlayer() == null)
                 return;
 
             SetLogoutStartTime(0);

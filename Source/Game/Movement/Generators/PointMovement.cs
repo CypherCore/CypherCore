@@ -87,7 +87,7 @@ namespace Game.Movement
             if (_speed.HasValue)
                 init.SetVelocity(_speed.Value);
 
-            if (_faceTarget)
+            if (_faceTarget != null)
                 init.SetFacing(_faceTarget);
 
             if (_spellEffectExtra != null)

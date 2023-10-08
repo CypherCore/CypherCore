@@ -212,13 +212,13 @@ namespace Game
                 SendSound(source, finalSound, finalType, whisperTarget, range, team, gmOnly, textEntry.BroadcastTextId, finalPlayType);
 
             Unit finalSource = source;
-            if (srcPlr)
+            if (srcPlr != null)
                 finalSource = srcPlr;
 
             if (textEntry.emote != 0)
                 SendEmote(finalSource, textEntry.emote);
 
-            if (srcPlr)
+            if (srcPlr != null)
             {
                 PlayerTextBuilder builder = new(source, finalSource, finalSource.GetGender(), finalType, textEntry.groupId, textEntry.id, finalLang, whisperTarget);
                 SendChatPacket(finalSource, builder, finalType, whisperTarget, range, team, gmOnly);
@@ -254,7 +254,7 @@ namespace Game
 
         public void SendSound(Creature source, uint sound, ChatMsg msgType, WorldObject whisperTarget = null, CreatureTextRange range = CreatureTextRange.Normal, Team team = Team.Other, bool gmOnly = false, uint keyBroadcastTextId = 0, SoundKitPlayType playType = SoundKitPlayType.Normal)
         {
-            if (sound == 0 || !source)
+            if (sound == 0 || source == null)
                 return;
 
             if (playType == SoundKitPlayType.ObjectSound)
@@ -278,14 +278,14 @@ namespace Game
             switch (msgType)
             {
                 case ChatMsg.MonsterParty:
-                    if (!whisperTarget)
+                    if (whisperTarget == null)
                         return;
 
                     Player whisperPlayer = whisperTarget.ToPlayer();
-                    if (whisperPlayer)
+                    if (whisperPlayer != null)
                     {
                         Group group = whisperPlayer.GetGroup();
-                        if (group)
+                        if (group != null)
                             group.BroadcastWorker(player => player.SendPacket(data));
                     }
                     return;
@@ -294,7 +294,7 @@ namespace Game
                     {
                         if (range == CreatureTextRange.Normal)//ignores team and gmOnly
                         {
-                            if (!whisperTarget || !whisperTarget.IsTypeId(TypeId.Player))
+                            if (whisperTarget == null || !whisperTarget.IsTypeId(TypeId.Player))
                                 return;
 
                             whisperTarget.ToPlayer().SendPacket(data);
@@ -362,7 +362,7 @@ namespace Game
 
         void SendEmote(Unit source, Emote emote)
         {
-            if (!source)
+            if (source == null)
                 return;
 
             source.HandleEmoteCommand(emote);
@@ -446,7 +446,7 @@ namespace Game
                     {
                         if (range == CreatureTextRange.Normal) //ignores team and gmOnly
                         {
-                            if (!whisperTarget || !whisperTarget.IsTypeId(TypeId.Player))
+                            if (whisperTarget == null || !whisperTarget.IsTypeId(TypeId.Player))
                                 return;
 
                             localizer.Invoke(whisperTarget.ToPlayer());

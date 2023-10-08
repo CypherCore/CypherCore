@@ -112,7 +112,7 @@ namespace Game.Entities
                             {
                                 if (msg)
                                 {
-                                    if (player)
+                                    if (player != null)
                                         player.SendSysMessage("Craft spell {0} not have create item entry.", spellInfo.Id);
                                     else
                                         Log.outError(LogFilter.Spells, "Craft spell {0} not have create item entry.", spellInfo.Id);
@@ -126,7 +126,7 @@ namespace Game.Entities
                         {
                             if (msg)
                             {
-                                if (player)
+                                if (player != null)
                                     player.SendSysMessage("Craft spell {0} create not-exist in DB item (Entry: {1}) and then...", spellInfo.Id, spellEffectInfo.ItemType);
                                 else
                                     Log.outError(LogFilter.Spells, "Craft spell {0} create not-exist in DB item (Entry: {1}) and then...", spellInfo.Id, spellEffectInfo.ItemType);
@@ -460,8 +460,8 @@ namespace Game.Entities
             if (((uint)procEntry.AttributesMask & 0x0000001) != 0)
             {
                 Player actor = eventInfo.GetActor().ToPlayer();
-                if (actor)
-                    if (eventInfo.GetActionTarget() && !actor.IsHonorOrXPTarget(eventInfo.GetActionTarget()))
+                if (actor != null)
+                    if (eventInfo.GetActionTarget() != null && !actor.IsHonorOrXPTarget(eventInfo.GetActionTarget()))
                         return false;
             }
 
@@ -4964,10 +4964,10 @@ namespace Game.Entities
                 if (player == null || (auraSpell > 0 && !player.HasAura((uint)auraSpell)) || (auraSpell < 0 && player.HasAura((uint)-auraSpell)))
                     return false;
 
-            if (player)
+            if (player != null)
             {
                 Battleground bg = player.GetBattleground();
-                if (bg)
+                if (bg != null)
                     return bg.IsSpellAllowed(spellId, player);
             }
 
@@ -4976,7 +4976,7 @@ namespace Game.Entities
             {
                 case 91604: // No fly Zone - Wintergrasp
                 {
-                    if (!player)
+                    if (player == null)
                         return false;
 
                     BattleField Bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(player.GetMap(), player.GetZoneId());
@@ -4987,7 +4987,7 @@ namespace Game.Entities
                 case 56618: // Horde Controls Factory Phase Shift
                 case 56617: // Alliance Controls Factory Phase Shift
                 {
-                    if (!player)
+                    if (player == null)
                         return false;
 
                     BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(player.GetMap(), player.GetZoneId());
@@ -5007,7 +5007,7 @@ namespace Game.Entities
                 case 57940: // Essence of Wintergrasp - Northrend
                 case 58045: // Essence of Wintergrasp - Wintergrasp
                 {
-                    if (!player)
+                    if (player == null)
                         return false;
 
                     BattleField battlefieldWG = Global.BattleFieldMgr.GetBattlefieldByBattleId(player.GetMap(), 1);
@@ -5017,7 +5017,7 @@ namespace Game.Entities
                 }
                 case 74411: // Battleground- Dampening
                 {
-                    if (!player)
+                    if (player == null)
                         return false;
 
                     BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(player.GetMap(), player.GetZoneId());

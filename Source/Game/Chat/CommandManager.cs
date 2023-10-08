@@ -337,8 +337,8 @@ namespace Game.Chat
             }
 
             Log.outCommand(session.GetAccountId(), $"Command: {cmdStr} [Player: {player.GetName()} ({player.GetGUID()}) (Account: {session.GetAccountId()}) " +
-                $"X: {player.GetPositionX()} Y: {player.GetPositionY()} Z: {player.GetPositionZ()} Map: {player.GetMapId()} ({(player.GetMap() ? player.GetMap().GetMapName() : "Unknown")}) " +
-                $"Area: {areaId} ({areaName}) Zone: {zoneName} Selected: {(player.GetSelectedUnit() ? player.GetSelectedUnit().GetName() : "")} ({targetGuid})]");
+                $"X: {player.GetPositionX()} Y: {player.GetPositionY()} Z: {player.GetPositionZ()} Map: {player.GetMapId()} ({(player.GetMap() != null ? player.GetMap().GetMapName() : "Unknown")}) " +
+                $"Area: {areaId} ({areaName}) Zone: {zoneName} Selected: {(player.GetSelectedUnit() != null ? player.GetSelectedUnit().GetName() : "")} ({targetGuid})]");
         }
 
         public void SendCommandHelp(CommandHandler handler)

@@ -27,7 +27,7 @@ namespace Game.Chat.Commands
                 return false;
 
             // from console show not existed sender
-            MailSender sender = new(MailMessageType.Normal, handler.GetSession() ? handler.GetSession().GetPlayer().GetGUID().GetCounter() : 0, MailStationery.Gm);
+            MailSender sender = new(MailMessageType.Normal, handler.GetSession() != null ? handler.GetSession().GetPlayer().GetGUID().GetCounter() : 0, MailStationery.Gm);
 
             // @todo Fix poor design
             SQLTransaction trans = new();
@@ -96,7 +96,7 @@ namespace Game.Chat.Commands
             }
 
             // from console show not existed sender
-            MailSender sender = new(MailMessageType.Normal, handler.GetSession() ? handler.GetSession().GetPlayer().GetGUID().GetCounter() : 0, MailStationery.Gm);
+            MailSender sender = new(MailMessageType.Normal, handler.GetSession() != null ? handler.GetSession().GetPlayer().GetGUID().GetCounter() : 0, MailStationery.Gm);
 
             // fill mail
             MailDraft draft = new(subject, text);
@@ -105,8 +105,8 @@ namespace Game.Chat.Commands
 
             foreach (var pair in items)
             {
-                Item item = Item.CreateItem(pair.Key, pair.Value, ItemContext.None, handler.GetSession() ? handler.GetSession().GetPlayer() : null);
-                if (item)
+                Item item = Item.CreateItem(pair.Key, pair.Value, ItemContext.None, handler.GetSession() != null ? handler.GetSession().GetPlayer() : null);
+                if (item != null)
                 {
                     item.SaveToDB(trans);                               // save for prevent lost at next mail load, if send fail then item will deleted
                     draft.AddItem(item);
@@ -125,7 +125,7 @@ namespace Game.Chat.Commands
         static bool HandleSendMoneyCommand(CommandHandler handler, PlayerIdentifier receiver, QuotedString subject, QuotedString text, long money)
         {
             // from console show not existed sender
-            MailSender sender = new(MailMessageType.Normal, handler.GetSession() ? handler.GetSession().GetPlayer().GetGUID().GetCounter() : 0, MailStationery.Gm);
+            MailSender sender = new(MailMessageType.Normal, handler.GetSession() != null ? handler.GetSession().GetPlayer().GetGUID().GetCounter() : 0, MailStationery.Gm);
 
             SQLTransaction trans = new();
 

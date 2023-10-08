@@ -80,10 +80,10 @@ namespace Game
                     ObjectGuid guid = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0));
 
                     // Kick if player is online
-                    Player p = Global.ObjAccessor.FindPlayer(guid);
-                    if (p)
+                    Player player = Global.ObjAccessor.FindPlayer(guid);
+                    if (player != null)
                     {
-                        WorldSession s = p.GetSession();
+                        WorldSession s = player.GetSession();
                         s.KickPlayer("AccountMgr::DeleteAccount Deleting the account");                            // mark session to remove at next session list update
                         s.LogoutPlayer(false);                     // logout player without waiting next session list update
                     }

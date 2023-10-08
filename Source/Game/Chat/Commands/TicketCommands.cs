@@ -257,7 +257,7 @@ namespace Game.Chat.Commands
             // If assigned to different player other than current, leave
             //! Console can override though
             Player player = handler.GetSession() != null ? handler.GetSession().GetPlayer() : null;
-            if (player && ticket.IsAssignedNotTo(player.GetGUID()))
+            if (player != null && ticket.IsAssignedNotTo(player.GetGUID()))
             {
                 handler.SendSysMessage(CypherStrings.CommandTicketalreadyassigned, ticket.GetId());
                 return true;
@@ -284,21 +284,21 @@ namespace Game.Chat.Commands
             // Ticket should be assigned to the player who tries to close it.
             // Console can override though
             Player player = handler.GetSession() != null ? handler.GetSession().GetPlayer() : null;
-            if (player && ticket.IsAssignedNotTo(player.GetGUID()))
+            if (player != null && ticket.IsAssignedNotTo(player.GetGUID()))
             {
                 handler.SendSysMessage(CypherStrings.CommandTicketcannotclose, ticket.GetId());
                 return true;
             }
 
             ObjectGuid closedByGuid = ObjectGuid.Empty;
-            if (player)
+            if (player != null)
                 closedByGuid = player.GetGUID();
             else
                 closedByGuid.SetRawValue(0, ulong.MaxValue);
 
             Global.SupportMgr.CloseTicket<T>(ticket.GetId(), closedByGuid);
 
-            string msg = ticket.FormatViewMessageString(handler, player ? player.GetName() : "Console", null, null, null);
+            string msg = ticket.FormatViewMessageString(handler, player != null ? player.GetName() : "Console", null, null, null);
             handler.SendGlobalGMSysMessage(msg);
 
             return true;
@@ -325,7 +325,7 @@ namespace Game.Chat.Commands
             // Cannot comment ticket assigned to someone else
             //! Console excluded
             Player player = handler.GetSession() != null ? handler.GetSession().GetPlayer() : null;
-            if (player && ticket.IsAssignedNotTo(player.GetGUID()))
+            if (player != null && ticket.IsAssignedNotTo(player.GetGUID()))
             {
                 handler.SendSysMessage(CypherStrings.CommandTicketalreadyassigned, ticket.GetId());
                 return true;
@@ -336,7 +336,7 @@ namespace Game.Chat.Commands
             Global.SupportMgr.UpdateLastChange();
 
             string msg = ticket.FormatViewMessageString(handler, null, ticket.GetAssignedToName(), null, null);
-            msg += string.Format(handler.GetCypherString(CypherStrings.CommandTicketlistaddcomment), player ? player.GetName() : "Console", comment);
+            msg += string.Format(handler.GetCypherString(CypherStrings.CommandTicketlistaddcomment), player != null ? player.GetName() : "Console", comment);
             handler.SendGlobalGMSysMessage(msg);
 
             return true;
@@ -405,7 +405,7 @@ namespace Game.Chat.Commands
             // Get security level of player, whom this ticket is assigned to
             AccountTypes security;
             Player assignedPlayer = ticket.GetAssignedPlayer();
-            if (assignedPlayer && assignedPlayer.IsInWorld)
+            if (assignedPlayer != null && assignedPlayer.IsInWorld)
                 security = assignedPlayer.GetSession().GetSecurity();
             else
             {

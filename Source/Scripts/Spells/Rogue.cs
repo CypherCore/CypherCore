@@ -87,7 +87,7 @@ namespace Scripts.Spells.Rogue
         void HandleHitDamage(uint effIndex)
         {
             Unit hitUnit = GetHitUnit();
-            if (!hitUnit)
+            if (hitUnit == null)
                 return;
 
             Unit caster = GetCaster();
@@ -208,7 +208,7 @@ namespace Scripts.Spells.Rogue
         public override bool Load()
         {
             // at this point CastItem must already be initialized
-            return GetCaster().IsPlayer() && GetCastItem();
+            return GetCaster().IsPlayer() && GetCastItem() != null;
         }
 
         void HandleBeforeHit(SpellMissInfo missInfo)
@@ -242,7 +242,7 @@ namespace Scripts.Spells.Rogue
                 if (item == GetCastItem())
                     item = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
 
-                if (!item)
+                if (item == null)
                     return;
 
                 // item combat enchantments
@@ -446,7 +446,7 @@ namespace Scripts.Spells.Rogue
     {
         void FilterTargets(List<WorldObject> targets)
         {
-            if (targets.Empty() || GetCaster().GetVehicleBase())
+            if (targets.Empty() || GetCaster().GetVehicleBase() != null)
                 FinishCast(SpellCastResult.OutOfRange);
         }
 
@@ -492,7 +492,7 @@ namespace Scripts.Spells.Rogue
 
         bool HandleCheckProc(ProcEventInfo eventInfo)
         {
-            return eventInfo.GetDamageInfo()?.GetVictim();
+            return eventInfo.GetDamageInfo()?.GetVictim() != null;
         }
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo procInfo)
@@ -514,7 +514,7 @@ namespace Scripts.Spells.Rogue
     {
         SpellCastResult CheckCast()
         {
-            if (!GetExplTargetUnit() || !GetCaster().IsValidAttackTarget(GetExplTargetUnit(), GetSpellInfo()))
+            if (GetExplTargetUnit() == null || !GetCaster().IsValidAttackTarget(GetExplTargetUnit(), GetSpellInfo()))
                 return SpellCastResult.BadTargets;
 
             return SpellCastResult.SpellCastOk;
@@ -902,7 +902,7 @@ namespace Scripts.Spells.Rogue
                 if (script != null)
                 {
                     Unit explTarget = GetExplTargetUnit();
-                    if (explTarget)
+                    if (explTarget != null)
                         script.SetRedirectTarget(explTarget.GetGUID());
                     else
                         script.SetRedirectTarget(ObjectGuid.Empty);

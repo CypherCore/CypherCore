@@ -56,7 +56,7 @@ namespace Game.Chat.Commands
         static bool HandleExploreCheatCommand(CommandHandler handler, bool reveal)
         {
             Player chr = handler.GetSelectedPlayer();
-            if (!chr)
+            if (chr == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
@@ -155,7 +155,7 @@ namespace Game.Chat.Commands
         static bool HandleTaxiCheatCommand(CommandHandler handler, bool? enableArg)
         {
             Player chr = handler.GetSelectedPlayer();
-            if (!chr)
+            if (chr == null)
                 chr = handler.GetSession().GetPlayer();
             else if (handler.HasLowerSecurity(chr, ObjectGuid.Empty)) // check online security
                 return false;

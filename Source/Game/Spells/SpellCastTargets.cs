@@ -69,7 +69,7 @@ namespace Game.Spells
             if (m_targetMask.HasAnyFlag(SpellCastTargetFlags.Unit | SpellCastTargetFlags.CorpseAlly | SpellCastTargetFlags.Gameobject | SpellCastTargetFlags.CorpseEnemy | SpellCastTargetFlags.UnitMinipet))
                 data.Unit = m_objectTargetGUID;
 
-            if (m_targetMask.HasAnyFlag(SpellCastTargetFlags.Item | SpellCastTargetFlags.TradeItem) && m_itemTarget)
+            if (m_targetMask.HasAnyFlag(SpellCastTargetFlags.Item | SpellCastTargetFlags.TradeItem) && m_itemTarget != null)
                 data.Item = m_itemTarget.GetGUID();
 
             if (m_targetMask.HasAnyFlag(SpellCastTargetFlags.SourceLocation))
@@ -110,9 +110,7 @@ namespace Game.Spells
 
         public Unit GetUnitTarget()
         {
-            if (m_objectTarget)
-                return m_objectTarget.ToUnit();
-            return null;
+            return m_objectTarget?.ToUnit();
         }
 
         public void SetUnitTarget(Unit target)

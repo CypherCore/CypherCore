@@ -25,7 +25,7 @@ namespace Game.Entities
         {
             // make sure all references were properly removed
             Cypher.Assert(_aura == null);
-            Cypher.Assert(!_caster);
+            Cypher.Assert(_caster == null);
             Cypher.Assert(!_isViewpoint);
             _removedAura = null;
 

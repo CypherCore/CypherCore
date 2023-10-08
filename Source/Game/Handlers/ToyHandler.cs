@@ -18,7 +18,7 @@ namespace Game
                 return;
 
             Item item = _player.GetItemByGuid(packet.Guid);
-            if (!item)
+            if (item == null)
             {
                 _player.SendEquipError(InventoryResult.ItemNotFound);
                 return;

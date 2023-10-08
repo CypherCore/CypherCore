@@ -18,7 +18,7 @@ namespace Game
         void HandleEnableTaxiNodeOpcode(EnableTaxiNode enableTaxiNode)
         {
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(enableTaxiNode.Unit, NPCFlags.FlightMaster, NPCFlags2.None);
-            if (unit)
+            if (unit != null)
                 SendLearnNewTaxiNode(unit);
         }
 
@@ -33,7 +33,7 @@ namespace Game
             // cheating checks
             Player player = GetPlayer();
             Creature unit = ObjectAccessor.GetCreature(player, guid);
-            if (!unit || unit.IsHostileTo(player) || !unit.HasNpcFlag(NPCFlags.FlightMaster))
+            if (unit == null || unit.IsHostileTo(player) || !unit.HasNpcFlag(NPCFlags.FlightMaster))
             {
                 Log.outDebug(LogFilter.Network, "WorldSession.SendTaxiStatus - {0} not found.", guid.ToString());
                 return;

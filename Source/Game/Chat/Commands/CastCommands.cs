@@ -16,7 +16,7 @@ namespace Game.Chat
         static bool HandleCastCommand(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
         {
             Unit target = handler.GetSelectedUnit();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
                 return false;
@@ -37,7 +37,7 @@ namespace Game.Chat
         static bool HandleCastBackCommand(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
         {
             Creature caster = handler.GetSelectedCreature();
-            if (!caster)
+            if (caster == null)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
                 return false;
@@ -77,7 +77,7 @@ namespace Game.Chat
         static bool HandleCastSelfCommand(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
         {
             Unit target = handler.GetSelectedUnit();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
                 return false;
@@ -99,13 +99,13 @@ namespace Game.Chat
         static bool HandleCastTargetCommad(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
         {
             Creature caster = handler.GetSelectedCreature();
-            if (!caster)
+            if (caster == null)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
                 return false;
             }
 
-            if (!caster.GetVictim())
+            if (caster.GetVictim() == null)
             {
                 handler.SendSysMessage(CypherStrings.SelectedTargetNotHaveVictim);
                 return false;
@@ -127,7 +127,7 @@ namespace Game.Chat
         static bool HandleCastDestCommand(CommandHandler handler, uint spellId, float x, float y, float z, [OptionalArg] string triggeredStr)
         {
             Unit caster = handler.GetSelectedUnit();
-            if (!caster)
+            if (caster == null)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
                 return false;

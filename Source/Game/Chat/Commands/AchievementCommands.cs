@@ -16,7 +16,7 @@ namespace Game.Chat.Commands
         static bool HandleAchievementAddCommand(CommandHandler handler, AchievementRecord achievementEntry)
         {
             Player target = handler.GetSelectedPlayer();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;

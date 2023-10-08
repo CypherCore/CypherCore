@@ -84,7 +84,7 @@ namespace Game.Entities
                 return;
 
             Unit owner = Global.ObjAccessor.GetUnit(this, ownerGUID);
-            if (owner)
+            if (owner != null)
             {
                 owner.RemoveGameObject(this, false);
                 Cypher.Assert(GetOwnerGUID().IsEmpty());
@@ -114,7 +114,7 @@ namespace Game.Entities
                 if (m_model != null)
                 {
                     Transport trans = ToTransport();
-                    if (trans)
+                    if (trans != null)
                         trans.SetDelayedAddModelToMap();
                     else
                         GetMap().InsertGameObjectModel(m_model);
@@ -175,7 +175,7 @@ namespace Game.Entities
 
         bool Create(uint entry, Map map, Position pos, Quaternion rotation, uint animProgress, GameObjectState goState, uint artKit, bool dynamic, ulong spawnid)
         {
-            Cypher.Assert(map);
+            Cypher.Assert(map != null);
             SetMap(map);
 
             Relocate(pos);
@@ -439,7 +439,7 @@ namespace Game.Entities
 
                     m_perPlayerState.Remove(guid);
 
-                    if (seer)
+                    if (seer != null)
                     {
                         if (despawned)
                         {
@@ -475,7 +475,7 @@ namespace Game.Entities
                             Unit owner = GetOwner();
                             if (goInfo.Trap.charges == 2)
                                 m_cooldownTime = GameTime.GetGameTimeMS() + 10 * Time.InMilliseconds;   // Hardcoded tooltip value
-                            else if (owner)
+                            else if (owner != null)
                             {
                                 if (owner.IsInCombat())
                                     m_cooldownTime = GameTime.GetGameTimeMS() + goInfo.Trap.startDelay * Time.InMilliseconds;
@@ -632,7 +632,7 @@ namespace Game.Entities
                                 target = searcher.GetTarget();
                             }
 
-                            if (target)
+                            if (target != null)
                                 SetLootState(LootState.Activated, target);
                         }
                         else if (goInfo.type == GameObjectTypes.CapturePoint)
@@ -738,7 +738,7 @@ namespace Game.Entities
                                 CastSpell(null, goInfo.Trap.spell);
                                 SetLootState(LootState.JustDeactivated);
                             }
-                            else if (target)
+                            else if (target != null)
                             {
                                 // Some traps do not have a spell but should be triggered
                                 CastSpellExtraArgs args = new();
@@ -765,7 +765,7 @@ namespace Game.Entities
                 {
                     // If nearby linked trap exists, despawn it
                     GameObject linkedTrap = GetLinkedTrap();
-                    if (linkedTrap)
+                    if (linkedTrap != null)
                         linkedTrap.DespawnOrUnsummon();
 
                     //if Gameobject should cast spell, then this, but some GOs (type = 10) should be destroyed
@@ -1384,7 +1384,7 @@ namespace Game.Entities
                         || LootStorage.Gameobject.HaveQuestLootForPlayer(GetGoInfo().Chest.chestPushLoot, target))
                     {
                         Battleground bg = target.GetBattleground();
-                        if (bg)
+                        if (bg != null)
                             return bg.CanActivateGO((int)GetEntry(), (uint)bg.GetPlayerTeam(target.GetGUID()));
                         return true;
                     }
@@ -1419,7 +1419,7 @@ namespace Game.Entities
                 return;
 
             GameObject trapGO = GetLinkedTrap();
-            if (trapGO)
+            if (trapGO != null)
                 trapGO.CastSpell(target, trapSpell.Id);
         }
 
@@ -1460,7 +1460,7 @@ namespace Game.Entities
 
         public void ActivateObject(GameObjectActions action, int param, WorldObject spellCaster = null, uint spellId = 0, int effectIndex = -1)
         {
-            Unit unitCaster = spellCaster ? spellCaster.ToUnit() : null;
+            Unit unitCaster = spellCaster != null ? spellCaster.ToUnit() : null;
 
             switch (action)
             {
@@ -1474,7 +1474,7 @@ namespace Game.Entities
                     SendCustomAnim((uint)(action - GameObjectActions.AnimateCustom0));
                     break;
                 case GameObjectActions.Disturb: // What's the difference with Open?
-                    if (unitCaster)
+                    if (unitCaster != null)
                         Use(unitCaster);
                     break;
                 case GameObjectActions.Unlock:
@@ -1484,11 +1484,11 @@ namespace Game.Entities
                     SetFlag(GameObjectFlags.Locked);
                     break;
                 case GameObjectActions.Open:
-                    if (unitCaster)
+                    if (unitCaster != null)
                         Use(unitCaster);
                     break;
                 case GameObjectActions.OpenAndUnlock:
-                    if (unitCaster)
+                    if (unitCaster != null)
                         UseDoorOrButton(0, false, unitCaster);
                     RemoveFlag(GameObjectFlags.Locked);
                     break;
@@ -1499,7 +1499,7 @@ namespace Game.Entities
                     // No use cases, implementation unknown
                     break;
                 case GameObjectActions.Destroy:
-                    if (unitCaster)
+                    if (unitCaster != null)
                         UseDoorOrButton(0, true, unitCaster);
                     break;
                 case GameObjectActions.Rebuild:
@@ -1561,7 +1561,7 @@ namespace Game.Entities
                     SetAnimKitId((ushort)param, false);
                     break;
                 case GameObjectActions.OpenAndPlayAnimKit:
-                    if (unitCaster)
+                    if (unitCaster != null)
                         UseDoorOrButton(0, false, unitCaster);
                     SetAnimKitId((ushort)param, false);
                     break;
@@ -1576,7 +1576,7 @@ namespace Game.Entities
                     SetAnimKitId(0, false);
                     break;
                 case GameObjectActions.OpenAndStopAnimKit:
-                    if (unitCaster)
+                    if (unitCaster != null)
                         UseDoorOrButton(0, false, unitCaster);
                     SetAnimKitId(0, false);
                     break;
@@ -1684,7 +1684,7 @@ namespace Game.Entities
                 case GameObjectTypes.Chest:                         //3
                 {
                     Player player = user.ToPlayer();
-                    if (!player)
+                    if (player == null)
                         return;
 
                     Battleground bg = player.GetBattleground();
@@ -1922,12 +1922,12 @@ namespace Game.Entities
                         }
 
                         Group group = player.GetGroup();
-                        if (group)
+                        if (group != null)
                         {
                             for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                             {
                                 Player member = refe.GetSource();
-                                if (member)
+                                if (member != null)
                                     if (member.IsAtGroupRewardDistance(this))
                                         member.KillCreditGO(info.entry, GetGUID());
                             }
@@ -2044,14 +2044,14 @@ namespace Game.Entities
 
                             // If fishing skill is high enough, or if fishing on a pool, send correct loot.
                             // Fishing pools have no skill requirement as of patch 3.3.0 (undocumented change).
-                            if (chance >= roll || fishingPool)
+                            if (chance >= roll || fishingPool != null)
                             {
                                 // @todo I do not understand this hack. Need some explanation.
                                 // prevent removing GO at spell cancel
                                 RemoveFromOwner();
                                 SetOwnerGUID(player.GetGUID());
 
-                                if (fishingPool)
+                                if (fishingPool != null)
                                 {
                                     fishingPool.Use(player);
                                     SetLootState(LootState.JustDeactivated);
@@ -2248,7 +2248,7 @@ namespace Game.Entities
                     {
                         // in Battlegroundcheck
                         Battleground bg = player.GetBattleground();
-                        if (!bg)
+                        if (bg == null)
                             return;
 
                         if (player.GetVehicle() != null)
@@ -2296,7 +2296,7 @@ namespace Game.Entities
                     {
                         // in Battlegroundcheck
                         Battleground bg = player.GetBattleground();
-                        if (!bg)
+                        if (bg == null)
                             return;
 
                         if (player.GetVehicle() != null)
@@ -2452,7 +2452,7 @@ namespace Game.Entities
 
                             Aura artifactAura = player.GetAura(PlayerConst.ArtifactsAllWeaponsGeneralWeaponEquippedPassive);
                             Item item = artifactAura != null ? player.GetItemByGuid(artifactAura.GetCastItemGUID()) : null;
-                            if (!item)
+                            if (item == null)
                             {
                                 player.SendPacket(new DisplayGameError(GameError.MustEquipArtifact));
                                 return;
@@ -2467,7 +2467,7 @@ namespace Game.Entities
                         case 2: // Heart Forge
                         {
                             Item item = player.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
-                            if (!item)
+                            if (item == null)
                                 return;
 
                             GameObjectInteraction openHeartForge = new();
@@ -2484,7 +2484,7 @@ namespace Game.Entities
                 case GameObjectTypes.UILink:
                 {
                     Player player = user.ToPlayer();
-                    if (!player)
+                    if (player == null)
                         return;
 
                     GameObjectInteraction gameObjectUILink = new();
@@ -2587,7 +2587,7 @@ namespace Game.Entities
             }
 
             Player player1 = user.ToPlayer();
-            if (player1)
+            if (player1 != null)
                 Global.OutdoorPvPMgr.HandleCustomSpell(player1, spellId, this);
 
             if (spellCaster != null)
@@ -2794,7 +2794,7 @@ namespace Game.Entities
 
         public SpellInfo GetSpellForLock(Player player)
         {
-            if (!player)
+            if (player == null)
                 return null;
 
             uint lockId = GetGoInfo().GetLockId();
@@ -2937,7 +2937,7 @@ namespace Game.Entities
                     GetAI().Destroyed(attackerOrHealer, m_goInfo.DestructibleBuilding.DestroyedEvent);
 
                     Player player = attackerOrHealer != null ? attackerOrHealer.GetCharmerOrOwnerPlayerOrPlayerItself() : null;
-                    if (player)
+                    if (player != null)
                     {
                         Battleground bg = player.GetBattleground();
                         if (bg != null)
@@ -2990,7 +2990,7 @@ namespace Game.Entities
         public void SetLootState(LootState state, Unit unit = null)
         {
             m_lootState = state;
-            m_lootStateUnitGUID = unit ? unit.GetGUID() : ObjectGuid.Empty;
+            m_lootStateUnitGUID = unit != null ? unit.GetGUID() : ObjectGuid.Empty;
             GetAI().OnLootStateChanged((uint)state, unit);
 
             // Start restock timer if the chest is partially looted or not looted at all
@@ -3437,7 +3437,7 @@ namespace Game.Entities
                     battleground = bg;
             }
 
-            if (!battleground)
+            if (battleground == null)
                 return;
 
             // Cancel current timer
@@ -4414,7 +4414,7 @@ namespace Game.Entities
                 FlagState oldState = _state;
                 _state = newState;
 
-                if (player && newState == FlagState.Taken)
+                if (player != null && newState == FlagState.Taken)
                     _carrierGUID = player.GetGUID();
                 else
                     _carrierGUID = ObjectGuid.Empty;

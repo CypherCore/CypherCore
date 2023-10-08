@@ -76,7 +76,7 @@ namespace Game.Mails
             m_receiver = receiver;
             m_receiver_lowguid = receiver_lowguid;
 
-            Cypher.Assert(!receiver || receiver.GetGUID().GetCounter() == receiver_lowguid);
+            Cypher.Assert(receiver == null || receiver.GetGUID().GetCounter() == receiver_lowguid);
         }
 
         public MailReceiver(Player receiver, ObjectGuid receiverGuid)
@@ -84,7 +84,7 @@ namespace Game.Mails
             m_receiver = receiver;
             m_receiver_lowguid = receiverGuid.GetCounter();
 
-            Cypher.Assert(!receiver || receiver.GetGUID() == receiverGuid);
+            Cypher.Assert(receiver == null || receiver.GetGUID() == receiverGuid);
         }
 
         public Player GetPlayer() { return m_receiver; }

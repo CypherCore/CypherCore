@@ -595,7 +595,7 @@ namespace Game.Guilds
             invite.GuildName = GetName();
 
             Guild oldGuild = pInvitee.GetGuild();
-            if (oldGuild)
+            if (oldGuild != null)
             {
                 invite.OldGuildGUID = oldGuild.GetGUID();
                 invite.OldGuildName = oldGuild.GetName();
@@ -993,7 +993,7 @@ namespace Game.Guilds
             Group group = player.GetGroup();
 
             // Make sure player is a member of the guild and that he is in a group.
-            if (!IsMember(player.GetGUID()) || !group)
+            if (!IsMember(player.GetGUID()) || group == null)
                 return;
 
             GuildPartyState partyStateResponse = new();
@@ -1216,7 +1216,7 @@ namespace Game.Guilds
             eventPacket.LeaverName = leaver.GetName();
             eventPacket.LeaverVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
 
-            if (isRemoved && remover)
+            if (isRemoved && remover != null)
             {
                 eventPacket.RemoverGUID = remover.GetGUID();
                 eventPacket.RemoverName = remover.GetName();
@@ -1502,7 +1502,7 @@ namespace Game.Guilds
                 foreach (var member in m_members.Values)
                 {
                     Player player = member.FindPlayer();
-                    if (player)
+                    if (player != null)
                     {
                         if (player.GetSession() != null && _HasRankRight(player, officerOnly ? GuildRankRights.OffChatListen : GuildRankRights.GChatListen) &&
                             !player.GetSocial().HasIgnore(session.GetPlayer().GetGUID(), session.GetAccountGUID()) && player.GetSession().IsAddonRegistered(prefix))
@@ -1542,7 +1542,7 @@ namespace Game.Guilds
                 if (member.IsTrackingCriteriaId(criteriaId))
                 {
                     Player player = member.FindPlayer();
-                    if (player)
+                    if (player != null)
                         player.SendPacket(packet);
                 }
             }
@@ -2254,11 +2254,11 @@ namespace Game.Guilds
                     GuildBankItemInfo itemInfo = new();
 
                     itemInfo.Slot = slot;
-                    itemInfo.Item.ItemID = tabItem ? tabItem.GetEntry() : 0;
-                    itemInfo.Count = (int)(tabItem ? tabItem.GetCount() : 0);
-                    itemInfo.EnchantmentID = (int)(tabItem ? tabItem.GetEnchantmentId(EnchantmentSlot.Perm) : 0);
-                    itemInfo.Charges = tabItem ? Math.Abs(tabItem.GetSpellCharges()) : 0;
-                    itemInfo.OnUseEnchantmentID = (int)(tabItem ? tabItem.GetEnchantmentId(EnchantmentSlot.Use) : 0);
+                    itemInfo.Item.ItemID = tabItem != null ? tabItem.GetEntry() : 0;
+                    itemInfo.Count = (int)(tabItem != null ? tabItem.GetCount() : 0);
+                    itemInfo.EnchantmentID = (int)(tabItem != null ? tabItem.GetEnchantmentId(EnchantmentSlot.Perm) : 0);
+                    itemInfo.Charges = tabItem != null ? Math.Abs(tabItem.GetSpellCharges()) : 0;
+                    itemInfo.OnUseEnchantmentID = (int)(tabItem != null ? tabItem.GetEnchantmentId(EnchantmentSlot.Use) : 0);
                     itemInfo.Flags = 0;
                     itemInfo.Locked = false;
 
@@ -2331,7 +2331,7 @@ namespace Game.Guilds
                     for (byte slotId = 0; slotId < GuildConst.MaxBankSlots; ++slotId)
                     {
                         Item tabItem = tab.GetItem(slotId);
-                        if (tabItem)
+                        if (tabItem != null)
                         {
                             GuildBankItemInfo itemInfo = new();
 
@@ -2560,11 +2560,6 @@ namespace Game.Guilds
         LogHolder<NewsLogEntry> m_newsLog = new();
         GuildAchievementMgr m_achievementSys;
         #endregion
-
-        public static implicit operator bool(Guild guild)
-        {
-            return guild != null;
-        }
 
         #region Classes
         public class Member

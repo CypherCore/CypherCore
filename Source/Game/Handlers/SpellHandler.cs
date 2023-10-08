@@ -130,7 +130,7 @@ namespace Game
             }
 
             Item item = player.GetItemByPos(packet.Slot, packet.PackSlot);
-            if (!item)
+            if (item == null)
             {
                 player.SendEquipError(InventoryResult.ItemNotFound);
                 return;
@@ -207,11 +207,11 @@ namespace Game
 
         void HandleOpenWrappedItemCallback(ushort pos, ObjectGuid itemGuid, SQLResult result)
         {
-            if (!GetPlayer())
+            if (GetPlayer() == null)
                 return;
 
             Item item = GetPlayer().GetItemByPos(pos);
-            if (!item)
+            if (item == null)
                 return;
 
             if (item.GetGUID() != itemGuid || !item.IsWrapped()) // during getting result, gift was swapped with another item
@@ -248,7 +248,7 @@ namespace Game
         void HandleGameObjectUse(GameObjUse packet)
         {
             GameObject obj = GetPlayer().GetGameObjectIfCanInteractWith(packet.Guid);
-            if (obj)
+            if (obj != null)
             {
                 // ignore for remote control state
                 if (GetPlayer().GetUnitBeingMoved() != GetPlayer())
@@ -267,7 +267,7 @@ namespace Game
                 return;
 
             GameObject go = GetPlayer().GetGameObjectIfCanInteractWith(packet.Guid);
-            if (go)
+            if (go != null)
             {
                 if (go.GetAI().OnGossipHello(GetPlayer()))
                     return;
@@ -571,7 +571,7 @@ namespace Game
 
             // Get unit for which data is needed by client
             Unit unit = Global.ObjAccessor.GetUnit(GetPlayer(), guid);
-            if (!unit)
+            if (unit == null)
                 return;
 
             if (!unit.HasAuraType(AuraType.CloneCaster))
@@ -579,11 +579,11 @@ namespace Game
 
             // Get creator of the unit (SPELL_AURA_CLONE_CASTER does not stack)
             Unit creator = unit.GetAuraEffectsByType(AuraType.CloneCaster).FirstOrDefault().GetCaster();
-            if (!creator)
+            if (creator == null)
                 return;
 
             Player player = creator.ToPlayer();
-            if (player)
+            if (player != null)
             {
                 MirrorImageComponentedData mirrorImageComponentedData = new();
                 mirrorImageComponentedData.UnitGUID = guid;
@@ -601,7 +601,7 @@ namespace Game
                 }
 
                 Guild guild = player.GetGuild();
-                mirrorImageComponentedData.GuildGUID = (guild ? guild.GetGUID() : ObjectGuid.Empty);
+                mirrorImageComponentedData.GuildGUID = (guild != null ? guild.GetGUID() : ObjectGuid.Empty);
 
                 byte[] itemSlots =
                 {
@@ -671,7 +671,7 @@ namespace Game
         void HandleUpdateMissileTrajectory(UpdateMissileTrajectory packet)
         {
             Unit caster = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Guid);
-            Spell spell = caster ? caster.GetCurrentSpell(CurrentSpellTypes.Generic) : null;
+            Spell spell = caster != null ? caster.GetCurrentSpell(CurrentSpellTypes.Generic) : null;
             if (spell == null || spell.m_spellInfo.Id != packet.SpellID || spell.m_castId != packet.CastID || !spell.m_targets.HasDst() || !spell.m_targets.HasSrc())
                 return;
 

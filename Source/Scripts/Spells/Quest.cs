@@ -52,7 +52,7 @@ namespace Scripts.Spells.Azerite
             Creature creatureTarget = GetHitCreature();
             if (creatureTarget != null)
             {
-                if (!creatureTarget.IsPet() && creatureTarget.GetEntry() == _originalEntry)
+                if (creatureTarget.IsPet() && creatureTarget.GetEntry() == _originalEntry)
                 {
                     creatureTarget.UpdateEntry(_newEntry);
                     if (_shouldAttack)

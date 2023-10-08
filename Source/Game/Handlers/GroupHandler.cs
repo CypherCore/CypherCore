@@ -89,11 +89,11 @@ namespace Game
             Group group2 = invitedPlayer.GetGroup(packet.PartyIndex);
             PartyInvite partyInvite;
             // player already in another group or invited
-            if (group2 || invitedPlayer.GetGroupInvite())
+            if (group2 != null || invitedPlayer.GetGroupInvite() != null)
             {
                 SendPartyResult(PartyOperation.Invite, invitedPlayer.GetName(), PartyResult.AlreadyInGroupS);
 
-                if (group2)
+                if (group2 != null)
                 {
                     // tell the player that they were invited but it failed as they were already in a group
                     partyInvite = new PartyInvite();
@@ -104,7 +104,7 @@ namespace Game
                 return;
             }
 
-            if (group)
+            if (group != null)
             {
                 // not have permissions for invite
                 if (!group.IsLeader(invitingPlayer.GetGUID()) && !group.IsAssistant(invitingPlayer.GetGUID()))
@@ -185,14 +185,14 @@ namespace Game
                 if (!group.IsCreated())
                 {
                     // This can happen if the leader is zoning. To be removed once delayed actions for zoning are implemented
-                    if (!leader)
+                    if (leader == null)
                     {
                         group.RemoveAllInvites();
                         return;
                     }
 
                     // If we're about to create a group there really should be a leader present
-                    Cypher.Assert(leader);
+                    Cypher.Assert(leader != null);
                     group.RemoveInvite(leader);
                     group.Create(leader);
                     Global.GroupMgr.AddGroup(group);
@@ -212,7 +212,7 @@ namespace Game
                 // uninvite, group can be deleted
                 GetPlayer().UninviteFromGroup();
 
-                if (!leader || leader.GetSession() == null)
+                if (leader == null || leader.GetSession() == null)
                     return;
 
                 // report
@@ -241,7 +241,7 @@ namespace Game
 
             Group grp = GetPlayer().GetGroup(packet.PartyIndex);
             // grp is checked already above in CanUninviteFromGroup()
-            Cypher.Assert(grp);
+            Cypher.Assert(grp != null);
 
             if (grp.IsMember(packet.TargetGUID))
             {
@@ -249,7 +249,7 @@ namespace Game
                 return;
             }
             Player player = grp.GetInvited(packet.TargetGUID);
-            if (player)
+            if (player != null)
             {
                 player.UninviteFromGroup();
                 return;
@@ -264,7 +264,7 @@ namespace Game
             Player player = Global.ObjAccessor.FindConnectedPlayer(packet.TargetGUID);
             Group group = GetPlayer().GetGroup(packet.PartyIndex);
 
-            if (!group || !player)
+            if (group == null || player == null)
                 return;
 
             if (!group.IsLeader(GetPlayer().GetGUID()) || player.GetGroup() != group)
@@ -281,7 +281,7 @@ namespace Game
             RoleChangedInform roleChangedInform = new();
 
             Group group = GetPlayer().GetGroup(packet.PartyIndex);
-            byte oldRole = (byte)(group ? group.GetLfgRoles(packet.TargetGUID) : 0);
+            byte oldRole = (byte)(group != null ? group.GetLfgRoles(packet.TargetGUID) : 0);
             if (oldRole == packet.Role)
                 return;
 
@@ -291,7 +291,7 @@ namespace Game
             roleChangedInform.OldRole = oldRole;
             roleChangedInform.NewRole = packet.Role;
 
-            if (group)
+            if (group != null)
             {
                 group.BroadcastPacket(roleChangedInform, false);
                 group.SetLfgRoles(packet.TargetGUID, (LfgRoles)packet.Role);
@@ -336,7 +336,7 @@ namespace Game
             // not allowed to change
             /*
             Group group = GetPlayer().GetGroup(packet.PartyIndex);
-            if (!group)
+            if (group == null)
                  return;
 
             if (!group.IsLeader(GetPlayer().GetGUID()))
@@ -410,7 +410,7 @@ namespace Game
                 if (packet.Target.IsPlayer())
                 {
                     Player target = Global.ObjAccessor.FindConnectedPlayer(packet.Target);
-                    if (!target || target.IsHostileTo(GetPlayer()))
+                    if (target == null || target.IsHostileTo(GetPlayer()))
                         return;
                 }
 
@@ -422,7 +422,7 @@ namespace Game
         void HandleConvertRaid(ConvertRaid packet)
         {
             Group group = GetPlayer().GetGroup();
-            if (!group)
+            if (group == null)
                 return;
 
             if (GetPlayer().InBattleground())
@@ -559,7 +559,7 @@ namespace Game
             PartyMemberFullState partyMemberStats = new();
 
             Player player = Global.ObjAccessor.FindConnectedPlayer(packet.TargetGUID);
-            if (!player)
+            if (player == null)
             {
                 partyMemberStats.MemberGuid = packet.TargetGUID;
                 partyMemberStats.MemberStats.Status = GroupMemberOnlineStatus.Offline;
@@ -581,7 +581,7 @@ namespace Game
         void HandleOptOutOfLoot(OptOutOfLoot packet)
         {
             // ignore if player not loaded
-            if (!GetPlayer())                                        // needed because STATUS_AUTHED
+            if (GetPlayer() == null)                                        // needed because STATUS_AUTHED
             {
                 if (packet.PassOnLoot)
                     Log.outError(LogFilter.Network, "CMSG_OPT_OUT_OF_LOOT value<>0 for not-loaded character!");
@@ -643,7 +643,7 @@ namespace Game
                 return false;
 
             group = player.GetGroup();
-            if (!group)
+            if (group == null)
                 return false;
 
             if (group.IsRestrictPingsToAssistants() && !group.IsLeader(player.GetGUID()) && !group.IsAssistant(player.GetGUID()))
@@ -656,7 +656,7 @@ namespace Game
         void HandleSetRestrictPingsToAssistants(SetRestrictPingsToAssistants setRestrictPingsToAssistants)
         {
             Group group = GetPlayer().GetGroup(setRestrictPingsToAssistants.PartyIndex);
-            if (!group)
+            if (group == null)
                 return;
 
             if (!group.IsLeader(GetPlayer().GetGUID()))
@@ -673,7 +673,7 @@ namespace Game
                 return;
 
             Unit target = Global.ObjAccessor.GetUnit(_player, pingUnit.TargetGUID);
-            if (!target || !_player.HaveAtClient(target))
+            if (target == null || !_player.HaveAtClient(target))
                 return;
 
             ReceivePingUnit broadcastPingUnit = new();

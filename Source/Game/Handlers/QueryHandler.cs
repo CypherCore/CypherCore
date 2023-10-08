@@ -187,7 +187,7 @@ namespace Game
         {
             CorpseLocation packet = new();
             Player player = Global.ObjAccessor.FindConnectedPlayer(queryCorpseLocation.Player);
-            if (!player || !player.HasCorpse() || !_player.IsInSameRaidWith(player))
+            if (player == null || !player.HasCorpse() || !_player.IsInSameRaidWith(player))
             {
                 packet.Valid = false;                               // corpse not found
                 packet.Player = queryCorpseLocation.Player;
@@ -240,10 +240,10 @@ namespace Game
             response.Player = queryCorpseTransport.Player;
 
             Player player = Global.ObjAccessor.FindConnectedPlayer(queryCorpseTransport.Player);
-            if (player)
+            if (player != null)
             {
                 Corpse corpse = player.GetCorpse();
-                if (_player.IsInSameRaidWith(player) && corpse && !corpse.GetTransGUID().IsEmpty() && corpse.GetTransGUID() == queryCorpseTransport.Transport)
+                if (_player.IsInSameRaidWith(player) && corpse != null && !corpse.GetTransGUID().IsEmpty() && corpse.GetTransGUID() == queryCorpseTransport.Transport)
                 {
                     response.Position = new Vector3(corpse.GetTransOffsetX(), corpse.GetTransOffsetY(), corpse.GetTransOffsetZ());
                     response.Facing = corpse.GetTransOffsetO();
@@ -315,7 +315,7 @@ namespace Game
             queryItemTextResponse.Id = packet.Id;
 
             Item item = GetPlayer().GetItemByGuid(packet.Id);
-            if (item)
+            if (item != null)
             {
                 queryItemTextResponse.Valid = true;
                 queryItemTextResponse.Text = item.GetText();

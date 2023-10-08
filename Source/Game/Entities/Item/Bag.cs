@@ -24,7 +24,7 @@ namespace Game.Entities
             for (byte i = 0; i < ItemConst.MaxBagSize; ++i)
             {
                 Item item = m_bagslot[i];
-                if (item)
+                if (item != null)
                 {
                     if (item.IsInWorld)
                     {
@@ -72,7 +72,7 @@ namespace Game.Entities
             SetEntry(itemid);
             SetObjectScale(1.0f);
 
-            if (owner)
+            if (owner != null)
             {
                 SetOwnerGUID(owner.GetGUID());
                 SetContainedIn(owner.GetGUID());

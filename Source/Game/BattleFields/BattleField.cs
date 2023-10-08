@@ -83,7 +83,7 @@ namespace Game.BattleFields
                 {
                     m_PlayersInWar[player.GetTeamId()].Remove(player.GetGUID());
                     Group group = player.GetGroup();
-                    if (group) // Remove the player from the raid group
+                    if (group != null) // Remove the player from the raid group
                         group.RemoveMember(player.GetGUID());
 
                     OnPlayerLeaveWar(player);
@@ -171,7 +171,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_players[team])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                         InvitePlayerToQueue(player);
                 }
             }
@@ -193,7 +193,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_PlayersInQueue[team])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                     {
                         if (m_PlayersInWar[player.GetTeamId()].Count + m_InvitedPlayers[player.GetTeamId()].Count < m_MaxPlayer)
                             InvitePlayerToWar(player);
@@ -214,7 +214,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_players[team])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                     {
                         if (m_PlayersInWar[player.GetTeamId()].Contains(player.GetGUID()) || m_InvitedPlayers[player.GetTeamId()].ContainsKey(player.GetGUID()))
                             continue;
@@ -229,14 +229,14 @@ namespace Game.BattleFields
 
         void InvitePlayerToWar(Player player)
         {
-            if (!player)
+            if (player == null)
                 return;
 
             // todo needed ?
             if (player.IsInFlight())
                 return;
 
-            if (player.InArena() || player.GetBattleground())
+            if (player.InArena() || player.GetBattleground() != null)
             {
                 m_PlayersInQueue[player.GetTeamId()].Remove(player.GetGUID());
                 return;
@@ -262,7 +262,7 @@ namespace Game.BattleFields
         public void InitStalker(uint entry, Position pos)
         {
             Creature creature = SpawnCreature(entry, pos);
-            if (creature)
+            if (creature != null)
                 StalkerGuid = creature.GetGUID();
             else
                 Log.outError(LogFilter.Battlefield, "Battlefield.InitStalker: could not spawn Stalker (Creature entry {0}), zone messeges will be un-available", entry);
@@ -275,7 +275,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_PlayersInWar[team])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                         if (player.IsAFK())
                             KickPlayerFromBattlefield(guid);
                 }
@@ -285,7 +285,7 @@ namespace Game.BattleFields
         public void KickPlayerFromBattlefield(ObjectGuid guid)
         {
             Player player = Global.ObjAccessor.FindPlayer(guid);
-            if (player)
+            if (player != null)
                 if (player.GetZoneId() == GetZoneId())
                     player.TeleportTo(KickPosition);
         }
@@ -383,7 +383,7 @@ namespace Game.BattleFields
             foreach (var guid in m_PlayersInWar[teamIndex])
             {
                 Player player = Global.ObjAccessor.FindPlayer(guid);
-                if (player)
+                if (player != null)
                 {
                     if (spellId > 0)
                         player.CastSpell(player, (uint)spellId, true);
@@ -400,7 +400,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_players[team])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                         player.SendPacket(data);
                 }
             }
@@ -413,7 +413,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_PlayersInQueue[team])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                         player.SendPacket(data);
                 }
             }
@@ -426,7 +426,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_PlayersInWar[team])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                         player.SendPacket(data);
                 }
             }
@@ -435,7 +435,7 @@ namespace Game.BattleFields
         public void SendWarning(uint id, WorldObject target = null)
         {
             Creature stalker = GetCreature(StalkerGuid);
-            if (stalker)
+            if (stalker != null)
                 Global.CreatureTextMgr.SendChat(stalker, (byte)id, target);
         }
 
@@ -472,7 +472,7 @@ namespace Game.BattleFields
             creature.SetVisible(true);
             creature.RemoveUnitFlag(UnitFlags.NonAttackable);
             creature.SetUninteractible(false);
-            if (!creature.IsAlive())
+            if (creature.IsAlive())
                 creature.Respawn(true);
             if (aggressive)
                 creature.SetReactState(ReactStates.Aggressive);
@@ -491,7 +491,7 @@ namespace Game.BattleFields
             foreach (var guid in m_Groups[teamIndex])
             {
                 Group group = Global.GroupMgr.GetGroupByGUID(guid);
-                if (group)
+                if (group != null)
                     if (!group.IsFull())
                         return group;
             }
@@ -504,7 +504,7 @@ namespace Game.BattleFields
             foreach (var guid in m_Groups[teamIndex])
             {
                 Group group = Global.GroupMgr.GetGroupByGUID(guid);
-                if (group)
+                if (group != null)
                     if (group.IsMember(plguid))
                         return group;
             }
@@ -518,11 +518,11 @@ namespace Game.BattleFields
                 return false;
 
             Group oldgroup = player.GetGroup();
-            if (oldgroup)
+            if (oldgroup != null)
                 oldgroup.RemoveMember(player.GetGUID());
 
             Group group = GetFreeBfRaid(player.GetTeamId());
-            if (!group)
+            if (group == null)
             {
                 group = new Group();
                 group.SetBattlefieldGroup(this);
@@ -594,7 +594,7 @@ namespace Game.BattleFields
             }
 
             Creature creature = Creature.CreateCreature(entry, m_Map, pos);
-            if (!creature)
+            if (creature == null)
             {
                 Log.outError(LogFilter.Battlefield, "Battlefield:SpawnCreature: Can't create creature entry: {0}", entry);
                 return null;
@@ -621,7 +621,7 @@ namespace Game.BattleFields
 
             // Create gameobject
             GameObject go = GameObject.CreateGameObject(entry, m_Map, pos, rotation, 255, GameObjectState.Ready);
-            if (!go)
+            if (go == null)
             {
                 Log.outError(LogFilter.Battlefield, "Battlefield:SpawnGameObject: Cannot create gameobject template {1}! Battlefield not created!", entry);
                 return null;
@@ -637,14 +637,14 @@ namespace Game.BattleFields
 
         public Creature GetCreature(ObjectGuid guid)
         {
-            if (!m_Map)
+            if (m_Map == null)
                 return null;
             return m_Map.GetCreature(guid);
         }
 
         public GameObject GetGameObject(ObjectGuid guid)
         {
-            if (!m_Map)
+            if (m_Map == null)
                 return null;
             return m_Map.GetGameObject(guid);
         }
@@ -788,7 +788,7 @@ namespace Game.BattleFields
 
         public void SetSpirit(Creature spirit, int teamIndex)
         {
-            if (!spirit)
+            if (spirit == null)
             {
                 Log.outError(LogFilter.Battlefield, "BfGraveyard:SetSpirit: Invalid Spirit.");
                 return;
@@ -826,8 +826,8 @@ namespace Game.BattleFields
             if (m_SpiritGuide[TeamId.Alliance].IsEmpty() || m_SpiritGuide[TeamId.Horde].IsEmpty())
                 return false;
 
-            if (!m_Bf.GetCreature(m_SpiritGuide[TeamId.Alliance]) ||
-                !m_Bf.GetCreature(m_SpiritGuide[TeamId.Horde]))
+            if (m_Bf.GetCreature(m_SpiritGuide[TeamId.Alliance]) == null ||
+                m_Bf.GetCreature(m_SpiritGuide[TeamId.Horde]) == null)
                 return false;
 
             return (m_SpiritGuide[TeamId.Alliance] == guid || m_SpiritGuide[TeamId.Horde] == guid);
@@ -869,7 +869,7 @@ namespace Game.BattleFields
             if (!m_capturePointGUID.IsEmpty())
             {
                 GameObject capturePoint = m_Bf.GetGameObject(m_capturePointGUID);
-                if (capturePoint)
+                if (capturePoint != null)
                 {
                     player.SendUpdateWorldState(capturePoint.GetGoInfo().ControlZone.worldState1, 1);
                     player.SendUpdateWorldState(capturePoint.GetGoInfo().ControlZone.worldstate2, (uint)(Math.Ceiling((m_value + m_maxValue) / (2 * m_maxValue) * 100.0f)));
@@ -885,7 +885,7 @@ namespace Game.BattleFields
             if (!m_capturePointGUID.IsEmpty())
             {
                 GameObject capturePoint = m_Bf.GetGameObject(m_capturePointGUID);
-                if (capturePoint)
+                if (capturePoint != null)
                     player.SendUpdateWorldState(capturePoint.GetGoInfo().ControlZone.worldState1, 0);
             }
 
@@ -898,7 +898,7 @@ namespace Game.BattleFields
                 return;
 
             GameObject capturePoint = m_Bf.GetGameObject(m_capturePointGUID);
-            if (capturePoint)
+            if (capturePoint != null)
             {
                 // send this too, sometimes the slider disappears, dunno why :(
                 SendUpdateWorldState(capturePoint.GetGoInfo().ControlZone.worldState1, 1);
@@ -911,7 +911,7 @@ namespace Game.BattleFields
 
         public bool SetCapturePointData(GameObject capturePoint)
         {
-            Cypher.Assert(capturePoint);
+            Cypher.Assert(capturePoint != null);
 
             Log.outError(LogFilter.Battlefield, "Creating capture point {0}", capturePoint.GetEntry());
 
@@ -956,7 +956,7 @@ namespace Game.BattleFields
             if (!m_capturePointGUID.IsEmpty())
             {
                 GameObject capturePoint = m_Bf.GetGameObject(m_capturePointGUID);
-                if (capturePoint)
+                if (capturePoint != null)
                 {
                     capturePoint.SetRespawnTime(0);                  // not save respawn time
                     capturePoint.Delete();
@@ -974,7 +974,7 @@ namespace Game.BattleFields
                 return false;
 
             GameObject capturePoint = m_Bf.GetGameObject(m_capturePointGUID);
-            if (capturePoint)
+            if (capturePoint != null)
             {
                 float radius = capturePoint.GetGoInfo().ControlZone.radius;
 
@@ -983,7 +983,7 @@ namespace Game.BattleFields
                     foreach (var guid in m_activePlayers[team])
                     {
                         Player player = Global.ObjAccessor.FindPlayer(guid);
-                        if (player)
+                        if (player != null)
                         {
                             if (!capturePoint.IsWithinDistInMap(player, radius) || !player.IsOutdoorPvPActive())
                                 HandlePlayerLeave(player);
@@ -1098,7 +1098,7 @@ namespace Game.BattleFields
                 foreach (var guid in m_activePlayers[team])  // send to all players present in the area
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                         player.SendUpdateWorldState(field, value);
                 }
             }
@@ -1123,7 +1123,7 @@ namespace Game.BattleFields
             foreach (var _guid in m_activePlayers[team])
             {
                 Player player = Global.ObjAccessor.FindPlayer(_guid);
-                if (player)
+                if (player != null)
                     player.KilledMonsterCredit(id, guid);
             }
         }

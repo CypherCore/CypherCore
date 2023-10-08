@@ -932,7 +932,7 @@ namespace Game.Entities
                 if (petStable.CurrentPetIndex == (uint)srcPetSlot)
                 {
                     Pet oldPet = GetPet();
-                    if (oldPet && !oldPet.IsAlive())
+                    if (oldPet != null && !oldPet.IsAlive())
                     {
                         sess.SendPetStableResult(StableResult.InternalError);
                         return;
@@ -1109,7 +1109,7 @@ namespace Game.Entities
         public void UnsummonPetTemporaryIfAny()
         {
             Pet pet = GetPet();
-            if (!pet)
+            if (pet == null)
                 return;
 
             if (m_temporaryUnsummonedPetNumber == 0 && pet.IsControlled() && !pet.IsTemporarySummoned())
@@ -1179,7 +1179,7 @@ namespace Game.Entities
         public void StopCastingCharm()
         {
             Unit charm = GetCharmed();
-            if (!charm)
+            if (charm == null)
                 return;
 
             if (charm.IsTypeId(TypeId.Unit))
@@ -1219,7 +1219,7 @@ namespace Game.Entities
         public void CharmSpellInitialize()
         {
             Unit charm = GetFirstControlled();
-            if (!charm)
+            if (charm == null)
                 return;
 
             CharmInfo charmInfo = charm.GetCharmInfo();
@@ -1257,7 +1257,7 @@ namespace Game.Entities
         public void PossessSpellInitialize()
         {
             Unit charm = GetCharmed();
-            if (!charm)
+            if (charm == null)
                 return;
 
             CharmInfo charmInfo = charm.GetCharmInfo();
@@ -1281,7 +1281,7 @@ namespace Game.Entities
         public void VehicleSpellInitialize()
         {
             Creature vehicle = GetVehicleCreatureBase();
-            if (!vehicle)
+            if (vehicle == null)
                 return;
 
             PetSpells petSpells = new();
@@ -1843,7 +1843,7 @@ namespace Game.Entities
         // Calculates how many reputation points player gains in victim's enemy factions
         public void RewardReputation(Unit victim, float rate)
         {
-            if (!victim || victim.IsTypeId(TypeId.Player))
+            if (victim == null || victim.IsTypeId(TypeId.Player))
                 return;
 
             if (victim.ToCreature().IsReputationGainDisabled())
@@ -2021,7 +2021,7 @@ namespace Game.Entities
             // The player was ported to another map and loses the duel immediately.
             // We have to perform this check before the teleport, otherwise the
             // ObjectAccessor won't find the flag.
-            if (duel != null && GetMapId() != mapid && GetMap().GetGameObject(m_playerData.DuelArbiter))
+            if (duel != null && GetMapId() != mapid && GetMap().GetGameObject(m_playerData.DuelArbiter) != null)
                 DuelComplete(DuelCompleteType.Fled);
 
             if (GetMapId() == mapid && (!instanceId.HasValue || GetInstanceId() == instanceId))
@@ -2045,7 +2045,7 @@ namespace Game.Entities
                 if (!options.HasAnyFlag(TeleportToOptions.NotUnSummonPet))
                 {
                     //same map, only remove pet if out of range for new position
-                    if (pet && !pet.IsWithinDist3d(x, y, z, GetMap().GetVisibilityRange()))
+                    if (pet != null && !pet.IsWithinDist3d(x, y, z, GetMap().GetVisibilityRange()))
                         UnsummonPetTemporaryIfAny();
                 }
 
@@ -2090,7 +2090,7 @@ namespace Game.Entities
                 }
 
                 // Seamless teleport can happen only if cosmetic maps match
-                if (!oldmap || (oldmap.GetEntry().CosmeticParentMapID != mapid && GetMapId() != mEntry.CosmeticParentMapID &&
+                if (oldmap == null || (oldmap.GetEntry().CosmeticParentMapID != mapid && GetMapId() != mEntry.CosmeticParentMapID &&
                     !((oldmap.GetEntry().CosmeticParentMapID != -1) ^ (oldmap.GetEntry().CosmeticParentMapID != mEntry.CosmeticParentMapID))))
                     options &= ~TeleportToOptions.Seamless;
 
@@ -2118,7 +2118,7 @@ namespace Game.Entities
 
                 // remove player from Battlegroundon far teleport (when changing maps)
                 Battleground bg = GetBattleground();
-                if (bg)
+                if (bg != null)
                 {
                     // Note: at Battlegroundjoin Battlegroundid set before teleport
                     // and we already will found "current" Battleground
@@ -2132,12 +2132,12 @@ namespace Game.Entities
                 {
                     RemoveArenaSpellCooldowns(true);
                     RemoveArenaAuras();
-                    if (pet)
+                    if (pet != null)
                         pet.RemoveArenaAuras();
                 }
 
                 // remove pet on map change
-                if (pet)
+                if (pet != null)
                     UnsummonPetTemporaryIfAny();
 
                 // remove all dyn objects
@@ -2259,7 +2259,7 @@ namespace Game.Entities
                 }
             });
 
-            if (!m_unitMovedByMe.GetVehicleBase() || !m_unitMovedByMe.GetVehicle().GetVehicleInfo().Flags.HasAnyFlag(VehicleFlags.FixedPosition))
+            if (m_unitMovedByMe.GetVehicleBase() == null || !m_unitMovedByMe.GetVehicle().GetVehicleInfo().Flags.HasAnyFlag(VehicleFlags.FixedPosition))
                 RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.Root), MovementFlag.Root);
 
             /*! This must be a packet spoofing attempt. MOVEMENTFLAG_ROOT sent from the client is not valid
@@ -2382,7 +2382,7 @@ namespace Game.Entities
 
         public void SendSummonRequestFrom(Unit summoner)
         {
-            if (!summoner)
+            if (summoner == null)
                 return;
 
             // Player already has active summon request
@@ -2475,7 +2475,7 @@ namespace Game.Entities
             // drop flag at summon
             // this code can be reached only when GM is summoning player who carries flag, because player should be immune to summoning spells when he carries flag
             Battleground bg = GetBattleground();
-            if (bg)
+            if (bg != null)
                 bg.EventPlayerDroppedFlag(this);
 
             m_summon_expire = 0;
@@ -2626,7 +2626,7 @@ namespace Game.Entities
                 bool canTalk = true;
                 GameObject go = source.ToGameObject();
                 Creature creature = source.ToCreature();
-                if (creature)
+                if (creature != null)
                 {
                     switch (gossipMenuItem.OptionNpc)
                     {
@@ -2639,13 +2639,13 @@ namespace Game.Entities
                                 canTalk = false;
                             break;
                         case GossipOptionNpc.Battlemaster:
-                            if (!creature.CanInteractWithBattleMaster(this, false))
+                            if (creature.CanInteractWithBattleMaster(this, false))
                                 canTalk = false;
                             break;
                         case GossipOptionNpc.TalentMaster:
                         case GossipOptionNpc.SpecializationMaster:
                         case GossipOptionNpc.GlyphMaster:
-                            if (!creature.CanResetTalents(this))
+                            if (creature.CanResetTalents(this))
                                 canTalk = false;
                             break;
                         case GossipOptionNpc.Stablemaster:
@@ -2705,7 +2705,7 @@ namespace Game.Entities
         }
         public void SendPreparedGossip(WorldObject source)
         {
-            if (!source)
+            if (source == null)
                 return;
 
             if (source.IsTypeId(TypeId.Unit) || source.IsTypeId(TypeId.GameObject))
@@ -3450,7 +3450,7 @@ namespace Game.Entities
 
         public bool IsAllowedToLoot(Creature creature)
         {
-            if (!creature.IsDead())
+            if (creature.IsDead())
                 return false;
 
             if (HasPendingBind())
@@ -4256,7 +4256,7 @@ namespace Game.Entities
             if (InBattleground())
             {
                 Battleground bg = GetBattleground();
-                if (bg)
+                if (bg != null)
                     bg.HandlePlayerResurrect(this);
             }
 
@@ -4299,14 +4299,14 @@ namespace Game.Entities
         
         public void SetAreaSpiritHealer(Creature creature)
         {
-            if (!creature)
+            if (creature == null)
             {
                 _areaSpiritHealerGUID = ObjectGuid.Empty;
                 RemoveAurasDueToSpell(BattlegroundConst.SpellWaitingForResurrect);
                 return;
             }
 
-            if (!creature.IsAreaSpiritHealer())
+            if (creature.IsAreaSpiritHealer())
                 return;
 
             _areaSpiritHealerGUID = creature.GetGUID();
@@ -4434,7 +4434,7 @@ namespace Game.Entities
         public void SpawnCorpseBones(bool triggerSave = true)
         {
             _corpseLocation = new WorldLocation();
-            if (GetMap().ConvertCorpseToBones(GetGUID()))
+            if (GetMap().ConvertCorpseToBones(GetGUID()) != null)
                 if (triggerSave && !GetSession().PlayerLogoutWithSave())   // at logout we will already store the player
                     SaveToDB();                                             // prevent loading as ghost without corpse
         }
@@ -4460,7 +4460,7 @@ namespace Game.Entities
 
             // Special handle for Battlegroundmaps
             Battleground bg = GetBattleground();
-            if (bg)
+            if (bg != null)
                 closestGrave = bg.GetClosestGraveyard(this);
             else
             {
@@ -4545,10 +4545,10 @@ namespace Game.Entities
         int CalculateCorpseReclaimDelay(bool load = false)
         {
             Corpse corpse = GetCorpse();
-            if (load && !corpse)
+            if (load && corpse == null)
                 return -1;
 
-            bool pvp = corpse ? corpse.GetCorpseType() == CorpseType.ResurrectablePVP : (m_ExtraFlags & PlayerExtraFlags.PVPDeath) != 0;
+            bool pvp = corpse != null ? corpse.GetCorpseType() == CorpseType.ResurrectablePVP : (m_ExtraFlags & PlayerExtraFlags.PVPDeath) != 0;
 
             uint delay;
             if (load)
@@ -4696,10 +4696,10 @@ namespace Game.Entities
 
         public void RemovePet(Pet pet, PetSaveMode mode, bool returnreagent = false)
         {
-            if (!pet)
+            if (pet == null)
                 pet = GetPet();
 
-            if (pet)
+            if (pet != null)
             {
                 Log.outDebug(LogFilter.Pet, "RemovePet {0}, {1}, {2}", pet.GetEntry(), mode, returnreagent);
 
@@ -4707,10 +4707,10 @@ namespace Game.Entities
                     return;
             }
 
-            if (returnreagent && (pet || m_temporaryUnsummonedPetNumber != 0) && !InBattleground())
+            if (returnreagent && (pet != null || m_temporaryUnsummonedPetNumber != 0) && !InBattleground())
             {
                 //returning of reagents only for players, so best done here
-                uint spellId = pet ? pet.m_unitData.CreatedBySpell : m_oldpetspell;
+                uint spellId = pet != null ? pet.m_unitData.CreatedBySpell : m_oldpetspell;
                 SpellInfo spellInfo = SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
 
                 if (spellInfo != null)
@@ -4781,7 +4781,7 @@ namespace Game.Entities
             {
                 SendPacket(new PetSpells());
 
-                if (GetGroup())
+                if (GetGroup() != null)
                     SetGroupUpdateFlag(GroupUpdateFlags.Pet);
             }
         }
@@ -4814,7 +4814,7 @@ namespace Game.Entities
         public bool InArena()
         {
             Battleground bg = GetBattleground();
-            if (!bg || !bg.IsArena())
+            if (bg == null || !bg.IsArena())
                 return false;
 
             return true;
@@ -5341,7 +5341,7 @@ namespace Game.Entities
 
             // update level to hunter/summon pet
             Pet pet = GetPet();
-            if (pet)
+            if (pet != null)
                 pet.SynchronizeLevelWithOwner();
 
             MailLevelReward mailReward = ObjectMgr.GetMailLevelReward(level, GetRace());
@@ -5448,7 +5448,7 @@ namespace Game.Entities
                 return null;
 
             // alive or spirit healer
-            if (!creature.IsAlive() && !creature.GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.InteractWhileDead))
+            if (creature.IsAlive() && !creature.GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.InteractWhileDead))
                 return null;
 
             // appropriate npc type
@@ -5467,7 +5467,7 @@ namespace Game.Entities
                 return null;
 
             // not allow interaction under control, but allow with own pets
-            if (!creature.GetCharmerGUID().IsEmpty())
+            if (creature.GetCharmerGUID().IsEmpty())
                 return null;
 
             // not unfriendly/hostile
@@ -5475,7 +5475,7 @@ namespace Game.Entities
                 return null;
 
             // not too far, taken from CGGameUI::SetInteractTarget
-            if (!creature.IsWithinDistInMap(this, creature.GetCombatReach() + 4.0f))
+            if (creature.IsWithinDistInMap(this, creature.GetCombatReach() + 4.0f))
                 return null;
 
             return creature;
@@ -5510,7 +5510,7 @@ namespace Game.Entities
         public GameObject GetGameObjectIfCanInteractWith(ObjectGuid guid, GameObjectTypes type)
         {
             GameObject go = GetGameObjectIfCanInteractWith(guid);
-            if (!go)
+            if (go == null)
                 return null;
 
             if (go.GetGoType() != type)
@@ -5980,7 +5980,7 @@ namespace Game.Entities
 
             // update level to hunter/summon pet
             Pet pet = GetPet();
-            if (pet)
+            if (pet != null)
                 pet.SynchronizeLevelWithOwner();
         }
         public void InitDataForForm(bool reapplyMods = false)
@@ -6246,10 +6246,10 @@ namespace Game.Entities
                 return false;
 
             // group update
-            if (GetGroup())
+            if (GetGroup() != null)
                 SetGroupUpdateFlag(GroupUpdateFlags.Position);
 
-            if (GetTrader() && !IsWithinDistInMap(GetTrader(), SharedConst.InteractionDistance))
+            if (GetTrader() != null && !IsWithinDistInMap(GetTrader(), SharedConst.InteractionDistance))
                 GetSession().SendCancelTrade();
 
             CheckAreaExploreAndOutdoor();
@@ -6441,7 +6441,7 @@ namespace Game.Entities
         public void SendBuyError(BuyResult msg, Creature creature, uint item)
         {
             BuyFailed packet = new();
-            packet.VendorGUID = creature ? creature.GetGUID() : ObjectGuid.Empty;
+            packet.VendorGUID = creature != null ? creature.GetGUID() : ObjectGuid.Empty;
             packet.Muid = item;
             packet.Reason = msg;
             SendPacket(packet);
@@ -6449,7 +6449,7 @@ namespace Game.Entities
         public void SendSellError(SellResult msg, Creature creature, ObjectGuid guid)
         {
             SellResponse sellResponse = new();
-            sellResponse.VendorGUID = creature ? creature.GetGUID() : ObjectGuid.Empty;
+            sellResponse.VendorGUID = creature != null ? creature.GetGUID() : ObjectGuid.Empty;
             sellResponse.ItemGUIDs.Add(guid);
             sellResponse.Reason = msg;
             SendPacket(sellResponse);
@@ -6553,7 +6553,7 @@ namespace Game.Entities
 
         public override void Whisper(uint textId, Player target, bool isBossWhisper = false)
         {
-            if (!target)
+            if (target == null)
                 return;
 
             BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(textId);
@@ -6685,9 +6685,9 @@ namespace Game.Entities
                 bonus_xp = victim != null ? _restMgr.GetRestBonusFor(RestTypes.XP, xp) : 0; // XP resting bonus
 
             LogXPGain packet = new();
-            packet.Victim = victim ? victim.GetGUID() : ObjectGuid.Empty;
+            packet.Victim = victim != null ? victim.GetGUID() : ObjectGuid.Empty;
             packet.Original = (int)(xp + bonus_xp);
-            packet.Reason = victim ? PlayerLogXPReason.Kill : PlayerLogXPReason.NoKill;
+            packet.Reason = victim != null ? PlayerLogXPReason.Kill : PlayerLogXPReason.NoKill;
             packet.Amount = (int)xp;
             packet.GroupBonus = group_rate;
             SendPacket(packet);
@@ -7154,12 +7154,12 @@ namespace Game.Entities
             if (GetLevel() <= WorldConfig.GetIntValue(WorldCfg.MaxRecruitAFriendBonusPlayerLevel) || !forXP)
             {
                 Group group = GetGroup();
-                if (group)
+                if (group != null)
                 {
                     for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                     {
                         Player player = refe.GetSource();
-                        if (!player)
+                        if (player == null)
                             continue;
 
                         if (!player.IsAtRecruitAFriendDistance(this))
@@ -7192,11 +7192,11 @@ namespace Game.Entities
 
         bool IsAtRecruitAFriendDistance(WorldObject pOther)
         {
-            if (!pOther || !IsInMap(pOther))
+            if (pOther == null || !IsInMap(pOther))
                 return false;
 
             WorldObject player = GetCorpse();
-            if (!player || IsAlive())
+            if (player == null || IsAlive())
                 player = this;
 
             return pOther.GetDistance(player) <= WorldConfig.GetFloatValue(WorldCfg.MaxRecruitAFriendDistance);
@@ -7228,7 +7228,7 @@ namespace Game.Entities
             randomRoll.RollerWowAccount = GetSession().GetAccountGUID();
 
             Group group = GetGroup();
-            if (group)
+            if (group != null)
                 group.BroadcastPacket(randomRoll, false);
             else
                 SendPacket(randomRoll);
@@ -7409,7 +7409,7 @@ namespace Game.Entities
         public void SetClientControl(Unit target, bool allowMove)
         {
             // a player can never client control nothing
-            Cypher.Assert(target);
+            Cypher.Assert(target != null);
 
             // don't allow possession to be overridden
             if (target.HasUnitState(UnitState.Charmed) && (GetGUID() != target.GetCharmerGUID()))

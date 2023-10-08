@@ -31,7 +31,7 @@ namespace Game.Chat
                 return false;
             }
 
-            if (Global.GuildMgr.GetGuildByName(guildName))
+            if (Global.GuildMgr.GetGuildByName(guildName) != null)
             {
                 handler.SendSysMessage(CypherStrings.GuildRenameAlreadyExists);
                 return false;
@@ -122,7 +122,7 @@ namespace Game.Chat
                 return false;
 
             Guild targetGuild = Global.GuildMgr.GetGuildById(guildId);
-            if (!targetGuild)
+            if (targetGuild == null)
                 return false;
 
             return targetGuild.ChangeMemberRank(null, player.GetGUID(), (GuildRankId)rank);
@@ -144,13 +144,13 @@ namespace Game.Chat
             }
 
             Guild guild = Global.GuildMgr.GetGuildByName(oldGuildName);
-            if (!guild)
+            if (guild == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandCouldnotfind, oldGuildName);
                 return false;
             }
 
-            if (Global.GuildMgr.GetGuildByName(newGuildName))
+            if (Global.GuildMgr.GetGuildByName(newGuildName) != null)
             {
                 handler.SendSysMessage(CypherStrings.GuildRenameAlreadyExists, newGuildName);
                 return false;
@@ -185,7 +185,7 @@ namespace Game.Chat
                     guild = target.GetConnectedPlayer().GetGuild();
             }
 
-            if (!guild)
+            if (guild == null)
                 return false;
 
             // Display Guild Information

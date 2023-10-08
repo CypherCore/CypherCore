@@ -80,7 +80,7 @@ namespace Game.Entities
                         continue;
 
                     bool meetsPlayerCondition = false;
-                    if (player)
+                    if (player != null)
                     {
                         var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(itemContextPickerEntry.PlayerConditionID);
                         if (playerCondition != null)

@@ -38,7 +38,7 @@ namespace Game.Combat
         {
             Creature cWho = who.ToCreature();
             // only creatures can have threat list
-            if (!cWho)
+            if (cWho == null)
                 return false;
 
             // pets, totems and triggers cannot have threat list
@@ -263,7 +263,7 @@ namespace Game.Combat
                         else
                             redirTarget = Global.ObjAccessor.GetUnit(_owner, pair.Item1);
 
-                        if (redirTarget)
+                        if (redirTarget != null)
                         {
                             float amountRedirected = MathFunctions.CalculatePct(origAmount, pair.Item2);
                             AddThreat(redirTarget, amountRedirected, spell, true, true);
@@ -397,7 +397,7 @@ namespace Game.Combat
 
         public void FixateTarget(Unit target)
         {
-            if (target)
+            if (target != null)
             {
                 var it = _myThreatListEntries.LookupByKey(target.GetGUID());
                 if (it != null)

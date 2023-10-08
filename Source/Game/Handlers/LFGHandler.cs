@@ -19,7 +19,7 @@ namespace Game
         void HandleLfgJoin(DFJoin dfJoin)
         {
             if (!Global.LFGMgr.IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser) ||
-                (GetPlayer().GetGroup() && GetPlayer().GetGroup().GetLeaderGUID() != GetPlayer().GetGUID() &&
+                (GetPlayer().GetGroup() != null && GetPlayer().GetGroup().GetLeaderGUID() != GetPlayer().GetGUID() &&
                 (GetPlayer().GetGroup().GetMembersCount() == MapConst.MaxGroupSize || !GetPlayer().GetGroup().IsLFGGroup())))
                 return;
 
@@ -47,10 +47,10 @@ namespace Game
         {
             Group group = GetPlayer().GetGroup();
 
-            Log.outDebug(LogFilter.Lfg, "CMSG_DF_LEAVE {0} in group: {1} sent guid {2}.", GetPlayerInfo(), group ? 1 : 0, dfLeave.Ticket.RequesterGuid.ToString());
+            Log.outDebug(LogFilter.Lfg, "CMSG_DF_LEAVE {0} in group: {1} sent guid {2}.", GetPlayerInfo(), group != null ? 1 : 0, dfLeave.Ticket.RequesterGuid.ToString());
 
             // Check cheating - only leader can leave the queue
-            if (!group || group.GetLeaderGUID() == dfLeave.Ticket.RequesterGuid)
+            if (group == null || group.GetLeaderGUID() == dfLeave.Ticket.RequesterGuid)
                 Global.LFGMgr.LeaveLfg(dfLeave.Ticket.RequesterGuid);
         }
 
@@ -66,7 +66,7 @@ namespace Game
         {
             ObjectGuid guid = GetPlayer().GetGUID();
             Group group = GetPlayer().GetGroup();
-            if (!group)
+            if (group == null)
             {
                 Log.outDebug(LogFilter.Lfg, "CMSG_DF_SET_ROLES {0} Not in group",
                     GetPlayerInfo());
@@ -112,7 +112,7 @@ namespace Game
             ObjectGuid guid = GetPlayer().GetGUID();
             LfgUpdateData updateData = Global.LFGMgr.GetLfgStatus(guid);
 
-            if (GetPlayer().GetGroup())
+            if (GetPlayer().GetGroup() != null)
             {
                 SendLfgUpdateStatus(updateData, true);
                 updateData.dungeons.Clear();
@@ -199,7 +199,7 @@ namespace Game
         {
             ObjectGuid guid = GetPlayer().GetGUID();
             Group group = GetPlayer().GetGroup();
-            if (!group)
+            if (group == null)
                 return;
 
             LfgPartyInfo lfgPartyInfo = new();
@@ -208,7 +208,7 @@ namespace Game
             for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
             {
                 Player plrg = refe.GetSource();
-                if (!plrg)
+                if (plrg == null)
                     continue;
 
                 ObjectGuid pguid = plrg.GetGUID();

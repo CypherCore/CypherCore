@@ -138,13 +138,13 @@ namespace Game
             Creature creature = u.ToCreature();
             uint gain = 0;
 
-            if (!creature || creature.CanGiveExperience())
+            if (creature == null || creature.CanGiveExperience())
             {
                 float xpMod = 1.0f;
 
                 gain = BaseGain(player.GetLevel(), u.GetLevelForTarget(player));
 
-                if (gain != 0 && creature)
+                if (gain != 0 && creature != null)
                 {
                     // Players get only 10% xp for killing creatures of lower expansion levels than himself
                     if ((creature.GetCreatureDifficulty().GetHealthScalingExpansion() < (int)GetExpansionForLevel(player.GetLevel())))
@@ -162,7 +162,7 @@ namespace Game
                     xpMod *= creature.GetCreatureTemplate().ModExperience;
                 }
                 xpMod *= isBattleGround ? WorldConfig.GetFloatValue(WorldCfg.RateXpBgKill) : WorldConfig.GetFloatValue(WorldCfg.RateXpKill);
-                if (creature && creature.m_PlayerDamageReq != 0) // if players dealt less than 50% of the damage and were credited anyway (due to CREATURE_FLAG_EXTRA_NO_PLAYER_DAMAGE_REQ), scale XP gained appropriately (linear scaling)
+                if (creature != null && creature.m_PlayerDamageReq != 0) // if players dealt less than 50% of the damage and were credited anyway (due to CREATURE_FLAG_EXTRA_NO_PLAYER_DAMAGE_REQ), scale XP gained appropriately (linear scaling)
                     xpMod *= 1.0f - 2.0f * creature.m_PlayerDamageReq / creature.GetMaxHealth();
 
                 gain = (uint)(gain * xpMod);

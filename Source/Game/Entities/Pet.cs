@@ -709,7 +709,7 @@ namespace Game.Entities
 
         public bool CreateBaseAtCreature(Creature creature)
         {
-            Cypher.Assert(creature);
+            Cypher.Assert(creature != null);
 
             if (!CreateBaseAtTamed(creature.GetCreatureTemplate(), creature.GetMap()))
                 return false;
@@ -1251,7 +1251,7 @@ namespace Game.Entities
                 {
                     // need update action bar for last removed rank
                     Unit owner = GetOwner();
-                    if (owner)
+                    if (owner != null)
                         if (owner.IsTypeId(TypeId.Player))
                             owner.ToPlayer().PetSpellInitialize();
                 }
@@ -1356,7 +1356,7 @@ namespace Game.Entities
 
         public bool Create(ulong guidlow, Map map, uint entry, uint petNumber)
         {
-            Cypher.Assert(map);
+            Cypher.Assert(map != null);
             SetMap(map);
 
             // TODO: counter should be constructed as (summon_count << 32) | petNumber
@@ -1458,7 +1458,7 @@ namespace Game.Entities
         public void SynchronizeLevelWithOwner()
         {
             Unit owner = GetOwner();
-            if (!owner || !owner.IsTypeId(TypeId.Player))
+            if (owner == null || !owner.IsTypeId(TypeId.Player))
                 return;
 
             switch (GetPetType())
@@ -1534,7 +1534,7 @@ namespace Game.Entities
         public GroupUpdatePetFlags GetGroupUpdateFlag() { return m_groupUpdateMask; }
         public void SetGroupUpdateFlag(GroupUpdatePetFlags flag)
         {
-            if (GetOwner().GetGroup())
+            if (GetOwner().GetGroup() != null)
             {
                 m_groupUpdateMask |= flag;
                 GetOwner().SetGroupUpdateFlag(GroupUpdateFlags.Pet);
@@ -1543,7 +1543,7 @@ namespace Game.Entities
         public void ResetGroupUpdateFlag()
         {
             m_groupUpdateMask = GroupUpdatePetFlags.None;
-            if (GetOwner().GetGroup())
+            if (GetOwner().GetGroup() != null)
                 GetOwner().RemoveGroupUpdateFlag(GroupUpdateFlags.Pet);
         }
 

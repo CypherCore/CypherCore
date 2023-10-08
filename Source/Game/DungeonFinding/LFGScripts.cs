@@ -20,7 +20,7 @@ namespace Game.DungeonFinding
             if (!Global.LFGMgr.IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser))
                 return;
 
-            if (!player.GetGroup())
+            if (player.GetGroup() == null)
                 Global.LFGMgr.LeaveLfg(player.GetGUID());
             else if (player.GetSession().PlayerDisconnected())
                 Global.LFGMgr.LeaveLfg(player.GetGUID(), true);
@@ -36,7 +36,7 @@ namespace Game.DungeonFinding
             ObjectGuid gguid = Global.LFGMgr.GetGroup(guid);
 
             Group group = player.GetGroup();
-            if (group)
+            if (group != null)
             {
                 ObjectGuid gguid2 = group.GetGUID();
                 if (gguid != gguid2)
@@ -61,7 +61,7 @@ namespace Game.DungeonFinding
                 // if for some reason the LFG system recognises the player as being in a LFG dungeon,
                 // but the player was loaded without a valid group, we'll teleport to homebind to prevent
                 // crashes or other undefined behaviour
-                if (!group)
+                if (group == null)
                 {
                     Global.LFGMgr.LeaveLfg(player.GetGUID());
                     player.RemoveAurasDueToSpell(SharedConst.LFGSpellLuckOfTheDraw);
@@ -86,7 +86,7 @@ namespace Game.DungeonFinding
             else
             {
                 Group group = player.GetGroup();
-                if (group && group.GetMembersCount() == 1)
+                if (group != null && group.GetMembersCount() == 1)
                 {
                     Global.LFGMgr.LeaveLfg(group.GetGUID());
                     group.Disband();
@@ -170,7 +170,7 @@ namespace Game.DungeonFinding
             byte players = Global.LFGMgr.RemovePlayerFromGroup(gguid, guid);
 
             Player player = Global.ObjAccessor.FindPlayer(guid);
-            if (player)
+            if (player != null)
             {
                 if (method == RemoveMethod.Leave && state == LfgState.Dungeon &&
                     players >= SharedConst.LFGKickVotesNeeded)
@@ -188,7 +188,7 @@ namespace Game.DungeonFinding
             if (isLFG && state != LfgState.FinishedDungeon) // Need more players to finish the dungeon
             {
                 Player leader = Global.ObjAccessor.FindPlayer(Global.LFGMgr.GetLeader(gguid));
-                if (leader)
+                if (leader != null)
                     leader.GetSession().SendLfgOfferContinue(Global.LFGMgr.GetDungeon(gguid, false));
             }
         }

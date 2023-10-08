@@ -573,7 +573,7 @@ namespace Game.BattlePets
                 return;
 
             Item item = _owner.GetPlayer().StoreNewItem(dest, SharedConst.BattlePetCageItemId, true);
-            if (!item)
+            if (item == null)
                 return;
 
             item.SetModifier(ItemModifier.BattlePetSpeciesId, pet.PacketInfo.Species);
@@ -808,7 +808,7 @@ namespace Game.BattlePets
         {
             Player player = _owner.GetPlayer();
             Creature summonedBattlePet = player.GetSummonedBattlePet();
-            if (summonedBattlePet)
+            if (summonedBattlePet != null)
             {
                 summonedBattlePet.DespawnOrUnsummon();
                 player.SetBattlePetData(null);

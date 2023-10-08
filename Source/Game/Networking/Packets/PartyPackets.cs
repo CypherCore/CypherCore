@@ -255,7 +255,7 @@ namespace Game.Networking.Packets
             if (player.IsDND())
                 MemberStats.Status |= GroupMemberOnlineStatus.DND;
 
-            if (player.GetVehicle())
+            if (player.GetVehicle() != null)
                 MemberStats.Status |= GroupMemberOnlineStatus.Vehicle;
 
             // Level
@@ -319,7 +319,7 @@ namespace Game.Networking.Packets
             PhasingHandler.FillPartyMemberPhase(MemberStats.Phases, player.GetPhaseShift());
 
             // Pet
-            if (player.GetPet())
+            if (player.GetPet() != null)
             {
                 Pet pet = player.GetPet();
 

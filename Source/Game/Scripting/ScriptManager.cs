@@ -547,14 +547,14 @@ namespace Game.Scripting
         }
         public bool OnItemUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
         {
-            Cypher.Assert(player);
-            Cypher.Assert(item);
+            Cypher.Assert(player != null);
+            Cypher.Assert(item != null);
 
             return RunScriptRet<ItemScript>(p => p.OnUse(player, item, targets, castId), item.GetScriptId());
         }
         public bool OnItemExpire(Player player, ItemTemplate proto)
         {
-            Cypher.Assert(player);
+            Cypher.Assert(player != null);
             Cypher.Assert(proto != null);
 
             return RunScriptRet<ItemScript>(p => p.OnExpire(player, proto), proto.ScriptId);
@@ -951,27 +951,27 @@ namespace Game.Scripting
         // GroupScript
         public void OnGroupAddMember(Group group, ObjectGuid guid)
         {
-            Cypher.Assert(group);
+            Cypher.Assert(group != null);
             ForEach<GroupScript>(p => p.OnAddMember(group, guid));
         }
         public void OnGroupInviteMember(Group group, ObjectGuid guid)
         {
-            Cypher.Assert(group);
+            Cypher.Assert(group != null);
             ForEach<GroupScript>(p => p.OnInviteMember(group, guid));
         }
         public void OnGroupRemoveMember(Group group, ObjectGuid guid, RemoveMethod method, ObjectGuid kicker, string reason)
         {
-            Cypher.Assert(group);
+            Cypher.Assert(group != null);
             ForEach<GroupScript>(p => p.OnRemoveMember(group, guid, method, kicker, reason));
         }
         public void OnGroupChangeLeader(Group group, ObjectGuid newLeaderGuid, ObjectGuid oldLeaderGuid)
         {
-            Cypher.Assert(group);
+            Cypher.Assert(group != null);
             ForEach<GroupScript>(p => p.OnChangeLeader(group, newLeaderGuid, oldLeaderGuid));
         }
         public void OnGroupDisband(Group group)
         {
-            Cypher.Assert(group);
+            Cypher.Assert(group != null);
             ForEach<GroupScript>(p => p.OnDisband(group));
         }
 
@@ -1010,7 +1010,7 @@ namespace Game.Scripting
         // AreaTriggerEntityScript
         public AreaTriggerAI GetAreaTriggerAI(AreaTrigger areaTrigger)
         {
-            Cypher.Assert(areaTrigger);
+            Cypher.Assert(areaTrigger != null);
 
             return RunScriptRet<AreaTriggerEntityScript, AreaTriggerAI>(p => p.GetAI(areaTrigger), areaTrigger.GetScriptId(), null);
         }
@@ -1048,28 +1048,28 @@ namespace Game.Scripting
         //SceneScript
         public void OnSceneStart(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
-            Cypher.Assert(player);
+            Cypher.Assert(player != null);
             Cypher.Assert(sceneTemplate != null);
 
             RunScript<SceneScript>(script => script.OnSceneStart(player, sceneInstanceID, sceneTemplate), sceneTemplate.ScriptId);
         }
         public void OnSceneTrigger(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
         {
-            Cypher.Assert(player);
+            Cypher.Assert(player != null);
             Cypher.Assert(sceneTemplate != null);
 
             RunScript<SceneScript>(script => script.OnSceneTriggerEvent(player, sceneInstanceID, sceneTemplate, triggerName), sceneTemplate.ScriptId);
         }
         public void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
-            Cypher.Assert(player);
+            Cypher.Assert(player != null);
             Cypher.Assert(sceneTemplate != null);
 
             RunScript<SceneScript>(script => script.OnSceneCancel(player, sceneInstanceID, sceneTemplate), sceneTemplate.ScriptId);
         }
         public void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
-            Cypher.Assert(player);
+            Cypher.Assert(player != null);
             Cypher.Assert(sceneTemplate != null);
 
             RunScript<SceneScript>(script => script.OnSceneComplete(player, sceneInstanceID, sceneTemplate), sceneTemplate.ScriptId);
@@ -1078,21 +1078,21 @@ namespace Game.Scripting
         //QuestScript
         public void OnQuestStatusChange(Player player, Quest quest, QuestStatus oldStatus, QuestStatus newStatus)
         {
-            Cypher.Assert(player);
+            Cypher.Assert(player != null);
             Cypher.Assert(quest != null);
 
             RunScript<QuestScript>(script => script.OnQuestStatusChange(player, quest, oldStatus, newStatus), quest.ScriptId);
         }
         public void OnQuestAcknowledgeAutoAccept(Player player, Quest quest)
         {
-            Cypher.Assert(player);
+            Cypher.Assert(player != null);
             Cypher.Assert(quest != null);
 
             RunScript<QuestScript>(script => script.OnAcknowledgeAutoAccept(player, quest), quest.ScriptId);
         }
         public void OnQuestObjectiveChange(Player player, Quest quest, QuestObjective objective, int oldAmount, int newAmount)
         {
-            Cypher.Assert(player);
+            Cypher.Assert(player != null);
             Cypher.Assert(quest != null);
 
             RunScript<QuestScript>(script => script.OnQuestObjectiveChange(player, quest, objective, oldAmount, newAmount), quest.ScriptId);

@@ -57,7 +57,7 @@ namespace Game
                 if (!unit.m_SummonSlot[i].IsEmpty())
                 {
                     Creature summon = unit.GetMap().GetCreature(unit.m_SummonSlot[i]);
-                    if (summon)
+                    if (summon != null)
                         func(summon);
                 }
             }
@@ -88,13 +88,10 @@ namespace Game
                 obj.GetPhaseShift().PersonalGuid = personalGuid;
 
             Unit unit = obj.ToUnit();
-            if (unit)
+            if (unit != null)
             {
                 unit.OnPhaseChange();
-                visitor.VisitControlledOf(unit, controlled =>
-                {
-                    AddPhase(controlled, phaseId, personalGuid, updateVisibility, visitor);
-                });
+                visitor.VisitControlledOf(unit, controlled => AddPhase(controlled, phaseId, personalGuid, updateVisibility, visitor));
                 unit.RemoveNotOwnSingleTargetAuras(true);
             }
 
@@ -112,13 +109,10 @@ namespace Game
             bool changed = obj.GetPhaseShift().RemovePhase(phaseId);
 
             Unit unit = obj.ToUnit();
-            if (unit)
+            if (unit != null)
             {
                 unit.OnPhaseChange();
-                visitor.VisitControlledOf(unit, controlled =>
-                {
-                    RemovePhase(controlled, phaseId, updateVisibility, visitor);
-                });
+                visitor.VisitControlledOf(unit, controlled => RemovePhase(controlled, phaseId, updateVisibility, visitor));
                 unit.RemoveNotOwnSingleTargetAuras(true);
             }
 
@@ -144,13 +138,10 @@ namespace Game
                 obj.GetPhaseShift().PersonalGuid = personalGuid;
 
             Unit unit = obj.ToUnit();
-            if (unit)
+            if (unit != null)
             {
                 unit.OnPhaseChange();
-                visitor.VisitControlledOf(unit, controlled =>
-                {
-                    AddPhaseGroup(controlled, phasesInGroup, personalGuid, updateVisibility, visitor);
-                });
+                visitor.VisitControlledOf(unit, controlled => AddPhaseGroup(controlled, phasesInGroup, personalGuid, updateVisibility, visitor));
                 unit.RemoveNotOwnSingleTargetAuras(true);
             }
 
@@ -174,13 +165,10 @@ namespace Game
                 changed = obj.GetPhaseShift().RemovePhase(phaseId) || changed;
 
             Unit unit = obj.ToUnit();
-            if (unit)
+            if (unit != null)
             {
                 unit.OnPhaseChange();
-                visitor.VisitControlledOf(unit, controlled =>
-                {
-                    RemovePhaseGroup(controlled, phasesInGroup, updateVisibility, visitor);
-                });
+                visitor.VisitControlledOf(unit, controlled => RemovePhaseGroup(controlled, phasesInGroup, updateVisibility, visitor));
                 unit.RemoveNotOwnSingleTargetAuras(true);
             }
 
@@ -202,13 +190,8 @@ namespace Game
                 changed = obj.GetPhaseShift().AddUiMapPhaseId(uiMapPhaseId) || changed;
 
             Unit unit = obj.ToUnit();
-            if (unit)
-            {
-                visitor.VisitControlledOf(unit, controlled =>
-                {
-                    AddVisibleMapId(controlled, visibleMapId, visitor);
-                });
-            }
+            if (unit != null)
+                visitor.VisitControlledOf(unit, controlled => AddVisibleMapId(controlled, visibleMapId, visitor));
 
             UpdateVisibilityIfNeeded(obj, false, changed);
         }
@@ -228,13 +211,8 @@ namespace Game
                 changed = obj.GetPhaseShift().RemoveUiMapPhaseId(uiWorldMapAreaIDSwap) || changed;
 
             Unit unit = obj.ToUnit();
-            if (unit)
-            {
-                visitor.VisitControlledOf(unit, controlled =>
-                {
-                    RemoveVisibleMapId(controlled, visibleMapId, visitor);
-                });
-            }
+            if (unit != null)
+                visitor.VisitControlledOf(unit, controlled => RemoveVisibleMapId(controlled, visibleMapId, visitor));
 
             UpdateVisibilityIfNeeded(obj, false, changed);
         }
@@ -272,7 +250,7 @@ namespace Game
                     foreach (uint uiMapPhaseId in visibleMapInfo.UiMapPhaseIDs)
                         phaseShift.AddUiMapPhaseId(uiMapPhaseId);
                 }
-                else if(mapId == obj.GetMapId())
+                else if (mapId == obj.GetMapId())
                     suppressedPhaseShift.AddVisibleMapId(visibleMapInfo.Id, visibleMapInfo);
             }
 
@@ -314,7 +292,7 @@ namespace Game
 
             bool changed = phaseShift.GetPhases() != oldPhases;
             Unit unit = obj.ToUnit();
-            if (unit)
+            if (unit != null)
             {
                 foreach (AuraEffect aurEff in unit.GetAuraEffectsByType(AuraType.Phase))
                 {
@@ -336,10 +314,7 @@ namespace Game
                     unit.OnPhaseChange();
 
                 ControlledUnitVisitor visitor = new(unit);
-                visitor.VisitControlledOf(unit, controlled =>
-                {
-                    InheritPhaseShift(controlled, unit);
-                });
+                visitor.VisitControlledOf(unit, controlled => InheritPhaseShift(controlled, unit));
 
                 if (changed)
                     unit.RemoveNotOwnSingleTargetAuras(true);
@@ -406,7 +381,7 @@ namespace Game
             }
 
             Unit unit = obj.ToUnit();
-            if (unit)
+            if (unit != null)
             {
                 foreach (AuraEffect aurEff in unit.GetAuraEffectsByType(AuraType.Phase))
                 {
@@ -442,16 +417,13 @@ namespace Game
             foreach (var pair in newSuppressions.VisibleMapIds)
                 suppressedPhaseShift.AddVisibleMapId(pair.Key, pair.Value.VisibleMapInfo, pair.Value.References);
 
-            if (unit)
+            if (unit != null)
             {
                 if (changed)
                     unit.OnPhaseChange();
 
                 ControlledUnitVisitor visitor = new(unit);
-                visitor.VisitControlledOf(unit, controlled =>
-                {
-                    InheritPhaseShift(controlled, unit);
-                });
+                visitor.VisitControlledOf(unit, controlled => InheritPhaseShift(controlled, unit));
 
                 if (changed)
                     unit.RemoveNotOwnSingleTargetAuras(true);
@@ -498,7 +470,7 @@ namespace Game
         {
             return AlwaysVisible;
         }
-        
+
         public static void InitDbPhaseShift(PhaseShift phaseShift, PhaseUseFlagsValues phaseUseFlags, uint phaseId, uint phaseGroupId)
         {
             phaseShift.ClearPhases();
@@ -661,18 +633,18 @@ namespace Game
 
             return false;
         }
-        
+
         static void UpdateVisibilityIfNeeded(WorldObject obj, bool updateVisibility, bool changed)
         {
             if (changed && obj.IsInWorld)
             {
                 Player player = obj.ToPlayer();
-                if (player)
+                if (player != null)
                     SendToPlayer(player);
 
                 if (updateVisibility)
                 {
-                    if (player)
+                    if (player != null)
                         player.GetMap().SendUpdateTransportVisibility(player);
 
                     obj.UpdateObjectVisibility();

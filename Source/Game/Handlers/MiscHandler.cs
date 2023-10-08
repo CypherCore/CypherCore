@@ -29,7 +29,7 @@ namespace Game
             AccountData adata = GetAccountData(request.DataType);
 
             UpdateAccountData data = new();
-            data.Player = GetPlayer() ? GetPlayer().GetGUID() : ObjectGuid.Empty;
+            data.Player = GetPlayer() != null ? GetPlayer().GetGUID() : ObjectGuid.Empty;
             data.Time = (uint)adata.Time;
             data.DataType = request.DataType;
 
@@ -111,7 +111,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SetActionBarToggles)]
         void HandleSetActionBarToggles(SetActionBarToggles packet)
         {
-            if (!GetPlayer())                                        // ignore until not logged (check needed because STATUS_AUTHED)
+            if (GetPlayer() == null)                                        // ignore until not logged (check needed because STATUS_AUTHED)
             {
                 if (packet.Mask != 0)
                     Log.outError(LogFilter.Network, "WorldSession.HandleSetActionBarToggles in not logged state with value: {0}, ignored", packet.Mask);
@@ -252,7 +252,7 @@ namespace Game
                 return;
             }
             Battleground bg = player.GetBattleground();
-            if (bg)
+            if (bg != null)
                 bg.HandleAreaTrigger(player, packet.AreaTriggerID, packet.Entered);
 
             OutdoorPvP pvp = player.GetOutdoorPvP();
@@ -349,7 +349,7 @@ namespace Game
                 }
 
                 Group group = player.GetGroup();
-                if (group)
+                if (group != null)
                     if (group.IsLFGGroup() && player.GetMap().IsDungeon())
                         teleported = player.TeleportToBGEntryPoint();
             }
@@ -536,7 +536,7 @@ namespace Game
             {
                 Log.outDebug(LogFilter.Network, "Added FarSight {0} to player {1}", GetPlayer().m_activePlayerData.FarsightObject.ToString(), GetPlayer().GetGUID().ToString());
                 WorldObject target = GetPlayer().GetViewpoint();
-                if (target)
+                if (target != null)
                     GetPlayer().SetSeer(target);
                 else
                     Log.outDebug(LogFilter.Network, "Player {0} (GUID: {1}) requests non-existing seer {2}", GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), GetPlayer().m_activePlayerData.FarsightObject.ToString());
@@ -573,7 +573,7 @@ namespace Game
                 return;
 
             Group group = GetPlayer().GetGroup();
-            if (group)
+            if (group != null)
             {
                 if (!group.IsLeader(GetPlayer().GetGUID()))
                     return;
@@ -618,7 +618,7 @@ namespace Game
 
             // cannot reset while in an instance
             Map map = GetPlayer().GetMap();
-            if (map && map.Instanceable())
+            if (map != null && map.Instanceable())
             {
                 Log.outDebug(LogFilter.Network, "WorldSession:HandleSetDungeonDifficulty: player (Name: {0}, {1}) tried to reset the instance while player is inside!",
                     GetPlayer().GetName(), GetPlayer().GetGUID().ToString());
@@ -626,7 +626,7 @@ namespace Game
             }
 
             Group group = GetPlayer().GetGroup();
-            if (group)
+            if (group != null)
             {
                 if (!group.IsLeader(_player.GetGUID()))
                     return;
@@ -684,7 +684,7 @@ namespace Game
 
             // cannot reset while in an instance
             Map map = GetPlayer().GetMap();
-            if (map && map.Instanceable())
+            if (map != null && map.Instanceable())
             {
                 Log.outDebug(LogFilter.Network, "WorldSession:HandleSetRaidDifficulty: player (Name: {0}, {1} tried to reset the instance while inside!",
                     GetPlayer().GetName(), GetPlayer().GetGUID().ToString());
@@ -692,7 +692,7 @@ namespace Game
             }
 
             Group group = GetPlayer().GetGroup();
-            if (group)
+            if (group != null)
             {
                 if (!group.IsLeader(_player.GetGUID()))
                     return;
@@ -732,7 +732,7 @@ namespace Game
         void HandleGuildSetFocusedAchievement(GuildSetFocusedAchievement setFocusedAchievement)
         {
             Guild guild = Global.GuildMgr.GetGuildById(GetPlayer().GetGuildId());
-            if (guild)
+            if (guild != null)
                 guild.GetAchievementMgr().SendAchievementInfo(GetPlayer(), setFocusedAchievement.AchievementID);
         }
 

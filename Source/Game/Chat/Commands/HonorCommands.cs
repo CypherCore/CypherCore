@@ -14,7 +14,7 @@ namespace Game.Chat.Commands
         static bool HandleHonorUpdateCommand(CommandHandler handler)
         {
             Player target = handler.GetSelectedPlayer();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;
@@ -35,7 +35,7 @@ namespace Game.Chat.Commands
             static bool HandleHonorAddCommand(CommandHandler handler, int amount)
             {
                 Player target = handler.GetSelectedPlayer();
-                if (!target)
+                if (target == null)
                 {
                     handler.SendSysMessage(CypherStrings.PlayerNotFound);
                     return false;
@@ -53,7 +53,7 @@ namespace Game.Chat.Commands
             static bool HandleHonorAddKillCommand(CommandHandler handler)
             {
                 Unit target = handler.GetSelectedUnit();
-                if (!target)
+                if (target == null)
                 {
                     handler.SendSysMessage(CypherStrings.PlayerNotFound);
                     return false;
@@ -61,7 +61,7 @@ namespace Game.Chat.Commands
 
                 // check online security
                 Player player = target.ToPlayer();
-                if (player)
+                if (player != null)
                     if (handler.HasLowerSecurity(player, ObjectGuid.Empty))
                         return false;
 

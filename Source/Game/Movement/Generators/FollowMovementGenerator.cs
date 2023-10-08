@@ -189,7 +189,7 @@ namespace Game.Movement
             Pet oPet = owner.ToPet();
             if (oPet != null)
             {
-                if (!_abstractFollower.GetTarget() || _abstractFollower.GetTarget().GetGUID() == owner.GetOwnerGUID())
+                if (_abstractFollower.GetTarget() == null || _abstractFollower.GetTarget().GetGUID() == owner.GetOwnerGUID())
                 {
                     oPet.UpdateSpeed(UnitMoveType.Run);
                     oPet.UpdateSpeed(UnitMoveType.Walk);

@@ -72,13 +72,13 @@ namespace Game.PvP
         public virtual void HandleKill(Player killer, Unit killed)
         {
             Group group = killer.GetGroup();
-            if (group)
+            if (group != null)
             {
                 for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                 {
                     Player groupGuy = refe.GetSource();
 
-                    if (!groupGuy)
+                    if (groupGuy == null)
                         continue;
 
                     // skip if too far away
@@ -148,7 +148,7 @@ namespace Game.PvP
                 foreach (var guid in m_players[team])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                         player.SendPacket(packet);
                 }
             }
@@ -169,7 +169,7 @@ namespace Game.PvP
             foreach (var guid in m_players[teamIndex])
             {
                 Player player = Global.ObjAccessor.FindPlayer(guid);
-                if (player)
+                if (player != null)
                 {
                     if (spellId > 0)
                         player.CastSpell(player, (uint)spellId, true);
@@ -219,7 +219,7 @@ namespace Game.PvP
                 foreach (var guid in m_players[i])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                         if (player.GetZoneId() == zoneId)
                             _worker.Invoke(player);
                 }
@@ -276,7 +276,7 @@ namespace Game.PvP
 
         public virtual bool HandlePlayerEnter(Player player)
         {
-            if (m_capturePoint)
+            if (m_capturePoint != null)
             {
                 player.SendUpdateWorldState(m_capturePoint.GetGoInfo().ControlZone.worldState1, 1);
                 player.SendUpdateWorldState(m_capturePoint.GetGoInfo().ControlZone.worldstate2, (uint)Math.Ceiling((m_value + m_maxValue) / (2 * m_maxValue) * 100.0f));
@@ -287,14 +287,14 @@ namespace Game.PvP
 
         public virtual void HandlePlayerLeave(Player player)
         {
-            if (m_capturePoint)
+            if (m_capturePoint != null)
                 player.SendUpdateWorldState(m_capturePoint.GetGoInfo().ControlZone.worldState1, 0);
             m_activePlayers[player.GetTeamId()].Remove(player.GetGUID());
         }
 
         public virtual void SendChangePhase()
         {
-            if (!m_capturePoint)
+            if (m_capturePoint == null)
                 return;
 
             // send this too, sometimes the slider disappears, dunno why :(
@@ -327,7 +327,7 @@ namespace Game.PvP
 
         public virtual bool Update(uint diff)
         {
-            if (!m_capturePoint)
+            if (m_capturePoint == null)
                 return false;
 
             float radius = m_capturePoint.GetGoInfo().ControlZone.radius;
@@ -337,7 +337,7 @@ namespace Game.PvP
                 foreach (var playerGuid in m_activePlayers[team].ToList())
                 {
                     Player player = Global.ObjAccessor.FindPlayer(playerGuid);
-                    if (player)
+                    if (player != null)
                         if (!m_capturePoint.IsWithinDistInMap(player, radius) || !player.IsOutdoorPvPActive())
                             HandlePlayerLeave(player);
                 }
@@ -451,7 +451,7 @@ namespace Game.PvP
                 foreach (var guid in m_activePlayers[team])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                         player.SendUpdateWorldState(field, value);
                 }
             }
@@ -476,7 +476,7 @@ namespace Game.PvP
             foreach (var playerGuid in m_activePlayers[team])
             {
                 Player player = Global.ObjAccessor.FindPlayer(playerGuid);
-                if (player)
+                if (player != null)
                     player.KilledMonsterCredit(id, guid);
             }
         }

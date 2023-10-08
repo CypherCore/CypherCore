@@ -25,7 +25,7 @@ namespace Game.Chat
         static bool HandleDebugAnimCommand(CommandHandler handler, Emote emote)
         {
             Unit unit = handler.GetSelectedUnit();
-            if (unit)
+            if (unit != null)
                 unit.HandleEmoteCommand(emote);
 
             handler.SendSysMessage($"Playing emote {emote}");
@@ -68,11 +68,11 @@ namespace Game.Chat
         static bool HandleDebugBoundaryCommand(CommandHandler handler, string fill, uint durationArg)
         {
             Player player = handler.GetPlayer();
-            if (!player)
+            if (player == null)
                 return false;
 
             Creature target = handler.GetSelectedCreature();
-            if (!target || !target.IsAIEnabled())
+            if (target == null || !target.IsAIEnabled())
                 return false;
 
             TimeSpan duration = durationArg != 0 ? TimeSpan.FromSeconds(durationArg) : TimeSpan.Zero;
@@ -90,7 +90,7 @@ namespace Game.Chat
         static bool HandleDebugCombatListCommand(CommandHandler handler)
         {
             Unit target = handler.GetSelectedUnit();
-            if (!target)
+            if (target == null)
                 target = handler.GetPlayer();
 
             handler.SendSysMessage($"Combat refs: (Combat state: {target.IsInCombat()} | Manager state: {target.GetCombatManager().HasCombat()})");
@@ -112,7 +112,7 @@ namespace Game.Chat
         static bool HandleDebugConversationCommand(CommandHandler handler, uint conversationEntry)
         {
             Player target = handler.GetSelectedPlayerOrSelf();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;
@@ -132,7 +132,7 @@ namespace Game.Chat
         static bool HandleDebugEnterVehicleCommand(CommandHandler handler, uint entry, sbyte seatId = -1)
         {
             Unit target = handler.GetSelectedUnit();
-            if (!target || !target.IsVehicle())
+            if (target == null || !target.IsVehicle())
                 return false;
 
             if (entry == 0)
@@ -143,7 +143,7 @@ namespace Game.Chat
                 var searcher = new CreatureSearcher(handler.GetPlayer(), check);
                 Cell.VisitAllObjects(handler.GetPlayer(), searcher, 30.0f);
                 var passenger = searcher.GetTarget();
-                if (!passenger || passenger == target)
+                if (passenger == null || passenger == target)
                     return false;
                 passenger.EnterVehicle(target, seatId);
             }
@@ -175,7 +175,7 @@ namespace Game.Chat
                 return false;
 
             Player player = handler.GetSelectedPlayer();
-            if (!player)
+            if (player == null)
                 player = handler.GetPlayer();
 
             if (!listQueue && !checkAll)
@@ -188,15 +188,15 @@ namespace Game.Chat
                         continue;
 
                     Item item = player.GetItemByPos(InventorySlots.Bag0, i);
-                    if (item)
+                    if (item != null)
                     {
                         Bag bag = item.ToBag();
-                        if (bag)
+                        if (bag != null)
                         {
                             for (byte j = 0; j < bag.GetBagSize(); ++j)
                             {
                                 Item item2 = bag.GetItemByPos(j);
-                                if (item2)
+                                if (item2 != null)
                                     if (item2.GetState() == state)
                                         handler.SendSysMessage("bag: 255 slot: {0} guid: {1} owner: {2}", item2.GetSlot(), item2.GetGUID().ToString(), item2.GetOwnerGUID().ToString());
                             }
@@ -213,11 +213,11 @@ namespace Game.Chat
                 for (int i = 0; i < updateQueue.Count; ++i)
                 {
                     Item item = updateQueue[i];
-                    if (!item)
+                    if (item == null)
                         continue;
 
                     Bag container = item.GetContainer();
-                    byte bagSlot = container ? container.GetSlot() : InventorySlots.Bag0;
+                    byte bagSlot = container != null ? container.GetSlot() : InventorySlots.Bag0;
 
                     string st = "";
                     switch (item.GetState())
@@ -252,7 +252,7 @@ namespace Game.Chat
                         continue;
 
                     Item item = player.GetItemByPos(InventorySlots.Bag0, i);
-                    if (!item)
+                    if (item == null)
                         continue;
 
                     if (item.GetSlot() != i)
@@ -270,7 +270,7 @@ namespace Game.Chat
                     }
 
                     Bag container = item.GetContainer();
-                    if (container)
+                    if (container != null)
                     {
                         handler.SendSysMessage("The item with slot {0} and guid {1} has a container (slot: {2}, guid: {3}) but shouldn't!", item.GetSlot(), item.GetGUID().ToString(), container.GetSlot(), container.GetGUID().ToString());
                         error = true;
@@ -309,12 +309,12 @@ namespace Game.Chat
                     }
 
                     Bag bag = item.ToBag();
-                    if (bag)
+                    if (bag != null)
                     {
                         for (byte j = 0; j < bag.GetBagSize(); ++j)
                         {
                             Item item2 = bag.GetItemByPos(j);
-                            if (!item2)
+                            if (item2 == null)
                                 continue;
 
                             if (item2.GetSlot() != j)
@@ -332,7 +332,7 @@ namespace Game.Chat
                             }
 
                             Bag container1 = item2.GetContainer();
-                            if (!container1)
+                            if (container1 == null)
                             {
                                 handler.SendSysMessage("The item in bag {0} at slot {1} with guid {2} has no container!", bag.GetSlot(), item2.GetSlot(), item2.GetGUID().ToString());
                                 error = true;
@@ -383,7 +383,7 @@ namespace Game.Chat
                 for (int i = 0; i < updateQueue.Count; ++i)
                 {
                     Item item = updateQueue[i];
-                    if (!item)
+                    if (item == null)
                         continue;
 
                     if (item.GetOwnerGUID() != player.GetGUID())
@@ -550,7 +550,7 @@ namespace Game.Chat
         static bool HandleDebugItemExpireCommand(CommandHandler handler, ulong guid)
         {
             Item item = handler.GetPlayer().GetItemByGuid(ObjectGuid.Create(HighGuid.Item, guid));
-            if (!item)
+            if (item == null)
                 return false;
 
             handler.GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
@@ -580,7 +580,7 @@ namespace Game.Chat
 
         static bool HandleDebugLoadCellsCommandHelper(CommandHandler handler, Map map, uint? tileX, uint? tileY)
         {
-            if (!map)
+            if (map == null)
                 return false;
 
             // Load 1 single tile if specified, otherwise load the whole map
@@ -610,7 +610,7 @@ namespace Game.Chat
         static bool HandleDebugGetLootRecipientCommand(CommandHandler handler)
         {
             Creature target = handler.GetSelectedCreature();
-            if (!target)
+            if (target == null)
                 return false;
 
             handler.SendSysMessage($"Loot recipients for creature {target.GetName()} ({target.GetGUID()}, SpawnID {target.GetSpawnId()}) are:");
@@ -627,7 +627,7 @@ namespace Game.Chat
         static bool HandleDebugLoSCommand(CommandHandler handler)
         {
             Unit unit = handler.GetSelectedUnit();
-            if (unit)
+            if (unit != null)
             {
                 Player player = handler.GetPlayer();
                 handler.SendSysMessage($"Checking LoS {player.GetName()} . {unit.GetName()}:");
@@ -643,7 +643,7 @@ namespace Game.Chat
         static bool HandleDebugMoveflagsCommand(CommandHandler handler, uint? moveFlags, uint? moveFlagsExtra)
         {
             Unit target = handler.GetSelectedUnit();
-            if (!target)
+            if (target == null)
                 target = handler.GetPlayer();
 
             if (!moveFlags.HasValue)
@@ -684,7 +684,7 @@ namespace Game.Chat
             if (linked == "linked")
             {
                 Battleground bg = player.GetBattleground();
-                if (bg)
+                if (bg != null)
                     nearestLoc = bg.GetClosestGraveyard(player);
                 else
                 {
@@ -763,7 +763,7 @@ namespace Game.Chat
         static bool HandleDebugPhaseCommand(CommandHandler handler)
         {
             Unit target = handler.GetSelectedUnit();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.SelectCreature);
                 return false;
@@ -782,7 +782,7 @@ namespace Game.Chat
         static bool HandleDebugPlayerConditionCommand(CommandHandler handler, uint playerConditionId)
         {
             Player target = handler.GetSelectedPlayerOrSelf();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;
@@ -900,7 +900,7 @@ namespace Game.Chat
         static bool HandleDebugSetAuraStateCommand(CommandHandler handler, AuraStateType? state, bool apply)
         {
             Unit unit = handler.GetSelectedUnit();
-            if (!unit)
+            if (unit == null)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
                 return false;
@@ -925,7 +925,7 @@ namespace Game.Chat
             handler.GetPlayer().GetClosePoint(out x, out y, out z, handler.GetPlayer().GetCombatReach());
 
             if (id == 0)
-                return handler.GetPlayer().SummonCreature(entry, x, y, z, o);
+                return handler.GetPlayer().SummonCreature(entry, x, y, z, o) != null;
 
             CreatureTemplate creatureTemplate = Global.ObjectMgr.GetCreatureTemplate(entry);
             if (creatureTemplate == null)
@@ -939,7 +939,7 @@ namespace Game.Chat
             Position pos = new(x, y, z, o);
 
             Creature creature = Creature.CreateCreature(entry, map, pos, id);
-            if (!creature)
+            if (creature == null)
                 return false;
 
             map.AddToMap(creature);
@@ -1086,7 +1086,7 @@ namespace Game.Chat
         static bool HandleDebugTransportCommand(CommandHandler handler, string operation)
         {
             Transport transport = handler.GetPlayer().GetTransport<Transport>();
-            if (!transport)
+            if (transport == null)
                 return false;
 
             bool start = false;
@@ -1267,7 +1267,7 @@ namespace Game.Chat
                 Player player = handler.GetPlayer();
 
                 Unit unit = handler.GetSelectedUnit();
-                if (!unit)
+                if (unit == null)
                 {
                     handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
                     return false;

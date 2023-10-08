@@ -218,7 +218,7 @@ namespace Game.Chat
                             return 0;
 
                         Player player = Global.ObjAccessor.FindPlayerByName(idS);
-                        if (player)
+                        if (player != null)
                             return player.GetGUID().GetCounter();
 
                         ObjectGuid guid = Global.CharacterCacheStorage.GetCharacterGuidByName(idS);
@@ -320,7 +320,7 @@ namespace Game.Chat
                 return null;
 
             Unit selected = _session.GetPlayer().GetSelectedUnit();
-            if (selected)
+            if (selected != null)
                 return selected;
 
             return _session.GetPlayer();
@@ -356,7 +356,7 @@ namespace Game.Chat
             // first try with selected target
             Player targetPlayer = Global.ObjAccessor.FindConnectedPlayer(selected);
             // if the target is not a player, then return self
-            if (!targetPlayer)
+            if (targetPlayer == null)
                 targetPlayer = _session.GetPlayer();
 
             return targetPlayer;
@@ -376,7 +376,7 @@ namespace Game.Chat
 
         public Creature GetCreatureFromPlayerMapByDbGuid(ulong lowguid)
         {
-            if (!_session)
+            if (_session == null)
                 return null;
 
             // Select the first alive creature or a dead one if not found
@@ -586,7 +586,7 @@ namespace Game.Chat
                     guid = Global.CharacterCacheStorage.GetCharacterGuidByName(name);
             }
 
-            if (player)
+            if (player != null)
             {
                 group = player.GetGroup();
                 if (guid.IsEmpty() || !offline)
@@ -594,7 +594,7 @@ namespace Game.Chat
             }
             else
             {
-                if (GetSelectedPlayer())
+                if (GetSelectedPlayer() != null)
                     player = GetSelectedPlayer();
                 else
                     player = _session.GetPlayer();

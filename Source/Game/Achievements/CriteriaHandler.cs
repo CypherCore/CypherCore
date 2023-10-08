@@ -51,7 +51,7 @@ namespace Game.Achievements
                 return;
             }
 
-            if (!referencePlayer)
+            if (referencePlayer == null)
             {
                 Log.outDebug(LogFilter.Achievement, "UpdateCriteria: Player is NULL! Cant update criteria");
                 return;
@@ -590,7 +590,7 @@ namespace Game.Achievements
 
             progress.Changed = true;
             progress.Date = GameTime.GetGameTime(); // set the date to the latest update.
-            progress.PlayerGUID = referencePlayer ? referencePlayer.GetGUID() : ObjectGuid.Empty;
+            progress.PlayerGUID = referencePlayer != null ? referencePlayer.GetGUID() : ObjectGuid.Empty;
             _criteriaProgress[criteria.Id] = progress;
 
             TimeSpan timeElapsed = TimeSpan.Zero;
@@ -898,7 +898,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case CriteriaFailEvent.ModifyPartyStatus:
-                    if (referencePlayer.GetGroup())
+                    if (referencePlayer.GetGroup() != null)
                         return false;
                     break;
                 default:
@@ -1010,7 +1010,7 @@ namespace Game.Achievements
                         return false;
 
                     Map map = referencePlayer.IsInWorld ? referencePlayer.GetMap() : Global.MapMgr.FindMap(referencePlayer.GetMapId(), referencePlayer.GetInstanceId());
-                    if (!map || !map.IsDungeon())
+                    if (map == null || !map.IsDungeon())
                         return false;
 
                     //FIXME: work only for instances where max == min for players
@@ -1019,7 +1019,7 @@ namespace Game.Achievements
                     break;
                 }
                 case CriteriaType.KilledByPlayer:
-                    if (miscValue1 == 0 || !refe || !refe.IsTypeId(TypeId.Player))
+                    if (miscValue1 == 0 || refe == null || !refe.IsTypeId(TypeId.Player))
                         return false;
                     break;
                 case CriteriaType.DieFromEnviromentalDamage:
@@ -1145,7 +1145,7 @@ namespace Game.Achievements
                             return false;
 
                         // map specific case (BG in fact) expected player targeted damage/heal
-                        if (!refe || !refe.IsTypeId(TypeId.Player))
+                        if (refe == null || !refe.IsTypeId(TypeId.Player))
                             return false;
                     }
                     break;
@@ -1369,17 +1369,17 @@ namespace Game.Achievements
                         return false;
                     break;
                 case ModifierTreeType.TargetToPlayerLevelDeltaGreaterThan: // 22
-                    if (!refe || !refe.IsUnit() || referencePlayer.GetLevel() + reqValue < refe.ToUnit().GetLevel())
+                    if (refe == null || !refe.IsUnit() || referencePlayer.GetLevel() + reqValue < refe.ToUnit().GetLevel())
                         return false;
                     break;
                 case ModifierTreeType.PlayerLevelEqualTargetLevel: // 23
-                    if (!refe || !refe.IsUnit() || referencePlayer.GetLevel() != refe.ToUnit().GetLevel())
+                    if (refe == null || !refe.IsUnit() || referencePlayer.GetLevel() != refe.ToUnit().GetLevel())
                         return false;
                     break;
                 case ModifierTreeType.PlayerInArenaWithTeamSize: // 24
                 {
                     Battleground bg = referencePlayer.GetBattleground();
-                    if (!bg || !bg.IsArena() || bg.GetArenaType() != (ArenaTypes)reqValue)
+                    if (bg == null || !bg.IsArena() || bg.GetArenaType() != (ArenaTypes)reqValue)
                         return false;
                     break;
                 }
@@ -1400,7 +1400,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case ModifierTreeType.LessThanTappers: // 29
-                    if (referencePlayer.GetGroup() && referencePlayer.GetGroup().GetMembersCount() >= reqValue)
+                    if (referencePlayer.GetGroup() != null && referencePlayer.GetGroup().GetMembersCount() >= reqValue)
                         return false;
                     break;
                 case ModifierTreeType.CreatureType: // 30
@@ -1414,7 +1414,7 @@ namespace Game.Achievements
                 }
                 case ModifierTreeType.CreatureFamily: // 31
                 {
-                    if (!refe)
+                    if (refe == null)
                         return false;
                     if (!refe.IsCreature() || refe.ToCreature().GetCreatureTemplate().Family != (CreatureFamily)reqValue)
                         return false;
@@ -1434,11 +1434,11 @@ namespace Game.Achievements
                             return false;
                     break;
                 case ModifierTreeType.PlayerIsNotInParty: // 35
-                    if (referencePlayer.GetGroup())
+                    if (referencePlayer.GetGroup() != null)
                         return false;
                     break;
                 case ModifierTreeType.PlayerIsInParty: // 36
-                    if (!referencePlayer.GetGroup())
+                    if (referencePlayer.GetGroup() == null)
                         return false;
                     break;
                 case ModifierTreeType.HasPersonalRatingEqualOrGreaterThan: // 37
@@ -1469,7 +1469,7 @@ namespace Game.Achievements
                 }
                 case ModifierTreeType.TargetIsInZone: // 42
                 {
-                    if (!refe)
+                    if (refe == null)
                         return false;
                     uint zoneId = refe.GetAreaId();
                     AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
@@ -1496,11 +1496,11 @@ namespace Game.Achievements
                         return false;
                     break;
                 case ModifierTreeType.TargetHealthAbovePercent: // 47
-                    if (!refe || !refe.IsUnit() || refe.ToUnit().GetHealthPct() < reqValue)
+                    if (refe == null || !refe.IsUnit() || refe.ToUnit().GetHealthPct() < reqValue)
                         return false;
                     break;
                 case ModifierTreeType.TargetHealthEqualsPercent: // 48
-                    if (!refe || !refe.IsUnit() || refe.ToUnit().GetHealthPct() != reqValue)
+                    if (refe == null || !refe.IsUnit() || refe.ToUnit().GetHealthPct() != reqValue)
                         return false;
                     break;
                 case ModifierTreeType.PlayerHealthBelowValue: // 49
@@ -1516,15 +1516,15 @@ namespace Game.Achievements
                         return false;
                     break;
                 case ModifierTreeType.TargetHealthBelowValue: // 52
-                    if (!refe || !refe.IsUnit() || refe.ToUnit().GetHealth() > reqValue)
+                    if (refe == null || !refe.IsUnit() || refe.ToUnit().GetHealth() > reqValue)
                         return false;
                     break;
                 case ModifierTreeType.TargetHealthAboveValue: // 53
-                    if (!refe || !refe.IsUnit() || refe.ToUnit().GetHealth() < reqValue)
+                    if (refe == null || !refe.IsUnit() || refe.ToUnit().GetHealth() < reqValue)
                         return false;
                     break;
                 case ModifierTreeType.TargetHealthEqualsValue: // 54
-                    if (!refe || !refe.IsUnit() || refe.ToUnit().GetHealth() != reqValue)
+                    if (refe == null || !refe.IsUnit() || refe.ToUnit().GetHealth() != reqValue)
                         return false;
                     break;
                 case ModifierTreeType.TargetIsPlayerAndMeetsCondition: // 55
@@ -1594,7 +1594,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case ModifierTreeType.TargetLevelEqualOrGreaterThan: // 70
-                    if (!refe || !refe.IsUnit() || refe.ToUnit().GetLevel() < reqValue)
+                    if (refe == null || !refe.IsUnit() || refe.ToUnit().GetLevel() < reqValue)
                         return false;
                     break;
                 case ModifierTreeType.PlayerLevelEqualOrLessThan: // 71
@@ -1602,7 +1602,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case ModifierTreeType.TargetLevelEqualOrLessThan: // 72
-                    if (!refe || !refe.IsUnit() || refe.ToUnit().GetLevel() > reqValue)
+                    if (refe == null || !refe.IsUnit() || refe.ToUnit().GetLevel() > reqValue)
                         return false;
                     break;
                 case ModifierTreeType.ModifierTree: // 73
@@ -2764,7 +2764,7 @@ namespace Game.Achievements
                         return false;
 
                     Item artifact = referencePlayer.GetItemByGuid(artifactAura.GetCastItemGUID());
-                    if (!artifact)
+                    if (artifact == null)
                         return false;
 
                     var artifactPower = artifact.GetArtifactPower((uint)secondaryAsset);
@@ -2876,7 +2876,7 @@ namespace Game.Achievements
                 case ModifierTreeType.PlayerAzeriteLevelEqualOrGreaterThan: // 235
                 {
                     Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
-                    if (!heartOfAzeroth || heartOfAzeroth.ToAzeriteItem().GetLevel() < reqValue)
+                    if (heartOfAzeroth == null || heartOfAzeroth.ToAzeriteItem().GetLevel() < reqValue)
                         return false;
                     break;
                 }
@@ -3050,7 +3050,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case ModifierTreeType.TargetAuraStackCountEqual: // 256
-                    if (!refe || !refe.IsUnit() || refe.ToUnit().GetAuraCount((uint)secondaryAsset) != reqValue)
+                    if (refe == null || !refe.IsUnit() || refe.ToUnit().GetAuraCount((uint)secondaryAsset) != reqValue)
                         return false;
                     break;
                 case ModifierTreeType.PlayerAuraStackCountEqualOrGreaterThan: // 257
@@ -3058,7 +3058,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case ModifierTreeType.TargetAuraStackCountEqualOrGreaterThan: // 258
-                    if (!refe || !refe.IsUnit() || refe.ToUnit().GetAuraCount((uint)secondaryAsset) < reqValue)
+                    if (refe == null || !refe.IsUnit() || refe.ToUnit().GetAuraCount((uint)secondaryAsset) < reqValue)
                         return false;
                     break;
                 case ModifierTreeType.PlayerHasAzeriteEssenceRankLessThan: // 259
@@ -3183,7 +3183,7 @@ namespace Game.Achievements
                 }
                 case ModifierTreeType.TargetLevelWithinContentTuning: // 269
                 {
-                    if (!refe || !refe.IsUnit())
+                    if (refe == null || !refe.IsUnit())
                         return false;
 
                     uint level = refe.ToUnit().GetLevel();
@@ -3215,7 +3215,7 @@ namespace Game.Achievements
                 }
                 case ModifierTreeType.TargetLevelWithinOrAboveContentTuning: // 273
                 {
-                    if (!refe || !refe.IsUnit())
+                    if (refe == null || !refe.IsUnit())
                         return false;
 
                     uint level = refe.ToUnit().GetLevel();
@@ -3334,7 +3334,7 @@ namespace Game.Achievements
                 }
                 case ModifierTreeType.TargetIsInAreaGroup: // 299
                 {
-                    if (!refe)
+                    if (refe == null)
                         return false;
 
                     var areas = Global.DB2Mgr.GetAreasForGroup(reqValue);
@@ -3427,7 +3427,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case ModifierTreeType.TargetCovenant: // 314
-                    if (!refe || !refe.IsPlayer())
+                    if (refe == null || !refe.IsPlayer())
                         return false;
                     if (refe.ToPlayer().m_playerData.CovenantID != reqValue)
                         return false;
@@ -4560,7 +4560,7 @@ namespace Game.Achievements
                 case CriteriaDataType.Script:
                 {
                     Unit unitTarget = null;
-                    if (target)
+                    if (target != null)
                         unitTarget = target.ToUnit();
                     return Global.ScriptMgr.OnCriteriaCheck(ScriptId, source.ToPlayer(), unitTarget.ToUnit());
                 }
@@ -4579,7 +4579,7 @@ namespace Game.Achievements
                 case CriteriaDataType.BgLossTeamScore:
                 {
                     Battleground bg = source.GetBattleground();
-                    if (!bg)
+                    if (bg == null)
                         return false;
 
                     int score = (int)bg.GetTeamScore(bg.GetPlayerTeam(source.GetGUID()) == Team.Alliance ? Framework.Constants.TeamId.Horde : Framework.Constants.TeamId.Alliance);
@@ -4625,7 +4625,7 @@ namespace Game.Achievements
                 {
                     CharTitlesRecord titleInfo = CliDB.CharTitlesStorage.LookupByKey(KnownTitle.Id);
                     if (titleInfo != null)
-                        return source && source.HasTitle(titleInfo.MaskID);
+                        return source != null && source.HasTitle(titleInfo.MaskID);
 
                     return false;
                 }

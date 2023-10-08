@@ -151,7 +151,7 @@ namespace Game.Chat
 
             if (HasFlag(ChannelFlags.Lfg) && WorldConfig.GetBoolValue(WorldCfg.RestrictedLfgChannel) &&
                 Global.AccountMgr.IsPlayerAccount(player.GetSession().GetSecurity()) && //FIXME: Move to RBAC
-                player.GetGroup())
+                player.GetGroup() != null)
             {
                 var builder = new ChannelNameBuilder(this, new NotInLFGAppend());
                 SendToOne(builder, guid);
@@ -285,9 +285,9 @@ namespace Game.Chat
                 return;
             }
 
-            Player bad = Global.ObjAccessor.FindPlayerByName(badname);
-            ObjectGuid victim = bad ? bad.GetGUID() : ObjectGuid.Empty;
-            if (bad == null || victim.IsEmpty() || !IsOn(victim))
+            Player badPlayer = Global.ObjAccessor.FindPlayerByName(badname);
+            ObjectGuid victim = badPlayer != null ? badPlayer.GetGUID() : ObjectGuid.Empty;
+            if (badPlayer == null || victim.IsEmpty() || !IsOn(victim))
             {
                 ChannelNameBuilder builder = new(this, new PlayerNotFoundAppend(badname));
                 SendToOne(builder, good);
@@ -322,7 +322,7 @@ namespace Game.Chat
             }
 
             _playersStore.Remove(victim);
-            bad.LeftChannel(this);
+            badPlayer.LeftChannel(this);
 
             if (changeowner && _ownershipEnabled && !_playersStore.Empty())
             {
@@ -350,8 +350,8 @@ namespace Game.Chat
                 return;
             }
 
-            Player bad = Global.ObjAccessor.FindPlayerByName(badname);
-            ObjectGuid victim = bad ? bad.GetGUID() : ObjectGuid.Empty;
+            Player badPlayer = Global.ObjAccessor.FindPlayerByName(badname);
+            ObjectGuid victim = badPlayer != null ? badPlayer.GetGUID() : ObjectGuid.Empty;
 
             if (victim.IsEmpty() || !IsBanned(victim))
             {
@@ -417,13 +417,13 @@ namespace Game.Chat
             if (guid == _ownerGuid && p2n == player.GetName() && mod)
                 return;
 
-            Player newp = Global.ObjAccessor.FindPlayerByName(p2n);
-            ObjectGuid victim = newp ? newp.GetGUID() : ObjectGuid.Empty;
+            Player newPlayer = Global.ObjAccessor.FindPlayerByName(p2n);
+            ObjectGuid victim = newPlayer != null ? newPlayer.GetGUID() : ObjectGuid.Empty;
 
-            if (newp == null || victim.IsEmpty() || !IsOn(victim) ||
-                (player.GetTeam() != newp.GetTeam() &&
+            if (newPlayer == null || victim.IsEmpty() || !IsOn(victim) ||
+                (player.GetTeam() != newPlayer.GetTeam() &&
             (!player.GetSession().HasPermission(RBACPermissions.TwoSideInteractionChannel) ||
-            !newp.GetSession().HasPermission(RBACPermissions.TwoSideInteractionChannel))))
+            !newPlayer.GetSession().HasPermission(RBACPermissions.TwoSideInteractionChannel))))
             {
                 ChannelNameBuilder builder = new(this, new PlayerNotFoundAppend(p2n));
                 SendToOne(builder, guid);
@@ -438,9 +438,9 @@ namespace Game.Chat
             }
 
             if (mod)
-                SetModerator(newp.GetGUID(), set);
+                SetModerator(newPlayer.GetGUID(), set);
             else
-                SetMute(newp.GetGUID(), set);
+                SetMute(newPlayer.GetGUID(), set);
         }
 
         public void SetInvisible(Player player, bool on)
@@ -473,13 +473,13 @@ namespace Game.Chat
                 return;
             }
 
-            Player newp = Global.ObjAccessor.FindPlayerByName(newname);
-            ObjectGuid victim = newp ? newp.GetGUID() : ObjectGuid.Empty;
+            Player newPlayer = Global.ObjAccessor.FindPlayerByName(newname);
+            ObjectGuid victim = newPlayer != null ? newPlayer.GetGUID() : ObjectGuid.Empty;
 
-            if (newp == null || victim.IsEmpty() || !IsOn(victim) ||
-                (player.GetTeam() != newp.GetTeam() &&
+            if (newPlayer == null || victim.IsEmpty() || !IsOn(victim) ||
+                (player.GetTeam() != newPlayer.GetTeam() &&
             (!player.GetSession().HasPermission(RBACPermissions.TwoSideInteractionChannel) ||
-            !newp.GetSession().HasPermission(RBACPermissions.TwoSideInteractionChannel))))
+            !newPlayer.GetSession().HasPermission(RBACPermissions.TwoSideInteractionChannel))))
             {
                 ChannelNameBuilder builder = new(this, new PlayerNotFoundAppend(newname));
                 SendToOne(builder, guid);
@@ -532,7 +532,7 @@ namespace Game.Chat
 
                 // PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
                 // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
-                if (member && (player.GetSession().HasPermission(RBACPermissions.WhoSeeAllSecLevels) ||
+                if (member != null && (player.GetSession().HasPermission(RBACPermissions.WhoSeeAllSecLevels) ||
                     member.GetSession().GetSecurity() <= (AccountTypes)gmLevelInWhoList) &&
                     member.IsVisibleGloballyFor(player))
                 {
@@ -603,7 +603,7 @@ namespace Game.Chat
             }
 
             Player player = Global.ObjAccessor.FindConnectedPlayer(guid);
-            SendToAll(new ChannelSayBuilder(this, lang, what, guid, _channelGuid), !playerInfo.IsModerator() ? guid : ObjectGuid.Empty, !playerInfo.IsModerator() && player ? player.GetSession().GetAccountGUID() : ObjectGuid.Empty);
+            SendToAll(new ChannelSayBuilder(this, lang, what, guid, _channelGuid), !playerInfo.IsModerator() ? guid : ObjectGuid.Empty, !playerInfo.IsModerator() && player != null ? player.GetSession().GetAccountGUID() : ObjectGuid.Empty);
         }
 
         public void AddonSay(ObjectGuid guid, string prefix, string what, bool isLogged)
@@ -630,7 +630,7 @@ namespace Game.Chat
 
             Player player = Global.ObjAccessor.FindConnectedPlayer(guid);
             SendToAllWithAddon(new ChannelWhisperBuilder(this, isLogged ? Language.AddonLogged : Language.Addon, what, prefix, guid), prefix, !playerInfo.IsModerator() ? guid : ObjectGuid.Empty,
-                !playerInfo.IsModerator() && player ? player.GetSession().GetAccountGUID() : ObjectGuid.Empty);
+                !playerInfo.IsModerator() && player != null ? player.GetSession().GetAccountGUID() : ObjectGuid.Empty);
         }
 
         public void Invite(Player player, string newname)
@@ -645,7 +645,7 @@ namespace Game.Chat
             }
 
             Player newp = Global.ObjAccessor.FindPlayerByName(newname);
-            if (!newp || !newp.IsGMVisible())
+            if (newp == null || !newp.IsGMVisible())
             {
                 ChannelNameBuilder builder = new(this, new PlayerNotFoundAppend(newname));
                 SendToOne(builder, guid);
@@ -786,7 +786,7 @@ namespace Game.Chat
             foreach (var pair in _playersStore)
             {
                 Player player = Global.ObjAccessor.FindConnectedPlayer(pair.Key);
-                if (player)
+                if (player != null)
                     if (guid.IsEmpty() || !player.GetSocial().HasIgnore(guid, accountGuid))
                         localizer.Invoke(player);
             }
@@ -801,7 +801,7 @@ namespace Game.Chat
                 if (pair.Key != who)
                 {
                     Player player = Global.ObjAccessor.FindConnectedPlayer(pair.Key);
-                    if (player)
+                    if (player != null)
                         localizer.Invoke(player);
                 }
             }
@@ -812,7 +812,7 @@ namespace Game.Chat
             LocalizedDo localizer = new(builder);
 
             Player player = Global.ObjAccessor.FindConnectedPlayer(who);
-            if (player)
+            if (player != null)
                 localizer.Invoke(player);
         }
 
@@ -823,7 +823,7 @@ namespace Game.Chat
             foreach (var pair in _playersStore)
             {
                 Player player = Global.ObjAccessor.FindConnectedPlayer(pair.Key);
-                if (player)
+                if (player != null)
                     if (player.GetSession().IsAddonRegistered(addonPrefix) && (guid.IsEmpty() || !player.GetSocial().HasIgnore(guid, accountGuid)))
                         localizer.Invoke(player);
             }

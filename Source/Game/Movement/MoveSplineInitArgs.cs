@@ -47,7 +47,7 @@ namespace Game.Movement
             {
                 if (!exp)
                 {
-                    if (unit)
+                    if (unit != null)
                         Log.outError(LogFilter.Movement, $"MoveSplineInitArgs::Validate: expression '{exp}' failed for {(verbose ? unit.GetDebugInfo() : unit.GetGUID().ToString())}");
                     else
                         Log.outError(LogFilter.Movement, $"MoveSplineInitArgs::Validate: expression '{exp}' failed for cyclic spline continuation");

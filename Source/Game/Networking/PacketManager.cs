@@ -171,7 +171,7 @@ namespace Game.Networking
                 return false;
 
             Player player = m_pSession.GetPlayer();
-            if (!player)
+            if (player == null)
                 return false;
 
             //in Map.Update() we do not process packets where player is not in world!
@@ -196,7 +196,7 @@ namespace Game.Networking
 
             //no player attached? . our client! ^^
             Player player = m_pSession.GetPlayer();
-            if (!player)
+            if (player == null)
                 return true;
 
             //lets process all packets for non-in-the-world player

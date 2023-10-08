@@ -59,7 +59,7 @@ namespace Game
             Unit mover = GetPlayer().GetUnitBeingMoved();
             Player plrMover = mover.ToPlayer();
 
-            if (plrMover && plrMover.IsBeingTeleported())
+            if (plrMover != null && plrMover.IsBeingTeleported())
                 return;
 
             GetPlayer().ValidateMovementInfo(movementInfo);
@@ -78,7 +78,7 @@ namespace Game
                 return;
 
             // stop some emotes at player move
-            if (plrMover && (plrMover.GetEmoteState() != 0))
+            if (plrMover != null && (plrMover.GetEmoteState() != 0))
                 plrMover.SetEmoteState(Emote.OneshotNone);
 
             //handle special cases
@@ -95,7 +95,7 @@ namespace Game
                     movementInfo.Pos.posZ + movementInfo.transport.pos.posZ, movementInfo.Pos.Orientation + movementInfo.transport.pos.Orientation))
                     return;
 
-                if (plrMover)
+                if (plrMover != null)
                 {
                     if (plrMover.GetTransport() == null)
                     {
@@ -124,14 +124,14 @@ namespace Game
                     }
                 }
 
-                if (mover.GetTransport() == null && !mover.GetVehicle())
+                if (mover.GetTransport() == null && mover.GetVehicle() == null)
                     movementInfo.transport.Reset();
             }
-            else if (plrMover && plrMover.GetTransport() != null)                // if we were on a transport, leave
+            else if (plrMover != null && plrMover.GetTransport() != null)                // if we were on a transport, leave
                 plrMover.GetTransport().RemovePassenger(plrMover);
 
             // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
-            if (opcode == ClientOpcodes.MoveFallLand && plrMover && !plrMover.IsInFlight())
+            if (opcode == ClientOpcodes.MoveFallLand && plrMover != null && !plrMover.IsInFlight())
                 plrMover.HandleFall(movementInfo);
 
             // interrupt parachutes upon falling or landing in water
@@ -147,7 +147,7 @@ namespace Game
 
             // Some vehicles allow the passenger to turn by himself
             Vehicle vehicle = mover.GetVehicle();
-            if (vehicle)
+            if (vehicle != null)
             {
                 VehicleSeatRecord seat = vehicle.GetSeatForPassenger(mover);
                 if (seat != null)
@@ -170,7 +170,7 @@ namespace Game
             moveUpdate.Status = mover.m_movementInfo;
             mover.SendMessageToSet(moveUpdate, GetPlayer());
 
-            if (plrMover)                                            // nothing is charmed, or player charmed
+            if (plrMover != null)                                            // nothing is charmed, or player charmed
             {
                 if (plrMover.IsSitState() && movementInfo.HasMovementFlag(MovementFlag.MaskMoving | MovementFlag.MaskTurning))
                     plrMover.SetStandState(UnitStandStateType.Stand);
@@ -179,7 +179,7 @@ namespace Game
 
                 if (movementInfo.Pos.posZ < plrMover.GetMap().GetMinHeight(plrMover.GetPhaseShift(), movementInfo.Pos.GetPositionX(), movementInfo.Pos.GetPositionY()))
                 {
-                    if (!(plrMover.GetBattleground() && plrMover.GetBattleground().HandlePlayerUnderMap(GetPlayer())))
+                    if (!(plrMover.GetBattleground() != null && plrMover.GetBattleground().HandlePlayerUnderMap(GetPlayer())))
                     {
                         // NOTE: this is actually called many times while falling
                         // even after the player has been teleported away
@@ -261,7 +261,7 @@ namespace Game
             // while the player is in transit, for example the map may get full
             if (newMap == null || newMap.CannotEnter(player) != null)
             {
-                Log.outError(LogFilter.Network, $"Map {loc.GetMapId()} could not be created for {(newMap ? newMap.GetMapName() : "Unknown")} ({player.GetGUID()}), porting player to homebind");
+                Log.outError(LogFilter.Network, $"Map {loc.GetMapId()} could not be created for {(newMap != null ? newMap.GetMapName() : "Unknown")} ({player.GetGUID()}), porting player to homebind");
                 player.TeleportTo(player.GetHomebind());
                 return;
             }
@@ -291,7 +291,7 @@ namespace Game
 
             if (!player.GetMap().AddPlayerToMap(player, !seamlessTeleport))
             {
-                Log.outError(LogFilter.Network, $"WORLD: failed to teleport player {player.GetName()} ({player.GetGUID()}) to map {loc.GetMapId()} ({(newMap ? newMap.GetMapName() : "Unknown")}) because of unknown reason!");
+                Log.outError(LogFilter.Network, $"WORLD: failed to teleport player {player.GetName()} ({player.GetGUID()}) to map {loc.GetMapId()} ({(newMap != null ? newMap.GetMapName() : "Unknown")}) because of unknown reason!");
                 player.ResetMap();
                 player.SetMap(oldMap);
                 player.TeleportTo(player.GetHomebind());
@@ -314,7 +314,7 @@ namespace Game
                 else
                 {
                     Battleground bg = player.GetBattleground();
-                    if (bg)
+                    if (bg != null)
                     {
                         if (player.IsInvitedForBattlegroundInstance(player.GetBattlegroundId()))
                             bg.AddPlayer(player, player.m_bgData.queueId);
@@ -443,7 +443,7 @@ namespace Game
         {
             Player plMover = GetPlayer().GetUnitBeingMoved().ToPlayer();
 
-            if (!plMover || !plMover.IsBeingTeleportedNear())
+            if (plMover == null || !plMover.IsBeingTeleportedNear())
                 return;
 
             if (packet.MoverGUID != plMover.GetGUID())

@@ -21,7 +21,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GarrisonPurchaseBuilding)]
         void HandleGarrisonPurchaseBuilding(GarrisonPurchaseBuilding garrisonPurchaseBuilding)
         {
-            if (!_player.GetNPCIfCanInteractWith(garrisonPurchaseBuilding.NpcGUID, NPCFlags.None, NPCFlags2.GarrisonArchitect))
+            if (_player.GetNPCIfCanInteractWith(garrisonPurchaseBuilding.NpcGUID, NPCFlags.None, NPCFlags2.GarrisonArchitect) == null)
                 return;
 
             Garrison garrison = _player.GetGarrison();
@@ -32,7 +32,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GarrisonCancelConstruction)]
         void HandleGarrisonCancelConstruction(GarrisonCancelConstruction garrisonCancelConstruction)
         {
-            if (!_player.GetNPCIfCanInteractWith(garrisonCancelConstruction.NpcGUID, NPCFlags.None, NPCFlags2.GarrisonArchitect))
+            if (_player.GetNPCIfCanInteractWith(garrisonCancelConstruction.NpcGUID, NPCFlags.None, NPCFlags2.GarrisonArchitect) == null)
                 return;
 
             Garrison garrison = _player.GetGarrison();

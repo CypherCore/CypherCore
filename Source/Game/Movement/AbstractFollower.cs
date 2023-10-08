@@ -16,12 +16,12 @@ namespace Game.Movement
             if (unit == _target)
                 return;
 
-            if (_target)
+            if (_target != null)
                 _target.FollowerRemoved(this);
 
             _target = unit;
 
-            if (_target)
+            if (_target != null)
                 _target.FollowerAdded(this);
         }
 

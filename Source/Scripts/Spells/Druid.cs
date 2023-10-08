@@ -1661,7 +1661,7 @@ namespace Scripts.Spells.Druid
 
         void FilterTargets(List<WorldObject> targets)
         {
-            if (!GetCaster().ToPlayer().GetGroup())
+            if (GetCaster().ToPlayer().GetGroup() == null)
             {
                 targets.Clear();
                 targets.Add(GetCaster());
@@ -1715,7 +1715,7 @@ namespace Scripts.Spells.Druid
             if (caster == null)
                 return false;
 
-            return caster.GetGroup() || caster != eventInfo.GetProcTarget();
+            return caster.GetGroup() != null || caster != eventInfo.GetProcTarget();
         }
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)

@@ -38,7 +38,7 @@ namespace Game
                     GameObject go = player.GetMap().GetGameObject(lguid);
 
                     // not check distance for GO in case owned GO (fishing bobber case, for example) or Fishing hole GO
-                    if (!go || ((go.GetOwnerGUID() != player.GetGUID() && go.GetGoType() != GameObjectTypes.FishingHole) && !go.IsWithinDistInMap(player)))
+                    if (go == null || ((go.GetOwnerGUID() != player.GetGUID() && go.GetGoType() != GameObjectTypes.FishingHole) && !go.IsWithinDistInMap(player)))
                     {
                         player.SendLootRelease(lguid);
                         continue;
@@ -53,7 +53,7 @@ namespace Game
                         continue;
                     }
 
-                    if (!creature.IsWithinDistInMap(player, AELootCreatureCheck.LootDistance))
+                    if (creature.IsWithinDistInMap(player, AELootCreatureCheck.LootDistance))
                     {
                         player.SendLootError(req.Object, lguid, LootError.TooFar);
                         continue;
@@ -102,7 +102,7 @@ namespace Game
                     for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                     {
                         Player member = refe.GetSource();
-                        if (!member)
+                        if (member == null)
                             continue;
 
                         if (!loot.HasAllowedLooter(member.GetGUID()))
@@ -203,7 +203,7 @@ namespace Game
                 return;
 
             Creature lootTarget = ObjectAccessor.GetCreature(GetPlayer(), packet.Unit);
-            if (!lootTarget)
+            if (lootTarget == null)
                 return;
 
             AELootCreatureCheck check = new(_player, packet.Unit);
@@ -272,7 +272,7 @@ namespace Game
                 GameObject go = player.GetMap().GetGameObject(lguid);
 
                 // not check distance for GO in case owned GO (fishing bobber case, for example) or Fishing hole GO
-                if (!go || ((go.GetOwnerGUID() != player.GetGUID() && go.GetGoType() != GameObjectTypes.FishingHole) && !go.IsWithinDistInMap(player)))
+                if (go == null || ((go.GetOwnerGUID() != player.GetGUID() && go.GetGoType() != GameObjectTypes.FishingHole) && !go.IsWithinDistInMap(player)))
                     return;
 
                 if (loot.IsLooted() || go.GetGoType() == GameObjectTypes.FishingNode || go.GetGoType() == GameObjectTypes.FishingHole)
@@ -303,7 +303,7 @@ namespace Game
             else if (lguid.IsCorpse())        // ONLY remove insignia at BG
             {
                 Corpse corpse = ObjectAccessor.GetCorpse(player, lguid);
-                if (!corpse || !corpse.IsWithinDistInMap(player, SharedConst.InteractionDistance))
+                if (corpse == null || !corpse.IsWithinDistInMap(player, SharedConst.InteractionDistance))
                     return;
 
                 if (loot.IsLooted())
@@ -315,7 +315,7 @@ namespace Game
             else if (lguid.IsItem())
             {
                 Item pItem = player.GetItemByGuid(lguid);
-                if (!pItem)
+                if (pItem == null)
                     return;
 
                 ItemTemplate proto = pItem.GetTemplate();
@@ -355,7 +355,7 @@ namespace Game
                         creature.RemoveDynamicFlag(UnitDynFlags.Lootable);
 
                         // skip pickpocketing loot for speed, skinning timer reduction is no-op in fact
-                        if (!creature.IsAlive())
+                        if (creature.IsAlive())
                             creature.AllLootRemovedFromCorpse();
                     }
                 }
@@ -395,7 +395,7 @@ namespace Game
 
             // player on other map
             Player target = Global.ObjAccessor.GetPlayer(_player, masterLootItem.Target);
-            if (!target)
+            if (target == null)
             {
                 GetPlayer().SendLootError(ObjectGuid.Empty, ObjectGuid.Empty, LootError.PlayerNotFound);
                 return;

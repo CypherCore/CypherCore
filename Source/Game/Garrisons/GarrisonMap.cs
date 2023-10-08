@@ -26,11 +26,11 @@ namespace Game.Garrisons
 
         public Garrison GetGarrison()
         {
-            if (_loadingPlayer)
+            if (_loadingPlayer != null)
                 return _loadingPlayer.GetGarrison();
 
             Player owner = Global.ObjAccessor.FindConnectedPlayer(_owner);
-            if (owner)
+            if (owner != null)
                 return owner.GetGarrison();
 
             return null;
@@ -105,7 +105,7 @@ namespace Game.Garrisons
                         continue;
 
                     GameObject go = plot.CreateGameObject(i_map, i_garrison.GetFaction());
-                    if (!go)
+                    if (go == null)
                         continue;
 
                     var cell = new Cell(cellCoord);

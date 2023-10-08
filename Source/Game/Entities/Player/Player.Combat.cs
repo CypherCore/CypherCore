@@ -38,19 +38,19 @@ namespace Game.Entities
 
             // prepare data for near group iteration
             Group group = GetGroup();
-            if (group)
+            if (group != null)
             {
                 for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                 {
                     Player player = refe.GetSource();
-                    if (!player)
+                    if (player == null)
                         continue;
 
                     if (!player.IsAtGroupRewardDistance(pRewardSource))
                         continue;                               // member (alive or dead) or his corpse at req. distance
 
                     // quest objectives updated only for alive group member or dead but with not released body
-                    if (player.IsAlive() || !player.GetCorpse())
+                    if (player.IsAlive() || player.GetCorpse() == null)
                         player.KilledMonsterCredit(creature_id, creature_guid);
                 }
             }
@@ -247,7 +247,7 @@ namespace Game.Entities
         bool IsTwoHandUsed()
         {
             Item mainItem = GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
-            if (!mainItem)
+            if (mainItem == null)
                 return false;
 
             ItemTemplate itemTemplate = mainItem.GetTemplate();
@@ -259,14 +259,14 @@ namespace Game.Entities
         bool IsUsingTwoHandedWeaponInOneHand()
         {
             Item offItem = GetItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
-            if (offItem && offItem.GetTemplate().GetInventoryType() == InventoryType.Weapon2Hand)
+            if (offItem != null && offItem.GetTemplate().GetInventoryType() == InventoryType.Weapon2Hand)
                 return true;
 
             Item mainItem = GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
-            if (!mainItem || mainItem.GetTemplate().GetInventoryType() == InventoryType.Weapon2Hand)
+            if (mainItem == null || mainItem.GetTemplate().GetInventoryType() == InventoryType.Weapon2Hand)
                 return false;
 
-            if (!offItem)
+            if (offItem == null)
                 return false;
 
             return true;
@@ -390,7 +390,7 @@ namespace Game.Entities
 
             ObjectGuid duelFlagGUID = m_playerData.DuelArbiter;
             GameObject obj = GetMap().GetGameObject(duelFlagGUID);
-            if (!obj)
+            if (obj == null)
                 return;
 
             if (duel.OutOfBoundsTime == 0)
@@ -494,7 +494,7 @@ namespace Game.Entities
 
             //Remove Duel Flag object
             GameObject obj = GetMap().GetGameObject(m_playerData.DuelArbiter);
-            if (obj)
+            if (obj != null)
                 duel.Initiator.RemoveGameObject(obj, true);
 
             //remove auras

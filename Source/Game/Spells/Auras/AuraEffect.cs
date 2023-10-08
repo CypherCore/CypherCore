@@ -96,7 +96,7 @@ namespace Game.Spells
                         amount = (int)mountCapability.Id;
                     break;
                 case AuraType.ShowConfirmationPromptWithDifficulty:
-                    if (caster)
+                    if (caster != null)
                         amount = (int)caster.GetMap().GetDifficultyID();
                     m_canBeRecalculated = false;
                     break;
@@ -144,7 +144,7 @@ namespace Game.Spells
 
         public float? CalculateEstimatedAmount(Unit caster, int amount)
         {
-            if (!caster || GetBase().GetAuraType() != AuraObjectType.Unit)
+            if (caster == null || GetBase().GetAuraType() != AuraObjectType.Unit)
                 return null;
 
             return CalculateEstimatedAmount(caster, GetBase().GetUnitOwner(), GetSpellInfo(), GetSpellEffectInfo(), amount, GetBase().GetStackAmount(), this);
@@ -2422,7 +2422,7 @@ namespace Game.Spells
             Unit caster = GetCaster();
             Unit target = aurApp.GetTarget();
 
-            if (!caster || !caster.IsAlive() || !target.IsAlive() || !caster.CanHaveThreatList())
+            if (caster == null || !caster.IsAlive() || !target.IsAlive() || !caster.CanHaveThreatList())
                 return;
 
             caster.GetThreatManager().TauntUpdate();
@@ -2863,7 +2863,7 @@ namespace Game.Spells
                 if (player.InBattleground())
                 {
                     Battleground bg = player.GetBattleground();
-                    if (bg)
+                    if (bg != null)
                         bg.EventPlayerDroppedFlag(player);
                 }
                 else
@@ -3228,7 +3228,7 @@ namespace Game.Spells
                 return;
 
             Player player = aurApp.GetTarget().ToPlayer();
-            if (player)
+            if (player != null)
                 player.UpdateHealingDonePercentMod();
         }
 
@@ -3300,7 +3300,7 @@ namespace Game.Spells
 
             // only players have primary stats
             Player player = aurApp.GetTarget().ToPlayer();
-            if (!player)
+            if (player == null)
                 return;
 
             player.UpdateArmor();
@@ -3359,7 +3359,7 @@ namespace Game.Spells
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
-            if (!target)
+            if (target == null)
                 return;
 
             target.ApplyModOverrideSpellPowerByAPPercent(GetAmount(), apply);
@@ -3373,7 +3373,7 @@ namespace Game.Spells
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
-            if (!target)
+            if (target == null)
                 return;
 
             target.ApplyModOverrideAPBySpellPowerPercent(GetAmount(), apply);
@@ -3388,7 +3388,7 @@ namespace Game.Spells
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
-            if (target)
+            if (target != null)
             {
                 target.SetVersatilityBonus(target.GetTotalAuraModifier(AuraType.ModVersatility));
                 target.UpdateHealingDonePercentMod();
@@ -3790,7 +3790,7 @@ namespace Game.Spells
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
-            if (!target)
+            if (target == null)
                 return;
 
             target.UpdateAllWeaponDependentCritAuras();
@@ -4116,7 +4116,7 @@ namespace Game.Spells
                 }
 
                 Guardian pet = playerTarget.GetGuardianPet();
-                if (pet)
+                if (pet != null)
                     pet.UpdateAttackPowerAndDamage();
             }
         }
@@ -4177,7 +4177,7 @@ namespace Game.Spells
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
-            if (!target)
+            if (target == null)
                 return;
 
             if (apply)
@@ -4463,7 +4463,7 @@ namespace Game.Spells
                         case 57821: // Champion of the Kirin Tor
                         case 57822: // Wyrmrest Champion
                         {
-                            if (!caster || !caster.IsTypeId(TypeId.Player))
+                            if (caster == null || !caster.IsTypeId(TypeId.Player))
                                 break;
 
                             uint FactionID = 0;
@@ -4724,7 +4724,7 @@ namespace Game.Spells
                 return;
 
             Unit caster = triggeredSpellInfo.NeedsToBeTriggeredByCaster(m_spellInfo) ? GetCaster() : target;
-            if (!caster)
+            if (caster == null)
                 return;
 
             if (mode.HasAnyFlag(AuraEffectHandleModes.Real))
@@ -4861,7 +4861,7 @@ namespace Game.Spells
                 target.m_invisibilityDetect.AddValue(InvisibilityType.Drunk, GetAmount());
 
                 Player playerTarget = target.ToPlayer();
-                if (playerTarget)
+                if (playerTarget != null)
                     playerTarget.ApplyModFakeInebriation(GetAmount(), true);
             }
             else
@@ -5189,7 +5189,7 @@ namespace Game.Spells
             // ignore negative values (can be result apply spellmods to aura damage
             uint damage = (uint)Math.Max(GetAmount(), 0);
 
-            if (caster)
+            if (caster != null)
                 damage = (uint)caster.SpellDamageBonusDone(target, GetSpellInfo(), (int)damage, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses, null, this);
 
             damage = (uint)target.SpellDamageBonusTaken(caster, GetSpellInfo(), (int)damage, DamageEffectType.DOT);
@@ -5249,7 +5249,7 @@ namespace Game.Spells
             Unit.ProcSkillsAndAuras(caster, target, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.Hit, hitMask, null, damageInfo, null);
 
             // process caster heal from now on (must be in world)
-            if (!caster || !caster.IsAlive())
+            if (caster == null || !caster.IsAlive())
                 return;
 
             float gainMultiplier = GetSpellEffectInfo().CalcValueMultiplier(caster);
@@ -5533,11 +5533,11 @@ namespace Game.Spells
 
         float CalcPeriodicCritChance(Unit caster)
         {
-            if (!caster || !CanPeriodicTickCrit())
+            if (caster == null || !CanPeriodicTickCrit())
                 return 0.0f;
 
             Player modOwner = caster.GetSpellModOwner();
-            if (!modOwner)
+            if (modOwner == null)
                 return 0.0f;
 
             float critChance = modOwner.SpellCritChanceDone(null, this, GetSpellInfo().GetSchoolMask(), GetSpellInfo().GetAttackType());
@@ -5678,7 +5678,7 @@ namespace Game.Spells
                 return;
 
             Player player = aurApp.GetTarget().ToPlayer();
-            if (!player)
+            if (player == null)
                 return;
 
             if (apply)
@@ -5694,14 +5694,14 @@ namespace Game.Spells
                 return;
 
             Player player = aurApp.GetTarget().ToPlayer();
-            if (!player)
+            if (player == null)
                 return;
 
             if (player.GetClass() != Class.Hunter)
                 return;
 
             Pet pet = player.GetPet();
-            if (!pet)
+            if (pet == null)
                 return;
 
             ChrSpecializationRecord currSpec = CliDB.ChrSpecializationStorage.LookupByKey(pet.GetSpecialization());
@@ -5734,7 +5734,7 @@ namespace Game.Spells
                 return;
 
             Player player = aurApp.GetTarget().ToPlayer();
-            if (!player)
+            if (player == null)
                 return;
 
             if (apply)
@@ -5758,7 +5758,7 @@ namespace Game.Spells
             else
             {
                 Unit caster = GetCaster();
-                if (caster)
+                if (caster != null)
                     caster.RemoveAreaTrigger(this);
             }
         }
@@ -5770,7 +5770,7 @@ namespace Game.Spells
                 return;
 
             Player target = auraApp.GetTarget().ToPlayer();
-            if (target)
+            if (target != null)
             {
                 if (apply)
                     target.TogglePvpTalents(true);
@@ -5827,7 +5827,7 @@ namespace Game.Spells
                         else
                         {
                             TempSummon tempSummon = creature.ToTempSummon();
-                            if (tempSummon)
+                            if (tempSummon != null)
                             {
                                 if (tempSummon.GetSummonerGUID() == target.GetGUID())
                                 {
@@ -5848,7 +5848,7 @@ namespace Game.Spells
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
-            if (!target)
+            if (target == null)
                 return;
 
             target.UpdatePvPState(true);

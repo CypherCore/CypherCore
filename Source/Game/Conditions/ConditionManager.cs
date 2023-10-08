@@ -2165,7 +2165,7 @@ namespace Game
             if (condition.WeaponSubclassMask != 0)
             {
                 Item mainHand = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
-                if (!mainHand || !Convert.ToBoolean((1 << (int)mainHand.GetTemplate().GetSubClass()) & condition.WeaponSubclassMask))
+                if (mainHand == null || !Convert.ToBoolean((1 << (int)mainHand.GetTemplate().GetSubClass()) & condition.WeaponSubclassMask))
                     return false;
             }
 
@@ -2175,23 +2175,23 @@ namespace Game
                 switch (condition.PartyStatus)
                 {
                     case 1:
-                        if (group)
+                        if (group != null)
                             return false;
                         break;
                     case 2:
-                        if (!group)
+                        if (group == null)
                             return false;
                         break;
                     case 3:
-                        if (!group || group.IsRaidGroup())
+                        if (group == null || group.IsRaidGroup())
                             return false;
                         break;
                     case 4:
-                        if (!group || !group.IsRaidGroup())
+                        if (group == null || !group.IsRaidGroup())
                             return false;
                         break;
                     case 5:
-                        if (group && group.IsRaidGroup())
+                        if (group != null && group.IsRaidGroup())
                             return false;
                         break;
                     default:
@@ -2558,19 +2558,19 @@ namespace Game
                 case UnitConditionVariable.IsMyPet:
                     return (otherUnit != null && unit.GetCharmerOrOwnerGUID() == otherUnit.GetGUID()) ? 1 : 0;
                 case UnitConditionVariable.IsMaster:
-                    return (otherUnit && otherUnit.GetCharmerOrOwnerGUID() == unit.GetGUID()) ? 1 : 0;
+                    return (otherUnit != null && otherUnit.GetCharmerOrOwnerGUID() == unit.GetGUID()) ? 1 : 0;
                 case UnitConditionVariable.IsTarget:
-                    return (otherUnit && otherUnit.GetTarget() == unit.GetGUID()) ? 1 : 0;
+                    return (otherUnit != null && otherUnit.GetTarget() == unit.GetGUID()) ? 1 : 0;
                 case UnitConditionVariable.CanAssist:
-                    return (otherUnit && unit.IsValidAssistTarget(otherUnit)) ? 1 : 0;
+                    return (otherUnit != null && unit.IsValidAssistTarget(otherUnit)) ? 1 : 0;
                 case UnitConditionVariable.CanAttack:
-                    return (otherUnit && unit.IsValidAttackTarget(otherUnit)) ? 1 : 0;
+                    return (otherUnit != null && unit.IsValidAttackTarget(otherUnit)) ? 1 : 0;
                 case UnitConditionVariable.HasPet:
                     return (!unit.GetCharmedGUID().IsEmpty() || !unit.GetMinionGUID().IsEmpty()) ? 1 : 0;
                 case UnitConditionVariable.HasWeapon:
                     Player player = unit.ToPlayer();
                     if (player != null)
-                        return (player.GetWeaponForAttack(WeaponAttackType.BaseAttack) || player.GetWeaponForAttack(WeaponAttackType.OffAttack)) ? 1 : 0;
+                        return (player.GetWeaponForAttack(WeaponAttackType.BaseAttack) != null || player.GetWeaponForAttack(WeaponAttackType.OffAttack) != null) ? 1 : 0;
                     return (unit.GetVirtualItemId(0) != 0 || unit.GetVirtualItemId(1) != 0) ? 1 : 0;
                 case UnitConditionVariable.HealthPct:
                     return (int)unit.GetHealthPct();
@@ -2631,9 +2631,9 @@ namespace Game
                 case UnitConditionVariable.IsAttackingMe:
                     return (otherUnit != null && unit.GetTarget() == otherUnit.GetGUID()) ? 1:0;
                 case UnitConditionVariable.Range:
-                    return otherUnit ? (int)unit.GetExactDist(otherUnit) : 0;
+                    return otherUnit != null ? (int)unit.GetExactDist(otherUnit) : 0;
                 case UnitConditionVariable.InMeleeRange:
-                    if (otherUnit)
+                    if (otherUnit != null)
                     {
                         float distance = Math.Max(unit.GetCombatReach() + otherUnit.GetCombatReach() + 1.3333334f, 5.0f);
                         if (unit.HasUnitFlag(UnitFlags.PlayerControlled) || otherUnit.HasUnitFlag(UnitFlags.PlayerControlled))
@@ -2740,7 +2740,7 @@ namespace Game
                 case UnitConditionVariable.HasAura:
                     return unit.HasAura((uint)value) ? value : 0;
                 case UnitConditionVariable.IsEnemy:
-                    return (otherUnit && unit.GetReactionTo(otherUnit) <= ReputationRank.Hostile) ? 1 : 0;
+                    return (otherUnit != null && unit.GetReactionTo(otherUnit) <= ReputationRank.Hostile) ? 1 : 0;
                 case UnitConditionVariable.IsSpecMelee:
                     return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry() != null && unit.ToPlayer().GetPrimarySpecializationEntry().GetFlags().HasFlag(ChrSpecializationFlag.Melee) ? 1 : 0;
                 case UnitConditionVariable.IsSpecTank:
@@ -2760,11 +2760,11 @@ namespace Game
                 case UnitConditionVariable.Label:
                     break;
                 case UnitConditionVariable.IsMySummon:
-                    return (otherUnit && (otherUnit.GetCharmerGUID() == unit.GetGUID() || otherUnit.GetCreatorGUID() == unit.GetGUID())) ? 1 : 0;
+                    return (otherUnit != null && (otherUnit.GetCharmerGUID() == unit.GetGUID() || otherUnit.GetCreatorGUID() == unit.GetGUID())) ? 1 : 0;
                 case UnitConditionVariable.IsSummoner:
-                    return (otherUnit && (unit.GetCharmerGUID() == otherUnit.GetGUID() || unit.GetCreatorGUID() == otherUnit.GetGUID())) ? 1 : 0;
+                    return (otherUnit != null && (unit.GetCharmerGUID() == otherUnit.GetGUID() || unit.GetCreatorGUID() == otherUnit.GetGUID())) ? 1 : 0;
                 case UnitConditionVariable.IsMyTarget:
-                    return (otherUnit && unit.GetTarget() == otherUnit.GetGUID()) ? 1 : 0;
+                    return (otherUnit != null && unit.GetTarget() == otherUnit.GetGUID()) ? 1 : 0;
                 case UnitConditionVariable.Sex:
                     return (int)unit.GetGender();
                 case UnitConditionVariable.LevelWithinContentTuning:

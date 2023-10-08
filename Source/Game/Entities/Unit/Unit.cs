@@ -226,7 +226,7 @@ namespace Game.Entities
             {
                 if (pair.Value != null && pair.Value.IsExpired())
                     RemoveOwnedAura(pair, AuraRemoveMode.Expire);
-                else if (pair.Value.GetSpellInfo().IsChanneled() && pair.Value.GetCasterGUID() != GetGUID() && !Global.ObjAccessor.GetWorldObject(this, pair.Value.GetCasterGUID()))
+                else if (pair.Value.GetSpellInfo().IsChanneled() && pair.Value.GetCasterGUID() != GetGUID() && Global.ObjAccessor.GetWorldObject(this, pair.Value.GetCasterGUID()) == null)
                     RemoveOwnedAura(pair, AuraRemoveMode.Cancel); // remove channeled auras when caster is not on the same map
             }
 
@@ -380,7 +380,7 @@ namespace Game.Entities
 
         public virtual void Whisper(string text, Language language, Player target, bool isBossWhisper = false)
         {
-            if (!target)
+            if (target == null)
                 return;
 
             Locale locale = target.GetSession().GetSessionDbLocaleIndex();
@@ -420,7 +420,7 @@ namespace Game.Entities
 
         public virtual void Whisper(uint textId, Player target, bool isBossWhisper = false)
         {
-            if (!target)
+            if (target == null)
                 return;
 
             BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(textId);
@@ -558,12 +558,12 @@ namespace Game.Entities
         {
             Unit vehicleRoot = GetVehicleBase();
 
-            if (!vehicleRoot)
+            if (vehicleRoot == null)
                 return null;
 
             for (; ; )
             {
-                if (!vehicleRoot.GetVehicleBase())
+                if (vehicleRoot.GetVehicleBase() == null)
                     return vehicleRoot;
 
                 vehicleRoot = vehicleRoot.GetVehicleBase();
@@ -964,10 +964,10 @@ namespace Game.Entities
             Cell.VisitAllObjects(this, searcher, dist);
 
             // remove current target
-            if (GetVictim())
+            if (GetVictim() != null)
                 targets.Remove(GetVictim());
 
-            if (exclude)
+            if (exclude != null)
                 targets.Remove(exclude);
 
             // remove not LoS targets
@@ -1037,7 +1037,7 @@ namespace Game.Entities
                 }
             }
 
-            Cypher.Assert(!m_vehicle);
+            Cypher.Assert(m_vehicle == null);
             vehicle.AddVehiclePassenger(this, seatId);
         }
 
@@ -1113,7 +1113,7 @@ namespace Game.Entities
             Player player = ToPlayer();
 
             // If the player is on mounted duel and exits the mount, he should immediatly lose the duel
-            if (player && player.duel != null && player.duel.IsMounted)
+            if (player != null && player.duel != null && player.duel.IsMounted)
                 player.DuelComplete(DuelCompleteType.Fled);
 
             SetControlled(false, UnitState.Root);      // SMSG_MOVE_FORCE_UNROOT, ~MOVEMENTFLAG_ROOT
@@ -1728,7 +1728,7 @@ namespace Game.Entities
                             displayPower = cEntry.DisplayPower;
 
                         Vehicle vehicle = GetVehicleKit();
-                        if (vehicle)
+                        if (vehicle != null)
                         {
                             PowerDisplayRecord powerDisplay = CliDB.PowerDisplayStorage.LookupByKey(vehicle.GetVehicleInfo().PowerDisplayID[0]);
                             if (powerDisplay != null)
@@ -1737,7 +1737,7 @@ namespace Game.Entities
                         else
                         {
                             Pet pet = ToPet();
-                            if (pet)
+                            if (pet != null)
                             {
                                 if (pet.GetPetType() == PetType.Hunter) // Hunter pets have focus
                                     displayPower = PowerType.Focus;
@@ -1895,7 +1895,7 @@ namespace Game.Entities
             Player player = ToPlayer();
             if (player != null)
             {
-                if (player.GetGroup())
+                if (player.GetGroup() != null)
                     player.SetGroupUpdateFlag(GroupUpdateFlags.Level);
 
                 Global.CharacterCacheStorage.UpdateCharacterLevel(ToPlayer().GetGUID(), (byte)lvl);
@@ -2252,7 +2252,7 @@ namespace Game.Entities
                 if (owner != null)
                 {
                     Player ownerPlayer = owner.ToPlayer();
-                    if (ownerPlayer)
+                    if (ownerPlayer != null)
                         if (ownerPlayer.IsGroupVisibleFor(seerPlayer))
                             return true;
                 }
@@ -2279,7 +2279,7 @@ namespace Game.Entities
                 if (HasUnitTypeMask(UnitTypeMask.Minion))
                 {
                     Unit owner = GetOwner();
-                    if (owner)
+                    if (owner != null)
                     {
                         SetFaction(owner.GetFaction());
                         return;
@@ -2588,7 +2588,7 @@ namespace Game.Entities
                 // if any script modified damage, we need to also apply the same modification to unscaled damage value
                 if (tmpDamage != damageTaken)
                 {
-                    if (attacker)
+                    if (attacker != null)
                         damageDone = (uint)(tmpDamage * victim.GetHealthMultiplierForTarget(attacker));
                     else
                         damageDone = tmpDamage;
@@ -2686,7 +2686,7 @@ namespace Game.Entities
             bool duel_wasMounted = false;
             if (victim.IsPlayer() && victim.ToPlayer().duel != null && damageTaken >= (health - 1))
             {
-                if (!attacker)
+                if (attacker == null)
                     return 0;
 
                 // prevent kill only if killed in duel and killed by opponent or opponent controlled creature
@@ -2708,7 +2708,7 @@ namespace Game.Entities
                 Player victimRider = victim.GetCharmer().ToPlayer();
                 if (victimRider != null && victimRider.duel != null && victimRider.duel.IsMounted)
                 {
-                    if (!attacker)
+                    if (attacker == null)
                         return 0;
 
                     // prevent kill only if killed in duel and killed by opponent or opponent controlled creature
@@ -2923,7 +2923,7 @@ namespace Game.Entities
                 {
                     Player he = duel_wasMounted ? victim.GetCharmer().ToPlayer() : victim.ToPlayer();
 
-                    Cypher.Assert(he && he.duel != null);
+                    Cypher.Assert(he != null && he.duel != null);
 
                     if (duel_wasMounted) // In this case victim==mount
                         victim.SetHealth(1);
@@ -3046,7 +3046,7 @@ namespace Game.Entities
 
                     uint damage = (uint)dmgShield.GetAmount();
                     Unit caster = dmgShield.GetCaster();
-                    if (caster)
+                    if (caster != null)
                     {
                         damage = (uint)caster.SpellDamageBonusDone(this, spellInfo, (int)damage, DamageEffectType.SpellDirect, dmgShield.GetSpellEffectInfo());
                         damage = (uint)SpellDamageBonusTaken(caster, spellInfo, (int)damage, DamageEffectType.SpellDirect);
@@ -3111,7 +3111,7 @@ namespace Game.Entities
                 packet.Health = (long)GetHealth();
 
                 Player player = GetCharmerOrOwnerPlayerOrPlayerItself();
-                if (player)
+                if (player != null)
                     player.SendPacket(packet);
             }
 
@@ -3328,7 +3328,7 @@ namespace Game.Entities
                 return null;
             Group group = player.GetGroup();
             // When there is no group check pet presence
-            if (!group)
+            if (group == null)
             {
                 // We are pet now, return owner
                 if (player != this)
@@ -3347,7 +3347,7 @@ namespace Game.Entities
             for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
             {
                 Player target = refe.GetSource();
-                if (target)
+                if (target != null)
                 {
                     // IsHostileTo check duel and controlled by enemy
                     if (target != this && IsWithinDistInMap(target, radius) && target.IsAlive() && !IsHostileTo(target))
@@ -3355,7 +3355,7 @@ namespace Game.Entities
 
                     // Push player's pet to vector
                     Unit pet = target.GetGuardianPet();
-                    if (pet)
+                    if (pet != null)
                         if (pet != this && IsWithinDistInMap(pet, radius) && pet.IsAlive() && !IsHostileTo(pet))
                             nearMembers.Add(pet);
                 }
@@ -3484,7 +3484,7 @@ namespace Game.Entities
 
             uint bossLevel = 83;
             float bossResistanceConstant = 510.0f;
-            uint level = caster ? victim.GetLevelForTarget(caster) : victim.GetLevel();
+            uint level = caster != null ? victim.GetLevelForTarget(caster) : victim.GetLevel();
             float resistanceConstant;
 
             if (level == bossLevel)
@@ -3497,7 +3497,7 @@ namespace Game.Entities
 
         public static void CalcAbsorbResist(DamageInfo damageInfo, Spell spell = null)
         {
-            if (!damageInfo.GetVictim() || !damageInfo.GetVictim().IsAlive() || damageInfo.GetDamage() == 0)
+            if (damageInfo.GetVictim() == null || !damageInfo.GetVictim().IsAlive() || damageInfo.GetDamage() == 0)
                 return;
 
             uint resistedDamage = CalcSpellResistedDamage(damageInfo.GetAttacker(), damageInfo.GetVictim(), damageInfo.GetDamage(), damageInfo.GetSchoolMask(), damageInfo.GetSpellInfo());
@@ -3691,7 +3691,7 @@ namespace Game.Entities
 
                     // Damage can be splitted only if aura has an alive caster
                     Unit caster = itr.GetCaster();
-                    if (!caster || (caster == damageInfo.GetVictim()) || !caster.IsInWorld || !caster.IsAlive())
+                    if (caster == null || (caster == damageInfo.GetVictim()) || !caster.IsInWorld || !caster.IsAlive())
                         continue;
 
                     uint splitDamage = MathFunctions.CalculatePct(damageInfo.GetDamage(), itr.GetAmount());
@@ -3789,7 +3789,7 @@ namespace Game.Entities
                 if (currentAbsorb != 0)
                 {
                     SpellHealAbsorbLog absorbLog = new();
-                    absorbLog.Healer = healInfo.GetHealer() ? healInfo.GetHealer().GetGUID() : ObjectGuid.Empty;
+                    absorbLog.Healer = healInfo.GetHealer() != null ? healInfo.GetHealer().GetGUID() : ObjectGuid.Empty;
                     absorbLog.Target = healInfo.GetTarget().GetGUID();
                     absorbLog.AbsorbCaster = absorbAurEff.GetBase().GetCasterGUID();
                     absorbLog.AbsorbedSpellID = (int)(healInfo.GetSpellInfo() != null ? healInfo.GetSpellInfo().Id : 0);
@@ -4070,7 +4070,7 @@ namespace Game.Entities
 
             // Versatility
             Player modOwner = GetSpellModOwner();
-            if (modOwner)
+            if (modOwner != null)
             {
                 // only 50% of SPELL_AURA_MOD_VERSATILITY for damage reduction
                 float versaBonus = modOwner.GetTotalAuraModifier(AuraType.ModVersatility) / 2.0f;

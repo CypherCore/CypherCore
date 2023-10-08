@@ -749,7 +749,7 @@ namespace Game
                         if (spawns.GetMap().IsGridLoaded(data.SpawnPoint))
                         {
                             GameObject go = GameObject.CreateGameObjectFromDB(obj.guid, spawns.GetMap(), false);
-                            if (go && go.IsSpawnedByDefault())
+                            if (go != null && go.IsSpawnedByDefault())
                                 if (!spawns.GetMap().AddToMap(go))
                                     go.Dispose();
                         }

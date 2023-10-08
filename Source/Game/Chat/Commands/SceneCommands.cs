@@ -15,7 +15,7 @@ namespace Game.Chat
         static bool HandleCancelSceneCommand(CommandHandler handler, uint sceneScriptPackageId)
         {
             Player target = handler.GetSelectedPlayerOrSelf();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;
@@ -32,7 +32,7 @@ namespace Game.Chat
         static bool HandleDebugSceneCommand(CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
-            if (player)
+            if (player != null)
             {
                 player.GetSceneMgr().ToggleDebugSceneMode();
                 handler.SendSysMessage(player.GetSceneMgr().IsInDebugSceneMode() ? CypherStrings.CommandSceneDebugOn : CypherStrings.CommandSceneDebugOff);
@@ -45,7 +45,7 @@ namespace Game.Chat
         static bool HandlePlaySceneCommand(CommandHandler handler, uint sceneId)
         {
             Player target = handler.GetSelectedPlayerOrSelf();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;
@@ -62,7 +62,7 @@ namespace Game.Chat
         static bool HandlePlayScenePackageCommand(CommandHandler handler, uint sceneScriptPackageId, SceneFlags? flags)
         {
             Player target = handler.GetSelectedPlayerOrSelf();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;

@@ -19,7 +19,7 @@ namespace Game
             Player player = GetPlayer();
 
             // Validate
-            if (!player.GetNPCIfCanInteractWith(transmogrifyItems.Npc, NPCFlags.Transmogrifier, NPCFlags2.None))
+            if (player.GetNPCIfCanInteractWith(transmogrifyItems.Npc, NPCFlags.Transmogrifier, NPCFlags2.None) == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - Unit (GUID: {0}) not found or player can't interact with it.", transmogrifyItems.ToString());
                 return;
@@ -94,7 +94,7 @@ namespace Game
 
                 // transmogrified item
                 Item itemTransmogrified = player.GetItemByPos(InventorySlots.Bag0, (byte)transmogItem.Slot);
-                if (!itemTransmogrified)
+                if (itemTransmogrified == null)
                 {
                     Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - Player (GUID: {0}, name: {1}) tried to transmogrify an invalid item in a valid slot (slot: {2}).", player.GetGUID().ToString(), player.GetName(), transmogItem.Slot);
                     return;
@@ -316,7 +316,7 @@ namespace Game
                 foreach (ObjectGuid itemGuid in itemsProvidingAppearance)
                 {
                     Item item = player.GetItemByGuid(itemGuid);
-                    if (item)
+                    if (item != null)
                     {
                         item.SetNotRefundable(player);
                         item.ClearSoulboundTradeable(player);

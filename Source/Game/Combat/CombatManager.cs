@@ -51,7 +51,7 @@ namespace Game.Combat
             Player playerA = a.GetCharmerOrOwnerPlayerOrPlayerItself();
             Player playerB = b.GetCharmerOrOwnerPlayerOrPlayerItself();
             // ...neither of the two units must be (owned by) a player with .gm on
-            if ((playerA && playerA.IsGameMaster()) || (playerB && playerB.IsGameMaster()))
+            if ((playerA != null && playerA.IsGameMaster()) || (playerB != null && playerB.IsGameMaster()))
                 return false;
             return true;
         }

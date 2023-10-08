@@ -63,7 +63,7 @@ namespace Game.Chat.Commands
                         thisMap = handler.GetSession().GetPlayer().GetMap();
 
                     // If map found, try to find active version of this creature
-                    if (thisMap)
+                    if (thisMap != null)
                     {
                         var creBounds = thisMap.GetCreatureBySpawnIdStore().LookupByKey(guid);
                         foreach (var creature in creBounds)
@@ -73,7 +73,7 @@ namespace Game.Chat.Commands
 
                     if (!liveFound)
                     {
-                        if (handler.GetSession())
+                        if (handler.GetSession() != null)
                             handler.SendSysMessage(CypherStrings.CreatureListChat, guid, guid, cInfo.Name, x, y, z, mapId, "", "");
                         else
                             handler.SendSysMessage(CypherStrings.CreatureListConsole, guid, cInfo.Name, x, y, z, mapId, "", "");
@@ -403,7 +403,7 @@ namespace Game.Chat.Commands
                         thisMap = handler.GetSession().GetPlayer().GetMap();
 
                     // If map found, try to find active version of this object
-                    if (thisMap)
+                    if (thisMap != null)
                     {
                         var goBounds = thisMap.GetGameObjectBySpawnIdStore().LookupByKey(guid);
                         foreach (var go in goBounds)
@@ -413,7 +413,7 @@ namespace Game.Chat.Commands
 
                     if (!liveFound)
                     {
-                        if (handler.GetSession())
+                        if (handler.GetSession() != null)
                             handler.SendSysMessage(CypherStrings.GoListChat, guid, entry, guid, gInfo.name, x, y, z, mapId, "", "");
                         else
                             handler.SendSysMessage(CypherStrings.GoListConsole, guid, gInfo.name, x, y, z, mapId, "", "");
@@ -485,10 +485,10 @@ namespace Game.Chat.Commands
         static bool HandleListScenesCommand(CommandHandler handler)
         {
             Player target = handler.GetSelectedPlayer();
-            if (!target)
+            if (target == null)
                 target = handler.GetSession().GetPlayer();
 
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;
@@ -572,7 +572,7 @@ namespace Game.Chat.Commands
             static bool ListAurasCommand(CommandHandler handler, uint? spellId, string namePart)
             {
                 Unit unit = handler.GetSelectedUnit();
-                if (!unit)
+                if (unit == null)
                 {
                     handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
                     return false;

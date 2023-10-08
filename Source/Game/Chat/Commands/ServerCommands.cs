@@ -134,10 +134,10 @@ namespace Game.Chat
         static bool IsOnlyUser(WorldSession mySession)
         {
             // check if there is any session connected from a different address
-            string myAddr = mySession ? mySession.GetRemoteAddress() : "";
+            string myAddr = mySession != null ? mySession.GetRemoteAddress() : "";
             var sessions = Global.WorldMgr.GetAllSessions();
             foreach (var session in sessions)
-                if (session && myAddr != session.GetRemoteAddress())
+                if (session != null && myAddr != session.GetRemoteAddress())
                     return false;
             return true;
         }

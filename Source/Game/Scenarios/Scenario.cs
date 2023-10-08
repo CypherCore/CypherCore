@@ -39,7 +39,7 @@ namespace Game.Scenarios
             foreach (ObjectGuid guid in _players)
             {
                 Player player = Global.ObjAccessor.GetPlayer(_map, guid);
-                if (player)
+                if (player != null)
                     SendBootPlayer(player);
             }
 
@@ -60,7 +60,7 @@ namespace Game.Scenarios
                 foreach (ObjectGuid guid in _players)
                 {
                     Player player = Global.ObjAccessor.GetPlayer(_map, guid);
-                    if (player)
+                    if (player != null)
                         player.RewardQuest(quest, LootItemType.Item, 0, null, false);
                 }
             }
@@ -223,7 +223,7 @@ namespace Game.Scenarios
             foreach (ObjectGuid guid in _players)
             {
                 Player player = Global.ObjAccessor.GetPlayer(_map, guid);
-                if (player)
+                if (player != null)
                     player.SendPacket(data);
             }
         }

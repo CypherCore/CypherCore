@@ -351,7 +351,7 @@ namespace Game.Garrisons
                 uint oldBuildingId = 0;
                 Map map = FindMap();
                 GarrBuildingRecord building = CliDB.GarrBuildingStorage.LookupByKey(garrBuildingId);
-                if (map)
+                if (map != null)
                     plot.DeleteGameObject(map);
 
                 if (plot.BuildingInfo.PacketInfo != null)
@@ -362,10 +362,10 @@ namespace Game.Garrisons
                 }
 
                 plot.SetBuildingInfo(placeBuildingResult.BuildingInfo, _owner);
-                if (map)
+                if (map != null)
                 {
                     GameObject go = plot.CreateGameObject(map, GetFaction());
-                    if (go)
+                    if (go != null)
                         map.AddToMap(go);
                 }
 
@@ -401,7 +401,7 @@ namespace Game.Garrisons
                 buildingRemoved.GarrBuildingID = plot.BuildingInfo.PacketInfo.GarrBuildingID;
 
                 Map map = FindMap();
-                if (map)
+                if (map != null)
                     plot.DeleteGameObject(map);
 
                 plot.ClearBuildingInfo(GetGarrisonType(), _owner);
@@ -430,10 +430,10 @@ namespace Game.Garrisons
                     _owner.SendPacket(placeBuildingResult);
                 }
 
-                if (map)
+                if (map != null)
                 {
                     GameObject go = plot.CreateGameObject(map, GetFaction());
-                    if (go)
+                    if (go != null)
                         map.AddToMap(go);
                 }
             }
@@ -450,11 +450,11 @@ namespace Game.Garrisons
                 {
                     plot.BuildingInfo.PacketInfo.Active = true;
                     Map map = FindMap();
-                    if (map)
+                    if (map != null)
                     {
                         plot.DeleteGameObject(map);
                         GameObject go = plot.CreateGameObject(map, GetFaction());
-                        if (go)
+                        if (go != null)
                             map.AddToMap(go);
                     }
 
@@ -711,7 +711,7 @@ namespace Game.Garrisons
                 }
 
                 GameObject go = GameObject.CreateGameObject(entry, map, PacketInfo.PlotPos, Rotation, 255, GameObjectState.Ready);
-                if (!go)
+                if (go == null)
                     return null;
 
                 if (BuildingInfo.CanActivate() && BuildingInfo.PacketInfo != null && !BuildingInfo.PacketInfo.Active)
@@ -721,7 +721,7 @@ namespace Game.Garrisons
                     {
                         Position pos2 = finalizeInfo.factionInfo[faction].Pos;
                         GameObject finalizer = GameObject.CreateGameObject(finalizeInfo.factionInfo[faction].GameObjectId, map, pos2, Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(pos2.GetOrientation(), 0.0f, 0.0f)), 255, GameObjectState.Ready);
-                        if (finalizer)
+                        if (finalizer != null)
                         {
                             // set some spell id to make the object delete itself after use
                             finalizer.SetSpellId(finalizer.GetGoInfo().Goober.spell);
@@ -743,14 +743,14 @@ namespace Game.Garrisons
                         foreach (var spawnId in cellGuids.Value.creatures)
                         {
                             Creature spawn = BuildingSpawnHelper<Creature>(go, spawnId, map);
-                            if (spawn)
+                            if (spawn != null)
                                 BuildingInfo.Spawns.Add(spawn.GetGUID());
                         }
 
                         foreach (var spawnId in cellGuids.Value.gameobjects)
                         {
                             GameObject spawn = BuildingSpawnHelper<GameObject>(go, spawnId, map);
-                            if (spawn)
+                            if (spawn != null)
                                 BuildingInfo.Spawns.Add(spawn.GetGUID());
                         }
                     }
@@ -780,14 +780,14 @@ namespace Game.Garrisons
                             continue;
                     }
 
-                    if (obj)
+                    if (obj != null)
                         obj.AddObjectToRemoveList();
                 }
 
                 BuildingInfo.Spawns.Clear();
 
                 GameObject oldBuilding = map.GetGameObject(BuildingInfo.Guid);
-                if (oldBuilding)
+                if (oldBuilding != null)
                     oldBuilding.Delete();
 
                 BuildingInfo.Guid.Clear();

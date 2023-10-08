@@ -52,7 +52,7 @@ namespace Game
             response.BattlePetID = queryBattlePetName.BattlePetID;
 
             Creature summonedBattlePet = ObjectAccessor.GetCreatureOrPetOrVehicle(_player, queryBattlePetName.UnitGUID);
-            if (!summonedBattlePet || !summonedBattlePet.IsSummon())
+            if (summonedBattlePet == null || !summonedBattlePet.IsSummon())
             {
                 SendPacket(response);
                 return;

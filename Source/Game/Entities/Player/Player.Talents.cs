@@ -285,7 +285,7 @@ namespace Game.Entities
 
             // TO-DO: We need more research to know what happens with warlock's reagent
             Pet pet = GetPet();
-            if (pet)
+            if (pet != null)
                 RemovePet(pet, PetSaveMode.NotInSlot);
 
             ClearAllReactives();
@@ -428,7 +428,7 @@ namespace Game.Entities
             for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
             {
                 Item equippedItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (equippedItem)
+                if (equippedItem != null)
                     SetVisibleItemSlot(i, equippedItem);
             }
 

@@ -623,7 +623,7 @@ namespace Game.Chat
                 else
                 {
                     Player player = handler.GetSelectedPlayer();
-                    if (!player)
+                    if (player == null)
                         return false;
 
                     accountId = player.GetSession().GetAccountId();
@@ -708,7 +708,7 @@ namespace Game.Chat
                 else
                 {
                     Player player = handler.GetSelectedPlayer();
-                    if (!player)
+                    if (player == null)
                         return false;
 
                     accountId = player.GetSession().GetAccountId();

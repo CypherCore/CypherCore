@@ -120,7 +120,7 @@ namespace Game
                 var buyerGuid = _player.GetGUID();
                 AddTransactionCallback(DB.Characters.AsyncCommitTransaction(trans)).AfterComplete(success =>
                 {
-                    if (GetPlayer() && GetPlayer().GetGUID() == buyerGuid)
+                    if (GetPlayer() != null && GetPlayer().GetGUID() == buyerGuid)
                     {
                         if (success)
                         {
@@ -138,7 +138,7 @@ namespace Game
         void HandleAuctionHello(AuctionHelloRequest hello)
         {
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(hello.Guid, NPCFlags.Auctioneer, NPCFlags2.None);
-            if (!unit)
+            if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, $"WORLD: HandleAuctionHelloOpcode - {hello.Guid} not found or you can't interact with him.");
                 return;
@@ -159,7 +159,7 @@ namespace Game
                 return;
 
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(listBiddedItems.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
-            if (!creature)
+            if (creature == null)
             {
                 Log.outDebug(LogFilter.Network, $"WORLD: HandleAuctionListBidderItems - {listBiddedItems.Auctioneer} not found or you can't interact with him.");
                 return;
@@ -282,7 +282,7 @@ namespace Game
                 return;
 
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(listOwnedItems.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
-            if (!creature)
+            if (creature == null)
             {
                 Log.outDebug(LogFilter.Network, $"WORLD: HandleAuctionListOwnerItems - {listOwnedItems.Auctioneer} not found or you can't interact with him.");
                 return;
@@ -309,7 +309,7 @@ namespace Game
                 return;
 
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(placeBid.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
-            if (!creature)
+            if (creature == null)
             {
                 Log.outDebug(LogFilter.Network, $"WORLD: HandleAuctionPlaceBid - {placeBid.Auctioneer} not found or you can't interact with him.");
                 return;
@@ -423,7 +423,7 @@ namespace Game
             player.SaveInventoryAndGoldToDB(trans);
             AddTransactionCallback(DB.Characters.AsyncCommitTransaction(trans)).AfterComplete(success =>
             {
-                if (GetPlayer() && GetPlayer().GetGUID() == _player.GetGUID())
+                if (GetPlayer() != null && GetPlayer().GetGUID() == _player.GetGUID())
                 {
                     if (success)
                     {
@@ -444,7 +444,7 @@ namespace Game
                 return;
 
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(removeItem.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
-            if (!creature)
+            if (creature == null)
             {
                 Log.outDebug(LogFilter.Network, $"WORLD: HandleAuctionRemoveItem - {removeItem.Auctioneer} not found or you can't interact with him.");
                 return;
@@ -492,7 +492,7 @@ namespace Game
             auctionHouse.RemoveAuction(trans, auction);
             AddTransactionCallback(DB.Characters.AsyncCommitTransaction(trans)).AfterComplete(success =>
             {
-                if (GetPlayer() && GetPlayer().GetGUID() == _player.GetGUID())
+                if (GetPlayer() != null && GetPlayer().GetGUID() == _player.GetGUID())
                 {
                     if (success)
                         SendAuctionCommandResult(auctionIdForClient, AuctionCommand.Cancel, AuctionResult.Ok, throttle.DelayUntilNext);        //inform player, that auction is removed
@@ -506,7 +506,7 @@ namespace Game
         void HandleReplicateItems(AuctionReplicateItems replicateItems)
         {
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(replicateItems.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
-            if (!creature)
+            if (creature == null)
             {
                 Log.outError(LogFilter.Network, $"WORLD: HandleReplicateItems - {replicateItems.Auctioneer} not found or you can't interact with him.");
                 return;
@@ -612,7 +612,7 @@ namespace Game
             foreach (var itemForSale in sellCommodity.Items)
     {
                 Item item = _player.GetItemByGuid(itemForSale.Guid);
-                if (!item)
+                if (item == null)
                 {
                     SendAuctionCommandResult(0, AuctionCommand.SellItem, AuctionResult.ItemNotFound, throttle.DelayUntilNext);
                     return;
@@ -632,7 +632,7 @@ namespace Game
                     return;
                 }
 
-                if (Global.AuctionHouseMgr.GetAItem(item.GetGUID()) || !item.CanBeTraded() || item.IsNotEmptyBag() ||
+                if (Global.AuctionHouseMgr.GetAItem(item.GetGUID()) != null || !item.CanBeTraded() || item.IsNotEmptyBag() ||
                     item.GetTemplate().HasFlag(ItemFlags.Conjured) || item.m_itemData.Expiration != 0 ||
                     item.GetCount() < itemForSale.UseCount)
                 {
@@ -756,7 +756,7 @@ namespace Game
             var auctionPlayerGuid = _player.GetGUID();
             AddTransactionCallback(DB.Characters.AsyncCommitTransaction(trans)).AfterComplete(success =>
             {
-                if (GetPlayer() && GetPlayer().GetGUID() == auctionPlayerGuid)
+                if (GetPlayer() != null && GetPlayer().GetGUID() == auctionPlayerGuid)
                 {
                     if (success)
                     {
@@ -803,7 +803,7 @@ namespace Game
             }
 
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(sellItem.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
-            if (!creature)
+            if (creature == null)
             {
                 Log.outError(LogFilter.Network, "WORLD: HandleAuctionSellItem - Unit (%s) not found or you can't interact with him.", sellItem.Auctioneer.ToString());
                 return;
@@ -832,7 +832,7 @@ namespace Game
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
 
             Item item = _player.GetItemByGuid(sellItem.Items[0].Guid);
-            if (!item)
+            if (item == null)
             {
                 SendAuctionCommandResult(0, AuctionCommand.SellItem, AuctionResult.ItemNotFound, throttle.DelayUntilNext);
                 return;
@@ -845,7 +845,7 @@ namespace Game
                 return;
             }
 
-            if (Global.AuctionHouseMgr.GetAItem(item.GetGUID()) || !item.CanBeTraded() || item.IsNotEmptyBag() ||
+            if (Global.AuctionHouseMgr.GetAItem(item.GetGUID()) != null || !item.CanBeTraded() || item.IsNotEmptyBag() ||
                 item.GetTemplate().HasFlag(ItemFlags.Conjured) || item.m_itemData.Expiration != 0 ||
                 item.GetCount() != 1)
             {
@@ -904,7 +904,7 @@ namespace Game
             var auctionPlayerGuid = _player.GetGUID();
             AddTransactionCallback(DB.Characters.AsyncCommitTransaction(trans)).AfterComplete(success =>
             {
-                if (GetPlayer() && GetPlayer().GetGUID() == auctionPlayerGuid)
+                if (GetPlayer() != null && GetPlayer().GetGUID() == auctionPlayerGuid)
                 {
                     if (success)
                     {
@@ -954,7 +954,7 @@ namespace Game
                 return;
 
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(getCommodityQuote.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
-            if (!creature)
+            if (creature == null)
             {
                 Log.outError(LogFilter.Network, $"WORLD: HandleAuctionStartCommoditiesPurchase - {getCommodityQuote.Auctioneer} not found or you can't interact with him.");
                 return;

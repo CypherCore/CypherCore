@@ -16,7 +16,7 @@ namespace Game.Chat
         static bool HandleQuestAdd(CommandHandler handler, Quest quest)
         {
             Player player = handler.GetSelectedPlayer();
-            if (!player)
+            if (player == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
@@ -52,7 +52,7 @@ namespace Game.Chat
         static bool HandleQuestComplete(CommandHandler handler, Quest quest)
         {
             Player player = handler.GetSelectedPlayer();
-            if (!player)
+            if (player == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
@@ -76,7 +76,7 @@ namespace Game.Chat
         static bool HandleQuestRemove(CommandHandler handler, Quest quest)
         {
             Player player = handler.GetSelectedPlayer();
-            if (!player)
+            if (player == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
@@ -125,7 +125,7 @@ namespace Game.Chat
         static bool HandleQuestReward(CommandHandler handler, Quest quest)
         {
             Player player = handler.GetSelectedPlayer();
-            if (!player)
+            if (player == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
@@ -149,7 +149,7 @@ namespace Game.Chat
             static bool HandleQuestObjectiveComplete(CommandHandler handler, uint objectiveId)
             {
                 Player player = handler.GetSelectedPlayerOrSelf();
-                if (!player)
+                if (player == null)
                 {
                     handler.SendSysMessage(CypherStrings.NoCharSelected);
                     return false;

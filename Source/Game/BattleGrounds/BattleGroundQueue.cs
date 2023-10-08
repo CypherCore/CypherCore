@@ -80,12 +80,12 @@ namespace Game.BattleGrounds
             }
 
             //add players from group to ginfo
-            if (group)
+            if (group != null)
             {
                 for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                 {
                     Player member = refe.GetSource();
-                    if (!member)
+                    if (member == null)
                         continue;   // this should never happen
 
                     PlayerQueueInfo pl_info = new();
@@ -210,7 +210,7 @@ namespace Game.BattleGrounds
             {
                 string playerName = "Unknown";
                 Player player = Global.ObjAccessor.FindPlayer(guid);
-                if (player)
+                if (player != null)
                     playerName = player.GetName();
                 Log.outDebug(LogFilter.Battleground, "BattlegroundQueue: couldn't find player {0} ({1})", playerName, guid.ToString());
                 return;
@@ -264,7 +264,7 @@ namespace Game.BattleGrounds
             if (decreaseInvitedCount && group.IsInvitedToBGInstanceGUID != 0)
             {
                 Battleground bg = Global.BattlegroundMgr.GetBattleground(group.IsInvitedToBGInstanceGUID, (BattlegroundTypeId)m_queueId.BattlemasterListId);
-                if (bg)
+                if (bg != null)
                     bg.DecreaseInvitedCount(group.Team);
             }
 
@@ -287,7 +287,7 @@ namespace Game.BattleGrounds
                 {
                     Log.outDebug(LogFilter.Battleground, "UPDATING memberLost's personal arena rating for {0} by opponents rating: {1}", guid.ToString(), group.OpponentsTeamRating);
                     Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
+                    if (player != null)
                         at.MemberLost(player, group.OpponentsMatchmakerRating);
                     else
                         at.OfflineMemberLost(guid, group.OpponentsMatchmakerRating);
@@ -310,7 +310,7 @@ namespace Game.BattleGrounds
                 // remove next player, this is recursive
                 // first send removal information
                 Player plr2 = Global.ObjAccessor.FindConnectedPlayer(group.Players.FirstOrDefault().Key);
-                if (plr2)
+                if (plr2 != null)
                 {
                     uint queueSlot = plr2.GetBattlegroundQueueIndex(m_queueId);
 
@@ -378,7 +378,7 @@ namespace Game.BattleGrounds
                     // get the player
                     Player player = Global.ObjAccessor.FindPlayer(guid);
                     // if offline, skip him, this should not happen - player is removed from queue when he logs out
-                    if (!player)
+                    if (player == null)
                         continue;
 
                     // invite the player
@@ -911,7 +911,7 @@ namespace Game.BattleGrounds
                     GroupQueueInfo aTeam = queueArray[TeamId.Alliance];
                     GroupQueueInfo hTeam = queueArray[TeamId.Horde];
                     Battleground arena = Global.BattlegroundMgr.CreateNewBattleground(m_queueId, bracket_id);
-                    if (!arena)
+                    if (arena == null)
                     {
                         Log.outError(LogFilter.Battleground, "BattlegroundQueue.Update couldn't create arena instance for rated arena match!");
                         return;
@@ -1156,7 +1156,7 @@ namespace Game.BattleGrounds
         {
             Player player = Global.ObjAccessor.FindPlayer(m_PlayerGuid);
             // player logged off (we should do nothing, he is correctly removed from queue in another procedure)
-            if (!player)
+            if (player == null)
                 return true;
 
             Battleground bg = Global.BattlegroundMgr.GetBattleground(m_BgInstanceGUID, m_BgTypeId);
@@ -1206,7 +1206,7 @@ namespace Game.BattleGrounds
         public override bool Execute(ulong e_time, uint p_time)
         {
             Player player = Global.ObjAccessor.FindPlayer(m_PlayerGuid);
-            if (!player)
+            if (player == null)
                 // player logged off (we should do nothing, he is correctly removed from queue in another procedure)
                 return true;
 
@@ -1226,7 +1226,7 @@ namespace Game.BattleGrounds
                     player.RemoveBattlegroundQueueId(m_BgQueueTypeId);
                     bgQueue.RemovePlayer(m_PlayerGuid, true);
                     //update queues if Battleground isn't ended
-                    if (bg && bg.IsBattleground() && bg.GetStatus() != BattlegroundStatus.WaitLeave)
+                    if (bg != null && bg.IsBattleground() && bg.GetStatus() != BattlegroundStatus.WaitLeave)
                         Global.BattlegroundMgr.ScheduleQueueUpdate(0, m_BgQueueTypeId, bg.GetBracketId());
 
                     BattlefieldStatusNone battlefieldStatus;

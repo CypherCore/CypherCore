@@ -156,12 +156,12 @@ namespace Game.Entities
             }
 
             // group update
-            if (GetGroup())
+            if (GetGroup() != null)
             {
                 SetGroupUpdateFlag(GroupUpdateFlags.Full);
 
                 Pet pet = GetPet();
-                if (pet)
+                if (pet != null)
                     pet.SetGroupUpdateFlag(GroupUpdatePetFlags.Full);
             }
 
@@ -213,7 +213,7 @@ namespace Game.Entities
                 Global.BattleFieldMgr.HandlePlayerEnterZone(this, newZone);
                 SendInitWorldStates(newZone, newArea);              // only if really enters to new zone, not just area change, works strange...
                 Guild guild = GetGuild();
-                if (guild)
+                if (guild != null)
                     guild.UpdateMemberData(this, GuildMemberData.ZoneId, newZone);
             }
         }
@@ -437,7 +437,7 @@ namespace Game.Entities
                 if (group == null || group.IsRaidGroup())
                     return false;
 
-            if (group)
+            if (group != null)
             {
                 // check if player's group is bound to this instance
                 if (group != instance.GetOwningGroup())
@@ -495,7 +495,7 @@ namespace Game.Entities
                 {
                     Group group = GetGroup();
                     Difficulty difficulty = group != null ? group.GetDifficultyID(mapEntry) : GetDifficultyID(mapEntry);
-                    ObjectGuid instanceOwnerGuid = group ? group.GetRecentInstanceOwner(targetMapId) : GetGUID();
+                    ObjectGuid instanceOwnerGuid = group != null ? group.GetRecentInstanceOwner(targetMapId) : GetGUID();
 
                     InstanceLock instanceLock = Global.InstanceLockMgr.FindActiveInstanceLock(instanceOwnerGuid, new MapDb2Entries(mapEntry, Global.DB2Mgr.GetDownscaledMapDifficultyData(targetMapId, ref difficulty)));
                     if (instanceLock != null)
@@ -532,7 +532,7 @@ namespace Game.Entities
             {
                 Map map = Global.MapMgr.FindMap(mapId, instanceId);
                 bool forgetInstance = false;
-                if (map)
+                if (map != null)
                 {
                     InstanceMap instance = map.ToInstanceMap();
                     if (instance != null)

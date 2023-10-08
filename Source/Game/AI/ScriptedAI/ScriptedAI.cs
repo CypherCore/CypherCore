@@ -109,10 +109,10 @@ namespace Game.AI
         /// <param name="who"></param>
         public void AddThreat(Unit victim, float amount, Unit who = null)
         {
-            if (!victim)
+            if (victim == null) 
                 return;
 
-            if (!who)
+            if (who == null)
                 who = me;
 
             who.GetThreatManager().AddThreat(victim, amount, null, true, true);
@@ -126,10 +126,10 @@ namespace Game.AI
         /// <param name="who"></param>
         public void ModifyThreatByPercent(Unit victim, int pct, Unit who = null)
         {
-            if (!victim)
+            if (victim == null) 
                 return;
 
-            if (!who)
+            if (who == null)
                 who = me;
 
             who.GetThreatManager().ModifyThreatByPercent(victim, pct);
@@ -142,10 +142,10 @@ namespace Game.AI
         /// <param name="who"></param>
         public void ResetThreat(Unit victim, Unit who)
         {
-            if (!victim)
+            if (victim == null) 
                 return;
 
-            if (!who)
+            if (who == null)
                 who = me;
 
             who.GetThreatManager().ResetThreat(victim);
@@ -157,7 +157,7 @@ namespace Game.AI
         /// <param name="who"></param>
         public void ResetThreatList(Unit who = null)
         {
-            if (!who)
+            if (who == null)
                 who = me;
 
             who.GetThreatManager().ResetAllThreat();
@@ -171,10 +171,10 @@ namespace Game.AI
         /// <returns></returns>
         public float GetThreat(Unit victim, Unit who = null)
         {
-            if (!victim)
+            if (victim == null) 
                 return 0.0f;
 
-            if (!who)
+            if (who == null)
                 who = me;
 
             return who.GetThreatManager().GetThreat(victim);
@@ -645,11 +645,11 @@ namespace Game.AI
                 delayToRespawn = TimeSpan.FromSeconds(2);
             }
 
-            if (!who)
+            if (who == null)
                 who = me;
 
             TempSummon whoSummon = who.ToTempSummon();
-            if (whoSummon)
+            if (whoSummon != null)
             {
                 Log.outWarn(LogFilter.ScriptsAi, $"BossAI::_DespawnAtEvade: called on a temporary summon (who: {who.GetGUID()})");
                 whoSummon.UnSummon();
@@ -705,7 +705,7 @@ namespace Game.AI
         void _JustEngagedWith()
         {
             Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-            if (target)
+            if (target != null)
                 AttackStart(target);
         }
 
@@ -713,7 +713,7 @@ namespace Game.AI
         {
             summons.Summon(summon);
             Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-            if (target)
+            if (target != null)
                 summon.GetAI().AttackStart(target);
         }
 
@@ -772,7 +772,7 @@ namespace Game.AI
             foreach (var id in this)
             {
                 Creature summon = ObjectAccessor.GetCreature(_me, id);
-                if (summon && summon.IsAIEnabled() && (entry == 0 || summon.GetEntry() == entry))
+                if (summon != null && summon.IsAIEnabled() && (entry == 0 || summon.GetEntry() == entry))
                 {
                     summon.GetAI().DoZoneInCombat();
                 }
@@ -784,7 +784,7 @@ namespace Game.AI
             foreach (var id in this)
             {
                 Creature summon = ObjectAccessor.GetCreature(_me, id);
-                if (!summon)
+                if (summon == null)
                     Remove(id);
                 else if (summon.GetEntry() == entry)
                 {
@@ -800,7 +800,7 @@ namespace Game.AI
             {
                 Creature summon = ObjectAccessor.GetCreature(_me, this.FirstOrDefault());
                 RemoveAt(0);
-                if (summon)
+                if (summon != null)
                     summon.DespawnOrUnsummon();
             }
         }
@@ -821,7 +821,7 @@ namespace Game.AI
         {
             foreach (var id in this)
             {
-                if (!ObjectAccessor.GetCreature(_me, id))
+                if (ObjectAccessor.GetCreature(_me, id) == null)
                     Remove(id);
             }
         }
@@ -847,7 +847,7 @@ namespace Game.AI
             foreach (var id in this)
             {
                 Creature summon = ObjectAccessor.GetCreature(_me, id);
-                if (summon && summon.GetEntry() == entry)
+                if (summon != null && summon.GetEntry() == entry)
                     return true;
             }
 
@@ -859,7 +859,7 @@ namespace Game.AI
             foreach (var guid in summons)
             {
                 Creature summon = ObjectAccessor.GetCreature(_me, guid);
-                if (summon && summon.IsAIEnabled())
+                if (summon != null && summon.IsAIEnabled())
                     summon.GetAI().DoAction(action);
             }
         }

@@ -58,7 +58,11 @@ namespace Game.Scripting
             player.PlayerTalkClass.GetGossipMenu().AddMenuItem(gossipMenuID, gossipMenuItemID, sender, action);
         }
         public static void SendGossipMenuFor(Player player, uint npcTextID, ObjectGuid guid) { player.PlayerTalkClass.SendGossipMenu(npcTextID, guid); }
-        public static void SendGossipMenuFor(Player player, uint npcTextID, Creature creature) { if (creature) SendGossipMenuFor(player, npcTextID, creature.GetGUID()); }
+        public static void SendGossipMenuFor(Player player, uint npcTextID, Creature creature)
+        {
+            if (creature != null)
+                SendGossipMenuFor(player, npcTextID, creature.GetGUID());
+        }
         public static void CloseGossipMenuFor(Player player) { player.PlayerTalkClass.SendCloseGossip(); }
 
         string _name;

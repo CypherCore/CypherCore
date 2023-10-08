@@ -206,7 +206,7 @@ namespace Game.BlackMarket
             string bidderName = "";
             bool logGmTrade;
 
-            if (bidder)
+            if (bidder != null)
             {
                 bidderAccId = bidder.GetSession().GetAccountId();
                 bidderName = bidder.GetName();
@@ -227,7 +227,7 @@ namespace Game.BlackMarket
             // Create item
             BlackMarketTemplate templ = entry.GetTemplate();
             Item item = Item.CreateItem(templ.Item.ItemID, templ.Quantity, ItemContext.BlackMarket);
-            if (!item)
+            if (item == null)
                 return;
 
             if (templ.Item.ItemBonus != null)
@@ -245,7 +245,7 @@ namespace Game.BlackMarket
                 Log.outCommand(bidderAccId, "GM {0} (Account: {1}) won item in blackmarket auction: {2} (Entry: {3} Count: {4}) and payed gold : {5}.",
                     bidderName, bidderAccId, item.GetTemplate().GetName(), item.GetEntry(), item.GetCount(), entry.GetCurrentBid() / MoneyConstants.Gold);
 
-            if (bidder)
+            if (bidder != null)
                 bidder.GetSession().SendBlackMarketWonNotification(entry, item);
 
             new MailDraft(entry.BuildAuctionMailSubject(BMAHMailAuctionAnswers.Won), entry.BuildAuctionMailBody())
@@ -261,14 +261,14 @@ namespace Game.BlackMarket
             Player oldBidder = Global.ObjAccessor.FindConnectedPlayer(oldBidder_guid);
 
             uint oldBidder_accId = 0;
-            if (!oldBidder)
+            if (oldBidder == null)
                 oldBidder_accId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(oldBidder_guid);
 
             // old bidder exist
-            if (!oldBidder && oldBidder_accId == 0)
+            if (oldBidder == null && oldBidder_accId == 0)
                 return;
 
-            if (oldBidder)
+            if (oldBidder != null)
                 oldBidder.GetSession().SendBlackMarketOutbidNotification(entry.GetTemplate());
 
             new MailDraft(entry.BuildAuctionMailSubject(BMAHMailAuctionAnswers.Outbid), entry.BuildAuctionMailBody())

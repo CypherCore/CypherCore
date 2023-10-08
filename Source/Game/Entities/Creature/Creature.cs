@@ -682,7 +682,7 @@ namespace Game.Entities
 
         public void DoFleeToGetAssistance()
         {
-            if (!GetVictim())
+            if (GetVictim() == null)
                 return;
 
             if (HasAuraType(AuraType.PreventsFleeing))
@@ -699,7 +699,7 @@ namespace Game.Entities
 
                 SetNoSearchAssistance(true);
 
-                if (!creature)
+                if (creature == null)
                     SetControlled(true, UnitState.Fleeing);
                 else
                     GetMotionMaster().MoveSeekAssistance(creature.GetPositionX(), creature.GetPositionY(), creature.GetPositionZ());
@@ -757,7 +757,7 @@ namespace Game.Entities
                 lowGuid = map.GenerateLowGuid(HighGuid.Creature);
 
             Creature creature = new();
-            if (!creature.Create(lowGuid, map, entry, pos, null, vehId))
+            if (creature.Create(lowGuid, map, entry, pos, null, vehId))
                 return null;
 
             return creature;
@@ -766,7 +766,7 @@ namespace Game.Entities
         public static Creature CreateCreatureFromDB(ulong spawnId, Map map, bool addToMap = true, bool allowDuplicate = false)
         {
             Creature creature = new();
-            if (!creature.LoadFromDB(spawnId, map, addToMap, allowDuplicate))
+            if (creature.LoadFromDB(spawnId, map, addToMap, allowDuplicate))
                 return null;
 
             return creature;
@@ -882,21 +882,21 @@ namespace Game.Entities
             {
                 // We're a player pet, probably
                 target = GetAttackerForHelper();
-                if (!target && IsSummon())
+                if (target == null && IsSummon())
                 {
                     Unit owner = ToTempSummon().GetOwner();
                     if (owner != null)
                     {
                         if (owner.IsInCombat())
                             target = owner.GetAttackerForHelper();
-                        if (!target)
+                        if (target == null)
                         {
                             foreach (var itr in owner.m_Controlled)
                             {
                                 if (itr.IsInCombat())
                                 {
                                     target = itr.GetAttackerForHelper();
-                                    if (target)
+                                    if (target != null)
                                         break;
                                 }
                             }
@@ -907,7 +907,7 @@ namespace Game.Entities
             else
                 return null;
 
-            if (target && _IsTargetAcceptable(target) && CanCreatureAttack(target))
+            if (target != null && _IsTargetAcceptable(target) && CanCreatureAttack(target))
             {
                 if (!HasSpellFocus())
                     SetInFront(target);
@@ -915,7 +915,7 @@ namespace Game.Entities
             }
 
             /// @todo a vehicle may eat some mob, so mob should not evade
-            if (GetVehicle())
+            if (GetVehicle() != null)
                 return null;
 
             var iAuras = GetAuraEffectsByType(AuraType.ModInvisibility);
@@ -1619,7 +1619,7 @@ namespace Game.Entities
             if (GetSparringHealthPct() == 0)
                 return false;
 
-            if (!attacker)
+            if (attacker == null)
                 return false;
 
             if (!attacker.IsCreature())
@@ -2786,7 +2786,7 @@ namespace Game.Entities
         public override uint GetLevelForTarget(WorldObject target)
         {
             Unit unitTarget = target.ToUnit();
-            if (unitTarget)
+            if (unitTarget != null)
             {
                 if (IsWorldBoss())
                 {
@@ -3161,7 +3161,7 @@ namespace Game.Entities
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Target), newTarget);
 
             // If we are not allowed to turn during cast but have a focus target, face the target
-            if (!turnDisabled && noTurnDuringCast && target)
+            if (!turnDisabled && noTurnDuringCast && target != null)
                 SetFacingToObject(target, false);
 
             if (!noTurnDuringCast)
@@ -3222,7 +3222,7 @@ namespace Game.Entities
                 if (!_spellFocusInfo.Target.IsEmpty())
                 {
                     WorldObject objTarget = Global.ObjAccessor.GetWorldObject(this, _spellFocusInfo.Target);
-                    if (objTarget)
+                    if (objTarget != null)
                         SetFacingToObject(objTarget, false);
                 }
                 else

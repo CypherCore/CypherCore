@@ -288,7 +288,7 @@ namespace Game.Movement
 
         public void Update(uint diff)
         {
-            if (!_owner)
+            if (_owner == null)
                 return;
 
             if (HasFlag(MotionMasterFlags.InitializationPending | MotionMasterFlags.Initializing))
@@ -556,7 +556,7 @@ namespace Game.Movement
         public void MoveFollow(Unit target, float dist, ChaseAngle angle, TimeSpan? duration = null, MovementSlot slot = MovementSlot.Active)
         {
             // Ignore movement request if target not exist
-            if (!target || target == _owner)
+            if (target == null || target == _owner)
                 return;
 
             Add(new FollowMovementGenerator(target, dist, angle, duration), slot);
@@ -567,7 +567,7 @@ namespace Game.Movement
         public void MoveChase(Unit target, ChaseRange? dist = null, ChaseAngle? angle = null)
         {
             // Ignore movement request if target not exist
-            if (!target || target == _owner)
+            if (target == null || target == _owner)
                 return;
 
             Add(new ChaseMovementGenerator(target, dist, angle));
@@ -583,7 +583,7 @@ namespace Game.Movement
 
         public void MoveFleeing(Unit enemy, TimeSpan time = default)
         {
-            if (!enemy)
+            if (enemy == null)
                 return;
 
             if (_owner.IsCreature())
@@ -899,7 +899,7 @@ namespace Game.Movement
         public void MoveAlongSplineChain(uint pointId, uint dbChainId, bool walk)
         {
             Creature owner = _owner.ToCreature();
-            if (!owner)
+            if (owner == null)
             {
                 Log.outError(LogFilter.Misc, "MotionMaster.MoveAlongSplineChain: non-creature {0} tried to walk along DB spline chain. Ignoring.", _owner.GetGUID().ToString());
                 return;

@@ -275,7 +275,7 @@ namespace Game.Entities
             Log.outDebug(LogFilter.Vehicle, "Vehicle ({0}, Entry {1}): installing accessory (Entry: {2}) on seat: {3}", _me.GetGUID().ToString(), GetCreatureEntry(), entry, seatId);
 
             TempSummon accessory = _me.SummonCreature(entry, _me, (TempSummonType)type, TimeSpan.FromMilliseconds(summonTime));
-            Cypher.Assert(accessory);
+            Cypher.Assert(accessory != null);
 
             if (minion)
                 accessory.AddUnitTypeMask(UnitTypeMask.Accessory);
@@ -600,11 +600,6 @@ namespace Game.Entities
         public Dictionary<sbyte, VehicleSeat> Seats = new();
         public uint UsableSeatNum;    //< Number of seats that match VehicleSeatEntry.UsableByPlayer, used for proper display flags
 
-        public static implicit operator bool(Vehicle vehicle)
-        {
-            return vehicle != null;
-        }
-
         public enum Status
         {
             None,
@@ -677,7 +672,7 @@ namespace Game.Entities
             {
                 // drop flag
                 Battleground bg = player.GetBattleground();
-                if (bg)
+                if (bg != null)
                     bg.EventPlayerDroppedFlag(player);
 
                 player.StopCastingCharm();

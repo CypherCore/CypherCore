@@ -388,7 +388,7 @@ namespace Game.Networking.Packets
             for (byte i = 0; i < mail.items.Count; i++)
             {
                 Item item = player.GetMItem(mail.items[i].item_guid);
-                if (item)
+                if (item != null)
                     Attachments.Add(new MailAttachedItem(item, i));
             }
         }

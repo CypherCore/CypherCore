@@ -354,13 +354,13 @@ namespace Game.BattleGrounds.Zones
                 CastSpellOnTeam(BattlegroundConst.AbQuestReward4Bases, team);
 
             Creature trigger = !BgCreatures[node + 7].IsEmpty() ? GetBGCreature(node + 7) : null; // 0-6 spirit guides
-            if (!trigger)
+            if (trigger == null)
                 trigger = AddCreature(SharedConst.WorldTrigger, node + 7, NodePositions[node], GetTeamIndexByTeamId(team));
 
             //add bonus honor aura trigger creature when node is accupied
             //cast bonus aura (+50% honor in 25yards)
             //aura should only apply to players who have accupied the node, set correct faction for trigger
-            if (trigger)
+            if (trigger != null)
             {
                 trigger.SetFaction(team == Team.Alliance ? 84u : 83u);
                 trigger.CastSpell(trigger, BattlegroundConst.SpellHonorableDefender25y, false);
@@ -389,7 +389,7 @@ namespace Game.BattleGrounds.Zones
 
             byte node = ABBattlegroundNodes.NodeStables;
             GameObject obj = GetBgMap().GetGameObject(BgObjects[node * 8 + 7]);
-            while ((node < ABBattlegroundNodes.DynamicNodesCount) && ((!obj) || (!source.IsWithinDistInMap(obj, 10))))
+            while ((node < ABBattlegroundNodes.DynamicNodesCount) && ((obj == null) || (!source.IsWithinDistInMap(obj, 10))))
             {
                 ++node;
                 obj = GetBgMap().GetGameObject(BgObjects[node * 8 + ABObjectTypes.AuraContested]);

@@ -91,7 +91,7 @@ namespace Game.Maps
             // at this moment i_clientGUIDs have guids that not iterate at grid level checks
             // but exist one case when this possible and object not out of range: transports
             Transport transport = i_player.GetTransport<Transport>();
-            if (transport)
+            if (transport != null)
             {
                 foreach (var obj in transport.GetPassengers())
                 {
@@ -197,10 +197,10 @@ namespace Game.Maps
             {
                 DynamicObject dynamicObject = objs[i];
                 Unit caster = dynamicObject.GetCaster();
-                if (caster)
+                if (caster != null)
                 {
                     Player pl = caster.ToPlayer();
-                    if (pl && pl.seerView == dynamicObject)
+                    if (pl != null && pl.seerView == dynamicObject)
                         pl.UpdateVisibilityOf(i_objects);
                 }
             }
@@ -277,7 +277,7 @@ namespace Game.Maps
                 Creature creature = objs[i];
                 CreatureUnitRelocationWorker(i_creature, creature);
 
-                if (!creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
+                if (creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
                     CreatureUnitRelocationWorker(creature, i_creature);
             }
         }
@@ -320,7 +320,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (!creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
+                if (creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
                     continue;
 
                 CreatureRelocationNotifier relocate = new(creature);
@@ -439,7 +439,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (!creature.InSamePhase(i_phaseShift))
+                if (creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if ((!required3dDist ? creature.GetExactDist2dSq(i_source) : creature.GetExactDistSq(i_source)) > i_distSq)
@@ -468,10 +468,10 @@ namespace Game.Maps
 
                 // Send packet back to the caster if the caster has vision of dynamic object
                 Unit caster = dynamicObject.GetCaster();
-                if (caster)
+                if (caster != null)
                 {
                     Player player = caster.ToPlayer();
-                    if (player && player.seerView == dynamicObject)
+                    if (player != null && player.seerView == dynamicObject)
                         SendPacket(player);
                 }
             }
@@ -524,7 +524,7 @@ namespace Game.Maps
                             SendPacket(visionPlayer);
                 }
 
-                if (player.seerView == player || player.GetVehicle())
+                if (player.seerView == player || player.GetVehicle() != null)
                     SendPacket(player);
             }
         }
@@ -534,7 +534,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (!creature.InSamePhase(i_phaseShift))
+                if (creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if (creature.GetExactDist2dSq(i_source) > i_distSq)
@@ -566,7 +566,7 @@ namespace Game.Maps
                 {
                     // Send packet back to the caster if the caster has vision of dynamic object
                     Player player = caster.ToPlayer();
-                    if (player && player.seerView == dynamicObject)
+                    if (player != null && player.seerView == dynamicObject)
                         SendPacket(player);
                 }
             }
@@ -839,7 +839,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (!creature.GetSharedVisionList().Empty())
+                if (creature.GetSharedVisionList().Empty())
                 {
                     foreach (var visionPlayer in creature.GetSharedVisionList())
                         BuildPacket(visionPlayer);
@@ -1007,7 +1007,7 @@ namespace Game.Maps
                 return;
 
             // already found
-            if (i_object)
+            if (i_object != null)
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1030,7 +1030,7 @@ namespace Game.Maps
                 return;
 
             // already found
-            if (i_object)
+            if (i_object != null)
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1053,13 +1053,13 @@ namespace Game.Maps
                 return;
 
             // already found
-            if (i_object)
+            if (i_object != null)
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (!creature.InSamePhase(i_phaseShift))
+                if (creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if (i_check.Invoke(creature))
@@ -1076,7 +1076,7 @@ namespace Game.Maps
                 return;
 
             // already found
-            if (i_object)
+            if (i_object != null)
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1099,7 +1099,7 @@ namespace Game.Maps
                 return;
 
             // already found
-            if (i_object)
+            if (i_object != null)
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1122,7 +1122,7 @@ namespace Game.Maps
                 return;
 
             // already found
-            if (i_object)
+            if (i_object != null)
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1145,7 +1145,7 @@ namespace Game.Maps
                 return;
 
             // already found
-            if (i_object)
+            if (i_object != null)
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1168,7 +1168,7 @@ namespace Game.Maps
                 return;
 
             // already found
-            if (i_object)
+            if (i_object != null)
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1242,7 +1242,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (!creature.InSamePhase(i_phaseShift))
+                if (creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if (i_check.Invoke(creature))
@@ -1468,7 +1468,7 @@ namespace Game.Maps
         public override void Visit(IList<GameObject> objs)
         {
             // already found
-            if (i_object)
+            if (i_object != null)
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -1574,7 +1574,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (!creature.InSamePhase(i_phaseShift))
+                if (creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if (i_check.Invoke(creature))
@@ -1618,7 +1618,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (!creature.InSamePhase(i_phaseShift))
+                if (creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if (i_check.Invoke(creature))
@@ -1680,13 +1680,13 @@ namespace Game.Maps
         public override void Visit(IList<Creature> objs)
         {
             // already found
-            if (i_object)
+            if (i_object != null)
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (!creature.InSamePhase(i_phaseShift))
+                if (creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if (i_check.Invoke(creature))
@@ -1717,7 +1717,7 @@ namespace Game.Maps
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (!creature.InSamePhase(i_phaseShift))
+                if (creature.InSamePhase(i_phaseShift))
                     continue;
 
                 if (i_check.Invoke(creature))
@@ -1768,7 +1768,7 @@ namespace Game.Maps
         public override void Visit(IList<Player> objs)
         {
             // already found
-            if (i_object)
+            if (i_object != null)
                 return;
 
             for (var i = 0; i < objs.Count; ++i)
@@ -2804,7 +2804,7 @@ namespace Game.Maps
 
         public bool Invoke(T obj)
         {
-            return obj.ToUnit() && obj.ToUnit().HasAura(_spellId, _casterGUID) == _present;
+            return obj.ToUnit() != null && obj.ToUnit().HasAura(_spellId, _casterGUID) == _present;
         }
 
         public static implicit operator Predicate<T>(UnitAuraCheck<T> unit)
@@ -3033,15 +3033,15 @@ namespace Game.Maps
         public virtual bool Invoke(T obj)
         {
             Player player = obj.ToPlayer();
-            if (player)
+            if (player != null)
                 return !player.IsAlive() && !player.HasAuraType(AuraType.Ghost) && i_searchObj.IsWithinDistInMap(player, i_range);
 
             Creature creature = obj.ToCreature();
-            if (creature)
+            if (creature != null)
                 return !creature.IsAlive() && i_searchObj.IsWithinDistInMap(creature, i_range);
 
             Corpse corpse = obj.ToCorpse();
-            if (corpse)
+            if (corpse != null)
                 return corpse.GetCorpseType() != CorpseType.Bones && i_searchObj.IsWithinDistInMap(corpse, i_range);
 
             return false;
@@ -3074,7 +3074,7 @@ namespace Game.Maps
                 return false;
 
             Creature creature = obj.ToCreature();
-            if (creature)
+            if (creature != null)
                 return !creature.IsPet();
 
             return true;

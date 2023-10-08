@@ -31,7 +31,7 @@ namespace Game
                 return;
             }
 
-            if (_player.GetBattleground() && _player.GetBattleground().GetStatus() == BattlegroundStatus.InProgress)
+            if (_player.GetBattleground() != null && _player.GetBattleground().GetStatus() == BattlegroundStatus.InProgress)
             {
                 SendPacket(new TraitConfigCommitFailed(configId, 0, (int)TalentLearnResult.InPvpMatch));
                 return;

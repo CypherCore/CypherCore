@@ -20,7 +20,7 @@ namespace Game
         void HandleTabardVendorActivate(Hello packet)
         {
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.TabardDesigner, NPCFlags2.None);
-            if (!unit)
+            if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleTabardVendorActivateOpcode - {0} not found or you can not interact with him.", packet.Unit.ToString());
                 return;
@@ -46,7 +46,7 @@ namespace Game
         void HandleTrainerList(Hello packet)
         {
             Creature npc = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Trainer, NPCFlags2.None);
-            if (!npc)
+            if (npc == null)
             {
                 Log.outDebug(LogFilter.Network, $"WorldSession.SendTrainerList - {packet.Unit} not found or you can not interact with him.");
                 return;
@@ -193,7 +193,7 @@ namespace Game
             if (GetPlayer().HasUnitState(UnitState.Died))
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
 
-            if ((unit && unit.GetScriptId() != unit.LastUsedScriptID) || (go != null && go.GetScriptId() != go.LastUsedScriptID))
+            if ((unit != null && unit.GetScriptId() != unit.LastUsedScriptID) || (go != null && go.GetScriptId() != go.LastUsedScriptID))
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleGossipSelectOption - Script reloaded while in use, ignoring and set new scipt id");
                 if (unit != null)
@@ -236,7 +236,7 @@ namespace Game
         void HandleSpiritHealerActivate(SpiritHealerActivate packet)
         {
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Healer, NPCFlags.SpiritHealer, NPCFlags2.None);
-            if (!unit)
+            if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleSpiritHealerActivateOpcode - {0} not found or you can not interact with him.", packet.Healer.ToString());
                 return;
@@ -283,7 +283,7 @@ namespace Game
                 return;
 
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Innkeeper, NPCFlags2.None);
-            if (!unit)
+            if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleBinderActivate - {0} not found or you can not interact with him.", packet.Unit.ToString());
                 return;
@@ -350,7 +350,7 @@ namespace Game
         void HandleRepairItem(RepairItem packet)
         {
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.NpcGUID, NPCFlags.Repair, NPCFlags2.None);
-            if (!unit)
+            if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleRepairItemOpcode - {0} not found or you can not interact with him.", packet.NpcGUID.ToString());
                 return;
@@ -368,7 +368,7 @@ namespace Game
                 Log.outDebug(LogFilter.Network, "ITEM: Repair {0}, at {1}", packet.ItemGUID.ToString(), packet.NpcGUID.ToString());
 
                 Item item = GetPlayer().GetItemByGuid(packet.ItemGUID);
-                if (item)
+                if (item != null)
                     GetPlayer().DurabilityRepair(item.GetPos(), true, discountMod);
             }
             else

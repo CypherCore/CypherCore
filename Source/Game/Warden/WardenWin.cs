@@ -167,7 +167,7 @@ namespace Game
         
         public override void RequestChecks()
         {
-            Log.outDebug(LogFilter.Warden, $"Request data from {_session.GetPlayerName()} (account {_session.GetAccountId()}) - loaded: {_session.GetPlayer() && !_session.PlayerLoading()}");
+            Log.outDebug(LogFilter.Warden, $"Request data from {_session.GetPlayerName()} (account {_session.GetAccountId()}) - loaded: {_session.GetPlayer() != null && !_session.PlayerLoading()}");
 
             // If all checks for a category are done, fill its todo list again
             foreach (WardenCheckCategory category in Enum.GetValues<WardenCheckCategory>())
@@ -189,7 +189,7 @@ namespace Game
 
             foreach (var category in Enum.GetValues<WardenCheckCategory>())
             {
-                if (WardenCheckManager.IsWardenCategoryInWorldOnly(category) && !_session.GetPlayer())
+                if (WardenCheckManager.IsWardenCategoryInWorldOnly(category) && _session.GetPlayer() == null)
                     continue;
 
                 var checks = _checks[(int)category];

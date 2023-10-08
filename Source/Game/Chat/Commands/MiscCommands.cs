@@ -37,7 +37,7 @@ namespace Game.Chat
                 return false;
             }
 
-            if (target)
+            if (target != null)
             {
                 // check online security
                 if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
@@ -70,7 +70,7 @@ namespace Game.Chat
                     // we have to go to instance, and can go to player only if:
                     //   1) we are in his group (either as leader or as member)
                     //   2) we are not bound to any group and have GM mode on
-                    if (_player.GetGroup())
+                    if (_player.GetGroup() != null)
                     {
                         // we are in group, we can go only if we are in the player group
                         if (_player.GetGroup() != target.GetGroup())
@@ -153,7 +153,7 @@ namespace Game.Chat
         static bool HandleBindSightCommand(CommandHandler handler)
         {
             Unit unit = handler.GetSelectedUnit();
-            if (!unit)
+            if (unit == null)
                 return false;
 
             handler.GetSession().GetPlayer().CastSpell(unit, 6277, true);
@@ -168,14 +168,14 @@ namespace Game.Chat
             if (!args.Empty())
             {
                 target = Global.ObjAccessor.FindPlayerByName(args.NextString());
-                if (!target)
+                if (target == null)
                 {
                     handler.SendSysMessage(CypherStrings.PlayerNotFound);
                     return false;
                 }
             }
 
-            if (!target)
+            if (target == null)
             {
                 if (!handler.ExtractPlayerTarget(args, out target))
                     return false;
@@ -193,7 +193,7 @@ namespace Game.Chat
         static bool HandleComeToMeCommand(CommandHandler handler)
         {
             Creature caster = handler.GetSelectedCreature();
-            if (!caster)
+            if (caster == null)
             {
                 handler.SendSysMessage(CypherStrings.SelectCreature);
                 return false;
@@ -216,14 +216,14 @@ namespace Game.Chat
         static bool HandleDamageCommand(CommandHandler handler, uint damage, SpellSchools? school, [OptionalArg]SpellInfo spellInfo)
         {
             Unit target = handler.GetSelectedUnit();
-            if (!target || handler.GetSession().GetPlayer().GetTarget().IsEmpty())
+            if (target == null || handler.GetSession().GetPlayer().GetTarget().IsEmpty())
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
                 return false;
             }
-            Player player_ = target.ToPlayer();
-            if (player_)
-                if (handler.HasLowerSecurity(player_, ObjectGuid.Empty, false))
+            Player player = target.ToPlayer();
+            if (player != null)
+                if (handler.HasLowerSecurity(player, ObjectGuid.Empty, false))
                     return false;
 
             if (!target.IsAlive())
@@ -324,14 +324,14 @@ namespace Game.Chat
         static bool HandleDieCommand(CommandHandler handler)
         {
             Unit target = handler.GetSelectedUnit();
-            if (!target && handler.GetPlayer().GetTarget().IsEmpty())
+            if (target == null && handler.GetPlayer().GetTarget().IsEmpty())
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
                 return false;
             }
 
             Player player = target.ToPlayer();
-            if (player)
+            if (player != null)
                 if (handler.HasLowerSecurity(player, ObjectGuid.Empty, false))
                     return false;
 
@@ -380,7 +380,7 @@ namespace Game.Chat
                     case HighGuid.Player:
                     {
                         obj = Global.ObjAccessor.FindPlayer(ObjectGuid.Create(HighGuid.Player, guidLow));
-                        if (!obj)
+                        if (obj == null)
                         {
                             handler.SendSysMessage(CypherStrings.PlayerNotFound);
                         }
@@ -389,7 +389,7 @@ namespace Game.Chat
                     case HighGuid.Creature:
                     {
                         obj = handler.GetCreatureFromPlayerMapByDbGuid(guidLow);
-                        if (!obj)
+                        if (obj == null)
                         {
                             handler.SendSysMessage(CypherStrings.CommandNocreaturefound);
                         }
@@ -398,7 +398,7 @@ namespace Game.Chat
                     case HighGuid.GameObject:
                     {
                         obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
-                        if (!obj)
+                        if (obj == null)
                         {
                             handler.SendSysMessage(CypherStrings.CommandNogameobjectfound);
                         }
@@ -407,14 +407,14 @@ namespace Game.Chat
                     default:
                         return false;
                 }
-                if (!obj)
+                if (obj == null)
                     return false;
             }
             else
             {
                 obj = handler.GetSelectedUnit();
 
-                if (!obj)
+                if (obj == null)
                 {
                     handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
                     return false;
@@ -486,7 +486,7 @@ namespace Game.Chat
             // Player and duration retrieval is over
             if (canApplyFreeze)
             {
-                if (!player) // can be null if some previous selection failed
+                if (player == null) // can be null if some previous selection failed
                 {
                     handler.SendSysMessage(CypherStrings.CommandFreezeWrong);
                     return true;
@@ -532,7 +532,7 @@ namespace Game.Chat
                     case HighGuid.Player:
                     {
                         obj = Global.ObjAccessor.FindPlayer(ObjectGuid.Create(HighGuid.Player, guidLow));
-                        if (!obj)
+                        if (obj == null)
                         {
                             handler.SendSysMessage(CypherStrings.PlayerNotFound);
                         }
@@ -541,7 +541,7 @@ namespace Game.Chat
                     case HighGuid.Creature:
                     {
                         obj = handler.GetCreatureFromPlayerMapByDbGuid(guidLow);
-                        if (!obj)
+                        if (obj == null)
                         {
                             handler.SendSysMessage(CypherStrings.CommandNocreaturefound);
                         }
@@ -550,7 +550,7 @@ namespace Game.Chat
                     case HighGuid.GameObject:
                     {
                         obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
-                        if (!obj)
+                        if (obj == null)
                         {
                             handler.SendSysMessage(CypherStrings.CommandNogameobjectfound);
                         }
@@ -559,14 +559,14 @@ namespace Game.Chat
                     default:
                         return false;
                 }
-                if (!obj)
+                if (obj == null)
                     return false;
             }
             else
             {
                 obj = handler.GetSelectedUnit();
 
-                if (!obj)
+                if (obj == null)
                 {
                     handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
                     return false;
@@ -622,7 +622,7 @@ namespace Game.Chat
                 obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), obj.GetOrientation());
 
             Transport transport = obj.GetTransport<Transport>();
-            if (transport)
+            if (transport != null)
             {
                 handler.SendSysMessage(CypherStrings.TransportPosition, transport.GetGoInfo().MoTransport.SpawnMap, obj.GetTransOffsetX(), obj.GetTransOffsetY(), obj.GetTransOffsetZ(), obj.GetTransOffsetO(),
                     transport.GetEntry(), transport.GetName());
@@ -671,7 +671,7 @@ namespace Game.Chat
         static bool HandleHideAreaCommand(CommandHandler handler, uint areaId)
         {
             Player playerTarget = handler.GetSelectedPlayer();
-            if (!playerTarget)
+            if (playerTarget == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
@@ -821,7 +821,7 @@ namespace Game.Chat
                 // Save the frozen player to update remaining time in case of future .listfreeze uses
                 // before the frozen state expires
                 Player frozen = Global.ObjAccessor.FindPlayerByName(player);
-                if (frozen)
+                if (frozen != null)
                     frozen.SaveToDB();
                 // Notify the freeze duration
                 if (remaintime == -1) // Permanent duration
@@ -848,7 +848,7 @@ namespace Game.Chat
         static bool HandleMovegensCommand(CommandHandler handler)
         {
             Unit unit = handler.GetSelectedUnit();
-            if (!unit)
+            if (unit == null)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
 
@@ -948,7 +948,7 @@ namespace Game.Chat
             uint accountId = target != null ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(player.GetGUID());
 
             // find only player from same account if any
-            if (!target)
+            if (target == null)
             {
                 WorldSession session = Global.WorldMgr.FindSession(accountId);
                 if (session != null)
@@ -967,7 +967,7 @@ namespace Game.Chat
             else
                 muteBy = handler.GetCypherString(CypherStrings.Console);
 
-            if (target)
+            if (target != null)
             {
                 // Target is online, mute will be in effect right away.
                 long mutedUntil = GameTime.GetGameTime() + muteTime * Time.Minute;
@@ -995,7 +995,7 @@ namespace Game.Chat
 
             if (WorldConfig.GetBoolValue(WorldCfg.ShowMuteInWorld))
                 Global.WorldMgr.SendWorldText(CypherStrings.CommandMutemessageWorld, muteBy, nameLink, muteTime, muteReasonStr);
-            if (target)
+            if (target != null)
             {
                 target.SendSysMessage(CypherStrings.YourChatDisabled, muteTime, muteBy, muteReasonStr);
                 handler.SendSysMessage(CypherStrings.YouDisableChat, nameLink, muteTime, muteReasonStr);
@@ -1201,7 +1201,7 @@ namespace Game.Chat
 
             // Mail data print is only defined if you have a mail
 
-            if (target)
+            if (target != null)
             {
                 // check online security
                 if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
@@ -1266,7 +1266,7 @@ namespace Game.Chat
 
                 // Only fetch these fields if commander has sufficient rights)
                 if (handler.HasPermission(RBACPermissions.CommandsPinfoCheckPersonalData) && // RBAC Perm. 48, Role 39
-                    (!handler.GetSession() || handler.GetSession().GetSecurity() >= (AccountTypes)security))
+                    (handler.GetSession() == null || handler.GetSession().GetSecurity() >= (AccountTypes)security))
                 {
                     eMail = result0.Read<string>(2);
                     regMail = result0.Read<string>(3);
@@ -1344,10 +1344,10 @@ namespace Game.Chat
 
             // Initiate output
             // Output I. LANG_PINFO_PLAYER
-            handler.SendSysMessage(CypherStrings.PinfoPlayer, target ? "" : handler.GetCypherString(CypherStrings.Offline), nameLink, targetGuid.ToString());
+            handler.SendSysMessage(CypherStrings.PinfoPlayer, target != null ? "" : handler.GetCypherString(CypherStrings.Offline), nameLink, targetGuid.ToString());
 
             // Output II. LANG_PINFO_GM_ACTIVE if character is gamemaster
-            if (target && target.IsGameMaster())
+            if (target != null && target.IsGameMaster())
                 handler.SendSysMessage(CypherStrings.PinfoGmActive);
 
             // Output III. LANG_PINFO_BANNED if ban exists and is applied
@@ -1387,7 +1387,7 @@ namespace Game.Chat
             handler.SendSysMessage(CypherStrings.PinfoChrAlive, alive);
 
             // Output XIII. phases
-            if (target)
+            if (target != null)
                 PhasingHandler.PrintToChat(handler, target);
 
             // Output XIV. LANG_PINFO_CHR_MONEY
@@ -1470,7 +1470,7 @@ namespace Game.Chat
         static bool HandlePossessCommand(CommandHandler handler)
         {
             Unit unit = handler.GetSelectedUnit();
-            if (!unit)
+            if (unit == null)
                 return false;
 
             handler.GetSession().GetPlayer().CastSpell(unit, 530, true);
@@ -1559,7 +1559,7 @@ namespace Game.Chat
 
             // accept only explicitly selected target (not implicitly self targeting case)
             Creature target = !player.GetTarget().IsEmpty() ? handler.GetSelectedCreature() : null;
-            if (target)
+            if (target != null)
             {
                 if (target.IsPet())
                 {
@@ -1628,7 +1628,7 @@ namespace Game.Chat
             if (handler.GetSession().HasPermission(RBACPermissions.CommandsSaveWithoutDelay))
             {
                 Player target = handler.GetSelectedPlayer();
-                if (target)
+                if (target != null)
                     target.SaveToDB();
                 else
                     player.SaveToDB();
@@ -1648,7 +1648,7 @@ namespace Game.Chat
         static bool HandleShowAreaCommand(CommandHandler handler, uint areaId)
         {
             Player playerTarget = handler.GetSelectedPlayer();
-            if (!playerTarget)
+            if (playerTarget == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
@@ -1699,7 +1699,7 @@ namespace Game.Chat
                 return false;
             }
 
-            if (target)
+            if (target != null)
             {
                 string nameLink = handler.PlayerLink(targetName);
                 // check online security
@@ -1821,11 +1821,11 @@ namespace Game.Chat
             else // If no name was entered - use target
             {
                 player = handler.GetSelectedPlayer();
-                if (player)
+                if (player != null)
                     name = player.GetName();
             }
 
-            if (player)
+            if (player != null)
             {
                 handler.SendSysMessage(CypherStrings.CommandUnfreeze, name);
 
@@ -1874,10 +1874,10 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
-            uint accountId = target ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid);
+            uint accountId = target != null ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid);
 
             // find only player from same account if any
-            if (!target)
+            if (target == null)
             {
                 WorldSession session = Global.WorldMgr.FindSession(accountId);
                 if (session != null)
@@ -1888,7 +1888,7 @@ namespace Game.Chat
             if (handler.HasLowerSecurity(target, targetGuid, true))
                 return false;
 
-            if (target)
+            if (target != null)
             {
                 if (target.GetSession().CanSpeak())
                 {
@@ -1906,7 +1906,7 @@ namespace Game.Chat
             stmt.AddValue(3, accountId);
             DB.Login.Execute(stmt);
 
-            if (target)
+            if (target != null)
                 target.SendSysMessage(CypherStrings.YourChatEnabled);
 
             string nameLink = handler.PlayerLink(targetName);
@@ -1920,7 +1920,7 @@ namespace Game.Chat
         static bool HandleUnPossessCommand(CommandHandler handler)
         {
             Unit unit = handler.GetSelectedUnit();
-            if (!unit)
+            if (unit == null)
                 unit = handler.GetSession().GetPlayer();
 
             unit.RemoveCharmAuras();
@@ -1939,7 +1939,7 @@ namespace Game.Chat
             {
                 // 7355: "Stuck"
                 var player1 = handler.GetSession().GetPlayer();
-                if (player1)
+                if (player1 != null)
                     player1.CastSpell(player1, SPELL_UNSTUCK_ID, false);
                 return true;
             }
@@ -1957,7 +1957,7 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(args, out player, out targetGUID))
                 return false;
 
-            if (!player)
+            if (player == null)
             {
                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_HOMEBIND);
                 stmt.AddValue(0, targetGUID.GetCounter());
@@ -1978,7 +1978,7 @@ namespace Game.Chat
                     return false;
 
                 Player caster = handler.GetSession().GetPlayer();
-                if (caster)
+                if (caster != null)
                 {
                     ObjectGuid castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, player.GetMapId(), SPELL_UNSTUCK_ID, player.GetMap().GenerateLowGuid(HighGuid.Cast));
                     Spell.SendCastResult(caster, spellInfo, new Networking.Packets.SpellCastVisual(SPELL_UNSTUCK_VISUAL, 0), castId, SpellCastResult.CantDoThatRightNow);
@@ -2105,7 +2105,7 @@ namespace Game.Chat
 
             Player player = handler.GetSession().GetPlayer();
             Player playerTarget = handler.GetSelectedPlayer();
-            if (!playerTarget)
+            if (playerTarget == null)
                 playerTarget = player;
 
             ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
@@ -2164,12 +2164,12 @@ namespace Game.Chat
                 foreach (var posCount in dest)
                 {
                     Item item1 = player.GetItemByPos(posCount.pos);
-                    if (item1)
+                    if (item1 != null)
                         item1.SetBinding(false);
                 }
             }
 
-            if (count > 0 && item)
+            if (count > 0 && item != null)
             {
                 player.SendNewItem(item, (uint)count, false, true);
                 handler.SendSysMessage(CypherStrings.Additem, itemId, count, handler.GetNameLink(playerTarget));
@@ -2212,7 +2212,7 @@ namespace Game.Chat
 
             Player player = handler.GetSession().GetPlayer();
             Player playerTarget = handler.GetSelectedPlayer();
-            if (!playerTarget)
+            if (playerTarget == null)
                 playerTarget = player;
 
             Log.outDebug(LogFilter.Server, Global.ObjectMgr.GetCypherString(CypherStrings.Additemset), itemSetId);
@@ -2409,7 +2409,7 @@ namespace Game.Chat
                 }
             }
 
-            if (count > 0 && item)
+            if (count > 0 && item != null)
             {
                 player.SendNewItem(item, (uint)count, false, true);
                 if (player != playerTarget)

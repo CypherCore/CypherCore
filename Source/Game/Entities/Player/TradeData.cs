@@ -51,7 +51,7 @@ namespace Game.Entities
 
         public void SetItem(TradeSlots slot, Item item, bool update = false)
         {
-            ObjectGuid itemGuid = item ? item.GetGUID() : ObjectGuid.Empty;
+            ObjectGuid itemGuid = item != null ? item.GetGUID() : ObjectGuid.Empty;
 
             if (m_items[(int)slot] == itemGuid && !update)
                 return;
@@ -77,7 +77,7 @@ namespace Game.Entities
 
         public void SetSpell(uint spell_id, Item castItem = null)
         {
-            ObjectGuid itemGuid = castItem ? castItem.GetGUID() : ObjectGuid.Empty;
+            ObjectGuid itemGuid = castItem != null ? castItem.GetGUID() : ObjectGuid.Empty;
 
             if (m_spell == spell_id && m_spellCastItem == itemGuid)
                 return;

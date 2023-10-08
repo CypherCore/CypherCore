@@ -207,7 +207,7 @@ namespace Game.Chat
 
             foreach (var factionEntry in CliDB.FactionStorage.Values)
             {
-                FactionState factionState = target ? target.GetReputationMgr().GetState(factionEntry) : null;
+                FactionState factionState = target != null ? target.GetReputationMgr().GetState(factionEntry) : null;
 
                 Locale locale = handler.GetSessionDbcLocale();
                 string name = factionEntry.Name[locale];
@@ -450,7 +450,7 @@ namespace Game.Chat
 
                     string valStr = "";
                     string knownStr = "";
-                    if (target && target.HasSkill((SkillType)skillInfo.Id))
+                    if (target != null && target.HasSkill((SkillType)skillInfo.Id))
                     {
                         knownStr = handler.GetCypherString(CypherStrings.Known);
                         uint curValue = target.GetPureSkillValue((SkillType)skillInfo.Id);
@@ -564,7 +564,7 @@ namespace Game.Chat
             Player target = handler.GetSelectedPlayer();
 
             // title name have single string arg for player name
-            string targetName = target ? target.GetName() : "NAME";
+            string targetName = target != null ? target.GetName() : "NAME";
 
             uint counter = 0;                                     // Counter for figure out that we found smth.
             // Search in CharTitles.dbc
@@ -572,7 +572,7 @@ namespace Game.Chat
             {
                 for (Gender gender = Gender.Male; gender <= Gender.Female; ++gender)
                 {
-                    if (target && target.GetGender() != gender)
+                    if (target != null && target.GetGender() != gender)
                         continue;
 
                     Locale locale = handler.GetSessionDbcLocale();
@@ -605,9 +605,9 @@ namespace Game.Chat
                             return true;
                         }
 
-                        string knownStr = target && target.HasTitle(titleInfo) ? handler.GetCypherString(CypherStrings.Known) : "";
+                        string knownStr = target != null && target.HasTitle(titleInfo) ? handler.GetCypherString(CypherStrings.Known) : "";
 
-                        string activeStr = target && target.m_playerData.PlayerTitle == titleInfo.MaskID
+                        string activeStr = target != null && target.m_playerData.PlayerTitle == titleInfo.MaskID
                             ? handler.GetCypherString(CypherStrings.Active) : "";
 
                         string titleNameStr = string.Format(name.ConvertFormatSyntax(), targetName);
@@ -684,7 +684,7 @@ namespace Game.Chat
                         return true;
                     }
 
-                    if (handler.GetSession())
+                    if (handler.GetSession() != null)
                         handler.SendSysMessage(CypherStrings.ItemListChat, id, id, name);
                     else
                         handler.SendSysMessage(CypherStrings.ItemListConsole, id, name);
@@ -739,7 +739,7 @@ namespace Game.Chat
                         }
 
                         // send item set in "id - [namedlink locale]" format
-                        if (handler.GetSession())
+                        if (handler.GetSession() != null)
                             handler.SendSysMessage(CypherStrings.ItemsetListChat, id, id, name, "");
                         else
                             handler.SendSysMessage(CypherStrings.ItemsetListConsole, id, name, "");
@@ -774,7 +774,7 @@ namespace Game.Chat
                     if (string.IsNullOrEmpty(name))
                         continue;
 
-                    if (!name.Like(namePart) && handler.GetSession())
+                    if (!name.Like(namePart) && handler.GetSession() != null)
                     {
                         locale = 0;
                         for (; locale < Locale.Total; ++locale)
@@ -839,7 +839,7 @@ namespace Game.Chat
                 var mapInfo = CliDB.MapStorage.LookupByKey(id);
                 if (mapInfo != null)
                 {
-                    Locale locale = handler.GetSession() ? handler.GetSession().GetSessionDbcLocale() : Global.WorldMgr.GetDefaultDbcLocale();
+                    Locale locale = handler.GetSession() != null ? handler.GetSession().GetSessionDbcLocale() : Global.WorldMgr.GetDefaultDbcLocale();
                     string name = mapInfo.MapName[locale];
                     if (name.IsEmpty())
                     {
@@ -891,7 +891,7 @@ namespace Game.Chat
                 if (ip.IsEmpty())
                 {
                     // NULL only if used from console
-                    if (!target || target == handler.GetSession().GetPlayer())
+                    if (target == null || target == handler.GetSession().GetPlayer())
                         return false;
 
                     ip = target.GetSession().GetRemoteAddress();
@@ -1004,7 +1004,7 @@ namespace Game.Chat
 
                                 string statusStr = "";
 
-                                if (target)
+                                if (target != null)
                                 {
                                     switch (target.GetQuestStatus(qInfo.Id))
                                     {
@@ -1065,7 +1065,7 @@ namespace Game.Chat
 
                         string statusStr = "";
 
-                        if (target)
+                        if (target != null)
                         {
                             QuestStatus status = target.GetQuestStatus(qInfo.Id);
 
@@ -1135,7 +1135,7 @@ namespace Game.Chat
 
                     string statusStr = "";
 
-                    if (target)
+                    if (target != null)
                     {
                         switch (target.GetQuestStatus(id))
                         {
@@ -1153,7 +1153,7 @@ namespace Game.Chat
                         }
                     }
 
-                    if (handler.GetSession())
+                    if (handler.GetSession() != null)
                     {
                         int maxLevel = 0;
                         var questLevels = Global.DB2Mgr.GetContentTuningData(quest.ContentTuningId, handler.GetSession().GetPlayer().m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
@@ -1229,14 +1229,14 @@ namespace Game.Chat
                                 return true;
                             }
 
-                            bool known = target && target.HasSpell(spellInfo.Id);
+                            bool known = target != null && target.HasSpell(spellInfo.Id);
                             var spellEffectInfo = spellInfo.GetEffects().Find(spelleffectInfo => spelleffectInfo.IsEffect(SpellEffectName.LearnSpell));
 
                             SpellInfo learnSpellInfo = spellEffectInfo != null ? Global.SpellMgr.GetSpellInfo(spellEffectInfo.TriggerSpell, spellInfo.Difficulty) : null;
 
                             bool talent = spellInfo.HasAttribute(SpellCustomAttributes.IsTalent);
                             bool passive = spellInfo.IsPassive();
-                            bool active = target && target.HasAura(spellInfo.Id);
+                            bool active = target != null && target.HasAura(spellInfo.Id);
 
                             // unit32 used to prevent interpreting public byte as char at output
                             // find rank of learned spell for learning spell, or talent rank
@@ -1297,14 +1297,14 @@ namespace Game.Chat
                         return true;
                     }
 
-                    bool known = target && target.HasSpell(id);
+                    bool known = target != null && target.HasSpell(id);
                     var spellEffectInfo = spellInfo.GetEffects().Find(spelleffectInfo => spelleffectInfo.IsEffect(SpellEffectName.LearnSpell));
 
                     SpellInfo learnSpellInfo = Global.SpellMgr.GetSpellInfo(spellEffectInfo.TriggerSpell, Difficulty.None);
 
                     bool talent = spellInfo.HasAttribute(SpellCustomAttributes.IsTalent);
                     bool passive = spellInfo.IsPassive();
-                    bool active = target && target.HasAura(id);
+                    bool active = target != null && target.HasAura(id);
 
                     // unit32 used to prevent interpreting public byte as char at output
                     // find rank of learned spell for learning spell, or talent rank

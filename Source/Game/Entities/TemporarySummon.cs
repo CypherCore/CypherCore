@@ -385,7 +385,7 @@ namespace Game.Entities
         bool IsSharingTotemSlotWith(ObjectGuid objectGuid)
         {
             Creature otherSummon = GetMap().GetCreature(objectGuid);
-            if (!otherSummon)
+            if (otherSummon == null)
                 return false;
 
             SpellInfo mySummonSpell = Global.SpellMgr.GetSpellInfo(m_unitData.CreatedBySpell, Difficulty.None);
@@ -456,7 +456,7 @@ namespace Game.Entities
             : base(properties, owner, isWorldObject)
         {
             m_owner = owner;
-            Cypher.Assert(m_owner);
+            Cypher.Assert(m_owner != null);
             UnitTypeMask |= UnitTypeMask.Minion;
             m_followAngle = SharedConst.PetFollowAngle;
             /// @todo: Find correct way
@@ -513,7 +513,7 @@ namespace Game.Entities
 
         public override string GetDebugInfo()
         {
-            return $"{base.GetDebugInfo()}\nOwner: {(GetOwner() ? GetOwner().GetGUID() : "")}";
+            return $"{base.GetDebugInfo()}\nOwner: {(GetOwner() != null ? GetOwner().GetGUID() : "")}";
         }
 
         public override Unit GetOwner() { return m_owner; }
@@ -1033,7 +1033,7 @@ namespace Game.Entities
             else
                 val = 2 * GetStat(Stats.Strength) - 20.0f;
 
-            Player owner = GetOwner() ? GetOwner().ToPlayer() : null;
+            Player owner = GetOwner() != null ? GetOwner().ToPlayer() : null;
             if (owner != null)
             {
                 if (IsHunterPet())                      //hunter pets benefit from owner's attack power

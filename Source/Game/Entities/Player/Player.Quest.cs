@@ -707,7 +707,7 @@ namespace Game.Entities
             if (CanCompleteQuest(quest.Id))
                 CompleteQuest(quest.Id);
 
-            if (!questGiver)
+            if (questGiver == null)
                 return;
 
             switch (questGiver.GetTypeId())
@@ -1190,10 +1190,10 @@ namespace Game.Entities
 
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(displaySpell.SpellId, GetMap().GetDifficultyID());
                     Unit caster = this;
-                    if (questGiver && questGiver.IsTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastComplete) && !spellInfo.HasTargetType(Targets.UnitCaster))
+                    if (questGiver != null && questGiver.IsTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastComplete) && !spellInfo.HasTargetType(Targets.UnitCaster))
                     {
                         Unit unit = questGiver.ToUnit();
-                        if (unit)
+                        if (unit != null)
                             caster = unit;
                     }
 
@@ -2326,14 +2326,14 @@ namespace Game.Entities
         public void GroupEventHappens(uint questId, WorldObject pEventObject)
         {
             var group = GetGroup();
-            if (group)
+            if (group != null)
             {
                 for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                 {
                     Player player = refe.GetSource();
 
                     // for any leave or dead (with not released body) group member at appropriate distance
-                    if (player && player.IsAtGroupRewardDistance(pEventObject) && !player.GetCorpse())
+                    if (player != null && player.IsAtGroupRewardDistance(pEventObject) && player.GetCorpse() == null)
                         player.AreaExploredOrEventHappens(questId);
                 }
             }
@@ -2450,7 +2450,7 @@ namespace Game.Entities
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
 
                 if (!QuestObjective.CanAlwaysBeProgressedInRaid(objectiveType))
-                    if (GetGroup() && GetGroup().IsRaidGroup() && !quest.IsAllowedInRaid(GetMap().GetDifficultyID()))
+                    if (GetGroup() != null && GetGroup().IsRaidGroup() && !quest.IsAllowedInRaid(GetMap().GetDifficultyID()))
                         continue;
 
                 ushort logSlot = objectiveStatusData.QuestStatusPair.Status.Slot;
@@ -2595,7 +2595,7 @@ namespace Game.Entities
                     continue;
 
                 // hide quest if player is in raid-group and quest is no raid quest
-                if (GetGroup() && GetGroup().IsRaidGroup() && !qInfo.IsAllowedInRaid(GetMap().GetDifficultyID()))
+                if (GetGroup() != null && GetGroup().IsRaidGroup() && !qInfo.IsAllowedInRaid(GetMap().GetDifficultyID()))
                     if (!InBattleground()) //there are two ways.. we can make every bg-quest a raidquest, or add this code here.. i don't know if this can be exploited by other quests, but i think all other quests depend on a specific area.. but keep this in mind, if something strange happens later
                         continue;
 
@@ -2611,7 +2611,7 @@ namespace Game.Entities
 
                 Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questStatus.Key);
                 // hide quest if player is in raid-group and quest is no raid quest
-                if (GetGroup() && GetGroup().IsRaidGroup() && !qInfo.IsAllowedInRaid(GetMap().GetDifficultyID()))
+                if (GetGroup() != null && GetGroup().IsRaidGroup() && !qInfo.IsAllowedInRaid(GetMap().GetDifficultyID()))
                     if (!InBattleground())
                         continue;
 
@@ -2855,7 +2855,7 @@ namespace Game.Entities
             packet.SkillLineIDReward = quest.RewardSkillId;
             packet.NumSkillUpsReward = quest.RewardSkillPoints;
 
-            if (questGiver)
+            if (questGiver != null)
             {
                 if (questGiver.IsGossip())
                     packet.LaunchGossip = quest.HasFlag(QuestFlags.LaunchGossipComplete);
@@ -2910,7 +2910,7 @@ namespace Game.Entities
 
         public void SendQuestConfirmAccept(Quest quest, Player receiver)
         {
-            if (!receiver)
+            if (receiver == null)
                 return;
 
             QuestConfirmAcceptResponse packet = new();
@@ -2998,7 +2998,7 @@ namespace Game.Entities
                 {
                     // need also pet quests case support
                     Creature questgiver = ObjectAccessor.GetCreatureOrPetOrVehicle(this, itr);
-                    if (!questgiver || questgiver.IsHostileTo(this))
+                    if (questgiver == null || questgiver.IsHostileTo(this))
                         continue;
 
                     if (!questgiver.HasNpcFlag(NPCFlags.QuestGiver))
@@ -3009,7 +3009,7 @@ namespace Game.Entities
                 else if (itr.IsGameObject())
                 {
                     GameObject questgiver = GetMap().GetGameObject(itr);
-                    if (!questgiver || questgiver.GetGoType() != GameObjectTypes.QuestGiver)
+                    if (questgiver == null || questgiver.GetGoType() != GameObjectTypes.QuestGiver)
                         continue;
 
                     response.QuestGiver.Add(new QuestGiverInfo(questgiver.GetGUID(), GetQuestDialogStatus(questgiver)));
@@ -3048,7 +3048,7 @@ namespace Game.Entities
                     continue;
 
                 // hide quest if player is in raid-group and quest is no raid quest
-                if (GetGroup() && GetGroup().IsRaidGroup() && !qInfo.IsAllowedInRaid(GetMap().GetDifficultyID()))
+                if (GetGroup() != null && GetGroup().IsRaidGroup() && !qInfo.IsAllowedInRaid(GetMap().GetDifficultyID()))
                     if (!InBattleground()) //there are two ways.. we can make every bg-quest a raidquest, or add this code here.. i don't know if this can be exploited by other quests, but i think all other quests depend on a specific area.. but keep this in mind, if something strange happens later
                         continue;
 
@@ -3201,7 +3201,7 @@ namespace Game.Entities
             {
                 case DisplayToastType.NewItem:
                 {
-                    if (!item)
+                    if (item == null)
                         return;
 
                     displayToast.BonusRoll = isBonusRoll;

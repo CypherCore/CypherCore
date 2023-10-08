@@ -510,9 +510,9 @@ namespace Game.Entities
 
             // group update
             Player player = ToPlayer();
-            if (player)
+            if (player != null)
             {
-                if (player.GetGroup())
+                if (player.GetGroup() != null)
                     player.SetGroupUpdateFlag(GroupUpdateFlags.CurHp);
             }
             else if (IsPet())
@@ -536,7 +536,7 @@ namespace Game.Entities
             // group update
             if (IsTypeId(TypeId.Player))
             {
-                if (ToPlayer().GetGroup())
+                if (ToPlayer().GetGroup() != null)
                     ToPlayer().SetGroupUpdateFlag(GroupUpdateFlags.MaxHp);
             }
             else if (IsPet())
@@ -590,7 +590,7 @@ namespace Game.Entities
             Player thisPlayer = ToPlayer();
             if (thisPlayer != null)
             {
-                if (thisPlayer.GetGroup())
+                if (thisPlayer.GetGroup() != null)
                     thisPlayer.SetGroupUpdateFlag(GroupUpdateFlags.PowerType);
             }
             /*else if (IsPet()) TODO 6.x
@@ -634,7 +634,7 @@ namespace Game.Entities
             // group update
             if (IsTypeId(TypeId.Player))
             {
-                if (ToPlayer().GetGroup())
+                if (ToPlayer().GetGroup() != null)
                     ToPlayer().SetGroupUpdateFlag(GroupUpdateFlags.MaxPower);
             }
             /*else if (IsPet()) TODO 6.x
@@ -675,7 +675,7 @@ namespace Game.Entities
             if (IsTypeId(TypeId.Player))
             {
                 Player player = ToPlayer();
-                if (player.GetGroup())
+                if (player.GetGroup() != null)
                     player.SetGroupUpdateFlag(GroupUpdateFlags.CurPower);
             }
             /*else if (IsPet()) TODO 6.x
@@ -788,7 +788,7 @@ namespace Game.Entities
                         target = owner;
             }
 
-            if (!target)
+            if (target == null)
                 return;
 
             damage -= (int)target.GetDamageReduction((uint)damage);
@@ -809,13 +809,13 @@ namespace Game.Entities
         float GetCombatRatingReduction(CombatRating cr)
         {
             Player player = ToPlayer();
-            if (player)
+            if (player != null)
                 return player.GetRatingBonusValue(cr);
             // Player's pet get resilience from owner
-            else if (IsPet() && GetOwner())
+            else if (IsPet() && GetOwner() != null)
             {
                 Player owner = GetOwner().ToPlayer();
-                if (owner)
+                if (owner != null)
                     return owner.GetRatingBonusValue(cr);
             }
 
@@ -954,7 +954,7 @@ namespace Game.Entities
             float chance = 0.0f;
             float levelBonus = 0.0f;
             Player playerVictim = victim.ToPlayer();
-            if (playerVictim)
+            if (playerVictim != null)
                 chance = playerVictim.m_activePlayerData.DodgePercentage;
             else
             {
@@ -991,15 +991,15 @@ namespace Game.Entities
             float chance = 0.0f;
             float levelBonus = 0.0f;
             Player playerVictim = victim.ToPlayer();
-            if (playerVictim)
+            if (playerVictim != null)
             {
                 if (playerVictim.CanParry())
                 {
                     Item tmpitem = playerVictim.GetWeaponForAttack(WeaponAttackType.BaseAttack, true);
-                    if (!tmpitem)
+                    if (tmpitem == null)
                         tmpitem = playerVictim.GetWeaponForAttack(WeaponAttackType.OffAttack, true);
 
-                    if (tmpitem)
+                    if (tmpitem != null)
                         chance = playerVictim.m_activePlayerData.ParryPercentage;
                 }
             }
@@ -1039,12 +1039,12 @@ namespace Game.Entities
             float chance = 0.0f;
             float levelBonus = 0.0f;
             Player playerVictim = victim.ToPlayer();
-            if (playerVictim)
+            if (playerVictim != null)
             {
                 if (playerVictim.CanBlock())
                 {
                     Item tmpitem = playerVictim.GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
-                    if (tmpitem && !tmpitem.IsBroken() && tmpitem.GetTemplate().GetInventoryType() == InventoryType.Shield)
+                    if (tmpitem != null && !tmpitem.IsBroken() && tmpitem.GetTemplate().GetInventoryType() == InventoryType.Shield)
                         chance = playerVictim.m_activePlayerData.BlockPercentage;
                 }
             }
@@ -1391,7 +1391,7 @@ namespace Game.Entities
             {
                 UpdateDamagePhysical(WeaponAttackType.BaseAttack);
                 Item offhand = GetWeaponForAttack(WeaponAttackType.OffAttack, true);
-                if (offhand)
+                if (offhand != null)
                     if (CanDualWield() || offhand.GetTemplate().HasFlag(ItemFlags3.AlwaysAllowDualWield))
                         UpdateDamagePhysical(WeaponAttackType.OffAttack);
 
@@ -1432,7 +1432,7 @@ namespace Game.Entities
             SetArmor((int)value, (int)(value - baseValue));
 
             Pet pet = GetPet();
-            if (pet)
+            if (pet != null)
                 pet.UpdateArmor();
 
             UpdateAttackPowerAndDamage();                           // armor dependent auras update for SPELL_AURA_MOD_ATTACK_POWER_OF_ARMOR

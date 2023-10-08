@@ -87,7 +87,7 @@ namespace Game
         void HandleCalendarCommunityInvite(CalendarCommunityInviteRequest calendarCommunityInvite)
         {
             Guild guild = Global.GuildMgr.GetGuildById(GetPlayer().GetGuildId());
-            if (guild)
+            if (guild != null)
                 guild.MassInviteToEvent(this, calendarCommunityInvite.MinLevel, calendarCommunityInvite.MaxLevel, (GuildRankOrder)calendarCommunityInvite.MaxRankOrder);
         }
 
@@ -308,7 +308,7 @@ namespace Game
                 return;
 
             Player player = Global.ObjAccessor.FindPlayerByName(calendarInvite.Name);
-            if (player)
+            if (player != null)
             {
                 // Invitee is online
                 inviteeGuid = player.GetGUID();

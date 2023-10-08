@@ -213,7 +213,7 @@ namespace Game
                     }
 
                     Player receiver = Global.ObjAccessor.FindPlayerByName(extName.Name);
-                    if (!receiver || (lang != Language.Addon && !receiver.IsAcceptWhispers() && receiver.GetSession().HasPermission(RBACPermissions.CanFilterWhispers) && !receiver.IsInWhisperWhiteList(sender.GetGUID())))
+                    if (receiver == null || (lang != Language.Addon && !receiver.IsAcceptWhispers() && receiver.GetSession().HasPermission(RBACPermissions.CanFilterWhispers) && !receiver.IsInWhisperWhiteList(sender.GetGUID())))
                     {
                         SendChatPlayerNotfoundNotice(target);
                         return;
@@ -251,10 +251,10 @@ namespace Game
                 {
                     // if player is in Battleground, he cannot say to Battlegroundmembers by /p
                     Group group = GetPlayer().GetOriginalGroup();
-                    if (!group)
+                    if (group == null)
                     {
                         group = GetPlayer().GetGroup();
-                        if (!group || group.IsBGGroup())
+                        if (group == null || group.IsBGGroup())
                             return;
                     }
 
@@ -272,7 +272,7 @@ namespace Game
                     if (GetPlayer().GetGuildId() != 0)
                     {
                         Guild guild = Global.GuildMgr.GetGuildById(GetPlayer().GetGuildId());
-                        if (guild)
+                        if (guild != null)
                         {
                             Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, guild);
 
@@ -284,7 +284,7 @@ namespace Game
                     if (GetPlayer().GetGuildId() != 0)
                     {
                         Guild guild = Global.GuildMgr.GetGuildById(GetPlayer().GetGuildId());
-                        if (guild)
+                        if (guild != null)
                         {
                             Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, guild);
 
@@ -295,7 +295,7 @@ namespace Game
                 case ChatMsg.Raid:
                 {
                     Group group = GetPlayer().GetGroup();
-                    if (!group || !group.IsRaidGroup() || group.IsBGGroup())
+                    if (group == null || !group.IsRaidGroup() || group.IsBGGroup())
                         return;
 
                     if (group.IsLeader(GetPlayer().GetGUID()))
@@ -311,7 +311,7 @@ namespace Game
                 case ChatMsg.RaidWarning:
                 {
                     Group group = GetPlayer().GetGroup();
-                    if (!group || !(group.IsRaidGroup() || WorldConfig.GetBoolValue(WorldCfg.ChatPartyRaidWarnings)) || !(group.IsLeader(GetPlayer().GetGUID()) || group.IsAssistant(GetPlayer().GetGUID())) || group.IsBGGroup())
+                    if (group == null || !(group.IsRaidGroup() || WorldConfig.GetBoolValue(WorldCfg.ChatPartyRaidWarnings)) || !(group.IsLeader(GetPlayer().GetGUID()) || group.IsAssistant(GetPlayer().GetGUID())) || group.IsBGGroup())
                         return;
 
                     Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, group);
@@ -341,7 +341,7 @@ namespace Game
                 case ChatMsg.InstanceChat:
                 {
                     Group group = GetPlayer().GetGroup();
-                    if (!group)
+                    if (group == null)
                         return;
 
                     if (group.IsLeader(GetPlayer().GetGUID()))
@@ -393,7 +393,7 @@ namespace Game
                     if (sender.GetGuildId() != 0)
                     {
                         Guild guild = Global.GuildMgr.GetGuildById(sender.GetGuildId());
-                        if (guild)
+                        if (guild != null)
                             guild.BroadcastAddonToGuild(this, type == ChatMsg.Officer, text, prefix, isLogged);
                     }
                     break;
@@ -405,7 +405,7 @@ namespace Game
                         break;
 
                     Player receiver = Global.ObjAccessor.FindPlayerByName(extName.Name);
-                    if (!receiver)
+                    if (receiver == null)
                         break;
 
                     sender.WhisperAddon(text, prefix, isLogged, receiver);
@@ -420,10 +420,10 @@ namespace Game
                     if (type != ChatMsg.InstanceChat)
                         group = sender.GetOriginalGroup();
 
-                    if (!group)
+                    if (group == null)
                     {
                         group = sender.GetGroup();
-                        if (!group)
+                        if (group == null)
                             break;
 
                         if (type == ChatMsg.Party)
@@ -586,10 +586,10 @@ namespace Game
             GetPlayer().UpdateCriteria(CriteriaType.DoEmote, (uint)packet.EmoteID, 0, 0, unit);
 
             // Send scripted event call
-            if (unit)
+            if (unit != null)
             {
                 Creature creature = unit.ToCreature();
-                if (creature)
+                if (creature != null)
                     creature.GetAI().ReceiveEmote(GetPlayer(), (TextEmotes)packet.EmoteID);
             }
 
@@ -601,7 +601,7 @@ namespace Game
         void HandleChatIgnoredOpcode(ChatReportIgnored packet)
         {
             Player player = Global.ObjAccessor.FindPlayer(packet.IgnoredGUID);
-            if (!player || player.GetSession() == null)
+            if (player == null || player.GetSession() == null)
                 return;
 
             ChatPkt data = new();
@@ -631,7 +631,7 @@ namespace Game
 
             Player sender = GetPlayer();
             Player receiver = Global.ObjAccessor.FindConnectedPlayer(canLocalWhisperTargetRequest.WhisperTarget);
-            if (!receiver || (!receiver.IsAcceptWhispers() && receiver.GetSession().HasPermission(RBACPermissions.CanFilterWhispers) && !receiver.IsInWhisperWhiteList(sender.GetGUID())))
+            if (receiver == null || (!receiver.IsAcceptWhispers() && receiver.GetSession().HasPermission(RBACPermissions.CanFilterWhispers) && !receiver.IsInWhisperWhiteList(sender.GetGUID())))
                 status = ChatWhisperTargetStatus.Offline;
             else
             {

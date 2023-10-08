@@ -21,7 +21,7 @@ namespace Game.Chat
 
             string name = "Console";
             WorldSession session = handler.GetSession();
-            if (session)
+            if (session != null)
                 name = session.GetPlayer().GetName();
 
             Global.WorldMgr.SendWorldText(CypherStrings.AnnounceColor, name, message);
@@ -36,7 +36,7 @@ namespace Game.Chat
 
             string name = "Console";
             WorldSession session = handler.GetSession();
-            if (session)
+            if (session != null)
                 name = session.GetPlayer().GetName();
 
             Global.WorldMgr.SendGMText(CypherStrings.AnnounceColor, name, message);

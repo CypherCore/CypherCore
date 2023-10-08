@@ -270,7 +270,7 @@ namespace Game
             key.Raw = linkInfo.Item2;
 
             WorldSession session = FindSession(key.AccountId);
-            if (!session || session.GetConnectToInstanceKey() != linkInfo.Item2)
+            if (session == null || session.GetConnectToInstanceKey() != linkInfo.Item2)
             {
                 linkInfo.Item1.SendAuthResponseError(BattlenetRpcErrorCode.TimedOut);
                 linkInfo.Item1.CloseSocket();
@@ -1550,7 +1550,7 @@ namespace Game
             var wt_do = new LocalizedDo(wt_builder);
             foreach (var session in m_sessions.Values)
             {
-                if (session == null || !session.GetPlayer() || !session.GetPlayer().IsInWorld)
+                if (session == null || session.GetPlayer() == null || !session.GetPlayer().IsInWorld)
                     continue;
 
                 wt_do.Invoke(session.GetPlayer());
@@ -1570,7 +1570,7 @@ namespace Game
 
                 // Player should be in world
                 Player player = session.GetPlayer();
-                if (!player || !player.IsInWorld)
+                if (player == null || !player.IsInWorld)
                     continue;
 
                 wt_do.Invoke(player);
@@ -1583,7 +1583,7 @@ namespace Game
             bool foundPlayerToSend = false;
             foreach (var session in m_sessions.Values)
             {
-                if (session != null && session.GetPlayer() && session.GetPlayer().IsInWorld &&
+                if (session != null && session.GetPlayer() != null && session.GetPlayer().IsInWorld &&
                     session.GetPlayer().GetZoneId() == zone && session != self && (team == 0 || (uint)session.GetPlayer().GetTeam() == team))
                 {
                     session.SendPacket(packet);
@@ -1697,7 +1697,7 @@ namespace Game
                 }
 
                 WorldSession sess = FindSession(account);
-                if (sess)
+                if (sess != null)
                 {
                     if (sess.GetPlayerName() != author)
                         sess.KickPlayer("World::BanAccount Banning account");
@@ -1751,7 +1751,7 @@ namespace Game
             ObjectGuid guid;
 
             // Pick a player to ban if not online
-            if (!pBanned)
+            if (pBanned == null)
             {
                 guid = Global.CharacterCacheStorage.GetCharacterGuidByName(name);
                 if (guid.IsEmpty())
@@ -1776,7 +1776,7 @@ namespace Game
             trans.Append(stmt);
             DB.Characters.CommitTransaction(trans);
 
-            if (pBanned)
+            if (pBanned != null)
                 pBanned.GetSession().KickPlayer("World::BanCharacter Banning character");
 
             return BanReturn.Success;
@@ -1789,7 +1789,7 @@ namespace Game
             ObjectGuid guid;
 
             // Pick a player to ban if not online
-            if (!pBanned)
+            if (pBanned == null)
             {
                 guid = Global.CharacterCacheStorage.GetCharacterGuidByName(name);
                 if (guid.IsEmpty())
@@ -1907,7 +1907,7 @@ namespace Game
             if (messageID <= ServerMessageType.String)
                 packet.StringParam = stringParam;
 
-            if (player)
+            if (player != null)
                 player.SendPacket(packet);
             else
                 SendGlobalMessage(packet);
@@ -2254,7 +2254,7 @@ namespace Game
             DB.Characters.Execute(stmt);
 
             foreach (var session in m_sessions.Values)
-                if (session.GetPlayer())
+                if (session.GetPlayer() != null)
                     session.GetPlayer().SetRandomWinner(false);
 
             m_NextRandomBGReset += Time.Day;

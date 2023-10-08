@@ -105,7 +105,7 @@ namespace Game.Chat
 
             // reset level for pet
             Pet pet = target.GetPet();
-            if (pet)
+            if (pet != null)
                 pet.SynchronizeLevelWithOwner();
 
             Global.ScriptMgr.OnPlayerLevelChanged(target, oldLevel);
@@ -185,7 +185,7 @@ namespace Game.Chat
                 /* TODO: 6.x remove/update pet talents
                 Pet* pet = target.GetPet();
                 Pet.resetTalentsForAllPetsOf(target, pet);
-                if (pet)
+                if (pet != null)
                     target.SendTalentsInfoData(true);
                 */
                 return true;

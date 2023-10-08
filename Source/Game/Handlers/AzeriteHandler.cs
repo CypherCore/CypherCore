@@ -15,15 +15,15 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AzeriteEssenceUnlockMilestone, Processing = PacketProcessing.Inplace)]
         void HandleAzeriteEssenceUnlockMilestone(AzeriteEssenceUnlockMilestone azeriteEssenceUnlockMilestone)
         {
-            if (!AzeriteItem.FindHeartForge(_player))
+            if (AzeriteItem.FindHeartForge(_player) == null)
                 return;
 
             Item item = _player.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
-            if (!item)
+            if (item == null)
                 return;
 
             AzeriteItem azeriteItem = item.ToAzeriteItem();
-            if (!azeriteItem || !azeriteItem.CanUseEssences())
+            if (azeriteItem == null || !azeriteItem.CanUseEssences())
                 return;
 
             AzeriteItemMilestonePowerRecord milestonePower = CliDB.AzeriteItemMilestonePowerStorage.LookupByKey(azeriteEssenceUnlockMilestone.AzeriteItemMilestonePowerID);

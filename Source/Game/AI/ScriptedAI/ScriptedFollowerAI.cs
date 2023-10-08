@@ -47,15 +47,15 @@ namespace Game.AI
 
             // @todo need a better check for quests with time limit.
             Player player = GetLeaderForFollower();
-            if (player)
+            if (player != null)
             {
                 Group group = player.GetGroup();
-                if (group)
+                if (group != null)
                 {
                     for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                     {
                         Player member = groupRef.GetSource();
-                        if (member)
+                        if (member != null)
                             if (member.IsInMap(player))
                                 member.FailQuest(_questForFollow);
                     }
@@ -104,10 +104,10 @@ namespace Game.AI
                     bool questAbandoned = (_questForFollow != 0);
 
                     Player player = GetLeaderForFollower();
-                    if (player)
+                    if (player != null)
                     {
                         Group group = player.GetGroup();
-                        if (group)
+                        if (group != null)
                         {
                             for (GroupReference groupRef = group.GetFirstMember(); groupRef != null && (maxRangeExceeded || questAbandoned); groupRef = groupRef.Next())
                             {
@@ -247,19 +247,19 @@ namespace Game.AI
         Player GetLeaderForFollower()
         {
             Player player = Global.ObjAccessor.GetPlayer(me, _leaderGUID);
-            if (player)
+            if (player != null)
             {
                 if (player.IsAlive())
                     return player;
                 else
                 {
                     Group group = player.GetGroup();
-                    if (group)
+                    if (group != null)
                     {
                         for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                         {
                             Player member = groupRef.GetSource();
-                            if (member && me.IsWithinDistInMap(member, 100.0f) && member.IsAlive())
+                            if (member != null && me.IsWithinDistInMap(member, 100.0f) && member.IsAlive())
                             {
                                 Log.outDebug(LogFilter.Scripts, $"FollowerAI::GetLeaderForFollower: GetLeader changed and returned new leader. ({me.GetGUID()})");
                                 _leaderGUID = member.GetGUID();
@@ -279,7 +279,7 @@ namespace Game.AI
         //The flag (type_flag) is unconfirmed, but used here for further research and is a good candidate.
         bool ShouldAssistPlayerInCombatAgainst(Unit who)
         {
-            if (!who || !who.GetVictim())
+            if (who == null || who.GetVictim() == null)
                 return false;
 
             //experimental (unknown) flag not present

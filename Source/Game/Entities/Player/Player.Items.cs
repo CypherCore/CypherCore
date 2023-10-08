@@ -222,7 +222,7 @@ namespace Game.Entities
             foreach (var guid in m_itemSoulboundTradeable.ToList())
             {
                 Item item = GetItemByGuid(guid);
-                if (!item || item.GetOwnerGUID() != GetGUID() || item.CheckSoulboundTradeExpire())
+                if (item == null || item.GetOwnerGUID() != GetGUID() || item.CheckSoulboundTradeExpire())
                     m_itemSoulboundTradeable.Remove(guid);
             }
         }
@@ -637,7 +637,7 @@ namespace Game.Entities
                 // search free slot in bag for place to
                 if (bag == InventorySlots.Bag0)                     // inventory
                 {
-                    if (pItem && pItem.HasItemFlag(ItemFieldFlags.Child))
+                    if (pItem != null && pItem.HasItemFlag(ItemFieldFlags.Child))
                     {
                         res = CanStoreItem_InInventorySlots(InventorySlots.ChildEquipmentStart, InventorySlots.ChildEquipmentEnd, dest, pProto, ref count, false, pItem, bag, slot);
                         if (res != InventoryResult.Ok)
@@ -791,7 +791,7 @@ namespace Game.Entities
             if (pItem != null && pItem.IsNotEmptyBag())
                 return InventoryResult.BagInBag;
 
-            if (pItem && pItem.HasItemFlag(ItemFieldFlags.Child))
+            if (pItem != null && pItem.HasItemFlag(ItemFieldFlags.Child))
             {
                 res = CanStoreItem_InInventorySlots(InventorySlots.ChildEquipmentStart, InventorySlots.ChildEquipmentEnd, dest, pProto, ref count, false, pItem, bag, slot);
                 if (res != InventoryResult.Ok)
@@ -813,7 +813,7 @@ namespace Game.Entities
             // search free slot
             byte searchSlotStart = InventorySlots.ItemStart;
             // new bags can be directly equipped
-            if (!pItem && pProto.GetClass() == ItemClass.Container && (ItemSubClassContainer)pProto.GetSubClass() == ItemSubClassContainer.Container &&
+            if (pItem == null && pProto.GetClass() == ItemClass.Container && (ItemSubClassContainer)pProto.GetSubClass() == ItemSubClassContainer.Container &&
                 (pProto.GetBonding() == ItemBondingType.None || pProto.GetBonding() == ItemBondingType.OnAcquire))
                 searchSlotStart = InventorySlots.BagStart;
 
@@ -874,7 +874,7 @@ namespace Game.Entities
             {
                 // build items in stock backpack
                 item2 = GetItemByPos(InventorySlots.Bag0, i);
-                if (item2 && !item2.IsInTrade())
+                if (item2 != null && !item2.IsInTrade())
                 {
                     inventoryCounts[i - InventorySlots.ItemStart] = item2.GetCount();
                     inventoryPointers[i - InventorySlots.ItemStart] = item2;
@@ -884,7 +884,7 @@ namespace Game.Entities
             for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; i++)
             {
                 Bag pBag = GetBagByPos(i);
-                if (pBag)
+                if (pBag != null)
                 {
                     bagCounts[i - InventorySlots.BagStart] = new uint[ItemConst.MaxBagSize];
                     bagPointers[i - InventorySlots.BagStart] = new Item[ItemConst.MaxBagSize];
@@ -892,7 +892,7 @@ namespace Game.Entities
                     {
                         // build item counts in equippable bags
                         item2 = GetItemByPos(i, j);
-                        if (item2 && !item2.IsInTrade())
+                        if (item2 != null && !item2.IsInTrade())
                         {
                             bagCounts[i - InventorySlots.BagStart][j] = item2.GetCount();
                             bagPointers[i - InventorySlots.BagStart][j] = item2;
@@ -908,7 +908,7 @@ namespace Game.Entities
                 Item item = items[k];
 
                 // no item
-                if (!item)
+                if (item == null)
                     continue;
 
                 uint remaining_count = item.GetCount();
@@ -942,7 +942,7 @@ namespace Game.Entities
                     for (byte t = InventorySlots.ItemStart; t < inventoryEnd; ++t)
                     {
                         item2 = inventoryPointers[t - InventorySlots.ItemStart];
-                        if (item2 && item2.CanBeMergedPartlyWith(pProto) == InventoryResult.Ok && inventoryCounts[t - InventorySlots.ItemStart] < pProto.GetMaxStackSize())
+                        if (item2 != null && item2.CanBeMergedPartlyWith(pProto) == InventoryResult.Ok && inventoryCounts[t - InventorySlots.ItemStart] < pProto.GetMaxStackSize())
                         {
                             inventoryCounts[t - InventorySlots.ItemStart] += remaining_count;
                             remaining_count = inventoryCounts[t - InventorySlots.ItemStart] < pProto.GetMaxStackSize() ? 0 : inventoryCounts[t - InventorySlots.ItemStart] - pProto.GetMaxStackSize();
@@ -960,7 +960,7 @@ namespace Game.Entities
                     for (byte t = InventorySlots.BagStart; !b_found && t < InventorySlots.BagEnd; ++t)
                     {
                         Bag bag = GetBagByPos(t);
-                        if (bag)
+                        if (bag != null)
                         {
                             if (!Item.ItemCanGoIntoBag(item.GetTemplate(), bag.GetTemplate()))
                                 continue;
@@ -968,7 +968,7 @@ namespace Game.Entities
                             for (byte j = 0; j < bag.GetBagSize(); j++)
                             {
                                 item2 = bagPointers[t - InventorySlots.BagStart][j];
-                                if (item2 && item2.CanBeMergedPartlyWith(pProto) == InventoryResult.Ok && bagCounts[t - InventorySlots.BagStart][j] < pProto.GetMaxStackSize())
+                                if (item2 != null && item2.CanBeMergedPartlyWith(pProto) == InventoryResult.Ok && bagCounts[t - InventorySlots.BagStart][j] < pProto.GetMaxStackSize())
                                 {
                                     // add count to stack so that later items in the list do not double-book
                                     bagCounts[t - InventorySlots.BagStart][j] += remaining_count;
@@ -994,7 +994,7 @@ namespace Game.Entities
                     for (byte t = InventorySlots.BagStart; !b_found && t < InventorySlots.BagEnd; ++t)
                     {
                         Bag bag = GetBagByPos(t);
-                        if (bag)
+                        if (bag != null)
                         {
                             pBagProto = bag.GetTemplate();
 
@@ -1042,7 +1042,7 @@ namespace Game.Entities
                 for (byte t = InventorySlots.BagStart; !b_found && t < InventorySlots.BagEnd; ++t)
                 {
                     Bag bag = GetBagByPos(t);
-                    if (bag)
+                    if (bag != null)
                     {
                         pBagProto = bag.GetTemplate();
 
@@ -1292,7 +1292,7 @@ namespace Game.Entities
                         List<ItemPosCount> childDest = new();
                         CanStoreItem_InInventorySlots(InventorySlots.ChildEquipmentStart, InventorySlots.ChildEquipmentEnd, childDest, childTemplate, ref count, false, null, ItemConst.NullBag, ItemConst.NullSlot);
                         Item childItem = StoreNewItem(childDest, childTemplate.GetId(), update, 0, null, context, null, addToCollection);
-                        if (childItem)
+                        if (childItem != null)
                         {
                             childItem.SetCreator(item.GetGUID());
                             childItem.SetItemFlag(ItemFieldFlags.Child);
@@ -1644,13 +1644,13 @@ namespace Game.Entities
             if (itemChildEquipment != null)
             {
                 Item childItem = GetChildItemByGuid(parentItem.GetChildItem());
-                if (childItem)
+                if (childItem != null)
                 {
                     ushort childDest = (ushort)((InventorySlots.Bag0 << 8) | itemChildEquipment.ChildItemEquipSlot);
                     if (childItem.GetPos() != childDest)
                     {
                         Item dstItem = GetItemByPos(childDest);
-                        if (!dstItem)                                      // empty slot, simple case
+                        if (dstItem == null)                                      // empty slot, simple case
                         {
                             RemoveItem(childItem.GetBagSlot(), childItem.GetSlot(), true);
                             EquipItem(childDest, childItem, true);
@@ -1722,7 +1722,7 @@ namespace Game.Entities
             if (Global.DB2Mgr.GetItemChildEquipment(parentItem.GetEntry()) != null)
             {
                 Item childItem = GetChildItemByGuid(parentItem.GetChildItem());
-                if (childItem)
+                if (childItem != null)
                 {
                     if (IsChildEquipmentPos(childItem.GetPos()))
                         return;
@@ -1770,10 +1770,10 @@ namespace Game.Entities
 
             if (msg != InventoryResult.Ok)
             {
-                if (item1)
+                if (item1 != null)
                     failure.Item[0] = item1.GetGUID();
 
-                if (item2)
+                if (item2 != null)
                     failure.Item[1] = item2.GetGUID();
 
                 failure.ContainerBSlot = 0; // bag equip slot, used with EQUIP_ERR_EVENT_AUTOEQUIP_BIND_CONFIRM and EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG2
@@ -1783,7 +1783,7 @@ namespace Game.Entities
                     case InventoryResult.CantEquipLevelI:
                     case InventoryResult.PurchaseLevelTooLow:
                     {
-                        failure.Level = (item1 ? item1.GetRequiredLevel() : 0);
+                        failure.Level = (item1 != null ? item1.GetRequiredLevel() : 0);
                         break;
                     }
                     case InventoryResult.EventAutoequipBindConfirm:    // no idea about this one...
@@ -1797,7 +1797,7 @@ namespace Game.Entities
                     case InventoryResult.ItemMaxLimitCategorySocketedExceededIs:
                     case InventoryResult.ItemMaxLimitCategoryEquippedExceededIs:
                     {
-                        ItemTemplate proto = item1 ? item1.GetTemplate() : Global.ObjectMgr.GetItemTemplate(itemId);
+                        ItemTemplate proto = item1 != null ? item1.GetTemplate() : Global.ObjectMgr.GetItemTemplate(itemId);
                         failure.LimitCategory = (int)(proto != null ? proto.GetItemLimitCategory() : 0u);
                         break;
                     }
@@ -1924,7 +1924,7 @@ namespace Game.Entities
             byte dstslot = (byte)(dst & 255);
 
             Item pSrcItem = GetItemByPos(srcbag, srcslot);
-            if (!pSrcItem)
+            if (pSrcItem == null)
             {
                 SendEquipError(InventoryResult.ItemNotFound, pSrcItem);
                 return;
@@ -1962,7 +1962,7 @@ namespace Game.Entities
 
             Log.outDebug(LogFilter.Player, "STORAGE: SplitItem bag = {0}, slot = {1}, item = {2}, count = {3}", dstbag, dstslot, pSrcItem.GetEntry(), count);
             Item pNewItem = pSrcItem.CloneItem(count, this);
-            if (!pNewItem)
+            if (pNewItem == null)
             {
                 SendEquipError(InventoryResult.ItemNotFound, pSrcItem);
                 return;
@@ -2044,7 +2044,7 @@ namespace Game.Entities
             if (pSrcItem.HasItemFlag(ItemFieldFlags.Child))
             {
                 Item parentItem = GetItemByGuid(pSrcItem.m_itemData.Creator);
-                if (parentItem)
+                if (parentItem != null)
                 {
                     if (IsEquipmentPos(src))
                     {
@@ -2055,10 +2055,10 @@ namespace Game.Entities
                     }
                 }
             }
-            else if (pDstItem && pDstItem.HasItemFlag(ItemFieldFlags.Child))
+            else if (pDstItem != null && pDstItem.HasItemFlag(ItemFieldFlags.Child))
             {
                 Item parentItem = GetItemByGuid(pDstItem.m_itemData.Creator);
-                if (parentItem)
+                if (parentItem != null)
                 {
                     if (IsEquipmentPos(dst))
                     {
@@ -2522,7 +2522,7 @@ namespace Game.Entities
                 packet.IsEncounterLoot = true;
             }
 
-            if (broadcast && GetGroup() && !item.GetTemplate().HasFlag(ItemFlags3.DontReportLootLogToParty))
+            if (broadcast && GetGroup() != null && !item.GetTemplate().HasFlag(ItemFlags3.DontReportLootLogToParty))
                 GetGroup().BroadcastPacket(packet, true);
             else
                 SendPacket(packet);
@@ -2576,7 +2576,7 @@ namespace Game.Entities
 
                 Item pItem = GetItemByPos(InventorySlots.Bag0, slot);
 
-                if (!pItem || pItem.GetSocketColor(0) == 0)   //if item has no sockets or no item is equipped go to next item
+                if (pItem == null || pItem.GetSocketColor(0) == 0)   //if item has no sockets or no item is equipped go to next item
                     continue;
 
                 //cycle all (gem)enchants
@@ -2675,7 +2675,7 @@ namespace Game.Entities
         public Item GetUseableItemByPos(byte bag, byte slot)
         {
             Item item = GetItemByPos(bag, slot);
-            if (!item)
+            if (item == null)
                 return null;
 
             if (!CanUseAttackType(GetAttackBySlot(slot, item.GetTemplate().GetInventoryType())))
@@ -2743,7 +2743,7 @@ namespace Game.Entities
             uint currentCount = 0;
             return !ForEachItem(location, pItem =>
             {
-                if (pItem && pItem.GetEntry() == item && !pItem.IsInTrade())
+                if (pItem != null && pItem.GetEntry() == item && !pItem.IsInTrade())
                 {
                     currentCount += pItem.GetCount();
                     if (currentCount >= count)
@@ -2879,7 +2879,7 @@ namespace Game.Entities
             for (byte i = InventorySlots.ItemStart; i < inventoryEnd; i++)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem)
+                if (pItem != null)
                 {
                     if (pItem.IsConjuredConsumable())
                         DestroyItem(InventorySlots.Bag0, i, update);
@@ -2890,12 +2890,12 @@ namespace Game.Entities
             for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; i++)
             {
                 Bag pBag = GetBagByPos(i);
-                if (pBag)
+                if (pBag != null)
                 {
                     for (byte j = 0; j < pBag.GetBagSize(); j++)
                     {
                         Item pItem = pBag.GetItemByPos(j);
-                        if (pItem)
+                        if (pItem != null)
                             if (pItem.IsConjuredConsumable())
                                 DestroyItem(i, j, update);
                     }
@@ -2906,7 +2906,7 @@ namespace Game.Entities
             for (byte i = EquipmentSlot.Start; i < InventorySlots.BagEnd; i++)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem)
+                if (pItem != null)
                     if (pItem.IsConjuredConsumable())
                         DestroyItem(InventorySlots.Bag0, i, update);
             }
@@ -2920,7 +2920,7 @@ namespace Game.Entities
             for (byte i = InventorySlots.ItemStart; i < inventoryEnd; i++)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem)
+                if (pItem != null)
                     if (pItem.IsLimitedToAnotherMapOrZone(GetMapId(), new_zone))
                         DestroyItem(InventorySlots.Bag0, i, update);
             }
@@ -2929,12 +2929,12 @@ namespace Game.Entities
             for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; i++)
             {
                 Bag pBag = GetBagByPos(i);
-                if (pBag)
+                if (pBag != null)
                 {
                     for (byte j = 0; j < pBag.GetBagSize(); j++)
                     {
                         Item pItem = pBag.GetItemByPos(j);
-                        if (pItem)
+                        if (pItem != null)
                             if (pItem.IsLimitedToAnotherMapOrZone(GetMapId(), new_zone))
                                 DestroyItem(i, j, update);
                     }
@@ -2945,7 +2945,7 @@ namespace Game.Entities
             for (byte i = EquipmentSlot.Start; i < InventorySlots.BagEnd; i++)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem)
+                if (pItem != null)
                     if (pItem.IsLimitedToAnotherMapOrZone(GetMapId(), new_zone))
                         DestroyItem(InventorySlots.Bag0, i, update);
             }
@@ -2955,7 +2955,7 @@ namespace Game.Entities
         {
             if (restrictOnlyLfg)
             {
-                if (!GetGroup() || !GetGroup().IsLFGGroup())
+                if (GetGroup() == null || !GetGroup().IsLFGGroup())
                     return InventoryResult.Ok;    // not in LFG group
 
                 // check if looted object is inside the lfg dungeon
@@ -3008,7 +3008,7 @@ namespace Game.Entities
                     for (byte i = InventorySlots.BuyBackStart + 1; i < InventorySlots.BuyBackEnd; ++i)
                     {
                         // found empty
-                        if (!m_items[i])
+                        if (m_items[i] == null)
                         {
                             oldest_slot = i;
                             break;
@@ -3066,7 +3066,7 @@ namespace Game.Entities
             }
 
             Creature creature = GetNPCIfCanInteractWith(vendorGuid, NPCFlags.Vendor, NPCFlags2.None);
-            if (!creature)
+            if (creature == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: BuyCurrencyFromVendorSlot - {0} not found or you can't interact with him.", vendorGuid.ToString());
                 SendBuyError(BuyResult.DistanceTooFar, null, currency);
@@ -3233,7 +3233,7 @@ namespace Game.Entities
                 return false;
 
             Creature creature = GetNPCIfCanInteractWith(vendorguid, NPCFlags.Vendor, NPCFlags2.None);
-            if (!creature)
+            if (creature == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: BuyItemFromVendor - {0} not found or you can't interact with him.", vendorguid.ToString());
                 SendBuyError(BuyResult.DistanceTooFar, null, item);
@@ -3456,7 +3456,7 @@ namespace Game.Entities
             SQLTransaction trans = new();
 
             Item item = Item.CreateItem(itemEntry, count, context, null);
-            if (item)
+            if (item != null)
             {
                 item.SaveToDB(trans);
                 draft.AddItem(item);
@@ -3481,7 +3481,7 @@ namespace Game.Entities
             if (slot >= InventorySlots.BuyBackStart && slot < InventorySlots.BuyBackEnd)
             {
                 Item pItem = m_items[slot];
-                if (pItem)
+                if (pItem != null)
                 {
                     pItem.RemoveFromWorld();
                     if (del)
@@ -3503,7 +3503,7 @@ namespace Game.Entities
                 SetBuybackTimestamp(eslot, 0);
 
                 // if current backslot is filled set to now free slot
-                if (m_items[m_currentBuybackSlot])
+                if (m_items[m_currentBuybackSlot] != null)
                     m_currentBuybackSlot = slot;
             }
         }
@@ -3518,19 +3518,19 @@ namespace Game.Entities
             for (byte i = EquipmentSlot.Start; i < inventoryEnd; ++i)
             {
                 Item item = GetUseableItemByPos(InventorySlots.Bag0, i);
-                if (item && Global.DB2Mgr.IsTotemCategoryCompatibleWith(item.GetTemplate().GetTotemCategory(), TotemCategory))
+                if (item != null && Global.DB2Mgr.IsTotemCategoryCompatibleWith(item.GetTemplate().GetTotemCategory(), TotemCategory))
                     return true;
             }
 
             for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; ++i)
             {
                 Bag bag = GetBagByPos(i);
-                if (bag)
+                if (bag != null)
                 {
                     for (byte j = 0; j < bag.GetBagSize(); ++j)
                     {
                         Item item = GetUseableItemByPos(i, j);
-                        if (item && Global.DB2Mgr.IsTotemCategoryCompatibleWith(item.GetTemplate().GetTotemCategory(), TotemCategory))
+                        if (item != null && Global.DB2Mgr.IsTotemCategoryCompatibleWith(item.GetTemplate().GetTotemCategory(), TotemCategory))
                             return true;
                     }
                 }
@@ -3539,7 +3539,7 @@ namespace Game.Entities
             for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
             {
                 Item item = GetUseableItemByPos(InventorySlots.Bag0, i);
-                if (item && Global.DB2Mgr.IsTotemCategoryCompatibleWith(item.GetTemplate().GetTotemCategory(), TotemCategory))
+                if (item != null && Global.DB2Mgr.IsTotemCategoryCompatibleWith(item.GetTemplate().GetTotemCategory(), TotemCategory))
                     return true;
             }
 
@@ -4050,7 +4050,7 @@ namespace Game.Entities
         {
             for (byte i = 0; i < InventorySlots.BagEnd; ++i)
             {
-                if (m_items[i])
+                if (m_items[i] != null)
                 {
                     if (!m_items[i].IsAzeriteItem() || m_items[i].IsBroken() || !CanUseAttackType(Player.GetAttackBySlot(i, m_items[i].GetTemplate().GetInventoryType())))
                         continue;
@@ -4064,7 +4064,7 @@ namespace Game.Entities
         {
             for (byte i = 0; i < InventorySlots.BagEnd; ++i)
             {
-                if (m_items[i])
+                if (m_items[i] != null)
                 {
                     if (!m_items[i].IsAzeriteEmpoweredItem() || m_items[i].IsBroken() || !CanUseAttackType(Player.GetAttackBySlot(i, m_items[i].GetTemplate().GetInventoryType())))
                         continue;
@@ -4170,7 +4170,7 @@ namespace Game.Entities
 
             uint need_space;
 
-            if (pSrcItem)
+            if (pSrcItem != null)
             {
                 if (pSrcItem.IsNotEmptyBag() && !IsBagPos((ushort)((ushort)bag << 8 | slot)))
                     return InventoryResult.DestroyNonemptyBag;
@@ -4522,7 +4522,7 @@ namespace Game.Entities
                         ++freeSlotCount;
 
                 for (byte i = ProfessionSlots.Start; i < ProfessionSlots.End; ++i)
-                    if (!GetItemByPos(InventorySlots.Bag0, i))
+                    if (GetItemByPos(InventorySlots.Bag0, i) == null)
                         ++freeSlotCount;
             }
 
@@ -4650,7 +4650,7 @@ namespace Game.Entities
             if (pBag == null || pBag == pSrcItem)
                 return InventoryResult.WrongBagType;
 
-            if (pSrcItem)
+            if (pSrcItem != null)
             {
                 if (pSrcItem.IsNotEmptyBag())
                     return InventoryResult.DestroyNonemptyBag;
@@ -4990,7 +4990,7 @@ namespace Game.Entities
                             if (IsInCombat())
                                 return InventoryResult.NotInCombat;
                             Battleground bg = GetBattleground();
-                            if (bg)
+                            if (bg != null)
                                 if (bg.IsArena() && bg.GetStatus() == BattlegroundStatus.InProgress)
                                     return InventoryResult.NotDuringArenaMatch;
                         }
@@ -5151,7 +5151,7 @@ namespace Game.Entities
         public InventoryResult CanEquipChildItem(Item parentItem)
         {
             Item childItem = GetChildItemByGuid(parentItem.GetChildItem());
-            if (!childItem)
+            if (childItem == null)
                 return InventoryResult.Ok;
 
             ItemChildEquipmentRecord childEquipement = Global.DB2Mgr.GetItemChildEquipment(parentItem.GetEntry());
@@ -5159,7 +5159,7 @@ namespace Game.Entities
                 return InventoryResult.Ok;
 
             Item dstItem = GetItemByPos(InventorySlots.Bag0, childEquipement.ChildItemEquipSlot);
-            if (!dstItem)
+            if (dstItem == null)
                 return InventoryResult.Ok;
 
             ushort childDest = (ushort)((InventorySlots.Bag0 << 8) | childEquipement.ChildItemEquipSlot);
@@ -5278,7 +5278,7 @@ namespace Game.Entities
                 if (IsInCombat())
                     return InventoryResult.NotInCombat;
                 Battleground bg = GetBattleground();
-                if (bg)
+                if (bg != null)
                     if (bg.IsArena() && bg.GetStatus() == BattlegroundStatus.InProgress)
                         return InventoryResult.NotDuringArenaMatch;
             }
@@ -5403,9 +5403,9 @@ namespace Game.Entities
             else
             {
                 AzeriteEmpoweredItem azeriteEmpoweredItem = item.ToAzeriteEmpoweredItem();
-                if (azeriteEmpoweredItem)
+                if (azeriteEmpoweredItem != null)
                 {
-                    if (!apply || GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Equipment))
+                    if (!apply || GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Equipment) != null)
                     {
                         for (int i = 0; i < SharedConst.MaxAzeriteEmpoweredTier; ++i)
                         {
@@ -5884,7 +5884,7 @@ namespace Game.Entities
             for (byte i = InventorySlots.BankBagStart; i < InventorySlots.BankBagEnd; i++)
             {
                 Item item = GetItemByPos(InventorySlots.Bag0, i);
-                if (item)
+                if (item != null)
                 {
                     if (item.GetEntry() == itemEntry && !item.IsInTrade())
                     {
@@ -5914,7 +5914,7 @@ namespace Game.Entities
             for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ReagentEnd; ++i)
             {
                 Item item = GetItemByPos(InventorySlots.Bag0, i);
-                if (item)
+                if (item != null)
                 {
                     if (item.GetEntry() == itemEntry && !item.IsInTrade())
                     {
@@ -5943,7 +5943,7 @@ namespace Game.Entities
             for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
             {
                 Item item = GetItemByPos(InventorySlots.Bag0, i);
-                if (item)
+                if (item != null)
                 {
                     if (item.GetEntry() == itemEntry && !item.IsInTrade())
                     {
@@ -6017,7 +6017,7 @@ namespace Game.Entities
                 for (byte slot = (byte)(InventorySlots.ItemStart + slots); slot < InventorySlots.ItemEnd; ++slot)
                 {
                     Item unstorableItem = GetItemByPos(InventorySlots.Bag0, slot);
-                    if (unstorableItem)
+                    if (unstorableItem != null)
                         unstorableItems.Add(unstorableItem);
                 }
 
@@ -6110,7 +6110,7 @@ namespace Game.Entities
                     if (newitem.GetQuality() > ItemQuality.Epic || (newitem.GetQuality() == ItemQuality.Epic && newitem.GetItemLevel(this) >= GuildConst.MinNewsItemLevel))
                     {
                         Guild guild = GetGuild();
-                        if (guild)
+                        if (guild != null)
                             guild.AddGuildNews(GuildNews.ItemLooted, GetGUID(), 0, item.itemid);
                     }
                 }
@@ -6162,7 +6162,7 @@ namespace Game.Entities
             // We have to convert player corpse to bones, not to be able to resurrect there
             // SpawnCorpseBones isn't handy, 'cos it saves player while he in BG
             Corpse bones = GetMap().ConvertCorpseToBones(GetGUID(), true);
-            if (!bones)
+            if (bones == null)
                 return;
 
             // Now we must make bones lootable, and send player loot

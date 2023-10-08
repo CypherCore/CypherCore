@@ -160,7 +160,7 @@ namespace Game.Arenas
             for (byte i = RingofValorObjectTypes.Pilar1; i <= RingofValorObjectTypes.PilarCollision4; ++i)
             {
                 GameObject go = GetBGObject(i);
-                if (go)
+                if (go != null)
                 {
                     if (i >= RingofValorObjectTypes.PilarCollision1)
                     {
@@ -171,7 +171,7 @@ namespace Game.Arenas
                     foreach (var guid in GetPlayers().Keys)
                     {
                         Player player = Global.ObjAccessor.FindPlayer(guid);
-                        if (player)
+                        if (player != null)
                             go.SendUpdateToPlayer(player);
                     }
                 }

@@ -15,7 +15,7 @@ namespace Game
         void HandleAttackSwing(AttackSwing packet)
         {
             Unit enemy = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Victim);
-            if (!enemy)
+            if (enemy == null)
             {
                 // stop attack state at client
                 SendAttackStop(null);
@@ -33,7 +33,7 @@ namespace Game
             //! so we'll place the same check here. Note that it might be possible to reuse this snippet
             //! in other places as well.
             Vehicle vehicle = GetPlayer().GetVehicle();
-            if (vehicle)
+            if (vehicle != null)
             {
                 VehicleSeatRecord seat = vehicle.GetSeatForPassenger(GetPlayer());
                 Cypher.Assert(seat != null);

@@ -1294,28 +1294,28 @@ namespace Game.Networking.Packets
         {
             Player playerAttacker = attacker.ToPlayer();
             Creature creatureAttacker = attacker.ToCreature();
-            if (playerAttacker)
+            if (playerAttacker != null)
             {
                 Player playerTarget = target.ToPlayer();
                 Creature creatureTarget = target.ToCreature();
-                if (playerTarget)
+                if (playerTarget != null)
                     return GenerateDataPlayerToPlayer(playerAttacker, playerTarget);
-                else if (creatureTarget)
+                else if (creatureTarget != null)
                 {
                     if (creatureTarget.HasScalableLevels())
                         return GenerateDataPlayerToCreature(playerAttacker, creatureTarget);
                 }
             }
-            else if (creatureAttacker)
+            else if (creatureAttacker != null)
             {
                 Player playerTarget = target.ToPlayer();
                 Creature creatureTarget = target.ToCreature();
-                if (playerTarget)
+                if (playerTarget != null)
                 {
                     if (creatureAttacker.HasScalableLevels())
                         return GenerateDataCreatureToPlayer(creatureAttacker, playerTarget);
                 }
-                else if (creatureTarget)
+                else if (creatureTarget != null)
                 {
                     if (creatureAttacker.HasScalableLevels() || creatureTarget.HasScalableLevels())
                         return GenerateDataCreatureToCreature(creatureAttacker, creatureTarget);

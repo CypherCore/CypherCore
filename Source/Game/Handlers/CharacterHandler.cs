@@ -186,7 +186,7 @@ namespace Game
 
             if (req.QuestID != 0)
             {
-                if (!_player)
+                if (_player == null)
                     return false;
 
                 if (!_player.IsQuestRewarded((uint)req.QuestID))
@@ -647,14 +647,14 @@ namespace Game
             uint initAccountId = GetAccountId();
 
             // can't delete loaded character
-            if (Global.ObjAccessor.FindPlayer(charDelete.Guid))
+            if (Global.ObjAccessor.FindPlayer(charDelete.Guid) != null)
             {
                 Global.ScriptMgr.OnPlayerFailedDelete(charDelete.Guid, initAccountId);
                 return;
             }
 
             // is guild leader
-            if (Global.GuildMgr.GetGuildByLeader(charDelete.Guid))
+            if (Global.GuildMgr.GetGuildByLeader(charDelete.Guid) != null)
             {
                 Global.ScriptMgr.OnPlayerFailedDelete(charDelete.Guid, initAccountId);
                 SendCharDelete(ResponseCodes.CharDeleteFailedGuildLeader);
@@ -764,7 +764,7 @@ namespace Game
 
         public void HandleContinuePlayerLogin()
         {
-            if (!PlayerLoading() || GetPlayer())
+            if (!PlayerLoading() || GetPlayer() != null)
             {
                 KickPlayer("WorldSession::HandleContinuePlayerLogin incorrect player state when logging in");
                 return;
@@ -834,7 +834,7 @@ namespace Game
                 pCurrChar.SetInGuild(resultGuild.Read<uint>(0));
                 pCurrChar.SetGuildRank(resultGuild.Read<byte>(1));
                 Guild guild = Global.GuildMgr.GetGuildById(pCurrChar.GetGuildId());
-                if (guild)
+                if (guild != null)
                     pCurrChar.SetGuildLevel(guild.GetLevel());
             }
             else if (pCurrChar.GetGuildId() != 0)
@@ -890,7 +890,7 @@ namespace Game
             if (pCurrChar.GetGuildId() != 0)
             {
                 Guild guild = Global.GuildMgr.GetGuildById(pCurrChar.GetGuildId());
-                if (guild)
+                if (guild != null)
                     guild.SendLoginInfo(this);
                 else
                 {
@@ -917,7 +917,7 @@ namespace Game
 
             // announce group about member online (must be after add to player list to receive announce to self)
             Group group = pCurrChar.GetGroup();
-            if (group)
+            if (group != null)
             {
                 group.SendUpdate();
                 if (group.GetLeaderGUID() == pCurrChar.GetGUID())
@@ -1093,7 +1093,7 @@ namespace Game
 
         public void AbortLogin(LoginFailureReason reason)
         {
-            if (!PlayerLoading() || GetPlayer())
+            if (!PlayerLoading() || GetPlayer() != null)
             {
                 KickPlayer("WorldSession::AbortLogin incorrect player state when logging in");
                 return;
@@ -1404,7 +1404,7 @@ namespace Game
                 return;
 
             GameObject go = GetPlayer().FindNearestGameObjectOfType(GameObjectTypes.BarberChair, 5.0f);
-            if (!go)
+            if (go == null)
             {
                 SendPacket(new BarberShopResult(BarberShopResult.ResultEnum.NotOnChair));
                 return;
@@ -1583,7 +1583,7 @@ namespace Game
                             Item item = _player.GetItemByPos(InventorySlots.Bag0, i);
 
                             // cheating check 1 (item equipped but sent empty guid)
-                            if (!item)
+                            if (item == null)
                                 return;
 
                             // cheating check 2 (sent guid does not match equipped item)
@@ -1678,10 +1678,10 @@ namespace Game
                 Item item = GetPlayer().GetItemByGuid(useEquipmentSet.Items[i].Item);
 
                 ushort dstPos = (ushort)(i | (InventorySlots.Bag0 << 8));
-                if (!item)
+                if (item == null)
                 {
                     Item uItem = GetPlayer().GetItemByPos(InventorySlots.Bag0, i);
-                    if (!uItem)
+                    if (uItem == null)
                         continue;
 
                     List<ItemPosCount> itemPosCount = new();
@@ -2473,7 +2473,7 @@ namespace Game
                 return;
 
             Corpse corpse = GetPlayer().GetCorpse();
-            if (!corpse)
+            if (corpse == null)
                 return;
 
             // prevent resurrect before 30-sec delay after body release not finished
@@ -2506,7 +2506,7 @@ namespace Game
                 return;
 
             Player ressPlayer = Global.ObjAccessor.GetPlayer(GetPlayer(), packet.Resurrecter);
-            if (ressPlayer)
+            if (ressPlayer != null)
             {
                 InstanceScript instance = ressPlayer.GetInstanceScript();
                 if (instance != null)

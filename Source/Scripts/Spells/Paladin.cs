@@ -266,7 +266,7 @@ namespace Scripts.Spells.Paladin
         SpellCastResult CheckForbearance()
         {
             Unit target = GetExplTargetUnit();
-            if (!target || target.HasAura(SpellIds.Forbearance))
+            if (target == null || target.HasAura(SpellIds.Forbearance))
                 return SpellCastResult.TargetAurastate;
 
             return SpellCastResult.SpellCastOk;
@@ -321,7 +321,7 @@ namespace Scripts.Spells.Paladin
         void HandleEffectPeriodic(AuraEffect aurEff)
         {
             AreaTrigger at = GetTarget().GetAreaTrigger(SpellIds.Consecration);
-            if (at)
+            if (at != null)
                 GetTarget().CastSpell(at.GetPosition(), SpellIds.ConsecrationDamage);
         }
 
@@ -826,7 +826,7 @@ namespace Scripts.Spells.Paladin
         void HandleScript(uint effIndex)
         {
             Unit initialTarget = ObjAccessor.GetUnit(GetCaster(), _targetGUID);
-            if (initialTarget)
+            if (initialTarget != null)
                 initialTarget.CastSpell(GetHitUnit(), SpellIds.HolyPrismAreaBeamVisual, true);
         }
 
@@ -879,7 +879,7 @@ namespace Scripts.Spells.Paladin
             Unit caster = GetCaster();
 
             Unit unitTarget = GetHitUnit();
-            if (unitTarget)
+            if (unitTarget != null)
             {
                 if (caster.IsFriendlyTo(unitTarget))
                     caster.CastSpell(unitTarget, SpellIds.HolyShockHealing, GetSpell());
@@ -1015,7 +1015,7 @@ namespace Scripts.Spells.Paladin
         SpellCastResult CheckForbearance()
         {
             Unit target = GetExplTargetUnit();
-            if (!target || target.HasAura(SpellIds.Forbearance))
+            if (target == null || target.HasAura(SpellIds.Forbearance))
                 return SpellCastResult.TargetAurastate;
 
             return SpellCastResult.SpellCastOk;
@@ -1048,7 +1048,7 @@ namespace Scripts.Spells.Paladin
 
         bool CheckProc(ProcEventInfo eventInfo)
         {
-            if (!eventInfo.GetActionTarget())
+            if (eventInfo.GetActionTarget() == null)
                 return false;
             if (eventInfo.GetActionTarget().HasAura(SpellIds.BeaconOfLight, eventInfo.GetActor().GetGUID()))
                 return false;
@@ -1102,7 +1102,7 @@ namespace Scripts.Spells.Paladin
             foreach (var summonedObject in GetSpell().GetExecuteLogEffect(SpellEffectName.Summon).GenericVictimTargets)
             {
                 Unit hammer = ObjAccessor.GetUnit(GetCaster(), summonedObject.Victim);
-                if (hammer)
+                if (hammer != null)
                 {
                     hammer.CastSpell(hammer, SpellIds.LightHammerCosmetic,
                         new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetTriggeringSpell(GetSpell()));
@@ -1130,7 +1130,7 @@ namespace Scripts.Spells.Paladin
         {
             Unit lightHammer = GetTarget();
             Unit originalCaster = lightHammer.GetOwner();
-            if (originalCaster)
+            if (originalCaster != null)
             {
                 originalCaster.CastSpell(lightHammer.GetPosition(), SpellIds.LightHammerDamage, TriggerCastFlags.IgnoreCastInProgress);
                 originalCaster.CastSpell(lightHammer.GetPosition(), SpellIds.LightHammerHealing, TriggerCastFlags.IgnoreCastInProgress);

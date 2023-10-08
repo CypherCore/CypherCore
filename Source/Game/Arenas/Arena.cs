@@ -112,7 +112,7 @@ namespace Game.Arenas
                     if (winnerArenaTeam != null && loserArenaTeam != null && winnerArenaTeam != loserArenaTeam)
                     {
                         Player player = _GetPlayer(guid, bgPlayer.OfflineRemoveTime != 0, "Arena.RemovePlayerAtLeave");
-                        if (player)
+                        if (player != null)
                             loserArenaTeam.MemberLost(player, GetArenaMatchmakerRating(GetOtherTeam(bgPlayer.Team)));
                         else
                             loserArenaTeam.OfflineMemberLost(guid, GetArenaMatchmakerRating(GetOtherTeam(bgPlayer.Team)));
@@ -189,7 +189,7 @@ namespace Game.Arenas
                             foreach (var score in PlayerScores)
                             {
                                 Player player = Global.ObjAccessor.FindPlayer(score.Key);
-                                if (player)
+                                if (player != null)
                                 {
                                     Log.outDebug(LogFilter.Arena, "Statistics match Type: {0} for {1} (GUID: {2}, Team: {3}, IP: {4}): {5}",
                                         GetArenaType(), player.GetName(), score.Key, player.GetArenaTeamId((byte)(GetArenaType() == ArenaTypes.Team5v5 ? 2 : (GetArenaType() == ArenaTypes.Team3v3 ? 1 : 0))),
@@ -229,7 +229,7 @@ namespace Game.Arenas
                         }
 
                         Player player = _GetPlayer(pair.Key, pair.Value.OfflineRemoveTime != 0, "Arena.EndBattleground");
-                        if (!player)
+                        if (player == null)
                             continue;
 
                         // per player calculation
@@ -251,7 +251,7 @@ namespace Game.Arenas
                                 if (guildId != 0)
                                 {
                                     Guild guild = Global.GuildMgr.GetGuildById(guildId);
-                                    if (guild)
+                                    if (guild != null)
                                         guild.UpdateCriteria(CriteriaType.WinAnyRankedArena, Math.Max(winnerArenaTeam.GetRating(), 1), 0, 0, null, player);
                                 }
                             }

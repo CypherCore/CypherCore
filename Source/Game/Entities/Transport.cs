@@ -327,7 +327,7 @@ namespace Game.Entities
                 passenger.m_movementInfo.transport.guid = GetGUID();
 
                 Player player = passenger.ToPlayer();
-                if (player)
+                if (player != null)
                     Global.ScriptMgr.OnAddPassenger(this, player);
             }
         }
@@ -358,7 +358,7 @@ namespace Game.Entities
                 return null;
 
             Creature creature = Creature.CreateCreatureFromDB(guid, map, false, true);
-            if (!creature)
+            if (creature == null)
                 return null;
 
             float x, y, z, o;
@@ -377,7 +377,7 @@ namespace Game.Entities
             //         because the current GameObjectModel cannot be moved without recreating
             creature.AddUnitState(UnitState.IgnorePathfinding);
 
-            if (!creature.IsPositionValid())
+            if (creature.IsPositionValid())
             {
                 Log.outError(LogFilter.Transport, "Creature (guidlow {0}, entry {1}) not created. Suggested coordinates aren't valid (X: {2} Y: {3})", creature.GetGUID().ToString(), creature.GetEntry(), creature.GetPositionX(), creature.GetPositionY());
                 return null;
@@ -401,7 +401,7 @@ namespace Game.Entities
                 return null;
 
             GameObject go = CreateGameObjectFromDB(guid, map, false);
-            if (!go)
+            if (go == null)
                 return null;
 
             float x, y, z, o;
@@ -653,7 +653,7 @@ namespace Game.Entities
                     {
                         // will be relocated in UpdatePosition of the vehicle
                         Unit veh = obj.ToUnit().GetVehicleBase();
-                        if (veh)
+                        if (veh != null)
                             if (veh.GetTransport() == this)
                                 continue;
 

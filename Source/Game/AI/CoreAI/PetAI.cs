@@ -34,11 +34,11 @@ namespace Game.AI
             else
                 _updateAlliesTimer -= diff;
 
-            if (me.GetVictim() && me.GetVictim().IsAlive())
+            if (me.GetVictim() != null && me.GetVictim().IsAlive())
             {
                 // is only necessary to stop casting, the pet must not exit combat
                 if (me.GetCurrentSpell(CurrentSpellTypes.Channeled) == null && // ignore channeled spells (Pin, Seduction)
-                    (me.GetVictim() && me.GetVictim().HasBreakableByDamageCrowdControlAura(me)))
+                    (me.GetVictim() != null && me.GetVictim().HasBreakableByDamageCrowdControlAura(me)))
                 {
                     me.InterruptNonMeleeSpells(false);
                     return;
@@ -71,7 +71,7 @@ namespace Game.AI
                     // All other cases (ie: defensive) - Targets are assigned by DamageTaken(), OwnerAttackedBy(), OwnerAttacked(), etc.
                     Unit nextTarget = SelectNextTarget(me.HasReactState(ReactStates.Aggressive));
 
-                    if (nextTarget)
+                    if (nextTarget != null)
                         AttackStart(nextTarget);
                     else
                         HandleReturnMovement();
@@ -117,10 +117,10 @@ namespace Game.AI
                         // Some spells can target enemy or friendly (DK Ghoul's Leap)
                         // Check for enemy first (pet then owner)
                         Unit target = me.GetAttackerForHelper();
-                        if (!target && owner)
+                        if (target == null && owner != null)
                             target = owner.GetAttackerForHelper();
 
-                        if (target)
+                        if (target != null)
                         {
                             if (CanAttack(target) && spell.CanAutoCast(target))
                             {
@@ -144,7 +144,7 @@ namespace Game.AI
                                 Unit ally = Global.ObjAccessor.GetUnit(me, tar);
 
                                 //only buff targets that are in combat, unless the spell can only be cast while out of combat
-                                if (!ally)
+                                if (ally == null)
                                     continue;
 
                                 if (spell.CanAutoCast(ally))
@@ -160,7 +160,7 @@ namespace Game.AI
                         if (!spellUsed)
                             spell.Dispose();
                     }
-                    else if (me.GetVictim() && CanAttack(me.GetVictim()) && spellInfo.CanBeUsedInCombat(me))
+                    else if (me.GetVictim() != null && CanAttack(me.GetVictim()) && spellInfo.CanBeUsedInCombat(me))
                     {
                         Spell spell = new(me, spellInfo, TriggerCastFlags.None);
                         if (spell.CanAutoCast(me.GetVictim()))
@@ -201,7 +201,7 @@ namespace Game.AI
         {
             // Called from Unit.Kill() in case where pet or owner kills something
             // if owner killed this victim, pet may still be attacking something else
-            if (me.GetVictim() && me.GetVictim() != victim)
+            if (me.GetVictim() != null && me.GetVictim() != victim)
                 return;
 
             // Clear target just in case. May help problem where health / focus / mana
@@ -213,7 +213,7 @@ namespace Game.AI
 
             // Before returning to owner, see if there are more things to attack
             Unit nextTarget = SelectNextTarget(false);
-            if (nextTarget)
+            if (nextTarget != null)
                 AttackStart(nextTarget);
             else
                 HandleReturnMovement(); // Return
@@ -254,7 +254,7 @@ namespace Game.AI
                 return;
 
             // Prevent pet from disengaging from current target
-            if (me.GetVictim() && me.GetVictim().IsAlive())
+            if (me.GetVictim() != null && me.GetVictim().IsAlive())
                 return;
 
             // Continue to evaluate and attack if necessary
@@ -275,7 +275,7 @@ namespace Game.AI
                 return;
 
             // Prevent pet from disengaging from current target
-            if (me.GetVictim() && me.GetVictim().IsAlive())
+            if (me.GetVictim() != null && me.GetVictim().IsAlive())
                 return;
 
             // Continue to evaluate and attack if necessary
@@ -295,24 +295,24 @@ namespace Game.AI
 
             // Check pet attackers first so we don't drag a bunch of targets to the owner
             Unit myAttacker = me.GetAttackerForHelper();
-            if (myAttacker)
+            if (myAttacker != null)
                 if (!myAttacker.HasBreakableByDamageCrowdControlAura())
                     return myAttacker;
 
             // Not sure why we wouldn't have an owner but just in case...
-            if (!me.GetCharmerOrOwner())
+            if (me.GetCharmerOrOwner() == null)
                 return null;
 
             // Check owner attackers
             Unit ownerAttacker = me.GetCharmerOrOwner().GetAttackerForHelper();
-            if (ownerAttacker)
+            if (ownerAttacker != null)
                 if (!ownerAttacker.HasBreakableByDamageCrowdControlAura())
                     return ownerAttacker;
 
             // Check owner victim
             // 3.0.2 - Pets now start attacking their owners victim in defensive mode as soon as the hunter does
             Unit ownerVictim = me.GetCharmerOrOwner().GetVictim();
-            if (ownerVictim)
+            if (ownerVictim != null)
                 return ownerVictim;
 
             // Neither pet or owner had a target and aggressive pets can pick any target
@@ -323,7 +323,7 @@ namespace Game.AI
                 if (!me.GetCharmInfo().IsReturning() || me.GetCharmInfo().IsFollowing() || me.GetCharmInfo().IsAtStay())
                 {
                     Unit nearTarget = me.SelectNearestHostileUnitInAggroRange(true, true);
-                    if (nearTarget)
+                    if (nearTarget != null)
                         return nearTarget;
                 }
             }
@@ -443,7 +443,7 @@ namespace Game.AI
                 {
                     // If data is owner's GUIDLow then we've reached follow point,
                     // otherwise we're probably chasing a creature
-                    if (me.GetCharmerOrOwner() && me.GetCharmInfo() != null && id == me.GetCharmerOrOwner().GetGUID().GetCounter() && me.GetCharmInfo().IsReturning())
+                    if (me.GetCharmerOrOwner() != null && me.GetCharmInfo() != null && id == me.GetCharmerOrOwner().GetGUID().GetCounter() && me.GetCharmInfo().IsReturning())
                     {
                         ClearCharmInfoFlags();
                         me.GetCharmInfo().SetIsFollowing(true);
@@ -461,7 +461,7 @@ namespace Game.AI
             // IMPORTANT: The order in which things are checked is important, be careful if you add or remove checks
 
             // Hmmm...
-            if (!victim)
+            if (victim == null) 
                 return false;
 
             if (!victim.IsAlive())
@@ -496,18 +496,18 @@ namespace Game.AI
                 return (me.IsWithinMeleeRange(victim) || me.GetCharmInfo().IsCommandAttack());
 
             //  Pets attacking something (or chasing) should only switch targets if owner tells them to
-            if (me.GetVictim() && me.GetVictim() != victim)
+            if (me.GetVictim() != null && me.GetVictim() != victim)
             {
                 // Check if our owner selected this target and clicked "attack"
                 Unit ownerTarget;
                 Player owner = me.GetCharmerOrOwner().ToPlayer();
-                if (owner)
+                if (owner != null)
                     ownerTarget = owner.GetSelectedUnit();
                 else
                     ownerTarget = me.GetCharmerOrOwner().GetVictim();
 
-                if (ownerTarget && me.GetCharmInfo().IsCommandAttack())
-                    return (victim.GetGUID() == ownerTarget.GetGUID());
+                if (ownerTarget != null && me.GetCharmInfo().IsCommandAttack())
+                    return victim.GetGUID() == ownerTarget.GetGUID();
             }
 
             // Follow
@@ -552,7 +552,7 @@ namespace Game.AI
 
             // dont allow pets to follow targets far away from owner
             Unit owner = me.GetCharmerOrOwner();
-            if (owner)
+            if (owner != null)
                 if (owner.GetExactDist(me) >= (owner.GetVisibilityRange() - 10.0f))
                     return true;
 
@@ -581,30 +581,30 @@ namespace Game.AI
             _updateAlliesTimer = 10 * Time.InMilliseconds;                 // update friendly targets every 10 seconds, lesser checks increase performance
 
             Unit owner = me.GetCharmerOrOwner();
-            if (!owner)
+            if (owner == null)
                 return;
 
             Group group = null;
             Player player = owner.ToPlayer();
-            if (player)
+            if (player != null)
                 group = player.GetGroup();
 
             // only pet and owner/not in group.ok
-            if (_allySet.Count == 2 && !group)
+            if (_allySet.Count == 2 && group == null)
                 return;
 
             // owner is in group; group members filled in already (no raid . subgroupcount = whole count)
-            if (group && !group.IsRaidGroup() && _allySet.Count == (group.GetMembersCount() + 2))
+            if (group != null && !group.IsRaidGroup() && _allySet.Count == (group.GetMembersCount() + 2))
                 return;
 
             _allySet.Clear();
             _allySet.Add(me.GetGUID());
-            if (group) // add group
+            if (group != null) // add group
             {
                 for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                 {
                     Player target = refe.GetSource();
-                    if (!target || !target.IsInMap(owner) || !group.SameSubGroup(owner.ToPlayer(), target))
+                    if (target == null || !target.IsInMap(owner) || !group.SameSubGroup(owner.ToPlayer(), target))
                         continue;
 
                     if (target.GetGUID() == owner.GetGUID())

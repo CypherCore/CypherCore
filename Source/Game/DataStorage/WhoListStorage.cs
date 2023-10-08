@@ -68,7 +68,7 @@ namespace Game.DataStorage
                 Guild guild = player.GetGuild();
                 ObjectGuid guildGuid = ObjectGuid.Empty;
 
-                if (guild)
+                if (guild != null)
                     guildGuid = guild.GetGUID();
 
                 _whoListStorage.Add(new WhoListPlayerInfo(player.GetGUID(), player.GetTeam(), player.GetSession().GetSecurity(), player.GetLevel(),

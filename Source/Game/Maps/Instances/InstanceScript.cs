@@ -232,7 +232,7 @@ namespace Game.Maps
                     continue; // nothing to do here
                               // if we should spawn group, then spawn it...
                 if (doSpawn)
-                    instance.SpawnGroupSpawn(groupId, instance);
+                    instance.SpawnGroupSpawn(groupId, instance != null);
                 else // otherwise, set it as inactive so it no longer respawns (but don't despawn it)
                     instance.SetSpawnGroupInactive(groupId);
             }
@@ -351,7 +351,7 @@ namespace Game.Maps
                         foreach (var guid in bossInfo.minion)
                         {
                             Creature minion = instance.GetCreature(guid);
-                            if (minion)
+                            if (minion != null)
                                 if (minion.IsWorldBoss() && minion.IsAlive())
                                     return false;
                         }
@@ -401,7 +401,7 @@ namespace Game.Maps
                     foreach (var guid in bossInfo.door[type])
                     {
                         GameObject door = instance.GetGameObject(guid);
-                        if (door)
+                        if (door != null)
                             UpdateDoorState(door);
                     }
                 }
@@ -409,7 +409,7 @@ namespace Game.Maps
                 foreach (var guid in bossInfo.minion.ToArray())
                 {
                     Creature minion = instance.GetCreature(guid);
-                    if (minion)
+                    if (minion != null)
                         UpdateMinionState(minion, state);
                 }
 
@@ -421,7 +421,7 @@ namespace Game.Maps
 
         public bool _SkipCheckRequiredBosses(Player player = null)
         {
-            return player && player.GetSession().HasPermission(RBACPermissions.SkipCheckInstanceRequiredBosses);
+            return player != null && player.GetSession().HasPermission(RBACPermissions.SkipCheckInstanceRequiredBosses);
         }
 
         public virtual void Create()
@@ -510,9 +510,9 @@ namespace Game.Maps
 
         public void HandleGameObject(ObjectGuid guid, bool open, GameObject go = null)
         {
-            if (!go)
+            if (go == null)
                 go = instance.GetGameObject(guid);
-            if (go)
+            if (go != null)
                 go.SetGoState(open ? GameObjectState.Active : GameObjectState.Ready);
             else
                 Log.outDebug(LogFilter.Scripts, "InstanceScript: HandleGameObject failed");
@@ -524,7 +524,7 @@ namespace Game.Maps
                 return;
 
             GameObject go = instance.GetGameObject(uiGuid);
-            if (go)
+            if (go != null)
             {
                 if (go.GetGoType() == GameObjectTypes.Door || go.GetGoType() == GameObjectTypes.Button)
                 {
@@ -546,7 +546,7 @@ namespace Game.Maps
                 return;
 
             GameObject go = instance.GetGameObject(guid);
-            if (go)
+            if (go != null)
             {
                 if (go.GetGoType() == GameObjectTypes.Door || go.GetGoType() == GameObjectTypes.Button)
                 {
@@ -563,7 +563,7 @@ namespace Game.Maps
         public void DoRespawnGameObject(ObjectGuid guid, TimeSpan timeToDespawn)
         {
             GameObject go = instance.GetGameObject(guid);
-            if (go)
+            if (go != null)
             {
                 switch (go.GetGoType())
                 {
@@ -612,7 +612,7 @@ namespace Game.Maps
 
         public void DoRemoveAurasDueToSpellOnPlayer(Player player, uint spell, bool includePets = false, bool includeControlled = false)
         {
-            if (!player)
+            if (player == null)
                 return;
 
             player.RemoveAurasDueToSpell(spell);
@@ -651,7 +651,7 @@ namespace Game.Maps
 
         public void DoCastSpellOnPlayer(Player player, uint spell, bool includePets = false, bool includeControlled = false)
         {
-            if (!player)
+            if (player == null)
                 return;
 
             player.CastSpell(player, spell, true);
@@ -743,7 +743,7 @@ namespace Game.Maps
                     instance.SendToPlayers(encounterEngageMessage);
                     break;
                 case EncounterFrameType.Disengage:
-                    if (!unit)
+                    if (unit == null)
                         return;
 
                     InstanceEncounterDisengageUnit encounterDisengageMessage = new();
@@ -751,7 +751,7 @@ namespace Game.Maps
                     instance.SendToPlayers(encounterDisengageMessage);
                     break;
                 case EncounterFrameType.UpdatePriority:
-                    if (!unit)
+                    if (unit == null)
                         return;
 
                     InstanceEncounterChangePriority encounterChangePriorityMessage = new();

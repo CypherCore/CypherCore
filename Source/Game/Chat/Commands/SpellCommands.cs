@@ -16,14 +16,14 @@ namespace Game.Chat
         static bool HandleCooldownCommand(CommandHandler handler, uint? spellIdArg)
         {
             Unit target = handler.GetSelectedUnit();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;
             }
 
             Player owner = target.GetCharmerOrOwnerPlayerOrPlayerItself();
-            if (!owner)
+            if (owner == null)
             {
                 owner = handler.GetSession().GetPlayer();
                 target = owner;
@@ -56,7 +56,7 @@ namespace Game.Chat
         static bool HandleAuraCommand(CommandHandler handler, uint spellId)
         {
             Unit target = handler.GetSelectedUnit();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
 
@@ -80,7 +80,7 @@ namespace Game.Chat
         static bool HandleUnAuraCommand(CommandHandler handler, uint spellId = 0)
         {
             Unit target = handler.GetSelectedUnit();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
 
@@ -107,7 +107,7 @@ namespace Game.Chat
         static bool HandleSetSkillCommand(CommandHandler handler, uint skillId, uint level, uint? maxSkillArg)
         {
             Player target = handler.GetSelectedPlayerOrSelf();
-            if (!target)
+            if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;

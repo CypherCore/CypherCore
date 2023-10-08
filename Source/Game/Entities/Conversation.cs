@@ -428,7 +428,7 @@ namespace Game.Entities
                     break;
             }
 
-            if (bestFit)
+            if (bestFit != null)
                 _conversation.AddActor(_actor.Id, _actor.Index, bestFit.GetGUID());
         }
 

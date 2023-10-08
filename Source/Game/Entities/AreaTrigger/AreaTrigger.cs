@@ -60,7 +60,7 @@ namespace Game.Entities
                 _isRemoved = true;
 
                 Unit caster = GetCaster();
-                if (caster)
+                if (caster != null)
                     caster._UnregisterAreaTrigger(this);
 
                 _ai.OnRemove();
@@ -78,7 +78,7 @@ namespace Game.Entities
 
         bool Create(uint areaTriggerCreatePropertiesId, Unit caster, Unit target, SpellInfo spellInfo, Position pos, int duration, SpellCastVisualField spellVisual, Spell spell, AuraEffect aurEff)
         {
-            _targetGuid = target ? target.GetGUID() : ObjectGuid.Empty;
+            _targetGuid = target != null ? target.GetGUID() : ObjectGuid.Empty;
             _aurEff = aurEff;
 
             SetMap(caster.GetMap());
@@ -138,7 +138,7 @@ namespace Game.Entities
 
             PhasingHandler.InheritPhaseShift(this, caster);
 
-            if (target && GetTemplate() != null && GetTemplate().HasFlag(AreaTriggerFlags.HasAttached))
+            if (target != null && GetTemplate() != null && GetTemplate().HasFlag(AreaTriggerFlags.HasAttached))
             {
                 m_movementInfo.transport.guid = target.GetGUID();
             }
@@ -153,7 +153,7 @@ namespace Game.Entities
             if (GetCreateProperties().OrbitInfo != null)
             {
                 AreaTriggerOrbitInfo orbit = GetCreateProperties().OrbitInfo;
-                if (target && GetTemplate() != null && GetTemplate().HasFlag(AreaTriggerFlags.HasAttached))
+                if (target != null && GetTemplate() != null && GetTemplate().HasFlag(AreaTriggerFlags.HasAttached))
                     orbit.PathTarget = target.GetGUID();
                 else
                     orbit.Center = new(pos.posX, pos.posY, pos.posZ);
@@ -297,7 +297,7 @@ namespace Game.Entities
                 else if (GetTemplate() != null && GetTemplate().HasFlag(AreaTriggerFlags.HasAttached))
                 {
                     Unit target = GetTarget();
-                    if (target)
+                    if (target != null)
                         GetMap().AreaTriggerRelocation(this, target.GetPositionX(), target.GetPositionY(), target.GetPositionZ(), target.GetOrientation());
                 }
                 else
@@ -607,7 +607,7 @@ namespace Game.Entities
             foreach (Unit unit in enteringUnits)
             {
                 Player player = unit.ToPlayer();
-                if (player)
+                if (player != null)
                 {
                     if (player.IsDebugAreaTriggers)
                         player.SendSysMessage(CypherStrings.DebugAreatriggerEntered, GetEntry());
@@ -623,10 +623,10 @@ namespace Game.Entities
             foreach (ObjectGuid exitUnitGuid in exitUnits)
             {
                 Unit leavingUnit = Global.ObjAccessor.GetUnit(this, exitUnitGuid);
-                if (leavingUnit)
+                if (leavingUnit != null)
                 {
                     Player player = leavingUnit.ToPlayer();
-                    if (player)
+                    if (player != null)
                     {
                         if (player.IsDebugAreaTriggers)
                             player.SendSysMessage(CypherStrings.DebugAreatriggerLeft, GetEntry());
@@ -673,7 +673,7 @@ namespace Game.Entities
         public override uint GetFaction()
         {
             Unit caster = GetCaster();
-            if (caster)
+            if (caster != null)
                 return caster.GetFaction();
 
             return 0;
@@ -958,7 +958,7 @@ namespace Game.Entities
             if (_orbitInfo.PathTarget.HasValue)
             {
                 WorldObject center = Global.ObjAccessor.GetWorldObject(this, _orbitInfo.PathTarget.Value);
-                if (center)
+                if (center != null)
                     return center;
             }
 
@@ -1188,10 +1188,10 @@ namespace Game.Entities
         void DebugVisualizePosition()
         {
             Unit caster = GetCaster();
-            if (caster)
+            if (caster != null)
             {
                 Player player = caster.ToPlayer();
-                if (player)
+                if (player != null)
                     if (player.IsDebugAreaTriggers)
                         player.SummonCreature(1, this, TempSummonType.TimedDespawn, TimeSpan.FromMilliseconds(GetTimeToTarget()));
             }

@@ -211,7 +211,7 @@ namespace Game.Entities
         {
             Pet pet = GetPet();
 
-            if (!pet)
+            if (pet == null)
                 return;
 
             Log.outDebug(LogFilter.Pet, "Pet Spells Groups");
@@ -250,7 +250,7 @@ namespace Game.Entities
 
         public bool CanSeeSpellClickOn(Creature creature)
         {
-            if (!creature.HasNpcFlag(NPCFlags.SpellClick))
+            if (creature.HasNpcFlag(NPCFlags.SpellClick))
                 return false;
 
             var clickBounds = Global.ObjectMgr.GetSpellClickInfoMapBounds(creature.GetEntry());
@@ -871,7 +871,7 @@ namespace Game.Entities
         public void StopCastingBindSight()
         {
             WorldObject target = GetViewpoint();
-            if (target)
+            if (target != null)
             {
                 if (target.IsTypeMask(TypeMask.Unit))
                 {
@@ -950,7 +950,7 @@ namespace Game.Entities
                 var enchantDuration = m_enchantDuration[i];
                 if (enchantDuration.slot == slot)
                 {
-                    if (enchantDuration.item && enchantDuration.item.GetEnchantmentId(slot) != 0)
+                    if (enchantDuration.item != null && enchantDuration.item.GetEnchantmentId(slot) != 0)
                     {
                         // Poisons and DK runes are enchants which are allowed on arenas
                         if (Global.SpellMgr.IsArenaAllowedEnchancment(enchantDuration.item.GetEnchantmentId(slot)))
@@ -973,7 +973,7 @@ namespace Game.Entities
             for (byte i = InventorySlots.ItemStart; i < inventoryEnd; ++i)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem && !Global.SpellMgr.IsArenaAllowedEnchancment(pItem.GetEnchantmentId(slot)))
+                if (pItem != null && !Global.SpellMgr.IsArenaAllowedEnchancment(pItem.GetEnchantmentId(slot)))
                     pItem.ClearEnchantment(slot);
             }
 
@@ -981,12 +981,12 @@ namespace Game.Entities
             for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; ++i)
             {
                 Bag pBag = GetBagByPos(i);
-                if (pBag)
+                if (pBag != null)
                 {
                     for (byte j = 0; j < pBag.GetBagSize(); j++)
                     {
                         Item pItem = pBag.GetItemByPos(j);
-                        if (pItem && !Global.SpellMgr.IsArenaAllowedEnchancment(pItem.GetEnchantmentId(slot)))
+                        if (pItem != null && !Global.SpellMgr.IsArenaAllowedEnchancment(pItem.GetEnchantmentId(slot)))
                             pItem.ClearEnchantment(slot);
                     }
                 }
@@ -1755,12 +1755,12 @@ namespace Game.Entities
                 case ItemClass.Weapon:
                 {
                     Item item = GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
-                    if (item)
+                    if (item != null)
                         if (item != ignoreItem && item.IsFitToSpellRequirements(spellInfo))
                             return true;
 
                     item = GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
-                    if (item)
+                    if (item != null)
                         if (item != ignoreItem && item.IsFitToSpellRequirements(spellInfo))
                             return true;
                     break;
@@ -1790,7 +1790,7 @@ namespace Game.Entities
                         for (byte i = EquipmentSlot.Start; i < EquipmentSlot.MainHand; ++i)
                         {
                             Item item = GetUseableItemByPos(InventorySlots.Bag0, i);
-                            if (item)
+                            if (item != null)
                                 if (item != ignoreItem && item.IsFitToSpellRequirements(spellInfo))
                                     return true;
                         }
@@ -1801,7 +1801,7 @@ namespace Game.Entities
                         foreach (byte i in new[] { EquipmentSlot.Head, EquipmentSlot.Shoulders, EquipmentSlot.Chest, EquipmentSlot.Waist, EquipmentSlot.Legs, EquipmentSlot.Feet, EquipmentSlot.Wrist, EquipmentSlot.Hands })
                         {
                             Item item = GetUseableItemByPos(InventorySlots.Bag0, i);
-                            if (!item || item == ignoreItem || !item.IsFitToSpellRequirements(spellInfo))
+                            if (item == null || item == ignoreItem || !item.IsFitToSpellRequirements(spellInfo))
                                 return false;
                         }
 
@@ -1834,20 +1834,20 @@ namespace Game.Entities
             for (byte slot = InventorySlots.ItemStart; slot < inventoryEnd; ++slot)
             {
                 Item item = GetItemByPos(InventorySlots.Bag0, slot);
-                if (item)
+                if (item != null)
                     ApplyItemObtainSpells(item, true);
             }
 
             for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; ++i)
             {
                 Bag bag = GetBagByPos(i);
-                if (!bag)
+                if (bag == null)
                     continue;
 
                 for (byte slot = 0; slot < bag.GetBagSize(); ++slot)
                 {
                     Item item = bag.GetItemByPos(slot);
-                    if (item)
+                    if (item != null)
                         ApplyItemObtainSpells(item, true);
                 }
             }
@@ -3234,7 +3234,7 @@ namespace Game.Entities
         {
             for (byte i = 0; i < InventorySlots.BagEnd; ++i)
             {
-                if (m_items[i] && !m_items[i].IsBroken() && CanUseAttackType(GetAttackBySlot(i, m_items[i].GetTemplate().GetInventoryType())))
+                if (m_items[i] != null && !m_items[i].IsBroken() && CanUseAttackType(GetAttackBySlot(i, m_items[i].GetTemplate().GetInventoryType())))
                 {
                     ApplyItemEquipSpell(m_items[i], false, true);     // remove spells that not fit to form
                     ApplyItemEquipSpell(m_items[i], true, true);      // add spells that fit form but not active
@@ -3283,7 +3283,7 @@ namespace Game.Entities
             if (removeActivePetCooldowns)
             {
                 Pet pet = GetPet();
-                if (pet)
+                if (pet != null)
                     pet.GetSpellHistory().ResetAllCooldowns();
             }
         }

@@ -22,7 +22,7 @@ namespace Game.Entities
 
         public static void GetFriendInfo(Player player, ObjectGuid friendGUID, FriendInfo friendInfo)
         {
-            if (!player)
+            if (player == null)
                 return;
 
             friendInfo.Status = FriendStatus.Offline;
@@ -31,7 +31,7 @@ namespace Game.Entities
             friendInfo.Class = 0;
 
             Player target = Global.ObjAccessor.FindPlayer(friendGUID);
-            if (!target)
+            if (target == null)
                 return;
 
             var playerFriendInfo = player.GetSocial().PlayerSocialMap.LookupByKey(friendGUID);
@@ -84,7 +84,7 @@ namespace Game.Entities
 
         void BroadcastToFriendListers(Player player, ServerPacket packet)
         {
-            if (!player)
+            if (player == null)
                 return;
 
             AccountTypes gmSecLevel = (AccountTypes)WorldConfig.GetIntValue(WorldCfg.GmLevelInWhoList);
@@ -94,7 +94,7 @@ namespace Game.Entities
                 if (info != null && info.Flags.HasAnyFlag(SocialFlag.Friend))
                 {
                     Player target = Global.ObjAccessor.FindPlayer(pair.Key);
-                    if (!target || !target.IsInWorld)
+                    if (target == null || !target.IsInWorld)
                         continue;
 
                     WorldSession session = target.GetSession();
@@ -244,7 +244,7 @@ namespace Game.Entities
 
         public void SendSocialList(Player player, SocialFlag flags)
         {
-            if (!player)
+            if (player == null)
                 return;
 
             uint friendsCount = 0;

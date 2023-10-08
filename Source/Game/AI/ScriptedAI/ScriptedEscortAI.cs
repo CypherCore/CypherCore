@@ -33,7 +33,7 @@ namespace Game.AI
         //see followerAI
         bool AssistPlayerInCombatAgainst(Unit who)
         {
-            if (!who || !who.GetVictim())
+            if (who == null || who.GetVictim() == null)
                 return false;
 
             if (me.HasReactState(ReactStates.Passive))
@@ -44,7 +44,7 @@ namespace Game.AI
                 return false;
 
             //not a player
-            if (!who.GetVictim().GetCharmerOrOwnerPlayerOrPlayerItself())
+            if (who.GetVictim().GetCharmerOrOwnerPlayerOrPlayerItself() == null)
                 return false;
 
             //never attack friendly
@@ -78,15 +78,15 @@ namespace Game.AI
                 return;
 
             Player player = GetPlayerForEscort();
-            if (player)
+            if (player != null)
             {
                 Group group = player.GetGroup();
-                if (group)
+                if (group != null)
                 {
                     for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                     {
                         Player member = groupRef.GetSource();
-                        if (member)
+                        if (member != null)
                             if (member.IsInMap(player))
                                 member.FailQuest(_escortQuest.Id);
                     }
@@ -145,15 +145,15 @@ namespace Game.AI
         bool IsPlayerOrGroupInRange()
         {
             Player player = GetPlayerForEscort();
-            if (player)
+            if (player != null)
             {
                 Group group = player.GetGroup();
-                if (group)
+                if (group != null)
                 {
                     for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                     {
                         Player member = groupRef.GetSource();
-                        if (member)
+                        if (member != null)
                             if (me.IsWithinDistInMap(member, GetMaxPlayerDistance()))
                                 return true;
                     }

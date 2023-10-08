@@ -1282,7 +1282,7 @@ namespace Game.Loots
             if ((item.lootmode & _lootMode) == 0)
                 return true;
 
-            if (_personalLooter && !LootItem.AllowedForPlayer(_personalLooter, null, item.itemid, item.needs_quest,
+            if (_personalLooter != null && !LootItem.AllowedForPlayer(_personalLooter, null, item.itemid, item.needs_quest,
                 !item.needs_quest || Global.ObjectMgr.GetItemTemplate(item.itemid).HasFlag(ItemFlagsCustom.FollowLootRules),
                 true, item.conditions))
                 return true;

@@ -545,7 +545,7 @@ namespace Game.Misc
 
             // Is there a better way? what about game objects?
             Creature creature = ObjectAccessor.GetCreature(_session.GetPlayer(), npcGUID);
-            if (creature)
+            if (creature != null)
             {
                 packet.QuestGiverCreatureID = creature.GetEntry();
                 offer.QuestGiverCreatureID = creature.GetCreatureTemplate().Entry;
@@ -612,7 +612,7 @@ namespace Game.Misc
 
             // Is there a better way? what about game objects?
             Creature creature = ObjectAccessor.GetCreature(_session.GetPlayer(), npcGUID);
-            if (creature)
+            if (creature != null)
                 packet.QuestGiverCreatureID = creature.GetCreatureTemplate().Entry;
 
             packet.QuestID = quest.Id;

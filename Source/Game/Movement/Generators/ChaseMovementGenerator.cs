@@ -55,7 +55,7 @@ namespace Game.Movement
         public override bool Update(Unit owner, uint diff)
         {
             // owner might be dead or gone (can we even get nullptr here?)
-            if (!owner || !owner.IsAlive())
+            if (owner == null || !owner.IsAlive())
                 return false;
 
             // our target might have gone away
@@ -162,7 +162,7 @@ namespace Game.Movement
                     bool success = _path.CalculatePath(x, y, z, owner.CanFly());
                     if (!success || _path.GetPathType().HasAnyFlag(PathType.NoPath))
                     {
-                        if (cOwner)
+                        if (cOwner != null)
                             cOwner.SetCannotReachTarget(true);
 
                         owner.StopMoving();
@@ -172,11 +172,11 @@ namespace Game.Movement
                     if (shortenPath)
                         _path.ShortenPathUntilDist(target, maxTarget);
 
-                    if (cOwner)
+                    if (cOwner != null)
                         cOwner.SetCannotReachTarget(false);
 
                     bool walk = false;
-                    if (cOwner && !cOwner.IsPet())
+                    if (cOwner != null && !cOwner.IsPet())
                     {
                         switch (cOwner.GetMovementTemplate().GetChase())
                         {

@@ -17,7 +17,7 @@ namespace Game.Chat
             Player player = handler.GetSession().GetPlayer();
             Creature creatureTarget = handler.GetSelectedCreature();
 
-            if (!creatureTarget || creatureTarget.IsPet() || creatureTarget.IsTypeId(TypeId.Player))
+            if (creatureTarget == null || creatureTarget.IsPet() || creatureTarget.IsTypeId(TypeId.Player))
             {
                 handler.SendSysMessage(CypherStrings.SelectCreature);
                 return false;
@@ -65,7 +65,7 @@ namespace Game.Chat
         static bool HandlePetLearnCommand(CommandHandler handler, SpellInfo spellInfo)
         {
             Pet pet = GetSelectedPlayerPetOrOwn(handler);
-            if (!pet)
+            if (pet == null)
             {
                 handler.SendSysMessage(CypherStrings.SelectPlayerOrPet);
                 return false;
@@ -97,7 +97,7 @@ namespace Game.Chat
         static bool HandlePetUnlearnCommand(CommandHandler handler, SpellInfo spellInfo)
         {
             Pet pet = GetSelectedPlayerPetOrOwn(handler);
-            if (!pet)
+            if (pet == null)
             {
                 handler.SendSysMessage(CypherStrings.SelectPlayerOrPet);
                 return false;
@@ -117,8 +117,8 @@ namespace Game.Chat
         static bool HandlePetLevelCommand(CommandHandler handler, int? level)
         {
             Pet pet = GetSelectedPlayerPetOrOwn(handler);
-            Player owner = pet ? pet.GetOwner() : null;
-            if (!pet || !owner)
+            Player owner = pet != null ? pet.GetOwner() : null;
+            if (pet == null || owner == null)
             {
                 handler.SendSysMessage(CypherStrings.SelectPlayerOrPet);
                 return false;
@@ -146,7 +146,7 @@ namespace Game.Chat
         static Pet GetSelectedPlayerPetOrOwn(CommandHandler handler)
         {
             Unit target = handler.GetSelectedUnit();
-            if (target)
+            if (target != null)
             {
                 if (target.IsTypeId(TypeId.Player))
                     return target.ToPlayer().GetPet();
@@ -156,7 +156,7 @@ namespace Game.Chat
             }
 
             Player player = handler.GetSession().GetPlayer();
-            return player ? player.GetPet() : null;
+            return player != null ? player.GetPet() : null;
         }
     }
 }

@@ -77,7 +77,7 @@ namespace Game.Entities
                         if (item.HasItemFlag(ItemFieldFlags.Child))
                         {
                             Item parent = GetItemByGuid(item.GetCreator());
-                            if (parent)
+                            if (parent != null)
                             {
                                 parent.SetChildItem(item.GetGUID());
                                 item.CopyArtifactDataFromParent(parent);
@@ -1468,7 +1468,7 @@ namespace Game.Entities
             if (!result.IsEmpty())
             {
                 Group group = Global.GroupMgr.GetGroupByDbStoreId(result.Read<uint>(0));
-                if (group)
+                if (group != null)
                 {
                     if (group.IsLeader(GetGUID()))
                         SetPlayerFlag(PlayerFlags.GroupLeader);
@@ -1485,7 +1485,7 @@ namespace Game.Entities
                 }
             }
 
-            if (!GetGroup() || !GetGroup().IsLeader(GetGUID()))
+            if (GetGroup() == null || !GetGroup().IsLeader(GetGUID()))
                 RemovePlayerFlag(PlayerFlags.GroupLeader);
         }
         void _LoadInstanceTimeRestrictions(SQLResult result)
@@ -1777,7 +1777,7 @@ namespace Game.Entities
                     case ItemUpdateState.Changed:
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_INVENTORY_ITEM);
                         stmt.AddValue(0, GetGUID().GetCounter());
-                        stmt.AddValue(1, container ? container.GetGUID().GetCounter() : 0);
+                        stmt.AddValue(1, container != null ? container.GetGUID().GetCounter() : 0);
                         stmt.AddValue(2, item.GetSlot());
                         stmt.AddValue(3, item.GetGUID().GetCounter());
                         trans.Append(stmt);
@@ -3090,7 +3090,7 @@ namespace Game.Entities
                             mapId = transportOnMap.GetExpectedMapId();
                             instanceId = 0;
                             transportMap = Global.MapMgr.CreateMap(mapId, this);
-                            if (transportMap)
+                            if (transportMap != null)
                                 transport = transportMap.GetTransport(transGUID);
                         }
                         else
@@ -3098,7 +3098,7 @@ namespace Game.Entities
                     }
                 }
                 
-                if (transport)
+                if (transport != null)
                 {
                     float x = trans_x;
                     float y = trans_y;
@@ -3201,13 +3201,13 @@ namespace Game.Entities
 
             // NOW player must have valid map
             // load the player's map here if it's not already loaded
-            if (!map)
+            if (map == null)
                 map = Global.MapMgr.CreateMap(mapId, this);
 
             AreaTriggerStruct areaTrigger = null;
             bool check = false;
 
-            if (!map)
+            if (map == null)
             {
                 areaTrigger = Global.ObjectMgr.GetGoBackTrigger(mapId);
                 check = true;
@@ -3241,11 +3241,11 @@ namespace Game.Entities
                 }
             }
 
-            if (!map)
+            if (map == null)
             {
                 RelocateToHomebind();
                 map = Global.MapMgr.CreateMap(mapId, this);
-                if (!map)
+                if (map == null)
                 {
                     Log.outError(LogFilter.Player, "Player {0} {1} Map: {2}, {3}. Invalid default map coordinates or instance couldn't be created.", GetName(), guid.ToString(), mapId, GetPosition());
                     return false;
@@ -3960,7 +3960,7 @@ namespace Game.Entities
 
             // save pet (hunter pet level and experience and all type pets health/mana).
             Pet pet = GetPet();
-            if (pet)
+            if (pet != null)
                 pet.SavePetToDB(PetSaveMode.AsCurrent);
         }
         void DeleteSpellFromAllPlayers(uint spellId)
@@ -4060,7 +4060,7 @@ namespace Game.Entities
             if (guildId != 0)
             {
                 Guild guild = Global.GuildMgr.GetGuildById(guildId);
-                if (guild)
+                if (guild != null)
                     guild.DeleteMember(trans, playerGuid, false, false, true);
             }
 
@@ -4075,7 +4075,7 @@ namespace Game.Entities
             if (!resultGroup.IsEmpty())
             {
                 Group group = Global.GroupMgr.GetGroupByDbStoreId(resultGroup.Read<uint>(0));
-                if (group)
+                if (group != null)
                     RemoveFromGroup(group, playerGuid);
             }
 
@@ -4215,7 +4215,7 @@ namespace Game.Entities
                         do
                         {
                             Player playerFriend = Global.ObjAccessor.FindPlayer(ObjectGuid.Create(HighGuid.Player, resultFriends.Read<ulong>(0)));
-                            if (playerFriend)
+                            if (playerFriend != null)
                             {
                                 playerFriend.GetSocial().RemoveFromSocialList(playerGuid, SocialFlag.All);
                                 Global.SocialMgr.SendFriendStatus(playerFriend, FriendsResult.Removed, playerGuid);

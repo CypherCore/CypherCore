@@ -153,13 +153,13 @@ namespace Game.BattleGrounds.Zones
             for (byte i = 0; i < EotSPoints.PointsMax; ++i)
             {
                 obj = GetBgMap().GetGameObject(BgObjects[EotSObjectTypes.TowerCapFelReaver + i]);
-                if (obj)
+                if (obj != null)
                 {
                     byte j = 0;
                     while (j < m_PlayersNearPoint[EotSPoints.PointsMax].Count)
                     {
                         Player player = Global.ObjAccessor.FindPlayer(m_PlayersNearPoint[EotSPoints.PointsMax][j]);
-                        if (!player)
+                        if (player == null)
                         {
                             Log.outError(LogFilter.Battleground, "BattlegroundEY:CheckSomeoneJoinedPoint: Player ({0}) could not be found!", m_PlayersNearPoint[EotSPoints.PointsMax][j].ToString());
                             ++j;
@@ -194,13 +194,13 @@ namespace Game.BattleGrounds.Zones
             for (byte i = 0; i < EotSPoints.PointsMax; ++i)
             {
                 obj = GetBgMap().GetGameObject(BgObjects[EotSObjectTypes.TowerCapFelReaver + i]);
-                if (obj)
+                if (obj != null)
                 {
                     byte j = 0;
                     while (j < m_PlayersNearPoint[i].Count)
                     {
                         Player player = Global.ObjAccessor.FindPlayer(m_PlayersNearPoint[i][j]);
-                        if (!player)
+                        if (player == null)
                         {
                             Log.outError(LogFilter.Battleground, "BattlegroundEY:CheckSomeoneLeftPoint Player ({0}) could not be found!", m_PlayersNearPoint[i][j].ToString());
                             //move non-existing players to "free space" - this will cause many errors showing in log, but it is a very important bug
@@ -256,7 +256,7 @@ namespace Game.BattleGrounds.Zones
                     for (byte i = 0; i < m_PlayersNearPoint[point].Count; ++i)
                     {
                         Player player = Global.ObjAccessor.FindPlayer(m_PlayersNearPoint[point][i]);
-                        if (player)
+                        if (player != null)
                         {
                             player.SendUpdateWorldState(EotSWorldStateIds.ProgressBarStatus, (uint)m_PointBarStatus[point]);
                             Team team = GetPlayerTeam(player.GetGUID());
@@ -375,7 +375,7 @@ namespace Game.BattleGrounds.Zones
             {
                 if (m_FlagKeeper == guid)
                 {
-                    if (player)
+                    if (player != null)
                         EventPlayerDroppedFlag(player);
                     else
                     {
@@ -578,7 +578,7 @@ namespace Game.BattleGrounds.Zones
             RespawnFlag(true);
 
             GameObject obj = GetBgMap().GetGameObject(GetDroppedFlagGUID());
-            if (obj)
+            if (obj != null)
                 obj.Delete();
             else
                 Log.outError(LogFilter.Battleground, "BattlegroundEY: Unknown dropped flag ({0}).", GetDroppedFlagGUID().ToString());
@@ -764,13 +764,13 @@ namespace Game.BattleGrounds.Zones
                 return;
 
             Creature trigger = GetBGCreature(Point + 6);//0-5 spirit guides
-            if (!trigger)
+            if (trigger == null)
                 trigger = AddCreature(SharedConst.WorldTrigger, Point + 6, EotSMisc.TriggerPositions[Point], GetTeamIndexByTeamId(Team));
 
             //add bonus honor aura trigger creature when node is accupied
             //cast bonus aura (+50% honor in 25yards)
             //aura should only apply to players who have accupied the node, set correct faction for trigger
-            if (trigger)
+            if (trigger != null)
             {
                 trigger.SetFaction(Team == Team.Alliance ? 84u : 83);
                 trigger.CastSpell(trigger, BattlegroundConst.SpellHonorableDefender25y, false);

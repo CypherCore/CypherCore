@@ -330,7 +330,7 @@ namespace Scripts.Spells.DemonHunter
         SpellCastResult CheckCast()
         {
             Unit caster = GetCaster();
-            if (caster.IsMounted() || caster.GetVehicleBase())
+            if (caster.IsMounted() || caster.GetVehicleBase() != null)
                 return SpellCastResult.DontReport;
 
             if (!caster.IsFalling())

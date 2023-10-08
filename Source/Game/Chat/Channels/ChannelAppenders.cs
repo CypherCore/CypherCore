@@ -105,7 +105,7 @@ namespace Game.Chat
 
             PacketSenderOwning<ChatPkt> packet = new();
             Player player = Global.ObjAccessor.FindConnectedPlayer(_guid);
-            if (player)
+            if (player != null)
                 packet.Data.Initialize(ChatMsg.Channel, _lang, player, player, _what, 0, _source.GetName(localeIdx));
             else
             {
@@ -143,7 +143,7 @@ namespace Game.Chat
 
             PacketSenderOwning<ChatPkt> packet = new();
             Player player = Global.ObjAccessor.FindConnectedPlayer(_guid);
-            if (player)
+            if (player != null)
                 packet.Data.Initialize(ChatMsg.Channel, _lang, player, player, _what, 0, _source.GetName(localeIdx), Locale.enUS, _prefix);
             else
             {
