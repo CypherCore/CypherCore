@@ -1620,7 +1620,7 @@ namespace Game.Groups
             return m_guid.GetCounter();
         }
 
-        string GetLeaderName()
+        public string GetLeaderName()
         {
             return m_leaderName;
         }

@@ -2793,7 +2793,7 @@ namespace Game.Maps
         bool _reverse;
     }
 
-    public class UnitAuraCheck<T> : ICheck<T> where T : WorldObject
+    public class UnitAuraCheck : ICheck<WorldObject>
     {
         public UnitAuraCheck(bool present, uint spellId, ObjectGuid casterGUID = default)
         {
@@ -2802,12 +2802,12 @@ namespace Game.Maps
             _casterGUID = casterGUID;
         }
 
-        public bool Invoke(T obj)
+        public bool Invoke(WorldObject obj)
         {
             return obj.ToUnit() != null && obj.ToUnit().HasAura(_spellId, _casterGUID) == _present;
         }
 
-        public static implicit operator Predicate<T>(UnitAuraCheck<T> unit)
+        public static implicit operator Predicate<WorldObject>(UnitAuraCheck unit)
         {
             return unit.Invoke;
         }

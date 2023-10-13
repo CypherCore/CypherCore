@@ -8,41 +8,24 @@ using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
 using System;
+using static Global;
 
 namespace Scripts.World.NpcGuard
 {
-    struct SpellIds
-    {
-        public const uint BanishedShattrathA = 36642;
-        public const uint BanishedShattrathS = 36671;
-        public const uint BanishTeleport = 36643;
-        public const uint Exile = 39533;
-    }
-
-    struct TextIds
-    {
-        public const uint SayGuardSilAggro = 0;
-    }
-
-
-    struct CreatureIds
-    {
-        public const uint CenarionHoldInfantry = 15184;
-        public const uint StormwindCityGuard = 68;
-        public const uint StormwindCityPatroller = 1976;
-        public const uint OrgrimmarGrunt = 3296;
-        public const uint AldorVindicator = 18549;
-    }
-
     [Script]
     class npc_guard_generic : GuardAI
     {
-        TaskScheduler _combatScheduler;
+        const uint SayGuardSilAggro = 0;
+        const uint NpcCenarionHoldInfantry = 15184;
+        const uint NpcStormwindCityGuard = 68;
+        const uint NpcStormwindCityPatroller = 1976;
+        const uint NpcOrgrimmarGrunt = 3296;
+
+        TaskScheduler _combatScheduler = new();
 
         public npc_guard_generic(Creature creature) : base(creature)
         {
             _scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting) && !me.IsInEvadeMode() && me.IsAlive());
-            _combatScheduler = new TaskScheduler();
             _combatScheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
         }
 
@@ -50,14 +33,14 @@ namespace Scripts.World.NpcGuard
         {
             _scheduler.CancelAll();
             _combatScheduler.CancelAll();
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+            _scheduler.Schedule(TimeSpan.FromSeconds(1), context =>
             {
                 // Find a spell that targets friendly and applies an aura (these are generally buffs)
                 SpellInfo spellInfo = SelectSpell(me, 0, 0, SelectTargetType.AnyFriend, 0, 0, SelectEffect.Aura);
                 if (spellInfo != null)
                     DoCast(me, spellInfo.Id);
 
-                task.Repeat(TimeSpan.FromMinutes(10));
+                context.Repeat(TimeSpan.FromMinutes(10));
             });
         }
 
@@ -90,9 +73,9 @@ namespace Scripts.World.NpcGuard
         {
             switch (me.GetEntry())
             {
-                case CreatureIds.StormwindCityGuard:
-                case CreatureIds.StormwindCityPatroller:
-                case CreatureIds.OrgrimmarGrunt:
+                case NpcStormwindCityGuard:
+                case NpcStormwindCityPatroller:
+                case NpcOrgrimmarGrunt:
                     break;
                 default:
                     return;
@@ -106,15 +89,15 @@ namespace Scripts.World.NpcGuard
 
         public override void JustEngagedWith(Unit who)
         {
-            if (me.GetEntry() == CreatureIds.CenarionHoldInfantry)
-                Talk(TextIds.SayGuardSilAggro, who);
+            if (me.GetEntry() == NpcCenarionHoldInfantry)
+                Talk(SayGuardSilAggro, who);
 
-            _combatScheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+            _combatScheduler.Schedule(TimeSpan.FromSeconds(1), meleeContext =>
             {
                 Unit victim = me.GetVictim();
                 if (!me.IsAttackReady() || !me.IsWithinMeleeRange(victim))
                 {
-                    task.Repeat();
+                    meleeContext.Repeat();
                     return;
                 }
                 if (RandomHelper.randChance(20))
@@ -124,16 +107,14 @@ namespace Scripts.World.NpcGuard
                     {
                         me.ResetAttackTimer();
                         DoCastVictim(spellInfo.Id);
-                        task.Repeat();
+                        meleeContext.Repeat();
                         return;
                     }
                 }
-
                 me.AttackerStateUpdate(victim);
                 me.ResetAttackTimer();
-                task.Repeat();
-            });
-            _combatScheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+                meleeContext.Repeat();
+            }).Schedule(TimeSpan.FromSeconds(5), spellContext =>
             {
                 bool healing = false;
                 SpellInfo spellInfo = null;
@@ -155,10 +136,10 @@ namespace Scripts.World.NpcGuard
                         DoCast(me, spellInfo.Id);
                     else
                         DoCastVictim(spellInfo.Id);
-                    task.Repeat(TimeSpan.FromSeconds(5));
+                    spellContext.Repeat(TimeSpan.FromSeconds(5));
                 }
                 else
-                    task.Repeat(TimeSpan.FromSeconds(1));
+                    spellContext.Repeat(TimeSpan.FromSeconds(1));
             });
         }
 
@@ -176,6 +157,12 @@ namespace Scripts.World.NpcGuard
     [Script]
     class npc_guard_shattrath_faction : GuardAI
     {
+        const uint NpcAldorVindicator = 18549;
+        const uint SpellBanishedShattrathA = 36642;
+        const uint SpellBanishedShattrathS = 36671;
+        const uint SpellBanishTeleport = 36643;
+        const uint SpellExile = 39533;
+
         public npc_guard_shattrath_faction(Creature creature) : base(creature)
         {
             _scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
@@ -196,31 +183,33 @@ namespace Scripts.World.NpcGuard
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, base.DoMeleeAttackIfReady);
+            _scheduler.Update(diff, DoMeleeAttackIfReady);
         }
 
         void ScheduleVanish()
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+            _scheduler.Schedule(TimeSpan.FromSeconds(5), banishContext =>
             {
                 Unit temp = me.GetVictim();
-                if (temp && temp.IsTypeId(TypeId.Player))
+                if (temp != null && temp.IsPlayer())
                 {
-                    DoCast(temp, me.GetEntry() == CreatureIds.AldorVindicator ? SpellIds.BanishedShattrathS : SpellIds.BanishedShattrathA);
+                    DoCast(temp, me.GetEntry() == NpcAldorVindicator ? SpellBanishedShattrathS : SpellBanishedShattrathA);
                     ObjectGuid playerGUID = temp.GetGUID();
-                    task.Schedule(TimeSpan.FromSeconds(9), task =>
+                    banishContext.Schedule(TimeSpan.FromSeconds(9), exileContext =>
                     {
-                        Unit temp = Global.ObjAccessor.GetUnit(me, playerGUID);
-                        if (temp)
+                        Unit temp = ObjAccessor.GetUnit(me, playerGUID);
+                        if (temp != null)
                         {
-                            temp.CastSpell(temp, SpellIds.Exile, true);
-                            temp.CastSpell(temp, SpellIds.BanishTeleport, true);
+                            temp.CastSpell(temp, SpellExile, true);
+                            temp.CastSpell(temp, SpellBanishTeleport, true);
                         }
                         ScheduleVanish();
+
+
                     });
                 }
                 else
-                    task.Repeat();
+                    banishContext.Repeat();
             });
         }
     }

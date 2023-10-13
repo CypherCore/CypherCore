@@ -5,67 +5,16 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
-using System;
 using System.Collections.Generic;
-using System.Numerics;
+using static Global;
 
-namespace Scripts.World.ItemScripts
+namespace Scripts.World.Items
 {
-    struct  SpellIds
-    {  
-        //Onlyforflight
-        public const uint ArcaneCharges = 45072;
-
-        //Petrovclusterbombs
-        public const uint PetrovBomb = 42406;
-    }
-
-    struct CreatureIds
-    {
-        //Pilefakefur
-        public const uint NesingwaryTrapper = 25835;
-
-        //Theemissary
-        public const uint Leviroth = 26452;
-
-        //Capturedfrog
-        public const uint VanirasSentryTotem = 40187;
-    }
-
-    struct GameObjectIds
-    {
-        //Pilefakefur
-        public const uint HighQualityFur = 187983;
-        public static uint[] CaribouTraps =
-        {
-            187982, 187995, 187996, 187997, 187998,
-            187999, 188000, 188001, 188002, 188003,
-            188004, 188005, 188006, 188007, 188008,
-        };
-    }
-
-    struct QuestIds
-    {
-        //Helpthemselves
-        public const uint CannotHelpThemselves = 11876;
-
-        //Theemissary
-        public const uint TheEmissary = 11626;
-
-        //Capturedfrog
-        public const uint ThePerfectSpies = 25444;
-    }
-
-    struct Misc
-    {
-        //Petrovclusterbombs
-        public const uint AreaIdShatteredStraits = 4064;
-        public const uint ZoneIdHowling = 495;
-    }
-
     [Script]
     class item_only_for_flight : ItemScript
     {
+        const uint SpellArcaneCharges = 45072;
+
         public item_only_for_flight() : base("item_only_for_flight") { }
 
         public override bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
@@ -85,7 +34,7 @@ namespace Scripts.World.ItemScripts
                         disabled = true;
                     break;
                 case 34475:
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.ArcaneCharges, player.GetMap().GetDifficultyID());
+                    SpellInfo spellInfo = SpellMgr.GetSpellInfo(SpellArcaneCharges, player.GetMap().GetDifficultyID());
                     if (spellInfo != null)
                         Spell.SendCastResult(player, spellInfo, default, castId, SpellCastResult.NotOnGround);
                     break;
@@ -108,7 +57,7 @@ namespace Scripts.World.ItemScripts
 
         public override bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
         {
-            if (targets.GetUnitTarget() && targets.GetUnitTarget().IsTypeId(TypeId.Unit) &&
+            if (targets.GetUnitTarget() != null && targets.GetUnitTarget().GetTypeId() == TypeId.Unit &&
                 targets.GetUnitTarget().GetEntry() == 20748 && !targets.GetUnitTarget().HasAura(32578))
                 return false;
 
@@ -125,7 +74,7 @@ namespace Scripts.World.ItemScripts
         public override bool OnExpire(Player player, ItemTemplate pItemProto)
         {
             List<ItemPosCount> dest = new();
-            InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, 39883, 1); // Cracked Egg
+            var msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, 39883, 1); // Cracked Egg
             if (msg == InventoryResult.Ok)
                 player.StoreNewItem(dest, 39883, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(39883));
 
@@ -141,7 +90,7 @@ namespace Scripts.World.ItemScripts
         public override bool OnExpire(Player player, ItemTemplate pItemProto)
         {
             List<ItemPosCount> dest = new();
-            InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, 44718, 1); // Ripe Disgusting Jar
+            var msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, 44718, 1); // Ripe Disgusting Jar
             if (msg == InventoryResult.Ok)
                 player.StoreNewItem(dest, 44718, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(44718));
 
@@ -152,16 +101,20 @@ namespace Scripts.World.ItemScripts
     [Script]
     class item_petrov_cluster_bombs : ItemScript
     {
+        const uint SpellPetrovBomb = 42406;
+        const uint AreaIdShatteredStraits = 4064;
+        const uint ZoneIdHowling = 495;
+
         public item_petrov_cluster_bombs() : base("item_petrov_cluster_bombs") { }
 
         public override bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
         {
-            if (player.GetZoneId() != Misc.ZoneIdHowling)
+            if (player.GetZoneId() != ZoneIdHowling)
                 return false;
 
-            if (player.GetTransport() == null || player.GetAreaId() != Misc.AreaIdShatteredStraits)
+            if (player.GetTransport() == null || player.GetAreaId() != AreaIdShatteredStraits)
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.PetrovBomb, Difficulty.None);
+                SpellInfo spellInfo = SpellMgr.GetSpellInfo(SpellPetrovBomb, Difficulty.None);
                 if (spellInfo != null)
                     Spell.SendCastResult(player, spellInfo, default, castId, SpellCastResult.NotHere);
 
@@ -175,13 +128,16 @@ namespace Scripts.World.ItemScripts
     [Script]
     class item_captured_frog : ItemScript
     {
+        const uint QuestThePerfectSpies = 25444;
+        const uint NpcVanirasSentryTotem = 40187;
+
         public item_captured_frog() : base("item_captured_frog") { }
 
         public override bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
         {
-            if (player.GetQuestStatus(QuestIds.ThePerfectSpies) == QuestStatus.Incomplete)
+            if (player.GetQuestStatus(QuestThePerfectSpies) == QuestStatus.Incomplete)
             {
-                if (player.FindNearestCreature(CreatureIds.VanirasSentryTotem, 10.0f))
+                if (player.FindNearestCreature(NpcVanirasSentryTotem, 10.0f) != null)
                     return false;
                 else
                     player.SendEquipError(InventoryResult.OutOfRange, item, null);
@@ -192,8 +148,8 @@ namespace Scripts.World.ItemScripts
         }
     }
 
-    [Script] // Only used currently for
-    // 19169: Nightfall
+    // Only used currently for
+    [Script] // 19169: Nightfall
     class item_generic_limit_chance_above_60 : ItemScript
     {
         public item_generic_limit_chance_above_60() : base("item_generic_limit_chance_above_60") { }
@@ -215,4 +171,3 @@ namespace Scripts.World.ItemScripts
         }
     }
 }
-

@@ -5,23 +5,21 @@ using Game;
 using Game.Entities;
 using Game.Scripting;
 
-namespace Scripts.World.SceneScripts
+namespace Scripts.World.Achievements
 {
-    struct SpellIds
-    {
-        public const uint DeathwingSimulator = 201184;
-    }
-
     [Script]
     class scene_deathwing_simulator : SceneScript
     {
+        const uint SpellDeathwingSimulator = 201184;
+
         public scene_deathwing_simulator() : base("scene_deathwing_simulator") { }
 
         // Called when a player receive trigger from scene
         public override void OnSceneTriggerEvent(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
         {
             if (triggerName == "Burn Player")
-                player.CastSpell(player, SpellIds.DeathwingSimulator, true); // Deathwing Simulator Burn player
+                player.CastSpell(player, SpellDeathwingSimulator, true); // Deathwing Simulator Burn player
         }
     }
 }
+

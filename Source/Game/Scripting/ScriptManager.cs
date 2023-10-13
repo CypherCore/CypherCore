@@ -801,9 +801,11 @@ namespace Game.Scripting
         {
             ForEach<PlayerScript>(p => p.OnMoneyChanged(player, amount));
         }
-        public void OnGivePlayerXP(Player player, uint amount, Unit victim)
+        public void OnGivePlayerXP(Player player, ref uint amount, Unit victim)
         {
-            ForEach<PlayerScript>(p => p.OnGiveXP(player, amount, victim));
+            uint tempAmount = amount;
+            ForEach<PlayerScript>(p => tempAmount = p.OnGiveXP(player, tempAmount, victim));
+            amount = tempAmount;
         }
         public void OnPlayerReputationChange(Player player, uint factionID, int standing, bool incremental)
         {

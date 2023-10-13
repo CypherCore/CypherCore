@@ -2,47 +2,18 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Game.BattleGrounds;
-using Game.BattleGrounds.Zones;
+using Game.DataStorage;
 using Game.Entities;
 using Game.Scripting;
-using Game.DataStorage;
 
 namespace Scripts.World.Achievements
 {
-    struct AreaIds
-    {
-        //Tilted
-        public const uint AreaArgentTournamentFields = 4658;
-        public const uint AreaRingOfAspirants = 4670;
-        public const uint AreaRingOfArgentValiants = 4671;
-        public const uint AreaRingOfAllianceValiants = 4672;
-        public const uint AreaRingOfHordeValiants = 4673;
-        public const uint AreaRingOfChampions = 4669;
-    }
-
-    struct AuraIds
-    {
-        //Flirt With Disaster
-        public const uint AuraPerfumeForever = 70235;
-        public const uint AuraPerfumeEnchantress = 70234;
-        public const uint AuraPerfumeVictory = 70233;
-    }
-
-    struct VehicleIds
-    {
-        //BgSA Artillery
-        public const uint AntiPersonnalCannon = 27894;
-    }
-
-    [Script("achievement_arena_2v2_kills", ArenaTypes.Team2v2)]
-    [Script("achievement_arena_3v3_kills", ArenaTypes.Team3v3)]
-    [Script("achievement_arena_5v5_kills", ArenaTypes.Team5v5)]
+    [Script]
     class achievement_arena_kills : AchievementCriteriaScript
     {
-        ArenaTypes _arenaType;
+        byte _arenaType;
 
-        public achievement_arena_kills(string name, ArenaTypes arenaType) : base(name)
+        public achievement_arena_kills(string name, byte arenaType) : base(name)
         {
             _arenaType = arenaType;
         }
@@ -53,26 +24,33 @@ namespace Scripts.World.Achievements
             if (!source.InArena())
                 return false;
 
-            return source.GetBattleground().GetArenaType() == _arenaType;
+            return source.GetBattleground().GetArenaType() == (ArenaTypes)_arenaType;
         }
     }
 
     [Script]
     class achievement_tilted : AchievementCriteriaScript
     {
+        const uint AreaArgentTournamentFields = 4658;
+        const uint AreaRingOfAspirants = 4670;
+        const uint AreaRingOfArgentValiants = 4671;
+        const uint AreaRingOfAllianceValiants = 4672;
+        const uint AreaRingOfHordeValiants = 4673;
+        const uint AreaRingOfChapions = 4669;
+
         public achievement_tilted() : base("achievement_tilted") { }
 
         public override bool OnCheck(Player player, Unit target)
         {
-            if (!player)
+            if (player == null)
                 return false;
 
-            bool checkArea = player.GetAreaId() == AreaIds.AreaArgentTournamentFields ||
-                                player.GetAreaId() == AreaIds.AreaRingOfAspirants ||
-                                player.GetAreaId() == AreaIds.AreaRingOfArgentValiants ||
-                                player.GetAreaId() == AreaIds.AreaRingOfAllianceValiants ||
-                                player.GetAreaId() == AreaIds.AreaRingOfHordeValiants ||
-                                player.GetAreaId() == AreaIds.AreaRingOfChampions;
+            bool checkArea = player.GetAreaId() == AreaArgentTournamentFields ||
+                                player.GetAreaId() == AreaRingOfAspirants ||
+                                player.GetAreaId() == AreaRingOfArgentValiants ||
+                                player.GetAreaId() == AreaRingOfAllianceValiants ||
+                                player.GetAreaId() == AreaRingOfHordeValiants ||
+                                player.GetAreaId() == AreaRingOfChapions;
 
             return checkArea && player.duel != null && player.duel.IsMounted;
         }
@@ -81,14 +59,18 @@ namespace Scripts.World.Achievements
     [Script]
     class achievement_flirt_with_disaster_perf_check : AchievementCriteriaScript
     {
+        const uint AuraPerfumeForever = 70235;
+        const uint AuraPerfumeEnchantress = 70234;
+        const uint AuraPerfumeVictory = 70233;
+
         public achievement_flirt_with_disaster_perf_check() : base("achievement_flirt_with_disaster_perf_check") { }
 
         public override bool OnCheck(Player player, Unit target)
         {
-            if (!player)
+            if (player == null)
                 return false;
 
-            if (player.HasAura(AuraIds.AuraPerfumeForever) || player.HasAura(AuraIds.AuraPerfumeEnchantress) || player.HasAura(AuraIds.AuraPerfumeVictory))
+            if (player.HasAura(AuraPerfumeForever) || player.HasAura(AuraPerfumeEnchantress) || player.HasAura(AuraPerfumeVictory))
                 return true;
 
             return false;
@@ -102,7 +84,7 @@ namespace Scripts.World.Achievements
 
         public override bool OnCheck(Player player, Unit target)
         {
-            return target && player.IsHonorOrXPTarget(target);
+            return target != null && player.IsHonorOrXPTarget(target);
         }
     }
 
@@ -114,7 +96,7 @@ namespace Scripts.World.Achievements
         public override void OnCompleted(Player player, AchievementRecord achievement)
         {
             player.GetSession().GetBattlePetMgr().UnlockSlot(BattlePetSlots.Slot1);
-            // TODO: Unlock trap
+            // Todo: Unlock trap
         }
     }
 
@@ -129,3 +111,4 @@ namespace Scripts.World.Achievements
         }
     }
 }
+

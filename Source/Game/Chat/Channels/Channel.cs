@@ -847,7 +847,7 @@ namespace Game.Chat
         public uint GetNumPlayers() { return (uint)_playersStore.Count; }
 
         public ChannelFlags GetFlags() { return _channelFlags; }
-        bool HasFlag(ChannelFlags flag) { return _channelFlags.HasAnyFlag(flag); }
+        public bool HasFlag(ChannelFlags flag) { return _channelFlags.HasAnyFlag(flag); }
 
         public AreaTableRecord GetZoneEntry() { return _zoneEntry; }
 

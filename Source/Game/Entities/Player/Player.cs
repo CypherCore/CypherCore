@@ -6669,7 +6669,7 @@ namespace Game.Entities
 
             uint level = GetLevel();
 
-            ScriptMgr.OnGivePlayerXP(this, xp, victim);
+            ScriptMgr.OnGivePlayerXP(this, ref xp, victim);
 
             // XP to money conversion processed in Player.RewardQuest
             if (IsMaxLevel())

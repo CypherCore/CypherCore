@@ -2263,6 +2263,7 @@ namespace Game.Entities
 
         public override uint GetFaction() { return m_unitData.FactionTemplate; }
         public override void SetFaction(uint faction) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.FactionTemplate), faction); }
+        public override void SetFaction(FactionTemplates faction) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.FactionTemplate), (uint)faction); }
 
         public void RestoreFaction()
         {

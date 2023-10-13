@@ -4,9 +4,9 @@
 using Framework.Constants;
 using Game;
 using Game.AI;
+using Game.DataStorage;
 using Game.Entities;
 using Game.Scripting;
-using Game.DataStorage;
 
 namespace Scripts.Smart
 {
@@ -126,7 +126,7 @@ namespace Scripts.Smart
             Log.outDebug(LogFilter.ScriptsAi, $"Event {eventId} is using SmartEventTrigger script");
             SmartScript script = new();
             // Set invoker as BaseObject if there isn't target for GameEvents::Trigger
-            script.OnInitialize(obj?? invoker, null, null, null, eventId);
+            script.OnInitialize(obj ?? invoker, null, null, null, eventId);
             script.ProcessEventsFor(SmartEvents.SendEventTrigger, invoker.ToUnit(), 0, 0, false, null, invoker.ToGameObject());
         }
     }

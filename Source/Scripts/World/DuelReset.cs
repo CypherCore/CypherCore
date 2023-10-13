@@ -7,26 +7,20 @@ using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
 using System;
+using static Global;
 
 namespace Scripts.World.DuelReset
 {
     [Script]
     class DuelResetScript : PlayerScript
     {
-        bool _resetCooldowns;
-        bool _resetHealthMana;
+        public DuelResetScript() : base("DuelResetScript") { }
 
-        public DuelResetScript() : base("DuelResetScript")
-        {
-            _resetCooldowns = WorldConfig.GetBoolValue(WorldCfg.ResetDuelCooldowns);
-            _resetHealthMana = WorldConfig.GetBoolValue(WorldCfg.ResetDuelHealthMana);
-        }
-
-        // Called when a duel starts (after 3s countdown)
+        // Called when a duel starts (after TimeSpan.FromSeconds(3) countdown)
         public override void OnDuelStart(Player player1, Player player2)
         {
             // Cooldowns reset
-            if (_resetCooldowns)
+            if (WorldConfig.GetBoolValue(WorldCfg.ResetDuelCooldowns))
             {
                 player1.GetSpellHistory().SaveCooldownStateBeforeDuel();
                 player2.GetSpellHistory().SaveCooldownStateBeforeDuel();
@@ -36,7 +30,7 @@ namespace Scripts.World.DuelReset
             }
 
             // Health and mana reset
-            if (_resetHealthMana)
+            if (WorldConfig.GetBoolValue(WorldCfg.ResetDuelHealthMana))
             {
                 player1.SaveHealthBeforeDuel();
                 player1.SaveManaBeforeDuel();
@@ -55,7 +49,7 @@ namespace Scripts.World.DuelReset
             if (type == DuelCompleteType.Won)
             {
                 // Cooldown restore
-                if (_resetCooldowns)
+                if (WorldConfig.GetBoolValue(WorldCfg.ResetDuelCooldowns))
                 {
                     ResetSpellCooldowns(winner, false);
                     ResetSpellCooldowns(loser, false);
@@ -65,7 +59,7 @@ namespace Scripts.World.DuelReset
                 }
 
                 // Health and mana restore
-                if (_resetHealthMana)
+                if (WorldConfig.GetBoolValue(WorldCfg.ResetDuelHealthMana))
                 {
                     winner.RestoreHealthAfterDuel();
                     loser.RestoreHealthAfterDuel();
@@ -83,31 +77,31 @@ namespace Scripts.World.DuelReset
 
         static void ResetSpellCooldowns(Player player, bool onStartDuel)
         {
-            // remove cooldowns on spells that have < 10 min Cd > 30 sec and has no onHold
+            // Remove cooldowns on spells that have < 10 min Cd > 30 sec and has no onHold
             player.GetSpellHistory().ResetCooldowns(pair =>
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pair.Key, Difficulty.None);
+                SpellInfo spellInfo = SpellMgr.GetSpellInfo(pair.Key, Difficulty.None);
                 TimeSpan remainingCooldown = player.GetSpellHistory().GetRemainingCooldown(spellInfo);
                 TimeSpan totalCooldown = TimeSpan.FromMilliseconds(spellInfo.RecoveryTime);
                 TimeSpan categoryCooldown = TimeSpan.FromMilliseconds(spellInfo.CategoryRecoveryTime);
 
-                void applySpellMod(ref TimeSpan value)
+                var applySpellMod = (TimeSpan value) =>
                 {
                     int intValue = (int)value.TotalMilliseconds;
                     player.ApplySpellMod(spellInfo, SpellModOp.Cooldown, ref intValue, null);
                     value = TimeSpan.FromMilliseconds(intValue);
                 };
 
-                applySpellMod(ref totalCooldown);
+                applySpellMod(totalCooldown);
 
                 int cooldownMod = player.GetTotalAuraModifier(AuraType.ModCooldown);
                 if (cooldownMod != 0)
                     totalCooldown += TimeSpan.FromMilliseconds(cooldownMod);
 
-                if (!spellInfo.HasAttribute(SpellAttr6.NoCategoryCooldownMods))
-                    applySpellMod(ref categoryCooldown);
+                if (spellInfo.HasAttribute(SpellAttr6.NoCategoryCooldownMods))
+                    applySpellMod(categoryCooldown);
 
-                return remainingCooldown > TimeSpan.Zero
+                return remainingCooldown > TimeSpan.FromMilliseconds(0)
                     && !pair.Value.OnHold
                     && totalCooldown < TimeSpan.FromMinutes(10)
                     && categoryCooldown < TimeSpan.FromMinutes(10)
@@ -118,7 +112,7 @@ namespace Scripts.World.DuelReset
 
             // pet cooldowns
             Pet pet = player.GetPet();
-            if (pet)
+            if (pet != null)
                 pet.GetSpellHistory().ResetAllCooldowns();
         }
     }

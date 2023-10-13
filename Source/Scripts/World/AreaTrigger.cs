@@ -12,128 +12,17 @@ using System.Collections.Generic;
 
 namespace Scripts.World.Areatriggers
 {
-    struct TextIds
-    {
-        //Brewfest
-        public const uint SayWelcome = 4;
-    }
-
-    struct SpellIds
-    {
-        //Legion Teleporter
-        public const uint TeleATo = 37387;
-        public const uint TeleHTo = 37389;
-
-        //Sholazar Waygate
-        public const uint SholazarToUngoroTeleport = 52056;
-        public const uint UngoroToSholazarTeleport = 52057;
-
-        //Nats Landing
-        public const uint FishPaste = 42644;
-
-        //Area 52
-        public const uint A52Neuralyzer = 34400;
-
-        //Stormwind teleport
-        public const uint DustInTheStormwind = 312593;
-    }
-
-    struct QuestIds
-    {
-        //Legion Teleporter
-        public const uint GainingAccessA = 10589;
-        public const uint GainingAccessH = 10604;
-
-        //Scent Larkorwi
-        public const uint ScentOfLarkorwi = 4291;
-
-        //Last Rites
-        public const uint LastRites = 12019;
-        public const uint BreakingThrough = 11898;
-
-        //Sholazar Waygate
-        public const uint TheMakersOverlook = 12613;
-        public const uint TheMakersPerch = 12559;
-        public const uint MeetingAGreatOne = 13956;
-
-        //Nats Landing
-        public const uint NatsBargain = 11209;
-
-        //Frostgrips Hollow
-        public const uint TheLonesomeWatcher = 12877;
-    }
-
-    struct CreatureIds
-    {
-        //Scent Larkorwi
-        public const uint LarkorwiMate = 9683;
-
-        //Nats Landing
-        public const uint LurkingShark = 23928;
-
-        //Brewfest
-        public const uint TapperSwindlekeg = 24711;
-        public const uint IpfelkoferIronkeg = 24710;
-
-        //Area 52
-        public const uint Spotlight = 19913;
-
-        //Frostgrips Hollow
-        public const uint StormforgedMonitor = 29862;
-        public const uint StormforgedEradictor = 29861;
-
-        //Stormwind Teleport
-        public const uint KillCreditTeleportStormwind = 160561;
-    }
-
-    struct GameObjectIds
-    {
-        //Coilfang Waterfall
-        public const uint CoilfangWaterfall = 184212;
-    }
-
-    struct AreaTriggerIds
-    {
-        //Sholazar Waygate
-        public const uint Sholazar = 5046;
-        public const uint Ungoro = 5047;
-
-        //Brewfest
-        public const uint BrewfestDurotar = 4829;
-        public const uint BrewfestDunMorogh = 4820;
-
-        //Area 52
-        public const uint Area52South = 4472;
-        public const uint Area52North = 4466;
-        public const uint Area52West = 4471;
-        public const uint Area52East = 4422;
-    }
-
-    struct Misc
-    {
-        //Brewfest
-        public const uint AreatriggerTalkCooldown = 5; // In Seconds
-
-        //Area 52
-        public const uint SummonCooldown = 5;
-
-        //Frostgrips Hollow
-        public const uint TypeWaypoint = 0;
-        public const uint DataStart = 0;
-
-        public static Position StormforgedMonitorPosition = new(6963.95f, 45.65f, 818.71f, 4.948f);
-        public static Position StormforgedEradictorPosition = new(6983.18f, 7.15f, 806.33f, 2.228f);
-    }
-
     [Script]
     class AreaTrigger_at_coilfang_waterfall : AreaTriggerScript
     {
+        const uint GoCoilfangWaterfall = 184212;
+
         public AreaTrigger_at_coilfang_waterfall() : base("at_coilfang_waterfall") { }
 
         public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
-            GameObject go = player.FindNearestGameObject(GameObjectIds.CoilfangWaterfall, 35.0f);
-            if (go)
+            GameObject go = player.FindNearestGameObject(GoCoilfangWaterfall, 35.0f);
+            if (go != null)
                 if (go.GetLootState() == LootState.Ready)
                     go.UseDoorOrButton();
 
@@ -144,21 +33,27 @@ namespace Scripts.World.Areatriggers
     [Script]
     class AreaTrigger_at_legion_teleporter : AreaTriggerScript
     {
+        const uint SpellTeleATo = 37387;
+        const uint QuestGainingAccessA = 10589;
+
+        const uint SpellTeleHTo = 37389;
+        const uint QuestGainingAccessH = 10604;
+
         public AreaTrigger_at_legion_teleporter() : base("at_legion_teleporter") { }
 
         public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             if (player.IsAlive() && !player.IsInCombat())
             {
-                if (player.GetTeam() == Team.Alliance && player.GetQuestRewardStatus(QuestIds.GainingAccessA))
+                if (player.GetTeam() == Team.Alliance && player.GetQuestRewardStatus(QuestGainingAccessA))
                 {
-                    player.CastSpell(player, SpellIds.TeleATo, false);
+                    player.CastSpell(player, SpellTeleATo, false);
                     return true;
                 }
 
-                if (player.GetTeam() == Team.Horde && player.GetQuestRewardStatus(QuestIds.GainingAccessH))
+                if (player.GetTeam() == Team.Horde && player.GetQuestRewardStatus(QuestGainingAccessH))
                 {
-                    player.CastSpell(player, SpellIds.TeleHTo, false);
+                    player.CastSpell(player, SpellTeleHTo, false);
                     return true;
                 }
 
@@ -171,14 +66,17 @@ namespace Scripts.World.Areatriggers
     [Script]
     class AreaTrigger_at_scent_larkorwi : AreaTriggerScript
     {
+        const uint QuestScentOfLarkorwi = 4291;
+        const uint NpcLarkorwiMate = 9683;
+
         public AreaTrigger_at_scent_larkorwi() : base("at_scent_larkorwi") { }
 
         public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
-            if (!player.IsDead() && player.GetQuestStatus(QuestIds.ScentOfLarkorwi) == QuestStatus.Incomplete)
+            if (!player.IsDead() && player.GetQuestStatus(QuestScentOfLarkorwi) == QuestStatus.Incomplete)
             {
-                if (!player.FindNearestCreature(CreatureIds.LarkorwiMate, 15))
-                    player.SummonCreature(CreatureIds.LarkorwiMate, player.GetPositionX() + 5, player.GetPositionY(), player.GetPositionZ(), 3.3f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(100));
+                if (player.FindNearestCreature(NpcLarkorwiMate, 15) == null)
+                    player.SummonCreature(NpcLarkorwiMate, player.GetPositionX() + 5, player.GetPositionY(), player.GetPositionZ(), 3.3f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(100));
             }
 
             return false;
@@ -188,21 +86,31 @@ namespace Scripts.World.Areatriggers
     [Script]
     class AreaTrigger_at_sholazar_waygate : AreaTriggerScript
     {
+        const uint SpellSholazarToUngoroTeleport = 52056;
+        const uint SpellUngoroToSholazarTeleport = 52057;
+
+        const uint AtSholazar = 5046;
+        const uint AtUngoro = 5047;
+
+        const uint QuestTheMakersOverlook = 12613;
+        const uint QuestTheMakersPerch = 12559;
+        const uint QuestMeetingAGreatOne = 13956;
+
         public AreaTrigger_at_sholazar_waygate() : base("at_sholazar_waygate") { }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
+        public override bool OnTrigger(Player player, AreaTriggerRecord trigger)
         {
-            if (!player.IsDead() && (player.GetQuestStatus(QuestIds.MeetingAGreatOne) != QuestStatus.None ||
-                (player.GetQuestStatus(QuestIds.TheMakersOverlook) == QuestStatus.Rewarded && player.GetQuestStatus(QuestIds.TheMakersPerch) == QuestStatus.Rewarded)))
+            if (!player.IsDead() && (player.GetQuestStatus(QuestMeetingAGreatOne) != QuestStatus.None ||
+                (player.GetQuestStatus(QuestTheMakersOverlook) == QuestStatus.Rewarded && player.GetQuestStatus(QuestTheMakersPerch) == QuestStatus.Rewarded)))
             {
-                switch (areaTrigger.Id)
+                switch (trigger.Id)
                 {
-                    case AreaTriggerIds.Sholazar:
-                        player.CastSpell(player, SpellIds.SholazarToUngoroTeleport, true);
+                    case AtSholazar:
+                        player.CastSpell(player, SpellSholazarToUngoroTeleport, true);
                         break;
 
-                    case AreaTriggerIds.Ungoro:
-                        player.CastSpell(player, SpellIds.UngoroToSholazarTeleport, true);
+                    case AtUngoro:
+                        player.CastSpell(player, SpellUngoroToSholazarTeleport, true);
                         break;
                 }
             }
@@ -214,19 +122,23 @@ namespace Scripts.World.Areatriggers
     [Script]
     class AreaTrigger_at_nats_landing : AreaTriggerScript
     {
+        const uint QuestNatsBargain = 11209;
+        const uint SpellFishPaste = 42644;
+        const uint NpcLurkingShark = 23928;
+
         public AreaTrigger_at_nats_landing() : base("at_nats_landing") { }
 
         public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
-            if (!player.IsAlive() || !player.HasAura(SpellIds.FishPaste))
+            if (!player.IsAlive() || !player.HasAura(SpellFishPaste))
                 return false;
 
-            if (player.GetQuestStatus(QuestIds.NatsBargain) == QuestStatus.Incomplete)
+            if (player.GetQuestStatus(QuestNatsBargain) == QuestStatus.Incomplete)
             {
-                if (!player.FindNearestCreature(CreatureIds.LurkingShark, 20.0f))
+                if (player.FindNearestCreature(NpcLurkingShark, 20.0f) == null)
                 {
-                    Creature shark = player.SummonCreature(CreatureIds.LurkingShark, -4246.243f, -3922.356f, -7.488f, 5.0f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(100));
-                    if (shark)
+                    Creature shark = player.SummonCreature(NpcLurkingShark, -4246.243f, -3922.356f, -7.488f, 5.0f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(100));
+                    if (shark != null)
                         shark.GetAI().AttackStart(player);
 
                     return false;
@@ -239,36 +151,42 @@ namespace Scripts.World.Areatriggers
     [Script]
     class AreaTrigger_at_brewfest : AreaTriggerScript
     {
-        Dictionary<uint, long> _triggerTimes;
+        const uint NpcTapperSwindlekeg = 24711;
+        const uint NpcIpfelkoferIronkeg = 24710;
+
+        const uint AtBrewfestDurotar = 4829;
+        const uint AtBrewfestDunMorogh = 4820;
+
+        const uint SayWelcome = 4;
+
+        const uint AreatriggerTalkCooldown = 5; // in seconds
+
+        Dictionary<uint, long> _triggerTimes = new();
 
         public AreaTrigger_at_brewfest() : base("at_brewfest")
         {
             // Initialize for cooldown
-            _triggerTimes = new Dictionary<uint, long>()
-            {
-                { AreaTriggerIds.BrewfestDurotar, 0 },
-                { AreaTriggerIds.BrewfestDunMorogh,0 },
-            };
+            _triggerTimes[AtBrewfestDurotar] = _triggerTimes[AtBrewfestDunMorogh] = 0;
         }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
+        public override bool OnTrigger(Player player, AreaTriggerRecord trigger)
         {
-            uint triggerId = areaTrigger.Id;
+            uint triggerId = trigger.Id;
             // Second trigger happened too early after first, skip for now
-            if (GameTime.GetGameTime() - _triggerTimes[triggerId] < Misc.AreatriggerTalkCooldown)
+            if (GameTime.GetGameTime() - _triggerTimes[triggerId] < AreatriggerTalkCooldown)
                 return false;
 
             switch (triggerId)
             {
-                case AreaTriggerIds.BrewfestDurotar:
-                    Creature tapper = player.FindNearestCreature(CreatureIds.TapperSwindlekeg, 20.0f);
-                    if (tapper)
-                        tapper.GetAI().Talk(TextIds.SayWelcome, player);
+                case AtBrewfestDurotar:
+                    Creature tapper = player.FindNearestCreature(NpcTapperSwindlekeg, 20.0f);
+                    if (tapper != null)
+                        tapper.GetAI().Talk(SayWelcome, player);
                     break;
-                case AreaTriggerIds.BrewfestDunMorogh:
-                    Creature ipfelkofer = player.FindNearestCreature(CreatureIds.IpfelkoferIronkeg, 20.0f);
-                    if (ipfelkofer)
-                        ipfelkofer.GetAI().Talk(TextIds.SayWelcome, player);
+                case AtBrewfestDunMorogh:
+                    Creature ipfelkofer = player.FindNearestCreature(NpcIpfelkoferIronkeg, 20.0f);
+                    if (ipfelkofer != null)
+                        ipfelkofer.GetAI().Talk(SayWelcome, player);
                     break;
                 default:
                     break;
@@ -282,63 +200,74 @@ namespace Scripts.World.Areatriggers
     [Script]
     class AreaTrigger_at_area_52_entrance : AreaTriggerScript
     {
-        Dictionary<uint, long> _triggerTimes;
+        const uint SpellA52Neuralyzer = 34400;
+        const uint NpcSpotlight = 19913;
+        const uint SummonCooldown = 5;
+
+        const uint AtArea52South = 4472;
+        const uint AtArea52North = 4466;
+        const uint AtArea52West = 4471;
+        const uint AtArea52East = 4422;
+
+        Dictionary<uint, long> _triggerTimes = new();
 
         public AreaTrigger_at_area_52_entrance() : base("at_area_52_entrance")
         {
-            _triggerTimes = new Dictionary<uint, long>()
-            {
-                { AreaTriggerIds.Area52South, 0 },
-                { AreaTriggerIds.Area52North,0 },
-                { AreaTriggerIds.Area52West,0},
-                { AreaTriggerIds.Area52East,0},
-            };
+            _triggerTimes[AtArea52South] = _triggerTimes[AtArea52North] = _triggerTimes[AtArea52West] = _triggerTimes[AtArea52East] = 0;
         }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
+        public override bool OnTrigger(Player player, AreaTriggerRecord trigger)
         {
             float x = 0.0f, y = 0.0f, z = 0.0f;
 
             if (!player.IsAlive())
                 return false;
 
-            if (GameTime.GetGameTime() - _triggerTimes[areaTrigger.Id] < Misc.SummonCooldown)
+            uint triggerId = trigger.Id;
+            if (GameTime.GetGameTime() - _triggerTimes[triggerId] < SummonCooldown)
                 return false;
 
-            switch (areaTrigger.Id)
+            switch (triggerId)
             {
-                case AreaTriggerIds.Area52East:
+                case AtArea52East:
                     x = 3044.176f;
                     y = 3610.692f;
                     z = 143.61f;
                     break;
-                case AreaTriggerIds.Area52North:
+                case AtArea52North:
                     x = 3114.87f;
                     y = 3687.619f;
                     z = 143.62f;
                     break;
-                case AreaTriggerIds.Area52West:
+                case AtArea52West:
                     x = 3017.79f;
                     y = 3746.806f;
                     z = 144.27f;
                     break;
-                case AreaTriggerIds.Area52South:
+                case AtArea52South:
                     x = 2950.63f;
                     y = 3719.905f;
                     z = 143.33f;
                     break;
             }
 
-            player.SummonCreature(CreatureIds.Spotlight, x, y, z, 0.0f, TempSummonType.TimedDespawn, TimeSpan.FromSeconds(5));
-            player.AddAura(SpellIds.A52Neuralyzer, player);
-            _triggerTimes[areaTrigger.Id] = GameTime.GetGameTime();
+            player.SummonCreature(NpcSpotlight, x, y, z, 0.0f, TempSummonType.TimedDespawn, TimeSpan.FromSeconds(5));
+            player.AddAura(SpellA52Neuralyzer, player);
+            _triggerTimes[trigger.Id] = GameTime.GetGameTime();
             return false;
         }
     }
 
-    [Script]
     class AreaTrigger_at_frostgrips_hollow : AreaTriggerScript
     {
+        const uint QuestTheLonesomeWatcher = 12877;
+
+        const uint NpcStormforgedMonitor = 29862;
+        const uint NpcStormforgedEradictor = 29861;
+
+        Position stormforgedMonitorPosition = new(6963.95f, 45.65f, 818.71f, 4.948f);
+        Position stormforgedEradictorPosition = new(6983.18f, 7.15f, 806.33f, 2.228f);
+
         ObjectGuid stormforgedMonitorGUID;
         ObjectGuid stormforgedEradictorGUID;
 
@@ -350,41 +279,43 @@ namespace Scripts.World.Areatriggers
 
         public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
-            if (player.GetQuestStatus(QuestIds.TheLonesomeWatcher) != QuestStatus.Incomplete)
+            if (player.GetQuestStatus(QuestTheLonesomeWatcher) != QuestStatus.Incomplete)
                 return false;
 
             Creature stormforgedMonitor = ObjectAccessor.GetCreature(player, stormforgedMonitorGUID);
-            if (stormforgedMonitor)
+            if (stormforgedMonitor != null)
                 return false;
 
             Creature stormforgedEradictor = ObjectAccessor.GetCreature(player, stormforgedEradictorGUID);
-            if (stormforgedEradictor)
+            if (stormforgedEradictor != null)
                 return false;
 
-            stormforgedMonitor = player.SummonCreature(CreatureIds.StormforgedMonitor, Misc.StormforgedMonitorPosition, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(60));
-            if (stormforgedMonitor)
+            stormforgedMonitor = player.SummonCreature(NpcStormforgedMonitor, stormforgedMonitorPosition, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromMinutes(1));
+            if (stormforgedMonitor != null)
             {
                 stormforgedMonitorGUID = stormforgedMonitor.GetGUID();
                 stormforgedMonitor.SetWalk(false);
                 /// The npc would search an alternative way to get to the last waypoint without this unit state.
                 stormforgedMonitor.AddUnitState(UnitState.IgnorePathfinding);
-                stormforgedMonitor.GetMotionMaster().MovePath((CreatureIds.StormforgedMonitor * 100) << 3, false);
+                stormforgedMonitor.GetMotionMaster().MovePath((NpcStormforgedMonitor * 100) << 3, false);
             }
 
-            stormforgedEradictor = player.SummonCreature(CreatureIds.StormforgedEradictor, Misc.StormforgedEradictorPosition, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(60));
-            if (stormforgedEradictor)
+            stormforgedEradictor = player.SummonCreature(NpcStormforgedEradictor, stormforgedEradictorPosition, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromMinutes(1));
+            if (stormforgedEradictor != null)
             {
                 stormforgedEradictorGUID = stormforgedEradictor.GetGUID();
-                stormforgedEradictor.GetMotionMaster().MovePath((CreatureIds.StormforgedEradictor * 100) << 3, false);
+                stormforgedEradictor.GetMotionMaster().MovePath((NpcStormforgedEradictor * 100) << 3, false);
             }
 
             return true;
         }
     }
 
-    [Script]
     class areatrigger_stormwind_teleport_unit : AreaTriggerAI
     {
+        const uint SpellDustInTheStormwind = 312593;
+        const uint NpcKillCreditTeleportStormwind = 160561;
+
         public areatrigger_stormwind_teleport_unit(AreaTrigger areatrigger) : base(areatrigger) { }
 
         public override void OnUnitEnter(Unit unit)
@@ -393,12 +324,11 @@ namespace Scripts.World.Areatriggers
             if (player == null)
                 return;
 
-            player.CastSpell(unit, SpellIds.DustInTheStormwind);
-            player.KilledMonsterCredit(CreatureIds.KillCreditTeleportStormwind);
+            player.CastSpell(unit, SpellDustInTheStormwind);
+            player.KilledMonsterCredit(NpcKillCreditTeleportStormwind);
         }
     }
 
-    [Script]
     class areatrigger_battleground_buffs : AreaTriggerAI
     {
         public areatrigger_battleground_buffs(AreaTrigger areatrigger) : base(areatrigger) { }
@@ -408,8 +338,12 @@ namespace Scripts.World.Areatriggers
             if (!unit.IsPlayer())
                 return;
 
-            var player = unit.ToPlayer();
-            GameObject buffObject = player.FindNearestGameObjectWithOptions(4.0f, new FindGameObjectOptions() { StringId = "bg_buff_object" });
+            HandleBuffAreaTrigger(unit.ToPlayer());
+        }
+
+        void HandleBuffAreaTrigger(Player player)
+        {
+            GameObject buffObject = player.FindNearestGameObjectWithOptions(4.0f, new FindGameObjectOptions() { StringId = "bg_buff_obj" });
             if (buffObject != null)
             {
                 buffObject.ActivateObject(GameObjectActions.Disturb, 0, player);
@@ -418,24 +352,27 @@ namespace Scripts.World.Areatriggers
         }
     }
 
-    [Script]
     class AreaTrigger_at_battleground_buffs : AreaTriggerScript
     {
         public AreaTrigger_at_battleground_buffs() : base("at_battleground_buffs") { }
 
         public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
-            GameObject buffObject = player.FindNearestGameObjectWithOptions(4.0f, new FindGameObjectOptions() { StringId = "bg_buff_object" });
+            HandleBuffAreaTrigger(player);
+            return true;
+        }
+
+        void HandleBuffAreaTrigger(Player player)
+        {
+            GameObject buffObject = player.FindNearestGameObjectWithOptions(4.0f, new FindGameObjectOptions() { StringId = "bg_buff_obj" });
             if (buffObject != null)
             {
                 buffObject.ActivateObject(GameObjectActions.Disturb, 0, player);
                 buffObject.DespawnOrUnsummon();
             }
-            return true;
         }
     }
 
-    [Script]
     class areatrigger_action_capture_flag : AreaTriggerAI
     {
         public areatrigger_action_capture_flag(AreaTrigger areatrigger) : base(areatrigger) { }
@@ -447,8 +384,9 @@ namespace Scripts.World.Areatriggers
 
             Player player = unit.ToPlayer();
             ZoneScript zoneScript = at.GetZoneScript();
-            if (zoneScript != null && zoneScript.CanCaptureFlag(at, player))
-                zoneScript.OnCaptureFlag(at, player);
+            if (zoneScript != null)
+                if (zoneScript.CanCaptureFlag(at, player))
+                    zoneScript.OnCaptureFlag(at, player);
         }
     }
 }

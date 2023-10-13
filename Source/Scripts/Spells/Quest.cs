@@ -1390,7 +1390,7 @@ namespace Scripts.Spells.Azerite
         }
     }
 
-    // 13790 13793 13811 13814 - Among the ChaMathF.PIons
+    // 13790 13793 13811 13814 - Among the Chapions
     [Script] // 13665 13745 13750 13756 13761 13767 13772 13777 13782  13787 - The Grand Melee
     class spell_q13665_q13790_bested_trigger : SpellScript
     {

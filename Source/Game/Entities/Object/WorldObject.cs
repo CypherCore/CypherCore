@@ -3126,6 +3126,7 @@ namespace Game.Entities
 
         public virtual uint GetFaction() { return 0; }
         public virtual void SetFaction(uint faction) { }
+        public virtual void SetFaction(FactionTemplates faction) { }
 
         //Position
 
