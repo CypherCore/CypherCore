@@ -197,7 +197,7 @@ namespace Game.Chat
         }
 
         [Command("create", CypherStrings.CommandAccCreateHelp, RBACPermissions.CommandAccountCreate, true)]
-        static bool HandleAccountCreateCommand(CommandHandler handler, string accountName, string password, [OptionalArg]string email)
+        static bool HandleAccountCreateCommand(CommandHandler handler, string accountName, string password, [OptionalArg] string email)
         {
             if (accountName.Contains("@"))
             {
@@ -277,6 +277,7 @@ namespace Game.Chat
             if (!Global.AccountMgr.CheckEmail(handler.GetSession().GetAccountId(), oldEmail))
             {
                 handler.SendSysMessage(CypherStrings.CommandWrongemail);
+                Global.ScriptMgr.OnFailedEmailChange(handler.GetSession().GetAccountId());
                 Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) Tried to change email, but the provided email [{4}] is not equal to registration email [{5}].",
                     handler.GetSession().GetAccountId(), handler.GetSession().GetRemoteAddress(),
                     handler.GetSession().GetPlayer().GetName(), handler.GetSession().GetPlayer().GetGUID().ToString(),
@@ -287,6 +288,7 @@ namespace Game.Chat
             if (!Global.AccountMgr.CheckPassword(handler.GetSession().GetAccountId(), password))
             {
                 handler.SendSysMessage(CypherStrings.CommandWrongoldpassword);
+                Global.ScriptMgr.OnFailedEmailChange(handler.GetSession().GetAccountId());
                 Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) Tried to change email, but the provided password is wrong.",
                     handler.GetSession().GetAccountId(), handler.GetSession().GetRemoteAddress(),
                     handler.GetSession().GetPlayer().GetName(), handler.GetSession().GetPlayer().GetGUID().ToString());
@@ -296,12 +298,14 @@ namespace Game.Chat
             if (email == oldEmail)
             {
                 handler.SendSysMessage(CypherStrings.OldEmailIsNewEmail);
+                Global.ScriptMgr.OnFailedEmailChange(handler.GetSession().GetAccountId());
                 return false;
             }
 
             if (email != emailConfirm)
             {
                 handler.SendSysMessage(CypherStrings.NewEmailsNotMatch);
+                Global.ScriptMgr.OnFailedEmailChange(handler.GetSession().GetAccountId());
                 Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) Tried to change email, but the provided password is wrong.",
                     handler.GetSession().GetAccountId(), handler.GetSession().GetRemoteAddress(),
                     handler.GetSession().GetPlayer().GetName(), handler.GetSession().GetPlayer().GetGUID().ToString());
@@ -314,6 +318,7 @@ namespace Game.Chat
             {
                 case AccountOpResult.Ok:
                     handler.SendSysMessage(CypherStrings.CommandEmail);
+                    Global.ScriptMgr.OnEmailChange(handler.GetSession().GetAccountId());
                     Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) Changed Email from [{4}] to [{5}].",
                         handler.GetSession().GetAccountId(), handler.GetSession().GetRemoteAddress(),
                         handler.GetSession().GetPlayer().GetName(), handler.GetSession().GetPlayer().GetGUID().ToString(),
@@ -321,6 +326,7 @@ namespace Game.Chat
                     break;
                 case AccountOpResult.EmailTooLong:
                     handler.SendSysMessage(CypherStrings.EmailTooLong);
+                    Global.ScriptMgr.OnFailedEmailChange(handler.GetSession().GetAccountId());
                     return false;
                 default:
                     handler.SendSysMessage(CypherStrings.CommandNotchangeemail);
@@ -340,7 +346,7 @@ namespace Game.Chat
             if (!Global.AccountMgr.CheckPassword(handler.GetSession().GetAccountId(), oldPassword))
             {
                 handler.SendSysMessage(CypherStrings.CommandWrongoldpassword);
-
+                Global.ScriptMgr.OnFailedPasswordChange(handler.GetSession().GetAccountId());
                 Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) Tried to change password, but the provided old password is wrong.",
                     handler.GetSession().GetAccountId(), handler.GetSession().GetRemoteAddress(),
                     handler.GetSession().GetPlayer().GetName(), handler.GetSession().GetPlayer().GetGUID().ToString());
@@ -351,7 +357,7 @@ namespace Game.Chat
                 && !Global.AccountMgr.CheckEmail(handler.GetSession().GetAccountId(), confirmEmail)) // ... and returns false if the comparison fails.
             {
                 handler.SendSysMessage(CypherStrings.CommandWrongemail);
-
+                Global.ScriptMgr.OnFailedPasswordChange(handler.GetSession().GetAccountId());
                 Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) Tried to change password, but the entered email [{4}] is wrong.",
                     handler.GetSession().GetAccountId(), handler.GetSession().GetRemoteAddress(),
                     handler.GetSession().GetPlayer().GetName(), handler.GetSession().GetPlayer().GetGUID().ToString(),
@@ -363,6 +369,7 @@ namespace Game.Chat
             if (newPassword != confirmPassword)
             {
                 handler.SendSysMessage(CypherStrings.NewPasswordsNotMatch);
+                Global.ScriptMgr.OnFailedPasswordChange(handler.GetSession().GetAccountId());
                 return false;
             }
 
@@ -372,12 +379,14 @@ namespace Game.Chat
             {
                 case AccountOpResult.Ok:
                     handler.SendSysMessage(CypherStrings.CommandPassword);
+                    Global.ScriptMgr.OnPasswordChange(handler.GetSession().GetAccountId());
                     Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) Changed Password.",
                         handler.GetSession().GetAccountId(), handler.GetSession().GetRemoteAddress(),
                         handler.GetSession().GetPlayer().GetName(), handler.GetSession().GetPlayer().GetGUID().ToString());
                     break;
                 case AccountOpResult.PassTooLong:
                     handler.SendSysMessage(CypherStrings.PasswordTooLong);
+                    Global.ScriptMgr.OnFailedPasswordChange(handler.GetSession().GetAccountId());
                     return false;
                 default:
                     handler.SendSysMessage(CypherStrings.CommandNotchangepassword);
@@ -552,7 +561,7 @@ namespace Game.Chat
         {
             [Command("2fa", CypherStrings.CommandAccSet2faHelp, RBACPermissions.CommandAccountSet2Fa, true)]
             static bool HandleAccountSet2FACommand(CommandHandler handler, string accountName, string secret)
-            {                
+            {
                 /*uint targetAccountId = Global.AccountMgr.GetId(accountName);
                 if (targetAccountId == 0)
                 {

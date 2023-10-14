@@ -1,4 +1,4 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
@@ -6,50 +6,70 @@ using Game.AI;
 using Game.Entities;
 using Game.Scripting;
 
-namespace Scripts.Pets
+namespace Scripts.Pets.Priest
 {
-    namespace Priest
+    [Script] // 198236 - Divine Image
+    class npc_pet_pri_divine_image : PassiveAI
     {
-        struct SpellIds
+        const uint SpellPriestDivineImageSpellCheck = 405216;
+        const uint SpellPriestInvokeTheNaaru = 196687;
+
+        public npc_pet_pri_divine_image(Creature creature) : base(creature) { }
+
+        public override void IsSummonedBy(WorldObject summoner)
         {
-            public const uint GlyphOfShadowFiend = 58228;
-            public const uint ShadowFiendDeath = 57989;
-            public const uint LightWellCharges = 59907;
+            me.CastSpell(me, SpellPriestInvokeTheNaaru);
+
+            if (me.ToTempSummon().IsGuardian() && summoner.IsUnit())
+                (me as Guardian).SetBonusDamage((int)summoner.ToUnit().SpellBaseHealingBonusDone(SpellSchoolMask.Holy));
         }
 
-        [Script]
-        class npc_pet_pri_lightwell : PassiveAI
+        public override void OnDespawn()
         {
-            public npc_pet_pri_lightwell(Creature creature) : base(creature)
-            {
-                DoCast(creature, SpellIds.LightWellCharges, new Game.Spells.CastSpellExtraArgs(false));
-            }
+            Unit owner = me.GetOwner();
+            if (owner != null)
+                owner.RemoveAura(SpellPriestDivineImageSpellCheck);
+        }
+    }
 
-            public override void EnterEvadeMode(EvadeReason why)
-            {
-                if (!me.IsAlive())
-                    return;
+    [Script] // 189820 - Lightwell
+    class npc_pet_pri_lightwell : PassiveAI
+    {
+        const uint SpellPriestLightwellCharges = 59907;
 
-                me.CombatStop(true);
-                EngagementOver();
-                me.ResetPlayerDamageReq();
-            }
+        public npc_pet_pri_lightwell(Creature creature) : base(creature)
+        {
+            DoCast(me, SpellPriestLightwellCharges, false);
         }
 
-        [Script]
-        class npc_pet_pri_shadowfiend : PetAI
+        public override void EnterEvadeMode(EvadeReason why)
         {
-            public npc_pet_pri_shadowfiend(Creature creature) : base(creature) { }
+            if (!me.IsAlive())
+                return;
 
-            public override void IsSummonedBy(WorldObject summoner)
-            {
-                Unit unitSummoner = summoner.ToUnit();
-                if (unitSummoner == null)
-                    return;
+            me.CombatStop(true);
+            EngagementOver();
+            me.ResetPlayerDamageReq();
+        }
+    }
 
-                if (unitSummoner.HasAura(SpellIds.GlyphOfShadowFiend))
-                    DoCastAOE(SpellIds.ShadowFiendDeath);
-            }
+    // 19668 - Shadowfiend
+    [Script] // 62982 - Mindbender
+    class npc_pet_pri_shadowfiend_mindbender : PetAI
+    {
+        const uint SpellPriestAtonement = 81749;
+        const uint SpellPriestAtonementPassive = 195178;
+
+        public npc_pet_pri_shadowfiend_mindbender(Creature creature) : base(creature) { }
+
+        public override void IsSummonedBy(WorldObject summonerWO)
+        {
+            Unit summoner = summonerWO.ToUnit();
+            if (summoner == null)
+                return;
+
+            if (summoner.HasAura(SpellPriestAtonement))
+                DoCastSelf(SpellPriestAtonementPassive, TriggerCastFlags.FullMask);
         }
     }
 }

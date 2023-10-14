@@ -26,7 +26,7 @@ namespace Game.DungeonFinding
                 Global.LFGMgr.LeaveLfg(player.GetGUID(), true);
         }
 
-        public override void OnLogin(Player player)
+        public override void OnLogin(Player player, bool firstLogin)
         {
             if (!Global.LFGMgr.IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser))
                 return;

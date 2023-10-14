@@ -34,47 +34,48 @@ namespace Scripts.World.Achievements
         UnknownAction = 12
     }
 
+    [Script]
     class AccountActionIpLogger : AccountScript
     {
         public AccountActionIpLogger() : base("AccountActionIpLogger") { }
 
         // We log last_ip instead of last_attempt_ip, as login was successful
         // AccountLogin = 0
-        void OnAccountLogin(uint accountId)
+        public override void OnAccountLogin(uint accountId)
         {
-            AccountIPLogAction(accountId, AccountLogin);
+            AccountIPLogAction(accountId, IPLoggingTypes.AccountLogin);
         }
 
         // We log last_attempt_ip instead of last_ip, as failed login doesn't necessarily mean approperiate user
         // AccountFailLogin = 1
-        void OnFailedAccountLogin(uint accountId)
+        public override void OnFailedAccountLogin(uint accountId)
         {
-            AccountIPLogAction(accountId, AccountFailLogin);
+            AccountIPLogAction(accountId, IPLoggingTypes.AccountFailLogin);
         }
 
         // AccountChangePw = 2
-        void OnPasswordChange(uint accountId)
+        public override void OnPasswordChange(uint accountId)
         {
-            AccountIPLogAction(accountId, AccountChangePw);
+            AccountIPLogAction(accountId, IPLoggingTypes.AccountChangePw);
         }
 
         // AccountChangePwFail = 3
-        void OnFailedPasswordChange(uint accountId)
+        public override void OnFailedPasswordChange(uint accountId)
         {
-            AccountIPLogAction(accountId, AccountChangePwFail);
+            AccountIPLogAction(accountId, IPLoggingTypes.AccountChangePwFail);
         }
 
         // Registration Email can Not be changed apart from Gm level users. Thus, we do not require to log them...
         // AccountChangeEmail = 4
-        void OnEmailChange(uint accountId)
+        public override void OnEmailChange(uint accountId)
         {
-            AccountIPLogAction(accountId, AccountChangeEmail); // ... they get logged by gm command logger anyway
+            AccountIPLogAction(accountId, IPLoggingTypes.AccountChangeEmail); // ... they get logged by gm command logger anyway
         }
 
         // AccountChangeEmailFail = 5
-        void OnFailedEmailChange(uint accountId)
+        public override void OnFailedEmailChange(uint accountId)
         {
-            AccountIPLogAction(accountId, AccountChangeEmailFail);
+            AccountIPLogAction(accountId, IPLoggingTypes.AccountChangeEmailFail);
         }
 
         // AccountLogout = 6
@@ -85,36 +86,36 @@ namespace Scripts.World.Achievements
 
             // We declare all the required variables
             uint playerGuid = accountId;
-            uint realmId = realm.Id.Realm;
-            std.string systemNote = "Error"; // "Error" is a placeholder here. We change it later.
+            uint realmId = Global.WorldMgr.GetRealmId().Index;
+            string systemNote = "Error"; // "Error" is a placeholder here. We change it later.
 
             // With this switch, we change systemNote so that we have a more accurate phraMath.Sing of what type it is.
             // Avoids Magicnumbers in Sql table
             switch (aType)
             {
-                case AccountLogin:
+                case IPLoggingTypes.AccountLogin:
                     systemNote = "Logged into WoW";
                     break;
-                case AccountFailLogin:
+                case IPLoggingTypes.AccountFailLogin:
                     systemNote = "Login to WoW Failed";
                     break;
-                case AccountChangePw:
+                case IPLoggingTypes.AccountChangePw:
                     systemNote = "Password Reset Completed";
                     break;
-                case AccountChangePwFail:
+                case IPLoggingTypes.AccountChangePwFail:
                     systemNote = "Password Reset Failed";
                     break;
-                case AccountChangeEmail:
+                case IPLoggingTypes.AccountChangeEmail:
                     systemNote = "Email Change Completed";
                     break;
-                case AccountChangeEmailFail:
+                case IPLoggingTypes.AccountChangeEmailFail:
                     systemNote = "Email Change Failed";
                     break;
-                case AccountLogout:
+                /*case IPLoggingTypes.AccountLogout:
                     systemNote = "Logged on AccountLogout"; //Can not be logged
-                    break;
+                    break;*/
                 // Neither should happen. Ever. Period. If it does, call Ghostbusters and all your local software defences to investigate.
-                case UnknownAction:
+                case IPLoggingTypes.UnknownAction:
                 default:
                     systemNote = "Error! Unknown action!";
                     break;
@@ -123,54 +124,57 @@ namespace Scripts.World.Achievements
             // Once we have done everything, we can Add the new log.
             // Seeing as the time differences should be minimal, we do not get unixtime and the timestamp right now;
             // Rather, we let it be added with the Sql query.
-            if (aType != AccountFailLogin)
+            if (aType != IPLoggingTypes.AccountFailLogin)
             {
                 // As we can assume most account actions are Not failed login, so this is the more accurate check.
                 // For those, we need last_ip...
+                PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_ALDL_IP_LOGGING);
 
-                stmt.setUint(0, playerGuid);
-                stmt.setUInt64(1, 0);
-                stmt.setUint(2, realmId);
-                stmt.setUInt8(3, aType);
-                stmt.setUint(4, playerGuid);
-                stmt.setString(5, systemNote);
-                LoginDatabase.Execute(stmt);
+                stmt.AddValue(0, playerGuid);
+                stmt.AddValue(1, 0ul);
+                stmt.AddValue(2, realmId);
+                stmt.AddValue(3, (byte)aType);
+                stmt.AddValue(4, playerGuid);
+                stmt.AddValue(5, systemNote);
+                DB.Login.Execute(stmt);
             }
             else // ... but for failed login, we query last_attempt_ip from account table. Which we do with an unique query
             {
+                PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_FACL_IP_LOGGING);
 
-                stmt.setUint(0, playerGuid);
-                stmt.setUInt64(1, 0);
-                stmt.setUint(2, realmId);
-                stmt.setUInt8(3, aType);
-                stmt.setUint(4, playerGuid);
-                stmt.setString(5, systemNote);
-                LoginDatabase.Execute(stmt);
+                stmt.AddValue(0, playerGuid);
+                stmt.AddValue(1, 0ul);
+                stmt.AddValue(2, realmId);
+                stmt.AddValue(3, (byte)aType);
+                stmt.AddValue(4, playerGuid);
+                stmt.AddValue(5, systemNote);
+                DB.Login.Execute(stmt);
             }
             return;
         }
     }
 
+    [Script]
     class CharacterActionIpLogger : PlayerScript
     {
         public CharacterActionIpLogger() : base("CharacterActionIpLogger") { }
 
         // CharacterCreate = 7
-        void OnCreate(Player player)
+        public override void OnCreate(Player player)
         {
-            CharacterIPLogAction(player, CharacterCreate);
+            CharacterIPLogAction(player, IPLoggingTypes.CharacterCreate);
         }
 
         // CharacterLogin = 8
-        void OnLogin(Player player, bool firstLogin)
+        public override void OnLogin(Player player, bool firstLogin)
         {
-            CharacterIPLogAction(player, CharacterLogin);
+            CharacterIPLogAction(player, IPLoggingTypes.CharacterLogin);
         }
 
         // CharacterLogout = 9
-        void OnLogout(Player player)
+        public override void OnLogout(Player player)
         {
-            CharacterIPLogAction(player, CharacterLogout);
+            CharacterIPLogAction(player, IPLoggingTypes.CharacterLogout);
         }
 
         // CharacterDelete = 10
@@ -189,65 +193,67 @@ namespace Scripts.World.Achievements
 
             // We declare all the required variables
             uint playerGuid = player.GetSession().GetAccountId();
-            uint realmId = realm.Id.Realm;
-            std.string currentIp = player.GetSession().GetRemoteAddress();
-            std.string systemNote = "Error"; // "Error" is a placeholder here. We change it...
+            uint realmId = Global.WorldMgr.GetRealmId().Index;
+            string currentIp = player.GetSession().GetRemoteAddress();
+            string systemNote;
 
             // ... with this switch, so that we have a more accurate phraMath.Sing of what type it is
             switch (aType)
             {
-                case CharacterCreate:
+                case IPLoggingTypes.CharacterCreate:
                     systemNote = "Character Created";
                     break;
-                case CharacterLogin:
+                case IPLoggingTypes.CharacterLogin:
                     systemNote = "Logged onto Character";
                     break;
-                case CharacterLogout:
+                case IPLoggingTypes.CharacterLogout:
                     systemNote = "Logged out of Character";
                     break;
-                case CharacterDelete:
+                case IPLoggingTypes.CharacterDelete:
                     systemNote = "Character Deleted";
                     break;
-                case CharacterFailedDelete:
+                case IPLoggingTypes.CharacterFailedDelete:
                     systemNote = "Character Deletion Failed";
                     break;
                 // Neither should happen. Ever. Period. If it does, call Mythbusters.
-                case UnknownAction:
+                case IPLoggingTypes.UnknownAction:
                 default:
                     systemNote = "Error! Unknown action!";
                     break;
             }
 
             // Once we have done everything, we can Add the new log.
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_CHAR_IP_LOGGING);
 
-            stmt.setUint(0, playerGuid);
-            stmt.setUInt64(1, player.GetGUID().GetCounter());
-            stmt.setUint(2, realmId);
-            stmt.setUInt8(3, aType);
-            stmt.setString(4, currentIp); // We query the ip here.
-            stmt.setString(5, systemNote);
+            stmt.AddValue(0, playerGuid);
+            stmt.AddValue(1, player.GetGUID().GetCounter());
+            stmt.AddValue(2, realmId);
+            stmt.AddValue(3, (byte)aType);
+            stmt.AddValue(4, currentIp); // We query the ip here.
+            stmt.AddValue(5, systemNote);
             // Seeing as the time differences should be minimal, we do not get unixtime and the timestamp right now;
             // Rather, we let it be added with the Sql query.
 
-            LoginDatabase.Execute(stmt);
+            DB.Login.Execute(stmt);
             return;
         }
     }
 
+    [Script]
     class CharacterDeleteActionIpLogger : PlayerScript
     {
         public CharacterDeleteActionIpLogger() : base("CharacterDeleteActionIpLogger") { }
 
         // CharacterDelete = 10
-        void OnDelete(ObjectGuid guid, uint accountId)
+        public override void OnDelete(ObjectGuid guid, uint accountId)
         {
-            DeleteIPLogAction(guid, accountId, CharacterDelete);
+            DeleteIPLogAction(guid, accountId, IPLoggingTypes.CharacterDelete);
         }
 
         // CharacterFailedDelete = 11
-        void OnFailedDelete(ObjectGuid guid, uint accountId)
+        public override void OnFailedDelete(ObjectGuid guid, uint accountId)
         {
-            DeleteIPLogAction(guid, accountId, CharacterFailedDelete);
+            DeleteIPLogAction(guid, accountId, IPLoggingTypes.CharacterFailedDelete);
         }
 
         void DeleteIPLogAction(ObjectGuid guid, uint playerGuid, IPLoggingTypes aType)
@@ -255,40 +261,41 @@ namespace Scripts.World.Achievements
             // Action Ip Logger is only intialized if config is set up
             // Else, this script isn't loaded in the first place: We require no config check.
 
-            uint realmId = realm.Id.Realm;
+            uint realmId = Global.WorldMgr.GetRealmId().Index;
             // Query playerGuid/accountId, as we only have characterGuid
-            std.string systemNote = "Error"; // "Error" is a placeholder here. We change it later.
+            string systemNote;
 
             // With this switch, we change systemNote so that we have a more accurate phraMath.Sing of what type it is.
             // Avoids Magicnumbers in Sql table
             switch (aType)
             {
-                case CharacterDelete:
+                case IPLoggingTypes.CharacterDelete:
                     systemNote = "Character Deleted";
                     break;
-                case CharacterFailedDelete:
+                case IPLoggingTypes.CharacterFailedDelete:
                     systemNote = "Character Deletion Failed";
                     break;
                 // Neither should happen. Ever. Period. If it does, call to whatever god you have for mercy and guidance.
-                case UnknownAction:
+                case IPLoggingTypes.UnknownAction:
                 default:
                     systemNote = "Error! Unknown action!";
                     break;
             }
 
             // Once we have done everything, we can Add the new log.
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_ALDL_IP_LOGGING);
 
-            stmt.setUint(0, playerGuid);
-            stmt.setUInt64(1, guid.GetCounter());
-            stmt.setUint(2, realmId);
-            stmt.setUInt8(3, aType);
-            stmt.setUint(4, playerGuid);
-            stmt.setString(5, systemNote);
+            stmt.AddValue(0, playerGuid);
+            stmt.AddValue(1, guid.GetCounter());
+            stmt.AddValue(2, realmId);
+            stmt.AddValue(3, (byte)aType);
+            stmt.AddValue(4, playerGuid);
+            stmt.AddValue(5, systemNote);
 
             // Seeing as the time differences should be minimal, we do not get unixtime and the timestamp right now;
             // Rather, we let it be added with the Sql query.
 
-            LoginDatabase.Execute(stmt);
+            DB.Login.Execute(stmt);
             return;
         }
     }

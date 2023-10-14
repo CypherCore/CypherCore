@@ -586,6 +586,8 @@ namespace Game.Networking
                 {
                     SendAuthResponseError(BattlenetRpcErrorCode.RiskAccountLocked);
                     Log.outDebug(LogFilter.Network, "HandleAuthSession: Sent Auth Response (Account IP differs).");
+                    // We could log on hook only instead of an additional db log, however action logger is config based. Better keep DB logging as well
+                    Global.ScriptMgr.OnFailedAccountLogin(account.game.Id);
                     CloseSocket();
                     return;
                 }
@@ -596,6 +598,8 @@ namespace Game.Networking
                 {
                     SendAuthResponseError(BattlenetRpcErrorCode.RiskAccountLocked);
                     Log.outDebug(LogFilter.Network, "WorldSocket.HandleAuthSession: Sent Auth Response (Account country differs. Original country: {0}, new country: {1}).", account.battleNet.LockCountry, _ipCountry);
+                    // We could log on hook only instead of an additional db log, however action logger is config based. Better keep DB logging as well
+                    Global.ScriptMgr.OnFailedAccountLogin(account.game.Id);
                     CloseSocket();
                     return;
                 }
@@ -617,6 +621,7 @@ namespace Game.Networking
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.GameAccountBanned);
                 Log.outError(LogFilter.Network, "WorldSocket:HandleAuthSession: Sent Auth Response (Account banned).");
+                Global.ScriptMgr.OnFailedAccountLogin(account.game.Id);
                 CloseSocket();
                 return;
             }
@@ -627,6 +632,7 @@ namespace Game.Networking
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.ServerIsPrivate);
                 Log.outInfo(LogFilter.Network, "WorldSocket:HandleAuthSession: User tries to login but his security level is not enough");
+                Global.ScriptMgr.OnFailedAccountLogin(account.game.Id);
                 CloseSocket();
                 return;
             }
@@ -641,6 +647,9 @@ namespace Game.Networking
                 stmt.AddValue(1, authSession.RealmJoinTicket);
                 DB.Login.Execute(stmt);
             }
+
+            // At this point, we can safely hook a successful login
+            Global.ScriptMgr.OnAccountLogin(account.game.Id);
 
             _worldSession = new WorldSession(account.game.Id, authSession.RealmJoinTicket, account.battleNet.Id, this, account.game.Security, (Expansion)account.game.Expansion,
                 mutetime, account.game.OS, account.battleNet.Locale, account.game.Recruiter, account.game.IsRectuiter);

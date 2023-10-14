@@ -984,7 +984,8 @@ namespace Game
                 SendNotification(CypherStrings.ResetTalents);
             }
 
-            if (pCurrChar.HasAtLoginFlag(AtLoginFlags.FirstLogin))
+            bool firstLogin = pCurrChar.HasAtLoginFlag(AtLoginFlags.FirstLogin);
+            if (firstLogin)
             {
                 pCurrChar.RemoveAtLoginFlag(AtLoginFlags.FirstLogin);
 
@@ -1075,7 +1076,7 @@ namespace Game
                 SendNotification(CypherStrings.GmOn);
 
             string IP_str = GetRemoteAddress();
-            Log.outDebug(LogFilter.Network, $"Account: {GetAccountId()} (IP: {GetRemoteAddress()}) Login Character: [{pCurrChar.GetName()}] ({pCurrChar.GetGUID()}) Level: {pCurrChar.GetLevel()}, XP: { _player.GetXP()}/{_player.GetXPForNextLevel()} ({_player.GetXPForNextLevel() - _player.GetXP()} left)");
+            Log.outDebug(LogFilter.Network, $"Account: {GetAccountId()} (IP: {GetRemoteAddress()}) Login Character: [{pCurrChar.GetName()}] ({pCurrChar.GetGUID()}) Level: {pCurrChar.GetLevel()}, XP: {_player.GetXP()}/{_player.GetXPForNextLevel()} ({_player.GetXPForNextLevel() - _player.GetXP()} left)");
 
             if (!pCurrChar.IsStandState() && !pCurrChar.HasUnitState(UnitState.Stunned))
                 pCurrChar.SetStandState(UnitStandStateType.Stand);
@@ -1088,7 +1089,7 @@ namespace Game
             // Handle Login-Achievements (should be handled after loading)
             _player.UpdateCriteria(CriteriaType.Login, 1);
 
-            Global.ScriptMgr.OnPlayerLogin(pCurrChar);
+            Global.ScriptMgr.OnPlayerLogin(pCurrChar, firstLogin);
         }
 
         public void AbortLogin(LoginFailureReason reason)
@@ -1166,18 +1167,18 @@ namespace Game
             switch (packet.Action)
             {
                 case TutorialAction.Update:
+                {
+                    byte index = (byte)(packet.TutorialBit >> 5);
+                    if (index >= SharedConst.MaxAccountTutorialValues)
                     {
-                        byte index = (byte)(packet.TutorialBit >> 5);
-                        if (index >= SharedConst.MaxAccountTutorialValues)
-                        {
-                            Log.outError(LogFilter.Network, "CMSG_TUTORIAL_FLAG received bad TutorialBit {0}.", packet.TutorialBit);
-                            return;
-                        }
-                        uint flag = GetTutorialInt(index);
-                        flag |= (uint)(1 << (int)(packet.TutorialBit & 0x1F));
-                        SetTutorialInt(index, flag);
-                        break;
+                        Log.outError(LogFilter.Network, "CMSG_TUTORIAL_FLAG received bad TutorialBit {0}.", packet.TutorialBit);
+                        return;
                     }
+                    uint flag = GetTutorialInt(index);
+                    flag |= (uint)(1 << (int)(packet.TutorialBit & 0x1F));
+                    SetTutorialInt(index, flag);
+                    break;
+                }
                 case TutorialAction.Clear:
                     for (byte i = 0; i < SharedConst.MaxAccountTutorialValues; ++i)
                         SetTutorialInt(i, 0xFFFFFFFF);

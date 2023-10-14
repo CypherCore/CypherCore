@@ -653,7 +653,7 @@ namespace Game.Scripting
         public virtual void OnSpellCast(Player player, Spell spell, bool skipCheck) { }
 
         // Called when a player logs in.
-        public virtual void OnLogin(Player player) { }
+        public virtual void OnLogin(Player player, bool firstLogin) { }
 
         // Called when a player logs out.
         public virtual void OnLogout(Player player) { }
@@ -690,6 +690,32 @@ namespace Game.Scripting
 
         // Called when a player choose a response from a PlayerChoice
         public virtual void OnPlayerChoiceResponse(Player player, uint choiceId, uint responseId) { }
+    }
+
+    public class AccountScript : ScriptObject
+    {
+        public AccountScript(string name) : base(name)
+        {
+            Global.ScriptMgr.AddScript(this);
+        }
+
+        // Called when an account logged in succesfully
+        public virtual void OnAccountLogin(uint accountId) { }
+
+        // Called when an account login failed
+        public virtual void OnFailedAccountLogin(uint accountId) { }
+
+        // Called when Email is successfully changed for Account
+        public virtual void OnEmailChange(uint accountId) { }
+
+        // Called when Email failed to change for Account
+        public virtual void OnFailedEmailChange(uint accountId) { }
+
+        // Called when Password is successfully changed for Account
+        public virtual void OnPasswordChange(uint accountId) { }
+
+        // Called when Password failed to change for Account
+        public virtual void OnFailedPasswordChange(uint accountId) { }
     }
 
     public class GuildScript : ScriptObject

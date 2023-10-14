@@ -1,200 +1,252 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Framework.Dynamic;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
+using System;
 using System.Collections.Generic;
 
-namespace Scripts.Pets
+namespace Scripts.Pets.Generic
 {
-    namespace Generic
+    [Script]
+    class npc_pet_gen_pandaren_monk : NullCreatureAI
     {
-        struct SpellIds
+        const uint SpellPandarenMonk = 69800;
+
+        Action<TaskContext> focusAction;
+
+        public npc_pet_gen_pandaren_monk(Creature creature) : base(creature)
         {
-            //Mojo
-            public const uint FeelingFroggy = 43906;
-            public const uint SeductionVisual = 43919;
-
-            //SoulTrader
-            public const uint EtherealOnSummon = 50052;
-            public const uint EtherealPetRemoveAura = 50055;
-
-            // LichPet
-            public const uint LichPetAura = 69732;
-            public const uint LichPetAuraOnkill = 69731;
-            public const uint LichPetEmote = 70049;
-        }
-
-        struct CreatureIds
-        {
-            // LichPet
-            public const uint LichPet = 36979;
-        }
-
-        struct TextIds
-        {
-            //Mojo
-            public const uint SayMojo = 0;
-
-            //SoulTrader
-            public const uint SaySoulTraderInto = 0;
-        }
-
-        [Script]
-        class npc_pet_gen_soul_trader : ScriptedAI
-        {
-            public npc_pet_gen_soul_trader(Creature creature) : base(creature) { }
-
-            public override void OnDespawn()
+            focusAction = task =>
             {
-                Unit owner = me.GetOwner();
+                Unit owner = me.GetCharmerOrOwner();
                 if (owner != null)
-                    DoCast(owner, SpellIds.EtherealPetRemoveAura);
-            }
+                    me.SetFacingToObject(owner);
 
-            public override void JustAppeared()
+                _scheduler.Schedule(TimeSpan.FromSeconds(1), _ =>
+                {
+                    me.HandleEmoteCommand(Emote.OneshotBow);
+                    _scheduler.Schedule(TimeSpan.FromSeconds(1), _ =>
+                    {
+                        Unit owner = me.GetCharmerOrOwner();
+                        if (owner != null)
+                            me.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
+                    });
+                });
+            };
+        }
+
+        public override void Reset()
+        {
+            _scheduler.CancelAll();
+            _scheduler.Schedule(TimeSpan.FromSeconds(1), focusAction);
+        }
+
+        public override void EnterEvadeMode(EvadeReason why)
+        {
+            if (!_EnterEvadeMode(why))
+                return;
+
+            Reset();
+        }
+
+        public override void ReceiveEmote(Player player, TextEmotes emote)
+        {
+            me.InterruptSpell(CurrentSpellTypes.Channeled);
+            me.StopMoving();
+
+            switch (emote)
             {
-                Talk(TextIds.SaySoulTraderInto);
-
-                Unit owner = me.GetOwner();
-                if (owner != null)
-                    DoCast(owner, SpellIds.EtherealOnSummon);
-
-                base.JustAppeared();
+                case TextEmotes.Bow:
+                    _scheduler.Schedule(TimeSpan.FromSeconds(1), focusAction);
+                    break;
+                case TextEmotes.Drink:
+                    _scheduler.Schedule(TimeSpan.FromSeconds(1), _ => me.CastSpell(me, SpellPandarenMonk, false));
+                    break;
             }
         }
 
-        [Script] // 69735 - Lich Pet OnSummon
-        class spell_gen_lich_pet_onsummon : SpellScript
+        public override void UpdateAI(uint diff)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.LichPetAura);
-            }
+            _scheduler.Update(diff);
 
-            void HandleScriptEffect(uint effIndex)
-            {
-                Unit target = GetHitUnit();
-                target.CastSpell(target, SpellIds.LichPetAura, true);
-            }
+            Unit owner = me.GetCharmerOrOwner();
+            if (owner != null)
+                if (!me.IsWithinDist(owner, 30.0f))
+                    me.InterruptSpell(CurrentSpellTypes.Channeled);
+        }
+    }
 
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
-            }
+    [Script]
+    class npc_pet_gen_soul_trader : ScriptedAI
+    {
+        const uint SaySoulTraderIntro = 0;
+
+        const uint SpellEtherealOnsummon = 50052;
+        const uint SpellEtherealPetRemoveAura = 50055;
+
+        public npc_pet_gen_soul_trader(Creature creature) : base(creature) { }
+
+        public override void OnDespawn()
+        {
+            Unit owner = me.GetOwner();
+            if (owner != null)
+                DoCast(owner, SpellEtherealPetRemoveAura);
         }
 
-        [Script] // 69736 - Lich Pet Aura Remove
-        class spell_gen_lich_pet_aura_remove : SpellScript
+        public override void JustAppeared()
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.LichPetAura);
-            }
+            Talk(SaySoulTraderIntro);
+            Unit owner = me.GetOwner();
+            if (owner != null)
+                DoCast(owner, SpellEtherealOnsummon);
 
-            void HandleScriptEffect(uint effIndex)
-            {
-                GetHitUnit().RemoveAurasDueToSpell(SpellIds.LichPetAura);
-            }
+            base.JustAppeared();
+        }
+    }
 
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
-            }
+    [Script] // 69735 - Lich Pet OnSummon
+    class spell_pet_gen_lich_pet_onsummon : SpellScript
+    {
+        const uint SpellLichPetAura = 69732;
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellLichPetAura);
         }
 
-        [Script] // 69732 - Lich Pet Aura
-        class spell_gen_lich_pet_aura : AuraScript
+        void HandleScript(uint effIndex)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.LichPetAuraOnkill);
-            }
-
-            bool CheckProc(ProcEventInfo eventInfo)
-            {
-                return eventInfo.GetProcTarget().IsPlayer();
-            }
-
-            void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-            {
-                PreventDefaultAction();
-
-                List<TempSummon> minionList = new();
-                GetUnitOwner().GetAllMinionsByEntry(minionList, CreatureIds.LichPet);
-                foreach (Creature minion in minionList)
-                    if (minion.IsAIEnabled())
-                        minion.GetAI().DoCastSelf(SpellIds.LichPetAuraOnkill);
-            }
-
-            public override void Register()
-            {
-                DoCheckProc.Add(new CheckProcHandler(CheckProc));
-                OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell));
-            }
+            Unit target = GetHitUnit();
+            target.CastSpell(target, SpellLichPetAura, true);
         }
 
-        [Script] // 70050 - [DND] Lich Pet
-        class spell_pet_gen_lich_pet_periodic_emote : AuraScript
+        public override void Register()
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.LichPetEmote);
-            }
+            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
 
-            void OnPeriodic(AuraEffect aurEff)
-            {
-                // The chance to cast this spell is not 100%.
-                // Triggered spell roots creature for 3 sec and plays anim and sound (doesn't require any script).
-                // Emote and sound never shows up in sniffs because both comes from spell visual directly.
-                // Both 69683 and 70050 can trigger spells at once and are not linked together in any way.
-                // Effect of 70050 is overlapped by effect of 69683 but not instantly (69683 is a series of spell casts, takes longer to execute).
-                // However, for some reason emote is not played if creature is idle and only if creature is moving or is already rooted.
-                // For now it's scripted manually in script below to play emote always.
-                if (RandomHelper.randChance(50))
-                    GetTarget().CastSpell(GetTarget(), SpellIds.LichPetEmote, true);
-            }
+    [Script] // 69736 - Lich Pet Aura Remove
+    class spell_pet_gen_lich_pet_aura_Remove : SpellScript
+    {
+        const uint SpellLichPetAura = 69732;
 
-            public override void Register()
-            {
-                OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
-            }
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellLichPetAura);
         }
 
-        [Script] // 70049 - [DND] Lich Pet
-        class spell_pet_gen_lich_pet_emote : AuraScript
+        void HandleScript(uint effIndex)
         {
-            void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
-            {
-                GetTarget().HandleEmoteCommand(Emote.OneshotCustomSpell01);
-            }
-
-            public override void Register()
-            {
-                AfterEffectApply.Add(new EffectApplyHandler(AfterApply, 0, AuraType.ModRoot, AuraEffectHandleModes.Real));
-            }
+            GetHitUnit().RemoveAurasDueToSpell(SpellLichPetAura);
         }
 
-        [Script] // 69682 - Lil' K.T. Focus
-        class spell_pet_gen_lich_pet_focus : SpellScript
+        public override void Register()
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
-            }
+            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
 
-            void HandleScript(uint effIndex)
-            {
-                GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue());
-            }
+    [Script] // 69732 - Lich Pet Aura
+    class spell_pet_gen_lich_pet_AuraScript : AuraScript
+    {
+        const uint SpellLichPetAuraOnkill = 69731;
 
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
-            }
+        const uint NpcLichPet = 36979;
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellLichPetAuraOnkill);
+        }
+
+        bool CheckProc(ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetProcTarget().IsPlayer();
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+
+            Unit owner = GetUnitOwner();
+
+            List<TempSummon> minionList = new();
+            owner.GetAllMinionsByEntry(minionList, NpcLichPet);
+            foreach (TempSummon minion in minionList)
+                owner.CastSpell(minion, SpellLichPetAuraOnkill, true);
+        }
+
+        public override void Register()
+        {
+            DoCheckProc.Add(new(CheckProc));
+            OnEffectProc.Add(new(HandleProc, 0, AuraType.ProcTriggerSpell));
+        }
+    }
+
+    [Script] // 70050 - [Dnd] Lich Pet
+    class spell_pet_gen_lich_pet_periodic_emote : AuraScript
+    {
+        const uint SpellLichPetEmote = 70049;
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellLichPetEmote);
+        }
+
+        void OnPeriodic(AuraEffect aurEff)
+        {
+            // The chance to cast this spell is not 100%.
+            // Triggered spell roots creature for 3 sec and plays anim and sound (doesn't require any script).
+            // Emote and sound never shows up in sniffs because both comes from spell visual directly.
+            // Both 69683 and 70050 can trigger spells at once and are not linked together in any way.
+            // Effect of 70050 is overlapped by effect of 69683 but not instantly (69683 is a series of spell casts, takes longer to execute).
+            // However, for some reason emote is not played if creature is idle and only if creature is moving or is already rooted.
+            // For now it's scripted manually in script below to play emote always.
+            if (RandomHelper.randChance(50))
+                GetTarget().CastSpell(GetTarget(), SpellLichPetEmote, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
+        }
+    }
+
+    [Script] // 70049 - [Dnd] Lich Pet
+    class spell_pet_gen_lich_pet_emote : AuraScript
+    {
+        void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().HandleEmoteCommand(Emote.OneshotCustomSpell01);
+        }
+
+        public override void Register()
+        {
+            AfterEffectApply.Add(new(AfterApply, 0, AuraType.ModRoot, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script] // 69682 - Lil' K.T. Focus
+    class spell_pet_gen_lich_pet_focus : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue());
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 }
