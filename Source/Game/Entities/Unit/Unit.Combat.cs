@@ -109,6 +109,29 @@ namespace Game.Entities
                 owner.RemoveUnitFlag(UnitFlags.PetInCombat);
         }
 
+        public bool IsAttackingPlayer()
+        {
+            if (HasUnitState(UnitState.AttackPlayer))
+                return true;
+
+            foreach (var unit in m_Controlled)
+                if (unit.IsAttackingPlayer())
+                    return true;
+
+            for (byte i = 0; i < SharedConst.MaxSummonSlot; ++i)
+            {
+                if (!m_SummonSlot[i].IsEmpty())
+                {
+                    Creature summon = GetMap().GetCreature(m_SummonSlot[i]);
+                    if (summon != null)
+                        if (summon.IsAttackingPlayer())
+                            return true;
+                }
+            }
+
+            return false;
+        }
+
         public void RemoveAllAttackers()
         {
             while (!attackerList.Empty())
@@ -372,7 +395,7 @@ namespace Game.Entities
         {
             SendMessageToSet(new SAttackStop(this, victim), true);
 
-            if (victim != null) 
+            if (victim != null)
                 Log.outInfo(LogFilter.Unit, "{0} {1} stopped attacking {2} {3}", (IsTypeId(TypeId.Player) ? "Player" : "Creature"), GetGUID().ToString(),
                     (victim.IsTypeId(TypeId.Player) ? "player" : "creature"), victim.GetGUID().ToString());
             else
@@ -555,7 +578,7 @@ namespace Game.Entities
                     });
 
                     if (auraEffect != null)
-                        meleeAttackSpellId = (uint)auraEffect.GetSpellEffectInfo().MiscValue;                    
+                        meleeAttackSpellId = (uint)auraEffect.GetSpellEffectInfo().MiscValue;
                 }
 
                 if (meleeAttackSpellId == 0)
@@ -832,7 +855,7 @@ namespace Game.Entities
                 }
 
                 new KillRewarder(tappers.ToArray(), victim, false).Reward();
-            }      
+            }
 
             // Do KILL and KILLED procs. KILL proc is called only for the unit who landed the killing blow (and its owner - for pets and totems) regardless of who tapped the victim
             if (attacker != null && (attacker.IsPet() || attacker.IsTotem()))

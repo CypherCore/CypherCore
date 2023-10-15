@@ -2881,7 +2881,6 @@ namespace Game.Entities
             return creatureList;
         }
 
-
         public List<Unit> GetPlayerListInGrid(float maxSearchRange, bool alive = true)
         {
             List<Unit> playerList = new();

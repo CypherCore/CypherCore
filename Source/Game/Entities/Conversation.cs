@@ -165,7 +165,7 @@ namespace Game.Entities
             Global.ScriptMgr.OnConversationCreate(this, creator);
         }
 
-        bool Start()
+        public bool Start()
         {
             foreach (ConversationLine line in m_conversationData.Lines.GetValue())
             {
