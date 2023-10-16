@@ -1,4 +1,4 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
@@ -18,9 +18,9 @@ namespace Scripts.DragonIsles.RubyLifePools
     struct CreatureIds
     {
         // Bosses
-        public const uint MelidrussaChillworn = 188252;
-        public const uint KokiaBlazehoof = 189232;
-        public const uint Kyrakka = 190484;
+        public const uint BossMelidrussaChillworn = 188252;
+        public const uint BossKokiaBlazehoof = 189232;
+        public const uint BossKyrakka = 190484;
     }
 
     struct GameObjectIds
@@ -28,26 +28,25 @@ namespace Scripts.DragonIsles.RubyLifePools
         public const uint FireWall = 377194;
     }
 
-    [Script]
     class instance_ruby_life_pools : InstanceMapScript
     {
-        public static ObjectData[] creatureData =
+        static ObjectData[] creatureData =
         {
-            new ObjectData(CreatureIds.MelidrussaChillworn, DataTypes.MelidrussaChillworn),
-            new ObjectData(CreatureIds.KokiaBlazehoof, DataTypes.KokiaBlazehoof),
-            new ObjectData(CreatureIds.Kyrakka, DataTypes.KyrakkaAndErkhartStormvein),
+            new(CreatureIds.BossMelidrussaChillworn, DataTypes.MelidrussaChillworn),
+            new(CreatureIds.BossKokiaBlazehoof, DataTypes.KokiaBlazehoof),
+            new(CreatureIds.BossKyrakka, DataTypes.KyrakkaAndErkhartStormvein)
         };
 
-        public static DoorData[] doorData =
+        static DoorData[] doorData =
         {
-            new DoorData(GameObjectIds.FireWall, DataTypes.KokiaBlazehoof, DoorType.Passage),
+            new(GameObjectIds.FireWall, DataTypes.KokiaBlazehoof, DoorType.Passage)
         };
 
-        public static DungeonEncounterData[] encounters =
+        static DungeonEncounterData[] encounters =
         {
-            new DungeonEncounterData(DataTypes.MelidrussaChillworn, 2609 ),
-            new DungeonEncounterData(DataTypes.KokiaBlazehoof, 2606 ),
-            new DungeonEncounterData(DataTypes.KyrakkaAndErkhartStormvein, 2623 )
+            new(DataTypes.MelidrussaChillworn, 2609),
+            new(DataTypes.KokiaBlazehoof, 2606),
+            new(DataTypes.KyrakkaAndErkhartStormvein, 2623)
         };
 
         public instance_ruby_life_pools() : base(nameof(instance_ruby_life_pools), 2521) { }
