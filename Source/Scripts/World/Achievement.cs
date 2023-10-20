@@ -8,12 +8,14 @@ using Game.Scripting;
 
 namespace Scripts.World.Achievements
 {
-    [Script]
+    [Script("achievement_arena_2v2_kills", ArenaTypes.Team2v2)]
+    [Script("achievement_arena_3v3_kills", ArenaTypes.Team3v3)]
+    [Script("achievement_arena_5v5_kills", ArenaTypes.Team5v5)]
     class achievement_arena_kills : AchievementCriteriaScript
     {
-        byte _arenaType;
+        ArenaTypes _arenaType;
 
-        public achievement_arena_kills(string name, byte arenaType) : base(name)
+        public achievement_arena_kills(string name, ArenaTypes arenaType) : base(name)
         {
             _arenaType = arenaType;
         }
@@ -24,7 +26,7 @@ namespace Scripts.World.Achievements
             if (!source.InArena())
                 return false;
 
-            return source.GetBattleground().GetArenaType() == (ArenaTypes)_arenaType;
+            return source.GetBattleground().GetArenaType() == _arenaType;
         }
     }
 

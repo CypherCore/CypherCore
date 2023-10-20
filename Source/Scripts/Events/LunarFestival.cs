@@ -1,4 +1,4 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
@@ -8,44 +8,12 @@ using Game.Scripting;
 using Game.Spells;
 using System;
 using System.Numerics;
+using static Global;
 
 namespace Scripts.Events.LunarFestival
 {
-    struct SpellIds
-    {
-        //Fireworks
-        public const uint RocketBlue = 26344;
-        public const uint RocketGreen = 26345;
-        public const uint RocketPurple = 26346;
-        public const uint RocketRed = 26347;
-        public const uint RocketWhite = 26348;
-        public const uint RocketYellow = 26349;
-        public const uint RocketBigBlue = 26351;
-        public const uint RocketBigGreen = 26352;
-        public const uint RocketBigPurple = 26353;
-        public const uint RocketBigRed = 26354;
-        public const uint RocketBigWhite = 26355;
-        public const uint RocketBigYellow = 26356;
-        public const uint LunarFortune = 26522;
-
-        //Omen
-        public const uint OmenCleave = 15284;
-        public const uint OmenStarfall = 26540;
-        public const uint OmenSummonSpotlight = 26392;
-        public const uint EluneCandle = 26374;
-
-        //EluneCandle
-        public const uint EluneCandleOmenHead = 26622;
-        public const uint EluneCandleOmenChest = 26624;
-        public const uint EluneCandleOmenHandR = 26625;
-        public const uint EluneCandleOmenHandL = 26649;
-        public const uint EluneCandleNormal = 26636;
-
-    }
-
     struct CreatureIds
     {
-        //Fireworks
         public const uint Omen = 15467;
         public const uint MinionOfOmen = 15466;
         public const uint FireworkBlue = 15879;
@@ -78,7 +46,6 @@ namespace Scripts.Events.LunarFestival
 
     struct GameObjectIds
     {
-        //Fireworks
         public const uint FireworkLauncher1 = 180771;
         public const uint FireworkLauncher2 = 180868;
         public const uint FireworkLauncher3 = 180850;
@@ -86,25 +53,36 @@ namespace Scripts.Events.LunarFestival
         public const uint ClusterLauncher2 = 180859;
         public const uint ClusterLauncher3 = 180869;
         public const uint ClusterLauncher4 = 180874;
-
-        //Omen
-        public const uint EluneTrap1 = 180876;
-        public const uint EluneTrap2 = 180877;
     }
 
-    struct MiscConst
+    struct SpellIds
     {
-        //Fireworks
+        public const uint RocketBlue = 26344;
+        public const uint RocketGreen = 26345;
+        public const uint RocketPurple = 26346;
+        public const uint RocketRed = 26347;
+        public const uint RocketWhite = 26348;
+        public const uint RocketYellow = 26349;
+        public const uint RocketBigBlue = 26351;
+        public const uint RocketBigGreen = 26352;
+        public const uint RocketBigPurple = 26353;
+        public const uint RocketBigRed = 26354;
+        public const uint RocketBigWhite = 26355;
+        public const uint RocketBigYellow = 26356;
+        public const uint LunarFortune = 26522;
+    }
+
+    struct Misc
+    {
         public const uint AnimGoLaunchFirework = 3;
         public const uint ZoneMoonglade = 493;
-
-        //Omen
-        public static Position OmenSummonPos = new(7558.993f, -2839.999f, 450.0214f, 4.46f);
     }
 
     [Script]
     class npc_firework : ScriptedAI
     {
+        Position omenSummonPos = new(7558.993f, -2839.999f, 450.0214f, 4.46f);
+
         public npc_firework(Creature creature) : base(creature) { }
 
         bool isCluster()
@@ -153,13 +131,13 @@ namespace Scripts.Events.LunarFestival
                 GameObject launcher3 = GetClosestGameObjectWithEntry(me, GameObjectIds.ClusterLauncher3, 0.5f);
                 GameObject launcher4 = GetClosestGameObjectWithEntry(me, GameObjectIds.ClusterLauncher4, 0.5f);
 
-                if (launcher1)
+                if (launcher1 != null)
                     launcher = launcher1;
-                else if (launcher2)
+                else if (launcher2 != null)
                     launcher = launcher2;
-                else if (launcher3)
+                else if (launcher3 != null)
                     launcher = launcher3;
-                else if (launcher4)
+                else if (launcher4 != null)
                     launcher = launcher4;
             }
             else
@@ -168,11 +146,11 @@ namespace Scripts.Events.LunarFestival
                 GameObject launcher2 = GetClosestGameObjectWithEntry(me, GameObjectIds.FireworkLauncher2, 0.5f);
                 GameObject launcher3 = GetClosestGameObjectWithEntry(me, GameObjectIds.FireworkLauncher3, 0.5f);
 
-                if (launcher1)
+                if (launcher1 != null)
                     launcher = launcher1;
-                else if (launcher2)
+                else if (launcher2 != null)
                     launcher = launcher2;
-                else if (launcher3)
+                else if (launcher3 != null)
                     launcher = launcher3;
             }
 
@@ -259,7 +237,7 @@ namespace Scripts.Events.LunarFestival
                     break;
             }
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
+            SpellInfo spellInfo = SpellMgr.GetSpellInfo(spellId, Difficulty.None);
 
             if (spellInfo != null && spellInfo.GetEffect(0).Effect == SpellEffectName.SummonObjectWild)
                 return (uint)spellInfo.GetEffect(0).MiscValue;
@@ -270,10 +248,10 @@ namespace Scripts.Events.LunarFestival
         public override void Reset()
         {
             GameObject launcher = FindNearestLauncher();
-            if (launcher)
+            if (launcher != null)
             {
-                launcher.SendCustomAnim(MiscConst.AnimGoLaunchFirework);
-                me.SetOrientation(launcher.GetOrientation() + MathF.PI / 2);
+                launcher.SendCustomAnim(Misc.AnimGoLaunchFirework);
+                me.SetOrientation(launcher.GetOrientation() + (float)(MathF.PI) / 2);
             }
             else
                 return;
@@ -281,9 +259,9 @@ namespace Scripts.Events.LunarFestival
             if (isCluster())
             {
                 // Check if we are near Elune'ara lake south, if so try to summon Omen or a minion
-                if (me.GetZoneId() == MiscConst.ZoneMoonglade)
+                if (me.GetZoneId() == Misc.ZoneMoonglade)
                 {
-                    if (!me.FindNearestCreature(CreatureIds.Omen, 100.0f) && me.GetDistance2d(MiscConst.OmenSummonPos.GetPositionX(), MiscConst.OmenSummonPos.GetPositionY()) <= 100.0f)
+                    if (me.FindNearestCreature(CreatureIds.Omen, 100.0f) == null && me.GetDistance2d(omenSummonPos.GetPositionX(), omenSummonPos.GetPositionY()) <= 100.0f)
                     {
                         switch (RandomHelper.URand(0, 9))
                         {
@@ -292,11 +270,11 @@ namespace Scripts.Events.LunarFestival
                             case 2:
                             case 3:
                                 Creature minion = me.SummonCreature(CreatureIds.MinionOfOmen, me.GetPositionX() + RandomHelper.FRand(-5.0f, 5.0f), me.GetPositionY() + RandomHelper.FRand(-5.0f, 5.0f), me.GetPositionZ(), 0.0f, TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(20));
-                                if (minion)
+                                if (minion != null)
                                     minion.GetAI().AttackStart(me.SelectNearestPlayer(20.0f));
                                 break;
                             case 9:
-                                me.SummonCreature(CreatureIds.Omen, MiscConst.OmenSummonPos);
+                                me.SummonCreature(CreatureIds.Omen, omenSummonPos);
                                 break;
                         }
                     }
@@ -310,13 +288,18 @@ namespace Scripts.Events.LunarFestival
             }
             else
                 //me.CastSpell(me, GetFireworkSpell(me.GetEntry()), true);
-                me.CastSpell(me.GetPosition(), GetFireworkSpell(me.GetEntry()), new CastSpellExtraArgs(true));
+                me.CastSpell(me.GetPosition(), GetFireworkSpell(me.GetEntry()), true);
         }
     }
 
     [Script]
     class npc_omen : ScriptedAI
     {
+        const uint SpellOmenCleave = 15284;
+        const uint SpellOmenStarfall = 26540;
+        const uint SpellOmenSummonSpotlight = 26392;
+        const uint SpellEluneCandle = 26374;
+
         public npc_omen(Creature creature) : base(creature)
         {
             me.SetImmuneToPC(true);
@@ -333,7 +316,7 @@ namespace Scripts.Events.LunarFestival
                 me.SetHomePosition(me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), me.GetOrientation());
                 me.SetImmuneToPC(false);
                 Player player = me.SelectNearestPlayer(40.0f);
-                if (player)
+                if (player != null)
                     AttackStart(player);
             }
         }
@@ -341,31 +324,33 @@ namespace Scripts.Events.LunarFestival
         public override void JustEngagedWith(Unit attacker)
         {
             _scheduler.CancelAll();
+
             _scheduler.Schedule(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(5), task =>
             {
-                DoCastVictim(SpellIds.OmenCleave);
+                DoCastVictim(SpellOmenCleave);
                 task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10));
             });
+
             _scheduler.Schedule(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10), 1, task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0);
-                if (target)
-                    DoCast(target, SpellIds.OmenStarfall);
+                if (target != null)
+                    DoCast(target, SpellOmenStarfall);
                 task.Repeat(TimeSpan.FromSeconds(14), TimeSpan.FromSeconds(16));
             });
         }
 
         public override void JustDied(Unit killer)
         {
-            DoCast(SpellIds.OmenSummonSpotlight);
+            DoCast(SpellOmenSummonSpotlight);
         }
 
         public override void SpellHit(WorldObject caster, SpellInfo spellInfo)
         {
-            if (spellInfo.Id == SpellIds.EluneCandle)
+            if (spellInfo.Id == SpellEluneCandle)
             {
-                if (me.HasAura(SpellIds.OmenStarfall))
-                    me.RemoveAurasDueToSpell(SpellIds.OmenStarfall);
+                if (me.HasAura(SpellOmenStarfall))
+                    me.RemoveAurasDueToSpell(SpellOmenStarfall);
 
                 _scheduler.RescheduleGroup(1, TimeSpan.FromSeconds(14), TimeSpan.FromSeconds(16));
             }
@@ -376,32 +361,33 @@ namespace Scripts.Events.LunarFestival
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff);
-
-            DoMeleeAttackIfReady();
+            _scheduler.Update(diff, DoMeleeAttackIfReady);
         }
     }
 
     [Script]
     class npc_giant_spotlight : ScriptedAI
     {
+        const uint GoEluneTrap1 = 180876;
+        const uint GoEluneTrap2 = 180877;
+
         public npc_giant_spotlight(Creature creature) : base(creature) { }
 
         public override void Reset()
         {
             _scheduler.CancelAll();
-            _scheduler.Schedule(TimeSpan.FromMinutes(5), task =>
+            _scheduler.Schedule(TimeSpan.FromMinutes(5), _ =>
             {
-                GameObject trap = me.FindNearestGameObject(GameObjectIds.EluneTrap1, 5.0f);
-                if (trap)
+                GameObject trap = me.FindNearestGameObject(GoEluneTrap1, 5.0f);
+                if (trap != null)
                     trap.RemoveFromWorld();
 
-                trap = me.FindNearestGameObject(GameObjectIds.EluneTrap2, 5.0f);
-                if (trap)
+                trap = me.FindNearestGameObject(GoEluneTrap2, 5.0f);
+                if (trap != null)
                     trap.RemoveFromWorld();
 
                 Creature omen = me.FindNearestCreature(CreatureIds.Omen, 5.0f, false);
-                if (omen)
+                if (omen != null)
                     omen.DespawnOrUnsummon();
 
                 me.DespawnOrUnsummon();
@@ -417,9 +403,20 @@ namespace Scripts.Events.LunarFestival
     [Script] // 26374 - Elune's Candle
     class spell_lunar_festival_elune_candle : SpellScript
     {
+        const uint SpellEluneCandleOmenHead = 26622;
+        const uint SpellEluneCandleOmenChest = 26624;
+        const uint SpellEluneCandleOmenHandR = 26625;
+        const uint SpellEluneCandleOmenHandL = 26649;
+        const uint SpellEluneCandleNormal = 26636;
+
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.EluneCandleOmenHead, SpellIds.EluneCandleOmenChest, SpellIds.EluneCandleOmenHandR, SpellIds.EluneCandleOmenHandL, SpellIds.EluneCandleNormal);
+            return ValidateSpellInfo(SpellEluneCandleOmenHead,
+                SpellEluneCandleOmenChest,
+                SpellEluneCandleOmenHandR,
+                SpellEluneCandleOmenHandL,
+                SpellEluneCandleNormal
+           );
         }
 
         void HandleScript(uint effIndex)
@@ -431,28 +428,28 @@ namespace Scripts.Events.LunarFestival
                 switch (RandomHelper.URand(0, 3))
                 {
                     case 0:
-                        spellId = SpellIds.EluneCandleOmenHead;
+                        spellId = SpellEluneCandleOmenHead;
                         break;
                     case 1:
-                        spellId = SpellIds.EluneCandleOmenChest;
+                        spellId = SpellEluneCandleOmenChest;
                         break;
                     case 2:
-                        spellId = SpellIds.EluneCandleOmenHandR;
+                        spellId = SpellEluneCandleOmenHandR;
                         break;
                     case 3:
-                        spellId = SpellIds.EluneCandleOmenHandL;
+                        spellId = SpellEluneCandleOmenHandL;
                         break;
                 }
             }
             else
-                spellId = SpellIds.EluneCandleNormal;
+                spellId = SpellEluneCandleNormal;
 
             GetCaster().CastSpell(GetHitUnit(), spellId, true);
         }
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.Dummy));
         }
     }
 }

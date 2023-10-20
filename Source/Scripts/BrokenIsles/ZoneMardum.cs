@@ -15,16 +15,6 @@ using static Global;
 
 namespace Scripts.BrokenIsles.ZoneMardum
 {
-
-    enum MardumQuestData
-    {
-        QuestDemonHunterIntroTracker = 40076
-    }
-
-    enum MardumSoundData
-    {
-    }
-
     [Script]
     class scene_demonhunter_intro : SceneScript
     {
@@ -44,7 +34,7 @@ namespace Scripts.BrokenIsles.ZoneMardum
     }
 
     [Script] // 196030 - Start: Quest Invis
-    class spell_demon_hunter_intro_AuraScript : AuraScript
+    class spell_demon_hunter_intro : AuraScript
     {
         const uint SpellStartDemonHunterPlayScene = 193525;
 
@@ -550,6 +540,214 @@ namespace Scripts.BrokenIsles.ZoneMardum
                 return;
 
             DoMeleeAttackIfReady();
+        }
+    }
+
+    struct AshtongueIntroData
+    {
+        public const uint QuestEnterTheIllidariAshtongue = 40378;
+
+        public const uint NpcKaynSunfuryAshtongue = 98229;
+        public const uint NpcKorvasBloodthornAshtongue = 98354;
+        public const uint NpcSevisBrightflameAshtongue = 99916;
+        public const uint NpcAllariSouleaterAshtongue = 94410;
+
+        public const uint DisplayIdSevisMount = 64385;
+
+        public const uint SayKaynActivateGateway = 0;
+        public const uint SayKaynCutAHole = 1;
+        public const uint SayKorvasSlayMoreDemons = 0;
+        public const uint SaySevisSayFindAllari = 1;
+
+        public const uint SpellVisualKitSevisMount = 36264;
+
+        public const uint SpellCastMountDhFelsaber = 200175;
+        public const uint SpellAshtongueFellsaberKillCredit = 200254;
+
+        public const uint PathKaynSunfuryNearTeleport = 9822900;
+        public const uint PathKorvasBloodthornNearTeleport = 9835400;
+        public const uint PathSevisBrightflameGateway = 9991600;
+    }
+
+    [Script] // 98229 - Kayn Sunfury
+    class npc_kayn_sunfury_ashtongue_intro : ScriptedAI
+    {
+        public npc_kayn_sunfury_ashtongue_intro(Creature creature) : base(creature) { }
+
+        public override void OnQuestAccept(Player player, Quest quest)
+        {
+            if (quest.Id == AshtongueIntroData.QuestEnterTheIllidariAshtongue)
+            {
+                PhasingHandler.OnConditionChange(player);
+                Creature kaynObject = GetClosestCreatureWithOptions(player, 10.0f, new FindCreatureOptions() { CreatureId = AshtongueIntroData.NpcKaynSunfuryAshtongue, IgnorePhases = true });
+                Creature korvasObject = GetClosestCreatureWithOptions(player, 10.0f, new FindCreatureOptions() { CreatureId = AshtongueIntroData.NpcKorvasBloodthornAshtongue, IgnorePhases = true });
+                if (kaynObject == null || korvasObject == null)
+                    return;
+
+                TempSummon kaynClone = kaynObject.SummonPersonalClone(kaynObject.GetPosition(), TempSummonType.ManualDespawn, TimeSpan.Zero, 0, 0, player);
+                TempSummon korvasClone = korvasObject.SummonPersonalClone(korvasObject.GetPosition(), TempSummonType.ManualDespawn, TimeSpan.Zero, 0, 0, player);
+                if (kaynClone == null || korvasClone == null)
+                    return;
+
+                korvasClone.SetEmoteState(Emote.StateReady1h);
+                kaynClone.RemoveNpcFlag(NPCFlags.QuestGiver);
+            }
+        }
+
+        public override void JustAppeared()
+        {
+            if (!me.IsPrivateObject())
+                return;
+
+            Creature korvasObject = GetClosestCreatureWithOptions(me, 10.0f, new FindCreatureOptions() { CreatureId = AshtongueIntroData.NpcKorvasBloodthornAshtongue, IgnorePhases = true, PrivateObjectOwnerGuid = me.GetPrivateObjectOwner() });
+            if (korvasObject == null)
+                return;
+
+            ObjectGuid korvasGuid = korvasObject.GetGUID();
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+            {
+                Unit privateObjectOwner = ObjAccessor.GetUnit(me, me.GetPrivateObjectOwner());
+                if (privateObjectOwner == null)
+                    return;
+
+                Unit korvas = ObjAccessor.GetUnit(me, korvasGuid);
+                if (korvas == null)
+                    return;
+
+                Talk(AshtongueIntroData.SayKaynActivateGateway, me);
+                me.CastSpell(privateObjectOwner, TheInvasionBeginsConst.SpellTrackTargetInChannel, false);
+                korvas.CastSpell(privateObjectOwner, TheInvasionBeginsConst.SpellTrackTargetInChannel, false);
+
+                task.Schedule(TimeSpan.FromSeconds(6), task =>
+                {
+                    Talk(AshtongueIntroData.SayKaynCutAHole, me);
+
+                    task.Schedule(TimeSpan.FromSeconds(6), task =>
+                    {
+                        Creature korvas = ObjectAccessor.GetCreature(me, korvasGuid);
+                        if (korvas == null)
+                            return;
+
+                        if (!korvas.IsAIEnabled())
+                            return;
+
+                        korvas.GetAI().Talk(AshtongueIntroData.SayKorvasSlayMoreDemons, me);
+                        me.InterruptNonMeleeSpells(true);
+                        me.GetMotionMaster().MovePath(AshtongueIntroData.PathKaynSunfuryNearTeleport, false);
+                        me.SetAIAnimKitId(TheInvasionBeginsConst.AnimDhRun);
+                        me.DespawnOrUnsummon(TimeSpan.FromSeconds(10));
+
+                        task.Schedule(TimeSpan.FromSeconds(2), _ =>
+                        {
+                            Creature korvas = ObjectAccessor.GetCreature(me, korvasGuid);
+                            if (korvas == null)
+                                return;
+
+                            korvas.InterruptNonMeleeSpells(true);
+                            korvas.GetMotionMaster().MovePath(AshtongueIntroData.PathKorvasBloodthornNearTeleport, false);
+                            korvas.SetAIAnimKitId(TheInvasionBeginsConst.AnimDhRun);
+                            korvas.DespawnOrUnsummon(TimeSpan.FromSeconds(12));
+                        });
+                    });
+                });
+            });
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            _scheduler.Update(diff);
+        }
+    }
+
+    [Script] // 1053 - Enter the Illidari: Ashtongue
+    class scene_enter_the_illidari_ashtongue : SceneScript
+    {
+        public scene_enter_the_illidari_ashtongue() : base("scene_enter_the_illidari_ashtongue") { }
+
+        public override void OnSceneStart(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
+        {
+            Creature sevisObject = player.FindNearestCreatureWithOptions(30.0f, new() { CreatureId = AshtongueIntroData.NpcSevisBrightflameAshtongue, IgnorePhases = true });
+            if (sevisObject == null)
+                return;
+
+            TempSummon sevisClone = sevisObject.SummonPersonalClone(sevisObject.GetPosition(), TempSummonType.ManualDespawn, TimeSpan.Zero, 0, 0, player);
+            if (sevisClone == null)
+                return;
+
+            sevisClone.CastSpell(player, TheInvasionBeginsConst.SpellTrackTargetInChannel, false);
+            sevisClone.DespawnOrUnsummon(TimeSpan.FromSeconds(15));
+        }
+
+        public override void OnSceneTriggerEvent(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
+        {
+            if (triggerName == "SEEFELSABERCREDIT")
+                player.CastSpell(player, AshtongueIntroData.SpellAshtongueFellsaberKillCredit, true);
+            else if (triggerName == "UPDATEPHASE")
+                PhasingHandler.OnConditionChange(player);
+        }
+    }
+
+    [Script] // 99916 - Sevis Brightflame (Ashtongue Gateway)
+    class npc_sevis_brightflame_ashtongue_gateway_private : ScriptedAI
+    {
+        public npc_sevis_brightflame_ashtongue_gateway_private(Creature creature) : base(creature) { }
+
+        public override void JustAppeared()
+        {
+            if (!me.IsPrivateObject())
+                return;
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+            {
+                Talk(AshtongueIntroData.SaySevisSayFindAllari, me);
+
+                task.Schedule(TimeSpan.FromSeconds(2), task =>
+                {
+                    me.SendPlaySpellVisualKit(AshtongueIntroData.SpellVisualKitSevisMount, 0, 0);
+                    me.SetMountDisplayId(AshtongueIntroData.DisplayIdSevisMount);
+
+                    task.Schedule(TimeSpan.FromSeconds(3), _ =>
+                    {
+                        me.InterruptNonMeleeSpells(true);
+                        me.GetMotionMaster().MovePath(AshtongueIntroData.PathSevisBrightflameGateway, false);
+                    });
+                });
+            });
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            _scheduler.Update(diff);
+        }
+    }
+
+    [Script] // 200255 - Accepting Felsaber Gift
+    class spell_accepting_felsaber_gift : SpellScript
+    {
+        void HandleHitTarget(uint effIndex)
+        {
+            GetCaster().CastSpell(null, AshtongueIntroData.SpellCastMountDhFelsaber, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new(HandleHitTarget, 3, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 32 - Mardum - Trigger KillCredit for Quest "Enter the Illidari: Ashtongue"
+    class at_enter_the_illidari_ashtongue_allari_killcredit : AreaTriggerAI
+    {
+        public at_enter_the_illidari_ashtongue_allari_killcredit(AreaTrigger areatrigger) : base(areatrigger) { }
+
+        public override void OnUnitEnter(Unit unit)
+        {
+            Player player = unit.ToPlayer();
+            if (player == null || player.GetQuestStatus(AshtongueIntroData.QuestEnterTheIllidariAshtongue) != QuestStatus.Incomplete)
+                return;
+
+            player.KilledMonsterCredit(AshtongueIntroData.NpcAllariSouleaterAshtongue);
         }
     }
 }

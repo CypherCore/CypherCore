@@ -1287,6 +1287,8 @@ namespace Game.Entities
 
         public virtual UnitAI GetAI() { return i_AI; }
 
+        public virtual T GetAI<T>() where T : UnitAI { return (T)i_AI; }
+
         public UnitAI GetTopAI() { return i_AIs.Count == 0 ? null : i_AIs.Peek(); }
 
         public void AIUpdateTick(uint diff)

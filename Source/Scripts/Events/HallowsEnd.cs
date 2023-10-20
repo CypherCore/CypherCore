@@ -1,4 +1,4 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
@@ -11,15 +11,15 @@ namespace Scripts.Events.HallowsEnd
 {
     struct SpellIds
     {
-        //HallowEndCandysSpells
-        public const uint CandyOrangeGiant = 24924; // Effect 1: Apply Aura: Mod Size, Value: 30%
-        public const uint CandySkeleton = 24925; // Effect 1: Apply Aura: Change Model (Skeleton). Effect 2: Apply Aura: Underwater Breathing
-        public const uint CandyPirate = 24926; // Effect 1: Apply Aura: Increase Swim Speed, Value: 50%
-        public const uint CandyGhost = 24927; // Effect 1: Apply Aura: Levitate / Hover. Effect 2: Apply Aura: Slow Fall, Effect 3: Apply Aura: Water Walking
-        public const uint CandyFemaleDefiasPirate = 44742; // Effect 1: Apply Aura: Change Model (Defias Pirate, Female). Effect 2: Increase Swim Speed, Value: 50%
-        public const uint CandyMaleDefiasPirate = 44743;  // Effect 1: Apply Aura: Change Model (Defias Pirate, Male).   Effect 2: Increase Swim Speed, Value: 50%
+        //CandySpells
+        public const uint HallowsEndCandyOrangeGiant = 24924;
+        public const uint HallowsEndCandySkeleton = 24925;
+        public const uint HallowsEndCandyPirate = 24926;
+        public const uint HallowsEndCandyGhost = 24927;
+        public const uint HallowsEndCandyFemaleDefiasPirate = 44742;
+        public const uint HallowsEndCandyMaleDefiasPirate = 44743;
 
-        //Trickspells
+        //TrickSpells
         public const uint PirateCostumeMale = 24708;
         public const uint PirateCostumeFemale = 24709;
         public const uint NinjaCostumeMale = 24710;
@@ -31,7 +31,7 @@ namespace Scripts.Events.HallowsEnd
         public const uint GhostCostumeFemale = 24736;
         public const uint TrickBuff = 24753;
 
-        //Trickortreatspells
+        //TrickOrTreatSpells
         public const uint Trick = 24714;
         public const uint Treat = 24715;
         public const uint TrickedOrTreated = 24755;
@@ -39,7 +39,7 @@ namespace Scripts.Events.HallowsEnd
         public const uint TrickyTreatTrigger = 42965;
         public const uint UpsetTummy = 42966;
 
-        //Wand Spells
+        //HallowendData
         public const uint HallowedWandPirate = 24717;
         public const uint HallowedWandNinja = 24718;
         public const uint HallowedWandLeperGnome = 24719;
@@ -50,98 +50,79 @@ namespace Scripts.Events.HallowsEnd
         public const uint HallowedWandBat = 24741;
     }
 
-
     [Script] // 24930 - Hallow's End Candy
-    class spell_hallow_end_candy_SpellScript : SpellScript
+    class spell_hallow_end_candy : SpellScript
     {
-        uint[] spells =
-        {
-            SpellIds.CandyOrangeGiant,
-            SpellIds.CandySkeleton,
-            SpellIds.CandyPirate,
-            SpellIds.CandyGhost
-        };
+        uint[] CandysSpells = { SpellIds.HallowsEndCandyOrangeGiant, SpellIds.HallowsEndCandySkeleton, SpellIds.HallowsEndCandyPirate, SpellIds.HallowsEndCandyGhost };
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(spells);
+            return ValidateSpellInfo(CandysSpells);
         }
 
         void HandleDummy(uint effIndex)
         {
-            GetCaster().CastSpell(GetCaster(), spells.SelectRandom(), true);
+            GetCaster().CastSpell(GetCaster(), CandysSpells.SelectRandom(), true);
         }
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            OnEffectHit.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     [Script] // 24926 - Hallow's End Candy
-    class spell_hallow_end_candy_pirate_AuraScript : AuraScript
+    class spell_hallow_end_candy_pirate : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.CandyFemaleDefiasPirate, SpellIds.CandyMaleDefiasPirate);
+            return ValidateSpellInfo(SpellIds.HallowsEndCandyFemaleDefiasPirate, SpellIds.HallowsEndCandyMaleDefiasPirate);
         }
 
         void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            uint spell = GetTarget().GetNativeGender() == Gender.Female ? SpellIds.CandyFemaleDefiasPirate : SpellIds.CandyMaleDefiasPirate;
+            uint spell = GetTarget().GetNativeGender() == Gender.Female ? SpellIds.HallowsEndCandyFemaleDefiasPirate : SpellIds.HallowsEndCandyMaleDefiasPirate;
             GetTarget().CastSpell(GetTarget(), spell, true);
         }
 
         void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            uint spell = GetTarget().GetNativeGender() == Gender.Female ? SpellIds.CandyFemaleDefiasPirate : SpellIds.CandyMaleDefiasPirate;
+            uint spell = GetTarget().GetNativeGender() == Gender.Female ? SpellIds.HallowsEndCandyFemaleDefiasPirate : SpellIds.HallowsEndCandyMaleDefiasPirate;
             GetTarget().RemoveAurasDueToSpell(spell);
         }
 
         public override void Register()
         {
-            AfterEffectApply.Add(new EffectApplyHandler(HandleApply, 0, AuraType.ModIncreaseSwimSpeed, AuraEffectHandleModes.Real));
-            AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.ModIncreaseSwimSpeed, AuraEffectHandleModes.Real));
+            AfterEffectApply.Add(new(HandleApply, 0, AuraType.ModIncreaseSwimSpeed, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new(HandleRemove, 0, AuraType.ModIncreaseSwimSpeed, AuraEffectHandleModes.Real));
         }
     }
 
-    [Script] // 24750 Trick
+    [Script] // 24750 - Trick
     class spell_hallow_end_trick : SpellScript
     {
         public override bool Validate(SpellInfo spell)
         {
-            return ValidateSpellInfo(SpellIds.PirateCostumeMale, SpellIds.PirateCostumeFemale, SpellIds.NinjaCostumeMale, SpellIds.NinjaCostumeFemale,
-                SpellIds.LeperGnomeCostumeMale, SpellIds.LeperGnomeCostumeFemale, SpellIds.SkeletonCostume, SpellIds.GhostCostumeMale, SpellIds.GhostCostumeFemale, SpellIds.TrickBuff);
+            return ValidateSpellInfo(SpellIds.PirateCostumeMale, SpellIds.PirateCostumeFemale, SpellIds.NinjaCostumeMale, SpellIds.NinjaCostumeFemale, SpellIds.LeperGnomeCostumeMale,
+                SpellIds.LeperGnomeCostumeFemale, SpellIds.SkeletonCostume, SpellIds.GhostCostumeMale, SpellIds.GhostCostumeFemale, SpellIds.TrickBuff);
         }
 
         void HandleScript(uint effIndex)
         {
             Unit caster = GetCaster();
             Player target = GetHitPlayer();
-            if (target)
+            if (target != null)
             {
                 Gender gender = target.GetNativeGender();
-                uint spellId = SpellIds.TrickBuff;
-                switch (RandomHelper.URand(0, 5))
+                uint spellId = RandomHelper.URand(0, 5) switch
                 {
-                    case 1:
-                        spellId = gender == Gender.Female ? SpellIds.LeperGnomeCostumeFemale : SpellIds.LeperGnomeCostumeMale;
-                        break;
-                    case 2:
-                        spellId = gender == Gender.Female ? SpellIds.PirateCostumeFemale : SpellIds.PirateCostumeMale;
-                        break;
-                    case 3:
-                        spellId = gender == Gender.Female ? SpellIds.GhostCostumeFemale : SpellIds.GhostCostumeMale;
-                        break;
-                    case 4:
-                        spellId = gender == Gender.Female ? SpellIds.NinjaCostumeFemale : SpellIds.NinjaCostumeMale;
-                        break;
-                    case 5:
-                        spellId = SpellIds.SkeletonCostume;
-                        break;
-                    default:
-                        break;
-                }
+                    1 => gender == Gender.Female ? SpellIds.LeperGnomeCostumeFemale : SpellIds.LeperGnomeCostumeMale,
+                    2 => gender == Gender.Female ? SpellIds.PirateCostumeFemale : SpellIds.PirateCostumeMale,
+                    3 => gender == Gender.Female ? SpellIds.GhostCostumeFemale : SpellIds.GhostCostumeMale,
+                    4 => gender == Gender.Female ? SpellIds.NinjaCostumeFemale : SpellIds.NinjaCostumeMale,
+                    5 => SpellIds.SkeletonCostume,
+                    _ => SpellIds.TrickBuff
+                };
 
                 caster.CastSpell(target, spellId, true);
             }
@@ -149,11 +130,11 @@ namespace Scripts.Events.HallowsEnd
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
-    [Script] // 24751 Trick or Treat
+    [Script] // 24751 - Trick or Treat
     class spell_hallow_end_trick_or_treat : SpellScript
     {
         public override bool Validate(SpellInfo spell)
@@ -165,7 +146,7 @@ namespace Scripts.Events.HallowsEnd
         {
             Unit caster = GetCaster();
             Player target = GetHitPlayer();
-            if (target)
+            if (target != null)
             {
                 caster.CastSpell(target, RandomHelper.randChance(50) ? SpellIds.Trick : SpellIds.Treat, true);
                 caster.CastSpell(target, SpellIds.TrickedOrTreated, true);
@@ -174,7 +155,7 @@ namespace Scripts.Events.HallowsEnd
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
@@ -195,7 +176,7 @@ namespace Scripts.Events.HallowsEnd
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
@@ -204,8 +185,8 @@ namespace Scripts.Events.HallowsEnd
     {
         public override bool Validate(SpellInfo spellEntry)
         {
-            return ValidateSpellInfo(SpellIds.PirateCostumeMale, SpellIds.PirateCostumeFemale, SpellIds.NinjaCostumeMale, SpellIds.NinjaCostumeFemale,
-                SpellIds.LeperGnomeCostumeMale, SpellIds.LeperGnomeCostumeFemale, SpellIds.GhostCostumeMale, SpellIds.GhostCostumeFemale);
+            return ValidateSpellInfo(SpellIds.PirateCostumeMale, SpellIds.PirateCostumeFemale, SpellIds.NinjaCostumeMale, SpellIds.NinjaCostumeFemale, SpellIds.LeperGnomeCostumeMale,
+                SpellIds.LeperGnomeCostumeFemale, SpellIds.GhostCostumeMale, SpellIds.GhostCostumeFemale);
         }
 
         void HandleScriptEffect()
@@ -213,35 +194,25 @@ namespace Scripts.Events.HallowsEnd
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
 
-            uint spellId;
-            bool female = target.GetNativeGender() == Gender.Female;
+            Gender gender = target.GetNativeGender();
 
-            switch (GetSpellInfo().Id)
+            uint spellId = GetSpellInfo().Id switch
             {
-                case SpellIds.HallowedWandLeperGnome:
-                    spellId = female ? SpellIds.LeperGnomeCostumeFemale : SpellIds.LeperGnomeCostumeMale;
-                    break;
-                case SpellIds.HallowedWandPirate:
-                    spellId = female ? SpellIds.PirateCostumeFemale : SpellIds.PirateCostumeMale;
-                    break;
-                case SpellIds.HallowedWandGhost:
-                    spellId = female ? SpellIds.GhostCostumeFemale : SpellIds.GhostCostumeMale;
-                    break;
-                case SpellIds.HallowedWandNinja:
-                    spellId = female ? SpellIds.NinjaCostumeFemale : SpellIds.NinjaCostumeMale;
-                    break;
-                case SpellIds.HallowedWandRandom:
-                    spellId = RandomHelper.RAND(SpellIds.HallowedWandPirate, SpellIds.HallowedWandNinja, SpellIds.HallowedWandLeperGnome, SpellIds.HallowedWandSkeleton, SpellIds.HallowedWandWisp, SpellIds.HallowedWandGhost, SpellIds.HallowedWandBat);
-                    break;
-                default:
-                    return;
-            }
-            caster.CastSpell(target, spellId, true);
+                SpellIds.HallowedWandLeperGnome => gender == Gender.Female ? SpellIds.LeperGnomeCostumeFemale : SpellIds.LeperGnomeCostumeMale,
+                SpellIds.HallowedWandPirate => gender == Gender.Female ? SpellIds.PirateCostumeFemale : SpellIds.PirateCostumeMale,
+                SpellIds.HallowedWandGhost => gender == Gender.Female ? SpellIds.GhostCostumeFemale : SpellIds.GhostCostumeMale,
+                SpellIds.HallowedWandNinja => gender == Gender.Female ? SpellIds.NinjaCostumeFemale : SpellIds.NinjaCostumeMale,
+                SpellIds.HallowedWandRandom => RandomHelper.RAND(SpellIds.HallowedWandPirate, SpellIds.HallowedWandNinja, SpellIds.HallowedWandLeperGnome, SpellIds.HallowedWandSkeleton, SpellIds.HallowedWandWisp, SpellIds.HallowedWandGhost, SpellIds.HallowedWandBat),
+                _ => 0
+            };
+
+            if (spellId != 0)
+                caster.CastSpell(target, spellId, true);
         }
 
         public override void Register()
         {
-            AfterHit.Add(new HitHandler(HandleScriptEffect));
+            AfterHit.Add(new(HandleScriptEffect));
         }
     }
 }

@@ -15,9 +15,9 @@ namespace Scripts.DragonIsles.RubyLifePools
 
         // Primal Juggernaut
         public const uint Excavate = 373497;
-    };
+    }
 
-    // 371652 - Executed
+    [Script] // 371652 - Executed
     class spell_ruby_life_pools_executed : AuraScript
     {
         void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -34,7 +34,7 @@ namespace Scripts.DragonIsles.RubyLifePools
         }
     }
 
-    // 384933 - Ice Shield
+    [Script] // 384933 - Ice Shield
     class spell_ruby_life_pools_ice_shield : AuraScript
     {
         void HandleEffectPeriodic(AuraEffect aurEff)
@@ -49,7 +49,7 @@ namespace Scripts.DragonIsles.RubyLifePools
         }
     }
 
-    // 372793 - Excavate
+    [Script] // 372793 - Excavate
     class spell_ruby_life_pools_excavate : AuraScript
     {
         void HandleEffectPeriodic(AuraEffect aurEff)
@@ -63,7 +63,7 @@ namespace Scripts.DragonIsles.RubyLifePools
         }
     }
 
-    // 395029 - Storm Infusion
+    [Script] // 395029 - Storm Infusion
     class spell_ruby_life_pools_storm_infusion : SpellScript
     {
         void SetDest(ref SpellDestination dest)

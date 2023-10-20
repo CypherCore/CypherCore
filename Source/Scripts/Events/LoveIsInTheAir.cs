@@ -1,4 +1,4 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
@@ -10,53 +10,26 @@ using System.Collections.Generic;
 
 namespace Scripts.Events.LoveIsInTheAir
 {
-    struct SpellIds
-    {
-        //Romantic Picnic
-        public const uint BasketCheck = 45119; // Holiday - Valentine - Romantic Picnic Near Basket Check
-        public const uint MealPeriodic = 45103; // Holiday - Valentine - Romantic Picnic Meal Periodic - Effect Dummy
-        public const uint MealEatVisual = 45120; // Holiday - Valentine - Romantic Picnic Meal Eat Visual
-        //public const uint MealParticle = 45114; // Holiday - Valentine - Romantic Picnic Meal Particle - Unused
-        public const uint DrinkVisual = 45121; // Holiday - Valentine - Romantic Picnic Drink Visual
-        public const uint RomanticPicnicAchiev = 45123; // Romantic Picnic Periodic = 5000
-
-        //CreateHeartCandy
-        public const uint CreateHeartCandy1 = 26668;
-        public const uint CreateHeartCandy2 = 26670;
-        public const uint CreateHeartCandy3 = 26671;
-        public const uint CreateHeartCandy4 = 26672;
-        public const uint CreateHeartCandy5 = 26673;
-        public const uint CreateHeartCandy6 = 26674;
-        public const uint CreateHeartCandy7 = 26675;
-        public const uint CreateHeartCandy8 = 26676;
-
-        //SomethingStinks
-        public const uint HeavilyPerfumed = 71507;
-
-        //PilferingPerfume
-        public const uint ServiceUniform = 71450;
-    }
-
-    struct ModelIds
-    {
-        //PilferingPerfume
-        public const uint GoblinMale = 31002;
-        public const uint GoblinFemale = 31003;
-    }
-
-    [Script] // 45102 Romantic Picnic
+    [Script] // 45102 - Romantic Picnic
     class spell_love_is_in_the_air_romantic_picnic : AuraScript
     {
+        const uint SpellBasketCheck = 45119; // Holiday - Valentine - Romantic Picnic Near Basket Check
+        const uint SpellMealPeriodic = 45103; // Holiday - Valentine - Romantic Picnic Meal Periodic - effect dummy
+        const uint SpellMealEatVisual = 45120; // Holiday - Valentine - Romantic Picnic Meal Eat Visual
+        // const uint SpellMealParticle          = 45114; // Holiday - Valentine - Romantic Picnic Meal Particle - unused
+        const uint SpellDrinkVisual = 45121; // Holiday - Valentine - Romantic Picnic Drink Visual
+        const uint SpellRomanticPicnicAchiev = 45123; // Romantic Picnic periodic = 5000
+
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.BasketCheck, SpellIds.MealPeriodic, SpellIds.MealEatVisual, SpellIds.DrinkVisual, SpellIds.RomanticPicnicAchiev);
+            return ValidateSpellInfo(SpellBasketCheck, SpellMealPeriodic, SpellMealEatVisual, SpellDrinkVisual, SpellRomanticPicnicAchiev);
         }
 
         void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
             target.SetStandState(UnitStandStateType.Sit);
-            target.CastSpell(target, SpellIds.MealPeriodic);
+            target.CastSpell(target, SpellMealPeriodic);
         }
 
         void OnPeriodic(AuraEffect aurEff)
@@ -67,51 +40,50 @@ namespace Scripts.Events.LoveIsInTheAir
             // If our player is no longer sit, Remove all auras
             if (target.GetStandState() != UnitStandStateType.Sit)
             {
-                target.RemoveAura(SpellIds.RomanticPicnicAchiev);
+                target.RemoveAurasDueToSpell(SpellRomanticPicnicAchiev);
                 target.RemoveAura(GetAura());
                 return;
             }
 
-            target.CastSpell(target, SpellIds.BasketCheck); // unknown use, it targets Romantic Basket
-            target.CastSpell(target, RandomHelper.RAND(SpellIds.MealEatVisual, SpellIds.DrinkVisual));
+            target.CastSpell(target, SpellBasketCheck); // unknown use, it targets Romantic Basket
+            target.CastSpell(target, RandomHelper.RAND(SpellMealEatVisual, SpellDrinkVisual));
 
             bool foundSomeone = false;
             // For nearby players, check if they have the same aura. If so, cast Romantic Picnic (45123)
             // required by achievement and "hearts" visual
             List<Unit> playerList = new();
             AnyPlayerInObjectRangeCheck checker = new(target, SharedConst.InteractionDistance * 2);
-            var searcher = new PlayerListSearcher(target, playerList, checker);
+            PlayerListSearcher searcher = new(target, playerList, checker);
             Cell.VisitWorldObjects(target, searcher, SharedConst.InteractionDistance * 2);
-            foreach (Player playerFound in playerList)
+            foreach (var playerFound in playerList)
             {
-                if (target != playerFound && playerFound.HasAura(GetId()))
+                if (playerFound != null)
                 {
-                    playerFound.CastSpell(playerFound, SpellIds.RomanticPicnicAchiev, true);
-                    target.CastSpell(target, SpellIds.RomanticPicnicAchiev, true);
-                    foundSomeone = true;
-                    break;
+                    if (target != playerFound && playerFound.HasAura(GetId()))
+                    {
+                        playerFound.CastSpell(playerFound, SpellRomanticPicnicAchiev, true);
+                        target.CastSpell(target, SpellRomanticPicnicAchiev, true);
+                        foundSomeone = true;
+                        break;
+                    }
                 }
             }
 
-            if (!foundSomeone && target.HasAura(SpellIds.RomanticPicnicAchiev))
-                target.RemoveAura(SpellIds.RomanticPicnicAchiev);
+            if (!foundSomeone && target.HasAura(SpellRomanticPicnicAchiev))
+                target.RemoveAurasDueToSpell(SpellRomanticPicnicAchiev);
         }
 
         public override void Register()
         {
-            AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
+            AfterEffectApply.Add(new(OnApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
+            OnEffectPeriodic.Add(new(OnPeriodic, 0, AuraType.PeriodicDummy));
         }
     }
 
     [Script] // 26678 - Create Heart Candy
     class spell_love_is_in_the_air_create_heart_candy : SpellScript
     {
-        uint[] CreateHeartCandySpells =
-        {
-            SpellIds.CreateHeartCandy1, SpellIds.CreateHeartCandy2, SpellIds.CreateHeartCandy3, SpellIds.CreateHeartCandy4,
-            SpellIds.CreateHeartCandy5, SpellIds.CreateHeartCandy6, SpellIds.CreateHeartCandy7, SpellIds.CreateHeartCandy8
-        };
+        uint[] CreateHeartCandySpells = { 26668, 26670, 26671, 26672, 26673, 26674, 26675, 26676 };
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -120,15 +92,12 @@ namespace Scripts.Events.LoveIsInTheAir
 
         void HandleScript(uint effIndex)
         {
-            PreventHitDefaultEffect(effIndex);
-            Player target = GetHitPlayer();
-            if (target != null)
-                target.CastSpell(target, CreateHeartCandySpells.SelectRandom(), true);
+            GetCaster().CastSpell(GetCaster(), CreateHeartCandySpells.SelectRandom());
         }
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            OnEffectHit.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
@@ -147,7 +116,7 @@ namespace Scripts.Events.LoveIsInTheAir
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
@@ -166,29 +135,32 @@ namespace Scripts.Events.LoveIsInTheAir
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
 
     [Script] // 71508 - Recently Analyzed
     class spell_love_is_in_the_air_recently_analyzed : AuraScript
     {
+        const uint SpellHeavilyPerfumed = 71507;
+
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.HeavilyPerfumed);
+            return ValidateSpellInfo(SpellHeavilyPerfumed);
         }
 
         void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Expire)
-                GetTarget().CastSpell(GetTarget(), SpellIds.HeavilyPerfumed);
+                GetTarget().CastSpell(GetTarget(), SpellHeavilyPerfumed);
         }
 
         public override void Register()
         {
-            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
+
 
     [Script] // 69438 - Sample Satisfaction
     class spell_love_is_in_the_air_sample_satisfaction : AuraScript
@@ -201,13 +173,16 @@ namespace Scripts.Events.LoveIsInTheAir
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
+            OnEffectPeriodic.Add(new(OnPeriodic, 0, AuraType.PeriodicDummy));
         }
     }
 
     [Script] // 71450 - Crown Parcel Service Uniform
     class spell_love_is_in_the_air_service_uniform : AuraScript
     {
+        const uint ModelGoblinMale = 31002;
+        const uint ModelGoblinFemale = 31003;
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
@@ -219,9 +194,9 @@ namespace Scripts.Events.LoveIsInTheAir
             if (target.IsPlayer())
             {
                 if (target.GetNativeGender() == Gender.Male)
-                    target.SetDisplayId(ModelIds.GoblinMale);
+                    target.SetDisplayId(ModelGoblinMale);
                 else
-                    target.SetDisplayId(ModelIds.GoblinFemale);
+                    target.SetDisplayId(ModelGoblinFemale);
             }
         }
 
@@ -232,8 +207,8 @@ namespace Scripts.Events.LoveIsInTheAir
 
         public override void Register()
         {
-            AfterEffectApply.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Transform, AuraEffectHandleModes.Real));
-            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Transform, AuraEffectHandleModes.Real));
+            AfterEffectApply.Add(new(AfterApply, 0, AuraType.Transform, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new(AfterRemove, 0, AuraType.Transform, AuraEffectHandleModes.Real));
         }
     }
 
@@ -241,21 +216,24 @@ namespace Scripts.Events.LoveIsInTheAir
     [Script] // 71539 - Crown Chemical Co. Supplies
     class spell_love_is_in_the_air_cancel_service_uniform : SpellScript
     {
+        const uint SpellServiceUniform = 71450;
+
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.ServiceUniform);
+            return ValidateSpellInfo(SpellServiceUniform);
         }
 
         void HandleScript(uint effIndex)
         {
-            GetHitUnit().RemoveAurasDueToSpell(SpellIds.ServiceUniform);
+            GetHitUnit().RemoveAurasDueToSpell(SpellServiceUniform);
         }
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScript, 1, SpellEffectName.ScriptEffect));
         }
     }
+
 
     // 68529 - Perfume Immune
     [Script] // 68530 - Cologne Immune
@@ -273,8 +251,8 @@ namespace Scripts.Events.LoveIsInTheAir
 
         public override void Register()
         {
-            OnEffectHit.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
-            OnEffectHit.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect));
+            OnEffectHit.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+            OnEffectHit.Add(new(HandleScript, 1, SpellEffectName.ScriptEffect));
         }
     }
 }

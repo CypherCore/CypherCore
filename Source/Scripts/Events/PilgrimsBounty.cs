@@ -1,25 +1,23 @@
-﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
-using System.Collections.Generic;
 
-namespace Scripts.Events.PilgrimsBounty
+namespace Scripts.Events
 {
     struct SpellIds
     {
-        //Pilgrims Bounty
+        // Pilgrims Bounty Buff Food
         public const uint WellFedApTrigger = 65414;
         public const uint WellFedZmTrigger = 65412;
         public const uint WellFedHitTrigger = 65416;
         public const uint WellFedHasteTrigger = 65410;
         public const uint WellFedSpiritTrigger = 65415;
 
-        //FeastOnSpells
-        //Feastonspells
+        // FeastSpells
         public const uint FeastOnTurkey = 61784;
         public const uint FeastOnCranberries = 61785;
         public const uint FeastOnSweetPotatoes = 61786;
@@ -32,14 +30,14 @@ namespace Scripts.Events.PilgrimsBounty
         public const uint PieHelpins = 61845;
         public const uint OnPlateEatVisual = 61826;
 
-        //Theturkinator
+        // TheTurkinator
         public const uint KillCounterVisual = 62015;
         public const uint KillCounterVisualMax = 62021;
 
-        //Spiritofsharing
+        // SpiritOfSharing
         public const uint TheSpiritOfSharing = 61849;
 
-        //Bountifultablemisc
+        // BountifulTableMisc
         public const uint OnPlateTurkey = 61928;
         public const uint OnPlateCranberries = 61925;
         public const uint OnPlateStuffing = 61927;
@@ -67,26 +65,19 @@ namespace Scripts.Events.PilgrimsBounty
         public const uint AServingOfPieChair = 61805;
     }
 
-    struct CreatureIds
+    struct Misc
     {
-        //BountifulTableMisc
-        public const uint BountifulTable = 32823;
-    }
+        // TheTurkinator
+        public const uint EmoteTurkeyHunter = 0;
+        public const uint EmoteTurkeyDomination = 1;
+        public const uint EmoteTurkeySlaughter = 2;
+        public const uint EmoteTurkeyTriumph = 3;
 
-    struct EmoteIds
-    {
-        //TheTurkinator
-        public const uint TurkeyHunter = 0;
-        public const uint TurkeyDomination = 1;
-        public const uint TurkeySlaughter = 2;
-        public const uint TurkeyTriumph = 3;
-    }
+        // BountifulTableMisc
+        public const sbyte SeatPlayer = 0;
+        public const sbyte SeatPlateHolder = 6;
+        public const uint NpcBountifulTable = 32823;
 
-    struct SeatIds
-    {
-        //BountifulTableMisc
-        public const sbyte Player = 0;
-        public const sbyte PlateHolder = 6;
     }
 
     [Script("spell_gen_slow_roasted_turkey", SpellIds.WellFedApTrigger)]
@@ -96,10 +87,11 @@ namespace Scripts.Events.PilgrimsBounty
     [Script("spell_gen_candied_sweet_potato", SpellIds.WellFedHasteTrigger)]
     class spell_pilgrims_bounty_buff_food : AuraScript
     {
+        uint _triggeredSpellId;
+
         public spell_pilgrims_bounty_buff_food(uint triggeredSpellId)
         {
             _triggeredSpellId = triggeredSpellId;
-            _handled = false;
         }
 
         void HandleTriggerSpell(AuraEffect aurEff)
@@ -114,52 +106,36 @@ namespace Scripts.Events.PilgrimsBounty
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleTriggerSpell, 2, AuraType.PeriodicTriggerSpell));
+            OnEffectPeriodic.Add(new(HandleTriggerSpell, 2, AuraType.PeriodicTriggerSpell));
         }
-
-        readonly uint _triggeredSpellId;
 
         bool _handled;
     }
 
-    /* 61784 - Feast On Turkey
-     * 61785 - Feast On Cranberries
-     * 61786 - Feast On Sweet Potatoes
-     * 61787 - Feast On Pie
-     * 61788 - Feast On Stuffing */
     [Script]
-    class spell_pilgrims_bounty_feast_on_SpellScript : SpellScript
+    class spell_pilgrims_bounty_feast_on : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellEffect(spellInfo.Id, 0) && ValidateSpellEffect((uint)spellInfo.GetEffect(0).CalcValue(), 0);
+            return ValidateSpellEffect((spellInfo.Id, 0)) && ValidateSpellEffect(((uint)spellInfo.GetEffect(0).CalcValue(), 0));
         }
 
         void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
 
-            uint _spellId = 0;
-            switch (GetSpellInfo().Id)
+            uint spellId = GetSpellInfo().Id switch
             {
-                case SpellIds.FeastOnTurkey:
-                    _spellId = SpellIds.TurkeyHelpins;
-                    break;
-                case SpellIds.FeastOnCranberries:
-                    _spellId = SpellIds.CranberryHelpins;
-                    break;
-                case SpellIds.FeastOnSweetPotatoes:
-                    _spellId = SpellIds.SweetPotatoHelpins;
-                    break;
-                case SpellIds.FeastOnPie:
-                    _spellId = SpellIds.PieHelpins;
-                    break;
-                case SpellIds.FeastOnStuffing:
-                    _spellId = SpellIds.StuffingHelpins;
-                    break;
-                default:
-                    return;
-            }
+                SpellIds.FeastOnTurkey => SpellIds.TurkeyHelpins,
+                SpellIds.FeastOnCranberries => SpellIds.CranberryHelpins,
+                SpellIds.FeastOnSweetPotatoes => SpellIds.SweetPotatoHelpins,
+                SpellIds.FeastOnPie => SpellIds.PieHelpins,
+                SpellIds.FeastOnStuffing => SpellIds.StuffingHelpins,
+                _ => 0
+            };
+
+            if (spellId == 0)
+                return;
 
             Vehicle vehicle = caster.GetVehicleKit();
             if (vehicle != null)
@@ -171,7 +147,7 @@ namespace Scripts.Events.PilgrimsBounty
                     if (player != null)
                     {
                         player.CastSpell(player, SpellIds.OnPlateEatVisual, true);
-                        caster.CastSpell(player, _spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                        caster.CastSpell(player, spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
                             .SetOriginalCaster(player.GetGUID()));
                     }
                 }
@@ -188,12 +164,12 @@ namespace Scripts.Events.PilgrimsBounty
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     [Script] // 62014 - Turkey Tracker
-    class spell_pilgrims_bounty_turkey_tracker_SpellScript : SpellScript
+    class spell_pilgrims_bounty_turkey_tracker : SpellScript
     {
         public override bool Validate(SpellInfo spell)
         {
@@ -213,20 +189,20 @@ namespace Scripts.Events.PilgrimsBounty
 
             Aura aura = target.GetAura(GetSpellInfo().Id);
             if (aura != null)
-                {
+            {
                 switch (aura.GetStackAmount())
                 {
                     case 10:
-                        caster.GetAI().Talk(EmoteIds.TurkeyHunter, target);
+                        caster.GetAI().Talk(Misc.EmoteTurkeyHunter, target);
                         break;
                     case 20:
-                        caster.GetAI().Talk(EmoteIds.TurkeyDomination, target);
+                        caster.GetAI().Talk(Misc.EmoteTurkeyDomination, target);
                         break;
                     case 30:
-                        caster.GetAI().Talk(EmoteIds.TurkeySlaughter, target);
+                        caster.GetAI().Talk(Misc.EmoteTurkeySlaughter, target);
                         break;
                     case 40:
-                        caster.GetAI().Talk(EmoteIds.TurkeyTriumph, target);
+                        caster.GetAI().Talk(Misc.EmoteTurkeyTriumph, target);
                         target.CastSpell(target, SpellIds.KillCounterVisualMax, true);
                         target.RemoveAurasDueToSpell(GetSpellInfo().Id);
                         break;
@@ -239,7 +215,7 @@ namespace Scripts.Events.PilgrimsBounty
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScript, 1, SpellEffectName.ScriptEffect));
         }
     }
 
@@ -248,14 +224,15 @@ namespace Scripts.Events.PilgrimsBounty
     [Script("spell_pilgrims_bounty_well_fed_stuffing", SpellIds.WellFedHitTrigger)]
     [Script("spell_pilgrims_bounty_well_fed_sweet_potatoes", SpellIds.WellFedHasteTrigger)]
     [Script("spell_pilgrims_bounty_well_fed_pie", SpellIds.WellFedSpiritTrigger)]
-    class spell_pilgrims_bounty_well_fed_SpellScript : SpellScript
+    class spell_pilgrims_bounty_well_fed : SpellScript
     {
         uint _triggeredSpellId;
 
-        public spell_pilgrims_bounty_well_fed_SpellScript(uint triggeredSpellId)
+        public spell_pilgrims_bounty_well_fed(uint triggeredSpellId)
         {
             _triggeredSpellId = triggeredSpellId;
         }
+
 
         public override bool Validate(SpellInfo spell)
         {
@@ -296,7 +273,7 @@ namespace Scripts.Events.PilgrimsBounty
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScript, 1, SpellEffectName.ScriptEffect));
         }
     }
 
@@ -305,14 +282,14 @@ namespace Scripts.Events.PilgrimsBounty
     [Script("spell_pilgrims_bounty_on_plate_stuffing", SpellIds.OnPlateStuffing, SpellIds.PassTheStuffing, SpellIds.OnPlateVisualStuffing, SpellIds.AServingOfStuffingChair)]
     [Script("spell_pilgrims_bounty_on_plate_sweet_potatoes", SpellIds.OnPlateSweetPotatoes, SpellIds.PassTheSweetPotatoes, SpellIds.OnPlateVisualPotatoes, SpellIds.AServingOfSweetPotatoesChair)]
     [Script("spell_pilgrims_bounty_on_plate_pie", SpellIds.OnPlatePie, SpellIds.PassThePie, SpellIds.OnPlateVisualPie, SpellIds.AServingOfPieChair)]
-    class spell_pilgrims_bounty_on_plate_SpellScript : SpellScript
+    class spell_pilgrims_bounty_on_plate : SpellScript
     {
         uint _triggeredSpellId1;
         uint _triggeredSpellId2;
         uint _triggeredSpellId3;
         uint _triggeredSpellId4;
 
-        public spell_pilgrims_bounty_on_plate_SpellScript(uint triggeredSpellId1, uint triggeredSpellId2, uint triggeredSpellId3, uint triggeredSpellId4)
+        public spell_pilgrims_bounty_on_plate(uint triggeredSpellId1, uint triggeredSpellId2, uint triggeredSpellId3, uint triggeredSpellId4)
         {
             _triggeredSpellId1 = triggeredSpellId1;
             _triggeredSpellId2 = triggeredSpellId2;
@@ -334,7 +311,7 @@ namespace Scripts.Events.PilgrimsBounty
                 {
                     Vehicle table = vehBase.GetVehicle();
                     if (table != null)
-                        if (table.GetCreatureEntry() == CreatureIds.BountifulTable)
+                        if (table.GetCreatureEntry() == Misc.NpcBountifulTable)
                             return table;
                 }
             }
@@ -342,7 +319,7 @@ namespace Scripts.Events.PilgrimsBounty
             {
                 Vehicle veh = target.GetVehicle();
                 if (veh != null)
-                    if (veh.GetCreatureEntry() == CreatureIds.BountifulTable)
+                    if (veh.GetCreatureEntry() == Misc.NpcBountifulTable)
                         return veh;
             }
 
@@ -351,12 +328,16 @@ namespace Scripts.Events.PilgrimsBounty
 
         Unit GetPlateInSeat(Vehicle table, sbyte seat)
         {
-            Unit holderUnit = table.GetPassenger(SeatIds.PlateHolder);
+            Unit holderUnit = table.GetPassenger(Misc.SeatPlateHolder);
             if (holderUnit != null)
             {
                 Vehicle holder = holderUnit.GetVehicleKit();
                 if (holder != null)
-                    return holder.GetPassenger(seat);
+                {
+                    Unit plate = holder.GetPassenger(seat);
+                    if (plate != null)
+                        return plate;
+                }
             }
 
             return null;
@@ -366,17 +347,17 @@ namespace Scripts.Events.PilgrimsBounty
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
-            if (!target || caster == target)
+            if (target == null || caster == target)
                 return;
 
             Vehicle table = GetTable(caster);
-            if (!table || table != GetTable(target))
+            if (table == null || table != GetTable(target))
                 return;
 
             Vehicle casterChair = caster.GetVehicleKit();
             if (casterChair != null)
             {
-                Unit casterPlr = casterChair.GetPassenger(SeatIds.Player);
+                Unit casterPlr = casterChair.GetPassenger(Misc.SeatPlayer);
                 if (casterPlr != null)
                 {
                     if (casterPlr == target)
@@ -385,7 +366,7 @@ namespace Scripts.Events.PilgrimsBounty
                     casterPlr.CastSpell(casterPlr, _triggeredSpellId2, true); //Credit for Sharing is Caring(always)
 
                     sbyte seat = target.GetTransSeat();
-                    if (target.IsPlayer() && target.GetVehicleBase())
+                    if (target.IsPlayer() && target.GetVehicleBase() != null)
                         seat = target.GetVehicleBase().GetTransSeat();
 
                     Unit plate = GetPlateInSeat(table, seat);
@@ -408,7 +389,7 @@ namespace Scripts.Events.PilgrimsBounty
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
@@ -417,11 +398,11 @@ namespace Scripts.Events.PilgrimsBounty
     [Script("spell_pilgrims_bounty_a_serving_of_stuffing", SpellIds.AServingOfStuffingPlate)]
     [Script("spell_pilgrims_bounty_a_serving_of_potatoes", SpellIds.AServingOfSweetPotatoesPlate)]
     [Script("spell_pilgrims_bounty_a_serving_of_pie", SpellIds.AServingOfPiePlate)]
-    class spell_pilgrims_bounty_a_serving_of_AuraScript : AuraScript
+    class spell_pilgrims_bounty_a_serving_of : AuraScript
     {
         uint _triggeredSpellId;
 
-        public spell_pilgrims_bounty_a_serving_of_AuraScript(uint triggeredSpellId)
+        public spell_pilgrims_bounty_a_serving_of(uint triggeredSpellId)
         {
             _triggeredSpellId = triggeredSpellId;
         }
@@ -450,7 +431,7 @@ namespace Scripts.Events.PilgrimsBounty
             Vehicle table = target.GetVehicle();
             if (table != null)
             {
-                Unit holderUnit = table.GetPassenger(SeatIds.PlateHolder);
+                Unit holderUnit = table.GetPassenger(Misc.SeatPlateHolder);
                 if (holderUnit != null)
                 {
                     Vehicle holder = holderUnit.GetVehicleKit();
@@ -471,8 +452,8 @@ namespace Scripts.Events.PilgrimsBounty
 
         public override void Register()
         {
-            AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
-            OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            AfterEffectApply.Add(new(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            OnEffectRemove.Add(new(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
 }
