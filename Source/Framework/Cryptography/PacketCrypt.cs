@@ -13,8 +13,8 @@ namespace Framework.Cryptography
             if (IsInitialized)
                 throw new InvalidOperationException("PacketCrypt already initialized!");
 
-            _serverEncrypt = new AesGcm(key);
-            _clientDecrypt = new AesGcm(key);
+            _serverEncrypt = new AesGcm(key, 12);
+            _clientDecrypt = new AesGcm(key, 12);
 
             IsInitialized = true;
         }
