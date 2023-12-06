@@ -2100,8 +2100,8 @@ namespace Game
             if (time.Day == 1)
                 return t;
 
-            var newDate = new DateTime(time.Year, time.Month + 1, 1, 0, 0, 0, time.Kind);
-            return Time.DateTimeToUnixTime(newDate);
+            var newDate = new DateTime(time.Year, time.Month, 1, 0, 0, 0, time.Kind);
+            return Time.DateTimeToUnixTime(newDate.AddMonths(1));
         }
 
         public void ResetMonthlyQuests()
