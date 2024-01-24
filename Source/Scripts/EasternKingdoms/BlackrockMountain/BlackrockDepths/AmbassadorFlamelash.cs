@@ -41,7 +41,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.AmbassadorFl
         void SummonSpirit(Unit victim)
         {
             Creature spirit = DoSpawnCreature(9178, RandomHelper.FRand(-9, 9), RandomHelper.FRand(-9, 9), 0, 0, Framework.Constants.TempSummonType.TimedOrCorpseDespawn, TimeSpan.FromSeconds(60));
-            if (spirit)
+            if (spirit != null)
                 spirit.GetAI().AttackStart(victim);
         }
 

@@ -143,7 +143,7 @@ namespace Scripts.EasternKingdoms.Deadmines
                                 break;
 
                             GameObject go = ObjectAccessor.GetGameObject(me, instance.GetGuidData(DataTypes.SmiteChest));
-                            if (go)
+                            if (go != null)
                             {
                                 me.GetMotionMaster().Clear();
                                 me.GetMotionMaster().MovePoint(1, go.GetPositionX() - 1.5f, go.GetPositionY() + 1.4f, go.GetPositionZ());

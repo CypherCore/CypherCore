@@ -365,7 +365,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                         if (GetBossState(DataTypes.PyrogaurdEmberseer) == EncounterState.NotStarted)
                         {
                             Creature Emberseer = instance.GetCreature(PyroguardEmberseer);
-                            if (Emberseer)
+                            if (Emberseer != null)
                                 Emberseer.GetAI().SetData(1, 1);
                         }
                         break;
@@ -395,7 +395,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                         foreach (var itr in _incarceratorList)
                         {
                             Creature creature = instance.GetCreature(itr);
-                            if (creature)
+                            if (creature != null)
                                 creature.Respawn();
                         }
                         break;
@@ -513,13 +513,13 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                     runecreaturelist[i].Clear();
 
                     GameObject rune = instance.GetGameObject(go_roomrunes[i]);
-                    if (rune)
+                    if (rune != null)
                     {
                         for (byte j = 0; j < 3; ++j)
                         {
                             List<Creature> creatureList = rune.GetCreatureListWithEntryInGrid(BRSMiscConst.DragonspireMobs[j], 15.0f);
                             foreach (var creature in creatureList)
-                                if (creature)
+                                if (creature != null)
                                     runecreaturelist[i].Add(creature.GetGUID());
                         }
                     }
@@ -535,7 +535,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                 {
                     bool _mobAlive = false;
                     rune = instance.GetGameObject(go_roomrunes[i]);
-                    if (!rune)
+                    if (rune == null)
                         continue;
 
                     if (rune.GetGoState() == GameObjectState.Active)
@@ -543,7 +543,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                         foreach (ObjectGuid guid in runecreaturelist[i])
                         {
                             mob = instance.GetCreature(guid);
-                            if (mob && mob.IsAlive())
+                            if (mob != null && mob.IsAlive())
                                 _mobAlive = true;
                         }
                     }
@@ -587,10 +587,10 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                 {
                     SetBossState(DataTypes.DragonspireRoom, EncounterState.Done);
                     GameObject door1 = instance.GetGameObject(go_emberseerin);
-                    if (door1)
+                    if (door1 != null)
                         HandleGameObject(ObjectGuid.Empty, true, door1);
                     GameObject door2 = instance.GetGameObject(go_doors);
-                    if (door2)
+                    if (door2 != null)
                         HandleGameObject(ObjectGuid.Empty, true, door2);
                 }
             }
@@ -636,7 +636,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
 
         public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
-            if (player && player.IsAlive())
+            if (player != null && player.IsAlive())
             {
                 InstanceScript instance = player.GetInstanceScript();
                 if (instance != null)
@@ -657,14 +657,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
 
         public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
-            if (player && player.IsAlive())
+            if (player != null && player.IsAlive())
             {
                 InstanceScript instance = player.GetInstanceScript();
                 if (instance == null)
                     return false;
 
                 Creature rend = player.FindNearestCreature(CreaturesIds.WarchiefRendBlackhand, 50.0f);
-                if (rend)
+                if (rend != null)
                 {
                     rend.GetAI().SetData(BRSMiscConst.Areatrigger, BRSMiscConst.AreatriggerBlackrockStadium);
                     return true;
@@ -688,7 +688,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                 if (instance != null)
                 {
                     Creature infiltrator = ObjectAccessor.GetCreature(player, instance.GetGuidData(DataTypes.ScarshieldInfiltrator));
-                    if (infiltrator)
+                    if (infiltrator != null)
                     {
                         if (player.GetLevel() >= 57)
                             infiltrator.GetAI().SetData(1, 1);

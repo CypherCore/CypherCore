@@ -75,7 +75,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
         public override void EnterEvadeMode(EvadeReason why)
         {
             Creature midnight = ObjectAccessor.GetCreature(me, _midnightGUID);
-            if (midnight)
+            if (midnight != null)
                 base._DespawnAtEvade(TimeSpan.FromSeconds(10), midnight);
 
             me.DespawnOrUnsummon();
@@ -92,7 +92,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
             _scheduler.Schedule(TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(45), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.IntangiblePresence);
 
                 task.Repeat(TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(45));
@@ -116,7 +116,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
                 _phase = Phases.None;
 
                 Creature midnight = ObjectAccessor.GetCreature(me, _midnightGUID);
-                if (midnight)
+                if (midnight != null)
                     midnight.GetAI().DoCastAOE(SpellIds.Mount, new CastSpellExtraArgs(true));
             }
         }
@@ -131,7 +131,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
             if (summon.GetEntry() == CreatureIds.AttumenMounted)
             {
                 Creature midnight = ObjectAccessor.GetCreature(me, _midnightGUID);
-                if (midnight)
+                if (midnight != null)
                 {
                     if (midnight.GetHealth() > me.GetHealth())
                         summon.SetHealth(midnight.GetHealth());
@@ -164,7 +164,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
                     foreach (var refe in me.GetThreatManager().GetSortedThreatList())
                     {
                         target = refe.GetVictim();
-                        if (target && !target.IsWithinDist(me, 8.00f, false) && target.IsWithinDist(me, 25.0f, false))
+                        if (target != null && !target.IsWithinDist(me, 8.00f, false) && target.IsWithinDist(me, 25.0f, false))
                             targetList.Add(target);
 
                         target = null;
@@ -189,7 +189,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
         {
             Talk(TextIds.SayDeath);
             Unit midnight = Global.ObjAccessor.GetUnit(me, _midnightGUID);
-            if (midnight)
+            if (midnight != null)
                 midnight.KillSelf();
 
             _JustDied();
@@ -217,7 +217,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
             if (spellInfo.Id == SpellIds.Mount)
             {
                 Creature midnight = ObjectAccessor.GetCreature(me, _midnightGUID);
-                if (midnight)
+                if (midnight != null)
                 {
                     _phase = Phases.None;
                     _scheduler.CancelAll();
@@ -235,25 +235,25 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
                     Talk(TextIds.SayMount);
 
                     _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
-                                   {
-                                       Creature midnight = ObjectAccessor.GetCreature(me, _midnightGUID);
-                                       if (midnight)
-                                       {
-                                           if (me.IsWithinDist2d(midnight, 5.0f))
-                                           {
-                                               DoCastAOE(SpellIds.SummonAttumenMounted);
-                                               me.SetVisible(false);
-                                               me.GetMotionMaster().Clear();
-                                               midnight.SetVisible(false);
-                                           }
-                                           else
-                                           {
-                                               midnight.GetMotionMaster().MoveFollow(me, 2.0f, 0.0f);
-                                               me.GetMotionMaster().MoveFollow(midnight, 2.0f, 0.0f);
-                                               task.Repeat();
-                                           }
-                                       }
-                                   });
+                    {
+                        Creature midnight = ObjectAccessor.GetCreature(me, _midnightGUID);
+                        if (midnight != null)
+                        {
+                            if (me.IsWithinDist2d(midnight, 5.0f))
+                            {
+                                DoCastAOE(SpellIds.SummonAttumenMounted);
+                                me.SetVisible(false);
+                                me.GetMotionMaster().Clear();
+                                midnight.SetVisible(false);
+                            }
+                            else
+                            {
+                                midnight.GetMotionMaster().MoveFollow(me, 2.0f, 0.0f);
+                                me.GetMotionMaster().MoveFollow(midnight, 2.0f, 0.0f);
+                                task.Repeat();
+                            }
+                        }
+                    });
                 }
             }
         }
@@ -336,7 +336,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
             if (_phase == Phases.AttumenEngages)
             {
                 Unit unit = Global.ObjAccessor.GetUnit(me, _attumenGUID);
-                if (unit)
+                if (unit != null)
                     Talk(TextIds.SayMidnightKill, unit);
             }
         }

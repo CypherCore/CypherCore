@@ -219,7 +219,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
             if (!players.Empty())
             {
                 Group group = players[0].GetGroup();
-                if (group)
+                if (group != null)
                     if (group.IsLFGGroup())
                         Global.LFGMgr.FinishDungeon(group.GetGUID(), 287, me.GetMap());
             }
@@ -228,7 +228,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
         void SummonSister(uint entry)
         {
             Creature sister = me.SummonCreature(entry, me.GetPosition(), TempSummonType.DeadDespawn);
-            if (sister)
+            if (sister != null)
                 DoZoneInCombat(sister);
         }
 
@@ -275,7 +275,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
             _scheduler.Schedule(TimeSpan.FromSeconds(2), mugChuck =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, false, true, -(int)SpellIds.HasDarkBrewmaidensBrew);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.ChuckMug);
                 mugChuck.Repeat(TimeSpan.FromSeconds(4));
             });
@@ -305,7 +305,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
         public override void IsSummonedBy(WorldObject summoner)
         {
             Creature coren = ObjectAccessor.GetCreature(me, _instance.GetGuidData(DataTypes.DataCoren));
-            if (coren)
+            if (coren != null)
                 coren.GetAI().JustSummoned(me);
         }
     }
@@ -356,7 +356,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
             _scheduler.Schedule(TimeSpan.FromSeconds(4), context =>
             {
                 GameObject trap = me.GetLinkedTrap();
-                if (trap)
+                if (trap != null)
                 {
                     trap.SetLootState(LootState.Activated);
                     trap.UseDoorOrButton();
@@ -396,7 +396,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
         {
             Unit caster = GetCaster();
 
-            targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.HasDarkBrewmaidensBrew));
+            targets.RemoveAll(new UnitAuraCheck(true, SpellIds.HasDarkBrewmaidensBrew));
 
             if (targets.Count > 1)
             {

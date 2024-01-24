@@ -120,7 +120,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
             {
                 Talk(TextIds.SayFlameStrike);
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 40.0f, true);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.FlameStrike);
                 task.Repeat();
             });
@@ -284,7 +284,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
         public override void SpellHitTarget(WorldObject target, SpellInfo spellInfo)
         {
             Unit unitTarget = target.ToUnit();
-            if (!unitTarget)
+            if (unitTarget == null)
                 return;
 
             switch (spellInfo.Id)
@@ -318,7 +318,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
             {
                 case CreatureIds.ArcaneSphere:
                     Unit target = SelectTarget(SelectTargetMethod.Random, 0, 70.0f, true);
-                    if (target)
+                    if (target != null)
                         summon.GetMotionMaster().MoveFollow(target, 0.0f, 0.0f);
                     break;
                 case CreatureIds.FlameStrike:
@@ -382,10 +382,10 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
                     DoCastSelf(SpellIds.EmberBlast);
                     // DoCastSelf(SpellSummonPhoenixEgg); -- We do a manual summon for now. Feel free to move it to spelleffect_dbc
                     Creature egg = DoSummon(CreatureIds.PhoenixEgg, me.GetPosition(), TimeSpan.FromSeconds(0));
-                    if (egg)
+                    if (egg != null)
                     {
                         Creature kaelthas = _instance.GetCreature(DataTypes.KaelthasSunstrider);
-                        if (kaelthas)
+                        if (kaelthas != null)
                         {
                             kaelthas.GetAI().JustSummoned(egg);
                             _eggGUID = egg.GetGUID();
@@ -395,7 +395,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
                     _scheduler.Schedule(TimeSpan.FromSeconds(15), task =>
                     {
                         Creature egg = ObjectAccessor.GetCreature(me, _eggGUID);
-                        if (egg)
+                        if (egg != null)
                             egg.DespawnOrUnsummon();
 
                         me.RemoveAllAuras();
@@ -445,7 +445,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
         void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            if (target)
+            if (target != null)
                 target.CastSpell(target, SpellIds.FlameStrikeDamage);
         }
 

@@ -64,7 +64,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Garr
             _scheduler.Schedule(TimeSpan.FromSeconds(4), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.Immolate);
 
                 task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(10));
@@ -74,7 +74,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Garr
             // ...and enrage if he is not.
             _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
             {
-                if (!me.FindNearestCreature(MCCreatureIds.Garr, 20.0f))
+                if (me.FindNearestCreature(MCCreatureIds.Garr, 20.0f) == null)
                     DoCastSelf(SpellIds.SeparationAnxiety);
                 else if (me.HasAura(SpellIds.SeparationAnxiety))
                     me.RemoveAurasDueToSpell(SpellIds.SeparationAnxiety);

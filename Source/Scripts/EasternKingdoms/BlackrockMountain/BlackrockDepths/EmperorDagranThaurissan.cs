@@ -46,7 +46,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Draganthauri
             _scheduler.Schedule(TimeSpan.FromSeconds(4), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.Handofthaurissan);
                 task.Repeat(TimeSpan.FromSeconds(5));
             });
@@ -66,7 +66,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Draganthauri
         public override void JustDied(Unit killer)
         {
             Creature moira = ObjectAccessor.GetCreature(me, _instance.GetGuidData(DataTypes.DataMoira));
-            if (moira)
+            if (moira != null)
             {
                 moira.GetAI().EnterEvadeMode();
                 moira.SetFaction((uint)FactionTemplates.Friendly);

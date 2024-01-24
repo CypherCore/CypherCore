@@ -33,14 +33,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Gehennas
             _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.RainOfFire);
                 task.Repeat(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(12));
             });
             _scheduler.Schedule(TimeSpan.FromSeconds(6), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 1);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.ShadowBolt);
                 task.Repeat(TimeSpan.FromSeconds(7));
             });

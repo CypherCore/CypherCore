@@ -68,7 +68,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Curator
             _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.MaxThreat, 1);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.HatefulBolt);
                 task.Repeat(TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(15));
             });

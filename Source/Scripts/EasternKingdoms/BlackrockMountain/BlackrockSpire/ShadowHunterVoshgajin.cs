@@ -39,7 +39,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.ShadowHunterV
             _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.Hex);
                 task.Repeat(TimeSpan.FromSeconds(15));
             });

@@ -86,7 +86,7 @@ namespace Scripts.EasternKingdoms.Deadmines
                     return;
 
                 GameObject pIronCladDoor = instance.GetGameObject(IronCladDoorGUID);
-                if (!pIronCladDoor)
+                if (pIronCladDoor == null)
                     return;
 
                 switch (State)
@@ -127,7 +127,7 @@ namespace Scripts.EasternKingdoms.Deadmines
             void SummonCreatures()
             {
                 GameObject pIronCladDoor = instance.GetGameObject(IronCladDoorGUID);
-                if (pIronCladDoor)
+                if (pIronCladDoor != null)
                 {
                     Creature DefiasPirate1 = pIronCladDoor.SummonCreature(657, pIronCladDoor.GetPositionX() - 2, pIronCladDoor.GetPositionY() - 7, pIronCladDoor.GetPositionZ(), 0, TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(3));
                     Creature DefiasPirate2 = pIronCladDoor.SummonCreature(657, pIronCladDoor.GetPositionX() + 3, pIronCladDoor.GetPositionY() - 6, pIronCladDoor.GetPositionZ(), 0, TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(3));
@@ -144,7 +144,7 @@ namespace Scripts.EasternKingdoms.Deadmines
 
                 Creature pDefiasPirate1 = instance.GetCreature(DefiasPirate1GUID);
                 Creature pDefiasPirate2 = instance.GetCreature(DefiasPirate2GUID);
-                if (!pDefiasPirate1 || !pDefiasPirate2)
+                if (pDefiasPirate1 == null || pDefiasPirate2 == null)
                     return;
 
                 MoveCreatureInside(pDefiasPirate1);
@@ -160,7 +160,7 @@ namespace Scripts.EasternKingdoms.Deadmines
             void ShootCannon()
             {
                 GameObject pDefiasCannon = instance.GetGameObject(DefiasCannonGUID);
-                if (pDefiasCannon)
+                if (pDefiasCannon != null)
                 {
                     pDefiasCannon.SetGoState(GameObjectState.Active);
                     pDefiasCannon.PlayDirectSound(SoundIds.Cannonfire);
@@ -170,7 +170,7 @@ namespace Scripts.EasternKingdoms.Deadmines
             void BlastOutDoor()
             {
                 GameObject pIronCladDoor = instance.GetGameObject(IronCladDoorGUID);
-                if (pIronCladDoor)
+                if (pIronCladDoor != null)
                 {
                     pIronCladDoor.SetGoState(GameObjectState.Destroyed);
                     pIronCladDoor.PlayDirectSound(SoundIds.Destroydoor);
@@ -180,7 +180,7 @@ namespace Scripts.EasternKingdoms.Deadmines
             void LeverStucked()
             {
                 GameObject pDoorLever = instance.GetGameObject(DoorLeverGUID);
-                if (pDoorLever)
+                if (pDoorLever != null)
                     pDoorLever.SetFlag(GameObjectFlags.InteractCond);
             }
 
@@ -218,7 +218,7 @@ namespace Scripts.EasternKingdoms.Deadmines
                         if (data == (uint)EncounterState.Done)
                         {
                             GameObject go = instance.GetGameObject(FactoryDoorGUID);
-                            if (go)
+                            if (go != null)
                                 go.SetGoState(GameObjectState.Active);
                         }
                         break;

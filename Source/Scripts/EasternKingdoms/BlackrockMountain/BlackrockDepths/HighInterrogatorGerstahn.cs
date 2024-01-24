@@ -32,14 +32,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.HighInterrog
             _scheduler.Schedule(TimeSpan.FromSeconds(4), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100.0f, true);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.Shadowwordpain);
                 task.Repeat(TimeSpan.FromSeconds(7));
             });
             _scheduler.Schedule(TimeSpan.FromSeconds(14), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100.0f, true);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.Manaburn);
                 task.Repeat(TimeSpan.FromSeconds(10));
             });

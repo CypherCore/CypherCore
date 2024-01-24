@@ -73,14 +73,14 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.Vexallus
             _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.ChainLightning);
                 task.Repeat();
             });
             _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 20.0f, true);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.ArcaneShock);
                 task.Repeat(TimeSpan.FromSeconds(8));
             });
@@ -89,7 +89,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.Vexallus
         public override void JustSummoned(Creature summoned)
         {
             Unit temp = SelectTarget(SelectTargetMethod.Random, 0);
-            if (temp)
+            if (temp != null)
                 summoned.GetMotionMaster().MoveFollow(temp, 0, 0);
 
             summons.Summon(summoned);
@@ -150,7 +150,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.Vexallus
 
         public override void JustDied(Unit killer)
         {
-            if (killer)
+            if (killer != null)
                 killer.CastSpell(killer, SpellIds.EnergyFeedback, true);
             me.RemoveAurasDueToSpell(SpellIds.PureEnergyPassive);
         }

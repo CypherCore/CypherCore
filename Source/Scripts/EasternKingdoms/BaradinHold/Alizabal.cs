@@ -63,7 +63,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
             if (instance != null)
             {
                 Creature alizabal = ObjectAccessor.GetCreature(player, instance.GetGuidData(DataTypes.Alizabal));
-                if (alizabal)
+                if (alizabal != null)
                     alizabal.GetAI().DoAction(ActionIds.Intro);
             }
             return true;
@@ -157,7 +157,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
                                 if (!_skewer)
                                 {
                                     Unit target = SelectTarget(SelectTargetMethod.MaxThreat, 0);
-                                    if (target)
+                                    if (target != null)
                                     {
                                         DoCast(target, SpellIds.Skewer, new CastSpellExtraArgs(true));
                                         Talk(TextIds.SaySkewer);
@@ -169,7 +169,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
                                 else if (!_hate)
                                 {
                                     Unit target = SelectTarget(SelectTargetMethod.Random, 0, new NonTankTargetSelector(me));
-                                    if (target)
+                                    if (target != null)
                                     {
                                         DoCast(target, SpellIds.SeethingHate, new CastSpellExtraArgs(true));
                                         Talk(TextIds.SayHate);
@@ -191,7 +191,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
                                 if (!_hate)
                                 {
                                     Unit target = SelectTarget(SelectTargetMethod.Random, 0, new NonTankTargetSelector(me));
-                                    if (target)
+                                    if (target != null)
                                     {
                                         DoCast(target, SpellIds.SeethingHate, new CastSpellExtraArgs(true));
                                         Talk(TextIds.SayHate);
@@ -202,7 +202,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
                                 else if (!_skewer)
                                 {
                                     Unit target = SelectTarget(SelectTargetMethod.MaxThreat, 0);
-                                    if (target)
+                                    if (target != null)
                                     {
                                         DoCast(target, SpellIds.Skewer, new CastSpellExtraArgs(true));
                                         Talk(TextIds.SaySkewer);
@@ -229,7 +229,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
                         me.SetSpeedRate(UnitMoveType.Run, 4.0f);
                         me.SetSpeedRate(UnitMoveType.Walk, 4.0f);
                         Unit target = SelectTarget(SelectTargetMethod.Random, 0, new NonTankTargetSelector(me));
-                        if (target)
+                        if (target != null)
                             me.GetMotionMaster().MovePoint(PointIds.Storm, target.GetPositionX(), target.GetPositionY(), target.GetPositionZ());
                         _events.ScheduleEvent(EventIds.MoveStorm, TimeSpan.FromMilliseconds(4050));
                         break;

@@ -77,14 +77,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.GeneralAnger
         void SummonAdd(Unit victim)
         {
             Creature SummonedAdd = DoSpawnCreature(8901, RandomHelper.IRand(-14, 14), RandomHelper.IRand(-14, 14), 0, 0, TempSummonType.TimedOrCorpseDespawn, TimeSpan.FromSeconds(120));
-            if (SummonedAdd)
+            if (SummonedAdd != null)
                 SummonedAdd.GetAI().AttackStart(victim);
         }
 
         void SummonMedic(Unit victim)
         {
             Creature SummonedMedic = DoSpawnCreature(8894, RandomHelper.IRand(-9, 9), RandomHelper.IRand(-9, 9), 0, 0, TempSummonType.TimedOrCorpseDespawn, TimeSpan.FromSeconds(120));
-            if (SummonedMedic)
+            if (SummonedMedic != null)
                 SummonedMedic.GetAI().AttackStart(victim);
         }
 

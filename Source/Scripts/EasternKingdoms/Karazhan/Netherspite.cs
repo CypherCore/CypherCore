@@ -92,7 +92,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
 
         bool IsBetween(WorldObject u1, WorldObject target, WorldObject u2) // the in-line checker
         {
-            if (!u1 || !u2 || !target)
+            if (u1 == null || u2 == null || target == null)
                 return false;
 
             float xn, yn, xp, yp, xh, yh;
@@ -134,7 +134,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
             for (int i = 0; i < 3; ++i)
             {
                 Creature portal = me.SummonCreature(MiscConst.PortalID[i], MiscConst.PortalCoord[pos[i]].X, MiscConst.PortalCoord[pos[i]].Y, MiscConst.PortalCoord[pos[i]].Z, 0, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(1));
-                if (portal)
+                if (portal != null)
                 {
                     PortalGUID[i] = portal.GetGUID();
                     portal.AddAura(MiscConst.PortalVisual[i], portal);
@@ -147,11 +147,11 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
             for (int i = 0; i < 3; ++i)
             {
                 Creature portal = ObjectAccessor.GetCreature(me, PortalGUID[i]);
-                if (portal)
+                if (portal != null)
                     portal.DisappearAndDie();
 
                 Creature portal1 = ObjectAccessor.GetCreature(me, BeamerGUID[i]);
-                if (portal1)
+                if (portal1 != null)
                     portal1.DisappearAndDie();
 
                 PortalGUID[i].Clear();
@@ -164,7 +164,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
             for (int j = 0; j < 3; ++j) // j = color
             {
                 Creature portal = ObjectAccessor.GetCreature(me, PortalGUID[j]);
-                if (portal)
+                if (portal != null)
                 {
                     // the one who's been cast upon before
                     Unit current = Global.ObjAccessor.GetUnit(portal, BeamTarget[j]);
@@ -176,8 +176,8 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
                     // get the best suitable target
                     foreach (var player in players)
                     {
-                        if (player && player.IsAlive() // alive
-                            && (!target || target.GetDistance2d(portal) > player.GetDistance2d(portal)) // closer than current best
+                        if (player != null && player.IsAlive() // alive
+                            && (target == null || target.GetDistance2d(portal) > player.GetDistance2d(portal)) // closer than current best
                             && !player.HasAura(MiscConst.PlayerDebuff[j]) // not exhausted
                             && !player.HasAura(MiscConst.PlayerBuff[(j + 1) % 3]) // not on another beam
                             && !player.HasAura(MiscConst.PlayerBuff[(j + 2) % 3])
@@ -192,12 +192,12 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
                         target.AddAura(MiscConst.NetherBuff[j], target);
                     // cast visual beam on the chosen target if switched
                     // simple target switching isn't working . using BeamerGUID to cast (workaround)
-                    if (!current || target != current)
+                    if (current == null || target != current)
                     {
                         BeamTarget[j] = target.GetGUID();
                         // remove currently beaming portal
                         Creature beamer = ObjectAccessor.GetCreature(portal, BeamerGUID[j]);
-                        if (beamer)
+                        if (beamer != null)
                         {
                             beamer.CastSpell(target, MiscConst.PortalBeam[j], false);
                             beamer.DisappearAndDie();
@@ -205,7 +205,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
                         }
                         // create new one and start beaming on the target
                         Creature beamer1 = portal.SummonCreature(MiscConst.PortalID[j], portal.GetPositionX(), portal.GetPositionY(), portal.GetPositionZ(), portal.GetOrientation(), TempSummonType.TimedDespawn, TimeSpan.FromMinutes(1));
-                        if (beamer1)
+                        if (beamer1 != null)
                         {
                             beamer1.CastSpell(target, MiscConst.PortalBeam[j], false);
                             BeamerGUID[j] = beamer1.GetGUID();
@@ -248,7 +248,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
         void HandleDoors(bool open) // Massive Door switcher
         {
             GameObject Door = ObjectAccessor.GetGameObject(me, instance.GetGuidData(DataTypes.GoMassiveDoor));
-            if (Door)
+            if (Door != null)
                 Door.SetGoState(open ? GameObjectState.Active : GameObjectState.Ready);
         }
 
@@ -321,7 +321,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
                 if (NetherbreathTimer <= diff)
                 {
                     Unit target = SelectTarget(SelectTargetMethod.Random, 0, 40, true);
-                    if (target)
+                    if (target != null)
                         DoCast(target, SpellIds.Netherbreath);
                     NetherbreathTimer = RandomHelper.URand(5000, 7000);
                 }

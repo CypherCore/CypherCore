@@ -253,7 +253,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                             foreach (var guid in EggList)
                             {
                                 GameObject egg = instance.GetGameObject(guid);
-                                if (egg)
+                                if (egg != null)
                                     egg.SetLootState(LootState.JustDeactivated);
                             }
                         }
@@ -264,7 +264,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                         {
                             case EncounterState.NotStarted:
                                 Creature nefarian = GetCreature(DataTypes.Nefarian);
-                                if (nefarian)
+                                if (nefarian != null)
                                     nefarian.DespawnOrUnsummon();
                                 break;
                             case EncounterState.Fail:
@@ -299,7 +299,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                             if (++EggCount == 15)
                             {
                                 Creature razor = GetCreature(DataTypes.RazorgoreTheUntamed);
-                                if (razor)
+                                if (razor != null)
                                 {
                                     SetData(BWLMisc.DataEggEvent, (uint)EncounterState.Done);
                                     razor.RemoveAurasDueToSpell(42013); // MindControl
@@ -337,7 +337,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                             for (uint i = RandomHelper.URand(2, 5); i > 0; --i)
                             {
                                 Creature summon = instance.SummonCreature(BWLMisc.Entry[RandomHelper.URand(0, 4)], BWLMisc.SummonPosition[RandomHelper.URand(0, 7)]);
-                                if (summon)
+                                if (summon != null)
                                     summon.GetAI().DoZoneInCombat();
                             }
                             _events.ScheduleEvent(EventIds.RazorSpawn, TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(17));
@@ -345,12 +345,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                         case EventIds.RazorPhaseTwo:
                             _events.CancelEvent(EventIds.RazorSpawn);
                             Creature razor = GetCreature(DataTypes.RazorgoreTheUntamed);
-                            if (razor)
+                            if (razor != null)
                                 razor.GetAI().DoAction(BWLMisc.ActionPhaseTwo);
                             break;
                         case EventIds.RespawnNefarius:
                             Creature nefarius = GetCreature(DataTypes.LordVictorNefarius);
-                            if (nefarius)
+                            if (nefarius != null)
                             {
                                 nefarius.SetActive(true);
                                 nefarius.SetFarVisible(true);

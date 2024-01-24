@@ -85,7 +85,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
                 for (sbyte i = 0; i < MiscConst.MaxOccutharVehicleSeats; ++i)
                 {
                     Unit vehicle = _vehicle.GetPassenger(i);
-                    if (vehicle)
+                    if (vehicle != null)
                         vehicle.CastSpell(summon, SpellIds.FocusedFireVisual);
                 }
             }
@@ -259,13 +259,13 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
     {
         public override bool Load()
         {
-            return GetCaster() && GetCaster().GetTypeId() == TypeId.Unit;
+            return GetCaster() != null && GetCaster().GetTypeId() == TypeId.Unit;
         }
 
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit caster = GetCaster();
-            if (caster)
+            if (caster != null)
             {
                 if (IsExpired())
                     caster.CastSpell((WorldObject)null, SpellIds.OccutharsDestuction, new CastSpellExtraArgs(aurEff));

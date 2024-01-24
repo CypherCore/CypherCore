@@ -165,7 +165,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
 
             if (me.GetMapId() == 469)
             {
-                if (!me.FindNearestCreature(BWLCreatureIds.Nefarian, 1000.0f, true))
+                if (me.FindNearestCreature(BWLCreatureIds.Nefarian, 1000.0f, true) == null)
                     _Reset();
 
                 me.SetVisible(true);
@@ -240,7 +240,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                             break;
                         case EventIds.Chaos1:
                             Creature gyth = me.FindNearestCreature(CreatureIds.Gyth, 75.0f, true);
-                            if (gyth)
+                            if (gyth != null)
                             {
                                 me.SetFacingToObject(gyth);
                                 Talk(TextIds.SayChaosSpell);
@@ -253,15 +253,15 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                             break;
                         case EventIds.Success1:
                             Unit player = me.SelectNearestPlayer(60.0f);
-                            if (player)
+                            if (player != null)
                             {
                                 me.SetFacingToObject(player);
                                 Talk(TextIds.SaySuccess);
                                 GameObject portcullis1 = me.FindNearestGameObject(GameObjectIds.PortcullisActive, 65.0f);
-                                if (portcullis1)
+                                if (portcullis1 != null)
                                     portcullis1.SetGoState(GameObjectState.Active);
                                 GameObject portcullis2 = me.FindNearestGameObject(GameObjectIds.PortcullisTobossrooms, 80.0f);
-                                if (portcullis2)
+                                if (portcullis2 != null)
                                     portcullis2.SetGoState(GameObjectState.Active);
                             }
                             _events.ScheduleEvent(EventIds.Success2, TimeSpan.FromSeconds(4));
@@ -300,7 +300,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                                     break;
                                 case 1:
                                     Unit target = SelectTarget(SelectTargetMethod.Random, 0, 40, true);
-                                    if (target)
+                                    if (target != null)
                                         DoCast(target, SpellIds.Shadowbolt);
                                     break;
                             }
@@ -310,7 +310,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                         case EventIds.Fear:
                         {
                             Unit target = SelectTarget(SelectTargetMethod.Random, 0, 40, true);
-                            if (target)
+                            if (target != null)
                                 DoCast(target, SpellIds.Fear);
                             _events.ScheduleEvent(EventIds.Fear, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(20));
                             break;
@@ -318,7 +318,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                         case EventIds.MindControl:
                         {
                             Unit target = SelectTarget(SelectTargetMethod.Random, 0, 40, true);
-                            if (target)
+                            if (target != null)
                                 DoCast(target, SpellIds.ShadowCommand);
                             _events.ScheduleEvent(EventIds.MindControl, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(35));
                             break;
@@ -332,7 +332,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                                 else
                                     CreatureID = MiscConst.Entry[RandomHelper.URand(0, 4)];
                                 Creature dragon = me.SummonCreature(CreatureID, MiscConst.DrakeSpawnLoc[i]);
-                                if (dragon)
+                                if (dragon != null)
                                 {
                                     dragon.SetFaction((uint)FactionTemplates.DragonflightBlack);
                                     dragon.GetAI().AttackStart(me.GetVictim());
@@ -341,7 +341,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                                 if (++SpawnedAdds >= 42)
                                 {
                                     Creature nefarian = me.SummonCreature(BWLCreatureIds.Nefarian, MiscConst.NefarianLoc[0]);
-                                    if (nefarian)
+                                    if (nefarian != null)
                                     {
                                         nefarian.SetActive(true);
                                         nefarian.SetFarVisible(true);
@@ -441,7 +441,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
             if (id == 1)
             {
                 DoZoneInCombat();
-                if (me.GetVictim())
+                if (me.GetVictim() != null)
                     AttackStart(me.GetVictim());
             }
         }
@@ -497,7 +497,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                         break;
                     case EventIds.Classcall:
                         Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100.0f, true);
-                        if (target)
+                        if (target != null)
                             switch (target.GetClass())
                             {
                                 case Class.Mage:

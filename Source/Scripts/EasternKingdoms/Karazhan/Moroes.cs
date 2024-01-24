@@ -122,8 +122,8 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                     if (!AddGUID[i].IsEmpty())
                     {
                         Creature temp = ObjectAccessor.GetCreature(me, AddGUID[i]);
-                        if (temp && temp.IsAlive())
-                            if (!temp.GetVictim())
+                        if (temp != null && temp.IsAlive())
+                            if (temp.GetVictim() == null)
                                 temp.GetAI().AttackStart(me.GetVictim());
                     }
                 }
@@ -144,7 +144,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                     Talk(TextIds.SaySpecial);
 
                     Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
-                    if (target)
+                    if (target != null)
                         target.CastSpell(target, SpellIds.Garrote, true);
 
                     InVanish = false;
@@ -155,7 +155,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             _scheduler.Schedule(TimeSpan.FromSeconds(35), MiscConst.GroupNonEnrage, task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.MinDistance, 0, 0.0f, true, false);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.Blind);
                 task.Repeat(TimeSpan.FromSeconds(40));
             });
@@ -193,7 +193,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                 for (var i = 0; i < 4; ++i)
                 {
                     Creature creature = me.SummonCreature(AddList[i], MiscConst.Locations[i], TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(10));
-                    if (creature)
+                    if (creature != null)
                     {
                         AddGUID[i] = creature.GetGUID();
                         AddId[i] = AddList[i];
@@ -205,7 +205,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                 for (byte i = 0; i < 4; ++i)
                 {
                     Creature creature = me.SummonCreature(AddId[i], MiscConst.Locations[i], TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(10));
-                    if (creature)
+                    if (creature != null)
                         AddGUID[i] = creature.GetGUID();
                 }
             }
@@ -227,7 +227,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                 if (!AddGUID[i].IsEmpty())
                 {
                     Creature temp = ObjectAccessor.GetCreature(me, AddGUID[i]);
-                    if (temp)
+                    if (temp != null)
                         temp.DespawnOrUnsummon();
                 }
             }
@@ -240,7 +240,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                 if (!AddGUID[i].IsEmpty())
                 {
                     Creature temp = ObjectAccessor.GetCreature((me), AddGUID[i]);
-                    if (temp && temp.IsAlive())
+                    if (temp != null && temp.IsAlive())
                     {
                         temp.GetAI().AttackStart(me.GetVictim());
                         DoZoneInCombat(temp);
@@ -290,7 +290,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
         public void AcquireGUID()
         {
             Creature Moroes = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.Moroes));
-            if (Moroes)
+            if (Moroes != null)
             {
                 for (byte i = 0; i < 4; ++i)
                 {
@@ -307,7 +307,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             if (!TempGUID.IsEmpty())
             {
                 Unit unit = Global.ObjAccessor.GetUnit(me, TempGUID);
-                if (unit && unit.IsAlive())
+                if (unit != null && unit.IsAlive())
                     return unit;
             }
 
@@ -369,7 +369,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             if (ManaBurn_Timer <= diff)
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
-                if (target)
+                if (target != null)
                     if (target.GetPowerType() == PowerType.Mana)
                         DoCast(target, SpellIds.Manaburn);
                 ManaBurn_Timer = 5000;                          // 3 sec cast
@@ -379,7 +379,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             if (ShadowWordPain_Timer <= diff)
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
-                if (target)
+                if (target != null)
                 {
                     DoCast(target, SpellIds.Swpain);
                     ShadowWordPain_Timer = 7000;
@@ -511,7 +511,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             if (DispelMagic_Timer <= diff)
             {
                 Unit target = RandomHelper.RAND(SelectGuestTarget(), SelectTarget(SelectTargetMethod.Random, 0, 100, true));
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.Dispelmagic);
 
                 DispelMagic_Timer = 25000;

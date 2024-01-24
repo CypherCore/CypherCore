@@ -182,7 +182,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
             uint i = 0;
             foreach (var unit in targets)
             {
-                if (unit)
+                if (unit != null)
                 {
                     FlameWreathTarget[i] = unit.GetGUID();
                     FWTargPosX[i] = unit.GetPositionX();
@@ -282,7 +282,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
                 if (!me.IsNonMeleeSpellCast(false))
                 {
                     Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
-                    if (!target)
+                    if (target == null)
                         return;
 
                     uint[] Spells = new uint[3];
@@ -325,7 +325,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
                         break;
                     case 1:
                         Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
-                        if (target)
+                        if (target != null)
                             DoCast(target, SpellIds.Chainsofice);
                         break;
                 }
@@ -387,7 +387,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
                         Talk(TextIds.SayBlizzard);
 
                         Creature pSpawn = me.SummonCreature(CreatureIds.AranBlizzard, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawn, TimeSpan.FromSeconds(25));
-                        if (pSpawn)
+                        if (pSpawn != null)
                         {
                             pSpawn.SetFaction(me.GetFaction());
                             pSpawn.CastSpell(pSpawn, SpellIds.CircularBlizzard, false);
@@ -406,7 +406,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
                 for (uint i = 0; i < 4; ++i)
                 {
                     Creature unit = me.SummonCreature(CreatureIds.WaterElemental, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawn, TimeSpan.FromSeconds(90));
-                    if (unit)
+                    if (unit != null)
                     {
                         unit.Attack(me.GetVictim(), true);
                         unit.SetFaction(me.GetFaction());
@@ -421,7 +421,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
                 for (uint i = 0; i < 5; ++i)
                 {
                     Creature unit = me.SummonCreature(CreatureIds.ShadowOfAran, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(5));
-                    if (unit)
+                    if (unit != null)
                     {
                         unit.Attack(me.GetVictim(), true);
                         unit.SetFaction(me.GetFaction());
@@ -449,7 +449,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
                             continue;
 
                         Unit unit = Global.ObjAccessor.GetUnit(me, FlameWreathTarget[i]);
-                        if (unit && !unit.IsWithinDist2d(FWTargPosX[i], FWTargPosY[i], 3))
+                        if (unit != null && !unit.IsWithinDist2d(FWTargPosX[i], FWTargPosY[i], 3))
                         {
                             unit.CastSpell(unit, 20476, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
                                 .SetOriginalCaster(me.GetGUID()));
@@ -500,7 +500,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
                 return;
 
             Player player = who.ToPlayer();
-            if (!player)
+            if (player == null)
                 return;
 
             foreach (uint id in AtieshStaves)
@@ -520,7 +520,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
         bool PlayerHasWeaponEquipped(Player player, uint itemEntry)
         {
             Item item = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
-            if (item && item.GetEntry() == itemEntry)
+            if (item != null && item.GetEntry() == itemEntry)
                 return true;
 
             return false;

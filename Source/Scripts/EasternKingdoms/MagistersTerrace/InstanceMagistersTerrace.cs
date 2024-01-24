@@ -195,7 +195,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
                             if (_kaelthasPreTrashGUIDs.Count == 0)
                             {
                                 Creature kaelthas = GetCreature(DataTypes.KaelthasSunstrider);
-                                if (kaelthas)
+                                if (kaelthas != null)
                                     kaelthas.GetAI().SetData(DataTypes.KaelthasIntro, (uint)EncounterState.InProgress);
                             }
                         }
@@ -223,7 +223,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
             public override void ProcessEvent(WorldObject obj, uint eventId, WorldObject invoker)
             {
                 if (eventId == MiscConst.EventSpawnKalecgos)
-                    if (!GetCreature(DataTypes.Kalecgos) && _events.Empty())
+                    if (GetCreature(DataTypes.Kalecgos) == null && _events.Empty())
                         _events.ScheduleEvent(MiscConst.EventSpawnKalecgos, TimeSpan.FromMinutes(1));
             }
 
@@ -234,7 +234,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
                 if (_events.ExecuteEvent() == MiscConst.EventSpawnKalecgos)
                 {
                     Creature kalecgos = instance.SummonCreature(CreatureIds.Kalecgos, MiscConst.KalecgosSpawnPos);
-                    if (kalecgos)
+                    if (kalecgos != null)
                     {
                         kalecgos.GetMotionMaster().MovePath(MiscConst.PathKalecgosFlight, false);
                         kalecgos.GetAI().Talk(MiscConst.SayKalecgosSpawn);

@@ -224,7 +224,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.RendBlackhand
                         break;
                     case 11:
                         Creature gyth = me.FindNearestCreature(CreaturesIds.Gyth, 10.0f, true);
-                        if (gyth)
+                        if (gyth != null)
                             gyth.GetAI().SetData(1, 1);
                         me.DespawnOrUnsummon(TimeSpan.FromSeconds(1), TimeSpan.FromDays(7));
                         break;

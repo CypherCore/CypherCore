@@ -205,7 +205,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                 var players = me.GetMap().GetPlayers();
                 foreach (var player in players)
                 {
-                    if (player)
+                    if (player != null)
                     {
                         DoCast(player, RandomHelper.RAND(SpellIds.BroodafBlue, SpellIds.BroodafBlack, SpellIds.BroodafRed, SpellIds.BroodafBronze, SpellIds.BroodafGreen), new CastSpellExtraArgs(true));
 
@@ -265,11 +265,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                 _instance.SetBossState(DataTypes.Chromaggus, EncounterState.InProgress);
 
                 Creature creature = _instance.GetCreature(DataTypes.Chromaggus);
-                if (creature)
+                if (creature != null)
                     creature.GetAI().JustEngagedWith(player);
 
                 GameObject go = _instance.GetGameObject(DataTypes.GoChromaggusDoor);
-                if (go)
+                if (go != null)
                     _instance.HandleGameObject(ObjectGuid.Empty, true, go);
             }
 

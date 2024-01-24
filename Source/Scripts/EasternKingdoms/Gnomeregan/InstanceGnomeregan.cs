@@ -93,7 +93,7 @@ namespace Scripts.EasternKingdoms.Gnomeregan
             public override void OnUnitDeath(Unit unit)
             {
                 Creature creature = unit.ToCreature();
-                if (creature)
+                if (creature != null)
                     switch (creature.GetEntry())
                     {
                         case GNOCreatureIds.ViciousFallout:

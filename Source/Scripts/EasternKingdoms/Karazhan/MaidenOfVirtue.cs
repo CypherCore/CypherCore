@@ -59,14 +59,14 @@ namespace Scripts.EasternKingdoms.Karazhan.MaidenOfVirtue
             _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 50, true);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.Holyfire);
                 task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(19));
             });
             _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 80, true);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.Holywrath);
                 task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25));
             });

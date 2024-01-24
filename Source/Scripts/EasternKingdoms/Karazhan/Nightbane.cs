@@ -89,7 +89,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
             me.SetDisableGravity(true);
             HandleTerraceDoors(true);
             GameObject urn = ObjectAccessor.GetGameObject(me, instance.GetGuidData(DataTypes.GoBlackenedUrn));
-            if (urn)
+            if (urn != null)
                 urn.RemoveFlag(GameObjectFlags.InUse);
         }
 
@@ -135,7 +135,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
             _scheduler.Schedule(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(23), MiscConst.GroupGround, task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-                if (target)
+                if (target != null)
                     if (!me.HasInArc(MathF.PI, target))
                         DoCast(target, SpellIds.TailSweep);
                 task.Repeat(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(30));
@@ -147,7 +147,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
             _scheduler.Schedule(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(18), MiscConst.GroupGround, task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.CharredEarth);
                 task.Repeat(TimeSpan.FromSeconds(18), TimeSpan.FromSeconds(21));
             });
@@ -159,7 +159,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
             _scheduler.Schedule(TimeSpan.FromSeconds(82), MiscConst.GroupGround, task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.DistractingAsh);
             });
         }
@@ -262,7 +262,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
                         {
                             ResetThreatList();
                             Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-                            if (target)
+                            if (target != null)
                             {
                                 me.SetFacingToObject(target);
                                 DoCast(target, SpellIds.RainOfBones);
@@ -272,14 +272,14 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
                     _scheduler.Schedule(TimeSpan.FromSeconds(21), MiscConst.GroupFly, task =>
                     {
                         Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-                        if (target)
+                        if (target != null)
                             DoCast(target, SpellIds.SmokingBlastT);
                         task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(7));
                     });
                     _scheduler.Schedule(TimeSpan.FromSeconds(17), MiscConst.GroupFly, task =>
                     {
                         Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-                        if (target)
+                        if (target != null)
                             DoCast(target, SpellIds.SmokingBlast);
                         task.Repeat(TimeSpan.FromMilliseconds(1400));
                     });
@@ -361,7 +361,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
                 return false;
 
             Creature nightbane = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.Nightbane));
-            if (nightbane)
+            if (nightbane != null)
             {
                 me.SetFlag(GameObjectFlags.InUse);
                 nightbane.GetAI().DoAction(MiscConst.ActionSummon);

@@ -137,9 +137,9 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             if (instance.GetData(DataTypes.OperaOzDeathcount) == 4)
             {
                 Creature pCrone = creature.SummonCreature(CreatureIds.Crone, -10891.96f, -1755.95f, creature.GetPositionZ(), 4.64f, TempSummonType.TimedOrDeadDespawn, TimeSpan.FromHours(2));
-                if (pCrone)
+                if (pCrone != null)
                 {
-                    if (creature.GetVictim())
+                    if (creature.GetVictim() != null)
                         pCrone.GetAI().AttackStart(creature.GetVictim());
                 }
             }
@@ -162,7 +162,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             target.SetFullHealth();
             target.SetStandState(UnitStandStateType.Stand);
             target.CastSpell(target, SpellIds.ResVisual, true);
-            if (target.GetVictim())
+            if (target.GetVictim() != null)
             {
                 target.GetMotionMaster().MoveChase(target.GetVictim());
                 target.GetAI().AttackStart(target.GetVictim());
@@ -291,7 +291,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
         void SummonTito()
         {
             Creature pTito = me.SummonCreature(CreatureIds.Tito, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(30));
-            if (pTito)
+            if (pTito != null)
             {
                 Talk(TextIds.SayDorotheeSummon);
                 pTito.GetAI<npc_tito>().DorotheeGUID = me.GetGUID();
@@ -331,7 +331,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             if (!DorotheeGUID.IsEmpty())
             {
                 Creature Dorothee = ObjectAccessor.GetCreature(me, DorotheeGUID);
-                if (Dorothee && Dorothee.IsAlive())
+                if (Dorothee != null && Dorothee.IsAlive())
                 {
                     Dorothee.GetAI<boss_dorothee>().TitoDied = true;
                     Talk(TextIds.SayDorotheeTitoDeath, Dorothee);
@@ -451,7 +451,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             if (BrainWipeTimer <= diff)
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.BrainWipe);
                 BrainWipeTimer = 20000;
             }
@@ -737,7 +737,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             if (CycloneTimer <= diff)
             {
                 Creature Cyclone = DoSpawnCreature(CreatureIds.Cyclone, RandomHelper.URand(0, 9), RandomHelper.URand(0, 9), 0, 0, TempSummonType.TimedDespawn, TimeSpan.FromSeconds(15));
-                if (Cyclone)
+                if (Cyclone != null)
                     Cyclone.CastSpell(Cyclone, SpellIds.CycloneVisual, true);
                 CycloneTimer = 30000;
             }
@@ -808,7 +808,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 player.CloseGossipMenu();
 
                 Creature pBigBadWolf = me.SummonCreature(CreatureIds.BigBadWolf, me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), me.GetOrientation(), TempSummonType.TimedOrDeadDespawn, TimeSpan.FromHours(2));
-                if (pBigBadWolf)
+                if (pBigBadWolf != null)
                     pBigBadWolf.GetAI().AttackStart(player);
 
                 me.DespawnOrUnsummon();
@@ -887,7 +887,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 if (!IsChasing)
                 {
                     Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
-                    if (target)
+                    if (target != null)
                     {
                         Talk(TextIds.SayWolfHood);
                         DoCast(target, SpellIds.LittleRedRidingHood, new CastSpellExtraArgs(true));
@@ -905,7 +905,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                     IsChasing = false;
 
                     Unit target = Global.ObjAccessor.GetUnit(me, HoodGUID);
-                    if (target)
+                    if (target != null)
                     {
                         HoodGUID.Clear();
                         if (GetThreat(target) != 0f)
@@ -1068,7 +1068,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 if (RomuloDead)
                 {
                     Creature Romulo = ObjectAccessor.GetCreature(me, RomuloGUID);
-                    if (Romulo)
+                    if (Romulo != null)
                     {
                         Romulo.SetUninteractible(false);
                         Romulo.GetMotionMaster().Clear();
@@ -1082,7 +1082,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
                 //if not already returned, then romulo is alive and we can pretend die
                 Creature Romulo1 = (ObjectAccessor.GetCreature((me), RomuloGUID));
-                if (Romulo1)
+                if (Romulo1 != null)
                 {
                     MiscConst.PretendToDie(me);
                     IsFakingDeath = true;
@@ -1148,7 +1148,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 if (SummonRomuloTimer <= diff)
                 {
                     Creature pRomulo = me.SummonCreature(CreatureIds.Romulo, MiscConst.RomuloX, MiscConst.RomuloY, me.GetPositionZ(), 0, TempSummonType.TimedOrDeadDespawn, TimeSpan.FromHours(2));
-                    if (pRomulo)
+                    if (pRomulo != null)
                     {
                         RomuloGUID = pRomulo.GetGUID();
                         pRomulo.GetAI<boss_romulo>().JulianneGUID = me.GetGUID();
@@ -1170,7 +1170,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                     Phase = RAJPhase.Both;
                     IsFakingDeath = false;
 
-                    if (me.GetVictim())
+                    if (me.GetVictim() != null)
                         AttackStart(me.GetVictim());
 
                     ResurrectSelfTimer = 0;
@@ -1187,7 +1187,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 if (ResurrectTimer <= diff)
                 {
                     Creature Romulo = ObjectAccessor.GetCreature(me, RomuloGUID);
-                    if (Romulo && Romulo.GetAI<boss_romulo>().IsFakingDeath)
+                    if (Romulo != null && Romulo.GetAI<boss_romulo>().IsFakingDeath)
                     {
                         Talk(TextIds.SayJulianneResurrect);
                         MiscConst.Resurrect(Romulo);
@@ -1202,7 +1202,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             if (BlindingPassionTimer <= diff)
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.BlindingPassion);
                 BlindingPassionTimer = RandomHelper.URand(30000, 45000);
             }
@@ -1227,7 +1227,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 if (RandomHelper.URand(0, 1) != 0 && SummonedRomulo)
                 {
                     Creature Romulo = (ObjectAccessor.GetCreature((me), RomuloGUID));
-                    if (Romulo && Romulo.IsAlive() && !RomuloDead)
+                    if (Romulo != null && Romulo.IsAlive() && !RomuloDead)
                         DoCast(Romulo, SpellIds.EternalAffection);
                 }
                 else DoCast(me, SpellIds.EternalAffection);
@@ -1303,7 +1303,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 Phase = RAJPhase.Both;
 
                 Creature Julianne = ObjectAccessor.GetCreature(me, JulianneGUID);
-                if (Julianne)
+                if (Julianne != null)
                 {
                     Julianne.GetAI<boss_julianne>().RomuloDead = true;
                     Julianne.GetAI<boss_julianne>().ResurrectSelfTimer = 10000;
@@ -1318,7 +1318,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 if (JulianneDead)
                 {
                     Creature Julianne = ObjectAccessor.GetCreature(me, JulianneGUID);
-                    if (Julianne)
+                    if (Julianne != null)
                     {
                         Julianne.SetUninteractible(false);
                         Julianne.GetMotionMaster().Clear();
@@ -1330,7 +1330,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 }
 
                 Creature Julianne1 = ObjectAccessor.GetCreature(me, JulianneGUID);
-                if (Julianne1)
+                if (Julianne1 != null)
                 {
                     MiscConst.PretendToDie(me);
                     IsFakingDeath = true;
@@ -1350,7 +1350,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             if (!JulianneGUID.IsEmpty())
             {
                 Creature Julianne = ObjectAccessor.GetCreature(me, JulianneGUID);
-                if (Julianne && Julianne.GetVictim())
+                if (Julianne != null && Julianne.GetVictim() != null)
                 {
                     AddThreat(Julianne.GetVictim(), 1.0f);
                     AttackStart(Julianne.GetVictim());
@@ -1387,7 +1387,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 if (ResurrectTimer <= diff)
                 {
                     Creature Julianne = (ObjectAccessor.GetCreature((me), JulianneGUID));
-                    if (Julianne && Julianne.GetAI<boss_julianne>().IsFakingDeath)
+                    if (Julianne != null && Julianne.GetAI<boss_julianne>().IsFakingDeath)
                     {
                         Talk(TextIds.SayRomuloResurrect);
                         MiscConst.Resurrect(Julianne);
@@ -1402,7 +1402,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             if (BackwardLungeTimer <= diff)
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 1, 100, true);
-                if (target && !me.HasInArc(MathF.PI, target))
+                if (target != null && !me.HasInArc(MathF.PI, target))
                 {
                     DoCast(target, SpellIds.BackwardLunge);
                     BackwardLungeTimer = RandomHelper.URand(15000, 30000);
@@ -1420,7 +1420,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             if (DeadlySwatheTimer <= diff)
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.DeadlySwathe);
                 DeadlySwatheTimer = RandomHelper.URand(15000, 25000);
             }

@@ -96,7 +96,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
                                 List<Creature> creatureList = me.GetCreatureListWithEntryInGrid(CreaturesIds.BlackhandIncarcerator, 35.0f);
                                 foreach (var creature in creatureList)
                                 {
-                                    if (creature)
+                                    if (creature != null)
                                     {
                                         creature.SetImmuneToAll(false);
                                         creature.InterruptSpell(CurrentSpellTypes.Channeled);
@@ -136,7 +136,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
             _scheduler.Schedule(TimeSpan.FromSeconds(14), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.Pyroblast);
                 task.Repeat(TimeSpan.FromSeconds(15));
             });
@@ -186,25 +186,25 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
         {
             // update all runes
             GameObject rune1 = ObjectAccessor.GetGameObject(me, instance.GetGuidData(GameObjectsIds.EmberseerRune1));
-            if (rune1)
+            if (rune1 != null)
                 rune1.SetGoState(state);
             GameObject rune2 = ObjectAccessor.GetGameObject(me, instance.GetGuidData(GameObjectsIds.EmberseerRune2));
-            if (rune2)
+            if (rune2 != null)
                 rune2.SetGoState(state);
             GameObject rune3 = ObjectAccessor.GetGameObject(me, instance.GetGuidData(GameObjectsIds.EmberseerRune3));
-            if (rune3)
+            if (rune3 != null)
                 rune3.SetGoState(state);
             GameObject rune4 = ObjectAccessor.GetGameObject(me, instance.GetGuidData(GameObjectsIds.EmberseerRune4));
-            if (rune4)
+            if (rune4 != null)
                 rune4.SetGoState(state);
             GameObject rune5 = ObjectAccessor.GetGameObject(me, instance.GetGuidData(GameObjectsIds.EmberseerRune5));
-            if (rune5)
+            if (rune5 != null)
                 rune5.SetGoState(state);
             GameObject rune6 = ObjectAccessor.GetGameObject(me, instance.GetGuidData(GameObjectsIds.EmberseerRune6));
-            if (rune6)
+            if (rune6 != null)
                 rune6.SetGoState(state);
             GameObject rune7 = ObjectAccessor.GetGameObject(me, instance.GetGuidData(GameObjectsIds.EmberseerRune7));
-            if (rune7)
+            if (rune7 != null)
                 rune7.SetGoState(state);
         }
 
@@ -234,7 +234,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
             // Had to do this because CallForHelp will ignore any npcs without Los
             List<Creature> creatureList = me.GetCreatureListWithEntryInGrid(CreaturesIds.BlackhandIncarcerator, 60.0f);
             foreach (var creature in creatureList)
-                if (creature)
+                if (creature != null)
                     DoZoneInCombat(creature);    // GetAI().AttackStart(me.GetVictim());
 
             _scheduler.Schedule(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(16), task =>

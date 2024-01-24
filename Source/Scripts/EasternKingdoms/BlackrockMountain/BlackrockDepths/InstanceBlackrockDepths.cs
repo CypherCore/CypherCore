@@ -322,12 +322,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                 if (GhostKillCount < MiscConst.TombOfSevenBossNum && !TombBossGUIDs[TombEventCounter].IsEmpty())
                 {
                     Creature boss = instance.GetCreature(TombBossGUIDs[TombEventCounter]);
-                    if (boss)
+                    if (boss != null)
                     {
                         boss.SetFaction((uint)FactionTemplates.DarkIronDwarves);
                         boss.SetImmuneToPC(false);
                         Unit target = boss.SelectNearestTarget(500);
-                        if (target)
+                        if (target != null)
                             boss.GetAI().AttackStart(target);
                     }
                 }
@@ -340,7 +340,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                 for (byte i = 0; i < MiscConst.TombOfSevenBossNum; ++i)
                 {
                     Creature boss = instance.GetCreature(TombBossGUIDs[i]);
-                    if (boss)
+                    if (boss != null)
                     {
                         if (!boss.IsAlive())
                             boss.Respawn();
@@ -388,7 +388,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                         for (byte i = 0; i < MiscConst.TombOfSevenBossNum; ++i)
                         {
                             Creature boss = instance.GetCreature(TombBossGUIDs[i]);
-                            if (boss)
+                            if (boss != null)
                             {
                                 if (!boss.IsAlive())
                                 {

@@ -70,7 +70,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Shazzrah
                         break;
                     case EventIds.ShazzrahCurse:
                         Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true, true, -(int)SpellIds.ShazzrahCurse);
-                        if (target)
+                        if (target != null)
                             DoCast(target, SpellIds.ShazzrahCurse);
                         _events.ScheduleEvent(EventIds.ShazzrahCurse, TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(30));
                         break;
@@ -123,11 +123,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Shazzrah
         void HandleScript(uint effIndex)
         {
             Unit target = GetHitUnit();
-            if (target)
+            if (target != null)
             {
                 target.CastSpell(GetCaster(), SpellIds.ShazzrahGate, true);
                 Creature creature = GetCaster().ToCreature();
-                if (creature)
+                if (creature != null)
                     creature.GetAI().AttackStart(target); // Attack the target which caster will teleport to.
             }
         }

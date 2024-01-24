@@ -46,7 +46,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Golemagg
             _scheduler.Schedule(TimeSpan.FromSeconds(7), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.Pyroblast);
                 task.Repeat(TimeSpan.FromSeconds(7));
             });
@@ -104,7 +104,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Golemagg
                 return;
 
             Creature pGolemagg = ObjectAccessor.GetCreature(me, _instance.GetGuidData(DataTypes.GolemaggTheIncinerator));
-            if (pGolemagg)
+            if (pGolemagg != null)
             {
                 if (pGolemagg.IsAlive())
                 {

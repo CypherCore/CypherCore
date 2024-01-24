@@ -92,10 +92,10 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Gyth
                     {
                         me.AddAura(SpellIds.RendMounts, me);
                         GameObject portcullis = me.FindNearestGameObject(GameObjectsIds.DrPortcullis, 40.0f);
-                        if (portcullis)
+                        if (portcullis != null)
                             portcullis.UseDoorOrButton();
                         Creature victor = me.FindNearestCreature(CreaturesIds.LordVictorNefarius, 75.0f, true);
-                        if (victor)
+                        if (victor != null)
                             victor.GetAI().SetData(1, 1);
 
                         task.Schedule(TimeSpan.FromSeconds(2), summonTask2 =>

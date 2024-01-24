@@ -52,7 +52,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Magmadar
             _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true, true, -(int)SpellIds.LavaBomb);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.LavaBomb);
                 task.Repeat(TimeSpan.FromSeconds(12));
             });

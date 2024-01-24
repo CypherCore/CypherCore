@@ -214,7 +214,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                 else
                 {
                     TempSummon summon = instance.SummonCreature(MCCreatureIds.MajordomoExecutus, MCMiscConst.RagnarosTelePos);
-                    if (summon)
+                    if (summon != null)
                         summon.GetAI().DoAction(ActionIds.StartRagnarosAlt);
                 }
             }

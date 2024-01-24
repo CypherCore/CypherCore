@@ -142,7 +142,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Razorgore
             if (instance.GetData(BWLMisc.DataEggEvent) != (uint)EncounterState.Done)
             {
                 Creature razorgore = instance.GetCreature(DataTypes.RazorgoreTheUntamed);
-                if (razorgore)
+                if (razorgore != null)
                 {
                     razorgore.Attack(player, true);
                     player.CastSpell(razorgore, SpellIds.Mindcontrol);

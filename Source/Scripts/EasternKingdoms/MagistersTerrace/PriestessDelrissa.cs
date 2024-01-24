@@ -223,7 +223,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                     }
                 }
 
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.DispelMagic);
 
                 task.Repeat(TimeSpan.FromSeconds(12));
@@ -261,7 +261,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             foreach (var lackeyGuid in m_auiLackeyGUID)
             {
                 Unit pAdd = Global.ObjAccessor.GetUnit(me, lackeyGuid);
-                if (pAdd && !pAdd.IsEngaged())
+                if (pAdd != null && !pAdd.IsEngaged())
                     AddThreat(who, 0.0f, pAdd);
             }
 
@@ -303,7 +303,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                     Unit pAdd = Global.ObjAccessor.GetUnit(me, m_auiLackeyGUID[j]);
 
                     //object already removed, not exist
-                    if (!pAdd)
+                    if (pAdd == null)
                     {
                         pAdd = me.SummonCreature(guid, MiscConst.LackeyLocations[j][0], MiscConst.LackeyLocations[j][1], MiscConst.fZLocation, MiscConst.fOrientation, TempSummonType.CorpseDespawn);
                         if (pAdd != null)
@@ -380,7 +380,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 
             // in case she is not alive and Reset was for some reason called, respawn her (most likely party wipe after killing her)
             Creature delrissa = instance.GetCreature(DataTypes.PriestessDelrissa);
-            if (delrissa)
+            if (delrissa != null)
             {
                 if (!delrissa.IsAlive())
                     delrissa.Respawn();
@@ -389,7 +389,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 
         public override void JustEngagedWith(Unit who)
         {
-            if (!who)
+            if (who == null)
                 return;
 
             foreach (var guid in m_auiLackeyGUIDs)
@@ -400,7 +400,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             }
 
             Creature delrissa = instance.GetCreature(DataTypes.PriestessDelrissa);
-            if (delrissa)
+            if (delrissa != null)
                 if (delrissa.IsAlive() && !delrissa.IsEngaged())
                     AddThreat(who, 0.0f, delrissa);
         }
@@ -410,7 +410,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             Creature delrissa = instance.GetCreature(DataTypes.PriestessDelrissa);
             uint uiLackeyDeathCount = instance.GetData(DataTypes.DelrissaDeathCount);
 
-            if (!delrissa)
+            if (delrissa == null)
                 return;
 
             //should delrissa really yell if dead?
@@ -436,14 +436,14 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
         public override void KilledUnit(Unit victim)
         {
             Creature delrissa = instance.GetCreature(DataTypes.PriestessDelrissa);
-            if (delrissa)
+            if (delrissa != null)
                 delrissa.GetAI().KilledUnit(victim);
         }
 
         void AcquireGUIDs()
         {
             Creature delrissa = instance.GetCreature(DataTypes.PriestessDelrissa);
-            if (delrissa)
+            if (delrissa != null)
             {
                 for (byte i = 0; i < MiscConst.MaxActiveLackey; ++i)
                     m_auiLackeyGUIDs[i] = (delrissa.GetAI() as boss_priestess_delrissa).m_auiLackeyGUID[i];
@@ -493,7 +493,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 
                 ResetThreatList();
 
-                if (unit)
+                if (unit != null)
                     AddThreat(unit, 1000.0f);
 
                 InVanish = true;
@@ -565,7 +565,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
             {
                 Unit unit = SelectTarget(SelectTargetMethod.Random, 0);
-                if (unit)
+                if (unit != null)
                     DoCast(unit, SpellIds.SeedOfCorruption);
 
                 task.Repeat(TimeSpan.FromSeconds(10));
@@ -573,7 +573,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
             {
                 Unit unit = SelectTarget(SelectTargetMethod.Random, 0);
-                if (unit)
+                if (unit != null)
                     DoCast(unit, SpellIds.CurseOfAgony);
 
                 task.Repeat(TimeSpan.FromSeconds(13));
@@ -582,7 +582,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
             {
                 Unit unit = SelectTarget(SelectTargetMethod.Random, 0);
-                if (unit)
+                if (unit != null)
                     DoCast(unit, SpellIds.Fear);
 
                 task.Repeat();
@@ -671,7 +671,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0);
-                if (target)
+                if (target != null)
                 {
                     DoCast(target, SpellIds.Polymorph);
                     task.Repeat(TimeSpan.FromSeconds(20));
@@ -680,7 +680,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
             {
                 Unit unit = SelectTarget(SelectTargetMethod.Random, 0);
-                if (unit)
+                if (unit != null)
                     DoCast(unit, SpellIds.Blizzard);
 
                 task.Repeat();
@@ -771,7 +771,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                 if (!InMeleeRange)
                 {
                     Unit unit = SelectTarget(SelectTargetMethod.Random, 0);
-                    if (unit)
+                    if (unit != null)
                         DoCast(unit, SpellIds.InterceptStun);
                 }
 
@@ -873,7 +873,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                 GameObject go = me.GetGameObject(SpellIds.FreezingTrap);
 
                 //if we have a go, we need to wait (only one trap at a time)
-                if (go)
+                if (go != null)
                     task.Repeat(TimeSpan.FromSeconds(2.5));
                 else
                 {
@@ -889,7 +889,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             Initialize();
 
             Unit pPet = Global.ObjAccessor.GetUnit(me, m_uiPetGUID);
-            if (!pPet)
+            if (pPet == null)
                 me.SummonCreature(CreatureIds.Sliver, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.CorpseDespawn);
 
             base.Reset();
@@ -942,7 +942,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
             {
                 Unit unit = SelectTarget(SelectTargetMethod.Random, 0);
-                if (unit)
+                if (unit != null)
                     DoCast(unit, SpellIds.Purge);
 
                 task.Repeat(TimeSpan.FromSeconds(15));

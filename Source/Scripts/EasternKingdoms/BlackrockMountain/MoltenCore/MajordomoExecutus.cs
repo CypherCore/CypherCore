@@ -69,7 +69,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Majordomo
             _scheduler.Schedule(TimeSpan.FromSeconds(20), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 1);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.Teleport);
                 task.Repeat(TimeSpan.FromSeconds(20));
             });
@@ -84,7 +84,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Majordomo
                 if (!UpdateVictim())
                     return;
 
-                if (!me.FindNearestCreature(MCCreatureIds.FlamewakerHealer, 100.0f) && !me.FindNearestCreature(MCCreatureIds.FlamewakerElite, 100.0f))
+                if (me.FindNearestCreature(MCCreatureIds.FlamewakerHealer, 100.0f) == null && me.FindNearestCreature(MCCreatureIds.FlamewakerElite, 100.0f) == null)
                 {
                     instance.UpdateEncounterStateForKilledCreature(me.GetEntry(), me);
                     me.SetFaction((uint)FactionTemplates.Friendly);

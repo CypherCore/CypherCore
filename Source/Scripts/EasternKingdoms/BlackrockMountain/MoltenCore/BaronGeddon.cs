@@ -41,14 +41,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.BaronGeddon
             _scheduler.Schedule(TimeSpan.FromSeconds(30), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true, true, -(int)SpellIds.IgniteMana);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.IgniteMana);
                 task.Repeat(TimeSpan.FromSeconds(30));
             });
             _scheduler.Schedule(TimeSpan.FromSeconds(35), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.LivingBomb);
                 task.Repeat(TimeSpan.FromSeconds(35));
             });

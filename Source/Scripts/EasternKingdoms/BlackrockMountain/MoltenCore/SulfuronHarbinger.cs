@@ -61,7 +61,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Sulfuron
             _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.Flamespear);
                 task.Repeat(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(16));
             });
@@ -100,21 +100,21 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Sulfuron
             _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30), task =>
             {
                 Unit target = DoSelectLowestHpFriendly(60.0f, 1);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.Heal);
                 task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(20));
             });
             _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true, true, -(int)SpellIds.Shadowwordpain);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.Shadowwordpain);
                 task.Repeat(TimeSpan.FromSeconds(18), TimeSpan.FromSeconds(26));
             });
             _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true, true, -(int)SpellIds.Immolate);
-                if (target)
+                if (target != null)
                     DoCast(target, SpellIds.Immolate);
                 task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25));
             });

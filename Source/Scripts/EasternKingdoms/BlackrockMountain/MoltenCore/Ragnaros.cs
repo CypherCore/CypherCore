@@ -140,7 +140,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                         case EventIds.Intro4:
                             Talk(TextIds.SayArrival5Rag);
                             Creature executus = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.MajordomoExecutus));
-                            if (executus)
+                            if (executus != null)
                                 Unit.Kill(me, executus);
                             break;
                         case EventIds.Intro5:
@@ -165,7 +165,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                     me.SetEmoteState(Emote.OneshotNone);
                     me.HandleEmoteCommand(Emote.OneshotEmerge);
                     Unit target = SelectTarget(SelectTargetMethod.Random, 0);
-                    if (target)
+                    if (target != null)
                         AttackStart(target);
                     instance.SetData(MCMiscConst.DataRagnarosAdds, 0);
 

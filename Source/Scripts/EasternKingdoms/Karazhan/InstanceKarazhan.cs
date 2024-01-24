@@ -175,7 +175,7 @@ namespace Scripts.EasternKingdoms.Karazhan
             public override void OnUnitDeath(Unit unit)
             {
                 Creature creature = unit.ToCreature();
-                if (!creature)
+                if (creature == null)
                     return;
 
                 switch (creature.GetEntry())
@@ -239,7 +239,7 @@ namespace Scripts.EasternKingdoms.Karazhan
                             HandleGameObject(StageDoorLeftGUID, true);
                             HandleGameObject(StageDoorRightGUID, true);
                             GameObject sideEntrance = instance.GetGameObject(SideEntranceDoor);
-                            if (sideEntrance)
+                            if (sideEntrance != null)
                                 sideEntrance.RemoveFlag(GameObjectFlags.Locked);
                             UpdateEncounterStateForKilledCreature(16812, null);
                         }

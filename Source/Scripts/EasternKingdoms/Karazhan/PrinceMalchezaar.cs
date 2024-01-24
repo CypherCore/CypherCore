@@ -76,10 +76,10 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
         public override void KilledUnit(Unit who)
         {
             Unit unit = Global.ObjAccessor.GetUnit(me, Malchezaar);
-            if (unit)
+            if (unit != null)
             {
                 Creature creature = unit.ToCreature();
-                if (creature)
+                if (creature != null)
                     creature.GetAI().KilledUnit(who);
             }
         }
@@ -96,7 +96,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
                 {
                     Creature pMalchezaar = ObjectAccessor.GetCreature(me, Malchezaar);
 
-                    if (pMalchezaar && pMalchezaar.IsAlive())
+                    if (pMalchezaar != null && pMalchezaar.IsAlive())
                         pMalchezaar.GetAI<boss_malchezaar>().Cleanup(me, Point);
                 });
             }
@@ -104,7 +104,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
 
         public override void DamageTaken(Unit done_by, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
-            if (!done_by || done_by.GetGUID() != Malchezaar)
+            if (done_by == null || done_by.GetGUID() != Malchezaar)
                 damage = 0;
         }
     }
@@ -231,7 +231,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
             foreach (var guid in infernals)
             {
                 Unit pInfernal = Global.ObjAccessor.GetUnit(me, guid);
-                if (pInfernal && pInfernal.IsAlive())
+                if (pInfernal != null && pInfernal.IsAlive())
                 {
                     pInfernal.SetVisible(false);
                     pInfernal.SetDeathState(DeathState.JustDied);
@@ -246,7 +246,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
             for (byte i = 0; i < 2; ++i)
             {
                 Unit axe = Global.ObjAccessor.GetUnit(me, axes[i]);
-                if (axe && axe.IsAlive())
+                if (axe != null && axe.IsAlive())
                     axe.KillSelf();
                 axes[i].Clear();
             }
@@ -283,7 +283,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
             uint i = 0;
             foreach (var target in targets)
             {
-                if (target)
+                if (target != null)
                 {
                     enfeeble_targets[i] = target.GetGUID();
                     enfeeble_health[i] = target.GetHealth();
@@ -303,7 +303,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
             for (byte i = 0; i < 5; ++i)
             {
                 Unit target = Global.ObjAccessor.GetUnit(me, enfeeble_targets[i]);
-                if (target && target.IsAlive())
+                if (target != null && target.IsAlive())
                     target.SetHealth(enfeeble_health[i]);
                 enfeeble_targets[i].Clear();
                 enfeeble_health[i] = 0;
@@ -324,7 +324,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
 
             Creature infernal = me.SummonCreature(MiscConst.NetherspiteInfernal, pos, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(3));
 
-            if (infernal)
+            if (infernal != null)
             {
                 infernal.SetDisplayId(MiscConst.InfernalModelInvisible);
                 infernal.SetFaction(me.GetFaction());
@@ -354,7 +354,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
             if (me.HasUnitState(UnitState.Stunned))      // While shifting to phase 2 malchezaar stuns himself
                 return;
 
-            if (me.GetVictim() && me.GetTarget() != me.GetVictim().GetGUID())
+            if (me.GetVictim() != null && me.GetTarget() != me.GetVictim().GetGUID())
                 me.SetTarget(me.GetVictim().GetGUID());
 
             if (phase == 1)
@@ -400,12 +400,12 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
                     for (byte i = 0; i < 2; ++i)
                     {
                         Creature axe = me.SummonCreature(MiscConst.MalchezarsAxe, me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), 0, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(1));
-                        if (axe)
+                        if (axe != null)
                         {
                             axe.SetUninteractible(true);
                             axe.SetFaction(me.GetFaction());
                             axes[i] = axe.GetGUID();
-                            if (target)
+                            if (target != null)
                             {
                                 axe.GetAI().AttackStart(target);
                                 AddThreat(target, 10000000.0f, axe);
@@ -440,14 +440,14 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
                     AxesTargetSwitchTimer = RandomHelper.URand(7500, 20000);
 
                     Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
-                    if (target)
+                    if (target != null)
                     {
                         for (byte i = 0; i < 2; ++i)
                         {
                             Unit axe = Global.ObjAccessor.GetUnit(me, axes[i]);
-                            if (axe)
+                            if (axe != null)
                             {
-                                if (axe.GetVictim())
+                                if (axe.GetVictim() != null)
                                     ResetThreat(axe.GetVictim(), axe);
                                 AddThreat(target, 1000000.0f, axe);
                             }
@@ -459,7 +459,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
                 if (AmplifyDamageTimer <= diff)
                 {
                     Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
-                    if (target)
+                    if (target != null)
                         DoCast(target, SpellIds.AmplifyDamage);
                     AmplifyDamageTimer = RandomHelper.URand(20000, 30000);
                 }
@@ -491,7 +491,7 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
                     else                                          // anyone but the tank
                         target = SelectTarget(SelectTargetMethod.Random, 1, 100, true);
 
-                    if (target)
+                    if (target != null)
                         DoCast(target, SpellIds.SwPain);
 
                     SWPainTimer = 20000;
@@ -522,13 +522,13 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
             if (me.IsWithinMeleeRange(me.GetVictim()) && !me.IsNonMeleeSpellCast(false))
             {
                 //Check for base attack
-                if (me.IsAttackReady() && me.GetVictim())
+                if (me.IsAttackReady() && me.GetVictim() != null)
                 {
                     me.AttackerStateUpdate(me.GetVictim());
                     me.ResetAttackTimer();
                 }
                 //Check for offhand attack
-                if (me.IsAttackReady(WeaponAttackType.OffAttack) && me.GetVictim())
+                if (me.IsAttackReady(WeaponAttackType.OffAttack) && me.GetVictim() != null)
                 {
                     me.AttackerStateUpdate(me.GetVictim(), WeaponAttackType.OffAttack);
                     me.ResetAttackTimer(WeaponAttackType.OffAttack);
