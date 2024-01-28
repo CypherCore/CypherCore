@@ -679,7 +679,7 @@ namespace Scripts.World.GameObjects
                     _rings = 12;
                 }
 
-                // Dwarf hourly horn should only play a Math.Single time, each time the next hour begins.
+                // Dwarf hourly horn should only play a Single time, each time the next hour begins.
                 if (_soundId == BellHourlyConst.Belltolldwarfgnome)
                 {
                     _rings = 1;
