@@ -1265,13 +1265,13 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(TotalTime);
-            _worldPacket.WriteUInt32(TimeLeft);
+            _worldPacket.WriteInt64(TotalTime);
+            _worldPacket.WriteInt64(TimeLeft);
             _worldPacket.WriteInt32((int)Type);
         }
 
-        public uint TotalTime;
-        public uint TimeLeft;
+        public long TotalTime;
+        public long TimeLeft;
         public TimerType Type;
     }
 
