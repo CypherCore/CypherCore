@@ -1654,10 +1654,6 @@ namespace Game.Entities
                         continue;
                 }
 
-                // AcquireMethod == 2 && NumSkillUps == 1 -. automatically learn riding skill spell, else we skip it (client shows riding in spellbook as trainable).
-                if (skillId == (uint)SkillType.Riding && (ability.AcquireMethod != AbilityLearnType.OnSkillLearn || ability.NumSkillUps != 1))
-                    continue;
-
                 // Check race if set
                 var raceMask = new RaceMask<long>(ability.RaceMask);
                 if (!raceMask.IsEmpty() && !raceMask.HasRace(race))
@@ -1667,8 +1663,18 @@ namespace Game.Entities
                 if (ability.ClassMask != 0 && !Convert.ToBoolean(ability.ClassMask & classMask))
                     continue;
 
-                // check level, skip class spells if not high enough
-                if (GetLevel() < spellInfo.SpellLevel)
+                // Check level, skip class spells if not high enough
+                uint requiredLevel = Math.Max(spellInfo.SpellLevel, spellInfo.BaseLevel);
+
+                // riding special cases
+                if (skillId == (uint)SkillType.Riding)
+                {
+                    if ((GetClassMask() & ((1 << ((int)Class.Deathknight - 1)) | (1 << ((int)Class.DemonHunter - 1)))) != 0
+                        && (ability.Spell == PlayerConst.SpellApprenticeRiding || ability.Spell == PlayerConst.SpellJourneymanRiding))
+                        requiredLevel = 0;
+                }
+
+                if (requiredLevel > GetLevel())
                     continue;
 
                 // need unlearn spell

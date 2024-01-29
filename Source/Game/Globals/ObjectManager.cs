@@ -6083,11 +6083,11 @@ namespace Game
                         var raceMask = new RaceMask<long>(rcInfo.RaceMask);
                         for (Race raceIndex = Race.Human; raceIndex < Race.Max; ++raceIndex)
                         {
-                            if (raceMask.HasRace(raceIndex))
+                            if (raceMask.IsEmpty() || raceMask.HasRace(raceIndex))
                             {
                                 for (Class classIndex = Class.Warrior; classIndex < Class.Max; ++classIndex)
                                 {
-                                    if (rcInfo.ClassMask == -1 || Convert.ToBoolean((1 << ((int)classIndex - 1)) & rcInfo.ClassMask))
+                                    if (rcInfo.ClassMask == -1 || rcInfo.ClassMask == 0 || Convert.ToBoolean((1 << ((int)classIndex - 1)) & rcInfo.ClassMask))
                                     {
                                         PlayerInfo info = _playerInfo.LookupByKey(Tuple.Create(raceIndex, classIndex));
                                         if (info != null)
