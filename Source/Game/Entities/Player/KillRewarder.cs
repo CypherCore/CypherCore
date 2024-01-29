@@ -84,13 +84,6 @@ namespace Game.Entities
             Creature victim = _victim.ToCreature();
             if (victim != null)
             {
-                if (victim.IsDungeonBoss())
-                {
-                    InstanceScript instance = _victim.GetInstanceScript();
-                    if (instance != null)
-                        instance.UpdateEncounterStateForKilledCreature(_victim.GetEntry(), _victim);
-                }
-
                 if (!_killers.Empty())
                 {
                     uint guildId = victim.GetMap().GetOwnerGuildId();

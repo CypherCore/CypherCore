@@ -543,7 +543,7 @@ namespace Framework.Constants
         Unused25 = 0x2000000,
         Unused26 = 0x4000000,
         Unused27 = 0x8000000,
-        DungeonBoss = 0x10000000,        // Creature Is A Dungeon Boss (Set Dynamically, Do Not Add In Db)
+        DungeonBoss = 0x10000000,        // Creature Is A Dungeon Boss
         IgnorePathfinding = 0x20000000,        // creature ignore pathfinding
         ImmunityKnockback = 0x40000000,        // creature is immune to knockback effects
         Unused31 = 0x80000000,

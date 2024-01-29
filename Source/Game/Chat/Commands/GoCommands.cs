@@ -41,8 +41,6 @@ namespace Game.Chat.Commands
             foreach (var pair in Global.ObjectMgr.GetCreatureTemplates())
             {
                 CreatureTemplate data = pair.Value;
-                if (!data.FlagsExtra.HasFlag(CreatureFlagsExtra.DungeonBoss))
-                    continue;
 
                 uint count = 0;
                 string scriptName = Global.ObjectMgr.GetScriptName(data.ScriptID);

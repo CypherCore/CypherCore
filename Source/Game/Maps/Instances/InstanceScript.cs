@@ -385,6 +385,8 @@ namespace Game.Maps
                                 SendBossKillCredit(dungeonEncounter.Id);
                                 if (dungeonEncounter.CompleteWorldStateID != 0)
                                     DoUpdateWorldState((uint)dungeonEncounter.CompleteWorldStateID, 1);
+
+                                UpdateLfgEncounterState(bossInfo);
                             }
 
                             instance.DoOnPlayers(player => player.AtEndOfEncounter(EncounterType.DungeonEncounter));
@@ -796,53 +798,18 @@ namespace Game.Maps
             instance.SendToPlayers(bossKillCreditMessage);
         }
 
-        public void UpdateEncounterStateForKilledCreature(uint creatureId, Unit source)
+        void UpdateLfgEncounterState(BossInfo bossInfo)
         {
-            UpdateEncounterState(EncounterCreditType.KillCreature, creatureId, source);
-        }
-
-        public void UpdateEncounterStateForSpellCast(uint spellId, Unit source)
-        {
-            UpdateEncounterState(EncounterCreditType.CastSpell, spellId, source);
-        }
-
-        void UpdateEncounterState(EncounterCreditType type, uint creditEntry, Unit source)
-        {
-            var encounters = Global.ObjectMgr.GetDungeonEncounterList(instance.GetId(), instance.GetDifficultyID());
-            if (encounters.Empty())
-                return;
-
-            uint dungeonId = 0;
-
-            foreach (var encounter in encounters)
+            foreach (var player in instance.GetPlayers())
             {
-                if (encounter.creditType == type && encounter.creditEntry == creditEntry)
-                {
-                    if (encounter.dbcEntry.CompleteWorldStateID != 0)
-                        DoUpdateWorldState((uint)encounter.dbcEntry.CompleteWorldStateID, 1);
-
-                    if (encounter.lastEncounterDungeon != 0)
-                    {
-                        dungeonId = encounter.lastEncounterDungeon;
-                        Log.outDebug(LogFilter.Lfg, "UpdateEncounterState: Instance {0} (instanceId {1}) completed encounter {2}. Credit Dungeon: {3}",
-                            instance.GetMapName(), instance.GetInstanceId(), encounter.dbcEntry.Name[Global.WorldMgr.GetDefaultDbcLocale()], dungeonId);
-                        break;
-                    }
-                }
-            }
-
-            if (dungeonId != 0)
-            {
-                var players = instance.GetPlayers();
-                foreach (var player in players)
+                if (player != null)
                 {
                     Group grp = player.GetGroup();
-                    if (grp != null)
-                        if (grp.IsLFGGroup())
-                        {
-                            Global.LFGMgr.FinishDungeon(grp.GetGUID(), dungeonId, instance);
-                            return;
-                        }
+                    if (grp != null && grp.IsLFGGroup())
+                    {
+                        Global.LFGMgr.OnDungeonEncounterDone(grp.GetGUID(), bossInfo.DungeonEncounters.Select(entry => entry.Id).ToArray(), instance);
+                        break;
+                    }
                 }
             }
         }

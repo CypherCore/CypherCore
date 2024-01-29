@@ -743,9 +743,6 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading LFG entrance positions..."); // Must be after areatriggers
             Global.LFGMgr.LoadLFGDungeons();
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading Dungeon boss data...");
-            Global.ObjectMgr.LoadInstanceEncounters();
-
             Log.outInfo(LogFilter.ServerLoading, "Loading LFG rewards...");
             Global.LFGMgr.LoadRewards();
 

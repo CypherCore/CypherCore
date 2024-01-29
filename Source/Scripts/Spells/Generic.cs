@@ -1339,35 +1339,6 @@ namespace Scripts.Spells.Generic
         }
     }
 
-    [Script]
-    class spell_gen_dungeon_credit : SpellScript
-    {
-        public override bool Load()
-        {
-            return GetCaster().GetTypeId() == TypeId.Unit;
-        }
-
-        void CreditEncounter()
-        {
-            // This hook is executed for every target, make sure we only credit instance once
-            if (_handled)
-                return;
-
-            _handled = true;
-            Unit caster = GetCaster();
-            InstanceScript instance = caster.GetInstanceScript();
-            if (instance != null)
-                instance.UpdateEncounterStateForSpellCast(GetSpellInfo().Id, caster);
-        }
-
-        public override void Register()
-        {
-            AfterHit.Add(new(CreditEncounter));
-        }
-
-        bool _handled = false;
-    }
-
     [Script] // 50051 - Ethereal Pet Aura
     class spell_ethereal_pet_AuraScript : AuraScript
     {

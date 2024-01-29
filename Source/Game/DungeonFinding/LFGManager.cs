@@ -1335,6 +1335,35 @@ namespace Game.DungeonFinding
             Log.outDebug(LogFilter.Lfg, "TeleportPlayer: Player {0} is being teleported in to map {1} (x: {2}, y: {3}, z: {4}) Result: {5}", player.GetName(), dungeon.map, dungeon.x, dungeon.y, dungeon.z, error);
         }
 
+        /// <summary>
+        /// Check if dungeon can be rewarded, if any.
+        /// </summary>
+        /// <param name="gguid">Group guid</param>
+        /// <param name="dungeonEncounterIds">DungeonEncounter that was just completed</param>
+        /// <param name="currMap">Map of the instance where encounter was completed</param>
+        public void OnDungeonEncounterDone(ObjectGuid gguid, uint[] dungeonEncounterIds, Map currMap)
+        {
+            if (GetState(gguid) == LfgState.FinishedDungeon) // Shouldn't happen. Do not reward multiple times
+            {
+                Log.outDebug(LogFilter.Lfg, $"Group: {gguid} already rewarded");
+                return;
+            }
+
+            uint gDungeonId = GetDungeon(gguid);
+            LFGDungeonData dungeonDone = GetLFGDungeon(gDungeonId);
+            // LFGDungeons can point to a DungeonEncounter from any difficulty so we need this kind of lenient check
+            if (!dungeonEncounterIds.Contains(dungeonDone.finalDungeonEncounterId))
+                return;
+
+            FinishDungeon(gguid, gDungeonId, currMap);
+        }
+
+        /// <summary>
+        /// Finish a dungeon and give reward, if any.
+        /// </summary>
+        /// <param name="gguid">Group guid</param>
+        /// <param name="dungeonId">Dungeonid</param>
+        /// <param name="currMap">Map of the instance where encounter was completed</param>
         public void FinishDungeon(ObjectGuid gguid, uint dungeonId, Map currMap)
         {
             uint gDungeonId = GetDungeon(gguid);
@@ -2289,6 +2318,10 @@ namespace Game.DungeonFinding
             contentTuningId = dbc.ContentTuningID;
             difficulty = dbc.DifficultyID;
             seasonal = dbc.Flags[0].HasAnyFlag(LfgFlags.Seasonal);
+
+            var journalEncounter = CliDB.JournalEncounterStorage.LookupByKey(dbc.FinalEncounterID);
+            if (journalEncounter != null)
+                finalDungeonEncounterId = journalEncounter.DungeonEncounterID;
         }
 
         public uint id;
@@ -2302,6 +2335,7 @@ namespace Game.DungeonFinding
         public bool seasonal;
         public float x, y, z, o;
         public ushort requiredItemLevel;
+        public uint finalDungeonEncounterId;
 
         // Helpers
         public uint Entry() { return (uint)(id + ((int)type << 24)); }

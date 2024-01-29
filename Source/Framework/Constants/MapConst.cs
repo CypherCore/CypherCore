@@ -151,12 +151,6 @@ namespace Framework.Constants
         ToBeDecided = 5
     }
 
-    public enum EncounterCreditType
-    {
-        KillCreature = 0,
-        CastSpell = 1
-    }
-
     public enum DoorType
     {
         Room = 0,    // Door can open if encounter is not in progress
