@@ -617,7 +617,8 @@ namespace Game.Achievements
                 criteriaUpdate.Progress.TimeFromCreate = 0;
                 SendPacket(criteriaUpdate);
             }
-            else
+
+            if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.Player))
             {
                 CriteriaUpdate criteriaUpdate = new();
 
