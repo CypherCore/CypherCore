@@ -3379,6 +3379,9 @@ namespace Game.Spells
             if (spellInfo.HasAttribute(SpellAttr4.AuraIsBuff))
                 return true;
 
+            if (effect.EffectAttributes.HasFlag(SpellEffectAttributes.IsHarmful))
+                return false;
+
             visited.Add(Tuple.Create(spellInfo, effect.EffectIndex));
 
             //We need scaling level info for some auras that compute bp 0 or positive but should be debuffs

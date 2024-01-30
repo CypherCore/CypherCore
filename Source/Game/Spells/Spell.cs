@@ -398,6 +398,7 @@ namespace Game.Spells
                             spellEffectInfo.ImplicitTargetConditions == effects[j].ImplicitTargetConditions &&
                             spellEffectInfo.CalcRadius(m_caster, SpellTargetIndex.TargetA) == effects[j].CalcRadius(m_caster, SpellTargetIndex.TargetA) &&
                             spellEffectInfo.CalcRadius(m_caster, SpellTargetIndex.TargetB) == effects[j].CalcRadius(m_caster, SpellTargetIndex.TargetB) &&
+                            spellEffectInfo.EffectAttributes.HasFlag(SpellEffectAttributes.PlayersOnly) == effects[j].EffectAttributes.HasFlag(SpellEffectAttributes.PlayersOnly) &&
                             CheckScriptEffectImplicitTargets(spellEffectInfo.EffectIndex, (uint)j))
                         {
                             effectMask |= 1u << j;
@@ -658,7 +659,7 @@ namespace Game.Spells
                 }
             }
 
-            WorldObject target = SearchNearbyTarget(range, targetType.GetObjectType(), targetType.GetCheckType(), condList);
+            WorldObject target = SearchNearbyTarget(spellEffectInfo, range, targetType.GetObjectType(), targetType.GetCheckType(), condList);
             float randomRadius = 0.0f;
             switch (targetType.GetTarget())
             {
@@ -782,7 +783,7 @@ namespace Game.Spells
             var condList = spellEffectInfo.ImplicitTargetConditions;
             float radius = spellEffectInfo.CalcRadius(m_caster, targetIndex) * m_spellValue.RadiusMod;
 
-            GridMapTypeMask containerTypeMask = GetSearcherTypeMask(objectType, condList);
+            GridMapTypeMask containerTypeMask = GetSearcherTypeMask(m_spellInfo, spellEffectInfo, objectType, condList);
             if (containerTypeMask != 0)
             {
                 float extraSearchRadius = radius > 0.0f ? SharedConst.ExtraCellSearchRadius : 0.0f;
@@ -892,15 +893,15 @@ namespace Game.Spells
                         if (!m_caster.IsUnit() || !m_caster.ToUnit().IsInRaidWith(targetedUnit))
                             targets.Add(m_targets.GetUnitTarget());
                         else
-                            SearchAreaTargets(targets, radius, targetedUnit, referer, targetType.GetObjectType(), targetType.GetCheckType(), spellEffectInfo.ImplicitTargetConditions);
+                            SearchAreaTargets(targets, spellEffectInfo, radius, targetedUnit, referer, targetType.GetObjectType(), targetType.GetCheckType(), spellEffectInfo.ImplicitTargetConditions);
                     }
                     break;
                 case Targets.UnitCasterAndSummons:
                     targets.Add(m_caster);
-                    SearchAreaTargets(targets, radius, center, referer, targetType.GetObjectType(), targetType.GetCheckType(), spellEffectInfo.ImplicitTargetConditions);
+                    SearchAreaTargets(targets, spellEffectInfo, radius, center, referer, targetType.GetObjectType(), targetType.GetCheckType(), spellEffectInfo.ImplicitTargetConditions);
                     break;
                 default:
-                    SearchAreaTargets(targets, radius, center, referer, targetType.GetObjectType(), targetType.GetCheckType(), spellEffectInfo.ImplicitTargetConditions);
+                    SearchAreaTargets(targets, spellEffectInfo, radius, center, referer, targetType.GetObjectType(), targetType.GetCheckType(), spellEffectInfo.ImplicitTargetConditions);
                     break;
             }
 
@@ -1484,7 +1485,7 @@ namespace Game.Spells
             var condList = spellEffectInfo.ImplicitTargetConditions;
             float radius = spellEffectInfo.CalcRadius(m_caster, targetIndex) * m_spellValue.RadiusMod;
 
-            GridMapTypeMask containerTypeMask = GetSearcherTypeMask(objectType, condList);
+            GridMapTypeMask containerTypeMask = GetSearcherTypeMask(m_spellInfo, spellEffectInfo, objectType, condList);
             if (containerTypeMask != 0)
             {
                 WorldObjectSpellLineTargetCheck check = new(m_caster, dst, m_spellInfo.Width != 0 ? m_spellInfo.Width : m_caster.GetCombatReach(), radius, m_caster, m_spellInfo, selectionType, condList, objectType);
@@ -1625,7 +1626,7 @@ namespace Game.Spells
             }
         }
 
-        public GridMapTypeMask GetSearcherTypeMask(SpellTargetObjectTypes objType, List<Condition> condList)
+        public static GridMapTypeMask GetSearcherTypeMask(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, SpellTargetObjectTypes objType, List<Condition> condList)
         {
             // this function selects which containers need to be searched for spell target
             GridMapTypeMask retMask = GridMapTypeMask.All;
@@ -1650,11 +1651,11 @@ namespace Game.Spells
                     break;
             }
 
-            if (m_spellInfo.HasAttribute(SpellAttr3.OnlyOnPlayer))
+            if (spellInfo.HasAttribute(SpellAttr3.OnlyOnPlayer) || spellEffectInfo.EffectAttributes.HasFlag(SpellEffectAttributes.PlayersOnly))
                 retMask &= GridMapTypeMask.Corpse | GridMapTypeMask.Player;
-            if (m_spellInfo.HasAttribute(SpellAttr3.OnlyOnGhosts))
+            if (spellInfo.HasAttribute(SpellAttr3.OnlyOnGhosts))
                 retMask &= GridMapTypeMask.Player;
-            if (m_spellInfo.HasAttribute(SpellAttr5.NotOnPlayer))
+            if (spellInfo.HasAttribute(SpellAttr5.NotOnPlayer))
                 retMask &= ~GridMapTypeMask.Player;
 
             if (condList != null)
@@ -1662,7 +1663,7 @@ namespace Game.Spells
             return retMask;
         }
 
-        void SearchTargets(Notifier notifier, GridMapTypeMask containerMask, WorldObject referer, Position pos, float radius)
+        public static void SearchTargets(Notifier notifier, GridMapTypeMask containerMask, WorldObject referer, Position pos, float radius)
         {
             if (containerMask == 0)
                 return;
@@ -1688,20 +1689,21 @@ namespace Game.Spells
             }
         }
 
-        WorldObject SearchNearbyTarget(float range, SpellTargetObjectTypes objectType, SpellTargetCheckTypes selectionType, List<Condition> condList)
+        WorldObject SearchNearbyTarget(SpellEffectInfo spellEffectInfo, float range, SpellTargetObjectTypes objectType, SpellTargetCheckTypes selectionType, List<Condition> condList)
         {
-            GridMapTypeMask containerTypeMask = GetSearcherTypeMask(objectType, condList);
+            GridMapTypeMask containerTypeMask = GetSearcherTypeMask(m_spellInfo, spellEffectInfo, objectType, condList);
             if (containerTypeMask == 0)
                 return null;
+
             var check = new WorldObjectSpellNearbyTargetCheck(range, m_caster, m_spellInfo, selectionType, condList, objectType);
             var searcher = new WorldObjectLastSearcher(m_caster, check, containerTypeMask);
             SearchTargets(searcher, containerTypeMask, m_caster, m_caster.GetPosition(), range);
             return searcher.GetTarget();
         }
 
-        void SearchAreaTargets(List<WorldObject> targets, float range, Position position, WorldObject referer, SpellTargetObjectTypes objectType, SpellTargetCheckTypes selectionType, List<Condition> condList)
+        void SearchAreaTargets(List<WorldObject> targets, SpellEffectInfo spellEffectInfo, float range, Position position, WorldObject referer, SpellTargetObjectTypes objectType, SpellTargetCheckTypes selectionType, List<Condition> condList)
         {
-            var containerTypeMask = GetSearcherTypeMask(objectType, condList);
+            var containerTypeMask = GetSearcherTypeMask(m_spellInfo, spellEffectInfo, objectType, condList);
             if (containerTypeMask == 0)
                 return;
 
@@ -1750,7 +1752,7 @@ namespace Game.Spells
 
             WorldObject chainSource = m_spellInfo.HasAttribute(SpellAttr2.ChainFromCaster) ? m_caster : target;
             List<WorldObject> tempTargets = new();
-            SearchAreaTargets(tempTargets, searchRadius, chainSource, m_caster, objectType, selectType, spellEffectInfo.ImplicitTargetConditions);
+            SearchAreaTargets(tempTargets, spellEffectInfo, searchRadius, chainSource, m_caster, objectType, selectType, spellEffectInfo.ImplicitTargetConditions);
             tempTargets.Remove(target);
 
             // remove targets which are always invalid for chain spells
@@ -1761,7 +1763,7 @@ namespace Game.Spells
             while (chainTargets != 0)
             {
                 // try to get unit for next chain jump
-                WorldObject found = null;
+                WorldObject foundObj = null;
                 // get unit with highest hp deficit in dist
                 if (isChainHeal)
                 {
@@ -1772,9 +1774,9 @@ namespace Game.Spells
                         if (unitTarget != null)
                         {
                             uint deficit = (uint)(unitTarget.GetMaxHealth() - unitTarget.GetHealth());
-                            if ((deficit > maxHPDeficit || found == null) && chainSource.IsWithinDist(unitTarget, jumpRadius) && IsWithinLOS(chainSource, unitTarget, false, ModelIgnoreFlags.M2))
+                            if ((deficit > maxHPDeficit || foundObj == null) && chainSource.IsWithinDist(unitTarget, jumpRadius) && IsWithinLOS(chainSource, unitTarget, false, ModelIgnoreFlags.M2))
                             {
-                                found = obj;
+                                foundObj = obj;
                                 maxHPDeficit = deficit;
                             }
                         }
@@ -1785,24 +1787,28 @@ namespace Game.Spells
                 {
                     foreach (var obj in tempTargets)
                     {
-                        if (found == null)
-                        {
-                            if (chainSource.IsWithinDist(obj, jumpRadius) && IsWithinLOS(chainSource, obj, false, ModelIgnoreFlags.M2))
-                                found = obj;
-                        }
-                        else if (chainSource.GetDistanceOrder(obj, found) && IsWithinLOS(chainSource, obj, false, ModelIgnoreFlags.M2))
-                            found = obj;
+                        bool isBestDistanceMatch = foundObj != null ? chainSource.GetDistanceOrder(obj, foundObj) : chainSource.IsWithinDist(obj, jumpRadius);
+                        if (!isBestDistanceMatch)
+                            continue;
+
+                        if (!IsWithinLOS(chainSource, obj, false, ModelIgnoreFlags.M2))
+                            continue;
+
+                        if (spellEffectInfo.EffectAttributes.HasFlag(SpellEffectAttributes.EnforceLineOfSightToChainTargets) && !IsWithinLOS(m_caster, obj, false, ModelIgnoreFlags.M2))
+                            continue;
+
+                        foundObj = obj;
                     }
                 }
                 // not found any valid target - chain ends
-                if (found == null)
+                if (foundObj == null)
                     break;
 
                 if (!m_spellInfo.HasAttribute(SpellAttr2.ChainFromCaster) && !spellEffectInfo.EffectAttributes.HasFlag(SpellEffectAttributes.ChainFromInitialTarget))
-                    chainSource = found;
+                    chainSource = foundObj;
 
-                targets.Add(found);
-                tempTargets.Remove(found);
+                targets.Add(foundObj);
+                tempTargets.Remove(foundObj);
                 --chainTargets;
             }
         }
@@ -7118,7 +7124,7 @@ namespace Game.Spells
                 }
                 default:
                 {
-                    if (losPosition == null || m_spellInfo.HasAttribute(SpellAttr5.AlwaysAoeLineOfSight))
+                    if (losPosition == null || m_spellInfo.HasAttribute(SpellAttr5.AlwaysAoeLineOfSight) || spellEffectInfo.EffectAttributes.HasFlag(SpellEffectAttributes.AlwaysAoeLineOfSight))
                     {
                         // Get GO cast coordinates if original caster . GO
                         WorldObject caster = null;

@@ -116,7 +116,7 @@ namespace Game.Spells
             }
 
             GetBase().CallScriptEffectCalcAmountHandlers(this, ref amount, ref m_canBeRecalculated);
-            if (!GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack))
+            if (!GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.SuppressPointsStacking))
                 amount *= GetBase().GetStackAmount();
 
             _estimatedAmount = CalculateEstimatedAmount(caster, amount);
@@ -126,7 +126,7 @@ namespace Game.Spells
 
         public static float? CalculateEstimatedAmount(Unit caster, Unit target, SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, int amount, byte stack, AuraEffect aurEff)
         {
-            uint stackAmountForBonuses = !spellEffectInfo.EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack) ? stack : 1u;
+            uint stackAmountForBonuses = !spellEffectInfo.EffectAttributes.HasFlag(SpellEffectAttributes.SuppressPointsStacking) ? stack : 1u;
 
             switch (spellEffectInfo.ApplyAuraName)
             {
@@ -5057,7 +5057,7 @@ namespace Game.Spells
 
             CleanDamage cleanDamage = new(0, 0, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
 
-            uint stackAmountForBonuses = !GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack) ? GetBase().GetStackAmount() : 1u;
+            uint stackAmountForBonuses = !GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.SuppressPointsStacking) ? GetBase().GetStackAmount() : 1u;
 
             // ignore non positive values (can be result apply spellmods to aura damage
             uint damage = (uint)Math.Max(GetAmount(), 0);
@@ -5184,7 +5184,7 @@ namespace Game.Spells
 
             CleanDamage cleanDamage = new(0, 0, GetSpellInfo().GetAttackType(), MeleeHitOutcome.Normal);
 
-            uint stackAmountForBonuses = !GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack) ? GetBase().GetStackAmount() : 1u;
+            uint stackAmountForBonuses = !GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.SuppressPointsStacking) ? GetBase().GetStackAmount() : 1u;
 
             // ignore negative values (can be result apply spellmods to aura damage
             uint damage = (uint)Math.Max(GetAmount(), 0);
@@ -5311,7 +5311,7 @@ namespace Game.Spells
             if (GetBase().IsPermanent() && target.IsFullHealth())
                 return;
 
-            uint stackAmountForBonuses = !GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack) ? GetBase().GetStackAmount() : 1u;
+            uint stackAmountForBonuses = !GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.SuppressPointsStacking) ? GetBase().GetStackAmount() : 1u;
 
             // ignore negative values (can be result apply spellmods to aura damage
             uint damage = (uint)Math.Max(GetAmount(), 0);

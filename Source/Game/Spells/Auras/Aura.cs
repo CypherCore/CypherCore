@@ -2748,7 +2748,7 @@ namespace Game.Spells
                 if (GetUnitOwner().HasUnitState(UnitState.Isolated))
                     continue;
 
-                List<Unit> units = new();
+                List<WorldObject> units = new();
                 var condList = spellEffectInfo.ImplicitTargetConditions;
 
                 float radius = spellEffectInfo.CalcRadius(refe);
@@ -2804,20 +2804,25 @@ namespace Game.Spells
 
                 if (selectionType != SpellTargetCheckTypes.Default)
                 {
-                    WorldObjectSpellAreaTargetCheck check = new(radius, GetUnitOwner(), refe, GetUnitOwner(), GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
-                    UnitListSearcher searcher = new(GetUnitOwner(), units, check);
-                    Cell.VisitAllObjects(GetUnitOwner(), searcher, radius + extraSearchRadius);
+                    var containerTypeMask = Spell.GetSearcherTypeMask(GetSpellInfo(), spellEffectInfo, SpellTargetObjectTypes.Unit, condList);
+                    if (containerTypeMask != 0)
+                    {
+                        WorldObjectSpellAreaTargetCheck check = new(radius, GetUnitOwner(), refe, GetUnitOwner(), GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
+                        WorldObjectListSearcher searcher = new(GetUnitOwner(), units, check, containerTypeMask);
+                        searcher.i_phaseShift = PhasingHandler.GetAlwaysVisiblePhaseShift();
+                        Spell.SearchTargets(searcher, containerTypeMask, GetUnitOwner(), GetUnitOwner(), radius + extraSearchRadius);
 
-                    // by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for auras it is not acceptable
-                    units.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetUnitOwner()));
+                        // by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for auras it is not acceptable
+                        units.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetUnitOwner()));
+                    }
                 }
 
-                foreach (Unit unit in units)
+                foreach (WorldObject unit in units)
                 {
                     if (!targets.ContainsKey(unit))
-                        targets[unit] = 0;
+                        targets[unit.ToUnit()] = 0;
 
-                    targets[unit] |= 1u << (int)spellEffectInfo.EffectIndex;
+                    targets[unit.ToUnit()] |= 1u << (int)spellEffectInfo.EffectIndex;
                 }
             }
         }
