@@ -5484,7 +5484,7 @@ namespace Game.Entities
                 return null;
 
             // not unfriendly/hostile
-            if (creature.GetReactionTo(this) <= ReputationRank.Unfriendly)
+            if (!creature.HasUnitFlag2(UnitFlags2.InteractWhileHostile) && creature.GetReactionTo(this) <= ReputationRank.Unfriendly)
                 return null;
 
             // not too far, taken from CGGameUI::SetInteractTarget
