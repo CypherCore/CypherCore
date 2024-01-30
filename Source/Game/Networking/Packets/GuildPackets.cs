@@ -1075,7 +1075,7 @@ namespace Game.Networking.Packets
         {
             Banker = _worldPacket.ReadPackedGuid();
             BankTab = _worldPacket.ReadUInt8();
-            BankSlot = _worldPacket.ReadUInt8(); ;
+            BankSlot = _worldPacket.ReadUInt8();
             ContainerItemSlot = _worldPacket.ReadUInt8();
 
             if (_worldPacket.HasBit())
@@ -1097,7 +1097,7 @@ namespace Game.Networking.Packets
         {
             Banker = _worldPacket.ReadPackedGuid();
             BankTab = _worldPacket.ReadUInt8();
-            BankSlot = _worldPacket.ReadUInt8(); ;
+            BankSlot = _worldPacket.ReadUInt8();
             ContainerItemSlot = _worldPacket.ReadUInt8();
 
             if (_worldPacket.HasBit())
@@ -1119,7 +1119,7 @@ namespace Game.Networking.Packets
         {
             Banker = _worldPacket.ReadPackedGuid();
             BankTab = _worldPacket.ReadUInt8();
-            BankSlot = _worldPacket.ReadUInt8(); ;
+            BankSlot = _worldPacket.ReadUInt8();
             ContainerItemSlot = _worldPacket.ReadUInt8();
 
             if (_worldPacket.HasBit())
@@ -1179,7 +1179,7 @@ namespace Game.Networking.Packets
         {
             Banker = _worldPacket.ReadPackedGuid();
             BankTab = _worldPacket.ReadUInt8();
-            BankSlot = _worldPacket.ReadUInt8(); ;
+            BankSlot = _worldPacket.ReadUInt8();
             ContainerItemSlot = _worldPacket.ReadUInt8();
             StackCount = _worldPacket.ReadUInt32();
 
@@ -1203,7 +1203,7 @@ namespace Game.Networking.Packets
         {
             Banker = _worldPacket.ReadPackedGuid();
             BankTab = _worldPacket.ReadUInt8();
-            BankSlot = _worldPacket.ReadUInt8(); ;
+            BankSlot = _worldPacket.ReadUInt8();
             ContainerItemSlot = _worldPacket.ReadUInt8();
             StackCount = _worldPacket.ReadUInt32();
 
@@ -1227,7 +1227,7 @@ namespace Game.Networking.Packets
         {
             Banker = _worldPacket.ReadPackedGuid();
             BankTab = _worldPacket.ReadUInt8();
-            BankSlot = _worldPacket.ReadUInt8(); ;
+            BankSlot = _worldPacket.ReadUInt8();
             ContainerItemSlot = _worldPacket.ReadUInt8();
             StackCount = _worldPacket.ReadUInt32();
 
@@ -1251,7 +1251,7 @@ namespace Game.Networking.Packets
         {
             Banker = _worldPacket.ReadPackedGuid();
             BankTab = _worldPacket.ReadUInt8();
-            BankSlot = _worldPacket.ReadUInt8(); ;
+            BankSlot = _worldPacket.ReadUInt8();
             ContainerItemSlot = _worldPacket.ReadUInt8();
             StackCount = _worldPacket.ReadUInt32();
 

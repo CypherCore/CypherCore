@@ -1544,7 +1544,7 @@ namespace Game.Entities
                     SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.RangedAttackRoundBaseTime), (uint)(m_baseAttackSpeed[(int)att] * m_modAttackSpeedPct[(int)att]));
                     break;
                 default:
-                    break; ;
+                    break;
             }
         }
 

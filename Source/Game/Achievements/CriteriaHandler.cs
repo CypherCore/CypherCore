@@ -2009,7 +2009,7 @@ namespace Game.Achievements
                         if (followerBuilding == null)
                             return false;
 
-                        return followerBuilding.BuildingType == secondaryAsset && follower.HasAbility(reqValue); ;
+                        return followerBuilding.BuildingType == secondaryAsset && follower.HasAbility(reqValue);
                     });
 
                     if (followerCount < 1)
@@ -2032,7 +2032,7 @@ namespace Game.Achievements
                         if (followerBuilding == null)
                             return false;
 
-                        return followerBuilding.BuildingType == secondaryAsset && follower.HasAbility(reqValue); ;
+                        return followerBuilding.BuildingType == secondaryAsset && follower.HasAbility(reqValue);
                     });
 
                     if (followerCount < 1)
@@ -3297,7 +3297,7 @@ namespace Game.Achievements
                             break;
                         case 123: // Shadowlands Season 1 End
                                   // timestamp = unknown
-                            break; ;
+                            break;
                         case 149: // Shadowlands Season 2 End
                                   // timestamp = unknown
                             break;

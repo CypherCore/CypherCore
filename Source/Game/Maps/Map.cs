@@ -2591,7 +2591,7 @@ namespace Game.Maps
                     }
                     break;
                 case TypeId.GameObject:
-                    GameObject gameObject = obj.ToGameObject(); ;
+                    GameObject gameObject = obj.ToGameObject();
                     if (gameObject != null && gameObject.GetSpawnId() != 0)
                     {
                         respawnLocation = new();
