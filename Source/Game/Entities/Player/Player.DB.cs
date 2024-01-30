@@ -2558,6 +2558,8 @@ namespace Game.Entities
             stmt.AddValue(index++, m_unitData.RangedAttackPower);
             stmt.AddValue(index++, GetBaseSpellPowerBonus());
             stmt.AddValue(index, m_activePlayerData.CombatRatings[(int)CombatRating.ResiliencePlayerDamage]);
+            stmt.AddValue(index++, m_activePlayerData.Mastery);
+            stmt.AddValue(index++, m_activePlayerData.Versatility);
 
             trans.Append(stmt);
         }
