@@ -114,7 +114,7 @@ namespace Game.Chat
 
             if (!factionid.HasValue)
             {
-                handler.SendSysMessage(CypherStrings.CurrentFaction, target.GetGUID().ToString(), factionid.Value, flag.Value, npcflag.Value, dyflag.Value);
+                handler.SendSysMessage(CypherStrings.CurrentFaction, target.GetGUID().ToString(), target.GetFaction(), flag.Value, npcflag.Value, dyflag.Value);
                 return true;
             }
 
