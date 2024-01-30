@@ -2904,7 +2904,7 @@ namespace Game
             uint disallowedUnitFlags3 = (cInfo.UnitFlags3 & ~(uint)UnitFlags3.Allowed);
             if (disallowedUnitFlags3 != 0)
             {
-                Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags2` {disallowedUnitFlags3}, removing incorrect flag.");
+                Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags3` {disallowedUnitFlags3}, removing incorrect flag.");
                 cInfo.UnitFlags3 &= (uint)UnitFlags3.Allowed;
             }
 
@@ -3666,7 +3666,7 @@ namespace Game
                     uint disallowedUnitFlags3 = (data.unit_flags3.Value & ~(uint)UnitFlags3.Allowed);
                     if (disallowedUnitFlags3 != 0)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags2` {disallowedUnitFlags3}, removing incorrect flag.");
+                        Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags3` {disallowedUnitFlags3}, removing incorrect flag.");
                         data.unit_flags3 = data.unit_flags3 & (uint)UnitFlags3.Allowed;
                     }
                 }
