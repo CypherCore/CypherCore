@@ -86,7 +86,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Majordomo
 
                 if (me.FindNearestCreature(MCCreatureIds.FlamewakerHealer, 100.0f) == null && me.FindNearestCreature(MCCreatureIds.FlamewakerElite, 100.0f) == null)
                 {
-                    instance.UpdateEncounterStateForKilledCreature(me.GetEntry(), me);
                     me.SetFaction((uint)FactionTemplates.Friendly);
                     EnterEvadeMode();
                     Talk(TextIds.SayDefeat);
