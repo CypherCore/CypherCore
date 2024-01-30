@@ -2569,7 +2569,7 @@ namespace Game.Entities
                         if (CanCompleteQuest(questId, objective.Id))
                             CompleteQuest(questId);
                     }
-                    else if (!(objective.Flags.HasAnyFlag(QuestObjectiveFlags.Optional) && objectiveStatusData.QuestStatusPair.Status.Status == QuestStatus.Complete)
+                    else if (!objective.Flags.HasAnyFlag(QuestObjectiveFlags.Optional) && objectiveStatusData.QuestStatusPair.Status.Status == QuestStatus.Complete)
                         IncompleteQuest(questId);
                 }
             }
