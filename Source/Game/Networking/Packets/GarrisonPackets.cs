@@ -444,10 +444,10 @@ namespace Game.Networking.Packets
         public ulong DbID;
         public int MissionRecID;
         public long OfferTime;
-        public uint OfferDuration;
+        public long OfferDuration;
         public long StartTime = 2288912640;
-        public uint TravelDuration;
-        public uint MissionDuration;
+        public long TravelDuration;
+        public long MissionDuration;
         public int MissionState = 0;
         public int SuccessChance = 0;
         public uint Flags = 0;
@@ -462,10 +462,10 @@ namespace Game.Networking.Packets
             data.WriteUInt64(DbID);
             data.WriteInt32(MissionRecID);
             data.WriteInt64(OfferTime);
-            data.WriteUInt32(OfferDuration);
+            data.WriteInt64(OfferDuration);
             data.WriteInt64(StartTime);
-            data.WriteUInt32(TravelDuration);
-            data.WriteUInt32(MissionDuration);
+            data.WriteInt64(TravelDuration);
+            data.WriteInt64(MissionDuration);
             data.WriteInt32(MissionState);
             data.WriteInt32(SuccessChance);
             data.WriteUInt32(Flags);

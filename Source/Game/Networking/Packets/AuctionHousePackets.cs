@@ -489,7 +489,7 @@ namespace Game.Networking.Packets
     {
         public ulong? TotalPrice;
         public uint? Quantity;
-        public int? QuoteDuration;
+        public long? QuoteDuration;
         public int ItemID;
         public uint DesiredDelay;
 
@@ -510,7 +510,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt32(Quantity.Value);
 
             if (QuoteDuration.HasValue)
-                _worldPacket.WriteInt32(QuoteDuration.Value);
+                _worldPacket.WriteInt64(QuoteDuration.Value);
         }
     }
 

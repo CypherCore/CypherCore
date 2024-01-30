@@ -473,7 +473,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(MapID);
             _worldPacket.WriteUInt8((byte)State);
             _worldPacket.WriteInt64(StartTime);
-            _worldPacket.WriteInt32(Duration);
+            _worldPacket.WriteInt64(Duration);
             _worldPacket.WriteUInt8(ArenaFaction);
             _worldPacket.WriteUInt32(BattlemasterListID);
             _worldPacket.WriteBit(Registered);
@@ -488,7 +488,7 @@ namespace Game.Networking.Packets
         public uint MapID;
         public PVPMatchState State = PVPMatchState.Inactive;
         public long StartTime;
-        public int Duration;
+        public long Duration;
         public RatedMatchDeserterPenalty DeserterPenalty;
         public byte ArenaFaction;
         public uint BattlemasterListID;
@@ -518,7 +518,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt8(Winner);
-            _worldPacket.WriteInt32(Duration);
+            _worldPacket.WriteInt64(Duration);
             _worldPacket.WriteBit(LogData != null);
             _worldPacket.WriteBits(SoloShuffleStatus, 2);
             _worldPacket.FlushBits();
@@ -528,7 +528,7 @@ namespace Game.Networking.Packets
         }
 
         public byte Winner;
-        public int Duration;
+        public long Duration;
         public PVPMatchStatistics LogData;
         public uint SoloShuffleStatus;
     }

@@ -633,13 +633,13 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt8(PartyIndex);
             _worldPacket.WritePackedGuid(PartyGUID);
             _worldPacket.WritePackedGuid(InitiatorGUID);
-            _worldPacket.WriteUInt32(Duration);
+            _worldPacket.WriteInt64(Duration);
         }
 
         public sbyte PartyIndex;
         public ObjectGuid PartyGUID;
         public ObjectGuid InitiatorGUID;
-        public uint Duration;
+        public long Duration;
     }
 
     class ReadyCheckResponseClient : ClientPacket
