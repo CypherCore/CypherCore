@@ -1973,7 +1973,7 @@ namespace Framework.Constants
     public enum SpellEffectAttributes
     {
         None = 0,
-        NoImmunity = 0x01, /*NYI*/ // not cancelled by immunities
+        NoImmunity = 0x01,  // not cancelled by immunities
         PositionIsFacingRelative = 0x02, /*NYI*/
         JumpChargeUnitMeleeRange = 0x04, /*NYI*/
         JumpChargeUnitStrictPathCheck = 0x08, /*NYI*/

@@ -1373,6 +1373,9 @@ namespace Game.Entities
             if (spellInfo.HasAttribute(SpellAttr0.NoImmunities))
                 return false;
 
+            if (spellEffectInfo.EffectAttributes.HasFlag(SpellEffectAttributes.NoImmunity))
+                return false;
+
             bool hasImmunity(MultiMap<uint, uint> container, uint key)
             {
                 var range = container.LookupByKey(key);
@@ -1445,7 +1448,7 @@ namespace Game.Entities
             return false;
         }
 
-        public bool IsImmunedToDamage(SpellInfo spellInfo)
+        public bool IsImmunedToDamage(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo = null)
         {
             if (spellInfo == null)
                 return false;
@@ -1455,6 +1458,9 @@ namespace Game.Entities
                 return false;
 
             if (spellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) || spellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities))
+                return false;
+
+            if (spellEffectInfo != null && spellEffectInfo.EffectAttributes.HasFlag(SpellEffectAttributes.NoImmunity))
                 return false;
 
             uint schoolMask = (uint)spellInfo.GetSchoolMask();
