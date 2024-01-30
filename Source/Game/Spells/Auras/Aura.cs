@@ -817,7 +817,18 @@ namespace Game.Spells
         {
             m_maxDuration = CalcMaxDuration();
 
+            // Pandemic Mechanic
+            if (m_spellInfo.HasAttribute(SpellAttr13.PeriodicRefreshExtendsDuration))
+            {
+                // Pandemic doesn't reset periodic timer
+                resetPeriodicTimer = false;
+
+                int pandemicDuration = MathFunctions.CalculatePct(m_maxDuration, 30.0f);
+                m_maxDuration = Math.Max(GetDuration(), Math.Min(pandemicDuration, GetDuration()) + m_maxDuration);
+            }
+
             RefreshDuration();
+
             Unit caster = GetCaster();
             for (byte i = 0; i < SpellConst.MaxEffects; ++i)
             {
