@@ -3754,8 +3754,12 @@ namespace Game.Entities
 
             Player player = ToPlayer();
             if (player != null)
+            {
                 if (Global.ConditionMgr.IsSpellUsedInSpellClickConditions(aurApp.GetBase().GetId()))
                     player.UpdateVisibleGameobjectsOrSpellClicks();
+
+                player.FailCriteria(CriteriaFailEvent.LoseAura, aurApp.GetBase().GetId());
+            }
         }
 
         public void _UnapplyAura(AuraApplication aurApp, AuraRemoveMode removeMode)
@@ -3970,8 +3974,14 @@ namespace Game.Entities
 
             Player player = ToPlayer();
             if (player != null)
+            {
                 if (Global.ConditionMgr.IsSpellUsedInSpellClickConditions(aurApp.GetBase().GetId()))
-                    player.UpdateVisibleGameobjectsOrSpellClicks();
+                    player.UpdateVisibleGameobjectsOrSpellClicks(); 
+                
+                player.FailCriteria(CriteriaFailEvent.GainAura, aurApp.GetBase().GetId());
+                player.StartCriteria(CriteriaStartEvent.GainAura, aurApp.GetBase().GetId());
+                player.UpdateCriteria(CriteriaType.GainAura, aurApp.GetBase().GetId());
+            }
         }
 
         public void _AddAura(UnitAura aura, Unit caster)
@@ -4370,10 +4380,19 @@ namespace Game.Entities
         public void _RegisterAuraEffect(AuraEffect aurEff, bool apply)
         {
             if (apply)
+            {
                 m_modAuras.Add(aurEff.GetAuraType(), aurEff);
+                Player player = ToPlayer();
+                if (player != null)
+                {
+                    player.StartCriteria(CriteriaStartEvent.GainAuraEffect, (uint)aurEff.GetAuraType());
+                    player.FailCriteria(CriteriaFailEvent.GainAuraEffect, (uint)aurEff.GetAuraType());
+                }
+            }
             else
                 m_modAuras.Remove(aurEff.GetAuraType(), aurEff);
         }
+
         public float GetTotalAuraModValue(UnitMods unitMod)
         {
             if (unitMod >= UnitMods.End)

@@ -97,7 +97,15 @@ namespace Game.Scenarios
         {
             _currentstep = step;
             if (step != null)
+            {
                 SetStepState(step, ScenarioStepState.InProgress);
+                foreach (ObjectGuid guid in _players)
+                {
+                    Player player = Global.ObjAccessor.GetPlayer(_map, guid);
+                    if (player != null)
+                        player.StartCriteria(CriteriaStartEvent.BeginScenarioStep, step.Id);
+                }
+            }
 
             ScenarioState scenarioState = new();
             BuildScenarioState(scenarioState);

@@ -6,6 +6,7 @@ using Game.Achievements;
 using Game.DataStorage;
 using Game.Guilds;
 using Game.Scenarios;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Entities
@@ -36,20 +37,16 @@ namespace Game.Entities
         {
             return m_achievementSys.HasAchieved(achievementId);
         }
-        public void StartCriteriaTimer(CriteriaStartEvent startEvent, uint entry, uint timeLost = 0)
+
+        public void StartCriteria(CriteriaStartEvent startEvent, uint entry, TimeSpan timeLost = default)
         {
-            m_achievementSys.StartCriteriaTimer(startEvent, entry, timeLost);
+            m_achievementSys.StartCriteria(startEvent, entry, timeLost);
         }
 
-        public void RemoveCriteriaTimer(CriteriaStartEvent startEvent, uint entry)
+        public void FailCriteria(CriteriaFailEvent failEvent, uint failAsset)
         {
-            m_achievementSys.RemoveCriteriaTimer(startEvent, entry);
-        }
-
-        public void ResetCriteria(CriteriaFailEvent failEvent, uint failAsset, bool evenIfCriteriaComplete = false)
-        {
-            m_achievementSys.ResetCriteria(failEvent, failAsset, evenIfCriteriaComplete);
-            m_questObjectiveCriteriaMgr.ResetCriteria(failEvent, failAsset, evenIfCriteriaComplete);
+            m_achievementSys.FailCriteria(failEvent, failAsset);
+            m_questObjectiveCriteriaMgr.FailCriteria(failEvent, failAsset);
         }
 
         public void UpdateCriteria(CriteriaType type, ulong miscValue1 = 0, ulong miscValue2 = 0, ulong miscValue3 = 0, WorldObject refe = null)

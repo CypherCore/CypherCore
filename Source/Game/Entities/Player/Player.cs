@@ -416,7 +416,7 @@ namespace Game.Entities
                 }
             }
 
-            m_achievementSys.UpdateTimedCriteria(diff);
+            m_achievementSys.UpdateTimedCriteria(TimeSpan.FromMilliseconds(diff));
 
             if (HasUnitState(UnitState.MeleeAttacking) && !HasUnitState(UnitState.Casting | UnitState.Charging))
             {
@@ -662,7 +662,7 @@ namespace Game.Entities
                 UpdateCriteria(CriteriaType.DieInInstance, 1);
 
                 // reset all death criterias
-                ResetCriteria(CriteriaFailEvent.Death, 0);
+                FailCriteria(CriteriaFailEvent.Death, 0);
             }
 
             base.SetDeathState(s);
@@ -5365,6 +5365,7 @@ namespace Game.Entities
                 DB.Characters.CommitTransaction(trans);
             }
 
+            StartCriteria(CriteriaStartEvent.ReachLevel, level);
             UpdateCriteria(CriteriaType.ReachLevel);
             UpdateCriteria(CriteriaType.ActivelyReachLevel, level);
 

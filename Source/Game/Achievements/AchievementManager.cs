@@ -63,13 +63,6 @@ namespace Game.Achievements
                 return false;
             }
 
-            if (achievement.InstanceID != -1 && referencePlayer.GetMapId() != achievement.InstanceID)
-            {
-                Log.outTrace(LogFilter.Achievement, "CanUpdateCriteriaTree: (Id: {0} Type {1} Achievement {2}) Wrong map",
-                    criteria.Id, criteria.Entry.Type, achievement.Id);
-                return false;
-            }
-
             if ((achievement.Faction == AchievementFaction.Horde && referencePlayer.GetTeam() != Team.Horde) ||
                 (achievement.Faction == AchievementFaction.Alliance && referencePlayer.GetTeam() != Team.Alliance))
             {
@@ -356,40 +349,6 @@ namespace Game.Achievements
                     }
 
                     pair.Value.Changed = false;
-                }
-            }
-        }
-
-        public void ResetCriteria(CriteriaFailEvent failEvent, uint failAsset, bool evenIfCriteriaComplete)
-        {
-            Log.outDebug(LogFilter.Achievement, $"ResetAchievementCriteria({failEvent}, {failAsset}, {evenIfCriteriaComplete})");
-
-            // Disable for GameMasters with GM-mode enabled or for players that don't have the related RBAC permission
-            if (_owner.IsGameMaster() || _owner.GetSession().HasPermission(RBACPermissions.CannotEarnAchievements))
-                return;
-
-            var achievementCriteriaList = Global.CriteriaMgr.GetCriteriaByFailEvent(failEvent, (int)failAsset);
-            if (!achievementCriteriaList.Empty())
-            {
-                foreach (Criteria achievementCriteria in achievementCriteriaList)
-                {
-
-                    var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(achievementCriteria.Id);
-                    bool allComplete = true;
-                    foreach (CriteriaTree tree in trees)
-                    {
-                        // don't update already completed criteria if not forced or achievement already complete
-                        if (!(IsCompletedCriteriaTree(tree) && !evenIfCriteriaComplete) || !HasAchieved(tree.Achievement.Id))
-                        {
-                            allComplete = false;
-                            break;
-                        }
-                    }
-
-                    if (allComplete)
-                        continue;
-
-                    RemoveCriteriaProgress(achievementCriteria);
                 }
             }
         }

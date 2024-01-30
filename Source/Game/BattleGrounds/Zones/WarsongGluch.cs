@@ -439,7 +439,7 @@ namespace Game.BattleGrounds.Zones
                 //update world state to show correct flag carrier
                 UpdateFlagState(Team.Horde, WSGFlagState.OnPlayer);
                 player.CastSpell(player, WSGSpellId.SilverwingFlag, true);
-                player.StartCriteriaTimer(CriteriaStartEvent.BeSpellTarget, WSGSpellId.SilverwingFlagPicked);
+                //player.StartCriteria(CriteriaStartEvent.BeSpellTarget, WSGSpellId.SilverwingFlagPicked);
                 if (_flagState[1] == WSGFlagState.OnPlayer)
                     _bothFlagsKept = true;
 
@@ -461,7 +461,7 @@ namespace Game.BattleGrounds.Zones
                 //update world state to show correct flag carrier
                 UpdateFlagState(Team.Alliance, WSGFlagState.OnPlayer);
                 player.CastSpell(player, WSGSpellId.WarsongFlag, true);
-                player.StartCriteriaTimer(CriteriaStartEvent.BeSpellTarget, WSGSpellId.WarsongFlagPicked);
+                //player.StartCriteriaTimer(CriteriaStartEvent.BeSpellTarget, WSGSpellId.WarsongFlagPicked);
                 if (_flagState[0] == WSGFlagState.OnPlayer)
                     _bothFlagsKept = true;
 

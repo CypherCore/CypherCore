@@ -150,36 +150,6 @@ namespace Game
             }
         }
 
-        public void ResetCriteria(CriteriaFailEvent failEvent, uint failAsset, bool evenIfCriteriaComplete)
-        {
-            Log.outDebug(LogFilter.Player, $"QuestObjectiveCriteriaMgr.ResetCriteria({failEvent}, {failAsset}, {evenIfCriteriaComplete})");
-
-            // disable for gamemasters with GM-mode enabled
-            if (_owner.IsGameMaster())
-                return;
-
-            var playerCriteriaList = Global.CriteriaMgr.GetCriteriaByFailEvent(failEvent, (int)failAsset);
-            foreach (Criteria playerCriteria in playerCriteriaList)
-            {
-                var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(playerCriteria.Id);
-                bool allComplete = true;
-                foreach (CriteriaTree tree in trees)
-                {
-                    // don't update already completed criteria if not forced
-                    if (!(IsCompletedCriteriaTree(tree) && !evenIfCriteriaComplete))
-                    {
-                        allComplete = false;
-                        break;
-                    }
-                }
-
-                if (allComplete)
-                    continue;
-
-                RemoveCriteriaProgress(playerCriteria);
-            }
-        }
-
         public void ResetCriteriaTree(uint criteriaTreeId)
         {
             CriteriaTree tree = Global.CriteriaMgr.GetCriteriaTree(criteriaTreeId);

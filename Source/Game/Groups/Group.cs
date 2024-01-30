@@ -476,6 +476,8 @@ namespace Game.Groups
             if (IsRaidGroup())
                 player.UpdateVisibleGameobjectsOrSpellClicks();
 
+            player.FailCriteria(CriteriaFailEvent.ModifyPartyStatus, 0);
+
             {
                 // Broadcast new player group member fields to rest of the group
                 UpdateData groupData = new(player.GetMapId());
@@ -543,6 +545,9 @@ namespace Game.Groups
             // LFG group vote kick handled in scripts
             if (IsLFGGroup() && method == RemoveMethod.Kick)
                 return m_memberSlots.Count != 0;
+
+            if (player != null)
+                player.FailCriteria(CriteriaFailEvent.ModifyPartyStatus, 0);
 
             // remove member and change leader (if need) only if strong more 2 members _before_ member remove (BG/BF allow 1 member group)
             if (GetMembersCount() > ((IsBGGroup() || IsLFGGroup() || IsBFGroup()) ? 1 : 2))

@@ -237,6 +237,7 @@ namespace Game.Arenas
                         {
                             // update achievement BEFORE personal rating update
                             uint rating = player.GetArenaPersonalRating(winnerArenaTeam.GetSlot());
+                            player.StartCriteria(CriteriaStartEvent.WinRankedArenaMatchWithTeamSize, 0);
                             player.UpdateCriteria(CriteriaType.WinAnyRankedArena, rating != 0 ? rating : 1);
                             player.UpdateCriteria(CriteriaType.WinArena, GetMapId());
 
@@ -266,7 +267,7 @@ namespace Game.Arenas
                             loserArenaTeam.MemberLost(player, winnerMatchmakerRating, loserMatchmakerChange);
 
                             // Arena lost => reset the win_rated_arena having the "no_lose" condition
-                            player.ResetCriteria(CriteriaFailEvent.LoseRankedArenaMatchWithTeamSize, 0);
+                            player.FailCriteria(CriteriaFailEvent.LoseRankedArenaMatchWithTeamSize, 0);
                         }
                     }
 

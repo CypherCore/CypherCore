@@ -24,7 +24,7 @@ namespace Game.Achievements
     public class CriteriaHandler
     {
         protected Dictionary<uint, CriteriaProgress> _criteriaProgress = new();
-        Dictionary<uint, uint /*ms time left*/> _timeCriteriaTrees = new();
+        Dictionary<uint /*criteriaID*/, TimeSpan /*time left*/> _startedCriteria = new();
 
         public virtual void Reset()
         {
@@ -444,75 +444,89 @@ namespace Game.Achievements
             }
         }
 
-        public void UpdateTimedCriteria(uint timeDiff)
+        public void UpdateTimedCriteria(TimeSpan timeDiff)
         {
-            if (!_timeCriteriaTrees.Empty())
+            foreach (var key in _startedCriteria.Keys.ToList())
             {
-                foreach (var key in _timeCriteriaTrees.Keys.ToList())
+                // Time is up, remove timer and reset progress
+                if (_startedCriteria[key] <= timeDiff)
                 {
-                    var value = _timeCriteriaTrees[key];
-                    // Time is up, remove timer and reset progress
-                    if (value <= timeDiff)
-                    {
-                        CriteriaTree criteriaTree = Global.CriteriaMgr.GetCriteriaTree(key);
-                        if (criteriaTree.Criteria != null)
-                            RemoveCriteriaProgress(criteriaTree.Criteria);
+                    RemoveCriteriaProgress(Global.CriteriaMgr.GetCriteria(key));
 
-                        _timeCriteriaTrees.Remove(key);
-                    }
-                    else
-                    {
-                        _timeCriteriaTrees[key] -= timeDiff;
-                    }
+                    _startedCriteria.Remove(key);
                 }
-            }
+                else
+                    _startedCriteria[key] -= timeDiff;
+            }            
         }
 
-        public void StartCriteriaTimer(CriteriaStartEvent startEvent, uint entry, uint timeLost = 0)
+        public void StartCriteria(CriteriaStartEvent startEvent, uint entry, TimeSpan timeLost = default)
         {
-            List<Criteria> criteriaList = Global.CriteriaMgr.GetTimedCriteriaByType(startEvent);
+            List<Criteria> criteriaList = Global.CriteriaMgr.GetCriteriaByStartEvent(startEvent, (int)entry);
+            if (criteriaList.Empty())
+                return;
+
             foreach (Criteria criteria in criteriaList)
             {
-                if (criteria.Entry.StartAsset != entry)
+                TimeSpan timeLimit = TimeSpan.MaxValue; // this value is for criteria that have a start event requirement but no time limit
+                if (criteria.Entry.StartTimer != 0)
+                    timeLimit = TimeSpan.FromSeconds(criteria.Entry.StartTimer);
+
+                timeLimit -= timeLost;
+
+                if (timeLimit <= TimeSpan.Zero)
                     continue;
 
                 List<CriteriaTree> trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
-                bool canStart = false;
-                foreach (CriteriaTree tree in trees)
-                {
-                    if ((!_timeCriteriaTrees.ContainsKey(tree.Id) || criteria.Entry.GetFlags().HasFlag(CriteriaFlags.ResetOnStart)) && !IsCompletedCriteriaTree(tree))
-                    {
-                        // Start the timer
-                        if (criteria.Entry.StartTimer * Time.InMilliseconds > timeLost)
-                        {
-                            _timeCriteriaTrees[tree.Id] = (uint)(criteria.Entry.StartTimer * Time.InMilliseconds - timeLost);
-                            canStart = true;
-                        }
-                    }
-                }
+                bool canStart = trees.Any(tree => !IsCompletedCriteriaTree(tree));
 
                 if (!canStart)
                     continue;
+
+                bool isNew = _startedCriteria.TryAdd(criteria.Id, timeLimit);
+                if (!isNew)
+                {
+                    if (!criteria.Entry.GetFlags().HasFlag(CriteriaFlags.ResetOnStart))
+                        continue;
+
+                    _startedCriteria[criteria.Id] = timeLimit;
+                }
 
                 // and at client too
                 SetCriteriaProgress(criteria, 0, null, ProgressType.Set);
             }
         }
 
-        public void RemoveCriteriaTimer(CriteriaStartEvent startEvent, uint entry)
+        public void FailCriteria(CriteriaFailEvent failEvent, uint asset)
         {
-            List<Criteria> criteriaList = Global.CriteriaMgr.GetTimedCriteriaByType(startEvent);
+            List<Criteria> criteriaList = Global.CriteriaMgr.GetCriteriaByFailEvent(failEvent, (int)asset);
+            if (criteriaList.Empty())
+                return;
+
             foreach (Criteria criteria in criteriaList)
             {
-                if (criteria.Entry.StartAsset != entry)
-                    continue;
+                _startedCriteria.Remove(criteria.Id);
 
                 List<CriteriaTree> trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
-                // Remove the timer from all trees
-                foreach (CriteriaTree tree in trees)
-                    _timeCriteriaTrees.Remove(tree.Id);
+                bool allTreesFullyComplete = trees.All(tree =>
+                {
+                    CriteriaTree root = tree;
+                    CriteriaTree parent = Global.CriteriaMgr.GetCriteriaTree(root.Entry.Parent);
+                    if (parent != null)
+                    {
+                        do
+                        {
+                            root = parent;
+                            parent = Global.CriteriaMgr.GetCriteriaTree(root.Entry.Parent);
+                        } while (parent != null);
+                    }
 
-                // remove progress
+                    return IsCompletedCriteriaTree(root);
+                });
+
+                if (allTreesFullyComplete)
+                    continue;
+
                 RemoveCriteriaProgress(criteria);
             }
         }
@@ -524,29 +538,6 @@ namespace Game.Achievements
 
         public void SetCriteriaProgress(Criteria criteria, ulong changeValue, Player referencePlayer, ProgressType progressType = ProgressType.Set)
         {
-            // Don't allow to cheat - doing timed criteria without timer active
-            List<CriteriaTree> trees = null;
-            if (criteria.Entry.StartTimer != 0)
-            {
-                trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
-                if (trees.Empty())
-                    return;
-
-                bool hasTreeForTimed = false;
-                foreach (CriteriaTree tree in trees)
-                {
-                    var timedIter = _timeCriteriaTrees.LookupByKey(tree.Id);
-                    if (timedIter != 0)
-                    {
-                        hasTreeForTimed = true;
-                        break;
-                    }
-                }
-
-                if (!hasTreeForTimed)
-                    return;
-            }
-
             Log.outDebug(LogFilter.Achievement, "SetCriteriaProgress({0}, {1}) for {2}", criteria.Id, changeValue, GetOwnerInfo());
 
             CriteriaProgress progress = GetCriteriaProgress(criteria);
@@ -596,20 +587,18 @@ namespace Game.Achievements
             TimeSpan timeElapsed = TimeSpan.Zero;
             if (criteria.Entry.StartTimer != 0)
             {
-                Cypher.Assert(trees != null);
-
-                foreach (CriteriaTree tree in trees)
+                if (_startedCriteria.TryGetValue(criteria.Id, out TimeSpan startedTime))
                 {
-                    var timed = _timeCriteriaTrees.LookupByKey(tree.Id);
-                    if (timed != 0)
-                    {
-                        // Client expects this in packet
-                        timeElapsed = TimeSpan.FromSeconds(criteria.Entry.StartTimer - (timed / Time.InMilliseconds));
+                    // Client expects this in packet
+                    timeElapsed = TimeSpan.FromSeconds(criteria.Entry.StartTimer) - startedTime;
 
-                        // Remove the timer, we wont need it anymore
-                        if (IsCompletedCriteriaTree(tree))
-                            _timeCriteriaTrees.Remove(tree.Id);
-                    }
+                    // Remove the timer, we wont need it anymore
+                    var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
+
+                    bool allTreesCompleted = trees.All(IsCompletedCriteriaTree);
+
+                    if (allTreesCompleted)
+                        _startedCriteria.Remove(criteria.Id);
                 }
             }
 
@@ -626,7 +615,8 @@ namespace Game.Achievements
 
             SendCriteriaProgressRemoved(criteria.Id);
 
-            _criteriaProgress.Remove(criteria.Id);
+            _criteriaProgress[criteria.Id].Counter = 0;
+            _criteriaProgress[criteria.Id].Changed = true;
         }
 
         public bool IsCompletedCriteriaTree(CriteriaTree tree)
@@ -888,22 +878,8 @@ namespace Game.Achievements
 
         bool ConditionsSatisfied(Criteria criteria, Player referencePlayer)
         {
-            if (criteria.Entry.FailEvent == 0)
-                return true;
-
-            switch ((CriteriaFailEvent)criteria.Entry.FailEvent)
-            {
-                case CriteriaFailEvent.LeaveBattleground:
-                    if (!referencePlayer.InBattleground())
-                        return false;
-                    break;
-                case CriteriaFailEvent.ModifyPartyStatus:
-                    if (referencePlayer.GetGroup() != null)
-                        return false;
-                    break;
-                default:
-                    break;
-            }
+            if (criteria.Entry.StartEvent != 0 && !_startedCriteria.ContainsKey(criteria.Id))
+                return false;
 
             return true;
         }
@@ -3720,7 +3696,7 @@ namespace Game.Achievements
         MultiMap<uint, Criteria>[] _scenarioCriteriasByTypeAndScenarioId = new MultiMap<uint, Criteria>[(int)CriteriaType.Count];
         MultiMap<CriteriaType, Criteria> _questObjectiveCriteriasByType = new();
 
-        MultiMap<CriteriaStartEvent, Criteria> _criteriasByTimedType = new();
+        MultiMap<int, Criteria>[] _criteriasByStartEvent = new MultiMap<int, Criteria>[(int)CriteriaStartEvent.Max];
         MultiMap<int, Criteria>[] _criteriasByFailEvent = new MultiMap<int, Criteria>[(int)CriteriaFailEvent.Max];
 
         CriteriaManager()
@@ -3943,7 +3919,7 @@ namespace Game.Achievements
                 }
 
                 if (criteriaEntry.StartTimer != 0)
-                    _criteriasByTimedType.Add((CriteriaStartEvent)criteriaEntry.StartEvent, criteria);
+                    _criteriasByStartEvent[criteriaEntry.StartEvent].Add((int)criteriaEntry.StartAsset, criteria);
 
                 if (criteriaEntry.FailEvent != 0)
                     _criteriasByFailEvent[criteriaEntry.FailEvent].Add((int)criteriaEntry.FailAsset, criteria);
@@ -4083,6 +4059,16 @@ namespace Game.Achievements
         {
             return _scenarioCriteriasByTypeAndScenarioId[(int)type].LookupByKey(scenarioId);
         }
+
+        public List<Criteria> GetCriteriaByStartEvent(CriteriaStartEvent startEvent, int asset)
+        {
+            return _criteriasByStartEvent[(int)startEvent].LookupByKey(asset);
+        }
+
+        public List<Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent, int asset)
+        {
+            return _criteriasByFailEvent[(int)failEvent].LookupByKey(asset);
+        }
         
         public List<Criteria> GetGuildCriteriaByType(CriteriaType type)
         {
@@ -4097,16 +4083,6 @@ namespace Game.Achievements
         public List<CriteriaTree> GetCriteriaTreesByCriteria(uint criteriaId)
         {
             return _criteriaTreeByCriteria.LookupByKey(criteriaId);
-        }
-
-        public List<Criteria> GetTimedCriteriaByType(CriteriaStartEvent startEvent)
-        {
-            return _criteriasByTimedType.LookupByKey(startEvent);
-        }
-
-        public List<Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent, int asset)
-        {
-            return _criteriasByFailEvent[(int)failEvent].LookupByKey(asset);
         }
 
         public CriteriaDataSet GetCriteriaDataSet(Criteria criteria)
