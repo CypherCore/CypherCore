@@ -1595,9 +1595,9 @@ namespace Game.Spells
 
                             TempSummonType summonType = TempSummonType.TimedDespawn;
                             if (duration == TimeSpan.Zero)
-                                    summonType = TempSummonType.DeadDespawn;
+                                summonType = TempSummonType.DeadDespawn;
                             else if (duration == TimeSpan.FromMilliseconds(-1))
-                                    summonType = TempSummonType.ManualDespawn;
+                                summonType = TempSummonType.ManualDespawn;
 
                             for (uint count = 0; count < numSummons; ++count)
                             {
@@ -1943,22 +1943,32 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            if (!unitTarget.IsTypeId(TypeId.Player))
+            Player playerTarget = unitTarget?.ToPlayer();
+            if (playerTarget == null)
                 return;
 
             if (damage < 1)
                 return;
 
             uint skillid = (uint)effectInfo.MiscValue;
-            SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skillid, unitTarget.GetRace(), unitTarget.GetClass());
+            if (effectInfo.Effect == SpellEffectName.Skill && playerTarget.GetSkillStep(skillid) >= damage)
+                return;
+
+            SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skillid, playerTarget.GetRace(), playerTarget.GetClass());
             if (rcEntry == null)
                 return;
 
             SkillTiersEntry tier = Global.ObjectMgr.GetSkillTier(rcEntry.SkillTierID);
             if (tier == null)
                 return;
-            ushort skillval = unitTarget.ToPlayer().GetPureSkillValue((SkillType)skillid);
-            unitTarget.ToPlayer().SetSkill(skillid, (uint)damage, Math.Max(skillval, (ushort)1), tier.Value[damage - 1]);
+
+            ushort skillval = Math.Max((ushort)1, playerTarget.GetPureSkillValue(skillid));
+            ushort maxSkillVal = (ushort)tier.Value[damage - 1];
+
+            if (rcEntry.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
+                skillval = maxSkillVal;
+
+            playerTarget.SetSkill(skillid, (uint)damage, skillval, maxSkillVal);
         }
 
         [SpellEffectHandler(SpellEffectName.PlayMovie)]
@@ -3241,7 +3251,7 @@ namespace Game.Spells
                 unitCaster.GetClosePoint(out x, out y, out z, SharedConst.DefaultPlayerBoundingRadius);
                 o = unitCaster.GetOrientation();
             }
-            
+
             Map map = m_caster.GetMap();
             Position pos = new(x, y, z, o);
             Quaternion rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(o, 0.0f, 0.0f));
@@ -4268,7 +4278,32 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Hit)
                 return;
 
-            Log.outDebug(LogFilter.Spells, "WORLD: SkillEFFECT");
+            Player playerTarget = GetUnitCasterForEffectHandlers()?.ToPlayer();
+            if (playerTarget == null)
+                return;
+
+            if (damage < 1)
+                return;
+
+            uint skillid = (uint)effectInfo.MiscValue;
+            if (effectInfo.Effect == SpellEffectName.Skill && playerTarget.GetSkillStep(skillid) >= damage)
+                return;
+
+            var rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skillid, playerTarget.GetRace(), playerTarget.GetClass());
+            if (rcEntry == null)
+                return;
+
+            var tier = Global.ObjectMgr.GetSkillTier(rcEntry.SkillTierID);
+            if (tier == null)
+                return;
+
+            ushort skillval = Math.Max((ushort)1, playerTarget.GetPureSkillValue(skillid));
+            ushort maxSkillVal = (ushort)tier.Value[damage - 1];
+
+            if (rcEntry.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
+                skillval = maxSkillVal;
+
+            playerTarget.SetSkill(skillid, (uint)damage, skillval, maxSkillVal);
         }
 
         void EffectSpiritHeal()

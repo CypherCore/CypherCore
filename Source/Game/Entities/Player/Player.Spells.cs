@@ -111,6 +111,11 @@ namespace Game.Entities
 
         public ushort GetSkillStep(SkillType skill)
         {
+            return GetSkillStep((uint)skill);
+        }
+
+        public ushort GetSkillStep(uint skill)
+        {
             if (skill == 0)
                 return 0;
 
@@ -2261,16 +2266,50 @@ namespace Game.Entities
                         SetSkill(spellLearnSkill.skill, 0, 0, 0);
                     else                                            // set to prev. skill setting values
                     {
-                        uint skill_value = GetPureSkillValue(prevSkill.skill);
-                        uint skill_max_value = GetPureMaxSkillValue(prevSkill.skill);
+                        ushort skill_value = GetPureSkillValue(prevSkill.skill);
+                        ushort skill_max_value = GetPureMaxSkillValue(prevSkill.skill);
 
-                        if (skill_value > prevSkill.value)
+                        ushort new_skill_max_value = prevSkill.maxvalue;
+
+                        if (new_skill_max_value == 0)
+                        {
+                            var rcInfo = Global.DB2Mgr.GetSkillRaceClassInfo((uint)prevSkill.skill, GetRace(), GetClass());
+                            if (rcInfo != null)
+                            {
+                                switch (Global.SpellMgr.GetSkillRangeType(rcInfo))
+                                {
+                                    case SkillRangeType.Language:
+                                        skill_value = 300;
+                                        new_skill_max_value = 300;
+                                        break;
+                                    case SkillRangeType.Level:
+                                        new_skill_max_value = GetMaxSkillValueForLevel();
+                                        break;
+                                    case SkillRangeType.Mono:
+                                        new_skill_max_value = 1;
+                                        break;
+                                    case SkillRangeType.Rank:
+                                    {
+                                        var tier = Global.ObjectMgr.GetSkillTier(rcInfo.SkillTierID);
+                                        new_skill_max_value = (ushort)tier.Value[prevSkill.step - 1];
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
+
+                                if (rcInfo.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
+                                    skill_value = new_skill_max_value;
+                            }
+                        }
+                        else if (skill_value > prevSkill.value)
                             skill_value = prevSkill.value;
-
-                        uint new_skill_max_value = prevSkill.maxvalue == 0 ? GetMaxSkillValueForLevel() : prevSkill.maxvalue;
 
                         if (skill_max_value > new_skill_max_value)
                             skill_max_value = new_skill_max_value;
+
+                        if (skill_value > new_skill_max_value)
+                            skill_value = new_skill_max_value;
 
                         SetSkill(prevSkill.skill, prevSkill.step, skill_value, skill_max_value);
                     }
@@ -2738,7 +2777,39 @@ namespace Game.Entities
                     if (skill_value < spellLearnSkill.value)
                         skill_value = spellLearnSkill.value;
 
-                    ushort new_skill_max_value = spellLearnSkill.maxvalue == 0 ? GetMaxSkillValueForLevel() : spellLearnSkill.maxvalue;
+                    ushort new_skill_max_value = spellLearnSkill.maxvalue;
+
+                    if (new_skill_max_value == 0)
+                    {
+                        var rcInfo = Global.DB2Mgr.GetSkillRaceClassInfo((uint)spellLearnSkill.skill, GetRace(), GetClass());
+                        if (rcInfo != null)
+                        {
+                            switch (Global.SpellMgr.GetSkillRangeType(rcInfo))
+                            {
+                                case SkillRangeType.Language:
+                                    skill_value = 300;
+                                    new_skill_max_value = 300;
+                                    break;
+                                case SkillRangeType.Level:
+                                    new_skill_max_value = GetMaxSkillValueForLevel();
+                                    break;
+                                case SkillRangeType.Mono:
+                                    new_skill_max_value = 1;
+                                    break;
+                                case SkillRangeType.Rank:
+                                {
+                                    var tier = Global.ObjectMgr.GetSkillTier(rcInfo.SkillTierID);
+                                    new_skill_max_value = (ushort)tier.Value[spellLearnSkill.step - 1];
+                                    break;
+                                }
+                                default:
+                                    break;
+                            }
+
+                            if (rcInfo.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
+                                skill_value = new_skill_max_value;
+                        }
+                    }
 
                     if (skill_max_value < new_skill_max_value)
                         skill_max_value = new_skill_max_value;

@@ -819,11 +819,8 @@ namespace Game.Entities
                         case SpellEffectName.Skill:
                             dbc_node.skill = (SkillType)spellEffectInfo.MiscValue;
                             dbc_node.step = (ushort)spellEffectInfo.CalcValue();
-                            if (dbc_node.skill != SkillType.Riding)
-                                dbc_node.value = 1;
-                            else
-                                dbc_node.value = (ushort)(dbc_node.step * 75);
-                            dbc_node.maxvalue = (ushort)(dbc_node.step * 75);
+                            dbc_node.value = 0;
+                            dbc_node.maxvalue = 0;
                             break;
                         case SpellEffectName.DualWield:
                             dbc_node.skill = SkillType.DualWield;
@@ -3065,7 +3062,7 @@ namespace Game.Entities
                 {
                     ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
                     {
-                        spellEffectInfo.ApplyAuraPeriod = 1 * Time.InMilliseconds;;
+                        spellEffectInfo.ApplyAuraPeriod = 1 * Time.InMilliseconds;
                     });
                 });
 
@@ -3074,7 +3071,7 @@ namespace Game.Entities
                 {
                     ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
                     {
-                        spellEffectInfo.ApplyAuraPeriod = 5 * Time.InMilliseconds;;
+                        spellEffectInfo.ApplyAuraPeriod = 5 * Time.InMilliseconds;
                     });
                 });
 
@@ -3083,7 +3080,7 @@ namespace Game.Entities
                 {
                     ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
                     {
-                        spellEffectInfo.ApplyAuraPeriod = 1 * Time.InMilliseconds;;
+                        spellEffectInfo.ApplyAuraPeriod = 1 * Time.InMilliseconds;
                     });
                 });
             }
@@ -3597,8 +3594,8 @@ namespace Game.Entities
                 44408  // Trained Rock Falcon/Hawk Hunting
              }, spellInfo =>
              {
-                spellInfo.Speed = 0.0f;
-            });
+                 spellInfo.Speed = 0.0f;
+             });
 
             // Summon Corpse Scarabs
             ApplySpellFix(new[] { 28864, 29105 }, spellInfo =>
@@ -3610,7 +3607,7 @@ namespace Game.Entities
             });
 
             // Tag Greater Felfire Diemetradon
-            ApplySpellFix(new[] { 
+            ApplySpellFix(new[] {
                 37851, // Tag Greater Felfire Diemetradon
                 37918  // Arcano-pince
             }, spellInfo =>
@@ -4091,7 +4088,7 @@ namespace Game.Entities
                 ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
                 {
                     spellEffectInfo.TargetARadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards10); // 10yd
-            spellEffectInfo.MiscValue = 190;
+                    spellEffectInfo.MiscValue = 190;
                 });
             });
             // ENDOF ICECROWN CITADEL SPELLS
@@ -4260,7 +4257,7 @@ namespace Game.Entities
             });
 
             // Baron Rivendare (Stratholme) - Unholy Aura
-            ApplySpellFix(new [] { 17466, 17467 }, spellInfo =>
+            ApplySpellFix(new[] { 17466, 17467 }, spellInfo =>
             {
                 spellInfo.AttributesEx2 |= SpellAttr2.NoInitialThreat;
             });
@@ -4333,7 +4330,7 @@ namespace Game.Entities
             });
 
             // Earthquake
-            ApplySpellFix(new [] { 61882 }, spellInfo =>
+            ApplySpellFix(new[] { 61882 }, spellInfo =>
             {
                 spellInfo.NegativeEffects[2] = true;
             });
@@ -4391,7 +4388,7 @@ namespace Game.Entities
             });
 
             // Burning Rush
-            ApplySpellFix(new[] {111400 }, spellInfo =>
+            ApplySpellFix(new[] { 111400 }, spellInfo =>
             {
                 spellInfo.AttributesEx4 |= SpellAttr4.AuraIsBuff;
             });
