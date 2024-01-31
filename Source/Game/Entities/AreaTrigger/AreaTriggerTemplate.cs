@@ -163,13 +163,15 @@ namespace Game.Entities
                 case AreaTriggerTypes.Sphere:
                     return Math.Max(SphereDatas.Radius, SphereDatas.RadiusTarget);
                 case AreaTriggerTypes.Box:
-                    return MathF.Sqrt(BoxDatas.Extents[0] * BoxDatas.Extents[0] + BoxDatas.Extents[1] * BoxDatas.Extents[1]);
+                    return MathF.Sqrt(Math.Max(BoxDatas.Extents[0] * BoxDatas.Extents[0] + BoxDatas.Extents[1] * BoxDatas.Extents[1],
+                        BoxDatas.ExtentsTarget[0] * BoxDatas.ExtentsTarget[0] + BoxDatas.ExtentsTarget[1] * BoxDatas.ExtentsTarget[1]));
                 case AreaTriggerTypes.Cylinder:
                     return Math.Max(CylinderDatas.Radius, CylinderDatas.RadiusTarget);
                 case AreaTriggerTypes.Disk:
                     return Math.Max(DiskDatas.OuterRadius, DiskDatas.OuterRadiusTarget);
                 case AreaTriggerTypes.BoundedPlane:
-                    return MathF.Sqrt(BoundedPlaneDatas.Extents[0] * BoundedPlaneDatas.Extents[0] / 4 + BoundedPlaneDatas.Extents[1] * BoundedPlaneDatas.Extents[1] / 4);
+                    return MathF.Sqrt(Math.Max(BoundedPlaneDatas.Extents[0] * BoundedPlaneDatas.Extents[0] / 4 + BoundedPlaneDatas.Extents[1] * BoundedPlaneDatas.Extents[1] / 4,
+                        BoundedPlaneDatas.ExtentsTarget[0] * BoundedPlaneDatas.ExtentsTarget[0] / 4 + BoundedPlaneDatas.ExtentsTarget[1] * BoundedPlaneDatas.ExtentsTarget[1] / 4));
             }
 
             return 0.0f;
@@ -246,20 +248,18 @@ namespace Game.Entities
                 Position center = new(0.0f, 0.0f);
                 float maxSearchRadius = 0.0f;
 
-                foreach (var vertice in PolygonVertices)
-                {
-                    float pointDist = center.GetExactDist2d(vertice.X, vertice.Y);
+                foreach (var vertex in PolygonVertices)
+                    maxSearchRadius = Math.Max(maxSearchRadius, center.GetExactDist2d(vertex.X, vertex.Y));
 
-                    if (pointDist > maxSearchRadius)
-                        maxSearchRadius = pointDist;
-                }
+                foreach (var vertex in PolygonVerticesTarget)
+                    maxSearchRadius = Math.Max(maxSearchRadius, center.GetExactDist2d(vertex.X, vertex.Y));
 
                 return maxSearchRadius;
             }
 
             return Shape.GetMaxSearchRadius();
         }
-        
+
         public uint Id;
         public AreaTriggerTemplate Template;
 

@@ -574,7 +574,7 @@ namespace Game.Entities
                 //    *data << *areaTrigger.GetMovementScript(); // AreaTriggerMovementScriptInfo
 
                 if (hasOrbit)
-                    areaTrigger.GetCircularMovementInfo().Write(data);
+                    areaTrigger.GetOrbit().Write(data);
             }
 
             if (flags.GameObject)
