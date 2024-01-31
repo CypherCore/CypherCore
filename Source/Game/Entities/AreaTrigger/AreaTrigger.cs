@@ -318,8 +318,9 @@ namespace Game.Entities
                     if (target != null)
                     {
                         float orientation = 0.0f;
-                        if (GetCreateProperties().FacingCurveId != 0)
-                            orientation = Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().FacingCurveId, GetProgress());
+                        AreaTriggerCreateProperties createProperties = GetCreateProperties();
+                        if (createProperties != null && createProperties.FacingCurveId != 0)
+                            orientation = Global.DB2Mgr.GetCurveValueAt(createProperties.FacingCurveId, GetProgress());
 
                         if (GetTemplate() == null || !GetTemplate().HasFlag(AreaTriggerFlags.HasAbsoluteOrientation))
                             orientation += target.GetOrientation();
@@ -333,9 +334,10 @@ namespace Game.Entities
                 }
                 else
                 {
-                    if (GetCreateProperties().FacingCurveId != 0)
+                    AreaTriggerCreateProperties createProperties = GetCreateProperties();
+                    if (createProperties != null && createProperties.FacingCurveId != 0)
                     {
-                        float orientation = Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().FacingCurveId, GetProgress());
+                        float orientation = Global.DB2Mgr.GetCurveValueAt(createProperties.FacingCurveId, GetProgress());
                         if (GetTemplate() == null || !GetTemplate().HasFlag(AreaTriggerFlags.HasAbsoluteOrientation))
                             orientation += GetStationaryO();
 
@@ -645,8 +647,9 @@ namespace Game.Entities
         void SearchUnitInSphere(List<Unit> targetList)
         {
             float progress = GetProgress();
-            if (GetCreateProperties().MorphCurveId != 0)
-                progress = Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().MorphCurveId, progress);
+            AreaTriggerCreateProperties createProperties = GetCreateProperties();
+            if (createProperties != null && createProperties.MorphCurveId != 0)
+                progress = Global.DB2Mgr.GetCurveValueAt(createProperties.MorphCurveId, progress);
 
             float scale = CalcCurrentScale();
             float radius = MathFunctions.Lerp(_shape.SphereDatas.Radius, _shape.SphereDatas.RadiusTarget, progress) * scale;
@@ -657,8 +660,9 @@ namespace Game.Entities
         void SearchUnitInBox(List<Unit> targetList)
         {
             float progress = GetProgress();
-            if (GetCreateProperties().MorphCurveId != 0)
-                progress = Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().MorphCurveId, progress);
+            AreaTriggerCreateProperties createProperties = GetCreateProperties();
+            if (createProperties != null && createProperties.MorphCurveId != 0)
+                progress = Global.DB2Mgr.GetCurveValueAt(createProperties.MorphCurveId, progress);
 
             unsafe
             {
@@ -678,8 +682,9 @@ namespace Game.Entities
         void SearchUnitInPolygon(List<Unit> targetList)
         {
             float progress = GetProgress();
-            if (GetCreateProperties().MorphCurveId != 0)
-                progress = Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().MorphCurveId, progress);
+            AreaTriggerCreateProperties createProperties = GetCreateProperties();
+            if (createProperties != null && createProperties.MorphCurveId != 0)
+                progress = Global.DB2Mgr.GetCurveValueAt(createProperties.MorphCurveId, progress);
 
             float height = MathFunctions.Lerp(_shape.PolygonDatas.Height, _shape.PolygonDatas.HeightTarget, progress);
             float minZ = GetPositionZ() - height;
@@ -693,8 +698,9 @@ namespace Game.Entities
         void SearchUnitInCylinder(List<Unit> targetList)
         {
             float progress = GetProgress();
-            if (GetCreateProperties().MorphCurveId != 0)
-                progress = Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().MorphCurveId, progress);
+            AreaTriggerCreateProperties createProperties = GetCreateProperties();
+            if (createProperties != null && createProperties.MorphCurveId != 0)
+                progress = Global.DB2Mgr.GetCurveValueAt(createProperties.MorphCurveId, progress);
 
             float scale = CalcCurrentScale();
             float radius = MathFunctions.Lerp(_shape.CylinderDatas.Radius, _shape.CylinderDatas.RadiusTarget, progress) * scale;
@@ -713,8 +719,9 @@ namespace Game.Entities
         void SearchUnitInDisk(List<Unit> targetList)
         {
             float progress = GetProgress();
-            if (GetCreateProperties().MorphCurveId != 0)
-                progress = Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().MorphCurveId, progress);
+            AreaTriggerCreateProperties createProperties = GetCreateProperties();
+            if (createProperties != null && createProperties.MorphCurveId != 0)
+                progress = Global.DB2Mgr.GetCurveValueAt(createProperties.MorphCurveId, progress);
 
             float scale = CalcCurrentScale();
             float innerRadius = MathFunctions.Lerp(_shape.DiskDatas.InnerRadius, _shape.DiskDatas.InnerRadiusTarget, progress) * scale;
@@ -734,8 +741,9 @@ namespace Game.Entities
         void SearchUnitInBoundedPlane(List<Unit> targetList)
         {
             float progress = GetProgress();
-            if (GetCreateProperties().MorphCurveId != 0)
-                progress = Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().MorphCurveId, progress);
+            AreaTriggerCreateProperties createProperties = GetCreateProperties();
+            if (createProperties != null && createProperties.MorphCurveId != 0)
+                progress = Global.DB2Mgr.GetCurveValueAt(createProperties.MorphCurveId, progress);
 
             unsafe
             {
@@ -817,8 +825,9 @@ namespace Game.Entities
             if (_spawnId != 0)
                 return Global.AreaTriggerDataStorage.GetAreaTriggerSpawn(_spawnId).ScriptId;
 
-            if (GetCreateProperties() != null)
-                return GetCreateProperties().ScriptId;
+            AreaTriggerCreateProperties createProperties = GetCreateProperties();
+            if (createProperties != null)
+                return createProperties.ScriptId;
 
             return 0;
         }
@@ -849,24 +858,25 @@ namespace Game.Entities
 
         void UpdatePolygonVertices()
         {
+            AreaTriggerCreateProperties createProperties = GetCreateProperties();
             float newOrientation = GetOrientation();
 
             // No need to recalculate, orientation didn't change
-            if (MathFunctions.fuzzyEq(_verticesUpdatePreviousOrientation, newOrientation) && GetCreateProperties().PolygonVerticesTarget.Empty())
+            if (MathFunctions.fuzzyEq(_verticesUpdatePreviousOrientation, newOrientation) && (createProperties == null) || createProperties.PolygonVerticesTarget.Empty())
                 return;
 
-            _polygonVertices = GetCreateProperties().PolygonVertices;
+            _polygonVertices = createProperties.PolygonVertices;
 
-            if (!GetCreateProperties().PolygonVerticesTarget.Empty())
+            if (!createProperties.PolygonVerticesTarget.Empty())
             {
                 float progress = GetProgress();
-                if (GetCreateProperties().MorphCurveId != 0)
-                    progress = Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().MorphCurveId, progress);
+                if (createProperties.MorphCurveId != 0)
+                    progress = Global.DB2Mgr.GetCurveValueAt(createProperties.MorphCurveId, progress);
 
                 for (var i = 0; i < _polygonVertices.Count; ++i)
                 {
                     Vector2 vertex = _polygonVertices[i];
-                    Vector2 vertexTarget = GetCreateProperties().PolygonVerticesTarget[i];
+                    Vector2 vertexTarget = createProperties.PolygonVerticesTarget[i];
 
                     vertex.X = MathFunctions.Lerp(vertex.X, vertexTarget.X, progress);
                     vertex.Y = MathFunctions.Lerp(vertex.Y, vertexTarget.Y, progress);
@@ -1165,12 +1175,13 @@ namespace Game.Entities
             if (centerPos == null)
                 return GetPosition();
 
+            AreaTriggerCreateProperties createProperties = GetCreateProperties();
             AreaTriggerOrbitInfo cmi = _orbitInfo;
 
             // AreaTrigger make exactly "Duration / TimeToTarget" loops during his life time
             float pathProgress = (float)cmi.ElapsedTimeForMovement / cmi.TimeToTarget;
-            if (GetCreateProperties().MoveCurveId != 0)
-                pathProgress = Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().MoveCurveId, pathProgress);
+            if (createProperties != null && createProperties.MoveCurveId != 0)
+                pathProgress = Global.DB2Mgr.GetCurveValueAt(createProperties.MoveCurveId, pathProgress);
 
             // We already made one circle and can't loop
             if (!cmi.CanLoop)
@@ -1196,8 +1207,8 @@ namespace Game.Entities
             float z = centerPos.GetPositionZ() + cmi.ZOffset;
 
             float orientation = 0.0f;
-            if (GetCreateProperties().FacingCurveId != 0)
-                orientation = Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().FacingCurveId, GetProgress());
+            if (createProperties != null && createProperties.FacingCurveId != 0)
+                orientation = Global.DB2Mgr.GetCurveValueAt(createProperties.FacingCurveId, GetProgress());
 
             if (GetTemplate() == null || !GetTemplate().HasFlag(AreaTriggerFlags.HasAbsoluteOrientation))
             {
@@ -1249,12 +1260,13 @@ namespace Game.Entities
             if (currentTimePercent <= 0.0f)
                 return;
 
-            if (GetCreateProperties().MoveCurveId != 0)
+            AreaTriggerCreateProperties createProperties = GetCreateProperties();
+            if (createProperties != null && createProperties.MoveCurveId != 0)
             {
-                float progress = Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().MoveCurveId, currentTimePercent);
+                float progress = Global.DB2Mgr.GetCurveValueAt(createProperties.MoveCurveId, currentTimePercent);
                 if (progress < 0.0f || progress > 1.0f)
                 {
-                    Log.outError(LogFilter.AreaTrigger, $"AreaTrigger (Id: {GetEntry()}, AreaTriggerCreatePropertiesId: {GetCreateProperties().Id}) has wrong progress ({progress}) caused by curve calculation (MoveCurveId: {GetCreateProperties().MorphCurveId})");
+                    Log.outError(LogFilter.AreaTrigger, $"AreaTrigger (Id: {GetEntry()}, AreaTriggerCreatePropertiesId: {createProperties.Id}) has wrong progress ({progress}) caused by curve calculation (MoveCurveId: {createProperties.MorphCurveId})");
                 }
                 else
                     currentTimePercent = progress;
@@ -1268,8 +1280,8 @@ namespace Game.Entities
             _spline.Evaluate_Percent(lastPositionIndex, percentFromLastPoint, out currentPosition);
 
             float orientation = GetStationaryO();
-            if (GetCreateProperties().FacingCurveId != 0)
-                orientation += Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().FacingCurveId, GetProgress());
+            if (createProperties != null && createProperties.FacingCurveId != 0)
+                orientation += Global.DB2Mgr.GetCurveValueAt(createProperties.FacingCurveId, GetProgress());
 
             if (GetTemplate() != null && !GetTemplate().HasFlag(AreaTriggerFlags.HasAbsoluteOrientation) && GetTemplate().HasFlag(AreaTriggerFlags.HasFaceMovementDir))
             {
