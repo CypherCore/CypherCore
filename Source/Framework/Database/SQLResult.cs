@@ -16,11 +16,13 @@ namespace Framework.Database
         public SQLResult(MySqlDataReader reader)
         {
             _reader = reader;
-            NextRow();
+            if (!NextRow())
+                Close();
         }
 
-        ~SQLResult()
+        public void Close()
         {
+            _reader.Close();
             _reader = null;
         }
 
@@ -129,7 +131,7 @@ namespace Framework.Database
             if (_reader.Read())
                 return true;
 
-            _reader.Close();
+            Close();
             return false;
         }
     }
