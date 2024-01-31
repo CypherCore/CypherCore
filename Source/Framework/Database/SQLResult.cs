@@ -22,8 +22,11 @@ namespace Framework.Database
 
         public void Close()
         {
-            _reader.Close();
-            _reader = null;
+            if (_reader != null)
+            {
+                _reader.Close();
+                _reader = null;
+            }
         }
 
         public T Read<T>(int column)
