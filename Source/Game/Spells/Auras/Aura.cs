@@ -2716,6 +2716,9 @@ namespace Game.Spells
 
         public override void FillTargetMap(ref Dictionary<Unit, uint> targets, Unit caster)
         {
+            if (GetSpellInfo().HasAttribute(SpellAttr7.DisableAuraWhileDead) && !GetUnitOwner().IsAlive())
+                return;
+
             Unit refe = caster;
             if (refe == null)
                 refe = GetUnitOwner();

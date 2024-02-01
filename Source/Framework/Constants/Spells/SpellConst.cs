@@ -1894,7 +1894,7 @@ namespace Framework.Constants
     {
         Unk0 = 0x01, //  0 Shaman'S New Spells (Call Of The ...), Feign Death.
         IgnoreDurationMods = 0x02, //  1 Duration is not affected by duration modifiers
-        ReactivateAtResurrect = 0x04, //  2 Paladin'S Auras And 65607 Only.
+        DisableAuraWhileDead = 0x04, //  2 Disable Aura While Dead
         IsCheatSpell = 0x08, //  3 Cannot Cast If Caster Doesn'T Have Unitflag2 & UnitFlag2AllowCheatSpells
         Unk4 = 0x10, //  4 Only 47883 (Soulstone Resurrection) And Test Spell.
         SummonTotem = 0x20, //  5 Only Shaman Player Totems.
