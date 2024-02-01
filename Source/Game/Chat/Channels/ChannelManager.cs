@@ -13,6 +13,8 @@ namespace Game.Chat
 {
     public class ChannelManager
     {
+        public static AreaTableRecord SpecialLinkedArea { get; private set; }
+
         public ChannelManager(Team team)
         {
             _team = team;
@@ -21,6 +23,9 @@ namespace Game.Chat
 
         public static void LoadFromDB()
         {
+            SpecialLinkedArea = CliDB.AreaTableStorage.LookupByKey(3459);
+            Cypher.Assert(SpecialLinkedArea.GetFlags().HasFlag(AreaFlags.LinkedChatSpecialArea));
+
             if (!WorldConfig.GetBoolValue(WorldCfg.PreserveCustomChannels))
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 custom chat channels. Custom channel saving is disabled.");
@@ -212,25 +217,19 @@ namespace Game.Chat
 
         ObjectGuid CreateBuiltinChannelGuid(uint channelId, AreaTableRecord zoneEntry = null)
         {
-
             ChatChannelsRecord channelEntry = CliDB.ChatChannelsStorage.LookupByKey(channelId);
-            uint zoneId = zoneEntry != null ? zoneEntry.Id : 0;
-            if (channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.Global | ChannelDBCFlags.CityOnly))
-                zoneId = 0;
+            uint zoneId = 0;
+            if (zoneEntry != null && channelEntry.GetFlags().HasFlag(ChatChannelFlags.ZoneBased) && !channelEntry.GetFlags().HasFlag(ChatChannelFlags.LinkedChannel))
+                zoneId = zoneEntry.Id;
 
-            ulong high = 0;
-            high |= (ulong)HighGuid.ChatChannel << 58;
-            high |= (ulong)Global.WorldMgr.GetRealmId().Index << 42;
-            high |= 1ul << 25; // built-in
-            if (channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.CityOnly2))
-                high |= 1ul << 24; // trade
+            if (channelEntry.GetFlags().HasFlag(ChatChannelFlags.GlobalForTournament))
+            {
+                var category = CliDB.CfgCategoriesStorage.LookupByKey(Global.WorldMgr.GetRealm().Timezone);
+                if (category != null && category.GetFlags().HasFlag(CfgCategoriesFlags.Tournament))
+                    zoneId = 0;
+            }
 
-            high |= (ulong)(zoneId) << 10;
-            high |= (ulong)(_team == Team.Alliance ? 3 : 5) << 4;
-
-            ObjectGuid channelGuid = new();
-            channelGuid.SetRawValue(high, channelId);
-            return channelGuid;
+            return ObjectGuid.Create(HighGuid.ChatChannel, true, channelEntry.GetFlags().HasFlag(ChatChannelFlags.LinkedChannel), (ushort)zoneId, (byte)(_team == Team.Alliance ? 3 : 5), channelId);
         }
 
         Dictionary<string, Channel> _customChannels = new();

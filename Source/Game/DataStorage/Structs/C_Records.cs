@@ -20,7 +20,7 @@ namespace Game.DataStorage
         public CfgCategoriesCharsets GetExistingCharsetMask() { return (CfgCategoriesCharsets)ExistingCharsetMask; }
         public CfgCategoriesFlags GetFlags() { return (CfgCategoriesFlags)Flags; }
     }
-    
+
     public sealed class Cfg_RegionsRecord
     {
         public uint Id;
@@ -75,9 +75,12 @@ namespace Game.DataStorage
         public uint Id;
         public LocalizedString Name;
         public string Shortcut;
-        public ChannelDBCFlags Flags;
+        public int Flags;
         public sbyte FactionGroup;
         public int Ruleset;
+
+        public ChatChannelFlags GetFlags() { return (ChatChannelFlags)Flags; }
+        public ChatChannelRuleset GetRuleset() { return (ChatChannelRuleset)Ruleset; }
     }
 
     public sealed class ChrClassUIDisplayRecord

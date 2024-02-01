@@ -1,6 +1,8 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.﻿
 
+using System;
+
 namespace Framework.Constants
 {
     public enum ChatNotify
@@ -63,22 +65,6 @@ namespace Framework.Constants
         // LocalDefence             0x18 = 0x10 | 0x08
         // GuildRecruitment         0x38 = 0x20 | 0x10 | 0x08
         // LookingForGroup          0x50 = 0x40 | 0x10
-    }
-
-    public enum ChannelDBCFlags
-    {
-        None = 0x00000,
-        Initial = 0x00001,              // General, Trade, Localdefense, Lfg
-        ZoneDep = 0x00002,              // General, Trade, Localdefense, Guildrecruitment
-        Global = 0x00004,              // Worlddefense
-        Trade = 0x00008,              // Trade, Lfg
-        CityOnly = 0x00010,              // Trade, Guildrecruitment, Lfg
-        CityOnly2 = 0x00020,              // Trade, Guildrecruitment, Lfg
-        Defense = 0x10000,              // Localdefense, Worlddefense
-        GuildReq = 0x20000,              // Guildrecruitment
-        Lfg = 0x40000,              // Lfg
-        Unk1 = 0x80000,               // General
-        NoClientJoin = 0x200000
     }
 
     public enum ChannelMemberFlags

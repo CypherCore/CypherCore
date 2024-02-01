@@ -25,13 +25,13 @@ namespace Game.Chat
             _zoneEntry = zoneEntry;
 
             ChatChannelsRecord channelEntry = CliDB.ChatChannelsStorage.LookupByKey(channelId);
-            if (channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.Trade))             // for trade channel
+            if (channelEntry.GetFlags().HasFlag(ChatChannelFlags.AllowItemLinks))             // for trade channel
                 _channelFlags |= ChannelFlags.Trade;
 
-            if (channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.CityOnly2))        // for city only channels
+            if (channelEntry.GetFlags().HasFlag(ChatChannelFlags.LinkedChannel))        // for city only channels
                 _channelFlags |= ChannelFlags.City;
 
-            if (channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.Lfg))               // for LFG channel
+            if (channelEntry.GetFlags().HasFlag(ChatChannelFlags.LookingForGroup))               // for LFG channel
                 _channelFlags |= ChannelFlags.Lfg;
             else                                                // for all other channels
                 _channelFlags |= ChannelFlags.NotLfg;
@@ -66,12 +66,12 @@ namespace Game.Chat
             if (channelId != 0)
             {
                 ChatChannelsRecord channelEntry = CliDB.ChatChannelsStorage.LookupByKey(channelId);
-                if (!channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.Global))
+                if (channelEntry.GetFlags().HasFlag(ChatChannelFlags.ZoneBased))
                 {
-                    if (channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.CityOnly))
-                        channelName = string.Format(channelEntry.Name[locale].ConvertFormatSyntax(), Global.ObjectMgr.GetCypherString(CypherStrings.ChannelCity, locale));
-                    else
-                        channelName = string.Format(channelEntry.Name[locale].ConvertFormatSyntax(), zoneEntry.AreaName[locale]);
+                    if (channelEntry.GetFlags().HasFlag(ChatChannelFlags.LinkedChannel))
+                        zoneEntry = ChannelManager.SpecialLinkedArea;
+
+                    channelName = string.Format(channelEntry.Name[locale].ConvertFormatSyntax(), zoneEntry?.AreaName[locale]);
                 }
                 else
                     channelName = channelEntry.Name[locale];

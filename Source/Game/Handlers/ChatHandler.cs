@@ -334,6 +334,10 @@ namespace Game
                     Channel chn = !channelGuid.IsEmpty() ? ChannelManager.GetChannelForPlayerByGuid(channelGuid, sender) : ChannelManager.GetChannelForPlayerByNamePart(target, sender);
                     if (chn != null)
                     {
+                        var chatChannel = CliDB.ChatChannelsStorage.LookupByKey(chn.GetChannelId());
+                        if (chatChannel != null && chatChannel.GetFlags().HasFlag(ChatChannelFlags.ReadOnly))
+                            return;
+
                         Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, chn);
                         chn.Say(GetPlayer().GetGUID(), msg, lang);
                     }

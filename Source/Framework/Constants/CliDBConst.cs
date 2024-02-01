@@ -1079,6 +1079,7 @@ namespace Framework.Constants
         Factional = 0x40
     }
 
+    [Flags]
     public enum CfgCategoriesCharsets
     {
         Any = 0x00,
@@ -1089,10 +1090,42 @@ namespace Framework.Constants
         Chinese = 0x10
     }
 
+    [Flags]
     public enum CfgCategoriesFlags
     {
         None = 0x0,
         Tournament = 0x1
+    }
+
+    [Flags]
+    public enum ChatChannelFlags
+    {
+        None = 0x00,
+        AutoJoin = 0x01,
+        ZoneBased = 0x02,
+        ReadOnly = 0x04,
+        AllowItemLinks = 0x08,
+        OnlyInCities = 0x10,
+        LinkedChannel = 0x20,
+        ZoneAttackAlerts = 0x10000,
+        GuildRecruitment = 0x20000,
+        LookingForGroup = 0x40000,
+        GlobalForTournament = 0x80000,
+        DisableRaidIcons = 0x100000,
+        Regional = 0x200000
+    }
+
+    public enum ChatChannelRuleset
+    {
+        None = 0,
+        Mentor = 1,
+        Disabled = 2,
+        ChromieTimeCataclysm = 3,
+        ChromieTimeBuringCrusade = 4,
+        ChromieTimeWrath = 5,
+        ChromieTimeMists = 6,
+        ChromieTimeWoD = 7,
+        ChromieTimeLegion = 8,
     }
 
     [Flags]
