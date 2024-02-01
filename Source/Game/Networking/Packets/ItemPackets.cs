@@ -424,6 +424,7 @@ namespace Game.Networking.Packets
 
             _worldPacket.WriteBit(Pushed);
             _worldPacket.WriteBit(Created);
+            _worldPacket.WriteBit(Unused_1017);
             _worldPacket.WriteBits((uint)DisplayText, 3);
             _worldPacket.WriteBit(IsBonusRoll);
             _worldPacket.WriteBit(IsEncounterLoot);
@@ -460,9 +461,9 @@ namespace Game.Networking.Packets
         public bool Pushed;
         public DisplayType DisplayText;
         public bool Created;
+        public bool Unused_1017;
         public bool IsBonusRoll;
         public bool IsEncounterLoot;
-
 
         public enum DisplayType
         {
