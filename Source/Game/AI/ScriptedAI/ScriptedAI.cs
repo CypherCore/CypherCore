@@ -16,12 +16,10 @@ namespace Game.AI
     {
         Difficulty _difficulty;
         bool _isCombatMovementAllowed;
-        bool _isHeroic;
 
         public ScriptedAI(Creature creature) : base(creature)
         {
             _isCombatMovementAllowed = true;
-            _isHeroic = me.GetMap().IsHeroic();
             _difficulty = me.GetMap().GetDifficultyID();
         }
 
@@ -109,7 +107,7 @@ namespace Game.AI
         /// <param name="who"></param>
         public void AddThreat(Unit victim, float amount, Unit who = null)
         {
-            if (victim == null) 
+            if (victim == null)
                 return;
 
             if (who == null)
@@ -126,7 +124,7 @@ namespace Game.AI
         /// <param name="who"></param>
         public void ModifyThreatByPercent(Unit victim, int pct, Unit who = null)
         {
-            if (victim == null) 
+            if (victim == null)
                 return;
 
             if (who == null)
@@ -142,7 +140,7 @@ namespace Game.AI
         /// <param name="who"></param>
         public void ResetThreat(Unit victim, Unit who)
         {
-            if (victim == null) 
+            if (victim == null)
                 return;
 
             if (who == null)
@@ -171,7 +169,7 @@ namespace Game.AI
         /// <returns></returns>
         public float GetThreat(Unit victim, Unit who = null)
         {
-            if (victim == null) 
+            if (victim == null)
                 return 0.0f;
 
             if (who == null)
@@ -306,10 +304,10 @@ namespace Game.AI
                         break;
                     }
                 }
-                
+
                 if (!hasPower)
                     continue;
-                
+
                 //Check if the spell meets our range requirements
                 if (rangeMin != 0 && me.GetSpellMinRangeForTarget(target, tempSpell) < rangeMin)
                     continue;
@@ -449,23 +447,52 @@ namespace Game.AI
         {
             return source.FindNearestCreatureWithOptions(maxSearchRange, options);
         }
-        
+
         public static GameObject GetClosestGameObjectWithEntry(WorldObject source, uint entry, float maxSearchRange, bool spawnedOnly = true)
         {
             return source.FindNearestGameObject(entry, maxSearchRange, spawnedOnly);
         }
 
         public bool HealthBelowPct(int pct) { return me.HealthBelowPct(pct); }
+
         public bool HealthAbovePct(int pct) { return me.HealthAbovePct(pct); }
 
-        public bool IsCombatMovementAllowed() { return _isCombatMovementAllowed; }
+        public bool IsLFR()
+        {
+            return me.GetMap().IsLFR();
+        }
 
-        // return true for heroic mode. i.e.
-        //   - for dungeon in mode 10-heroic,
-        //   - for raid in mode 10-Heroic
-        //   - for raid in mode 25-heroic
-        // DO NOT USE to check raid in mode 25-normal.
-        public bool IsHeroic() { return _isHeroic; }
+        public bool IsNormal()
+        {
+            return me.GetMap().IsNormal();
+        }
+
+        public bool IsHeroic()
+        {
+            return me.GetMap().IsHeroic();
+        }
+
+        public bool IsMythic()
+        {
+            return me.GetMap().IsMythic();
+        }
+
+        public bool IsMythicPlus()
+        {
+            return me.GetMap().IsMythicPlus();
+        }
+
+        public bool IsHeroicOrHigher()
+        {
+            return me.GetMap().IsHeroicOrHigher();
+        }
+
+        public bool IsTimewalking()
+        {
+            return me.GetMap().IsTimewalking();
+        }
+
+        public bool IsCombatMovementAllowed() { return _isCombatMovementAllowed; }
 
         // return the dungeon or raid difficulty
         public Difficulty GetDifficulty() { return _difficulty; }

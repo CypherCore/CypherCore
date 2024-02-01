@@ -3264,18 +3264,60 @@ namespace Game.Maps
             return i_mapRecord != null && i_mapRecord.IsRaid();
         }
 
+        public bool IsLFR() => i_spawnMode switch
+        {
+            Difficulty.LFR or Difficulty.LFRNew or Difficulty.LFR15thAnniversary => true,
+            _ => false
+        };
+
+        public bool IsNormal() => i_spawnMode switch
+        {
+            Difficulty.Normal or Difficulty.Raid10N or Difficulty.Raid25N or Difficulty.NormalRaid or Difficulty.NormalIsland or Difficulty.NormalWarfront => true,
+            _ => false
+        };
+
         public bool IsHeroic()
         {
             DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(i_spawnMode);
+            if (difficulty != null && difficulty.Flags.HasFlag(DifficultyFlags.DisplayHeroic))
+                return true;
+
+            // compatibility purposes of old difficulties
+            return i_spawnMode switch
+            {
+                Difficulty.Raid10HC or Difficulty.Raid25HC or Difficulty.Heroic or Difficulty.Scenario3ManHC => true,
+                _ => false
+            };
+        }
+
+        public bool IsMythic()
+        {
+            var difficulty = CliDB.DifficultyStorage.LookupByKey(i_spawnMode);
             if (difficulty != null)
-                return difficulty.Flags.HasAnyFlag(DifficultyFlags.Heroic);
+                return difficulty.Flags.HasFlag(DifficultyFlags.DisplayMythic);
+
             return false;
+        }
+
+        public bool IsMythicPlus()
+        {
+            return IsDungeon() && i_spawnMode == Difficulty.MythicKeystone;
+        }
+
+        public bool IsHeroicOrHigher()
+        {
+            return IsHeroic() || IsMythic() || IsMythicPlus();
         }
 
         public bool Is25ManRaid()
         {
             // since 25man difficulties are 1 and 3, we can check them like that
             return IsRaid() && (i_spawnMode == Difficulty.Raid25N || i_spawnMode == Difficulty.Raid25HC);
+        }
+
+        public bool IsTimewalking()
+        {
+            return (IsDungeon() && i_spawnMode == Difficulty.Timewalking) || (IsRaid() && i_spawnMode == Difficulty.TimewalkingRaid);
         }
 
         public bool IsBattleground()
