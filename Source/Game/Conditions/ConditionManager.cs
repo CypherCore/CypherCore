@@ -2394,7 +2394,7 @@ namespace Game
 
                 for (var i = 0; i < condition.AreaID.Length; ++i)
                     if (condition.AreaID[i] != 0)
-                        results[i] = player.GetAreaId() == condition.AreaID[i] || player.GetZoneId() == condition.AreaID[i];
+                        results[i] = Global.DB2Mgr.IsInArea(player.GetAreaId(), condition.AreaID[i]);
 
                 if (!PlayerConditionLogic(condition.AreaLogic, results))
                     return false;

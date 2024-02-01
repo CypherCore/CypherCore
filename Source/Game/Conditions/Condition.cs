@@ -196,7 +196,7 @@ namespace Game.Conditions
                     }
                     break;
                 case ConditionTypes.Areaid:
-                    condMeets = obj.GetAreaId() == ConditionValue1;
+                    condMeets = Global.DB2Mgr.IsInArea(obj.GetAreaId(), ConditionValue1);
                     break;
                 case ConditionTypes.Spell:
                     if (player != null)
