@@ -99,6 +99,7 @@ namespace Game.DataStorage
         {
             return Id == 609 || // Acherus (DeathKnight Start)
             Id == 1265 ||   // Assault on the Dark Portal (WoD Intro)
+            Id == 1481 ||   // Mardum (DH Start)
             Id == 2175 ||   // Exiles Reach - NPE
             Id == 2570;     // Forbidden Reach (Dracthyr/Evoker Start)
         }
