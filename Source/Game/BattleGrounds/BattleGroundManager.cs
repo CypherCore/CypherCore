@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Game.BattleGrounds.Zones;
+using Game.BattleGrounds.Zones.EyeofStorm;
 
 namespace Game.BattleGrounds
 {

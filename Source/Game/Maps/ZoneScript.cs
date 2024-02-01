@@ -51,4 +51,17 @@ namespace Game.Maps
 
         protected EventMap _events = new();
     }
+
+    public class ControlZoneHandler
+    {
+        public virtual void HandleCaptureEventHorde(GameObject controlZone) { }
+        public virtual void HandleCaptureEventAlliance(GameObject controlZone) { }
+        public virtual void HandleContestedEventHorde(GameObject controlZone) { }
+        public virtual void HandleContestedEventAlliance(GameObject controlZone) { }
+        public virtual void HandleProgressEventHorde(GameObject controlZone) { }
+        public virtual void HandleProgressEventAlliance(GameObject controlZone) { }
+        public virtual void HandleNeutralEventHorde(GameObject controlZone) { HandleNeutralEvent(controlZone); }
+        public virtual void HandleNeutralEventAlliance(GameObject controlZone) { HandleNeutralEvent(controlZone); }
+        public virtual void HandleNeutralEvent(GameObject controlZone) { }
+    }
 }

@@ -158,7 +158,7 @@ namespace Game.BattleGrounds.Zones
             ShipsStarted = false;
 
             //Graveyards
-            for (byte i = 0; i < SAGraveyards.Max; i++)
+            for (uint i = 0; i < SAGraveyards.Max; i++)
             {
                 WorldSafeLocsEntry sg = Global.ObjectMgr.GetWorldSafeLoc(SAMiscConst.GYEntries[i]);
                 if (sg == null)
@@ -744,7 +744,7 @@ namespace Game.BattleGrounds.Zones
             }
         }
 
-        void CaptureGraveyard(int i, Player source)
+        void CaptureGraveyard(uint i, Player source)
         {
             if (GraveyardStatus[i] == Attackers)
                 return;
@@ -773,7 +773,7 @@ namespace Game.BattleGrounds.Zones
                         SAMiscConst.ObjSpawnlocs[flag], 0, 0, 0, 0, BattlegroundConst.RespawnOneDay);
 
                     npc = SACreatureTypes.Rigspark;
-                    Creature rigspark = AddCreature(SAMiscConst.NpcEntries[npc], (int)npc, SAMiscConst.NpcSpawnlocs[npc], Attackers);
+                    Creature rigspark = AddCreature(SAMiscConst.NpcEntries[npc], npc, SAMiscConst.NpcSpawnlocs[npc], Attackers);
                     if (rigspark != null)
                         rigspark.GetAI().Talk(SATextIds.SparklightRigsparkSpawn);
 
@@ -801,7 +801,7 @@ namespace Game.BattleGrounds.Zones
                         SAMiscConst.ObjSpawnlocs[flag], 0, 0, 0, 0, BattlegroundConst.RespawnOneDay);
 
                     npc = SACreatureTypes.Sparklight;
-                    Creature sparklight = AddCreature(SAMiscConst.NpcEntries[npc], (int)npc, SAMiscConst.NpcSpawnlocs[npc], Attackers);
+                    Creature sparklight = AddCreature(SAMiscConst.NpcEntries[npc], npc, SAMiscConst.NpcSpawnlocs[npc], Attackers);
                     if (sparklight != null)
                         sparklight.GetAI().Talk(SATextIds.SparklightRigsparkSpawn);
 

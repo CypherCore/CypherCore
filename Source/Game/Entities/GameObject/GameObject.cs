@@ -322,6 +322,10 @@ namespace Game.Entities
                         m_invisibility.AddValue(InvisibilityType.Trap, 300);
                     }
                     break;
+                case GameObjectTypes.ControlZone:
+                    m_goTypeImpl = new ControlZone(this);
+                    SetActive(true);
+                    break;
                 case GameObjectTypes.NewFlag:
                     m_goTypeImpl = new GameObjectType.NewFlag(this);
                     if (map.Instanceable())
@@ -1594,6 +1598,10 @@ namespace Game.Entities
                     Log.outError(LogFilter.Spells, $"Spell {spellId} has unhandled action {action} in effect {effectIndex}");
                     break;
             }
+
+            // Apply side effects of type
+            if (m_goTypeImpl != null)
+                m_goTypeImpl.ActivateObject(action, param, spellCaster, spellId, effectIndex);
         }
 
         public void SetGoArtKit(uint kit)
@@ -2670,7 +2678,7 @@ namespace Game.Entities
         }
 
         public string[] GetStringIds() { return m_stringIds; }
-        
+
         public override string GetName(Locale locale = Locale.enUS)
         {
             if (locale != Locale.enUS)
@@ -3622,6 +3630,15 @@ namespace Game.Entities
             return newFlag.GetTakenFromBaseTime();
         }
 
+        public List<ObjectGuid> GetInsidePlayers()
+        {
+            ControlZone controlZone = m_goTypeImpl as ControlZone;
+            if (controlZone != null)
+                return controlZone.GetInsidePlayers();
+
+            return null;
+        }
+
         public bool MeetsInteractCondition(Player user)
         {
             if (m_goInfo.GetConditionID1() == 0)
@@ -3943,6 +3960,7 @@ namespace Game.Entities
         public virtual void OnStateChanged(GameObjectState oldState, GameObjectState newState) { }
         public virtual void OnRelocated() { }
         public virtual bool IsNeverVisibleFor(WorldObject seer, bool allowServersideObjects) { return false; }
+        public virtual void ActivateObject(GameObjectActions action, int param, WorldObject spellCaster = null, uint spellId = 0, int effectIndex = -1) { }
 
         public class CustomCommand
         {
@@ -4477,5 +4495,253 @@ namespace Game.Entities
         public DateTime ValidUntil = DateTime.MinValue;
         public GameObjectState? State;
         public bool Despawned;
+    }
+
+    class ControlZone : GameObjectTypeBase
+    {
+        TimeSpan _heartbeatRate;
+        TimeTracker _heartbeatTracker;
+        List<ObjectGuid> _insidePlayers = new();
+        int _previousTeamId;
+        float _value;
+        bool _contestedTriggered;
+
+        public ControlZone(GameObject owner) : base(owner)
+        {
+            _value = owner.GetGoInfo().ControlZone.startingValue;
+
+
+            if (owner.GetMap().Instanceable())
+                _heartbeatRate = TimeSpan.FromSeconds(1);
+            else if (owner.GetGoInfo().ControlZone.FrequentHeartbeat != 0)
+                _heartbeatRate = TimeSpan.FromSeconds(2.5);
+            else
+                _heartbeatRate = TimeSpan.FromSeconds(5);
+
+            _heartbeatTracker = new(_heartbeatRate);
+            _previousTeamId = GetControllingTeam();
+            _contestedTriggered = false;
+        }
+
+        public override void Update(uint diff)
+        {
+            if (_owner.HasFlag(GameObjectFlags.NotSelectable))
+                return;
+
+            _heartbeatTracker.Update(diff);
+            if (_heartbeatTracker.Passed())
+            {
+                _heartbeatTracker.Reset(_heartbeatRate);
+                HandleHeartbeat();
+            }
+        }
+
+        int GetControllingTeam()
+        {
+            if (_value < GetMaxHordeValue())
+                return TeamId.Horde;
+
+            if (_value > GetMinAllianceValue())
+                return TeamId.Alliance;
+
+            return TeamId.Neutral;
+        }
+
+        public List<ObjectGuid> GetInsidePlayers() { return _insidePlayers; }
+
+        public override void ActivateObject(GameObjectActions action, int param, WorldObject spellCaster, uint spellId, int effectIndex)
+        {
+            switch (action)
+            {
+                case GameObjectActions.MakeInert:
+                    foreach (ObjectGuid guid in _insidePlayers)
+                    {
+                        Player player = Global.ObjAccessor.GetPlayer(_owner, guid);
+                        if (player != null)
+                            player.SendUpdateWorldState(_owner.GetGoInfo().ControlZone.worldState1, 0);
+                    }
+
+                    _insidePlayers.Clear();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public void SetValue(float value)
+        {
+            _value = MathFunctions.RoundToInterval(ref value, 0.0f, 100.0f);
+        }
+
+        void HandleHeartbeat()
+        {
+            // update player list inside control zone
+            List<Unit> targetList = new();
+            SearchTargets(targetList);
+
+            int oldControllingTeam = GetControllingTeam();
+            float pointsGained = CalculatePointsPerSecond(targetList) * (float)_heartbeatRate.TotalMilliseconds / 1000.0f;
+            if (pointsGained == 0)
+                return;
+
+            int oldRoundedValue = (int)_value;
+            SetValue(_value + pointsGained);
+            int roundedValue = (int)_value;
+            if (oldRoundedValue == roundedValue)
+                return;
+
+            int newControllingTeam = GetControllingTeam();
+            int assaultingTeam = pointsGained > 0 ? TeamId.Alliance : TeamId.Horde;
+
+            if (oldControllingTeam != newControllingTeam)
+                _contestedTriggered = false;
+
+            if (oldControllingTeam != TeamId.Alliance && newControllingTeam == TeamId.Alliance)
+                TriggerEvent(_owner.GetGoInfo().ControlZone.ProgressEventAlliance);
+            else if (oldControllingTeam != TeamId.Horde && newControllingTeam == TeamId.Horde)
+                TriggerEvent(_owner.GetGoInfo().ControlZone.ProgressEventHorde);
+            else if (oldControllingTeam == TeamId.Horde && newControllingTeam == TeamId.Neutral)
+                TriggerEvent(_owner.GetGoInfo().ControlZone.NeutralEventHorde);
+            else if (oldControllingTeam == TeamId.Alliance && newControllingTeam == TeamId.Neutral)
+                TriggerEvent(_owner.GetGoInfo().ControlZone.NeutralEventAlliance);
+
+            if (roundedValue == 100 && newControllingTeam == TeamId.Alliance && assaultingTeam == TeamId.Alliance)
+                TriggerEvent(_owner.GetGoInfo().ControlZone.CaptureEventAlliance);
+            else if (roundedValue == 0 && newControllingTeam == TeamId.Horde && assaultingTeam == TeamId.Horde)
+                TriggerEvent(_owner.GetGoInfo().ControlZone.CaptureEventHorde);
+
+            if (oldRoundedValue == 100 && assaultingTeam == TeamId.Horde && !_contestedTriggered)
+            {
+                TriggerEvent(_owner.GetGoInfo().ControlZone.ContestedEventHorde);
+                _contestedTriggered = true;
+            }
+            else if (oldRoundedValue == 0 && assaultingTeam == TeamId.Alliance && !_contestedTriggered)
+            {
+                TriggerEvent(_owner.GetGoInfo().ControlZone.ContestedEventAlliance);
+                _contestedTriggered = true;
+            }
+
+            foreach (Player player in targetList)
+                player.SendUpdateWorldState(_owner.GetGoInfo().ControlZone.worldstate2, (uint)roundedValue);
+        }
+
+        void SearchTargets(List<Unit> targetList)
+        {
+            AnyUnitInObjectRangeCheck check = new(_owner, _owner.GetGoInfo().ControlZone.radius, true);
+            PlayerListSearcher searcher = new(_owner, targetList, check);
+            Cell.VisitWorldObjects(_owner, searcher, _owner.GetGoInfo().ControlZone.radius);
+            HandleUnitEnterExit(targetList);
+        }
+
+        float CalculatePointsPerSecond(List<Unit> targetList)
+        {
+            int delta = 0;
+
+            foreach (Player player in targetList)
+            {
+                if (!player.IsOutdoorPvPActive())
+                    continue;
+
+                if (player.GetTeam() == Team.Horde)
+                    delta--;
+                else
+                    delta++;
+            }
+
+            uint minTime = _owner.GetGoInfo().ControlZone.minTime;
+            uint maxTime = _owner.GetGoInfo().ControlZone.maxTime;
+            uint minSuperiority = _owner.GetGoInfo().ControlZone.minSuperiority;
+            uint maxSuperiority = _owner.GetGoInfo().ControlZone.maxSuperiority;
+
+            if (Math.Abs(delta) < minSuperiority)
+                return 0;
+
+            float slope = ((float)minTime - maxTime) / (maxSuperiority - minSuperiority);
+            float intercept = maxTime - slope * minSuperiority;
+            float timeNeeded = slope * Math.Abs(delta) + intercept;
+            float percentageIncrease = 100.0f / timeNeeded;
+
+            if (delta < 0)
+                percentageIncrease *= -1;
+
+            return percentageIncrease;
+        }
+
+        void HandleUnitEnterExit(List<Unit> newTargetList)
+        {
+            List<ObjectGuid> exitPlayers = new(_insidePlayers);
+
+            List<Player> enteringPlayers = new();
+
+            foreach (Player unit in newTargetList)
+            {
+                if (!exitPlayers.Remove(unit.GetGUID()))
+                    enteringPlayers.Add(unit);
+
+                _insidePlayers.Add(unit.GetGUID());
+            }
+
+            foreach (Player player in enteringPlayers)
+            {
+                player.SendUpdateWorldState(_owner.GetGoInfo().ControlZone.worldState1, 1);
+                player.SendUpdateWorldState(_owner.GetGoInfo().ControlZone.worldstate2, (uint)_value);
+                player.SendUpdateWorldState(_owner.GetGoInfo().ControlZone.worldstate3, _owner.GetGoInfo().ControlZone.neutralPercent);
+            }
+
+            foreach (ObjectGuid exitPlayerGuid in exitPlayers)
+            {
+                Player player = Global.ObjAccessor.GetPlayer(_owner, exitPlayerGuid);
+                if (player != null)
+                    player.SendUpdateWorldState(_owner.GetGoInfo().ControlZone.worldState1, 0);
+            }
+        }
+
+        float GetMaxHordeValue()
+        {
+            // ex: if neutralPercent is 40; then 0 - 30 is Horde Controlled
+            return 50.0f - _owner.GetGoInfo().ControlZone.neutralPercent / 2.0f;
+        }
+
+        float GetMinAllianceValue()
+        {
+            // ex: if neutralPercent is 40; then 70 - 100 is Alliance Controlled
+            return 50.0f + _owner.GetGoInfo().ControlZone.neutralPercent / 2.0f;
+        }
+
+        void TriggerEvent(uint eventId)
+        {
+            if (eventId <= 0)
+                return;
+
+            GameEvents.Trigger(eventId, _owner, null);
+        }
+
+        public uint GetStartingValue()
+        {
+            return _owner.GetGoInfo().ControlZone.startingValue;
+        }
+    }
+
+    class SetControlZoneValue : GameObjectTypeBase.CustomCommand
+    {
+        uint? _value;
+
+        public SetControlZoneValue(uint? value = null)
+        {
+            _value = value;
+        }
+
+        public override void Execute(GameObjectTypeBase type)
+        {
+            ControlZone controlZone = type as ControlZone;
+            if (controlZone != null)
+            {
+                uint value = controlZone.GetStartingValue();
+                if (_value.HasValue)
+                    value = _value.Value;
+
+                controlZone.SetValue(value);
+            }
+        }
     }
 }
