@@ -213,7 +213,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("damage", RBACPermissions.CommandDamage)]
-        static bool HandleDamageCommand(CommandHandler handler, uint damage, SpellSchools? school, [OptionalArg]SpellInfo spellInfo)
+        static bool HandleDamageCommand(CommandHandler handler, uint damage, SpellSchools? school, [OptionalArg] SpellInfo spellInfo)
         {
             Unit target = handler.GetSelectedUnit();
             if (target == null || handler.GetSession().GetPlayer().GetTarget().IsEmpty())
@@ -784,7 +784,7 @@ namespace Game.Chat
             uint zoneId = player.GetZoneId();
 
             AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
-            if (areaEntry == null || areaEntry.ParentAreaID != 0)
+            if (areaEntry == null || areaEntry.GetFlags().HasFlag(AreaFlags.IsSubzone))
             {
                 handler.SendSysMessage(CypherStrings.CommandGraveyardwrongzone, graveyardId, zoneId);
                 return false;
@@ -1102,7 +1102,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("pinfo", RBACPermissions.CommandPinfo, true)]
-        static bool HandlePInfoCommand(CommandHandler handler, [OptionalArg]PlayerIdentifier arg)
+        static bool HandlePInfoCommand(CommandHandler handler, [OptionalArg] PlayerIdentifier arg)
         {
             if (arg == null)
                 arg = PlayerIdentifier.FromTargetOrSelf(handler);
@@ -1403,11 +1403,14 @@ namespace Game.Chat
             {
                 zoneName = area.AreaName[locale];
 
-                AreaTableRecord zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
-                if (zone != null)
+                if (area.GetFlags().HasFlag(AreaFlags.IsSubzone))
                 {
-                    areaName = zoneName;
-                    zoneName = zone.AreaName[locale];
+                    AreaTableRecord zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
+                    if (zone != null)
+                    {
+                        areaName = zoneName;
+                        zoneName = zone.AreaName[locale];
+                    }
                 }
             }
 

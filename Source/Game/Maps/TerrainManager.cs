@@ -785,7 +785,7 @@ namespace Game.Maps
             uint areaId = GetAreaId(phaseShift, mapId, x, y, z, dynamicMapTree);
             var area = CliDB.AreaTableStorage.LookupByKey(areaId);
             if (area != null)
-                if (area.ParentAreaID != 0)
+                if (area.ParentAreaID != 0 && area.GetFlags().HasFlag(AreaFlags.IsSubzone))
                     return area.ParentAreaID;
 
             return areaId;
@@ -798,7 +798,7 @@ namespace Game.Maps
             areaid = zoneid = GetAreaId(phaseShift, mapId, x, y, z, dynamicMapTree);
             var area = CliDB.AreaTableStorage.LookupByKey(areaid);
             if (area != null)
-                if (area.ParentAreaID != 0)
+                if (area.ParentAreaID != 0 && area.GetFlags().HasFlag(AreaFlags.IsSubzone))
                     zoneid = area.ParentAreaID;
         }
 

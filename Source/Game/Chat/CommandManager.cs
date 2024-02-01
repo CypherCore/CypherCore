@@ -331,9 +331,12 @@ namespace Game.Chat
             {
                 Locale locale = session.GetSessionDbcLocale();
                 areaName = area.AreaName[locale];
-                var zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
-                if (zone != null)
-                    zoneName = zone.AreaName[locale];
+                if (area.GetFlags().HasFlag(AreaFlags.IsSubzone))
+                {
+                    var zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
+                    if (zone != null)
+                        zoneName = zone.AreaName[locale];
+                }
             }
 
             Log.outCommand(session.GetAccountId(), $"Command: {cmdStr} [Player: {player.GetName()} ({player.GetGUID()}) (Account: {session.GetAccountId()}) " +

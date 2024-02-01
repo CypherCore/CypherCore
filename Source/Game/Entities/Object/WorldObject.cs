@@ -114,7 +114,7 @@ namespace Game.Entities
 
             var area = CliDB.AreaTableStorage.LookupByKey(m_areaId);
             if (area != null)
-                if (area.ParentAreaID != 0)
+                if (area.ParentAreaID != 0 && area.GetFlags().HasFlag(AreaFlags.IsSubzone))
                     m_zoneId = area.ParentAreaID;
 
             m_outdoors = data.outdoors;

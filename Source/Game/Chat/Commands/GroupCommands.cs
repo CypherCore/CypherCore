@@ -203,7 +203,7 @@ namespace Game.Chat
                     phases = PhasingHandler.FormatPhases(player.GetPhaseShift());
 
                     AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(player.GetAreaId());
-                    if (area != null)
+                    if (area != null && area.GetFlags().HasFlag(AreaFlags.IsSubzone))
                     {
                         AreaTableRecord zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
                         if (zone != null)

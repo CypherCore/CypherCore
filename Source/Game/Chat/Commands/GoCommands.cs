@@ -405,14 +405,16 @@ namespace Game.Chat.Commands
             }
 
             // update to parent zone if exist (client map show only zones without parents)
-            AreaTableRecord zoneEntry = areaEntry.ParentAreaID != 0 ? CliDB.AreaTableStorage.LookupByKey(areaEntry.ParentAreaID) : areaEntry;
+            var zoneEntry = areaEntry.ParentAreaID != 0 && areaEntry.GetFlags().HasFlag(AreaFlags.IsSubzone)
+                ? CliDB.AreaTableStorage.LookupByKey(areaEntry.ParentAreaID)
+                : areaEntry;
             Cypher.Assert(zoneEntry != null);
 
             x /= 100.0f;
             y /= 100.0f;
 
             TerrainInfo terrain = Global.TerrainMgr.LoadTerrain(zoneEntry.ContinentID);
-            if (!Global.DB2Mgr.Zone2MapCoordinates(areaEntry.ParentAreaID != 0 ? areaEntry.ParentAreaID : areaId, ref x, ref y))
+            if (!Global.DB2Mgr.Zone2MapCoordinates(zoneEntry.Id, ref x, ref y))
             {
                 handler.SendSysMessage(CypherStrings.InvalidZoneMap, areaId, areaEntry.AreaName[handler.GetSessionDbcLocale()], terrain.GetId(), terrain.GetMapName());
                 return false;
@@ -545,7 +547,7 @@ namespace Game.Chat.Commands
             {
                 GameObjectData spawnpoint = null;
                 foreach (var pair in Global.ObjectMgr.GetAllGameObjectData())
-        {
+                {
                     if (pair.Value.Id != goId)
                         continue;
 

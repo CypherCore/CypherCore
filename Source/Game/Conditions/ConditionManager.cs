@@ -1348,7 +1348,7 @@ namespace Game
                         return false;
                     }
 
-                    if (areaEntry.ParentAreaID != 0)
+                    if (areaEntry.ParentAreaID != 0 && areaEntry.GetFlags().HasFlag(AreaFlags.IsSubzone))
                     {
                         Log.outError(LogFilter.Sql, "{0} requires to be in area ({1}) which is a subzone but zone expected, skipped.", cond.ToString(true), cond.ConditionValue1);
                         return false;
