@@ -5,6 +5,7 @@ using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
 using Framework.IO;
+using Game.Achievements;
 using Game.Conditions;
 using Game.DataStorage;
 using Game.Entities;
@@ -1481,6 +1482,26 @@ namespace Game
                         _eventStorage.Add(node.DepartureEventID);
                 }
             }
+
+            // Load all possible event ids from criterias
+            void addCriteriaEventsToStore(List<Criteria> criteriaList)
+            {
+                foreach (Criteria criteria in criteriaList)
+                    if (criteria.Entry.Asset != 0)
+                        _eventStorage.Add(criteria.Entry.Asset);
+            };
+
+            CriteriaType[] eventCriteriaTypes = { CriteriaType.PlayerTriggerGameEvent, CriteriaType.AnyoneTriggerGameEventScenario };
+            foreach (CriteriaType criteriaType in eventCriteriaTypes)
+            {
+                addCriteriaEventsToStore(Global.CriteriaMgr.GetPlayerCriteriaByType(criteriaType, 0));
+                addCriteriaEventsToStore(Global.CriteriaMgr.GetGuildCriteriaByType(criteriaType));
+                addCriteriaEventsToStore(Global.CriteriaMgr.GetQuestObjectiveCriteriaByType(criteriaType));
+            }
+
+            foreach (ScenarioRecord scenario in CliDB.ScenarioStorage.Values)
+                foreach (CriteriaType criteriaType in eventCriteriaTypes)
+                    addCriteriaEventsToStore(Global.CriteriaMgr.GetScenarioCriteriaByTypeAndScenario(criteriaType, scenario.Id));
         }
 
         public void LoadEventScripts()
@@ -1495,7 +1516,7 @@ namespace Game
             foreach (var script in sEventScripts)
             {
                 if (!IsValidEvent(script.Key))
-                    Log.outError(LogFilter.Sql, $"Table `event_scripts` has script (Id: {script.Key}) not referring to any gameobject_template (data field referencing GameEvent), any taxi path node or any spell effect {SpellEffectName.SendEvent}");
+                    Log.outError(LogFilter.Sql, $"Table `event_scripts` has script (Id: {script.Key}) not referring to any gameobject_template (data field referencing GameEvent), any taxi path node, any criteria asset or any spell effect {SpellEffectName.SendEvent}");
             }
 
             uint oldMSTime = Time.GetMSTime();
@@ -1516,7 +1537,7 @@ namespace Game
 
                 if (!IsValidEvent(eventId))
                 {
-                    Log.outError(LogFilter.Sql, $"Event (ID: {eventId}) not referring to any gameobject_template (data field referencing GameEvent), any taxi path node or any spell effect {SpellEffectName.SendEvent}");
+                    Log.outError(LogFilter.Sql, $"Event (ID: {eventId}) not referring to any gameobject_template (data field referencing GameEvent), any taxi path node, any criteria asset or any spell effect {SpellEffectName.SendEvent}");
                     continue;
                 }
                 _eventScriptStorage[eventId] = GetScriptId(scriptName);
