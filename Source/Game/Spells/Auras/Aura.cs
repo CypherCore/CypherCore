@@ -1726,6 +1726,20 @@ namespace Game.Spells
 
                 if (GetSpellInfo().HasAttribute(SpellAttr12.OnlyProcFromClassAbilities) && !spell.GetSpellInfo().HasAttribute(SpellAttr13.AllowClassAbilityProcs))
                     return 0;
+
+                if (eventInfo.GetTypeMask().HasFlag(ProcFlags.TakenHitMask))
+                {
+                    if (spell.GetSpellInfo().HasAttribute(SpellAttr3.SuppressTargetProcs)
+                        && !GetSpellInfo().HasAttribute(SpellAttr7.CanProcFromSuppressedTargetProcs))
+                        return 0;
+                }
+                else
+                {
+                    if (spell.GetSpellInfo().HasAttribute(SpellAttr3.SuppressCasterProcs)
+                        && !spell.GetSpellInfo().HasAttribute(SpellAttr12.EnableProcsFromSuppressedCasterProcs)
+                        && !GetSpellInfo().HasAttribute(SpellAttr12.CanProcFromSuppressedCasterProcs))
+                        return 0;
+                }
             }
 
             // check don't break stealth attr present

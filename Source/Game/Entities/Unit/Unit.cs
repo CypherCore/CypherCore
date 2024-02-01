@@ -2724,7 +2724,7 @@ namespace Game.Entities
                 if (killer != null)
                 {
                     // in bg, count dmg if victim is also a player
-                    if (victim.IsPlayer())
+                    if (victim.IsPlayer() && !(spellProto != null && spellProto.HasAttribute(SpellAttr7.DoNotCountForPvpScoreboard)))
                     {
                         Battleground bg = killer.GetBattleground();
                         if (bg != null)
@@ -2864,7 +2864,7 @@ namespace Game.Entities
 
                 if (damagetype != DamageEffectType.NoDamage && damagetype != DamageEffectType.DOT)
                 {
-                    if (victim != attacker && (spellProto == null || !(spellProto.HasAttribute(SpellAttr6.NoPushback) || spellProto.HasAttribute(SpellAttr7.NoPushbackOnDamage) || spellProto.HasAttribute(SpellAttr3.TreatAsPeriodic))))
+                    if (victim != attacker && (spellProto == null || !(spellProto.HasAttribute(SpellAttr6.NoPushback) || spellProto.HasAttribute(SpellAttr7.DontCauseSpellPushback) || spellProto.HasAttribute(SpellAttr3.TreatAsPeriodic))))
                     {
                         Spell spell = victim.GetCurrentSpell(CurrentSpellTypes.Generic);
                         if (spell != null)

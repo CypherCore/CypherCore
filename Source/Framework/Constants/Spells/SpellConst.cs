@@ -1892,38 +1892,38 @@ namespace Framework.Constants
     }
     public enum SpellAttr7 : uint
     {
-        Unk0 = 0x01, //  0 Shaman'S New Spells (Call Of The ...), Feign Death.
-        IgnoreDurationMods = 0x02, //  1 Duration is not affected by duration modifiers
-        DisableAuraWhileDead = 0x04, //  2 Disable Aura While Dead
-        IsCheatSpell = 0x08, //  3 Cannot Cast If Caster Doesn'T Have Unitflag2 & UnitFlag2AllowCheatSpells
-        Unk4 = 0x10, //  4 Only 47883 (Soulstone Resurrection) And Test Spell.
-        SummonTotem = 0x20, //  5 Only Shaman Player Totems.
-        NoPushbackOnDamage = 0x40, //  6 Does not cause spell pushback on damage
-        Unk7 = 0x80, //  7 66218 (Launch) Spell.
-        HordeOnly = 0x100, //  8 Teleports, Mounts And Other Spells.
-        AllianceOnly = 0x200, //  9 Teleports, Mounts And Other Spells.
-        DispelCharges = 0x400, // 10 Dispel And Spellsteal Individual Charges Instead Of Whole Aura.
-        InterruptOnlyNonplayer = 0x800, // 11 Only Non-Player Casts Interrupt, Though Feral Charge - Bear Has It.
-        SilenceOnlyNonplayer = 0x1000, // 12 Not Set In 3.2.2a.
-        CanAlwaysBeInterrupted = 0x2000, // 13 Can always be interrupted, even if caster is immune
-        Unk14 = 0x4000, // 14 Only 52150 (Raise Dead - Pet) Spell.
-        Unk15 = 0x8000, // 15 Exorcism. Usable On Players? 100% Crit Chance On Undead And Demons?
-        HiddenInSpellbookWhenLearned = 0x10000, // 16 After learning these spells become hidden in spellbook (but are visible when not learned for low level characters)
-        Unk17 = 0x20000, // 17 Only 27965 (Suicide) Spell.
-        HasChargeEffect = 0x40000, // 18 Only Spells That Have Charge Among Effects.
-        ZoneTeleport = 0x80000, // 19 Teleports To Specific Zones.
-        Unk20 = 0x100000, // 20 Blink, Divine Shield, Ice Block
-        Unk21 = 0x200000, // 21 Not Set
-        Unk22 = 0x400000, // 22
-        NoAttackDodge = 0x800000, // 23 No Attack Dodge
-        NoAttackParry = 0x1000000, // 24 No Attack Parry
+        AllowSpellReflection = 0x01, // Allow Spell Reflection
+        NoTargetDurationMod = 0x02, // No Target Duration Mod
+        DisableAuraWhileDead = 0x04, // Disable Aura While Dead
+        DebugSpell = 0x08, // Debug Spell Description Cannot Cast If Caster Doesn'T Have Unitflag2 & UnitFlag2AllowCheatSpells
+        TreatAsRaidBuff = 0x10, /*Nyi*/ // Treat As Raid Buff
+        CanBeMultiCast = 0x20, // Can Be Multi Cast
+        DontCauseSpellPushback = 0x40, // Don'T Cause Spell Pushback Description Damage Dealt By This Does Not Cause Spell Pushback
+        PrepareForVehicleControlEnd = 0x80, /*Nyi*/ // Prepare For Vehicle Control End
+        HordeSpecificSpell = 0x100, /*Nyi*/ // Horde Specific Spell
+        AllianceSpecificSpell = 0x200, /*Nyi*/ // Alliance Specific Spell
+        DispelRemovesCharges = 0x400, // Dispel Removes Charges Description Dispel/Spellsteal Remove Individual Charges
+        CanCauseInterrupt = 0x800, // Can Cause Interrupt Description Only Interrupt Non-Player Casting
+        CanCauseSilence = 0x1000, /*Nyi*/ // Can Cause Silence
+        NoUiNotInterruptible = 0x2000, // No Ui Not Interruptible Description Can Always Be Interrupted, Even If Caster Is Immune
+        RecastOnResummon = 0x4000, /*Nyi - Deprecated Attribute, There Is No SpellGo Sent Anymore On Pet Resummon*/ // Recast On Resummon
+        ResetSwingTimerAtSpellStart = 0x8000, // Reset Swing Timer At Spell Start
+        OnlyInSpellbookUntilLearned = 0x10000, // Only In Spellbook Until Learned Description After Learning These Spells Become Hidden In Spellbook (But Are Visible When Not Learned For Low Level Characters)
+        DoNotLogPvpKill = 0x20000, /*Nyi, Only Used By 1 Spell That Is Already Filtered Out In Pvp Credits Because Its Self Targeting*/ // Do Not Log Pvp Kill
+        AttackOnChargeToUnit = 0x40000, // Attack On Charge To Unit
+        ReportSpellFailureToUnitTarget = 0x80000, // Report Spell Failure To Unit Target
+        NoClientFailWhileStunnedFleeingConfused = 0x100000, // No Client Fail While Stunned, Fleeing, Confused Description Clientside - Skips Stunned/Fleeing/Confused Checks
+        RetainCooldownThroughLoad = 0x200000, /*Nyi*/ // Retain Cooldown Through Load
+        IgnoresColdWeatherFlyingRequirement = 0x400000, /*Nyi - Deprecated Attribute*/ // Ignores Cold Weather Flying Requirement
+        NoAttackDodge = 0x800000, // No Attack Dodge
+        NoAttackParry = 0x1000000, // No Attack Parry
         NoAttackMiss = 0x2000000, // No Attack Miss
-        Unk26 = 0x4000000, // 26
-        BypassNoResurrectAura = 0x8000000, // 27 Bypass No Resurrect Aura
-        ConsolidatedRaidBuff = 0x10000000, // 28 Related To Player Positive Buff
-        Unk29 = 0x20000000, // 29 Only 69028, 71237
-        Unk30 = 0x40000000, // 30 Burning Determination, Divine Sacrifice, Earth Shield, Prayer Of Mending
-        ClientIndicator = 0x80000000  // 31 Only 70769
+        TreatAsNpcAoe = 0x4000000, // Treat As Npc Aoe
+        BypassNoResurrectAura = 0x8000000, // Bypass No Resurrect Aura
+        DoNotCountForPvpScoreboard = 0x10000000, // Do Not Count For Pvp Scoreboard
+        ReflectionOnlyDefends = 0x20000000, // Reflection Only Defends
+        CanProcFromSuppressedTargetProcs = 0x40000000, // Can Proc From Suppressed Target Procs
+        AlwaysCastLog = 0x80000000  // Always Cast Log
     }
     public enum SpellAttr8 : uint
     {
@@ -2067,8 +2067,8 @@ namespace Framework.Constants
     }
     public enum SpellAttr12 : uint
     {
-        Unk0 = 0x01, //  0
-        Unk1 = 0x02, //  1
+        EnableProcsFromSuppressedCasterProcs = 0x01, //  0
+        CanProcFromSuppressedCasterProcs = 0x02, //  1
         Unk2 = 0x04, //  2
         Unk3 = 0x08, //  3
         Unk4 = 0x10, //  4
@@ -2595,7 +2595,7 @@ namespace Framework.Constants
 
         RangedMask = DealRangedAttack | TakeRangedAttack | DealRangedAbility | TakeRangedAbility,
 
-        SpellMask = DealMeleeAbility | TakeMeleeAbility |  DealRangedAttack | TakeRangedAttack
+        SpellMask = DealMeleeAbility | TakeMeleeAbility | DealRangedAttack | TakeRangedAttack
             | DealRangedAbility | TakeRangedAbility | DealHelpfulAbility | TakeHelpfulAbility
             | DealHarmfulAbility | TakeHarmfulAbility | DealHelpfulSpell | TakeHelpfulSpell
             | DealHarmfulSpell | TakeHarmfulSpell | DealHarmfulPeriodic | TakeHarmfulPeriodic | DealHelpfulPeriodic | TakeHelpfulPeriodic,

@@ -3952,7 +3952,7 @@ namespace Game.Spells
 
         public bool CanBeInterrupted(WorldObject interruptCaster, Unit interruptTarget, bool ignoreImmunity = false)
         {
-            return HasAttribute(SpellAttr7.CanAlwaysBeInterrupted)
+            return HasAttribute(SpellAttr7.NoUiNotInterruptible)
                 || HasChannelInterruptFlag(SpellAuraInterruptFlags.Damage | SpellAuraInterruptFlags.EnteringCombat)
                 || (interruptTarget.IsPlayer() && InterruptFlags.HasFlag(SpellInterruptFlags.DamageCancelsPlayerOnly))
                 || InterruptFlags.HasFlag(SpellInterruptFlags.DamageCancels)

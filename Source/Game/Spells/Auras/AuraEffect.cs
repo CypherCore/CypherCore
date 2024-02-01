@@ -5126,8 +5126,8 @@ namespace Game.Spells
 
             if (!GetSpellInfo().HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers))
             {
-                if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) || GetSpellInfo().HasAttribute(SpellAttr5.TreatAsAreaEffect))
-                    damage = (uint)target.CalculateAOEAvoidance((int)damage, (uint)m_spellInfo.SchoolMask, GetBase().GetCastItemGUID());
+                if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) || GetSpellInfo().HasAttribute(SpellAttr5.TreatAsAreaEffect) || GetSpellInfo().HasAttribute(SpellAttr7.TreatAsNpcAoe))
+                    damage = (uint)target.CalculateAOEAvoidance((int)damage, (uint)m_spellInfo.SchoolMask, (caster != null && !caster.IsControlledByPlayer()) || GetSpellInfo().HasAttribute(SpellAttr7.TreatAsNpcAoe));
             }
 
             int dmg = (int)damage;
@@ -5208,8 +5208,8 @@ namespace Game.Spells
 
             if (!GetSpellInfo().HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers))
             {
-                if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) || GetSpellInfo().HasAttribute(SpellAttr5.TreatAsAreaEffect))
-                    damage = (uint)target.CalculateAOEAvoidance((int)damage, (uint)m_spellInfo.SchoolMask, GetBase().GetCastItemGUID());
+                if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) || GetSpellInfo().HasAttribute(SpellAttr5.TreatAsAreaEffect) || GetSpellInfo().HasAttribute(SpellAttr7.TreatAsNpcAoe))
+                    damage = (uint)target.CalculateAOEAvoidance((int)damage, (uint)m_spellInfo.SchoolMask, (caster != null && !caster.IsControlledByPlayer()) || GetSpellInfo().HasAttribute(SpellAttr7.TreatAsNpcAoe));
             }
 
             int dmg = (int)damage;
