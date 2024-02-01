@@ -4088,5 +4088,6 @@ namespace Game.Entities
 
         public ObjectGuid? OwnerGuid;
         public ObjectGuid? PrivateObjectOwnerGuid;
+        public GameObjectTypes? GameObjectType;
     }
 }
