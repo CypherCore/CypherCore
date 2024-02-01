@@ -241,7 +241,6 @@ namespace Scripts.EasternKingdoms.Karazhan
                             GameObject sideEntrance = instance.GetGameObject(SideEntranceDoor);
                             if (sideEntrance != null)
                                 sideEntrance.RemoveFlag(GameObjectFlags.Locked);
-                            UpdateEncounterStateForKilledCreature(16812, null);
                         }
                         break;
                     case DataTypes.Chess:
