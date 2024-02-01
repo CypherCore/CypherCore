@@ -868,6 +868,9 @@ namespace Game.Movement
 
         void UpdateFilter()
         {
+            _filter.setIncludeFlags((ushort)(_filter.getIncludeFlags() | _source.GetMap().GetForceEnabledNavMeshFilterFlags()));
+            _filter.setExcludeFlags((ushort)(_filter.getExcludeFlags() | _source.GetMap().GetForceDisabledNavMeshFilterFlags()));
+
             // allow creatures to cheat and use different movement types if they are moved
             // forcefully into terrain they can't normally move in
             Unit _sourceUnit = _source.ToUnit();
