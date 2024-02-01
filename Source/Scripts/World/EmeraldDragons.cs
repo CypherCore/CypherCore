@@ -80,7 +80,6 @@ namespace Scripts.World.Achievements
         public const uint SayTaerarSummonShades = 1;
     }
 
-    [Script]
     class emerald_dragon : WorldBossAI
     {
         public emerald_dragon(Creature creature) : base(creature) { }
