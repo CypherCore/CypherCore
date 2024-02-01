@@ -3925,7 +3925,7 @@ namespace Game.Achievements
                     _questObjectiveCriteriasByType.Add(criteriaEntry.Type, criteria);
                 }
 
-                if (criteriaEntry.StartTimer != 0)
+                if (criteriaEntry.StartEvent != 0)
                     _criteriasByStartEvent[criteriaEntry.StartEvent].Add((int)criteriaEntry.StartAsset, criteria);
 
                 if (criteriaEntry.FailEvent != 0)
