@@ -591,18 +591,22 @@ namespace Game.Entities
         void LoadStaticPassengers()
         {
             uint mapId = (uint)GetGoInfo().MoTransport.SpawnMap;
+            if (mapId == 0)
+                return;
+
             var cells = Global.ObjectMgr.GetMapObjectGuids(mapId, GetMap().GetDifficultyID());
             if (cells == null)
                 return;
-            foreach (var cell in cells)
-            {
-                // Creatures on transport
-                foreach (var npc in cell.Value.creatures)
-                    CreateNPCPassenger(npc, Global.ObjectMgr.GetCreatureData(npc));
 
+            foreach (var (_, guids) in cells)
+            {
                 // GameObjects on transport
-                foreach (var go in cell.Value.gameobjects)
-                    CreateGOPassenger(go, Global.ObjectMgr.GetGameObjectData(go));
+                foreach (var spawnId in guids.gameobjects)
+                    CreateGOPassenger(spawnId, Global.ObjectMgr.GetGameObjectData(spawnId));
+
+                // Creatures on transport
+                foreach (var spawnId in guids.creatures)
+                    CreateNPCPassenger(spawnId, Global.ObjectMgr.GetCreatureData(spawnId));
             }
         }
 

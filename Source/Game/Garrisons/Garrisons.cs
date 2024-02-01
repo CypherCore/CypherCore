@@ -738,20 +738,24 @@ namespace Game.Garrisons
 
                 if (go.GetGoType() == GameObjectTypes.GarrisonBuilding && go.GetGoInfo().GarrisonBuilding.SpawnMap != 0)
                 {
-                    foreach (var cellGuids in Global.ObjectMgr.GetMapObjectGuids((uint)go.GetGoInfo().GarrisonBuilding.SpawnMap, map.GetDifficultyID()))
+                    var cells = Global.ObjectMgr.GetMapObjectGuids((uint)go.GetGoInfo().GarrisonBuilding.SpawnMap, map.GetDifficultyID());
+                    if (cells != null)
                     {
-                        foreach (var spawnId in cellGuids.Value.creatures)
+                        foreach (var (_, guids) in cells)
                         {
-                            Creature spawn = BuildingSpawnHelper<Creature>(go, spawnId, map);
-                            if (spawn != null)
-                                BuildingInfo.Spawns.Add(spawn.GetGUID());
-                        }
+                            foreach (var spawnId in guids.creatures)
+                            {
+                                Creature spawn = BuildingSpawnHelper<Creature>(go, spawnId, map);
+                                if (spawn != null)
+                                    BuildingInfo.Spawns.Add(spawn.GetGUID());
+                            }
 
-                        foreach (var spawnId in cellGuids.Value.gameobjects)
-                        {
-                            GameObject spawn = BuildingSpawnHelper<GameObject>(go, spawnId, map);
-                            if (spawn != null)
-                                BuildingInfo.Spawns.Add(spawn.GetGUID());
+                            foreach (var spawnId in guids.gameobjects)
+                            {
+                                GameObject spawn = BuildingSpawnHelper<GameObject>(go, spawnId, map);
+                                if (spawn != null)
+                                    BuildingInfo.Spawns.Add(spawn.GetGUID());
+                            }
                         }
                     }
                 }

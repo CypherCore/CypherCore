@@ -101,20 +101,16 @@ namespace Game.Maps
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
             CellObjectGuids cellguids = Global.ObjectMgr.GetCellObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), cellCoord.GetId());
-            if (cellguids == null)
-                return;
-
-            LoadHelper<GameObject>(cellguids.gameobjects, cellCoord, ref i_gameObjects, i_map);
+            if (cellguids != null)
+                LoadHelper<GameObject>(cellguids.gameobjects, cellCoord, ref i_gameObjects, i_map);
         }
 
         public override void Visit(IList<Creature> objs)
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
             CellObjectGuids cellguids = Global.ObjectMgr.GetCellObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), cellCoord.GetId());
-            if (cellguids == null)
-                return;
-
-            LoadHelper<Creature>(cellguids.creatures, cellCoord, ref i_creatures, i_map);
+            if (cellguids != null)
+                LoadHelper<Creature>(cellguids.creatures, cellCoord, ref i_creatures, i_map);
         }
 
         public override void Visit(IList<AreaTrigger> objs)
@@ -221,7 +217,7 @@ namespace Game.Maps
         {
             // stop any fights at grid de-activation and remove dynobjects/areatriggers created at cast by creatures
             for (var i = 0; i < objs.Count; ++i)
-            {  
+            {
                 Creature creature = objs[i];
                 creature.RemoveAllDynObjects();
                 creature.RemoveAllAreaTriggers();
@@ -274,7 +270,7 @@ namespace Game.Maps
 
                 obj.SetDestroyedObject(true);
                 obj.CleanupsBeforeDelete();
-            }       
+            }
         }
     }
 
