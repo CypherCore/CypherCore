@@ -3,6 +3,7 @@
 
 using Framework.Configuration;
 using Framework.Constants;
+using Game.DataStorage;
 using System;
 using System.Collections.Generic;
 
@@ -312,12 +313,12 @@ namespace Game
 
             if (reload)
             {
-                int val = (int)GetDefaultValue("RealmZone", RealmZones.Development);
+                int val = (int)GetDefaultValue("RealmZone", RealmManager.HardcodedDevelopmentRealmCategoryId);
                 if (val != (int)Values[WorldCfg.RealmZone])
                     Log.outError(LogFilter.ServerLoading, "RealmZone option can't be changed at worldserver.conf reload, using current value ({0}).", Values[WorldCfg.RealmZone]);
             }
             else
-                Values[WorldCfg.RealmZone] = GetDefaultValue("RealmZone", (int)RealmZones.Development);
+                Values[WorldCfg.RealmZone] = GetDefaultValue("RealmZone", RealmManager.HardcodedDevelopmentRealmCategoryId);
 
             Values[WorldCfg.AllowTwoSideInteractionCalendar] = GetDefaultValue("AllowTwoSide.Interaction.Calendar", false);
             Values[WorldCfg.AllowTwoSideInteractionChannel] = GetDefaultValue("AllowTwoSide.Interaction.Channel", false);
@@ -702,8 +703,11 @@ namespace Game
 
             Values[WorldCfg.ThreatRadius] = GetDefaultValue("ThreatRadius", 60.0f);
 
+            Values[WorldCfg.DeclinedNamesUsed] = GetDefaultValue("DeclinedNames", false);
             // always use declined names in the russian client
-            Values[WorldCfg.DeclinedNamesUsed] = (RealmZones)Values[WorldCfg.RealmZone] == RealmZones.Russian || GetDefaultValue("DeclinedNames", false);
+            var category = CliDB.CfgCategoriesStorage.LookupByKey((uint)Values[WorldCfg.RealmZone]);
+            if (category != null && category.GetCreateCharsetMask().HasFlag(CfgCategoriesCharsets.Russian))
+                Values[WorldCfg.DeclinedNamesUsed] = true;
 
             Values[WorldCfg.ListenRangeSay] = GetDefaultValue("ListenRange.Say", 25.0f);
             Values[WorldCfg.ListenRangeTextemote] = GetDefaultValue("ListenRange.TextEmote", 25.0f);

@@ -1079,6 +1079,22 @@ namespace Framework.Constants
         Factional = 0x40
     }
 
+    public enum CfgCategoriesCharsets
+    {
+        Any = 0x00,
+        Latin1 = 0x01,
+        English = 0x02,
+        Russian = 0x04,
+        Korean = 0x08,
+        Chinese = 0x10
+    }
+
+    public enum CfgCategoriesFlags
+    {
+        None = 0x0,
+        Tournament = 0x1
+    }
+
     [Flags]
     public enum ChrRacesFlag
     {

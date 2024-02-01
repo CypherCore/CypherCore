@@ -6,6 +6,21 @@ using System.Numerics;
 
 namespace Game.DataStorage
 {
+    public sealed class Cfg_CategoriesRecord
+    {
+        public uint Id;
+        public LocalizedString Name;
+        public ushort LocaleMask;
+        public byte CreateCharsetMask;
+        public byte ExistingCharsetMask;
+        public byte Flags;
+        public sbyte Order;
+
+        public CfgCategoriesCharsets GetCreateCharsetMask() { return (CfgCategoriesCharsets)CreateCharsetMask; }
+        public CfgCategoriesCharsets GetExistingCharsetMask() { return (CfgCategoriesCharsets)ExistingCharsetMask; }
+        public CfgCategoriesFlags GetFlags() { return (CfgCategoriesFlags)Flags; }
+    }
+    
     public sealed class Cfg_RegionsRecord
     {
         public uint Id;

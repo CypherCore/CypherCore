@@ -15,6 +15,8 @@ using Framework.Realm;
 
 public class RealmManager : Singleton<RealmManager>
 {
+    public static uint HardcodedDevelopmentRealmCategoryId = 1;
+
     RealmManager() { }
 
     public void Initialize(int updateInterval)

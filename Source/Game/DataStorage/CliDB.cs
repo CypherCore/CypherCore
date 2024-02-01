@@ -92,6 +92,7 @@ namespace Game.DataStorage
             BattlemasterListStorage = ReadDB2<BattlemasterListRecord>("BattlemasterList.db2", HotfixStatements.SEL_BATTLEMASTER_LIST, HotfixStatements.SEL_BATTLEMASTER_LIST_LOCALE);
             BroadcastTextStorage = ReadDB2<BroadcastTextRecord>("BroadcastText.db2", HotfixStatements.SEL_BROADCAST_TEXT, HotfixStatements.SEL_BROADCAST_TEXT_LOCALE);
             BroadcastTextDurationStorage = ReadDB2<BroadcastTextDurationRecord>("BroadcastTextDuration.db2", HotfixStatements.SEL_BROADCAST_TEXT_DURATION);
+            CfgCategoriesStorage = ReadDB2<Cfg_CategoriesRecord>("Cfg_Categories.db2", HotfixStatements.SEL_CFG_CATEGORIES, HotfixStatements.SEL_CFG_CATEGORIES_LOCALE);
             CfgRegionsStorage = ReadDB2<Cfg_RegionsRecord>("Cfg_Regions.db2", HotfixStatements.SEL_CFG_REGIONS);
             ChallengeModeItemBonusOverrideStorage = ReadDB2<ChallengeModeItemBonusOverrideRecord>("ChallengeModeItemBonusOverride.db2", HotfixStatements.SEL_CHALLENGE_MODE_ITEM_BONUS_OVERRIDE);
             CharTitlesStorage = ReadDB2<CharTitlesRecord>("CharTitles.db2", HotfixStatements.SEL_CHAR_TITLES, HotfixStatements.SEL_CHAR_TITLES_LOCALE);
@@ -525,6 +526,7 @@ namespace Game.DataStorage
         public static DB6Storage<BattlemasterListRecord> BattlemasterListStorage;
         public static DB6Storage<BroadcastTextRecord> BroadcastTextStorage;
         public static DB6Storage<BroadcastTextDurationRecord> BroadcastTextDurationStorage;
+        public static DB6Storage<Cfg_CategoriesRecord> CfgCategoriesStorage;
         public static DB6Storage<Cfg_RegionsRecord> CfgRegionsStorage;
         public static DB6Storage<ChallengeModeItemBonusOverrideRecord> ChallengeModeItemBonusOverrideStorage;
         public static DB6Storage<CharTitlesRecord> CharTitlesStorage;

@@ -1272,13 +1272,4 @@ namespace Framework.Constants
         CallForHelp = 2541,
         FleeForAssist = 1150
     }
-
-    public enum LanguageType
-    {
-        BasicLatin = 0x00,
-        ExtendenLatin = 0x01,
-        Cyrillic = 0x02,
-        EastAsia = 0x04,
-        Any = 0xFFFF
-    }
 }
