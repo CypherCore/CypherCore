@@ -5119,7 +5119,8 @@ namespace Game.Entities
                 RemoveAurasDueToSpell(auraOutside);
                 RemoveAurasDueToSpell(auraInside);
                 RemovePlayerFlag(PlayerFlags.WarModeActive);
-                RemovePvpFlag(UnitPVPStateFlags.PvP);
+                if (!HasPlayerFlag(PlayerFlags.InPVP))
+                    RemovePvpFlag(UnitPVPStateFlags.PvP);
                 RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.WarModeLeave);
             }
         }
