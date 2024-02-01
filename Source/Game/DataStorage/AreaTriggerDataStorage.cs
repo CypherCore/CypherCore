@@ -191,8 +191,14 @@ namespace Game.DataStorage
                     createProperties.ScriptId = Global.ObjectMgr.GetScriptId(areatriggerCreateProperties.Read<string>(20));
 
                     if (shape == AreaTriggerTypes.Polygon)
+                    {
                         if (createProperties.Shape.PolygonDatas.Height <= 0.0f)
+                        {
                             createProperties.Shape.PolygonDatas.Height = 1.0f;
+                            if (createProperties.Shape.PolygonDatas.HeightTarget <= 0.0f)
+                                createProperties.Shape.PolygonDatas.HeightTarget = 1.0f;
+                        }
+                    }
 
                     createProperties.PolygonVertices = verticesByCreateProperties[createProperties.Id];
                     createProperties.PolygonVerticesTarget = verticesTargetByCreateProperties[createProperties.Id];
