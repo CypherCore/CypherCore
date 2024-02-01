@@ -6,16 +6,55 @@ using Game.Entities;
 using Game.Maps;
 using Game.Networking.Packets;
 using Game.Scripting;
+using System.Collections.Generic;
 
-namespace Game.PvP
+namespace Game.PvP.HellfirePeninsula
 {
     class HellfirePeninsulaPvP : OutdoorPvP
     {
+        // how many towers are controlled
+        uint m_AllianceTowersControlled;
+        uint m_HordeTowersControlled;
+        List<ObjectGuid> _controlZoneGUIDs = new();
+
         public HellfirePeninsulaPvP(Map map) : base(map)
         {
             m_TypeId = OutdoorPvPTypes.HellfirePeninsula;
             m_AllianceTowersControlled = 0;
             m_HordeTowersControlled = 0;
+
+            ControlZoneHandlers[(uint)GameObjectIds.TowerS] = new HellfirePeninsulaControlZoneHandler(this);
+            GetControlZoneTowerSouthHandler().SetFlagArtKitAlliance(65);
+            GetControlZoneTowerSouthHandler().SetFlagArtKitHorde(64);
+            GetControlZoneTowerSouthHandler().SetFlagArtKitNeutral(66);
+            GetControlZoneTowerSouthHandler().SetTextCaptureAlliance(DefenseMessages.BrokenHillTakenAlliance);
+            GetControlZoneTowerSouthHandler().SetTextCaptureHorde(DefenseMessages.BrokenHillTakenHorde);
+            GetControlZoneTowerSouthHandler().SetWorldstateAlliance(WorldStateIds.UiTowerSA);
+            GetControlZoneTowerSouthHandler().SetWorldstateHorde(WorldStateIds.UiTowerSH);
+            GetControlZoneTowerSouthHandler().SetWorldstateNeutral(WorldStateIds.UiTowerSN);
+            GetControlZoneTowerSouthHandler().SetKillCredit((uint)KillCreditIds.TowerS);
+
+            ControlZoneHandlers[(uint)GameObjectIds.TowerN] = new HellfirePeninsulaControlZoneHandler(this);
+            GetControlZoneTowerNorthHandler().SetFlagArtKitAlliance(62);
+            GetControlZoneTowerNorthHandler().SetFlagArtKitHorde(61);
+            GetControlZoneTowerNorthHandler().SetFlagArtKitNeutral(63);
+            GetControlZoneTowerNorthHandler().SetTextCaptureAlliance(DefenseMessages.OverlookTakenAlliance);
+            GetControlZoneTowerNorthHandler().SetTextCaptureHorde(DefenseMessages.OverlookTakenHorde);
+            GetControlZoneTowerNorthHandler().SetWorldstateAlliance(WorldStateIds.UiTowerNA);
+            GetControlZoneTowerNorthHandler().SetWorldstateHorde(WorldStateIds.UiTowerNH);
+            GetControlZoneTowerNorthHandler().SetWorldstateNeutral(WorldStateIds.UiTowerNN);
+            GetControlZoneTowerNorthHandler().SetKillCredit((uint)KillCreditIds.TowerN);
+
+            ControlZoneHandlers[(uint)GameObjectIds.TowerW] = new HellfirePeninsulaControlZoneHandler(this);
+            GetControlZoneTowerWestHandler().SetFlagArtKitAlliance(67);
+            GetControlZoneTowerWestHandler().SetFlagArtKitHorde(68);
+            GetControlZoneTowerWestHandler().SetFlagArtKitNeutral(69);
+            GetControlZoneTowerWestHandler().SetTextCaptureAlliance(DefenseMessages.StadiumTakenAlliance);
+            GetControlZoneTowerWestHandler().SetTextCaptureHorde(DefenseMessages.StadiumTakenHorde);
+            GetControlZoneTowerWestHandler().SetWorldstateAlliance(WorldStateIds.UiTowerWA);
+            GetControlZoneTowerWestHandler().SetWorldstateHorde(WorldStateIds.UiTowerWH);
+            GetControlZoneTowerWestHandler().SetWorldstateNeutral(WorldStateIds.UiTowerWN);
+            GetControlZoneTowerWestHandler().SetKillCredit((uint)KillCreditIds.TowerW);
         }
 
         public override bool SetupOutdoorPvP()
@@ -24,8 +63,8 @@ namespace Game.PvP
             m_HordeTowersControlled = 0;
 
             // add the zones affected by the pvp buff
-            for (int i = 0; i < HPConst.BuffZones.Length; ++i)
-                RegisterZone(HPConst.BuffZones[i]);
+            for (int i = 0; i < Misc.BuffZones.Length; ++i)
+                RegisterZone(Misc.BuffZones[i]);
 
             return true;
         }
@@ -34,23 +73,14 @@ namespace Game.PvP
         {
             switch (go.GetEntry())
             {
-                case 182175:
-                    AddCapturePoint(new HellfirePeninsulaCapturePoint(this, OutdoorPvPHPTowerType.BrokenHill, go, m_towerFlagSpawnIds[(int)OutdoorPvPHPTowerType.BrokenHill]));
-                    break;
-                case 182174:
-                    AddCapturePoint(new HellfirePeninsulaCapturePoint(this, OutdoorPvPHPTowerType.Overlook, go, m_towerFlagSpawnIds[(int)OutdoorPvPHPTowerType.Overlook]));
-                    break;
-                case 182173:
-                    AddCapturePoint(new HellfirePeninsulaCapturePoint(this, OutdoorPvPHPTowerType.Stadium, go, m_towerFlagSpawnIds[(int)OutdoorPvPHPTowerType.Stadium]));
-                    break;
                 case 183514:
-                    m_towerFlagSpawnIds[(int)OutdoorPvPHPTowerType.BrokenHill] = go.GetSpawnId();
+                    GetControlZoneTowerSouthHandler().SetFlagGuid(go.GetGUID());
                     break;
                 case 182525:
-                    m_towerFlagSpawnIds[(int)OutdoorPvPHPTowerType.Overlook] = go.GetSpawnId();
+                    GetControlZoneTowerNorthHandler().SetFlagGuid(go.GetGUID());
                     break;
                 case 183515:
-                    m_towerFlagSpawnIds[(int)OutdoorPvPHPTowerType.Stadium] = go.GetSpawnId();
+                    GetControlZoneTowerWestHandler().SetFlagGuid(go.GetGUID());
                     break;
                 default:
                     break;
@@ -65,12 +95,12 @@ namespace Game.PvP
             if (player.GetTeam() == Team.Alliance)
             {
                 if (m_AllianceTowersControlled >= 3)
-                    player.CastSpell(player, OutdoorPvPHPSpells.AllianceBuff, true);
+                    player.CastSpell(player, SpellIds.AllianceBuff, true);
             }
             else
             {
                 if (m_HordeTowersControlled >= 3)
-                    player.CastSpell(player, OutdoorPvPHPSpells.HordeBuff, true);
+                    player.CastSpell(player, SpellIds.HordeBuff, true);
             }
             base.HandlePlayerEnterZone(player, zone);
         }
@@ -79,31 +109,29 @@ namespace Game.PvP
         {
             // remove buffs
             if (player.GetTeam() == Team.Alliance)
-                player.RemoveAurasDueToSpell(OutdoorPvPHPSpells.AllianceBuff);
+                player.RemoveAurasDueToSpell(SpellIds.AllianceBuff);
             else
-                player.RemoveAurasDueToSpell(OutdoorPvPHPSpells.HordeBuff);
+                player.RemoveAurasDueToSpell(SpellIds.HordeBuff);
 
             base.HandlePlayerLeaveZone(player, zone);
         }
 
-        public override bool Update(uint diff)
+        public override void Update(uint diff)
         {
-            bool changed = base.Update(diff);
-            if (changed)
+            base.Update(diff);
+
+            if (m_AllianceTowersControlled == 3)
+                TeamApplyBuff(TeamId.Alliance, SpellIds.AllianceBuff, SpellIds.HordeBuff);
+            else if (m_HordeTowersControlled == 3)
+                TeamApplyBuff(TeamId.Horde, SpellIds.HordeBuff, SpellIds.AllianceBuff);
+            else
             {
-                if (m_AllianceTowersControlled == 3)
-                    TeamApplyBuff(TeamId.Alliance, OutdoorPvPHPSpells.AllianceBuff, OutdoorPvPHPSpells.HordeBuff);
-                else if (m_HordeTowersControlled == 3)
-                    TeamApplyBuff(TeamId.Horde, OutdoorPvPHPSpells.HordeBuff, OutdoorPvPHPSpells.AllianceBuff);
-                else
-                {
-                    TeamCastSpell(TeamId.Alliance, -(int)OutdoorPvPHPSpells.AllianceBuff);
-                    TeamCastSpell(TeamId.Horde, -(int)OutdoorPvPHPSpells.HordeBuff);
-                }
-                SetWorldState(OutdoorPvPHPWorldStates.Count_A, (int)m_AllianceTowersControlled);
-                SetWorldState(OutdoorPvPHPWorldStates.Count_H, (int)m_HordeTowersControlled);
+                TeamCastSpell(TeamId.Alliance, -(int)SpellIds.AllianceBuff);
+                TeamCastSpell(TeamId.Horde, -(int)SpellIds.HordeBuff);
             }
-            return changed;
+
+            SetWorldState(WorldStateIds.CountA, (int)m_AllianceTowersControlled);
+            SetWorldState(WorldStateIds.CountH, (int)m_HordeTowersControlled);
         }
 
         public override void SendRemoveWorldStates(Player player)
@@ -112,30 +140,53 @@ namespace Game.PvP
             initWorldStates.MapID = player.GetMapId();
             initWorldStates.AreaID = player.GetZoneId();
             initWorldStates.SubareaID = player.GetAreaId();
-            initWorldStates.AddState(OutdoorPvPHPWorldStates.Display_A, 0);
-            initWorldStates.AddState(OutdoorPvPHPWorldStates.Display_H, 0);
-            initWorldStates.AddState(OutdoorPvPHPWorldStates.Count_H, 0);
-            initWorldStates.AddState(OutdoorPvPHPWorldStates.Count_A, 0);
+            initWorldStates.AddState(WorldStateIds.DisplayA, 0);
+            initWorldStates.AddState(WorldStateIds.DisplayH, 0);
+            initWorldStates.AddState(WorldStateIds.CountH, 0);
+            initWorldStates.AddState(WorldStateIds.CountA, 0);
 
-            for (int i = 0; i < (int)OutdoorPvPHPTowerType.Num; ++i)
+            foreach (var pair in ControlZoneHandlers)
             {
-                initWorldStates.AddState(HPConst.Map_N[i], 0);
-                initWorldStates.AddState(HPConst.Map_A[i], 0);
-                initWorldStates.AddState(HPConst.Map_H[i], 0);
+                HellfirePeninsulaControlZoneHandler handler = pair.Value as HellfirePeninsulaControlZoneHandler;
+                initWorldStates.AddState(handler.GetWorldStateNeutral(), 0);
+                initWorldStates.AddState(handler.GetWorldStateHorde(), 0);
+                initWorldStates.AddState(handler.GetWorldStateAlliance(), 0);
             }
 
             player.SendPacket(initWorldStates);
         }
 
-        public override void HandleKillImpl(Player killer, Unit killed)
+        public override void HandleKillImpl(Player player, Unit killed)
         {
-            if (!killed.IsTypeId(TypeId.Player))
+            if (!killed.IsPlayer())
                 return;
 
-            if (killer.GetTeam() == Team.Alliance && killed.ToPlayer().GetTeam() != Team.Alliance)
-                killer.CastSpell(killer, OutdoorPvPHPSpells.AlliancePlayerKillReward, true);
-            else if (killer.GetTeam() == Team.Horde && killed.ToPlayer().GetTeam() != Team.Horde)
-                killer.CastSpell(killer, OutdoorPvPHPSpells.HordePlayerKillReward, true);
+            // need to check if player is inside an capture zone
+            bool isInsideCaptureZone = false;
+            foreach (ObjectGuid guid in _controlZoneGUIDs)
+            {
+                GameObject gameObject = GetMap().GetGameObject(guid);
+                if (gameObject != null)
+                {
+                    var insidePlayerGuids = gameObject.GetInsidePlayers();
+                    if (!insidePlayerGuids.Empty())
+                    {
+                        if (insidePlayerGuids.Contains(player.GetGUID()))
+                        {
+                            isInsideCaptureZone = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (isInsideCaptureZone)
+            {
+                if (player.GetTeam() == Team.Alliance && killed.ToPlayer().GetTeam() != Team.Alliance)
+                    player.CastSpell(player, SpellIds.AlliancePlayerKillReward, true);
+                else if (player.GetTeam() == Team.Horde && killed.ToPlayer().GetTeam() != Team.Horde)
+                    player.CastSpell(player, SpellIds.HordePlayerKillReward, true);
+            }
         }
 
         public uint GetAllianceTowersControlled()
@@ -158,131 +209,121 @@ namespace Game.PvP
             m_HordeTowersControlled = count;
         }
 
-        // how many towers are controlled
-        uint m_AllianceTowersControlled;
-        uint m_HordeTowersControlled;
-        ulong[] m_towerFlagSpawnIds = new ulong[(int)OutdoorPvPHPTowerType.Num];
+        HellfirePeninsulaControlZoneHandler GetControlZoneTowerNorthHandler() { return ControlZoneHandlers[(uint)GameObjectIds.TowerN] as HellfirePeninsulaControlZoneHandler; }
+        HellfirePeninsulaControlZoneHandler GetControlZoneTowerSouthHandler() { return ControlZoneHandlers[(uint)GameObjectIds.TowerS] as HellfirePeninsulaControlZoneHandler; }
+        HellfirePeninsulaControlZoneHandler GetControlZoneTowerWestHandler() { return ControlZoneHandlers[(uint)GameObjectIds.TowerW] as HellfirePeninsulaControlZoneHandler; }
     }
 
-    class HellfirePeninsulaCapturePoint : OPvPCapturePoint
+    class HellfirePeninsulaControlZoneHandler : OutdoorPvPControlZoneHandler
     {
-        public HellfirePeninsulaCapturePoint(OutdoorPvP pvp, OutdoorPvPHPTowerType type, GameObject go, ulong flagSpawnId) : base(pvp)
-        {
-            m_TowerType = (uint)type;
-            m_flagSpawnId = flagSpawnId;
+        ObjectGuid _flagGuid;
+        uint _textCaptureAlliance;
+        uint _textCaptureHorde;
+        uint _flagArtKitNeutral;
+        uint _flagArtKitHorde;
+        uint _flagArtKitAlliance;
+        int _worldstateNeutral;
+        int _worldstateHorde;
+        int _worldstateAlliance;
+        uint _killCredit;
 
-            m_capturePointSpawnId = go.GetSpawnId();
-            m_capturePoint = go;
-            SetCapturePointData(go.GetEntry());
+        public HellfirePeninsulaControlZoneHandler(HellfirePeninsulaPvP pvp) : base(pvp) { }
+
+        public override void HandleProgressEventHorde(GameObject controlZone)
+        {
+            base.HandleProgressEventHorde(controlZone);
+
+            controlZone.SetGoArtKit(1);
+            controlZone.SendCustomAnim(0);
+            GameObject flag = controlZone.GetMap().GetGameObject(_flagGuid);
+            if (flag != null)
+                flag.SetGoArtKit(_flagArtKitHorde);
+
+            controlZone.GetMap().SetWorldStateValue(_worldstateHorde, 1, false);
+            controlZone.GetMap().SetWorldStateValue(_worldstateAlliance, 0, false);
+            controlZone.GetMap().SetWorldStateValue(_worldstateNeutral, 0, false);
+
+            GetOutdoorPvPHP().SendDefenseMessage(Misc.BuffZones[0], _textCaptureHorde);
+
+            var guidSet = controlZone.GetInsidePlayers();
+            foreach (ObjectGuid guid in guidSet)
+            {
+                Player player = Global.ObjAccessor.GetPlayer(controlZone, guid);
+                if (player != null && player.GetTeam() == Team.Horde)
+                    player.KilledMonsterCredit(_killCredit);
+            }
         }
 
-        public override void ChangeState()
+        public override void HandleProgressEventAlliance(GameObject controlZone)
         {
-            uint field = 0;
-            switch (OldState)
+            base.HandleProgressEventAlliance(controlZone);
+
+            controlZone.SetGoArtKit(2);
+            controlZone.SendCustomAnim(1);
+            GameObject flag = controlZone.GetMap().GetGameObject(_flagGuid);
+            if (flag != null)
+                flag.SetGoArtKit(_flagArtKitAlliance);
+
+            controlZone.GetMap().SetWorldStateValue(_worldstateHorde, 0, false);
+            controlZone.GetMap().SetWorldStateValue(_worldstateAlliance, 1, false);
+            controlZone.GetMap().SetWorldStateValue(_worldstateNeutral, 0, false);
+
+            GetOutdoorPvPHP().SendDefenseMessage(Misc.BuffZones[0], _textCaptureAlliance);
+
+            var guidSet = controlZone.GetInsidePlayers();
+            foreach (ObjectGuid guid in guidSet)
             {
-                case ObjectiveStates.Neutral:
-                    field = HPConst.Map_N[m_TowerType];
-                    break;
-                case ObjectiveStates.Alliance:
-                    field = HPConst.Map_A[m_TowerType];
-                    uint alliance_towers = ((HellfirePeninsulaPvP)PvP).GetAllianceTowersControlled();
-                    if (alliance_towers != 0)
-                        ((HellfirePeninsulaPvP)PvP).SetAllianceTowersControlled(--alliance_towers);
-                    break;
-                case ObjectiveStates.Horde:
-                    field = HPConst.Map_H[m_TowerType];
-                    uint horde_towers = ((HellfirePeninsulaPvP)PvP).GetHordeTowersControlled();
-                    if (horde_towers != 0)
-                        ((HellfirePeninsulaPvP)PvP).SetHordeTowersControlled(--horde_towers);
-                    break;
-                case ObjectiveStates.NeutralAllianceChallenge:
-                    field = HPConst.Map_N[m_TowerType];
-                    break;
-                case ObjectiveStates.NeutralHordeChallenge:
-                    field = HPConst.Map_N[m_TowerType];
-                    break;
-                case ObjectiveStates.AllianceHordeChallenge:
-                    field = HPConst.Map_A[m_TowerType];
-                    break;
-                case ObjectiveStates.HordeAllianceChallenge:
-                    field = HPConst.Map_H[m_TowerType];
-                    break;
+                Player player = Global.ObjAccessor.GetPlayer(controlZone, guid);
+                if (player != null && player.GetTeam() == Team.Alliance)
+                    player.KilledMonsterCredit(_killCredit);
             }
-
-            // send world state update
-            if (field != 0)
-            {
-                PvP.SetWorldState((int)field, 0);
-                field = 0;
-            }
-            uint artkit = 21;
-            uint artkit2 = HPConst.TowerArtKit_N[m_TowerType];
-            switch (State)
-            {
-                case ObjectiveStates.Neutral:
-                    field = HPConst.Map_N[m_TowerType];
-                    break;
-                case ObjectiveStates.Alliance:
-                    {
-                        field = HPConst.Map_A[m_TowerType];
-                        artkit = 2;
-                        artkit2 = HPConst.TowerArtKit_A[m_TowerType];
-                        uint alliance_towers = ((HellfirePeninsulaPvP)PvP).GetAllianceTowersControlled();
-                        if (alliance_towers < 3)
-                            ((HellfirePeninsulaPvP)PvP).SetAllianceTowersControlled(++alliance_towers);
-                        PvP.SendDefenseMessage(HPConst.BuffZones[0], HPConst.LangCapture_A[m_TowerType]);
-                        break;
-                    }
-                case ObjectiveStates.Horde:
-                    {
-                        field = HPConst.Map_H[m_TowerType];
-                        artkit = 1;
-                        artkit2 = HPConst.TowerArtKit_H[m_TowerType];
-                        uint horde_towers = ((HellfirePeninsulaPvP)PvP).GetHordeTowersControlled();
-                        if (horde_towers < 3)
-                            ((HellfirePeninsulaPvP)PvP).SetHordeTowersControlled(++horde_towers);
-                        PvP.SendDefenseMessage(HPConst.BuffZones[0], HPConst.LangCapture_H[m_TowerType]);
-                        break;
-                    }
-                case ObjectiveStates.NeutralAllianceChallenge:
-                    field = HPConst.Map_N[m_TowerType];
-                    break;
-                case ObjectiveStates.NeutralHordeChallenge:
-                    field = HPConst.Map_N[m_TowerType];
-                    break;
-                case ObjectiveStates.AllianceHordeChallenge:
-                    field = HPConst.Map_A[m_TowerType];
-                    artkit = 2;
-                    artkit2 = HPConst.TowerArtKit_A[m_TowerType];
-                    break;
-                case ObjectiveStates.HordeAllianceChallenge:
-                    field = HPConst.Map_H[m_TowerType];
-                    artkit = 1;
-                    artkit2 = HPConst.TowerArtKit_H[m_TowerType];
-                    break;
-            }
-
-            Map map = Global.MapMgr.FindMap(530, 0);
-            var bounds = map.GetGameObjectBySpawnIdStore().LookupByKey(m_capturePointSpawnId);
-            foreach (var go in bounds)
-                go.SetGoArtKit(artkit);
-
-            bounds = map.GetGameObjectBySpawnIdStore().LookupByKey(m_flagSpawnId);
-            foreach (var go in bounds)
-                go.SetGoArtKit(artkit2);
-
-            // send world state update
-            if (field != 0)
-                PvP.SetWorldState((int)field, 1);
-
-            // complete quest objective
-            if (State == ObjectiveStates.Alliance || State == ObjectiveStates.Horde)
-                SendObjectiveComplete(HPConst.CreditMarker[m_TowerType], ObjectGuid.Empty);
         }
 
-        uint m_TowerType;
-        ulong m_flagSpawnId;
+        public override void HandleNeutralEventHorde(GameObject controlZone)
+        {
+            base.HandleNeutralEventHorde(controlZone);
+            GetOutdoorPvPHP().SetHordeTowersControlled(GetOutdoorPvPHP().GetHordeTowersControlled() - 1);
+        }
+
+        public override void HandleNeutralEventAlliance(GameObject controlZone)
+        {
+            base.HandleNeutralEventAlliance(controlZone);
+            GetOutdoorPvPHP().SetAllianceTowersControlled(GetOutdoorPvPHP().GetAllianceTowersControlled() - 1);
+        }
+
+        public override void HandleNeutralEvent(GameObject controlZone)
+        {
+            base.HandleNeutralEvent(controlZone);
+            controlZone.SetGoArtKit(21);
+            controlZone.SendCustomAnim(2);
+            GameObject flag = controlZone.GetMap().GetGameObject(_flagGuid);
+            if (flag != null)
+                flag.SetGoArtKit(_flagArtKitNeutral);
+
+            controlZone.GetMap().SetWorldStateValue(_worldstateHorde, 0, false);
+            controlZone.GetMap().SetWorldStateValue(_worldstateAlliance, 0, false);
+            controlZone.GetMap().SetWorldStateValue(_worldstateNeutral, 1, false);
+        }
+
+        public HellfirePeninsulaPvP GetOutdoorPvPHP()
+        {
+            return GetOutdoorPvP<HellfirePeninsulaPvP>();
+        }
+
+        public void SetFlagGuid(ObjectGuid guid) { _flagGuid = guid; }
+        public void SetTextCaptureHorde(uint text) { _textCaptureHorde = text; }
+        public void SetTextCaptureAlliance(uint text) { _textCaptureAlliance = text; }
+        public void SetFlagArtKitNeutral(uint artKit) { _flagArtKitNeutral = artKit; }
+        public void SetFlagArtKitHorde(uint artKit) { _flagArtKitHorde = artKit; }
+        public void SetFlagArtKitAlliance(uint artKit) { _flagArtKitAlliance = artKit; }
+        public void SetWorldstateNeutral(int id) { _worldstateNeutral = id; }
+        public void SetWorldstateHorde(int id) { _worldstateHorde = id; }
+        public void SetWorldstateAlliance(int id) { _worldstateAlliance = id; }
+        public void SetKillCredit(uint credit) { _killCredit = credit; }
+
+        public int GetWorldStateNeutral() { return _worldstateNeutral; }
+        public int GetWorldStateHorde() { return _worldstateHorde; }
+        public int GetWorldStateAlliance() { return _worldstateAlliance; }
     }
 
     [Script]
@@ -296,32 +337,10 @@ namespace Game.PvP
         }
     }
 
-    struct HPConst
+    struct Misc
     {
-        public static uint[] LangCapture_A = { DefenseMessages.BrokenHillTakenAlliance, DefenseMessages.OverlookTakenAlliance, DefenseMessages.StadiumTakenAlliance };
-
-        public static uint[] LangCapture_H = { DefenseMessages.BrokenHillTakenHorde, DefenseMessages.OverlookTakenHorde, DefenseMessages.StadiumTakenHorde };
-
-        public static uint[] Map_N = { 2485, 2482, 0x9a8 };
-
-        public static uint[] Map_A = { 2483, 2480, 2471 };
-
-        public static uint[] Map_H = { 2484, 2481, 2470 };
-
-        public static uint[] TowerArtKit_A = { 65, 62, 67 };
-
-        public static uint[] TowerArtKit_H = { 64, 61, 68 };
-
-        public static uint[] TowerArtKit_N = { 66, 63, 69 };
-
         //  HP, citadel, ramparts, blood furnace, shattered halls, mag's lair
         public static uint[] BuffZones = { 3483, 3563, 3562, 3713, 3714, 3836 };
-
-        public static uint[] CreditMarker = { 19032, 19028, 19029 };
-
-        public static uint[] CapturePointEventEnter = { 11404, 11396, 11388 };
-
-        public static uint[] CapturePointEventLeave = { 11403, 11395, 11387 };
     }
 
     struct DefenseMessages
@@ -334,7 +353,7 @@ namespace Game.PvP
         public const uint BrokenHillTakenHorde = 14846; // '|cffffff00Broken Hill has been taken by the Horde!|r'
     }
 
-    struct OutdoorPvPHPSpells
+    struct SpellIds
     {
         public const uint AlliancePlayerKillReward = 32155;
         public const uint HordePlayerKillReward = 32158;
@@ -342,7 +361,7 @@ namespace Game.PvP
         public const uint HordeBuff = 32049;
     }
 
-    enum OutdoorPvPHPTowerType
+    enum TowerType
     {
         BrokenHill = 0,
         Overlook = 1,
@@ -350,12 +369,56 @@ namespace Game.PvP
         Num = 3
     }
 
-    struct OutdoorPvPHPWorldStates
+    struct WorldStateIds
     {
-        public const int Display_A = 0x9ba;
-        public const int Display_H = 0x9b9;
+        public const int DisplayA = 0x9ba;
+        public const int DisplayH = 0x9b9;
 
-        public const int Count_H = 0x9ae;
-        public const int Count_A = 0x9ac;
+        public const int CountH = 0x9ae;
+        public const int CountA = 0x9ac;
+
+        public const int UiTowerSA = 2483;
+        public const int UiTowerSH = 2484;
+        public const int UiTowerSN = 2485;
+
+        public const int UiTowerNA = 2480;
+        public const int UiTowerNH = 2481;
+        public const int UiTowerNN = 2482;
+
+        public const int UiTowerWA = 2471;
+        public const int UiTowerWH = 2470;
+        public const int UiTowerWN = 2472;
+    }
+
+    enum EventIds
+    {
+        HP_EVENT_TOWER_W_PROGRESS_HORDE = 11383,
+        HP_EVENT_TOWER_W_PROGRESS_ALLIANCE = 11387,
+        HP_EVENT_TOWER_W_NEUTRAL_HORDE = 11386,
+        HP_EVENT_TOWER_W_NEUTRAL_ALLIANCE = 11385,
+
+        HP_EVENT_TOWER_N_PROGRESS_HORDE = 11396,
+        HP_EVENT_TOWER_N_PROGRESS_ALLIANCE = 11395,
+        HP_EVENT_TOWER_N_NEUTRAL_HORDE = 11394,
+        HP_EVENT_TOWER_N_NEUTRAL_ALLIANCE = 11393,
+
+        HP_EVENT_TOWER_S_PROGRESS_HORDE = 11404,
+        HP_EVENT_TOWER_S_PROGRESS_ALLIANCE = 11403,
+        HP_EVENT_TOWER_S_NEUTRAL_HORDE = 11402,
+        HP_EVENT_TOWER_S_NEUTRAL_ALLIANCE = 11401
+    }
+
+    enum GameObjectIds
+    {
+        TowerW = 182173,
+        TowerN = 182174,
+        TowerS = 182175
+    }
+
+    enum KillCreditIds
+    {
+        TowerS = 19032,
+        TowerN = 19028,
+        TowerW = 19029
     }
 }

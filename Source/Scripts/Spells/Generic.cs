@@ -189,7 +189,7 @@ namespace Scripts.Spells.Generic
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            if (!ValidateSpellEffect((spellInfo.Id, 0)) || spellInfo.GetEffect(0).IsAura(AuraType.ModPowerRegen))
+            if (!ValidateSpellEffect((spellInfo.Id, 0)) || !spellInfo.GetEffect(0).IsAura(AuraType.ModPowerRegen))
             {
                 Log.outError(LogFilter.Spells, $"Aura {GetId()} structure has been changed - first aura is no longer AuraType.ModPowerRegen");
                 return false;
@@ -1207,7 +1207,7 @@ namespace Scripts.Spells.Generic
 
         public override void Register()
         {
-            SpellInfo spell = SpellMgr.GetSpellInfo(m_scriptSpellId, Difficulty.None);
+            /*SpellInfo spell = SpellMgr.GetSpellInfo(m_scriptSpellId, Difficulty.None);
 
             // 6.x effects Removed
 
@@ -1227,7 +1227,7 @@ namespace Scripts.Spells.Generic
             {
                 AfterEffectApply.Add(new(RefreshVisualShields, 1, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask));
                 OnEffectRemove.Add(new(RemoveVisualShields, 1, AuraType.Dummy, AuraEffectHandleModes.ChangeAmountMask));
-            }
+            }*/
         }
     }
 

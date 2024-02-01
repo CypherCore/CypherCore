@@ -353,9 +353,9 @@ namespace Game.BattleGrounds.Zones
             if (capturedNodes >= 4)
                 CastSpellOnTeam(BattlegroundConst.AbQuestReward4Bases, team);
 
-            Creature trigger = !BgCreatures[node + 7].IsEmpty() ? GetBGCreature(node + 7) : null; // 0-6 spirit guides
+            Creature trigger = !BgCreatures[node + 7].IsEmpty() ? GetBGCreature(node + 7u) : null; // 0-6 spirit guides
             if (trigger == null)
-                trigger = AddCreature(SharedConst.WorldTrigger, node + 7, NodePositions[node], GetTeamIndexByTeamId(team));
+                trigger = AddCreature(SharedConst.WorldTrigger, node + 7u, NodePositions[node], GetTeamIndexByTeamId(team));
 
             //add bonus honor aura trigger creature when node is accupied
             //cast bonus aura (+50% honor in 25yards)
@@ -374,7 +374,7 @@ namespace Game.BattleGrounds.Zones
                 return;
 
             //remove bonus honor aura trigger creature when node is lost
-            DelCreature(node + 7);//null checks are in DelCreature! 0-6 spirit guides
+            DelCreature(node + 7u);//null checks are in DelCreature! 0-6 spirit guides
 
             DelCreature(node);
 

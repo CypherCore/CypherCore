@@ -108,7 +108,8 @@ namespace Game.Entities
             ASSERT(m_ownedAuras.empty());
             ASSERT(m_removedAuras.empty());
             ASSERT(m_gameObj.empty());
-            ASSERT(m_dynObj.empty());*/
+            ASSERT(m_dynObj.empty());
+            ASSERT(m_areaTrigger.empty());*/
 
             base.Dispose();
         }
@@ -813,9 +814,6 @@ namespace Game.Entities
 
         public void RemoveAreaTrigger(uint spellId)
         {
-            if (m_areaTrigger.Empty())
-                return;
-
             for (var i = 0; i < m_areaTrigger.Count; ++i)
             {
                 AreaTrigger areaTrigger = m_areaTrigger[i];
@@ -826,9 +824,6 @@ namespace Game.Entities
 
         public void RemoveAreaTrigger(AuraEffect aurEff)
         {
-            if (m_areaTrigger.Empty())
-                return;
-
             foreach (AreaTrigger areaTrigger in m_areaTrigger)
             {
                 if (areaTrigger.GetAuraEffect() == aurEff)
@@ -842,7 +837,7 @@ namespace Game.Entities
         public void RemoveAllAreaTriggers()
         {
             while (!m_areaTrigger.Empty())
-                m_areaTrigger[0].Remove();
+                m_areaTrigger.Last()?.Remove();
         }
 
         public NPCFlags GetNpcFlags() { return (NPCFlags)m_unitData.NpcFlags[0]; }

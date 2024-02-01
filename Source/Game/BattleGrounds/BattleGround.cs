@@ -42,7 +42,7 @@ namespace Game.BattleGrounds
         {
             // remove objects and creatures
             // (this is done automatically in mapmanager update, when the instance is reset after the reset time)
-            for (var i = 0; i < BgCreatures.Length; ++i)
+            for (uint i = 0; i < BgCreatures.Length; ++i)
                 DelCreature(i);
 
             for (var i = 0; i < BgObjects.Length; ++i)
@@ -1348,7 +1348,7 @@ namespace Game.BattleGrounds
             return obj;
         }
 
-        public Creature GetBGCreature(int type)
+        public Creature GetBGCreature(uint type)
         {
             if (BgCreatures[type].IsEmpty())
                 return null;
@@ -1398,7 +1398,7 @@ namespace Game.BattleGrounds
             }
         }
 
-        public virtual Creature AddCreature(uint entry, int type, float x, float y, float z, float o, int teamIndex = TeamId.Neutral, uint respawntime = 0, Transport transport = null)
+        public virtual Creature AddCreature(uint entry, uint type, float x, float y, float z, float o, int teamIndex = TeamId.Neutral, uint respawntime = 0, Transport transport = null)
         {
             Map map = FindBgMap();
             if (map == null)
@@ -1445,12 +1445,12 @@ namespace Game.BattleGrounds
             return creature;
         }
 
-        public Creature AddCreature(uint entry, int type, Position pos, int teamIndex = TeamId.Neutral, uint respawntime = 0, Transport transport = null)
+        public Creature AddCreature(uint entry, uint type, Position pos, int teamIndex = TeamId.Neutral, uint respawntime = 0, Transport transport = null)
         {
             return AddCreature(entry, type, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), teamIndex, respawntime, transport);
         }
 
-        public bool DelCreature(int type)
+        public bool DelCreature(uint type)
         {
             if (BgCreatures[type].IsEmpty())
                 return true;
@@ -1502,7 +1502,7 @@ namespace Game.BattleGrounds
             return false;
         }
 
-        public bool AddSpiritGuide(int type, float x, float y, float z, float o, int teamIndex)
+        public bool AddSpiritGuide(uint type, float x, float y, float z, float o, int teamIndex)
         {
             uint entry = (uint)(teamIndex == TeamId.Alliance ? BattlegroundCreatures.A_SpiritGuide : BattlegroundCreatures.H_SpiritGuide);
 
@@ -1514,7 +1514,7 @@ namespace Game.BattleGrounds
             return false;
         }
 
-        public bool AddSpiritGuide(int type, Position pos, int teamIndex = TeamId.Neutral)
+        public bool AddSpiritGuide(uint type, Position pos, int teamIndex = TeamId.Neutral)
         {
             return AddSpiritGuide(type, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), teamIndex);
         }

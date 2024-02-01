@@ -142,7 +142,7 @@ namespace Game.Arenas
                         break;
                     case DalaranSewersEvents.PipeKnockback:
                     {
-                        for (int i = DalaranSewersCreatureTypes.PipeKnockback1; i <= DalaranSewersCreatureTypes.PipeKnockback2; ++i)
+                        for (uint i = DalaranSewersCreatureTypes.PipeKnockback1; i <= DalaranSewersCreatureTypes.PipeKnockback2; ++i)
                         {
                             Creature waterSpout = GetBGCreature(i);
                             if (waterSpout != null)
