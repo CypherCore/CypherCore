@@ -1927,38 +1927,38 @@ namespace Framework.Constants
     }
     public enum SpellAttr8 : uint
     {
-        CantMiss = 0x01, // 0
-        Unk1 = 0x02, // 1
-        Unk2 = 0x04, // 2
-        Unk3 = 0x08, // 3
-        Unk4 = 0x10, // 4
-        Unk5 = 0x20, // 5
-        Unk6 = 0x40, // 6
-        Unk7 = 0x80, // 7
-        AffectPartyAndRaid = 0x100, // 8
-        PeriodicCanCrit = 0x200, // 9
-        NameChangedDuringTransofrm = 0x400, // 10
-        Unk11 = 0x800, // 11
-        AuraSendAmount = 0x1000, // 12 Aura Must Have Flag AflagAnyEffectAmountSent To Send Amount
-        Unk13 = 0x2000, // 13
-        Unk14 = 0x4000, // 14
-        WaterMount = 0x8000, // 15
-        Unk16 = 0x10000, // 16
-        HasteAffectsDuration = 0x20000, // 17 Haste Affects Duration
-        RememberSpells = 0x40000, // 18
-        UseComboPointsOnAnyTarget = 0x80000, // 19
-        ArmorSpecialization = 0x100000, // 20
-        Unk21 = 0x200000, // 21
-        Unk22 = 0x400000, // 22
-        BattleResurrection = 0x800000, // 23
-        HealingSpell = 0x1000000, // 24
-        Unk25 = 0x2000000, // 25
-        RaidMarker = 0x4000000, // 26 Probably Spell No Need Learn To Cast
-        Unk27 = 0x8000000, // 27
-        NotInBgOrArena = 0x10000000, // 28
-        MasteryAffectPoints = 0x20000000, // 29
-        Unk30 = 0x40000000, // 30
-        AttackIgnoreImmuneToPCFlag = 0x80000000  // 31
+        NoAttackBlock = 0x01, // No Attack Block
+        IgnoreDynamicObjectCaster = 0x02, /*Nyi*/ // Ignore Dynamic Object Caster
+        RemoveOutsideDungeonsAndRaids = 0x04, // Remove Outside Dungeons And Raids
+        OnlyTargetIfSameCreator = 0x08, // Only Target If Same Creator
+        CanHitAoeUntargetable = 0x10, /*Nyi - No Aoe Immunity Implementation*/ // Can Hit Aoe Untargetable
+        AllowWhileCharmed = 0x20, /*Nyi - Not Implementable Currently, Charming Replaces Ai*/ // Allow While Charmed
+        AuraRequiredByClient = 0x40, /*Nyi - We Send All Auras To Client*/ // Aura Required By Client
+        IgnoreSanctuary = 0x80, // Ignore Sanctuary
+        UseTargetsLevelForSpellScaling = 0x100, // Use Target'S Level For Spell Scaling
+        PeriodicCanCrit = 0x200, // Periodic Can Crit
+        MirrorCreatureName = 0x400, // Mirror Creature Name Description Transform Auras Also Override Name (Handled Clientside)
+        OnlyPlayersCanCastThisSpell = 0x800, // Only Players Can Cast This Spell
+        AuraPointsOnClient = 0x1000, // Aura Points On Client
+        NotInSpellbookUntilLearned = 0x2000, // Not In Spellbook Until Learned Description Hides Autolearned Spell From Spellbook Before Learning (Handled Clientside)
+        TargetProcsOnCaster = 0x4000, // Target Procs On Caster Description Target (Taken) Procs Happen On Caster (Actor) Instead Of Aura Target (Action Target)
+        RequiresLocationToBeOnLiquidSurface = 0x8000, // Requires Location To Be On Liquid Surface
+        OnlyTargetOwnSummons = 0x10000, // Only Target Own Summons
+        HasteAffectsDuration = 0x20000, // Haste Affects Duration
+        IgnoreSpellcastOverrideCost = 0x40000, // Ttile Ignore Spellcast Override Cost
+        AllowTargetsHiddenBySpawnTracking = 0x80000, /*Nyi - No Spawn Tracking Implementation*/ // Allow Targets Hidden By Spawn Tracking
+        RequiresEquippedInvTypes = 0x100000, // Requires Equipped Inv Types
+        NoSummonDestFromClientTargetingPathingRequirement = 0x200000, /*Nyi - Vald Path To A Spell Dest Is Not Required Currently If The Dest Comes From Client*/ // No 'Summon + Dest From Client' Targeting Pathing Requirement
+        MeleeHasteAffectsPeriodic = 0x400000, // Melee Haste Affects Periodic
+        EnforceInCombatRessurectionLimit = 0x800000, // Enforce In Combat Ressurection Limit Description Used To Limit The Number Of Resurrections In Boss Encounters
+        HealPrediction = 0x1000000, // Heal Prediction
+        NoLevelUpToast = 0x2000000, // No Level Up Toast
+        SkipIsKnownCheck = 0x4000000, // Skip Is Known Check
+        AiFaceTarget = 0x8000000, /*Nyi - Unknown Facing Conditions, Needs Research*/ // Ai Face Target
+        NotInBattleground = 0x10000000, // Not In Battleground
+        MasteryAffectsPoints = 0x20000000, // Mastery Affects Points
+        DisplayLargeAuraIconOnUnitFramesBossAura = 0x40000000, // Display Large Aura Icon On Unit Frames (Boss Aura)
+        AttackIgnoreImmuneToPcFlag = 0x80000000  // Can Attack Immunepc Description Do Not Check UnitFlagImmuneToPc In Isvalidattacktarget
     }
     public enum SpellAttr9 : uint
     {
@@ -2972,5 +2972,13 @@ namespace Framework.Constants
     {
         TargetA = 0,
         TargetB = 1
+    }
+
+    public enum SpellHealPredictionType : byte
+    {
+        Target = 0,
+        TargetAndCaster = 1,
+        TargetAndBeacon = 2,
+        TargetParty = 3,
     }
 }

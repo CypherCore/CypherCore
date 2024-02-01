@@ -305,6 +305,21 @@ namespace Game.Spells
                     }
                 }
             }
+
+            if (m_targets.HasDst())
+            {
+                if (m_spellInfo.HasAttribute(SpellAttr8.RequiresLocationToBeOnLiquidSurface))
+                {
+                    ZLiquidStatus status = m_caster.GetMap().GetLiquidStatus(m_caster.GetPhaseShift(), m_targets.GetDstPos().GetPositionX(), m_targets.GetDstPos().GetPositionY(), m_targets.GetDstPos().GetPositionZ(), LiquidHeaderTypeFlags.AllLiquids);
+                    if (!status.HasAnyFlag(ZLiquidStatus.WaterWalk | ZLiquidStatus.InWater))
+                    {
+                        SendCastResult(SpellCastResult.NoLiquid);
+                        Finish(SpellCastResult.NoLiquid);
+                        return;
+                    }
+                }
+            }
+
             ulong dstDelay = CalculateDelayMomentForDst(m_spellInfo.LaunchDelay);
             if (dstDelay != 0)
                 m_delayMoment = dstDelay;
@@ -3806,6 +3821,9 @@ namespace Game.Spells
             if (HasPowerTypeCost(PowerType.Runes))
                 castFlags |= SpellCastFlags.NoGCD; // not needed, but Blizzard sends it
 
+            if (m_spellInfo.HasAttribute(SpellAttr8.HealPrediction) && m_casttime != 0 && m_caster.IsUnit())
+                castFlags |= SpellCastFlags.HealPrediction;
+
             SpellStart packet = new();
             SpellCastData castData = packet.Cast;
 
@@ -3874,13 +3892,7 @@ namespace Game.Spells
                 castData.Immunities.Value = (uint)mechanicImmunityMask;
             }
 
-            /** @todo implement heal prediction packet data
-            if (castFlags & CAST_FLAG_HEAL_PREDICTION)
-            {
-                castData.Predict.BeconGUID = ??
-                castData.Predict.Points = 0;
-                castData.Predict.Type = 0;
-            }**/
+            UpdateSpellHealPrediction(castData.Predict, false);
 
             m_caster.SendMessageToSet(packet, true);
         }
@@ -4093,6 +4105,77 @@ namespace Game.Spells
             return ammoDisplayID;
         }
 
+        static (int, SpellHealPredictionType) CalcPredictedHealing(SpellInfo spellInfo, Unit unitCaster, Unit target, uint castItemEntry, int castItemLevel, Spell spell, bool withPeriodic)
+        {
+            int points = 0;
+            SpellHealPredictionType type = SpellHealPredictionType.Target;
+            foreach (SpellEffectInfo spellEffectInfo in spellInfo.GetEffects())
+            {
+                switch (spellEffectInfo.Effect)
+                {
+                    case SpellEffectName.Heal:
+                    case SpellEffectName.HealPct:
+                        points += unitCaster.SpellHealingBonusDone(target, spellInfo, spellEffectInfo.CalcValue(unitCaster, null, target, castItemEntry, castItemLevel), DamageEffectType.Direct, spellEffectInfo, 1, spell);
+
+                        if (target != unitCaster && (spellEffectInfo.TargetA.GetTarget() == Targets.UnitCaster || spellEffectInfo.TargetB.GetTarget() == Targets.UnitCaster))
+                            type = SpellHealPredictionType.TargetAndCaster;    // Binding Heal-like spells
+                        else if (spellEffectInfo.TargetA.GetCheckType() == SpellTargetCheckTypes.Party || spellEffectInfo.TargetB.GetCheckType() == SpellTargetCheckTypes.Party)
+                            type = SpellHealPredictionType.TargetParty;         // Prayer of Healing (old party-wide targeting)
+                        break;
+                    default:
+                        break;
+                }
+
+                if (withPeriodic)
+                {
+                    switch (spellEffectInfo.ApplyAuraName)
+                    {
+                        case AuraType.PeriodicHeal:
+                        case AuraType.ObsModHealth:
+                            points += (int)(unitCaster.SpellHealingBonusDone(target, spellInfo, spellEffectInfo.CalcValue(unitCaster, null, target, castItemEntry, castItemLevel), DamageEffectType.Direct, spellEffectInfo, 1, spell) * spellInfo.GetMaxTicks());
+                            break;
+                        case AuraType.PeriodicTriggerSpell:
+                            SpellInfo triggered = Global.SpellMgr.GetSpellInfo(spellEffectInfo.TriggerSpell, spellInfo.Difficulty);
+                            if (triggered != null)
+                                points += CalcPredictedHealing(triggered, unitCaster, target, castItemEntry, castItemLevel, null, withPeriodic).Item1;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            return (points, type);
+        }
+
+        void UpdateSpellHealPrediction(SpellHealPrediction healPrediction, bool withPeriodic)
+        {
+            healPrediction.BeaconGUID = ObjectGuid.Empty;
+            healPrediction.Points = 0;
+            healPrediction.Type = SpellHealPredictionType.Target;
+
+            Unit unitCaster = m_caster.ToUnit();
+            Unit target = m_targets.GetUnitTarget();
+            if (target != null)
+            {
+                var (points, type) = CalcPredictedHealing(m_spellInfo, unitCaster, target, m_castItemEntry, m_castItemLevel, this, withPeriodic);
+                healPrediction.Points = (uint)points;
+                healPrediction.Type = type;
+            }
+
+            uint beaconSpellId = 53651;
+
+            if (healPrediction.Type == SpellHealPredictionType.Target && unitCaster.HasAura(beaconSpellId, unitCaster.GetGUID()))
+            {
+                var beacon = unitCaster.GetSingleCastAuras().Find(aura => aura.GetSpellInfo().GetEffects().Count > 1 && aura.GetSpellInfo().GetEffect(1).TriggerSpell == beaconSpellId);
+                if (beacon != null)
+                {
+                    healPrediction.BeaconGUID = beacon.GetOwner().GetGUID();
+                    healPrediction.Type = SpellHealPredictionType.TargetAndBeacon;
+                }
+            }
+        }
+
         void SendSpellExecuteLog()
         {
             if (_executeLogEffects.Empty())
@@ -4256,25 +4339,6 @@ namespace Game.Spells
             if (unitCaster == null)
                 return;
 
-            SpellChannelStart spellChannelStart = new();
-            spellChannelStart.CasterGUID = unitCaster.GetGUID();
-            spellChannelStart.SpellID = (int)m_spellInfo.Id;
-            spellChannelStart.Visual = m_SpellVisual;
-            spellChannelStart.ChannelDuration = duration;
-
-            uint schoolImmunityMask = unitCaster.GetSchoolImmunityMask();
-            ulong mechanicImmunityMask = unitCaster.GetMechanicImmunityMask();
-
-            if (schoolImmunityMask != 0 || mechanicImmunityMask != 0)
-            {
-                SpellChannelStartInterruptImmunities interruptImmunities = new();
-                interruptImmunities.SchoolImmunities = (int)schoolImmunityMask;
-                interruptImmunities.Immunities = (int)mechanicImmunityMask;
-
-                spellChannelStart.InterruptImmunities = interruptImmunities;
-            }
-            unitCaster.SendMessageToSet(spellChannelStart, true);
-
             m_timer = (int)duration;
 
             if (!m_targets.HasDst())
@@ -4320,6 +4384,37 @@ namespace Game.Spells
 
             unitCaster.SetChannelSpellId(m_spellInfo.Id);
             unitCaster.SetChannelVisual(m_SpellVisual);
+
+            SpellChannelStart spellChannelStart = new();
+            spellChannelStart.CasterGUID = unitCaster.GetGUID();
+            spellChannelStart.SpellID = (int)m_spellInfo.Id;
+            spellChannelStart.Visual = m_SpellVisual;
+            spellChannelStart.ChannelDuration = duration;
+
+            uint schoolImmunityMask = unitCaster.GetSchoolImmunityMask();
+            ulong mechanicImmunityMask = unitCaster.GetMechanicImmunityMask();
+
+            if (schoolImmunityMask != 0 || mechanicImmunityMask != 0)
+            {
+                SpellChannelStartInterruptImmunities interruptImmunities = new();
+                interruptImmunities.SchoolImmunities = (int)schoolImmunityMask;
+                interruptImmunities.Immunities = (int)mechanicImmunityMask;
+
+                spellChannelStart.InterruptImmunities = interruptImmunities;
+            }
+
+            if (m_spellInfo.HasAttribute(SpellAttr8.HealPrediction) && m_casttime != 0 && m_caster.IsUnit())
+            {
+                SpellTargetedHealPrediction healPrediction = new();
+                if (unitCaster.m_unitData.ChannelObjects.Size() == 1 && unitCaster.m_unitData.ChannelObjects[0].IsUnit())
+                    healPrediction.TargetGUID = unitCaster.m_unitData.ChannelObjects[0];
+
+                UpdateSpellHealPrediction(healPrediction.Predict, true);
+
+                spellChannelStart.HealPrediction = healPrediction;
+            }
+
+            unitCaster.SendMessageToSet(spellChannelStart, true);
         }
 
         void SendResurrectRequest(Player target)
@@ -4745,6 +4840,9 @@ namespace Game.Spells
                 m_customError = SpellCustomErrors.GmOnly;
                 return SpellCastResult.CustomError;
             }
+
+            if (m_spellInfo.HasAttribute(SpellAttr8.OnlyPlayersCanCastThisSpell) && !m_caster.IsPlayer())
+                return SpellCastResult.CasterAurastate;
 
             // Check global cooldown
             if (strict && !Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnoreGCD) && HasGlobalCooldown())
@@ -7195,7 +7293,7 @@ namespace Game.Spells
         bool IsNeedSendToClient()
         {
             return m_SpellVisual.SpellXSpellVisualID != 0 || m_SpellVisual.ScriptVisualID != 0 || m_spellInfo.IsChanneled() ||
-                (m_spellInfo.HasAttribute(SpellAttr8.AuraSendAmount)) || m_spellInfo.HasHitDelay() || (m_triggeredByAuraSpell == null && !IsTriggered()) ||
+                (m_spellInfo.HasAttribute(SpellAttr8.AuraPointsOnClient)) || m_spellInfo.HasHitDelay() || (m_triggeredByAuraSpell == null && !IsTriggered()) ||
                 m_spellInfo.HasAttribute(SpellAttr7.AlwaysCastLog);
         }
 
@@ -8474,7 +8572,7 @@ namespace Game.Spells
             if (unit.IsAlive() != IsAlive)
                 return;
 
-            if (spell.GetState() == SpellState.Delayed && !spell.IsPositive() && (GameTime.GetGameTimeMS() - TimeDelay) <= unit.LastSanctuaryTime)
+            if (!spell.m_spellInfo.HasAttribute(SpellAttr8.IgnoreSanctuary) && spell.GetState() == SpellState.Delayed && !spell.IsPositive() && (GameTime.GetGameTimeMS() - TimeDelay) <= unit.LastSanctuaryTime)
                 return;                                             // No missinfo in that case
 
             if (_spellHitTarget != null)

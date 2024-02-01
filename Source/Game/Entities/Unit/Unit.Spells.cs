@@ -774,7 +774,7 @@ namespace Game.Entities
 
             bool canDodge = !spellInfo.HasAttribute(SpellAttr7.NoAttackDodge);
             bool canParry = !spellInfo.HasAttribute(SpellAttr7.NoAttackParry);
-            bool canBlock = true;
+            bool canBlock = !spellInfo.HasAttribute(SpellAttr8.NoAttackBlock);
 
             // if victim is casting or cc'd it can't avoid attacks
             if (victim.IsNonMeleeSpellCast(false, false, true) || victim.HasUnitState(UnitState.Controlled))
@@ -892,7 +892,7 @@ namespace Game.Entities
             spell.Finish(result);
         }
 
-        public virtual SpellInfo GetCastSpellInfo(SpellInfo spellInfo)
+        public virtual SpellInfo GetCastSpellInfo(SpellInfo spellInfo, TriggerCastFlags triggerFlag)
         {
             SpellInfo findMatchingAuraEffectIn(AuraType type)
             {
@@ -903,7 +903,13 @@ namespace Game.Entities
                     {
                         SpellInfo info = Global.SpellMgr.GetSpellInfo((uint)auraEffect.GetAmount(), GetMap().GetDifficultyID());
                         if (info != null)
+                        {
+                            if (auraEffect.GetSpellInfo().HasAttribute(SpellAttr8.IgnoreSpellcastOverrideCost))
+                                triggerFlag |= TriggerCastFlags.IgnorePowerAndReagentCost;
+
                             return info;
+
+                        }
                     }
                 }
 

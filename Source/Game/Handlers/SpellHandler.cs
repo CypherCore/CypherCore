@@ -308,10 +308,9 @@ namespace Game
             SpellCastTargets targets = new(caster, cast.Cast);
 
             // check known spell or raid marker spell (which not requires player to know it)
-            if (caster.IsTypeId(TypeId.Player) && !caster.ToPlayer().HasActiveSpell(spellInfo.Id) && !spellInfo.HasEffect(SpellEffectName.ChangeRaidMarker) && !spellInfo.HasAttribute(SpellAttr8.RaidMarker))
+            if (caster.IsTypeId(TypeId.Player) && !caster.ToPlayer().HasActiveSpell(spellInfo.Id) && !spellInfo.HasAttribute(SpellAttr8.SkipIsKnownCheck))
             {
                 bool allow = false;
-
 
                 // allow casting of unknown spells for special lock cases
                 GameObject go = targets.GetGOTarget();
@@ -331,7 +330,7 @@ namespace Game
             }
 
             // Check possible spell cast overrides
-            spellInfo = caster.GetCastSpellInfo(spellInfo);
+            spellInfo = caster.GetCastSpellInfo(spellInfo, triggerFlag);
 
             if (spellInfo.IsPassive())
                 return;

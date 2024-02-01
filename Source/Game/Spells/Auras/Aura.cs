@@ -143,7 +143,7 @@ namespace Game.Spells
 
             bool effectNeedsAmount(AuraEffect effect) => effect != null && (GetEffectsToApply() & (1 << (int)effect.GetEffIndex())) != 0 && Aura.EffectTypeNeedsSendingAmount(effect.GetAuraType());
 
-            if (GetBase().GetSpellInfo().HasAttribute(SpellAttr8.AuraSendAmount) || GetBase().GetAuraEffects().Any(effectNeedsAmount))
+            if (GetBase().GetSpellInfo().HasAttribute(SpellAttr8.AuraPointsOnClient) || GetBase().GetAuraEffects().Any(effectNeedsAmount))
                 _flags |= AuraFlags.Scalable;
         }
 

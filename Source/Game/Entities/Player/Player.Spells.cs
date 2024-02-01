@@ -274,7 +274,7 @@ namespace Game.Entities
             return false;
         }
 
-        public override SpellInfo GetCastSpellInfo(SpellInfo spellInfo)
+        public override SpellInfo GetCastSpellInfo(SpellInfo spellInfo, TriggerCastFlags triggerFlag)
         {
             var overrides = m_overrideSpells.LookupByKey(spellInfo.Id);
             if (!overrides.Empty())
@@ -283,11 +283,11 @@ namespace Game.Entities
                 {
                     SpellInfo newInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
                     if (newInfo != null)
-                        return GetCastSpellInfo(newInfo);
+                        return GetCastSpellInfo(newInfo, triggerFlag);
                 }
             }
 
-            return base.GetCastSpellInfo(spellInfo);
+            return base.GetCastSpellInfo(spellInfo, triggerFlag);
         }
 
         public void SetOverrideSpellsId(uint overrideSpellsId) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.OverrideSpellsID), overrideSpellsId); }
@@ -1778,7 +1778,7 @@ namespace Game.Entities
                 }
                 case ItemClass.Armor:
                 {
-                    if (!spellInfo.HasAttribute(SpellAttr8.ArmorSpecialization))
+                    if (!spellInfo.HasAttribute(SpellAttr8.RequiresEquippedInvTypes))
                     {
                         // most used check: shield only
                         if ((spellInfo.EquippedItemSubClassMask & (1 << (int)ItemSubClassArmor.Shield)) != 0)

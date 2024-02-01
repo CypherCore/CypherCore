@@ -2004,7 +2004,7 @@ namespace Game.Entities
             if (spellInfo == null || duration < 0)
                 return;
 
-            if (spellInfo.IsChanneled() && !spellInfo.HasAttribute(SpellAttr5.SpellHasteAffectsPeriodic))
+            if (spellInfo.IsChanneled() && !spellInfo.HasAttribute(SpellAttr5.SpellHasteAffectsPeriodic) && !spellInfo.HasAttribute(SpellAttr8.MeleeHasteAffectsPeriodic))
                 return;
 
             // called from caster
@@ -2594,7 +2594,7 @@ namespace Game.Entities
                 if (!unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) && unitOrOwner.IsImmuneToNPC())
                     return false;
 
-                if (bySpell == null || !bySpell.HasAttribute(SpellAttr8.AttackIgnoreImmuneToPCFlag))
+                if (bySpell == null || !bySpell.HasAttribute(SpellAttr8.AttackIgnoreImmuneToPcFlag))
                 {
                     if (unitOrOwner.HasUnitFlag(UnitFlags.PlayerControlled) && unitTarget.IsImmuneToPC())
                         return false;
@@ -2664,7 +2664,8 @@ namespace Game.Entities
 
             // PvP case - can't attack when attacker or target are in sanctuary
             // however, 13850 client doesn't allow to attack when one of the unit's has sanctuary flag and is pvp
-            if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) && unitOrOwner != null && unitOrOwner.HasUnitFlag(UnitFlags.PlayerControlled) && (unitTarget.IsInSanctuary() || unitOrOwner.IsInSanctuary()))
+            if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) && unitOrOwner != null && unitOrOwner.HasUnitFlag(UnitFlags.PlayerControlled)
+                && (unitTarget.IsInSanctuary() || unitOrOwner.IsInSanctuary()) && (bySpell == null || bySpell.HasAttribute(SpellAttr8.IgnoreSanctuary)))
                 return false;
 
             // additional checks - only PvP case
@@ -2738,7 +2739,7 @@ namespace Game.Entities
             {
                 if (unit != null && unit.HasUnitFlag(UnitFlags.PlayerControlled))
                 {
-                    if (bySpell == null || !bySpell.HasAttribute(SpellAttr8.AttackIgnoreImmuneToPCFlag))
+                    if (bySpell == null || !bySpell.HasAttribute(SpellAttr8.AttackIgnoreImmuneToPcFlag))
                         if (unitTarget != null && unitTarget.IsImmuneToPC())
                             return false;
                 }
@@ -2771,7 +2772,7 @@ namespace Game.Entities
                         return false;
 
                     // can't assist player out of sanctuary from sanctuary if has pvp enabled
-                    if (unitTarget.IsPvP())
+                    if (unitTarget.IsPvP() && (bySpell == null || bySpell.HasAttribute(SpellAttr8.IgnoreSanctuary)))
                         if (unit.IsInSanctuary() && !unitTarget.IsInSanctuary())
                             return false;
                 }
@@ -2836,7 +2837,7 @@ namespace Game.Entities
         {
             return spellInfo.GetSpellXSpellVisualId(this);
         }
-        
+
         public List<GameObject> GetGameObjectListWithEntryInGrid(uint entry = 0, float maxSearchRange = 250.0f)
         {
             List<GameObject> gameobjectList = new();
