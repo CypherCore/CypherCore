@@ -2,28 +2,12 @@
 
   <PropertyGroup>
     <OutputPath>../../Build/$(Configuration)/$(Platform)</OutputPath>
-	<TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
     <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>False</AppendRuntimeIdentifierToOutputPath>
-    <Platforms>win-x64;linux-x64;mac-x64</Platforms>
-    <RuntimeIdentifiers>win10-x64;linux-x64;osx-x64</RuntimeIdentifiers>
-	<LangVersion>latest</LangVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Platform)' == 'win-x64'">
-    <Platform>x64</Platform>
-    <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Platform)' == 'linux-x64'">
-    <Platform>x64</Platform>
-    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Platform)' == 'mac-x64'">
-    <Platform>x64</Platform>
-    <RuntimeIdentifier>osx-x64</RuntimeIdentifier>
+    <RuntimeIdentifiers>win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>
