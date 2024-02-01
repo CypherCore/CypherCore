@@ -133,11 +133,9 @@ namespace Game.Achievements
                     case CriteriaType.HonorLevelIncrease:
                     case CriteriaType.PrestigeLevelIncrease:
                     case CriteriaType.LearnAnyTransmogInSlot:
-                    case CriteriaType.CollectTransmogSetFromGroup:
                     case CriteriaType.CompleteAnyReplayQuest:
                     case CriteriaType.BuyItemsFromVendors:
                     case CriteriaType.SellItemsToVendors:
-                    case CriteriaType.EnterTopLevelArea:
                         SetCriteriaProgress(criteria, 1, referencePlayer, ProgressType.Accumulate);
                         break;
                     // std case: increment at miscValue1
@@ -246,16 +244,21 @@ namespace Game.Achievements
                         // miscValue1 is the ingame fallheight*100 as stored in dbc
                         SetCriteriaProgress(criteria, miscValue1, referencePlayer);
                         break;
+                    case CriteriaType.EarnAchievement:
                     case CriteriaType.CompleteQuest:
                     case CriteriaType.LearnOrKnowSpell:
                     case CriteriaType.RevealWorldMapOverlay:
                     case CriteriaType.GotHaircut:
                     case CriteriaType.EquipItemInSlot:
                     case CriteriaType.EquipItem:
-                    case CriteriaType.EarnAchievement:
-                    case CriteriaType.RecruitGarrisonFollower:
                     case CriteriaType.LearnedNewPet:
+                    case CriteriaType.EnterArea:
+                    case CriteriaType.LeaveArea:
+                    case CriteriaType.RecruitGarrisonFollower:
                     case CriteriaType.ActivelyReachLevel:
+                    case CriteriaType.CollectTransmogSetFromGroup:
+                    case CriteriaType.EnterTopLevelArea:
+                    case CriteriaType.LeaveTopLevelArea:
                         SetCriteriaProgress(criteria, 1, referencePlayer);
                         break;
                     case CriteriaType.BankSlotsPurchased:
@@ -381,8 +384,6 @@ namespace Game.Achievements
                     case CriteriaType.AccountObtainPetThroughBattle:
                     case CriteriaType.WinPetBattle:
                     case CriteriaType.PlayerObtainPetThroughBattle:
-                    case CriteriaType.EnterArea:
-                    case CriteriaType.LeaveArea:
                     case CriteriaType.DefeatDungeonEncounter:
                     case CriteriaType.ActivateGarrisonBuilding:
                     case CriteriaType.UpgradeGarrison:
@@ -767,14 +768,11 @@ namespace Game.Achievements
                 case CriteriaType.BankSlotsPurchased:
                 case CriteriaType.ReputationGained:
                 case CriteriaType.TotalExaltedFactions:
-                case CriteriaType.GotHaircut:
-                case CriteriaType.EquipItemInSlot:
                 case CriteriaType.RollNeed:
                 case CriteriaType.RollGreed:
                 case CriteriaType.DeliverKillingBlowToClass:
                 case CriteriaType.DeliverKillingBlowToRace:
                 case CriteriaType.DoEmote:
-                case CriteriaType.EquipItem:
                 case CriteriaType.MoneyEarnedFromQuesting:
                 case CriteriaType.MoneyLootedFromCreatures:
                 case CriteriaType.UseGameobject:
@@ -801,18 +799,24 @@ namespace Game.Achievements
                 case CriteriaType.CompleteAnyReplayQuest:
                 case CriteriaType.BuyItemsFromVendors:
                 case CriteriaType.SellItemsToVendors:
-                case CriteriaType.EnterTopLevelArea:
                     return progress.Counter >= requiredAmount;
                 case CriteriaType.EarnAchievement:
                 case CriteriaType.CompleteQuest:
                 case CriteriaType.LearnOrKnowSpell:
                 case CriteriaType.RevealWorldMapOverlay:
-                case CriteriaType.RecruitGarrisonFollower:
+                case CriteriaType.GotHaircut:
+                case CriteriaType.EquipItemInSlot:
+                case CriteriaType.EquipItem:
                 case CriteriaType.LearnedNewPet:
                 case CriteriaType.HonorLevelIncrease:
                 case CriteriaType.PrestigeLevelIncrease:
+                case CriteriaType.EnterArea:
+                case CriteriaType.LeaveArea:
+                case CriteriaType.RecruitGarrisonFollower:
                 case CriteriaType.ActivelyReachLevel:
                 case CriteriaType.CollectTransmogSetFromGroup:
+                case CriteriaType.EnterTopLevelArea:
+                case CriteriaType.LeaveTopLevelArea:
                     return progress.Counter >= 1;
                 case CriteriaType.AchieveSkillStep:
                     return progress.Counter >= (requiredAmount * 75);
@@ -1148,8 +1152,12 @@ namespace Game.Achievements
                         return false;
                     break;
                 case CriteriaType.PVPKillInArea:
-                case CriteriaType.EnterTopLevelArea:
+                case CriteriaType.EnterArea:
                     if (miscValue1 == 0 || !Global.DB2Mgr.IsInArea((uint)miscValue1, criteria.Entry.Asset))
+                        return false;
+                    break;
+                case CriteriaType.LeaveArea:
+                    if (miscValue1 == 0 || Global.DB2Mgr.IsInArea((uint)miscValue1, criteria.Entry.Asset))
                         return false;
                     break;
                 case CriteriaType.CurrencyGained:
@@ -1182,6 +1190,11 @@ namespace Game.Achievements
                         return false;
                     break;
                 case CriteriaType.ActivelyReachLevel:
+                    if (miscValue1 == 0 || miscValue1 != criteria.Entry.Asset)
+                        return false;
+                    break;
+                case CriteriaType.EnterTopLevelArea:
+                case CriteriaType.LeaveTopLevelArea:
                     if (miscValue1 == 0 || miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
