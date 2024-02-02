@@ -121,16 +121,16 @@ namespace Game
                 return;
             }
 
-            if (!player.HasEnoughMoney(reqmoney) && !player.IsGameMaster())
-            {
-                player.SendMailResult(0, MailResponseType.Send, MailResponseResult.NotEnoughMoney);
-                return;
-            }
-
             void mailCountCheckContinuation(Team receiverTeam, ulong mailsCount, uint receiverLevel, uint receiverAccountId, uint receiverBnetAccountId)
             {
                 if (_player != player)
                     return;
+
+                if (!player.HasEnoughMoney(reqmoney) && !player.IsGameMaster())
+                {
+                    player.SendMailResult(0, MailResponseType.Send, MailResponseResult.NotEnoughMoney);
+                    return;
+                }
 
                 // do not allow to have more than 100 mails in mailbox.. mails count is in opcode uint8!!! - so max can be 255..
                 if (mailsCount > 100)
@@ -478,7 +478,7 @@ namespace Game
                     {
                         new MailDraft(m.subject, "")
                             .AddMoney(m.COD)
-                            .SendMailTo(trans, new MailReceiver(receiver, m.sender), new MailSender( MailMessageType.Normal, m.receiver), MailCheckMask.CodPayment);
+                            .SendMailTo(trans, new MailReceiver(receiver, m.sender), new MailSender(MailMessageType.Normal, m.receiver), MailCheckMask.CodPayment);
                     }
 
                     player.ModifyMoney(-(long)m.COD);
@@ -549,7 +549,7 @@ namespace Game
             var mails = player.GetMails();
 
             MailListResult response = new();
-            long curTime  = GameTime.GetGameTime();
+            long curTime = GameTime.GetGameTime();
 
             foreach (Mail m in mails)
             {
