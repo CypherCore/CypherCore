@@ -900,7 +900,7 @@ namespace Game.Spells
             if (_owner.HasAuraType(AuraType.ChargeRecoveryAffectedByHaste))
                 recoveryTimeF *= _owner.m_unitData.ModSpellHaste;
 
-            if (_owner.HasAuraType(AuraType.ChargeRecoveryAffectedByHasteRegen))
+            if (_owner.HasAuraTypeWithMiscvalue(AuraType.ChargeRecoveryAffectedByHasteRegen, (int)chargeCategoryId))
                 recoveryTimeF *= _owner.m_unitData.ModHasteRegen;
 
             return (int)Math.Floor(recoveryTimeF);
