@@ -413,7 +413,7 @@ namespace Game.DataStorage
 
             foreach (var node in TaxiNodesStorage.Values)
             {
-                if (!node.Flags.HasAnyFlag(TaxiNodeFlags.Alliance | TaxiNodeFlags.Horde))
+                if (!node.IsPartOfTaxiNetwork())
                     continue;
 
                 // valid taxi network node
@@ -421,9 +421,9 @@ namespace Game.DataStorage
                 byte submask = (byte)(1 << (int)((node.Id - 1) % 8));
 
                 TaxiNodesMask[field] |= submask;
-                if (node.Flags.HasAnyFlag(TaxiNodeFlags.Horde))
+                if (node.GetFlags().HasFlag(TaxiNodeFlags.ShowOnHordeMap))
                     HordeTaxiNodesMask[field] |= submask;
-                if (node.Flags.HasAnyFlag(TaxiNodeFlags.Alliance))
+                if (node.GetFlags().HasFlag(TaxiNodeFlags.ShowOnAllianceMap))
                     AllianceTaxiNodesMask[field] |= submask;
 
                 int uiMapId;

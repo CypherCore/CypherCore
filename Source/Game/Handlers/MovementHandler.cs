@@ -750,17 +750,27 @@ namespace Game
                 TaxiNodesRecord curDestNode = CliDB.TaxiNodesStorage.LookupByKey(curDest);
 
                 // far teleport case
-                if (curDestNode != null && curDestNode.ContinentID != GetPlayer().GetMapId() && GetPlayer().GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Flight)
+                if (GetPlayer().GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Flight)
                 {
                     FlightPathMovementGenerator flight = GetPlayer().GetMotionMaster().GetCurrentMovementGenerator() as FlightPathMovementGenerator;
                     if (flight != null)
                     {
-                        // short preparations to continue flight
-                        flight.SetCurrentNodeAfterTeleport();
-                        TaxiPathNodeRecord node = flight.GetPath()[(int)flight.GetCurrentNode()];
-                        flight.SkipCurrentNode();
+                        bool shouldTeleport = curDestNode != null && curDestNode.ContinentID != GetPlayer().GetMapId();
+                        if (!shouldTeleport)
+                        {
+                            var currentNode = flight.GetPath()[(int)flight.GetCurrentNode()];
+                            shouldTeleport = currentNode.Flags.HasFlag(TaxiPathNodeFlags.Teleport);
+                        }
 
-                        GetPlayer().TeleportTo(curDestNode.ContinentID, node.Loc.X, node.Loc.Y, node.Loc.Z, GetPlayer().GetOrientation());
+                        if (shouldTeleport)
+                        {
+                            // short preparations to continue flight
+                            flight.SetCurrentNodeAfterTeleport();
+                            var node = flight.GetPath()[(int)flight.GetCurrentNode()];
+                            flight.SkipCurrentNode();
+
+                            GetPlayer().TeleportTo(curDestNode.ContinentID, node.Loc.X, node.Loc.Y, node.Loc.Z, GetPlayer().GetOrientation());
+                        }
                     }
                 }
 

@@ -55,7 +55,7 @@ namespace Game.Movement
                 Vector3 vertice = new(_path[i].Loc.X, _path[i].Loc.Y, _path[i].Loc.Z);
                 init.Path().Add(vertice);
             }
-            
+
             init.SetFirstPointId((int)GetCurrentNode());
             init.SetFly();
             init.SetSmooth();
@@ -127,14 +127,17 @@ namespace Game.Movement
             owner.Dismount();
             owner.RemoveUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.OnTaxi);
 
-            if (owner.m_taxi.Empty())
+
+            // update z position to ground and orientation for landing point
+            // this prevent cheating with landing  point at lags
+            // when client side flight end early in comparison server side
+            owner.StopMoving();
+
+            // When the player reaches the last flight point, teleport to destination taxi node location
+            if (!_path.Empty() && (_path.Count < 2 || !_path[_path.Count - 2].Flags.HasFlag(TaxiPathNodeFlags.Teleport)))
             {
-                // update z position to ground and orientation for landing point
-                // this prevent cheating with landing  point at lags
-                // when client side flight end early in comparison server side
-                owner.StopMoving();
-                // When the player reaches the last flight point, teleport to destination taxi node location
-                var node = CliDB.TaxiNodesStorage.LookupByKey(taxiNodeId);
+                var lastPath = CliDB.TaxiPathStorage.LookupByKey(_path.Last().PathID);
+                var node = CliDB.TaxiNodesStorage.LookupByKey(lastPath.ToTaxiNode);
                 if (node != null)
                 {
                     owner.SetFallInformation(0, node.Pos.Z);
@@ -155,6 +158,8 @@ namespace Game.Movement
             {
                 if (_path[i].ContinentID != curMapId)
                     return (uint)i;
+                if (i > 0 && _path[i - 1].Flags.HasFlag(TaxiPathNodeFlags.Teleport))
+                    return (uint)i;
             }
 
             return (uint)_path.Count;
@@ -162,7 +167,10 @@ namespace Game.Movement
 
         bool IsNodeIncludedInShortenedPath(TaxiPathNodeRecord p1, TaxiPathNodeRecord p2)
         {
-            return p1.ContinentID != p2.ContinentID || Math.Pow(p1.Loc.X - p2.Loc.X, 2) + Math.Pow(p1.Loc.Y - p2.Loc.Y, 2) > (40.0f * 40.0f);
+            return p1.ContinentID != p2.ContinentID
+                || MathF.Pow(p1.Loc.X - p2.Loc.X, 2) + MathF.Pow(p1.Loc.Y - p2.Loc.Y, 2) > 40.0f * 40.0f
+                || p2.Flags.HasFlag(TaxiPathNodeFlags.Teleport)
+                || (p2.Flags.HasFlag(TaxiPathNodeFlags.Stop) && p2.Delay != 0);
         }
 
         public void LoadPath(Player player, uint startNode = 0)
@@ -191,7 +199,8 @@ namespace Game.Movement
                         if (passedPreviousSegmentProximityCheck || src == 0 || _path.Empty() || IsNodeIncludedInShortenedPath(_path.Last(), nodes[i]))
                         {
                             if ((src == 0 || (IsNodeIncludedInShortenedPath(start, nodes[i]) && i >= 2)) &&
-                                (dst == taxi.Count - 1 || (IsNodeIncludedInShortenedPath(end, nodes[i]) && i < nodes.Length - 1)))
+                                (dst == taxi.Count - 1 || (IsNodeIncludedInShortenedPath(end, nodes[i]) && (i < nodes.Length - 1 || _path.Empty()))) &&
+                                (!nodes[i].Flags.HasFlag(TaxiPathNodeFlags.Teleport) || _path.Empty() || !_path.Last().Flags.HasFlag(TaxiPathNodeFlags.Teleport))) // skip consecutive teleports, only keep the first one
                             {
                                 passedPreviousSegmentProximityCheck = true;
                                 _path.Add(nodes[i]);
@@ -205,7 +214,7 @@ namespace Game.Movement
                     }
                 }
 
-                _pointsForPathSwitch.Add(new TaxiNodeChangeInfo((uint)(_path.Count - 1), (long)Math.Ceiling(cost * discount)));
+                _pointsForPathSwitch.Add(new TaxiNodeChangeInfo((uint)(Math.Max(_path.Count, 1) - 1), (long)Math.Ceiling(cost * discount)));
             }
         }
 
@@ -217,7 +226,7 @@ namespace Game.Movement
             uint map0 = _path[_currentNode].ContinentID;
             for (int i = _currentNode + 1; i < _path.Count; ++i)
             {
-                if (_path[i].ContinentID != map0)
+                if (_path[i].ContinentID != map0 || _path[i - 1].Flags.HasFlag(TaxiPathNodeFlags.Teleport))
                 {
                     _currentNode = i;
                     return;
@@ -277,13 +286,13 @@ namespace Game.Movement
 
             return _path[index].PathID;
         }
-        
+
         public override string GetDebugInfo()
         {
             return $"Current Node: {GetCurrentNode()}\n{base.GetDebugInfo()}\nStart Path Id: {GetPathId(0)} Path Size: {_path.Count} HasArrived: {HasArrived()} End Grid X: {_endGridX} " +
                 $"End Grid Y: {_endGridY} End Map Id: {_endMapId} Preloaded Target Node: {_preloadTargetNode}";
         }
-        
+
         public override bool GetResetPosition(Unit u, out float x, out float y, out float z)
         {
             var node = _path[_currentNode];

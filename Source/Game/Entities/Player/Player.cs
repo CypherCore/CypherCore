@@ -7036,7 +7036,7 @@ namespace Game.Entities
             // change but I couldn't find a suitable alternative. OK to use class because only DK
             // can use this taxi.
             uint mount_display_id;
-            if (node.Flags.HasAnyFlag(TaxiNodeFlags.UseFavoriteMount) && preferredMountDisplay != 0)
+            if (node.GetFlags().HasFlag(TaxiNodeFlags.UsePlayerFavoriteMount) && preferredMountDisplay != 0)
                 mount_display_id = preferredMountDisplay;
             else
                 mount_display_id = ObjectMgr.GetTaxiMountDisplayId(sourcenode, GetTeam(), npc == null || (sourcenode == 315 && GetClass() == Class.Deathknight));

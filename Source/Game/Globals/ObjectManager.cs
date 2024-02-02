@@ -10398,11 +10398,11 @@ namespace Game
             float dist = 10000;
             uint id = 0;
 
-            TaxiNodeFlags requireFlag = (team == Team.Alliance) ? TaxiNodeFlags.Alliance : TaxiNodeFlags.Horde;
+            TaxiNodeFlags requireFlag = (team == Team.Alliance) ? TaxiNodeFlags.ShowOnAllianceMap : TaxiNodeFlags.ShowOnHordeMap;
             foreach (var node in CliDB.TaxiNodesStorage.Values)
             {
                 var i = node.Id;
-                if (node.ContinentID != mapid || !node.Flags.HasAnyFlag(requireFlag))
+                if (node.ContinentID != mapid || !node.GetFlags().HasFlag(requireFlag) || node.GetFlags().HasFlag(TaxiNodeFlags.IgnoreForFindNearest))
                     continue;
 
                 uint field = (i - 1) / 8;

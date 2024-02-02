@@ -36,13 +36,29 @@ namespace Game.DataStorage
         public ushort ContinentID;
         public uint ConditionID;
         public ushort CharacterBitNumber;
-        public TaxiNodeFlags Flags;
+        public int Flags;
         public int UiTextureKitID;
         public int MinimapAtlasMemberID;
         public float Facing;
         public uint SpecialIconConditionID;
         public uint VisibilityConditionID;
         public uint[] MountCreatureID = new uint[2];
+
+        public TaxiNodeFlags GetFlags() { return (TaxiNodeFlags)Flags; }
+
+        public bool IsPartOfTaxiNetwork()
+        {
+            return GetFlags().HasFlag(TaxiNodeFlags.ShowOnAllianceMap | TaxiNodeFlags.ShowOnHordeMap)
+                // manually whitelisted nodes
+                || Id == 1985   // [Hidden] Argus Ground Points Hub (Ground TP out to here, TP to Vindicaar from here)
+                || Id == 1986   // [Hidden] Argus Vindicaar Ground Hub (Vindicaar TP out to here, TP to ground from here)
+                || Id == 1987   // [Hidden] Argus Vindicaar No Load Hub (Vindicaar No Load transition goes through here)
+                || Id == 2627   // [Hidden] 9.0 Bastion Ground Points Hub (Ground TP out to here, TP to Sanctum from here)
+                || Id == 2628   // [Hidden] 9.0 Bastion Ground Hub (Sanctum TP out to here, TP to ground from here)
+                || Id == 2732   // [HIDDEN] 9.2 Resonant Peaks - Teleport Network - Hidden Hub (Connects all Nodes to each other without unique paths)
+                || Id == 2835   // [Hidden] 10.0 Travel Network - Destination Input
+                || Id == 2843;   // [Hidden] 10.0 Travel Network - Destination Output
+        }
     }
 
     public sealed class TaxiPathRecord
