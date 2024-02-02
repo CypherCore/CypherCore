@@ -23,8 +23,6 @@ namespace Game.AI
             {
                 case "AggressorAI":
                     return new AggressorAI(creature);
-                case "ArcherAI":
-                    return new ArcherAI(creature);
                 case "CombatAI":
                     return new CombatAI(creature);
                 case "CritterAI":
