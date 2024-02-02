@@ -5,6 +5,8 @@ using Framework.Constants;
 using Game.DataStorage;
 using Game.Networking;
 using Game.Networking.Packets;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Game
 {
@@ -46,7 +48,18 @@ namespace Game
 
         void SendAvailableHotfixes()
         {
-            SendPacket(new AvailableHotfixes(Global.WorldMgr.GetRealmId().GetAddress(), Global.DB2Mgr.GetHotfixData()));
+            AvailableHotfixes availableHotfixes = new();
+            availableHotfixes.VirtualRealmAddress = Global.WorldMgr.GetRealmId().GetAddress();
+
+            foreach (var (_, push) in Global.DB2Mgr.GetHotfixData())
+            {
+                if ((push.AvailableLocalesMask & (1 << (int)GetSessionDbcLocale())) == 0)
+                    continue;
+
+                availableHotfixes.Hotfixes.Add(push.Records.First().ID);
+            }
+
+            SendPacket(availableHotfixes);
         }
 
         [WorldPacketHandler(ClientOpcodes.HotfixRequest, Status = SessionStatus.Authed)]
@@ -60,8 +73,11 @@ namespace Game
                 var hotfixRecords = hotfixes.LookupByKey(hotfixId);
                 if (hotfixRecords != null)
                 {
-                    foreach (var hotfixRecord in hotfixRecords)
+                    foreach (var hotfixRecord in hotfixRecords.Records)
                     {
+                        if ((hotfixRecord.AvailableLocalesMask & (1 << (int)GetSessionDbcLocale())) == 0)
+                            continue;
+
                         HotfixConnect.HotfixData hotfixData = new();
                         hotfixData.Record = hotfixRecord;
                         if (hotfixRecord.HotfixStatus == HotfixRecord.Status.Valid)

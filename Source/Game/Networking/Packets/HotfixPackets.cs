@@ -61,23 +61,19 @@ namespace Game.Networking.Packets
 
     class AvailableHotfixes : ServerPacket
     {
-        public AvailableHotfixes(uint virtualRealmAddress, MultiMap<int, HotfixRecord> hotfixes) : base(ServerOpcodes.AvailableHotfixes)
-        {
-            VirtualRealmAddress = virtualRealmAddress;
-            Hotfixes = hotfixes;
-        }
+        public AvailableHotfixes() : base(ServerOpcodes.AvailableHotfixes) { }
 
         public override void Write()
         {
             _worldPacket.WriteUInt32(VirtualRealmAddress);
-            _worldPacket.WriteInt32(Hotfixes.Keys.Count);
+            _worldPacket.WriteInt32(Hotfixes.Count);
 
-            foreach (var key in Hotfixes.Keys)
-                Hotfixes[key][0].ID.Write(_worldPacket);
+            foreach (var hotfixId in Hotfixes)
+                hotfixId.Write(_worldPacket);
         }
 
         public uint VirtualRealmAddress;
-        public MultiMap<int, HotfixRecord> Hotfixes;
+        public List<HotfixId> Hotfixes = new();
     }
 
     class HotfixRequest : ClientPacket

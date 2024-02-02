@@ -437,7 +437,7 @@ namespace Game
             Global.DB2Mgr.LoadHotfixBlob(m_availableDbcLocaleMask);
 
             Log.outInfo(LogFilter.ServerLoading, "Loading hotfix info...");
-            Global.DB2Mgr.LoadHotfixData();
+            Global.DB2Mgr.LoadHotfixData(m_availableDbcLocaleMask);
 
             Log.outInfo(LogFilter.ServerLoading, "Loading hotfix optional data...");
             Global.DB2Mgr.LoadHotfixOptionalData(m_availableDbcLocaleMask);
