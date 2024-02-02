@@ -2077,7 +2077,7 @@ namespace Game.Entities
             udata.BuildPacket(out packet);
             player.SendPacket(packet);
         }
-        public ObjectGuid GetCreatorGUID() { return m_unitData.CreatedBy; }
+        public override ObjectGuid GetCreatorGUID() { return m_unitData.CreatedBy; }
         public void SetCreatorGUID(ObjectGuid creator) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CreatedBy), creator); }
         public ObjectGuid GetMinionGUID() { return m_unitData.Summon; }
         public void SetMinionGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Summon), guid); }

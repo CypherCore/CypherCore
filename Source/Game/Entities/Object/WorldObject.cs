@@ -3121,6 +3121,7 @@ namespace Game.Entities
 
         public virtual bool LoadFromDB(ulong spawnId, Map map, bool addToMap, bool allowDuplicate) { return true; }
 
+        public virtual ObjectGuid GetCreatorGUID() { return default; }
         public virtual ObjectGuid GetOwnerGUID() { return default; }
         public virtual ObjectGuid GetCharmerOrOwnerGUID() { return GetOwnerGUID(); }
 

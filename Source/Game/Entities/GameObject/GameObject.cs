@@ -3678,6 +3678,7 @@ namespace Game.Entities
         public Quaternion GetLocalRotation() { return m_localRotation; }
         public long GetPackedLocalRotation() { return m_packedRotation; }
 
+        public override ObjectGuid GetCreatorGUID() { return m_gameObjectData.CreatedBy; }
         public void SetOwnerGUID(ObjectGuid owner)
         {
             // Owner already found and different than expected owner - remove object from old owner

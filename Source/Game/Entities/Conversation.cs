@@ -341,8 +341,8 @@ namespace Game.Entities
         TimeSpan GetDuration() { return _duration; }
         public uint GetTextureKitId() { return _textureKitId; }
 
-        public ObjectGuid GetCreatorGuid() { return _creatorGuid; }
-        public override ObjectGuid GetOwnerGUID() { return GetCreatorGuid(); }
+        public override ObjectGuid GetCreatorGUID() { return _creatorGuid; }
+        public override ObjectGuid GetOwnerGUID() { return GetCreatorGUID(); }
         public override uint GetFaction() { return 0; }
 
         public override float GetStationaryX() { return _stationaryPosition.GetPositionX(); }

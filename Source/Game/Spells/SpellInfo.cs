@@ -1006,8 +1006,19 @@ namespace Game.Spells
             Unit unitTarget = target.ToUnit();
 
             if (HasAttribute(SpellAttr8.OnlyTargetIfSameCreator))
-                if (caster != target && caster.GetGUID() != target.GetOwnerGUID())
+            {
+                ObjectGuid getCreatorOrSelf(WorldObject obj)
+                {
+                    ObjectGuid creator = obj.GetCreatorGUID();
+                    if (creator.IsEmpty())
+                        creator = obj.GetGUID();
+
+                    return creator;
+                };
+
+                if (getCreatorOrSelf(caster) != getCreatorOrSelf(target))
                     return SpellCastResult.BadTargets;
+            }
 
             // creature/player specific target checks
             if (unitTarget != null)
@@ -4109,7 +4120,7 @@ namespace Game.Spells
         {
             public int MaxTargets;               // The amount of targets after the damage decreases by the Square Root AOE formula
             public int NumNonDiminishedTargets;  // The amount of targets that still take the full amount before the damage decreases by the Square Root AOE formula
-        }        
+        }
     }
 
     public class SpellEffectInfo

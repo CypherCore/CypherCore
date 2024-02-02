@@ -4403,7 +4403,7 @@ namespace Game.Spells
                 spellChannelStart.InterruptImmunities = interruptImmunities;
             }
 
-            if (m_spellInfo.HasAttribute(SpellAttr8.HealPrediction) && m_casttime != 0 && m_caster.IsUnit())
+            if (m_spellInfo.HasAttribute(SpellAttr8.HealPrediction) && m_caster.IsUnit())
             {
                 SpellTargetedHealPrediction healPrediction = new();
                 if (unitCaster.m_unitData.ChannelObjects.Size() == 1 && unitCaster.m_unitData.ChannelObjects[0].IsUnit())

@@ -185,6 +185,7 @@ namespace Game.Entities
             base.ClearUpdateMask(remove);
         }
 
+        public override ObjectGuid GetCreatorGUID() { return m_sceneObjectData.CreatedBy; }
         public override ObjectGuid GetOwnerGUID() { return m_sceneObjectData.CreatedBy; }
         public override uint GetFaction() { return 0; }
 

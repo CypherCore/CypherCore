@@ -81,7 +81,7 @@ namespace Game.Entities
         public override void Update(uint diff)
         {
             base.Update(diff);
-            
+
             loot?.Update();
         }
 
@@ -284,6 +284,7 @@ namespace Game.Entities
         public void SetCorpseDynamicFlag(CorpseDynFlags dynamicFlags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.DynamicFlags), (uint)dynamicFlags); }
         public void RemoveCorpseDynamicFlag(CorpseDynFlags dynamicFlags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.DynamicFlags), (uint)dynamicFlags); }
         public void ReplaceAllCorpseDynamicFlags(CorpseDynFlags dynamicFlags) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.DynamicFlags), (uint)dynamicFlags); }
+        public override ObjectGuid GetCreatorGUID() { return m_corpseData.Owner; }
         public override ObjectGuid GetOwnerGUID() { return m_corpseData.Owner; }
         public void SetOwnerGUID(ObjectGuid owner) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.Owner), owner); }
         public void SetPartyGUID(ObjectGuid partyGuid) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.PartyGUID), partyGuid); }
@@ -317,8 +318,8 @@ namespace Game.Entities
         public CellCoord GetCellCoord() { return _cellCoord; }
         public void SetCellCoord(CellCoord cellCoord) { _cellCoord = cellCoord; }
 
-        public override Loot GetLootForPlayer(Player player)  { return loot; }
-        
+        public override Loot GetLootForPlayer(Player player) { return loot; }
+
         public CorpseData m_corpseData;
 
         public Loot loot;
