@@ -39,7 +39,7 @@ namespace Scripts.DragonIsles.RubyLifePools
 
         static DoorData[] doorData =
         {
-            new(GameObjectIds.FireWall, DataTypes.KokiaBlazehoof, DoorType.Passage)
+            new(GameObjectIds.FireWall, DataTypes.KokiaBlazehoof, EncounterDoorBehavior.OpenWhenDone)
         };
 
         static DungeonEncounterData[] encounters =

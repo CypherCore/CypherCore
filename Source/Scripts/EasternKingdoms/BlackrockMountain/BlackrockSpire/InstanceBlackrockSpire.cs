@@ -116,12 +116,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
 
         public static DoorData[] doorData =
         {
-            new DoorData(GameObjectsIds.Doors, DataTypes.PyrogaurdEmberseer, DoorType.Passage),
-            new DoorData(GameObjectsIds.EmberseerOut, DataTypes.PyrogaurdEmberseer, DoorType.Passage),
-            new DoorData(GameObjectsIds.DrakkisathDoor1, DataTypes.GeneralDrakkisath, DoorType.Passage),
-            new DoorData(GameObjectsIds.DrakkisathDoor2, DataTypes.GeneralDrakkisath, DoorType.Passage),
-            new DoorData(GameObjectsIds.PortcullisActive, DataTypes.WarchiefRendBlackhand, DoorType.Passage),
-            new DoorData(GameObjectsIds.PortcullisTobossrooms, DataTypes.WarchiefRendBlackhand, DoorType.Passage),
+            new DoorData(GameObjectsIds.Doors, DataTypes.PyrogaurdEmberseer, EncounterDoorBehavior.OpenWhenNotInProgress),
+            new DoorData(GameObjectsIds.EmberseerOut, DataTypes.PyrogaurdEmberseer, EncounterDoorBehavior.OpenWhenDone),
+            new DoorData(GameObjectsIds.DrakkisathDoor1, DataTypes.GeneralDrakkisath, EncounterDoorBehavior.OpenWhenDone),
+            new DoorData(GameObjectsIds.DrakkisathDoor2, DataTypes.GeneralDrakkisath, EncounterDoorBehavior.OpenWhenDone),
+            new DoorData(GameObjectsIds.PortcullisActive, DataTypes.WarchiefRendBlackhand, EncounterDoorBehavior.OpenWhenDone),
+            new DoorData(GameObjectsIds.PortcullisTobossrooms, DataTypes.WarchiefRendBlackhand, EncounterDoorBehavior.OpenWhenDone),
         };
     }
 

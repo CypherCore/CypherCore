@@ -78,14 +78,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
 
         public static DoorData[] doorData =
         {
-            new DoorData(BWLGameObjectIds.PortcullisRazorgore, DataTypes.RazorgoreTheUntamed, DoorType.Passage),
-            new DoorData(BWLGameObjectIds.PortcullisVaelastrasz, DataTypes.VaelastrazTheCorrupt, DoorType.Passage),
-            new DoorData(BWLGameObjectIds.PortcullisBroodlord, DataTypes.BroodlordLashlayer, DoorType.Passage),
-            new DoorData(BWLGameObjectIds.PortcullisThreedragons, DataTypes.Firemaw, DoorType.Passage),
-            new DoorData(BWLGameObjectIds.PortcullisThreedragons, DataTypes.Ebonroc, DoorType.Passage),
-            new DoorData(BWLGameObjectIds.PortcullisThreedragons, DataTypes.Flamegor, DoorType.Passage),
-            new DoorData(BWLGameObjectIds.PortcullisChromaggus, DataTypes.Chromaggus, DoorType.Passage),
-            new DoorData(BWLGameObjectIds.PortcullisNefarian, DataTypes.Nefarian, DoorType.Room),
+            new DoorData(BWLGameObjectIds.PortcullisRazorgore, DataTypes.RazorgoreTheUntamed, EncounterDoorBehavior.OpenWhenDone),
+            new DoorData(BWLGameObjectIds.PortcullisVaelastrasz, DataTypes.VaelastrazTheCorrupt, EncounterDoorBehavior.OpenWhenDone),
+            new DoorData(BWLGameObjectIds.PortcullisBroodlord, DataTypes.BroodlordLashlayer, EncounterDoorBehavior.OpenWhenDone),
+            new DoorData(BWLGameObjectIds.PortcullisThreedragons, DataTypes.Firemaw, EncounterDoorBehavior.OpenWhenDone),
+            new DoorData(BWLGameObjectIds.PortcullisThreedragons, DataTypes.Ebonroc, EncounterDoorBehavior.OpenWhenDone),
+            new DoorData(BWLGameObjectIds.PortcullisThreedragons, DataTypes.Flamegor, EncounterDoorBehavior.OpenWhenDone),
+            new DoorData(BWLGameObjectIds.PortcullisChromaggus, DataTypes.Chromaggus, EncounterDoorBehavior.OpenWhenDone),
+            new DoorData(BWLGameObjectIds.PortcullisNefarian, DataTypes.Nefarian, EncounterDoorBehavior.OpenWhenNotInProgress),
         };
 
         public static ObjectData[] creatureData =

@@ -151,11 +151,12 @@ namespace Framework.Constants
         ToBeDecided = 5
     }
 
-    public enum DoorType
+    public enum EncounterDoorBehavior
     {
-        Room = 0,    // Door can open if encounter is not in progress
-        Passage = 1,    // Door can open if encounter is done
-        SpawnHole = 2,    // Door can open if encounter is in progress, typically used for spawning places
+        OpenWhenNotInProgress = 0, // open if encounter is not in progress
+        OpenWhenDone = 1, // open if encounter is done
+        OpenWhenInProgress = 2, // open if encounter is in progress, typically used for spawning places
+        OpenWhenNotDone = 3, // open if encounter is not done
         Max
     }
 

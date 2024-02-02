@@ -55,8 +55,8 @@ namespace Scripts.DragonIsles.AzureVault
 
         static DoorData[] doorData =
         {
-            new(GameObjectIds.ArcaneVaultsDoorLeymorEntrance, DataTypes.Leymor, DoorType.Room),
-            new(GameObjectIds.ArcaneVaultsDoorLeymorExit, DataTypes.Leymor, DoorType.Passage),
+            new(GameObjectIds.ArcaneVaultsDoorLeymorEntrance, DataTypes.Leymor, EncounterDoorBehavior.OpenWhenNotInProgress),
+            new(GameObjectIds.ArcaneVaultsDoorLeymorExit, DataTypes.Leymor, EncounterDoorBehavior.OpenWhenDone),
         };
 
         static DungeonEncounterData[] encounters =

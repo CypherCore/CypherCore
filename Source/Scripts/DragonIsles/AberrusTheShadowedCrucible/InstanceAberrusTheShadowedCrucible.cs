@@ -87,7 +87,7 @@ namespace Scripts.DragonIsles.AberrusTheShadowedCrucible
 
         static DoorData[] doorData =
         {
-            new (GameObjectIds.KazzaraDoor, DataTypes.KazzaraTheHellforged, DoorType.Room)
+            new (GameObjectIds.KazzaraDoor, DataTypes.KazzaraTheHellforged, EncounterDoorBehavior.OpenWhenNotInProgress)
         };
 
         static ObjectData[] objData =

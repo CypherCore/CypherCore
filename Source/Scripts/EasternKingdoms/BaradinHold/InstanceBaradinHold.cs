@@ -41,9 +41,9 @@ namespace Scripts.EasternKingdoms.BaradinHold
     {
         static DoorData[] doorData =
         {
-            new DoorData(GameObjectIds.ArgalothDoor,  DataTypes.Argaloth, DoorType.Room),
-            new DoorData(GameObjectIds.OccutharDoor,  DataTypes.Occuthar, DoorType.Room),
-            new DoorData(GameObjectIds.AlizabalDoor,  DataTypes.Alizabal, DoorType.Room),
+            new DoorData(GameObjectIds.ArgalothDoor,  DataTypes.Argaloth, EncounterDoorBehavior.OpenWhenNotInProgress),
+            new DoorData(GameObjectIds.OccutharDoor,  DataTypes.Occuthar, EncounterDoorBehavior.OpenWhenNotInProgress),
+            new DoorData(GameObjectIds.AlizabalDoor,  DataTypes.Alizabal, EncounterDoorBehavior.OpenWhenNotInProgress),
         };
 
         static DungeonEncounterData[] encounters =

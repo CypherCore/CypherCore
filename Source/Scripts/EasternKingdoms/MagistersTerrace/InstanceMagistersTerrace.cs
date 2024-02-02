@@ -91,11 +91,11 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
 
         public static DoorData[] doorData =
         {
-            new DoorData(GameObjectIds.SunwellRaidGate2, DataTypes.SelinFireheart, DoorType.Passage),
-            new DoorData(GameObjectIds.AssemblyChamberDoor, DataTypes.SelinFireheart, DoorType.Room),
-            new DoorData(GameObjectIds.SunwellRaidGate5, DataTypes.Vexallus, DoorType.Passage),
-            new DoorData(GameObjectIds.SunwellRaidGate4, DataTypes.PriestessDelrissa, DoorType.Passage),
-            new DoorData(GameObjectIds.AsylumDoor, DataTypes.KaelthasSunstrider, DoorType.Room),
+            new DoorData(GameObjectIds.SunwellRaidGate2, DataTypes.SelinFireheart, EncounterDoorBehavior.OpenWhenDone),
+            new DoorData(GameObjectIds.AssemblyChamberDoor, DataTypes.SelinFireheart, EncounterDoorBehavior.OpenWhenNotInProgress),
+            new DoorData(GameObjectIds.SunwellRaidGate5, DataTypes.Vexallus, EncounterDoorBehavior.OpenWhenDone),
+            new DoorData(GameObjectIds.SunwellRaidGate4, DataTypes.PriestessDelrissa, EncounterDoorBehavior.OpenWhenDone),
+            new DoorData(GameObjectIds.AsylumDoor, DataTypes.KaelthasSunstrider, EncounterDoorBehavior.OpenWhenNotInProgress),
         };
 
         public static Position KalecgosSpawnPos = new Position(164.3747f, -397.1197f, 2.151798f, 1.66219f);

@@ -103,7 +103,7 @@ namespace Game.Maps
                     continue;
 
                 if (door.bossId < bosses.Count)
-                    doors.Add(door.entry, new DoorInfo(bosses[door.bossId], door.type));
+                    doors.Add(door.entry, new DoorInfo(bosses[door.bossId], door.Behavior));
             }
 
             Log.outDebug(LogFilter.Scripts, "InstanceScript.LoadDoorData: {0} doors loaded.", doors.Count);
@@ -154,16 +154,19 @@ namespace Game.Maps
                 if (!open)
                     break;
 
-                switch (info.type)
+                switch (info.Behavior)
                 {
-                    case DoorType.Room:
-                        open = (info.bossInfo.state != EncounterState.InProgress);
+                    case EncounterDoorBehavior.OpenWhenNotInProgress:
+                        open = info.bossInfo.state != EncounterState.InProgress;
                         break;
-                    case DoorType.Passage:
-                        open = (info.bossInfo.state == EncounterState.Done);
+                    case EncounterDoorBehavior.OpenWhenDone:
+                        open = info.bossInfo.state == EncounterState.Done;
                         break;
-                    case DoorType.SpawnHole:
-                        open = (info.bossInfo.state == EncounterState.InProgress);
+                    case EncounterDoorBehavior.OpenWhenInProgress:
+                        open = info.bossInfo.state == EncounterState.InProgress;
+                        break;
+                    case EncounterDoorBehavior.OpenWhenNotDone:
+                        open = info.bossInfo.state != EncounterState.Done;
                         break;
                     default:
                         break;
@@ -277,9 +280,9 @@ namespace Game.Maps
             foreach (var data in range)
             {
                 if (add)
-                    data.bossInfo.door[(int)data.type].Add(door.GetGUID());
+                    data.bossInfo.door[(int)data.Behavior].Add(door.GetGUID());
                 else
-                    data.bossInfo.door[(int)data.type].Remove(door.GetGUID());
+                    data.bossInfo.door[(int)data.Behavior].Remove(door.GetGUID());
             }
 
             if (add)
@@ -400,11 +403,11 @@ namespace Game.Maps
                         instance.UpdateInstanceLock(new UpdateBossStateSaveDataEvent(dungeonEncounter, id, state));
                 }
 
-                for (uint type = 0; type < (int)DoorType.Max; ++type)
+                foreach (var doorSet in bossInfo.door)
                 {
-                    foreach (var guid in bossInfo.door[type])
+                    foreach (ObjectGuid doorGUID in doorSet)
                     {
-                        GameObject door = instance.GetGameObject(guid);
+                        GameObject door = instance.GetGameObject(doorGUID);
                         if (door != null)
                             UpdateDoorState(door);
                     }
@@ -705,7 +708,7 @@ namespace Game.Maps
 
             return null;
         }
-        
+
         public virtual bool CheckAchievementCriteriaMeet(uint criteria_id, Player source, Unit target = null, uint miscvalue1 = 0)
         {
             Log.outError(LogFilter.Server, "Achievement system call CheckAchievementCriteriaMeet but instance script for map {0} not have implementation for achievement criteria {1}",
@@ -732,7 +735,7 @@ namespace Game.Maps
 
             return false;
         }
-        
+
         public void SetEntranceLocation(uint worldSafeLocationId)
         {
             _entranceId = worldSafeLocationId;
@@ -971,16 +974,16 @@ namespace Game.Maps
 
     public class DoorData
     {
-        public DoorData(uint _entry, uint _bossid, DoorType _type)
+        public DoorData(uint _entry, uint _bossid, EncounterDoorBehavior behavior)
         {
             entry = _entry;
             bossId = _bossid;
-            type = _type;
+            Behavior = behavior;
         }
 
         public uint entry;
         public uint bossId;
-        public DoorType type;
+        public EncounterDoorBehavior Behavior;
     }
 
     public class BossBoundaryEntry
@@ -1022,7 +1025,7 @@ namespace Game.Maps
     public class BossInfo
     {
         public EncounterState state;
-        public List<ObjectGuid>[] door = new List<ObjectGuid>[(int)DoorType.Max];
+        public List<ObjectGuid>[] door = new List<ObjectGuid>[(int)EncounterDoorBehavior.Max];
         public List<ObjectGuid> minion = new();
         public List<AreaBoundary> boundary = new();
         public DungeonEncounterRecord[] DungeonEncounters = new DungeonEncounterRecord[MapConst.MaxDungeonEncountersPerBoss];
@@ -1030,7 +1033,7 @@ namespace Game.Maps
         public BossInfo()
         {
             state = EncounterState.ToBeDecided;
-            for (var i = 0; i < (int)DoorType.Max; ++i)
+            for (var i = 0; i < (int)EncounterDoorBehavior.Max; ++i)
                 door[i] = new List<ObjectGuid>();
         }
 
@@ -1041,14 +1044,14 @@ namespace Game.Maps
     }
     class DoorInfo
     {
-        public DoorInfo(BossInfo _bossInfo, DoorType _type)
+        public DoorInfo(BossInfo _bossInfo, EncounterDoorBehavior behavior)
         {
             bossInfo = _bossInfo;
-            type = _type;
+            Behavior = behavior;
         }
 
         public BossInfo bossInfo;
-        public DoorType type;
+        public EncounterDoorBehavior Behavior;
     }
     class MinionInfo
     {
@@ -1097,7 +1100,7 @@ namespace Game.Maps
             _instance = instance;
             _name = name;
             _value = value;
-            
+
             _instance.RegisterPersistentScriptValue(this);
         }
 

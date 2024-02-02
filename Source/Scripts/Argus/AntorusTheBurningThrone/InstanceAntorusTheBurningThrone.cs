@@ -4,6 +4,7 @@
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Framework.Constants;
 
 namespace Scripts.Argus.AntorusTheBurningThrone
 {
@@ -57,8 +58,8 @@ namespace Scripts.Argus.AntorusTheBurningThrone
 
         public static DoorData[] doorData =
         {
-            new(GameObjectIds.Collision, DataTypes.GarothiWorldbreaker, Framework.Constants.DoorType.Passage),
-            new(GameObjectIds.Rock, DataTypes.GarothiWorldbreaker, Framework.Constants.DoorType.Passage)
+            new(GameObjectIds.Collision, DataTypes.GarothiWorldbreaker, EncounterDoorBehavior.OpenWhenDone),
+            new(GameObjectIds.Rock, DataTypes.GarothiWorldbreaker, EncounterDoorBehavior.OpenWhenDone)
         };
 
         public static DungeonEncounterData[] encounters =
