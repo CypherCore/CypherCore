@@ -285,7 +285,6 @@ namespace Game
             if (oldRole == packet.Role)
                 return;
 
-            roleChangedInform.PartyIndex = (byte)group.GetGroupCategory();
             roleChangedInform.From = GetPlayer().GetGUID();
             roleChangedInform.ChangedUnit = packet.TargetGUID;
             roleChangedInform.OldRole = oldRole;
@@ -293,6 +292,7 @@ namespace Game
 
             if (group != null)
             {
+                roleChangedInform.PartyIndex = (byte)group.GetGroupCategory();
                 group.BroadcastPacket(roleChangedInform, false);
                 group.SetLfgRoles(packet.TargetGUID, (LfgRoles)packet.Role);
             }
