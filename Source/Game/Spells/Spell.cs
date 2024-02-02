@@ -5744,7 +5744,7 @@ namespace Game.Spells
 
                                     if (spellEffectInfo.Effect == SpellEffectName.ChangeBattlepetQuality)
                                     {
-                                        var qualityRecord = CliDB.BattlePetBreedQualityStorage.Values.FirstOrDefault(a1 => a1.MaxQualityRoll < spellEffectInfo.BasePoints);
+                                        var qualityRecord = CliDB.BattlePetBreedQualityStorage.Values.FirstOrDefault(a1 => a1.MaxQualityRoll < spellEffectInfo.CalcBaseValue(m_caster, creature, m_castItemEntry, m_castItemLevel));
 
                                         BattlePetBreedQuality quality = BattlePetBreedQuality.Poor;
                                         if (qualityRecord != null)
@@ -6230,7 +6230,7 @@ namespace Game.Spells
                             break;
                         case SpellGroupStackRule.ExclusiveSameEffect: // this one has further checks, but i don't think they're necessary for autocast logic
                         case SpellGroupStackRule.ExclusiveHighest:
-                            if (Math.Abs(spellEffectInfo.BasePoints) <= Math.Abs(eff.GetAmount()))
+                            if (Math.Abs(spellEffectInfo.CalcBaseValue(m_caster, target, 0, -1)) <= Math.Abs(eff.GetAmount()))
                                 return false;
                             break;
                         case SpellGroupStackRule.Default:

@@ -2652,7 +2652,7 @@ namespace Game.Entities
                     {
                         int[] bp = new int[SpellConst.MaxEffects];
                         foreach (var spellEffectInfo in spellEntry.GetEffects())
-                            bp[spellEffectInfo.EffectIndex] = spellEffectInfo.BasePoints;
+                            bp[spellEffectInfo.EffectIndex] = (int)spellEffectInfo.BasePoints;
 
                         bp[i] = seatId;
 
@@ -4079,7 +4079,7 @@ namespace Game.Entities
                         if (createInfo.BaseAmount != null)
                             bp = createInfo.BaseAmount[spellEffectInfo.EffectIndex];
                         else
-                            bp = spellEffectInfo.BasePoints;
+                            bp = (int)spellEffectInfo.BasePoints;
 
                         auraEff.m_baseAmount = bp;
                     }
