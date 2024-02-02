@@ -5832,7 +5832,14 @@ namespace Game.Spells
                 return;
 
             newConfig.TraitSystemID = CliDB.TraitTreeStorage.LookupByKey(effectInfo.MiscValue).TraitSystemID;
-            target.CreateTraitConfig(newConfig);
+            int existingConfigForSystem = target.m_activePlayerData.TraitConfigs.FindIndexIf(config =>
+            {
+                return config.Type == (int)TraitConfigType.Generic
+                    && config.TraitSystemID == newConfig.TraitSystemID;
+            });
+
+            if (existingConfigForSystem < 0)
+                target.CreateTraitConfig(newConfig);
         }
 
         [SpellEffectHandler(SpellEffectName.ChangeActiveCombatTraitConfig)]
