@@ -16,9 +16,9 @@ public class RandomHelper
     /// Returns a random number between 0.0 and 1.0.
     /// </summary>
     /// <returns></returns>
-    public static double NextDouble()
+    public static float NextSingle()
     {
-        return rand.NextDouble();
+        return rand.NextSingle();
     }
 
     /// <summary>

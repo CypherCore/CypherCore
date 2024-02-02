@@ -217,16 +217,16 @@ namespace Game
             }
             else if (u < 90)
             {
-                m_intensity = (float)RandomHelper.NextDouble() * 0.3333f;
+                m_intensity = RandomHelper.NextSingle() * 0.3333f;
             }
             else
             {
                 // Severe change, but how severe?
                 rn = RandomHelper.URand(0, 99);
                 if (rn < 50)
-                    m_intensity = (float)RandomHelper.NextDouble() * 0.3333f + 0.3334f;
+                    m_intensity = RandomHelper.NextSingle() * 0.3333f + 0.3334f;
                 else
-                    m_intensity = (float)RandomHelper.NextDouble() * 0.3333f + 0.6667f;
+                    m_intensity = RandomHelper.NextSingle() * 0.3333f + 0.6667f;
             }
 
             // return true only in case weather changes

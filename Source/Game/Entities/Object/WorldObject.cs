@@ -3389,12 +3389,12 @@ namespace Game.Entities
             }
 
             // angle to face `obj` to `this`
-            float angle = (float)RandomHelper.NextDouble() * (2 * MathFunctions.PI);
-            float new_dist = (float)RandomHelper.NextDouble() + (float)RandomHelper.NextDouble();
+            float angle = RandomHelper.NextSingle() * (2 * MathFunctions.PI);
+            float new_dist = RandomHelper.NextSingle() + RandomHelper.NextSingle();
             new_dist = distance * (new_dist > 1 ? new_dist - 2 : new_dist);
 
-            rand_x = (float)(pos.posX + new_dist * Math.Cos(angle));
-            rand_y = (float)(pos.posY + new_dist * Math.Sin(angle));
+            rand_x = (pos.posX + new_dist * MathF.Cos(angle));
+            rand_y = (pos.posY + new_dist * MathF.Sin(angle));
             rand_z = pos.posZ;
 
             GridDefines.NormalizeMapCoord(ref rand_x);
@@ -3570,7 +3570,7 @@ namespace Game.Entities
         public Position GetRandomNearPosition(float radius)
         {
             var pos = GetPosition();
-            MovePosition(pos, radius * (float)RandomHelper.NextDouble(), (float)RandomHelper.NextDouble() * MathFunctions.PI * 2);
+            MovePosition(pos, radius * RandomHelper.NextSingle(), RandomHelper.NextSingle() * MathFunctions.PI * 2);
             return pos;
         }
 

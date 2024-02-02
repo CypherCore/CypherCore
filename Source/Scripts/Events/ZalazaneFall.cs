@@ -261,7 +261,7 @@ namespace Scripts.Events.ZalazaneFall
             me.SetDisplayId(trollmodel[RandomHelper.URand(0, 39)]);
             Player player = me.GetOwner().ToPlayer();
             if (player != null)
-                me.GetMotionMaster().MoveFollow(player, 5.0f, (float)(RandomHelper.NextDouble() + 1.0f) * (float)(MathF.PI) / 3.0f * 4.0f);
+                me.GetMotionMaster().MoveFollow(player, 5.0f, (RandomHelper.NextSingle() + 1.0f) * (MathF.PI) / 3.0f * 4.0f);
         }
 
         public override void Reset()

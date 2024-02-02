@@ -276,7 +276,7 @@ namespace Scripts.Events
 
         void HandleDummy(uint effIndex)
         {
-            Position dest = GetCaster().GetFirstCollisionPosition(30.0f, (float)RandomHelper.NextDouble() * (float)(2 * MathF.PI));
+            Position dest = GetCaster().GetFirstCollisionPosition(30.0f, RandomHelper.NextSingle() * (float)(2 * MathF.PI));
             GetCaster().CastSpell(dest, FlingTorch.SpellFlingTorchTriggered, true);
             GetCaster().CastSpell(dest, FlingTorch.SpellFlingTorchShadow);
         }
@@ -355,7 +355,7 @@ namespace Scripts.Events
             }
             else
             {
-                Position dest = player.GetFirstCollisionPosition(15.0f, (float)RandomHelper.NextDouble() * (float)(2 * MathF.PI));
+                Position dest = player.GetFirstCollisionPosition(15.0f, RandomHelper.NextSingle() * (2 * MathF.PI));
                 player.CastSpell(player, FlingTorch.SpellTorchesCaught);
                 player.CastSpell(dest, FlingTorch.SpellFlingTorchTriggered, true);
                 player.CastSpell(dest, FlingTorch.SpellFlingTorchShadow);

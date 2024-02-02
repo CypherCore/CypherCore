@@ -995,9 +995,9 @@ namespace Game.Spells
                 {
                     float minDist = m_spellInfo.GetMinRange(true);
                     float maxDist = m_spellInfo.GetMaxRange(true);
-                    float dis = (float)RandomHelper.NextDouble() * (maxDist - minDist) + minDist;
+                    float dis = RandomHelper.NextSingle() * (maxDist - minDist) + minDist;
                     float x, y, z;
-                    float angle = (float)RandomHelper.NextDouble() * (MathFunctions.PI * 35.0f / 180.0f) - (float)(Math.PI * 17.5f / 180.0f);
+                    float angle = RandomHelper.NextSingle() * (MathF.PI * 35.0f / 180.0f) - (MathF.PI * 17.5f / 180.0f);
                     m_caster.GetClosePoint(out x, out y, out z, SharedConst.DefaultPlayerBoundingRadius, dis, angle);
 
                     float ground = m_caster.GetMapHeight(x, y, z);
@@ -1114,7 +1114,7 @@ namespace Game.Spells
                             break;
                         case Targets.DestCasterRandom:
                             if (dist > objSize)
-                                dist = objSize + (dist - objSize) * (float)RandomHelper.NextDouble();
+                                dist = objSize + (dist - objSize) * RandomHelper.NextSingle();
                             break;
                         case Targets.DestCasterFrontLeft:
                         case Targets.DestCasterBackLeft:
@@ -1165,7 +1165,7 @@ namespace Game.Spells
                     float angle = targetType.CalcDirectionAngle();
                     float dist = spellEffectInfo.CalcRadius(null, targetIndex);
                     if (targetType.GetTarget() == Targets.DestRandom)
-                        dist *= (float)RandomHelper.NextDouble();
+                        dist *= RandomHelper.NextSingle();
 
                     Position pos = new(dest.Position);
                     target.MovePositionToFirstCollision(pos, dist, angle);
@@ -1219,7 +1219,7 @@ namespace Game.Spells
                     float angle = targetType.CalcDirectionAngle();
                     float dist = spellEffectInfo.CalcRadius(m_caster, targetIndex);
                     if (targetType.GetTarget() == Targets.DestRandom)
-                        dist *= (float)RandomHelper.NextDouble();
+                        dist *= RandomHelper.NextSingle();
 
                     Position pos = new(m_targets.GetDstPos());
                     m_caster.MovePositionToFirstCollision(pos, dist, angle);

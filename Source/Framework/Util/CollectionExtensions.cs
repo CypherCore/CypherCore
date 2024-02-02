@@ -158,7 +158,7 @@ namespace System.Collections.Generic
         {
             float totalWeight = sequence.Sum(weightSelector);
             // The weight we are after...
-            float itemWeightIndex = (float)RandomHelper.NextDouble() * totalWeight;
+            float itemWeightIndex = RandomHelper.NextSingle() * totalWeight;
             float currentWeightIndex = 0;
 
             foreach (var item in from weightedItem in sequence select new { Value = weightedItem, Weight = weightSelector(weightedItem) })
