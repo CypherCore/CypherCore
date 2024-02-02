@@ -3887,44 +3887,27 @@ namespace Game.AI
                     Log.outDebug(LogFilter.ScriptsAi, $"SmartScript: EventMap for Event {eventId} is empty but is using SmartScript.");
                 return;
             }
-            foreach (var holder in e)
+
+            foreach (var scriptholder in e)
             {
-                if (holder.Event.event_flags.HasAnyFlag(SmartEventFlags.DifficultyAll))//if has instance flag add only if in it
+                if (obj != null && !scriptholder.Difficulties.Empty())
                 {
-                    if (!(obj != null && obj.GetMap().IsDungeon()))
-                        continue;
-
-                    // TODO: fix it for new maps and difficulties
-                    switch (obj.GetMap().GetDifficultyID())
+                    bool foundValidDifficulty = false;
+                    foreach (Difficulty difficulty in scriptholder.Difficulties)
                     {
-
-
-                        case Difficulty.Normal:
-                        case Difficulty.Raid10N:
-                            if (holder.Event.event_flags.HasAnyFlag(SmartEventFlags.Difficulty0))
-                                _events.Add(holder);
+                        if (difficulty == obj.GetMap().GetDifficultyID())
+                        {
+                            foundValidDifficulty = true;
                             break;
-                        case Difficulty.Heroic:
-                        case Difficulty.Raid25N:
-                            if (holder.Event.event_flags.HasAnyFlag(SmartEventFlags.Difficulty1))
-                                _events.Add(holder);
-                            break;
-                        case Difficulty.Raid10HC:
-                            if (holder.Event.event_flags.HasAnyFlag(SmartEventFlags.Difficulty2))
-                                _events.Add(holder);
-                            break;
-                        case Difficulty.Raid25HC:
-                            if (holder.Event.event_flags.HasAnyFlag(SmartEventFlags.Difficulty3))
-                                _events.Add(holder);
-                            break;
-                        default:
-                            break;
-
+                        }
                     }
+
+                    if (!foundValidDifficulty)
+                        continue;
                 }
 
-                _allEventFlags |= holder.Event.event_flags;
-                _events.Add(holder);//NOTE: 'world(0)' events still get processed in ANY instance mode
+                _allEventFlags |= scriptholder.Event.event_flags;
+                _events.Add(scriptholder);
             }
         }
 

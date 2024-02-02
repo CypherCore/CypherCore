@@ -80,21 +80,22 @@ namespace Framework.Constants
                                          Phase11Bit + Phase12Bit
     }
 
+    [Flags]
     public enum SmartEventFlags
     {
         NotRepeatable = 0x01,           //Event can not repeat
-        Difficulty0 = 0x02,             //Event only occurs in instance difficulty 0
-        Difficulty1 = 0x04,             //Event only occurs in instance difficulty 1
-        Difficulty2 = 0x08,             //Event only occurs in instance difficulty 2
-        Difficulty3 = 0x10,             //Event only occurs in instance difficulty 3
+        Difficulty0_Deprecated = 0x02,             //Event only occurs in instance difficulty 0
+        Difficulty1_Deprecated = 0x04,             //Event only occurs in instance difficulty 1
+        Difficulty2_Deprecated = 0x08,             //Event only occurs in instance difficulty 2
+        Difficulty3_Deprecated = 0x10,             //Event only occurs in instance difficulty 3
         Reserved5 = 0x20,
         Reserved6 = 0x40,
         DebugOnly = 0x80,               //Event only occurs in debug build
         DontReset = 0x100,              //Event will not reset in SmartScript.OnReset()
         WhileCharmed = 0x200,           //Event occurs even if AI owner is charmed
 
-        DifficultyAll = (Difficulty0 | Difficulty1 | Difficulty2 | Difficulty3),
-        All = (NotRepeatable | DifficultyAll | Reserved5 | Reserved6 | DebugOnly | DontReset | WhileCharmed),
+        Deprecated = (Difficulty0_Deprecated | Difficulty1_Deprecated | Difficulty2_Deprecated | Difficulty3_Deprecated),
+        All = (NotRepeatable | Deprecated | Reserved5 | Reserved6 | DebugOnly | DontReset | WhileCharmed),
         
         // Temp flags, used only at runtime, never stored in DB
         TempIgnoreChanceRoll = 0x40000000,              //Event occurs no matter what roll_chance_i(e.event.event_chance) returns.
