@@ -1784,13 +1784,19 @@ namespace Game
                 case ConditionTypes.PetType:
                     if (cond.ConditionValue1 >= (1 << (int)PetType.Max))
                     {
-                        Log.outError(LogFilter.Sql, "{0} has non-existing pet type {1}, skipped.", cond.ToString(true), cond.ConditionValue1);
+                        Log.outError(LogFilter.Sql, $"{cond.ToString(true)} has non-existing pet type {cond.ConditionValue1}, skipped.");
+                        return false;
+                    }
+                    break;
+                case ConditionTypes.InstanceInfo:
+                    if (cond.ConditionValue3 == (uint)InstanceInfo.GuidData)
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond.ToString(true)} has unsupported ConditionValue3 {cond.ConditionValue3} (INSTANCE_INFO_GUID_DATA), skipped.");
                         return false;
                     }
                     break;
                 case ConditionTypes.Alive:
                 case ConditionTypes.Areaid:
-                case ConditionTypes.InstanceInfo:
                 case ConditionTypes.TerrainSwap:
                 case ConditionTypes.InWater:
                 case ConditionTypes.Charmed:

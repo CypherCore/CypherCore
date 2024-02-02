@@ -38,9 +38,10 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.InstanceInfo:
                 {
-                    if (map.IsDungeon())
+                    InstanceMap instanceMap = map.ToInstanceMap();
+                    if (instanceMap != null)
                     {
-                        InstanceScript instance = ((InstanceMap)map).GetInstanceScript();
+                        InstanceScript instance = instanceMap.GetInstanceScript();
                         if (instance != null)
                         {
                             switch ((InstanceInfo)ConditionValue3)
@@ -48,14 +49,31 @@ namespace Game.Conditions
                                 case InstanceInfo.Data:
                                     condMeets = instance.GetData(ConditionValue1) == ConditionValue2;
                                     break;
-                                //case INSTANCE_INFO_GUID_DATA:
-                                //    condMeets = instance->GetGuidData(ConditionValue1) == ObjectGuid(uint64(ConditionValue2));
-                                //    break;
                                 case InstanceInfo.BossState:
                                     condMeets = instance.GetBossState(ConditionValue1) == (EncounterState)ConditionValue2;
                                     break;
                                 case InstanceInfo.Data64:
                                     condMeets = instance.GetData64(ConditionValue1) == ConditionValue2;
+                                    break;
+                                default:
+                                    condMeets = false;
+                                    break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        BattlegroundMap bgMap = map.ToBattlegroundMap();
+                        if (bgMap != null)
+                        {
+                            ZoneScript zoneScript = bgMap.GetBG();
+                            switch ((InstanceInfo)ConditionValue3)
+                            {
+                                case InstanceInfo.Data:
+                                    condMeets = zoneScript.GetData(ConditionValue1) == ConditionValue2;
+                                    break;
+                                case InstanceInfo.Data64:
+                                    condMeets = zoneScript.GetData64(ConditionValue1) == ConditionValue2;
                                     break;
                                 default:
                                     condMeets = false;
@@ -657,7 +675,7 @@ namespace Game.Conditions
             mConditionMap = map;
             mLastFailedCondition = null;
         }
-        
+
         public WorldObject[] mConditionTargets = new WorldObject[SharedConst.MaxConditionTargets]; // an array of targets available for conditions
         public Map mConditionMap;
         public Condition mLastFailedCondition;

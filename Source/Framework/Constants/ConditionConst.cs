@@ -119,7 +119,8 @@ namespace Framework.Constants
     public enum InstanceInfo
     {
         Data = 0,
-        Data64,
-        BossState
+        GuidData,
+        BossState,
+        Data64
     }
 }
