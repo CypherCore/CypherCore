@@ -249,7 +249,7 @@ namespace Game.Misc
 
             NpcText text = Global.ObjectMgr.GetNpcText(titleTextId);
             if (text != null)
-                packet.TextID = (int)text.Data.SelectRandomElementByWeight(data => data.Probability).BroadcastTextID;
+                packet.BroadcastTextID = (int)text.Data.SelectRandomElementByWeight(data => data.Probability).BroadcastTextID;
 
             foreach (var (index, item) in _gossipMenu.GetMenuItems())
             {
