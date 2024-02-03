@@ -2149,7 +2149,7 @@ namespace Game.Entities
         {
             SpellNonMeleeDamageLog packet = new();
             packet.Me = log.target.GetGUID();
-            packet.CasterGUID = log.attacker.GetGUID();
+            packet.CasterGUID = log.attacker?.GetGUID() ?? ObjectGuid.Empty;
             packet.CastID = log.castId;
             packet.SpellID = (int)(log.Spell != null ? log.Spell.Id : 0);
             packet.Visual = log.SpellVisual;
