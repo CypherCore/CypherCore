@@ -484,7 +484,7 @@ namespace Game
 
             if (phaseId != 0)
                 phaseShift.AddPhase(phaseId, GetPhaseFlags(phaseId), null);
-            else
+            else if (phaseGroupId != 0)
             {
                 var phasesInGroup = Global.DB2Mgr.GetPhasesForGroup(phaseGroupId);
                 foreach (uint phaseInGroup in phasesInGroup)
