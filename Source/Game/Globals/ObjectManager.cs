@@ -1454,33 +1454,18 @@ namespace Game
                 _eventStorage.AddRange(go.Value.GetEventScriptSet());
 
             // Load all possible event ids from spells
-            foreach (SpellNameRecord spellNameEntry in CliDB.SpellNameStorage.Values)
-            {
-                SpellInfo spell = Global.SpellMgr.GetSpellInfo(spellNameEntry.Id, Difficulty.None);
-                if (spell != null)
-                {
-                    foreach (var spellEffectInfo in spell.GetEffects())
-                    {
-                        if (spellEffectInfo.IsEffect(SpellEffectName.SendEvent))
-                            if (spellEffectInfo.MiscValue != 0)
-                                _eventStorage.Add((uint)spellEffectInfo.MiscValue);
-                    }
-                }
-            }
+            foreach (var spellEffect in CliDB.SpellEffectStorage.Values)
+                if (spellEffect.Effect == (uint)SpellEffectName.SendEvent && spellEffect.EffectMiscValue[0] != 0)
+                    _eventStorage.Add((uint)spellEffect.EffectMiscValue[0]);
 
             // Load all possible event ids from taxi path nodes
-            foreach (var path_idx in CliDB.TaxiPathNodesByPath)
+            foreach (var node in CliDB.TaxiPathNodeStorage.Values)
             {
-                for (uint node_idx = 0; node_idx < path_idx.Value.Length; ++node_idx)
-                {
-                    TaxiPathNodeRecord node = path_idx.Value[node_idx];
+                if (node.ArrivalEventID != 0)
+                    _eventStorage.Add(node.ArrivalEventID);
 
-                    if (node.ArrivalEventID != 0)
-                        _eventStorage.Add(node.ArrivalEventID);
-
-                    if (node.DepartureEventID != 0)
-                        _eventStorage.Add(node.DepartureEventID);
-                }
+                if (node.DepartureEventID != 0)
+                    _eventStorage.Add(node.DepartureEventID);
             }
 
             // Load all possible event ids from criterias
@@ -1502,6 +1487,14 @@ namespace Game
             foreach (ScenarioRecord scenario in CliDB.ScenarioStorage.Values)
                 foreach (CriteriaType criteriaType in eventCriteriaTypes)
                     addCriteriaEventsToStore(Global.CriteriaMgr.GetScenarioCriteriaByTypeAndScenario(criteriaType, scenario.Id));
+
+            foreach (var (gameEventId, _) in Global.CriteriaMgr.GetCriteriaByStartEvent(CriteriaStartEvent.SendEvent))
+                if (gameEventId != 0)
+                    _eventStorage.Add((uint)gameEventId);
+
+            foreach (var (gameEventId, _) in Global.CriteriaMgr.GetCriteriaByFailEvent(CriteriaFailEvent.SendEvent))
+                if (gameEventId != 0)
+                    _eventStorage.Add((uint)gameEventId);
         }
 
         public void LoadEventScripts()

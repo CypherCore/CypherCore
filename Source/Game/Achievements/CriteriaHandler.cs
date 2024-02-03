@@ -4104,9 +4104,19 @@ namespace Game.Achievements
             return _scenarioCriteriasByTypeAndScenarioId[(int)type].LookupByKey(scenarioId);
         }
 
+        public MultiMap<int, Criteria> GetCriteriaByStartEvent(CriteriaStartEvent startEvent)
+        {
+            return _criteriasByStartEvent[(int)startEvent];
+        }
+
         public List<Criteria> GetCriteriaByStartEvent(CriteriaStartEvent startEvent, int asset)
         {
             return _criteriasByStartEvent[(int)startEvent].LookupByKey(asset);
+        }
+
+        public MultiMap<int, Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent)
+        {
+            return _criteriasByFailEvent[(int)failEvent];
         }
 
         public List<Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent, int asset)
