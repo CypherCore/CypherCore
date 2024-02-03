@@ -44,7 +44,7 @@ namespace Game.Networking.Packets
 
         public int ChannelSpell;
         public int Reason;       // 40 = /run SpellStopCasting(), 16 = movement/AURA_INTERRUPT_FLAG_MOVE, 41 = turning/AURA_INTERRUPT_FLAG_TURNING
-                                // does not match SpellCastResult enum
+                                 // does not match SpellCastResult enum
     }
 
     class CancelGrowthAura : ClientPacket
@@ -181,11 +181,11 @@ namespace Game.Networking.Packets
 
     public class CastSpell : ClientPacket
     {
-        public SpellCastRequest Cast;
+        public SpellCastRequestPkt Cast;
 
         public CastSpell(WorldPacket packet) : base(packet)
         {
-            Cast = new SpellCastRequest();
+            Cast = new SpellCastRequestPkt();
         }
 
         public override void Read()
@@ -197,11 +197,11 @@ namespace Game.Networking.Packets
     public class PetCastSpell : ClientPacket
     {
         public ObjectGuid PetGUID;
-        public SpellCastRequest Cast;
+        public SpellCastRequestPkt Cast;
 
         public PetCastSpell(WorldPacket packet) : base(packet)
         {
-            Cast = new SpellCastRequest();
+            Cast = new SpellCastRequestPkt();
         }
 
         public override void Read()
@@ -216,11 +216,11 @@ namespace Game.Networking.Packets
         public byte PackSlot;
         public byte Slot;
         public ObjectGuid CastItem;
-        public SpellCastRequest Cast;
+        public SpellCastRequestPkt Cast;
 
         public UseItem(WorldPacket packet) : base(packet)
         {
-            Cast = new SpellCastRequest();
+            Cast = new SpellCastRequestPkt();
         }
 
         public override void Read()
@@ -363,8 +363,8 @@ namespace Game.Networking.Packets
         public int SpellID;
         public SpellCastResult Reason;
         public int FailedArg1 = -1;
-        public int FailedArg2 = -1; 
-        
+        public int FailedArg2 = -1;
+
         public CastFailedBase(ServerOpcodes opcode, ConnectionType connectionType) : base(opcode, connectionType) { }
 
         public override void Write()
@@ -760,7 +760,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Delay);
         }
     }
-    
+
     public class CancelCast : ClientPacket
     {
         public CancelCast(WorldPacket packet) : base(packet) { }
@@ -1161,7 +1161,14 @@ namespace Game.Networking.Packets
 
         public ushort OverrideID;
     }
-    
+
+    class CancelQueuedSpell : ClientPacket
+    {
+        public CancelQueuedSpell(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+
     //Structs
     public struct SpellLogPowerData
     {
@@ -1326,14 +1333,14 @@ namespace Game.Networking.Packets
         }
 
         public void Write(WorldPacket data)
-        {   
+        {
             data.WriteFloat(PlayerItemLevel);
             data.WriteFloat(TargetItemLevel);
             data.WriteInt16(PlayerLevelDelta);
             data.WriteUInt32(ScalingHealthItemLevelCurveID);
             data.WriteUInt8(TargetLevel);
             data.WriteUInt8(Expansion);
-            data.WriteInt8(TargetScalingLevelDelta); 
+            data.WriteInt8(TargetScalingLevelDelta);
             data.WriteUInt32((uint)Flags);
             data.WriteUInt32(PlayerContentTuningID);
             data.WriteUInt32(TargetContentTuningID);
@@ -1356,7 +1363,7 @@ namespace Game.Networking.Packets
         public int Unused927;
 
         public enum ContentTuningType
-        {        
+        {
             CreatureToPlayerDamage = 1,
             PlayerToCreatureDamage = 2,
             CreatureToCreatureDamage = 4,
@@ -1505,7 +1512,7 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data .WriteUInt8(Slot);
+            data.WriteUInt8(Slot);
             data.WriteBit(AuraData != null);
             data.FlushBits();
 
@@ -1661,8 +1668,8 @@ namespace Game.Networking.Packets
         }
     }
 
-    public class SpellCastRequest
-    {   
+    public class SpellCastRequestPkt
+    {
         public ObjectGuid CastID;
         public uint SpellID;
         public SpellCastVisual Visual;
@@ -1852,7 +1859,7 @@ namespace Game.Networking.Packets
 
             Immunities.Write(data);
             Predict.Write(data);
- 
+
             data.WriteBits(HitTargets.Count, 16);
             data.WriteBits(MissTargets.Count, 16);
             data.WriteBits(HitStatus.Count, 16);
@@ -2000,7 +2007,7 @@ namespace Game.Networking.Packets
             data.FlushBits();
 
             if (unused622_1.HasValue)
-                data .WriteUInt32(unused622_1.Value);
+                data.WriteUInt32(unused622_1.Value);
             if (unused622_2.HasValue)
                 data.WriteUInt32(unused622_2.Value);
         }

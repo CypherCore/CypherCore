@@ -110,6 +110,7 @@ namespace Game.Entities
         public Spell m_spellModTakingSpell;
         uint m_oldpetspell;
         Dictionary<uint, StoredAuraTeleportLocation> m_storedAuraTeleportLocations = new();
+        SpellCastRequest _pendingSpellCastRequest;
 
         //Mail
         List<Mail> m_mail = new();

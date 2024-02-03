@@ -18,7 +18,7 @@ namespace Game.Spells
             m_dst = new SpellDestination();
         }
 
-        public SpellCastTargets(Unit caster, SpellCastRequest spellCastRequest)
+        public SpellCastTargets(Unit caster, SpellCastRequestPkt spellCastRequest)
         {
             m_targetMask = spellCastRequest.Target.Flags;
             m_objectTargetGUID = spellCastRequest.Target.Unit;

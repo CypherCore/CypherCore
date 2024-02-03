@@ -20,97 +20,22 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.UseItem, Processing = PacketProcessing.Inplace)]
         void HandleUseItem(UseItem packet)
         {
-            Player user = GetPlayer();
-
             // ignore for remote control state
-            if (user.GetUnitBeingMoved() != user)
+            if (_player.GetUnitBeingMoved() != _player)
                 return;
 
-            Item item = user.GetUseableItemByPos(packet.PackSlot, packet.Slot);
-            if (item == null)
+            // Skip casting invalid spells right away
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(packet.Cast.SpellID, _player.GetMap().GetDifficultyID());
+            if (spellInfo == null)
             {
-                user.SendEquipError(InventoryResult.ItemNotFound);
-                return;
-            }
-
-            if (item.GetGUID() != packet.CastItem)
-            {
-                user.SendEquipError(InventoryResult.ItemNotFound);
+                Log.outError(LogFilter.Network, $"WorldSession::HandleUseItemOpcode: attempted to cast a non-existing spell (Id: {packet.Cast.SpellID})");
                 return;
             }
 
-            ItemTemplate proto = item.GetTemplate();
-            if (proto == null)
-            {
-                user.SendEquipError(InventoryResult.ItemNotFound, item);
-                return;
-            }
-
-            // some item classes can be used only in equipped state
-            if (proto.GetInventoryType() != InventoryType.NonEquip && !item.IsEquipped())
-            {
-                user.SendEquipError(InventoryResult.ItemNotFound, item);
-                return;
-            }
-
-            InventoryResult msg = user.CanUseItem(item);
-            if (msg != InventoryResult.Ok)
-            {
-                user.SendEquipError(msg, item);
-                return;
-            }
-
-            // only allow conjured consumable, bandage, poisons (all should have the 2^21 item flag set in DB)
-            if (proto.GetClass() == ItemClass.Consumable && !proto.HasFlag(ItemFlags.IgnoreDefaultArenaRestrictions) && user.InArena())
-            {
-                user.SendEquipError(InventoryResult.NotDuringArenaMatch, item);
-                return;
-            }
-
-            // don't allow items banned in arena
-            if (proto.HasFlag(ItemFlags.NotUseableInArena) && user.InArena())
-            {
-                user.SendEquipError(InventoryResult.NotDuringArenaMatch, item);
-                return;
-            }
-
-            if (user.IsInCombat())
-            {
-                foreach (ItemEffectRecord effect in item.GetEffects())
-                {
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)effect.SpellID, user.GetMap().GetDifficultyID());
-                    if (spellInfo != null)
-                    {
-                        if (!spellInfo.CanBeUsedInCombat(user))
-                        {
-                            user.SendEquipError(InventoryResult.NotInCombat, item);
-                            return;
-                        }
-                    }
-                }
-            }
-
-            // check also  BIND_WHEN_PICKED_UP and BIND_QUEST_ITEM for .additem or .additemset case by GM (not binded at adding to inventory)
-            if (item.GetBonding() == ItemBondingType.OnUse || item.GetBonding() == ItemBondingType.OnAcquire || item.GetBonding() == ItemBondingType.Quest)
-            {
-                if (!item.IsSoulBound())
-                {
-                    item.SetState(ItemUpdateState.Changed, user);
-                    item.SetBinding(true);
-                    GetCollectionMgr().AddItemAppearance(item);
-                }
-            }
-
-            user.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ItemUse);
-
-            SpellCastTargets targets = new(user, packet.Cast);
-
-            // Note: If script stop casting it must send appropriate data to client to prevent stuck item in gray state.
-            if (!Global.ScriptMgr.OnItemUse(user, item, targets, packet.Cast.CastID))
-            {
-                // no script or script not process request by self
-                user.CastItemUseSpell(item, targets, packet.Cast.CastID, packet.Cast.Misc);
-            }
+            if (_player.CanRequestSpellCast(spellInfo, _player))
+                _player.RequestSpellCast(new SpellCastRequest(packet.Cast, _player.GetGUID(), new SpellCastRequestItemData(packet.PackSlot, packet.Slot, packet.CastItem)));
+            else
+                Spell.SendCastResult(_player, spellInfo, default, packet.Cast.CastID, SpellCastResult.SpellInProgress);
         }
 
         [WorldPacketHandler(ClientOpcodes.OpenItem, Processing = PacketProcessing.Inplace)]
@@ -279,108 +204,46 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.CastSpell, Processing = PacketProcessing.ThreadSafe)]
         void HandleCastSpell(CastSpell cast)
         {
-            // ignore for remote control state (for player case)
-            Unit mover = GetPlayer().GetUnitBeingMoved();
-            if (mover != GetPlayer() && mover.IsTypeId(TypeId.Player))
-                return;
-
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(cast.Cast.SpellID, mover.GetMap().GetDifficultyID());
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(cast.Cast.SpellID, _player.GetMap().GetDifficultyID());
             if (spellInfo == null)
             {
-                Log.outError(LogFilter.Network, "WORLD: unknown spell id {0}", cast.Cast.SpellID);
+                Log.outError(LogFilter.Network, $"WorldSession::HandleCastSpellOpcode: attempted to cast a non-existing spell (Id: {cast.Cast.SpellID})");
                 return;
             }
 
-            Unit caster = mover;
-            if (caster.IsTypeId(TypeId.Unit) && !caster.ToCreature().HasSpell(spellInfo.Id))
+            // ignore for remote control state (for player case)
+            Unit mover = _player.GetUnitBeingMoved();
+            if (mover != _player && mover.IsPlayer())
+                return;
+
+            Unit castingUnit = mover;
+            if (castingUnit.IsCreature() && !castingUnit.ToCreature().HasSpell(spellInfo.Id))
             {
                 // If the vehicle creature does not have the spell but it allows the passenger to cast own spells
                 // change caster to player and let him cast
-                if (!GetPlayer().IsOnVehicle(caster) || spellInfo.CheckVehicle(GetPlayer()) != SpellCastResult.SpellCastOk)
+                if (!GetPlayer().IsOnVehicle(castingUnit) || spellInfo.CheckVehicle(GetPlayer()) != SpellCastResult.SpellCastOk)
                     return;
 
-                caster = GetPlayer();
-            }
-
-            TriggerCastFlags triggerFlag = TriggerCastFlags.None;
-
-            // client provided targets
-            SpellCastTargets targets = new(caster, cast.Cast);
-
-            // check known spell or raid marker spell (which not requires player to know it)
-            if (caster.IsTypeId(TypeId.Player) && !caster.ToPlayer().HasActiveSpell(spellInfo.Id) && !spellInfo.HasAttribute(SpellAttr8.SkipIsKnownCheck))
-            {
-                bool allow = false;
-
-                // allow casting of unknown spells for special lock cases
-                GameObject go = targets.GetGOTarget();
-                if (go != null)
-                    if (go.GetSpellForLock(caster.ToPlayer()) == spellInfo)
-                        allow = true;
-
-                // allow casting of spells triggered by clientside periodic trigger auras
-                if (caster.HasAuraTypeWithTriggerSpell(AuraType.PeriodicTriggerSpellFromClient, spellInfo.Id))
-                {
-                    allow = true;
-                    triggerFlag = TriggerCastFlags.FullMask;
-                }
-
-                if (!allow)
-                    return;
-            }
-
-            // Check possible spell cast overrides
-            spellInfo = caster.GetCastSpellInfo(spellInfo, triggerFlag);
-
-            if (spellInfo.IsPassive())
-                return;
-
-            // can't use our own spells when we're in possession of another unit,
-            if (GetPlayer().IsPossessing())
-                return;
-
-            // Client is resending autoshot cast opcode when other spell is cast during shoot rotation
-            // Skip it to prevent "interrupt" message
-            // Also check targets! target may have changed and we need to interrupt current spell
-            if (spellInfo.IsAutoRepeatRangedSpell())
-            {
-                Spell autoRepeatSpell = caster.GetCurrentSpell(CurrentSpellTypes.AutoRepeat);
-                if (autoRepeatSpell != null)
-                    if (autoRepeatSpell.m_spellInfo == spellInfo && autoRepeatSpell.m_targets.GetUnitTargetGUID() == targets.GetUnitTargetGUID())
-                        return;
-            }
-
-            // auto-selection buff level base at target level (in spellInfo)
-            if (targets.GetUnitTarget() != null)
-            {
-                SpellInfo actualSpellInfo = spellInfo.GetAuraRankForLevel(targets.GetUnitTarget().GetLevelForTarget(caster));
-
-                // if rank not found then function return NULL but in explicit cast case original spell can be casted and later failed with appropriate error message
-                if (actualSpellInfo != null)
-                    spellInfo = actualSpellInfo;
+                castingUnit = GetPlayer();
             }
 
             if (cast.Cast.MoveUpdate != null)
                 HandleMovementOpcode(ClientOpcodes.MoveStop, cast.Cast.MoveUpdate);
 
-            Spell spell = new(caster, spellInfo, triggerFlag);
-
-            SpellPrepare spellPrepare = new();
-            spellPrepare.ClientCastID = cast.Cast.CastID;
-            spellPrepare.ServerCastID = spell.m_castId;
-            SendPacket(spellPrepare);
-
-            spell.m_fromClient = true;
-            spell.m_misc.Data0 = cast.Cast.Misc[0];
-            spell.m_misc.Data1 = cast.Cast.Misc[1];
-            spell.Prepare(targets);
+            if (_player.CanRequestSpellCast(spellInfo, castingUnit))
+                _player.RequestSpellCast(new SpellCastRequest(cast.Cast, castingUnit.GetGUID()));
+            else
+                Spell.SendCastResult(_player, spellInfo, default, cast.Cast.CastID, SpellCastResult.SpellInProgress);
         }
 
         [WorldPacketHandler(ClientOpcodes.CancelCast, Processing = PacketProcessing.ThreadSafe)]
         void HandleCancelCast(CancelCast packet)
         {
-            if (GetPlayer().IsNonMeleeSpellCast(false))
-                GetPlayer().InterruptNonMeleeSpells(false, packet.SpellID, false);
+            if (_player.IsNonMeleeSpellCast(false))
+            {
+                _player.InterruptNonMeleeSpells(false, packet.SpellID, false);
+                _player.CancelPendingCastRequest(); // canceling casts also cancels pending spell cast requests
+            }
         }
 
         [WorldPacketHandler(ClientOpcodes.CancelAura, Processing = PacketProcessing.Inplace)]
@@ -484,6 +347,12 @@ namespace Game
             //may be better send SMSG_CANCEL_AUTO_REPEAT?
             //cancel and prepare for deleting
             _player.InterruptSpell(CurrentSpellTypes.AutoRepeat);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.CancelChannelling, Processing = PacketProcessing.Inplace)]
+        void HandleCancelQueuedSpellOpcode(CancelQueuedSpell cancelQueuedSpell)
+        {
+            _player.CancelPendingCastRequest();
         }
 
         [WorldPacketHandler(ClientOpcodes.CancelChannelling, Processing = PacketProcessing.Inplace)]

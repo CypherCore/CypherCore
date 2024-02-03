@@ -29,7 +29,7 @@ namespace Game.Networking.Packets
             Cast.Read(_worldPacket);
         }
 
-        public SpellCastRequest Cast = new();
+        public SpellCastRequestPkt Cast = new();
     }
 
     class AccountToyUpdate : ServerPacket

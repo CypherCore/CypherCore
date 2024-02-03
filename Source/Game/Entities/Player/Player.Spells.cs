@@ -1433,7 +1433,7 @@ namespace Game.Entities
 
             return 0;
         }
-        
+
         int SkillGainChance(uint SkillValue, uint GrayLevel, uint GreenLevel, uint YellowLevel)
         {
             if (SkillValue >= GrayLevel)
@@ -1702,7 +1702,7 @@ namespace Game.Entities
 
             return -1;
         }
-        
+
         int FindEmptyProfessionSlotFor(uint skillId)
         {
             SkillLineRecord skillEntry = CliDB.SkillLineStorage.LookupByKey(skillId);
@@ -3758,6 +3758,269 @@ namespace Game.Entities
         {
             SkillInfo skillInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill);
             SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillPermBonus, (int)pos), bonus);
+        }
+
+        public void RequestSpellCast(SpellCastRequest castRequest)
+        {
+            // We are overriding an already existing spell cast request so inform the client that the old cast is being replaced
+            if (_pendingSpellCastRequest != null)
+                CancelPendingCastRequest();
+
+            _pendingSpellCastRequest = castRequest;
+
+            // If we can process the cast request right now, do it.
+            if (CanExecutePendingSpellCastRequest())
+                ExecutePendingSpellCastRequest();
+        }
+
+        public void CancelPendingCastRequest()
+        {
+            if (_pendingSpellCastRequest == null)
+                return;
+
+            // We have to inform the client that the cast has been canceled. Otherwise the cast button will remain highlightened
+            CastFailed castFailed = new();
+            castFailed.CastID = _pendingSpellCastRequest.CastRequest.CastID;
+            castFailed.SpellID = (int)_pendingSpellCastRequest.CastRequest.SpellID;
+            castFailed.Reason = SpellCastResult.DontReport;
+            SendPacket(castFailed);
+
+            _pendingSpellCastRequest = null;
+        }
+
+        // A spell can be queued up within 400 milliseconds before global cooldown expires or the cast finishes
+        static TimeSpan SPELL_QUEUE_TIME_WINDOW = TimeSpan.FromMilliseconds(400);
+
+        public bool CanRequestSpellCast(SpellInfo spellInfo, Unit castingUnit)
+        {
+            if (castingUnit.GetSpellHistory().GetRemainingGlobalCooldown(spellInfo) > SPELL_QUEUE_TIME_WINDOW)
+                return false;
+
+            foreach (CurrentSpellTypes spellSlot in new[] { CurrentSpellTypes.Melee, CurrentSpellTypes.Generic })
+            {
+                Spell spell = GetCurrentSpell(spellSlot);
+                if (spell != null && TimeSpan.FromMilliseconds(spell.GetRemainingCastTime()) > SPELL_QUEUE_TIME_WINDOW)
+                    return false;
+            }
+
+            return true;
+        }
+
+        void ExecutePendingSpellCastRequest()
+        {
+            if (_pendingSpellCastRequest == null)
+                return;
+
+            TriggerCastFlags triggerFlag = TriggerCastFlags.None;
+
+            Unit castingUnit = _pendingSpellCastRequest.CastingUnitGUID == GetGUID() ? this : Global.ObjAccessor.GetUnit(this, _pendingSpellCastRequest.CastingUnitGUID);
+
+            // client provided targets
+            SpellCastTargets targets = new(castingUnit, _pendingSpellCastRequest.CastRequest);
+
+            // The spell cast has been requested by using an item. Handle the cast accordingly.
+            if (_pendingSpellCastRequest.ItemData != null)
+            {
+                if (ProcessItemCast(_pendingSpellCastRequest, targets))
+                    _pendingSpellCastRequest = null;
+                else
+                    CancelPendingCastRequest();
+                return;
+            }
+
+            // check known spell or raid marker spell (which not requires player to know it)
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(_pendingSpellCastRequest.CastRequest.SpellID, GetMap().GetDifficultyID());
+            Player plrCaster = castingUnit.ToPlayer();
+            if (plrCaster != null && !plrCaster.HasActiveSpell(spellInfo.Id) && !spellInfo.HasAttribute(SpellAttr8.SkipIsKnownCheck))
+            {
+                bool allow = false;
+
+                // allow casting of unknown spells for special lock cases
+                GameObject go = targets.GetGOTarget();
+                if (go != null && go.GetSpellForLock(plrCaster) == spellInfo)
+                    allow = true;
+
+                // allow casting of spells triggered by clientside periodic trigger auras
+                if (castingUnit.HasAuraTypeWithTriggerSpell(AuraType.PeriodicTriggerSpellFromClient, spellInfo.Id))
+                {
+                    allow = true;
+                    triggerFlag = TriggerCastFlags.FullMask;
+                }
+
+                if (!allow)
+                {
+                    CancelPendingCastRequest();
+                    return;
+                }
+            }
+
+            // Check possible spell cast overrides
+            spellInfo = castingUnit.GetCastSpellInfo(spellInfo, triggerFlag);
+            if (spellInfo.IsPassive())
+            {
+                CancelPendingCastRequest();
+                return;
+            }
+
+            // can't use our own spells when we're in possession of another unit
+            if (IsPossessing())
+            {
+                CancelPendingCastRequest();
+                return;
+            }
+
+            // Client is resending autoshot cast opcode when other spell is cast during shoot rotation
+            // Skip it to prevent "interrupt" message
+            // Also check targets! target may have changed and we need to interrupt current spell
+            if (spellInfo.IsAutoRepeatRangedSpell())
+            {
+                Spell currentSpell = castingUnit.GetCurrentSpell(CurrentSpellTypes.AutoRepeat);
+                if (currentSpell != null)
+                {
+                    if (currentSpell.m_spellInfo == spellInfo && currentSpell.m_targets.GetUnitTargetGUID() == targets.GetUnitTargetGUID())
+                    {
+                        CancelPendingCastRequest();
+                        return;
+                    }
+                }
+            }
+
+            // auto-selection buff level base at target level (in spellInfo)
+            if (targets.GetUnitTarget() != null)
+            {
+                SpellInfo actualSpellInfo = spellInfo.GetAuraRankForLevel(targets.GetUnitTarget().GetLevelForTarget(this));
+
+                // if rank not found then function return NULL but in explicit cast case original spell can be cast and later failed with appropriate error message
+                if (actualSpellInfo != null)
+                    spellInfo = actualSpellInfo;
+            }
+
+            Spell spell = new Spell(castingUnit, spellInfo, triggerFlag);
+
+            SpellPrepare spellPrepare = new();
+            spellPrepare.ClientCastID = _pendingSpellCastRequest.CastRequest.CastID;
+            spellPrepare.ServerCastID = spell.m_castId;
+            SendPacket(spellPrepare);
+
+            spell.m_fromClient = true;
+            spell.m_misc.Data0 = _pendingSpellCastRequest.CastRequest.Misc[0];
+            spell.m_misc.Data1 = _pendingSpellCastRequest.CastRequest.Misc[1];
+            spell.Prepare(targets);
+
+            _pendingSpellCastRequest = null;
+        }
+
+        bool ProcessItemCast(SpellCastRequest castRequest, SpellCastTargets targets)
+        {
+            Item item = GetUseableItemByPos(castRequest.ItemData.PackSlot, castRequest.ItemData.Slot);
+            if (item == null)
+            {
+                SendEquipError(InventoryResult.ItemNotFound);
+                return false;
+            }
+
+            if (item.GetGUID() != castRequest.ItemData.CastItem)
+            {
+                SendEquipError(InventoryResult.ItemNotFound);
+                return false;
+            }
+
+            ItemTemplate proto = item.GetTemplate();
+            if (proto == null)
+            {
+                SendEquipError(InventoryResult.ItemNotFound, item);
+                return false;
+            }
+
+            // some item classes can be used only in equipped state
+            if (proto.GetInventoryType() != InventoryType.NonEquip && !item.IsEquipped())
+            {
+                SendEquipError(InventoryResult.ItemNotFound, item);
+                return false;
+            }
+
+            InventoryResult msg = CanUseItem(item);
+            if (msg != InventoryResult.Ok)
+            {
+                SendEquipError(msg, item, null);
+                return false;
+            }
+
+            // only allow conjured consumable, bandage, poisons (all should have the 2^21 item flag set in DB)
+            if (proto.GetClass() == ItemClass.Consumable && !proto.HasFlag(ItemFlags.IgnoreDefaultArenaRestrictions) && InArena())
+            {
+                SendEquipError(InventoryResult.NotDuringArenaMatch, item);
+                return false;
+            }
+
+            // don't allow items banned in arena
+            if (proto.HasFlag(ItemFlags.NotUseableInArena) && InArena())
+            {
+                SendEquipError(InventoryResult.NotDuringArenaMatch, item);
+                return false;
+            }
+
+            if (IsInCombat())
+            {
+                foreach (var effect in item.GetEffects())
+                {
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)effect.SpellID, GetMap().GetDifficultyID());
+                    if (spellInfo != null)
+                    {
+                        if (!spellInfo.CanBeUsedInCombat(this))
+                        {
+                            SendEquipError(InventoryResult.NotInCombat, item);
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            // check also  BIND_ON_ACQUIRE and BIND_QUEST for .additem or .additemset case by GM (not binded at adding to inventory)
+            if (item.GetBonding() == ItemBondingType.OnUse || item.GetBonding() == ItemBondingType.OnAcquire || item.GetBonding() == ItemBondingType.Quest)
+            {
+                if (!item.IsSoulBound())
+                {
+                    item.SetState(ItemUpdateState.Changed, this);
+                    item.SetBinding(true);
+                    GetSession().GetCollectionMgr().AddItemAppearance(item);
+                }
+            }
+
+            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ItemUse);
+
+            // Note: If script stop casting it must send appropriate data to client to prevent stuck item in gray state.
+            if (!Global.ScriptMgr.OnItemUse(this, item, targets, castRequest.CastRequest.CastID))
+            {
+                // no script or script not process request by self
+                CastItemUseSpell(item, targets, castRequest.CastRequest.CastID, castRequest.CastRequest.Misc);
+            }
+
+            return true;
+        }
+
+        bool CanExecutePendingSpellCastRequest()
+        {
+            if (_pendingSpellCastRequest == null)
+                return false;
+
+            Unit castingUnit = _pendingSpellCastRequest.CastingUnitGUID == GetGUID() ? this : Global.ObjAccessor.GetUnit(this, _pendingSpellCastRequest.CastingUnitGUID);
+            if (castingUnit == null || !castingUnit.IsInWorld || (castingUnit != this && GetUnitBeingMoved() != castingUnit))
+            {
+                // If the casting unit is no longer available, just cancel the entire spell cast request and be done with it
+                CancelPendingCastRequest();
+                return false;
+            }
+
+            // Generic and melee spells have to wait, channeled spells can be processed immediately.
+            if (castingUnit.GetCurrentSpell(CurrentSpellTypes.Channeled) == null && castingUnit.HasUnitState(UnitState.Casting))
+                return false;
+
+            // Waiting for the global cooldown to expire before attempting to execute the cast request
+            if (castingUnit.GetSpellHistory().GetRemainingGlobalCooldown(Global.SpellMgr.GetSpellInfo(_pendingSpellCastRequest.CastRequest.SpellID, GetMap().GetDifficultyID())) > TimeSpan.Zero)
+                return false;
+
+            return true;
         }
     }
 
