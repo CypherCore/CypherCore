@@ -21,6 +21,7 @@ namespace Scripts.Spells.DeathKnight
         public const uint ArmySkeletonTransform = 127527;
         public const uint ArmySpikedGhoulTransform = 127525;
         public const uint ArmySuperZombieTransform = 127526;
+        public const uint BlindingSleetSlow = 317898;
         public const uint Blood = 137008;
         public const uint BloodPlague = 55078;
         public const uint BloodShieldAbsorb = 77535;
@@ -201,6 +202,26 @@ namespace Scripts.Spells.DeathKnight
         {
             OnCheckCast.Add(new(CheckCast));
             OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 207167 - Blinding Sleet
+    class spell_dk_blinding_sleet : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.BlindingSleetSlow);
+        }
+
+        void HandleOnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Expire)
+                GetTarget().CastSpell(GetTarget(), SpellIds.BlindingSleetSlow, true);
+        }
+
+        public override void Register()
+        {
+            AfterEffectRemove.Add(new EffectApplyHandler(HandleOnRemove, 0, AuraType.ModConfuse, AuraEffectHandleModes.Real));
         }
     }
 
