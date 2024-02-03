@@ -299,88 +299,91 @@ namespace Game
         {
             ObjectGuid playerGuid = GetPlayer().GetGUID();
 
-            ObjectGuid inviteeGuid = ObjectGuid.Empty;
-            Team inviteeTeam = 0;
-            ulong inviteeGuildId = 0;
+            ulong? eventId = null;
+            if (!calendarInvite.Creating)
+                eventId = calendarInvite.EventID;
+
+            bool isSignUp = calendarInvite.IsSignUp;
+
+            string inviteeName = calendarInvite.Name;
 
             if (!ObjectManager.NormalizePlayerName(ref calendarInvite.Name))
                 return;
 
-            Player player = Global.ObjAccessor.FindPlayerByName(calendarInvite.Name);
-            if (player != null)
+            var createInvite = (ObjectGuid inviteeGuid, Team inviteeTeam, ulong inviteeGuildId, bool inviteeIsIngoring) =>
             {
-                // Invitee is online
-                inviteeGuid = player.GetGUID();
-                inviteeTeam = player.GetTeam();
-                inviteeGuildId = player.GetGuildId();
-            }
-            else
-            {
-                // Invitee offline, get data from database
-                ObjectGuid guid = Global.CharacterCacheStorage.GetCharacterGuidByName(calendarInvite.Name);
-                if (!guid.IsEmpty())
+                if (_player == null || _player.GetGUID() != playerGuid)
+                    return;
+
+                if (_player.GetTeam() != inviteeTeam && !WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionCalendar))
                 {
-                    CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(guid);
-                    if (characterInfo != null)
-                    {
-                        inviteeGuid = guid;
-                        inviteeTeam = Player.TeamForRace(characterInfo.RaceId);
-                        inviteeGuildId = characterInfo.GuildId;
-                    }
-                }
-            }
-
-            if (inviteeGuid.IsEmpty())
-            {
-                Global.CalendarMgr.SendCalendarCommandResult(playerGuid, CalendarError.PlayerNotFound);
-                return;
-            }
-
-            if (GetPlayer().GetTeam() != inviteeTeam && !WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionCalendar))
-            {
-                Global.CalendarMgr.SendCalendarCommandResult(playerGuid, CalendarError.NotAllied);
-                return;
-            }
-
-            SQLResult result1 = DB.Characters.Query("SELECT flags FROM character_social WHERE guid = {0} AND friend = {1}", inviteeGuid, playerGuid);
-            if (!result1.IsEmpty())
-            {
-
-                if (Convert.ToBoolean(result1.Read<byte>(0) & (byte)SocialFlag.Ignored))
-                {
-                    Global.CalendarMgr.SendCalendarCommandResult(playerGuid, CalendarError.IgnoringYouS, calendarInvite.Name);
+                    Global.CalendarMgr.SendCalendarCommandResult(playerGuid, CalendarError.NotAllied);
                     return;
                 }
-            }
 
-            if (!calendarInvite.Creating)
-            {
-                CalendarEvent calendarEvent = Global.CalendarMgr.GetEvent(calendarInvite.EventID);
-                if (calendarEvent != null)
+                if (inviteeIsIngoring)
                 {
-                    if (calendarEvent.IsGuildEvent() && calendarEvent.GuildId == inviteeGuildId)
+                    Global.CalendarMgr.SendCalendarCommandResult(playerGuid, CalendarError.IgnoringYouS, inviteeName);
+                    return;
+                }
+
+                if (eventId.HasValue)
+                {
+                    CalendarEvent calendarEvent = Global.CalendarMgr.GetEvent(eventId.Value);
+                    if (calendarEvent != null)
                     {
-                        // we can't invite guild members to guild events
+                        if (calendarEvent.IsGuildEvent() && calendarEvent.GuildId == inviteeGuildId)
+                        {
+                            // we can't invite guild members to guild events
+                            Global.CalendarMgr.SendCalendarCommandResult(playerGuid, CalendarError.NoGuildInvites);
+                            return;
+                        }
+
+                        CalendarInvite invite = new CalendarInvite(Global.CalendarMgr.GetFreeInviteId(), eventId.Value, inviteeGuid, playerGuid, SharedConst.CalendarDefaultResponseTime, CalendarInviteStatus.Invited, CalendarModerationRank.Player, "");
+                        Global.CalendarMgr.AddInvite(calendarEvent, invite);
+                    }
+                    else
+                        Global.CalendarMgr.SendCalendarCommandResult(playerGuid, CalendarError.EventInvalid);
+                }
+                else
+                {
+                    if (isSignUp && inviteeGuildId == _player.GetGuildId())
+                    {
                         Global.CalendarMgr.SendCalendarCommandResult(playerGuid, CalendarError.NoGuildInvites);
                         return;
                     }
 
-                    CalendarInvite invite = new(Global.CalendarMgr.GetFreeInviteId(), calendarInvite.EventID, inviteeGuid, playerGuid, SharedConst.CalendarDefaultResponseTime, CalendarInviteStatus.Invited, CalendarModerationRank.Player, "");
-                    Global.CalendarMgr.AddInvite(calendarEvent, invite);
+                    CalendarInvite invite = new(Global.CalendarMgr.GetFreeInviteId(), 0L, inviteeGuid, playerGuid, SharedConst.CalendarDefaultResponseTime, CalendarInviteStatus.Invited, CalendarModerationRank.Player, "");
+                    Global.CalendarMgr.SendCalendarEventInvite(invite);
                 }
-                else
-                    Global.CalendarMgr.SendCalendarCommandResult(playerGuid, CalendarError.EventInvalid);
+            };
+
+            Player player = Global.ObjAccessor.FindConnectedPlayerByName(calendarInvite.Name);
+            if (player != null)
+            {
+                // Invitee is online
+                createInvite(player.GetGUID(), player.GetTeam(), player.GetGuildId(), player.GetSocial().HasIgnore(playerGuid, GetAccountGUID()));
             }
             else
             {
-                if (calendarInvite.IsSignUp && inviteeGuildId == GetPlayer().GetGuildId())
+                // Invitee offline, get data from storage
+                CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByName(inviteeName);
+                if (characterInfo == null)
                 {
-                    Global.CalendarMgr.SendCalendarCommandResult(playerGuid, CalendarError.NoGuildInvites);
+                    Global.CalendarMgr.SendCalendarCommandResult(playerGuid, CalendarError.PlayerNotFound);
                     return;
                 }
 
-                CalendarInvite invite = new(calendarInvite.EventID, 0, inviteeGuid, playerGuid, SharedConst.CalendarDefaultResponseTime, CalendarInviteStatus.Invited, CalendarModerationRank.Player, "");
-                Global.CalendarMgr.SendCalendarEventInvite(invite);
+                var inviteeGuid = characterInfo.Guid;
+                var inviteeTeam = Player.TeamForRace(characterInfo.RaceId);
+                var inviteeGuildId = characterInfo.GuildId;
+                var continuation = createInvite;
+                GetQueryProcessor().AddCallback(DB.Characters.AsyncQuery(new PreparedStatement($"SELECT 1 FROM character_social cs INNER JOIN characters friend_character ON cs.friend = friend_character.guid WHERE cs.guid = {characterInfo.Guid.GetCounter()} AND friend_character.account = {characterInfo.AccountId} AND (cs.flags & {(uint)SocialFlag.Ignored}) <> 0")))
+                    .WithCallback(result =>
+                    {
+                        bool isIgnoring = result != null;
+                        continuation(inviteeGuid, inviteeTeam, inviteeGuildId, isIgnoring);
+                    });
             }
         }
 
