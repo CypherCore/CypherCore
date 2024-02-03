@@ -45,8 +45,9 @@ namespace Game.Maps
                 } while (result.NextRow());
             }
 
+            // ORDER BY required by MapManager::RegisterInstanceId
             //                                                  0     1      2       3           4           5     6                        7           8
-            SQLResult lockResult = DB.Characters.Query("SELECT guid, mapId, lockId, instanceId, difficulty, data, completedEncountersMask, expiryTime, extended FROM character_instance_lock");
+            SQLResult lockResult = DB.Characters.Query("SELECT guid, mapId, lockId, instanceId, difficulty, data, completedEncountersMask, expiryTime, extended FROM character_instance_lock ORDER BY instanceId");
             if (!result.IsEmpty())
             {
                 do
