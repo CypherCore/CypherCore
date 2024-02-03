@@ -384,6 +384,12 @@ namespace Game.Maps
                             dungeonEncounter = bossInfo.GetDungeonEncounterForDifficulty(instance.GetDifficultyID());
                             if (dungeonEncounter != null)
                             {
+                                instance.DoOnPlayers(player =>
+                                {
+                                    if (!player.IsLockedToDungeonEncounter(dungeonEncounter.Id))
+                                        player.UpdateCriteria(CriteriaType.DefeatDungeonEncounterWhileElegibleForLoot, dungeonEncounter.Id);
+                                });
+
                                 DoUpdateCriteria(CriteriaType.DefeatDungeonEncounter, dungeonEncounter.Id);
                                 SendBossKillCredit(dungeonEncounter.Id);
                                 if (dungeonEncounter.CompleteWorldStateID != 0)
