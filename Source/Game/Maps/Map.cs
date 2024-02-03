@@ -4977,7 +4977,7 @@ namespace Game.Maps
         public InstanceResetResult Reset(InstanceResetMethod method)
         {
             // raids can be reset if no boss was killed
-            if (method != InstanceResetMethod.Expire && i_instanceLock != null && !i_instanceLock.IsNew())
+            if (method != InstanceResetMethod.Expire && i_instanceLock != null && !i_instanceLock.IsNew() && i_data != null)
                 return InstanceResetResult.CannotReset;
 
             if (HavePlayers())
@@ -5000,20 +5000,25 @@ namespace Game.Maps
                         raidInstanceMessage.DifficultyID = GetDifficultyID();
                         raidInstanceMessage.Write();
 
-                        PendingRaidLock pendingRaidLock = new();
-                        pendingRaidLock.TimeUntilLock = 60000;
-                        pendingRaidLock.CompletedMask = i_instanceLock.GetData().CompletedEncountersMask;
-                        pendingRaidLock.Extending = true;
-                        pendingRaidLock.WarningOnly = GetEntry().IsFlexLocking();
-                        pendingRaidLock.Write();
-
-                        foreach (Player player in GetPlayers())
-                        {
+                        foreach (Player player in GetPlayers())                        
                             player.SendPacket(raidInstanceMessage);
-                            player.SendPacket(pendingRaidLock);
+                        
+                        if (i_data != null)
+                        {
+                            PendingRaidLock pendingRaidLock = new();
+                            pendingRaidLock.TimeUntilLock = 60000;
+                            pendingRaidLock.CompletedMask = i_instanceLock.GetData().CompletedEncountersMask;
+                            pendingRaidLock.Extending = true;
+                            pendingRaidLock.WarningOnly = GetEntry().IsFlexLocking();
+                            pendingRaidLock.Write();
 
-                            if (!pendingRaidLock.WarningOnly)
-                                player.SetPendingBind(GetInstanceId(), 60000);
+                            foreach (Player player in GetPlayers())
+                            {
+                                player.SendPacket(pendingRaidLock);
+
+                                if (!pendingRaidLock.WarningOnly)
+                                    player.SetPendingBind(GetInstanceId(), 60000);
+                            }
                         }
                         break;
                     }
