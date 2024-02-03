@@ -183,6 +183,7 @@ namespace Framework.Dynamic
                     uint eventId = (pair.Value & 0x0000FFFF);
                     _lastEvent = pair.Value; // include phase/group
                     _eventMap.Remove(pair);
+                    ScheduleNextFromSeries(_lastEvent);
                     return eventId;
                 }
             }
@@ -257,6 +258,12 @@ namespace Framework.Dynamic
                 if (eventId == (pair.Value & 0x0000FFFF))
                     _eventMap.Remove(pair.Key, pair.Value);
             }
+
+            foreach (var key in _timerSeries.Keys.ToList())
+            {
+                if (eventId == (key & 0x0000FFFF))
+                    _timerSeries.Remove(key);
+            }
         }
 
         /// <summary>
@@ -270,8 +277,14 @@ namespace Framework.Dynamic
 
             foreach (var pair in _eventMap.KeyValueList)
             {
-                if (Convert.ToBoolean(pair.Value & (uint)(1 << ((int)group + 15))))
+                if ((pair.Value & (uint)(1 << ((int)group + 15))) != 0)
                     _eventMap.Remove(pair.Key, pair.Value);
+            }
+
+            foreach (var key in _timerSeries.Keys.ToList())
+            {
+                if ((key & (1 << ((int)group + 15))) != 0)
+                    _timerSeries.Remove(key);
             }
         }
 
@@ -287,6 +300,52 @@ namespace Framework.Dynamic
                     return pair.Key - _time;
 
             return TimeSpan.MaxValue;
+        }
+
+        /// <summary>
+        /// Schedules specified event with next timer from series
+        /// </summary>
+        /// <param name="eventData">full event data, including group and phase</param>
+        public void ScheduleNextFromSeries(uint eventData)
+        {
+            if (_timerSeries.TryGetValue(eventData, out Queue<TimeSpan> queue))
+                return;
+
+            if (queue.Count == 0)
+                return;
+
+            ScheduleEvent(eventData, queue.Dequeue());
+        }
+
+        /// <summary>
+        /// Schedules specified event with first value of the series and then requeues with the next
+        /// </summary>
+        /// <param name="eventId">eventId of the event.</param>
+        /// <param name="group">group of the event.</param>
+        /// <param name="phase">phase of the event.</param>
+        /// <param name="timeSeries">timeSeries specifying the times the event should be automatically scheduled after each trigger (first value is initial schedule)</param>
+        public void ScheduleEventSeries(uint eventId, byte group, byte phase, List<TimeSpan> timeSeries)
+        {
+            if (group != 0 && group <= 8)
+                eventId |= (1u << (group + 15));
+
+            if (phase != 0 && phase <= 8)
+                eventId |= (1u << (phase + 23));
+
+            foreach (var time in timeSeries)
+                _timerSeries[eventId].Enqueue(time);
+
+            ScheduleNextFromSeries(eventId);
+        }
+
+        /// <summary>
+        /// Schedules specified event with first value of the series and then requeues with the next
+        /// </summary>
+        /// <param name="eventId">eventId of the event.</param>
+        /// <param name="timeSeries">timeSeries specifying the times the event should be automatically scheduled after each trigger (first value is initial schedule)</param>
+        public void ScheduleEventSeries(uint eventId, List<TimeSpan> timeSeries)
+        {
+            ScheduleEventSeries(eventId, 0, 0, timeSeries);
         }
 
         /// <summary>
@@ -332,5 +391,10 @@ namespace Framework.Dynamic
         /// - Pattern: 0xPPGGEEEE
         /// </summary>
         SortedMultiMap<TimeSpan, uint> _eventMap = new();
+
+        /// <summary>
+        /// Stores information about time series which requeue itself until series is empty
+        /// </summary>
+        Dictionary<uint /*event data*/, Queue<TimeSpan>> _timerSeries = new();
     }
 }
