@@ -354,8 +354,9 @@ namespace Game.Entities
                 creature.SendAIReaction(AiReaction.Hostile);
                 creature.CallAssistance();
 
-                // Remove emote state - will be restored on creature reset
+                // Remove emote and stand state - will be restored on creature reset
                 SetEmoteState(Emote.OneshotNone);
+                SetStandState(UnitStandStateType.Stand);
             }
 
             // delay offhand weapon attack by 50% of the base attack time

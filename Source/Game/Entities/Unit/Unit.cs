@@ -1551,6 +1551,7 @@ namespace Game.Entities
                 SetHealth(0);
                 SetPower(GetPowerType(), 0);
                 SetEmoteState(Emote.OneshotNone);
+                SetStandState(UnitStandStateType.Stand);
 
                 // players in instance don't have ZoneScript, but they have InstanceScript
                 ZoneScript zoneScript = GetZoneScript() != null ? GetZoneScript() : GetInstanceScript();
