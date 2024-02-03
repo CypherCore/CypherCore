@@ -423,6 +423,9 @@ namespace Game.Maps
                 return false; //Should delete object
             }
 
+            if (IsAlwaysActive())
+                obj.SetActive(true);
+
             var cell = new Cell(cellCoord);
             if (obj.IsActiveObject())
                 EnsureGridLoadedForActiveObject(cell, obj);
@@ -3343,6 +3346,15 @@ namespace Game.Maps
         public bool IsGarrison()
         {
             return i_mapRecord != null && i_mapRecord.IsGarrison();
+        }
+
+        /// <summary>
+        /// Currently, this means that every entity added to this map will be marked as active
+        /// </summary>
+        /// <returns></returns>
+        bool IsAlwaysActive()
+        {
+            return IsBattlegroundOrArena();
         }
 
         private bool GetEntrancePos(out uint mapid, out float x, out float y)

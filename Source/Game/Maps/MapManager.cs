@@ -97,6 +97,10 @@ namespace Game.Entities
             Cypher.Assert(map.IsBattlegroundOrArena());
             map.SetBG(bg);
             bg.SetBgMap(map);
+
+            if (WorldConfig.GetBoolValue(WorldCfg.BattlegroundMapLoadGrids))
+                map.LoadAllCells();
+
             return map;
         }
 
