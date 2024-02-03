@@ -11686,6 +11686,17 @@ namespace Game
     {
         public uint Id;
         public uint[] Value = new uint[SkillConst.MaxSkillStep];
+
+        public uint GetValueForTierIndex(int tierIndex)
+        {
+            if (tierIndex >= SkillConst.MaxSkillStep)
+                tierIndex = (int)SkillConst.MaxSkillStep - 1;
+
+            while (Value[tierIndex] == 0 && tierIndex > 0)
+                --tierIndex;
+
+            return Value[tierIndex];
+        }
     }
 
     public class TerrainSwapInfo

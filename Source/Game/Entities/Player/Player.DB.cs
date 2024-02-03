@@ -333,7 +333,6 @@ namespace Game.Entities
         void _LoadSkills(SQLResult result)
         {
             Race race = GetRace();
-            uint count = 0;
             Dictionary<uint, uint> loadedSkillValues = new();
             List<ushort> loadedProfessionsWithoutSlot = new(); // fixup old characters
             if (!result.IsEmpty())
@@ -414,22 +413,37 @@ namespace Game.Entities
                 while (result.NextRow());
             }
             // Learn skill rewarded spells after all skills have been loaded to prevent learning a skill from them before its loaded with proper value from DB
-            foreach (var skill in loadedSkillValues)
+            foreach (var (skillId, skillValue) in loadedSkillValues)
             {
-                LearnSkillRewardedSpells(skill.Key, skill.Value, race);
-                List<SkillLineRecord> childSkillLines = Global.DB2Mgr.GetSkillLinesForParentSkill(skill.Key);
+                LearnSkillRewardedSpells(skillId, skillValue, race);
+
+                // enable parent skill line if missing
+                var skillEntry = CliDB.SkillLineStorage.LookupByKey(skillId);
+                if (skillEntry.ParentSkillLineID != 0 && skillEntry.ParentTierIndex > 0 && GetSkillStep(skillEntry.ParentSkillLineID) < skillEntry.ParentTierIndex)
+                {
+                    var rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skillEntry.ParentSkillLineID, GetRace(), GetClass());
+                    if (rcEntry != null)
+                    {
+                        var tier = Global.ObjectMgr.GetSkillTier(rcEntry.SkillTierID);
+                        if (tier != null)
+                            SetSkill(skillEntry.ParentSkillLineID, (uint)skillEntry.ParentTierIndex, Math.Max(GetPureSkillValue(skillEntry.ParentSkillLineID), 1u), tier.GetValueForTierIndex(skillEntry.ParentTierIndex - 1));
+                    }
+                }
+
+                List<SkillLineRecord> childSkillLines = Global.DB2Mgr.GetSkillLinesForParentSkill(skillId);
                 if (childSkillLines != null)
                 {
-                    foreach (var childItr in childSkillLines)
+                    foreach (var childSkillLine in childSkillLines)
                     {
                         if (mSkillStatus.Count >= SkillConst.MaxPlayerSkills)
                             break;
 
-                        if (!mSkillStatus.ContainsKey(childItr.Id))
+                        if (!mSkillStatus.ContainsKey(childSkillLine.Id))
                         {
-                            SetSkillLineId(count, (ushort)childItr.Id);
-                            SetSkillStartingRank(count, 1);
-                            mSkillStatus.Add(childItr.Id, new SkillStatusData(count, SkillState.Unchanged));
+                            uint pos = (uint)mSkillStatus.Count;
+                            SetSkillLineId(pos, (ushort)childSkillLine.Id);
+                            SetSkillStartingRank(pos, 1);
+                            mSkillStatus.Add(childSkillLine.Id, new SkillStatusData(pos, SkillState.Unchanged));
                         }
                     }
                 }

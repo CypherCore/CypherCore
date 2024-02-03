@@ -1097,6 +1097,18 @@ namespace Game.Entities
                 // Activate and update skill line
                 if (newVal != 0)
                 {
+                    // enable parent skill line if missing
+                    if (skillEntry.ParentSkillLineID != 0 && skillEntry.ParentTierIndex > 0 && GetSkillStep(skillEntry.ParentSkillLineID) < skillEntry.ParentTierIndex)
+                    {
+                        var rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skillEntry.ParentSkillLineID, GetRace(), GetClass());
+                        if (rcEntry != null)
+                        {
+                            var tier = Global.ObjectMgr.GetSkillTier(rcEntry.SkillTierID);
+                            if (tier != null)
+                                SetSkill(skillEntry.ParentSkillLineID, (uint)skillEntry.ParentTierIndex, Math.Max(GetPureSkillValue(skillEntry.ParentSkillLineID), 1u), tier.GetValueForTierIndex(skillEntry.ParentTierIndex - 1));
+                        }
+                    }
+
                     // if skill value is going down, update enchantments before setting the new value
                     if (newVal < currVal)
                         UpdateSkillEnchantments(id, currVal, (ushort)newVal);
@@ -1231,7 +1243,7 @@ namespace Game.Entities
                             if (tier != null)
                             {
                                 ushort skillval = GetPureSkillValue((SkillType)skillEntry.ParentSkillLineID);
-                                SetSkill(skillEntry.ParentSkillLineID, (uint)skillEntry.ParentTierIndex, Math.Max(skillval, (ushort)1), tier.Value[skillEntry.ParentTierIndex - 1]);
+                                SetSkill(skillEntry.ParentSkillLineID, (uint)skillEntry.ParentTierIndex, Math.Max(skillval, (ushort)1), tier.GetValueForTierIndex(skillEntry.ParentTierIndex - 1));
                             }
                         }
                     }
@@ -2094,7 +2106,7 @@ namespace Game.Entities
                 case SkillRangeType.Rank:
                 {
                     SkillTiersEntry tier = Global.ObjectMgr.GetSkillTier(rcInfo.SkillTierID);
-                    ushort maxValue = (ushort)tier.Value[0];
+                    ushort maxValue = (ushort)tier.GetValueForTierIndex(0);
                     ushort skillValue = 1;
                     if (rcInfo.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
                         skillValue = maxValue;
@@ -2291,7 +2303,7 @@ namespace Game.Entities
                                     case SkillRangeType.Rank:
                                     {
                                         var tier = Global.ObjectMgr.GetSkillTier(rcInfo.SkillTierID);
-                                        new_skill_max_value = (ushort)tier.Value[prevSkill.step - 1];
+                                        new_skill_max_value = (ushort)tier.GetValueForTierIndex(prevSkill.step - 1);
                                         break;
                                     }
                                     default:
@@ -2799,7 +2811,7 @@ namespace Game.Entities
                                 case SkillRangeType.Rank:
                                 {
                                     var tier = Global.ObjectMgr.GetSkillTier(rcInfo.SkillTierID);
-                                    new_skill_max_value = (ushort)tier.Value[spellLearnSkill.step - 1];
+                                    new_skill_max_value = (ushort)tier.GetValueForTierIndex(spellLearnSkill.step - 1);
                                     break;
                                 }
                                 default:
@@ -2876,6 +2888,7 @@ namespace Game.Entities
             // return true (for send learn packet) only if spell active (in case ranked spells) and not replace old spell
             return active && !disabled && !superceded_old;
         }
+
         public override bool HasSpell(uint spellId)
         {
             var spell = m_spells.LookupByKey(spellId);
@@ -2884,6 +2897,7 @@ namespace Game.Entities
 
             return false;
         }
+
         public bool HasActiveSpell(uint spellId)
         {
             var spell = m_spells.LookupByKey(spellId);
