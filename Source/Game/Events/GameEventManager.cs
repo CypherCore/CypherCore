@@ -1272,49 +1272,55 @@ namespace Game
 
         void ChangeEquipOrModel(short event_id, bool activate)
         {
-            foreach (var tuple in mGameEventModelEquip[event_id])
+            foreach (var (spawnId, modelEquip) in mGameEventModelEquip[event_id])
             {
                 // Remove the creature from grid
-                CreatureData data = Global.ObjectMgr.GetCreatureData(tuple.Item1);
+                CreatureData data = Global.ObjectMgr.GetCreatureData(spawnId);
                 if (data == null)
                     continue;
 
                 // Update if spawned
                 Global.MapMgr.DoForAllMapsWithMapId(data.MapId, map =>
                 {
-                    var creatureBounds = map.GetCreatureBySpawnIdStore().LookupByKey(tuple.Item1);
+                    var creatureBounds = map.GetCreatureBySpawnIdStore().LookupByKey(spawnId);
                     foreach (var creature in creatureBounds)
                     {
                         if (activate)
                         {
-                            tuple.Item2.equipement_id_prev = creature.GetCurrentEquipmentId();
-                            tuple.Item2.modelid_prev = creature.GetDisplayId();
-                            creature.LoadEquipment(tuple.Item2.equipment_id, true);
-                            if (tuple.Item2.modelid > 0 && tuple.Item2.modelid_prev != tuple.Item2.modelid && Global.ObjectMgr.GetCreatureModelInfo(tuple.Item2.modelid) != null)
-                                creature.SetDisplayId(tuple.Item2.modelid, true);
+                            modelEquip.equipement_id_prev = creature.GetCurrentEquipmentId();
+                            modelEquip.modelid_prev = creature.GetDisplayId();
+                            creature.LoadEquipment(modelEquip.equipment_id, true);
+                            if (modelEquip.modelid > 0 && modelEquip.modelid_prev != modelEquip.modelid && Global.ObjectMgr.GetCreatureModelInfo(modelEquip.modelid) != null)
+                                creature.SetDisplayId(modelEquip.modelid, true);
                         }
                         else
                         {
-                            creature.LoadEquipment(tuple.Item2.equipement_id_prev, true);
-                            if (tuple.Item2.modelid_prev > 0 && tuple.Item2.modelid_prev != tuple.Item2.modelid && Global.ObjectMgr.GetCreatureModelInfo(tuple.Item2.modelid_prev) != null)
-                                creature.SetDisplayId(tuple.Item2.modelid_prev, true);
+                            creature.LoadEquipment(modelEquip.equipement_id_prev, true);
+                            if (modelEquip.modelid_prev > 0 && modelEquip.modelid_prev != modelEquip.modelid && Global.ObjectMgr.GetCreatureModelInfo(modelEquip.modelid_prev) != null)
+                                creature.SetDisplayId(modelEquip.modelid_prev, true);
                         }
                     }
                 });
 
                 // now last step: put in data
-                CreatureData data2 = Global.ObjectMgr.NewOrExistCreatureData(tuple.Item1);
+                CreatureData data2 = Global.ObjectMgr.NewOrExistCreatureData(spawnId);
                 if (activate)
                 {
-                    tuple.Item2.modelid_prev = data2.displayid;
-                    tuple.Item2.equipement_id_prev = (byte)data2.equipmentId;
-                    data2.displayid = tuple.Item2.modelid;
-                    data2.equipmentId = (sbyte)tuple.Item2.equipment_id;
+                    modelEquip.modelid_prev = data2.display != null ? data2.display.CreatureDisplayID : 0;
+                    modelEquip.equipement_id_prev = (byte)data2.equipmentId;
+                    if (modelEquip.modelid != 0)
+                        data2.display = new(modelEquip.modelid, SharedConst.DefaultPlayerDisplayScale, 1.0f);
+                    else
+                        data2.display = null;
+                    data2.equipmentId = (sbyte)modelEquip.equipment_id;
                 }
                 else
                 {
-                    data2.displayid = tuple.Item2.modelid_prev;
-                    data2.equipmentId = (sbyte)tuple.Item2.equipement_id_prev;
+                    if (modelEquip.modelid_prev != 0)
+                        data2.display = new(modelEquip.modelid_prev, SharedConst.DefaultPlayerDisplayScale, 1.0f);
+                    else
+                        data2.display = null;
+                    data2.equipmentId = (sbyte)modelEquip.equipement_id_prev;
                 }
             }
         }

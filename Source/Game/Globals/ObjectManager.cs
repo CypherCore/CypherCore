@@ -70,12 +70,8 @@ namespace Game
         public static CreatureModel ChooseDisplayId(CreatureTemplate cinfo, CreatureData data = null)
         {
             // Load creature model (display id)
-            if (data != null && data.displayid != 0)
-            {
-                CreatureModel model = cinfo.GetModelWithDisplayId(data.displayid);
-                if (model != null)
-                    return model;
-            }
+            if (data != null && data.display != null)
+                return data.display;
 
             if (!cinfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Trigger))
             {
@@ -3480,7 +3476,10 @@ namespace Game
                 data.Id = entry;
                 data.MapId = result.Read<ushort>(2);
                 data.SpawnPoint = new Position(result.Read<float>(3), result.Read<float>(4), result.Read<float>(5), result.Read<float>(6));
-                data.displayid = result.Read<uint>(7);
+                uint displayId = result.Read<uint>(7);
+                if (displayId != 0)
+                    data.display = new(displayId, SharedConst.DefaultPlayerDisplayScale, 1.0f);
+
                 data.equipmentId = result.Read<sbyte>(8);
                 data.spawntimesecs = result.Read<int>(9);
                 data.WanderDistance = result.Read<float>(10);

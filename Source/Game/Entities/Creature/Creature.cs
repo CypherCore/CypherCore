@@ -1355,7 +1355,10 @@ namespace Game.Entities
             Cypher.Assert(data.SpawnId == m_spawnId);
 
             data.Id = GetEntry();
-            data.displayid = displayId;
+            if (displayId != 0)
+                data.display = new(displayId, SharedConst.DefaultPlayerDisplayScale, 1.0f);
+            else
+                data.display = null;
             data.equipmentId = (sbyte)GetCurrentEquipmentId();
 
             if (GetTransport() == null)

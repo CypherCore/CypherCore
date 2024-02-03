@@ -259,7 +259,7 @@ namespace Game.Entities
 
     public class CreatureData : SpawnData
     {
-        public uint displayid;
+        public CreatureModel display;
         public sbyte equipmentId;
         public float WanderDistance;
         public uint currentwaypoint;
