@@ -126,6 +126,43 @@ namespace Game.Entities
         public bool HasValue() { return _hasValue; }
     }
 
+    public class UpdateFieldArrayString
+    {
+        public string[] _values;
+        public int FirstElementBit;
+        public int Bit;
+
+        public UpdateFieldArrayString(uint size, int bit, int firstElementBit)
+        {
+            _values = new string[size];
+            for (var i = 0; i < size; ++i)
+                _values[i] = "";
+
+            Bit = bit;
+            FirstElementBit = firstElementBit;
+        }
+
+        public string this[int index]
+        {
+            get
+            {
+                return _values[index];
+            }
+            set
+            {
+                _values[index] = value;
+            }
+        }
+
+        public int GetSize() { return _values.Length; }
+
+        public IEnumerator<string> GetEnumerator()
+        {
+            foreach (var obj in _values)
+                yield return obj;
+        }
+    }
+
     public class UpdateFieldArray<T> where T : new()
     {
         public T[] _values;
@@ -404,6 +441,8 @@ namespace Game.Entities
             }
         }
 
+        public void ClearChangesMask(UpdateFieldArrayString updateField) { }
+
         public void ClearChangesMask<U>(DynamicUpdateField<U> updateField) where U : new()
         {
             if (typeof(IHasChangesMask).IsAssignableFrom(typeof(U)))
@@ -421,19 +460,25 @@ namespace Game.Entities
             return updateField;
         }
 
-        public OptionalUpdateField<U> ModifyValue<U>(OptionalUpdateField<U> updateField) where U : new()
-        {
-            MarkChanged(updateField);
-            return updateField;
-        }
-
         public UpdateFieldString ModifyValue(UpdateFieldString updateField)
         {
             MarkChanged(updateField);
             return updateField;
         }
 
+        public OptionalUpdateField<U> ModifyValue<U>(OptionalUpdateField<U> updateField) where U : new()
+        {
+            MarkChanged(updateField);
+            return updateField;
+        }
+
         public ref U ModifyValue<U>(UpdateFieldArray<U> updateField, int index) where U : new()
+        {
+            MarkChanged(updateField, index);
+            return ref updateField._values[index];
+        }
+
+        public ref string ModifyValue(UpdateFieldArrayString updateField, int index)
         {
             MarkChanged(updateField, index);
             return ref updateField._values[index];
@@ -481,6 +526,12 @@ namespace Game.Entities
         }
 
         public void MarkChanged<U>(UpdateFieldArray<U> updateField, int index) where U : new()
+        {
+            _changesMask.Set(updateField.Bit);
+            _changesMask.Set(updateField.FirstElementBit + index);
+        }
+
+        public void MarkChanged(UpdateFieldArrayString updateField, int index)
         {
             _changesMask.Set(updateField.Bit);
             _changesMask.Set(updateField.FirstElementBit + index);

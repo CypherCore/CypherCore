@@ -225,7 +225,8 @@ namespace Framework.Constants
         ContributionCollector = 0x400,
         AzeriteRespec = 0x4000,
         IslandsQueue = 0x8000,
-        SuppressNpcSoundsExceptEndOfInteraction = 0x00010000,
+        SuppressNpcSoundsExceptEndOfInteraction = 0x10000,
+        PersonalTabardDesigner = 0x200000
     }
 
     [Flags]

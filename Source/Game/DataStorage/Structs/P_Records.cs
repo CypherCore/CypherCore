@@ -66,7 +66,7 @@ namespace Game.DataStorage
         public int MaxAvgItemLevel;
         public ushort MinAvgEquippedItemLevel;
         public ushort MaxAvgEquippedItemLevel;
-        public byte PhaseUseFlags;
+        public int PhaseUseFlags;
         public ushort PhaseID;
         public uint PhaseGroupID;
         public int Flags;

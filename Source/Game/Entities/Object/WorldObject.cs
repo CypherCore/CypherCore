@@ -832,6 +832,15 @@ namespace Game.Entities
             }
         }
 
+        public void SetUpdateFieldValue(ref string value, string newValue)
+        {
+            if (!newValue.Equals(value))
+            {
+                value = newValue;
+                AddToObjectUpdateIfNeeded();
+            }
+        }
+
         public void SetUpdateFieldValue<T>(DynamicUpdateField<T> updateField, int index, T newValue) where T : new()
         {
             if (!newValue.Equals(updateField[index]))

@@ -68,6 +68,12 @@ namespace Game.DataStorage
         public string Script;
     }
 
+    public sealed class ServerMessagesRecord
+    {
+        public uint Id;
+        public LocalizedString Text;
+    }
+
     public sealed class SkillLineRecord
     {
         public LocalizedString DisplayName;
@@ -544,6 +550,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public string Name;
+        public uint CreatureDisplayID;
         public sbyte CreatureType;
         public SpellShapeshiftFormFlags Flags;
         public int AttackIconFileID;
@@ -551,7 +558,6 @@ namespace Game.DataStorage
         public ushort CombatRoundTime;
         public float DamageVariance;
         public ushort MountTypeID;
-        public uint[] CreatureDisplayID = new uint[4];
         public uint[] PresetSpellID = new uint[SpellConst.MaxShapeshift];
     }
 

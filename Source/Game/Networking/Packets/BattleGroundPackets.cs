@@ -310,15 +310,23 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(WargameArenas);
             _worldPacket.WriteBit(RatedArenas);
             _worldPacket.WriteBit(ArenaSkirmish);
+            _worldPacket.WriteBit(SoloShuffle);
+            _worldPacket.WriteBit(RatedSoloShuffle);
+            _worldPacket.WriteBit(BattlegroundBlitz);
+            _worldPacket.WriteBit(RatedBattlegroundBlitz);
             _worldPacket.FlushBits();
         }
 
+        public bool RatedBattlegrounds;
+        public bool PugBattlegrounds;
+        public bool WargameBattlegrounds;
         public bool WargameArenas;
         public bool RatedArenas;
-        public bool WargameBattlegrounds;
         public bool ArenaSkirmish;
-        public bool PugBattlegrounds;
-        public bool RatedBattlegrounds;
+        public bool SoloShuffle;
+        public bool RatedSoloShuffle;
+        public bool BattlegroundBlitz;
+        public bool RatedBattlegroundBlitz; // solo rbg
     }
 
     class RequestBattlefieldStatus : ClientPacket
@@ -510,7 +518,7 @@ namespace Game.Networking.Packets
 
         PVPMatchState State;
     }
-    
+
     class PVPMatchComplete : ServerPacket
     {
         public PVPMatchComplete() : base(ServerOpcodes.PvpMatchComplete, ConnectionType.Instance) { }

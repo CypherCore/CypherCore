@@ -17,27 +17,44 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.TabardVendorActivate, Processing = PacketProcessing.Inplace)]
-        void HandleTabardVendorActivate(Hello packet)
+        void HandleTabardVendorActivate(TabardVendorActivate tabardVendorActivate)
         {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.TabardDesigner, NPCFlags2.None);
+            Creature unit = GetPlayer().GetNPCIfCanInteractWith(tabardVendorActivate.Vendor, NPCFlags.TabardDesigner, NPCFlags2.None);
             if (unit == null)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleTabardVendorActivateOpcode - {0} not found or you can not interact with him.", packet.Unit.ToString());
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleTabardVendorActivateOpcode - {tabardVendorActivate.Vendor} not found or you can not interact with him.");
                 return;
             }
+
+            TabardVendorType type = (TabardVendorType)tabardVendorActivate.Type;
+            if (type != TabardVendorType.Guild && type != TabardVendorType.Personal)
+                return;
 
             // remove fake death
             if (GetPlayer().HasUnitState(UnitState.Died))
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
 
-            SendTabardVendorActivate(packet.Unit);
+            SendTabardVendorActivate(tabardVendorActivate.Vendor, type);
         }
 
-        public void SendTabardVendorActivate(ObjectGuid guid)
+        public void SendTabardVendorActivate(ObjectGuid guid, TabardVendorType type)
         {
             NPCInteractionOpenResult npcInteraction = new();
             npcInteraction.Npc = guid;
-            npcInteraction.InteractionType = PlayerInteractionType.TabardVendor;
+
+            switch (type)
+            {
+                case TabardVendorType.Guild:
+                    npcInteraction.InteractionType = PlayerInteractionType.GuildTabardVendor;
+                    break;
+                case TabardVendorType.Personal:
+                    npcInteraction.InteractionType = PlayerInteractionType.PersonalTabardVendor;
+                    break;
+                default:
+                    Log.outFatal(LogFilter.Server, $"Unsupported tabard vendor type {type}");
+                    break;
+            }
+
             npcInteraction.Success = true;
             SendPacket(npcInteraction);
         }
@@ -345,7 +362,7 @@ namespace Game
 
             _player.SetPetSlot(setPetSlot.PetNumber, (PetSaveMode)setPetSlot.DestSlot);
         }
-        
+
         [WorldPacketHandler(ClientOpcodes.RepairItem, Processing = PacketProcessing.Inplace)]
         void HandleRepairItem(RepairItem packet)
         {

@@ -108,6 +108,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(FirstCraftOperationID.HasValue);
             _worldPacket.WriteBit(NextRechargeTime.HasValue);
             _worldPacket.WriteBit(RechargeCycleStartTime.HasValue);
+            _worldPacket.WriteBit(OverflownCurrencyID.HasValue);
             _worldPacket.FlushBits();
 
             if (WeeklyQuantity.HasValue)
@@ -139,6 +140,9 @@ namespace Game.Networking.Packets
 
             if (RechargeCycleStartTime.HasValue)
                 _worldPacket.WriteInt64(RechargeCycleStartTime.Value);
+
+            if (OverflownCurrencyID.HasValue)
+                _worldPacket.WriteInt32(OverflownCurrencyID.Value);
         }
 
         public uint Type;
@@ -155,6 +159,7 @@ namespace Game.Networking.Packets
         public uint? FirstCraftOperationID;
         public long? NextRechargeTime;
         public long? RechargeCycleStartTime;
+        public int? OverflownCurrencyID;    // what currency was originally changed but couldn't be incremented because of a cap
         public bool SuppressChatLog;
     }
 
@@ -1442,17 +1447,17 @@ namespace Game.Networking.Packets
     {
         public PhaseShiftDataPhase(uint phaseFlags, uint id)
         {
-            PhaseFlags = (ushort)phaseFlags;
+            PhaseFlags = phaseFlags;
             Id = (ushort)id;
         }
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt16(PhaseFlags);
+            data.WriteUInt32(PhaseFlags);
             data.WriteUInt16(Id);
         }
 
-        public ushort PhaseFlags;
+        public uint PhaseFlags;
         public ushort Id;
     }
 

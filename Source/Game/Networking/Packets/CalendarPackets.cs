@@ -149,11 +149,11 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Events.Count);
             _worldPacket.WriteInt32(RaidLockouts.Count);
 
-            foreach (var invite in Invites)
-                invite.Write(_worldPacket);
-
             foreach (var lockout in RaidLockouts)
                 lockout.Write(_worldPacket);
+
+            foreach (var invite in Invites)
+                invite.Write(_worldPacket);
 
             foreach (var Event in Events)
                 Event.Write(_worldPacket);
@@ -822,6 +822,8 @@ namespace Game.Networking.Packets
             data.WriteUInt8((byte)Moderator);
             data.WriteUInt8(InviteType);
             data.WritePackedGuid(InviterGuid);
+            data.WriteBit(IgnoreFriendAndGuildRestriction);
+            data.FlushBits();
         }
 
         public ulong EventID;
@@ -830,6 +832,7 @@ namespace Game.Networking.Packets
         public CalendarInviteStatus Status;
         public CalendarModerationRank Moderator;
         public byte InviteType;
+        public bool IgnoreFriendAndGuildRestriction;
     }
     struct CalendarSendCalendarRaidLockoutInfo
     {

@@ -146,7 +146,7 @@ namespace Game.DataStorage
         public Vector3 Pos;
         public uint Id;
         public ushort ContinentID;
-        public sbyte PhaseUseFlags;
+        public int PhaseUseFlags;
         public ushort PhaseID;
         public ushort PhaseGroupID;
         public float Radius;

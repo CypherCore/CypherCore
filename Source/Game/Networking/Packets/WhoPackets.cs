@@ -42,9 +42,11 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             uint areasCount = _worldPacket.ReadBits<uint>(4);
+            IsFromAddOn = _worldPacket.HasBit();
 
             Request.Read(_worldPacket);
             RequestID = _worldPacket.ReadUInt32();
+            Origin = _worldPacket.ReadUInt8();
 
             for (int i = 0; i < areasCount; ++i)
                 Areas.Add(_worldPacket.ReadInt32());
@@ -52,6 +54,8 @@ namespace Game.Networking.Packets
 
         public WhoRequest Request = new();
         public uint RequestID;
+        public byte Origin;   // 1 = Social, 2 = Chat, 3 = Item
+        public bool IsFromAddOn;
         public List<int> Areas= new();
     }
 

@@ -1495,27 +1495,11 @@ namespace Game.Entities
                 }
             }
 
-            uint modelid = 0;
             SpellShapeshiftFormRecord formEntry = CliDB.SpellShapeshiftFormStorage.LookupByKey(form);
-            if (formEntry != null && formEntry.CreatureDisplayID[0] != 0)
-            {
-                // Take the alliance modelid as default
-                if (GetTypeId() != TypeId.Player)
-                    return formEntry.CreatureDisplayID[0];
-                else
-                {
-                    if (Player.TeamForRace(GetRace()) == Team.Alliance)
-                        modelid = formEntry.CreatureDisplayID[0];
-                    else
-                        modelid = formEntry.CreatureDisplayID[1];
+            if (formEntry != null && formEntry.CreatureDisplayID != 0)
+                return formEntry.CreatureDisplayID;
 
-                    // If the player is horde but there are no values for the horde modelid - take the alliance modelid
-                    if (modelid == 0 && Player.TeamForRace(GetRace()) == Team.Horde)
-                        modelid = formEntry.CreatureDisplayID[0];
-                }
-            }
-
-            return modelid;
+            return 0;
         }
 
         public Totem ToTotem() { return IsTotem() ? (this as Totem) : null; }

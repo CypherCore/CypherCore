@@ -465,7 +465,7 @@ namespace Game.Entities
                 do
                 {
                     var spell = m_spells.LookupByKey(favoritesResult.Read<uint>(0));
-                    if (spell !=null)
+                    if (spell != null)
                         spell.Favorite = true;
                 } while (favoritesResult.NextRow());
             }
@@ -1388,9 +1388,9 @@ namespace Game.Entities
             if (result.IsEmpty())
                 return;
 
-            _declinedname = new DeclinedName();
-            for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
-                _declinedname.name[i] = result.Read<string>(i);
+            DeclinedNames declinedNames = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.DeclinedNames);
+            for (int i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
+                SetUpdateFieldValue(ref declinedNames.ModifyValue(declinedNames.Name, i), result.Read<string>(i));
         }
         void _LoadArenaTeamInfo(SQLResult result)
         {
@@ -2047,7 +2047,7 @@ namespace Game.Entities
         void _SaveActions(SQLTransaction trans)
         {
             int traitConfigId = 0;
-            
+
             TraitConfig traitConfig = GetTraitConfig((int)(uint)m_activePlayerData.ActiveCombatTraitConfigID);
             if (traitConfig != null)
             {
@@ -2430,7 +2430,7 @@ namespace Game.Entities
 
             m_traitConfigStates.Clear();
         }
-        
+
         public void _SaveMail(SQLTransaction trans)
         {
             PreparedStatement stmt;
@@ -2863,7 +2863,11 @@ namespace Game.Entities
             PlayerRestState honorRestState = (PlayerRestState)result.Read<byte>(fieldIndex++);
             float honorRestBonus = result.Read<float>(fieldIndex++);
             byte numRespecs = result.Read<byte>(fieldIndex++);
-
+            int personalTabardEmblemStyle = result.Read<int>(fieldIndex++);
+            int personalTabardEmblemColor = result.Read<int>(fieldIndex++);
+            int personalTabardBorderStyle = result.Read<int>(fieldIndex++);
+            int personalTabardBorderColor = result.Read<int>(fieldIndex++);
+            int personalTabardBackgroundColor = result.Read<int>(fieldIndex++);
 
             // check if the character's account in the db and the logged in account match.
             // player should be able to load/delete character only with correct account!
@@ -2895,9 +2899,10 @@ namespace Game.Entities
                 return false;
             }
 
+            SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.Name), GetName());
 
             SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.WowAccount), GetSession().GetAccountGUID());
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BnetAccount), GetSession().GetBattlenetAccountGUID());
+            SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.BnetAccount), GetSession().GetBattlenetAccountGUID());
 
             if (gender >= Gender.None)
             {
@@ -3099,7 +3104,7 @@ namespace Game.Entities
                             transport = transportOnMap;
                     }
                 }
-                
+
                 if (transport != null)
                 {
                     float x = trans_x;
@@ -3217,7 +3222,7 @@ namespace Game.Entities
             else if (map.IsDungeon()) // if map is dungeon...
             {
                 TransferAbortParams denyReason = map.CannotEnter(this); // ... and can't enter map, then look for entry point.
-                if (denyReason != null) 
+                if (denyReason != null)
                 {
                     SendTransferAborted(map.GetId(), denyReason.Reason, denyReason.Arg, denyReason.MapDifficultyXConditionId);
                     areaTrigger = Global.ObjectMgr.GetGoBackTrigger(mapId);
@@ -3459,6 +3464,8 @@ namespace Game.Entities
                     ++runes;
                 }
             }
+
+            SetPersonalTabard(personalTabardEmblemStyle, personalTabardEmblemColor, personalTabardBorderStyle, personalTabardBorderColor, personalTabardBackgroundColor);
 
             Log.outDebug(LogFilter.Player, "The value of player {0} after load item and aura is: ", GetName());
 

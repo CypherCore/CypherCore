@@ -447,6 +447,11 @@ namespace Framework.Constants
         PlayerHasCompletedQuestWithLabel = 372, /*NYI*/ // Player has previously completed quest with {QuestLabel}
         LegacyLootIsEnabled = 373, /*NYI*/
         PlayerZPositionBelow = 374,
+        PlayerWeaponHighWatermarkAboveOrEqual = 375, /*NYI*/
+        PlayerHeadHighWatermarkAboveOrEqual = 376, /*NYI*/
+        PlayerHasDisplayedCurrencyLessThan = 377, /*NYI*/ // Player has {CurrencyTypes} less than {#Amount} (value visible in ui is taken into account, not raw value)
+
+        PlayerIsOnMapWithExpansion = 380, // Player is on map that has {ExpansionID}
     }
 
     public enum CriteriaFailEvent : byte
@@ -467,7 +472,7 @@ namespace Framework.Constants
         DailyQuestsCleared = 13,   // Daily quests cleared
         SendEvent = 14,   // Send event "{GameEvents}" (player-sent/instance only)
 
-        Max
+        Count
     }
 
     public enum CriteriaStartEvent : byte
@@ -488,7 +493,7 @@ namespace Framework.Constants
         SendEvent = 13, // Send event "{GameEvents}" (player-sent/instance only)
         BeginScenarioStep = 14, // Begin scenario step "{#Step}" (for use with "Player on Scenario" modifier only)
 
-        Max
+        Count
     }
 
     public enum CriteriaFlags
@@ -501,7 +506,7 @@ namespace Framework.Constants
         IsForQuest = 0x20  // Is For Quest
     }
 
-    public enum CriteriaType : byte
+    public enum CriteriaType : short
     {
         KillCreature = 0,   // Kill NPC "{Creature}"
         WinBattleground = 1,   // Win battleground "{Map}"
@@ -745,6 +750,7 @@ namespace Framework.Constants
         PerksProgramMonthComplete = 249, /*NYI*/
         CompleteTrackingQuest = 250, /*NYI*/
 
+        GainLevels = 253, // Gain levels
         Count
     }
 

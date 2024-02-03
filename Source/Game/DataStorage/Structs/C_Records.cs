@@ -163,6 +163,7 @@ namespace Game.DataStorage
         public uint DisplayID;
         public float BarberShopMinCameraDistance;
         public float BarberShopHeightOffset;
+        public float BarberShopCameraZoomOffset;
     }
 
     public sealed class ChrCustomizationElementRecord
@@ -180,6 +181,7 @@ namespace Game.DataStorage
         public int ChrCustomizationVoiceID;
         public int AnimKitID;
         public int ParticleColorID;
+        public int ChrCustGeoComponentLinkID;
     }
 
     public sealed class ChrCustomizationOptionRecord
@@ -422,6 +424,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public uint BroadcastTextID;
+        public uint Unused1020;
         public uint SpellVisualKitID;
         public int AdditionalDuration;
         public ushort NextConversationLineID;

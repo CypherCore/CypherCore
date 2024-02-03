@@ -3539,9 +3539,14 @@ namespace Game.Guilds
 
             public bool ValidateEmblemColors()
             {
-                return CliDB.GuildColorBackgroundStorage.ContainsKey(m_backgroundColor) &&
-                       CliDB.GuildColorBorderStorage.ContainsKey(m_borderColor) &&
-                       CliDB.GuildColorEmblemStorage.ContainsKey(m_color);
+                return ValidateEmblemColors(m_style, m_color, m_borderStyle, m_borderColor, m_backgroundColor);
+            }
+            
+            public static bool ValidateEmblemColors(uint style, uint color, uint borderStyle, uint borderColor, uint backgroundColor)
+            {
+                return CliDB.GuildColorBackgroundStorage.ContainsKey(backgroundColor) &&
+                       CliDB.GuildColorBorderStorage.ContainsKey(borderColor) &&
+                       CliDB.GuildColorEmblemStorage.ContainsKey(color);
             }
 
             public bool LoadFromDB(SQLFields field)

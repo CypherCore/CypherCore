@@ -607,8 +607,17 @@ namespace Game
         {
             // This packet is completely irrelevant, it triggers PVP_TYPES_ENABLED lua event but that is not handled in interface code as of 6.1.2
             PVPOptionsEnabled pvpOptionsEnabled = new();
+            pvpOptionsEnabled.RatedBattlegrounds = false;
             pvpOptionsEnabled.PugBattlegrounds = true;
-            SendPacket(new PVPOptionsEnabled());
+            pvpOptionsEnabled.WargameBattlegrounds = false;
+            pvpOptionsEnabled.WargameArenas = false;
+            pvpOptionsEnabled.RatedArenas = false;
+            pvpOptionsEnabled.ArenaSkirmish = false;
+            pvpOptionsEnabled.SoloShuffle = false;
+            pvpOptionsEnabled.RatedSoloShuffle = false;
+            pvpOptionsEnabled.BattlegroundBlitz = false;
+            pvpOptionsEnabled.RatedBattlegroundBlitz = false;
+            SendPacket(pvpOptionsEnabled);
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestPvpRewards, Processing = PacketProcessing.Inplace)]

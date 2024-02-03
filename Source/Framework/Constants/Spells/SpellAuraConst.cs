@@ -551,6 +551,7 @@ namespace Framework.Constants
         ModRequiredMountCapabilityFlags = 541,
         Unk542 = 542,
         Unk543 = 543,
+        Unk544 = 544,
         Total
     }
 

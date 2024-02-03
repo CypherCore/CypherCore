@@ -83,9 +83,13 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(ChatDisabledByPlayer);
             _worldPacket.WriteBit(LFGListCustomRequiresAuthenticator);
             _worldPacket.WriteBit(AddonsDisabled);
-            _worldPacket.WriteBit(Unused1000);
+            _worldPacket.WriteBit(WarGamesEnabled);
             _worldPacket.WriteBit(ContentTrackingEnabled);
             _worldPacket.WriteBit(IsSellAllJunkEnabled);
+            _worldPacket.WriteBit(IsGroupFinderEnabled);
+            _worldPacket.WriteBit(IsLFDEnabled);
+            _worldPacket.WriteBit(IsLFREnabled);
+            _worldPacket.WriteBit(IsPremadeGroupEnabled);
 
             _worldPacket.FlushBits();
 
@@ -177,9 +181,13 @@ namespace Game.Networking.Packets
         public bool ChatDisabledByPlayer;
         public bool LFGListCustomRequiresAuthenticator;
         public bool AddonsDisabled;
-        public bool Unused1000;
+        public bool WarGamesEnabled; // classic only
         public bool ContentTrackingEnabled;
         public bool IsSellAllJunkEnabled;
+        public bool IsGroupFinderEnabled = true;  // classic only
+        public bool IsLFDEnabled = true;  // classic only
+        public bool IsLFREnabled = true;  // classic only
+        public bool IsPremadeGroupEnabled = true;  // classic only
 
         public SocialQueueConfig QuickJoinConfig;
         public SquelchInfo Squelch;
@@ -359,26 +367,6 @@ namespace Game.Networking.Packets
         public List<DebugTimeEventInfo> DebugTimeEvents = new();
         public int Unused1007;
         public string RealmHiddenAlert;
-    }
-
-    public class MOTD : ServerPacket
-    {
-        public MOTD() : base(ServerOpcodes.Motd) { }
-
-        public override void Write()
-        {
-            _worldPacket.WriteBits(Text.Count, 4);
-            _worldPacket.FlushBits();
-
-            foreach (var line in Text)
-            {
-                _worldPacket.WriteBits(line.GetByteCount(), 7);
-                _worldPacket.FlushBits();
-                _worldPacket.WriteString(line);
-            }
-        }
-
-        public List<string> Text;
     }
 
     public class SetTimeZoneInformation : ServerPacket

@@ -111,8 +111,6 @@ namespace Game
                 while (result.NextRow() && charResult.Characters.Count < 200);
             }
 
-            charResult.IsAlliedRacesCreationAllowed = CanAccessAlliedRaces();
-
             foreach (var requirement in Global.ObjectMgr.GetRaceUnlockRequirements())
             {
                 EnumCharactersResult.RaceUnlock raceUnlock = new();
@@ -811,9 +809,8 @@ namespace Game
 
             SendFeatureSystemStatus();
 
-            MOTD motd = new();
-            motd.Text = Global.WorldMgr.GetMotd();
-            SendPacket(motd);
+            foreach (var motdLine in Global.WorldMgr.GetMotd())
+                Global.WorldMgr.SendServerMessage(ServerMessageType.String, motdLine, pCurrChar);
 
             SendSetTimeZoneInformation();
 
@@ -2542,6 +2539,29 @@ namespace Game
             }
 
             GetPlayer().SetStandState(packet.StandState);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.SavePersonalEmblem)]
+        void HandleSavePersonalEmblem(SavePersonalEmblem savePersonalEmblem)
+        {
+            if (_player.GetNPCIfCanInteractWith(savePersonalEmblem.Vendor, NPCFlags.None, NPCFlags2.PersonalTabardDesigner) == null)
+            {
+                SendPacket(new PlayerSavePersonalEmblem(GuildEmblemError.InvalidVendor));
+                return;
+            }
+
+            if (!Guild.EmblemInfo.ValidateEmblemColors((uint)savePersonalEmblem.PersonalTabard.EmblemStyle, (uint)savePersonalEmblem.PersonalTabard.EmblemColor,
+                (uint)savePersonalEmblem.PersonalTabard.BorderStyle, (uint)savePersonalEmblem.PersonalTabard.BorderColor, (uint)savePersonalEmblem.PersonalTabard.BackgroundColor))
+            {
+                SendPacket(new PlayerSavePersonalEmblem(GuildEmblemError.InvalidTabardColors));
+                return;
+            }
+
+            _player.SetPersonalTabard(savePersonalEmblem.PersonalTabard.EmblemStyle, savePersonalEmblem.PersonalTabard.EmblemColor,
+                savePersonalEmblem.PersonalTabard.BorderStyle, savePersonalEmblem.PersonalTabard.BorderColor,
+                savePersonalEmblem.PersonalTabard.BackgroundColor);
+
+            SendPacket(new PlayerSavePersonalEmblem(GuildEmblemError.Success));
         }
 
         void SendCharCreate(ResponseCodes result, ObjectGuid guid = default)

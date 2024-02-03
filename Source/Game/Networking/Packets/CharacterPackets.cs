@@ -33,7 +33,6 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(IsNewPlayer);
             _worldPacket.WriteBit(IsTrialAccountRestricted);
             _worldPacket.WriteBit(DisabledClassesMask.HasValue);
-            _worldPacket.WriteBit(IsAlliedRacesCreationAllowed);
             _worldPacket.WriteInt32(Characters.Count);
             _worldPacket.WriteInt32(MaxCharacterLevel);
             _worldPacket.WriteInt32(RaceUnlockData.Count);
@@ -62,7 +61,6 @@ namespace Game.Networking.Packets
         public bool IsNewPlayerRestricted; // forbids using level boost and class trials
         public bool IsNewPlayer; // forbids hero classes and allied races
         public bool IsTrialAccountRestricted;
-        public bool IsAlliedRacesCreationAllowed;
 
         public int MaxCharacterLevel = 1;
         public uint? DisabledClassesMask = new();
@@ -105,7 +103,7 @@ namespace Game.Networking.Packets
                 if (fields.Read<uint>(18) != 0)
                     Flags |= CharacterFlags.LockedByBilling;
 
-                if (WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed) && !string.IsNullOrEmpty(fields.Read<string>(23)))
+                if (WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed) && !string.IsNullOrEmpty(fields.Read<string>(28)))
                     Flags |= CharacterFlags.Declined;
 
                 if (atLoginFlags.HasAnyFlag(AtLoginFlags.Customize))
@@ -144,6 +142,12 @@ namespace Game.Networking.Packets
                     SpecID = (short)spec.Id;
 
                 LastLoginVersion = fields.Read<int>(22);
+
+                PersonalTabard.EmblemStyle = fields.Read<int>(23);
+                PersonalTabard.EmblemColor = fields.Read<int>(24);
+                PersonalTabard.BorderStyle = fields.Read<int>(25);
+                PersonalTabard.BorderColor = fields.Read<int>(26);
+                PersonalTabard.BackgroundColor = fields.Read<int>(27);
 
                 int equipmentFieldsPerSlot = 5;
 
@@ -194,6 +198,7 @@ namespace Game.Networking.Packets
                 data.WriteInt32(MailSenders.Count);
                 data.WriteInt32(MailSenderTypes.Count);
                 data.WriteUInt32(OverrideSelectScreenFileDataID);
+                PersonalTabard.Write(data);
 
                 foreach (ChrCustomizationChoice customization in Customizations)
                 {
@@ -208,6 +213,8 @@ namespace Game.Networking.Packets
                 data.WriteBit(FirstLogin);
                 data.WriteBit(BoostInProgress);
                 data.WriteBits(unkWod61x, 5);
+                data.WriteBit(RpeResetAvailable);
+                data.WriteBit(RpeResetQuestClearAvailable);
 
                 foreach (string str in MailSenders)
                     data.WriteBits(str.GetByteCount() + 1, 6);
@@ -228,7 +235,7 @@ namespace Game.Networking.Packets
             public byte RaceId;
             public Class ClassId;
             public byte SexId;
-            public Array<ChrCustomizationChoice> Customizations = new(125);
+            public Array<ChrCustomizationChoice> Customizations = new(250);
             public byte ExperienceLevel;
             public uint ZoneId;
             public uint MapId;
@@ -253,6 +260,9 @@ namespace Game.Networking.Packets
             public VisualItemInfo[] VisualItems = new VisualItemInfo[InventorySlots.ReagentBagEnd];
             public List<string> MailSenders = new();
             public List<uint> MailSenderTypes = new();
+            public bool RpeResetAvailable = false;
+            public bool RpeResetQuestClearAvailable = false;
+            public CustomTabardInfo PersonalTabard = new();
 
             public struct VisualItemInfo
             {
@@ -288,6 +298,7 @@ namespace Game.Networking.Packets
                 data.WriteBit(HasExpansion);
                 data.WriteBit(HasAchievement);
                 data.WriteBit(HasHeritageArmor);
+                data.WriteBit(IsLocked);
                 data.FlushBits();
             }
 
@@ -295,6 +306,7 @@ namespace Game.Networking.Packets
             public bool HasExpansion;
             public bool HasAchievement;
             public bool HasHeritageArmor;
+            public bool IsLocked;
         }
 
         public struct UnlockedConditionalAppearance
@@ -329,7 +341,7 @@ namespace Game.Networking.Packets
     }
 
     class CheckCharacterNameAvailability : ClientPacket
-    {     
+    {
         public uint SequenceIndex;
         public string Name;
 
@@ -359,7 +371,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32((uint)Result);
         }
     }
-    
+
     public class CreateCharacter : ClientPacket
     {
         public CreateCharacter(WorldPacket packet) : base(packet) { }
@@ -570,7 +582,7 @@ namespace Game.Networking.Packets
             public string Name;
             public byte SexID;
             public byte RaceID;
-            public Array<ChrCustomizationChoice> Customizations = new(125);
+            public Array<ChrCustomizationChoice> Customizations = new(250);
         }
     }
 
@@ -883,7 +895,7 @@ namespace Game.Networking.Packets
         }
 
         public byte NewSex;
-        public Array<ChrCustomizationChoice> Customizations = new(125);
+        public Array<ChrCustomizationChoice> Customizations = new(250);
         public int CustomizedRace;
         public int CustomizedChrModelID;
     }
@@ -952,7 +964,7 @@ namespace Game.Networking.Packets
             FactionIndex = _worldPacket.ReadUInt8();
         }
 
-        public byte FactionIndex;
+        public ushort FactionIndex;
     }
 
     class SetFactionNotAtWar : ClientPacket
@@ -964,7 +976,7 @@ namespace Game.Networking.Packets
             FactionIndex = _worldPacket.ReadUInt8();
         }
 
-        public byte FactionIndex;
+        public ushort FactionIndex;
     }
 
     class SetFactionInactive : ClientPacket
@@ -1089,6 +1101,35 @@ namespace Game.Networking.Packets
         public DeclinedNameResult ResultCode;
     }
 
+    class SavePersonalEmblem : ClientPacket
+    {
+        public ObjectGuid Vendor;
+        public CustomTabardInfo PersonalTabard = new();
+
+        public SavePersonalEmblem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Vendor = _worldPacket.ReadPackedGuid();
+            PersonalTabard.Read(_worldPacket);
+        }
+    }
+
+    class PlayerSavePersonalEmblem : ServerPacket
+    {
+        public GuildEmblemError Error;
+
+        public PlayerSavePersonalEmblem(GuildEmblemError error) : base(ServerOpcodes.PlayerSavePersonalEmblem)
+        {
+            Error = error;
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32((int)Error);
+        }
+    }
+
     //Structs
     public class CharacterCreateInfo
     {
@@ -1096,7 +1137,7 @@ namespace Game.Networking.Packets
         public Race RaceId = Race.None;
         public Class ClassId = Class.None;
         public Gender Sex = Gender.None;
-        public Array<ChrCustomizationChoice> Customizations = new(125);
+        public Array<ChrCustomizationChoice> Customizations = new(250);
         public uint? TemplateSet;
         public bool IsTrialBoost;
         public bool UseNPE;
@@ -1117,7 +1158,7 @@ namespace Game.Networking.Packets
         public ObjectGuid CharGUID;
         public Gender SexID = Gender.None;
         public string CharName;
-        public Array<ChrCustomizationChoice> Customizations = new(125);
+        public Array<ChrCustomizationChoice> Customizations = new(250);
     }
 
     public class CharRaceOrFactionChangeInfo
@@ -1128,15 +1169,42 @@ namespace Game.Networking.Packets
         public ObjectGuid Guid;
         public bool FactionChange;
         public string Name;
-        public Array<ChrCustomizationChoice> Customizations = new(125);
+        public Array<ChrCustomizationChoice> Customizations = new(250);
     }
 
     public class CharacterUndeleteInfo
     {            // User specified variables
         public ObjectGuid CharacterGuid; // Guid of the character to restore
-        public int ClientToken = 0; // @todo: research
+        public int ClientToken; // @todo: research
 
         // Server side data
         public string Name;
+    }
+
+    public class CustomTabardInfo
+    {
+        public int EmblemStyle = -1;
+        public int EmblemColor = -1;
+        public int BorderStyle = -1;
+        public int BorderColor = -1;
+        public int BackgroundColor = -1;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(EmblemStyle);
+            data.WriteInt32(EmblemColor);
+            data.WriteInt32(BorderStyle);
+            data.WriteInt32(BorderColor);
+            data.WriteInt32(BackgroundColor);
+        }
+
+        public void Read(WorldPacket data)
+        {
+            EmblemStyle = data.ReadInt32();
+            EmblemColor = data.ReadInt32();
+            BorderStyle = data.ReadInt32();
+            BorderColor = data.ReadInt32();
+            BackgroundColor = data.ReadInt32();
+        }
     }
 }

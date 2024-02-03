@@ -26,8 +26,8 @@ namespace Game
             CalendarSendCalendar packet = new();
             packet.ServerTime = currTime;
 
-            var invites = Global.CalendarMgr.GetPlayerInvites(guid);
-            foreach (var invite in invites)
+            var playerInvites = Global.CalendarMgr.GetPlayerInvites(guid);
+            foreach (var invite in playerInvites)
             {
                 CalendarSendCalendarInviteInfo inviteInfo = new();
                 inviteInfo.EventID = invite.EventId;
@@ -45,7 +45,7 @@ namespace Game
             var playerEvents = Global.CalendarMgr.GetPlayerEvents(guid);
             foreach (var calendarEvent in playerEvents)
             {
-                CalendarSendCalendarEventInfo eventInfo;
+                CalendarSendCalendarEventInfo eventInfo = new();
                 eventInfo.EventID = calendarEvent.EventId;
                 eventInfo.Date = calendarEvent.Date;
                 eventInfo.EventClubID = calendarEvent.GuildId;
@@ -61,7 +61,6 @@ namespace Game
             foreach (InstanceLock instanceLock in Global.InstanceLockMgr.GetInstanceLocksForPlayer(_player.GetGUID()))
             {
                 CalendarSendCalendarRaidLockoutInfo lockoutInfo = new();
-
                 lockoutInfo.MapID = (int)instanceLock.GetMapId();
                 lockoutInfo.DifficultyID = (uint)instanceLock.GetDifficultyId();
                 lockoutInfo.ExpireTime = (int)Math.Max((instanceLock.GetEffectiveExpiryTime() - GameTime.GetSystemTime()).TotalSeconds, 0);

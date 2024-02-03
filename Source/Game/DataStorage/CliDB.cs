@@ -281,6 +281,7 @@ namespace Game.DataStorage
             SceneScriptGlobalTextStorage = ReadDB2<SceneScriptGlobalTextRecord>("SceneScriptGlobalText.db2", HotfixStatements.SEL_SCENE_SCRIPT_GLOBAL_TEXT);
             SceneScriptPackageStorage = ReadDB2<SceneScriptPackageRecord>("SceneScriptPackage.db2", HotfixStatements.SEL_SCENE_SCRIPT_PACKAGE);
             SceneScriptTextStorage = ReadDB2<SceneScriptTextRecord>("SceneScriptText.db2", HotfixStatements.SEL_SCENE_SCRIPT_TEXT);
+            ServerMessagesStorage = ReadDB2<ServerMessagesRecord>("ServerMessages.db2", HotfixStatements.SEL_SERVER_MESSAGES, HotfixStatements.SEL_SERVER_MESSAGES_LOCALE);
             SkillLineStorage = ReadDB2<SkillLineRecord>("SkillLine.db2", HotfixStatements.SEL_SKILL_LINE, HotfixStatements.SEL_SKILL_LINE_LOCALE);
             SkillLineAbilityStorage = ReadDB2<SkillLineAbilityRecord>("SkillLineAbility.db2", HotfixStatements.SEL_SKILL_LINE_ABILITY);
             SkillLineXTraitTreeStorage = ReadDB2<SkillLineXTraitTreeRecord>("SkillLineXTraitTree.db2", HotfixStatements.SEL_SKILL_LINE_X_TRAIT_TREE);
@@ -715,6 +716,7 @@ namespace Game.DataStorage
         public static DB6Storage<SceneScriptGlobalTextRecord> SceneScriptGlobalTextStorage;
         public static DB6Storage<SceneScriptPackageRecord> SceneScriptPackageStorage;
         public static DB6Storage<SceneScriptTextRecord> SceneScriptTextStorage;
+        public static DB6Storage<ServerMessagesRecord> ServerMessagesStorage;
         public static DB6Storage<SkillLineRecord> SkillLineStorage;
         public static DB6Storage<SkillLineAbilityRecord> SkillLineAbilityStorage;
         public static DB6Storage<SkillLineXTraitTreeRecord> SkillLineXTraitTreeStorage;

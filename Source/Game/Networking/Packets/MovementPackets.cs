@@ -1497,7 +1497,6 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(Id);
-            data.WriteVector3(Destination);
             data.WriteBit(CrzTeleport);
             data.WriteBits(StopDistanceTolerance, 3);
 
@@ -1505,7 +1504,6 @@ namespace Game.Networking.Packets
         }
 
         public uint Id;
-        public Vector3 Destination;
         public bool CrzTeleport;
         public byte StopDistanceTolerance;    // Determines how far from spline destination the mover is allowed to stop in place 0, 0, 3.0, 2.76, numeric_limits<float>::max, 1.1, float(INT_MAX); default before this field existed was distance 3.0 (index 2)
         public MovementSpline Move;

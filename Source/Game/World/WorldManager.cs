@@ -1899,9 +1899,13 @@ namespace Game
 
         public void SendServerMessage(ServerMessageType messageID, string stringParam = "", Player player = null)
         {
+            ServerMessagesRecord serverMessage = CliDB.ServerMessagesStorage.LookupByKey(messageID);
+            if (serverMessage == null)
+                return;
+
             ChatServerMessage packet = new();
             packet.MessageID = (int)messageID;
-            if (messageID <= ServerMessageType.String)
+            if (serverMessage.Text[player != null ? player.GetSession().GetSessionDbcLocale() : GetDefaultDbcLocale()].Contains("%s"))
                 packet.StringParam = stringParam;
 
             if (player != null)

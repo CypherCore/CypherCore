@@ -1042,17 +1042,17 @@ namespace Game.Networking.Packets
     {
         public PartyMemberPhase(uint flags, uint id)
         {
-            Flags = (ushort)flags;
+            Flags = flags;
             Id = (ushort)id;
         }
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt16(Flags);
+            data.WriteUInt32(Flags);
             data.WriteUInt16(Id);
         }
 
-        public ushort Flags;
+        public uint Flags;
         public ushort Id;
     }
 

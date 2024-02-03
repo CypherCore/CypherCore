@@ -237,7 +237,6 @@ namespace Game.Entities
         TimeTracker m_groupUpdateTimer;
 
         ulong m_GuildIdInvited;
-        DeclinedName _declinedname;
         Runes m_runes = new();
         uint m_hostileReferenceCheckTimer;
         uint m_drunkTimer;

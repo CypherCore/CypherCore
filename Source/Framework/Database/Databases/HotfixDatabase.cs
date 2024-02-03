@@ -270,13 +270,13 @@ namespace Framework.Database
 
             // ChrCustomizationDisplayInfo.db2
             PrepareStatement(HotfixStatements.SEL_CHR_CUSTOMIZATION_DISPLAY_INFO, "SELECT ID, ShapeshiftFormID, DisplayID, BarberShopMinCameraDistance, " +
-                "BarberShopHeightOffset FROM chr_customization_display_info WHERE (`VerifiedBuild` > 0) = ?");
+                "BarberShopHeightOffset, BarberShopCameraZoomOffset FROM chr_customization_display_info WHERE (`VerifiedBuild` > 0) = ?");
 
             // ChrCustomizationElement.db2
             PrepareStatement(HotfixStatements.SEL_CHR_CUSTOMIZATION_ELEMENT, "SELECT ID, ChrCustomizationChoiceID, RelatedChrCustomizationChoiceID, " +
                 "ChrCustomizationGeosetID, ChrCustomizationSkinnedModelID, ChrCustomizationMaterialID, ChrCustomizationBoneSetID, " +
-                "ChrCustomizationCondModelID, ChrCustomizationDisplayInfoID, ChrCustItemGeoModifyID, ChrCustomizationVoiceID, AnimKitID, ParticleColorID" +
-                " FROM chr_customization_element WHERE (`VerifiedBuild` > 0) = ?");
+                "ChrCustomizationCondModelID, ChrCustomizationDisplayInfoID, ChrCustItemGeoModifyID, ChrCustomizationVoiceID, AnimKitID, ParticleColorID, " +
+                "ChrCustGeoComponentLinkID FROM chr_customization_element WHERE (`VerifiedBuild` > 0) = ?");
 
             // ChrCustomizationOption.db2
             PrepareStatement(HotfixStatements.SEL_CHR_CUSTOMIZATION_OPTION, "SELECT Name, ID, SecondaryID, Flags, ChrModelID, SortIndex, ChrCustomizationCategoryID, " +
@@ -357,8 +357,8 @@ namespace Framework.Database
                 " WHERE (`VerifiedBuild` > 0) = ?");
 
             // ConversationLine.db2
-            PrepareStatement(HotfixStatements.SEL_CONVERSATION_LINE, "SELECT ID, BroadcastTextID, SpellVisualKitID, AdditionalDuration, NextConversationLineID, " +
-                "AnimKitID, SpeechType, StartAnimation, EndAnimation FROM conversation_line WHERE (`VerifiedBuild` > 0) = ?");
+            PrepareStatement(HotfixStatements.SEL_CONVERSATION_LINE, "SELECT ID, BroadcastTextID, Unused1020, SpellVisualKitID, AdditionalDuration, " +
+                "NextConversationLineID, AnimKitID, SpeechType, StartAnimation, EndAnimation FROM conversation_line WHERE (`VerifiedBuild` > 0) = ?");
 
             // CorruptionEffects.db2
             PrepareStatement(HotfixStatements.SEL_CORRUPTION_EFFECTS, "SELECT ID, MinCorruption, Aura, PlayerConditionID, Flags FROM corruption_effects" +
@@ -1121,6 +1121,10 @@ namespace Framework.Database
             // SceneScriptText.db2
             PrepareStatement(HotfixStatements.SEL_SCENE_SCRIPT_TEXT, "SELECT ID, Name, Script FROM scene_script_text WHERE (`VerifiedBuild` > 0) = ?");
 
+            // ServerMessages.db2
+            PrepareStatement(HotfixStatements.SEL_SERVER_MESSAGES, "SELECT ID, `Text` FROM server_messages WHERE (`VerifiedBuild` > 0) = ?");
+            PrepareStatement(HotfixStatements.SEL_SERVER_MESSAGES_LOCALE, "SELECT ID, Text_lang FROM server_messages_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
+
             // SkillLine.db2
             PrepareStatement(HotfixStatements.SEL_SKILL_LINE, "SELECT DisplayName, AlternateVerb, Description, HordeDisplayName, OverrideSourceInfoDisplayName, ID, " +
                 "CategoryID, SpellIconFileID, CanLink, ParentSkillLineID, ParentTierIndex, Flags, SpellBookSpellID, ExpansionNameSharedStringID, " +
@@ -1305,10 +1309,9 @@ namespace Framework.Database
                 "ShapeshiftMask2 FROM spell_shapeshift WHERE (`VerifiedBuild` > 0) = ?");
 
             // SpellShapeshiftForm.db2
-            PrepareStatement(HotfixStatements.SEL_SPELL_SHAPESHIFT_FORM, "SELECT ID, Name, CreatureType, Flags, AttackIconFileID, BonusActionBar, CombatRoundTime, " +
-                "DamageVariance, MountTypeID, CreatureDisplayID1, CreatureDisplayID2, CreatureDisplayID3, CreatureDisplayID4, PresetSpellID1, PresetSpellID2, " +
-                "PresetSpellID3, PresetSpellID4, PresetSpellID5, PresetSpellID6, PresetSpellID7, PresetSpellID8 FROM spell_shapeshift_form" +
-                    " WHERE (`VerifiedBuild` > 0) = ?");
+            PrepareStatement(HotfixStatements.SEL_SPELL_SHAPESHIFT_FORM, "SELECT ID, Name, CreatureDisplayID, CreatureType, Flags, AttackIconFileID, BonusActionBar, " +
+                "CombatRoundTime, DamageVariance, MountTypeID, PresetSpellID1, PresetSpellID2, PresetSpellID3, PresetSpellID4, PresetSpellID5, " +
+                "PresetSpellID6, PresetSpellID7, PresetSpellID8 FROM spell_shapeshift_form WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_SPELL_SHAPESHIFT_FORM_LOCALE, "SELECT ID, Name_lang FROM spell_shapeshift_form_locale WHERE (`VerifiedBuild` > 0) = ?" +
                 " AND locale = ?");
 
@@ -2118,6 +2121,9 @@ namespace Framework.Database
         SEL_SCENE_SCRIPT_PACKAGE,
 
         SEL_SCENE_SCRIPT_TEXT,
+
+        SEL_SERVER_MESSAGES,
+        SEL_SERVER_MESSAGES_LOCALE,
 
         SEL_SKILL_LINE,
         SEL_SKILL_LINE_LOCALE,

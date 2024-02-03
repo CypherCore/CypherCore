@@ -894,4 +894,10 @@ namespace Framework.Constants
         DroppedFromDeath = 0x02,
         FromAccountServer = 0x04
     }
+
+    public enum TabardVendorType
+    {
+        Guild = 0,
+        Personal = 1,
+    }
 }

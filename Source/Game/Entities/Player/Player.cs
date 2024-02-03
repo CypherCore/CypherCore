@@ -138,7 +138,6 @@ namespace Game.Entities
             PlayerTalkClass.ClearMenus();
             ItemSetEff.Clear();
 
-            _declinedname = null;
             m_runes = null;
             m_achievementSys = null;
             reputationMgr = null;
@@ -816,7 +815,7 @@ namespace Game.Entities
             _session.SendPacket(data);
         }
 
-        public DeclinedName GetDeclinedNames() { return _declinedname; }
+        public DeclinedNames GetDeclinedNames() { return m_playerData.DeclinedNames.HasValue() ? m_playerData.DeclinedNames.GetValue() : null; }
 
         public void CreateGarrison(uint garrSiteId)
         {
@@ -1040,7 +1039,7 @@ namespace Game.Entities
             if (!m_activePlayerData.PetStable.HasValue())
                 return ObjectGuid.Empty;
 
-            return m_activePlayerData.PetStable.GetValue().StableMaster;              
+            return m_activePlayerData.PetStable.GetValue().StableMaster;
         }
 
         public void SetStableMaster(ObjectGuid stableMaster)
@@ -1051,7 +1050,7 @@ namespace Game.Entities
             StableInfo stableInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.PetStable);
             SetUpdateFieldValue(stableInfo.ModifyValue(stableInfo.StableMaster), stableMaster);
         }
-        
+
         // last used pet number (for BG's)
         public uint GetLastPetNumber() { return m_lastpetnumber; }
         public void SetLastPetNumber(uint petnumber) { m_lastpetnumber = petnumber; }
@@ -1059,7 +1058,7 @@ namespace Game.Entities
         public void SetTemporaryUnsummonedPetNumber(uint petnumber) { m_temporaryUnsummonedPetNumber = petnumber; }
 
         public ReactStates? GetTemporaryPetReactState() { return m_temporaryPetReactState; }
-        
+
         public void DisablePetControlsOnMount(ReactStates reactState, CommandStates commandState)
         {
             Pet pet = GetPet();
@@ -2667,11 +2666,12 @@ namespace Game.Entities
                         case GossipOptionNpc.Binder:
                         case GossipOptionNpc.Banker:
                         case GossipOptionNpc.PetitionVendor:
-                        case GossipOptionNpc.TabardVendor:
+                        case GossipOptionNpc.GuildTabardVendor:
                         case GossipOptionNpc.Auctioneer:
                         case GossipOptionNpc.Mailbox:
                         case GossipOptionNpc.Transmogrify:
                         case GossipOptionNpc.AzeriteRespec:
+                        case GossipOptionNpc.PersonalTabardVendor:
                             break;                                         // No checks
                         case GossipOptionNpc.CemeterySelect:
                             canTalk = false;                               // Deprecated
@@ -2887,7 +2887,7 @@ namespace Game.Entities
                     {
                         PlayerInteractionType.None, PlayerInteractionType.Vendor, PlayerInteractionType.TaxiNode,
                         PlayerInteractionType.Trainer, PlayerInteractionType.SpiritHealer, PlayerInteractionType.Binder,
-                        PlayerInteractionType.Banker, PlayerInteractionType.PetitionVendor, PlayerInteractionType.TabardVendor,
+                        PlayerInteractionType.Banker, PlayerInteractionType.PetitionVendor, PlayerInteractionType.GuildTabardVendor,
                         PlayerInteractionType.BattleMaster, PlayerInteractionType.Auctioneer, PlayerInteractionType.TalentMaster,
                         PlayerInteractionType.StableMaster, PlayerInteractionType.None, PlayerInteractionType.GuildBanker,
                         PlayerInteractionType.None, PlayerInteractionType.None, PlayerInteractionType.None,
@@ -2902,7 +2902,8 @@ namespace Game.Entities
                         PlayerInteractionType.LegendaryCrafting, PlayerInteractionType.NewPlayerGuide, PlayerInteractionType.LegendaryCrafting,
                         PlayerInteractionType.Renown, PlayerInteractionType.BlackMarketAuctioneer, PlayerInteractionType.PerksProgramVendor,
                         PlayerInteractionType.ProfessionsCraftingOrder, PlayerInteractionType.Professions, PlayerInteractionType.ProfessionsCustomerOrder,
-                        PlayerInteractionType.TraitSystem, PlayerInteractionType.BarbersChoice, PlayerInteractionType.MajorFactionRenown
+                        PlayerInteractionType.TraitSystem, PlayerInteractionType.BarbersChoice, PlayerInteractionType.MajorFactionRenown,
+                        PlayerInteractionType.PersonalTabardVendor
                     };
 
                     PlayerInteractionType interactionType = GossipOptionNpcToInteractionType[(int)gossipOptionNpc];
@@ -4313,9 +4314,9 @@ namespace Game.Entities
         }
 
         ObjectGuid GetSpiritHealerGUID() { return _areaSpiritHealerGUID; }
-        
+
         public bool CanAcceptAreaSpiritHealFrom(Unit spiritHealer) { return spiritHealer.GetGUID() == _areaSpiritHealerGUID; }
-        
+
         public void SetAreaSpiritHealer(Creature creature)
         {
             if (creature == null)
@@ -4349,7 +4350,7 @@ namespace Game.Entities
             areaSpiritHealerTime.TimeLeft = (uint)timeLeft;
             SendPacket(areaSpiritHealerTime);
         }
-        
+
         public void KillPlayer()
         {
             if (IsFlying() && GetTransport() == null)
@@ -5254,7 +5255,7 @@ namespace Game.Entities
             if (guildId != 0)
             {
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.GuildGUID), ObjectGuid.Create(HighGuid.Guild, guildId));
-                SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.GuildClubMemberID), GetGUID().GetCounter());
+                SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_playerData.GuildClubMemberID), GetGUID().GetCounter());
                 SetPlayerFlag(PlayerFlags.GuildLevelEnabled);
             }
             else
@@ -5376,6 +5377,8 @@ namespace Game.Entities
             StartCriteria(CriteriaStartEvent.ReachLevel, level);
             UpdateCriteria(CriteriaType.ReachLevel);
             UpdateCriteria(CriteriaType.ActivelyReachLevel, level);
+            if (level > oldLevel)
+                UpdateCriteria(CriteriaType.GainLevels, level - oldLevel);
 
             PushQuests();
 
@@ -7691,10 +7694,10 @@ namespace Game.Entities
         public void RemoveAuraVision(PlayerFieldByte2Flags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.AuraVision), (byte)flags); }
 
         public void SetTransportServerTime(int transportServerTime) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TransportServerTime), transportServerTime); }
-        
+
         public void SetRequiredMountCapabilityFlag(byte flag) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.RequiredMountCapabilityFlags), flag); }
         public void ReplaceAllRequiredMountCapabilityFlags(byte flags) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.RequiredMountCapabilityFlags), flags); }
-        
+
         public bool CanTameExoticPets() { return IsGameMaster() || HasAuraType(AuraType.AllowTamePetType); }
 
         void SendAttackSwingCantAttack() { SendPacket(new AttackSwingError(AttackSwingErr.CantAttack)); }
@@ -7874,5 +7877,15 @@ namespace Game.Entities
 
         //Clears the Menu
         public void ClearGossipMenu() { PlayerTalkClass.ClearMenus(); }
+
+        public void SetPersonalTabard(int style, int color, int borderStyle, int borderColor, int backgroundColor)
+        {
+            CustomTabardInfo personalTabard = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PersonalTabard);
+            SetUpdateFieldValue(personalTabard.ModifyValue(personalTabard.EmblemStyle), style);
+            SetUpdateFieldValue(personalTabard.ModifyValue(personalTabard.EmblemColor), color);
+            SetUpdateFieldValue(personalTabard.ModifyValue(personalTabard.BorderStyle), borderStyle);
+            SetUpdateFieldValue(personalTabard.ModifyValue(personalTabard.BorderColor), borderColor);
+            SetUpdateFieldValue(personalTabard.ModifyValue(personalTabard.BackgroundColor), backgroundColor);
+        }
     }
 }

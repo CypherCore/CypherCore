@@ -601,9 +601,9 @@ namespace Game.Networking.Packets
                 ClassID = player.GetClass();
                 Level = (byte)player.GetLevel();
 
-                DeclinedName names = player.GetDeclinedNames();
+                DeclinedNames names = player.GetDeclinedNames();
                 if (names != null)
-                    DeclinedNames = names;
+                    DeclinedNames = new(names);
             }
             else
             {

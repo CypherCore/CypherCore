@@ -40,7 +40,7 @@ namespace Framework.Constants
         Binder = 5,    // Golden interaction wheel
         Banker = 6,    // Brown bag (with gold coin in lower corner)
         PetitionVendor = 7,    // White chat bubble (with "..." inside)
-        TabardVendor = 8,    // White tabard
+        GuildTabardVendor = 8,    // White tabard
         Battlemaster = 9,    // Two crossed swords
         Auctioneer = 10,   // Stack of gold coins
         TalentMaster = 11,   // White chat bubble
@@ -86,6 +86,8 @@ namespace Framework.Constants
         TraitSystem = 51,
         BarbersChoice = 52,
         MajorFactionRenown = 53,
+        PersonalTabardVendor = 54,
+
         Max
     }
 

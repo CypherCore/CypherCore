@@ -234,7 +234,7 @@ namespace Game.DataStorage
         public byte KeyID;
         public uint AudioFileDataID;
         public uint SubtitleFileDataID;
-        public int SubtitleFileFormat;
+        public uint SubtitleFileFormat;
     }
 
     public sealed class MythicPlusSeasonRecord

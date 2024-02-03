@@ -93,7 +93,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             uint nameLength = _worldPacket.ReadBits<uint>(9);
-            uint noteslength = _worldPacket.ReadBits<uint>(10);
+            uint noteslength = _worldPacket.ReadBits<uint>(9);
             Name = _worldPacket.ReadString(nameLength);
             Notes = _worldPacket.ReadString(noteslength);
         }
