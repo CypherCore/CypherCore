@@ -328,8 +328,6 @@ namespace Game.AI
             waypoint.orientation = orientation;
             waypoint.moveType = run ? WaypointMoveType.Run : WaypointMoveType.Walk;
             waypoint.delay = (uint)waitTime.TotalMilliseconds;
-            waypoint.eventId = 0;
-            waypoint.eventChance = 100;
             _path.nodes.Add(waypoint);
         }
 

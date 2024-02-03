@@ -1540,32 +1540,6 @@ namespace Game
         }
 
         //Load WP Scripts
-        public void LoadWaypointScripts()
-        {
-            LoadScripts(ScriptsType.Waypoint);
-
-            List<uint> actionSet = new();
-
-            foreach (var script in sWaypointScripts)
-                actionSet.Add(script.Key);
-
-            PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_ACTION);
-            SQLResult result = DB.World.Query(stmt);
-
-            if (!result.IsEmpty())
-            {
-                do
-                {
-                    uint action = result.Read<uint>(0);
-
-                    actionSet.Remove(action);
-                }
-                while (result.NextRow());
-            }
-
-            foreach (var id in actionSet)
-                Log.outError(LogFilter.Sql, "There is no waypoint which links to the waypoint script {0}", id);
-        }
         public void LoadSpellScriptNames()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -1747,8 +1721,6 @@ namespace Game
                     return sSpellScripts;
                 case ScriptsType.Event:
                     return sEventScripts;
-                case ScriptsType.Waypoint:
-                    return sWaypointScripts;
                 default:
                     return null;
             }
@@ -1761,8 +1733,6 @@ namespace Game
                     return "spell_scripts";
                 case ScriptsType.Event:
                     return "event_scripts";
-                case ScriptsType.Waypoint:
-                    return "waypoint_scripts";
                 default:
                     return "";
             }
@@ -10798,7 +10768,6 @@ namespace Game
         MultiMap<uint, uint> spellScriptsStorage = new();
         public Dictionary<uint, MultiMap<uint, ScriptInfo>> sSpellScripts = new();
         public Dictionary<uint, MultiMap<uint, ScriptInfo>> sEventScripts = new();
-        public Dictionary<uint, MultiMap<uint, ScriptInfo>> sWaypointScripts = new();
         Dictionary<uint, uint> areaTriggerScriptStorage = new();
         List<uint> _eventStorage = new();
         Dictionary<uint, uint> _eventScriptStorage = new();

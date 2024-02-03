@@ -288,7 +288,7 @@ namespace Game.Movement
             }
 
             if (_waitTimeRangeAtPathEnd.HasValue && _followPathBackwardsFromEndToStart
-    && ((_isReturningToStart && _currentNode == 0) || (!_isReturningToStart && _currentNode == _path.nodes.Count - 1)))
+                && ((_isReturningToStart && _currentNode == 0) || (!_isReturningToStart && _currentNode == _path.nodes.Count - 1)))
             {
                 owner.ClearUnitState(UnitState.RoamingMove);
                 TimeSpan waitTime = RandomHelper.RandTime(_waitTimeRangeAtPathEnd.Value.min, _waitTimeRangeAtPathEnd.Value.max);
@@ -299,13 +299,6 @@ namespace Game.Movement
                     owner.GetMotionMaster().MoveRandom(_wanderDistanceAtPathEnds.Value, waitTime, MovementSlot.Active);
                 else
                     _nextMoveTime.Reset(waitTime);
-            }
-
-            if (waypoint.eventId != 0 && RandomHelper.URand(0, 99) < waypoint.eventChance)
-            {
-                Log.outDebug(LogFilter.MapsScript, $"Creature movement start script {waypoint.eventId} at point {_currentNode} for {owner.GetGUID()}.");
-                owner.ClearUnitState(UnitState.RoamingMove);
-                owner.GetMap().ScriptsStart(ScriptsType.Waypoint, waypoint.eventId, owner, null);
             }
 
             // inform AI

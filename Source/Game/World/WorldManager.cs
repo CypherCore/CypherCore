@@ -963,7 +963,6 @@ namespace Game
             // Load and initialize scripts
             Global.ObjectMgr.LoadSpellScripts();                              // must be after load Creature/Gameobject(Template/Data)
             Global.ObjectMgr.LoadEventScripts();                              // must be after load Creature/Gameobject(Template/Data)
-            Global.ObjectMgr.LoadWaypointScripts();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading spell script names...");
             Global.ObjectMgr.LoadSpellScriptNames();

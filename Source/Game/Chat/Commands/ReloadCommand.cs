@@ -929,26 +929,6 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("waypoint_scripts", RBACPermissions.CommandReloadWaypointScripts, true)]
-        static bool HandleReloadWpScriptsCommand(CommandHandler handler, StringArguments args)
-        {
-            if (Global.MapMgr.IsScriptScheduled())
-            {
-                handler.SendSysMessage("DB scripts used currently, please attempt reload later.");
-                return false;
-            }
-
-            if (args != null)
-                Log.outInfo(LogFilter.Server, "Re-Loading Scripts from `waypoint_scripts`...");
-
-            Global.ObjectMgr.LoadWaypointScripts();
-
-            if (args != null)
-                handler.SendGlobalGMSysMessage("DB table `waypoint_scripts` reloaded.");
-
-            return true;
-        }
-
         [CommandGroup("all")]
         class AllCommand
         {
@@ -1080,7 +1060,6 @@ namespace Game.Chat
                 HandleReloadEventScriptsCommand(handler, null);
                 HandleReloadSpellScriptsCommand(handler, null);
                 handler.SendGlobalGMSysMessage("DB tables `*_scripts` reloaded.");
-                HandleReloadWpScriptsCommand(handler, null);
                 HandleReloadWpCommand(handler, null);
                 return true;
             }

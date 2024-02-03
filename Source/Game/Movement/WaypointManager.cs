@@ -15,8 +15,8 @@ namespace Game
         {
             var oldMSTime = Time.GetMSTime();
 
-            //                                          0    1         2           3          4            5           6        7      8           9
-            SQLResult result = DB.World.Query("SELECT id, point, position_x, position_y, position_z, orientation, move_type, delay, action, action_chance FROM waypoint_data ORDER BY id, point");
+            //                                          0    1         2           3          4            5           6        7
+            SQLResult result = DB.World.Query("SELECT id, point, position_x, position_y, position_z, orientation, move_type, delay FROM waypoint_data ORDER BY id, point");
 
             if (result.IsEmpty())
             {
@@ -55,8 +55,6 @@ namespace Game
                 }
 
                 waypoint.delay = result.Read<uint>(7);
-                waypoint.eventId = result.Read<uint>(8);
-                waypoint.eventChance = result.Read<byte>(9);
 
                 if (!_waypointStore.ContainsKey(pathId))
                     _waypointStore[pathId] = new WaypointPath();
@@ -110,8 +108,6 @@ namespace Game
                 }
 
                 waypoint.delay = result.Read<uint>(6);
-                waypoint.eventId = result.Read<uint>(7);
-                waypoint.eventChance = result.Read<byte>(8);
 
                 values.Add(waypoint);
             }
@@ -139,18 +135,14 @@ namespace Game
             z = _z;
             orientation = _orientation;
             delay = _delay;
-            eventId = 0;
             moveType = WaypointMoveType.Walk;
-            eventChance = 100;
         }
 
         public uint id;
         public float x, y, z;
         public float? orientation;
         public uint delay;
-        public uint eventId;
         public WaypointMoveType moveType;
-        public byte eventChance;
     }
 
     public class WaypointPath
