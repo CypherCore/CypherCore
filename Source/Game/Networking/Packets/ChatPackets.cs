@@ -497,7 +497,34 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32((int)Status);
         }
     }
-    
+
+    class UpdateAADCStatus : ClientPacket
+    {
+        public bool ChatDisabled;
+
+        public UpdateAADCStatus(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            ChatDisabled = _worldPacket.HasBit();
+        }
+    }
+
+    class UpdateAADCStatusResponse : ServerPacket
+    {
+        public bool Success;
+        public bool ChatDisabled;
+
+        public UpdateAADCStatusResponse() : base(ServerOpcodes.UpdateAadcStatusResponse) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBit(Success);
+            _worldPacket.WriteBit(ChatDisabled);
+            _worldPacket.FlushBits();
+        }
+    }
+
     public class ChatAddonMessageParams
     {
         public void Read(WorldPacket data)
