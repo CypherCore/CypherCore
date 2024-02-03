@@ -666,7 +666,14 @@ namespace Game.Conditions
             mConditionTargets[0] = target0;
             mConditionTargets[1] = target1;
             mConditionTargets[2] = target2;
-            mConditionMap = target0 != null ? target0.GetMap() : null;
+            if (target0 != null)
+                mConditionMap = target0.GetMap();
+            else if (target1 != null)
+                mConditionMap = target1.GetMap();
+            else if (target2 != null)
+                mConditionMap = target2.GetMap();
+            else
+                mConditionMap = null;
             mLastFailedCondition = null;
         }
 
