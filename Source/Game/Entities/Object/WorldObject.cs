@@ -1723,11 +1723,11 @@ namespace Game.Entities
             return searcher.GetTarget();
         }
 
-        public Player SelectNearestPlayer(float distance)
+        public Player SelectNearestPlayer(float range)
         {
-            var checker = new NearestPlayerInObjectRangeCheck(this, distance);
+            var checker = new NearestPlayerInObjectRangeCheck(this, range);
             var searcher = new PlayerLastSearcher(this, checker);
-            Cell.VisitAllObjects(this, searcher, distance);
+            Cell.VisitWorldObjects(this, searcher, range);
             return searcher.GetTarget();
         }
 
