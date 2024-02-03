@@ -1119,24 +1119,30 @@ namespace Game.Entities
 
         public bool GemsFitSockets()
         {
-            uint gemSlot = 0;
-            foreach (SocketedGem gemData in m_itemData.Gems)
+            for (uint gemSlot = 0; gemSlot < ItemConst.MaxGemSockets; ++gemSlot)
             {
-                SocketColor SocketColor = GetTemplate().GetSocketColor(gemSlot);
-                if (SocketColor == 0) // no socket slot
+                SocketColor socketColor = GetTemplate().GetSocketColor(gemSlot);
+                if (socketColor == 0) // no socket slot
                     continue;
+
+                if (gemSlot >= m_itemData.Gems.Size()) // no gems on this socket
+                    return false;
 
                 SocketColor GemColor = 0;
 
-                ItemTemplate gemProto = Global.ObjectMgr.GetItemTemplate(gemData.ItemId);
-                if (gemProto != null)
+                uint gemid = m_itemData.Gems[(int)gemSlot].ItemId;
+                if (gemid != 0)
                 {
-                    GemPropertiesRecord gemProperty = CliDB.GemPropertiesStorage.LookupByKey(gemProto.GetGemProperties());
-                    if (gemProperty != null)
-                        GemColor = gemProperty.Type;
+                    ItemTemplate gemProto = Global.ObjectMgr.GetItemTemplate(gemid);
+                    if (gemProto != null)
+                    {
+                        GemPropertiesRecord gemProperty = CliDB.GemPropertiesStorage.LookupByKey(gemProto.GetGemProperties());
+                        if (gemProperty != null)
+                            GemColor = gemProperty.Type;
+                    }
                 }
 
-                if (!GemColor.HasAnyFlag(ItemConst.SocketColorToGemTypeMask[(int)SocketColor])) // bad gem color on this socket
+                if (!GemColor.HasAnyFlag(ItemConst.SocketColorToGemTypeMask[(int)socketColor])) // bad gem color on this socket
                     return false;
             }
             return true;
