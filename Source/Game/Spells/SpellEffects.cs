@@ -392,6 +392,7 @@ namespace Game.Spells
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.SetOriginalCaster(m_originalCasterGUID);
             args.SetTriggeringSpell(this);
+            args.SetCustomArg(m_customArg);
             // set basepoints for trigger with value effect
             if (effectInfo.Effect == SpellEffectName.TriggerMissileSpellWithValue)
                 for (int i = 0; i < SpellConst.MaxEffects; ++i)
