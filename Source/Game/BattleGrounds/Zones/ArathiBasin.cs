@@ -75,7 +75,7 @@ namespace Game.BattleGrounds.Zones
                             // create new occupied banner
                             _CreateBanner(node, ABNodeStatus.Occupied, teamIndex, true);
                             _SendNodeUpdate(node);
-                            _NodeOccupied(node, (teamIndex == TeamId.Alliance) ? Team.Alliance : Team.Horde);
+                            _NodeOccupied(node, (teamIndex == BatttleGroundTeamId.Alliance) ? Team.Alliance : Team.Horde);
                             // Message to chatlog
 
                             if (teamIndex == 0)
@@ -114,7 +114,7 @@ namespace Game.BattleGrounds.Zones
 
                         if (m_ReputationScoreTics[team] >= m_ReputationTics)
                         {
-                            if (team == TeamId.Alliance)
+                            if (team == BatttleGroundTeamId.Alliance)
                                 RewardReputationToTeam(509, 10, Team.Alliance);
                             else
                                 RewardReputationToTeam(510, 10, Team.Horde);
@@ -124,13 +124,13 @@ namespace Game.BattleGrounds.Zones
 
                         if (m_HonorScoreTics[team] >= m_HonorTics)
                         {
-                            RewardHonorToTeam(GetBonusHonorFromKill(1), (team == TeamId.Alliance) ? Team.Alliance : Team.Horde);
+                            RewardHonorToTeam(GetBonusHonorFromKill(1), (team == BatttleGroundTeamId.Alliance) ? Team.Alliance : Team.Horde);
                             m_HonorScoreTics[team] -= m_HonorTics;
                         }
 
                         if (!m_IsInformedNearVictory && m_TeamScores[team] > WarningNearVictoryScore)
                         {
-                            if (team == TeamId.Alliance)
+                            if (team == BatttleGroundTeamId.Alliance)
                             {
                                 SendBroadcastText(ABBattlegroundBroadcastTexts.AllianceNearVictory, ChatMsg.BgSystemNeutral);
                                 PlaySoundToAll(SoundNearVictoryAlliance);
@@ -146,7 +146,7 @@ namespace Game.BattleGrounds.Zones
                         if (m_TeamScores[team] > MaxTeamScore)
                             m_TeamScores[team] = MaxTeamScore;
 
-                        if (team == TeamId.Alliance)
+                        if (team == BatttleGroundTeamId.Alliance)
                             UpdateWorldState(ABWorldStates.ResourcesAlly, (int)m_TeamScores[team]);
                         else
                             UpdateWorldState(ABWorldStates.ResourcesHorde, (int)m_TeamScores[team]);
@@ -155,7 +155,7 @@ namespace Game.BattleGrounds.Zones
                         int otherTeam = (team + 1) % SharedConst.PvpTeamsCount;
                         if (m_TeamScores[team] > m_TeamScores[otherTeam] + 500)
                         {
-                            if (team == TeamId.Alliance)
+                            if (team == BatttleGroundTeamId.Alliance)
                                 UpdateWorldState(ABWorldStates.Had500DisadvantageHorde, 1);
                             else
                                 UpdateWorldState(ABWorldStates.Had500DisadvantageAlliance, 1);
@@ -164,9 +164,9 @@ namespace Game.BattleGrounds.Zones
                 }
 
                 // Test win condition
-                if (m_TeamScores[TeamId.Alliance] >= MaxTeamScore)
+                if (m_TeamScores[BatttleGroundTeamId.Alliance] >= MaxTeamScore)
                     EndBattleground(Team.Alliance);
-                else if (m_TeamScores[TeamId.Horde] >= MaxTeamScore)
+                else if (m_TeamScores[BatttleGroundTeamId.Horde] >= MaxTeamScore)
                     EndBattleground(Team.Horde);
             }
         }
@@ -411,7 +411,7 @@ namespace Game.BattleGrounds.Zones
                 m_NodeTimers[node] = FlagCapturingTime;
 
                 // FIXME: team and node names not localized
-                if (teamIndex == TeamId.Alliance)
+                if (teamIndex == BatttleGroundTeamId.Alliance)
                     SendBroadcastText(ABBattlegroundBroadcastTexts.ABNodes[node].TextAllianceClaims, ChatMsg.BgSystemAlliance, source);
                 else
                     SendBroadcastText(ABBattlegroundBroadcastTexts.ABNodes[node].TextHordeClaims, ChatMsg.BgSystemHorde, source);
@@ -434,7 +434,7 @@ namespace Game.BattleGrounds.Zones
                     _SendNodeUpdate(node);
                     m_NodeTimers[node] = FlagCapturingTime;
 
-                    if (teamIndex == TeamId.Alliance)
+                    if (teamIndex == BatttleGroundTeamId.Alliance)
                         SendBroadcastText(ABBattlegroundBroadcastTexts.ABNodes[node].TextAllianceAssaulted, ChatMsg.BgSystemAlliance, source);
                     else
                         SendBroadcastText(ABBattlegroundBroadcastTexts.ABNodes[node].TextHordeAssaulted, ChatMsg.BgSystemHorde, source);
@@ -451,14 +451,14 @@ namespace Game.BattleGrounds.Zones
                     _CreateBanner(node, ABNodeStatus.Occupied, (byte)teamIndex, true);
                     _SendNodeUpdate(node);
                     m_NodeTimers[node] = 0;
-                    _NodeOccupied(node, (teamIndex == TeamId.Alliance) ? Team.Alliance : Team.Horde);
+                    _NodeOccupied(node, (teamIndex == BatttleGroundTeamId.Alliance) ? Team.Alliance : Team.Horde);
 
-                    if (teamIndex == TeamId.Alliance)
+                    if (teamIndex == BatttleGroundTeamId.Alliance)
                         SendBroadcastText(ABBattlegroundBroadcastTexts.ABNodes[node].TextAllianceDefended, ChatMsg.BgSystemAlliance, source);
                     else
                         SendBroadcastText(ABBattlegroundBroadcastTexts.ABNodes[node].TextHordeDefended, ChatMsg.BgSystemHorde, source);
                 }
-                sound = (teamIndex == TeamId.Alliance) ? SoundAssaultedAlliance : SoundAssaultedHorde;
+                sound = (teamIndex == BatttleGroundTeamId.Alliance) ? SoundAssaultedAlliance : SoundAssaultedHorde;
             }
             // If node is occupied, change to enemy-contested
             else
@@ -474,19 +474,19 @@ namespace Game.BattleGrounds.Zones
                 _NodeDeOccupied(node);
                 m_NodeTimers[node] = FlagCapturingTime;
 
-                if (teamIndex == TeamId.Alliance)
+                if (teamIndex == BatttleGroundTeamId.Alliance)
                     SendBroadcastText(ABBattlegroundBroadcastTexts.ABNodes[node].TextAllianceAssaulted, ChatMsg.BgSystemAlliance, source);
                 else
                     SendBroadcastText(ABBattlegroundBroadcastTexts.ABNodes[node].TextHordeAssaulted, ChatMsg.BgSystemHorde, source);
 
-                sound = (teamIndex == TeamId.Alliance) ? SoundAssaultedAlliance : SoundAssaultedHorde;
+                sound = (teamIndex == BatttleGroundTeamId.Alliance) ? SoundAssaultedAlliance : SoundAssaultedHorde;
             }
 
             // If node is occupied again, send "X has taken the Y" msg.
             if (m_Nodes[node] >= ABNodeStatus.Occupied)
             {
                 // FIXME: team and node names not localized
-                if (teamIndex == TeamId.Alliance)
+                if (teamIndex == BatttleGroundTeamId.Alliance)
                     SendBroadcastText(ABBattlegroundBroadcastTexts.ABNodes[node].TextAllianceTaken, ChatMsg.BgSystemAlliance);
                 else
                     SendBroadcastText(ABBattlegroundBroadcastTexts.ABNodes[node].TextHordeTaken, ChatMsg.BgSystemHorde);

@@ -4795,8 +4795,8 @@ namespace Game.Maps
             // this make sure it gets unloaded if for some reason no player joins
             m_unloadTimer = (uint)Math.Max(WorldConfig.GetIntValue(WorldCfg.InstanceUnloadDelay), 1);
 
-            Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceAlliance, instanceTeam == TeamId.Alliance ? 1 : 0, false, this);
-            Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceHorde, instanceTeam == TeamId.Horde ? 1 : 0, false, this);
+            Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceAlliance, instanceTeam == BatttleGroundTeamId.Alliance ? 1 : 0, false, this);
+            Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceHorde, instanceTeam == BatttleGroundTeamId.Horde ? 1 : 0, false, this);
 
             if (i_instanceLock != null)
             {
@@ -5175,13 +5175,13 @@ namespace Game.Maps
         public int GetTeamIdInInstance()
         {
             if (Global.WorldStateMgr.GetValue(WorldStates.TeamInInstanceAlliance, this) != 0)
-                return TeamId.Alliance;
+                return BatttleGroundTeamId.Alliance;
             if (Global.WorldStateMgr.GetValue(WorldStates.TeamInInstanceHorde, this) != 0)
-                return TeamId.Horde;
-            return TeamId.Neutral;
+                return BatttleGroundTeamId.Horde;
+            return BatttleGroundTeamId.Neutral;
         }
 
-        public Team GetTeamInInstance() { return GetTeamIdInInstance() == TeamId.Alliance ? Team.Alliance : Team.Horde; }
+        public Team GetTeamInInstance() { return GetTeamIdInInstance() == BatttleGroundTeamId.Alliance ? Team.Alliance : Team.Horde; }
 
         public uint GetScriptId()
         {

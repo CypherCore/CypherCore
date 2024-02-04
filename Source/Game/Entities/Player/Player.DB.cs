@@ -1623,7 +1623,7 @@ namespace Game.Entities
             //         0           1     2      3      4      5      6          7          8        9           10
             // SELECT instanceId, team, joinX, joinY, joinZ, joinO, joinMapId, taxiStart, taxiEnd, mountSpell, queueTypeId FROM character_Battleground_data WHERE guid = ?
             m_bgData.bgInstanceID = result.Read<uint>(0);
-            m_bgData.bgTeam = result.Read<ushort>(1);
+            m_bgData.bgTeam = (Team)result.Read<ushort>(1);
             m_bgData.joinPos = new WorldLocation(result.Read<ushort>(6), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
             m_bgData.taxiPath[0] = result.Read<uint>(7);
             m_bgData.taxiPath[1] = result.Read<uint>(8);
@@ -2784,7 +2784,7 @@ namespace Game.Entities
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PLAYER_BGDATA);
             stmt.AddValue(0, GetGUID().GetCounter());
             stmt.AddValue(1, m_bgData.bgInstanceID);
-            stmt.AddValue(2, m_bgData.bgTeam);
+            stmt.AddValue(2, (ushort)m_bgData.bgTeam);
             stmt.AddValue(3, m_bgData.joinPos.GetPositionX());
             stmt.AddValue(4, m_bgData.joinPos.GetPositionY());
             stmt.AddValue(5, m_bgData.joinPos.GetPositionZ());

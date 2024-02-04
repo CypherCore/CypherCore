@@ -5179,13 +5179,13 @@ namespace Game.Entities
                 return (uint)rEntry.Alliance;
 
             Log.outError(LogFilter.Player, "Race ({0}) not found in DBC: wrong DBC files?", race);
-            return TeamId.Neutral;
+            return BatttleGroundTeamId.Neutral;
         }
         public Team GetTeam() { return m_team; }
-        public int GetTeamId() { return m_team == Team.Alliance ? TeamId.Alliance : TeamId.Horde; }
+        public int GetTeamId() { return m_team == Team.Alliance ? BatttleGroundTeamId.Alliance : BatttleGroundTeamId.Horde; }
 
         public Team GetEffectiveTeam() { return HasPlayerFlagEx(PlayerFlagsEx.MercenaryMode) ? (GetTeam() == Team.Alliance ? Team.Horde : Team.Alliance) : GetTeam(); }
-        public int GetEffectiveTeamId() { return GetEffectiveTeam() == Team.Alliance ? TeamId.Alliance : TeamId.Horde; }
+        public int GetEffectiveTeamId() { return GetEffectiveTeam() == Team.Alliance ? BatttleGroundTeamId.Alliance : BatttleGroundTeamId.Horde; }
 
         //Money
         public ulong GetMoney() { return m_activePlayerData.Coinage; }

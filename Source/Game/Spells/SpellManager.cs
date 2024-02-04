@@ -4995,9 +4995,9 @@ namespace Game.Entities
                     // team that controls the workshop in the specified area
                     uint team = bf.GetData(newArea);
 
-                    if (team == TeamId.Horde)
+                    if (team == BatttleGroundTeamId.Horde)
                         return spellId == 56618;
-                    else if (team == TeamId.Alliance)
+                    else if (team == BatttleGroundTeamId.Alliance)
                         return spellId == 56617;
                     break;
                 }

@@ -308,7 +308,7 @@ namespace Game
                     // We're not in BG
                     player.SetBattlegroundId(0, BattlegroundTypeId.None);
                     // reset destination bg team
-                    player.SetBGTeam(0);
+                    player.SetBGTeam(Team.Other);
                 }
                 // join to bg case
                 else

@@ -174,7 +174,7 @@ namespace Game.Cache
         {
             var characterCacheEntry = _characterCacheStore.LookupByKey(guid);
             if (characterCacheEntry == null)
-                return 0;
+                return Team.Other;
 
             return Player.TeamForRace(characterCacheEntry.RaceId);
         }

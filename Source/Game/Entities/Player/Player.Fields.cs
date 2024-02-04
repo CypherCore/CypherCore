@@ -578,7 +578,7 @@ namespace Game.Entities
         public byte bgAfkReportedCount;
         public long bgAfkReportedTimer;
 
-        public uint bgTeam;                          //< What side the player will be added to
+        public Team bgTeam;                          //< What side the player will be added to
 
         public uint mountSpell;
         public uint[] taxiPath = new uint[2];

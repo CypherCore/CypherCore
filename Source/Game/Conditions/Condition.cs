@@ -170,7 +170,7 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.Team:
                     if (player != null)
-                        condMeets = (uint)player.GetTeam() == ConditionValue1;
+                        condMeets = player.GetTeam() == (Team)ConditionValue1;
                     break;
                 case ConditionTypes.Class:
                     if (unit != null)

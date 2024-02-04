@@ -19,10 +19,10 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
             m_Points_Trigger[Points.BloodElf] = PointsTrigger.BloodElfBuff;
             m_Points_Trigger[Points.DraeneiRuins] = PointsTrigger.DraeneiRuinsBuff;
             m_Points_Trigger[Points.MageTower] = PointsTrigger.MageTowerBuff;
-            m_HonorScoreTics[TeamId.Alliance] = 0;
-            m_HonorScoreTics[TeamId.Horde] = 0;
-            m_TeamPointsCount[TeamId.Alliance] = 0;
-            m_TeamPointsCount[TeamId.Horde] = 0;
+            m_HonorScoreTics[BatttleGroundTeamId.Alliance] = 0;
+            m_HonorScoreTics[BatttleGroundTeamId.Horde] = 0;
+            m_TeamPointsCount[BatttleGroundTeamId.Alliance] = 0;
+            m_TeamPointsCount[BatttleGroundTeamId.Horde] = 0;
             m_FlagKeeper.Clear();
             m_DroppedFlagGUID.Clear();
             m_FlagCapturedBgObjectType = 0;
@@ -55,10 +55,10 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
                 if (m_PointAddingTimer <= 0)
                 {
                     m_PointAddingTimer = Misc.FPointsTickTime;
-                    if (m_TeamPointsCount[TeamId.Alliance] > 0)
-                        AddPoints(Team.Alliance, Misc.TickPoints[m_TeamPointsCount[TeamId.Alliance] - 1]);
-                    if (m_TeamPointsCount[TeamId.Horde] > 0)
-                        AddPoints(Team.Horde, Misc.TickPoints[m_TeamPointsCount[TeamId.Horde] - 1]);
+                    if (m_TeamPointsCount[BatttleGroundTeamId.Alliance] > 0)
+                        AddPoints(Team.Alliance, Misc.TickPoints[m_TeamPointsCount[BatttleGroundTeamId.Alliance] - 1]);
+                    if (m_TeamPointsCount[BatttleGroundTeamId.Horde] > 0)
+                        AddPoints(Team.Horde, Misc.TickPoints[m_TeamPointsCount[BatttleGroundTeamId.Horde] - 1]);
                 }
 
                 if (m_FlagState == FlagState.WaitRespawn || m_FlagState == FlagState.OnGround)
@@ -140,13 +140,13 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
             if (score >= ScoreIds.MaxTeamScore)
             {
                 score = ScoreIds.MaxTeamScore;
-                if (team == TeamId.Alliance)
+                if (team == BatttleGroundTeamId.Alliance)
                     EndBattleground(Team.Alliance);
                 else
                     EndBattleground(Team.Horde);
             }
 
-            if (team == TeamId.Alliance)
+            if (team == BatttleGroundTeamId.Alliance)
                 UpdateWorldState(WorldStateIds.AllianceResources, (int)score);
             else
                 UpdateWorldState(WorldStateIds.HordeResources, (int)score);
@@ -169,9 +169,9 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
         void UpdatePointsCount(Team team)
         {
             if (team == Team.Alliance)
-                UpdateWorldState(WorldStateIds.AllianceBase, (int)m_TeamPointsCount[TeamId.Alliance]);
+                UpdateWorldState(WorldStateIds.AllianceBase, (int)m_TeamPointsCount[BatttleGroundTeamId.Alliance]);
             else
-                UpdateWorldState(WorldStateIds.HordeBase, (int)m_TeamPointsCount[TeamId.Horde]);
+                UpdateWorldState(WorldStateIds.HordeBase, (int)m_TeamPointsCount[BatttleGroundTeamId.Horde]);
         }
 
         void UpdatePointsIcons(Team team, uint Point)
@@ -342,14 +342,14 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
             }
 
             WorldSafeLocsEntry sg = Global.ObjectMgr.GetWorldSafeLoc(GaveyardIds.MainAlliance);
-            if (sg == null || !AddSpiritGuide(CreaturesTypes.SpiritMainAlliance, sg.Loc.GetPositionX(), sg.Loc.GetPositionY(), sg.Loc.GetPositionZ(), 3.124139f, TeamId.Alliance))
+            if (sg == null || !AddSpiritGuide(CreaturesTypes.SpiritMainAlliance, sg.Loc.GetPositionX(), sg.Loc.GetPositionY(), sg.Loc.GetPositionZ(), 3.124139f, BatttleGroundTeamId.Alliance))
             {
                 Log.outError(LogFilter.Sql, "BatteGroundEY: Failed to spawn spirit guide. The battleground was not created.");
                 return false;
             }
 
             sg = Global.ObjectMgr.GetWorldSafeLoc(GaveyardIds.MainHorde);
-            if (sg == null || !AddSpiritGuide(CreaturesTypes.SpiritMainHorde, sg.Loc.GetPositionX(), sg.Loc.GetPositionY(), sg.Loc.GetPositionZ(), 3.193953f, TeamId.Horde))
+            if (sg == null || !AddSpiritGuide(CreaturesTypes.SpiritMainHorde, sg.Loc.GetPositionX(), sg.Loc.GetPositionY(), sg.Loc.GetPositionZ(), 3.193953f, BatttleGroundTeamId.Horde))
             {
                 Log.outError(LogFilter.Sql, "BatteGroundEY: Failed to spawn spirit guide. The battleground was not created.");
                 return false;
@@ -368,12 +368,12 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
             //call parent's class reset
             base.Reset();
 
-            m_TeamScores[TeamId.Alliance] = 0;
-            m_TeamScores[TeamId.Horde] = 0;
-            m_TeamPointsCount[TeamId.Alliance] = 0;
-            m_TeamPointsCount[TeamId.Horde] = 0;
-            m_HonorScoreTics[TeamId.Alliance] = 0;
-            m_HonorScoreTics[TeamId.Horde] = 0;
+            m_TeamScores[BatttleGroundTeamId.Alliance] = 0;
+            m_TeamScores[BatttleGroundTeamId.Horde] = 0;
+            m_TeamPointsCount[BatttleGroundTeamId.Alliance] = 0;
+            m_TeamPointsCount[BatttleGroundTeamId.Horde] = 0;
+            m_HonorScoreTics[BatttleGroundTeamId.Alliance] = 0;
+            m_HonorScoreTics[BatttleGroundTeamId.Horde] = 0;
             m_FlagState = FlagState.OnBase;
             m_FlagCapturedBgObjectType = 0;
             m_FlagKeeper.Clear();
@@ -511,14 +511,14 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
 
             if (team == Team.Alliance)
             {
-                m_TeamPointsCount[TeamId.Alliance]--;
+                m_TeamPointsCount[BatttleGroundTeamId.Alliance]--;
                 SpawnBGObject(Misc.m_LosingPointTypes[point].DespawnObjectTypeAlliance, BattlegroundConst.RespawnOneDay);
                 SpawnBGObject(Misc.m_LosingPointTypes[point].DespawnObjectTypeAlliance + 1, BattlegroundConst.RespawnOneDay);
                 SpawnBGObject(Misc.m_LosingPointTypes[point].DespawnObjectTypeAlliance + 2, BattlegroundConst.RespawnOneDay);
             }
             else
             {
-                m_TeamPointsCount[TeamId.Horde]--;
+                m_TeamPointsCount[BatttleGroundTeamId.Horde]--;
                 SpawnBGObject(Misc.m_LosingPointTypes[point].DespawnObjectTypeHorde, BattlegroundConst.RespawnOneDay);
                 SpawnBGObject(Misc.m_LosingPointTypes[point].DespawnObjectTypeHorde + 1, BattlegroundConst.RespawnOneDay);
                 SpawnBGObject(Misc.m_LosingPointTypes[point].DespawnObjectTypeHorde + 2, BattlegroundConst.RespawnOneDay);
@@ -557,14 +557,14 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
 
             if (team == Team.Alliance)
             {
-                m_TeamPointsCount[TeamId.Alliance]++;
+                m_TeamPointsCount[BatttleGroundTeamId.Alliance]++;
                 SpawnBGObject(Misc.m_CapturingPointTypes[point].SpawnObjectTypeAlliance, BattlegroundConst.RespawnImmediately);
                 SpawnBGObject(Misc.m_CapturingPointTypes[point].SpawnObjectTypeAlliance + 1, BattlegroundConst.RespawnImmediately);
                 SpawnBGObject(Misc.m_CapturingPointTypes[point].SpawnObjectTypeAlliance + 2, BattlegroundConst.RespawnImmediately);
             }
             else
             {
-                m_TeamPointsCount[TeamId.Horde]++;
+                m_TeamPointsCount[BatttleGroundTeamId.Horde]++;
                 SpawnBGObject(Misc.m_CapturingPointTypes[point].SpawnObjectTypeHorde, BattlegroundConst.RespawnImmediately);
                 SpawnBGObject(Misc.m_CapturingPointTypes[point].SpawnObjectTypeHorde + 1, BattlegroundConst.RespawnImmediately);
                 SpawnBGObject(Misc.m_CapturingPointTypes[point].SpawnObjectTypeHorde + 2, BattlegroundConst.RespawnImmediately);
@@ -707,9 +707,9 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
 
         public override Team GetPrematureWinner()
         {
-            if (GetTeamScore(TeamId.Alliance) > GetTeamScore(TeamId.Horde))
+            if (GetTeamScore(BatttleGroundTeamId.Alliance) > GetTeamScore(BatttleGroundTeamId.Horde))
                 return Team.Alliance;
-            else if (GetTeamScore(TeamId.Horde) > GetTeamScore(TeamId.Alliance))
+            else if (GetTeamScore(BatttleGroundTeamId.Horde) > GetTeamScore(BatttleGroundTeamId.Alliance))
                 return Team.Horde;
 
             return base.GetPrematureWinner();

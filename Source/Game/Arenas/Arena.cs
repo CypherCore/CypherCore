@@ -146,17 +146,17 @@ namespace Game.Arenas
 
                 // In case of arena draw, follow this logic:
                 // winnerArenaTeam => ALLIANCE, loserArenaTeam => HORDE
-                ArenaTeam winnerArenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(GetArenaTeamIdForTeam(winner == 0 ? Team.Alliance : winner));
-                ArenaTeam loserArenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(GetArenaTeamIdForTeam(winner == 0 ? Team.Horde : GetOtherTeam(winner)));
+                ArenaTeam winnerArenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(GetArenaTeamIdForTeam(winner == Team.Other ? Team.Alliance : winner));
+                ArenaTeam loserArenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(GetArenaTeamIdForTeam(winner == Team.Other ? Team.Horde : GetOtherTeam(winner)));
 
                 if (winnerArenaTeam != null && loserArenaTeam != null && winnerArenaTeam != loserArenaTeam)
                 {
                     // In case of arena draw, follow this logic:
                     // winnerMatchmakerRating => ALLIANCE, loserMatchmakerRating => HORDE
                     loserTeamRating = loserArenaTeam.GetRating();
-                    loserMatchmakerRating = GetArenaMatchmakerRating(winner == 0 ? Team.Horde : GetOtherTeam(winner));
+                    loserMatchmakerRating = GetArenaMatchmakerRating(winner == Team.Other ? Team.Horde : GetOtherTeam(winner));
                     winnerTeamRating = winnerArenaTeam.GetRating();
-                    winnerMatchmakerRating = GetArenaMatchmakerRating(winner == 0 ? Team.Alliance : winner);
+                    winnerMatchmakerRating = GetArenaMatchmakerRating(winner == Team.Other ? Team.Alliance : winner);
 
                     if (winner != 0)
                     {
@@ -179,7 +179,7 @@ namespace Game.Arenas
                         _arenaTeamScores[loserTeam].Assign(loserTeamRating, (uint)(loserTeamRating + loserChange), loserMatchmakerRating, GetArenaMatchmakerRating(GetOtherTeam(winner)));
 
                         Log.outDebug(LogFilter.Arena, "Arena match Type: {0} for Team1Id: {1} - Team2Id: {2} ended. WinnerTeamId: {3}. Winner rating: +{4}, Loser rating: {5}",
-                            GetArenaType(), GetArenaTeamIdByIndex(TeamId.Alliance), GetArenaTeamIdByIndex(TeamId.Horde), winnerArenaTeam.GetId(), winnerChange, loserChange);
+                            GetArenaType(), GetArenaTeamIdByIndex(BatttleGroundTeamId.Alliance), GetArenaTeamIdByIndex(BatttleGroundTeamId.Horde), winnerArenaTeam.GetId(), winnerChange, loserChange);
 
                         if (WorldConfig.GetBoolValue(WorldCfg.ArenaLogExtendedInfo))
                         {

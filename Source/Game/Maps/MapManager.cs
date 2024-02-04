@@ -502,8 +502,8 @@ namespace Game.Entities
 
         public override void OnCreate(Map map)
         {
-            Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceAlliance, map.GetInstanceId() == TeamId.Alliance ? 1 : 0, false, map);
-            Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceHorde, map.GetInstanceId() == TeamId.Horde ? 1 : 0, false, map);
+            Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceAlliance, map.GetInstanceId() == BatttleGroundTeamId.Alliance ? 1 : 0, false, map);
+            Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceHorde, map.GetInstanceId() == BatttleGroundTeamId.Horde ? 1 : 0, false, map);
         }
     }
 }

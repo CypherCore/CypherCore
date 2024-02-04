@@ -216,8 +216,8 @@ namespace Game.Maps
                 if (((1 << (int)GetBossState(info.BossStateId)) & info.BossStates) == 0)
                     continue;
 
-                if (((instance.GetTeamIdInInstance() == TeamId.Alliance) && info.Flags.HasFlag(InstanceSpawnGroupFlags.HordeOnly))
-                    || ((instance.GetTeamIdInInstance() == TeamId.Horde) && info.Flags.HasFlag(InstanceSpawnGroupFlags.AllianceOnly)))
+                if (((instance.GetTeamIdInInstance() == BatttleGroundTeamId.Alliance) && info.Flags.HasFlag(InstanceSpawnGroupFlags.HordeOnly))
+                    || ((instance.GetTeamIdInInstance() == BatttleGroundTeamId.Horde) && info.Flags.HasFlag(InstanceSpawnGroupFlags.AllianceOnly)))
                     continue;
 
                 if (info.Flags.HasAnyFlag(InstanceSpawnGroupFlags.BlockSpawn))

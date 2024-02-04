@@ -730,7 +730,7 @@ namespace Game.Chat
         {
             void HandleDebugObjectCountMap(Map map)
             {
-                handler.SendSysMessage($"Map Id: {map.GetId()} Name: '{map.GetMapName()}' Instance Id: {map.GetInstanceId()} Creatures: {map.GetObjectsStore().OfType<Creature>().Count()} GameObjects: {map.GetObjectsStore().OfType<GameObject>().Count()} SetActive Objects: {map.GetActiveNonPlayersCount()}");
+                handler.SendSysMessage($"Map Id: {map.GetId()} Name: '{map.GetMapName()}' Instance Id: {map.GetInstanceId()} Creatures: {map.GetObjectsStore().Values.OfType<Creature>().Count()} GameObjects: {map.GetObjectsStore().Values.OfType<GameObject>().Count()} SetActive Objects: {map.GetActiveNonPlayersCount()}");
 
                 Dictionary<uint, uint> creatureIds = new();
                 foreach (var p in map.GetObjectsStore())
@@ -811,13 +811,13 @@ namespace Game.Chat
             switch (command)
             {
                 case "alliance":
-                    Global.WorldMgr.SetForcedWarModeFactionBalanceState(TeamId.Alliance, rewardValue.GetValueOrDefault(0));
+                    Global.WorldMgr.SetForcedWarModeFactionBalanceState(BatttleGroundTeamId.Alliance, rewardValue.GetValueOrDefault(0));
                     break;
                 case "horde":
-                    Global.WorldMgr.SetForcedWarModeFactionBalanceState(TeamId.Horde, rewardValue.GetValueOrDefault(0));
+                    Global.WorldMgr.SetForcedWarModeFactionBalanceState(BatttleGroundTeamId.Horde, rewardValue.GetValueOrDefault(0));
                     break;
                 case "neutral":
-                    Global.WorldMgr.SetForcedWarModeFactionBalanceState(TeamId.Neutral);
+                    Global.WorldMgr.SetForcedWarModeFactionBalanceState(BatttleGroundTeamId.Neutral);
                     break;
                 case "off":
                     Global.WorldMgr.DisableForcedWarModeFactionBalanceState();
@@ -1300,13 +1300,13 @@ namespace Game.Chat
                         handler.SendSysMessage(CypherStrings.BadValue);
                         return false;
                     case "alliance":
-                        Global.WorldMgr.SetForcedWarModeFactionBalanceState(TeamId.Alliance, rewardValue);
+                        Global.WorldMgr.SetForcedWarModeFactionBalanceState(BatttleGroundTeamId.Alliance, rewardValue);
                         break;
                     case "horde":
-                        Global.WorldMgr.SetForcedWarModeFactionBalanceState(TeamId.Horde, rewardValue);
+                        Global.WorldMgr.SetForcedWarModeFactionBalanceState(BatttleGroundTeamId.Horde, rewardValue);
                         break;
                     case "neutral":
-                        Global.WorldMgr.SetForcedWarModeFactionBalanceState(TeamId.Neutral);
+                        Global.WorldMgr.SetForcedWarModeFactionBalanceState(BatttleGroundTeamId.Neutral);
                         break;
                     case "off":
                         Global.WorldMgr.DisableForcedWarModeFactionBalanceState();

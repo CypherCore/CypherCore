@@ -580,13 +580,13 @@ namespace Game.Entities
 
         public void SetBGTeam(Team team)
         {
-            m_bgData.bgTeam = (uint)team;
+            m_bgData.bgTeam = team;
             SetArenaFaction((byte)(team == Team.Alliance ? 1 : 0));
         }
 
         public Team GetBGTeam()
         {
-            return m_bgData.bgTeam != 0 ? (Team)m_bgData.bgTeam : GetTeam();
+            return m_bgData.bgTeam != 0 ? m_bgData.bgTeam : GetTeam();
         }
 
         public void LeaveBattleground(bool teleportToEntryPoint = true)

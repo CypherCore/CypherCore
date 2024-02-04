@@ -500,7 +500,7 @@ namespace Framework.Constants
         Max
     }
 
-    public struct TeamId
+    public struct BatttleGroundTeamId
     {
         public const int Alliance = 0;
         public const int Horde = 1;

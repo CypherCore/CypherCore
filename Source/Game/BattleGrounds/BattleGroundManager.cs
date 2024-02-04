@@ -145,7 +145,7 @@ namespace Game.BattleGrounds
             battlefieldStatus = new BattlefieldStatusActive();
             BuildBattlegroundStatusHeader(battlefieldStatus.Hdr, player, ticketId, joinTime, queueId);
             battlefieldStatus.ShutdownTimer = bg.GetRemainingTime();
-            battlefieldStatus.ArenaFaction = (byte)(player.GetBGTeam() == Team.Horde ? TeamId.Horde : TeamId.Alliance);
+            battlefieldStatus.ArenaFaction = (byte)(player.GetBGTeam() == Team.Horde ? BatttleGroundTeamId.Horde : BatttleGroundTeamId.Alliance);
             battlefieldStatus.LeftEarly = false;
             battlefieldStatus.StartTimer = bg.GetElapsedTime();
             battlefieldStatus.Mapid = bg.GetMapId();
@@ -350,8 +350,8 @@ namespace Game.BattleGrounds
                     uint startId = result.Read<uint>(1);
                     WorldSafeLocsEntry start = Global.ObjectMgr.GetWorldSafeLoc(startId);
                     if (start != null)
-                        bgTemplate.StartLocation[TeamId.Alliance] = start;
-                    else if (bgTemplate.StartLocation[TeamId.Alliance] != null) // reload case
+                        bgTemplate.StartLocation[BatttleGroundTeamId.Alliance] = start;
+                    else if (bgTemplate.StartLocation[BatttleGroundTeamId.Alliance] != null) // reload case
                         Log.outError(LogFilter.Sql, $"Table `battleground_template` for id {bgTemplate.Id} contains a non-existing WorldSafeLocs.dbc id {startId} in field `AllianceStartLoc`. Ignoring.");
                     else
                     {
@@ -362,8 +362,8 @@ namespace Game.BattleGrounds
                     startId = result.Read<uint>(2);
                     start = Global.ObjectMgr.GetWorldSafeLoc(startId);
                     if (start != null)
-                        bgTemplate.StartLocation[TeamId.Horde] = start;
-                    else if (bgTemplate.StartLocation[TeamId.Horde] != null) // reload case
+                        bgTemplate.StartLocation[BatttleGroundTeamId.Horde] = start;
+                    else if (bgTemplate.StartLocation[BatttleGroundTeamId.Horde] != null) // reload case
                         Log.outError(LogFilter.Sql, $"Table `battleground_template` for id {bgTemplate.Id} contains a non-existing WorldSafeLocs.dbc id {startId} in field `HordeStartLoc`. Ignoring.");
                     else
                     {
