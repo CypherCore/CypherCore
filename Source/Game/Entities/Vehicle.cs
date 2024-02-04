@@ -661,7 +661,9 @@ namespace Game.Entities
                 }
             }
 
-            Passenger.InterruptNonMeleeSpells(false);
+            Passenger.InterruptSpell(CurrentSpellTypes.Generic);
+            Passenger.InterruptSpell(CurrentSpellTypes.AutoRepeat);
+            Passenger.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Mount);
             Passenger.RemoveAurasByType(AuraType.Mounted);
 
             VehicleSeatRecord veSeat = Seat.Value.SeatInfo;
