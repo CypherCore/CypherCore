@@ -2374,6 +2374,13 @@ namespace Game.Maps
             return _toggledSpawnGroupIds.Contains(groupId) != !data.flags.HasAnyFlag(SpawnGroupFlags.ManualSpawn);
         }
 
+        public void InitSpawnGroupState()
+        {
+            var spawnGroups = Global.ObjectMgr.GetSpawnGroupsForMap(GetId());
+            foreach (uint spawnGroupId in spawnGroups)
+                SetSpawnGroupActive(spawnGroupId, Global.ConditionMgr.IsMapMeetingNotGroupedConditions(ConditionSourceType.SpawnGroup, spawnGroupId, this));
+        }
+
         public void UpdateSpawnGroupConditions()
         {
             var spawnGroups = Global.ObjectMgr.GetSpawnGroupsForMap(GetId());
