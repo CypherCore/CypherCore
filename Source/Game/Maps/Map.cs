@@ -2378,7 +2378,13 @@ namespace Game.Maps
         {
             var spawnGroups = Global.ObjectMgr.GetSpawnGroupsForMap(GetId());
             foreach (uint spawnGroupId in spawnGroups)
+            {
+                SpawnGroupTemplateData spawnGroupTemplate = GetSpawnGroupData(spawnGroupId);
+                if (spawnGroupTemplate.flags.HasAnyFlag(SpawnGroupFlags.System))
+                    continue;
+
                 SetSpawnGroupActive(spawnGroupId, Global.ConditionMgr.IsMapMeetingNotGroupedConditions(ConditionSourceType.SpawnGroup, spawnGroupId, this));
+            }
         }
 
         public void UpdateSpawnGroupConditions()
