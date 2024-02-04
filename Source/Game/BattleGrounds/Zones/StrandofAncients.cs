@@ -420,8 +420,6 @@ namespace Game.BattleGrounds.Zones
         {
             bool isInBattleground = IsPlayerInBattleground(player.GetGUID());
             base.AddPlayer(player, queueId);
-            if (!isInBattleground)
-                PlayerScores[player.GetGUID()] = new BattlegroundSAScore(player.GetGUID(), player.GetBGTeam());
 
             SendTransportInit(player);
 
@@ -560,7 +558,7 @@ namespace Game.BattleGrounds.Zones
                                         Player player = unit.GetCharmerOrOwnerPlayerOrPlayerItself();
                                         if (player != null)
                                         {
-                                            UpdatePlayerScore(player, ScoreType.DestroyedWall, 1);
+                                            UpdatePvpStat(player, (uint)StrandOfTheAncientsPvpStats.GatesDestroyed, 1);
                                             if (rewardHonor)
                                                 UpdatePlayerScore(player, ScoreType.BonusHonor, GetBonusHonorFromKill(1));
                                         }
@@ -586,7 +584,7 @@ namespace Game.BattleGrounds.Zones
         {
             if (creature.GetEntry() == SACreatureIds.Demolisher)
             {
-                UpdatePlayerScore(killer, ScoreType.DestroyedDemolisher, 1);
+                UpdatePvpStat(killer, (uint)StrandOfTheAncientsPvpStats.DemolishersDestroyed, 1);
                 uint worldStateId = Attackers == TeamId.Horde ? SAWorldStateIds.DestroyedHordeVehicles : SAWorldStateIds.DestroyedAllianceVehicles;
                 int currentDestroyedVehicles = Global.WorldStateMgr.GetValue((int)worldStateId, GetBgMap());
                 UpdateWorldState(worldStateId, currentDestroyedVehicles + 1);
@@ -1022,25 +1020,6 @@ namespace Game.BattleGrounds.Zones
             return true;
         }
 
-        public override bool UpdatePlayerScore(Player player, ScoreType type, uint value, bool doAddHonor = true)
-        {
-            if (!base.UpdatePlayerScore(player, type, value, doAddHonor))
-                return false;
-
-            switch (type)
-            {
-                case ScoreType.DestroyedDemolisher:
-                    player.UpdateCriteria(CriteriaType.TrackedWorldStateUIModified, (uint)SAObjectives.DemolishersDestroyed);
-                    break;
-                case ScoreType.DestroyedWall:
-                    player.UpdateCriteria(CriteriaType.TrackedWorldStateUIModified, (uint)SAObjectives.GatesDestroyed);
-                    break;
-                default:
-                    break;
-            }
-            return true;
-        }
-
         SAGateInfo GetGate(uint entry)
         {
             foreach (var gate in SAMiscConst.Gates)
@@ -1078,41 +1057,6 @@ namespace Game.BattleGrounds.Zones
         // for know if second round has been init
         bool InitSecondRound;
         Dictionary<uint/*id*/, uint/*timer*/> DemoliserRespawnList = new();
-    }
-
-    class BattlegroundSAScore : BattlegroundScore
-    {
-        public BattlegroundSAScore(ObjectGuid playerGuid, Team team) : base(playerGuid, team) { }
-
-        public override void UpdateScore(ScoreType type, uint value)
-        {
-            switch (type)
-            {
-                case ScoreType.DestroyedDemolisher:
-                    DemolishersDestroyed += value;
-                    break;
-                case ScoreType.DestroyedWall:
-                    GatesDestroyed += value;
-                    break;
-                default:
-                    base.UpdateScore(type, value);
-                    break;
-            }
-        }
-
-        public override void BuildPvPLogPlayerDataPacket(out PVPMatchStatistics.PVPMatchPlayerStatistics playerData)
-        {
-            base.BuildPvPLogPlayerDataPacket(out playerData);
-
-            playerData.Stats.Add(new PVPMatchStatistics.PVPMatchPlayerPVPStat((int)SAObjectives.DemolishersDestroyed, DemolishersDestroyed));
-            playerData.Stats.Add(new PVPMatchStatistics.PVPMatchPlayerPVPStat((int)SAObjectives.GatesDestroyed, GatesDestroyed));
-        }
-
-        public override uint GetAttr1() { return DemolishersDestroyed; }
-        public override uint GetAttr2() { return GatesDestroyed; }
-
-        uint DemolishersDestroyed;
-        uint GatesDestroyed;
     }
 
     struct SARoundScore
@@ -1597,7 +1541,7 @@ namespace Game.BattleGrounds.Zones
         public const int Max = 5;
     }
 
-    enum SAObjectives
+    enum StrandOfTheAncientsPvpStats
     {
         GatesDestroyed = 231,
         DemolishersDestroyed = 232

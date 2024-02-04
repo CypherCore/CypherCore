@@ -630,6 +630,9 @@ namespace Game.DataStorage
 
             foreach (WMOAreaTableRecord entry in WMOAreaTableStorage.Values)
                 _wmoAreaTableLookup[Tuple.Create((short)entry.WmoID, (sbyte)entry.NameSetID, entry.WmoGroupID)] = entry;
+
+            foreach (PvpStatRecord pvpStat in PvpStatStorage.Values)
+                _pvpStatIdsByMap.Add(pvpStat.MapID, pvpStat.Id);
         }
 
         public IDB2Storage GetStorage(uint type)
@@ -1051,7 +1054,7 @@ namespace Game.DataStorage
 
             return contentTuningId;
         }
-        
+
         public ContentTuningLevels? GetContentTuningData(uint contentTuningId, uint redirectFlag, bool forItem = false)
         {
             ContentTuningRecord contentTuning = ContentTuningStorage.LookupByKey(GetRedirectedContentTuningId(contentTuningId, redirectFlag));
@@ -1095,7 +1098,7 @@ namespace Game.DataStorage
         {
             return _contentTuningLabels.Contains((contentTuningId, label));
         }
-        
+
         public string GetCreatureFamilyPetName(CreatureFamily petfamily, Locale locale)
         {
             if (petfamily == CreatureFamily.None)
@@ -1294,16 +1297,16 @@ namespace Game.DataStorage
             {
                 var mythicPlusSeason = MythicPlusSeasonStorage.LookupByKey(contentTuningXExpected.MinMythicPlusSeasonID);
                 if (mythicPlusSeason != null)
-                if (ActiveMilestoneSeason < mythicPlusSeason.MilestoneSeason)
-                    return mod;
+                    if (ActiveMilestoneSeason < mythicPlusSeason.MilestoneSeason)
+                        return mod;
             }
 
             if (contentTuningXExpected.MaxMythicPlusSeasonID != 0)
             {
                 var mythicPlusSeason = MythicPlusSeasonStorage.LookupByKey(contentTuningXExpected.MaxMythicPlusSeasonID);
                 if (mythicPlusSeason != null)
-                if (ActiveMilestoneSeason >= mythicPlusSeason.MilestoneSeason)
-                    return mod;
+                    if (ActiveMilestoneSeason >= mythicPlusSeason.MilestoneSeason)
+                        return mod;
             }
 
             var expectedStatMod = ExpectedStatModStorage.LookupByKey(contentTuningXExpected.ExpectedStatModID);
@@ -1872,7 +1875,7 @@ namespace Game.DataStorage
         {
             return _skillRaceClassInfoBySkill.LookupByKey(skill);
         }
-        
+
         public SoulbindConduitRankRecord GetSoulbindConduitRank(int soulbindConduitId, int rank)
         {
             return _soulbindConduitRanks.LookupByKey(Tuple.Create(soulbindConduitId, rank));
@@ -1902,7 +1905,7 @@ namespace Game.DataStorage
         {
             return _spellVisualMissilesBySet.LookupByKey(spellVisualMissileSetId);
         }
-        
+
         public List<TalentRecord> GetTalentsByPosition(Class class_, uint tier, uint column)
         {
             return _talentsByPosition[(int)class_][tier][column];
@@ -2223,6 +2226,11 @@ namespace Game.DataStorage
             return null;
         }
 
+        public List<uint> GetPVPStatIDsForMap(uint mapId)
+        {
+            return _pvpStatIdsByMap.LookupByKey(mapId);
+        }
+
         public bool HasItemCurrencyCost(uint itemId) { return _itemsWithCurrencyCost.Contains(itemId); }
 
         public Dictionary<uint, Dictionary<uint, MapDifficultyRecord>> GetMapDifficulties() { return _mapDifficulties; }
@@ -2316,6 +2324,7 @@ namespace Game.DataStorage
         MultiMap<int, UiMapAssignmentRecord>[] _uiMapAssignmentByWmoGroup = new MultiMap<int, UiMapAssignmentRecord>[(int)UiMapSystem.Max];
         List<int> _uiMapPhases = new();
         Dictionary<Tuple<short, sbyte, int>, WMOAreaTableRecord> _wmoAreaTableLookup = new();
+        MultiMap<uint, uint> _pvpStatIdsByMap = new();
     }
 
     class UiMapBounds
@@ -2526,7 +2535,7 @@ namespace Game.DataStorage
             UniqueID = data.ReadUInt32();
         }
     }
-    
+
     public class HotfixOptionalData
     {
         public uint Key;

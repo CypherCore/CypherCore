@@ -184,14 +184,6 @@ namespace Game.BattleGrounds.Zones
             TriggerGameEvent(8563);
         }
 
-        public override void AddPlayer(Player player, BattlegroundQueueTypeId queueId)
-        {
-            bool isInBattleground = IsPlayerInBattleground(player.GetGUID());
-            base.AddPlayer(player, queueId);
-            if (!isInBattleground)
-                PlayerScores[player.GetGUID()] = new BattlegroundWGScore(player.GetGUID(), player.GetBGTeam());
-        }
-
         void RespawnFlag(Team Team, bool captured)
         {
             if (Team == Team.Alliance)
@@ -303,7 +295,7 @@ namespace Game.BattleGrounds.Zones
             UpdateFlagState(team, WSGFlagState.WaitRespawn);                  // flag state none
             UpdateTeamScore(GetTeamIndexByTeamId(team));
             // only flag capture should be updated
-            UpdatePlayerScore(player, ScoreType.FlagCaptures, 1);      // +1 flag captures
+            UpdatePvpStat(player, (uint)WarsongGulchPvpStats.FlagCaptures, 1);      // +1 flag captures
 
             // update last flag capture to be used if teamscore is equal
             SetLastFlagCapture(team);
@@ -482,7 +474,7 @@ namespace Game.BattleGrounds.Zones
                     RespawnFlag(Team.Alliance, false);
                     SpawnBGObject(WSGObjectTypes.AFlag, BattlegroundConst.RespawnImmediately);
                     PlaySoundToAll(WSGSound.FlagReturned);
-                    UpdatePlayerScore(player, ScoreType.FlagReturns, 1);
+                    UpdatePvpStat(player, (uint)WarsongGulchPvpStats.FlagReturns, 1);
                     _bothFlagsKept = false;
 
                     HandleFlagRoomCapturePoint(TeamId.Horde); // Check Horde flag if it is in capture zone; if so, capture it
@@ -516,7 +508,7 @@ namespace Game.BattleGrounds.Zones
                     RespawnFlag(Team.Horde, false);
                     SpawnBGObject(WSGObjectTypes.HFlag, BattlegroundConst.RespawnImmediately);
                     PlaySoundToAll(WSGSound.FlagReturned);
-                    UpdatePlayerScore(player, ScoreType.FlagReturns, 1);
+                    UpdatePvpStat(player, (uint)WarsongGulchPvpStats.FlagReturns, 1);
                     _bothFlagsKept = false;
 
                     HandleFlagRoomCapturePoint(TeamId.Alliance); // Check Alliance flag if it is in capture zone; if so, capture it
@@ -778,25 +770,6 @@ namespace Game.BattleGrounds.Zones
             base.HandleKillPlayer(victim, killer);
         }
 
-        public override bool UpdatePlayerScore(Player player, ScoreType type, uint value, bool doAddHonor = true)
-        {
-            if (!base.UpdatePlayerScore(player, type, value, doAddHonor))
-                return false;
-
-            switch (type)
-            {
-                case ScoreType.FlagCaptures:                           // flags captured
-                    player.UpdateCriteria(CriteriaType.TrackedWorldStateUIModified, WSObjectives.CaptureFlag);
-                    break;
-                case ScoreType.FlagReturns:                            // flags returned
-                    player.UpdateCriteria(CriteriaType.TrackedWorldStateUIModified, WSObjectives.ReturnFlag);
-                    break;
-                default:
-                    break;
-            }
-            return true;
-        }
-
         public override WorldSafeLocsEntry GetClosestGraveyard(Player player)
         {
             //if status in progress, it returns main graveyards with spiritguides
@@ -881,41 +854,6 @@ namespace Game.BattleGrounds.Zones
         };
         const uint ExploitTeleportLocationAlliance = 3784;
         const uint ExploitTeleportLocationHorde = 3785;
-    }
-
-    class BattlegroundWGScore : BattlegroundScore
-    {
-        public BattlegroundWGScore(ObjectGuid playerGuid, Team team) : base(playerGuid, team) { }
-
-        public override void UpdateScore(ScoreType type, uint value)
-        {
-            switch (type)
-            {
-                case ScoreType.FlagCaptures:   // Flags captured
-                    FlagCaptures += value;
-                    break;
-                case ScoreType.FlagReturns:    // Flags returned
-                    FlagReturns += value;
-                    break;
-                default:
-                    base.UpdateScore(type, value);
-                    break;
-            }
-        }
-
-        public override void BuildPvPLogPlayerDataPacket(out PVPMatchStatistics.PVPMatchPlayerStatistics playerData)
-        {
-            base.BuildPvPLogPlayerDataPacket(out playerData);
-
-            playerData.Stats.Add(new PVPMatchStatistics.PVPMatchPlayerPVPStat(WSObjectives.CaptureFlag, FlagCaptures));
-            playerData.Stats.Add(new PVPMatchStatistics.PVPMatchPlayerPVPStat(WSObjectives.ReturnFlag, FlagReturns));
-        }
-
-        public override uint GetAttr1() { return FlagCaptures; }
-        public override uint GetAttr2() { return FlagReturns; }
-
-        uint FlagCaptures;
-        uint FlagReturns;
     }
 
     #region Constants
@@ -1057,10 +995,17 @@ namespace Game.BattleGrounds.Zones
         public const uint AllianceFlagReturned = 9808;
         public const uint HordeFlagReturned = 9809;
     }
+
     struct WSObjectives
     {
         public const int CaptureFlag = 42;
         public const int ReturnFlag = 44;
+    }
+
+    enum WarsongGulchPvpStats
+    {
+        FlagCaptures = 928,
+        FlagReturns = 929
     }
     #endregion
 }

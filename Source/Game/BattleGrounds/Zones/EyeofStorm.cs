@@ -195,16 +195,6 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
             }
         }
 
-        public override void AddPlayer(Player player, BattlegroundQueueTypeId queueId)
-        {
-            bool isInBattleground = IsPlayerInBattleground(player.GetGUID());
-            base.AddPlayer(player, queueId);
-            if (!isInBattleground)
-                PlayerScores[player.GetGUID()] = new BgEyeOfStormScore(player.GetGUID(), player.GetBGTeam());
-
-            m_PlayersNearPoint[Points.PointsMax].Add(player.GetGUID());
-        }
-
         public override void RemovePlayer(Player player, ObjectGuid guid, Team team)
         {
             // sometimes flag aura not removed :(
@@ -655,23 +645,7 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
             UpdateWorldState(WorldStateIds.NetherstormFlagStateHorde, (int)FlagState.OnBase);
             UpdateWorldState(WorldStateIds.NetherstormFlagStateAlliance, (int)FlagState.OnBase);
 
-            UpdatePlayerScore(player, ScoreType.FlagCaptures, 1);
-        }
-
-        public override bool UpdatePlayerScore(Player player, ScoreType type, uint value, bool doAddHonor = true)
-        {
-            if (!base.UpdatePlayerScore(player, type, value, doAddHonor))
-                return false;
-
-            switch (type)
-            {
-                case ScoreType.FlagCaptures:
-                    player.UpdateCriteria(CriteriaType.TrackedWorldStateUIModified, Misc.ObjectiveCaptureFlag);
-                    break;
-                default:
-                    break;
-            }
-            return true;
+            UpdatePvpStat(player, (uint)EyeOfTheStormPvpStats.FlagCaptures, 1);
         }
 
         public override WorldSafeLocsEntry GetClosestGraveyard(Player player)
@@ -809,35 +783,6 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
         Dictionary<uint, BgEyeOfStormControlZoneHandler> ControlZoneHandlers = new();
     }
 
-    class BgEyeOfStormScore : BattlegroundScore
-    {
-        public BgEyeOfStormScore(ObjectGuid playerGuid, Team team) : base(playerGuid, team) { }
-
-        public override void UpdateScore(ScoreType type, uint value)
-        {
-            switch (type)
-            {
-                case ScoreType.FlagCaptures:   // Flags captured
-                    FlagCaptures += value;
-                    break;
-                default:
-                    base.UpdateScore(type, value);
-                    break;
-            }
-        }
-
-        public override void BuildPvPLogPlayerDataPacket(out PVPMatchStatistics.PVPMatchPlayerStatistics playerData)
-        {
-            base.BuildPvPLogPlayerDataPacket(out playerData);
-
-            playerData.Stats.Add(new PVPMatchStatistics.PVPMatchPlayerPVPStat((int)Misc.ObjectiveCaptureFlag, FlagCaptures));
-        }
-
-        public override uint GetAttr1() { return FlagCaptures; }
-
-        uint FlagCaptures;
-    }
-
     struct BgEyeOfStormPointIconsStruct
     {
         public BgEyeOfStormPointIconsStruct(uint worldStateControlIndex, uint worldStateAllianceControlledIndex, uint worldStateHordeControlledIndex, uint worldStateAllianceStatusBarIcon, uint worldStateHordeStatusBarIcon)
@@ -934,8 +879,6 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
 
         public const uint NotEYWeekendHonorTicks = 260;
         public const uint EYWeekendHonorTicks = 160;
-
-        public const uint ObjectiveCaptureFlag = 183;
 
         public const uint SpellNetherstormFlag = 34976;
         public const uint SpellPlayerDroppedFlag = 34991;
@@ -1228,5 +1171,10 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
         NoOwner = 0,
         Uncontrolled = 0,
         UnderControl = 3
+    }
+
+    enum EyeOfTheStormPvpStats
+    {
+        FlagCaptures = 183
     }
 }

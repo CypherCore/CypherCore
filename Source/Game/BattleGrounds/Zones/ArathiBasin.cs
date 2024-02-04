@@ -208,18 +208,6 @@ namespace Game.BattleGrounds.Zones
             TriggerGameEvent(EventStartBattle);
         }
 
-        public override void AddPlayer(Player player, BattlegroundQueueTypeId queueId)
-        {
-            bool isInBattleground = IsPlayerInBattleground(player.GetGUID());
-            base.AddPlayer(player, queueId);
-            if (!isInBattleground)
-                PlayerScores[player.GetGUID()] = new BattlegroundABScore(player.GetGUID(), player.GetBGTeam());
-        }
-
-        public override void RemovePlayer(Player Player, ObjectGuid guid, Team team)
-        {
-        }
-
         public override void HandleAreaTrigger(Player player, uint trigger, bool entered)
         {
             switch (trigger)
@@ -412,7 +400,7 @@ namespace Game.BattleGrounds.Zones
             // If node is neutral, change to contested
             if (m_Nodes[node] == ABNodeStatus.Neutral)
             {
-                UpdatePlayerScore(source, ScoreType.BasesAssaulted, 1);
+                UpdatePvpStat(source, (uint)ArathiBasinPvpStats.BasesAssaulted, 1);
                 m_prevNodes[node] = m_Nodes[node];
                 m_Nodes[node] = (ABNodeStatus)(teamIndex + 1);
                 // burn current neutral banner
@@ -436,7 +424,7 @@ namespace Game.BattleGrounds.Zones
                 // If last state is NOT occupied, change node to enemy-contested
                 if (m_prevNodes[node] < ABNodeStatus.Occupied)
                 {
-                    UpdatePlayerScore(source, ScoreType.BasesAssaulted, 1);
+                    UpdatePvpStat(source, (uint)ArathiBasinPvpStats.BasesAssaulted, 1);
                     m_prevNodes[node] = m_Nodes[node];
                     m_Nodes[node] = (ABNodeStatus.Contested + teamIndex);
                     // burn current contested banner
@@ -454,7 +442,7 @@ namespace Game.BattleGrounds.Zones
                 // If contested, change back to occupied
                 else
                 {
-                    UpdatePlayerScore(source, ScoreType.BasesDefended, 1);
+                    UpdatePvpStat(source, (uint)ArathiBasinPvpStats.BasesDefended, 1);
                     m_prevNodes[node] = m_Nodes[node];
                     m_Nodes[node] = (ABNodeStatus.Occupied + teamIndex);
                     // burn current contested banner
@@ -475,7 +463,7 @@ namespace Game.BattleGrounds.Zones
             // If node is occupied, change to enemy-contested
             else
             {
-                UpdatePlayerScore(source, ScoreType.BasesAssaulted, 1);
+                UpdatePvpStat(source, (uint)ArathiBasinPvpStats.BasesAssaulted, 1);
                 m_prevNodes[node] = m_Nodes[node];
                 m_Nodes[node] = (ABNodeStatus.Contested + teamIndex);
                 // burn current occupied banner
@@ -657,25 +645,6 @@ namespace Game.BattleGrounds.Zones
             return Global.ObjectMgr.GetWorldSafeLoc(team == Team.Alliance ? ExploitTeleportLocationAlliance : ExploitTeleportLocationHorde);
         }
 
-        public override bool UpdatePlayerScore(Player player, ScoreType type, uint value, bool doAddHonor = true)
-        {
-            if (!base.UpdatePlayerScore(player, type, value, doAddHonor))
-                return false;
-
-            switch (type)
-            {
-                case ScoreType.BasesAssaulted:
-                    player.UpdateCriteria(CriteriaType.TrackedWorldStateUIModified, (uint)ABObjectives.AssaultBase);
-                    break;
-                case ScoreType.BasesDefended:
-                    player.UpdateCriteria(CriteriaType.TrackedWorldStateUIModified, (uint)ABObjectives.DefendBase);
-                    break;
-                default:
-                    break;
-            }
-            return true;
-        }
-
         /// <summary>
         /// Nodes info:
         ///    0: neutral
@@ -766,45 +735,6 @@ namespace Game.BattleGrounds.Zones
         public static int[] NodeStates = { 1767, 1782, 1772, 1792, 1787 };
 
         public static int[] NodeIcons = { 1842, 1846, 1845, 1844, 1843 };
-    }
-
-    class BattlegroundABScore : BattlegroundScore
-    {
-        public BattlegroundABScore(ObjectGuid playerGuid, Team team) : base(playerGuid, team)
-        {
-            BasesAssaulted = 0;
-            BasesDefended = 0;
-        }
-
-        public override void UpdateScore(ScoreType type, uint value)
-        {
-            switch (type)
-            {
-                case ScoreType.BasesAssaulted:
-                    BasesAssaulted += value;
-                    break;
-                case ScoreType.BasesDefended:
-                    BasesDefended += value;
-                    break;
-                default:
-                    base.UpdateScore(type, value);
-                    break;
-            }
-        }
-
-        public override void BuildPvPLogPlayerDataPacket(out PVPMatchStatistics.PVPMatchPlayerStatistics playerData)
-        {
-            base.BuildPvPLogPlayerDataPacket(out playerData);
-
-            playerData.Stats.Add(new PVPMatchStatistics.PVPMatchPlayerPVPStat((int)ABObjectives.AssaultBase, BasesAssaulted));
-            playerData.Stats.Add(new PVPMatchStatistics.PVPMatchPlayerPVPStat((int)ABObjectives.DefendBase, BasesDefended));
-        }
-
-        public override uint GetAttr1() { return BasesAssaulted; }
-        public override uint GetAttr2() { return BasesDefended; }
-
-        uint BasesAssaulted;
-        uint BasesDefended;
     }
 
     struct BannerTimer
@@ -1002,6 +932,12 @@ namespace Game.BattleGrounds.Zones
     {
         AssaultBase = 122,
         DefendBase = 123
+    }
+
+    enum ArathiBasinPvpStats
+    {
+        BasesAssaulted = 926,
+        BasesDefended = 927,
     }
     #endregion
 }

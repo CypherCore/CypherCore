@@ -258,6 +258,7 @@ namespace Game.DataStorage
             PrestigeLevelInfoStorage = ReadDB2<PrestigeLevelInfoRecord>("PrestigeLevelInfo.db2", HotfixStatements.SEL_PRESTIGE_LEVEL_INFO, HotfixStatements.SEL_PRESTIGE_LEVEL_INFO_LOCALE);
             PvpDifficultyStorage = ReadDB2<PvpDifficultyRecord>("PVPDifficulty.db2", HotfixStatements.SEL_PVP_DIFFICULTY);
             PvpItemStorage = ReadDB2<PvpItemRecord>("PVPItem.db2", HotfixStatements.SEL_PVP_ITEM);
+            PvpStatStorage = ReadDB2<PvpStatRecord>("PVPStat.db2", HotfixStatements.SEL_PVP_STAT, HotfixStatements.SEL_PVP_STAT_LOCALE);
             PvpSeasonStorage = ReadDB2<PvpSeasonRecord>("PvpSeason.db2", HotfixStatements.SEL_PVP_SEASON);
             PvpTalentStorage = ReadDB2<PvpTalentRecord>("PvpTalent.db2", HotfixStatements.SEL_PVP_TALENT, HotfixStatements.SEL_PVP_TALENT_LOCALE);
             PvpTalentCategoryStorage = ReadDB2<PvpTalentCategoryRecord>("PvpTalentCategory.db2", HotfixStatements.SEL_PVP_TALENT_CATEGORY);
@@ -693,6 +694,7 @@ namespace Game.DataStorage
         public static DB6Storage<PrestigeLevelInfoRecord> PrestigeLevelInfoStorage;
         public static DB6Storage<PvpDifficultyRecord> PvpDifficultyStorage;
         public static DB6Storage<PvpItemRecord> PvpItemStorage;
+        public static DB6Storage<PvpStatRecord> PvpStatStorage;
         public static DB6Storage<PvpSeasonRecord> PvpSeasonStorage;
         public static DB6Storage<PvpTalentRecord> PvpTalentStorage;
         public static DB6Storage<PvpTalentCategoryRecord> PvpTalentCategoryStorage;

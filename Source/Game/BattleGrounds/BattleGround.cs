@@ -148,7 +148,7 @@ namespace Game.BattleGrounds
             if (m_ValidStartPositionTimer >= BattlegroundConst.CheckPlayerPositionInverval)
             {
                 m_ValidStartPositionTimer = 0;
-                
+
                 foreach (var guid in GetPlayers().Keys)
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
@@ -177,7 +177,7 @@ namespace Game.BattleGrounds
                 m_LastPlayerPositionBroadcast = 0;
 
                 BattlegroundPlayerPositions playerPositions = new();
-                for (var i =0; i < _playerPositions.Count; ++i)
+                for (var i = 0; i < _playerPositions.Count; ++i)
                 {
                     var playerPosition = _playerPositions[i];
                     // Update position data if we found player.
@@ -477,7 +477,7 @@ namespace Game.BattleGrounds
         {
             return _battlegroundTemplate.MaxStartDistSq;
         }
-        
+
         public void SendPacketToAll(ServerPacket packet)
         {
             foreach (var pair in m_Players)
@@ -690,11 +690,11 @@ namespace Game.BattleGrounds
                     stmt.AddValue(6, score.BonusHonor);
                     stmt.AddValue(7, score.DamageDone);
                     stmt.AddValue(8, score.HealingDone);
-                    stmt.AddValue(9, score.GetAttr1());
-                    stmt.AddValue(10, score.GetAttr2());
-                    stmt.AddValue(11, score.GetAttr3());
-                    stmt.AddValue(12, score.GetAttr4());
-                    stmt.AddValue(13, score.GetAttr5());
+                    stmt.AddValue(9, score.GetAttr(1));
+                    stmt.AddValue(10, score.GetAttr(2));
+                    stmt.AddValue(11, score.GetAttr(3));
+                    stmt.AddValue(12, score.GetAttr(4));
+                    stmt.AddValue(13, score.GetAttr(5));
 
                     DB.Characters.Execute(stmt);
                 }
@@ -760,7 +760,7 @@ namespace Game.BattleGrounds
         {
             return _battlegroundTemplate.ScriptId;
         }
-        
+
         public uint GetBonusHonorFromKill(uint kills)
         {
             //variable kills means how many honorable kills you scored (so we need kills * honor_for_one_kill)
@@ -795,7 +795,7 @@ namespace Game.BattleGrounds
 
             Player player = Global.ObjAccessor.FindPlayer(guid);
             if (player != null)
-            { 
+            {
                 // should remove spirit of redemption
                 if (player.HasAuraType(AuraType.SpiritOfRedemption))
                     player.RemoveAurasByType(AuraType.ModShapeshift);
@@ -955,7 +955,10 @@ namespace Game.BattleGrounds
             m_Players[guid] = bp;
 
             if (!isInBattleground)
+            {
                 UpdatePlayersCountByTeam(team, false);                  // +1 player
+                PlayerScores[player.GetGUID()] = new BattlegroundScore(player.GetGUID(), player.GetBGTeam(), _pvpStatIds);
+            }
 
             BattlegroundPlayerJoined playerJoined = new();
             playerJoined.Guid = player.GetGUID();
@@ -1219,7 +1222,7 @@ namespace Game.BattleGrounds
         {
             return !IsArena();
         }
-        
+
         public bool HasFreeSlots()
         {
             return GetPlayersSize() < GetMaxPlayers();
@@ -1231,26 +1234,29 @@ namespace Game.BattleGrounds
 
             foreach (var score in PlayerScores)
             {
-                PVPMatchStatistics.PVPMatchPlayerStatistics playerData;
-
-                score.Value.BuildPvPLogPlayerDataPacket(out playerData);
-
-                Player player = Global.ObjAccessor.GetPlayer(GetBgMap(), playerData.PlayerGUID);
+                Player player = Global.ObjAccessor.GetPlayer(GetBgMap(), score.Key);
                 if (player != null)
                 {
+                    score.Value.BuildPvPLogPlayerDataPacket(out PVPMatchStatistics.PVPMatchPlayerStatistics playerData);
+
                     playerData.IsInWorld = true;
                     playerData.PrimaryTalentTree = (int)player.GetPrimarySpecialization();
                     playerData.Sex = (sbyte)player.GetGender();
                     playerData.PlayerRace = player.GetRace();
                     playerData.PlayerClass = (int)player.GetClass();
                     playerData.HonorLevel = (int)player.GetHonorLevel();
-                }
 
-                pvpLogData.Statistics.Add(playerData);
+                    pvpLogData.Statistics.Add(playerData);
+                }
             }
 
             pvpLogData.PlayerCount[(int)PvPTeamId.Horde] = (sbyte)GetPlayersCountByTeam(Team.Horde);
             pvpLogData.PlayerCount[(int)PvPTeamId.Alliance] = (sbyte)GetPlayersCountByTeam(Team.Alliance);
+        }
+
+        public BattlegroundScore GetBattlegroundScore(Player player)
+        {
+            return PlayerScores.LookupByKey(player.GetGUID());
         }
 
         public virtual bool UpdatePlayerScore(Player player, ScoreType type, uint value, bool doAddHonor = true)
@@ -1265,6 +1271,13 @@ namespace Game.BattleGrounds
                 bgScore.UpdateScore(type, value);
 
             return true;
+        }
+
+        public void UpdatePvpStat(Player player, uint pvpStatId, uint value)
+        {
+            BattlegroundScore score = PlayerScores.LookupByKey(player.GetGUID());
+            if (score != null)
+                score.UpdatePvpStat(pvpStatId, value);
         }
 
         public bool AddObject(int type, uint entry, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3, uint respawnTime = 0, GameObjectState goState = GameObjectState.Ready)
@@ -1363,6 +1376,15 @@ namespace Game.BattleGrounds
         public uint GetMapId()
         {
             return (uint)_battlegroundTemplate.BattlemasterEntry.MapId[0];
+        }
+
+        public void SetBgMap(BattlegroundMap map)
+        {
+            m_Map = map;
+            if (map != null)
+                _pvpStatIds = Global.DB2Mgr.GetPVPStatIDsForMap(map.GetId());
+            else
+                _pvpStatIds = null;
         }
 
         public void SpawnBGObject(int type, uint respawntime)
@@ -1548,7 +1570,7 @@ namespace Game.BattleGrounds
         {
             _playerPositions.RemoveAll(playerPosition => playerPosition.Guid == guid);
         }
-        
+
         void EndNow()
         {
             RemoveFromBGFreeSlotQueue();
@@ -1630,7 +1652,7 @@ namespace Game.BattleGrounds
 
             return false;
         }
-        
+
         void PlayerAddedToBGCheckIfBGIsRunning(Player player)
         {
             if (GetStatus() != BattlegroundStatus.WaitLeave)
@@ -1800,7 +1822,7 @@ namespace Game.BattleGrounds
         {
             return m_Players.LookupByKey(playerGuid);
         }
-        
+
         public virtual void StartingEventCloseDoors() { }
         public virtual void StartingEventOpenDoors() { }
 
@@ -1825,6 +1847,7 @@ namespace Game.BattleGrounds
         public void SetRated(bool state) { m_IsRated = state; }
         public void SetArenaType(ArenaTypes type) { m_ArenaType = type; }
         public void SetWinner(PvPTeamId winnerTeamId) { _winnerTeamId = winnerTeamId; }
+        public List<uint> GetPvpStatIds() { return _pvpStatIds; }
 
         void ModifyStartDelayTime(int diff) { m_StartDelayTime -= diff; }
         void SetStartDelayTime(BattlegroundStartTimeIntervals Time) { m_StartDelayTime = (int)Time; }
@@ -1852,7 +1875,6 @@ namespace Game.BattleGrounds
         uint GetPlayersSize() { return (uint)m_Players.Count; }
         uint GetPlayerScoresSize() { return (uint)PlayerScores.Count; }
 
-        public void SetBgMap(BattlegroundMap map) { m_Map = map; }
         BattlegroundMap FindBgMap() { return m_Map; }
 
         Group GetBgRaid(Team team) { return m_BgRaids[GetTeamIndexByTeamId(team)]; }
@@ -1979,6 +2001,7 @@ namespace Game.BattleGrounds
 
         BattlegroundTemplate _battlegroundTemplate;
         PvpDifficultyRecord _pvpDifficultyEntry;
+        List<uint> _pvpStatIds = new();
 
         List<BattlegroundPlayerPosition> _playerPositions = new();
         #endregion

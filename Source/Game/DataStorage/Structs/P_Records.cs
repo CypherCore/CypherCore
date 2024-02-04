@@ -178,6 +178,13 @@ namespace Game.DataStorage
         public byte ItemLevelDelta;
     }
 
+    public sealed class PvpStatRecord
+    {
+        public LocalizedString Description;
+        public uint Id;
+        public uint MapID;
+    }
+
     public sealed class PvpSeasonRecord
     {
         public uint Id;

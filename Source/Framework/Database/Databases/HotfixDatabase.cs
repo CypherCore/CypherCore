@@ -1028,6 +1028,10 @@ namespace Framework.Database
             // PvpItem.db2
             PrepareStatement(HotfixStatements.SEL_PVP_ITEM, "SELECT ID, ItemID, ItemLevelDelta FROM pvp_item WHERE (`VerifiedBuild` > 0) = ?");
 
+            // PvpStat.db2
+            PrepareStatement(HotfixStatements.SEL_PVP_STAT, "SELECT Description, ID, MapID FROM pvp_stat WHERE (`VerifiedBuild` > 0) = ?");
+            PrepareStatement(HotfixStatements.SEL_PVP_STAT_LOCALE, "SELECT ID, Description_lang FROM pvp_stat_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
+
             // PvpSeason.db2
             PrepareStatement(HotfixStatements.SEL_PVP_SEASON, "SELECT ID, MilestoneSeason, AllianceAchievementID, HordeAchievementID FROM pvp_season" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
@@ -2069,6 +2073,9 @@ namespace Framework.Database
         SEL_PVP_DIFFICULTY,
 
         SEL_PVP_ITEM,
+
+        SEL_PVP_STAT,
+        SEL_PVP_STAT_LOCALE,
 
         SEL_PVP_SEASON,
 
