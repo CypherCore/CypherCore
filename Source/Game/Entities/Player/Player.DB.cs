@@ -766,7 +766,7 @@ namespace Game.Entities
                             questStatusData.Slot = slot;
 
                             foreach (QuestObjective obj in quest.Objectives)
-                                m_questObjectiveStatus.Add((obj.Type, obj.ObjectID), new QuestObjectiveStatusData() { QuestStatusPair = (questId, questStatusData), Objective = obj });
+                                m_questObjectiveStatus.Add((obj.Type, obj.ObjectID), new QuestObjectiveStatusData() { QuestStatusPair = (questId, questStatusData), ObjectiveId = obj.Id });
 
                             SetQuestSlot(slot, questId);
                             SetQuestSlotEndTime(slot, endTime);

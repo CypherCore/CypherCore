@@ -673,6 +673,6 @@ namespace Game.Entities
     struct QuestObjectiveStatusData
     {
         public (uint QuestID, QuestStatusData Status) QuestStatusPair;
-        public QuestObjective Objective;
+        public uint ObjectiveId;
     }
 }

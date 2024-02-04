@@ -779,7 +779,7 @@ namespace Game.Entities
 
             foreach (QuestObjective obj in quest.Objectives)
             {
-                m_questObjectiveStatus.Add((obj.Type, obj.ObjectID), new QuestObjectiveStatusData() { QuestStatusPair = (questId, questStatusData), Objective = obj });
+                m_questObjectiveStatus.Add((obj.Type, obj.ObjectID), new QuestObjectiveStatusData() { QuestStatusPair = (questId, questStatusData), ObjectiveId = obj.Id });
                 switch (obj.Type)
                 {
                     case QuestObjectiveType.MinReputation:
@@ -2366,12 +2366,12 @@ namespace Game.Entities
         {
             foreach (var objectiveStatusData in m_questObjectiveStatus.LookupByKey((QuestObjectiveType.Item, (int)entry)))
             {
-                uint questId = objectiveStatusData.QuestStatusPair.QuestID;
-                Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
+                uint questId = objectiveStatusData.QuestStatusPair.QuestID; 
                 ushort logSlot = objectiveStatusData.QuestStatusPair.Status.Slot;
-                QuestObjective objective = objectiveStatusData.Objective;
+                Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
+                QuestObjective objective = Global.ObjectMgr.GetQuestObjective(objectiveStatusData.ObjectiveId);
 
-                if (!IsQuestObjectiveCompletable(logSlot, quest, objective))
+                if (quest == null || objective == null || !IsQuestObjectiveCompletable(logSlot, quest, objective))
                     continue;
 
                 int newItemCount = (int)GetItemCount(entry, false);  // we may have more than what the status shows, so we have to iterate inventory
@@ -2465,14 +2465,16 @@ namespace Game.Entities
             {
                 uint questId = objectiveStatusData.QuestStatusPair.QuestID;
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
+                if (quest == null)
+                    continue;
 
                 if (!QuestObjective.CanAlwaysBeProgressedInRaid(objectiveType))
                     if (GetGroup() != null && GetGroup().IsRaidGroup() && !quest.IsAllowedInRaid(GetMap().GetDifficultyID()))
                         continue;
 
                 ushort logSlot = objectiveStatusData.QuestStatusPair.Status.Slot;
-                QuestObjective objective = objectiveStatusData.Objective;
-                if (!IsQuestObjectiveCompletable(logSlot, quest, objective))
+                QuestObjective objective = Global.ObjectMgr.GetQuestObjective(objectiveStatusData.ObjectiveId);
+                if (objective == null || !IsQuestObjectiveCompletable(logSlot, quest, objective))
                     continue;
 
                 if (quest.HasFlagEx(QuestFlagsEx.NoCreditForProxy))
@@ -2610,8 +2612,8 @@ namespace Game.Entities
             foreach (var objectiveItr in m_questObjectiveStatus.LookupByKey((QuestObjectiveType.Item, (int)itemid)))
             {
                 Quest qInfo = Global.ObjectMgr.GetQuestTemplate(objectiveItr.QuestStatusPair.QuestID);
-                QuestObjective objective = objectiveItr.Objective;
-                if (!IsQuestObjectiveCompletable(objectiveItr.QuestStatusPair.Status.Slot, qInfo, objective))
+                QuestObjective objective = Global.ObjectMgr.GetQuestObjective(objectiveItr.ObjectiveId);
+                if (qInfo == null || objective == null || !IsQuestObjectiveCompletable(objectiveItr.QuestStatusPair.Status.Slot, qInfo, objective))
                     continue;
 
                 // hide quest if player is in raid-group and quest is no raid quest
@@ -3080,8 +3082,8 @@ namespace Game.Entities
             foreach (var objectiveStatusData in m_questObjectiveStatus.LookupByKey((QuestObjectiveType.GameObject, GOId)))
             {
                 Quest qInfo = Global.ObjectMgr.GetQuestTemplate(objectiveStatusData.QuestStatusPair.QuestID);
-                QuestObjective objective = objectiveStatusData.Objective;
-                if (!IsQuestObjectiveCompletable(objectiveStatusData.QuestStatusPair.Status.Slot, qInfo, objective))
+                QuestObjective objective = Global.ObjectMgr.GetQuestObjective(objectiveStatusData.ObjectiveId);
+                if (qInfo == null || objective == null || !IsQuestObjectiveCompletable(objectiveStatusData.QuestStatusPair.Status.Slot, qInfo, objective))
                     continue;
 
                 // hide quest if player is in raid-group and quest is no raid quest
