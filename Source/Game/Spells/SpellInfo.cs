@@ -4413,17 +4413,26 @@ namespace Game.Spells
             // TargetA -> TargetARadiusEntry
             // TargetB -> TargetBRadiusEntry
             // Aura effects have TargetARadiusEntry == TargetBRadiusEntry (mostly)
+            SpellImplicitTargetInfo target = TargetA;
             var entry = TargetARadiusEntry;
             if (targetIndex == SpellTargetIndex.TargetB && HasRadius(targetIndex))
+            {
+                target = TargetB;
                 entry = TargetBRadiusEntry;
+            }
 
             if (entry == null)
                 return 0.0f;
 
             float radius = entry.RadiusMin;
 
-            // Client uses max if min is 0
-            if (radius == 0.0f)
+            // Random targets use random value between RadiusMin and RadiusMax
+            // For other cases, client uses RadiusMax if RadiusMin is 0
+            if (target.GetTarget() == Targets.DestCasterRandom ||
+                target.GetTarget() == Targets.DestTargetRandom ||
+                target.GetTarget() == Targets.DestDestRandom)
+                radius += (entry.RadiusMax - radius) * RandomHelper.NextSingle();
+            else if (radius == 0.0f)
                 radius = entry.RadiusMax;
 
             if (caster != null)

@@ -2773,7 +2773,7 @@ namespace Framework.Constants
         DestFrontLeft = 71,
         DestCasterRandom = 72,
         DestCasterRadius = 73,
-        DestRandom = 74,
+        DestTargetRandom = 74,
         DestRadius = 75,
         DestChannelTarget = 76,
         UnitChannelTarget = 77,

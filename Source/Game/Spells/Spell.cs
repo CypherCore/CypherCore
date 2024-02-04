@@ -1114,7 +1114,7 @@ namespace Game.Spells
                             break;
                         case Targets.DestCasterRandom:
                             if (dist > objSize)
-                                dist = objSize + (dist - objSize) * RandomHelper.NextSingle();
+                                dist = objSize + (dist - objSize);
                             break;
                         case Targets.DestCasterFrontLeft:
                         case Targets.DestCasterBackLeft:
@@ -1164,8 +1164,6 @@ namespace Game.Spells
                 {
                     float angle = targetType.CalcDirectionAngle();
                     float dist = spellEffectInfo.CalcRadius(null, targetIndex);
-                    if (targetType.GetTarget() == Targets.DestRandom)
-                        dist *= RandomHelper.NextSingle();
 
                     Position pos = new(dest.Position);
                     target.MovePositionToFirstCollision(pos, dist, angle);
@@ -1218,8 +1216,6 @@ namespace Game.Spells
                 {
                     float angle = targetType.CalcDirectionAngle();
                     float dist = spellEffectInfo.CalcRadius(m_caster, targetIndex);
-                    if (targetType.GetTarget() == Targets.DestRandom)
-                        dist *= RandomHelper.NextSingle();
 
                     Position pos = new(m_targets.GetDstPos());
                     m_caster.MovePositionToFirstCollision(pos, dist, angle);
