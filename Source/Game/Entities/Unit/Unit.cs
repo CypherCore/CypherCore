@@ -2678,7 +2678,7 @@ namespace Game.Entities
 
                 duel_hasEnded = true;
             }
-            else if (victim.IsCreature() && damageTaken >= health && victim.ToCreature().HasFlag(CreatureStaticFlags.Unkillable))
+            else if (victim.IsCreature() && victim != attacker && damageTaken >= health && victim.ToCreature().HasFlag(CreatureStaticFlags.Unkillable))
             {
                 damageTaken = health - 1;
 
