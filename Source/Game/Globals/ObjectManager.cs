@@ -1791,7 +1791,7 @@ namespace Game
             creature.SpeedWalk = fields.Read<float>(12);
             creature.SpeedRun = fields.Read<float>(13);
             creature.Scale = fields.Read<float>(14);
-            creature.Rank = (CreatureEliteType)fields.Read<uint>(15);
+            creature.Classification = (CreatureClassifications)fields.Read<uint>(15);
             creature.DmgSchool = fields.Read<uint>(16);
             creature.BaseAttackTime = fields.Read<uint>(17);
             creature.RangeAttackTime = fields.Read<uint>(18);
@@ -2727,7 +2727,7 @@ namespace Game
                 creatureDifficulty.StaticFlags = new(result.Read<uint>(18), result.Read<uint>(19), result.Read<uint>(20), result.Read<uint>(21), result.Read<uint>(22), result.Read<uint>(23), result.Read<uint>(24), result.Read<uint>(25));
 
                 // TODO: Check if this still applies
-                creatureDifficulty.DamageModifier *= Creature._GetDamageMod(template.Rank);
+                creatureDifficulty.DamageModifier *= Creature.GetDamageMod(template.Classification);
 
                 if (creatureDifficulty.HealthScalingExpansion < (int)Expansion.LevelCurrent || creatureDifficulty.HealthScalingExpansion >= (int)Expansion.Max)
                 {

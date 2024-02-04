@@ -22,14 +22,15 @@ namespace Framework.Constants
         Destory = 4                                // used on object destroy (NOT used in client packet handler)
     }
 
-    public enum CreatureEliteType
+    public enum CreatureClassifications
     {
         Normal = 0,
         Elite = 1,
         RareElite = 2,
-        WorldBoss = 3,
+        Obsolete = 3,
         Rare = 4,
-        EliteTrivial = 5                      // found in 2.2.3 for 2 mobs
+        Trivial = 5,
+        MinusMob = 6
     }
 
     [Flags]

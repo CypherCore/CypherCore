@@ -833,22 +833,25 @@ namespace Game.Entities
             if (cinfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.DungeonBoss) && map.IsDungeon())
                 m_respawnDelay = 0; // special value, prevents respawn for dungeon bosses unless overridden
 
-            switch (cinfo.Rank)
+            switch (GetCreatureClassification())
             {
-                case CreatureEliteType.Rare:
-                    m_corpseDelay = WorldConfig.GetUIntValue(WorldCfg.CorpseDecayRare);
-                    break;
-                case CreatureEliteType.Elite:
+                case CreatureClassifications.Elite:
                     m_corpseDelay = WorldConfig.GetUIntValue(WorldCfg.CorpseDecayElite);
                     break;
-                case CreatureEliteType.RareElite:
+                case CreatureClassifications.RareElite:
                     m_corpseDelay = WorldConfig.GetUIntValue(WorldCfg.CorpseDecayRareelite);
                     break;
-                case CreatureEliteType.WorldBoss:
-                    m_corpseDelay = WorldConfig.GetUIntValue(WorldCfg.CorpseDecayWorldboss);
+                case CreatureClassifications.Obsolete:
+                    m_corpseDelay = WorldConfig.GetUIntValue(WorldCfg.CorpseDecayObsolete);
                     break;
-                default:
-                    m_corpseDelay = WorldConfig.GetUIntValue(WorldCfg.CorpseDecayNormal);
+                case CreatureClassifications.Rare:
+                    m_corpseDelay = WorldConfig.GetUIntValue(WorldCfg.CorpseDecayRare);
+                    break;
+                case CreatureClassifications.Trivial:
+                    m_corpseDelay = WorldConfig.GetUIntValue(WorldCfg.CorpseDecayTrivial);
+                    break;
+                case CreatureClassifications.MinusMob:
+                    m_corpseDelay = WorldConfig.GetUIntValue(WorldCfg.CorpseDecayMinusMob);
                     break;
             }
 
@@ -1458,12 +1461,12 @@ namespace Game.Entities
         void UpdateLevelDependantStats()
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
-            CreatureEliteType rank = IsPet() ? 0 : cInfo.Rank;
+            CreatureClassifications classification = IsPet() ? CreatureClassifications.Normal : cInfo.Classification;
             uint level = GetLevel();
             CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(level, cInfo.UnitClass);
 
             // health
-            float healthmod = GetHealthMod(rank);
+            float healthmod = GetHealthMod(classification);
 
             uint basehp = (uint)GetMaxHealthByLevel(level);
             uint health = (uint)(basehp * healthmod);
@@ -1526,22 +1529,26 @@ namespace Game.Entities
             }
         }
 
-        public float GetHealthMod(CreatureEliteType Rank)
+        public float GetHealthMod(CreatureClassifications classification)
         {
-            switch (Rank)                                           // define rates for each elite rank
+            switch (classification)                                           // define rates for each elite rank
             {
-                case CreatureEliteType.Normal:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureNormalHp);
-                case CreatureEliteType.Elite:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureEliteEliteHp);
-                case CreatureEliteType.RareElite:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureEliteRareeliteHp);
-                case CreatureEliteType.WorldBoss:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureEliteWorldbossHp);
-                case CreatureEliteType.Rare:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureEliteRareHp);
+                case CreatureClassifications.Normal:
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureHpNormal);
+                case CreatureClassifications.Elite:
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureHpElite);
+                case CreatureClassifications.RareElite:
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureHpRareelite);
+                case CreatureClassifications.Obsolete:
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureHpObsolete);
+                case CreatureClassifications.Rare:
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureHpRare);
+                case CreatureClassifications.Trivial:
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureHpTrivial);
+                case CreatureClassifications.MinusMob:
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureHpMinusmob);
                 default:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureEliteRareeliteHp);
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureHpElite);
             }
         }
 
@@ -1556,41 +1563,49 @@ namespace Game.Entities
             }
         }
 
-        public static float _GetDamageMod(CreatureEliteType Rank)
+        public static float GetDamageMod(CreatureClassifications classification)
         {
-            switch (Rank)                                           // define rates for each elite rank
+            switch (classification)
             {
-                case CreatureEliteType.Normal:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureNormalDamage);
-                case CreatureEliteType.Elite:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureEliteEliteDamage);
-                case CreatureEliteType.RareElite:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureEliteRareeliteDamage);
-                case CreatureEliteType.WorldBoss:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureEliteWorldbossDamage);
-                case CreatureEliteType.Rare:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureEliteRareDamage);
+                case CreatureClassifications.Normal:
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureDamageNormal);
+                case CreatureClassifications.Elite:
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureDamageElite);
+                case CreatureClassifications.RareElite:
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureDamageRareelite);
+                case CreatureClassifications.Obsolete:
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureDamageObsolete);
+                case CreatureClassifications.Rare:
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureDamageRare);
+                case CreatureClassifications.Trivial:
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureDamageTrivial);
+                case CreatureClassifications.MinusMob:
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureDamageMinusmob);
                 default:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureEliteEliteDamage);
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureDamageElite);
             }
         }
 
-        public float GetSpellDamageMod(CreatureEliteType Rank)
+        public float GetSpellDamageMod(CreatureClassifications classification)
         {
-            switch (Rank)                                           // define rates for each elite rank
+            switch (classification)                                           // define rates for each elite rank
             {
-                case CreatureEliteType.Normal:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureNormalSpelldamage);
-                case CreatureEliteType.Elite:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureEliteEliteSpelldamage);
-                case CreatureEliteType.RareElite:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureEliteRareeliteSpelldamage);
-                case CreatureEliteType.WorldBoss:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureEliteWorldbossSpelldamage);
-                case CreatureEliteType.Rare:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureEliteRareSpelldamage);
+                case CreatureClassifications.Normal:
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureSpelldamageNormal);
+                case CreatureClassifications.Elite:
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureSpelldamageElite);
+                case CreatureClassifications.RareElite:
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureSpelldamageRareelite);
+                case CreatureClassifications.Obsolete:
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureSpelldamageObsolete);
+                case CreatureClassifications.Rare:
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureSpelldamageRare);
+                case CreatureClassifications.Trivial:
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureSpelldamageTrivial);
+                case CreatureClassifications.MinusMob:
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureSpelldamageMinusmob);
                 default:
-                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureEliteEliteSpelldamage);
+                    return WorldConfig.GetFloatValue(WorldCfg.RateCreatureSpelldamageElite);
             }
         }
 
@@ -1729,7 +1744,7 @@ namespace Game.Entities
                 curhealth = m_creatureData.curhealth;
                 if (curhealth != 0)
                 {
-                    curhealth = (uint)(curhealth * GetHealthMod(GetCreatureTemplate().Rank));
+                    curhealth = (uint)(curhealth * GetHealthMod(GetCreatureTemplate().Classification));
                     if (curhealth < 1)
                         curhealth = 1;
                 }
@@ -2205,8 +2220,7 @@ namespace Game.Entities
             if (IsPet())
                 return false;
 
-            var rank = GetCreatureTemplate().Rank;
-            return rank != CreatureEliteType.Elite && rank != CreatureEliteType.RareElite;
+            return HasClassification(CreatureClassifications.Elite) || HasClassification(CreatureClassifications.RareElite);
         }
 
         public bool IsWorldBoss()
@@ -3448,6 +3462,9 @@ namespace Game.Entities
 
         public override MovementGeneratorType GetDefaultMovementType() { return DefaultMovementType; }
         public void SetDefaultMovementType(MovementGeneratorType mgt) { DefaultMovementType = mgt; }
+
+        public CreatureClassifications GetCreatureClassification() { return GetCreatureTemplate().Classification; }
+        public bool HasClassification(CreatureClassifications classification) { return GetCreatureTemplate().Classification == classification; }
 
         public long GetRespawnTime() { return m_respawnTime; }
         public void SetRespawnTime(uint respawn) { m_respawnTime = respawn != 0 ? GameTime.GetGameTime() + respawn : 0; }

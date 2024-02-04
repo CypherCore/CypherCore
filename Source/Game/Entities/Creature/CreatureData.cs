@@ -30,7 +30,7 @@ namespace Game.Entities
         public float SpeedWalk;
         public float SpeedRun;
         public float Scale;
-        public CreatureEliteType Rank;
+        public CreatureClassifications Classification;
         public uint DmgSchool;
         public uint BaseAttackTime;
         public uint RangeAttackTime;
@@ -165,7 +165,7 @@ namespace Game.Entities
 
             stats.CreatureType = (int)CreatureType;
             stats.CreatureFamily = (int)Family;
-            stats.Classification = (int)Rank;
+            stats.Classification = (int)Classification;
 
             for (uint i = 0; i < SharedConst.MaxCreatureKillCredit; ++i)
                 stats.ProxyCreatureID[i] = KillCredit[i];

@@ -176,7 +176,7 @@ namespace Game.Entities
 
             // Pet damage?
             if (IsTypeId(TypeId.Unit) && !IsPet())
-                DoneTotalMod *= ToCreature().GetSpellDamageMod(ToCreature().GetCreatureTemplate().Rank);
+                DoneTotalMod *= ToCreature().GetSpellDamageMod(ToCreature().GetCreatureTemplate().Classification);
 
             // Versatility
             Player modOwner = GetSpellModOwner();
