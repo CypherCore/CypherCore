@@ -17,6 +17,7 @@ namespace Scripts.Spells.Hunter
         public const uint AMurderOfCrowsVisual2 = 131951;
         public const uint AMurderOfCrowsVisual3 = 131952;
         public const uint AspectCheetahSlow = 186258;
+        public const uint AspectOfTheTurtlePacifyAura = 205769;
         public const uint Exhilaration = 109304;
         public const uint ExhilarationPet = 128594;
         public const uint ExhilarationR2 = 231546;
@@ -100,6 +101,31 @@ namespace Scripts.Spells.Hunter
         public override void Register()
         {
             AfterEffectRemove.Add(new(HandleOnRemove, 0, AuraType.ModIncreaseSpeed, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script] // 186265 - Aspect of the Turtle
+    class spell_hun_aspect_of_the_turtle : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.AspectOfTheTurtlePacifyAura);
+        }
+
+        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().CastSpell(GetTarget(), SpellIds.AspectOfTheTurtlePacifyAura, true);
+        }
+
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAurasDueToSpell(SpellIds.AspectOfTheTurtlePacifyAura);
+        }
+
+        public override void Register()
+        {
+            AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.ModAttackerMeleeHitChance, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModAttackerMeleeHitChance, AuraEffectHandleModes.Real));
         }
     }
 
