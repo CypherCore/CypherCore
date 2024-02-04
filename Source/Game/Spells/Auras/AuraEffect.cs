@@ -2432,6 +2432,24 @@ namespace Game.Spells
             caster.GetThreatManager().TauntUpdate();
         }
 
+        [AuraEffectHandler(AuraType.ModFixate)]
+        void HandleAuraModFixate(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            Unit caster = GetCaster();
+            Unit target = aurApp.GetTarget();
+
+            if (caster == null || !caster.IsAlive() || !target.IsAlive() || !caster.CanHaveThreatList())
+                return;
+
+            if (apply)
+                caster.GetThreatManager().FixateTarget(target);
+            else
+                caster.GetThreatManager().ClearFixate();
+        }
+
         /*****************************/
         /***        CONTROL        ***/
         /*****************************/
