@@ -1246,6 +1246,11 @@ namespace Game.Entities
             foreach (var itemPosCount in pos)
                 count += itemPosCount.count;
 
+            // quest objectives must be processed twice - QUEST_OBJECTIVE_FLAG_2_QUEST_BOUND_ITEM prevents item creation
+            ItemAddedQuestCheck(itemId, count, true, out bool hadBoundItemObjective);
+            if (hadBoundItemObjective)
+                return null;
+
             Item item = Item.CreateItem(itemId, count, context, this, bonusListIDs == null);
             if (item != null)
             {
@@ -1256,7 +1261,7 @@ namespace Game.Entities
 
                 item = StoreItem(pos, item, update);
 
-                ItemAddedQuestCheck(itemId, count);
+                ItemAddedQuestCheck(itemId, count, false);
                 UpdateCriteria(CriteriaType.ObtainAnyItem, itemId, count);
                 UpdateCriteria(CriteriaType.AcquireItem, itemId, count);
 
@@ -2500,7 +2505,7 @@ namespace Game.Entities
 
             packet.Item = new ItemInstance(item);
 
-            //packet.QuestLogItemID;
+            packet.QuestLogItemID = item.GetTemplate().QuestLogItemId;
             packet.Quantity = quantity;
             packet.QuantityInInventory = GetItemCount(item.GetEntry());
             packet.BattlePetSpeciesID = (int)item.GetModifier(ItemModifier.BattlePetSpeciesId);
@@ -3939,6 +3944,20 @@ namespace Game.Entities
             }
         }
 
+        public void ApplyItemLootedSpell(ItemTemplate itemTemplate)
+        {
+            if (itemTemplate.HasFlag(ItemFlags.Legacy))
+                return;
+
+            foreach (var effect in itemTemplate.Effects)
+            {
+                if (effect.TriggerType != ItemSpelltriggerType.OnLooted)
+                    continue;
+
+                CastSpell(this, (uint)effect.SpellID, true);
+            }
+        }
+
         void _RemoveAllItemMods()
         {
             Log.outDebug(LogFilter.Player, "_RemoveAllItemMods start.");
@@ -4856,17 +4875,17 @@ namespace Game.Entities
                             slots[0] = ProfessionSlots.FishingTool;
                             break;
                         }
-                        case ItemSubclassProfession.Blacksmithing :
-                        case ItemSubclassProfession.Leatherworking :
-                        case ItemSubclassProfession.Alchemy :
-                        case ItemSubclassProfession.Herbalism :
-                        case ItemSubclassProfession.Mining :
-                        case ItemSubclassProfession.Tailoring :
-                        case ItemSubclassProfession.Engineering :
-                        case ItemSubclassProfession.Enchanting :
-                        case ItemSubclassProfession.Skinning :
-                        case ItemSubclassProfession.Jewelcrafting :
-                        case ItemSubclassProfession.Inscription :
+                        case ItemSubclassProfession.Blacksmithing:
+                        case ItemSubclassProfession.Leatherworking:
+                        case ItemSubclassProfession.Alchemy:
+                        case ItemSubclassProfession.Herbalism:
+                        case ItemSubclassProfession.Mining:
+                        case ItemSubclassProfession.Tailoring:
+                        case ItemSubclassProfession.Engineering:
+                        case ItemSubclassProfession.Enchanting:
+                        case ItemSubclassProfession.Skinning:
+                        case ItemSubclassProfession.Jewelcrafting:
+                        case ItemSubclassProfession.Inscription:
                         {
                             int professionSlot = GetProfessionSlotFor(itemSkill);
                             if (professionSlot == -1)
@@ -6105,18 +6124,15 @@ namespace Game.Entities
 
                 --loot.unlootedCount;
 
-                if (Global.ObjectMgr.GetItemTemplate(item.itemid) != null)
+                if (newitem != null && newitem.GetQuality() > ItemQuality.Epic || (newitem.GetQuality() == ItemQuality.Epic && newitem.GetItemLevel(this) >= GuildConst.MinNewsItemLevel))
                 {
-                    if (newitem.GetQuality() > ItemQuality.Epic || (newitem.GetQuality() == ItemQuality.Epic && newitem.GetItemLevel(this) >= GuildConst.MinNewsItemLevel))
-                    {
-                        Guild guild = GetGuild();
-                        if (guild != null)
-                            guild.AddGuildNews(GuildNews.ItemLooted, GetGUID(), 0, item.itemid);
-                    }
-                }
+                    Guild guild = GetGuild();
+                    if (guild != null)
+                        guild.AddGuildNews(GuildNews.ItemLooted, GetGUID(), 0, item.itemid);
+                }                
 
                 // if aeLooting then we must delay sending out item so that it appears properly stacked in chat
-                if (aeResult == null)
+                if (aeResult == null || newitem == null)
                 {
                     SendNewItem(newitem, item.count, false, false, true, loot.GetDungeonEncounterId());
                     UpdateCriteria(CriteriaType.LootItem, item.itemid, item.count);
@@ -6130,7 +6146,10 @@ namespace Game.Entities
                 if (loot.loot_type == LootType.Item)
                     Global.LootItemStorage.RemoveStoredLootItemForContainer(lootWorldObjectGuid.GetCounter(), item.itemid, item.count, item.LootListId);
 
-                ApplyItemLootedSpell(newitem, true);
+                if (newitem != null)
+                    ApplyItemLootedSpell(newitem, true);
+                else
+                    ApplyItemLootedSpell(Global.ObjectMgr.GetItemTemplate(item.itemid));
             }
             else
                 SendEquipError(msg, null, null, item.itemid);

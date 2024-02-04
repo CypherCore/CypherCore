@@ -244,7 +244,7 @@ namespace Game
             obj.ObjectID = fields.Read<int>(4);
             obj.Amount = fields.Read<int>(5);
             obj.Flags = (QuestObjectiveFlags)fields.Read<uint>(6);
-            obj.Flags2 = fields.Read<uint>(7);
+            obj.Flags2 = (QuestObjectiveFlags2)fields.Read<uint>(7);
             obj.ProgressBarWeight = fields.Read<float>(8);
             obj.Description = fields.Read<string>(9);
 
@@ -1051,7 +1051,7 @@ namespace Game
         public int ObjectID;
         public int Amount;
         public QuestObjectiveFlags Flags;
-        public uint Flags2;
+        public QuestObjectiveFlags2 Flags2;
         public float ProgressBarWeight;
         public string Description;
         public int[] VisualEffects = Array.Empty<int>();

@@ -997,26 +997,21 @@ namespace Game.Spells
             {
                 // create the new item and store it
                 Item pItem = player.StoreNewItem(dest, newitemid, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(newitemid), null, context, bonusListIds);
-
-                // was it successful? return error if not
-                if (pItem == null)
+                if (pItem != null)
                 {
-                    player.SendEquipError(InventoryResult.ItemNotFound);
-                    return;
-                }
+                    // set the "Crafted by ..." property of the item
+                    if (pItem.GetTemplate().HasSignature())
+                        pItem.SetCreator(player.GetGUID());
 
-                // set the "Crafted by ..." property of the item
-                if (pItem.GetTemplate().HasSignature())
-                    pItem.SetCreator(player.GetGUID());
+                    // send info to the client
+                    player.SendNewItem(pItem, num_to_add, true, true);
 
-                // send info to the client
-                player.SendNewItem(pItem, num_to_add, true, true);
-
-                if (pItem.GetQuality() > ItemQuality.Epic || (pItem.GetQuality() == ItemQuality.Epic && pItem.GetItemLevel(player) >= GuildConst.MinNewsItemLevel))
-                {
-                    Guild guild = player.GetGuild();
-                    if (guild != null)
-                        guild.AddGuildNews(GuildNews.ItemCrafted, player.GetGUID(), 0, pProto.GetId());
+                    if (pItem.GetQuality() > ItemQuality.Epic || (pItem.GetQuality() == ItemQuality.Epic && pItem.GetItemLevel(player) >= GuildConst.MinNewsItemLevel))
+                    {
+                        Guild guild = player.GetGuild();
+                        if (guild != null)
+                            guild.AddGuildNews(GuildNews.ItemCrafted, player.GetGUID(), 0, pProto.GetId());
+                    }
                 }
 
                 // we succeeded in creating at least one item, so a levelup is possible

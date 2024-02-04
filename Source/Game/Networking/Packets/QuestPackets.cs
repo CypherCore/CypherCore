@@ -227,7 +227,7 @@ namespace Game.Networking.Packets
                     _worldPacket.WriteInt32(questObjective.ObjectID);
                     _worldPacket.WriteInt32(questObjective.Amount);
                     _worldPacket.WriteUInt32((uint)questObjective.Flags);
-                    _worldPacket.WriteUInt32(questObjective.Flags2);
+                    _worldPacket.WriteUInt32((uint)questObjective.Flags2);
                     _worldPacket.WriteFloat(questObjective.ProgressBarWeight);
 
                     _worldPacket.WriteInt32(questObjective.VisualEffects.Length);

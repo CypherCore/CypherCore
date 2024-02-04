@@ -181,9 +181,12 @@ namespace Game
                 }
 
                 Item item = player.StoreNewItem(dest, itemVS.ItemEntry, true, itemVS.RandomBonusListId, null, itemVS.Context, itemVS.BonusListIDs);
-                item.SetCreator(itemVS.CreatorGuid);
-                item.SetBinding(true);
-                GetCollectionMgr().AddItemAppearance(item);
+                if (item != null)
+                {
+                    item.SetCreator(itemVS.CreatorGuid);
+                    item.SetBinding(true);
+                    GetCollectionMgr().AddItemAppearance(item);
+                }
 
                 voidStorageTransferChanges.RemovedItems.Add(ObjectGuid.Create(HighGuid.Item, itemVS.ItemId));
 

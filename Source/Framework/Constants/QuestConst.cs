@@ -31,6 +31,7 @@ namespace Framework.Constants
         Max
     }
 
+    [Flags]
     public enum QuestObjectiveFlags
     {
         TrackedOnMinimap = 0x01, // Client Displays Large Yellow Blob On Minimap For Creature/Gameobject
@@ -43,6 +44,12 @@ namespace Framework.Constants
         KillPlayersSameFaction = 0x80,
         NoShareProgress = 0x0100,
         IgnoreSoulboundItems = 0x0200,
+    }
+
+    [Flags]
+    public enum QuestObjectiveFlags2
+    {
+        QuestBoundItem = 0x1   // Item is bound to a single objective, only increments the counter for one quest if multiple require the same item and is not stored in inventory
     }
 
     public enum QuestCompleteSpellType

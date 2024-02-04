@@ -2240,6 +2240,8 @@ namespace Game.Chat
                     }
 
                     Item item = playerTarget.StoreNewItem(dest, template.Value.GetId(), true, 0, null, itemContext, bonusListIDsForItem.Empty() ? null : bonusListIDsForItem);
+                    if (item == null)
+                        continue;
 
                     // remove binding (let GM give it to another player later)
                     if (player == playerTarget)

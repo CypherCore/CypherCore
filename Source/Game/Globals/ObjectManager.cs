@@ -5000,7 +5000,7 @@ namespace Game
             var time = Time.GetMSTime();
 
             uint count = 0;
-            SQLResult result = DB.World.Query("SELECT Id, FlagsCu, FoodType, MinMoneyLoot, MaxMoneyLoot, SpellPPMChance, RandomBonusListTemplateId FROM item_template_addon");
+            SQLResult result = DB.World.Query("SELECT Id, FlagsCu, FoodType, MinMoneyLoot, MaxMoneyLoot, SpellPPMChance, RandomBonusListTemplateId, QuestLogItemId FROM item_template_addon");
             if (!result.IsEmpty())
             {
                 do
@@ -5028,6 +5028,7 @@ namespace Game
                     itemTemplate.MaxMoneyLoot = maxMoneyLoot;
                     itemTemplate.SpellPPMRate = result.Read<float>(5);
                     itemTemplate.RandomBonusListTemplateId = result.Read<uint>(6);
+                    itemTemplate.QuestLogItemId = result.Read<int>(7);
                     ++count;
                 } while (result.NextRow());
             }

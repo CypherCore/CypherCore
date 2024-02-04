@@ -105,7 +105,7 @@ namespace Game.Loots
         {
             return allowedGUIDs.Contains(looter);
         }
-        
+
         public LootSlotType? GetUiTypeForPlayer(Player player, Loot loot)
         {
             if (is_looted)
@@ -721,8 +721,13 @@ namespace Game.Loots
                 --unlootedCount;
 
                 Item pItem = player.StoreNewItem(dest, lootItem.itemid, true, lootItem.randomBonusListId, null, lootItem.context, lootItem.BonusListIDs);
-                player.SendNewItem(pItem, lootItem.count, false, createdByPlayer, broadcast);
-                player.ApplyItemLootedSpell(pItem, true);
+                if (pItem != null)
+                {
+                    player.SendNewItem(pItem, lootItem.count, false, createdByPlayer, broadcast, GetDungeonEncounterId());
+                    player.ApplyItemLootedSpell(pItem, true);
+                }
+                else
+                    player.ApplyItemLootedSpell(Global.ObjectMgr.GetItemTemplate(lootItem.itemid));
             }
 
             return allLooted;
@@ -933,7 +938,7 @@ namespace Game.Loots
         {
             return _allowedLooters.Contains(looter);
         }
-        
+
         public void GenerateMoneyLoot(uint minAmount, uint maxAmount)
         {
             if (maxAmount > 0)
@@ -1075,7 +1080,7 @@ namespace Game.Loots
 
         public bool IsLooted() { return gold == 0 && unlootedCount == 0; }
         public bool IsChanged() { return _changed; }
-        
+
         public void AddLooter(ObjectGuid guid) { PlayersLooting.Add(guid); }
         public void RemoveLooter(ObjectGuid guid) { PlayersLooting.Remove(guid); }
 

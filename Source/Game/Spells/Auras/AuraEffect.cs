@@ -4589,12 +4589,8 @@ namespace Game.Spells
             }
 
             Item newitem = plCaster.StoreNewItem(dest, GetSpellEffectInfo().ItemType, true);
-            if (newitem == null)
-            {
-                plCaster.SendEquipError(InventoryResult.ItemNotFound);
-                return;
-            }
-            plCaster.SendNewItem(newitem, count, true, true);
+            if (newitem != null)
+                plCaster.SendNewItem(newitem, count, true, true);
         }
 
         [AuraEffectHandler(AuraType.BindSight)]

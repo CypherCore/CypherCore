@@ -352,6 +352,7 @@ namespace Game.Entities
         public uint RandomBonusListTemplateId;
         public BitSet[] Specializations = new BitSet[3];
         public uint ItemSpecClassMask;
+        public int QuestLogItemId;
 
         protected ItemRecord BasicData;
         protected ItemSparseRecord ExtendedData;
