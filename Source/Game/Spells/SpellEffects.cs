@@ -1235,11 +1235,6 @@ namespace Game.Spells
                         return;
                     }
                 }
-                else if (goInfo.type == GameObjectTypes.CapturePoint)
-                {
-                    gameObjTarget.AssaultCapturePoint(player);
-                    return;
-                }
                 else if (goInfo.type == GameObjectTypes.FlagStand)
                 {
                     //CanUseBattlegroundObject() already called in CheckCast()
@@ -1251,11 +1246,6 @@ namespace Game.Spells
                             bg.EventPlayerClickedOnFlag(player, gameObjTarget);
                         return;
                     }
-                }
-                else if (goInfo.type == GameObjectTypes.NewFlag)
-                {
-                    gameObjTarget.Use(player);
-                    return;
                 }
                 else if (m_spellInfo.Id == 1842 && gameObjTarget.GetGoInfo().type == GameObjectTypes.Trap && gameObjTarget.GetOwner() != null)
                 {
