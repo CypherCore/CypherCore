@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Game.AI;
 using Game.Entities;
 using Game.Networking.Packets;
 using Game.Scripting;
@@ -56,8 +57,10 @@ namespace Scripts.Spells.DeathKnight
         public const uint SludgeBelcherSummon = 212027;
         public const uint DeathStrikeEnabler = 89832; // Server Side
         public const uint TighteningGrasp = 206970;
-        public const uint TighteningGraspSlow = 143375;
+        //public const uint TighteningGraspSlow = 143375; // dropped in BfA
         public const uint Unholy = 137007;
+        public const uint UnholyGroundHaste = 374271;
+        public const uint UnholyGroundTalent = 374265;
         public const uint UnholyVigor = 196263;
         public const uint VolatileShielding = 207188;
         public const uint VolatileShieldingDamage = 207194;
@@ -300,31 +303,7 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 43265 - Death and Decay
-    class spell_dk_death_and_decay : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.TighteningGrasp, SpellIds.TighteningGraspSlow);
-        }
-
-        void HandleDummy()
-        {
-            if (GetCaster().HasAura(SpellIds.TighteningGrasp))
-            {
-                WorldLocation pos = GetExplTargetDest();
-                if (pos != null)
-                    GetCaster().CastSpell(pos, SpellIds.TighteningGraspSlow, true);
-            }
-        }
-
-        public override void Register()
-        {
-            OnCast.Add(new(HandleDummy));
-        }
-    }
-
-    [Script] // 43265 - Death and Decay (Aura)
-    class spell_dk_death_and_decay_AuraScript : AuraScript
+    class spell_dk_death_and_decay : AuraScript
     {
         void HandleDummyTick(AuraEffect aurEff)
         {
@@ -335,7 +314,7 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new(HandleDummyTick, 2, AuraType.PeriodicDummy));
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleDummyTick, 2, AuraType.PeriodicDummy));
         }
     }
 
@@ -889,6 +868,30 @@ namespace Scripts.Spells.DeathKnight
         public override void Register()
         {
             DoEffectCalcAmount.Add(new(CalculateAmount, 1, AuraType.ModIncreaseHealth2));
+        }
+    }
+
+    [Script] // 43265 - Death and Decay
+    class at_dk_death_and_decay : AreaTriggerAI
+    {
+        public at_dk_death_and_decay(AreaTrigger areatrigger) : base(areatrigger) { }
+
+        public override void OnUnitEnter(Unit unit)
+        {
+            Unit caster = at.GetCaster();
+            if (caster != null)
+            {
+                if (caster == unit)
+                {
+                    if (caster.HasAura(SpellIds.UnholyGroundTalent))
+                        caster.CastSpell(caster, SpellIds.UnholyGroundHaste);
+                }
+            }
+        }
+
+        public override void OnUnitExit(Unit unit)
+        {
+            unit.RemoveAurasDueToSpell(SpellIds.UnholyGroundHaste);
         }
     }
 }
