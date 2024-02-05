@@ -178,6 +178,12 @@ namespace Game.Entities
                 }
             }
 
+            if (IsInWorld)
+            {
+                Log.outError(LogFilter.Conversation, $"Attempted to start conversation (Id: {GetEntry()}) multiple times.");
+                return true; // returning true to not cause delete in Conversation::CreateConversation if convo is already started in ConversationScript::OnConversationCreate
+            }
+
             if (!GetMap().AddToMap(this))
                 return false;
 
