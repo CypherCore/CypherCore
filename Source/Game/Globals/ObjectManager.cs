@@ -4732,7 +4732,7 @@ namespace Game
             if (CliDB.LockStorage.ContainsKey(dataN))
                 return;
 
-            Log.outError(LogFilter.Sql, "Gameobject (Entry: {0} GoType: {1}) have data{2}={3} but lock (Id: {4}) not found.", goInfo.entry, goInfo.type, N, goInfo.Door.open, goInfo.Door.open);
+            Log.outError(LogFilter.Sql, "Gameobject (Entry: {0} GoType: {1}) have data{2}={3} but lock (Id: {4}) not found.", goInfo.entry, goInfo.type, N, dataN, dataN);
         }
 
         void CheckGOLinkedTrapId(GameObjectTemplate goInfo, uint dataN, uint N)
