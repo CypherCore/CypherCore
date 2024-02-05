@@ -43,7 +43,7 @@ namespace Game.Networking.Packets
                 QuestGiverGUIDs.Add(_worldPacket.ReadPackedGuid());
         }
     }
-    
+
     public class QuestGiverStatusPkt : ServerPacket
     {
         public QuestGiverStatusPkt() : base(ServerOpcodes.QuestGiverStatus, ConnectionType.Instance)
@@ -440,7 +440,7 @@ namespace Game.Networking.Packets
 
         public uint QuestID;
     }
-    
+
     public class QuestGiverQuestDetails : ServerPacket
     {
         public QuestGiverQuestDetails() : base(ServerOpcodes.QuestGiverQuestDetails) { }
@@ -848,6 +848,21 @@ namespace Game.Networking.Packets
         public override void Write() { }
     }
 
+    class QuestForceRemoved : ServerPacket
+    {
+        uint QuestID;
+
+        public QuestForceRemoved(uint questId) : base(ServerOpcodes.QuestForceRemoved)
+        {
+            QuestID = questId;
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(QuestID);
+        }
+    }
+
     class RequestWorldQuestUpdate : ClientPacket
     {
         public RequestWorldQuestUpdate(WorldPacket packet) : base(packet) { }
@@ -1038,7 +1053,7 @@ namespace Game.Networking.Packets
         public float POIx;
         public float POIy;
         public uint POIPriority;
-        public RaceMask<ulong> AllowableRaces = new (0xFFFFFFFFFFFFFFFF);
+        public RaceMask<ulong> AllowableRaces = new(0xFFFFFFFFFFFFFFFF);
         public string LogTitle;
         public string LogDescription;
         public string QuestDescription;
@@ -1372,7 +1387,7 @@ namespace Game.Networking.Packets
     }
 
     class PlayerChoiceResponse
-    {    
+    {
         public int ResponseID;
         public ushort ResponseIdentifier;
         public int ChoiceArtFileID;

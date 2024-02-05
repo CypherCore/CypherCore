@@ -2016,17 +2016,6 @@ namespace Game
                     player.DailyReset();
             }
 
-            StringBuilder questIds = new StringBuilder("DELETE cq, cqo FROM character_queststatus cq LEFT JOIN character_queststatus_objectives cqo ON cq.quest = cqo.quest WHERE cq.quest IN (");
-            foreach (var (questId, quest) in Global.ObjectMgr.GetQuestTemplates())
-            {
-                if (quest.IsDaily() && quest.HasFlagEx(QuestFlagsEx.RemoveOnPeriodicReset))
-                    questIds.Append($"{questId},");
-            }
-            questIds.Append("0)");
-
-            DB.Characters.Execute(questIds.ToString());
-
-
             // reselect pools
             Global.QuestPoolMgr.ChangeDailyQuests();
 
@@ -2068,16 +2057,6 @@ namespace Game
                 if (player != null)
                     player.ResetWeeklyQuestStatus();
             }
-
-            StringBuilder questIds = new StringBuilder("DELETE cq, cqo FROM character_queststatus cq LEFT JOIN character_queststatus_objectives cqo ON cq.quest = cqo.quest WHERE cq.quest IN (");
-            foreach (var (questId, quest) in Global.ObjectMgr.GetQuestTemplates())
-            {
-                if (quest.IsWeekly() && quest.HasFlagEx(QuestFlagsEx.RemoveOnWeeklyReset))
-                    questIds.Append($"{questId},");
-            }
-            questIds.Append("0)");
-
-            DB.Characters.Execute(questIds.ToString());
 
             // reselect pools
             Global.QuestPoolMgr.ChangeWeeklyQuests();
