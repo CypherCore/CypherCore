@@ -127,11 +127,11 @@ namespace Game.AI
                             }
                             break;
                         }
-                        case SmartScriptType.AreaTriggerEntityServerside:
+                        case SmartScriptType.AreaTriggerEntityCustom:
                         {
                             if (Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(new AreaTriggerId((uint)temp.EntryOrGuid, true)) == null)
                             {
-                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: AreaTrigger entry ({temp.EntryOrGuid} IsServerSide true) does not exist, skipped loading.");
+                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: AreaTrigger entry ({temp.EntryOrGuid} IsCustom true) does not exist, skipped loading.");
                                 continue;
                             }
                             break;
@@ -1123,9 +1123,9 @@ namespace Game.AI
                     }
                     case SmartEvents.AreatriggerOntrigger:
                     {
-                        if (e.Event.areatrigger.id != 0 && (e.GetScriptType() == SmartScriptType.AreaTriggerEntity || e.GetScriptType() == SmartScriptType.AreaTriggerEntityServerside))
+                        if (e.Event.areatrigger.id != 0 && (e.GetScriptType() == SmartScriptType.AreaTriggerEntity || e.GetScriptType() == SmartScriptType.AreaTriggerEntityCustom))
                         {
-                            Log.outError(LogFilter.Sql, $"SmartAIMgr: Entry {e.EntryOrGuid} SourceType {e.GetScriptType()} Event {e.EventId} Action {e.GetActionType()} areatrigger param not supported for SMART_SCRIPT_TYPE_AREATRIGGER_ENTITY and SMART_SCRIPT_TYPE_AREATRIGGER_ENTITY_SERVERSIDE, skipped.");
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr: Entry {e.EntryOrGuid} SourceType {e.GetScriptType()} Event {e.EventId} Action {e.GetActionType()} areatrigger param not supported for SMART_SCRIPT_TYPE_AREATRIGGER_ENTITY and SMART_SCRIPT_TYPE_AREATRIGGER_ENTITY_CUSTOM, skipped.");
                             return false;
                         }
 
@@ -2351,7 +2351,7 @@ namespace Game.AI
                 SmartScriptType.TimedActionlist => SmartScriptTypeMaskId.TimedActionlist,
                 SmartScriptType.Scene => SmartScriptTypeMaskId.Scene,
                 SmartScriptType.AreaTriggerEntity => SmartScriptTypeMaskId.AreatrigggerEntity,
-                SmartScriptType.AreaTriggerEntityServerside => SmartScriptTypeMaskId.AreatrigggerEntity,
+                SmartScriptType.AreaTriggerEntityCustom => SmartScriptTypeMaskId.AreatrigggerEntity,
                 _ => 0,
             };
 

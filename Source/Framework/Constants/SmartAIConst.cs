@@ -19,7 +19,7 @@ namespace Framework.Constants
         TimedActionlist = 9,
         Scene = 10,
         AreaTriggerEntity = 11,
-        AreaTriggerEntityServerside = 12,
+        AreaTriggerEntityCustom = 12,
         Max = 11
     }
 

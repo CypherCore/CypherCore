@@ -1039,7 +1039,9 @@ namespace Framework.Constants
         CmdparserCurrencyNoExist = 1516,
         CmdparserQuestNoExist = 1517,
 
-        // 1516-1998 - Free
+        // 1516-1996 - Free
+        DebugAreatriggerEntityEntered = 1997,
+        DebugAreatriggerEntityLeft = 1998,
         DebugAreatriggerLeft = 1999,
         // Ticket Strings 2000-2030
         CommandTicketnew = 2000, // 3.3.5 Reserved

@@ -2240,7 +2240,7 @@ namespace Game.AI
 
                             Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::ProcessAction:: SMART_ACTION_PLAY_ANIMKIT: target: {target.GetName()} ({target.GetGUID()}), AnimKit: {e.Action.animKit.animKit}, Type: {e.Action.animKit.type}");
                         }
-                        else if(IsGameObject(target))
+                        else if (IsGameObject(target))
                         {
                             switch (e.Action.animKit.type)
                             {
@@ -3764,9 +3764,7 @@ namespace Game.AI
 
         public void OnUpdate(uint diff)
         {
-            if ((_scriptType == SmartScriptType.Creature || _scriptType == SmartScriptType.GameObject
-                || _scriptType == SmartScriptType.AreaTriggerEntity || _scriptType == SmartScriptType.AreaTriggerEntityServerside)
-                && GetBaseObject() == null)
+            if ((_scriptType == SmartScriptType.Creature || _scriptType == SmartScriptType.GameObject || _scriptType == SmartScriptType.AreaTriggerEntity || _scriptType == SmartScriptType.AreaTriggerEntityCustom) && GetBaseObject() == null)
                 return;
 
             if (_me != null && _me.IsInEvadeMode())
@@ -3930,7 +3928,7 @@ namespace Game.AI
                     FillScript(e, _go, null, null, null, 0);
                     break;
                 case SmartScriptType.AreaTriggerEntity:
-                case SmartScriptType.AreaTriggerEntityServerside:
+                case SmartScriptType.AreaTriggerEntityCustom:
                     e = Global.SmartAIMgr.GetScript((int)_areaTrigger.GetEntry(), _scriptType);
                     FillScript(e, _areaTrigger, null, null, null, 0);
                     break;
@@ -4041,8 +4039,8 @@ namespace Game.AI
                         break;
                     case TypeId.AreaTrigger:
                         _areaTrigger = obj.ToAreaTrigger();
-                        _scriptType = _areaTrigger.IsServerSide() ? SmartScriptType.AreaTriggerEntityServerside : SmartScriptType.AreaTriggerEntity;
-                        Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.OnInitialize: source is AreaTrigger {_areaTrigger.GetEntry()}, IsServerSide {_areaTrigger.IsServerSide()}");
+                        _scriptType = _areaTrigger.IsCustom() ? SmartScriptType.AreaTriggerEntityCustom : SmartScriptType.AreaTriggerEntity;
+                        Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.OnInitialize: source is AreaTrigger {_areaTrigger.GetEntry()}, IsCustom {_areaTrigger.IsCustom()}");
                         break;
                     default:
                         Log.outError(LogFilter.Scripts, "SmartScript.OnInitialize: Unhandled TypeID !WARNING!");
@@ -4104,7 +4102,7 @@ namespace Game.AI
             Cell.VisitGridObjects(_me, searcher, range);
             return searcher.GetTarget();
         }
-        
+
         void DoFindFriendlyCC(List<Creature> creatures, float range)
         {
             if (_me == null)
@@ -4204,7 +4202,7 @@ namespace Game.AI
         }
 
         public bool HasAnyEventWithFlag(SmartEventFlags flag) { return _allEventFlags.HasAnyFlag(flag); }
-        
+
         public bool IsUnit(WorldObject obj) { return obj != null && (obj.IsTypeId(TypeId.Unit) || obj.IsTypeId(TypeId.Player)); }
 
         public bool IsPlayer(WorldObject obj) { return obj != null && obj.IsTypeId(TypeId.Player); }

@@ -5067,8 +5067,9 @@ namespace Game.Spells
             if (unitCaster == null || !m_targets.HasDst())
                 return;
 
+            AreaTriggerId createPropertiesId = new((uint)effectInfo.MiscValue, false);
             int duration = GetSpellInfo().CalcDuration(GetCaster());
-            AreaTrigger.CreateAreaTrigger((uint)effectInfo.MiscValue, unitCaster, null, GetSpellInfo(), destTarget.GetPosition(), duration, m_SpellVisual, this);
+            AreaTrigger.CreateAreaTrigger(createPropertiesId, destTarget.GetPosition(), duration, unitCaster, null, m_SpellVisual, GetSpellInfo(), this);
         }
 
         [SpellEffectHandler(SpellEffectName.RemoveTalent)]

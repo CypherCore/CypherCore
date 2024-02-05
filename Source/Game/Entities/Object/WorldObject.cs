@@ -429,20 +429,19 @@ namespace Game.Entities
             {
                 AreaTrigger areaTrigger = ToAreaTrigger();
                 AreaTriggerCreateProperties createProperties = areaTrigger.GetCreateProperties();
-                AreaTriggerTemplate areaTriggerTemplate = areaTrigger.GetTemplate();
                 AreaTriggerShapeInfo shape = areaTrigger.GetShape();
 
                 data.WriteUInt32(areaTrigger.GetTimeSinceCreated());
 
                 data.WriteVector3(areaTrigger.GetRollPitchYaw());
 
-                bool hasAbsoluteOrientation = areaTriggerTemplate != null && areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasAbsoluteOrientation);
-                bool hasDynamicShape = areaTriggerTemplate != null && areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasDynamicShape);
-                bool hasAttached = areaTriggerTemplate != null && areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasAttached);
-                bool hasFaceMovementDir = areaTriggerTemplate != null && areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasFaceMovementDir);
-                bool hasFollowsTerrain = areaTriggerTemplate != null && areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasFollowsTerrain);
-                bool hasUnk1 = areaTriggerTemplate != null && areaTriggerTemplate.HasFlag(AreaTriggerFlags.Unk1);
-                bool hasTargetRollPitchYaw = areaTriggerTemplate != null && areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasTargetRollPitchYaw);
+                bool hasAbsoluteOrientation = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasAbsoluteOrientation);
+                bool hasDynamicShape = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasDynamicShape);
+                bool hasAttached = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasAttached);
+                bool hasFaceMovementDir = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasFaceMovementDir);
+                bool hasFollowsTerrain = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasFollowsTerrain);
+                bool hasUnk1 = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.Unk1);
+                bool hasTargetRollPitchYaw = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasTargetRollPitchYaw);
                 bool hasScaleCurveID = createProperties != null && createProperties.ScaleCurveId != 0;
                 bool hasMorphCurveID = createProperties != null && createProperties.MorphCurveId != 0;
                 bool hasFacingCurveID = createProperties != null && createProperties.FacingCurveId != 0;
@@ -452,7 +451,7 @@ namespace Game.Entities
                 bool hasAreaTriggerPolygon = createProperties != null && shape.IsPolygon();
                 bool hasAreaTriggerCylinder = shape.IsCylinder();
                 bool hasDisk = shape.IsDisk();
-                bool hasBoundedPlane = shape.IsBoudedPlane();
+                bool hasBoundedPlane = shape.IsBoundedPlane();
                 bool hasAreaTriggerSpline = areaTrigger.HasSplines();
                 bool hasOrbit = areaTrigger.HasOrbit();
                 bool hasMovementScript = false;
@@ -525,15 +524,15 @@ namespace Game.Entities
 
                 if (hasAreaTriggerPolygon)
                 {
-                    data.WriteInt32(createProperties.PolygonVertices.Count);
-                    data.WriteInt32(createProperties.PolygonVerticesTarget.Count);
+                    data.WriteInt32(shape.PolygonVertices.Count);
+                    data.WriteInt32(shape.PolygonVerticesTarget.Count);
                     data.WriteFloat(shape.PolygonDatas.Height);
                     data.WriteFloat(shape.PolygonDatas.HeightTarget);
 
-                    foreach (var vertice in createProperties.PolygonVertices)
+                    foreach (var vertice in shape.PolygonVertices)
                         data.WriteVector2(vertice);
 
-                    foreach (var vertice in createProperties.PolygonVerticesTarget)
+                    foreach (var vertice in shape.PolygonVerticesTarget)
                         data.WriteVector2(vertice);
                 }
 

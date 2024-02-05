@@ -3,23 +3,13 @@
 
 namespace Framework.Constants
 {
-    public enum AreaTriggerFlags
+    public enum AreaTriggerFlag
     {
-        HasAbsoluteOrientation = 0x01,
-        HasDynamicShape = 0x02, // Implemented For Spheres
-        HasAttached = 0x04,
-        HasFaceMovementDir = 0x08,
-        HasFollowsTerrain = 0x010, // Nyi
-        Unk1 = 0x020,
-        HasTargetRollPitchYaw = 0x040, // Nyi
-        HasAnimID = 0x080,
-        Unk3 = 0x100,
-        HasAnimKitID = 0x200,
-        HasCircularMovement = 0x400,
-        Unk5 = 0x800
+        None = 0x00,
+        IsServerSide = 0x01
     }
 
-    public enum AreaTriggerTypes
+    public enum AreaTriggerShapeType
     {
         Sphere = 0,
         Box = 1,
@@ -48,5 +38,22 @@ namespace Framework.Constants
         Party = 4,
         Caster = 5,
         Max = 6
+    }
+
+    public enum AreaTriggerCreatePropertiesFlag
+    {
+        None = 0x00,
+        HasAbsoluteOrientation = 0x01,
+        HasDynamicShape = 0x02,
+        HasAttached = 0x04,
+        HasFaceMovementDir = 0x08,
+        HasFollowsTerrain = 0x10, // NYI
+        Unk1 = 0x20,
+        HasTargetRollPitchYaw = 0x40, // NYI
+        HasAnimId = 0x80, // DEPRECATED
+        Unk3 = 0x100,
+        HasAnimKitId = 0x200, // DEPRECATED
+        HasCircularMovement = 0x400, // DEPRECATED
+        Unk5 = 0x800,
     }
 }
