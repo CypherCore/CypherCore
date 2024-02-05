@@ -2237,7 +2237,7 @@ namespace Game.Entities
             return GetQuestSlotObjectiveFlag(slot, objective.StorageIndex) ? 1 : 0;
         }
 
-        int GetQuestSlotObjectiveData(uint questId, uint objectiveId)
+        public int GetQuestObjectiveData(uint questId, uint objectiveId)
         {
             ushort slot = FindQuestSlot(questId);
             if (slot >= SharedConst.MaxQuestLogSize)
