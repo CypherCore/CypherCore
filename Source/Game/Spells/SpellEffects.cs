@@ -3746,6 +3746,7 @@ namespace Game.Spells
 
             player.RemoveActiveQuest(quest_id, false);
             player.RemoveRewardedQuest(quest_id);
+            player.DespawnPersonalSummonsForQuest(quest_id);
 
             Global.ScriptMgr.OnQuestStatusChange(player, quest_id);
             Global.ScriptMgr.OnQuestStatusChange(player, quest, oldStatus, QuestStatus.None);

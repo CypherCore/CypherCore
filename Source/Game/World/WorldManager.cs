@@ -704,6 +704,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Game Event Data...");               // must be after loading pools fully
             Global.GameEventMgr.LoadFromDB();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading creature summoned data...");
+            Global.ObjectMgr.LoadCreatureSummonedData();                     // must be after LoadCreatureTemplates() and LoadQuests()
+
             Log.outInfo(LogFilter.ServerLoading, "Loading NPCSpellClick Data..."); // must be after LoadQuests
             Global.ObjectMgr.LoadNPCSpellClickSpells();
 

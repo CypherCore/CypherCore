@@ -107,6 +107,7 @@ namespace Game.Chat
 
                 player.RemoveActiveQuest(quest.Id, false);
                 player.RemoveRewardedQuest(quest.Id);
+                player.DespawnPersonalSummonsForQuest(quest.Id);
 
                 Global.ScriptMgr.OnQuestStatusChange(player, quest.Id);
                 Global.ScriptMgr.OnQuestStatusChange(player, quest, oldStatus, QuestStatus.None);
