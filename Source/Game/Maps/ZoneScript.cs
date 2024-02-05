@@ -43,7 +43,7 @@ namespace Game.Maps
         public virtual void SetData(uint dataId, uint value) { }
 
         public virtual void ProcessEvent(WorldObject obj, uint eventId, WorldObject invoker) { }
-
+        public virtual void DoAction(uint actionId, WorldObject source = null, WorldObject target = null) { }
         public virtual void OnFlagStateChange(GameObject flagInBase, FlagState oldValue, FlagState newValue, Player player) { }
 
         public virtual bool CanCaptureFlag(AreaTrigger areaTrigger, Player player) { return false; }
