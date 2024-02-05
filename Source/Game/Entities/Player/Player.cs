@@ -753,9 +753,6 @@ namespace Game.Entities
                     GetName(), viewpoint.GetEntry(), viewpoint.GetTypeId());
                 SetViewpoint(viewpoint, false);
             }
-
-            RemovePlayerLocalFlag(PlayerLocalFlags.OverrideTransportServerTime);
-            SetTransportServerTime(0);
         }
 
         void ScheduleDelayedOperation(PlayerDelayedOperations operation)
@@ -2178,6 +2175,9 @@ namespace Game.Entities
                     }
 
                     SendPacket(transferPending);
+
+                    RemovePlayerLocalFlag(PlayerLocalFlags.OverrideTransportServerTime);
+                    SetTransportServerTime(0);
                 }
 
                 // remove from old map now
