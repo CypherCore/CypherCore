@@ -513,6 +513,8 @@ namespace Game.Maps
             return _liquidMap[cx_int * _liquidWidth + cy_int];
         }
 
+        static float GROUND_LEVEL_OFFSET_HACK = 0.02f; // due to floating point precision issues, we have to resort to a small hack to fix inconsistencies in liquids
+
         // Get water state on map
         public ZLiquidStatus GetLiquidStatus(float x, float y, float z, LiquidHeaderTypeFlags? reqLiquidType, LiquidData data, float collisionHeight)
         {
@@ -577,11 +579,11 @@ namespace Game.Maps
 
             // Get water level
             float liquid_level = _liquidMap != null ? _liquidMap[lx_int * _liquidWidth + ly_int] : _liquidLevel;
-            // Get ground level (sub 0.2 for fix some errors)
+            // Get ground level (sub 0.02 for fix some errors)
             float ground_level = GetHeight(x, y);
 
             // Check water level and ground level
-            if (liquid_level < ground_level || z < ground_level)
+            if (liquid_level < (ground_level - GROUND_LEVEL_OFFSET_HACK) || z < (ground_level - GROUND_LEVEL_OFFSET_HACK))
                 return ZLiquidStatus.NoWater;
 
             // All ok in water . store data
