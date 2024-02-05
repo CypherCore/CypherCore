@@ -2138,6 +2138,59 @@ namespace Game.Entities
             return result;
         }
 
+        /// <summary>
+        /// Removes quest from log, flags rewarded, but does not give any rewards to player
+        /// </summary>
+        /// <param name="questIds"></param>
+        public void SkipQuests(List<uint> questIds)
+        {
+            bool updateVisibility = false;
+            foreach (uint questId in questIds)
+            {
+                Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
+                if (quest == null)
+                    return;
+
+                ushort questSlot = FindQuestSlot(questId);
+                QuestStatus oldStatus = GetQuestStatus(questSlot);
+
+                if (questSlot != SharedConst.MaxQuestLogSize)
+                {
+                    if (quest.LimitTime != 0)
+                        RemoveTimedQuest(questId);
+
+                    if (quest.HasFlag(QuestFlags.Pvp))
+                    {
+                        pvpInfo.IsHostile = pvpInfo.IsInHostileArea || HasPvPForcingQuest();
+                        UpdatePvPState();
+                    }
+
+                    SetQuestSlot(questSlot, 0);
+                    TakeQuestSourceItem(questId, true); // remove quest src item from player
+                    AbandonQuest(questId); // remove all quest items player received before abandoning quest. Note, this does not remove normal drop items that happen to be quest requirements.
+                    RemoveActiveQuest(questId);
+                }
+
+                SetRewardedQuest(questId);
+                SendQuestUpdate(questId);
+
+                if (!updateVisibility && quest.HasFlag(QuestFlags.UpdatePhaseshift))
+                    updateVisibility = PhasingHandler.OnConditionChange(this, false);
+
+                Global.ScriptMgr.OnQuestStatusChange(this, questId);
+                Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, QuestStatus.Rewarded);
+            }
+
+            SendQuestGiverStatusMultiple();
+
+            // make full db save
+            SaveToDB(false);
+
+            if (updateVisibility)
+                UpdateObjectVisibility();
+        }
+
+
         public ushort GetReqKillOrCastCurrentCount(uint quest_id, int entry)
         {
             Quest qInfo = Global.ObjectMgr.GetQuestTemplate(quest_id);
