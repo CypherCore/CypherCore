@@ -580,11 +580,14 @@ namespace Game.BattleGrounds.Zones
             }
         }
 
-        public override void HandleKillUnit(Creature creature, Player killer)
+        public override void HandleKillUnit(Creature creature, Unit killer)
         {
             if (creature.GetEntry() == SACreatureIds.Demolisher)
             {
-                UpdatePvpStat(killer, (uint)StrandOfTheAncientsPvpStats.DemolishersDestroyed, 1);
+                Player killerPlayer = killer.GetCharmerOrOwnerPlayerOrPlayerItself();
+                if (killerPlayer != null)
+                    UpdatePvpStat(killerPlayer, (uint)StrandOfTheAncientsPvpStats.DemolishersDestroyed, 1);
+
                 uint worldStateId = Attackers == BatttleGroundTeamId.Horde ? SAWorldStateIds.DestroyedHordeVehicles : SAWorldStateIds.DestroyedAllianceVehicles;
                 int currentDestroyedVehicles = Global.WorldStateMgr.GetValue((int)worldStateId, GetBgMap());
                 UpdateWorldState(worldStateId, currentDestroyedVehicles + 1);

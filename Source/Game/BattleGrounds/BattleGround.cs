@@ -1614,7 +1614,8 @@ namespace Game.BattleGrounds
                 RewardXPAtKill(killer, victim);
             }
         }
-        public virtual void HandleKillUnit(Creature creature, Player killer) { }
+
+        public virtual void HandleKillUnit(Creature creature, Unit killer) { }
 
         // Return the player's team based on Battlegroundplayer info
         // Used in same faction arena matches mainly
