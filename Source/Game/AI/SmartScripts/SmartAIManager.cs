@@ -1645,7 +1645,7 @@ namespace Game.AI
                 case SmartActions.WpStart:
                 {
                     WaypointPath path = Global.WaypointMgr.GetPath(e.Action.wpStart.pathID);
-                    if (path == null || path.nodes.Empty())
+                    if (path == null || path.Nodes.Empty())
                     {
                         Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent WaypointPath id {e.Action.wpStart.pathID}, skipped.");
                         return false;

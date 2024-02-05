@@ -2027,17 +2027,17 @@ namespace Game.AI
                                 foreach (uint pathId in waypoints)
                                 {
                                     WaypointPath path = Global.WaypointMgr.GetPath(pathId);
-                                    if (path == null || path.nodes.Empty())
+                                    if (path == null || path.Nodes.Empty())
                                         continue;
 
-                                    foreach (var waypoint in path.nodes)
+                                    foreach (var waypoint in path.Nodes)
                                     {
-                                        float distToThisPath = creature.GetDistance(waypoint.x, waypoint.y, waypoint.z);
-                                        if (distToThisPath < distanceToClosest)
+                                        float distanceToThisNode = creature.GetDistance(waypoint.X, waypoint.Y, waypoint.Z);
+                                        if (distanceToThisNode < distanceToClosest)
                                         {
-                                            distanceToClosest = distToThisPath;
+                                            distanceToClosest = distanceToThisNode;
                                             closestPathId = pathId;
-                                            closestWaypointId = waypoint.id;
+                                            closestWaypointId = waypoint.Id;
                                         }
                                     }
                                 }

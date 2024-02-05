@@ -33,7 +33,7 @@ namespace Game.AI
         SmartEscortState _escortState;
         uint _escortNPCFlags;
         uint _escortInvokerCheckTimer;
-        uint _currentWaypointNode;
+        uint _currentWaypointNodeId;
         bool _waypointReached;
         uint _waypointPauseTimer;
         bool _waypointPauseForced;
@@ -82,7 +82,7 @@ namespace Game.AI
             if (path == null)
                 return;
 
-            _currentWaypointNode = nodeId;
+            _currentWaypointNodeId = nodeId;
             _waypointPathEnded = false;
 
             _repeatWaypointPath = repeat;
@@ -105,7 +105,7 @@ namespace Game.AI
                 return null;
 
             WaypointPath path = Global.WaypointMgr.GetPath(entry);
-            if (path == null || path.nodes.Empty())
+            if (path == null || path.Nodes.Empty())
             {
                 GetScript().SetPathId(0);
                 return null;
@@ -147,7 +147,7 @@ namespace Game.AI
                 _waypointReached = false;
 
             AddEscortState(SmartEscortState.Paused);
-            GetScript().ProcessEventsFor(SmartEvents.WaypointPaused, null, _currentWaypointNode, GetScript().GetPathId());
+            GetScript().ProcessEventsFor(SmartEvents.WaypointPaused, null, _currentWaypointNodeId, GetScript().GetPathId());
         }
 
         public bool CanResumePath()
@@ -196,7 +196,7 @@ namespace Game.AI
 
             me.GetMotionMaster().MoveIdle();
 
-            GetScript().ProcessEventsFor(SmartEvents.WaypointStopped, null, _currentWaypointNode, GetScript().GetPathId());
+            GetScript().ProcessEventsFor(SmartEvents.WaypointStopped, null, _currentWaypointNodeId, GetScript().GetPathId());
 
             EndPath(fail);
         }
@@ -262,7 +262,7 @@ namespace Game.AI
                 return;
 
             uint pathid = GetScript().GetPathId();
-            GetScript().ProcessEventsFor(SmartEvents.WaypointEnded, null, _currentWaypointNode, pathid);
+            GetScript().ProcessEventsFor(SmartEvents.WaypointEnded, null, _currentWaypointNodeId, pathid);
 
             if (_repeatWaypointPath)
             {
@@ -278,7 +278,7 @@ namespace Game.AI
 
         public void ResumePath()
         {
-            GetScript().ProcessEventsFor(SmartEvents.WaypointResumed, null, _currentWaypointNode, GetScript().GetPathId());
+            GetScript().ProcessEventsFor(SmartEvents.WaypointResumed, null, _currentWaypointNodeId, GetScript().GetPathId());
 
             RemoveEscortState(SmartEscortState.Paused);
 
@@ -378,9 +378,9 @@ namespace Game.AI
                 return;
             }
 
-            _currentWaypointNode = nodeId;
+            _currentWaypointNodeId = nodeId;
 
-            GetScript().ProcessEventsFor(SmartEvents.WaypointReached, null, _currentWaypointNode, pathId);
+            GetScript().ProcessEventsFor(SmartEvents.WaypointReached, null, _currentWaypointNodeId, pathId);
 
             if (_waypointPauseTimer != 0 && !_waypointPauseForced)
             {
@@ -391,7 +391,7 @@ namespace Game.AI
             else if (HasEscortState(SmartEscortState.Escorting) && me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Waypoint)
             {
                 WaypointPath path = Global.WaypointMgr.GetPath(pathId);
-                if (path != null && _currentWaypointNode == path.nodes.Last()?.id)
+                if (path != null && _currentWaypointNodeId == path.Nodes.Last()?.Id)
                     _waypointPathEnded = true;
                 else
                     SetRun(_run);
@@ -568,8 +568,8 @@ namespace Game.AI
             if (formation == null || formation.GetLeader() == me || !formation.IsFormed())
             {
                 if (me.GetMotionMaster().GetCurrentMovementGeneratorType(MovementSlot.Default) != MovementGeneratorType.Waypoint)
-                    if (me.GetWaypointPath() != 0)
-                        me.GetMotionMaster().MovePath(me.GetWaypointPath(), true);
+                    if (me.GetWaypointPathId() != 0)
+                        me.GetMotionMaster().MovePath(me.GetWaypointPathId(), true);
                 
                 me.ResumeMovement();
             }

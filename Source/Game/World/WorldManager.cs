@@ -898,7 +898,7 @@ namespace Game
             Global.ObjectMgr.LoadVendors();                                  // must be after load CreatureTemplate and ItemTemplate
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Waypoints...");
-            Global.WaypointMgr.Load();
+            Global.WaypointMgr.LoadPaths();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Creature Formations...");
             FormationMgr.LoadCreatureFormations();

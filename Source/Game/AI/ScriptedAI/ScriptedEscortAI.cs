@@ -295,13 +295,13 @@ namespace Game.AI
             }
             else if (moveType == MovementGeneratorType.Waypoint)
             {
-                Cypher.Assert(Id < _path.nodes.Count, $"EscortAI::MovementInform: referenced movement id ({Id}) points to non-existing node in loaded path ({me.GetGUID()})");
-                WaypointNode waypoint = _path.nodes[(int)Id];
+                Cypher.Assert(Id < _path.Nodes.Count, $"EscortAI::MovementInform: referenced movement id ({Id}) points to non-existing node in loaded path ({me.GetGUID()})");
+                WaypointNode waypoint = _path.Nodes[(int)Id];
 
-                Log.outDebug(LogFilter.ScriptsAi, $"EscortAI::MovementInform: waypoint node {waypoint.id} reached ({me.GetGUID()})");
+                Log.outDebug(LogFilter.ScriptsAi, $"EscortAI::MovementInform: waypoint node {waypoint.Id} reached ({me.GetGUID()})");
 
                 // last point
-                if (Id == _path.nodes.Count - 1)
+                if (Id == _path.Nodes.Count - 1)
                 {
                     _started = false;
                     _ended = true;
@@ -310,7 +310,7 @@ namespace Game.AI
             }
         }
 
-        void AddWaypoint(uint id, float x, float y, float z, bool run)
+        public void AddWaypoint(uint id, float x, float y, float z, bool run)
         {
             AddWaypoint(id, x, y, z, 0.0f, TimeSpan.Zero, run);
         }
@@ -320,20 +320,14 @@ namespace Game.AI
             GridDefines.NormalizeMapCoord(ref x);
             GridDefines.NormalizeMapCoord(ref y);
 
-            WaypointNode waypoint = new();
-            waypoint.id = id;
-            waypoint.x = x;
-            waypoint.y = y;
-            waypoint.z = z;
-            waypoint.orientation = orientation;
-            waypoint.moveType = run ? WaypointMoveType.Run : WaypointMoveType.Walk;
-            waypoint.delay = (uint)waitTime.TotalMilliseconds;
-            _path.nodes.Add(waypoint);
+            WaypointNode waypoint = new(id, x, y, z, orientation, (uint)waitTime.TotalMilliseconds);
+            waypoint.MoveType = run ? WaypointMoveType.Run : WaypointMoveType.Walk;
+            _path.Nodes.Add(waypoint);
         }
 
         void ResetPath()
         {
-            _path.nodes.Clear();
+            _path.Nodes.Clear();
         }
 
         public void LoadPath(uint pathId)
@@ -350,7 +344,7 @@ namespace Game.AI
         /// todo get rid of this many variables passed in function.
         public void Start(bool isActiveAttacker = true, ObjectGuid playerGUID = default, Quest quest = null, bool instantRespawn = false, bool canLoopPath = false)
         {
-            if (_path.nodes.Empty())
+            if (_path.Nodes.Empty())
             {
                 Log.outError(LogFilter.ScriptsAi, $"EscortAI::Start: (script: {me.GetScriptName()}) path is empty ({me.GetGUID()})");
                 return;
@@ -376,7 +370,7 @@ namespace Game.AI
                 return;
             }
 
-            if (_path.nodes.Empty())
+            if (_path.Nodes.Empty())
             {
                 Log.outError(LogFilter.ScriptsAi, $"EscortAI::Start: (script: {me.GetScriptName()} starts with 0 waypoints (possible missing entry in script_waypoint. Quest: {(quest != null ? quest.Id : 0)} ({me.GetGUID()})");
                 return;
@@ -404,7 +398,7 @@ namespace Game.AI
                 me.SetImmuneToNPC(false);
             }
 
-            Log.outDebug(LogFilter.ScriptsAi, $"EscortAI::Start: (script: {me.GetScriptName()}, started with {_path.nodes.Count} waypoints. ActiveAttacker = {_activeAttacker}, Player = {_playerGUID} ({me.GetGUID()})");
+            Log.outDebug(LogFilter.ScriptsAi, $"EscortAI::Start: (script: {me.GetScriptName()}, started with {_path.Nodes.Count} waypoints. ActiveAttacker = {_activeAttacker}, Player = {_playerGUID} ({me.GetGUID()})");
 
             _started = false;
             AddEscortState(EscortState.Escorting);

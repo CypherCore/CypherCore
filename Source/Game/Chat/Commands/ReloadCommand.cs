@@ -915,16 +915,16 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("waypoint_data", RBACPermissions.CommandReloadWaypointData, true)]
+        [Command("waypoint_path", RBACPermissions.CommandReloadWaypointPath, true)]
         static bool HandleReloadWpCommand(CommandHandler handler, StringArguments args)
         {
             if (args != null)
-                Log.outInfo(LogFilter.Server, "Re-Loading Waypoints data from 'waypoints_data'");
+                Log.outInfo(LogFilter.Server, "Re-Loading Waypoints data from 'waypoint_path' and 'waypoint_path_node'");
 
-            Global.WaypointMgr.Load();
+            Global.WaypointMgr.LoadPaths();
 
             if (args != null)
-                handler.SendGlobalGMSysMessage("DB Table 'waypoint_data' reloaded.");
+                handler.SendGlobalGMSysMessage("DB Tables 'waypoint_path' and 'waypoint_path_node' reloaded.");
 
             return true;
         }

@@ -569,7 +569,7 @@ namespace Framework.Constants
         CommandReloadSpellGroupStackRules = 703,
         CommandReloadCypherString = 704,
         // 705 - 706 previously used, do not reuse
-        CommandReloadWaypointData = 707,
+        CommandReloadWaypointPath = 707,
         CommandReloadVehicleAccesory = 708,
         CommandReloadVehicleTemplateAccessory = 709,
         CommandReset = 710,
