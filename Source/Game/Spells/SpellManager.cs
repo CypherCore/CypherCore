@@ -989,8 +989,8 @@ namespace Game.Entities
 
             mSpellTargetPositions.Clear();                                // need for reload case
 
-            //                                         0   1         2           3                  4                  5
-            SQLResult result = DB.World.Query("SELECT ID, EffectIndex, MapID, PositionX, PositionY, PositionZ FROM spell_target_position");
+            //                                         0   1            2      3          4          5          6
+            SQLResult result = DB.World.Query("SELECT ID, EffectIndex, MapID, PositionX, PositionY, PositionZ, Orientation FROM spell_target_position");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell target coordinates. DB table `spell_target_position` is empty.");
@@ -1035,11 +1035,16 @@ namespace Game.Entities
                     continue;
                 }
 
-                // target facing is in degrees for 6484 & 9268... (blizz sucks)
-                if (spellInfo.GetEffect(effIndex).PositionFacing > 2 * Math.PI)
-                    st.target_Orientation = spellInfo.GetEffect(effIndex).PositionFacing * (float)Math.PI / 180;
+                if (!result.IsNull(6))
+                    st.target_Orientation = result.Read<float>(6);
                 else
-                    st.target_Orientation = spellInfo.GetEffect(effIndex).PositionFacing;
+                {
+                    // target facing is in degrees for 6484 & 9268... (blizz sucks)
+                    if (spellInfo.GetEffect(effIndex).PositionFacing > 2 * MathF.PI)
+                        st.target_Orientation = spellInfo.GetEffect(effIndex).PositionFacing * MathF.PI / 180;
+                    else
+                        st.target_Orientation = spellInfo.GetEffect(effIndex).PositionFacing;
+                }
 
                 bool hasTarget(Targets target)
                 {
