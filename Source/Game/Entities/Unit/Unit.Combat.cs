@@ -1009,7 +1009,10 @@ namespace Game.Entities
                     {
                         Player playerVictim = victim.ToPlayer();
                         if (playerVictim != null)
-                            bg.HandleKillPlayer(playerVictim, player);
+                        {
+                            if (player != null)
+                                bg.HandleKillPlayer(playerVictim, player);
+                        }
                         else
                             bg.HandleKillUnit(victim.ToCreature(), player);
                     }
