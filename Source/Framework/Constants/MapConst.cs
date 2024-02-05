@@ -121,6 +121,7 @@ namespace Framework.Constants
         WaterWalk = 0x02,
         InWater = 0x04,
         UnderWater = 0x08,
+        OceanFloor = 0x10,
 
         Swimming = InWater | UnderWater,
         InContact = Swimming | WaterWalk

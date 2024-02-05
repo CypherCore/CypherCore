@@ -551,14 +551,19 @@ namespace Game.Maps
                 data.LiquidInfo.type_flags = (LiquidHeaderTypeFlags)(1 << (int)liquidFlagType);
 
                 float delta = wmoData.liquidInfo.Value.Level - z;
+                ZLiquidStatus status = ZLiquidStatus.AboveWater;
                 if (delta > collisionHeight)
-                    data.LiquidStatus = ZLiquidStatus.UnderWater;
+                    status = ZLiquidStatus.UnderWater;
                 else if (delta > 0.0f)
-                    data.LiquidStatus = ZLiquidStatus.InWater;
+                    status = ZLiquidStatus.InWater;
                 else if (delta > -0.1f)
-                    data.LiquidStatus = ZLiquidStatus.WaterWalk;
-                else
-                    data.LiquidStatus = ZLiquidStatus.AboveWater;
+                    status = ZLiquidStatus.WaterWalk;
+
+                if (status != ZLiquidStatus.AboveWater)
+                    if (MathF.Abs(wmoData.floorZ - z) <= MapConst.GroundHeightTolerance)
+                        status |= ZLiquidStatus.OceanFloor;
+
+                data.LiquidStatus = status;
             }
             // look up liquid data from grid map
             if (gmap != null && useGridLiquid)
@@ -636,13 +641,23 @@ namespace Game.Maps
 
                     float delta = liquid_level - z;
 
-                    // Get position delta
+                    ZLiquidStatus status = ZLiquidStatus.AboveWater; // Above water
+
                     if (delta > collisionHeight)                   // Under water
-                        return ZLiquidStatus.UnderWater;
+                        status = ZLiquidStatus.UnderWater;
                     if (delta > 0.0f)                   // In water
-                        return ZLiquidStatus.InWater;
+                        status = ZLiquidStatus.InWater;
                     if (delta > -0.1f)                   // Walk on water
-                        return ZLiquidStatus.WaterWalk;
+                        status = ZLiquidStatus.WaterWalk;
+
+                    if (status != ZLiquidStatus.AboveWater)
+                    {
+                        if (MathF.Abs(ground_level - z) <= MapConst.GroundHeightTolerance)
+                            status |= ZLiquidStatus.OceanFloor;
+
+                        return status;
+                    }
+
                     result = ZLiquidStatus.AboveWater;
                 }
             }

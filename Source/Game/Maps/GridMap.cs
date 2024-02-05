@@ -463,7 +463,7 @@ namespace Game.Maps
 
             return (_holes[cellRow * 16 * 8 + cellCol * 8 + holeRow] & (1 << holeCol)) != 0;
         }
-        
+
         public float GetMinHeight(float x, float y)
         {
             if (_minHeightPlanes == null)
@@ -598,14 +598,20 @@ namespace Game.Maps
             // For speed check as int values
             float delta = liquid_level - z;
 
+            ZLiquidStatus status = ZLiquidStatus.AboveWater; // Above water
+
             if (delta > collisionHeight)                   // Under water
-                return ZLiquidStatus.UnderWater;
+                status = ZLiquidStatus.UnderWater;
             if (delta > 0.0f)                   // In water
-                return ZLiquidStatus.InWater;
+                status = ZLiquidStatus.InWater;
             if (delta > -0.1f)                   // Walk on water
-                return ZLiquidStatus.WaterWalk;
-            // Above water
-            return ZLiquidStatus.AboveWater;
+                status = ZLiquidStatus.WaterWalk;
+
+            if (status != ZLiquidStatus.AboveWater)
+                if (MathF.Abs(ground_level - z) <= MapConst.GroundHeightTolerance)
+                    status |= ZLiquidStatus.OceanFloor;
+
+            return status;
         }
 
         public float GetHeight(float x, float y) { return _gridGetHeight(x, y); }
