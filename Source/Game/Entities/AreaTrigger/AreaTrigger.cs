@@ -797,7 +797,12 @@ namespace Game.Entities
         public uint GetScriptId()
         {
             if (_spawnId != 0)
-                return Global.AreaTriggerDataStorage.GetAreaTriggerSpawn(_spawnId).ScriptId;
+            {
+                AreaTriggerSpawn spawn = Global.AreaTriggerDataStorage.GetAreaTriggerSpawn(_spawnId);
+                if (spawn != null && spawn.ScriptId != 0)
+                    return spawn.ScriptId;
+
+            }
 
             AreaTriggerCreateProperties createProperties = GetCreateProperties();
             if (createProperties != null)
