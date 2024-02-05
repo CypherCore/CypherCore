@@ -396,7 +396,7 @@ namespace Game.Movement
             //! but formationDest contains global coordinates
             init.MoveTo(waypoint.x, waypoint.y, waypoint.z, _generatePath);
 
-            if (waypoint.orientation.HasValue && waypoint.delay != 0)
+            if (waypoint.orientation.HasValue && (waypoint.delay > 0 || _currentNode == _path.nodes.Count - 1))
                 init.SetFacing(waypoint.orientation.Value);
 
             switch (waypoint.moveType)
