@@ -103,8 +103,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Majordomo
 
                 if (HealthBelowPct(50))
                     DoCast(me, SpellIds.AegisOfRagnaros, new CastSpellExtraArgs(true));
-
-                DoMeleeAttackIfReady();
             }
         }
 

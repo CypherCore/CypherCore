@@ -96,9 +96,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Shazzrah
                 if (me.HasUnitState(UnitState.Casting))
                     return;
             });
-
-
-            DoMeleeAttackIfReady();
         }
     }
 

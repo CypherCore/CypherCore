@@ -134,8 +134,6 @@ namespace Scripts.World.Achievements
             Unit target = SelectTarget(SelectTargetMethod.MaxThreat, 0, -50.0f, true);
             if (target != null)
                 DoCast(target, SpellIds.SummonPlayer);
-
-            DoMeleeAttackIfReady();
         }
     }
 

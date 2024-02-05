@@ -66,7 +66,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns.AscendantLo
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }

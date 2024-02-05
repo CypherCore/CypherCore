@@ -75,8 +75,7 @@ namespace Scripts.EasternKingdoms.AlteracValley.Vanndar
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }
-

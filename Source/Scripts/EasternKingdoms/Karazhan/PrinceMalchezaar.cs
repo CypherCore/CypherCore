@@ -513,8 +513,6 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
 
             if (phase == 2)
                 DoMeleeAttacksIfReady();
-            else
-                DoMeleeAttackIfReady();
         }
 
         void DoMeleeAttacksIfReady()

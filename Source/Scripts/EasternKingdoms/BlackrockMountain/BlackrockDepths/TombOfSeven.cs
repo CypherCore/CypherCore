@@ -189,7 +189,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.TombOfSeven
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
 
         public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)

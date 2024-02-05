@@ -72,8 +72,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.BaronGeddon
 
             if (me.HasUnitState(UnitState.Casting))
                 return;
-
-            DoMeleeAttackIfReady();
         }
     }
 

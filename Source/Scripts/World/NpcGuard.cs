@@ -107,12 +107,9 @@ namespace Scripts.World.NpcGuard
                     {
                         me.ResetAttackTimer();
                         DoCastVictim(spellInfo.Id);
-                        meleeContext.Repeat();
                         return;
                     }
                 }
-                me.AttackerStateUpdate(victim);
-                me.ResetAttackTimer();
                 meleeContext.Repeat();
             }).Schedule(TimeSpan.FromSeconds(5), spellContext =>
             {
@@ -183,7 +180,7 @@ namespace Scripts.World.NpcGuard
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, DoMeleeAttackIfReady);
+            _scheduler.Update(diff);
         }
 
         void ScheduleVanish()

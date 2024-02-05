@@ -502,7 +502,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.RendBlackhand
                 if (me.HasUnitState(UnitState.Casting))
                     return;
             });
-            DoMeleeAttackIfReady();
         }
     }
 }

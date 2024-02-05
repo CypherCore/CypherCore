@@ -60,7 +60,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.ShadowHunterV
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }

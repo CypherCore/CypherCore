@@ -46,7 +46,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Ebonroc
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }

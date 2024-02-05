@@ -50,7 +50,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.AmbassadorFl
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }

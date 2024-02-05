@@ -131,10 +131,7 @@ namespace Scripts.EasternKingdoms.AlteracValley
             _scheduler.Update(diff);
 
             if (me.HasUnitState(UnitState.Casting))
-                return;    
-
-            DoMeleeAttackIfReady();
+                return;
         }
     }
 }
-

@@ -570,9 +570,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                 Phase3 = true;
                 Talk(TextIds.SayRaiseSkeletons);
             }
-
-            DoMeleeAttackIfReady();
         }
     }
 }
-

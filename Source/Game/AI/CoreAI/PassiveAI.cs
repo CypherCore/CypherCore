@@ -11,7 +11,8 @@ namespace Game.AI
     {
         public PassiveAI(Creature creature) : base(creature)
         {
-            creature.SetReactState(ReactStates.Passive);
+            me.SetReactState(ReactStates.Passive);
+            me.SetCanMelee(false);
         }
 
         public override void UpdateAI(uint diff)
@@ -43,8 +44,6 @@ namespace Game.AI
             {
                 if (!me.IsValidAttackTarget(me.GetVictim()))
                     me.AttackStop();
-                else
-                    DoMeleeAttackIfReady();
             }
         }
 

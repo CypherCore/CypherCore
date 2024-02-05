@@ -69,7 +69,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns.Beauty
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }

@@ -54,7 +54,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Flamegor
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }

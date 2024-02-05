@@ -672,7 +672,7 @@ namespace Game.Entities
         public void RemoveAllDynObjects()
         {
             while (!m_dynObj.Empty())
-                m_dynObj.First().Remove();
+                m_dynObj.Last().Remove();
         }
 
         public GameObject GetGameObject(uint spellId)

@@ -72,7 +72,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Sulfuron
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 
@@ -125,7 +125,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Sulfuron
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }

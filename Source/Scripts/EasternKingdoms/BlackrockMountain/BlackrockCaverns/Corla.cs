@@ -78,8 +78,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns.Corla
         public override void UpdateAI(uint diff)
         {
             _scheduler.Update(diff);
-
-            DoMeleeAttackIfReady();
         }
     }
 }

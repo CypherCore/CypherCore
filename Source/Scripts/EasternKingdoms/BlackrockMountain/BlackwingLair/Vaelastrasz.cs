@@ -164,8 +164,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
                 Talk(TextIds.SayHalflife);
                 HasYelled = true;
             }
-
-            DoMeleeAttackIfReady();
         }
 
         public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)

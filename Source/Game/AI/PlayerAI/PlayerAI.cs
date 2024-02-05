@@ -573,8 +573,6 @@ namespace Game.AI
         {
             if (IsRangedAttacker())
                 DoRangedAttackIfReady();
-            else
-                DoMeleeAttackIfReady();
         }
 
         public void CancelAllShapeshifts()

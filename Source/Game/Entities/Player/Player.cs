@@ -421,69 +421,7 @@ namespace Game.Entities
 
             m_achievementSys.UpdateTimedCriteria(TimeSpan.FromMilliseconds(diff));
 
-            if (HasUnitState(UnitState.MeleeAttacking) && !HasUnitState(UnitState.Casting | UnitState.Charging))
-            {
-                Unit victim = GetVictim();
-                if (victim != null)
-                {
-                    // default combat reach 10
-                    // TODO add weapon, skill check
-
-                    if (IsAttackReady(WeaponAttackType.BaseAttack))
-                    {
-                        if (!IsWithinMeleeRange(victim))
-                        {
-                            SetAttackTimer(WeaponAttackType.BaseAttack, 100);
-                            if (m_swingErrorMsg != 1)               // send single time (client auto repeat)
-                            {
-                                SendAttackSwingNotInRange();
-                                m_swingErrorMsg = 1;
-                            }
-                        }
-                        //120 degrees of radiant range, if player is not in boundary radius
-                        else if (!IsWithinBoundaryRadius(victim) && !HasInArc(2 * MathFunctions.PI / 3, victim))
-                        {
-                            SetAttackTimer(WeaponAttackType.BaseAttack, 100);
-                            if (m_swingErrorMsg != 2)               // send single time (client auto repeat)
-                            {
-                                SendAttackSwingBadFacingAttack();
-                                m_swingErrorMsg = 2;
-                            }
-                        }
-                        else
-                        {
-                            m_swingErrorMsg = 0;                    // reset swing error state
-
-                            // prevent base and off attack in same time, delay attack at 0.2 sec
-                            if (HaveOffhandWeapon())
-                                if (GetAttackTimer(WeaponAttackType.OffAttack) < SharedConst.AttackDisplayDelay)
-                                    SetAttackTimer(WeaponAttackType.OffAttack, SharedConst.AttackDisplayDelay);
-
-                            // do attack
-                            AttackerStateUpdate(victim, WeaponAttackType.BaseAttack);
-                            ResetAttackTimer(WeaponAttackType.BaseAttack);
-                        }
-                    }
-
-                    if (!IsInFeralForm() && HaveOffhandWeapon() && IsAttackReady(WeaponAttackType.OffAttack))
-                    {
-                        if (!IsWithinMeleeRange(victim))
-                            SetAttackTimer(WeaponAttackType.OffAttack, 100);
-                        else if (!IsWithinBoundaryRadius(victim) && !HasInArc(2 * MathFunctions.PI / 3, victim))
-                            SetAttackTimer(WeaponAttackType.BaseAttack, 100);
-                        else
-                        {
-                            // prevent base and off attack in same time, delay attack at 0.2 sec
-                            if (GetAttackTimer(WeaponAttackType.BaseAttack) < SharedConst.AttackDisplayDelay)
-                                SetAttackTimer(WeaponAttackType.BaseAttack, SharedConst.AttackDisplayDelay);
-
-                            // do attack
-                            AttackerStateUpdate(victim, WeaponAttackType.OffAttack);
-                            ResetAttackTimer(WeaponAttackType.OffAttack);
-                        }
-                    }
-                }
-            }
+            DoMeleeAttackIfReady();
 
             if (HasPlayerFlag(PlayerFlags.Resting))
                 _restMgr.Update(diff);
@@ -7707,11 +7645,19 @@ namespace Game.Entities
 
         public bool CanTameExoticPets() { return IsGameMaster() || HasAuraType(AuraType.AllowTamePetType); }
 
-        void SendAttackSwingCantAttack() { SendPacket(new AttackSwingError(AttackSwingErr.CantAttack)); }
-        public void SendAttackSwingCancelAttack() { SendPacket(new CancelCombat()); }
-        void SendAttackSwingDeadTarget() { SendPacket(new AttackSwingError(AttackSwingErr.DeadTarget)); }
-        public void SendAttackSwingNotInRange() { SendPacket(new AttackSwingError(AttackSwingErr.NotInRange)); }
-        void SendAttackSwingBadFacingAttack() { SendPacket(new AttackSwingError(AttackSwingErr.BadFacing)); }
+        public void SendAttackSwingCancelAttack()
+        {
+            SendPacket(new CancelCombat());
+        }
+
+        public void SetAttackSwingError(AttackSwingErr? err)
+        {
+            if (err.HasValue && err.Value != m_swingErrorMsg)
+                SendPacket(new AttackSwingError(err.Value));
+
+            m_swingErrorMsg = err;
+        }
+
         public void SendAutoRepeatCancel(Unit target)
         {
             CancelAutoRepeat cancelAutoRepeat = new();

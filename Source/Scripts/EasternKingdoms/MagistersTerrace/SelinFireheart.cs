@@ -231,8 +231,6 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
                         _events.ScheduleEvent(EventIds.DrainCrystal, TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(25), 0, PhaseIds.Normal);
                 }
             }
-
-            DoMeleeAttackIfReady();
         }
     }
 
@@ -253,4 +251,3 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
         }
     }
 }
-

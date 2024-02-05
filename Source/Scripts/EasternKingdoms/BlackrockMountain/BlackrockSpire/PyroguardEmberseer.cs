@@ -214,8 +214,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
 
             if (!UpdateVictim())
                 return;
-
-            DoMeleeAttackIfReady();
         }
     }
 
@@ -261,7 +259,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }

@@ -118,7 +118,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Gyth
                 SummonedRend = true;
             }
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }

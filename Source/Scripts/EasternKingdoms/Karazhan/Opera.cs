@@ -284,8 +284,6 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                     SummonTito();
                 else SummonTitoTimer -= diff;
             }
-
-            DoMeleeAttackIfReady();
         }
 
         void SummonTito()
@@ -350,8 +348,6 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 YipTimer = 10000;
             }
             else YipTimer -= diff;
-
-            DoMeleeAttackIfReady();
         }
     }
 
@@ -456,8 +452,6 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 BrainWipeTimer = 20000;
             }
             else BrainWipeTimer -= diff;
-
-            DoMeleeAttackIfReady();
         }
     }
 
@@ -563,8 +557,6 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 }
                 else RustTimer -= diff;
             }
-
-            DoMeleeAttackIfReady();
         }
     }
 
@@ -671,8 +663,6 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 ScreamTimer = RandomHelper.URand(20000, 30000);
             }
             else ScreamTimer -= diff;
-
-            DoMeleeAttackIfReady();
         }
     }
 
@@ -749,8 +739,6 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 ChainLightningTimer = 15000;
             }
             else ChainLightningTimer -= diff;
-
-            DoMeleeAttackIfReady();
         }
     }
 
@@ -879,8 +867,6 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
         {
             if (!UpdateVictim())
                 return;
-
-            DoMeleeAttackIfReady();
 
             if (ChaseTimer <= diff)
             {
@@ -1235,8 +1221,6 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 EternalAffectionTimer = RandomHelper.URand(45000, 60000);
             }
             else EternalAffectionTimer -= diff;
-
-            DoMeleeAttackIfReady();
         }
     }
 
@@ -1432,8 +1416,6 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 PoisonThrustTimer = RandomHelper.URand(10000, 20000);
             }
             else PoisonThrustTimer -= diff;
-
-            DoMeleeAttackIfReady();
         }
     }
 }

@@ -50,15 +50,6 @@ namespace Game.AI
                     StopAttack();
                     return;
                 }
-
-                // Check before attacking to prevent pets from leaving stay position
-                if (me.GetCharmInfo().HasCommandState(CommandStates.Stay))
-                {
-                    if (me.GetCharmInfo().IsCommandAttack() || (me.GetCharmInfo().IsAtStay() && me.IsWithinMeleeRange(me.GetVictim())))
-                        DoMeleeAttackIfReady();
-                }
-                else
-                    DoMeleeAttackIfReady();
             }
             else
             {

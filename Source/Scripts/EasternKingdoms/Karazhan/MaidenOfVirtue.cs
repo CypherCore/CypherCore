@@ -81,7 +81,7 @@ namespace Scripts.EasternKingdoms.Karazhan.MaidenOfVirtue
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }

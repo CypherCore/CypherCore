@@ -207,8 +207,7 @@ namespace Scripts.World.NpcsSpecial
                     ResetFlagTimer -= diff;
             }
 
-            if (UpdateVictim())
-                DoMeleeAttackIfReady();
+            UpdateVictim();
         }
 
         public override void ReceiveEmote(Player player, TextEmotes emote)

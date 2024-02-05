@@ -49,7 +49,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Garr
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 
@@ -110,7 +110,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Garr
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }

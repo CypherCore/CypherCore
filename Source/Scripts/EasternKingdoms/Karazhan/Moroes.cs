@@ -137,6 +137,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             _scheduler.Schedule(TimeSpan.FromSeconds(30), MiscConst.GroupNonEnrage, task =>
             {
                 DoCast(me, SpellIds.Vanish);
+                me.SetCanMelee(false);
                 InVanish = true;
 
                 task.Schedule(TimeSpan.FromSeconds(5), garroteTask =>
@@ -148,6 +149,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                         target.CastSpell(target, SpellIds.Garrote, true);
 
                     InVanish = false;
+                    me.SetCanMelee(true);
                 });
 
                 task.Repeat();
@@ -263,11 +265,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                 _scheduler.CancelGroup(MiscConst.GroupNonEnrage);
             }
 
-            _scheduler.Update(diff, () =>
-            {
-                if (!InVanish)
-                    DoMeleeAttackIfReady();
-            });
+            _scheduler.Update(diff);
         }
     }
 
@@ -318,8 +316,6 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
         {
             if (instance.GetBossState(DataTypes.Moroes) != EncounterState.InProgress)
                 EnterEvadeMode();
-
-            DoMeleeAttackIfReady();
         }
     }
 

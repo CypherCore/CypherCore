@@ -337,8 +337,6 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
                 }
                 else PhaseTimer -= diff;
             }
-
-            DoMeleeAttackIfReady();
         }
     }
 }

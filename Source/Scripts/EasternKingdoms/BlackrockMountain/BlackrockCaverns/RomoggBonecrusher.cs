@@ -102,7 +102,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns.RomoggBonec
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }

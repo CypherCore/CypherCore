@@ -318,7 +318,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
             if (!UpdateVictim() && phase != NightbanePhases.Intro)
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 

@@ -125,8 +125,6 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
                         break;
                 }
             });
-
-            DoMeleeAttackIfReady();
         }
     }
 

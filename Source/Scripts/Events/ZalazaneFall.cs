@@ -206,7 +206,7 @@ namespace Scripts.Events.ZalazaneFall
             if (_tigerGuid.IsEmpty())
                 return;
 
-            _scheduler.Update(diff, DoMeleeAttackIfReady);
+            _scheduler.Update(diff);
         }
     }
 

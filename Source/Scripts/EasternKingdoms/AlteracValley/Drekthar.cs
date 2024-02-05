@@ -91,8 +91,7 @@ namespace Scripts.EasternKingdoms.AlteracValley.Drekthar
             if (!UpdateVictim() || !CheckInRoom())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }
-

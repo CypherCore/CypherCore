@@ -340,7 +340,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 
@@ -497,6 +497,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                     AddThreat(unit, 1000.0f);
 
                 InVanish = true;
+                me.SetCanMelee(false);
                 task.Repeat(TimeSpan.FromSeconds(30));
                 task.Schedule(TimeSpan.FromSeconds(10), waitTask =>
                 {
@@ -505,6 +506,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                         DoCastVictim(SpellIds.Backstab, new CastSpellExtraArgs(true));
                         DoCastVictim(SpellIds.KidneyShot, new CastSpellExtraArgs(true));
                         me.SetVisible(true);       // ...? Hacklike
+                        me.SetCanMelee(true);
                         InVanish = false;
                     }
                     waitTask.Repeat();
@@ -523,6 +525,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
         {
             Initialize();
             me.SetVisible(true);
+            me.SetCanMelee(true);
 
             base.Reset();
         }
@@ -535,9 +538,6 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             base.UpdateAI(diff);
 
             _scheduler.Update(diff);
-
-            if (!InVanish)
-                DoMeleeAttackIfReady();
         }
     }
 
@@ -608,7 +608,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 
             base.UpdateAI(diff);
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 
@@ -649,7 +649,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 
             base.UpdateAI(diff);
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 
@@ -740,7 +740,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                 HasIceBlocked = true;
             }
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 
@@ -823,7 +823,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 
             base.UpdateAI(diff);
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 
@@ -908,7 +908,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             base.UpdateAI(diff);
 
             if (me.IsWithinDistInMap(me.GetVictim(), SharedConst.AttackDistance))
-                _meleeScheduler.Update(diff, () => DoMeleeAttackIfReady());
+                _meleeScheduler.Update(diff);
             else
                 _scheduler.Update(diff);
         }
@@ -973,7 +973,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 
             base.UpdateAI(diff);
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 
@@ -1037,7 +1037,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 
             base.UpdateAI(diff);
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }

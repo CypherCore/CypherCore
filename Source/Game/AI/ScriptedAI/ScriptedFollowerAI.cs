@@ -158,10 +158,7 @@ namespace Game.AI
 
         void UpdateFollowerAI(uint diff)
         {
-            if (!UpdateVictim())
-                return;
-
-            DoMeleeAttackIfReady();
+            UpdateVictim();
         }
 
         public void StartFollow(Player player, uint factionForFollower = 0, Quest quest = null)

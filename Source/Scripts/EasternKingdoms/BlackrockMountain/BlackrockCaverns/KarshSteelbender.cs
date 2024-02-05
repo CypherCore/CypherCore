@@ -64,8 +64,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns.KarshSteelb
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }
-

@@ -71,8 +71,6 @@ namespace Game.AI
                 if (info != null)
                     _events.ScheduleEvent(spellId, info.cooldown, info.cooldown * 2);
             }
-            else
-                DoMeleeAttackIfReady();
         }
 
         public override void SpellInterrupted(uint spellId, uint unTimeMs)
@@ -87,10 +85,7 @@ namespace Game.AI
 
         public override void UpdateAI(uint diff)
         {
-            if (!UpdateVictim())
-                return;
-
-            DoMeleeAttackIfReady();
+            UpdateVictim();
         }
     }
 
@@ -193,6 +188,7 @@ namespace Game.AI
             _minRange = spellInfo != null ? spellInfo.GetMinRange(false) : 0;
             creature.m_CombatDistance = spellInfo != null ? spellInfo.GetMaxRange(false) : 0;
             creature.m_SightDistance = creature.m_CombatDistance;
+            creature.SetCanMelee(false);
         }
 
         public override bool CanAIAttack(Unit victim)
@@ -234,6 +230,7 @@ namespace Game.AI
             LoadConditions();
             _doDismiss = false;
             _dismissTimer = VEHICLE_DISMISS_TIME;
+            me.SetCanMelee(false);
         }
 
         public override void UpdateAI(uint diff)
@@ -315,10 +312,7 @@ namespace Game.AI
 
         public override void UpdateAI(uint diff)
         {
-            if (!UpdateVictim())
-                return;
-
-            DoMeleeAttackIfReady();
+            UpdateVictim();
         }
     }
 }

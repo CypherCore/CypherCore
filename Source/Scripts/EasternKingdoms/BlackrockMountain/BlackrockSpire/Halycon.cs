@@ -72,7 +72,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Halycon
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }

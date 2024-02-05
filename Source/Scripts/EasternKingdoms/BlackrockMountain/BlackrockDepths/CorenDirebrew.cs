@@ -237,7 +237,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
             if (!UpdateVictim() && phase != DirebrewPhases.Intro)
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 
@@ -283,7 +283,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
 
         public override void UpdateAI(uint diff)
         {
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 
@@ -514,4 +514,3 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
         }
     }
 }
-

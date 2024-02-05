@@ -144,7 +144,7 @@ namespace Scripts.DragonIsles.AzureVault.Leymor
 
         public override void UpdateAI(uint diff)
         {
-            _scheduler.Update(diff, DoMeleeAttackIfReady);
+            _scheduler.Update(diff);
         }
     }
 
@@ -203,7 +203,7 @@ namespace Scripts.DragonIsles.AzureVault.Leymor
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, DoMeleeAttackIfReady);
+            _scheduler.Update(diff);
         }
     }
 

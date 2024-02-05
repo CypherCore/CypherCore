@@ -144,7 +144,7 @@ namespace Game.Entities
         uint m_titanGripPenaltySpellId;
         uint m_deathTimer;
         long m_deathExpireTime;
-        byte m_swingErrorMsg;
+        AttackSwingErr? m_swingErrorMsg;
         DateTime m_regenInterruptTimestamp;
         uint m_regenTimerCount;
         uint m_foodEmoteTimerCount;

@@ -281,14 +281,8 @@ namespace Game.Entities
 
             Creature creature = ToCreature();
             // creatures cannot attack while evading
-            if (creature != null)
-            {
-                if (creature.IsInEvadeMode())
-                    return false;
-
-                if (creature.CanMelee())
-                    meleeAttack = false;
-            }
+            if (creature != null && creature.IsInEvadeMode())
+                return false;
 
             // nobody can attack GM in GM-mode
             if (victim.IsTypeId(TypeId.Player))
@@ -522,12 +516,15 @@ namespace Game.Entities
             return m_baseAttackSpeed[(int)att];
         }
 
-        public void AttackerStateUpdate(Unit victim, WeaponAttackType attType = WeaponAttackType.BaseAttack, bool extra = false)
+        public void DoMeleeAttackIfReady()
         {
-            if (HasUnitFlag(UnitFlags.Pacified))
+            if (!HasUnitState(UnitState.MeleeAttacking))
                 return;
 
-            if (HasUnitState(UnitState.CannotAutoattack) && !extra)
+            if (HasUnitState(UnitState.Charging))
+                return;
+
+            if (IsCreature() && !ToCreature().CanMelee())
                 return;
 
             if (HasUnitState(UnitState.Casting))
@@ -536,6 +533,70 @@ namespace Game.Entities
                 if (channeledSpell == null || !channeledSpell.GetSpellInfo().HasAttribute(SpellAttr5.AllowActionsDuringChannel))
                     return;
             }
+
+            Unit victim = GetVictim();
+            if (victim == null)
+                return;
+
+            AttackSwingErr? getAutoAttackError()
+            {
+                if (!IsWithinMeleeRange(victim))
+                    return AttackSwingErr.NotInRange;
+
+                //120 degrees of radiant range, if player is not in boundary radius
+                if (!IsWithinBoundaryRadius(victim) && !HasInArc(2 * MathF.PI / 3, victim))
+                    return AttackSwingErr.BadFacing;
+
+                return null;
+            };
+
+            if (IsAttackReady(WeaponAttackType.BaseAttack))
+            {
+                AttackSwingErr? autoAttackError = getAutoAttackError();
+                if (!autoAttackError.HasValue)
+                {
+                    // prevent base and off attack in same time, delay attack at 0.2 sec
+                    if (HaveOffhandWeapon())
+                        if (GetAttackTimer(WeaponAttackType.OffAttack) < SharedConst.AttackDisplayDelay)
+                            SetAttackTimer(WeaponAttackType.OffAttack, SharedConst.AttackDisplayDelay);
+
+                    // do attack
+                    AttackerStateUpdate(victim, WeaponAttackType.BaseAttack);
+                    ResetAttackTimer(WeaponAttackType.BaseAttack);
+                }
+                else
+                    SetAttackTimer(WeaponAttackType.BaseAttack, 100);
+
+                Player attackerPlayer = ToPlayer();
+                if (attackerPlayer != null)
+                    attackerPlayer.SetAttackSwingError(autoAttackError);
+            }
+
+            if (!IsInFeralForm() && HaveOffhandWeapon() && IsAttackReady(WeaponAttackType.OffAttack))
+            {
+                AttackSwingErr? autoAttackError = getAutoAttackError();
+                if (!autoAttackError.HasValue)
+                {
+                    // prevent base and off attack in same time, delay attack at 0.2 sec
+                    if (GetAttackTimer(WeaponAttackType.BaseAttack) < SharedConst.AttackDisplayDelay)
+                        SetAttackTimer(WeaponAttackType.BaseAttack, SharedConst.AttackDisplayDelay);
+
+                    // do attack
+                    AttackerStateUpdate(victim, WeaponAttackType.OffAttack);
+                    ResetAttackTimer(WeaponAttackType.OffAttack);
+                }
+                else
+                    SetAttackTimer(WeaponAttackType.OffAttack, 100);
+            }
+        }
+
+        public void AttackerStateUpdate(Unit victim, WeaponAttackType attType = WeaponAttackType.BaseAttack, bool extra = false)
+        {
+            if (HasUnitFlag(UnitFlags.Pacified))
+                return;
+
+            if (HasUnitState(UnitState.CannotAutoattack) && !extra)
+                return;
 
             if (HasAuraType(AuraType.DisableAttackingExceptAbilities))
                 return;

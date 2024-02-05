@@ -1236,7 +1236,6 @@ namespace Game.Entities
                     case UnitState.Confused:
                         if (!HasUnitState(UnitState.Stunned))
                         {
-                            ClearUnitState(UnitState.MeleeAttacking);
                             SendMeleeAttackStop();
                             // SendAutoRepeatCancel ?
                             SetConfused(true);
@@ -1245,7 +1244,6 @@ namespace Game.Entities
                     case UnitState.Fleeing:
                         if (!HasUnitState(UnitState.Stunned | UnitState.Confused))
                         {
-                            ClearUnitState(UnitState.MeleeAttacking);
                             SendMeleeAttackStop();
                             // SendAutoRepeatCancel ?
                             SetFeared(true);

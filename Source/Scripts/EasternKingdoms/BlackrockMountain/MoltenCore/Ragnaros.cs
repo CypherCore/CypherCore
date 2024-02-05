@@ -294,9 +294,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                             break;
                     }
                 });
-
-
-                DoMeleeAttackIfReady();
             }
         }
     }
@@ -314,14 +311,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
         public override void JustDied(Unit killer)
         {
             instance.SetData(MCMiscConst.DataRagnarosAdds, 1);
-        }
-
-        public override void UpdateAI(uint diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            DoMeleeAttackIfReady();
         }
     }
 }

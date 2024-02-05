@@ -175,8 +175,6 @@ namespace Scripts.EasternKingdoms.Deadmines
                 }
                 else uiTimer -= uiDiff;
             }
-
-            DoMeleeAttackIfReady();
         }
 
         public override void MovementInform(MovementGeneratorType uiType, uint uiId)

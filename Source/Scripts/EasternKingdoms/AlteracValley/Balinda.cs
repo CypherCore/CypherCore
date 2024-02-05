@@ -141,8 +141,7 @@ namespace Scripts.EasternKingdoms.AlteracValley.Balinda
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }
-

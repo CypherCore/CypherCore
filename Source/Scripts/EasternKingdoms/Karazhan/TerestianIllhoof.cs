@@ -124,7 +124,7 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
 
         public override void UpdateAI(uint diff)
         {
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 
@@ -153,10 +153,7 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () =>
-            {
-                DoMeleeAttackIfReady();
-            });
+            _scheduler.Update(diff);
         }
     }
 
@@ -239,7 +236,7 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }

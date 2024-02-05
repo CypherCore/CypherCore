@@ -58,8 +58,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.MotherSmolder
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }
-

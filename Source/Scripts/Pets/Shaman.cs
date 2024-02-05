@@ -32,8 +32,6 @@ namespace Scripts.Pets.Shaman
                 return;
 
             _scheduler.Update(diff);
-
-            DoMeleeAttackIfReady();
         }
     }
 
@@ -74,7 +72,7 @@ namespace Scripts.Pets.Shaman
             if (me.HasUnitState(UnitState.Casting))
                 return;
 
-            _scheduler.Update(diff, DoMeleeAttackIfReady);
+            _scheduler.Update(diff);
         }
     }
 }

@@ -112,7 +112,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Curator
 
         public override void UpdateAI(uint diff)
         {
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
 
         bool _infused;

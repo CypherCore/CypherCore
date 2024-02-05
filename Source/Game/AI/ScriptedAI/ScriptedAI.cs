@@ -45,10 +45,7 @@ namespace Game.AI
         public override void UpdateAI(uint diff)
         {
             //Check if we have a current target
-            if (!UpdateVictim())
-                return;
-
-            DoMeleeAttackIfReady();
+            UpdateVictim();
         }
 
         //Start movement toward victim
@@ -655,8 +652,6 @@ namespace Game.AI
                 if (me.HasUnitState(UnitState.Casting))
                     return;
             });
-
-            DoMeleeAttackIfReady();
         }
 
         public void _DespawnAtEvade()
@@ -766,8 +761,6 @@ namespace Game.AI
                 if (me.HasUnitState(UnitState.Casting))
                     return;
             });
-
-            DoMeleeAttackIfReady();
         }
 
         // Hook used to execute events scheduled into EventMap without the need

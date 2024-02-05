@@ -70,7 +70,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.PitLordArgaloth
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 

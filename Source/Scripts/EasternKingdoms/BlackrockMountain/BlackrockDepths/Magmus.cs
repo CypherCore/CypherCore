@@ -71,7 +71,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Magmus
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
 
         public override void JustDied(Unit killer)

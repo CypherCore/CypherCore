@@ -248,8 +248,6 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
                         break;
                 }
             });
-
-            DoMeleeAttackIfReady();
         }
     }
 }

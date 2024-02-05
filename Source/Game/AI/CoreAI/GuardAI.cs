@@ -12,10 +12,7 @@ namespace Game.AI
 
         public override void UpdateAI(uint diff)
         {
-            if (!UpdateVictim())
-                return;
-
-            DoMeleeAttackIfReady();
+            UpdateVictim();
         }
 
         public override bool CanSeeAlways(WorldObject obj)

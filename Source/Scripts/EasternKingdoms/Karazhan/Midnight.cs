@@ -206,7 +206,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
             if (!UpdateVictim() && _phase != Phases.None)
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
 
         public override void SpellHit(WorldObject caster, SpellInfo spellInfo)
@@ -346,7 +346,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
             if (!UpdateVictim() || _phase == Phases.Mounted)
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }

@@ -310,21 +310,13 @@ namespace Game.AI
 
             CheckConditions(diff);
 
-            bool hasVictim = UpdateVictim();
+            UpdateVictim();
 
             GetScript().OnUpdate(diff);
 
             UpdatePath(diff);
             UpdateFollow(diff);
             UpdateDespawn(diff);
-
-            if (!IsAIControlled())
-                return;
-
-            if (!hasVictim)
-                return;
-            
-            DoMeleeAttackIfReady();
         }
 
         bool IsEscortInvokerInRange()

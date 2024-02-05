@@ -97,8 +97,6 @@ namespace Scripts.Pets.Hunter
                 else
                     _spellTimer -= diff;
             }
-
-            DoMeleeAttackIfReady();
         }
     }
 }

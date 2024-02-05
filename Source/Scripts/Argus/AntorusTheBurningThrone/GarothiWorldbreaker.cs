@@ -408,9 +408,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.Argus
             });
 
 
-            if (me.GetVictim() != null && me.GetVictim().IsWithinMeleeRange(me))
-                DoMeleeAttackIfReady();
-            else
+            if (me.GetVictim() == null && !me.GetVictim().IsWithinMeleeRange(me))
                 DoSpellAttackIfReady(SpellIds.Carnage);
         }
 

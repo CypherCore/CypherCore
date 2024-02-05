@@ -538,8 +538,6 @@ namespace Scripts.BrokenIsles.ZoneMardum
 
             if (me.HasUnitState(UnitState.Casting))
                 return;
-
-            DoMeleeAttackIfReady();
         }
     }
 

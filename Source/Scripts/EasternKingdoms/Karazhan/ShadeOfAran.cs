@@ -138,6 +138,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
         public override void Reset()
         {
             Initialize();
+            me.SetCanMelee(true);
 
             // Not in progress
             instance.SetBossState(DataTypes.Aran, EncounterState.NotStarted);
@@ -462,8 +463,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
                 else FlameWreathCheckTime -= diff;
             }
 
-            if (ArcaneCooldown != 0 && FireCooldown != 0 && FrostCooldown != 0)
-                DoMeleeAttackIfReady();
+            me.SetCanMelee(ArcaneCooldown != 0 && FireCooldown != 0 && FrostCooldown != 0);
         }
 
         public override void DamageTaken(Unit pAttacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)

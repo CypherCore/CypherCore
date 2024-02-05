@@ -92,8 +92,7 @@ namespace Scripts.EasternKingdoms.AlteracValley.Galvangar
             if (!UpdateVictim() || !CheckInRoom())
                 return;
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }
-

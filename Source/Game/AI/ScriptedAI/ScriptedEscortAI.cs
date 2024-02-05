@@ -261,10 +261,7 @@ namespace Game.AI
 
         public virtual void UpdateEscortAI(uint diff)
         {
-            if (!UpdateVictim())
-                return;
-
-            DoMeleeAttackIfReady();
+            UpdateVictim();
         }
 
         public override void MovementInform(MovementGeneratorType moveType, uint Id)

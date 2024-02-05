@@ -98,8 +98,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.OverlordWyrmt
                 }
             }
 
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+            _scheduler.Update(diff);
         }
     }
 }
-

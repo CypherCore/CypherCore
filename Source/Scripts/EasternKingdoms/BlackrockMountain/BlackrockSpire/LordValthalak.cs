@@ -94,9 +94,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                     frenzy15 = true;
                 }
             }
-
-            DoMeleeAttackIfReady();
         }
     }
 }
-
