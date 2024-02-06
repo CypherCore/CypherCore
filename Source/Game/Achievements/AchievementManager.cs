@@ -483,8 +483,8 @@ namespace Game.Achievements
             if (!achievement.Flags.HasAnyFlag(AchievementFlags.TrackingFlag))
                 _achievementPoints += achievement.Points;
 
-            UpdateCriteria(CriteriaType.EarnAchievement, achievement.Id, 0, 0, null, referencePlayer);
-            UpdateCriteria(CriteriaType.EarnAchievementPoints, achievement.Points, 0, 0, null, referencePlayer);
+            referencePlayer.UpdateCriteria(CriteriaType.EarnAchievement, achievement.Id, 0, 0, null);
+            referencePlayer.UpdateCriteria(CriteriaType.EarnAchievementPoints, achievement.Points, 0, 0, null);
 
             Global.ScriptMgr.OnAchievementCompleted(referencePlayer, achievement);
 
