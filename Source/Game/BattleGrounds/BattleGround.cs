@@ -1359,7 +1359,10 @@ namespace Game.BattleGrounds
         {
             m_Map = map;
             if (map != null)
+            {
                 _pvpStatIds = Global.DB2Mgr.GetPVPStatIDsForMap(map.GetId());
+                OnMapSet(map);
+            }
             else
                 _pvpStatIds = null;
         }
@@ -1792,6 +1795,9 @@ namespace Game.BattleGrounds
         {
             return m_Players.LookupByKey(playerGuid);
         }
+
+        // Called when valid BattlegroundMap is assigned to the battleground
+        public virtual void OnMapSet(BattlegroundMap map) { }
 
         public virtual void StartingEventCloseDoors() { }
         public virtual void StartingEventOpenDoors() { }
