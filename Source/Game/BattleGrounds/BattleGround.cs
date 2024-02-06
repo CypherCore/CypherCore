@@ -130,10 +130,7 @@ namespace Game.BattleGrounds
             // Update start time and reset stats timer
             SetElapsedTime(GetElapsedTime() + diff);
             if (GetStatus() == BattlegroundStatus.WaitJoin)
-            {
                 m_ResetStatTimer += diff;
-                m_CountdownTimer += diff;
-            }
 
             PostUpdateImpl(diff);
         }
@@ -278,26 +275,6 @@ namespace Game.BattleGrounds
                 }
             }
 
-            // Send packet every 10 seconds until the 2nd field reach 0
-            if (m_CountdownTimer >= 10000)
-            {
-                uint countdownMaxForBGType = IsArena() ? BattlegroundConst.ArenaCountdownMax : BattlegroundConst.BattlegroundCountdownMax;
-
-                StartTimer timer = new();
-                timer.Type = TimerType.Pvp;
-                timer.TimeLeft = countdownMaxForBGType - (GetElapsedTime() / 1000);
-                timer.TotalTime = countdownMaxForBGType;
-
-                foreach (var guid in GetPlayers().Keys)
-                {
-                    Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player != null)
-                        player.SendPacket(timer);
-                }
-
-                m_CountdownTimer = 0;
-            }
-
             if (!m_Events.HasAnyFlag(BattlegroundEventFlags.Event1))
             {
                 m_Events |= BattlegroundEventFlags.Event1;
@@ -315,6 +292,11 @@ namespace Game.BattleGrounds
                     EndNow();
                     return;
                 }
+
+                _preparationStartTime = GameTime.GetGameTime();
+                foreach (Group group in m_BgRaids)
+                    if (group != null)
+                        group.StartCountdown(CountdownTimerType.Pvp, TimeSpan.FromSeconds((int)StartDelayTimes[BattlegroundConst.EventIdFirst] / 1000), _preparationStartTime);
 
                 StartingEventCloseDoors();
                 SetStartDelayTime(StartDelayTimes[BattlegroundConst.EventIdFirst]);
@@ -1017,17 +999,7 @@ namespace Game.BattleGrounds
             else
             {
                 if (GetStatus() == BattlegroundStatus.WaitJoin)                 // not started yet
-                {
                     player.CastSpell(player, BattlegroundConst.SpellPreparation, true);   // reduces all mana cost of spells.
-
-                    uint countdownMaxForBGType = IsArena() ? BattlegroundConst.ArenaCountdownMax : BattlegroundConst.BattlegroundCountdownMax;
-                    StartTimer timer = new();
-                    timer.Type = TimerType.Pvp;
-                    timer.TimeLeft = countdownMaxForBGType - (GetElapsedTime() / 1000);
-                    timer.TotalTime = countdownMaxForBGType;
-
-                    player.SendPacket(timer);
-                }
 
                 if (bp.Mercenary)
                 {
@@ -1062,6 +1034,11 @@ namespace Game.BattleGrounds
                 group = new Group();
                 SetBgRaid(team, group);
                 group.Create(player);
+                TimeSpan countdownMaxForBGType = TimeSpan.FromSeconds((int)StartDelayTimes[BattlegroundConst.EventIdFirst] / 1000);
+                if (_preparationStartTime != 0)
+                    group.StartCountdown(CountdownTimerType.Pvp, countdownMaxForBGType, _preparationStartTime);
+                else
+                    group.StartCountdown(CountdownTimerType.Pvp, countdownMaxForBGType);
             }
             else                                            // raid already exist
             {
@@ -1952,7 +1929,6 @@ namespace Game.BattleGrounds
         BattlegroundStatus m_Status;
         uint m_ClientInstanceID;                          // the instance-id which is sent to the client and without any other internal use
         uint m_StartTime;
-        uint m_CountdownTimer;
         uint m_ResetStatTimer;
         uint m_ValidStartPositionTimer;
         int m_EndTime;                                    // it is set to 120000 when bg is ending and it decreases itself
@@ -1994,6 +1970,9 @@ namespace Game.BattleGrounds
         List<uint> _pvpStatIds = new();
 
         List<BattlegroundPlayerPosition> _playerPositions = new();
+
+        // Time when the first message "the battle will begin in 2minutes" is send (or 1m for arenas)
+        long _preparationStartTime;
         #endregion
     }
 

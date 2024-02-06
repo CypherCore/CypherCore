@@ -1394,6 +1394,25 @@ namespace Game.Groups
             }
         }
 
+        public void StartCountdown(CountdownTimerType timerType, TimeSpan duration, long? startTime = null)
+        {
+            if (timerType < 0 || (int)timerType >= _countdowns.Length)
+                return;
+
+            if (_countdowns[(int)timerType] == null)
+                _countdowns[(int)timerType] = new();
+
+            _countdowns[(int)timerType].StartCountdown(duration, startTime);
+        }
+
+        public CountdownInfo GetCountdownInfo(CountdownTimerType timerType)
+        {
+            if (timerType < 0 || (int)timerType >= _countdowns.Length)
+                return null;
+
+            return _countdowns[(int)timerType];
+        }
+
         public void SetLootMethod(LootMethod method)
         {
             m_lootMethod = method;
@@ -1927,7 +1946,7 @@ namespace Game.Groups
         {
             m_recentInstances[mapId] = Tuple.Create(instanceOwner, instanceId);
         }
-        
+
         List<MemberSlot> m_memberSlots = new();
         GroupRefManager m_memberMgr = new();
         List<Player> m_invitees = new();
@@ -1961,6 +1980,8 @@ namespace Game.Groups
         // Raid markers
         RaidMarker[] m_markers = new RaidMarker[MapConst.RaidMarkersCount];
         uint m_activeMarkers;
+
+        CountdownInfo[] _countdowns = new CountdownInfo[3];
     }
 
     public class MemberSlot
@@ -1986,4 +2007,32 @@ namespace Game.Groups
         public WorldLocation Location;
         public ObjectGuid TransportGUID;
     }
+
+    public class CountdownInfo
+    {
+        long _startTime;
+        long _endTime;
+
+        public long GetTimeLeft()
+        {
+            return Math.Max(_endTime - GameTime.GetGameTime(), 0);
+        }
+
+        public void StartCountdown(TimeSpan duration, long? startTime)
+        {
+            _startTime = startTime.HasValue ? startTime.Value : GameTime.GetGameTime();
+            _endTime = (long)(_startTime + duration.TotalSeconds);
+        }
+
+        public bool IsRunning()
+        {
+            return _endTime > GameTime.GetGameTime();
+        }
+
+        public long GetTotalTime()
+        {
+            return _endTime - _startTime;
+        }
+    }
+
 }

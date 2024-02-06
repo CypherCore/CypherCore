@@ -166,4 +166,11 @@ namespace Framework.Constants
 
         Max
     }
+
+    public enum CountdownTimerType
+    {
+        Pvp = 0,
+        ChallengeMode = 1,
+        PlayerCountdown = 2
+    }
 }

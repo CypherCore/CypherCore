@@ -1888,13 +1888,6 @@ namespace Framework.Constants
         Max
     }
 
-    public enum TimerType
-    {
-        Pvp = 0,
-        ChallengerMode = 1,
-        PlayerCountdown = 2
-    }
-
     public enum GameError : uint
     {
         System = 0,
