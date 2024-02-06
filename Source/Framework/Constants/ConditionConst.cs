@@ -102,6 +102,9 @@ namespace Framework.Constants
         TrainerSpell = 31,
         ObjectIdVisibility = 32,
         SpawnGroup = 33,
+
+        MaxDbAllowed,
+        ReferenceCondition = MaxDbAllowed,
         Max
     }
 

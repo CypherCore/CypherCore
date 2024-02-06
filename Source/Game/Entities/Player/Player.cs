@@ -2564,7 +2564,7 @@ namespace Game.Entities
 
             foreach (var gossipMenuItem in menuItemBounds)
             {
-                if (!ConditionMgr.IsObjectMeetToConditions(this, source, gossipMenuItem.Conditions))
+                if (!gossipMenuItem.Conditions.Meets(this, source))
                     continue;
 
                 bool canTalk = true;
@@ -2889,7 +2889,7 @@ namespace Game.Entities
                 if (menu.TextId == 0)
                     continue;
 
-                if (ConditionMgr.IsObjectMeetToConditions(this, source, menu.Conditions))
+                if (menu.Conditions.Meets(this, source))
                     textId = menu.TextId;
             }
 
@@ -2913,9 +2913,9 @@ namespace Game.Entities
                     {
                         var menuBounds = ObjectMgr.GetGossipMenusMapBounds(menuId);
 
-                        foreach (var itr in menuBounds)
+                        foreach (var menu in menuBounds)
                         {
-                            if (!ConditionMgr.IsObjectMeetToConditions(this, source, itr.Conditions))
+                            if (!menu.Conditions.Meets(this, source))
                                 continue;
 
                             menuIdToShow = menuId;

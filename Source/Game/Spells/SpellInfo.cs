@@ -3883,19 +3883,8 @@ namespace Game.Spells
         public void _UnloadImplicitTargetConditionLists()
         {
             // find the same instances of ConditionList and delete them.
-            foreach (var effectInfo in _effects)
-            {
-                var cur = effectInfo.ImplicitTargetConditions;
-                if (cur == null)
-                    continue;
-
-                for (int j = (int)effectInfo.EffectIndex; j < _effects.Count; ++j)
-                {
-                    SpellEffectInfo eff = _effects[j];
-                    if (eff.ImplicitTargetConditions == cur)
-                        eff.ImplicitTargetConditions = null;
-                }
-            }
+            foreach (SpellEffectInfo  effect in _effects)
+                effect.ImplicitTargetConditions = null;
         }
 
         public bool MeetsFutureSpellPlayerCondition(Player player)

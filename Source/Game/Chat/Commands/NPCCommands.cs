@@ -334,7 +334,7 @@ namespace Game.Chat
             {
                 handler.SendSysMessage(CypherStrings.CommandNpcShowlootLabel, "Standard items", loot.items.Count);
                 foreach (LootItem item in loot.items)
-                    if (!item.is_looted && !item.freeforall && item.conditions.Empty())
+                    if (!item.is_looted && !item.freeforall && item.conditions.IsEmpty())
                         _ShowLootEntry(handler, item.itemid, item.count);
 
                 if (!loot.GetPlayerFFAItems().Empty())

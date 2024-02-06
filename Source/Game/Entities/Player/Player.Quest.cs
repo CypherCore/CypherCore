@@ -3301,8 +3301,7 @@ namespace Game.Entities
                     var clickBounds = Global.ObjectMgr.GetSpellClickInfoMapBounds(obj.GetEntry());
                     foreach (var spellClickInfo in clickBounds)
                     {
-                        List<Condition> conds = Global.ConditionMgr.GetConditionsForSpellClickEvent(obj.GetEntry(), spellClickInfo.spellId);
-                        if (conds != null)
+                        if (Global.ConditionMgr.HasConditionsForSpellClickEvent(obj.GetEntry(), spellClickInfo.spellId))
                         {
                             ObjectFieldData objMask = new();
                             UnitData unitMask = new();

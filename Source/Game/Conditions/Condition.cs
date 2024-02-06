@@ -619,8 +619,10 @@ namespace Game.Conditions
         {
             StringBuilder ss = new();
             ss.AppendFormat("[Condition SourceType: {0}", SourceType);
-            if (SourceType < ConditionSourceType.Max)
+            if (SourceType < ConditionSourceType.MaxDbAllowed)
                 ss.AppendFormat(" ({0})", Global.ConditionMgr.StaticSourceTypeData[(int)SourceType]);
+            else if (SourceType == ConditionSourceType.ReferenceCondition)
+                ss.Append(" (Reference)");
             else
                 ss.Append(" (Unknown)");
             if (Global.ConditionMgr.CanHaveSourceGroupSet(SourceType))
@@ -657,6 +659,52 @@ namespace Game.Conditions
         public uint ScriptId;
         public byte ConditionTarget;
         public bool NegativeCondition;
+    }
+
+    public struct ConditionId
+    {
+        public uint SourceGroup;
+        public int SourceEntry;
+        public uint SourceId;
+
+        public ConditionId(uint sourceGroup, int sourceEntry, uint sourceId)
+        {
+            SourceGroup = sourceGroup;
+            SourceEntry = sourceEntry;
+            SourceId = sourceId;
+        }
+
+        public override int GetHashCode()
+        {
+            return SourceGroup.GetHashCode() ^ SourceEntry.GetHashCode() ^ SourceId.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is ConditionId)
+                return (ConditionId)obj == this;
+
+            return false;
+        }
+
+        public static bool operator ==(ConditionId left, ConditionId right)
+        {
+            if (left.SourceGroup != right.SourceGroup)
+                return false;
+
+            if (left.SourceEntry != right.SourceEntry)
+                return false;
+
+            if (left.SourceId != right.SourceId)
+                return false;
+
+            return true;
+        }
+
+        public static bool operator !=(ConditionId left, ConditionId right)
+        {
+            return !(left == right);
+        }
     }
 
     public class ConditionSourceInfo
