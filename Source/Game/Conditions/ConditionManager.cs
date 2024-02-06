@@ -2423,7 +2423,7 @@ namespace Game
                         break;
                 }
 
-                if (buffer.GetCurrentStream().Position < buffer.GetSize())
+                if (buffer.GetCurrentStream().Position >= buffer.GetSize())
                     break;
 
                 resultLogic = (WorldStateExpressionLogic)buffer.ReadUInt8();
