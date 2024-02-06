@@ -168,13 +168,17 @@ namespace Game.Entities
 
         public bool Start()
         {
-            foreach (ConversationLine line in m_conversationData.Lines.GetValue())
+            ConversationTemplate conversationTemplate = Global.ConversationDataStorage.GetConversationTemplate(GetEntry()); // never null, already checked in ::Create / ::CreateConversation
+            if (!conversationTemplate.Flags.HasFlag(ConversationFlags.AllowWithoutSpawnedActor))
             {
-                ConversationActorField actor = line.ActorIndex < m_conversationData.Actors.Size() ? m_conversationData.Actors[line.ActorIndex] : null;
-                if (actor == null || (actor.CreatureID == 0 && actor.ActorGUID.IsEmpty() && actor.NoActorObject == 0))
+                foreach (ConversationLine line in m_conversationData.Lines.GetValue())
                 {
-                    Log.outError(LogFilter.Conversation, $"Failed to create conversation (Id: {GetEntry()}) due to missing actor (Idx: {line.ActorIndex}).");
-                    return false;
+                    ConversationActorField actor = line.ActorIndex < m_conversationData.Actors.Size() ? m_conversationData.Actors[line.ActorIndex] : null;
+                    if (actor == null || (actor.CreatureID == 0 && actor.ActorGUID.IsEmpty() && actor.NoActorObject == 0))
+                    {
+                        Log.outError(LogFilter.Conversation, $"Failed to create conversation (Id: {GetEntry()}) due to missing actor (Idx: {line.ActorIndex}).");
+                        return false;
+                    }
                 }
             }
 

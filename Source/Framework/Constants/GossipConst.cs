@@ -1,6 +1,8 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+
 namespace Framework.Constants
 {
     public enum GossipOption
@@ -163,5 +165,14 @@ namespace Framework.Constants
     {
         None = 0x0,
         QuestLabelPrepend = 0x1
+    }
+
+    [Flags]
+    public enum ConversationFlags
+    {
+        None = 0x00,
+        MultipleConversationType = 0x01, // NYI purpose unknown
+        IsTalkingHeadConversation = 0x02, // implicitly implemented when conversation_actors.ActivePlayerObject == 0 && conversation_actors.NoActorObject == 0 && conversation_actors.ConversationActorGuid == 0
+        AllowWithoutSpawnedActor = 0x04,
     }
 }

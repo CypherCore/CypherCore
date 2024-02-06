@@ -1,11 +1,10 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Constants;
 using Framework.Database;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using Game.Entities;
 
 namespace Game.DataStorage
 {
@@ -115,7 +114,7 @@ namespace Game.DataStorage
                 return lineId;
             }
 
-            SQLResult templateResult = DB.World.Query("SELECT Id, FirstLineId, TextureKitId, ScriptName FROM conversation_template");
+            SQLResult templateResult = DB.World.Query("SELECT Id, FirstLineId, TextureKitId, Flags, ScriptName FROM conversation_template");
             if (!templateResult.IsEmpty())
             {
                 uint oldMSTime = Time.GetMSTime();
@@ -126,7 +125,8 @@ namespace Game.DataStorage
                     conversationTemplate.Id = templateResult.Read<uint>(0);
                     conversationTemplate.FirstLineId = templateResult.Read<uint>(1);
                     conversationTemplate.TextureKitId = templateResult.Read<uint>(2);
-                    conversationTemplate.ScriptId = Global.ObjectMgr.GetScriptId(templateResult.Read<string>(3));
+                    conversationTemplate.Flags = (ConversationFlags)templateResult.Read<byte>(3);
+                    conversationTemplate.ScriptId = Global.ObjectMgr.GetScriptId(templateResult.Read<string>(4));
 
                     conversationTemplate.Actors = actorsByConversation.TryGetValue(conversationTemplate.Id, out var actors) ? actors.ToList() : new();
 
@@ -327,6 +327,7 @@ namespace Game.DataStorage
         public uint Id;
         public uint FirstLineId;     // Link to ConversationLine.db2
         public uint TextureKitId;    // Background texture
+        public ConversationFlags Flags = ConversationFlags.None;
         public uint ScriptId;
 
         public List<ConversationActorTemplate> Actors = new();
