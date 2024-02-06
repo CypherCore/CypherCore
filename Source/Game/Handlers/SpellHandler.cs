@@ -115,6 +115,7 @@ namespace Game
                 {
                     Loot loot = new(player.GetMap(), item.GetGUID(), LootType.Item, null);
                     item.loot = loot;
+                    item.m_lootGenerated = true;
                     loot.GenerateMoneyLoot(item.GetTemplate().MinMoneyLoot, item.GetTemplate().MaxMoneyLoot);
                     loot.FillLoot(item.GetEntry(), LootStorage.Items, player, true, loot.gold != 0);
 

@@ -7,6 +7,7 @@ using Framework.Database;
 using Game.Entities;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Game.Loots
@@ -124,6 +125,25 @@ namespace Game.Loots
 
                     // Increment unlooted count
                     ++loot.unlootedCount;
+                }
+            }
+
+            if (!loot.items.Empty())
+            {
+                loot.items = loot.items.OrderBy(p => p.LootListId).ToList();
+
+                int lootListId = 0;
+                // add dummy loot items to ensure items are indexable by their LootListId
+                while (loot.items.Count <= loot.items.Last().LootListId)
+                {
+                    if (loot.items[lootListId].LootListId != lootListId)
+                    {
+                        loot.items.Add(loot.items[lootListId]);
+                        loot.items.Last().LootListId = (uint)lootListId;
+                        loot.items.Last().is_looted = true;
+                    }
+
+                    ++lootListId;
                 }
             }
 
@@ -280,7 +300,7 @@ namespace Game.Loots
             var bounds = _lootItems.LookupByKey(itemId);
             foreach (var itr in bounds)
             {
-                if (itr.Count == count)
+                if (itr.ItemIndex == itemIndex)
                 {
                     _lootItems.Remove(itr.ItemId);
                     break;
