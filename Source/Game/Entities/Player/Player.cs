@@ -5565,7 +5565,9 @@ namespace Game.Entities
 
             // SMSG_WORLD_SERVER_INFO
             WorldServerInfo worldServerInfo = new();
-            worldServerInfo.InstanceGroupSize = GetMap().GetMapDifficulty().MaxPlayers;         // @todo
+            var mapDifficulty = GetMap().GetMapDifficulty();
+            if (mapDifficulty != null)
+                worldServerInfo.InstanceGroupSize = mapDifficulty.MaxPlayers;
             worldServerInfo.IsTournamentRealm = false;             // @todo
             worldServerInfo.RestrictedAccountMaxLevel = null; // @todo
             worldServerInfo.RestrictedAccountMaxMoney = null; // @todo
