@@ -414,6 +414,7 @@ namespace Game.Entities
 
             // Apply all other side effects of flag changes
             SetTemplateRooted(flags.HasFlag(CreatureStaticFlags.Sessile));
+            m_updateFlag.NoBirthAnim = flags.HasFlag(CreatureStaticFlags4.NoBirthAnim);
         }
 
         public override void Update(uint diff)
