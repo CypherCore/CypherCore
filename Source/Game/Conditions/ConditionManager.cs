@@ -353,10 +353,11 @@ namespace Game
                 cond.ConditionValue1 = result.Read<uint>(7);
                 cond.ConditionValue2 = result.Read<uint>(8);
                 cond.ConditionValue3 = result.Read<uint>(9);
-                cond.NegativeCondition = result.Read<byte>(10) != 0;
-                cond.ErrorType = result.Read<uint>(11);
-                cond.ErrorTextId = result.Read<uint>(12);
-                cond.ScriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(13));
+                cond.ConditionStringValue1 = result.Read<string>(10);
+                cond.NegativeCondition = result.Read<bool>(11);
+                cond.ErrorType = result.Read<uint>(12);
+                cond.ErrorTextId = result.Read<uint>(13);
+                cond.ScriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(14));
 
                 if (iConditionTypeOrReference >= 0)
                     cond.ConditionType = (ConditionTypes)iConditionTypeOrReference;
@@ -1764,13 +1765,20 @@ namespace Game
                 LogUselessConditionValue(cond, 2, cond.ConditionValue2);
             if (cond.ConditionValue3 != 0 && !StaticConditionTypeData[(int)cond.ConditionType].HasConditionValue3)
                 LogUselessConditionValue(cond, 3, cond.ConditionValue3);
+            if (!cond.ConditionStringValue1.IsEmpty() && !StaticConditionTypeData[(int)cond.ConditionType].HasConditionStringValue1)
+                LogUselessConditionValue(cond, 1, cond.ConditionStringValue1);
 
             return true;
         }
 
         void LogUselessConditionValue(Condition cond, byte index, uint value)
         {
-            Log.outError(LogFilter.Sql, "{0} has useless data in ConditionValue{1} ({2})!", cond.ToString(true), index, value);
+            Log.outError(LogFilter.Sql, $"{cond.ToString(true)} has useless data in ConditionValue{index} ({value})!");
+        }
+
+        void LogUselessConditionValue(Condition cond, byte index, string value)
+        {
+            Log.outError(LogFilter.Sql, $"{cond.ToString(true)} has useless data in ConditionStringValue{index} ({value})!");
         }
 
         void Clean()
@@ -2943,63 +2951,64 @@ namespace Game
 
         public ConditionTypeInfo[] StaticConditionTypeData =
         {
-            new ConditionTypeInfo("None",                 false,false, false),
-            new ConditionTypeInfo("Aura",                 true, true,  true ),
-            new ConditionTypeInfo("Item Stored",          true, true,  true ),
-            new ConditionTypeInfo("Item Equipped",        true, false, false),
-            new ConditionTypeInfo("Zone",                 true, false, false),
-            new ConditionTypeInfo("Reputation",           true, true,  false),
-            new ConditionTypeInfo("Team",                 true, false, false),
-            new ConditionTypeInfo("Skill",                true, true,  false),
-            new ConditionTypeInfo("Quest Rewarded",       true, false, false),
-            new ConditionTypeInfo("Quest Taken",          true, false, false),
-            new ConditionTypeInfo("Drunken",              true, false, false),
-            new ConditionTypeInfo("WorldState",           true, true,  false),
-            new ConditionTypeInfo("Active Event",         true, false, false),
-            new ConditionTypeInfo("Instance Info",        true, true,  true ),
-            new ConditionTypeInfo("Quest None",           true, false, false),
-            new ConditionTypeInfo("Class",                true, false, false),
-            new ConditionTypeInfo("Race",                 true, false, false),
-            new ConditionTypeInfo("Achievement",          true, false, false),
-            new ConditionTypeInfo("Title",                true, false, false),
-            new ConditionTypeInfo("SpawnMask",            true, false, false),
-            new ConditionTypeInfo("Gender",               true, false, false),
-            new ConditionTypeInfo("Unit State",           true, false, false),
-            new ConditionTypeInfo("Map",                  true, false, false),
-            new ConditionTypeInfo("Area",                 true, false, false),
-            new ConditionTypeInfo("CreatureType",         true, false, false),
-            new ConditionTypeInfo("Spell Known",          true, false, false),
-            new ConditionTypeInfo("Phase",                true, false, false),
-            new ConditionTypeInfo("Level",                true, true,  false),
-            new ConditionTypeInfo("Quest Completed",      true, false, false),
-            new ConditionTypeInfo("Near Creature",        true, true,  true),
-            new ConditionTypeInfo("Near GameObject",      true, true,  false),
-            new ConditionTypeInfo("Object Entry or Guid", true, true,  true ),
-            new ConditionTypeInfo("Object TypeMask",      true, false, false),
-            new ConditionTypeInfo("Relation",             true, true,  false),
-            new ConditionTypeInfo("Reaction",             true, true,  false),
-            new ConditionTypeInfo("Distance",             true, true,  true ),
-            new ConditionTypeInfo("Alive",                false,false, false),
-            new ConditionTypeInfo("Health Value",         true, true,  false),
-            new ConditionTypeInfo("Health Pct",           true, true,  false),
-            new ConditionTypeInfo("Realm Achievement",    true, false, false),
-            new ConditionTypeInfo("In Water",             false,false, false),
-            new ConditionTypeInfo("Terrain Swap",         true, false, false),
-            new ConditionTypeInfo("Sit/stand state",      true, true, false),
-            new ConditionTypeInfo("Daily Quest Completed",true, false, false),
-            new ConditionTypeInfo("Charmed",              false,false, false),
-            new ConditionTypeInfo("Pet type",             true, false, false),
-            new ConditionTypeInfo("On Taxi",              false,false, false),
-            new ConditionTypeInfo("Quest state mask",     true, true, false),
-            new ConditionTypeInfo("Quest objective progress",   true, false, true),
-            new ConditionTypeInfo("Map Difficulty",       true, false, false),
-            new ConditionTypeInfo("Is Gamemaster",        true, false, false),
-            new ConditionTypeInfo("Object Entry or Guid", true, true,  true),
-            new ConditionTypeInfo("Object TypeMask",      true, false, false),
-            new ConditionTypeInfo("BattlePet Species Learned", true, true,  true),
-            new ConditionTypeInfo("On Scenario Step",     true, false, false),
-            new ConditionTypeInfo("Scene In Progress",    true, false, false),
-            new ConditionTypeInfo("Player Condition",     true, false, false)
+            new ConditionTypeInfo("None",                 false, false, false, false),
+            new ConditionTypeInfo("Aura",                 true, true,  true, false),
+            new ConditionTypeInfo("Item Stored",          true, true,  true, false),
+            new ConditionTypeInfo("Item Equipped",        true, false, false, false),
+            new ConditionTypeInfo("Zone",                 true, false, false, false),
+            new ConditionTypeInfo("Reputation",           true, true,  false, false),
+            new ConditionTypeInfo("Team",                 true, false, false, false),
+            new ConditionTypeInfo("Skill",                true, true,  false, false),
+            new ConditionTypeInfo("Quest Rewarded",       true, false, false, false),
+            new ConditionTypeInfo("Quest Taken",          true, false, false, false),
+            new ConditionTypeInfo("Drunken",              true, false, false, false),
+            new ConditionTypeInfo("WorldState",           true, true,  false, false),
+            new ConditionTypeInfo("Active Event",         true, false, false, false),
+            new ConditionTypeInfo("Instance Info",        true, true,  true, false),
+            new ConditionTypeInfo("Quest None",           true, false, false, false),
+            new ConditionTypeInfo("Class",                true, false, false, false),
+            new ConditionTypeInfo("Race",                 true, false, false, false),
+            new ConditionTypeInfo("Achievement",          true, false, false, false),
+            new ConditionTypeInfo("Title",                true, false, false, false),
+            new ConditionTypeInfo("SpawnMask",            true, false, false, false),
+            new ConditionTypeInfo("Gender",               true, false, false, false),
+            new ConditionTypeInfo("Unit State",           true, false, false, false),
+            new ConditionTypeInfo("Map",                  true, false, false, false),
+            new ConditionTypeInfo("Area",                 true, false, false, false),
+            new ConditionTypeInfo("CreatureType",         true, false, false, false),
+            new ConditionTypeInfo("Spell Known",          true, false, false, false),
+            new ConditionTypeInfo("Phase",                true, false, false, false),
+            new ConditionTypeInfo("Level",                true, true,  false, false),
+            new ConditionTypeInfo("Quest Completed",      true, false, false, false),
+            new ConditionTypeInfo("Near Creature",        true, true,  true, false),
+            new ConditionTypeInfo("Near GameObject",      true, true,  false, false),
+            new ConditionTypeInfo("Object Entry or Guid", true, true,  true, false),
+            new ConditionTypeInfo("Object TypeMask",      true, false, false, false),
+            new ConditionTypeInfo("Relation",             true, true,  false, false),
+            new ConditionTypeInfo("Reaction",             true, true,  false, false),
+            new ConditionTypeInfo("Distance",             true, true,  true, false),
+            new ConditionTypeInfo("Alive",                false, false, false, false),
+            new ConditionTypeInfo("Health Value",         true, true,  false, false),
+            new ConditionTypeInfo("Health Pct",           true, true,  false, false),
+            new ConditionTypeInfo("Realm Achievement",    true, false, false, false),
+            new ConditionTypeInfo("In Water",             false, false, false, false),
+            new ConditionTypeInfo("Terrain Swap",         true, false, false, false),
+            new ConditionTypeInfo("Sit/stand state",      true, true, false, false),
+            new ConditionTypeInfo("Daily Quest Completed",true, false, false, false),
+            new ConditionTypeInfo("Charmed",              false, false, false, false),
+            new ConditionTypeInfo("Pet type",             true, false, false, false),
+            new ConditionTypeInfo("On Taxi",              false, false, false, false),
+            new ConditionTypeInfo("Quest state mask",     true, true, false, false),
+            new ConditionTypeInfo("Quest objective progress",   true, false, true, false),
+            new ConditionTypeInfo("Map Difficulty",       true, false, false, false),
+            new ConditionTypeInfo("Is Gamemaster",        true, false, false, false),
+            new ConditionTypeInfo("Object Entry or Guid", true, true,  true, false),
+            new ConditionTypeInfo("Object TypeMask",      true, false, false, false),
+            new ConditionTypeInfo("BattlePet Species Learned", true, true,  true, false),
+            new ConditionTypeInfo("On Scenario Step",     true, false, false, false),
+            new ConditionTypeInfo("Scene In Progress",    true, false, false, false),
+            new ConditionTypeInfo("Player Condition",     true, false, false, false),
+            new ConditionTypeInfo("String ID",            true, false, false, true)
         };
 
         public struct ConditionTypeInfo
@@ -3016,6 +3025,7 @@ namespace Game
             public bool HasConditionValue1;
             public bool HasConditionValue2;
             public bool HasConditionValue3;
+            public bool HasConditionStringValue1;
         }
     }
 

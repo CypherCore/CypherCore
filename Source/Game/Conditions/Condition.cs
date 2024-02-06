@@ -458,6 +458,19 @@ namespace Game.Conditions
                     condMeets = !obj.GetPrivateObjectOwner().IsEmpty();
                     break;
                 }
+                case ConditionTypes.StringId:
+                {
+                    Creature creature = obj.ToCreature();
+                    if (creature != null)
+                        condMeets = creature.HasStringId(ConditionStringValue1);
+                    else
+                    {
+                        GameObject go = obj.ToGameObject();
+                        if (go != null)
+                            condMeets = go.HasStringId(ConditionStringValue1);
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -653,6 +666,7 @@ namespace Game.Conditions
         public uint ConditionValue1;
         public uint ConditionValue2;
         public uint ConditionValue3;
+        public string ConditionStringValue1;
         public uint ErrorType;
         public uint ErrorTextId;
         public uint ReferenceId;
