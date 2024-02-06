@@ -2718,11 +2718,18 @@ namespace Game.Entities
                 if (_loot != null && _loot.loot_type == LootType.Skinning && _loot.IsLooted())
                     return true;
 
+                bool hasSkinningLoot = false;
                 foreach (var (_, loot) in m_personalLoot)
-                    if (loot.loot_type != LootType.Skinning || !loot.IsLooted())
-                        return false;
+                {
+                    if (loot.loot_type == LootType.Skinning)
+                    {
+                        if (!loot.IsLooted())
+                            return false;
+                        hasSkinningLoot = true;
+                    }
+                }
 
-                return true;
+                return hasSkinningLoot;
             }
 
             if (isFullySkinned())
