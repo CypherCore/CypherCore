@@ -7,6 +7,7 @@ using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Loots;
+using Game.Miscellaneous;
 using Game.Scripting;
 using Game.Spells;
 using System;

@@ -1497,7 +1497,7 @@ namespace Game.Entities
 
         public override bool IsLoading() { return m_loading; }
 
-        public override byte GetPetAutoSpellSize() { return (byte)m_autospells.Count; }
+        public override int GetPetAutoSpellSize() { return m_autospells.Count; }
         public override uint GetPetAutoSpellOnPos(byte pos)
         {
             if (pos >= m_autospells.Count)

@@ -6,6 +6,7 @@ using Framework.Dynamic;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
+using Game.Miscellaneous;
 using Game.Networking.Packets;
 using Game.Scripting;
 using Game.Spells;
@@ -76,10 +77,10 @@ namespace Scripts.Spells.Generic
             uint spellId = SharedConst.GetFirstSchoolInMask(eventInfo.GetSchoolMask()) switch
             {
                 SpellSchools.Fire => SpellGenAdaptiveWardingFire,
-                SpellSchools.Nature                   => SpellGenAdaptiveWardingNature,
-                SpellSchools.Frost                    => SpellGenAdaptiveWardingFrost,
-                SpellSchools.Shadow                   => SpellGenAdaptiveWardingShadow,
-                SpellSchools.Arcane                    => SpellGenAdaptiveWardingArcane,
+                SpellSchools.Nature => SpellGenAdaptiveWardingNature,
+                SpellSchools.Frost => SpellGenAdaptiveWardingFrost,
+                SpellSchools.Shadow => SpellGenAdaptiveWardingShadow,
+                SpellSchools.Arcane => SpellGenAdaptiveWardingArcane,
                 _ => 0
             };
 
