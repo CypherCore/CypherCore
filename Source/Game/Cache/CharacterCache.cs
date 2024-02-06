@@ -51,7 +51,8 @@ namespace Game.Cache
             data.IsDeleted = isDeleted;
 
             // Fill Name to Guid Store
-            _characterCacheByNameStore[name] = data;
+            if (!isDeleted)
+                _characterCacheByNameStore[name] = data;
             _characterCacheStore[guid] = data;
         }
 
@@ -92,7 +93,7 @@ namespace Game.Cache
 
             _characterCacheStore[guid].Sex = (Gender)gender;
         }
-        
+
         public void UpdateCharacterLevel(ObjectGuid guid, byte level)
         {
             if (!_characterCacheStore.ContainsKey(guid))
@@ -125,14 +126,18 @@ namespace Game.Cache
             _characterCacheStore[guid].ArenaTeamId[slot] = arenaTeamId;
         }
 
-        public void UpdateCharacterInfoDeleted(ObjectGuid guid, bool deleted, string name = null)
+        public void UpdateCharacterInfoDeleted(ObjectGuid guid, bool deleted, string name)
         {
-            if (!_characterCacheStore.ContainsKey(guid))
+            if (!_characterCacheStore.TryGetValue(guid, out var cacheEntry))
                 return;
 
+            if (deleted)
+                _characterCacheByNameStore.Remove(cacheEntry.Name);
+            else
+                _characterCacheByNameStore[name] = cacheEntry;
+
+            _characterCacheStore[guid].Name = name;
             _characterCacheStore[guid].IsDeleted = deleted;
-            if (!name.IsEmpty())
-                _characterCacheStore[guid].Name = name;
         }
 
         public bool HasCharacterCacheEntry(ObjectGuid guid)
