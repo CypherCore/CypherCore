@@ -562,8 +562,8 @@ namespace Game.Entities
                         Creature creature1 = ToCreature();
                         if (creature1 != null)
                         {
-                            ulong immuneMask = creature1.GetCreatureTemplate().MechanicImmuneMask;
-                            if (Convert.ToBoolean(immuneMask & (1 << ((int)Mechanics.Snare - 1))) || Convert.ToBoolean(immuneMask & (1 << ((int)Mechanics.Daze - 1))))
+                            CreatureImmunities immunities = Global.SpellMgr.GetCreatureImmunities(creature1.GetCreatureTemplate().CreatureImmunitiesId);
+                            if (immunities != null && (immunities.Mechanic[(int)Mechanics.Snare] || immunities.Mechanic[(int)Mechanics.Daze]))
                                 break;
                         }
 

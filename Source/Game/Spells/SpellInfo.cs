@@ -12,6 +12,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Framework.Collections;
 
 namespace Game.Spells
 {
@@ -1105,6 +1106,13 @@ namespace Game.Spells
 
                 if (HasAttribute(SpellAttr5.NotOnPlayerControlledNpc) && unitTarget.IsControlledByPlayer())
                     return SpellCastResult.TargetIsPlayerControlled;
+
+                if (HasAttribute(SpellAttr3.NotOnAoeImmune))
+                {
+                    CreatureImmunities immunities = Global.SpellMgr.GetCreatureImmunities(unitTarget.ToCreature().GetCreatureTemplate().CreatureImmunitiesId);
+                    if (immunities != null && immunities.ImmuneAoE)
+                        return SpellCastResult.BadTargets;
+                }
             }
             else if (HasAttribute(SpellAttr5.NotOnPlayer))
                 return SpellCastResult.TargetIsPlayer;
@@ -2134,7 +2142,7 @@ namespace Game.Spells
                 uint schoolImmunityMask = 0;
                 uint applyHarmfulAuraImmunityMask = 0;
                 ulong mechanicImmunityMask = 0;
-                uint dispelImmunity = 0;
+                uint dispelImmunityMask = 0;
                 uint damageImmunityMask = 0;
 
                 int miscVal = effect.MiscValue;
@@ -2146,6 +2154,18 @@ namespace Game.Spells
                 {
                     case AuraType.MechanicImmunityMask:
                     {
+                        CreatureImmunities creatureImmunities = Global.SpellMgr.GetCreatureImmunities(miscVal);
+                        if (creatureImmunities != null)
+                        {
+                            schoolImmunityMask |= creatureImmunities.School.ToUInt();
+                            dispelImmunityMask |= creatureImmunities.DispelType.ToUInt();
+                            mechanicImmunityMask |= creatureImmunities.Mechanic.ToUInt();
+                            foreach (SpellEffectName effectType in creatureImmunities.Effect)
+                                immuneInfo.SpellEffectImmune.Add(effectType);
+                            foreach (AuraType aura in creatureImmunities.Aura)
+                                immuneInfo.AuraTypeImmune.Add(aura);
+                        }
+
                         switch (miscVal)
                         {
                             case 96:   // Free Friend, Uncontrollable Frenzy, Warlord's Presence
@@ -2286,29 +2306,6 @@ namespace Game.Spells
                             default:
                                 break;
                         }
-
-                        if (immuneInfo.AuraTypeImmune.Empty())
-                        {
-                            if (miscVal.HasAnyFlag(1 << 10))
-                                immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
-                            if (miscVal.HasAnyFlag(1 << 1))
-                                immuneInfo.AuraTypeImmune.Add(AuraType.Transform);
-
-                            // These flag can be recognized wrong:
-                            if (miscVal.HasAnyFlag(1 << 6))
-                                immuneInfo.AuraTypeImmune.Add(AuraType.ModDecreaseSpeed);
-                            if (miscVal.HasAnyFlag(1 << 0))
-                            {
-                                immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot);
-                                immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot2);
-                            }
-                            if (miscVal.HasAnyFlag(1 << 2))
-                                immuneInfo.AuraTypeImmune.Add(AuraType.ModConfuse);
-                            if (miscVal.HasAnyFlag(1 << 9))
-                                immuneInfo.AuraTypeImmune.Add(AuraType.ModFear);
-                            if (miscVal.HasAnyFlag(1 << 7))
-                                immuneInfo.AuraTypeImmune.Add(AuraType.ModDisarm);
-                        }
                         break;
                     }
                     case AuraType.MechanicImmunity:
@@ -2370,7 +2367,7 @@ namespace Game.Spells
                     }
                     case AuraType.DispelImmunity:
                     {
-                        dispelImmunity = (uint)miscVal;
+                        dispelImmunityMask = 1u << miscVal;
                         break;
                     }
                     default:
@@ -2380,7 +2377,7 @@ namespace Game.Spells
                 immuneInfo.SchoolImmuneMask = schoolImmunityMask;
                 immuneInfo.ApplyHarmfulAuraImmuneMask = applyHarmfulAuraImmunityMask;
                 immuneInfo.MechanicImmuneMask = mechanicImmunityMask;
-                immuneInfo.DispelImmune = dispelImmunity;
+                immuneInfo.DispelImmuneMask = dispelImmunityMask;
                 immuneInfo.DamageSchoolMask = damageImmunityMask;
 
                 _allowedMechanicMask |= immuneInfo.MechanicImmuneMask;
@@ -2513,17 +2510,20 @@ namespace Game.Spells
                 }
             }
 
-            uint dispelImmunity = immuneInfo.DispelImmune;
+            uint dispelImmunity = immuneInfo.DispelImmuneMask;
             if (dispelImmunity != 0)
             {
-                target.ApplySpellImmune(Id, SpellImmunity.Dispel, dispelImmunity, apply);
+                for (int i = 0; i < (int)DispelType.Max; ++i)
+                    if ((dispelImmunity & (1u << i)) != 0)
+                        target.ApplySpellImmune(Id, SpellImmunity.Dispel, (uint)i, apply);
 
                 if (apply && HasAttribute(SpellAttr1.ImmunityPurgesEffect))
                 {
                     target.RemoveAppliedAuras(aurApp =>
                     {
                         SpellInfo spellInfo = aurApp.GetBase().GetSpellInfo();
-                        if ((uint)spellInfo.Dispel == dispelImmunity)
+                        uint dispelMask = spellInfo.GetDispelMask();
+                        if ((dispelMask & dispelImmunity) == dispelMask)
                             return true;
 
                         return false;
@@ -2582,7 +2582,7 @@ namespace Game.Spells
                     if ((mechanicImmunity & (1ul << (int)auraSpellInfo.Mechanic)) != 0)
                         return true;
 
-                uint dispelImmunity = immuneInfo.DispelImmune;
+                uint dispelImmunity = immuneInfo.DispelImmuneMask;
                 if (dispelImmunity != 0)
                     if ((uint)auraSpellInfo.Dispel == dispelImmunity)
                         return true;
@@ -3883,7 +3883,7 @@ namespace Game.Spells
         public void _UnloadImplicitTargetConditionLists()
         {
             // find the same instances of ConditionList and delete them.
-            foreach (SpellEffectInfo  effect in _effects)
+            foreach (SpellEffectInfo effect in _effects)
                 effect.ImplicitTargetConditions = null;
         }
 
@@ -5294,7 +5294,7 @@ namespace Game.Spells
         public uint SchoolImmuneMask;
         public uint ApplyHarmfulAuraImmuneMask;
         public ulong MechanicImmuneMask;
-        public uint DispelImmune;
+        public uint DispelImmuneMask;
         public uint DamageSchoolMask;
 
         public List<AuraType> AuraTypeImmune = new();

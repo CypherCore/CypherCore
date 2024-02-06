@@ -260,6 +260,7 @@ namespace Framework.Constants
         Enrage = 9,
         ZGTicket = 10,
         OldUnused = 11,
+        Max,
 
         AllMask = ((1 << Magic) | (1 << Curse) | (1 << Disease) | (1 << Poison))
     }
@@ -1783,7 +1784,7 @@ namespace Framework.Constants
         IgnoreCasterAndTargetRestrictions = 0x10000000, /*Nyi*/ // Ignore Caster & Target Restrictions
         IgnoreCasterModifiers = 0x20000000, // Ignore Caster Modifiers
         DoNotDisplayRange = 0x40000000, // Do Not Display Range (Client Only)
-        NotOnAoeImmune = 0x80000000  /*Nyi, No Aoe Immunity Implementation*/ // Not On Aoe Immune
+        NotOnAoeImmune = 0x80000000  // Not On Aoe Immune
     }
     public enum SpellAttr4 : uint
     {
@@ -2980,5 +2981,11 @@ namespace Framework.Constants
         TargetAndCaster = 1,
         TargetAndBeacon = 2,
         TargetParty = 3,
+    }
+
+    public enum WorldObjectSpellAreaTargetSearchReason
+    {
+        Area,
+        Chain
     }
 }

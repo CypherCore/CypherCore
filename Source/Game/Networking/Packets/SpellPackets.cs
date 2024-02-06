@@ -1810,18 +1810,6 @@ namespace Game.Networking.Packets
         }
     }
 
-    public struct CreatureImmunities
-    {
-        public uint School;
-        public uint Value;
-
-        public void Write(WorldPacket data)
-        {
-            data.WriteUInt32(School);
-            data.WriteUInt32(Value);
-        }
-    }
-
     public struct SpellHealPrediction
     {
         public ObjectGuid BeaconGUID;
@@ -1915,6 +1903,18 @@ namespace Game.Networking.Packets
         public List<TargetLocation> TargetPoints = new();
         public CreatureImmunities Immunities;
         public SpellHealPrediction Predict;
+
+        public struct CreatureImmunities
+        {
+            public uint School;
+            public uint Value;
+
+            public void Write(WorldPacket data)
+            {
+                data.WriteUInt32(School);
+                data.WriteUInt32(Value);
+            }
+        }
     }
 
     public struct LearnedSpellInfo

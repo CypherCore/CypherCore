@@ -186,6 +186,13 @@ namespace System.Collections.Generic
             return blockValues;
         }
 
+        public static uint ToUInt(this BitSet array)
+        {
+            uint[] blockValues = new uint[array.Length / 32 + 1];
+            array.CopyTo(blockValues, 0);
+            return blockValues[0];
+        }
+
         public static void Clear(this Array array)
         {
             Array.Clear(array, 0, array.Length);

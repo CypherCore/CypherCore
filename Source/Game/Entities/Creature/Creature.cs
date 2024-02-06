@@ -397,7 +397,7 @@ namespace Game.Entities
 
             LoadCreaturesAddon();
             LoadCreaturesSparringHealth();
-            LoadTemplateImmunities();
+            LoadTemplateImmunities(cInfo.CreatureImmunitiesId);
             GetThreatManager().EvaluateSuppressed();
 
             //We must update last scriptId or it looks like we reloaded a script, breaking some things such as gossip temporarily
@@ -2177,38 +2177,47 @@ namespace Game.Entities
                 ForcedDespawn((uint)msTimeToDespawn.TotalMilliseconds, forceRespawnTimer);
         }
 
-        public void LoadTemplateImmunities()
+        public void LoadTemplateImmunities(int creatureImmunitiesId)
         {
             // uint32 max used for "spell id", the immunity system will not perform SpellInfo checks against invalid spells
             // used so we know which immunities were loaded from template
             uint placeholderSpellId = uint.MaxValue;
 
-            // unapply template immunities (in case we're updating entry)
-            for (uint i = 0; i < (int)Mechanics.Max; ++i)
-                ApplySpellImmune(placeholderSpellId, SpellImmunity.Mechanic, i, false);
-
-            for (var i = (int)SpellSchools.Normal; i < (int)SpellSchools.Max; ++i)
-                ApplySpellImmune(placeholderSpellId, SpellImmunity.School, 1u << i, false);
-
-            // don't inherit immunities for hunter pets
-            if (GetOwnerGUID().IsPlayer() && IsHunterPet())
-                return;
-
-            ulong mechanicMask = GetCreatureTemplate().MechanicImmuneMask;
-            if (mechanicMask != 0)
+            void applyCreatureImmunities(CreatureImmunities immunities, bool apply)
             {
-                for (uint i = 0 + 1; i < (int)Mechanics.Max; ++i)
-                {
-                    if ((mechanicMask & (1ul << ((int)i - 1))) != 0)
-                        ApplySpellImmune(placeholderSpellId, SpellImmunity.Mechanic, i, true);
-                }
+                for (var i = 0; i < immunities.School.Count; ++i)
+                    if (immunities.School[i])
+                        ApplySpellImmune(placeholderSpellId, SpellImmunity.School, 1u << i, apply);
+
+                for (int i = 0; i < immunities.DispelType.Count; ++i)
+                    if (immunities.DispelType[i])
+                        ApplySpellImmune(placeholderSpellId, SpellImmunity.Dispel, (uint)i, apply);
+
+                for (var i = 0; i < immunities.Mechanic.Count; ++i)
+                    if (immunities.Mechanic[i])
+                        ApplySpellImmune(placeholderSpellId, SpellImmunity.Mechanic, (uint)i, apply);
+
+                foreach (SpellEffectName effect in immunities.Effect)
+                    ApplySpellImmune(placeholderSpellId, SpellImmunity.Effect, effect, apply);
+
+                foreach (AuraType aura in immunities.Aura)
+                    ApplySpellImmune(placeholderSpellId, SpellImmunity.State, aura, apply);
             }
 
-            uint schoolMask = GetCreatureTemplate().SpellSchoolImmuneMask;
-            if (schoolMask != 0)
-                for (var i = (int)SpellSchools.Normal; i <= (int)SpellSchools.Max; ++i)
-                    if ((schoolMask & (1 << i)) != 0)
-                        ApplySpellImmune(placeholderSpellId, SpellImmunity.School, 1u << i, true);
+            // unapply template immunities (in case we're updating entry)
+            CreatureImmunities immunities = Global.SpellMgr.GetCreatureImmunities(_creatureImmunitiesId);
+            if (immunities != null)
+                applyCreatureImmunities(immunities, false);
+
+            // apply new immunities
+            immunities = Global.SpellMgr.GetCreatureImmunities(creatureImmunitiesId);
+            if (immunities != null)
+            {
+                _creatureImmunitiesId = creatureImmunitiesId;
+                applyCreatureImmunities(immunities, true);
+            }
+            else
+                _creatureImmunitiesId = 0;
         }
 
         public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, WorldObject caster, bool requireImmunityPurgesEffectAttribute = false)

@@ -909,15 +909,15 @@ namespace Game.Spells
                         if (!m_caster.IsUnit() || !m_caster.ToUnit().IsInRaidWith(targetedUnit))
                             targets.Add(m_targets.GetUnitTarget());
                         else
-                            SearchAreaTargets(targets, spellEffectInfo, radius, targetedUnit, referer, targetType.GetObjectType(), targetType.GetCheckType(), spellEffectInfo.ImplicitTargetConditions);
+                            SearchAreaTargets(targets, spellEffectInfo, radius, targetedUnit, referer, targetType.GetObjectType(), targetType.GetCheckType(), spellEffectInfo.ImplicitTargetConditions, WorldObjectSpellAreaTargetSearchReason.Area);
                     }
                     break;
                 case Targets.UnitCasterAndSummons:
                     targets.Add(m_caster);
-                    SearchAreaTargets(targets, spellEffectInfo, radius, center, referer, targetType.GetObjectType(), targetType.GetCheckType(), spellEffectInfo.ImplicitTargetConditions);
+                    SearchAreaTargets(targets, spellEffectInfo, radius, center, referer, targetType.GetObjectType(), targetType.GetCheckType(), spellEffectInfo.ImplicitTargetConditions, WorldObjectSpellAreaTargetSearchReason.Area);
                     break;
                 default:
-                    SearchAreaTargets(targets, spellEffectInfo, radius, center, referer, targetType.GetObjectType(), targetType.GetCheckType(), spellEffectInfo.ImplicitTargetConditions);
+                    SearchAreaTargets(targets, spellEffectInfo, radius, center, referer, targetType.GetObjectType(), targetType.GetCheckType(), spellEffectInfo.ImplicitTargetConditions, WorldObjectSpellAreaTargetSearchReason.Area);
                     break;
             }
 
@@ -1713,14 +1713,15 @@ namespace Game.Spells
             return searcher.GetTarget();
         }
 
-        void SearchAreaTargets(List<WorldObject> targets, SpellEffectInfo spellEffectInfo, float range, Position position, WorldObject referer, SpellTargetObjectTypes objectType, SpellTargetCheckTypes selectionType, List<Condition> condList)
+        void SearchAreaTargets(List<WorldObject> targets, SpellEffectInfo spellEffectInfo, float range, Position position, WorldObject referer,
+            SpellTargetObjectTypes objectType, SpellTargetCheckTypes selectionType, List<Condition> condList, WorldObjectSpellAreaTargetSearchReason searchReason)
         {
             var containerTypeMask = GetSearcherTypeMask(m_spellInfo, spellEffectInfo, objectType, condList);
             if (containerTypeMask == 0)
                 return;
 
             float extraSearchRadius = range > 0.0f ? SharedConst.ExtraCellSearchRadius : 0.0f;
-            var check = new WorldObjectSpellAreaTargetCheck(range, position, m_caster, referer, m_spellInfo, selectionType, condList, objectType);
+            var check = new WorldObjectSpellAreaTargetCheck(range, position, m_caster, referer, m_spellInfo, selectionType, condList, objectType, searchReason);
             var searcher = new WorldObjectListSearcher(m_caster, targets, check, containerTypeMask);
             SearchTargets(searcher, containerTypeMask, m_caster, position, range + extraSearchRadius);
         }
@@ -1764,7 +1765,7 @@ namespace Game.Spells
 
             WorldObject chainSource = m_spellInfo.HasAttribute(SpellAttr2.ChainFromCaster) ? m_caster : target;
             List<WorldObject> tempTargets = new();
-            SearchAreaTargets(tempTargets, spellEffectInfo, searchRadius, chainSource, m_caster, objectType, selectType, spellEffectInfo.ImplicitTargetConditions);
+            SearchAreaTargets(tempTargets, spellEffectInfo, searchRadius, chainSource, m_caster, objectType, selectType, spellEffectInfo.ImplicitTargetConditions, WorldObjectSpellAreaTargetSearchReason.Chain);
             tempTargets.Remove(target);
 
             // remove targets which are always invalid for chain spells
@@ -3996,7 +3997,7 @@ namespace Game.Spells
             foreach (var targetInfo in m_UniqueTargetInfo)
             {
                 if (targetInfo.EffectMask == 0)                  // No effect apply - all immuned add state
-                    // possibly SPELL_MISS_IMMUNE2 for this??
+                                                                 // possibly SPELL_MISS_IMMUNE2 for this??
                     targetInfo.MissCondition = SpellMissInfo.Immune2;
 
                 if (targetInfo.MissCondition == SpellMissInfo.None || (targetInfo.MissCondition == SpellMissInfo.Block && !m_spellInfo.HasAttribute(SpellAttr3.CompletelyBlocked))) // Add only hits and partial blocked
@@ -9155,21 +9156,24 @@ namespace Game.Spells
     {
         float _range;
         Position _position;
+        WorldObjectSpellAreaTargetSearchReason _searchReason;
 
-        public WorldObjectSpellAreaTargetCheck(float range, Position position, WorldObject caster, WorldObject referer, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList, SpellTargetObjectTypes objectType)
+        public WorldObjectSpellAreaTargetCheck(float range, Position position, WorldObject caster, WorldObject referer, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList, SpellTargetObjectTypes objectType,
+            WorldObjectSpellAreaTargetSearchReason searchReason = WorldObjectSpellAreaTargetSearchReason.Area)
             : base(caster, referer, spellInfo, selectionType, condList, objectType)
         {
             _range = range;
             _position = position;
-
+            _searchReason = searchReason;
         }
 
         public override bool Invoke(WorldObject target)
         {
-            if (target.ToGameObject() != null)
+            GameObject gameObjectTarget = target.ToGameObject();
+            if (gameObjectTarget != null)
             {
                 // isInRange including the dimension of the GO
-                bool isInRange = target.ToGameObject().IsInRange(_position.GetPositionX(), _position.GetPositionY(), _position.GetPositionZ(), _range);
+                bool isInRange = gameObjectTarget.IsInRange(_position.GetPositionX(), _position.GetPositionY(), _position.GetPositionZ(), _range);
                 if (!isInRange)
                     return false;
             }
@@ -9178,6 +9182,29 @@ namespace Game.Spells
                 bool isInsideCylinder = target.IsWithinDist2d(_position, _range) && Math.Abs(target.GetPositionZ() - _position.GetPositionZ()) <= _range;
                 if (!isInsideCylinder)
                     return false;
+
+                Creature creatureTarget = target.ToCreature();
+                if (creatureTarget != null)
+                {
+                    CreatureImmunities immunities = Global.SpellMgr.GetCreatureImmunities(creatureTarget.GetCreatureTemplate().CreatureImmunitiesId);
+                    if (immunities != null)
+                    {
+                        switch (_searchReason)
+                        {
+                            case WorldObjectSpellAreaTargetSearchReason.Area:
+                                if (immunities.ImmuneAoE)
+                                    return false;
+                                break;
+                            case WorldObjectSpellAreaTargetSearchReason.Chain:
+                                if (immunities.ImmuneChain)
+                                    return false;
+                                break;
+                            default:
+                                break;
+                        }
+
+                    }
+                }
             }
 
             return base.Invoke(target);

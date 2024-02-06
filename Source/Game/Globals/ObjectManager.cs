@@ -1840,11 +1840,10 @@ namespace Game
             creature.WidgetSetID = fields.Read<int>(41);
             creature.WidgetSetUnitConditionID = fields.Read<int>(42);
             creature.RegenHealth = fields.Read<bool>(43);
-            creature.MechanicImmuneMask = fields.Read<ulong>(44);
-            creature.SpellSchoolImmuneMask = fields.Read<uint>(45);
-            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(46);
-            creature.ScriptID = GetScriptId(fields.Read<string>(47));
-            creature.StringId = fields.Read<string>(48);
+            creature.CreatureImmunitiesId = fields.Read<int>(44);
+            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(45);
+            creature.ScriptID = GetScriptId(fields.Read<string>(46));
+            creature.StringId = fields.Read<string>(47);
 
             creatureTemplateStorage[entry] = creature;
         }

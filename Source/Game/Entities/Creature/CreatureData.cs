@@ -55,8 +55,7 @@ namespace Game.Entities
         public int WidgetSetID;
         public int WidgetSetUnitConditionID;
         public bool RegenHealth;
-        public ulong MechanicImmuneMask;
-        public uint SpellSchoolImmuneMask;
+        public int CreatureImmunitiesId;
         public CreatureFlagsExtra FlagsExtra;
         public uint ScriptID;
         public string StringId;

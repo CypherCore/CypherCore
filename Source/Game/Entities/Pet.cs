@@ -370,7 +370,7 @@ namespace Game.Entities
                         owner.DisablePetControlsOnMount(ReactStates.Passive, CommandStates.Follow);
 
                     // must be after SetMinion (owner guid check)
-                    LoadTemplateImmunities();
+                    LoadTemplateImmunities(0);
                     m_loading = false;
                 });
 

@@ -45,6 +45,8 @@ namespace System.Collections
             _version = 0;
         }
 
+        public BitSet(ulong value) : this(new uint[] { (uint)(value & (ulong)uint.MaxValue), (uint)(value >> 32) }) { }
+
         public BitSet(BitSet bits)
         {
             if (bits == null)
