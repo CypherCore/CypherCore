@@ -3547,7 +3547,7 @@ namespace Game.Entities
 
             if (!IsInCombat())
             {
-                if (powerType.GetFlags().HasFlag(PowerTypeFlags.UseRegenInterrupt) && m_regenInterruptTimestamp + TimeSpan.FromMicroseconds(powerType.RegenInterruptTimeMS) < GameTime.Now())
+                if (powerType.GetFlags().HasFlag(PowerTypeFlags.UseRegenInterrupt) && m_regenInterruptTimestamp + TimeSpan.FromMicroseconds(powerType.RegenInterruptTimeMS) >= GameTime.Now())
                     return;
 
                 addvalue = (powerType.RegenPeace + m_unitData.PowerRegenFlatModifier[(int)powerIndex]) * 0.001f * RegenTimer;
