@@ -441,6 +441,7 @@ namespace Game.Entities
                 bool hasFaceMovementDir = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasFaceMovementDir);
                 bool hasFollowsTerrain = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasFollowsTerrain);
                 bool hasUnk1 = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.Unk1);
+                bool hasUnknown1025 = false;
                 bool hasTargetRollPitchYaw = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasTargetRollPitchYaw);
                 bool hasScaleCurveID = createProperties != null && createProperties.ScaleCurveId != 0;
                 bool hasMorphCurveID = createProperties != null && createProperties.MorphCurveId != 0;
@@ -462,6 +463,7 @@ namespace Game.Entities
                 data.WriteBit(hasFaceMovementDir);
                 data.WriteBit(hasFollowsTerrain);
                 data.WriteBit(hasUnk1);
+                data.WriteBit(hasUnknown1025);
                 data.WriteBit(hasTargetRollPitchYaw);
                 data.WriteBit(hasScaleCurveID);
                 data.WriteBit(hasMorphCurveID);
