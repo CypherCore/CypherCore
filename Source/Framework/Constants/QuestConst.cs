@@ -28,6 +28,7 @@ namespace Framework.Constants
         IncreaseReputation = 18,// requires the player to gain X reputation with a faction
         AreaTriggerEnter = 19,
         AreaTriggerExit = 20,
+        KillWithLabel = 21,
         Max
     }
 

@@ -106,8 +106,8 @@ namespace Game.Networking.Packets
 
                 _worldPacket.WriteFloat(Stats.HpMulti);
                 _worldPacket.WriteFloat(Stats.EnergyMulti);
-
                 _worldPacket.WriteInt32(Stats.QuestItems.Count);
+                _worldPacket.WriteInt32(Stats.QuestCurrencies.Count);
                 _worldPacket.WriteUInt32(Stats.CreatureMovementInfoID);
                 _worldPacket.WriteInt32(Stats.HealthScalingExpansion);
                 _worldPacket.WriteUInt32(Stats.RequiredExpansion);
@@ -128,6 +128,9 @@ namespace Game.Networking.Packets
 
                 foreach (var questItem in Stats.QuestItems)
                     _worldPacket.WriteUInt32(questItem);
+
+                foreach (var currencyItem in Stats.QuestCurrencies)
+                    _worldPacket.WriteInt32(currencyItem);
             }
         }
 
@@ -671,7 +674,7 @@ namespace Game.Networking.Packets
         public uint Unused1;
         public ObjectGuid Unused2;
         public string Unused3 = "";
-        
+
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(Unused1);
@@ -739,6 +742,7 @@ namespace Game.Networking.Packets
         public float EnergyMulti;
         public bool Leader;
         public List<uint> QuestItems = new();
+        public List<int> QuestCurrencies = new();
         public uint CreatureMovementInfoID;
         public int HealthScalingExpansion;
         public uint RequiredExpansion;

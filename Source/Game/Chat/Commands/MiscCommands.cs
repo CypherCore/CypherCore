@@ -690,14 +690,9 @@ namespace Game.Chat
                 return false;
             }
 
-            uint offset = (uint)(area.AreaBit / ActivePlayerData.ExploredZonesBits);
-            if (offset >= PlayerConst.ExploredZonesSize)
-            {
-                handler.SendSysMessage(CypherStrings.BadValue);
-                return false;
-            }
+            int offset = (area.AreaBit / PlayerConst.ExploredZonesBits);
 
-            uint val = 1u << (area.AreaBit % ActivePlayerData.ExploredZonesBits);
+            uint val = 1u << (area.AreaBit % PlayerConst.ExploredZonesBits);
             playerTarget.RemoveExploredZones(offset, val);
 
             handler.SendSysMessage(CypherStrings.UnexploreArea);
@@ -1670,14 +1665,9 @@ namespace Game.Chat
                 return false;
             }
 
-            uint offset = (uint)(area.AreaBit / ActivePlayerData.ExploredZonesBits);
-            if (offset >= PlayerConst.ExploredZonesSize)
-            {
-                handler.SendSysMessage(CypherStrings.BadValue);
-                return false;
-            }
+            int offset = (area.AreaBit / PlayerConst.ExploredZonesBits);
 
-            ulong val = 1ul << (area.AreaBit % ActivePlayerData.ExploredZonesBits);
+            ulong val = 1ul << (area.AreaBit % PlayerConst.ExploredZonesBits);
             playerTarget.AddExploredZones(offset, val);
 
             handler.SendSysMessage(CypherStrings.ExploreArea);

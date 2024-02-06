@@ -6301,8 +6301,6 @@ namespace Game.Entities
             SendPacket(new ResetWeeklyCurrency());
         }
 
-        public void AddExploredZones(uint pos, ulong mask) { SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, (int)pos), mask); }
-        public void RemoveExploredZones(uint pos, ulong mask) { RemoveUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, (int)pos), mask); }
         void CheckAreaExploreAndOutdoor()
         {
             if (!IsAlive())
@@ -6326,20 +6324,13 @@ namespace Game.Entities
                 return;
             }
 
-            int offset = areaEntry.AreaBit / ActivePlayerData.ExploredZonesBits;
-            if (offset >= PlayerConst.ExploredZonesSize)
-            {
-                Log.outError(LogFilter.Player, "Wrong area flag {0} in map data for (X: {1} Y: {2}) point to field PLAYER_EXPLORED_ZONES_1 + {3} ( {4} must be < {5} ).",
-                    areaId, GetPositionX(), GetPositionY(), offset, offset, PlayerConst.ExploredZonesSize);
-                return;
-            }
+            int offset = (areaEntry.AreaBit / PlayerConst.ExploredZonesBits);
+            ulong val = 1ul << (areaEntry.AreaBit % PlayerConst.ExploredZonesBits);
 
-            ulong val = 1ul << (areaEntry.AreaBit % ActivePlayerData.ExploredZonesBits);
-            ulong currFields = m_activePlayerData.ExploredZones[offset];
-
-            if (!Convert.ToBoolean(currFields & val))
+            if (offset >= m_activePlayerData.DataFlags[(int)PlayerDataFlag.ExploredZonesIndex].Size()
+                || (m_activePlayerData.DataFlags[(int)PlayerDataFlag.ExploredZonesIndex][offset] & val) == 0)
             {
-                SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, (int)offset), val);
+                AddExploredZones(offset, val);
 
                 UpdateCriteria(CriteriaType.RevealWorldMapOverlay, GetAreaId());
 
@@ -6385,6 +6376,38 @@ namespace Game.Entities
                 }
             }
         }
+
+        public void AddExploredZones(int pos, ulong mask)
+        {
+            SetUpdateFieldFlagValue(m_values
+                .ModifyValue(m_activePlayerData)
+                .ModifyValue(m_activePlayerData.DataFlags, (int)PlayerDataFlag.ExploredZonesIndex), pos, mask);
+        }
+
+        public void RemoveExploredZones(int pos, ulong mask)
+        {
+            RemoveUpdateFieldFlagValue(m_values
+                .ModifyValue(m_activePlayerData)
+                .ModifyValue(m_activePlayerData.DataFlags, (int)PlayerDataFlag.ExploredZonesIndex), pos, mask);
+        }
+
+        public bool HasExploredZone(uint areaId)
+        {
+            var area = CliDB.AreaTableStorage.LookupByKey(areaId);
+            if (area == null)
+                return false;
+
+            if (area.AreaBit < 0)
+                return false;
+
+            int playerIndexOffset = area.AreaBit / PlayerConst.ExploredZonesBits;
+            if (playerIndexOffset >= m_activePlayerData.DataFlags[(int)PlayerDataFlag.ExploredZonesIndex].Size())
+                return false;
+
+            ulong mask = 1ul << (area.AreaBit % PlayerConst.ExploredZonesBits);
+            return (m_activePlayerData.DataFlags[(int)PlayerDataFlag.ExploredZonesIndex][playerIndexOffset] & mask) != 0;
+        }
+
         void SendExplorationExperience(uint Area, uint Experience)
         {
             SendPacket(new ExplorationExperience(Experience, Area));

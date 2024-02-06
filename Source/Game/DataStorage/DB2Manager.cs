@@ -42,6 +42,9 @@ namespace Game.DataStorage
             foreach (var areaGroupMember in AreaGroupMemberStorage.Values)
                 _areaGroupMembers.Add(areaGroupMember.AreaGroupID, areaGroupMember.AreaID);
 
+            foreach (AreaTableRecord areaTable in AreaTableStorage.Values)
+                Cypher.Assert(areaTable.AreaBit <= 0 || (areaTable.AreaBit / 64) < PlayerConst.ExploredZonesSize, $"PLAYER_EXPLORED_ZONES_SIZE must be at least {((areaTable.AreaBit + 63) / 64)}");
+
             foreach (ArtifactPowerRecord artifactPower in ArtifactPowerStorage.Values)
                 _artifactPowers.Add(artifactPower.ArtifactID, artifactPower);
 
@@ -226,6 +229,9 @@ namespace Game.DataStorage
 
                 _chrSpecializationsByIndex[storageIndex][chrSpec.OrderIndex] = chrSpec;
             }
+
+            foreach (ConditionalChrModelRecord conditionalChrModel in ConditionalChrModelStorage.Values)
+                _conditionalChrModelsByChrModelId[conditionalChrModel.ChrModelID] = conditionalChrModel;
 
             foreach (ConditionalContentTuningRecord conditionalContentTuning in ConditionalContentTuningStorage.Values)
                 _conditionalContentTuning.Add(conditionalContentTuning.ParentContentTuningID, conditionalContentTuning);
@@ -1022,6 +1028,11 @@ namespace Game.DataStorage
         public ChrModelRecord GetChrModel(Race race, Gender gender)
         {
             return _chrModelsByRaceAndGender.LookupByKey(Tuple.Create((byte)race, (byte)gender));
+        }
+
+        public ConditionalChrModelRecord GetConditionalChrModel(int chrModelId)
+        {
+            return _conditionalChrModelsByChrModelId.LookupByKey(chrModelId);
         }
 
         public string GetChrRaceName(Race race, Locale locale = Locale.enUS)
@@ -2267,6 +2278,7 @@ namespace Game.DataStorage
         MultiMap<Tuple<byte, byte>, ChrCustomizationOptionRecord> _chrCustomizationOptionsByRaceAndGender = new();
         Dictionary<uint, MultiMap<uint, uint>> _chrCustomizationRequiredChoices = new();
         ChrSpecializationRecord[][] _chrSpecializationsByIndex = new ChrSpecializationRecord[(int)Class.Max + 1][];
+        Dictionary<int, ConditionalChrModelRecord> _conditionalChrModelsByChrModelId = new();
         MultiMap<uint, ConditionalContentTuningRecord> _conditionalContentTuning = new();
         List<(uint, int)> _contentTuningLabels = new();
         MultiMap<uint, CurrencyContainerRecord> _currencyContainers = new();

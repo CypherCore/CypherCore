@@ -2016,7 +2016,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template models in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
-        
+
         public void LoadCreatureSummonedData()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -8226,6 +8226,11 @@ namespace Game
             return null;
         }
 
+        public List<int> GetCreatureQuestCurrencyList(uint creatureId)
+        {
+            return creatureQuestCurrenciesStorage.LookupByKey(creatureId);
+        }
+
         //Spells /Skills / Phases
         public void LoadPhases()
         {
@@ -10005,6 +10010,46 @@ namespace Game
                 Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Player Choice Response locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
             }
         }
+
+        public void LoadCreatureQuestCurrencies()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            //                                         0           1
+            SQLResult result = DB.World.Query("SELECT CreatureId, CurrencyId FROM creature_quest_currency ORDER BY CreatureId, CurrencyId ASC");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, ">> Loaded 0 creature quest currencies. DB table `creature_quest_currency` is empty.");
+                return;
+            }
+
+            uint count = 0;
+            do
+            {
+                uint entry = result.Read<uint>(0);
+                int currency = result.Read<int>(1);
+
+                if (GetCreatureTemplate(entry) == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `creature_quest_currency` has data for nonexistent creature (entry: {entry}, currency: {currency}), skipped");
+                    continue;
+                }
+
+                if (!CliDB.CurrencyTypesStorage.HasRecord((uint)currency))
+                {
+                    Log.outError(LogFilter.Sql, $"Table `creature_quest_currency` has nonexistent currency (ID: {currency}) in creature (entry: {entry}, currency: {currency}), skipped");
+                    continue;
+                }
+
+                creatureQuestCurrenciesStorage.Add(entry, currency);
+
+                ++count;
+            }
+            while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature quest currencies in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+
         public void InitializeQueriesData(QueryDataGroup mask)
         {
             uint oldMSTime = Time.GetMSTime();
@@ -10827,6 +10872,7 @@ namespace Game
         Dictionary<ulong, CreatureData> creatureDataStorage = new();
         Dictionary<ulong, CreatureAddon> creatureAddonStorage = new();
         MultiMap<(uint, Difficulty), uint> creatureQuestItemStorage = new();
+        MultiMap<uint, int> creatureQuestCurrenciesStorage = new();
         Dictionary<uint, CreatureAddon> creatureTemplateAddonStorage = new();
         MultiMap<uint, float> _creatureTemplateSparringStorage = new();
         Dictionary<ulong, CreatureMovementData> creatureMovementOverrides = new();

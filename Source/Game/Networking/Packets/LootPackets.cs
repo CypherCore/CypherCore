@@ -264,7 +264,7 @@ namespace Game.Networking.Packets
         public uint RollTime;
         public LootMethod Method;
         public RollMask ValidRolls;
-        public Array<LootRollIneligibilityReason> LootRollIneligibleReason = new Array<LootRollIneligibilityReason>(4);
+        public Array<LootRollIneligibilityReason> LootRollIneligibleReason = new Array<LootRollIneligibilityReason>(5);
         public LootItemData Item = new();
         public uint DungeonEncounterID;
 

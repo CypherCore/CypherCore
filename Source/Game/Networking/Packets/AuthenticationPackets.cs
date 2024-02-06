@@ -22,7 +22,7 @@ namespace Game.Networking.Packets
             Serial = _worldPacket.ReadUInt32();
             Latency = _worldPacket.ReadUInt32();
         }
-        
+
         public uint Serial;
         public uint Latency;
     }
@@ -153,7 +153,7 @@ namespace Game.Networking.Packets
                 if (SuccessInfo.NumPlayersAlliance.HasValue)
                     _worldPacket.WriteUInt16(SuccessInfo.NumPlayersAlliance.Value);
 
-                if(SuccessInfo.ExpansionTrialExpiration.HasValue)
+                if (SuccessInfo.ExpansionTrialExpiration.HasValue)
                     _worldPacket.WriteInt64(SuccessInfo.ExpansionTrialExpiration.Value);
 
                 if (SuccessInfo.NewBuildKeys != null)
@@ -188,7 +188,7 @@ namespace Game.Networking.Packets
             }
 
             if (WaitInfo.HasValue)
-                WaitInfo.Value.Write(_worldPacket);            
+                WaitInfo.Value.Write(_worldPacket);
         }
 
         public AuthSuccessInfo SuccessInfo; // contains the packet data in case that it has account information (It is never set when WaitInfo is set), otherwise its contents are undefined.
@@ -412,13 +412,17 @@ namespace Game.Networking.Packets
         {
             data.WriteUInt32(WaitCount);
             data.WriteUInt32(WaitTime);
+            data.WriteUInt32(AllowedFactionGroupForCharacterCreate);
             data.WriteBit(HasFCM);
+            data.WriteBit(CanCreateOnlyIfExisting);
             data.FlushBits();
         }
 
         public uint WaitCount; // position of the account in the login queue
         public uint WaitTime; // Wait time in login queue in minutes, if sent queued and this value is 0 client displays "unknown time"
+        public uint AllowedFactionGroupForCharacterCreate;
         public bool HasFCM; // true if the account has a forced character migration pending. @todo implement
+        public bool CanCreateOnlyIfExisting; ///< Can create characters on realm only if player has other existing characters there
     }
 
     struct VirtualRealmNameInfo

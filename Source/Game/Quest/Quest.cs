@@ -1070,6 +1070,7 @@ namespace Game
                 case QuestObjectiveType.HaveCurrency:
                 case QuestObjectiveType.ObtainCurrency:
                 case QuestObjectiveType.IncreaseReputation:
+                case QuestObjectiveType.KillWithLabel:
                     return true;
                 default:
                     break;

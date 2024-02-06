@@ -673,6 +673,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Creature Quest Items...");
             Global.ObjectMgr.LoadCreatureQuestItems();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading Creature Quest Currencies...");
+            Global.ObjectMgr.LoadCreatureQuestCurrencies();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading Creature Linked Respawn...");
             Global.ObjectMgr.LoadLinkedRespawn();                             // must be after LoadCreatures(), LoadGameObjects()
 

@@ -196,6 +196,10 @@ namespace Game.Entities
             if (items != null)
                 stats.QuestItems.AddRange(items);
 
+            var currencies = Global.ObjectMgr.GetCreatureQuestCurrencyList(Entry);
+            if (currencies != null)
+                stats.QuestCurrencies.AddRange(currencies);
+
             if (locale != Locale.enUS)
             {
                 CreatureLocale creatureLocale = Global.ObjectMgr.GetCreatureLocale(Entry);

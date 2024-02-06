@@ -2953,8 +2953,13 @@ namespace Game.Entities
             SetXP(xp);
 
             StringArray exploredZonesStrings = new(exploredZones, ' ');
-            for (int i = 0; i < exploredZonesStrings.Length && i / 2 < ActivePlayerData.ExploredZonesSize; ++i)
-                SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, i / 2), (ulong)((long.Parse(exploredZonesStrings[i])) << (32 * (i % 2))));
+            for (int i = 0; i < exploredZonesStrings.Length && i / 2 < PlayerConst.ExploredZonesSize; ++i)
+            {
+                if (!ulong.TryParse(exploredZonesStrings[i], out ulong value))
+                    value = 0;
+
+                AddExploredZones(i / 2, (value << (32 * (i % 2))));
+            }
 
             StringArray knownTitlesStrings = new(knownTitles, ' ');
             if ((knownTitlesStrings.Length % 2) == 0)
@@ -3742,8 +3747,8 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetLootSpecId());
 
                 ss.Clear();
-                for (int i = 0; i < PlayerConst.ExploredZonesSize; ++i)
-                    ss.Append($"{(uint)(m_activePlayerData.ExploredZones[i] & 0xFFFFFFFF)} {(uint)((m_activePlayerData.ExploredZones[i] >> 32) & 0xFFFFFFFF)} ");
+                for (int i = 0; i < m_activePlayerData.DataFlags[(int)PlayerDataFlag.ExploredZonesIndex].Size(); ++i)
+                    ss.Append($"{(uint)(m_activePlayerData.DataFlags[(int)PlayerDataFlag.ExploredZonesIndex][i] & 0xFFFFFFFF)} {(uint)((m_activePlayerData.DataFlags[(int)PlayerDataFlag.ExploredZonesIndex][i] >> 32) & 0xFFFFFFFF)} ");
 
                 stmt.AddValue(index++, ss.ToString());
 
@@ -3877,8 +3882,8 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetLootSpecId());
 
                 ss.Clear();
-                for (int i = 0; i < PlayerConst.ExploredZonesSize; ++i)
-                    ss.Append($"{(uint)(m_activePlayerData.ExploredZones[i] & 0xFFFFFFFF)} {(uint)((m_activePlayerData.ExploredZones[i] >> 32) & 0xFFFFFFFF)} ");
+                for (int i = 0; i < m_activePlayerData.DataFlags[(int)PlayerDataFlag.ExploredZonesIndex].Size(); ++i)
+                    ss.Append($"{(uint)(m_activePlayerData.DataFlags[(int)PlayerDataFlag.ExploredZonesIndex][i] & 0xFFFFFFFF)} {(uint)((m_activePlayerData.DataFlags[(int)PlayerDataFlag.ExploredZonesIndex][i] >> 32) & 0xFFFFFFFF)} ");
 
                 stmt.AddValue(index++, ss.ToString());
 

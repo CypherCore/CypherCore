@@ -19,7 +19,10 @@ namespace Framework.Constants
         public const int MaxMasterySpells = 2;
 
         public const int ReqPrimaryTreeTalents = 31;
-        public const int ExploredZonesSize = 192;
+
+        public const int ExploredZonesSize = 240;
+        public const int ExploredZonesBits = sizeof(ulong) * 8;
+
         public const ulong MaxMoneyAmount = 99999999999UL;
         public const int MaxActionButtons = 180;
         public const int MaxActionButtonActionValue = 0x00FFFFFF + 1;
@@ -899,5 +902,12 @@ namespace Framework.Constants
     {
         Guild = 0,
         Personal = 1,
+    }
+
+    public enum PlayerDataFlag
+    {
+        ExploredZonesIndex = 1,
+        CharacterIndex = 2,
+        AccountIndex = 3
     }
 }

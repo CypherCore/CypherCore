@@ -1068,21 +1068,9 @@ namespace Game.Achievements
                         break;
 
                     bool matchFound = false;
-                    for (int j = 0; j < SharedConst.MaxWorldMapOverlayArea; ++j)
+                    for (uint j = 0; j < SharedConst.MaxWorldMapOverlayArea; ++j)
                     {
-                        AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(worldOverlayEntry.AreaID[j]);
-                        if (area == null)
-                            break;
-
-                        if (area.AreaBit < 0)
-                            continue;
-
-                        int playerIndexOffset = (int)area.AreaBit / ActivePlayerData.ExploredZonesBits;
-                        if (playerIndexOffset >= PlayerConst.ExploredZonesSize)
-                            continue;
-
-                        ulong mask = 1ul << (int)((uint)area.AreaBit % ActivePlayerData.ExploredZonesBits);
-                        if (Convert.ToBoolean(referencePlayer.m_activePlayerData.ExploredZones[playerIndexOffset] & mask))
+                        if (referencePlayer.HasExploredZone(j))
                         {
                             matchFound = true;
                             break;
@@ -1835,18 +1823,7 @@ namespace Game.Achievements
                 }
                 case ModifierTreeType.PlayerHasExploredArea: // 113
                 {
-                    AreaTableRecord areaTable = CliDB.AreaTableStorage.LookupByKey(reqValue);
-                    if (areaTable == null)
-                        return false;
-
-                    if (areaTable.AreaBit <= 0)
-                        break; // success
-
-                    int playerIndexOffset = areaTable.AreaBit / ActivePlayerData.ExploredZonesBits;
-                    if (playerIndexOffset >= PlayerConst.ExploredZonesSize)
-                        break;
-
-                    if ((referencePlayer.m_activePlayerData.ExploredZones[playerIndexOffset] & (1ul << (areaTable.AreaBit % ActivePlayerData.ExploredZonesBits))) == 0)
+                    if (!referencePlayer.HasExploredZone(reqValue))
                         return false;
                     break;
                 }

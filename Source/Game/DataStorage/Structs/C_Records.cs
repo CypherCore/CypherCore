@@ -357,7 +357,7 @@ namespace Game.DataStorage
     public sealed class ConditionalChrModelRecord
     {
         public uint Id;
-        public uint ChrModelID;                                      // This is the PK
+        public int ChrModelID;
         public int ChrCustomizationReqID;
         public int PlayerConditionID;
         public int Flags;

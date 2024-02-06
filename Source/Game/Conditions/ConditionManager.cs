@@ -2192,9 +2192,8 @@ namespace Game
                 for (var i = 0; i < condition.Explored.Length; ++i)
                 {
                     AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(condition.Explored[i]);
-                    if (area != null)
-                        if (area.AreaBit != -1 && !Convert.ToBoolean(player.m_activePlayerData.ExploredZones[area.AreaBit / ActivePlayerData.ExploredZonesBits] & (1ul << ((int)area.AreaBit % ActivePlayerData.ExploredZonesBits))))
-                            return false;
+                    if (area != null && !player.HasExploredZone(area.Id))
+                        return false;
                 }
             }
 

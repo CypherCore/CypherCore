@@ -398,7 +398,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8((byte)Reason);
+            _worldPacket.WriteInt32((int)Reason);
         }
 
         ChatRestrictionType Reason;
