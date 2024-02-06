@@ -76,7 +76,7 @@ namespace Game.DataStorage
                         actor.ActivePlayerTemplate = new();
                     else if (noActorObject)
                         actor.NoObjectTemplate = new();
-                    else if (data.SpawnId != 0)
+                    else if (data.SpawnId != 0 || data.CreatureId == 0) // @TODO: remove CreatureId check when actor flags are implemented
                         actor.WorldObjectTemplate = new();
                     else
                         actor.TalkingHeadTemplate = new();
