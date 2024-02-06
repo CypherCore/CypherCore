@@ -1611,6 +1611,7 @@ namespace Framework.Constants
         DieCommandMode,
         DisableBreathing,
         DurabilityLossInPvp,
+        EnableAeLoot,
         EnableMmaps,
         EnableSinfoLogin,
         EventAnnounce,

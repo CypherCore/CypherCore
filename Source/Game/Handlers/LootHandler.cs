@@ -217,8 +217,12 @@ namespace Game
             GetPlayer().RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Looting);
 
             List<Creature> corpses = new();
-            CreatureListSearcher searcher = new(_player, corpses, check);
-            Cell.VisitGridObjects(_player, searcher, AELootCreatureCheck.LootDistance);
+            bool aeLootEnabled = WorldConfig.GetBoolValue(WorldCfg.EnableAeLoot);
+            if (aeLootEnabled)
+            {
+                CreatureListSearcher searcher = new(_player, corpses, check);
+                Cell.VisitGridObjects(_player, searcher, AELootCreatureCheck.LootDistance);
+            }
 
             if (!corpses.Empty())
                 SendPacket(new AELootTargets((uint)corpses.Count + 1));
