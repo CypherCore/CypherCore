@@ -694,11 +694,13 @@ namespace Game.DataStorage
                 hotfixRecord.HotfixStatus = status;
                 hotfixRecord.AvailableLocalesMask = availableDb2Locales.ToBlockRange()[0];//Ulgy i know
 
+                if (!_hotfixData.ContainsKey(id))
+                    _hotfixData[id] = new();
+
                 HotfixPush push = _hotfixData[id];
                 push.Records.Add(hotfixRecord);
                 push.AvailableLocalesMask |= hotfixRecord.AvailableLocalesMask;
 
-                _hotfixData.Add(id, push);
                 deletedRecords[(tableHash, recordId)] = status == HotfixRecord.Status.RecordRemoved;
 
                 ++count;

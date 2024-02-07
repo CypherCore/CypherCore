@@ -202,7 +202,7 @@ namespace Game.AI
                 temp.Link = result.Read<ushort>(3);
 
                 bool invalidDifficulties = false;
-                foreach (string token in new StringArray(result.Read<string>(4), ' '))
+                foreach (string token in result.Read<string>(4).Split(' ', StringSplitOptions.RemoveEmptyEntries))
                 {
                     if (!Enum.TryParse<Difficulty>(token, out Difficulty difficultyId))
                     {

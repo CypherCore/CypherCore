@@ -713,11 +713,6 @@ namespace Game
             Values[WorldCfg.ThreatRadius] = GetDefaultValue("ThreatRadius", 60.0f);
 
             Values[WorldCfg.DeclinedNamesUsed] = GetDefaultValue("DeclinedNames", false);
-            // always use declined names in the russian client
-            var category = CliDB.CfgCategoriesStorage.LookupByKey((uint)Values[WorldCfg.RealmZone]);
-            if (category != null && category.GetCreateCharsetMask().HasFlag(CfgCategoriesCharsets.Russian))
-                Values[WorldCfg.DeclinedNamesUsed] = true;
-
             Values[WorldCfg.ListenRangeSay] = GetDefaultValue("ListenRange.Say", 25.0f);
             Values[WorldCfg.ListenRangeTextemote] = GetDefaultValue("ListenRange.TextEmote", 25.0f);
             Values[WorldCfg.ListenRangeYell] = GetDefaultValue("ListenRange.Yell", 300.0f);

@@ -1909,7 +1909,7 @@ namespace Game.Entities
         public virtual float GetNativeObjectScale() { return 1.0f; }
 
         public float GetDisplayScale() { return m_unitData.DisplayScale; }
-        
+
         public uint GetDisplayId() { return m_unitData.DisplayID; }
 
         public virtual void SetDisplayId(uint displayId, bool setNative = false)
@@ -2088,7 +2088,17 @@ namespace Game.Entities
             return IsCharmed() ? GetCharmerGUID() : GetOwnerGUID();
         }
 
-        Player GetControllingPlayer()
+        public Unit GetDemonCreator()
+        {
+            return Global.ObjAccessor.GetUnit(this, GetDemonCreatorGUID());
+        }
+
+        public Player GetDemonCreatorPlayer()
+        {
+            return Global.ObjAccessor.GetPlayer(this, GetDemonCreatorGUID());
+        }
+
+        public Player GetControllingPlayer()
         {
             ObjectGuid guid = GetCharmerOrOwnerGUID();
             if (!guid.IsEmpty())

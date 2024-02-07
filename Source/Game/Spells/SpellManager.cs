@@ -4522,7 +4522,7 @@ namespace Game.Entities
                     ushort dispelType = result.Read<ushort>(2);
                     ulong mechanics = result.Read<ulong>(3);
 
-                    CreatureImmunities immunities = mCreatureImmunities[id];
+                    CreatureImmunities immunities = new();
                     immunities.School = new BitSet(new uint[] { school });
                     immunities.DispelType = new BitSet(new uint[] { dispelType });
                     immunities.Mechanic = new BitSet(mechanics);
@@ -4536,7 +4536,7 @@ namespace Game.Entities
                     if (immunities.Mechanic.ToUInt() != mechanics)
                         Log.outError(LogFilter.Sql, $"Invalid value in `MechanicsMask` {mechanics} for creature immunities {id}, truncated");
 
-                    foreach (string token in new StringArray(result.Read<string>(4), ','))
+                    foreach (string token in result.Read<string>(4).Split(',', StringSplitOptions.RemoveEmptyEntries))
                     {
                         if (uint.TryParse(token, out uint effect) && effect != 0 && effect < (int)SpellEffectName.TotalSpellEffects)
                             immunities.Effect.Add((SpellEffectName)effect);
@@ -4544,13 +4544,15 @@ namespace Game.Entities
                             Log.outError(LogFilter.Sql, $"Invalid effect type in `Effects` {token} for creature immunities {id}, skipped");
                     }
 
-                    foreach (string token in new StringArray(result.Read<string>(5), ','))
+                    foreach (string token in result.Read<string>(5).Split(',', StringSplitOptions.RemoveEmptyEntries))
                     {
                         if (uint.TryParse(token, out uint aura) && aura != 0 && aura < (int)AuraType.Total)
                             immunities.Aura.Add((AuraType)aura);
                         else
                             Log.outError(LogFilter.Sql, $"Invalid aura type in `Auras` {token} for creature immunities {id}, skipped");
                     }
+
+                    mCreatureImmunities[id] = immunities;
                 }
                 while (result.NextRow());
             }

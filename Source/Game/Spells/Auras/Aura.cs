@@ -2836,7 +2836,7 @@ namespace Game.Spells
 
                 foreach (WorldObject unit in units)
                 {
-                    if (!targets.ContainsKey(unit))
+                    if (!targets.ContainsKey(unit.ToUnit()))
                         targets[unit.ToUnit()] = 0;
 
                     targets[unit.ToUnit()] |= 1u << (int)spellEffectInfo.EffectIndex;

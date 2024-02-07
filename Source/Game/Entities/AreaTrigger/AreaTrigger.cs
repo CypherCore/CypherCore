@@ -31,6 +31,7 @@ namespace Game.Entities
             m_areaTriggerData = new AreaTriggerFieldData();
 
             _spline = new();
+            _stationaryPosition = new();
         }
 
         public override void AddToWorld()
@@ -261,9 +262,9 @@ namespace Game.Entities
 
             SpellInfo spellInfo = null;
             SpellCastVisual spellVisual = default;
-            if (spawnData.SpellForVisuals != 0)
+            if (spawnData.SpellForVisuals.HasValue)
             {
-                spellInfo = Global.SpellMgr.GetSpellInfo((uint)spawnData.SpellForVisuals, Difficulty.None);
+                spellInfo = Global.SpellMgr.GetSpellInfo(spawnData.SpellForVisuals.Value, Difficulty.None);
                 if (spellInfo != null)
                     spellVisual.SpellXSpellVisualID = spellInfo.GetSpellXSpellVisualId();
             }

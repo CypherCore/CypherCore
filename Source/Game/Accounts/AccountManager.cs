@@ -294,15 +294,11 @@ namespace Game
             return false;
         }
 
-        public bool CheckPassword(uint accountId, string password)
+        public bool CheckPassword(string username, string password)
         {
-            string username;
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_CHECK_PASSWORD_BY_NAME);
+            stmt.AddValue(0, username);
 
-            if (!GetName(accountId, out username))
-                return false;
-
-            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_CHECK_PASSWORD);
-            stmt.AddValue(0, accountId);
             SQLResult result = DB.Login.Query(stmt);
             if (!result.IsEmpty())
             {
@@ -313,6 +309,14 @@ namespace Game
             }
 
             return false;
+        }
+
+        public bool CheckPassword(uint accountId, string password)
+        {
+            if (!GetName(accountId, out string username))
+                return false;
+
+            return CheckPassword(username, password);
         }
 
         public bool CheckEmail(uint accountId, string newEmail)
