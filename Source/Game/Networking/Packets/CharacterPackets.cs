@@ -91,6 +91,9 @@ namespace Game.Networking.Packets
                 PlayerFlags playerFlags = (PlayerFlags)fields.Read<uint>(12);
                 AtLoginFlags atLoginFlags = (AtLoginFlags)fields.Read<ushort>(13);
 
+                if (playerFlags.HasFlag(PlayerFlags.Resting))
+                    Flags |= CharacterFlags.Resting;
+
                 if (atLoginFlags.HasAnyFlag(AtLoginFlags.Resurrect))
                     playerFlags &= ~PlayerFlags.Ghost;
 
