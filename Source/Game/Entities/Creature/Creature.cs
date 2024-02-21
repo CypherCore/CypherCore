@@ -383,6 +383,9 @@ namespace Game.Entities
             if (IsTrigger())
                 SetUninteractible(true);
 
+            if (HasNpcFlag(NPCFlags.SpellClick))
+                InitializeInteractSpellId();
+
             InitializeReactState();
 
             if (Convert.ToBoolean(cInfo.FlagsExtra & CreatureFlagsExtra.NoTaunt))
@@ -1148,6 +1151,16 @@ namespace Game.Entities
             SummonCreature(npcEntry, GetPosition(), TempSummonType.TimedDespawn, TimeSpan.FromSeconds(1), 0, 0);
         }
 
+        void InitializeInteractSpellId()
+        {
+            var clickBounds = Global.ObjectMgr.GetSpellClickInfoMapBounds(GetEntry());
+            // Set InteractSpellID if there is only one row in npc_spellclick_spells in db for this creature
+            if (clickBounds.Count == 1)
+                SetInteractSpellId((int)clickBounds[0].spellId);
+            else
+                SetInteractSpellId(0);
+        }
+
         public bool HasFlag(CreatureStaticFlags flag) { return _staticFlags.HasFlag(flag); }
         public bool HasFlag(CreatureStaticFlags2 flag) { return _staticFlags.HasFlag(flag); }
         public bool HasFlag(CreatureStaticFlags3 flag) { return _staticFlags.HasFlag(flag); }
@@ -1615,6 +1628,8 @@ namespace Game.Entities
         }
 
         float GetSparringHealthPct() { return _sparringHealthPct; }
+
+        void SetInteractSpellId(int interactSpellId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.InteractSpellID), interactSpellId); }
 
         public void OverrideSparringHealthPct(List<float> healthPct)
         {
