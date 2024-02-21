@@ -2717,6 +2717,8 @@ namespace Game.Entities
             bool handled = true;
             switch (gossipOptionNpc)
             {
+                case GossipOptionNpc.None:
+                    break;
                 case GossipOptionNpc.Vendor:
                     GetSession().SendListInventory(guid);
                     break;
