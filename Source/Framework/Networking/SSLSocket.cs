@@ -33,16 +33,16 @@ namespace Framework.Networking
             _stream.Dispose();
         }
 
-        public abstract void Accept();
+        public abstract void Start();
 
         public virtual bool Update()
         {
             return _socket.Connected;
         }
 
-        public IPEndPoint GetRemoteIpEndPoint()
+        public IPAddress GetRemoteIpAddress()
         {
-            return _remoteEndPoint;
+            return _remoteEndPoint.Address;
         }
 
         public async Task AsyncRead()
@@ -63,7 +63,7 @@ namespace Framework.Networking
             }
             catch (Exception ex)
             {
-                Log.outException(ex);
+                Log.outDebug(LogFilter.Network, ex.Message);
             }
         }
 
@@ -73,15 +73,16 @@ namespace Framework.Networking
             {
                 await _stream.AuthenticateAsServerAsync(certificate, false, SslProtocols.Tls12, false);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Log.outException(ex);
-                CloseSocket();
+                await HandshakeHandler(ex);
                 return;
             }
 
-            await AsyncRead();
+            await HandshakeHandler();
         }
+
+        public abstract Task HandshakeHandler(Exception ex = null);
 
         public abstract void ReadHandler(byte[] data, int receivedLength);
 
@@ -109,7 +110,7 @@ namespace Framework.Networking
             }
             catch (Exception ex)
             {
-                Log.outDebug(LogFilter.Network, $"WorldSocket.CloseSocket: {GetRemoteIpEndPoint()} errored when shutting down socket: {ex.Message}");
+                Log.outDebug(LogFilter.Network, $"WorldSocket.CloseSocket: {GetRemoteIpAddress()} errored when shutting down socket: {ex.Message}");
             }
         }
 

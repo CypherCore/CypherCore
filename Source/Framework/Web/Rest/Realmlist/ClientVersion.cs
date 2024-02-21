@@ -1,23 +1,22 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
-namespace Framework.Web
+namespace Framework.Web.Rest.Realmlist
 {
-    [DataContract]
     public class ClientVersion
     {
-        [DataMember(Name = "versionMajor")]
+        [JsonPropertyName("versionMajor")]
         public int Major { get; set; }
 
-        [DataMember(Name = "versionBuild")]
+        [JsonPropertyName("versionBuild")]
         public int Build { get; set; }
 
-        [DataMember(Name = "versionMinor")]
+        [JsonPropertyName("versionMinor")]
         public int Minor { get; set; }
 
-        [DataMember(Name = "versionRevision")]
+        [JsonPropertyName("versionRevision")]
         public int Revision { get; set; }
     }
 }

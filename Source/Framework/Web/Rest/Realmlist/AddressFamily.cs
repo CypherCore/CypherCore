@@ -2,17 +2,16 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
-namespace Framework.Web
+namespace Framework.Web.Rest.Realmlist
 {
-    [DataContract]
     public class AddressFamily
     {
-        [DataMember(Name = "family")]
+        [JsonPropertyName("family")]
         public int Id { get; set; }
 
-        [DataMember(Name = "addresses")]
+        [JsonPropertyName("addresses")]
         public IList<Address> Addresses { get; set; } = new List<Address>();
     }
 }

@@ -64,7 +64,7 @@ namespace Framework.Networking
                 if (socket != null)
                 {
                     T newSocket = (T)Activator.CreateInstance(typeof(T), socket);
-                    newSocket.Accept();
+                    newSocket.Start();
 
                     if (!_closed)
                         AsyncAccept<T>();

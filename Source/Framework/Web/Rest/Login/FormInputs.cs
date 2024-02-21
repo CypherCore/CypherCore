@@ -2,20 +2,22 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
-namespace Framework.Web
+namespace Framework.Web.Rest.Login
 {
-    [DataContract]
     public class FormInputs
     {
-        [DataMember(Name = "type")]
+        [JsonPropertyName("type")]
         public string Type { get; set; }
 
-        [DataMember(Name = "prompt")]
-        public string Prompt { get; set; }
-
-        [DataMember(Name = "inputs")]
+        [JsonPropertyName("inputs")]
         public List<FormInput> Inputs { get; set; } = new List<FormInput>();
+
+        [JsonPropertyName("srp_url")]
+        public string SrpUrl { get; set; }
+
+        [JsonPropertyName("srp_js")]
+        public string SrpJs { get; set; }
     }
 }

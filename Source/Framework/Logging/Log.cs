@@ -382,7 +382,6 @@ public enum LogLevel
 
 public enum LogFilter
 {
-    Misc,
     Achievement,
     Addon,
     Ahbot,
@@ -404,11 +403,13 @@ public enum LogFilter
     Garrison,
     Gameevent,
     Guild,
+    Http,
     Instance,
     Lfg,
     Loot,
     MapsScript,
     Maps,
+    Misc,
     Movement,
     Network,
     Outdoorpvp,

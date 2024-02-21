@@ -1,42 +1,41 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
+using Framework.Web.Rest.Realmlist;
 
 namespace Framework.Web
 {
-    [DataContract]
     public class RealmEntry
     {
-
-        [DataMember(Name = "wowRealmAddress")]
+        [JsonPropertyName("wowRealmAddress")]
         public int WowRealmAddress { get; set; }
 
-        [DataMember(Name = "cfgTimezonesID")]
+        [JsonPropertyName("cfgTimezonesID")]
         public int CfgTimezonesID { get; set; }
 
-        [DataMember(Name = "populationState")]
+        [JsonPropertyName("populationState")]
         public int PopulationState { get; set; }
 
-        [DataMember(Name = "cfgCategoriesID")]
+        [JsonPropertyName("cfgCategoriesID")]
         public int CfgCategoriesID { get; set; }
 
-        [DataMember(Name = "version")]
+        [JsonPropertyName("version")]
         public ClientVersion Version { get; set; } = new ClientVersion();
 
-        [DataMember(Name = "cfgRealmsID")]
+        [JsonPropertyName("cfgRealmsID")]
         public int CfgRealmsID { get; set; }
 
-        [DataMember(Name = "flags")]
+        [JsonPropertyName("flags")]
         public int Flags { get; set; }
 
-        [DataMember(Name = "name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
 
-        [DataMember(Name = "cfgConfigsID")]
+        [JsonPropertyName("cfgConfigsID")]
         public int CfgConfigsID { get; set; }
 
-        [DataMember(Name = "cfgLanguagesID")]
+        [JsonPropertyName("cfgLanguagesID")]
         public int CfgLanguagesID { get; set; }
     }
 }

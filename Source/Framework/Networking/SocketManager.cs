@@ -32,8 +32,6 @@ namespace Framework.Networking
                 _threads[i].Start();
             }
 
-            Acceptor.AsyncAcceptSocket(OnSocketOpen);
-
             return true;
         }
 
@@ -64,7 +62,7 @@ namespace Framework.Networking
             try
             {
                 TSocketType newSocket = (TSocketType)Activator.CreateInstance(typeof(TSocketType), sock);
-                newSocket.Accept();
+                newSocket.Start();
 
                 _threads[SelectThreadWithMinConnections()].AddSocket(newSocket);
             }

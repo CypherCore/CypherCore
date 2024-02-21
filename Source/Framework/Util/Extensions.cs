@@ -6,10 +6,10 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Runtime.CompilerServices;
 
 namespace System
 {
@@ -29,8 +29,8 @@ namespace System
             else
                 return byteArray.Aggregate("", (current, b) => current + b.ToString("X2"));
         }
-        
-        public static byte[] ToByteArray(this string str)
+
+        public static byte[] ToByteArray(this string str, bool reverse = false)
         {
             str = str.Replace(" ", String.Empty);
 
@@ -40,7 +40,7 @@ namespace System
                 string temp = String.Concat(str[i * 2], str[i * 2 + 1]);
                 res[i] = Convert.ToByte(temp, 16);
             }
-            return res;
+            return reverse ? res.Reverse().ToArray() : res;
         }
 
         public static byte[] ToByteArray(this string value, char separator)
@@ -124,7 +124,7 @@ namespace System
         public static uint[] SerializeObject<T>(this T obj)
         {
             //if (obj.GetType()<StructLayoutAttribute>() == null)
-                //return null;
+            //return null;
 
             var size = Marshal.SizeOf(typeof(T));
             var ptr = Marshal.AllocHGlobal(size);
@@ -233,7 +233,7 @@ namespace System
             float invSqrt = 1.0f / MathF.Sqrt(lenSquared);
             return new Vector3(vector.X * invSqrt, vector.Y * invSqrt, vector.Z * invSqrt);
         }
-        
+
         public static Vector3 directionOrZero(this Vector3 vector)
         {
             float mag = vector.LengthSquared();
@@ -282,7 +282,7 @@ namespace System
                 x = 0.0f;
             }
         }
-        
+
         public static Matrix4x4 fromEulerAnglesZYX(float fYAngle, float fPAngle, float fRAngle)
         {
             float fCos = MathF.Cos(fYAngle);
@@ -318,7 +318,7 @@ namespace System
         public static string ConvertFormatSyntax(this string str)
         {
             string pattern = @"(%\W*\d*[a-zA-Z]*)";
-            
+
             int count = 0;
             string result = Regex.Replace(str, pattern, m => string.Concat("{", count++, "}"));
 

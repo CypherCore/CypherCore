@@ -39,11 +39,9 @@ namespace BNetServer.Networking
             os = logonRequest.Platform;
             build = (uint)logonRequest.ApplicationVersion;
 
-            var hostname = Global.LoginServiceMgr.GetHostnameForClient(GetRemoteIpEndPoint());
-
             ChallengeExternalRequest externalChallenge = new();
             externalChallenge.PayloadType = "web_auth_url";
-            externalChallenge.Payload = ByteString.CopyFromUtf8($"https://{Global.LoginServiceMgr.GetHostnameForClient(GetRemoteIpEndPoint())}:{Global.LoginServiceMgr.GetPort()}/bnetserver/login/");
+            externalChallenge.Payload = ByteString.CopyFromUtf8($"https://{Global.LoginService.GetHostnameForClient(GetRemoteIpAddress())}:{Global.LoginService.GetPort()}/bnetserver/login/");
 
             SendRequest((uint)OriginalHash.ChallengeListener, 3, externalChallenge);
             return BattlenetRpcErrorCode.Ok;
@@ -55,7 +53,7 @@ namespace BNetServer.Networking
             if (verifyWebCredentialsRequest.WebCredentials.IsEmpty)
                 return BattlenetRpcErrorCode.Denied;
 
-            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SelBnetAccountInfo);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_ACCOUNT_INFO);
             stmt.AddValue(0, verifyWebCredentialsRequest.WebCredentials.ToStringUtf8());
 
             SQLResult result = DB.Login.Query(stmt);
@@ -81,7 +79,7 @@ namespace BNetServer.Networking
                 } while (characterCountsResult.NextRow());
             }
 
-            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SelBnetLastPlayerCharacters);
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_LAST_PLAYER_CHARACTERS);
             stmt.AddValue(0, accountInfo.Id);
 
             SQLResult lastPlayerCharactersResult = DB.Login.Query(stmt);
@@ -102,7 +100,7 @@ namespace BNetServer.Networking
                 } while (lastPlayerCharactersResult.NextRow());
             }
 
-            string ip_address = GetRemoteIpEndPoint().ToString();
+            string ip_address = GetRemoteIpAddress().ToString();
 
             // If the IP is 'locked', check that the player comes indeed from the correct IP address
             if (accountInfo.IsLockedToIP)

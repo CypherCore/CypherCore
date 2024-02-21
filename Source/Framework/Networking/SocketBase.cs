@@ -9,7 +9,7 @@ namespace Framework.Networking
 {
     public interface ISocket
     {
-        void Accept();
+        void Start();
         bool Update();
         bool IsOpen();
         void CloseSocket();
@@ -43,7 +43,7 @@ namespace Framework.Networking
             _socket.Dispose();
         }
 
-        public abstract void Accept();
+        public virtual void Start() { }
 
         public virtual bool Update()
         {

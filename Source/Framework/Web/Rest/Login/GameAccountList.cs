@@ -3,13 +3,12 @@
 
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using Framework.Web.Rest.Realmlist;
 
-namespace Framework.Web
+namespace Framework.Web.Rest.Login
 {
-    public class RealmCharacterCountList
+    public class GameAccountList
     {
-        [JsonPropertyName("counts")]
-        public IList<RealmCharacterCountEntry> Counts { get; set; } = new List<RealmCharacterCountEntry>();
+        [JsonPropertyName("game_accounts")]
+        public List<GameAccountInfo> GameAccounts { get; set; }
     }
 }

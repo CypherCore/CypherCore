@@ -30,6 +30,8 @@ namespace Framework.Database
         {
             commands.Add(new MySqlCommand(string.Format(sql, args)));
         }
+
+        public int GetSize() {  return commands.Count; }
     }
 
     class TransactionTask : ISqlOperation

@@ -16,9 +16,9 @@ using Game.DungeonFinding;
 using Game.Entities;
 using Game.Garrisons;
 using Game.Groups;
-using Game.Guilds;
 using Game.Loots;
 using Game.Maps;
+using Game.Networking;
 using Game.PvP;
 using Game.Scenarios;
 using Game.Scripting;
@@ -33,6 +33,7 @@ public static class Global
     public static WorldManager WorldMgr { get { return WorldManager.Instance; } }
     public static RealmManager RealmMgr { get { return RealmManager.Instance; } }
     public static WorldServiceManager ServiceMgr { get { return WorldServiceManager.Instance; } }
+    public static WorldSocketManager WorldSocketMgr { get { return WorldSocketManager.Instance; } }
 
     //Guild
     public static PetitionManager PetitionMgr { get { return PetitionManager.Instance; } }

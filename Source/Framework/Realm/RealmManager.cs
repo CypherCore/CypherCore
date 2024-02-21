@@ -3,15 +3,18 @@
 
 using Framework.Constants;
 using Framework.Database;
+using Framework.IO;
+using Framework.Realm;
 using Framework.Web;
-using Framework.Serialization;
+using Framework.Web.Rest.Realmlist;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Text;
+using System.Text.Json;
 using System.Timers;
-using System.Collections.Concurrent;
-using Framework.Realm;
 
 public class RealmManager : Singleton<RealmManager>
 {
@@ -71,7 +74,7 @@ public class RealmManager : Singleton<RealmManager>
     {
         var oldRealm = _realms.LookupByKey(realm.Id);
         if (oldRealm != null && oldRealm == realm)
-                return;
+            return;
 
         _realms[realm.Id] = realm;
     }
@@ -154,7 +157,7 @@ public class RealmManager : Singleton<RealmManager>
         return true;
     }
 
-public RealmBuildInfo GetBuildInfo(uint build)
+    public RealmBuildInfo GetBuildInfo(uint build)
     {
         foreach (var clientBuild in _builds)
             if (clientBuild.Build == build)
@@ -217,7 +220,10 @@ public RealmBuildInfo GetBuildInfo(uint build)
                 realmEntry.CfgConfigsID = (int)realm.GetConfigId();
                 realmEntry.CfgLanguagesID = 1;
 
-                compressed = Json.Deflate("JamJSONRealmEntry", realmEntry);
+                var jsonData = Encoding.UTF8.GetBytes("JamJSONRealmEntry:" + JsonSerializer.Serialize(realmEntry) + "\0");
+                var compressedData = ZLib.Compress(jsonData);
+
+                compressed = BitConverter.GetBytes(jsonData.Length).Combine(compressedData);
             }
         }
 
@@ -269,10 +275,13 @@ public RealmBuildInfo GetBuildInfo(uint build)
             realmList.Updates.Add(realmListUpdate);
         }
 
-        return Json.Deflate("JSONRealmListUpdates", realmList);
+        var jsonData = Encoding.UTF8.GetBytes("JSONRealmListUpdates:" + JsonSerializer.Serialize(realmList) + "\0");
+        var compressedData = ZLib.Compress(jsonData);
+
+        return BitConverter.GetBytes(jsonData.Length).Combine(compressedData);
     }
 
-    public BattlenetRpcErrorCode JoinRealm(uint realmAddress, uint build, IPAddress clientAddress, byte[] clientSecret, Locale locale, string os, string accountName, Bgs.Protocol.GameUtilities.V1.ClientResponse response)
+    public BattlenetRpcErrorCode JoinRealm(uint realmAddress, uint build, IPAddress clientAddress, byte[] clientSecret, Locale locale, string os, TimeSpan timezoneOffset, string accountName, Bgs.Protocol.GameUtilities.V1.ClientResponse response)
     {
         Realm realm = GetRealm(new RealmId(realmAddress));
         if (realm != null)
@@ -290,17 +299,21 @@ public RealmBuildInfo GetBuildInfo(uint build)
             addressFamily.Addresses.Add(address);
             serverAddresses.Families.Add(addressFamily);
 
-            byte[] compressed = Json.Deflate("JSONRealmListServerIPAddresses", serverAddresses);
+            var jsonData = Encoding.UTF8.GetBytes("JSONRealmListServerIPAddresses:" + JsonSerializer.Serialize(serverAddresses) + "\0");
+            var compressedData = ZLib.Compress(jsonData);
+
+            byte[] compressed = BitConverter.GetBytes(jsonData.Length).Combine(compressedData);
 
             byte[] serverSecret = new byte[0].GenerateRandomKey(32);
-            byte[] keyData = clientSecret.ToArray().Combine(serverSecret);
+            byte[] keyData = clientSecret.Combine(serverSecret);
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_BNET_GAME_ACCOUNT_LOGIN_INFO);
             stmt.AddValue(0, keyData);
             stmt.AddValue(1, clientAddress.ToString());
             stmt.AddValue(2, (byte)locale);
             stmt.AddValue(3, os);
-            stmt.AddValue(4, accountName);
+            stmt.AddValue(4, (short)timezoneOffset.TotalMinutes);
+            stmt.AddValue(5, accountName);
             DB.Login.DirectExecute(stmt);
 
             Bgs.Protocol.Attribute attribute = new();

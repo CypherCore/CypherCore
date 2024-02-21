@@ -10,7 +10,9 @@ namespace Game.Networking
 {
     public class WorldSocketManager : SocketManager<WorldSocket>
     {
-        public override bool StartNetwork(string bindIp, int port, int threadCount)
+        public static WorldSocketManager Instance { get; } = new WorldSocketManager();
+
+        public override bool StartNetwork(string bindIp, int port, int threadCount = 1)
         {
             _tcpNoDelay = ConfigMgr.GetDefaultValue("Network.TcpNodelay", true);
 
@@ -29,6 +31,7 @@ namespace Game.Networking
                 return false;
             }
 
+            Acceptor.AsyncAcceptSocket(OnSocketAccept);
             _instanceAcceptor.AsyncAcceptSocket(OnSocketOpen);
 
             return true;
@@ -60,6 +63,11 @@ namespace Game.Networking
             }
 
             base.OnSocketOpen(sock);
+        }
+
+        static void OnSocketAccept(Socket sock)
+        {
+            Global.WorldSocketMgr.OnSocketOpen(sock);
         }
 
         AsyncAcceptor _instanceAcceptor;

@@ -84,6 +84,13 @@ public class RandomHelper
         rand.NextBytes(buffer);
     }
 
+    public static byte[] GetRandomBytes(int length)
+    {
+        byte[] buffer = new byte[length];
+        rand.NextBytes(buffer);
+        return buffer;
+    }
+
     public static T RAND<T>(params T[] args)
     {
         int randIndex = IRand(0, args.Length - 1);

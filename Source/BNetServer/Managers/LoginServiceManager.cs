@@ -4,13 +4,11 @@
 using BNetServer.Networking;
 using Framework.Configuration;
 using Framework.Constants;
-using Framework.Web;
 using Google.Protobuf;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Net;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 
@@ -19,67 +17,12 @@ namespace BNetServer
     public class LoginServiceManager : Singleton<LoginServiceManager>
     {
         ConcurrentDictionary<(uint ServiceHash, uint MethodId), BnetServiceHandler> serviceHandlers = new();
-        FormInputs formInputs = new();
-        string[] _hostnames = new string[2];
-        IPAddress[] _addresses = new IPAddress[2];
-        int _port;
         X509Certificate2 certificate;
-
 
         LoginServiceManager() { }
 
         public void Initialize()
         {
-            _port = ConfigMgr.GetDefaultValue("LoginREST.Port", 8081);
-            if (_port < 0 || _port > 0xFFFF)
-            {
-                Log.outError(LogFilter.Network, $"Specified login service port ({_port}) out of allowed range (1-65535), defaulting to 8081");
-                _port = 8081;
-            }
-
-            _hostnames[0] = ConfigMgr.GetDefaultValue("LoginREST.ExternalAddress", "127.0.0.1");
-            var externalAddress = Dns.GetHostAddresses(_hostnames[0], System.Net.Sockets.AddressFamily.InterNetwork);
-            if (externalAddress == null || externalAddress.Empty())
-            {
-                Log.outError(LogFilter.Network, $"Could not resolve LoginREST.ExternalAddress {_hostnames[0]}");
-                return;
-            }
-
-            _addresses[0] = externalAddress[0];
-
-            _hostnames[1] = ConfigMgr.GetDefaultValue("LoginREST.LocalAddress", "127.0.0.1");
-            var localAddress = Dns.GetHostAddresses(_hostnames[1], System.Net.Sockets.AddressFamily.InterNetwork);
-            if (localAddress == null || localAddress.Empty())
-            {
-                Log.outError(LogFilter.Network, $"Could not resolve LoginREST.ExternalAddress {_hostnames[1]}");
-                return;
-            }
-
-            _addresses[1] = localAddress[0];
-
-            // set up form inputs 
-            formInputs.Type = "LOGIN_FORM";
-
-            var input = new FormInput();
-            input.Id = "account_name";
-            input.Type = "text";
-            input.Label = "E-mail";
-            input.MaxLength = 320;
-            formInputs.Inputs.Add(input);
-
-            input = new FormInput();
-            input.Id = "password";
-            input.Type = "password";
-            input.Label = "Password";
-            input.MaxLength = 16;
-            formInputs.Inputs.Add(input);
-
-            input = new FormInput();
-            input.Id = "log_in_submit";
-            input.Type = "submit";
-            input.Label = "Log In";
-            formInputs.Inputs.Add(input);
-
             certificate = new X509Certificate2(ConfigMgr.GetDefaultValue("CertificatesFile", "./BNetServer.pfx"));
 
             Assembly currentAsm = Assembly.GetExecutingAssembly();
@@ -115,21 +58,6 @@ namespace BNetServer
         public BnetServiceHandler GetHandler(uint serviceHash, uint methodId)
         {
             return serviceHandlers.LookupByKey((serviceHash, methodId));
-        }
-
-        public string GetHostnameForClient(IPEndPoint address)
-        {
-            if (IPAddress.IsLoopback(address.Address))
-                return _hostnames[1];
-
-            return _hostnames[0];
-        }
-
-        public int GetPort() { return _port; }
-
-        public FormInputs GetFormInput()
-        {
-            return formInputs;
         }
 
         public X509Certificate2 GetCertificate()

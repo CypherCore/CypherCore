@@ -1,17 +1,16 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
-namespace Framework.Web
+namespace Framework.Web.Rest.Realmlist
 {
-    [DataContract]
     public class RealmCharacterCountEntry
     {
-        [DataMember(Name = "wowRealmAddress")]
+        [JsonPropertyName("wowRealmAddress")]
         public int WowRealmAddress { get; set; }
 
-        [DataMember(Name = "count")]
+        [JsonPropertyName("count")]
         public int Count { get; set; }
     }
 }

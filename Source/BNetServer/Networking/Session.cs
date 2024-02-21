@@ -12,10 +12,11 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace BNetServer.Networking
 {
-    partial class Session : SSLSocket
+    public partial class Session : SSLSocket
     {
         AccountInfo accountInfo;
         GameAccountInfo gameAccountInfo;
@@ -23,6 +24,7 @@ namespace BNetServer.Networking
         string locale;
         string os;
         uint build;
+        TimeSpan _timezoneOffset;
         string ipCountry;
 
         byte[] clientSecret;
@@ -39,19 +41,19 @@ namespace BNetServer.Networking
             responseCallbacks = new Dictionary<uint, Action<CodedInputStream>>();
         }
 
-        public override void Accept()
+        public override void Start()
         {
-            string ipAddress = GetRemoteIpEndPoint().ToString();
+            string ipAddress = GetRemoteIpAddress().ToString();
             Log.outInfo(LogFilter.Network, $"{GetClientInfo()} Connection Accepted.");
 
             // Verify that this IP is not in the ip_banned table
-            DB.Login.Execute(LoginDatabase.GetPreparedStatement(LoginStatements.DelExpiredIpBans));
+            DB.Login.Execute(LoginDatabase.GetPreparedStatement(LoginStatements.DEL_EXPIRED_IP_BANS));
 
-            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SelIpInfo);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_IP_INFO);
             stmt.AddValue(0, ipAddress);
-            stmt.AddValue(1, BitConverter.ToUInt32(GetRemoteIpEndPoint().Address.GetAddressBytes(), 0));
+            stmt.AddValue(1, BitConverter.ToUInt32(GetRemoteIpAddress().GetAddressBytes(), 0));
 
-            queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(async result =>            
+            queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(async result =>
             {
                 if (!result.IsEmpty())
                 {
@@ -76,6 +78,18 @@ namespace BNetServer.Networking
 
                 await AsyncHandshake(Global.LoginServiceMgr.GetCertificate());
             }));
+        }
+
+        public async override Task HandshakeHandler(Exception ex = null)
+        {
+            if (ex != null)
+            {
+                Log.outError(LogFilter.Session, $"{GetClientInfo()} SSL Handshake failed {ex.Message}");
+                CloseSocket();
+                return;
+            }
+
+            await AsyncRead();
         }
 
         public override bool Update()
@@ -103,7 +117,7 @@ namespace BNetServer.Networking
                 header.MergeFrom(data, readPos, headerLength);
                 readPos += headerLength;
 
-                var stream = new CodedInputStream(data, readPos, (int)header.Size);                
+                var stream = new CodedInputStream(data, readPos, (int)header.Size);
                 readPos += (int)header.Size;
 
                 if (header.ServiceId != 0xFE && header.ServiceHash != 0)
@@ -181,7 +195,7 @@ namespace BNetServer.Networking
         {
             var size = (ushort)header.CalculateSize();
             byte[] bytes = new byte[2];
-            bytes[0] = (byte)((size >> 8) & 0xff);
+            bytes[0] = (byte)(size >> 8 & 0xff);
             bytes[1] = (byte)(size & 0xff);
 
             var headerSizeBytes = BitConverter.GetBytes((ushort)header.CalculateSize());
@@ -192,7 +206,7 @@ namespace BNetServer.Networking
 
         public string GetClientInfo()
         {
-            string stream = '[' + GetRemoteIpEndPoint().ToString();
+            string stream = '[' + GetRemoteIpAddress().ToString();
             if (accountInfo != null && !accountInfo.Login.IsEmpty())
                 stream += ", Account: " + accountInfo.Login;
 
@@ -206,7 +220,7 @@ namespace BNetServer.Networking
     }
 
     public class AccountInfo
-    {   
+    {
         public uint Id;
         public string Login;
         public bool IsLockedToIP;

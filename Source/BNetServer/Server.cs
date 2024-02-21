@@ -27,36 +27,36 @@ namespace BNetServer
             if (!StartDB())
                 ExitNow();
 
-            string bindIp = ConfigMgr.GetDefaultValue("BindIP", "0.0.0.0");
-
-            var restSocketServer = new SocketManager<RestSession>();
-            int restPort = ConfigMgr.GetDefaultValue("LoginREST.Port", 8081);
-            if (restPort < 0 || restPort > 0xFFFF)
+            string httpBindIp = ConfigMgr.GetDefaultValue("BindIP", "0.0.0.0");
+            int httpPort = ConfigMgr.GetDefaultValue("LoginREST.Port", 8081);
+            if (httpPort <= 0 || httpPort > 0xFFFF)
             {
-                Log.outError(LogFilter.Network, $"Specified login service port ({restPort}) out of allowed range (1-65535), defaulting to 8081");
-                restPort = 8081;
-            }
-
-            if (!restSocketServer.StartNetwork(bindIp, restPort))
-            {
-                Log.outError(LogFilter.Server, "Failed to initialize Rest Socket Server");
+                Log.outError(LogFilter.Server, $"Specified login service port ({httpPort}) out of allowed range (1-65535)");
                 ExitNow();
             }
 
-            // Get the list of realms for the server
-            Global.RealmMgr.Initialize(ConfigMgr.GetDefaultValue("RealmsStateUpdateDelay", 10));
-            Global.LoginServiceMgr.Initialize();
+            if (!Global.LoginService.StartNetwork(httpBindIp, httpPort))
+            {
+                Log.outError(LogFilter.Server, "Failed to initialize login service");
+                ExitNow();
+            }
 
-            var sessionSocketServer = new SocketManager<Session>();
             // Start the listening port (acceptor) for auth connections
             int bnPort = ConfigMgr.GetDefaultValue("BattlenetPort", 1119);
-            if (bnPort < 0 || bnPort > 0xFFFF)
+            if (bnPort <= 0 || bnPort > 0xFFFF)
             {
                 Log.outError(LogFilter.Server, $"Specified battle.net port ({bnPort}) out of allowed range (1-65535)");
                 ExitNow();
             }
 
-            if (!sessionSocketServer.StartNetwork(bindIp, bnPort))
+            // Get the list of realms for the server
+            Global.RealmMgr.Initialize(ConfigMgr.GetDefaultValue("RealmsStateUpdateDelay", 10));
+
+            Global.LoginServiceMgr.Initialize();
+
+            string bindIp = ConfigMgr.GetDefaultValue("BindIP", "0.0.0.0");
+
+            if (!Global.SessionMgr.StartNetwork(bindIp, bnPort))
             {
                 Log.outError(LogFilter.Network, "Failed to start BnetServer Network");
                 ExitNow();
@@ -89,9 +89,9 @@ namespace BNetServer
 
         static void BanExpiryCheckTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            DB.Login.Execute(LoginDatabase.GetPreparedStatement(LoginStatements.DelExpiredIpBans));
-            DB.Login.Execute(LoginDatabase.GetPreparedStatement(LoginStatements.UpdExpiredAccountBans));
-            DB.Login.Execute(LoginDatabase.GetPreparedStatement(LoginStatements.DelBnetExpiredAccountBanned));
+            DB.Login.Execute(LoginDatabase.GetPreparedStatement(LoginStatements.DEL_EXPIRED_IP_BANS));
+            DB.Login.Execute(LoginDatabase.GetPreparedStatement(LoginStatements.UPD_EXPIRED_ACCOUNT_BANS));
+            DB.Login.Execute(LoginDatabase.GetPreparedStatement(LoginStatements.DEL_BNET_EXPIRED_ACCOUNT_BANNED));
         }
 
         static Timer _banExpiryCheckTimer;

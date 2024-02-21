@@ -34,7 +34,7 @@ namespace Game
             if (GetId(username) != 0)
                 return AccountOpResult.NameAlreadyExist;
 
-            (byte[] salt, byte[] verifier) = SRP6.MakeRegistrationData(username, password);
+            (byte[] salt, byte[] verifier) = SRP6.MakeAccountRegistrationData<GruntSRP6>(username, password);
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_ACCOUNT);
             stmt.AddValue(0, username);
@@ -152,7 +152,7 @@ namespace Game
             stmt.AddValue(1, accountId);
             DB.Login.Execute(stmt);
 
-            (byte[] salt, byte[] verifier) = SRP6.MakeRegistrationData(newUsername, newPassword);
+            (byte[] salt, byte[] verifier) = SRP6.MakeAccountRegistrationData<GruntSRP6>(newUsername, newPassword);
             stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_LOGON);
             stmt.AddValue(0, salt);
             stmt.AddValue(1, verifier);
@@ -178,7 +178,7 @@ namespace Game
                 return AccountOpResult.PassTooLong;
             }
 
-            (byte[] salt, byte[] verifier) = SRP6.MakeRegistrationData(username, newPassword);
+            (byte[] salt, byte[] verifier) = SRP6.MakeAccountRegistrationData<GruntSRP6>(username, newPassword);
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_LOGON);
             stmt.AddValue(0, salt);
@@ -304,7 +304,7 @@ namespace Game
             {
                 byte[] salt = result.Read<byte[]>(0);
                 byte[] verifier = result.Read<byte[]>(1);
-                if (SRP6.CheckLogin(username, password, salt, verifier))
+                if (new GruntSRP6(username, salt, verifier).CheckCredentials(username, password))
                     return true;
             }
 

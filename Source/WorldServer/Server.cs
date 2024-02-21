@@ -67,8 +67,7 @@ namespace WorldServer
                 return;
             }
 
-            var WorldSocketMgr = new WorldSocketManager();
-            if (!WorldSocketMgr.StartNetwork(worldListener, worldPort, networkThreads))
+            if (!Global.WorldSocketMgr.StartNetwork(worldListener, worldPort, networkThreads))
             {
                 Log.outError(LogFilter.Network, "Failed to start Realm Network");
                 ExitNow();
@@ -104,7 +103,7 @@ namespace WorldServer
                 // unload Battlegroundtemplates before different singletons destroyed
                 Global.BattlegroundMgr.DeleteAllBattlegrounds();
 
-                WorldSocketMgr.StopNetwork();
+                Global.WorldSocketMgr.StopNetwork();
 
                 Global.MapMgr.UnloadAll();                     // unload all grids (including locked in memory)
                 Global.TerrainMgr.UnloadAll();

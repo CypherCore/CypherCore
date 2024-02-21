@@ -5,11 +5,14 @@ using Bgs.Protocol;
 using Bgs.Protocol.GameUtilities.V1;
 using Framework.Constants;
 using Framework.Database;
-using Framework.Serialization;
+using Framework.IO;
 using Framework.Web;
+using Framework.Web.Rest.Realmlist;
 using Google.Protobuf;
 using System;
 using System.Collections.Generic;
+using System.Text;
+using System.Text.Json;
 
 namespace BNetServer.Networking
 {
@@ -36,7 +39,7 @@ namespace BNetServer.Networking
             {
                 Bgs.Protocol.Attribute attr = request.Attribute[i];
                 if (attr.Name.Contains("Command_"))
-                { 
+                {
                     command = attr;
                     Params[removeSuffix(attr.Name)] = attr.Value;
                 }
@@ -80,10 +83,15 @@ namespace BNetServer.Networking
             Variant identity = Params.LookupByKey("Param_Identity");
             if (identity != null)
             {
-                var realmListTicketIdentity = Json.CreateObject<RealmListTicketIdentity>(identity.BlobValue.ToStringUtf8(), true);
-                var gameAccount = accountInfo.GameAccounts.LookupByKey(realmListTicketIdentity.GameAccountId);
-                if (gameAccount != null)
-                    gameAccountInfo = gameAccount;
+                string jsonString = identity.BlobValue.ToStringUtf8().TrimEnd('\0');
+                int jsonStart = jsonString.IndexOf(':');
+                if (jsonStart != -1)
+                {
+                    var realmListTicketIdentity = JsonSerializer.Deserialize<RealmListTicketIdentity>(jsonString.Substring(jsonStart + 1));
+                    var gameAccount = accountInfo.GameAccounts.LookupByKey(realmListTicketIdentity.GameAccountId);
+                    if (gameAccount != null)
+                        gameAccountInfo = gameAccount;
+                }
             }
 
             if (gameAccountInfo == null)
@@ -98,18 +106,23 @@ namespace BNetServer.Networking
             Variant clientInfo = Params.LookupByKey("Param_ClientInfo");
             if (clientInfo != null)
             {
-                var realmListTicketClientInformation = Json.CreateObject<RealmListTicketClientInformation>(clientInfo.BlobValue.ToStringUtf8(), true);
-                clientInfoOk = true;
-                int i = 0;
-                foreach (byte b in realmListTicketClientInformation.Info.Secret)
-                    clientSecret[i++] = b;
+                string jsonString = clientInfo.BlobValue.ToStringUtf8().Trim('\0');
+                int jsonStart = jsonString.IndexOf(':');
+                if (jsonStart != -1)
+                {
+                    var realmListTicketClientInformation = JsonSerializer.Deserialize<RealmListTicketClientInformation>(jsonString.Substring(jsonStart + 1));
+                    clientInfoOk = true;
+                    int i = 0;
+                    foreach (byte b in realmListTicketClientInformation.Info.Secret)
+                        clientSecret[i++] = b;
+                }
             }
 
             if (!clientInfoOk)
                 return BattlenetRpcErrorCode.WowServicesDeniedRealmListTicket;
 
-            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UpdBnetLastLoginInfo);
-            stmt.AddValue(0, GetRemoteIpEndPoint().ToString());
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_BNET_LAST_LOGIN_INFO);
+            stmt.AddValue(0, GetRemoteIpAddress().ToString());
             stmt.AddValue(1, (byte)locale.ToEnum<Locale>());
             stmt.AddValue(2, os);
             stmt.AddValue(3, accountInfo.Id);
@@ -119,7 +132,7 @@ namespace BNetServer.Networking
             var attribute = new Bgs.Protocol.Attribute();
             attribute.Name = "Param_RealmListTicket";
             attribute.Value = new Variant();
-            attribute.Value.BlobValue = ByteString.CopyFrom("AuthRealmListTicket", System.Text.Encoding.UTF8);
+            attribute.Value.BlobValue = ByteString.CopyFrom("AuthRealmListTicket", Encoding.UTF8);
             response.Attribute.Add(attribute);
 
             return BattlenetRpcErrorCode.Ok;
@@ -197,7 +210,10 @@ namespace BNetServer.Networking
                 realmCharacterCounts.Counts.Add(countEntry);
             }
 
-            compressed = Json.Deflate("JSONRealmCharacterCountList", realmCharacterCounts);
+            var jsonData = Encoding.UTF8.GetBytes("JSONRealmCharacterCountList:" + JsonSerializer.Serialize(realmCharacterCounts) + "\0");
+            var compressedData = ZLib.Compress(jsonData);
+
+            compressed = BitConverter.GetBytes(jsonData.Length).Combine(compressedData);
 
             attribute = new Bgs.Protocol.Attribute();
             attribute.Name = "Param_CharacterCountList";
@@ -211,7 +227,7 @@ namespace BNetServer.Networking
         {
             Variant realmAddress = Params.LookupByKey("Param_RealmAddress");
             if (realmAddress != null)
-                return Global.RealmMgr.JoinRealm((uint)realmAddress.UintValue, build, GetRemoteIpEndPoint().Address, clientSecret, (Locale)Enum.Parse(typeof(Locale), locale), os, gameAccountInfo.Name, response);
+                return Global.RealmMgr.JoinRealm((uint)realmAddress.UintValue, build, GetRemoteIpAddress(), clientSecret, (Locale)Enum.Parse(typeof(Locale), locale), os, _timezoneOffset, gameAccountInfo.Name, response);
 
             return BattlenetRpcErrorCode.WowServicesInvalidJoinTicket;
         }

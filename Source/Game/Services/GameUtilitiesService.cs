@@ -3,11 +3,15 @@
 
 using Bgs.Protocol.GameUtilities.V1;
 using Framework.Constants;
+using Framework.IO;
 using Framework.Web;
-using Framework.Serialization;
+using Framework.Web.Rest.Realmlist;
 using Game.Services;
 using Google.Protobuf;
+using System;
 using System.Collections.Generic;
+using System.Text;
+using System.Text.Json;
 
 namespace Game
 {
@@ -90,7 +94,11 @@ namespace Game
                 countEntry.Count = characterCount.Value;
                 realmCharacterCounts.Counts.Add(countEntry);
             }
-            compressed = Json.Deflate("JSONRealmCharacterCountList", realmCharacterCounts);
+
+            var jsonData = Encoding.UTF8.GetBytes("JSONRealmCharacterCountList:" + JsonSerializer.Serialize(realmCharacterCounts) + "\0");
+            var compressedData = ZLib.Compress(jsonData);
+
+            compressed = BitConverter.GetBytes(jsonData.Length).Combine(compressedData);
 
             attribute = new Bgs.Protocol.Attribute();
             attribute.Name = "Param_CharacterCountList";
@@ -105,7 +113,7 @@ namespace Game
             var realmAddress = Params.LookupByKey("Param_RealmAddress");
             if (realmAddress != null)
                 return Global.RealmMgr.JoinRealm((uint)realmAddress.UintValue, Global.WorldMgr.GetRealm().Build, System.Net.IPAddress.Parse(GetRemoteAddress()), GetRealmListSecret(),
-                    GetSessionDbcLocale(), GetOS(), GetAccountName(), response);
+                    GetSessionDbcLocale(), GetOS(), GetTimezoneOffset(), GetAccountName(), response);
 
             return BattlenetRpcErrorCode.Ok;
         }

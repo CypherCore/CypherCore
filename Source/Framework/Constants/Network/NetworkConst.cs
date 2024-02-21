@@ -18,4 +18,18 @@ namespace Framework.Constants
         ThreadUnsafe,            //packet is not thread-safe - process it in World.UpdateSessions()
         ThreadSafe               //packet is thread-safe - process it in Map.Update()
     }
+
+    public enum RequestHandlerFlag
+    {
+        None = 0x0,
+        DoNotLogRequestContent = 0x1,
+        DoNotLogResponseContent = 0x2,
+    }
+
+    public enum RequestHandlerResult
+    {
+        Handled,
+        Error,
+        Async,
+    }
 }

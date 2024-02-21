@@ -133,4 +133,16 @@ namespace Framework.Constants
         NameTakenByThisAccount = 4,
         Unknown = 5
     }
+
+    public enum SrpVersion
+    {
+        v1 = 1,
+        v2 = 2
+    }
+
+    public enum SrpHashFunction
+    {
+        Sha256 = 0,
+        Sha512 = 1
+    }
 }

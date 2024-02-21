@@ -69,11 +69,11 @@ namespace Game.Networking
             base.Dispose();
         }
 
-        public override void Accept()
+        public override void Start()
         {
             string ip_address = GetRemoteIpAddress().ToString();
 
-            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SelIpInfo);
+            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_IP_INFO);
             stmt.AddValue(0, ip_address);
             stmt.AddValue(1, BitConverter.ToUInt32(GetRemoteIpAddress().Address.GetAddressBytes(), 0));
 
@@ -489,7 +489,7 @@ namespace Game.Networking
             var address = GetRemoteIpAddress();
 
             Sha256 digestKeyHash = new();
-            digestKeyHash.Process(account.game.SessionKey, account.game.SessionKey.Length);
+            digestKeyHash.Process(account.game.KeyData, account.game.KeyData.Length);
             if (account.game.OS == "Wn64")
                 digestKeyHash.Finish(buildInfo.Win64AuthSeed);
             else if (account.game.OS == "Mc64")
@@ -515,7 +515,7 @@ namespace Game.Networking
             }
 
             Sha256 keyData = new();
-            keyData.Finish(account.game.SessionKey);
+            keyData.Finish(account.game.KeyData);
 
             HmacSha256 sessionKeyHmac = new(keyData.Digest);
             sessionKeyHmac.Process(_serverChallenge, 16);
@@ -652,7 +652,7 @@ namespace Game.Networking
             Global.ScriptMgr.OnAccountLogin(account.game.Id);
 
             _worldSession = new WorldSession(account.game.Id, authSession.RealmJoinTicket, account.battleNet.Id, this, account.game.Security, (Expansion)account.game.Expansion,
-                mutetime, account.game.OS, account.battleNet.Locale, account.game.Recruiter, account.game.IsRectuiter);
+                mutetime, account.game.OS, account.game.TimezoneOffset, account.battleNet.Locale, account.game.Recruiter, account.game.IsRectuiter);
 
             // Initialize Warden system only if it is enabled by config
             //if (wardenActive)
@@ -839,15 +839,15 @@ namespace Game.Networking
     {
         public AccountInfo(SQLFields fields)
         {
-            //         0             1           2          3                4            5           6          7            8      9     10          11
-            // SELECT a.id, a.sessionkey, ba.last_ip, ba.locked, ba.lock_country, a.expansion, a.mutetime, ba.locale, a.recruiter, a.os, ba.id, aa.gmLevel,
-            //                                                              12                                                            13    14
+            //           0              1           2          3                4            5           6          7            8     9                 10     11                12
+            // SELECT a.id, a.session_key, ba.last_ip, ba.locked, ba.lock_country, a.expansion, a.mutetime, ba.locale, a.recruiter, a.os, a.timezone_offset, ba.id, aa.SecurityLevel,
+            //                                                              13                                                            14    15
             // bab.unbandate > UNIX_TIMESTAMP() OR bab.unbandate = bab.bandate, ab.unbandate > UNIX_TIMESTAMP() OR ab.unbandate = ab.bandate, r.id
-            // FROM account a LEFT JOIN battlenet_accounts ba ON a.battlenet_account = ba.id LEFT JOIN account_access aa ON a.id = aa.id AND aa.RealmID IN (-1, ?)
+            // FROM account a LEFT JOIN battlenet_accounts ba ON a.battlenet_account = ba.id LEFT JOIN account_access aa ON a.id = aa.AccountID AND aa.RealmID IN (-1, ?)
             // LEFT JOIN battlenet_account_bans bab ON ba.id = bab.id LEFT JOIN account_banned ab ON a.id = ab.id LEFT JOIN account r ON a.id = r.recruiter
-            // WHERE a.username = ? ORDER BY aa.RealmID DESC LIMIT 1
+            // WHERE a.username = ? AND LENGTH(a.session_key) = 40 ORDER BY aa.RealmID DESC LIMIT 1
             game.Id = fields.Read<uint>(0);
-            game.SessionKey = fields.Read<byte[]>(1);
+            game.KeyData = fields.Read<byte[]>(1);
             battleNet.LastIP = fields.Read<string>(2);
             battleNet.IsLockedToIP = fields.Read<bool>(3);
             battleNet.LockCountry = fields.Read<string>(4);
@@ -856,11 +856,12 @@ namespace Game.Networking
             battleNet.Locale = (Locale)fields.Read<byte>(7);
             game.Recruiter = fields.Read<uint>(8);
             game.OS = fields.Read<string>(9);
-            battleNet.Id = fields.Read<uint>(10);
-            game.Security = (AccountTypes)fields.Read<byte>(11);
-            battleNet.IsBanned = fields.Read<uint>(12) != 0;
-            game.IsBanned = fields.Read<uint>(13) != 0;
-            game.IsRectuiter = fields.Read<uint>(14) != 0;
+            game.TimezoneOffset = TimeSpan.FromMinutes(fields.Read<short>(10));
+            battleNet.Id = fields.Read<uint>(11);
+            game.Security = (AccountTypes)fields.Read<byte>(12);
+            battleNet.IsBanned = fields.Read<uint>(13) != 0;
+            game.IsBanned = fields.Read<uint>(14) != 0;
+            game.IsRectuiter = fields.Read<uint>(15) != 0;
 
             if (battleNet.Locale >= Locale.Total)
                 battleNet.Locale = Locale.enUS;
@@ -884,11 +885,12 @@ namespace Game.Networking
         public struct Game
         {
             public uint Id;
-            public byte[] SessionKey;
+            public byte[] KeyData;
             public byte Expansion;
             public long MuteTime;
-            public string OS;
             public uint Recruiter;
+            public string OS;
+            public TimeSpan TimezoneOffset;
             public bool IsRectuiter;
             public AccountTypes Security;
             public bool IsBanned;
