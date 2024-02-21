@@ -1384,6 +1384,16 @@ namespace Game.Entities
             return mask;
         }
 
+        public SpellOtherImmunity GetSpellOtherImmunityMask()
+        {
+            SpellOtherImmunity mask = 0;
+            var damageList = m_spellImmune[(int)SpellImmunity.Other];
+            foreach (var pair in damageList)
+                mask |= (SpellOtherImmunity)pair.Key;
+
+            return mask;
+        }
+
         public virtual bool IsImmunedToSpellEffect(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, WorldObject caster, bool requireImmunityPurgesEffectAttribute = false)
         {
             if (spellInfo == null)

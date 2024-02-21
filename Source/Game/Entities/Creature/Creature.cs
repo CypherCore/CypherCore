@@ -2218,6 +2218,9 @@ namespace Game.Entities
 
                 foreach (AuraType aura in immunities.Aura)
                     ApplySpellImmune(placeholderSpellId, SpellImmunity.State, aura, apply);
+
+                if (immunities.Other != SpellOtherImmunity.None)
+                    ApplySpellImmune(placeholderSpellId, SpellImmunity.Other, (byte)immunities.Other, apply);
             }
 
             // unapply template immunities (in case we're updating entry)

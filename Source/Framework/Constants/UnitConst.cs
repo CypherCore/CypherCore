@@ -98,7 +98,8 @@ namespace Framework.Constants
         Dispel = 4,                     // enum DispelType
         Mechanic = 5,                     // enum Mechanics
         Id = 6,
-        Max = 7
+        Other = 7,  //enum SpellOtherImmunity
+        Max
     }
 
 

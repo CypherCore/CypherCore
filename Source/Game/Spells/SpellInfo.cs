@@ -1078,6 +1078,10 @@ namespace Game.Spells
                 if (HasAttribute(SpellAttr8.OnlyTargetOwnSummons))
                     if (!unitTarget.IsSummon() || unitTarget.ToTempSummon().GetSummonerGUID() != caster.GetGUID())
                         return SpellCastResult.BadTargets;
+
+                if (HasAttribute(SpellAttr3.NotOnAoeImmune))
+                    if (unitTarget.GetSpellOtherImmunityMask().HasFlag(SpellOtherImmunity.AoETarget))
+                        return SpellCastResult.BadTargets;
             }
             // corpse specific target checks
             else if (target.IsTypeId(TypeId.Corpse))
@@ -1106,13 +1110,6 @@ namespace Game.Spells
 
                 if (HasAttribute(SpellAttr5.NotOnPlayerControlledNpc) && unitTarget.IsControlledByPlayer())
                     return SpellCastResult.TargetIsPlayerControlled;
-
-                if (HasAttribute(SpellAttr3.NotOnAoeImmune))
-                {
-                    CreatureImmunities immunities = Global.SpellMgr.GetCreatureImmunities(unitTarget.ToCreature().GetCreatureTemplate().CreatureImmunitiesId);
-                    if (immunities != null && immunities.ImmuneAoE)
-                        return SpellCastResult.BadTargets;
-                }
             }
             else if (HasAttribute(SpellAttr5.NotOnPlayer))
                 return SpellCastResult.TargetIsPlayer;
@@ -2144,6 +2141,7 @@ namespace Game.Spells
                 ulong mechanicImmunityMask = 0;
                 uint dispelImmunityMask = 0;
                 uint damageImmunityMask = 0;
+                byte otherImmunityMask = 0;
 
                 int miscVal = effect.MiscValue;
 
@@ -2159,6 +2157,7 @@ namespace Game.Spells
                             schoolImmunityMask |= creatureImmunities.School.ToUInt();
                             dispelImmunityMask |= creatureImmunities.DispelType.ToUInt();
                             mechanicImmunityMask |= creatureImmunities.Mechanic.ToUInt();
+                            otherImmunityMask |= (byte)creatureImmunities.Other;
                             foreach (SpellEffectName effectType in creatureImmunities.Effect)
                                 immuneInfo.SpellEffectImmune.Add(effectType);
                             foreach (AuraType aura in creatureImmunities.Aura)
@@ -2237,6 +2236,7 @@ namespace Game.Spells
                 immuneInfo.MechanicImmuneMask = mechanicImmunityMask;
                 immuneInfo.DispelImmuneMask = dispelImmunityMask;
                 immuneInfo.DamageSchoolMask = damageImmunityMask;
+                immuneInfo.OtherImmuneMask = otherImmunityMask;
 
                 _allowedMechanicMask |= immuneInfo.MechanicImmuneMask;
             }
@@ -2413,6 +2413,10 @@ namespace Game.Spells
 
             foreach (SpellEffectName effectType in immuneInfo.SpellEffectImmune)
                 target.ApplySpellImmune(Id, SpellImmunity.Effect, effectType, apply);
+
+            byte otherImmuneMask = immuneInfo.OtherImmuneMask;
+            if (otherImmuneMask != 0)
+                target.ApplySpellImmune(Id, SpellImmunity.Other, otherImmuneMask, apply);
         }
 
         bool CanSpellProvideImmunityAgainstAura(SpellInfo auraSpellInfo)
@@ -5154,6 +5158,7 @@ namespace Game.Spells
         public ulong MechanicImmuneMask;
         public uint DispelImmuneMask;
         public uint DamageSchoolMask;
+        public byte OtherImmuneMask;
 
         public List<AuraType> AuraTypeImmune = new();
         public List<SpellEffectName> SpellEffectImmune = new();

@@ -4513,8 +4513,10 @@ namespace Game.Entities
                     immunities.School = new BitSet(new uint[] { school });
                     immunities.DispelType = new BitSet(new uint[] { dispelType });
                     immunities.Mechanic = new BitSet(mechanics);
-                    immunities.ImmuneAoE = result.Read<bool>(6);
-                    immunities.ImmuneChain = result.Read<bool>(7);
+                    if (result.Read<bool>(6))
+                        immunities.Other |= SpellOtherImmunity.AoETarget;
+                    if (result.Read<bool>(7))
+                        immunities.Other |= SpellOtherImmunity.ChainTarget;
 
                     if (immunities.School.ToUInt() != school)
                         Log.outError(LogFilter.Sql, $"Invalid value in `SchoolMask` {school} for creature immunities {id}, truncated");
@@ -5147,7 +5149,6 @@ namespace Game.Entities
         public BitSet Mechanic = new((int)Mechanics.Max);
         public List<SpellEffectName> Effect = new();
         public List<AuraType> Aura = new();
-        public bool ImmuneAoE;   // NYI
-        public bool ImmuneChain; // NYI
+        public SpellOtherImmunity Other;
     }
 }

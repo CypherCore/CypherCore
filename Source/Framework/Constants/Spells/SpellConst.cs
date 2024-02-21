@@ -2988,4 +2988,12 @@ namespace Framework.Constants
         Area,
         Chain
     }
+
+    [Flags]
+    public enum SpellOtherImmunity
+    {
+        None = 0x0,
+        AoETarget = 0x1,
+        ChainTarget = 0x2
+    }
 }
