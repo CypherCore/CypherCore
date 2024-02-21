@@ -200,7 +200,8 @@ namespace Game.Guilds
         {
             GuildRoster roster = new();
             roster.NumAccounts = (int)m_accountsNumber;
-            roster.CreateDate = (uint)m_createdDate;
+            roster.CreateDate.SetUtcTimeFromUnixTime(m_createdDate);
+            roster.CreateDate += session.GetTimezoneOffset();
             roster.GuildFlags = 0;
 
             bool sendOfficerNote = _HasRankRight(session.GetPlayer(), GuildRankRights.ViewOffNote);
@@ -558,7 +559,7 @@ namespace Game.Guilds
                 return;
             }
 
-                // Invited player cannot be invited
+            // Invited player cannot be invited
             if (pInvitee.GetGuildIdInvited() != 0)
             {
                 SendCommandResult(session, GuildCommandType.InvitePlayer, GuildCommandError.AlreadyInvitedToGuild_S, name);
@@ -1040,7 +1041,10 @@ namespace Game.Guilds
 
             GuildNewsPkt packet = new();
             foreach (var newsLogEntry in newsLog)
+            {
                 newsLogEntry.WritePacket(packet);
+                packet.NewsEvents.Last().CompletedDate += session.GetTimezoneOffset();
+            }
 
             session.SendPacket(packet);
         }
@@ -1535,17 +1539,20 @@ namespace Game.Guilds
             }
         }
 
-        public void BroadcastPacketIfTrackingAchievement(ServerPacket packet, uint criteriaId)
+        public List<Player> GetMembersTrackingCriteria(uint criteriaId)
         {
-            foreach (var member in m_members.Values)
+            List<Player> members = new();
+            foreach (var (_, member) in m_members)
             {
                 if (member.IsTrackingCriteriaId(criteriaId))
                 {
                     Player player = member.FindPlayer();
                     if (player != null)
-                        player.SendPacket(packet);
+                        members.Add(player);
                 }
             }
+
+            return members;
         }
 
         public void MassInviteToEvent(WorldSession session, uint minLevel, uint maxLevel, GuildRankOrder minRank)
@@ -1717,7 +1724,7 @@ namespace Game.Guilds
                 player.SetGuildLevel(0);
 
                 foreach (var entry in CliDB.GuildPerkSpellsStorage.Values)
-                        player.RemoveSpell(entry.SpellID, false, false);
+                    player.RemoveSpell(entry.SpellID, false, false);
             }
             else
                 Global.CharacterCacheStorage.UpdateCharacterGuildId(guid, 0);
@@ -1754,7 +1761,7 @@ namespace Game.Guilds
 
             return Math.Min(m_bankMoney, (ulong)_GetMemberRemainingMoney(member));
         }
-        
+
         public void SwapItems(Player player, byte tabId, byte slotId, byte destTabId, byte destSlotId, uint splitedAmount)
         {
             if (tabId >= _GetPurchasedTabsSize() || slotId >= GuildConst.MaxBankSlots ||
@@ -1805,7 +1812,7 @@ namespace Game.Guilds
         {
             return m_ranks.Find(rank => rank.GetOrder() == rankOrder);
         }
-        
+
         // Private methods
         void _CreateNewBankTab()
         {
@@ -1841,7 +1848,7 @@ namespace Game.Guilds
             stmt.AddValue(0, m_id);
             trans.Append(stmt);
 
-            _CreateRank(trans, Global.ObjectMgr.GetCypherString( CypherStrings.GuildMaster, loc), GuildRankRights.All);
+            _CreateRank(trans, Global.ObjectMgr.GetCypherString(CypherStrings.GuildMaster, loc), GuildRankRights.All);
             _CreateRank(trans, Global.ObjectMgr.GetCypherString(CypherStrings.GuildOfficer, loc), GuildRankRights.All);
             _CreateRank(trans, Global.ObjectMgr.GetCypherString(CypherStrings.GuildVeteran, loc), GuildRankRights.GChatListen | GuildRankRights.GChatSpeak);
             _CreateRank(trans, Global.ObjectMgr.GetCypherString(CypherStrings.GuildMember, loc), GuildRankRights.GChatListen | GuildRankRights.GChatSpeak);
@@ -2404,9 +2411,16 @@ namespace Game.Guilds
             NewsLogEntry news = m_newsLog.AddEvent(trans, new NewsLogEntry(m_id, m_newsLog.GetNextGUID(), type, guid, flags, value));
             DB.Characters.CommitTransaction(trans);
 
-            GuildNewsPkt newsPacket = new();
-            news.WritePacket(newsPacket);
-            BroadcastPacket(newsPacket);
+            var packetBuilder = (Player receiver) =>
+            {
+                GuildNewsPkt newsPacket = new();
+                news.WritePacket(newsPacket);
+                newsPacket.NewsEvents.Last().CompletedDate += receiver.GetSession().GetTimezoneOffset();
+
+                receiver.SendPacket(newsPacket);
+            };
+
+            BroadcastWorker(packetBuilder);
         }
 
         bool HasAchieved(uint achievementId)
@@ -2432,6 +2446,7 @@ namespace Game.Guilds
 
             GuildNewsPkt newsPacket = new();
             newsLog.WritePacket(newsPacket);
+            newsPacket.NewsEvents.Last().CompletedDate += session.GetTimezoneOffset();
             session.SendPacket(newsPacket);
         }
 
@@ -2445,6 +2460,17 @@ namespace Game.Guilds
         public ulong GetBankMoney() { return m_bankMoney; }
 
         public void BroadcastWorker(IDoWork<Player> _do, Player except = null)
+        {
+            foreach (var member in m_members.Values)
+            {
+                Player player = member.FindPlayer();
+                if (player != null)
+                    if (player != except)
+                        _do.Invoke(player);
+            }
+        }
+
+        public void BroadcastWorker(Action<Player> _do, Player except = null)
         {
             foreach (var member in m_members.Values)
             {
@@ -3077,7 +3103,7 @@ namespace Game.Guilds
                 GuildNewsEvent newsEvent = new();
                 newsEvent.Id = (int)GetGUID();
                 newsEvent.MemberGuid = GetPlayerGuid();
-                newsEvent.CompletedDate = (uint)GetTimestamp();
+                newsEvent.CompletedDate.SetUtcTimeFromUnixTime(GetTimestamp());
                 newsEvent.Flags = GetFlags();
                 newsEvent.Type = (int)GetNewsType();
 
@@ -3116,9 +3142,9 @@ namespace Game.Guilds
 
             // Checks if new log entry can be added to holder
             public bool CanInsert() { return m_log.Count < m_maxRecords; }
-            
+
             public byte GetSize() { return (byte)m_log.Count; }
-            
+
             public void LoadEvent(T entry)
             {
                 if (m_nextGUID == GuildConst.EventLogGuidUndefined)
@@ -3540,7 +3566,7 @@ namespace Game.Guilds
             {
                 return ValidateEmblemColors(m_style, m_color, m_borderStyle, m_borderColor, m_backgroundColor);
             }
-            
+
             public static bool ValidateEmblemColors(uint style, uint color, uint borderStyle, uint borderColor, uint backgroundColor)
             {
                 return CliDB.GuildColorBackgroundStorage.ContainsKey(backgroundColor) &&
@@ -3650,7 +3676,7 @@ namespace Game.Guilds
             {
                 m_pPlayer.SendEquipError(result, item);
             }
-            
+
             public abstract bool IsBank();
             // Initializes item. Returns true, if item exists, false otherwise.
             public abstract bool InitItem();
@@ -3823,7 +3849,7 @@ namespace Game.Guilds
 
             public override void LogBankEvent(SQLTransaction trans, MoveItemData pFrom, uint count)
             {
-               Cypher.Assert(pFrom.GetItem() != null);
+                Cypher.Assert(pFrom.GetItem() != null);
                 if (pFrom.IsBank())
                     // Bank . Bank
                     m_pGuild._LogBankEvent(trans, GuildBankEventLogTypes.MoveItem, pFrom.GetContainer(), m_pPlayer.GetGUID().GetCounter(),

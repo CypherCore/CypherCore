@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+
+using Framework;
+using System;
 
 public class GameTime
 {
@@ -11,6 +15,9 @@ public class GameTime
     static DateTime _gameTimeSteadyPoint = DateTime.MinValue;
 
     static DateTime _dateTime;
+
+    static WowTime UtcWow;
+    static WowTime Wow;
 
     public static long GetStartTime()
     {
@@ -47,6 +54,16 @@ public class GameTime
         return _dateTime;
     }
 
+    public static WowTime GetUtcWowTime()
+    {
+        return UtcWow;
+    }
+
+    public static WowTime GetWowTime()
+    {
+        return Wow;
+    }
+
     public static void UpdateGameTimers()
     {
         _gameTime = Time.UnixTime;
@@ -55,5 +72,8 @@ public class GameTime
         _gameTimeSteadyPoint = DateTime.Now;
 
         _dateTime = Time.UnixTimeToDateTime(_gameTime);
+
+        UtcWow.SetUtcTimeFromUnixTime(_gameTime);
+        Wow = UtcWow + Timezone.GetSystemZoneOffsetAt(_gameTimeSystemPoint);
     }
 }

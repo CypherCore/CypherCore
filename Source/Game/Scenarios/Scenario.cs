@@ -107,9 +107,12 @@ namespace Game.Scenarios
                 }
             }
 
-            ScenarioState scenarioState = new();
-            BuildScenarioState(scenarioState);
-            SendPacket(scenarioState);
+            DoForAllPlayers(receiver =>
+            {
+                ScenarioState scenarioState = new();
+                BuildScenarioStateFor(receiver, scenarioState);
+                receiver.SendPacket(scenarioState);
+            });
         }
 
         public virtual void OnPlayerEnter(Player player)
@@ -153,18 +156,22 @@ namespace Game.Scenarios
 
         public override void SendCriteriaUpdate(Criteria criteria, CriteriaProgress progress, TimeSpan timeElapsed, bool timedCompleted)
         {
-            ScenarioProgressUpdate progressUpdate = new();
-            progressUpdate.CriteriaProgress.Id = criteria.Id;
-            progressUpdate.CriteriaProgress.Quantity = progress.Counter;
-            progressUpdate.CriteriaProgress.Player = progress.PlayerGUID;
-            progressUpdate.CriteriaProgress.Date = progress.Date;
-            if (criteria.Entry.StartTimer != 0)
-                progressUpdate.CriteriaProgress.Flags = timedCompleted ? 1 : 0u;
+            DoForAllPlayers(receiver =>
+            {
+                ScenarioProgressUpdate progressUpdate = new();
+                progressUpdate.CriteriaProgress.Id = criteria.Id;
+                progressUpdate.CriteriaProgress.Quantity = progress.Counter;
+                progressUpdate.CriteriaProgress.Player = progress.PlayerGUID;
+                progressUpdate.CriteriaProgress.Date.SetUtcTimeFromUnixTime(progress.Date);
+                progressUpdate.CriteriaProgress.Date += receiver.GetSession().GetTimezoneOffset();
+                if (criteria.Entry.StartTimer != 0)
+                    progressUpdate.CriteriaProgress.Flags = timedCompleted ? 1 : 0u;
 
-            progressUpdate.CriteriaProgress.TimeFromStart = (uint)timeElapsed.TotalSeconds;
-            progressUpdate.CriteriaProgress.TimeFromCreate = 0;
+                progressUpdate.CriteriaProgress.TimeFromStart = (uint)timeElapsed.TotalSeconds;
+                progressUpdate.CriteriaProgress.TimeFromCreate = 0;
 
-            SendPacket(progressUpdate);
+                receiver.SendPacket(progressUpdate);
+            });
         }
 
         public override bool CanUpdateCriteriaTree(Criteria criteria, CriteriaTree tree, Player referencePlayer)
@@ -225,25 +232,30 @@ namespace Game.Scenarios
 
             return IsCompletedCriteriaTree(tree);
         }
-        
-        public override void SendPacket(ServerPacket data)
+
+        public void DoForAllPlayers(Action<Player> worker)
         {
             foreach (ObjectGuid guid in _players)
             {
                 Player player = Global.ObjAccessor.GetPlayer(_map, guid);
                 if (player != null)
-                    player.SendPacket(data);
+                    worker(player);
             }
         }
 
-        void BuildScenarioState(ScenarioState scenarioState)
+        public override void SendPacket(ServerPacket data)
+        {
+            DoForAllPlayers(player => player.SendPacket(data));
+        }
+
+        void BuildScenarioStateFor(Player player, ScenarioState scenarioState)
         {
             scenarioState.ScenarioGUID = _guid;
             scenarioState.ScenarioID = (int)_data.Entry.Id;
             ScenarioStepRecord step = GetStep();
             if (step != null)
                 scenarioState.CurrentStep = (int)step.Id;
-            scenarioState.CriteriaProgress = GetCriteriasProgress();
+            scenarioState.CriteriaProgress = GetCriteriasProgressFor(player);
             scenarioState.BonusObjectives = GetBonusObjectivesData();
             // Don't know exactly what this is for, but seems to contain list of scenario steps that we're either on or that are completed
             foreach (var state in _stepStates)
@@ -297,11 +309,11 @@ namespace Game.Scenarios
 
             return lastStep;
         }
-        
+
         public void SendScenarioState(Player player)
         {
             ScenarioState scenarioState = new();
-            BuildScenarioState(scenarioState);
+            BuildScenarioStateFor(player, scenarioState);
             player.SendPacket(scenarioState);
         }
 
@@ -325,21 +337,19 @@ namespace Game.Scenarios
             return bonusObjectivesData;
         }
 
-        List<CriteriaProgressPkt> GetCriteriasProgress()
+        List<CriteriaProgressPkt> GetCriteriasProgressFor(Player player)
         {
             List<CriteriaProgressPkt> criteriasProgress = new();
 
-            if (!_criteriaProgress.Empty())
+            foreach (var (criteriaId, progress) in _criteriaProgress)
             {
-                foreach (var pair in _criteriaProgress)
-                {
-                    CriteriaProgressPkt criteriaProgress = new();
-                    criteriaProgress.Id = pair.Key;
-                    criteriaProgress.Quantity = pair.Value.Counter;
-                    criteriaProgress.Date = pair.Value.Date;
-                    criteriaProgress.Player = pair.Value.PlayerGUID;
-                    criteriasProgress.Add(criteriaProgress);
-                }
+                CriteriaProgressPkt criteriaProgress = new();
+                criteriaProgress.Id = criteriaId;
+                criteriaProgress.Quantity = progress.Counter;
+                criteriaProgress.Date.SetUtcTimeFromUnixTime(progress.Date);
+                criteriaProgress.Date += player.GetSession().GetTimezoneOffset();
+                criteriaProgress.Player = progress.PlayerGUID;
+                criteriasProgress.Add(criteriaProgress);
             }
 
             return criteriasProgress;

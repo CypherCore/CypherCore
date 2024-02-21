@@ -1547,13 +1547,13 @@ namespace Game
             // owner exist (online or offline)
             if ((owner != null || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Owner)))// && !sAuctionBotConfig.IsBotChar(auction.Owner))
             {
-                ByteBuffer tempBuffer = new();
-                tempBuffer.WritePackedTime(GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.MailDeliveryDelay));
-                uint eta = tempBuffer.ReadUInt32();
+                WowTime eta = GameTime.GetUtcWowTime();
+                eta += TimeSpan.FromSeconds(WorldConfig.GetIntValue(WorldCfg.MailDeliveryDelay));
+                eta += owner.GetSession().GetTimezoneOffset();
 
                 new MailDraft(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Invoice, auction),
                     Global.AuctionHouseMgr.BuildAuctionInvoiceMailBody(auction.Bidder, auction.BidAmount, auction.BuyoutOrUnitPrice, (uint)auction.Deposit,
-                        CalculateAuctionHouseCut(auction.BidAmount), WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay), eta))
+                        CalculateAuctionHouseCut(auction.BidAmount), WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay), eta.GetPackedTime()))
                     .SendMailTo(trans, new MailReceiver(owner, auction.Owner), new MailSender(this), MailCheckMask.Copied);
             }
         }

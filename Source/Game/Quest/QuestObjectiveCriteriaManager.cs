@@ -164,16 +164,17 @@ namespace Game
 
         public override void SendAllData(Player receiver)
         {
-            foreach (var pair in _criteriaProgress)
+            foreach (var (id, criteriaProgres) in _criteriaProgress)
             {
                 CriteriaUpdate criteriaUpdate = new();
 
-                criteriaUpdate.CriteriaID = pair.Key;
-                criteriaUpdate.Quantity = pair.Value.Counter;
+                criteriaUpdate.CriteriaID = id;
+                criteriaUpdate.Quantity = criteriaProgres.Counter;
                 criteriaUpdate.PlayerGUID = _owner.GetGUID();
                 criteriaUpdate.Flags = 0;
 
-                criteriaUpdate.CurrentTime = pair.Value.Date;
+                criteriaUpdate.CurrentTime.SetUtcTimeFromUnixTime(criteriaProgres.Date);
+                criteriaUpdate.CurrentTime += _owner.GetSession().GetTimezoneOffset();
                 criteriaUpdate.CreationTime = 0;
 
                 SendPacket(criteriaUpdate);
@@ -208,7 +209,8 @@ namespace Game
             if (criteria.Entry.StartTimer != 0)
                 criteriaUpdate.Flags = timedCompleted ? 1 : 0u; // 1 is for keeping the counter at 0 in client
 
-            criteriaUpdate.CurrentTime = progress.Date;
+            criteriaUpdate.CurrentTime.SetUtcTimeFromUnixTime(progress.Date);
+            criteriaUpdate.CurrentTime += _owner.GetSession().GetTimezoneOffset();
             criteriaUpdate.ElapsedTime = (uint)timeElapsed.TotalSeconds;
             criteriaUpdate.CreationTime = 0;
 

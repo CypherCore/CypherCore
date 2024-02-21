@@ -62,8 +62,8 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WritePackedTime(ServerTime);
-            _worldPacket.WritePackedTime(GameTime);
+            ServerTime.Write(_worldPacket);
+            GameTime.Write(_worldPacket);
             _worldPacket.WriteFloat(NewSpeed);
             _worldPacket.WriteInt32(ServerTimeHolidayOffset);
             _worldPacket.WriteInt32(GameTimeHolidayOffset);
@@ -71,8 +71,8 @@ namespace Game.Networking.Packets
 
         public float NewSpeed;
         public int ServerTimeHolidayOffset;
-        public uint GameTime;
-        public uint ServerTime;
+        public WowTime GameTime;
+        public WowTime ServerTime;
         public int GameTimeHolidayOffset;
     }
 

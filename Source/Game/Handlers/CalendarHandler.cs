@@ -21,10 +21,8 @@ namespace Game
         {
             ObjectGuid guid = GetPlayer().GetGUID();
 
-            long currTime = GameTime.GetGameTime();
-
             CalendarSendCalendar packet = new();
-            packet.ServerTime = currTime;
+            packet.ServerTime = GameTime.GetWowTime();
 
             var playerInvites = Global.CalendarMgr.GetPlayerInvites(guid);
             foreach (var invite in playerInvites)
@@ -47,7 +45,8 @@ namespace Game
             {
                 CalendarSendCalendarEventInfo eventInfo = new();
                 eventInfo.EventID = calendarEvent.EventId;
-                eventInfo.Date = calendarEvent.Date;
+                eventInfo.Date.SetUtcTimeFromUnixTime(calendarEvent.Date);
+                eventInfo.Date += GetTimezoneOffset();
                 eventInfo.EventClubID = calendarEvent.GuildId;
                 eventInfo.EventName = calendarEvent.Title;
                 eventInfo.EventType = calendarEvent.EventType;
@@ -95,11 +94,10 @@ namespace Game
         {
             ObjectGuid guid = GetPlayer().GetGUID();
 
-            calendarAddEvent.EventInfo.Time = Time.LocalTimeToUTCTime(calendarAddEvent.EventInfo.Time);
+            calendarAddEvent.EventInfo.Time -= GetTimezoneOffset();
 
             // prevent events in the past
-            // To Do: properly handle timezones and remove the "- time_t(86400L)" hack
-            if (calendarAddEvent.EventInfo.Time < (GameTime.GetGameTime() - 86400L))
+            if (calendarAddEvent.EventInfo.Time < GameTime.GetUtcWowTime())
             {
                 Global.CalendarMgr.SendCalendarCommandResult(guid, CalendarError.EventPassed);
                 return;
@@ -141,7 +139,7 @@ namespace Game
             SetCalendarEventCreationCooldown(GameTime.GetGameTime() + SharedConst.CalendarCreateEventCooldown);
 
             CalendarEvent calendarEvent = new(Global.CalendarMgr.GetFreeEventId(), guid, 0, (CalendarEventType)calendarAddEvent.EventInfo.EventType, calendarAddEvent.EventInfo.TextureID,
-                calendarAddEvent.EventInfo.Time, (CalendarFlags)calendarAddEvent.EventInfo.Flags, calendarAddEvent.EventInfo.Title, calendarAddEvent.EventInfo.Description, 0);
+                calendarAddEvent.EventInfo.Time.GetUnixTimeFromUtcTime(), (CalendarFlags)calendarAddEvent.EventInfo.Flags, calendarAddEvent.EventInfo.Title, calendarAddEvent.EventInfo.Description, 0);
 
             if (calendarEvent.IsGuildEvent() || calendarEvent.IsGuildAnnouncement())
                 calendarEvent.GuildId = _player.GetGuildId();
@@ -180,11 +178,10 @@ namespace Game
             ObjectGuid guid = GetPlayer().GetGUID();
             long oldEventTime;
 
-            calendarUpdateEvent.EventInfo.Time = Time.LocalTimeToUTCTime(calendarUpdateEvent.EventInfo.Time);
+            calendarUpdateEvent.EventInfo.Time -= GetTimezoneOffset();
 
             // prevent events in the past
-            // To Do: properly handle timezones and remove the "- time_t(86400L)" hack
-            if (calendarUpdateEvent.EventInfo.Time < (GameTime.GetGameTime() - 86400L))
+            if (calendarUpdateEvent.EventInfo.Time < GameTime.GetUtcWowTime())
                 return;
 
             CalendarEvent calendarEvent = Global.CalendarMgr.GetEvent(calendarUpdateEvent.EventInfo.EventID);
@@ -194,7 +191,7 @@ namespace Game
 
                 calendarEvent.EventType = (CalendarEventType)calendarUpdateEvent.EventInfo.EventType;
                 calendarEvent.Flags = (CalendarFlags)calendarUpdateEvent.EventInfo.Flags;
-                calendarEvent.Date = calendarUpdateEvent.EventInfo.Time;
+                calendarEvent.Date = calendarUpdateEvent.EventInfo.Time.GetUnixTimeFromUtcTime();
                 calendarEvent.TextureId = (int)calendarUpdateEvent.EventInfo.TextureID;
                 calendarEvent.Title = calendarUpdateEvent.EventInfo.Title;
                 calendarEvent.Description = calendarUpdateEvent.EventInfo.Description;
@@ -218,11 +215,10 @@ namespace Game
         {
             ObjectGuid guid = GetPlayer().GetGUID();
 
-            calendarCopyEvent.Date = Time.LocalTimeToUTCTime(calendarCopyEvent.Date);
+            calendarCopyEvent.Date -= GetTimezoneOffset();
 
             // prevent events in the past
-            // To Do: properly handle timezones and remove the "- time_t(86400L)" hack
-            if (calendarCopyEvent.Date < (GameTime.GetGameTime() - 86400L))
+            if (calendarCopyEvent.Date < GameTime.GetUtcWowTime())
             {
                 Global.CalendarMgr.SendCalendarCommandResult(guid, CalendarError.EventPassed);
                 return;
@@ -275,7 +271,7 @@ namespace Game
                 SetCalendarEventCreationCooldown(GameTime.GetGameTime() + SharedConst.CalendarCreateEventCooldown);
 
                 CalendarEvent newEvent = new(oldEvent, Global.CalendarMgr.GetFreeEventId());
-                newEvent.Date = calendarCopyEvent.Date;
+                newEvent.Date = calendarCopyEvent.Date.GetUnixTimeFromUtcTime();
                 Global.CalendarMgr.AddEvent(newEvent, CalendarSendEventType.Copy);
 
                 var invites = Global.CalendarMgr.GetEventInvites(calendarCopyEvent.EventID);
@@ -536,7 +532,7 @@ namespace Game
                 return;
 
             CalendarRaidLockoutUpdated calendarRaidLockoutUpdated = new();
-            calendarRaidLockoutUpdated.ServerTime = GameTime.GetGameTime();
+            calendarRaidLockoutUpdated.ServerTime = GameTime.GetWowTime();
             calendarRaidLockoutUpdated.MapID = setSavedInstanceExtend.MapID;
             calendarRaidLockoutUpdated.DifficultyID = setSavedInstanceExtend.DifficultyID;
             calendarRaidLockoutUpdated.OldTimeRemaining = (int)Math.Max((expiryTimes.Item1 - GameTime.GetSystemTime()).TotalSeconds, 0);
@@ -548,7 +544,7 @@ namespace Game
         {
             CalendarRaidLockoutAdded calendarRaidLockoutAdded = new();
             calendarRaidLockoutAdded.InstanceID = instanceLock.GetInstanceId();
-            calendarRaidLockoutAdded.ServerTime = (uint)GameTime.GetGameTime();
+            calendarRaidLockoutAdded.ServerTime = GameTime.GetWowTime();
             calendarRaidLockoutAdded.MapID = (int)instanceLock.GetMapId();
             calendarRaidLockoutAdded.DifficultyID = instanceLock.GetDifficultyId();
             calendarRaidLockoutAdded.TimeRemaining = (int)(instanceLock.GetEffectiveExpiryTime() - GameTime.GetSystemTime()).TotalSeconds;

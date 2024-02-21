@@ -60,7 +60,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(PlayerGUID);
             _worldPacket.WriteUInt32(Unused_10_1_5);
             _worldPacket.WriteUInt32(Flags);
-            _worldPacket.WritePackedTime(CurrentTime);
+            CurrentTime.Write(_worldPacket);
             _worldPacket.WriteInt64(ElapsedTime);
             _worldPacket.WriteInt64(CreationTime);
             _worldPacket.WriteBit(RafAcceptanceID.HasValue);
@@ -75,7 +75,7 @@ namespace Game.Networking.Packets
         public ObjectGuid PlayerGUID;
         public uint Unused_10_1_5;
         public uint Flags;
-        public long CurrentTime;
+        public WowTime CurrentTime;
         public long ElapsedTime;
         public long CreationTime;
         public ulong? RafAcceptanceID;
@@ -128,7 +128,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(Sender);
             _worldPacket.WritePackedGuid(Earner);
             _worldPacket.WriteUInt32(AchievementID);
-            _worldPacket.WritePackedTime(Time);
+            Time.Write(_worldPacket);
             _worldPacket.WriteUInt32(EarnerNativeRealm);
             _worldPacket.WriteUInt32(EarnerVirtualRealm);
             _worldPacket.WriteBit(Initial);
@@ -139,7 +139,7 @@ namespace Game.Networking.Packets
         public uint EarnerNativeRealm;
         public uint EarnerVirtualRealm;
         public uint AchievementID;
-        public long Time;
+        public WowTime Time;
         public bool Initial;
         public ObjectGuid Sender;
     }
@@ -176,7 +176,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt32(progress.CriteriaID);
                 _worldPacket.WriteInt64(progress.DateCreated);
                 _worldPacket.WriteInt64(progress.DateStarted);
-                _worldPacket.WritePackedTime(progress.DateUpdated);
+                progress.DateUpdated.Write(_worldPacket);
                 _worldPacket.WriteUInt32(0); // this is a hack. this is a packed time written as int64 (progress.DateUpdated)
                 _worldPacket.WriteUInt64(progress.Quantity);
                 _worldPacket.WritePackedGuid(progress.PlayerGUID);
@@ -222,12 +222,12 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(GuildGUID);
             _worldPacket.WriteUInt32(AchievementID);
-            _worldPacket.WritePackedTime(TimeDeleted);
+            TimeDeleted.Write(_worldPacket);
         }
 
         public ObjectGuid GuildGUID;
         public uint AchievementID;
-        public long TimeDeleted;
+        public WowTime TimeDeleted;
     }
 
     public class GuildAchievementEarned : ServerPacket
@@ -238,12 +238,12 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(GuildGUID);
             _worldPacket.WriteUInt32(AchievementID);
-            _worldPacket.WritePackedTime(TimeEarned);
+            TimeEarned.Write(_worldPacket);
         }
 
         public uint AchievementID;
         public ObjectGuid GuildGUID;
-        public long TimeEarned;
+        public WowTime TimeEarned;
     }
 
     public class AllGuildAchievements : ServerPacket
@@ -301,14 +301,14 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(Id);
-            data.WritePackedTime(Date);
+            Date.Write(data);
             data.WritePackedGuid(Owner);
             data.WriteUInt32(VirtualRealmAddress);
             data.WriteUInt32(NativeRealmAddress);
         }
 
         public uint Id;
-        public long Date;
+        public WowTime Date;
         public ObjectGuid Owner;
         public uint VirtualRealmAddress;
         public uint NativeRealmAddress;
@@ -323,7 +323,7 @@ namespace Game.Networking.Packets
             data.WritePackedGuid(Player);
             data.WriteUInt32(Unused_10_1_5);
             data.WriteUInt32(Flags);
-            data.WritePackedTime(Date);
+            Date.Write(data);
             data.WriteInt64(TimeFromStart);
             data.WriteInt64(TimeFromCreate);
             data.WriteBit(RafAcceptanceID.HasValue);
@@ -338,7 +338,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Player;
         public uint Unused_10_1_5;
         public uint Flags;
-        public long Date;
+        public WowTime Date;
         public long TimeFromStart;
         public long TimeFromCreate;
         public ulong? RafAcceptanceID;
@@ -349,7 +349,7 @@ namespace Game.Networking.Packets
         public uint CriteriaID;
         public long DateCreated;
         public long DateStarted;
-        public long DateUpdated;
+        public WowTime DateUpdated;
         public ulong Quantity;
         public ObjectGuid PlayerGUID;
         public int Unused_10_1_5;

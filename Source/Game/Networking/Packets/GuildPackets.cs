@@ -112,7 +112,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(NumAccounts);
-            _worldPacket.WritePackedTime(CreateDate);
+            CreateDate.Write(_worldPacket);
             _worldPacket.WriteInt32(GuildFlags);
             _worldPacket.WriteInt32(MemberData.Count);
             _worldPacket.WriteBits(WelcomeText.GetByteCount(), 11);
@@ -128,7 +128,7 @@ namespace Game.Networking.Packets
         public List<GuildRosterMemberData> MemberData;
         public string WelcomeText;
         public string InfoText;
-        public uint CreateDate;
+        public WowTime CreateDate;
         public int NumAccounts;
         public int GuildFlags;
     }
@@ -1765,7 +1765,7 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteInt32(Id);
-            data.WritePackedTime(CompletedDate);
+            CompletedDate.Write(data);
             data.WriteInt32(Type);
             data.WriteInt32(Flags);
 
@@ -1786,7 +1786,7 @@ namespace Game.Networking.Packets
         }
 
         public int Id;
-        public uint CompletedDate;
+        public WowTime CompletedDate;
         public int Type;
         public int Flags;
         public int[] Data = new int[2];

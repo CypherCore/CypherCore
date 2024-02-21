@@ -4,11 +4,13 @@
 using Bgs.Protocol;
 using Bgs.Protocol.Authentication.V1;
 using Bgs.Protocol.Challenge.V1;
+using Framework;
 using Framework.Constants;
 using Framework.Database;
 using Framework.Realm;
 using Google.Protobuf;
 using System;
+using System.Text.Json;
 
 namespace BNetServer.Networking
 {
@@ -38,6 +40,20 @@ namespace BNetServer.Networking
             locale = logonRequest.Locale;
             os = logonRequest.Platform;
             build = (uint)logonRequest.ApplicationVersion;
+
+            _timezoneOffset = TimeSpan.Zero;
+            if (logonRequest.HasDeviceId)
+            {
+                var doc = JsonSerializer.Deserialize<JsonDocument>(logonRequest.DeviceId);
+                if (doc != null)
+                {
+                    var itr = doc.RootElement.GetProperty("UTCO");
+                    {
+                        if (itr.TryGetUInt32(out uint value))
+                            _timezoneOffset = Timezone.GetOffsetByHash(value);
+                    }
+                }
+            }
 
             ChallengeExternalRequest externalChallenge = new();
             externalChallenge.PayloadType = "web_auth_url";

@@ -1790,9 +1790,12 @@ namespace Game.Achievements
                     break;
                 case ModifierTreeType.TimeBetween: // 109
                 {
-                    long from = Time.GetUnixTimeFromPackedTime(reqValue);
-                    long to = Time.GetUnixTimeFromPackedTime((uint)secondaryAsset);
-                    if (GameTime.GetGameTime() < from || GameTime.GetGameTime() > to)
+                    WowTime from = new();
+                    from.SetPackedTime(reqValue);
+                    WowTime to = new();
+                    to.SetPackedTime((uint)secondaryAsset);
+
+                    if (!GameTime.GetWowTime().IsInRange(from, to))
                         return false;
                     break;
                 }

@@ -387,17 +387,30 @@ namespace Game.Maps
         }
     }
 
-    public class MessageDistDeliverer<T> : Notifier where T : IDoWork<Player>
+    public class MessageDistDeliverer : Notifier
     {
         WorldObject i_source;
-        T i_packetSender;
+        Action<Player> i_packetSender;
         PhaseShift i_phaseShift;
         float i_distSq;
         Team team;
         Player skipped_receiver;
         bool required3dDist;
 
-        public MessageDistDeliverer(WorldObject src, T packetSender, float dist, bool own_team_only = false, Player skipped = null, bool req3dDist = false)
+        public MessageDistDeliverer(WorldObject src, IDoWork<Player> packetSender, float dist, bool own_team_only = false, Player skipped = null, bool req3dDist = false)
+        {
+            i_source = src;
+            i_packetSender = packetSender.Invoke;
+            i_phaseShift = src.GetPhaseShift();
+            i_distSq = dist * dist;
+            if (own_team_only && src.IsPlayer())
+                team = src.ToPlayer().GetEffectiveTeam();
+
+            skipped_receiver = skipped;
+            required3dDist = req3dDist;
+        }
+
+        public MessageDistDeliverer(WorldObject src, Action<Player> packetSender, float dist, bool own_team_only = false, Player skipped = null, bool req3dDist = false)
         {
             i_source = src;
             i_packetSender = packetSender;

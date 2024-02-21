@@ -5557,8 +5557,8 @@ namespace Game.Entities
             float TimeSpeed = 0.01666667f;
             LoginSetTimeSpeed loginSetTimeSpeed = new();
             loginSetTimeSpeed.NewSpeed = TimeSpeed;
-            loginSetTimeSpeed.GameTime = (uint)GameTime.GetGameTime();
-            loginSetTimeSpeed.ServerTime = (uint)GameTime.GetGameTime();
+            loginSetTimeSpeed.GameTime = GameTime.GetWowTime();
+            loginSetTimeSpeed.ServerTime = GameTime.GetWowTime();
             loginSetTimeSpeed.GameTimeHolidayOffset = 0; // @todo
             loginSetTimeSpeed.ServerTimeHolidayOffset = 0; // @todo
             SendPacket(loginSetTimeSpeed);
@@ -6176,7 +6176,7 @@ namespace Game.Entities
                 SendPacket(data);
 
             PacketSenderRef sender = new(data);
-            var notifier = new MessageDistDeliverer<PacketSenderRef>(this, sender, dist);
+            var notifier = new MessageDistDeliverer(this, sender, dist);
             Cell.VisitWorldObjects(this, notifier, dist);
         }
 
@@ -6186,7 +6186,7 @@ namespace Game.Entities
                 SendPacket(data);
 
             PacketSenderRef sender = new(data);
-            var notifier = new MessageDistDeliverer<PacketSenderRef>(this, sender, dist, own_team_only, null, required3dDist);
+            var notifier = new MessageDistDeliverer(this, sender, dist, own_team_only, null, required3dDist);
             Cell.VisitWorldObjects(this, notifier, dist);
         }
 
@@ -6198,7 +6198,7 @@ namespace Game.Entities
             // we use World.GetMaxVisibleDistance() because i cannot see why not use a distance
             // update: replaced by GetMap().GetVisibilityDistance()
             PacketSenderRef sender = new(data);
-            var notifier = new MessageDistDeliverer<PacketSenderRef>(this, sender, GetVisibilityRange(), false, skipped_rcvr);
+            var notifier = new MessageDistDeliverer(this, sender, GetVisibilityRange(), false, skipped_rcvr);
             Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
         }
         public override void SendMessageToSet(ServerPacket data, bool self)
@@ -6467,7 +6467,7 @@ namespace Game.Entities
             localizer.Invoke(this);
 
             // Send to players
-            MessageDistDeliverer<LocalizedDo> notifier = new(this, localizer, range, false, null, true);
+            MessageDistDeliverer notifier = new(this, localizer, range, false, null, true);
             Cell.VisitWorldObjects(this, notifier, range);
         }
 

@@ -93,7 +93,7 @@ public static class Time
 
     public static DateTime UnixTimeToDateTime(long unixTime)
     {
-        return DateTimeOffset.FromUnixTimeSeconds(unixTime).LocalDateTime;
+        return DateTimeOffset.FromUnixTimeSeconds(unixTime).DateTime;
     }
 
     public static long DateTimeToUnixTime(DateTime dateTime)

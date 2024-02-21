@@ -19,7 +19,7 @@ namespace Game
         CalendarManager()
         {
             _events = new List<CalendarEvent>();
-            _invites = new MultiMap<ulong,CalendarInvite>();
+            _invites = new MultiMap<ulong, CalendarInvite>();
         }
 
         public void LoadFromDB()
@@ -147,7 +147,6 @@ namespace Game
 
             SQLTransaction trans = new();
             PreparedStatement stmt;
-            MailDraft mail = new(calendarEvent.BuildCalendarMailSubject(remover), calendarEvent.BuildCalendarMailBody());
 
             var eventInvites = _invites[calendarEvent.EventId];
             for (int i = 0; i < eventInvites.Count; ++i)
@@ -160,7 +159,10 @@ namespace Game
                 // guild events only? check invite status here?
                 // When an event is deleted, all invited (accepted/declined? - verify) guildies are notified via in-game mail. (wowwiki)
                 if (!remover.IsEmpty() && invite.InviteeGuid != remover)
+                {
+                    MailDraft mail = new(calendarEvent.BuildCalendarMailSubject(remover), calendarEvent.BuildCalendarMailBody(Global.ObjAccessor.FindConnectedPlayer(invite.InviteeGuid)));
                     mail.SendMailTo(trans, new MailReceiver(invite.InviteeGuid.GetCounter()), new MailSender(calendarEvent), MailCheckMask.Copied);
+                }
             }
 
             _invites.Remove(calendarEvent.EventId);
@@ -361,7 +363,7 @@ namespace Game
 
             return result;
         }
-        
+
         public List<CalendarEvent> GetPlayerEvents(ObjectGuid guid)
         {
             List<CalendarEvent> events = new();
@@ -436,68 +438,100 @@ namespace Game
 
             uint level = player != null ? player.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(invitee);
 
-            CalendarInviteAdded packet = new();
-            packet.EventID = calendarEvent != null ? calendarEvent.EventId : 0;
-            packet.InviteGuid = invitee;
-            packet.InviteID = calendarEvent != null ? invite.InviteId : 0;
-            packet.Level = (byte)level;
-            packet.ResponseTime = invite.ResponseTime;
-            packet.Status = invite.Status;
-            packet.Type = (byte)(calendarEvent != null ? calendarEvent.IsGuildEvent() ? 1 : 0 : 0); // Correct ?
-            packet.ClearPending = calendarEvent == null || !calendarEvent.IsGuildEvent(); // Correct ?
+            var packetBuilder = (Player receiver) =>
+            {
+                CalendarInviteAdded packet = new();
+                packet.EventID = calendarEvent != null ? calendarEvent.EventId : 0;
+                packet.InviteGuid = invitee;
+                packet.InviteID = calendarEvent != null ? invite.InviteId : 0;
+                packet.Level = (byte)level;
+                packet.ResponseTime.SetUtcTimeFromUnixTime(invite.ResponseTime);
+                packet.ResponseTime += receiver.GetSession().GetTimezoneOffset();
+                packet.Status = invite.Status;
+                packet.Type = (byte)(calendarEvent != null ? calendarEvent.IsGuildEvent() ? 1 : 0 : 0); // Correct ?
+                packet.ClearPending = calendarEvent != null ? !calendarEvent.IsGuildEvent() : true; // Correct ?
+
+                receiver.SendPacket(packet);
+            };
 
             if (calendarEvent == null) // Pre-invite
             {
                 player = Global.ObjAccessor.FindPlayer(invite.SenderGuid);
                 if (player != null)
-                    player.SendPacket(packet);
+                    packetBuilder(player);
             }
             else
             {
                 if (calendarEvent.OwnerGuid != invite.InviteeGuid) // correct?
-                    SendPacketToAllEventRelatives(packet, calendarEvent);
+                    foreach (Player receiver in GetAllEventRelatives(calendarEvent))
+                        packetBuilder(receiver);
             }
         }
 
         public void SendCalendarEventUpdateAlert(CalendarEvent calendarEvent, long originalDate)
         {
-            CalendarEventUpdatedAlert packet = new();
-            packet.ClearPending = true; // FIXME
-            packet.Date = calendarEvent.Date;
-            packet.Description = calendarEvent.Description;
-            packet.EventID = calendarEvent.EventId;
-            packet.EventName = calendarEvent.Title;
-            packet.EventType = calendarEvent.EventType;
-            packet.Flags = calendarEvent.Flags;
-            packet.LockDate = calendarEvent.LockDate; // Always 0 ?
-            packet.OriginalDate = originalDate;
-            packet.TextureID = calendarEvent.TextureId;
+            var packetBuilder = (Player receiver) =>
+            {
+                CalendarEventUpdatedAlert packet = new();
+                packet.ClearPending = true; // FIXME
+                packet.Date.SetUtcTimeFromUnixTime(calendarEvent.Date);
+                packet.Date += receiver.GetSession().GetTimezoneOffset();
+                packet.Description = calendarEvent.Description;
+                packet.EventID = calendarEvent.EventId;
+                packet.EventName = calendarEvent.Title;
+                packet.EventType = calendarEvent.EventType;
+                packet.Flags = calendarEvent.Flags;
+                packet.LockDate.SetUtcTimeFromUnixTime(calendarEvent.LockDate); // Always 0 ?
+                if (calendarEvent.LockDate != 0)
+                    packet.LockDate += receiver.GetSession().GetTimezoneOffset();
+                packet.OriginalDate.SetUtcTimeFromUnixTime(originalDate);
+                packet.OriginalDate += receiver.GetSession().GetTimezoneOffset();
+                packet.TextureID = calendarEvent.TextureId;
 
-            SendPacketToAllEventRelatives(packet, calendarEvent);
+                receiver.SendPacket(packet);
+            };
+
+            foreach (Player receiver in GetAllEventRelatives(calendarEvent))
+                packetBuilder(receiver);
         }
 
         public void SendCalendarEventStatus(CalendarEvent calendarEvent, CalendarInvite invite)
         {
-            CalendarInviteStatusPacket packet = new();
-            packet.ClearPending = true; // FIXME
-            packet.Date = calendarEvent.Date;
-            packet.EventID = calendarEvent.EventId;
-            packet.Flags = calendarEvent.Flags;
-            packet.InviteGuid = invite.InviteeGuid;
-            packet.ResponseTime = invite.ResponseTime;
-            packet.Status = invite.Status;
+            var packetBuilder = (Player receiver) =>
+            {
+                CalendarInviteStatusPacket packet = new();
+                packet.ClearPending = true; // FIXME
+                packet.Date.SetUtcTimeFromUnixTime(calendarEvent.Date);
+                packet.Date += receiver.GetSession().GetTimezoneOffset();
+                packet.EventID = calendarEvent.EventId;
+                packet.Flags = calendarEvent.Flags;
+                packet.InviteGuid = invite.InviteeGuid;
+                packet.ResponseTime.SetUtcTimeFromUnixTime(invite.ResponseTime);
+                packet.ResponseTime += receiver.GetSession().GetTimezoneOffset();
+                packet.Status = invite.Status;
 
-            SendPacketToAllEventRelatives(packet, calendarEvent);
+                receiver.SendPacket(packet);
+            };
+
+            foreach (Player receiver in GetAllEventRelatives(calendarEvent))
+                packetBuilder(receiver);
         }
 
         void SendCalendarEventRemovedAlert(CalendarEvent calendarEvent)
         {
-            CalendarEventRemovedAlert packet = new();
-            packet.ClearPending = true; // FIXME
-            packet.Date = calendarEvent.Date;
-            packet.EventID = calendarEvent.EventId;
+            var packetBuilder = (Player receiver) =>
+            {
+                CalendarEventRemovedAlert packet = new();
+                packet.ClearPending = true; // FIXME
+                packet.Date.SetUtcTimeFromUnixTime(calendarEvent.Date);
+                packet.Date += receiver.GetSession().GetTimezoneOffset();
+                packet.EventID = calendarEvent.EventId;
 
-            SendPacketToAllEventRelatives(packet, calendarEvent);
+                receiver.SendPacket(packet);
+            };
+
+            foreach (Player receiver in GetAllEventRelatives(calendarEvent))
+                packetBuilder(receiver);
         }
 
         void SendCalendarEventInviteRemove(CalendarEvent calendarEvent, CalendarInvite invite, uint flags)
@@ -524,33 +558,37 @@ namespace Game
 
         void SendCalendarEventInviteAlert(CalendarEvent calendarEvent, CalendarInvite invite)
         {
-            CalendarInviteAlert packet = new();
-            packet.Date = calendarEvent.Date;
-            packet.EventID = calendarEvent.EventId;
-            packet.EventName = calendarEvent.Title;
-            packet.EventType = calendarEvent.EventType;
-            packet.Flags = calendarEvent.Flags;
-            packet.InviteID = invite.InviteId;
-            packet.InvitedByGuid = invite.SenderGuid;
-            packet.ModeratorStatus = invite.Rank;
-            packet.OwnerGuid = calendarEvent.OwnerGuid;
-            packet.Status = invite.Status;
-            packet.TextureID = calendarEvent.TextureId;
+            var packetBuilder = (Player receiver) =>
+            {
+                CalendarInviteAlert packet = new();
+                packet.Date.SetUtcTimeFromUnixTime(calendarEvent.Date);
+                packet.Date += receiver.GetSession().GetTimezoneOffset();
+                packet.EventID = calendarEvent.EventId;
+                packet.EventName = calendarEvent.Title;
+                packet.EventType = calendarEvent.EventType;
+                packet.Flags = calendarEvent.Flags;
+                packet.InviteID = invite.InviteId;
+                packet.InvitedByGuid = invite.SenderGuid;
+                packet.ModeratorStatus = invite.Rank;
+                packet.OwnerGuid = calendarEvent.OwnerGuid;
+                packet.Status = invite.Status;
+                packet.TextureID = calendarEvent.TextureId;
+                packet.EventClubID = calendarEvent.GuildId;
 
-            Guild guild = Global.GuildMgr.GetGuildById(calendarEvent.GuildId);
-            packet.EventGuildID = guild != null ? guild.GetGUID() : ObjectGuid.Empty;
+                receiver.SendPacket(packet);
+            };
 
             if (calendarEvent.IsGuildEvent() || calendarEvent.IsGuildAnnouncement())
             {
-                guild = Global.GuildMgr.GetGuildById(calendarEvent.GuildId);
+                Guild guild = Global.GuildMgr.GetGuildById(calendarEvent.GuildId);
                 if (guild != null)
-                    guild.BroadcastPacket(packet);
+                    guild.BroadcastWorker(packetBuilder);
             }
             else
             {
                 Player player = Global.ObjAccessor.FindPlayer(invite.InviteeGuid);
                 if (player != null)
-                    player.SendPacket(packet);
+                    packetBuilder(player);
             }
         }
 
@@ -560,23 +598,23 @@ namespace Game
             if (player == null)
                 return;
 
-            List<CalendarInvite> eventInviteeList = _invites[calendarEvent.EventId];
-
             CalendarSendEvent packet = new();
-            packet.Date = calendarEvent.Date;
+            packet.Date.SetUtcTimeFromUnixTime(calendarEvent.Date);
+            packet.Date += player.GetSession().GetTimezoneOffset();
             packet.Description = calendarEvent.Description;
             packet.EventID = calendarEvent.EventId;
             packet.EventName = calendarEvent.Title;
             packet.EventType = sendType;
             packet.Flags = calendarEvent.Flags;
             packet.GetEventType = calendarEvent.EventType;
-            packet.LockDate = calendarEvent.LockDate; // Always 0 ?
+            packet.LockDate.SetUtcTimeFromUnixTime(calendarEvent.LockDate); // Always 0 ?
+            if (calendarEvent.LockDate != 0)
+                packet.LockDate += player.GetSession().GetTimezoneOffset();
             packet.OwnerGuid = calendarEvent.OwnerGuid;
             packet.TextureID = calendarEvent.TextureId;
+            packet.EventGuildID = calendarEvent.GuildId;
 
-            Guild guild = Global.GuildMgr.GetGuildById(calendarEvent.GuildId);
-            packet.EventGuildID = (guild != null ? guild.GetGUID() : ObjectGuid.Empty);
-
+            List<CalendarInvite> eventInviteeList = _invites[calendarEvent.EventId];
             foreach (var calendarInvite in eventInviteeList)
             {
                 ObjectGuid inviteeGuid = calendarInvite.InviteeGuid;
@@ -607,7 +645,8 @@ namespace Game
             if (player != null)
             {
                 CalendarInviteRemovedAlert packet = new();
-                packet.Date = calendarEvent.Date;
+                packet.Date.SetUtcTimeFromUnixTime(calendarEvent.Date);
+                packet.Date += player.GetSession().GetTimezoneOffset();
                 packet.EventID = calendarEvent.EventId;
                 packet.Flags = calendarEvent.Flags;
                 packet.Status = status;
@@ -620,7 +659,7 @@ namespace Game
         {
             Player player = Global.ObjAccessor.FindPlayer(guid);
             if (player != null)
-               player.SendPacket(new CalendarClearPendingAction());
+                player.SendPacket(new CalendarClearPendingAction());
         }
 
         public void SendCalendarCommandResult(ObjectGuid guid, CalendarError err, string param = null)
@@ -647,23 +686,33 @@ namespace Game
 
         void SendPacketToAllEventRelatives(ServerPacket packet, CalendarEvent calendarEvent)
         {
+            foreach (Player player in GetAllEventRelatives(calendarEvent))
+                player.SendPacket(packet);
+        }
+
+        List<Player> GetAllEventRelatives(CalendarEvent calendarEvent)
+        {
+            List<Player> relatedPlayers = new();
+
             // Send packet to all guild members
             if (calendarEvent.IsGuildEvent() || calendarEvent.IsGuildAnnouncement())
             {
                 Guild guild = Global.GuildMgr.GetGuildById(calendarEvent.GuildId);
                 if (guild != null)
-                    guild.BroadcastPacket(packet);
+                    guild.BroadcastWorker(relatedPlayers.Add);
             }
 
             // Send packet to all invitees if event is non-guild, in other case only to non-guild invitees (packet was broadcasted for them)
-            List<CalendarInvite> invites = _invites[calendarEvent.EventId];
-            foreach (var playerCalendarEvent in invites)
+            var invites = _invites.LookupByKey(calendarEvent.EventId);
+            foreach (CalendarInvite invite in invites)
             {
-                Player player = Global.ObjAccessor.FindPlayer(playerCalendarEvent.InviteeGuid);
+                Player player = Global.ObjAccessor.FindConnectedPlayer(invite.InviteeGuid);
                 if (player != null)
                     if (!calendarEvent.IsGuildEvent() || player.GetGuildId() != calendarEvent.GuildId)
-                        player.SendPacket(packet);
+                        relatedPlayers.Add(player);
             }
+
+            return relatedPlayers;
         }
 
         List<CalendarEvent> _events;
@@ -780,11 +829,14 @@ namespace Game
             return remover + ":" + Title;
         }
 
-        public string BuildCalendarMailBody()
+        public string BuildCalendarMailBody(Player invitee)
         {
-            var now = Time.UnixTimeToDateTime(Date);
-            uint time = Convert.ToUInt32(((now.Year - 1900) - 100) << 24 | (now.Month - 1) << 20 | (now.Day - 1) << 14 | (int)now.DayOfWeek << 11 | now.Hour << 6 | now.Minute);
-            return time.ToString();
+            WowTime time = new();
+            time.SetUtcTimeFromUnixTime(Date);
+            if (invitee != null)
+                time += invitee.GetSession().GetTimezoneOffset();
+
+            return time.GetPackedTime().ToString();
         }
 
         public bool IsGuildEvent() { return Flags.HasAnyFlag(CalendarFlags.GuildEvent); }

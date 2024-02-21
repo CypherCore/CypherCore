@@ -2224,10 +2224,18 @@ namespace Game
 
             if (condition.Time[0] != 0)
             {
-                var from = Time.GetUnixTimeFromPackedTime(condition.Time[0]);
-                var to = Time.GetUnixTimeFromPackedTime(condition.Time[1]);
+                WowTime time0 = new();
+                time0.SetPackedTime(condition.Time[0]);
 
-                if (GameTime.GetGameTime() < from || GameTime.GetGameTime() > to)
+                if (condition.Time[1] != 0)
+                {
+                    WowTime time1 = new();
+                    time1.SetPackedTime(condition.Time[1]);
+
+                    if (!GameTime.GetWowTime().IsInRange(time0, time1))
+                        return false;
+                }
+                else if (GameTime.GetWowTime() != time0)
                     return false;
             }
 

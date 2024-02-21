@@ -49,7 +49,7 @@ namespace Game.Achievements
         {
             return _completedAchievements.Keys;
         }
-        
+
         public override bool CanUpdateCriteriaTree(Criteria criteria, CriteriaTree tree, Player referencePlayer)
         {
             AchievementRecord achievement = tree.Achievement;
@@ -178,9 +178,9 @@ namespace Game.Achievements
 
         public virtual void CompletedAchievement(AchievementRecord entry, Player referencePlayer) { }
 
-        public Func<KeyValuePair<uint, CompletedAchievementData>, AchievementRecord> VisibleAchievementCheck = value =>
+        public Func<uint, AchievementRecord> VisibleAchievementCheck = id =>
         {
-            AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(value.Key);
+            AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(id);
             if (achievement != null && !achievement.Flags.HasAnyFlag(AchievementFlags.Hidden))
                 return achievement;
             return null;
@@ -358,33 +358,35 @@ namespace Game.Achievements
             AllAccountCriteria allAccountCriteria = new();
             AllAchievementData achievementData = new();
 
-            foreach (var pair in _completedAchievements)
+            foreach (var (id, completedAchievement) in _completedAchievements)
             {
-                AchievementRecord achievement = VisibleAchievementCheck(pair);
+                AchievementRecord achievement = VisibleAchievementCheck(id);
                 if (achievement == null)
                     continue;
 
                 EarnedAchievement earned = new();
-                earned.Id = pair.Key;
-                earned.Date = pair.Value.Date;
+                earned.Id = id;
+                earned.Date.SetUtcTimeFromUnixTime(completedAchievement.Date);
                 if (!achievement.Flags.HasAnyFlag(AchievementFlags.Account))
                 {
                     earned.Owner = _owner.GetGUID();
                     earned.VirtualRealmAddress = earned.NativeRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
                 }
+
                 achievementData.Data.Earned.Add(earned);
             }
 
-            foreach (var pair in _criteriaProgress)
+            foreach (var (id, criteriaProgres) in _criteriaProgress)
             {
-                Criteria criteria = Global.CriteriaMgr.GetCriteria(pair.Key);
+                Criteria criteria = Global.CriteriaMgr.GetCriteria(id);
 
                 CriteriaProgressPkt progress = new();
-                progress.Id = pair.Key;
-                progress.Quantity = pair.Value.Counter;
-                progress.Player = pair.Value.PlayerGUID;
+                progress.Id = id;
+                progress.Quantity = criteriaProgres.Counter;
+                progress.Player = criteriaProgres.PlayerGUID;
                 progress.Flags = 0;
-                progress.Date = pair.Value.Date;
+                progress.Date.SetUtcTimeFromUnixTime(criteriaProgres.Date);
+                progress.Date += _owner.GetSession().GetTimezoneOffset();
                 progress.TimeFromStart = 0;
                 progress.TimeFromCreate = 0;
                 achievementData.Data.Progress.Add(progress);
@@ -392,11 +394,12 @@ namespace Game.Achievements
                 if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.Account))
                 {
                     CriteriaProgressPkt accountProgress = new();
-                    accountProgress.Id = pair.Key;
-                    accountProgress.Quantity = pair.Value.Counter;
+                    accountProgress.Id = id;
+                    accountProgress.Quantity = criteriaProgres.Counter;
                     accountProgress.Player = _owner.GetSession().GetBattlenetAccountGUID();
                     accountProgress.Flags = 0;
-                    accountProgress.Date = pair.Value.Date;
+                    accountProgress.Date.SetUtcTimeFromUnixTime(criteriaProgres.Date);
+                    accountProgress.Date += _owner.GetSession().GetTimezoneOffset();
                     accountProgress.TimeFromStart = 0;
                     accountProgress.TimeFromCreate = 0;
                     allAccountCriteria.Progress.Add(accountProgress);
@@ -414,31 +417,34 @@ namespace Game.Achievements
             RespondInspectAchievements inspectedAchievements = new();
             inspectedAchievements.Player = _owner.GetGUID();
 
-            foreach (var pair in _completedAchievements)
+            foreach (var (id, completedAchievement) in _completedAchievements)
             {
-                AchievementRecord achievement = VisibleAchievementCheck(pair);
+                AchievementRecord achievement = VisibleAchievementCheck(id);
                 if (achievement == null)
                     continue;
 
                 EarnedAchievement earned = new();
-                earned.Id = pair.Key;
-                earned.Date = pair.Value.Date;
+                earned.Id = id;
+                earned.Date.SetUtcTimeFromUnixTime(completedAchievement.Date);
+                earned.Date += receiver.GetSession().GetTimezoneOffset();
                 if (!achievement.Flags.HasAnyFlag(AchievementFlags.Account))
                 {
                     earned.Owner = _owner.GetGUID();
                     earned.VirtualRealmAddress = earned.NativeRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
                 }
+
                 inspectedAchievements.Data.Earned.Add(earned);
             }
 
-            foreach (var pair in _criteriaProgress)
+            foreach (var (id, criteriaProgres) in _criteriaProgress)
             {
                 CriteriaProgressPkt progress = new();
-                progress.Id = pair.Key;
-                progress.Quantity = pair.Value.Counter;
-                progress.Player = pair.Value.PlayerGUID;
+                progress.Id = id;
+                progress.Quantity = criteriaProgres.Counter;
+                progress.Player = criteriaProgres.PlayerGUID;
                 progress.Flags = 0;
-                progress.Date = pair.Value.Date;
+                progress.Date.SetUtcTimeFromUnixTime(criteriaProgres.Date);
+                progress.Date += receiver.GetSession().GetTimezoneOffset();
                 progress.TimeFromStart = 0;
                 progress.TimeFromCreate = 0;
                 inspectedAchievements.Data.Progress.Add(progress);
@@ -571,7 +577,8 @@ namespace Game.Achievements
                 if (criteria.Entry.StartTimer != 0)
                     criteriaUpdate.Progress.Flags = timedCompleted ? 1 : 0u; // 1 is for keeping the counter at 0 in client
 
-                criteriaUpdate.Progress.Date = progress.Date;
+                criteriaUpdate.Progress.Date.SetUtcTimeFromUnixTime(progress.Date);
+                criteriaUpdate.Progress.Date += _owner.GetSession().GetTimezoneOffset();
                 criteriaUpdate.Progress.TimeFromStart = (uint)timeElapsed.TotalSeconds;
                 criteriaUpdate.Progress.TimeFromCreate = 0;
                 SendPacket(criteriaUpdate);
@@ -588,7 +595,8 @@ namespace Game.Achievements
                 if (criteria.Entry.StartTimer != 0)
                     criteriaUpdate.Flags = timedCompleted ? 1 : 0u; // 1 is for keeping the counter at 0 in client
 
-                criteriaUpdate.CurrentTime = progress.Date;
+                criteriaUpdate.CurrentTime.SetUtcTimeFromUnixTime(progress.Date);
+                criteriaUpdate.CurrentTime += _owner.GetSession().GetTimezoneOffset();
                 criteriaUpdate.ElapsedTime = (uint)timeElapsed.TotalSeconds;
                 criteriaUpdate.CreationTime = 0;
 
@@ -640,17 +648,26 @@ namespace Game.Achievements
                 }
             }
 
-            AchievementEarned achievementEarned = new();
-            achievementEarned.Sender = _owner.GetGUID();
-            achievementEarned.Earner = _owner.GetGUID();
-            achievementEarned.EarnerNativeRealm = achievementEarned.EarnerVirtualRealm = Global.WorldMgr.GetVirtualRealmAddress();
-            achievementEarned.AchievementID = achievement.Id;
-            achievementEarned.Time = GameTime.GetGameTime();
+            var achievementEarnedBuilder = (Player receiver) =>
+            {
+                AchievementEarned achievementEarned = new();
+                achievementEarned.Sender = _owner.GetGUID();
+                achievementEarned.Earner = _owner.GetGUID();
+                achievementEarned.EarnerNativeRealm = achievementEarned.EarnerVirtualRealm = Global.WorldMgr.GetVirtualRealmAddress();
+                achievementEarned.AchievementID = achievement.Id;
+                achievementEarned.Time = GameTime.GetUtcWowTime();
+                achievementEarned.Time += receiver.GetSession().GetTimezoneOffset();
+                receiver.SendPacket(achievementEarned);
+            };
 
             if (!achievement.Flags.HasAnyFlag(AchievementFlags.TrackingFlag))
-                _owner.SendMessageToSetInRange(achievementEarned, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay), true);
+            {
+                float dist = WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay);
+                MessageDistDeliverer notifier = new(_owner, achievementEarnedBuilder, dist);
+                Cell.VisitWorldObjects(_owner, notifier, dist);
+            }
             else
-                _owner.SendPacket(achievementEarned);
+                achievementEarnedBuilder(_owner);
         }
 
         public override void SendPacket(ServerPacket data)
@@ -683,13 +700,17 @@ namespace Game.Achievements
             base.Reset();
 
             ObjectGuid guid = _owner.GetGUID();
-            foreach (var iter in _completedAchievements)
+            foreach (var (id, _) in _completedAchievements)
             {
-                GuildAchievementDeleted guildAchievementDeleted = new();
-                guildAchievementDeleted.AchievementID = iter.Key;
-                guildAchievementDeleted.GuildGUID = guid;
-                guildAchievementDeleted.TimeDeleted = GameTime.GetGameTime();
-                SendPacket(guildAchievementDeleted);
+                _owner.BroadcastWorker(receiver =>
+                {
+                    GuildAchievementDeleted guildAchievementDeleted = new();
+                    guildAchievementDeleted.AchievementID = id;
+                    guildAchievementDeleted.GuildGUID = guid;
+                    guildAchievementDeleted.TimeDeleted = GameTime.GetUtcWowTime();
+                    guildAchievementDeleted.TimeDeleted += receiver.GetSession().GetTimezoneOffset();
+                    receiver.SendPacket(guildAchievementDeleted);
+                });
             }
 
             _achievementPoints = 0;
@@ -831,15 +852,16 @@ namespace Game.Achievements
         {
             AllGuildAchievements allGuildAchievements = new();
 
-            foreach (var pair in _completedAchievements)
+            foreach (var (id, completedAchievement) in _completedAchievements)
             {
-                AchievementRecord achievement = VisibleAchievementCheck(pair);
+                AchievementRecord achievement = VisibleAchievementCheck(id);
                 if (achievement == null)
                     continue;
 
                 EarnedAchievement earned = new();
-                earned.Id = pair.Key;
-                earned.Date = pair.Value.Date;
+                earned.Id = id;
+                earned.Date.SetUtcTimeFromUnixTime(completedAchievement.Date);
+                earned.Date += receiver.GetSession().GetTimezoneOffset();
                 allGuildAchievements.Earned.Add(earned);
             }
 
@@ -856,25 +878,26 @@ namespace Game.Achievements
                 if (tree != null)
                 {
                     CriteriaManager.WalkCriteriaTree(tree, node =>
-            {
-                if (node.Criteria != null)
-                {
-                    var progress = _criteriaProgress.LookupByKey(node.Criteria.Id);
-                    if (progress != null)
                     {
-                        GuildCriteriaProgress guildCriteriaProgress = new();
-                        guildCriteriaProgress.CriteriaID = node.Criteria.Id;
-                        guildCriteriaProgress.DateCreated = 0;
-                        guildCriteriaProgress.DateStarted = 0;
-                        guildCriteriaProgress.DateUpdated = progress.Date;
-                        guildCriteriaProgress.Quantity = progress.Counter;
-                        guildCriteriaProgress.PlayerGUID = progress.PlayerGUID;
-                        guildCriteriaProgress.Flags = 0;
+                        if (node.Criteria != null)
+                        {
+                            var progress = _criteriaProgress.LookupByKey(node.Criteria.Id);
+                            if (progress != null)
+                            {
+                                GuildCriteriaProgress guildCriteriaProgress = new();
+                                guildCriteriaProgress.CriteriaID = node.Criteria.Id;
+                                guildCriteriaProgress.DateCreated = 0;
+                                guildCriteriaProgress.DateStarted = 0;
+                                guildCriteriaProgress.DateUpdated.SetUtcTimeFromUnixTime(progress.Date);
+                                guildCriteriaProgress.DateUpdated += receiver.GetSession().GetTimezoneOffset();
+                                guildCriteriaProgress.Quantity = progress.Counter;
+                                guildCriteriaProgress.PlayerGUID = progress.PlayerGUID;
+                                guildCriteriaProgress.Flags = 0;
 
-                        guildCriteriaUpdate.Progress.Add(guildCriteriaProgress);
-                    }
-                }
-            });
+                                guildCriteriaUpdate.Progress.Add(guildCriteriaProgress);
+                            }
+                        }
+                    });
                 }
             }
 
@@ -895,7 +918,8 @@ namespace Game.Achievements
                 guildCriteriaProgress.CriteriaID = criteriaId;
                 guildCriteriaProgress.DateCreated = 0;
                 guildCriteriaProgress.DateStarted = 0;
-                guildCriteriaProgress.DateUpdated = progress.Date;
+                guildCriteriaProgress.DateUpdated.SetUtcTimeFromUnixTime(progress.Date);
+                guildCriteriaProgress.DateUpdated += receiver.GetSession().GetTimezoneOffset();
                 guildCriteriaProgress.Quantity = progress.Counter;
                 guildCriteriaProgress.PlayerGUID = progress.PlayerGUID;
                 guildCriteriaProgress.Flags = 0;
@@ -975,20 +999,22 @@ namespace Game.Achievements
 
         public override void SendCriteriaUpdate(Criteria entry, CriteriaProgress progress, TimeSpan timeElapsed, bool timedCompleted)
         {
-            GuildCriteriaUpdate guildCriteriaUpdate = new();
+            foreach (Player member in _owner.GetMembersTrackingCriteria(entry.Id))
+            {
+                GuildCriteriaUpdate guildCriteriaUpdate = new();
+                GuildCriteriaProgress guildCriteriaProgress = new();
+                guildCriteriaProgress.CriteriaID = entry.Id;
+                guildCriteriaProgress.DateCreated = 0;
+                guildCriteriaProgress.DateStarted = 0;
+                guildCriteriaProgress.DateUpdated.SetUtcTimeFromUnixTime(progress.Date);
+                guildCriteriaProgress.DateUpdated += member.GetSession().GetTimezoneOffset();
+                guildCriteriaProgress.Quantity = progress.Counter;
+                guildCriteriaProgress.PlayerGUID = progress.PlayerGUID;
+                guildCriteriaProgress.Flags = 0;
+                guildCriteriaUpdate.Progress.Add(guildCriteriaProgress);
 
-            GuildCriteriaProgress guildCriteriaProgress = new();
-            guildCriteriaProgress.CriteriaID = entry.Id;
-            guildCriteriaProgress.DateCreated = 0;
-            guildCriteriaProgress.DateStarted = 0;
-            guildCriteriaProgress.DateUpdated = progress.Date;
-            guildCriteriaProgress.Quantity = progress.Counter;
-            guildCriteriaProgress.PlayerGUID = progress.PlayerGUID;
-            guildCriteriaProgress.Flags = 0;
-
-            guildCriteriaUpdate.Progress.Add(guildCriteriaProgress);
-
-            _owner.BroadcastPacketIfTrackingAchievement(guildCriteriaUpdate, entry.Id);
+                member.SendPacket(guildCriteriaUpdate);
+            }
         }
 
         public override void SendCriteriaProgressRemoved(uint criteriaId)
@@ -1012,11 +1038,17 @@ namespace Game.Achievements
                 Global.WorldMgr.SendGlobalMessage(serverFirstAchievement);
             }
 
-            GuildAchievementEarned guildAchievementEarned = new();
-            guildAchievementEarned.AchievementID = achievement.Id;
-            guildAchievementEarned.GuildGUID = _owner.GetGUID();
-            guildAchievementEarned.TimeEarned = GameTime.GetGameTime();
-            SendPacket(guildAchievementEarned);
+            var guildAchievementEarnedBuilder = (Player receiver) =>
+            {
+                GuildAchievementEarned guildAchievementEarned = new();
+                guildAchievementEarned.AchievementID = achievement.Id;
+                guildAchievementEarned.GuildGUID = _owner.GetGUID();
+                guildAchievementEarned.TimeEarned = GameTime.GetUtcWowTime();
+                guildAchievementEarned.TimeEarned += receiver.GetSession().GetTimezoneOffset();
+                receiver.SendPacket(guildAchievementEarned);
+            };
+
+            _owner.BroadcastWorker(guildAchievementEarnedBuilder);
         }
 
         public override void SendPacket(ServerPacket data)
