@@ -3352,7 +3352,10 @@ namespace Game.Entities
         public override void SetImmuneToPC(bool apply) { SetImmuneToPC(apply, HasReactState(ReactStates.Passive)); }
         public override void SetImmuneToNPC(bool apply) { SetImmuneToNPC(apply, HasReactState(ReactStates.Passive)); }
 
-        void SetUnkillable(bool unkillable) { _staticFlags.ApplyFlag(CreatureStaticFlags.Unkillable, unkillable); }
+        public bool IsThreatFeedbackDisabled() { return _staticFlags.HasFlag(CreatureStaticFlags3.NoThreatFeedback); }
+        public void SetNoThreatFeedback(bool noThreatFeedback) { _staticFlags.ApplyFlag(CreatureStaticFlags3.NoThreatFeedback, noThreatFeedback); }
+
+        public void SetUnkillable(bool unkillable) { _staticFlags.ApplyFlag(CreatureStaticFlags.Unkillable, unkillable); }
 
         public bool IsInEvadeMode() { return HasUnitState(UnitState.Evade); }
         public bool IsEvadingAttacks() { return IsInEvadeMode() || CanNotReachTarget(); }

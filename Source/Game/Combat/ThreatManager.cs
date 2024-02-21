@@ -669,6 +669,10 @@ namespace Game.Combat
 
         void SendClearAllThreatToClients()
         {
+            Creature owner = _owner.ToCreature();
+            if (owner != null && owner.IsThreatFeedbackDisabled())
+                return;
+
             ThreatClear threatClear = new();
             threatClear.UnitGUID = _owner.GetGUID();
             _owner.SendMessageToSet(threatClear, false);
@@ -676,6 +680,10 @@ namespace Game.Combat
 
         public void SendRemoveToClients(Unit victim)
         {
+            Creature owner = _owner.ToCreature();
+            if (owner != null && owner.IsThreatFeedbackDisabled())
+                return;
+
             ThreatRemove threatRemove = new();
             threatRemove.UnitGUID = _owner.GetGUID();
             threatRemove.AboutGUID = victim.GetGUID();
@@ -684,6 +692,10 @@ namespace Game.Combat
 
         void SendThreatListToClients(bool newHighest)
         {
+            Creature owner = _owner.ToCreature();
+            if (owner != null && owner.IsThreatFeedbackDisabled())
+                return;
+
             void fillSharedPacketDataAndSend(dynamic packet)
             {
                 packet.UnitGUID = _owner.GetGUID();
@@ -961,16 +973,17 @@ namespace Game.Combat
         public bool IsTaunting() { return _taunted >= TauntState.Taunt; }
         public bool IsDetaunted() { return _taunted == TauntState.Detaunt; }
 
-        public void SetThreat(float amount) 
-        { 
+        public void SetThreat(float amount)
+        {
             _baseAmount = amount;
-            ListNotifyChanged(); 
+            ListNotifyChanged();
         }
 
         public void ModifyThreatByPercent(int percent)
         {
             if (percent != 0)
-                ScaleThreat(0.01f * (100f + percent)); }
+                ScaleThreat(0.01f * (100f + percent));
+        }
 
         public void ListNotifyChanged() { _mgr.ListNotifyChanged(); }
 
