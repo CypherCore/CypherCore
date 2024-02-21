@@ -63,7 +63,7 @@ namespace Game.Entities
             ModMeleeHitChance = 0.0f;
             ModRangedHitChance = 0.0f;
             ModSpellHitChance = 0.0f;
-            BaseSpellCritChance = 5;
+            BaseSpellCritChance = 5.0f;
 
             for (byte i = 0; i < (int)UnitMoveType.Max; ++i)
                 m_speed_rate[i] = 1.0f;

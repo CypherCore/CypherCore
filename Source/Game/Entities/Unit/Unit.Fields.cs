@@ -53,7 +53,7 @@ namespace Game.Entities
         public float ModRangedHitChance { get; set; }
         public float ModSpellHitChance { get; set; }
         public bool m_canDualWield;
-        public int BaseSpellCritChance { get; set; }
+        public float BaseSpellCritChance { get; set; }
         public uint RegenTimer { get; set; }
 
         uint _lastExtraAttackSpell;

@@ -615,23 +615,36 @@ namespace Game.Entities
             float crit_chance = 0.0f;
             switch (spellInfo.DmgClass)
             {
+                case SpellDmgClass.None:
                 case SpellDmgClass.Magic:
                 {
-                    if (schoolMask.HasAnyFlag(SpellSchoolMask.Normal))
-                        crit_chance = 0.0f;
-                    // For other schools
-                    else if (IsTypeId(TypeId.Player))
-                        crit_chance = ToPlayer().m_activePlayerData.SpellCritPercentage;
-                    else
-                        crit_chance = BaseSpellCritChance;
+                    var getMagicCritChance = float () =>
+                    {
+                        Player thisPlayer = ToPlayer();
+                        if (thisPlayer != null)
+                            return thisPlayer.m_activePlayerData.SpellCritPercentage;
+
+                        return BaseSpellCritChance;
+                    };
+
+                    switch (schoolMask & SpellSchoolMask.Normal)
+                    {
+                        case SpellSchoolMask.Normal: // physical only
+                            crit_chance = GetUnitCriticalChanceDone(attackType);
+                            break;
+                        case 0: // spell only
+                            crit_chance = getMagicCritChance();
+                            break;
+                        default: // mix of physical and magic
+                            crit_chance = Math.Max(getMagicCritChance(), GetUnitCriticalChanceDone(attackType));
+                            break;
+                    }
                     break;
                 }
                 case SpellDmgClass.Melee:
                 case SpellDmgClass.Ranged:
                     crit_chance += GetUnitCriticalChanceDone(attackType);
                     break;
-
-                case SpellDmgClass.None:
                 default:
                     return 0f;
             }

@@ -3155,19 +3155,6 @@ namespace Game.Entities
                 });
             }
 
-            // Allows those to crit
-            ApplySpellFix(new[] {
-                379,   // Earth Shield
-                71607, // Item - Bauble of True Blood 10m
-                71646, // Item - Bauble of True Blood 25m
-                71610, // Item - Althor's Abacus trigger 10m
-                71641  // Item - Althor's Abacus trigger 25m
-            }, spellInfo =>
-            {
-                // We need more spells to find a general way (if there is any)
-                spellInfo.DmgClass = SpellDmgClass.Magic;
-            });
-
             ApplySpellFix(new[] {
                 63026, // Summon Aspirant Test NPC (HACK: Target shouldn't be changed)
                 63137  // Summon Valiant Test (HACK: Target shouldn't be changed; summon position should be untied from spell destination)
