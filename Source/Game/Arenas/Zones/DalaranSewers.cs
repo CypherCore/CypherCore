@@ -153,8 +153,6 @@ namespace Game.Arenas
                 }
             });
         }
-
-        EventMap _events = new();
     }
 
     struct DalaranSewersEvents

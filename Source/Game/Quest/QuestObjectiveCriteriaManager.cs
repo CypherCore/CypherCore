@@ -290,7 +290,7 @@ namespace Game
             return Global.CriteriaMgr.GetQuestObjectiveCriteriaByType(type);
         }
 
-        public bool RequiredAchievementSatisfied(uint achievementId)
+        public override bool RequiredAchievementSatisfied(uint achievementId)
         {
             return _owner.HasAchieved(achievementId);
         }

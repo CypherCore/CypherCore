@@ -26,7 +26,7 @@ namespace Game.Spells
         public ObjectGuid CastingUnitGUID;
         public SpellCastRequestItemData ItemData;
 
-        public SpellCastRequest(SpellCastRequestPkt castRequest, ObjectGuid castingUnitGUID, SpellCastRequestItemData? itemData = null)
+        public SpellCastRequest(SpellCastRequestPkt castRequest, ObjectGuid castingUnitGUID, SpellCastRequestItemData itemData = null)
         {
             CastRequest = castRequest;
             CastingUnitGUID = castingUnitGUID;
