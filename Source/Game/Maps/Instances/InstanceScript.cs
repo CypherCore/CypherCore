@@ -748,7 +748,7 @@ namespace Game.Maps
             _temporaryEntranceId = 0;
         }
 
-        public void SendEncounterUnit(EncounterFrameType type, Unit unit = null, byte priority = 0)
+        public void SendEncounterUnit(EncounterFrameType type, Unit unit = null, int? param1 = null, int? param2 = null)
         {
             switch (type)
             {
@@ -758,7 +758,7 @@ namespace Game.Maps
 
                     InstanceEncounterEngageUnit encounterEngageMessage = new();
                     encounterEngageMessage.Unit = unit.GetGUID();
-                    encounterEngageMessage.TargetFramePriority = priority;
+                    encounterEngageMessage.TargetFramePriority = (byte)param1.GetValueOrDefault(0);
                     instance.SendToPlayers(encounterEngageMessage);
                     break;
                 case EncounterFrameType.Disengage:
@@ -775,9 +775,44 @@ namespace Game.Maps
 
                     InstanceEncounterChangePriority encounterChangePriorityMessage = new();
                     encounterChangePriorityMessage.Unit = unit.GetGUID();
-                    encounterChangePriorityMessage.TargetFramePriority = priority;
+                    encounterChangePriorityMessage.TargetFramePriority = (byte)param1.GetValueOrDefault(0);
                     instance.SendToPlayers(encounterChangePriorityMessage);
                     break;
+                case EncounterFrameType.AddTimer:
+                {
+                    InstanceEncounterTimerStart instanceEncounterTimerStart = new();
+                    instanceEncounterTimerStart.TimeRemaining = param1.GetValueOrDefault(0);
+                    instance.SendToPlayers(instanceEncounterTimerStart);
+                    break;
+                }
+                case EncounterFrameType.EnableObjective:
+                {
+                    InstanceEncounterObjectiveStart instanceEncounterObjectiveStart = new();
+                    instanceEncounterObjectiveStart.ObjectiveID = param1.GetValueOrDefault(0);
+                    instance.SendToPlayers(instanceEncounterObjectiveStart);
+                    break;
+                }
+                case EncounterFrameType.UpdateObjective:
+                {
+                    InstanceEncounterObjectiveUpdate instanceEncounterObjectiveUpdate = new();
+                    instanceEncounterObjectiveUpdate.ObjectiveID = param1.GetValueOrDefault(0);
+                    instanceEncounterObjectiveUpdate.ProgressAmount = param2.GetValueOrDefault(0);
+                    instance.SendToPlayers(instanceEncounterObjectiveUpdate);
+                    break;
+                }
+                case EncounterFrameType.DisableObjective:
+                {
+                    InstanceEncounterObjectiveComplete instanceEncounterObjectiveComplete = new();
+                    instanceEncounterObjectiveComplete.ObjectiveID = param1.GetValueOrDefault(0);
+                    instance.SendToPlayers(instanceEncounterObjectiveComplete);
+                    break;
+                }
+                case EncounterFrameType.PhaseShiftChanged:
+                {
+                    InstanceEncounterPhaseShiftChanged instanceEncounterPhaseShiftChanged = new();
+                    instance.SendToPlayers(instanceEncounterPhaseShiftChanged);
+                    break;
+                }
                 default:
                     break;
             }

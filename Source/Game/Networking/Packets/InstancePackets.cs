@@ -194,6 +194,50 @@ namespace Game.Networking.Packets
         public byte TargetFramePriority; // used to update the position of the unit's current frame
     }
 
+    class InstanceEncounterTimerStart : ServerPacket
+    {
+        public int TimeRemaining;
+
+        public InstanceEncounterTimerStart() : base(ServerOpcodes.InstanceEncounterTimerStart) { }
+
+        public override void Write() { }
+    }
+
+    class InstanceEncounterObjectiveStart : ServerPacket
+    {
+        public int ObjectiveID;
+
+        public InstanceEncounterObjectiveStart() : base(ServerOpcodes.InstanceEncounterObjectiveStart) { }
+
+        public override void Write() { }
+    }
+
+    class InstanceEncounterObjectiveUpdate : ServerPacket
+    {
+        public int ObjectiveID;
+        public int ProgressAmount;
+
+        public InstanceEncounterObjectiveUpdate() : base(ServerOpcodes.InstanceEncounterObjectiveUpdate) { }
+
+        public override void Write() { }
+    }
+
+    class InstanceEncounterObjectiveComplete : ServerPacket
+    {
+        public int ObjectiveID;
+
+        public InstanceEncounterObjectiveComplete() : base(ServerOpcodes.InstanceEncounterObjectiveComplete) { }
+
+        public override void Write() { }
+    }
+
+    class InstanceEncounterPhaseShiftChanged : ServerPacket
+    {
+        public InstanceEncounterPhaseShiftChanged() : base(ServerOpcodes.InstanceEncounterPhaseShiftChanged, ConnectionType.Instance) { }
+
+        public override void Write() { }
+    }
+
     class InstanceEncounterStart : ServerPacket
     {
         public InstanceEncounterStart() : base(ServerOpcodes.InstanceEncounterStart, ConnectionType.Instance) { }
