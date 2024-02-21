@@ -1372,31 +1372,11 @@ namespace Game.AI
 
                     WorldObject target = null;
 
-                    /*if (e.GetTargetType() == SmartTargets.CreatureRange || e.GetTargetType() == SmartTargets.CreatureGuid ||
-                        e.GetTargetType() == SmartTargets.CreatureDistance || e.GetTargetType() == SmartTargets.GameobjectRange ||
-                        e.GetTargetType() == SmartTargets.GameobjectGuid || e.GetTargetType() == SmartTargets.GameobjectDistance ||
-                        e.GetTargetType() == SmartTargets.ClosestCreature || e.GetTargetType() == SmartTargets.ClosestGameobject ||
-                        e.GetTargetType() == SmartTargets.OwnerOrSummoner || e.GetTargetType() == SmartTargets.ActionInvoker ||
-                        e.GetTargetType() == SmartTargets.ClosestEnemy || e.GetTargetType() == SmartTargets.ClosestFriendly)*/
-                    {
-                        // we want to move to random element
-                        if (!targets.Empty())
-                            target = targets.SelectRandom();
-                    }
+                    // we want to move to random element
+                    if (!targets.Empty())
+                        target = targets.SelectRandom();
 
-                    if (target == null)
-                    {
-                        Position dest = new(e.Target.x, e.Target.y, e.Target.z);
-                        if (e.Action.moveToPos.transport != 0)
-                        {
-                            ITransport trans = _me.GetDirectTransport();
-                            if (trans != null)
-                                trans.CalculatePassengerPosition(ref dest.posX, ref dest.posY, ref dest.posZ, ref dest.Orientation);
-                        }
-
-                        _me.GetMotionMaster().MovePoint(e.Action.moveToPos.pointId, dest, e.Action.moveToPos.disablePathfinding == 0);
-                    }
-                    else
+                    if (target != null)
                     {
                         float x, y, z;
                         target.GetPosition(out x, out y, out z);
@@ -1404,6 +1384,19 @@ namespace Game.AI
                             target.GetContactPoint(_me, out x, out y, out z, e.Action.moveToPos.contactDistance);
                         _me.GetMotionMaster().MovePoint(e.Action.moveToPos.pointId, x + e.Target.x, y + e.Target.y, z + e.Target.z, e.Action.moveToPos.disablePathfinding == 0);
                     }
+
+                    if (e.GetTargetType() != SmartTargets.Position)
+                        break;
+
+                    Position dest = new(e.Target.x, e.Target.y, e.Target.z);
+                    if (e.Action.moveToPos.transport != 0)
+                    {
+                        var trans = _me.GetDirectTransport();
+                        if (trans != null)
+                            trans.CalculatePassengerPosition(ref dest.posX, ref dest.posY, ref dest.posZ, ref dest.Orientation);
+                    }
+
+                    _me.GetMotionMaster().MovePoint(e.Action.moveToPos.pointId, dest, e.Action.moveToPos.disablePathfinding == 0);
                     break;
                 }
                 case SmartActions.EnableTempGobj:
@@ -1822,6 +1815,8 @@ namespace Game.AI
                             target.GetContactPoint(_me, out x, out y, out z, e.Action.jump.ContactDistance);
                         pos = new Position(x + e.Target.x, y + e.Target.y, z + e.Target.z);
                     }
+                    else if (e.GetTargetType() != SmartTargets.Position)
+                        break;
 
                     if (e.Action.jump.Gravity != 0 || e.Action.jump.UseDefaultGravity != 0)
                     {
