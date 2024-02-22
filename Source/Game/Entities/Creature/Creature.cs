@@ -2586,7 +2586,10 @@ namespace Game.Entities
         {
             var templateValues = Global.ObjectMgr.GetCreatureTemplateSparringValues(GetCreatureTemplate().Entry);
             if (!templateValues.Empty())
-                _sparringHealthPct = templateValues.SelectRandom();
+            {
+                if (templateValues.Contains(_sparringHealthPct)) // only re-randomize sparring value if it was loaded from template (not when set to custom value from script)
+                    _sparringHealthPct = templateValues.SelectRandom();
+            }
         }
 
         // Send a message to LocalDefense channel for players opposition team in the zone
