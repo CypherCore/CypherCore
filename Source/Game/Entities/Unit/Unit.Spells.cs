@@ -618,6 +618,11 @@ namespace Game.Entities
                 case SpellDmgClass.None:
                 case SpellDmgClass.Magic:
                 {
+                    var getPhysicalCritChance = float () =>
+                    {
+                        return GetUnitCriticalChanceDone(attackType);
+                    };
+
                     var getMagicCritChance = float () =>
                     {
                         Player thisPlayer = ToPlayer();
@@ -627,18 +632,11 @@ namespace Game.Entities
                         return BaseSpellCritChance;
                     };
 
-                    switch (schoolMask & SpellSchoolMask.Normal)
-                    {
-                        case SpellSchoolMask.Normal: // physical only
-                            crit_chance = GetUnitCriticalChanceDone(attackType);
-                            break;
-                        case 0: // spell only
-                            crit_chance = getMagicCritChance();
-                            break;
-                        default: // mix of physical and magic
-                            crit_chance = Math.Max(getMagicCritChance(), GetUnitCriticalChanceDone(attackType));
-                            break;
-                    }
+                    if (schoolMask.HasAnyFlag(SpellSchoolMask.Normal))
+                        crit_chance = Math.Max(crit_chance, getPhysicalCritChance());
+
+                    if (schoolMask.HasAnyFlag(~SpellSchoolMask.Normal))
+                        crit_chance = Math.Max(crit_chance, getMagicCritChance());
                     break;
                 }
                 case SpellDmgClass.Melee:
