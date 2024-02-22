@@ -29,7 +29,7 @@ namespace Game
             if (GetId(email) != 0)
                 return AccountOpResult.NameAlreadyExist;
 
-            string srpUsername = GetSrpUsername(email);
+            string srpUsername = GetSrpUsername(email.ToUpper());
             var (salt, verifier) = SRP6.MakeBNetRegistrationData<BnetSRP6v2Hash256>(srpUsername, password);
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_BNET_ACCOUNT);
@@ -61,7 +61,7 @@ namespace Game
             if (newPassword.Length > MAX_BNET_PASS_STR)
                 return AccountOpResult.PassTooLong;
 
-            string srpUsername = GetSrpUsername(username);
+            string srpUsername = GetSrpUsername(username.ToUpper());
             var (salt, verifier) = SRP6.MakeBNetRegistrationData<BnetSRP6v2Hash256>(srpUsername, newPassword);
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_BNET_LOGON);

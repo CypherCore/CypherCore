@@ -23,7 +23,12 @@ namespace Framework.Cryptography
 
         bool _used; // a single instance can only be used to verify once
 
-        public SRP6() { }
+        public SRP6()
+        {
+            s = new byte[0].GenerateRandomKey(SaltLength);
+            _used = true;
+        }
+
         public SRP6(BigInteger i, byte[] salt, byte[] verifier, BigInteger N, BigInteger g, BigInteger k)
         {
             s = salt;
@@ -48,8 +53,8 @@ namespace Framework.Cryptography
 
         BigInteger CalculatePrivateB(BigInteger N)
         {
-            BigInteger b = new BigInteger(RandomHelper.GetRandomBytes((int)N.GetBitLength()), true);
-            b = b % (N - 1);
+            BigInteger b = new BigInteger(new byte[0].GenerateRandomKey((int)N.GetBitLength()), true);
+            b %= (N - 1);
             return b;
         }
 
@@ -268,6 +273,8 @@ namespace Framework.Cryptography
         /// </summary>
         public static BigInteger g;
 
+        protected static byte[] dummyBytes = new byte[127];
+
         static BnetSRP6v1Base()
         {
             g = new BigInteger(2u);
@@ -301,6 +308,8 @@ namespace Framework.Cryptography
         /// </summary>
         protected static BigInteger g;
 
+        protected static byte[] dummyBytes = new byte[255];
+
         static BnetSRP6v2Base()
         {
             N = new BigInteger("AC6BDB41324A9A9BF166DE5E1389582FAF72B6651987EE07FC3192943DB56050A37329CBB4A099ED8193E0757767A13DD52312AB4B03310DCD7F48A9DA04FD50E8083969EDB767B0CF6095179A163AB3661A05FBD5FAAAE82918A9962F0B93B855F97993EC975EEAA80D740ADBF4FF747359D041D5C33EA71D281E446B14773BCA97B43A23FB801676BD207A436C6481F1D2B9078717461A5B9D32E688F87748544523B524B0D57D5EA77A2775D2ECFA032CFBDBF52FB3786160279004E57AE6AF874E7303CE53299CCC041C7BC308D82A5698F3A8D0C38271AE35F8E9DBFBB694B5C803D89F7AE435DE236D525F54759B65E372FCD68EF20FA7111F9E4AFF73".ToByteArray(), true, true);
@@ -313,6 +322,7 @@ namespace Framework.Cryptography
         public override BigInteger CalculateX(string username, string password, byte[] salt)
         {
             string tmp = username + ":" + password;
+
             Rfc2898DeriveBytes rfc = new Rfc2898DeriveBytes(tmp, salt, (int)GetXIterations(), HashAlgorithmName.SHA512);
             byte[] xBytes = rfc.GetBytes(SHA512.HashSizeInBytes);
             BigInteger x = new(xBytes, true, true);
@@ -320,7 +330,7 @@ namespace Framework.Cryptography
             {
                 byte[] fix = new byte[65];
                 fix[64] = 1;
-                x -= new BigInteger(fix, true);
+                x -= new BigInteger(fix);
             }
 
             return x % (N - 1);
@@ -335,8 +345,6 @@ namespace Framework.Cryptography
 
     public class BnetSRP6v1Hash256 : BnetSRP6v1Base
     {
-        static byte[] dummyBytes = new byte[127];
-
         public BnetSRP6v1Hash256() : base() { }
         public BnetSRP6v1Hash256(string username, byte[] salt, byte[] verifier) : base(username, salt, verifier, new BigInteger(SHA256.HashData(N.ToByteArray(true, true).Combine(dummyBytes.Combine(g.ToByteArray(true, true)))), true, true)) { }
 
@@ -354,7 +362,7 @@ namespace Framework.Cryptography
     public class BnetSRP6v1Hash512 : BnetSRP6v1Base
     {
         public BnetSRP6v1Hash512() : base() { }
-        public BnetSRP6v1Hash512(string username, byte[] salt, byte[] verifier) : base(username, salt, verifier, new BigInteger(SHA512.HashData(N.ToByteArray(true, true).Combine(g.ToByteArray(true, true))), true, true)) { }
+        public BnetSRP6v1Hash512(string username, byte[] salt, byte[] verifier) : base(username, salt, verifier, new BigInteger(SHA512.HashData(N.ToByteArray(true, true).Combine(dummyBytes.Combine(g.ToByteArray(true, true)))), true, true)) { }
 
         public override BigInteger CalculateU(BigInteger A)
         {
@@ -370,11 +378,11 @@ namespace Framework.Cryptography
     public class BnetSRP6v2Hash256 : BnetSRP6v2Base
     {
         public BnetSRP6v2Hash256() : base() { }
-        public BnetSRP6v2Hash256(string username, byte[] salt, byte[] verifier) : base(username, salt, verifier, new BigInteger(_sha256.ComputeHash(N.ToByteArray(true, false).Combine(g.ToByteArray(true, false))), true)) { }
+        public BnetSRP6v2Hash256(string username, byte[] salt, byte[] verifier) : base(username, salt, verifier, new BigInteger(SHA256.HashData(N.ToByteArray(true, true).Combine(dummyBytes.Combine(g.ToByteArray(true, true)))), true, true)) { }
 
         public override BigInteger CalculateU(BigInteger A)
         {
-            return new BigInteger(_sha256.ComputeHash(A.ToByteArray(true, true).Combine(B.ToByteArray(true, true))), true, true);
+            return new BigInteger(SHA256.HashData(A.ToByteArray(true, true).Combine(B.ToByteArray(true, true))), true, true);
         }
 
         public override BigInteger DoCalculateEvidence(params BigInteger[] bns)
@@ -386,11 +394,11 @@ namespace Framework.Cryptography
     public class BnetSRP6v2Hash512 : BnetSRP6v2Base
     {
         public BnetSRP6v2Hash512() : base() { }
-        public BnetSRP6v2Hash512(string username, byte[] salt, byte[] verifier) : base(username, salt, verifier, new BigInteger(_sha512.ComputeHash(N.ToByteArray(true, true).Combine(g.ToByteArray(true, true))), true, true)) { }
+        public BnetSRP6v2Hash512(string username, byte[] salt, byte[] verifier) : base(username, salt, verifier, new BigInteger(SHA512.HashData(N.ToByteArray(true, true).Combine(g.ToByteArray(true, true))), true, true)) { }
 
         public override BigInteger CalculateU(BigInteger A)
         {
-            return new BigInteger(_sha512.ComputeHash(A.ToByteArray(true, true).Combine(B.ToByteArray(true, true))), true, true);
+            return new BigInteger(SHA512.HashData(A.ToByteArray(true, true).Combine(B.ToByteArray(true, true))), true, true);
         }
 
         public override BigInteger DoCalculateEvidence(params BigInteger[] bns)
