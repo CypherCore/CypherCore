@@ -597,7 +597,7 @@ namespace Game.Entities
             if (GetTemplate() != null)
             {
                 var conditions = Global.ConditionMgr.GetConditionsForAreaTrigger(GetTemplate().Id.Id, GetTemplate().Id.IsCustom);
-                if (!conditions.Empty())
+                if (conditions != null && !conditions.Empty())
                     targetList.RemoveAll(target => !Global.ConditionMgr.IsObjectMeetToConditions(target, conditions));
             }
 

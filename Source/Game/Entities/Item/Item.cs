@@ -1305,11 +1305,11 @@ namespace Game.Entities
 
         public override void BuildValuesUpdateWithFlag(WorldPacket data, UpdateFieldFlag flags, Player target)
         {
-            UpdateMask valuesMask = new(14);
+            UpdateMask valuesMask = new((int)TypeId.Max);
             valuesMask.Set((int)TypeId.Item);
 
             WorldPacket buffer = new();
-            UpdateMask mask = new(40);
+            UpdateMask mask = m_itemData.GetStaticUpdateMask();
 
             buffer.WriteUInt32(valuesMask.GetBlock(0));
             m_itemData.AppendAllowedFieldsMaskForFlag(mask, flags);

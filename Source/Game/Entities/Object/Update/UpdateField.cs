@@ -379,6 +379,7 @@ namespace Game.Entities
 
     public abstract class HasChangesMask : IHasChangesMask
     {
+        public int _changeMask;
         public UpdateMask _changesMask;
         public int _blockBit;
         public int Bit;
@@ -388,6 +389,7 @@ namespace Game.Entities
             _blockBit = blockBit;
             Bit = (int)bit;
             _changesMask = new UpdateMask(changeMask);
+            _changeMask = changeMask;
         }
 
         public HasChangesMask(int changeMask)
@@ -557,6 +559,11 @@ namespace Game.Entities
 
             if ((size % 32) != 0)
                 data.WriteBits(0xFFFFFFFFu, size % 32);
+        }
+
+        public UpdateMask GetStaticUpdateMask()
+        {
+            return new UpdateMask(_changeMask);
         }
     }
 
