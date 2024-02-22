@@ -13,23 +13,31 @@ namespace Game.Movement
         MovementGeneratorType _type;
         uint _pointId;
         TimeTracker _duration;
+        bool _durationTracksSpline;
 
         uint _arrivalSpellId;
         ObjectGuid _arrivalSpellTargetGuid;
 
-        public GenericMovementGenerator(Action<MoveSplineInit> initializer, MovementGeneratorType type, uint id, uint arrivalSpellId = 0, ObjectGuid arrivalSpellTargetGuid = default)
+        public GenericMovementGenerator(Action<MoveSplineInit> initializer, MovementGeneratorType type, uint id, GenericMovementGeneratorArgs args = default)
         {
             _splineInit = initializer;
             _type = type;
             _pointId = id;
-            _duration = new();
-            _arrivalSpellId = arrivalSpellId;
-            _arrivalSpellTargetGuid = arrivalSpellTargetGuid;
+            _durationTracksSpline = true;
 
             Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Roaming;
+            if (args.ArrivalSpellId.HasValue)
+                _arrivalSpellId = args.ArrivalSpellId.Value;
+            if (args.ArrivalSpellTarget.HasValue)
+                _arrivalSpellTargetGuid = args.ArrivalSpellTarget.Value;
+            if (args.Duration.HasValue)
+            {
+                _duration = new(args.Duration.Value);
+                _durationTracksSpline = false;
+            }
         }
 
         public override void Initialize(Unit owner)
@@ -46,7 +54,9 @@ namespace Game.Movement
 
             MoveSplineInit init = new(owner);
             _splineInit(init);
-            _duration.Reset((uint)init.Launch());
+            int duration = init.Launch();
+            if (_durationTracksSpline)
+                _duration = new((uint)duration);
         }
 
         public override void Reset(Unit owner)
@@ -60,10 +70,9 @@ namespace Game.Movement
                 return false;
 
             // Cyclic splines never expire, so update the duration only if it's not cyclic
-            if (!owner.MoveSpline.IsCyclic())
-                _duration.Update(diff);
+            _duration?.Update(diff);
 
-            if (_duration.Passed() || owner.MoveSpline.Finalized())
+            if ((_duration != null && _duration.Passed()) || owner.MoveSpline.Finalized())
             {
                 AddFlag(MovementGeneratorFlags.InformEnabled);
                 return false;
@@ -96,5 +105,12 @@ namespace Game.Movement
         }
 
         public override MovementGeneratorType GetMovementGeneratorType() { return _type; }
+    }
+
+    struct GenericMovementGeneratorArgs
+    {
+        public uint? ArrivalSpellId;
+        public ObjectGuid? ArrivalSpellTarget;
+        public TimeSpan? Duration;
     }
 }

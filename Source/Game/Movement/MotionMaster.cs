@@ -795,7 +795,7 @@ namespace Game.Movement
                 arrivalSpellTargetGuid = arrivalCast.Target;
             }
 
-            GenericMovementGenerator movement = new(initializer, MovementGeneratorType.Effect, id, arrivalSpellId, arrivalSpellTargetGuid);
+            GenericMovementGenerator movement = new(initializer, MovementGeneratorType.Effect, id, new GenericMovementGeneratorArgs() { ArrivalSpellId = arrivalSpellId, ArrivalSpellTarget = arrivalSpellTargetGuid });
             movement.Priority = MovementGeneratorPriority.Highest;
             movement.BaseUnitState = UnitState.Jumping;
             Add(movement);
@@ -828,14 +828,14 @@ namespace Game.Movement
                 arrivalSpellTargetGuid = arrivalCast.Target;
             }
 
-            GenericMovementGenerator movement = new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, id, arrivalSpellId, arrivalSpellTargetGuid);
+            GenericMovementGenerator movement = new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, id, new GenericMovementGeneratorArgs() { ArrivalSpellId = arrivalSpellId, ArrivalSpellTarget = arrivalSpellTargetGuid });
             movement.Priority = MovementGeneratorPriority.Highest;
             movement.BaseUnitState = UnitState.Jumping;
             movement.AddFlag(MovementGeneratorFlags.PersistOnDeath);
             Add(movement);
         }
 
-        public void MoveCirclePath(float x, float y, float z, float radius, bool clockwise, byte stepCount)
+        public void MoveCirclePath(float x, float y, float z, float radius, bool clockwise, byte stepCount, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default)
         {
             var initializer = (MoveSplineInit init) =>
             {
@@ -851,7 +851,7 @@ namespace Game.Movement
                     Vector3 point = new();
                     point.X = (float)(x + radius * Math.Cos(angle));
                     point.Y = (float)(y + radius * Math.Sin(angle));
-
+          
                     if (_owner.IsFlying())
                         point.Z = z;
                     else
@@ -859,21 +859,34 @@ namespace Game.Movement
 
                     init.Path().Add(point);
                 }
-
+                
+                init.SetCyclic();
                 if (_owner.IsFlying())
                 {
                     init.SetFly();
-                    init.SetCyclic();
                     init.SetAnimation(AnimTier.Hover);
                 }
                 else
-                {
                     init.SetWalk(true);
-                    init.SetCyclic();
+
+                switch (speedSelectionMode)
+                {
+                    case MovementWalkRunSpeedSelectionMode.ForceRun:
+                        init.SetWalk(false);
+                        break;
+                    case MovementWalkRunSpeedSelectionMode.ForceWalk:
+                        init.SetWalk(true);
+                        break;
+                    case MovementWalkRunSpeedSelectionMode.Default:
+                    default:
+                        break;
                 }
+
+                if (speed.HasValue)
+                    init.SetVelocity(speed.Value);
             };
 
-            Add(new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, 0));
+            Add(new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, 0, new GenericMovementGeneratorArgs() { Duration = duration }));
         }
 
         public void MoveSmoothPath(uint pointId, Vector3[] pathPoints, int pathSize, bool walk = false, bool fly = false)
