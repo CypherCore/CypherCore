@@ -2616,7 +2616,7 @@ namespace Game.Entities
                 if (!unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) && unitOrOwner.IsImmuneToNPC())
                     return false;
 
-                if (bySpell == null || !bySpell.HasAttribute(SpellAttr8.AttackIgnoreImmuneToPcFlag))
+                if (bySpell == null || !bySpell.HasAttribute(SpellAttr8.CanAttackImmunePC))
                 {
                     if (unitOrOwner.HasUnitFlag(UnitFlags.PlayerControlled) && unitTarget.IsImmuneToPC())
                         return false;
@@ -2761,7 +2761,7 @@ namespace Game.Entities
             {
                 if (unit != null && unit.HasUnitFlag(UnitFlags.PlayerControlled))
                 {
-                    if (bySpell == null || !bySpell.HasAttribute(SpellAttr8.AttackIgnoreImmuneToPcFlag))
+                    if (bySpell == null || !bySpell.HasAttribute(SpellAttr8.CanAttackImmunePC))
                         if (unitTarget != null && unitTarget.IsImmuneToPC())
                             return false;
                 }

@@ -9191,7 +9191,7 @@ namespace Game.Spells
                     switch (_searchReason)
                     {
                         case WorldObjectSpellAreaTargetSearchReason.Area:
-                            if (unitTarget.GetSpellOtherImmunityMask().HasFlag(SpellOtherImmunity.AoETarget))
+                            if (!_spellInfo.HasAttribute(SpellAttr8.CanHitAoeUntargetable) && unitTarget.GetSpellOtherImmunityMask().HasFlag(SpellOtherImmunity.AoETarget))
                                 return false;
                             break;
                         case WorldObjectSpellAreaTargetSearchReason.Chain:

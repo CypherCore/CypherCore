@@ -1932,7 +1932,7 @@ namespace Framework.Constants
         IgnoreDynamicObjectCaster = 0x02, /*Nyi*/ // Ignore Dynamic Object Caster
         RemoveOutsideDungeonsAndRaids = 0x04, // Remove Outside Dungeons And Raids
         OnlyTargetIfSameCreator = 0x08, // Only Target If Same Creator
-        CanHitAoeUntargetable = 0x10, /*Nyi - No Aoe Immunity Implementation*/ // Can Hit Aoe Untargetable
+        CanHitAoeUntargetable = 0x10, // Can Hit Aoe Untargetable
         AllowWhileCharmed = 0x20, /*Nyi - Not Implementable Currently, Charming Replaces Ai*/ // Allow While Charmed
         AuraRequiredByClient = 0x40, /*Nyi - We Send All Auras To Client*/ // Aura Required By Client
         IgnoreSanctuary = 0x80, // Ignore Sanctuary
@@ -1959,7 +1959,7 @@ namespace Framework.Constants
         NotInBattleground = 0x10000000, // Not In Battleground
         MasteryAffectsPoints = 0x20000000, // Mastery Affects Points
         DisplayLargeAuraIconOnUnitFramesBossAura = 0x40000000, // Display Large Aura Icon On Unit Frames (Boss Aura)
-        AttackIgnoreImmuneToPcFlag = 0x80000000  // Can Attack Immunepc Description Do Not Check UnitFlagImmuneToPc In Isvalidattacktarget
+        CanAttackImmunePC = 0x80000000  // Can Attack Immunepc Description Do Not Check UnitFlagImmuneToPc In Isvalidattacktarget
     }
     public enum SpellAttr9 : uint
     {
