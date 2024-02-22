@@ -330,7 +330,7 @@ namespace Framework.Cryptography
             {
                 byte[] fix = new byte[65];
                 fix[64] = 1;
-                x -= new BigInteger(fix);
+                x -= new BigInteger(fix, true);
             }
 
             return x % (N - 1);

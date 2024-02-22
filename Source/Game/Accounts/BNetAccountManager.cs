@@ -45,7 +45,7 @@ namespace Game
             if (withGameAccount)
             {
                 gameAccountName = newAccountId + "#1";
-                string gameAccountPassword = password.Substring(0, 16);
+                string gameAccountPassword = password.Substring(0, Math.Min(16, password.Length));
                 Global.AccountMgr.CreateAccount(gameAccountName, gameAccountPassword.ToUpper(), email, newAccountId, 1);
             }
 
