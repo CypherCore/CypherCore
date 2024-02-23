@@ -30,6 +30,9 @@ namespace Scripts.Spells.Priest
         public const uint AtonementHeal = 81751;
         public const uint Benediction = 193157;
         public const uint Benevolence = 415416;
+        public const uint BlazeOfLight = 215768;
+        public const uint BlazeOfLightIncrease = 355851;
+        public const uint BlazeOfLightDecrease = 356084;
         public const uint BlessedHealing = 70772;
         public const uint BlessedLight = 196813;
         public const uint BodyAndSoul = 64129;
@@ -571,6 +574,32 @@ namespace Scripts.Spells.Priest
         public override void Register()
         {
             OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffectName.Heal));
+        }
+    }
+
+    [Script] // 215768 - Blaze of Light
+    class spell_pri_blaze_of_light : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.BlazeOfLightDecrease, SpellIds.BlazeOfLightIncrease);
+        }
+
+        void HandleProc(ProcEventInfo eventInfo)
+        {
+            Unit procTarget = eventInfo.GetProcTarget();
+            if (procTarget == null)
+                return;
+
+            if (GetTarget().IsValidAttackTarget(procTarget))
+                GetTarget().CastSpell(procTarget, SpellIds.BlazeOfLightDecrease, TriggerCastFlags.CastDirectly | TriggerCastFlags.IgnoreCastInProgress);
+            else
+                GetTarget().CastSpell(procTarget, SpellIds.BlazeOfLightIncrease, TriggerCastFlags.CastDirectly | TriggerCastFlags.IgnoreCastInProgress);
+        }
+
+        public override void Register()
+        {
+            OnProc.Add(new(HandleProc));
         }
     }
 
