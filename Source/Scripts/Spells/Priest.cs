@@ -1065,7 +1065,7 @@ namespace Scripts.Spells.Priest
     {
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            GetCaster().CastSpell(GetCaster(), SpellIds.FromDarknessComesLightAura, aurEff);
+            GetTarget().CastSpell(GetTarget(), SpellIds.FromDarknessComesLightAura, aurEff);
         }
 
         public override void Register()
