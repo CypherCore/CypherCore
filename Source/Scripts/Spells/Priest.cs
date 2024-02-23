@@ -38,6 +38,7 @@ namespace Scripts.Spells.Priest
         public const uint BodyAndSoul = 64129;
         public const uint BodyAndSoulSpeed = 65081;
         public const uint CircleOfHealing = 204883;
+        public const uint DarkIndulgence = 372972;
         public const uint DarkReprimand = 400169;
         public const uint DarkReprimandChannelDamage = 373129;
         public const uint DarkReprimandChannelHealing = 400171;
@@ -130,6 +131,8 @@ namespace Scripts.Spells.Priest
         public const uint RenewedHopeEffect = 197470;
         public const uint RevelInPurity = 373003;
         public const uint SayYourPrayers = 391186;
+        public const uint Schism = 424509;
+        public const uint SchismAura = 214621;
         public const uint SearingLight = 196811;
         public const uint ShadowMendDamage = 186439;
         public const uint ShadowWordDeath = 32379;
@@ -626,6 +629,30 @@ namespace Scripts.Spells.Priest
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitDestAreaAlly));
+        }
+    }
+
+    [Script] // 8092 - Mind Blast
+    class spell_pri_dark_indulgence : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellEffect((SpellIds.DarkIndulgence, 0));
+        }
+
+        void HandleEffectHit(uint effIndex)
+        {
+            AuraEffect aurEff = GetCaster().GetAuraEffect(SpellIds.DarkIndulgence, 0);
+            if (aurEff == null)
+                return;
+
+            if (RandomHelper.randChance(aurEff.GetAmount()))
+                GetCaster().CastSpell(GetCaster(), SpellIds.PowerOfTheDarkSide, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new(HandleEffectHit, 0, SpellEffectName.SchoolDamage));
         }
     }
 
@@ -2369,7 +2396,27 @@ namespace Scripts.Spells.Priest
         }
     }
 
-    [Script] // 280391 - Math.Sins of the Many
+    [Script] // 8092 - Mind Blast
+    class spell_pri_schism : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.Schism, SpellIds.SchismAura);
+        }
+
+        void HandleEffectHitTarget(uint effIndex)
+        {
+            if (GetCaster().HasAura(SpellIds.Schism))
+                GetCaster().CastSpell(GetHitUnit(), SpellIds.SchismAura, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+
+    [Script] // 280391 - Sins of the Many
     class spell_pri_Sins_of_the_many : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
