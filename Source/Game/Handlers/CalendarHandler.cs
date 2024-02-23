@@ -175,9 +175,6 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.CalendarUpdateEvent)]
         void HandleCalendarUpdateEvent(CalendarUpdateEvent calendarUpdateEvent)
         {
-            ObjectGuid guid = GetPlayer().GetGUID();
-            long oldEventTime;
-
             calendarUpdateEvent.EventInfo.Time -= GetTimezoneOffset();
 
             // prevent events in the past
@@ -187,7 +184,7 @@ namespace Game
             CalendarEvent calendarEvent = Global.CalendarMgr.GetEvent(calendarUpdateEvent.EventInfo.EventID);
             if (calendarEvent != null)
             {
-                oldEventTime = calendarEvent.Date;
+                long oldEventTime = calendarEvent.Date;
 
                 calendarEvent.EventType = (CalendarEventType)calendarUpdateEvent.EventInfo.EventType;
                 calendarEvent.Flags = (CalendarFlags)calendarUpdateEvent.EventInfo.Flags;
@@ -200,7 +197,7 @@ namespace Game
                 Global.CalendarMgr.SendCalendarEventUpdateAlert(calendarEvent, oldEventTime);
             }
             else
-                Global.CalendarMgr.SendCalendarCommandResult(guid, CalendarError.EventInvalid);
+                Global.CalendarMgr.SendCalendarCommandResult(_player.GetGUID(), CalendarError.EventInvalid);
         }
 
         [WorldPacketHandler(ClientOpcodes.CalendarRemoveEvent)]

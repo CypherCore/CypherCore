@@ -473,7 +473,7 @@ namespace Game
             var packetBuilder = (Player receiver) =>
             {
                 CalendarEventUpdatedAlert packet = new();
-                packet.ClearPending = true; // FIXME
+                packet.ClearPending = calendarEvent.OwnerGuid == receiver.GetGUID();
                 packet.Date.SetUtcTimeFromUnixTime(calendarEvent.Date);
                 packet.Date += receiver.GetSession().GetTimezoneOffset();
                 packet.Description = calendarEvent.Description;
@@ -500,7 +500,7 @@ namespace Game
             var packetBuilder = (Player receiver) =>
             {
                 CalendarInviteStatusPacket packet = new();
-                packet.ClearPending = true; // FIXME
+                packet.ClearPending = invite.InviteeGuid == receiver.GetGUID();
                 packet.Date.SetUtcTimeFromUnixTime(calendarEvent.Date);
                 packet.Date += receiver.GetSession().GetTimezoneOffset();
                 packet.EventID = calendarEvent.EventId;
@@ -522,7 +522,7 @@ namespace Game
             var packetBuilder = (Player receiver) =>
             {
                 CalendarEventRemovedAlert packet = new();
-                packet.ClearPending = true; // FIXME
+                packet.ClearPending = calendarEvent.OwnerGuid == receiver.GetGUID();
                 packet.Date.SetUtcTimeFromUnixTime(calendarEvent.Date);
                 packet.Date += receiver.GetSession().GetTimezoneOffset();
                 packet.EventID = calendarEvent.EventId;
