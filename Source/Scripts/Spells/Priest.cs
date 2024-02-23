@@ -116,6 +116,7 @@ namespace Scripts.Spells.Priest
         public const uint PrayerOfMendingAura = 41635;
         public const uint PrayerOfMendingHeal = 33110;
         public const uint PrayerOfMendingJump = 155793;
+        public const uint ProtectiveLightAura = 193065;
         public const uint PurgeTheWicked = 204197;
         public const uint PurgeTheWickedDummy = 204215;
         public const uint PurgeTheWickedPeriodic = 204213;
@@ -2045,6 +2046,26 @@ namespace Scripts.Spells.Priest
         {
             OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitSrcAreaAlly));
             OnEffectHitTarget.Add(new(HandleJump, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 193063 - Protective Light (Aura)
+    class spell_pri_protective_light : AuraScript
+    {
+        bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetProcTarget() == GetCaster();
+        }
+
+        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            GetCaster().CastSpell(GetCaster(), SpellIds.ProtectiveLightAura, aurEff);
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new(CheckEffectProc, 0, AuraType.Dummy));
+            OnEffectProc.Add(new(HandleEffectProc, 0, AuraType.Dummy));
         }
     }
 
