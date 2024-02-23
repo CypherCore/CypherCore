@@ -61,6 +61,7 @@ namespace Scripts.Spells.Priest
         public const uint EssenceDevourerShadowfiendHeal = 415673;
         public const uint EssenceDevourerMindbenderHeal = 415676;
         public const uint FlashHeal = 2061;
+        public const uint FromDarknessComesLightAura = 390617;
         public const uint GreaterHeal = 289666;
         public const uint FocusedMending = 372354;
         public const uint GuardianSpiritHeal = 48153;
@@ -1056,6 +1057,20 @@ namespace Scripts.Spells.Priest
         public override void Register()
         {
             CalcHealing.Add(new(CalculateHealingBonus));
+        }
+    }
+
+    [Script] // 390615 - From Darkness Comes Light (Talent)
+    class spell_pri_from_darkness_comes_light : AuraScript
+    {
+        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            GetCaster().CastSpell(GetCaster(), SpellIds.FromDarknessComesLightAura, aurEff);
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new(HandleEffectProc, 0, AuraType.Dummy));
         }
     }
 
