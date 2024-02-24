@@ -12,14 +12,17 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.MoveDismissVehicle, Processing = PacketProcessing.ThreadSafe)]
-        void HandleMoveDismissVehicle(MoveDismissVehicle packet)
+        void HandleMoveDismissVehicle(MoveDismissVehicle moveDismissVehicle)
         {
             ObjectGuid vehicleGUID = GetPlayer().GetCharmedGUID();
             if (vehicleGUID.IsEmpty())                                       // something wrong here...
                 return;
 
-            GetPlayer().ValidateMovementInfo(packet.Status);
-            GetPlayer().m_movementInfo = packet.Status;
+            if (moveDismissVehicle.Status.Guid != vehicleGUID)
+            {
+                Log.outError(LogFilter.Network, $"Player {GetPlayer().GetGUID()} tried to dismiss a controlled vehicle ({vehicleGUID}) that he has no control over. Possible cheater or malformed packet.");
+                return;
+            }
 
             GetPlayer().ExitVehicle();
         }
