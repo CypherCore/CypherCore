@@ -445,6 +445,8 @@ namespace Game
 
                     if (quest != null)
                         Global.ScriptMgr.OnQuestStatusChange(_player, quest, oldStatus, QuestStatus.None);
+
+                    _player.UpdateNearbyCreatureNpcFlags();
                 }
 
                 GetPlayer().UpdateCriteria(CriteriaType.AbandonAnyQuest, 1);

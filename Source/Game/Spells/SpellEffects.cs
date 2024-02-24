@@ -3752,6 +3752,8 @@ namespace Game.Spells
 
             Global.ScriptMgr.OnQuestStatusChange(player, quest_id);
             Global.ScriptMgr.OnQuestStatusChange(player, quest, oldStatus, QuestStatus.None);
+
+            player.UpdateNearbyCreatureNpcFlags();
         }
 
         [SpellEffectHandler(SpellEffectName.SendTaxi)]

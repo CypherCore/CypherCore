@@ -2332,8 +2332,18 @@ namespace Game.Entities
         uint GetViewerDependentNpcFlags(UnitData unitData, int i, Unit unit, Player receiver)
         {
             uint npcFlag = unitData.NpcFlags[i];
-            if (i == 0 && unit.IsCreature() && !receiver.CanSeeSpellClickOn(unit.ToCreature()))
-                npcFlag &= ~(uint)NPCFlags.SpellClick;
+            if (i == 0)
+            {
+                Creature creature = unit.ToCreature();
+                if (creature != null)
+                {
+                    if (!receiver.CanSeeGossipOn(creature))
+                        npcFlag &= ~(uint)(NPCFlags.Gossip | NPCFlags.QuestGiver);
+
+                    if (!receiver.CanSeeSpellClickOn(creature))
+                        npcFlag &= ~(uint)NPCFlags.SpellClick;
+                }
+            }
 
             return npcFlag;
         }
