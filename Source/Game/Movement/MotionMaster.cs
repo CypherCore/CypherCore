@@ -563,7 +563,6 @@ namespace Game.Movement
         }
 
         public void MoveChase(Unit target, float dist, float angle = 0.0f) { MoveChase(target, new ChaseRange(dist), new ChaseAngle(angle)); }
-        public void MoveChase(Unit target, float dist) { MoveChase(target, new ChaseRange(dist)); }
         public void MoveChase(Unit target, ChaseRange? dist = null, ChaseAngle? angle = null)
         {
             // Ignore movement request if target not exist

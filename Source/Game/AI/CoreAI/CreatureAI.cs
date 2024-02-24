@@ -27,9 +27,9 @@ namespace Game.AI
         protected TaskScheduler _scheduler = new();
         protected InstanceScript _instanceScript;
 
-        public CreatureAI(Creature _creature) : base(_creature)
+        public CreatureAI(Creature creature) : base(creature)
         {
-            me = _creature;
+            me = creature;
             _moveInLOSLocked = false;
         }
 
@@ -513,6 +513,21 @@ namespace Game.AI
 
         // called when the corpse of this creature gets removed
         public virtual void CorpseRemoved(long respawnDelay) { }
+
+        public override void AttackStart(Unit victim)
+        {
+            if (victim != null && me.Attack(victim, true))
+            {
+                // Clear distracted state on attacking
+                if (me.HasUnitState(UnitState.Distracted))
+                {
+                    me.ClearUnitState(UnitState.Distracted);
+                    me.GetMotionMaster().Clear();
+                }
+
+                me.StartDefaultCombatMovement(victim);
+            }
+        }
 
         /// == Gossip system ================================
 

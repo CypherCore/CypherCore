@@ -32,8 +32,6 @@ namespace Game.Movement
             if (owner == null || !owner.IsAlive())
                 return;
 
-            // TODO: UNIT_FIELD_FLAGS should not be handled by generators
-            owner.SetUnitFlag(UnitFlags.Fleeing);
             _path = null;
             SetTargetLocation(owner);
         }
@@ -83,16 +81,15 @@ namespace Game.Movement
             {
                 if (owner.IsPlayer())
                 {
-                    owner.RemoveUnitFlag(UnitFlags.Fleeing);
                     owner.ClearUnitState(UnitState.FleeingMove);
                     owner.StopMoving();
                 }
                 else
                 {
-                    owner.RemoveUnitFlag(UnitFlags.Fleeing);
                     owner.ClearUnitState(UnitState.FleeingMove);
-                    if (owner.GetVictim() != null)
-                        owner.SetTarget(owner.GetVictim().GetGUID());
+                    Unit victim = owner.GetVictim();
+                    if (victim != null)
+                        owner.SetTarget(victim.GetGUID());
                 }
             }
         }
@@ -220,7 +217,6 @@ namespace Game.Movement
             if (!active)
                 return;
 
-            owner.RemoveUnitFlag(UnitFlags.Fleeing);
             Unit victim = owner.GetVictim();
             if (victim != null)
             {

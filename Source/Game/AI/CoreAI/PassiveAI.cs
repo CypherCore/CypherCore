@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Spells;
+using System;
 
 namespace Game.AI
 {
@@ -92,28 +93,34 @@ namespace Game.AI
 
     public class CritterAI : PassiveAI
     {
-        public CritterAI(Creature c) : base(c)
+        TimeTracker _evadeTimer;
+
+        public CritterAI(Creature creature) : base(creature)
         {
-            me.SetReactState(ReactStates.Passive);
+            _evadeTimer = new();
+            me.SetCanMelee(false, true);
         }
 
         public override void JustEngagedWith(Unit who)
         {
-            if (!me.HasUnitState(UnitState.Fleeing))
-                me.SetControlled(true, UnitState.Fleeing);
+            me.StartDefaultCombatMovement(who);            
+            _evadeTimer.Reset(TimeSpan.FromMilliseconds(WorldConfig.GetIntValue(WorldCfg.CreatureFamilyFleeDelay)));
         }
 
-        public override void MovementInform(MovementGeneratorType type, uint id)
+        public override void UpdateAI(uint diff)
         {
-            if (type == MovementGeneratorType.TimedFleeing)
-                EnterEvadeMode(EvadeReason.Other);
-        }
+            if (me.IsEngaged())
+            {
+                if (!me.IsInCombat())
+                {
+                    EnterEvadeMode(EvadeReason.NoHostiles);
+                    return;
+                }
 
-        public override void EnterEvadeMode(EvadeReason why)
-        {
-            if (me.HasUnitState(UnitState.Fleeing))
-                me.SetControlled(false, UnitState.Fleeing);
-            base.EnterEvadeMode(why);
+                _evadeTimer.Update(diff);
+                if (_evadeTimer.Passed())
+                    EnterEvadeMode(EvadeReason.Other);
+            }
         }
     }
 

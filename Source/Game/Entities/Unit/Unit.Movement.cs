@@ -1391,14 +1391,17 @@ namespace Game.Entities
                 if (caster == null)
                     caster = GetAttackerForHelper();
                 GetMotionMaster().MoveFleeing(caster, TimeSpan.FromMilliseconds(fearAuras.Empty() ? WorldConfig.GetIntValue(WorldCfg.CreatureFamilyFleeDelay) : 0)); // caster == NULL processed in MoveFleeing
+                SetUnitFlag(UnitFlags.Fleeing);
             }
             else
             {
+                RemoveUnitFlag(UnitFlags.Fleeing);
                 if (IsAlive())
                 {
                     GetMotionMaster().Remove(MovementGeneratorType.Fleeing);
-                    if (GetVictim() != null)
-                        SetTarget(GetVictim().GetGUID());
+                    Unit victim = GetVictim();
+                    if (victim != null)
+                        SetTarget(victim.GetGUID());
                     if (!IsPlayer() && !IsInCombat())
                         GetMotionMaster().MoveTargetedHome();
                 }

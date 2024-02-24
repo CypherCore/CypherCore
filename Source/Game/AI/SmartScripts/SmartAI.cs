@@ -618,7 +618,7 @@ namespace Game.AI
                 if (_canCombatMove)
                 {
                     SetRun(_run);
-                    me.GetMotionMaster().MoveChase(who);
+                    me.StartDefaultCombatMovement(who);
                 }
             }
         }
@@ -830,7 +830,7 @@ namespace Game.AI
                     }))
                     {
                         SetRun(_run);
-                        me.GetMotionMaster().MoveChase(me.GetVictim());
+                        me.StartDefaultCombatMovement(me.GetVictim());
                     }
                 }
                 else

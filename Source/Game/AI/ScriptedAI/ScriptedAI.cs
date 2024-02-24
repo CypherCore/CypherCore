@@ -52,7 +52,7 @@ namespace Game.AI
         public void DoStartMovement(Unit target, float distance = 0.0f, float angle = 0.0f)
         {
             if (target != null)
-                me.GetMotionMaster().MoveChase(target, distance, angle);
+                me.StartDefaultCombatMovement(target, distance, angle);
         }
 
         //Start no movement on victim

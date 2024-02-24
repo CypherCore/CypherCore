@@ -1515,7 +1515,7 @@ namespace Game.AI
                         if (creature != null)
                             if (IsSmart(creature) && creature.GetVictim() != null)
                                 if (((SmartAI)creature.GetAI()).CanCombatMove())
-                                    creature.GetMotionMaster().MoveChase(creature.GetVictim(), attackDistance, attackAngle);
+                                    creature.StartDefaultCombatMovement(creature.GetVictim(), attackDistance, attackAngle);
                     }
                     break;
                 }

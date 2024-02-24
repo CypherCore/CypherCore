@@ -290,7 +290,7 @@ namespace Framework.Constants
         CombatPing = 0x00020000,
         Aquatic = 0x00040000, // Aka Water Only, CreatureTemplateMovement.Ground = 0
         Amphibious = 0x00080000, // CreatureTemplateMovement.Swim = 1
-        NoMelee = 0x00100000, // Prevents Melee(Does Not Prevent Chasing, Does Not Make Creature Passive). Not Sure What 'Flee' Means But Another Flag Is Named NoMeleeApproach
+        NoMeleeFlee = 0x00100000, // "No Melee (Flee)" Prevents melee (moves as-if feared, does not make creature passive)
         VisibleToGhosts = 0x00200000, // CreatureTypeFlagVisibleToGhosts
         PvpEnabling = 0x00400000, // Old UnitFlagPvpEnabling, Now UnitBytes2OffsetPvpFlag From UnitFieldBytes2
         DoNotPlayWoundAnim = 0x00800000, // CreatureTypeFlagDoNotPlayWoundAnim
@@ -390,7 +390,7 @@ namespace Framework.Constants
         DealsTripleDamageToPcControlledPets = 0x00000040,
         NoNpcDamageBelow85ptc = 0x00000080,
         ObeysTauntDiminishingReturns = 0x00000100, // CreatureFlagExtraObeysTauntDiminishingReturns
-        NoMeleeApproach = 0x00000200,
+        NoMeleeApproach = 0x00000200, // "No Melee (Approach)" Prevents melee (chases into melee range, does not make creature passive)
         UpdateCreatureRecordWhenInstanceChangesDifficulty = 0x00000400, // Used Only By Snobold Vassal
         CannotDaze = 0x00000800, // "Cannot Daze (Combat Stun)"
         FlatHonorAward = 0x00001000,
