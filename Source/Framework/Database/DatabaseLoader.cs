@@ -190,6 +190,7 @@ namespace Framework.Database
         List<Func<bool>> _prepare = new();
     }
 
+    [Flags]
     public enum DatabaseTypeFlags
     {
         None = 0,

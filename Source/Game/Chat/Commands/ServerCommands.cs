@@ -3,8 +3,11 @@
 
 using Framework.Configuration;
 using Framework.Constants;
+using Framework.Database;
 using Framework.IO;
 using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Game.Chat
 {
@@ -21,7 +24,88 @@ namespace Game.Chat
         [Command("debug", RBACPermissions.CommandServerCorpses, true)]
         static bool HandleServerDebugCommand(CommandHandler handler)
         {
-            return false;//todo fix me
+            string dbPortOutput;
+
+            ushort dbPort = 0;
+            SQLResult res = DB.Login.Query($"SELECT port FROM realmlist WHERE id = {Global.WorldMgr.GetRealmId().Index}");
+            if (!res.IsEmpty())
+                dbPort = res.Read<ushort>(0);
+
+            if (dbPort != 0)
+                dbPortOutput = $"Realmlist (Realm Id: {Global.WorldMgr.GetRealmId().Index}) configured in port {dbPort}";
+            else
+                dbPortOutput = $"Realm Id: {Global.WorldMgr.GetRealmId().Index} not found in `realmlist` table. Please check your setup";
+
+            DatabaseTypeFlags updateFlags = ConfigMgr.GetDefaultValue("Updates.EnableDatabases", DatabaseTypeFlags.None);
+            if (updateFlags == 0)
+                handler.SendSysMessage("Automatic database updates are disabled for all databases!");
+            else
+                handler.SendSysMessage($"Automatic database updates are enabled for the following databases: {updateFlags}");
+
+            handler.SendSysMessage($"Worldserver listening connections on port {WorldConfig.GetIntValue(WorldCfg.PortWorld)}");
+            handler.SendSysMessage(dbPortOutput);
+
+            bool vmapIndoorCheck = WorldConfig.GetBoolValue(WorldCfg.VmapIndoorCheck);
+            bool vmapLOSCheck = Global.VMapMgr.IsLineOfSightCalcEnabled();
+            bool vmapHeightCheck = Global.VMapMgr.IsHeightCalcEnabled();
+
+            bool mmapEnabled = WorldConfig.GetBoolValue(WorldCfg.EnableMmaps);
+
+            string dataDir = Global.WorldMgr.GetDataPath();
+            List<string> subDirs = new();
+            subDirs.Add("/maps");
+            if (vmapIndoorCheck || vmapLOSCheck || vmapHeightCheck)
+            {
+                handler.SendSysMessage($"VMAPs status: Enabled. LineOfSight: {vmapLOSCheck}, getHeight: {vmapHeightCheck}, indoorCheck: {vmapIndoorCheck}");
+                subDirs.Add("/vmaps");
+            }
+            else
+                handler.SendSysMessage("VMAPs status: Disabled");
+
+            if (mmapEnabled)
+            {
+                handler.SendSysMessage("MMAPs status: Enabled");
+                subDirs.Add("/mmaps");
+            }
+            else
+                handler.SendSysMessage("MMAPs status: Disabled");
+
+            foreach (string subDir in subDirs)
+            {
+                if (!File.Exists(dataDir + subDir))
+                {
+                    handler.SendSysMessage($"{subDir} directory doesn't exist!. Using path: {dataDir + subDir}");
+                    continue;
+                }
+            }
+
+            Locale defaultLocale = Global.WorldMgr.GetDefaultDbcLocale();
+            uint availableLocalesMask = (1u << (int)defaultLocale);
+
+            for (Locale locale = 0; locale < Locale.Total; ++locale)
+            {
+                if (locale == defaultLocale)
+                    continue;
+
+                if (Global.WorldMgr.GetAvailableDbcLocale(locale) != defaultLocale)
+                    availableLocalesMask |= (1u << (int)locale);
+            }
+
+            string availableLocales = "";
+            for (Locale locale = 0; locale < Locale.Total; ++locale)
+            {
+                if ((availableLocalesMask & (1 << (int)locale)) == 0)
+                    continue;
+
+                availableLocales += locale;
+                if (locale != Locale.Total - 1)
+                    availableLocales += " ";
+            }
+
+            handler.SendSysMessage($"Using {defaultLocale} DBC Locale as default. All available DBC locales: {availableLocales}");
+
+            handler.SendSysMessage($"Using World DB: {Global.WorldMgr.GetDBVersion()}");
+            return true;
         }
 
         [Command("exit", RBACPermissions.CommandServerExit, true)]
@@ -160,7 +244,7 @@ namespace Game.Chat
             return true;
         }
 
-        static bool ShutdownServer(StringArguments args,CommandHandler handler, ShutdownMask shutdownMask, ShutdownExitCode defaultExitCode)
+        static bool ShutdownServer(StringArguments args, CommandHandler handler, ShutdownMask shutdownMask, ShutdownExitCode defaultExitCode)
         {
             if (args.Empty())
                 return false;

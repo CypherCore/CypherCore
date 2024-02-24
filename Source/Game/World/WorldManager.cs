@@ -2277,19 +2277,21 @@ namespace Game
             m_maxQueuedSessionCount = Math.Max(m_maxQueuedSessionCount, (uint)m_QueuedPlayer.Count);
         }
 
+        public string GetDBVersion() { return m_DBVersion; }
+
         public string LoadDBVersion()
         {
-            var DBVersion = "Unknown world database.";
+            m_DBVersion = "Unknown world database.";
 
             SQLResult result = DB.World.Query("SELECT db_version, cache_id FROM version LIMIT 1");
             if (!result.IsEmpty())
             {
-                DBVersion = result.Read<string>(0);
+                m_DBVersion = result.Read<string>(0);
                 // will be overwrite by config values if different and non-0
                 WorldConfig.SetValue(WorldCfg.ClientCacheVersion, result.Read<uint>(1));
             }
 
-            return DBVersion;
+            return m_DBVersion;
         }
 
         void UpdateAreaDependentAuras()
@@ -2606,6 +2608,7 @@ namespace Game
         Realm _realm;
 
         string _dataPath;
+        string m_DBVersion;
 
         WorldUpdateTime _worldUpdateTime;
 
