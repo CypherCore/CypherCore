@@ -3,6 +3,7 @@
 
 using Framework.Constants;
 using Game.AI;
+using Game.DataStorage;
 using Game.Entities;
 using Game.Scripting;
 using System;
@@ -132,6 +133,21 @@ namespace Scripts.EasternKingdoms.AlteracValley
 
             if (me.HasUnitState(UnitState.Casting))
                 return;
+        }
+    }
+
+    [Script]
+    class at_av_exploit : AreaTriggerScript
+    {
+        public at_av_exploit() : base("at_av_exploit") { }
+
+        public override bool OnTrigger(Player player, AreaTriggerRecord trigger)
+        {
+            var battleground = player.GetBattleground();
+            if (battleground != null && battleground.GetStatus() == BattlegroundStatus.WaitJoin)
+                battleground.TeleportPlayerToExploitLocation(player);
+
+            return true;
         }
     }
 }

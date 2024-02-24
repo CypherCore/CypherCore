@@ -63,22 +63,6 @@ namespace Game.Arenas
             for (int i = RuinsofLordaeronObjectTypes.Buff1; i <= RuinsofLordaeronObjectTypes.Buff2; ++i)
                 SpawnBGObject(i, 60);
         }
-
-        public override void HandleAreaTrigger(Player player, uint trigger, bool entered)
-        {
-            if (GetStatus() != BattlegroundStatus.InProgress)
-                return;
-
-            switch (trigger)
-            {
-                case 4696:                                          // buff trigger?
-                case 4697:                                          // buff trigger?
-                    break;
-                default:
-                    base.HandleAreaTrigger(player, trigger, entered);
-                    break;
-            }
-        }
     }
 
     struct RuinsofLordaeronObjectTypes

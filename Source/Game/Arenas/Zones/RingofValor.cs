@@ -88,25 +88,6 @@ namespace Game.Arenas
             TogglePillarCollision(true);
         }
 
-        public override void HandleAreaTrigger(Player player, uint trigger, bool entered)
-        {
-            if (GetStatus() != BattlegroundStatus.InProgress)
-                return;
-
-            switch (trigger)
-            {
-                case 5224:
-                case 5226:
-                // fire was removed in 3.2.0
-                case 5473:
-                case 5474:
-                    break;
-                default:
-                    base.HandleAreaTrigger(player, trigger, entered);
-                    break;
-            }
-        }
-
         public override void PostUpdateImpl(uint diff)
         {
             if (GetStatus() != BattlegroundStatus.InProgress)

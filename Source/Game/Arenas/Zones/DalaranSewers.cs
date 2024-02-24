@@ -12,6 +12,9 @@ namespace Game.Arenas
 {
     class DalaranSewersArena : Arena
     {
+        uint _pipeKnockBackTimer;
+        uint _pipeKnockBackCount;
+
         public DalaranSewersArena(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
         {
             _events = new EventMap();
@@ -32,7 +35,10 @@ namespace Game.Arenas
                 SpawnBGObject(i, 60);
 
             _events.ScheduleEvent(DalaranSewersEvents.WaterfallWarning, DalaranSewersData.WaterfallTimerMin, DalaranSewersData.WaterfallTimerMax);
-            _events.ScheduleEvent(DalaranSewersEvents.PipeKnockback, DalaranSewersData.PipeKnockbackFirstDelay);
+            //_events.ScheduleEvent(DalaranSewersEvents.PipeKnockback, DalaranSewersData.PipeKnockbackFirstDelay);
+
+            _pipeKnockBackCount = 0;
+            _pipeKnockBackTimer = DalaranSewersData.PipeKnockbackFirstDelay;
 
             SpawnBGObject(DalaranSewersObjectTypes.Water2, BattlegroundConst.RespawnImmediately);
 
@@ -45,28 +51,6 @@ namespace Game.Arenas
                 Player player = _GetPlayer(pair, "BattlegroundDS::StartingEventOpenDoors");
                 if (player != null)
                     player.RemoveAurasDueToSpell(DalaranSewersSpells.DemonicCircle);
-            }
-        }
-
-        public override void HandleAreaTrigger(Player player, uint trigger, bool entered)
-        {
-            if (GetStatus() != BattlegroundStatus.InProgress)
-                return;
-
-            switch (trigger)
-            {
-                case 5347:
-                case 5348:
-                    // Remove effects of Demonic Circle Summon
-                    player.RemoveAurasDueToSpell(DalaranSewersSpells.DemonicCircle);
-
-                    // Someone has get back into the pipes and the knockback has already been performed,
-                    // so we reset the knockback count for kicking the player again into the arena.
-                    _events.ScheduleEvent(DalaranSewersEvents.PipeKnockback, DalaranSewersData.PipeKnockbackDelay);
-                    break;
-                default:
-                    base.HandleAreaTrigger(player, trigger, entered);
-                    break;
             }
         }
 
@@ -139,7 +123,7 @@ namespace Game.Arenas
                             waterSpout.CastSpell(waterSpout, DalaranSewersSpells.WaterSpout, true);
                         _events.ScheduleEvent(eventId, DalaranSewersData.WaterfallKnockbackTimer);
                     }
-                        break;
+                    break;
                     case DalaranSewersEvents.PipeKnockback:
                     {
                         for (uint i = DalaranSewersCreatureTypes.PipeKnockback1; i <= DalaranSewersCreatureTypes.PipeKnockback2; ++i)
@@ -149,9 +133,42 @@ namespace Game.Arenas
                                 waterSpout.CastSpell(waterSpout, DalaranSewersSpells.Flush, true);
                         }
                     }
-                        break;
+                    break;
                 }
             });
+
+            if (_pipeKnockBackCount < DalaranSewersData.PipeKnockbackTotalCount)
+            {
+                if (_pipeKnockBackTimer < diff)
+                {
+                    for (uint i = DalaranSewersCreatureTypes.PipeKnockback1; i <= DalaranSewersCreatureTypes.PipeKnockback2; ++i)
+                    {
+                        Creature waterSpout = GetBGCreature(i);
+                        if (waterSpout != null)
+                            waterSpout.CastSpell(waterSpout, DalaranSewersSpells.Flush, true);
+                    }
+
+                    ++_pipeKnockBackCount;
+                    _pipeKnockBackTimer = DalaranSewersData.PipeKnockbackDelay;
+                }
+                else
+                    _pipeKnockBackTimer -= diff;
+            }
+        }
+
+        public override void SetData(uint dataId, uint value)
+        {
+            base.SetData(dataId, value);
+            if (dataId == DalaranSewersData.PipeKnockbackCount)
+                _pipeKnockBackCount = value;
+        }
+
+        public override uint GetData(uint dataId)
+        {
+            if (dataId == DalaranSewersData.PipeKnockbackCount)
+                return _pipeKnockBackCount;
+
+            return base.GetData(dataId);
         }
     }
 
@@ -203,9 +220,10 @@ namespace Game.Arenas
         public static TimeSpan WaterfallDuration = TimeSpan.FromSeconds(30);
         public static TimeSpan WaterfallKnockbackTimer = TimeSpan.FromSeconds(1.5);
 
-        public static TimeSpan PipeKnockbackFirstDelay = TimeSpan.FromSeconds(5);
-        public static TimeSpan PipeKnockbackDelay = TimeSpan.FromSeconds(3);
+        public static uint PipeKnockbackFirstDelay = 5000;
+        public static uint PipeKnockbackDelay = 3000;
         public const uint PipeKnockbackTotalCount = 2;
+        public const uint PipeKnockbackCount = 1;
 
         public const uint NpcWaterSpout = 28567;
     }

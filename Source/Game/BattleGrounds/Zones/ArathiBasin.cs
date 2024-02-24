@@ -208,31 +208,6 @@ namespace Game.BattleGrounds.Zones
             TriggerGameEvent(EventStartBattle);
         }
 
-        public override void HandleAreaTrigger(Player player, uint trigger, bool entered)
-        {
-            switch (trigger)
-            {
-                case 6635: // Horde Start
-                case 6634: // Alliance Start
-                    if (GetStatus() == BattlegroundStatus.WaitJoin && !entered)
-                        TeleportPlayerToExploitLocation(player);
-                    break;
-                case 3948:                                          // Arathi Basin Alliance Exit.
-                case 3949:                                          // Arathi Basin Horde Exit.
-                case 3866:                                          // Stables
-                case 3869:                                          // Gold Mine
-                case 3867:                                          // Farm
-                case 3868:                                          // Lumber Mill
-                case 3870:                                          // Black Smith
-                case 4020:                                          // Unk1
-                case 4021:                                          // Unk2
-                case 4674:                                          // Unk3
-                default:
-                    base.HandleAreaTrigger(player, trigger, entered);
-                    break;
-            }
-        }
-
         void _CreateBanner(byte node, ABNodeStatus type, int teamIndex, bool delay)
         {
             // Just put it into the queue

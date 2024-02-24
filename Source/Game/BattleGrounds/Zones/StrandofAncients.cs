@@ -429,13 +429,6 @@ namespace Game.BattleGrounds.Zones
 
         public override void RemovePlayer(Player player, ObjectGuid guid, Team team) { }
 
-        public override void HandleAreaTrigger(Player source, uint trigger, bool entered)
-        {
-            // this is wrong way to implement these things. On official it done by gameobject spell cast.
-            if (GetStatus() != BattlegroundStatus.InProgress)
-                return;
-        }
-
         void TeleportPlayers()
         {
             foreach (var pair in GetPlayers())

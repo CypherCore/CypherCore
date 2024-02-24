@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
 using Game.Networking.Packets;
+using System;
 using System.Collections.Generic;
 
 namespace Game.BattleGrounds.Zones.EyeofStorm
@@ -219,6 +220,7 @@ namespace Game.BattleGrounds.Zones.EyeofStorm
             }
         }
 
+        [Obsolete("Remove me when eye of the storm is updated.")]
         public override void HandleAreaTrigger(Player player, uint trigger, bool entered)
         {
             if (!player.IsAlive())                                  //hack code, must be removed later

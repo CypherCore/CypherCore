@@ -45,22 +45,6 @@ namespace Game.Arenas
                 SpawnBGObject(i, 60);
         }
 
-        public override void HandleAreaTrigger(Player player, uint trigger, bool entered)
-        {
-            if (GetStatus() != BattlegroundStatus.InProgress)
-                return;
-
-            switch (trigger)
-            {
-                case 4538:                                          // buff trigger?
-                case 4539:                                          // buff trigger?
-                    break;
-                default:
-                    base.HandleAreaTrigger(player, trigger, entered);
-                    break;
-            }
-        }
-
         public override bool SetupBattleground()
         {
             bool result = true;
