@@ -8,7 +8,7 @@ using System;
 
 namespace Game.Movement
 {
-    public class FleeingMovementGenerator<T> : MovementGeneratorMedium<T> where T : Unit
+    public class FleeingMovementGenerator : MovementGenerator
     {
         public const float MIN_QUIET_DISTANCE = 28.0f;
         public const float MAX_QUIET_DISTANCE = 43.0f;
@@ -24,7 +24,7 @@ namespace Game.Movement
             BaseUnitState = UnitState.Fleeing;
         }
 
-        public override void DoInitialize(T owner)
+        public override void Initialize(Unit owner)
         {
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
@@ -36,13 +36,13 @@ namespace Game.Movement
             SetTargetLocation(owner);
         }
 
-        public override void DoReset(T owner)
+        public override void Reset(Unit owner)
         {
             RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
-            DoInitialize(owner);
+            Initialize(owner);
         }
 
-        public override bool DoUpdate(T owner, uint diff)
+        public override bool Update(Unit owner, uint diff)
         {
             if (owner == null || !owner.IsAlive())
                 return false;
@@ -67,34 +67,32 @@ namespace Game.Movement
             return true;
         }
 
-        public override void DoDeactivate(T owner)
+        public override void Deactivate(Unit owner)
         {
             AddFlag(MovementGeneratorFlags.Deactivated);
             owner.ClearUnitState(UnitState.FleeingMove);
         }
 
-        public override void DoFinalize(T owner, bool active, bool movementInform)
+        public override void Finalize(Unit owner, bool active, bool movementInform)
         {
             AddFlag(MovementGeneratorFlags.Finalized);
 
             if (active)
             {
-                if (owner.IsPlayer())
+                owner.ClearUnitState(UnitState.FleeingMove);
+
+                if (owner.IsCreature())
                 {
-                    owner.ClearUnitState(UnitState.FleeingMove);
-                    owner.StopMoving();
-                }
-                else
-                {
-                    owner.ClearUnitState(UnitState.FleeingMove);
                     Unit victim = owner.GetVictim();
                     if (victim != null)
                         owner.SetTarget(victim.GetGUID());
                 }
+                else if (owner.IsPlayer())
+                    owner.StopMoving();
             }
         }
 
-        void SetTargetLocation(T owner)
+        void SetTargetLocation(Unit owner)
         {
             if (owner == null || !owner.IsAlive())
                 return;
@@ -107,7 +105,7 @@ namespace Game.Movement
                 return;
             }
 
-            Position destination = new (owner.GetPosition());
+            Position destination = new(owner.GetPosition());
             GetPoint(owner, destination);
 
             // Add LOS check for target point
@@ -139,7 +137,7 @@ namespace Game.Movement
             _timer.Reset(traveltime + RandomHelper.URand(800, 1500));
         }
 
-        void GetPoint(T owner, Position position)
+        void GetPoint(Unit owner, Position position)
         {
             float casterDistance, casterAngle;
             Unit fleeTarget = Global.ObjAccessor.GetUnit(owner, _fleeTargetGUID);
@@ -192,7 +190,7 @@ namespace Game.Movement
         TimeTracker _timer;
     }
 
-    public class TimedFleeingMovementGenerator : FleeingMovementGenerator<Creature>
+    public class TimedFleeingMovementGenerator : FleeingMovementGenerator
     {
         public TimedFleeingMovementGenerator(ObjectGuid fright, TimeSpan time) : base(fright)
         {
@@ -208,7 +206,7 @@ namespace Game.Movement
             if (_totalFleeTime.Passed())
                 return false;
 
-            return DoUpdate(owner.ToCreature(), diff);
+            return base.Update(owner.ToCreature(), diff);
         }
 
         public override void Finalize(Unit owner, bool active, bool movementInform)
@@ -217,13 +215,14 @@ namespace Game.Movement
             if (!active)
                 return;
 
-            Unit victim = owner.GetVictim();
-            if (victim != null)
+            owner.StopMoving();
+            if (owner.IsCreature() && owner.IsAlive())
             {
-                if (owner.IsAlive())
+                Unit victim = owner.GetVictim();
+                if (victim != null)
                 {
                     owner.AttackStop();
-                    owner.ToCreature().GetAI().AttackStart(victim);
+                    owner.GetAI().AttackStart(victim);
                 }
             }
 
