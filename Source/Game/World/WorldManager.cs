@@ -2279,7 +2279,7 @@ namespace Game
 
         public string GetDBVersion() { return m_DBVersion; }
 
-        public string LoadDBVersion()
+        public void LoadDBVersion()
         {
             m_DBVersion = "Unknown world database.";
 
@@ -2290,8 +2290,6 @@ namespace Game
                 // will be overwrite by config values if different and non-0
                 WorldConfig.SetValue(WorldCfg.ClientCacheVersion, result.Read<uint>(1));
             }
-
-            return m_DBVersion;
         }
 
         void UpdateAreaDependentAuras()

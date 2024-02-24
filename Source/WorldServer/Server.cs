@@ -149,7 +149,9 @@ namespace WorldServer
             // Clean the database before starting
             ClearOnlineAccounts();
 
-            Log.outInfo(LogFilter.Server, "Using World DB: {0}", Global.WorldMgr.LoadDBVersion());
+            Global.WorldMgr.LoadDBVersion();
+
+            Log.outInfo(LogFilter.Server, $"Using World DB: {Global.WorldMgr.GetDBVersion()}");
             return true;
         }
 

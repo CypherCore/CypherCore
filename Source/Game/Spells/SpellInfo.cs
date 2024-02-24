@@ -1422,6 +1422,7 @@ namespace Game.Spells
                     break;
                 case 71465: // Divine Surge
                 case 50241: // Evasive Charges
+                case 81262: // Efflorescence
                     _auraState = AuraStateType.RaidEncounter;
                     break;
                 case 6950:   // Faerie Fire
