@@ -5773,7 +5773,8 @@ namespace Game
                     stmt.AddValue(0, pair.Value.name);
                     DB.World.Execute(stmt);
 
-                    keyToDelete = pair.Key;                    
+                    keyToDelete = pair.Key;
+                    break;
                 }
             }
 
