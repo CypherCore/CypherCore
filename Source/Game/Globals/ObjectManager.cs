@@ -5758,11 +5758,14 @@ namespace Game
 
             return true;
         }
+
         public bool DeleteGameTele(string name)
         {
             name = name.ToLowerInvariant();
 
-            foreach (var pair in gameTeleStorage.ToList())
+            uint? keyToDelete = null;
+
+            foreach (var pair in gameTeleStorage)
             {
                 if (pair.Value.nameLow == name)
                 {
@@ -5770,13 +5773,19 @@ namespace Game
                     stmt.AddValue(0, pair.Value.name);
                     DB.World.Execute(stmt);
 
-                    gameTeleStorage.Remove(pair.Key);
-                    return true;
+                    keyToDelete = pair.Key;                    
                 }
+            }
+
+            if (keyToDelete.HasValue)
+            {
+                gameTeleStorage.Remove(keyToDelete.Value);
+                return true;
             }
 
             return false;
         }
+
         public bool IsTransportMap(uint mapId) { return _transportMaps.Contains((ushort)mapId); }
         public SpawnGroupTemplateData GetSpawnGroupData(uint groupId) { return _spawnGroupDataStorage.LookupByKey(groupId); }
         public SpawnGroupTemplateData GetSpawnGroupData(SpawnObjectType type, ulong spawnId)
