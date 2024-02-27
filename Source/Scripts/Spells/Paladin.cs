@@ -80,6 +80,7 @@ namespace Scripts.Spells.Paladin
         public const uint RighteousDefenseTaunt = 31790;
         public const uint RighteousVerdictAura = 267611;
         public const uint SealOfRighteousness = 25742;
+        public const uint ShieldOfTheRightrousArmor = 132403;
         public const uint ShieldOfVengeanceDamage = 184689;
         public const uint TemplarVerdictDamage = 224266;
         public const uint T302PHeartfireDamage = 408399;
@@ -1214,6 +1215,25 @@ namespace Scripts.Spells.Paladin
         public override void Register()
         {
             DoCheckEffectProc.Add(new(CheckEffectProc, 0, AuraType.ProcTriggerSpell));
+        }
+    }
+
+    [Script] // 53600 - Shield of the Righteous
+    class spell_pal_shield_of_the_righteous : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ShieldOfTheRightrousArmor);
+        }
+
+        void HandleArmor()
+        {
+            GetCaster().CastSpell(GetCaster(), SpellIds.ShieldOfTheRightrousArmor, true);
+        }
+
+        public override void Register()
+        {
+            AfterCast.Add(new(HandleArmor));
         }
     }
 
