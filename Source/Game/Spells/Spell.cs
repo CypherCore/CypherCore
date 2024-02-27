@@ -4479,8 +4479,8 @@ namespace Game.Spells
 
                     int charges = m_CastItem.GetSpellCharges(itemEffect.LegacySlotIndex);
 
-                    // item has charges left
-                    if (charges != 0)
+                    // item has charges left for this slot
+                    if (charges != 0 && itemEffect.SpellID == m_spellInfo.Id)
                     {
                         if (charges > 0)
                             --charges;
