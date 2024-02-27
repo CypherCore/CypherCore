@@ -2032,7 +2032,7 @@ namespace Framework.Constants
         SuppressPointsStacking = 0x40,
         ChainFromInitialTarget = 0x80,
         UncontrolledNoBackwards = 0x100, /*NYI*/
-        AuraPointsStack = 0x000200, /*NYI*/ // refreshing periodic auras with this attribute will add remaining damage to new aura
+        AuraPointsStack = 0x000200, // refreshing periodic auras with this attribute will add remaining damage to new aura
         NoCopyDamageInterruptsOrProcs = 0x400, /*NYI*/
         AddTargetCombatReachToAOE = 0x800, /*NYI*/
         IsHarmful = 0x1000,
