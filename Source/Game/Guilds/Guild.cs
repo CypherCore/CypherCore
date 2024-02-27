@@ -902,7 +902,7 @@ namespace Game.Guilds
             if (!cashFlow)
             {
                 player.ModifyMoney(-(long)amount);
-                player.SaveGoldToDB(trans);
+                player.SaveInventoryAndGoldToDB(trans);
             }
 
             _LogBankEvent(trans, cashFlow ? GuildBankEventLogTypes.CashFlowDeposit : GuildBankEventLogTypes.DepositMoney, 0, player.GetGUID().GetCounter(), (uint)amount);
@@ -947,7 +947,7 @@ namespace Game.Guilds
                 if (!player.ModifyMoney((long)amount))
                     return false;
 
-                player.SaveGoldToDB(trans);
+                player.SaveInventoryAndGoldToDB(trans);
             }
 
             // Update remaining money amount

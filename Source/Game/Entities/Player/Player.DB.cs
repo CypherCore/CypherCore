@@ -2590,18 +2590,15 @@ namespace Game.Entities
 
             trans.Append(stmt);
         }
-        public void SaveGoldToDB(SQLTransaction trans)
-        {
-            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_MONEY);
-            stmt.AddValue(0, GetMoney());
-            stmt.AddValue(1, GetGUID().GetCounter());
-            trans.Append(stmt);
-        }
         public void SaveInventoryAndGoldToDB(SQLTransaction trans)
         {
             _SaveInventory(trans);
             _SaveCurrency(trans);
-            SaveGoldToDB(trans);
+
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_MONEY);
+            stmt.AddValue(0, GetMoney());
+            stmt.AddValue(1, GetGUID().GetCounter());
+            trans.Append(stmt);
         }
         void _SaveEquipmentSets(SQLTransaction trans)
         {
