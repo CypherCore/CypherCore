@@ -63,11 +63,14 @@ namespace Game.AI
                 if (!owner.HasCanSwimFlagOutOfCombat())
                     owner.RemoveUnitFlag(UnitFlags.CanSwim);
 
-                owner.SetSpawnHealth();
-                owner.LoadCreaturesAddon();
-                owner.LoadCreaturesSparringHealth();
-                if (owner.IsVehicle())
-                    owner.GetVehicleKit().Reset(true);
+                if (owner.IsStateRestoredOnEvade())
+                {
+                    owner.SetSpawnHealth();
+                    owner.LoadCreaturesAddon();
+                    owner.LoadCreaturesSparringHealth();
+                    if (owner.IsVehicle())
+                        owner.GetVehicleKit().Reset(true);
+                }
 
                 CreatureAI ai = owner.GetAI();
                 if (ai != null)

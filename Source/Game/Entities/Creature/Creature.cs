@@ -3404,6 +3404,9 @@ namespace Game.Entities
         public bool IsInEvadeMode() { return HasUnitState(UnitState.Evade); }
         public bool IsEvadingAttacks() { return IsInEvadeMode() || CanNotReachTarget(); }
 
+        public bool IsStateRestoredOnEvade() { return !HasFlag(CreatureStaticFlags5.NoLeavecombatStateRestore); }
+        public void SetRestoreStateOnEvade(bool restoreOnEvade) { _staticFlags.ApplyFlag(CreatureStaticFlags5.NoLeavecombatStateRestore, !restoreOnEvade); }
+
         public override CreatureAI GetAI()
         {
             return (CreatureAI)i_AI;

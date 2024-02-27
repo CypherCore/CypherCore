@@ -290,7 +290,8 @@ namespace Game.AI
                 return false;
             }
 
-            me.RemoveAurasOnEvade();
+            if (me.IsStateRestoredOnEvade())
+                me.RemoveAurasOnEvade();
 
             // sometimes bosses stuck in combat?
             me.CombatStop(true);
