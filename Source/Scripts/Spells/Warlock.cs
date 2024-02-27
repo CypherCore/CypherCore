@@ -18,6 +18,7 @@ namespace Scripts.Spells.Warlock
         public const uint DemonicCircleSummon = 48018;
         public const uint DemonicCircleTeleport = 48020;
         public const uint DevourMagicHeal = 19658;
+        public const uint DoomEnergize = 193318;
         public const uint DrainSoulEnergize = 205292;
         public const uint GlyphOfDemonTraining = 56249;
         public const uint GlyphOfSoulSwap = 56226;
@@ -314,6 +315,27 @@ namespace Scripts.Spells.Warlock
         public override void Register()
         {
             OnEffectSuccessfulDispel.Add(new(OnSuccessfulDispel, 0, SpellEffectName.Dispel));
+        }
+    }
+
+    [Script] // 603 - Doom
+    class spell_warl_doom : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.DoomEnergize);
+        }
+
+        void HandleEffectPeriodic(AuraEffect aurEff)
+        {
+            Unit caster = GetCaster();
+            if (caster != null)
+                caster.CastSpell(caster, SpellIds.DoomEnergize, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new(HandleEffectPeriodic, 0, AuraType.PeriodicDamage));
         }
     }
 
