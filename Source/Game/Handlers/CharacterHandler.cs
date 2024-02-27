@@ -1898,7 +1898,8 @@ namespace Game
                 trans.Append(stmt);
 
                 // Race specific languages
-                if (factionChangeInfo.RaceID != Race.Orc && factionChangeInfo.RaceID != Race.Human)
+                Race[] racesWithoutSpecificLanguages = { Race.Orc, Race.Human, Race.MagharOrc, Race.KulTiran };
+                if (!racesWithoutSpecificLanguages.Contains(factionChangeInfo.RaceID))
                 {
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHAR_SKILL_LANGUAGE);
                     stmt.AddValue(0, lowGuid);
@@ -1913,6 +1914,7 @@ namespace Game
                             stmt.AddValue(1, 759);
                             break;
                         case Race.Gnome:
+                        case Race.MechaGnome:
                             stmt.AddValue(1, 313);
                             break;
                         case Race.NightElf:
@@ -1929,6 +1931,7 @@ namespace Game
                             stmt.AddValue(1, 115);
                             break;
                         case Race.Troll:
+                        case Race.ZandalariTroll:
                             stmt.AddValue(1, 315);
                             break;
                         case Race.BloodElf:
@@ -1940,6 +1943,17 @@ namespace Game
                             break;
                         case Race.Nightborne:
                             stmt.AddValue(1, 2464);
+                            break;
+                        case Race.Vulpera:
+                            stmt.AddValue(1, 2776);
+                            break;
+                        case Race.PandarenAlliance:
+                        case Race.PandarenHorde:
+                            stmt.AddValue(1, 905);
+                            break;
+                        case Race.DracthyrAlliance:
+                        case Race.DracthyrHorde:
+                            stmt.AddValue(1, 138);
                             break;
                         default:
                             Log.outError(LogFilter.Player, $"Could not find language data for race ({factionChangeInfo.RaceID}).");
