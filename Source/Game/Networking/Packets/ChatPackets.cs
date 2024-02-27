@@ -334,6 +334,13 @@ namespace Game.Networking.Packets
         public int EmoteID;
     }
 
+    class ClearBossEmotes : ServerPacket
+    {
+        public ClearBossEmotes() : base(ServerOpcodes.ClearBossEmotes) { }
+
+        public override void Write() { }
+    }
+
     public class PrintNotification : ServerPacket
     {
         public PrintNotification(string notifyText) : base(ServerOpcodes.PrintNotification)

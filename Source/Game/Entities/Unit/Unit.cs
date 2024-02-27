@@ -437,6 +437,26 @@ namespace Game.Entities
             target.SendPacket(data);
         }
 
+        /// <summary>
+        /// Clears boss emotes frame
+        /// </summary>
+        /// <param name="zoneId">Only clears emotes for players in that zone id</param>
+        /// <param name="target">Only clears emotes for that player</param>
+        public void ClearBossEmotes(uint? zoneId, Player target)
+        {
+            ClearBossEmotes clearBossEmotes = new();
+
+            if (target != null)
+            {
+                target.SendPacket(clearBossEmotes);
+                return;
+            }
+
+            foreach (var player in GetMap().GetPlayers())
+                if (!zoneId.HasValue || Global.DB2Mgr.IsInArea(player.GetAreaId(), zoneId.Value))
+                    player.SendPacket(clearBossEmotes);
+        }
+
         public override void UpdateObjectVisibility(bool forced = true)
         {
             if (!forced)
