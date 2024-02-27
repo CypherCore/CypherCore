@@ -40,6 +40,7 @@ namespace Scripts.Spells.DeathKnight
         public const uint Frost = 137006;
         public const uint FrostFever = 55095;
         public const uint FrostScythe = 207230;
+        public const uint FrostShield = 207203;
         public const uint GlyphOfFoulMenagerie = 58642;
         public const uint GlyphOfTheGeist = 58640;
         public const uint GlyphOfTheSkeleton = 146652;
@@ -679,6 +680,27 @@ namespace Scripts.Spells.DeathKnight
         public override void Register()
         {
             AfterEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
+        }
+    }
+
+    [Script] // 207200 - Permafrost
+    class spell_dk_permafrost : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.FrostShield);
+        }
+
+        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            CastSpellExtraArgs args = new(aurEff);
+            args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()));
+            GetTarget().CastSpell(GetTarget(), SpellIds.FrostShield, args);
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new(HandleEffectProc, 0, AuraType.Dummy));
         }
     }
 
