@@ -4102,7 +4102,11 @@ namespace Game.Entities
                         else
                             bp = (int)spellEffectInfo.BasePoints;
 
-                        auraEff.m_baseAmount = bp;
+                        int oldBP = auraEff.m_baseAmount;
+                        if (spellEffectInfo.EffectAttributes.HasFlag(SpellEffectAttributes.AuraPointsStack))
+                            auraEff.m_baseAmount += bp;
+                        else
+                            auraEff.m_baseAmount = bp;
                     }
 
                     // correct cast item guid if needed
