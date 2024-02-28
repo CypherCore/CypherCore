@@ -1046,12 +1046,19 @@ namespace Game.Movement
             Add(new WaypointMovementGenerator(path, repeatable, duration, speed, speedSelectionMode, waitTimeRangeAtPathEnd, wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, generatePath), MovementSlot.Default);
         }
 
-        public void MoveRotate(uint id, uint time, RotateDirection direction)
+        /// <summary>
+        /// Makes the Unit turn in place
+        /// </summary>
+        /// <param name="id">Movement identifier, later passed to script MovementInform hooks</param>
+        /// <param name="direction">Rotation direction</param>
+        /// <param name="time">How long should this movement last, infinite if not set</param>
+        /// <param name="turnSpeed">How fast should the unit rotate, in radians per second. Uses unit's turn speed if not set</param>
+        /// <param name="totalTurnAngle">Total angle of the entire movement, infinite if not set</param>
+        public void MoveRotate(uint id, RotateDirection direction, TimeSpan? time = null, float? turnSpeed = null, float? totalTurnAngle = null)
         {
-            if (time == 0)
-                return;
+            Log.outDebug(LogFilter.Movement, $"MotionMaster::MoveRotate: '{_owner.GetGUID()}', starts rotate (time: {time.GetValueOrDefault(TimeSpan.Zero)}ms, turnSpeed: {turnSpeed}, totalTurnAngle: {totalTurnAngle}, direction: {direction})");
 
-            Add(new RotateMovementGenerator(id, time, direction));
+            Add(new RotateMovementGenerator(id, direction, time, turnSpeed, totalTurnAngle));
         }
 
         public void MoveFormation(Unit leader, float range, float angle, uint point1, uint point2)

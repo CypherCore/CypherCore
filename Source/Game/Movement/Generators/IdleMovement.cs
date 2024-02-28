@@ -47,12 +47,24 @@ namespace Game.Movement
 
     public class RotateMovementGenerator : MovementGenerator
     {
-        public RotateMovementGenerator(uint id, uint time, RotateDirection direction)
+        static float MIN_ANGLE_DELTA_FOR_FACING_UPDATE = 0.05f;
+
+        uint _id;
+        RotateDirection _direction;
+        TimeTracker _duration;
+        float? _turnSpeed;         ///< radians per sec
+        float? _totalTurnAngle;
+        uint _diffSinceLastUpdate;
+
+        public RotateMovementGenerator(uint id, RotateDirection direction, TimeSpan? duration, float? turnSpeed, float? totalTurnAngle)
         {
             _id = id;
-            _duration = time;
-            _maxDuration = time;
             _direction = direction;
+            if (duration.HasValue)
+                _duration = new TimeTracker(duration.Value);
+
+            _turnSpeed = turnSpeed;
+            _totalTurnAngle = totalTurnAngle;
 
             Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
@@ -64,7 +76,7 @@ namespace Game.Movement
         {
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
-            
+
             owner.StopMoving();
 
             /*
@@ -85,28 +97,38 @@ namespace Game.Movement
 
         public override bool Update(Unit owner, uint diff)
         {
-            if (owner == null)
-                return false;
+            _diffSinceLastUpdate += diff;
 
-            float angle = owner.GetOrientation();
-            angle += diff * MathFunctions.TwoPi / _maxDuration * (_direction == RotateDirection.Left ? 1.0f : -1.0f);
-            angle = Math.Clamp(angle, 0.0f, MathF.PI * 2);
+            float currentAngle = owner.GetOrientation();
+            float angleDelta = _turnSpeed.GetValueOrDefault(owner.GetSpeed(UnitMoveType.TurnRate)) * ((float)_diffSinceLastUpdate / (float)Time.InMilliseconds);
 
-            MoveSplineInit init = new(owner);
-            init.MoveTo(owner, false);
-            if (!owner.GetTransGUID().IsEmpty())
-                init.DisableTransportPathTransformations();
+            if (_duration != null)
+                _duration.Update(diff);
 
-            init.SetFacing(angle);
-            init.Launch();
+            if (_totalTurnAngle.HasValue)
+                _totalTurnAngle = _totalTurnAngle - angleDelta;
 
-            if (_duration > diff)
-                _duration -= diff;
-            else
+            bool expired = (_duration != null && _duration.Passed()) || (_totalTurnAngle.HasValue && _totalTurnAngle < 0.0f);
+
+            if (angleDelta >= MIN_ANGLE_DELTA_FOR_FACING_UPDATE || expired)
+            {
+                float newAngle = Position.NormalizeOrientation(currentAngle + angleDelta * (_direction == RotateDirection.Left ? 1.0f : -1.0f));
+
+                MoveSplineInit init = new(owner);
+                init.MoveTo(owner.GetPosition(), false);
+                if (!owner.GetTransGUID().IsEmpty())
+                    init.DisableTransportPathTransformations();
+                init.SetFacing(newAngle);
+                init.Launch();
+
+                _diffSinceLastUpdate = 0;
+            }
+
+            if (expired)
             {
                 AddFlag(MovementGeneratorFlags.InformEnabled);
                 return false;
-            } 
+            }
 
             return true;
         }
@@ -125,11 +147,6 @@ namespace Game.Movement
         }
 
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Rotate; }
-
-        uint _id;
-        uint _duration;
-        uint _maxDuration;
-        RotateDirection _direction;
     }
 
     public class DistractMovementGenerator : MovementGenerator
@@ -163,7 +180,7 @@ namespace Game.Movement
             init.Launch();
         }
 
-        public override void Reset(Unit owner) 
+        public override void Reset(Unit owner)
         {
             RemoveFlag(MovementGeneratorFlags.Deactivated);
             Initialize(owner);
