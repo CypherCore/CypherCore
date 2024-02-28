@@ -38,6 +38,9 @@ namespace Scripts.Spells.Priest
         public const uint BodyAndSoul = 64129;
         public const uint BodyAndSoulSpeed = 65081;
         public const uint CircleOfHealing = 204883;
+        public const uint CrystallineReflection = 373457;
+        public const uint CrystallineReflectionHeal = 373462;
+        public const uint CrystallineReflectionReflect = 373464;
         public const uint DarkIndulgence = 372972;
         public const uint DarkReprimand = 400169;
         public const uint DarkReprimandChannelDamage = 373129;
@@ -637,6 +640,53 @@ namespace Scripts.Spells.Priest
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitDestAreaAlly));
+        }
+    }
+
+    [Script] // 17 - Power Word: Shield
+    class spell_pri_crystalline_reflection : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.CrystallineReflection, SpellIds.CrystallineReflectionHeal, SpellIds.CrystallineReflectionReflect)
+            && ValidateSpellEffect((SpellIds.CrystallineReflection, 0));
+        }
+
+        void HandleOnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit caster = GetCaster();
+            if (caster == null)
+                return;
+
+            // Crystalline Reflection Heal
+            if (caster.HasAura(SpellIds.CrystallineReflection))
+                caster.CastSpell(GetTarget(), SpellIds.CrystallineReflectionHeal, new CastSpellExtraArgs(aurEff)
+                    .SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError));
+        }
+
+        void HandleAfterAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        {
+            Unit caster = GetCaster();
+            if (caster == null)
+                return;
+
+            AuraEffect auraEff = caster.GetAuraEffect(SpellIds.CrystallineReflection, 0);
+            if (auraEff == null)
+                return;
+
+            Unit attacker = dmgInfo.GetAttacker();
+            if (attacker == null)
+                return;
+
+            CastSpellExtraArgs args = new(TriggerCastFlags.DontReportCastError);
+            args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(absorbAmount, auraEff.GetAmount()));
+            caster.CastSpell(attacker, SpellIds.CrystallineReflectionReflect, args);
+        }
+
+        public override void Register()
+        {
+            AfterEffectApply.Add(new(HandleOnApply, 0, AuraType.SchoolAbsorb, AuraEffectHandleModes.RealOrReapplyMask));
+            AfterEffectAbsorb.Add(new(HandleAfterAbsorb, 0));
         }
     }
 
