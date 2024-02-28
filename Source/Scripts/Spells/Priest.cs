@@ -2901,6 +2901,46 @@ namespace Scripts.Spells.Priest
         }
     }
 
+    // 390693 - Train of Thought
+    [Script] // Called by Flash Heal, Renew, Smite
+    class spell_pri_train_of_thought : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.PowerWordShield, SpellIds.Penance);
+        }
+
+        bool CheckEffect0(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            // Renew & Flash Heal
+            return eventInfo.GetSpellInfo().IsAffected(SpellFamilyNames.Priest, new FlagArray128(0x840));
+        }
+
+        bool CheckEffect1(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            // Smite
+            return eventInfo.GetSpellInfo().IsAffected(SpellFamilyNames.Priest, new FlagArray128(0x80));
+        }
+
+        void ReducePowerWordShieldCooldown(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.PowerWordShield, TimeSpan.FromMilliseconds(aurEff.GetAmount()));
+        }
+
+        void ReducePenanceCooldown(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.Penance, TimeSpan.FromMilliseconds(aurEff.GetAmount()));
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new(CheckEffect0, 0, AuraType.Dummy));
+            OnEffectProc.Add(new(ReducePowerWordShieldCooldown, 0, AuraType.Dummy));
+            DoCheckEffectProc.Add(new(CheckEffect1, 1, AuraType.Dummy));
+            OnEffectProc.Add(new(ReducePenanceCooldown, 1, AuraType.Dummy));
+        }
+    }
+
     // 109142 - Twist of Fate (Shadow)
     [Script] // 265259 - Twist of Fate (Discipline)
     class spell_pri_twist_of_fate : AuraScript
