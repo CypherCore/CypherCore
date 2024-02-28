@@ -1619,6 +1619,20 @@ namespace Scripts.Spells.Priest
         }
     }
 
+    [Script] // 114239 - Phantasm
+    class spell_pri_phantasm : SpellScript
+    {
+        void HandleEffectHit(uint effIndex)
+        {
+            GetCaster().RemoveMovementImpairingAuras(false);
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new(HandleEffectHit, 0, SpellEffectName.Dummy));
+        }
+    }
+
     // 262484 - Power Leech (Passive for Shadowfiend)
     [Script] // 284621 - Power Leech (Passive for Mindbender)
     class spell_pri_power_leech_passive : AuraScript
