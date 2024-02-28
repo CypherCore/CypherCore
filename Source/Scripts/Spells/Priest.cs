@@ -77,6 +77,7 @@ namespace Scripts.Spells.Priest
         public const uint HaloShadowHeal = 390971;
         public const uint Heal = 2060;
         public const uint HealingLight = 196809;
+        public const uint HeavensWrath = 421558;
         public const uint HolyFire = 14914;
         public const uint HolyMendingHeal = 391156;
         public const uint HolyNova = 132157;
@@ -152,6 +153,9 @@ namespace Scripts.Spells.Priest
         public const uint TrailOfLightHeal = 234946;
         public const uint Trinity = 214205;
         public const uint TrinityEffect = 214206;
+        public const uint UltimatePenitence = 421453;
+        public const uint UltimatePenitenceDamage = 421543;
+        public const uint UltimatePenitenceHeal = 421544;
         public const uint VapiricEmbraceHeal = 15290;
         public const uint VapiricTouchDispel = 64085;
         public const uint VoidShield = 199144;
@@ -1173,6 +1177,35 @@ namespace Scripts.Spells.Priest
         {
             DoEffectCalcAmount.Add(new(CalculateAmount, 1, AuraType.SchoolAbsorb));
             OnEffectAbsorb.Add(new(Absorb, 1));
+        }
+    }
+
+    [Script] // 421558 - Heaven's Wrath
+    class spell_pri_heavens_wrath : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.UltimatePenitence);
+        }
+
+        bool CheckProc(ProcEventInfo eventInfo)
+        {
+            return !(eventInfo.GetSpellInfo().Id == SpellIds.UltimatePenitenceDamage || eventInfo.GetSpellInfo().Id == SpellIds.UltimatePenitenceHeal);
+        }
+
+        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            Unit caster = eventInfo.GetActor();
+            if (caster == null)
+                return;
+
+            int cdReduction = aurEff.GetAmount();
+            caster.GetSpellHistory().ModifyCooldown(SpellIds.UltimatePenitence, TimeSpan.FromSeconds(-cdReduction), true);
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new(HandleEffectProc, 0, AuraType.Dummy));
         }
     }
 
