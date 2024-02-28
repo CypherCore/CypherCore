@@ -93,6 +93,7 @@ namespace Scripts.Spells.Priest
         public const uint Holy101ClassSet2PChooser = 411097;
         public const uint Holy101ClassSet4P = 405556;
         public const uint Holy101ClassSet4PEffect = 409479;
+        public const uint Indemnity = 373049;
         public const uint ItemEfficiency = 37595;
         public const uint LeapOfFaithEffect = 92832;
         public const uint LevitateEffect = 111759;
@@ -451,7 +452,7 @@ namespace Scripts.Spells.Priest
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementEffect, SpellIds.Trinity, SpellIds.TrinityEffect, SpellIds.PowerWordRadiance, SpellIds.PowerWordShield)
-            && ValidateSpellEffect((SpellIds.PowerWordRadiance, 3));
+            && ValidateSpellEffect((SpellIds.PowerWordRadiance, 3), (SpellIds.Indemnity, 0));
         }
 
         public override bool Load()
@@ -480,9 +481,20 @@ namespace Scripts.Spells.Priest
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.SetTriggeringSpell(GetSpell());
 
-            // Power Word: Radiance applies Atonement at 60 % (without modifiers) of its total duration.
-            if (GetSpellInfo().Id == SpellIds.PowerWordRadiance)
-                args.AddSpellMod(SpellValueMod.DurationPct, GetSpellInfo().GetEffect(3).CalcValue(caster));
+            switch (GetSpellInfo().Id)
+            {
+                case SpellIds.PowerWordShield:
+                    AuraEffect indemnity = caster.GetAuraEffect(SpellIds.Indemnity, 0);
+                    if (indemnity != null)
+                        args.AddSpellMod(SpellValueMod.Duration, (int)(TimeSpan.FromSeconds(indemnity.GetAmount()) + TimeSpan.FromMilliseconds(Aura.CalcMaxDuration(Global.SpellMgr.GetSpellInfo(_effectSpellId, GetCastDifficulty()), caster, GetSpell().GetPowerCost()))).TotalSeconds);
+                    break;
+                case SpellIds.PowerWordRadiance:
+                    // Power Word: Radiance applies Atonement at 60 % (without modifiers) of its total duration.
+                    args.AddSpellMod(SpellValueMod.DurationPct, GetEffectInfo(3).CalcValue(caster));
+                    break;
+                default:
+                    break;
+            }
 
             caster.CastSpell(target, _effectSpellId, args);
         }
