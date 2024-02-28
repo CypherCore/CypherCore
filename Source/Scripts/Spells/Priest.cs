@@ -145,6 +145,8 @@ namespace Scripts.Spells.Priest
         public const uint SpiritOfRedemption = 27827;
         public const uint StrengthOfSoul = 197535;
         public const uint StrengthOfSoulEffect = 197548;
+        public const uint SurgeOfLight = 109186;
+        public const uint SurgeOfLightEffect = 114255;
         public const uint TranquilLight = 196816;
         public const uint ThePenitentAura = 200347;
         public const uint TrailOfLightHeal = 234946;
@@ -2565,6 +2567,38 @@ namespace Scripts.Spells.Priest
             OnEffectPeriodic.Add(new(HandleDummyTick, 0, AuraType.PeriodicDummy));
             DoCheckProc.Add(new(CheckProc));
             OnEffectProc.Add(new(HandleProc, 1, AuraType.Dummy));
+        }
+    }
+
+    [Script] // 109186 - Surge of Light
+    class spell_pri_surge_of_light : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.Smite, SpellIds.SurgeOfLightEffect);
+        }
+
+        bool CheckProc(ProcEventInfo eventInfo)
+        {
+            if (eventInfo.GetSpellInfo().Id == SpellIds.Smite)
+                return true;
+
+            if (eventInfo.GetSpellInfo().SpellFamilyName == SpellFamilyNames.Priest)
+                return eventInfo.GetHealInfo() != null;
+
+            return false;
+        }
+
+        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            if (RandomHelper.randChance(aurEff.GetAmount()))
+                GetTarget().CastSpell(GetTarget(), SpellIds.SurgeOfLightEffect, aurEff);
+        }
+
+        public override void Register()
+        {
+            DoCheckProc.Add(new(CheckProc));
+            OnEffectProc.Add(new(HandleEffectProc, 0, AuraType.Dummy));
         }
     }
 
