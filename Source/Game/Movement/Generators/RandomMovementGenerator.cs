@@ -153,8 +153,8 @@ namespace Game.Movement
             }
 
             Position position = new(_reference);
-            float distance = RandomHelper.FRand(0.0f, _wanderDistance);
-            float angle = RandomHelper.FRand(0.0f, MathF.PI * 2.0f);
+            float distance = _wanderDistance > 0.1f ? RandomHelper.FRand(0.1f, _wanderDistance) : _wanderDistance;
+            float angle = RandomHelper.FRand(0.0f, MathF.PI * 2);
             owner.MovePositionToFirstCollision(position, distance, angle);
 
             // Check if the destination is in LOS
@@ -176,6 +176,13 @@ namespace Game.Movement
             if (!result || _path.GetPathType().HasFlag(PathType.NoPath) || _path.GetPathType().HasFlag(PathType.Shortcut))// || _path.GetPathType().HasFlag(PathType.FarFromPoly))
             {
                 _timer.Reset(100);
+                return;
+            }
+
+            if (_path.GetPathLength() < 0.1f)
+            {
+                // the path is too short for the spline system to be accepted. Let's try again soon.
+                _timer.Reset(500);
                 return;
             }
 
