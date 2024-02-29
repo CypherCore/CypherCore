@@ -2531,10 +2531,7 @@ namespace Game.Spells
             target.SetControlled(apply, UnitState.Root);
 
             // Do not remove DisableGravity if there are more than this auraEffect of that kind on the unit or if it's a creature with DisableGravity on its movement template.
-            if (!apply
-                && (target.HasAuraType(GetAuraType())
-                    || target.HasAuraType(AuraType.ModStunDisableGravity)
-                    || (target.IsCreature() && target.ToCreature().GetMovementTemplate().Flight == CreatureFlightMovementType.DisableGravity)))
+            if (!apply && (target.HasAuraType(GetAuraType()) || target.HasAuraType(AuraType.ModRootDisableGravity) || (target.IsCreature() && target.ToCreature().IsFloating())))
                 return;
 
             if (target.SetDisableGravity(apply))
@@ -2556,10 +2553,7 @@ namespace Game.Spells
                 target.GetThreatManager().EvaluateSuppressed();
 
             // Do not remove DisableGravity if there are more than this auraEffect of that kind on the unit or if it's a creature with DisableGravity on its movement template.
-            if (!apply
-                && (target.HasAuraType(GetAuraType())
-                    || target.HasAuraType(AuraType.ModStunDisableGravity)
-                    || (target.IsCreature() && target.ToCreature().GetMovementTemplate().Flight == CreatureFlightMovementType.DisableGravity)))
+            if (!apply && (target.HasAuraType(GetAuraType()) || target.HasAuraType(AuraType.ModStunDisableGravity) || (target.IsCreature() && target.ToCreature().IsFloating())))
                 return;
 
             if (target.SetDisableGravity(apply))

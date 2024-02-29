@@ -412,10 +412,6 @@ namespace Game.Entities
 
             AddUnitState(UnitState.Charmed);
 
-            Creature creature = ToCreature();
-            if (creature != null)
-                creature.RefreshCanSwimFlag();
-
             if (!IsPlayer() || !charmer.IsPlayer())
             {
                 // AI will schedule its own change if appropriate

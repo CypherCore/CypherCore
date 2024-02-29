@@ -72,7 +72,7 @@ namespace Framework.Constants
         Disallowed = (ServerControlled | NonAttackable | RemoveClientControl |
                                    PlayerControlled | Rename | Preparation | /* UNIT_FLAG_UNK_6 | */
                                    NotAttackable1 | Looting | PetInCombat | PvpEnabling |
-                                   NonAttackable2 | Pacified | Stunned |
+                                   CantSwim | CanSwim | NonAttackable2 | Pacified | Stunned |
                                    InCombat | OnTaxi | Disarmed | Confused | Fleeing |
                                    Possessed | Skinnable | Mount | Unk28 |
                                    PreventEmotesFromChatText | Sheathe | Immune),
@@ -118,7 +118,7 @@ namespace Framework.Constants
         Disallowed = (FeignDeath | IgnoreReputation | ComprehendLang |
             MirrorImage | ForceMovement | DisarmOffhand |
             DisablePredStats | AllowChangingTalents | DisarmRanged |
-            /* UNIT_FLAG2_REGENERATE_POWER | */ RestrictPartyInteraction |
+            /* UNIT_FLAG2_REGENERATE_POWER | */ RestrictPartyInteraction | CannotTurn |
             PreventSpellClick | /*InteractWhileHostile | */ /* Unk2 | */
             /* UNIT_FLAG2_PLAY_DEATH_ANIM | */ AllowCheatSpells | SuppressHighlightWhenTargetedOrMousedOver |
             TreatAsRaidUnitForHelpfulSpells | LargeAoi | GiganticAoi | NoActions |
@@ -278,7 +278,7 @@ namespace Framework.Constants
         ImmuneToPc = 0x00000020, // UnitFlagImmuneToPc
         ImmuneToNpc = 0x00000040, // UnitFlagImmuneToNpc
         CanWieldLoot = 0x00000080,
-        Sessile = 0x00000100, // CreatureTemplateMovement.Rooted = 1
+        Sessile = 0x00000100, // Rooted movementflag, creature is permanently rooted in place
         Uninteractible = 0x00000200, // UnitFlagUninteractible
         NoAutomaticRegen = 0x00000400, // Creatures With That Flag Uses No UnitFlag2RegeneratePower
         DespawnInstantly = 0x00000800, // Creature Instantly Disappear When Killed
@@ -289,7 +289,7 @@ namespace Framework.Constants
         BossMob = 0x00010000, // CreatureTypeFlagBossMob, Original Description: Raid Boss Mob
         CombatPing = 0x00020000,
         Aquatic = 0x00040000, // Aka Water Only, CreatureTemplateMovement.Ground = 0
-        Amphibious = 0x00080000, // CreatureTemplateMovement.Swim = 1
+        Amphibious = 0x00080000, // Creatures will be able to enter and leave water but can only move on the ocean floor when CREATURE_STATIC_FLAG_CAN_SWIM is not present
         NoMeleeFlee = 0x00100000, // "No Melee (Flee)" Prevents melee (moves as-if feared, does not make creature passive)
         VisibleToGhosts = 0x00200000, // CreatureTypeFlagVisibleToGhosts
         PvpEnabling = 0x00400000, // Old UnitFlagPvpEnabling, Now UnitBytes2OffsetPvpFlag From UnitFieldBytes2
@@ -299,7 +299,7 @@ namespace Framework.Constants
         OnlyAttackPvpEnabling = 0x04000000, // "Only Attack Targets That Are Pvp Enabling"
         CallsGuards = 0x08000000, // Creature Will Summon A Guard If Player Is Within Its Aggro Range (Even If Creature Doesn'T Attack Per Se)
         CanSwim = 0x10000000, // Unitflags 0x8000 UnitFlagCanSwim
-        Floating = 0x20000000, // CreatureTemplateMovement.Flight = 1
+        Floating = 0x20000000, // sets DisableGravity movementflag on spawn/reset
         MoreAudible = 0x40000000, // CreatureTypeFlagMoreAudible
         LargeAoi = 0x80000000  // Unitflags2 0x200000
     }
@@ -526,7 +526,7 @@ namespace Framework.Constants
         NoXP = 0x40,       // creature kill does not provide XP
         Trigger = 0x80,       // Trigger Creature
         NoTaunt = 0x100,       // Creature Is Immune To Taunt Auras And 'attack me' effects
-        NoMoveFlagsUpdate = 0x200, // Creature won't update movement flags
+        Unused9 = 0x200,
         GhostVisibility = 0x400,       // creature will only be visible to dead players
         UseOffhandAttack = 0x800, // creature will use offhand attacks
         NoSellVendor = 0x1000,       // players can't sell items to this vendor
@@ -702,24 +702,6 @@ namespace Framework.Constants
         LeaderAssistsMember = 0x02, // The leader aggroes if the member aggroes
         MembersAssistMember = (MembersAssistLeader | LeaderAssistsMember), // every member will assist if any member is attacked
         IdleInFormation = 0x200, // The member will follow the leader when pathing idly
-    }
-
-    public enum CreatureGroundMovementType
-    {
-        None,
-        Run,
-        Hover,
-
-        Max
-    }
-
-    public enum CreatureFlightMovementType
-    {
-        None,
-        DisableGravity,
-        CanFly,
-
-        Max
     }
 
     public enum CreatureChaseMovementType

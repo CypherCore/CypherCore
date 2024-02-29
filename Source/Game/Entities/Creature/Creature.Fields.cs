@@ -27,8 +27,6 @@ namespace Game.Entities
         // Regenerate health
         bool _regenerateHealth; // Set on creation
 
-        bool _isMissingCanSwimFlagOutOfCombat;
-
         uint? _defaultMountDisplayIdOverride;
         int _creatureImmunitiesId;
         uint _gossipMenuId;

@@ -60,11 +60,9 @@ namespace Game.AI
 
             if (movementInform && HasFlag(MovementGeneratorFlags.InformEnabled))
             {
-                if (!owner.HasCanSwimFlagOutOfCombat())
-                    owner.RemoveUnitFlag(UnitFlags.CanSwim);
-
                 if (owner.IsStateRestoredOnEvade())
                 {
+                    owner.InitializeMovementCapabilities();
                     owner.SetSpawnHealth();
                     owner.LoadCreaturesAddon();
                     owner.LoadCreaturesSparringHealth();

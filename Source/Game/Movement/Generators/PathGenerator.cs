@@ -155,7 +155,7 @@ namespace Game.Movement
                 BuildShortcut();
                 bool path = _source.IsTypeId(TypeId.Unit) && _source.ToCreature().CanFly();
 
-                bool waterPath = _source.IsTypeId(TypeId.Unit) && _source.ToCreature().CanSwim();
+                bool waterPath = _source.IsTypeId(TypeId.Unit) && _source.ToCreature().CanEnterWater();
                 if (waterPath)
                 {
                     // Check both start and end points, if they're both in water, then we can *safely* let the creature move
@@ -850,7 +850,7 @@ namespace Game.Movement
             if (_source.IsTypeId(TypeId.Unit))
             {
                 Creature creature = _source.ToCreature();
-                if (creature.CanWalk())
+                if (!creature.IsAquatic())
                     includeFlags |= NavTerrainFlag.Ground;
 
                 // creatures don't take environmental damage

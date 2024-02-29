@@ -279,38 +279,28 @@ namespace Game.Entities
 
     public class CreatureMovementData
     {
-        public CreatureGroundMovementType Ground;
-        public CreatureFlightMovementType Flight;
-        public bool Swim;
-        public bool Rooted;
+        public bool HoverInitiallyEnabled;
         public CreatureChaseMovementType Chase;
         public CreatureRandomMovementType Random;
         public uint InteractionPauseTimer;
 
         public CreatureMovementData()
         {
-            Ground = CreatureGroundMovementType.Run;
-            Flight = CreatureFlightMovementType.None;
-            Swim = true;
-            Rooted = false;
             Chase = CreatureChaseMovementType.Run;
             Random = CreatureRandomMovementType.Walk;
             InteractionPauseTimer = WorldConfig.GetUIntValue(WorldCfg.CreatureStopForPlayer);
         }
 
-        public bool IsGroundAllowed() { return Ground != CreatureGroundMovementType.None; }
-        public bool IsSwimAllowed() { return Swim; }
-        public bool IsFlightAllowed() { return Flight != CreatureFlightMovementType.None; }
-        public bool IsRooted() { return Rooted; }
-
         public CreatureChaseMovementType GetChase() { return Chase; }
         public CreatureRandomMovementType GetRandom() { return Random; }
+
+        public bool IsHoverInitiallyEnabled() { return HoverInitiallyEnabled; }
 
         public uint GetInteractionPauseTimer() { return InteractionPauseTimer; }
 
         public override string ToString()
         {
-            return $"Ground: {Ground}, Swim: {Swim}, Flight: {Flight} {(Rooted ? ", Rooted" : "")}, Chase: {Chase}, Random: {Random}, InteractionPauseTimer: {InteractionPauseTimer}";
+            return $"HoverInitiallyEnabled: {HoverInitiallyEnabled}, Chase: {Chase}, Random: {Random}, InteractionPauseTimer: {InteractionPauseTimer}";
         }
     }
 
