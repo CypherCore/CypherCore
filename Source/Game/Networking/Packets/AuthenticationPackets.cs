@@ -168,22 +168,22 @@ namespace Game.Networking.Packets
                 foreach (VirtualRealmInfo virtualRealm in SuccessInfo.VirtualRealms)
                     virtualRealm.Write(_worldPacket);
 
-                foreach (var templat in SuccessInfo.Templates)
+                foreach (var characterTemplate in SuccessInfo.Templates)
                 {
-                    _worldPacket.WriteUInt32(templat.TemplateSetId);
-                    _worldPacket.WriteInt32(templat.Classes.Count);
-                    foreach (var templateClass in templat.Classes)
+                    _worldPacket.WriteUInt32(characterTemplate.TemplateSetId);
+                    _worldPacket.WriteInt32(characterTemplate.Classes.Count);
+                    foreach (var templateClass in characterTemplate.Classes)
                     {
                         _worldPacket.WriteUInt8(templateClass.ClassID);
                         _worldPacket.WriteUInt8((byte)templateClass.FactionGroup);
                     }
 
-                    _worldPacket.WriteBits(templat.Name.GetByteCount(), 7);
-                    _worldPacket.WriteBits(templat.Description.GetByteCount(), 10);
+                    _worldPacket.WriteBits(characterTemplate.Name.GetByteCount(), 7);
+                    _worldPacket.WriteBits(characterTemplate.Description.GetByteCount(), 10);
                     _worldPacket.FlushBits();
 
-                    _worldPacket.WriteString(templat.Name);
-                    _worldPacket.WriteString(templat.Description);
+                    _worldPacket.WriteString(characterTemplate.Name);
+                    _worldPacket.WriteString(characterTemplate.Description);
                 }
             }
 
