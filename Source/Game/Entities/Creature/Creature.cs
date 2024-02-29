@@ -286,7 +286,7 @@ namespace Game.Entities
 
             // TODO: migrate these in DB
             _staticFlags.ApplyFlag(CreatureStaticFlags2.AllowMountedCombat, GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.AllowMountedCombat));
-            _staticFlags.ApplyFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells, GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.TreatAsRaidUnit));
+            SetTreatAsRaidUnit(GetCreatureDifficulty().TypeFlags.HasAnyFlag(CreatureTypeFlags.TreatAsRaidUnit));
 
             return true;
         }
@@ -3397,6 +3397,9 @@ namespace Game.Entities
         public bool CanMelee() { return !_staticFlags.HasFlag(CreatureStaticFlags.NoMeleeFlee) && !_staticFlags.HasFlag(CreatureStaticFlags4.NoMeleeApproach); }
 
         public bool CanIgnoreLineOfSightWhenCastingOnMe() { return _staticFlags.HasFlag(CreatureStaticFlags4.IgnoreLosWhenCastingOnMe); }
+
+        public bool IsTreatedAsRaidUnit() { return _staticFlags.HasFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells); }
+        public void SetTreatAsRaidUnit(bool treatAsRaidUnit) { _staticFlags.ApplyFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells, treatAsRaidUnit); }
 
         public sbyte GetOriginalEquipmentId() { return m_originalEquipmentId; }
         public byte GetCurrentEquipmentId() { return m_equipmentId; }

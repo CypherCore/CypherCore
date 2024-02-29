@@ -2316,8 +2316,8 @@ namespace Game.Entities
 
             if (u1.IsTypeId(TypeId.Player) && u2.IsTypeId(TypeId.Player))
                 return u1.ToPlayer().IsInSameGroupWith(u2.ToPlayer());
-            else if ((u2.IsTypeId(TypeId.Player) && u1.IsTypeId(TypeId.Unit) && u1.ToCreature().HasFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells)) ||
-                (u1.IsTypeId(TypeId.Player) && u2.IsTypeId(TypeId.Unit) && u2.ToCreature().HasFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells)))
+            else if ((u2.IsTypeId(TypeId.Player) && u1.IsTypeId(TypeId.Unit) && u1.ToCreature().IsTreatedAsRaidUnit()) ||
+                (u1.IsTypeId(TypeId.Player) && u2.IsTypeId(TypeId.Unit) && u2.ToCreature().IsTreatedAsRaidUnit()))
                 return true;
 
             return u1.GetTypeId() == TypeId.Unit && u2.GetTypeId() == TypeId.Unit && u1.GetFaction() == u2.GetFaction();
@@ -2335,8 +2335,8 @@ namespace Game.Entities
 
             if (u1.IsTypeId(TypeId.Player) && u2.IsTypeId(TypeId.Player))
                 return u1.ToPlayer().IsInSameRaidWith(u2.ToPlayer());
-            else if ((u2.IsTypeId(TypeId.Player) && u1.IsTypeId(TypeId.Unit) && u1.ToCreature().HasFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells)) ||
-                    (u1.IsTypeId(TypeId.Player) && u2.IsTypeId(TypeId.Unit) && u2.ToCreature().HasFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells)))
+            else if ((u2.IsTypeId(TypeId.Player) && u1.IsTypeId(TypeId.Unit) && u1.ToCreature().IsTreatedAsRaidUnit()) ||
+                    (u1.IsTypeId(TypeId.Player) && u2.IsTypeId(TypeId.Unit) && u2.ToCreature().IsTreatedAsRaidUnit()))
                 return true;
 
             // else u1.GetTypeId() == u2.GetTypeId() == TYPEID_UNIT

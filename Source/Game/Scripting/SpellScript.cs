@@ -1055,7 +1055,7 @@ namespace Game.Scripting
                 if (prioritizeGroupMembersOf != null && (!target.IsUnit() || target.ToUnit().IsInRaidWith(prioritizeGroupMembersOf)))
                     negativePoints |= 1 << NOT_GROUPED;
 
-                if (prioritizePlayers && !target.IsPlayer() && (!target.IsCreature() || !target.ToCreature().HasFlag(CreatureStaticFlags4.TreatAsRaidUnitForHelpfulSpells)))
+                if (prioritizePlayers && !target.IsPlayer() && (!target.IsCreature() || !target.ToCreature().IsTreatedAsRaidUnit()))
                     negativePoints |= 1 << NOT_PLAYER;
 
                 if (!target.IsUnit() || target.ToUnit().IsFullHealth())
