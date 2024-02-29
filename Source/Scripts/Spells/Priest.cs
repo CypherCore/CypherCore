@@ -2094,9 +2094,6 @@ namespace Scripts.Spells.Priest
                 return;
 
             int aegisAmount = (int)MathFunctions.CalculatePct(eventInfo.GetHealInfo().GetHeal(), aurEff.GetAmount());
-            AuraEffect existingAegis = eventInfo.GetProcTarget().GetAuraEffect(SpellIds.DivineAegisAbsorb, 0, caster.GetGUID());
-            if (existingAegis != null)
-                aegisAmount += existingAegis.GetAmount();
 
             CastSpellExtraArgs args = new(aurEff);
             args.SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError);
