@@ -107,6 +107,7 @@ namespace Scripts.Spells.Priest
         public const uint Mindgames = 375901;
         public const uint MindgamesVenthyr = 323673;
         public const uint MindBombStun = 226943;
+        public const uint Misery = 238558;
         public const uint OracularHeal = 26170;
         public const uint PainTransformation = 372991;
         public const uint PainTransformationHeal = 372994;
@@ -149,6 +150,7 @@ namespace Scripts.Spells.Priest
         public const uint ShadowWordPain = 589;
         public const uint ShieldDiscipline = 197045;
         public const uint ShieldDisciplineEffect = 47755;
+        public const uint SinAndPunishment = 87204;
         public const uint SinsOfTheMany = 280398;
         public const uint Smite = 585;
         public const uint SpiritOfRedemption = 27827;
@@ -164,8 +166,7 @@ namespace Scripts.Spells.Priest
         public const uint UltimatePenitence = 421453;
         public const uint UltimatePenitenceDamage = 421543;
         public const uint UltimatePenitenceHeal = 421544;
-        public const uint VapiricEmbraceHeal = 15290;
-        public const uint VapiricTouchDispel = 64085;
+        public const uint VampiricEmbraceHeal = 15290;
         public const uint VoidShield = 199144;
         public const uint VoidShieldEffect = 199145;
         public const uint WeakenedSoul = 6788;
@@ -173,7 +174,6 @@ namespace Scripts.Spells.Priest
         public const uint PvpRulesEnabledHardcoded = 134735;
         public const uint VisualPriestPowerWordRadiance = 52872;
         public const uint VisualPriestPrayerOfMending = 38945;
-        public const uint GenReplenishment = 57669;
     }
 
     [Script] // 121536 - Angelic Feather talent
@@ -2999,12 +2999,12 @@ namespace Scripts.Spells.Priest
         }
     }
 
-    [Script] // 15286 - Vapiric Embrace
-    class spell_pri_vapiric_embrace : AuraScript
+    [Script] // 15286 - Vampiric Embrace
+    class spell_pri_vampiric_embrace : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.VapiricEmbraceHeal);
+            return ValidateSpellInfo(SpellIds.VampiricEmbraceHeal);
         }
 
         bool CheckProc(ProcEventInfo eventInfo)
@@ -3026,7 +3026,7 @@ namespace Scripts.Spells.Priest
             CastSpellExtraArgs args = new(aurEff);
             args.AddSpellMod(SpellValueMod.BasePoint0, teamHeal);
             args.AddSpellMod(SpellValueMod.BasePoint1, selfHeal);
-            GetTarget().CastSpell(null, SpellIds.VapiricEmbraceHeal, args);
+            GetTarget().CastSpell(null, SpellIds.VampiricEmbraceHeal, args);
         }
 
         public override void Register()
@@ -3036,8 +3036,8 @@ namespace Scripts.Spells.Priest
         }
     }
 
-    [Script] // 15290 - Vapiric Embrace (heal)
-    class spell_pri_vapiric_embrace_target : SpellScript
+    [Script] // 15290 - Vampiric Embrace (heal)
+    class spell_pri_vampiric_embrace_target : SpellScript
     {
         void FilterTargets(List<WorldObject> unitList)
         {
@@ -3050,54 +3050,32 @@ namespace Scripts.Spells.Priest
         }
     }
 
-    [Script] // 34914 - VaMathF.PIric Touch
-    class spell_pri_vapiric_touch : AuraScript
+    [Script] // 34914 - Vampiric Touch
+    class spell_pri_vampiric_touch : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.VapiricTouchDispel, SpellIds.GenReplenishment);
+            return ValidateSpellInfo(SpellIds.SinAndPunishment, SpellIds.ShadowWordPain);
         }
 
         void HandleDispel(DispelInfo dispelInfo)
         {
             Unit caster = GetCaster();
             if (caster != null)
-            {
-                Unit target = GetUnitOwner();
-                if (target != null)
-                {
-                    AuraEffect aurEff = GetEffect(1);
-                    if (aurEff != null)
-                    {
-                        // backfire damage
-                        int bp = aurEff.GetAmount();
-                        bp = target.SpellDamageBonusTaken(caster, aurEff.GetSpellInfo(), bp, DamageEffectType.DOT);
-                        bp *= 8;
-
-                        CastSpellExtraArgs args = new(aurEff);
-                        args.AddSpellMod(SpellValueMod.BasePoint0, bp);
-                        caster.CastSpell(target, SpellIds.VapiricTouchDispel, args);
-                    }
-                }
-            }
+                caster.CastSpell(dispelInfo.GetDispeller(), SpellIds.SinAndPunishment, true);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        void HandleApplyEffect(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            return eventInfo.GetProcTarget() == GetCaster();
-        }
-
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-            eventInfo.GetProcTarget().CastSpell(null, SpellIds.GenReplenishment, aurEff);
+            Unit caster = GetCaster();
+            if (caster != null && caster.HasAura(SpellIds.Misery))
+                    caster.CastSpell(GetTarget(), SpellIds.ShadowWordPain, true);
         }
 
         public override void Register()
         {
             AfterDispel.Add(new(HandleDispel));
-            DoCheckProc.Add(new(CheckProc));
-            OnEffectProc.Add(new(HandleEffectProc, 2, AuraType.Dummy));
+            OnEffectApply.Add(new(HandleApplyEffect, 0, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask));
         }
     }
 }
