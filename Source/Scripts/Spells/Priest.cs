@@ -108,6 +108,8 @@ namespace Scripts.Spells.Priest
         public const uint MindgamesVenthyr = 323673;
         public const uint MindBombStun = 226943;
         public const uint OracularHeal = 26170;
+        public const uint PainTransformation = 372991;
+        public const uint PainTransformationHeal = 372994;
         public const uint Penance = 47540;
         public const uint PenanceChannelDamage = 47758;
         public const uint PenanceChannelHealing = 47757;
@@ -1630,6 +1632,35 @@ namespace Scripts.Spells.Priest
         public override void Register()
         {
             OnEffectProc.Add(new(HandleEffectProc, 0, AuraType.Dummy));
+        }
+    }
+
+    // 372991 - Pain Transformation
+    [Script] // Triggered by 33206 - Pain Suppression
+    class spell_pri_pain_transformation : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.AtonementEffect, SpellIds.Trinity, SpellIds.PainTransformation, SpellIds.PainTransformationHeal);
+        }
+
+        public override bool Load()
+        {
+            return GetCaster().HasAura(SpellIds.PainTransformation) && !GetCaster().HasAura(SpellIds.Trinity);
+        }
+
+        void HandleHit(uint effIndex)
+        {
+            CastSpellExtraArgs args = new(GetSpell());
+            args.SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError);
+
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.PainTransformationHeal, args);
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.AtonementEffect, args);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffectName.ApplyAura));
         }
     }
 
