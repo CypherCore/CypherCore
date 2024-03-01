@@ -2689,7 +2689,7 @@ namespace Game.Entities
                 SetFall(false);
 
             // Some Amphibious creatures toggle swimming while engaged
-            if (IsAmphibious() && !HasUnitFlag(UnitFlags.CantSwim) && !HasUnitFlag(UnitFlags.CanSwim))
+            if (IsAmphibious() && !HasUnitFlag(UnitFlags.CantSwim) && !HasUnitFlag(UnitFlags.CanSwim) && IsEngaged())
                 if (!IsSwimPrevented() || (GetVictim() != null && !GetVictim().IsOnOceanFloor()))
                     SetUnitFlag(UnitFlags.CanSwim);
 
