@@ -650,10 +650,6 @@ namespace Game.Entities
                     return false;
             }
 
-            if (itemTemplate.GetQuality() < ItemQuality.Uncommon)
-                if (!itemTemplate.HasFlag(ItemFlags2.IgnoreQualityForItemVisualSource) || !itemTemplate.HasFlag(ItemFlags3.ActsAsTransmogHiddenVisualOption))
-                    return false;
-
             if (itemModifiedAppearance.Id < _appearances.Count && _appearances.Get((int)itemModifiedAppearance.Id))
                 return false;
 
