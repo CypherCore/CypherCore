@@ -926,11 +926,42 @@ namespace Game.Spells
             if (!_globalCooldowns.TryGetValue(spellInfo.StartRecoveryCategory, out DateTime end))
                 return TimeSpan.Zero;
 
-            DateTime now = GameTime.GetDateAndTime();
+            DateTime now = GameTime.GetSystemTime();
             if (end < now)
                 return TimeSpan.Zero;
 
             return end - now;
+        }
+
+        public bool IsPaused() { return _pauseTime.HasValue; }
+
+        public void PauseCooldowns()
+        {
+            _pauseTime = GameTime.GetSystemTime().TimeOfDay;
+        }
+
+        public void ResumeCooldowns()
+        {
+            if (!_pauseTime.HasValue)
+                return;
+
+            TimeSpan pausedDuration = GameTime.GetSystemTime().TimeOfDay - _pauseTime.Value;
+
+            foreach (var itr in _spellCooldowns)
+                itr.Value.CooldownEnd += pausedDuration;
+
+            foreach (var itr in _categoryCharges.Keys)
+            {
+                for (var i = 0; i < _categoryCharges[itr].Count; ++i)
+                {
+                    var entry = _categoryCharges[itr][i];
+                    entry.RechargeEnd += pausedDuration;
+                }
+            }
+
+            _pauseTime = null;
+
+            Update();
         }
 
         public Player GetPlayerOwner()
@@ -1063,6 +1094,7 @@ namespace Game.Spells
         DateTime[] _schoolLockouts = new DateTime[(int)SpellSchools.Max];
         MultiMap<uint, ChargeEntry> _categoryCharges = new();
         Dictionary<uint, DateTime> _globalCooldowns = new();
+        TimeSpan? _pauseTime;
 
         public class CooldownEntry
         {

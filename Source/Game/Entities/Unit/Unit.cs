@@ -199,7 +199,8 @@ namespace Game.Entities
 
         void _UpdateSpells(uint diff)
         {
-            _spellHistory.Update();
+            if (!_spellHistory.IsPaused())
+                _spellHistory.Update();
 
             if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null)
                 _UpdateAutoRepeatSpell();
