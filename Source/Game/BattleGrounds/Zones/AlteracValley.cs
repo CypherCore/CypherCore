@@ -37,7 +37,7 @@ namespace Game.BattleGrounds.Zones.AlteracValley
                 for (byte j = 0; j < 9; j++)
                     m_Team_QuestStatus[i][j] = 0;
 
-                _captainBuffTimer[i].Reset(120000 + RandomHelper.URand(0, 4) * 60); //as far as i could see, the buff is randomly so i make 2minutes (thats the duration of the buff itself) + 0-4minutes @todo get the right times
+                _captainBuffTimer[i] = new(120000 + RandomHelper.URand(0, 4) * 60); //as far as i could see, the buff is randomly so i make 2minutes (thats the duration of the buff itself) + 0-4minutes @todo get the right times
             }
 
             _mineInfo[(byte)AlteracValleyMine.North] = new AlteracValleyMineInfo(Team.Other, new StaticMineInfo(WorldStateIds.IrondeepMineOwner, WorldStateIds.IrondeepMineAllianceControlled, WorldStateIds.IrondeepMineHordeControlled, WorldStateIds.IrondeepMineTroggControlled, (byte)TextIds.IrondeepMineAllianceTaken, (byte)TextIds.IrondeepMineHordeTaken));
@@ -53,7 +53,7 @@ namespace Game.BattleGrounds.Zones.AlteracValley
                 InitNode(i, Team.Horde, true);
             InitNode(AVNodes.SnowfallGrave, Team.Other, false); //give snowfall neutral owner
 
-            _mineResourceTimer.Reset(MiscConst.MineResourceTimer);
+            _mineResourceTimer = new(MiscConst.MineResourceTimer);
 
             StartMessageIds[BattlegroundConst.EventIdSecond] = (uint)BroadcastTextIds.StartOneMinute;
             StartMessageIds[BattlegroundConst.EventIdThird] = (uint)BroadcastTextIds.StartHalfMinute;

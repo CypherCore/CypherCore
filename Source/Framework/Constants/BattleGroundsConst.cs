@@ -72,7 +72,9 @@ namespace Framework.Constants
         public const uint SpellArenaPreparation = 32727;                // Use This One, 32728 Not Correct
         public const uint SpellPreparation = 44521;                // Preparation
         public const uint SpellSpiritHealMana = 44535;                // Spirit Heal
-        public const uint SpellRecentlyDroppedFlag = 42792;                // Recently Dropped Flag
+        public const uint SpellRecentlyDroppedAllianceFlag = 42792;                // makes Alliance flag unselectable
+        public const uint SpellRecentlyDroppedHordeFlag = 42792;                // makes Horde flag unselectable
+        public const uint SpellRecentlyDroppedNeutralFlag = 42792;                // makes Neutral flag unselectable
         public const uint SpellAuraPlayerInactive = 43681;                // Inactive
         public const uint SpellHonorableDefender25y = 68652;                // +50% Honor When Standing At A Capture Point That You Control, 25yards Radius (Added In 3.2)
         public const uint SpellHonorableDefender60y = 66157;              // +50% Honor When Standing At A Capture Point That You Control, 60yards Radius (Added In 3.2), Probably For 40+ Player Battlegrounds

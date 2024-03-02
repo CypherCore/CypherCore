@@ -908,8 +908,6 @@ namespace Game.Spells
                 case 23333:         // Warsong Flag
                 case 23335:         // Silverwing Flag
                     return map_id == 489 && player != null && player.InBattleground() ? SpellCastResult.SpellCastOk : SpellCastResult.RequiresArea;
-                case 34976:         // Netherstorm Flag
-                    return map_id == 566 && player != null && player.InBattleground() ? SpellCastResult.SpellCastOk : SpellCastResult.RequiresArea;
                 case 2584:          // Waiting to Resurrect
                 case 42792:         // Recently Dropped Flag
                 case 43681:         // Inactive

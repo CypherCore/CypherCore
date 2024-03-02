@@ -321,7 +321,7 @@ namespace Game.Entities
                 return;
 
             if (!GetCombatManager().HasPvPCombat())
-            { 
+            {
                 RemoveAurasDueToSpell(PlayerConst.SpellPvpRulesEnabled);
                 UpdateItemLevelAreaBasedScaling();
             }
@@ -493,7 +493,7 @@ namespace Game.Entities
                     return m_bgBattlegroundQueueID[i].mercenary;
             return false;
         }
-        
+
         public WorldLocation GetBattlegroundEntryPoint() { return m_bgData.joinPos; }
 
         public bool InBattleground() { return m_bgData.bgInstanceID != 0; }
@@ -520,10 +520,21 @@ namespace Game.Entities
                     return false;
             }
 
+            bool hasRecentlyDroppedFlagDebuff = HasAura(aura =>
+            {
+                if (aura.GetSpellInfo().Id == BattlegroundConst.SpellRecentlyDroppedAllianceFlag)
+                    return true;
+                else if (aura.GetSpellInfo().Id == BattlegroundConst.SpellRecentlyDroppedHordeFlag)
+                    return true;
+                else if (aura.GetSpellInfo().Id == BattlegroundConst.SpellRecentlyDroppedNeutralFlag)
+                    return true;
+                return false;
+            });
+
             // BUG: sometimes when player clicks on flag in AB - client won't send gameobject_use, only gameobject_report_use packet
             // Note: Mount, stealth and invisibility will be removed when used
             return (!IsTotalImmune() &&                            // Damage immune
-            !HasAura(BattlegroundConst.SpellRecentlyDroppedFlag) &&       // Still has recently held flag debuff
+            !hasRecentlyDroppedFlagDebuff &&       // Still has recently held flag debuff
             IsAlive());                                    // Alive
         }
 
@@ -615,7 +626,7 @@ namespace Game.Entities
         }
 
         public bool IsDeserter() { return HasAura(26013); }
-        
+
         public bool CanJoinToBattleground(BattlegroundTemplate bg)
         {
             RBACPermissions perm = RBACPermissions.JoinNormalBg;
