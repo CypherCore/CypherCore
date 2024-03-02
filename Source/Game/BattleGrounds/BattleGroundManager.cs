@@ -3,15 +3,15 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Game.Arenas;
+using Game.BattleGrounds.Zones;
+using Game.BattleGrounds.Zones.AlteracValley;
+using Game.BattleGrounds.Zones.EyeofStorm;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Game.BattleGrounds.Zones;
-using Game.BattleGrounds.Zones.EyeofStorm;
 
 namespace Game.BattleGrounds
 {
@@ -25,7 +25,7 @@ namespace Game.BattleGrounds
         public void DeleteAllBattlegrounds()
         {
             foreach (var data in bgDataStore.Values.ToList())
-                while(!data.m_Battlegrounds.Empty())
+                while (!data.m_Battlegrounds.Empty())
                     data.m_Battlegrounds.First().Value.Dispose();
 
             bgDataStore.Clear();
@@ -244,7 +244,7 @@ namespace Game.BattleGrounds
                 Log.outError(LogFilter.Battleground, $"Battleground: CreateNewBattleground: bg bracket entry not found for map {bg_template.BattlemasterEntry.MapId[0]} bracket id {bracketId}");
                 return null;
             }
- 
+
             Battleground bg = null;
             // create a copy of the BG template
             switch (bgTypeId)
@@ -686,7 +686,7 @@ namespace Game.BattleGrounds
             bgDataStore[bgTypeId].m_Battlegrounds.Remove(instanceId);
         }
 
-        public BattlegroundQueue GetBattlegroundQueue(BattlegroundQueueTypeId bgQueueTypeId) 
+        public BattlegroundQueue GetBattlegroundQueue(BattlegroundQueueTypeId bgQueueTypeId)
         {
             if (!m_BattlegroundQueues.ContainsKey(bgQueueTypeId))
                 m_BattlegroundQueues[bgQueueTypeId] = new BattlegroundQueue(bgQueueTypeId);
