@@ -1851,7 +1851,7 @@ namespace Game.BattleGrounds
         uint GetPlayersSize() { return (uint)m_Players.Count; }
         uint GetPlayerScoresSize() { return (uint)PlayerScores.Count; }
 
-        BattlegroundMap FindBgMap() { return m_Map; }
+        public BattlegroundMap FindBgMap() { return m_Map; }
 
         Group GetBgRaid(Team team) { return m_BgRaids[GetTeamIndexByTeamId(team)]; }
 

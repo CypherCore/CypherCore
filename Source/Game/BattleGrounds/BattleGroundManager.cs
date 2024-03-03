@@ -5,6 +5,7 @@ using Framework.Constants;
 using Framework.Database;
 using Game.BattleGrounds.Zones;
 using Game.BattleGrounds.Zones.AlteracValley;
+using Game.BattleGrounds.Zones.ArathisBasin;
 using Game.BattleGrounds.Zones.EyeofStorm;
 using Game.DataStorage;
 using Game.Entities;
