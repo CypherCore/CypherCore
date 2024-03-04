@@ -229,7 +229,7 @@ namespace Game
                     }
 
                     if (anyObjectiveChangedCompletionState)
-                        player.UpdateVisibleGameobjectsOrSpellClicks();
+                        player.UpdateVisibleObjectInteractions(true, false, false, true);
                 }
             }
 

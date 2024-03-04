@@ -112,8 +112,6 @@ namespace Game.Chat
                 Global.ScriptMgr.OnQuestStatusChange(player, quest.Id);
                 Global.ScriptMgr.OnQuestStatusChange(player, quest, oldStatus, QuestStatus.None);
 
-                player.UpdateNearbyCreatureNpcFlags();
-
                 handler.SendSysMessage(CypherStrings.CommandQuestRemoved);
                 return true;
             }

@@ -269,7 +269,7 @@ namespace Game.Groups
             {
                 Player player = Global.ObjAccessor.FindPlayer(member.guid);
                 if (player != null)
-                    player.UpdateVisibleGameobjectsOrSpellClicks();
+                    player.UpdateVisibleObjectInteractions(false, true, false, true);
             }
         }
 
@@ -299,7 +299,7 @@ namespace Game.Groups
             {
                 Player player = Global.ObjAccessor.FindPlayer(member.guid);
                 if (player != null)
-                    player.UpdateVisibleGameobjectsOrSpellClicks();
+                    player.UpdateVisibleObjectInteractions(false, true, false, true);
             }
         }
 
@@ -474,7 +474,7 @@ namespace Game.Groups
 
             // quest related GO state dependent from raid membership
             if (IsRaidGroup())
-                player.UpdateVisibleGameobjectsOrSpellClicks();
+                player.UpdateVisibleObjectInteractions(false, true, false, true);
 
             player.FailCriteria(CriteriaFailEvent.ModifyPartyStatus, 0);
 
@@ -566,7 +566,7 @@ namespace Game.Groups
                             player.SetGroup(null);
 
                         // quest related GO state dependent from raid membership
-                        player.UpdateVisibleGameobjectsOrSpellClicks();
+                        player.UpdateVisibleObjectInteractions(false, true, false, true);
 
 
                     }
@@ -713,7 +713,7 @@ namespace Game.Groups
 
                 // quest related GO state dependent from raid membership
                 if (IsRaidGroup())
-                    player.UpdateVisibleGameobjectsOrSpellClicks();
+                    player.UpdateVisibleObjectInteractions(false, true, false, true);
 
                 if (!hideDestroy)
                     player.SendPacket(new GroupDestroyed());

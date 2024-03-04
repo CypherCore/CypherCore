@@ -841,8 +841,6 @@ namespace Game.Entities
 
             Global.ScriptMgr.OnQuestStatusChange(this, questId);
             Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, questStatusData.Status);
-
-            UpdateNearbyCreatureNpcFlags();
         }
 
         public void CompleteQuest(uint quest_id)
@@ -1222,15 +1220,11 @@ namespace Game.Entities
                 UpdatePvPState();
             }
 
-            SendQuestGiverStatusMultiple();
-
-            SendQuestUpdate(questId);
+            SendQuestUpdate(questId, true, true);
 
             bool updateVisibility = false;
             if (quest.HasFlag(QuestFlags.UpdatePhaseshift))
                 updateVisibility = PhasingHandler.OnConditionChange(this, false);
-
-            UpdateNearbyCreatureNpcFlags();
 
             //lets remove flag for delayed teleports
             SetCanDelayTeleport(false);
@@ -1262,8 +1256,6 @@ namespace Game.Entities
 
             if (updateVisibility)
                 UpdateObjectVisibility();
-
-            UpdateNearbyCreatureNpcFlags();
         }
 
         public void SetRewardedQuest(uint questId)
@@ -1916,8 +1908,6 @@ namespace Game.Entities
                 Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, status);
             }
 
-            UpdateNearbyCreatureNpcFlags();
-
             if (update)
                 SendQuestUpdate(questId);
         }
@@ -1968,7 +1958,7 @@ namespace Game.Entities
                 SendQuestUpdate(questId);
         }
 
-        void SendQuestUpdate(uint questId)
+        void SendQuestUpdate(uint questId, bool updateInteractions = true, bool updateGameObjectQuestGiverStatus = false)
         {
             var saBounds = Global.SpellMgr.GetSpellAreaForQuestMapBounds(questId);
             if (!saBounds.Empty())
@@ -2015,7 +2005,8 @@ namespace Game.Entities
                     RemoveAurasDueToSpell(spellId);
             }
 
-            UpdateVisibleGameobjectsOrSpellClicks();
+            if (updateInteractions)
+                UpdateVisibleObjectInteractions(true, false, updateGameObjectQuestGiverStatus, true);
         }
 
         public QuestGiverStatus GetQuestDialogStatus(WorldObject questgiver)
@@ -2176,7 +2167,7 @@ namespace Game.Entities
                 }
 
                 SetRewardedQuest(questId);
-                SendQuestUpdate(questId);
+                SendQuestUpdate(questId, false);
 
                 if (!updateVisibility && quest.HasFlag(QuestFlags.UpdatePhaseshift))
                     updateVisibility = PhasingHandler.OnConditionChange(this, false);
@@ -2185,15 +2176,13 @@ namespace Game.Entities
                 Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, QuestStatus.Rewarded);
             }
 
-            SendQuestGiverStatusMultiple();
+            UpdateVisibleObjectInteractions(true, false, true, true);
 
             // make full db save
             SaveToDB(false);
 
             if (updateVisibility)
                 UpdateObjectVisibility();
-
-            UpdateNearbyCreatureNpcFlags();
         }
 
         public void DespawnPersonalSummonsForQuest(uint questId)
@@ -2488,7 +2477,7 @@ namespace Game.Entities
                 }
             }
 
-            UpdateVisibleGameobjectsOrSpellClicks();
+            UpdateVisibleObjectInteractions(true, false, false, true);
         }
 
         public void KilledMonster(CreatureTemplate cInfo, ObjectGuid guid)
@@ -2710,12 +2699,10 @@ namespace Game.Entities
             }
 
             if (anyObjectiveChangedCompletionState)
-                UpdateVisibleGameobjectsOrSpellClicks();
+                UpdateVisibleObjectInteractions(true, false, false, true);
 
             if (updatePhaseShift)
                 PhasingHandler.OnConditionChange(this);
-
-            UpdateNearbyCreatureNpcFlags();
 
             if (updateZoneAuras)
             {
@@ -3294,70 +3281,100 @@ namespace Game.Entities
             return false;
         }
 
-        public void UpdateVisibleGameobjectsOrSpellClicks()
+        public void UpdateVisibleObjectInteractions(bool allUnits, bool onlySpellClicks, bool gameObjectQuestGiverStatus, bool questObjectiveGameObjects)
         {
-            if (m_clientGUIDs.Empty())
-                return;
-
+            QuestGiverStatusMultiple giverStatusMultiple = new();
             UpdateData udata = new(GetMapId());
-            UpdateObject packet;
-            foreach (var guid in m_clientGUIDs)
+            foreach (var visibleObjectGuid in m_clientGUIDs)
             {
-                if (guid.IsGameObject())
+                if (visibleObjectGuid.IsGameObject() && (gameObjectQuestGiverStatus || questObjectiveGameObjects))
                 {
-                    GameObject obj = ObjectAccessor.GetGameObject(this, guid);
-                    if (obj != null)
+                    GameObject gameObject = ObjectAccessor.GetGameObject(this, visibleObjectGuid);
+                    if (gameObject == null)
+                        continue;
+
+                    if (gameObjectQuestGiverStatus && gameObject.GetGoType() == GameObjectTypes.QuestGiver)
+                        giverStatusMultiple.QuestGiver.Add(new QuestGiverInfo(visibleObjectGuid, GetQuestDialogStatus(gameObject)));
+
+                    if (questObjectiveGameObjects)
                     {
                         ObjectFieldData objMask = new();
                         GameObjectFieldData goMask = new();
 
-                        if (m_questObjectiveStatus.ContainsKey((QuestObjectiveType.GameObject, (int)obj.GetEntry())))
-                            objMask.MarkChanged(obj.m_objectData.DynamicFlags);
+                        if (m_questObjectiveStatus.ContainsKey((QuestObjectiveType.GameObject, (int)gameObject.GetEntry())))
+                            objMask.MarkChanged(gameObject.m_objectData.DynamicFlags);
 
-                        switch (obj.GetGoType())
+                        switch (gameObject.GetGoType())
                         {
                             case GameObjectTypes.QuestGiver:
                             case GameObjectTypes.Chest:
                             case GameObjectTypes.Goober:
                             case GameObjectTypes.Generic:
                             case GameObjectTypes.GatheringNode:
-                                if (Global.ObjectMgr.IsGameObjectForQuests(obj.GetEntry()))
-                                    objMask.MarkChanged(obj.m_objectData.DynamicFlags);
+                                if (Global.ObjectMgr.IsGameObjectForQuests(gameObject.GetEntry()))
+                                    objMask.MarkChanged(gameObject.m_objectData.DynamicFlags);
                                 break;
                             default:
                                 break;
                         }
 
                         if (objMask.GetUpdateMask().IsAnySet() || goMask.GetUpdateMask().IsAnySet())
-                            obj.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetUpdateMask(), goMask.GetUpdateMask(), this);
+                            gameObject.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetUpdateMask(), goMask.GetUpdateMask(), this);
                     }
+
                 }
-                else if (guid.IsCreatureOrVehicle())
+                else if (visibleObjectGuid.IsCreatureOrVehicle() && (allUnits || onlySpellClicks))
                 {
-                    Creature obj = ObjectAccessor.GetCreatureOrPetOrVehicle(this, guid);
-                    if (obj == null)
+                    Creature creature = ObjectAccessor.GetCreatureOrPetOrVehicle(this, visibleObjectGuid);
+                    if (creature == null)
                         continue;
 
-                    // check if this unit requires quest specific flags
-                    if (!obj.HasNpcFlag(NPCFlags.SpellClick))
-                        continue;
-
-                    var clickBounds = Global.ObjectMgr.GetSpellClickInfoMapBounds(obj.GetEntry());
-                    foreach (var spellClickInfo in clickBounds)
+                    if (allUnits)
                     {
-                        if (Global.ConditionMgr.HasConditionsForSpellClickEvent(obj.GetEntry(), spellClickInfo.spellId))
+                        ObjectFieldData objMask = new();
+                        UnitData unitMask = new();
+                        for (int i = 0; i < creature.m_unitData.NpcFlags.GetSize(); ++i)
+                            if (creature.m_unitData.NpcFlags[i] != 0)
+                                unitMask.MarkChanged(creature.m_unitData.NpcFlags, i);
+
+                        if (objMask.GetUpdateMask().IsAnySet() || unitMask.GetUpdateMask().IsAnySet())
+                            creature.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetUpdateMask(), unitMask.GetUpdateMask(), this);
+
+                        if (creature.IsQuestGiver())
+                            giverStatusMultiple.QuestGiver.Add(new QuestGiverInfo(visibleObjectGuid, GetQuestDialogStatus(creature)));
+                    }
+                    else if (onlySpellClicks)
+                    {
+                        // check if this unit requires quest specific flags
+                        if (!creature.HasNpcFlag(NPCFlags.SpellClick))
+                            continue;
+
+                        var clickBounds = Global.ObjectMgr.GetSpellClickInfoMapBounds(creature.GetEntry());
+                        foreach (var spellClickInfo in clickBounds)
                         {
-                            ObjectFieldData objMask = new();
-                            UnitData unitMask = new();
-                            unitMask.MarkChanged(m_unitData.NpcFlags, 0); // NpcFlags[0] has UNIT_NPC_FLAG_SPELLCLICK
-                            obj.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetUpdateMask(), unitMask.GetUpdateMask(), this);
-                            break;
+                            if (Global.ConditionMgr.HasConditionsForSpellClickEvent(creature.GetEntry(), spellClickInfo.spellId))
+                            {
+                                ObjectFieldData objMask = new();
+                                UnitData unitMask = new();
+                                unitMask.MarkChanged(m_unitData.NpcFlags, 0); // NpcFlags[0] has UNIT_NPC_FLAG_SPELLCLICK
+                                creature.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetUpdateMask(), unitMask.GetUpdateMask(), this);
+                                break;
+                            }
                         }
                     }
                 }
             }
-            udata.BuildPacket(out packet);
-            SendPacket(packet);
+
+            // If as a result of npcflag updates we stop seeing UNIT_NPC_FLAG_QUESTGIVER then
+            // we must also send SMSG_QUEST_GIVER_STATUS_MULTIPLE because client will not request it automatically
+            if (!giverStatusMultiple.QuestGiver.Empty())
+                SendPacket(giverStatusMultiple);
+
+            if (udata.HasData())
+            {
+                udata.BuildPacket(out var packet);
+                SendPacket(packet);
+            }
         }
 
         void SetDailyQuestStatus(uint quest_id)

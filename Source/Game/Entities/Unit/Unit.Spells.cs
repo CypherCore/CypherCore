@@ -3800,7 +3800,7 @@ namespace Game.Entities
             if (player != null)
             {
                 if (Global.ConditionMgr.IsSpellUsedInSpellClickConditions(aurApp.GetBase().GetId()))
-                    player.UpdateVisibleGameobjectsOrSpellClicks();
+                    player.UpdateVisibleObjectInteractions(false, true, false, false);
 
                 player.FailCriteria(CriteriaFailEvent.LoseAura, aurApp.GetBase().GetId());
             }
@@ -4020,7 +4020,7 @@ namespace Game.Entities
             if (player != null)
             {
                 if (Global.ConditionMgr.IsSpellUsedInSpellClickConditions(aurApp.GetBase().GetId()))
-                    player.UpdateVisibleGameobjectsOrSpellClicks();
+                    player.UpdateVisibleObjectInteractions(false, true, false, false);
 
                 player.FailCriteria(CriteriaFailEvent.GainAura, aurApp.GetBase().GetId());
                 player.StartCriteria(CriteriaStartEvent.GainAura, aurApp.GetBase().GetId());

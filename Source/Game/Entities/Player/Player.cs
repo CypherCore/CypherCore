@@ -5520,35 +5520,6 @@ namespace Game.Entities
             return go;
         }
 
-        public void UpdateNearbyCreatureNpcFlags()
-        {
-            List<Creature> creatures = GetCreatureListWithOptionsInGrid(GetVisibilityRange(), new() { IgnorePhases = false });
-
-            UpdateData udata = new(GetMapId());
-            ObjectFieldData objMask = new();
-            UnitData unitMask = new();
-            for (int i = 0; i < m_unitData.NpcFlags.GetSize(); ++i)
-                unitMask.MarkChanged(m_unitData.NpcFlags, i);
-
-            foreach (Creature creature in creatures)
-            {
-                if (!HaveAtClient(creature))
-                    continue;
-
-                // skip creatures which dont have any npcflags set
-                if (creature.GetNpcFlags() == 0 && creature.GetNpcFlags2() == 0)
-                    continue;
-
-                creature.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetUpdateMask(), unitMask.GetUpdateMask(), this);
-            }
-
-            if (!udata.HasData())
-                return;
-
-            udata.BuildPacket(out UpdateObject packet);
-            SendPacket(packet);
-        }
-
         public void SendInitialPacketsBeforeAddToMap()
         {
             if (!m_teleport_options.HasAnyFlag(TeleportToOptions.Seamless))
