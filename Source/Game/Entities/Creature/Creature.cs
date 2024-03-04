@@ -3066,7 +3066,17 @@ namespace Game.Entities
                 Log.outDebug(LogFilter.Unit, $"Creature::SetCannotReachTarget() called with true. Details: {GetDebugInfo()}");
         }
 
-        void SetDefaultMount(uint? mountCreatureDisplayId)
+        public bool IsIgnoringChaseRange()
+        {
+            return _staticFlags.HasFlag(CreatureStaticFlags6.AlwaysStandOnTopOfTarget);
+        }
+
+        public void SetIgnoreChaseRange(bool ignoreChaseRange)
+        {
+            _staticFlags.ApplyFlag(CreatureStaticFlags6.AlwaysStandOnTopOfTarget, ignoreChaseRange);
+        }
+
+        public void SetDefaultMount(uint? mountCreatureDisplayId)
         {
             if (mountCreatureDisplayId.HasValue && !CliDB.CreatureDisplayInfoStorage.HasRecord(mountCreatureDisplayId.Value))
                 mountCreatureDisplayId = null;

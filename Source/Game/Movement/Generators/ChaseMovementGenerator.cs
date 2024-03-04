@@ -63,12 +63,13 @@ namespace Game.Movement
             if (target == null || !target.IsInWorld)
                 return false;
 
+            Creature cOwner = owner.ToCreature();
+
             // the owner might be unable to move (rooted or casting), or we have lost the target, pause movement
             if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting() || HasLostTarget(owner, target))
             {
                 owner.StopMoving();
                 _lastTargetPosition = null;
-                Creature cOwner = owner.ToCreature();
                 if (cOwner != null)
                     cOwner.SetCannotReachTarget(false);
                 return true;
@@ -82,6 +83,9 @@ namespace Game.Movement
             float maxTarget = _range.HasValue ? _range.Value.MaxTolerance + hitboxSum : SharedConst.ContactDistance + hitboxSum;
             ChaseAngle? angle = mutualChase ? null : _angle;
 
+            if (cOwner != null && cOwner.IsIgnoringChaseRange())
+                    minRange = minTarget = maxRange = maxTarget = 0.0f;
+
             // periodically check if we're already in the expected range...
             _rangeCheckTimer.Update(diff);
             if (_rangeCheckTimer.Passed())
@@ -92,7 +96,6 @@ namespace Game.Movement
                     RemoveFlag(MovementGeneratorFlags.InformEnabled);
                     _path = null;
 
-                    Creature cOwner = owner.ToCreature();
                     if (cOwner != null)
                         cOwner.SetCannotReachTarget(false);
 
@@ -108,7 +111,6 @@ namespace Game.Movement
             {
                 RemoveFlag(MovementGeneratorFlags.InformEnabled);
                 _path = null;
-                Creature cOwner = owner.ToCreature();
                 if (cOwner != null)
                     cOwner.SetCannotReachTarget(false);
                 owner.ClearUnitState(UnitState.ChaseMove);
@@ -123,7 +125,6 @@ namespace Game.Movement
                 _mutualChase = mutualChase;
                 if (owner.HasUnitState(UnitState.ChaseMove) || !PositionOkay(owner, target, minRange, maxRange, angle))
                 {
-                    Creature cOwner = owner.ToCreature();
                     // can we get to the target?
                     if (cOwner != null && !target.IsInAccessiblePlaceFor(cOwner))
                     {

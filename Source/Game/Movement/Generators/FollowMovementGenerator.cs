@@ -87,11 +87,16 @@ namespace Game.Movement
                 return true;
             }
 
+            float range = _range;
+            Creature cOwner = owner.ToCreature();
+            if (cOwner != null && cOwner.IsIgnoringChaseRange())
+                range = 0.0f;
+
             _checkTimer.Update(diff);
             if (_checkTimer.Passed())
             {
                 _checkTimer.Reset(CHECK_INTERVAL);
-                if (HasFlag(MovementGeneratorFlags.InformEnabled) && PositionOkay(owner, target, _range, _angle))
+                if (HasFlag(MovementGeneratorFlags.InformEnabled) && PositionOkay(owner, target, range, _angle))
                 {
                     RemoveFlag(MovementGeneratorFlags.InformEnabled);
                     _path = null;
@@ -113,7 +118,7 @@ namespace Game.Movement
             if (_lastTargetPosition == null || _lastTargetPosition.GetExactDistSq(target.GetPosition()) > 0.0f)
             {
                 _lastTargetPosition = new(target.GetPosition());
-                if (owner.HasUnitState(UnitState.FollowMove) || !PositionOkay(owner, target, _range + FOLLOW_RANGE_TOLERANCE))
+                if (owner.HasUnitState(UnitState.FollowMove) || !PositionOkay(owner, target, range + FOLLOW_RANGE_TOLERANCE))
                 {
                     if (_path == null)
                         _path = new PathGenerator(owner);
@@ -135,7 +140,7 @@ namespace Game.Movement
                             tAngle = _angle.LowerBound();
                     }
 
-                    target.GetNearPoint(owner, out x, out y, out z, _range, target.ToAbsoluteAngle(tAngle));
+                    target.GetNearPoint(owner, out x, out y, out z, range, target.ToAbsoluteAngle(tAngle));
 
                     if (owner.IsHovering())
                         owner.UpdateAllowedPositionZ(x, y, ref z);
