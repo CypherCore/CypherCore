@@ -938,6 +938,21 @@ namespace Game.Networking.Packets
         public uint SoundKitID;
     }
 
+    class StopSpeakerbotSound : ServerPacket
+    {
+        ObjectGuid SourceObjectGUID;
+
+        public StopSpeakerbotSound(ObjectGuid sourceObjectGUID) : base(ServerOpcodes.StopSpeakerbotSound)
+        {
+            SourceObjectGUID = sourceObjectGUID;
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(SourceObjectGUID);
+        }
+    }
+
     class OpeningCinematic : ClientPacket
     {
         public OpeningCinematic(WorldPacket packet) : base(packet) { }
