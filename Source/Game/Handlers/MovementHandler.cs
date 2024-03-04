@@ -139,7 +139,10 @@ namespace Game
                 mover.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.LandingOrFlight); // Parachutes
 
             if (opcode == ClientOpcodes.MoveSetFly || opcode == ClientOpcodes.MoveSetAdvFly)
+            {
                 _player.UnsummonPetTemporaryIfAny(); // always do the pet removal on current client activeplayer only
+                _player.UnsummonBattlePetTemporaryIfAny(true);
+            }
 
             movementInfo.Guid = mover.GetGUID();
             movementInfo.Time = AdjustClientMovementTime(movementInfo.Time);
@@ -408,6 +411,7 @@ namespace Game
 
             // resummon pet
             player.ResummonPetTemporaryUnSummonedIfAny();
+            player.ResummonBattlePetTemporaryUnSummonedIfAny();
 
             //lets process all delayed operations on successful teleport
             player.ProcessDelayedOperations();

@@ -181,7 +181,7 @@ namespace Game.Entities
             {
                 if (IsTrigger() && m_spells[0] != 0)
                     m_ControlledByPlayer = true;
-            
+
                 CreatureSummonedData summonedData = Global.ObjectMgr.GetCreatureSummonedData(GetEntry());
                 if (summonedData != null)
                 {
@@ -410,12 +410,12 @@ namespace Game.Entities
 
             return false;
         }
-        
+
         public override string GetDebugInfo()
         {
             return $"{base.GetDebugInfo()}\nTempSummonType : {GetSummonType()} Summoner: {GetSummonerGUID()} Timer: {GetTimer()}";
         }
-        
+
         public override void SaveToDB(uint mapid, List<Difficulty> spawnDifficulties) { }
 
         public ObjectGuid GetSummonerGUID() { return m_summonerGUID; }
@@ -435,10 +435,30 @@ namespace Game.Entities
         public uint? GetCreatureIdVisibleToSummoner() { return m_creatureIdVisibleToSummoner; }
 
         public uint? GetDisplayIdVisibleToSummoner() { return m_displayIdVisibleToSummoner; }
-        
+
         public bool CanFollowOwner() { return m_canFollowOwner; }
 
         public void SetCanFollowOwner(bool can) { m_canFollowOwner = can; }
+
+        public bool IsDismissedOnFlyingMount()
+        {
+            return !HasFlag(CreatureStaticFlags5.DontDismissOnFlyingMount);
+        }
+
+        public void SetDontDismissOnFlyingMount(bool dontDismissOnFlyingMount)
+        {
+            _staticFlags.ApplyFlag(CreatureStaticFlags5.DontDismissOnFlyingMount, dontDismissOnFlyingMount);
+        }
+
+        public bool IsAutoResummoned()
+        {
+            return !HasFlag(CreatureStaticFlags6.DoNotAutoResummon);
+        }
+
+        public void SetDontAutoResummon(bool dontAutoResummon)
+        {
+            _staticFlags.ApplyFlag(CreatureStaticFlags6.DoNotAutoResummon, dontAutoResummon);
+        }
 
         public SummonPropertiesRecord m_Properties;
         TempSummonType m_type;

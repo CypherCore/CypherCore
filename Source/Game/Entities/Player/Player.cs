@@ -667,6 +667,7 @@ namespace Game.Entities
                 StopCastingCharm();
                 StopCastingBindSight();
                 UnsummonPetTemporaryIfAny();
+                UnsummonBattlePetTemporaryIfAny();
                 SetPower(PowerType.ComboPoints, 0);
                 GetSession().DoLootReleaseAll();
                 m_lootRolls.Clear();
@@ -1077,6 +1078,35 @@ namespace Game.Entities
             NewPet.LoadPetFromDB(this, 0, m_temporaryUnsummonedPetNumber, true);
 
             m_temporaryUnsummonedPetNumber = 0;
+        }
+
+        public void UnsummonBattlePetTemporaryIfAny(bool onFlyingMount = false)
+        {
+            Creature battlepet = GetSummonedBattlePet();
+            if (battlepet == null || !battlepet.IsSummon())
+                return;
+
+            if (onFlyingMount && !battlepet.ToTempSummon().IsDismissedOnFlyingMount())
+                return;
+
+            if (battlepet.ToTempSummon().IsAutoResummoned())
+                m_temporaryUnsummonedBattlePet = battlepet.GetBattlePetCompanionGUID();
+
+            GetSession().GetBattlePetMgr().DismissPet();
+        }
+
+        public void ResummonBattlePetTemporaryUnSummonedIfAny()
+        {
+            if (m_temporaryUnsummonedBattlePet.IsEmpty())
+                return;
+
+            // not resummon in not appropriate state
+            if (IsPetNeedBeTemporaryUnsummoned())
+                return;
+
+            GetSession().GetBattlePetMgr().SummonPet(m_temporaryUnsummonedBattlePet);
+
+            m_temporaryUnsummonedBattlePet.Clear();
         }
 
         public bool IsPetNeedBeTemporaryUnsummoned()

@@ -1533,6 +1533,7 @@ namespace Game.Entities
             {
                 player.EnablePetControlsOnDismount();
                 player.ResummonPetTemporaryUnSummonedIfAny();
+                player.ResummonBattlePetTemporaryUnSummonedIfAny();
             }
         }
 

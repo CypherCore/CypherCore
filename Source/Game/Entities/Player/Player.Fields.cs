@@ -109,6 +109,7 @@ namespace Game.Entities
         MultiMap<uint, uint> m_overrideSpells = new();
         public Spell m_spellModTakingSpell;
         uint m_oldpetspell;
+        ObjectGuid m_temporaryUnsummonedBattlePet;
         Dictionary<uint, StoredAuraTeleportLocation> m_storedAuraTeleportLocations = new();
         SpellCastRequest _pendingSpellCastRequest;
 

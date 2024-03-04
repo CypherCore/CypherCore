@@ -22,7 +22,7 @@ namespace Game.Entities
         long _lastDamagedTime; // Part of Evade mechanics
         MultiMap<byte, byte> m_textRepeat = new();
 
-        CreatureStaticFlagsHolder _staticFlags;
+        protected CreatureStaticFlagsHolder _staticFlags;
 
         // Regenerate health
         bool _regenerateHealth; // Set on creation
