@@ -5473,7 +5473,7 @@ namespace Game.Entities
 
             // not unfriendly/hostile
             if (!creature.IsInteractionAllowedWhileHostile() && creature.GetReactionTo(this) <= ReputationRank.Unfriendly)
-                return nullptr;
+                return null;
 
             if (creature.IsInCombat() && !creature.IsInteractionAllowedInCombat())
                 return null;
