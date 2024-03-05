@@ -286,6 +286,7 @@ namespace Game.Entities
 
             // TODO: migrate these in DB
             _staticFlags.ApplyFlag(CreatureStaticFlags2.AllowMountedCombat, GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.AllowMountedCombat));
+            SetInteractionAllowedInCombat(GetCreatureDifficulty().TypeFlags.HasAnyFlag(CreatureTypeFlags.AllowInteractionWhileInCombat));
             SetTreatAsRaidUnit(GetCreatureDifficulty().TypeFlags.HasAnyFlag(CreatureTypeFlags.TreatAsRaidUnit));
 
             return true;
@@ -2754,6 +2755,33 @@ namespace Game.Entities
                 m_corpseRemoveTime = now + (uint)(m_corpseDelay * decayRate);
 
             m_respawnTime = Math.Max(m_corpseRemoveTime + m_respawnDelay, m_respawnTime);
+        }
+
+        public override void SetInteractionAllowedWhileHostile(bool interactionAllowed)
+        {
+            _staticFlags.ApplyFlag(CreatureStaticFlags5.InteractWhileHostile, interactionAllowed);
+            base.SetInteractionAllowedWhileHostile(interactionAllowed);
+        }
+
+        public override void SetInteractionAllowedInCombat(bool interactionAllowed)
+        {
+            _staticFlags.ApplyFlag(CreatureStaticFlags3.AllowInteractionWhileInCombat, interactionAllowed);
+            base.SetInteractionAllowedInCombat(interactionAllowed);
+        }
+
+        public override void UpdateNearbyPlayersInteractions()
+        {
+            base.UpdateNearbyPlayersInteractions();
+
+            // If as a result of npcflag updates we stop seeing UNIT_NPC_FLAG_QUESTGIVER then
+            // we must also send SMSG_QUEST_GIVER_STATUS_MULTIPLE because client will not request it automatically
+            if (IsQuestGiver())
+            {
+                var sender = (Player receiver) => receiver.PlayerTalkClass.SendQuestGiverStatus(receiver.GetQuestDialogStatus(this), GetGUID());
+
+                MessageDistDeliverer notifier = new(this, sender, GetVisibilityRange());
+                Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
+            }
         }
 
         public bool HasScalableLevels()

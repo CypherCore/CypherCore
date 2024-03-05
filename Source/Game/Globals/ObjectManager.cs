@@ -98,7 +98,12 @@ namespace Game
             if (staticFlags.HasFlag(CreatureStaticFlags3.CannotTurn))
                 unitFlags2 |= (uint)UnitFlags2.CannotTurn;
 
+            if (staticFlags.HasFlag(CreatureStaticFlags5.InteractWhileHostile))
+                unitFlags2 |= (uint)UnitFlags2.InteractWhileHostile;
+
             unitFlags3 = data != null && data.unit_flags3.HasValue ? data.unit_flags3.Value : cInfo.UnitFlags3;
+            if (staticFlags.HasFlag(CreatureStaticFlags3.AllowInteractionWhileInCombat))
+                unitFlags3 |= (uint)UnitFlags3.AllowInteractionWhileInCombat;
         }
 
         public static ResponseCodes CheckPlayerName(string name, Locale locale, bool create = false)

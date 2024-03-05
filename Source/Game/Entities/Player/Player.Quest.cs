@@ -2032,6 +2032,14 @@ namespace Game.Entities
                 }
                 case TypeId.Unit:
                 {
+                    Creature questGiverCreature = questgiver.ToCreature();
+                    if (!questGiverCreature.IsInteractionAllowedWhileHostile() && questGiverCreature.IsHostileTo(this))
+                        return QuestGiverStatus.None;
+
+                    if (!questGiverCreature.IsInteractionAllowedInCombat() && questGiverCreature.IsInCombat())
+                        return QuestGiverStatus.None;
+
+
                     CreatureAI ai = questgiver.ToCreature().GetAI();
                     if (ai != null)
                     {
@@ -3220,7 +3228,7 @@ namespace Game.Entities
                 {
                     // need also pet quests case support
                     Creature questgiver = ObjectAccessor.GetCreatureOrPetOrVehicle(this, itr);
-                    if (questgiver == null || questgiver.IsHostileTo(this))
+                    if (questgiver == null)
                         continue;
 
                     if (!questgiver.HasNpcFlag(NPCFlags.QuestGiver))

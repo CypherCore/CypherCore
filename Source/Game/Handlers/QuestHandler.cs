@@ -17,28 +17,14 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.QuestGiverStatusQuery, Processing = PacketProcessing.Inplace)]
         void HandleQuestgiverStatusQuery(QuestGiverStatusQuery packet)
         {
-            QuestGiverStatus questStatus = QuestGiverStatus.None;
-
-            var questgiver = Global.ObjAccessor.GetObjectByTypeMask(GetPlayer(), packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject);
-            if (questgiver == null)
+            var questGiver = Global.ObjAccessor.GetObjectByTypeMask(GetPlayer(), packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject);
+            if (questGiver == null)
             {
                 Log.outInfo(LogFilter.Network, "Error in CMSG_QUESTGIVER_STATUS_QUERY, called for non-existing questgiver {0}", packet.QuestGiverGUID.ToString());
                 return;
             }
 
-            switch (questgiver.GetTypeId())
-            {
-                case TypeId.Unit:
-                    if (!questgiver.ToCreature().IsHostileTo(GetPlayer()))// do not show quest status to enemies
-                        questStatus = GetPlayer().GetQuestDialogStatus(questgiver);
-                    break;
-                case TypeId.GameObject:
-                    questStatus = GetPlayer().GetQuestDialogStatus(questgiver);
-                    break;
-                default:
-                    Log.outError(LogFilter.Network, "QuestGiver called for unexpected type {0}", questgiver.GetTypeId());
-                    break;
-            }
+            QuestGiverStatus questStatus = _player.GetQuestDialogStatus(questGiver);
 
             //inform client about status of quest
             GetPlayer().PlayerTalkClass.SendQuestGiverStatus(questStatus, packet.QuestGiverGUID);
@@ -396,7 +382,7 @@ namespace Game
 
             if (GetPlayer().GetQuestStatus(packet.QuestID) != QuestStatus.Complete)
                 return;
-            
+
             GetPlayer().PlayerTalkClass.SendQuestGiverOfferReward(quest, packet.QuestGiverGUID, true);
         }
 
