@@ -286,6 +286,7 @@ namespace Game.Entities
 
             // TODO: migrate these in DB
             _staticFlags.ApplyFlag(CreatureStaticFlags2.AllowMountedCombat, GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.AllowMountedCombat));
+            SetIgnoreFeignDeath(creatureInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.IgnoreFeighDeath));
             SetInteractionAllowedInCombat(GetCreatureDifficulty().TypeFlags.HasAnyFlag(CreatureTypeFlags.AllowInteractionWhileInCombat));
             SetTreatAsRaidUnit(GetCreatureDifficulty().TypeFlags.HasAnyFlag(CreatureTypeFlags.TreatAsRaidUnit));
 
@@ -2406,7 +2407,7 @@ namespace Game.Entities
             if (target.HasUnitState(UnitState.Died))
             {
                 // some creatures can detect fake death
-                if (CanIgnoreFeignDeath() && target.HasUnitFlag2(UnitFlags2.FeignDeath))
+                if (IsIgnoringFeignDeath() && target.HasUnitFlag2(UnitFlags2.FeignDeath))
                     return true;
                 else
                     return false;
@@ -3563,9 +3564,10 @@ namespace Game.Entities
         public void SetNoCallAssistance(bool val) { m_AlreadyCallAssistance = val; }
         public void SetNoSearchAssistance(bool val) { m_AlreadySearchedAssistance = val; }
         public bool HasSearchedAssistance() { return m_AlreadySearchedAssistance; }
-        public bool CanIgnoreFeignDeath() { return GetCreatureTemplate().FlagsExtra.HasFlag(CreatureFlagsExtra.IgnoreFeighDeath); }
+        public bool IsIgnoringFeignDeath() { return _staticFlags.HasFlag(CreatureStaticFlags2.IgnoreFeignDeath); }
+        public void SetIgnoreFeignDeath(bool ignoreFeignDeath) { _staticFlags.ApplyFlag(CreatureStaticFlags2.IgnoreFeignDeath, ignoreFeignDeath); }
         public bool IsIgnoringSanctuarySpellEffect() { return _staticFlags.HasFlag(CreatureStaticFlags2.IgnoreSanctuary); }
-        public void SetIngoreSanctuarySpellEffect(bool ignoreSanctuary) { _staticFlags.ApplyFlag(CreatureStaticFlags2.IgnoreSanctuary, ignoreSanctuary); }
+        public void SetIgnoreSanctuarySpellEffect(bool ignoreSanctuary) { _staticFlags.ApplyFlag(CreatureStaticFlags2.IgnoreSanctuary, ignoreSanctuary); }
 
         public override MovementGeneratorType GetDefaultMovementType() { return DefaultMovementType; }
         public void SetDefaultMovementType(MovementGeneratorType mgt) { DefaultMovementType = mgt; }
