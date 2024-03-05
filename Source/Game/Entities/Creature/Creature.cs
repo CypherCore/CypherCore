@@ -3564,6 +3564,8 @@ namespace Game.Entities
         public void SetNoSearchAssistance(bool val) { m_AlreadySearchedAssistance = val; }
         public bool HasSearchedAssistance() { return m_AlreadySearchedAssistance; }
         public bool CanIgnoreFeignDeath() { return GetCreatureTemplate().FlagsExtra.HasFlag(CreatureFlagsExtra.IgnoreFeighDeath); }
+        public bool IsIgnoringSanctuarySpellEffect() { return _staticFlags.HasFlag(CreatureStaticFlags2.IgnoreSanctuary); }
+        public void SetIngoreSanctuarySpellEffect(bool ignoreSanctuary) { _staticFlags.ApplyFlag(CreatureStaticFlags2.IgnoreSanctuary, ignoreSanctuary); }
 
         public override MovementGeneratorType GetDefaultMovementType() { return DefaultMovementType; }
         public void SetDefaultMovementType(MovementGeneratorType mgt) { DefaultMovementType = mgt; }

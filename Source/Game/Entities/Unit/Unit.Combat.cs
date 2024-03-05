@@ -55,23 +55,29 @@ namespace Game.Entities
 
         public virtual void AtDisengage() { }
 
-        public void CombatStop(bool includingCast = false, bool mutualPvP = true)
+        public void CombatStop(bool includingCast = false, bool mutualPvP = true, Func<Unit, bool> unitFilter = null)
         {
             if (includingCast && IsNonMeleeSpellCast(false))
                 InterruptNonMeleeSpells(false);
 
             AttackStop();
-            RemoveAllAttackers();
+            if (unitFilter == null)
+                RemoveAllAttackers();
+            else
+            {
+                List<Unit> attackersToRemove = attackerList.Where(unitFilter).ToList();
+                foreach (Unit attacker in attackersToRemove)
+                    attacker.AttackStop();
+            }
+
             if (IsTypeId(TypeId.Player))
                 ToPlayer().SendAttackSwingCancelAttack();     // melee and ranged forced attack cancel
 
+            m_combatManager.EndAllPvECombat(unitFilter);
             if (mutualPvP)
-                ClearInCombat();
-            else
-            { // vanish and brethren are weird
-                m_combatManager.EndAllPvECombat();
-                m_combatManager.SuppressPvPCombat();
-            }
+                m_combatManager.EndAllPvPCombat(unitFilter);
+            else // vanish and brethren are weird
+                m_combatManager.SuppressPvPCombat(unitFilter);
         }
 
         public void CombatStopWithPets(bool includingCast = false)

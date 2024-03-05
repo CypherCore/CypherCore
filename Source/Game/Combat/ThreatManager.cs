@@ -610,13 +610,15 @@ namespace Game.Combat
                 threatened.GetThreatManager().AddThreat(assistant, 0.0f, spell, true);
         }
 
-        public void RemoveMeFromThreatLists()
+        public void RemoveMeFromThreatLists(Func<Unit, bool> unitFilter)
         {
-            while (!_threatenedByMe.Empty())
-            {
-                var refe = _threatenedByMe.FirstOrDefault().Value;
+            List<ThreatReference> threatReferencesToRemove = new();
+            foreach (var (_, refe) in _threatenedByMe)
+                if (unitFilter == null || unitFilter(refe.GetOwner()))
+                    threatReferencesToRemove.Add(refe);
+
+            foreach (ThreatReference refe in threatReferencesToRemove)
                 refe._mgr.ClearThreat(_owner);
-            }
         }
 
         public void UpdateMyTempModifiers()

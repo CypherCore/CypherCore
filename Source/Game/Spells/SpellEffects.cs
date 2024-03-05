@@ -2840,16 +2840,23 @@ namespace Game.Spells
             if (unitTarget == null)
                 return;
 
+            var isAffectedBySanctuary = bool (Unit attacker) =>
+            {
+                Creature attackerCreature = attacker.ToCreature();
+                return attackerCreature == null || !attackerCreature.IsIgnoringSanctuarySpellEffect();
+            };
+
             if (unitTarget.IsPlayer() && !unitTarget.GetMap().IsDungeon())
             {
                 // stop all pve combat for players outside dungeons, suppress pvp combat
-                unitTarget.CombatStop(false, false);
+                unitTarget.CombatStop(false, false, isAffectedBySanctuary);
             }
             else
             {
                 // in dungeons (or for nonplayers), reset this unit on all enemies' threat lists
-                foreach (var pair in unitTarget.GetThreatManager().GetThreatenedByMeList())
-                    pair.Value.ScaleThreat(0.0f);
+                foreach (var (_, refe) in unitTarget.GetThreatManager().GetThreatenedByMeList())
+                    if (isAffectedBySanctuary(refe.GetOwner()))
+                        refe.ScaleThreat(0.0f);
             }
 
             // makes spells cast before this time fizzle

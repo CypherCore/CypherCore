@@ -316,7 +316,7 @@ namespace Framework.Constants
         NoWoundedSlowdown = 0x00000040,
         UseCreatorBonuses = 0x00000080,
         IgnoreFeignDeath = 0x00000100, // CreatureFlagExtraIgnoreFeignDeath
-        IgnoreSanctuary = 0x00000200,
+        IgnoreSanctuary = 0x00000200, // Ignores SPELL_EFFECT_SANCTUARY
         ActionTriggersWhileCharmed = 0x00000400,
         InteractWhileDead = 0x00000800, // CreatureTypeFlagInteractWhileDead
         NoInterruptSchoolCooldown = 0x00001000,

@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -58,9 +59,9 @@ namespace Game.Combat
 
         public void Update(uint tdiff)
         {
-            foreach(var pair in _pvpRefs.ToList())
+            foreach (var pair in _pvpRefs.ToList())
             {
-                PvPCombatReference  refe = pair.Value;
+                PvPCombatReference refe = pair.Value;
                 if (refe.first == _owner && !refe.Update(tdiff)) // only update if we're the first unit involved (otherwise double decrement)
                 {
                     _pvpRefs.Remove(pair.Key);
@@ -76,7 +77,7 @@ namespace Game.Combat
                     return true;
             return false;
         }
-        
+
         public bool HasPvECombatWithPlayers()
         {
             foreach (var reference in _pveRefs)
@@ -85,7 +86,7 @@ namespace Game.Combat
 
             return false;
         }
-        
+
         public bool HasPvPCombat()
         {
             foreach (var pair in _pvpRefs)
@@ -217,10 +218,11 @@ namespace Game.Combat
             }
         }
 
-        public void SuppressPvPCombat()
+        public void SuppressPvPCombat(Func<Unit, bool> unitFilter = null)
         {
-            foreach (var pair in _pvpRefs)
-                pair.Value.Suppress(_owner);
+            foreach (var (_, combatRef) in _pvpRefs)
+                if (unitFilter == null || unitFilter(combatRef.GetOther(_owner)))
+                    combatRef.Suppress(_owner);
 
             if (UpdateOwnerCombatState())
             {
@@ -230,18 +232,24 @@ namespace Game.Combat
             }
         }
 
-        public void EndAllPvECombat()
+        public void EndAllPvECombat(Func<Unit, bool> unitFilter = null)
         {
             // cannot have threat without combat
-            _owner.GetThreatManager().RemoveMeFromThreatLists();
+            _owner.GetThreatManager().RemoveMeFromThreatLists(unitFilter);
             _owner.GetThreatManager().ClearAllThreat();
-            while (!_pveRefs.Empty())
-                _pveRefs.First().Value.EndCombat();
+
+            List<CombatReference> combatReferencesToRemove = new();
+            foreach (var (_, combatRef) in _pveRefs)
+                if (unitFilter == null || unitFilter(combatRef.GetOther(_owner)))
+                    combatReferencesToRemove.Add(combatRef);
+
+            foreach (CombatReference combatRef in combatReferencesToRemove)
+                combatRef.EndCombat();
         }
 
         public void RevalidateCombat()
         {
-            foreach(var (guid, refe) in _pveRefs.ToList())
+            foreach (var (guid, refe) in _pveRefs.ToList())
             {
                 if (!CanBeginCombat(_owner, refe.GetOther(_owner)))
                 {
@@ -260,10 +268,21 @@ namespace Game.Combat
             }
         }
 
-        void EndAllPvPCombat()
+        public void EndAllPvPCombat(Func<Unit, bool> unitFilter = null)
         {
-            while (!_pvpRefs.Empty())
-                _pvpRefs.First().Value.EndCombat();
+            List<CombatReference> combatReferencesToRemove = new();
+            foreach (var (_, combatRef) in _pvpRefs)
+                if (unitFilter == null || unitFilter(combatRef.GetOther(_owner)))
+                    combatReferencesToRemove.Add(combatRef);
+
+            foreach (CombatReference combatRef in combatReferencesToRemove)
+                combatRef.EndCombat();
+        }
+
+        void EndAllCombat(Func<Unit, bool> unitFilter = null)
+        {
+            EndAllPvECombat(unitFilter);
+            EndAllPvPCombat(unitFilter);
         }
 
         public static void NotifyAICombat(Unit me, Unit other)
@@ -343,7 +362,7 @@ namespace Game.Combat
         public Unit first;
         public Unit second;
         public bool _isPvP;
-        
+
         bool _suppressFirst;
         bool _suppressSecond;
 
