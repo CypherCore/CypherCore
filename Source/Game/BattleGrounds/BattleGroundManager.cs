@@ -7,6 +7,7 @@ using Game.BattleGrounds.Zones;
 using Game.BattleGrounds.Zones.AlteracValley;
 using Game.BattleGrounds.Zones.ArathisBasin;
 using Game.BattleGrounds.Zones.EyeofStorm;
+using Game.BattleGrounds.Zones.WarsongGluch;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Networking.Packets;
@@ -254,6 +255,7 @@ namespace Game.BattleGrounds
                     bg = new BgAlteracValley(bg_template);
                     break;
                 case BattlegroundTypeId.WS:
+                case BattlegroundTypeId.WgCtf:
                     bg = new BgWarsongGluch(bg_template);
                     break;
                 case BattlegroundTypeId.AB:

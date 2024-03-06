@@ -3603,7 +3603,7 @@ namespace Game.Entities
                 || m_goValue.CapturePoint.State == BattlegroundCapturePointState.HordeCaptured;
         }
 
-        FlagState GetFlagState()
+        public FlagState GetFlagState()
         {
             if (GetGoType() != GameObjectTypes.NewFlag)
                 return 0;
@@ -3627,7 +3627,7 @@ namespace Game.Entities
             return newFlag.GetCarrierGUID();
         }
 
-        long GetFlagTakenFromBaseTime()
+        public long GetFlagTakenFromBaseTime()
         {
             if (GetGoType() != GameObjectTypes.NewFlag)
                 return 0;
