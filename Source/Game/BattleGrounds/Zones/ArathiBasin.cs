@@ -62,7 +62,7 @@ namespace Game.BattleGrounds.Zones.ArathisBasin
 
                         if (m_ReputationScoreTics[team] >= m_ReputationTics)
                         {
-                            if (team == BatttleGroundTeamId.Alliance)
+                            if (team == BattleGroundTeamId.Alliance)
                                 RewardReputationToTeam(509, 10, Team.Alliance);
                             else
                                 RewardReputationToTeam(510, 10, Team.Horde);
@@ -72,13 +72,13 @@ namespace Game.BattleGrounds.Zones.ArathisBasin
 
                         if (m_HonorScoreTics[team] >= m_HonorTics)
                         {
-                            RewardHonorToTeam(GetBonusHonorFromKill(1), (team == BatttleGroundTeamId.Alliance) ? Team.Alliance : Team.Horde);
+                            RewardHonorToTeam(GetBonusHonorFromKill(1), (team == BattleGroundTeamId.Alliance) ? Team.Alliance : Team.Horde);
                             m_HonorScoreTics[team] -= m_HonorTics;
                         }
 
                         if (!m_IsInformedNearVictory && m_TeamScores[team] > MiscConst.WarningNearVictoryScore)
                         {
-                            if (team == BatttleGroundTeamId.Alliance)
+                            if (team == BattleGroundTeamId.Alliance)
                             {
                                 SendBroadcastText((uint)ABBattlegroundBroadcastTexts.AllianceNearVictory, ChatMsg.BgSystemNeutral);
                                 PlaySoundToAll((uint)SoundIds.NearVictoryAlliance);
@@ -94,7 +94,7 @@ namespace Game.BattleGrounds.Zones.ArathisBasin
                         if (m_TeamScores[team] > MiscConst.MaxTeamScore)
                             m_TeamScores[team] = MiscConst.MaxTeamScore;
 
-                        if (team == BatttleGroundTeamId.Alliance)
+                        if (team == BattleGroundTeamId.Alliance)
                             UpdateWorldState(WorldStateIds.ResourcesAlly, (int)m_TeamScores[team]);
                         else
                             UpdateWorldState(WorldStateIds.ResourcesHorde, (int)m_TeamScores[team]);
@@ -103,7 +103,7 @@ namespace Game.BattleGrounds.Zones.ArathisBasin
                         int otherTeam = (team + 1) % SharedConst.PvpTeamsCount;
                         if (m_TeamScores[team] > m_TeamScores[otherTeam] + 500)
                         {
-                            if (team == BatttleGroundTeamId.Alliance)
+                            if (team == BattleGroundTeamId.Alliance)
                                 UpdateWorldState(WorldStateIds.Had500DisadvantageHorde, 1);
                             else
                                 UpdateWorldState(WorldStateIds.Had500DisadvantageAlliance, 1);
@@ -115,9 +115,9 @@ namespace Game.BattleGrounds.Zones.ArathisBasin
                 }
 
                 // Test win condition
-                if (m_TeamScores[BatttleGroundTeamId.Alliance] >= MiscConst.MaxTeamScore)
+                if (m_TeamScores[BattleGroundTeamId.Alliance] >= MiscConst.MaxTeamScore)
                     EndBattleground(Team.Alliance);
-                else if (m_TeamScores[BatttleGroundTeamId.Horde] >= MiscConst.MaxTeamScore)
+                else if (m_TeamScores[BattleGroundTeamId.Horde] >= MiscConst.MaxTeamScore)
                     EndBattleground(Team.Horde);
             }
         }

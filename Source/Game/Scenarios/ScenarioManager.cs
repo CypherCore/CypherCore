@@ -24,10 +24,10 @@ namespace Game.Scenarios
             uint scenarioID = 0;
             switch (team)
             {
-                case BatttleGroundTeamId.Alliance:
+                case BattleGroundTeamId.Alliance:
                     scenarioID = dbData.Scenario_A;
                     break;
-                case BatttleGroundTeamId.Horde:
+                case BattleGroundTeamId.Horde:
                     scenarioID = dbData.Scenario_H;
                     break;
                 default:

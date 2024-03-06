@@ -342,7 +342,7 @@ namespace Game.Entities
                 case GameObjectTypes.CapturePoint:
                     SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.SpellVisualID), m_goInfo.CapturePoint.SpellVisual1);
                     m_goValue.CapturePoint.AssaultTimer = 0;
-                    m_goValue.CapturePoint.LastTeamCapture = BatttleGroundTeamId.Neutral;
+                    m_goValue.CapturePoint.LastTeamCapture = BattleGroundTeamId.Neutral;
                     m_goValue.CapturePoint.State = BattlegroundCapturePointState.Neutral;
                     UpdateCapturePoint();
                     if (map.Instanceable())
@@ -679,7 +679,7 @@ namespace Game.Entities
                                         }
                                     }
 
-                                    m_goValue.CapturePoint.LastTeamCapture = hordeCapturing ? BatttleGroundTeamId.Horde : BatttleGroundTeamId.Alliance;
+                                    m_goValue.CapturePoint.LastTeamCapture = hordeCapturing ? BattleGroundTeamId.Horde : BattleGroundTeamId.Alliance;
                                     UpdateCapturePoint();
                                 }
                                 else
@@ -3462,7 +3462,7 @@ namespace Game.Entities
 
             if (player.GetBGTeam() == Team.Horde)
             {
-                if (m_goValue.CapturePoint.LastTeamCapture == BatttleGroundTeamId.Horde)
+                if (m_goValue.CapturePoint.LastTeamCapture == BattleGroundTeamId.Horde)
                 {
                     // defended. capture instantly.
                     m_goValue.CapturePoint.State = BattlegroundCapturePointState.HordeCaptured;
@@ -3491,7 +3491,7 @@ namespace Game.Entities
             }
             else
             {
-                if (m_goValue.CapturePoint.LastTeamCapture == BatttleGroundTeamId.Alliance)
+                if (m_goValue.CapturePoint.LastTeamCapture == BattleGroundTeamId.Alliance)
                 {
                     // defended. capture instantly.
                     m_goValue.CapturePoint.State = BattlegroundCapturePointState.AllianceCaptured;
@@ -4549,12 +4549,12 @@ namespace Game.Entities
         int GetControllingTeam()
         {
             if (_value < GetMaxHordeValue())
-                return BatttleGroundTeamId.Horde;
+                return BattleGroundTeamId.Horde;
 
             if (_value > GetMinAllianceValue())
-                return BatttleGroundTeamId.Alliance;
+                return BattleGroundTeamId.Alliance;
 
-            return BatttleGroundTeamId.Neutral;
+            return BattleGroundTeamId.Neutral;
         }
 
         public List<ObjectGuid> GetInsidePlayers() { return _insidePlayers; }
@@ -4601,31 +4601,31 @@ namespace Game.Entities
                 return;
 
             int newControllingTeam = GetControllingTeam();
-            int assaultingTeam = pointsGained > 0 ? BatttleGroundTeamId.Alliance : BatttleGroundTeamId.Horde;
+            int assaultingTeam = pointsGained > 0 ? BattleGroundTeamId.Alliance : BattleGroundTeamId.Horde;
 
             if (oldControllingTeam != newControllingTeam)
                 _contestedTriggered = false;
 
-            if (oldControllingTeam != BatttleGroundTeamId.Alliance && newControllingTeam == BatttleGroundTeamId.Alliance)
+            if (oldControllingTeam != BattleGroundTeamId.Alliance && newControllingTeam == BattleGroundTeamId.Alliance)
                 TriggerEvent(_owner.GetGoInfo().ControlZone.ProgressEventAlliance);
-            else if (oldControllingTeam != BatttleGroundTeamId.Horde && newControllingTeam == BatttleGroundTeamId.Horde)
+            else if (oldControllingTeam != BattleGroundTeamId.Horde && newControllingTeam == BattleGroundTeamId.Horde)
                 TriggerEvent(_owner.GetGoInfo().ControlZone.ProgressEventHorde);
-            else if (oldControllingTeam == BatttleGroundTeamId.Horde && newControllingTeam == BatttleGroundTeamId.Neutral)
+            else if (oldControllingTeam == BattleGroundTeamId.Horde && newControllingTeam == BattleGroundTeamId.Neutral)
                 TriggerEvent(_owner.GetGoInfo().ControlZone.NeutralEventHorde);
-            else if (oldControllingTeam == BatttleGroundTeamId.Alliance && newControllingTeam == BatttleGroundTeamId.Neutral)
+            else if (oldControllingTeam == BattleGroundTeamId.Alliance && newControllingTeam == BattleGroundTeamId.Neutral)
                 TriggerEvent(_owner.GetGoInfo().ControlZone.NeutralEventAlliance);
 
-            if (roundedValue == 100 && newControllingTeam == BatttleGroundTeamId.Alliance && assaultingTeam == BatttleGroundTeamId.Alliance)
+            if (roundedValue == 100 && newControllingTeam == BattleGroundTeamId.Alliance && assaultingTeam == BattleGroundTeamId.Alliance)
                 TriggerEvent(_owner.GetGoInfo().ControlZone.CaptureEventAlliance);
-            else if (roundedValue == 0 && newControllingTeam == BatttleGroundTeamId.Horde && assaultingTeam == BatttleGroundTeamId.Horde)
+            else if (roundedValue == 0 && newControllingTeam == BattleGroundTeamId.Horde && assaultingTeam == BattleGroundTeamId.Horde)
                 TriggerEvent(_owner.GetGoInfo().ControlZone.CaptureEventHorde);
 
-            if (oldRoundedValue == 100 && assaultingTeam == BatttleGroundTeamId.Horde && !_contestedTriggered)
+            if (oldRoundedValue == 100 && assaultingTeam == BattleGroundTeamId.Horde && !_contestedTriggered)
             {
                 TriggerEvent(_owner.GetGoInfo().ControlZone.ContestedEventHorde);
                 _contestedTriggered = true;
             }
-            else if (oldRoundedValue == 0 && assaultingTeam == BatttleGroundTeamId.Alliance && !_contestedTriggered)
+            else if (oldRoundedValue == 0 && assaultingTeam == BattleGroundTeamId.Alliance && !_contestedTriggered)
             {
                 TriggerEvent(_owner.GetGoInfo().ControlZone.ContestedEventAlliance);
                 _contestedTriggered = true;

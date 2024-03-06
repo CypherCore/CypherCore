@@ -451,7 +451,7 @@ namespace Game.BattleGrounds
 
         public WorldSafeLocsEntry GetTeamStartPosition(int teamId)
         {
-            Cypher.Assert(teamId < BatttleGroundTeamId.Neutral);
+            Cypher.Assert(teamId < BattleGroundTeamId.Neutral);
             return _battlegroundTemplate.StartLocation[teamId];
         }
 
@@ -571,6 +571,11 @@ namespace Game.BattleGrounds
         public void UpdateWorldState(uint worldStateId, int value, bool hidden = false)
         {
             Global.WorldStateMgr.SetValue((int)worldStateId, value, hidden, GetBgMap());
+        }
+
+        public void UpdateWorldState(int worldStateId, bool value, bool hidden = false)
+        {
+            Global.WorldStateMgr.SetValue(worldStateId, value ? 1 : 0, hidden, GetBgMap());
         }
 
         public virtual void EndBattleground(Team winner)
@@ -905,7 +910,7 @@ namespace Game.BattleGrounds
             Global.BattlegroundMgr.AddBattleground(this);
 
             if (m_IsRated)
-                Log.outDebug(LogFilter.Arena, "Arena match type: {0} for Team1Id: {1} - Team2Id: {2} started.", m_ArenaType, m_ArenaTeamIds[BatttleGroundTeamId.Alliance], m_ArenaTeamIds[BatttleGroundTeamId.Horde]);
+                Log.outDebug(LogFilter.Arena, "Arena match type: {0} for Team1Id: {1} - Team2Id: {2} started.", m_ArenaType, m_ArenaTeamIds[BattleGroundTeamId.Alliance], m_ArenaTeamIds[BattleGroundTeamId.Horde]);
         }
 
         public void TeleportPlayerToExploitLocation(Player player)
@@ -1400,7 +1405,7 @@ namespace Game.BattleGrounds
             }
         }
 
-        public virtual Creature AddCreature(uint entry, uint type, float x, float y, float z, float o, int teamIndex = BatttleGroundTeamId.Neutral, uint respawntime = 0, Transport transport = null)
+        public virtual Creature AddCreature(uint entry, uint type, float x, float y, float z, float o, int teamIndex = BattleGroundTeamId.Neutral, uint respawntime = 0, Transport transport = null)
         {
             Map map = FindBgMap();
             if (map == null)
@@ -1447,7 +1452,7 @@ namespace Game.BattleGrounds
             return creature;
         }
 
-        public Creature AddCreature(uint entry, uint type, Position pos, int teamIndex = BatttleGroundTeamId.Neutral, uint respawntime = 0, Transport transport = null)
+        public Creature AddCreature(uint entry, uint type, Position pos, int teamIndex = BattleGroundTeamId.Neutral, uint respawntime = 0, Transport transport = null)
         {
             return AddCreature(entry, type, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), teamIndex, respawntime, transport);
         }
@@ -1506,7 +1511,7 @@ namespace Game.BattleGrounds
 
         public bool AddSpiritGuide(uint type, float x, float y, float z, float o, int teamIndex)
         {
-            uint entry = (uint)(teamIndex == BatttleGroundTeamId.Alliance ? BattlegroundCreatures.A_SpiritGuide : BattlegroundCreatures.H_SpiritGuide);
+            uint entry = (uint)(teamIndex == BattleGroundTeamId.Alliance ? BattlegroundCreatures.A_SpiritGuide : BattlegroundCreatures.H_SpiritGuide);
 
             if (AddCreature(entry, type, x, y, z, o) != null)
                 return true;
@@ -1516,7 +1521,7 @@ namespace Game.BattleGrounds
             return false;
         }
 
-        public bool AddSpiritGuide(uint type, Position pos, int teamIndex = BatttleGroundTeamId.Neutral)
+        public bool AddSpiritGuide(uint type, Position pos, int teamIndex = BattleGroundTeamId.Neutral)
         {
             return AddSpiritGuide(type, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), teamIndex);
         }
@@ -1702,7 +1707,7 @@ namespace Game.BattleGrounds
 
         public uint GetTeamScore(int teamIndex)
         {
-            if (teamIndex == BatttleGroundTeamId.Alliance || teamIndex == BatttleGroundTeamId.Horde)
+            if (teamIndex == BattleGroundTeamId.Alliance || teamIndex == BattleGroundTeamId.Horde)
                 return m_TeamScores[teamIndex];
 
             Log.outError(LogFilter.Battleground, "GetTeamScore with wrong Team {0} for BG {1}", teamIndex, GetTypeID());
@@ -1855,7 +1860,7 @@ namespace Game.BattleGrounds
 
         Group GetBgRaid(Team team) { return m_BgRaids[GetTeamIndexByTeamId(team)]; }
 
-        public static int GetTeamIndexByTeamId(Team team) { return team == Team.Alliance ? BatttleGroundTeamId.Alliance : BatttleGroundTeamId.Horde; }
+        public static int GetTeamIndexByTeamId(Team team) { return team == Team.Alliance ? BattleGroundTeamId.Alliance : BattleGroundTeamId.Horde; }
         public uint GetPlayersCountByTeam(Team team) { return m_PlayersCount[GetTeamIndexByTeamId(team)]; }
         void UpdatePlayersCountByTeam(Team team, bool remove)
         {

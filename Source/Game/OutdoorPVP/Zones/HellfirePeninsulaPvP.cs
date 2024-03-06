@@ -121,13 +121,13 @@ namespace Game.PvP.HellfirePeninsula
             base.Update(diff);
 
             if (m_AllianceTowersControlled == 3)
-                TeamApplyBuff(BatttleGroundTeamId.Alliance, SpellIds.AllianceBuff, SpellIds.HordeBuff);
+                TeamApplyBuff(BattleGroundTeamId.Alliance, SpellIds.AllianceBuff, SpellIds.HordeBuff);
             else if (m_HordeTowersControlled == 3)
-                TeamApplyBuff(BatttleGroundTeamId.Horde, SpellIds.HordeBuff, SpellIds.AllianceBuff);
+                TeamApplyBuff(BattleGroundTeamId.Horde, SpellIds.HordeBuff, SpellIds.AllianceBuff);
             else
             {
-                TeamCastSpell(BatttleGroundTeamId.Alliance, -(int)SpellIds.AllianceBuff);
-                TeamCastSpell(BatttleGroundTeamId.Horde, -(int)SpellIds.HordeBuff);
+                TeamCastSpell(BattleGroundTeamId.Alliance, -(int)SpellIds.AllianceBuff);
+                TeamCastSpell(BattleGroundTeamId.Horde, -(int)SpellIds.HordeBuff);
             }
 
             SetWorldState(WorldStateIds.CountA, (int)m_AllianceTowersControlled);

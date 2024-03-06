@@ -4469,10 +4469,10 @@ namespace Scripts.Spells.Generic
 
             switch (target.GetTeamId())
             {
-                case BatttleGroundTeamId.Alliance:
+                case BattleGroundTeamId.Alliance:
                     amount = WorldStateMgr.GetValue(WorldStates.WarModeAllianceBuffValue, target.GetMap());
                     break;
-                case BatttleGroundTeamId.Horde:
+                case BattleGroundTeamId.Horde:
                     amount = WorldStateMgr.GetValue(WorldStates.WarModeHordeBuffValue, target.GetMap());
                     break;
                 default:

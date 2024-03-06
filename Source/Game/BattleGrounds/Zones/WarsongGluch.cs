@@ -41,18 +41,18 @@ namespace Game.BattleGrounds.Zones.WarsongGluch
             {
                 if (GetElapsedTime() >= 17 * Time.Minute * Time.InMilliseconds)
                 {
-                    if (GetTeamScore(BatttleGroundTeamId.Alliance) == 0)
+                    if (GetTeamScore(BattleGroundTeamId.Alliance) == 0)
                     {
-                        if (GetTeamScore(BatttleGroundTeamId.Horde) == 0)        // No one scored - result is tie
+                        if (GetTeamScore(BattleGroundTeamId.Horde) == 0)        // No one scored - result is tie
                             EndBattleground(Team.Other);
                         else                                 // Horde has more points and thus wins
                             EndBattleground(Team.Horde);
                     }
-                    else if (GetTeamScore(BatttleGroundTeamId.Horde) == 0)
+                    else if (GetTeamScore(BattleGroundTeamId.Horde) == 0)
                         EndBattleground(Team.Alliance);           // Alliance has > 0, Horde has 0, alliance wins
-                    else if (GetTeamScore(BatttleGroundTeamId.Horde) == GetTeamScore(BatttleGroundTeamId.Alliance)) // Team score equal, winner is team that scored the last flag
+                    else if (GetTeamScore(BattleGroundTeamId.Horde) == GetTeamScore(BattleGroundTeamId.Alliance)) // Team score equal, winner is team that scored the last flag
                         EndBattleground((Team)_lastFlagCaptureTeam);
-                    else if (GetTeamScore(BatttleGroundTeamId.Horde) > GetTeamScore(BatttleGroundTeamId.Alliance))  // Last but not least, check who has the higher score
+                    else if (GetTeamScore(BattleGroundTeamId.Horde) > GetTeamScore(BattleGroundTeamId.Alliance))  // Last but not least, check who has the higher score
                         EndBattleground(Team.Horde);
                     else
                         EndBattleground(Team.Alliance);
@@ -205,7 +205,7 @@ namespace Game.BattleGrounds.Zones.WarsongGluch
 
         void UpdateTeamScore(int team)
         {
-            if (team == BatttleGroundTeamId.Alliance)
+            if (team == BattleGroundTeamId.Alliance)
                 UpdateWorldState((int)WorldStateIds.FlagCapturesAlliance, (int)GetTeamScore(team));
             else
                 UpdateWorldState((int)WorldStateIds.FlagCapturesHorde, (int)GetTeamScore(team));
@@ -221,8 +221,8 @@ namespace Game.BattleGrounds.Zones.WarsongGluch
             //call parent's class reset
             base.Reset();
 
-            m_TeamScores[BatttleGroundTeamId.Alliance] = 0;
-            m_TeamScores[BatttleGroundTeamId.Horde] = 0;
+            m_TeamScores[BattleGroundTeamId.Alliance] = 0;
+            m_TeamScores[BattleGroundTeamId.Horde] = 0;
 
             if (Global.BattlegroundMgr.IsBGWeekend(GetTypeID()))
             {
@@ -284,9 +284,9 @@ namespace Game.BattleGrounds.Zones.WarsongGluch
 
         public override Team GetPrematureWinner()
         {
-            if (GetTeamScore(BatttleGroundTeamId.Alliance) > GetTeamScore(BatttleGroundTeamId.Horde))
+            if (GetTeamScore(BattleGroundTeamId.Alliance) > GetTeamScore(BattleGroundTeamId.Horde))
                 return Team.Alliance;
-            else if (GetTeamScore(BatttleGroundTeamId.Horde) > GetTeamScore(BatttleGroundTeamId.Alliance))
+            else if (GetTeamScore(BattleGroundTeamId.Horde) > GetTeamScore(BattleGroundTeamId.Alliance))
                 return Team.Horde;
 
             return base.GetPrematureWinner();
@@ -305,10 +305,10 @@ namespace Game.BattleGrounds.Zones.WarsongGluch
                     _doors.Add(gameObject.GetGUID());
                     break;
                 case GameobjectIds.AllianceFlagInBase:
-                    _flags[BatttleGroundTeamId.Alliance] = gameObject.GetGUID();
+                    _flags[BattleGroundTeamId.Alliance] = gameObject.GetGUID();
                     break;
                 case GameobjectIds.HordeFlagInBase:
-                    _flags[BatttleGroundTeamId.Horde] = gameObject.GetGUID();
+                    _flags[BattleGroundTeamId.Horde] = gameObject.GetGUID();
                     break;
                 default:
                     break;
@@ -323,10 +323,10 @@ namespace Game.BattleGrounds.Zones.WarsongGluch
             switch (areaTrigger.GetEntry())
             {
                 case MiscConst.AtCapturePointAlliance:
-                    _capturePointAreaTriggers[BatttleGroundTeamId.Alliance] = areaTrigger.GetGUID();
+                    _capturePointAreaTriggers[BattleGroundTeamId.Alliance] = areaTrigger.GetGUID();
                     break;
                 case MiscConst.AtCapturePointHorde:
-                    _capturePointAreaTriggers[BatttleGroundTeamId.Horde] = areaTrigger.GetGUID();
+                    _capturePointAreaTriggers[BattleGroundTeamId.Horde] = areaTrigger.GetGUID();
                     break;
                 default:
                     break;

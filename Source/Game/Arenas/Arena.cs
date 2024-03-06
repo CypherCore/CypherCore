@@ -179,7 +179,7 @@ namespace Game.Arenas
                         _arenaTeamScores[loserTeam].Assign(loserTeamRating, (uint)(loserTeamRating + loserChange), loserMatchmakerRating, GetArenaMatchmakerRating(GetOtherTeam(winner)));
 
                         Log.outDebug(LogFilter.Arena, "Arena match Type: {0} for Team1Id: {1} - Team2Id: {2} ended. WinnerTeamId: {3}. Winner rating: +{4}, Loser rating: {5}",
-                            GetArenaType(), GetArenaTeamIdByIndex(BatttleGroundTeamId.Alliance), GetArenaTeamIdByIndex(BatttleGroundTeamId.Horde), winnerArenaTeam.GetId(), winnerChange, loserChange);
+                            GetArenaType(), GetArenaTeamIdByIndex(BattleGroundTeamId.Alliance), GetArenaTeamIdByIndex(BattleGroundTeamId.Horde), winnerArenaTeam.GetId(), winnerChange, loserChange);
 
                         if (WorldConfig.GetBoolValue(WorldCfg.ArenaLogExtendedInfo))
                         {
