@@ -1217,20 +1217,7 @@ namespace Game.Spells
                 if (goInfo.GetNoDamageImmune() != 0 && player.HasUnitFlag(UnitFlags.Immune))
                     return;
 
-                // Arathi Basin banner opening. // @todo Verify correctness of this check
-                if ((goInfo.type == GameObjectTypes.Button && goInfo.Button.noDamageImmune != 0) ||
-                    (goInfo.type == GameObjectTypes.Goober && goInfo.Goober.requireLOS != 0))
-                {
-                    //CanUseBattlegroundObject() already called in CheckCast()
-                    // in Battlegroundcheck
-                    Battleground bg = player.GetBattleground();
-                    if (bg != null)
-                    {
-                        bg.EventPlayerClickedOnFlag(player, gameObjTarget);
-                        return;
-                    }
-                }
-                else if (goInfo.type == GameObjectTypes.FlagStand)
+                if (goInfo.type == GameObjectTypes.FlagStand)
                 {
                     //CanUseBattlegroundObject() already called in CheckCast()
                     // in Battlegroundcheck
