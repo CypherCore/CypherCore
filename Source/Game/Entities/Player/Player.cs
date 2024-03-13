@@ -6049,7 +6049,7 @@ namespace Game.Entities
                 return;
 
             UpdateData udata = new(GetMapId());
-            List<Unit> newVisibleUnits = new();
+            List<WorldObject> newVisibleObjects = new();
 
             foreach (WorldObject target in targets)
             {
@@ -6059,28 +6059,28 @@ namespace Game.Entities
                 switch (target.GetTypeId())
                 {
                     case TypeId.Unit:
-                        UpdateVisibilityOf(target.ToCreature(), udata, newVisibleUnits);
+                        UpdateVisibilityOf(target.ToCreature(), udata, newVisibleObjects);
                         break;
                     case TypeId.Player:
-                        UpdateVisibilityOf(target.ToPlayer(), udata, newVisibleUnits);
+                        UpdateVisibilityOf(target.ToPlayer(), udata, newVisibleObjects);
                         break;
                     case TypeId.GameObject:
-                        UpdateVisibilityOf(target.ToGameObject(), udata, newVisibleUnits);
+                        UpdateVisibilityOf(target.ToGameObject(), udata, newVisibleObjects);
                         break;
                     case TypeId.DynamicObject:
-                        UpdateVisibilityOf(target.ToDynamicObject(), udata, newVisibleUnits);
+                        UpdateVisibilityOf(target.ToDynamicObject(), udata, newVisibleObjects);
                         break;
                     case TypeId.Corpse:
-                        UpdateVisibilityOf(target.ToCorpse(), udata, newVisibleUnits);
+                        UpdateVisibilityOf(target.ToCorpse(), udata, newVisibleObjects);
                         break;
                     case TypeId.AreaTrigger:
-                        UpdateVisibilityOf(target.ToAreaTrigger(), udata, newVisibleUnits);
+                        UpdateVisibilityOf(target.ToAreaTrigger(), udata, newVisibleObjects);
                         break;
                     case TypeId.SceneObject:
-                        UpdateVisibilityOf(target.ToSceneObject(), udata, newVisibleUnits);
+                        UpdateVisibilityOf(target.ToSceneObject(), udata, newVisibleObjects);
                         break;
                     case TypeId.Conversation:
-                        UpdateVisibilityOf(target.ToConversation(), udata, newVisibleUnits);
+                        UpdateVisibilityOf(target.ToConversation(), udata, newVisibleObjects);
                         break;
                     default:
                         break;
@@ -6093,7 +6093,7 @@ namespace Game.Entities
             udata.BuildPacket(out UpdateObject packet);
             SendPacket(packet);
 
-            foreach (var visibleUnit in newVisibleUnits)
+            foreach (var visibleUnit in newVisibleObjects)
                 SendInitialVisiblePackets(visibleUnit);
         }
 
@@ -6129,7 +6129,7 @@ namespace Game.Entities
             }
         }
 
-        public void UpdateVisibilityOf<T>(T target, UpdateData data, List<Unit> visibleNow) where T : WorldObject
+        public void UpdateVisibilityOf<T>(T target, UpdateData data, List<WorldObject> visibleNow) where T : WorldObject
         {
             if (HaveAtClient(target))
             {
@@ -6150,33 +6150,23 @@ namespace Game.Entities
                 if (CanSeeOrDetect(target, false, true))
                 {
                     target.BuildCreateUpdateBlockForPlayer(data, this);
-                    UpdateVisibilityOf_helper(m_clientGUIDs, target, visibleNow);
+                    m_clientGUIDs.Add(target.GetGUID());
+                    visibleNow.Add(target);
                 }
             }
         }
 
-        void UpdateVisibilityOf_helper<T>(List<ObjectGuid> s64, T target, List<Unit> v) where T : WorldObject
+        public void SendInitialVisiblePackets(WorldObject target)
         {
-            s64.Add(target.GetGUID());
-
-            switch (target.GetTypeId())
+            Unit targetUnit = target.ToUnit();
+            if (targetUnit != null)
             {
-                case TypeId.Unit:
-                    v.Add(target.ToCreature());
-                    break;
-                case TypeId.Player:
-                    v.Add(target.ToPlayer());
-                    break;
-            }
-        }
-
-        public void SendInitialVisiblePackets(Unit target)
-        {
-            SendAurasForTarget(target);
-            if (target.IsAlive())
-            {
-                if (target.HasUnitState(UnitState.MeleeAttacking) && target.GetVictim() != null)
-                    target.SendMeleeAttackStart(target.GetVictim());
+                SendAurasForTarget(targetUnit);
+                if (targetUnit.IsAlive())
+                {
+                    if (targetUnit.HasUnitState(UnitState.MeleeAttacking) && targetUnit.GetVictim() != null)
+                        targetUnit.SendMeleeAttackStart(targetUnit.GetVictim());
+                }
             }
         }
 

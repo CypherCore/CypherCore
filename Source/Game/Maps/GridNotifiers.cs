@@ -72,7 +72,7 @@ namespace Game.Maps
             i_player = pl;
             i_data = new UpdateData(pl.GetMapId());
             vis_guids = new List<ObjectGuid>(pl.m_clientGUIDs);
-            i_visibleNow = new List<Unit>();
+            i_visibleNow = new List<WorldObject>();
         }
 
         public override void Visit(IList<WorldObject> objs)
@@ -93,30 +93,28 @@ namespace Game.Maps
             Transport transport = i_player.GetTransport<Transport>();
             if (transport != null)
             {
-                foreach (var obj in transport.GetPassengers())
+                foreach (var passenger in transport.GetPassengers())
                 {
-                    if (vis_guids.Contains(obj.GetGUID()))
+                    if (vis_guids.Remove(passenger.GetGUID()))
                     {
-                        vis_guids.Remove(obj.GetGUID());
-
-                        switch (obj.GetTypeId())
+                        switch (passenger.GetTypeId())
                         {
                             case TypeId.GameObject:
-                                i_player.UpdateVisibilityOf(obj.ToGameObject(), i_data, i_visibleNow);
+                                i_player.UpdateVisibilityOf(passenger.ToGameObject(), i_data, i_visibleNow);
                                 break;
                             case TypeId.Player:
-                                i_player.UpdateVisibilityOf(obj.ToPlayer(), i_data, i_visibleNow);
-                                if (!obj.IsNeedNotify(NotifyFlags.VisibilityChanged))
-                                    obj.ToPlayer().UpdateVisibilityOf(i_player);
+                                i_player.UpdateVisibilityOf(passenger.ToPlayer(), i_data, i_visibleNow);
+                                if (!passenger.IsNeedNotify(NotifyFlags.VisibilityChanged))
+                                    passenger.ToPlayer().UpdateVisibilityOf(i_player);
                                 break;
                             case TypeId.Unit:
-                                i_player.UpdateVisibilityOf(obj.ToCreature(), i_data, i_visibleNow);
+                                i_player.UpdateVisibilityOf(passenger.ToCreature(), i_data, i_visibleNow);
                                 break;
                             case TypeId.DynamicObject:
-                                i_player.UpdateVisibilityOf(obj.ToDynamicObject(), i_data, i_visibleNow);
+                                i_player.UpdateVisibilityOf(passenger.ToDynamicObject(), i_data, i_visibleNow);
                                 break;
                             case TypeId.AreaTrigger:
-                                i_player.UpdateVisibilityOf(obj.ToAreaTrigger(), i_data, i_visibleNow);
+                                i_player.UpdateVisibilityOf(passenger.ToAreaTrigger(), i_data, i_visibleNow);
                                 break;
                             default:
                                 break;
@@ -125,16 +123,16 @@ namespace Game.Maps
                 }
             }
 
-            foreach (var guid in vis_guids)
+            foreach (var outOfRangeGuid in vis_guids)
             {
-                i_player.m_clientGUIDs.Remove(guid);
-                i_data.AddOutOfRangeGUID(guid);
+                i_player.m_clientGUIDs.Remove(outOfRangeGuid);
+                i_data.AddOutOfRangeGUID(outOfRangeGuid);
 
-                if (guid.IsPlayer())
+                if (outOfRangeGuid.IsPlayer())
                 {
-                    Player pl = Global.ObjAccessor.FindPlayer(guid);
-                    if (pl != null && pl.IsInWorld && !pl.IsNeedNotify(NotifyFlags.VisibilityChanged))
-                        pl.UpdateVisibilityOf(i_player);
+                    Player player = Global.ObjAccessor.FindPlayer(outOfRangeGuid);
+                    if (player != null && !player.IsNeedNotify(NotifyFlags.VisibilityChanged))
+                        player.UpdateVisibilityOf(i_player);
                 }
             }
 
@@ -145,14 +143,14 @@ namespace Game.Maps
             i_data.BuildPacket(out packet);
             i_player.SendPacket(packet);
 
-            foreach (var obj in i_visibleNow)
-                i_player.SendInitialVisiblePackets(obj);
+            foreach (var visibleObject in i_visibleNow)
+                i_player.SendInitialVisiblePackets(visibleObject);
         }
 
         internal Player i_player;
         internal UpdateData i_data;
         internal List<ObjectGuid> vis_guids;
-        internal List<Unit> i_visibleNow;
+        internal List<WorldObject> i_visibleNow;
     }
 
     public class VisibleChangesNotifier : Notifier
