@@ -62,7 +62,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
             InstanceScript instance = player.GetInstanceScript();
             if (instance != null)
             {
-                Creature alizabal = ObjectAccessor.GetCreature(player, instance.GetGuidData(DataTypes.Alizabal));
+                Creature alizabal = ObjectAccessor.GetCreature(player, instance.GetGuidData((uint)DataTypes.Alizabal));
                 if (alizabal != null)
                     alizabal.GetAI().DoAction(ActionIds.Intro);
             }
@@ -77,7 +77,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
         bool _hate;
         bool _skewer;
 
-        public boss_alizabal(Creature creature) : base(creature, DataTypes.Alizabal) { }
+        public boss_alizabal(Creature creature) : base(creature, (uint)DataTypes.Alizabal) { }
 
         public override void Reset()
         {
@@ -251,4 +251,3 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
         }
     }
 }
-

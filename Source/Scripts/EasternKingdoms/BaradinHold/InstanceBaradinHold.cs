@@ -5,35 +5,48 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using System;
+using System.Collections.Generic;
 
 namespace Scripts.EasternKingdoms.BaradinHold
 {
-    struct DataTypes
+    enum DataTypes
     {
-        public const uint Argaloth = 0;
-        public const uint Occuthar = 1;
-        public const uint Alizabal = 2;
+        Argaloth = 0,
+        Occuthar = 1,
+        Alizabal = 2,
+
+        // Encounter Related
+        ExtinuishFelFlames
     }
 
-    struct CreatureIds
+    enum CreatureIds
     {
-        public const uint EyeOfOccuthar = 52389;
-        public const uint FocusFireDummy = 52369;
-        public const uint OccutharEye = 52368;
+        // Bosses
+        Argaloth = 47120,
+        Occuthar = 52363,
+        Alizabal = 55869,
+
+        // Encounter Related Creatures
+        /*Argaloth*/
+        FelFlames = 47829,
+
+        EyeOfOccuthar = 52389,
+        FocusFireDummy = 52369,
+        OccutharEye = 52368
     }
 
-    struct BossIds
+    enum GameObjectIds
     {
-        public const uint Argaloth = 47120;
-        public const uint Occuthar = 52363;
-        public const uint Alizabal = 55869;
+        ArgalothDoor = 207619,
+        OccutharDoor = 208953,
+        AlizabalDoor = 209849
     }
 
-    struct GameObjectIds
+    enum SpellIds
     {
-        public const uint ArgalothDoor = 207619;
-        public const uint OccutharDoor = 208953;
-        public const uint AlizabalDoor = 209849;
+        // Fel Flames
+        FelFlames = 88999
     }
 
     [Script]
@@ -41,87 +54,66 @@ namespace Scripts.EasternKingdoms.BaradinHold
     {
         static DoorData[] doorData =
         {
-            new DoorData(GameObjectIds.ArgalothDoor,  DataTypes.Argaloth, EncounterDoorBehavior.OpenWhenNotInProgress),
-            new DoorData(GameObjectIds.OccutharDoor,  DataTypes.Occuthar, EncounterDoorBehavior.OpenWhenNotInProgress),
-            new DoorData(GameObjectIds.AlizabalDoor,  DataTypes.Alizabal, EncounterDoorBehavior.OpenWhenNotInProgress),
+            new DoorData((uint)GameObjectIds.ArgalothDoor,  (uint)DataTypes.Argaloth, EncounterDoorBehavior.OpenWhenNotInProgress),
+            new DoorData((uint)GameObjectIds.OccutharDoor,  (uint)DataTypes.Occuthar, EncounterDoorBehavior.OpenWhenNotInProgress),
+            new DoorData((uint)GameObjectIds.AlizabalDoor,  (uint)DataTypes.Alizabal, EncounterDoorBehavior.OpenWhenNotInProgress),
+        };
+
+        static ObjectData[] creatureData =
+        {
+            new ObjectData((uint)CreatureIds.Argaloth, (uint)DataTypes.Argaloth),
+            new ObjectData((uint)CreatureIds.Occuthar, (uint)DataTypes.Occuthar),
+            new ObjectData((uint)CreatureIds.Alizabal, (uint)DataTypes.Alizabal),
         };
 
         static DungeonEncounterData[] encounters =
         {
-            new DungeonEncounterData(DataTypes.Argaloth, 1033),
-            new DungeonEncounterData(DataTypes.Occuthar, 1250),
-            new DungeonEncounterData(DataTypes.Alizabal, 1332)
+            new DungeonEncounterData((uint)DataTypes.Argaloth, 1033),
+            new DungeonEncounterData((uint)DataTypes.Occuthar, 1250),
+            new DungeonEncounterData((uint)DataTypes.Alizabal, 1332)
         };
 
         public instance_baradin_hold() : base(nameof(instance_baradin_hold), 757) { }
 
         class instance_baradin_hold_InstanceMapScript : InstanceScript
         {
-            ObjectGuid ArgalothGUID;
-            ObjectGuid OccutharGUID;
-            ObjectGuid AlizabalGUID;
+            List<ObjectGuid> _felFlameGUIDs = new();
 
             public instance_baradin_hold_InstanceMapScript(InstanceMap map) : base(map)
             {
                 SetHeaders("BH");
                 SetBossNumber(3);
+                LoadObjectData(creatureData, null);
                 LoadDoorData(doorData);
                 LoadDungeonEncounterData(encounters);
             }
 
             public override void OnCreatureCreate(Creature creature)
             {
-                switch (creature.GetEntry())
+                switch ((CreatureIds)creature.GetEntry())
                 {
-                    case BossIds.Argaloth:
-                        ArgalothGUID = creature.GetGUID();
-                        break;
-                    case BossIds.Occuthar:
-                        OccutharGUID = creature.GetGUID();
-                        break;
-                    case BossIds.Alizabal:
-                        AlizabalGUID = creature.GetGUID();
+                    case CreatureIds.FelFlames:
+                        _felFlameGUIDs.Add(creature.GetGUID());
+                        creature.m_Events.AddEventAtOffset(() => creature.CastSpell(null, (uint)SpellIds.FelFlames), TimeSpan.FromSeconds(1));
                         break;
                 }
             }
 
-            public override void OnGameObjectCreate(GameObject go)
+            public override void SetData(uint type, uint value)
             {
-                switch (go.GetEntry())
+                switch ((DataTypes)type)
                 {
-                    case GameObjectIds.ArgalothDoor:
-                    case GameObjectIds.OccutharDoor:
-                    case GameObjectIds.AlizabalDoor:
-                        AddDoor(go, true);
-                        break;
-                }
-            }
+                    case DataTypes.ExtinuishFelFlames:
+                        foreach (ObjectGuid guid in _felFlameGUIDs)
+                        {
+                            Creature felFlame = instance.GetCreature(guid);
+                            if (felFlame != null)
+                                felFlame.RemoveAllAuras();
+                        }
 
-            public override ObjectGuid GetGuidData(uint data)
-            {
-                switch (data)
-                {
-                    case DataTypes.Argaloth:
-                        return ArgalothGUID;
-                    case DataTypes.Occuthar:
-                        return OccutharGUID;
-                    case DataTypes.Alizabal:
-                        return AlizabalGUID;
+                        _felFlameGUIDs.Clear();
+                        break;
                     default:
-                        break;
-                }
-
-                return ObjectGuid.Empty;
-            }
-
-            public override void OnGameObjectRemove(GameObject go)
-            {
-                switch (go.GetEntry())
-                {
-                    case GameObjectIds.ArgalothDoor:
-                    case GameObjectIds.OccutharDoor:
-                    case GameObjectIds.AlizabalDoor:
-                        AddDoor(go, false);
                         break;
                 }
             }

@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.AI;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Maps;
 using Game.Scripting;
 using System;
 
@@ -133,6 +134,69 @@ namespace Scripts.EasternKingdoms.AlteracValley
 
             if (me.HasUnitState(UnitState.Casting))
                 return;
+        }
+    }
+
+    [Script]
+    class go_av_capturable_object : GameObjectAI
+    {
+        public go_av_capturable_object(GameObject go) : base(go) { }
+
+        public override void Reset()
+        {
+            me.SetActive(true);
+        }
+
+        public override bool OnGossipHello(Player player)
+        {
+            if (me.GetGoState() != GameObjectState.Ready)
+                return true;
+
+            ZoneScript zonescript = me.GetZoneScript();
+            if (zonescript != null)
+            {
+                zonescript.DoAction(1, player, me);
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+    [Script]
+    class go_av_contested_object : GameObjectAI
+    {
+        public go_av_contested_object(GameObject go) : base(go) { }
+
+        public override void Reset()
+        {
+            me.SetActive(true);
+            _scheduler.Schedule(TimeSpan.FromMinutes(4), _ =>
+            {
+                ZoneScript zonescript = me.GetZoneScript();
+                if (zonescript != null)
+                    zonescript.DoAction(2, me, me);
+            });
+        }
+
+        public override bool OnGossipHello(Player player)
+        {
+            if (me.GetGoState() != GameObjectState.Ready)
+                return true;
+
+            ZoneScript zonescript = me.GetZoneScript();
+            if (zonescript != null)
+            {
+                zonescript.DoAction(1, player, me);
+                return false;
+            }
+
+            return true;
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            _scheduler.Update(diff);
         }
     }
 

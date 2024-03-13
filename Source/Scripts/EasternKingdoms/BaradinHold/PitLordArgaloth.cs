@@ -22,7 +22,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.PitLordArgaloth
     [Script]
     class boss_pit_lord_argaloth : BossAI
     {
-        boss_pit_lord_argaloth(Creature creature) : base(creature, DataTypes.Argaloth) { }
+        public boss_pit_lord_argaloth(Creature creature) : base(creature, (uint)DataTypes.Argaloth) { }
 
         public override void JustEngagedWith(Unit who)
         {
@@ -113,4 +113,3 @@ namespace Scripts.EasternKingdoms.BaradinHold.PitLordArgaloth
         }
     }
 }
-

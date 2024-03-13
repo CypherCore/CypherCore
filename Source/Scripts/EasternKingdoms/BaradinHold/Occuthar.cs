@@ -45,7 +45,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
     {
         Vehicle _vehicle;
 
-        public boss_occuthar(Creature creature) : base(creature, DataTypes.Occuthar)
+        public boss_occuthar(Creature creature) : base(creature, (uint)DataTypes.Occuthar)
         {
             _vehicle = me.GetVehicleKit();
             Cypher.Assert(_vehicle != null);
@@ -78,7 +78,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
         {
             summons.Summon(summon);
 
-            if (summon.GetEntry() == CreatureIds.FocusFireDummy)
+            if (summon.GetEntry() == (uint)CreatureIds.FocusFireDummy)
             {
                 DoCast(summon, SpellIds.FocusedFire);
 
@@ -142,7 +142,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
         public override void IsSummonedBy(WorldObject summoner)
         {
             // player is the spellcaster so register summon manually
-            Creature occuthar = ObjectAccessor.GetCreature(me, _instance.GetGuidData(DataTypes.Occuthar));
+            Creature occuthar = ObjectAccessor.GetCreature(me, _instance.GetGuidData((uint)DataTypes.Occuthar));
             if (occuthar != null)
                 occuthar.GetAI().JustSummoned(me);
         }
@@ -169,7 +169,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
     }
 
     [Script] // 96872 - Focused Fire
-    class spell_occuthar_focused_fire_SpellScript : SpellScript
+    class spell_occuthar_focused_fire : SpellScript
     {
         void FilterTargets(List<WorldObject> targets)
         {
@@ -189,7 +189,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
     }
 
     [Script] // Id - 96931 Eyes of Occu'thar
-    class spell_occuthar_eyes_of_occuthar_SpellScript : SpellScript
+    class spell_occuthar_eyes_of_occuthar : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -222,7 +222,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
     }
 
     [Script] // Id - 96932 Eyes of Occu'thar
-    class spell_occuthar_eyes_of_occuthar_vehicle_SpellScript : SpellScript
+    class spell_occuthar_eyes_of_occuthar_vehicle : SpellScript
     {
         public override bool Load()
         {
@@ -237,10 +237,10 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
         {
             Position pos = GetHitUnit().GetPosition();
 
-            Creature occuthar = ObjectAccessor.GetCreature(GetCaster(), GetCaster().GetInstanceScript().GetGuidData(DataTypes.Occuthar));
+            Creature occuthar = ObjectAccessor.GetCreature(GetCaster(), GetCaster().GetInstanceScript().GetGuidData((uint)DataTypes.Occuthar));
             if (occuthar != null)
             {
-                Creature creature = occuthar.SummonCreature(CreatureIds.EyeOfOccuthar, pos);
+                Creature creature = occuthar.SummonCreature((uint)CreatureIds.EyeOfOccuthar, pos);
                 if (creature != null)
                     creature.CastSpell(GetHitUnit(), SpellIds.GazeOfOccuthar, false);
             }
@@ -253,7 +253,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
     }
 
     [Script] // 96942 / 101009 - Gaze of Occu'thar
-    class spell_occuthar_occuthars_destruction_AuraScript : AuraScript
+    class spell_occuthar_occuthars_destruction : AuraScript
     {
         public override bool Load()
         {
@@ -278,4 +278,3 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
         }
     }
 }
-
