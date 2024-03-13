@@ -280,8 +280,13 @@ namespace Game.Networking.Packets
             MemberStats.SpecID = (ushort)player.GetPrimarySpecialization();
             MemberStats.PartyType[0] = player.m_playerData.PartyType[0];
             MemberStats.PartyType[1] = player.m_playerData.PartyType[1];
-            MemberStats.WmoGroupID = 0;
-            MemberStats.WmoDoodadPlacementID = 0;
+
+            var wmoLocation = player.GetCurrentWmo();
+            if (wmoLocation != null)
+            {
+                MemberStats.WmoGroupID = (ushort)wmoLocation.GroupId;
+                MemberStats.WmoDoodadPlacementID = wmoLocation.UniqueId;
+            }
 
             // Vehicle
             Vehicle vehicle = player.GetVehicle();

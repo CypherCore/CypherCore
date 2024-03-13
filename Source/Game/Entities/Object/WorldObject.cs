@@ -120,6 +120,7 @@ namespace Game.Entities
             m_outdoors = data.outdoors;
             m_staticFloorZ = data.FloorZ;
             m_liquidStatus = data.LiquidStatus;
+            m_currentWmo = data.wmoLocation;
         }
 
         public virtual void BuildCreateUpdateBlockForPlayer(UpdateData data, Player target)
@@ -1079,6 +1080,8 @@ namespace Game.Entities
         public bool IsOutdoors() { return m_outdoors; }
 
         public ZLiquidStatus GetLiquidStatus() { return m_liquidStatus; }
+
+        public WmoLocation GetCurrentWmo() { return m_currentWmo; }
 
         public bool IsInWorldPvpZone()
         {
@@ -3804,6 +3807,7 @@ namespace Game.Entities
         float m_staticFloorZ;
         bool m_outdoors;
         ZLiquidStatus m_liquidStatus;
+        WmoLocation m_currentWmo;
 
         // Event handler
         public EventSystem m_Events = new();
