@@ -390,8 +390,8 @@ namespace Game
             if (canBuyout && placeBid.BidAmount == auction.BuyoutOrUnitPrice)
             {
                 // buyout
-                auctionHouse.SendAuctionWon(auction, player, trans);
                 auctionHouse.SendAuctionSold(auction, null, trans);
+                auctionHouse.SendAuctionWon(auction, player, trans);
 
                 auctionHouse.RemoveAuction(trans, auction);
             }

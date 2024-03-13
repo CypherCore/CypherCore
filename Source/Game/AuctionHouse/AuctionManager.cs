@@ -466,18 +466,18 @@ namespace Game
                         houseid = 7;
                         break; // everlook, Blackwater Auction House
                     default:                       // default
-                        {
-                            FactionTemplateRecord u_entry = CliDB.FactionTemplateStorage.LookupByKey(factionTemplateId);
-                            if (u_entry == null)
-                                houseid = 1; // Auction House
-                            else if ((u_entry.FactionGroup & (int)FactionMasks.Alliance) != 0)
-                                houseid = 2; // Alliance Auction House
-                            else if ((u_entry.FactionGroup & (int)FactionMasks.Horde) != 0)
-                                houseid = 6; // Horde Auction House
-                            else
-                                houseid = 1; // Auction House
-                            break;
-                        }
+                    {
+                        FactionTemplateRecord u_entry = CliDB.FactionTemplateStorage.LookupByKey(factionTemplateId);
+                        if (u_entry == null)
+                            houseid = 1; // Auction House
+                        else if ((u_entry.FactionGroup & (int)FactionMasks.Alliance) != 0)
+                            houseid = 2; // Alliance Auction House
+                        else if ((u_entry.FactionGroup & (int)FactionMasks.Horde) != 0)
+                            houseid = 6; // Horde Auction House
+                        else
+                            houseid = 1; // Auction House
+                        break;
+                    }
                 }
             }
 
@@ -785,20 +785,25 @@ namespace Game
                 {
                     SendAuctionExpired(auction, trans);
                     Global.ScriptMgr.OnAuctionExpire(this, auction);
+
+                    RemoveAuction(trans, auction);
                 }
                 ///- Or perform the transaction
                 else
                 {
+                    // Copy data before freeing AuctionPosting in auctionHouse->RemoveAuction
+                    // Because auctionHouse->SendAuctionWon can unload items if bidder is offline
+                    // we need to RemoveAuction before sending mails
+                    AuctionPosting copy = auction;
+                    RemoveAuction(trans, auction);
+
                     //we should send an "item sold" message if the seller is online
                     //we send the item to the winner
                     //we send the money to the seller
-                    SendAuctionWon(auction, null, trans);
-                    SendAuctionSold(auction, null, trans);
+                    SendAuctionSold(copy, null, trans);
+                    SendAuctionWon(copy, null, trans);
                     Global.ScriptMgr.OnAuctionSuccessful(this, auction);
                 }
-
-                ///- In any case clear the auction
-                RemoveAuction(trans, auction);
             }
 
             // Run DB changes
@@ -816,7 +821,7 @@ namespace Game
                 knownAppearanceIds = player.GetSession().GetCollectionMgr().GetAppearanceIds();
                 //todo fix me
                 //if (knownPetSpecies.Length < CliDB.BattlePetSpeciesStorage.GetNumRows())
-                    //knownPetSpecies.resize(CliDB.BattlePetSpeciesStorage.GetNumRows());
+                //knownPetSpecies.resize(CliDB.BattlePetSpeciesStorage.GetNumRows());
             }
 
             var sorter = new AuctionsBucketData.Sorter(player.GetSession().GetSessionDbcLocale(), sorts, sortCount);
@@ -1294,7 +1299,7 @@ namespace Game
                         ownerName = Global.ObjectMgr.GetCypherString(CypherStrings.Unknown);
 
                     Log.outCommand(bidderAccId, $"GM {player.GetName()} (Account: {bidderAccId}) bought commodity in auction: {items[0].Items[0].GetName(Global.WorldMgr.GetDefaultDbcLocale())} (Entry: {items[0].Items[0].GetEntry()} " +
-                        $"Count: {boughtFromAuction}) and pay money: { auction.BuyoutOrUnitPrice * boughtFromAuction}. Original owner {ownerName} (Account: {Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(auction.Owner)})");
+                        $"Count: {boughtFromAuction}) and pay money: {auction.BuyoutOrUnitPrice * boughtFromAuction}. Original owner {ownerName} (Account: {Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(auction.Owner)})");
                 }
 
                 ulong auctionHouseCut = CalculateAuctionHouseCut(auction.BuyoutOrUnitPrice * boughtFromAuction);
@@ -1393,7 +1398,7 @@ namespace Game
 
             // data for gm.log
             string bidderName = "";
-            bool logGmTrade= auction.ServerFlags.HasFlag(AuctionPostingServerFlag.GmLogBuyer);
+            bool logGmTrade = auction.ServerFlags.HasFlag(AuctionPostingServerFlag.GmLogBuyer);
 
             if (bidder != null)
             {
@@ -1496,7 +1501,7 @@ namespace Game
 
                 int itemIndex = 0;
                 while (itemIndex < auction.Items.Count)
-                {  
+                {
                     MailDraft mail = new(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Expired, auction), "");
 
                     for (int i = 0; i < SharedConst.MaxMailItems && itemIndex < auction.Items.Count; ++i, ++itemIndex)
@@ -1586,7 +1591,7 @@ namespace Game
                 TotalPrice += unitPrice * item.GetCount();
             }
         }
-        
+
         AuctionHouseRecord _auctionHouse;
 
         SortedList<uint, AuctionPosting> _itemsByAuctionId = new(); // ordered for replicate
@@ -1749,19 +1754,19 @@ namespace Game
                 switch (column)
                 {
                     case AuctionHouseSortOrder.Price:
-                        {
-                            ulong leftPrice = left.BuyoutOrUnitPrice != 0 ? left.BuyoutOrUnitPrice : (left.BidAmount != 0 ? left.BidAmount : left.MinBid);
-                            ulong rightPrice = right.BuyoutOrUnitPrice != 0 ? right.BuyoutOrUnitPrice : (right.BidAmount != 0 ? right.BidAmount : right.MinBid);
-                            return (long)(leftPrice - rightPrice);
-                        }
+                    {
+                        ulong leftPrice = left.BuyoutOrUnitPrice != 0 ? left.BuyoutOrUnitPrice : (left.BidAmount != 0 ? left.BidAmount : left.MinBid);
+                        ulong rightPrice = right.BuyoutOrUnitPrice != 0 ? right.BuyoutOrUnitPrice : (right.BidAmount != 0 ? right.BidAmount : right.MinBid);
+                        return (long)(leftPrice - rightPrice);
+                    }
                     case AuctionHouseSortOrder.Name:
                         return left.Bucket.FullName[(int)_locale].CompareTo(right.Bucket.FullName[(int)_locale]);
                     case AuctionHouseSortOrder.Level:
-                        {
-                            int leftLevel = left.Items[0].GetModifier(ItemModifier.BattlePetSpeciesId) == 0 ? left.Bucket.SortLevel : (int)left.Items[0].GetModifier(ItemModifier.BattlePetLevel);
-                            int rightLevel = right.Items[0].GetModifier(ItemModifier.BattlePetSpeciesId) == 0 ? right.Bucket.SortLevel : (int)right.Items[0].GetModifier(ItemModifier.BattlePetLevel);
-                            return leftLevel - rightLevel;
-                        }
+                    {
+                        int leftLevel = left.Items[0].GetModifier(ItemModifier.BattlePetSpeciesId) == 0 ? left.Bucket.SortLevel : (int)left.Items[0].GetModifier(ItemModifier.BattlePetLevel);
+                        int rightLevel = right.Items[0].GetModifier(ItemModifier.BattlePetSpeciesId) == 0 ? right.Bucket.SortLevel : (int)right.Items[0].GetModifier(ItemModifier.BattlePetLevel);
+                        return leftLevel - rightLevel;
+                    }
                     case AuctionHouseSortOrder.Bid:
                         return (long)(left.BidAmount - right.BidAmount);
                     case AuctionHouseSortOrder.Buyout:
@@ -1978,7 +1983,7 @@ namespace Game
 
         public AuctionSearchClassFilters()
         {
-            for (var i  = 0; i < (int)ItemClass.Max; ++i)
+            for (var i = 0; i < (int)ItemClass.Max; ++i)
                 Classes[i] = new SubclassFilter();
         }
 
@@ -1986,8 +1991,8 @@ namespace Game
         {
             public FilterType SubclassMask;
             public ulong[] InvTypes = new ulong[ItemConst.MaxItemSubclassTotal];
-        } 
-        
+        }
+
         public enum FilterType : uint
         {
             SkipClass = 0,
