@@ -229,7 +229,7 @@ namespace Game.Collision
             return data;
         }
 
-        public WorldModel AcquireModelInstance(string filename, uint flags = 0)
+        public WorldModel AcquireModelInstance(string filename)
         {
             lock (LoadedModelFilesLock)
             {
@@ -245,7 +245,6 @@ namespace Game.Collision
                     }
 
                     Log.outDebug(LogFilter.Maps, "VMapManager: loading file '{0}'", filename);
-                    model.GetModel().Flags = flags;
 
                     iLoadedModelFiles.Add(filename, model);
                 }

@@ -127,7 +127,7 @@ namespace Game.Collision
                         if (ModelSpawn.ReadFromFile(reader, out ModelSpawn spawn))
                         {
                             // acquire model instance
-                            WorldModel model = vm.AcquireModelInstance(spawn.name, spawn.flags);
+                            WorldModel model = vm.AcquireModelInstance(spawn.name);
                             if (model == null)
                                 Log.outError(LogFilter.Server, "StaticMapTree.LoadMapTile() : could not acquire WorldModel [{0}, {1}]", tileX, tileY);
 

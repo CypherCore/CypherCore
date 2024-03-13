@@ -290,8 +290,7 @@ namespace Game.Collision
 
     public class WorldModel : IModel
     {
-        public uint Flags;
-
+        ModelFlags Flags;
         uint RootWMOID;
         List<GroupModel> groupModels = new();
         BIH groupTree = new();
@@ -302,7 +301,7 @@ namespace Game.Collision
             if ((ignoreFlags & ModelIgnoreFlags.M2) != ModelIgnoreFlags.Nothing)
             {
                 // M2 models are not taken into account for LoS calculation if caller requested their ignoring.
-                if ((Flags & (uint)ModelFlags.M2) != 0)
+                if (Flags.HasFlag(ModelFlags.None))
                     return false;
             }
 
@@ -371,6 +370,7 @@ namespace Game.Collision
                 return false;
 
             reader.ReadUInt32(); //chunkSize notused
+            Flags = (ModelFlags)reader.ReadUInt32();
             RootWMOID = reader.ReadUInt32();
 
             // read group models
@@ -391,5 +391,14 @@ namespace Game.Collision
 
             return groupTree.ReadFromFile(reader);
         }
+
+        public bool IsM2() { return Flags.HasFlag(ModelFlags.IsM2); }
+    }
+
+    [Flags]
+    enum ModelFlags
+    {
+        None = 0x0,
+        IsM2 = 0x1
     }
 }
