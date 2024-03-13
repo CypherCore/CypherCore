@@ -301,7 +301,7 @@ namespace Game.Collision
             if ((ignoreFlags & ModelIgnoreFlags.M2) != ModelIgnoreFlags.Nothing)
             {
                 // M2 models are not taken into account for LoS calculation if caller requested their ignoring.
-                if (Flags.HasFlag(ModelFlags.None))
+                if (IsM2())
                     return false;
             }
 
@@ -313,26 +313,6 @@ namespace Game.Collision
             WModelRayCallBack isc = new(groupModels);
             groupTree.IntersectRay(ray, isc, ref distance, stopAtFirstHit);
             return isc.hit;
-        }
-
-        public bool IntersectPoint(Vector3 p, Vector3 down, out float dist, AreaInfo info)
-        {
-            dist = 0f;
-            if (groupModels.Empty())
-                return false;
-
-            WModelAreaCallback callback = new(groupModels, down);
-            groupTree.IntersectPoint(p, callback);
-            if (callback.hit != null)
-            {
-                info.rootId = (int)RootWMOID;
-                info.groupId = (int)callback.hit.GetWmoID();
-                info.flags = callback.hit.GetMogpFlags();
-                info.result = true;
-                dist = callback.zDist;
-                return true;
-            }
-            return false;
         }
 
         public bool GetLocationInfo(Vector3 p, Vector3 down, out float dist, GroupLocationInfo info)

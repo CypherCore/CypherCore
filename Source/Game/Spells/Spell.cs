@@ -311,7 +311,7 @@ namespace Game.Spells
             {
                 if (m_spellInfo.HasAttribute(SpellAttr8.RequiresLocationToBeOnLiquidSurface))
                 {
-                    ZLiquidStatus status = m_caster.GetMap().GetLiquidStatus(m_caster.GetPhaseShift(), m_targets.GetDstPos().GetPositionX(), m_targets.GetDstPos().GetPositionY(), m_targets.GetDstPos().GetPositionZ(), LiquidHeaderTypeFlags.AllLiquids);
+                    ZLiquidStatus status = m_caster.GetMap().GetLiquidStatus(m_caster.GetPhaseShift(), m_targets.GetDstPos().GetPositionX(), m_targets.GetDstPos().GetPositionY(), m_targets.GetDstPos().GetPositionZ());
                     if (!status.HasAnyFlag(ZLiquidStatus.WaterWalk | ZLiquidStatus.InWater))
                     {
                         SendCastResult(SpellCastResult.NoLiquid);
@@ -1004,7 +1004,7 @@ namespace Game.Spells
                     float ground = m_caster.GetMapHeight(x, y, z);
                     float liquidLevel = MapConst.VMAPInvalidHeightValue;
                     LiquidData liquidData;
-                    if (m_caster.GetMap().GetLiquidStatus(m_caster.GetPhaseShift(), x, y, z, LiquidHeaderTypeFlags.AllLiquids, out liquidData, m_caster.GetCollisionHeight()) != 0)
+                    if (m_caster.GetMap().GetLiquidStatus(m_caster.GetPhaseShift(), x, y, z, out liquidData, null, m_caster.GetCollisionHeight()) != 0)
                         liquidLevel = liquidData.level;
 
                     if (liquidLevel <= ground) // When there is no liquid Map.GetWaterOrGroundLevel returns ground level

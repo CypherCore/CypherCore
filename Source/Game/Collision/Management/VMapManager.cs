@@ -147,66 +147,12 @@ namespace Game.Collision
             return MapConst.VMAPInvalidHeightValue;
         }
 
-        public bool GetAreaInfo(uint mapId, float x, float y, ref float z, out uint flags, out int adtId, out int rootId, out int groupId)
+
+
+        public bool GetAreaAndLiquidData(uint mapId, float x, float y, float z, byte? reqLiquidType, out AreaAndLiquidData data)
         {
-            flags = 0;
-            adtId = 0;
-            rootId = 0;
-            groupId = 0;
-            if (!Global.DisableMgr.IsVMAPDisabledFor(mapId, DisableFlags.VmapAreaFlag))
-            {
-                var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
-                if (instanceTree != null)
-                {
-                    Vector3 pos = ConvertPositionToInternalRep(x, y, z);
-                    bool result = instanceTree.GetAreaInfo(ref pos, out flags, out adtId, out rootId, out groupId);
-                    // z is not touched by convertPositionToInternalRep(), so just copy
-                    z = pos.Z;
-                    return result;
-                }
-            }
+            data = new AreaAndLiquidData();
 
-            return false;
-        }
-
-        public bool GetLiquidLevel(uint mapId, float x, float y, float z, uint reqLiquidType, ref float level, ref float floor, ref uint type, ref uint mogpFlags)
-        {
-            if (!Global.DisableMgr.IsVMAPDisabledFor(mapId, DisableFlags.VmapLiquidStatus))
-            {
-                var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
-                if (instanceTree != null)
-                {
-                    LocationInfo info = new();
-                    Vector3 pos = ConvertPositionToInternalRep(x, y, z);
-                    if (instanceTree.GetLocationInfo(pos, info))
-                    {
-                        floor = info.ground_Z;
-                        Cypher.Assert(floor < float.MaxValue);
-                        type = info.hitModel.GetLiquidType();  // entry from LiquidType.dbc
-                        mogpFlags = info.hitModel.GetMogpFlags();
-                        if (reqLiquidType != 0 && !Convert.ToBoolean(Global.DB2Mgr.GetLiquidFlags(type) & reqLiquidType))
-                            return false;
-                        if (info.hitInstance.GetLiquidLevel(pos, info, ref level))
-                            return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        public AreaAndLiquidData GetAreaAndLiquidData(uint mapId, float x, float y, float z, uint reqLiquidType)
-        {
-            var data = new AreaAndLiquidData();
-
-            if (Global.DisableMgr.IsVMAPDisabledFor(mapId, DisableFlags.VmapLiquidStatus))
-            {
-                data.floorZ = z;
-                int adtId, rootId, groupId;
-                uint flags;
-                if (GetAreaInfo(mapId, x, y, ref data.floorZ, out flags, out adtId, out rootId, out groupId))
-                    data.areaInfo = new(adtId, rootId, groupId, flags);
-                return data;
-            }
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
             if (instanceTree != null)
             {
@@ -215,18 +161,24 @@ namespace Game.Collision
                 if (instanceTree.GetLocationInfo(pos, info))
                 {
                     data.floorZ = info.ground_Z;
-                    uint liquidType = info.hitModel.GetLiquidType();
-                    float liquidLevel = 0;
-                    if (reqLiquidType == 0 || Convert.ToBoolean(Global.DB2Mgr.GetLiquidFlags(liquidType) & reqLiquidType))
-                        if (info.hitInstance.GetLiquidLevel(pos, info, ref liquidLevel))
-                            data.liquidInfo = new(liquidType, liquidLevel);
 
                     if (!Global.DisableMgr.IsVMAPDisabledFor(mapId, DisableFlags.VmapLiquidStatus))
-                        data.areaInfo = new(info.hitInstance.adtId, info.rootId, (int)info.hitModel.GetWmoID(), info.hitModel.GetMogpFlags());
+                    {
+                        uint liquidType = info.hitModel.GetLiquidType(); // entry from LiquidType.dbc
+                        float liquidLevel = 0;
+                        if (!reqLiquidType.HasValue || (Global.DB2Mgr.GetLiquidFlags(liquidType) & reqLiquidType.Value) != 0)
+                            if (info.hitInstance.GetLiquidLevel(pos, info, ref liquidLevel))
+                                data.liquidInfo = new(liquidType, liquidLevel);
+                    }
+
+                    if (!Global.DisableMgr.IsVMAPDisabledFor(mapId, DisableFlags.VmapLiquidStatus))
+                        data.areaInfo = new((int)info.hitModel.GetWmoID(), info.hitInstance.adtId, info.rootId, info.hitModel.GetMogpFlags(), info.hitInstance.Id);
+
+                    return true;
                 }
             }
 
-            return data;
+            return false;
         }
 
         public WorldModel AcquireModelInstance(string filename)
@@ -336,22 +288,25 @@ namespace Game.Collision
 
     public class AreaAndLiquidData
     {
-        public struct AreaInfo
+        public class AreaInfo
         {
+            public int GroupId;
             public int AdtId;
             public int RootId;
-            public int GroupId;
             public uint MogpFlags;
+            public uint UniqueId;
 
-            public AreaInfo(int adtId, int rootId, int groupId, uint flags)
+            public AreaInfo(int groupId, int adtId, int rootId, uint mogpFlags, uint uniqueId)
             {
+                GroupId = groupId;
                 AdtId = adtId;
                 RootId = rootId;
-                GroupId = groupId;
-                MogpFlags = flags;
+                MogpFlags = mogpFlags;
+                UniqueId = uniqueId;
             }
         }
-        public struct LiquidInfo
+
+        public class LiquidInfo
         {
             public uint LiquidType;
             public float Level;
@@ -364,7 +319,7 @@ namespace Game.Collision
         }
 
         public float floorZ = MapConst.VMAPInvalidHeightValue;
-        public AreaInfo? areaInfo;
-        public LiquidInfo? liquidInfo;
+        public AreaInfo areaInfo;
+        public LiquidInfo liquidInfo;
     }
 }

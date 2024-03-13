@@ -104,33 +104,6 @@ namespace Game.Collision
             return hit;
         }
 
-        public override void IntersectPoint(Vector3 point, AreaInfo info, PhaseShift phaseShift)
-        {
-            if (!IsCollisionEnabled() || !owner.IsSpawned() || !IsMapObject())
-                return;
-
-            if (!owner.IsInPhase(phaseShift))
-                return;
-
-            if (!iBound.contains(point))
-                return;
-
-            // child bounds are defined in object space:
-            Vector3 pModel = iInvRot.Multiply(point - iPos) * iInvScale;
-            Vector3 zDirModel = iInvRot.Multiply(new Vector3(0.0f, 0.0f, -1.0f));
-            float zDist;
-            if (iModel.IntersectPoint(pModel, zDirModel, out zDist, info))
-            {
-                Vector3 modelGround = pModel + zDist * zDirModel;
-                float world_Z = (iInvRot.Multiply(modelGround) * iScale + iPos).Z;
-                if (info.ground_Z < world_Z)
-                {
-                    info.ground_Z = world_Z;
-                    info.adtId = owner.GetNameSetId();
-                }
-            }
-        }
-
         public bool GetLocationInfo(Vector3 point, LocationInfo info, PhaseShift phaseShift)
         {
             if (!IsCollisionEnabled() || !owner.IsSpawned() || !IsMapObject())

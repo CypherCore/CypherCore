@@ -174,24 +174,6 @@ namespace Game.Collision
         ModelIgnoreFlags flags;
     }
 
-    public class AreaInfoCallback : WorkerCallback
-    {
-        public AreaInfoCallback(ModelInstance[] val)
-        {
-            prims = val;
-        }
-        public override void Invoke(Vector3 point, uint entry)
-        {
-            if (prims[entry] == null)
-                return;
-
-            prims[entry].IntersectPoint(point, aInfo);
-        }
-
-        ModelInstance[] prims;
-        public AreaInfo aInfo = new();
-    }
-
     public class LocationInfoCallback : WorkerCallback
     {
         public LocationInfoCallback(ModelInstance[] val, LocationInfo info)
@@ -230,25 +212,6 @@ namespace Game.Collision
 
         bool _didHit;
         PhaseShift _phaseShift;
-    }
-
-    public class DynamicTreeAreaInfoCallback : WorkerCallback
-    {
-        public DynamicTreeAreaInfoCallback(PhaseShift phaseShift)
-        {
-            _phaseShift = phaseShift;
-            _areaInfo = new AreaInfo();
-        }
-
-        public override void Invoke(Vector3 p, GameObjectModel obj)
-        {
-            obj.IntersectPoint(p, _areaInfo, _phaseShift);
-        }
-
-        public AreaInfo GetAreaInfo() { return _areaInfo; }
-
-        PhaseShift _phaseShift;
-        AreaInfo _areaInfo;
     }
 
     public class DynamicTreeLocationInfoCallback : WorkerCallback

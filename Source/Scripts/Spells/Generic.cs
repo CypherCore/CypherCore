@@ -153,7 +153,7 @@ namespace Scripts.Spells.Generic
             Unit caster = GetCaster();
             Position summonPos = caster.GetPosition();
             LiquidData liquidStatus;
-            if (caster.GetMap().GetLiquidStatus(caster.GetPhaseShift(), caster.GetPositionX(), caster.GetPositionY(), caster.GetPositionZ(), LiquidHeaderTypeFlags.AllLiquids, out liquidStatus, caster.GetCollisionHeight()) != ZLiquidStatus.NoWater)
+            if (caster.GetMap().GetLiquidStatus(caster.GetPhaseShift(), caster.GetPositionX(), caster.GetPositionY(), caster.GetPositionZ(), out liquidStatus, null, caster.GetCollisionHeight()) != ZLiquidStatus.NoWater)
                 summonPos.posZ = liquidStatus.level;
             dest.Relocate(summonPos);
         }

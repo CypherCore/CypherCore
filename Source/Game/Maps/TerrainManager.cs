@@ -266,7 +266,7 @@ namespace Game.Maps
             if (++_referenceCountFromMap[gx][gy] != 1)    // check if already loaded
                 return;
 
-            lock(_loadLock)
+            lock (_loadLock)
                 LoadMapAndVMapImpl(gx, gy);
         }
 
@@ -393,7 +393,7 @@ namespace Game.Maps
             // ensure GridMap is loaded
             if (!_loadedGrids[GetBitsetIndex(gx, gy)] && loadIfMissing)
             {
-                lock(_loadLock)
+                lock (_loadLock)
                     LoadMapAndVMapImpl(gx, gy);
             }
 
@@ -428,16 +428,17 @@ namespace Game.Maps
             return (mogpFlags & 0x2000) != 0;
         }
 
-        public void GetFullTerrainStatusForPosition(PhaseShift phaseShift, uint mapId, float x, float y, float z, PositionFullTerrainStatus data, LiquidHeaderTypeFlags reqLiquidType = LiquidHeaderTypeFlags.AllLiquids, float collisionHeight = MapConst.DefaultCollesionHeight, DynamicMapTree dynamicMapTree = null)
+        public void GetFullTerrainStatusForPosition(PhaseShift phaseShift, uint mapId, float x, float y, float z, PositionFullTerrainStatus data, LiquidHeaderTypeFlags? reqLiquidType = null, float collisionHeight = MapConst.DefaultCollesionHeight, DynamicMapTree dynamicMapTree = null)
         {
             AreaAndLiquidData dynData = null;
             AreaAndLiquidData wmoData = null;
 
             uint terrainMapId = PhasingHandler.GetTerrainMapId(phaseShift, mapId, this, x, y);
             GridMap gmap = GetGrid(terrainMapId, x, y);
-            AreaAndLiquidData vmapData = Global.VMapMgr.GetAreaAndLiquidData(terrainMapId, x, y, z, (byte)reqLiquidType);
+            AreaAndLiquidData vmapData;
+            Global.VMapMgr.GetAreaAndLiquidData(terrainMapId, x, y, z, reqLiquidType.HasValue ? (byte)reqLiquidType : null, out vmapData);
             if (dynamicMapTree != null)
-                dynData = dynamicMapTree.GetAreaAndLiquidData(x, y, z, phaseShift, (byte)reqLiquidType);
+                dynamicMapTree.GetAreaAndLiquidData(x, y, z, phaseShift, reqLiquidType.HasValue ? (byte)reqLiquidType : null, out dynData);
 
             uint gridAreaId = 0;
             float gridMapHeight = MapConst.InvalidHeight;
@@ -475,15 +476,15 @@ namespace Game.Maps
 
             if (wmoData != null)
             {
-                if (wmoData.areaInfo.HasValue)
+                if (wmoData.areaInfo != null)
                 {
-                    data.areaInfo = new(wmoData.areaInfo.Value.AdtId, wmoData.areaInfo.Value.RootId, wmoData.areaInfo.Value.GroupId, wmoData.areaInfo.Value.MogpFlags);
+                    data.wmoLocation = new(wmoData.areaInfo.AdtId, wmoData.areaInfo.RootId, wmoData.areaInfo.GroupId, wmoData.areaInfo.MogpFlags);
                     // wmo found
-                    var wmoEntry = Global.DB2Mgr.GetWMOAreaTable(wmoData.areaInfo.Value.RootId, wmoData.areaInfo.Value.AdtId, wmoData.areaInfo.Value.GroupId);
+                    var wmoEntry = Global.DB2Mgr.GetWMOAreaTable(wmoData.areaInfo.RootId, wmoData.areaInfo.AdtId, wmoData.areaInfo.GroupId);
                     if (wmoEntry == null)
-                        wmoEntry = Global.DB2Mgr.GetWMOAreaTable(wmoData.areaInfo.Value.RootId, wmoData.areaInfo.Value.AdtId, -1);
+                        wmoEntry = Global.DB2Mgr.GetWMOAreaTable(wmoData.areaInfo.RootId, wmoData.areaInfo.AdtId, -1);
 
-                    data.outdoors = (wmoData.areaInfo.Value.MogpFlags & 0x8) != 0;
+                    data.outdoors = (wmoData.areaInfo.MogpFlags & 0x8) != 0;
                     if (wmoEntry != null)
                     {
                         data.AreaId = wmoEntry.AreaTableID;
@@ -496,7 +497,7 @@ namespace Game.Maps
                     if (data.AreaId == 0)
                         data.AreaId = gridAreaId;
 
-                    useGridLiquid = !IsInWMOInterior(wmoData.areaInfo.Value.MogpFlags);
+                    useGridLiquid = !IsInWMOInterior(wmoData.areaInfo.MogpFlags);
                 }
             }
             else
@@ -515,9 +516,9 @@ namespace Game.Maps
 
             // liquid processing
             data.LiquidStatus = ZLiquidStatus.NoWater;
-            if (wmoData != null && wmoData.liquidInfo.HasValue && wmoData.liquidInfo.Value.Level > wmoData.floorZ)
+            if (wmoData != null && wmoData.liquidInfo != null && wmoData.liquidInfo.Level > wmoData.floorZ)
             {
-                uint liquidType = wmoData.liquidInfo.Value.LiquidType;
+                uint liquidType = wmoData.liquidInfo.LiquidType;
                 if (GetId() == 530 && liquidType == 2) // gotta love hacks
                     liquidType = 15;
 
@@ -545,12 +546,12 @@ namespace Game.Maps
                 }
 
                 data.LiquidInfo = new();
-                data.LiquidInfo.level = wmoData.liquidInfo.Value.Level;
+                data.LiquidInfo.level = wmoData.liquidInfo.Level;
                 data.LiquidInfo.depth_level = wmoData.floorZ;
                 data.LiquidInfo.entry = liquidType;
                 data.LiquidInfo.type_flags = (LiquidHeaderTypeFlags)(1 << (int)liquidFlagType);
 
-                float delta = wmoData.liquidInfo.Value.Level - z;
+                float delta = wmoData.liquidInfo.Level - z;
                 ZLiquidStatus status = ZLiquidStatus.AboveWater;
                 if (delta > collisionHeight)
                     status = ZLiquidStatus.UnderWater;
@@ -580,38 +581,35 @@ namespace Game.Maps
             }
         }
 
-        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, uint mapId, float x, float y, float z, LiquidHeaderTypeFlags ReqLiquidType, out LiquidData data, float collisionHeight = MapConst.DefaultCollesionHeight)
+        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, uint mapId, float x, float y, float z, out LiquidData data, LiquidHeaderTypeFlags? ReqLiquidType = null, float collisionHeight = MapConst.DefaultCollesionHeight)
         {
             data = null;
 
             ZLiquidStatus result = ZLiquidStatus.NoWater;
-            float liquid_level = MapConst.InvalidHeight;
-            float ground_level = MapConst.InvalidHeight;
-            uint liquid_type = 0;
-            uint mogpFlags = 0;
+            AreaAndLiquidData vmapData;
             bool useGridLiquid = true;
             uint terrainMapId = PhasingHandler.GetTerrainMapId(phaseShift, mapId, this, x, y);
 
-            if (Global.VMapMgr.GetLiquidLevel(terrainMapId, x, y, z, (byte)ReqLiquidType, ref liquid_level, ref ground_level, ref liquid_type, ref mogpFlags))
+            if (Global.VMapMgr.GetAreaAndLiquidData(terrainMapId, x, y, z, ReqLiquidType.HasValue ? (byte)ReqLiquidType : null, out vmapData) && vmapData.liquidInfo != null)
             {
-                useGridLiquid = !IsInWMOInterior(mogpFlags);
-                Log.outDebug(LogFilter.Maps, $"GetLiquidStatus(): vmap liquid level: {liquid_level} ground: {ground_level} type: {liquid_type}");
+                useGridLiquid = vmapData.areaInfo == null || !IsInWMOInterior(vmapData.areaInfo.MogpFlags);
+                Log.outDebug(LogFilter.Maps, $"GetLiquidStatus(): vmap liquid level: {vmapData.liquidInfo.Level} ground: {vmapData.floorZ} type: {vmapData.liquidInfo.LiquidType}");
                 // Check water level and ground level
-                if (liquid_level > ground_level && MathFunctions.fuzzyGe(z, ground_level - MapConst.GroundHeightTolerance))
+                if (vmapData.liquidInfo.Level > vmapData.floorZ && MathFunctions.fuzzyGe(z, vmapData.floorZ - MapConst.GroundHeightTolerance))
                 {
                     // All ok in water . store data
                     data = new();
 
                     // hardcoded in client like this
-                    if (GetId() == 530 && liquid_type == 2)
-                        liquid_type = 15;
+                    if (GetId() == 530 && vmapData.liquidInfo.LiquidType == 2)
+                        vmapData.liquidInfo.LiquidType = 15;
 
                     uint liquidFlagType = 0;
-                    var liq = CliDB.LiquidTypeStorage.LookupByKey(liquid_type);
+                    var liq = CliDB.LiquidTypeStorage.LookupByKey(vmapData.liquidInfo.LiquidType);
                     if (liq != null)
                         liquidFlagType = liq.SoundBank;
 
-                    if (liquid_type != 0 && liquid_type < 21)
+                    if (vmapData.liquidInfo.LiquidType != 0 && vmapData.liquidInfo.LiquidType < 21)
                     {
                         var area = CliDB.AreaTableStorage.LookupByKey(GetAreaId(phaseShift, mapId, x, y, z));
                         if (area != null)
@@ -627,19 +625,19 @@ namespace Game.Maps
                             var liq1 = CliDB.LiquidTypeStorage.LookupByKey(overrideLiquid);
                             if (liq1 != null)
                             {
-                                liquid_type = overrideLiquid;
+                                vmapData.liquidInfo.LiquidType = overrideLiquid;
                                 liquidFlagType = liq1.SoundBank;
                             }
                         }
                     }
 
-                    data.level = liquid_level;
-                    data.depth_level = ground_level;
+                    data.level = vmapData.liquidInfo.Level;
+                    data.depth_level = vmapData.floorZ;
 
-                    data.entry = liquid_type;
+                    data.entry = vmapData.liquidInfo.LiquidType;
                     data.type_flags = (LiquidHeaderTypeFlags)(1 << (int)liquidFlagType);
 
-                    float delta = liquid_level - z;
+                    float delta = vmapData.liquidInfo.Level - z;
 
                     ZLiquidStatus status = ZLiquidStatus.AboveWater; // Above water
 
@@ -652,7 +650,7 @@ namespace Game.Maps
 
                     if (status != ZLiquidStatus.AboveWater)
                     {
-                        if (MathF.Abs(ground_level - z) <= MapConst.GroundHeightTolerance)
+                        if (MathF.Abs(vmapData.floorZ - z) <= MapConst.GroundHeightTolerance)
                             status |= ZLiquidStatus.OceanFloor;
 
                         return status;
@@ -670,7 +668,7 @@ namespace Game.Maps
                     LiquidData map_data = new();
                     ZLiquidStatus map_result = gmap.GetLiquidStatus(x, y, z, ReqLiquidType, map_data, collisionHeight);
                     // Not override LIQUID_MAP_ABOVE_WATER with LIQUID_MAP_NO_WATER:
-                    if (map_result != ZLiquidStatus.NoWater && (map_data.level > ground_level))
+                    if (map_result != ZLiquidStatus.NoWater && (map_data.level > vmapData.floorZ))
                     {
                         // hardcoded in client like this
                         if (GetId() == 530 && map_data.entry == 2)
@@ -692,49 +690,41 @@ namespace Game.Maps
             rootId = 0;
             groupId = 0;
 
-            float vmap_z = z;
-            float dynamic_z = z;
             float check_z = z;
             uint terrainMapId = PhasingHandler.GetTerrainMapId(phaseShift, mapId, this, x, y);
 
-            uint vflags;
-            int vadtId;
-            int vrootId;
-            int vgroupId;
-            uint dflags = 0;
-            int dadtId = 0;
-            int drootId = 0;
-            int dgroupId = 0;
+            AreaAndLiquidData vdata;
+            AreaAndLiquidData ddata = null;
 
-            bool hasVmapAreaInfo = Global.VMapMgr.GetAreaInfo(terrainMapId, x, y, ref vmap_z, out vflags, out vadtId, out vrootId, out vgroupId);
-            bool hasDynamicAreaInfo = dynamicMapTree != null ? dynamicMapTree.GetAreaInfo(x, y, ref dynamic_z, phaseShift, out dflags, out dadtId, out drootId, out dgroupId) : false;
+            bool hasVmapAreaInfo = Global.VMapMgr.GetAreaAndLiquidData(terrainMapId, x, y, z, null, out vdata) && vdata.areaInfo != null;
+            bool hasDynamicAreaInfo = dynamicMapTree != null ? dynamicMapTree.GetAreaAndLiquidData(x, y, z, phaseShift, null, out ddata) && ddata.areaInfo != null : false;
 
             if (hasVmapAreaInfo)
             {
-                if (hasDynamicAreaInfo && dynamic_z > vmap_z)
+                if (hasDynamicAreaInfo && ddata.floorZ > vdata.floorZ)
                 {
-                    check_z = dynamic_z;
-                    mogpflags = dflags;
-                    adtId = dadtId;
-                    rootId = drootId;
-                    groupId = dgroupId;
+                    check_z = ddata.floorZ; 
+                    groupId = ddata.areaInfo.GroupId; 
+                    adtId = ddata.areaInfo.AdtId; 
+                    rootId = ddata.areaInfo.RootId; 
+                    mogpflags = ddata.areaInfo.MogpFlags;
                 }
                 else
                 {
-                    check_z = vmap_z;
-                    mogpflags = vflags;
-                    adtId = vadtId;
-                    rootId = vrootId;
-                    groupId = vgroupId;
+                    check_z = vdata.floorZ; 
+                    groupId = vdata.areaInfo.GroupId; 
+                    adtId = vdata.areaInfo.AdtId; 
+                    rootId = vdata.areaInfo.RootId; 
+                    mogpflags = vdata.areaInfo.MogpFlags;
                 }
             }
             else if (hasDynamicAreaInfo)
             {
-                check_z = dynamic_z;
-                mogpflags = dflags;
-                adtId = dadtId;
-                rootId = drootId;
-                groupId = dgroupId;
+                check_z = ddata.floorZ;
+                groupId = ddata.areaInfo.GroupId;
+                adtId = ddata.areaInfo.AdtId;
+                rootId = ddata.areaInfo.RootId;
+                mogpflags = ddata.areaInfo.MogpFlags;
             }
 
             if (hasVmapAreaInfo || hasDynamicAreaInfo)
@@ -754,7 +744,7 @@ namespace Game.Maps
         }
 
         public uint GetAreaId(PhaseShift phaseShift, uint mapId, Position pos, DynamicMapTree dynamicMapTree = null) { return GetAreaId(phaseShift, mapId, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), dynamicMapTree); }
-        
+
         public uint GetAreaId(PhaseShift phaseShift, uint mapId, float x, float y, float z, DynamicMapTree dynamicMapTree = null)
         {
             uint mogpFlags;
@@ -794,7 +784,7 @@ namespace Game.Maps
         }
 
         public uint GetZoneId(PhaseShift phaseShift, uint mapId, Position pos, DynamicMapTree dynamicMapTree = null) { return GetZoneId(phaseShift, mapId, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), dynamicMapTree); }
-        
+
         public uint GetZoneId(PhaseShift phaseShift, uint mapId, float x, float y, float z, DynamicMapTree dynamicMapTree = null)
         {
             uint areaId = GetAreaId(phaseShift, mapId, x, y, z, dynamicMapTree);
@@ -807,7 +797,7 @@ namespace Game.Maps
         }
 
         public void GetZoneAndAreaId(PhaseShift phaseShift, uint mapId, out uint zoneid, out uint areaid, Position pos, DynamicMapTree dynamicMapTree = null) { GetZoneAndAreaId(phaseShift, mapId, out zoneid, out areaid, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), dynamicMapTree); }
-        
+
         public void GetZoneAndAreaId(PhaseShift phaseShift, uint mapId, out uint zoneid, out uint areaid, float x, float y, float z, DynamicMapTree dynamicMapTree = null)
         {
             areaid = zoneid = GetAreaId(phaseShift, mapId, x, y, z, dynamicMapTree);
@@ -881,18 +871,18 @@ namespace Game.Maps
             GridMap gmap = GetGrid(PhasingHandler.GetTerrainMapId(phaseShift, mapId, this, x, y), x, y);
             if (gmap != null)
                 return gmap.GetLiquidLevel(x, y);
-            
+
             return 0;
         }
 
         public bool IsInWater(PhaseShift phaseShift, uint mapId, float x, float y, float pZ, out LiquidData data)
         {
-            return (GetLiquidStatus(phaseShift, mapId, x, y, pZ, LiquidHeaderTypeFlags.AllLiquids, out data) & (ZLiquidStatus.InWater | ZLiquidStatus.UnderWater)) != 0;
+            return (GetLiquidStatus(phaseShift, mapId, x, y, pZ, out data, null) & (ZLiquidStatus.InWater | ZLiquidStatus.UnderWater)) != 0;
         }
 
         public bool IsUnderWater(PhaseShift phaseShift, uint mapId, float x, float y, float z)
         {
-            return (GetLiquidStatus(phaseShift, mapId, x, y, z, LiquidHeaderTypeFlags.Water | LiquidHeaderTypeFlags.Ocean, out _) & ZLiquidStatus.UnderWater) != 0;
+            return (GetLiquidStatus(phaseShift, mapId, x, y, z, out _, LiquidHeaderTypeFlags.Water | LiquidHeaderTypeFlags.Ocean) & ZLiquidStatus.UnderWater) != 0;
         }
 
         public float GetWaterOrGroundLevel(PhaseShift phaseShift, uint mapId, float x, float y, float z, ref float ground, bool swim = false, float collisionHeight = MapConst.DefaultCollesionHeight, DynamicMapTree dynamicMapTree = null)
@@ -907,7 +897,7 @@ namespace Game.Maps
                 ground = ground_z;
 
                 LiquidData liquid_status;
-                ZLiquidStatus res = GetLiquidStatus(phaseShift, mapId, x, y, ground_z, LiquidHeaderTypeFlags.AllLiquids, out liquid_status, collisionHeight);
+                ZLiquidStatus res = GetLiquidStatus(phaseShift, mapId, x, y, ground_z, out liquid_status, null, collisionHeight);
                 switch (res)
                 {
                     case ZLiquidStatus.AboveWater:

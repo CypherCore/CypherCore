@@ -1520,24 +1520,19 @@ namespace Game.Maps
             return (mogpFlags & 0x2000) != 0;
         }
 
-        public void GetFullTerrainStatusForPosition(PhaseShift phaseShift, float x, float y, float z, PositionFullTerrainStatus data, LiquidHeaderTypeFlags reqLiquidType, float collisionHeight = MapConst.DefaultCollesionHeight)
+        public void GetFullTerrainStatusForPosition(PhaseShift phaseShift, float x, float y, float z, PositionFullTerrainStatus data, LiquidHeaderTypeFlags? reqLiquidType = null, float collisionHeight = MapConst.DefaultCollesionHeight)
         {
             m_terrain.GetFullTerrainStatusForPosition(phaseShift, GetId(), x, y, z, data, reqLiquidType, collisionHeight, _dynamicTree);
         }
 
-        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, LiquidHeaderTypeFlags reqLiquidType, float collisionHeight = MapConst.DefaultCollesionHeight)
+        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, LiquidHeaderTypeFlags? reqLiquidType = null, float collisionHeight = MapConst.DefaultCollesionHeight)
         {
-            return m_terrain.GetLiquidStatus(phaseShift, GetId(), x, y, z, reqLiquidType, out _, collisionHeight);
+            return m_terrain.GetLiquidStatus(phaseShift, GetId(), x, y, z, out _, reqLiquidType, collisionHeight);
         }
 
-        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, LiquidHeaderTypeFlags reqLiquidType, out LiquidData data, float collisionHeight = MapConst.DefaultCollesionHeight)
+        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, out LiquidData data, LiquidHeaderTypeFlags? reqLiquidType = null, float collisionHeight = MapConst.DefaultCollesionHeight)
         {
-            return m_terrain.GetLiquidStatus(phaseShift, GetId(), x, y, z, reqLiquidType, out data, collisionHeight);
-        }
-
-        private bool GetAreaInfo(PhaseShift phaseShift, float x, float y, float z, out uint mogpflags, out int adtId, out int rootId, out int groupId)
-        {
-            return m_terrain.GetAreaInfo(phaseShift, GetId(), x, y, z, out mogpflags, out adtId, out rootId, out groupId, _dynamicTree);
+            return m_terrain.GetLiquidStatus(phaseShift, GetId(), x, y, z, out data, reqLiquidType, collisionHeight);
         }
 
         public uint GetAreaId(PhaseShift phaseShift, Position pos)
@@ -5013,9 +5008,9 @@ namespace Game.Maps
                         raidInstanceMessage.DifficultyID = GetDifficultyID();
                         raidInstanceMessage.Write();
 
-                        foreach (Player player in GetPlayers())                        
+                        foreach (Player player in GetPlayers())
                             player.SendPacket(raidInstanceMessage);
-                        
+
                         if (i_data != null)
                         {
                             PendingRaidLock pendingRaidLock = new();
@@ -5321,29 +5316,29 @@ namespace Game.Maps
         }
     }
 
+    public class WmoLocation
+    {
+        public int GroupId;
+        public int NameSetId;
+        public int RootId;
+        public uint UniqueId;
+
+        public WmoLocation(int groupId, int nameSetId, int rootId, uint uniqueId)
+        {
+            GroupId = groupId;
+            NameSetId = nameSetId;
+            RootId = rootId;
+            UniqueId = uniqueId;
+        }
+    }
+
     public class PositionFullTerrainStatus
     {
-        public struct AreaInfo
-        {
-            public int AdtId;
-            public int RootId;
-            public int GroupId;
-            public uint MogpFlags;
-
-            public AreaInfo(int adtId, int rootId, int groupId, uint flags)
-            {
-                AdtId = adtId;
-                RootId = rootId;
-                GroupId = groupId;
-                MogpFlags = flags;
-            }
-        }
-
         public uint AreaId;
         public float FloorZ;
         public bool outdoors = true;
         public ZLiquidStatus LiquidStatus;
-        public AreaInfo? areaInfo;
+        public WmoLocation? wmoLocation;
         public LiquidData LiquidInfo;
     }
 
