@@ -4622,12 +4622,15 @@ namespace Game.Entities
                 if (duration > 0)
                     pet.SetDuration(duration);
 
-                return null;
+                return pet;
             }
 
             // petentry == 0 for hunter "call pet" (current pet summoned if any)
             if (entry == 0)
+            {
+                pet.Dispose();
                 return null;
+            }
 
             // only SUMMON_PET are handled here
 
@@ -4636,6 +4639,7 @@ namespace Game.Entities
             {
                 Log.outError(LogFilter.Server, "Pet (guidlow {0}, entry {1}) not summoned. Suggested coordinates isn't valid (X: {2} Y: {3})",
                     pet.GetGUID().ToString(), pet.GetEntry(), pet.GetPositionX(), pet.GetPositionY());
+                pet.Dispose();
                 return null;
             }
 
@@ -4644,6 +4648,7 @@ namespace Game.Entities
             if (!pet.Create(map.GenerateLowGuid(HighGuid.Pet), map, entry, petNumber))
             {
                 Log.outError(LogFilter.Server, "no such creature entry {0}", entry);
+                pet.Dispose();
                 return null;
             }
 

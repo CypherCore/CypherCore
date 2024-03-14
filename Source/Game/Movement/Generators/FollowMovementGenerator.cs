@@ -208,8 +208,6 @@ namespace Game.Movement
             return _abstractFollower.GetTarget();
         }
 
-
-
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Follow; }
 
         public override void UnitSpeedChanged() { _lastTargetPosition = null; }

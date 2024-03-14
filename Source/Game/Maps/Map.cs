@@ -1176,7 +1176,7 @@ namespace Game.Maps
                 }
 
                 creature._moveState = ObjectCellMoveState.None;
-                if (creature.IsInWorld)
+                if (!creature.IsInWorld)
                     continue;
 
                 // do move or do move to respawn or remove creature if previous all fail
