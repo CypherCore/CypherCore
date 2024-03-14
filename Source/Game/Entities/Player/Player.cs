@@ -6148,8 +6148,7 @@ namespace Game.Entities
 
                     // target aura duration for caster show only if target exist at caster client
                     // send data at target visibility change (adding to client)
-                    if (target.IsTypeMask(TypeMask.Unit))
-                        SendInitialVisiblePackets(target.ToUnit());
+                    SendInitialVisiblePackets(target);
                 }
             }
         }
@@ -7438,8 +7437,9 @@ namespace Game.Entities
                 // farsight dynobj or puppet may be very far away
                 UpdateVisibilityOf(target);
 
-                if (target.IsTypeMask(TypeMask.Unit) && target != GetVehicleBase())
-                    target.ToUnit().AddPlayerToVision(this);
+                Unit targetUnit = target.ToUnit();
+                if (targetUnit != null && targetUnit != GetVehicleBase())
+                    targetUnit.AddPlayerToVision(this);
                 SetSeer(target);
             }
             else
@@ -7454,8 +7454,9 @@ namespace Game.Entities
 
                 SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.FarsightObject), ObjectGuid.Empty);
 
-                if (target.IsTypeMask(TypeMask.Unit) && target != GetVehicleBase())
-                    target.ToUnit().RemovePlayerFromVision(this);
+                Unit targetUnit = target.ToUnit();
+                if (targetUnit != null && targetUnit != GetVehicleBase())
+                    targetUnit.RemovePlayerFromVision(this);
 
                 //must immediately set seer back otherwise may crash
                 SetSeer(this);

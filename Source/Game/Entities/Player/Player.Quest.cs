@@ -820,12 +820,8 @@ namespace Game.Entities
             {
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.SourceSpellID, GetMap().GetDifficultyID());
                 Unit caster = this;
-                if (questGiver != null && questGiver.IsTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastAccept) && !spellInfo.HasTargetType(Targets.UnitCaster) && !spellInfo.HasTargetType(Targets.DestCasterSummon))
-                {
-                    Unit unit = questGiver.ToUnit();
-                    if (unit != null)
-                        caster = unit;
-                }
+                if (questGiver != null && questGiver.IsUnit() && !quest.HasFlag(QuestFlags.PlayerCastAccept) && !spellInfo.HasTargetType(Targets.UnitCaster) && !spellInfo.HasTargetType(Targets.DestCasterSummon))
+                    caster = questGiver.ToUnit();
 
                 caster.CastSpell(this, spellInfo.Id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetCastDifficulty(spellInfo.Difficulty));
             }
@@ -1169,12 +1165,8 @@ namespace Game.Entities
             {
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardSpell, GetMap().GetDifficultyID());
                 Unit caster = this;
-                if (questGiver != null && questGiver.IsTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastComplete) && !spellInfo.HasTargetType(Targets.UnitCaster))
-                {
-                    Unit unit = questGiver.ToUnit();
-                    if (unit != null)
-                        caster = unit;
-                }
+                if (questGiver != null && questGiver.IsUnit() && !quest.HasFlag(QuestFlags.PlayerCastComplete) && !spellInfo.HasTargetType(Targets.UnitCaster))
+                    caster = questGiver.ToUnit();
 
                 caster.CastSpell(this, spellInfo.Id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetCastDifficulty(spellInfo.Difficulty));
             }
@@ -1189,12 +1181,8 @@ namespace Game.Entities
 
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(displaySpell.SpellId, GetMap().GetDifficultyID());
                     Unit caster = this;
-                    if (questGiver != null && questGiver.IsTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastComplete) && !spellInfo.HasTargetType(Targets.UnitCaster))
-                    {
-                        Unit unit = questGiver.ToUnit();
-                        if (unit != null)
-                            caster = unit;
-                    }
+                    if (questGiver != null && questGiver.IsUnit() && !quest.HasFlag(QuestFlags.PlayerCastComplete) && !spellInfo.HasTargetType(Targets.UnitCaster))
+                        caster = questGiver.ToUnit();
 
                     caster.CastSpell(this, spellInfo.Id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetCastDifficulty(spellInfo.Difficulty));
                 }
@@ -1229,7 +1217,7 @@ namespace Game.Entities
             //lets remove flag for delayed teleports
             SetCanDelayTeleport(false);
 
-            if (questGiver != null && questGiver.IsTypeMask(TypeMask.Unit | TypeMask.GameObject))
+            if (questGiver != null && questGiver.IsWorldObject())
             {
                 //For AutoSubmition was added plr case there as it almost same exclute AI script cases.
                 // Send next quest

@@ -1331,7 +1331,7 @@ namespace Game.Entities
                     return true;
 
                 Unit owner = GetOwner();
-                if (owner != null && seer.IsTypeMask(TypeMask.Unit) && owner.IsFriendlyTo(seer.ToUnit()))
+                if (owner != null && seer.IsUnit() && owner.IsFriendlyTo(seer.ToUnit()))
                     return true;
             }
 

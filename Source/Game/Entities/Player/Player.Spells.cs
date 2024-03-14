@@ -875,15 +875,12 @@ namespace Game.Entities
 
         public void StopCastingBindSight()
         {
-            WorldObject target = GetViewpoint();
+            Unit target = GetViewpoint()?.ToUnit();
             if (target != null)
             {
-                if (target.IsTypeMask(TypeMask.Unit))
-                {
-                    ((Unit)target).RemoveAurasByType(AuraType.BindSight, GetGUID());
-                    ((Unit)target).RemoveAurasByType(AuraType.ModPossess, GetGUID());
-                    ((Unit)target).RemoveAurasByType(AuraType.ModPossessPet, GetGUID());
-                }
+                target.RemoveAurasByType(AuraType.BindSight, GetGUID());
+                target.RemoveAurasByType(AuraType.ModPossess, GetGUID());
+                target.RemoveAurasByType(AuraType.ModPossessPet, GetGUID());
             }
         }
 
