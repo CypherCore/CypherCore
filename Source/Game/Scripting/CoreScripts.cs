@@ -619,7 +619,7 @@ namespace Game.Scripting
         public virtual void OnMoneyChanged(Player player, long amount) { }
 
         // Called when a player gains XP (before anything is given)
-        public virtual uint OnGiveXP(Player player, uint amount, Unit victim) { return 0; }
+        public virtual uint OnGiveXP(Player player, uint amount, Unit victim) { return amount; }
 
         // Called when a player's reputation changes (before it is actually changed)
         public virtual void OnReputationChange(Player player, uint factionId, int standing, bool incremental) { }

@@ -509,6 +509,23 @@ namespace Game.Entities
             return new DynamicUpdateFieldSetter<U>(updateField, index);
         }
 
+        public DynamicUpdateFieldSetter<U> ModifyValue<U>(UpdateFieldArray<DynamicUpdateField<U>> updateField, int index, int dynamicIndex) where U : new()
+        {
+            if (dynamicIndex >= updateField[index].Size())
+            {
+                // fill with zeros until reaching desired slot
+                updateField[index]._values.Resize((uint)dynamicIndex + 1);
+                updateField[index]._updateMask.Resize((uint)(updateField[index]._values.Count + 31) / 32);
+            }
+
+            //MarkChanged(updateField, index);
+            _changesMask.Set(updateField.Bit);
+            _changesMask.Set(updateField.FirstElementBit);
+            updateField[index].MarkChanged(dynamicIndex);
+
+            return new DynamicUpdateFieldSetter<U>(updateField[index], dynamicIndex);
+        }
+
         public void MarkChanged<U>(UpdateField<U> updateField) where U : new()
         {
             _changesMask.Set(updateField.BlockBit);

@@ -444,7 +444,7 @@ namespace Game.Networking.Packets
         public ObjectGuid PlayerGUID;
         public byte Slot;
         public int SlotInBag;
-        public ItemInstance Item;
+        public ItemInstance Item = new();
         public int QuestLogItemID;// Item ID used for updating quest progress
                                   // only set if different than real ID (similar to CreatureTemplate.KillCredit)
         public uint Quantity;

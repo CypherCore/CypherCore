@@ -858,10 +858,10 @@ namespace Game.Entities
             SetUpdateFieldValue(updateField, (T)(updateField.GetValue() | (dynamic)flag));
         }
 
-        public void SetUpdateFieldFlagValue<T>(DynamicUpdateField<T> updateField, int index, T flag) where T : new()
+        public void SetUpdateFieldFlagValue<T>(DynamicUpdateFieldSetter<T> updateField, T flag) where T : new()
         {
             //static_assert(std::is_integral < T >::value, "SetUpdateFieldFlagValue must be used with integral types");
-            InsertDynamicUpdateFieldValue(updateField, index, (T)(updateField[index] | (dynamic)flag));
+            SetUpdateFieldValue(updateField, (T)(updateField.GetValue() | (dynamic)flag));
         }
 
         public void SetUpdateFieldFlagValue<T>(ref T value, T flag) where T : new()
@@ -876,10 +876,10 @@ namespace Game.Entities
             SetUpdateFieldValue(updateField, (T)(updateField.GetValue() & ~(dynamic)flag));
         }
 
-        public void RemoveUpdateFieldFlagValue<T>(DynamicUpdateField<T> updateField, int index, T flag) where T : new()
+        public void RemoveUpdateFieldFlagValue<T>(DynamicUpdateFieldSetter<T> updateField, T flag) where T : new()
         {
             //static_assert(std::is_integral < T >::value, "SetUpdateFieldFlagValue must be used with integral types");
-            InsertDynamicUpdateFieldValue(updateField, index, (T)(updateField[index] & ~(dynamic)flag));
+            SetUpdateFieldValue(updateField, (T)(updateField.GetValue() & ~(dynamic)flag));
         }
 
         public void RemoveUpdateFieldFlagValue<T>(ref T value, T flag) where T : new()

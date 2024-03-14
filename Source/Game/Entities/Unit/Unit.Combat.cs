@@ -826,7 +826,7 @@ namespace Game.Entities
                         tappers.Add(tapper);
                 }
 
-                if (creature.CanHaveLoot())
+                if (!creature.CanHaveLoot())
                     isRewardAllowed = false;
             }
 
