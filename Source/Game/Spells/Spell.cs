@@ -8852,6 +8852,12 @@ namespace Game.Spells
 
                         if (effMask != 0)
                             _spellHitTarget._ApplyAura(aurApp, effMask);
+
+                        if (aurApp.IsNeedClientUpdate() && aurApp.GetRemoveMode() == AuraRemoveMode.None)
+                        {
+                            aurApp.ClientUpdate(false);
+                            _spellHitTarget.RemoveVisibleAuraUpdate(aurApp);
+                        }
                     }
                 }
 

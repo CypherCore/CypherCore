@@ -4487,5 +4487,6 @@ namespace Game.Entities
         public SortedSet<AuraApplication> GetVisibleAuras() { return m_visibleAuras; }
         public bool HasVisibleAura(AuraApplication aurApp) { return m_visibleAuras.Contains(aurApp); }
         public void SetVisibleAuraUpdate(AuraApplication aurApp) { m_visibleAurasToUpdate.Add(aurApp); }
+        public void RemoveVisibleAuraUpdate(AuraApplication aurApp) { m_visibleAurasToUpdate.Remove(aurApp); }
     }
 }
