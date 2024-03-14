@@ -21,6 +21,7 @@ namespace Game.Collision
         {
             tree= new uint[3];
             objects = Array.Empty<uint>();
+            bounds = AxisAlignedBox.Zero();
             // create space for the first node
             tree[0] = (3u << 30); // dummy leaf
         }
