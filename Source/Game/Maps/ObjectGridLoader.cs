@@ -190,7 +190,7 @@ namespace Game.Maps
                 {
                     corpse.AddToWorld();
                     var cell = i_grid.GetGridCell(i_cell.GetCellX(), i_cell.GetCellY());
-                    if (corpse.IsWorldObject())
+                    if (corpse.IsStoredInWorldObjectGridContainer())
                     {
                         i_map.AddToGrid(corpse, new Cell(cellCoord));
                         cell.AddWorldObject(corpse);

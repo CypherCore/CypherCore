@@ -341,7 +341,7 @@ namespace Game.Entities
             if (m_sharedVision.Empty())
             {
                 SetActive(true);
-                SetWorldObject(true);
+                SetIsStoredInWorldObjectGridContainer(true);
             }
             m_sharedVision.Add(player);
         }
@@ -353,7 +353,7 @@ namespace Game.Entities
             if (m_sharedVision.Empty())
             {
                 SetActive(false);
-                SetWorldObject(false);
+                SetIsStoredInWorldObjectGridContainer(false);
             }
         }
 

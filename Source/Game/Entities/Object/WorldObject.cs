@@ -25,7 +25,7 @@ namespace Game.Entities
         public WorldObject(bool isWorldObject)
         {
             _name = "";
-            m_isWorldObject = isWorldObject;
+            m_isStoredInWorldObjectGridContainer = isWorldObject;
 
             m_serverSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive | GhostVisibilityType.Ghost);
             m_serverSideVisibilityDetect.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive);
@@ -46,7 +46,7 @@ namespace Game.Entities
         public virtual void Dispose()
         {
             // this may happen because there are many !create/delete
-            if (IsWorldObject() && _currMap != null)
+            if (IsStoredInWorldObjectGridContainer() && _currMap != null)
             {
                 if (IsTypeId(TypeId.Corpse))
                 {
@@ -972,9 +972,9 @@ namespace Game.Entities
             AddToObjectUpdateIfNeeded();
         }
 
-        public bool IsWorldObject()
+        public bool IsStoredInWorldObjectGridContainer()
         {
-            if (m_isWorldObject)
+            if (m_isStoredInWorldObjectGridContainer)
                 return true;
 
             if (IsTypeId(TypeId.Unit) && ToCreature().m_isTempWorldObject)
@@ -988,7 +988,7 @@ namespace Game.Entities
             m_Events.Update(diff);
         }
 
-        public void SetWorldObject(bool on)
+        public void SetIsStoredInWorldObjectGridContainer(bool on)
         {
             if (!IsInWorld)
                 return;
@@ -1480,7 +1480,7 @@ namespace Game.Entities
             _currMap = map;
             SetMapId(map.GetId());
             instanceId = map.GetInstanceId();
-            if (IsWorldObject())
+            if (IsStoredInWorldObjectGridContainer())
                 _currMap.AddWorldObject(this);
         }
 
@@ -1491,7 +1491,7 @@ namespace Game.Entities
 
             Cypher.Assert(_currMap != null);
             Cypher.Assert(!IsInWorld);
-            if (IsWorldObject())
+            if (IsStoredInWorldObjectGridContainer())
                 _currMap.RemoveWorldObject(this);
             _currMap = null;
         }
@@ -3118,7 +3118,7 @@ namespace Game.Entities
         public void ResetAllNotifies() { m_notifyflags = 0; }
 
         public bool IsActiveObject() { return m_isActive; }
-        public bool IsPermanentWorldObject() { return m_isWorldObject; }
+        public bool IsAlwaysStoredInWorldObjectGridContainer() { return m_isStoredInWorldObjectGridContainer; }
 
         public ITransport GetTransport() { return m_transport; }
         public T GetTransport<T>() where T : class, ITransport
@@ -3819,7 +3819,7 @@ namespace Game.Entities
         protected bool m_isActive;
         bool m_isFarVisible;
         float? m_visibilityDistanceOverride;
-        bool m_isWorldObject;
+        bool m_isStoredInWorldObjectGridContainer;
         public ZoneScript m_zoneScript;
 
         ITransport m_transport;

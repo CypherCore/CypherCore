@@ -78,7 +78,7 @@ namespace Game.Maps
             for (var i = 0; i < i_worldObjects.Count; ++i)
             {
                 WorldObject obj = i_worldObjects[i];
-                Cypher.Assert(obj.IsWorldObject());
+                Cypher.Assert(obj.IsStoredInWorldObjectGridContainer());
                 obj.RemoveFromWorld();
                 obj.ResetMap();
             }
@@ -120,7 +120,7 @@ namespace Game.Maps
                         // ObjectGridLoader loads all corpses from _corpsesByCell even if they were already added to grid before it was loaded
                         // so we need to explicitly check it here (Map::AddToGrid is only called from Player::BuildPlayerRepop, not from ObjectGridLoader)
                         // to avoid failing an assertion in GridObject::AddToGrid
-                        if (obj.IsWorldObject())
+                        if (obj.IsStoredInWorldObjectGridContainer())
                         {
                             obj.SetCurrentCell(cell);
                             grid.GetGridCell(cell.GetCellX(), cell.GetCellY()).AddWorldObject(obj);
@@ -135,7 +135,7 @@ namespace Game.Maps
                     break;
                 case TypeId.DynamicObject:
                 default:
-                    if (obj.IsWorldObject())
+                    if (obj.IsStoredInWorldObjectGridContainer())
                         grid.GetGridCell(cell.GetCellX(), cell.GetCellY()).AddWorldObject(obj);
                     else
                         grid.GetGridCell(cell.GetCellX(), cell.GetCellY()).AddGridObject(obj);
@@ -154,7 +154,7 @@ namespace Game.Maps
             if (grid == null)
                 return;
 
-            if (obj.IsWorldObject())
+            if (obj.IsStoredInWorldObjectGridContainer())
                 grid.GetGridCell(cell.GetCellX(), cell.GetCellY()).RemoveWorldObject(obj);
             else
                 grid.GetGridCell(cell.GetCellX(), cell.GetCellY()).RemoveGridObject(obj);
@@ -164,7 +164,7 @@ namespace Game.Maps
 
         void SwitchGridContainers(WorldObject obj, bool on)
         {
-            if (obj.IsPermanentWorldObject())
+            if (obj.IsAlwaysStoredInWorldObjectGridContainer())
                 return;
 
             CellCoord p = GridDefines.ComputeCellCoord(obj.GetPositionX(), obj.GetPositionY());
@@ -2530,7 +2530,7 @@ namespace Game.Maps
                 bool on = pair.Value;
                 i_objectsToSwitch.Remove(pair.Key);
 
-                if (!obj.IsPermanentWorldObject())
+                if (!obj.IsAlwaysStoredInWorldObjectGridContainer())
                 {
                     switch (obj.GetTypeId())
                     {

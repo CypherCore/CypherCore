@@ -94,7 +94,7 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.Radius), radius);
             SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.CastTime), GameTime.GetGameTimeMS());
 
-            if (IsWorldObject())
+            if (IsStoredInWorldObjectGridContainer())
                 SetActive(true);    //must before add to map to be put in world container
 
             ITransport transport = caster.GetTransport();
