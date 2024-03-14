@@ -1,0 +1,147 @@
+﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+
+using Framework.Constants;
+using Game.DataStorage;
+using Game.Maps;
+using Game.Networking.Packets;
+using System.Collections.Generic;
+
+namespace Game.Entities
+{
+    static class Vignettes
+    {
+        public static void UpdatePosition(VignetteData vignette, WorldObject owner)
+        {
+            vignette.Position = owner.GetPosition();
+            WmoLocation wmoLocation = owner.GetCurrentWmo();
+            if (wmoLocation != null)
+            {
+                vignette.WMOGroupID = (uint)wmoLocation.GroupId;
+                vignette.WMODoodadPlacementID = wmoLocation.UniqueId;
+            }
+        }
+
+        public static void SendVignetteUpdate(VignetteData vignette, WorldObject owner)
+        {
+            if (!owner.IsInWorld)
+                return;
+
+            VignetteUpdate vignetteUpdate = new();
+            vignette.FillPacket(vignetteUpdate.Updated);
+            vignetteUpdate.Write();
+
+            var sender = (Player receiver) =>
+            {
+                if (CanSee(receiver, vignette))
+                    receiver.SendPacket(vignetteUpdate);
+            };
+
+            MessageDistDeliverer notifier = new(owner, sender, owner.GetVisibilityRange());
+            Cell.VisitWorldObjects(owner, notifier, owner.GetVisibilityRange());
+        }
+
+        public static void SendVignetteAdded(VignetteData vignette, WorldObject owner)
+        {
+            if (!owner.IsInWorld)
+                return;
+
+            VignetteUpdate vignetteUpdate = new();
+            vignette.FillPacket(vignetteUpdate.Added);
+            vignetteUpdate.Write();
+
+            var sender = (Player receiver) =>
+            {
+                if (CanSee(receiver, vignette))
+                    receiver.SendPacket(vignetteUpdate);
+            };
+
+            MessageDistDeliverer notifier = new(owner, sender, owner.GetVisibilityRange());
+            Cell.VisitWorldObjects(owner, notifier, owner.GetVisibilityRange());
+        }
+
+        public static VignetteData Create(VignetteRecord vignetteData, WorldObject owner)
+        {
+            VignetteData vignette = new();
+            vignette.Guid = ObjectGuid.Create(HighGuid.Vignette, owner.GetMapId(), vignetteData.ID, owner.GetMap().GenerateLowGuid(HighGuid.Vignette));
+            vignette.Object = owner.GetGUID();
+            vignette.Position = owner.GetPosition();
+            vignette.Data = vignetteData;
+            vignette.ZoneID = owner.GetZoneId(); // not updateable
+            UpdatePosition(vignette, owner);
+
+            if (vignetteData.IsInfiniteAOI())
+                owner.GetMap().AddInfiniteAOIVignette(vignette);
+            else
+                SendVignetteAdded(vignette, owner);
+
+            return vignette;
+        }
+
+        public static void Update(VignetteData vignette, WorldObject owner)
+        {
+            UpdatePosition(vignette, owner);
+
+            if (vignette.Data.IsInfiniteAOI())
+                vignette.NeedUpdate = true;
+            else
+                SendVignetteUpdate(vignette, owner);
+        }
+
+        public static void Remove(VignetteData vignette, WorldObject owner)
+        {
+            if (vignette.Data.IsInfiniteAOI())
+                owner.GetMap().RemoveInfiniteAOIVignette(vignette);
+            else
+            {
+                VignetteUpdate vignetteUpdate = new();
+                vignetteUpdate.Removed.Add(vignette.Guid);
+                owner.SendMessageToSet(vignetteUpdate, true);
+            }
+        }
+
+        public static bool CanSee(Player player, VignetteData vignette)
+        {
+            if (vignette.Data.GetFlags().HasFlag(VignetteFlags.ZoneInfiniteAOI))
+                if (vignette.ZoneID != player.GetZoneId())
+                    return false;
+
+            if (vignette.Data.VisibleTrackingQuestID != 0)
+                if (player.IsQuestRewarded(vignette.Data.VisibleTrackingQuestID))
+                    return false;
+
+            var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(vignette.Data.PlayerConditionID);
+            if (playerCondition != null && !ConditionManager.IsPlayerMeetingCondition(player, playerCondition))
+                return false;
+
+            return true;
+        }
+    }
+
+    public class VignetteData
+    {
+        public ObjectGuid Guid;
+        public ObjectGuid Object;
+        public Position Position;
+        public VignetteRecord Data;
+        public uint ZoneID;
+        public uint WMOGroupID;
+        public uint WMODoodadPlacementID;
+        public bool NeedUpdate;
+
+        public void FillPacket(VignetteDataSet dataSet)
+        {
+            dataSet.IDs.Add(Guid);
+
+            VignetteDataPkt data = new();
+            data.ObjGUID = Object;
+            data.Position = Position;
+            data.VignetteID = (int)Data.ID;
+            data.ZoneID = ZoneID;
+            data.WMOGroupID = WMOGroupID;
+            data.WMODoodadPlacementID = WMODoodadPlacementID;
+
+            dataSet.Data.Add(data);
+        }
+    }
+}

@@ -1566,6 +1566,11 @@ namespace Framework.Database
                 "ExitAnimKitID, VehicleEnterAnimKitID, VehicleRideAnimKitID, VehicleExitAnimKitID, CameraModeID FROM vehicle_seat" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
 
+            // Vignette.db2
+            PrepareStatement(HotfixStatements.SEL_VIGNETTE, "SELECT ID, Name, PlayerConditionID, VisibleTrackingQuestID, QuestFeedbackEffectID, Flags, MaxHeight, " +
+                "MinHeight, VignetteType, RewardQuestID, UiWidgetSetID FROM vignette WHERE (`VerifiedBuild` > 0) = ?");
+            PrepareStatement(HotfixStatements.SEL_VIGNETTE_LOCALE, "SELECT ID, Name_lang FROM vignette_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
+
             // WmoAreaTable.db2
             PrepareStatement(HotfixStatements.SEL_WMO_AREA_TABLE, "SELECT AreaName, ID, WmoID, NameSetID, WmoGroupID, SoundProviderPref, SoundProviderPrefUnderwater, " +
                 "AmbienceID, UwAmbience, ZoneMusic, UwZoneMusic, IntroSound, UwIntroSound, AreaTableID, Flags FROM wmo_area_table" +
@@ -2339,6 +2344,9 @@ namespace Framework.Database
         SEL_VEHICLE,
 
         SEL_VEHICLE_SEAT,
+
+        SEL_VIGNETTE,
+        SEL_VIGNETTE_LOCALE,
 
         SEL_WMO_AREA_TABLE,
         SEL_WMO_AREA_TABLE_LOCALE,

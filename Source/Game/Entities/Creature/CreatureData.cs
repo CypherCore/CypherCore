@@ -24,7 +24,7 @@ namespace Game.Entities
         public List<uint> GossipMenuIds = new();
         public Dictionary<Difficulty, CreatureDifficulty> difficultyStorage = new();
         public uint RequiredExpansion;
-        public uint VignetteID; // @todo Read Vignette.db2
+        public uint VignetteID;
         public uint Faction;
         public ulong Npcflag;
         public float SpeedWalk;

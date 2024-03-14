@@ -3032,6 +3032,26 @@ namespace Framework.Constants
         IgnoreTransport = 0x20
     }
 
+    [Flags]
+    public enum VignetteFlags
+    {
+        InfiniteAOI = 0x000001,
+        ShowOnMap = 0x000002,
+        PingMinimap = 0x000004,
+        TestVisibilityRules = 0x000008,
+        VerticalRangeIsAbsolute = 0x000010,
+        Unique = 0x000020,
+        ZoneInfiniteAOI = 0x000040,
+        PersistsThroughDeath = 0x000080,
+
+        DontShowOnMinimap = 0x000200,
+        HasTooltip = 0x000400,
+
+        AdditionalHeightReq = 0x008000, // Must be within 10 yards of vignette Z coord (hardcoded in client)
+        HideOnContinentMaps = 0x010000,
+        NoPaddingAboveUiWidgets = 0x020000
+    }
+
     public enum WorldMapTransformsFlags
     {
         Dungeon = 0x04

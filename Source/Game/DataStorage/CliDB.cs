@@ -377,6 +377,7 @@ namespace Game.DataStorage
             UnitPowerBarStorage = ReadDB2<UnitPowerBarRecord>("UnitPowerBar.db2", HotfixStatements.SEL_UNIT_POWER_BAR, HotfixStatements.SEL_UNIT_POWER_BAR_LOCALE);
             VehicleStorage = ReadDB2<VehicleRecord>("Vehicle.db2", HotfixStatements.SEL_VEHICLE);
             VehicleSeatStorage = ReadDB2<VehicleSeatRecord>("VehicleSeat.db2", HotfixStatements.SEL_VEHICLE_SEAT);
+            VignetteStorage = ReadDB2<VignetteRecord>("Vignette.db2",  HotfixStatements.SEL_VIGNETTE, HotfixStatements.SEL_VIGNETTE_LOCALE);
             WMOAreaTableStorage = ReadDB2<WMOAreaTableRecord>("WMOAreaTable.db2", HotfixStatements.SEL_WMO_AREA_TABLE, HotfixStatements.SEL_WMO_AREA_TABLE_LOCALE);
             WorldEffectStorage = ReadDB2<WorldEffectRecord>("WorldEffect.db2", HotfixStatements.SEL_WORLD_EFFECT);
             WorldMapOverlayStorage = ReadDB2<WorldMapOverlayRecord>("WorldMapOverlay.db2", HotfixStatements.SEL_WORLD_MAP_OVERLAY);
@@ -813,6 +814,7 @@ namespace Game.DataStorage
         public static DB6Storage<UnitPowerBarRecord> UnitPowerBarStorage;
         public static DB6Storage<VehicleRecord> VehicleStorage;
         public static DB6Storage<VehicleSeatRecord> VehicleSeatStorage;
+        public static DB6Storage<VignetteRecord> VignetteStorage;
         public static DB6Storage<WMOAreaTableRecord> WMOAreaTableStorage;
         public static DB6Storage<WorldEffectRecord> WorldEffectStorage;
         public static DB6Storage<WorldMapOverlayRecord> WorldMapOverlayStorage;

@@ -5644,6 +5644,17 @@ namespace Game.Entities
         {
             UpdateVisibilityForPlayer();
 
+            // Send map wide vignettes before UpdateZone, that will send zone wide vignettes
+            // But first send on new map will wipe all vignettes on client
+            VignetteUpdate vignetteUpdate = new();
+            vignetteUpdate.ForceUpdate = true;
+
+            foreach (VignetteData vignette in GetMap().GetInfiniteAOIVignettes())
+                if (!vignette.Data.GetFlags().HasFlag(VignetteFlags.ZoneInfiniteAOI) && Vignettes.CanSee(this, vignette))
+                    vignette.FillPacket(vignetteUpdate.Added);
+
+            SendPacket(vignetteUpdate);
+
             // update zone
             uint newzone, newarea;
             GetZoneAndAreaId(out newzone, out newarea);
@@ -6034,13 +6045,23 @@ namespace Game.Entities
         }
 
         #region Sends / Updates
-        void BeforeVisibilityDestroy(WorldObject obj, Player p)
+        void BeforeVisibilityDestroy(WorldObject t, Player p)
         {
-            if (!obj.IsTypeId(TypeId.Unit))
-                return;
+            var creature = t.ToCreature();
+            if (creature != null)
+                if (p.GetPetGUID() == creature.GetGUID() && creature.IsPet())
+                    creature.ToPet().Remove(PetSaveMode.NotInSlot, true);
 
-            if (p.GetPetGUID() == obj.GetGUID() && obj.ToCreature().IsPet())
-                ((Pet)obj).Remove(PetSaveMode.NotInSlot, true);
+            VignetteData vignette = t.GetVignette();
+            if (vignette != null)
+            {
+                if (!vignette.Data.IsInfiniteAOI())
+                {
+                    VignetteUpdate vignetteUpdate = new();
+                    vignetteUpdate.Removed.Add(vignette.Guid);
+                    p.SendPacket(vignetteUpdate);
+                }
+            }
         }
 
         public void UpdateVisibilityOf(ICollection<WorldObject> targets)
@@ -6103,8 +6124,7 @@ namespace Game.Entities
             {
                 if (!CanSeeOrDetect(target, false, true))
                 {
-                    if (target.IsTypeId(TypeId.Unit))
-                        BeforeVisibilityDestroy(target.ToCreature(), this);
+                    BeforeVisibilityDestroy(target, this);
 
                     if (!target.IsDestroyedObject())
                         target.SendOutOfRangeForPlayer(this);
@@ -6158,6 +6178,16 @@ namespace Game.Entities
 
         public void SendInitialVisiblePackets(WorldObject target)
         {
+            var sendVignette = (VignetteData vignette, Player where) =>
+            {
+                if (!vignette.Data.IsInfiniteAOI() && Vignettes.CanSee(where, vignette))
+                {
+                    VignetteUpdate vignetteUpdate = new();
+                    vignette.FillPacket(vignetteUpdate.Added);
+                    where.SendPacket(vignetteUpdate);
+                }
+            };
+
             Unit targetUnit = target.ToUnit();
             if (targetUnit != null)
             {
@@ -6166,6 +6196,20 @@ namespace Game.Entities
                 {
                     if (targetUnit.HasUnitState(UnitState.MeleeAttacking) && targetUnit.GetVictim() != null)
                         targetUnit.SendMeleeAttackStart(targetUnit.GetVictim());
+                }
+
+                VignetteData vignette = targetUnit.GetVignette();
+                if (vignette != null)
+                    sendVignette(vignette, this);
+            }
+            else
+            {
+                GameObject targetGo = target.ToGameObject();
+                if (targetGo != null)
+                {
+                    VignetteData vignette = targetGo.GetVignette();
+                    if (vignette != null)
+                        sendVignette(vignette, this);
                 }
             }
         }

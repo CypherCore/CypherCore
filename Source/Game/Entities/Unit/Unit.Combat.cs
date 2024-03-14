@@ -928,6 +928,20 @@ namespace Game.Entities
                     }
                 }
 
+                VignetteData vignette = victim.GetVignette();
+                if (vignette != null)
+                {
+                    foreach (Player tapper in tappers)
+                    {
+                        Quest reward = Global.ObjectMgr.GetQuestTemplate((uint)vignette.Data.RewardQuestID);
+                        if (reward != null)
+                            tapper.RewardQuest(reward, LootItemType.Item, 0, victim, false);
+
+                        if (vignette.Data.VisibleTrackingQuestID != 0)
+                            tapper.SetRewardedQuest(vignette.Data.VisibleTrackingQuestID);
+                    }
+                }
+
                 new KillRewarder(tappers.ToArray(), victim, false).Reward();
             }
 

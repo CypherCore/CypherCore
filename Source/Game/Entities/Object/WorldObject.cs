@@ -1553,6 +1553,8 @@ namespace Game.Entities
             return null;
         }
 
+        public virtual VignetteData GetVignette() { return null; }
+
         public TempSummon SummonCreature(uint entry, float x, float y, float z, float o = 0, TempSummonType despawnType = TempSummonType.ManualDespawn, TimeSpan despawnTime = default, ObjectGuid privateObjectOwner = default)
         {
             if (x == 0.0f && y == 0.0f && z == 0.0f)

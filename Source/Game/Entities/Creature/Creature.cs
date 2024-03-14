@@ -1724,6 +1724,13 @@ namespace Game.Entities
                 if (CreateVehicleKit(vehId, entry, true))
                     UpdateDisplayPower();
 
+            if (!IsPet())
+            {
+                uint vignetteId = GetCreatureTemplate().VignetteID;
+                if (vignetteId != 0)
+                    SetVignette(vignetteId);
+            }
+
             return true;
         }
 
@@ -2052,6 +2059,10 @@ namespace Game.Entities
                     RemoveUnitFlag(UnitFlags.InCombat);
 
                     SetMeleeDamageSchool((SpellSchools)cInfo.DmgSchool);
+
+                    uint vignetteId = cInfo.VignetteID;
+                    if (vignetteId != 0)
+                        SetVignette(vignetteId);
                 }
 
                 InitializeMovementAI();

@@ -32,6 +32,7 @@ namespace Game.Maps
             m_VisibilityNotifyPeriod = SharedConst.DefaultVisibilityNotifyPeriod;
             i_gridExpiry = expiry;
             m_terrain = Global.TerrainMgr.LoadTerrain(id);
+            _vignetteUpdateTimer = new(5200, 5200);
 
             for (uint x = 0; x < MapConst.MaxGrids; ++x)
             {
@@ -398,6 +399,41 @@ namespace Game.Maps
             }
         }
 
+
+        public void AddInfiniteAOIVignette(VignetteData vignette)
+        {
+            _infiniteAOIVignettes.Add(vignette);
+
+            VignetteUpdate vignetteUpdate = new();
+            vignette.FillPacket(vignetteUpdate.Added);
+            vignetteUpdate.Write();
+
+            foreach (var player in GetPlayers())
+                if (Vignettes.CanSee(player, vignette))
+                    player.SendPacket(vignetteUpdate);
+        }
+
+        public void RemoveInfiniteAOIVignette(VignetteData vignette)
+        {
+            if (!_infiniteAOIVignettes.Remove(vignette))
+                return;
+
+            VignetteUpdate vignetteUpdate = new();
+            vignetteUpdate.Removed.Add(vignette.Guid);
+            vignetteUpdate.Write();
+
+            if (vignette.Data.GetFlags().HasFlag(VignetteFlags.ZoneInfiniteAOI))
+            {
+                foreach (var player in GetPlayers())
+                    if (player.GetZoneId() == vignette.ZoneID)
+                        player.SendPacket(vignetteUpdate);
+            }
+            else
+                SendToPlayers(vignetteUpdate);
+        }
+
+        public List<VignetteData> GetInfiniteAOIVignettes() { return _infiniteAOIVignettes; }
+
         void InitializeObject(WorldObject obj)
         {
             if (!obj.IsTypeId(TypeId.Unit) || !obj.IsTypeId(TypeId.GameObject))
@@ -661,6 +697,24 @@ namespace Game.Maps
                     continue;
 
                 transport.Update(diff);
+            }
+
+            if (_vignetteUpdateTimer.Update((int)diff))
+            {
+                foreach (VignetteData vignette in _infiniteAOIVignettes)
+                {
+                    if (vignette.NeedUpdate)
+                    {
+                        VignetteUpdate vignetteUpdate = new();
+                        vignette.FillPacket(vignetteUpdate.Updated);
+                        vignetteUpdate.Write();
+                        foreach (var player in GetPlayers())
+                            if (Vignettes.CanSee(player, vignette))
+                                player.SendPacket(vignetteUpdate);
+
+                        vignette.NeedUpdate = false;
+                    }
+                }
             }
 
             SendObjectUpdates();
@@ -4780,6 +4834,9 @@ namespace Game.Maps
         MultiPersonalPhaseTracker _multiPersonalPhaseTracker = new();
 
         Dictionary<int, int> _worldStateValues = new();
+
+        List<VignetteData> _infiniteAOIVignettes = new();
+        PeriodicTimer _vignetteUpdateTimer;
         #endregion
     }
 

@@ -4981,6 +4981,15 @@ namespace Game.Spells
                 target.ToPlayer().SendOnCancelExpectedVehicleRideAura();
         }
 
+        [AuraEffectHandler(AuraType.SetVignette)]
+        void HandleSetVignette(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            aurApp.GetTarget().SetVignette((uint)(apply ? GetMiscValue() : 0));
+        }
+
         [AuraEffectHandler(AuraType.PreventResurrection)]
         void HandlePreventResurrection(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {

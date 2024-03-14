@@ -538,6 +538,8 @@ namespace Game.Entities
             // This needs to be before RemoveFromWorld to make GetCaster() return a valid for aura removal
             InterruptNonMeleeSpells(true);
 
+            SetVignette(0);
+
             if (IsInWorld)
                 RemoveFromWorld();
             else
@@ -937,6 +939,24 @@ namespace Game.Entities
 
             float collisionHeight1 = scaleMod * defaultModelData.CollisionHeight * defaultModelData.ModelScale * defaultDisplayInfo.CreatureModelScale;
             return collisionHeight1 == 0.0f ? MapConst.DefaultCollesionHeight : collisionHeight1;
+        }
+
+        public override VignetteData GetVignette() { return m_vignette; }
+
+        public void SetVignette(uint vignetteId)
+        {
+            if (m_vignette != null)
+            {
+                if (m_vignette.Data.ID == vignetteId)
+                    return;
+
+                Vignettes.Remove(m_vignette, this);
+                m_vignette = null;
+            }
+
+            var vignette = CliDB.VignetteStorage.LookupByKey(vignetteId);
+            if (vignette != null)
+                m_vignette = Vignettes.Create(vignette, this);
         }
 
         public override string GetDebugInfo()
@@ -1573,6 +1593,9 @@ namespace Game.Entities
                 SetPower(GetPowerType(), 0);
                 SetEmoteState(Emote.OneshotNone);
                 SetStandState(UnitStandStateType.Stand);
+
+                if (m_vignette != null && !m_vignette.Data.GetFlags().HasFlag(VignetteFlags.PersistsThroughDeath))
+                    SetVignette(0);
 
                 // players in instance don't have ZoneScript, but they have InstanceScript
                 ZoneScript zoneScript = GetZoneScript() != null ? GetZoneScript() : GetInstanceScript();

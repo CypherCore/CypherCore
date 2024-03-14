@@ -110,6 +110,7 @@ namespace Game.Entities
         public UnitTypeMask UnitTypeMask { get; set; }
         UnitState m_state;
         protected LiquidTypeRecord _lastLiquid;
+        VignetteData m_vignette;
         protected DeathState m_deathState;
         public Vehicle m_vehicle { get; set; }
         public Vehicle VehicleKit { get; set; }

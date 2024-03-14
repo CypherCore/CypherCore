@@ -120,4 +120,25 @@ namespace Game.DataStorage
         }
         public bool IsEjectable() { return HasFlag(VehicleSeatFlagsB.Ejectable); }
     }
+
+    public sealed class VignetteRecord
+    {
+        public uint ID;
+        public LocalizedString Name;
+        public uint PlayerConditionID;
+        public uint VisibleTrackingQuestID;
+        public uint QuestFeedbackEffectID;
+        public int Flags;
+        public float MaxHeight;
+        public float MinHeight;
+        public sbyte VignetteType;
+        public int RewardQuestID;
+        public int UiWidgetSetID;
+
+        public VignetteFlags GetFlags() { return (VignetteFlags)Flags; }
+        public bool IsInfiniteAOI()
+        {
+            return GetFlags().HasFlag(VignetteFlags.InfiniteAOI | VignetteFlags.ZoneInfiniteAOI);
+        }
+    }
 }

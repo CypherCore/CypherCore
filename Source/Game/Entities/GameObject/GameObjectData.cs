@@ -744,7 +744,25 @@ namespace Game.Entities
             GameObjectTypes.AuraGenerator => AuraGenerator.serverOnly,
             _ => 0,
         };
-        
+
+        public uint GetSpawnVignette() => type switch
+        {
+
+            GameObjectTypes.Chest => Chest.SpawnVignette,
+            GameObjectTypes.Goober => Goober.SpawnVignette,
+            GameObjectTypes.NewFlag => NewFlag.SpawnVignette,
+            GameObjectTypes.NewFlagDrop => NewFlagDrop.SpawnVignette,
+            GameObjectTypes.CapturePoint => CapturePoint.SpawnVignette,
+            GameObjectTypes.GatheringNode => GatheringNode.SpawnVignette,
+            _ => 0
+        };
+
+        public bool ClearObjectVignetteonOpening() => type switch
+        {
+            GameObjectTypes.GatheringNode => GatheringNode.ClearObjectVignetteonOpening != 0,
+            _ => false
+        };
+
         public uint GetSpellFocusType()
         {
             switch (type)
@@ -776,7 +794,7 @@ namespace Game.Entities
             GameObjectTypes.SpellFocus or GameObjectTypes.Multi or GameObjectTypes.SiegeableMulti => false,
             _ => true
         };
-        
+
         public void InitializeQueryData()
         {
             QueryData = new QueryGameObjectResponse();

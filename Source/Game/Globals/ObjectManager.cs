@@ -2901,6 +2901,12 @@ namespace Game
                 Log.outInfo(LogFilter.Sql, $"Creature (Entry: {cInfo.Entry}) has assigned gossip menu, but npcflag does not include UNIT_NPC_FLAG_GOSSIP.");
             else if (cInfo.GossipMenuIds.Empty() && cInfo.Npcflag.HasAnyFlag((uint)NPCFlags.Gossip))
                 Log.outInfo(LogFilter.Sql, $"Creature (Entry: {cInfo.Entry}) has npcflag UNIT_NPC_FLAG_GOSSIP, but gossip menu is unassigned.");
+
+            if (cInfo.VignetteID != 0 && !CliDB.VignetteStorage.HasRecord(cInfo.VignetteID))
+            {
+                Log.outInfo(LogFilter.Sql, $"Creature (Entry: {cInfo.Entry}) has non-existing Vignette {cInfo.VignetteID}, set to 0.");
+                cInfo.VignetteID = 0;
+            }
         }
         void CheckCreatureMovement(string table, ulong id, CreatureMovementData creatureMovement)
         {

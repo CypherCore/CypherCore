@@ -230,6 +230,22 @@ namespace Game.Entities
 
                 UpdateCriteria(CriteriaType.EnterTopLevelArea, newZone);
                 UpdateCriteria(CriteriaType.LeaveTopLevelArea, oldZone);
+
+                VignetteUpdate vignetteUpdate = new();
+
+                foreach (var vignette in GetMap().GetInfiniteAOIVignettes())
+                {
+                    if (!vignette.Data.GetFlags().HasFlag(VignetteFlags.ZoneInfiniteAOI))
+                        continue;
+
+                    if (vignette.ZoneID == newZone && Vignettes.CanSee(this, vignette))
+                        vignette.FillPacket(vignetteUpdate.Added);
+                    else if (vignette.ZoneID == oldZone)
+                        vignetteUpdate.Removed.Add(vignette.Guid);
+                }
+
+                if (!vignetteUpdate.Added.IDs.Empty() || !vignetteUpdate.Removed.Empty())
+                    SendPacket(vignetteUpdate);
             }
         }
 

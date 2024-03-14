@@ -72,6 +72,8 @@ namespace Game.Entities
 
         public override void CleanupsBeforeDelete(bool finalCleanup)
         {
+            SetVignette(0);
+
             base.CleanupsBeforeDelete(finalCleanup);
 
             RemoveFromOwner();
@@ -370,6 +372,10 @@ namespace Game.Entities
                 if (gameObjectAddon.AIAnimKitID != 0)
                     _animKitId = (ushort)gameObjectAddon.AIAnimKitID;
             }
+
+            uint vignetteId = GetGoInfo().GetSpawnVignette();
+            if (vignetteId != 0)
+                SetVignette(vignetteId);
 
             LastUsedScriptID = GetGoInfo().ScriptId;
 
@@ -2591,6 +2597,25 @@ namespace Game.Entities
                     break;
             }
 
+            if (m_vignette != null)
+            {
+                Player player = user.ToPlayer();
+                if (player != null)
+                {
+                    Quest reward = Global.ObjectMgr.GetQuestTemplate((uint)m_vignette.Data.RewardQuestID);
+                    if (reward != null && !player.GetQuestRewardStatus((uint)m_vignette.Data.RewardQuestID))
+                        player.RewardQuest(reward, LootItemType.Item, 0, this, false);
+
+                    if (m_vignette.Data.VisibleTrackingQuestID != 0)
+                        player.SetRewardedQuest(m_vignette.Data.VisibleTrackingQuestID);
+                }
+
+                // only unregister it from visibility (need to keep vignette for other gameobject users in case its usable by multiple players
+                // to flag their quest completion
+                if (GetGoInfo().ClearObjectVignetteonOpening())
+                    Vignettes.Remove(m_vignette, this);
+            }
+
             if (spellId == 0)
                 return;
 
@@ -3348,6 +3373,10 @@ namespace Game.Entities
             if (m_goTypeImpl != null)
                 m_goTypeImpl.OnRelocated();
 
+            // TODO: on heartbeat
+            if (m_vignette != null)
+                Vignettes.Update(m_vignette, this);
+
             UpdateObjectVisibility(false);
         }
 
@@ -3421,6 +3450,24 @@ namespace Game.Entities
             activateAnimKit.AnimKitID = animKitId;
             activateAnimKit.Maintain = !oneshot;
             SendMessageToSet(activateAnimKit, true);
+        }
+
+        public override VignetteData GetVignette() { return m_vignette; }
+
+        public void SetVignette(uint vignetteId)
+        {
+            if (m_vignette != null)
+            {
+                if (m_vignette.Data.ID == vignetteId)
+                    return;
+
+                Vignettes.Remove(m_vignette, this);
+                m_vignette = null;
+            }
+
+            VignetteRecord vignette = CliDB.VignetteStorage.LookupByKey(vignetteId);
+            if (vignette != null)
+                m_vignette = Vignettes.Create(vignette, this);
         }
 
         public void SetSpellVisualId(uint spellVisualId, ObjectGuid activatorGuid = default)
@@ -3899,6 +3946,8 @@ namespace Game.Entities
         bool m_respawnCompatibilityMode;
         ushort _animKitId;
         uint _worldEffectID;
+
+        VignetteData m_vignette;
 
         Dictionary<ObjectGuid, PerPlayerState> m_perPlayerState;
 
