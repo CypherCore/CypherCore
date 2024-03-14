@@ -25,12 +25,12 @@ namespace Game.Movement
         MovementWalkRunSpeedSelectionMode _speedSelectionMode;
         (TimeSpan min, TimeSpan max)? _waitTimeRangeAtPathEnd;
         float? _wanderDistanceAtPathEnds;
-        bool _followPathBackwardsFromEndToStart;
+        bool? _followPathBackwardsFromEndToStart;
         bool _isReturningToStart;
         bool _generatePath;
 
         public WaypointMovementGenerator(uint pathId = 0, bool repeating = true, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
-            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool followPathBackwardsFromEndToStart = false, bool generatePath = true)
+            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true)
 
         {
             _nextMoveTime = new TimeTracker(0);
@@ -55,7 +55,7 @@ namespace Game.Movement
         }
 
         public WaypointMovementGenerator(WaypointPath path, bool repeating = true, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
-            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool followPathBackwardsFromEndToStart = false, bool generatePath = true)
+            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true)
         {
             _nextMoveTime = new TimeTracker(0);
             _repeating = repeating;
@@ -142,8 +142,6 @@ namespace Game.Movement
                 Log.outError(LogFilter.Sql, $"WaypointMovementGenerator::DoInitialize: couldn't load path for creature ({owner.GetGUID()}) (_pathId: {_pathId})");
                 return;
             }
-
-            _followPathBackwardsFromEndToStart = _path.Flags.HasFlag(WaypointPathFlags.FollowPathBackwardsFromEndToStart);
 
             if (_path.Nodes.Count == 1)
                 _repeating = false;
@@ -296,7 +294,7 @@ namespace Game.Movement
                 _nextMoveTime.Reset(waypoint.Delay);
             }
 
-            if (_waitTimeRangeAtPathEnd.HasValue && _followPathBackwardsFromEndToStart
+            if (_waitTimeRangeAtPathEnd.HasValue && IsFollowingPathBackwardsFromEndToStart()
                 && ((_isReturningToStart && _currentNode == 0) || (!_isReturningToStart && _currentNode == _path.Nodes.Count - 1)))
             {
                 owner.ClearUnitState(UnitState.RoamingMove);
@@ -446,7 +444,7 @@ namespace Game.Movement
             if ((_currentNode == _path.Nodes.Count - 1) && !_repeating)
                 return false;
 
-            if (!_followPathBackwardsFromEndToStart || _path.Nodes.Count < 2)
+            if (!IsFollowingPathBackwardsFromEndToStart() || _path.Nodes.Count < 2)
                 _currentNode = (_currentNode + 1) % _path.Nodes.Count;
             else
             {
@@ -468,6 +466,14 @@ namespace Game.Movement
                 }
             }
             return true;
+        }
+
+        bool IsFollowingPathBackwardsFromEndToStart()
+        {
+            if (_followPathBackwardsFromEndToStart.HasValue)
+                return _followPathBackwardsFromEndToStart.Value;
+
+            return _path.Flags.HasFlag(WaypointPathFlags.FollowPathBackwardsFromEndToStart);
         }
 
         public override string GetDebugInfo()
