@@ -116,7 +116,7 @@ namespace Game.Movement
                     owner.GetAI().MovementInform(MovementGeneratorType.Random, 0);
         }
 
-        public override void Pause(uint timer = 0)
+        public override void Pause(uint timer)
         {
             if (timer != 0)
             {
@@ -131,7 +131,7 @@ namespace Game.Movement
             }
         }
 
-        public override void Resume(uint overrideTimer = 0)
+        public override void Resume(uint overrideTimer)
         {
             if (overrideTimer != 0)
                 _timer.Reset(overrideTimer);
