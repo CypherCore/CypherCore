@@ -72,7 +72,7 @@ namespace Game.AI
             else if (creature.IsCritter() && !creature.HasUnitTypeMask(UnitTypeMask.Guardian))
                 return new CritterAI(creature);
 
-            if (creature.IsCivilian() && !creature.IsNeutralToAll())
+            if (!creature.IsCivilian() && !creature.IsNeutralToAll())
                 return new AggressorAI(creature);
 
             if (creature.IsCivilian() || creature.IsNeutralToAll())

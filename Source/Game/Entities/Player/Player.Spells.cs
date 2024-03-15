@@ -255,7 +255,7 @@ namespace Game.Entities
 
         public bool CanSeeSpellClickOn(Creature creature)
         {
-            if (creature.HasNpcFlag(NPCFlags.SpellClick))
+            if (!creature.HasNpcFlag(NPCFlags.SpellClick))
                 return false;
 
             var clickBounds = Global.ObjectMgr.GetSpellClickInfoMapBounds(creature.GetEntry());

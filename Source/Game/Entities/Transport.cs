@@ -377,7 +377,7 @@ namespace Game.Entities
             //         because the current GameObjectModel cannot be moved without recreating
             creature.AddUnitState(UnitState.IgnorePathfinding);
 
-            if (creature.IsPositionValid())
+            if (!creature.IsPositionValid())
             {
                 Log.outError(LogFilter.Transport, "Creature (guidlow {0}, entry {1}) not created. Suggested coordinates aren't valid (X: {2} Y: {3})", creature.GetGUID().ToString(), creature.GetEntry(), creature.GetPositionX(), creature.GetPositionY());
                 return null;

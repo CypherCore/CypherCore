@@ -1193,7 +1193,7 @@ namespace Game.Maps
                 {
                     // if creature can't be move in new cell/grid (not loaded) move it to repawn cell/grid
                     // creature coordinates will be updated and notifiers send
-                    if (CreatureRespawnRelocation(creature, false))
+                    if (!CreatureRespawnRelocation(creature, false))
                     {
                         // ... or unload (if respawn grid also not loaded)
                         //This may happen when a player just logs in and a pet moves to a nearby unloaded cell

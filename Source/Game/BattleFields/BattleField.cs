@@ -487,7 +487,7 @@ namespace Game.BattleFields
             creature.SetVisible(true);
             creature.RemoveUnitFlag(UnitFlags.NonAttackable);
             creature.SetUninteractible(false);
-            if (creature.IsAlive())
+            if (!creature.IsAlive())
                 creature.Respawn(true);
             if (aggressive)
                 creature.SetReactState(ReactStates.Aggressive);

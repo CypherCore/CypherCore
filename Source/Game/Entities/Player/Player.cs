@@ -2613,13 +2613,13 @@ namespace Game.Entities
                                 canTalk = false;
                             break;
                         case GossipOptionNpc.Battlemaster:
-                            if (creature.CanInteractWithBattleMaster(this, false))
+                            if (!creature.CanInteractWithBattleMaster(this, false))
                                 canTalk = false;
                             break;
                         case GossipOptionNpc.TalentMaster:
                         case GossipOptionNpc.SpecializationMaster:
                         case GossipOptionNpc.GlyphMaster:
-                            if (creature.CanResetTalents(this))
+                            if (!creature.CanResetTalents(this))
                                 canTalk = false;
                             break;
                         case GossipOptionNpc.Stablemaster:
@@ -3435,7 +3435,7 @@ namespace Game.Entities
 
         public bool IsAllowedToLoot(Creature creature)
         {
-            if (creature.IsDead())
+            if (!creature.IsDead())
                 return false;
 
             if (HasPendingBind())
@@ -4303,7 +4303,7 @@ namespace Game.Entities
                 return;
             }
 
-            if (creature.IsAreaSpiritHealer())
+            if (!creature.IsAreaSpiritHealer())
                 return;
 
             _areaSpiritHealerGUID = creature.GetGUID();

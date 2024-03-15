@@ -53,7 +53,7 @@ namespace Game
                         continue;
                     }
 
-                    if (creature.IsWithinDistInMap(player, AELootCreatureCheck.LootDistance))
+                    if (!creature.IsWithinDistInMap(player, AELootCreatureCheck.LootDistance))
                     {
                         player.SendLootError(req.Object, lguid, LootError.TooFar);
                         continue;
@@ -359,7 +359,7 @@ namespace Game
                         creature.RemoveDynamicFlag(UnitDynFlags.Lootable);
 
                         // skip pickpocketing loot for speed, skinning timer reduction is no-op in fact
-                        if (creature.IsAlive())
+                        if (!creature.IsAlive())
                             creature.AllLootRemovedFromCorpse();
                     }
                 }
