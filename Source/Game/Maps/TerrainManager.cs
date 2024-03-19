@@ -643,9 +643,9 @@ namespace Game.Maps
 
                     if (delta > collisionHeight)                   // Under water
                         status = ZLiquidStatus.UnderWater;
-                    if (delta > 0.0f)                   // In water
+                    else if (delta > 0.0f)                   // In water
                         status = ZLiquidStatus.InWater;
-                    if (delta > -0.1f)                   // Walk on water
+                    else if (delta > -0.1f)                   // Walk on water
                         status = ZLiquidStatus.WaterWalk;
 
                     if (status != ZLiquidStatus.AboveWater)
