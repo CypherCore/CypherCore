@@ -448,7 +448,7 @@ namespace Game.Maps
                 case MapDifficultyResetInterval.Weekly:
                 {
                     int resetDay = WorldConfig.GetIntValue(WorldCfg.ResetScheduleWeekDay);
-                    int daysAdjust = resetDay - dateTime.Day;
+                    int daysAdjust = resetDay - (int)dateTime.DayOfWeek;
                     if (dateTime.Day > resetDay || (dateTime.Day == resetDay && dateTime.Hour >= resetHour))
                         daysAdjust += 7; // passed it for current week, grab time from next week
 
