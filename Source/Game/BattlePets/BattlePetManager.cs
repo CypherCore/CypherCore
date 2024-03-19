@@ -116,7 +116,7 @@ namespace Game.BattlePets
                     continue;
                 }
 
-                if (battlePetSpecies.GetFlags().HasFlag(BattlePetSpeciesFlags.WellKnown) && quality > BattlePetBreedQuality.Rare)
+                if (battlePetSpecies.HasFlag(BattlePetSpeciesFlags.WellKnown) && quality > BattlePetBreedQuality.Rare)
                 {
                     Log.outError(LogFilter.Sql, $"Learnable BattlePetSpecies.db2 entry {speciesId} was referenced in `battle_pet_quality` with invalid quality {quality}. Maximum allowed quality is BattlePetBreedQuality::Rare.");
                     continue;
@@ -165,7 +165,7 @@ namespace Game.BattlePets
             CreatureTemplate creatureTemplate = Global.ObjectMgr.GetCreatureTemplate(speciesEntry.CreatureID);
             if (creatureTemplate != null)
             {
-                if (!speciesEntry.GetFlags().HasFlag(BattlePetSpeciesFlags.RandomDisplay))
+                if (!speciesEntry.HasFlag(BattlePetSpeciesFlags.RandomDisplay))
                 {
                     CreatureModel creatureModel = creatureTemplate.GetRandomValidModel();
                     if (creatureModel != null)
@@ -188,7 +188,7 @@ namespace Game.BattlePets
                     BattlePetSpeciesRecord speciesEntry = CliDB.BattlePetSpeciesStorage.LookupByKey(species);
                     if (speciesEntry != null)
                     {
-                        if (speciesEntry.GetFlags().HasFlag(BattlePetSpeciesFlags.NotAccountWide))
+                        if (speciesEntry.HasFlag(BattlePetSpeciesFlags.NotAccountWide))
                         {
                             if (ownerGuid.IsEmpty())
                             {
@@ -387,7 +387,7 @@ namespace Game.BattlePets
             if (battlePetSpecies == null) // should never happen
                 return;
 
-            if (!battlePetSpecies.GetFlags().HasFlag(BattlePetSpeciesFlags.WellKnown)) // Not learnable
+            if (!battlePetSpecies.HasFlag(BattlePetSpeciesFlags.WellKnown)) // Not learnable
                 return;
 
             BattlePet pet = new();
@@ -405,7 +405,7 @@ namespace Game.BattlePets
             pet.PacketInfo.Health = pet.PacketInfo.MaxHealth;
 
             Player player = _owner.GetPlayer();
-            if (battlePetSpecies.GetFlags().HasFlag(BattlePetSpeciesFlags.NotAccountWide))
+            if (battlePetSpecies.HasFlag(BattlePetSpeciesFlags.NotAccountWide))
             {
                 BattlePetStruct.BattlePetOwnerInfo battlePetOwnerInfo = new();
                 battlePetOwnerInfo.Guid = player.GetGUID();
@@ -495,7 +495,7 @@ namespace Game.BattlePets
                 if (battlePet.SaveInfo == BattlePetSaveInfo.Removed)
                     return false;
 
-                if (battlePetSpecies.GetFlags().HasFlag(BattlePetSpeciesFlags.NotAccountWide))
+                if (battlePetSpecies.HasFlag(BattlePetSpeciesFlags.NotAccountWide))
                     if (!ownerGuid.IsEmpty() && battlePet.PacketInfo.OwnerInfo.HasValue)
                         if (battlePet.PacketInfo.OwnerInfo.Value.Guid != ownerGuid)
                             return false;
@@ -506,7 +506,7 @@ namespace Game.BattlePets
 
         public bool HasMaxPetCount(BattlePetSpeciesRecord battlePetSpecies, ObjectGuid ownerGuid)
         {
-            int maxPetsPerSpecies = battlePetSpecies.GetFlags().HasFlag(BattlePetSpeciesFlags.LegacyAccountUnique) ? 1 : SharedConst.DefaultMaxBattlePetsPerSpecies;
+            int maxPetsPerSpecies = battlePetSpecies.HasFlag(BattlePetSpeciesFlags.LegacyAccountUnique) ? 1 : SharedConst.DefaultMaxBattlePetsPerSpecies;
             return GetPetCount(battlePetSpecies, ownerGuid) >= maxPetsPerSpecies;
         }
         
@@ -558,7 +558,7 @@ namespace Game.BattlePets
 
             var battlePetSpecies = CliDB.BattlePetSpeciesStorage.LookupByKey(pet.PacketInfo.Species);
             if (battlePetSpecies != null)
-                if (battlePetSpecies.GetFlags().HasFlag(BattlePetSpeciesFlags.NotTradable))
+                if (battlePetSpecies.HasFlag(BattlePetSpeciesFlags.NotTradable))
                     return;
 
             if (IsPetInSlot(guid))
@@ -616,7 +616,7 @@ namespace Game.BattlePets
 
             var battlePetSpecies = CliDB.BattlePetSpeciesStorage.LookupByKey(pet.PacketInfo.Species);
             if (battlePetSpecies != null)
-                if (battlePetSpecies.GetFlags().HasFlag(BattlePetSpeciesFlags.CantBattle))
+                if (battlePetSpecies.HasFlag(BattlePetSpeciesFlags.CantBattle))
                     return;
 
             byte qualityValue = (byte)quality;
@@ -652,7 +652,7 @@ namespace Game.BattlePets
 
             var battlePetSpecies = CliDB.BattlePetSpeciesStorage.LookupByKey(pet.PacketInfo.Species);
             if (battlePetSpecies != null)
-        if (battlePetSpecies.GetFlags().HasFlag(BattlePetSpeciesFlags.CantBattle))
+        if (battlePetSpecies.HasFlag(BattlePetSpeciesFlags.CantBattle))
                 return;
 
             ushort level = pet.PacketInfo.Level;
@@ -710,7 +710,7 @@ namespace Game.BattlePets
 
             var battlePetSpecies = CliDB.BattlePetSpeciesStorage.LookupByKey(pet.PacketInfo.Species);
             if (battlePetSpecies != null)
-                if (battlePetSpecies.GetFlags().HasFlag(BattlePetSpeciesFlags.CantBattle))
+                if (battlePetSpecies.HasFlag(BattlePetSpeciesFlags.CantBattle))
                     return;
 
             ushort level = pet.PacketInfo.Level;
