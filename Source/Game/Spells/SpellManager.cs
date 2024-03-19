@@ -560,7 +560,7 @@ namespace Game.Entities
         {
             var enchantment = CliDB.SpellItemEnchantmentStorage.LookupByKey(ench_id);
             if (enchantment != null)
-                return enchantment.GetFlags().HasFlag(SpellItemEnchantmentFlags.AllowEnteringArena);
+                return enchantment.HasFlag(SpellItemEnchantmentFlags.AllowEnteringArena);
 
             return false;
         }
@@ -2205,7 +2205,7 @@ namespace Game.Entities
                     var summonProperties = CliDB.SummonPropertiesStorage.LookupByKey(effect.EffectMiscValue[1]);
                     if (summonProperties != null)
                     {
-                        if (summonProperties.Slot == (int)SummonSlot.MiniPet && summonProperties.GetFlags().HasFlag(SummonPropertiesFlags.SummonFromBattlePetJournal))
+                        if (summonProperties.Slot == (int)SummonSlot.MiniPet && summonProperties.HasFlag(SummonPropertiesFlags.SummonFromBattlePetJournal))
                         {
                             var battlePetSpecies = battlePetSpeciesByCreature.LookupByKey(effect.EffectMiscValue[0]);
                             if (battlePetSpecies != null)

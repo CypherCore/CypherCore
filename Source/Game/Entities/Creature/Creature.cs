@@ -364,7 +364,7 @@ namespace Game.Entities
             var factionTemplate = CliDB.FactionTemplateStorage.LookupByKey(cInfo.Faction);
             if (factionTemplate != null)
             {
-                SetPvP(factionTemplate.Flags.HasAnyFlag((ushort)FactionTemplateFlags.PVP));
+                SetPvP(factionTemplate.HasFlag(FactionTemplateFlags.PVP));
                 if (IsTaxi())
                 {
                     uint taxiNodesId = Global.ObjectMgr.GetNearestTaxiNode(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(),
@@ -1507,7 +1507,7 @@ namespace Game.Entities
             PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(powerType);
             if (powerTypeEntry != null)
             {
-                if (powerTypeEntry.GetFlags().HasFlag(PowerTypeFlags.UnitsUseDefaultPowerOnInit))
+                if (powerTypeEntry.HasFlag(PowerTypeFlags.UnitsUseDefaultPowerOnInit))
                     SetPower(powerType, powerTypeEntry.DefaultPower);
                 else
                     SetFullPower(powerType);

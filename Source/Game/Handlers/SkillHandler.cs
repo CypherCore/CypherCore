@@ -98,7 +98,7 @@ namespace Game
         void HandleUnlearnSkill(UnlearnSkill packet)
         {
             SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(packet.SkillLine, GetPlayer().GetRace(), GetPlayer().GetClass());
-            if (rcEntry == null || !rcEntry.Flags.HasAnyFlag(SkillRaceClassInfoFlags.Unlearnable))
+            if (rcEntry == null || !rcEntry.HasFlag(SkillRaceClassInfoFlags.Unlearnable))
                 return;
 
             GetPlayer().SetSkill(packet.SkillLine, 0, 0, 0);

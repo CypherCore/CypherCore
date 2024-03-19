@@ -1876,7 +1876,7 @@ namespace Game.Entities
                                 for (EnchantmentSlot enchantSlot = 0; enchantSlot < EnchantmentSlot.Max; ++enchantSlot)
                                 {
                                     var enchantment = CliDB.SpellItemEnchantmentStorage.LookupByKey(pItem.GetEnchantmentId(enchantSlot));
-                                    if (enchantment != null && enchantment.GetFlags().HasFlag(SpellItemEnchantmentFlags.MainhandOnly))
+                                    if (enchantment != null && enchantment.HasFlag(SpellItemEnchantmentFlags.MainhandOnly))
                                         pItem.ClearEnchantment(enchantSlot);
                                 }
 
@@ -5324,7 +5324,7 @@ namespace Game.Entities
                 if (rank == 0)
                     continue;
 
-                if (CliDB.ArtifactPowerStorage[artifactPower.ArtifactPowerId].Flags.HasAnyFlag(ArtifactPowerFlag.ScalesWithNumPowers))
+                if (CliDB.ArtifactPowerStorage[artifactPower.ArtifactPowerId].HasFlag(ArtifactPowerFlag.ScalesWithNumPowers))
                     rank = 1;
 
                 ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank(artifactPower.ArtifactPowerId, (byte)(rank - 1));

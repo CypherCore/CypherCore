@@ -624,7 +624,7 @@ namespace Game
                 return;
             }
 
-            if (!difficultyEntry.Flags.HasAnyFlag(DifficultyFlags.CanSelect))
+            if (!difficultyEntry.HasFlag(DifficultyFlags.CanSelect))
             {
                 Log.outDebug(LogFilter.Network, "WorldSession.HandleSetDungeonDifficulty: {0} sent unselectable instance mode {1}!",
                     GetPlayer().GetGUID().ToString(), difficultyEntry.Id);
@@ -683,14 +683,14 @@ namespace Game
                 return;
             }
 
-            if (!difficultyEntry.Flags.HasAnyFlag(DifficultyFlags.CanSelect))
+            if (!difficultyEntry.HasFlag(DifficultyFlags.CanSelect))
             {
                 Log.outDebug(LogFilter.Network, "WorldSession.HandleSetDungeonDifficulty: {0} sent unselectable instance mode {1}!",
                     GetPlayer().GetGUID().ToString(), difficultyEntry.Id);
                 return;
             }
 
-            if (((int)(difficultyEntry.Flags & DifficultyFlags.Legacy) != 0) != (setRaidDifficulty.Legacy != 0))
+            if (difficultyEntry.HasFlag(DifficultyFlags.Legacy) != (setRaidDifficulty.Legacy != 0))
             {
                 Log.outDebug(LogFilter.Network, "WorldSession.HandleSetDungeonDifficulty: {0} sent not matching legacy difficulty {1}!",
                     GetPlayer().GetGUID().ToString(), difficultyEntry.Id);

@@ -10,7 +10,7 @@ namespace Game.DataStorage
     public sealed class VehicleRecord
     {
         public uint Id;
-        public VehicleFlags Flags;
+        public int Flags;
         public int FlagsB;
         public float TurnSpeed;
         public float PitchSpeed;
@@ -28,6 +28,8 @@ namespace Game.DataStorage
         public ushort VehiclePOITypeID;
         public ushort[] SeatID = new ushort[8];
         public ushort[] PowerDisplayID = new ushort[3];
+
+        public bool HasFlag(VehicleFlags vehicleFlags) { return (Flags & (int)vehicleFlags) != 0; }
     }
 
     public sealed class VehicleSeatRecord
@@ -95,15 +97,8 @@ namespace Game.DataStorage
         public short VehicleExitAnimKitID;
         public short CameraModeID;
 
-        public bool HasFlag(VehicleSeatFlags flag)
-        {
-            return Flags.HasAnyFlag((int)flag);
-        }
-
-        public bool HasFlag(VehicleSeatFlagsB flag)
-        {
-            return FlagsB.HasAnyFlag((int)flag);
-        }
+        public bool HasFlag(VehicleSeatFlags flag) { return (Flags & (int)flag) != 0; }
+        public bool HasFlag(VehicleSeatFlagsB flag) { return (FlagsB & (int)flag) != 0; }
 
         public bool CanEnterOrExit()
         {
@@ -135,10 +130,10 @@ namespace Game.DataStorage
         public int RewardQuestID;
         public int UiWidgetSetID;
 
-        public VignetteFlags GetFlags() { return (VignetteFlags)Flags; }
+        public bool HasFlag(VignetteFlags vignetteFlags) { return (Flags & (int)vignetteFlags) != 0; }
         public bool IsInfiniteAOI()
         {
-            return GetFlags().HasFlag(VignetteFlags.InfiniteAOI | VignetteFlags.ZoneInfiniteAOI);
+            return HasFlag(VignetteFlags.InfiniteAOI | VignetteFlags.ZoneInfiniteAOI);
         }
     }
 }

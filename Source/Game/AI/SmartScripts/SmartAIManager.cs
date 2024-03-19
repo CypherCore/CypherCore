@@ -1871,7 +1871,7 @@ namespace Game.AI
                         return false;
                     }
 
-                    if (areaEntry.ParentAreaID != 0 && areaEntry.GetFlags().HasFlag(AreaFlags.IsSubzone))
+                    if (areaEntry.ParentAreaID != 0 && areaEntry.HasFlag(AreaFlags.IsSubzone))
                     {
                         Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses subzone (ID: {e.Action.overrideLight.zoneId}) instead of zone, skipped.");
                         return false;
@@ -1900,7 +1900,7 @@ namespace Game.AI
                         return false;
                     }
 
-                    if (areaEntry.ParentAreaID != 0 && areaEntry.GetFlags().HasFlag(AreaFlags.IsSubzone))
+                    if (areaEntry.ParentAreaID != 0 && areaEntry.HasFlag(AreaFlags.IsSubzone))
                     {
                         Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses subzone (ID: {e.Action.overrideWeather.zoneId}) instead of zone, skipped.");
                         return false;

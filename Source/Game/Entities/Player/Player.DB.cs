@@ -3606,7 +3606,7 @@ namespace Game.Entities
 
             foreach (var transmogIllusion in CliDB.TransmogIllusionStorage.Values)
             {
-                if (!transmogIllusion.GetFlags().HasFlag(TransmogIllusionFlags.PlayerConditionGrantsOnLogin))
+                if (!transmogIllusion.HasFlag(TransmogIllusionFlags.PlayerConditionGrantsOnLogin))
                     continue;
 
                 if (GetSession().GetCollectionMgr().HasTransmogIllusion(transmogIllusion.Id))

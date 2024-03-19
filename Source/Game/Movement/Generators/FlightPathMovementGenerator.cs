@@ -134,7 +134,7 @@ namespace Game.Movement
             owner.StopMoving();
 
             // When the player reaches the last flight point, teleport to destination taxi node location
-            if (!_path.Empty() && (_path.Count < 2 || !_path[_path.Count - 2].Flags.HasFlag(TaxiPathNodeFlags.Teleport)))
+            if (!_path.Empty() && (_path.Count < 2 || !_path[_path.Count - 2].HasFlag(TaxiPathNodeFlags.Teleport)))
             {
                 var lastPath = CliDB.TaxiPathStorage.LookupByKey(_path.Last().PathID);
                 var node = CliDB.TaxiNodesStorage.LookupByKey(lastPath.ToTaxiNode);
@@ -158,7 +158,7 @@ namespace Game.Movement
             {
                 if (_path[i].ContinentID != curMapId)
                     return (uint)i;
-                if (i > 0 && _path[i - 1].Flags.HasFlag(TaxiPathNodeFlags.Teleport))
+                if (i > 0 && _path[i - 1].HasFlag(TaxiPathNodeFlags.Teleport))
                     return (uint)i;
             }
 
@@ -169,8 +169,8 @@ namespace Game.Movement
         {
             return p1.ContinentID != p2.ContinentID
                 || MathF.Pow(p1.Loc.X - p2.Loc.X, 2) + MathF.Pow(p1.Loc.Y - p2.Loc.Y, 2) > 40.0f * 40.0f
-                || p2.Flags.HasFlag(TaxiPathNodeFlags.Teleport)
-                || (p2.Flags.HasFlag(TaxiPathNodeFlags.Stop) && p2.Delay != 0);
+                || p2.HasFlag(TaxiPathNodeFlags.Teleport)
+                || (p2.HasFlag(TaxiPathNodeFlags.Stop) && p2.Delay != 0);
         }
 
         public void LoadPath(Player player, uint startNode = 0)
@@ -200,7 +200,7 @@ namespace Game.Movement
                         {
                             if ((src == 0 || (IsNodeIncludedInShortenedPath(start, nodes[i]) && i >= 2)) &&
                                 (dst == taxi.Count - 1 || (IsNodeIncludedInShortenedPath(end, nodes[i]) && (i < nodes.Length - 1 || _path.Empty()))) &&
-                                (!nodes[i].Flags.HasFlag(TaxiPathNodeFlags.Teleport) || _path.Empty() || !_path.Last().Flags.HasFlag(TaxiPathNodeFlags.Teleport))) // skip consecutive teleports, only keep the first one
+                                (!nodes[i].HasFlag(TaxiPathNodeFlags.Teleport) || _path.Empty() || !_path.Last().HasFlag(TaxiPathNodeFlags.Teleport))) // skip consecutive teleports, only keep the first one
                             {
                                 passedPreviousSegmentProximityCheck = true;
                                 _path.Add(nodes[i]);
@@ -226,7 +226,7 @@ namespace Game.Movement
             uint map0 = _path[_currentNode].ContinentID;
             for (int i = _currentNode + 1; i < _path.Count; ++i)
             {
-                if (_path[i].ContinentID != map0 || _path[i - 1].Flags.HasFlag(TaxiPathNodeFlags.Teleport))
+                if (_path[i].ContinentID != map0 || _path[i - 1].HasFlag(TaxiPathNodeFlags.Teleport))
                 {
                     _currentNode = i;
                     return;

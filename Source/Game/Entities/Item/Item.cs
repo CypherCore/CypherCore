@@ -154,7 +154,7 @@ namespace Game.Entities
                     for (EnchantmentSlot slot = 0; slot < EnchantmentSlot.Max; ++slot)
                     {
                         var enchantment = CliDB.SpellItemEnchantmentStorage.LookupByKey(GetEnchantmentId(slot));
-                        if (enchantment != null && !enchantment.GetFlags().HasFlag(SpellItemEnchantmentFlags.DoNotSaveToDB))
+                        if (enchantment != null && !enchantment.HasFlag(SpellItemEnchantmentFlags.DoNotSaveToDB))
                             ss.Append($"{GetEnchantmentId(slot)} {GetEnchantmentDuration(slot)} {GetEnchantmentCharges(slot)} ");
                         else
                             ss.Append("0 0 0 ");
@@ -613,7 +613,7 @@ namespace Game.Entities
             foreach (ArtifactPowerData power in powers)
             {
                 ArtifactPowerRecord scaledArtifactPowerEntry = CliDB.ArtifactPowerStorage.LookupByKey(power.ArtifactPowerId);
-                if (!scaledArtifactPowerEntry.Flags.HasAnyFlag(ArtifactPowerFlag.ScalesWithNumPowers))
+                if (!scaledArtifactPowerEntry.HasFlag(ArtifactPowerFlag.ScalesWithNumPowers))
                     continue;
 
                 SetArtifactPower((ushort)power.ArtifactPowerId, power.PurchasedRank, (byte)(totalPurchasedRanks + 1));
@@ -925,7 +925,7 @@ namespace Game.Entities
                 {
                     var enchantEntry = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchant_id);
                     if (enchantEntry != null)
-                        if (enchantEntry.GetFlags().HasFlag(SpellItemEnchantmentFlags.Soulbound))
+                        if (enchantEntry.HasFlag(SpellItemEnchantmentFlags.Soulbound))
                             return true;
                 }
             }
@@ -994,11 +994,11 @@ namespace Game.Entities
             if (slot < EnchantmentSlot.MaxInspected)
             {
                 var oldEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(GetEnchantmentId(slot));
-                if (oldEnchant != null && !oldEnchant.GetFlags().HasFlag(SpellItemEnchantmentFlags.DoNotLog))
+                if (oldEnchant != null && !oldEnchant.HasFlag(SpellItemEnchantmentFlags.DoNotLog))
                         owner.GetSession().SendEnchantmentLog(GetOwnerGUID(), ObjectGuid.Empty, GetGUID(), GetEntry(), oldEnchant.Id, (uint)slot);
 
                 var newEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(id);
-                if (newEnchant != null && !newEnchant.GetFlags().HasFlag(SpellItemEnchantmentFlags.DoNotLog))
+                if (newEnchant != null && !newEnchant.HasFlag(SpellItemEnchantmentFlags.DoNotLog))
                         owner.GetSession().SendEnchantmentLog(GetOwnerGUID(), caster, GetGUID(), GetEntry(), id, (uint)slot);
             }
 
@@ -2188,7 +2188,7 @@ namespace Game.Entities
                 ArtifactPowerData powerData = new();
                 powerData.ArtifactPowerId = artifactPower.Id;
                 powerData.PurchasedRank = 0;
-                powerData.CurrentRankWithBonus = (byte)((artifactPower.Flags & ArtifactPowerFlag.First) == ArtifactPowerFlag.First ? 1 : 0);
+                powerData.CurrentRankWithBonus = (byte)((artifactPower.Flags & (byte)ArtifactPowerFlag.First) == (byte)ArtifactPowerFlag.First ? 1 : 0);
                 AddArtifactPower(powerData);
             }
         }
@@ -2443,7 +2443,7 @@ namespace Game.Entities
             if (set.RequiredSkill != 0 && player.GetSkillValue((SkillType)set.RequiredSkill) < set.RequiredSkillRank)
                 return;
 
-            if (set.SetFlags.HasAnyFlag(ItemSetFlags.LegacyInactive))
+            if (set.HasFlag(ItemSetFlags.LegacyInactive))
                 return;
 
             // Check player level for heirlooms
@@ -3133,13 +3133,13 @@ namespace Game.Entities
                     {
                         uint maxRank = artifactPower.MaxPurchasableRank;
                         // allow ARTIFACT_POWER_FLAG_FINAL to overflow maxrank here - needs to be handled in Item::CheckArtifactUnlock (will refund artifact power)
-                        if (artifactPower.Flags.HasAnyFlag(ArtifactPowerFlag.MaxRankWithTier) && artifactPower.Tier < info.Artifact.ArtifactTierId)
+                        if (artifactPower.HasFlag(ArtifactPowerFlag.MaxRankWithTier) && artifactPower.Tier < info.Artifact.ArtifactTierId)
                             maxRank += info.Artifact.ArtifactTierId - artifactPower.Tier;
 
                         if (artifactPowerData.PurchasedRank > maxRank)
                             artifactPowerData.PurchasedRank = (byte)maxRank;
 
-                        artifactPowerData.CurrentRankWithBonus = (byte)((artifactPower.Flags & ArtifactPowerFlag.First) == ArtifactPowerFlag.First ? 1 : 0);
+                        artifactPowerData.CurrentRankWithBonus = (byte)((artifactPower.Flags & (byte)ArtifactPowerFlag.First) == (byte)ArtifactPowerFlag.First ? 1 : 0);
 
                         info.Artifact.ArtifactPowers.Add(artifactPowerData);
                     }

@@ -62,7 +62,7 @@ namespace Game
             }
 
             BattlemasterListRecord battlemasterListEntry = CliDB.BattlemasterListStorage.LookupByKey(bgQueueTypeId.BattlemasterListId);
-            if (Global.DisableMgr.IsDisabledFor(DisableType.Battleground, bgQueueTypeId.BattlemasterListId, null) || battlemasterListEntry.Flags.HasAnyFlag(BattlemasterListFlags.Disabled))
+            if (Global.DisableMgr.IsDisabledFor(DisableType.Battleground, bgQueueTypeId.BattlemasterListId, null) || battlemasterListEntry.HasFlag(BattlemasterListFlags.Disabled))
             {
                 GetPlayer().SendSysMessage(CypherStrings.BgDisabled);
                 return;
@@ -692,7 +692,7 @@ namespace Game
             }
 
             AreaTableRecord atEntry = CliDB.AreaTableStorage.LookupByKey(GetPlayer().GetAreaId());
-            if (atEntry == null || !atEntry.GetFlags().HasFlag(AreaFlags.AllowHearthAndRessurectFromArea))
+            if (atEntry == null || !atEntry.HasFlag(AreaFlags.AllowHearthAndRessurectFromArea))
                 return;
 
             GetPlayer().BuildPlayerRepop();

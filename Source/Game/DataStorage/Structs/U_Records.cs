@@ -23,7 +23,7 @@ namespace Game.DataStorage
         public int AlternateUiMapGroup;
         public int ContentTuningID;
 
-        public UiMapFlag GetFlags() { return (UiMapFlag)Flags; }
+        public bool HasFlag(UiMapFlag uiMapFlag) { return (Flags & (int)uiMapFlag) != 0; }
 }
 
     public sealed class UiMapAssignmentRecord
@@ -90,7 +90,7 @@ namespace Game.DataStorage
         public sbyte[] Op = new sbyte[8];
         public int[] Value = new int[8];
 
-        public UnitConditionFlags GetFlags() { return (UnitConditionFlags)Flags; }
+        public bool HasFlag(UnitConditionFlags unitConditionFlags) { return (Flags & (byte)unitConditionFlags) != 0; }
     }
 
     public sealed class UnitPowerBarRecord

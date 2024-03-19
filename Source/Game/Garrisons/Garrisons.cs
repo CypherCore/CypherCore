@@ -608,7 +608,7 @@ namespace Game.Garrisons
             if (building.UpgradeLevel > _siteLevel.MaxBuildingLevel)
                 return GarrisonError.InvalidBuildingId;
 
-            if (building.Flags.HasAnyFlag(GarrisonBuildingFlags.NeedsPlan))
+            if (building.HasFlag(GarrisonBuildingFlags.NeedsPlan))
             {
                 if (HasBlueprint(garrBuildingId))
                     return GarrisonError.RequiresBlueprint;

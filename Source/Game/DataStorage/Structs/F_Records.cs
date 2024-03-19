@@ -47,6 +47,8 @@ namespace Game.DataStorage
         public ushort[] Friend = new ushort[MAX_FACTION_RELATIONS];
 
         // helpers
+        public bool HasFlag(FactionTemplateFlags factionTemplateFlags) { return (Flags & (ushort)factionTemplateFlags) != 0; }
+
         public bool IsFriendlyTo(FactionTemplateRecord entry)
         {
             if (this == entry)
@@ -87,7 +89,7 @@ namespace Game.DataStorage
                     return false;
             return EnemyGroup == 0 && FriendGroup == 0;
         }
-        public bool IsContestedGuardFaction() { return (Flags & (ushort)FactionTemplateFlags.ContestedGuard) != 0; }
+        public bool IsContestedGuardFaction() { return HasFlag(FactionTemplateFlags.ContestedGuard); }
     }
 
     public sealed class FriendshipRepReactionRecord
@@ -107,6 +109,8 @@ namespace Game.DataStorage
         public uint Id;
         public int FactionID;
         public int TextureFileID;
-        public FriendshipReputationFlags Flags;
+        public int Flags;
+
+        public bool HasFlag(FriendshipReputationFlags friendshipReputationFlags) { return (Flags & (int)friendshipReputationFlags) != 0; }
     }
 }

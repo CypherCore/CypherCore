@@ -422,7 +422,7 @@ namespace Game.Maps
             vignetteUpdate.Removed.Add(vignette.Guid);
             vignetteUpdate.Write();
 
-            if (vignette.Data.GetFlags().HasFlag(VignetteFlags.ZoneInfiniteAOI))
+            if (vignette.Data.HasFlag(VignetteFlags.ZoneInfiniteAOI))
             {
                 foreach (var player in GetPlayers())
                     if (player.GetZoneId() == vignette.ZoneID)
@@ -1739,7 +1739,7 @@ namespace Game.Maps
                 }
 
                 // players are only allowed to enter 10 instances per hour
-                if (!entry.GetFlags2().HasFlag(MapFlags2.IgnoreInstanceFarmLimit) && entry.IsDungeon() && !player.CheckInstanceCount(instanceIdToCheck) && !player.IsDead())
+                if (!entry.HasFlag(MapFlags2.IgnoreInstanceFarmLimit) && entry.IsDungeon() && !player.CheckInstanceCount(instanceIdToCheck) && !player.IsDead())
                     return new TransferAbortParams(TransferAbortReason.TooManyInstances);
             }
 
@@ -3344,7 +3344,7 @@ namespace Game.Maps
         public bool IsHeroic()
         {
             DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(i_spawnMode);
-            if (difficulty != null && difficulty.Flags.HasFlag(DifficultyFlags.DisplayHeroic))
+            if (difficulty != null && difficulty.HasFlag(DifficultyFlags.DisplayHeroic))
                 return true;
 
             // compatibility purposes of old difficulties
@@ -3359,7 +3359,7 @@ namespace Game.Maps
         {
             var difficulty = CliDB.DifficultyStorage.LookupByKey(i_spawnMode);
             if (difficulty != null)
-                return difficulty.Flags.HasFlag(DifficultyFlags.DisplayMythic);
+                return difficulty.HasFlag(DifficultyFlags.DisplayMythic);
 
             return false;
         }
@@ -3738,7 +3738,7 @@ namespace Game.Maps
                                 mask = UnitTypeMask.Minion;
                                 break;
                             default:
-                                if (properties.GetFlags().HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup)) // Mirror Image, Summon Gargoyle
+                                if (properties.HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup)) // Mirror Image, Summon Gargoyle
                                     mask = UnitTypeMask.Guardian;
                                 break;
                         }
@@ -3788,7 +3788,7 @@ namespace Game.Maps
             }
 
             // Set the summon to the summoner's phase
-            if (summoner != null && !(properties != null && properties.GetFlags().HasFlag(SummonPropertiesFlags.IgnoreSummonerPhase)))
+            if (summoner != null && !(properties != null && properties.HasFlag(SummonPropertiesFlags.IgnoreSummonerPhase)))
                 PhasingHandler.InheritPhaseShift(summon, summoner);
 
             summon.SetCreatedBySpell(spellId);

@@ -779,7 +779,7 @@ namespace Game.Chat
             uint zoneId = player.GetZoneId();
 
             AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
-            if (areaEntry == null || areaEntry.GetFlags().HasFlag(AreaFlags.IsSubzone))
+            if (areaEntry == null || areaEntry.HasFlag(AreaFlags.IsSubzone))
             {
                 handler.SendSysMessage(CypherStrings.CommandGraveyardwrongzone, graveyardId, zoneId);
                 return false;
@@ -1398,7 +1398,7 @@ namespace Game.Chat
             {
                 zoneName = area.AreaName[locale];
 
-                if (area.GetFlags().HasFlag(AreaFlags.IsSubzone))
+                if (area.HasFlag(AreaFlags.IsSubzone))
                 {
                     AreaTableRecord zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
                     if (zone != null)

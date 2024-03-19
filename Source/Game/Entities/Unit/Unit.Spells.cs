@@ -1211,7 +1211,7 @@ namespace Game.Entities
             {
                 var powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(powerType);
                 if (powerTypeEntry != null)
-                    if (powerTypeEntry.GetFlags().HasFlag(PowerTypeFlags.UseRegenInterrupt))
+                    if (powerTypeEntry.HasFlag(PowerTypeFlags.UseRegenInterrupt))
                         player.InterruptPowerRegen(powerType);
             }
 

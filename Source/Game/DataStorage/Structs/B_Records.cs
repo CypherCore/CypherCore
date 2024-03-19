@@ -62,7 +62,7 @@ namespace Game.DataStorage
         public int LoadoutUIModelSceneID;
         public int CovenantID;
 
-        public BattlePetSpeciesFlags GetFlags() { return (BattlePetSpeciesFlags)Flags; }
+        public bool HasFlag(BattlePetSpeciesFlags battlePetSpeciesFlags) { return (Flags & (int)battlePetSpeciesFlags) != 0; }
 }
 
     public sealed class BattlePetSpeciesStateRecord
@@ -89,10 +89,12 @@ namespace Game.DataStorage
         public sbyte GroupsAllowed;
         public sbyte MaxGroupSize;
         public ushort HolidayWorldState;
-        public BattlemasterListFlags Flags;
+        public int Flags;
         public int IconFileDataID;
         public int RequiredPlayerConditionID;
         public short[] MapId = new short[16];
+
+        public bool HasFlag(BattlemasterListFlags battlemasterListFlags) { return (Flags & (int)battlemasterListFlags) != 0; }
     }
 
     public sealed class BroadcastTextRecord

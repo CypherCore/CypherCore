@@ -42,12 +42,14 @@ namespace Game.DataStorage
         public byte FallbackDifficultyID;
         public byte MinPlayers;
         public byte MaxPlayers;
-        public DifficultyFlags Flags;
+        public ushort Flags;
         public byte ItemContext;
         public byte ToggleDifficultyID;
         public uint GroupSizeHealthCurveID;
         public uint GroupSizeDmgCurveID;
         public uint GroupSizeSpellPointsCurveID;
+
+        public bool HasFlag(DifficultyFlags difficultyFlags) { return (Flags & (ushort)difficultyFlags) != 0; }
     }
 
     public sealed class DungeonEncounterRecord

@@ -25,13 +25,13 @@ namespace Game.Chat
             _zoneEntry = zoneEntry;
 
             ChatChannelsRecord channelEntry = CliDB.ChatChannelsStorage.LookupByKey(channelId);
-            if (channelEntry.GetFlags().HasFlag(ChatChannelFlags.AllowItemLinks))             // for trade channel
+            if (channelEntry.HasFlag(ChatChannelFlags.AllowItemLinks))             // for trade channel
                 _channelFlags |= ChannelFlags.Trade;
 
-            if (channelEntry.GetFlags().HasFlag(ChatChannelFlags.LinkedChannel))        // for city only channels
+            if (channelEntry.HasFlag(ChatChannelFlags.LinkedChannel))        // for city only channels
                 _channelFlags |= ChannelFlags.City;
 
-            if (channelEntry.GetFlags().HasFlag(ChatChannelFlags.LookingForGroup))               // for LFG channel
+            if (channelEntry.HasFlag(ChatChannelFlags.LookingForGroup))               // for LFG channel
                 _channelFlags |= ChannelFlags.Lfg;
             else                                                // for all other channels
                 _channelFlags |= ChannelFlags.NotLfg;
@@ -66,9 +66,9 @@ namespace Game.Chat
             if (channelId != 0)
             {
                 ChatChannelsRecord channelEntry = CliDB.ChatChannelsStorage.LookupByKey(channelId);
-                if (channelEntry.GetFlags().HasFlag(ChatChannelFlags.ZoneBased))
+                if (channelEntry.HasFlag(ChatChannelFlags.ZoneBased))
                 {
-                    if (channelEntry.GetFlags().HasFlag(ChatChannelFlags.LinkedChannel))
+                    if (channelEntry.HasFlag(ChatChannelFlags.LinkedChannel))
                         zoneEntry = ChannelManager.SpecialLinkedArea;
 
                     channelName = string.Format(channelEntry.Name[locale].ConvertFormatSyntax(), zoneEntry?.AreaName[locale]);

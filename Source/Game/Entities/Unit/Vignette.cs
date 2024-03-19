@@ -102,7 +102,7 @@ namespace Game.Entities
 
         public static bool CanSee(Player player, VignetteData vignette)
         {
-            if (vignette.Data.GetFlags().HasFlag(VignetteFlags.ZoneInfiniteAOI))
+            if (vignette.Data.HasFlag(VignetteFlags.ZoneInfiniteAOI))
                 if (vignette.ZoneID != player.GetZoneId())
                     return false;
 

@@ -62,7 +62,9 @@ namespace Game.DataStorage
         public sbyte GarrFollowerTypeID;
         public int IconFileDataID;
         public ushort FactionChangeGarrAbilityID;
-        public GarrisonAbilityFlags Flags;
+        public int Flags;
+
+        public bool HasFlag(GarrisonAbilityFlags garrisonAbilityFlags) { return (Flags & (int)garrisonAbilityFlags) != 0; }
     }
 
     public sealed class GarrBuildingRecord
@@ -91,7 +93,9 @@ namespace Game.DataStorage
         public ushort GarrAbilityID;
         public ushort BonusGarrAbilityID;
         public ushort GoldCost;
-        public GarrisonBuildingFlags Flags;
+        public int Flags;
+
+        public bool HasFlag(GarrisonBuildingFlags garrisonBuildingFlags) { return (Flags & (int)garrisonBuildingFlags) != 0; }
     }
 
     public sealed class GarrBuildingPlotInstRecord

@@ -3,6 +3,7 @@
 
 using Framework.Constants;
 using System.Numerics;
+using System;
 
 namespace Game.DataStorage
 {
@@ -44,11 +45,11 @@ namespace Game.DataStorage
         public uint VisibilityConditionID;
         public uint[] MountCreatureID = new uint[2];
 
-        public TaxiNodeFlags GetFlags() { return (TaxiNodeFlags)Flags; }
+        public bool HasFlag(TaxiNodeFlags flag) { return (Flags & (int)flag) != 0; }
 
         public bool IsPartOfTaxiNetwork()
         {
-            return GetFlags().HasFlag(TaxiNodeFlags.ShowOnAllianceMap | TaxiNodeFlags.ShowOnHordeMap)
+            return HasFlag(TaxiNodeFlags.ShowOnAllianceMap | TaxiNodeFlags.ShowOnHordeMap)
                 // manually whitelisted nodes
                 || Id == 1985   // [Hidden] Argus Ground Points Hub (Ground TP out to here, TP to Vindicaar from here)
                 || Id == 1986   // [Hidden] Argus Vindicaar Ground Hub (Vindicaar TP out to here, TP to ground from here)
@@ -76,10 +77,12 @@ namespace Game.DataStorage
         public ushort PathID;
         public int NodeIndex;
         public ushort ContinentID;
-        public TaxiPathNodeFlags Flags;
+        public int Flags;
         public uint Delay;
         public uint ArrivalEventID;
         public uint DepartureEventID;
+
+        public bool HasFlag(TaxiPathNodeFlags taxiPathNodeFlags) { return (Flags & (int)taxiPathNodeFlags) != 0; }
     }
 
     public sealed class TotemCategoryRecord
@@ -288,7 +291,7 @@ namespace Game.DataStorage
         public float Unused1000_2;
         public float Unused1000_3;
 
-        public TraitTreeFlag GetFlags() { return (TraitTreeFlag)Flags; }
+        public bool HasFlag(TraitTreeFlag traitTreeFlag) { return (Flags & (int)traitTreeFlag) != 0; }
     }
 
     public sealed class TraitTreeLoadoutRecord
@@ -331,7 +334,7 @@ namespace Game.DataStorage
         public int SpellItemEnchantmentID;
         public int Flags;
 
-        public TransmogIllusionFlags GetFlags() { return (TransmogIllusionFlags)Flags; }
+        public bool HasFlag(TransmogIllusionFlags transmogIllusionFlags) { return (Flags & (int)transmogIllusionFlags) != 0; }
     }
 
     public sealed class TransmogSetRecord

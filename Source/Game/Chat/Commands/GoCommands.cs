@@ -405,7 +405,7 @@ namespace Game.Chat.Commands
             }
 
             // update to parent zone if exist (client map show only zones without parents)
-            var zoneEntry = areaEntry.ParentAreaID != 0 && areaEntry.GetFlags().HasFlag(AreaFlags.IsSubzone)
+            var zoneEntry = areaEntry.ParentAreaID != 0 && areaEntry.HasFlag(AreaFlags.IsSubzone)
                 ? CliDB.AreaTableStorage.LookupByKey(areaEntry.ParentAreaID)
                 : areaEntry;
             Cypher.Assert(zoneEntry != null);

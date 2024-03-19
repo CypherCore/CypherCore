@@ -58,7 +58,7 @@ namespace Game
                         return;
                     }
 
-                    if (traitTree.GetFlags().HasFlag(TraitTreeFlag.CannotRefund))
+                    if (traitTree.HasFlag(TraitTreeFlag.CannotRefund))
                     {
                         SendPacket(new TraitConfigCommitFailed(configId, 0, (int)TalentLearnResult.FailedCantRemoveTalent));
                         return;

@@ -166,7 +166,7 @@ namespace Game
 
         public bool MeetsChrCustomizationReq(ChrCustomizationReqRecord req, Race race, Class playerClass, bool checkRequiredDependentChoices, List<ChrCustomizationChoice> selectedChoices)
         {
-            if (!req.GetFlags().HasFlag(ChrCustomizationReqFlag.HasRequirements))
+            if (!req.HasFlag(ChrCustomizationReqFlag.HasRequirements))
                 return true;
 
             if (req.ClassMask != 0 && (req.ClassMask & (1 << ((int)playerClass - 1))) == 0)
@@ -370,7 +370,7 @@ namespace Game
 
             if (!HasPermission(RBACPermissions.SkipCheckCharacterCreationRacemask))
             {
-                if (raceEntry.GetFlags().HasFlag(ChrRacesFlag.NPCOnly))
+                if (raceEntry.HasFlag(ChrRacesFlag.NPCOnly))
                 {
                     Log.outError(LogFilter.Network, $"Race ({charCreate.CreateInfo.RaceId}) was not playable but requested while creating new char for account (ID: {GetAccountId()}): wrong DBC files or cheater?");
                     SendCharCreate(ResponseCodes.CharCreateDisabled);
@@ -1629,7 +1629,7 @@ namespace Game
                     if (illusion == null)
                         return false;
 
-                    if (illusion.ItemVisual == 0 || !illusion.GetFlags().HasFlag(SpellItemEnchantmentFlags.AllowTransmog))
+                    if (illusion.ItemVisual == 0 || !illusion.HasFlag(SpellItemEnchantmentFlags.AllowTransmog))
                         return false;
 
                     PlayerConditionRecord condition = CliDB.PlayerConditionStorage.LookupByKey(illusion.TransmogUseConditionID);

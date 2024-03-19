@@ -335,7 +335,7 @@ namespace Game
                     if (chn != null)
                     {
                         var chatChannel = CliDB.ChatChannelsStorage.LookupByKey(chn.GetChannelId());
-                        if (chatChannel != null && chatChannel.GetFlags().HasFlag(ChatChannelFlags.ReadOnly))
+                        if (chatChannel != null && chatChannel.HasFlag(ChatChannelFlags.ReadOnly))
                             return;
 
                         Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, chn);

@@ -474,7 +474,7 @@ namespace Game.Entities
                                 mask = UnitTypeMask.Minion;
                                 break;
                             default:
-                                if (properties.GetFlags().HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup)) // Mirror Image, Summon Gargoyle
+                                if (properties.HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup)) // Mirror Image, Summon Gargoyle
                                     mask = UnitTypeMask.Guardian;
                                 break;
                         }
@@ -513,7 +513,7 @@ namespace Game.Entities
                 return null;
 
             WorldObject phaseShiftOwner = this;
-            if (summoner != null && !(properties != null && properties.GetFlags().HasFlag(SummonPropertiesFlags.IgnoreSummonerPhase)))
+            if (summoner != null && !(properties != null && properties.HasFlag(SummonPropertiesFlags.IgnoreSummonerPhase)))
                 phaseShiftOwner = summoner;
 
             if (phaseShiftOwner != null)

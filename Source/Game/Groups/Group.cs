@@ -1330,7 +1330,7 @@ namespace Game.Groups
                 return m_legacyRaidDifficulty;
 
             DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(defaultDifficulty.DifficultyID);
-            if (difficulty == null || difficulty.Flags.HasAnyFlag(DifficultyFlags.Legacy))
+            if (difficulty == null || difficulty.HasFlag(DifficultyFlags.Legacy))
                 return m_legacyRaidDifficulty;
 
             return m_raidDifficulty;

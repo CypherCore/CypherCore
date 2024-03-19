@@ -24,7 +24,7 @@ namespace Game.Chat
         public static void LoadFromDB()
         {
             SpecialLinkedArea = CliDB.AreaTableStorage.LookupByKey(3459);
-            Cypher.Assert(SpecialLinkedArea.GetFlags().HasFlag(AreaFlags.LinkedChatSpecialArea));
+            Cypher.Assert(SpecialLinkedArea.HasFlag(AreaFlags.LinkedChatSpecialArea));
 
             if (!WorldConfig.GetBoolValue(WorldCfg.PreserveCustomChannels))
             {
@@ -219,17 +219,17 @@ namespace Game.Chat
         {
             ChatChannelsRecord channelEntry = CliDB.ChatChannelsStorage.LookupByKey(channelId);
             uint zoneId = 0;
-            if (zoneEntry != null && channelEntry.GetFlags().HasFlag(ChatChannelFlags.ZoneBased) && !channelEntry.GetFlags().HasFlag(ChatChannelFlags.LinkedChannel))
+            if (zoneEntry != null && channelEntry.HasFlag(ChatChannelFlags.ZoneBased) && !channelEntry.HasFlag(ChatChannelFlags.LinkedChannel))
                 zoneId = zoneEntry.Id;
 
-            if (channelEntry.GetFlags().HasFlag(ChatChannelFlags.GlobalForTournament))
+            if (channelEntry.HasFlag(ChatChannelFlags.GlobalForTournament))
             {
                 var category = CliDB.CfgCategoriesStorage.LookupByKey(Global.WorldMgr.GetRealm().Timezone);
-                if (category != null && category.GetFlags().HasFlag(CfgCategoriesFlags.Tournament))
+                if (category != null && category.HasFlag(CfgCategoriesFlags.Tournament))
                     zoneId = 0;
             }
 
-            return ObjectGuid.Create(HighGuid.ChatChannel, true, channelEntry.GetFlags().HasFlag(ChatChannelFlags.LinkedChannel), (ushort)zoneId, (byte)(_team == Team.Alliance ? 3 : 5), channelId);
+            return ObjectGuid.Create(HighGuid.ChatChannel, true, channelEntry.HasFlag(ChatChannelFlags.LinkedChannel), (ushort)zoneId, (byte)(_team == Team.Alliance ? 3 : 5), channelId);
         }
 
         Dictionary<string, Channel> _customChannels = new();

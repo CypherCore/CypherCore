@@ -51,7 +51,7 @@ namespace Game.Garrisons
                     if (ability.GarrFollowerTypeID != (uint)GarrisonFollowerType.Garrison)
                         continue;
 
-                    if (!ability.Flags.HasAnyFlag(GarrisonAbilityFlags.CannotRoll) && ability.Flags.HasAnyFlag(GarrisonAbilityFlags.Trait))
+                    if (!ability.HasFlag(GarrisonAbilityFlags.CannotRoll) && ability.HasFlag(GarrisonAbilityFlags.Trait))
                         _garrisonFollowerRandomTraits.Add(ability);
 
                     if (followerAbility.FactionIndex < 2)
@@ -61,7 +61,7 @@ namespace Game.Garrisons
                         if (!dic.ContainsKey(followerAbility.GarrFollowerID))
                             dic[followerAbility.GarrFollowerID] = new GarrAbilities();
 
-                        if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.Trait))
+                        if (ability.HasFlag(GarrisonAbilityFlags.Trait))
                             dic[followerAbility.GarrFollowerID].Traits.Add(ability);
                         else
                             dic[followerAbility.GarrFollowerID].Counters.Add(ability);
@@ -177,12 +177,12 @@ namespace Game.Garrisons
             {
                 foreach (GarrAbilityRecord ability in garrAbilities.Counters)
                 {
-                    if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.HordeOnly) && faction != GarrisonFactionIndex.Horde)
+                    if (ability.HasFlag(GarrisonAbilityFlags.HordeOnly) && faction != GarrisonFactionIndex.Horde)
                         continue;
-                    else if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.AllianceOnly) && faction != GarrisonFactionIndex.Alliance)
+                    else if (ability.HasFlag(GarrisonAbilityFlags.AllianceOnly) && faction != GarrisonFactionIndex.Alliance)
                         continue;
 
-                    if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.CannotRemove))
+                    if (ability.HasFlag(GarrisonAbilityFlags.CannotRemove))
                         forcedAbilities.Add(ability);
                     else
                         abilityList.Add(ability);
@@ -190,12 +190,12 @@ namespace Game.Garrisons
 
                 foreach (GarrAbilityRecord ability in garrAbilities.Traits)
                 {
-                    if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.HordeOnly) && faction != GarrisonFactionIndex.Horde)
+                    if (ability.HasFlag(GarrisonAbilityFlags.HordeOnly) && faction != GarrisonFactionIndex.Horde)
                         continue;
-                    else if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.AllianceOnly) && faction != GarrisonFactionIndex.Alliance)
+                    else if (ability.HasFlag(GarrisonAbilityFlags.AllianceOnly) && faction != GarrisonFactionIndex.Alliance)
                         continue;
 
-                    if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.CannotRemove))
+                    if (ability.HasFlag(GarrisonAbilityFlags.CannotRemove))
                         forcedTraits.Add(ability);
                     else
                         traitList.Add(ability);
@@ -220,7 +220,7 @@ namespace Game.Garrisons
             // check if we have a trait from exclusive category
             foreach (GarrAbilityRecord ability in forcedTraits)
             {
-                if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.Exclusive))
+                if (ability.HasFlag(GarrisonAbilityFlags.Exclusive))
                 {
                     hasForcedExclusiveTrait = true;
                     break;
@@ -241,13 +241,13 @@ namespace Game.Garrisons
                 List<GarrAbilityRecord> genericTraitsTemp = new();
                 foreach (GarrAbilityRecord ability in _garrisonFollowerRandomTraits)
                 {
-                    if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.HordeOnly) && faction != GarrisonFactionIndex.Horde)
+                    if (ability.HasFlag(GarrisonAbilityFlags.HordeOnly) && faction != GarrisonFactionIndex.Horde)
                         continue;
-                    else if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.AllianceOnly) && faction != GarrisonFactionIndex.Alliance)
+                    else if (ability.HasFlag(GarrisonAbilityFlags.AllianceOnly) && faction != GarrisonFactionIndex.Alliance)
                         continue;
 
                     // forced exclusive trait exists, skip other ones entirely
-                    if (hasForcedExclusiveTrait && ability.Flags.HasAnyFlag(GarrisonAbilityFlags.Exclusive))
+                    if (hasForcedExclusiveTrait && ability.HasFlag(GarrisonAbilityFlags.Exclusive))
                         continue;
 
                     genericTraitsTemp.Add(ability);
@@ -257,8 +257,8 @@ namespace Game.Garrisons
                 genericTraits.AddRange(traitList);
                 genericTraits.Sort((GarrAbilityRecord a1, GarrAbilityRecord a2) =>
                 {
-                    int e1 = (int)(a1.Flags & GarrisonAbilityFlags.Exclusive);
-                    int e2 = (int)(a2.Flags & GarrisonAbilityFlags.Exclusive);
+                    int e1 = (int)(a1.Flags & (int)GarrisonAbilityFlags.Exclusive);
+                    int e2 = (int)(a2.Flags & (int)GarrisonAbilityFlags.Exclusive);
                     if (e1 != e2)
                         return e1.CompareTo(e2);
 
@@ -269,13 +269,13 @@ namespace Game.Garrisons
                 int firstExclusive = 0;
                 int total = genericTraits.Count;
                 for (var i = 0; i < total; ++i, ++firstExclusive)
-                    if (genericTraits[i].Flags.HasAnyFlag(GarrisonAbilityFlags.Exclusive))
+                    if (genericTraits[i].HasFlag(GarrisonAbilityFlags.Exclusive))
                         break;
 
                 while (traitList.Count < Math.Max(0, slots[1] - forcedTraits.Count) && total != 0)
                 {
                     var garrAbility = genericTraits[RandomHelper.IRand(0, total-- - 1)];
-                    if (garrAbility.Flags.HasAnyFlag(GarrisonAbilityFlags.Exclusive))
+                    if (garrAbility.HasFlag(GarrisonAbilityFlags.Exclusive))
                         total = firstExclusive; // selected exclusive trait - no other can be selected now
                     else
                         --firstExclusive;

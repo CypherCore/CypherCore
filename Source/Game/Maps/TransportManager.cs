@@ -338,9 +338,9 @@ namespace Game.Maps
                     transport.PathLegs.Add(leg);
                 }
 
-                prevNodeWasTeleport = node.Flags.HasFlag(TaxiPathNodeFlags.Teleport);
+                prevNodeWasTeleport = node.HasFlag(TaxiPathNodeFlags.Teleport);
                 pathPoints.Add(node);
-                if (node.Flags.HasFlag(TaxiPathNodeFlags.Stop))
+                if (node.HasFlag(TaxiPathNodeFlags.Stop))
                     pauses.Add(node);
 
                 if (node.ArrivalEventID != 0 || node.DepartureEventID != 0)

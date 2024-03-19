@@ -763,7 +763,7 @@ namespace Game
                         if (!shouldTeleport)
                         {
                             var currentNode = flight.GetPath()[(int)flight.GetCurrentNode()];
-                            shouldTeleport = currentNode.Flags.HasFlag(TaxiPathNodeFlags.Teleport);
+                            shouldTeleport = currentNode.HasFlag(TaxiPathNodeFlags.Teleport);
                         }
 
                         if (shouldTeleport)

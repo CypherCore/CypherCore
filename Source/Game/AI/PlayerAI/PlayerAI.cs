@@ -404,7 +404,7 @@ namespace Game.AI
                 return false;
 
             var chrSpec = who.GetPrimarySpecializationEntry();
-            return chrSpec != null && chrSpec.GetFlags().HasFlag(ChrSpecializationFlag.Ranged);
+            return chrSpec != null && chrSpec.HasFlag(ChrSpecializationFlag.Ranged);
         }
 
         Tuple<Spell, Unit> VerifySpellCast(uint spellId, Unit target)

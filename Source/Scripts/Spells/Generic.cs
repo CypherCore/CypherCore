@@ -459,7 +459,7 @@ namespace Scripts.Spells.Generic
 
             RacialSkills.Clear();
             foreach (var skillLine in CliDB.SkillLineStorage.Values)
-                if (skillLine.GetFlags().HasFlag(SkillLineFlags.RacialForThePurposeOfTemporaryRaceChange))
+                if (skillLine.HasFlag(SkillLineFlags.RacialForThePurposeOfTemporaryRaceChange))
                     RacialSkills.Add(skillLine.Id);
 
             return true;

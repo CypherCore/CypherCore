@@ -50,16 +50,16 @@ namespace Game
             uint maxRank = artifactPowerEntry.MaxPurchasableRank;
             if (artifactPowerEntry.Tier < currentArtifactTier)
             {
-                if (artifactPowerEntry.Flags.HasAnyFlag(ArtifactPowerFlag.Final))
+                if (artifactPowerEntry.HasFlag(ArtifactPowerFlag.Final))
                     maxRank = 1;
-                else if (artifactPowerEntry.Flags.HasAnyFlag(ArtifactPowerFlag.MaxRankWithTier))
+                else if (artifactPowerEntry.HasFlag(ArtifactPowerFlag.MaxRankWithTier))
                     maxRank += currentArtifactTier - artifactPowerEntry.Tier;
             }
 
             if (artifactAddPower.PowerChoices[0].Rank != artifactPower.PurchasedRank + 1 ||
                 artifactAddPower.PowerChoices[0].Rank > maxRank)
                 return;
-            if (!artifactPowerEntry.Flags.HasAnyFlag(ArtifactPowerFlag.NoLinkRequired))
+            if (!artifactPowerEntry.HasFlag(ArtifactPowerFlag.NoLinkRequired))
             {
                 var artifactPowerLinks = Global.DB2Mgr.GetArtifactPowerLinks(artifactPower.ArtifactPowerId);
                 if (artifactPowerLinks != null)
@@ -100,7 +100,7 @@ namespace Game
                 foreach (ArtifactPower power in artifact.m_itemData.ArtifactPowers)
                 {
                     ArtifactPowerRecord scaledArtifactPowerEntry = CliDB.ArtifactPowerStorage.LookupByKey(power.ArtifactPowerId);
-                    if (!scaledArtifactPowerEntry.Flags.HasAnyFlag(ArtifactPowerFlag.ScalesWithNumPowers))
+                    if (!scaledArtifactPowerEntry.HasFlag(ArtifactPowerFlag.ScalesWithNumPowers))
                         continue;
 
                     ArtifactPowerRankRecord scaledArtifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank(scaledArtifactPowerEntry.Id, 0);
@@ -122,7 +122,7 @@ namespace Game
 
             foreach (ArtifactTierRecord tier in CliDB.ArtifactTierStorage.Values)
             {
-                if (artifactPowerEntry.Flags.HasAnyFlag(ArtifactPowerFlag.Final) && artifactPowerEntry.Tier < PlayerConst.MaxArtifactTier)
+                if (artifactPowerEntry.HasFlag(ArtifactPowerFlag.Final) && artifactPowerEntry.Tier < PlayerConst.MaxArtifactTier)
                 {
                     artifactTier = artifactPowerEntry.Tier + 1u;
                     break;
@@ -234,7 +234,7 @@ namespace Game
             foreach (ArtifactPower power in artifact.m_itemData.ArtifactPowers)
             {
                 ArtifactPowerRecord scaledArtifactPowerEntry = CliDB.ArtifactPowerStorage.LookupByKey(power.ArtifactPowerId);
-                if (!scaledArtifactPowerEntry.Flags.HasAnyFlag(ArtifactPowerFlag.ScalesWithNumPowers))
+                if (!scaledArtifactPowerEntry.HasFlag(ArtifactPowerFlag.ScalesWithNumPowers))
                     continue;
 
                 ArtifactPowerRankRecord scaledArtifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank(scaledArtifactPowerEntry.Id, 0);

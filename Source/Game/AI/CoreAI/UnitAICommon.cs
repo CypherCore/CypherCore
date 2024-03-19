@@ -101,7 +101,7 @@ namespace Game.AI
             float rangeMod = 0.0f;
             if (_spellInfo.RangeEntry != null)
             {
-                if (_spellInfo.RangeEntry.Flags.HasAnyFlag(SpellRangeFlag.Melee))
+                if (_spellInfo.RangeEntry.HasFlag(SpellRangeFlag.Melee))
                 {
                     rangeMod = _caster.GetCombatReach() + 4.0f / 3.0f;
                     rangeMod += target.GetCombatReach();
@@ -111,7 +111,7 @@ namespace Game.AI
                 else
                 {
                     float meleeRange = 0.0f;
-                    if (_spellInfo.RangeEntry.Flags.HasAnyFlag(SpellRangeFlag.Ranged))
+                    if (_spellInfo.RangeEntry.HasFlag(SpellRangeFlag.Ranged))
                     {
                         meleeRange = _caster.GetCombatReach() + 4.0f / 3.0f;
                         meleeRange += target.GetCombatReach();
@@ -125,12 +125,12 @@ namespace Game.AI
                     rangeMod = _caster.GetCombatReach();
                     rangeMod += target.GetCombatReach();
 
-                    if (minRange > 0.0f && !_spellInfo.RangeEntry.Flags.HasAnyFlag(SpellRangeFlag.Ranged))
+                    if (minRange > 0.0f && !_spellInfo.RangeEntry.HasFlag(SpellRangeFlag.Ranged))
                         minRange += rangeMod;
                 }
 
                 if (_caster.IsMoving() && target.IsMoving() && !_caster.IsWalking() && !target.IsWalking() &&
-                    (_spellInfo.RangeEntry.Flags.HasAnyFlag(SpellRangeFlag.Melee) || target.IsTypeId(TypeId.Player)))
+                    (_spellInfo.RangeEntry.HasFlag(SpellRangeFlag.Melee) || target.IsTypeId(TypeId.Player)))
                     rangeMod += 8.0f / 3.0f;
             }
 

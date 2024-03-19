@@ -506,7 +506,7 @@ namespace Game.Maps
                 data.AreaId = gridAreaId;
                 var areaEntry1 = CliDB.AreaTableStorage.LookupByKey(data.AreaId);
                 if (areaEntry1 != null)
-                    data.outdoors = areaEntry1.GetFlags().HasFlag(AreaFlags.ForceOutdoors) || !areaEntry1.GetFlags().HasFlag(AreaFlags.ForceIndoors);
+                    data.outdoors = areaEntry1.HasFlag(AreaFlags.ForceOutdoors) || !areaEntry1.HasFlag(AreaFlags.ForceIndoors);
             }
 
             if (data.AreaId == 0)
@@ -790,7 +790,7 @@ namespace Game.Maps
             uint areaId = GetAreaId(phaseShift, mapId, x, y, z, dynamicMapTree);
             var area = CliDB.AreaTableStorage.LookupByKey(areaId);
             if (area != null)
-                if (area.ParentAreaID != 0 && area.GetFlags().HasFlag(AreaFlags.IsSubzone))
+                if (area.ParentAreaID != 0 && area.HasFlag(AreaFlags.IsSubzone))
                     return area.ParentAreaID;
 
             return areaId;
@@ -803,7 +803,7 @@ namespace Game.Maps
             areaid = zoneid = GetAreaId(phaseShift, mapId, x, y, z, dynamicMapTree);
             var area = CliDB.AreaTableStorage.LookupByKey(areaid);
             if (area != null)
-                if (area.ParentAreaID != 0 && area.GetFlags().HasFlag(AreaFlags.IsSubzone))
+                if (area.ParentAreaID != 0 && area.HasFlag(AreaFlags.IsSubzone))
                     zoneid = area.ParentAreaID;
         }
 

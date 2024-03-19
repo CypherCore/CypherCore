@@ -299,7 +299,7 @@ namespace Game.Entities
                 if (shapeshift == null)
                     return true;
 
-                if (!shapeshift.Flags.HasAnyFlag(SpellShapeshiftFormFlags.Stance))
+                if (!shapeshift.HasFlag(SpellShapeshiftFormFlags.Stance))
                     return true;
             }
             if (displayId == GetNativeDisplayId())
@@ -316,8 +316,8 @@ namespace Game.Entities
             CreatureModelDataRecord model = CliDB.CreatureModelDataStorage.LookupByKey(display.ModelID);
             ChrRacesRecord race = CliDB.ChrRacesStorage.LookupByKey(displayExtra.DisplayRaceID);
 
-            if (model != null && !model.GetFlags().HasFlag(CreatureModelDataFlags.CanMountWhileTransformedAsThis))
-                if (race != null && !race.GetFlags().HasFlag(ChrRacesFlag.CanMount))
+            if (model != null && !model.HasFlag(CreatureModelDataFlags.CanMountWhileTransformedAsThis))
+                if (race != null && !race.HasFlag(ChrRacesFlag.CanMount))
                     return true;
 
             return false;
@@ -1594,7 +1594,7 @@ namespace Game.Entities
                 SetEmoteState(Emote.OneshotNone);
                 SetStandState(UnitStandStateType.Stand);
 
-                if (m_vignette != null && !m_vignette.Data.GetFlags().HasFlag(VignetteFlags.PersistsThroughDeath))
+                if (m_vignette != null && !m_vignette.Data.HasFlag(VignetteFlags.PersistsThroughDeath))
                     SetVignette(0);
 
                 // players in instance don't have ZoneScript, but they have InstanceScript

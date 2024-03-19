@@ -25,7 +25,7 @@ namespace Game.Entities
                 return m_legacyRaidDifficulty;
 
             DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(defaultDifficulty.DifficultyID);
-            if (difficulty == null || difficulty.Flags.HasAnyFlag(DifficultyFlags.Legacy))
+            if (difficulty == null || difficulty.HasFlag(DifficultyFlags.Legacy))
                 return m_legacyRaidDifficulty;
 
             return m_raidDifficulty;
@@ -46,7 +46,7 @@ namespace Game.Entities
             if (difficultyEntry.InstanceType != MapTypes.Instance)
                 return Difficulty.Normal;
 
-            if (!difficultyEntry.Flags.HasAnyFlag(DifficultyFlags.CanSelect))
+            if (!difficultyEntry.HasFlag(DifficultyFlags.CanSelect))
                 return Difficulty.Normal;
 
             return difficulty;
@@ -60,7 +60,7 @@ namespace Game.Entities
             if (difficultyEntry.InstanceType != MapTypes.Raid)
                 return Difficulty.NormalRaid;
 
-            if (!difficultyEntry.Flags.HasAnyFlag(DifficultyFlags.CanSelect) || difficultyEntry.Flags.HasAnyFlag(DifficultyFlags.Legacy))
+            if (!difficultyEntry.HasFlag(DifficultyFlags.CanSelect) || difficultyEntry.HasFlag(DifficultyFlags.Legacy))
                 return Difficulty.NormalRaid;
 
             return difficulty;
@@ -74,7 +74,7 @@ namespace Game.Entities
             if (difficultyEntry.InstanceType != MapTypes.Raid)
                 return Difficulty.Raid10N;
 
-            if (!difficultyEntry.Flags.HasAnyFlag(DifficultyFlags.CanSelect) || !difficultyEntry.Flags.HasAnyFlag(DifficultyFlags.Legacy))
+            if (!difficultyEntry.HasFlag(DifficultyFlags.CanSelect) || !difficultyEntry.HasFlag(DifficultyFlags.Legacy))
                 return Difficulty.Raid10N;
 
             return difficulty;
@@ -99,7 +99,7 @@ namespace Game.Entities
             AreaTableRecord oldAreaEntry = CliDB.AreaTableStorage.LookupByKey(oldArea);
             AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(newArea);
             bool oldFFAPvPArea = pvpInfo.IsInFFAPvPArea;
-            pvpInfo.IsInFFAPvPArea = area != null && area.GetFlags().HasFlag(AreaFlags.FreeForAllPvP);
+            pvpInfo.IsInFFAPvPArea = area != null && area.HasFlag(AreaFlags.FreeForAllPvP);
             UpdatePvPState(true);
 
             // check if we were in ffa arena and we left
@@ -127,7 +127,7 @@ namespace Game.Entities
                 RemovePvpFlag(UnitPVPStateFlags.Sanctuary);
 
             AreaFlags areaRestFlag = (GetTeam() == Team.Alliance) ? AreaFlags.AllianceResting : AreaFlags.HordeResting;
-            if (area != null && area.GetFlags().HasFlag(areaRestFlag))
+            if (area != null && area.HasFlag(areaRestFlag))
                 _restMgr.SetRestFlag(RestFlag.FactionArea);
             else
                 _restMgr.RemoveRestFlag(RestFlag.FactionArea);
@@ -136,8 +136,8 @@ namespace Game.Entities
 
             UpdateMountCapability();
 
-            if ((oldAreaEntry != null && oldAreaEntry.GetFlags2().HasFlag(AreaFlags2.UseSubzoneForChatChannel))
-                || (area != null && area.GetFlags2().HasFlag(AreaFlags2.UseSubzoneForChatChannel)))
+            if ((oldAreaEntry != null && oldAreaEntry.HasFlag(AreaFlags2.UseSubzoneForChatChannel))
+                || (area != null && area.HasFlag(AreaFlags2.UseSubzoneForChatChannel)))
                 UpdateLocalChannels(newArea);
 
             if (oldArea != newArea)
@@ -191,7 +191,7 @@ namespace Game.Entities
 
             UpdateHostileAreaState(zone);
 
-            if (zone.GetFlags().HasFlag(AreaFlags.LinkedChat))                     // Is in a capital city
+            if (zone.HasFlag(AreaFlags.LinkedChat))                     // Is in a capital city
             {
                 if (!pvpInfo.IsInHostileArea || zone.IsSanctuary())
                     _restMgr.SetRestFlag(RestFlag.City);
@@ -212,7 +212,7 @@ namespace Game.Entities
 
             // recent client version not send leave/join channel packets for built-in local channels
             var newAreaEntry = CliDB.AreaTableStorage.LookupByKey(newArea);
-            if (newAreaEntry == null || !newAreaEntry.GetFlags2().HasFlag(AreaFlags2.UseSubzoneForChatChannel))
+            if (newAreaEntry == null || !newAreaEntry.HasFlag(AreaFlags2.UseSubzoneForChatChannel))
                 UpdateLocalChannels(newZone);
 
             UpdateZoneDependentAuras(newZone);
@@ -235,7 +235,7 @@ namespace Game.Entities
 
                 foreach (var vignette in GetMap().GetInfiniteAOIVignettes())
                 {
-                    if (!vignette.Data.GetFlags().HasFlag(VignetteFlags.ZoneInfiniteAOI))
+                    if (!vignette.Data.HasFlag(VignetteFlags.ZoneInfiniteAOI))
                         continue;
 
                     if (vignette.ZoneID == newZone && Vignettes.CanSee(this, vignette))
@@ -257,17 +257,17 @@ namespace Game.Entities
 
             if (area.IsSanctuary()) // sanctuary and arena cannot be overriden
                 pvpInfo.IsInHostileArea = false;
-            else if (area.GetFlags().HasFlag(AreaFlags.FreeForAllPvP))
+            else if (area.HasFlag(AreaFlags.FreeForAllPvP))
                 pvpInfo.IsInHostileArea = true;
             else if (overrideZonePvpType == ZonePVPTypeOverride.None)
             {
                 if (area != null)
                 {
-                    if (InBattleground() || area.GetFlags().HasFlag(AreaFlags.CombatZone) || (area.PvpCombatWorldStateID != -1 && Global.WorldStateMgr.GetValue(area.PvpCombatWorldStateID, GetMap()) != 0))
+                    if (InBattleground() || area.HasFlag(AreaFlags.CombatZone) || (area.PvpCombatWorldStateID != -1 && Global.WorldStateMgr.GetValue(area.PvpCombatWorldStateID, GetMap()) != 0))
                         pvpInfo.IsInHostileArea = true;
-                    else if (IsWarModeLocalActive() || area.GetFlags().HasFlag(AreaFlags.EnemiesPvPFlagged))
+                    else if (IsWarModeLocalActive() || area.HasFlag(AreaFlags.EnemiesPvPFlagged))
                     {
-                        if (area.GetFlags().HasFlag(AreaFlags.Contested))
+                        if (area.HasFlag(AreaFlags.Contested))
                             pvpInfo.IsInHostileArea = IsWarModeLocalActive();
                         else
                         {

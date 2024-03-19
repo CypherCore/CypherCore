@@ -115,7 +115,7 @@ namespace Game.Entities
 
             var area = CliDB.AreaTableStorage.LookupByKey(m_areaId);
             if (area != null)
-                if (area.ParentAreaID != 0 && area.GetFlags().HasFlag(AreaFlags.IsSubzone))
+                if (area.ParentAreaID != 0 && area.HasFlag(AreaFlags.IsSubzone))
                     m_zoneId = area.ParentAreaID;
 
             m_outdoors = data.outdoors;
@@ -2262,7 +2262,7 @@ namespace Game.Entities
                 if (tempSummon == null || tempSummon.m_Properties == null)
                     return false;
 
-                if (tempSummon.m_Properties.GetFlags().HasFlag(SummonPropertiesFlags.AttackableBySummoner)
+                if (tempSummon.m_Properties.HasFlag(SummonPropertiesFlags.AttackableBySummoner)
                     && targetGuid == tempSummon.GetSummonerGUID())
                     return true;
 
@@ -2345,7 +2345,7 @@ namespace Game.Entities
                                     if (targetFactionEntry.CanHaveReputation())
                                     {
                                         // check contested flags
-                                        if ((targetFactionTemplateEntry.Flags & (ushort)FactionTemplateFlags.ContestedGuard) != 0 && selfPlayerOwner.HasPlayerFlag(PlayerFlags.ContestedPVP))
+                                        if (targetFactionTemplateEntry.HasFlag(FactionTemplateFlags.ContestedGuard) && selfPlayerOwner.HasPlayerFlag(PlayerFlags.ContestedPVP))
                                             return ReputationRank.Hostile;
 
                                         // if faction has reputation, hostile state depends only from AtWar state
@@ -2378,7 +2378,7 @@ namespace Game.Entities
             if (targetPlayerOwner != null)
             {
                 // check contested flags
-                if ((factionTemplateEntry.Flags & (ushort)FactionTemplateFlags.ContestedGuard) != 0 && targetPlayerOwner.HasPlayerFlag(PlayerFlags.ContestedPVP))
+                if (factionTemplateEntry.HasFlag(FactionTemplateFlags.ContestedGuard) && targetPlayerOwner.HasPlayerFlag(PlayerFlags.ContestedPVP))
                     return ReputationRank.Hostile;
 
                 var repRank = targetPlayerOwner.GetReputationMgr().GetForcedRankIfAny(factionTemplateEntry);
@@ -2409,7 +2409,7 @@ namespace Game.Entities
                 return ReputationRank.Friendly;
             if (targetFactionTemplateEntry.IsFriendlyTo(factionTemplateEntry))
                 return ReputationRank.Friendly;
-            if ((factionTemplateEntry.Flags & (ushort)FactionTemplateFlags.HostileByDefault) != 0)
+            if (factionTemplateEntry.HasFlag(FactionTemplateFlags.HostileByDefault))
                 return ReputationRank.Hostile;
             // neutral by default
             return ReputationRank.Neutral;

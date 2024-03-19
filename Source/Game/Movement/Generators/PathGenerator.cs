@@ -897,10 +897,10 @@ namespace Game.Movement
             if (liquidStatus == ZLiquidStatus.NoWater)
                 return NavTerrainFlag.Ground;
 
-            if (data.type_flags.HasFlag(LiquidHeaderTypeFlags.Water | LiquidHeaderTypeFlags.Ocean))
+            if (data.type_flags.HasAnyFlag(LiquidHeaderTypeFlags.Water | LiquidHeaderTypeFlags.Ocean))
                 return NavTerrainFlag.Water;
 
-            if (data.type_flags.HasFlag(LiquidHeaderTypeFlags.Magma | LiquidHeaderTypeFlags.Slime))
+            if (data.type_flags.HasAnyFlag(LiquidHeaderTypeFlags.Magma | LiquidHeaderTypeFlags.Slime))
                 return NavTerrainFlag.MagmaSlime;
 
             return NavTerrainFlag.Ground;

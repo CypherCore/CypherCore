@@ -1457,13 +1457,13 @@ namespace Game.Spells
                 caster = m_originalCaster;
 
             ObjectGuid privateObjectOwner = caster.GetGUID();
-            if (!properties.GetFlags().HasAnyFlag(SummonPropertiesFlags.OnlyVisibleToSummoner | SummonPropertiesFlags.OnlyVisibleToSummonerGroup))
+            if (!properties.HasFlag(SummonPropertiesFlags.OnlyVisibleToSummoner | SummonPropertiesFlags.OnlyVisibleToSummonerGroup))
                 privateObjectOwner = ObjectGuid.Empty;
 
             if (caster.IsPrivateObject())
                 privateObjectOwner = caster.GetPrivateObjectOwner();
 
-            if (properties.GetFlags().HasFlag(SummonPropertiesFlags.OnlyVisibleToSummonerGroup))
+            if (properties.HasFlag(SummonPropertiesFlags.OnlyVisibleToSummonerGroup))
                 if (caster.IsPlayer() && m_originalCaster.ToPlayer().GetGroup() != null)
                     privateObjectOwner = caster.ToPlayer().GetGroup().GetGUID();
 
@@ -1509,7 +1509,7 @@ namespace Game.Spells
                 case SummonCategory.Wild:
                 case SummonCategory.Ally:
                 case SummonCategory.Unk:
-                    if (properties.GetFlags().HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup))
+                    if (properties.HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup))
                     {
                         SummonGuardian(effectInfo, entry, properties, numSummons, privateObjectOwner);
                         break;
@@ -1938,7 +1938,7 @@ namespace Game.Spells
             ushort skillval = Math.Max((ushort)1, playerTarget.GetPureSkillValue(skillid));
             ushort maxSkillVal = (ushort)tier.GetValueForTierIndex(damage - 1);
 
-            if (rcEntry.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
+            if (rcEntry.HasFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
                 skillval = maxSkillVal;
 
             playerTarget.SetSkill(skillid, (uint)damage, skillval, maxSkillVal);
@@ -2867,14 +2867,14 @@ namespace Game.Spells
 
             // Players can only fight a duel in zones with this flag
             AreaTableRecord casterAreaEntry = CliDB.AreaTableStorage.LookupByKey(caster.GetAreaId());
-            if (casterAreaEntry != null && !casterAreaEntry.GetFlags().HasFlag(AreaFlags.AllowDueling))
+            if (casterAreaEntry != null && !casterAreaEntry.HasFlag(AreaFlags.AllowDueling))
             {
                 SendCastResult(SpellCastResult.NoDueling);            // Dueling isn't allowed here
                 return;
             }
 
             AreaTableRecord targetAreaEntry = CliDB.AreaTableStorage.LookupByKey(target.GetAreaId());
-            if (targetAreaEntry != null && !targetAreaEntry.GetFlags().HasFlag(AreaFlags.AllowDueling))
+            if (targetAreaEntry != null && !targetAreaEntry.HasFlag(AreaFlags.AllowDueling))
             {
                 SendCastResult(SpellCastResult.NoDueling);            // Dueling isn't allowed here
                 return;
@@ -4281,7 +4281,7 @@ namespace Game.Spells
             ushort skillval = Math.Max((ushort)1, playerTarget.GetPureSkillValue(skillid));
             ushort maxSkillVal = (ushort)tier.GetValueForTierIndex(damage - 1);
 
-            if (rcEntry.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
+            if (rcEntry.HasFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
                 skillval = maxSkillVal;
 
             playerTarget.SetSkill(skillid, (uint)damage, skillval, maxSkillVal);

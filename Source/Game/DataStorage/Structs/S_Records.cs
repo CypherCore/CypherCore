@@ -28,14 +28,15 @@ namespace Game.DataStorage
         public int RelatedStep;                                              // Bonus step can only be completed if scenario is in the step specified in this field
         public ushort Supersedes;                                              // Used in conjunction with Proving Grounds scenarios, when sequencing steps (Not using step order?)
         public byte OrderIndex;
-        public ScenarioStepFlags Flags;
+        public byte Flags;
         public uint VisibilityPlayerConditionID;
         public ushort WidgetSetID;
 
         // helpers
+        public bool HasFlag(ScenarioStepFlags scenarioStepFlags) { return (Flags & (byte)scenarioStepFlags) != 0; }
         public bool IsBonusObjective()
         {
-            return Flags.HasAnyFlag(ScenarioStepFlags.BonusObjective);
+            return HasFlag(ScenarioStepFlags.BonusObjective);
         }
     }
 
@@ -92,7 +93,7 @@ namespace Game.DataStorage
         public int ExpansionNameSharedStringID;
         public int HordeExpansionNameSharedStringID;
 
-        public SkillLineFlags GetFlags() => (SkillLineFlags)Flags;
+        public bool HasFlag(SkillLineFlags skillLineFlags) { return (Flags & (ushort)skillLineFlags) != 0; }
     }
 
     public sealed class SkillLineAbilityRecord
@@ -109,11 +110,13 @@ namespace Game.DataStorage
         public AbilityLearnType AcquireMethod;
         public ushort TrivialSkillLineRankHigh;
         public ushort TrivialSkillLineRankLow;
-        public SkillLineAbilityFlags Flags;
+        public int Flags;
         public byte NumSkillUps;
         public short UniqueBit;
         public short TradeSkillCategoryID;
         public ushort SkillupSkillLineID;
+
+        public bool HasFlag(SkillLineAbilityFlags skillLineAbilityFlags) { return (Flags & (int)skillLineAbilityFlags) != 0; }
     }
 
     public sealed class SkillLineXTraitTreeRecord
@@ -130,10 +133,12 @@ namespace Game.DataStorage
         public long RaceMask;
         public ushort SkillID;
         public int ClassMask;
-        public SkillRaceClassInfoFlags Flags;
+        public ushort Flags;
         public sbyte Availability;
         public sbyte MinLevel;
         public ushort SkillTierID;
+
+        public bool HasFlag(SkillRaceClassInfoFlags skillRaceClassInfoFlags) { return (Flags & (int)skillRaceClassInfoFlags) != 0; }
     }
 
     public sealed class SoulbindConduitRankRecord
@@ -252,11 +257,13 @@ namespace Game.DataStorage
     {
         public uint Id;
         public string Name;
-        public SpellCategoryFlags Flags;
+        public int Flags;
         public byte UsesPerWeek;
         public byte MaxCharges;
         public int ChargeRecoveryTime;
         public int TypeMask;
+
+        public bool HasFlag(SpellCategoryFlags spellCategoryFlags) { return (Flags & (int)spellCategoryFlags) != 0; }
     }
 
     public sealed class SpellClassOptionsRecord
@@ -372,7 +379,7 @@ namespace Game.DataStorage
         public byte MinLevel;
         public byte MaxLevel;
 
-        public SpellItemEnchantmentFlags GetFlags() { return (SpellItemEnchantmentFlags)Flags; }
+        public bool HasFlag(SpellItemEnchantmentFlags spellItemEnchantmentFlags) { return (Flags & (ushort)spellItemEnchantmentFlags) != 0; }
     }
 
     public sealed class SpellItemEnchantmentConditionRecord
@@ -505,9 +512,11 @@ namespace Game.DataStorage
         public uint Id;
         public string DisplayName;
         public string DisplayNameShort;
-        public SpellRangeFlag Flags;
+        public byte Flags;
         public float[] RangeMin = new float[2];
         public float[] RangeMax = new float[2];
+
+        public bool HasFlag(SpellRangeFlag spellRangeFlag) { return (Flags & (byte)spellRangeFlag) != 0; }
     }
 
     public sealed class SpellReagentsRecord
@@ -552,13 +561,15 @@ namespace Game.DataStorage
         public string Name;
         public uint CreatureDisplayID;
         public sbyte CreatureType;
-        public SpellShapeshiftFormFlags Flags;
+        public int Flags;
         public int AttackIconFileID;
         public sbyte BonusActionBar;
         public ushort CombatRoundTime;
         public float DamageVariance;
         public ushort MountTypeID;
         public uint[] PresetSpellID = new uint[SpellConst.MaxShapeshift];
+
+        public bool HasFlag(SpellShapeshiftFormFlags spellShapeshiftFormFlags) { return (Flags & (int)spellShapeshiftFormFlags) != 0; }
     }
 
     public sealed class SpellTargetRestrictionsRecord
@@ -681,6 +692,6 @@ namespace Game.DataStorage
         public int Slot;
         public uint[] Flags = new uint[2];
 
-        public SummonPropertiesFlags GetFlags() { return (SummonPropertiesFlags)Flags[0]; }
+        public bool HasFlag(SummonPropertiesFlags summonPropertiesFlags) { return (Flags[0] & (uint)summonPropertiesFlags) != 0; }
     }
 }

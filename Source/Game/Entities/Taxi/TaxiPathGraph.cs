@@ -59,7 +59,7 @@ namespace Game.Entities
 
                 for (int i = first + 1; i < last; ++i)
                 {
-                    if (nodes[i - 1].Flags.HasAnyFlag(TaxiPathNodeFlags.Teleport))
+                    if (nodes[i - 1].HasFlag(TaxiPathNodeFlags.Teleport))
                         continue;
 
                     int uiMap1, uiMap2;
@@ -155,7 +155,7 @@ namespace Game.Entities
                     {
                         var To = m_nodesByVertex[(int)edge.To];
                         TaxiNodeFlags requireFlag = (player.GetTeam() == Team.Alliance) ? TaxiNodeFlags.ShowOnAllianceMap : TaxiNodeFlags.ShowOnHordeMap;
-                        if (!To.GetFlags().HasFlag(requireFlag))
+                        if (!To.HasFlag(requireFlag))
                             continue;
 
                         PlayerConditionRecord condition = CliDB.PlayerConditionStorage.LookupByKey(To.ConditionID);

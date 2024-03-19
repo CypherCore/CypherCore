@@ -16,7 +16,9 @@ namespace Game.DataStorage
     public sealed class PhaseRecord
     {
         public uint Id;
-        public PhaseEntryFlags Flags;
+        public int Flags;
+
+        public bool HasFlag(PhaseEntryFlags phaseEntryFlags) { return (Flags & (int)phaseEntryFlags) != 0; }
     }
 
     public sealed class PhaseXPhaseGroupRecord
@@ -141,7 +143,7 @@ namespace Game.DataStorage
         public float RegenCombat;
         public short Flags;
 
-        public PowerTypeFlags GetFlags() { return (PowerTypeFlags)Flags; }
+        public bool HasFlag(PowerTypeFlags powerTypeFlags) { return (Flags & (short)powerTypeFlags) != 0; }
     }
 
     public sealed class PrestigeLevelInfoRecord
@@ -150,10 +152,11 @@ namespace Game.DataStorage
         public string Name;
         public int PrestigeLevel;
         public int BadgeTextureFileDataID;
-        public PrestigeLevelInfoFlags Flags;
+        public byte Flags;
         public int AwardedAchievementID;
 
-        public bool IsDisabled() { return (Flags & PrestigeLevelInfoFlags.Disabled) != 0; }
+        public bool HasFlag(PrestigeLevelInfoFlags prestigeLevelInfoFlags) { return (Flags & (byte)prestigeLevelInfoFlags) != 0; }
+        public bool IsDisabled() { return  HasFlag(PrestigeLevelInfoFlags.Disabled); }
     }
 
     public sealed class PvpDifficultyRecord

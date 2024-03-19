@@ -215,18 +215,18 @@ namespace Game.Entities
                     unitSummoner.m_SummonSlot[slot] = GetGUID();
                 }
 
-                if (!m_Properties.GetFlags().HasFlag(SummonPropertiesFlags.UseCreatureLevel))
+                if (!m_Properties.HasFlag(SummonPropertiesFlags.UseCreatureLevel))
                     SetLevel(unitSummoner.GetLevel());
             }
 
             uint faction = m_Properties.Faction;
-            if (summoner != null && m_Properties.GetFlags().HasFlag(SummonPropertiesFlags.UseSummonerFaction)) // TODO: Determine priority between faction and flag
+            if (summoner != null && m_Properties.HasFlag(SummonPropertiesFlags.UseSummonerFaction)) // TODO: Determine priority between faction and flag
                 faction = summoner.GetFaction();
 
             if (faction != 0)
                 SetFaction(faction);
 
-            if (m_Properties.GetFlags().HasFlag(SummonPropertiesFlags.SummonFromBattlePetJournal))
+            if (m_Properties.HasFlag(SummonPropertiesFlags.SummonFromBattlePetJournal))
                 RemoveNpcFlag(NPCFlags.WildBattlePet);
         }
 

@@ -1471,7 +1471,7 @@ namespace Game.Entities
                 return;
 
             // Check dynamic maximum flag
-            if (!currency.GetFlags().HasFlag(CurrencyTypesFlags.DynamicMaximum))
+            if (!currency.HasFlag(CurrencyTypesFlags.DynamicMaximum))
                 return;
 
             // Ancient mana maximum cap
@@ -1562,7 +1562,7 @@ namespace Game.Entities
                 maxQuantity = (uint)WorldStateMgr.GetValue(currency.MaxQtyWorldStateID, GetMap());
 
             uint increasedCap = 0;
-            if (currency.GetFlags().HasFlag(CurrencyTypesFlags.DynamicMaximum))
+            if (currency.HasFlag(CurrencyTypesFlags.DynamicMaximum))
                 increasedCap = GetCurrencyIncreasedCapQuantity(currency.Id);
 
             return maxQuantity + increasedCap;
@@ -1727,7 +1727,7 @@ namespace Game.Entities
             {
                 var friendshipReputation = CliDB.FriendshipReputationStorage.LookupByKey(factionEntry.FriendshipRepID);
                 if (friendshipReputation != null)
-                    if (friendshipReputation.Flags.HasAnyFlag(FriendshipReputationFlags.NoRepGainModifiers))
+                    if (friendshipReputation.HasFlag(FriendshipReputationFlags.NoRepGainModifiers))
                         noBonuses = true;
             }
 
@@ -2188,7 +2188,7 @@ namespace Game.Entities
         public uint GetStartLevel(Race race, Class playerClass, uint? characterTemplateId = null)
         {
             uint startLevel = WorldConfig.GetUIntValue(WorldCfg.StartPlayerLevel);
-            if (CliDB.ChrRacesStorage.LookupByKey(race).GetFlags().HasAnyFlag(ChrRacesFlag.IsAlliedRace))
+            if (CliDB.ChrRacesStorage.LookupByKey(race).HasFlag(ChrRacesFlag.IsAlliedRace))
                 startLevel = WorldConfig.GetUIntValue(WorldCfg.StartAlliedRaceLevel);
 
             if (playerClass == Class.Deathknight)
@@ -2233,7 +2233,7 @@ namespace Game.Entities
                 }
             });
 
-            if (m_unitMovedByMe.GetVehicleBase() == null || !m_unitMovedByMe.GetVehicle().GetVehicleInfo().Flags.HasAnyFlag(VehicleFlags.FixedPosition))
+            if (m_unitMovedByMe.GetVehicleBase() == null || !m_unitMovedByMe.GetVehicle().GetVehicleInfo().HasFlag(VehicleFlags.FixedPosition))
                 RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.Root), MovementFlag.Root);
 
             /*! This must be a packet spoofing attempt. MOVEMENTFLAG_ROOT sent from the client is not valid
@@ -2966,19 +2966,19 @@ namespace Game.Entities
 
         public bool CanJoinConstantChannelInZone(ChatChannelsRecord channel, AreaTableRecord zone)
         {
-            if (channel.GetFlags().HasFlag(ChatChannelFlags.ZoneBased) && zone.GetFlags().HasFlag(AreaFlags.NoChatChannels))
+            if (channel.HasFlag(ChatChannelFlags.ZoneBased) && zone.HasFlag(AreaFlags.NoChatChannels))
                 return false;
 
-            if (channel.GetFlags().HasFlag(ChatChannelFlags.OnlyInCities) && !zone.GetFlags().HasFlag(AreaFlags.AllowTradeChannel))
+            if (channel.HasFlag(ChatChannelFlags.OnlyInCities) && !zone.HasFlag(AreaFlags.AllowTradeChannel))
                 return false;
 
-            if (channel.GetFlags().HasFlag(ChatChannelFlags.GuildRecruitment) && GetGuildId() != 0)
+            if (channel.HasFlag(ChatChannelFlags.GuildRecruitment) && GetGuildId() != 0)
                 return false;
 
             if (channel.GetRuleset() == ChatChannelRuleset.Disabled)
                 return false;
 
-            if (channel.GetFlags().HasFlag(ChatChannelFlags.Regional))
+            if (channel.HasFlag(ChatChannelFlags.Regional))
                 return false;
 
             return true;
@@ -3026,7 +3026,7 @@ namespace Game.Entities
 
             foreach (var channelEntry in CliDB.ChatChannelsStorage.Values)
             {
-                if (!channelEntry.GetFlags().HasFlag(ChatChannelFlags.AutoJoin))
+                if (!channelEntry.HasFlag(ChatChannelFlags.AutoJoin))
                     continue;
 
                 Channel usedChannel = null;
@@ -3045,9 +3045,9 @@ namespace Game.Entities
 
                 if (CanJoinConstantChannelInZone(channelEntry, current_zone))
                 {
-                    if (!channelEntry.GetFlags().HasFlag(ChatChannelFlags.ZoneBased))
+                    if (!channelEntry.HasFlag(ChatChannelFlags.ZoneBased))
                     {
-                        if (channelEntry.GetFlags().HasFlag(ChatChannelFlags.LinkedChannel) && usedChannel != null)
+                        if (channelEntry.HasFlag(ChatChannelFlags.LinkedChannel) && usedChannel != null)
                             continue;                            // Already on the channel, as city channel names are not changing
 
                         joinChannel = cMgr.GetSystemChannel(channelEntry.Id, current_zone);
@@ -3579,7 +3579,7 @@ namespace Game.Entities
 
             if (!IsInCombat())
             {
-                if (powerType.GetFlags().HasFlag(PowerTypeFlags.UseRegenInterrupt) && m_regenInterruptTimestamp + TimeSpan.FromMicroseconds(powerType.RegenInterruptTimeMS) >= GameTime.Now())
+                if (powerType.HasFlag(PowerTypeFlags.UseRegenInterrupt) && m_regenInterruptTimestamp + TimeSpan.FromMicroseconds(powerType.RegenInterruptTimeMS) >= GameTime.Now())
                     return;
 
                 addvalue = (powerType.RegenPeace + m_unitData.PowerRegenFlatModifier[(int)powerIndex]) * 0.001f * RegenTimer;
@@ -4447,7 +4447,7 @@ namespace Game.Entities
 
             bool shouldResurrect = false;
             // Such zones are considered unreachable as a ghost and the player must be automatically revived
-            if ((!IsAlive() && zone != null && zone.GetFlags().HasFlag(AreaFlags.NoGhostOnRelease)) || GetMap().IsNonRaidDungeon() || GetMap().IsRaid() || GetTransport() != null || GetPositionZ() < GetMap().GetMinHeight(GetPhaseShift(), GetPositionX(), GetPositionY()))
+            if ((!IsAlive() && zone != null && zone.HasFlag(AreaFlags.NoGhostOnRelease)) || GetMap().IsNonRaidDungeon() || GetMap().IsRaid() || GetTransport() != null || GetPositionZ() < GetMap().GetMinHeight(GetPhaseShift(), GetPositionX(), GetPositionY()))
             {
                 shouldResurrect = true;
                 SpawnCorpseBones();
@@ -5064,7 +5064,7 @@ namespace Game.Entities
 
             do
             {
-                if (area.GetFlags2().HasFlag(AreaFlags2.AllowWarModeToggle))
+                if (area.HasFlag(AreaFlags2.AllowWarModeToggle))
                     return true;
 
                 area = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
@@ -5339,7 +5339,7 @@ namespace Game.Entities
             // Only health and mana are set to maximum.
             SetFullHealth();
             foreach (PowerTypeRecord powerType in CliDB.PowerTypeStorage.Values)
-                if (powerType.GetFlags().HasFlag(PowerTypeFlags.SetToMaxOnLevelUp))
+                if (powerType.HasFlag(PowerTypeFlags.SetToMaxOnLevelUp))
                     SetFullPower(powerType.PowerTypeEnum);
 
             // update level to hunter/summon pet
@@ -5655,7 +5655,7 @@ namespace Game.Entities
             vignetteUpdate.ForceUpdate = true;
 
             foreach (VignetteData vignette in GetMap().GetInfiniteAOIVignettes())
-                if (!vignette.Data.GetFlags().HasFlag(VignetteFlags.ZoneInfiniteAOI) && Vignettes.CanSee(this, vignette))
+                if (!vignette.Data.HasFlag(VignetteFlags.ZoneInfiniteAOI) && Vignettes.CanSee(this, vignette))
                     vignette.FillPacket(vignetteUpdate.Added);
 
             SendPacket(vignetteUpdate);
@@ -5732,7 +5732,7 @@ namespace Game.Entities
             {
                 Difficulty mapDifficulty = GetMap().GetDifficultyID();
                 var difficulty = CliDB.DifficultyStorage.LookupByKey(mapDifficulty);
-                SendRaidDifficulty((difficulty.Flags & DifficultyFlags.Legacy) != 0, (int)mapDifficulty);
+                SendRaidDifficulty(difficulty.HasFlag(DifficultyFlags.Legacy), (int)mapDifficulty);
             }
             else if (GetMap().IsNonRaidDungeon())
                 SendDungeonDifficulty((int)GetMap().GetDifficultyID());
@@ -7078,7 +7078,7 @@ namespace Game.Entities
             // change but I couldn't find a suitable alternative. OK to use class because only DK
             // can use this taxi.
             uint mount_display_id;
-            if (node.GetFlags().HasFlag(TaxiNodeFlags.UsePlayerFavoriteMount) && preferredMountDisplay != 0)
+            if (node.HasFlag(TaxiNodeFlags.UsePlayerFavoriteMount) && preferredMountDisplay != 0)
                 mount_display_id = preferredMountDisplay;
             else
                 mount_display_id = ObjectMgr.GetTaxiMountDisplayId(sourcenode, GetTeam(), npc == null || (sourcenode == 315 && GetClass() == Class.Deathknight));

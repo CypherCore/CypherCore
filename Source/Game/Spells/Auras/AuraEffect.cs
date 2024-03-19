@@ -1343,7 +1343,7 @@ namespace Game.Spells
                         target.SetDisplayId(modelid);
                 }
 
-                if (!shapeInfo.Flags.HasAnyFlag(SpellShapeshiftFormFlags.Stance))
+                if (!shapeInfo.HasFlag(SpellShapeshiftFormFlags.Stance))
                     target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Shapeshifting, GetSpellInfo());
             }
             else

@@ -146,7 +146,7 @@ namespace Game.Entities
                     Player thisPlayer = ToPlayer();
                     if (thisPlayer != null)
                     {
-                        if (properties.GetFlags().HasFlag(SummonPropertiesFlags.SummonFromBattlePetJournal))
+                        if (properties.HasFlag(SummonPropertiesFlags.SummonFromBattlePetJournal))
                         {
                             var pet = thisPlayer.GetSession().GetBattlePetMgr().GetPet(thisPlayer.GetSummonedBattlePetGUID());
                             if (pet != null)

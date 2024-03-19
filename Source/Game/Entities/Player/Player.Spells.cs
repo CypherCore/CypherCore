@@ -33,7 +33,7 @@ namespace Game.Entities
 
                 if (Global.SpellMgr.GetSkillRangeType(rcEntry) == SkillRangeType.Level)
                 {
-                    if (rcEntry.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
+                    if (rcEntry.HasFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
                         SetSkillRank(pair.Value.Pos, maxSkill);
 
                     SetSkillMaxRank(pair.Value.Pos, maxSkill);
@@ -605,7 +605,7 @@ namespace Game.Entities
                                 if ((m_unitData.MinItemLevel != 0 || m_unitData.MaxItemLevel != 0) && pEnchant.ScalingClassRestricted != 0)
                                     scalingClass = pEnchant.ScalingClassRestricted;
 
-                                uint minLevel = pEnchant.GetFlags().HasFlag(SpellItemEnchantmentFlags.ScaleAsAGem) ? 1 : 60u;
+                                uint minLevel = pEnchant.HasFlag(SpellItemEnchantmentFlags.ScaleAsAGem) ? 1 : 60u;
                                 uint scalingLevel = GetLevel();
                                 byte maxLevel = (byte)(pEnchant.MaxLevel != 0 ? pEnchant.MaxLevel : CliDB.SpellScalingGameTable.GetTableRowCount() - 1);
 
@@ -630,7 +630,7 @@ namespace Game.Entities
                                 if ((m_unitData.MinItemLevel != 0 || m_unitData.MaxItemLevel != 0) && pEnchant.ScalingClassRestricted != 0)
                                     scalingClass = pEnchant.ScalingClassRestricted;
 
-                                uint minLevel = pEnchant.GetFlags().HasFlag(SpellItemEnchantmentFlags.ScaleAsAGem) ? 1 : 60u;
+                                uint minLevel = pEnchant.HasFlag(SpellItemEnchantmentFlags.ScaleAsAGem) ? 1 : 60u;
                                 uint scalingLevel = GetLevel();
                                 byte maxLevel = (byte)(pEnchant.MaxLevel != 0 ? pEnchant.MaxLevel : CliDB.SpellScalingGameTable.GetTableRowCount() - 1);
 
@@ -1660,7 +1660,7 @@ namespace Game.Entities
                     case AbilityLearnType.OnSkillLearn:
                         break;
                     case AbilityLearnType.RewardedFromQuest:
-                        if (!ability.Flags.HasAnyFlag(SkillLineAbilityFlags.CanFallbackToLearnedOnSkillLearn) ||
+                        if (!ability.HasFlag(SkillLineAbilityFlags.CanFallbackToLearnedOnSkillLearn) ||
                             !spellInfo.MeetsFutureSpellPlayerCondition(this))
                             continue;
                         break;
@@ -2089,7 +2089,7 @@ namespace Game.Entities
                 {
                     ushort skillValue = 1;
                     ushort maxValue = GetMaxSkillValueForLevel();
-                    if (rcInfo.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
+                    if (rcInfo.HasFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
                         skillValue = maxValue;
                     else if (GetClass() == Class.Deathknight)
                         skillValue = (ushort)Math.Min(Math.Max(1, (GetLevel() - 1) * 5), maxValue);
@@ -2105,7 +2105,7 @@ namespace Game.Entities
                     SkillTiersEntry tier = Global.ObjectMgr.GetSkillTier(rcInfo.SkillTierID);
                     ushort maxValue = (ushort)tier.GetValueForTierIndex(0);
                     ushort skillValue = 1;
-                    if (rcInfo.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
+                    if (rcInfo.HasFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
                         skillValue = maxValue;
                     else if (GetClass() == Class.Deathknight)
                         skillValue = (ushort)Math.Min(Math.Max(1, (GetLevel() - 1) * 5), maxValue);
@@ -2307,7 +2307,7 @@ namespace Game.Entities
                                         break;
                                 }
 
-                                if (rcInfo.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
+                                if (rcInfo.HasFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
                                     skill_value = new_skill_max_value;
                             }
                         }
@@ -2815,7 +2815,7 @@ namespace Game.Entities
                                     break;
                             }
 
-                            if (rcInfo.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
+                            if (rcInfo.HasFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
                                 skill_value = new_skill_max_value;
                         }
                     }

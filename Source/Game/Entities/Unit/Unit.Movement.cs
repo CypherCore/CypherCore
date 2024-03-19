@@ -820,15 +820,15 @@ namespace Game.Entities
                 if (ridingSkill < mountCapability.ReqRidingSkill)
                     continue;
 
-                if (!mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.IgnoreRestrictions))
+                if (!mountCapability.HasFlag(MountCapabilityFlags.IgnoreRestrictions))
                 {
-                    if (mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Ground) && !mountFlags.HasFlag(AreaMountFlags.AllowGroundMounts))
+                    if (mountCapability.HasFlag(MountCapabilityFlags.Ground) && !mountFlags.HasFlag(AreaMountFlags.AllowGroundMounts))
                         continue;
-                    if (mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Flying) && !mountFlags.HasFlag(AreaMountFlags.AllowFlyingMounts))
+                    if (mountCapability.HasFlag(MountCapabilityFlags.Flying) && !mountFlags.HasFlag(AreaMountFlags.AllowFlyingMounts))
                         continue;
-                    if (mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Float) && !mountFlags.HasFlag(AreaMountFlags.AllowSurfaceSwimmingMounts))
+                    if (mountCapability.HasFlag(MountCapabilityFlags.Float) && !mountFlags.HasFlag(AreaMountFlags.AllowSurfaceSwimmingMounts))
                         continue;
-                    if (mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Underwater) && !mountFlags.HasFlag(AreaMountFlags.AllowUnderwaterSwimmingMounts))
+                    if (mountCapability.HasFlag(MountCapabilityFlags.Underwater) && !mountFlags.HasFlag(AreaMountFlags.AllowUnderwaterSwimmingMounts))
                         continue;
                 }
 
@@ -837,19 +837,19 @@ namespace Game.Entities
                     if (!isInWater)
                     {
                         // player is completely out of water
-                        if (!mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Ground))
+                        if (!mountCapability.HasFlag(MountCapabilityFlags.Ground))
                             continue;
                     }
                     // player is on water surface
-                    else if (!mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Float))
+                    else if (!mountCapability.HasFlag(MountCapabilityFlags.Float))
                         continue;
                 }
                 else if (isInWater)
                 {
-                    if (!mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Underwater))
+                    if (!mountCapability.HasFlag(MountCapabilityFlags.Underwater))
                         continue;
                 }
-                else if (!mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Float))
+                else if (!mountCapability.HasFlag(MountCapabilityFlags.Float))
                     continue;
 
                 if (mountCapability.ReqMapID != -1 &&

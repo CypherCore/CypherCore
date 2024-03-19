@@ -131,13 +131,13 @@ namespace Game.DataStorage
         public uint[] Flags = new uint[2];
         public ushort[] LiquidTypeID = new ushort[4];
 
-        public AreaFlags GetFlags() { return (AreaFlags)Flags[0]; }
-        public AreaFlags2 GetFlags2() { return (AreaFlags2)Flags[1]; }
-        public AreaMountFlags GetMountFlags() { return (AreaMountFlags)MountFlags; }
+        public bool HasFlag(AreaFlags areaFlags) { return (Flags[0] & (uint)areaFlags) != 0; }
+        public bool HasFlag(AreaFlags2 areaFlags2) { return (Flags[1] & (uint)areaFlags2) != 0; }
+        public bool HasMountFlag(AreaMountFlags areaMountFlags) { return (MountFlags & (uint)areaMountFlags) != 0; }
 
         public bool IsSanctuary()
         {
-            return GetFlags().HasFlag(AreaFlags.NoPvP);
+            return HasFlag(AreaFlags.NoPvP);
         }
     }
 
@@ -232,8 +232,10 @@ namespace Game.DataStorage
         public byte ArtifactID;
         public byte MaxPurchasableRank;
         public int Label;
-        public ArtifactPowerFlag Flags;
+        public byte Flags;
         public byte Tier;
+
+        public bool HasFlag(ArtifactPowerFlag artifactPowerFlag) { return (Flags & (byte)artifactPowerFlag) != 0; }
     }
 
     public sealed class ArtifactPowerLinkRecord
@@ -383,7 +385,9 @@ namespace Game.DataStorage
     public sealed class AzeriteTierUnlockSetRecord
     {
         public uint Id;
-        public AzeriteTierUnlockSetFlags Flags;
+        public int Flags;
+
+        public bool HasFlag(AzeriteTierUnlockSetFlags azeriteTierUnlockSetFlags) { return (Flags & (int)azeriteTierUnlockSetFlags) != 0; }
     }
 
     public sealed class AzeriteUnlockMappingRecord

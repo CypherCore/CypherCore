@@ -331,7 +331,7 @@ namespace Game.Chat
             {
                 Locale locale = session.GetSessionDbcLocale();
                 areaName = area.AreaName[locale];
-                if (area.GetFlags().HasFlag(AreaFlags.IsSubzone))
+                if (area.HasFlag(AreaFlags.IsSubzone))
                 {
                     var zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
                     if (zone != null)

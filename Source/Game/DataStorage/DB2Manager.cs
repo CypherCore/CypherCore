@@ -219,7 +219,7 @@ namespace Game.DataStorage
                 //ASSERT(chrSpec.OrderIndex < MAX_SPECIALIZATIONS);
 
                 uint storageIndex = chrSpec.ClassID;
-                if (chrSpec.GetFlags().HasFlag(ChrSpecializationFlag.PetOverrideSpec))
+                if (chrSpec.HasFlag(ChrSpecializationFlag.PetOverrideSpec))
                 {
                     //ASSERT(!chrSpec.ClassID);
                     storageIndex = (int)Class.Max;
@@ -566,7 +566,7 @@ namespace Game.DataStorage
                 UiMapRecord parentUiMap = UiMapStorage.LookupByKey(uiMap.ParentUiMapID);
                 if (parentUiMap != null)
                 {
-                    if (parentUiMap.GetFlags().HasAnyFlag(UiMapFlag.NoWorldPositions))
+                    if (parentUiMap.HasFlag(UiMapFlag.NoWorldPositions))
                         continue;
                     UiMapAssignmentRecord uiMapAssignment = null;
                     UiMapAssignmentRecord parentUiMapAssignment = null;
@@ -958,7 +958,7 @@ namespace Game.DataStorage
                 return levels[tier];
 
             AzeriteTierUnlockSetRecord azeriteTierUnlockSet = AzeriteTierUnlockSetStorage.LookupByKey(azeriteUnlockSetId);
-            if (azeriteTierUnlockSet != null && azeriteTierUnlockSet.Flags.HasAnyFlag(AzeriteTierUnlockSetFlags.Default))
+            if (azeriteTierUnlockSet != null && azeriteTierUnlockSet.HasFlag(AzeriteTierUnlockSetFlags.Default))
             {
                 levels = _azeriteTierUnlockLevels.LookupByKey((azeriteUnlockSetId, ItemContext.None));
                 if (levels != null)
@@ -1074,7 +1074,7 @@ namespace Game.DataStorage
             if (contentTuning == null)
                 return null;
 
-            if (forItem && contentTuning.GetFlags().HasFlag(ContentTuningFlag.DisabledForItem))
+            if (forItem && contentTuning.HasFlag(ContentTuningFlag.DisabledForItem))
                 return null;
 
             static int getLevelAdjustment(ContentTuningCalcType type) => type switch
@@ -1600,7 +1600,7 @@ namespace Game.DataStorage
                 if (difficultyEntry == null)
                     continue;
 
-                if (difficultyEntry.Flags.HasAnyFlag(DifficultyFlags.Default))
+                if (difficultyEntry.HasFlag(DifficultyFlags.Default))
                 {
                     difficulty = (Difficulty)pair.Key;
                     return pair.Value;

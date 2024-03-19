@@ -92,9 +92,9 @@ namespace Game.DataStorage
             }
         }
 
-        public bool IsDynamicDifficultyMap() { return GetFlags().HasFlag(MapFlags.DynamicDifficulty); }
-        public bool IsFlexLocking() { return GetFlags().HasFlag(MapFlags.FlexibleRaidLocking); }
-        public bool IsGarrison() { return GetFlags().HasFlag(MapFlags.Garrison); }
+        public bool IsDynamicDifficultyMap() { return HasFlag(MapFlags.DynamicDifficulty); }
+        public bool IsFlexLocking() { return HasFlag(MapFlags.FlexibleRaidLocking); }
+        public bool IsGarrison() { return HasFlag(MapFlags.Garrison); }
         public bool IsSplitByFaction()
         {
             return Id == 609 || // Acherus (DeathKnight Start)
@@ -104,8 +104,8 @@ namespace Game.DataStorage
             Id == 2570;     // Forbidden Reach (Dracthyr/Evoker Start)
         }
 
-        public MapFlags GetFlags() { return (MapFlags)Flags[0]; }
-        public MapFlags2 GetFlags2() { return (MapFlags2)Flags[1]; }
+        public bool HasFlag(MapFlags mapFlags) { return (Flags[0] & (uint)mapFlags) != 0; }
+        public bool HasFlag(MapFlags2 mapFlags2) { return (Flags[1] & (uint)mapFlags2) != 0; }
     }
 
     public sealed class MapChallengeModeRecord
@@ -134,9 +134,9 @@ namespace Game.DataStorage
         public uint MapID;
 
         public bool HasResetSchedule() { return ResetInterval != MapDifficultyResetInterval.Anytime; }
-        public bool IsUsingEncounterLocks() { return GetFlags().HasFlag(MapDifficultyFlags.UseLootBasedLockInsteadOfInstanceLock); }
-        public bool IsRestoringDungeonState() { return GetFlags().HasFlag(MapDifficultyFlags.ResumeDungeonProgressBasedOnLockout); }
-        public bool IsExtendable() { return !GetFlags().HasFlag(MapDifficultyFlags.DisableLockExtension); }
+        public bool IsUsingEncounterLocks() { return HasFlag(MapDifficultyFlags.UseLootBasedLockInsteadOfInstanceLock); }
+        public bool IsRestoringDungeonState() { return HasFlag(MapDifficultyFlags.ResumeDungeonProgressBasedOnLockout); }
+        public bool IsExtendable() { return !HasFlag(MapDifficultyFlags.DisableLockExtension); }
 
         public uint GetRaidDuration()
         {
@@ -147,7 +147,7 @@ namespace Game.DataStorage
             return 0;
         }
 
-        public MapDifficultyFlags GetFlags() { return (MapDifficultyFlags)Flags; }
+        public bool HasFlag(MapDifficultyFlags mapFlags) { return (Flags & (int)mapFlags) != 0; }
     }
 
     public sealed class MapDifficultyXConditionRecord
@@ -185,7 +185,7 @@ namespace Game.DataStorage
         public string Description;
         public uint Id;
         public ushort MountTypeID;
-        public MountFlags Flags;
+        public int Flags;
         public sbyte SourceTypeEnum;
         public uint SourceSpellID;
         public uint PlayerConditionID;
@@ -194,13 +194,14 @@ namespace Game.DataStorage
         public int MountSpecialRiderAnimKitID;
         public int MountSpecialSpellVisualKitID;
 
-        public bool IsSelfMount() { return (Flags & MountFlags.SelfMount) != 0; }
+        public bool HasFlag(MountFlags mountFlags) { return (Flags & (int)mountFlags) != 0; }
+        public bool IsSelfMount() { return HasFlag(MountFlags.SelfMount); }
     }
 
     public sealed class MountCapabilityRecord
     {
         public uint Id;
-        public MountCapabilityFlags Flags;
+        public int Flags;
         public ushort ReqRidingSkill;
         public ushort ReqAreaID;
         public uint ReqSpellAuraID;
@@ -209,6 +210,8 @@ namespace Game.DataStorage
         public short ReqMapID;
         public int PlayerConditionID;
         public int FlightCapabilityID;
+
+        public bool HasFlag(MountCapabilityFlags mountCapabilityFlags) { return (Flags & (int)mountCapabilityFlags) != 0; }
     }
 
     public sealed class MountTypeXCapabilityRecord

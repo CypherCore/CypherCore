@@ -18,7 +18,7 @@ namespace Game.DataStorage
 
         public CfgCategoriesCharsets GetCreateCharsetMask() { return (CfgCategoriesCharsets)CreateCharsetMask; }
         public CfgCategoriesCharsets GetExistingCharsetMask() { return (CfgCategoriesCharsets)ExistingCharsetMask; }
-        public CfgCategoriesFlags GetFlags() { return (CfgCategoriesFlags)Flags; }
+        public bool HasFlag(CfgCategoriesFlags cfgCategoriesFlags) { return (Flags & (byte)cfgCategoriesFlags) != 0; }
     }
 
     public sealed class Cfg_RegionsRecord
@@ -79,7 +79,7 @@ namespace Game.DataStorage
         public sbyte FactionGroup;
         public int Ruleset;
 
-        public ChatChannelFlags GetFlags() { return (ChatChannelFlags)Flags; }
+        public bool HasFlag(ChatChannelFlags chatChannelFlags) { return (Flags & (int)chatChannelFlags) != 0; }
         public ChatChannelRuleset GetRuleset() { return (ChatChannelRuleset)Ruleset; }
     }
 
@@ -213,7 +213,7 @@ namespace Game.DataStorage
         public int OverrideArchive;                                          // -1: allow any, otherwise must match OverrideArchive cvar
         public uint ItemModifiedAppearanceID;
 
-        public ChrCustomizationReqFlag GetFlags() { return (ChrCustomizationReqFlag)Flags; }
+        public bool HasFlag(ChrCustomizationReqFlag chrCustomizationReqFlag) { return (Flags & (int)chrCustomizationReqFlag) != 0; }
     }
 
     public sealed class ChrCustomizationReqChoiceRecord
@@ -309,7 +309,7 @@ namespace Game.DataStorage
         public sbyte MaleTextureFallbackSex;
         public sbyte FemaleTextureFallbackSex;
 
-        public ChrRacesFlag GetFlags() { return (ChrRacesFlag)Flags; }
+        public bool HasFlag(ChrRacesFlag chrRacesFlag) { return (Flags & (int)chrRacesFlag) != 0; }
     }
 
     public sealed class ChrSpecializationRecord
@@ -328,7 +328,7 @@ namespace Game.DataStorage
         public int AnimReplacements;
         public uint[] MasterySpellID = new uint[PlayerConst.MaxMasterySpells];
 
-        public ChrSpecializationFlag GetFlags() { return (ChrSpecializationFlag)Flags; }
+        public bool HasFlag(ChrSpecializationFlag chrSpecializationFlag) { return (Flags & (uint)chrSpecializationFlag) != 0; }
         public ChrSpecializationRole GetRole() { return (ChrSpecializationRole)Role; }
 
         public bool IsPetSpecialization()
@@ -389,15 +389,14 @@ namespace Game.DataStorage
         public int MinItemLevel;
         public float QuestXpMultiplier;
 
-        public ContentTuningFlag GetFlags() { return (ContentTuningFlag)Flags; }
+        public bool HasFlag(ContentTuningFlag contentTuningFlag) { return (Flags & (int)contentTuningFlag) != 0; }
 
         public int GetScalingFactionGroup()
         {
-            ContentTuningFlag flags = GetFlags();
-            if (flags.HasFlag(ContentTuningFlag.Horde))
+            if (HasFlag(ContentTuningFlag.Horde))
                 return 5;
 
-            if (flags.HasFlag(ContentTuningFlag.Alliance))
+            if (HasFlag(ContentTuningFlag.Alliance))
                 return 3;
 
             return 0;
@@ -534,7 +533,7 @@ namespace Game.DataStorage
         public float Unknown820_2;                                             // scale related
         public float[] Unknown820_3 = new float[2];                            // scale related
 
-        public CreatureModelDataFlags GetFlags() { return (CreatureModelDataFlags)Flags; }
+        public bool HasFlag(CreatureModelDataFlags creatureModelDataFlags) { return (Flags & (uint)creatureModelDataFlags) != 0; }
     }
 
     public sealed class CreatureTypeRecord
@@ -559,7 +558,7 @@ namespace Game.DataStorage
         public ushort EligibilityWorldStateID;
         public byte EligibilityWorldStateValue;
 
-        public CriteriaFlags GetFlags() => (CriteriaFlags)Flags;
+        public bool HasFlag(CriteriaFlags criteriaFlags) { return (Flags & (int)criteriaFlags) != 0; }
     }
 
     public sealed class CriteriaTreeRecord
@@ -571,7 +570,9 @@ namespace Game.DataStorage
         public int Operator;
         public uint CriteriaID;
         public int OrderIndex;
-        public CriteriaTreeFlags Flags;
+        public int Flags;
+
+        public bool HasFlag(CriteriaTreeFlags criteriaTreeFlags) { return (Flags & (int)criteriaTreeFlags) != 0; }
     }
 
     public sealed class CurrencyContainerRecord
@@ -608,50 +609,50 @@ namespace Game.DataStorage
         public uint RechargingCycleDurationMS;
         public int[] Flags = new int[2];
 
-        public CurrencyTypesFlags GetFlags() { return (CurrencyTypesFlags)Flags[0]; }
-        public CurrencyTypesFlagsB GetFlagsB() { return (CurrencyTypesFlagsB)Flags[1]; }
+        public bool HasFlag(CurrencyTypesFlags currencyTypesFlags) { return (Flags[0] & (int)currencyTypesFlags) != 0; }
+        public bool HasFlag(CurrencyTypesFlagsB currencyTypesFlagsB) { return (Flags[1] & (int)currencyTypesFlagsB) != 0; }
 
         // Helpers
         public int GetScaler()
         {
-            return GetFlags().HasFlag(CurrencyTypesFlags._100_Scaler) ? 100 : 1;
+            return HasFlag(CurrencyTypesFlags._100_Scaler) ? 100 : 1;
         }
 
         public bool HasMaxEarnablePerWeek()
         {
-            return MaxEarnablePerWeek != 0 || GetFlags().HasFlag(CurrencyTypesFlags.ComputedWeeklyMaximum);
+            return MaxEarnablePerWeek != 0 || HasFlag(CurrencyTypesFlags.ComputedWeeklyMaximum);
         }
 
         public bool HasMaxQuantity(bool onLoad = false, bool onUpdateVersion = false)
         {
-            if (onLoad && GetFlags().HasFlag(CurrencyTypesFlags.IgnoreMaxQtyOnLoad))
+            if (onLoad && HasFlag(CurrencyTypesFlags.IgnoreMaxQtyOnLoad))
                 return false;
 
-            if (onUpdateVersion && GetFlags().HasFlag(CurrencyTypesFlags.UpdateVersionIgnoreMax))
+            if (onUpdateVersion && HasFlag(CurrencyTypesFlags.UpdateVersionIgnoreMax))
                 return false;
 
-            return MaxQty != 0 || MaxQtyWorldStateID != 0 || GetFlags().HasFlag(CurrencyTypesFlags.DynamicMaximum);
+            return MaxQty != 0 || MaxQtyWorldStateID != 0 || HasFlag(CurrencyTypesFlags.DynamicMaximum);
         }
 
         public bool HasTotalEarned()
         {
-            return GetFlagsB().HasFlag(CurrencyTypesFlagsB.UseTotalEarnedForEarned);
+            return HasFlag(CurrencyTypesFlagsB.UseTotalEarnedForEarned);
         }
 
         public bool IsAlliance()
         {
-            return GetFlags().HasFlag(CurrencyTypesFlags.IsAllianceOnly);
+            return HasFlag(CurrencyTypesFlags.IsAllianceOnly);
         }
 
         public bool IsHorde()
         {
-            return GetFlags().HasFlag(CurrencyTypesFlags.IsHordeOnly);
+            return HasFlag(CurrencyTypesFlags.IsHordeOnly);
         }
 
         public bool IsSuppressingChatLog(bool onUpdateVersion = false)
         {
-            if ((onUpdateVersion && GetFlags().HasFlag(CurrencyTypesFlags.SuppressChatMessageOnVersionChange)) ||
-                GetFlags().HasFlag(CurrencyTypesFlags.SuppressChatMessages))
+            if ((onUpdateVersion && HasFlag(CurrencyTypesFlags.SuppressChatMessageOnVersionChange)) ||
+                HasFlag(CurrencyTypesFlags.SuppressChatMessages))
                 return true;
 
             return false;
@@ -659,7 +660,7 @@ namespace Game.DataStorage
 
         public bool IsTrackingQuantity()
         {
-            return GetFlags().HasFlag(CurrencyTypesFlags.TrackQuantity);
+            return HasFlag(CurrencyTypesFlags.TrackQuantity);
         }
     }
 

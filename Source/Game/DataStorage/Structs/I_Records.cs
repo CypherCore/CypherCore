@@ -335,10 +335,12 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString Name;
-        public ItemSetFlags SetFlags;
+        public int SetFlags;
         public uint RequiredSkill;
         public ushort RequiredSkillRank;
         public uint[] ItemID = new uint[ItemConst.MaxItemSetItems];
+
+        public bool HasFlag(ItemSetFlags itemSetFlags) { return (SetFlags & (int)itemSetFlags) != 0; }
     }
 
     public sealed class ItemSetSpellRecord

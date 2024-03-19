@@ -1245,7 +1245,7 @@ namespace Game
                         return false;
                     }
 
-                    if (areaEntry.ParentAreaID != 0 && areaEntry.GetFlags().HasFlag(AreaFlags.IsSubzone))
+                    if (areaEntry.ParentAreaID != 0 && areaEntry.HasFlag(AreaFlags.IsSubzone))
                     {
                         Log.outError(LogFilter.Sql, "{0} requires to be in area ({1}) which is a subzone but zone expected, skipped.", cond.ToString(true), cond.ConditionValue1);
                         return false;
@@ -2643,11 +2643,11 @@ namespace Game
                 case UnitConditionVariable.IsEnemy:
                     return (otherUnit != null && unit.GetReactionTo(otherUnit) <= ReputationRank.Hostile) ? 1 : 0;
                 case UnitConditionVariable.IsSpecMelee:
-                    return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry() != null && unit.ToPlayer().GetPrimarySpecializationEntry().GetFlags().HasFlag(ChrSpecializationFlag.Melee) ? 1 : 0;
+                    return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry() != null && unit.ToPlayer().GetPrimarySpecializationEntry().HasFlag(ChrSpecializationFlag.Melee) ? 1 : 0;
                 case UnitConditionVariable.IsSpecTank:
                     return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry() != null && unit.ToPlayer().GetPrimarySpecializationEntry().GetRole() == ChrSpecializationRole.Tank ? 1 : 0;
                 case UnitConditionVariable.IsSpecRanged:
-                    return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry() != null && unit.ToPlayer().GetPrimarySpecializationEntry().GetFlags().HasFlag(ChrSpecializationFlag.Ranged) ? 1 : 0;
+                    return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry() != null && unit.ToPlayer().GetPrimarySpecializationEntry().HasFlag(ChrSpecializationFlag.Ranged) ? 1 : 0;
                 case UnitConditionVariable.IsSpecHealer:
                     return unit.IsPlayer() && unit.ToPlayer().GetPrimarySpecializationEntry()?.GetRole() == ChrSpecializationRole.Healer ? 1 : 0;
                 case UnitConditionVariable.IsPlayerControlledNPC:
@@ -2724,7 +2724,7 @@ namespace Game
                         break;
                 }
 
-                if (condition.GetFlags().HasFlag(UnitConditionFlags.LogicOr))
+                if (condition.HasFlag(UnitConditionFlags.LogicOr))
                 {
                     if (meets)
                         return true;
@@ -2733,7 +2733,7 @@ namespace Game
                     return false;
             }
 
-            return !condition.GetFlags().HasFlag(UnitConditionFlags.LogicOr);
+            return !condition.HasFlag(UnitConditionFlags.LogicOr);
         }
 
         static int EvalSingleValue(ByteBuffer buffer, Map map)

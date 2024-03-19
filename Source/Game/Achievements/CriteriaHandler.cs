@@ -488,7 +488,7 @@ namespace Game.Achievements
                 bool isNew = _startedCriteria.TryAdd(criteria.Id, timeLimit);
                 if (!isNew)
                 {
-                    if (!criteria.Entry.GetFlags().HasFlag(CriteriaFlags.ResetOnStart))
+                    if (!criteria.Entry.HasFlag(CriteriaFlags.ResetOnStart))
                         continue;
 
                     _startedCriteria[criteria.Id] = timeLimit;
@@ -717,8 +717,8 @@ namespace Game.Achievements
 
         public virtual bool CanUpdateCriteriaTree(Criteria criteria, CriteriaTree tree, Player referencePlayer)
         {
-            if ((tree.Entry.Flags.HasAnyFlag(CriteriaTreeFlags.HordeOnly) && referencePlayer.GetTeam() != Team.Horde) ||
-                (tree.Entry.Flags.HasAnyFlag(CriteriaTreeFlags.AllianceOnly) && referencePlayer.GetTeam() != Team.Alliance))
+            if ((tree.Entry.HasFlag(CriteriaTreeFlags.HordeOnly) && referencePlayer.GetTeam() != Team.Horde) ||
+                (tree.Entry.HasFlag(CriteriaTreeFlags.AllianceOnly) && referencePlayer.GetTeam() != Team.Alliance))
             {
                 Log.outTrace(LogFilter.Achievement, "CriteriaHandler.CanUpdateCriteriaTree: (Id: {0} Type {1} CriteriaTree {2}) Wrong faction",
                     criteria.Id, criteria.Entry.Type, tree.Entry.Id);
@@ -1449,7 +1449,7 @@ namespace Game.Achievements
                 {
                     uint zoneId = referencePlayer.GetAreaId();
                     AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
-                    if (areaEntry != null && areaEntry.GetFlags().HasFlag(AreaFlags.IsSubzone))
+                    if (areaEntry != null && areaEntry.HasFlag(AreaFlags.IsSubzone))
                         zoneId = areaEntry.ParentAreaID;
                     if (zoneId != reqValue)
                         return false;
@@ -1461,7 +1461,7 @@ namespace Game.Achievements
                         return false;
                     uint zoneId = refe.GetAreaId();
                     AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
-                    if (areaEntry != null && areaEntry.GetFlags().HasFlag(AreaFlags.IsSubzone))
+                    if (areaEntry != null && areaEntry.HasFlag(AreaFlags.IsSubzone))
                         zoneId = areaEntry.ParentAreaID;
                     if (zoneId != reqValue)
                         return false;
@@ -1964,7 +1964,7 @@ namespace Game.Achievements
                         return false;
 
                     GarrAbilityRecord traitEntry = CliDB.GarrAbilityStorage.LookupByKey(secondaryAsset);
-                    if (traitEntry == null || !traitEntry.Flags.HasAnyFlag(GarrisonAbilityFlags.Trait))
+                    if (traitEntry == null || !traitEntry.HasFlag(GarrisonAbilityFlags.Trait))
                         return false;
 
                     uint followerCount = garrison.CountFollowers(follower =>
@@ -2003,7 +2003,7 @@ namespace Game.Achievements
                         return false;
 
                     GarrAbilityRecord traitEntry = CliDB.GarrAbilityStorage.LookupByKey(reqValue);
-                    if (traitEntry == null || !traitEntry.Flags.HasAnyFlag(GarrisonAbilityFlags.Trait))
+                    if (traitEntry == null || !traitEntry.HasFlag(GarrisonAbilityFlags.Trait))
                         return false;
 
                     uint followerCount = garrison.CountFollowers(follower =>
@@ -2158,7 +2158,7 @@ namespace Game.Achievements
                 case ModifierTreeType.GarrisonFollowerHasTrait: // 144
                 {
                     GarrAbilityRecord traitEntry = CliDB.GarrAbilityStorage.LookupByKey(reqValue);
-                    if (traitEntry == null || !traitEntry.Flags.HasAnyFlag(GarrisonAbilityFlags.Trait))
+                    if (traitEntry == null || !traitEntry.HasFlag(GarrisonAbilityFlags.Trait))
                         return false;
 
                     Garrison garrison = referencePlayer.GetGarrison();
@@ -2701,7 +2701,7 @@ namespace Game.Achievements
                 case ModifierTreeType.PlayerIsInPvpBrawl: // 220
                 {
                     var bg = CliDB.BattlemasterListStorage.LookupByKey(referencePlayer.GetBattlegroundTypeId());
-                    if (bg == null || !bg.Flags.HasFlag(BattlemasterListFlags.Brawl))
+                    if (bg == null || !bg.HasFlag(BattlemasterListFlags.Brawl))
                         return false;
                     break;
                 }

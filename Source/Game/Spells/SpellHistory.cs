@@ -408,7 +408,7 @@ namespace Game.Spells
                         }
 
                         SpellCategoryRecord categoryEntry = CliDB.SpellCategoryStorage.LookupByKey(categoryId);
-                        if (categoryEntry.Flags.HasAnyFlag(SpellCategoryFlags.CooldownExpiresAtDailyReset))
+                        if (categoryEntry.HasFlag(SpellCategoryFlags.CooldownExpiresAtDailyReset))
                             categoryCooldown = Time.UnixTimeToDateTime(Global.WorldMgr.GetNextDailyQuestsResetTime()) - GameTime.GetSystemTime();
                     }
                 }
