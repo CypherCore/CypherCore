@@ -4,11 +4,12 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
+using Game.PvP;
 using Game.Networking.Packets;
 using Game.Scripting;
 using System.Collections.Generic;
 
-namespace Game.PvP.HellfirePeninsula
+namespace Scripts.OutdoorPVP.HellfirePeninsula
 {
     class HellfirePeninsulaPvP : OutdoorPvP
     {
