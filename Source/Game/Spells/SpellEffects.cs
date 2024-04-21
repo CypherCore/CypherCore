@@ -1457,7 +1457,7 @@ namespace Game.Spells
                 caster = m_originalCaster;
 
             ObjectGuid privateObjectOwner = caster.GetGUID();
-            if (!properties.HasFlag(SummonPropertiesFlags.OnlyVisibleToSummoner | SummonPropertiesFlags.OnlyVisibleToSummonerGroup))
+            if (!properties.HasAnyFlag(SummonPropertiesFlags.OnlyVisibleToSummoner | SummonPropertiesFlags.OnlyVisibleToSummonerGroup))
                 privateObjectOwner = ObjectGuid.Empty;
 
             if (caster.IsPrivateObject())

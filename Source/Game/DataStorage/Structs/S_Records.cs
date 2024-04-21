@@ -692,6 +692,7 @@ namespace Game.DataStorage
         public int Slot;
         public uint[] Flags = new uint[2];
 
-        public bool HasFlag(SummonPropertiesFlags summonPropertiesFlags) { return (Flags[0] & (uint)summonPropertiesFlags) != 0; }
+        public bool HasFlag(SummonPropertiesFlags summonPropertiesFlags) { return (Flags[0] & (uint)summonPropertiesFlags) == (uint)summonPropertiesFlags; }
+        public bool HasAnyFlag(SummonPropertiesFlags summonPropertiesFlags) { return (Flags[0] & (uint)summonPropertiesFlags) != 0; }
     }
 }
