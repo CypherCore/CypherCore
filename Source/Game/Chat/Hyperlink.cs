@@ -19,12 +19,24 @@ namespace Game.Chat
 
             ChatCommandResult errorResult = ChatCommandResult.FromErrorMessage(handler.GetCypherString(CypherStrings.CmdparserLinkdataInvalid));
 
+            string data;
+
+            switch (info.Tag)
+            {
+                case "mount":
+                    data = new MountLinkData(info.Data).SpellId;
+                    break;
+                default:
+                    data = info.Data;
+                    break;
+            }
+
             // store value
             switch (Type.GetTypeCode(type))
             {
                 case TypeCode.UInt32:
                 {
-                    if (!uint.TryParse(info.Data, out uint tempValue))
+                    if (!uint.TryParse(data, out uint tempValue))
                         return errorResult;
 
                     value = tempValue;
@@ -32,7 +44,7 @@ namespace Game.Chat
                 }
                 case TypeCode.UInt64:
                 {
-                    if (!ulong.TryParse(info.Data, out ulong tempValue))
+                    if (!ulong.TryParse(data, out ulong tempValue))
                         return errorResult;
 
                     value = tempValue;
@@ -40,7 +52,7 @@ namespace Game.Chat
                 }
                 case TypeCode.String:
                 {
-                    value = info.Data;
+                    value = data;
                     break;
                 }
                 default:
@@ -201,6 +213,46 @@ namespace Game.Chat
             g = (byte)(c >> 8);
             b = (byte)c;
             a = (byte)(c >> 24);
+        }
+    }
+
+    readonly struct MountLinkData
+    {
+        public readonly string SpellId;
+        public readonly string DisplayId;
+        public readonly string Customizations;
+
+        public MountLinkData(string data)
+        {
+            var args = data.Split(':');
+            if (args.Length == 3)
+            {
+                SpellId = args[0];
+                DisplayId = args[1];
+                Customizations = args[2];
+            }
+            else
+            {
+                SpellId = string.Empty;
+                DisplayId = string.Empty;
+                Customizations = string.Empty;
+            }
+        }
+
+        public MountLinkData(string spellId, string displayId, string customization)
+        {
+            SpellId = spellId;
+            DisplayId = displayId;
+            Customizations = customization;
+        }
+
+        public string GeneratedData
+        {
+            get
+            {
+                Cypher.Assert(false, "MountLinkData.Data property is not implement yet!");
+                return string.Empty;
+            }
         }
     }
 }
