@@ -77,7 +77,7 @@ namespace Game.Entities
         Difficulty m_legacyRaidDifficulty;
 
         //Movement
-        public PlayerTaxi m_taxi = new();
+        public PlayerTaxi m_taxi = new(CliDB.GetTaxiMaskSize());
         public byte[] m_forced_speed_changes = new byte[(int)UnitMoveType.Max];
         public byte m_movementForceModMagnitudeChanges;
         uint m_lastFallTime;

@@ -408,7 +408,7 @@ namespace Game.DataStorage
             foreach (var entry in TaxiPathNodeStorage.Values)
                 TaxiPathNodesByPath[entry.PathID][entry.NodeIndex] = entry;
 
-            var taxiMaskSize = ((TaxiNodesStorage.GetNumRows() - 1) / (1 * 64) + 1) * 8;
+            var taxiMaskSize = GetTaxiMaskSize();
             TaxiNodesMask = new byte[taxiMaskSize];
             OldContinentsNodesMask = new byte[taxiMaskSize];
             HordeTaxiNodesMask = new byte[taxiMaskSize];
@@ -844,6 +844,7 @@ namespace Game.DataStorage
         public static byte[] AllianceTaxiNodesMask;
         public static Dictionary<uint, Dictionary<uint, TaxiPathBySourceAndDestination>> TaxiPathSetBySource = new();
         public static Dictionary<uint, TaxiPathNodeRecord[]> TaxiPathNodesByPath = new();
+        public static uint GetTaxiMaskSize() { return ((TaxiNodesStorage.GetNumRows() - 1) / (1 * 64) + 1) * 8; }
         #endregion
 
         #region Helper Methods
