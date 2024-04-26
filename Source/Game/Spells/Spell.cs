@@ -6266,7 +6266,7 @@ namespace Game.Spells
             (float minRange, float maxRange) = GetMinMaxRange(strict);
 
             // dont check max_range to strictly after cast
-            if (m_spellInfo.RangeEntry != null && m_spellInfo.RangeEntry.HasFlag(SpellRangeFlag.Melee) && !strict)
+            if (m_spellInfo.RangeEntry != null && !m_spellInfo.RangeEntry.HasFlag(SpellRangeFlag.Melee) && !strict)
                 maxRange += Math.Min(3.0f, maxRange * 0.1f); // 10% but no more than 3.0f
 
             // get square values for sqr distance checks
