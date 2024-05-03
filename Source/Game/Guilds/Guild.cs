@@ -740,7 +740,7 @@ namespace Game.Guilds
 
                 member.ChangeRank(null, newRankId);
                 _LogEvent(demote ? GuildEventLogTypes.DemotePlayer : GuildEventLogTypes.PromotePlayer, player.GetGUID().GetCounter(), member.GetGUID().GetCounter(), (byte)newRankId);
-                //_BroadcastEvent(demote ? GuildEvents.Demotion : GuildEvents.Promotion, ObjectGuid.Empty, player.GetName(), name, _GetRankName((byte)newRankId));
+                SendGuildRanksUpdate(player.GetGUID(), guid, oldRank.GetId(), newRankId);
             }
         }
 
@@ -776,7 +776,9 @@ namespace Game.Guilds
                 return;
             }
 
-            SendGuildRanksUpdate(setterGuid, targetGuid, newRank.GetId());
+            member.ChangeRank(null, newRank.GetId());
+
+            SendGuildRanksUpdate(setterGuid, targetGuid, oldRank.GetId(), newRank.GetId());
         }
 
         public void HandleAddNewRank(WorldSession session, string name)
@@ -2374,7 +2376,7 @@ namespace Game.Guilds
             session.SendPacket(packet);
         }
 
-        void SendGuildRanksUpdate(ObjectGuid setterGuid, ObjectGuid targetGuid, GuildRankId rank)
+        void SendGuildRanksUpdate(ObjectGuid setterGuid, ObjectGuid targetGuid, GuildRankId oldRank, GuildRankId newRank)
         {
             Member member = GetMember(targetGuid);
             Cypher.Assert(member != null);
@@ -2382,13 +2384,11 @@ namespace Game.Guilds
             GuildSendRankChange rankChange = new();
             rankChange.Officer = setterGuid;
             rankChange.Other = targetGuid;
-            rankChange.RankID = (byte)rank;
-            rankChange.Promote = (rank < member.GetRankId());
+            rankChange.RankID = (byte)newRank;
+            rankChange.Promote = newRank < oldRank;
             BroadcastPacket(rankChange);
 
-            member.ChangeRank(null, rank);
-
-            Log.outDebug(LogFilter.Network, "SMSG_GUILD_RANKS_UPDATE [Broadcast] Target: {0}, Issuer: {1}, RankId: {2}", targetGuid.ToString(), setterGuid.ToString(), rank);
+            Log.outDebug(LogFilter.Network, $"SMSG_GUILD_RANKS_UPDATE [Broadcast] Target: {targetGuid}, Issuer: {setterGuid}, RankId: {newRank}");
         }
 
         public void ResetTimes(bool weekly)
