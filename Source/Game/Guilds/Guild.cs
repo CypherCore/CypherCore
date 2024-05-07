@@ -672,11 +672,13 @@ namespace Game.Guilds
                         SendCommandResult(session, GuildCommandType.RemovePlayer, GuildCommandError.RankTooHigh_S, name);
                     else
                     {
-                        DeleteMember(null, guid, false, true);
                         _LogEvent(GuildEventLogTypes.UninvitePlayer, player.GetGUID().GetCounter(), guid.GetCounter());
 
                         Player pMember = Global.ObjAccessor.FindConnectedPlayer(guid);
                         SendEventPlayerLeft(pMember, player, true);
+
+                        // After call to DeleteMember pointer to member becomes invalid
+                        DeleteMember(null, guid, false, true);
 
                         SendCommandResult(session, GuildCommandType.RemovePlayer, GuildCommandError.Success, name);
                     }
