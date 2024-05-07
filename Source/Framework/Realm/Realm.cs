@@ -12,8 +12,7 @@ public class Realm : IEquatable<Realm>
     public void SetName(string name)
     {
         Name = name;
-        NormalizedName = name;
-        NormalizedName = NormalizedName.Replace(" ", "");
+        NormalizedName = name.Replace(" ", "");
     }
 
     public IPAddress GetAddressForClient(IPAddress clientAddr)
@@ -60,8 +59,8 @@ public class Realm : IEquatable<Realm>
     public uint Build;
     public List<IPAddress> Addresses = new();
     public ushort Port;
-    public string Name;
-    public string NormalizedName;
+    public string Name { get; private set; }
+    public string NormalizedName { get; private set; }
     public byte Type;
     public RealmFlags Flags;
     public byte Timezone;

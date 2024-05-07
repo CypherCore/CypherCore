@@ -96,7 +96,7 @@ public class RealmManager : Singleton<RealmManager>
             {
                 var realm = new Realm();
                 uint realmId = result.Read<uint>(0);
-                realm.Name = result.Read<string>(1);
+                realm.SetName(result.Read<string>(1));
                 realm.Addresses.Add(IPAddress.Parse(result.Read<string>(2)));
                 realm.Addresses.Add(IPAddress.Parse(result.Read<string>(3)));
                 realm.Port = result.Read<ushort>(4);
