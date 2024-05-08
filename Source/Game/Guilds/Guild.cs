@@ -675,7 +675,7 @@ namespace Game.Guilds
                         _LogEvent(GuildEventLogTypes.UninvitePlayer, player.GetGUID().GetCounter(), guid.GetCounter());
 
                         Player pMember = Global.ObjAccessor.FindConnectedPlayer(guid);
-                        SendEventPlayerLeft(pMember, player, true);                       
+                        SendEventPlayerLeft(pMember, player, true);
 
                         SendCommandResult(session, GuildCommandType.RemovePlayer, GuildCommandError.Success, name);
 
