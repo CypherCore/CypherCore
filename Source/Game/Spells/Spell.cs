@@ -9424,7 +9424,7 @@ namespace Game.Spells
 
     public class CastSpellTargetArg
     {
-        public SpellCastTargets Targets;
+        public readonly SpellCastTargets Targets;
 
         public CastSpellTargetArg() { Targets = new(); }
 

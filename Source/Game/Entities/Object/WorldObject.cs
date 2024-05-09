@@ -2465,7 +2465,11 @@ namespace Game.Entities
                 return SpellCastResult.SpellUnavailable;
             }
 
-            if (targets.Targets == null)
+            if (targets == null)
+            {
+                targets = new();
+            }
+            else if (targets.Targets == null) 
             {
                 Log.outError(LogFilter.Unit, $"CastSpell: Invalid target passed to spell cast {spellId} by {GetGUID()}");
                 return SpellCastResult.BadTargets;
