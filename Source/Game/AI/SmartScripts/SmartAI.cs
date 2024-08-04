@@ -870,6 +870,7 @@ namespace Game.AI
             _followGuid.Clear();
             _followDist = 0;
             _followAngle = 0;
+            uint followCredit = _followCredit;
             _followCredit = 0;
             _followArrivedTimer = 1000;
             _followArrivedEntry = 0;
@@ -885,9 +886,9 @@ namespace Game.AI
             if (player != null)
             {
                 if (_followCreditType == 0)
-                    player.RewardPlayerAndGroupAtEvent(_followCredit, me);
+                    player.RewardPlayerAndGroupAtEvent(followCredit, me);
                 else
-                    player.GroupEventHappens(_followCredit, me);
+                    player.GroupEventHappens(followCredit, me);
             }
 
             SetDespawnTime(5000);

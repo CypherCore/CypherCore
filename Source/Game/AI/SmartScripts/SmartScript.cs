@@ -445,47 +445,48 @@ namespace Game.AI
                     bool failedSpellCast = false;
                     bool successfulSpellCast = false;
 
-                    foreach (var target in targets)
+                    CastSpellExtraArgs args = new();
+                    if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.Triggered))
                     {
-                        if (_go != null)
-                            _go.CastSpell(target.ToUnit(), e.Action.cast.spell);
-
-                        if (!IsUnit(target))
-                            continue;
-
-                        if (!e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.AuraNotPresent) || !target.ToUnit().HasAura(e.Action.cast.spell))
-                        {
-                            TriggerCastFlags triggerFlag = TriggerCastFlags.None;
-                            if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.Triggered))
-                            {
-                                if (e.Action.cast.triggerFlags != 0)
-                                    triggerFlag = (TriggerCastFlags)e.Action.cast.triggerFlags;
-                                else
-                                    triggerFlag = TriggerCastFlags.FullMask;
-                            }
-
-                            if (_me != null)
-                            {
-                                if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.InterruptPrevious))
-                                    _me.InterruptNonMeleeSpells(false);
-
-                                SpellCastResult result = _me.CastSpell(target.ToUnit(), e.Action.cast.spell, new CastSpellExtraArgs(triggerFlag));
-                                bool spellCastFailed = (result != SpellCastResult.SpellCastOk && result != SpellCastResult.SpellInProgress);
-
-                                if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.CombatMove))
-                                    ((SmartAI)_me.GetAI()).SetCombatMove(spellCastFailed, true);
-
-                                if (spellCastFailed)
-                                    failedSpellCast = true;
-                                else
-                                    successfulSpellCast = true;
-                            }
-                            else if (_go != null)
-                                _go.CastSpell(target.ToUnit(), e.Action.cast.spell, new CastSpellExtraArgs(triggerFlag));
-                        }
+                        if (e.Action.cast.triggerFlags != 0)
+                            args.TriggerFlags = (TriggerCastFlags)e.Action.cast.triggerFlags;
                         else
-                            Log.outDebug(LogFilter.ScriptsAi, "Spell {0} not casted because it has flag SMARTCAST_AURA_NOT_PRESENT and the target (Guid: {1} Entry: {2} Type: {3}) already has the aura",
-                                e.Action.cast.spell, target.GetGUID(), target.GetEntry(), target.GetTypeId());
+                            args.TriggerFlags = TriggerCastFlags.FullMask;
+                    }
+
+                    foreach (WorldObject target in targets)
+                    {
+                        if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.AuraNotPresent) && (!target.IsUnit() || target.ToUnit().HasAura(e.Action.cast.spell)))
+                        {
+                            Log.outDebug(LogFilter.ScriptsAi, $"Spell {e.Action.cast.spell} not cast because it has flag SMARTCAST_AURA_NOT_PRESENT and the target ({target.GetGUID()}) already has the aura");
+                            continue;
+                        }
+
+
+                        SpellCastResult result = SpellCastResult.BadTargets;
+                        if (_me != null)
+                        {
+                            if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.InterruptPrevious))
+                                _me.InterruptNonMeleeSpells(false);
+
+                            result = _me.CastSpell(target, e.Action.cast.spell, args);
+                        }
+                        else if (_go != null)
+                            result = _go.CastSpell(target, e.Action.cast.spell, args);
+
+                        bool spellCastFailed = result != SpellCastResult.SpellCastOk && result != SpellCastResult.SpellInProgress;
+                        if (_me != null && e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.CombatMove))
+                        {
+                            // If cast flag SMARTCAST_COMBAT_MOVE is set combat movement will not be allowed unless target is outside spell range, out of mana, or LOS.
+                            _me.GetAI<SmartAI>().SetCombatMove(spellCastFailed, true);
+                        }
+
+                        if (spellCastFailed)
+                            failedSpellCast = true;
+                        else
+                            successfulSpellCast = true;
+
+                        Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::ProcessAction:: SMART_ACTION_CAST:: {(_me != null ? _me.GetGUID() : _go.GetGUID())} casts spell {e.Action.cast.spell} on target {target.GetGUID()} with castflags {e.Action.cast.castFlags}");
                     }
 
                     // If there is at least 1 failed cast and no successful casts at all, retry again on next loop
@@ -506,28 +507,24 @@ namespace Game.AI
                     if (e.Action.cast.targetsLimit != 0)
                         targets.RandomResize(e.Action.cast.targetsLimit);
 
-                    TriggerCastFlags triggerFlags = TriggerCastFlags.None;
+                    CastSpellExtraArgs args = new();
                     if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.Triggered))
                     {
                         if (e.Action.cast.triggerFlags != 0)
-                            triggerFlags = (TriggerCastFlags)e.Action.cast.triggerFlags;
+                            args.TriggerFlags = (TriggerCastFlags)e.Action.cast.triggerFlags;
                         else
-                            triggerFlags = TriggerCastFlags.FullMask;
+                            args.TriggerFlags = TriggerCastFlags.FullMask;
                     }
 
                     foreach (WorldObject target in targets)
                     {
-                        Unit uTarget = target.ToUnit();
-                        if (uTarget == null)
+                        if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.AuraNotPresent) && (!target.IsUnit() || target.ToUnit().HasAura(e.Action.cast.spell)))
                             continue;
 
-                        if (!e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.AuraNotPresent) || !uTarget.HasAura(e.Action.cast.spell))
-                        {
-                            if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.InterruptPrevious))
-                                uTarget.InterruptNonMeleeSpells(false);
+                        if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.InterruptPrevious) && target.IsUnit())
+                            target.ToUnit().InterruptNonMeleeSpells(false);
 
-                            uTarget.CastSpell(uTarget, e.Action.cast.spell, new CastSpellExtraArgs(triggerFlags));
-                        }
+                        target.CastSpell(target, e.Action.cast.spell, args);
                     }
                     break;
                 }
@@ -543,33 +540,28 @@ namespace Game.AI
                     if (e.Action.cast.targetsLimit != 0)
                         targets.RandomResize(e.Action.cast.targetsLimit);
 
+                    CastSpellExtraArgs args = new();
+                    if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.Triggered))
+                    {
+                        if (e.Action.cast.triggerFlags != 0)
+                            args.TriggerFlags = (TriggerCastFlags)e.Action.cast.triggerFlags;
+                        else
+                            args.TriggerFlags = TriggerCastFlags.FullMask;
+                    }
+
                     foreach (var target in targets)
                     {
-                        if (!IsUnit(target))
-                            continue;
-
-                        if (!e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.AuraNotPresent) || !target.ToUnit().HasAura(e.Action.cast.spell))
+                        if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.AuraNotPresent) && (!target.IsUnit() || target.ToUnit().HasAura(e.Action.cast.spell)))
                         {
-
-                            if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.InterruptPrevious))
-                                tempLastInvoker.InterruptNonMeleeSpells(false);
-
-                            TriggerCastFlags triggerFlag = TriggerCastFlags.None;
-                            if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.Triggered))
-                            {
-                                if (e.Action.cast.triggerFlags != 0)
-                                    triggerFlag = (TriggerCastFlags)e.Action.cast.triggerFlags;
-                                else
-                                    triggerFlag = TriggerCastFlags.FullMask;
-                            }
-
-                            tempLastInvoker.CastSpell(target.ToUnit(), e.Action.cast.spell, new CastSpellExtraArgs(triggerFlag));
-
-                            Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_INVOKER_CAST: Invoker {0} casts spell {1} on target {2} with castflags {3}",
-                                tempLastInvoker.GetGUID().ToString(), e.Action.cast.spell, target.GetGUID().ToString(), e.Action.cast.castFlags);
+                            Log.outDebug(LogFilter.ScriptsAi, $"Spell {e.Action.cast.spell} not cast because it has flag SMARTCAST_AURA_NOT_PRESENT and the target ({target.GetGUID()}) already has the aura");
+                            continue;
                         }
-                        else
-                            Log.outDebug(LogFilter.ScriptsAi, "Spell {0} not cast because it has flag SMARTCAST_AURA_NOT_PRESENT and the target ({1}) already has the aura", e.Action.cast.spell, target.GetGUID().ToString());
+
+                        if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.InterruptPrevious))
+                            tempLastInvoker.InterruptNonMeleeSpells(false);
+
+                        tempLastInvoker.CastSpell(target, e.Action.cast.spell, args);
+                        Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::ProcessAction:: SMART_ACTION_INVOKER_CAST: Invoker {tempLastInvoker.GetGUID()} casts spell {e.Action.cast.spell} on target {target.GetGUID()} with castflags {e.Action.cast.castFlags}");
                     }
                     break;
                 }
@@ -1584,31 +1576,34 @@ namespace Game.AI
                         break;
 
                     List<WorldObject> casters = GetTargets(CreateSmartEvent(SmartEvents.UpdateIc, 0, 0, 0, 0, 0, 0, SmartActions.None, 0, 0, 0, 0, 0, 0, 0, (SmartTargets)e.Action.crossCast.targetType, e.Action.crossCast.targetParam1, e.Action.crossCast.targetParam2, e.Action.crossCast.targetParam3, 0, 0), unit);
+
+                    CastSpellExtraArgs args = new();
+                    if (e.Action.crossCast.castFlags.HasAnyFlag((uint)SmartCastFlags.Triggered))
+                        args.TriggerFlags = TriggerCastFlags.FullMask;
+
                     foreach (var caster in casters)
                     {
-                        if (!IsUnit(caster))
+                        Unit casterUnit = caster.ToUnit();
+                        if (casterUnit == null)
                             continue;
 
-                        Unit casterUnit = caster.ToUnit();
                         bool interruptedSpell = false;
 
                         foreach (var target in targets)
                         {
-                            if (!IsUnit(target))
-                                continue;
-
-                            if (!(e.Action.crossCast.castFlags.HasAnyFlag((uint)SmartCastFlags.AuraNotPresent)) || !target.ToUnit().HasAura(e.Action.crossCast.spell))
+                            if (e.Action.crossCast.castFlags.HasAnyFlag((uint)SmartCastFlags.AuraNotPresent) && (!target.IsUnit() || target.ToUnit().HasAura(e.Action.crossCast.spell)))
                             {
-                                if (!interruptedSpell && e.Action.crossCast.castFlags.HasAnyFlag((uint)SmartCastFlags.InterruptPrevious))
-                                {
-                                    casterUnit.InterruptNonMeleeSpells(false);
-                                    interruptedSpell = true;
-                                }
-
-                                casterUnit.CastSpell(target.ToUnit(), e.Action.crossCast.spell, e.Action.crossCast.castFlags.HasAnyFlag((uint)SmartCastFlags.Triggered));
+                                Log.outDebug(LogFilter.ScriptsAi, $"Spell {e.Action.crossCast.spell} not cast because it has flag SMARTCAST_AURA_NOT_PRESENT and the target ({target.GetGUID()}) already has the aura");
+                                continue;
                             }
-                            else
-                                Log.outDebug(LogFilter.ScriptsAi, "Spell {0} not cast because it has flag SMARTCAST_AURA_NOT_PRESENT and the target ({1}) already has the aura", e.Action.crossCast.spell, target.GetGUID().ToString());
+
+                            if (!interruptedSpell && e.Action.crossCast.castFlags.HasAnyFlag((uint)SmartCastFlags.InterruptPrevious))
+                            {
+                                casterUnit.InterruptNonMeleeSpells(false);
+                                interruptedSpell = true;
+                            }
+
+                            casterUnit.CastSpell(target, e.Action.crossCast.spell, args);
                         }
                     }
                     break;
