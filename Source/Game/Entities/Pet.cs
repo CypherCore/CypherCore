@@ -220,7 +220,6 @@ namespace Game.Entities
                 case PetType.Summon:
                     petlevel = owner.GetLevel();
 
-                    SetClass(Class.Mage);
                     ReplaceAllUnitFlags(UnitFlags.PlayerControlled); // this enables popup window (pet dismiss, cancel)
                     break;
                 case PetType.Hunter:

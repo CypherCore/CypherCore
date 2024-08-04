@@ -553,7 +553,6 @@ namespace Game.Entities
 
         // Death Knight pets
         public bool IsPetGhoul() { return GetEntry() == (uint)PetEntry.Ghoul; } // Ghoul may be guardian or pet
-        public bool IsPetAbomination() { return GetEntry() == (uint)PetEntry.Abomination; } // Sludge Belcher dk talent
 
         // Shaman pet
         public bool IsSpiritWolf() { return GetEntry() == (uint)PetEntry.SpiritWolf; } // Spirit wolf from feral spirits
@@ -684,7 +683,7 @@ namespace Game.Entities
             }
 
             // Power
-            SetPowerType(powerType);
+            SetPowerType(powerType, true, true);
 
             // Damage
             SetBonusDamage(0);
@@ -1240,7 +1239,6 @@ namespace Game.Entities
 
         // Death Knight pets
         Ghoul = 26125,
-        Abomination = 106848,
 
         // Shaman pet
         SpiritWolf = 29264

@@ -1760,17 +1760,8 @@ namespace Game.Entities
                             if (powerDisplay != null)
                                 displayPower = (PowerType)powerDisplay.ActualType;
                         }
-                        else
-                        {
-                            Pet pet = ToPet();
-                            if (pet != null)
-                            {
-                                if (pet.GetPetType() == PetType.Hunter) // Hunter pets have focus
-                                    displayPower = PowerType.Focus;
-                                else if (pet.IsPetGhoul() || pet.IsPetAbomination()) // DK pets have energy
-                                    displayPower = PowerType.Energy;
-                            }
-                        }
+                        else if (IsHunterPet())
+                            displayPower = PowerType.Focus;
                     }
                     break;
                 }
