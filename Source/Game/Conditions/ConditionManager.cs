@@ -2089,7 +2089,7 @@ namespace Game
                 if (player.GetMap().IsBattlegroundOrArena())
                     team = player.m_playerData.ArenaFaction;
                 else
-                    team = (byte)player.GetTeamId();
+                    team = (byte)(player.GetTeamId() == BattleGroundTeamId.Alliance ? 1 : 0);
 
                 if (condition.CurrentPvpFaction - 1 != team)
                     return false;
