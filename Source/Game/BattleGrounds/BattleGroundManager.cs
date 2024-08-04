@@ -3,13 +3,7 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Game.BattleGrounds.Zones;
-using Game.BattleGrounds.Zones.AlteracValley;
-using Game.BattleGrounds.Zones.ArathisBasin;
-using Game.BattleGrounds.Zones.EyeofStorm;
-using Game.BattleGrounds.Zones.IsleOfConquest;
-using Game.BattleGrounds.Zones.StrandOfAncients;
-using Game.BattleGrounds.Zones.WarsongGluch;
+using Game.Arenas;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Networking.Packets;
@@ -201,6 +195,60 @@ namespace Game.BattleGrounds
             return null;
         }
 
+        public void LoadBattlegroundScriptTemplate()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            //                                         0      1                   2
+            SQLResult result = DB.World.Query("SELECT MapId, BattlemasterListId, ScriptName FROM battleground_scripts");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 battleground scripts. DB table `battleground_scripts` is empty!");
+                return;
+            }
+
+            uint count = 0;
+            do
+            {
+                uint mapID = result.Read<uint>(0);
+
+                var mapEntry = CliDB.MapStorage.LookupByKey(mapID);
+                if (mapEntry == null || !mapEntry.IsBattlegroundOrArena())
+                {
+                    Log.outError(LogFilter.Sql, $"BattlegroundMgr::LoadBattlegroundScriptTemplate: bad mapid {mapID}! Map doesn't exist or is not a battleground/arena!");
+                    continue;
+                }
+
+                BattlegroundTypeId bgTypeId = (BattlegroundTypeId)result.Read<uint>(1);
+                if (bgTypeId != BattlegroundTypeId.None && !_battlegroundTemplates.ContainsKey(bgTypeId))
+                {
+                    Log.outError(LogFilter.Sql, $"BattlegroundMgr::LoadBattlegroundScriptTemplate: bad battlemasterlist id {bgTypeId}! Battleground doesn't exist or is not supported in battleground_template!");
+                    continue;
+                }
+
+                BattlegroundScriptTemplate scriptTemplate = new();
+                scriptTemplate.MapId = mapID;
+                scriptTemplate.Id = bgTypeId;
+                scriptTemplate.ScriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(2));
+
+                _battlegroundScriptTemplates[(mapID, bgTypeId)] = scriptTemplate;
+
+                ++count;
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} battleground scripts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+
+        public BattlegroundScriptTemplate FindBattlegroundScriptTemplate(uint mapId, BattlegroundTypeId bgTypeId)
+        {
+            BattlegroundScriptTemplate scriptTemplate = _battlegroundScriptTemplates.LookupByKey((mapId, bgTypeId));
+            if (scriptTemplate != null)
+                return scriptTemplate;
+
+            // fall back to 0 for no specific battleground type id
+            return _battlegroundScriptTemplates.LookupByKey((mapId, BattlegroundTypeId.None));
+        }
+
         uint CreateClientVisibleInstanceId(BattlegroundTypeId bgTypeId, BattlegroundBracketId bracket_id)
         {
             if (IsArenaType(bgTypeId))
@@ -250,56 +298,10 @@ namespace Game.BattleGrounds
             }
 
             Battleground bg = null;
-            // create a copy of the BG template
-            switch (bgTypeId)
-            {
-                case BattlegroundTypeId.AV:
-                    bg = new BgAlteracValley(bg_template);
-                    break;
-                case BattlegroundTypeId.WS:
-                case BattlegroundTypeId.WgCtf:
-                    bg = new BgWarsongGluch(bg_template);
-                    break;
-                case BattlegroundTypeId.AB:
-                case BattlegroundTypeId.DomAb:
-                    bg = new BgArathiBasin(bg_template);
-                    break;
-                case BattlegroundTypeId.NA:
-                    bg = new BgNagrandArena(bg_template);
-                    break;
-                case BattlegroundTypeId.BE:
-                    bg = new BgBladesEdgeArena(bg_template);
-                    break;
-                case BattlegroundTypeId.EY:
-                    bg = new BgEyeofStorm(bg_template);
-                    break;
-                case BattlegroundTypeId.RL:
-                    bg = new BgRuinsOfLordaernon(bg_template);
-                    break;
-                case BattlegroundTypeId.SA:
-                    bg = new BgStrandOfAncients(bg_template);
-                    break;
-                case BattlegroundTypeId.DS:
-                    bg = new BgDalaranSewers(bg_template);
-                    break;
-                case BattlegroundTypeId.RV:
-                    bg = new BgTheRingOfValor(bg_template);
-                    break;
-                case BattlegroundTypeId.IC:
-                    bg = new BgIsleofConquest(bg_template);
-                    break;
-                case BattlegroundTypeId.TP:
-                    bg = new BgTwinPeaks(bg_template);
-                    break;
-                case BattlegroundTypeId.BFG:
-                    bg = new BgBattleforGilneas(bg_template);
-                    break;
-                case BattlegroundTypeId.RB:
-                case BattlegroundTypeId.AA:
-                case BattlegroundTypeId.RandomEpic:
-                default:
-                    return null;
-            }
+            if (bg_template.IsArena())
+                bg = new Arena(bg_template);
+            else
+                bg = new Battleground(bg_template);
 
             bg.SetBracket(bracketEntry);
             bg.SetInstanceID(Global.MapMgr.GenerateInstanceId());
@@ -723,6 +725,7 @@ namespace Game.BattleGrounds
         Dictionary<uint, BattlegroundTypeId> mBattleMastersMap = new();
         Dictionary<BattlegroundTypeId, BattlegroundTemplate> _battlegroundTemplates = new();
         Dictionary<uint, BattlegroundTemplate> _battlegroundMapTemplates = new();
+        Dictionary<(uint, BattlegroundTypeId), BattlegroundScriptTemplate> _battlegroundScriptTemplates = new();
 
         struct ScheduledQueueUpdate
         {
@@ -807,5 +810,12 @@ namespace Game.BattleGrounds
         {
             return BattlemasterEntry.MaxLevel;
         }
+    }
+
+    public class BattlegroundScriptTemplate
+    {
+        public uint MapId;
+        public BattlegroundTypeId Id;
+        public uint ScriptId;
     }
 }

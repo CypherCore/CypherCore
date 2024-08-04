@@ -326,12 +326,6 @@ namespace Game.Networking.Packets
 
         public struct RaceLimitDisableInfo
         {
-            enum blah
-            {
-                Server,
-                Level
-            }
-
             public int RaceID;
             public int BlockReason;
 
@@ -386,6 +380,7 @@ namespace Game.Networking.Packets
             bool hasTemplateSet = _worldPacket.HasBit();
             CreateInfo.IsTrialBoost = _worldPacket.HasBit();
             CreateInfo.UseNPE = _worldPacket.HasBit();
+            CreateInfo.Unused1026 = _worldPacket.HasBit();
 
             CreateInfo.RaceId = (Race)_worldPacket.ReadUInt8();
             CreateInfo.ClassId = (Class)_worldPacket.ReadUInt8();
@@ -1144,6 +1139,7 @@ namespace Game.Networking.Packets
         public uint? TemplateSet;
         public bool IsTrialBoost;
         public bool UseNPE;
+        public bool Unused1026;
         public string Name;
 
         // Server side data

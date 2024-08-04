@@ -123,7 +123,7 @@ namespace Game.Chat
 
                 if (normalizePlayerName(*playerNameArg))
                 {
-                    if (Player * player = ObjectAccessor::FindPlayerByName(*playerNameArg))
+                    if (Player * player = Global.ObjAccessor.FindPlayerByName(*playerNameArg))
                     {
                         handler->GetSession()->GetPlayer()->RemoveFromWhisperWhiteList(player->GetGUID());
                         handler->PSendSysMessage(LANG_COMMAND_WHISPEROFFPLAYER, playerNameArg->c_str());

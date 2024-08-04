@@ -40,34 +40,41 @@ namespace Game.Collision
 
     public class WModelAreaCallback : WorkerCallback
     {
-        public WModelAreaCallback(List<GroupModel> vals, Vector3 down)
+        List<GroupModel> prims;
+        public GroupModel[] hit = new GroupModel[3];
+
+        public WModelAreaCallback(List<GroupModel> vals)
         {
             prims = vals;
-            hit = null;
-            zDist = float.PositiveInfinity;
-            zVec = down;
         }
 
-        List<GroupModel> prims;
-        public GroupModel hit;
-        public float zDist;
-        Vector3 zVec;
-        public override void Invoke(Vector3 point, uint entry)
+        public override bool Invoke(Ray ray, uint entry, ref float distance, bool stopAtFirstHit)
         {
-            float group_Z;
-            if (prims[(int)entry].IsInsideObject(point, zVec, out group_Z))
+            GroupModel.InsideResult result = prims[(int)entry].IsInsideObject(ray, out float group_Z);
+            if ( result != GroupModel.InsideResult.OutOfBounds)
             {
-                if (group_Z < zDist)
+                if (result != GroupModel.InsideResult.MaybeInside)
                 {
-                    zDist = group_Z;
-                    hit = prims[(int)entry];
+                    if (group_Z < distance)
+                    {
+                        distance = group_Z;
+                        hit[(int)result] = prims[(int)entry];
+                        return true;
+                    }
+
                 }
+                else
+                    hit[(int)result] = prims[(int)entry];
             }
+            return false;
         }
     }
 
     public class WModelRayCallBack : WorkerCallback
     {
+        List<GroupModel> models;
+        public bool hit;
+
         public WModelRayCallBack(List<GroupModel> mod)
         {
             models = mod;
@@ -79,8 +86,6 @@ namespace Game.Collision
             if (result) hit = true;
             return hit;
         }
-        List<GroupModel> models;
-        public bool hit;
     }
 
     public class GModelRayCallback : WorkerCallback

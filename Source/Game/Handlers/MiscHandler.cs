@@ -251,9 +251,6 @@ namespace Game
 
                 return;
             }
-            Battleground bg = player.GetBattleground();
-            if (bg != null)
-                bg.HandleAreaTrigger(player, packet.AreaTriggerID, packet.Entered);
 
             OutdoorPvP pvp = player.GetOutdoorPvP();
             if (pvp != null)
@@ -452,10 +449,8 @@ namespace Game
             UISplashScreenRecord splashScreen = null;
             foreach (var itr in CliDB.UISplashScreenStorage.Values)
             {
-                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(itr.CharLevelConditionID);
-                if (playerCondition != null)
-                    if (!ConditionManager.IsPlayerMeetingCondition(_player, playerCondition))
-                        continue;
+                if (!ConditionManager.IsPlayerMeetingCondition(_player, (uint)itr.CharLevelConditionID))
+                    continue;
 
                 splashScreen = itr;
             }

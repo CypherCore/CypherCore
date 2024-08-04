@@ -66,7 +66,7 @@ namespace Game.Conditions
                         BattlegroundMap bgMap = map.ToBattlegroundMap();
                         if (bgMap != null)
                         {
-                            ZoneScript zoneScript = bgMap.GetBG();
+                            ZoneScript zoneScript = bgMap.GetBattlegroundScript();
                             switch ((InstanceInfo)ConditionValue3)
                             {
                                 case InstanceInfo.Data:
@@ -446,11 +446,7 @@ namespace Game.Conditions
                 case ConditionTypes.PlayerCondition:
                 {
                     if (player != null)
-                    {
-                        PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(ConditionValue1);
-                        if (playerCondition != null)
-                            condMeets = ConditionManager.IsPlayerMeetingCondition(player, playerCondition);
-                    }
+                        condMeets = ConditionManager.IsPlayerMeetingCondition(player, ConditionValue1);
                     break;
                 }
                 case ConditionTypes.PrivateObject:

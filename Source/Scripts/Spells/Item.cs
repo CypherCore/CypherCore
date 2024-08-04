@@ -2773,9 +2773,6 @@ namespace Scripts.Spells.Azerite
         void HandleDummy(uint effIndex)
         {
             Player caster = GetCaster().ToPlayer();
-            Battleground bg = caster.GetBattleground();
-            bg?.EventPlayerDroppedFlag(caster);
-
             caster.GetSpellHistory().ResetCooldown(SpellRocketBootsProc);
             caster.CastSpell(caster, SpellRocketBootsProc, true);
         }

@@ -72,10 +72,8 @@ namespace Game.Entities
                         if (itemProto.GetArtifactID() != artifactAppearanceSet.ArtifactID)
                             continue;
 
-                        PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(artifactAppearance.UnlockPlayerConditionID);
-                        if (playerCondition != null)
-                            if (owner == null || !ConditionManager.IsPlayerMeetingCondition(owner, playerCondition))
-                                continue;
+                        if (owner == null || !ConditionManager.IsPlayerMeetingCondition(owner, artifactAppearance.UnlockPlayerConditionID))
+                            continue;
 
                         SetModifier(ItemModifier.ArtifactAppearanceId, artifactAppearance.Id);
                         SetAppearanceModId(artifactAppearance.ItemAppearanceModifierID);
@@ -591,13 +589,9 @@ namespace Game.Entities
                                     if (_bonusData.GemRelicType[e - EnchantmentSlot.Sock1] != -1)
                                     {
                                         ArtifactPowerPickerRecord artifactPowerPicker = CliDB.ArtifactPowerPickerStorage.LookupByKey(enchant.EffectArg[i]);
-                                        if (artifactPowerPicker != null)
-                                        {
-                                            PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(artifactPowerPicker.PlayerConditionID);
-                                            if (playerCondition == null || (owner != null && ConditionManager.IsPlayerMeetingCondition(owner, playerCondition)))
-                                                if (artifactPower.Label == _bonusData.GemRelicType[e - EnchantmentSlot.Sock1])
-                                                    power.CurrentRankWithBonus += (byte)enchant.EffectPointsMin[i];
-                                        }
+                                        if (artifactPowerPicker != null && owner != null && ConditionManager.IsPlayerMeetingCondition(owner, artifactPowerPicker.PlayerConditionID))
+                                            if (artifactPower.Label == _bonusData.GemRelicType[e - EnchantmentSlot.Sock1])
+                                                power.CurrentRankWithBonus += (byte)enchant.EffectPointsMin[i];
                                     }
                                     break;
                                 default:
@@ -793,7 +787,7 @@ namespace Game.Entities
             return !IsInBag() && (m_slot < EquipmentSlot.End
                 || (m_slot >= ProfessionSlots.Start && m_slot < ProfessionSlots.End));
         }
-        
+
         public bool CanBeTraded(bool mail = false, bool trade = false)
         {
             if (m_lootGenerated)
@@ -876,7 +870,7 @@ namespace Game.Entities
 
             return cost;
         }
-        
+
         bool HasEnchantRequiredSkill(Player player)
         {
             // Check all enchants for required skill
@@ -995,11 +989,11 @@ namespace Game.Entities
             {
                 var oldEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(GetEnchantmentId(slot));
                 if (oldEnchant != null && !oldEnchant.HasFlag(SpellItemEnchantmentFlags.DoNotLog))
-                        owner.GetSession().SendEnchantmentLog(GetOwnerGUID(), ObjectGuid.Empty, GetGUID(), GetEntry(), oldEnchant.Id, (uint)slot);
+                    owner.GetSession().SendEnchantmentLog(GetOwnerGUID(), ObjectGuid.Empty, GetGUID(), GetEntry(), oldEnchant.Id, (uint)slot);
 
                 var newEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(id);
                 if (newEnchant != null && !newEnchant.HasFlag(SpellItemEnchantmentFlags.DoNotLog))
-                        owner.GetSession().SendEnchantmentLog(GetOwnerGUID(), caster, GetGUID(), GetEntry(), id, (uint)slot);
+                    owner.GetSession().SendEnchantmentLog(GetOwnerGUID(), caster, GetGUID(), GetEntry(), id, (uint)slot);
             }
 
             ApplyArtifactPowerEnchantmentBonuses(slot, GetEnchantmentId(slot), false, owner);
@@ -2059,7 +2053,7 @@ namespace Game.Entities
 
             return itemModifiedAppearanceId;
         }
-        
+
         public uint GetVisibleSecondaryModifiedAppearanceId(Player owner)
         {
             uint itemModifiedAppearanceId = GetModifier(ItemConst.SecondaryAppearanceModifierSlotBySpec[owner.GetActiveTalentGroup()]);
@@ -2068,7 +2062,7 @@ namespace Game.Entities
 
             return itemModifiedAppearanceId;
         }
-        
+
         public uint GetVisibleEnchantmentId(Player owner)
         {
             uint enchantmentId = GetModifier(ItemConst.IllusionModifierSlotBySpec[owner.GetActiveTalentGroup()]);
@@ -2290,8 +2284,7 @@ namespace Game.Entities
                                 ArtifactPowerPickerRecord artifactPowerPicker = CliDB.ArtifactPowerPickerStorage.LookupByKey(enchant.EffectArg[i]);
                                 if (artifactPowerPicker != null)
                                 {
-                                    PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(artifactPowerPicker.PlayerConditionID);
-                                    if (playerCondition == null || ConditionManager.IsPlayerMeetingCondition(owner, playerCondition))
+                                    if (ConditionManager.IsPlayerMeetingCondition(owner, artifactPowerPicker.PlayerConditionID))
                                     {
                                         for (int artifactPowerIndex = 0; artifactPowerIndex < m_itemData.ArtifactPowers.Size(); ++artifactPowerIndex)
                                         {
@@ -2413,7 +2406,7 @@ namespace Game.Entities
         {
             return $"{base.GetDebugInfo()}\nOwner: {GetOwnerGUID()} Count: {GetCount()} BagSlot: {GetBagSlot()} Slot: {GetSlot()} Equipped: {IsEquipped()}";
         }
-        
+
         public static Item NewItemOrBag(ItemTemplate proto)
         {
             if (proto.GetInventoryType() == InventoryType.Bag)
@@ -2685,8 +2678,8 @@ namespace Game.Entities
         public void SetChildItem(ObjectGuid childItem) { m_childItem = childItem; }
 
         public ItemEffectRecord[] GetEffects() { return _bonusData.Effects[0.._bonusData.EffectCount]; }
-        
-        public override Loot GetLootForPlayer(Player player)  { return loot; }
+
+        public override Loot GetLootForPlayer(Player player) { return loot; }
 
         //Static
         public static bool ItemCanGoIntoBag(ItemTemplate pProto, ItemTemplate pBagProto)

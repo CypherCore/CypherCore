@@ -2152,11 +2152,7 @@ namespace Game.Spells
                                 {
                                     Player playerTarget = target.ToPlayer();
                                     if (playerTarget != null)
-                                    {
-                                        var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(mountDisplay.PlayerConditionID);
-                                        if (playerCondition != null)
-                                            return ConditionManager.IsPlayerMeetingCondition(playerTarget, playerCondition);
-                                    }
+                                        return ConditionManager.IsPlayerMeetingCondition(playerTarget, mountDisplay.PlayerConditionID);
 
                                     return true;
                                 }).ToList();
@@ -2886,13 +2882,7 @@ namespace Game.Spells
             Player player = target.ToPlayer();
             if (!apply && player != null && GetSpellInfo().HasAuraInterruptFlag(SpellAuraInterruptFlags.StealthOrInvis))
             {
-                if (player.InBattleground())
-                {
-                    Battleground bg = player.GetBattleground();
-                    if (bg != null)
-                        bg.EventPlayerDroppedFlag(player);
-                }
-                else
+                if (!player.InBattleground())
                     Global.OutdoorPvPMgr.HandleDropFlag(player, GetSpellInfo().Id);
             }
         }

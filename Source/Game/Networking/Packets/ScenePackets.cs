@@ -65,9 +65,11 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             SceneInstanceID = _worldPacket.ReadUInt32();
+            TimePassed = _worldPacket.ReadInt32();
         }
 
         public uint SceneInstanceID;
+        public int TimePassed;
     }
 
     class ScenePlaybackCanceled : ClientPacket
@@ -77,8 +79,10 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             SceneInstanceID = _worldPacket.ReadUInt32();
+            TimePassed = _worldPacket.ReadInt32();
         }
 
         public uint SceneInstanceID;
+        public int TimePassed;
     }
 }

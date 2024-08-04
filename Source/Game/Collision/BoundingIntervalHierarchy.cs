@@ -19,7 +19,7 @@ namespace Game.Collision
 
         void InitEmpty()
         {
-            tree= new uint[3];
+            tree = new uint[3];
             objects = Array.Empty<uint>();
             bounds = AxisAlignedBox.Zero();
             // create space for the first node
@@ -76,7 +76,7 @@ namespace Game.Collision
                 rightOrig = right; // save this for later
                 float nodeL = float.PositiveInfinity;
                 float nodeR = float.NegativeInfinity;
-                for (int i = left; i <= right; )
+                for (int i = left; i <= right;)
                 {
                     int obj = (int)dat.indices[i];
                     float minb = dat.primBound[obj].Lo.GetAt(axis);
@@ -306,6 +306,7 @@ namespace Game.Collision
         }
 
         public uint PrimCount() { return (uint)objects.Length; }
+        public AxisAlignedBox bound() { return bounds; }
 
         public void IntersectRay(Ray r, WorkerCallback intersectCallback, ref float maxDist, bool stopAtFirst = false)
         {
@@ -410,7 +411,7 @@ namespace Game.Collision
                             while (n > 0)
                             {
                                 bool hit = intersectCallback.Invoke(r, objects[offset], ref maxDist, stopAtFirst);
-                                if (stopAtFirst && hit) 
+                                if (stopAtFirst && hit)
                                     return;
                                 --n;
                                 ++offset;

@@ -2,8 +2,13 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using System;
+using System.IO;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 
 namespace Framework.Networking
 {
@@ -15,92 +20,126 @@ namespace Framework.Networking
         void CloseSocket();
     }
 
+    public delegate Task SocketReadCallback(byte[] data, int receivedLength);
+
     public abstract class SocketBase : ISocket, IDisposable
     {
         Socket _socket;
-        IPEndPoint _remoteIPEndPoint;
+        Stream _stream;
+        IPEndPoint _remoteEndPoint;
+        byte[] _receiveBuffer;
 
-        SocketAsyncEventArgs receiveSocketAsyncEventArgsWithCallback;
-        SocketAsyncEventArgs receiveSocketAsyncEventArgs;
-
-        public delegate void SocketReadCallback(SocketAsyncEventArgs args);
-
-        protected SocketBase(Socket socket)
+        protected SocketBase(Socket socket, bool useSSL = false)
         {
             _socket = socket;
-            _remoteIPEndPoint = (IPEndPoint)_socket.RemoteEndPoint;
+            _remoteEndPoint = (IPEndPoint)_socket.RemoteEndPoint;
+            _receiveBuffer = new byte[ushort.MaxValue];
 
-            receiveSocketAsyncEventArgsWithCallback = new SocketAsyncEventArgs();
-            receiveSocketAsyncEventArgsWithCallback.SetBuffer(new byte[0x4000], 0, 0x4000);
-
-            receiveSocketAsyncEventArgs = new SocketAsyncEventArgs();
-            receiveSocketAsyncEventArgs.SetBuffer(new byte[0x4000], 0, 0x4000);
-            receiveSocketAsyncEventArgs.Completed += (sender, args) => ProcessReadAsync(args);
+            if (useSSL)
+                _stream = new SslStream(new NetworkStream(socket), false);
+            else
+                _stream = new NetworkStream(socket);
         }
 
         public virtual void Dispose()
         {
-            _socket.Dispose();
+            _receiveBuffer = null;
+            _stream.Dispose();
         }
 
-        public virtual void Start() { }
+        public abstract void Start();
 
         public virtual bool Update()
         {
             return IsOpen();
         }
 
-        public IPEndPoint GetRemoteIpAddress()
+        public IPAddress GetRemoteIpAddress()
         {
-            return _remoteIPEndPoint;
+            return _remoteEndPoint.Address;
         }
 
-        public void AsyncReadWithCallback(SocketReadCallback callback)
+        public IPEndPoint GetRemoteIpEndPoint()
+        {
+            return _remoteEndPoint;
+        }
+
+        public async void AsyncReadWithCallback(SocketReadCallback callback)
         {
             if (!IsOpen())
                 return;
 
-            receiveSocketAsyncEventArgsWithCallback.Completed += (sender, args) => callback(args);
-            receiveSocketAsyncEventArgsWithCallback.SetBuffer(0, 0x4000);
-            if (!_socket.ReceiveAsync(receiveSocketAsyncEventArgsWithCallback))
-                callback(receiveSocketAsyncEventArgsWithCallback);
-        }
-
-        public void AsyncRead()
-        {
-            if (!IsOpen())
-                return;
-
-            receiveSocketAsyncEventArgs.SetBuffer(0, 0x4000);
-            if (!_socket.ReceiveAsync(receiveSocketAsyncEventArgs))
-                ProcessReadAsync(receiveSocketAsyncEventArgs);
-        }
-
-        void ProcessReadAsync(SocketAsyncEventArgs args)
-        {
-            if (args.SocketError != SocketError.Success)
+            try
             {
-                CloseSocket();
+                var result = await _stream.ReadAsync(_receiveBuffer, 0, _receiveBuffer.Length);
+                if (result == 0)
+                {
+                    CloseSocket();
+                    return;
+                }
+
+                await callback(_receiveBuffer, result);
+            }
+            catch (Exception ex)
+            {
+                Log.outDebug(LogFilter.Network, ex.Message);
+            }
+        }
+
+        public async Task AsyncRead()
+        {
+            if (!IsOpen())
+                return;
+
+            try
+            {
+                var result = await _stream.ReadAsync(_receiveBuffer, 0, _receiveBuffer.Length);
+                if (result == 0)
+                {
+                    CloseSocket();
+                    return;
+                }
+
+                ReadHandler(_receiveBuffer, result);
+            }
+            catch (Exception ex)
+            {
+                Log.outDebug(LogFilter.Network, ex.Message);
+            }
+        }
+
+        public async Task AsyncHandshake(X509Certificate2 certificate)
+        {
+            try
+            {
+                await (_stream as SslStream).AuthenticateAsServerAsync(certificate, false, SslProtocols.Tls12, false);
+            }
+            catch (Exception ex)
+            {
+                await HandshakeHandler(ex);
                 return;
             }
 
-            if (args.BytesTransferred == 0)
-            {
-                CloseSocket();
-                return;
-            }
-
-            ReadHandler(args);
+            await HandshakeHandler();
         }
 
-        public abstract void ReadHandler(SocketAsyncEventArgs args);
+        public virtual Task HandshakeHandler(Exception exception = null) { return null; }
 
-        public void AsyncWrite(byte[] data)
+        public abstract void ReadHandler(byte[] data, int receivedLength);
+
+        public async Task AsyncWrite(byte[] data)
         {
             if (!IsOpen())
                 return;
 
-            _socket.Send(data);
+            try
+            {
+                await _stream.WriteAsync(data, 0, data.Length);
+            }
+            catch (Exception ex)
+            {
+                Log.outException(ex);
+            }
         }
 
         public void CloseSocket()

@@ -3612,10 +3612,8 @@ namespace Game.Entities
                 if (GetSession().GetCollectionMgr().HasTransmogIllusion(transmogIllusion.Id))
                     continue;
 
-                var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(transmogIllusion.UnlockConditionID);
-                if (playerCondition != null)
-                    if (!ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
-                        continue;
+                if (!ConditionManager.IsPlayerMeetingCondition(this, (uint)transmogIllusion.UnlockConditionID))
+                    continue;
 
                 GetSession().GetCollectionMgr().AddTransmogIllusion(transmogIllusion.Id);
             }

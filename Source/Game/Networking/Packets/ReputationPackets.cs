@@ -93,13 +93,22 @@ namespace Game.Networking.Packets
             Standing = standing;
         }
 
+        public FactionStandingData(int index, int standing, int factionId)
+        {
+            Index = index;
+            Standing = standing;
+            FactionID = factionId;
+        }
+
         public void Write(WorldPacket data)
         {
             data.WriteInt32(Index);
             data.WriteInt32(Standing);
+            data.WriteInt32(FactionID);
         }
 
         int Index;
         int Standing;
+        int FactionID;
     }
 }

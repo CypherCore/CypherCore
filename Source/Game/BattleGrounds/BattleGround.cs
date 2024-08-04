@@ -40,15 +40,8 @@ namespace Game.BattleGrounds
 
         public virtual void Dispose()
         {
-            // remove objects and creatures
-            // (this is done automatically in mapmanager update, when the instance is reset after the reset time)
-            for (uint i = 0; i < BgCreatures.Length; ++i)
-                DelCreature(i);
-
-            for (var i = 0; i < BgObjects.Length; ++i)
-                DelObject(i);
-
             Global.BattlegroundMgr.RemoveBattleground(GetTypeID(), GetInstanceID());
+
             // unload map
             if (m_Map != null)
             {
@@ -207,7 +200,7 @@ namespace Game.BattleGrounds
             }
         }
 
-        public virtual Team GetPrematureWinner()
+        public Team GetPrematureWinner()
         {
             Team winner = Team.Other;
             if (GetPlayersCountByTeam(Team.Alliance) >= GetMinPlayersPerTeam())
@@ -286,19 +279,12 @@ namespace Game.BattleGrounds
                     return;
                 }
 
-                // Setup here, only when at least one player has ported to the map
-                if (!SetupBattleground())
-                {
-                    EndNow();
-                    return;
-                }
-
                 _preparationStartTime = GameTime.GetGameTime();
                 foreach (Group group in m_BgRaids)
                     if (group != null)
                         group.StartCountdown(CountdownTimerType.Pvp, TimeSpan.FromSeconds((int)StartDelayTimes[BattlegroundConst.EventIdFirst] / 1000), _preparationStartTime);
 
-                StartingEventCloseDoors();
+                GetBgMap().GetBattlegroundScript().OnPrepareStage1();
                 SetStartDelayTime(StartDelayTimes[BattlegroundConst.EventIdFirst]);
                 // First start warning - 2 or 1 Minute
                 if (StartMessageIds[BattlegroundConst.EventIdFirst] != 0)
@@ -308,6 +294,7 @@ namespace Game.BattleGrounds
             else if (GetStartDelayTime() <= (int)StartDelayTimes[BattlegroundConst.EventIdSecond] && !m_Events.HasAnyFlag(BattlegroundEventFlags.Event2))
             {
                 m_Events |= BattlegroundEventFlags.Event2;
+                GetBgMap().GetBattlegroundScript().OnPrepareStage2();
                 if (StartMessageIds[BattlegroundConst.EventIdSecond] != 0)
                     SendBroadcastText(StartMessageIds[BattlegroundConst.EventIdSecond], ChatMsg.BgSystemNeutral);
             }
@@ -315,6 +302,7 @@ namespace Game.BattleGrounds
             else if (GetStartDelayTime() <= (int)StartDelayTimes[BattlegroundConst.EventIdThird] && !m_Events.HasAnyFlag(BattlegroundEventFlags.Event3))
             {
                 m_Events |= BattlegroundEventFlags.Event3;
+                GetBgMap().GetBattlegroundScript().OnPrepareStage3();
                 if (StartMessageIds[BattlegroundConst.EventIdThird] != 0)
                     SendBroadcastText(StartMessageIds[BattlegroundConst.EventIdThird], ChatMsg.BgSystemNeutral);
             }
@@ -323,7 +311,7 @@ namespace Game.BattleGrounds
             {
                 m_Events |= BattlegroundEventFlags.Event4;
 
-                StartingEventOpenDoors();
+                GetBgMap().GetBattlegroundScript().OnStart();
 
                 if (StartMessageIds[BattlegroundConst.EventIdFourth] != 0)
                     SendBroadcastText(StartMessageIds[BattlegroundConst.EventIdFourth], ChatMsg.RaidBossEmote);
@@ -740,6 +728,8 @@ namespace Game.BattleGrounds
                 player.SendPacket(pvpMatchComplete);
 
                 player.UpdateCriteria(CriteriaType.ParticipateInBattleground, player.GetMapId());
+
+                GetBgMap().GetBattlegroundScript().OnEnd(winner);
             }
         }
 
@@ -1027,6 +1017,8 @@ namespace Game.BattleGrounds
             // setup BG group membership
             PlayerAddedToBGCheckIfBGIsRunning(player);
             AddOrSetPlayerToCorrectBgGroup(player, team);
+
+            GetBgMap().GetBattlegroundScript().OnPlayerJoined(player, isInBattleground);
         }
 
         // this method adds player to his team's bg group, or sets his correct group if player is already in bg group
@@ -1104,8 +1096,8 @@ namespace Game.BattleGrounds
 
                 // 1 player is logging out, if it is the last alive, then end arena!
                 if (IsArena() && player.IsAlive())
-                    if (GetAlivePlayersCountByTeam(player.GetBGTeam()) <= 1 && GetPlayersCountByTeam(GetOtherTeam(player.GetBGTeam())) != 0)
-                        EndBattleground(GetOtherTeam(player.GetBGTeam()));
+                    if (GetAlivePlayersCountByTeam(player.GetBGTeam()) <= 1 && GetPlayersCountByTeam(SharedConst.GetOtherTeam(player.GetBGTeam())) != 0)
+                        EndBattleground(SharedConst.GetOtherTeam(player.GetBGTeam()));
             }
         }
 
@@ -1241,7 +1233,7 @@ namespace Game.BattleGrounds
             return PlayerScores.LookupByKey(player.GetGUID());
         }
 
-        public virtual bool UpdatePlayerScore(Player player, ScoreType type, uint value, bool doAddHonor = true)
+        public bool UpdatePlayerScore(Player player, ScoreType type, uint value, bool doAddHonor = true)
         {
             var bgScore = PlayerScores.LookupByKey(player.GetGUID());
             if (bgScore == null)  // player not found...
@@ -1262,99 +1254,6 @@ namespace Game.BattleGrounds
                 score.UpdatePvpStat(pvpStatId, value);
         }
 
-        public bool AddObject(int type, uint entry, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3, uint respawnTime = 0, GameObjectState goState = GameObjectState.Ready)
-        {
-            Map map = FindBgMap();
-            if (map == null)
-                return false;
-
-            Quaternion rotation = new(rotation0, rotation1, rotation2, rotation3);
-            // Temporally add safety check for bad spawns and send log (object rotations need to be rechecked in sniff)
-            if (rotation0 == 0 && rotation1 == 0 && rotation2 == 0 && rotation3 == 0)
-            {
-                Log.outDebug(LogFilter.Battleground, $"Battleground.AddObject: gameoobject [entry: {entry}, object type: {type}] for BG (map: {GetMapId()}) has zeroed rotation fields, " +
-                    "orientation used temporally, but please fix the spawn");
-
-                rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(o, 0.0f, 0.0f));
-            }
-
-            // Must be created this way, adding to godatamap would add it to the base map of the instance
-            // and when loading it (in go.LoadFromDB()), a new guid would be assigned to the object, and a new object would be created
-            // So we must create it specific for this instance
-            GameObject go = GameObject.CreateGameObject(entry, GetBgMap(), new Position(x, y, z, o), rotation, 255, goState);
-            if (go == null)
-            {
-                Log.outError(LogFilter.Battleground, $"Battleground.AddObject: cannot create gameobject (entry: {entry}) for BG (map: {GetMapId()}, instance id: {m_InstanceID})!");
-                return false;
-            }
-
-            // Add to world, so it can be later looked up from HashMapHolder
-            if (!map.AddToMap(go))
-                return false;
-
-            BgObjects[type] = go.GetGUID();
-            return true;
-        }
-
-        public bool AddObject(int type, uint entry, Position pos, float rotation0, float rotation1, float rotation2, float rotation3, uint respawnTime = 0, GameObjectState goState = GameObjectState.Ready)
-        {
-            return AddObject(type, entry, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), rotation0, rotation1, rotation2, rotation3, respawnTime, goState);
-        }
-
-        // Some doors aren't despawned so we cannot handle their closing in gameobject.update()
-        // It would be nice to correctly implement GO_ACTIVATED state and open/close doors in gameobject code
-        public void DoorClose(int type)
-        {
-            GameObject obj = GetBgMap().GetGameObject(BgObjects[type]);
-            if (obj != null)
-            {
-                // If doors are open, close it
-                if (obj.GetLootState() == LootState.Activated && obj.GetGoState() != GameObjectState.Ready)
-                {
-                    obj.SetLootState(LootState.Ready);
-                    obj.SetGoState(GameObjectState.Ready);
-                }
-            }
-            else
-                Log.outError(LogFilter.Battleground, $"Battleground.DoorClose: door gameobject (type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance id: {m_InstanceID})!");
-        }
-
-        public void DoorOpen(int type)
-        {
-            GameObject obj = GetBgMap().GetGameObject(BgObjects[type]);
-            if (obj != null)
-            {
-                obj.SetLootState(LootState.Activated);
-                obj.SetGoState(GameObjectState.Active);
-            }
-            else
-                Log.outError(LogFilter.Battleground, $"Battleground.DoorOpen: door gameobject (type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance id: {m_InstanceID})!");
-        }
-
-        public GameObject GetBGObject(int type)
-        {
-            if (BgObjects[type].IsEmpty())
-                return null;
-
-            GameObject obj = GetBgMap().GetGameObject(BgObjects[type]);
-            if (obj == null)
-                Log.outError(LogFilter.Battleground, $"Battleground.GetBGObject: gameobject (type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance id: {m_InstanceID})!");
-
-            return obj;
-        }
-
-        public Creature GetBGCreature(uint type)
-        {
-            if (BgCreatures[type].IsEmpty())
-                return null;
-
-            Creature creature = GetBgMap().GetCreature(BgCreatures[type]);
-            if (creature == null)
-                Log.outError(LogFilter.Battleground, $"Battleground.GetBGCreature: creature (type: {type}, {BgCreatures[type]}) not found for BG (map: {GetMapId()}, instance id: {m_InstanceID})!");
-
-            return creature;
-        }
-
         public uint GetMapId()
         {
             return (uint)_battlegroundTemplate.BattlemasterEntry.MapId[0];
@@ -1364,166 +1263,9 @@ namespace Game.BattleGrounds
         {
             m_Map = map;
             if (map != null)
-            {
                 _pvpStatIds = Global.DB2Mgr.GetPVPStatIDsForMap(map.GetId());
-                OnMapSet(map);
-            }
             else
                 _pvpStatIds = null;
-        }
-
-        public void SpawnBGObject(int type, uint respawntime)
-        {
-            Map map = FindBgMap();
-            if (map != null)
-            {
-                GameObject obj = map.GetGameObject(BgObjects[type]);
-                if (obj != null)
-                {
-                    if (respawntime != 0)
-                    {
-                        obj.SetLootState(LootState.JustDeactivated);
-                        {
-                            GameObjectOverride goOverride = obj.GetGameObjectOverride();
-                            if (goOverride != null)
-                                if (goOverride.Flags.HasFlag(GameObjectFlags.NoDespawn))
-                                {
-                                    // This function should be called in GameObject::Update() but in case of
-                                    // GO_FLAG_NODESPAWN flag the function is never called, so we call it here
-                                    obj.SendGameObjectDespawn();
-                                }
-                        }
-                    }
-                    else if (obj.GetLootState() == LootState.JustDeactivated)
-                    {
-                        // Change state from GO_JUST_DEACTIVATED to GO_READY in case battleground is starting again
-                        obj.SetLootState(LootState.Ready);
-                    }
-                    obj.SetRespawnTime((int)respawntime);
-                    map.AddToMap(obj);
-                }
-            }
-        }
-
-        public virtual Creature AddCreature(uint entry, uint type, float x, float y, float z, float o, int teamIndex = BattleGroundTeamId.Neutral, uint respawntime = 0, Transport transport = null)
-        {
-            Map map = FindBgMap();
-            if (map == null)
-                return null;
-
-            if (Global.ObjectMgr.GetCreatureTemplate(entry) == null)
-            {
-                Log.outError(LogFilter.Battleground, $"Battleground.AddCreature: creature template (entry: {entry}) does not exist for BG (map: {GetMapId()}, instance id: {m_InstanceID})!");
-                return null;
-            }
-
-
-            if (transport != null)
-            {
-                Creature transCreature = transport.SummonPassenger(entry, new Position(x, y, z, o), TempSummonType.ManualDespawn);
-                if (transCreature != null)
-                {
-                    BgCreatures[type] = transCreature.GetGUID();
-                    return transCreature;
-                }
-
-                return null;
-            }
-
-            Position pos = new(x, y, z, o);
-
-            Creature creature = Creature.CreateCreature(entry, map, pos);
-            if (creature == null)
-            {
-                Log.outError(LogFilter.Battleground, $"Battleground.AddCreature: cannot create creature (entry: {entry}) for BG (map: {GetMapId()}, instance id: {m_InstanceID})!");
-                return null;
-            }
-
-            creature.SetHomePosition(pos);
-
-            if (!map.AddToMap(creature))
-                return null;
-
-            BgCreatures[type] = creature.GetGUID();
-
-            if (respawntime != 0)
-                creature.SetRespawnDelay(respawntime);
-
-            return creature;
-        }
-
-        public Creature AddCreature(uint entry, uint type, Position pos, int teamIndex = BattleGroundTeamId.Neutral, uint respawntime = 0, Transport transport = null)
-        {
-            return AddCreature(entry, type, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), teamIndex, respawntime, transport);
-        }
-
-        public bool DelCreature(uint type)
-        {
-            if (BgCreatures[type].IsEmpty())
-                return true;
-
-            Creature creature = GetBgMap().GetCreature(BgCreatures[type]);
-            if (creature != null)
-            {
-                creature.AddObjectToRemoveList();
-                BgCreatures[type].Clear();
-                return true;
-            }
-
-            Log.outError(LogFilter.Battleground, $"Battleground.DelCreature: creature (type: {type}, {BgCreatures[type]}) not found for BG (map: {GetMapId()}, instance id: {m_InstanceID})!");
-            BgCreatures[type].Clear();
-            return false;
-        }
-
-        public bool DelObject(int type)
-        {
-            if (BgObjects[type].IsEmpty())
-                return true;
-
-            GameObject obj = GetBgMap().GetGameObject(BgObjects[type]);
-            if (obj != null)
-            {
-                obj.SetRespawnTime(0);                                 // not save respawn time
-                obj.Delete();
-                BgObjects[type].Clear();
-                return true;
-            }
-            Log.outError(LogFilter.Battleground, $"Battleground.DelObject: gameobject (type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance id: {m_InstanceID})!");
-            BgObjects[type].Clear();
-            return false;
-        }
-
-        bool RemoveObjectFromWorld(uint type)
-        {
-            if (BgObjects[type].IsEmpty())
-                return true;
-
-            GameObject obj = GetBgMap().GetGameObject(BgObjects[type]);
-            if (obj != null)
-            {
-                obj.RemoveFromWorld();
-                BgObjects[type].Clear();
-                return true;
-            }
-            Log.outInfo(LogFilter.Battleground, $"Battleground::RemoveObjectFromWorld: gameobject (type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance id: {m_InstanceID})!");
-            return false;
-        }
-
-        public bool AddSpiritGuide(uint type, float x, float y, float z, float o, int teamIndex)
-        {
-            uint entry = (uint)(teamIndex == BattleGroundTeamId.Alliance ? BattlegroundCreatures.A_SpiritGuide : BattlegroundCreatures.H_SpiritGuide);
-
-            if (AddCreature(entry, type, x, y, z, o) != null)
-                return true;
-
-            Log.outError(LogFilter.Battleground, $"Battleground.AddSpiritGuide: cannot create spirit guide (type: {type}, entry: {entry}) for BG (map: {GetMapId()}, instance id: {m_InstanceID})!");
-            EndNow();
-            return false;
-        }
-
-        public bool AddSpiritGuide(uint type, Position pos, int teamIndex = BattleGroundTeamId.Neutral)
-        {
-            return AddSpiritGuide(type, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), teamIndex);
         }
 
         public void SendMessageToAll(CypherStrings entry, ChatMsg msgType, Player source = null)
@@ -1598,9 +1340,18 @@ namespace Game.BattleGrounds
                 victim.SetUnitFlag(UnitFlags.Skinnable);
                 RewardXPAtKill(killer, victim);
             }
+
+            BattlegroundScript script = GetBgMap().GetBattlegroundScript();
+            if (script != null)
+                script.OnPlayerKilled(victim, killer);
         }
 
-        public virtual void HandleKillUnit(Creature creature, Unit killer) { }
+        public virtual void HandleKillUnit(Creature victim, Unit killer) 
+        {
+            BattlegroundScript script = GetBgMap().GetBattlegroundScript();
+            if (script != null)
+                script.OnUnitKilled(victim, killer);
+        }
 
         // Return the player's team based on Battlegroundplayer info
         // Used in same faction arena matches mainly
@@ -1610,11 +1361,6 @@ namespace Game.BattleGrounds
             if (player != null)
                 return player.Team;
             return Team.Other;
-        }
-
-        public Team GetOtherTeam(Team team)
-        {
-            return team != 0 ? ((team == Team.Alliance) ? Team.Horde : Team.Alliance) : Team.Other;
         }
 
         public bool IsPlayerInBattleground(ObjectGuid guid)
@@ -1658,15 +1404,6 @@ namespace Game.BattleGrounds
             return count;
         }
 
-        public int GetObjectType(ObjectGuid guid)
-        {
-            for (int i = 0; i < BgObjects.Length; ++i)
-                if (BgObjects[i] == guid)
-                    return i;
-            Log.outError(LogFilter.Battleground, $"Battleground.GetObjectType: player used gameobject ({guid}) which is not in internal data for BG (map: {GetMapId()}, instance id: {m_InstanceID}), cheating?");
-            return -1;
-        }
-
         public void SetBgRaid(Team team, Group bg_raid)
         {
             Group old_raid = m_BgRaids[GetTeamIndexByTeamId(team)];
@@ -1675,23 +1412,6 @@ namespace Game.BattleGrounds
             if (bg_raid != null)
                 bg_raid.SetBattlegroundGroup(this);
             m_BgRaids[GetTeamIndexByTeamId(team)] = bg_raid;
-        }
-
-        public virtual WorldSafeLocsEntry GetClosestGraveyard(Player player)
-        {
-            return Global.ObjectMgr.GetClosestGraveyard(player, GetPlayerTeam(player.GetGUID()), player);
-        }
-
-        public override void TriggerGameEvent(uint gameEventId, WorldObject source = null, WorldObject target = null)
-        {
-            ProcessEvent(target, gameEventId, source);
-            GameEvents.TriggerForMap(gameEventId, GetBgMap(), source, target);
-            foreach (var guid in GetPlayers().Keys)
-            {
-                Player player = Global.ObjAccessor.FindPlayer(guid);
-                if (player != null)
-                    GameEvents.TriggerForPlayer(gameEventId, player);
-            }
         }
 
         public void SetBracket(PvpDifficultyRecord bracketEntry)
@@ -1712,17 +1432,6 @@ namespace Game.BattleGrounds
 
             Log.outError(LogFilter.Battleground, "GetTeamScore with wrong Team {0} for BG {1}", teamIndex, GetTypeID());
             return 0;
-        }
-
-        public virtual void HandleAreaTrigger(Player player, uint trigger, bool entered)
-        {
-            Log.outDebug(LogFilter.Battleground, "Unhandled AreaTrigger {0} in Battleground {1}. Player coords (x: {2}, y: {3}, z: {4})",
-                           trigger, player.GetMapId(), player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
-        }
-
-        public virtual bool SetupBattleground()
-        {
-            return true;
         }
 
         public string GetName()
@@ -1801,13 +1510,9 @@ namespace Game.BattleGrounds
             return m_Players.LookupByKey(playerGuid);
         }
 
-        // Called when valid BattlegroundMap is assigned to the battleground
-        public virtual void OnMapSet(BattlegroundMap map) { }
-
-        public virtual void StartingEventCloseDoors() { }
-        public virtual void StartingEventOpenDoors() { }
-
-        public virtual void DestroyGate(Player player, GameObject go) { }
+        public void AddPoint(Team team, uint points = 1) { m_TeamScores[GetTeamIndexByTeamId(team)] += points; }
+        public void SetTeamPoint(Team team, uint points = 0) { m_TeamScores[GetTeamIndexByTeamId(team)] = points; }
+        void RemovePoint(Team team, uint points = 1) { m_TeamScores[GetTeamIndexByTeamId(team)] -= points; }
 
         public uint GetInstanceID() { return m_InstanceID; }
         public BattlegroundStatus GetStatus() { return m_Status; }
@@ -1878,14 +1583,6 @@ namespace Game.BattleGrounds
         public void SetArenaMatchmakerRating(Team team, uint MMR) { m_ArenaTeamMMR[GetTeamIndexByTeamId(team)] = MMR; }
         public uint GetArenaMatchmakerRating(Team team) { return m_ArenaTeamMMR[GetTeamIndexByTeamId(team)]; }
 
-        // Battleground events
-        public virtual void EventPlayerDroppedFlag(Player player) { }
-        public virtual void EventPlayerClickedOnFlag(Player player, GameObject target_obj) { }
-
-        public override void ProcessEvent(WorldObject obj, uint eventId, WorldObject invoker = null) { }
-
-        public virtual void HandlePlayerResurrect(Player player) { }
-
         public virtual WorldSafeLocsEntry GetExploitTeleportLocation(Team team) { return null; }
 
         public virtual bool HandlePlayerUnderMap(Player player) { return false; }
@@ -1894,12 +1591,6 @@ namespace Game.BattleGrounds
         void SetDeleteThis() { m_SetDeleteThis = true; }
 
         bool CanAwardArenaPoints() { return GetMinLevel() >= 71; }
-
-        public virtual ObjectGuid GetFlagPickerGUID(int teamIndex = -1) { return ObjectGuid.Empty; }
-        public virtual void SetDroppedFlagGUID(ObjectGuid guid, int teamIndex = -1) { }
-        public virtual void HandleQuestComplete(uint questid, Player player) { }
-        public virtual bool CanActivateGO(int entry, uint team) { return true; }
-        public virtual bool IsSpellAllowed(uint spellId, Player player) { return true; }
 
         public virtual void RemovePlayer(Player player, ObjectGuid guid, Team team) { }
 
@@ -1929,9 +1620,6 @@ namespace Game.BattleGrounds
         public uint[] StartMessageIds = new uint[4];
 
         public uint[] m_TeamScores = new uint[SharedConst.PvpTeamsCount];
-
-        protected ObjectGuid[] BgObjects;// = new Dictionary<int, ObjectGuid>();
-        protected ObjectGuid[] BgCreatures;// = new Dictionary<int, ObjectGuid>();
 
         public uint[] Buff_Entries = { BattlegroundConst.SpeedBuff, BattlegroundConst.RegenBuff, BattlegroundConst.BerserkerBuff };
 

@@ -36,7 +36,7 @@ namespace Game
             realmListTicket.Ticket.WriteCString("WorldserverRealmListTicket");
 
             SendPacket(realmListTicket);
-        }        
+        }
 
         public void SendBattlenetResponse(uint serviceHash, uint methodId, uint token, IMessage response)
         {
@@ -52,7 +52,7 @@ namespace Game
             SendPacket(bnetResponse);
         }
 
-        public void SendBattlenetResponse(uint serviceHash, uint methodId, uint token,  BattlenetRpcErrorCode status)
+        public void SendBattlenetResponse(uint serviceHash, uint methodId, uint token, BattlenetRpcErrorCode status)
         {
             Response bnetResponse = new();
             bnetResponse.BnetStatus = status;
@@ -63,16 +63,35 @@ namespace Game
             SendPacket(bnetResponse);
         }
 
-        public void SendBattlenetRequest(uint serviceHash, uint methodId, IMessage request, Action<CodedInputStream> callback)
+        public void SendBattlenetRequest(OriginalHash serviceHash, uint methodId, IMessage request, bool client, bool server, Action<CodedInputStream> callback)
         {
             _battlenetResponseCallbacks[_battlenetRequestToken] = callback;
-            SendBattlenetRequest(serviceHash, methodId, request);
+            SendBattlenetRequest(serviceHash, methodId, request, client, server);
         }
 
-        public void SendBattlenetRequest(uint serviceHash, uint methodId, IMessage request)
+        public void SendBattlenetRequest(NameHash serviceHash, uint methodId, IMessage request, bool client, bool server, Action<CodedInputStream> callback)
+        {
+            _battlenetResponseCallbacks[_battlenetRequestToken] = callback;
+            SendBattlenetRequest(serviceHash, methodId, request, client, server);
+        }
+
+        public void SendBattlenetRequest(OriginalHash serviceHash, uint methodId, IMessage request, bool client = true, bool server = true)
         {
             Notification notification = new();
-            notification.Method.Type = MathFunctions.MakePair64(methodId, serviceHash);
+            notification.Method.Type = MathFunctions.MakePair64(methodId | (client ? 0x40000000 : 0u) | (server ? 0x80000000 : 0u), (uint)serviceHash);
+            notification.Method.ObjectId = 1;
+            notification.Method.Token = _battlenetRequestToken++;
+
+            if (request.CalculateSize() != 0)
+                notification.Data.WriteBytes(request.ToByteArray());
+
+            SendPacket(notification);
+        }
+
+        public void SendBattlenetRequest(NameHash serviceHash, uint methodId, IMessage request, bool client = true, bool server = true)
+        {
+            Notification notification = new();
+            notification.Method.Type = MathFunctions.MakePair64(methodId | (client ? 0x40000000 : 0u) | (server ? 0x80000000 : 0u), (uint)serviceHash);
             notification.Method.ObjectId = 1;
             notification.Method.Token = _battlenetRequestToken++;
 

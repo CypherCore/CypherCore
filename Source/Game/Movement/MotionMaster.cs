@@ -148,8 +148,7 @@ namespace Game.Movement
                 {
                     case MovementGeneratorType.Chase:
                     case MovementGeneratorType.Follow:
-                        var followInformation = movement as FollowMovementGenerator;
-                        if (followInformation != null)
+                        if (movement is FollowMovementGenerator followInformation)
                         {
                             Unit target = followInformation.GetTarget();
                             if (target != null)

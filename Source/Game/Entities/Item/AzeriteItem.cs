@@ -296,11 +296,7 @@ namespace Game.Entities
 
         public bool CanUseEssences()
         {
-            PlayerConditionRecord condition = CliDB.PlayerConditionStorage.LookupByKey(PlayerConst.PlayerConditionIdUnlockedAzeriteEssences);
-            if (condition != null)
-                return ConditionManager.IsPlayerMeetingCondition(GetOwner(), condition);
-
-            return false;
+            return ConditionManager.IsPlayerMeetingCondition(GetOwner(), PlayerConst.PlayerConditionIdUnlockedAzeriteEssences);
         }
 
         public bool HasUnlockedEssenceSlot(byte slot)

@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace BNetServer.Networking
 {
-    public partial class Session : SSLSocket
+    public partial class Session : SocketBase
     {
         AccountInfo accountInfo;
         GameAccountInfo gameAccountInfo;
@@ -34,7 +34,7 @@ namespace BNetServer.Networking
         AsyncCallbackProcessor<QueryCallback> queryProcessor;
         Dictionary<uint, Action<CodedInputStream>> responseCallbacks;
 
-        public Session(Socket socket) : base(socket)
+        public Session(Socket socket) : base(socket, true)
         {
             clientSecret = new byte[32];
             queryProcessor = new AsyncCallbackProcessor<QueryCallback>();

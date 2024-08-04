@@ -140,6 +140,7 @@ namespace Scripts.Spells.Priest
         public const uint RenewedHope = 197469;
         public const uint RenewedHopeEffect = 197470;
         public const uint RevelInPurity = 373003;
+        public const uint RhapsodyProc = 390636;
         public const uint SayYourPrayers = 391186;
         public const uint Schism = 424509;
         public const uint SchismAura = 214621;
@@ -167,10 +168,12 @@ namespace Scripts.Spells.Priest
         public const uint UltimatePenitenceDamage = 421543;
         public const uint UltimatePenitenceHeal = 421544;
         public const uint VampiricEmbraceHeal = 15290;
+        public const uint VampiricTouch = 34914;
         public const uint VoidShield = 199144;
         public const uint VoidShieldEffect = 199145;
         public const uint WeakenedSoul = 6788;
-
+        public const uint WhisperingShadows = 406777;
+        public const uint WhisperingShadowsDummy = 391286;
         public const uint PvpRulesEnabledHardcoded = 134735;
         public const uint VisualPriestPowerWordRadiance = 52872;
         public const uint VisualPriestPrayerOfMending = 38945;
@@ -2558,6 +2561,52 @@ namespace Scripts.Spells.Priest
         }
     }
 
+    [Script] // 390622 - Rhapsody
+    class spell_pri_rhapsody : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.RhapsodyProc);
+        }
+
+        void HandlePeriodic(AuraEffect aurEff)
+        {
+            Unit target = GetTarget();
+            Aura rhapsodyStack = target.GetAura(SpellIds.RhapsodyProc, GetCasterGUID());
+            if (rhapsodyStack != null)
+                rhapsodyStack.ModStackAmount(1);
+            else
+                target.CastSpell(target, SpellIds.RhapsodyProc,
+                    new CastSpellExtraArgs(aurEff).SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError));
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new(HandlePeriodic, 0, AuraType.Dummy));
+        }
+    }
+
+    [Script] // 390636 - Rhapsody
+    class spell_pri_rhapsody_proc : AuraScript
+    {
+        void PreventChargeDrop(ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+        }
+
+        void RemoveAura(ProcEventInfo eventInfo)
+        {
+            // delay charge drop to allow spellmod to be applied to both damaging and healing spells
+            GetAura().DropChargeDelayed(1);
+        }
+
+        public override void Register()
+        {
+            DoPrepareProc.Add(new(PreventChargeDrop));
+            AfterProc.Add(new(RemoveAura));
+        }
+    }
+
     [Script] // 47536 - Rapture
     class spell_pri_rapture : SpellScript
     {
@@ -3066,13 +3115,86 @@ namespace Scripts.Spells.Priest
         {
             Unit caster = GetCaster();
             if (caster != null && caster.HasAura(SpellIds.Misery))
-                    caster.CastSpell(GetTarget(), SpellIds.ShadowWordPain, true);
+                caster.CastSpell(GetTarget(), SpellIds.ShadowWordPain, true);
         }
 
         public override void Register()
         {
             AfterDispel.Add(new(HandleDispel));
             OnEffectApply.Add(new(HandleApplyEffect, 0, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask));
+        }
+    }
+
+    [Script] // 205385 - Shadow Crash
+    class spell_pri_whispering_shadows : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.WhisperingShadows);
+        }
+
+        void HandleEffectHitTarget(uint effIndex)
+        {
+            if (!GetCaster().HasAura(SpellIds.WhisperingShadows))
+                PreventHitDefaultEffect(effIndex);
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new(HandleEffectHitTarget, 2, SpellEffectName.TriggerMissile));
+        }
+    }
+
+    [Script] // 391286 - Whispering Shadows (Dot Application)
+    class spell_pri_whispering_shadows_effect : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.VampiricTouch);
+        }
+
+        void FilterTargets(List<WorldObject> targets)
+        {
+            if (targets.Count <= GetSpellValue().MaxAffectedTargets)
+                return;
+
+            Aura getVampiricTouch(WorldObject target)
+            {
+                return target.ToUnit().GetAura(SpellIds.VampiricTouch, GetCaster().GetGUID());
+            }
+
+            // prioritize targets without Vampiric Touch
+            targets.Sort((WorldObject target1, WorldObject target2) =>
+            {
+                int duration1 = 0;
+                Aura aura1 = getVampiricTouch(target1);
+                if (aura1 != null)
+                    duration1 = aura1.GetDuration();
+                int duration2 = 0;
+                Aura aura2 = getVampiricTouch(target2);
+                if (aura2 != null)
+                    duration2 = aura2.GetDuration();
+                return duration1.CompareTo(duration2);
+            });
+
+            // remove targets that definitely will not get Vampiric Touch applied (excess targets with longest remaining duration)
+            while (targets.Count > GetSpellValue().MaxAffectedTargets && getVampiricTouch(targets.Last()) != null)
+                targets.RemoveAt(targets.Count - 1);
+
+            targets.RandomResize(GetSpellValue().MaxAffectedTargets);
+        }
+
+        void HandleEffectHitTarget(uint effIndex)
+        {
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.VampiricTouch, new CastSpellExtraArgs()
+                .SetTriggeringSpell(GetSpell())
+                .SetTriggerFlags(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreSpellAndCategoryCD | TriggerCastFlags.IgnorePowerAndReagentCost | TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.CastDirectly | TriggerCastFlags.DontReportCastError));
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitDestAreaEnemy));
+            OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffectName.Dummy));
         }
     }
 }

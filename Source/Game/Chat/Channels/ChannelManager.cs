@@ -90,15 +90,15 @@ namespace Game.Chat
         public static ChannelManager ForTeam(Team team)
         {
             if (WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionChannel))
-                return allianceChannelMgr;        // cross-faction
+                return neutralChannelMgr;        // cross-faction
 
-            if (team == Team.Alliance)
-                return allianceChannelMgr;
-
-            if (team == Team.Horde)
-                return hordeChannelMgr;
-
-            return null;
+            return team switch
+            {
+                Team.Alliance => allianceChannelMgr,
+                Team.Horde => hordeChannelMgr,
+                Team.PandariaNeutral => neutralChannelMgr,
+                _ => null
+            };
         }
 
         public static Channel GetChannelForPlayerByNamePart(string namePart, Player playerSearcher)
@@ -239,5 +239,6 @@ namespace Game.Chat
 
         static ChannelManager allianceChannelMgr = new(Team.Alliance);
         static ChannelManager hordeChannelMgr = new(Team.Horde);
+        static ChannelManager neutralChannelMgr = new(Team.PandariaNeutral);
     }
 }

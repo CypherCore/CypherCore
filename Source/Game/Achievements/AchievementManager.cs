@@ -506,13 +506,25 @@ namespace Game.Achievements
             //! Since no common attributes were found, (not even in titleRewardFlags field)
             //! we explicitly check by ID. Maybe in the future we could move the achievement_reward
             //! condition fields to the condition system.
-            uint titleId = reward.TitleId[achievement.Id == 1793 ? (int)_owner.GetNativeGender() : (_owner.GetTeam() == Team.Alliance ? 0 : 1)];
-            if (titleId != 0)
+            uint titleId = 0;
+            if (achievement.Id == 1793)
+                titleId = reward.TitleId[(int)_owner.GetNativeGender()];
+            else
             {
-                CharTitlesRecord titleEntry = CliDB.CharTitlesStorage.LookupByKey(titleId);
-                if (titleEntry != null)
-                    _owner.SetTitle(titleEntry);
+                switch (_owner.GetTeam())
+                {
+                    case Team.Alliance:
+                        titleId = reward.TitleId[0];
+                        break;
+                    case Team.Horde:
+                        titleId = reward.TitleId[1];
+                        break;
+                }
             }
+
+            var titleEntry = CliDB.CharTitlesStorage.LookupByKey(titleId);
+            if (titleEntry != null)
+                _owner.SetTitle(titleEntry);
 
             // mail
             if (reward.SenderCreatureId != 0)

@@ -608,11 +608,11 @@ namespace Game.Scripting
         }
 
         //BattlegroundScript
-        public Battleground CreateBattleground(BattlegroundTypeId typeId)
+        public BattlegroundScript CreateBattlegroundData(BattlegroundMap map)
         {
-            // @todo Implement script-side Battlegrounds.
-            Cypher.Assert(false);
-            return null;
+            Cypher.Assert(map != null);
+
+            return RunScriptRet<BattlegroundMapScript, BattlegroundScript>(p => p.GetBattlegroundScript(map), map.GetScriptId(), null);
         }
 
         // OutdoorPvPScript

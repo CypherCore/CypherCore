@@ -9,6 +9,9 @@ namespace Game.Maps
 {
     public class ZoneScript
     {
+        protected EventMap _events = new();
+        protected TaskScheduler _scheduler = new();
+
         public virtual void TriggerGameEvent(uint gameEventId, WorldObject source = null, WorldObject target = null)
         {
             if (source != null)
@@ -48,8 +51,6 @@ namespace Game.Maps
 
         public virtual bool CanCaptureFlag(AreaTrigger areaTrigger, Player player) { return false; }
         public virtual void OnCaptureFlag(AreaTrigger areaTrigger, Player player) { }
-
-        protected EventMap _events = new();
     }
 
     public class ControlZoneHandler

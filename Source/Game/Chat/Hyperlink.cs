@@ -17,35 +17,10 @@ namespace Game.Chat
             if (info == null)
                 return default;
 
-            ChatCommandResult errorResult = ChatCommandResult.FromErrorMessage(handler.GetCypherString(CypherStrings.CmdparserLinkdataInvalid));
-
             // store value
-            switch (Type.GetTypeCode(type))
-            {
-                case TypeCode.UInt32:
-                {
-                    if (!uint.TryParse(info.Data, out uint tempValue))
-                        return errorResult;
-
-                    value = tempValue;
-                    break;
-                }
-                case TypeCode.UInt64:
-                {
-                    if (!ulong.TryParse(info.Data, out ulong tempValue))
-                        return errorResult;
-
-                    value = tempValue;
-                    break;
-                }
-                case TypeCode.String:
-                {
-                    value = info.Data;
-                    break;
-                }
-                default:
-                    return errorResult;
-            }
+            HyperlinkDataTokenizer t = new(info.Data, true);
+            if (!t.TryConsumeTo(out value, type))
+                return new ChatCommandResult(handler.GetCypherString(CypherStrings.CmdparserLinkdataInvalid));
 
             // finally, skip any potential delimiters
             var (token, next) = info.Tail.Tokenize();
@@ -101,7 +76,6 @@ namespace Game.Chat
 
         static byte toHex(char c) { return (byte)((c >= '0' && c <= '9') ? c - '0' + 0x10 : (c >= 'a' && c <= 'f') ? c - 'a' + 0x1a : 0x00); }
 
-        //|color|Henchant:recipe_spell_id|h[prof_name: recipe_name]|h|r
         public static HyperlinkInfo ParseHyperlink(string currentString)
         {
             if (currentString.IsEmpty())

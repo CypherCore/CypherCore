@@ -243,8 +243,7 @@ namespace Game.Movement
             if (target.GetMotionMaster().GetCurrentMovementGeneratorType() != MovementGeneratorType.Chase)
                 return false;
 
-            ChaseMovementGenerator movement = target.GetMotionMaster().GetCurrentMovementGenerator() as ChaseMovementGenerator;
-            if (movement != null)
+            if (target.GetMotionMaster().GetCurrentMovementGenerator() is ChaseMovementGenerator movement)
                 return movement.GetTarget() == owner;
 
             return false;

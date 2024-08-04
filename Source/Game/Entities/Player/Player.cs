@@ -1327,11 +1327,8 @@ namespace Game.Entities
 
             // Check award condition
             if (currency.AwardConditionID != 0)
-            {
-                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(currency.AwardConditionID);
-                if (playerCondition != null && !ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
+                if (!ConditionManager.IsPlayerMeetingCondition(this, (uint)currency.AwardConditionID))
                     return;
-            }
 
             bool isGainOnRefund = false;
 
@@ -2445,12 +2442,6 @@ namespace Game.Entities
 
             // stop taxi flight at summon
             FinishTaxiFlight();
-
-            // drop flag at summon
-            // this code can be reached only when GM is summoning player who carries flag, because player should be immune to summoning spells when he carries flag
-            Battleground bg = GetBattleground();
-            if (bg != null)
-                bg.EventPlayerDroppedFlag(this);
 
             m_summon_expire = 0;
 
@@ -4250,13 +4241,6 @@ namespace Game.Entities
             UpdateZone(newzone, newarea);
             OutdoorPvPMgr.HandlePlayerResurrects(this, newzone);
 
-            if (InBattleground())
-            {
-                Battleground bg = GetBattleground();
-                if (bg != null)
-                    bg.HandlePlayerResurrect(this);
-            }
-
             // update visibility
             UpdateObjectVisibility();
 
@@ -4454,22 +4438,14 @@ namespace Game.Entities
             }
 
             WorldSafeLocsEntry closestGrave = null;
-
-            // Special handle for Battlegroundmaps
-            Battleground bg = GetBattleground();
-            if (bg != null)
-                closestGrave = bg.GetClosestGraveyard(this);
+            var bf = BattleFieldMgr.GetBattlefieldToZoneId(GetMap(), GetZoneId());
+            if (bf != null)
+                closestGrave = bf.GetClosestGraveyard(this);
             else
             {
-                var bf = BattleFieldMgr.GetBattlefieldToZoneId(GetMap(), GetZoneId());
-                if (bf != null)
-                    closestGrave = bf.GetClosestGraveyard(this);
-                else
-                {
-                    InstanceScript instance = GetInstanceScript();
-                    if (instance != null)
-                        closestGrave = ObjectMgr.GetWorldSafeLoc(instance.GetEntranceLocation());
-                }
+                InstanceScript instance = GetInstanceScript();
+                if (instance != null)
+                    closestGrave = ObjectMgr.GetWorldSafeLoc(instance.GetEntranceLocation());
             }
 
             if (closestGrave == null)
@@ -4985,12 +4961,7 @@ namespace Game.Entities
 
         public bool MeetPlayerCondition(uint conditionId)
         {
-            PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(conditionId);
-            if (playerCondition != null)
-                if (!ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
-                    return false;
-
-            return true;
+            return ConditionManager.IsPlayerMeetingCondition(this, conditionId);
         }
 
         bool IsInFriendlyArea()
@@ -5143,6 +5114,8 @@ namespace Game.Entities
                     return Team.Alliance;
                 case 1:
                     return Team.Horde;
+                case 2:
+                    return Team.PandariaNeutral;
             }
 
             return Team.Alliance;
@@ -5157,10 +5130,10 @@ namespace Game.Entities
             return BattleGroundTeamId.Neutral;
         }
         public Team GetTeam() { return m_team; }
-        public int GetTeamId() { return m_team == Team.Alliance ? BattleGroundTeamId.Alliance : BattleGroundTeamId.Horde; }
+        public int GetTeamId() { return SharedConst.GetTeamIdForTeam(m_team); }
 
-        public Team GetEffectiveTeam() { return HasPlayerFlagEx(PlayerFlagsEx.MercenaryMode) ? (GetTeam() == Team.Alliance ? Team.Horde : Team.Alliance) : GetTeam(); }
-        public int GetEffectiveTeamId() { return GetEffectiveTeam() == Team.Alliance ? BattleGroundTeamId.Alliance : BattleGroundTeamId.Horde; }
+        public Team GetEffectiveTeam() { return HasPlayerFlagEx(PlayerFlagsEx.MercenaryMode) ? SharedConst.GetOtherTeam(GetTeam()) : GetTeam(); }
+        public int GetEffectiveTeamId() { return SharedConst.GetTeamIdForTeam(GetEffectiveTeam()); }
 
         //Money
         public ulong GetMoney() { return m_activePlayerData.Coinage; }
@@ -6318,11 +6291,8 @@ namespace Game.Entities
 
                 // Check award condition
                 if (currencyRecord.AwardConditionID != 0)
-                {
-                    PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(currencyRecord.AwardConditionID);
-                    if (playerCondition != null && !ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
+                    if (!ConditionManager.IsPlayerMeetingCondition(this, (uint)currencyRecord.AwardConditionID))
                         continue;
-                }
 
                 SetupCurrency.Record record = new();
                 record.Type = currencyRecord.Id;

@@ -191,15 +191,7 @@ namespace Game
                     var mountDisplays = Global.DB2Mgr.GetMountDisplays(mount.Id);
                     if (mountDisplays != null)
                     {
-                        List<MountXDisplayRecord> usableDisplays = mountDisplays.Where(mountDisplay =>
-                        {
-                            PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(mountDisplay.PlayerConditionID);
-                            if (playerCondition != null)
-                                return ConditionManager.IsPlayerMeetingCondition(GetPlayer(), playerCondition);
-
-                            return true;
-                        }).ToList();
-
+                        List<MountXDisplayRecord> usableDisplays = mountDisplays.Where(mountDisplay => ConditionManager.IsPlayerMeetingCondition(GetPlayer(), mountDisplay.PlayerConditionID)).ToList();
                         if (!usableDisplays.Empty())
                             preferredMountDisplay = usableDisplays.SelectRandom().CreatureDisplayInfoID;
                     }
@@ -221,8 +213,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.TaxiRequestEarlyLanding, Processing = PacketProcessing.ThreadSafe)]
         void HandleTaxiRequestEarlyLanding(TaxiRequestEarlyLanding taxiRequestEarlyLanding)
         {
-            FlightPathMovementGenerator flight = GetPlayer().GetMotionMaster().GetCurrentMovementGenerator() as FlightPathMovementGenerator;
-            if (flight != null)
+            if (GetPlayer().GetMotionMaster().GetCurrentMovementGenerator() is FlightPathMovementGenerator flight)
             {
                 if (GetPlayer().m_taxi.RequestEarlyLanding())
                 {

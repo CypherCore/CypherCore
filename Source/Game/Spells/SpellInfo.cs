@@ -3181,10 +3181,8 @@ namespace Game.Spells
         {
             foreach (SpellXSpellVisualRecord visual in _visuals)
             {
-                var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(visual.CasterPlayerConditionID);
-                if (playerCondition != null)
-                    if (caster == null || !caster.IsPlayer() || !ConditionManager.IsPlayerMeetingCondition(caster.ToPlayer(), playerCondition))
-                        continue;
+                if (caster == null || !caster.IsPlayer() || !ConditionManager.IsPlayerMeetingCondition(caster.ToPlayer(), visual.CasterPlayerConditionID))
+                    continue;
 
                 var unitCondition = CliDB.UnitConditionStorage.LookupByKey(visual.CasterUnitConditionID);
                 if (unitCondition != null)
@@ -3753,8 +3751,7 @@ namespace Game.Spells
             if (ShowFutureSpellPlayerConditionID == 0)
                 return false;
 
-            var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(ShowFutureSpellPlayerConditionID);
-            return playerCondition == null || ConditionManager.IsPlayerMeetingCondition(player, playerCondition);
+            return ConditionManager.IsPlayerMeetingCondition(player, ShowFutureSpellPlayerConditionID);
         }
 
         public bool HasLabel(uint labelId)

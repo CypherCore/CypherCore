@@ -57,7 +57,7 @@ namespace BNetServer.Networking
 
             ChallengeExternalRequest externalChallenge = new();
             externalChallenge.PayloadType = "web_auth_url";
-            externalChallenge.Payload = ByteString.CopyFromUtf8($"https://{Global.LoginService.GetHostnameForClient(GetRemoteIpAddress())}:{Global.LoginService.GetPort()}/bnetserver/login/");
+            externalChallenge.Payload = ByteString.CopyFromUtf8($"http{(!Global.LoginServiceMgr.UsesDevWildcardCertificate() ? "s" : "")}://{Global.LoginService.GetHostnameForClient(GetRemoteIpAddress())}:{Global.LoginService.GetPort()}/bnetserver/login/");
 
             SendRequest((uint)OriginalHash.ChallengeListener, 3, externalChallenge);
             return BattlenetRpcErrorCode.Ok;

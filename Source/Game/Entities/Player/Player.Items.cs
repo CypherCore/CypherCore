@@ -2865,8 +2865,7 @@ namespace Game.Entities
             var limitConditions = Global.DB2Mgr.GetItemLimitCategoryConditions(limitEntry.Id);
             foreach (ItemLimitCategoryConditionRecord limitCondition in limitConditions)
             {
-                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(limitCondition.PlayerConditionID);
-                if (playerCondition == null || ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
+                if (ConditionManager.IsPlayerMeetingCondition(this, limitCondition.PlayerConditionID))
                     limit += (byte)limitCondition.AddQuantity;
             }
 
@@ -3273,14 +3272,10 @@ namespace Game.Entities
                 return false;
             }
 
-            PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(crItem.PlayerConditionId);
-            if (playerCondition != null)
+            if (!ConditionManager.IsPlayerMeetingCondition(this, crItem.PlayerConditionId))
             {
-                if (!ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
-                {
-                    SendEquipError(InventoryResult.ItemLocked);
-                    return false;
-                }
+                SendEquipError(InventoryResult.ItemLocked);
+                return false;
             }
 
             // check current item amount if it limited
@@ -6130,7 +6125,7 @@ namespace Game.Entities
                     Guild guild = GetGuild();
                     if (guild != null)
                         guild.AddGuildNews(GuildNews.ItemLooted, GetGUID(), 0, item.itemid);
-                }                
+                }
 
                 // if aeLooting then we must delay sending out item so that it appears properly stacked in chat
                 if (aeResult == null || newitem == null)

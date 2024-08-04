@@ -210,6 +210,11 @@ namespace Framework.GameMath
         {
             return Vector3.Divide(Vector3.One, Direction);
         }
+
+        public Ray bumpedRay(float distance)
+        {
+            return new Ray(Origin + Direction * distance, Direction);
+        }
     }
 
     #region RayConverter class

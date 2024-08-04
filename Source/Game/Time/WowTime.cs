@@ -168,13 +168,13 @@ public struct WowTime : IComparable<WowTime>
 
     public int CompareTo(WowTime other)
     {
-        var compareFieldIfSet = int (int left1, int right1) =>
+        static int compareFieldIfSet(int left1, int right1)
         {
             if (left1 < 0 || right1 < 0)
                 return 0;
 
             return left1.CompareTo(right1);
-        };
+        }
 
         var cmp = compareFieldIfSet(_year, other._year);
         if (cmp == -1)

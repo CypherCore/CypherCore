@@ -6,6 +6,7 @@ using Framework.Database;
 using Framework.Web;
 using System;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace Framework.Networking.Http
 {
@@ -20,9 +21,21 @@ namespace Framework.Networking.Http
         public Guid? GetSessionId();
     }
 
-    public abstract class BaseSocket<Derived> : SSLSocket, IAbstractSocket
+    public abstract class BaseHttpSocket : SocketBase, IAbstractSocket
     {
-        public BaseSocket(Socket socket) : base(socket) { }
+        public BaseHttpSocket(Socket socket, bool useSSL = false) : base(socket, useSSL) { }
+
+        public async override Task HandshakeHandler(Exception exception = null)
+        {
+            if (exception != null)
+            {
+                Log.outError(LogFilter.Http, $"{GetClientInfo()} SSL Handshake failed {exception.Message}");
+                CloseSocket();
+                return;
+            }
+
+            await AsyncRead();
+        }
 
         public async override void ReadHandler(byte[] data, int receivedLength)
         {
@@ -114,5 +127,6 @@ namespace Framework.Networking.Http
 
         protected AsyncCallbackProcessor<QueryCallback> _queryProcessor = new();
         protected SessionState _state;
+        protected ISocket socket;
     }
 }

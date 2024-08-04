@@ -440,10 +440,8 @@ namespace Game
 
                 VendorItemPkt item = new();
 
-                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(vendorItem.PlayerConditionId);
-                if (playerCondition != null)
-                    if (!ConditionManager.IsPlayerMeetingCondition(_player, playerCondition))
-                        item.PlayerConditionFailed = (int)playerCondition.Id;
+                if (!ConditionManager.IsPlayerMeetingCondition(_player, vendorItem.PlayerConditionId))
+                    item.PlayerConditionFailed = (int)vendorItem.PlayerConditionId;
 
                 if (vendorItem.Type == ItemVendorType.Item)
                 {

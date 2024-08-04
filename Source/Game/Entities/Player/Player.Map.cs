@@ -370,7 +370,7 @@ namespace Game.Entities
                     var mapDifficultyConditions = Global.DB2Mgr.GetMapDifficultyConditions(mapDiff.Id);
                     foreach (var pair in mapDifficultyConditions)
                     {
-                        if (!ConditionManager.IsPlayerMeetingCondition(this, pair.Item2))
+                        if (!ConditionManager.IsPlayerMeetingCondition(this, pair.Item2.Id))
                         {
                             failedMapDifficultyXCondition = pair.Item1;
                             break;

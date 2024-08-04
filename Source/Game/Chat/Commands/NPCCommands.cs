@@ -839,8 +839,7 @@ namespace Game.Chat
                 {
                     if (a.GetMovementGeneratorType() == MovementGeneratorType.Follow)
                     {
-                        FollowMovementGenerator followMovement = a as FollowMovementGenerator;
-                        return followMovement != null && followMovement.GetTarget() == player;
+                        return a is FollowMovementGenerator followMovement && followMovement.GetTarget() == player;
                     }
                     return false;
                 });

@@ -98,7 +98,7 @@ namespace Scripts.OutdoorPVP.HellfirePeninsula
                 if (m_AllianceTowersControlled >= 3)
                     player.CastSpell(player, SpellIds.AllianceBuff, true);
             }
-            else
+            else if(player.GetTeam() == Team.Horde)
             {
                 if (m_HordeTowersControlled >= 3)
                     player.CastSpell(player, SpellIds.HordeBuff, true);
@@ -111,7 +111,7 @@ namespace Scripts.OutdoorPVP.HellfirePeninsula
             // remove buffs
             if (player.GetTeam() == Team.Alliance)
                 player.RemoveAurasDueToSpell(SpellIds.AllianceBuff);
-            else
+            else if (player.GetTeam() == Team.Horde)
                 player.RemoveAurasDueToSpell(SpellIds.HordeBuff);
 
             base.HandlePlayerLeaveZone(player, zone);

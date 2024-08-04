@@ -363,7 +363,7 @@ namespace Game.Entities
                     break;
             }
         }
-        
+
         public virtual void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, out float minDamage, out float maxDamage)
         {
             minDamage = 0f;
@@ -802,7 +802,7 @@ namespace Game.Entities
 
             return damage;
         }
-        
+
         // player or player's pet resilience (-1%)
         uint GetDamageReduction(uint damage) { return GetCombatRatingDamageReduction(CombatRating.ResiliencePlayerDamage, 1.0f, 100.0f, damage); }
 
@@ -946,7 +946,7 @@ namespace Game.Entities
             float chance = GetUnitCriticalChanceDone(attackType);
             return victim.GetUnitCriticalChanceTaken(this, attackType, chance);
         }
-        
+
         float GetUnitDodgeChance(WeaponAttackType attType, Unit victim)
         {
             int levelDiff = (int)(victim.GetLevelForTarget(this) - GetLevelForTarget(victim));
@@ -1085,7 +1085,7 @@ namespace Game.Entities
             }
             return Math.Max(resistMech, 0);
         }
-        
+
         public void ApplyModManaCostMultiplier(float manaCostMultiplier, bool apply) { ApplyModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ManaCostMultiplier), manaCostMultiplier, apply); }
 
         public void ApplyModManaCostModifier(SpellSchools school, int mod, bool apply) { ApplyModUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ManaCostModifier, (int)school), mod, apply); }
@@ -1545,34 +1545,34 @@ namespace Game.Entities
                 case CombatRating.HasteMelee:
                 case CombatRating.HasteRanged:
                 case CombatRating.HasteSpell:
+                {
+                    // explicit affected values
+                    float multiplier = GetRatingMultiplier(cr);
+                    float oldVal = ApplyRatingDiminishing(cr, oldRating * multiplier);
+                    float newVal = ApplyRatingDiminishing(cr, amount * multiplier);
+                    switch (cr)
                     {
-                        // explicit affected values
-                        float multiplier = GetRatingMultiplier(cr);
-                        float oldVal = ApplyRatingDiminishing(cr, oldRating * multiplier);
-                        float newVal = ApplyRatingDiminishing(cr, amount * multiplier);
-                        switch (cr)
-                        {
-                            case CombatRating.HasteMelee:
-                                ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, oldVal, false);
-                                ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, oldVal, false);
-                                ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, newVal, true);
-                                ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, newVal, true);
-                                if (GetClass() == Class.Deathknight)
-                                    UpdateAllRunesRegen();
-                                break;
-                            case CombatRating.HasteRanged:
-                                ApplyAttackTimePercentMod(WeaponAttackType.RangedAttack, oldVal, false);
-                                ApplyAttackTimePercentMod(WeaponAttackType.RangedAttack, newVal, true);
-                                break;
-                            case CombatRating.HasteSpell:
-                                ApplyCastTimePercentMod(oldVal, false);
-                                ApplyCastTimePercentMod(newVal, true);
-                                break;
-                            default:
-                                break;
-                        }
-                        break;
+                        case CombatRating.HasteMelee:
+                            ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, oldVal, false);
+                            ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, oldVal, false);
+                            ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, newVal, true);
+                            ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, newVal, true);
+                            if (GetClass() == Class.Deathknight)
+                                UpdateAllRunesRegen();
+                            break;
+                        case CombatRating.HasteRanged:
+                            ApplyAttackTimePercentMod(WeaponAttackType.RangedAttack, oldVal, false);
+                            ApplyAttackTimePercentMod(WeaponAttackType.RangedAttack, newVal, true);
+                            break;
+                        case CombatRating.HasteSpell:
+                            ApplyCastTimePercentMod(oldVal, false);
+                            ApplyCastTimePercentMod(newVal, true);
+                            break;
+                        default:
+                            break;
                     }
+                    break;
+                }
                 case CombatRating.Expertise:
                     if (affectStats)
                     {
@@ -1667,14 +1667,10 @@ namespace Game.Entities
                     continue;
                 }
 
-                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(corruptionEffect.PlayerConditionID);
-                if (playerCondition != null)
+                if (!ConditionManager.IsPlayerMeetingCondition(this, (uint)corruptionEffect.PlayerConditionID))
                 {
-                    if (!ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
-                    {
-                        RemoveAura(corruptionEffect.Aura);
-                        continue;
-                    }
+                    RemoveAura(corruptionEffect.Aura);
+                    continue;
                 }
 
                 CastSpell(this, corruptionEffect.Aura, true);
@@ -1766,7 +1762,7 @@ namespace Game.Entities
             }
             SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ParryPercentage), value);
         }
-        
+
         float[] dodge_cap =
         {
             65.631440f,     // Warrior            
@@ -1997,7 +1993,7 @@ namespace Game.Entities
 
             return Stats.Intellect;
         }
-        
+
         public override void UpdateMaxHealth()
         {
             UnitMods unitMod = UnitMods.Health;
@@ -2112,7 +2108,7 @@ namespace Game.Entities
 
             return base.GetCreatePowerValue(power);
         }
-        
+
         public override bool UpdateStats(Stats stat)
         {
             return true;

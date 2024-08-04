@@ -267,6 +267,15 @@ namespace Game.Entities
             }
         }
 
+        public uint GetQuestID() => type switch
+        {
+            GameObjectTypes.Chest => Chest.questID,
+            GameObjectTypes.Generic => Generic.questID,
+            GameObjectTypes.SpellFocus => SpellFocus.questID,
+            GameObjectTypes.Goober => Goober.questID,
+            _ => 0
+        };
+
         public uint GetConditionID1() => type switch
         {
             GameObjectTypes.Door => Door.conditionID1,
@@ -1647,5 +1656,14 @@ namespace Game.Entities
         public uint artKit;
 
         public GameObjectData() : base(SpawnObjectType.GameObject) { }
+    }
+
+    public class DestructibleHitpoint
+    {
+        public uint Id;
+        public uint IntactNumHits;
+        public uint DamagedNumHits;
+
+        public uint GetMaxHealth() { return IntactNumHits + DamagedNumHits; }
     }
 }

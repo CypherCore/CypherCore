@@ -538,6 +538,7 @@ namespace Game
             Global.ObjectMgr.LoadPageTexts();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading GameObject Template...");
+            Global.ObjectMgr.LoadDestructibleHitpoints();
             Global.ObjectMgr.LoadGameObjectTemplate();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Game Object template addons...");
@@ -1074,6 +1075,7 @@ namespace Game
             // Initialize Battlegrounds
             Log.outInfo(LogFilter.ServerLoading, "Starting BattlegroundSystem");
             Global.BattlegroundMgr.LoadBattlegroundTemplates();
+            Global.BattlegroundMgr.LoadBattlegroundScriptTemplate();
 
             // Initialize outdoor pvp
             Log.outInfo(LogFilter.ServerLoading, "Starting Outdoor PvP System");
@@ -1334,11 +1336,14 @@ namespace Game
 
                 if (WorldConfig.GetBoolValue(WorldCfg.PreserveCustomChannels))
                 {
-                    ChannelManager mgr1 = ChannelManager.ForTeam(Team.Alliance);
+                    ChannelManager mgr1 = ChannelManager.ForTeam(Team.PandariaNeutral);
                     mgr1.SaveToDB();
-                    ChannelManager mgr2 = ChannelManager.ForTeam(Team.Horde);
+                    ChannelManager mgr2 = ChannelManager.ForTeam(Team.Alliance);
                     if (mgr1 != mgr2)
                         mgr2.SaveToDB();
+                    ChannelManager mgr3 = ChannelManager.ForTeam(Team.Horde);
+                    if (mgr1 != mgr3)
+                        mgr3.SaveToDB();
                 }
             }
 

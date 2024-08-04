@@ -451,13 +451,14 @@ namespace Game.Entities
                 bool hasMoveCurveID = createProperties != null && createProperties.MoveCurveId != 0;
                 bool hasAreaTriggerSphere = shape.IsSphere();
                 bool hasAreaTriggerBox = shape.IsBox();
-                bool hasAreaTriggerPolygon = createProperties != null && shape.IsPolygon();
+                bool hasAreaTriggerPolygon = shape.IsPolygon();
                 bool hasAreaTriggerCylinder = shape.IsCylinder();
                 bool hasDisk = shape.IsDisk();
                 bool hasBoundedPlane = shape.IsBoundedPlane();
                 bool hasAreaTriggerSpline = areaTrigger.HasSplines();
                 bool hasOrbit = areaTrigger.HasOrbit();
                 bool hasMovementScript = false;
+                bool hasPositionalSoundKitID = false;
 
                 data.WriteBit(hasAbsoluteOrientation);
                 data.WriteBit(hasDynamicShape);
@@ -471,6 +472,7 @@ namespace Game.Entities
                 data.WriteBit(hasMorphCurveID);
                 data.WriteBit(hasFacingCurveID);
                 data.WriteBit(hasMoveCurveID);
+                data.WriteBit(hasPositionalSoundKitID);
                 data.WriteBit(hasAreaTriggerSphere);
                 data.WriteBit(hasAreaTriggerBox);
                 data.WriteBit(hasAreaTriggerPolygon);
@@ -505,6 +507,9 @@ namespace Game.Entities
 
                 if (hasMoveCurveID)
                     data.WriteUInt32(createProperties.MoveCurveId);
+
+                if (hasPositionalSoundKitID)
+                    data.WriteUInt32(0);
 
                 if (hasAreaTriggerSphere)
                 {
@@ -1522,7 +1527,7 @@ namespace Game.Entities
 
                 BattlegroundMap bgMap = map.ToBattlegroundMap();
                 if (bgMap != null)
-                    return (ZoneScript)bgMap.GetBG();
+                    return (ZoneScript)bgMap.GetBattlegroundScript();
 
                 if (!map.IsBattlegroundOrArena())
                 {

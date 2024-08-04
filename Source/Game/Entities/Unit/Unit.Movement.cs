@@ -868,13 +868,8 @@ namespace Game.Entities
                     continue;
 
                 Player thisPlayer = ToPlayer();
-                if (thisPlayer != null)
-                {
-                    PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(mountCapability.PlayerConditionID);
-                    if (playerCondition != null)
-                        if (!ConditionManager.IsPlayerMeetingCondition(thisPlayer, playerCondition))
-                            continue;
-                }
+                if (thisPlayer != null && !ConditionManager.IsPlayerMeetingCondition(thisPlayer, (uint)mountCapability.PlayerConditionID))
+                    continue;
 
                 return mountCapability;
             }

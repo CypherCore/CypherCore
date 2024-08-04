@@ -290,9 +290,10 @@ namespace Game.Entities
                     m_goValue.FishingHole.MaxOpens = RandomHelper.URand(GetGoInfo().FishingHole.minRestock, GetGoInfo().FishingHole.maxRestock);
                     break;
                 case GameObjectTypes.DestructibleBuilding:
-                    m_goValue.Building.Health = 20000;//goinfo.DestructibleBuilding.intactNumHits + goinfo.DestructibleBuilding.damagedNumHits;
-                    m_goValue.Building.MaxHealth = m_goValue.Building.Health;
+                    m_goValue.Building.DestructibleHitpoint = Global.ObjectMgr.GetDestructibleHitpoint(GetGoInfo().DestructibleBuilding.HealthRec);
+                    m_goValue.Building.Health = m_goValue.Building.DestructibleHitpoint != null ? m_goValue.Building.DestructibleHitpoint.GetMaxHealth() : 0;
                     SetGoAnimProgress(255);
+
                     // yes, even after the updatefield rewrite this garbage hack is still in client
                     SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.ParentRotation), new Quaternion(goInfo.DestructibleBuilding.DestructibleModelRec, 0f, 0f, 0f));
                     break;
@@ -1366,13 +1367,24 @@ namespace Game.Entities
             }
         }
 
+        public bool CanActivateForPlayer(Player target)
+        {
+            if (!MeetsInteractCondition(target))
+                return false;
+
+            if (!ActivateToQuest(target))
+                return false;
+
+            return true;
+        }
+
         public bool ActivateToQuest(Player target)
         {
             if (target.HasQuestForGO((int)GetEntry()))
                 return true;
 
             if (!Global.ObjectMgr.IsGameObjectForQuests(GetEntry()))
-                return false;
+                return true;
 
             switch (GetGoType())
             {
@@ -1393,9 +1405,6 @@ namespace Game.Entities
                         || LootStorage.Gameobject.HaveQuestLootForPlayer(GetGoInfo().Chest.chestPersonalLoot, target)
                         || LootStorage.Gameobject.HaveQuestLootForPlayer(GetGoInfo().Chest.chestPushLoot, target))
                     {
-                        Battleground bg = target.GetBattleground();
-                        if (bg != null)
-                            return bg.CanActivateGO((int)GetEntry(), (uint)bg.GetPlayerTeam(target.GetGUID()));
                         return true;
                     }
                     break;
@@ -1403,6 +1412,12 @@ namespace Game.Entities
                 case GameObjectTypes.Generic:
                 {
                     if (target.GetQuestStatus(GetGoInfo().Generic.questID) == QuestStatus.Incomplete)
+                        return true;
+                    break;
+                }
+                case GameObjectTypes.SpellFocus:
+                {
+                    if (target.GetQuestStatus(GetGoInfo().SpellFocus.questID) == QuestStatus.Incomplete)
                         return true;
                     break;
                 }
@@ -1699,10 +1714,6 @@ namespace Game.Entities
                 {
                     Player player = user.ToPlayer();
                     if (player == null)
-                        return;
-
-                    Battleground bg = player.GetBattleground();
-                    if (bg != null && !bg.CanActivateGO((int)GetEntry(), (uint)bg.GetPlayerTeam(user.GetGUID())))
                         return;
 
                     GameObjectTemplate info = GetGoInfo();
@@ -2250,7 +2261,6 @@ namespace Game.Entities
 
                     break;
                 }
-
                 case GameObjectTypes.FlagStand:                     // 24
                 {
                     if (!user.IsTypeId(TypeId.Player))
@@ -2260,29 +2270,15 @@ namespace Game.Entities
 
                     if (player.CanUseBattlegroundObject(this))
                     {
-                        // in Battlegroundcheck
-                        Battleground bg = player.GetBattleground();
-                        if (bg == null)
-                            return;
-
                         if (player.GetVehicle() != null)
                             return;
 
                         player.RemoveAurasByType(AuraType.ModStealth);
                         player.RemoveAurasByType(AuraType.ModInvisibility);
-                        // BG flag click
-                        // AB:
-                        // 15001
-                        // 15002
-                        // 15003
-                        // 15004
-                        // 15005
-                        bg.EventPlayerClickedOnFlag(player, this);
                         return;                                     //we don;t need to delete flag ... it is despawned!
                     }
                     break;
                 }
-
                 case GameObjectTypes.FishingHole:                   // 25
                 {
                     if (!user.IsTypeId(TypeId.Player))
@@ -2290,7 +2286,7 @@ namespace Game.Entities
 
                     Player player = user.ToPlayer();
 
-                    Loot loot = new Loot(GetMap(), GetGUID(), LootType.Fishinghole, null);
+                    Loot loot = new(GetMap(), GetGUID(), LootType.Fishinghole, null);
                     loot.FillLoot(GetGoInfo().GetLootId(), LootStorage.Gameobject, player, true, false, LootModes.Default, ItemBonusMgr.GetContextForPlayer(GetMap().GetMapDifficulty(), player));
                     m_personalLoot[player.GetGUID()] = loot;
 
@@ -2298,7 +2294,6 @@ namespace Game.Entities
                     player.UpdateCriteria(CriteriaType.CatchFishInFishingHole, GetGoInfo().entry);
                     return;
                 }
-
                 case GameObjectTypes.FlagDrop:                      // 26
                 {
                     if (!user.IsTypeId(TypeId.Player))
@@ -2308,11 +2303,6 @@ namespace Game.Entities
 
                     if (player.CanUseBattlegroundObject(this))
                     {
-                        // in Battlegroundcheck
-                        Battleground bg = player.GetBattleground();
-                        if (bg == null)
-                            return;
-
                         if (player.GetVehicle() != null)
                             return;
 
@@ -2325,24 +2315,8 @@ namespace Game.Entities
                         // EotS:
                         // 184142 - Netherstorm Flag
                         GameObjectTemplate info = GetGoInfo();
-                        if (info != null)
-                        {
-                            switch (info.entry)
-                            {
-                                case 179785:                        // Silverwing Flag
-                                case 179786:                        // Warsong Flag
-                                    if (bg.GetTypeID() == BattlegroundTypeId.WS)
-                                        bg.EventPlayerClickedOnFlag(player, this);
-                                    break;
-                                case 184142:                        // Netherstorm Flag
-                                    if (bg.GetTypeID() == BattlegroundTypeId.EY)
-                                        bg.EventPlayerClickedOnFlag(player, this);
-                                    break;
-                            }
-
-                            if (info.FlagDrop.eventID != 0)
-                                GameEvents.Trigger(info.FlagDrop.eventID, player, this);
-                        }
+                        if (info != null && info.FlagDrop.eventID != 0)
+                            GameEvents.Trigger(info.FlagDrop.eventID, player, this);
                         //this cause to call return, all flags must be deleted here!!
                         spellId = 0;
                         Delete();
@@ -2462,10 +2436,9 @@ namespace Game.Entities
                         return;
 
                     Player player = user.ToPlayer();
-                    PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(info.ItemForge.conditionID1);
-                    if (playerCondition != null)
-                        if (!ConditionManager.IsPlayerMeetingCondition(player, playerCondition))
-                            return;
+
+                    if (!MeetsInteractCondition(player))
+                        return;
 
                     switch (info.ItemForge.ForgeType)
                     {
@@ -2743,7 +2716,7 @@ namespace Game.Entities
 
         public void SetLocalRotation(float qx, float qy, float qz, float qw)
         {
-            Quaternion rotation = new Quaternion(qx, qy, qz, qw);
+            Quaternion rotation = new(qx, qy, qz, qw);
             rotation = Quaternion.Multiply(rotation, 1.0f / MathF.Sqrt(Quaternion.Dot(rotation, rotation)));
 
             m_localRotation.X = rotation.X;
@@ -2880,7 +2853,7 @@ namespace Game.Entities
 
         public void ModifyHealth(int change, WorldObject attackerOrHealer = null, uint spellId = 0)
         {
-            if (m_goValue.Building.MaxHealth == 0 || change == 0)
+            if (m_goValue.Building.DestructibleHitpoint == null || change == 0)
                 return;
 
             // prevent double destructions of the same object
@@ -2889,13 +2862,13 @@ namespace Game.Entities
 
             if (m_goValue.Building.Health + change <= 0)
                 m_goValue.Building.Health = 0;
-            else if (m_goValue.Building.Health + change >= m_goValue.Building.MaxHealth)
-                m_goValue.Building.Health = m_goValue.Building.MaxHealth;
+            else if (m_goValue.Building.Health + change >= m_goValue.Building.DestructibleHitpoint.GetMaxHealth())
+                m_goValue.Building.Health = m_goValue.Building.DestructibleHitpoint.GetMaxHealth();
             else
                 m_goValue.Building.Health += (uint)change;
 
             // Set the health bar, value = 255 * healthPct;
-            SetGoAnimProgress(m_goValue.Building.Health * 255 / m_goValue.Building.MaxHealth);
+            SetGoAnimProgress(m_goValue.Building.Health * 255 / m_goValue.Building.DestructibleHitpoint.GetMaxHealth());
 
             // dealing damage, send packet
             Player player = attackerOrHealer != null ? attackerOrHealer.GetCharmerOrOwnerPlayerOrPlayerItself() : null;
@@ -2917,9 +2890,9 @@ namespace Game.Entities
 
             if (m_goValue.Building.Health == 0)
                 newState = GameObjectDestructibleState.Destroyed;
-            else if (m_goValue.Building.Health < m_goValue.Building.MaxHealth / 2)
+            else if (m_goValue.Building.Health < m_goValue.Building.DestructibleHitpoint.DamagedNumHits)
                 newState = GameObjectDestructibleState.Damaged;
-            else if (m_goValue.Building.Health == m_goValue.Building.MaxHealth)
+            else if (m_goValue.Building.Health == m_goValue.Building.DestructibleHitpoint.GetMaxHealth())
                 newState = GameObjectDestructibleState.Intact;
 
             if (newState == GetDestructibleState())
@@ -2938,9 +2911,9 @@ namespace Game.Entities
                 case GameObjectDestructibleState.Intact:
                     RemoveFlag(GameObjectFlags.Damaged | GameObjectFlags.Destroyed);
                     SetDisplayId(m_goInfo.displayId);
-                    if (setHealth)
+                    if (setHealth && m_goValue.Building.DestructibleHitpoint != null)
                     {
-                        m_goValue.Building.Health = m_goValue.Building.MaxHealth;
+                        m_goValue.Building.Health = m_goValue.Building.DestructibleHitpoint.GetMaxHealth();
                         SetGoAnimProgress(255);
                     }
                     EnableCollision(true);
@@ -2959,12 +2932,13 @@ namespace Game.Entities
                     if (modelData != null)
                         if (modelData.State1Wmo != 0)
                             modelId = modelData.State1Wmo;
+
                     SetDisplayId(modelId);
 
-                    if (setHealth)
+                    if (setHealth && m_goValue.Building.DestructibleHitpoint != null)
                     {
-                        m_goValue.Building.Health = 10000;//m_goInfo.DestructibleBuilding.damagedNumHits;
-                        uint maxHealth = m_goValue.Building.MaxHealth;
+                        m_goValue.Building.Health = m_goValue.Building.DestructibleHitpoint.DamagedNumHits;
+                        uint maxHealth = m_goValue.Building.DestructibleHitpoint.GetMaxHealth();
                         // in this case current health is 0 anyway so just prevent crashing here
                         if (maxHealth == 0)
                             maxHealth = 1;
@@ -2978,14 +2952,6 @@ namespace Game.Entities
                         GameEvents.Trigger(GetGoInfo().DestructibleBuilding.DestroyedEvent, attackerOrHealer, this);
                     GetAI().Destroyed(attackerOrHealer, m_goInfo.DestructibleBuilding.DestroyedEvent);
 
-                    Player player = attackerOrHealer != null ? attackerOrHealer.GetCharmerOrOwnerPlayerOrPlayerItself() : null;
-                    if (player != null)
-                    {
-                        Battleground bg = player.GetBattleground();
-                        if (bg != null)
-                            bg.DestroyGate(player, this);
-                    }
-
                     RemoveFlag(GameObjectFlags.Damaged);
                     SetFlag(GameObjectFlags.Destroyed);
 
@@ -2994,6 +2960,7 @@ namespace Game.Entities
                     if (modelData != null)
                         if (modelData.State2Wmo != 0)
                             modelId = modelData.State2Wmo;
+
                     SetDisplayId(modelId);
 
                     if (setHealth)
@@ -3018,9 +2985,9 @@ namespace Game.Entities
                     SetDisplayId(modelId);
 
                     // restores to full health
-                    if (setHealth)
+                    if (setHealth & m_goValue.Building.DestructibleHitpoint != null)
                     {
-                        m_goValue.Building.Health = m_goValue.Building.MaxHealth;
+                        m_goValue.Building.Health = m_goValue.Building.DestructibleHitpoint.GetMaxHealth();
                         SetGoAnimProgress(255);
                     }
                     EnableCollision(true);
@@ -3318,8 +3285,7 @@ namespace Game.Entities
 
         public List<uint> GetPauseTimes()
         {
-            GameObjectType.Transport transport = m_goTypeImpl as GameObjectType.Transport;
-            if (transport != null)
+            if (m_goTypeImpl is GameObjectType.Transport transport)
                 return transport.GetPauseTimes();
 
             return null;
@@ -3655,8 +3621,7 @@ namespace Game.Entities
             if (GetGoType() != GameObjectTypes.NewFlag)
                 return 0;
 
-            GameObjectType.NewFlag newFlag = m_goTypeImpl as GameObjectType.NewFlag;
-            if (newFlag == null)
+            if (m_goTypeImpl is not GameObjectType.NewFlag newFlag)
                 return 0;
 
             return newFlag.GetState();
@@ -3667,8 +3632,7 @@ namespace Game.Entities
             if (GetGoType() != GameObjectTypes.NewFlag)
                 return ObjectGuid.Empty;
 
-            GameObjectType.NewFlag newFlag = m_goTypeImpl as GameObjectType.NewFlag;
-            if (newFlag == null)
+            if (m_goTypeImpl is not GameObjectType.NewFlag newFlag)
                 return ObjectGuid.Empty;
 
             return newFlag.GetCarrierGUID();
@@ -3679,8 +3643,7 @@ namespace Game.Entities
             if (GetGoType() != GameObjectTypes.NewFlag)
                 return 0;
 
-            GameObjectType.NewFlag newFlag = m_goTypeImpl as GameObjectType.NewFlag;
-            if (newFlag == null)
+            if (m_goTypeImpl is not GameObjectType.NewFlag newFlag)
                 return 0;
 
             return newFlag.GetTakenFromBaseTime();
@@ -3688,8 +3651,7 @@ namespace Game.Entities
 
         public List<ObjectGuid> GetInsidePlayers()
         {
-            ControlZone controlZone = m_goTypeImpl as ControlZone;
-            if (controlZone != null)
+            if (m_goTypeImpl is ControlZone controlZone)
                 return controlZone.GetInsidePlayers();
 
             return null;
@@ -3697,15 +3659,7 @@ namespace Game.Entities
 
         public bool MeetsInteractCondition(Player user)
         {
-            if (m_goInfo.GetConditionID1() == 0)
-                return true;
-
-            PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(m_goInfo.GetConditionID1());
-            if (playerCondition != null)
-                if (!ConditionManager.IsPlayerMeetingCondition(user, playerCondition))
-                    return false;
-
-            return true;
+            return ConditionManager.IsPlayerMeetingCondition(user, m_goInfo.GetConditionID1());
         }
 
         PerPlayerState GetOrCreatePerPlayerStates(ObjectGuid guid)
@@ -3797,17 +3751,17 @@ namespace Game.Entities
         public GameObjectTypes GetGoType() { return (GameObjectTypes)(sbyte)m_gameObjectData.TypeID; }
         public void SetGoType(GameObjectTypes type) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.TypeID), (sbyte)type); }
         public GameObjectState GetGoState() { return (GameObjectState)(sbyte)m_gameObjectData.State; }
-        uint GetGoArtKit() { return m_gameObjectData.ArtKit; }
-        byte GetGoAnimProgress() { return m_gameObjectData.PercentHealth; }
+        public uint GetGoArtKit() { return m_gameObjectData.ArtKit; }
+        public byte GetGoAnimProgress() { return m_gameObjectData.PercentHealth; }
         public void SetGoAnimProgress(uint animprogress) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.PercentHealth), (byte)animprogress); }
 
         public LootState GetLootState() { return m_lootState; }
         public LootModes GetLootMode() { return m_LootMode; }
-        bool HasLootMode(LootModes lootMode) { return Convert.ToBoolean(m_LootMode & lootMode); }
-        void SetLootMode(LootModes lootMode) { m_LootMode = lootMode; }
-        void AddLootMode(LootModes lootMode) { m_LootMode |= lootMode; }
-        void RemoveLootMode(LootModes lootMode) { m_LootMode &= ~lootMode; }
-        void ResetLootMode() { m_LootMode = LootModes.Default; }
+        public bool HasLootMode(LootModes lootMode) { return Convert.ToBoolean(m_LootMode & lootMode); }
+        public void SetLootMode(LootModes lootMode) { m_LootMode = lootMode; }
+        public void AddLootMode(LootModes lootMode) { m_LootMode |= lootMode; }
+        public void RemoveLootMode(LootModes lootMode) { m_LootMode &= ~lootMode; }
+        public void ResetLootMode() { m_LootMode = LootModes.Default; }
 
         public void AddToSkillupList(ObjectGuid PlayerGuid) { m_SkillupList.Add(PlayerGuid); }
         public bool IsInSkillupList(ObjectGuid PlayerGuid)
@@ -3818,17 +3772,17 @@ namespace Game.Entities
 
             return false;
         }
-        void ClearSkillupList() { m_SkillupList.Clear(); }
+        public void ClearSkillupList() { m_SkillupList.Clear(); }
 
         public void AddUse() { ++m_usetimes; }
 
         public uint GetUseCount() { return m_usetimes; }
-        uint GetUniqueUseCount() { return (uint)m_unique_users.Count; }
+        public uint GetUniqueUseCount() { return (uint)m_unique_users.Count; }
 
-        List<ObjectGuid> GetTapList() { return m_tapList; }
-        void SetTapList(List<ObjectGuid> tapList) { m_tapList = tapList; }
+        public List<ObjectGuid> GetTapList() { return m_tapList; }
+        public void SetTapList(List<ObjectGuid> tapList) { m_tapList = tapList; }
 
-        bool HasLootRecipient() { return !m_tapList.Empty(); }
+        public bool HasLootRecipient() { return !m_tapList.Empty(); }
 
         public override uint GetLevelForTarget(WorldObject target)
         {
@@ -4006,14 +3960,9 @@ namespace Game.Entities
     }
 
     // Base class for GameObject type specific implementations
-    public class GameObjectTypeBase
+    public class GameObjectTypeBase(GameObject owner)
     {
-        protected GameObject _owner;
-
-        public GameObjectTypeBase(GameObject owner)
-        {
-            _owner = owner;
-        }
+        protected GameObject _owner = owner;
 
         public virtual void Update(uint diff) { }
         public virtual void OnStateChanged(GameObjectState oldState, GameObjectState newState) { }
@@ -4057,7 +4006,7 @@ namespace Game.Entities
         public struct building
         {
             public uint Health;
-            public uint MaxHealth;
+            public DestructibleHitpoint DestructibleHitpoint;
         }
         //42 GAMEOBJECT_TYPE_CAPTURE_POINT
         public struct capturePoint
@@ -4149,12 +4098,12 @@ namespace Game.Entities
 
                 uint now = GameTime.GetGameTimeMS();
                 uint period = GetTransportPeriod();
-                uint newProgress = 0;
+                uint newProgress;
                 if (_stopFrames.Empty())
                     newProgress = now % period;
                 else
                 {
-                    int stopTargetTime = 0;
+                    int stopTargetTime;
                     if (_owner.GetGoState() == GameObjectState.TransportActive)
                         stopTargetTime = 0;
                     else
@@ -4179,7 +4128,7 @@ namespace Game.Entities
 
                             progressPct = pathPctBetweenStops * timeSinceStopProgressPct + stopSourcePathPct;
                             if (progressPct > 1.0f)
-                                progressPct = progressPct - 1.0f;
+                                progressPct = -1.0f;
                         }
                         else
                         {
@@ -4379,8 +4328,7 @@ namespace Game.Entities
             {
                 foreach (WorldObject passenger in _passengers)
                 {
-                    float x, y, z, o;
-                    passenger.m_movementInfo.transport.pos.GetPosition(out x, out y, out z, out o);
+                    passenger.m_movementInfo.transport.pos.GetPosition(out float x, out float y, out float z, out float o);
                     CalculatePassengerPosition(ref x, ref y, ref z, ref o);
                     ITransport.UpdatePassengerPosition(this, _owner.GetMap(), passenger, x, y, z, o, true);
                 }
@@ -4529,7 +4477,7 @@ namespace Game.Entities
             public long GetTakenFromBaseTime() { return _takenFromBaseTime; }
         }
 
-        class SetNewFlagState : GameObjectTypeBase.CustomCommand
+        public class SetNewFlagState : GameObjectTypeBase.CustomCommand
         {
             FlagState _state;
             Player _player;
@@ -4542,8 +4490,7 @@ namespace Game.Entities
 
             public override void Execute(GameObjectTypeBase type)
             {
-                NewFlag newFlag = type as NewFlag;
-                if (newFlag != null)
+                if (type is NewFlag newFlag)
                     newFlag.SetState(_state, _player);
             }
         }
@@ -4793,8 +4740,7 @@ namespace Game.Entities
 
         public override void Execute(GameObjectTypeBase type)
         {
-            ControlZone controlZone = type as ControlZone;
-            if (controlZone != null)
+            if (type is ControlZone controlZone)
             {
                 uint value = controlZone.GetStartingValue();
                 if (_value.HasValue)

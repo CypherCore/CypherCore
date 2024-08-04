@@ -2,7 +2,11 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.IO;
+using Game.DataStorage;
 using Game.Entities;
+using Game.Spells;
+using System;
+using System.Collections.Generic;
 
 namespace Game.Chat
 {
@@ -14,136 +18,95 @@ namespace Game.Chat
             _allowEmptyTokens = allowEmptyTokens;
         }
 
-        public bool TryConsumeTo(out byte val)
+        public bool TryConsumeTo(out dynamic val, Type type)
         {
+            val = default;
+
             if (IsEmpty())
-            {
-                val = default;
                 return _allowEmptyTokens;
+
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.SByte:
+                    val = _arg.NextByte(":");
+                    return true;
+                case TypeCode.Int16:
+                    val = _arg.NextUInt16(":");
+                    return true;
+                case TypeCode.Int32:
+                    val = _arg.NextUInt32(":");
+                    return true;
+                case TypeCode.Int64:
+                    val = _arg.NextUInt64(":");
+                    return true;
+                case TypeCode.Byte:
+                    val = _arg.NextByte(":");
+                    return true;
+                case TypeCode.UInt16:
+                    val = _arg.NextUInt16(":");
+                    return true;
+                case TypeCode.UInt32:
+                    val = _arg.NextUInt32(":");
+                    return true;
+                case TypeCode.UInt64:
+                    val = _arg.NextUInt64(":");
+                    return true;
+                case TypeCode.Single:
+                    val = _arg.NextSingle(":");
+                    return true;
+                case TypeCode.Double:
+                    val = _arg.NextDouble(":");
+                    return true;
+                case TypeCode.String:
+                    val = _arg.NextString(":");
+                    return true;
+                case TypeCode.Object:
+                {
+                    switch (type.Name)
+                    {
+                        case nameof(AchievementRecord):
+                            val = CliDB.AchievementStorage.LookupByKey(_arg.NextUInt32(":"));
+                            if (val != null)
+                                return true;
+                            break;
+                        case nameof(CurrencyTypesRecord):
+                            val = CliDB.CurrencyTypesStorage.LookupByKey(_arg.NextUInt32(":"));
+                            if (val != null)
+                                return true;
+                            break;
+                        case nameof(GameTele):
+                            val = Global.ObjectMgr.GetGameTele(_arg.NextUInt32(":"));
+                            if (val != null)
+                                return true;
+                            break;
+                        case nameof(ItemTemplate):
+                            val = Global.ObjectMgr.GetItemTemplate(_arg.NextUInt32(":"));
+                            if (val != null)
+                                return true;
+                            break;
+                        case nameof(Quest):
+                            val = Global.ObjectMgr.GetQuestTemplate(_arg.NextUInt32(":"));
+                            if (val != null)
+                                return true;
+                            break;
+                        case nameof(SpellInfo):
+                            val = Global.SpellMgr.GetSpellInfo(_arg.NextUInt32(":"), Framework.Constants.Difficulty.None);
+                            if (val != null)
+                                return true;
+                            break;
+                        case nameof(ObjectGuid):
+                            val = ObjectGuid.FromString(_arg.NextString(":"));
+                            if (val != ObjectGuid.FromStringFailed)
+                                return true;
+                            break;
+                        default:
+                            return false;
+                    }
+                    break;
+                }
             }
 
-            val = _arg.NextByte(":");
-            return true;
-        }
-        public bool TryConsumeTo(out ushort val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
-            val = _arg.NextUInt16(":");
-            return true;
-        }
-        public bool TryConsumeTo(out uint val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
-
-            val = _arg.NextUInt32(":");
-            return true;
-        }
-        public bool TryConsumeTo(out ulong val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
-
-            val = _arg.NextUInt64(":");
-            return true;
-        }
-        public bool TryConsumeTo(out sbyte val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
-
-            val = _arg.NextSByte(":");
-            return true;
-        }
-        public bool TryConsumeTo(out short val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
-
-            val = _arg.NextInt16(":");
-            return true;
-        }
-        public bool TryConsumeTo(out int val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
-
-            val = _arg.NextInt32(":");
-            return true;
-        }
-        public bool TryConsumeTo(out long val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
-
-            val = _arg.NextInt64(":");
-            return true;
-        }
-        public bool TryConsumeTo(out float val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
-
-            val = _arg.NextSingle(":");
-            return true;
-        }
-        public bool TryConsumeTo(out ObjectGuid val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
-
-            val = ObjectGuid.FromString(_arg.NextString(":"));
-            return true;
-        }
-        public bool TryConsumeTo(out string val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
-
-            val = _arg.NextString(":");
-            return true;
-        }
-        public bool TryConsumeTo(out bool val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
-
-            val = _arg.NextBoolean(":");
-            return true;
+            return false;
         }
 
         public bool IsEmpty() { return _arg.Empty(); }

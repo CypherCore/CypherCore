@@ -251,19 +251,56 @@ namespace Game.Collision
             return callback.hit;
         }
 
-        public bool IsInsideObject(Vector3 pos, Vector3 down, out float z_dist)
+        bool IsInsideOrAboveBound(AxisAlignedBox bounds, Vector3 point)
         {
-            z_dist = 0f;
-            if (triangles.Empty() || !iBound.contains(pos))
-                return false;
+            return point.X >= bounds.Lo.X
+                && point.Y >= bounds.Lo.Y
+                && point.Z >= bounds.Lo.Z
+                && point.X <= bounds.Hi.X
+                && point.Y <= bounds.Hi.Y;
+        }
 
-            Vector3 rPos = pos - 0.1f * down;
-            float dist = float.PositiveInfinity;
-            Ray ray = new(rPos, down);
-            bool hit = IntersectRay(ray, ref dist, false);
-            if (hit)
-                z_dist = dist - 0.1f;
-            return hit;
+        public enum InsideResult
+        {
+            Inside = 0,
+            MaybeInside = 1,
+            Above = 2,
+            OutOfBounds = -1
+        }
+
+        public InsideResult IsInsideObject(Ray ray, out float z_dist)
+        {
+            z_dist = 0;
+
+            if (triangles.Empty() || !IsInsideOrAboveBound(iBound, ray.Origin))
+                return InsideResult.OutOfBounds;
+
+            if (meshTree.bound().Hi.Z >= ray.Origin.Z)
+            {
+                float dist = float.PositiveInfinity;
+                if (IntersectRay(ray, ref dist, false))
+                {
+                    z_dist = dist - 0.1f;
+                    return InsideResult.Inside;
+                }
+                if (meshTree.bound().contains(ray.Origin))
+                    return InsideResult.MaybeInside;
+            }
+            else
+            {
+                // some group models don't have any floor to intersect with
+                // so we should attempt to intersect with a model part below this group
+                // then find back where we originated from (in WorldModel::GetLocationInfo)
+                float dist = float.PositiveInfinity;
+                float delta = ray.Origin.Z - meshTree.bound().Hi.Z;
+                if (IntersectRay(ray.bumpedRay(delta), ref dist, false))
+                {
+                    z_dist = dist - 0.1f + delta;
+                    return InsideResult.Above;
+                }
+            }
+
+            return InsideResult.OutOfBounds;
         }
 
         public bool GetLiquidLevel(Vector3 pos, out float liqHeight)
@@ -321,13 +358,26 @@ namespace Game.Collision
             if (groupModels.Empty())
                 return false;
 
-            WModelAreaCallback callback = new(groupModels, down);
-            groupTree.IntersectPoint(p, callback);
-            if (callback.hit != null)
+            WModelAreaCallback callback = new(groupModels);
+            Ray r = new(p - down * 0.1f, down);
+            float zDist = groupTree.bound().extent().Length();
+            groupTree.IntersectRay(r, callback, ref zDist, false);
+            if (callback.hit[(int)GroupModel.InsideResult.Inside] != null)
             {
                 info.rootId = (int)RootWMOID;
-                info.hitModel = callback.hit;
-                dist = callback.zDist;
+                info.hitModel = callback.hit[(int)GroupModel.InsideResult.Inside];
+                dist = zDist;
+                return true;
+            }
+
+            // some group models don't have any floor to intersect with
+            // so we should attempt to intersect with a model part below the group `p` is in (stored in GroupModel::ABOVE)
+            // then find back where we originated from (GroupModel::MAYBE_INSIDE)
+            if (callback.hit[(int)GroupModel.InsideResult.MaybeInside] != null && callback.hit[(int)GroupModel.InsideResult.Above] != null)
+            {
+                info.rootId = (int)RootWMOID;
+                info.hitModel = callback.hit[(int)GroupModel.InsideResult.MaybeInside];
+                dist = zDist;
                 return true;
             }
             return false;

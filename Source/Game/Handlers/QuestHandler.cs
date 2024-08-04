@@ -348,10 +348,6 @@ namespace Game
             {
                 if (GetPlayer().CanRewardQuest(quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID, true)) // Then check if player can receive the reward item (if inventory is not full, if player doesn't have too many unique items, and so on). If not, the client will close the gossip window
                 {
-                    Battleground bg = _player.GetBattleground();
-                    if (bg != null)
-                        bg.HandleQuestComplete(packet.QuestID, _player);
-
                     GetPlayer().RewardQuest(quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID, obj);
                 }
             }
@@ -650,10 +646,17 @@ namespace Game
                     continue;
                 }
 
-                if (!receiver.SatisfyQuestReputation(quest, false))
+                if (!receiver.SatisfyQuestMinReputation(quest, false))
                 {
                     sender.SendPushToPartyResponse(receiver, QuestPushReason.LowFaction);
                     receiver.SendPushToPartyResponse(sender, QuestPushReason.LowFactionToRecipient, quest);
+                    continue;
+                }
+
+                if (!receiver.SatisfyQuestMaxReputation(quest, false))
+                {
+                    sender.SendPushToPartyResponse(receiver, QuestPushReason.HighFaction);
+                    receiver.SendPushToPartyResponse(sender, QuestPushReason.HighFactionToRecipient, quest);
                     continue;
                 }
 

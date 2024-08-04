@@ -2588,11 +2588,15 @@ namespace Game.Entities
         // Send a message to LocalDefense channel for players opposition team in the zone
         public void SendZoneUnderAttackMessage(Player attacker)
         {
-            Team enemy_team = attacker.GetTeam();
-
             ZoneUnderAttack packet = new();
             packet.AreaID = (int)GetAreaId();
-            Global.WorldMgr.SendGlobalMessage(packet, null, (enemy_team == Team.Alliance ? Team.Horde : Team.Alliance));
+            packet.Write();
+
+            Team enemyTeam = attacker.GetTeam();
+            if (enemyTeam != Team.Alliance)
+                Global.WorldMgr.SendGlobalMessage(packet, null, Team.Alliance);
+            if (enemyTeam != Team.Horde)
+                Global.WorldMgr.SendGlobalMessage(packet, null, Team.Horde);
         }
 
         public void SetCanMelee(bool canMelee, bool fleeFromMelee = false)

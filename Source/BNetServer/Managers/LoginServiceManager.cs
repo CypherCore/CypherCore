@@ -64,6 +64,11 @@ namespace BNetServer
         {
             return certificate;
         }
+
+        public bool UsesDevWildcardCertificate()
+        {
+            return certificate.Subject.Contains("*.*");
+        }
     }
 
     public class BnetServiceHandler

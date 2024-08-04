@@ -133,8 +133,11 @@ namespace Game
 
             if (playerConditionId != 0 && !CliDB.PlayerConditionStorage.ContainsKey(playerConditionId))
             {
-                Log.outError(LogFilter.Sql, $"Table `quest_reward_display_spell` has non-existing PlayerCondition ({playerConditionId}) set for quest {Id}. and spell {spellId} Set to 0.");
-                playerConditionId = 0;
+                if (!Global.ConditionMgr.HasConditionsForNotGroupedEntry(ConditionSourceType.PlayerCondition, playerConditionId))
+                {
+                    Log.outError(LogFilter.Sql, $"Table `quest_reward_display_spell` has serverside PlayerCondition ({playerConditionId}) set for quest {Id}. and spell {spellId} without conditions. Set to 0.");
+                    playerConditionId = 0;
+                }
             }
 
             if (type >= QuestCompleteSpellType.Max)
@@ -481,7 +484,7 @@ namespace Game
 
             return false;
         }
-        
+
         public void BuildQuestRewards(QuestRewards rewards, Player player)
         {
             rewards.ChoiceItemCount = GetRewChoiceItemsCount();
@@ -495,10 +498,8 @@ namespace Game
             var displaySpellIndex = 0;
             foreach (QuestRewardDisplaySpell displaySpell in RewardDisplaySpell)
             {
-                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(displaySpell.PlayerConditionId);
-                if (playerCondition != null)
-                    if (!ConditionManager.IsPlayerMeetingCondition(player, playerCondition))
-                        continue;
+                if (!ConditionManager.IsPlayerMeetingCondition(player, displaySpell.PlayerConditionId))
+                    continue;
 
                 rewards.SpellCompletionDisplayID[displaySpellIndex] = (int)displaySpell.SpellId;
                 if (++displaySpellIndex >= rewards.SpellCompletionDisplayID.Length)
@@ -811,7 +812,7 @@ namespace Game
         public bool IsDailyOrWeekly() { return Flags.HasAnyFlag(QuestFlags.Daily | QuestFlags.Weekly); }
         public bool IsDFQuest() { return SpecialFlags.HasAnyFlag(QuestSpecialFlags.DfQuest); }
         public bool IsPushedToPartyOnAccept() { return HasSpecialFlag(QuestSpecialFlags.AutoPushToParty); }
-        
+
         public uint GetRewChoiceItemsCount() { return _rewChoiceItemsCount; }
         public uint GetRewItemsCount() { return _rewItemsCount; }
         public uint GetRewCurrencyCount() { return _rewCurrencyCount; }
@@ -1013,7 +1014,7 @@ namespace Game
     }
 
     public struct QuestRewardDisplaySpell
-    {    
+    {
         public uint SpellId;
         public uint PlayerConditionId;
         public QuestCompleteSpellType Type;
@@ -1077,7 +1078,7 @@ namespace Game
             }
             return false;
         }
-        
+
         public bool IsStoringFlag()
         {
             switch (Type)

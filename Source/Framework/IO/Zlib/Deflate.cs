@@ -618,11 +618,10 @@ namespace Framework.IO
 
 			if(strm==null||strm.state==null||dictionary==null) return Z_STREAM_ERROR;
 
-			deflate_state s=strm.state as deflate_state;
-			if(s==null||s.wrap==2||(s.wrap==1&&s.status!=INIT_STATE))
-				return Z_STREAM_ERROR;
+            if (strm.state is not deflate_state s || s.wrap == 2 || (s.wrap == 1 && s.status != INIT_STATE))
+                return Z_STREAM_ERROR;
 
-			if(s.wrap!=0) strm.adler=adler32(strm.adler, dictionary, dictLength);
+            if (s.wrap!=0) strm.adler=adler32(strm.adler, dictionary, dictLength);
 
 			if(length<MIN_MATCH) return Z_OK;
 

@@ -26,6 +26,8 @@ namespace Game.DataStorage
         public uint CriteriaTree;
         public ushort SharesCriteria;
         public int CovenantID;
+        public int HiddenBeforeDisplaySeason;                                // hidden in UI before this DisplaySeason is active
+        public int LegacyAfterTimeEvent;                                     // category changes clientside to Legacy after this TimeEvent is passed
     }
 
     public sealed class AchievementCategoryRecord
@@ -54,8 +56,6 @@ namespace Game.DataStorage
         public ushort BattleMasterListID;
         public byte PriorityMin;
         public byte PriorityMax;
-        public int ItemID;
-        public uint ItemQuantity;
         public ushort CurrencyType;
         public uint CurrencyQuantity;
         public ushort UiMapID;

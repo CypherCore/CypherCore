@@ -129,14 +129,10 @@ namespace Game
                         return;
                     }
 
-                    var condition = CliDB.PlayerConditionStorage.LookupByKey(illusion.UnlockConditionID);
-                    if (condition != null)
+                    if (!ConditionManager.IsPlayerMeetingCondition(player, (uint)illusion.UnlockConditionID))
                     {
-                        if (!ConditionManager.IsPlayerMeetingCondition(player, condition))
-                        {
-                            Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - {0}, Name: {1} tried to transmogrify illusion using not allowed enchant ({2}).", player.GetGUID().ToString(), player.GetName(), transmogItem.SpellItemEnchantmentID);
-                            return;
-                        }
+                        Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - {0}, Name: {1} tried to transmogrify illusion using not allowed enchant ({2}).", player.GetGUID().ToString(), player.GetName(), transmogItem.SpellItemEnchantmentID);
+                        return;
                     }
 
                     illusionItems[itemTransmogrified] = (uint)transmogItem.SpellItemEnchantmentID;

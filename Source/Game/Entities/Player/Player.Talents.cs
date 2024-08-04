@@ -256,7 +256,7 @@ namespace Game.Entities
         {
             return CliDB.ChrSpecializationStorage.LookupByKey((uint)GetPrimarySpecialization());
         }
-        
+
         public byte GetActiveTalentGroup() { return _specializationInfo.ActiveGroup; }
 
         void SetActiveTalentGroup(byte group) { _specializationInfo.ActiveGroup = group; }
@@ -742,10 +742,8 @@ namespace Game.Entities
             if (HasPvpTalent(talentID, GetActiveTalentGroup()))
                 return TalentLearnResult.FailedUnknown;
 
-            PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(talentInfo.PlayerConditionID);
-            if (playerCondition != null)
-                if (!ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
-                    return TalentLearnResult.FailedCantDoThatRightNow;
+            if (!ConditionManager.IsPlayerMeetingCondition(this, (uint)talentInfo.PlayerConditionID))
+                return TalentLearnResult.FailedCantDoThatRightNow;
 
             PvpTalentRecord talent = CliDB.PvpTalentStorage.LookupByKey(GetPvpTalentMap(GetActiveTalentGroup())[slot]);
             if (talent != null)

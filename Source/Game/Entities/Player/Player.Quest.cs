@@ -1174,10 +1174,8 @@ namespace Game.Entities
             {
                 foreach (QuestRewardDisplaySpell displaySpell in quest.RewardDisplaySpell)
                 {
-                    var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(displaySpell.PlayerConditionId);
-                    if (playerCondition != null)
-                        if (!ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
-                            continue;
+                    if (!ConditionManager.IsPlayerMeetingCondition(this, displaySpell.PlayerConditionId))
+                        continue;
 
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(displaySpell.SpellId, GetMap().GetDifficultyID());
                     Unit caster = this;
@@ -1588,7 +1586,7 @@ namespace Game.Entities
             return true;
         }
 
-        public bool SatisfyQuestReputation(Quest qInfo, bool msg)
+        public bool SatisfyQuestMinReputation(Quest qInfo, bool msg)
         {
             uint fIdMin = qInfo.RequiredMinRepFaction;      //Min required rep
             if (fIdMin != 0 && GetReputationMgr().GetReputation(fIdMin) < qInfo.RequiredMinRepValue)
@@ -1601,6 +1599,11 @@ namespace Game.Entities
                 return false;
             }
 
+            return true;
+        }
+
+        public bool SatisfyQuestMaxReputation(Quest qInfo, bool msg)
+        {
             uint fIdMax = qInfo.RequiredMaxRepFaction;      //Max required rep
             if (fIdMax != 0 && GetReputationMgr().GetReputation(fIdMax) >= qInfo.RequiredMaxRepValue)
             {
@@ -1613,6 +1616,11 @@ namespace Game.Entities
             }
 
             return true;
+        }
+
+        bool SatisfyQuestReputation(Quest qInfo, bool msg)
+        {
+            return SatisfyQuestMinReputation(qInfo, msg) && SatisfyQuestMaxReputation(qInfo, msg);
         }
 
         public bool SatisfyQuestStatus(Quest qInfo, bool msg)
@@ -3297,21 +3305,24 @@ namespace Game.Entities
                         ObjectFieldData objMask = new();
                         GameObjectFieldData goMask = new();
 
-                        if (m_questObjectiveStatus.ContainsKey((QuestObjectiveType.GameObject, (int)gameObject.GetEntry())))
+                        if (m_questObjectiveStatus.ContainsKey((QuestObjectiveType.GameObject, (int)gameObject.GetEntry())) || gameObject.GetGoInfo().GetConditionID1() != 0)
                             objMask.MarkChanged(gameObject.m_objectData.DynamicFlags);
-
-                        switch (gameObject.GetGoType())
+                        else
                         {
-                            case GameObjectTypes.QuestGiver:
-                            case GameObjectTypes.Chest:
-                            case GameObjectTypes.Goober:
-                            case GameObjectTypes.Generic:
-                            case GameObjectTypes.GatheringNode:
-                                if (Global.ObjectMgr.IsGameObjectForQuests(gameObject.GetEntry()))
-                                    objMask.MarkChanged(gameObject.m_objectData.DynamicFlags);
-                                break;
-                            default:
-                                break;
+                            switch (gameObject.GetGoType())
+                            {
+                                case GameObjectTypes.QuestGiver:
+                                case GameObjectTypes.Chest:
+                                case GameObjectTypes.Generic:
+                                case GameObjectTypes.SpellFocus:
+                                case GameObjectTypes.Goober:
+                                case GameObjectTypes.GatheringNode:
+                                    if (Global.ObjectMgr.IsGameObjectForQuests(gameObject.GetEntry()))
+                                        objMask.MarkChanged(gameObject.m_objectData.DynamicFlags);
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
 
                         if (objMask.GetUpdateMask().IsAnySet() || goMask.GetUpdateMask().IsAnySet())

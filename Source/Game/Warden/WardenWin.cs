@@ -487,7 +487,7 @@ namespace Game
 
         public static implicit operator byte[](WardenInitModuleRequest request)
         {
-            ByteBuffer buffer = new ByteBuffer();
+            ByteBuffer buffer = new();
             buffer.WriteUInt8((byte)request.Command1);
             buffer.WriteUInt16(request.Size1);
             buffer.WriteUInt32(request.CheckSumm1);

@@ -505,6 +505,41 @@ namespace Game
             foreach (var (id, conditions) in ConditionStorage[ConditionSourceType.Graveyard])
                 AddToGraveyardData(id, conditions);
 
+            bool isPlayerConditionIdUsedByCondition(int playerConditionId, List<Condition> conditions, Dictionary<ConditionSourceType, Dictionary<ConditionId, List<Condition>>> store)
+            {
+                return conditions.Any(condition =>
+                {
+                    if (condition.ConditionType == ConditionTypes.PlayerCondition)
+                    {
+                        if (condition.ConditionValue1 == playerConditionId)
+                            return true;
+
+                        var playerCondList = store[ConditionSourceType.PlayerCondition].LookupByKey(new ConditionId(0, (int)condition.ConditionValue1, 0));
+                        if (playerCondList != null)
+                            if (isPlayerConditionIdUsedByCondition(playerConditionId, playerCondList, store))
+                                return true;
+                    }
+                    else if (condition.ReferenceId != 0)
+                    {
+                        var refList = store[ConditionSourceType.ReferenceCondition].LookupByKey(new ConditionId(condition.ReferenceId, 0, 0));
+                        if (refList != null)
+                            if (isPlayerConditionIdUsedByCondition(playerConditionId, refList, store))
+                                return true;
+                    }
+                    return false;
+                });
+            }
+
+            foreach (var (id, conditions) in ConditionStorage[ConditionSourceType.PlayerCondition])
+            {
+                if (isPlayerConditionIdUsedByCondition(id.SourceEntry, conditions, ConditionStorage))
+                {
+                    Log.outError(LogFilter.Sql, $"[Condition SourceType: CONDITION_SOURCE_TYPE_PLAYER_CONDITION, SourceGroup: {id.SourceGroup}, SourceEntry: {id.SourceEntry}, SourceId: {id.SourceId}] " +
+                        $"has a circular reference to player condition id {id.SourceEntry}, removed all conditions for this SourceEntry!");
+                    conditions.Clear();
+                }
+            }
+
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} conditions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
@@ -1086,10 +1121,6 @@ namespace Game
                         return false;
                     }
                     break;
-                case ConditionSourceType.GossipMenu:
-                case ConditionSourceType.GossipMenuOption:
-                case ConditionSourceType.SmartEvent:
-                    break;
                 case ConditionSourceType.Graveyard:
                     if (Global.ObjectMgr.FindGraveyardData((uint)cond.SourceEntry, cond.SourceGroup) == null)
                     {
@@ -1183,6 +1214,11 @@ namespace Game
                     }
                     break;
                 }
+                case ConditionSourceType.GossipMenu:
+                case ConditionSourceType.GossipMenuOption:
+                case ConditionSourceType.SmartEvent:
+                case ConditionSourceType.PlayerCondition:
+                    break;
                 default:
                     Log.outError(LogFilter.Sql, $"{cond.ToString()} Invalid ConditionSourceType in `condition` table, ignoring.");
                     return false;
@@ -1890,6 +1926,21 @@ namespace Game
             }
 
             return 0;
+        }
+
+        public static bool IsPlayerMeetingCondition(Player player, uint conditionId)
+        {
+            if (conditionId == 0)
+                return true;
+
+            if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.PlayerCondition, conditionId, player))
+                return false;
+
+            var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(conditionId);
+            if (playerCondition != null)
+                return IsPlayerMeetingCondition(player, playerCondition);
+
+            return true;
         }
 
         public static bool IsPlayerMeetingCondition(Player player, PlayerConditionRecord condition)
@@ -2957,7 +3008,8 @@ namespace Game
             "AreaTrigger Client Triggered",
             "Trainer Spell",
             "Object Visibility (by ID)",
-            "Spawn Group"
+            "Spawn Group",
+            "Player Condition"
         };
 
         public ConditionTypeInfo[] StaticConditionTypeData =

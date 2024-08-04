@@ -9,6 +9,7 @@ using Framework.Networking;
 using Game.Networking.Packets;
 using System;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace Game.Networking
 {
@@ -75,12 +76,12 @@ namespace Game.Networking
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_IP_INFO);
             stmt.AddValue(0, ip_address);
-            stmt.AddValue(1, BitConverter.ToUInt32(GetRemoteIpAddress().Address.GetAddressBytes(), 0));
+            stmt.AddValue(1, BitConverter.ToUInt32(GetRemoteIpAddress().GetAddressBytes(), 0));
 
             _queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(CheckIpCallback));
         }
 
-        void CheckIpCallback(SQLResult result)
+        async void CheckIpCallback(SQLResult result)
         {
             if (!result.IsEmpty())
             {
@@ -109,24 +110,18 @@ namespace Game.Networking
             ByteBuffer packet = new();
             packet.WriteString(ServerConnectionInitialize);
             packet.WriteString("\n");
-            AsyncWrite(packet.GetData());
+            await AsyncWrite(packet.GetData());
         }
 
-        void InitializeHandler(SocketAsyncEventArgs args)
+        async Task InitializeHandler(byte[] data, int receivedLength)
         {
-            if (args.SocketError != SocketError.Success)
-            {
-                CloseSocket();
-                return;
-            }
-
-            if (args.BytesTransferred > 0)
+            if (receivedLength > 0)
             {
                 if (_packetBuffer.GetRemainingSpace() > 0)
                 {
                     // need to receive the header
-                    int readHeaderSize = Math.Min(args.BytesTransferred, _packetBuffer.GetRemainingSpace());
-                    _packetBuffer.Write(args.Buffer, 0, readHeaderSize);
+                    int readHeaderSize = Math.Min(receivedLength, _packetBuffer.GetRemainingSpace());
+                    _packetBuffer.Write(data, 0, readHeaderSize);
 
                     if (_packetBuffer.GetRemainingSpace() > 0)
                     {
@@ -165,25 +160,25 @@ namespace Game.Networking
                     _packetBuffer.Resize(0);
                     _packetBuffer.Reset();
                     HandleSendAuthSession();
-                    AsyncRead();
+                    await AsyncRead();
                     return;
                 }
             }
         }
 
-        public override void ReadHandler(SocketAsyncEventArgs args)
+        public async override void ReadHandler(byte[] data, int receivedLength)
         {
             if (!IsOpen())
                 return;
 
             int currentReadIndex = 0;
-            while (currentReadIndex < args.BytesTransferred)
+            while (currentReadIndex < receivedLength)
             {
                 if (_headerBuffer.GetRemainingSpace() > 0)
                 {
                     // need to receive the header
-                    int readHeaderSize = Math.Min(args.BytesTransferred - currentReadIndex, _headerBuffer.GetRemainingSpace());
-                    _headerBuffer.Write(args.Buffer, currentReadIndex, readHeaderSize);
+                    int readHeaderSize = Math.Min(receivedLength - currentReadIndex, _headerBuffer.GetRemainingSpace());
+                    _headerBuffer.Write(data, currentReadIndex, readHeaderSize);
                     currentReadIndex += readHeaderSize;
 
                     if (_headerBuffer.GetRemainingSpace() > 0)
@@ -201,8 +196,8 @@ namespace Game.Networking
                 if (_packetBuffer.GetRemainingSpace() > 0)
                 {
                     // need more data in the payload
-                    int readDataSize = Math.Min(args.BytesTransferred - currentReadIndex, _packetBuffer.GetRemainingSpace());
-                    _packetBuffer.Write(args.Buffer, currentReadIndex, readDataSize);
+                    int readDataSize = Math.Min(receivedLength - currentReadIndex, _packetBuffer.GetRemainingSpace());
+                    _packetBuffer.Write(data, currentReadIndex, readDataSize);
                     currentReadIndex += readDataSize;
 
                     if (_packetBuffer.GetRemainingSpace() > 0)
@@ -221,7 +216,7 @@ namespace Game.Networking
                 }
             }
 
-            AsyncRead();
+            await AsyncRead();
         }
 
         bool ReadHeader()
@@ -254,7 +249,7 @@ namespace Game.Networking
                 return ReadDataHandlerResult.Error;
             }
 
-            PacketLog.Write(packet.GetData(), packet.GetOpcode(), GetRemoteIpAddress(), _connectType, true);
+            PacketLog.Write(packet.GetData(), packet.GetOpcode(), GetRemoteIpEndPoint(), _connectType, true);
 
             ClientOpcodes opcode = (ClientOpcodes)packet.GetOpcode();
 
@@ -346,7 +341,7 @@ namespace Game.Networking
             return ReadDataHandlerResult.Ok;
         }
 
-        public void SendPacket(ServerPacket packet)
+        public async void SendPacket(ServerPacket packet)
         {
             if (!IsOpen())
                 return;
@@ -356,7 +351,7 @@ namespace Game.Networking
 
             var data = packet.GetData();
             ServerOpcodes opcode = packet.GetOpcode();
-            PacketLog.Write(data, (uint)opcode, GetRemoteIpAddress(), _connectType, false);
+            PacketLog.Write(data, (uint)opcode, GetRemoteIpEndPoint(), _connectType, false);
 
             ByteBuffer buffer = new();
 
@@ -368,7 +363,7 @@ namespace Game.Networking
 
                 byte[] compressedData;
                 uint compressedSize = CompressPacket(data, opcode, out compressedData);
-                buffer.WriteUInt32(ZLib.adler32(0x9827D8F1, compressedData, compressedSize)); 
+                buffer.WriteUInt32(ZLib.adler32(0x9827D8F1, compressedData, compressedSize));
                 buffer.WriteBytes(compressedData, compressedSize);
 
                 packetSize = (int)(compressedSize + 12);
@@ -392,7 +387,7 @@ namespace Game.Networking
             header.Write(byteBuffer);
             byteBuffer.WriteBytes(data);
 
-            AsyncWrite(byteBuffer.GetData());
+            await AsyncWrite(byteBuffer.GetData());
         }
 
         public void SetWorldSession(WorldSession session)
@@ -464,7 +459,7 @@ namespace Game.Networking
             _queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(HandleAuthSessionCallback, authSession));
         }
 
-        void HandleAuthSessionCallback(AuthSession authSession, SQLResult result)
+        async void HandleAuthSessionCallback(AuthSession authSession, SQLResult result)
         {
             // Stop if the account is not found
             if (result.IsEmpty())
@@ -540,7 +535,7 @@ namespace Game.Networking
             {
                 // As we don't know if attempted login process by ip works, we update last_attempt_ip right away
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_LAST_ATTEMPT_IP);
-                stmt.AddValue(0, address.Address.ToString());
+                stmt.AddValue(0, address.ToString());
                 stmt.AddValue(1, authSession.RealmJoinTicket);
                 DB.Login.Execute(stmt);
                 // This also allows to check for possible "hack" attempts on account
@@ -582,7 +577,7 @@ namespace Game.Networking
             //Re-check ip locking (same check as in auth).
             if (account.battleNet.IsLockedToIP) // if ip is locked
             {
-                if (account.battleNet.LastIP != address.Address.ToString())
+                if (account.battleNet.LastIP != address.ToString())
                 {
                     SendAuthResponseError(BattlenetRpcErrorCode.RiskAccountLocked);
                     Log.outDebug(LogFilter.Network, "HandleAuthSession: Sent Auth Response (Account IP differs).");
@@ -643,7 +638,7 @@ namespace Game.Networking
             {
                 // Update the last_ip in the database
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_LAST_IP);
-                stmt.AddValue(0, address.Address.ToString());
+                stmt.AddValue(0, address.ToString());
                 stmt.AddValue(1, authSession.RealmJoinTicket);
                 DB.Login.Execute(stmt);
             }
@@ -659,7 +654,7 @@ namespace Game.Networking
             //_worldSession.InitWarden(_sessionKey);
 
             _queryProcessor.AddCallback(_worldSession.LoadPermissionsAsync().WithCallback(LoadSessionPermissionsCallback));
-            AsyncRead();
+            await AsyncRead();
         }
 
         void LoadSessionPermissionsCallback(SQLResult result)
@@ -690,7 +685,7 @@ namespace Game.Networking
             _queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(HandleAuthContinuedSessionCallback, authSession));
         }
 
-        void HandleAuthContinuedSessionCallback(AuthContinuedSession authSession, SQLResult result)
+        async void HandleAuthContinuedSessionCallback(AuthContinuedSession authSession, SQLResult result)
         {
             if (result.IsEmpty())
             {
@@ -728,7 +723,7 @@ namespace Game.Networking
             Buffer.BlockCopy(encryptKeyGen.Digest, 0, _encryptKey, 0, 16);
 
             SendPacket(new EnterEncryptedMode(_encryptKey, true));
-            AsyncRead();
+            await AsyncRead();
         }
 
         void HandleConnectToFailed(ConnectToFailed connectToFailed)
@@ -752,11 +747,11 @@ namespace Game.Networking
                             _worldSession.SendConnectToInstance(ConnectToSerial.WorldAttempt5);
                             break;
                         case ConnectToSerial.WorldAttempt5:
-                            {
-                                Log.outError(LogFilter.Network, "{0} failed to connect 5 times to world socket, aborting login", _worldSession.GetPlayerInfo());
-                                _worldSession.AbortLogin(LoginFailureReason.NoWorld);
-                                break;
-                            }
+                        {
+                            Log.outError(LogFilter.Network, "{0} failed to connect 5 times to world socket, aborting login", _worldSession.GetPlayerInfo());
+                            _worldSession.AbortLogin(LoginFailureReason.NoWorld);
+                            break;
+                        }
                         default:
                             return;
                     }

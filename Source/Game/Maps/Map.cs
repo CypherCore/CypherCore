@@ -60,17 +60,10 @@ namespace Game.Maps
             m_terrain.LoadMMapInstance(GetId(), GetInstanceId());
 
             _worldStateValues = Global.WorldStateMgr.GetInitialWorldStatesForMap(this);
-
-            Global.OutdoorPvPMgr.CreateOutdoorPvPForMap(this);
-            Global.BattleFieldMgr.CreateBattlefieldsForMap(this);
-
-            Global.ScriptMgr.OnCreateMap(this);
         }
 
         public void Dispose()
         {
-            Global.ScriptMgr.OnDestroyMap(this);
-
             // Delete all waiting spawns
             // This doesn't delete from database.
             UnloadAllRespawnInfos();
@@ -85,9 +78,6 @@ namespace Game.Maps
 
             if (!m_scriptSchedule.Empty())
                 Global.MapMgr.DecreaseScheduledScriptCount((uint)m_scriptSchedule.Count);
-
-            Global.OutdoorPvPMgr.DestroyOutdoorPvPForMap(this);
-            Global.BattleFieldMgr.DestroyBattlefieldsForMap(this);
 
             m_terrain.UnloadMMapInstance(GetId(), GetInstanceId());
         }
@@ -5273,6 +5263,10 @@ namespace Game.Maps
 
     public class BattlegroundMap : Map
     {
+        Battleground m_bg;
+        BattlegroundScript _battlegroundScript;
+        uint _scriptId;
+
         public BattlegroundMap(uint id, uint expiry, uint InstanceId, Difficulty spawnMode)
             : base(id, expiry, InstanceId, spawnMode)
         {
@@ -5283,6 +5277,37 @@ namespace Game.Maps
         {
             m_VisibleDistance = IsBattleArena() ? Global.WorldMgr.GetMaxVisibleDistanceInArenas() : Global.WorldMgr.GetMaxVisibleDistanceInBG();
             m_VisibilityNotifyPeriod = IsBattleArena() ? Global.WorldMgr.GetVisibilityNotifyPeriodInArenas() : Global.WorldMgr.GetVisibilityNotifyPeriodInBG();
+        }
+
+        string GetScriptName()
+        {
+            return Global.ObjectMgr.GetScriptName(_scriptId);
+        }
+
+        public void InitScriptData()
+        {
+            if (_battlegroundScript != null)
+                return;
+
+            Cypher.Assert(GetBG() != null, "Battleground not set yet!");
+
+            BattlegroundScriptTemplate scriptTemplate = Global.BattlegroundMgr.FindBattlegroundScriptTemplate(GetId(), GetBG().GetTypeID());
+            if (scriptTemplate != null)
+            {
+                _scriptId = scriptTemplate.ScriptId;
+                _battlegroundScript = Global.ScriptMgr.CreateBattlegroundData(this);
+            }
+
+            // Make sure every battleground has a default script
+            if (_battlegroundScript == null)
+            {
+                if (IsBattleArena())
+                    _battlegroundScript = new ArenaScript(this);
+                else
+                    _battlegroundScript = new BattlegroundScript(this);
+            }
+
+            _battlegroundScript.OnInit();
         }
 
         public override TransferAbortParams CannotEnter(Player player)
@@ -5327,10 +5352,18 @@ namespace Game.Maps
                         player.TeleportTo(player.GetBattlegroundEntryPoint());
         }
 
+        public override void Update(uint diff)
+        {
+            base.Update(diff);
+            _battlegroundScript.OnUpdate(diff);
+        }
+
         public Battleground GetBG() { return m_bg; }
         public void SetBG(Battleground bg) { m_bg = bg; }
 
-        Battleground m_bg;
+        public uint GetScriptId() { return _scriptId; }
+
+        public BattlegroundScript GetBattlegroundScript() { return _battlegroundScript; }
     }
 
     public class TransferAbortParams
@@ -5396,7 +5429,7 @@ namespace Game.Maps
         public float FloorZ;
         public bool outdoors = true;
         public ZLiquidStatus LiquidStatus;
-        public WmoLocation? wmoLocation;
+        public WmoLocation wmoLocation;
         public LiquidData LiquidInfo;
     }
 

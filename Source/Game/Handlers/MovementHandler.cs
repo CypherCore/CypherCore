@@ -756,8 +756,7 @@ namespace Game
                 // far teleport case
                 if (GetPlayer().GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Flight)
                 {
-                    FlightPathMovementGenerator flight = GetPlayer().GetMotionMaster().GetCurrentMovementGenerator() as FlightPathMovementGenerator;
-                    if (flight != null)
+                    if (GetPlayer().GetMotionMaster().GetCurrentMovementGenerator() is FlightPathMovementGenerator flight)
                     {
                         bool shouldTeleport = curDestNode != null && curDestNode.ContinentID != GetPlayer().GetMapId();
                         if (!shouldTeleport)

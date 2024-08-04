@@ -1254,8 +1254,7 @@ namespace Game.Achievements
                 }
                 case ModifierTreeType.PlayerMeetsCondition: // 2
                 {
-                    PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(reqValue);
-                    if (playerCondition == null || !ConditionManager.IsPlayerMeetingCondition(referencePlayer, playerCondition))
+                    if (!ConditionManager.IsPlayerMeetingCondition(referencePlayer, reqValue))
                         return false;
                     break;
                 }
@@ -1520,8 +1519,7 @@ namespace Game.Achievements
                     if (refe == null || !refe.IsPlayer())
                         return false;
 
-                    PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(reqValue);
-                    if (playerCondition == null || !ConditionManager.IsPlayerMeetingCondition(refe.ToPlayer(), playerCondition))
+                    if (!ConditionManager.IsPlayerMeetingCondition(refe.ToPlayer(), reqValue))
                         return false;
                     break;
                 }

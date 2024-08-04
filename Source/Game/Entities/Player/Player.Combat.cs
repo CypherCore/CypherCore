@@ -457,7 +457,7 @@ namespace Game.Entities
                 case DuelCompleteType.Fled:
                     // if initiator and opponent are on the same team
                     // or initiator and opponent are not PvP enabled, forcibly stop attacking
-                    if (GetTeam() == opponent.GetTeam())
+                    if (GetEffectiveTeam() == opponent.GetEffectiveTeam())
                     {
                         AttackStop();
                         opponent.AttackStop();

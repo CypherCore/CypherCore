@@ -110,8 +110,7 @@ namespace Game.Entities
                 if (player.IsQuestRewarded(vignette.Data.VisibleTrackingQuestID))
                     return false;
 
-            var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(vignette.Data.PlayerConditionID);
-            if (playerCondition != null && !ConditionManager.IsPlayerMeetingCondition(player, playerCondition))
+            if (!ConditionManager.IsPlayerMeetingCondition(player, vignette.Data.PlayerConditionID))
                 return false;
 
             return true;

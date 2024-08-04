@@ -132,7 +132,7 @@ namespace BNetServer.REST
         RequestHandlerResult HandleGetForm(LoginHttpSession session, RequestContext context)
         {
             FormInputs form = _formInputs;
-            form.SrpUrl = $"https://{GetHostnameForClient(session.GetRemoteIpAddress())}:{_port}/bnetserver/login/srp/";
+            form.SrpUrl = $"http{(!Global.LoginServiceMgr.UsesDevWildcardCertificate() ? "s" : "")}://{GetHostnameForClient(session.GetRemoteIpAddress())}:{_port}/bnetserver/login/srp/";
 
             context.response.ContentType = "application/json;charset=utf-8";
             context.response.Content = JsonSerializer.Serialize(form);

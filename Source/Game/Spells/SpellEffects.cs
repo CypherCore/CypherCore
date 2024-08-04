@@ -1217,19 +1217,7 @@ namespace Game.Spells
                 if (goInfo.GetNoDamageImmune() != 0 && player.HasUnitFlag(UnitFlags.Immune))
                     return;
 
-                if (goInfo.type == GameObjectTypes.FlagStand)
-                {
-                    //CanUseBattlegroundObject() already called in CheckCast()
-                    // in Battlegroundcheck
-                    Battleground bg = player.GetBattleground();
-                    if (bg != null)
-                    {
-                        if (bg.GetTypeID() == BattlegroundTypeId.EY)
-                            bg.EventPlayerClickedOnFlag(player, gameObjTarget);
-                        return;
-                    }
-                }
-                else if (m_spellInfo.Id == 1842 && gameObjTarget.GetGoInfo().type == GameObjectTypes.Trap && gameObjTarget.GetOwner() != null)
+                if (m_spellInfo.Id == 1842 && gameObjTarget.GetGoInfo().type == GameObjectTypes.Trap && gameObjTarget.GetOwner() != null)
                 {
                     gameObjTarget.SetLootState(LootState.JustDeactivated);
                     return;
@@ -2610,17 +2598,6 @@ namespace Game.Spells
 
             // Wild object not have owner and check clickable by players
             map.AddToMap(go);
-
-            if (go.GetGoType() == GameObjectTypes.FlagDrop)
-            {
-                Player player = m_caster.ToPlayer();
-                if (player != null)
-                {
-                    Battleground bg = player.GetBattleground();
-                    if (bg != null)
-                        bg.SetDroppedFlagGUID(go.GetGUID(), bg.GetPlayerTeam(player.GetGUID()) == Team.Alliance ? BattleGroundTeamId.Horde : BattleGroundTeamId.Alliance);
-                }
-            }
 
             GameObject linkedTrap = go.GetLinkedTrap();
             if (linkedTrap != null)

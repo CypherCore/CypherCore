@@ -1394,10 +1394,8 @@ namespace Game
                     if (!MeetsChrCustomizationReq(req, (Race)packet.CustomizedRace, _player.GetClass(), false, packet.Customizations))
                         return;
 
-                var condition = CliDB.PlayerConditionStorage.LookupByKey(conditionalChrModel.PlayerConditionID);
-                if (condition != null)
-                    if (!ConditionManager.IsPlayerMeetingCondition(_player, condition))
-                        return;
+                if (!ConditionManager.IsPlayerMeetingCondition(_player, (uint)conditionalChrModel.PlayerConditionID))
+                    return;
             }
 
             if (!ValidateAppearance(_player.GetRace(), _player.GetClass(), (Gender)packet.NewSex, packet.Customizations))
@@ -1632,10 +1630,8 @@ namespace Game
                     if (illusion.ItemVisual == 0 || !illusion.HasFlag(SpellItemEnchantmentFlags.AllowTransmog))
                         return false;
 
-                    PlayerConditionRecord condition = CliDB.PlayerConditionStorage.LookupByKey(illusion.TransmogUseConditionID);
-                    if (condition != null)
-                        if (!ConditionManager.IsPlayerMeetingCondition(_player, condition))
-                            return false;
+                    if (!ConditionManager.IsPlayerMeetingCondition(_player, illusion.TransmogUseConditionID))
+                        return false;
 
                     if (illusion.ScalingClassRestricted > 0 && illusion.ScalingClassRestricted != (byte)_player.GetClass())
                         return false;

@@ -264,7 +264,7 @@ namespace Game.Networking.Packets
 
             _worldPacket.WriteBit(KioskModeEnabled);
             _worldPacket.WriteBit(CompetitiveModeEnabled);
-            _worldPacket.WriteBit(false); // unused, 10.0.2
+            _worldPacket.WriteBit(IsBoostEnabled);
             _worldPacket.WriteBit(TrialBoostEnabled);
             _worldPacket.WriteBit(TokenBalanceEnabled);
             _worldPacket.WriteBit(LiveRegionCharacterListEnabled);
@@ -275,7 +275,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(Unknown901CheckoutRelated);
             _worldPacket.WriteBit(false); // unused, 10.0.2
             _worldPacket.WriteBit(EuropaTicketSystemStatus.HasValue);
-            _worldPacket.WriteBit(false); // unused, 10.0.2
+            _worldPacket.WriteBit(IsNameReservationEnabled);
             _worldPacket.WriteBit(LaunchETA.HasValue);
             _worldPacket.WriteBit(AddonsDisabled);
             _worldPacket.WriteBit(Unused1000);
@@ -309,6 +309,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32((uint)PlayerNameQueryInterval.TotalSeconds);
             _worldPacket.WriteInt32(DebugTimeEvents.Count);
             _worldPacket.WriteInt32(Unused1007);
+            _worldPacket.WriteUInt32(EventRealmQueues);
 
             if (LaunchETA.HasValue)
                 _worldPacket.WriteInt32(LaunchETA.Value);
@@ -336,6 +337,7 @@ namespace Game.Networking.Packets
         public bool IsExpansionPreorderInStore; // NYI
         public bool KioskModeEnabled; // NYI
         public bool CompetitiveModeEnabled; // NYI
+        public bool IsBoostEnabled; // classic only
         public bool TrialBoostEnabled; // NYI
         public bool TokenBalanceEnabled; // NYI
         public bool LiveRegionCharacterListEnabled; // NYI
@@ -343,6 +345,7 @@ namespace Game.Networking.Packets
         public bool LiveRegionAccountCopyEnabled; // NYI
         public bool LiveRegionKeyBindingsCopyEnabled;
         public bool Unknown901CheckoutRelated; // NYI
+        public bool IsNameReservationEnabled; // classic only
         public bool AddonsDisabled;
         public bool Unused1000;
         public bool AccountSaveDataExportEnabled;
@@ -366,6 +369,7 @@ namespace Game.Networking.Packets
         public int? LaunchETA;
         public List<DebugTimeEventInfo> DebugTimeEvents = new();
         public int Unused1007;
+        public uint EventRealmQueues;
         public string RealmHiddenAlert;
     }
 

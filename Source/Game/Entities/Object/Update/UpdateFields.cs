@@ -112,29 +112,33 @@ namespace Game.Entities
                     ushort pathProgress = 0xFFFF;
                     switch (gameObject.GetGoType())
                     {
+                        case GameObjectTypes.Button:
+                        case GameObjectTypes.Goober:
+                            if (gameObject.GetGoInfo().GetQuestID() != 0 || gameObject.GetGoInfo().GetConditionID1() != 0)
+                            {
+                                if (gameObject.CanActivateForPlayer(receiver))
+                                {
+                                    dynFlags |= GameObjectDynamicLowFlags.Highlight;
+                                    if (gameObject.GetGoStateFor(receiver.GetGUID()) != GameObjectState.Active)
+                                        dynFlags |= GameObjectDynamicLowFlags.Activate;
+                                }
+                            }
+                            break;
                         case GameObjectTypes.QuestGiver:
-                            if (gameObject.ActivateToQuest(receiver))
+                            if (gameObject.CanActivateForPlayer(receiver))
                                 dynFlags |= GameObjectDynamicLowFlags.Activate;
                             break;
                         case GameObjectTypes.Chest:
-                            if (gameObject.ActivateToQuest(receiver))
+                            if (gameObject.CanActivateForPlayer(receiver))
                                 dynFlags |= GameObjectDynamicLowFlags.Activate | GameObjectDynamicLowFlags.Sparkle | GameObjectDynamicLowFlags.Highlight;
                             else if (receiver.IsGameMaster())
-                                dynFlags |= GameObjectDynamicLowFlags.Activate;
-                            break;
-                        case GameObjectTypes.Goober:
-                            if (gameObject.ActivateToQuest(receiver))
-                            {
-                                dynFlags |= GameObjectDynamicLowFlags.Highlight;
-                                if (gameObject.GetGoStateFor(receiver.GetGUID()) != GameObjectState.Active)
-                                    dynFlags |= GameObjectDynamicLowFlags.Activate;
-                            }
-                            else if (receiver.IsGameMaster())
-                                dynFlags |= GameObjectDynamicLowFlags.Activate;
+                                dynFlags |= GameObjectDynamicLowFlags.Activate | GameObjectDynamicLowFlags.Sparkle;
                             break;
                         case GameObjectTypes.Generic:
-                            if (gameObject.ActivateToQuest(receiver))
-                                dynFlags |= GameObjectDynamicLowFlags.Sparkle | GameObjectDynamicLowFlags.Highlight;
+                        case GameObjectTypes.SpellFocus:
+                            if (gameObject.GetGoInfo().GetQuestID() != 0 || gameObject.GetGoInfo().GetConditionID1() != 0)
+                                if (gameObject.CanActivateForPlayer(receiver))
+                                    dynFlags |= GameObjectDynamicLowFlags.Sparkle | GameObjectDynamicLowFlags.Highlight;
                             break;
                         case GameObjectTypes.Transport:
                         case GameObjectTypes.MapObjTransport:
@@ -150,7 +154,7 @@ namespace Game.Entities
                                 dynFlags &= ~GameObjectDynamicLowFlags.NoInterract;
                             break;
                         case GameObjectTypes.GatheringNode:
-                            if (gameObject.ActivateToQuest(receiver))
+                            if (gameObject.CanActivateForPlayer(receiver))
                                 dynFlags |= GameObjectDynamicLowFlags.Activate | GameObjectDynamicLowFlags.Sparkle | GameObjectDynamicLowFlags.Highlight;
                             if (gameObject.GetGoStateFor(receiver.GetGUID()) == GameObjectState.Active)
                                 dynFlags |= GameObjectDynamicLowFlags.Depleted;
@@ -159,7 +163,7 @@ namespace Game.Entities
                             break;
                     }
 
-                    if (!gameObject.MeetsInteractCondition(receiver))
+                    if (!receiver.IsGameMaster() && !gameObject.MeetsInteractCondition(receiver))
                         dynFlags |= GameObjectDynamicLowFlags.NoInterract;
 
                     unitDynFlags = ((uint)pathProgress << 16) | (uint)dynFlags;
@@ -2789,22 +2793,25 @@ namespace Game.Entities
         public UpdateField<uint> HonorLevel = new(0, 30);
         public UpdateField<long> LogoutTime = new(0, 31);
         public UpdateFieldString Name = new(32, 33);
-        public UpdateField<int> Field_B0 = new(32, 34);
-        public UpdateField<int> Field_B4 = new(32, 35);
+        public UpdateField<int> Field_1AC = new(32, 34);
+        public UpdateField<int> Field_1B0 = new(32, 35);
         public UpdateField<int> CurrentBattlePetSpeciesID = new(32, 36);
         public UpdateField<CTROptions> CtrOptions = new(32, 37);
         public UpdateField<int> CovenantID = new(32, 38);
         public UpdateField<int> SoulbindID = new(32, 39);
         public UpdateField<DungeonScoreSummary> DungeonScore = new(32, 40);
-        public OptionalUpdateField<DeclinedNames> DeclinedNames = new(32, 41);
-        public UpdateField<CustomTabardInfo> PersonalTabard = new(32, 42);
-        public UpdateFieldArray<byte> PartyType = new(2, 43, 44);
-        public UpdateFieldArray<QuestLog> QuestLog = new(175, 46, 47);
-        public UpdateFieldArray<VisibleItem> VisibleItems = new(19, 222, 223);
-        public UpdateFieldArray<float> AvgItemLevel = new(6, 242, 243);
-        public UpdateFieldArray<uint> Field_3120 = new(19, 249, 250);
+        public UpdateField<ObjectGuid> SpectateTarget = new(32, 41);
+        public UpdateField<int> Field_200 = new(32, 42);
+        public OptionalUpdateField<DeclinedNames> DeclinedNames = new(32, 43);
+        public UpdateField<CustomTabardInfo> PersonalTabard = new(32, 44);
+        public UpdateFieldArray<byte> PartyType = new(2, 45, 46);
+        public UpdateFieldArray<QuestLog> QuestLog = new(175, 48, 49);
+        public UpdateFieldArray<VisibleItem> VisibleItems = new(19, 224, 225);
+        public UpdateFieldArray<float> AvgItemLevel = new(6, 244, 245);
+        public UpdateFieldArray<ItemInstance> VisibleEquipableSpells = new(16, 251, 252);
+        public UpdateFieldArray<uint> Field_3120 = new(19, 268, 269);
 
-        public PlayerData() : base(0, TypeId.Player, 269) { }
+        public PlayerData() : base(0, TypeId.Player, 288) { }
 
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
         {
@@ -2854,12 +2861,14 @@ namespace Game.Entities
             data.WriteUInt32(HonorLevel);
             data.WriteInt64(LogoutTime);
             data.WriteInt32(ArenaCooldowns.Size());
-            data.WriteInt32(Field_B0);
-            data.WriteInt32(Field_B4);
+            data.WriteInt32(Field_1AC);
+            data.WriteInt32(Field_1B0);
             data.WriteInt32(CurrentBattlePetSpeciesID);
             ((CTROptions)CtrOptions).WriteCreate(data, owner, receiver);
             data.WriteInt32(CovenantID);
             data.WriteInt32(SoulbindID);
+            data.WritePackedGuid(SpectateTarget);
+            data.WriteInt32(Field_200);
             data.WriteInt32(VisualItemReplacements.Size());
             for (int i = 0; i < 19; ++i)
             {
@@ -2899,6 +2908,10 @@ namespace Game.Entities
             data.WriteBits(DeclinedNames.HasValue(), 1);
             DungeonScore._value.Write(data);
             data.WriteString(Name);
+            for (int i = 0; i < 16; ++i)
+            {
+                VisibleEquipableSpells[i].Write(data);
+            }
             if (DeclinedNames.HasValue())
             {
                 DeclinedNames.GetValue().WriteCreate(data, owner, receiver);
@@ -2908,7 +2921,7 @@ namespace Game.Entities
 
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
         {
-            UpdateMask allowedMaskForTarget = new(269, [0xFFFFFFDDu, 0x00003FFFu, 0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0xC0000000u, 0xFFFFFFFFu, 0x00001FFFu]);
+            UpdateMask allowedMaskForTarget = new(288, [0xFFFFFFDDu, 0x0000FFFFu, 0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0xFFFFFFFFu, 0xFFFFFFFFu]);
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
         }
@@ -2916,12 +2929,12 @@ namespace Game.Entities
         public void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.PartyMember))
-                allowedMaskForTarget.OR(new UpdateMask(269, new[] { 0x00000022u, 0xFFFFC000u, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0x3FFFFFFFu, 0x00000000u, 0x00000000u }));
+                allowedMaskForTarget.OR(new UpdateMask(288, [0x00000022u, 0xFFFF0000u, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0x00000000u, 0x00000000u]));
         }
 
         public void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
         {
-            UpdateMask allowedMaskForTarget = new(269, new[] { 0xFFFFFFDDu, 0x00003FFFu, 0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0xC0000000u, 0xFFFFFFFFu, 0x00001FFFu });
+            UpdateMask allowedMaskForTarget = new(288, [0xFFFFFFDDu, 0x0000FFFFu, 0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0xFFFFFFFFu, 0xFFFFFFFFu]);
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             changesMask.AND(allowedMaskForTarget);
         }
@@ -3137,11 +3150,11 @@ namespace Game.Entities
             {
                 if (changesMask[34])
                 {
-                    data.WriteInt32(Field_B0);
+                    data.WriteInt32(Field_1AC);
                 }
                 if (changesMask[35])
                 {
-                    data.WriteInt32(Field_B4);
+                    data.WriteInt32(Field_1B0);
                 }
                 if (changesMask[36])
                 {
@@ -3159,13 +3172,21 @@ namespace Game.Entities
                 {
                     data.WriteInt32(SoulbindID);
                 }
+                if (changesMask[41])
+                {
+                    data.WritePackedGuid(SpectateTarget);
+                }
                 if (changesMask[42])
+                {
+                    data.WriteInt32(Field_200);
+                }
+                if (changesMask[44])
                 {
                     PersonalTabard.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                 }
                 if (changesMask[33])
                 {
-                    data.WriteBits(Name.GetValue().GetByteCount(), 32);
+                    data.WriteBits(Name.GetValue().GetByteCount(), 6);
                 }
                 data.WriteBits(DeclinedNames.HasValue(), 1);
                 data.FlushBits();
@@ -3177,7 +3198,7 @@ namespace Game.Entities
                 {
                     data.WriteString(Name);
                 }
-                if (changesMask[41])
+                if (changesMask[43])
                 {
                     if (DeclinedNames.HasValue())
                     {
@@ -3185,21 +3206,21 @@ namespace Game.Entities
                     }
                 }
             }
-            if (changesMask[43])
+            if (changesMask[45])
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    if (changesMask[44 + i])
+                    if (changesMask[46 + i])
                     {
                         data.WriteUInt8(PartyType[i]);
                     }
                 }
             }
-            if (changesMask[46])
+            if (changesMask[48])
             {
                 for (int i = 0; i < 175; ++i)
                 {
-                    if (changesMask[47 + i])
+                    if (changesMask[49 + i])
                     {
                         if (noQuestLogChangesMask)
                             QuestLog[i].WriteCreate(data, owner, receiver);
@@ -3208,33 +3229,43 @@ namespace Game.Entities
                     }
                 }
             }
-            if (changesMask[222])
+            if (changesMask[224])
             {
                 for (int i = 0; i < 19; ++i)
                 {
-                    if (changesMask[223 + i])
+                    if (changesMask[225 + i])
                     {
                         VisibleItems[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                     }
                 }
             }
-            if (changesMask[242])
+            if (changesMask[244])
             {
                 for (int i = 0; i < 6; ++i)
                 {
-                    if (changesMask[243 + i])
+                    if (changesMask[245 + i])
                     {
                         data.WriteFloat(AvgItemLevel[i]);
                     }
                 }
             }
-            if (changesMask[249])
+            if (changesMask[268])
             {
                 for (int i = 0; i < 19; ++i)
                 {
-                    if (changesMask[250 + i])
+                    if (changesMask[269 + i])
                     {
                         data.WriteUInt32(Field_3120[i]);
+                    }
+                }
+            }
+            if (changesMask[251])
+            {
+                for (int i = 0; i < 16; ++i)
+                {
+                    if (changesMask[252 + i])
+                    {
+                        VisibleEquipableSpells[i].Write(data);
                     }
                 }
             }
@@ -3275,19 +3306,22 @@ namespace Game.Entities
             ClearChangesMask(HonorLevel);
             ClearChangesMask(LogoutTime);
             ClearChangesMask(Name);
-            ClearChangesMask(Field_B0);
-            ClearChangesMask(Field_B4);
+            ClearChangesMask(Field_1AC);
+            ClearChangesMask(Field_1B0);
             ClearChangesMask(CurrentBattlePetSpeciesID);
             ClearChangesMask(CtrOptions);
             ClearChangesMask(CovenantID);
             ClearChangesMask(SoulbindID);
             ClearChangesMask(DungeonScore);
+            ClearChangesMask(SpectateTarget);
+            ClearChangesMask(Field_200);
             ClearChangesMask(DeclinedNames);
             ClearChangesMask(PersonalTabard);
             ClearChangesMask(PartyType);
             ClearChangesMask(QuestLog);
             ClearChangesMask(VisibleItems);
             ClearChangesMask(AvgItemLevel);
+            ClearChangesMask(VisibleEquipableSpells);
             ClearChangesMask(Field_3120);
             _changesMask.ResetAll();
         }

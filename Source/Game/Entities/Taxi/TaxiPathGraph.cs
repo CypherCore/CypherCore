@@ -154,14 +154,18 @@ namespace Game.Entities
                     foreach (var edge in path)
                     {
                         var To = m_nodesByVertex[(int)edge.To];
-                        TaxiNodeFlags requireFlag = (player.GetTeam() == Team.Alliance) ? TaxiNodeFlags.ShowOnAllianceMap : TaxiNodeFlags.ShowOnHordeMap;
-                        if (!To.HasFlag(requireFlag))
+                        bool isVisibleForFaction = player.GetTeam() switch
+                        {
+                            Team.Horde => To.HasFlag(TaxiNodeFlags.ShowOnHordeMap),
+                            Team.Alliance => To.HasFlag(TaxiNodeFlags.ShowOnAllianceMap),
+                            _ => false
+                        };
+
+                        if (!isVisibleForFaction)
                             continue;
 
-                        PlayerConditionRecord condition = CliDB.PlayerConditionStorage.LookupByKey(To.ConditionID);
-                        if (condition != null)
-                            if (!ConditionManager.IsPlayerMeetingCondition(player, condition))
-                                continue;
+                        if (!ConditionManager.IsPlayerMeetingCondition(player, To.ConditionID))
+                            continue;
 
                         shortestPath.Add(GetNodeIDFromVertexID(edge.To));
                     }

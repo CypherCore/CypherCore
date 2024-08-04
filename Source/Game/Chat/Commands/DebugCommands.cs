@@ -683,17 +683,11 @@ namespace Game.Chat
 
             if (linked == "linked")
             {
-                Battleground bg = player.GetBattleground();
-                if (bg != null)
-                    nearestLoc = bg.GetClosestGraveyard(player);
+                BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(player.GetMap(), player.GetZoneId());
+                if (bf != null)
+                    nearestLoc = bf.GetClosestGraveyard(player);
                 else
-                {
-                    BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(player.GetMap(), player.GetZoneId());
-                    if (bf != null)
-                        nearestLoc = bf.GetClosestGraveyard(player);
-                    else
-                        nearestLoc = Global.ObjectMgr.GetClosestGraveyard(player, player.GetTeam(), player);
-                }
+                    nearestLoc = Global.ObjectMgr.GetClosestGraveyard(player, player.GetTeam(), player);
             }
             else
             {
@@ -788,11 +782,7 @@ namespace Game.Chat
                 return false;
             }
 
-            var playerConditionEntry = CliDB.PlayerConditionStorage.LookupByKey(playerConditionId);
-            if (playerConditionEntry == null)
-                return false;
-
-            if (ConditionManager.IsPlayerMeetingCondition(target, playerConditionEntry))
+            if (ConditionManager.IsPlayerMeetingCondition(target, playerConditionId))
                 handler.SendSysMessage($"PlayerCondition {playerConditionId} met");
             else
                 handler.SendSysMessage($"PlayerCondition {playerConditionId} not met");

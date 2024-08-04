@@ -16,11 +16,11 @@ namespace BNetServer.REST
         public BnetSRP6Base Srp;
     }
 
-    public class LoginHttpSession : SslSocket<LoginHttpSession>
+    public class LoginHttpSession : BaseHttpSocket
     {
         public static string SESSION_ID_COOKIE = "JSESSIONID";
 
-        public LoginHttpSession(Socket socket) : base(socket) { }
+        public LoginHttpSession(Socket socket) : base(socket, !Global.LoginServiceMgr.UsesDevWildcardCertificate()) { }
 
         public override void Start()
         {
@@ -56,7 +56,10 @@ namespace BNetServer.REST
                 }
             }
 
-            await AsyncHandshake(Global.LoginServiceMgr.GetCertificate());
+            if (!Global.LoginServiceMgr.UsesDevWildcardCertificate())
+                await AsyncHandshake(Global.LoginServiceMgr.GetCertificate());
+            else
+                await AsyncRead();
         }
 
         public override RequestHandlerResult RequestHandler(RequestContext context)

@@ -242,6 +242,19 @@ namespace Game.Scripting
 
             Global.ScriptMgr.AddScript(this);
         }
+
+        // Gets an BattlegroundScript object for this battleground.
+        public virtual BattlegroundScript GetBattlegroundScript(BattlegroundMap map) { return null; }
+    }
+
+    class GenericBattlegroundMapScript<Script> : BattlegroundMapScript where Script : BattlegroundScript
+    {
+        public GenericBattlegroundMapScript(string name, uint mapId) : base(name, mapId) { }
+
+        public override BattlegroundScript GetBattlegroundScript(BattlegroundMap map)
+        {
+            return (Script)Activator.CreateInstance(typeof(Script), new object[] { map });
+        }
     }
 
     public class ItemScript : ScriptObject
@@ -428,19 +441,6 @@ namespace Game.Scripting
         public override bool IsDatabaseBound() { return true; }
 
         public virtual BattleField GetBattlefield(Map map) { return null; }
-    }
-
-    public class BattlegroundScript : ScriptObject
-    {
-        public BattlegroundScript(string name) : base(name)
-        {
-            Global.ScriptMgr.AddScript(this);
-        }
-
-        public override bool IsDatabaseBound() { return true; }
-
-        // Should return a fully valid Battlegroundobject for the type ID.
-        public virtual Battleground GetBattleground() { return null; }
     }
 
     public class OutdoorPvPScript : ScriptObject

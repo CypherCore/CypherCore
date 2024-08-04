@@ -672,11 +672,6 @@ namespace Game.Entities
             Player player = Passenger.ToPlayer();
             if (player != null)
             {
-                // drop flag
-                Battleground bg = player.GetBattleground();
-                if (bg != null)
-                    bg.EventPlayerDroppedFlag(player);
-
                 player.StopCastingCharm();
                 player.StopCastingBindSight();
                 player.SendOnCancelExpectedVehicleRideAura();

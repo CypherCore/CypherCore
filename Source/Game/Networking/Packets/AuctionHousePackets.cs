@@ -19,6 +19,7 @@ namespace Game.Networking.Packets
         public AuctionHouseFilterMask Filters;
         public byte[] KnownPets;
         public sbyte MaxPetLevel;
+        public uint Unused1026;
         public AddOnInfo? TaintedBy;
         public string Name;
         public Array<AuctionListFilterClass> ItemClassFilters = new(7);
@@ -37,6 +38,7 @@ namespace Game.Networking.Packets
             Filters = (AuctionHouseFilterMask)_worldPacket.ReadUInt32();
             uint knownPetSize = _worldPacket.ReadUInt32();
             MaxPetLevel = _worldPacket.ReadInt8();
+            Unused1026 = _worldPacket.ReadUInt32();
 
             uint sizeLimit = CliDB.BattlePetSpeciesStorage.GetNumRows() / 8 + 1;
             if (knownPetSize >= sizeLimit)

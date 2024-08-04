@@ -285,7 +285,7 @@ namespace Game.Entities
 
     public class AreaTriggerSpawn : SpawnData
     {
-        public AreaTriggerId Id;
+        public new AreaTriggerId Id;
         public uint? SpellForVisuals;
 
         public AreaTriggerSpawn() : base(SpawnObjectType.AreaTrigger) { }

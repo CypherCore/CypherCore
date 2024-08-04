@@ -50,6 +50,9 @@ namespace Game.Entities
 
         public static ItemContext GetContextForPlayer(MapDifficultyRecord mapDifficulty, Player player)
         {
+            if (mapDifficulty == null)
+                return ItemContext.None;
+
             ItemContext evalContext(ItemContext currentContext, ItemContext newContext)
             {
                 if (newContext == ItemContext.None)
@@ -81,11 +84,7 @@ namespace Game.Entities
 
                     bool meetsPlayerCondition = false;
                     if (player != null)
-                    {
-                        var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(itemContextPickerEntry.PlayerConditionID);
-                        if (playerCondition != null)
-                            meetsPlayerCondition = ConditionManager.IsPlayerMeetingCondition(player, playerCondition);
-                    }
+                        meetsPlayerCondition = ConditionManager.IsPlayerMeetingCondition(player, itemContextPickerEntry.PlayerConditionID);
 
                     if ((itemContextPickerEntry.Flags & 0x1) != 0)
                         meetsPlayerCondition = !meetsPlayerCondition;

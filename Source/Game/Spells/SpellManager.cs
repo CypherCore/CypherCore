@@ -5010,13 +5010,6 @@ namespace Game.Entities
                 if (player == null || (auraSpell > 0 && !player.HasAura((uint)auraSpell)) || (auraSpell < 0 && player.HasAura((uint)-auraSpell)))
                     return false;
 
-            if (player != null)
-            {
-                Battleground bg = player.GetBattleground();
-                if (bg != null)
-                    return bg.IsSpellAllowed(spellId, player);
-            }
-
             // Extra conditions -- leaving the possibility add extra conditions...
             switch (spellId)
             {

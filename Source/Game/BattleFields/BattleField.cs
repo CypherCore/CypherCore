@@ -174,7 +174,7 @@ namespace Game.BattleFields
             if (m_PlayersInQueue[player.GetTeamId()].Contains(player.GetGUID()))
                 return;
 
-            if (m_PlayersInQueue[player.GetTeamId()].Count <= m_MinPlayer || m_PlayersInQueue[GetOtherTeam(player.GetTeamId())].Count >= m_MinPlayer)
+            if (m_PlayersInQueue[player.GetTeamId()].Count <= m_MinPlayer || m_PlayersInQueue[SharedConst.GetOtherTeam(player.GetTeamId())].Count >= m_MinPlayer)
                 PlayerAcceptInviteToQueue(player);
         }
 
@@ -705,7 +705,6 @@ namespace Game.BattleFields
         // Battlefield - generic methods
         public uint GetDefenderTeam() { return m_DefenderTeam; }
         public uint GetAttackerTeam() { return 1 - m_DefenderTeam; }
-        public int GetOtherTeam(int teamIndex) { return (teamIndex == BattleGroundTeamId.Horde ? BattleGroundTeamId.Alliance : BattleGroundTeamId.Horde); }
         void SetDefenderTeam(uint team) { m_DefenderTeam = team; }
 
         // Called on start

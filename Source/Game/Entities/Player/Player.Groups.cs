@@ -252,7 +252,7 @@ namespace Game.Entities
                 case 1: 
                     return IsInSameRaidWith(p);
                 case 2: 
-                    return GetTeam() == p.GetTeam();
+                    return GetEffectiveTeam() == p.GetEffectiveTeam();
                 case 3:
                     return false;
             }

@@ -296,6 +296,14 @@ namespace Framework.GameMath
             return v;
         }
 
+        public Vector3 extent()
+        {
+            if (Lo.IsEmpty())
+                return Vector3.Zero;
+
+            return Hi - Lo;
+        }
+
         public static AxisAlignedBox operator +(AxisAlignedBox box, Vector3 v)
         {
             AxisAlignedBox outt = new();

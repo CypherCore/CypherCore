@@ -1016,7 +1016,7 @@ namespace Scripts.Spells.Generic
             {
                 if (target.GetTeam() == Team.Alliance)
                     GetCaster().CastSpell(target, SpellCreateLanceAlliance, true);
-                else
+                else if (target.GetTeam() == Team.Horde)
                     GetCaster().CastSpell(target, SpellCreateLanceHorde, true);
             }
         }
@@ -4830,7 +4830,7 @@ namespace Scripts.Spells.Generic
                     case SkillType.CataclysmSkinning: return SpellCataclysmSkinning;
                     case SkillType.PandariaSkinning: return SpellPandariaSkinning;
                     case SkillType.DraenorSkinning: return SpellDraenorSkinning;
-                    case SkillType.KulTiranSkinning: return player.GetTeam() == Team.Alliance ? SpellKulTiranSkinning : SpellZandalariSkinning;
+                    case SkillType.KulTiranSkinning: return player.GetTeam() == Team.Alliance ? SpellKulTiranSkinning : (player.GetTeam() == Team.Horde ? SpellZandalariSkinning : 0);
                     case SkillType.ShadowlandsSkinning: return SpellShadowlandsSkinning;
                     case SkillType.DragonIslesSkinning: return SpellDragonIslesSkinning;
                     case SkillType.ClassicSkinning:      // Trainer only

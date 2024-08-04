@@ -102,7 +102,7 @@ namespace Game.Arenas
                 {
                     // if the player was a match participant, calculate rating
 
-                    ArenaTeam winnerArenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(GetArenaTeamIdForTeam(GetOtherTeam(bgPlayer.Team)));
+                    ArenaTeam winnerArenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(GetArenaTeamIdForTeam(SharedConst.GetOtherTeam(bgPlayer.Team)));
                     ArenaTeam loserArenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(GetArenaTeamIdForTeam(bgPlayer.Team));
 
                     // left a rated match while the encounter was in progress, consider as loser
@@ -110,9 +110,9 @@ namespace Game.Arenas
                     {
                         Player player = _GetPlayer(guid, bgPlayer.OfflineRemoveTime != 0, "Arena.RemovePlayerAtLeave");
                         if (player != null)
-                            loserArenaTeam.MemberLost(player, GetArenaMatchmakerRating(GetOtherTeam(bgPlayer.Team)));
+                            loserArenaTeam.MemberLost(player, GetArenaMatchmakerRating(SharedConst.GetOtherTeam(bgPlayer.Team)));
                         else
-                            loserArenaTeam.OfflineMemberLost(guid, GetArenaMatchmakerRating(GetOtherTeam(bgPlayer.Team)));
+                            loserArenaTeam.OfflineMemberLost(guid, GetArenaMatchmakerRating(SharedConst.GetOtherTeam(bgPlayer.Team)));
                     }
                 }
             }
@@ -147,14 +147,14 @@ namespace Game.Arenas
                 // In case of arena draw, follow this logic:
                 // winnerArenaTeam => ALLIANCE, loserArenaTeam => HORDE
                 ArenaTeam winnerArenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(GetArenaTeamIdForTeam(winner == Team.Other ? Team.Alliance : winner));
-                ArenaTeam loserArenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(GetArenaTeamIdForTeam(winner == Team.Other ? Team.Horde : GetOtherTeam(winner)));
+                ArenaTeam loserArenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(GetArenaTeamIdForTeam(winner == Team.Other ? Team.Horde : SharedConst.GetOtherTeam(winner)));
 
                 if (winnerArenaTeam != null && loserArenaTeam != null && winnerArenaTeam != loserArenaTeam)
                 {
                     // In case of arena draw, follow this logic:
                     // winnerMatchmakerRating => ALLIANCE, loserMatchmakerRating => HORDE
                     loserTeamRating = loserArenaTeam.GetRating();
-                    loserMatchmakerRating = GetArenaMatchmakerRating(winner == Team.Other ? Team.Horde : GetOtherTeam(winner));
+                    loserMatchmakerRating = GetArenaMatchmakerRating(winner == Team.Other ? Team.Horde : SharedConst.GetOtherTeam(winner));
                     winnerTeamRating = winnerArenaTeam.GetRating();
                     winnerMatchmakerRating = GetArenaMatchmakerRating(winner == Team.Other ? Team.Alliance : winner);
 
@@ -168,7 +168,7 @@ namespace Game.Arenas
                             loserTeamRating, loserChange, loserMatchmakerRating, loserMatchmakerChange);
 
                         SetArenaMatchmakerRating(winner, (uint)(winnerMatchmakerRating + winnerMatchmakerChange));
-                        SetArenaMatchmakerRating(GetOtherTeam(winner), (uint)(loserMatchmakerRating + loserMatchmakerChange));
+                        SetArenaMatchmakerRating(SharedConst.GetOtherTeam(winner), (uint)(loserMatchmakerRating + loserMatchmakerChange));
 
                         // bg team that the client expects is different to TeamId
                         // alliance 1, horde 0
@@ -176,7 +176,7 @@ namespace Game.Arenas
                         byte loserTeam = (byte)(winner == Team.Alliance ? PvPTeamId.Horde : PvPTeamId.Alliance);
 
                         _arenaTeamScores[winnerTeam].Assign(winnerTeamRating, (uint)(winnerTeamRating + winnerChange), winnerMatchmakerRating, GetArenaMatchmakerRating(winner));
-                        _arenaTeamScores[loserTeam].Assign(loserTeamRating, (uint)(loserTeamRating + loserChange), loserMatchmakerRating, GetArenaMatchmakerRating(GetOtherTeam(winner)));
+                        _arenaTeamScores[loserTeam].Assign(loserTeamRating, (uint)(loserTeamRating + loserChange), loserMatchmakerRating, GetArenaMatchmakerRating(SharedConst.GetOtherTeam(winner)));
 
                         Log.outDebug(LogFilter.Arena, "Arena match Type: {0} for Team1Id: {1} - Team2Id: {2} ended. WinnerTeamId: {3}. Winner rating: +{4}, Loser rating: {5}",
                             GetArenaType(), GetArenaTeamIdByIndex(BattleGroundTeamId.Alliance), GetArenaTeamIdByIndex(BattleGroundTeamId.Horde), winnerArenaTeam.GetId(), winnerChange, loserChange);

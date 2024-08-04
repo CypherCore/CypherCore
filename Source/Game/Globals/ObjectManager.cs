@@ -158,7 +158,7 @@ namespace Game
         {
             if (value == null)
                 value = "";
-            
+
             data[(int)locale] = value;
         }
         public static void GetLocaleString(StringArray data, Locale locale, ref string value)
@@ -4118,6 +4118,10 @@ namespace Game
                                 got.BarberChair.SitAnimKit = 0;
                             }
                             break;
+                        case GameObjectTypes.DestructibleBuilding:
+                            if (got.DestructibleBuilding.HealthRec != 0 && GetDestructibleHitpoint(got.DestructibleBuilding.HealthRec) == null)
+                                Log.outError(LogFilter.Sql, $"GameObject (Entry: {entry}) Has non existing Destructible Hitpoint Record {got.DestructibleBuilding.HealthRec}.");
+                            break;
                         case GameObjectTypes.GarrisonBuilding:
                         {
                             int transportMap = got.GarrisonBuilding.SpawnMap;
@@ -4647,6 +4651,12 @@ namespace Game
 
                         continue;
                     }
+                    case GameObjectTypes.SpellFocus:
+                    {
+                        if (pair.Value.SpellFocus.questID > 0)          //quests objects
+                            break;
+                        continue;
+                    }
                     case GameObjectTypes.Goober:
                     {
                         if (pair.Value.Goober.questID > 0)              //quests objects
@@ -4671,6 +4681,33 @@ namespace Game
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} GameObjects for quests in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+        }
+
+        public void LoadDestructibleHitpoints()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            _destructibleHitpointStorage.Clear(); // need for reload case
+
+            //                                         0   1              2
+            SQLResult result = DB.World.Query("SELECT Id, IntactNumHits, DamagedNumHits FROM destructible_hitpoint");
+            if (result.IsEmpty())
+                return;
+
+            do
+            {
+                uint id = result.Read<uint>(0);
+
+                DestructibleHitpoint data = new();
+                data.Id = id;
+                data.IntactNumHits = result.Read<uint>(1);
+                data.DamagedNumHits = result.Read<uint>(2);
+
+                _destructibleHitpointStorage.Add(id, data);
+
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_destructibleHitpointStorage.Count} destructible_hitpoint records in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public void AddGameObjectToGrid(GameObjectData data)
@@ -4831,6 +4868,11 @@ namespace Game
 
             difficulties.Sort();
             return difficulties;
+        }
+
+        public DestructibleHitpoint GetDestructibleHitpoint(uint entry)
+        {
+            return _destructibleHitpointStorage.LookupByKey(entry);
         }
 
         //Items
@@ -5172,8 +5214,11 @@ namespace Game
 
             if (vItem.PlayerConditionId != 0 && !CliDB.PlayerConditionStorage.ContainsKey(vItem.PlayerConditionId))
             {
-                Log.outError(LogFilter.Sql, "Table `(game_event_)npc_vendor` has Item (Entry: {0}) with invalid PlayerConditionId ({1}) for vendor ({2}), ignore", vItem.item, vItem.PlayerConditionId, vendorentry);
-                return false;
+                if (!Global.ConditionMgr.HasConditionsForNotGroupedEntry(ConditionSourceType.PlayerCondition, vItem.PlayerConditionId))
+                {
+                    Log.outError(LogFilter.Sql, "Table `(game_event_)npc_vendor` has Item (Entry: {0}) with serverside PlayerConditionId ({1}) for vendor ({2}) without conditions, ignore", vItem.item, vItem.PlayerConditionId, vendorentry);
+                    return false;
+                }
             }
 
             if (vItem.ExtendedCost != 0 && !CliDB.ItemExtendedCostStorage.ContainsKey(vItem.ExtendedCost))
@@ -10426,10 +10471,19 @@ namespace Game
             float dist = 10000;
             uint id = 0;
 
-            TaxiNodeFlags requireFlag = (team == Team.Alliance) ? TaxiNodeFlags.ShowOnAllianceMap : TaxiNodeFlags.ShowOnHordeMap;
+            var isVisibleForFaction = (TaxiNodesRecord node) =>
+            {
+                return team switch
+                {
+                    Team.Horde => node.HasFlag(TaxiNodeFlags.ShowOnHordeMap),
+                    Team.Alliance => node.HasFlag(TaxiNodeFlags.ShowOnAllianceMap),
+                    _ => false
+                };
+            };
+
             foreach (var node in CliDB.TaxiNodesStorage.Values)
             {
-                if (node.ContinentID != mapid || !node.HasFlag(requireFlag) || node.HasFlag(TaxiNodeFlags.IgnoreForFindNearest))
+                if (node.ContinentID != mapid || !isVisibleForFaction(node) || node.HasFlag(TaxiNodeFlags.IgnoreForFindNearest))
                     continue;
 
                 uint field = (node.Id - 1) / 8;
@@ -10890,6 +10944,7 @@ namespace Game
         Dictionary<ulong, GameObjectAddon> _gameObjectAddonStorage = new();
         MultiMap<uint, uint> _gameObjectQuestItemStorage = new();
         List<uint> _gameObjectForQuestStorage = new();
+        Dictionary<uint, DestructibleHitpoint> _destructibleHitpointStorage = new();
 
         //Item
         Dictionary<uint, ItemTemplate> ItemTemplateStorage = new();
