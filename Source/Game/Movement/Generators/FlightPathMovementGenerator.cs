@@ -14,8 +14,19 @@ namespace Game.Movement
 {
     public class FlightPathMovementGenerator : MovementGeneratorMedium<Player>
     {
-        public FlightPathMovementGenerator()
+        float? _speed;
+        float _endGridX;                //! X coord of last node location
+        float _endGridY;                //! Y coord of last node location
+        uint _endMapId;               //! map Id of last node location
+        uint _preloadTargetNode;      //! node index where preloading starts
+
+        List<TaxiPathNodeRecord> _path = new();
+        int _currentNode;
+        List<TaxiNodeChangeInfo> _pointsForPathSwitch = new();    //! node indexes and costs where TaxiPath changes
+
+        public FlightPathMovementGenerator(float? speed)
         {
+            _speed = speed;
             Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Highest;
             Flags = MovementGeneratorFlags.InitializationPending;
@@ -61,7 +72,7 @@ namespace Game.Movement
             init.SetSmooth();
             init.SetUncompressed();
             init.SetWalk(true);
-            init.SetVelocity(30.0f);
+            init.SetVelocity(_speed.GetValueOrDefault(30.0f));
             init.Launch();
         }
 
@@ -311,15 +322,6 @@ namespace Game.Movement
         public void SkipCurrentNode() { ++_currentNode; }
 
         public uint GetCurrentNode() { return (uint)_currentNode; }
-
-        float _endGridX;                //! X coord of last node location
-        float _endGridY;                //! Y coord of last node location
-        uint _endMapId;               //! map Id of last node location
-        uint _preloadTargetNode;      //! node index where preloading starts
-
-        List<TaxiPathNodeRecord> _path = new();
-        int _currentNode;
-        List<TaxiNodeChangeInfo> _pointsForPathSwitch = new();    //! node indexes and costs where TaxiPath changes
 
         class TaxiNodeChangeInfo
         {

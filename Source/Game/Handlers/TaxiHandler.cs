@@ -112,18 +112,6 @@ namespace Game
             GetPlayer().SetTaxiCheater(lastTaxiCheaterState);
         }
 
-        public void SendDoFlight(uint mountDisplayId, uint path, uint pathNode = 0)
-        {
-            // remove fake death
-            if (GetPlayer().HasUnitState(UnitState.Died))
-                GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
-
-            if (mountDisplayId != 0)
-                GetPlayer().Mount(mountDisplayId);
-
-            GetPlayer().GetMotionMaster().MoveTaxiFlight(path, pathNode);
-        }
-
         public bool SendLearnNewTaxiNode(Creature unit)
         {
             // find current node

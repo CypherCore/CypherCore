@@ -994,7 +994,7 @@ namespace Game.Movement
                 Log.outError(LogFilter.Server, $"MotionMaster::MoveSeekAssistanceDistract: {_owner.GetGUID()} attempted to call distract after assistance");
         }
 
-        public void MoveTaxiFlight(uint path, uint pathnode)
+        public void MoveTaxiFlight(uint path, uint pathnode, float? speed = null)
         {
             if (_owner.IsTypeId(TypeId.Player))
             {
@@ -1006,7 +1006,7 @@ namespace Game.Movement
                     bool hasExisting = HasMovementGenerator(gen => gen.GetMovementGeneratorType() == MovementGeneratorType.Flight);
                     Cypher.Assert(!hasExisting, "Duplicate flight path movement generator");
 
-                    FlightPathMovementGenerator movement = new();
+                    FlightPathMovementGenerator movement = new(speed);
                     movement.LoadPath(_owner.ToPlayer());
                     Add(movement);
                 }
