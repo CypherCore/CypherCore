@@ -43,6 +43,14 @@ namespace Game.DataStorage
         public uint SrcItemBonusTreeID;
     }
 
+    public sealed class CharBaseInfoRecord
+    {
+        public uint Id;
+        public sbyte RaceID;
+        public sbyte ClassID;
+        public int OtherFactionRaceID;
+    }
+
     public sealed class CharTitlesRecord
     {
         public uint Id;

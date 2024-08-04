@@ -222,6 +222,9 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_CHALLENGE_MODE_ITEM_BONUS_OVERRIDE, "SELECT ID, ItemBonusTreeGroupID, DstItemBonusTreeID, Type, Value, " +
                 "MythicPlusSeasonID, PvPSeasonID, SrcItemBonusTreeID FROM challenge_mode_item_bonus_override WHERE (`VerifiedBuild` > 0) = ?");
 
+            // CharBaseInfo.db2
+            PrepareStatement(HotfixStatements.SEL_CHAR_BASE_INFO, "SELECT ID, RaceID, ClassID, OtherFactionRaceID FROM char_base_info WHERE (`VerifiedBuild` > 0) = ?");
+
             // CharTitles.db2
             PrepareStatement(HotfixStatements.SEL_CHAR_TITLES, "SELECT ID, Name, Name1, MaskID, Flags FROM char_titles WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_CHAR_TITLES_LOCALE, "SELECT ID, Name_lang, Name1_lang FROM char_titles_locale WHERE (`VerifiedBuild` > 0) = ?" +
@@ -1705,6 +1708,8 @@ namespace Framework.Database
         SEL_CFG_REGIONS,
 
         SEL_CHALLENGE_MODE_ITEM_BONUS_OVERRIDE,
+
+        SEL_CHAR_BASE_INFO,
 
         SEL_CHAR_TITLES,
         SEL_CHAR_TITLES_LOCALE,

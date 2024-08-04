@@ -113,6 +113,8 @@ namespace Game.DataStorage
             foreach (var broadcastTextDuration in BroadcastTextDurationStorage.Values)
                 _broadcastTextDurations[(broadcastTextDuration.BroadcastTextID, (CascLocaleBit)broadcastTextDuration.Locale)] = broadcastTextDuration.Duration;
 
+            foreach (var (_, charBaseInfo) in CharBaseInfoStorage)
+                _charBaseInfoByRaceAndClass[(charBaseInfo.RaceID, charBaseInfo.ClassID)] = charBaseInfo;
 
             foreach (var uiDisplay in ChrClassUIDisplayStorage.Values)
             {
@@ -987,6 +989,11 @@ namespace Game.DataStorage
         public int GetBroadcastTextDuration(int broadcastTextId, Locale locale = Locale.enUS)
         {
             return _broadcastTextDurations.LookupByKey((broadcastTextId, SharedConst.WowLocaleToCascLocaleBit[(int)locale]));
+        }
+
+        public CharBaseInfoRecord GetCharBaseInfo(Race race, Class class_)
+        {
+            return _charBaseInfoByRaceAndClass.LookupByKey((race, class_));
         }
 
         public ChrClassUIDisplayRecord GetUiDisplayForClass(Class unitClass)
@@ -2272,6 +2279,7 @@ namespace Game.DataStorage
         MultiMap<uint, AzeritePowerSetMemberRecord> _azeritePowers = new();
         Dictionary<(uint azeriteUnlockSetId, ItemContext itemContext), byte[]> _azeriteTierUnlockLevels = new();
         Dictionary<(int broadcastTextId, CascLocaleBit cascLocaleBit), int> _broadcastTextDurations = new();
+        Dictionary<(sbyte, sbyte), CharBaseInfoRecord> _charBaseInfoByRaceAndClass = new();
         ChrClassUIDisplayRecord[] _uiDisplayByClass = new ChrClassUIDisplayRecord[(int)Class.Max];
         uint[][] _powersByClass = new uint[(int)Class.Max][];
         MultiMap<uint, ChrCustomizationChoiceRecord> _chrCustomizationChoicesByOption = new();

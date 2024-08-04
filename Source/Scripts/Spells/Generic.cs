@@ -357,35 +357,6 @@ namespace Scripts.Spells.Generic
     {
         List<uint> RacialSkills = new();
 
-        Dictionary<Race, Race[]> RaceInfo = new()
-        {
-            { Race.Human , new[] { Race.Undead, Race.BloodElf } },
-            { Race.Orc , new[] { Race.Dwarf } },
-            { Race.Dwarf , new[] { Race.Orc, Race.Undead, Race.Tauren } },
-            { Race.NightElf , new[] { Race.Troll, Race.BloodElf } },
-            { Race.Undead , new[] { Race.Human } },
-            { Race.Tauren , new[] { Race.Draenei, Race.NightElf } },
-            { Race.Gnome , new[] { Race.Goblin, Race.BloodElf } },
-            { Race.Troll , new[] { Race.NightElf, Race.Human, Race.Draenei } },
-            { Race.Goblin , new[] { Race.Gnome, Race.Dwarf } },
-            { Race.BloodElf , new[] { Race.Human, Race.NightElf } },
-            { Race.Draenei , new[] { Race.Tauren, Race.Orc } },
-            { Race.Worgen , new[] { Race.Troll } },
-            { Race.PandarenNeutral , new[] { Race.PandarenNeutral } },
-            { Race.PandarenAlliance , new[] { Race.PandarenHorde, Race.PandarenNeutral } },
-            { Race.PandarenHorde , new[] { Race.PandarenAlliance, Race.PandarenNeutral } },
-            { Race.Nightborne , new[] { Race.NightElf, Race.Human } },
-            { Race.HighmountainTauren , new[] { Race.Draenei, Race.NightElf } },
-            { Race.VoidElf , new[] { Race.Troll, Race.BloodElf } },
-            { Race.LightforgedDraenei , new[] { Race.Tauren, Race.Orc } },
-            { Race.ZandalariTroll , new[] { Race.KulTiran, Race.Human } },
-            { Race.KulTiran , new[] { Race.ZandalariTroll } },
-            { Race.DarkIronDwarf , new[] { Race.MagharOrc, Race.Orc } },
-            { Race.Vulpera , new[] { Race.MechaGnome, Race.DarkIronDwarf } },
-            { Race.MagharOrc , new[] { Race.DarkIronDwarf } },
-            { Race.MechaGnome , new[] { Race.Vulpera } },
-        };
-
         Dictionary<Race, uint[]> RaceDisplayIds = new()
         {
             {  Race.Human , new uint[] { 55239, 55238 } },
@@ -417,11 +388,9 @@ namespace Scripts.Spells.Generic
 
         Race GetReplacementRace(Race nativeRace, Class playerClass)
         {
-            var otherRaces = RaceInfo.LookupByKey(nativeRace);
-            if (!otherRaces.Empty())
-                foreach (Race race in otherRaces)
-                    if (ObjectMgr.GetPlayerInfo(race, playerClass) != null)
-                        return race;
+            CharBaseInfoRecord charBaseInfo = DB2Mgr.GetCharBaseInfo(nativeRace, playerClass);
+            if (charBaseInfo != null && ObjectMgr.GetPlayerInfo((Race)charBaseInfo.OtherFactionRaceID, playerClass) != null)
+                return (Race)charBaseInfo.OtherFactionRaceID;
 
             return Race.None;
         }
@@ -437,16 +406,6 @@ namespace Scripts.Spells.Generic
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            foreach (var (race, otherRaces) in RaceInfo)
-            {
-                if (!CliDB.ChrRacesStorage.ContainsKey(race))
-                    return false;
-
-                foreach (Race otherRace in otherRaces)
-                    if (!CliDB.ChrRacesStorage.ContainsKey(otherRace))
-                        return false;
-            }
-
             foreach (var (race, displayIds) in RaceDisplayIds)
             {
                 if (!CliDB.ChrRacesStorage.ContainsKey(race))
