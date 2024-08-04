@@ -430,6 +430,9 @@ namespace Game.Movement
                     break;
             }
 
+            if (_path.Velocity.HasValue && !_speed.HasValue)
+                _speed = _path.Velocity;
+
             if (_speed.HasValue)
                 init.SetVelocity(_speed.Value);
 

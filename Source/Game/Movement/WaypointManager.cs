@@ -76,7 +76,6 @@ namespace Game
             uint pathId = fields.Read<uint>(0);
 
             WaypointPath path = new();
-            path.Id = pathId;
             path.MoveType = (WaypointMoveType)fields.Read<byte>(1);
 
             if (path.MoveType >= WaypointMoveType.Max)
@@ -84,7 +83,19 @@ namespace Game
                 Log.outError(LogFilter.Sql, $"PathId {pathId} in `waypoint_path` has invalid MoveType {path.MoveType}, ignoring");
                 return;
             }
+
+            path.Id = pathId;
             path.Flags = (WaypointPathFlags)fields.Read<byte>(2);
+
+            if (!fields.IsNull(3))
+            {
+                float velocity = fields.Read<float>(3);
+                if (velocity > 0.0f)
+                    path.Velocity = velocity;
+                else
+                    Log.outError(LogFilter.Sql, $"PathId {pathId} in `waypoint_path` has invalid velocity {velocity}, using default velocity instead");
+            }
+
             path.Nodes.Clear();
 
             _pathStorage.Add(pathId, path);
@@ -325,6 +336,7 @@ namespace Game
         public uint Id;
         public WaypointMoveType MoveType;
         public WaypointPathFlags Flags = WaypointPathFlags.None;
+        public float? Velocity;
     }
 
     public enum WaypointMoveType
