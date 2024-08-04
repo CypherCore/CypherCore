@@ -990,9 +990,8 @@ namespace Game.Chat
                     return false;
                 }
 
-                creature.SetMaxHealth((uint)(100 + 30 * lvl));
-                creature.SetHealth((uint)(100 + 30 * lvl));
                 creature.SetLevel(lvl);
+                creature.UpdateLevelDependantStats();
                 creature.SaveToDB();
 
                 return true;

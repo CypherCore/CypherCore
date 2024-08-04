@@ -56,6 +56,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
         {
             _Reset();
 
+            me.SetSpawnHealth();
             me.SetStandState(UnitStandStateType.Dead);
             Initialize();
         }
@@ -65,7 +66,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
             base.JustEngagedWith(who);
 
             DoCast(me, SpellIds.Essenceofthered);
-            me.SetHealth(me.CountPctFromMaxHealth(30));
             // now drop damage requirement to be able to take loot
             me.ResetPlayerDamageReq();
 

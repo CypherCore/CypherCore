@@ -577,12 +577,43 @@ namespace Game.Entities
         //Powers
         public PowerType GetPowerType() { return (PowerType)(byte)m_unitData.DisplayPower; }
 
-        public void SetPowerType(PowerType powerType, bool sendUpdate = true)
+        public void SetPowerType(PowerType power, bool sendUpdate = true, bool onInit = false)
         {
-            if (GetPowerType() == powerType)
+            if (!onInit && GetPowerType() == power)
                 return;
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayPower), (byte)powerType);
+            PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(power);
+            if (powerTypeEntry == null)
+                return;
+
+            if (IsCreature() && !powerTypeEntry.HasFlag(PowerTypeFlags.IsUsedByNPCs))
+                return;
+
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayPower), (byte)power);
+
+            // Update max power
+            UpdateMaxPower(power);
+
+            // Update current power
+            if (!onInit)
+            {
+                switch (power)
+                {
+                    case PowerType.Mana: // Keep the same (druid form switching...)
+                    case PowerType.Energy:
+                        break;
+                    case PowerType.Rage: // Reset to zero
+                        SetPower(PowerType.Rage, 0);
+                        break;
+                    case PowerType.Focus: // Make it full
+                        SetFullPower(power);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else
+                SetInitialPowerValue(power);
 
             if (!sendUpdate)
                 return;
@@ -600,24 +631,18 @@ namespace Game.Entities
                     pet.SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_POWER_TYPE);
             }*/
 
-            // Update max power
-            UpdateMaxPower(powerType);
+        }
 
-            // Update current power
-            switch (powerType)
-            {
-                case PowerType.Mana: // Keep the same (druid form switching...)
-                case PowerType.Energy:
-                    break;
-                case PowerType.Rage: // Reset to zero
-                    SetPower(PowerType.Rage, 0);
-                    break;
-                case PowerType.Focus: // Make it full
-                    SetFullPower(powerType);
-                    break;
-                default:
-                    break;
-            }
+        public void SetInitialPowerValue(PowerType power)
+        {
+            PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(power);
+            if (powerTypeEntry == null)
+                return;
+
+            if (powerTypeEntry.HasFlag(PowerTypeFlags.UnitsUseDefaultPowerOnInit))
+                SetPower(power, powerTypeEntry.DefaultPower);
+            else
+                SetFullPower(power);
         }
 
         public void SetOverrideDisplayPowerId(uint powerDisplayId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.OverrideDisplayPowerID), powerDisplayId); }

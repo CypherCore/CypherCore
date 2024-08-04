@@ -1399,8 +1399,7 @@ namespace Game.Entities
             // prevent add data integrity problems
             data.WanderDistance = GetDefaultMovementType() == MovementGeneratorType.Idle ? 0.0f : m_wanderDistance;
             data.currentwaypoint = 0;
-            data.curhealth = (uint)GetHealth();
-            data.curmana = (uint)GetPower(PowerType.Mana);
+            data.curHealthPct = (uint)GetHealthPct();
             // prevent add data integrity problems
             data.movementType = (byte)(m_wanderDistance == 0 && GetDefaultMovementType() == MovementGeneratorType.Random
                 ? MovementGeneratorType.Idle : GetDefaultMovementType());
@@ -1440,8 +1439,7 @@ namespace Game.Entities
             stmt.AddValue(index++, m_respawnDelay);
             stmt.AddValue(index++, m_wanderDistance);
             stmt.AddValue(index++, 0);
-            stmt.AddValue(index++, GetHealth());
-            stmt.AddValue(index++, GetPower(PowerType.Mana));
+            stmt.AddValue(index++, (uint)GetHealthPct());
             stmt.AddValue(index++, (byte)GetDefaultMovementType());
             if (npcflag.HasValue)
                 stmt.AddValue(index++, npcflag.Value);
@@ -1478,7 +1476,7 @@ namespace Game.Entities
             UpdateLevelDependantStats();
         }
 
-        void UpdateLevelDependantStats()
+        public void UpdateLevelDependantStats()
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
             CreatureClassifications classification = IsPet() ? CreatureClassifications.Normal : cInfo.Classification;
@@ -1502,16 +1500,7 @@ namespace Game.Entities
             PowerType powerType = CalculateDisplayPowerType();
             SetCreateMana(stats.BaseMana);
             SetStatPctModifier(UnitMods.PowerStart + (int)powerType, UnitModifierPctType.Base, GetCreatureDifficulty().ManaModifier);
-            SetPowerType(powerType);
-
-            PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(powerType);
-            if (powerTypeEntry != null)
-            {
-                if (powerTypeEntry.HasFlag(PowerTypeFlags.UnitsUseDefaultPowerOnInit))
-                    SetPower(powerType, powerTypeEntry.DefaultPower);
-                else
-                    SetFullPower(powerType);
-            }
+            SetPowerType(powerType, true, true);
 
             //Damage
             float basedamage = GetBaseDamageForLevel(level);
@@ -1764,29 +1753,8 @@ namespace Game.Entities
 
         public void SetSpawnHealth()
         {
-            if (_staticFlags.HasFlag(CreatureStaticFlags5.NoHealthRegen))
-                return;
-
-            ulong curhealth;
-            if (m_creatureData != null && !_regenerateHealth)
-            {
-                curhealth = m_creatureData.curhealth;
-                if (curhealth != 0)
-                {
-                    curhealth = (uint)(curhealth * GetHealthMod(GetCreatureTemplate().Classification));
-                    if (curhealth < 1)
-                        curhealth = 1;
-                }
-
-                SetPower(PowerType.Mana, (int)m_creatureData.curmana);
-            }
-            else
-            {
-                curhealth = GetMaxHealth();
-                SetFullPower(PowerType.Mana);
-            }
-
-            SetHealth((m_deathState == DeathState.Alive || m_deathState == DeathState.JustRespawned) ? curhealth : 0);
+            SetHealth(CountPctFromMaxHealth(m_creatureData != null ? (int)m_creatureData.curHealthPct : 100));
+            SetInitialPowerValue(GetPowerType());
         }
 
         public override bool HasQuest(uint questId)

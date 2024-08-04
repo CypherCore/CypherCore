@@ -868,7 +868,7 @@ namespace Scripts.World.NpcsSpecial
 
             me.SetStandState(UnitStandStateType.Kneel);
             // expect database to have RegenHealth=0
-            me.SetHealth(me.CountPctFromMaxHealth(70));
+            me.SetSpawnHealth();
         }
 
         public override void JustEngagedWith(Unit who) { }

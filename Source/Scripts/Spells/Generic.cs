@@ -5102,4 +5102,32 @@ namespace Scripts.Spells.Generic
             DoEffectCalcDamageAndHealing.Add(new(CalculateHealingBonus, SpellConst.EffectAll, AuraType.Any));
         }
     }
+
+    // 24931 - 100 Health
+    // 24959 - 500 Health
+    // 28838 - 1 Health
+    // 43645 - 1 Health
+    // 73342 - 1 Health
+    [Script] // 86562 - 1 Health
+    class spell_gen_set_health : SpellScript
+    {
+        ulong _health;
+
+        public spell_gen_set_health(ulong health)
+        {
+            _health = health;
+        }
+
+        void HandleHit(uint effIndex)
+        {
+            if (GetHitUnit().IsAlive() && _health > 0)
+                GetHitUnit().SetHealth(_health);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleHit, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+
 }

@@ -3446,9 +3446,9 @@ namespace Game
 
             //                                         0              1   2    3           4           5           6            7        8             9              10
             SQLResult result = DB.World.Query("SELECT creature.guid, id, map, position_x, position_y, position_z, orientation, modelid, equipment_id, spawntimesecs, wander_distance, " +
-                //11               12         13       14            15                 16          17           18                19                   20                    21
-                "currentwaypoint, curhealth, curmana, MovementType, spawnDifficulties, eventEntry, poolSpawnId, creature.npcflag, creature.unit_flags, creature.unit_flags2, creature.unit_flags3, " +
-                //22                      23                24                   25                       26                   27
+                //11               12            13            14                 15          16           17                18                   19                    20
+                "currentwaypoint, curHealthPct, MovementType, spawnDifficulties, eventEntry, poolSpawnId, creature.npcflag, creature.unit_flags, creature.unit_flags2, creature.unit_flags3, " +
+                //21                      22                23                   24                       25                   26
                 "creature.phaseUseFlags, creature.phaseid, creature.phasegroup, creature.terrainSwapMap, creature.ScriptName, creature.StringId " +
                 "FROM creature LEFT OUTER JOIN game_event_creature ON creature.guid = game_event_creature.guid LEFT OUTER JOIN pool_members ON pool_members.type = 0 AND creature.guid = pool_members.spawnId");
 
@@ -3499,28 +3499,27 @@ namespace Game
                 data.spawntimesecs = result.Read<int>(9);
                 data.WanderDistance = result.Read<float>(10);
                 data.currentwaypoint = result.Read<uint>(11);
-                data.curhealth = result.Read<uint>(12);
-                data.curmana = result.Read<uint>(13);
-                data.movementType = result.Read<byte>(14);
-                data.SpawnDifficulties = ParseSpawnDifficulties(result.Read<string>(15), "creature", guid, data.MapId, spawnMasks.LookupByKey(data.MapId));
-                short gameEvent = result.Read<short>(16);
-                data.poolId = result.Read<uint>(17);
+                data.curHealthPct = result.Read<uint>(12);
+                data.movementType = result.Read<byte>(13);
+                data.SpawnDifficulties = ParseSpawnDifficulties(result.Read<string>(14), "creature", guid, data.MapId, spawnMasks.LookupByKey(data.MapId));
+                short gameEvent = result.Read<short>(15);
+                data.poolId = result.Read<uint>(16);
 
+                if (!result.IsNull(17))
+                    data.npcflag = result.Read<ulong>(17);
                 if (!result.IsNull(18))
-                    data.npcflag = result.Read<ulong>(18);
+                    data.unit_flags = result.Read<uint>(18);
                 if (!result.IsNull(19))
-                    data.unit_flags = result.Read<uint>(19);
+                    data.unit_flags2 = result.Read<uint>(19);
                 if (!result.IsNull(20))
-                    data.unit_flags2 = result.Read<uint>(20);
-                if (!result.IsNull(21))
-                    data.unit_flags3 = result.Read<uint>(21);
+                    data.unit_flags3 = result.Read<uint>(20);
 
-                data.PhaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(22);
-                data.PhaseId = result.Read<uint>(23);
-                data.PhaseGroup = result.Read<uint>(24);
-                data.terrainSwapMap = result.Read<int>(25);
-                data.ScriptId = GetScriptId(result.Read<string>(26));
-                data.StringId = result.Read<string>(27);
+                data.PhaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(21);
+                data.PhaseId = result.Read<uint>(22);
+                data.PhaseGroup = result.Read<uint>(23);
+                data.terrainSwapMap = result.Read<int>(24);
+                data.ScriptId = GetScriptId(result.Read<string>(25));
+                data.StringId = result.Read<string>(26);
                 data.spawnGroupData = _spawnGroupDataStorage[IsTransportMap(data.MapId) ? 1 : 0u]; // transport spawns default to compatibility group
 
                 var mapEntry = CliDB.MapStorage.LookupByKey(data.MapId);
@@ -3660,6 +3659,13 @@ namespace Game
                         Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags3` {disallowedUnitFlags3}, removing incorrect flag.");
                         data.unit_flags3 = data.unit_flags3 & (uint)UnitFlags3.Allowed;
                     }
+                }
+
+                uint healthPct = Math.Clamp(data.curHealthPct, 1, 100);
+                if (data.curHealthPct != healthPct)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `creature` has creature (GUID: {guid} Entry: {data.Id}) with invalid `curHealthPct` {data.curHealthPct}, set to {healthPct}.");
+                    data.curHealthPct = healthPct;
                 }
 
                 if (WorldConfig.GetBoolValue(WorldCfg.CalculateCreatureZoneAreaData))

@@ -1979,7 +1979,7 @@ namespace Framework.Constants
         ContinueRegenWhileFatigued = 0x200,
         RegenAffectedByHaste = 0x400,
         SetToMaxOnLevelUp = 0x1000,
-        SetToMaxLevelOnInitialLogIn = 0x2000,
+        SetToMaxOnInitialLogIn = 0x2000,
         AllowCostModsForPlayers = 0x4000
     }
 

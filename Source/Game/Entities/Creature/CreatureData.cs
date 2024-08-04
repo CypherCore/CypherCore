@@ -266,8 +266,7 @@ namespace Game.Entities
         public sbyte equipmentId;
         public float WanderDistance;
         public uint currentwaypoint;
-        public uint curhealth;
-        public uint curmana;
+        public uint curHealthPct;
         public byte movementType;
         public ulong? npcflag;
         public uint? unit_flags;                                  // enum UnitFlags mask values
