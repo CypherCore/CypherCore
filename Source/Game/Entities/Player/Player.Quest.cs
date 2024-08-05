@@ -835,6 +835,13 @@ namespace Game.Entities
 
             SendQuestUpdate(questId);
 
+            bool updateVisibility = false;
+            if (quest.HasFlag(QuestFlags.UpdatePhaseshift))
+                updateVisibility = PhasingHandler.OnConditionChange(this, false);
+
+            if (updateVisibility)
+                UpdateObjectVisibility();
+
             Global.ScriptMgr.OnQuestStatusChange(this, questId);
             Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, questStatusData.Status);
         }
@@ -1922,8 +1929,19 @@ namespace Game.Entities
                 m_QuestStatusSave[questId] = QuestSaveType.Delete;
             }
 
+            Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
+            bool updateVisibility = false;
+
             if (update)
+            { 
                 SendQuestUpdate(questId);
+
+                if (quest != null && quest.HasFlag(QuestFlags.UpdatePhaseshift))
+                    updateVisibility = PhasingHandler.OnConditionChange(this, false);
+            }
+
+            if (updateVisibility)
+                UpdateObjectVisibility();
         }
 
         public void RemoveRewardedQuest(uint questId, bool update = true)
@@ -1939,10 +1957,12 @@ namespace Game.Entities
                 SetQuestCompletedBit(questBit, false);
 
             // Remove seasonal quest also
-            Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questId);
-            if (qInfo.IsSeasonal())
+            Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
+            bool updateVisibility = false;
+
+            if (quest != null && quest.IsSeasonal())
             {
-                ushort eventId = qInfo.GetEventIdForQuest();
+                ushort eventId = quest.GetEventIdForQuest();
                 if (m_seasonalquests.ContainsKey(eventId))
                 {
                     m_seasonalquests[eventId].Remove(questId);
@@ -1951,7 +1971,15 @@ namespace Game.Entities
             }
 
             if (update)
+            { 
                 SendQuestUpdate(questId);
+
+                if (quest != null && quest.HasFlag(QuestFlags.UpdatePhaseshift))
+                    updateVisibility = PhasingHandler.OnConditionChange(this, false);
+            }
+
+            if (updateVisibility)
+                UpdateObjectVisibility();
         }
 
         void SendQuestUpdate(uint questId, bool updateInteractions = true, bool updateGameObjectQuestGiverStatus = false)
