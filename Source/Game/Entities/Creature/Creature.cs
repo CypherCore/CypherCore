@@ -411,7 +411,7 @@ namespace Game.Entities
             //We must update last scriptId or it looks like we reloaded a script, breaking some things such as gossip temporarily
             LastUsedScriptID = GetScriptId();
 
-            m_stringIds[0] = cInfo.StringId;
+            m_stringIds[(int)StringIdType.Template] = cInfo.StringId;
 
             return true;
         }
@@ -2925,12 +2925,12 @@ namespace Game.Entities
             if (!id.IsEmpty())
             {
                 m_scriptStringId = id;
-                m_stringIds[2] = m_scriptStringId;
+                m_stringIds[(int)StringIdType.Script] = m_scriptStringId;
             }
             else
             {
                 m_scriptStringId = null;
-                m_stringIds[2] = null;
+                m_stringIds[(int)StringIdType.Script] = null;
             }
         }
 
@@ -3531,7 +3531,7 @@ namespace Game.Entities
             // checked at creature_template loading
             DefaultMovementType = (MovementGeneratorType)data.movementType;
 
-            m_stringIds[1] = data.StringId;
+            m_stringIds[(int)StringIdType.Spawn] = data.StringId;
 
             if (addToMap && !GetMap().AddToMap(this))
                 return false;

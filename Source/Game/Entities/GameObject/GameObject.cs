@@ -380,7 +380,7 @@ namespace Game.Entities
 
             LastUsedScriptID = GetGoInfo().ScriptId;
 
-            m_stringIds[0] = goInfo.StringId;
+            m_stringIds[(int)StringIdType.Template] = goInfo.StringId;
 
             AIM_Initialize();
 
@@ -1163,7 +1163,7 @@ namespace Game.Entities
 
             m_goData = data;
 
-            m_stringIds[1] = data.StringId;
+            m_stringIds[(int)StringIdType.Spawn] = data.StringId;
 
             if (addToMap && !GetMap().AddToMap(this))
                 return false;
@@ -2675,12 +2675,12 @@ namespace Game.Entities
             if (!id.IsEmpty())
             {
                 m_scriptStringId = id;
-                m_stringIds[2] = m_scriptStringId;
+                m_stringIds[(int)StringIdType.Script] = m_scriptStringId;
             }
             else
             {
                 m_scriptStringId = null;
-                m_stringIds[2] = null;
+                m_stringIds[(int)StringIdType.Script] = null;
             }
         }
 
