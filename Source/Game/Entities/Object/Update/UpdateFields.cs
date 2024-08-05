@@ -154,7 +154,7 @@ namespace Game.Entities
                                 dynFlags &= ~GameObjectDynamicLowFlags.NoInterract;
                             break;
                         case GameObjectTypes.GatheringNode:
-                            if (gameObject.CanActivateForPlayer(receiver))
+                            if (gameObject.GetGoInfo().GetConditionID1() != 0 && gameObject.CanActivateForPlayer(receiver))
                                 dynFlags |= GameObjectDynamicLowFlags.Activate | GameObjectDynamicLowFlags.Sparkle | GameObjectDynamicLowFlags.Highlight;
                             if (gameObject.GetGoStateFor(receiver.GetGUID()) == GameObjectState.Active)
                                 dynFlags |= GameObjectDynamicLowFlags.Depleted;
