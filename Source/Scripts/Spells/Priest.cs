@@ -102,6 +102,8 @@ namespace Scripts.Spells.Priest
         public const uint MasochismTalent = 193063;
         public const uint MasochismPeriodicHeal = 193065;
         public const uint MasteryGrace = 271534;
+        public const uint MindDevourer = 373202;
+        public const uint MindDevourerAura = 373204;
         public const uint MindbenderDisc = 123040;
         public const uint MindbenderShadow = 200174;
         public const uint Mindgames = 375901;
@@ -1603,6 +1605,97 @@ namespace Scripts.Spells.Priest
         public override void Register()
         {
             AfterEffectRemove.Add(new(RemoveEffect, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+
+    // 373202 - Mind Devourer
+    [Script] // Triggered by 8092 - Mind Blast
+    class spell_pri_mind_devourer : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.MindDevourerAura)
+             && ValidateSpellEffect((SpellIds.MindDevourer, 0));
+        }
+
+        public override bool Load()
+        {
+            return GetCaster().HasAura(SpellIds.MindDevourer);
+        }
+
+        void HandleEffectHitTarget(uint effIndex)
+        {
+            AuraEffect aurEff = GetCaster().GetAuraEffect(SpellIds.MindDevourer, 0);
+            if (aurEff != null && RandomHelper.randChance(aurEff.GetAmount()))
+                GetCaster().CastSpell(GetCaster(), SpellIds.MindDevourerAura, GetSpell());
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+
+    // 373204 - Mind Devourer (Aura)
+    [Script] // Attached to 335467 - Devouring Plague
+    class spell_pri_mind_devourer_buff_aura : AuraScript
+    {
+        public float DamageIncrease;
+
+        void CalculateDamage(AuraEffect aurEff, Unit victim, ref int damage, ref int flatMod, ref float pctMod)
+        {
+            MathFunctions.AddPct(ref pctMod, DamageIncrease);
+        }
+
+        public override void Register()
+        {
+            DoEffectCalcDamageAndHealing.Add(new EffectCalcDamageAndHealingHandler(CalculateDamage, 1, AuraType.PeriodicLeech));
+        }
+    }
+
+    [Script]
+    class spell_pri_mind_devourer_buff : SpellScript
+    {
+        float _damageIncrease;
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellEffect((SpellIds.MindDevourerAura, 1));
+        }
+
+        public override void OnPrecast()
+        {
+            AuraEffect mindDevourer = GetCaster().GetAuraEffect(SpellIds.MindDevourerAura, 1);
+            if (mindDevourer == null || !GetSpell().m_appliedMods.Contains(mindDevourer.GetBase()))
+                return;
+
+            _damageIncrease = mindDevourer.GetAmount();
+        }
+
+        void CalculateDamage(Unit victim, ref int damage, ref int flatMod, ref float pctMod)
+        {
+            MathFunctions.AddPct(ref pctMod, _damageIncrease);
+        }
+
+        void ModifyAuraValueAndRemoveBuff(uint effIndex)
+        {
+            if (_damageIncrease == 0)
+                return;
+
+            Aura devouringPlague = GetHitAura();
+            if (devouringPlague != null)
+            {
+                spell_pri_mind_devourer_buff_aura script = devouringPlague.GetScript<spell_pri_mind_devourer_buff_aura>();
+                script.DamageIncrease = _damageIncrease;
+            }
+
+            GetCaster().RemoveAurasDueToSpell(SpellIds.MindDevourerAura);
+        }
+
+        public override void Register()
+        {
+            CalcDamage.Add(new DamageAndHealingCalcHandler(CalculateDamage));
+            OnEffectHitTarget.Add(new EffectHandler(ModifyAuraValueAndRemoveBuff, 1, SpellEffectName.ApplyAura));
         }
     }
 
