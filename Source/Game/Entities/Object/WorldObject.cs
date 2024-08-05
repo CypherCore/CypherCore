@@ -1597,6 +1597,10 @@ namespace Game.Entities
                 if (summon != null)
                 {
                     summon.SetTempSummonType(despawnType);
+
+                    Creature thisCreature = ToCreature();
+                    if (thisCreature != null)
+                        summon.InheritStringIds(thisCreature);
                     return summon;
                 }
             }

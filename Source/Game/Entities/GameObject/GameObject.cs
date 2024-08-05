@@ -2665,6 +2665,15 @@ namespace Game.Entities
             return GetGoInfo().ScriptId;
         }
 
+        public void InheritStringIds(GameObject parent)
+        {
+            // copy references to stringIds from template and spawn
+            m_stringIds = parent.m_stringIds;
+
+            // then copy script stringId, not just its reference
+            SetScriptStringId(parent.GetStringId(StringIdType.Script));
+        }
+
         public bool HasStringId(string id)
         {
             return m_stringIds.Contains(id);
