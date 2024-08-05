@@ -1,6 +1,7 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Bgs.Protocol.Notification.V1;
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.AI;
@@ -169,6 +170,9 @@ namespace Scripts.Spells.Priest
         public const uint UltimatePenitence = 421453;
         public const uint UltimatePenitenceDamage = 421543;
         public const uint UltimatePenitenceHeal = 421544;
+        public const uint UnfurlingDarkness = 341273;
+        public const uint UnfurlingDarknessAura = 341282;
+        public const uint UnfurlingDarknessDebuff = 341291;
         public const uint VampiricEmbraceHeal = 15290;
         public const uint VampiricTouch = 34914;
         public const uint VoidShield = 199144;
@@ -3135,6 +3139,59 @@ namespace Scripts.Spells.Priest
         public override void Register()
         {
             DoCheckEffectProc.Add(new(CheckProc, 0, AuraType.ProcTriggerSpell));
+        }
+    }
+
+    // 341273 - Unfurling Darkness
+    [Script] // Triggered by 34914 - Vampiric Touch
+    class spell_pri_unfurling_darkness : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.UnfurlingDarkness, SpellIds.UnfurlingDarknessDebuff)
+            && ValidateSpellEffect((SpellIds.UnfurlingDarknessAura, 0));
+        }
+
+        void PreventDirectDamage(ref WorldObject target)
+        {
+            bool canTriggerDirectDamage = new Func<bool>(() =>
+            {
+                if (!GetSpell().m_originalCastId.IsEmpty())
+                    return false;  // not when triggered by Shadow Crash (Whispering Shadows talent)
+                AuraEffect unfurlingDarkness = GetCaster().GetAuraEffect(SpellIds.UnfurlingDarknessAura, 0);
+                if (unfurlingDarkness != null && GetSpell().m_appliedMods.Contains(unfurlingDarkness.GetBase()))
+                    return true;
+                return false;
+            })();
+
+            if (!canTriggerDirectDamage)
+                target = null;
+        }
+
+        void TriggerUnfurlingDarkness()
+        {
+            if (!GetSpell().m_originalCastId.IsEmpty())
+                return; // not when triggered by Shadow Crash (Whispering Shadows talent)
+
+            Unit caster = GetCaster();
+            AuraEffect unfurlingDarkness = GetCaster().GetAuraEffect(SpellIds.UnfurlingDarknessAura, 0);
+            if (unfurlingDarkness != null)
+            {
+                if (GetSpell().m_appliedMods.Contains(unfurlingDarkness.GetBase()))
+                {
+                    unfurlingDarkness.GetBase().Remove();
+                    return;
+                }
+            }
+
+            if (!caster.HasAura(SpellIds.UnfurlingDarknessDebuff))
+                caster.CastSpell(caster, SpellIds.UnfurlingDarknessAura, true);
+        }
+
+        public override void Register()
+        {
+            OnObjectTargetSelect.Add(new ObjectTargetSelectHandler(PreventDirectDamage, 3, Targets.UnitTargetEnemy));
+            AfterCast.Add(new CastHandler(TriggerUnfurlingDarkness));
         }
     }
 
