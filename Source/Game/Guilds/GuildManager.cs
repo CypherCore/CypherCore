@@ -368,7 +368,7 @@ namespace Game
                     uint count = 0;
                     do
                     {
-                        ulong guildId = result.Read<ulong>(51);
+                        ulong guildId = result.Read<ulong>(52);
                         Guild guild = GetGuildById(guildId);
                         if (guild != null)
                             guild.LoadBankItemFromDB(result.GetFields());

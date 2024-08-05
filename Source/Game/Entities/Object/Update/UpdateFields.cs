@@ -397,7 +397,7 @@ namespace Game.Entities
         public UpdateField<uint> MaxDurability = new(0, 11);
         public UpdateField<uint> CreatePlayedTime = new(0, 12);
         public UpdateField<int> Context = new(0, 13);
-        public UpdateField<ulong> CreateTime = new(0, 14);
+        public UpdateField<long> CreateTime = new(0, 14);
         public UpdateField<ulong> ArtifactXP = new(0, 15);
         public UpdateField<byte> ItemAppearanceModID = new(0, 16);
         public UpdateField<ItemModList> Modifiers = new(0, 17);
@@ -436,7 +436,7 @@ namespace Game.Entities
             }
             data.WriteUInt32(CreatePlayedTime);
             data.WriteInt32(Context);
-            data.WriteUInt64(CreateTime);
+            data.WriteInt64(CreateTime);
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
             {
                 data.WriteUInt64(ArtifactXP);
@@ -577,7 +577,7 @@ namespace Game.Entities
                 }
                 if (changesMask[14])
                 {
-                    data.WriteUInt64(CreateTime);
+                    data.WriteInt64(CreateTime);
                 }
                 if (changesMask[15])
                 {

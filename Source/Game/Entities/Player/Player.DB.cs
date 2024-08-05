@@ -66,9 +66,9 @@ namespace Game.Entities
                         }
 
 
-                        ulong counter = result.Read<ulong>(51);
-                        ObjectGuid bagGuid = counter != 0 ? ObjectGuid.Create(HighGuid.Item, counter) : ObjectGuid.Empty;
-                        byte slot = result.Read<byte>(52);
+                        ulong dbId = result.Read<ulong>(52);
+                        ObjectGuid bagGuid = dbId != 0 ? ObjectGuid.Create(HighGuid.Item, dbId) : ObjectGuid.Empty;
+                        byte slot = result.Read<byte>(53);
 
                         GetSession().GetCollectionMgr().CheckHeirloomUpgrades(item);
                         GetSession().GetCollectionMgr().AddItemAppearance(item);
@@ -226,10 +226,10 @@ namespace Game.Entities
                     }
                     if (item.IsRefundable())
                     {
-                        if (item.GetPlayedTime() > (2 * Time.Hour))
+                        if (item.IsRefundExpired())
                         {
                             Log.outDebug(LogFilter.Player, "LoadInventory: player (GUID: {0}, name: {1}) has item (GUID: {2}, entry: {3}) with expired refund time ({4}). Deleting refund data and removing " +
-                                "efundable flag.", GetGUID().ToString(), GetName(), item.GetGUID().ToString(), item.GetEntry(), item.GetPlayedTime());
+                                "efundable flag.", GetGUID().ToString(), GetName(), item.GetGUID().ToString(), item.GetEntry(), GetTotalPlayedTime() - item.GetPlayedTime());
 
                             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ITEM_REFUND_INSTANCE);
                             stmt.AddValue(0, item.GetGUID().ToString());
@@ -1332,7 +1332,7 @@ namespace Game.Entities
 
                 do
                 {
-                    ulong mailId = mailItemsResult.Read<ulong>(52);
+                    ulong mailId = mailItemsResult.Read<ulong>(53);
                     _LoadMailedItem(GetGUID(), this, mailId, mailById[mailId], mailItemsResult.GetFields(), additionalData.LookupByKey(mailItemsResult.Read<ulong>(0)));
                 }
                 while (mailItemsResult.NextRow());
@@ -1366,7 +1366,7 @@ namespace Game.Entities
             }
 
             Item item = Bag.NewItemOrBag(proto);
-            ObjectGuid ownerGuid = fields.Read<ulong>(51) != 0 ? ObjectGuid.Create(HighGuid.Player, fields.Read<ulong>(51)) : ObjectGuid.Empty;
+            ObjectGuid ownerGuid = fields.Read<ulong>(52) != 0 ? ObjectGuid.Create(HighGuid.Player, fields.Read<ulong>(52)) : ObjectGuid.Empty;
             if (!item.LoadFromDB(itemGuid, ownerGuid, fields, itemEntry))
             {
                 Log.outError(LogFilter.Player, $"Player._LoadMailedItems: Item (GUID: {itemGuid}) in mail ({mailId}) doesn't exist, deleted from mail.");
@@ -1735,7 +1735,8 @@ namespace Game.Entities
                 Item item = GetItemByGuid(guid);
                 if (item != null)
                 {
-                    item.UpdatePlayedTime(this);
+                    if (item.IsRefundable() && item.IsRefundExpired())
+                        item.SetNotRefundable(this);
                     continue;
                 }
                 else
@@ -4161,7 +4162,7 @@ namespace Game.Entities
 
                             do
                             {
-                                ulong mailId = resultItems.Read<ulong>(52);
+                                ulong mailId = resultItems.Read<ulong>(53);
                                 Item mailItem = _LoadMailedItem(playerGuid, null, mailId, null, resultItems.GetFields(), additionalData.LookupByKey(resultItems.Read<ulong>(0)));
                                 if (mailItem != null)
                                     itemsByMail.Add(mailId, mailItem);

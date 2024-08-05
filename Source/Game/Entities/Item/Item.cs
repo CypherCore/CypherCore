@@ -28,7 +28,6 @@ namespace Game.Entities
 
             uState = ItemUpdateState.New;
             uQueuePos = -1;
-            m_lastPlayedTimeUpdate = GameTime.GetGameTime();
         }
 
         public virtual bool Create(ulong guidlow, uint itemId, ItemContext context, Player owner)
@@ -59,6 +58,7 @@ namespace Game.Entities
 
             SetExpiration(itemProto.GetDuration());
             SetCreatePlayedTime(0);
+            SetCreateTime(GameTime.GetGameTime());
             SetContext(context);
 
             if (itemProto.GetArtifactID() != 0)
@@ -162,6 +162,7 @@ namespace Game.Entities
                     stmt.AddValue(++index, m_randomBonusListId);
                     stmt.AddValue(++index, (uint)m_itemData.Durability);
                     stmt.AddValue(++index, (uint)m_itemData.CreatePlayedTime);
+                    stmt.AddValue(++index, m_itemData.CreateTime);
                     stmt.AddValue(++index, m_text);
                     stmt.AddValue(++index, GetModifier(ItemModifier.BattlePetSpeciesId));
                     stmt.AddValue(++index, GetModifier(ItemModifier.BattlePetBreedData));
@@ -441,16 +442,17 @@ namespace Game.Entities
             }
 
             SetCreatePlayedTime(fields.Read<uint>(11));
-            SetText(fields.Read<string>(12));
+            SetCreateTime(fields.Read<long>(12));
+            SetText(fields.Read<string>(13));
 
-            SetModifier(ItemModifier.BattlePetSpeciesId, fields.Read<uint>(13));
-            SetModifier(ItemModifier.BattlePetBreedData, fields.Read<uint>(14));
-            SetModifier(ItemModifier.BattlePetLevel, fields.Read<ushort>(14));
-            SetModifier(ItemModifier.BattlePetDisplayId, fields.Read<uint>(16));
+            SetModifier(ItemModifier.BattlePetSpeciesId, fields.Read<uint>(14));
+            SetModifier(ItemModifier.BattlePetBreedData, fields.Read<uint>(15));
+            SetModifier(ItemModifier.BattlePetLevel, fields.Read<ushort>(16));
+            SetModifier(ItemModifier.BattlePetDisplayId, fields.Read<uint>(17));
 
-            SetContext((ItemContext)fields.Read<byte>(17));
+            SetContext((ItemContext)fields.Read<byte>(18));
 
-            var bonusListString = new StringArray(fields.Read<string>(18), ' ');
+            var bonusListString = new StringArray(fields.Read<string>(19), ' ');
             List<uint> bonusListIDs = new();
             for (var i = 0; i < bonusListString.Length; ++i)
             {
@@ -467,34 +469,34 @@ namespace Game.Entities
                     SetSpellCharges(i, value);
             }
 
-            SetModifier(ItemModifier.TransmogAppearanceAllSpecs, fields.Read<uint>(19));
-            SetModifier(ItemModifier.TransmogAppearanceSpec1, fields.Read<uint>(20));
-            SetModifier(ItemModifier.TransmogAppearanceSpec2, fields.Read<uint>(21));
-            SetModifier(ItemModifier.TransmogAppearanceSpec3, fields.Read<uint>(22));
-            SetModifier(ItemModifier.TransmogAppearanceSpec4, fields.Read<uint>(23));
-            SetModifier(ItemModifier.TransmogAppearanceSpec5, fields.Read<uint>(24));
+            SetModifier(ItemModifier.TransmogAppearanceAllSpecs, fields.Read<uint>(20));
+            SetModifier(ItemModifier.TransmogAppearanceSpec1, fields.Read<uint>(21));
+            SetModifier(ItemModifier.TransmogAppearanceSpec2, fields.Read<uint>(22));
+            SetModifier(ItemModifier.TransmogAppearanceSpec3, fields.Read<uint>(23));
+            SetModifier(ItemModifier.TransmogAppearanceSpec4, fields.Read<uint>(24));
+            SetModifier(ItemModifier.TransmogAppearanceSpec5, fields.Read<uint>(25));
 
-            SetModifier(ItemModifier.EnchantIllusionAllSpecs, fields.Read<uint>(25));
-            SetModifier(ItemModifier.EnchantIllusionSpec1, fields.Read<uint>(26));
-            SetModifier(ItemModifier.EnchantIllusionSpec2, fields.Read<uint>(27));
-            SetModifier(ItemModifier.EnchantIllusionSpec3, fields.Read<uint>(28));
-            SetModifier(ItemModifier.EnchantIllusionSpec4, fields.Read<uint>(29));
+            SetModifier(ItemModifier.EnchantIllusionAllSpecs, fields.Read<uint>(26));
+            SetModifier(ItemModifier.EnchantIllusionSpec1, fields.Read<uint>(27));
+            SetModifier(ItemModifier.EnchantIllusionSpec2, fields.Read<uint>(28));
+            SetModifier(ItemModifier.EnchantIllusionSpec3, fields.Read<uint>(29));
             SetModifier(ItemModifier.EnchantIllusionSpec4, fields.Read<uint>(30));
+            SetModifier(ItemModifier.EnchantIllusionSpec4, fields.Read<uint>(31));
 
-            SetModifier(ItemModifier.TransmogSecondaryAppearanceAllSpecs, fields.Read<uint>(31));
-            SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec1, fields.Read<uint>(32));
-            SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec2, fields.Read<uint>(33));
-            SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec3, fields.Read<uint>(34));
-            SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec4, fields.Read<uint>(35));
-            SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec5, fields.Read<uint>(36));
+            SetModifier(ItemModifier.TransmogSecondaryAppearanceAllSpecs, fields.Read<uint>(32));
+            SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec1, fields.Read<uint>(33));
+            SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec2, fields.Read<uint>(34));
+            SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec3, fields.Read<uint>(35));
+            SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec4, fields.Read<uint>(36));
+            SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec5, fields.Read<uint>(37));
 
             int gemFields = 4;
             ItemDynamicFieldGems[] gemData = new ItemDynamicFieldGems[ItemConst.MaxGemSockets];
             for (int i = 0; i < ItemConst.MaxGemSockets; ++i)
             {
                 gemData[i] = new ItemDynamicFieldGems();
-                gemData[i].ItemId = fields.Read<uint>(37 + i * gemFields);
-                var gemBonusListIDs = new StringArray(fields.Read<string>(38 + i * gemFields), ' ');
+                gemData[i].ItemId = fields.Read<uint>(38 + i * gemFields);
+                var gemBonusListIDs = new StringArray(fields.Read<string>(39 + i * gemFields), ' ');
                 if (!gemBonusListIDs.IsEmpty())
                 {
                     uint b = 0;
@@ -505,13 +507,13 @@ namespace Game.Entities
                     }
                 }
 
-                gemData[i].Context = fields.Read<byte>(39 + i * gemFields);
+                gemData[i].Context = fields.Read<byte>(40 + i * gemFields);
                 if (gemData[i].ItemId != 0)
-                    SetGem((ushort)i, gemData[i], fields.Read<uint>(40 + i * gemFields));
+                    SetGem((ushort)i, gemData[i], fields.Read<uint>(41 + i * gemFields));
             }
 
-            SetModifier(ItemModifier.TimewalkerLevel, fields.Read<uint>(49));
-            SetModifier(ItemModifier.ArtifactKnowledgeLevel, fields.Read<uint>(50));
+            SetModifier(ItemModifier.TimewalkerLevel, fields.Read<uint>(50));
+            SetModifier(ItemModifier.ArtifactKnowledgeLevel, fields.Read<uint>(51));
 
             // Enchants must be loaded after all other bonus/scaling data
             var enchantmentTokens = new StringArray(fields.Read<string>(8), ' ');
@@ -1224,6 +1226,7 @@ namespace Game.Entities
             newItem.ReplaceAllItemFlags((ItemFieldFlags)(m_itemData.DynamicFlags & ~(uint)(ItemFieldFlags.Refundable | ItemFieldFlags.BopTradeable)));
             newItem.SetExpiration(m_itemData.Expiration);
             newItem.SetBonuses(m_itemData.ItemBonusKey.GetValue().BonusListIDs);
+            newItem.SetFixedLevel(GetModifier(ItemModifier.TimewalkerLevel));
             // player CAN be NULL in which case we must not update random properties because that accesses player's item update queue
             if (player != null)
                 newItem.SetItemRandomBonusList(m_randomBonusListId);
@@ -1413,40 +1416,14 @@ namespace Game.Entities
                 owner.GetSession().GetCollectionMgr().AddItemAppearance(this);
         }
 
-        public void UpdatePlayedTime(Player owner)
-        {
-            // Get current played time
-            uint current_playtime = m_itemData.CreatePlayedTime;
-            // Calculate time elapsed since last played time update
-            long curtime = GameTime.GetGameTime();
-            uint elapsed = (uint)(curtime - m_lastPlayedTimeUpdate);
-            uint new_playtime = current_playtime + elapsed;
-            // Check if the refund timer has expired yet
-            if (new_playtime <= 2 * Time.Hour)
-            {
-                // No? Proceed.
-                // Update the data field
-                SetCreatePlayedTime(new_playtime);
-                // Flag as changed to get saved to DB
-                SetState(ItemUpdateState.Changed, owner);
-                // Speaks for itself
-                m_lastPlayedTimeUpdate = curtime;
-                return;
-            }
-            // Yes
-            SetNotRefundable(owner);
-        }
-
         public uint GetPlayedTime()
         {
-            long curtime = GameTime.GetGameTime();
-            uint elapsed = (uint)(curtime - m_lastPlayedTimeUpdate);
-            return m_itemData.CreatePlayedTime + elapsed;
+            return m_itemData.CreatePlayedTime;
         }
 
         public bool IsRefundExpired()
         {
-            return (GetPlayedTime() > 2 * Time.Hour);
+            return m_itemData.CreateTime + 2 * Time.Hour <= GameTime.GetGameTime();
         }
 
         public void SetSoulboundTradeable(List<ObjectGuid> allowedLooters)
@@ -1472,7 +1449,7 @@ namespace Game.Entities
         public bool CheckSoulboundTradeExpire()
         {
             // called from owner's update - GetOwner() MUST be valid
-            if (m_itemData.CreatePlayedTime + 2 * Time.Hour < GetOwner().GetTotalPlayedTime())
+            if (m_itemData.CreatePlayedTime + 4 * Time.Hour < GetOwner().GetTotalPlayedTime())
             {
                 ClearSoulboundTradeable(GetOwner());
                 return true; // remove from tradeable list
@@ -2626,6 +2603,7 @@ namespace Game.Entities
         public int GetEnchantmentCharges(EnchantmentSlot slot) { return m_itemData.Enchantment[(int)slot].Charges; }
 
         public void SetCreatePlayedTime(uint createPlayedTime) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.CreatePlayedTime), createPlayedTime); }
+        public void SetCreateTime(long createTime) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.CreateTime), createTime); }
 
         public string GetText() { return m_text; }
         public void SetText(string text) { m_text = text; }
@@ -2784,7 +2762,6 @@ namespace Game.Entities
         int uQueuePos;
         string m_text;
         bool mb_in_trade;
-        long m_lastPlayedTimeUpdate;
         List<ObjectGuid> allowedGUIDs = new();
         uint m_randomBonusListId;        // store separately to easily find which bonus list is the one randomly given for stat rerolling
         ObjectGuid m_childItem;

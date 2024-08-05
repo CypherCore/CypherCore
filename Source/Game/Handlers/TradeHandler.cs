@@ -111,7 +111,7 @@ namespace Game
                         }
 
                         // adjust time (depends on /played)
-                        if (myItems[i].IsBOPTradeable())
+                        if (myItems[i].m_itemData.CreatePlayedTime != 0)
                             myItems[i].SetCreatePlayedTime(trader.GetTotalPlayedTime() - (GetPlayer().GetTotalPlayedTime() - myItems[i].m_itemData.CreatePlayedTime));
                         // store
                         trader.MoveItemToInventory(traderDst, myItems[i], true, true);
@@ -130,7 +130,7 @@ namespace Game
                         
 
                         // adjust time (depends on /played)
-                        if (hisItems[i].IsBOPTradeable())
+                        if (hisItems[i].m_itemData.CreatePlayedTime != 0)
                             hisItems[i].SetCreatePlayedTime(GetPlayer().GetTotalPlayedTime() - (trader.GetTotalPlayedTime() - hisItems[i].m_itemData.CreatePlayedTime));
                         // store
                         GetPlayer().MoveItemToInventory(playerDst, hisItems[i], true, true);

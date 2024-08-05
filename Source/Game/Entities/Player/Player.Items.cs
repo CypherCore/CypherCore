@@ -135,8 +135,8 @@ namespace Game.Entities
         }
         public void SendRefundInfo(Item item)
         {
-            // This function call unsets ITEM_FLAGS_REFUNDABLE if played time is over 2 hours.
-            item.UpdatePlayedTime(this);
+            if (item.IsRefundable() && item.IsRefundExpired())
+                item.SetNotRefundable(this);
 
             if (!item.IsRefundable())
             {
@@ -159,7 +159,7 @@ namespace Game.Entities
             }
             SetItemPurchaseData setItemPurchaseData = new();
             setItemPurchaseData.ItemGUID = item.GetGUID();
-            setItemPurchaseData.PurchaseTime = GetTotalPlayedTime() - item.GetPlayedTime();
+            setItemPurchaseData.PurchaseTime = item.m_itemData.CreatePlayedTime;
             setItemPurchaseData.Contents.Money = item.GetPaidMoney();
 
             for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i)                             // item cost data
@@ -1259,19 +1259,19 @@ namespace Game.Entities
                 if (bonusListIDs != null)
                     item.SetBonuses(bonusListIDs);
 
+                item.SetFixedLevel(GetLevel());
+                item.SetItemRandomBonusList(randomBonusListId);
+                item.SetCreatePlayedTime(GetTotalPlayedTime());
+
                 item = StoreItem(pos, item, update);
 
                 ItemAddedQuestCheck(itemId, count, false);
                 UpdateCriteria(CriteriaType.ObtainAnyItem, itemId, count);
                 UpdateCriteria(CriteriaType.AcquireItem, itemId, count);
 
-                item.SetFixedLevel(GetLevel());
-                item.SetItemRandomBonusList(randomBonusListId);
-
                 if (allowedLooters != null && allowedLooters.Count > 1 && item.GetTemplate().GetMaxStackSize() == 1 && item.IsSoulBound())
                 {
                     item.SetSoulboundTradeable(allowedLooters);
-                    item.SetCreatePlayedTime(GetTotalPlayedTime());
                     AddTradeableItem(item);
 
                     // save data
