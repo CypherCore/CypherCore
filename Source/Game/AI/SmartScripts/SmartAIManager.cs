@@ -3866,7 +3866,7 @@ namespace Game.AI
         [FieldOffset(20)]
         public Raw raw;
 
-        [FieldOffset(36)]
+        [FieldOffset(40)]
         public string param_string;
 
         #region Structs

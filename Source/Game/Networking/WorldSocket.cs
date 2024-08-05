@@ -504,6 +504,7 @@ namespace Game.Networking
             // Check that Key and account name are the same on client and server
             if (!hmac.Digest.Compare(authSession.Digest))
             {
+                SendAuthResponseError(BattlenetRpcErrorCode.Denied);
                 Log.outError(LogFilter.Network, "WorldSocket.HandleAuthSession: Authentication failed for account: {0} ('{1}') address: {2}", account.game.Id, authSession.RealmJoinTicket, address);
                 CloseSocket();
                 return;
