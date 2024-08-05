@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 
 namespace Game.Movement
 {
@@ -24,13 +25,14 @@ namespace Game.Movement
         int _currentNode;
         List<TaxiNodeChangeInfo> _pointsForPathSwitch = new();    //! node indexes and costs where TaxiPath changes
 
-        public FlightPathMovementGenerator(float? speed)
+        public FlightPathMovementGenerator(float? speed, TaskCompletionSource<MovementStopReason> scriptResult)
         {
             _speed = speed;
             Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Highest;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.InFlight;
+            ScriptResult = scriptResult;
         }
 
         public override void DoInitialize(Player owner)
@@ -157,6 +159,9 @@ namespace Game.Movement
             }
 
             owner.RemovePlayerFlag(PlayerFlags.TaxiBenchmark);
+
+            if (movementInform)
+                SetScriptResult(MovementStopReason.Finished);
         }
 
         uint GetPathAtMapEnd()

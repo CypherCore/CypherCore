@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Game.Entities;
 using System;
+using System.Threading.Tasks;
 
 namespace Game.Movement
 {
@@ -16,7 +17,7 @@ namespace Game.Movement
         float _wanderDistance;
         uint _wanderSteps;
 
-        public RandomMovementGenerator(float spawnDist = 0.0f, TimeSpan? duration = null)
+        public RandomMovementGenerator(float spawnDist = 0.0f, TimeSpan? duration = null, TaskCompletionSource<MovementStopReason> scriptResult = null)
         {
             _timer = new TimeTracker();
             _reference = new();
@@ -26,6 +27,8 @@ namespace Game.Movement
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Roaming;
+            ScriptResult = scriptResult;
+
             if (duration.HasValue)
                 _duration = new TimeTracker(duration.Value);
         }
@@ -112,8 +115,11 @@ namespace Game.Movement
             }
 
             if (movementInform && HasFlag(MovementGeneratorFlags.InformEnabled))
+            {
+                SetScriptResult(MovementStopReason.Finished);
                 if (owner.IsAIEnabled())
                     owner.GetAI().MovementInform(MovementGeneratorType.Random, 0);
+            }
         }
 
         public override void Pause(uint timer)

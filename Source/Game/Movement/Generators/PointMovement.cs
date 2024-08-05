@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Game.Entities;
 using System;
+using System.Threading.Tasks;
 
 namespace Game.Movement
 {
@@ -21,7 +22,7 @@ namespace Game.Movement
         float? _closeEnoughDistance;
 
         public PointMovementGenerator(uint id, float x, float y, float z, bool generatePath, float? speed = null, float? finalOrient = null, Unit faceTarget = null, SpellEffectExtraData spellEffectExtraData = null,
-            MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null)
+            MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null, TaskCompletionSource<MovementStopReason> scriptResult = null)
         {
             _movementId = id;
             _destination = new Position(x, y, z);
@@ -37,6 +38,7 @@ namespace Game.Movement
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Roaming;
+            ScriptResult = scriptResult;
         }
 
         public override void Initialize(Unit owner)
@@ -192,6 +194,8 @@ namespace Game.Movement
 
         public void MovementInform(Unit owner)
         {
+            SetScriptResult(MovementStopReason.Finished);
+
             // deliver EVENT_CHARGE to scripts, EVENT_CHARGE_PREPATH is just internal implementation detail of this movement generator
             uint movementId = _movementId == EventId.ChargePrepath ? EventId.Charge : _movementId;
             owner.ToCreature()?.GetAI()?.MovementInform(MovementGeneratorType.Point, movementId);

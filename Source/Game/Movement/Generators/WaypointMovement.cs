@@ -7,6 +7,7 @@ using Game.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Game.Movement
 {
@@ -30,8 +31,7 @@ namespace Game.Movement
         bool _generatePath;
 
         public WaypointMovementGenerator(uint pathId = 0, bool repeating = true, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
-            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true)
-
+            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true, TaskCompletionSource<MovementStopReason> scriptResult = null)
         {
             _nextMoveTime = new TimeTracker(0);
             _pathId = pathId;
@@ -49,13 +49,14 @@ namespace Game.Movement
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Roaming;
+            ScriptResult = scriptResult;
 
             if (duration.HasValue)
                 _duration = new(duration.Value);
         }
 
         public WaypointMovementGenerator(WaypointPath path, bool repeating = true, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
-            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true)
+            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true, TaskCompletionSource<MovementStopReason> scriptResult = null)
         {
             _nextMoveTime = new TimeTracker(0);
             _repeating = repeating;
@@ -72,6 +73,7 @@ namespace Game.Movement
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Roaming;
+            ScriptResult = scriptResult;
 
             if (duration.HasValue)
                 _duration = new(duration.Value);
@@ -176,6 +178,9 @@ namespace Game.Movement
                 {
                     RemoveFlag(MovementGeneratorFlags.Transitory);
                     AddFlag(MovementGeneratorFlags.InformEnabled);
+                    AddFlag(MovementGeneratorFlags.Finalized);
+                    owner.UpdateCurrentWaypointInfo(0, 0);
+                    SetScriptResult(MovementStopReason.Finished);
                     return false;
                 }
             }
@@ -268,6 +273,9 @@ namespace Game.Movement
                 // TODO: Research if this modification is needed, which most likely isnt
                 owner.SetWalk(false);
             }
+
+            if (movementInform)
+                SetScriptResult(MovementStopReason.Finished);
         }
 
         public void MovementInform(Creature owner)
@@ -367,6 +375,8 @@ namespace Game.Movement
                     CreatureAI ai = owner.GetAI();
                     if (ai != null)
                         ai.WaypointPathEnded(currentWaypoint.Id, _path.Id);
+
+                    SetScriptResult(MovementStopReason.Finished);
                     return;
                 }
             }
@@ -406,7 +416,7 @@ namespace Game.Movement
                     init.SetAnimation(AnimTier.Ground);
                     break;
                 case WaypointMoveType.Takeoff:
-                    init.SetAnimation(AnimTier.Hover);
+                    init.SetAnimation(AnimTier.Fly);
                     break;
                 case WaypointMoveType.Run:
                     init.SetWalk(false);

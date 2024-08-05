@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using System;
+using System.Threading.Tasks;
 
 namespace Game.Movement
 {
@@ -14,6 +15,7 @@ namespace Game.Movement
         public MovementGeneratorPriority Priority;
         public MovementGeneratorFlags Flags;
         public UnitState BaseUnitState;
+        public TaskCompletionSource<MovementStopReason> ScriptResult;
 
         // on top first update
         public virtual void Initialize(Unit owner) { }
@@ -68,8 +70,17 @@ namespace Game.Movement
         {
             return $"Mode: {Mode} Priority: {Priority} Flags: {Flags} BaseUniteState: {BaseUnitState}";
         }
+
+        public void SetScriptResult(MovementStopReason reason)
+        {
+            if (ScriptResult != null)
+            {
+                ScriptResult.SetResult(reason);
+                ScriptResult = null;
+            }
+        }
     }
-    
+
     public abstract class MovementGeneratorMedium<T> : MovementGenerator where T : Unit
     {
         public override void Initialize(Unit owner)

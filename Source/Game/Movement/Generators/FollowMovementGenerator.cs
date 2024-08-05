@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using System;
+using System.Threading.Tasks;
 
 namespace Game.Movement
 {
@@ -23,7 +24,7 @@ namespace Game.Movement
 
         AbstractFollower _abstractFollower;
 
-        public FollowMovementGenerator(Unit target, float range, ChaseAngle angle, TimeSpan? duration)
+        public FollowMovementGenerator(Unit target, float range, ChaseAngle angle, TimeSpan? duration, TaskCompletionSource<MovementStopReason> scriptResult = null)
         {
             _abstractFollower = new AbstractFollower(target);
             _range = range;
@@ -33,6 +34,7 @@ namespace Game.Movement
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Follow;
+            ScriptResult = scriptResult;
 
             if (duration.HasValue)
                 _duration = new(duration.Value);
@@ -186,6 +188,8 @@ namespace Game.Movement
             {
                 owner.ClearUnitState(UnitState.FollowMove);
                 UpdatePetSpeed(owner);
+                if (movementInform)
+                    SetScriptResult(MovementStopReason.Finished);
             }
         }
 

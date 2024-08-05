@@ -2497,6 +2497,8 @@ namespace Game.Entities
             }
 
             spell.m_customArg = args.CustomArg;
+            spell.m_scriptResult = args.ScriptResult;
+            spell.m_scriptWaitsForSpellHit = args.ScriptWaitsForSpellHit;
 
             return spell.Prepare(targets.Targets, args.TriggeringAura);
         }

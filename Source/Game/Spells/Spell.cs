@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace Game.Spells
 {
@@ -3000,6 +3001,9 @@ namespace Game.Spells
                 HandleImmediate();
             }
 
+            if (m_scriptResult != null && !m_scriptWaitsForSpellHit)
+                m_scriptResult.SetResult(SpellCastResult.SpellCastOk);
+
             CallScriptAfterCastHandlers();
 
             var spell_triggered = Global.SpellMgr.GetSpellLinked(SpellLinkedType.Cast, m_spellInfo.Id);
@@ -3437,6 +3441,9 @@ namespace Game.Spells
                 return;
 
             m_spellState = SpellState.Finished;
+
+            if (m_scriptResult != null && (m_scriptWaitsForSpellHit || result != SpellCastResult.SpellCastOk))
+                m_scriptResult.SetResult(result);
 
             if (m_caster == null)
                 return;
@@ -8225,6 +8232,9 @@ namespace Game.Spells
 
         public List<Aura> m_appliedMods = new();
 
+        public TaskCompletionSource<SpellCastResult> m_scriptResult;
+        public bool m_scriptWaitsForSpellHit;
+
         WorldObject m_caster;
         public SpellValue m_spellValue;
         ObjectGuid m_originalCasterGUID;
@@ -9516,6 +9526,9 @@ namespace Game.Spells
         public Dictionary<SpellValueMod, int> SpellValueOverrides = new();
         public object CustomArg;
 
+        public TaskCompletionSource<SpellCastResult> ScriptResult;
+        public bool ScriptWaitsForSpellHit;
+
         public CastSpellExtraArgs() { }
 
         public CastSpellExtraArgs(bool triggered)
@@ -9615,6 +9628,17 @@ namespace Game.Spells
         public CastSpellExtraArgs SetCustomArg(object customArg)
         {
             CustomArg = customArg;
+            return this;
+        }
+
+        public CastSpellExtraArgs SetScriptResult(TaskCompletionSource<SpellCastResult> scriptResult)
+        {
+            ScriptResult = scriptResult;
+            return this;
+        }
+        public CastSpellExtraArgs SetScriptWaitsForSpellHit(bool scriptWaitsForSpellHit)
+        {
+            ScriptWaitsForSpellHit = scriptWaitsForSpellHit;
             return this;
         }
 

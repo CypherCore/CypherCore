@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using System;
+using System.Threading.Tasks;
 
 namespace Game.Movement
 {
@@ -13,15 +14,16 @@ namespace Game.Movement
         public const float MIN_QUIET_DISTANCE = 28.0f;
         public const float MAX_QUIET_DISTANCE = 43.0f;
 
-        public FleeingMovementGenerator(ObjectGuid fright)
+        public FleeingMovementGenerator(ObjectGuid fleeTargetGUID, TaskCompletionSource<MovementStopReason> scriptResult = null)
         {
-            _fleeTargetGUID = fright;
+            _fleeTargetGUID = fleeTargetGUID;
             _timer = new TimeTracker();
 
             Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Highest;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Fleeing;
+            ScriptResult = scriptResult;
         }
 
         public override void Initialize(Unit owner)
@@ -90,6 +92,9 @@ namespace Game.Movement
                 else if (owner.IsPlayer())
                     owner.StopMoving();
             }
+
+            if (movementInform)
+                SetScriptResult(MovementStopReason.Finished);
         }
 
         void SetTargetLocation(Unit owner)
@@ -192,7 +197,7 @@ namespace Game.Movement
 
     public class TimedFleeingMovementGenerator : FleeingMovementGenerator
     {
-        public TimedFleeingMovementGenerator(ObjectGuid fright, TimeSpan time) : base(fright)
+        public TimedFleeingMovementGenerator(ObjectGuid fleeTargetGUID, TimeSpan time, TaskCompletionSource<MovementStopReason> scriptResult = null) : base(fleeTargetGUID, scriptResult)
         {
             _totalFleeTime = new TimeTracker(time);
         }
@@ -228,6 +233,8 @@ namespace Game.Movement
 
             if (movementInform)
             {
+                SetScriptResult(MovementStopReason.Finished);
+
                 Creature ownerCreature = owner.ToCreature();
                 CreatureAI ai = ownerCreature != null ? ownerCreature.GetAI() : null;
                 if (ai != null)

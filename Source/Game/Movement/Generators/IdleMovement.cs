@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Game.Entities;
 using System;
+using System.Threading.Tasks;
 
 namespace Game.Movement
 {
@@ -56,7 +57,7 @@ namespace Game.Movement
         float? _totalTurnAngle;
         uint _diffSinceLastUpdate;
 
-        public RotateMovementGenerator(uint id, RotateDirection direction, TimeSpan? duration, float? turnSpeed, float? totalTurnAngle)
+        public RotateMovementGenerator(uint id, RotateDirection direction, TimeSpan? duration, float? turnSpeed, float? totalTurnAngle, TaskCompletionSource<MovementStopReason> scriptResult)
         {
             _id = id;
             _direction = direction;
@@ -70,6 +71,7 @@ namespace Game.Movement
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Rotating;
+            ScriptResult = scriptResult;
         }
 
         public override void Initialize(Unit owner)
@@ -142,8 +144,12 @@ namespace Game.Movement
         {
             AddFlag(MovementGeneratorFlags.Finalized);
 
-            if (movementInform && owner.IsCreature())
-                owner.ToCreature().GetAI().MovementInform(MovementGeneratorType.Rotate, _id);
+            if (movementInform)
+            {
+                SetScriptResult(MovementStopReason.Finished);
+                if (owner.IsCreature())
+                    owner.ToCreature().GetAI().MovementInform(MovementGeneratorType.Rotate, _id);
+            }
         }
 
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Rotate; }

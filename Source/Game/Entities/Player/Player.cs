@@ -26,6 +26,7 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using static Global;
 
 namespace Game.Entities
@@ -6920,7 +6921,7 @@ namespace Game.Entities
 
         public uint GetDeathTimer() { return m_deathTimer; }
 
-        public bool ActivateTaxiPathTo(List<uint> nodes, Creature npc = null, uint spellid = 0, uint preferredMountDisplay = 0, float? speed = null)
+        public bool ActivateTaxiPathTo(List<uint> nodes, Creature npc = null, uint spellid = 0, uint preferredMountDisplay = 0, float? speed = null, TaskCompletionSource<MovementStopReason> scriptResult = null)
         {
             if (nodes.Count < 2)
             {
@@ -7097,18 +7098,18 @@ namespace Game.Entities
                 ModifyMoney(-firstcost);
                 UpdateCriteria(CriteriaType.MoneySpentOnTaxis, firstcost);
                 GetSession().SendActivateTaxiReply();
-                StartTaxiMovement(mount_display_id, sourcepath, 0, speed);
+                StartTaxiMovement(mount_display_id, sourcepath, 0, speed, scriptResult);
             }
             return true;
         }
 
-        public bool ActivateTaxiPathTo(uint taxi_path_id, uint spellid = 0, float? speed = null)
+        public bool ActivateTaxiPathTo(uint taxi_path_id, uint spellid = 0, float? speed = null, TaskCompletionSource<MovementStopReason> scriptResult = null)
         {
             var entry = CliDB.TaxiPathStorage.LookupByKey(taxi_path_id);
             if (entry == null)
                 return false;
 
-            return ActivateTaxiPathTo([entry.FromTaxiNode, entry.ToTaxiNode], null, spellid, 0, speed);
+            return ActivateTaxiPathTo([entry.FromTaxiNode, entry.ToTaxiNode], null, spellid, 0, speed, scriptResult);
         }
 
         public void FinishTaxiFlight()
@@ -7174,10 +7175,10 @@ namespace Game.Entities
                 }
             }
 
-            StartTaxiMovement(mountDisplayId, path, startNode, null);
+            StartTaxiMovement(mountDisplayId, path, startNode, null, null);
         }
 
-        void StartTaxiMovement(uint mountDisplayId, uint path, uint pathNode, float? speed)
+        void StartTaxiMovement(uint mountDisplayId, uint path, uint pathNode, float? speed, TaskCompletionSource<MovementStopReason> scriptResult)
         {
             // remove fake death
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Interacting);
@@ -7185,7 +7186,7 @@ namespace Game.Entities
             if (mountDisplayId != 0)
                 Mount(mountDisplayId);
 
-            GetMotionMaster().MoveTaxiFlight(path, pathNode, speed);
+            GetMotionMaster().MoveTaxiFlight(path, pathNode, speed, scriptResult);
         }
 
         public bool GetsRecruitAFriendBonus(bool forXP)
