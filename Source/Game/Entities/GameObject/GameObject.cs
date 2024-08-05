@@ -2685,6 +2685,7 @@ namespace Game.Entities
         }
 
         public string[] GetStringIds() { return m_stringIds; }
+        public string GetStringId(StringIdType type) { return m_stringIds[(int)type]; }
 
         public override string GetName(Locale locale = Locale.enUS)
         {

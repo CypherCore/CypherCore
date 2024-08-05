@@ -1024,6 +1024,13 @@ namespace Framework.Constants
         BelongsToLayer = 0x100000,
     }
 
+    public enum StringIdType
+    {
+        Template = 0,
+        Spawn = 1,
+        Script = 2
+    }
+
     // values based at Holidays.dbc
     public enum HolidayIds
     {
