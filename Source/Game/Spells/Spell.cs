@@ -4831,7 +4831,7 @@ namespace Game.Spells
                 {
                     if (!m_caster.ToUnit().GetSpellHistory().IsReady(m_spellInfo, m_castItemEntry))
                     {
-                        if (m_triggeredByAuraSpell != null)
+                        if (m_triggeredByAuraSpell != null || m_spellInfo.IsCooldownStartedOnEvent())
                             return SpellCastResult.DontReport;
                         else
                             return SpellCastResult.NotReady;
