@@ -3679,6 +3679,16 @@ namespace Game.Entities
                 spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(6);  // 100yd
             });
 
+            // Inescapable Torment
+            ApplySpellFix([373427], spellInfo =>
+            {
+                // Remove self-damage from passive aura on learn
+                ApplySpellEffectFix(spellInfo, 3, spellEffectInfo =>
+                {
+                    spellEffectInfo.Effect = SpellEffectName.Dummy;
+                });
+            });
+
             //
             // VIOLET HOLD SPELLS
             //
