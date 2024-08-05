@@ -107,12 +107,16 @@ namespace Game.Spells
             if (GetSpellInfo().HasAttribute(SpellAttr10.RollingPeriodic))
             {
                 var periodicAuras = GetBase().GetUnitOwner().GetAuraEffectsByType(GetAuraType());
-                amount = periodicAuras.Aggregate(0, (val, aurEff) =>
+                uint totalTicks = GetTotalTicks();
+                if (totalTicks != 0)
                 {
-                    if (aurEff.GetCasterGUID() == GetCasterGUID() && aurEff.GetId() == GetId() && aurEff.GetEffIndex() == GetEffIndex() && aurEff.GetTotalTicks() > 0)
-                        val += aurEff.GetAmount() * (int)aurEff.GetRemainingTicks() / (int)aurEff.GetTotalTicks();
-                    return val;
-                });
+                    amount = periodicAuras.Aggregate(amount, (val, aurEff) =>
+                    {
+                        if (aurEff.GetCasterGUID() == GetCasterGUID() && aurEff.GetId() == GetId() && aurEff.GetEffIndex() == GetEffIndex())
+                            val += (int)(aurEff.GetEstimatedAmount().GetValueOrDefault(aurEff.GetAmount()) * (float)aurEff.GetRemainingTicks() / (float)aurEff.GetTotalTicks());
+                        return val;
+                    });
+                }
             }
 
             GetBase().CallScriptEffectCalcAmountHandlers(this, ref amount, ref m_canBeRecalculated);
