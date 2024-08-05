@@ -17,6 +17,12 @@ namespace Game.Movement
         public UnitState BaseUnitState;
         public TaskCompletionSource<MovementStopReason> ScriptResult;
 
+        ~MovementGenerator()
+        {
+            // Ensure script doesn't get stuck waiting for this movement
+            SetScriptResult(MovementStopReason.Interrupted);
+        }
+
         // on top first update
         public virtual void Initialize(Unit owner) { }
 

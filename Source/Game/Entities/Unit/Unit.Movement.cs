@@ -754,16 +754,6 @@ namespace Game.Entities
                 SendMessageToSet(packet, true);
             }
 
-            if (IsCreature() && updateAnimTier && IsAlive() && !HasUnitState(UnitState.Root))
-            {
-                if (IsGravityDisabled())
-                    SetAnimTier(AnimTier.Fly);
-                else if (IsHovering())
-                    SetAnimTier(AnimTier.Hover);
-                else
-                    SetAnimTier(AnimTier.Ground);
-            }
-
             if (IsAlive())
             {
                 if (IsGravityDisabled() || IsHovering())
@@ -773,6 +763,16 @@ namespace Game.Entities
             }
             else if (IsPlayer()) // To update player who dies while flying/hovering
                 SetPlayHoverAnim(false, false);
+
+            if (IsCreature() && updateAnimTier && IsAlive() && !HasUnitState(UnitState.Root))
+            {
+                if (IsGravityDisabled())
+                    SetAnimTier(AnimTier.Fly);
+                else if (IsHovering())
+                    SetAnimTier(AnimTier.Hover);
+                else
+                    SetAnimTier(AnimTier.Ground);
+            }
 
             return true;
         }
@@ -1137,16 +1137,6 @@ namespace Game.Entities
                 SendMessageToSet(packet, true);
             }
 
-            if (IsCreature() && updateAnimTier && IsAlive() && !HasUnitState(UnitState.Root))
-            {
-                if (IsGravityDisabled())
-                    SetAnimTier(AnimTier.Fly);
-                else if (IsHovering())
-                    SetAnimTier(AnimTier.Hover);
-                else
-                    SetAnimTier(AnimTier.Ground);
-            }
-
             if (IsAlive())
             {
                 if (IsGravityDisabled() || IsHovering())
@@ -1156,6 +1146,16 @@ namespace Game.Entities
             }
             else if (IsPlayer()) // To update player who dies while flying/hovering
                 SetPlayHoverAnim(false, false);
+
+            if (IsCreature() && updateAnimTier && IsAlive() && !HasUnitState(UnitState.Root))
+            {
+                if (IsGravityDisabled())
+                    SetAnimTier(AnimTier.Fly);
+                else if (IsHovering())
+                    SetAnimTier(AnimTier.Hover);
+                else
+                    SetAnimTier(AnimTier.Ground);
+            }
 
             return true;
         }

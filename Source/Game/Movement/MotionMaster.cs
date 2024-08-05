@@ -645,6 +645,8 @@ namespace Game.Movement
             {
                 init.MoveTo(pos, false);
                 init.SetAnimation(AnimTier.Ground, tierTransitionId.GetValueOrDefault(1));
+                init.SetFly(); // ensure smooth animation even if gravity is enabled before calling this function
+                init.SetSmooth();
                 switch (speedSelectionMode)
                 {
                     case MovementWalkRunSpeedSelectionMode.ForceRun:
@@ -669,7 +671,8 @@ namespace Game.Movement
             var initializer = (MoveSplineInit init) =>
             {
                 init.MoveTo(pos, false);
-                init.SetAnimation(AnimTier.Hover, tierTransitionId.GetValueOrDefault(15));
+                init.SetAnimation(AnimTier.Fly, tierTransitionId.GetValueOrDefault(2));
+                init.SetFly(); // ensure smooth animation even if gravity is disabled after calling this function
                 switch (speedSelectionMode)
                 {
                     case MovementWalkRunSpeedSelectionMode.ForceRun:

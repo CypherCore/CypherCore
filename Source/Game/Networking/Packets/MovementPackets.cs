@@ -403,7 +403,7 @@ namespace Game.Networking.Packets
             movementSpline.FaceGUID = moveSpline.facing.target;
             movementSpline.FaceSpot = moveSpline.facing.f;
 
-            if (splineFlags.HasFlag(SplineFlag.Animation))
+            if (moveSpline.anim_tier != null)
             {
                 MonsterSplineAnimTierTransition animTierTransition = new();
                 animTierTransition.TierTransitionID = (int)moveSpline.anim_tier.TierTransitionId;

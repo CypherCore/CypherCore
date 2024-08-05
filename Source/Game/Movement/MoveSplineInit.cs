@@ -321,7 +321,8 @@ namespace Game.Movement
             args.animTier = new();
             args.animTier.TierTransitionId = tierTransitionId;
             args.animTier.AnimTier = (byte)anim;
-            args.flags.EnableAnimation();
+            if (tierTransitionId == 0)
+                args.flags.EnableAnimation();
         }
 
         public void DisableTransportPathTransformations() { args.TransformForTransport = false; }
