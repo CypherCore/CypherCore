@@ -6,6 +6,7 @@ using Framework.Dynamic;
 using Game.AI;
 using Game.BattleFields;
 using Game.BattleGrounds;
+using Game.Combat;
 using Game.Conditions;
 using Game.DataStorage;
 using Game.Entities;
@@ -889,6 +890,7 @@ namespace Game.Spells
             switch (targetType.GetTarget())
             {
                 case Targets.UnitCasterAndPassengers:
+                {
                     targets.Add(m_caster);
                     Unit unit = m_caster.ToUnit();
                     if (unit != null)
@@ -903,7 +905,9 @@ namespace Game.Spells
                             }
                     }
                     break;
+                }
                 case Targets.UnitTargetAllyOrRaid:
+                {
                     Unit targetedUnit = m_targets.GetUnitTarget();
                     if (targetedUnit != null)
                     {
@@ -913,10 +917,41 @@ namespace Game.Spells
                             SearchAreaTargets(targets, spellEffectInfo, radius, targetedUnit, referer, targetType.GetObjectType(), targetType.GetCheckType(), spellEffectInfo.ImplicitTargetConditions, WorldObjectSpellAreaTargetSearchReason.Area);
                     }
                     break;
+                }
                 case Targets.UnitCasterAndSummons:
+                {
                     targets.Add(m_caster);
                     SearchAreaTargets(targets, spellEffectInfo, radius, center, referer, targetType.GetObjectType(), targetType.GetCheckType(), spellEffectInfo.ImplicitTargetConditions, WorldObjectSpellAreaTargetSearchReason.Area);
                     break;
+                }
+                case Targets.UnitAreaThreatList:
+                {
+                    Unit unit = m_caster.ToUnit();
+                    if (unit != null)
+                    {
+                        foreach (ThreatReference threatRef in unit.GetThreatManager().GetSortedThreatList())
+                        {
+                            Unit threateningUnit = threatRef.GetVictim();
+                            if (threateningUnit != null)
+                                targets.Add(threateningUnit);
+                        }
+                    }
+                    break;
+                }
+                case Targets.UnitAreaTapList:
+                {
+                    Creature creature = m_caster.ToCreature();
+                    if (creature != null)
+                    {
+                        foreach (ObjectGuid tapperGuid in creature.GetTapList())
+                        {
+                            Player tapper = Global.ObjAccessor.GetPlayer(m_caster, tapperGuid);
+                            if (tapper != null)
+                                targets.Add(tapper);
+                        }
+                    }
+                    break;
+                }
                 default:
                     SearchAreaTargets(targets, spellEffectInfo, radius, center, referer, targetType.GetObjectType(), targetType.GetCheckType(), spellEffectInfo.ImplicitTargetConditions, WorldObjectSpellAreaTargetSearchReason.Area);
                     break;
@@ -9110,16 +9145,6 @@ namespace Game.Spells
                         if (!unitTarget.IsSummon())
                             return false;
                         if (unitTarget.ToTempSummon().GetSummonerGUID() != _caster.GetGUID())
-                            return false;
-                        break;
-                    case SpellTargetCheckTypes.Threat:
-                        if (!_referer.IsUnit() || _referer.ToUnit().GetThreatManager().GetThreat(unitTarget, true) <= 0.0f)
-                            return false;
-                        break;
-                    case SpellTargetCheckTypes.Tap:
-                        if (_referer.GetTypeId() != TypeId.Unit || unitTarget.GetTypeId() != TypeId.Player)
-                            return false;
-                        if (!_referer.ToCreature().IsTappedBy(unitTarget.ToPlayer()))
                             return false;
                         break;
                     default:

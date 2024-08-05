@@ -2903,9 +2903,7 @@ namespace Framework.Constants
         Raid,
         RaidClass,
         Passenger,
-        Summoned,
-        Threat,
-        Tap
+        Summoned
     }
 
     public enum SpellTargetDirectionTypes
