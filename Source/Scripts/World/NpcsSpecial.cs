@@ -393,7 +393,7 @@ namespace Scripts.World.NpcsSpecial
         bool checkNearbyPlayers()
         {
             // Returns true if no nearby player has aura "Test Ribbon Pole Channel".
-            List<Unit> players = new();
+            List<Player> players = new();
             UnitAuraCheck check = new(true, SpellRibbonDanceCosmetic);
             PlayerListSearcher searcher = new(me, players, check);
             Cell.VisitWorldObjects(me, searcher, 10.0f);

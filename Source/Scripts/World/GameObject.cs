@@ -451,7 +451,7 @@ namespace Scripts.World.GameObjects
                         break;
                     // Neurtal
                     case BrewfestMusicAreasIds.Shattrath:
-                        List<Unit> playersNearby = me.GetPlayerListInGrid(me.GetVisibilityRange());
+                        List<Player> playersNearby = me.GetPlayerListInGrid(me.GetVisibilityRange());
                         foreach (Player player in playersNearby)
                         {
                             if (player.GetTeam() == Team.Horde)
@@ -517,7 +517,7 @@ namespace Scripts.World.GameObjects
                 if (!GameEventMgr.IsHolidayActive(HolidayIds.MidsummerFireFestival))
                     return;
 
-                List<Unit> playersNearby = me.GetPlayerListInGrid(me.GetVisibilityRange());
+                List<Player> playersNearby = me.GetPlayerListInGrid(me.GetVisibilityRange());
                 foreach (Player player in playersNearby)
                 {
                     if (player.GetTeam() == Team.Horde)

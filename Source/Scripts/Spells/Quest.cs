@@ -648,7 +648,7 @@ namespace Scripts.Spells.Azerite
         {
             Unit caster = GetCaster();
             // Check for player that is in 65 y range
-            List<Unit> playerList = new();
+            List<Player> playerList = new();
             AnyPlayerInObjectRangeCheck checker = new(caster, 65.0f);
             PlayerListSearcher searcher = new(caster, playerList, checker);
             Cell.VisitWorldObjects(caster, searcher, 65.0f);

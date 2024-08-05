@@ -2693,7 +2693,6 @@ namespace Game.Entities
             }
         }
 
-        public string[] GetStringIds() { return m_stringIds; }
         public string GetStringId(StringIdType type) { return m_stringIds[(int)type]; }
 
         public override string GetName(Locale locale = Locale.enUS)
@@ -4592,7 +4591,7 @@ namespace Game.Entities
         void HandleHeartbeat()
         {
             // update player list inside control zone
-            List<Unit> targetList = new();
+            List<Player> targetList = new();
             SearchTargets(targetList);
 
             int oldControllingTeam = GetControllingTeam();
@@ -4641,7 +4640,7 @@ namespace Game.Entities
                 player.SendUpdateWorldState(_owner.GetGoInfo().ControlZone.worldstate2, (uint)roundedValue);
         }
 
-        void SearchTargets(List<Unit> targetList)
+        void SearchTargets(List<Player> targetList)
         {
             AnyUnitInObjectRangeCheck check = new(_owner, _owner.GetGoInfo().ControlZone.radius, true);
             PlayerListSearcher searcher = new(_owner, targetList, check);
@@ -4649,7 +4648,7 @@ namespace Game.Entities
             HandleUnitEnterExit(targetList);
         }
 
-        float CalculatePointsPerSecond(List<Unit> targetList)
+        float CalculatePointsPerSecond(List<Player> targetList)
         {
             int delta = 0;
 
@@ -4683,7 +4682,7 @@ namespace Game.Entities
             return percentageIncrease;
         }
 
-        void HandleUnitEnterExit(List<Unit> newTargetList)
+        void HandleUnitEnterExit(List<Player> newTargetList)
         {
             List<ObjectGuid> exitPlayers = new(_insidePlayers);
 

@@ -2887,15 +2887,17 @@ namespace Game.Entities
             return gameobjectList;
         }
 
-        void GetGameObjectListWithOptionsInGrid(List<GameObject> gameObjectContainer, float maxSearchRange, FindGameObjectOptions options)
+        public List<GameObject> GetGameObjectListWithOptionsInGrid(float maxSearchRange, FindGameObjectOptions options)
         {
+            List<GameObject> gameobjectList = new();
             InRangeCheckCustomizer checkCustomizer = new(this, maxSearchRange);
             GameObjectWithOptionsInObjectRangeCheck<InRangeCheckCustomizer> check = new(this, checkCustomizer, options);
-            GameObjectListSearcher searcher = new(this, gameObjectContainer, check);
+            GameObjectListSearcher searcher = new(this, gameobjectList, check);
             if (options.IgnorePhases)
                 searcher.i_phaseShift = PhasingHandler.GetAlwaysVisiblePhaseShift();
 
             Cell.VisitGridObjects(this, searcher, maxSearchRange);
+            return gameobjectList;
         }
 
         public List<Creature> GetCreatureListWithEntryInGrid(uint entry = 0, float maxSearchRange = 250.0f)
@@ -2921,9 +2923,9 @@ namespace Game.Entities
             return creatureList;
         }
 
-        public List<Unit> GetPlayerListInGrid(float maxSearchRange, bool alive = true)
+        public List<Player> GetPlayerListInGrid(float maxSearchRange, bool alive = true)
         {
-            List<Unit> playerList = new();
+            List<Player> playerList = new();
             var checker = new AnyPlayerInObjectRangeCheck(this, maxSearchRange, alive);
             var searcher = new PlayerListSearcher(this, playerList, checker);
 
@@ -3015,7 +3017,7 @@ namespace Game.Entities
             if (!IsInWorld)
                 return;
 
-            List<Unit> targets = new();
+            List<Player> targets = new();
             var check = new AnyPlayerInObjectRangeCheck(this, GetVisibilityRange(), false);
             var searcher = new PlayerListSearcher(this, targets, check);
 

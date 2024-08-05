@@ -609,8 +609,10 @@ namespace Game.Entities
             var check = new AnyUnitInObjectRangeCheck(this, radius, check3D);
             if (IsStaticSpawn())
             {
-                var searcher = new PlayerListSearcher(this, targetList, check);
+                List<Player> temp = new List<Player>();
+                var searcher = new PlayerListSearcher(this, temp, check);
                 Cell.VisitWorldObjects(this, searcher, GetMaxSearchRadius());
+                targetList.AddRange(temp);
             }
             else
             {

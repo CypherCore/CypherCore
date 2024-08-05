@@ -244,16 +244,18 @@ namespace Game.AI
                 temp.Action.raw.param5 = result.Read<uint>(20);
                 temp.Action.raw.param6 = result.Read<uint>(21);
                 temp.Action.raw.param7 = result.Read<uint>(22);
+                temp.Action.param_string = result.Read<string>(23);
 
-                temp.Target.type = (SmartTargets)result.Read<byte>(23);
-                temp.Target.raw.param1 = result.Read<uint>(24);
-                temp.Target.raw.param2 = result.Read<uint>(25);
-                temp.Target.raw.param3 = result.Read<uint>(26);
-                temp.Target.raw.param4 = result.Read<uint>(27);
-                temp.Target.x = result.Read<float>(28);
-                temp.Target.y = result.Read<float>(29);
-                temp.Target.z = result.Read<float>(30);
-                temp.Target.o = result.Read<float>(31);
+                temp.Target.type = (SmartTargets)result.Read<byte>(24);
+                temp.Target.raw.param1 = result.Read<uint>(25);
+                temp.Target.raw.param2 = result.Read<uint>(26);
+                temp.Target.raw.param3 = result.Read<uint>(27);
+                temp.Target.raw.param4 = result.Read<uint>(28);
+                temp.Target.param_string = result.Read<string>(29);
+                temp.Target.x = result.Read<float>(30);
+                temp.Target.y = result.Read<float>(31);
+                temp.Target.z = result.Read<float>(32);
+                temp.Target.o = result.Read<float>(33);
 
                 //check target
                 if (!IsTargetValid(temp))
@@ -657,6 +659,22 @@ namespace Game.AI
                     Log.outWarn(LogFilter.Sql, $"SmartAIMgr: {e} has unused event_param{index + 1} with value {value}, it should be 0.");
             }
 
+            bool eventUsesStringParam()
+            {
+                switch (e.GetEventType())
+                {
+                    case SmartEvents.SceneTrigger:
+                        return true;
+                    default:
+                        break;
+                }
+
+                return false;
+            }
+
+            if (!eventUsesStringParam() && !e.Event.param_string.IsEmpty())
+                Log.outWarn(LogFilter.Sql, $"SmartAIMgr: {e} has unused event_param_string with value {e.Event.param_string}, it should be NULL.");
+
             return true;
         }
 
@@ -834,6 +852,22 @@ namespace Game.AI
                     Log.outWarn(LogFilter.Sql, $"SmartAIMgr: {e} has unused action_param{index + 1} with value {value}, it should be 0.");
             }
 
+            bool actionUsesStringParam()
+            {
+                switch (e.GetActionType())
+                {
+                    case SmartActions.CrossCast:
+                        return true;
+                    default:
+                        break;
+                }
+
+                return false;
+            };
+
+            if (!actionUsesStringParam() && !e.Action.param_string.IsEmpty())
+                Log.outWarn(LogFilter.Sql, $"SmartAIMgr: {e} has unused action_param_string with value {e.Action.param_string}, it should be NULL.");
+
             return true;
         }
 
@@ -900,6 +934,27 @@ namespace Game.AI
                 if (value != 0)
                     Log.outWarn(LogFilter.Sql, $"SmartAIMgr: {e} has unused target_param{index + 1} with value {value}, it must be 0, skipped.");
             }
+
+            bool targetUsesStringParam()
+            {
+                switch (e.GetTargetType())
+                {
+                    case SmartTargets.CreatureRange:
+                    case SmartTargets.CreatureDistance:
+                    case SmartTargets.GameobjectRange:
+                    case SmartTargets.GameobjectDistance:
+                    case SmartTargets.ClosestCreature:
+                    case SmartTargets.ClosestGameobject:
+                        return true;
+                    default:
+                        break;
+                }
+
+                return false;
+            }
+
+            if (!targetUsesStringParam() && !e.Target.param_string.IsEmpty())
+                Log.outWarn(LogFilter.Sql, $"SmartAIMgr: {e} has unused target_param_string with value {e.Target.param_string}, it should be NULL.");
 
             return true;
         }
@@ -3172,6 +3227,9 @@ namespace Game.AI
         [FieldOffset(4)]
         public Raw raw;
 
+        [FieldOffset(32)]
+        public string param_string;
+
         #region Stucts
         public struct Talk
         {
@@ -3241,6 +3299,7 @@ namespace Game.AI
             public uint targetParam1;
             public uint targetParam2;
             public uint targetParam3;
+            public uint targetParam4;
         }
         public struct SummonCreature
         {
@@ -3806,6 +3865,9 @@ namespace Game.AI
 
         [FieldOffset(20)]
         public Raw raw;
+
+        [FieldOffset(36)]
+        public string param_string;
 
         #region Structs
         public struct HostilRandom

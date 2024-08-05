@@ -1830,16 +1830,16 @@ namespace Game.Maps
     public class PlayerListSearcher : Notifier
     {
         PhaseShift i_phaseShift;
-        List<Unit> i_objects;
+        List<Player> i_objects;
         ICheck<Player> i_check;
 
-        public PlayerListSearcher(WorldObject searcher, List<Unit> objects, ICheck<Player> check)
+        public PlayerListSearcher(WorldObject searcher, List<Player> objects, ICheck<Player> check)
         {
             i_phaseShift = searcher.GetPhaseShift();
             i_objects = objects;
             i_check = check;
         }
-        public PlayerListSearcher(PhaseShift phaseShift, List<Unit> objects, ICheck<Player> check)
+        public PlayerListSearcher(PhaseShift phaseShift, List<Player> objects, ICheck<Player> check)
         {
             i_phaseShift = phaseShift;
             i_objects = objects;

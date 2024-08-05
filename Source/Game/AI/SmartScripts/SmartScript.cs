@@ -1575,7 +1575,7 @@ namespace Game.AI
                     if (targets.Empty())
                         break;
 
-                    List<WorldObject> casters = GetTargets(CreateSmartEvent(SmartEvents.UpdateIc, 0, 0, 0, 0, 0, 0, SmartActions.None, 0, 0, 0, 0, 0, 0, 0, (SmartTargets)e.Action.crossCast.targetType, e.Action.crossCast.targetParam1, e.Action.crossCast.targetParam2, e.Action.crossCast.targetParam3, 0, 0), unit);
+                    List<WorldObject> casters = GetTargets(CreateSmartEvent(SmartEvents.UpdateIc, 0, 0, 0, 0, 0, 0, SmartActions.None, 0, 0, 0, 0, 0, 0, 0, (SmartTargets)e.Action.crossCast.targetType, e.Action.crossCast.targetParam1, e.Action.crossCast.targetParam2, e.Action.crossCast.targetParam3, e.Action.crossCast.targetParam4, e.Action.param_string, 0), unit);
 
                     CastSpellExtraArgs args = new();
                     if (e.Action.crossCast.castFlags.HasAnyFlag((uint)SmartCastFlags.Triggered))
@@ -2515,7 +2515,7 @@ namespace Game.AI
 
         SmartScriptHolder CreateSmartEvent(SmartEvents e, SmartEventFlags event_flags, uint event_param1, uint event_param2, uint event_param3, uint event_param4, uint event_param5,
             SmartActions action, uint action_param1, uint action_param2, uint action_param3, uint action_param4, uint action_param5, uint action_param6, uint action_param7,
-            SmartTargets t, uint target_param1, uint target_param2, uint target_param3, uint target_param4, uint phaseMask)
+            SmartTargets t, uint target_param1, uint target_param2, uint target_param3, uint target_param4, string targetParamString, uint phaseMask)
         {
             SmartScriptHolder script = new();
             script.Event.type = e;
@@ -2542,6 +2542,7 @@ namespace Game.AI
             script.Target.raw.param2 = target_param2;
             script.Target.raw.param3 = target_param3;
             script.Target.raw.param4 = target_param4;
+            script.Target.param_string = targetParamString;
 
             script.SourceType = SmartScriptType.Creature;
             InitTimer(script);
@@ -2694,18 +2695,9 @@ namespace Game.AI
                         break;
                     }
 
-                    List<WorldObject> units = GetWorldObjectsInDist(e.Target.unitRange.maxDist);
-                    foreach (var obj in units)
-                    {
-                        if (!IsCreature(obj))
-                            continue;
-
-                        if (_me != null && _me == obj)
-                            continue;
-
-                        if ((e.Target.unitRange.creature == 0 || obj.ToCreature().GetEntry() == e.Target.unitRange.creature) && refObj.IsInRange(obj, e.Target.unitRange.minDist, e.Target.unitRange.maxDist))
-                            targets.Add(obj);
-                    }
+                    List<Creature> creatures = refObj.GetCreatureListWithOptionsInGrid(e.Target.unitRange.maxDist,
+                        new FindCreatureOptions() { CreatureId = e.Target.unitRange.creature != 0 ? e.Target.unitRange.creature : null, StringId = !e.Target.param_string.IsEmpty() ? e.Target.param_string : null, });
+                    targets.AddRange(creatures.Where(target => !refObj.IsWithinDist(target, e.Target.unitRange.minDist)));
 
                     if (e.Target.unitRange.maxSize != 0)
                         targets.RandomResize(e.Target.unitRange.maxSize);
@@ -2713,40 +2705,17 @@ namespace Game.AI
                 }
                 case SmartTargets.CreatureDistance:
                 {
-                    List<WorldObject> units = GetWorldObjectsInDist(e.Target.unitDistance.dist);
-                    foreach (var obj in units)
-                    {
-                        if (!IsCreature(obj))
-                            continue;
+                    if (baseObject == null)
+                        break;
 
-                        if (_me != null && _me == obj)
-                            continue;
+                    List<Creature> creatures = baseObject.GetCreatureListWithOptionsInGrid(e.Target.unitDistance.dist,
+                        new FindCreatureOptions() { CreatureId = e.Target.unitDistance.creature != 0 ? e.Target.unitDistance.creature : null, StringId = !e.Target.param_string.IsEmpty() ? e.Target.param_string : null });
 
-                        if (e.Target.unitDistance.creature == 0 || obj.ToCreature().GetEntry() == e.Target.unitDistance.creature)
-                            targets.Add(obj);
-                    }
+                    targets.Clear();
+                    targets.AddRange(creatures);
 
                     if (e.Target.unitDistance.maxSize != 0)
                         targets.RandomResize(e.Target.unitDistance.maxSize);
-                    break;
-                }
-                case SmartTargets.GameobjectDistance:
-                {
-                    List<WorldObject> units = GetWorldObjectsInDist(e.Target.goDistance.dist);
-                    foreach (var obj in units)
-                    {
-                        if (!IsGameObject(obj))
-                            continue;
-
-                        if (_go != null && _go == obj)
-                            continue;
-
-                        if (e.Target.goDistance.entry == 0 || obj.ToGameObject().GetEntry() == e.Target.goDistance.entry)
-                            targets.Add(obj);
-                    }
-
-                    if (e.Target.goDistance.maxSize != 0)
-                        targets.RandomResize(e.Target.goDistance.maxSize);
                     break;
                 }
                 case SmartTargets.GameobjectRange:
@@ -2761,21 +2730,27 @@ namespace Game.AI
                         break;
                     }
 
-                    List<WorldObject> units = GetWorldObjectsInDist(e.Target.goRange.maxDist);
-                    foreach (var obj in units)
-                    {
-                        if (!IsGameObject(obj))
-                            continue;
-
-                        if (_go != null && _go == obj)
-                            continue;
-
-                        if ((e.Target.goRange.entry == 0 || obj.ToGameObject().GetEntry() == e.Target.goRange.entry) && refObj.IsInRange(obj, e.Target.goRange.minDist, e.Target.goRange.maxDist))
-                            targets.Add(obj);
-                    }
+                    List<GameObject> gameObjects = refObj.GetGameObjectListWithOptionsInGrid(e.Target.goRange.maxDist,
+                        new FindGameObjectOptions() { GameObjectId = e.Target.goRange.entry != 0 ? e.Target.goRange.entry : null, StringId = !e.Target.param_string.IsEmpty() ? e.Target.param_string : null });
+                    targets.AddRange(gameObjects.Where(target => !refObj.IsWithinDist(target, e.Target.goRange.minDist)));
 
                     if (e.Target.goRange.maxSize != 0)
                         targets.RandomResize(e.Target.goRange.maxSize);
+                    break;
+                }
+                case SmartTargets.GameobjectDistance:
+                {
+                    if (baseObject == null)
+                        break;
+
+                    List<GameObject> gameObjects = baseObject.GetGameObjectListWithOptionsInGrid(e.Target.goDistance.dist,
+                        new FindGameObjectOptions() { GameObjectId = e.Target.goDistance.entry != 0 ? e.Target.goDistance.entry : null, StringId = !e.Target.param_string.IsEmpty() ? e.Target.param_string : null });
+
+                    targets.Clear();
+                    targets.AddRange(gameObjects);
+
+                    if (e.Target.goDistance.maxSize != 0)
+                        targets.RandomResize(e.Target.goDistance.maxSize);
                     break;
                 }
                 case SmartTargets.CreatureGuid:
@@ -2808,20 +2783,21 @@ namespace Game.AI
                 }
                 case SmartTargets.PlayerRange:
                 {
-                    List<WorldObject> units = GetWorldObjectsInDist(e.Target.playerRange.maxDist);
-                    if (!units.Empty() && baseObject != null)
-                        foreach (var obj in units)
-                            if (IsPlayer(obj) && baseObject.IsInRange(obj, e.Target.playerRange.minDist, e.Target.playerRange.maxDist))
-                                targets.Add(obj);
+                    if (baseObject == null)
+                        break;
+
+                    List<Player> players = baseObject.GetPlayerListInGrid(e.Target.playerRange.maxDist);
+                    targets.AddRange(players.Where(target => !baseObject.IsWithinDist(target, e.Target.playerRange.minDist)));
 
                     break;
                 }
                 case SmartTargets.PlayerDistance:
                 {
-                    List<WorldObject> units = GetWorldObjectsInDist(e.Target.playerDistance.dist);
-                    foreach (var obj in units)
-                        if (IsPlayer(obj))
-                            targets.Add(obj);
+                    if (baseObject == null)
+                        break;
+
+                    List<Player> players = baseObject.GetPlayerListInGrid(e.Target.playerDistance.dist);
+                    targets.AddRange(players);
                     break;
                 }
                 case SmartTargets.Stored:
@@ -2854,7 +2830,9 @@ namespace Game.AI
                         break;
                     }
 
-                    Creature target = refObj.FindNearestCreature(e.Target.unitClosest.entry, e.Target.unitClosest.dist != 0 ? e.Target.unitClosest.dist : 100, e.Target.unitClosest.dead == 0);
+                    Creature target = refObj.FindNearestCreatureWithOptions(e.Target.unitClosest.dist != 0 ? e.Target.unitClosest.dist : 100,
+                        new FindCreatureOptions() { CreatureId = e.Target.unitClosest.entry, StringId = !e.Target.param_string.IsEmpty() ? e.Target.param_string : null, IsAlive = e.Target.unitClosest.dead == 0 });
+
                     if (target != null)
                         targets.Add(target);
                     break;
@@ -2871,7 +2849,9 @@ namespace Game.AI
                         break;
                     }
 
-                    GameObject target = refObj.FindNearestGameObject(e.Target.goClosest.entry, e.Target.goClosest.dist != 0 ? e.Target.goClosest.dist : 100);
+                    GameObject target = refObj.FindNearestGameObjectWithOptions(e.Target.goClosest.dist != 0 ? e.Target.goClosest.dist : 100,
+                        new FindGameObjectOptions() { GameObjectId = e.Target.goClosest.entry, StringId = !e.Target.param_string.IsEmpty() ? e.Target.param_string : null });
+
                     if (target != null)
                         targets.Add(target);
                     break;
@@ -3007,19 +2987,6 @@ namespace Game.AI
                     break;
             }
 
-            return targets;
-        }
-
-        List<WorldObject> GetWorldObjectsInDist(float dist)
-        {
-            List<WorldObject> targets = new();
-            WorldObject obj = GetBaseObject();
-            if (obj == null)
-                return targets;
-
-            var u_check = new AllWorldObjectsInRange(obj, dist);
-            var searcher = new WorldObjectListSearcher(obj, targets, u_check);
-            Cell.VisitAllObjects(obj, searcher, dist);
             return targets;
         }
 
