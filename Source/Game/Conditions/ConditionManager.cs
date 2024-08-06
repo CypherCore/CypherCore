@@ -1233,15 +1233,22 @@ namespace Game
             {
                 case ConditionTypes.Aura:
                 {
-                    if (!Global.SpellMgr.HasSpellInfo(cond.ConditionValue1, Difficulty.None))
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(cond.ConditionValue1, Difficulty.None);
+                    if (spellInfo == null)
                     {
-                        Log.outError(LogFilter.Sql, "{0} has non existing spell (Id: {1}), skipped", cond.ToString(), cond.ConditionValue1);
+                        Log.outError(LogFilter.Sql, "{0} has non existing spell (Id: {1}), skipped", cond.ToString(true), cond.ConditionValue1);
                         return false;
                     }
 
-                    if (cond.ConditionValue2 >= SpellConst.MaxEffects)
+                    if (cond.ConditionValue2 >= spellInfo.GetEffects().Count)
                     {
-                        Log.outError(LogFilter.Sql, $"{cond.ToString(true)} has non existing effect index ({cond.ConditionValue2}) (must be 0..{SpellConst.MaxEffects - 1}), skipped");
+                        Log.outError(LogFilter.Sql, $"{cond.ToString(true)} spell {cond.ConditionValue1} has non existing effect index ({cond.ConditionValue2}) (must be 0..{spellInfo.GetEffects().Count - 1}), skipped.");
+                        return false;
+                    }
+
+                    if (!spellInfo.GetEffect(cond.ConditionValue2).IsAura())
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond.ToString(true)} spell {cond.ConditionValue1} effect index {cond.ConditionValue2} is not an aura, skipped.");
                         return false;
                     }
                     break;
