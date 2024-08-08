@@ -1,7 +1,6 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
 using Game.DataStorage;
@@ -12,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using static Game.AI.SmartAction;
 
 namespace Game.AI
 {
@@ -1369,6 +1367,11 @@ namespace Game.AI
                         Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Not handled event_type({0}), Entry {1} SourceType {2} Event {3} Action {4}, skipped.", e.GetEventType(), e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
                         return false;
                 }
+                if (e.Event.event_flags.HasAnyFlag(SmartEventFlags.ActionlistWaits))
+                {
+                    Log.outError(LogFilter.Sql, "SmartAIMgr: {e}, uses SMART_EVENT_FLAG_ACTIONLIST_WAITS but is not part of a timed actionlist.");
+                    return false;
+                }
             }
 
             if (!CheckUnusedEventParams(e))
@@ -1506,6 +1509,11 @@ namespace Game.AI
                                 Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} Effect: SPELL_EFFECT_KILL_CREDIT: (SpellId: {e.Action.cast.spell} targetA: {spellEffectInfo.TargetA.GetTarget()} - targetB: {spellEffectInfo.TargetB.GetTarget()}) has invalid target for this Action");
                         }
                     }
+                    if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.WaitForHit) && !e.Event.event_flags.HasAnyFlag(SmartEventFlags.ActionlistWaits))
+                    {
+                        Log.outError(LogFilter.Sql, "SmartAIMgr: {e} uses SMARTCAST_WAIT_FOR_HIT but is not part of actionlist event that has SMART_EVENT_FLAG_ACTIONLIST_WAITS");
+                        return false;
+                    }
                     break;
                 }
                 case SmartActions.CrossCast:
@@ -1538,6 +1546,11 @@ namespace Game.AI
                             return false;
                         }
                     }
+                    if (e.Action.crossCast.castFlags.HasAnyFlag((uint)SmartCastFlags.WaitForHit) && !e.Event.event_flags.HasAnyFlag(SmartEventFlags.ActionlistWaits))
+                    {
+                        Log.outError(LogFilter.Sql, "SmartAIMgr: {e} uses SMARTCAST_WAIT_FOR_HIT but is not part of actionlist event that has SMART_EVENT_FLAG_ACTIONLIST_WAITS");
+                        return false;
+                    }
                     break;
                 }
                 case SmartActions.InvokerCast:
@@ -1552,6 +1565,11 @@ namespace Game.AI
                 case SmartActions.SelfCast:
                     if (!IsSpellValid(e, e.Action.cast.spell))
                         return false;
+                    if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.WaitForHit) && !e.Event.event_flags.HasAnyFlag(SmartEventFlags.ActionlistWaits))
+                    {
+                        Log.outError(LogFilter.Sql, "SmartAIMgr: {e} uses SMARTCAST_WAIT_FOR_HIT but is not part of actionlist event that has SMART_EVENT_FLAG_ACTIONLIST_WAITS");
+                        return false;
+                    }
                     break;
                 case SmartActions.CallAreaexploredoreventhappens:
                 case SmartActions.CallGroupeventhappens:

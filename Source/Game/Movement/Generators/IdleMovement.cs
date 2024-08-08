@@ -3,8 +3,8 @@
 
 using Framework.Constants;
 using Game.Entities;
+using Game.Scripting.v2;
 using System;
-using System.Threading.Tasks;
 
 namespace Game.Movement
 {
@@ -57,7 +57,7 @@ namespace Game.Movement
         float? _totalTurnAngle;
         uint _diffSinceLastUpdate;
 
-        public RotateMovementGenerator(uint id, RotateDirection direction, TimeSpan? duration, float? turnSpeed, float? totalTurnAngle, TaskCompletionSource<MovementStopReason> scriptResult)
+        public RotateMovementGenerator(uint id, RotateDirection direction, TimeSpan? duration, float? turnSpeed, float? totalTurnAngle, ActionResultSetter<MovementStopReason> scriptResult)
         {
             _id = id;
             _direction = direction;

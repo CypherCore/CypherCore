@@ -16,11 +16,11 @@ using Game.Miscellaneous;
 using Game.Movement;
 using Game.Networking.Packets;
 using Game.Scripting;
+using Game.Scripting.v2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 
 namespace Game.Spells
 {
@@ -8267,7 +8267,7 @@ namespace Game.Spells
 
         public List<Aura> m_appliedMods = new();
 
-        public TaskCompletionSource<SpellCastResult> m_scriptResult;
+        public ActionResultSetter<SpellCastResult> m_scriptResult;
         public bool m_scriptWaitsForSpellHit;
 
         WorldObject m_caster;
@@ -9551,7 +9551,7 @@ namespace Game.Spells
         public Dictionary<SpellValueMod, int> SpellValueOverrides = new();
         public object CustomArg;
 
-        public TaskCompletionSource<SpellCastResult> ScriptResult;
+        public ActionResultSetter<SpellCastResult> ScriptResult;
         public bool ScriptWaitsForSpellHit;
 
         public CastSpellExtraArgs() { }
@@ -9656,7 +9656,7 @@ namespace Game.Spells
             return this;
         }
 
-        public CastSpellExtraArgs SetScriptResult(TaskCompletionSource<SpellCastResult> scriptResult)
+        public CastSpellExtraArgs SetScriptResult(ActionResultSetter<SpellCastResult> scriptResult)
         {
             ScriptResult = scriptResult;
             return this;

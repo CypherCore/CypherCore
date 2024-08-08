@@ -4,9 +4,8 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Groups;
-using Game.Maps;
+using Game.Scripting.v2;
 using Game.Spells;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -70,7 +69,7 @@ namespace Game.AI
             return !_isCharmed;
         }
 
-        public void StartPath(uint pathId = 0, bool repeat = false, Unit invoker = null, uint nodeId = 0)
+        public void StartPath(uint pathId = 0, bool repeat = false, Unit invoker = null, uint nodeId = 0, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             if (HasEscortState(SmartEscortState.Escorting))
                 StopPath();
@@ -96,7 +95,7 @@ namespace Game.AI
                 me.ReplaceAllNpcFlags(NPCFlags.None);
             }
 
-            me.GetMotionMaster().MovePath(path, _repeatWaypointPath);
+            me.GetMotionMaster().MovePath(path, _repeatWaypointPath, null, null, MovementWalkRunSpeedSelectionMode.Default, null, null, null, true, scriptResult);
         }
 
         WaypointPath LoadPath(uint entry)
@@ -562,7 +561,7 @@ namespace Game.AI
                 if (me.GetMotionMaster().GetCurrentMovementGeneratorType(MovementSlot.Default) != MovementGeneratorType.Waypoint)
                     if (me.GetWaypointPathId() != 0)
                         me.GetMotionMaster().MovePath(me.GetWaypointPathId(), true);
-                
+
                 me.ResumeMovement();
             }
             else if (formation.IsFormed())
@@ -627,7 +626,7 @@ namespace Game.AI
         {
             GetScript().ProcessEventsFor(SmartEvents.SpellHit, caster.ToUnit(), 0, 0, false, spellInfo, caster.ToGameObject());
         }
-        
+
         public override void SpellHitTarget(WorldObject target, SpellInfo spellInfo)
         {
             GetScript().ProcessEventsFor(SmartEvents.SpellHitTarget, target.ToUnit(), 0, 0, false, spellInfo, target.ToGameObject());
@@ -647,7 +646,7 @@ namespace Game.AI
         {
             GetScript().ProcessEventsFor(SmartEvents.OnSpellStart, null, 0, 0, false, spellInfo);
         }
-        
+
         public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             GetScript().ProcessEventsFor(SmartEvents.Damaged, attacker, damage);
@@ -1139,7 +1138,7 @@ namespace Game.AI
         }
 
         public override void SetData(uint id, uint value) { SetData(id, value, null); }
-        
+
         public void SetData(uint id, uint value, Unit invoker)
         {
             GetScript().ProcessEventsFor(SmartEvents.DataSet, invoker, id, value);

@@ -2,15 +2,14 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.AI;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Scripting.v2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Threading.Tasks;
 
 namespace Game.Movement
 {
@@ -545,7 +544,7 @@ namespace Game.Movement
                 Add(new FollowMovementGenerator(target, SharedConst.PetFollowDist, new ChaseAngle(SharedConst.PetFollowAngle), null));
         }
 
-        public void MoveRandom(float wanderDistance = 0.0f, TimeSpan? duration = null, MovementSlot slot = MovementSlot.Default, TaskCompletionSource<MovementStopReason> scriptResult = null)
+        public void MoveRandom(float wanderDistance = 0.0f, TimeSpan? duration = null, MovementSlot slot = MovementSlot.Default, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             if (_owner.IsTypeId(TypeId.Unit))
                 Add(new RandomMovementGenerator(wanderDistance, duration, scriptResult), slot);
@@ -553,12 +552,12 @@ namespace Game.Movement
                 scriptResult.SetResult(MovementStopReason.Interrupted);
         }
 
-        public void MoveFollow(Unit target, float dist, float angle = 0.0f, TimeSpan? duration = null, MovementSlot slot = MovementSlot.Active, TaskCompletionSource<MovementStopReason> scriptResult = null)
+        public void MoveFollow(Unit target, float dist, float angle = 0.0f, TimeSpan? duration = null, MovementSlot slot = MovementSlot.Active, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             MoveFollow(target, dist, new ChaseAngle(angle), duration, slot, scriptResult);
         }
 
-        public void MoveFollow(Unit target, float dist, ChaseAngle angle, TimeSpan? duration = null, MovementSlot slot = MovementSlot.Active, TaskCompletionSource<MovementStopReason> scriptResult = null)
+        public void MoveFollow(Unit target, float dist, ChaseAngle angle, TimeSpan? duration = null, MovementSlot slot = MovementSlot.Active, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             // Ignore movement request if target not exist
             if (target == null || target == _owner)
@@ -589,7 +588,7 @@ namespace Game.Movement
                 Add(new ConfusedMovementGenerator<Creature>());
         }
 
-        public void MoveFleeing(Unit enemy, TimeSpan time = default, TaskCompletionSource<MovementStopReason> scriptResult = null)
+        public void MoveFleeing(Unit enemy, TimeSpan time = default, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             if (enemy == null)
             {
@@ -604,12 +603,12 @@ namespace Game.Movement
                 Add(new FleeingMovementGenerator(enemy.GetGUID(), scriptResult));
         }
 
-        public void MovePoint(uint id, Position pos, bool generatePath = true, float? finalOrient = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null, TaskCompletionSource<MovementStopReason> scriptResult = null)
+        public void MovePoint(uint id, Position pos, bool generatePath = true, float? finalOrient = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             MovePoint(id, pos.posX, pos.posY, pos.posZ, generatePath, finalOrient, speed, speedSelectionMode, closeEnoughDistance, scriptResult);
         }
 
-        public void MovePoint(uint id, float x, float y, float z, bool generatePath = true, float? finalOrient = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null, TaskCompletionSource<MovementStopReason> scriptResult = null)
+        public void MovePoint(uint id, float x, float y, float z, bool generatePath = true, float? finalOrient = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             Log.outDebug(LogFilter.Movement, $"MotionMaster::MovePoint: '{_owner.GetGUID()}', targeted point Id: {id} (X: {x}, Y: {y}, Z: {z})");
             Add(new PointMovementGenerator(id, x, y, z, generatePath, speed, finalOrient, null, null, speedSelectionMode, closeEnoughDistance, scriptResult));
@@ -639,7 +638,7 @@ namespace Game.Movement
             }
         }
 
-        public void MoveLand(uint id, Position pos, uint? tierTransitionId = null, float? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, TaskCompletionSource<MovementStopReason> scriptResult = null)
+        public void MoveLand(uint id, Position pos, uint? tierTransitionId = null, float? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             var initializer = (MoveSplineInit init) =>
             {
@@ -666,7 +665,7 @@ namespace Game.Movement
             Add(new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, id, new() { ScriptResult = scriptResult }));
         }
 
-        public void MoveTakeoff(uint id, Position pos, uint? tierTransitionId = null, float? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, TaskCompletionSource<MovementStopReason> scriptResult = null)
+        public void MoveTakeoff(uint id, Position pos, uint? tierTransitionId = null, float? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             var initializer = (MoveSplineInit init) =>
             {
@@ -772,12 +771,12 @@ namespace Game.Movement
             MoveJump(x, y, z, 0.0f, speedXY, speedZ);
         }
 
-        public void MoveJump(Position pos, float speedXY, float speedZ, uint id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, TaskCompletionSource<MovementStopReason> scriptResult = null)
+        public void MoveJump(Position pos, float speedXY, float speedZ, uint id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             MoveJump(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), speedXY, speedZ, id, hasOrientation, arrivalCast, spellEffectExtraData, scriptResult);
         }
 
-        public void MoveJump(float x, float y, float z, float o, float speedXY, float speedZ, uint id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, TaskCompletionSource<MovementStopReason> scriptResult = null)
+        public void MoveJump(float x, float y, float z, float o, float speedXY, float speedZ, uint id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             Log.outDebug(LogFilter.Server, "Unit ({0}) jump to point (X: {1} Y: {2} Z: {3})", _owner.GetGUID().ToString(), x, y, z);
             if (speedXY < 0.01f)
@@ -815,7 +814,7 @@ namespace Game.Movement
             Add(movement);
         }
 
-        public void MoveJumpWithGravity(Position pos, float speedXY, float gravity, uint id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, TaskCompletionSource<MovementStopReason> scriptResult = null)
+        public void MoveJumpWithGravity(Position pos, float speedXY, float gravity, uint id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             Log.outDebug(LogFilter.Movement, $"MotionMaster.MoveJumpWithGravity: '{_owner.GetGUID()}', jumps to point Id: {id} ({pos})");
             if (speedXY < 0.01f)
@@ -853,7 +852,7 @@ namespace Game.Movement
             Add(movement);
         }
 
-        public void MoveCirclePath(float x, float y, float z, float radius, bool clockwise, byte stepCount, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, TaskCompletionSource<MovementStopReason> scriptResult = null)
+        public void MoveCirclePath(float x, float y, float z, float radius, bool clockwise, byte stepCount, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             var initializer = (MoveSplineInit init) =>
             {
@@ -960,7 +959,7 @@ namespace Game.Movement
             Add(new SplineChainMovementGenerator(info));
         }
 
-        public void MoveFall(uint id = 0, TaskCompletionSource<MovementStopReason> scriptResult = null)
+        public void MoveFall(uint id = 0, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             // Use larger distance for vmap height search than in most other cases
             float tz = _owner.GetMapHeight(_owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ(), true, MapConst.MaxFallDistance);
@@ -1019,7 +1018,7 @@ namespace Game.Movement
                 Log.outError(LogFilter.Server, $"MotionMaster::MoveSeekAssistanceDistract: {_owner.GetGUID()} attempted to call distract after assistance");
         }
 
-        public void MoveTaxiFlight(uint path, uint pathnode, float? speed = null, TaskCompletionSource<MovementStopReason> scriptResult = null)
+        public void MoveTaxiFlight(uint path, uint pathnode, float? speed = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             if (_owner.IsTypeId(TypeId.Player))
             {
@@ -1054,7 +1053,7 @@ namespace Game.Movement
         }
 
         public void MovePath(uint pathId, bool repeatable, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
-            (TimeSpan, TimeSpan)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true, TaskCompletionSource<MovementStopReason> scriptResult = null)
+            (TimeSpan, TimeSpan)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             if (pathId == 0)
             {
@@ -1068,7 +1067,7 @@ namespace Game.Movement
         }
 
         public void MovePath(WaypointPath path, bool repeatable, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
-            (TimeSpan, TimeSpan)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true, TaskCompletionSource<MovementStopReason> scriptResult = null)
+            (TimeSpan, TimeSpan)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             Log.outDebug(LogFilter.Movement, $"MotionMaster::MovePath: '{_owner.GetGUID()}', starts moving over path Id: {path.Id} (repeatable: {repeatable})");
             Add(new WaypointMovementGenerator(path, repeatable, duration, speed, speedSelectionMode, waitTimeRangeAtPathEnd, wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, generatePath, scriptResult), MovementSlot.Default);
@@ -1082,7 +1081,7 @@ namespace Game.Movement
         /// <param name="time">How long should this movement last, infinite if not set</param>
         /// <param name="turnSpeed">How fast should the unit rotate, in radians per second. Uses unit's turn speed if not set</param>
         /// <param name="totalTurnAngle">Total angle of the entire movement, infinite if not set</param>
-        public void MoveRotate(uint id, RotateDirection direction, TimeSpan? time = null, float? turnSpeed = null, float? totalTurnAngle = null, TaskCompletionSource<MovementStopReason> scriptResult = null)
+        public void MoveRotate(uint id, RotateDirection direction, TimeSpan? time = null, float? turnSpeed = null, float? totalTurnAngle = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             Log.outDebug(LogFilter.Movement, $"MotionMaster::MoveRotate: '{_owner.GetGUID()}', starts rotate (time: {time.GetValueOrDefault(TimeSpan.Zero)}ms, turnSpeed: {turnSpeed}, totalTurnAngle: {totalTurnAngle}, direction: {direction})");
 

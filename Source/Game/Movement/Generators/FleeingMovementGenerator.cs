@@ -4,8 +4,8 @@
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
+using Game.Scripting.v2;
 using System;
-using System.Threading.Tasks;
 
 namespace Game.Movement
 {
@@ -14,7 +14,7 @@ namespace Game.Movement
         public const float MIN_QUIET_DISTANCE = 28.0f;
         public const float MAX_QUIET_DISTANCE = 43.0f;
 
-        public FleeingMovementGenerator(ObjectGuid fleeTargetGUID, TaskCompletionSource<MovementStopReason> scriptResult = null)
+        public FleeingMovementGenerator(ObjectGuid fleeTargetGUID, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             _fleeTargetGUID = fleeTargetGUID;
             _timer = new TimeTracker();
@@ -197,7 +197,7 @@ namespace Game.Movement
 
     public class TimedFleeingMovementGenerator : FleeingMovementGenerator
     {
-        public TimedFleeingMovementGenerator(ObjectGuid fleeTargetGUID, TimeSpan time, TaskCompletionSource<MovementStopReason> scriptResult = null) : base(fleeTargetGUID, scriptResult)
+        public TimedFleeingMovementGenerator(ObjectGuid fleeTargetGUID, TimeSpan time, ActionResultSetter<MovementStopReason> scriptResult = null) : base(fleeTargetGUID, scriptResult)
         {
             _totalFleeTime = new TimeTracker(time);
         }

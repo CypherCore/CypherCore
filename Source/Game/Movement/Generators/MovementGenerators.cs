@@ -2,10 +2,9 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Game.AI;
 using Game.Entities;
+using Game.Scripting.v2;
 using System;
-using System.Threading.Tasks;
 
 namespace Game.Movement
 {
@@ -15,7 +14,7 @@ namespace Game.Movement
         public MovementGeneratorPriority Priority;
         public MovementGeneratorFlags Flags;
         public UnitState BaseUnitState;
-        public TaskCompletionSource<MovementStopReason> ScriptResult;
+        public ActionResultSetter<MovementStopReason> ScriptResult;
 
         ~MovementGenerator()
         {

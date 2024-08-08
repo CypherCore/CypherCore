@@ -3,8 +3,8 @@
 
 using Framework.Constants;
 using Game.Entities;
+using Game.Scripting.v2;
 using System;
-using System.Threading.Tasks;
 
 namespace Game.Movement
 {
@@ -22,7 +22,7 @@ namespace Game.Movement
         float? _closeEnoughDistance;
 
         public PointMovementGenerator(uint id, float x, float y, float z, bool generatePath, float? speed = null, float? finalOrient = null, Unit faceTarget = null, SpellEffectExtraData spellEffectExtraData = null,
-            MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null, TaskCompletionSource<MovementStopReason> scriptResult = null)
+            MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             _movementId = id;
             _destination = new Position(x, y, z);
@@ -207,7 +207,7 @@ namespace Game.Movement
         }
 
         public uint GetId() { return _movementId; }
-        
+
         public override MovementGeneratorType GetMovementGeneratorType()
         {
             return MovementGeneratorType.Point;

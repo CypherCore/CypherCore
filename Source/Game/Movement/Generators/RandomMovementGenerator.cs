@@ -3,6 +3,7 @@
 
 using Framework.Constants;
 using Game.Entities;
+using Game.Scripting.v2;
 using System;
 using System.Threading.Tasks;
 
@@ -17,7 +18,7 @@ namespace Game.Movement
         float _wanderDistance;
         uint _wanderSteps;
 
-        public RandomMovementGenerator(float spawnDist = 0.0f, TimeSpan? duration = null, TaskCompletionSource<MovementStopReason> scriptResult = null)
+        public RandomMovementGenerator(float spawnDist = 0.0f, TimeSpan? duration = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             _timer = new TimeTracker();
             _reference = new();

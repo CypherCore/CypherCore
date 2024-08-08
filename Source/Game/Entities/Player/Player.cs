@@ -7,7 +7,6 @@ using Framework.Dynamic;
 using Game.Achievements;
 using Game.AI;
 using Game.Arenas;
-using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.BattlePets;
 using Game.Chat;
@@ -22,11 +21,11 @@ using Game.Misc;
 using Game.Miscellaneous;
 using Game.Networking;
 using Game.Networking.Packets;
+using Game.Scripting.v2;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using static Global;
 
 namespace Game.Entities
@@ -6921,7 +6920,7 @@ namespace Game.Entities
 
         public uint GetDeathTimer() { return m_deathTimer; }
 
-        public bool ActivateTaxiPathTo(List<uint> nodes, Creature npc = null, uint spellid = 0, uint preferredMountDisplay = 0, float? speed = null, TaskCompletionSource<MovementStopReason> scriptResult = null)
+        public bool ActivateTaxiPathTo(List<uint> nodes, Creature npc = null, uint spellid = 0, uint preferredMountDisplay = 0, float? speed = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             if (nodes.Count < 2)
             {
@@ -7103,7 +7102,7 @@ namespace Game.Entities
             return true;
         }
 
-        public bool ActivateTaxiPathTo(uint taxi_path_id, uint spellid = 0, float? speed = null, TaskCompletionSource<MovementStopReason> scriptResult = null)
+        public bool ActivateTaxiPathTo(uint taxi_path_id, uint spellid = 0, float? speed = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             var entry = CliDB.TaxiPathStorage.LookupByKey(taxi_path_id);
             if (entry == null)
@@ -7178,7 +7177,7 @@ namespace Game.Entities
             StartTaxiMovement(mountDisplayId, path, startNode, null, null);
         }
 
-        void StartTaxiMovement(uint mountDisplayId, uint path, uint pathNode, float? speed, TaskCompletionSource<MovementStopReason> scriptResult)
+        void StartTaxiMovement(uint mountDisplayId, uint path, uint pathNode, float? speed, ActionResultSetter<MovementStopReason> scriptResult)
         {
             // remove fake death
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Interacting);

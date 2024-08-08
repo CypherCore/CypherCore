@@ -5,11 +5,11 @@ using Framework.Constants;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
+using Game.Scripting.v2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Threading.Tasks;
 
 namespace Game.Movement
 {
@@ -25,7 +25,7 @@ namespace Game.Movement
         int _currentNode;
         List<TaxiNodeChangeInfo> _pointsForPathSwitch = new();    //! node indexes and costs where TaxiPath changes
 
-        public FlightPathMovementGenerator(float? speed, TaskCompletionSource<MovementStopReason> scriptResult)
+        public FlightPathMovementGenerator(float? speed, ActionResultSetter<MovementStopReason> scriptResult)
         {
             _speed = speed;
             Mode = MovementGeneratorMode.Default;

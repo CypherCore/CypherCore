@@ -4,10 +4,10 @@
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
+using Game.Scripting.v2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Game.Movement
 {
@@ -31,7 +31,7 @@ namespace Game.Movement
         bool _generatePath;
 
         public WaypointMovementGenerator(uint pathId = 0, bool repeating = true, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
-            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true, TaskCompletionSource<MovementStopReason> scriptResult = null)
+            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             _nextMoveTime = new TimeTracker(0);
             _pathId = pathId;
@@ -56,7 +56,7 @@ namespace Game.Movement
         }
 
         public WaypointMovementGenerator(WaypointPath path, bool repeating = true, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
-            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true, TaskCompletionSource<MovementStopReason> scriptResult = null)
+            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             _nextMoveTime = new TimeTracker(0);
             _repeating = repeating;

@@ -88,14 +88,14 @@ namespace Framework.Constants
         Difficulty1_Deprecated = 0x04,             //Event only occurs in instance difficulty 1
         Difficulty2_Deprecated = 0x08,             //Event only occurs in instance difficulty 2
         Difficulty3_Deprecated = 0x10,             //Event only occurs in instance difficulty 3
-        Reserved5 = 0x20,
+        ActionlistWaits = 0x20, // Timed action list will wait for action from this event to finish before moving on to next action
         Reserved6 = 0x40,
         DebugOnly = 0x80,               //Event only occurs in debug build
         DontReset = 0x100,              //Event will not reset in SmartScript.OnReset()
         WhileCharmed = 0x200,           //Event occurs even if AI owner is charmed
 
         Deprecated = (Difficulty0_Deprecated | Difficulty1_Deprecated | Difficulty2_Deprecated | Difficulty3_Deprecated),
-        All = (NotRepeatable | Deprecated | Reserved5 | Reserved6 | DebugOnly | DontReset | WhileCharmed),
+        All = (NotRepeatable | Deprecated | ActionlistWaits | Reserved6 | DebugOnly | DontReset | WhileCharmed),
         
         // Temp flags, used only at runtime, never stored in DB
         TempIgnoreChanceRoll = 0x40000000,              //Event occurs no matter what roll_chance_i(e.event.event_chance) returns.
@@ -127,7 +127,8 @@ namespace Framework.Constants
         //CAST_NO_MELEE_IF_OOM        = 0x08,                     //Prevents creature from entering melee if out of mana or out of range
         //CAST_FORCE_TARGET_SELF      = 0x10,                     //Forces the target to cast this spell on itself
         AuraNotPresent = 0x20,                      //Only casts the spell if the target does not have an aura from the spell
-        CombatMove = 0x40                      //Prevents combat movement if cast successful. Allows movement on range, OOM, LOS
+        CombatMove = 0x40,                      //Prevents combat movement if cast successful. Allows movement on range, OOM, LOS
+        WaitForHit = 0x80
     }
 
     public enum SmartActionSummonCreatureFlags

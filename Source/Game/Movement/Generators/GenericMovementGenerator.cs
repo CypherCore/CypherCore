@@ -3,8 +3,8 @@
 
 using Framework.Constants;
 using Game.Entities;
+using Game.Scripting.v2;
 using System;
-using System.Threading.Tasks;
 
 namespace Game.Movement
 {
@@ -117,6 +117,6 @@ namespace Game.Movement
         public uint? ArrivalSpellId;
         public ObjectGuid? ArrivalSpellTarget;
         public TimeSpan? Duration;
-        public TaskCompletionSource<MovementStopReason> ScriptResult;
+        public ActionResultSetter<MovementStopReason> ScriptResult;
     }
 }

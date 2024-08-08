@@ -9,6 +9,7 @@ using Game.Groups;
 using Game.Maps;
 using Game.Misc;
 using Game.Movement;
+using Game.Scripting.v2;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -30,6 +31,7 @@ namespace Game.AI
         List<SmartScriptHolder> _installEvents = new();
         List<SmartScriptHolder> _timedActionList = new();
         ObjectGuid mTimedActionListInvoker;
+        ActionBase mTimedActionWaitEvent;
         Creature _me;
         ObjectGuid _meOrigGUID;
         GameObject _go;
@@ -185,27 +187,29 @@ namespace Game.AI
                     _talkerEntry = talker.GetEntry();
                     _lastTextID = e.Action.talk.textGroupId;
                     _textTimer = e.Action.talk.duration;
-
                     _useTextTimer = true;
-                    Global.CreatureTextMgr.SendChat(talker, (byte)e.Action.talk.textGroupId, talkTarget);
+                    uint duration = Global.CreatureTextMgr.SendChat(talker, (byte)e.Action.talk.textGroupId, talkTarget);
+                    mTimedActionWaitEvent = CreateTimedActionListWaitEventFor<WaitAction>(e, [GameTime.Now() + TimeSpan.FromMilliseconds(duration)]);
                     Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction: SMART_ACTION_TALK: talker: {0} (Guid: {1}), textGuid: {2}",
                         talker.GetName(), talker.GetGUID().ToString(), _textGUID.ToString());
                     break;
                 }
                 case SmartActions.SimpleTalk:
                 {
+                    uint duration = 0;
                     foreach (var target in targets)
                     {
                         if (IsCreature(target))
-                            Global.CreatureTextMgr.SendChat(target.ToCreature(), (byte)e.Action.simpleTalk.textGroupId, IsPlayer(GetLastInvoker()) ? GetLastInvoker() : null);
+                            duration = Math.Max(Global.CreatureTextMgr.SendChat(target.ToCreature(), (byte)e.Action.simpleTalk.textGroupId, IsPlayer(GetLastInvoker()) ? GetLastInvoker() : null), duration);
                         else if (IsPlayer(target) && _me != null)
                         {
                             Unit templastInvoker = GetLastInvoker();
-                            Global.CreatureTextMgr.SendChat(_me, (byte)e.Action.simpleTalk.textGroupId, IsPlayer(templastInvoker) ? templastInvoker : null, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, SoundKitPlayType.Normal, Team.Other, false, target.ToPlayer());
+                            duration = Math.Max(Global.CreatureTextMgr.SendChat(_me, (byte)e.Action.simpleTalk.textGroupId, IsPlayer(templastInvoker) ? templastInvoker : null, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, SoundKitPlayType.Normal, Team.Other, false, target.ToPlayer()), duration);
                         }
                         Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_SIMPLE_TALK: talker: {0} (GuidLow: {1}), textGroupId: {2}",
                             target.GetName(), target.GetGUID().ToString(), e.Action.simpleTalk.textGroupId);
                     }
+                    mTimedActionWaitEvent = CreateTimedActionListWaitEventFor<WaitAction>(e, [GameTime.Now() + TimeSpan.FromMilliseconds(duration)]);
                     break;
                 }
                 case SmartActions.PlayEmote:
@@ -439,6 +443,9 @@ namespace Game.AI
                 }
                 case SmartActions.Cast:
                 {
+                    if (targets.Empty())
+                        break;
+
                     if (e.Action.cast.targetsLimit > 0 && targets.Count > e.Action.cast.targetsLimit)
                         targets.RandomResize(e.Action.cast.targetsLimit);
 
@@ -454,6 +461,8 @@ namespace Game.AI
                             args.TriggerFlags = TriggerCastFlags.FullMask;
                     }
 
+                    MultiActionResult<SpellCastResult> waitEvent = CreateTimedActionListWaitEventFor<MultiActionResult<SpellCastResult>>(e);
+
                     foreach (WorldObject target in targets)
                     {
                         if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.AuraNotPresent) && (!target.IsUnit() || target.ToUnit().HasAura(e.Action.cast.spell)))
@@ -462,6 +471,11 @@ namespace Game.AI
                             continue;
                         }
 
+                        if (waitEvent != null)
+                        {
+                            args.SetScriptResult(ActionResult<SpellCastResult>.GetResultSetter(waitEvent.CreateAndGetResult()));
+                            args.SetScriptWaitsForSpellHit(e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.WaitForHit));
+                        }
 
                         SpellCastResult result = SpellCastResult.BadTargets;
                         if (_me != null)
@@ -489,6 +503,9 @@ namespace Game.AI
                         Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::ProcessAction:: SMART_ACTION_CAST:: {(_me != null ? _me.GetGUID() : _go.GetGUID())} casts spell {e.Action.cast.spell} on target {target.GetGUID()} with castflags {e.Action.cast.castFlags}");
                     }
 
+                    if (waitEvent != null && !waitEvent.Results.Empty())
+                        mTimedActionWaitEvent = waitEvent;
+
                     // If there is at least 1 failed cast and no successful casts at all, retry again on next loop
                     if (failedSpellCast && !successfulSpellCast)
                     {
@@ -507,6 +524,8 @@ namespace Game.AI
                     if (e.Action.cast.targetsLimit != 0)
                         targets.RandomResize(e.Action.cast.targetsLimit);
 
+                    MultiActionResult<SpellCastResult> waitEvent = CreateTimedActionListWaitEventFor<MultiActionResult<SpellCastResult>>(e);
+
                     CastSpellExtraArgs args = new();
                     if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.Triggered))
                     {
@@ -521,11 +540,20 @@ namespace Game.AI
                         if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.AuraNotPresent) && (!target.IsUnit() || target.ToUnit().HasAura(e.Action.cast.spell)))
                             continue;
 
+                        if (waitEvent != null)
+                        {
+                            args.SetScriptResult(ActionResult<SpellCastResult>.GetResultSetter(waitEvent.CreateAndGetResult()));
+                            args.SetScriptWaitsForSpellHit(e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.WaitForHit));
+                        }
+
                         if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.InterruptPrevious) && target.IsUnit())
                             target.ToUnit().InterruptNonMeleeSpells(false);
 
                         target.CastSpell(target, e.Action.cast.spell, args);
                     }
+
+                    if (waitEvent != null && !waitEvent.Results.Empty())
+                        mTimedActionWaitEvent = waitEvent;
                     break;
                 }
                 case SmartActions.InvokerCast:
@@ -549,6 +577,8 @@ namespace Game.AI
                             args.TriggerFlags = TriggerCastFlags.FullMask;
                     }
 
+                    MultiActionResult<SpellCastResult> waitEvent = CreateTimedActionListWaitEventFor<MultiActionResult<SpellCastResult>>(e);
+
                     foreach (var target in targets)
                     {
                         if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.AuraNotPresent) && (!target.IsUnit() || target.ToUnit().HasAura(e.Action.cast.spell)))
@@ -560,9 +590,18 @@ namespace Game.AI
                         if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.InterruptPrevious))
                             tempLastInvoker.InterruptNonMeleeSpells(false);
 
+                        if (waitEvent != null)
+                        {
+                            args.SetScriptResult(ActionResult<SpellCastResult>.GetResultSetter(waitEvent.CreateAndGetResult()));
+                            args.SetScriptWaitsForSpellHit(e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.WaitForHit));
+                        }
+
                         tempLastInvoker.CastSpell(target, e.Action.cast.spell, args);
                         Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::ProcessAction:: SMART_ACTION_INVOKER_CAST: Invoker {tempLastInvoker.GetGUID()} casts spell {e.Action.cast.spell} on target {target.GetGUID()} with castflags {e.Action.cast.castFlags}");
                     }
+
+                    if (waitEvent != null && !waitEvent.Results.Empty())
+                        mTimedActionWaitEvent = waitEvent;
                     break;
                 }
                 case SmartActions.ActivateGobject:
@@ -1073,6 +1112,8 @@ namespace Game.AI
                 }
                 case SmartActions.MoveOffset:
                 {
+                    MultiActionResult<MovementStopReason> waitEvent = CreateTimedActionListWaitEventFor<MultiActionResult<MovementStopReason>>(e);
+
                     foreach (var target in targets)
                     {
                         if (!IsCreature(target))
@@ -1088,8 +1129,16 @@ namespace Game.AI
                         float x = (float)(pos.GetPositionX() + (Math.Cos(o - (Math.PI / 2)) * e.Target.x) + (Math.Cos(o) * e.Target.y));
                         float y = (float)(pos.GetPositionY() + (Math.Sin(o - (Math.PI / 2)) * e.Target.x) + (Math.Sin(o) * e.Target.y));
                         float z = pos.GetPositionZ() + e.Target.z;
-                        target.ToCreature().GetMotionMaster().MovePoint(e.Action.moveOffset.PointId, x, y, z);
+
+                        ActionResultSetter<MovementStopReason> scriptResult = null;
+                        if (waitEvent != null)
+                            scriptResult = ActionResult<MovementStopReason>.GetResultSetter(waitEvent.CreateAndGetResult());
+
+                        target.ToCreature().GetMotionMaster().MovePoint(e.Action.moveOffset.PointId, x, y, z, true, null, null, MovementWalkRunSpeedSelectionMode.Default, null, scriptResult);
                     }
+
+                    if (waitEvent != null && !waitEvent.Results.Empty())
+                        mTimedActionWaitEvent = waitEvent;
                     break;
                 }
                 case SmartActions.SetVisibility:
@@ -1294,7 +1343,13 @@ namespace Game.AI
                         }
                     }
 
-                    _me.GetAI<SmartAI>().StartPath(entry, repeat, unit);
+                    ActionResult<MovementStopReason> waitEvent = CreateTimedActionListWaitEventFor<MovementStopReason, ActionResult>(e);
+                    ActionResultSetter<MovementStopReason> scriptResult = null;
+                    if (waitEvent != null)
+                        scriptResult = ActionResult<MovementStopReason>.GetResultSetter(waitEvent);
+
+                    _me.GetAI<SmartAI>().StartPath(entry, repeat, unit, 0, scriptResult);
+                    mTimedActionWaitEvent = waitEvent;
 
                     uint quest = e.Action.wpStart.quest;
                     uint DespawnTime = e.Action.wpStart.despawnTime;
@@ -1368,6 +1423,11 @@ namespace Game.AI
                     if (!targets.Empty())
                         target = targets.SelectRandom();
 
+                    ActionResult<MovementStopReason> waitEvent = CreateTimedActionListWaitEventFor<MovementStopReason, ActionResult>(e);
+                    ActionResultSetter<MovementStopReason> scriptResult = null;
+                    if (waitEvent != null)
+                        scriptResult = ActionResult<MovementStopReason>.GetResultSetter(waitEvent);
+
                     if (target != null)
                     {
                         float x, y, z;
@@ -1375,6 +1435,7 @@ namespace Game.AI
                         if (e.Action.moveToPos.contactDistance > 0)
                             target.GetContactPoint(_me, out x, out y, out z, e.Action.moveToPos.contactDistance);
                         _me.GetMotionMaster().MovePoint(e.Action.moveToPos.pointId, x + e.Target.x, y + e.Target.y, z + e.Target.z, e.Action.moveToPos.disablePathfinding == 0);
+                        mTimedActionWaitEvent = waitEvent;
                     }
 
                     if (e.GetTargetType() != SmartTargets.Position)
@@ -1388,7 +1449,8 @@ namespace Game.AI
                             trans.CalculatePassengerPosition(ref dest.posX, ref dest.posY, ref dest.posZ, ref dest.Orientation);
                     }
 
-                    _me.GetMotionMaster().MovePoint(e.Action.moveToPos.pointId, dest, e.Action.moveToPos.disablePathfinding == 0);
+                    _me.GetMotionMaster().MovePoint(e.Action.moveToPos.pointId, dest, e.Action.moveToPos.disablePathfinding == 0, null, null, MovementWalkRunSpeedSelectionMode.Default, null, scriptResult);
+                    mTimedActionWaitEvent = waitEvent;
                     break;
                 }
                 case SmartActions.EnableTempGobj:
@@ -1577,6 +1639,8 @@ namespace Game.AI
 
                     List<WorldObject> casters = GetTargets(CreateSmartEvent(SmartEvents.UpdateIc, 0, 0, 0, 0, 0, 0, SmartActions.None, 0, 0, 0, 0, 0, 0, 0, (SmartTargets)e.Action.crossCast.targetType, e.Action.crossCast.targetParam1, e.Action.crossCast.targetParam2, e.Action.crossCast.targetParam3, e.Action.crossCast.targetParam4, e.Action.param_string, 0), unit);
 
+                    MultiActionResult<SpellCastResult> waitEvent = CreateTimedActionListWaitEventFor<MultiActionResult<SpellCastResult>>(e);
+
                     CastSpellExtraArgs args = new();
                     if (e.Action.crossCast.castFlags.HasAnyFlag((uint)SmartCastFlags.Triggered))
                         args.TriggerFlags = TriggerCastFlags.FullMask;
@@ -1603,9 +1667,18 @@ namespace Game.AI
                                 interruptedSpell = true;
                             }
 
+                            if (waitEvent != null)
+                            {
+                                args.SetScriptResult(ActionResult<SpellCastResult>.GetResultSetter(waitEvent.CreateAndGetResult()));
+                                args.SetScriptWaitsForSpellHit(e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.WaitForHit));
+                            }
+
                             casterUnit.CastSpell(target, e.Action.crossCast.spell, args);
                         }
                     }
+
+                    if (waitEvent != null && !waitEvent.Results.Empty())
+                        mTimedActionWaitEvent = waitEvent;
                     break;
                 }
                 case SmartActions.CallRandomTimedActionlist:
@@ -1694,9 +1767,24 @@ namespace Game.AI
                 }
                 case SmartActions.ActivateTaxi:
                 {
+                    MultiActionResult<MovementStopReason> waitEvent = CreateTimedActionListWaitEventFor<MultiActionResult<MovementStopReason>>(e);
+
                     foreach (var target in targets)
+                    {
                         if (IsPlayer(target))
-                            target.ToPlayer().ActivateTaxiPathTo(e.Action.taxi.id);
+                        {
+                            ActionResultSetter<MovementStopReason> scriptResult = null;
+                            if (waitEvent != null)
+                                scriptResult = ActionResult<MovementStopReason>.GetResultSetter(waitEvent.CreateAndGetResult());
+
+                            if (!target.ToPlayer().ActivateTaxiPathTo(e.Action.taxi.id, 0, null, scriptResult))
+                                if (scriptResult != null)
+                                    scriptResult.SetResult(MovementStopReason.Interrupted);
+                        }
+                    }
+
+                    if (waitEvent != null && !waitEvent.Results.Empty())
+                        mTimedActionWaitEvent = waitEvent;
                     break;
                 }
                 case SmartActions.RandomMove:
@@ -1813,13 +1901,20 @@ namespace Game.AI
                     else if (e.GetTargetType() != SmartTargets.Position)
                         break;
 
+                    ActionResult<MovementStopReason> waitEvent = CreateTimedActionListWaitEventFor<MovementStopReason, ActionResult>(e);
+                    ActionResultSetter<MovementStopReason> actionResultSetter = null;
+                    if (waitEvent != null)
+                        actionResultSetter = ActionResult<MovementStopReason>.GetResultSetter(waitEvent);
+
                     if (e.Action.jump.Gravity != 0 || e.Action.jump.UseDefaultGravity != 0)
                     {
                         float gravity = e.Action.jump.UseDefaultGravity != 0 ? (float)MotionMaster.gravity : e.Action.jump.Gravity;
-                        _me.GetMotionMaster().MoveJumpWithGravity(pos, e.Action.jump.SpeedXY, gravity, e.Action.jump.PointId);
+                        _me.GetMotionMaster().MoveJumpWithGravity(pos, e.Action.jump.SpeedXY, gravity, e.Action.jump.PointId, false, null, null, actionResultSetter);
                     }
                     else
-                        _me.GetMotionMaster().MoveJump(pos, e.Action.jump.SpeedXY, e.Action.jump.SpeedZ, e.Action.jump.PointId);
+                        _me.GetMotionMaster().MoveJump(pos, e.Action.jump.SpeedXY, e.Action.jump.SpeedZ, e.Action.jump.PointId, false, null, null, actionResultSetter);
+
+                    mTimedActionWaitEvent = waitEvent;
                     break;
                 }
                 case SmartActions.GoSetLootState:
@@ -1997,11 +2092,7 @@ namespace Game.AI
                 }
                 case SmartActions.StartClosestWaypoint:
                 {
-                    List<uint> waypoints = new();
-                    var closestWaypointFromList = e.Action.closestWaypointFromList;
-                    foreach (var id in new[] { closestWaypointFromList.wp1, closestWaypointFromList.wp2, closestWaypointFromList.wp3, closestWaypointFromList.wp4, closestWaypointFromList.wp5, closestWaypointFromList.wp6 })
-                        if (id != 0)
-                            waypoints.Add(id);
+                    MultiActionResult<MovementStopReason> waitEvent = CreateTimedActionListWaitEventFor<MultiActionResult<MovementStopReason>>(e);
 
                     float distanceToClosest = float.MaxValue;
                     uint closestPathId = 0;
@@ -2014,12 +2105,12 @@ namespace Game.AI
                         {
                             if (IsSmart(creature))
                             {
-                                foreach (uint pathId in waypoints)
+                                var closestWaypointFromList = e.Action.closestWaypointFromList;
+                                foreach (uint pathId in new[] { closestWaypointFromList.wp1, closestWaypointFromList.wp2, closestWaypointFromList.wp3, closestWaypointFromList.wp4, closestWaypointFromList.wp5, closestWaypointFromList.wp6 })
                                 {
                                     WaypointPath path = Global.WaypointMgr.GetPath(pathId);
                                     if (path == null || path.Nodes.Empty())
                                         continue;
-
                                     foreach (var waypoint in path.Nodes)
                                     {
                                         float distanceToThisNode = creature.GetDistance(waypoint.X, waypoint.Y, waypoint.Z);
@@ -2033,10 +2124,19 @@ namespace Game.AI
                                 }
 
                                 if (closestPathId != 0)
-                                    ((SmartAI)creature.GetAI()).StartPath(closestPathId, true, null, closestWaypointId);
+                                {
+                                    ActionResultSetter<MovementStopReason> actionResultSetter = null;
+                                    if (waitEvent != null)
+                                        actionResultSetter = ActionResult<MovementStopReason>.GetResultSetter(waitEvent.CreateAndGetResult());
+
+                                    creature.GetAI<SmartAI>().StartPath(closestPathId, true, null, closestWaypointId, actionResultSetter);
+                                }
                             }
                         }
                     }
+
+                    if (waitEvent != null && !waitEvent.Results.Empty())
+                        mTimedActionWaitEvent = waitEvent;
                     break;
                 }
                 case SmartActions.RandomSound:
@@ -3614,6 +3714,9 @@ namespace Game.AI
             if (e.GetEventType() == SmartEvents.UpdateOoc && (_me != null && _me.IsEngaged()))//can be used with me=NULL (go script)
                 return;
 
+            if (e.GetScriptType() == SmartScriptType.TimedActionlist && mTimedActionWaitEvent != null && !mTimedActionWaitEvent.IsReady())
+                return;
+
             if (e.Timer < diff)
             {
                 // delay spell cast event if another spell is being casted
@@ -4361,6 +4464,29 @@ namespace Game.AI
                     }
                 }
             }
+        }
+
+        //template<typename Result, typename ConcreteActionImpl = Scripting::v2::ActionResult<Result>, typename...Args>
+        public static ActionResult<Result> CreateTimedActionListWaitEventFor<Result, ConcreteActionImpl>(SmartScriptHolder e, object[] args = null) where ConcreteActionImpl : ActionBase
+        {
+            if (e.GetScriptType() != SmartScriptType.TimedActionlist)
+                return null;
+
+            if (!e.Event.event_flags.HasFlag(SmartEventFlags.ActionlistWaits))
+                return null;
+
+            return (ActionResult<Result>)Activator.CreateInstance(typeof(ActionResult<Result>), args);
+        }
+
+        public static ConcreteActionImpl CreateTimedActionListWaitEventFor<ConcreteActionImpl>(SmartScriptHolder e, object[] args = null) where ConcreteActionImpl : ActionBase
+        {
+            if (e.GetScriptType() != SmartScriptType.TimedActionlist)
+                return null;
+
+            if (!e.Event.event_flags.HasFlag(SmartEventFlags.ActionlistWaits))
+                return null;
+
+            return (ConcreteActionImpl)Activator.CreateInstance(typeof(ConcreteActionImpl), args);
         }
     }
 
