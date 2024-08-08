@@ -5,7 +5,6 @@ using Framework.Constants;
 using Game.DataStorage;
 using Game.Maps;
 using Game.Networking.Packets;
-using System.Collections.Generic;
 
 namespace Game.Entities
 {
@@ -36,6 +35,10 @@ namespace Game.Entities
                 if (CanSee(receiver, vignette))
                     receiver.SendPacket(vignetteUpdate);
             };
+
+            Player playerOwner = owner.ToPlayer();
+            if (playerOwner != null)
+                sender(playerOwner);
 
             MessageDistDeliverer notifier = new(owner, sender, owner.GetVisibilityRange());
             Cell.VisitWorldObjects(owner, notifier, owner.GetVisibilityRange());

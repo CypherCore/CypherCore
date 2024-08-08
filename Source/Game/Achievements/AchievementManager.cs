@@ -671,6 +671,8 @@ namespace Game.Achievements
                 achievementEarned.Time += receiver.GetSession().GetTimezoneOffset();
                 receiver.SendPacket(achievementEarned);
             };
+            
+            achievementEarnedBuilder(_owner);
 
             if (!achievement.Flags.HasAnyFlag(AchievementFlags.TrackingFlag))
             {
@@ -678,8 +680,6 @@ namespace Game.Achievements
                 MessageDistDeliverer notifier = new(_owner, achievementEarnedBuilder, dist);
                 Cell.VisitWorldObjects(_owner, notifier, dist);
             }
-            else
-                achievementEarnedBuilder(_owner);
         }
 
         public override void SendPacket(ServerPacket data)
@@ -1050,7 +1050,7 @@ namespace Game.Achievements
                 Global.WorldMgr.SendGlobalMessage(serverFirstAchievement);
             }
 
-            var guildAchievementEarnedBuilder = (Player receiver) =>
+            _owner.BroadcastWorker(receiver =>
             {
                 GuildAchievementEarned guildAchievementEarned = new();
                 guildAchievementEarned.AchievementID = achievement.Id;
@@ -1058,9 +1058,7 @@ namespace Game.Achievements
                 guildAchievementEarned.TimeEarned = GameTime.GetUtcWowTime();
                 guildAchievementEarned.TimeEarned += receiver.GetSession().GetTimezoneOffset();
                 receiver.SendPacket(guildAchievementEarned);
-            };
-
-            _owner.BroadcastWorker(guildAchievementEarnedBuilder);
+            });
         }
 
         public override void SendPacket(ServerPacket data)

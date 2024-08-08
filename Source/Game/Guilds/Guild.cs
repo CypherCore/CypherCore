@@ -2411,16 +2411,14 @@ namespace Game.Guilds
             NewsLogEntry news = m_newsLog.AddEvent(trans, new NewsLogEntry(m_id, m_newsLog.GetNextGUID(), type, guid, flags, value));
             DB.Characters.CommitTransaction(trans);
 
-            var packetBuilder = (Player receiver) =>
+            BroadcastWorker(receiver =>
             {
                 GuildNewsPkt newsPacket = new();
                 news.WritePacket(newsPacket);
                 newsPacket.NewsEvents.Last().CompletedDate += receiver.GetSession().GetTimezoneOffset();
 
                 receiver.SendPacket(newsPacket);
-            };
-
-            BroadcastWorker(packetBuilder);
+            });
         }
 
         bool HasAchieved(uint achievementId)
