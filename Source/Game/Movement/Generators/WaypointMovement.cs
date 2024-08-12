@@ -16,7 +16,6 @@ namespace Game.Movement
         TimeTracker _nextMoveTime;
         uint _pathId;
         bool _repeating;
-        bool _loadedFromDB;
 
         WaypointPath _path;
         int _currentNode;
@@ -131,7 +130,7 @@ namespace Game.Movement
         {
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
 
-            if (_loadedFromDB)
+            if (IsLoadedFromDB())
             {
                 if (_pathId == 0)
                     _pathId = owner.GetWaypointPathId();
@@ -296,10 +295,23 @@ namespace Game.Movement
 
             Cypher.Assert(_currentNode < _path.Nodes.Count, $"WaypointMovementGenerator.OnArrived: tried to reference a node id ({_currentNode}) which is not included in path ({_path.Id})");
             WaypointNode waypoint = _path.Nodes.ElementAt(_currentNode);
-            if (waypoint.Delay != 0)
+
+            TimeSpan delay = new Func<TimeSpan>(() =>
+            {
+                if (!_isReturningToStart)
+                    return TimeSpan.FromMilliseconds(waypoint.Delay);
+
+                // when traversing the path backwards, use delays from "next" waypoint to make sure pauses happen between the same points as in forward direction
+                if (_currentNode > 0)
+                    return TimeSpan.FromMilliseconds(_path.Nodes[_currentNode - 1].Delay);
+
+                return TimeSpan.Zero;
+            })();
+
+            if (delay > TimeSpan.Zero)
             {
                 owner.ClearUnitState(UnitState.RoamingMove);
-                _nextMoveTime.Reset(waypoint.Delay);
+                _nextMoveTime.Reset(delay);
             }
 
             if (_waitTimeRangeAtPathEnd.HasValue && IsFollowingPathBackwardsFromEndToStart()
@@ -508,5 +520,7 @@ namespace Game.Movement
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Waypoint; }
 
         public override void UnitSpeedChanged() { AddFlag(MovementGeneratorFlags.SpeedUpdatePending); }
-    }
+
+        bool IsLoadedFromDB() { return _path != null; }
+}
 }
