@@ -68,7 +68,6 @@ namespace Game
             while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} waypoint path nodes in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
-            DoPostLoadingChecks();
         }
 
         void LoadPathFromDB(SQLFields fields)
@@ -118,10 +117,15 @@ namespace Game
             if (!fields.IsNull(5))
                 o = fields.Read<float>(5);
 
+            TimeSpan delay = default;
+            uint delayMs = fields.Read<uint>(6);
+            if (delayMs != 0)
+                delay = TimeSpan.FromMilliseconds(delayMs);
+
             GridDefines.NormalizeMapCoord(ref x);
             GridDefines.NormalizeMapCoord(ref y);
 
-            WaypointNode waypoint = new(fields.Read<uint>(1), x, y, z, o, fields.Read<uint>(6));
+            WaypointNode waypoint = new(fields.Read<uint>(1), x, y, z, o, delay);
             _pathStorage[pathId].Nodes.Add(waypoint);
         }
 
@@ -303,7 +307,7 @@ namespace Game
     public class WaypointNode
     {
         public WaypointNode() { MoveType = WaypointMoveType.Run; }
-        public WaypointNode(uint id, float x, float y, float z, float? orientation = null, uint delay = 0)
+        public WaypointNode(uint id, float x, float y, float z, float? orientation = null, TimeSpan delay = default)
         {
             Id = id;
             X = x;
@@ -319,7 +323,7 @@ namespace Game
         public float Y;
         public float Z;
         public float? Orientation;
-        public uint Delay;
+        public TimeSpan Delay;
         public WaypointMoveType MoveType;
     }
 

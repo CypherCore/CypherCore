@@ -35,7 +35,6 @@ namespace Game.Movement
             _nextMoveTime = new TimeTracker(0);
             _pathId = pathId;
             _repeating = repeating;
-            _loadedFromDB = true;
             _speed = speed;
             _speedSelectionMode = speedSelectionMode;
             _waitTimeRangeAtPathEnd = waitTimeRangeAtPathEnd;
@@ -167,7 +166,10 @@ namespace Game.Movement
             if (owner == null || !owner.IsAlive())
                 return true;
 
-            if (HasFlag(MovementGeneratorFlags.Finalized | MovementGeneratorFlags.Paused) || _path == null || _path.Nodes.Empty())
+            if (HasFlag(MovementGeneratorFlags.Finalized | MovementGeneratorFlags.Paused))
+                return true;
+
+            if (_path == null || _path.Nodes.Empty())
                 return true;
 
             if (_duration != null)
@@ -296,22 +298,10 @@ namespace Game.Movement
             Cypher.Assert(_currentNode < _path.Nodes.Count, $"WaypointMovementGenerator.OnArrived: tried to reference a node id ({_currentNode}) which is not included in path ({_path.Id})");
             WaypointNode waypoint = _path.Nodes.ElementAt(_currentNode);
 
-            TimeSpan delay = new Func<TimeSpan>(() =>
-            {
-                if (!_isReturningToStart)
-                    return TimeSpan.FromMilliseconds(waypoint.Delay);
-
-                // when traversing the path backwards, use delays from "next" waypoint to make sure pauses happen between the same points as in forward direction
-                if (_currentNode > 0)
-                    return TimeSpan.FromMilliseconds(_path.Nodes[_currentNode - 1].Delay);
-
-                return TimeSpan.Zero;
-            })();
-
-            if (delay > TimeSpan.Zero)
+            if (waypoint.Delay != TimeSpan.Zero)
             {
                 owner.ClearUnitState(UnitState.RoamingMove);
-                _nextMoveTime.Reset(delay);
+                _nextMoveTime.Reset(waypoint.Delay);
             }
 
             if (_waitTimeRangeAtPathEnd.HasValue && IsFollowingPathBackwardsFromEndToStart()
@@ -336,7 +326,10 @@ namespace Game.Movement
         void StartMove(Creature owner, bool relaunch = false)
         {
             // sanity checks
-            if (owner == null || !owner.IsAlive() || HasFlag(MovementGeneratorFlags.Finalized) || _path == null || _path.Nodes.Empty() || (relaunch && (HasFlag(MovementGeneratorFlags.InformEnabled) || !HasFlag(MovementGeneratorFlags.Initialized))))
+            if (owner == null || !owner.IsAlive() || HasFlag(MovementGeneratorFlags.Finalized) || (relaunch && (HasFlag(MovementGeneratorFlags.InformEnabled) || !HasFlag(MovementGeneratorFlags.Initialized))))
+                return;
+
+            if (_path == null || _path.Nodes.Empty())
                 return;
 
             if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting() || (owner.IsFormationLeader() && !owner.IsFormationLeaderMoveAllowed())) // if cannot move OR cannot move because of formation
@@ -415,11 +408,9 @@ namespace Game.Movement
             if (transportPath)
                 init.DisableTransportPathTransformations();
 
-            //! Do not use formationDest here, MoveTo requires transport offsets due to DisableTransportPathTransformations() call
-            //! but formationDest contains global coordinates
             init.MoveTo(waypoint.X, waypoint.Y, waypoint.Z, _generatePath);
 
-            if (waypoint.Orientation.HasValue && (waypoint.Delay > 0 || _currentNode == _path.Nodes.Count - 1))
+            if (waypoint.Orientation.HasValue && (waypoint.Delay != TimeSpan.Zero || _currentNode == _path.Nodes.Count - 1))
                 init.SetFacing(waypoint.Orientation.Value);
 
             switch (_path.MoveType)
@@ -522,5 +513,5 @@ namespace Game.Movement
         public override void UnitSpeedChanged() { AddFlag(MovementGeneratorFlags.SpeedUpdatePending); }
 
         bool IsLoadedFromDB() { return _path != null; }
-}
+    }
 }
