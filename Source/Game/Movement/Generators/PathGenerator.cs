@@ -65,7 +65,7 @@ namespace Game.Movement
             return true;
         }
 
-        bool CalculatePath(float destX, float destY, float destZ, bool forceDest)
+        public bool CalculatePath(float destX, float destY, float destZ, bool forceDest = false)
         {
             _source.GetPosition(out float x, out float y, out float z);
             return CalculatePath(x, y, z, destX, destY, destZ, forceDest);
