@@ -57,6 +57,6 @@ namespace Framework.Constants
         MaskNoMonsterMove = Done,
         // Unused, not suported flags
         MaskUnused = NoSpline | EnterCycle | Frozen | Unknown_0x8 | Unknown_0x100 | Unknown_0x20000 | Unknown_0x40000
-            | Unknown_0x800000 | Unknown_0x1000000 | FadeObject | Steering | UnlimitedSpeed | Unknown_0x40000000 | Unknown_0x80000000
+            | Unknown_0x800000 | Unknown_0x1000000 | FadeObject | UnlimitedSpeed | Unknown_0x40000000 | Unknown_0x80000000
     }
 }

@@ -23,8 +23,8 @@ namespace Game.Movement
             args.flags.SetUnsetFlag(SplineFlag.CanSwim, unit.CanSwim());
             args.walk = unit.HasUnitMovementFlag(MovementFlag.Walking);
             args.flags.SetUnsetFlag(SplineFlag.Flying, unit.HasUnitMovementFlag(MovementFlag.CanFly | MovementFlag.DisableGravity));
-            args.flags.SetUnsetFlag(SplineFlag.SmoothGroundPath, true); // enabled by default, CatmullRom mode or client config "pathSmoothing" will disable this
             args.flags.SetUnsetFlag(SplineFlag.Steering, unit.HasNpcFlag2(NPCFlags2.Steering));
+            args.flags.SetUnsetFlag(SplineFlag.SmoothGroundPath, !args.flags.HasFlag(SplineFlag.Flying) && !args.flags.HasFlag(SplineFlag.Steering)); // enabled by default, CatmullRom mode or client config "pathSmoothing" will disable this
         }
 
         UnitMoveType SelectSpeedType(MovementFlag moveFlags)
@@ -60,7 +60,7 @@ namespace Game.Movement
             MoveSpline move_spline = unit.MoveSpline;
 
             bool transport = !unit.GetTransGUID().IsEmpty();
-            Vector4 real_position = new();            
+            Vector4 real_position = new();
             // there is a big chance that current position is unknown if current state is not finalized, need compute it
             // this also allows calculate spline position and update map position in much greater intervals
             // Don't compute for transport movement if the unit is in a motion between two transports
@@ -203,7 +203,7 @@ namespace Game.Movement
             args.facing.f = new Vector3(finalSpot.X, finalSpot.Y, finalSpot.Z);
             args.facing.type = MonsterMoveType.FacingSpot;
         }
-        
+
         public void SetFacing(float x, float y, float z)
         {
             SetFacing(new Vector3(x, y, z));
@@ -281,6 +281,8 @@ namespace Game.Movement
         public void SetTransportExit() { args.flags.EnableTransportExit(); }
 
         public void SetOrientationFixed(bool enable) { args.flags.SetUnsetFlag(SplineFlag.OrientationFixed, enable); }
+
+        public void SetSteering() { args.flags.EnableSteering(); }
 
         public void SetUnlimitedSpeed() { args.flags.SetUnsetFlag(SplineFlag.UnlimitedSpeed, true); }
 

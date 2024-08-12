@@ -33,6 +33,7 @@ namespace Game.Movement
         public void EnableCatmullRom() { Flags = (Flags & ~SplineFlag.SmoothGroundPath) | SplineFlag.Catmullrom; }
         public void EnableTransportEnter() { Flags = (Flags & ~SplineFlag.TransportExit) | SplineFlag.TransportEnter; }
         public void EnableTransportExit() { Flags = (Flags & ~SplineFlag.TransportEnter) | SplineFlag.TransportExit; }
+        public void EnableSteering() { Flags = (Flags & ~SplineFlag.SmoothGroundPath) | SplineFlag.Steering; }
 
         public SplineFlag Flags;
         public byte animTier;
