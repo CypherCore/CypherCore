@@ -18,13 +18,14 @@ namespace Game.Movement
             _useStraightPath = false;
             _forceDestination = false;
             _pointPathLimit = 74;
+            _startPosition = owner;
             _endPosition = Vector3.Zero;
             _source = owner;
             _navMesh = null;
             _navMeshQuery = null;
             Log.outDebug(LogFilter.Maps, "PathGenerator:PathGenerator for {0}", _source.GetGUID().ToString());
 
-            uint mapId = PhasingHandler.GetTerrainMapId(_source.GetPhaseShift(), _source.GetMapId(), _source.GetMap().GetTerrain(), _source.GetPositionX(), _source.GetPositionY());
+            uint mapId = PhasingHandler.GetTerrainMapId(_source.GetPhaseShift(), _source.GetMapId(), _source.GetMap().GetTerrain(), _startPosition.X, _startPosition.Y);
             if (Global.DisableMgr.IsPathfindingEnabled(_source.GetMapId()))
             {
                 _navMeshQuery = Global.MMapMgr.GetNavMeshQuery(mapId, _source.GetMapId(), _source.GetInstanceId());
@@ -33,18 +34,15 @@ namespace Game.Movement
             CreateFilter();
         }
 
-        public bool CalculatePath(float destX, float destY, float destZ, bool forceDest = false)
+        public bool CalculatePath(float srcX, float srcY, float srcZ, float destX, float destY, float destZ, bool forceDest = false)
         {
-            float x, y, z;
-            _source.GetPosition(out x, out y, out z);
-
-            if (!GridDefines.IsValidMapCoord(destX, destY, destZ) || !GridDefines.IsValidMapCoord(x, y, z))
+            if (!GridDefines.IsValidMapCoord(destX, destY, destZ) || !GridDefines.IsValidMapCoord(srcX, srcY, srcZ))
                 return false;
 
             Vector3 dest = new(destX, destY, destZ);
             SetEndPosition(dest);
 
-            Vector3 start = new(x, y, z);
+            Vector3 start = new(srcX, srcY, srcZ);
             SetStartPosition(start);
 
             _forceDestination = forceDest;
@@ -65,6 +63,12 @@ namespace Game.Movement
             UpdateFilter();
             BuildPolyPath(start, dest);
             return true;
+        }
+
+        bool CalculatePath(float destX, float destY, float destZ, bool forceDest)
+        {
+            _source.GetPosition(out float x, out float y, out float z);
+            return CalculatePath(x, y, z, destX, destY, destZ, forceDest);
         }
 
         ulong GetPathPolyByPosition(ulong[] polyPath, uint polyPathSize, float[] point, ref float distance)
@@ -879,7 +883,7 @@ namespace Game.Movement
                 if (_sourceUnit.IsInWater() || _sourceUnit.IsUnderWater())
                 {
                     NavTerrainFlag includedFlags = (NavTerrainFlag)_filter.getIncludeFlags();
-                    includedFlags |= GetNavTerrain(_source.GetPositionX(), _source.GetPositionY(), _source.GetPositionZ());
+                    includedFlags |= GetNavTerrain(_startPosition.X, _startPosition.Y, _startPosition.Z);
 
                     _filter.setIncludeFlags((ushort)includedFlags);
                 }
