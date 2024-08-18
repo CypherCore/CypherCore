@@ -131,14 +131,15 @@ namespace Game
 
         void DoPostLoadingChecks()
         {
-            foreach (var path in _pathStorage)
+            foreach (var (pathId, pathInfo) in _pathStorage)
             {
-                WaypointPath pathInfo = path.Value;
+                pathInfo.BuildSegments();
+
                 if (pathInfo.Nodes.Empty())
-                    Log.outError(LogFilter.Sql, $"PathId {pathInfo.Id} in `waypoint_path` has no assigned nodes in `waypoint_path_node`");
+                    Log.outError(LogFilter.Sql, $"PathId {pathId} in `waypoint_path` has no assigned nodes in `waypoint_path_node`");
 
                 if (pathInfo.Flags.HasFlag(WaypointPathFlags.FollowPathBackwardsFromEndToStart) && pathInfo.Nodes.Count < 2)
-                    Log.outError(LogFilter.Sql, $"PathId {pathInfo.Id} in `waypoint_path` has FollowPathBackwardsFromEndToStart set, but only {pathInfo.Nodes.Count} nodes, requires {2}");
+                    Log.outError(LogFilter.Sql, $"PathId {pathId} in `waypoint_path` has FollowPathBackwardsFromEndToStart set, but only {pathInfo.Nodes.Count} nodes, requires {2}");
             }
         }
 
@@ -174,6 +175,10 @@ namespace Game
             {
                 LoadPathNodesFromDB(result.GetFields());
             } while (result.NextRow());
+
+            WaypointPath path = _pathStorage.LookupByKey(pathId);
+            if (path != null)
+                path.BuildSegments();
         }
 
         public void VisualizePath(Unit owner, WaypointPath path, uint? displayId)
@@ -329,6 +334,13 @@ namespace Game
 
     public class WaypointPath
     {
+        public List<WaypointNode> Nodes = new();
+        public List<WaypointSegment> ContinuousSegments = new();
+        public uint Id;
+        public WaypointMoveType MoveType;
+        public WaypointPathFlags Flags = WaypointPathFlags.None;
+        public float? Velocity;
+
         public WaypointPath() { }
         public WaypointPath(uint id, List<WaypointNode> nodes)
         {
@@ -336,11 +348,31 @@ namespace Game
             Nodes = nodes;
         }
 
-        public List<WaypointNode> Nodes = new();
-        public uint Id;
-        public WaypointMoveType MoveType;
-        public WaypointPathFlags Flags = WaypointPathFlags.None;
-        public float? Velocity;
+        public void BuildSegments()
+        {
+            ContinuousSegments.Add(new WaypointSegment());
+            for (int i = 0; i < Nodes.Count; ++i)
+            {
+                var g = ContinuousSegments[^1];
+                ++g.Last;
+
+                // split on delay
+                if (i + 1 != Nodes.Count && Nodes[i].Delay != TimeSpan.Zero)
+                    ContinuousSegments.Add(new WaypointSegment(i, 1));
+            }
+        }
+    }
+
+    public struct WaypointSegment
+    {
+        public int First;
+        public int Last;
+
+        public WaypointSegment(int first, int last)
+        {
+            First = first;
+            Last = last;
+        }
     }
 
     public enum WaypointMoveType

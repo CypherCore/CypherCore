@@ -8,11 +8,13 @@ using Game.Scripting.v2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Game.Movement
 {
     public class WaypointMovementGenerator : MovementGeneratorMedium<Creature>
     {
+        List<int> _waypointTransitionSplinePoints = new();
         TimeTracker _nextMoveTime;
         uint _pathId;
         bool _repeating;
@@ -51,6 +53,8 @@ namespace Game.Movement
 
             if (duration.HasValue)
                 _duration = new(duration.Value);
+
+            _path.BuildSegments();
         }
 
         public WaypointMovementGenerator(WaypointPath path, bool repeating = true, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
@@ -221,6 +225,19 @@ namespace Game.Movement
                 if (owner.GetTransGUID().IsEmpty())
                     owner.SetHomePosition(owner.GetPosition());
 
+                // handle switching points in continuous segments
+                if (_waypointTransitionSplinePoints.Count > 1 && owner.MoveSpline.CurrentPathIdx() >= _waypointTransitionSplinePoints.First())
+                {
+                    OnArrived(owner);
+                    _waypointTransitionSplinePoints.Remove(_waypointTransitionSplinePoints.First());
+                    if (ComputeNextNode())
+                    {
+                        CreatureAI ai = owner.GetAI();
+                        if (ai != null)
+                            ai.WaypointStarted(_path.Nodes[_currentNode].Id, _path.Id);
+                    }
+                }
+
                 // relaunch movement if its speed has changed
                 if (HasFlag(MovementGeneratorFlags.SpeedUpdatePending))
                     StartMove(owner, true);
@@ -340,6 +357,7 @@ namespace Game.Movement
 
             bool transportPath = !owner.GetTransGUID().IsEmpty();
 
+            int previousNode = _currentNode;
             if (HasFlag(MovementGeneratorFlags.InformEnabled) && HasFlag(MovementGeneratorFlags.Initialized))
             {
                 if (ComputeNextNode())
@@ -396,7 +414,70 @@ namespace Game.Movement
             }
 
             Cypher.Assert(_currentNode < _path.Nodes.Count, $"WaypointMovementGenerator.StartMove: tried to reference a node id ({_currentNode}) which is not included in path ({_path.Id})");
-            WaypointNode waypoint = _path.Nodes[_currentNode];
+
+            List<WaypointNode> segment = new Func<List<WaypointNode>>(() =>
+            {
+                // find the continuous segment that our destination waypoint is on
+                var segmentIndex = _path.ContinuousSegments.FindIndex(segmentRange =>
+                {
+                    bool isInSegmentRange(int node) { return node >= segmentRange.First && node < segmentRange.Last + segmentRange.Last; };
+                    return isInSegmentRange(_currentNode) && isInSegmentRange(previousNode);
+                });
+
+                // handle path returning directly from last point to first
+                if (segmentIndex == -1)
+                {
+                    if (_currentNode != 0 || previousNode != _path.Nodes.Count - 1)
+                        return _path.Nodes[_currentNode..1];//, 1);
+
+                    var slice3 = _path.Nodes[2..];
+
+                    segmentIndex = 0;
+                }
+
+                if (!_isReturningToStart)
+                    return _path.Nodes[_currentNode..(_path.ContinuousSegments[segmentIndex].Last - (_currentNode - _path.ContinuousSegments[segmentIndex].First))];
+
+                return _path.Nodes[_path.ContinuousSegments[segmentIndex].First..(_currentNode - _path.ContinuousSegments[segmentIndex].First + 1)];
+            })();
+
+            WaypointNode lastWaypointForSegment = !_isReturningToStart ? segment.Last() : segment.First();
+
+            _waypointTransitionSplinePoints.Clear();
+            List<Vector3> points = new();
+            void fillPath(List<WaypointNode> list)
+            {
+                PathGenerator generator = null;
+                if (_generatePath)
+                    generator = new(owner);
+
+                Position source = owner.GetPosition();
+                points.Add(new Vector3(source.GetPositionX(), source.GetPositionY(), source.GetPositionZ()));
+
+                foreach (var node in list)
+                {
+                    if (generator != null)
+                    {
+                        bool result = generator.CalculatePath(source.GetPositionX(), source.GetPositionY(), source.GetPositionZ(), node.X, node.Y, node.Z);
+                        if (result && (generator.GetPathType() & PathType.NoPath) == 0)
+                            points.AddRange(generator.GetPath()[1..]);
+                        else
+                            generator = null; // when path generation to a waypoint fails, add all remaining points without pathfinding (preserve legacy behavior of MoveSplineInit::MoveTo)
+                    }
+
+                    if (generator == null)
+                        points.Add(new Vector3(node.X, node.Y, node.Z));
+
+                    _waypointTransitionSplinePoints.Add(points.Count - 1);
+
+                    source.Relocate(node.X, node.Y, node.Z);
+                }
+            };
+
+            if (!_isReturningToStart)
+                fillPath(segment);
+            else
+                fillPath(segment[^0..]);
 
             RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.InformEnabled | MovementGeneratorFlags.TimedPaused);
 
@@ -404,22 +485,28 @@ namespace Game.Movement
 
             MoveSplineInit init = new(owner);
 
+            // because steering flag can cause position on client to not be perfectly accurate, dont do it in combat
+            if (!owner.IsInCombat())
+                init.SetSteering();
+
             //! If creature is on transport, we assume waypoints set in DB are already transport offsets
             if (transportPath)
                 init.DisableTransportPathTransformations();
 
-            init.MoveTo(waypoint.X, waypoint.Y, waypoint.Z, _generatePath);
+            init.MovebyPath(points.ToArray());
 
-            if (waypoint.Orientation.HasValue && (waypoint.Delay != TimeSpan.Zero || _currentNode == _path.Nodes.Count - 1))
-                init.SetFacing(waypoint.Orientation.Value);
+            if (lastWaypointForSegment.Orientation.HasValue && (lastWaypointForSegment.Delay != TimeSpan.Zero || _currentNode == _path.Nodes.Count - 1))
+                init.SetFacing(lastWaypointForSegment.Orientation.Value);
 
             switch (_path.MoveType)
             {
                 case WaypointMoveType.Land:
                     init.SetAnimation(AnimTier.Ground);
+                    init.SetFly();
                     break;
                 case WaypointMoveType.Takeoff:
                     init.SetAnimation(AnimTier.Fly);
+                    init.SetFly();
                     break;
                 case WaypointMoveType.Run:
                     init.SetWalk(false);
@@ -448,6 +535,25 @@ namespace Game.Movement
 
             if (_speed.HasValue)
                 init.SetVelocity(_speed.Value);
+
+            if (init.Path().Count > 2)
+            {
+                Vector3 mid = (init.Path().First() + init.Path().Last()) / 2.0f;
+                var index = 0;// init.Path()[1..];
+                var endIndex = (init.Path().Count - 2);
+                while (index != endIndex)
+                {
+                    Vector3 offset = init.Path()[index] - mid;
+                    if (MathF.Abs(offset.X) >= 128.0f || MathF.Abs(offset.Y) >= 128.0f || MathF.Abs(offset.Z) >= 64.0f)
+                    {
+                        // when distance is too great, send path in uncompressed state otherwise too much precision is lost on each point
+                        init.SetUncompressed();
+                        break;
+                    }
+
+                    ++index;
+                }
+            }
 
             init.Launch();
 
