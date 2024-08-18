@@ -3181,8 +3181,9 @@ namespace Game.Spells
         {
             foreach (SpellXSpellVisualRecord visual in _visuals)
             {
-                if (caster == null || !caster.IsPlayer() || !ConditionManager.IsPlayerMeetingCondition(caster.ToPlayer(), visual.CasterPlayerConditionID))
-                    continue;
+                if (visual.CasterPlayerConditionID != 0)
+                    if (caster == null || !caster.IsPlayer() || !ConditionManager.IsPlayerMeetingCondition(caster.ToPlayer(), visual.CasterPlayerConditionID))
+                        continue;
 
                 var unitCondition = CliDB.UnitConditionStorage.LookupByKey(visual.CasterUnitConditionID);
                 if (unitCondition != null)
