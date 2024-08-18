@@ -95,7 +95,7 @@ namespace Game.AI
                 me.ReplaceAllNpcFlags(NPCFlags.None);
             }
 
-            me.GetMotionMaster().MovePath(path, _repeatWaypointPath, null, null, MovementWalkRunSpeedSelectionMode.Default, null, null, null, true, scriptResult);
+            me.GetMotionMaster().MovePath(path, _repeatWaypointPath, null, null, MovementWalkRunSpeedSelectionMode.Default, null, null, null, null, true, scriptResult);
         }
 
         WaypointPath LoadPath(uint entry)

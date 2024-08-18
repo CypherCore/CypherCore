@@ -14,11 +14,7 @@ namespace Game.Movement
 {
     public class WaypointMovementGenerator : MovementGeneratorMedium<Creature>
     {
-        List<int> _waypointTransitionSplinePoints = new();
-        TimeTracker _nextMoveTime;
         uint _pathId;
-        bool _repeating;
-
         WaypointPath _path;
         int _currentNode;
 
@@ -28,11 +24,19 @@ namespace Game.Movement
         (TimeSpan min, TimeSpan max)? _waitTimeRangeAtPathEnd;
         float? _wanderDistanceAtPathEnds;
         bool? _followPathBackwardsFromEndToStart;
-        bool _isReturningToStart;
+        bool? _exactSplinePath;
+        bool _repeating;
         bool _generatePath;
 
+        TimeTracker _moveTimer;
+        TimeTracker _nextMoveTime;
+        List<int> _waypointTransitionSplinePoints = new();
+        bool _isReturningToStart;
+
+        static TimeSpan SEND_NEXT_POINT_EARLY_DELTA = TimeSpan.FromMilliseconds(1500);
+
         public WaypointMovementGenerator(uint pathId = 0, bool repeating = true, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
-            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true, ActionResultSetter<MovementStopReason> scriptResult = null)
+            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool? exactSplinePath = null, bool generatePath = true, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             _nextMoveTime = new TimeTracker(0);
             _pathId = pathId;
@@ -42,7 +46,7 @@ namespace Game.Movement
             _waitTimeRangeAtPathEnd = waitTimeRangeAtPathEnd;
             _wanderDistanceAtPathEnds = wanderDistanceAtPathEnds;
             _followPathBackwardsFromEndToStart = followPathBackwardsFromEndToStart;
-            _isReturningToStart = false;
+            _exactSplinePath = exactSplinePath;
             _generatePath = generatePath;
 
             Mode = MovementGeneratorMode.Default;
@@ -58,7 +62,7 @@ namespace Game.Movement
         }
 
         public WaypointMovementGenerator(WaypointPath path, bool repeating = true, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
-            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true, ActionResultSetter<MovementStopReason> scriptResult = null)
+            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool? exactSplinePath = null, bool generatePath = true, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             _nextMoveTime = new TimeTracker(0);
             _repeating = repeating;
@@ -68,7 +72,7 @@ namespace Game.Movement
             _waitTimeRangeAtPathEnd = waitTimeRangeAtPathEnd;
             _wanderDistanceAtPathEnds = wanderDistanceAtPathEnds;
             _followPathBackwardsFromEndToStart = followPathBackwardsFromEndToStart;
-            _isReturningToStart = false;
+            _exactSplinePath = exactSplinePath;
             _generatePath = generatePath;
 
             Mode = MovementGeneratorMode.Default;
@@ -219,22 +223,25 @@ namespace Game.Movement
             }
 
             // if it's moving
-            if (!owner.MoveSpline.Finalized())
+            if (!UpdateMoveTimer(diff))
             {
                 // set home position at place (every MotionMaster::UpdateMotion)
                 if (owner.GetTransGUID().IsEmpty())
                     owner.SetHomePosition(owner.GetPosition());
 
                 // handle switching points in continuous segments
-                if (_waypointTransitionSplinePoints.Count > 1 && owner.MoveSpline.CurrentPathIdx() >= _waypointTransitionSplinePoints.First())
+                if (IsExactSplinePath())
                 {
-                    OnArrived(owner);
-                    _waypointTransitionSplinePoints.Remove(_waypointTransitionSplinePoints.First());
-                    if (ComputeNextNode())
+                    if (_waypointTransitionSplinePoints.Count > 1 && owner.MoveSpline.CurrentPathIdx() >= _waypointTransitionSplinePoints.First())
                     {
-                        CreatureAI ai = owner.GetAI();
-                        if (ai != null)
-                            ai.WaypointStarted(_path.Nodes[_currentNode].Id, _path.Id);
+                        OnArrived(owner);
+                        _waypointTransitionSplinePoints.Remove(_waypointTransitionSplinePoints.First());
+                        if (ComputeNextNode())
+                        {
+                            CreatureAI ai = owner.GetAI();
+                            if (ai != null)
+                                ai.WaypointStarted(_path.Nodes[_currentNode].Id, _path.Id);
+                        }
                     }
                 }
 
@@ -244,7 +251,7 @@ namespace Game.Movement
             }
             else if (!_nextMoveTime.Passed()) // it's not moving, is there a timer?
             {
-                if (UpdateTimer(diff))
+                if (UpdateWaitTimer(diff))
                 {
                     if (!HasFlag(MovementGeneratorFlags.Initialized)) // initial movement call
                     {
@@ -414,70 +421,15 @@ namespace Game.Movement
             }
 
             Cypher.Assert(_currentNode < _path.Nodes.Count, $"WaypointMovementGenerator.StartMove: tried to reference a node id ({_currentNode}) which is not included in path ({_path.Id})");
+            WaypointNode lastWaypointForSegment = _path.Nodes[_currentNode];
 
-            List<WaypointNode> segment = new Func<List<WaypointNode>>(() =>
-            {
-                // find the continuous segment that our destination waypoint is on
-                var segmentIndex = _path.ContinuousSegments.FindIndex(segmentRange =>
-                {
-                    bool isInSegmentRange(int node) { return node >= segmentRange.First && node < segmentRange.Last + segmentRange.Last; };
-                    return isInSegmentRange(_currentNode) && isInSegmentRange(previousNode);
-                });
-
-                // handle path returning directly from last point to first
-                if (segmentIndex == -1)
-                {
-                    if (_currentNode != 0 || previousNode != _path.Nodes.Count - 1)
-                        return _path.Nodes[_currentNode..1];//, 1);
-
-                    var slice3 = _path.Nodes[2..];
-
-                    segmentIndex = 0;
-                }
-
-                if (!_isReturningToStart)
-                    return _path.Nodes[_currentNode..(_path.ContinuousSegments[segmentIndex].Last - (_currentNode - _path.ContinuousSegments[segmentIndex].First))];
-
-                return _path.Nodes[_path.ContinuousSegments[segmentIndex].First..(_currentNode - _path.ContinuousSegments[segmentIndex].First + 1)];
-            })();
-
-            WaypointNode lastWaypointForSegment = !_isReturningToStart ? segment.Last() : segment.First();
-
-            _waypointTransitionSplinePoints.Clear();
             List<Vector3> points = new();
-            void fillPath(List<WaypointNode> list)
-            {
-                PathGenerator generator = null;
-                if (_generatePath)
-                    generator = new(owner);
 
-                Position source = owner.GetPosition();
-                points.Add(new Vector3(source.GetPositionX(), source.GetPositionY(), source.GetPositionZ()));
-
-                foreach (var node in list)
-                {
-                    if (generator != null)
-                    {
-                        bool result = generator.CalculatePath(source.GetPositionX(), source.GetPositionY(), source.GetPositionZ(), node.X, node.Y, node.Z);
-                        if (result && (generator.GetPathType() & PathType.NoPath) == 0)
-                            points.AddRange(generator.GetPath()[1..]);
-                        else
-                            generator = null; // when path generation to a waypoint fails, add all remaining points without pathfinding (preserve legacy behavior of MoveSplineInit::MoveTo)
-                    }
-
-                    if (generator == null)
-                        points.Add(new Vector3(node.X, node.Y, node.Z));
-
-                    _waypointTransitionSplinePoints.Add(points.Count - 1);
-
-                    source.Relocate(node.X, node.Y, node.Z);
-                }
-            };
-
-            if (!_isReturningToStart)
-                fillPath(segment);
+            if (IsExactSplinePath())
+                CreateMergedPath(owner, _path, previousNode, _currentNode, _isReturningToStart, false,
+                    points, _waypointTransitionSplinePoints, ref lastWaypointForSegment);
             else
-                fillPath(segment[^0..]);
+                CreateSingularPointPath(owner, _path, _currentNode, _generatePath, points, _waypointTransitionSplinePoints);
 
             RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.InformEnabled | MovementGeneratorFlags.TimedPaused);
 
@@ -495,7 +447,8 @@ namespace Game.Movement
 
             init.MovebyPath(points.ToArray());
 
-            if (lastWaypointForSegment.Orientation.HasValue && (lastWaypointForSegment.Delay != TimeSpan.Zero || _currentNode == _path.Nodes.Count - 1))
+            if (lastWaypointForSegment.Orientation.HasValue
+                && (lastWaypointForSegment.Delay != TimeSpan.Zero || (_isReturningToStart ? _currentNode == 0 : _currentNode == _path.Nodes.Count - 1)))
                 init.SetFacing(lastWaypointForSegment.Orientation.Value);
 
             switch (_path.MoveType)
@@ -555,7 +508,16 @@ namespace Game.Movement
                 }
             }
 
-            init.Launch();
+            TimeSpan duration = TimeSpan.FromMilliseconds(init.Launch());
+
+            if (!IsExactSplinePath()
+                && duration > 2 * SEND_NEXT_POINT_EARLY_DELTA
+                && lastWaypointForSegment.Delay == TimeSpan.Zero
+                // don't cut movement short at ends of path if its not a looping path or if it can be traversed backwards
+                && ((_currentNode != 0 && _currentNode != _path.Nodes.Count - 1) || (!IsFollowingPathBackwardsFromEndToStart() && _repeating)))
+                duration -= SEND_NEXT_POINT_EARLY_DELTA;
+
+            _moveTimer.Reset(duration);
 
             // inform formation
             owner.SignalFormationMovement();
@@ -598,17 +560,29 @@ namespace Game.Movement
             return _path.Flags.HasFlag(WaypointPathFlags.FollowPathBackwardsFromEndToStart);
         }
 
+        bool IsExactSplinePath()
+        {
+            if (_exactSplinePath.HasValue)
+                return _exactSplinePath.Value;
+
+            return _path.Flags.HasFlag(WaypointPathFlags.ExactSplinePath);
+        }
+
         public override string GetDebugInfo()
         {
             return $"Current Node: {_currentNode}\n{base.GetDebugInfo()}";
         }
 
-        bool UpdateTimer(uint diff)
+        bool UpdateMoveTimer(uint diff) { return UpdateTimer(_moveTimer, diff); }
+
+        bool UpdateWaitTimer(uint diff) { return UpdateTimer(_nextMoveTime, diff); }
+
+        bool UpdateTimer(TimeTracker timer, uint diff)
         {
-            _nextMoveTime.Update(diff);
-            if (_nextMoveTime.Passed())
+            timer.Update(diff);
+            if (timer.Passed())
             {
-                _nextMoveTime.Reset(0);
+                timer.Reset(0);
                 return true;
             }
             return false;
@@ -619,5 +593,90 @@ namespace Game.Movement
         public override void UnitSpeedChanged() { AddFlag(MovementGeneratorFlags.SpeedUpdatePending); }
 
         bool IsLoadedFromDB() { return _path != null; }
+
+        void CreateSingularPointPath(Unit owner, WaypointPath path, int currentNode, bool generatePath, List<Vector3> points, List<int> waypointTransitionSplinePoints)
+        {
+            WaypointNode waypoint = path.Nodes[currentNode];
+            points.Add(new Vector3(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ()));
+
+            if (generatePath)
+            {
+                PathGenerator generator = new(owner);
+                bool result = generator.CalculatePath(waypoint.X, waypoint.Y, waypoint.Z);
+                if (result && (generator.GetPathType() & PathType.NoPath) == 0)
+                    points.AddRange(generator.GetPath()[1..]);
+                else
+                    points.Add(new Vector3(waypoint.X, waypoint.Y, waypoint.Z));
+            }
+            else
+                points.Add(new Vector3(waypoint.X, waypoint.Y, waypoint.Z));
+
+            waypointTransitionSplinePoints.Add(points.Count - 1);
+        }
+
+        void CreateMergedPath(Unit owner, WaypointPath path, int previousNode, int currentNode, bool isReturningToStart, bool generatePath, List<Vector3> points, List<int> waypointTransitionSplinePoints, ref WaypointNode lastWaypointOnPath)
+        {
+            var segment = new Func<List<WaypointNode>>(() =>
+            {
+                // find the continuous segment that our destination waypoint is on
+                var segmentItr = path.ContinuousSegments.Find(segmentRange =>
+                {
+                    bool isInSegmentRange(int node) => node >= segmentRange.First && node < segmentRange.First + segmentRange.Last;
+                    return isInSegmentRange(currentNode) && isInSegmentRange(previousNode);
+                });
+
+                // handle path returning directly from last point to first
+                if (segmentItr == null)
+                {
+                    if (currentNode != 0 || previousNode != path.Nodes.Count - 1)
+                        return path.Nodes[currentNode..1];
+
+                    segmentItr = path.ContinuousSegments[0];
+                }
+
+                if (!isReturningToStart)
+                    return path.Nodes[currentNode..(segmentItr.Last - (currentNode - segmentItr.First))];
+
+                return path.Nodes[segmentItr.First..(currentNode - segmentItr.First + 1)];
+            })();
+
+            lastWaypointOnPath = !isReturningToStart ? segment.Last() : segment.First();
+
+            waypointTransitionSplinePoints.Clear();
+
+            void fillPath(List<WaypointNode> list)
+            {
+                PathGenerator generator = null;
+                if (_generatePath)
+                    generator = new(owner);
+
+                Position source = owner.GetPosition();
+                points.Add(new Vector3(source.GetPositionX(), source.GetPositionY(), source.GetPositionZ()));
+
+                foreach (var node in list)
+                {
+                    if (generator != null)
+                    {
+                        bool result = generator.CalculatePath(source.GetPositionX(), source.GetPositionY(), source.GetPositionZ(), node.X, node.Y, node.Z);
+                        if (result && (generator.GetPathType() & PathType.NoPath) == 0)
+                            points.AddRange(generator.GetPath()[1..]);
+                        else
+                            generator = null; // when path generation to a waypoint fails, add all remaining points without pathfinding (preserve legacy behavior of MoveSplineInit::MoveTo)
+                    }
+
+                    if (generator == null)
+                        points.Add(new Vector3(node.X, node.Y, node.Z));
+
+                    _waypointTransitionSplinePoints.Add(points.Count - 1);
+
+                    source.Relocate(node.X, node.Y, node.Z);
+                }
+            };
+
+            if (!isReturningToStart)
+                fillPath(segment);
+            else
+                fillPath(segment[^0..]);
+        }
     }
 }

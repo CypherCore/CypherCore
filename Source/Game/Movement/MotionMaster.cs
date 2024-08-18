@@ -1053,7 +1053,7 @@ namespace Game.Movement
         }
 
         public void MovePath(uint pathId, bool repeatable, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
-            (TimeSpan, TimeSpan)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true, ActionResultSetter<MovementStopReason> scriptResult = null)
+            (TimeSpan, TimeSpan)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool? exactSplinePath = null, bool generatePath = true, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             if (pathId == 0)
             {
@@ -1063,14 +1063,14 @@ namespace Game.Movement
             }
 
             Log.outDebug(LogFilter.Movement, $"MotionMaster::MovePath: '{_owner.GetGUID()}', starts moving over path Id: {pathId} (repeatable: {repeatable})");
-            Add(new WaypointMovementGenerator(pathId, repeatable, duration, speed, speedSelectionMode, waitTimeRangeAtPathEnd, wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, generatePath, scriptResult), MovementSlot.Default);
+            Add(new WaypointMovementGenerator(pathId, repeatable, duration, speed, speedSelectionMode, waitTimeRangeAtPathEnd, wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, exactSplinePath, generatePath, scriptResult), MovementSlot.Default);
         }
 
         public void MovePath(WaypointPath path, bool repeatable, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
-            (TimeSpan, TimeSpan)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool generatePath = true, ActionResultSetter<MovementStopReason> scriptResult = null)
+            (TimeSpan, TimeSpan)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool? exactSplinePath = null, bool generatePath = true, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             Log.outDebug(LogFilter.Movement, $"MotionMaster::MovePath: '{_owner.GetGUID()}', starts moving over path Id: {path.Id} (repeatable: {repeatable})");
-            Add(new WaypointMovementGenerator(path, repeatable, duration, speed, speedSelectionMode, waitTimeRangeAtPathEnd, wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, generatePath, scriptResult), MovementSlot.Default);
+            Add(new WaypointMovementGenerator(path, repeatable, duration, speed, speedSelectionMode, waitTimeRangeAtPathEnd, wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, exactSplinePath, generatePath, scriptResult), MovementSlot.Default);
         }
 
         /// <summary>

@@ -350,7 +350,7 @@ namespace Game
 
         public void BuildSegments()
         {
-            ContinuousSegments.Add(new WaypointSegment());
+            ContinuousSegments.Add(new WaypointSegment(0, 0));
             for (int i = 0; i < Nodes.Count; ++i)
             {
                 var g = ContinuousSegments[^1];
@@ -363,7 +363,7 @@ namespace Game
         }
     }
 
-    public struct WaypointSegment
+    public class WaypointSegment
     {
         public int First;
         public int Last;
@@ -390,5 +390,6 @@ namespace Game
     {
         None = 0x00,
         FollowPathBackwardsFromEndToStart = 0x01,
+        ExactSplinePath = 0x02
     }
 }
