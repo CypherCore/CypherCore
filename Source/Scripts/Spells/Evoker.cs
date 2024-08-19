@@ -12,22 +12,35 @@ using static Global;
 
 namespace Scripts.Spells.Evoker
 {
-    struct SpellIds
+    enum SpellIds
     {
-        public const uint BlastFurnace = 375510;
-        public const uint EnergizingFlame = 400006;
-        public const uint FireBreathDamage = 357209;
-        public const uint GlideKnockback = 358736;
-        public const uint Hover = 358267;
-        public const uint LivingFlame = 361469;
-        public const uint LivingFlameDamage = 361500;
-        public const uint LivingFlameHeal = 361509;
-        public const uint PermeatingChillTalent = 370897;
-        public const uint PyreDamage = 357212;
-        public const uint ScouringFlame = 378438;
-        public const uint SoarRacial = 369536;
+        BlastFurnace = 375510,
+        BlessingOfTheBronzeDk = 381732,
+        BlessingOfTheBronzeDh = 381741,
+        BlessingOfTheBronzeDruid = 381746,
+        BlessingOfTheBronzeEvoker = 381748,
+        BlessingOfTheBronzeHunter = 381749,
+        BlessingOfTheBronzeMage = 381750,
+        BlessingOfTheBronzeMonk = 381751,
+        BlessingOfTheBronzePaladin = 381752,
+        BlessingOfTheBronzePriest = 381753,
+        BlessingOfTheBronzeRogue = 381754,
+        BlessingOfTheBronzeShaman = 381756,
+        BlessingOfTheBronzeWarlock = 381757,
+        BlessingOfTheBronzeWarrior = 381758,
+        EnergizingFlame = 400006,
+        FireBreathDamage = 357209,
+        GlideKnockback = 358736,
+        Hover = 358267,
+        LivingFlame = 361469,
+        LivingFlameDamage = 361500,
+        LivingFlameHeal = 361509,
+        PermeatingChillTalent = 370897,
+        PyreDamage = 357212,
+        ScouringFlame = 378438,
+        SoarRacial = 369536,
 
-        public const uint LabelEvokerBlue = 1465;
+        LabelEvokerBlue = 1465
     }
 
     [Script] // 362969 - Azure Strike (blue)
@@ -46,12 +59,62 @@ namespace Scripts.Spells.Evoker
         }
     }
 
+    // 381732 - Blessing of the Bronze (Bronze)
+    // 381741 - Blessing of the Bronze (Bronze)
+    // 381746 - Blessing of the Bronze (Bronze)
+    // 381748 - Blessing of the Bronze (Bronze)
+    // 381749 - Blessing of the Bronze (Bronze)
+    // 381750 - Blessing of the Bronze (Bronze)
+    // 381751 - Blessing of the Bronze (Bronze)
+    // 381752 - Blessing of the Bronze (Bronze)
+    // 381753 - Blessing of the Bronze (Bronze)
+    // 381754 - Blessing of the Bronze (Bronze)
+    // 381756 - Blessing of the Bronze (Bronze)
+    // 381757 - Blessing of the Bronze (Bronze)
+    [Script] // 381758 - Blessing of the Bronze (Bronze)
+    class spell_evo_blessing_of_the_bronze : SpellScript
+    {
+        void RemoveInvalidTargets(List<WorldObject> targets)
+        {
+            targets.RemoveAll(target =>
+            {
+                Unit unitTarget = target.ToUnit();
+                if (unitTarget == null)
+                    return true;
+
+                return (SpellIds)GetSpellInfo().Id switch
+                {
+                    SpellIds.BlessingOfTheBronzeDk => unitTarget.GetClass() != Class.Deathknight,
+                    SpellIds.BlessingOfTheBronzeDh => unitTarget.GetClass() != Class.DemonHunter,
+                    SpellIds.BlessingOfTheBronzeDruid => unitTarget.GetClass() != Class.Druid,
+                    SpellIds.BlessingOfTheBronzeEvoker => unitTarget.GetClass() != Class.Evoker,
+                    SpellIds.BlessingOfTheBronzeHunter => unitTarget.GetClass() != Class.Hunter,
+                    SpellIds.BlessingOfTheBronzeMage => unitTarget.GetClass() != Class.Mage,
+                    SpellIds.BlessingOfTheBronzeMonk => unitTarget.GetClass() != Class.Monk,
+                    SpellIds.BlessingOfTheBronzePaladin => unitTarget.GetClass() != Class.Paladin,
+                    SpellIds.BlessingOfTheBronzePriest => unitTarget.GetClass() != Class.Priest,
+                    SpellIds.BlessingOfTheBronzeRogue => unitTarget.GetClass() != Class.Rogue,
+                    SpellIds.BlessingOfTheBronzeShaman => unitTarget.GetClass() != Class.Shaman,
+                    SpellIds.BlessingOfTheBronzeWarlock => unitTarget.GetClass() != Class.Warlock,
+                    SpellIds.BlessingOfTheBronzeWarrior => unitTarget.GetClass() != Class.Warrior,
+                    _ => true
+                };
+            });
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new(RemoveInvalidTargets, SpellConst.EffectAll, Targets.UnitCasterAreaRaid));
+        }
+    }
+
+
     [Script] // 370455 - Charged Blast
     class spell_evo_charged_blast : AuraScript
     {
         bool CheckProc(ProcEventInfo procInfo)
         {
-            return procInfo.GetSpellInfo() != null && procInfo.GetSpellInfo().HasLabel(SpellIds.LabelEvokerBlue);
+            return procInfo.GetSpellInfo() != null && procInfo.GetSpellInfo().HasLabel((uint)SpellIds.LabelEvokerBlue);
         }
 
         public override void Register()
@@ -66,17 +129,17 @@ namespace Scripts.Spells.Evoker
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.FireBreathDamage, SpellIds.BlastFurnace);
+            return ValidateSpellInfo((uint)SpellIds.FireBreathDamage, (uint)SpellIds.BlastFurnace);
         }
 
         void OnComplete(int completedStageCount)
         {
             int dotTicks = 10 - (completedStageCount - 1) * 3;
-            AuraEffect blastFurnace = GetCaster().GetAuraEffect(SpellIds.BlastFurnace, 0);
+            AuraEffect blastFurnace = GetCaster().GetAuraEffect((uint)SpellIds.BlastFurnace, 0);
             if (blastFurnace != null)
                 dotTicks += blastFurnace.GetAmount() / 2;
 
-            GetCaster().CastSpell(GetCaster(), SpellIds.FireBreathDamage, new CastSpellExtraArgs()
+            GetCaster().CastSpell(GetCaster(), (uint)SpellIds.FireBreathDamage, new CastSpellExtraArgs()
                 .SetTriggeringSpell(GetSpell())
                 .SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError)
                 .AddSpellMod(SpellValueMod.DurationPct, 100 * dotTicks)
@@ -127,7 +190,7 @@ namespace Scripts.Spells.Evoker
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.GlideKnockback, SpellIds.Hover, SpellIds.SoarRacial);
+            return ValidateSpellInfo((uint)SpellIds.GlideKnockback, (uint)SpellIds.Hover, (uint)SpellIds.SoarRacial);
         }
 
         SpellCastResult CheckCast()
@@ -146,10 +209,10 @@ namespace Scripts.Spells.Evoker
             if (caster == null)
                 return;
 
-            caster.CastSpell(caster, SpellIds.GlideKnockback, true);
+            caster.CastSpell(caster, (uint)SpellIds.GlideKnockback, true);
 
-            caster.GetSpellHistory().StartCooldown(SpellMgr.GetSpellInfo(SpellIds.Hover, GetCastDifficulty()), 0, null, false, TimeSpan.FromMilliseconds(250));
-            caster.GetSpellHistory().StartCooldown(SpellMgr.GetSpellInfo(SpellIds.SoarRacial, GetCastDifficulty()), 0, null, false, TimeSpan.FromMilliseconds(250));
+            caster.GetSpellHistory().StartCooldown(SpellMgr.GetSpellInfo((uint)SpellIds.Hover, GetCastDifficulty()), 0, null, false, TimeSpan.FromMilliseconds(250));
+            caster.GetSpellHistory().StartCooldown(SpellMgr.GetSpellInfo((uint)SpellIds.SoarRacial, GetCastDifficulty()), 0, null, false, TimeSpan.FromMilliseconds(250));
         }
 
         public override void Register()
@@ -164,7 +227,7 @@ namespace Scripts.Spells.Evoker
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.LivingFlameDamage, SpellIds.LivingFlameHeal, SpellIds.EnergizingFlame);
+            return ValidateSpellInfo((uint)SpellIds.LivingFlameDamage, (uint)SpellIds.LivingFlameHeal, (uint)SpellIds.EnergizingFlame);
         }
 
         void HandleHitTarget(uint effIndex)
@@ -172,9 +235,9 @@ namespace Scripts.Spells.Evoker
             Unit caster = GetCaster();
             Unit hitUnit = GetHitUnit();
             if (caster.IsFriendlyTo(hitUnit))
-                caster.CastSpell(hitUnit, SpellIds.LivingFlameHeal, true);
+                caster.CastSpell(hitUnit, (uint)SpellIds.LivingFlameHeal, true);
             else
-                caster.CastSpell(hitUnit, SpellIds.LivingFlameDamage, true);
+                caster.CastSpell(hitUnit, (uint)SpellIds.LivingFlameDamage, true);
         }
 
         void HandleLaunchTarget(uint effIndex)
@@ -183,7 +246,7 @@ namespace Scripts.Spells.Evoker
             if (caster.IsFriendlyTo(GetHitUnit()))
                 return;
 
-            AuraEffect auraEffect = caster.GetAuraEffect(SpellIds.EnergizingFlame, 0);
+            AuraEffect auraEffect = caster.GetAuraEffect((uint)SpellIds.EnergizingFlame, 0);
             if (auraEffect != null)
             {
                 int manaCost = GetSpell().GetPowerTypeCostAmount(PowerType.Mana).GetValueOrDefault(0);
@@ -204,7 +267,7 @@ namespace Scripts.Spells.Evoker
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.PermeatingChillTalent);
+            return ValidateSpellInfo((uint)SpellIds.PermeatingChillTalent);
         }
 
         bool CheckProc(ProcEventInfo procInfo)
@@ -213,10 +276,10 @@ namespace Scripts.Spells.Evoker
             if (spellInfo == null)
                 return false;
 
-            if (spellInfo.HasLabel(SpellIds.LabelEvokerBlue))
+            if (spellInfo.HasLabel((uint)SpellIds.LabelEvokerBlue))
                 return false;
 
-            if (!procInfo.GetActor().HasAura(SpellIds.PermeatingChillTalent))
+            if (!procInfo.GetActor().HasAura((uint)SpellIds.PermeatingChillTalent))
                 if (spellInfo.IsAffected(SpellFamilyNames.Evoker, new FlagArray128(0x40, 0, 0, 0))) // disintegrate
                     return false;
 
@@ -234,12 +297,12 @@ namespace Scripts.Spells.Evoker
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.PyreDamage);
+            return ValidateSpellInfo((uint)SpellIds.PyreDamage);
         }
 
         void HandleDamage(uint effIndex)
         {
-            GetCaster().CastSpell(GetHitUnit().GetPosition(), SpellIds.PyreDamage, true);
+            GetCaster().CastSpell(GetHitUnit().GetPosition(), (uint)SpellIds.PyreDamage, true);
         }
 
         public override void Register()
@@ -253,12 +316,12 @@ namespace Scripts.Spells.Evoker
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.ScouringFlame);
+            return ValidateSpellInfo((uint)SpellIds.ScouringFlame);
         }
 
         void HandleScouringFlame(List<WorldObject> targets)
         {
-            if (!GetCaster().HasAura(SpellIds.ScouringFlame))
+            if (!GetCaster().HasAura((uint)SpellIds.ScouringFlame))
                 targets.Clear();
         }
 
