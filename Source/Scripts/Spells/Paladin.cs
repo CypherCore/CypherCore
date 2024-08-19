@@ -373,7 +373,7 @@ namespace Scripts.Spells.Paladin
 
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.HolyShock, TimeSpan.FromSeconds(aurEff.GetAmount()));
+            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.HolyShock, TimeSpan.FromMilliseconds(aurEff.GetAmount()));
         }
 
         public override void Register()
