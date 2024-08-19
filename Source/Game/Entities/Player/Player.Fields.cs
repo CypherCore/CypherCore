@@ -236,8 +236,6 @@ namespace Game.Entities
         float[] m_powerFraction = new float[(int)PowerType.MaxPerClass];
         int[] m_MirrorTimer = new int[3];
 
-        TimeTracker m_groupUpdateTimer;
-
         ulong m_GuildIdInvited;
         Runes m_runes = new();
         uint m_hostileReferenceCheckTimer;

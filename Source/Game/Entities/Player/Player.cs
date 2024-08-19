@@ -114,8 +114,6 @@ namespace Game.Entities
             m_bgData = new BGData();
 
             _restMgr = new RestMgr(this);
-
-            m_groupUpdateTimer = new(5000);
         }
 
         public override void Dispose()
@@ -541,14 +539,6 @@ namespace Game.Entities
                 }
             }
 
-            // group update
-            m_groupUpdateTimer.Update(diff);
-            if (m_groupUpdateTimer.Passed())
-            {
-                SendUpdateToOutOfRangeGroupMembers();
-                m_groupUpdateTimer.Reset(5000);
-            }
-
             Pet pet = GetPet();
             if (pet != null && !pet.IsWithinDistInMap(this, GetMap().GetVisibilityRange()) && !pet.IsPossessed())
                 RemovePet(pet, PetSaveMode.NotInSlot, true);
@@ -569,6 +559,14 @@ namespace Game.Entities
             //because we don't want player's ghost teleported from graveyard
             if (IsHasDelayedTeleport() && IsAlive())
                 TeleportTo(teleportDest, m_teleport_options);
+        }
+
+        public override void Heartbeat()
+        {
+            base.Heartbeat();
+
+            // Group update
+            SendUpdateToOutOfRangeGroupMembers();
         }
 
         public override void SetDeathState(DeathState s)
