@@ -224,6 +224,7 @@ namespace Framework.Constants
         BlackMarketView = 0x80,
         GarrisonTalentNpc = 0x200,
         ContributionCollector = 0x400,
+        FastSteeringAvoidsObstacles = 0x2000,
         AzeriteRespec = 0x4000,
         IslandsQueue = 0x8000,
         SuppressNpcSoundsExceptEndOfInteraction = 0x10000,

@@ -42,7 +42,7 @@ namespace Framework.Constants
         CanSwim = 0x00200000,
         UncompressedPath = 0x00400000,
         Unknown_0x800000 = 0x00800000,           // NOT VERIFIED
-        Unknown_0x1000000 = 0x01000000,           // NOT VERIFIED
+        FastSteering = 0x01000000,           // Predicts spline only 500ms into the future for smoothing instead of 1s (making turns sharper) and turns off clientside obstacle detection
         Animation = 0x02000000,           // Plays animation after some time passed
         Parabolic = 0x04000000,           // Affects elevation computation, can't be combined with Falling flag
         FadeObject = 0x08000000,
@@ -57,6 +57,6 @@ namespace Framework.Constants
         MaskNoMonsterMove = Done,
         // Unused, not suported flags
         MaskUnused = NoSpline | EnterCycle | Frozen | Unknown_0x8 | Unknown_0x100 | Unknown_0x20000 | Unknown_0x40000
-            | Unknown_0x800000 | Unknown_0x1000000 | FadeObject | UnlimitedSpeed | Unknown_0x40000000 | Unknown_0x80000000
+            | Unknown_0x800000 | FastSteering | FadeObject | UnlimitedSpeed | Unknown_0x40000000 | Unknown_0x80000000
     }
 }
