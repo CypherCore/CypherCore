@@ -3575,6 +3575,14 @@ namespace Game.Spells
 
             Unit.ProcSkillsAndAuras(unitCaster, null, new ProcFlagsInit(ProcFlags.CastEnded), new ProcFlagsInit(), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, this, null, null);
 
+            if (IsEmpowerSpell())
+            {
+                // Empower spells trigger gcd at the end of cast instead of at start
+                SpellInfo gcd = Global.SpellMgr.GetSpellInfo(SpellConst.EmpowerHardcodedGCD, Difficulty.None);
+                if (gcd != null)
+                    unitCaster.GetSpellHistory().AddGlobalCooldown(gcd, TimeSpan.FromMilliseconds(gcd.StartRecoveryTime));
+            }
+
             if (result != SpellCastResult.SpellCastOk)
             {
                 // on failure (or manual cancel) send TraitConfigCommitFailed to revert talent UI saved config selection
@@ -3583,7 +3591,10 @@ namespace Game.Spells
                         m_caster.ToPlayer().SendPacket(new TraitConfigCommitFailed((m_customArg as TraitConfig).ID));
 
                 if (IsEmpowerSpell())
+                {
                     unitCaster.GetSpellHistory().ResetCooldown(m_spellInfo.Id, true);
+                    RefundPower();
+                }
 
                 return;
             }
@@ -3614,14 +3625,6 @@ namespace Game.Spells
             // Stop Attack for some spells
             if (m_spellInfo.HasAttribute(SpellAttr0.CancelsAutoAttackCombat))
                 unitCaster.AttackStop();
-
-            if (IsEmpowerSpell())
-            {
-                // Empower spells trigger gcd at the end of cast instead of at start
-                SpellInfo gcd = Global.SpellMgr.GetSpellInfo(SpellConst.EmpowerHardcodedGCD, Difficulty.None);
-                if (gcd != null)
-                    unitCaster.GetSpellHistory().AddGlobalCooldown(gcd, TimeSpan.FromMilliseconds(gcd.StartRecoveryTime));
-            }
         }
 
         static void FillSpellCastFailedArgs<T>(T packet, ObjectGuid castId, SpellInfo spellInfo, SpellCastResult result, SpellCustomErrors customError, int? param1, int? param2, Player caster) where T : CastFailedBase
@@ -4689,27 +4692,25 @@ namespace Game.Spells
                     return;
             }
 
+            bool hit = true;
+            if (unitCaster.IsPlayer())
+            {
+                if (m_spellInfo.HasAttribute(SpellAttr1.DiscountPowerOnMiss))
+                {
+                    ObjectGuid targetGUID = m_targets.GetUnitTargetGUID();
+                    if (!targetGUID.IsEmpty())
+                        hit = m_UniqueTargetInfo.Any(targetInfo => targetInfo.TargetGUID == targetGUID && targetInfo.MissCondition == SpellMissInfo.None);
+                }
+            }
+
             foreach (SpellPowerCost cost in m_powerCost)
             {
-                bool hit = true;
-                if (unitCaster.IsTypeId(TypeId.Player))
+                if (!hit)
                 {
-                    if (m_spellInfo.HasAttribute(SpellAttr1.DiscountPowerOnMiss))
-                    {
-                        ObjectGuid targetGUID = m_targets.GetUnitTargetGUID();
-                        if (!targetGUID.IsEmpty())
-                        {
-                            var ihit = m_UniqueTargetInfo.FirstOrDefault(targetInfo => targetInfo.TargetGUID == targetGUID && targetInfo.MissCondition != SpellMissInfo.None);
-                            if (ihit != null)
-                            {
-                                hit = false;
-                                //lower spell cost on fail (by talent aura)
-                                Player modOwner = unitCaster.GetSpellModOwner();
-                                if (modOwner != null)
-                                    modOwner.ApplySpellMod(m_spellInfo, SpellModOp.PowerCostOnMiss, ref cost.Amount);
-                            }
-                        }
-                    }
+                    //lower spell cost on fail (by talent aura)
+                    Player modOwner = unitCaster.GetSpellModOwner();
+                    if (modOwner != null)
+                        modOwner.ApplySpellMod(m_spellInfo, SpellModOp.PowerCostOnMiss, ref cost.Amount);
                 }
 
                 if (cost.Power == PowerType.Runes)
@@ -4728,13 +4729,46 @@ namespace Game.Spells
                     continue;
                 }
 
-                if (cost.Power >= PowerType.Max)
+                unitCaster->ModifyPower(cost.Power, -cost.Amount);
+            }
+        }
+
+        void RefundPower()
+        {
+            // GameObjects don't use power
+            Unit unitCaster = m_caster.ToUnit();
+            if (unitCaster == null)
+                return;
+
+            if (m_CastItem != null || m_triggeredByAuraSpell != null)
+                return;
+
+            //Don't take power if the spell is cast while .cheat power is enabled.
+            if (unitCaster.IsPlayer())
+            {
+                if (unitCaster.ToPlayer().GetCommandStatus(PlayerCommandStates.Power))
+                    return;
+            }
+
+            foreach (SpellPowerCost cost in m_powerCost)
+            {
+                if (cost.Power == PowerType.Runes)
                 {
-                    Log.outError(LogFilter.Spells, "Spell.TakePower: Unknown power type '{0}'", cost.Power);
+                    RefundRunePower();
                     continue;
                 }
 
-                unitCaster.ModifyPower(cost.Power, -cost.Amount);
+                if (cost.Amount == 0)
+                    continue;
+
+                // health as power used
+                if (cost.Power == PowerType.Health)
+                {
+                    unitCaster.ModifyHealth(cost.Amount);
+                    continue;
+                }
+
+                unitCaster.ModifyPower(cost.Power, cost.Amount);
             }
         }
 
@@ -4779,6 +4813,19 @@ namespace Game.Spells
                     --runeCost;
                 }
             }
+        }
+
+        void RefundRunePower()
+        {
+            if (!m_caster.IsPlayer() || m_caster.ToPlayer().GetClass() != Class.Deathknight)
+                return;
+
+            Player player = m_caster.ToPlayer();
+
+            // restore old rune state
+            for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
+                if ((m_runesState & (1 << i)) != 0)
+                    player.SetRuneCooldown(i, 0);
         }
 
         void TakeReagents()
