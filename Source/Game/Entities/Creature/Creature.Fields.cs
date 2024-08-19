@@ -80,8 +80,6 @@ namespace Game.Entities
         bool m_ignoreCorpseDecayRatio;
         float m_wanderDistance;
         uint m_boundaryCheckTime;                         // (msecs) remaining time for next evade boundary check
-        uint m_combatPulseTime;                           // (msecs) remaining time for next zone-in-combat pulse
-        uint m_combatPulseDelay;                          // (secs) how often the creature puts the entire zone in combat (only works in dungeons)
 
         // vendor items
         List<VendorItemCount> m_vendorItemCounts = new();

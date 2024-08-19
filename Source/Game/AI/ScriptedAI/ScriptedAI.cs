@@ -550,7 +550,6 @@ namespace Game.AI
             if (!me.IsAlive())
                 return;
 
-            me.SetCombatPulseDelay(0);
             me.ResetLootMode();
             _events.Reset();
             summons.DespawnAll();
@@ -581,9 +580,7 @@ namespace Game.AI
                 instance.SetBossState(_bossId, EncounterState.InProgress);
             }
 
-            me.SetCombatPulseDelay(5);
             me.SetActive(true);
-            DoZoneInCombat();
             ScheduleTasks();
         }
 

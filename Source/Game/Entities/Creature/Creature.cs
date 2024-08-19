@@ -562,29 +562,6 @@ namespace Game.Entities
                             m_boundaryCheckTime -= diff;
                     }
 
-                    // if periodic combat pulse is enabled and we are both in combat and in a dungeon, do this now
-                    if (m_combatPulseDelay > 0 && IsEngaged() && GetMap().IsDungeon())
-                    {
-                        if (diff > m_combatPulseTime)
-                            m_combatPulseTime = 0;
-                        else
-                            m_combatPulseTime -= diff;
-
-                        if (m_combatPulseTime == 0)
-                        {
-                            var players = GetMap().GetPlayers();
-                            foreach (var player in players)
-                            {
-                                if (player.IsGameMaster())
-                                    continue;
-
-                                if (player.IsAlive() && IsHostileTo(player))
-                                    EngageWithTarget(player);
-                            }
-                            m_combatPulseTime = m_combatPulseDelay * Time.InMilliseconds;
-                        }
-                    }
-
                     AIUpdateTick(diff);
 
                     DoMeleeAttackIfReady();
@@ -643,6 +620,14 @@ namespace Game.Entities
                     }
                     break;
             }
+        }
+
+        public override void Heartbeat()
+        {
+            base.Heartbeat();
+
+            // Creatures with CREATURE_STATIC_FLAG_2_FORCE_PARTY_MEMBERS_INTO_COMBAT periodically force party members into combat
+            ForcePartyMembersIntoCombat();
         }
 
         public void Regenerate(PowerType power)
@@ -1124,6 +1109,9 @@ namespace Game.Entities
             CreatureGroup formation = GetFormation();
             if (formation != null)
                 formation.MemberEngagingTarget(this, target);
+
+            // Creatures with CREATURE_STATIC_FLAG_2_FORCE_PARTY_MEMBERS_INTO_COMBAT periodically force party members into combat
+            ForcePartyMembersIntoCombat();
         }
 
         public override void AtDisengage()
@@ -1139,6 +1127,39 @@ namespace Game.Entities
                 UpdateSpeed(UnitMoveType.Run);
                 UpdateSpeed(UnitMoveType.Swim);
                 UpdateSpeed(UnitMoveType.Flight);
+            }
+        }
+
+        void ForcePartyMembersIntoCombat()
+        {
+            if (!_staticFlags.HasFlag(CreatureStaticFlags2.ForcePartyMembersIntoCombat) || !IsEngaged())
+                return;
+
+            List<Group> partiesToForceIntoCombat = new();
+            foreach (var (_, combatReference) in GetCombatManager().GetPvECombatRefs())
+            {
+                if (combatReference.IsSuppressedFor(this))
+                    continue;
+
+                Player player = combatReference.GetOther(this)?.ToPlayer();
+                if (player == null || player.IsGameMaster())
+                    continue;
+
+                Group group = player.GetGroup();
+                if (group != null)
+                    partiesToForceIntoCombat.Add(group);
+            }
+
+            foreach (Group partyToForceIntoCombat in partiesToForceIntoCombat)
+            {
+                for (GroupReference refe = partyToForceIntoCombat.GetFirstMember(); refe != null; refe = refe.Next())
+                {
+                    Player player = refe.GetSource();
+                    if (player == null || !player.IsInWorld || player.GetMap() != GetMap() || player.IsGameMaster())
+                        continue;
+
+                    EngageWithTarget(player);
+                }
             }
         }
 
@@ -3602,13 +3623,6 @@ namespace Game.Entities
         public void SetWanderDistance(float dist) { m_wanderDistance = dist; }
 
         public void DoImmediateBoundaryCheck() { m_boundaryCheckTime = 0; }
-        uint GetCombatPulseDelay() { return m_combatPulseDelay; }
-        public void SetCombatPulseDelay(uint delay) // (secs) interval at which the creature pulses the entire zone into combat (only works in dungeons)
-        {
-            m_combatPulseDelay = delay;
-            if (m_combatPulseTime == 0 || m_combatPulseTime > delay)
-                m_combatPulseTime = delay;
-        }
 
         bool CanRegenerateHealth() { return !_staticFlags.HasFlag(CreatureStaticFlags5.NoHealthRegen) && _regenerateHealth; }
         public void SetRegenerateHealth(bool value) { _staticFlags.ApplyFlag(CreatureStaticFlags5.NoHealthRegen, !value); }
