@@ -78,12 +78,15 @@ namespace Game.Movement
 
         bool _checkPathLengths()
         {
-            float MIN_OFFSET = 1.0f / 4.0f;
-            float MAX_XY_OFFSET = (1 << 11) / 4.0f;
-            float MAX_Z_OFFSET = (1 << 10) / 4.0f;
+            float MIN_XY_OFFSET = -(1 << 11) / 4.0f;
+            float MIN_Z_OFFSET = -(1 << 10) / 4.0f;
 
-            var isValidPackedXYOffset = (float coord) => coord < MAX_XY_OFFSET && (coord < 0.1f || coord >= MIN_OFFSET);
-            var isValidPackedZOffset = (float coord) => coord < MAX_Z_OFFSET && (coord < 0.1f || coord >= MIN_OFFSET);
+            // positive values have 1 less bit limit (if the highest bit was set, value would be sign extended into negative when decompressing)
+            float MAX_XY_OFFSET = (1 << 10) / 4.0f;
+            float MAX_Z_OFFSET = (1 << 9) / 4.0f;
+
+            var isValidPackedXYOffset = (float coord) => coord > MIN_XY_OFFSET && coord < MAX_XY_OFFSET;
+            var isValidPackedZOffset = (float coord) => coord > MIN_Z_OFFSET && coord < MAX_Z_OFFSET;
 
             if (path.Count > 2)
             {
@@ -98,9 +101,9 @@ namespace Game.Movement
 
                     // when compression is enabled, each point coord is packed into 11 bits (10 for Z)
                     if (!flags.HasFlag(MoveSplineFlagEnum.UncompressedPath))
-                        if (!isValidPackedXYOffset(MathF.Abs(path[i].X - middle.X))
-                            || !isValidPackedXYOffset(MathF.Abs(path[i].Y - middle.Y))
-                            || !isValidPackedZOffset(MathF.Abs(path[i].Z - middle.Z)))
+                        if (!isValidPackedXYOffset(middle.X - path[i].X)
+                            || !isValidPackedXYOffset(middle.Y - path[i].Y)
+                            || !isValidPackedZOffset(middle.Z - path[i].Z))
                             flags.SetUnsetFlag(MoveSplineFlagEnum.UncompressedPath, true);
                 }
             }
