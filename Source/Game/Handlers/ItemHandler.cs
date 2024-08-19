@@ -609,7 +609,7 @@ namespace Game
 
         public void SendEnchantmentLog(ObjectGuid owner, ObjectGuid caster, ObjectGuid itemGuid, uint itemId, uint enchantId, uint enchantSlot)
         {
-            EnchantmentLog packet = new(); 
+            EnchantmentLog packet = new();
             packet.Owner = owner;
             packet.Caster = caster;
             packet.ItemGUID = itemGuid;
@@ -822,7 +822,7 @@ namespace Game
 
                     if (i != firstPrismatic)
                         return;
-                }     
+                }
 
                 // Gem must match socket color
                 if (ItemConst.SocketColorToGemTypeMask[(int)itemTarget.GetSocketColor(i)] != gemProperties[i].Type)
@@ -1098,6 +1098,48 @@ namespace Game
                 item.RemoveItemFlag(ItemFieldFlags.NewItem);
                 item.SetState(ItemUpdateState.Changed, _player);
             }
+        }
+
+        [WorldPacketHandler(ClientOpcodes.ChangeBagSlotFlag, Processing = PacketProcessing.Inplace)]
+        void HandleChangeBagSlotFlag(ChangeBagSlotFlag changeBagSlotFlag)
+        {
+            if (changeBagSlotFlag.BagIndex >= _player.m_activePlayerData.BagSlotFlags.GetSize())
+                return;
+
+            if (changeBagSlotFlag.On)
+                _player.SetBagSlotFlag(changeBagSlotFlag.BagIndex, changeBagSlotFlag.FlagToChange);
+            else
+                _player.RemoveBagSlotFlag(changeBagSlotFlag.BagIndex, changeBagSlotFlag.FlagToChange);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.ChangeBankBagSlotFlag, Processing = PacketProcessing.Inplace)]
+        void HandleChangeBankBagSlotFlag(ChangeBankBagSlotFlag changeBankBagSlotFlag)
+        {
+            if (changeBankBagSlotFlag.BagIndex >= _player.m_activePlayerData.BankBagSlotFlags.GetSize())
+                return;
+
+            if (changeBankBagSlotFlag.On)
+                _player.SetBankBagSlotFlag(changeBankBagSlotFlag.BagIndex, changeBankBagSlotFlag.FlagToChange);
+            else
+                _player.RemoveBankBagSlotFlag(changeBankBagSlotFlag.BagIndex, changeBankBagSlotFlag.FlagToChange);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.SetBackpackAutosortDisabled, Processing = PacketProcessing.Inplace)]
+        void HandleSetBackpackAutosortDisabled(SetBackpackAutosortDisabled setBackpackAutosortDisabled)
+        {
+            _player.SetBackpackAutoSortDisabled(setBackpackAutosortDisabled.Disable);
+        }
+
+                [WorldPacketHandler(ClientOpcodes.SetBackpackSellJunkDisabled, Processing = PacketProcessing.Inplace)]
+        void HandleSetBackpackSellJunkDisabled(SetBackpackSellJunkDisabled setBackpackSellJunkDisabled)
+        {
+            _player.SetBackpackSellJunkDisabled(setBackpackSellJunkDisabled.Disable);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.SetBankAutosortDisabled, Processing = PacketProcessing.Inplace)]
+        void HandleSetBankAutosortDisabled(SetBankAutosortDisabled setBankAutosortDisabled)
+        {
+            _player.SetBankAutoSortDisabled(setBankAutosortDisabled.Disable);
         }
     }
 }

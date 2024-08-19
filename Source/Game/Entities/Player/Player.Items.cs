@@ -6069,6 +6069,21 @@ namespace Game.Entities
         public byte GetBankBagSlotCount() { return m_activePlayerData.NumBankSlots; }
         public void SetBankBagSlotCount(byte count) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NumBankSlots), count); }
 
+        public bool IsBackpackAutoSortDisabled() { return m_activePlayerData.BackpackAutoSortDisabled; }
+        public void SetBackpackAutoSortDisabled(bool disabled) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BackpackAutoSortDisabled), disabled); }
+        public bool IsBackpackSellJunkDisabled() { return m_activePlayerData.BackpackSellJunkDisabled; }
+        public void SetBackpackSellJunkDisabled(bool disabled) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BackpackSellJunkDisabled), disabled); }
+        public bool IsBankAutoSortDisabled() { return m_activePlayerData.BankAutoSortDisabled; }
+        public void SetBankAutoSortDisabled(bool disabled) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BankAutoSortDisabled), disabled); }
+        public BagSlotFlags GetBagSlotFlags(int bagIndex) { return (BagSlotFlags)m_activePlayerData.BagSlotFlags[bagIndex]; }
+        public void SetBagSlotFlag(int bagIndex, BagSlotFlags flags) { SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BagSlotFlags, bagIndex), (uint)flags); }
+        public void RemoveBagSlotFlag(int bagIndex, BagSlotFlags flags) { RemoveUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BagSlotFlags, bagIndex), (uint)flags); }
+        public void ReplaceAllBagSlotFlags(int bagIndex, BagSlotFlags flags) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BagSlotFlags, bagIndex), (uint)flags); }
+        public BagSlotFlags GetBankBagSlotFlags(int bagIndex) { return (BagSlotFlags)m_activePlayerData.BankBagSlotFlags[bagIndex]; }
+        public void SetBankBagSlotFlag(int bagIndex, BagSlotFlags flags) { SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BankBagSlotFlags, bagIndex), (uint)flags); }
+        public void RemoveBankBagSlotFlag(int bagIndex, BagSlotFlags flags) { RemoveUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BankBagSlotFlags, bagIndex), (uint)flags); }
+        public void ReplaceAllBankBagSlotFlags(int bagIndex, BagSlotFlags flags) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BankBagSlotFlags, bagIndex), (uint)flags); }
+
         //Loot
         public ObjectGuid GetLootGUID() { return m_playerData.LootTargetGUID; }
         public void SetLootGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.LootTargetGUID), guid); }

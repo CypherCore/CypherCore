@@ -2,11 +2,10 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 
 namespace Game.Networking.Packets
 {
@@ -680,6 +679,76 @@ namespace Game.Networking.Packets
         public InventoryFullOverflow() : base(ServerOpcodes.InventoryFullOverflow) { }
 
         public override void Write() { }
+    }
+
+    class ChangeBagSlotFlag : ClientPacket
+    {
+        public int BagIndex;
+        public BagSlotFlags FlagToChange;
+        public bool On;
+
+        public ChangeBagSlotFlag(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            BagIndex = _worldPacket.ReadInt32();
+            FlagToChange = (BagSlotFlags)_worldPacket.ReadUInt32();
+            On = _worldPacket.HasBit();
+        }
+    }
+
+    class ChangeBankBagSlotFlag : ClientPacket
+    {
+        public int BagIndex;
+        public BagSlotFlags FlagToChange;
+        public bool On;
+
+        public ChangeBankBagSlotFlag(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            BagIndex = _worldPacket.ReadInt32();
+            FlagToChange = (BagSlotFlags)_worldPacket.ReadUInt32();
+            On = _worldPacket.HasBit();
+        }
+    }
+
+    class SetBackpackAutosortDisabled : ClientPacket
+    {
+        public bool Disable;
+
+        public SetBackpackAutosortDisabled(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Disable = _worldPacket.HasBit();
+        }
+
+    }
+
+    class SetBackpackSellJunkDisabled : ClientPacket
+    {
+        public bool Disable;
+
+        public SetBackpackSellJunkDisabled(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Disable = _worldPacket.HasBit();
+        }
+
+    }
+
+    class SetBankAutosortDisabled : ClientPacket
+    {
+        public bool Disable;
+
+        public SetBankAutosortDisabled(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Disable = _worldPacket.HasBit();
+        }
     }
 
     //Structs

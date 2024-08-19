@@ -2828,7 +2828,17 @@ namespace Game.Entities
             uint xp = result.Read<uint>(fieldIndex++);
             ulong money = result.Read<ulong>(fieldIndex++);
             byte inventorySlots = result.Read<byte>(fieldIndex++);
+            BagSlotFlags inventoryBagFlags = (BagSlotFlags)result.Read<uint>(fieldIndex++);
+            BagSlotFlags[] bagSlotFlags = new BagSlotFlags[5];
+            for (var i = 0; i < bagSlotFlags.Length; ++i)
+                bagSlotFlags[i] = (BagSlotFlags)result.Read<uint>(fieldIndex++);
+
             byte bankSlots = result.Read<byte>(fieldIndex++);
+            BagSlotFlags[] bankBagSlotFlags = new BagSlotFlags[7];
+            BagSlotFlags bankBagFlags = (BagSlotFlags)result.Read<uint>(fieldIndex++);
+            for (var i = 0; i < bankBagSlotFlags.Length; ++i)
+                bankBagSlotFlags[i] = (BagSlotFlags)result.Read<uint>(fieldIndex++);
+
             PlayerRestState restState = (PlayerRestState)result.Read<byte>(fieldIndex++);
             PlayerFlags playerFlags = (PlayerFlags)result.Read<uint>(fieldIndex++);
             PlayerFlagsEx playerFlagsEx = (PlayerFlagsEx)result.Read<uint>(fieldIndex++);
@@ -2991,7 +3001,16 @@ namespace Game.Entities
 
             SetCustomizations(customizations, false);
             SetInventorySlotCount(inventorySlots);
+            SetBackpackAutoSortDisabled(inventoryBagFlags.HasFlag(BagSlotFlags.DisableAutoSort));
+            SetBackpackSellJunkDisabled(inventoryBagFlags.HasFlag(BagSlotFlags.ExcludeJunkSell));
+            for (int bagIndex = 0; bagIndex < bagSlotFlags.Length; ++bagIndex)
+                ReplaceAllBagSlotFlags(bagIndex, bagSlotFlags[bagIndex]);
+
             SetBankBagSlotCount(bankSlots);
+            SetBankAutoSortDisabled(bankBagFlags.HasFlag(BagSlotFlags.DisableAutoSort));
+            for (int bagIndex = 0; bagIndex < bankBagSlotFlags.Length; ++bagIndex)
+                ReplaceAllBankBagSlotFlags(bagIndex, bankBagSlotFlags[bagIndex]);
+
             SetNativeGender(gender);
             SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.Inebriation), drunk);
             ReplaceAllPlayerFlags(playerFlags);
@@ -3677,7 +3696,24 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetXP());
                 stmt.AddValue(index++, GetMoney());
                 stmt.AddValue(index++, GetInventorySlotCount());
+
+                BagSlotFlags inventoryFlags = BagSlotFlags.None;
+                if (m_activePlayerData.BackpackAutoSortDisabled)
+                    inventoryFlags |= BagSlotFlags.DisableAutoSort;
+                if (m_activePlayerData.BackpackSellJunkDisabled)
+                    inventoryFlags |= BagSlotFlags.ExcludeJunkSell;
+                stmt.AddValue(index++, (uint)inventoryFlags);
+                foreach (uint bagSlotFlag in m_activePlayerData.BagSlotFlags)
+                    stmt.AddValue(index++, bagSlotFlag);
                 stmt.AddValue(index++, GetBankBagSlotCount());
+
+                inventoryFlags = BagSlotFlags.None;
+                if (m_activePlayerData.BankAutoSortDisabled)
+                    inventoryFlags |= BagSlotFlags.DisableAutoSort;
+                stmt.AddValue(index++, (uint)inventoryFlags);
+                foreach (uint bankBagSlotFlag in m_activePlayerData.BankBagSlotFlags)
+                    stmt.AddValue(index++, bankBagSlotFlag);
+
                 stmt.AddValue(index++, m_activePlayerData.RestInfo[(int)RestTypes.XP].StateID);
                 stmt.AddValue(index++, m_playerData.PlayerFlags);
                 stmt.AddValue(index++, m_playerData.PlayerFlagsEx);
@@ -3791,7 +3827,24 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetXP());
                 stmt.AddValue(index++, GetMoney());
                 stmt.AddValue(index++, GetInventorySlotCount());
+
+                BagSlotFlags inventoryFlags = BagSlotFlags.None;
+                if (m_activePlayerData.BackpackAutoSortDisabled)
+                    inventoryFlags |= BagSlotFlags.DisableAutoSort;
+                if (m_activePlayerData.BackpackSellJunkDisabled)
+                    inventoryFlags |= BagSlotFlags.ExcludeJunkSell;
+                stmt.AddValue(index++, (uint)inventoryFlags);
+                foreach (uint bagSlotFlag in m_activePlayerData.BagSlotFlags)
+                    stmt.AddValue(index++, bagSlotFlag);
                 stmt.AddValue(index++, GetBankBagSlotCount());
+
+                inventoryFlags = BagSlotFlags.None;
+                if (m_activePlayerData.BankAutoSortDisabled)
+                    inventoryFlags |= BagSlotFlags.DisableAutoSort;
+                stmt.AddValue(index++, (uint)inventoryFlags);
+                foreach (uint bankBagSlotFlag in m_activePlayerData.BankBagSlotFlags)
+                    stmt.AddValue(index++, bankBagSlotFlag);
+
                 stmt.AddValue(index++, m_activePlayerData.RestInfo[(int)RestTypes.XP].StateID);
                 stmt.AddValue(index++, m_playerData.PlayerFlags);
                 stmt.AddValue(index++, m_playerData.PlayerFlagsEx);
