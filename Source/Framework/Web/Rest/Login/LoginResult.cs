@@ -24,6 +24,9 @@ namespace Framework.Web.Rest.Login
 
         [JsonPropertyName("server_evidence_M2")]
         public string ServerEvidenceM2 { get; set; }
+
+        [JsonPropertyName("next_url")]
+        public string NextUrl { get; set; }
     }
 
     public enum AuthenticationState
