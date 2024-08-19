@@ -2468,7 +2468,8 @@ namespace Game
                         continue;
                     }
 
-                    if (Global.DB2Mgr.GetItemModifiedAppearance(equipmentInfo.Items[i].ItemId, equipmentInfo.Items[i].AppearanceModId) == null)
+                    // AppearanceModId 0 is always valid
+                    if (equipmentInfo.Items[i].AppearanceModId != 0 && Global.DB2Mgr.GetItemModifiedAppearance(equipmentInfo.Items[i].ItemId, equipmentInfo.Items[i].AppearanceModId) == null)
                     {
                         Log.outError(LogFilter.Sql, "Unknown item appearance for (ID: {0}, AppearanceModID: {1}) pair in creature_equip_template.ItemID{2} creature_equip_template.AppearanceModID{3} " +
                             "for CreatureID: {4} and ID: {5}, forced to default.",
