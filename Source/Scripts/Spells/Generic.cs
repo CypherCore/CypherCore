@@ -1550,6 +1550,42 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script] // 96733 - Permanent Feign Death (Stun)
+    class spell_gen_feign_death_all_flags_no_uninteractible : AuraScript
+    {
+        void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+            target.SetUnitFlag3(UnitFlags3.FakeDead);
+            target.SetUnitFlag2(UnitFlags2.FeignDeath);
+            target.SetUnitFlag(UnitFlags.PreventEmotesFromChatText);
+            target.SetImmuneToAll(true);
+
+            Creature creature = target.ToCreature();
+            if (creature != null)
+                creature.SetReactState(ReactStates.Passive);
+        }
+
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+            target.RemoveUnitFlag3(UnitFlags3.FakeDead);
+            target.RemoveUnitFlag2(UnitFlags2.FeignDeath);
+            target.RemoveUnitFlag(UnitFlags.PreventEmotesFromChatText);
+            target.SetImmuneToAll(false);
+
+            Creature creature = target.ToCreature();
+            if (creature != null)
+                creature.InitializeReactState();
+        }
+
+        public override void Register()
+        {
+            OnEffectApply.Add(new(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            OnEffectRemove.Add(new(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+
     // 35357 - Spawn Feign Death
     [Script] // 51329 - Feign Death
     class spell_gen_feign_death_no_dyn_flag : AuraScript
