@@ -245,6 +245,7 @@ namespace Framework.Constants
         public const float DefaultVisibilityInstance = 170.0f;                    // default visible distance in instances, 170 yards
         public const float DefaultVisibilityBGAreans = 533.0f;                    // default visible distance in BG/Arenas, roughly 533 yards
         public const int DefaultVisibilityNotifyPeriod = 1000;
+        public static TimeSpan HeartbeatInterval = TimeSpan.FromSeconds(5.2);
 
         public const int WorldTrigger = 12999;
 

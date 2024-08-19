@@ -41,6 +41,8 @@ namespace Game.Entities
             m_objectData = new ObjectFieldData();
 
             m_staticFloorZ = MapConst.VMAPInvalidHeightValue;
+
+            _heartbeatTimer = SharedConst.HeartbeatInterval;
         }
 
         public virtual void Dispose()
@@ -992,7 +994,16 @@ namespace Game.Entities
         public virtual void Update(uint diff)
         {
             m_Events.Update(diff);
+
+            _heartbeatTimer -= TimeSpan.FromMilliseconds(diff);
+            while (_heartbeatTimer <= TimeSpan.Zero)
+            {
+                _heartbeatTimer += SharedConst.HeartbeatInterval;
+                Heartbeat();
+            }
         }
+
+        public virtual void Heartbeat() { }
 
         public void SetIsStoredInWorldObjectGridContainer(bool on)
         {
@@ -3858,6 +3869,8 @@ namespace Game.Entities
         ObjectGuid _privateObjectOwner;
 
         SmoothPhasing _smoothPhasing;
+
+        TimeSpan _heartbeatTimer;
 
         public FlaggedArray32<StealthType> m_stealth = new(2);
         public FlaggedArray32<StealthType> m_stealthDetect = new(2);
