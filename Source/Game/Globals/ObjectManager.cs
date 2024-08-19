@@ -2481,18 +2481,9 @@ namespace Game
                         continue;
                     }
 
-                    if (dbcItem.inventoryType != InventoryType.Weapon &&
-                        dbcItem.inventoryType != InventoryType.Shield &&
-                        dbcItem.inventoryType != InventoryType.Ranged &&
-                        dbcItem.inventoryType != InventoryType.Weapon2Hand &&
-                        dbcItem.inventoryType != InventoryType.WeaponMainhand &&
-                        dbcItem.inventoryType != InventoryType.WeaponOffhand &&
-                        dbcItem.inventoryType != InventoryType.Holdable &&
-                        dbcItem.inventoryType != InventoryType.Thrown &&
-                        dbcItem.inventoryType != InventoryType.RangedRight)
+                    if (ItemConst.InventoryTypesEquipable.All(inventoryType => inventoryType != dbcItem.inventoryType))
                     {
-                        Log.outError(LogFilter.Sql, "Item (ID {0}) in creature_equip_template.ItemID{1} for CreatureID  = {2} is not equipable in a hand, forced to 0.",
-                            equipmentInfo.Items[i].ItemId, i + 1, entry);
+                        Log.outError(LogFilter.Sql, $"Item (ID {equipmentInfo.Items[i].ItemId}) in creature_equip_template.ItemID{i + 1} for CreatureID = {entry} is not equipable in a hand, forced to 0.");
                         equipmentInfo.Items[i].ItemId = 0;
                     }
                 }

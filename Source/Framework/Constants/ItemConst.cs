@@ -94,6 +94,20 @@ namespace Framework.Constants
             ItemModifier.TransmogSecondaryAppearanceSpec4,
             ItemModifier.TransmogSecondaryAppearanceSpec5
         };
+
+        public static InventoryType[] InventoryTypesEquipable =
+        {
+            InventoryType.Weapon,
+            InventoryType.Shield,
+            InventoryType.Ranged,
+            InventoryType.Weapon2Hand,
+            InventoryType.WeaponMainhand,
+            InventoryType.WeaponOffhand,
+            InventoryType.Holdable,
+            InventoryType.Thrown,
+            InventoryType.RangedRight,
+            InventoryType.ProfessionTool
+        };
     }
 
     public struct ProfessionSlots

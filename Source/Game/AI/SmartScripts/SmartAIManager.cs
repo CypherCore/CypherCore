@@ -9,6 +9,7 @@ using Game.Movement;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -1805,6 +1806,33 @@ namespace Game.AI
                             return false;
                         }
                     }
+
+                    bool isValidEquipmentSlot(uint itemEntry, byte slot)
+                    {
+                        ItemRecord dbcItem = CliDB.ItemStorage.LookupByKey(itemEntry);
+                        if (dbcItem == null)
+                        {
+                            Log.outError(LogFilter.Sql, $"SmartScript: SMART_ACTION_EQUIP uses unknown item {itemEntry} (slot {slot}) for creature {e.EntryOrGuid}, skipped.");
+                            return false;
+                        }
+
+                        if (ItemConst.InventoryTypesEquipable.All(inventoryType => inventoryType != dbcItem.inventoryType))
+                        {
+                            Log.outError(LogFilter.Sql, $"SmartScript: SMART_ACTION_EQUIP uses item {itemEntry} (slot {slot}) not equipable in a hand for creature {e.EntryOrGuid}, skipped.");
+                            return false;
+                        }
+
+                        return true;
+                    };
+
+                    if (e.Action.equip.slot1 != 0 && !isValidEquipmentSlot(e.Action.equip.slot1, 0))
+                        return false;
+
+                    if (e.Action.equip.slot2 != 0 && !isValidEquipmentSlot(e.Action.equip.slot2, 1))
+                        return false;
+
+                    if (e.Action.equip.slot3 != 0 && !isValidEquipmentSlot(e.Action.equip.slot3, 2))
+                        return false;
                     break;
                 }
                 case SmartActions.SetInstData:
