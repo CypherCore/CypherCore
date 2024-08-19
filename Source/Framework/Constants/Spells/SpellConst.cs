@@ -26,6 +26,9 @@ namespace Framework.Constants
 
         public const uint VisualKitFood = 406;
         public const uint VisualKitDrink = 438;
+
+        public const uint EmpowerHoldTimeAtMax = 1 * Time.InMilliseconds;
+        public const uint EmpowerHardcodedGCD = 359115;
     }
 
 

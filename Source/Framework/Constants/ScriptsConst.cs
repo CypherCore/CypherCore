@@ -34,7 +34,9 @@ namespace Framework.Constants
         CalcDamage,
         CalcHealing,
         OnPrecast,
-        CalcCastTime
+        CalcCastTime,
+        EmpowerStageCompleted,
+        EmpowerCompleted
     }
 
     // AuraScript interface - enum used for runtime checks of script function calls

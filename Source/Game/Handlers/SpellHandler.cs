@@ -379,6 +379,42 @@ namespace Game
             mover.InterruptSpell(CurrentSpellTypes.Channeled);
         }
 
+        [WorldPacketHandler(ClientOpcodes.SetEmpowerMinHoldStagePercent, Processing = PacketProcessing.Inplace)]
+        void HandleSetEmpowerMinHoldStagePercent(SetEmpowerMinHoldStagePercent setEmpowerMinHoldStagePercent)
+        {
+            _player.SetEmpowerMinHoldStagePercent(setEmpowerMinHoldStagePercent.MinHoldStagePercent);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.SpellEmpowerRelease, Processing = PacketProcessing.Inplace)]
+        void HandleSpellEmpowerRelease(SpellEmpowerRelease spellEmpowerRelease)
+        {
+            // ignore for remote control state (for player case)
+            Unit mover = _player.GetUnitBeingMoved();
+            if (mover != _player && mover.IsPlayer())
+                return;
+
+            Spell spell = mover.GetCurrentSpell(CurrentSpellTypes.Channeled);
+            if (spell == null || spell.GetSpellInfo().Id != spellEmpowerRelease.SpellID || !spell.IsEmpowerSpell())
+                return;
+
+            spell.SetEmpowerReleasedByClient(true);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.SpellEmpowerRestart, Processing = PacketProcessing.Inplace)]
+        void HandleSpellEmpowerRestart(SpellEmpowerRestart spellEmpowerRestart)
+        {
+            // ignore for remote control state (for player case)
+            Unit mover = _player.GetUnitBeingMoved();
+            if (mover != _player && mover.IsPlayer())
+                return;
+
+            Spell spell = mover.GetCurrentSpell(CurrentSpellTypes.Channeled);
+            if (spell == null || spell.GetSpellInfo().Id != spellEmpowerRestart.SpellID || !spell.IsEmpowerSpell())
+                return;
+
+            spell.SetEmpowerReleasedByClient(false);
+        }
+
         [WorldPacketHandler(ClientOpcodes.TotemDestroyed, Processing = PacketProcessing.Inplace)]
         void HandleTotemDestroyed(TotemDestroyed totemDestroyed)
         {

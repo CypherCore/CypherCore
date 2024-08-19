@@ -112,6 +112,7 @@ namespace Game.Entities
         ObjectGuid m_temporaryUnsummonedBattlePet;
         Dictionary<uint, StoredAuraTeleportLocation> m_storedAuraTeleportLocations = new();
         SpellCastRequest _pendingSpellCastRequest;
+        float m_empowerMinHoldStagePercent;
 
         //Mail
         List<Mail> m_mail = new();

@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
 using Game.Spells;
 using System;
@@ -832,6 +831,128 @@ namespace Game.Networking.Packets
 
         public ObjectGuid CasterGUID;
         public int TimeRemaining;
+    }
+
+    class SpellEmpowerStart : ServerPacket
+    {
+        public ObjectGuid CastID;
+        public ObjectGuid CasterGUID;
+        public int SpellID;
+        public SpellCastVisual Visual;
+        public TimeSpan EmpowerDuration;
+        public TimeSpan MinHoldTime;
+        public TimeSpan HoldAtMaxTime;
+        public List<ObjectGuid> Targets = new();
+        public List<TimeSpan> StageDurations = new();
+        public SpellChannelStartInterruptImmunities? InterruptImmunities;
+        public SpellTargetedHealPrediction? HealPrediction;
+
+        public SpellEmpowerStart() : base(ServerOpcodes.SpellEmpowerStart) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(CastID);
+            _worldPacket.WritePackedGuid(CasterGUID);
+            _worldPacket.WriteInt32(Targets.Count);
+            _worldPacket.WriteInt32(SpellID);
+            Visual.Write(_worldPacket);
+            _worldPacket.WriteUInt32((uint)EmpowerDuration.TotalMilliseconds);
+            _worldPacket.WriteUInt32((uint)MinHoldTime.TotalMilliseconds);
+            _worldPacket.WriteUInt32((uint)HoldAtMaxTime.TotalMilliseconds);
+            _worldPacket.WriteInt32(StageDurations.Count);
+
+            foreach (var target in Targets)
+                _worldPacket.WritePackedGuid(target);
+
+            foreach (var stageDuration in StageDurations)
+                _worldPacket.WriteUInt32((uint)stageDuration.TotalMilliseconds);
+
+            _worldPacket.WriteBit(InterruptImmunities.HasValue);
+            _worldPacket.WriteBit(HealPrediction.HasValue);
+            _worldPacket.FlushBits();
+
+            if (InterruptImmunities.HasValue)
+                InterruptImmunities.Value.Write(_worldPacket);
+
+            if (HealPrediction.HasValue)
+                HealPrediction.Value.Write(_worldPacket);
+        }
+    }
+
+    class SpellEmpowerUpdate : ServerPacket
+    {
+        public ObjectGuid CastID;
+        public ObjectGuid CasterGUID;
+        public TimeSpan TimeRemaining;
+        public List<TimeSpan> StageDurations = new();
+        public byte Status;
+
+        public SpellEmpowerUpdate() : base(ServerOpcodes.SpellEmpowerUpdate) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(CastID);
+            _worldPacket.WritePackedGuid(CasterGUID);
+            _worldPacket.WriteUInt32((uint)TimeRemaining.TotalMilliseconds);
+            _worldPacket.WriteInt32(StageDurations.Count);
+            _worldPacket.WriteUInt8(Status);
+            _worldPacket.FlushBits();
+
+            foreach (var stageDuration in StageDurations)
+                _worldPacket.WriteUInt32((uint)stageDuration.TotalMilliseconds);
+        }
+    }
+
+    class SetEmpowerMinHoldStagePercent : ClientPacket
+    {
+        public float MinHoldStagePercent = 1.0f;
+
+        public SetEmpowerMinHoldStagePercent(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            MinHoldStagePercent = _worldPacket.ReadFloat();
+        }
+    }
+
+    class SpellEmpowerRelease : ClientPacket
+    {
+        public int SpellID;
+
+        public SpellEmpowerRelease(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            SpellID = _worldPacket.ReadInt32();
+        }
+    }
+
+    class SpellEmpowerRestart : ClientPacket
+    {
+        public int SpellID;
+
+        public SpellEmpowerRestart(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            SpellID = _worldPacket.ReadInt32();
+        }
+    }
+
+    class SpellEmpowerSetStage : ServerPacket
+    {
+        public ObjectGuid CastID;
+        public ObjectGuid CasterGUID;
+        public int Stage;
+
+        public SpellEmpowerSetStage() : base(ServerOpcodes.SpellEmpowerSetStage) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(CastID);
+            _worldPacket.WritePackedGuid(CasterGUID);
+            _worldPacket.WriteInt32(Stage);
+        }
     }
 
     class ResurrectRequest : ServerPacket

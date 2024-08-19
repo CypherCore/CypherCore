@@ -2428,6 +2428,10 @@ namespace Game.Entities
                 RemoveDynamicUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects), index);
         }
 
+        public sbyte GetSpellEmpowerStage() { return m_unitData.SpellEmpowerStage; }
+
+        public void SetSpellEmpowerStage(sbyte stage) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.SpellEmpowerStage), stage); }
+
         public static bool IsDamageReducedByArmor(SpellSchoolMask schoolMask, SpellInfo spellInfo = null)
         {
             // only physical spells damage gets reduced by armor

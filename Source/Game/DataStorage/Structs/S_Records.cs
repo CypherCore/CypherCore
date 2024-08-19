@@ -327,6 +327,21 @@ namespace Game.DataStorage
         public uint SpellID;
     }
 
+    public sealed class SpellEmpowerRecord
+    {
+        public uint Id;
+        public int SpellID;
+        public int Unused1000;
+    }
+
+    public sealed class SpellEmpowerStageRecord
+    {
+        public uint Id;
+        public int Stage;
+        public int DurationMs;
+        public uint SpellEmpowerID;
+    }
+
     public sealed class SpellEquippedItemsRecord
     {
         public uint Id;

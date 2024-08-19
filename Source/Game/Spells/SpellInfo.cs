@@ -158,6 +158,11 @@ namespace Game.Spells
             EquippedItemClass = ItemClass.None;
             EquippedItemSubClassMask = 0;
             EquippedItemInventoryTypeMask = 0;
+
+            // SpellEmpowerStageEntry
+            foreach (var stage in data.EmpowerStages)
+                EmpowerStageThresholds.Add(TimeSpan.FromMilliseconds(stage.DurationMs));
+
             // SpellEquippedItemsEntry
             SpellEquippedItemsRecord _equipped = data.EquippedItems;
             if (_equipped != null)
@@ -564,6 +569,11 @@ namespace Game.Spells
         public bool IsAutoRepeatRangedSpell()
         {
             return HasAttribute(SpellAttr2.AutoRepeat);
+        }
+
+        public bool IsEmpowerSpell()
+        {
+            return !EmpowerStageThresholds.Empty();
         }
 
         public bool HasInitialAggro()
@@ -3940,6 +3950,7 @@ namespace Game.Spells
         public SpellSchoolMask SchoolMask { get; set; }
         public uint ChargeCategoryId;
         public List<uint> Labels = new();
+        public List<TimeSpan> EmpowerStageThresholds = new();
 
         // SpellScalingEntry
         public ScalingInfo Scaling;

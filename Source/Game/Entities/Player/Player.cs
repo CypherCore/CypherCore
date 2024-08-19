@@ -73,6 +73,8 @@ namespace Game.Entities
             m_legacyRaidDifficulty = Difficulty.Raid10N;
             m_InstanceValid = true;
 
+            m_empowerMinHoldStagePercent = 1.0f;
+
             _specializationInfo = new SpecializationInfo();
 
             for (byte i = 0; i < (byte)BaseModGroup.End; ++i)
@@ -3319,6 +3321,10 @@ namespace Game.Entities
             SetFaction(rEntry != null ? (uint)rEntry.FactionID : 0);
         }
 
+        public float GetEmpowerMinHoldStagePercent() { return m_empowerMinHoldStagePercent; }
+
+        public void SetEmpowerMinHoldStagePercent(float empowerMinHoldStagePercent) { m_empowerMinHoldStagePercent = empowerMinHoldStagePercent; }
+
         public void SetResurrectRequestData(WorldObject caster, uint health, uint mana, uint appliedAura)
         {
             Cypher.Assert(!IsResurrectRequested());
@@ -3329,6 +3335,7 @@ namespace Game.Entities
             _resurrectionData.Mana = mana;
             _resurrectionData.Aura = appliedAura;
         }
+
         public void ClearResurrectRequestData()
         {
             _resurrectionData = null;
@@ -5810,6 +5817,7 @@ namespace Game.Entities
             SetModRangedHaste(1.0f);
             SetModHasteRegen(1.0f);
             SetModTimeRate(1.0f);
+            SetSpellEmpowerStage(-1);
 
             // reset size before reapply auras
             SetObjectScale(1.0f);

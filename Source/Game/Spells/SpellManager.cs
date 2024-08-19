@@ -1,12 +1,10 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
 using Framework.Dynamic;
 using Game.BattleFields;
-using Game.BattleGrounds;
 using Game.BattlePets;
 using Game.DataStorage;
 using Game.Miscellaneous;
@@ -2248,6 +2246,17 @@ namespace Game.Entities
             foreach (SpellCooldownsRecord cooldowns in CliDB.SpellCooldownsStorage.Values)
                 GetLoadHelper(cooldowns.SpellID, cooldowns.DifficultyID).Cooldowns = cooldowns;
 
+            foreach (var (_, empowerStage) in CliDB.SpellEmpowerStageStorage)
+            {
+                SpellEmpowerRecord empower = CliDB.SpellEmpowerStorage.LookupByKey(empowerStage.SpellEmpowerID);
+                if (empower != null)
+                    GetLoadHelper((uint)empower.SpellID, 0).EmpowerStages.Add(empowerStage);
+
+            }
+
+            foreach (var data in loadData)
+                data.Value.EmpowerStages.OrderBy(stageRecord => stageRecord.Stage);
+
             foreach (SpellEquippedItemsRecord equippedItems in CliDB.SpellEquippedItemsStorage.Values)
                 GetLoadHelper(equippedItems.SpellID, 0).EquippedItems = equippedItems;
 
@@ -2307,84 +2316,87 @@ namespace Game.Entities
             foreach (var data in loadData)
                 data.Value.Visuals.Sort((left, right) => { return right.CasterPlayerConditionID.CompareTo(left.CasterPlayerConditionID); });
 
-            foreach (var data in loadData)
+            foreach (var (key, data) in loadData)
             {
-                SpellNameRecord spellNameEntry = CliDB.SpellNameStorage.LookupByKey(data.Key.Id);
+                SpellNameRecord spellNameEntry = CliDB.SpellNameStorage.LookupByKey(key.Id);
                 if (spellNameEntry == null)
                     continue;
 
                 // fill blanks
-                DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(data.Key.difficulty);
+                DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(key.difficulty);
                 if (difficultyEntry != null)
                 {
                     do
                     {
-                        SpellInfoLoadHelper fallbackData = loadData.LookupByKey((data.Key.Id, (Difficulty)difficultyEntry.FallbackDifficultyID));
+                        SpellInfoLoadHelper fallbackData = loadData.LookupByKey((key.Id, (Difficulty)difficultyEntry.FallbackDifficultyID));
                         if (fallbackData != null)
                         {
-                            if (data.Value.AuraOptions == null)
-                                data.Value.AuraOptions = fallbackData.AuraOptions;
+                            if (data.AuraOptions == null)
+                                data.AuraOptions = fallbackData.AuraOptions;
 
-                            if (data.Value.AuraRestrictions == null)
-                                data.Value.AuraRestrictions = fallbackData.AuraRestrictions;
+                            if (data.AuraRestrictions == null)
+                                data.AuraRestrictions = fallbackData.AuraRestrictions;
 
-                            if (data.Value.CastingRequirements == null)
-                                data.Value.CastingRequirements = fallbackData.CastingRequirements;
+                            if (data.CastingRequirements == null)
+                                data.CastingRequirements = fallbackData.CastingRequirements;
 
-                            if (data.Value.Categories == null)
-                                data.Value.Categories = fallbackData.Categories;
+                            if (data.Categories == null)
+                                data.Categories = fallbackData.Categories;
 
-                            if (data.Value.ClassOptions == null)
-                                data.Value.ClassOptions = fallbackData.ClassOptions;
+                            if (data.ClassOptions == null)
+                                data.ClassOptions = fallbackData.ClassOptions;
 
-                            if (data.Value.Cooldowns == null)
-                                data.Value.Cooldowns = fallbackData.Cooldowns;
+                            if (data.Cooldowns == null)
+                                data.Cooldowns = fallbackData.Cooldowns;
 
-                            for (var i = 0; i < data.Value.Effects.Length; ++i)
-                                if (data.Value.Effects[i] == null)
-                                    data.Value.Effects[i] = fallbackData.Effects[i];
+                            for (var i = 0; i < data.Effects.Length; ++i)
+                                if (data.Effects[i] == null)
+                                    data.Effects[i] = fallbackData.Effects[i];
 
-                            if (data.Value.EquippedItems == null)
-                                data.Value.EquippedItems = fallbackData.EquippedItems;
+                            if (data.EmpowerStages.Empty())
+                                data.EmpowerStages = fallbackData.EmpowerStages;
 
-                            if (data.Value.Interrupts == null)
-                                data.Value.Interrupts = fallbackData.Interrupts;
+                            if (data.EquippedItems == null)
+                                data.EquippedItems = fallbackData.EquippedItems;
 
-                            if (data.Value.Labels.Empty())
-                                data.Value.Labels = fallbackData.Labels;
+                            if (data.Interrupts == null)
+                                data.Interrupts = fallbackData.Interrupts;
 
-                            if (data.Value.Levels == null)
-                                data.Value.Levels = fallbackData.Levels;
+                            if (data.Labels.Empty())
+                                data.Labels = fallbackData.Labels;
 
-                            if (data.Value.Misc == null)
-                                data.Value.Misc = fallbackData.Misc;
+                            if (data.Levels == null)
+                                data.Levels = fallbackData.Levels;
+
+                            if (data.Misc == null)
+                                data.Misc = fallbackData.Misc;
 
                             for (var i = 0; i < fallbackData.Powers.Length; ++i)
-                                if (data.Value.Powers[i] == null)
-                                    data.Value.Powers[i] = fallbackData.Powers[i];
+                                if (data.Powers[i] == null)
+                                    data.Powers[i] = fallbackData.Powers[i];
 
-                            if (data.Value.Reagents == null)
-                                data.Value.Reagents = fallbackData.Reagents;
+                            if (data.Reagents == null)
+                                data.Reagents = fallbackData.Reagents;
 
-                            if (data.Value.ReagentsCurrency.Empty())
-                                data.Value.ReagentsCurrency = fallbackData.ReagentsCurrency;
+                            if (data.ReagentsCurrency.Empty())
+                                data.ReagentsCurrency = fallbackData.ReagentsCurrency;
 
-                            if (data.Value.Scaling == null)
-                                data.Value.Scaling = fallbackData.Scaling;
+                            if (data.Scaling == null)
+                                data.Scaling = fallbackData.Scaling;
 
-                            if (data.Value.Shapeshift == null)
-                                data.Value.Shapeshift = fallbackData.Shapeshift;
+                            if (data.Shapeshift == null)
+                                data.Shapeshift = fallbackData.Shapeshift;
 
-                            if (data.Value.TargetRestrictions == null)
-                                data.Value.TargetRestrictions = fallbackData.TargetRestrictions;
+                            if (data.TargetRestrictions == null)
+                                data.TargetRestrictions = fallbackData.TargetRestrictions;
 
-                            if (data.Value.Totems == null)
-                                data.Value.Totems = fallbackData.Totems;
+                            if (data.Totems == null)
+                                data.Totems = fallbackData.Totems;
 
                             // visuals fall back only to first difficulty that defines any visual
                             // they do not stack all difficulties in fallback chain
-                            if (data.Value.Visuals.Empty())
-                                data.Value.Visuals = fallbackData.Visuals;
+                            if (data.Visuals.Empty())
+                                data.Visuals = fallbackData.Visuals;
                         }
 
                         difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficultyEntry.FallbackDifficultyID);
@@ -2395,7 +2407,7 @@ namespace Game.Entities
                 //second key = id
 
 
-                mSpellInfoMap.Add(spellNameEntry.Id, new SpellInfo(spellNameEntry, data.Key.difficulty, data.Value));
+                mSpellInfoMap.Add(spellNameEntry.Id, new SpellInfo(spellNameEntry, key.difficulty, data));
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo store in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
@@ -4921,6 +4933,7 @@ namespace Game.Entities
         public SpellClassOptionsRecord ClassOptions;
         public SpellCooldownsRecord Cooldowns;
         public SpellEffectRecord[] Effects = new SpellEffectRecord[SpellConst.MaxEffects];
+        public List<SpellEmpowerStageRecord> EmpowerStages = new();
         public SpellEquippedItemsRecord EquippedItems;
         public SpellInterruptsRecord Interrupts;
         public List<SpellLabelRecord> Labels = new();

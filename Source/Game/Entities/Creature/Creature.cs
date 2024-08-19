@@ -262,6 +262,7 @@ namespace Game.Entities
             SetModRangedHaste(1.0f);
             SetModHasteRegen(1.0f);
             SetModTimeRate(1.0f);
+            SetSpellEmpowerStage(-1);
 
             SetSpeedRate(UnitMoveType.Walk, creatureInfo.SpeedWalk);
             SetSpeedRate(UnitMoveType.Run, creatureInfo.SpeedRun);

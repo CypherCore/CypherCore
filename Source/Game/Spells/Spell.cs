@@ -91,13 +91,14 @@ namespace Game.Spells
             //Auto Shot & Shoot (wand)
             m_autoRepeat = m_spellInfo.IsAutoRepeatRangedSpell();
 
+            if (m_spellInfo.IsEmpowerSpell())
+                m_empower = new EmpowerData();
+
             // Determine if spell can be reflected back to the caster
             // Patch 1.2 notes: Spell Reflection no longer reflects abilities
             m_canReflect = caster.IsUnit() && ((m_spellInfo.DmgClass == SpellDmgClass.Magic && !m_spellInfo.HasAttribute(SpellAttr0.IsAbility)) || m_spellInfo.HasAttribute(SpellAttr7.AllowSpellReflection))
                 && !m_spellInfo.HasAttribute(SpellAttr1.NoReflection) && !m_spellInfo.HasAttribute(SpellAttr0.NoImmunities)
                 && !m_spellInfo.IsPassive();
-
-            CleanupTargetList();
 
             for (var i = 0; i < SpellConst.MaxEffects; ++i)
                 m_destTargets[i] = new SpellDestination(m_caster);
@@ -1046,7 +1047,7 @@ namespace Game.Spells
                     if (liquidLevel <= ground) // When there is no liquid Map.GetWaterOrGroundLevel returns ground level
                     {
                         SendCastResult(SpellCastResult.NotHere);
-                        SendChannelUpdate(0);
+                        SendChannelUpdate(0, SpellCastResult.NotHere);
                         Finish(SpellCastResult.NotHere);
                         return;
                     }
@@ -1054,7 +1055,7 @@ namespace Game.Spells
                     if (ground + 0.75 > liquidLevel)
                     {
                         SendCastResult(SpellCastResult.TooShallow);
-                        SendChannelUpdate(0);
+                        SendChannelUpdate(0, SpellCastResult.TooShallow);
                         Finish(SpellCastResult.TooShallow);
                         return;
                     }
@@ -2609,7 +2610,7 @@ namespace Game.Spells
                 // a possible alternative sollution for those would be validating aura target on unit state change
                 if (triggeredByAura != null && triggeredByAura.IsPeriodic() && !triggeredByAura.GetBase().IsPassive())
                 {
-                    SendChannelUpdate(0);
+                    SendChannelUpdate(0, result);
                     triggeredByAura.GetBase().SetDuration(0);
                 }
 
@@ -2741,7 +2742,7 @@ namespace Game.Spells
                         }
                     }
 
-                    SendChannelUpdate(0);
+                    SendChannelUpdate(0, SpellCastResult.Interrupted);
                     SendInterrupted(0);
                     SendCastResult(SpellCastResult.Interrupted);
 
@@ -3141,10 +3142,12 @@ namespace Game.Spells
             if (m_spellInfo.IsChanneled())
             {
                 int duration = m_spellInfo.GetDuration();
-                if (duration > 0 || m_spellValue.Duration.HasValue)
+                if (duration > 0 || m_spellValue.Duration > 0)
                 {
                     if (!m_spellValue.Duration.HasValue)
                     {
+                        int originalDuration = duration;
+
                         // First mod_duration then haste - see Missile Barrage
                         // Apply duration mod
                         Player modOwner = m_caster.GetSpellModOwner();
@@ -3155,6 +3158,27 @@ namespace Game.Spells
 
                         // Apply haste mods
                         m_caster.ModSpellDurationTime(m_spellInfo, ref duration, this);
+
+                        if (IsEmpowerSpell())
+                        {
+                            float ratio = (float)duration / (float)originalDuration;
+                            TimeSpan totalExceptLastStage = TimeSpan.Zero;
+                            for (int i = 0; i < m_spellInfo.EmpowerStageThresholds.Count - 1; ++i)
+                            {
+                                m_empower.StageDurations[i] = TimeSpan.FromMilliseconds((long)(m_spellInfo.EmpowerStageThresholds[i].TotalMilliseconds * ratio));
+                                totalExceptLastStage += m_empower.StageDurations[i];
+                            }
+
+                            m_empower.StageDurations[^1] = TimeSpan.FromMilliseconds(duration) - totalExceptLastStage;
+
+                            Player playerCaster = m_caster.ToPlayer();
+                            if (playerCaster != null)
+                                m_empower.MinHoldTime = TimeSpan.FromMilliseconds((long)(m_empower.StageDurations[0].TotalMilliseconds * playerCaster.GetEmpowerMinHoldStagePercent()));
+                            else
+                                m_empower.MinHoldTime = m_empower.StageDurations[0];
+
+                            duration += (int)SpellConst.EmpowerHoldTimeAtMax;
+                        }
                     }
                     else
                         duration = m_spellValue.Duration.Value;
@@ -3452,9 +3476,47 @@ namespace Game.Spells
                         }
                     }
 
+                    if (IsEmpowerSpell())
+                    {
+                        int getCompletedEmpowerStages()
+                        {
+                            TimeSpan passed = TimeSpan.FromMilliseconds(m_channeledDuration - m_timer);
+                            for (int i = 0; i < m_empower.StageDurations.Count; ++i)
+                            {
+                                passed -= m_empower.StageDurations[i];
+                                if (passed < TimeSpan.Zero)
+                                    return i;
+                            }
+
+                            return m_empower.StageDurations.Count;
+                        };
+
+                        int completedStages = getCompletedEmpowerStages();
+                        if (completedStages != m_empower.CompletedStages)
+                        {
+                            SpellEmpowerSetStage empowerSetStage = new();
+                            empowerSetStage.CastID = m_castId;
+                            empowerSetStage.CasterGUID = m_caster.GetGUID();
+                            empowerSetStage.Stage = m_empower.CompletedStages;
+                            m_caster.SendMessageToSet(empowerSetStage, true);
+
+                            m_empower.CompletedStages = completedStages;
+                            m_caster.ToUnit().SetSpellEmpowerStage((sbyte)completedStages);
+
+                            CallScriptEmpowerStageCompletedHandlers(completedStages);
+                        }
+
+                        if (CanReleaseEmpowerSpell())
+                        {
+                            m_empower.IsReleased = true;
+                            m_timer = 0;
+                            CallScriptEmpowerCompletedHandlers(m_empower.CompletedStages);
+                        }
+                    }
+
                     if (m_timer == 0)
                     {
-                        SendChannelUpdate(0);
+                        SendChannelUpdate(0, SpellCastResult.SpellCastOk);
                         Finish();
 
                         // We call the hook here instead of in Spell::finish because we only want to call it for completed channeling. Everything else is handled by interrupts
@@ -3520,6 +3582,9 @@ namespace Game.Spells
                     if (m_customArg is TraitConfig)
                         m_caster.ToPlayer().SendPacket(new TraitConfigCommitFailed((m_customArg as TraitConfig).ID));
 
+                if (IsEmpowerSpell())
+                    unitCaster.GetSpellHistory().ResetCooldown(m_spellInfo.Id, true);
+
                 return;
             }
 
@@ -3549,6 +3614,14 @@ namespace Game.Spells
             // Stop Attack for some spells
             if (m_spellInfo.HasAttribute(SpellAttr0.CancelsAutoAttackCombat))
                 unitCaster.AttackStop();
+
+            if (IsEmpowerSpell())
+            {
+                // Empower spells trigger gcd at the end of cast instead of at start
+                SpellInfo gcd = Global.SpellMgr.GetSpellInfo(SpellConst.EmpowerHardcodedGCD, Difficulty.None);
+                if (gcd != null)
+                    unitCaster.GetSpellHistory().AddGlobalCooldown(gcd, TimeSpan.FromMilliseconds(gcd.StartRecoveryTime));
+            }
         }
 
         static void FillSpellCastFailedArgs<T>(T packet, ObjectGuid castId, SpellInfo spellInfo, SpellCastResult result, SpellCustomErrors customError, int? param1, int? param2, Player caster) where T : CastFailedBase
@@ -4354,7 +4427,7 @@ namespace Game.Spells
             m_caster.SendMessageToSet(failedPacket, true);
         }
 
-        public void SendChannelUpdate(uint time)
+        public void SendChannelUpdate(uint time, SpellCastResult? result = null)
         {
             // GameObjects don't channel
             Unit unitCaster = m_caster.ToUnit();
@@ -4366,12 +4439,31 @@ namespace Game.Spells
                 unitCaster.ClearChannelObjects();
                 unitCaster.SetChannelSpellId(0);
                 unitCaster.SetChannelVisual(new SpellCastVisualField());
+                unitCaster.SetSpellEmpowerStage(-1);
             }
 
-            SpellChannelUpdate spellChannelUpdate = new();
-            spellChannelUpdate.CasterGUID = unitCaster.GetGUID();
-            spellChannelUpdate.TimeRemaining = (int)time;
-            unitCaster.SendMessageToSet(spellChannelUpdate, true);
+            if (IsEmpowerSpell())
+            {
+                SpellEmpowerUpdate spellEmpowerUpdate = new();
+                spellEmpowerUpdate.CastID = m_castId;
+                spellEmpowerUpdate.CasterGUID = unitCaster.GetGUID();
+                spellEmpowerUpdate.TimeRemaining = TimeSpan.FromMilliseconds(time);
+                if (time > 0)
+                    spellEmpowerUpdate.StageDurations.AddRange(m_empower.StageDurations);
+                else if (result.HasValue && result != SpellCastResult.SpellCastOk)
+                    spellEmpowerUpdate.Status = 1;
+                else
+                    spellEmpowerUpdate.Status = 4;
+
+                unitCaster.SendMessageToSet(spellEmpowerUpdate, true);
+            }
+            else
+            {
+                SpellChannelUpdate spellChannelUpdate = new();
+                spellChannelUpdate.CasterGUID = unitCaster.GetGUID();
+                spellChannelUpdate.TimeRemaining = (int)time;
+                unitCaster.SendMessageToSet(spellChannelUpdate, true);
+            }
         }
 
         void SendChannelStart(uint duration)
@@ -4427,36 +4519,62 @@ namespace Game.Spells
             unitCaster.SetChannelSpellId(m_spellInfo.Id);
             unitCaster.SetChannelVisual(m_SpellVisual);
 
-            SpellChannelStart spellChannelStart = new();
-            spellChannelStart.CasterGUID = unitCaster.GetGUID();
-            spellChannelStart.SpellID = (int)m_spellInfo.Id;
-            spellChannelStart.Visual = m_SpellVisual;
-            spellChannelStart.ChannelDuration = duration;
-
-            uint schoolImmunityMask = unitCaster.GetSchoolImmunityMask();
-            ulong mechanicImmunityMask = unitCaster.GetMechanicImmunityMask();
-
-            if (schoolImmunityMask != 0 || mechanicImmunityMask != 0)
+            void setImmunitiesAndHealPrediction(ref SpellChannelStartInterruptImmunities? interruptImmunities, ref SpellTargetedHealPrediction? healPrediction)
             {
-                SpellChannelStartInterruptImmunities interruptImmunities = new();
-                interruptImmunities.SchoolImmunities = (int)schoolImmunityMask;
-                interruptImmunities.Immunities = (int)mechanicImmunityMask;
+                uint schoolImmunityMask = unitCaster.GetSchoolImmunityMask();
+                ulong mechanicImmunityMask = unitCaster.GetMechanicImmunityMask();
 
-                spellChannelStart.InterruptImmunities = interruptImmunities;
-            }
+                if (schoolImmunityMask != 0 || mechanicImmunityMask != 0)
+                {
+                    SpellChannelStartInterruptImmunities immunities = new();
+                    immunities.SchoolImmunities = (int)schoolImmunityMask;
+                    immunities.Immunities = (int)mechanicImmunityMask;
 
-            if (m_spellInfo.HasAttribute(SpellAttr8.HealPrediction) && m_caster.IsUnit())
+                    interruptImmunities = immunities;
+                }
+
+                if (m_spellInfo.HasAttribute(SpellAttr8.HealPrediction) && m_caster.IsUnit())
+                {
+
+                    SpellTargetedHealPrediction prediction = new();
+                    if (unitCaster.m_unitData.ChannelObjects.Size() == 1 && unitCaster.m_unitData.ChannelObjects[0].IsUnit())
+                        prediction.TargetGUID = unitCaster.m_unitData.ChannelObjects[0];
+
+                    UpdateSpellHealPrediction(prediction.Predict, true);
+
+                    healPrediction = prediction;
+                }
+            };
+
+            if (IsEmpowerSpell())
             {
-                SpellTargetedHealPrediction healPrediction = new();
-                if (unitCaster.m_unitData.ChannelObjects.Size() == 1 && unitCaster.m_unitData.ChannelObjects[0].IsUnit())
-                    healPrediction.TargetGUID = unitCaster.m_unitData.ChannelObjects[0];
+                unitCaster.SetSpellEmpowerStage(0);
 
-                UpdateSpellHealPrediction(healPrediction.Predict, true);
+                SpellEmpowerStart spellEmpowerStart = new();
+                spellEmpowerStart.CastID = m_castId;
+                spellEmpowerStart.CasterGUID = unitCaster.GetGUID();
+                spellEmpowerStart.SpellID = (int)m_spellInfo.Id;
+                spellEmpowerStart.Visual = m_SpellVisual;
+                spellEmpowerStart.EmpowerDuration = new TimeSpan(m_empower.StageDurations.Sum(r => r.Ticks));
+                spellEmpowerStart.MinHoldTime = m_empower.MinHoldTime;
+                spellEmpowerStart.HoldAtMaxTime = TimeSpan.FromMilliseconds(SpellConst.EmpowerHoldTimeAtMax);
+                spellEmpowerStart.Targets.AddRange(unitCaster.m_unitData.ChannelObjects._values);
+                spellEmpowerStart.StageDurations.AddRange(m_empower.StageDurations);
+                setImmunitiesAndHealPrediction(ref spellEmpowerStart.InterruptImmunities, ref spellEmpowerStart.HealPrediction);
 
-                spellChannelStart.HealPrediction = healPrediction;
+                unitCaster.SendMessageToSet(spellEmpowerStart, true);
             }
+            else
+            {
+                SpellChannelStart spellChannelStart = new();
+                spellChannelStart.CasterGUID = unitCaster.GetGUID();
+                spellChannelStart.SpellID = (int)m_spellInfo.Id;
+                spellChannelStart.Visual = m_SpellVisual;
+                spellChannelStart.ChannelDuration = duration;
+                setImmunitiesAndHealPrediction(ref spellChannelStart.InterruptImmunities, ref spellChannelStart.HealPrediction);
 
-            unitCaster.SendMessageToSet(spellChannelStart, true);
+                unitCaster.SendMessageToSet(spellChannelStart, true);
+            }
         }
 
         void SendResurrectRequest(Player target)
@@ -7332,6 +7450,25 @@ namespace Game.Spells
             return m_spellInfo.IsPositive() && (m_triggeredByAuraSpell == null || m_triggeredByAuraSpell.IsPositive());
         }
 
+        public bool IsEmpowerSpell() { return m_empower != null; }
+
+        public void SetEmpowerReleasedByClient(bool release)
+        {
+            m_empower.IsReleasedByClient = release;
+        }
+
+        public bool CanReleaseEmpowerSpell()
+        {
+            if (m_empower.IsReleased)
+                return false;
+
+            if (!m_empower.IsReleasedByClient && m_timer != 0)
+                return false;
+
+            TimeSpan passedTime = TimeSpan.FromMilliseconds(m_channeledDuration - m_timer);
+            return passedTime >= m_empower.MinHoldTime;
+        }
+
         bool IsNeedSendToClient()
         {
             return m_SpellVisual.SpellXSpellVisualID != 0 || m_SpellVisual.ScriptVisualID != 0 || m_spellInfo.IsChanneled() ||
@@ -7936,6 +8073,30 @@ namespace Game.Spells
             return source.IsWithinLOS(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ(), LineOfSightChecks.All, ignoreFlags);
         }
 
+        void CallScriptEmpowerStageCompletedHandlers(int completedStagesCount)
+        {
+            foreach (SpellScript script in m_loadedScripts)
+            {
+                script._PrepareScriptCall(SpellScriptHookType.EmpowerStageCompleted);
+                foreach (var empowerStageCompleted in script.OnEmpowerStageCompleted)
+                    empowerStageCompleted.Call(completedStagesCount);
+
+                script._FinishScriptCall();
+            }
+        }
+
+        void CallScriptEmpowerCompletedHandlers(int completedStagesCount)
+        {
+            foreach (SpellScript script in m_loadedScripts)
+            {
+                script._PrepareScriptCall(SpellScriptHookType.EmpowerCompleted);
+                foreach (var empowerStageCompleted in script.OnEmpowerCompleted)
+                    empowerStageCompleted.Call(completedStagesCount);
+
+                script._FinishScriptCall();
+            }
+        }
+
         bool CheckScriptEffectImplicitTargets(uint effIndex, uint effIndexToCheck)
         {
             // Skip if there are not any script
@@ -8287,6 +8448,8 @@ namespace Game.Spells
         bool m_autoRepeat;
         byte m_runesState;
         byte m_delayAtDamageCount;
+
+        EmpowerData m_empower;
 
         // Delayed spells system
         ulong m_delayStart;                                // time of spell delay start, filled by event handler, zero = just started
@@ -9723,5 +9886,14 @@ namespace Game.Spells
         {
             return (_storage[1] & (int)procFlags) != 0;
         }
+    }
+
+    public class EmpowerData
+    {
+        public TimeSpan MinHoldTime;
+        public List<TimeSpan> StageDurations = new();
+        public int CompletedStages = 0;
+        public bool IsReleasedByClient;
+        public bool IsReleased;
     }
 }

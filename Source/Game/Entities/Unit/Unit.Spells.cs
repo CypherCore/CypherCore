@@ -898,7 +898,7 @@ namespace Game.Entities
                 return;
 
             if (spellType == CurrentSpellTypes.Channeled)
-                spell.SendChannelUpdate(0);
+                spell.SendChannelUpdate(0, result);
 
             spell.Finish(result);
         }

@@ -1217,6 +1217,13 @@ namespace Framework.Database
                 "EffectRadiusIndex2, EffectSpellClassMask1, EffectSpellClassMask2, EffectSpellClassMask3, EffectSpellClassMask4, ImplicitTarget1, " +
                 "ImplicitTarget2, SpellID FROM spell_effect WHERE (`VerifiedBuild` > 0) = ?");
 
+            // SpellEmpower.db2
+            PrepareStatement(HotfixStatements.SEL_SPELL_EMPOWER, "SELECT ID, SpellID, Unused1000 FROM spell_empower WHERE (`VerifiedBuild` > 0) = ?");
+
+            // SpellEmpowerStage.db2
+            PrepareStatement(HotfixStatements.SEL_SPELL_EMPOWER_STAGE, "SELECT ID, Stage, DurationMs, SpellEmpowerID FROM spell_empower_stage" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
+
             // SpellEquippedItems.db2
             PrepareStatement(HotfixStatements.SEL_SPELL_EQUIPPED_ITEMS, "SELECT ID, SpellID, EquippedItemClass, EquippedItemInvTypes, EquippedItemSubclass" +
                 " FROM spell_equipped_items WHERE (`VerifiedBuild` > 0) = ?");
@@ -2182,6 +2189,10 @@ namespace Framework.Database
         SEL_SPELL_DURATION,
 
         SEL_SPELL_EFFECT,
+
+        SEL_SPELL_EMPOWER,
+
+        SEL_SPELL_EMPOWER_STAGE,
 
         SEL_SPELL_EQUIPPED_ITEMS,
 

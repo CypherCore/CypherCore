@@ -303,6 +303,8 @@ namespace Game.DataStorage
             SpellCooldownsStorage = ReadDB2<SpellCooldownsRecord>("SpellCooldowns.db2", HotfixStatements.SEL_SPELL_COOLDOWNS);
             SpellDurationStorage = ReadDB2<SpellDurationRecord>("SpellDuration.db2", HotfixStatements.SEL_SPELL_DURATION);
             SpellEffectStorage = ReadDB2<SpellEffectRecord>("SpellEffect.db2", HotfixStatements.SEL_SPELL_EFFECT);
+            SpellEmpowerStorage = ReadDB2<SpellEmpowerRecord>("SpellEmpower.db2", HotfixStatements.SEL_SPELL_EMPOWER);
+            SpellEmpowerStageStorage = ReadDB2<SpellEmpowerStageRecord>("SpellEmpowerStage.db2", HotfixStatements.SEL_SPELL_EMPOWER_STAGE);
             SpellEquippedItemsStorage = ReadDB2<SpellEquippedItemsRecord>("SpellEquippedItems.db2", HotfixStatements.SEL_SPELL_EQUIPPED_ITEMS);
             SpellFocusObjectStorage = ReadDB2<SpellFocusObjectRecord>("SpellFocusObject.db2", HotfixStatements.SEL_SPELL_FOCUS_OBJECT, HotfixStatements.SEL_SPELL_FOCUS_OBJECT_LOCALE);
             SpellInterruptsStorage = ReadDB2<SpellInterruptsRecord>("SpellInterrupts.db2", HotfixStatements.SEL_SPELL_INTERRUPTS);
@@ -378,7 +380,7 @@ namespace Game.DataStorage
             UnitPowerBarStorage = ReadDB2<UnitPowerBarRecord>("UnitPowerBar.db2", HotfixStatements.SEL_UNIT_POWER_BAR, HotfixStatements.SEL_UNIT_POWER_BAR_LOCALE);
             VehicleStorage = ReadDB2<VehicleRecord>("Vehicle.db2", HotfixStatements.SEL_VEHICLE);
             VehicleSeatStorage = ReadDB2<VehicleSeatRecord>("VehicleSeat.db2", HotfixStatements.SEL_VEHICLE_SEAT);
-            VignetteStorage = ReadDB2<VignetteRecord>("Vignette.db2",  HotfixStatements.SEL_VIGNETTE, HotfixStatements.SEL_VIGNETTE_LOCALE);
+            VignetteStorage = ReadDB2<VignetteRecord>("Vignette.db2", HotfixStatements.SEL_VIGNETTE, HotfixStatements.SEL_VIGNETTE_LOCALE);
             WMOAreaTableStorage = ReadDB2<WMOAreaTableRecord>("WMOAreaTable.db2", HotfixStatements.SEL_WMO_AREA_TABLE, HotfixStatements.SEL_WMO_AREA_TABLE_LOCALE);
             WorldEffectStorage = ReadDB2<WorldEffectRecord>("WorldEffect.db2", HotfixStatements.SEL_WORLD_EFFECT);
             WorldMapOverlayStorage = ReadDB2<WorldMapOverlayRecord>("WorldMapOverlay.db2", HotfixStatements.SEL_WORLD_MAP_OVERLAY);
@@ -740,6 +742,8 @@ namespace Game.DataStorage
         public static DB6Storage<SpellCooldownsRecord> SpellCooldownsStorage;
         public static DB6Storage<SpellDurationRecord> SpellDurationStorage;
         public static DB6Storage<SpellEffectRecord> SpellEffectStorage;
+        public static DB6Storage<SpellEmpowerRecord> SpellEmpowerStorage;
+        public static DB6Storage<SpellEmpowerStageRecord> SpellEmpowerStageStorage;
         public static DB6Storage<SpellEquippedItemsRecord> SpellEquippedItemsStorage;
         public static DB6Storage<SpellFocusObjectRecord> SpellFocusObjectStorage;
         public static DB6Storage<SpellInterruptsRecord> SpellInterruptsStorage;

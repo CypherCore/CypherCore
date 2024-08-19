@@ -14,7 +14,9 @@ namespace Scripts.Spells.Evoker
 {
     struct SpellIds
     {
+        public const uint BlastFurnace = 375510;
         public const uint EnergizingFlame = 400006;
+        public const uint FireBreathDamage = 357209;
         public const uint GlideKnockback = 358736;
         public const uint Hover = 358267;
         public const uint LivingFlame = 361469;
@@ -22,6 +24,7 @@ namespace Scripts.Spells.Evoker
         public const uint LivingFlameHeal = 361509;
         public const uint PermeatingChillTalent = 370897;
         public const uint PyreDamage = 357212;
+        public const uint ScouringFlame = 378438;
         public const uint SoarRacial = 369536;
 
         public const uint LabelEvokerBlue = 1465;
@@ -54,6 +57,68 @@ namespace Scripts.Spells.Evoker
         public override void Register()
         {
             DoCheckProc.Add(new(CheckProc));
+        }
+    }
+
+    // 357208 Fire Breath (Red)
+    [Script] // 382266 Fire Breath (Red)
+    class spell_evo_fire_breath : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.FireBreathDamage, SpellIds.BlastFurnace);
+        }
+
+        void OnComplete(int completedStageCount)
+        {
+            int dotTicks = 10 - (completedStageCount - 1) * 3;
+            AuraEffect blastFurnace = GetCaster().GetAuraEffect(SpellIds.BlastFurnace, 0);
+            if (blastFurnace != null)
+                dotTicks += blastFurnace.GetAmount() / 2;
+
+            GetCaster().CastSpell(GetCaster(), SpellIds.FireBreathDamage, new CastSpellExtraArgs()
+                .SetTriggeringSpell(GetSpell())
+                .SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError)
+                .AddSpellMod(SpellValueMod.DurationPct, 100 * dotTicks)
+                .SetCustomArg(completedStageCount));
+        }
+
+        public override void Register()
+        {
+            OnEmpowerCompleted.Add(new(OnComplete));
+        }
+    }
+
+    [Script] // 357209 Fire Breath (Red)
+    class spell_evo_fire_breath_damage : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellEffect((spellInfo.Id, 2))
+            && spellInfo.GetEffect(2).IsAura(AuraType.ModSilence); // validate we are removing the correct effect
+        }
+
+        void AddBonusUpfrontDamage(Unit victim, ref int damage, ref int flatMod, ref float pctMod)
+        {
+            int empowerLevel = (int)GetSpell().m_customArg;
+            if (empowerLevel == 0)
+                return;
+
+            // damage is done after aura is applied, grab periodic amount
+            AuraEffect fireBreath = victim.GetAuraEffect(GetSpellInfo().Id, 1, GetCaster().GetGUID());
+            if (fireBreath != null)
+                flatMod += (int)(fireBreath.GetEstimatedAmount().GetValueOrDefault(fireBreath.GetAmount()) * (empowerLevel - 1) * 3);
+        }
+
+        void RemoveUnusedEffect(List<WorldObject> targets)
+        {
+            targets.Clear();
+        }
+
+        public override void Register()
+        {
+            CalcDamage.Add(new(AddBonusUpfrontDamage));
+            OnObjectAreaTargetSelect.Add(new(RemoveUnusedEffect, 2, Targets.UnitConeCasterToDestEnemy));
         }
     }
 
@@ -180,6 +245,34 @@ namespace Scripts.Spells.Evoker
         public override void Register()
         {
             OnEffectHitTarget.Add(new(HandleDamage, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 357209 Fire Breath (Red)
+    class spell_evo_scouring_flame : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ScouringFlame);
+        }
+
+        void HandleScouringFlame(List<WorldObject> targets)
+        {
+            if (!GetCaster().HasAura(SpellIds.ScouringFlame))
+                targets.Clear();
+        }
+
+        void CalcDispelCount(uint effIndex)
+        {
+            int empowerLevel = (int)GetSpell().m_customArg;
+            if (empowerLevel != 0)
+                SetEffectValue(empowerLevel);
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new(HandleScouringFlame, 3, Targets.UnitConeCasterToDestEnemy));
+            OnEffectHitTarget.Add(new(CalcDispelCount, 3, SpellEffectName.Dispel));
         }
     }
 }

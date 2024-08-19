@@ -764,9 +764,15 @@ namespace Game.Spells
                 maxDuration = -1;
 
             // IsPermanent() checks max duration (which we are supposed to calculate here)
-            if (maxDuration != -1 && modOwner != null)
-                modOwner.ApplySpellMod(spellInfo, SpellModOp.Duration, ref maxDuration);
+            if (maxDuration != -1)
+            {
 
+                if (modOwner != null)
+                    modOwner.ApplySpellMod(spellInfo, SpellModOp.Duration, ref maxDuration);
+
+                if (spellInfo.IsEmpowerSpell())
+                    maxDuration += (int)SpellConst.EmpowerHoldTimeAtMax;
+            }
             return maxDuration;
         }
 
