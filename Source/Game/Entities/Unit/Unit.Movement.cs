@@ -1809,20 +1809,6 @@ namespace Game.Entities
             MoveSpline.UpdateState((int)diff);
             bool arrived = MoveSpline.Finalized();
 
-            if (MoveSpline.IsCyclic())
-            {
-                splineSyncTimer.Update(diff);
-                if (splineSyncTimer.Passed())
-                {
-                    splineSyncTimer.Reset(5000); // Retail value, do not change
-
-                    FlightSplineSync flightSplineSync = new();
-                    flightSplineSync.Guid = GetGUID();
-                    flightSplineSync.SplineDist = (float)MoveSpline.TimePassed() / MoveSpline.Duration();
-                    SendMessageToSet(flightSplineSync, true);
-                }
-            }
-
             if (arrived)
             {
                 DisableSpline();
@@ -1858,6 +1844,17 @@ namespace Game.Entities
                 loc.W = GetOrientation();
 
             UpdatePosition(loc.X, loc.Y, loc.Z, loc.W);
+        }
+
+        void SendFlightSplineSyncUpdate()
+        {
+            if (!MoveSpline.IsCyclic() || MoveSpline.Finalized())
+                return;
+
+            FlightSplineSync flightSplineSync = new();
+            flightSplineSync.Guid = GetGUID();
+            flightSplineSync.SplineDist = (float)MoveSpline.TimePassed() / MoveSpline.Duration();
+            SendMessageToSet(flightSplineSync, true);
         }
 
         void InterruptMovementBasedAuras()

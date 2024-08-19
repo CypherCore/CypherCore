@@ -27,7 +27,6 @@ namespace Game.Entities
         public MoveSpline MoveSpline { get; set; }
         MotionMaster i_motionMaster;
         public uint m_movementCounter;       //< Incrementing counter used in movement packets
-        TimeTracker splineSyncTimer;
         MovementForces _movementForces;
         PositionUpdateInfo _positionUpdateInfo;
         protected Unit m_unitMovedByMe;    // only ever set for players, and only for direct client control

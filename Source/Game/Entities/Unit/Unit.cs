@@ -70,8 +70,6 @@ namespace Game.Entities
 
             m_serverSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive);
 
-            splineSyncTimer = new TimeTracker();
-
             m_unitData = new UnitData();
         }
 
@@ -2555,6 +2553,14 @@ namespace Game.Entities
         public DeathState GetDeathState()
         {
             return m_deathState;
+        }
+
+        public override void Heartbeat()
+        {
+            base.Heartbeat();
+
+            // SMSG_FLIGHT_SPLINE_SYNC for cyclic splines
+            SendFlightSplineSyncUpdate();
         }
 
         public bool HaveOffhandWeapon()
