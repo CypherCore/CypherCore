@@ -97,11 +97,11 @@ namespace Game.Movement
                         return false;
 
                     // when compression is enabled, each point coord is packed into 11 bits (10 for Z)
-                    if (!flags.HasFlag(SplineFlag.UncompressedPath))
+                    if (!flags.HasFlag(MoveSplineFlagEnum.UncompressedPath))
                         if (!isValidPackedXYOffset(MathF.Abs(path[i].X - middle.X))
                             || !isValidPackedXYOffset(MathF.Abs(path[i].Y - middle.Y))
                             || !isValidPackedZOffset(MathF.Abs(path[i].Z - middle.Z)))
-                            flags.SetUnsetFlag(SplineFlag.UncompressedPath, true);
+                            flags.SetUnsetFlag(MoveSplineFlagEnum.UncompressedPath, true);
                 }
             }
             return true;

@@ -437,10 +437,6 @@ namespace Game.Movement
 
             MoveSplineInit init = new(owner);
 
-            // because steering flag can cause position on client to not be perfectly accurate, dont do it in combat
-            if (!owner.IsInCombat())
-                init.SetSteering();
-
             //! If creature is on transport, we assume waypoints set in DB are already transport offsets
             if (transportPath)
                 init.DisableTransportPathTransformations();
@@ -494,6 +490,7 @@ namespace Game.Movement
             if (!IsExactSplinePath()
                 && duration > 2 * SEND_NEXT_POINT_EARLY_DELTA
                 && lastWaypointForSegment.Delay == TimeSpan.Zero
+                && _path.Nodes.Count > 2
                 // don't cut movement short at ends of path if its not a looping path or if it can be traversed backwards
                 && ((_currentNode != 0 && _currentNode != _path.Nodes.Count - 1) || (!IsFollowingPathBackwardsFromEndToStart() && _repeating)))
                 duration -= SEND_NEXT_POINT_EARLY_DELTA;

@@ -22,7 +22,7 @@ namespace Game.Movement
             point_Idx_offset = 0;
             onTransport = false;
             splineIsFacingOnly = false;
-            splineflags.Flags = SplineFlag.Done;
+            splineflags.Flags = MoveSplineFlagEnum.Done;
         }
 
         public void Initialize(MoveSplineInitArgs args)
@@ -43,7 +43,7 @@ namespace Game.Movement
             velocity = args.velocity;
 
             // Check if its a stop spline
-            if (args.flags.HasFlag(SplineFlag.Done))
+            if (args.flags.HasFlag(MoveSplineFlagEnum.Done))
             {
                 spline.Clear();
                 return;
@@ -53,14 +53,14 @@ namespace Game.Movement
 
             // init parabolic / animation
             // spline initialized, duration known and i able to compute parabolic acceleration
-            if (args.flags.HasFlag(SplineFlag.Parabolic | SplineFlag.Animation | SplineFlag.FadeObject))
+            if (args.flags.HasFlag(MoveSplineFlagEnum.Parabolic | MoveSplineFlagEnum.Animation | MoveSplineFlagEnum.FadeObject))
             {
                 int spline_duration = Duration();
                 effect_start_time = (int)(spline_duration * args.effect_start_time_percent + args.effect_start_time.TotalMilliseconds);
                 if (effect_start_time > spline_duration)
                     effect_start_time = spline_duration;
 
-                if (args.flags.HasFlag(SplineFlag.Parabolic) && effect_start_time < spline_duration)
+                if (args.flags.HasFlag(MoveSplineFlagEnum.Parabolic) && effect_start_time < spline_duration)
                 {
                     if (args.parabolic_amplitude != 0.0f)
                     {
@@ -78,10 +78,10 @@ namespace Game.Movement
         void InitSpline(MoveSplineInitArgs args)
         {
             EvaluationMode[] modes = new EvaluationMode[2] { EvaluationMode.Linear, EvaluationMode.Catmullrom };
-            if (args.flags.HasFlag(SplineFlag.Cyclic))
+            if (args.flags.HasFlag(MoveSplineFlagEnum.Cyclic))
             {
                 int cyclic_point = 0;
-                if (splineflags.HasFlag(SplineFlag.EnterCycle))
+                if (splineflags.HasFlag(MoveSplineFlagEnum.EnterCycle))
                     cyclic_point = 1;   // shouldn't be modified, came from client
                 spline.InitCyclicSpline(args.path.ToArray(), args.path.Count, modes[Convert.ToInt32(args.flags.IsSmooth())], cyclic_point, args.initialOrientation);
             }
@@ -91,7 +91,7 @@ namespace Game.Movement
             }
 
             // init spline timestamps
-            if (splineflags.HasFlag(SplineFlag.Falling))
+            if (splineflags.HasFlag(MoveSplineFlagEnum.Falling))
             {
                 FallInitializer init = new(spline.GetPoint(spline.First()).Z);
                 spline.InitLengths(init);
@@ -126,10 +126,10 @@ namespace Game.Movement
         public int Duration() { return spline.Length(); }
         public int CurrentSplineIdx() { return point_Idx; }
         public uint GetId() { return m_Id; }
-        public bool Finalized() { return splineflags.HasFlag(SplineFlag.Done); }
+        public bool Finalized() { return splineflags.HasFlag(MoveSplineFlagEnum.Done); }
         void _Finalize()
         {
-            splineflags.SetUnsetFlag(SplineFlag.Done);
+            splineflags.SetUnsetFlag(MoveSplineFlagEnum.Done);
             point_Idx = spline.Last() - 1;
             time_passed = Duration();
         }
@@ -144,12 +144,12 @@ namespace Game.Movement
             float orientation = initialOrientation;
             spline.Evaluate_Percent(point_index, u, out c);
 
-            if (splineflags.HasFlag(SplineFlag.Parabolic))
+            if (splineflags.HasFlag(MoveSplineFlagEnum.Parabolic))
                 ComputeParabolicElevation(time_point, ref c.Z);
-            else if (splineflags.HasFlag(SplineFlag.Falling))
+            else if (splineflags.HasFlag(MoveSplineFlagEnum.Falling))
                 ComputeFallElevation(time_point, ref c.Z);
 
-            if (splineflags.HasFlag(SplineFlag.Done) && facing.type != MonsterMoveType.Normal)
+            if (splineflags.HasFlag(MoveSplineFlagEnum.Done) && facing.type != MonsterMoveType.Normal)
             {
                 if (facing.type == MonsterMoveType.FacingAngle)
                     orientation = facing.angle;
@@ -159,7 +159,7 @@ namespace Game.Movement
             }
             else
             {
-                if (!splineflags.HasFlag(SplineFlag.OrientationFixed | SplineFlag.Falling | SplineFlag.Unknown_0x8))
+                if (!splineflags.HasFlag(MoveSplineFlagEnum.OrientationFixed | MoveSplineFlagEnum.Falling | MoveSplineFlagEnum.Unknown_0x8))
                 {
                     Vector3 hermite;
                     spline.Evaluate_Derivative(point_Idx, u, out hermite);
@@ -167,7 +167,7 @@ namespace Game.Movement
                         orientation = MathF.Atan2(hermite.Y, hermite.X);
                 }
 
-                if (splineflags.HasFlag(SplineFlag.Backward))
+                if (splineflags.HasFlag(MoveSplineFlagEnum.Backward))
                     orientation -= MathF.PI;
             }
 
@@ -250,7 +250,7 @@ namespace Game.Movement
             return time_passed > 0;
         }
 
-        public void Interrupt() { splineflags.SetUnsetFlag(SplineFlag.Done); }
+        public void Interrupt() { splineflags.SetUnsetFlag(MoveSplineFlagEnum.Done); }
         public void UpdateState(int difftime)
         {
             do
@@ -287,9 +287,9 @@ namespace Game.Movement
                         result = UpdateResult.NextCycle;
                         // Remove first point from the path after one full cycle.
                         // That point was the position of the unit prior to entering the cycle and it shouldn't be repeated with continuous cycles.
-                        if (splineflags.HasFlag(SplineFlag.EnterCycle))
+                        if (splineflags.HasFlag(MoveSplineFlagEnum.EnterCycle))
                         {
-                            splineflags.SetUnsetFlag(SplineFlag.EnterCycle, false);
+                            splineflags.SetUnsetFlag(MoveSplineFlagEnum.EnterCycle, false);
 
                             MoveSplineInitArgs args = new(spline.GetPointCount());
                             args.path.AddRange(spline.GetPoints().AsSpan().Slice(spline.First() + 1, spline.Last()).ToArray());
@@ -333,8 +333,8 @@ namespace Game.Movement
         }
         int NextTimestamp() { return spline.Length(point_Idx + 1); }
         int SegmentTimeElapsed() { return NextTimestamp() - time_passed; }
-        public bool IsCyclic() { return splineflags.HasFlag(SplineFlag.Cyclic); }
-        public bool IsFalling() { return splineflags.HasFlag(SplineFlag.Falling); }
+        public bool IsCyclic() { return splineflags.HasFlag(MoveSplineFlagEnum.Cyclic); }
+        public bool IsFalling() { return splineflags.HasFlag(MoveSplineFlagEnum.Falling); }
         public bool Initialized() { return !spline.Empty(); }
         public Vector3 FinalDestination() { return Initialized() ? spline.GetPoint(spline.Last()) : Vector3.Zero; }
         public Vector3 CurrentDestination() { return Initialized() ? spline.GetPoint(point_Idx + 1) : Vector3.Zero; }

@@ -14,10 +14,9 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum SplineFlag : uint
+    public enum MoveSplineFlagEnum : uint
     {
         None = 0x00,
-        // x00-x07 used as animation Ids storage in pair with Animation flag
         Unknown_0x1 = 0x00000001,           // NOT VERIFIED
         Unknown_0x2 = 0x00000002,           // NOT VERIFIED
         Unknown_0x4 = 0x00000004,           // NOT VERIFIED
@@ -51,12 +50,10 @@ namespace Framework.Constants
         Unknown_0x40000000 = 0x40000000,           // NOT VERIFIED
         Unknown_0x80000000 = 0x80000000,           // NOT VERIFIED
 
-        // animation ids stored here, see AnimType enum, used with Animation flag
-        MaskAnimations = 0x7,
         // flags that shouldn't be appended into SMSG_MONSTER_MOVE\SMSG_MONSTER_MOVE_TRANSPORT packet, should be more probably
         MaskNoMonsterMove = Done,
         // Unused, not suported flags
         MaskUnused = NoSpline | EnterCycle | Frozen | Unknown_0x8 | Unknown_0x100 | Unknown_0x20000 | Unknown_0x40000
-            | Unknown_0x800000 | FastSteering | FadeObject | UnlimitedSpeed | Unknown_0x40000000 | Unknown_0x80000000
+            | Unknown_0x800000 | FadeObject | UnlimitedSpeed | Unknown_0x40000000 | Unknown_0x80000000
     }
 }
