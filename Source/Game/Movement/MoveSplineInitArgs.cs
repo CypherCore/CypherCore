@@ -1,10 +1,12 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Constants;
 using Game.DataStorage;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace Game.Movement
@@ -43,12 +45,12 @@ namespace Game.Movement
         // Returns true to show that the arguments were configured correctly and MoveSpline initialization will succeed.
         public bool Validate(Unit unit)
         {
-            bool CHECK(bool exp, bool verbose)
+            bool CHECK(bool exp, string verbose)
             {
                 if (!exp)
                 {
                     if (unit != null)
-                        Log.outError(LogFilter.Movement, $"MoveSplineInitArgs::Validate: expression '{exp}' failed for {(verbose ? unit.GetDebugInfo() : unit.GetGUID().ToString())}");
+                        Log.outError(LogFilter.Movement, $"MoveSplineInitArgs::Validate: expression '{exp}' failed for {verbose}");
                     else
                         Log.outError(LogFilter.Movement, $"MoveSplineInitArgs::Validate: expression '{exp}' failed for cyclic spline continuation");
                     return false;
@@ -56,23 +58,19 @@ namespace Game.Movement
                 return true;
             }
 
-            if (!CHECK(path.Count > 1, true))
+            if (!CHECK(path.Count > 1, unit.GetDebugInfo()))
                 return false;
-            if (!CHECK(velocity >= 0.01f, true))
+            if (!CHECK(velocity >= 0.01f, unit.GetDebugInfo()))
                 return false;
-            if (!CHECK(effect_start_time_percent >= 0.0f && effect_start_time_percent <= 1.0f, true))
+            if (!CHECK(effect_start_time_percent >= 0.0f && effect_start_time_percent <= 1.0f, unit.GetDebugInfo()))
                 return false;
-            if (!CHECK(_checkPathLengths(), false))
+            if (!CHECK(_checkPathLengths(), unit.GetGUID().ToString()))
                 return false;
             if (spellEffectExtra != null)
             {
-                if (!CHECK(spellEffectExtra.ProgressCurveId == 0 || CliDB.CurveStorage.ContainsKey(spellEffectExtra.ProgressCurveId), false))
+                if (!CHECK(spellEffectExtra.ProgressCurveId == 0 || CliDB.CurveStorage.ContainsKey(spellEffectExtra.ProgressCurveId), unit.GetDebugInfo()))
                     return false;
-                if (!CHECK(spellEffectExtra.ParabolicCurveId == 0 || CliDB.CurveStorage.ContainsKey(spellEffectExtra.ParabolicCurveId), false))
-                    return false;
-                if (!CHECK(spellEffectExtra.ProgressCurveId == 0 || CliDB.CurveStorage.ContainsKey(spellEffectExtra.ProgressCurveId), true))
-                    return false;
-                if (!CHECK(spellEffectExtra.ParabolicCurveId == 0 || CliDB.CurveStorage.ContainsKey(spellEffectExtra.ParabolicCurveId), true))
+                if (!CHECK(spellEffectExtra.ParabolicCurveId == 0 || CliDB.CurveStorage.ContainsKey(spellEffectExtra.ParabolicCurveId), unit.GetDebugInfo()))
                     return false;
             }
             return true;
@@ -80,10 +78,32 @@ namespace Game.Movement
 
         bool _checkPathLengths()
         {
-            if (path.Count > 2 || facing.type == Framework.Constants.MonsterMoveType.Normal)
-                for (int i = 0; i < path.Count - 1; ++i)
+            float MIN_OFFSET = 1.0f / 4.0f;
+            float MAX_XY_OFFSET = (1 << 11) / 4.0f;
+            float MAX_Z_OFFSET = (1 << 10) / 4.0f;
+
+            var isValidPackedXYOffset = (float coord) => coord < MAX_XY_OFFSET && (coord < 0.1f || coord >= MIN_OFFSET);
+            var isValidPackedZOffset = (float coord) => coord < MAX_Z_OFFSET && (coord < 0.1f || coord >= MIN_OFFSET);
+
+            if (path.Count > 2)
+            {
+                if ((path[2] - path[1]).Length() < 0.1f)
+                    return false;
+
+                Vector3 middle = (path.First() + path.Last()) / 2;
+                for (int i = 1; i < path.Count - 1; ++i)
+                {
                     if ((path[i + 1] - path[i]).Length() < 0.1f)
                         return false;
+
+                    // when compression is enabled, each point coord is packed into 11 bits (10 for Z)
+                    if (!flags.HasFlag(SplineFlag.UncompressedPath))
+                        if (!isValidPackedXYOffset(MathF.Abs(path[i].X - middle.X))
+                            || !isValidPackedXYOffset(MathF.Abs(path[i].Y - middle.Y))
+                            || !isValidPackedZOffset(MathF.Abs(path[i].Z - middle.Z)))
+                            flags.SetUnsetFlag(SplineFlag.UncompressedPath, true);
+                }
+            }
             return true;
         }
     }

@@ -489,25 +489,6 @@ namespace Game.Movement
             if (_speed.HasValue)
                 init.SetVelocity(_speed.Value);
 
-            if (init.Path().Count > 2)
-            {
-                Vector3 mid = (init.Path().First() + init.Path().Last()) / 2.0f;
-                var index = 0;// init.Path()[1..];
-                var endIndex = (init.Path().Count - 2);
-                while (index != endIndex)
-                {
-                    Vector3 offset = init.Path()[index] - mid;
-                    if (MathF.Abs(offset.X) >= 128.0f || MathF.Abs(offset.Y) >= 128.0f || MathF.Abs(offset.Z) >= 64.0f)
-                    {
-                        // when distance is too great, send path in uncompressed state otherwise too much precision is lost on each point
-                        init.SetUncompressed();
-                        break;
-                    }
-
-                    ++index;
-                }
-            }
-
             TimeSpan duration = TimeSpan.FromMilliseconds(init.Launch());
 
             if (!IsExactSplinePath()

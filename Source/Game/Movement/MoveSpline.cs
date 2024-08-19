@@ -120,6 +120,7 @@ namespace Game.Movement
         }
 
         public Vector3[] GetPath() { return spline.GetPoints(); }
+        public int timeRemaining() { return Duration() - time_passed; }
         public int TimePassed() { return time_passed; }
 
         public int Duration() { return spline.Length(); }
@@ -339,7 +340,7 @@ namespace Game.Movement
         public Vector3 CurrentDestination() { return Initialized() ? spline.GetPoint(point_Idx + 1) : Vector3.Zero; }
 
         public AnimTier? GetAnimation() { return anim_tier != null ? (AnimTier)anim_tier.AnimTier : null; }
-        
+
         #region Fields
         public MoveSplineInitArgs InitArgs;
         public Spline<int> spline = new();
