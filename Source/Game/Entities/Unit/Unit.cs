@@ -2564,6 +2564,10 @@ namespace Game.Entities
 
             // Trigger heartbeat procs and generic aura behavior such as food emotes
             TriggerAuraHeartbeat();
+
+            // Update Vignette position and visibility
+            if (m_vignette != null)
+                Vignettes.Update(m_vignette, this);
         }
 
         void TriggerAuraHeartbeat()

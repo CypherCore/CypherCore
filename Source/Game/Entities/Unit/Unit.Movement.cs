@@ -684,10 +684,6 @@ namespace Game.Entities
             if (isInWater)
                 RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.Swimming);
 
-            // TODO: on heartbeat
-            if (m_vignette != null)
-                Vignettes.Update(m_vignette, this);
-
             return (relocated || turn);
         }
 
