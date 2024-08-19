@@ -148,7 +148,6 @@ namespace Game.Entities
         AttackSwingErr? m_swingErrorMsg;
         DateTime m_regenInterruptTimestamp;
         uint m_regenTimerCount;
-        uint m_foodEmoteTimerCount;
         uint m_weaponChangeTimer;
 
         //Quest

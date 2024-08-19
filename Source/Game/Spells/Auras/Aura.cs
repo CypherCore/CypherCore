@@ -364,6 +364,8 @@ namespace Game.Spells
             // m_casterLevel = cast item level/caster level, caster level should be saved to db, confirmed with sniffs
         }
 
+        public virtual void Heartbeat() { }
+
         public T GetScript<T>() where T : AuraScript
         {
             return (T)GetScriptByType(typeof(T));
@@ -2861,6 +2863,28 @@ namespace Game.Spells
                 _staticApplications[target.GetGUID()] = 0;
 
             _staticApplications[target.GetGUID()] |= effMask;
+        }
+
+        void Heartbeat()
+        {
+            base.Heartbeat();
+
+            // Periodic food and drink emote animation
+            HandlePeriodicFoodSpellVisualKit();
+        }
+
+        void HandlePeriodicFoodSpellVisualKit()
+        {
+            SpellSpecificType specificType = GetSpellInfo().GetSpellSpecific();
+
+            bool food = specificType == SpellSpecificType.Food || specificType == SpellSpecificType.FoodAndDrink;
+            bool drink = specificType == SpellSpecificType.Drink || specificType == SpellSpecificType.FoodAndDrink;
+
+            if (food)
+                GetUnitOwner().SendPlaySpellVisualKit(SpellConst.VisualKitFood, 0, 0);
+
+            if (drink)
+                GetUnitOwner().SendPlaySpellVisualKit(SpellConst.VisualKitDrink, 0, 0);
         }
 
         // Allow Apply Aura Handler to modify and access m_AuraDRGroup

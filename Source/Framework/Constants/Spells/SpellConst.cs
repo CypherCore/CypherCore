@@ -2538,7 +2538,7 @@ namespace Framework.Constants
     {
         None = 0x0,
 
-        Heartbeat = 0x01,    // 00 Killed by agressor - not sure about this flag
+        Heartbeat = 0x01,    // 00 Heartbeat
         Kill = 0x02,    // 01 Kill target (in most cases need XP/Honor reward)
 
         DealMeleeSwing = 0x04,    // 02 Done melee auto attack

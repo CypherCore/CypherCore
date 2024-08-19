@@ -2561,6 +2561,17 @@ namespace Game.Entities
 
             // SMSG_FLIGHT_SPLINE_SYNC for cyclic splines
             SendFlightSplineSyncUpdate();
+
+            // Trigger heartbeat procs and generic aura behavior such as food emotes
+            TriggerAuraHeartbeat();
+        }
+
+        void TriggerAuraHeartbeat()
+        {
+            foreach (var (_, auraApplication) in m_appliedAuras)
+                auraApplication.GetBase().Heartbeat();
+
+            Unit.ProcSkillsAndAuras(this, null, new ProcFlagsInit(ProcFlags.Heartbeat), new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
         }
 
         public bool HaveOffhandWeapon()
