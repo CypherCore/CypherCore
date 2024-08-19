@@ -1818,7 +1818,7 @@ namespace Game.Entities
 
                     FlightSplineSync flightSplineSync = new();
                     flightSplineSync.Guid = GetGUID();
-                    flightSplineSync.SplineDist = MoveSpline.TimePassed() / MoveSpline.Duration();
+                    flightSplineSync.SplineDist = (float)MoveSpline.TimePassed() / MoveSpline.Duration();
                     SendMessageToSet(flightSplineSync, true);
                 }
             }

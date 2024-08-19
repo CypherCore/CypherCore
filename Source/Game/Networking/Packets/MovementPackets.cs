@@ -396,7 +396,6 @@ namespace Game.Networking.Packets
             MovementSpline movementSpline = SplineData.Move;
 
             MoveSplineFlag splineFlags = moveSpline.splineflags;
-            splineFlags.SetUnsetFlag(SplineFlag.Cyclic, moveSpline.IsCyclic());
             movementSpline.Flags = (uint)(splineFlags.Flags & ~SplineFlag.MaskNoMonsterMove);
             movementSpline.Face = moveSpline.facing.type;
             movementSpline.FaceDirection = moveSpline.facing.angle;
@@ -441,24 +440,14 @@ namespace Game.Networking.Packets
 
             if (splineFlags.HasFlag(SplineFlag.UncompressedPath))
             {
-                if (!splineFlags.HasFlag(SplineFlag.Cyclic))
-                {
-                    int count = spline.GetPointCount() - 3;
-                    for (uint i = 0; i < count; ++i)
-                        movementSpline.Points.Add(array[i + 2]);
-                }
-                else
-                {
-                    int count = spline.GetPointCount() - 3;
-                    movementSpline.Points.Add(array[1]);
-                    for (uint i = 0; i < count; ++i)
-                        movementSpline.Points.Add(array[i + 1]);
-                }
+                int count = spline.GetPointCount() - (splineFlags.HasFlag(SplineFlag.Cyclic) ? 4 : 3);
+                for (int i = 0; i < count; ++i)
+                    movementSpline.Points.Add(new Vector3(array[i + 2].X, array[i + 2].Y, array[i + 2].Z));
             }
             else
             {
-                int lastIdx = spline.GetPointCount() - 3;
-                Span<Vector3> realPath = new Span<Vector3>(spline.GetPoints()).Slice(1);
+                int lastIdx = spline.GetPointCount() - (splineFlags.HasFlag(SplineFlag.Cyclic) ? 4 : 3);
+                Vector3[] realPath = array[1..];
 
                 movementSpline.Points.Add(realPath[lastIdx]);
 
