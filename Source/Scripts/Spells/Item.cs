@@ -3883,17 +3883,9 @@ namespace Scripts.Spells.Azerite
             return ValidateSpellInfo(SpellFragileEchoesMonk, SpellFragileEchoesShaman, SpellFragileEchoesPriestDiscipline, SpellFragileEchoesPaladin, SpellFragileEchoesDruid, SpellFragileEchoesPriestHoly);
         }
 
-        void ForcePeriodic(AuraEffect aurEff, ref bool isPeriodic, ref int amplitude)
+        void UpdateSpecAura()
         {
-            // simulate heartbeat timer
-            isPeriodic = true;
-            amplitude = 5000;
-        }
-
-        void UpdateSpecAura(AuraEffect aurEff)
-        {
-            PreventDefaultAction();
-            Player target = GetTarget().ToPlayer();
+            Player target = GetUnitOwner().ToPlayer();
             if (target == null)
                 return;
 
@@ -3902,7 +3894,7 @@ namespace Scripts.Spells.Azerite
                 if (target.GetPrimarySpecialization() != spec)
                     target.RemoveAurasDueToSpell(aura);
                 else if (!target.HasAura(aura))
-                    target.CastSpell(target, aura, aurEff);
+                    target.CastSpell(target, aura, GetEffect(0));
             }
 
             switch (target.GetClass())
@@ -3930,8 +3922,7 @@ namespace Scripts.Spells.Azerite
 
         public override void Register()
         {
-            DoEffectCalcPeriodic.Add(new(ForcePeriodic, 0, AuraType.Dummy));
-            OnEffectPeriodic.Add(new(UpdateSpecAura, 0, AuraType.Dummy));
+            OnHeartbeat.Add(new(UpdateSpecAura));
         }
     }
 

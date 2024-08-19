@@ -59,6 +59,7 @@ namespace Framework.Constants
         CheckAreaTarget,
         Dispel,
         AfterDispel,
+        OnHeartbeat,
         EnterLeaveCombat,
         // Spell Proc Hooks
         CheckProc,

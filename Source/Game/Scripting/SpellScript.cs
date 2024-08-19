@@ -1094,6 +1094,7 @@ namespace Game.Scripting
         // DO NOT OVERRIDE THESE IN SCRIPTS
         public delegate bool AuraCheckAreaTargetDelegate(Unit target);
         public delegate void AuraDispelDelegate(DispelInfo dispelInfo);
+        public delegate void AuraHeartbeatDelegate();
         public delegate void AuraEffectDamageAndHealingCalcFnType(AuraEffect aurEff, Unit victim, ref int damageOrHealing, ref int flatMod, ref float pctMod);
         public delegate void AuraEffectApplicationModeDelegate(AuraEffect aura, AuraEffectHandleModes auraMode);
         public delegate void AuraEffectPeriodicDelegate(AuraEffect aura);
@@ -1132,6 +1133,18 @@ namespace Game.Scripting
             public void Call(DispelInfo dispelInfo)
             {
                 _callImpl(dispelInfo);
+            }
+        }
+
+        public class AuraHeartbeatHandler
+        {
+            AuraHeartbeatDelegate _callImpl;
+
+            public AuraHeartbeatHandler(AuraHeartbeatDelegate callImpl) { _callImpl = callImpl; }
+
+            public void Call(AuraScript auraScript)
+            {
+                _callImpl();
             }
         }
 
@@ -1264,7 +1277,7 @@ namespace Game.Scripting
                 _callImpl(aurEff, victim, ref damageOrHealing, ref flatMod, ref pctMod);
             }
         }
-        
+
         public class EffectApplyHandler : EffectBase
         {
             AuraEffectApplicationModeDelegate _callImpl;
@@ -1600,6 +1613,11 @@ namespace Game.Scripting
         // example: AfterDispel += AuraDispelFn(class.function);
         // where function is: void function (DispelInfo dispelInfo);
         public List<AuraDispelHandler> AfterDispel = new();
+
+        // executed on every heartbeat of a unit
+        // example: OnHeartbeat += AuraHeartbeatFn(class::function);
+        // where function is: void function ();
+        public List<AuraHeartbeatHandler> OnHeartbeat = new();
 
         // executed when aura effect is applied with specified mode to target
         // should be used when effect handler preventing/replacing is needed, do not use this hook for triggering spellcasts/removing auras etc - may be unsafe

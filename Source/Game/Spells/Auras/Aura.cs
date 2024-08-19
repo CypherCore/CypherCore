@@ -1986,6 +1986,18 @@ namespace Game.Spells
             }
         }
 
+        public void CallScriptOnHeartbeat()
+        {
+            foreach (var script in m_loadedScripts)
+            {
+                script._PrepareScriptCall(AuraScriptHookType.OnHeartbeat);
+                foreach (var onHeartbeat in script.OnHeartbeat)
+                    onHeartbeat.Call(script);
+
+                script._FinishScriptCall();
+            }
+        }
+
         public bool CallScriptEffectApplyHandlers(AuraEffect aurEff, AuraApplication aurApp, AuraEffectHandleModes mode)
         {
             bool preventDefault = false;
@@ -2865,12 +2877,15 @@ namespace Game.Spells
             _staticApplications[target.GetGUID()] |= effMask;
         }
 
-        void Heartbeat()
+        public override void Heartbeat()
         {
             base.Heartbeat();
 
             // Periodic food and drink emote animation
             HandlePeriodicFoodSpellVisualKit();
+
+            // Invoke the OnHeartbeat AuraScript hook
+            CallScriptOnHeartbeat();
         }
 
         void HandlePeriodicFoodSpellVisualKit()
