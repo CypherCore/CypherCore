@@ -20,6 +20,7 @@ namespace Game.Combat
         bool _ownerCanHaveThreatList;
 
         public bool NeedClientUpdate;
+        bool _needThreatClearUpdate;
         uint _updateTimer;
         List<ThreatReference> _sortedThreatList = new();
         Dictionary<ObjectGuid, ThreatReference> _myThreatListEntries = new();
@@ -73,16 +74,33 @@ namespace Game.Combat
 
         public void Update(uint tdiff)
         {
-            if (!CanHaveThreatList() || IsThreatListEmpty(true))
+            if (!CanHaveThreatList())
                 return;
 
             if (_updateTimer <= tdiff)
             {
-                UpdateVictim();
+                if (_needThreatClearUpdate)
+                {
+                    SendClearAllThreatToClients();
+                    _needThreatClearUpdate = false;
+                }
+
+                if (!IsThreatListEmpty(true))
+                    UpdateVictim();
+
                 _updateTimer = THREAT_UPDATE_INTERVAL;
             }
             else
                 _updateTimer -= tdiff;
+        }
+
+        /// <summary>
+        /// called from Creature::AtEngage
+        /// should not be called from anywhere else
+        /// </summary>
+        public void ResetUpdateTimer()
+        {
+            _updateTimer = THREAT_UPDATE_INTERVAL;
         }
 
         public Unit GetCurrentVictim()

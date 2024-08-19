@@ -466,6 +466,8 @@ namespace Game.Entities
 
             UpdateMovementCapabilities();
 
+            GetThreatManager().Update(diff);
+
             switch (m_deathState)
             {
                 case DeathState.JustRespawned:
@@ -540,8 +542,6 @@ namespace Game.Entities
 
                     if (!IsAlive())
                         break;
-
-                    GetThreatManager().Update(diff);
 
                     if (_spellFocusInfo.Delay != 0)
                     {
@@ -1070,6 +1070,8 @@ namespace Game.Entities
         public override void AtEngage(Unit target)
         {
             base.AtEngage(target);
+
+            GetThreatManager().ResetUpdateTimer();
 
             if (!HasFlag(CreatureStaticFlags2.AllowMountedCombat))
                 Dismount();
