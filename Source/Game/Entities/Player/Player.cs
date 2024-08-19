@@ -567,6 +567,9 @@ namespace Game.Entities
 
             // Group update
             SendUpdateToOutOfRangeGroupMembers();
+
+            // Indoor/Outdoor aura requirements
+            CheckOutdoorsAuraRequirements();
         }
 
         public override void SetDeathState(DeathState s)
@@ -6266,7 +6269,7 @@ namespace Game.Entities
             if (GetTrader() != null && !IsWithinDistInMap(GetTrader(), SharedConst.InteractionDistance))
                 GetSession().SendCancelTrade();
 
-            CheckAreaExploreAndOutdoor();
+            CheckAreaExplore();
 
             return true;
         }
@@ -6343,16 +6346,13 @@ namespace Game.Entities
             SendPacket(new ResetWeeklyCurrency());
         }
 
-        void CheckAreaExploreAndOutdoor()
+        void CheckAreaExplore()
         {
             if (!IsAlive())
                 return;
 
             if (IsInFlight())
                 return;
-
-            if (WorldConfig.GetBoolValue(WorldCfg.VmapIndoorCheck))
-                RemoveAurasWithAttribute(IsOutdoors() ? SpellAttr0.OnlyIndoors : SpellAttr0.OnlyOutdoors);
 
             uint areaId = GetAreaId();
             if (areaId == 0)
@@ -6449,6 +6449,12 @@ namespace Game.Entities
         void SendExplorationExperience(uint Area, uint Experience)
         {
             SendPacket(new ExplorationExperience(Experience, Area));
+        }
+
+        public void CheckOutdoorsAuraRequirements()
+        {
+            if (WorldConfig.GetBoolValue(WorldCfg.VmapIndoorCheck))
+                RemoveAurasWithAttribute(IsOutdoors() ? SpellAttr0.OnlyIndoors : SpellAttr0.OnlyOutdoors);
         }
 
         public void SendSysMessage(CypherStrings str, params object[] args)

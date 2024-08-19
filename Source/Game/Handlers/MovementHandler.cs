@@ -208,6 +208,23 @@ namespace Game
                     plrMover.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.Jump); // Mind Control
                     Unit.ProcSkillsAndAuras(plrMover, null, new ProcFlagsInit(ProcFlags.Jump), new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
                 }
+
+                // Whenever a player stops a movement action, an indoor/outdoor check is being performed
+                switch (opcode)
+                {
+                    case ClientOpcodes.MoveSetFly:
+                    case ClientOpcodes.MoveFallLand:
+                    case ClientOpcodes.MoveStop:
+                    case ClientOpcodes.MoveStopStrafe:
+                    case ClientOpcodes.MoveStopTurn:
+                    case ClientOpcodes.MoveStopSwim:
+                    case ClientOpcodes.MoveStopPitch:
+                    case ClientOpcodes.MoveStopAscend:
+                        plrMover.CheckOutdoorsAuraRequirements();
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 
