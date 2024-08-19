@@ -3877,13 +3877,14 @@ namespace Scripts.Spells.Azerite
         const uint SpellFragileEchoesPaladin = 225297;
         const uint SpellFragileEchoesDruid = 225298;
         const uint SpellFragileEchoesPriestHoly = 225366;
+        const uint SpellFragileEchoesEvoker = 429020;
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellFragileEchoesMonk, SpellFragileEchoesShaman, SpellFragileEchoesPriestDiscipline, SpellFragileEchoesPaladin, SpellFragileEchoesDruid, SpellFragileEchoesPriestHoly);
+            return ValidateSpellInfo(SpellFragileEchoesMonk, SpellFragileEchoesShaman, SpellFragileEchoesPriestDiscipline, SpellFragileEchoesPaladin, SpellFragileEchoesDruid, SpellFragileEchoesPriestHoly, SpellFragileEchoesEvoker);
         }
 
-        void UpdateSpecAura()
+        void UpdateSpecAura(bool apply)
         {
             Player target = GetUnitOwner().ToPlayer();
             if (target == null)
@@ -3891,7 +3892,7 @@ namespace Scripts.Spells.Azerite
 
             void updateAuraIfInCorrectSpec(ChrSpecialization spec, uint aura)
             {
-                if (target.GetPrimarySpecialization() != spec)
+                if (!apply || target.GetPrimarySpecialization() != spec)
                     target.RemoveAurasDueToSpell(aura);
                 else if (!target.HasAura(aura))
                     target.CastSpell(target, aura, GetEffect(0));
@@ -3915,14 +3916,28 @@ namespace Scripts.Spells.Azerite
                 case Class.Druid:
                     updateAuraIfInCorrectSpec(ChrSpecialization.DruidRestoration, SpellFragileEchoesDruid);
                     break;
+                case Class.Evoker:
+                    updateAuraIfInCorrectSpec(ChrSpecialization.EvokerPreservation, SpellFragileEchoesEvoker);
+                    break;
                 default:
                     break;
             }
         }
 
+        void HandleHeartbeat()
+        {
+            UpdateSpecAura(true);
+        }
+
+        void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            UpdateSpecAura(false);
+        }
+
         public override void Register()
         {
-            OnHeartbeat.Add(new(UpdateSpecAura));
+            OnHeartbeat.Add(new(HandleHeartbeat));
+            AfterEffectRemove.Add(new(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
 
