@@ -280,7 +280,8 @@ namespace Game.Entities
             for (byte i = 0; i < SharedConst.MaxCreatureSpells; ++i)
                 m_spells[i] = GetCreatureTemplate().Spells[i];
 
-            ApplyAllStaticFlags(m_creatureDifficulty.StaticFlags);
+            CreatureStaticFlagsHolder staticFlags = GenerateStaticFlags(m_creatureDifficulty, GetSpawnId(), GetMap().GetDifficultyID());
+            ApplyAllStaticFlags(staticFlags);
 
             _staticFlags.ApplyFlag(CreatureStaticFlags.NoXp, creatureInfo.CreatureType == CreatureType.Critter || IsPet() || IsTotem() || creatureInfo.FlagsExtra.HasFlag(CreatureFlagsExtra.NoXP));
 
@@ -414,6 +415,30 @@ namespace Game.Entities
             m_stringIds[(int)StringIdType.Template] = cInfo.StringId;
 
             return true;
+        }
+
+        /// <summary>
+        /// Draws data from m_creatureDifficulty and spawn/difficulty based override data and returns a CreatureStaticFlagsHolder value which contains the data of both
+        /// </summary>
+        /// <param name="creatureDifficulty"></param>
+        /// <param name="spawnId"></param>
+        /// <param name="difficultyId"></param>
+        /// <returns></returns>
+        CreatureStaticFlagsHolder GenerateStaticFlags(CreatureDifficulty creatureDifficulty, ulong spawnId, Difficulty difficultyId)
+        {
+            CreatureStaticFlagsOverride staticFlagsOverride = Global.ObjectMgr.GetCreatureStaticFlagsOverride(spawnId, difficultyId);
+            if (staticFlagsOverride == null)
+                return creatureDifficulty.StaticFlags;
+
+            return new CreatureStaticFlagsHolder(
+                staticFlagsOverride.StaticFlags1.GetValueOrDefault(creatureDifficulty.StaticFlags.GetFlags()),
+                staticFlagsOverride.StaticFlags2.GetValueOrDefault(creatureDifficulty.StaticFlags.GetFlags2()),
+                staticFlagsOverride.StaticFlags3.GetValueOrDefault(creatureDifficulty.StaticFlags.GetFlags3()),
+                staticFlagsOverride.StaticFlags4.GetValueOrDefault(creatureDifficulty.StaticFlags.GetFlags4()),
+                staticFlagsOverride.StaticFlags5.GetValueOrDefault(creatureDifficulty.StaticFlags.GetFlags5()),
+                staticFlagsOverride.StaticFlags6.GetValueOrDefault(creatureDifficulty.StaticFlags.GetFlags6()),
+                staticFlagsOverride.StaticFlags7.GetValueOrDefault(creatureDifficulty.StaticFlags.GetFlags7()),
+                staticFlagsOverride.StaticFlags8.GetValueOrDefault(creatureDifficulty.StaticFlags.GetFlags8()));
         }
 
         void ApplyAllStaticFlags(CreatureStaticFlagsHolder flags)

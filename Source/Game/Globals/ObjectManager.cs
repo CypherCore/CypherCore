@@ -10100,6 +10100,65 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature quest currencies in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
+        public void LoadCreatureStaticFlagsOverride()
+        {
+            // reload case
+            _creatureStaticFlagsOverrideStorage.Clear();
+
+            uint oldMSTime = Time.GetMSTime();
+
+            //                                         0        1             2             3             4             5             6             7             8             9
+            SQLResult result = DB.World.Query("SELECT SpawnId, DifficultyId, StaticFlags1, StaticFlags2, StaticFlags3, StaticFlags4, StaticFlags5, StaticFlags6, StaticFlags7, StaticFlags8 FROM creature_static_flags_override");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature static flag overrides. DB table `creature_static_flags_override` is empty.");
+                return;
+            }
+
+            uint count = 0;
+            do
+            {
+                ulong spawnId = result.Read<ulong>(0);
+                Difficulty difficultyId = (Difficulty)result.Read<byte>(1);
+
+                CreatureData creatureData = GetCreatureData(spawnId);
+                if (creatureData == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `creature_static_flags_override` has data for nonexistent creature (SpawnId: {spawnId}), skipped");
+                    continue;
+                }
+
+                if (!creatureData.SpawnDifficulties.Contains(difficultyId))
+                {
+                    Log.outError(LogFilter.Sql, $"Table `creature_static_flags_override` has data for a creature that is not available for the specified DifficultyId (SpawnId: {spawnId}, DifficultyId: {difficultyId}), skipped");
+                    continue;
+                }
+
+                CreatureStaticFlagsOverride staticFlagsOverride = new();
+                if (!result.IsNull(2))
+                    staticFlagsOverride.StaticFlags1 = (CreatureStaticFlags)result.Read<uint>(2);
+                if (!result.IsNull(3))
+                    staticFlagsOverride.StaticFlags2 = (CreatureStaticFlags2)result.Read<uint>(3);
+                if (!result.IsNull(4))
+                    staticFlagsOverride.StaticFlags3 = (CreatureStaticFlags3)result.Read<uint>(4);
+                if (!result.IsNull(5))
+                    staticFlagsOverride.StaticFlags4 = (CreatureStaticFlags4)result.Read<uint>(5);
+                if (!result.IsNull(6))
+                    staticFlagsOverride.StaticFlags5 = (CreatureStaticFlags5)result.Read<uint>(6);
+                if (!result.IsNull(7))
+                    staticFlagsOverride.StaticFlags6 = (CreatureStaticFlags6)result.Read<uint>(7);
+                if (!result.IsNull(8))
+                    staticFlagsOverride.StaticFlags7 = (CreatureStaticFlags7)result.Read<uint>(8);
+                if (!result.IsNull(9))
+                    staticFlagsOverride.StaticFlags8 = (CreatureStaticFlags8)result.Read<uint>(9);
+
+                _creatureStaticFlagsOverrideStorage[(spawnId, difficultyId)] = staticFlagsOverride;
+                ++count;
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature static flag overrides in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+
         public void InitializeQueriesData(QueryDataGroup mask)
         {
             uint oldMSTime = Time.GetMSTime();
@@ -10133,6 +10192,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, $"Initialized query cache data in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
+
         public void LoadJumpChargeParams()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -10204,6 +10264,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {_jumpChargeParams.Count} Jump Charge Params in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
+
         public void LoadPhaseNames()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -10649,6 +10710,10 @@ namespace Game
         {
             return _jumpChargeParams.LookupByKey(id);
         }
+        public CreatureStaticFlagsOverride GetCreatureStaticFlagsOverride(ulong spawnId, Difficulty difficultyId)
+        {
+            return _creatureStaticFlagsOverrideStorage.LookupByKey((spawnId, difficultyId));
+        }
         public string GetPhaseName(uint phaseId)
         {
             return _phaseNameStorage.TryGetValue(phaseId, out string value) ? value : "Unknown Name";
@@ -10867,6 +10932,7 @@ namespace Game
         Dictionary<uint, SceneTemplate> _sceneTemplateStorage = new();
         Dictionary<int, JumpChargeParams> _jumpChargeParams = new();
         Dictionary<uint, string> _phaseNameStorage = new();
+        Dictionary<(ulong, Difficulty), CreatureStaticFlagsOverride> _creatureStaticFlagsOverrideStorage = new();
 
         Dictionary<byte, RaceUnlockRequirement> _raceUnlockRequirementStorage = new();
         List<RaceClassAvailability> _classExpansionRequirementStorage = new();

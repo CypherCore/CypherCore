@@ -130,6 +130,18 @@ namespace Game.Entities
             _flags8 = (CreatureStaticFlags8)flags8;
         }
 
+        public CreatureStaticFlagsHolder(CreatureStaticFlags flags, CreatureStaticFlags2 flags2, CreatureStaticFlags3 flags3, CreatureStaticFlags4 flags4, CreatureStaticFlags5 flags5, CreatureStaticFlags6 flags6, CreatureStaticFlags7 flags7, CreatureStaticFlags8 flags8)
+        {
+            _flags = flags;
+            _flags2 = flags2;
+            _flags3 = flags3;
+            _flags4 = flags4;
+            _flags5 = flags5;
+            _flags6 = flags6;
+            _flags7 = flags7;
+            _flags8 = flags8;
+        }
+
         public bool HasFlag(CreatureStaticFlags flag) { return _flags.HasFlag(flag); }
         public bool HasFlag(CreatureStaticFlags2 flag) { return _flags2.HasFlag(flag); }
         public bool HasFlag(CreatureStaticFlags3 flag) { return _flags3.HasFlag(flag); }
@@ -147,5 +159,27 @@ namespace Game.Entities
         public void ApplyFlag(CreatureStaticFlags6 flag, bool apply) { if (apply) _flags6 |= flag; else _flags6 &= ~flag; }
         public void ApplyFlag(CreatureStaticFlags7 flag, bool apply) { if (apply) _flags7 |= flag; else _flags7 &= ~flag; }
         public void ApplyFlag(CreatureStaticFlags8 flag, bool apply) { if (apply) _flags8 |= flag; else _flags8 &= ~flag; }
+
+        public CreatureStaticFlags GetFlags() { return _flags; }
+        public CreatureStaticFlags2 GetFlags2() { return _flags2; }
+        public CreatureStaticFlags3 GetFlags3() { return _flags3; }
+        public CreatureStaticFlags4 GetFlags4() { return _flags4; }
+        public CreatureStaticFlags5 GetFlags5() { return _flags5; }
+        public CreatureStaticFlags6 GetFlags6() { return _flags6; }
+        public CreatureStaticFlags7 GetFlags7() { return _flags7; }
+        public CreatureStaticFlags8 GetFlags8() { return _flags8; }
+    }
+
+    // `creature_static_flags_override` table
+    public class CreatureStaticFlagsOverride
+    {
+        public CreatureStaticFlags? StaticFlags1;
+        public CreatureStaticFlags2? StaticFlags2;
+        public CreatureStaticFlags3? StaticFlags3;
+        public CreatureStaticFlags4? StaticFlags4;
+        public CreatureStaticFlags5? StaticFlags5;
+        public CreatureStaticFlags6? StaticFlags6;
+        public CreatureStaticFlags7? StaticFlags7;
+        public CreatureStaticFlags8? StaticFlags8;
     }
 }

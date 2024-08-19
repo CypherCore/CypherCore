@@ -985,6 +985,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Creature Text Locales...");
             Global.CreatureTextMgr.LoadCreatureTextLocales();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading creature StaticFlags overrides...");
+            Global.ObjectMgr.LoadCreatureStaticFlagsOverride(); // must be after LoadCreatures
+
             Log.outInfo(LogFilter.ServerLoading, "Initializing Scripts...");
             Global.ScriptMgr.Initialize();
             Global.ScriptMgr.OnConfigLoad(false);                                // must be done after the ScriptMgr has been properly initialized
