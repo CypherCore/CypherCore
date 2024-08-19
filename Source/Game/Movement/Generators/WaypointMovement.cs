@@ -485,6 +485,9 @@ namespace Game.Movement
             if (_speed.HasValue)
                 init.SetVelocity(_speed.Value);
 
+            if (IsExactSplinePath() && points.Count > 2 && owner.CanFly())
+                init.SetSmooth();
+
             TimeSpan duration = TimeSpan.FromMilliseconds(init.Launch());
 
             if (!IsExactSplinePath()
