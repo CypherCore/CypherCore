@@ -906,26 +906,6 @@ namespace Game.Movement
             Add(new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, 0, new GenericMovementGeneratorArgs() { Duration = duration, ScriptResult = scriptResult }));
         }
 
-        public void MoveSmoothPath(uint pointId, Vector3[] pathPoints, int pathSize, bool walk = false, bool fly = false)
-        {
-            var initializer = (MoveSplineInit init) =>
-            {
-                init.MovebyPath(pathPoints);
-                init.SetWalk(walk);
-                if (fly)
-                {
-                    init.SetFly();
-                    init.SetUncompressed();
-                    init.SetSmooth();
-                }
-            };
-
-            // This code is not correct
-            // GenericMovementGenerator does not affect UNIT_STATE_ROAMING_MOVE
-            // need to call PointMovementGenerator with various pointIds
-            Add(new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, pointId));
-        }
-
         public void MoveAlongSplineChain(uint pointId, uint dbChainId, bool walk)
         {
             Creature owner = _owner.ToCreature();

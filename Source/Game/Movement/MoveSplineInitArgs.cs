@@ -90,9 +90,6 @@ namespace Game.Movement
 
             if (path.Count > 2)
             {
-                if ((path[2] - path[1]).Length() < 0.1f)
-                    return false;
-
                 Vector3 middle = (path.First() + path.Last()) / 2;
                 for (int i = 1; i < path.Count - 1; ++i)
                 {

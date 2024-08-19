@@ -342,10 +342,12 @@ namespace Game
         public float? Velocity;
 
         public WaypointPath() { }
-        public WaypointPath(uint id, List<WaypointNode> nodes)
+        public WaypointPath(uint id, List<WaypointNode> nodes, WaypointMoveType moveType = WaypointMoveType.Walk, WaypointPathFlags flags = WaypointPathFlags.None)
         {
             Id = id;
             Nodes = nodes;
+            Flags = flags;
+            MoveType = moveType;
         }
 
         public void BuildSegments()
@@ -390,6 +392,8 @@ namespace Game
     {
         None = 0x00,
         FollowPathBackwardsFromEndToStart = 0x01,
-        ExactSplinePath = 0x02
+        ExactSplinePath = 0x02,
+
+        FlyingPath = ExactSplinePath   // flying paths are always exact splines
     }
 }
