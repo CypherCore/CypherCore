@@ -379,7 +379,7 @@ namespace Game
             return found;
         }
 
-        public void SetInitialWorldSettings()
+        public bool SetInitialWorldSettings()
         {
             LoadRealmInfo();
 
@@ -397,8 +397,8 @@ namespace Game
                 || !TerrainManager.ExistMapAndVMap(1, 10311.3f, 832.463f) || !TerrainManager.ExistMapAndVMap(1, -2917.58f, -257.98f)
                 || (WorldConfig.GetIntValue(WorldCfg.Expansion) != 0 && (!TerrainManager.ExistMapAndVMap(530, 10349.6f, -6357.29f) || !TerrainManager.ExistMapAndVMap(530, -3961.64f, -13931.2f))))
             {
-                Log.outError(LogFilter.ServerLoading, "Unable to load map and vmap data for starting zones - server shutting down!");
-                Environment.Exit(1);
+                Log.outFatal(LogFilter.ServerLoading, "Unable to load map and vmap data for starting zones - server shutting down!");
+                return false;
             }
 
             // Initialize pool manager
@@ -423,14 +423,14 @@ namespace Game
             if (m_availableDbcLocaleMask == null || !m_availableDbcLocaleMask[(int)m_defaultDbcLocale])
             {
                 Log.outFatal(LogFilter.ServerLoading, $"Unable to load db2 files for {m_defaultDbcLocale} locale specified in DBC.Locale config!");
-                Environment.Exit(1);
+                return false;
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading GameObject models...");
             if (!GameObjectModel.LoadGameObjectModelList())
             {
                 Log.outFatal(LogFilter.ServerLoading, "Unable to load gameobject models (part of vmaps), objects using WMO models will crash the client - server shutting down!");
-                Environment.Exit(1);
+                return false;
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading hotfix blobs...");
@@ -1132,6 +1132,8 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading phase names...");
             Global.ObjectMgr.LoadPhaseNames();
+
+            return true;
         }
 
         public void LoadConfigSettings(bool reload = false)

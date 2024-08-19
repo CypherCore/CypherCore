@@ -41,7 +41,8 @@ namespace WorldServer
 
             Global.RealmMgr.Initialize(ConfigMgr.GetDefaultValue("RealmsStateUpdateDelay", 10));
 
-            Global.WorldMgr.SetInitialWorldSettings();
+            if (!Global.WorldMgr.SetInitialWorldSettings())
+                ExitNow();
 
             // Start the Remote Access port (acceptor) if enabled
             if (ConfigMgr.GetDefaultValue("Ra.Enable", false))
