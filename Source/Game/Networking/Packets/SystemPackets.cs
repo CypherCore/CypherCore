@@ -306,10 +306,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(Unused1000);
             _worldPacket.WriteBit(AccountSaveDataExportEnabled);
             _worldPacket.WriteBit(AccountLockedByExport);
-            _worldPacket.WriteBit(!RealmHiddenAlert.IsEmpty());
-
-            if (!RealmHiddenAlert.IsEmpty())
-                _worldPacket.WriteBits(RealmHiddenAlert.GetByteCount() + 1, 11);
+            _worldPacket.WriteBits(RealmHiddenAlert.GetByteCount() + 1, 11);
 
             _worldPacket.FlushBits();
 
