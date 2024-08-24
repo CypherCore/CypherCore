@@ -148,7 +148,8 @@ namespace Framework.Constants
         Mobile = 0x40,
         Guide = 0x1000,
         Newcomer = 0x2000,
-        Censored = 0x4000
+        Censored = 0x4000,
+        Timerunning = 0x8000
     }
 
     public enum DrunkenState

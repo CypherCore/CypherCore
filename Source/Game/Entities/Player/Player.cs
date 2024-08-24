@@ -957,16 +957,46 @@ namespace Game.Entities
 
                         if (srcPetIndex >= 0)
                         {
+                            PetStableFlags flagToAdd, flagToRemove;
+                            if (SharedConst.IsActivePetSlot(dstPetSlot))
+                            {
+                                flagToAdd = PetStableFlags.Active;
+                                flagToRemove = PetStableFlags.Inactive;
+                            }
+                            else
+                            {
+                                flagToAdd = PetStableFlags.Inactive;
+                                flagToRemove = PetStableFlags.Active;
+                            }
+
                             StableInfo stableInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.PetStable);
                             StablePetInfo stablePetInfo = stableInfo.ModifyValue(stableInfo.Pets, srcPetIndex);
+
                             SetUpdateFieldValue(stablePetInfo.ModifyValue(stablePetInfo.PetSlot), (uint)dstPetSlot);
+                            SetUpdateFieldFlagValue(stablePetInfo.ModifyValue(stablePetInfo.PetFlags), (byte)flagToAdd);
+                            RemoveUpdateFieldFlagValue(stablePetInfo.ModifyValue(stablePetInfo.PetFlags), (byte)flagToRemove);
                         }
 
                         if (dstPetIndex >= 0)
                         {
+                            PetStableFlags flagToAdd, flagToRemove;
+                            if (SharedConst.IsActivePetSlot(srcPetSlot))
+                            {
+                                flagToAdd = PetStableFlags.Active;
+                                flagToRemove = PetStableFlags.Inactive;
+                            }
+                            else
+                            {
+                                flagToAdd = PetStableFlags.Inactive;
+                                flagToRemove = PetStableFlags.Active;
+                            }
+
                             StableInfo stableInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.PetStable);
                             StablePetInfo stablePetInfo = stableInfo.ModifyValue(stableInfo.Pets, dstPetIndex);
+
                             SetUpdateFieldValue(stablePetInfo.ModifyValue(stablePetInfo.PetSlot), (uint)srcPetSlot);
+                            SetUpdateFieldFlagValue(stablePetInfo.ModifyValue(stablePetInfo.PetFlags), (byte)flagToAdd);
+                            RemoveUpdateFieldFlagValue(stablePetInfo.ModifyValue(stablePetInfo.PetFlags), (byte)flagToRemove);
                         }
 
                         sess.SendPetStableResult(StableResult.StableSuccess);
@@ -4745,6 +4775,48 @@ namespace Game.Entities
             }
         }
 
+        public void DeletePetFromDB(uint petNumber)
+        {
+            if (m_activePlayerData.PetStable.HasValue())
+            {
+                int ufIndex = m_activePlayerData.PetStable.GetValue().Pets.FindIndexIf(p => p.PetNumber == petNumber);
+                if (ufIndex >= 0)
+                {
+                    StableInfo stableInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.PetStable);
+                    RemoveDynamicUpdateFieldValue(stableInfo.ModifyValue(stableInfo.Pets), ufIndex);
+                }
+            }
+
+            if (m_petStable == null)
+                return;
+
+            var petIndex = m_petStable.GetCurrentActivePetIndex();
+            if (petIndex.HasValue)
+                if (m_petStable.ActivePets[petIndex.Value] != null && m_petStable.ActivePets[petIndex.Value].PetNumber == petNumber)
+                    m_petStable.CurrentPetIndex = null;
+
+            bool foundPet = false;
+
+            void FindAndRemovePet(PetStable.PetInfo[] pets)
+            {
+                for (var i = 0; i < pets.Length; ++i)
+                {
+                    var pet = pets[i];
+                    if (pet != null && pet.PetNumber == petNumber && pet.Type == PetType.Hunter)
+                    {
+                        pets[i] = null;
+                        foundPet = true;
+                    }
+                }
+            };
+
+            FindAndRemovePet(m_petStable.ActivePets);
+            FindAndRemovePet(m_petStable.StabledPets);
+
+            if (foundPet)
+                Pet.DeleteFromDB(petNumber);
+        }
+
         public void SendTameFailure(PetTameResult result)
         {
             PetTameFailure petTameFailure = new();
@@ -5368,6 +5440,8 @@ namespace Game.Entities
                 tag |= ChatFlags.AFK;
             if (IsDeveloper())
                 tag |= ChatFlags.Dev;
+            if (m_activePlayerData.TimerunningSeasonID != 0)
+                tag |= ChatFlags.Timerunning;
 
             return tag;
         }

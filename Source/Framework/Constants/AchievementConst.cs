@@ -751,7 +751,13 @@ namespace Framework.Constants
         CompleteTrackingQuest = 250, /*NYI*/
 
         GainLevels = 253, // Gain levels
-        Count = 257
+
+        CompleteQuestsCountOnAccount = 257, /*NYI*/
+
+        WarbandBankTabPurchased = 260, /*NYI*/
+
+        LearnTaxiNode = 262,
+        Count = 263
     }
 
     public enum CriteriaDataType

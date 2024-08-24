@@ -2,10 +2,9 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
+using Game.Entities;
 using System;
 using System.Collections.Generic;
-using Game.Entities;
 
 namespace Game.Networking.Packets
 {
@@ -40,6 +39,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt16(MaxPlayerNameQueriesPerPacket);
             _worldPacket.WriteInt16(PlayerNameQueryTelemetryInterval);
             _worldPacket.WriteUInt32((uint)PlayerNameQueryInterval.TotalSeconds);
+
+            _worldPacket.WriteInt32(AddonChatThrottle.MaxTries);
+            _worldPacket.WriteInt32(AddonChatThrottle.TriesRestoredPerSecond);
+            _worldPacket.WriteInt32(AddonChatThrottle.UsedTriesPerMessage);
 
             foreach (GameRuleValuePair gameRuleValue in GameRuleValues)
                 gameRuleValue.Write(_worldPacket);
@@ -76,9 +79,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(QuestSessionEnabled);
             _worldPacket.WriteBit(IsMuted);
             _worldPacket.WriteBit(ClubFinderEnabled);
+            _worldPacket.WriteBit(CommunityFinderEnabled);
             _worldPacket.WriteBit(Unknown901CheckoutRelated);
-
             _worldPacket.WriteBit(TextToSpeechFeatureEnabled);
+
             _worldPacket.WriteBit(ChatDisabledByDefault);
             _worldPacket.WriteBit(ChatDisabledByPlayer);
             _worldPacket.WriteBit(LFGListCustomRequiresAuthenticator);
@@ -87,9 +91,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(ContentTrackingEnabled);
             _worldPacket.WriteBit(IsSellAllJunkEnabled);
             _worldPacket.WriteBit(IsGroupFinderEnabled);
+
             _worldPacket.WriteBit(IsLFDEnabled);
             _worldPacket.WriteBit(IsLFREnabled);
             _worldPacket.WriteBit(IsPremadeGroupEnabled);
+            _worldPacket.WriteBit(CanShowSetRoleButton);
+            _worldPacket.WriteBit(false); // unused 10.2.7
+            _worldPacket.WriteBit(false); // unused 10.2.7
+
+            _worldPacket.WriteBits(Unknown1027.GetByteCount(), 7);
 
             _worldPacket.FlushBits();
 
@@ -125,6 +135,8 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(SessionAlert.Value.Period);
                 _worldPacket.WriteInt32(SessionAlert.Value.DisplayTime);
             }
+
+            _worldPacket.WriteString(Unknown1027);
 
             _worldPacket.WriteBit(Squelch.IsSquelched);
             _worldPacket.WritePackedGuid(Squelch.BnetAccountGuid);
@@ -175,6 +187,7 @@ namespace Game.Networking.Packets
         public bool QuestSessionEnabled;
         public bool IsMuted;
         public bool ClubFinderEnabled;
+        public bool CommunityFinderEnabled;
         public bool Unknown901CheckoutRelated;
         public bool TextToSpeechFeatureEnabled;
         public bool ChatDisabledByDefault;
@@ -188,11 +201,14 @@ namespace Game.Networking.Packets
         public bool IsLFDEnabled = true;  // classic only
         public bool IsLFREnabled = true;  // classic only
         public bool IsPremadeGroupEnabled = true;  // classic only
+        public bool CanShowSetRoleButton = true;
 
         public SocialQueueConfig QuickJoinConfig;
         public SquelchInfo Squelch;
         public RafSystemFeatureInfo RAFSystem;
         public List<GameRuleValuePair> GameRuleValues = new();
+        public string Unknown1027;                          // related to movement lua functions used by keybinds
+        public AddonChatThrottleParams AddonChatThrottle;
 
         public struct SessionAlertConfig
         {
@@ -245,6 +261,13 @@ namespace Game.Networking.Packets
             public uint DaysInCycle;
             public uint Unknown1007;
         }
+
+        public struct AddonChatThrottleParams
+        {
+            public int MaxTries;
+            public int TriesRestoredPerSecond;
+            public int UsedTriesPerMessage;
+        }
     }
 
     public class FeatureSystemStatusGlueScreen : ServerPacket
@@ -277,9 +300,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(EuropaTicketSystemStatus.HasValue);
             _worldPacket.WriteBit(IsNameReservationEnabled);
             _worldPacket.WriteBit(LaunchETA.HasValue);
+            _worldPacket.WriteBit(TimerunningEnabled);
             _worldPacket.WriteBit(AddonsDisabled);
-            _worldPacket.WriteBit(Unused1000);
 
+            _worldPacket.WriteBit(Unused1000);
             _worldPacket.WriteBit(AccountSaveDataExportEnabled);
             _worldPacket.WriteBit(AccountLockedByExport);
             _worldPacket.WriteBit(!RealmHiddenAlert.IsEmpty());
@@ -304,6 +328,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(MaximumExpansionLevel);
             _worldPacket.WriteInt32(ActiveSeason);
             _worldPacket.WriteInt32(GameRuleValues.Count);
+            _worldPacket.WriteInt32(ActiveTimerunningSeasonID);
+            _worldPacket.WriteInt32(RemainingTimerunningSeasonSeconds);
             _worldPacket.WriteInt16(MaxPlayerNameQueriesPerPacket);
             _worldPacket.WriteInt16(PlayerNameQueryTelemetryInterval);
             _worldPacket.WriteUInt32((uint)PlayerNameQueryInterval.TotalSeconds);
@@ -346,6 +372,7 @@ namespace Game.Networking.Packets
         public bool LiveRegionKeyBindingsCopyEnabled;
         public bool Unknown901CheckoutRelated; // NYI
         public bool IsNameReservationEnabled; // classic only
+        public bool TimerunningEnabled; // NYI
         public bool AddonsDisabled;
         public bool Unused1000;
         public bool AccountSaveDataExportEnabled;
@@ -363,6 +390,8 @@ namespace Game.Networking.Packets
         public uint KioskSessionMinutes;
         public int ActiveSeason; // Currently active Classic season
         public List<GameRuleValuePair> GameRuleValues = new();
+        public int ActiveTimerunningSeasonID;
+        public int RemainingTimerunningSeasonSeconds;
         public short MaxPlayerNameQueriesPerPacket = 50;
         public short PlayerNameQueryTelemetryInterval = 600;
         public TimeSpan PlayerNameQueryInterval = TimeSpan.FromSeconds(10);

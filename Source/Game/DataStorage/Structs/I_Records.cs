@@ -286,6 +286,7 @@ namespace Game.DataStorage
         public int ItemAppearanceID;
         public int OrderIndex;
         public byte TransmogSourceTypeEnum;
+        public int Flags;
     }
 
     public sealed class ItemModifiedAppearanceExtraRecord

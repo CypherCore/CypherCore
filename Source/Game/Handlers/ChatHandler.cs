@@ -63,9 +63,9 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ChatMessageWhisper)]
-        void HandleChatMessageWhisper(ChatMessageWhisper packet)
+        void HandleChatMessageWhisper(ChatMessageWhisper chatMessageWhisper)
         {
-            HandleChat(ChatMsg.Whisper, packet.Language, packet.Text, packet.Target);
+            HandleChat(ChatMsg.Whisper, chatMessageWhisper.Language, chatMessageWhisper.Text, chatMessageWhisper.Target, chatMessageWhisper.TargetGUID);
         }
 
         [WorldPacketHandler(ClientOpcodes.ChatMessageChannel)]
@@ -80,7 +80,7 @@ namespace Game
             HandleChat(ChatMsg.Emote, Language.Universal, packet.Text);
         }
 
-        void HandleChat(ChatMsg type, Language lang, string msg, string target = "", ObjectGuid channelGuid = default)
+        void HandleChat(ChatMsg type, Language lang, string msg, string target = "", ObjectGuid targetGuid = default)
         {
             Player sender = GetPlayer();
 
@@ -204,15 +204,22 @@ namespace Game
                     break;
                 case ChatMsg.Whisper:
                     // @todo implement cross realm whispers (someday)
-                    ExtendedPlayerName extName = ObjectManager.ExtractExtendedPlayerName(target);
-
-                    if (!ObjectManager.NormalizePlayerName(ref extName.Name))
+                    Player receiver = null;
+                    if (!targetGuid.IsEmpty())
+                        receiver = Global.ObjAccessor.FindConnectedPlayer(targetGuid);
+                    else
                     {
-                        SendChatPlayerNotfoundNotice(target);
-                        break;
+                        ExtendedPlayerName extName = ObjectManager.ExtractExtendedPlayerName(target);
+
+                        if (!ObjectManager.NormalizePlayerName(ref extName.Name))
+                        {
+                            SendChatPlayerNotfoundNotice(target);
+                            break;
+                        }
+                        
+                        receiver = Global.ObjAccessor.FindPlayerByName(extName.Name);
                     }
 
-                    Player receiver = Global.ObjAccessor.FindPlayerByName(extName.Name);
                     if (receiver == null || (lang != Language.Addon && !receiver.IsAcceptWhispers() && receiver.GetSession().HasPermission(RBACPermissions.CanFilterWhispers) && !receiver.IsInWhisperWhiteList(sender.GetGUID())))
                     {
                         SendChatPlayerNotfoundNotice(target);
@@ -331,7 +338,7 @@ namespace Game
                             return;
                         }
                     }
-                    Channel chn = !channelGuid.IsEmpty() ? ChannelManager.GetChannelForPlayerByGuid(channelGuid, sender) : ChannelManager.GetChannelForPlayerByNamePart(target, sender);
+                    Channel chn = !targetGuid.IsEmpty() ? ChannelManager.GetChannelForPlayerByGuid(targetGuid, sender) : ChannelManager.GetChannelForPlayerByNamePart(target, sender);
                     if (chn != null)
                     {
                         var chatChannel = CliDB.ChatChannelsStorage.LookupByKey(chn.GetChannelId());
@@ -373,10 +380,23 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ChatAddonMessageTargeted)]
         void HandleChatAddonMessageTargeted(ChatAddonMessageTargeted chatAddonMessageTargeted)
         {
-            HandleChatAddon(chatAddonMessageTargeted.Params.Type, chatAddonMessageTargeted.Params.Prefix, chatAddonMessageTargeted.Params.Text, chatAddonMessageTargeted.Params.IsLogged, chatAddonMessageTargeted.Target, chatAddonMessageTargeted.ChannelGUID);
+            switch (chatAddonMessageTargeted.Params.Type)
+            {
+                case ChatMsg.Whisper:
+                    HandleChatAddon(chatAddonMessageTargeted.Params.Type, chatAddonMessageTargeted.Params.Prefix, chatAddonMessageTargeted.Params.Text,
+                        chatAddonMessageTargeted.Params.IsLogged, chatAddonMessageTargeted.PlayerName, chatAddonMessageTargeted.PlayerGUID);
+                    break;
+                case ChatMsg.Channel:
+                    HandleChatAddon(chatAddonMessageTargeted.Params.Type, chatAddonMessageTargeted.Params.Prefix, chatAddonMessageTargeted.Params.Text,
+                        chatAddonMessageTargeted.Params.IsLogged, chatAddonMessageTargeted.ChannelName, chatAddonMessageTargeted.ChannelGUID);
+                    break;
+                default:
+                    Log.outError(LogFilter.Misc, $"HandleChatAddonMessageTargetedOpcode: unknown addon message type {chatAddonMessageTargeted.Params.Type}");
+                    break;
+            }
         }
 
-        void HandleChatAddon(ChatMsg type, string prefix, string text, bool isLogged, string target = "", ObjectGuid? channelGuid = null)
+        void HandleChatAddon(ChatMsg type, string prefix, string text, bool isLogged, string target = "", ObjectGuid? targetGuid = null)
         {
             Player sender = GetPlayer();
 
@@ -403,12 +423,19 @@ namespace Game
                     break;
                 case ChatMsg.Whisper:
                     // @todo implement cross realm whispers (someday)
-                    ExtendedPlayerName extName = ObjectManager.ExtractExtendedPlayerName(target);
+                    Player receiver = null;
+                    if (targetGuid.HasValue && !targetGuid.Value.IsEmpty())                    
+                        receiver = Global.ObjAccessor.FindConnectedPlayer(targetGuid.Value);                    
+                    else
+                    {
+                        ExtendedPlayerName extName = ObjectManager.ExtractExtendedPlayerName(target);
 
-                    if (!ObjectManager.NormalizePlayerName(ref extName.Name))
-                        break;
+                        if (!ObjectManager.NormalizePlayerName(ref extName.Name))
+                            break;
 
-                    Player receiver = Global.ObjAccessor.FindPlayerByName(extName.Name);
+                        receiver = Global.ObjAccessor.FindPlayerByName(extName.Name);
+                    }
+
                     if (receiver == null)
                         break;
 
@@ -440,7 +467,7 @@ namespace Game
                     break;
                 }
                 case ChatMsg.Channel:
-                    Channel chn = channelGuid.HasValue ? ChannelManager.GetChannelForPlayerByGuid(channelGuid.Value, sender) : ChannelManager.GetChannelForPlayerByNamePart(target, sender);
+                    Channel chn = targetGuid.HasValue ? ChannelManager.GetChannelForPlayerByGuid(targetGuid.Value, sender) : ChannelManager.GetChannelForPlayerByNamePart(target, sender);
                     if (chn != null)
                         chn.AddonSay(sender.GetGUID(), prefix, text, isLogged);
                     break;

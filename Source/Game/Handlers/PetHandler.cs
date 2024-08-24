@@ -593,6 +593,20 @@ namespace Game
             }
         }
 
+        void HandlePetAbandonByNumber(PetAbandonByNumber petAbandonByNumber)
+        {
+            Pet pet = _player.GetPet();
+            if (pet != null)
+            {
+                if (pet.IsHunterPet() && pet.m_unitData.PetNumber == petAbandonByNumber.PetNumber)
+                    _player.RemovePet(pet, PetSaveMode.AsDeleted);
+            }
+            else
+            {
+                _player.DeletePetFromDB(petAbandonByNumber.PetNumber);
+            }
+        }
+
         [WorldPacketHandler(ClientOpcodes.PetSpellAutocast, Processing = PacketProcessing.Inplace)]
         void HandlePetSpellAutocast(PetSpellAutocast packet)
         {

@@ -40,6 +40,18 @@ namespace Game.Networking.Packets
         public ObjectGuid Pet;
     }
 
+    class PetAbandonByNumber : ClientPacket
+    {
+        public uint PetNumber;
+
+        public PetAbandonByNumber(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            PetNumber = _worldPacket.ReadUInt32();
+        }
+    }
+
     class PetStopAttack : ClientPacket
     {
         public PetStopAttack(WorldPacket packet) : base(packet) { }
@@ -271,7 +283,7 @@ namespace Game.Networking.Packets
             TargetGUID = _worldPacket.ReadPackedGuid();
         }
     }
-    
+
     class PetCancelAura : ClientPacket
     {
         public PetCancelAura(WorldPacket packet) : base(packet) { }
@@ -354,7 +366,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8((byte)ReactState);
         }
     }
-    
+
     //Structs
     public class PetSpellCooldown
     {

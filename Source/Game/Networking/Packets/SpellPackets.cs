@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Game.DataStorage;
 using Game.Entities;
 using Game.Spells;
 using System;
@@ -1378,11 +1379,15 @@ namespace Game.Networking.Packets
             TuningType = ContentTuningType.CreatureToPlayerDamage;
             PlayerLevelDelta = (short)target.m_activePlayerData.ScalingPlayerLevelDelta;
             PlayerItemLevel = (ushort)target.GetAverageItemLevel();
-            ScalingHealthItemLevelCurveID = (ushort)target.m_unitData.ScalingHealthItemLevelCurveID;
+            var contentTuning = CliDB.ContentTuningStorage.LookupByKey(creatureDifficulty.ContentTuningID);
+            if (contentTuning != null)
+            {
+                ScalingHealthItemLevelCurveID = (uint)contentTuning.HealthItemLevelCurveID;
+                TargetContentTuningID = contentTuning.Id;
+            }
             TargetLevel = (byte)target.GetLevel();
             Expansion = (byte)creatureDifficulty.HealthScalingExpansion;
             TargetScalingLevelDelta = (sbyte)attacker.m_unitData.ScalingLevelDelta;
-            TargetContentTuningID = creatureDifficulty.ContentTuningID;
             return true;
         }
 
@@ -1394,11 +1399,15 @@ namespace Game.Networking.Packets
             TuningType = ContentTuningType.PlayerToCreatureDamage;
             PlayerLevelDelta = (short)attacker.m_activePlayerData.ScalingPlayerLevelDelta;
             PlayerItemLevel = (ushort)attacker.GetAverageItemLevel();
-            ScalingHealthItemLevelCurveID = (ushort)target.m_unitData.ScalingHealthItemLevelCurveID;
+            var contentTuning = CliDB.ContentTuningStorage.LookupByKey(creatureDifficulty.ContentTuningID);
+            if (contentTuning != null)
+            {
+                ScalingHealthItemLevelCurveID = (uint)contentTuning.HealthItemLevelCurveID;
+                TargetContentTuningID = contentTuning.Id;
+            }
             TargetLevel = (byte)target.GetLevel();
             Expansion = (byte)creatureDifficulty.HealthScalingExpansion;
             TargetScalingLevelDelta = (sbyte)target.m_unitData.ScalingLevelDelta;
-            TargetContentTuningID = creatureDifficulty.ContentTuningID;
             return true;
         }
 

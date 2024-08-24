@@ -417,6 +417,12 @@ namespace Game
                 return;
             }
 
+            if (charCreate.CreateInfo.TimerunningSeasonID != 0)
+            {
+                SendCharCreate(ResponseCodes.CharCreateTimerunning);
+                return;
+            }
+
             CharacterCreateInfo createInfo = charCreate.CreateInfo;
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHECK_NAME);
             stmt.AddValue(0, charCreate.CreateInfo.Name);

@@ -15,7 +15,7 @@ namespace Game.DataStorage
         public uint Id;
         public short InstanceID;
         public AchievementFaction Faction;
-        public ushort Supercedes;
+        public int Supercedes;
         public ushort Category;
         public byte MinimumCriteria;
         public byte Points;

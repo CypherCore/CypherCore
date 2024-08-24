@@ -1286,13 +1286,19 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt64(TotalTime);
-            _worldPacket.WriteInt64(TimeLeft);
             _worldPacket.WriteInt32((int)Type);
+            _worldPacket.WriteInt64(TimeLeft);
+            _worldPacket.WriteBit(PlayerGuid.HasValue);
+            _worldPacket.FlushBits();
+
+            if (PlayerGuid.HasValue)
+                _worldPacket.WritePackedGuid(PlayerGuid.Value);
         }
 
         public long TotalTime;
         public long TimeLeft;
         public CountdownTimerType Type;
+        public ObjectGuid? PlayerGuid;
     }
 
     class QueryCountdownTimer : ClientPacket

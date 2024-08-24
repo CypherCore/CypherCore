@@ -129,6 +129,7 @@ namespace Game
                 data.Status = TaxiNodeStatus.Learned;
                 SendPacket(data);
 
+                GetPlayer().UpdateCriteria(CriteriaType.LearnTaxiNode, curloc);
                 return true;
             }
             else

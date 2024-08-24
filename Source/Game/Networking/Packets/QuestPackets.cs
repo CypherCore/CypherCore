@@ -492,6 +492,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(PortraitTurnInText.GetByteCount(), 10);
             _worldPacket.WriteBits(PortraitTurnInName.GetByteCount(), 8);
             _worldPacket.WriteBit(AutoLaunched);
+            _worldPacket.WriteBit(FromContentPush);
             _worldPacket.WriteBit(false);   // unused in client
             _worldPacket.WriteBit(StartCheat);
             _worldPacket.WriteBit(DisplayPopup);
@@ -539,6 +540,7 @@ namespace Game.Networking.Packets
         public bool DisplayPopup;
         public bool StartCheat;
         public bool AutoLaunched;
+        public bool FromContentPush;
     }
 
     public class QuestGiverRequestItems : ServerPacket

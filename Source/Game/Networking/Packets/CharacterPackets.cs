@@ -202,6 +202,7 @@ namespace Game.Networking.Packets
                 data.WriteInt32(MailSenderTypes.Count);
                 data.WriteUInt32(OverrideSelectScreenFileDataID);
                 PersonalTabard.Write(data);
+                data.WriteInt32(TimerunningSeasonID);
 
                 foreach (ChrCustomizationChoice customization in Customizations)
                 {
@@ -255,6 +256,7 @@ namespace Game.Networking.Packets
             public int Unknown703;
             public int LastLoginVersion;
             public uint OverrideSelectScreenFileDataID;
+            public int TimerunningSeasonID;
             public uint PetCreatureDisplayId;
             public uint PetExperienceLevel;
             public uint PetCreatureFamilyId;
@@ -386,7 +388,7 @@ namespace Game.Networking.Packets
             CreateInfo.ClassId = (Class)_worldPacket.ReadUInt8();
             CreateInfo.Sex = (Gender)_worldPacket.ReadUInt8();
             var customizationCount = _worldPacket.ReadUInt32();
-
+            CreateInfo.TimerunningSeasonID = _worldPacket.ReadInt32();
             CreateInfo.Name = _worldPacket.ReadString(nameLength);
             if (CreateInfo.TemplateSet.HasValue)
                 CreateInfo.TemplateSet = _worldPacket.ReadUInt32();
@@ -1137,6 +1139,7 @@ namespace Game.Networking.Packets
         public Gender Sex = Gender.None;
         public Array<ChrCustomizationChoice> Customizations = new(250);
         public uint? TemplateSet;
+        public int TimerunningSeasonID;
         public bool IsTrialBoost;
         public bool UseNPE;
         public bool Unused1026;

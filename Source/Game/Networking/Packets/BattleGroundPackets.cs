@@ -22,7 +22,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(PreviousArenaSeason);
             _worldPacket.WriteInt32(ConquestWeeklyProgressCurrencyID);
             _worldPacket.WriteInt32(PvpSeasonID);
+            _worldPacket.WriteInt32(Unknown1027_1);
             _worldPacket.WriteBit(WeeklyRewardChestsEnabled);
+            _worldPacket.WriteBit(Unknown1027_2);
+            _worldPacket.WriteBit(Unknown1027_3);
             _worldPacket.FlushBits();
         }
 
@@ -32,7 +35,10 @@ namespace Game.Networking.Packets
         public int CurrentArenaSeason;
         public int PvpSeasonID;
         public int ConquestWeeklyProgressCurrencyID;
+        public int Unknown1027_1;
         public bool WeeklyRewardChestsEnabled;
+        public bool Unknown1027_2;
+        public bool Unknown1027_3;
     }
 
     public class AreaSpiritHealerQuery : ClientPacket

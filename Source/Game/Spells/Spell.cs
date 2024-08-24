@@ -4729,7 +4729,7 @@ namespace Game.Spells
                     continue;
                 }
 
-                unitCaster->ModifyPower(cost.Power, -cost.Amount);
+                unitCaster.ModifyPower(cost.Power, -cost.Amount);
             }
         }
 

@@ -35,7 +35,8 @@ namespace Framework.Constants
     public enum PetStableFlags
     {
         Active = 0x1,
-        Inactive = 0x2
+        Inactive = 0x2,
+        Favorite = 0x8
     }
 
     public enum PetSpellState

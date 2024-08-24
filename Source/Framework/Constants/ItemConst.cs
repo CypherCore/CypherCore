@@ -415,7 +415,7 @@ namespace Framework.Constants
         CraftingReagentSlot12 = 55,
         CraftingReagentSlot13 = 56,
         CraftingReagentSlot14 = 57,
-
+        Reforge = 58,
 
         Max
     }
@@ -558,6 +558,11 @@ namespace Framework.Constants
         TemplateCharacter2 = 98,
         TemplateCharacter3 = 99,
         TemplateCharacter4 = 100,
+        DungeonNormalJackpot = 101,
+        DungeonHeroicJackpot = 102,
+        DungeonMythicJackpot = 103,
+        Delves = 104,
+        Timerunning = 105,
 
         Max
     }

@@ -565,25 +565,6 @@ namespace Game.Networking.Packets
     }
 
     //Structs
-    public class PlayerGuidLookupHint
-    {
-        public void Write(WorldPacket data)
-        {
-            data.WriteBit(VirtualRealmAddress.HasValue);
-            data.WriteBit(NativeRealmAddress.HasValue);
-            data.FlushBits();
-
-            if (VirtualRealmAddress.HasValue)
-                data.WriteUInt32(VirtualRealmAddress.Value);
-
-            if (NativeRealmAddress.HasValue)
-                data.WriteUInt32(NativeRealmAddress.Value);
-        }
-
-        public uint? VirtualRealmAddress = new(); // current realm (?) (identifier made from the Index, BattleGroup and Region)
-        public uint? NativeRealmAddress = new(); // original realm (?) (identifier made from the Index, BattleGroup and Region)
-    }
-
     public class PlayerGuidLookupData
     {
         public bool Initialize(ObjectGuid guid, Player player = null)
@@ -603,6 +584,7 @@ namespace Game.Networking.Packets
                 Sex = player.GetNativeGender();
                 ClassID = player.GetClass();
                 Level = (byte)player.GetLevel();
+                TimerunningSeasonID = player.m_activePlayerData.TimerunningSeasonID;
 
                 DeclinedNames names = player.GetDeclinedNames();
                 if (names != null)
@@ -651,6 +633,7 @@ namespace Game.Networking.Packets
             data.WriteUInt8((byte)ClassID);
             data.WriteUInt8(Level);
             data.WriteUInt8(Unused915);
+            data.WriteInt32(TimerunningSeasonID);
             data.WriteString(Name);
         }
 
@@ -666,6 +649,7 @@ namespace Game.Networking.Packets
         public Class ClassID = Class.None;
         public byte Level;
         public byte Unused915;
+        public int TimerunningSeasonID;
         public DeclinedName DeclinedNames = new();
     }
 
