@@ -226,7 +226,11 @@ namespace Game.Entities
         public void AddHeirloom(uint itemId, HeirloomPlayerFlags flags)
         {
             if (UpdateAccountHeirlooms(itemId, flags))
+            {
+                _owner.GetPlayer().UpdateCriteria(CriteriaType.LearnHeirloom, itemId);
+                _owner.GetPlayer().UpdateCriteria(CriteriaType.LearnAnyHeirloom, 1);
                 _owner.GetPlayer().AddHeirloom(itemId, (uint)flags);
+            }
         }
 
         public bool HasHeirloom(uint itemId)

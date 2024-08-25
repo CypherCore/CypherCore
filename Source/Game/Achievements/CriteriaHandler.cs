@@ -133,6 +133,7 @@ namespace Game.Achievements
                     case CriteriaType.DefeatDungeonEncounter:
                     case CriteriaType.PlaceGarrisonBuilding:
                     case CriteriaType.ActivateAnyGarrisonBuilding:
+                    case CriteriaType.LearnAnyHeirloom:
                     case CriteriaType.HonorLevelIncrease:
                     case CriteriaType.PrestigeLevelIncrease:
                     case CriteriaType.LearnAnyTransmogInSlot:
@@ -260,6 +261,7 @@ namespace Game.Achievements
                     case CriteriaType.EnterArea:
                     case CriteriaType.LeaveArea:
                     case CriteriaType.RecruitGarrisonFollower:
+                    case CriteriaType.LearnHeirloom:
                     case CriteriaType.ActivelyReachLevel:
                     case CriteriaType.CollectTransmogSetFromGroup:
                     case CriteriaType.EnterTopLevelArea:
@@ -400,7 +402,6 @@ namespace Game.Achievements
                     case CriteriaType.LevelChangedForGarrisonFollower:
                     case CriteriaType.LearnToy:
                     case CriteriaType.LearnAnyToy:
-                    case CriteriaType.LearnAnyHeirloom:
                     case CriteriaType.FindResearchObject:
                     case CriteriaType.ExhaustAnyResearchSite:
                     case CriteriaType.CompleteInternalCriteria:
@@ -792,6 +793,8 @@ namespace Game.Achievements
                 case CriteriaType.BattlePetReachLevel:
                 case CriteriaType.ActivelyEarnPetLevel:
                 case CriteriaType.DefeatDungeonEncounter:
+                case CriteriaType.LearnHeirloom:
+                case CriteriaType.LearnAnyHeirloom:
                 case CriteriaType.LearnAnyTransmogInSlot:
                 case CriteriaType.ParagonLevelIncreaseWithFaction:
                 case CriteriaType.PlayerHasEarnedHonor:
