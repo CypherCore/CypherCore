@@ -2408,8 +2408,7 @@ namespace Game.Entities
                 return;
 
             m_summon_expire = GameTime.GetGameTime() + PlayerConst.MaxPlayerSummonDelay;
-            m_summon_location = new WorldLocation(summoner);
-            m_summon_instanceId = summoner.GetInstanceId();
+            m_summon_location = new() { Location = new WorldLocation(summoner), InstanceId = summoner.GetInstanceId() };
 
             SummonRequest summonRequest = new();
             summonRequest.SummonerGUID = summoner.GetGUID();
@@ -2491,7 +2490,7 @@ namespace Game.Entities
             UpdateCriteria(CriteriaType.AcceptSummon, 1);
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Summon);
 
-            TeleportTo(m_summon_location, 0, m_summon_instanceId);
+            TeleportTo(m_summon_location);
 
             broadcastSummonResponse(true);
         }
@@ -5840,11 +5839,10 @@ namespace Game.Entities
 
         public void SaveRecallPosition()
         {
-            m_recall_location = new WorldLocation(this);
-            m_recall_instanceId = GetInstanceId();
+            m_recall_location = new TeleportLocation() { Location = new WorldLocation(this), InstanceId = GetInstanceId() };
         }
 
-        public void Recall() { TeleportTo(m_recall_location, 0, m_recall_instanceId); }
+        public void Recall() { TeleportTo(m_recall_location); }
 
         public uint GetSaveTimer() { return m_nextSave; }
         void SetSaveTimer(uint timer) { m_nextSave = timer; }
@@ -7649,7 +7647,7 @@ namespace Game.Entities
             return homebind;
         }
 
-        public WorldLocation GetRecall()
+        public TeleportLocation GetRecall()
         {
             return m_recall_location;
         }

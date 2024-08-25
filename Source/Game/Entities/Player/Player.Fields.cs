@@ -129,8 +129,7 @@ namespace Game.Entities
 
         // Player summoning
         long m_summon_expire;
-        WorldLocation m_summon_location;
-        uint m_summon_instanceId;
+        TeleportLocation m_summon_location;
 
         RestMgr _restMgr;
 
@@ -216,8 +215,7 @@ namespace Game.Entities
         byte m_fishingSteps;
 
         // Recall position
-        WorldLocation m_recall_location;
-        uint m_recall_instanceId;
+        TeleportLocation m_recall_location;
         WorldLocation homebind = new();
         uint homebindAreaId;
         uint m_HomebindTimer;
