@@ -262,6 +262,8 @@ namespace Game.Entities
 
         public uint DecalPropertiesId;
 
+        public uint? SpellForVisuals;
+
         public uint TimeToTarget;
         public uint TimeToTargetScale;
 
@@ -286,7 +288,6 @@ namespace Game.Entities
     public class AreaTriggerSpawn : SpawnData
     {
         public new AreaTriggerId Id;
-        public uint? SpellForVisuals;
 
         public AreaTriggerSpawn() : base(SpawnObjectType.AreaTrigger) { }
     }

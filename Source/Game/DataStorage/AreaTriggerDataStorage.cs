@@ -122,9 +122,9 @@ namespace Game.DataStorage
 
             //                                                              0   1         2              3                    4
             SQLResult areatriggerCreateProperties = DB.World.Query("SELECT Id, IsCustom, AreaTriggerId, IsAreatriggerCustom, Flags, " +
-                //5            6             7             8              9       10         11                 12            13 +
-                "MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, AnimId, AnimKitId, DecalPropertiesId, TimeToTarget, TimeToTargetScale, " +
-                //14     15          16          17          18          19          20          21          22          23
+                //5            6             7             8              9       10         11                 12               13            14
+                "MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, AnimId, AnimKitId, DecalPropertiesId, SpellForVisuals, TimeToTarget, TimeToTargetScale, " +
+                //15     16          17          18          19          20          21          22          23          24
                 "Shape, ShapeData0, ShapeData1, ShapeData2, ShapeData3, ShapeData4, ShapeData5, ShapeData6, ShapeData7, ScriptName FROM `areatrigger_create_properties`");
             if (!areatriggerCreateProperties.IsEmpty())
             {
@@ -139,7 +139,7 @@ namespace Game.DataStorage
 
                     createProperties.Flags = (AreaTriggerCreatePropertiesFlag)areatriggerCreateProperties.Read<uint>(4);
 
-                    AreaTriggerShapeType shape = (AreaTriggerShapeType)areatriggerCreateProperties.Read<byte>(14);
+                    AreaTriggerShapeType shape = (AreaTriggerShapeType)areatriggerCreateProperties.Read<byte>(15);
 
                     if (areaTriggerId.Id != 0 && createProperties.Template == null)
                     {
@@ -173,17 +173,27 @@ namespace Game.DataStorage
                     createProperties.AnimKitId = areatriggerCreateProperties.Read<uint>(10);
                     createProperties.DecalPropertiesId = areatriggerCreateProperties.Read<uint>(11);
 
-                    createProperties.TimeToTarget = areatriggerCreateProperties.Read<uint>(12);
-                    createProperties.TimeToTargetScale = areatriggerCreateProperties.Read<uint>(13);
+                    if (!areatriggerCreateProperties.IsNull(12))
+                    {
+                        createProperties.SpellForVisuals = areatriggerCreateProperties.Read<uint>(12);
+                        if (!Global.SpellMgr.HasSpellInfo(createProperties.SpellForVisuals.Value, Difficulty.None))
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties` has AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) with invalid SpellForVisual {createProperties.SpellForVisuals.Value}, set to none.");
+                            createProperties.SpellForVisuals = null;
+                        }
+                    }
+
+                    createProperties.TimeToTarget = areatriggerCreateProperties.Read<uint>(13);
+                    createProperties.TimeToTargetScale = areatriggerCreateProperties.Read<uint>(14);
 
                     createProperties.Shape.TriggerType = shape;
                     unsafe
                     {
                         for (byte i = 0; i < SharedConst.MaxAreatriggerEntityData; ++i)
-                            createProperties.Shape.DefaultDatas.Data[i] = areatriggerCreateProperties.Read<float>(15 + i);
+                            createProperties.Shape.DefaultDatas.Data[i] = areatriggerCreateProperties.Read<float>(16 + i);
                     }
 
-                    createProperties.ScriptId = Global.ObjectMgr.GetScriptId(areatriggerCreateProperties.Read<string>(23));
+                    createProperties.ScriptId = Global.ObjectMgr.GetScriptId(areatriggerCreateProperties.Read<string>(24));
 
                     if (shape == AreaTriggerShapeType.Polygon)
                     {
@@ -274,8 +284,8 @@ namespace Game.DataStorage
 
             uint oldMSTime = Time.GetMSTime();
             // Load area trigger positions (to put them on the server)
-            //                                         0        1                              2         3      4                  5     6     7     8            9              10       11          12               13
-            SQLResult result = DB.World.Query("SELECT SpawnId, AreaTriggerCreatePropertiesId, IsCustom, MapId, SpawnDifficulties, PosX, PosY, PosZ, Orientation, PhaseUseFlags, PhaseId, PhaseGroup, SpellForVisuals, ScriptName FROM `areatrigger`");
+            //                                         0        1                              2         3      4                  5     6     7     8            9              10       11          12
+            SQLResult result = DB.World.Query("SELECT SpawnId, AreaTriggerCreatePropertiesId, IsCustom, MapId, SpawnDifficulties, PosX, PosY, PosZ, Orientation, PhaseUseFlags, PhaseId, PhaseGroup, ScriptName FROM `areatrigger`");
             if (!result.IsEmpty())
             {
                 do
@@ -344,17 +354,7 @@ namespace Game.DataStorage
                     spawn.PhaseId = result.Read<uint>(10);
                     spawn.PhaseGroup = result.Read<uint>(11);
 
-                    if (!result.IsNull(12))
-                    {
-                        spawn.SpellForVisuals = result.Read<uint>(12);
-                        if (!Global.SpellMgr.HasSpellInfo(spawn.SpellForVisuals.Value, Difficulty.None))
-                        {
-                            Log.outError(LogFilter.Sql, $"Table `areatrigger` has areatrigger (GUID: {spawnId}) with invalid SpellForVisual {spawn.SpellForVisuals}, set to none.");
-                            spawn.SpellForVisuals = null;
-                        }
-                    }
-
-                    spawn.ScriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(13));
+                    spawn.ScriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(12));
                     spawn.spawnGroupData = Global.ObjectMgr.GetLegacySpawnGroup();
 
                     // Add the trigger to a map::cell map, which is later used by GridLoader to query

@@ -128,8 +128,17 @@ namespace Game.Entities
 
             if (spellInfo != null && !IsStaticSpawn())
                 SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.SpellID), spellInfo.Id);
-            if (spellInfo != null)
-                SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.SpellForVisuals), spellInfo.Id);
+
+            SpellInfo spellForVisuals = spellInfo;
+            if (GetCreateProperties().SpellForVisuals.HasValue)
+            {
+                spellForVisuals = Global.SpellMgr.GetSpellInfo(GetCreateProperties().SpellForVisuals.Value, Difficulty.None);
+
+                if (spellForVisuals != null)
+                    spellVisual.SpellXSpellVisualID = spellForVisuals.GetSpellXSpellVisualId();
+            }
+            if (spellForVisuals != null)
+                SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.SpellForVisuals), spellForVisuals.Id);
 
             SpellCastVisualField spellCastVisual = areaTriggerData.ModifyValue(m_areaTriggerData.SpellVisual);
             SetUpdateFieldValue(ref spellCastVisual.SpellXSpellVisualID, spellVisual.SpellXSpellVisualID);
@@ -268,15 +277,7 @@ namespace Game.Entities
             if (createProperties == null)
                 return false;
 
-            SpellInfo spellInfo = null;
-            SpellCastVisual spellVisual = default;
-            if (spawnData.SpellForVisuals.HasValue)
-            {
-                spellInfo = Global.SpellMgr.GetSpellInfo(spawnData.SpellForVisuals.Value, Difficulty.None);
-                if (spellInfo != null)
-                    spellVisual.SpellXSpellVisualID = spellInfo.GetSpellXSpellVisualId();
-            }
-            return Create(spawnData.Id, map, spawnData.SpawnPoint, -1, spawnData, null, null, spellVisual, spellInfo);
+            return Create(spawnData.Id, map, spawnData.SpawnPoint, -1, spawnData);
         }
 
         public override void Update(uint diff)
