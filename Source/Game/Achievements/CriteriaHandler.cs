@@ -1066,6 +1066,7 @@ namespace Game.Achievements
                 case CriteriaType.UseItem:
                 case CriteriaType.LootItem:
                 case CriteriaType.EquipItem:
+                case CriteriaType.LearnHeirloom:
                     if (miscValue1 == 0 || criteria.Entry.Asset != miscValue1)
                         return false;
                     break;
