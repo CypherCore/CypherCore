@@ -974,7 +974,7 @@ namespace Game.Entities
 
         public void InitializeReactState()
         {
-            if (IsTotem() || IsTrigger() || IsCritter() || IsSpiritService())
+            if (IsTotem() || IsTrigger() || IsCritter() || IsSpiritService() || _staticFlags.HasFlag(CreatureStaticFlags.IgnoreCombat))
                 SetReactState(ReactStates.Passive);
             else
                 SetReactState(ReactStates.Aggressive);
