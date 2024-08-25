@@ -1515,6 +1515,9 @@ namespace Game.Entities
 
         public bool CanCastSpellWhileMoving(SpellInfo spellInfo)
         {
+            if (spellInfo.HasAttribute(SpellAttr13.DoNotAllowDisableMovementInterrupt))
+                return false;
+
             if (HasAuraTypeWithAffectMask(AuraType.CastWhileWalking, spellInfo))
                 return true;
 
