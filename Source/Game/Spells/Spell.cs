@@ -2632,16 +2632,9 @@ namespace Game.Spells
 
             m_casttime = CallScriptCalcCastTimeHandlers(m_spellInfo.CalcCastTime(this));
 
+            SpellCastResult movementResult = SpellCastResult.SpellCastOk;
             if (m_caster.IsUnit() && m_caster.ToUnit().IsMoving())
-            {
-                result = CheckMovement();
-                if (result != SpellCastResult.SpellCastOk)
-                {
-                    SendCastResult(result);
-                    Finish(result);
-                    return result;
-                }
-            }
+                movementResult = CheckMovement();
 
             // Creatures focus their target when possible
             if (m_casttime != 0 && m_caster.IsCreature() && !m_spellInfo.IsNextMeleeSwingSpell() && !IsAutoRepeat() && !m_caster.ToUnit().HasUnitFlag(UnitFlags.Possessed))
@@ -2652,6 +2645,24 @@ namespace Game.Spells
                     m_caster.ToCreature().SetSpellFocus(this, m_targets.GetObjectTarget());
                 else
                     m_caster.ToCreature().SetSpellFocus(this, null);
+            }
+
+            if (movementResult != SpellCastResult.SpellCastOk)
+            {
+                if (m_caster.ToUnit().IsControlledByPlayer() || !CanStopMovementForSpellCasting(m_caster.ToUnit().GetMotionMaster().GetCurrentMovementGeneratorType()))
+                {
+                    SendCastResult(movementResult);
+                    Finish(movementResult);
+                    return movementResult;
+                }
+                else
+                {
+                    // Creatures (not controlled) give priority to spell casting over movement.
+                    // We assume that the casting is always valid and the current movement
+                    // is stopped immediately (because spells are updated before movement, so next Unit::Update would cancel the spell before stopping movement)
+                    // and future attempts are stopped by by Unit::IsMovementPreventedByCasting in movement generators to prevent casting interruption.
+                    m_caster.ToUnit().StopMoving();
+                }
             }
 
             CallScriptOnPrecastHandler();
@@ -3420,16 +3431,9 @@ namespace Game.Spells
                 return;
             }
 
-            // check if the player caster has moved before the spell finished
-            // with the exception of spells affected with SPELL_AURA_CAST_WHILE_WALKING effect
+            // check if the unit caster has moved before the spell finished
             if (m_timer != 0 && m_caster.IsUnit() && m_caster.ToUnit().IsMoving() && CheckMovement() != SpellCastResult.SpellCastOk)
-            {
-                // if charmed by creature, trust the AI not to cheat and allow the cast to proceed
-                // @todo this is a hack, "creature" movesplines don't differentiate turning/moving right now
-                // however, checking what type of movement the spline is for every single spline would be really expensive
-                if (!m_caster.ToUnit().GetCharmerGUID().IsCreature())
-                    Cancel();
-            }
+                Cancel();
 
             switch (m_spellState)
             {
@@ -4262,6 +4266,21 @@ namespace Game.Spells
             }
 
             return (points, type);
+        }
+
+        bool CanStopMovementForSpellCasting(MovementGeneratorType type)
+        {
+            // MovementGenerators that don't check Unit::IsMovementPreventedByCasting
+            switch (type)
+            {
+                case MovementGeneratorType.Home:
+                case MovementGeneratorType.Flight:
+                case MovementGeneratorType.Effect:    // knockbacks, jumps, falling, land/takeoff transitions
+                    return false;
+                default:
+                    break;
+            }
+            return true;
         }
 
         void UpdateSpellHealPrediction(SpellHealPrediction healPrediction, bool withPeriodic)
@@ -8309,12 +8328,6 @@ namespace Game.Spells
         public SpellCastResult CheckMovement()
         {
             if (IsTriggered())
-                return SpellCastResult.SpellCastOk;
-
-            // Creatures (not controlled) give priority to spell casting over movement.
-            // We assume that the casting is always valid and the current movement
-            // is stopped by Unit:IsmovementPreventedByCasting to prevent casting interruption.
-            if (m_caster.IsCreature() && !m_caster.ToCreature().IsControlledByPlayer())
                 return SpellCastResult.SpellCastOk;
 
             Unit unitCaster = m_caster.ToUnit();

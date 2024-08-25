@@ -3314,6 +3314,7 @@ namespace Game.Spells
         }
 
         [SpellEffectHandler(SpellEffectName.Reputation)]
+        [SpellEffectHandler(SpellEffectName.Reputation2)]
         void EffectReputation()
         {
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
@@ -3629,10 +3630,6 @@ namespace Game.Spells
             // Spells with SPELL_EFFECT_KNOCK_BACK (like Thunderstorm) can't knockback target if target has ROOT/STUN
             if (unitTarget.HasUnitState(UnitState.Root | UnitState.Stunned))
                 return;
-
-            // Instantly interrupt non melee spells being casted
-            if (unitTarget.IsNonMeleeSpellCast(true))
-                unitTarget.InterruptNonMeleeSpells(true);
 
             float ratio = 0.1f;
             float speedxy = effectInfo.MiscValue * ratio;
