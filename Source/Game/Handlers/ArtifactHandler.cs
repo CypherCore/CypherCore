@@ -141,6 +141,7 @@ namespace Game
                 artifact.InitArtifactPowers(artifact.GetTemplate().GetArtifactID(), (byte)i);
 
             artifact.SetModifier(ItemModifier.ArtifactTier, artifactTier);
+            _player.UpdateCriteria(CriteriaType.AnyArtifactPowerRankPurchased, totalPurchasedArtifactPower);
         }
 
         [WorldPacketHandler(ClientOpcodes.ArtifactSetAppearance, Processing = PacketProcessing.Inplace)]
