@@ -151,31 +151,31 @@ namespace Framework.Constants
     public enum SpellAuraInterruptFlags2
     {
         None = 0,
-        Falling = 0x01, // NYI
+        Falling = 0x01, // Implemented in Unit::UpdatePosition
         Swimming = 0x02,
         NotMoving = 0x04, // NYI
         Ground = 0x08,
         Transform = 0x10, // NYI
         Jump = 0x20,
         ChangeSpec = 0x40,
-        AbandonVehicle = 0x80, // NYI
-        StartOfEncounter = 0x100, // NYI
-        EndOfEncounter = 0x200, // NYI
+        AbandonVehicle = 0x80, // Implemented in Unit::_ExitVehicle
+        StartOfRaidEncounterAndStartOfMythicPlus = 0x100, // Implemented in Unit::AtStartOfEncounter
+        EndOfRaidEncounterAndStartOfMythicPlus = 0x200, // Implemented in Unit::AtEndOfEncounter
         Disconnect = 0x400, // NYI
-        EnteringInstance = 0x800, // NYI
-        DuelEnd = 0x1000, // NYI
-        LeaveArenaOrBattleground = 0x2000, // NYI
+        EnteringInstance = 0x800, // Implemented in Map::AddPlayerToMap
+        DuelEnd = 0x1000, // Implemented in Player::DuelComplete
+        LeaveArenaOrBattleground = 0x2000, // Implemented in Battleground::RemovePlayerAtLeave
         ChangeTalent = 0x4000,
         ChangeGlyph = 0x8000,
         SeamlessTransfer = 0x10000, // NYI
-        WarModeLeave = 0x20000, // NYI
+        WarModeLeave = 0x20000, // Implemented in Player::UpdateWarModeAuras
         TouchingGround = 0x40000, // NYI
         ChromieTime = 0x80000, // NYI
         SplineFlightOrFreeFlight = 0x100000, // NYI
-        ProcOrPeriodicAttacking = 0x200000,  // NYI
-        StartOfMythicPlusRun = 0x400000, // Implemented in Unit::AtStartOfEncounter
-        StartOfDungeonEncounter = 0x800000, // Implemented in Unit::AtStartOfEncounter - Similar to StartOfEncounter (but only with bosses, not m+ run or battleground)
-        EndOfDungeonEncounter = 0x1000000, // Implemented in Unit::AtEndOfEncounter - Similar to EndOfEncounter (but only with bosses, not m+ run or battleground)
+        ProcOrPeriodicAttacking = 0x200000, // NYI
+        ChallengeModeStart = 0x400000, // Implemented in Unit::AtStartOfEncounter
+        StartOfEncounter = 0x800000, // Implemented in Unit::AtStartOfEncounter
+        EndOfEncounter = 0x1000000, // Implemented in Unit::AtEndOfEncounter
     }
 
     // Enum with EffectRadiusIndex and their actual radius

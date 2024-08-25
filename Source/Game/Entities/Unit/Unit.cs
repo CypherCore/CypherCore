@@ -613,15 +613,20 @@ namespace Game.Entities
 
         public void AtStartOfEncounter(EncounterType type)
         {
-            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.StartOfEncounter);
-
             switch (type)
             {
                 case EncounterType.DungeonEncounter:
-                    RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.StartOfDungeonEncounter);
+                    if (GetMap().IsRaid())
+                        RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.StartOfRaidEncounterAndStartOfMythicPlus);
+                    RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.StartOfEncounter);
                     break;
                 case EncounterType.MythicPlusRun:
-                    RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.StartOfMythicPlusRun);
+                    RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.StartOfRaidEncounterAndStartOfMythicPlus);
+                    RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.EndOfRaidEncounterAndStartOfMythicPlus);
+                    RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.ChallengeModeStart);
+                    break;
+                case EncounterType.Battleground:
+                    RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.StartOfRaidEncounterAndStartOfMythicPlus);
                     break;
                 default:
                     break;
@@ -633,12 +638,12 @@ namespace Game.Entities
 
         public void AtEndOfEncounter(EncounterType type)
         {
-            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.EndOfEncounter);
-
             switch (type)
             {
                 case EncounterType.DungeonEncounter:
-                    RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.EndOfDungeonEncounter);
+                    if (GetMap().IsRaid())
+                        RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.EndOfRaidEncounterAndStartOfMythicPlus);
+                    RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.EndOfEncounter);
                     break;
                 default:
                     break;
