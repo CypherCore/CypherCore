@@ -581,7 +581,7 @@ namespace Framework.Constants
         KillPlayer = 70,  // Kill a player (no honor check)
         CompleteChallengeMode = 71,  /*NYI*/ // Complete a challenge mode on map "{Map}"
         CatchFishInFishingHole = 72,  // Catch fish in the "{GameObjects}" fishing hole
-        PlayerTriggerGameEvent = 73,  /*NYI*/ // Player will Trigger game event "{GameEvents}"
+        PlayerTriggerGameEvent = 73,  // Player will Trigger game event "{GameEvents}"
         Login = 74,  // Login (USE SPARINGLY!)
         LearnSpellFromSkillLine = 75,  // Learn spell from the "{SkillLine}" skill line
         WinDuel = 76,  // Win a duel
@@ -698,7 +698,7 @@ namespace Framework.Constants
         QualityUpgradedForGarrisonFollower = 187, /*NYI*/ // Garrison Follower: Quality Upgraded
         LearnHeirloom = 188, /*NYI*/ // Learn Heirloom "{Item}"
         LearnAnyHeirloom = 189, /*NYI*/ // Learn Any Heirloom
-        EarnArtifactXP = 190, /*NYI*/ // Earn Artifact XP
+        EarnArtifactXP = 190, // Earn Artifact XP
         AnyArtifactPowerRankPurchased = 191, /*NYI*/ // Artifact Power Ranks Purchased
         LearnTransmog = 192, /*NYI*/ // Learn Transmog "{ItemModifiedAppearance}"
         LearnAnyTransmog = 193, /*NYI*/ // Learn Any Transmog

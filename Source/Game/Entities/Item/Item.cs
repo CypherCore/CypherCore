@@ -2304,6 +2304,7 @@ namespace Game.Entities
         }
 
         public void SetArtifactXP(ulong xp) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ArtifactXP), xp); }
+
         public void GiveArtifactXp(ulong amount, Item sourceItem, ArtifactCategory artifactCategoryId)
         {
             Player owner = GetOwner();
@@ -2336,6 +2337,8 @@ namespace Game.Entities
             owner.SendPacket(artifactXpGain);
 
             SetState(ItemUpdateState.Changed, owner);
+
+            owner.UpdateCriteria(CriteriaType.EarnArtifactXP, amount);
         }
 
         public ItemContext GetContext() { return (ItemContext)(int)m_itemData.Context; }

@@ -156,6 +156,7 @@ namespace Game.Achievements
                     case CriteriaType.HealingDone:
                     case CriteriaType.EarnArtifactXPForAzeriteItem:
                     case CriteriaType.GainLevels:
+                    case CriteriaType.EarnArtifactXP:
                         SetCriteriaProgress(criteria, miscValue1, referencePlayer, ProgressType.Accumulate);
                         break;
                     case CriteriaType.KillCreature:
@@ -419,7 +420,6 @@ namespace Game.Achievements
                     case CriteriaType.EnterAreaTriggerWithActionSet:
                     case CriteriaType.StartGarrisonMission:
                     case CriteriaType.QualityUpgradedForGarrisonFollower:
-                    case CriteriaType.EarnArtifactXP:
                     case CriteriaType.AnyArtifactPowerRankPurchased:
                     case CriteriaType.CompleteResearchGarrisonTalent:
                     case CriteriaType.RecruitAnyGarrisonTroop:
@@ -803,6 +803,7 @@ namespace Game.Achievements
                 case CriteriaType.BuyItemsFromVendors:
                 case CriteriaType.SellItemsToVendors:
                 case CriteriaType.GainLevels:
+                case CriteriaType.EarnArtifactXP:
                     return progress.Counter >= requiredAmount;
                 case CriteriaType.EarnAchievement:
                 case CriteriaType.CompleteQuest:
