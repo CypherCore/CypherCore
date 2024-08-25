@@ -1933,7 +1933,7 @@ namespace Game.Entities
             bool updateVisibility = false;
 
             if (update)
-            { 
+            {
                 SendQuestUpdate(questId);
 
                 if (quest != null && quest.HasFlag(QuestFlags.UpdatePhaseshift))
@@ -1971,7 +1971,7 @@ namespace Game.Entities
             }
 
             if (update)
-            { 
+            {
                 SendQuestUpdate(questId);
 
                 if (quest != null && quest.HasFlag(QuestFlags.UpdatePhaseshift))
@@ -2483,6 +2483,11 @@ namespace Game.Entities
 
             if (updatedObjectives.Count == 1 && updatedObjectives[0].Flags2.HasFlag(QuestObjectiveFlags2.QuestBoundItem))
             {
+                // Quest source items should ignore QUEST_OBJECTIVE_FLAG_2_QUEST_BOUND_ITEM
+                Quest quest = Global.ObjectMgr.GetQuestTemplate(updatedObjectives[0].QuestID);
+                if (quest != null && quest.SourceItemId == entry)
+                    return;
+
                 hadBoundItemObjective = updatedObjectives.Count == 1 && updatedObjectives[0].Flags2.HasFlag(QuestObjectiveFlags2.QuestBoundItem);
 
                 SendQuestUpdateAddItem(itemTemplate, updatedObjectives[0], (ushort)count);
