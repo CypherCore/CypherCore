@@ -236,7 +236,15 @@ namespace Game.DataStorage
                 _conditionalChrModelsByChrModelId[conditionalChrModel.ChrModelID] = conditionalChrModel;
 
             foreach (ConditionalContentTuningRecord conditionalContentTuning in ConditionalContentTuningStorage.Values)
-                _conditionalContentTuning.Add(conditionalContentTuning.ParentContentTuningID, conditionalContentTuning);
+            {
+                if (!_conditionalContentTuning.ContainsKey(conditionalContentTuning.ParentContentTuningID))
+                    _conditionalContentTuning[conditionalContentTuning.ParentContentTuningID] = new();
+
+                _conditionalContentTuning[conditionalContentTuning.ParentContentTuningID].Add(conditionalContentTuning);
+            }
+
+            foreach (var (parentContentTuningId, conditionalContentTunings) in _conditionalContentTuning)
+                conditionalContentTunings.OrderBy(p => p.OrderIndex);
 
             foreach (ContentTuningXExpectedRecord contentTuningXExpectedStat in ContentTuningXExpectedStorage.Values)
             {
@@ -1068,9 +1076,11 @@ namespace Game.DataStorage
 
         public uint GetRedirectedContentTuningId(uint contentTuningId, uint redirectFlag)
         {
-            foreach (var conditionalContentTuning in _conditionalContentTuning.LookupByKey(contentTuningId))
-                if ((conditionalContentTuning.RedirectFlag & redirectFlag) != 0)
-                    return (uint)conditionalContentTuning.RedirectContentTuningID;
+            var conditionalContentTunings = _conditionalContentTuning.LookupByKey(contentTuningId);
+            if (conditionalContentTunings != null)
+                foreach (var conditionalContentTuning in conditionalContentTunings)
+                    if ((conditionalContentTuning.RedirectFlag & redirectFlag) != 0)
+                        return (uint)conditionalContentTuning.RedirectContentTuningID;
 
             return contentTuningId;
         }
@@ -2289,7 +2299,7 @@ namespace Game.DataStorage
         Dictionary<uint, MultiMap<uint, uint>> _chrCustomizationRequiredChoices = new();
         ChrSpecializationRecord[][] _chrSpecializationsByIndex = new ChrSpecializationRecord[(int)Class.Max + 1][];
         Dictionary<int, ConditionalChrModelRecord> _conditionalChrModelsByChrModelId = new();
-        MultiMap<uint, ConditionalContentTuningRecord> _conditionalContentTuning = new();
+        Dictionary<uint, List<ConditionalContentTuningRecord>> _conditionalContentTuning = new();
         List<(uint, int)> _contentTuningLabels = new();
         MultiMap<uint, CurrencyContainerRecord> _currencyContainers = new();
         MultiMap<uint, Vector2> _curvePoints = new();
