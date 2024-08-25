@@ -91,6 +91,12 @@ namespace Game.Scenarios
         public virtual void CompleteScenario()
         {
             SendPacket(new ScenarioCompleted(_data.Entry.Id));
+
+            DoForAllPlayers(player =>
+            {
+                player.UpdateCriteria(CriteriaType.CompleteAnyScenario, 1);
+                player.UpdateCriteria(CriteriaType.CompleteScenario, _data.Entry.Id);
+            });
         }
 
         void SetStep(ScenarioStepRecord step)
