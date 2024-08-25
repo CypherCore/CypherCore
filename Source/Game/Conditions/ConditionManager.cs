@@ -1743,6 +1743,7 @@ namespace Game
                 case ConditionTypes.Taxi:
                 case ConditionTypes.Gamemaster:
                 case ConditionTypes.PrivateObject:
+                case ConditionTypes.StringId:
                     break;
                 case ConditionTypes.DifficultyId:
                     if (!CliDB.DifficultyStorage.ContainsKey(cond.ConditionValue1))
@@ -3078,6 +3079,7 @@ namespace Game
             new ConditionTypeInfo("On Scenario Step",     true, false, false, false),
             new ConditionTypeInfo("Scene In Progress",    true, false, false, false),
             new ConditionTypeInfo("Player Condition",     true, false, false, false),
+            new ConditionTypeInfo("Private Object",       false,false, false, false),
             new ConditionTypeInfo("String ID",            true, false, false, true)
         };
 
