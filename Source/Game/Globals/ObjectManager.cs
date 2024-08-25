@@ -10119,11 +10119,14 @@ namespace Game
                     Log.outError(LogFilter.Sql, $"Table `creature_static_flags_override` has data for nonexistent creature (SpawnId: {spawnId}), skipped");
                     continue;
                 }
-
-                if (!creatureData.SpawnDifficulties.Contains(difficultyId))
+                // DIFFICULTY_NONE is always a valid fallback
+                if (difficultyId != Difficulty.None)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `creature_static_flags_override` has data for a creature that is not available for the specified DifficultyId (SpawnId: {spawnId}, DifficultyId: {difficultyId}), skipped");
-                    continue;
+                    if (!creatureData.SpawnDifficulties.Contains(difficultyId))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `creature_static_flags_override` has data for a creature that is not available for the specified DifficultyId (SpawnId: {spawnId}, DifficultyId: {difficultyId}), skipped");
+                        continue;
+                    }
                 }
 
                 CreatureStaticFlagsOverride staticFlagsOverride = new();
@@ -10571,6 +10574,7 @@ namespace Game
 
             return id;
         }
+
         public void GetTaxiPath(uint source, uint destination, out uint path, out uint cost)
         {
             var pathSet = CliDB.TaxiPathSetBySource.LookupByKey(source);
@@ -10592,6 +10596,7 @@ namespace Game
             cost = dest_i.price;
             path = dest_i.Id;
         }
+
         public uint GetTaxiMountDisplayId(uint id, Team team, bool allowed_alt_team = false)
         {
             CreatureModel mountModel = new();
@@ -10638,14 +10643,17 @@ namespace Game
         {
             return _areaTriggerStorage.LookupByKey(trigger);
         }
+
         public AccessRequirement GetAccessRequirement(uint mapid, Difficulty difficulty)
         {
             return _accessRequirementStorage.LookupByKey(MathFunctions.MakePair64(mapid, (uint)difficulty));
         }
+
         public bool IsTavernAreaTrigger(uint Trigger_ID)
         {
             return _tavernAreaTriggerStorage.Contains(Trigger_ID);
         }
+
         public AreaTriggerStruct GetGoBackTrigger(uint Map)
         {
             uint? parentId = null;
@@ -10672,6 +10680,7 @@ namespace Game
             }
             return null;
         }
+
         public AreaTriggerStruct GetMapEntranceTrigger(uint Map)
         {
             foreach (var pair in _areaTriggerStorage)
@@ -10685,27 +10694,42 @@ namespace Game
             }
             return null;
         }
+
         public SceneTemplate GetSceneTemplate(uint sceneId)
         {
             return _sceneTemplateStorage.LookupByKey(sceneId);
         }
+
         public List<TempSummonData> GetSummonGroup(uint summonerId, SummonerType summonerType, byte group)
         {
             Tuple<uint, SummonerType, byte> key = Tuple.Create(summonerId, summonerType, group);
             return _tempSummonDataStorage.LookupByKey(key);
         }
+
         public bool IsReservedName(string name)
         {
             return _reservedNamesStorage.Contains(name.ToLower());
         }
+
         public JumpChargeParams GetJumpChargeParams(int id)
         {
             return _jumpChargeParams.LookupByKey(id);
         }
+
         public CreatureStaticFlagsOverride GetCreatureStaticFlagsOverride(ulong spawnId, Difficulty difficultyId)
         {
-            return _creatureStaticFlagsOverrideStorage.LookupByKey((spawnId, difficultyId));
+            CreatureStaticFlagsOverride staticFlagsOverride = _creatureStaticFlagsOverrideStorage.LookupByKey((spawnId, difficultyId));
+            if (staticFlagsOverride != null)
+                return staticFlagsOverride;
+
+            // If there is no data for the difficulty, try to get data for the fallback difficulty
+            var difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficultyId);
+            if (difficultyEntry != null)
+                return GetCreatureStaticFlagsOverride(spawnId, (Difficulty)difficultyEntry.FallbackDifficultyID);
+
+            return null;
         }
+
         public string GetPhaseName(uint phaseId)
         {
             return _phaseNameStorage.TryGetValue(phaseId, out string value) ? value : "Unknown Name";
