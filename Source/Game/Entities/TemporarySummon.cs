@@ -223,7 +223,12 @@ namespace Game.Entities
                 }
 
                 if (!m_Properties.HasFlag(SummonPropertiesFlags.UseCreatureLevel))
-                    SetLevel(unitSummoner.GetLevel());
+                {
+                    int minLevel = m_unitData.ScalingLevelMin + m_unitData.ScalingLevelDelta;
+                    int maxLevel = m_unitData.ScalingLevelMax + m_unitData.ScalingLevelDelta;
+                    uint level = (uint)Math.Clamp(unitSummoner.GetLevel(), minLevel, maxLevel);
+                    SetLevel(level);
+                }
             }
 
             uint faction = m_Properties.Faction;
