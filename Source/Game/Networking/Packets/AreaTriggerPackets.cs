@@ -76,6 +76,20 @@ namespace Game.Networking.Packets
         public ObjectGuid TriggerGUID;
     }
 
+    class AreaTriggerPlaySpellVisual : ServerPacket
+    {
+        public ObjectGuid AreaTriggerGUID;
+        public uint SpellVisualID;
+
+        public AreaTriggerPlaySpellVisual() : base(ServerOpcodes.AreaTriggerPlaySpellVisual) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(AreaTriggerGUID);
+            _worldPacket.WriteUInt32(SpellVisualID);
+        }
+    }
+
     //Structs
     class AreaTriggerSplineInfo
     {

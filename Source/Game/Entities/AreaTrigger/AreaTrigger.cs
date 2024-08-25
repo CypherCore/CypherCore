@@ -77,6 +77,14 @@ namespace Game.Entities
             }
         }
 
+        void PlaySpellVisual(uint spellVisualId)
+        {
+            AreaTriggerPlaySpellVisual packet = new();
+            packet.AreaTriggerGUID = GetGUID();
+            packet.SpellVisualID = spellVisualId;
+            SendMessageToSet(packet, false);
+        }
+
         bool Create(AreaTriggerId areaTriggerCreatePropertiesId, Map map, Position pos, int duration, AreaTriggerSpawn spawnData = null, Unit caster = null, Unit target = null, SpellCastVisual spellVisual = default, SpellInfo spellInfo = null, Spell spell = null, AuraEffect aurEff = null)
         {
             _targetGuid = target != null ? target.GetGUID() : ObjectGuid.Empty;
