@@ -156,6 +156,7 @@ namespace Game.Achievements
                     case CriteriaType.MoneyEarnedFromAuctions:/* FIXME: for online player only currently */
                     case CriteriaType.TotalDamageTaken:
                     case CriteriaType.TotalHealReceived:
+                    case CriteriaType.CompletedLFGDungeon:
                     case CriteriaType.CompletedLFGDungeonWithStrangers:
                     case CriteriaType.DamageDealt:
                     case CriteriaType.HealingDone:
@@ -414,7 +415,6 @@ namespace Game.Achievements
                     case CriteriaType.BattlePetAchievementPointsEarned:
                     case CriteriaType.ReleasedSpirit:
                     case CriteriaType.AccountKnownPet:
-                    case CriteriaType.CompletedLFGDungeon:
                     case CriteriaType.KickInitiatorInLFGDungeon:
                     case CriteriaType.KickVoterInLFGDungeon:
                     case CriteriaType.KickTargetInLFGDungeon:
@@ -786,6 +786,7 @@ namespace Game.Achievements
                 case CriteriaType.DefeatDungeonEncounterWhileElegibleForLoot:
                 case CriteriaType.GetLootByType:
                 case CriteriaType.LearnTradeskillSkillLine:
+                case CriteriaType.CompletedLFGDungeon:
                 case CriteriaType.CompletedLFGDungeonWithStrangers:
                 case CriteriaType.DeliveredKillingBlow:
                 case CriteriaType.CurrencyGained:
@@ -937,6 +938,7 @@ namespace Game.Achievements
                 case CriteriaType.KillPlayer:
                 case CriteriaType.TotalDamageTaken:
                 case CriteriaType.TotalHealReceived:
+                case CriteriaType.CompletedLFGDungeon:
                 case CriteriaType.CompletedLFGDungeonWithStrangers:
                 case CriteriaType.GotHaircut:
                 case CriteriaType.WinDuel:

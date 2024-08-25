@@ -1430,10 +1430,12 @@ namespace Game.DungeonFinding
                     continue;
                 }
 
+                player.UpdateCriteria(CriteriaType.CompletedLFGDungeon, 1);
+
                 // Update achievements
                 if (dungeon.difficulty == Difficulty.Heroic)
                 {
-                    byte lfdRandomPlayers = 0;
+                    byte lfdRandomPlayers;
                     byte numParty = PlayersStore[guid].GetNumberOfPartyMembersAtJoin();
                     if (numParty != 0)
                         lfdRandomPlayers = (byte)(5 - numParty);
