@@ -800,8 +800,8 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            //                                         0   1      2     3     4     5
-            SQLResult result = DB.World.Query("SELECT ID, MapID, LocX, LocY, LocZ, Facing FROM world_safe_locs");
+            //                                         0   1      2     3     4     5       6
+            SQLResult result = DB.World.Query("SELECT ID, MapID, LocX, LocY, LocZ, Facing, TransportSpawnId FROM world_safe_locs");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 world locations. DB table `world_safe_locs` is empty.");
@@ -817,9 +817,23 @@ namespace Game
                     continue;
                 }
 
+                ulong? transportSpawnId = null;
+                if (!result.IsNull(6))
+                {
+                    ulong spawnId = result.Read<ulong>(6);
+                    if (Global.TransportMgr.GetTransportSpawn(spawnId) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"World location (ID: {id}) has a invalid transportSpawnID {spawnId}, skipped.");
+                        continue;
+                    }
+
+                    transportSpawnId = spawnId;
+                }
+
                 WorldSafeLocsEntry worldSafeLocs = new();
                 worldSafeLocs.Id = id;
                 worldSafeLocs.Loc = loc;
+                worldSafeLocs.TransportSpawnId = transportSpawnId;
                 _worldSafeLocs[id] = worldSafeLocs;
 
             } while (result.NextRow());
@@ -11491,6 +11505,7 @@ namespace Game
     {
         public uint Id;
         public WorldLocation Loc;
+        public ulong? TransportSpawnId;
     }
 
     public class GraveyardData

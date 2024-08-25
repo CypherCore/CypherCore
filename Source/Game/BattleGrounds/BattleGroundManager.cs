@@ -417,7 +417,7 @@ namespace Game.BattleGrounds
 
                 WorldSafeLocsEntry pos = bg.GetTeamStartPosition(Battleground.GetTeamIndexByTeamId(team));
                 Log.outDebug(LogFilter.Battleground, $"BattlegroundMgr.SendToBattleground: Sending {player.GetName()} to map {mapid}, {pos.Loc} (bgType {bgTypeId})");
-                player.TeleportTo(pos.Loc);
+                player.TeleportTo(new Entities.TeleportLocation() { Location = pos.Loc, TransportGuid = pos.TransportSpawnId.HasValue ? ObjectGuid.Create(HighGuid.Transport, pos.TransportSpawnId.Value) : ObjectGuid.Empty });
             }
             else
                 Log.outError(LogFilter.Battleground, $"BattlegroundMgr.SendToBattleground: Instance {instanceId} (bgType {bgTypeId}) not found while trying to teleport player {player.GetName()}");

@@ -4480,7 +4480,7 @@ namespace Game.Entities
             // and don't show spirit healer location
             if (closestGrave != null)
             {
-                TeleportTo(closestGrave.Loc, shouldResurrect ? TeleportToOptions.ReviveAtTeleport : 0);
+                TeleportTo(new TeleportLocation() { Location = closestGrave.Loc, TransportGuid = closestGrave.TransportSpawnId.HasValue ? ObjectGuid.Create(HighGuid.Transport, closestGrave.TransportSpawnId.Value) : ObjectGuid.Empty }, shouldResurrect ? TeleportToOptions.ReviveAtTeleport : TeleportToOptions.None);
                 if (IsDead())                                        // not send if alive, because it used in TeleportTo()
                 {
                     DeathReleaseLoc packet = new();
