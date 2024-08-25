@@ -679,6 +679,8 @@ namespace Game.Entities
                 _temporaryAppearances.Remove(itemModifiedAppearance.Id);
             }
 
+            _owner.GetPlayer().UpdateCriteria(CriteriaType.LearnAnyTransmog, 1);
+
             ItemRecord item = CliDB.ItemStorage.LookupByKey(itemModifiedAppearance.ItemID);
             if (item != null)
             {

@@ -134,6 +134,7 @@ namespace Game.Achievements
                     case CriteriaType.PlaceGarrisonBuilding:
                     case CriteriaType.ActivateAnyGarrisonBuilding:
                     case CriteriaType.LearnAnyHeirloom:
+                    case CriteriaType.LearnAnyTransmog:
                     case CriteriaType.HonorLevelIncrease:
                     case CriteriaType.PrestigeLevelIncrease:
                     case CriteriaType.LearnAnyTransmogInSlot:
@@ -943,6 +944,7 @@ namespace Game.Achievements
                 case CriteriaType.BuyItemsFromVendors:
                 case CriteriaType.SellItemsToVendors:
                 case CriteriaType.GainLevels:
+                case CriteriaType.LearnAnyTransmog:
                     if (miscValue1 == 0)
                         return false;
                     break;
