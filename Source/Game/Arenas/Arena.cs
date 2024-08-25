@@ -229,6 +229,8 @@ namespace Game.Arenas
                         if (player == null)
                             continue;
 
+                        player.UpdateCriteria(CriteriaType.ParticipateInArena, GetMapId());
+
                         // per player calculation
                         if (team == winner)
                         {

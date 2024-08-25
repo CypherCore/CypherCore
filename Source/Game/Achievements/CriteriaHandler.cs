@@ -123,6 +123,7 @@ namespace Game.Achievements
                     case CriteriaType.DeliveredKillingBlow:
                     case CriteriaType.PVPKillInArea:
                     case CriteriaType.WinArena: // This also behaves like CriteriaType.WinAnyRankedArena
+                    case CriteriaType.ParticipateInArena:
                     case CriteriaType.PlayerTriggerGameEvent:
                     case CriteriaType.Login:
                     case CriteriaType.AnyoneTriggerGameEventScenario:
@@ -360,7 +361,6 @@ namespace Game.Achievements
                         break;
                     // FIXME: not triggered in code as result, need to implement
                     case CriteriaType.RunInstance:
-                    case CriteriaType.ParticipateInArena:
                     case CriteriaType.EarnTeamArenaRating:
                     case CriteriaType.EarnTitle:
                     case CriteriaType.MoneySpentOnGuildRepair:
@@ -828,6 +828,7 @@ namespace Game.Achievements
                 case CriteriaType.EarnAchievementPoints:
                     return progress.Counter >= 9000;
                 case CriteriaType.WinArena:
+                case CriteriaType.ParticipateInArena:
                     return requiredAmount != 0 && progress.Counter >= requiredAmount;
                 case CriteriaType.Login:
                     return true;
