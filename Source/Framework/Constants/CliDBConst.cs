@@ -2088,7 +2088,7 @@ namespace Framework.Constants
         DespawnOnSummonerDeath = 0x08, // NYI
         OnlyVisibleToSummoner = 0x10,
         CannotDismissPet = 0x20, // NYI
-        UseDemonTimeout = 0x40, // NYI
+        UseDemonTimeout = 0x40,
         UnlimitedSummons = 0x80, // NYI
         UseCreatureLevel = 0x100,
         JoinSummonerSpawnGroup = 0x200, // NYI
