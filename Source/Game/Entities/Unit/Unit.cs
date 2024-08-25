@@ -1921,7 +1921,11 @@ namespace Game.Entities
                 Global.CharacterCacheStorage.UpdateCharacterLevel(ToPlayer().GetGUID(), (byte)lvl);
             }
         }
+
         public uint GetLevel() { return m_unitData.Level; }
+
+        public byte GetEffectiveLevel() { return (byte)(m_unitData.EffectiveLevel != 0 ? m_unitData.EffectiveLevel : m_unitData.Level); }
+
         public override uint GetLevelForTarget(WorldObject target) { return GetLevel(); }
 
         public Race GetRace() { return (Race)(byte)m_unitData.Race; }

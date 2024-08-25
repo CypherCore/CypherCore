@@ -1791,8 +1791,8 @@ namespace Game.Entities
             ItemTemplate itemTemplate = GetTemplate();
             uint minItemLevel = owner.m_unitData.MinItemLevel;
             uint minItemLevelCutoff = owner.m_unitData.MinItemLevelCutoff;
-            uint maxItemLevel = itemTemplate.HasFlag(ItemFlags3.IgnoreItemLevelCapInPvp) ? 0u : owner.m_unitData.MaxItemLevel;
             bool pvpBonus = owner.IsUsingPvpItemLevels();
+            uint maxItemLevel = pvpBonus && itemTemplate.HasFlag(ItemFlags3.IgnoreItemLevelCapInPvp) ? 0u : owner.m_unitData.MaxItemLevel;
 
             uint azeriteLevel = 0;
             AzeriteItem azeriteItem = ToAzeriteItem();

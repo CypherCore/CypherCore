@@ -793,6 +793,16 @@ namespace Framework.Constants
         CorruptedLoot = 19
     }
 
+    public enum AvgItemLevelCategory
+    {
+        Base = 0,
+        EquippedBase = 1,
+        EquippedEffective = 2,
+        Pvp = 3,
+        PvpWeighted = 4,
+        EquippedEffectiveWeighted = 5
+    }
+
     [Flags]
     public enum CurrencyDbFlags
     {

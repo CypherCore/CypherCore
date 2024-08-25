@@ -1165,7 +1165,7 @@ namespace Game.Entities
         public UpdateField<ulong> Health = new(0, 31);
         public UpdateField<ulong> MaxHealth = new(32, 33);
         public UpdateField<uint> Level = new(32, 34);
-        public UpdateField<int> EffectiveLevel = new(32, 35);
+        public UpdateField<uint> EffectiveLevel = new(32, 35);
         public UpdateField<uint> ContentTuningID = new(32, 36);
         public UpdateField<int> ScalingLevelMin = new(32, 37);
         public UpdateField<int> ScalingLevelMax = new(32, 38);
@@ -1325,7 +1325,7 @@ namespace Game.Entities
             }
             data.WriteUInt64(MaxHealth);
             data.WriteUInt32(Level);
-            data.WriteInt32(EffectiveLevel);
+            data.WriteUInt32(EffectiveLevel);
             data.WriteUInt32(ContentTuningID);
             data.WriteInt32(ScalingLevelMin);
             data.WriteInt32(ScalingLevelMax);
@@ -1691,7 +1691,7 @@ namespace Game.Entities
                 }
                 if (changesMask[35])
                 {
-                    data.WriteInt32(EffectiveLevel);
+                    data.WriteUInt32(EffectiveLevel);
                 }
                 if (changesMask[36])
                 {

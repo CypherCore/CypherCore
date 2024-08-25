@@ -6551,7 +6551,7 @@ namespace Game.Entities
 
         public void UpdateAverageItemLevelTotal()
         {
-            (InventoryType inventoryType, uint itemLevel, ObjectGuid guid)[] bestItemLevels = new (InventoryType inventoryType, uint itemLevel, ObjectGuid guid)[EquipmentSlot.End];
+            var bestItemLevels = new (InventoryType inventoryType, uint itemLevel, ObjectGuid guid)[EquipmentSlot.End];
             float sum = 0;
 
             ForEachItem(ItemSearchLocation.Everywhere, item =>
@@ -6602,26 +6602,40 @@ namespace Game.Entities
                 sum += mainHand.itemLevel;
 
             sum /= 16.0f;
-            SetAverageItemLevelTotal(sum);
+            SetAverageItemLevel(sum, AvgItemLevelCategory.Base);
         }
 
         public void UpdateAverageItemLevelEquipped()
         {
             float totalItemLevel = 0;
+            float totalItemLevelEffective = 0;
             for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; i++)
             {
                 Item item = GetItemByPos(InventorySlots.Bag0, i);
                 if (item != null)
                 {
-                    uint itemLevel = item.GetItemLevel(this);
+                    uint azeriteLevel = 0;
+                    AzeriteItem azeriteItem = item.ToAzeriteItem();
+                    if (azeriteItem != null)
+                        azeriteLevel = azeriteItem.GetEffectiveLevel();
+
+                    uint itemLevel = Item.GetItemLevel(item.GetTemplate(), item.GetBonus(), GetLevel(), item.GetModifier(ItemModifier.TimewalkerLevel), 0, 0, 0, false, azeriteLevel);
+                    uint itemLevelEffective = Item.GetItemLevel(item.GetTemplate(), item.GetBonus(), GetEffectiveLevel(), item.GetModifier(ItemModifier.TimewalkerLevel), m_unitData.MinItemLevel,
+                        m_unitData.MinItemLevelCutoff, IsUsingPvpItemLevels() && item.GetTemplate().HasFlag(ItemFlags3.IgnoreItemLevelCapInPvp) ? 0 : m_unitData.MaxItemLevel, IsUsingPvpItemLevels(), azeriteLevel);
                     totalItemLevel += itemLevel;
+                    totalItemLevelEffective += itemLevelEffective;
                     if (!m_canTitanGrip && i == EquipmentSlot.MainHand && item.GetTemplate().GetInventoryType() == InventoryType.Weapon2Hand) // 2h weapon counts twice
+                    {
                         totalItemLevel += itemLevel;
+                        totalItemLevelEffective += itemLevelEffective;
+                    }
                 }
             }
 
             totalItemLevel /= 16.0f;
-            SetAverageItemLevelEquipped(totalItemLevel);
+            totalItemLevelEffective /= 16.0f;
+            SetAverageItemLevel(totalItemLevel, AvgItemLevelCategory.EquippedBase);
+            SetAverageItemLevel(totalItemLevelEffective, AvgItemLevelCategory.EquippedEffective);
         }
     }
 }

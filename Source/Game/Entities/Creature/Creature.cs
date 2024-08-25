@@ -2915,11 +2915,11 @@ namespace Game.Entities
                     int scalingLevelMax = m_unitData.ScalingLevelMax;
                     int scalingLevelDelta = m_unitData.ScalingLevelDelta;
                     int scalingFactionGroup = m_unitData.ScalingFactionGroup;
-                    int targetLevel = unitTarget.m_unitData.EffectiveLevel;
+                    uint targetLevel = unitTarget.m_unitData.EffectiveLevel;
                     if (targetLevel == 0)
-                        targetLevel = (int)unitTarget.GetLevel();
+                        targetLevel = unitTarget.GetLevel();
 
-                    int targetLevelDelta = 0;
+                    uint targetLevelDelta = 0;
 
                     Player playerTarget = target.ToPlayer();
                     if (playerTarget != null)
@@ -2928,10 +2928,10 @@ namespace Game.Entities
                             scalingLevelMin = scalingLevelMax;
 
                         int maxCreatureScalingLevel = playerTarget.m_activePlayerData.MaxCreatureScalingLevel;
-                        targetLevelDelta = Math.Min(maxCreatureScalingLevel > 0 ? maxCreatureScalingLevel - targetLevel : 0, playerTarget.m_activePlayerData.ScalingPlayerLevelDelta);
+                        targetLevelDelta = (uint)Math.Min(maxCreatureScalingLevel > 0 ? maxCreatureScalingLevel - targetLevel : 0, playerTarget.m_activePlayerData.ScalingPlayerLevelDelta);
                     }
 
-                    int levelWithDelta = targetLevel + targetLevelDelta;
+                    int levelWithDelta = (int)(targetLevel + targetLevelDelta);
                     int level = MathFunctions.RoundToInterval(ref levelWithDelta, scalingLevelMin, scalingLevelMax) + scalingLevelDelta;
                     return (uint)MathFunctions.RoundToInterval(ref level, 1, SharedConst.MaxLevel + 3);
                 }
