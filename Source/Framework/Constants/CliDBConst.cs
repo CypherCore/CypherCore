@@ -1221,9 +1221,10 @@ namespace Framework.Constants
 
     public enum ContentTuningCalcType
     {
-        Base = 0,
-        PlusOne = 1,
-        PlusMaxLevelForExpansion = 2
+        None = 0,
+        MinLevel = 1,
+        MaxLevel = 2,
+        PrevExpansionMaxLevel = 3
     }
 
     [Flags]

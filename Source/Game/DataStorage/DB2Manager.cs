@@ -1096,8 +1096,9 @@ namespace Game.DataStorage
 
             static int getLevelAdjustment(ContentTuningCalcType type) => type switch
             {
-                ContentTuningCalcType.PlusOne => 1,
-                ContentTuningCalcType.PlusMaxLevelForExpansion => (int)Global.ObjectMgr.GetMaxLevelForExpansion((Expansion)WorldConfig.GetUIntValue(WorldCfg.Expansion)),
+                ContentTuningCalcType.MinLevel => 1,
+                ContentTuningCalcType.MaxLevel => (int)Global.ObjectMgr.GetMaxLevelForExpansion((Expansion)WorldConfig.GetUIntValue(WorldCfg.Expansion)),
+                ContentTuningCalcType.PrevExpansionMaxLevel => (int)Global.ObjectMgr.GetMaxLevelForExpansion((Expansion)Math.Max(WorldConfig.GetUIntValue(WorldCfg.Expansion) - 1, 0)),
                 _ => 0
             };
 
