@@ -1754,7 +1754,7 @@ namespace Game.Entities
                 typeFactor = weaponPrice.Data;
             }
 
-            standardPrice = false;
+            standardPrice = true;
             return (uint)(proto.GetPriceVariance() * typeFactor * baseFactor * qualityFactor * proto.GetPriceRandomValue());
         }
 

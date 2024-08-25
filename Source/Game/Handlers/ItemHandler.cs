@@ -429,56 +429,59 @@ namespace Game
                     }
                 }
 
-                ItemTemplate pProto = pItem.GetTemplate();
-                if (pProto != null)
+                uint sellPrice = pItem.GetSellPrice(_player);
+                if (sellPrice > 0)
                 {
-                    if (pProto.GetSellPrice() > 0)
-                    {
-                        ulong money = pProto.GetSellPrice() * packet.Amount;
+                    ulong money = sellPrice * packet.Amount;
 
-                        if (!_player.ModifyMoney((long)money)) // ensure player doesn't exceed gold limit
+                    if (money > uint.MaxValue) // ensure sell price * amount doesn't overflow buyback price
+                    {
+                        _player.SendSellError(SellResult.CantSellItem, creature, packet.ItemGUID);
+                        return;
+                    }
+
+                    if (!_player.ModifyMoney((long)money)) // ensure player doesn't exceed gold limit
+                    {
+                        _player.SendSellError(SellResult.CantSellItem, creature, packet.ItemGUID);
+                        return;
+                    }
+
+                    _player.UpdateCriteria(CriteriaType.MoneyEarnedFromSales, money);
+                    _player.UpdateCriteria(CriteriaType.SellItemsToVendors, 1);
+
+                    if (packet.Amount < pItem.GetCount())               // need split items
+                    {
+                        Item pNewItem = pItem.CloneItem(packet.Amount, pl);
+                        if (pNewItem == null)
                         {
-                            _player.SendSellError(SellResult.CantSellItem, creature, packet.ItemGUID);
+                            Log.outError(LogFilter.Network, "WORLD: HandleSellItemOpcode - could not create clone of item {0}; count = {1}", pItem.GetEntry(), packet.Amount);
+                            pl.SendSellError(SellResult.CantSellItem, creature, packet.ItemGUID);
                             return;
                         }
 
-                        _player.UpdateCriteria(CriteriaType.MoneyEarnedFromSales, money);
-                        _player.UpdateCriteria(CriteriaType.SellItemsToVendors, 1);
+                        pItem.SetCount(pItem.GetCount() - packet.Amount);
+                        pl.ItemRemovedQuestCheck(pItem.GetEntry(), packet.Amount);
+                        if (pl.IsInWorld)
+                            pItem.SendUpdateToPlayer(pl);
+                        pItem.SetState(ItemUpdateState.Changed, pl);
 
-                        if (packet.Amount < pItem.GetCount())               // need split items
-                        {
-                            Item pNewItem = pItem.CloneItem(packet.Amount, pl);
-                            if (pNewItem == null)
-                            {
-                                Log.outError(LogFilter.Network, "WORLD: HandleSellItemOpcode - could not create clone of item {0}; count = {1}", pItem.GetEntry(), packet.Amount);
-                                pl.SendSellError(SellResult.CantSellItem, creature, packet.ItemGUID);
-                                return;
-                            }
-
-                            pItem.SetCount(pItem.GetCount() - packet.Amount);
-                            pl.ItemRemovedQuestCheck(pItem.GetEntry(), packet.Amount);
-                            if (pl.IsInWorld)
-                                pItem.SendUpdateToPlayer(pl);
-                            pItem.SetState(ItemUpdateState.Changed, pl);
-
-                            pl.AddItemToBuyBackSlot(pNewItem);
-                            if (pl.IsInWorld)
-                                pNewItem.SendUpdateToPlayer(pl);
-                        }
-                        else
-                        {
-                            pl.RemoveItem(pItem.GetBagSlot(), pItem.GetSlot(), true);
-                            pl.ItemRemovedQuestCheck(pItem.GetEntry(), pItem.GetCount());
-                            Item.RemoveItemFromUpdateQueueOf(pItem, pl);
-                            pl.AddItemToBuyBackSlot(pItem);
-                        }
+                        pl.AddItemToBuyBackSlot(pNewItem);
+                        if (pl.IsInWorld)
+                            pNewItem.SendUpdateToPlayer(pl);
                     }
                     else
-                        pl.SendSellError(SellResult.CantSellItem, creature, packet.ItemGUID);
-                    return;
+                    {
+                        pl.RemoveItem(pItem.GetBagSlot(), pItem.GetSlot(), true);
+                        pl.ItemRemovedQuestCheck(pItem.GetEntry(), pItem.GetCount());
+                        Item.RemoveItemFromUpdateQueueOf(pItem, pl);
+                        pl.AddItemToBuyBackSlot(pItem);
+                    }
                 }
+                else
+                    pl.SendSellError(SellResult.CantSellItem, creature, packet.ItemGUID);
+                return;
             }
-            pl.SendSellError(SellResult.CantSellItem, creature, packet.ItemGUID);
+            pl.SendSellError(SellResult.CantFindItem, creature, packet.ItemGUID);
             return;
         }
 
@@ -1130,7 +1133,7 @@ namespace Game
             _player.SetBackpackAutoSortDisabled(setBackpackAutosortDisabled.Disable);
         }
 
-                [WorldPacketHandler(ClientOpcodes.SetBackpackSellJunkDisabled, Processing = PacketProcessing.Inplace)]
+        [WorldPacketHandler(ClientOpcodes.SetBackpackSellJunkDisabled, Processing = PacketProcessing.Inplace)]
         void HandleSetBackpackSellJunkDisabled(SetBackpackSellJunkDisabled setBackpackSellJunkDisabled)
         {
             _player.SetBackpackSellJunkDisabled(setBackpackSellJunkDisabled.Disable);

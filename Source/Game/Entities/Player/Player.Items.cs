@@ -3039,11 +3039,7 @@ namespace Game.Entities
                 uint eslot = slot - InventorySlots.BuyBackStart;
 
                 SetInvSlot(slot, pItem.GetGUID());
-                ItemTemplate proto = pItem.GetTemplate();
-                if (proto != null)
-                    SetBuybackPrice(eslot, proto.GetSellPrice() * pItem.GetCount());
-                else
-                    SetBuybackPrice(eslot, 0);
+                SetBuybackPrice(eslot, pItem.GetSellPrice(this) * pItem.GetCount());
 
                 SetBuybackTimestamp(eslot, etime);
 
