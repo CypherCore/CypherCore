@@ -171,7 +171,7 @@ namespace Game
                 return;
             }
 
-            if (packet.Entered && !player.IsInAreaTriggerRadius(atEntry))
+            if (packet.Entered && !player.IsInAreaTrigger(atEntry))
             {
                 Log.outDebug(LogFilter.Network, "HandleAreaTrigger: Player '{0}' ({1}) too far, ignore Area Trigger ID: {2}",
                     player.GetName(), player.GetGUID().ToString(), packet.AreaTriggerID);

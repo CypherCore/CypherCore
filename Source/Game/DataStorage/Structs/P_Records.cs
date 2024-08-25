@@ -13,6 +13,26 @@ namespace Game.DataStorage
         public int QuestID;
     }
 
+    public sealed class PathRecord
+    {
+        public uint Id;
+        public byte Type;
+        public byte SplineType;
+        public byte Red;
+        public byte Green;
+        public byte Blue;
+        public byte Alpha;
+        public byte Flags;
+    }
+
+    public sealed class PathNodeRecord
+    {
+        public uint Id;
+        public ushort PathID;
+        public short Sequence;
+        public int LocationID;
+    }
+
     public sealed class PhaseRecord
     {
         public uint Id;

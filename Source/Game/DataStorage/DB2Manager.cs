@@ -420,6 +420,31 @@ namespace Game.DataStorage
                 if (FactionStorage.HasRecord(paragonReputation.FactionID))
                     _paragonReputations[paragonReputation.FactionID] = paragonReputation;
 
+            Dictionary<uint, List<PathNodeRecord>> unsortedNodes = new();
+            foreach (var (_, pathNode) in CliDB.PathNodeStorage)
+            {
+                if (CliDB.PathStorage.ContainsKey(pathNode.PathID))
+                {
+                    if (CliDB.LocationStorage.ContainsKey(pathNode.LocationID))
+                    {
+                        if (!unsortedNodes.ContainsKey(pathNode.PathID))
+                            unsortedNodes[pathNode.PathID] = new();
+
+                        unsortedNodes[pathNode.PathID].Add(pathNode);
+                    }
+                }
+            }
+
+            foreach (var (pathId, pathNodes) in unsortedNodes)
+            {
+                pathNodes.OrderBy(node => node.Sequence);
+                _pathNodes.AddRange(pathId, pathNodes.Select(node =>
+                {
+                    LocationRecord location = CliDB.LocationStorage.LookupByKey(node.LocationID);
+                    return location.Pos;
+                }));
+            }
+
             foreach (var group in PhaseXPhaseGroupStorage.Values)
             {
                 PhaseRecord phase = PhaseStorage.LookupByKey(group.PhaseId);
@@ -1740,6 +1765,11 @@ namespace Game.DataStorage
             return _paragonReputations.LookupByKey(factionId);
         }
 
+        public List<Vector3> GetNodesForPath(uint pathId)
+        {
+            return _pathNodes.LookupByKey(pathId);
+        }
+
         public PvpDifficultyRecord GetBattlegroundBracketByLevel(uint mapid, uint level)
         {
             PvpDifficultyRecord maxEntry = null;              // used for level > max listed level case
@@ -2328,6 +2358,7 @@ namespace Game.DataStorage
         Dictionary<uint, List<NameGenRecord>[]> _nameGenData = new();
         List<string>[] _nameValidators = new List<string>[(int)Locale.Total + 1];
         Dictionary<uint, ParagonReputationRecord> _paragonReputations = new();
+        MultiMap<uint, Vector3> _pathNodes = new();
         MultiMap<uint, uint> _phasesByGroup = new();
         Dictionary<PowerType, PowerTypeRecord> _powerTypes = new();
         Dictionary<uint, byte> _pvpItemBonus = new();

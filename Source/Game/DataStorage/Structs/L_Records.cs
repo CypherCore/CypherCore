@@ -96,6 +96,13 @@ namespace Game.DataStorage
         public float[] Coefficient = new float[4];
     }
 
+    public sealed class LocationRecord
+    {
+        public uint Id;
+        public Vector3 Pos;
+        public float[] Rot = new float[3];
+    }
+
     public sealed class LockRecord
     {
         public uint Id;

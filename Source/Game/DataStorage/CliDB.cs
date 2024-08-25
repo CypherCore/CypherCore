@@ -230,6 +230,7 @@ namespace Game.DataStorage
             LFGDungeonsStorage = ReadDB2<LFGDungeonsRecord>("LFGDungeons.db2", HotfixStatements.SEL_LFG_DUNGEONS, HotfixStatements.SEL_LFG_DUNGEONS_LOCALE);
             LightStorage = ReadDB2<LightRecord>("Light.db2", HotfixStatements.SEL_LIGHT);
             LiquidTypeStorage = ReadDB2<LiquidTypeRecord>("LiquidType.db2", HotfixStatements.SEL_LIQUID_TYPE);
+            LocationStorage = ReadDB2<LocationRecord>("Location.db2", HotfixStatements.SEL_LOCATION);
             LockStorage = ReadDB2<LockRecord>("Lock.db2", HotfixStatements.SEL_LOCK);
             MailTemplateStorage = ReadDB2<MailTemplateRecord>("MailTemplate.db2", HotfixStatements.SEL_MAIL_TEMPLATE, HotfixStatements.SEL_MAIL_TEMPLATE_LOCALE);
             MapStorage = ReadDB2<MapRecord>("Map.db2", HotfixStatements.SEL_MAP, HotfixStatements.SEL_MAP_LOCALE);
@@ -251,6 +252,8 @@ namespace Game.DataStorage
             NumTalentsAtLevelStorage = ReadDB2<NumTalentsAtLevelRecord>("NumTalentsAtLevel.db2", HotfixStatements.SEL_NUM_TALENTS_AT_LEVEL);
             OverrideSpellDataStorage = ReadDB2<OverrideSpellDataRecord>("OverrideSpellData.db2", HotfixStatements.SEL_OVERRIDE_SPELL_DATA);
             ParagonReputationStorage = ReadDB2<ParagonReputationRecord>("ParagonReputation.db2", HotfixStatements.SEL_PARAGON_REPUTATION);
+            PathStorage = ReadDB2<PathRecord>("Path.db2", HotfixStatements.SEL_PATH);
+            PathNodeStorage = ReadDB2<PathNodeRecord>("PathNode.db2", HotfixStatements.SEL_PATH_NODE);
             PhaseStorage = ReadDB2<PhaseRecord>("Phase.db2", HotfixStatements.SEL_PHASE);
             PhaseXPhaseGroupStorage = ReadDB2<PhaseXPhaseGroupRecord>("PhaseXPhaseGroup.db2", HotfixStatements.SEL_PHASE_X_PHASE_GROUP);
             PlayerConditionStorage = ReadDB2<PlayerConditionRecord>("PlayerCondition.db2", HotfixStatements.SEL_PLAYER_CONDITION, HotfixStatements.SEL_PLAYER_CONDITION_LOCALE);
@@ -670,6 +673,7 @@ namespace Game.DataStorage
         public static DB6Storage<LFGDungeonsRecord> LFGDungeonsStorage;
         public static DB6Storage<LightRecord> LightStorage;
         public static DB6Storage<LiquidTypeRecord> LiquidTypeStorage;
+        public static DB6Storage<LocationRecord> LocationStorage;
         public static DB6Storage<LockRecord> LockStorage;
         public static DB6Storage<MailTemplateRecord> MailTemplateStorage;
         public static DB6Storage<MapRecord> MapStorage;
@@ -691,6 +695,8 @@ namespace Game.DataStorage
         public static DB6Storage<NumTalentsAtLevelRecord> NumTalentsAtLevelStorage;
         public static DB6Storage<OverrideSpellDataRecord> OverrideSpellDataStorage;
         public static DB6Storage<ParagonReputationRecord> ParagonReputationStorage;
+        public static DB6Storage<PathRecord> PathStorage;
+        public static DB6Storage<PathNodeRecord> PathNodeStorage;
         public static DB6Storage<PhaseRecord> PhaseStorage;
         public static DB6Storage<PhaseXPhaseGroupRecord> PhaseXPhaseGroupStorage;
         public static DB6Storage<PlayerConditionRecord> PlayerConditionStorage;

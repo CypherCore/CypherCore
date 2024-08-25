@@ -892,6 +892,9 @@ namespace Framework.Database
                 "Float11, Float12, Float13, Float14, Float15, Float16, Float17, Float18, `Int1`, `Int2`, `Int3`, `Int4`, Coefficient1, Coefficient2, " +
                 "Coefficient3, Coefficient4 FROM liquid_type WHERE (`VerifiedBuild` > 0) = ?");
 
+            // Location.db2
+            PrepareStatement(HotfixStatements.SEL_LOCATION, "SELECT ID, PosX, PosY, PosZ, Rot1, Rot2, Rot3 FROM location WHERE (`VerifiedBuild` > 0) = ?");
+
             // Lock.db2
             PrepareStatement(HotfixStatements.SEL_LOCK, "SELECT ID, Flags, Index1, Index2, Index3, Index4, Index5, Index6, Index7, Index8, Skill1, Skill2, Skill3, " +
                 "Skill4, Skill5, Skill6, Skill7, Skill8, Type1, Type2, Type3, Type4, Type5, Type6, Type7, Type8, Action1, Action2, Action3, Action4, Action5, " +
@@ -983,6 +986,12 @@ namespace Framework.Database
             // ParagonReputation.db2
             PrepareStatement(HotfixStatements.SEL_PARAGON_REPUTATION, "SELECT ID, FactionID, LevelThreshold, QuestID FROM paragon_reputation" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
+
+            // Path.db2
+            PrepareStatement(HotfixStatements.SEL_PATH, "SELECT ID, Type, SplineType, Red, Green, Blue, Alpha, Flags FROM path WHERE (`VerifiedBuild` > 0) = ?");
+
+            // PathNode.db2
+            PrepareStatement(HotfixStatements.SEL_PATH_NODE, "SELECT ID, PathID, Sequence, LocationID FROM path_node WHERE (`VerifiedBuild` > 0) = ?");
 
             // Phase.db2
             PrepareStatement(HotfixStatements.SEL_PHASE, "SELECT ID, Flags FROM phase WHERE (`VerifiedBuild` > 0) = ?");
@@ -2027,6 +2036,8 @@ namespace Framework.Database
 
         SEL_LIQUID_TYPE,
 
+        SEL_LOCATION,
+
         SEL_LOCK,
 
         SEL_MAIL_TEMPLATE,
@@ -2074,6 +2085,10 @@ namespace Framework.Database
         SEL_OVERRIDE_SPELL_DATA,
 
         SEL_PARAGON_REPUTATION,
+
+        SEL_PATH,
+
+        SEL_PATH_NODE,
 
         SEL_PHASE,
 

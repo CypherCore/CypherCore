@@ -751,6 +751,23 @@ namespace Game
             return pointsOfInterestStorage.LookupByKey(id);
         }
 
+        public List<Position> GetVerticesForAreaTrigger(AreaTriggerRecord areaTrigger)
+        {
+            List<Position> vertices = new();
+            if (areaTrigger != null && areaTrigger.ShapeType == 3 /* Polygon */)
+            {
+                var pathNodes = Global.DB2Mgr.GetNodesForPath((uint)areaTrigger.ShapeID);
+                if (pathNodes != null)
+                    vertices.AddRange(pathNodes.Select(dbcPosition => new Position(dbcPosition.X, dbcPosition.Y, dbcPosition.Z)));
+
+
+                // Drop first node (areatrigger position)
+                vertices.RemoveAt(0);
+            }
+
+            return vertices;
+        }
+
         public void LoadGraveyardZones()
         {
             uint oldMSTime = Time.GetMSTime();

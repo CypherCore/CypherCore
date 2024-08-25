@@ -441,7 +441,7 @@ namespace Game.Entities
                     if (_restMgr.HasRestFlag(RestFlag.Tavern))
                     {
                         AreaTriggerRecord atEntry = CliDB.AreaTriggerStorage.LookupByKey(_restMgr.GetInnTriggerId());
-                        if (atEntry == null || !IsInAreaTriggerRadius(atEntry))
+                        if (atEntry == null || !IsInAreaTrigger(atEntry))
                             _restMgr.RemoveRestFlag(RestFlag.Tavern);
                     }
 
@@ -2425,29 +2425,38 @@ namespace Game.Entities
             }
         }
 
-        public bool IsInAreaTriggerRadius(AreaTriggerRecord trigger)
+        public bool IsInAreaTrigger(AreaTriggerRecord areaTrigger)
         {
-            if (trigger == null)
+            if (areaTrigger == null)
                 return false;
 
-            if (GetMapId() != trigger.ContinentID && !GetPhaseShift().HasVisibleMapId(trigger.ContinentID))
+            if (GetMapId() != areaTrigger.ContinentID && !GetPhaseShift().HasVisibleMapId(areaTrigger.ContinentID))
                 return false;
 
-            if (trigger.PhaseID != 0 || trigger.PhaseGroupID != 0 || trigger.PhaseUseFlags != 0)
-                if (!PhasingHandler.InDbPhaseShift(this, (PhaseUseFlagsValues)trigger.PhaseUseFlags, trigger.PhaseID, trigger.PhaseGroupID))
+            if (areaTrigger.PhaseID != 0 || areaTrigger.PhaseGroupID != 0 || areaTrigger.PhaseUseFlags != 0)
+                if (!PhasingHandler.InDbPhaseShift(this, (PhaseUseFlagsValues)areaTrigger.PhaseUseFlags, areaTrigger.PhaseID, areaTrigger.PhaseGroupID))
                     return false;
 
-            if (trigger.Radius > 0.0f)
+            Position areaTriggerPos = new(areaTrigger.Pos.X, areaTrigger.Pos.Y, areaTrigger.Pos.Z, areaTrigger.BoxYaw);
+            switch (areaTrigger.ShapeType)
             {
-                // if we have radius check it
-                float dist = GetDistance(trigger.Pos.X, trigger.Pos.Y, trigger.Pos.Z);
-                if (dist > trigger.Radius)
-                    return false;
-            }
-            else
-            {
-                Position center = new(trigger.Pos.X, trigger.Pos.Y, trigger.Pos.Z, trigger.BoxYaw);
-                if (!IsWithinBox(center, trigger.BoxLength / 2.0f, trigger.BoxWidth / 2.0f, trigger.BoxHeight / 2.0f))
+                case 0: // Sphere
+                    if (!IsInDist(areaTriggerPos, areaTrigger.Radius))
+                        return false;
+                    break;
+                case 1: // Box
+                    if (!IsWithinBox(areaTriggerPos, areaTrigger.BoxLength / 2.0f, areaTrigger.BoxWidth / 2.0f, areaTrigger.BoxHeight / 2.0f))
+                        return false;
+                    break;
+                case 3: // Polygon
+                    if (!IsInPolygon2D(areaTriggerPos, ObjectMgr.GetVerticesForAreaTrigger(areaTrigger)))
+                        return false;
+                    break;
+                case 4: // Cylinder
+                    if (!IsWithinVerticalCylinder(areaTriggerPos, areaTrigger.Radius, areaTrigger.BoxHeight))
+                        return false;
+                    break;
+                default:
                     return false;
             }
 

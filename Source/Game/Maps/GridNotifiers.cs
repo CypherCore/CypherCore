@@ -2061,7 +2061,7 @@ namespace Game.Maps
             if (i_incTargetRadius)
                 searchRadius += u.GetCombatReach();
 
-            if (!u.IsInMap(i_obj) || !u.InSamePhase(i_obj) || !u.IsWithinDoubleVerticalCylinder(i_obj, searchRadius, searchRadius))
+            if (!u.IsInMap(i_obj) || !u.InSamePhase(i_obj) || !u.IsWithinVerticalCylinder(i_obj, searchRadius, searchRadius, true))
                 return false;
 
             if (!i_funit.IsFriendlyTo(u))
@@ -2116,7 +2116,7 @@ namespace Game.Maps
             if (i_incTargetRadius)
                 searchRadius += u.GetCombatReach();
 
-            return u.IsInMap(_source) && u.InSamePhase(_source) && u.IsWithinDoubleVerticalCylinder(_source, searchRadius, searchRadius);
+            return u.IsInMap(_source) && u.InSamePhase(_source) && u.IsWithinVerticalCylinder(_source, searchRadius, searchRadius, true);
         }
 
         WorldObject _source;
@@ -2218,7 +2218,7 @@ namespace Game.Maps
             if (i_incTargetRadius)
                 searchRadius += u.GetCombatReach();
 
-            return u.IsInMap(i_obj) && u.InSamePhase(i_obj) && u.IsWithinDoubleVerticalCylinder(i_obj, searchRadius, searchRadius);
+            return u.IsInMap(i_obj) && u.InSamePhase(i_obj) && u.IsWithinVerticalCylinder(i_obj, searchRadius, searchRadius, true);
         }
 
         WorldObject i_obj;
