@@ -447,9 +447,10 @@ namespace Game.Entities
             Log.outDebug(LogFilter.Player, "Player:UpdateSkillPro Chance={0:F3}% taken", chance / 10.0f);
             return true;
         }
+
         void UpdateSkillEnchantments(uint skill_id, ushort curr_value, ushort new_value)
         {
-            for (byte i = 0; i < InventorySlots.BagEnd; ++i)
+            for (byte i = 0; i < InventorySlots.ReagentBagEnd; ++i)
             {
                 if (m_items[i] != null)
                 {
@@ -1858,7 +1859,7 @@ namespace Game.Entities
                     ApplyItemObtainSpells(item, true);
             }
 
-            for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; ++i)
+            for (byte i = InventorySlots.BagStart; i < InventorySlots.ReagentBagEnd; ++i)
             {
                 Bag bag = GetBagByPos(i);
                 if (bag == null)
@@ -3320,7 +3321,7 @@ namespace Game.Entities
 
         public void UpdateEquipSpellsAtFormChange()
         {
-            for (byte i = 0; i < InventorySlots.BagEnd; ++i)
+            for (byte i = 0; i < InventorySlots.ReagentBagEnd; ++i)
             {
                 if (m_items[i] != null && !m_items[i].IsBroken() && CanUseAttackType(GetAttackBySlot(i, m_items[i].GetTemplate().GetInventoryType())))
                 {

@@ -99,25 +99,7 @@ namespace Game
                 return;
             }
 
-            uint freeBagSlots = 0;
-            if (!voidStorageTransfer.Withdrawals.Empty())
-            {
-                // make this a Player function
-                for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; i++)
-                {
-                    Bag bag = player.GetBagByPos(i);
-                    if (bag != null)
-                        freeBagSlots += bag.GetFreeSlots();
-                }
-                int inventoryEnd = InventorySlots.ItemStart + _player.GetInventorySlotCount();
-                for (byte i = InventorySlots.ItemStart; i < inventoryEnd; i++)
-                {
-                    if (player.GetItemByPos(InventorySlots.Bag0, i) == null)
-                        ++freeBagSlots;
-                }
-            }
-
-            if (voidStorageTransfer.Withdrawals.Length > freeBagSlots)
+            if (!voidStorageTransfer.Withdrawals.Empty() && voidStorageTransfer.Withdrawals.Length > _player.GetFreeInventorySlotCount(ItemSearchLocation.Inventory))
             {
                 SendVoidStorageTransferResult(VoidTransferError.InventoryFull);
                 return;

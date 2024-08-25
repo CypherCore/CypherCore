@@ -6833,7 +6833,7 @@ namespace Game.Spells
                             // so we need to make sure there is at least one free space in the player's inventory
                             if (spellEffectInfo.Effect == SpellEffectName.CreateLoot)
                             {
-                                if (target.ToPlayer().GetFreeInventorySpace() == 0)
+                                if (target.ToPlayer().GetFreeInventorySlotCount(ItemSearchLocation.Inventory) == 0)
                                 {
                                     player.SendEquipError(InventoryResult.InvFull, null, null, spellEffectInfo.ItemType);
                                     return SpellCastResult.DontReport;
