@@ -2419,7 +2419,7 @@ namespace Game.Maps
             foreach (uint spawnGroupId in spawnGroups)
             {
                 SpawnGroupTemplateData spawnGroupTemplate = GetSpawnGroupData(spawnGroupId);
-                if (spawnGroupTemplate.flags.HasAnyFlag(SpawnGroupFlags.System))
+                if (spawnGroupTemplate.flags.HasAnyFlag(SpawnGroupFlags.System | SpawnGroupFlags.ManualSpawn))
                     continue;
 
                 SetSpawnGroupActive(spawnGroupId, Global.ConditionMgr.IsMapMeetingNotGroupedConditions(ConditionSourceType.SpawnGroup, spawnGroupId, this));
