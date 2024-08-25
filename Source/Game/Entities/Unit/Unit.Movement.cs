@@ -1203,17 +1203,18 @@ namespace Game.Entities
         }
 
         public void NearTeleportTo(float x, float y, float z, float orientation, bool casting = false) { NearTeleportTo(new Position(x, y, z, orientation), casting); }
+
         public void NearTeleportTo(Position pos, bool casting = false)
         {
             DisableSpline();
-            if (IsTypeId(TypeId.Player))
+            TeleportLocation target = new() { Location = new(GetMapId(), pos) };
+            if (IsPlayer())
             {
-                WorldLocation target = new(GetMapId(), pos);
                 ToPlayer().TeleportTo(target, (TeleportToOptions.NotLeaveTransport | TeleportToOptions.NotLeaveCombat | TeleportToOptions.NotUnSummonPet | (casting ? TeleportToOptions.Spell : 0)));
             }
             else
             {
-                SendTeleportPacket(pos);
+                SendTeleportPacket(target);
                 UpdatePosition(pos, true);
                 UpdateObjectVisibility();
             }
@@ -1881,7 +1882,7 @@ namespace Game.Entities
         }
 
         //Teleport
-        public void SendTeleportPacket(Position pos)
+        public void SendTeleportPacket(TeleportLocation teleportLocation)
         {
             // SMSG_MOVE_UPDATE_TELEPORT is sent to nearby players to signal the teleport
             // SMSG_MOVE_TELEPORT is sent to self in order to trigger CMSG_MOVE_TELEPORT_ACK and update the position server side
@@ -1896,20 +1897,11 @@ namespace Game.Entities
             Player playerMover = GetUnitBeingMoved()?.ToPlayer();
             if (playerMover != null)
             {
-                float x, y, z, o;
-                pos.GetPosition(out x, out y, out z, out o);
-
-                ITransport transportBase = GetDirectTransport();
-                if (transportBase != null)
-                    transportBase.CalculatePassengerOffset(ref x, ref y, ref z, ref o);
-
                 MoveTeleport moveTeleport = new();
                 moveTeleport.MoverGUID = GetGUID();
-                moveTeleport.Pos = new Position(x, y, z, o);
-                if (GetTransGUID() != ObjectGuid.Empty)
-                    moveTeleport.TransportGUID = GetTransGUID();
-
-                moveTeleport.Facing = o;
+                moveTeleport.Pos = teleportLocation.Location;
+                moveTeleport.TransportGUID = teleportLocation.TransportGuid;
+                moveTeleport.Facing = teleportLocation.Location.GetOrientation();
                 moveTeleport.SequenceIndex = m_movementCounter++;
                 playerMover.SendPacket(moveTeleport);
 
@@ -1920,15 +1912,21 @@ namespace Game.Entities
                 // This is the only packet sent for creatures which contains MovementInfo structure
                 // we do not update m_movementInfo for creatures so it needs to be done manually here
                 moveUpdateTeleport.Status.Guid = GetGUID();
-                moveUpdateTeleport.Status.Pos.Relocate(pos);
                 moveUpdateTeleport.Status.Time = Time.GetMSTime();
-                var transportBase = GetDirectTransport();
-                if (transportBase != null)
+
+                if (teleportLocation.TransportGuid.HasValue)
                 {
-                    pos.GetPosition(out float tx, out float ty, out float tz, out float to);
-                    transportBase.CalculatePassengerOffset(ref tx, ref ty, ref tz, ref to);
-                    moveUpdateTeleport.Status.transport.pos.Relocate(tx, ty, tz, to);
+                    Transport transport = GetMap().GetTransport(teleportLocation.TransportGuid.Value);
+                    if (transport == null)
+                        return;
+
+                    teleportLocation.Location.GetPosition(out float x, out float y, out float z, out float o);
+                    transport.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
+                    moveUpdateTeleport.Status.Pos.Relocate(x, y, z, o);
+                    moveUpdateTeleport.Status.transport.pos.Relocate(teleportLocation.Location);
                 }
+                else
+                    moveUpdateTeleport.Status.Pos.Relocate(teleportLocation.Location);
             }
 
             // Broadcast the packet to everyone except self.

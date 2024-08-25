@@ -246,33 +246,32 @@ namespace Game
             player.SetSemaphoreTeleportFar(false);
 
             // get the teleport destination
-            WorldLocation loc = player.GetTeleportDest();
+            var loc = player.GetTeleportDest();
 
             // possible errors in the coordinate validity check
-            if (!GridDefines.IsValidMapCoord(loc))
+            if (!GridDefines.IsValidMapCoord(loc.Location))
             {
                 LogoutPlayer(false);
                 return;
             }
 
             // get the destination map entry, not the current one, this will fix homebind and reset greeting
-            MapRecord mapEntry = CliDB.MapStorage.LookupByKey(loc.GetMapId());
+            MapRecord mapEntry = CliDB.MapStorage.LookupByKey(loc.Location.GetMapId());
 
             // reset instance validity, except if going to an instance inside an instance
             if (!player.m_InstanceValid && !mapEntry.IsDungeon())
                 player.m_InstanceValid = true;
 
             Map oldMap = player.GetMap();
-            Map newMap = GetPlayer().GetTeleportDestInstanceId().HasValue ? Global.MapMgr.FindMap(loc.GetMapId(), GetPlayer().GetTeleportDestInstanceId().Value) : Global.MapMgr.CreateMap(loc.GetMapId(), GetPlayer());
+            Map newMap = loc.InstanceId.HasValue ? Global.MapMgr.FindMap(loc.Location.GetMapId(), loc.InstanceId.Value) : Global.MapMgr.CreateMap(loc.Location.GetMapId(), GetPlayer());
 
-            MovementInfo.TransportInfo transportInfo = player.m_movementInfo.transport;
             ITransport transport = player.GetTransport();
             if (transport != null)
                 transport.RemovePassenger(player);
 
             if (player.IsInWorld)
             {
-                Log.outError(LogFilter.Network, $"Player (Name {player.GetName()}) is still in world when teleported from map {oldMap.GetId()} to new map {loc.GetMapId()}");
+                Log.outError(LogFilter.Network, $"Player (Name {player.GetName()}) is still in world when teleported from map {oldMap.GetId()} to new map {loc.Location.GetMapId()}");
                 oldMap.RemovePlayerFromMap(player, false);
             }
 
@@ -281,13 +280,13 @@ namespace Game
             // while the player is in transit, for example the map may get full
             if (newMap == null || newMap.CannotEnter(player) != null)
             {
-                Log.outError(LogFilter.Network, $"Map {loc.GetMapId()} could not be created for {(newMap != null ? newMap.GetMapName() : "Unknown")} ({player.GetGUID()}), porting player to homebind");
+                Log.outError(LogFilter.Network, $"Map {loc.Location.GetMapId()} could not be created for {(newMap != null ? newMap.GetMapName() : "Unknown")} ({player.GetGUID()}), porting player to homebind");
                 player.TeleportTo(player.GetHomebind());
                 return;
             }
 
-            float z = loc.GetPositionZ() + player.GetHoverOffset();
-            player.Relocate(loc.GetPositionX(), loc.GetPositionY(), z, loc.GetOrientation());
+            float zOffset = loc.Location.GetPositionZ() + player.GetHoverOffset();
+            player.Relocate(loc.Location.GetPositionX(), loc.Location.GetPositionY(), zOffset, loc.Location.GetOrientation());
             player.SetFallInformation(0, player.GetPositionZ());
 
             player.ResetMap();
@@ -301,17 +300,27 @@ namespace Game
             if (!seamlessTeleport)
                 player.SendInitialPacketsBeforeAddToMap();
 
-            // move player between transport copies on each map
-            Transport newTransport = newMap.GetTransport(transportInfo.guid);
-            if (newTransport != null)
+            if (loc.TransportGuid.HasValue)
             {
-                player.m_movementInfo.transport = transportInfo;
-                newTransport.AddPassenger(player);
+                Transport newTransport = newMap.GetTransport(loc.TransportGuid.Value);
+                if (newTransport != null)
+                {
+                    newTransport.AddPassenger(player);
+                    player.m_movementInfo.transport.pos.Relocate(loc.Location);
+                    loc.Location.GetPosition(out float x, out float y, out float z, out float o);
+                    newTransport.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
+                    player.Relocate(x, y, z, o);
+                }
+            }
+            else
+            {
+                if (transport != null)
+                    transport.RemovePassenger(player);
             }
 
             if (!player.GetMap().AddPlayerToMap(player, !seamlessTeleport))
             {
-                Log.outError(LogFilter.Network, $"WORLD: failed to teleport player {player.GetName()} ({player.GetGUID()}) to map {loc.GetMapId()} ({(newMap != null ? newMap.GetMapName() : "Unknown")}) because of unknown reason!");
+                Log.outError(LogFilter.Network, $"WORLD: failed to teleport player {player.GetName()} ({player.GetGUID()}) to map {loc.Location.GetMapId()} ({(newMap != null ? newMap.GetMapName() : "Unknown")}) because of unknown reason!");
                 player.ResetMap();
                 player.SetMap(oldMap);
                 player.TeleportTo(player.GetHomebind());
@@ -440,18 +449,18 @@ namespace Game
             if (!_player.IsBeingTeleportedFar())
                 return;
 
-            WorldLocation loc = GetPlayer().GetTeleportDest();
+            var loc = GetPlayer().GetTeleportDest();
 
-            if (CliDB.MapStorage.LookupByKey(loc.GetMapId()).IsDungeon())
+            if (CliDB.MapStorage.LookupByKey(loc.Location.GetMapId()).IsDungeon())
             {
                 UpdateLastInstance updateLastInstance = new();
-                updateLastInstance.MapID = loc.GetMapId();
+                updateLastInstance.MapID = loc.Location.GetMapId();
                 SendPacket(updateLastInstance);
             }
 
             NewWorld packet = new();
-            packet.MapID = loc.GetMapId();
-            packet.Loc.Pos = loc;
+            packet.MapID = loc.Location.GetMapId();
+            packet.Loc.Pos = loc.Location;
             packet.Reason = (uint)(!_player.IsBeingTeleportedSeamlessly() ? NewWorldReason.Normal : NewWorldReason.Seamless);
             SendPacket(packet);
 
@@ -474,9 +483,21 @@ namespace Game
 
             uint old_zone = plMover.GetZoneId();
 
-            WorldLocation dest = plMover.GetTeleportDest();
+            var dest = plMover.GetTeleportDest();
 
-            plMover.UpdatePosition(dest, true);
+            dest.Location.GetPosition(out float x, out float y, out float z, out float o);
+            if (dest.TransportGuid.HasValue)
+            {
+                Transport transport = plMover.GetMap().GetTransport(dest.TransportGuid.Value);
+                if (transport != null)
+                {
+                    transport.AddPassenger(plMover);
+                    plMover.m_movementInfo.transport.pos.Relocate(dest.Location.GetPosition());
+                    transport.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
+                }
+            }
+
+            plMover.UpdatePosition(dest.Location, true);
             plMover.SetFallInformation(0, GetPlayer().GetPositionZ());
 
             uint newzone, newarea;

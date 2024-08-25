@@ -1951,33 +1951,42 @@ namespace Game.Entities
 
         //Movement
         bool IsCanDelayTeleport() { return m_bCanDelayTeleport; }
+
         void SetCanDelayTeleport(bool setting) { m_bCanDelayTeleport = setting; }
+
         bool IsHasDelayedTeleport() { return m_bHasDelayedTeleport; }
+
         void SetDelayedTeleportFlag(bool setting) { m_bHasDelayedTeleport = setting; }
-        public bool TeleportTo(WorldLocation loc, TeleportToOptions options = 0, uint? instanceId = null)
+
+        public bool TeleportTo(uint mapid, float x, float y, float z, float orientation, TeleportToOptions options = TeleportToOptions.None, uint? instanceId = null)
         {
-            return TeleportTo(loc.GetMapId(), loc.posX, loc.posY, loc.posZ, loc.Orientation, options, instanceId);
+            return TeleportTo(new TeleportLocation() { Location = new WorldLocation(mapid, x, y, z, orientation), InstanceId = instanceId }, options);
         }
-        public bool TeleportTo(uint mapid, float x, float y, float z, float orientation, TeleportToOptions options = 0, uint? instanceId = null)
+
+        public bool TeleportTo(WorldLocation loc, TeleportToOptions options = TeleportToOptions.None, uint? instanceId = null)
         {
-            if (!GridDefines.IsValidMapCoord(mapid, x, y, z, orientation))
+            return TeleportTo(new TeleportLocation() { Location = loc, InstanceId = instanceId }, options);
+        }
+
+        public bool TeleportTo(TeleportLocation teleportLocation, TeleportToOptions options = TeleportToOptions.None)
+        {
+            if (!GridDefines.IsValidMapCoord(teleportLocation.Location))
             {
-                Log.outError(LogFilter.Maps, "TeleportTo: invalid map ({0}) or invalid coordinates (X: {1}, Y: {2}, Z: {3}, O: {4}) given when teleporting player (GUID: {5}, name: {6}, map: {7}, {8}).",
-                    mapid, x, y, z, orientation, GetGUID().ToString(), GetName(), GetMapId(), GetPosition().ToString());
+                Log.outError(LogFilter.Maps, $"Player::TeleportTo: Invalid map ({teleportLocation.Location.GetMapId()}) or invalid coordinates ({teleportLocation.Location.ToString()}) given when teleporting player '{GetGUID()}' ({GetName()}, MapID: {GetMapId()}, {GetPosition()}).");
                 return false;
             }
 
-            if (!GetSession().HasPermission(RBACPermissions.SkipCheckDisableMap) && DisableMgr.IsDisabledFor(DisableType.Map, mapid, this))
+            if (!GetSession().HasPermission(RBACPermissions.SkipCheckDisableMap) && DisableMgr.IsDisabledFor(DisableType.Map, teleportLocation.Location.GetMapId(), this))
             {
-                Log.outError(LogFilter.Maps, "Player (GUID: {0}, name: {1}) tried to enter a forbidden map {2}", GetGUID().ToString(), GetName(), mapid);
-                SendTransferAborted(mapid, TransferAbortReason.MapNotAllowed);
+                Log.outError(LogFilter.Maps, $"Player::TeleportTo: Player '{GetGUID()}' ({GetName()}) tried to enter a forbidden map (MapID: {teleportLocation.Location.GetMapId()})");
+                SendTransferAborted(teleportLocation.Location.GetMapId(), TransferAbortReason.MapNotAllowed);
                 return false;
             }
 
             // preparing unsummon pet if lost (we must get pet before teleportation or will not find it later)
             Pet pet = GetPet();
 
-            MapRecord mEntry = CliDB.MapStorage.LookupByKey(mapid);
+            MapRecord mEntry = CliDB.MapStorage.LookupByKey(teleportLocation.Location.GetMapId());
 
             // don't let enter Battlegrounds without assigned Battlegroundid (for example through areatrigger)...
             // don't let gm level > 1 either
@@ -1987,7 +1996,7 @@ namespace Game.Entities
             // client without expansion support
             if (GetSession().GetExpansion() < mEntry.Expansion())
             {
-                Log.outDebug(LogFilter.Maps, "Player {0} using client without required expansion tried teleport to non accessible map {1}", GetName(), mapid);
+                Log.outDebug(LogFilter.Maps, $"Player {GetName()} using client without required expansion tried teleport to non accessible map {teleportLocation.Location.GetMapId()}");
 
                 ITransport _transport = GetTransport();
                 if (_transport != null)
@@ -1996,11 +2005,11 @@ namespace Game.Entities
                     RepopAtGraveyard();                             // teleport to near graveyard if on transport, looks blizz like :)
                 }
 
-                SendTransferAborted(mapid, TransferAbortReason.InsufExpanLvl, (byte)mEntry.Expansion());
+                SendTransferAborted(teleportLocation.Location.GetMapId(), TransferAbortReason.InsufExpanLvl, (byte)mEntry.Expansion());
                 return false;                                       // normal client can't teleport to this map...
             }
             else
-                Log.outDebug(LogFilter.Maps, "Player {0} is being teleported to map {1}", GetName(), mapid);
+                Log.outDebug(LogFilter.Maps, $"Player {GetName()} is being teleported to map {teleportLocation.Location.GetMapId()}");
 
             if (m_vehicle != null)
                 ExitVehicle();
@@ -2013,18 +2022,17 @@ namespace Game.Entities
 
             ITransport transport = GetTransport();
             if (transport != null)
-            {
-                if (!options.HasAnyFlag(TeleportToOptions.NotLeaveTransport))
-                    transport.RemovePassenger(this);
-            }
+                if (!teleportLocation.TransportGuid.HasValue || teleportLocation.TransportGuid != transport.GetTransportGUID())
+                    if (!options.HasFlag(TeleportToOptions.NotLeaveTransport))
+                        transport.RemovePassenger(this);
 
             // The player was ported to another map and loses the duel immediately.
             // We have to perform this check before the teleport, otherwise the
             // ObjectAccessor won't find the flag.
-            if (duel != null && GetMapId() != mapid && GetMap().GetGameObject(m_playerData.DuelArbiter) != null)
+            if (duel != null && GetMapId() != teleportLocation.Location.GetMapId() && GetMap().GetGameObject(m_playerData.DuelArbiter) != null)
                 DuelComplete(DuelCompleteType.Fled);
 
-            if (GetMapId() == mapid && (!instanceId.HasValue || GetInstanceId() == instanceId))
+            if (GetMapId() == teleportLocation.Location.GetMapId() && (!teleportLocation.InstanceId.HasValue || GetInstanceId() == teleportLocation.InstanceId))
             {
                 //lets reset far teleport flag if it wasn't reset during chained teleports
                 SetSemaphoreTeleportFar(false);
@@ -2036,8 +2044,7 @@ namespace Game.Entities
                 {
                     SetSemaphoreTeleportNear(true);
                     //lets save teleport destination for player
-                    teleportDest = new WorldLocation(mapid, x, y, z, orientation);
-                    m_teleport_instanceId = null;
+                    teleportDest = teleportLocation;
                     m_teleport_options = options;
                     return true;
                 }
@@ -2045,7 +2052,7 @@ namespace Game.Entities
                 if (!options.HasAnyFlag(TeleportToOptions.NotUnSummonPet))
                 {
                     //same map, only remove pet if out of range for new position
-                    if (pet != null && !pet.IsWithinDist3d(x, y, z, GetMap().GetVisibilityRange()))
+                    if (pet != null && !pet.IsWithinDist3d(teleportLocation.Location, GetMap().GetVisibilityRange()))
                         UnsummonPetTemporaryIfAny();
                 }
 
@@ -2056,8 +2063,7 @@ namespace Game.Entities
                     CombatStop();
 
                 // this will be used instead of the current location in SaveToDB
-                teleportDest = new WorldLocation(mapid, x, y, z, orientation);
-                m_teleport_instanceId = null;
+                teleportDest = teleportLocation;
                 m_teleport_options = options;
                 SetFallInformation(0, GetPositionZ());
 
@@ -2072,7 +2078,7 @@ namespace Game.Entities
             {
                 if (GetClass() == Class.Deathknight && GetMapId() == 609 && !IsGameMaster() && !HasSpell(50977))
                 {
-                    SendTransferAborted(mapid, TransferAbortReason.UniqueMessage, 1);
+                    SendTransferAborted(teleportLocation.Location.GetMapId(), TransferAbortReason.UniqueMessage, 1);
                     return false;
                 }
 
@@ -2082,15 +2088,15 @@ namespace Game.Entities
 
                 // Check enter rights before map getting to avoid creating instance copy for player
                 // this check not dependent from map instance copy and same for all instance copies of selected map
-                TransferAbortParams abortParams = Map.PlayerCannotEnter(mapid, this);
+                TransferAbortParams abortParams = Map.PlayerCannotEnter(teleportLocation.Location.GetMapId(), this);
                 if (abortParams != null)
                 {
-                    SendTransferAborted(mapid, abortParams.Reason, abortParams.Arg, abortParams.MapDifficultyXConditionId);
+                    SendTransferAborted(teleportLocation.Location.GetMapId(), abortParams.Reason, abortParams.Arg, abortParams.MapDifficultyXConditionId);
                     return false;
                 }
 
                 // Seamless teleport can happen only if cosmetic maps match
-                if (oldmap == null || (oldmap.GetEntry().CosmeticParentMapID != mapid && GetMapId() != mEntry.CosmeticParentMapID &&
+                if (oldmap == null || (oldmap.GetEntry().CosmeticParentMapID != teleportLocation.Location.GetMapId() && GetMapId() != mEntry.CosmeticParentMapID &&
                     !((oldmap.GetEntry().CosmeticParentMapID != -1) ^ (oldmap.GetEntry().CosmeticParentMapID != mEntry.CosmeticParentMapID))))
                     options &= ~TeleportToOptions.Seamless;
 
@@ -2104,8 +2110,7 @@ namespace Game.Entities
                 {
                     SetSemaphoreTeleportFar(true);
                     //lets save teleport destination for player
-                    teleportDest = new(mapid, x, y, z, orientation);
-                    m_teleport_instanceId = instanceId;
+                    teleportDest = teleportLocation;
                     m_teleport_options = options;
                     return true;
                 }
@@ -2123,7 +2128,7 @@ namespace Game.Entities
                     // Note: at Battlegroundjoin Battlegroundid set before teleport
                     // and we already will found "current" Battleground
                     // just need check that this is targeted map or leave
-                    if (bg.GetMapId() != mapid)
+                    if (bg.GetMapId() != teleportLocation.Location.GetMapId())
                         LeaveBattleground(false);                   // don't teleport to entry point
                 }
 
@@ -2159,15 +2164,21 @@ namespace Game.Entities
                 {
                     // send transfer packets
                     TransferPending transferPending = new();
-                    transferPending.MapID = (int)mapid;
-                    transferPending.OldMapPosition = GetPosition();
+                    transferPending.MapID = (int)teleportLocation.Location.GetMapId();
+                    transferPending.OldMapPosition = teleportLocation.Location.GetPosition();
 
-                    Transport transport1 = (Transport)GetTransport();
-                    if (transport1 != null)
+                    if (teleportLocation.TransportGuid.HasValue)
                     {
                         TransferPending.ShipTransferPending shipTransferPending = new();
-                        shipTransferPending.Id = transport1.GetEntry();
-                        shipTransferPending.OriginMapID = (int)GetMapId();
+                        TransportSpawn transportSpawn = TransportMgr.GetTransportSpawn(teleportLocation.TransportGuid.Value.GetCounter());
+                        if (transportSpawn != null)
+                        {
+                            shipTransferPending.Id = transportSpawn.TransportGameObjectId;
+                            if (GetTransport() != null)
+                                shipTransferPending.OriginMapID = (int)GetMapId();
+                            else
+                                shipTransferPending.OriginMapID = -1;
+                        }
                         transferPending.Ship = shipTransferPending;
                     }
 
@@ -2181,8 +2192,7 @@ namespace Game.Entities
                 if (oldmap != null)
                     oldmap.RemovePlayerFromMap(this, false);
 
-                teleportDest = new WorldLocation(mapid, x, y, z, orientation);
-                m_teleport_instanceId = instanceId;
+                teleportDest = teleportLocation;
                 m_teleport_options = options;
                 SetFallInformation(0, GetPositionZ());
                 // if the player is saved before worldportack (at logout for example)
@@ -2203,6 +2213,7 @@ namespace Game.Entities
             }
             return true;
         }
+
         public bool TeleportToBGEntryPoint()
         {
             if (m_bgData.joinPos.GetMapId() == 0xFFFFFFFF)
@@ -7403,7 +7414,6 @@ namespace Game.Entities
             return false;
         }
 
-
         void SetActiveCombatTraitConfigID(int traitConfigId) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ActiveCombatTraitConfigID), (uint)traitConfigId); }
 
         void InitPrimaryProfessions()
@@ -7629,14 +7639,9 @@ namespace Game.Entities
             }
         }
 
-        public WorldLocation GetTeleportDest()
+        public TeleportLocation GetTeleportDest()
         {
             return teleportDest;
-        }
-
-        public uint? GetTeleportDestInstanceId()
-        {
-            return m_teleport_instanceId;
         }
 
         public WorldLocation GetHomebind()
@@ -7972,5 +7977,12 @@ namespace Game.Entities
             SetUpdateFieldValue(personalTabard.ModifyValue(personalTabard.BorderColor), borderColor);
             SetUpdateFieldValue(personalTabard.ModifyValue(personalTabard.BackgroundColor), backgroundColor);
         }
+    }
+
+    public class TeleportLocation
+    {
+        public WorldLocation Location;
+        public uint? InstanceId;
+        public ObjectGuid? TransportGuid;
     }
 }

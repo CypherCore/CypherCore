@@ -3863,15 +3863,15 @@ namespace Game.Entities
                 }
                 else
                 {
-                    stmt.AddValue(index++, (ushort)GetTeleportDest().GetMapId());
+                    stmt.AddValue(index++, (ushort)GetTeleportDest().Location.GetMapId());
                     stmt.AddValue(index++, 0);
                     stmt.AddValue(index++, (byte)GetDungeonDifficultyID());
                     stmt.AddValue(index++, (byte)GetRaidDifficultyID());
                     stmt.AddValue(index++, (byte)GetLegacyRaidDifficultyID());
-                    stmt.AddValue(index++, finiteAlways(GetTeleportDest().GetPositionX()));
-                    stmt.AddValue(index++, finiteAlways(GetTeleportDest().GetPositionY()));
-                    stmt.AddValue(index++, finiteAlways(GetTeleportDest().GetPositionZ()));
-                    stmt.AddValue(index++, finiteAlways(GetTeleportDest().GetOrientation()));
+                    stmt.AddValue(index++, finiteAlways(GetTeleportDest().Location.GetPositionX()));
+                    stmt.AddValue(index++, finiteAlways(GetTeleportDest().Location.GetPositionY()));
+                    stmt.AddValue(index++, finiteAlways(GetTeleportDest().Location.GetPositionZ()));
+                    stmt.AddValue(index++, finiteAlways(GetTeleportDest().Location.GetOrientation()));
                 }
 
                 stmt.AddValue(index++, finiteAlways(GetTransOffsetX()));

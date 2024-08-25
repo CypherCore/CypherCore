@@ -643,7 +643,7 @@ namespace Game.Entities
             if (oldMapId != newMapId)
             {
                 UnloadStaticPassengers();
-                TeleportPassengersAndHideTransport(newMapId, x, y, z, o);
+                TeleportPassengersAndHideTransport(newMapId);
                 return true;
             }
             else
@@ -673,7 +673,7 @@ namespace Game.Entities
             }
         }
 
-        void TeleportPassengersAndHideTransport(uint newMapid, float x, float y, float z, float o)
+        void TeleportPassengersAndHideTransport(uint newMapid)
         {
             if (newMapid == GetMapId())
             {
@@ -714,12 +714,11 @@ namespace Game.Entities
             {
                 float destX, destY, destZ, destO;
                 obj.m_movementInfo.transport.pos.GetPosition(out destX, out destY, out destZ, out destO);
-                ITransport.CalculatePassengerPosition(ref destX, ref destY, ref destZ, ref destO, x, y, z, o);
 
                 switch (obj.GetTypeId())
                 {
                     case TypeId.Player:
-                        if (!obj.ToPlayer().TeleportTo(newMapid, destX, destY, destZ, destO, TeleportToOptions.NotLeaveTransport))
+                        if (!obj.ToPlayer().TeleportTo(new TeleportLocation() { Location = new WorldLocation(newMapid, destX, destY, destZ, destO), TransportGuid = GetTransGUID() }, TeleportToOptions.NotLeaveTransport))
                             RemovePassenger(obj);
                         break;
                     case TypeId.DynamicObject:

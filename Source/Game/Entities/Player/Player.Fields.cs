@@ -82,8 +82,7 @@ namespace Game.Entities
         public byte m_movementForceModMagnitudeChanges;
         uint m_lastFallTime;
         float m_lastFallZ;
-        WorldLocation teleportDest;
-        uint? m_teleport_instanceId;
+        TeleportLocation teleportDest;
         TeleportToOptions m_teleport_options;
         bool mSemaphoreTeleport_Near;
         bool mSemaphoreTeleport_Far;
