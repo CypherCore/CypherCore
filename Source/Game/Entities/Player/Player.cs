@@ -3945,7 +3945,7 @@ namespace Game.Entities
 
             Player seerPlayer = seer.ToPlayer();
             if (seerPlayer != null)
-                if (IsGroupVisibleFor(seerPlayer))
+                if (IsGroupVisibleFor(seerPlayer) && !GetAuraEffectsByType(AuraType.ModInvisibility).All(invis => invis.GetSpellInfo().HasAttribute(SpellAttr9.ModInvisIncludesParty)))
                     return true;
 
             return false;

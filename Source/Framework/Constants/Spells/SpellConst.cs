@@ -1967,7 +1967,7 @@ namespace Framework.Constants
     public enum SpellAttr9 : uint
     {
         ForceDestLocation = 0x01, // Force Dest Location DESCRIPTION Ignores collision with terrain (unsure if it also ignores terrain height and can go under map)
-        Unk1 = 0x02, // 1
+        ModInvisIncludesParty = 0x02, // Mod Invis Includes Party 1@Attr9 DESCRIPTION Causes invisibility auras to ignore "can always see party member invis" rule
         RestrictedFlightArea = 0x04, // 2
         Unk3 = 0x08, // 3
         SpecialDelayCalculation = 0x10, // 4
