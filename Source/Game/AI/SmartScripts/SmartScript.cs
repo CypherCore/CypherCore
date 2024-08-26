@@ -1909,10 +1909,10 @@ namespace Game.AI
                     if (e.Action.jump.Gravity != 0 || e.Action.jump.UseDefaultGravity != 0)
                     {
                         float gravity = e.Action.jump.UseDefaultGravity != 0 ? (float)MotionMaster.gravity : e.Action.jump.Gravity;
-                        _me.GetMotionMaster().MoveJumpWithGravity(pos, e.Action.jump.SpeedXY, gravity, e.Action.jump.PointId, false, null, null, actionResultSetter);
+                        _me.GetMotionMaster().MoveJumpWithGravity(pos, e.Action.jump.SpeedXY, gravity, e.Action.jump.PointId, null, null, null, actionResultSetter);
                     }
                     else
-                        _me.GetMotionMaster().MoveJump(pos, e.Action.jump.SpeedXY, e.Action.jump.SpeedZ, e.Action.jump.PointId, false, null, null, actionResultSetter);
+                        _me.GetMotionMaster().MoveJump(pos, e.Action.jump.SpeedXY, e.Action.jump.SpeedZ, e.Action.jump.PointId, null, null, null, actionResultSetter);
 
                     mTimedActionWaitEvent = waitEvent;
                     break;

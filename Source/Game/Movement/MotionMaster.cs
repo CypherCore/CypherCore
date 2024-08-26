@@ -768,15 +768,15 @@ namespace Game.Movement
             _owner.GetNearPoint2D(null, out float x, out float y, dist, _owner.GetOrientation() + angle);
             float z = _owner.GetPositionZ();
             _owner.UpdateAllowedPositionZ(x, y, ref z);
-            MoveJump(x, y, z, 0.0f, speedXY, speedZ);
+            MoveJump(x, y, z, speedXY, speedZ);
         }
 
-        public void MoveJump(Position pos, float speedXY, float speedZ, uint id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
+        public void MoveJump(Position pos, float speedXY, float speedZ, uint id = EventId.Jump, object facing = null, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
-            MoveJump(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), speedXY, speedZ, id, hasOrientation, arrivalCast, spellEffectExtraData, scriptResult);
+            MoveJump(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), speedXY, speedZ, id, facing, arrivalCast, spellEffectExtraData, scriptResult);
         }
 
-        public void MoveJump(float x, float y, float z, float o, float speedXY, float speedZ, uint id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
+        public void MoveJump(float x, float y, float z, float speedXY, float speedZ, uint id = EventId.Jump, object facing = null, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             Log.outDebug(LogFilter.Server, "Unit ({0}) jump to point (X: {1} Y: {2} Z: {3})", _owner.GetGUID().ToString(), x, y, z);
             if (speedXY < 0.01f)
@@ -794,8 +794,7 @@ namespace Game.Movement
                 init.MoveTo(x, y, z, false);
                 init.SetParabolic(max_height, 0);
                 init.SetVelocity(speedXY);
-                if (hasOrientation)
-                    init.SetFacing(o);
+                MoveSplineInitFacingVisitor(init, facing);
                 if (spellEffectExtraData != null)
                     init.SetSpellEffectExtraData(spellEffectExtraData);
             };
@@ -814,7 +813,7 @@ namespace Game.Movement
             Add(movement);
         }
 
-        public void MoveJumpWithGravity(Position pos, float speedXY, float gravity, uint id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
+        public void MoveJumpWithGravity(Position pos, float speedXY, float gravity, uint id = EventId.Jump, object facing = null, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             Log.outDebug(LogFilter.Movement, $"MotionMaster.MoveJumpWithGravity: '{_owner.GetGUID()}', jumps to point Id: {id} ({pos})");
             if (speedXY < 0.01f)
@@ -831,8 +830,7 @@ namespace Game.Movement
                 init.SetUncompressed();
                 init.SetVelocity(speedXY);
                 init.SetUnlimitedSpeed();
-                if (hasOrientation)
-                    init.SetFacing(pos.GetOrientation());
+                MoveSplineInitFacingVisitor(init, facing);
                 if (spellEffectExtraData != null)
                     init.SetSpellEffectExtraData(spellEffectExtraData);
             };
@@ -850,6 +848,19 @@ namespace Game.Movement
             movement.BaseUnitState = UnitState.Jumping;
             movement.AddFlag(MovementGeneratorFlags.PersistOnDeath);
             Add(movement);
+        }
+
+        void MoveSplineInitFacingVisitor(MoveSplineInit init, object facing)
+        {
+            if (facing == null)
+                return;
+
+            if (facing is Position pos)
+                init.SetFacing(pos);
+            else if (facing is Unit unit)
+                init.SetFacing(unit);
+            else if (facing is float angle)
+                init.SetFacing(angle);
         }
 
         public void MoveCirclePath(float x, float y, float z, float radius, bool clockwise, byte stepCount, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, ActionResultSetter<MovementStopReason> scriptResult = null)

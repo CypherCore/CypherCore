@@ -468,14 +468,6 @@ namespace Game.Entities
             }
         }
 
-        public void JumpTo(WorldObject obj, float speedZ, bool withOrientation = false)
-        {
-            float x, y, z;
-            obj.GetContactPoint(this, out x, out y, out z);
-            float speedXY = GetExactDist2d(x, y) * 10.0f / speedZ;
-            GetMotionMaster().MoveJump(x, y, z, GetAbsoluteAngle(obj), speedXY, speedZ, EventId.Jump, withOrientation);
-        }
-
         public void UpdateSpeed(UnitMoveType mtype)
         {
             int main_speed_mod = 0;

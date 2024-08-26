@@ -534,7 +534,7 @@ namespace Game.Spells
             JumpArrivalCastArgs arrivalCast = new();
             arrivalCast.SpellId = effectInfo.TriggerSpell;
             arrivalCast.Target = unitTarget.GetGUID();
-            unitCaster.GetMotionMaster().MoveJump(unitTarget, speedXY, speedZ, EventId.Jump, false, arrivalCast);
+            unitCaster.GetMotionMaster().MoveJump(unitTarget, speedXY, speedZ, EventId.Jump, null, arrivalCast);
         }
 
         [SpellEffectHandler(SpellEffectName.JumpDest)]
@@ -555,9 +555,12 @@ namespace Game.Spells
 
             float speedXY, speedZ;
             CalculateJumpSpeeds(effectInfo, unitCaster.GetExactDist2d(destTarget), out speedXY, out speedZ);
+            object facing = null;
+            if (!m_targets.GetUnitTargetGUID().IsEmpty())
+                facing = destTarget.GetOrientation();
             JumpArrivalCastArgs arrivalCast = new();
             arrivalCast.SpellId = effectInfo.TriggerSpell;
-            unitCaster.GetMotionMaster().MoveJump(destTarget, speedXY, speedZ, EventId.Jump, !m_targets.GetObjectTargetGUID().IsEmpty(), arrivalCast);
+            unitCaster.GetMotionMaster().MoveJump(destTarget, speedXY, speedZ, EventId.Jump, facing, arrivalCast);
         }
 
         TeleportToOptions GetTeleportOptions(WorldObject caster, Unit unitTarget, SpellDestination targetDest)
@@ -5585,7 +5588,7 @@ namespace Game.Spells
                     effectExtra.ParabolicCurveId = jumpParams.ParabolicCurveId.Value;
             }
 
-            unitCaster.GetMotionMaster().MoveJumpWithGravity(destTarget, speed, jumpParams.JumpGravity, EventId.Jump, false, arrivalCast, effectExtra);
+            unitCaster.GetMotionMaster().MoveJumpWithGravity(destTarget, speed, jumpParams.JumpGravity, EventId.Jump, null, arrivalCast, effectExtra);
         }
 
         [SpellEffectHandler(SpellEffectName.LearnTransmogSet)]
