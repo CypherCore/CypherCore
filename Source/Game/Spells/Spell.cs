@@ -339,7 +339,7 @@ namespace Game.Spells
                     if (speed > 0.0f)
                         return (ulong)(Math.Floor((m_targets.GetDist2d() / speed + launchDelay) * 1000.0f));
                 }
-                else if (m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
+                else if (m_spellInfo.HasAttribute(SpellAttr9.MissileSpeedIsDelayInSec))
                     return (ulong)(Math.Floor((m_spellInfo.Speed + launchDelay) * 1000.0f));
                 else if (m_spellInfo.Speed > 0.0f)
                 {
@@ -1988,7 +1988,7 @@ namespace Game.Spells
                     }
                 }
 
-                if (m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
+                if (m_spellInfo.HasAttribute(SpellAttr9.MissileSpeedIsDelayInSec))
                     hitDelay += m_spellInfo.Speed;
                 else if (m_spellInfo.Speed > 0.0f)
                 {
@@ -2057,7 +2057,7 @@ namespace Game.Spells
             if (m_caster != go)
             {
                 float hitDelay = m_spellInfo.LaunchDelay;
-                if (m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
+                if (m_spellInfo.HasAttribute(SpellAttr9.MissileSpeedIsDelayInSec))
                     hitDelay += m_spellInfo.Speed;
                 else if (m_spellInfo.Speed > 0.0f)
                 {
@@ -2137,7 +2137,7 @@ namespace Game.Spells
             if (m_caster != corpse)
             {
                 float hitDelay = m_spellInfo.LaunchDelay;
-                if (m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
+                if (m_spellInfo.HasAttribute(SpellAttr9.MissileSpeedIsDelayInSec))
                     hitDelay += m_spellInfo.Speed;
                 else if (m_spellInfo.Speed > 0.0f)
                 {

@@ -1969,8 +1969,8 @@ namespace Framework.Constants
         ForceDestLocation = 0x01, // Force Dest Location DESCRIPTION Ignores collision with terrain (unsure if it also ignores terrain height and can go under map)
         ModInvisIncludesParty = 0x02, // Mod Invis Includes Party 1@Attr9 DESCRIPTION Causes invisibility auras to ignore "can always see party member invis" rule
         OnlyWhenIllegallyMounted = 0x04, // Only When Illegally Mounted
-        Unk3 = 0x08, // 3
-        SpecialDelayCalculation = 0x10, // 4
+        DoNotLogAuraRefresh = 0x08, // Do Not Log Aura Refresh (client only)
+        MissileSpeedIsDelayInSec = 0x10, // Missile Speed is Delay (in sec)
         SummonPlayerTotem = 0x20, // 5
         Unk6 = 0x40, // 6
         Unk7 = 0x80, // 7
