@@ -1465,6 +1465,9 @@ namespace Game.Spells
                 default:
                     break;
             }
+
+            if (Mechanic == Mechanics.Banish)
+                _auraState = AuraStateType.Banished;
         }
 
         public SpellSpecificType GetSpellSpecific()
