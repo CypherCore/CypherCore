@@ -2518,10 +2518,10 @@ namespace Game.Entities
             return spell.Prepare(targets.Targets, args.TriggeringAura);
         }
 
-        void SendPlayOrphanSpellVisual(ObjectGuid target, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
+        void SendPlayOrphanSpellVisual(Position sourceLocation, ObjectGuid target, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
         {
             PlayOrphanSpellVisual playOrphanSpellVisual = new();
-            playOrphanSpellVisual.SourceLocation = GetPosition();
+            playOrphanSpellVisual.SourceLocation = sourceLocation;
             if (withSourceOrientation)
             {
                 if (IsGameObject())
@@ -2543,10 +2543,10 @@ namespace Game.Entities
             SendMessageToSet(playOrphanSpellVisual, true);
         }
 
-        void SendPlayOrphanSpellVisual(Position targetLocation, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
+        void SendPlayOrphanSpellVisual(Position sourceLocation, Position targetLocation, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
         {
             PlayOrphanSpellVisual playOrphanSpellVisual = new();
-            playOrphanSpellVisual.SourceLocation = GetPosition();
+            playOrphanSpellVisual.SourceLocation = sourceLocation;
             if (withSourceOrientation)
             {
                 if (IsGameObject())
@@ -2566,6 +2566,16 @@ namespace Game.Entities
             playOrphanSpellVisual.SpeedAsTime = speedAsTime;
             playOrphanSpellVisual.LaunchDelay = 0.0f;
             SendMessageToSet(playOrphanSpellVisual, true);
+        }
+
+        void SendPlayOrphanSpellVisual(ObjectGuid target, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
+        {
+            SendPlayOrphanSpellVisual(GetPosition(), target, spellVisualId, travelSpeed, speedAsTime, withSourceOrientation);
+        }
+
+        void SendPlayOrphanSpellVisual(Position targetLocation, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
+        {
+            SendPlayOrphanSpellVisual(GetPosition(), targetLocation, spellVisualId, travelSpeed, speedAsTime, withSourceOrientation);
         }
 
         void SendCancelOrphanSpellVisual(uint id)
