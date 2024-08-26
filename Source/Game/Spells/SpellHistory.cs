@@ -211,7 +211,7 @@ namespace Game.Spells
 
         public bool IsReady(SpellInfo spellInfo, uint itemId = 0)
         {
-            if (spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence))
+            if (!spellInfo.HasAttribute(SpellAttr9.IgnoreSchoolLockout) && spellInfo.PreventionType.HasFlag(SpellPreventionType.Silence))
                 if (IsSchoolLocked(spellInfo.GetSchoolMask()))
                     return false;
 
@@ -739,6 +739,9 @@ namespace Game.Spells
                     continue;
 
                 if (!spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence))
+                    continue;
+
+                if (spellInfo.HasAttribute(SpellAttr9.IgnoreSchoolLockout))
                     continue;
 
                 if ((schoolMask & spellInfo.GetSchoolMask()) == 0)
