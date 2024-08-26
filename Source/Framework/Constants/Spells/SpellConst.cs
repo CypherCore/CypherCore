@@ -2045,7 +2045,7 @@ namespace Framework.Constants
         Unk6 = 0x40, //  6
         RankIgnoresCasterLevel = 0x80, //  7 Spell_C_GetSpellRank returns SpellLevels.MaxLevel * 5 instead of std::min(SpellLevels.MaxLevel, caster.Level) * 5
         Unk8 = 0x100, //  8
-        Unk9 = 0x200, //  9
+        IgnoreSpellcastOverrideShapeshiftRequirements = 0x200, // Ignore Spellcast Override Shapeshift Requirements
         Unk10 = 0x400, // 10
         NotUsableInInstances = 0x800, // 11
         Unk12 = 0x1000, // 12
