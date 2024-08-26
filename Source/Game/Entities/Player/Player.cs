@@ -2449,7 +2449,8 @@ namespace Game.Entities
                         return false;
                     break;
                 case 3: // Polygon
-                    if (!IsInPolygon2D(areaTriggerPos, ObjectMgr.GetVerticesForAreaTrigger(areaTrigger)))
+                    var polygon = ObjectMgr.GetAreaTriggerPolygon(areaTrigger.Id);
+                    if (polygon == null || (polygon.Height.HasValue && GetPositionZ() > areaTrigger.Pos.Z + polygon.Height) || !IsInPolygon2D(areaTriggerPos, polygon.Vertices))
                         return false;
                     break;
                 case 4: // Cylinder

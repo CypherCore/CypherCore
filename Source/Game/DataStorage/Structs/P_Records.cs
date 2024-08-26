@@ -33,6 +33,16 @@ namespace Game.DataStorage
         public int LocationID;
     }
 
+    public sealed class PathPropertyRecord
+    {
+        public uint Id;
+        public ushort PathID;
+        public byte PropertyIndex;
+        public int Value;
+
+        public PathPropertyIndex GetPropertyIndex() { return (PathPropertyIndex)PropertyIndex; }
+    }
+
     public sealed class PhaseRecord
     {
         public uint Id;
@@ -132,9 +142,9 @@ namespace Game.DataStorage
         public uint[] CurrencyCount = new uint[4];
         public uint[] QuestKillMonster = new uint[6];
         public int[] MovementFlags = new int[2];
-        public int[]TraitNodeEntryID = new int[4];
-        public ushort[]TraitNodeEntryMinRank = new ushort[4];
-        public ushort[]TraitNodeEntryMaxRank = new ushort[4];
+        public int[] TraitNodeEntryID = new int[4];
+        public ushort[] TraitNodeEntryMinRank = new ushort[4];
+        public ushort[] TraitNodeEntryMaxRank = new ushort[4];
     }
 
     public sealed class PowerDisplayRecord
@@ -176,7 +186,7 @@ namespace Game.DataStorage
         public int AwardedAchievementID;
 
         public bool HasFlag(PrestigeLevelInfoFlags prestigeLevelInfoFlags) { return (Flags & (byte)prestigeLevelInfoFlags) != 0; }
-        public bool IsDisabled() { return  HasFlag(PrestigeLevelInfoFlags.Disabled); }
+        public bool IsDisabled() { return HasFlag(PrestigeLevelInfoFlags.Disabled); }
     }
 
     public sealed class PvpDifficultyRecord

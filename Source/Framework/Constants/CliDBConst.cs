@@ -1860,6 +1860,25 @@ namespace Framework.Constants
         HideIfUnknown = 0x40
     }
 
+    public enum PathPropertyIndex
+    {
+        UseNewLiquidGenerateCode = 0,
+        AnimaCableId = 1,
+        AnimaPlayerCondition = 2,
+        AnimaStartTaper = 3,
+        AnimaEndTaper = 4,
+        VolumeHeight = 5,
+        AiPathGraphMaxStartDist = 6,
+        AiPathGraphMinTotalDist = 7,
+        AiPathGraphAreaControl = 8,
+        AiPathGraphAreaId = 9,
+        AiPathGraphWidth = 10,
+        AiPathDefaultFollowStyle = 11,
+        AiPathConstrainSteering = 12,
+        Phase = 13,
+        SteepSlopeDegrees = 14
+    }
+
     public enum PhaseEntryFlags : int
     {
         ReadOnly = 0x1,

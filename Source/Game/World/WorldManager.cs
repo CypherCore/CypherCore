@@ -740,6 +740,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Area Trigger Teleports definitions...");
             Global.ObjectMgr.LoadAreaTriggerTeleports();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading Area Trigger Polygon data...");
+            Global.ObjectMgr.LoadAreaTriggerPolygons();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading Access Requirements...");
             Global.ObjectMgr.LoadAccessRequirements();                        // must be after item template load
 

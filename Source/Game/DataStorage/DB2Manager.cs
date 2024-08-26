@@ -423,27 +423,27 @@ namespace Game.DataStorage
             Dictionary<uint, List<PathNodeRecord>> unsortedNodes = new();
             foreach (var (_, pathNode) in CliDB.PathNodeStorage)
             {
-                if (CliDB.PathStorage.ContainsKey(pathNode.PathID))
+                if (CliDB.PathStorage.HasRecord(pathNode.PathID) && CliDB.LocationStorage.HasRecord((uint)pathNode.LocationID))
                 {
-                    if (CliDB.LocationStorage.ContainsKey(pathNode.LocationID))
-                    {
-                        if (!unsortedNodes.ContainsKey(pathNode.PathID))
-                            unsortedNodes[pathNode.PathID] = new();
+                    if (!unsortedNodes.ContainsKey(pathNode.PathID))
+                        unsortedNodes[pathNode.PathID] = new();
 
-                        unsortedNodes[pathNode.PathID].Add(pathNode);
-                    }
-                }
+                    unsortedNodes[pathNode.PathID].Add(pathNode);
+                }                
             }
 
             foreach (var (pathId, pathNodes) in unsortedNodes)
             {
+                if (!_paths.ContainsKey(pathId))
+                    _paths[pathId] = new();
+
                 pathNodes.OrderBy(node => node.Sequence);
-                _pathNodes.AddRange(pathId, pathNodes.Select(node =>
-                {
-                    LocationRecord location = CliDB.LocationStorage.LookupByKey(node.LocationID);
-                    return location.Pos;
-                }));
+                _paths[pathId].Locations.AddRange(pathNodes.Select(node => CliDB.LocationStorage.LookupByKey(node.LocationID).Pos));
             }
+
+            foreach (var (_, pathProperty) in CliDB.PathPropertyStorage)
+                if (CliDB.PathStorage.HasRecord(pathProperty.PathID))
+                    _paths[pathProperty.PathID].Properties.Add(pathProperty);
 
             foreach (var group in PhaseXPhaseGroupStorage.Values)
             {
@@ -1765,9 +1765,9 @@ namespace Game.DataStorage
             return _paragonReputations.LookupByKey(factionId);
         }
 
-        public List<Vector3> GetNodesForPath(uint pathId)
+        public PathDb2 GetPath(uint pathId)
         {
-            return _pathNodes.LookupByKey(pathId);
+            return _paths.LookupByKey(pathId);
         }
 
         public PvpDifficultyRecord GetBattlegroundBracketByLevel(uint mapid, uint level)
@@ -2358,7 +2358,7 @@ namespace Game.DataStorage
         Dictionary<uint, List<NameGenRecord>[]> _nameGenData = new();
         List<string>[] _nameValidators = new List<string>[(int)Locale.Total + 1];
         Dictionary<uint, ParagonReputationRecord> _paragonReputations = new();
-        MultiMap<uint, Vector3> _pathNodes = new();
+        Dictionary<uint, PathDb2> _paths;
         MultiMap<uint, uint> _phasesByGroup = new();
         Dictionary<PowerType, PowerTypeRecord> _powerTypes = new();
         Dictionary<uint, byte> _pvpItemBonus = new();
@@ -2648,6 +2648,13 @@ namespace Game.DataStorage
         public short MaxLevelWithDelta;
         public short TargetLevelMin;
         public short TargetLevelMax;
+    }
+
+    public class PathDb2
+    {
+        public uint Id;
+        public List<Vector3> Locations = new();
+        public List<PathPropertyRecord> Properties = new();
     }
 
     public class ShapeshiftFormModelData

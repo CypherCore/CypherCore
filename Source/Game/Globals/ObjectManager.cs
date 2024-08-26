@@ -751,23 +751,6 @@ namespace Game
             return pointsOfInterestStorage.LookupByKey(id);
         }
 
-        public List<Position> GetVerticesForAreaTrigger(AreaTriggerRecord areaTrigger)
-        {
-            List<Position> vertices = new();
-            if (areaTrigger != null && areaTrigger.ShapeType == 3 /* Polygon */)
-            {
-                var pathNodes = Global.DB2Mgr.GetNodesForPath((uint)areaTrigger.ShapeID);
-                if (pathNodes != null)
-                    vertices.AddRange(pathNodes.Select(dbcPosition => new Position(dbcPosition.X, dbcPosition.Y, dbcPosition.Z)));
-
-
-                // Drop first node (areatrigger position)
-                vertices.RemoveAt(0);
-            }
-
-            return vertices;
-        }
-
         public void LoadGraveyardZones()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -5372,6 +5355,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} instance templates in {1} ms", count, Time.GetMSTimeDiffToNow(time));
         }
+
         public void LoadGameTele()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -5415,6 +5399,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} GameTeleports in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
+
         public void LoadAreaTriggerTeleports()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -5465,6 +5450,29 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} area trigger teleport definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
+
+        public void LoadAreaTriggerPolygons()
+        {
+            foreach (var (_, areaTrigger) in CliDB.AreaTriggerStorage)
+            {
+                if (areaTrigger.ShapeType != 3)
+                    continue;
+
+                PathDb2 path = Global.DB2Mgr.GetPath((uint)areaTrigger.ShapeID);
+                if (path == null || path.Locations.Count < 4)
+                    continue;
+
+                AreaTriggerPolygon polygon = new();
+                polygon.Vertices.AddRange(path.Locations.Select(pos => new Position(pos.X, pos.Y, pos.Z)));
+
+                foreach (var pathProperty in path.Properties)
+                    if (pathProperty.GetPropertyIndex() == PathPropertyIndex.VolumeHeight)
+                        polygon.Height = pathProperty.Value * 0.001f + 0.02f;
+
+                _areaTriggerPolygons[areaTrigger.Id] = polygon;
+            }
+        }
+
         public void LoadAccessRequirements()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -5561,6 +5569,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} access requirement definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
+
         public void LoadSpawnGroupTemplates()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -5621,6 +5630,7 @@ namespace Game
             else
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spawn group templates. DB table `spawn_group_template` is empty.");
         }
+
         public void LoadSpawnGroups()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -5683,6 +5693,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {numMembers} spawn group members in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
+
         public void LoadInstanceSpawnGroups()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -5749,6 +5760,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} instance spawn groups in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
+
         void OnDeleteSpawnData(SpawnData data)
         {
             var templateIt = _spawnGroupDataStorage.LookupByKey(data.spawnGroupData.groupId);
@@ -5888,6 +5900,10 @@ namespace Game
             }
         }
         public List<InstanceSpawnGroupInfo> GetInstanceSpawnGroupsForMap(uint mapId) { return _instanceSpawnGroupStorage.LookupByKey(mapId); }
+        public AreaTriggerPolygon GetAreaTriggerPolygon(uint areaTriggerId)
+        {
+            return _areaTriggerPolygons.LookupByKey(areaTriggerId);
+        }
 
         //Player
         public void LoadPlayerInfo()
@@ -11020,6 +11036,7 @@ namespace Game
         MultiMap<uint, SpawnMetadata> _spawnGroupMapStorage = new();
         MultiMap<uint, uint> _spawnGroupsByMap = new();
         MultiMap<ushort, InstanceSpawnGroupInfo> _instanceSpawnGroupStorage = new();
+        Dictionary<uint, AreaTriggerPolygon> _areaTriggerPolygons = new();
 
         //Spells /Skills / Phases
         Dictionary<uint, PhaseInfoStruct> _phaseInfoById = new();
@@ -12233,5 +12250,11 @@ namespace Game
     {
         public uint Parent;
         public uint ScriptId;
+    }
+
+    public class AreaTriggerPolygon
+    {
+        public List<Position> Vertices = new();
+        public float? Height;
     }
 }

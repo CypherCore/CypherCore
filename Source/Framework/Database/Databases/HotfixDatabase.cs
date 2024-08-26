@@ -993,6 +993,9 @@ namespace Framework.Database
             // PathNode.db2
             PrepareStatement(HotfixStatements.SEL_PATH_NODE, "SELECT ID, PathID, Sequence, LocationID FROM path_node WHERE (`VerifiedBuild` > 0) = ?");
 
+            // PathProperty.db2
+            PrepareStatement(HotfixStatements.SEL_PATH_PROPERTY, "SELECT ID, PathID, PropertyIndex, Value FROM path_property WHERE (`VerifiedBuild` > 0) = ?");
+
             // Phase.db2
             PrepareStatement(HotfixStatements.SEL_PHASE, "SELECT ID, Flags FROM phase WHERE (`VerifiedBuild` > 0) = ?");
 
@@ -2089,6 +2092,8 @@ namespace Framework.Database
         SEL_PATH,
 
         SEL_PATH_NODE,
+
+        SEL_PATH_PROPERTY,
 
         SEL_PHASE,
 

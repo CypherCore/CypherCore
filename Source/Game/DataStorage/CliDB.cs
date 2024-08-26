@@ -254,6 +254,7 @@ namespace Game.DataStorage
             ParagonReputationStorage = ReadDB2<ParagonReputationRecord>("ParagonReputation.db2", HotfixStatements.SEL_PARAGON_REPUTATION);
             PathStorage = ReadDB2<PathRecord>("Path.db2", HotfixStatements.SEL_PATH);
             PathNodeStorage = ReadDB2<PathNodeRecord>("PathNode.db2", HotfixStatements.SEL_PATH_NODE);
+            PathPropertyStorage = ReadDB2<PathPropertyRecord>("PathProperty.db2", HotfixStatements.SEL_PATH_PROPERTY);
             PhaseStorage = ReadDB2<PhaseRecord>("Phase.db2", HotfixStatements.SEL_PHASE);
             PhaseXPhaseGroupStorage = ReadDB2<PhaseXPhaseGroupRecord>("PhaseXPhaseGroup.db2", HotfixStatements.SEL_PHASE_X_PHASE_GROUP);
             PlayerConditionStorage = ReadDB2<PlayerConditionRecord>("PlayerCondition.db2", HotfixStatements.SEL_PLAYER_CONDITION, HotfixStatements.SEL_PLAYER_CONDITION_LOCALE);
@@ -697,6 +698,7 @@ namespace Game.DataStorage
         public static DB6Storage<ParagonReputationRecord> ParagonReputationStorage;
         public static DB6Storage<PathRecord> PathStorage;
         public static DB6Storage<PathNodeRecord> PathNodeStorage;
+        public static DB6Storage<PathPropertyRecord> PathPropertyStorage;
         public static DB6Storage<PhaseRecord> PhaseStorage;
         public static DB6Storage<PhaseXPhaseGroupRecord> PhaseXPhaseGroupStorage;
         public static DB6Storage<PlayerConditionRecord> PlayerConditionStorage;
