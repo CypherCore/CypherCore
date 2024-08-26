@@ -933,7 +933,10 @@ namespace Game.Entities
 
             newInfo = findMatchingAuraEffectIn(AuraType.OverrideActionbarSpellsTriggered);
             if (newInfo != null)
+            {
+                triggerFlag |= TriggerCastFlags.IgnoreCastTime;
                 return newInfo;
+            }
 
             return spellInfo;
         }
