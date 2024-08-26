@@ -531,10 +531,16 @@ namespace Game.Spells
 
             float speedXY, speedZ;
             CalculateJumpSpeeds(effectInfo, unitCaster.GetExactDist2d(unitTarget), out speedXY, out speedZ);
+
+            object facing = null;
+            Unit target = m_targets.GetUnitTarget();
+            if (target != null && m_spellInfo.HasAttribute(SpellAttr9.FaceUnitTargetUponCompletionOfJumpCharge))
+                facing = target;
+
             JumpArrivalCastArgs arrivalCast = new();
             arrivalCast.SpellId = effectInfo.TriggerSpell;
             arrivalCast.Target = unitTarget.GetGUID();
-            unitCaster.GetMotionMaster().MoveJump(unitTarget, speedXY, speedZ, EventId.Jump, null, arrivalCast);
+            unitCaster.GetMotionMaster().MoveJump(unitTarget, speedXY, speedZ, EventId.Jump, facing, arrivalCast);
         }
 
         [SpellEffectHandler(SpellEffectName.JumpDest)]
@@ -555,9 +561,14 @@ namespace Game.Spells
 
             float speedXY, speedZ;
             CalculateJumpSpeeds(effectInfo, unitCaster.GetExactDist2d(destTarget), out speedXY, out speedZ);
-            object facing = null;
-            if (!m_targets.GetUnitTargetGUID().IsEmpty())
+
+            object facing;
+            Unit target = m_targets.GetUnitTarget();
+            if (target != null && m_spellInfo.HasAttribute(SpellAttr9.FaceUnitTargetUponCompletionOfJumpCharge))
+                facing = target;
+            else
                 facing = destTarget.GetOrientation();
+
             JumpArrivalCastArgs arrivalCast = new();
             arrivalCast.SpellId = effectInfo.TriggerSpell;
             unitCaster.GetMotionMaster().MoveJump(destTarget, speedXY, speedZ, EventId.Jump, facing, arrivalCast);
@@ -5567,6 +5578,11 @@ namespace Game.Spells
             if (jumpParams.TreatSpeedAsMoveTimeSeconds)
                 speed = unitCaster.GetExactDist(destTarget) / jumpParams.Speed;
 
+            object facing = null;
+            Unit target = m_targets.GetUnitTarget();
+            if (target != null && m_spellInfo.HasAttribute(SpellAttr9.FaceUnitTargetUponCompletionOfJumpCharge))
+                facing = target;
+
             JumpArrivalCastArgs arrivalCast = null;
             if (effectInfo.TriggerSpell != 0)
             {
@@ -5588,7 +5604,7 @@ namespace Game.Spells
                     effectExtra.ParabolicCurveId = jumpParams.ParabolicCurveId.Value;
             }
 
-            unitCaster.GetMotionMaster().MoveJumpWithGravity(destTarget, speed, jumpParams.JumpGravity, EventId.Jump, null, arrivalCast, effectExtra);
+            unitCaster.GetMotionMaster().MoveJumpWithGravity(destTarget, speed, jumpParams.JumpGravity, EventId.Jump, facing, arrivalCast, effectExtra);
         }
 
         [SpellEffectHandler(SpellEffectName.LearnTransmogSet)]
