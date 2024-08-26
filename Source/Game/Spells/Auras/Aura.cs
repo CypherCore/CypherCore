@@ -2772,6 +2772,13 @@ namespace Game.Spells
                     targets.Add(target, targetPair.Value);
             }
 
+            // skip area update if owner is not in world!
+            if (!GetUnitOwner().IsInWorld)
+                return;
+
+            if (GetUnitOwner().HasAuraState(AuraStateType.Banished, GetSpellInfo(), caster))
+                return;
+
             foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
             {
                 if (!HasEffect(spellEffectInfo.EffectIndex))
@@ -2779,13 +2786,6 @@ namespace Game.Spells
 
                 // area auras only
                 if (spellEffectInfo.Effect == SpellEffectName.ApplyAura)
-                    continue;
-
-                // skip area update if owner is not in world!
-                if (!GetUnitOwner().IsInWorld)
-                    continue;
-
-                if (GetUnitOwner().HasAuraState(AuraStateType.Banished, GetSpellInfo(), caster))
                     continue;
 
                 List<WorldObject> units = new();

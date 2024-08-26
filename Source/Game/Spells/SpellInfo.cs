@@ -2435,54 +2435,72 @@ namespace Game.Spells
                 bool immuneToAllEffects = true;
                 foreach (var auraSpellEffectInfo in auraSpellInfo.GetEffects())
                 {
-                    if (!auraSpellEffectInfo.IsEffect())
+                    if (!auraSpellEffectInfo.IsAura())
                         continue;
 
-                    if (!immuneInfo.SpellEffectImmune.Contains(auraSpellEffectInfo.Effect))
-                    {
-                        immuneToAllEffects = false;
-                        break;
-                    }
+                    if (mechanicImmunity != 0)
+                        if ((mechanicImmunity & (1ul << (int)auraSpellEffectInfo.Mechanic)) != 0)
+                            continue;
 
-                    uint mechanic = (uint)auraSpellEffectInfo.Mechanic;
-                    if (mechanic != 0)
+                    AuraType auraName = auraSpellEffectInfo.ApplyAuraName;
+                    if (auraName != 0)
                     {
-                        if (!Convert.ToBoolean(immuneInfo.MechanicImmuneMask & (1ul << (int)mechanic)))
+                        if (immuneInfo.AuraTypeImmune.Contains(auraName))
+                            continue;
+
+                        if (!auraSpellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities) && !auraSpellInfo.IsPositiveEffect(auraSpellEffectInfo.EffectIndex))
                         {
-                            immuneToAllEffects = false;
-                            break;
+                            uint applyHarmfulAuraImmunityMask = immuneInfo.ApplyHarmfulAuraImmuneMask;
+                            if (applyHarmfulAuraImmunityMask != 0)
+                                if (((uint)auraSpellInfo.GetSchoolMask() & applyHarmfulAuraImmunityMask) != 0)
+                                    continue;
                         }
                     }
 
-                    if (!auraSpellInfo.HasAttribute(SpellAttr3.AlwaysHit))
-                    {
-                        AuraType auraName = auraSpellEffectInfo.ApplyAuraName;
-                        if (auraName != 0)
-                        {
-                            bool isImmuneToAuraEffectApply = false;
-                            if (!immuneInfo.AuraTypeImmune.Contains(auraName))
-                                isImmuneToAuraEffectApply = true;
-
-                            if (!isImmuneToAuraEffectApply && !auraSpellInfo.IsPositiveEffect(auraSpellEffectInfo.EffectIndex) && !auraSpellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities))
-                            {
-                                uint applyHarmfulAuraImmunityMask = immuneInfo.ApplyHarmfulAuraImmuneMask;
-                                if (applyHarmfulAuraImmunityMask != 0)
-                                    if (((uint)auraSpellInfo.GetSchoolMask() & applyHarmfulAuraImmunityMask) != 0)
-                                        isImmuneToAuraEffectApply = true;
-                            }
-
-                            if (!isImmuneToAuraEffectApply)
-                            {
-                                immuneToAllEffects = false;
-                                break;
-                            }
-                        }
-                    }
+                    immuneToAllEffects = false;
                 }
 
                 if (immuneToAllEffects)
                     return true;
             }
+
+            return false;
+        }
+
+        bool CanSpellEffectProvideImmunityAgainstAuraEffect(SpellEffectInfo immunityEffectInfo, SpellInfo auraSpellInfo, SpellEffectInfo auraEffectInfo)
+        {
+            ImmunityInfo immuneInfo = immunityEffectInfo.GetImmunityInfo();
+            if (immuneInfo == null)
+                return false;
+
+            if (!auraSpellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities))
+            {
+                uint schoolImmunity = immuneInfo.SchoolImmuneMask;
+                if (schoolImmunity != 0)
+                    if (((uint)auraSpellInfo.SchoolMask & schoolImmunity) != 0)
+                        return true;
+
+                uint applyHarmfulAuraImmunityMask = immuneInfo.ApplyHarmfulAuraImmuneMask;
+                if (applyHarmfulAuraImmunityMask != 0)
+                    if (((uint)auraSpellInfo.GetSchoolMask() & applyHarmfulAuraImmunityMask) != 0)
+                        return true;
+            }
+
+            ulong mechanicImmunity = immuneInfo.MechanicImmuneMask;
+            if (mechanicImmunity != 0)
+            {
+                if ((mechanicImmunity & (1ul << (int)auraSpellInfo.Mechanic)) != 0)
+                    return true;
+                if ((mechanicImmunity & (1ul << (int)auraEffectInfo.Mechanic)) != 0)
+                    return true;
+            }
+
+            uint dispelImmunity = immuneInfo.DispelImmuneMask;
+            if (dispelImmunity != 0 && (uint)auraSpellInfo.Dispel == dispelImmunity)
+                return true;
+
+            if (immuneInfo.AuraTypeImmune.Contains(auraEffectInfo.ApplyAuraName))
+                return true;
 
             return false;
         }
@@ -2495,40 +2513,12 @@ namespace Game.Spells
             if (aurEff.GetSpellInfo().HasAttribute(SpellAttr0.NoImmunities))
                 return false;
 
-            foreach (var effectInfo in GetEffects())
-            {
-                if (!effectInfo.IsEffect(SpellEffectName.ApplyAura))
-                    continue;
+            if (aurEff.GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.NoImmunity))
+                return false;
 
-                uint miscValue = (uint)effectInfo.MiscValue;
-                switch (effectInfo.ApplyAuraName)
-                {
-                    case AuraType.StateImmunity:
-                        if (miscValue != (uint)aurEff.GetAuraType())
-                            continue;
-                        break;
-                    case AuraType.SchoolImmunity:
-                    case AuraType.ModImmuneAuraApplySchool:
-                        if (aurEff.GetSpellInfo().HasAttribute(SpellAttr2.NoSchoolImmunities) || !Convert.ToBoolean((uint)aurEff.GetSpellInfo().SchoolMask & miscValue))
-                            continue;
-                        break;
-                    case AuraType.DispelImmunity:
-                        if (miscValue != (uint)aurEff.GetSpellInfo().Dispel)
-                            continue;
-                        break;
-                    case AuraType.MechanicImmunity:
-                        if (miscValue != (uint)aurEff.GetSpellInfo().Mechanic)
-                        {
-                            if (miscValue != (uint)aurEff.GetSpellEffectInfo().Mechanic)
-                                continue;
-                        }
-                        break;
-                    default:
-                        continue;
-                }
-
-                return true;
-            }
+            foreach (SpellEffectInfo effect in GetEffects())
+                if (CanSpellEffectProvideImmunityAgainstAuraEffect(effect, aurEff.GetSpellInfo(), aurEff.GetSpellEffectInfo()))
+                    return true;
 
             return false;
         }
