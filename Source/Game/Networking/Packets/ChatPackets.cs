@@ -48,7 +48,7 @@ namespace Game.Networking.Packets
             TargetGUID = _worldPacket.ReadPackedGuid();
             TargetVirtualRealmAddress = _worldPacket.ReadUInt32();
 
-            uint targetLen = _worldPacket.ReadBits<uint>(6);
+            uint targetLen = _worldPacket.ReadBits<uint>(9);
             uint textLen = _worldPacket.ReadBits<uint>(11);
 
             if (targetLen > 1)
@@ -118,8 +118,8 @@ namespace Game.Networking.Packets
             PlayerGUID = _worldPacket.ReadPackedGuid();
             PlayerVirtualRealmAddress = _worldPacket.ReadUInt32();
 
-            uint playerNameLength = _worldPacket.ReadBits<uint>(6);
-            uint channelNameLength = _worldPacket.ReadBits<uint>(6);
+            uint playerNameLength = _worldPacket.ReadBits<uint>(9);
+            uint channelNameLength = _worldPacket.ReadBits<uint>(8);
 
             if (playerNameLength > 1)
             {

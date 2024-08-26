@@ -262,7 +262,7 @@ namespace Game.Networking.Packets
             public uint PetCreatureFamilyId;
             public bool BoostInProgress; // @todo
             public uint[] ProfessionIds = new uint[2];      // @todo
-            public VisualItemInfo[] VisualItems = new VisualItemInfo[InventorySlots.ReagentBagEnd];
+            public VisualItemInfo[] VisualItems = new VisualItemInfo[19];
             public List<string> MailSenders = new();
             public List<uint> MailSenderTypes = new();
             public bool RpeResetAvailable = false;
@@ -304,6 +304,7 @@ namespace Game.Networking.Packets
                 data.WriteBit(HasAchievement);
                 data.WriteBit(HasHeritageArmor);
                 data.WriteBit(IsLocked);
+                data.WriteBit(Unused1027);
                 data.FlushBits();
             }
 
@@ -312,6 +313,7 @@ namespace Game.Networking.Packets
             public bool HasAchievement;
             public bool HasHeritageArmor;
             public bool IsLocked;
+            public bool Unused1027;
         }
 
         public struct UnlockedConditionalAppearance
