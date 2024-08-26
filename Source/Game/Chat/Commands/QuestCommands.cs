@@ -59,7 +59,7 @@ namespace Game.Chat
             }
 
             // If player doesn't have the quest
-            if (player.GetQuestStatus(quest.Id) == QuestStatus.None || Global.DisableMgr.IsDisabledFor(DisableType.Quest, quest.Id, null))
+            if ((player.GetQuestStatus(quest.Id) == QuestStatus.None && !quest.HasFlag(QuestFlags.TrackingEvent)) || Global.DisableMgr.IsDisabledFor(DisableType.Quest, quest.Id, null))
             {
                 handler.SendSysMessage(CypherStrings.CommandQuestNotfound, quest.Id);
                 return false;
