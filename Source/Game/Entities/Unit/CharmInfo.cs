@@ -149,7 +149,7 @@ namespace Game.Entities
                         newstate = ActiveStates.Passive;
                     else
                     {
-                        if (spellInfo.NeedsExplicitUnitTarget())
+                        if (spellInfo.IsAutocastEnabledByDefault() && spellInfo.NeedsExplicitUnitTarget())
                         {
                             newstate = ActiveStates.Enabled;
                             ToggleCreatureAutocast(spellInfo, true);
@@ -188,7 +188,17 @@ namespace Game.Entities
                 byte j = (byte)((preferredSlot + i) % SharedConst.ActionBarIndexMax);
                 if (PetActionBar[j].GetAction() == 0 && PetActionBar[j].IsActionBarForSpell())
                 {
-                    SetActionBar(j, spell_id, newstate == ActiveStates.Decide ? spellInfo.IsAutocastable() ? ActiveStates.Disabled : ActiveStates.Passive : newstate);
+                    newstate = new Func<ActiveStates>(() =>
+                    {
+                        if (newstate != ActiveStates.Decide)
+                            return newstate;
+                        if (!spellInfo.IsAutocastable())
+                            return ActiveStates.Passive;
+                        if (spellInfo.IsAutocastEnabledByDefault())
+                            return ActiveStates.Enabled;
+                        return ActiveStates.Disabled;
+                    })();
+                    SetActionBar(j, spell_id, newstate);
                     return true;
                 }
             }

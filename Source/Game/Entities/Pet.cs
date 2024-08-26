@@ -1046,10 +1046,12 @@ namespace Game.Entities
 
             if (active == ActiveStates.Decide)                               // active was not used before, so we save it's autocast/passive state here
             {
-                if (spellInfo.IsAutocastable())
-                    newspell.active = ActiveStates.Disabled;
-                else
+                if (!spellInfo.IsAutocastable())
                     newspell.active = ActiveStates.Passive;
+                else if (spellInfo.IsAutocastEnabledByDefault())
+                    newspell.active = ActiveStates.Enabled;
+                else
+                    newspell.active = ActiveStates.Disabled;
             }
             else
                 newspell.active = active;

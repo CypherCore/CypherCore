@@ -1983,7 +1983,7 @@ namespace Framework.Constants
         IgnoreDefaultRatedBattlegroundRestrictions = 0x4000, // Ignore Default Rated Battleground Restrictions
         DoNotDisplayPowerCost = 0x8000, // Do Not Display Power Cost (client only)
         NextModalSpellRequiresSameUnitTarget = 0x10000, // Prevents automatically casting the spell from SpellClassOptions::ModalNextSpell after current spell if target was changed (client only)
-        Unk17 = 0x20000, // 17
+        AutocastOffByDefault = 0x20000, // AutoCast Off By Default
         Unk18 = 0x40000, // 18
         Unk19 = 0x80000, // 19
         Unk20 = 0x100000, // 20

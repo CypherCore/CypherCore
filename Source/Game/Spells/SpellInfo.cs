@@ -433,6 +433,11 @@ namespace Game.Spells
             return true;
         }
 
+        public bool IsAutocastEnabledByDefault()
+        {
+            return !HasAttribute(SpellAttr9.AutocastOffByDefault);
+        }
+
         public bool IsStackableWithRanks()
         {
             if (IsPassive())
