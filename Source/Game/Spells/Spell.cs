@@ -5148,6 +5148,23 @@ namespace Game.Spells
 
                     if (unitCaster.IsInCombat() && !m_spellInfo.CanBeUsedInCombat(unitCaster))
                         return SpellCastResult.AffectingCombat;
+
+                    if (m_spellInfo.HasAttribute(SpellAttr9.OnlyWhenIllegallyMounted))
+                    {
+                        bool hasInvalidMountAura = unitCaster.GetAuraEffectsByType(AuraType.Mounted).Any(mountEffect =>
+                        {
+                            uint mountType = (uint)mountEffect.GetSpellEffectInfo().MiscValueB;
+                            var mountEntry = Global.DB2Mgr.GetMount(mountEffect.GetId());
+                            if (mountEntry != null)
+                                mountType = mountEntry.MountTypeID;
+
+                            var mountCapability = unitCaster.GetMountCapability(mountType);
+                            return mountCapability == null || mountCapability.Id != mountEffect.GetAmount();
+                        });
+
+                        if (!hasInvalidMountAura)
+                            return SpellCastResult.OnlyMounted;
+                    }
                 }
 
                 // Check vehicle flags
