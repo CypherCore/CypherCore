@@ -3939,7 +3939,7 @@ namespace Game.Spells
             if (schoolImmunityMask != 0 || mechanicImmunityMask != 0)
                 castFlags |= SpellCastFlags.Immunity;
 
-            if (((IsTriggered() && !m_spellInfo.IsAutoRepeatRangedSpell()) || m_triggeredByAuraSpell != null) && !m_fromClient)
+            if ((IsTriggered() && !m_spellInfo.IsAutoRepeatRangedSpell()) || m_triggeredByAuraSpell != null)
                 castFlags |= SpellCastFlags.Pending;
 
             if (m_spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot) || m_spellInfo.HasAttribute(SpellAttr10.UsesRangedSlotCosmeticOnly) || m_spellInfo.HasAttribute(SpellCustomAttributes.NeedsAmmoData))
@@ -4038,7 +4038,7 @@ namespace Game.Spells
             SpellCastFlags castFlags = SpellCastFlags.Unk9;
 
             // triggered spells with spell visual != 0
-            if (((IsTriggered() && !m_spellInfo.IsAutoRepeatRangedSpell()) || m_triggeredByAuraSpell != null) && !m_fromClient)
+            if ((IsTriggered() && !m_spellInfo.IsAutoRepeatRangedSpell()) || m_triggeredByAuraSpell != null)
                 castFlags |= SpellCastFlags.Pending;
 
             if (m_spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot) || m_spellInfo.HasAttribute(SpellAttr10.UsesRangedSlotCosmeticOnly) || m_spellInfo.HasAttribute(SpellCustomAttributes.NeedsAmmoData))
@@ -8419,7 +8419,7 @@ namespace Game.Spells
             m_timer = m_casttime > 0 ? m_casttime : 0;
         }
 
-        public bool IsTriggered() { return _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.FullMask); }
+        public bool IsTriggered() { return (!m_fromClient && _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.FullMask)) || !m_originalCastId.IsEmpty(); }
         public bool IsTriggeredByAura(SpellInfo auraSpellInfo) { return (auraSpellInfo == m_triggeredByAuraSpell); }
         public bool IsIgnoringCooldowns() { return _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreSpellAndCategoryCD); }
         public bool IsFocusDisabled() { return _triggeredCastFlags.HasFlag(TriggerCastFlags.IgnoreSetFacing) || (m_spellInfo.IsChanneled() && !m_spellInfo.HasAttribute(SpellAttr1.TrackTargetInChannel)); }
