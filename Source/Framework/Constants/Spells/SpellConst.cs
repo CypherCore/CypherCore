@@ -1976,7 +1976,7 @@ namespace Framework.Constants
         DoNotAddToUnlearnList = 0x80, //  NYI - unlearn list not maintained SMSG_SEND_UNLEARN_SPELLS always empty // Do Not Add to Unlearn List
         CooldownIgnoresRangedWeapon = 0x100, // Cooldown Ignores Ranged Weapon
         NotInArena = 0x200, // 9 Not In Arena
-        Unk10 = 0x400, // 10
+        TargetMustBeGrounded = 0x400, // Target Must Be Grounded
         Unk11 = 0x800, // 11
         Unk12 = 0x1000, // 12
         Slam = 0x2000, // 13
