@@ -6309,8 +6309,6 @@ namespace Game.Spells
                 }
                 else if (!CheckSpellCancelsStun(ref param1))
                     result = SpellCastResult.Stunned;
-                else if ((m_spellInfo.Mechanic & Mechanics.ImmuneShield) != 0 && m_caster.IsUnit() && m_caster.ToUnit().HasAuraWithMechanic(1 << (int)Mechanics.Banish))
-                    result = SpellCastResult.Stunned;
             }
             else if (unitCaster.IsSilenced(m_spellSchoolMask) && (m_spellInfo.PreventionType & SpellPreventionType.Silence) != 0 && !CheckSpellCancelsSilence(ref param1))
                 result = SpellCastResult.Silenced;

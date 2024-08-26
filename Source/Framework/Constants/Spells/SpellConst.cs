@@ -1977,7 +1977,7 @@ namespace Framework.Constants
         CooldownIgnoresRangedWeapon = 0x100, // Cooldown Ignores Ranged Weapon
         NotInArena = 0x200, // 9 Not In Arena
         TargetMustBeGrounded = 0x400, // Target Must Be Grounded
-        Unk11 = 0x800, // 11
+        AllowWhileBanishedAuraState = 0x800, // Doesn't seem to be doing anything, banish behaves like a regular stun now - tested on patch 10.2.7 with spell 17767 (doesn't have this attribute, only SPELL_ATTR5_ALLOW_WHILE_STUNNED and was castable while banished)
         Unk12 = 0x1000, // 12
         Slam = 0x2000, // 13
         UsableInRatedBattlegrounds = 0x4000, // 14 Can Be Used In Rated Battlegrounds
