@@ -2041,6 +2041,8 @@ namespace Game.Entities
                 castTime = 0;
             else if (!(spellInfo.HasAttribute(SpellAttr0.IsAbility) || spellInfo.HasAttribute(SpellAttr0.IsTradeskill) || spellInfo.HasAttribute(SpellAttr3.IgnoreCasterModifiers)) && ((IsPlayer() && spellInfo.SpellFamilyName != 0) || IsCreature()))
                 castTime = unitCaster.CanInstantCast() ? 0 : (int)(castTime * unitCaster.m_unitData.ModCastingSpeed);
+            else if (spellInfo.HasAttribute(SpellAttr0.IsAbility) && spellInfo.HasAttribute(SpellAttr9.HasteAffectsMeleeAbilityCasttime))
+                castTime = (int)(castTime * unitCaster.m_modAttackSpeedPct[(int)WeaponAttackType.BaseAttack]);
             else if (spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot) && !spellInfo.HasAttribute(SpellAttr2.AutoRepeat))
                 castTime = (int)(castTime * unitCaster.m_modAttackSpeedPct[(int)WeaponAttackType.RangedAttack]);
             else if (Global.SpellMgr.IsPartOfSkillLine(SkillType.Cooking, spellInfo.Id) && unitCaster.HasAura(67556)) // cooking with Chef Hat.
