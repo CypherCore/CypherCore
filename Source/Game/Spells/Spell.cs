@@ -664,7 +664,7 @@ namespace Game.Spells
                                 {
                                     float randomRadius1 = spellEffectInfo.CalcRadius(m_caster, targetIndex);
                                     if (randomRadius1 > 0.0f)
-                                        m_caster.MovePositionToFirstCollision(dest.Position, randomRadius1, targetType.CalcDirectionAngle());
+                                        MovePosition(dest.Position, m_caster, randomRadius1, targetType.CalcDirectionAngle());
                                 }
 
                                 CallScriptDestinationTargetSelectHandlers(ref dest, spellEffectInfo.EffectIndex, targetType);
@@ -753,7 +753,7 @@ namespace Game.Spells
                 case SpellTargetObjectTypes.Dest:
                     SpellDestination dest = new(target);
                     if (randomRadius > 0.0f)
-                        target.MovePositionToFirstCollision(dest.Position, randomRadius, targetType.CalcDirectionAngle());
+                        MovePosition(dest.Position, target, randomRadius, targetType.CalcDirectionAngle());
 
                     if (m_spellInfo.HasAttribute(SpellAttr4.UseFacingFromSpell))
                         dest.Position.SetOrientation(spellEffectInfo.PositionFacing);
@@ -1116,7 +1116,7 @@ namespace Game.Spells
 
                     Position pos = new(dest.Position);
 
-                    unitCaster.MovePositionToFirstCollision(pos, dist, angle);
+                    MovePosition(pos, unitCaster, dist, angle);
                     dest.Relocate(pos);
                     break;
                 }
@@ -1142,7 +1142,7 @@ namespace Game.Spells
                 default:
                 {
                     float dist = spellEffectInfo.CalcRadius(m_caster, targetIndex);
-                    float angl = targetType.CalcDirectionAngle();
+                    float angle = targetType.CalcDirectionAngle();
                     float objSize = m_caster.GetCombatReach();
 
                     switch (targetType.GetTarget())
@@ -1172,7 +1172,7 @@ namespace Game.Spells
                         dist = objSize;
 
                     Position pos = new(dest.Position);
-                    m_caster.MovePositionToFirstCollision(pos, dist, angl);
+                    MovePosition(pos, m_caster, dist, angle);
 
                     dest.Relocate(pos);
                     break;
@@ -1204,7 +1204,7 @@ namespace Game.Spells
                     float dist = spellEffectInfo.CalcRadius(null, targetIndex);
 
                     Position pos = new(dest.Position);
-                    target.MovePositionToFirstCollision(pos, dist, angle);
+                    MovePosition(pos, target, dist, angle);
 
                     dest.Relocate(pos);
                 }
@@ -1244,7 +1244,7 @@ namespace Game.Spells
                     Position pos = dest.Position;
                     float angle = pos.GetAbsoluteAngle(m_caster) - m_caster.GetOrientation();
 
-                    m_caster.MovePositionToFirstCollision(pos, dist, angle);
+                    MovePosition(pos, m_caster, dist, angle);
                     pos.SetOrientation(m_caster.GetAbsoluteAngle(dest.Position));
 
                     dest.Relocate(pos);
@@ -1256,7 +1256,7 @@ namespace Game.Spells
                     float dist = spellEffectInfo.CalcRadius(m_caster, targetIndex);
 
                     Position pos = new(m_targets.GetDstPos());
-                    m_caster.MovePositionToFirstCollision(pos, dist, angle);
+                    MovePosition(pos, m_caster, dist, angle);
 
                     dest.Relocate(pos);
                 }
@@ -8137,6 +8137,14 @@ namespace Game.Spells
                 return true;
 
             return source.IsWithinLOS(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ(), LineOfSightChecks.All, ignoreFlags);
+        }
+
+        void MovePosition(Position pos, WorldObject from, float dist, float angle)
+        {
+            if (m_spellInfo.HasAttribute(SpellAttr9.ForceDestLocation))
+                from.MovePosition(pos, dist, angle);
+            else
+                from.MovePositionToFirstCollision(pos, dist, angle);
         }
 
         void CallScriptEmpowerStageCompletedHandlers(int completedStagesCount)

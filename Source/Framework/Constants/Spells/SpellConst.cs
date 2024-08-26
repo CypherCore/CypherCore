@@ -1966,7 +1966,7 @@ namespace Framework.Constants
     }
     public enum SpellAttr9 : uint
     {
-        Unk0 = 0x01, // 0
+        ForceDestLocation = 0x01, // Force Dest Location DESCRIPTION Ignores collision with terrain (unsure if it also ignores terrain height and can go under map)
         Unk1 = 0x02, // 1
         RestrictedFlightArea = 0x04, // 2
         Unk3 = 0x08, // 3
