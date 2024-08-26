@@ -1973,7 +1973,7 @@ namespace Framework.Constants
         MissileSpeedIsDelayInSec = 0x10, // Missile Speed is Delay (in sec)
         IgnoreTotemRequirementsForCasting = 0x20, // Ignore Totem Requirements for Casting
         ItemCastGrantsSkillGain = 0x40, // Item Cast Grants Skill Gain
-        Unk7 = 0x80, // 7
+        DoNotAddToUnlearnList = 0x80, //  NYI - unlearn list not maintained SMSG_SEND_UNLEARN_SPELLS always empty // Do Not Add to Unlearn List
         AimedShot = 0x100, // 8
         NotUsableInArena = 0x200, // 9 Cannot Be Used In Arenas
         Unk10 = 0x400, // 10

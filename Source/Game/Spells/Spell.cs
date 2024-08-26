@@ -2992,7 +2992,7 @@ namespace Game.Spells
             }
 
             // Spells that don't create items can have this attribute - handle here
-            if (m_CastItem && m_spellInfo.HasAttribute(SpellAttr9.ItemCastGrantsSkillGain))
+            if (m_CastItem != null && m_spellInfo.HasAttribute(SpellAttr9.ItemCastGrantsSkillGain))
             {
                 Player playerCaster1 = m_caster.ToPlayer();
                 if (playerCaster1 != null)
