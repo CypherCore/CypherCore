@@ -1336,7 +1336,7 @@ namespace Game.Entities
                 VirtualItems[i].WriteCreate(data, owner, receiver);
 
             data.WriteUInt32(GetViewerDependentFlags(this, owner, receiver));
-            data.WriteUInt32(Flags2);
+            data.WriteUInt32(GetViewerDependentFlags2(this, owner, receiver));
             data.WriteUInt32(GetViewerDependentFlags3(this, owner, receiver));
             data.WriteUInt32(GetViewerDependentAuraState(this, owner, receiver));
             for (int i = 0; i < 2; ++i)
@@ -1723,7 +1723,7 @@ namespace Game.Entities
                 }
                 if (changesMask[43])
                 {
-                    data.WriteUInt32(Flags2);
+                    data.WriteUInt32(GetViewerDependentFlags2(this, owner, receiver));
                 }
                 if (changesMask[44])
                 {
@@ -2383,6 +2383,15 @@ namespace Game.Entities
             // Update fields of triggers, transformed units or uninteractible units (values dependent on GM state)
             if (receiver.IsGameMaster())
                 flags &= ~(uint)UnitFlags.Uninteractible;
+
+            return flags;
+        }
+        uint GetViewerDependentFlags2(UnitData unitData, Unit unit, Player receiver)
+        {
+            uint flags = unitData.Flags2;
+            // Gamemasters should be always able to interact with units - remove uninteractible flag
+            if (receiver.IsGameMaster())
+                flags &= ~(uint)UnitFlags2.UntargetableByClient;
 
             return flags;
         }
