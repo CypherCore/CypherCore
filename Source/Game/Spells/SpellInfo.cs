@@ -864,19 +864,8 @@ namespace Game.Spells
                 if (!mountFlags.HasFlag(AreaMountFlags.AllowFlyingMounts))
                     return SpellCastResult.IncorrectArea;
 
-                if (player != null)
-                {
-                    uint mapToCheck = map_id;
-                    MapRecord mapEntry1 = CliDB.MapStorage.LookupByKey(map_id);
-                    if (mapEntry1 != null)
-                        mapToCheck = (uint)mapEntry1.CosmeticParentMapID;
-                    if ((mapToCheck == 1116 || mapToCheck == 1464) && !player.HasSpell(191645)) // Draenor Pathfinder
-                        return SpellCastResult.IncorrectArea;
-                    else if (mapToCheck == 1220 && !player.HasSpell(233368)) // Broken Isles Pathfinder
-                        return SpellCastResult.IncorrectArea;
-                    else if ((mapToCheck == 1642 || mapToCheck == 1643) && !player.HasSpell(278833)) // Battle for Azeroth Pathfinder
-                        return SpellCastResult.IncorrectArea;
-                }
+                if (player != null && !ConditionManager.IsPlayerMeetingCondition(player, 72968)) // Hardcoded PlayerCondition id for attribute check in client
+                    return SpellCastResult.IncorrectArea;
             }
 
             var mapEntry = CliDB.MapStorage.LookupByKey(map_id);
