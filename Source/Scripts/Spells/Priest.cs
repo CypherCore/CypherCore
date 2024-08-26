@@ -143,6 +143,9 @@ namespace Scripts.Spells.Priest
         public const uint RenewedHope = 197469;
         public const uint RenewedHopeEffect = 197470;
         public const uint RevelInPurity = 373003;
+        public const uint Sanctuary = 231682;
+        public const uint SanctuaryAbsorb = 208771;
+        public const uint SanctuaryAura = 208772;
         public const uint RhapsodyProc = 390636;
         public const uint SayYourPrayers = 391186;
         public const uint Schism = 424509;
@@ -2754,6 +2757,85 @@ namespace Scripts.Spells.Priest
         public override void Register()
         {
             OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+
+    [Script] // 208771 - Sanctuary (Absorb)
+    class spell_pri_sanctuary_absorb : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.SanctuaryAura);
+        }
+
+        void CalcAbsorbAmount(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        {
+            PreventDefaultAction();
+
+            Unit attacker = dmgInfo.GetAttacker();
+            if (attacker == null)
+                return;
+
+            AuraEffect amountHolderEffect = attacker.GetAuraEffect(SpellIds.SanctuaryAura, 0, GetCasterGUID());
+            if (amountHolderEffect == null)
+                return;
+
+            if (dmgInfo.GetDamage() >= amountHolderEffect.GetAmount())
+            {
+                amountHolderEffect.GetBase().Remove(AuraRemoveMode.EnemySpell);
+                dmgInfo.AbsorbDamage((uint)amountHolderEffect.GetAmount());
+            }
+            else
+            {
+                amountHolderEffect.ChangeAmount((int)(amountHolderEffect.GetAmount() - dmgInfo.GetDamage()));
+                dmgInfo.AbsorbDamage(dmgInfo.GetDamage());
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectAbsorb.Add(new(CalcAbsorbAmount, 0));
+        }
+    }
+
+    [Script] // Smite - 585
+    class spell_pri_sanctuary_trigger : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.Sanctuary, SpellIds.SanctuaryAura, SpellIds.SanctuaryAbsorb);
+        }
+
+        void HandleEffectHit(uint effIndex)
+        {
+            Player caster = GetCaster()?.ToPlayer();
+            if (caster == null)
+                return;
+
+            AuraEffect sanctuaryEffect = caster.GetAuraEffect(SpellIds.Sanctuary, 0);
+            if (sanctuaryEffect != null)
+            {
+                Unit target = GetHitUnit();
+                if (target != null)
+                {
+                    float absorbAmount = MathFunctions.CalculatePct(caster.SpellBaseDamageBonusDone(SpellSchoolMask.Shadow), sanctuaryEffect.GetAmount());
+                    MathFunctions.AddPct(ref absorbAmount, caster.GetRatingBonusValue(CombatRating.VersatilityDamageDone));
+
+                    caster.CastSpell(caster, SpellIds.SanctuaryAbsorb, new CastSpellExtraArgs()
+                        .SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError)
+                        .SetTriggeringSpell(GetSpell()));
+
+                    caster.CastSpell(target, SpellIds.SanctuaryAura, new CastSpellExtraArgs()
+                        .AddSpellMod(SpellValueMod.BasePoint0, (int)absorbAmount)
+                        .SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError)
+                        .SetTriggeringSpell(GetSpell()));
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new(HandleEffectHit, 0, SpellEffectName.SchoolDamage));
         }
     }
 
