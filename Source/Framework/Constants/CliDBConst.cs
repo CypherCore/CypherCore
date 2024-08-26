@@ -952,6 +952,38 @@ namespace Framework.Constants
         ClientEnforcesMount = 0x10
     }
 
+    [Flags]
+    public enum AreaTriggerActionSetFlag
+    {
+        None = 0x00,
+        OnlyTriggeredByCaster = 0x01,
+        ResurrectIfConditionFails = 0x02,
+        Obsolete = 0x04,
+        AllowWhileGhost = 0x08,
+        AllowWhileDead = 0x10,
+        UnifyAllInstances = 0x20,
+        SuppressConditionError = 0x40, // NYI
+        NotTriggeredbyCaster = 0x80,
+        CreatorsPartyOnly = 0x100,
+        DontRunOnLeaveWhenExpiring = 0x200,
+        CanAffectUninteractible = 0x400,
+        DontDespawnWithCreator = 0x800,
+        CanAffectBeastmaster = 0x1000,
+        RequiresLineOfSight = 0x2000
+    }
+
+    public enum AreaTriggerShapeType
+    {
+        Sphere = 0,
+        Box = 1,
+        Unk = 2,
+        Polygon = 3,
+        Cylinder = 4,
+        Disk = 5,
+        BoundedPlane = 6,
+        Max
+    }
+
     public enum ArtifactCategory
     {
         Primary = 1,

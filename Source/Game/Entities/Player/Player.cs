@@ -2437,23 +2437,46 @@ namespace Game.Entities
                 if (!PhasingHandler.InDbPhaseShift(this, (PhaseUseFlagsValues)areaTrigger.PhaseUseFlags, areaTrigger.PhaseID, areaTrigger.PhaseGroupID))
                     return false;
 
-            Position areaTriggerPos = new(areaTrigger.Pos.X, areaTrigger.Pos.Y, areaTrigger.Pos.Z, areaTrigger.BoxYaw);
-            switch (areaTrigger.ShapeType)
+            bool hasActionSetFlag(AreaTriggerActionSetFlag flag)
             {
-                case 0: // Sphere
+                var areaTriggerActionSet = CliDB.AreaTriggerActionSetStorage.LookupByKey(areaTrigger.AreaTriggerActionSetID);
+                if (areaTriggerActionSet != null)
+                    return areaTriggerActionSet.GetFlags().HasFlag(flag);
+
+                return false;
+            }
+
+            switch (GetDeathState())
+            {
+                case DeathState.Dead:
+                    if (!hasActionSetFlag(AreaTriggerActionSetFlag.AllowWhileGhost))
+                        return false;
+                    break;
+                case DeathState.Corpse:
+                    if (!hasActionSetFlag(AreaTriggerActionSetFlag.AllowWhileDead))
+                        return false;
+                    break;
+                default:
+                    break;
+            }
+
+            Position areaTriggerPos = new(areaTrigger.Pos.X, areaTrigger.Pos.Y, areaTrigger.Pos.Z, areaTrigger.BoxYaw);
+            switch (areaTrigger.GetShapeType())
+            {
+                case AreaTriggerShapeType.Sphere:
                     if (!IsInDist(areaTriggerPos, areaTrigger.Radius))
                         return false;
                     break;
-                case 1: // Box
+                case AreaTriggerShapeType.Box:
                     if (!IsWithinBox(areaTriggerPos, areaTrigger.BoxLength / 2.0f, areaTrigger.BoxWidth / 2.0f, areaTrigger.BoxHeight / 2.0f))
                         return false;
                     break;
-                case 3: // Polygon
+                case AreaTriggerShapeType.Polygon:
                     var polygon = ObjectMgr.GetAreaTriggerPolygon(areaTrigger.Id);
                     if (polygon == null || (polygon.Height.HasValue && GetPositionZ() > areaTrigger.Pos.Z + polygon.Height) || !IsInPolygon2D(areaTriggerPos, polygon.Vertices))
                         return false;
                     break;
-                case 4: // Cylinder
+                case AreaTriggerShapeType.Cylinder:
                     if (!IsWithinVerticalCylinder(areaTriggerPos, areaTrigger.Radius, areaTrigger.BoxHeight))
                         return false;
                     break;

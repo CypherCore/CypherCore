@@ -158,6 +158,16 @@ namespace Game.DataStorage
         public short ShapeID;
         public int AreaTriggerActionSetID;
         public sbyte Flags;
+
+        public AreaTriggerShapeType GetShapeType() { return (AreaTriggerShapeType)ShapeType; }
+    }
+
+    public sealed class AreaTriggerActionSetRecord
+    {
+        public uint Id;
+        public int Flags;
+
+        public AreaTriggerActionSetFlag GetFlags() { return (AreaTriggerActionSetFlag)Flags; }
     }
 
     public sealed class ArmorLocationRecord

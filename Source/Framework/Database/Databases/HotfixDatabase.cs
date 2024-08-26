@@ -55,6 +55,9 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_AREA_TRIGGER, "SELECT PosX, PosY, PosZ, ID, ContinentID, PhaseUseFlags, PhaseID, PhaseGroupID, Radius, BoxLength, " +
                 "BoxWidth, BoxHeight, BoxYaw, ShapeType, ShapeID, AreaTriggerActionSetID, Flags FROM area_trigger WHERE (`VerifiedBuild` > 0) = ?");
 
+            // AreaTriggerActionSet.db2
+            PrepareStatement(HotfixStatements.SEL_AREA_TRIGGER_ACTION_SET, "SELECT ID, Flags FROM area_trigger_action_set WHERE (`VerifiedBuild` > 0) = ?");
+
             // ArmorLocation.db2
             PrepareStatement(HotfixStatements.SEL_ARMOR_LOCATION, "SELECT ID, Clothmodifier, Leathermodifier, Chainmodifier, Platemodifier, Modifier FROM armor_location" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
@@ -1641,6 +1644,8 @@ namespace Framework.Database
         SEL_AREA_TABLE_LOCALE,
 
         SEL_AREA_TRIGGER,
+
+        SEL_AREA_TRIGGER_ACTION_SET,
 
         SEL_ARMOR_LOCATION,
 

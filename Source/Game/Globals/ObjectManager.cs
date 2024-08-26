@@ -5470,7 +5470,7 @@ namespace Game
         {
             foreach (var (_, areaTrigger) in CliDB.AreaTriggerStorage)
             {
-                if (areaTrigger.ShapeType != 3)
+                if (areaTrigger.GetShapeType() != AreaTriggerShapeType.Polygon)
                     continue;
 
                 PathDb2 path = Global.DB2Mgr.GetPath((uint)areaTrigger.ShapeID);

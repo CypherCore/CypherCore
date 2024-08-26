@@ -57,6 +57,7 @@ namespace Game.DataStorage
             AreaGroupMemberStorage = ReadDB2<AreaGroupMemberRecord>("AreaGroupMember.db2", HotfixStatements.SEL_AREA_GROUP_MEMBER);
             AreaTableStorage = ReadDB2<AreaTableRecord>("AreaTable.db2", HotfixStatements.SEL_AREA_TABLE, HotfixStatements.SEL_AREA_TABLE_LOCALE);
             AreaTriggerStorage = ReadDB2<AreaTriggerRecord>("AreaTrigger.db2", HotfixStatements.SEL_AREA_TRIGGER);
+            AreaTriggerActionSetStorage = ReadDB2<AreaTriggerActionSetRecord>("AreaTriggerActionSet.db2", HotfixStatements.SEL_AREA_TRIGGER_ACTION_SET);
             ArmorLocationStorage = ReadDB2<ArmorLocationRecord>("ArmorLocation.db2", HotfixStatements.SEL_ARMOR_LOCATION);
             ArtifactStorage = ReadDB2<ArtifactRecord>("Artifact.db2", HotfixStatements.SEL_ARTIFACT, HotfixStatements.SEL_ARTIFACT_APPEARANCE_LOCALE);
             ArtifactAppearanceStorage = ReadDB2<ArtifactAppearanceRecord>("ArtifactAppearance.db2", HotfixStatements.SEL_ARTIFACT_APPEARANCE, HotfixStatements.SEL_ARTIFACT_APPEARANCE_LOCALE);
@@ -501,6 +502,7 @@ namespace Game.DataStorage
         public static DB6Storage<AreaGroupMemberRecord> AreaGroupMemberStorage;
         public static DB6Storage<AreaTableRecord> AreaTableStorage;
         public static DB6Storage<AreaTriggerRecord> AreaTriggerStorage;
+        public static DB6Storage<AreaTriggerActionSetRecord> AreaTriggerActionSetStorage;
         public static DB6Storage<ArmorLocationRecord> ArmorLocationStorage;
         public static DB6Storage<ArtifactRecord> ArtifactStorage;
         public static DB6Storage<ArtifactAppearanceRecord> ArtifactAppearanceStorage;

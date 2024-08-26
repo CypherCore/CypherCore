@@ -9,18 +9,6 @@ namespace Framework.Constants
         IsServerSide = 0x01
     }
 
-    public enum AreaTriggerShapeType
-    {
-        Sphere = 0,
-        Box = 1,
-        Unk = 2,
-        Polygon = 3,
-        Cylinder = 4,
-        Disk = 5,
-        BoundedPlane = 6,
-        Max
-    }
-
     public enum AreaTriggerActionTypes
     {
         Cast = 0,
