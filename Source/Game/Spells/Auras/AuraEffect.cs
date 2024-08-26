@@ -334,6 +334,29 @@ namespace Game.Spells
                     break;
             }
             GetBase().CallScriptEffectCalcSpellModHandlers(this, ref m_spellmod);
+
+            // validate modifier
+            if (m_spellmod != null)
+            {
+                bool isValid = true;
+                bool logErrors = GetBase().GetLoadedScripts().Any(script => script.DoEffectCalcSpellMod.Count > 0);
+                if (m_spellmod.op >= SpellModOp.Max)
+                {
+                    isValid = false;
+                    if (logErrors)
+                        Log.outError(LogFilter.Spells, $"Aura script for spell id {GetId()} created invalid spell modifier op {m_spellmod.op}");
+                }
+
+                if (m_spellmod.type >= SpellModType.End)
+                {
+                    isValid = false;
+                    if (logErrors)
+                        Log.outError(LogFilter.Spells, $"Aura script for spell id {GetId()} created invalid spell modifier type {m_spellmod.type}");
+                }
+
+                if (!isValid)
+                    m_spellmod = null;
+            }
         }
         public void ChangeAmount(int newAmount, bool mark = true, bool onStackOrReapply = false, AuraEffect triggeredBy = null)
         {

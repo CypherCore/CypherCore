@@ -2222,6 +2222,8 @@ namespace Game.Entities
                     case AuraType.AddPctModifierBySpellLabel:
                     case AuraType.AddFlatModifierBySpellLabel:
                         Cypher.Assert(effect.EffectMiscValue[0] < (int)SpellModOp.Max, $"MAX_SPELLMOD must be at least {effect.EffectMiscValue[0] + 1}");
+                        if (effect.EffectMiscValue[0] >= (int)SpellModOp.Max)                       
+                            Log.outError(LogFilter.ServerLoading, $"Invalid spell modifier type {effect.EffectMiscValue[0]} found on spell {effect.SpellID} effect index {effect.EffectIndex}, consider increasing MAX_SPELLMOD");
                         break;
                     default:
                         break;

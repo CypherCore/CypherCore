@@ -2675,6 +2675,8 @@ namespace Game.Spells
             return aura;
         }
 
+        public List<AuraScript> GetLoadedScripts() { return m_loadedScripts; }
+
         #region Fields
         List<AuraScript> m_loadedScripts = new();
         SpellInfo m_spellInfo;
