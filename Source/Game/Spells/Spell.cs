@@ -4497,7 +4497,7 @@ namespace Game.Spells
 
             m_timer = (int)duration;
 
-            if (!m_targets.HasDst())
+            if (!m_UniqueTargetInfo.Empty() || !m_UniqueGOTargetInfo.Empty())
             {
                 uint channelAuraMask = 0;
                 uint explicitTargetEffectMask = 0xFFFFFFFF;
