@@ -1971,7 +1971,7 @@ namespace Framework.Constants
         OnlyWhenIllegallyMounted = 0x04, // Only When Illegally Mounted
         DoNotLogAuraRefresh = 0x08, // Do Not Log Aura Refresh (client only)
         MissileSpeedIsDelayInSec = 0x10, // Missile Speed is Delay (in sec)
-        SummonPlayerTotem = 0x20, // 5
+        IgnoreTotemRequirementsForCasting = 0x20, // Ignore Totem Requirements for Casting
         Unk6 = 0x40, // 6
         Unk7 = 0x80, // 7
         AimedShot = 0x100, // 8

@@ -6814,42 +6814,27 @@ namespace Game.Spells
                     }
                 }
 
-                // check totem-item requirements (items presence in inventory)
-                uint totems = 2;
-                for (int i = 0; i < 2; ++i)
+                if (!m_spellInfo.HasAttribute(SpellAttr9.IgnoreTotemRequirementsForCasting))
                 {
-                    if (m_spellInfo.Totem[i] != 0)
+                    // check totem-item requirements (items presence in inventory)
+                    foreach (uint totem in m_spellInfo.Totem)
                     {
-                        if (player.HasItemCount(m_spellInfo.Totem[i]))
+                        if (totem != 0 && player.HasItemCount(totem))
                         {
-                            totems -= 1;
-                            continue;
+                            param1 = (int)totem;
+                            return SpellCastResult.Totems;
                         }
                     }
-                    else
-                        totems -= 1;
-                }
-                if (totems != 0)
-                    return SpellCastResult.Totems;
-
-                // Check items for TotemCategory (items presence in inventory)
-                uint totemCategory = 2;
-                for (byte i = 0; i < 2; ++i)
-                {
-                    if (m_spellInfo.TotemCategory[i] != 0)
+                    // Check items for TotemCategory (items presence in inventory)
+                    foreach (uint totemCategory in m_spellInfo.TotemCategory)
                     {
-                        if (player.HasItemTotemCategory(m_spellInfo.TotemCategory[i]))
+                        if (totemCategory != 0 && player.HasItemTotemCategory(totemCategory))
                         {
-                            totemCategory -= 1;
-                            continue;
+                            param1 = (int)totemCategory;
+                            return SpellCastResult.TotemCategory;
                         }
                     }
-                    else
-                        totemCategory -= 1;
                 }
-
-                if (totemCategory != 0)
-                    return SpellCastResult.TotemCategory;
             }
 
             // special checks for spell effects
