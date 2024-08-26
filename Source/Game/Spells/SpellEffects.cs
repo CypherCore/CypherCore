@@ -1015,7 +1015,8 @@ namespace Game.Spells
                 }
 
                 // we succeeded in creating at least one item, so a levelup is possible
-                player.UpdateCraftSkill(m_spellInfo);
+                if (m_CastItem == null)
+                    player.UpdateCraftSkill(m_spellInfo);
             }
         }
 
@@ -1046,7 +1047,8 @@ namespace Game.Spells
             if (m_spellInfo.IsLootCrafting())
             {
                 player.AutoStoreLoot(m_spellInfo.Id, LootStorage.Spell, context, false, true);
-                player.UpdateCraftSkill(m_spellInfo);
+                if (m_CastItem == null)
+                    player.UpdateCraftSkill(m_spellInfo);
             }
             else // If there's no random loot entries for this spell, pick the item associated with this spell
             {
@@ -1990,7 +1992,7 @@ namespace Game.Spells
             else
             {
                 // do not increase skill if vellum used
-                if (!(m_CastItem != null && m_CastItem.GetTemplate().HasFlag(ItemFlags.NoReagentCost)))
+                if (m_CastItem == null)
                     player.UpdateCraftSkill(m_spellInfo);
 
                 uint enchant_id = (uint)effectInfo.MiscValue;
@@ -3085,7 +3087,8 @@ namespace Game.Spells
             Player caster = m_caster.ToPlayer();
             if (caster != null)
             {
-                caster.UpdateCraftSkill(m_spellInfo);
+                if (m_CastItem == null)
+                    caster.UpdateCraftSkill(m_spellInfo);
                 itemTarget.loot = new Loot(caster.GetMap(), itemTarget.GetGUID(), LootType.Disenchanting, null);
                 itemTarget.loot.FillLoot(itemTarget.GetDisenchantLoot(caster).Id, LootStorage.Disenchant, caster, true);
                 caster.SendLoot(itemTarget.loot);

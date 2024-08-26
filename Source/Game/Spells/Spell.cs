@@ -2991,6 +2991,14 @@ namespace Game.Spells
                 player.UpdateCriteria(CriteriaType.CastSpell, m_spellInfo.Id);
             }
 
+            // Spells that don't create items can have this attribute - handle here
+            if (m_CastItem && m_spellInfo.HasAttribute(SpellAttr9.ItemCastGrantsSkillGain))
+            {
+                Player playerCaster1 = m_caster.ToPlayer();
+                if (playerCaster1 != null)
+                    playerCaster1.UpdateCraftSkill(m_spellInfo);
+            }
+
             Item targetItem = m_targets.GetItemTarget();
             if (!Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnorePowerAndReagentCost))
             {
