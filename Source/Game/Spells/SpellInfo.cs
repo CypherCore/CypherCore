@@ -673,24 +673,6 @@ namespace Game.Spells
 
         public bool CanPierceImmuneAura(SpellInfo auraSpellInfo)
         {
-            // aura can't be pierced
-            if (auraSpellInfo == null || auraSpellInfo.HasAttribute(SpellAttr0.NoImmunities))
-                return false;
-
-            // these spells pierce all avalible spells (Resurrection Sickness for example)
-            if (HasAttribute(SpellAttr0.NoImmunities))
-                return true;
-
-            // these spells (Cyclone for example) can pierce all...
-            if (HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) || HasAttribute(SpellAttr2.NoSchoolImmunities))
-            {
-                // ...but not these (Divine shield, Ice block, Cyclone and Banish for example)
-                if (auraSpellInfo.Mechanic != Mechanics.ImmuneShield &&
-                    auraSpellInfo.Mechanic != Mechanics.Invulnerability &&
-                    (auraSpellInfo.Mechanic != Mechanics.Banish || (IsRankOf(auraSpellInfo) && auraSpellInfo.Dispel != DispelType.None))) // Banish shouldn't be immune to itself, but Cyclone should
-                    return true;
-            }
-
             // Dispels other auras on immunity, check if this spell makes the unit immune to aura
             if (HasAttribute(SpellAttr1.ImmunityPurgesEffect) && CanSpellProvideImmunityAgainstAura(auraSpellInfo))
                 return true;
@@ -702,15 +684,6 @@ namespace Game.Spells
         {
             // These auras (like Divine Shield) can't be dispelled
             if (auraSpellInfo.HasAttribute(SpellAttr0.NoImmunities))
-                return false;
-
-            // These spells (like Mass Dispel) can dispel all auras
-            if (HasAttribute(SpellAttr0.NoImmunities))
-                return true;
-
-            // These auras (Cyclone for example) are not dispelable
-            if ((auraSpellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) && auraSpellInfo.Mechanic != Mechanics.None)
-                || auraSpellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities))
                 return false;
 
             return true;
@@ -2331,11 +2304,21 @@ namespace Game.Spells
                     target.RemoveAppliedAuras(aurApp =>
                     {
                         SpellInfo auraSpellInfo = aurApp.GetBase().GetSpellInfo();
-                        return (((uint)auraSpellInfo.GetSchoolMask() & schoolImmunity) != 0 && // Check for school mask
-                            CanDispelAura(auraSpellInfo) &&
-                            (IsPositive() != aurApp.IsPositive()) &&                     // Check spell vs aura possitivity
-                            !auraSpellInfo.IsPassive() &&                                // Don't remove passive auras
-                            auraSpellInfo.Id != Id);                                     // Don't remove self
+                        if (auraSpellInfo.Id == Id)                                      // Don't remove self
+                            return false;
+                        if (auraSpellInfo.IsPassive())                                   // Don't remove passive auras
+                            return false;
+                        if (((uint)auraSpellInfo.GetSchoolMask() & schoolImmunity) == 0)           // Check for school mask
+                            return false;
+                        if (!CanDispelAura(auraSpellInfo))
+                            return false;
+                        if (!HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects))
+                        {
+                            WorldObject existingAuraCaster = aurApp.GetBase().GetWorldObjectCaster();
+                            if (existingAuraCaster != null && existingAuraCaster.IsFriendlyTo(target)) // Check spell vs aura possitivity
+                                return false;
+                        }
+                        return true;
                     });
                 }
 
@@ -2408,13 +2391,7 @@ namespace Game.Spells
             {
                 target.ApplySpellImmune(Id, SpellImmunity.State, auraType, apply);
                 if (apply && HasAttribute(SpellAttr1.ImmunityPurgesEffect))
-                {
-                    target.RemoveAurasByType(auraType, aurApp =>
-                    {
-                        // if the aura has SPELL_ATTR0_NO_IMMUNITIES, then it cannot be removed by immunity
-                        return !aurApp.GetBase().GetSpellInfo().HasAttribute(SpellAttr0.NoImmunities);
-                    });
-                }
+                    target.RemoveAurasByType(auraType, aurApp => CanDispelAura(aurApp.GetBase().GetSpellInfo()));
             }
 
             foreach (SpellEffectName effectType in immuneInfo.SpellEffectImmune)
@@ -2437,7 +2414,7 @@ namespace Game.Spells
 
                 ImmunityInfo immuneInfo = effectInfo.GetImmunityInfo();
 
-                if (!auraSpellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) && !auraSpellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities))
+                if (!auraSpellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities))
                 {
                     uint schoolImmunity = immuneInfo.SchoolImmuneMask;
                     if (schoolImmunity != 0)

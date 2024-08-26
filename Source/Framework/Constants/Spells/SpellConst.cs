@@ -1702,7 +1702,7 @@ namespace Framework.Constants
         ToggleFarSight = 0x2000, // Toggle Far Sight (Client Only)
         TrackTargetInChannel = 0x4000, // Track Target In Channel Description While Channeling, Adjust Facing To Face Target
         ImmunityPurgesEffect = 0x8000, // Immunity Purges Effect Description For Immunity Spells, Cancel All Auras That This Spell Would Make You Immune To When The Spell Is Applied
-        ImmunityToHostileAndFriendlyEffects = 0x10000, /*Wrong Impl*/ // Immunity To Hostile & Friendly Effects Description Will Not Pierce Divine Shield, Ice Block And Other Full Invulnerabilities
+        ImmunityToHostileAndFriendlyEffects = 0x10000, //  Immunity applied by this aura will also be checked for friendly spells (school immunity only) - used by Cyclone for example to cause friendly spells and healing over time to be immuned
         NoAutocastAi = 0x20000, // No Autocast (Ai)
         PreventsAnim = 0x40000, /*Nyi*/ // Prevents Anim Description Auras Apply UnitFlagPreventEmotesFromChatText
         ExcludeCaster = 0x80000, // Exclude Caster
@@ -2683,7 +2683,7 @@ namespace Framework.Constants
         Marked = 5,            // C  T| Nyi
         Wounded25Percent = 6,            //   T |
         Defensive2 = 7,            // Cc  | Nyi
-        Banished = 8,            //  C  | Nyi
+        Banished = 8,            //  C  |
         Dazed = 9,            //    T|
         Victorious = 10,           // C   |
         Rampage = 11,           //     | Nyi

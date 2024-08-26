@@ -1339,11 +1339,13 @@ namespace Game.Entities
                         if (immuneSpellInfo == null || !immuneSpellInfo.HasAttribute(SpellAttr1.ImmunityPurgesEffect))
                             continue;
 
-                    // Consider the school immune if any of these conditions are not satisfied.
-                    // In case of no immuneSpellInfo, ignore that condition and check only the other conditions
-                    if ((immuneSpellInfo != null && !immuneSpellInfo.IsPositive()) || !spellInfo.IsPositive() || caster == null || !IsFriendlyTo(caster))
-                        if (!spellInfo.CanPierceImmuneAura(immuneSpellInfo))
-                            schoolImmunityMask |= pair.Key;
+                    if (immuneSpellInfo != null && !immuneSpellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) && caster != null && !caster.IsFriendlyTo(this))
+                        continue;
+
+                    if (spellInfo.CanPierceImmuneAura(immuneSpellInfo))
+                        continue;
+
+                    schoolImmunityMask |= pair.Key;
                 }
 
                 if ((schoolImmunityMask & schoolMask) == schoolMask)
@@ -1390,6 +1392,69 @@ namespace Game.Entities
                 mask |= (SpellOtherImmunity)pair.Key;
 
             return mask;
+        }
+
+        public bool IsImmunedToDamage(SpellSchoolMask schoolMask)
+        {
+            if (schoolMask == SpellSchoolMask.None)
+                return false;
+
+            // If m_immuneToSchool type contain this school type, IMMUNE damage.
+            uint schoolImmunityMask = GetSchoolImmunityMask();
+            if (((SpellSchoolMask)schoolImmunityMask & schoolMask) == schoolMask) // We need to be immune to all types
+                return true;
+
+            // If m_immuneToDamage type contain magic, IMMUNE damage.
+            uint damageImmunityMask = GetDamageImmunityMask();
+            if (((SpellSchoolMask)damageImmunityMask & schoolMask) == schoolMask) // We need to be immune to all types
+                return true;
+
+            return false;
+        }
+
+        public bool IsImmunedToDamage(WorldObject caster, SpellInfo spellInfo, SpellEffectInfo spellEffectInfo = null)
+        {
+            if (spellInfo == null)
+                return false;
+
+            if (spellInfo.HasAttribute(SpellAttr0.NoImmunities) && spellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities))
+                return false;
+
+            if (spellEffectInfo != null && spellEffectInfo.EffectAttributes.HasFlag(SpellEffectAttributes.NoImmunity))
+                return false;
+
+            uint schoolMask = (uint)spellInfo.GetSchoolMask();
+            if (schoolMask != 0)
+            {
+                bool hasImmunity(MultiMap<uint, uint> container)
+                {
+                    uint schoolImmunityMask = 0;
+                    foreach (var (immunitySchoolMask, immunityAuraId) in container)
+                    {
+                        SpellInfo immuneAuraInfo = Global.SpellMgr.GetSpellInfo(immunityAuraId, GetMap().GetDifficultyID());
+                        if (immuneAuraInfo != null && !immuneAuraInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) && caster != null && caster.IsFriendlyTo(this))
+                            continue;
+
+                        if (immuneAuraInfo != null && spellInfo.CanPierceImmuneAura(immuneAuraInfo))
+                            continue;
+
+                        schoolImmunityMask |= immunitySchoolMask;
+                    }
+
+                    // // We need to be immune to all types
+                    return (schoolImmunityMask & schoolMask) == schoolMask;
+                };
+
+                // If m_immuneToSchool type contain this school type, IMMUNE damage.
+                if (hasImmunity(m_spellImmune[(int)SpellImmunity.School]))
+                    return true;
+
+                // If m_immuneToDamage type contain magic, IMMUNE damage.
+                if (hasImmunity(m_spellImmune[(int)SpellImmunity.Damage]))
+                    return true;
+            }
+
+            return false;
         }
 
         public virtual bool IsImmunedToSpellEffect(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, WorldObject caster, bool requireImmunityPurgesEffectAttribute = false)
@@ -1445,46 +1510,26 @@ namespace Game.Entities
 
                 if (!spellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities))
                 {
-                    // Check for immune to application of harmful magical effects
-                    var immuneAuraApply = GetAuraEffectsByType(AuraType.ModImmuneAuraApplySchool);
-                    foreach (var auraEffect in immuneAuraApply)
-                        if (Convert.ToBoolean(auraEffect.GetMiscValue() & (int)spellInfo.GetSchoolMask()) &&  // Check school
-                            ((caster != null && !IsFriendlyTo(caster)) || !spellInfo.IsPositiveEffect(spellEffectInfo.EffectIndex)))                       // Harmful
+                    foreach (AuraEffect immuneAuraApply in GetAuraEffectsByType(AuraType.ModImmuneAuraApplySchool))
+                    {
+                        if ((immuneAuraApply.GetMiscValue() & (int)spellInfo.GetSchoolMask()) == 0)               // Check school
+                            continue;
+
+                        if (spellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) || (caster != null && !IsFriendlyTo(caster))) // Harmful
                             return true;
+                    }
                 }
             }
 
             return false;
         }
 
-        public bool IsImmunedToDamage(SpellSchoolMask schoolMask)
-        {
-            if (schoolMask == SpellSchoolMask.None)
-                return false;
-
-            // If m_immuneToSchool type contain this school type, IMMUNE damage.
-            uint schoolImmunityMask = GetSchoolImmunityMask();
-            if (((SpellSchoolMask)schoolImmunityMask & schoolMask) == schoolMask) // We need to be immune to all types
-                return true;
-
-            // If m_immuneToDamage type contain magic, IMMUNE damage.
-            uint damageImmunityMask = GetDamageImmunityMask();
-            if (((SpellSchoolMask)damageImmunityMask & schoolMask) == schoolMask) // We need to be immune to all types
-                return true;
-
-            return false;
-        }
-
-        public bool IsImmunedToDamage(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo = null)
+        public bool IsImmunedToAuraPeriodicTick(WorldObject caster, SpellInfo spellInfo, SpellEffectInfo spellEffectInfo = null)
         {
             if (spellInfo == null)
                 return false;
 
-            // for example 40175
-            if (spellInfo.HasAttribute(SpellAttr0.NoImmunities) && spellInfo.HasAttribute(SpellAttr3.AlwaysHit))
-                return false;
-
-            if (spellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) || spellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities))
+            if (spellInfo.HasAttribute(SpellAttr0.NoImmunities) || spellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities) /*only school immunities are checked in this function*/)
                 return false;
 
             if (spellEffectInfo != null && spellEffectInfo.EffectAttributes.HasFlag(SpellEffectAttributes.NoImmunity))
@@ -1493,20 +1538,24 @@ namespace Game.Entities
             uint schoolMask = (uint)spellInfo.GetSchoolMask();
             if (schoolMask != 0)
             {
+                bool hasImmunity(MultiMap<uint, uint> container)
+                {
+                    uint schoolImmunityMask = 0;
+                    foreach (var (immunitySchoolMask, immunityAuraId) in container)
+                    {
+                        SpellInfo immuneAuraInfo = Global.SpellMgr.GetSpellInfo(immunityAuraId, GetMap().GetDifficultyID());
+                        if (immuneAuraInfo != null && !immuneAuraInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) && caster != null && caster.IsFriendlyTo(this))
+                            continue;
+
+                        schoolImmunityMask |= immunitySchoolMask;
+                    }
+
+                    // // We need to be immune to all types
+                    return (schoolImmunityMask & schoolMask) == schoolMask;
+                }
+
                 // If m_immuneToSchool type contain this school type, IMMUNE damage.
-                uint schoolImmunityMask = 0;
-                var schoolList = m_spellImmune[(int)SpellImmunity.School];
-                foreach (var pair in schoolList)
-                    if (Convert.ToBoolean(pair.Key & schoolMask) && !spellInfo.CanPierceImmuneAura(Global.SpellMgr.GetSpellInfo(pair.Value, GetMap().GetDifficultyID())))
-                        schoolImmunityMask |= pair.Key;
-
-                // // We need to be immune to all types
-                if ((schoolImmunityMask & schoolMask) == schoolMask)
-                    return true;
-
-                // If m_immuneToDamage type contain magic, IMMUNE damage.
-                uint damageImmunityMask = GetDamageImmunityMask();
-                if ((damageImmunityMask & schoolMask) == schoolMask) // We need to be immune to all types
+                if (hasImmunity(m_spellImmune[(int)SpellImmunity.School]))
                     return true;
             }
 

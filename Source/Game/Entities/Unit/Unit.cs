@@ -3100,7 +3100,7 @@ namespace Game.Entities
                     }
 
                     // ...or immuned
-                    if (IsImmunedToDamage(spellInfo))
+                    if (IsImmunedToDamage(this, spellInfo))
                     {
                         victim.SendSpellDamageImmune(this, spellInfo.Id, false);
                         continue;

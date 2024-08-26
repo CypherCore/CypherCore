@@ -410,7 +410,7 @@ namespace Game.Spells
             return Global.ObjAccessor.GetUnit(m_owner, m_casterGuid);
         }
 
-        WorldObject GetWorldObjectCaster()
+        public WorldObject GetWorldObjectCaster()
         {
             if (GetCasterGUID().IsUnit())
                 return GetCaster();
@@ -2785,7 +2785,7 @@ namespace Game.Spells
                 if (!GetUnitOwner().IsInWorld)
                     continue;
 
-                if (GetUnitOwner().HasUnitState(UnitState.Isolated))
+                if (GetUnitOwner().HasAuraState(AuraStateType.Banished, GetSpellInfo(), caster))
                     continue;
 
                 List<WorldObject> units = new();

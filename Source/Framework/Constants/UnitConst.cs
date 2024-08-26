@@ -474,7 +474,7 @@ namespace Framework.Constants
         Root = 0x400,
         Confused = 0x800,
         Distracted = 0x1000,
-        Isolated = 0x2000, // Area Auras Do Not Affect Other Players
+        Isolated_Deprecated = 0x2000, // REUSE
         AttackPlayer = 0x4000,
         Casting = 0x8000,
         Possessed = 0x10000, // being possessed by another unit
@@ -494,7 +494,7 @@ namespace Framework.Constants
 
         AllStateSupported = Died | MeleeAttacking | Charmed | Stunned | Roaming | Chase
                             | Focusing | Fleeing | InFlight | Follow | Root | Confused
-                            | Distracted | Isolated | AttackPlayer | Casting
+                            | Distracted | AttackPlayer | Casting
                             | Possessed | Charging | Jumping | Move | Rotating
                             | Evade | RoamingMove | ConfusedMove | FleeingMove
                             | ChaseMove | FollowMove | IgnorePathfinding | FollowFormationMove,

@@ -9002,7 +9002,7 @@ namespace Game.Spells
                     // Fill base damage struct (unitTarget - is real spell target)
                     SpellNonMeleeDamage damageInfo = new(caster, spell.unitTarget, spell.m_spellInfo, spell.m_SpellVisual, spell.m_spellSchoolMask, spell.m_castId);
                     // Check damage immunity
-                    if (spell.unitTarget.IsImmunedToDamage(spell.m_spellInfo))
+                    if (spell.unitTarget.IsImmunedToDamage(caster, spell.m_spellInfo))
                     {
                         hitMask = ProcFlagsHit.Immune;
                         spell.m_damage = 0;

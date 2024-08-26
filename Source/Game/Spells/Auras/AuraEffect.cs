@@ -2933,28 +2933,6 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
             m_spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
 
-            if (GetSpellInfo().Mechanic == Mechanics.Banish)
-            {
-                if (apply)
-                    target.AddUnitState(UnitState.Isolated);
-                else
-                {
-                    bool banishFound = false;
-                    var banishAuras = target.GetAuraEffectsByType(GetAuraType());
-                    foreach (var aurEff in banishAuras)
-                    {
-                        if (aurEff.GetSpellInfo().Mechanic == Mechanics.Banish)
-                        {
-                            banishFound = true;
-                            break;
-                        }
-                    }
-
-                    if (!banishFound)
-                        target.ClearUnitState(UnitState.Isolated);
-                }
-            }
-
             // TODO: should be changed to a proc script on flag spell (they have "Taken positive" proc flags in db2)
             {
                 if (apply && GetMiscValue() == (int)SpellSchoolMask.Normal)
@@ -5091,7 +5069,7 @@ namespace Game.Spells
             if (!target.IsAlive())
                 return;
 
-            if (target.HasUnitState(UnitState.Isolated) || target.IsImmunedToDamage(GetSpellInfo(), GetSpellEffectInfo()))
+            if (target.IsImmunedToDamage(caster, GetSpellInfo(), GetSpellEffectInfo()))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -5219,7 +5197,7 @@ namespace Game.Spells
             if (!target.IsAlive())
                 return;
 
-            if (target.HasUnitState(UnitState.Isolated) || target.IsImmunedToDamage(GetSpellInfo(), GetSpellEffectInfo()))
+            if (target.IsImmunedToDamage(caster, GetSpellInfo(), GetSpellEffectInfo()))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -5319,7 +5297,7 @@ namespace Game.Spells
             if (caster == null || !caster.IsAlive() || !target.IsAlive())
                 return;
 
-            if (target.HasUnitState(UnitState.Isolated))
+            if (target.IsImmunedToAuraPeriodicTick(caster, GetSpellInfo(), GetSpellEffectInfo()))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -5349,7 +5327,7 @@ namespace Game.Spells
             if (!target.IsAlive())
                 return;
 
-            if (target.HasUnitState(UnitState.Isolated))
+            if (target.IsImmunedToAuraPeriodicTick(caster, GetSpellInfo(), GetSpellEffectInfo()))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -5409,7 +5387,7 @@ namespace Game.Spells
             if (caster == null || !caster.IsAlive() || !target.IsAlive() || target.GetPowerType() != powerType)
                 return;
 
-            if (target.HasUnitState(UnitState.Isolated) || target.IsImmunedToDamage(GetSpellInfo(), GetSpellEffectInfo()))
+            if (target.IsImmunedToAuraPeriodicTick(caster, GetSpellInfo(), GetSpellEffectInfo()))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -5469,7 +5447,7 @@ namespace Game.Spells
             if (!target.IsAlive() || target.GetMaxPower(powerType) == 0)
                 return;
 
-            if (target.HasUnitState(UnitState.Isolated))
+            if (target.IsImmunedToAuraPeriodicTick(caster, GetSpellInfo(), GetSpellEffectInfo()))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -5498,7 +5476,7 @@ namespace Game.Spells
             if (!target.IsAlive() || target.GetMaxPower(powerType) == 0)
                 return;
 
-            if (target.HasUnitState(UnitState.Isolated))
+            if (target.IsImmunedToAuraPeriodicTick(caster, GetSpellInfo(), GetSpellEffectInfo()))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -5527,7 +5505,7 @@ namespace Game.Spells
             if (caster == null || !target.IsAlive() || target.GetPowerType() != powerType)
                 return;
 
-            if (target.HasUnitState(UnitState.Isolated) || target.IsImmunedToDamage(GetSpellInfo(), GetSpellEffectInfo()))
+            if (target.IsImmunedToDamage(caster, GetSpellInfo(), GetSpellEffectInfo()))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -5657,7 +5635,7 @@ namespace Game.Spells
         {
             Unit target = aurApp.GetTarget();
             Unit triggerTarget = eventInfo.GetProcTarget();
-            if (triggerTarget.HasUnitState(UnitState.Isolated) || triggerTarget.IsImmunedToDamage(GetSpellInfo(), GetSpellEffectInfo()))
+            if (triggerTarget.IsImmunedToDamage(target, GetSpellInfo(), GetSpellEffectInfo()))
             {
                 SendTickImmune(triggerTarget, target);
                 return;
