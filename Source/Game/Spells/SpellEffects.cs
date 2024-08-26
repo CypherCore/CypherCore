@@ -4841,7 +4841,7 @@ namespace Game.Spells
                 if (!spellInfo.HasAttribute(SpellAttr7.CanBeMultiCast))
                     continue;
 
-                CastSpellExtraArgs args = new(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.CastDirectly | TriggerCastFlags.DontReportCastError);
+                CastSpellExtraArgs args = new(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.IgnoreCastTime | TriggerCastFlags.CastDirectly | TriggerCastFlags.DontReportCastError);
                 args.OriginalCastId = m_castId;
                 args.CastDifficulty = GetCastDifficulty();
                 m_caster.CastSpell(m_caster, spellInfo.Id, args);

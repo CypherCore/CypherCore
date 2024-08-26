@@ -3420,7 +3420,7 @@ namespace Scripts.Spells.Priest
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.VampiricTouch, new CastSpellExtraArgs()
                 .SetTriggeringSpell(GetSpell())
-                .SetTriggerFlags(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreSpellAndCategoryCD | TriggerCastFlags.IgnorePowerAndReagentCost | TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.CastDirectly | TriggerCastFlags.DontReportCastError));
+                .SetTriggerFlags(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreSpellAndCategoryCD | TriggerCastFlags.IgnorePowerAndReagentCost | TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.IgnoreCastTime | TriggerCastFlags.DontReportCastError));
         }
 
         public override void Register()

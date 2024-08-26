@@ -2630,7 +2630,9 @@ namespace Game.Spells
             // Prepare data for triggers
             PrepareDataForTriggerSystem();
 
-            m_casttime = CallScriptCalcCastTimeHandlers(m_spellInfo.CalcCastTime(this));
+            if (!_triggeredCastFlags.HasFlag(TriggerCastFlags.IgnoreCastTime))
+                m_casttime = m_spellInfo.CalcCastTime(this);
+            m_casttime = CallScriptCalcCastTimeHandlers(m_casttime);
 
             SpellCastResult movementResult = SpellCastResult.SpellCastOk;
             if (m_caster.IsUnit() && m_caster.ToUnit().IsMoving())
