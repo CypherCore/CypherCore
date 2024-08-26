@@ -4341,6 +4341,21 @@ namespace Game.Entities
 
             // ENDOF ANTORUS THE BURNING THRONE SPELLS
 
+            //
+            // STORMSONG VALLEY SPELLS
+            //
+
+            // Void Orb
+            ApplySpellFix([273467], spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.TargetARadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards0_5);
+                });
+            });
+
+            // ENDOF STORMSONG VALLEY SPELLS
+
             // Summon Master Li Fei
             ApplySpellFix(new[] { 102445 }, spellInfo =>
             {

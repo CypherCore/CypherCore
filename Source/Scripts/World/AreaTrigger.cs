@@ -2,11 +2,14 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Framework.Dynamic;
 using Game.AI;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
+using Game.Movement;
 using Game.Scripting;
+using Game.Spells;
 using System;
 using System.Collections.Generic;
 
@@ -258,6 +261,7 @@ namespace Scripts.World.Areatriggers
         }
     }
 
+    [Script]
     class AreaTrigger_at_frostgrips_hollow : AreaTriggerScript
     {
         const uint QuestTheLonesomeWatcher = 12877;
@@ -311,6 +315,7 @@ namespace Scripts.World.Areatriggers
         }
     }
 
+    [Script]
     class areatrigger_stormwind_teleport_unit : AreaTriggerAI
     {
         const uint SpellDustInTheStormwind = 312593;
@@ -329,6 +334,7 @@ namespace Scripts.World.Areatriggers
         }
     }
 
+    [Script]
     class areatrigger_battleground_buffs : AreaTriggerAI
     {
         public areatrigger_battleground_buffs(AreaTrigger areatrigger) : base(areatrigger) { }
@@ -352,6 +358,7 @@ namespace Scripts.World.Areatriggers
         }
     }
 
+    [Script]
     class AreaTrigger_at_battleground_buffs : AreaTriggerScript
     {
         public AreaTrigger_at_battleground_buffs() : base("at_battleground_buffs") { }
@@ -373,6 +380,7 @@ namespace Scripts.World.Areatriggers
         }
     }
 
+    [Script]
     class areatrigger_action_capture_flag : AreaTriggerAI
     {
         public areatrigger_action_capture_flag(AreaTrigger areatrigger) : base(areatrigger) { }
@@ -387,6 +395,83 @@ namespace Scripts.World.Areatriggers
             if (zoneScript != null)
                 if (zoneScript.CanCaptureFlag(at, player))
                     zoneScript.OnCaptureFlag(at, player);
+        }
+    }
+
+    [Script] // 18235 - Void Orb
+    class at_void_orb_harbinger : AreaTriggerAI
+    {
+        const uint SPELL_VOID_ORB_DAMAGE = 273502;
+
+        public at_void_orb_harbinger(AreaTrigger areatrigger) : base(areatrigger) { }
+
+        public override void OnInitialize()
+        {
+            Unit caster = at.GetCaster();
+            if (caster != null)
+            {
+                at.SetOrientation(caster.GetOrientation());
+
+                Position destPos = caster.GetPosition();
+                at.MovePositionToFirstCollision(destPos, 35.0f, 0.0f);
+
+                PathGenerator path = new(at);
+                path.CalculatePath(destPos.GetPositionX(), destPos.GetPositionY(), destPos.GetPositionZ(), false);
+
+                float timeToTarget = at.GetDistance(destPos.GetPositionX(), destPos.GetPositionY(), destPos.GetPositionZ()) * 144.5f;
+                at.InitSplines(path.GetPath(), (uint)timeToTarget);
+            }
+        }
+
+        public override void OnDestinationReached()
+        {
+            at.Remove();
+        }
+
+        public override void OnUnitEnter(Unit unit)
+        {
+            Unit caster = at.GetCaster();
+            if (caster == null)
+                return;
+
+            if (caster.IsFriendlyTo(unit))
+                return;
+
+            caster.CastSpell(unit, SPELL_VOID_ORB_DAMAGE);
+        }
+    }
+
+    [Script] // 18242 - Abyssal Portal
+    class at_abyssal_portal_harbinger : AreaTriggerAI
+    {
+        const uint SPELL_ABYSSAL_PORTAL_SUMMON = 273587;
+
+        TaskScheduler _scheduler = new();
+        int _remainingSummons;
+
+        public at_abyssal_portal_harbinger(AreaTrigger areatrigger) : base(areatrigger) { }
+
+        public override void OnCreate(Spell creatingSpell)
+        {
+            Unit caster = at.GetCaster();
+            if (caster != null)
+                _remainingSummons = creatingSpell.GetSpellInfo().GetEffect(0).CalcValue(caster);
+
+            _scheduler.Schedule(TimeSpan.FromMilliseconds(500), task =>
+            {
+                Unit caster = at.GetCaster();
+                if (caster != null)
+                    caster.CastSpell(at.GetRandomNearPosition(3.0f), SPELL_ABYSSAL_PORTAL_SUMMON, true);
+
+                _remainingSummons--;
+                if (_remainingSummons > 0)
+                    task.Repeat(TimeSpan.FromSeconds(1));
+            });
+        }
+
+        public override void OnUpdate(uint diff)
+        {
+            _scheduler.Update(diff);
         }
     }
 }
