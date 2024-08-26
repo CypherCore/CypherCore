@@ -237,7 +237,7 @@ namespace Game.Entities
             CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelRandomGender(ref model, creatureInfo);
             if (minfo == null)                                             // Cancel load if no model defined
             {
-                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has invalid model {1} defined in table `creature_template`, can't load.", entry, model.CreatureDisplayID);
+                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has invalid model {1} defined in table `creature_template_model`, can't load.", entry, model.CreatureDisplayID);
                 return false;
             }
 

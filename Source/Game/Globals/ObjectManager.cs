@@ -3538,6 +3538,15 @@ namespace Game
                     continue;
                 }
 
+                if (data.display != null)
+                {
+                    if (GetCreatureModelInfo(data.display.CreatureDisplayID) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `creature` has creature (GUID: {guid} Entry: {data.Id}) with invalid `modelid` {data.display.CreatureDisplayID}, ignoring.");
+                        data.display = null;
+                    }
+                }
+
                 // -1 random, 0 no equipment,
                 if (data.equipmentId != 0)
                 {
