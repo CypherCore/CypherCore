@@ -4698,6 +4698,15 @@ namespace Game
                 ++count;
             }
 
+            foreach (var (questObjectiveId, objective) in _questObjectives)
+            {
+                if (objective.Type != QuestObjectiveType.GameObject)
+                    continue;
+
+                _gameObjectForQuestStorage.Add((uint)objective.ObjectID);
+                ++count;
+            }
+
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} GameObjects for quests in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 

@@ -114,14 +114,11 @@ namespace Game.Entities
                     {
                         case GameObjectTypes.Button:
                         case GameObjectTypes.Goober:
-                            if (gameObject.GetGoInfo().GetQuestID() != 0 || gameObject.GetGoInfo().GetConditionID1() != 0)
+                            if (gameObject.HasConditionalInteraction() && gameObject.CanActivateForPlayer(receiver))
                             {
-                                if (gameObject.CanActivateForPlayer(receiver))
-                                {
-                                    dynFlags |= GameObjectDynamicLowFlags.Highlight;
-                                    if (gameObject.GetGoStateFor(receiver.GetGUID()) != GameObjectState.Active)
-                                        dynFlags |= GameObjectDynamicLowFlags.Activate;
-                                }
+                                dynFlags |= GameObjectDynamicLowFlags.Highlight;
+                                if (gameObject.GetGoStateFor(receiver.GetGUID()) != GameObjectState.Active)
+                                    dynFlags |= GameObjectDynamicLowFlags.Activate;
                             }
                             break;
                         case GameObjectTypes.QuestGiver:
@@ -129,16 +126,15 @@ namespace Game.Entities
                                 dynFlags |= GameObjectDynamicLowFlags.Activate;
                             break;
                         case GameObjectTypes.Chest:
-                            if (gameObject.CanActivateForPlayer(receiver))
+                            if (gameObject.HasConditionalInteraction() && gameObject.CanActivateForPlayer(receiver))
                                 dynFlags |= GameObjectDynamicLowFlags.Activate | GameObjectDynamicLowFlags.Sparkle | GameObjectDynamicLowFlags.Highlight;
                             else if (receiver.IsGameMaster())
                                 dynFlags |= GameObjectDynamicLowFlags.Activate | GameObjectDynamicLowFlags.Sparkle;
                             break;
                         case GameObjectTypes.Generic:
                         case GameObjectTypes.SpellFocus:
-                            if (gameObject.GetGoInfo().GetQuestID() != 0 || gameObject.GetGoInfo().GetConditionID1() != 0)
-                                if (gameObject.CanActivateForPlayer(receiver))
-                                    dynFlags |= GameObjectDynamicLowFlags.Sparkle | GameObjectDynamicLowFlags.Highlight;
+                            if (gameObject.HasConditionalInteraction() && gameObject.CanActivateForPlayer(receiver))
+                                dynFlags |= GameObjectDynamicLowFlags.Sparkle | GameObjectDynamicLowFlags.Highlight;
                             break;
                         case GameObjectTypes.Transport:
                         case GameObjectTypes.MapObjTransport:
@@ -154,7 +150,7 @@ namespace Game.Entities
                                 dynFlags &= ~GameObjectDynamicLowFlags.NoInterract;
                             break;
                         case GameObjectTypes.GatheringNode:
-                            if (gameObject.GetGoInfo().GetConditionID1() != 0 && gameObject.CanActivateForPlayer(receiver))
+                            if (gameObject.HasConditionalInteraction() && gameObject.CanActivateForPlayer(receiver))
                                 dynFlags |= GameObjectDynamicLowFlags.Activate | GameObjectDynamicLowFlags.Sparkle | GameObjectDynamicLowFlags.Highlight;
                             if (gameObject.GetGoStateFor(receiver.GetGUID()) == GameObjectState.Active)
                                 dynFlags |= GameObjectDynamicLowFlags.Depleted;

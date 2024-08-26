@@ -1367,6 +1367,20 @@ namespace Game.Entities
             }
         }
 
+        public bool HasConditionalInteraction()
+        {
+            if (GetGoInfo().GetQuestID() != 0)
+                return true;
+
+            if (GetGoType() != GameObjectTypes.AuraGenerator && GetGoInfo().GetConditionID1() != 0)
+                return true;
+
+            if (Global.ObjectMgr.IsGameObjectForQuests(GetEntry()))
+                return true;
+
+            return false;
+        }
+
         public bool CanActivateForPlayer(Player target)
         {
             if (!MeetsInteractCondition(target))
@@ -1424,6 +1438,12 @@ namespace Game.Entities
                 case GameObjectTypes.Goober:
                 {
                     if (target.GetQuestStatus(GetGoInfo().Goober.questID) == QuestStatus.Incomplete)
+                        return true;
+                    break;
+                }
+                case GameObjectTypes.GatheringNode:
+                {
+                    if (LootStorage.Gameobject.HaveQuestLootForPlayer(GetGoInfo().GatheringNode.chestLoot, target))
                         return true;
                     break;
                 }
