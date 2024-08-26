@@ -280,6 +280,9 @@ namespace Game
                             continue;
 
                         uint phaseId = phaseArea.PhaseInfo.Id;
+                        if (Global.DisableMgr.IsDisabledFor(DisableType.PhaseArea, phaseId, obj))
+                            continue;
+
                         if (Global.ConditionMgr.IsObjectMeetToConditions(srcInfo, phaseArea.Conditions))
                             phaseShift.AddPhase(phaseId, GetPhaseFlags(phaseId), phaseArea.Conditions);
                         else
@@ -348,7 +351,7 @@ namespace Game
 
             foreach (var pair in suppressedPhaseShift.Phases.ToList())
             {
-                if (Global.ConditionMgr.IsObjectMeetToConditions(srcInfo, pair.Value.AreaConditions))
+                if (!Global.DisableMgr.IsDisabledFor(DisableType.PhaseArea, pair.Key, obj) && Global.ConditionMgr.IsObjectMeetToConditions(srcInfo, pair.Value.AreaConditions))
                 {
                     changed = phaseShift.AddPhase(pair.Key, pair.Value.Flags, pair.Value.AreaConditions, pair.Value.References) || changed;
                     suppressedPhaseShift.ModifyPhasesReferences(pair.Key, pair.Value, -pair.Value.References);
@@ -592,6 +595,8 @@ namespace Game
                         phases.Append($" ({cosmetic})");
                     if (pair.Value.Flags.HasFlag(PhaseFlags.Personal))
                         phases.Append($" ({personal})");
+                    if (Global.DisableMgr.IsDisabledFor(DisableType.PhaseArea, pair.Key, null))
+                        phases.Append(" (Disabled)");
                 }
 
                 chat.SendSysMessage(CypherStrings.PhaseshiftPhases, phases.ToString());

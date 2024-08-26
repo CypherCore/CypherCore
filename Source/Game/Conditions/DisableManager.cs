@@ -229,6 +229,17 @@ namespace Game
                         }
                         break;
                     }
+                    case DisableType.PhaseArea:
+                    {
+                        if (!CliDB.PhaseStorage.HasRecord(entry))
+                        {
+                            Log.outError(LogFilter.Sql, $"Phase entry {entry} from `disables` doesn't exist in dbc, skipped.");
+                            continue;
+                        }
+                        if (flags != 0)
+                            Log.outError(LogFilter.Sql, $"Disable flags specified for phase {entry}, useless data.");
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -371,6 +382,7 @@ namespace Game
                 case DisableType.OutdoorPVP:
                 case DisableType.Criteria:
                 case DisableType.MMAP:
+                case DisableType.PhaseArea:
                     return true;
                 case DisableType.VMAP:
                     return flags.HasAnyFlag((DisableFlags)data.flags);
@@ -401,7 +413,8 @@ namespace Game
         VMAP = 6,
         MMAP = 7,
         LFGMap = 8,
-        Max = 9
+        PhaseArea = 9,
+        Max
     }
 
     [Flags]
