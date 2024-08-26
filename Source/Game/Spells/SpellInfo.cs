@@ -2635,7 +2635,7 @@ namespace Game.Spells
             if (spell != null)
                 spell.GetCaster().ModSpellCastTime(this, ref castTime, spell);
 
-            if (HasAttribute(SpellAttr0.UsesRangedSlot) && (!IsAutoRepeatRangedSpell()) && !HasAttribute(SpellAttr9.AimedShot))
+            if (HasAttribute(SpellAttr0.UsesRangedSlot) && (!IsAutoRepeatRangedSpell()) && !HasAttribute(SpellAttr9.CooldownIgnoresRangedWeapon))
                 castTime += 500;
 
             return (castTime > 0) ? castTime : 0;

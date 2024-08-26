@@ -6437,7 +6437,7 @@ namespace Game.Spells
             if (m_spellInfo.HasAttribute(SpellAttr4.NotInArenaOrRatedBattleground))
                 return isArena ? SpellCastResult.NotInArena : SpellCastResult.NotInBattleground;
 
-            if (isArena && m_spellInfo.HasAttribute(SpellAttr9.NotUsableInArena))
+            if (isArena && m_spellInfo.HasAttribute(SpellAttr9.NotInArena))
                 return SpellCastResult.NotInArena;
 
             // check cooldowns

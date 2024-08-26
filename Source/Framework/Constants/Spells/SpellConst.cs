@@ -1974,8 +1974,8 @@ namespace Framework.Constants
         IgnoreTotemRequirementsForCasting = 0x20, // Ignore Totem Requirements for Casting
         ItemCastGrantsSkillGain = 0x40, // Item Cast Grants Skill Gain
         DoNotAddToUnlearnList = 0x80, //  NYI - unlearn list not maintained SMSG_SEND_UNLEARN_SPELLS always empty // Do Not Add to Unlearn List
-        AimedShot = 0x100, // 8
-        NotUsableInArena = 0x200, // 9 Cannot Be Used In Arenas
+        CooldownIgnoresRangedWeapon = 0x100, // Cooldown Ignores Ranged Weapon
+        NotInArena = 0x200, // 9 Not In Arena
         Unk10 = 0x400, // 10
         Unk11 = 0x800, // 11
         Unk12 = 0x1000, // 12
