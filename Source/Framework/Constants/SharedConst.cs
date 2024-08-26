@@ -1685,6 +1685,7 @@ namespace Framework.Constants
         ListenRangeSay,
         ListenRangeTextemote,
         ListenRangeYell,
+        LoadLocales,
         LogdbClearinterval,
         LogdbCleartime,
         MailDeliveryDelay,

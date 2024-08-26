@@ -1009,6 +1009,9 @@ namespace Game
             // Enable AE loot
             Values[WorldCfg.EnableAeLoot] = GetDefaultValue("Loot.EnableAELoot", true);
 
+            // Loading of Locales
+            Values[WorldCfg.LoadLocales] = GetDefaultValue("Load.Locales", true);
+
             // call ScriptMgr if we're reloading the configuration
             if (reload)
                 Global.ScriptMgr.OnConfigLoad(reload);

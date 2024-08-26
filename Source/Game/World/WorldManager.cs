@@ -520,15 +520,19 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Localization strings...");
             uint oldMSTime = Time.GetMSTime();
-            Global.ObjectMgr.LoadCreatureLocales();
-            Global.ObjectMgr.LoadGameObjectLocales();
-            Global.ObjectMgr.LoadQuestTemplateLocale();
-            Global.ObjectMgr.LoadQuestOfferRewardLocale();
-            Global.ObjectMgr.LoadQuestRequestItemsLocale();
-            Global.ObjectMgr.LoadQuestObjectivesLocale();
-            Global.ObjectMgr.LoadPageTextLocales();
-            Global.ObjectMgr.LoadGossipMenuItemsLocales();
-            Global.ObjectMgr.LoadPointOfInterestLocales();
+            if (WorldConfig.GetBoolValue(WorldCfg.LoadLocales))
+            {
+                Global.ObjectMgr.LoadCreatureLocales();
+                Global.ObjectMgr.LoadGameObjectLocales();
+                Global.ObjectMgr.LoadQuestTemplateLocale();
+                Global.ObjectMgr.LoadQuestOfferRewardLocale();
+                Global.ObjectMgr.LoadQuestRequestItemsLocale();
+                Global.ObjectMgr.LoadQuestObjectivesLocale();
+                Global.ObjectMgr.LoadPageTextLocales();
+                Global.ObjectMgr.LoadGossipMenuItemsLocales();
+                Global.ObjectMgr.LoadPointOfInterestLocales();
+            }
+
             Log.outInfo(LogFilter.ServerLoading, "Localization strings loaded in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Account Roles and Permissions...");
@@ -702,7 +706,8 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Quest Greetings...");
             Global.ObjectMgr.LoadQuestGreetings();
-            Global.ObjectMgr.LoadQuestGreetingLocales();
+            if (WorldConfig.GetBoolValue(WorldCfg.LoadLocales))
+                Global.ObjectMgr.LoadQuestGreetingLocales();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Objects Pooling Data...");
             Global.PoolMgr.LoadFromDB();
@@ -797,8 +802,11 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Player Choices...");
             Global.ObjectMgr.LoadPlayerChoices();
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading Player Choices Locales...");
-            Global.ObjectMgr.LoadPlayerChoicesLocale();
+            if (WorldConfig.GetBoolValue(WorldCfg.LoadLocales))
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loading Player Choices Locales...");
+                Global.ObjectMgr.LoadPlayerChoicesLocale();
+            }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Jump Charge Params...");
             Global.ObjectMgr.LoadJumpChargeParams();
@@ -844,8 +852,13 @@ namespace Game
             Global.AchievementMgr.LoadAchievementScripts();
             Log.outInfo(LogFilter.ServerLoading, "Loading Achievement Rewards...");
             Global.AchievementMgr.LoadRewards();
-            Log.outInfo(LogFilter.ServerLoading, "Loading Achievement Reward Locales...");
-            Global.AchievementMgr.LoadRewardLocales();
+
+            if (WorldConfig.GetBoolValue(WorldCfg.LoadLocales))
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loading Achievement Reward Locales...");
+                Global.AchievementMgr.LoadRewardLocales();
+            }
+
             Log.outInfo(LogFilter.ServerLoading, "Loading Completed Achievements...");
             Global.AchievementMgr.LoadCompletedAchievements();
 
@@ -985,8 +998,11 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Creature Texts...");
             Global.CreatureTextMgr.LoadCreatureTexts();
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading Creature Text Locales...");
-            Global.CreatureTextMgr.LoadCreatureTextLocales();
+            if (WorldConfig.GetBoolValue(WorldCfg.LoadLocales))
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loading Creature Text Locales...");
+                Global.CreatureTextMgr.LoadCreatureTextLocales();
+            }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading creature StaticFlags overrides...");
             Global.ObjectMgr.LoadCreatureStaticFlagsOverride(); // must be after LoadCreatures

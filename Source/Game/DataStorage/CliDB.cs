@@ -23,7 +23,7 @@ namespace Game.DataStorage
             foreach (var dir in Directory.GetDirectories(db2Path))
             {
                 Locale locale = Path.GetFileName(dir).ToEnum<Locale>();
-                if (SharedConst.IsValidLocale(locale))
+                if (SharedConst.IsValidLocale(locale) && (WorldConfig.GetBoolValue(WorldCfg.LoadLocales) || locale == defaultLocale))
                     availableDb2Locales[(int)locale] = true;
             }
 

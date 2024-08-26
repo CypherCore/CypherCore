@@ -3257,10 +3257,7 @@ namespace Game
             }
 
             foreach (var unusedSpells in spellsByTrainer)
-            {
-                Log.outError(LogFilter.Sql, $"Table `trainer_spell` references non-existing trainer (TrainerId: {unusedSpells.Key}) for SpellId {unusedSpells.Value.SpellId}, ignoring");
-
-            }
+                Log.outError(LogFilter.Sql, $"Table `trainer_spell` references non-existing trainer (TrainerId: {unusedSpells.Key}) for SpellId {unusedSpells.Value.SpellId}, ignoring");            
 
             SQLResult trainerLocalesResult = DB.World.Query("SELECT Id, locale, Greeting_lang FROM trainer_locale");
             if (!trainerLocalesResult.IsEmpty())
@@ -3271,7 +3268,7 @@ namespace Game
                     string localeName = trainerLocalesResult.Read<string>(1);
 
                     Locale locale = localeName.ToEnum<Locale>();
-                    if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
+                    if (!SharedConst.IsValidLocale(locale) || !WorldConfig.GetBoolValue(WorldCfg.LoadLocales) || locale == Locale.enUS)
                         continue;
 
                     Trainer trainer = trainers.LookupByKey(trainerId);

@@ -304,6 +304,9 @@ namespace Game
         void LoadConditionalConditionalQuestDescription(SQLFields fields)
         {
             Locale locale = fields.Read<string>(4).ToEnum<Locale>();
+            if (!WorldConfig.GetBoolValue(WorldCfg.LoadLocales) && locale != SharedConst.DefaultLocale)
+                return;
+
             if (locale >= Locale.Total)
             {
                 Log.outError(LogFilter.Sql, $"Table `quest_description_conditional` has invalid locale {fields.Read<string>(4)} set for quest {fields.Read<uint>(0)}. Skipped.");
@@ -325,6 +328,9 @@ namespace Game
         void LoadConditionalConditionalRequestItemsText(SQLFields fields)
         {
             Locale locale = fields.Read<string>(4).ToEnum<Locale>();
+            if (!WorldConfig.GetBoolValue(WorldCfg.LoadLocales) && locale != SharedConst.DefaultLocale)
+                return;
+
             if (locale >= Locale.Total)
             {
                 Log.outError(LogFilter.Sql, $"Table `quest_request_items_conditional` has invalid locale {fields.Read<string>(4)} set for quest {fields.Read<uint>(0)}. Skipped.");
@@ -347,6 +353,9 @@ namespace Game
         void LoadConditionalConditionalOfferRewardText(SQLFields fields)
         {
             Locale locale = fields.Read<string>(4).ToEnum<Locale>();
+            if (!WorldConfig.GetBoolValue(WorldCfg.LoadLocales) && locale != SharedConst.DefaultLocale)
+                return;
+
             if (locale >= Locale.Total)
             {
                 Log.outError(LogFilter.Sql, $"Table `quest_offer_reward_conditional` has invalid locale {fields.Read<string>(4)} set for quest {fields.Read<uint>(0)}. Skipped.");
@@ -369,6 +378,9 @@ namespace Game
         void LoadConditionalConditionalQuestCompletionLog(SQLFields fields)
         {
             Locale locale = fields.Read<string>(4).ToEnum<Locale>();
+            if (!WorldConfig.GetBoolValue(WorldCfg.LoadLocales) && locale != SharedConst.DefaultLocale)
+                return;
+
             if (locale >= Locale.Total)
             {
                 Log.outError(LogFilter.Sql, $"Table `quest_completion_log_conditional` has invalid locale {fields.Read<string>(4)} set for quest {fields.Read<uint>(0)}. Skipped.");
@@ -604,7 +616,12 @@ namespace Game
         public void InitializeQueryData()
         {
             for (var loc = Locale.enUS; loc < Locale.Total; ++loc)
+            {
+                if (!WorldConfig.GetBoolValue(WorldCfg.LoadLocales) && loc != SharedConst.DefaultLocale)
+                    continue;
+
                 response[(int)loc] = BuildQueryData(loc, null);
+            }
         }
 
         public QueryQuestInfoResponse BuildQueryData(Locale loc, Player player)

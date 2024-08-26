@@ -141,7 +141,12 @@ namespace Game.Entities
         public void InitializeQueryData()
         {
             for (var loc = Locale.enUS; loc < Locale.Total; ++loc)
+            {
+                if (!WorldConfig.GetBoolValue(WorldCfg.LoadLocales) && loc != SharedConst.DefaultLocale)
+                    continue;
+
                 QueryData[(int)loc] = BuildQueryData(loc, Difficulty.None);
+            }
         }
 
         public QueryCreatureResponse BuildQueryData(Locale locale, Difficulty difficulty)
