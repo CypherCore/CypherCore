@@ -6425,7 +6425,7 @@ namespace Game.Spells
 
             // check USABLE attributes
             // USABLE takes precedence over NOT_USABLE
-            if (isRatedBattleground && m_spellInfo.HasAttribute(SpellAttr9.UsableInRatedBattlegrounds))
+            if (isRatedBattleground && m_spellInfo.HasAttribute(SpellAttr9.IgnoreDefaultRatedBattlegroundRestrictions))
                 return SpellCastResult.SpellCastOk;
 
             if (isArena && m_spellInfo.HasAttribute(SpellAttr4.IgnoreDefaultArenaRestrictions))

@@ -1980,9 +1980,9 @@ namespace Framework.Constants
         AllowWhileBanishedAuraState = 0x800, // Doesn't seem to be doing anything, banish behaves like a regular stun now - tested on patch 10.2.7 with spell 17767 (doesn't have this attribute, only SPELL_ATTR5_ALLOW_WHILE_STUNNED and was castable while banished)
         FaceUnitTargetUponCompletionOfJumpCharge = 0x1000, // Face unit target upon completion of jump charge
         HasteAffectsMeleeAbilityCasttime = 0x2000, // Haste Affects Melee Ability Casttime
-        UsableInRatedBattlegrounds = 0x4000, // 14 Can Be Used In Rated Battlegrounds
-        Unk15 = 0x8000, // 15
-        Unk16 = 0x10000, // 16
+        IgnoreDefaultRatedBattlegroundRestrictions = 0x4000, // Ignore Default Rated Battleground Restrictions
+        DoNotDisplayPowerCost = 0x8000, // Do Not Display Power Cost (client only)
+        NextModalSpellRequiresSameUnitTarget = 0x10000, // Prevents automatically casting the spell from SpellClassOptions::ModalNextSpell after current spell if target was changed (client only)
         Unk17 = 0x20000, // 17
         Unk18 = 0x40000, // 18
         Unk19 = 0x80000, // 19
