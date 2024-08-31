@@ -1987,8 +1987,8 @@ namespace Framework.Constants
         IgnoreSchoolLockout = 0x40000, // Ignore School Lockout
         AllowDarkSimulacrum = 0x80000, // Allow Dark Simulacrum
         AllowCastWhileChanneling = 0x100000, // Allow Cast While Channeling
-        Unk21 = 0x200000, // 21
-        Unk22 = 0x400000, // 22
+        SuppressVisualKitErrors = 0x200000, // Suppress Visual Kit Errors (client only)
+        SpellcastOverrideInSpellbook = 0x400000, // Spellcast Override In Spellbook (client only)
         Unk23 = 0x800000, // 23
         Unk24 = 0x1000000, // 24
         Unk25 = 0x2000000, // 25
