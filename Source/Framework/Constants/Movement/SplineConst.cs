@@ -20,14 +20,14 @@ namespace Framework.Constants
         Unknown_0x1 = 0x00000001,           // NOT VERIFIED
         Unknown_0x2 = 0x00000002,           // NOT VERIFIED
         Unknown_0x4 = 0x00000004,           // NOT VERIFIED
-        Unknown_0x8 = 0x00000008,           // NOT VERIFIED - does someting related to falling/fixed orientation
+        JumpOrientationFixed = 0x00000008,           // NOT VERIFIED - does someting related to falling/fixed orientation
         FallingSlow = 0x00000010,
         Done = 0x00000020,
         Falling = 0x00000040,           // Affects elevation computation, can't be combined with Parabolic flag
         NoSpline = 0x00000080,
         Unknown_0x100 = 0x00000100,           // NOT VERIFIED
         Flying = 0x00000200,           // Smooth movement(Catmullrom interpolation mode), flying animation
-        OrientationFixed = 0x00000400,           // Model orientation fixed
+        OrientationFixed = 0x00000400,           // Model orientation fixed (knockback animation)
         Catmullrom = 0x00000800,           // Used Catmullrom interpolation mode
         Cyclic = 0x00001000,           // Movement by cycled spline
         EnterCycle = 0x00002000,           // Everytimes appears with cyclic flag in monster move packet, erases first spline vertex after first cycle done
@@ -53,7 +53,7 @@ namespace Framework.Constants
         // flags that shouldn't be appended into SMSG_MONSTER_MOVE\SMSG_MONSTER_MOVE_TRANSPORT packet, should be more probably
         MaskNoMonsterMove = Done,
         // Unused, not suported flags
-        MaskUnused = NoSpline | EnterCycle | Frozen | Unknown_0x8 | Unknown_0x100 | Unknown_0x20000 | Unknown_0x40000
+        MaskUnused = NoSpline | EnterCycle | Frozen | Unknown_0x100 | Unknown_0x20000 | Unknown_0x40000
             | Unknown_0x800000 | FadeObject | UnlimitedSpeed | Unknown_0x40000000 | Unknown_0x80000000
     }
 }

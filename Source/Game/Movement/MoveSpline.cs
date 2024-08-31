@@ -159,7 +159,7 @@ namespace Game.Movement
             }
             else
             {
-                if (!splineflags.HasFlag(MoveSplineFlagEnum.OrientationFixed | MoveSplineFlagEnum.Falling | MoveSplineFlagEnum.Unknown_0x8))
+                if (!splineflags.HasFlag(MoveSplineFlagEnum.OrientationFixed | MoveSplineFlagEnum.Falling | MoveSplineFlagEnum.JumpOrientationFixed))
                 {
                     Vector3 hermite;
                     spline.Evaluate_Derivative(point_Idx, u, out hermite);

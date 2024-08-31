@@ -274,13 +274,15 @@ namespace Game.Movement
 
         public void SetVelocity(float vel) { args.velocity = vel; args.HasVelocity = true; }
 
-        void SetBackward() { args.flags.SetUnsetFlag(MoveSplineFlagEnum.Backward); }
+        public void SetBackward() { args.flags.SetUnsetFlag(MoveSplineFlagEnum.Backward); }
 
         public void SetTransportEnter() { args.flags.EnableTransportEnter(); }
 
         public void SetTransportExit() { args.flags.EnableTransportExit(); }
 
         public void SetOrientationFixed(bool enable) { args.flags.SetUnsetFlag(MoveSplineFlagEnum.OrientationFixed, enable); }
+
+        public void SetJumpOrientationFixed(bool enable) { args.flags.SetUnsetFlag(MoveSplineFlagEnum.JumpOrientationFixed, enable); }
 
         public void SetSteering() { args.flags.EnableSteering(); }
 

@@ -771,12 +771,12 @@ namespace Game.Movement
             MoveJump(x, y, z, speedXY, speedZ);
         }
 
-        public void MoveJump(Position pos, float speedXY, float speedZ, uint id = EventId.Jump, object facing = null, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
+        public void MoveJump(Position pos, float speedXY, float speedZ, uint id = EventId.Jump, object facing = null, bool orientationFixed = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
-            MoveJump(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), speedXY, speedZ, id, facing, arrivalCast, spellEffectExtraData, scriptResult);
+            MoveJump(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), speedXY, speedZ, id, facing, orientationFixed, arrivalCast, spellEffectExtraData, scriptResult);
         }
 
-        public void MoveJump(float x, float y, float z, float speedXY, float speedZ, uint id = EventId.Jump, object facing = null, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
+        public void MoveJump(float x, float y, float z, float speedXY, float speedZ, uint id = EventId.Jump, object facing = null, bool orientationFixed = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             Log.outDebug(LogFilter.Server, "Unit ({0}) jump to point (X: {1} Y: {2} Z: {3})", _owner.GetGUID().ToString(), x, y, z);
             if (speedXY < 0.01f)
@@ -795,6 +795,7 @@ namespace Game.Movement
                 init.SetParabolic(max_height, 0);
                 init.SetVelocity(speedXY);
                 MoveSplineInitFacingVisitor(init, facing);
+                init.SetJumpOrientationFixed(orientationFixed);
                 if (spellEffectExtraData != null)
                     init.SetSpellEffectExtraData(spellEffectExtraData);
             };
@@ -813,7 +814,7 @@ namespace Game.Movement
             Add(movement);
         }
 
-        public void MoveJumpWithGravity(Position pos, float speedXY, float gravity, uint id = EventId.Jump, object facing = null, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
+        public void MoveJumpWithGravity(Position pos, float speedXY, float gravity, uint id = EventId.Jump, object facing = null, bool orientationFixed = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             Log.outDebug(LogFilter.Movement, $"MotionMaster.MoveJumpWithGravity: '{_owner.GetGUID()}', jumps to point Id: {id} ({pos})");
             if (speedXY < 0.01f)
@@ -831,6 +832,7 @@ namespace Game.Movement
                 init.SetVelocity(speedXY);
                 init.SetUnlimitedSpeed();
                 MoveSplineInitFacingVisitor(init, facing);
+                init.SetJumpOrientationFixed(orientationFixed);
                 if (spellEffectExtraData != null)
                     init.SetSpellEffectExtraData(spellEffectExtraData);
             };
