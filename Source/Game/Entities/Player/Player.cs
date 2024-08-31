@@ -3476,11 +3476,12 @@ namespace Game.Entities
                 {
                     Creature creature = GetMap().GetCreature(guid);
                     // Update fields of triggers, transformed units or unselectable units (values dependent on GM state)
-                    if (creature == null || (!creature.IsTrigger() && !creature.HasAuraType(AuraType.Transform) && !creature.IsUninteractible()))
+                    if (creature == null || (!creature.IsTrigger() && !creature.HasAuraType(AuraType.Transform) && !creature.IsUninteractible() && !creature.HasUnitFlag2(UnitFlags2.UntargetableByClient)))
                         continue;
 
                     creature.m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayID);
                     creature.m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Flags);
+                    creature.m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Flags2);
                     creature.ForceUpdateFieldChange();
                     creature.BuildValuesUpdateBlockForPlayer(udata, this);
                 }
