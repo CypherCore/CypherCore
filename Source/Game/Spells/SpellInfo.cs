@@ -4273,6 +4273,10 @@ namespace Game.Spells
                 Player modOwner = caster.GetSpellModOwner();
                 if (modOwner != null)
                     modOwner.ApplySpellMod(_spellInfo, SpellModOp.Radius, ref radius, spell);
+
+                if (!_spellInfo.HasAttribute(SpellAttr9.NoMovementRadiusBonus))
+                    if (casterUnit != null && casterUnit.IsMoving() && !casterUnit.IsWalking())
+                        radius += 2.0f;
             }
 
             return radius;
