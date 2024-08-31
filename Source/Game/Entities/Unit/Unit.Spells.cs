@@ -513,6 +513,10 @@ namespace Game.Entities
             if (spellProto.HasAttribute(SpellAttr6.IgnoreHealingModifiers))
                 return 1.0f;
 
+            // Some spells don't benefit from done mods
+            if (spellProto.HasAttribute(SpellAttr9.IgnoreCasterHealingModifiers))
+                return 1.0f;
+
             // No bonus healing for potion spells
             if (spellProto.SpellFamilyName == SpellFamilyNames.Potion)
                 return 1.0f;
@@ -530,7 +534,7 @@ namespace Game.Entities
 
                 DoneTotalMod *= maxModDamagePercentSchool;
             }
-            else // SPELL_AURA_MOD_HEALING_DONE_PERCENT is included in m_activePlayerData->ModHealingDonePercent for players
+            else // SPELL_AURA_MOD_HEALING_DONE_PERCENT is included in m_activePlayerData.ModHealingDonePercent for players
                 DoneTotalMod *= GetTotalAuraMultiplier(AuraType.ModHealingDonePercent);
 
             // bonus against aurastate
@@ -550,50 +554,85 @@ namespace Game.Entities
 
         public int SpellHealingBonusTaken(Unit caster, SpellInfo spellProto, int healamount, DamageEffectType damagetype)
         {
+            bool allowPositive = !spellProto.HasAttribute(SpellAttr6.IgnoreHealingModifiers);
+            bool allowNegative = !spellProto.HasAttribute(SpellAttr6.IgnoreHealingModifiers) || spellProto.HasAttribute(SpellAttr13.AlwaysAllowNegativeHealingPercentModifiers);
+            if (!allowPositive && !allowNegative)
+                return healamount;
+
             float TakenTotalMod = 1.0f;
 
             // Healing taken percent
-            float minval = GetMaxNegativeAuraModifier(AuraType.ModHealingPct);
-            if (minval != 0)
-                MathFunctions.AddPct(ref TakenTotalMod, minval);
-
-            float maxval = GetMaxPositiveAuraModifier(AuraType.ModHealingPct);
-            if (maxval != 0)
-                MathFunctions.AddPct(ref TakenTotalMod, maxval);
-
-            // Nourish cast
-            if (spellProto.SpellFamilyName == SpellFamilyNames.Druid && spellProto.SpellFamilyFlags[1].HasAnyFlag(0x2000000u))
+            if (allowNegative)
             {
-                // Rejuvenation, Regrowth, Lifebloom, or Wild Growth
-                if (GetAuraEffect(AuraType.PeriodicHeal, SpellFamilyNames.Druid, new FlagArray128(0x50, 0x4000010, 0)) != null)
-                    // increase healing by 20%
-                    TakenTotalMod *= 1.2f;
+                float minval = GetMaxNegativeAuraModifier(AuraType.ModHealingPct);
+                if (minval != 0)
+                    MathFunctions.AddPct(ref TakenTotalMod, minval);
+
+                if (damagetype == DamageEffectType.DOT)
+                {
+                    // Healing over time taken percent
+                    float minval_hot = GetMaxNegativeAuraModifier(AuraType.ModHotPct);
+                    if (minval_hot != 0)
+                        MathFunctions.AddPct(ref TakenTotalMod, minval_hot);
+                }
             }
 
-            if (damagetype == DamageEffectType.DOT)
+            if (allowPositive)
             {
-                // Healing over time taken percent
-                float minval_hot = (float)GetMaxNegativeAuraModifier(AuraType.ModHotPct);
-                if (minval_hot != 0)
-                    MathFunctions.AddPct(ref TakenTotalMod, minval_hot);
+                float maxval = GetMaxPositiveAuraModifier(AuraType.ModHealingPct);
+                if (maxval != 0)
+                    MathFunctions.AddPct(ref TakenTotalMod, maxval);
 
-                float maxval_hot = (float)GetMaxPositiveAuraModifier(AuraType.ModHotPct);
-                if (maxval_hot != 0)
-                    MathFunctions.AddPct(ref TakenTotalMod, maxval_hot);
+                if (damagetype == DamageEffectType.DOT)
+                {
+                    // Healing over time taken percent
+                    float maxval_hot = GetMaxPositiveAuraModifier(AuraType.ModHotPct);
+                    if (maxval_hot != 0)
+                        MathFunctions.AddPct(ref TakenTotalMod, maxval_hot);
+                }
+
+                // Nourish cast
+                if (spellProto.SpellFamilyName == SpellFamilyNames.Druid && spellProto.SpellFamilyFlags[1].HasAnyFlag(0x2000000u))
+                {
+                    // Rejuvenation, Regrowth, Lifebloom, or Wild Growth
+                    if (GetAuraEffect(AuraType.PeriodicHeal, SpellFamilyNames.Druid, new FlagArray128(0x50, 0x4000010, 0)) != null)
+                        // increase healing by 20%
+                        TakenTotalMod *= 1.2f;
+                }
             }
 
             if (caster != null)
             {
                 TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModHealingReceived, aurEff =>
                 {
-                    if (caster.GetGUID() == aurEff.GetCasterGUID() && aurEff.IsAffectingSpell(spellProto))
-                        return true;
-                    return false;
+                    if (caster.GetGUID() != aurEff.GetCasterGUID() || !aurEff.IsAffectingSpell(spellProto))
+                        return false;
+
+                    if (aurEff.GetAmount() > 0)
+                    {
+                        if (!allowPositive)
+                            return false;
+                    }
+                    else if (!allowNegative)
+                        return false;
+
+                    return true;
                 });
 
                 TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModHealingTakenFromCaster, aurEff =>
                 {
-                    return aurEff.GetCasterGUID() == caster.GetGUID();
+                    if (aurEff.GetCasterGUID() != caster.GetGUID())
+                        return false;
+
+                    if (aurEff.GetAmount() > 0)
+                    {
+                        if (!allowPositive)
+                            return false;
+                    }
+                    else if (!allowNegative)
+                        return false;
+
+                    return true;
                 });
             }
 

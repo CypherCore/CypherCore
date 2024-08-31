@@ -1990,7 +1990,7 @@ namespace Framework.Constants
         SuppressVisualKitErrors = 0x200000, // Suppress Visual Kit Errors (client only)
         SpellcastOverrideInSpellbook = 0x400000, // Spellcast Override In Spellbook (client only)
         JumpchargeNoFacingControl = 0x800000, // JumpCharge - no facing control
-        Unk24 = 0x1000000, // 24
+        IgnoreCasterHealingModifiers = 0x1000000, // Ignore Caster Healing Modifiers
         Unk25 = 0x2000000, // 25
         Unk26 = 0x4000000, // 26
         Unk27 = 0x8000000, // 27
@@ -2132,7 +2132,7 @@ namespace Framework.Constants
         Unk23 = 0x800000, // 23
         Unk24 = 0x01000000, // 24
         Unk25 = 0x02000000, // 25
-        Unk26 = 0x04000000, // 26
+        AlwaysAllowNegativeHealingPercentModifiers = 0x04000000, // Always Allow Negative Healing Percent Modifiers
         DoNotAllowDisableMovementInterrupt = 0x08000000, // 27
         Unk28 = 0x10000000, // 28
         Unk29 = 0x20000000, // 29
