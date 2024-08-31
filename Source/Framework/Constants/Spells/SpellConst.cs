@@ -1986,7 +1986,7 @@ namespace Framework.Constants
         AutocastOffByDefault = 0x20000, // AutoCast Off By Default
         IgnoreSchoolLockout = 0x40000, // Ignore School Lockout
         AllowDarkSimulacrum = 0x80000, // Allow Dark Simulacrum
-        Unk20 = 0x100000, // 20
+        AllowCastWhileChanneling = 0x100000, // Allow Cast While Channeling
         Unk21 = 0x200000, // 21
         Unk22 = 0x400000, // 22
         Unk23 = 0x800000, // 23

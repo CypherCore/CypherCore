@@ -2583,7 +2583,7 @@ namespace Game.Spells
             }
 
             // Prevent casting at cast another spell (ServerSide check)
-            if (!_triggeredCastFlags.HasFlag(TriggerCastFlags.IgnoreCastInProgress) && m_caster.ToUnit() != null && m_caster.ToUnit().IsNonMeleeSpellCast(false, true, true, m_spellInfo.Id == 75) && !m_castId.IsEmpty())
+            if (!_triggeredCastFlags.HasFlag(TriggerCastFlags.IgnoreCastInProgress) && m_caster.ToUnit() != null && m_caster.ToUnit().IsNonMeleeSpellCast(false, true, true, m_spellInfo.Id == 75))
             {
                 SendCastResult(SpellCastResult.SpellInProgress);
                 Finish(SpellCastResult.SpellInProgress);

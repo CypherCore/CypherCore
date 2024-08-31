@@ -1814,7 +1814,8 @@ namespace Game.Entities
                     InterruptSpell(CurrentSpellTypes.Generic, false);
 
                     // generic spells always break channeled not delayed spells
-                    if (GetCurrentSpell(CurrentSpellTypes.Channeled) != null && !GetCurrentSpell(CurrentSpellTypes.Channeled).GetSpellInfo().HasAttribute(SpellAttr5.AllowActionsDuringChannel))
+                    if (GetCurrentSpell(CurrentSpellTypes.Channeled) != null && !GetCurrentSpell(CurrentSpellTypes.Channeled).GetSpellInfo().HasAttribute(SpellAttr5.AllowActionsDuringChannel)
+                        && !pSpell.GetSpellInfo().HasAttribute(SpellAttr9.AllowCastWhileChanneling))
                         InterruptSpell(CurrentSpellTypes.Channeled, false);
 
                     // autorepeat breaking
@@ -2979,7 +2980,7 @@ namespace Game.Entities
             return dispelList;
         }
 
-        bool IsInterruptFlagIgnoredForSpell(SpellAuraInterruptFlags flag, Unit unit, SpellInfo auraSpellInfo, SpellInfo interruptSource)
+        bool IsInterruptFlagIgnoredForSpell(SpellAuraInterruptFlags flag, Unit unit, SpellInfo auraSpellInfo, bool isChannel, SpellInfo interruptSource)
         {
             switch (flag)
             {
@@ -2994,6 +2995,9 @@ namespace Game.Entities
 
                         if (interruptSource.HasAttribute(SpellAttr2.AllowWhileInvisible) && auraSpellInfo.Dispel == DispelType.Invisibility)
                             return true;
+
+                        if (interruptSource.HasAttribute(SpellAttr9.AllowCastWhileChanneling) && isChannel)
+                            return true;
                     }
                     break;
                 default:
@@ -3003,7 +3007,7 @@ namespace Game.Entities
             return false;
         }
 
-        bool IsInterruptFlagIgnoredForSpell(SpellAuraInterruptFlags2 flag, Unit unit, SpellInfo auraSpellInfo, SpellInfo interruptSource)
+        bool IsInterruptFlagIgnoredForSpell(SpellAuraInterruptFlags2 flag, Unit unit, SpellInfo auraSpellInfo, bool isChannel, SpellInfo interruptSource)
         {
             return false;
         }
@@ -3018,7 +3022,7 @@ namespace Game.Entities
             {
                 Aura aura = m_interruptableAuras[i].GetBase();
 
-                if (aura.GetSpellInfo().HasAuraInterruptFlag(flag) && (source == null || aura.GetId() != source.Id) && !IsInterruptFlagIgnoredForSpell(flag, this, aura.GetSpellInfo(), source))
+                if (aura.GetSpellInfo().HasAuraInterruptFlag(flag) && (source == null || aura.GetId() != source.Id) && !IsInterruptFlagIgnoredForSpell(flag, this, aura.GetSpellInfo(), false, source))
                 {
                     uint removedAuras = m_removedAurasCount;
                     RemoveAura(aura, AuraRemoveMode.Interrupt);
@@ -3034,7 +3038,7 @@ namespace Game.Entities
                 if (spell.GetState() == SpellState.Casting
                     && spell.GetSpellInfo().HasChannelInterruptFlag(flag)
                     && (source == null || spell.GetSpellInfo().Id != source.Id)
-                    && !IsInterruptFlagIgnoredForSpell(flag, this, spell.GetSpellInfo(), source))
+                    && !IsInterruptFlagIgnoredForSpell(flag, this, spell.GetSpellInfo(), true, source))
                     InterruptNonMeleeSpells(false);
             }
 
@@ -3051,7 +3055,7 @@ namespace Game.Entities
             {
                 Aura aura = m_interruptableAuras[i].GetBase();
 
-                if (aura.GetSpellInfo().HasAuraInterruptFlag(flag) && (source == null || aura.GetId() != source.Id) && !IsInterruptFlagIgnoredForSpell(flag, this, aura.GetSpellInfo(), source))
+                if (aura.GetSpellInfo().HasAuraInterruptFlag(flag) && (source == null || aura.GetId() != source.Id) && !IsInterruptFlagIgnoredForSpell(flag, this, aura.GetSpellInfo(), false, source))
                 {
                     uint removedAuras = m_removedAurasCount;
                     RemoveAura(aura, AuraRemoveMode.Interrupt);
@@ -3067,7 +3071,7 @@ namespace Game.Entities
                 if (spell.GetState() == SpellState.Casting
                     && spell.GetSpellInfo().HasChannelInterruptFlag(flag)
                     && (source == null || spell.GetSpellInfo().Id != source.Id)
-                    && !IsInterruptFlagIgnoredForSpell(flag, this, spell.GetSpellInfo(), source))
+                    && !IsInterruptFlagIgnoredForSpell(flag, this, spell.GetSpellInfo(), true, source))
                     InterruptNonMeleeSpells(false);
             }
 
