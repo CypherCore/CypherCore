@@ -2782,6 +2782,9 @@ namespace Game.Entities
                 }
             }
 
+            if (spellProto != null && spellProto.HasAttribute(SpellAttr9.CannotKillTarget) && damageTaken >= health)
+                damageTaken = health - 1;
+
             if (attacker != null && attacker != victim)
             {
                 Player killer = attacker.ToPlayer();

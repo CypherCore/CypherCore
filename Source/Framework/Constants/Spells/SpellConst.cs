@@ -1994,7 +1994,7 @@ namespace Framework.Constants
         DontConsumeChargeIfItemDeleted = 0x2000000, // NYI - some sort of bugfix attribute to prevent double item deletion? // (Programmer Only) Don't consume charge if item deleted
         ItemPassiveOnClient = 0x4000000, // Item Passive On Client
         ForceCorpseTarget = 0x8000000, // Causes the spell to continue executing effects on the target even if one of them kills it
-        Unk28 = 0x10000000, // 28
+        CannotKillTarget = 0x10000000, // Cannot Kill Target
         Unk29 = 0x20000000, // 29
         Unk30 = 0x40000000, // 30
         Unk31 = 0x80000000  // 31
