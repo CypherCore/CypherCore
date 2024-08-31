@@ -1989,7 +1989,7 @@ namespace Framework.Constants
         AllowCastWhileChanneling = 0x100000, // Allow Cast While Channeling
         SuppressVisualKitErrors = 0x200000, // Suppress Visual Kit Errors (client only)
         SpellcastOverrideInSpellbook = 0x400000, // Spellcast Override In Spellbook (client only)
-        Unk23 = 0x800000, // 23
+        JumpchargeNoFacingControl = 0x800000, // JumpCharge - no facing control
         Unk24 = 0x1000000, // 24
         Unk25 = 0x2000000, // 25
         Unk26 = 0x4000000, // 26
