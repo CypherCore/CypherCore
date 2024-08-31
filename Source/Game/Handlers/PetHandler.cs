@@ -142,7 +142,10 @@ namespace Game
                             break;
                         case CommandStates.Follow: // spellid = 1792  //FOLLOW
                             pet.AttackStop();
-                            pet.InterruptNonMeleeSpells(false);
+                            pet.InterruptSpell(CurrentSpellTypes.Generic, false, false);
+                            Spell channeledSpell = pet.GetCurrentSpell(CurrentSpellTypes.Channeled);
+                            if (channeledSpell != null && !channeledSpell.GetSpellInfo().HasAttribute(SpellAttr9.ChannelPersistsOnPetFollow))
+                                pet.InterruptSpell(CurrentSpellTypes.Channeled, true, true);
                             pet.GetMotionMaster().MoveFollow(GetPlayer(), SharedConst.PetFollowDist, pet.GetFollowAngle());
                             charmInfo.SetCommandState(CommandStates.Follow);
 

@@ -1997,7 +1997,7 @@ namespace Framework.Constants
         CannotKillTarget = 0x10000000, // Cannot Kill Target
         LogPassive = 0x20000000, // Allows passive auras to trigger aura applied/refreshed/removed combat log events
         NoMovementRadiusBonus = 0x40000000, // No Movement Radius Bonus
-        Unk31 = 0x80000000  // 31
+        ChannelPersistsOnPetFollow = 0x80000000  // Channel Persists on Pet Follow
     }
     public enum SpellAttr10 : uint
     {
