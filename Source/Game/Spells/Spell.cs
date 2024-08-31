@@ -6557,6 +6557,12 @@ namespace Game.Spells
             return SpellCastResult.SpellCastOk;
         }
 
+        public static bool CanIncreaseRangeByMovement(Unit unit)
+        {
+            // forward running only
+            return unit.HasUnitMovementFlag(MovementFlag.Forward | MovementFlag.StrafeLeft | MovementFlag.StrafeRight | MovementFlag.Falling) && !unit.IsWalking();
+        }
+
         (float minRange, float maxRange) GetMinMaxRange(bool strict)
         {
             float rangeMod = 0.0f;
@@ -6598,7 +6604,7 @@ namespace Game.Spells
                     }
                 }
 
-                if (target != null && unitCaster != null && unitCaster.IsMoving() && target.IsMoving() && !unitCaster.IsWalking() && !target.IsWalking() &&
+                if (target != null && unitCaster != null && CanIncreaseRangeByMovement(target) && CanIncreaseRangeByMovement(unitCaster) &&
                     (m_spellInfo.RangeEntry.HasFlag(SpellRangeFlag.Melee) || target.IsPlayer()))
                     rangeMod += 8.0f / 3.0f;
             }

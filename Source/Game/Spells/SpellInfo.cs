@@ -4275,7 +4275,7 @@ namespace Game.Spells
                     modOwner.ApplySpellMod(_spellInfo, SpellModOp.Radius, ref radius, spell);
 
                 if (!_spellInfo.HasAttribute(SpellAttr9.NoMovementRadiusBonus))
-                    if (casterUnit != null && casterUnit.IsMoving() && !casterUnit.IsWalking())
+                    if (casterUnit != null && Spell.CanIncreaseRangeByMovement(casterUnit))
                         radius += 2.0f;
             }
 
