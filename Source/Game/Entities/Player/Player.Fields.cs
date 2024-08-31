@@ -37,6 +37,7 @@ namespace Game.Entities
         public List<ItemSetEffect> ItemSetEff = new();
         List<EnchantDuration> m_enchantDuration = new();
         List<Item> m_itemDuration = new();
+        List<uint> m_itemPassives = new();
         List<ObjectGuid> m_itemSoulboundTradeable = new();
         List<ObjectGuid> m_refundableItems = new();
         public List<Item> ItemUpdateQueue = new();

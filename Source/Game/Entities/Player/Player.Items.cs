@@ -2419,6 +2419,17 @@ namespace Game.Entities
             }
             return true;
         }
+
+        void SendItemPassives()
+        {
+            if (m_itemPassives.Empty())
+                return;
+
+            SendItemPassives sendItemPassives = new();
+            sendItemPassives.SpellID.AddRange(m_itemPassives);
+            SendPacket(sendItemPassives);
+        }
+
         public void SendNewItem(Item item, uint quantity, bool pushed, bool created, bool broadcast = false, uint dungeonEncounterId = 0)
         {
             if (item == null) // prevent crash
@@ -3785,6 +3796,17 @@ namespace Game.Entities
 
                 Log.outDebug(LogFilter.Player, "WORLD: cast {0} Equip spellId - {1}", (item != null ? "item" : "itemset"), spellInfo.Id);
 
+                if (spellInfo.HasAttribute(SpellAttr9.ItemPassiveOnClient))
+                {
+                    m_itemPassives.Add(spellInfo.Id);
+                    if (IsInWorld)
+                    {
+                        AddItemPassive addItemPassive = new();
+                        addItemPassive.SpellID = spellInfo.Id;
+                        SendPacket(addItemPassive);
+                    }
+                }
+
                 CastSpell(this, spellInfo.Id, new CastSpellExtraArgs(item));
             }
             else
@@ -3794,6 +3816,17 @@ namespace Game.Entities
                     // Cannot be used in this stance/form
                     if (spellInfo.CheckShapeshift(GetShapeshiftForm()) == SpellCastResult.SpellCastOk)
                         return;                                     // and remove only not compatible at form change
+                }
+
+                if (spellInfo.HasAttribute(SpellAttr9.ItemPassiveOnClient))
+                {
+                    m_itemPassives.Remove(spellInfo.Id);
+                    if (IsInWorld)
+                    {
+                        RemoveItemPassive removeItemPassive = new();
+                        removeItemPassive.SpellID = spellInfo.Id;
+                        SendPacket(removeItemPassive);
+                    }
                 }
 
                 if (item != null)

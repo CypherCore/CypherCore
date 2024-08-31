@@ -5798,6 +5798,7 @@ namespace Game.Entities
             SendAurasForTarget(this);
             SendEnchantmentDurations();                             // must be after add to map
             SendItemDurations();                                    // must be after add to map
+            SendItemPassives();                                     // must be after add to map
 
             // raid downscaling - send difficulty to player
             if (GetMap().IsRaid())

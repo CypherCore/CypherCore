@@ -1992,7 +1992,7 @@ namespace Framework.Constants
         JumpchargeNoFacingControl = 0x800000, // JumpCharge - no facing control
         IgnoreCasterHealingModifiers = 0x1000000, // Ignore Caster Healing Modifiers
         DontConsumeChargeIfItemDeleted = 0x2000000, // NYI - some sort of bugfix attribute to prevent double item deletion? // (Programmer Only) Don't consume charge if item deleted
-        Unk26 = 0x4000000, // 26
+        ItemPassiveOnClient = 0x4000000, // Item Passive On Client
         Unk27 = 0x8000000, // 27
         Unk28 = 0x10000000, // 28
         Unk29 = 0x20000000, // 29

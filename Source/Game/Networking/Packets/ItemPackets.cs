@@ -751,6 +751,45 @@ namespace Game.Networking.Packets
         }
     }
 
+    class AddItemPassive : ServerPacket
+    {
+        public uint SpellID;
+
+        public AddItemPassive() : base(ServerOpcodes.AddItemPassive, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(SpellID);
+        }
+    }
+
+    class RemoveItemPassive : ServerPacket
+    {
+        public uint SpellID;
+
+        public RemoveItemPassive() : base(ServerOpcodes.RemoveItemPassive, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(SpellID);
+        }
+    }
+
+    class SendItemPassives : ServerPacket
+    {
+        public List<uint> SpellID = new();
+
+        public SendItemPassives() : base(ServerOpcodes.SendItemPassives, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(SpellID.Count);
+            if (!SpellID.Empty())
+                foreach (uint id in SpellID)
+                    _worldPacket.WriteUInt32(id);
+        }
+    }
+
     //Structs
     public class ItemBonuses
     {
