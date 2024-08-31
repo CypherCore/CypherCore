@@ -77,7 +77,7 @@ namespace Game.Collision
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
             if (instanceTree != null)
             {
-                instanceTree.UnloadMap(this);
+                instanceTree.UnloadMap();
                 if (instanceTree.NumLoadedTiles() == 0)
                 {
                     iInstanceMapTrees.Remove(mapId);
@@ -186,22 +186,24 @@ namespace Game.Collision
             lock (LoadedModelFilesLock)
             {
                 filename = filename.TrimEnd('\0');
-                var model = iLoadedModelFiles.LookupByKey(filename);
-                if (model == null)
+                if (iLoadedModelFiles.TryGetValue(filename, out ManagedModel worldmodel))
+                    return worldmodel.Model;
+
+                var model = new ManagedModel();
+                if (!model.Model.ReadFile(VMapPath + filename))
                 {
-                    model = new ManagedModel();
-                    if (!model.GetModel().ReadFile(VMapPath + filename))
-                    {
-                        Log.outError(LogFilter.Server, "VMapManager: could not load '{0}'", filename);
-                        return null;
-                    }
-
-                    Log.outDebug(LogFilter.Maps, "VMapManager: loading file '{0}'", filename);
-
-                    iLoadedModelFiles.Add(filename, model);
+                    Log.outError(LogFilter.Server, $"VMapManager: could not load '{filename}'");
+                    return null;
                 }
-                model.IncRefCount();
-                return model.GetModel();
+
+                Log.outDebug(LogFilter.Maps, $"VMapManager: loading file '{filename}'");
+
+                worldmodel.Model.SetName(filename);
+
+                model = worldmodel;
+
+                iLoadedModelFiles.Add(filename, model);
+                return model.Model;
             }
         }
 
@@ -210,17 +212,14 @@ namespace Game.Collision
             lock (LoadedModelFilesLock)
             {
                 filename = filename.TrimEnd('\0');
-                var model = iLoadedModelFiles.LookupByKey(filename);
-                if (model == null)
+                var erased = iLoadedModelFiles.Remove(filename);
+                if (!erased)
                 {
-                    Log.outError(LogFilter.Server, "VMapManager: trying to unload non-loaded file '{0}'", filename);
+                    Log.outError(LogFilter.Server, $"VMapManager: trying to unload non-loaded file '{filename}'");
                     return;
                 }
-                if (model.DecRefCount() == 0)
-                {
-                    Log.outDebug(LogFilter.Maps, "VMapManager: unloading file '{0}'", filename);
-                    iLoadedModelFiles.Remove(filename);
-                }
+
+                Log.outDebug(LogFilter.Maps, $"VMapManager: unloading file '{filename}'");
             }
         }
 
@@ -271,19 +270,12 @@ namespace Game.Collision
 
     public class ManagedModel
     {
-        public ManagedModel()
+        public WorldModel Model;
+
+        ~ManagedModel()
         {
-            iModel = new();
-            iRefCount = 0;
+            Global.VMapMgr.ReleaseModelInstance(Model.GetName());
         }
-
-        public void SetModel(WorldModel model) { iModel = model; }
-        public WorldModel GetModel() { return iModel; }
-        public void IncRefCount() { ++iRefCount; }
-        public int DecRefCount() { return --iRefCount; }
-
-        WorldModel iModel;
-        int iRefCount;
     }
 
     public class AreaAndLiquidData

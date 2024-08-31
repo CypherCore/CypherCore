@@ -74,6 +74,7 @@ namespace Game.Collision
         Matrix4x4 iInvRot;
         float iInvScale;
         WorldModel iModel;
+        uint referencingTiles;
 
         public ModelInstance()
         {
@@ -174,5 +175,10 @@ namespace Game.Collision
         }
 
         public void SetUnloaded() { iModel = null; }
+
+        public WorldModel GetWorldModel() { return iModel; }
+
+        public void AddTileReference() { ++referencingTiles; }
+        public uint RemoveTileReference() { return --referencingTiles; }
     }
 }

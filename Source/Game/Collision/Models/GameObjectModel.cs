@@ -78,7 +78,6 @@ namespace Game.Collision
             return !iModel.IsM2();
         }
 
-
         public override bool IntersectRay(Ray ray, ref float maxDist, bool stopAtFirstHit, PhaseShift phaseShift, ModelIgnoreFlags ignoreFlags)
         {
             if (!IsCollisionEnabled() || !owner.IsSpawned())
