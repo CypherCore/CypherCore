@@ -249,7 +249,7 @@ namespace Game.Collision
 
         public static string GetMapFileName(uint mapId)
         {
-            return $"{mapId:D4}.vmtree";
+            return $"{mapId:D4}/{mapId:D4}.vmtree";
         }
 
         public void SetEnableLineOfSightCalc(bool pVal) { _enableLineOfSightCalc = pVal; }

@@ -56,7 +56,7 @@ namespace Framework.Constants
         public const uint mmapMagic = 0x4D4D4150; // 'MMAP'
         public const int mmapVersion = 15;
 
-        public const string VMapMagic = "VMAP_4.C";
+        public const string VMapMagic = "VMAP_4.D";
         public const float VMAPInvalidHeightValue = -200000.0f;
 
         public const uint MaxDungeonEncountersPerBoss = 4;
