@@ -123,6 +123,7 @@ namespace Game.Collision
                             if (referencedVal >= iTreeValues.Length)
                             {
                                 Log.outError(LogFilter.Maps, $"StaticMapTree::LoadMapTile() : invalid tree element ({referencedVal}/{iTreeValues.Length}) referenced in tile {fileResult.Name}");
+                                result = LoadResult.ReadFromFileFailed;
                                 continue;
                             }
 
@@ -175,23 +176,22 @@ namespace Game.Collision
                     for (uint i = 0; i < numSpawns && result; ++i)
                     {
                         // read model spawns
-                        ModelSpawn spawn;
-                        result = ModelSpawn.ReadFromFile(reader, out spawn);
-                        if (result)
-                        {
-                            // update tree
-                            int referencedNode =  spawnIndicesReader.ReadInt32();
-                            if (referencedNode >= iTreeValues.Length)
-                            {
-                                Log.outError(LogFilter.Maps, $"StaticMapTree::LoadMapTile() : invalid tree element ({referencedNode}/{iTreeValues.Length}) referenced in tile {fileResult.Name}");
-                                continue;
-                            }
+                        if (!ModelSpawn.ReadFromFile(reader, out ModelSpawn spawn))
+                            break;
 
-                            if (iTreeValues[referencedNode].GetWorldModel() == null)
-                                Log.outError(LogFilter.Misc, $"StaticMapTree::UnloadMapTile() : trying to unload non-referenced model '{spawn.name}' (ID:{spawn.Id})");
-                            else if (iTreeValues[referencedNode].RemoveTileReference() == 0)
-                                iTreeValues[referencedNode].SetUnloaded();
+                        // update tree
+                        int referencedNode = spawnIndicesReader.ReadInt32();
+                        if (referencedNode >= iTreeValues.Length)
+                        {
+                            Log.outError(LogFilter.Maps, $"StaticMapTree::LoadMapTile() : invalid tree element ({referencedNode}/{iTreeValues.Length}) referenced in tile {fileResult.Name}");
+                            result = false;
+                            continue;
                         }
+
+                        if (iTreeValues[referencedNode].GetWorldModel() == null)
+                            Log.outError(LogFilter.Misc, $"StaticMapTree::UnloadMapTile() : trying to unload non-referenced model '{spawn.name}' (ID:{spawn.Id})");
+                        else if (iTreeValues[referencedNode].RemoveTileReference() == 0)
+                            iTreeValues[referencedNode].SetUnloaded();
                     }
                 }
             }

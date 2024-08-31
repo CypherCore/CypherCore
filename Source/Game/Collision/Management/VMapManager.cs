@@ -183,13 +183,15 @@ namespace Game.Collision
 
         public WorldModel AcquireModelInstance(string filename)
         {
+            ManagedModel worldmodel; // this is intentionally declared before lock so that it is destroyed after it to prevent deadlocks in releaseModelInstance
+
             lock (LoadedModelFilesLock)
             {
                 filename = filename.TrimEnd('\0');
-                if (iLoadedModelFiles.TryGetValue(filename, out ManagedModel worldmodel))
+                if (iLoadedModelFiles.TryGetValue(filename, out worldmodel))
                     return worldmodel.Model;
 
-                var model = new ManagedModel();
+                var model = new ManagedModel(filename);
                 if (!model.Model.ReadFile(VMapPath + filename))
                 {
                     Log.outError(LogFilter.Server, $"VMapManager: could not load '{filename}'");
@@ -197,8 +199,6 @@ namespace Game.Collision
                 }
 
                 Log.outDebug(LogFilter.Maps, $"VMapManager: loading file '{filename}'");
-
-                worldmodel.Model.SetName(filename);
 
                 model = worldmodel;
 
@@ -212,14 +212,15 @@ namespace Game.Collision
             lock (LoadedModelFilesLock)
             {
                 filename = filename.TrimEnd('\0');
+                
+                Log.outDebug(LogFilter.Maps, $"VMapManager: unloading file '{filename}'");
+
                 var erased = iLoadedModelFiles.Remove(filename);
                 if (!erased)
                 {
                     Log.outError(LogFilter.Server, $"VMapManager: trying to unload non-loaded file '{filename}'");
                     return;
                 }
-
-                Log.outDebug(LogFilter.Maps, $"VMapManager: unloading file '{filename}'");
             }
         }
 
@@ -271,10 +272,16 @@ namespace Game.Collision
     public class ManagedModel
     {
         public WorldModel Model;
+        string _name; // valid only while model is held in VMapManager2::iLoadedModelFiles
+
+        public ManagedModel(string name)
+        {
+            _name = name;
+        }
 
         ~ManagedModel()
         {
-            Global.VMapMgr.ReleaseModelInstance(Model.GetName());
+            Global.VMapMgr.ReleaseModelInstance(_name);
         }
     }
 

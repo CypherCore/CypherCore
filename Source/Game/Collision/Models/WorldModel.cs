@@ -331,7 +331,6 @@ namespace Game.Collision
         uint RootWMOID;
         List<GroupModel> groupModels = new();
         BIH groupTree = new();
-        string name;    // valid only while model is held in VMapManager2::iLoadedModelFiles
 
         public override bool IntersectRay(Ray ray, ref float distance, bool stopAtFirstHit, ModelIgnoreFlags ignoreFlags)
         {
@@ -422,9 +421,6 @@ namespace Game.Collision
 
             return groupTree.ReadFromFile(reader);
         }
-
-        public string GetName() { return name; }
-        public void SetName(string newName) { name = newName; }
 
         public bool IsM2() { return Flags.HasFlag(ModelFlags.IsM2); }
     }
