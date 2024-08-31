@@ -8857,7 +8857,7 @@ namespace Game.Spells
             spell.m_damage = Damage;
             spell.m_healing = Healing;
 
-            if (unit.IsAlive() != IsAlive)
+            if (unit.IsAlive() != IsAlive && !spell.m_spellInfo.HasAttribute(SpellAttr9.ForceCorpseTarget))
                 return;
 
             if (!spell.m_spellInfo.HasAttribute(SpellAttr8.IgnoreSanctuary) && spell.GetState() == SpellState.Delayed && !spell.IsPositive() && (GameTime.GetGameTimeMS() - TimeDelay) <= unit.LastSanctuaryTime)
