@@ -1991,7 +1991,7 @@ namespace Framework.Constants
         SpellcastOverrideInSpellbook = 0x400000, // Spellcast Override In Spellbook (client only)
         JumpchargeNoFacingControl = 0x800000, // JumpCharge - no facing control
         IgnoreCasterHealingModifiers = 0x1000000, // Ignore Caster Healing Modifiers
-        Unk25 = 0x2000000, // 25
+        DontConsumeChargeIfItemDeleted = 0x2000000, // NYI - some sort of bugfix attribute to prevent double item deletion? // (Programmer Only) Don't consume charge if item deleted
         Unk26 = 0x4000000, // 26
         Unk27 = 0x8000000, // 27
         Unk28 = 0x10000000, // 28
