@@ -1985,7 +1985,7 @@ namespace Framework.Constants
         NextModalSpellRequiresSameUnitTarget = 0x10000, // Prevents automatically casting the spell from SpellClassOptions::ModalNextSpell after current spell if target was changed (client only)
         AutocastOffByDefault = 0x20000, // AutoCast Off By Default
         IgnoreSchoolLockout = 0x40000, // Ignore School Lockout
-        Unk19 = 0x80000, // 19
+        AllowDarkSimulacrum = 0x80000, // Allow Dark Simulacrum
         Unk20 = 0x100000, // 20
         Unk21 = 0x200000, // 21
         Unk22 = 0x400000, // 22

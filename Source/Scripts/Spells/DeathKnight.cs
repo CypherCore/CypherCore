@@ -29,6 +29,8 @@ namespace Scripts.Spells.DeathKnight
         public const uint BloodShieldMastery = 77513;
         public const uint BreathOfSindragosa = 152279;
         public const uint CorpseExplosionTriggered = 43999;
+        public const uint DarkSimulacrumBuff = 77616;
+        public const uint DarkSimulacrumSpellpowerBuff = 94984;
         public const uint DeathAndDecayDamage = 52212;
         public const uint DeathCoilDamage = 47632;
         public const uint DeathGripDummy = 243912;
@@ -303,6 +305,72 @@ namespace Scripts.Spells.DeathKnight
         }
     }
 
+    [Script] // 77606 - Dark Simulacrum
+    class spell_dk_dark_simulacrum : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.DarkSimulacrumBuff, SpellIds.DarkSimulacrumSpellpowerBuff);
+        }
+
+        bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            Spell procSpell = eventInfo.GetProcSpell();
+            if (procSpell == null)
+                return false;
+
+            if (!GetTarget().IsPlayer())
+                return procSpell.GetSpellInfo().HasAttribute(SpellAttr9.AllowDarkSimulacrum);
+
+            if (!procSpell.HasPowerTypeCost(PowerType.Mana))
+                return false;
+
+            // filter out spells not castable by mind controlled players (teleports, summons, item creations (healthstones))
+            if (procSpell.GetSpellInfo().HasAttribute(SpellAttr1.NoAutocastAi))
+                return false;
+
+            return true;
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            Unit caster = GetCaster();
+            if (caster == null)
+                return;
+
+            caster.CastSpell(caster, SpellIds.DarkSimulacrumBuff, new CastSpellExtraArgs()
+                .SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError)
+                .SetTriggeringSpell(eventInfo.GetProcSpell())
+                .AddSpellMod(SpellValueMod.BasePoint0, (int)eventInfo.GetSpellInfo().Id));
+
+            caster.CastSpell(caster, SpellIds.DarkSimulacrumSpellpowerBuff, new CastSpellExtraArgs()
+                .SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError)
+                .SetTriggeringSpell(eventInfo.GetProcSpell())
+                .AddSpellMod(SpellValueMod.BasePoint0, GetTarget().SpellBaseDamageBonusDone(SpellSchoolMask.Magic))
+                .AddSpellMod(SpellValueMod.BasePoint1, (int)GetTarget().SpellBaseHealingBonusDone(SpellSchoolMask.Magic)));
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new(CheckProc, 0, AuraType.Dummy));
+            OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
+        }
+    }
+
+    [Script] // 77616 - Dark Simulacrum
+    class spell_dk_dark_simulacrum_buff : AuraScript
+    {
+        bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return aurEff.GetAmount() == eventInfo.GetSpellInfo().Id;
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new(CheckProc, 0, AuraType.OverrideActionbarSpellsTriggered));
+        }
+    }
+
     [Script] // 43265 - Death and Decay
     class spell_dk_death_and_decay : AuraScript
     {
@@ -485,7 +553,7 @@ namespace Scripts.Spells.DeathKnight
 
         void Update(AuraEffect aurEff)
         {
-            // Move backwards all datas by one from [23][0][0][0][0] -> [0][23][0][0][0]
+            // Move backwards all datas by one from [23][0][0][0][0] . [0][23][0][0][0]
             _damagePerSecond = Enumerable.Range(1, _damagePerSecond.Length).Select(i => _damagePerSecond[i % _damagePerSecond.Length]).ToArray();
             _damagePerSecond[0] = 0;
         }
