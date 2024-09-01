@@ -2028,8 +2028,15 @@ namespace Game.Entities
                 SetNoSearchAssistance(false);
 
                 //Dismiss group if is leader
-                if (m_formation != null && m_formation.GetLeader() == this)
-                    m_formation.FormationReset(true);
+                if (m_formation != null)
+                {
+                    if (m_formation.GetLeader() == this)
+                        m_formation.FormationReset(true);
+
+                    ZoneScript script = GetZoneScript();
+                    if (script != null && !m_formation.HasAliveMembers())
+                        script.OnCreatureGroupDepleted(m_formation);
+                }
 
                 bool needsFalling = (IsFlying() || IsHovering()) && !IsUnderWater() && !HasUnitState(UnitState.Root);
                 SetHover(false, false);

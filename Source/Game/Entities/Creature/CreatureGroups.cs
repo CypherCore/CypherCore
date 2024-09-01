@@ -55,6 +55,12 @@ namespace Game.Entities
             Log.outDebug(LogFilter.Unit, $"Deleting member GUID: {leaderSpawnId} from group {member.GetSpawnId()}");
             group.RemoveMember(member);
 
+            // If removed member was alive we need to check if we have any other alive members
+            // if not - fire OnCreatureGroupDepleted
+            ZoneScript script = member.GetZoneScript();
+            if (script != null && member.IsAlive() && !group.HasAliveMembers())
+                script.OnCreatureGroupDepleted(group);
+
             if (group.IsEmpty())
             {
                 if (leaderSpawnId != 0)
@@ -297,6 +303,29 @@ namespace Game.Entities
             }
 
             return true;
+        }
+
+        public bool HasAliveMembers()
+        {
+            return _members.Any(pair => pair.Key.IsAlive());
+        }
+
+        public bool LeaderHasStringId(string id)
+        {
+            if (_leader != null)
+                return _leader.HasStringId(id);
+
+            CreatureData leaderCreatureData = Global.ObjectMgr.GetCreatureData(_leaderSpawnId);
+            if (leaderCreatureData != null)
+            {
+                if (leaderCreatureData.StringId == id)
+                    return true;
+
+                if (Global.ObjectMgr.GetCreatureTemplate(leaderCreatureData.Id).StringId == id)
+                    return true;
+            }
+
+            return false;
         }
 
         public Creature GetLeader() { return _leader; }

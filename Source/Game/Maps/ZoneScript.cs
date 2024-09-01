@@ -34,6 +34,9 @@ namespace Game.Maps
 
         public virtual void OnUnitDeath(Unit unit) { }
 
+        // Triggers when the CreatureGroup no longer has any alive members (either last alive member dies or is removed from the group)
+        public virtual void OnCreatureGroupDepleted(CreatureGroup creatureGroup) { }
+
         //All-purpose data storage 64 bit
         public virtual ObjectGuid GetGuidData(uint DataId) { return ObjectGuid.Empty; }
         public virtual void SetGuidData(uint DataId, ObjectGuid Value) { }
