@@ -3885,8 +3885,14 @@ namespace Game.Entities
         public void CreateModel()
         {
             m_model = GameObjectModel.Create(new GameObjectModelOwnerImpl(this));
-            if (m_model != null && m_model.IsMapObject())
-                SetFlag(GameObjectFlags.MapObject);
+            if (m_model != null)
+            {
+                if (m_model.IsMapObject())
+                    SetFlag(GameObjectFlags.MapObject);
+
+                if (GetGoType() == GameObjectTypes.Door)
+                    m_model.DisableLosBlocking(GetGoInfo().Door.NotLOSBlocking != 0);
+            }
         }
 
         // There's many places not ready for dynamic spawns. This allows them to live on for now.

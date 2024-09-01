@@ -94,7 +94,7 @@ namespace Game.Collision
                 return true;
 
             Ray r = new(startPos, (endPos - startPos) / maxDist);
-            DynamicTreeIntersectionCallback callback = new(phaseShift);
+            DynamicTreeLosCallback callback = new(phaseShift);
             impl.IntersectRay(r, callback, ref maxDist, endPos);
 
             return !callback.DidHit();

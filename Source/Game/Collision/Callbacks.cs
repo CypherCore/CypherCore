@@ -15,6 +15,7 @@ namespace Game.Collision
         public virtual void Invoke(Vector3 point, GameObjectModel obj) { }
         public virtual bool Invoke(Ray ray, uint entry, ref float distance, bool pStopAtFirstHit) { return false; }
         public virtual bool Invoke(Ray r, IModel obj, ref float distance) { return false; }
+        public virtual bool Invoke(Ray r, GameObjectModel obj, ref float distance) { return false; }
     }
 
     public class TriBoundFunc
@@ -51,7 +52,7 @@ namespace Game.Collision
         public override bool Invoke(Ray ray, uint entry, ref float distance, bool stopAtFirstHit)
         {
             GroupModel.InsideResult result = prims[(int)entry].IsInsideObject(ray, out float group_Z);
-            if ( result != GroupModel.InsideResult.OutOfBounds)
+            if (result != GroupModel.InsideResult.OutOfBounds)
             {
                 if (result != GroupModel.InsideResult.MaybeInside)
                 {
@@ -217,6 +218,26 @@ namespace Game.Collision
 
         bool _didHit;
         PhaseShift _phaseShift;
+    }
+
+    class DynamicTreeLosCallback : WorkerCallback
+    {
+        bool _didHit;
+        PhaseShift _phaseShift;
+
+        public DynamicTreeLosCallback(PhaseShift phaseShift)
+        {
+            _phaseShift = phaseShift;
+        }
+
+        public override bool Invoke(Ray r, GameObjectModel obj, ref float distance)
+        {
+            if (!obj.IsLosBlockingDisabled())
+                _didHit = obj.IntersectRay(r, ref distance, true, _phaseShift, ModelIgnoreFlags.Nothing);
+            return _didHit;
+        }
+
+        public bool DidHit() { return _didHit; }
     }
 
     public class DynamicTreeLocationInfoCallback : WorkerCallback

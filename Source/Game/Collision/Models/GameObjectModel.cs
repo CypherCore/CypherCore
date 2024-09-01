@@ -185,8 +185,10 @@ namespace Game.Collision
         public override Vector3 GetPosition() { return iPos; }
         public override AxisAlignedBox GetBounds() { return iBound; }
 
-        public void EnableCollision(bool enable) { _collisionEnabled = enable; }
-        bool IsCollisionEnabled() { return _collisionEnabled; }
+        public void EnableCollision(bool enable) { iCollisionEnabled = enable; }
+        public bool IsCollisionEnabled() { return iCollisionEnabled; }
+        public void DisableLosBlocking(bool enable) { iLosBlockingDisabled = enable; }
+        public bool IsLosBlockingDisabled() { return iLosBlockingDisabled; }
         public byte GetNameSetId() { return owner.GetNameSetId(); }
 
         public static bool LoadGameObjectModelList()
@@ -232,7 +234,8 @@ namespace Game.Collision
             return true;
         }
 
-        bool _collisionEnabled;
+        bool iCollisionEnabled;     // Is model ignored in all checks
+        bool iLosBlockingDisabled;  // Is model ignored during line of sight checks (but is always included in location/height checks)
         AxisAlignedBox iBound;
         Matrix4x4 iInvRot;
         Vector3 iPos;
