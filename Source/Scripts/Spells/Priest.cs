@@ -153,6 +153,7 @@ namespace Scripts.Spells.Priest
         public const uint SearingLight = 196811;
         public const uint ShadowMendDamage = 186439;
         public const uint ShadowWordDeath = 32379;
+        public const uint ShadowWordDeathDamage = 32409;
         public const uint ShadowMendPeriodicDummy = 187464;
         public const uint ShadowWordPain = 589;
         public const uint ShieldDiscipline = 197045;
@@ -2988,6 +2989,51 @@ namespace Scripts.Spells.Priest
             OnEffectPeriodic.Add(new(HandleDummyTick, 0, AuraType.PeriodicDummy));
             DoCheckProc.Add(new(CheckProc));
             OnEffectProc.Add(new(HandleProc, 1, AuraType.Dummy));
+        }
+    }
+
+    // 32379 - Shadow Word: Death
+    class spell_pri_shadow_word_death : SpellScript
+    {
+        static TimeSpan BACKLASH_DELAY = TimeSpan.FromSeconds(1);
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ShadowWordDeathDamage)
+            && ValidateSpellEffect((spellInfo.Id, 4));
+        }
+
+        void HandleDamageCalculation(Unit victim, ref int damage, ref int flatMod, ref float pctMod)
+        {
+            if (victim.HealthBelowPct(GetEffectInfo(1).CalcValue(GetCaster())))
+                MathFunctions.AddPct(ref pctMod, GetEffectInfo(2).CalcValue(GetCaster()));
+        }
+
+        void DetermineKillStatus(DamageInfo damageInfo, ref uint resistAmount, ref int absorbAmount)
+        {
+            bool killed = damageInfo.GetDamage() >= damageInfo.GetVictim().GetHealth();
+            if (!killed)
+            {
+                Unit caster = GetCaster();
+                int backlashDamage = (int)caster.CountPctFromMaxHealth(GetEffectInfo(4).CalcValue(caster));
+                var originalCastId = GetSpell().m_castId;
+                caster.m_Events.AddEventAtOffset(() =>
+                {
+                    caster.CastSpell(caster, SpellIds.ShadowWordDeathDamage, new CastSpellExtraArgs()
+                        .SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError)
+                        .SetOriginalCastId(originalCastId)
+                        .AddSpellMod(SpellValueMod.BasePoint0, backlashDamage));
+
+                }, BACKLASH_DELAY);
+            }
+        }
+
+        public override void Register()
+        {
+            CalcDamage.Add(new(HandleDamageCalculation));
+
+            // abuse OnCalculateResistAbsorb to determine if this spell will kill target or not (its still not perfect - happens before absorbs are applied)
+            OnCalculateResistAbsorb.Add(new(DetermineKillStatus));
         }
     }
 
