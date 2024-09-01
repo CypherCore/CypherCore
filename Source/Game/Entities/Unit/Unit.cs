@@ -175,6 +175,7 @@ namespace Game.Entities
                 ModifyAuraState(AuraStateType.WoundHealth20_80, HealthBelowPct(20) || HealthAbovePct(80));
                 ModifyAuraState(AuraStateType.Healthy75Percent, HealthAbovePct(75));
                 ModifyAuraState(AuraStateType.WoundHealth35_80, HealthBelowPct(35) || HealthAbovePct(80));
+                ModifyAuraState(AuraStateType.Wounded50Percent, HealthBelowPct(50));
             }
 
             UpdateSplineMovement(diff);
