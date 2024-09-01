@@ -2967,7 +2967,7 @@ namespace Game.Entities
                                 }
 
                                 if (isCastInterrupted())
-                                    victim.InterruptNonMeleeSpells(false);
+                                    victim.InterruptSpell(CurrentSpellTypes.Generic, false, false);
                                 else if (isCastDelayed())
                                     spell.Delayed();
                             }
