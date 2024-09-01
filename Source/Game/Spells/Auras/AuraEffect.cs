@@ -4961,13 +4961,23 @@ namespace Game.Spells
 
             int vehicleId = GetMiscValue();
 
+            target.RemoveVehicleKit();
+
             if (apply)
             {
                 if (!target.CreateVehicleKit((uint)vehicleId, 0))
                     return;
             }
-            else if (target.GetVehicleKit() != null)
-                target.RemoveVehicleKit();
+            else
+            {
+                Creature creature = target.ToCreature();
+                if (creature != null)
+                {
+                    uint originalVehicleId = creature.GetCreatureTemplate().VehicleId;
+                    if (originalVehicleId != 0)
+                        creature.CreateVehicleKit(originalVehicleId, creature.GetEntry());
+                }
+            }
 
             if (!target.IsTypeId(TypeId.Player))
                 return;

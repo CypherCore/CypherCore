@@ -42,7 +42,7 @@ namespace Game.Entities
             // Set or remove correct flags based on available seats. Will overwrite db data (if wrong).
             if (UsableSeatNum != 0)
                 _me.SetNpcFlag(_me.IsTypeId(TypeId.Player) ? NPCFlags.PlayerVehicle : NPCFlags.SpellClick);
-            else
+            else if(unit.m_unitData.InteractSpellID == 0)
                 _me.RemoveNpcFlag(_me.IsTypeId(TypeId.Player) ? NPCFlags.PlayerVehicle : NPCFlags.SpellClick);
 
             InitMovementInfoForBase();
