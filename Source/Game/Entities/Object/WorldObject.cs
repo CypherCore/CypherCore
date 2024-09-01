@@ -1685,21 +1685,13 @@ namespace Game.Entities
 
         public void SummonCreatureGroup(byte group, out List<TempSummon> list)
         {
-            Cypher.Assert((IsTypeId(TypeId.GameObject) || IsTypeId(TypeId.Unit)), "Only GOs and creatures can summon npc groups!");
-            list = new List<TempSummon>();
-            var data = Global.ObjectMgr.GetSummonGroup(GetEntry(), IsTypeId(TypeId.GameObject) ? SummonerType.GameObject : SummonerType.Creature, group);
-            if (data.Empty())
-            {
-                Log.outWarn(LogFilter.Scripts, "{0} ({1}) tried to summon non-existing summon group {2}.", GetName(), GetGUID().ToString(), group);
-                return;
-            }
+            list = new();
 
-            foreach (var tempSummonData in data)
+            Cypher.Assert(IsTypeId(TypeId.GameObject) || IsTypeId(TypeId.Unit), "Only GOs and creatures can summon npc groups!");
+            Map.SummonCreatureGroup(GetEntry(), GetTypeId() == TypeId.GameObject ? SummonerType.GameObject : SummonerType.Creature, group, list, tempSummonData =>
             {
-                TempSummon summon = SummonCreature(tempSummonData.entry, tempSummonData.pos, tempSummonData.type, tempSummonData.time);
-                if (summon != null)
-                    list.Add(summon);
-            }
+                return SummonCreature(tempSummonData.entry, tempSummonData.pos, tempSummonData.type, tempSummonData.time);
+            });
         }
 
         public Creature FindNearestCreature(uint entry, float range, bool alive = true)

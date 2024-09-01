@@ -3823,6 +3823,44 @@ namespace Game.Maps
             return summon;
         }
 
+        public static void SummonCreatureGroup(uint summonerId, SummonerType summonerType, byte group, List<TempSummon> summoned, Func<TempSummonData, TempSummon> summonCreature)
+        {
+            var data = Global.ObjectMgr.GetSummonGroup(summonerId, summonerType, group);
+            if (data == null)
+            {
+                Log.outWarn(LogFilter.Scripts, $"Summoner {summonerId} type {summonerType} tried to summon non-existing summon group {group}.");
+                return;
+            }
+
+            List<TempSummon> summons = new();
+
+            foreach (TempSummonData tempSummonData in data)
+            {
+                TempSummon summon = summonCreature(tempSummonData);
+                if (summon != null)
+                    summons.Add(summon);
+            }
+
+            CreatureGroup creatureGroup = new CreatureGroup(0);
+            foreach (TempSummon summon in summons)
+            {
+                if (!summon.IsInWorld)   // evil script might despawn a summon
+                    continue;
+
+                creatureGroup.AddMember(summon);
+                if (summoned != null)
+                    summoned.Add(summon);
+            }
+        }
+
+        public void SummonCreatureGroup(byte group, List<TempSummon> list = null)
+        {
+            SummonCreatureGroup(GetId(), SummonerType.Map, group, list, tempSummonData =>
+            {
+                return SummonCreature(tempSummonData.entry, tempSummonData.pos, null, tempSummonData.time);
+            });
+        }
+
         public ulong GenerateLowGuid(HighGuid high)
         {
             return GetGuidSequenceGenerator(high).Generate();
