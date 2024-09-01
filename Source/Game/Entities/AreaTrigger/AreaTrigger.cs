@@ -606,8 +606,55 @@ namespace Game.Entities
             if (GetTemplate() != null)
             {
                 var conditions = Global.ConditionMgr.GetConditionsForAreaTrigger(GetTemplate().Id.Id, GetTemplate().Id.IsCustom);
-                if (conditions != null && !conditions.Empty())
-                    targetList.RemoveAll(target => !Global.ConditionMgr.IsObjectMeetToConditions(target, conditions));
+                targetList.RemoveAll(target =>
+                {
+                    if (GetCasterGuid() == target.GetGUID())
+                    {
+                        if (HasActionSetFlag(AreaTriggerActionSetFlag.NotTriggeredbyCaster))
+                            return true;
+                    }
+                    else
+                    {
+                        if (HasActionSetFlag(AreaTriggerActionSetFlag.OnlyTriggeredByCaster))
+                            return true;
+
+                        if (HasActionSetFlag(AreaTriggerActionSetFlag.CreatorsPartyOnly))
+                        {
+                            Unit caster = GetCaster();
+                            if (caster == null)
+                                return true;
+
+                            if (!caster.IsInRaidWith(target))
+                                return true;
+                        }
+                    }
+
+                    Player player = target.ToPlayer();
+                    if (player != null)
+                    {
+                        switch (player.GetDeathState())
+                        {
+                            case DeathState.Dead:
+                                if (!HasActionSetFlag(AreaTriggerActionSetFlag.AllowWhileGhost))
+                                    return true;
+                                break;
+                            case DeathState.Corpse:
+                                if (!HasActionSetFlag(AreaTriggerActionSetFlag.AllowWhileDead))
+                                    return true;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
+                    if (!HasActionSetFlag(AreaTriggerActionSetFlag.CanAffectUninteractible) && target.IsUninteractible())
+                        return true;
+
+                    if (conditions != null)
+                        return !Global.ConditionMgr.IsObjectMeetToConditions(target, conditions);
+
+                    return false;
+                });
             }
 
             HandleUnitEnterExit(targetList);
@@ -615,7 +662,7 @@ namespace Game.Entities
 
         void SearchUnits(List<Unit> targetList, float radius, bool check3D)
         {
-            var check = new AnyUnitInObjectRangeCheck(this, radius, check3D);
+            var check = new AnyUnitInObjectRangeCheck(this, radius, check3D, false);
             if (IsStaticSpawn())
             {
                 List<Player> temp = new List<Player>();
@@ -770,6 +817,9 @@ namespace Game.Entities
                         player.SendSysMessage(CypherStrings.DebugAreatriggerEntityEntered, GetEntry(), IsCustom(), IsStaticSpawn(), _spawnId);
 
                     player.UpdateQuestObjectiveProgress(QuestObjectiveType.AreaTriggerEnter, (int)GetEntry(), 1);
+
+                    if (GetTemplate().ActionSetId != 0)
+                        player.UpdateCriteria(CriteriaType.EnterAreaTriggerWithActionSet, GetTemplate().ActionSetId);
                 }
 
                 DoActions(unit);
@@ -789,6 +839,9 @@ namespace Game.Entities
                             player.SendSysMessage(CypherStrings.DebugAreatriggerEntityLeft, GetEntry(), IsCustom(), IsStaticSpawn(), _spawnId);
 
                         player.UpdateQuestObjectiveProgress(QuestObjectiveType.AreaTriggerExit, (int)GetEntry(), 1);
+
+                        if (GetTemplate().ActionSetId != 0)
+                            player.UpdateCriteria(CriteriaType.LeaveAreaTriggerWithActionSet, GetTemplate().ActionSetId);
                     }
 
                     UndoActions(leavingUnit);
@@ -1344,6 +1397,7 @@ namespace Game.Entities
         public bool IsCustom() { return _areaTriggerTemplate.Id.IsCustom; }
         public bool IsServerSide() { return _areaTriggerTemplate.Flags.HasFlag(AreaTriggerFlag.IsServerSide); }
         public bool IsStaticSpawn() { return _spawnId != 0; }
+        public bool HasActionSetFlag(AreaTriggerActionSetFlag flag) { return _areaTriggerTemplate.ActionSetFlags.HasFlag(flag); }
 
         [System.Diagnostics.Conditional("DEBUG")]
         void DebugVisualizePosition()

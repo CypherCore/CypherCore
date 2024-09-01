@@ -104,8 +104,8 @@ namespace Game.DataStorage
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 AreaTrigger splines. DB table `areatrigger_create_properties_spline_point` is empty.");
             }
 
-            //                                            0   1         2
-            SQLResult templates = DB.World.Query("SELECT Id, IsCustom, Flags FROM `areatrigger_template`");
+            //                                            0   1         2      3            4
+            SQLResult templates = DB.World.Query("SELECT Id, IsCustom, Flags, ActionSetId, ActionSetFlags FROM `areatrigger_template`");
             if (!templates.IsEmpty())
             {
                 do
@@ -113,6 +113,8 @@ namespace Game.DataStorage
                     AreaTriggerTemplate areaTriggerTemplate = new();
                     areaTriggerTemplate.Id = new(templates.Read<uint>(0), templates.Read<bool>(1));
                     areaTriggerTemplate.Flags = (AreaTriggerFlag)templates.Read<uint>(2);
+                    areaTriggerTemplate.ActionSetId = templates.Read<uint>(3);
+                    areaTriggerTemplate.ActionSetFlags = (AreaTriggerActionSetFlag)templates.Read<uint>(4);
                     areaTriggerTemplate.Actions = actionsByAreaTrigger[areaTriggerTemplate.Id];
 
                     _areaTriggerTemplateStore[areaTriggerTemplate.Id] = areaTriggerTemplate;

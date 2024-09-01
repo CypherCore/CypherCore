@@ -156,7 +156,7 @@ namespace Game.DataStorage
         public float BoxYaw;
         public sbyte ShapeType;
         public short ShapeID;
-        public int AreaTriggerActionSetID;
+        public uint AreaTriggerActionSetID;
         public sbyte Flags;
 
         public AreaTriggerShapeType GetShapeType() { return (AreaTriggerShapeType)ShapeType; }

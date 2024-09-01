@@ -243,6 +243,8 @@ namespace Game.Entities
     {
         public AreaTriggerId Id;
         public AreaTriggerFlag Flags;
+        public uint ActionSetId;
+        public AreaTriggerActionSetFlag ActionSetFlags;
         public List<AreaTriggerAction> Actions = new();
     }
 

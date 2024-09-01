@@ -2130,17 +2130,21 @@ namespace Game.Maps
 
     public class AnyUnitInObjectRangeCheck : ICheck<Unit>
     {
-        public AnyUnitInObjectRangeCheck(WorldObject obj, float range, bool check3D = true)
+        public AnyUnitInObjectRangeCheck(WorldObject obj, float range, bool check3D = true, bool reqAlive = true)
         {
             i_obj = obj;
             i_range = range;
             i_check3D = check3D;
+            i_reqAlive = reqAlive;
         }
 
         public bool Invoke(Unit u)
         {
-            if (u.IsAlive() && i_obj.IsWithinDist(u, i_range, i_check3D))
-                return true;
+            if (i_reqAlive && !u.IsAlive())
+                return false;
+
+            if (!i_obj.IsWithinDist(u, i_range, i_check3D))
+                return false;
 
             return false;
         }
@@ -2148,6 +2152,7 @@ namespace Game.Maps
         WorldObject i_obj;
         float i_range;
         bool i_check3D;
+        bool i_reqAlive;
     }
 
     // Success at unit in range, range update for next check (this can be use with UnitLastSearcher to find nearest unit)
@@ -2543,7 +2548,7 @@ namespace Game.Maps
             return true;
         }
     }
-    
+
     public class AnyPlayerInObjectRangeCheck : ICheck<Player>
     {
         public AnyPlayerInObjectRangeCheck(WorldObject obj, float range, bool reqAlive = true)
@@ -3035,7 +3040,7 @@ namespace Game.Maps
             i_range = i_obj.GetDistance(obj);
         }
     }
-    
+
     public class AnyDeadUnitObjectInRangeCheck<T> : ICheck<T> where T : WorldObject
     {
         public AnyDeadUnitObjectInRangeCheck(WorldObject searchObj, float range)

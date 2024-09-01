@@ -957,19 +957,19 @@ namespace Framework.Constants
     {
         None = 0x00,
         OnlyTriggeredByCaster = 0x01,
-        ResurrectIfConditionFails = 0x02,
+        ResurrectIfConditionFails = 0x02, // NYI
         Obsolete = 0x04,
         AllowWhileGhost = 0x08,
         AllowWhileDead = 0x10,
-        UnifyAllInstances = 0x20,
+        UnifyAllInstances = 0x20, // NYI
         SuppressConditionError = 0x40, // NYI
         NotTriggeredbyCaster = 0x80,
         CreatorsPartyOnly = 0x100,
-        DontRunOnLeaveWhenExpiring = 0x200,
+        DontRunOnLeaveWhenExpiring = 0x200, // NYI
         CanAffectUninteractible = 0x400,
-        DontDespawnWithCreator = 0x800,
-        CanAffectBeastmaster = 0x1000,
-        RequiresLineOfSight = 0x2000
+        DontDespawnWithCreator = 0x800, // NYI
+        CanAffectBeastmaster = 0x1000, // Can affect GMs
+        RequiresLineOfSight = 0x2000 // NYI
     }
 
     public enum AreaTriggerShapeType

@@ -262,6 +262,8 @@ namespace Game.Achievements
                     case CriteriaType.GotHaircut:
                     case CriteriaType.EquipItemInSlot:
                     case CriteriaType.EquipItem:
+                    case CriteriaType.EnterAreaTriggerWithActionSet:
+                    case CriteriaType.LeaveAreaTriggerWithActionSet:
                     case CriteriaType.LearnedNewPet:
                     case CriteriaType.EnterArea:
                     case CriteriaType.LeaveArea:
@@ -420,7 +422,6 @@ namespace Game.Achievements
                     case CriteriaType.KickTargetInLFGDungeon:
                     case CriteriaType.AbandonedLFGDungeon:
                     case CriteriaType.GroupedTankLeftEarlyInLFGDungeon:
-                    case CriteriaType.EnterAreaTriggerWithActionSet:
                     case CriteriaType.StartGarrisonMission:
                     case CriteriaType.QualityUpgradedForGarrisonFollower:
                     case CriteriaType.CompleteResearchGarrisonTalent:
@@ -820,12 +821,14 @@ namespace Game.Achievements
                 case CriteriaType.GotHaircut:
                 case CriteriaType.EquipItemInSlot:
                 case CriteriaType.EquipItem:
+                case CriteriaType.EnterAreaTriggerWithActionSet:
+                case CriteriaType.LeaveAreaTriggerWithActionSet:
                 case CriteriaType.LearnedNewPet:
-                case CriteriaType.HonorLevelIncrease:
-                case CriteriaType.PrestigeLevelIncrease:
                 case CriteriaType.EnterArea:
                 case CriteriaType.LeaveArea:
                 case CriteriaType.RecruitGarrisonFollower:
+                case CriteriaType.HonorLevelIncrease:
+                case CriteriaType.PrestigeLevelIncrease:
                 case CriteriaType.ActivelyReachLevel:
                 case CriteriaType.CollectTransmogSetFromGroup:
                 case CriteriaType.EnterTopLevelArea:
@@ -1217,6 +1220,11 @@ namespace Game.Achievements
                     break;
                 case CriteriaType.CompleteScenario:
                     if (miscValue1 != criteria.Entry.Asset)
+                        return false;
+                    break;
+                case CriteriaType.EnterAreaTriggerWithActionSet:
+                case CriteriaType.LeaveAreaTriggerWithActionSet:
+                    if (miscValue1 == 0 || miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
                 default:

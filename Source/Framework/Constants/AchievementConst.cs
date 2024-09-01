@@ -661,8 +661,8 @@ namespace Framework.Constants
         GroupedTankLeftEarlyInLFRDungeon = 150, /*NYI*/ // Grouped tank left early in an LFR dungeon
         CompleteAnyScenario = 151, // Complete a Scenario
         CompleteScenario = 152, // Complete scenario "{Scenario}"
-        EnterAreaTriggerWithActionSet = 153, /*NYI*/ // Enter area trigger "{AreaTriggerActionSet}"
-        LeaveAreaTriggerWithActionSet = 154, /*NYI*/ // Leave area trigger "{AreaTriggerActionSet}"
+        EnterAreaTriggerWithActionSet = 153, // Enter area trigger "{AreaTriggerActionSet}"
+        LeaveAreaTriggerWithActionSet = 154, // Leave area trigger "{AreaTriggerActionSet}"
         LearnedNewPet = 155, // (Account Only) Learned a new pet
         UniquePetsOwned = 156, // (Account Only) Unique pets owned
         AccountObtainPetThroughBattle = 157, /*NYI*/ // (Account Only) Obtain a pet through battle
