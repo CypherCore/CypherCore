@@ -247,7 +247,7 @@ namespace Game.Entities
             foreach (var (creature, _) in _members)
             {
                 if (dismiss)
-                    creature.GetMotionMaster().Initialize();
+                    creature.GetMotionMaster().Remove(MovementGeneratorType.Formation, MovementSlot.Default);
                 else
                     creature.GetMotionMaster().MoveIdle();
                 Log.outDebug(LogFilter.Unit, $"CreatureGroup::FormationReset: Set {(dismiss ? "default" : "idle")} movement for member {creature.GetGUID()}");

@@ -1067,12 +1067,13 @@ namespace Game.Entities
                     return;
                 }
 
-                if (vehicle.GetBase().IsCreature())
+                Creature vehicleBaseCreature = vehicle.GetBase().ToCreature();
+                if (vehicleBaseCreature != null)
                 {
                     // If a player entered a vehicle that is part of a formation, remove it from said formation
-                    CreatureGroup creatureGroup = vehicle.GetBase().ToCreature().GetFormation();
+                    CreatureGroup creatureGroup = vehicleBaseCreature.GetFormation();
                     if (creatureGroup != null)
-                        creatureGroup.RemoveMember(vehicle.GetBase().ToCreature());
+                        FormationMgr.RemoveCreatureFromGroup(creatureGroup, vehicleBaseCreature);
                 }
             }
 
