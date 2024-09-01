@@ -1575,6 +1575,8 @@ namespace Game.Spells
                                 summonType = TempSummonType.DeadDespawn;
                             else if (duration == TimeSpan.FromMilliseconds(-1))
                                 summonType = TempSummonType.ManualDespawn;
+                            else if (properties.HasFlag(SummonPropertiesFlags.UseDemonTimeout))
+                                summonType = TempSummonType.TimedDespawnOutOfCombat;
 
                             for (uint count = 0; count < numSummons; ++count)
                             {
