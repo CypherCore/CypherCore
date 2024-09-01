@@ -2161,7 +2161,7 @@ namespace Framework.Constants
         Unk17 = 0x20000, // 17
         Unk18 = 0x40000, // 18
         Unk19 = 0x80000, // 19
-        Unk20 = 0x100000, // 20
+        AuraIsPrivate = 0x100000, // Clientside attribue that prevents the aura from being accessed by addons (but is still visible in UI)
         Unk21 = 0x200000, // 21
         Unk22 = 0x400000, // 22
         Unk23 = 0x800000, // 23
