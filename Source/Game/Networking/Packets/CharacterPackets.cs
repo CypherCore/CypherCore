@@ -384,7 +384,7 @@ namespace Game.Networking.Packets
             bool hasTemplateSet = _worldPacket.HasBit();
             CreateInfo.IsTrialBoost = _worldPacket.HasBit();
             CreateInfo.UseNPE = _worldPacket.HasBit();
-            CreateInfo.Unused1026 = _worldPacket.HasBit();
+            CreateInfo.HardcoreSelfFound = _worldPacket.HasBit();
 
             CreateInfo.RaceId = (Race)_worldPacket.ReadUInt8();
             CreateInfo.ClassId = (Class)_worldPacket.ReadUInt8();
@@ -1144,7 +1144,7 @@ namespace Game.Networking.Packets
         public int TimerunningSeasonID;
         public bool IsTrialBoost;
         public bool UseNPE;
-        public bool Unused1026;
+        public bool HardcoreSelfFound;
         public string Name;
 
         // Server side data
