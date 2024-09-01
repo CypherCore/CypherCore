@@ -50,16 +50,22 @@ namespace Game.Entities
 
         public static void RemoveCreatureFromGroup(CreatureGroup group, Creature member)
         {
-            Log.outDebug(LogFilter.Unit, "Deleting member GUID: {0} from group {1}", group.GetLeaderSpawnId(), member.GetSpawnId());
+            ulong leaderSpawnId = group.GetLeaderSpawnId();
+
+            Log.outDebug(LogFilter.Unit, $"Deleting member GUID: {leaderSpawnId} from group {member.GetSpawnId()}");
             group.RemoveMember(member);
 
             if (group.IsEmpty())
             {
-                Map map = member.GetMap();
+                if (leaderSpawnId != 0)
+                {
+                    Map map = member.GetMap();
 
-                Log.outDebug(LogFilter.Unit, "Deleting group with InstanceID {0}", member.GetInstanceId());
-                Cypher.Assert(map.CreatureGroupHolder.ContainsKey(group.GetLeaderSpawnId()), $"Not registered group {group.GetLeaderSpawnId()} in map {map.GetId()}");
-                map.CreatureGroupHolder.Remove(group.GetLeaderSpawnId());
+                    Log.outDebug(LogFilter.Unit, $"Deleting group with InstanceID {member.GetInstanceId()}");
+                    bool erased = map.CreatureGroupHolder.Remove(leaderSpawnId);
+                    Cypher.Assert(erased, $"Not registered group {leaderSpawnId} in map {map.GetId()}");
+
+                }
             }
         }
 
@@ -80,29 +86,14 @@ namespace Game.Entities
             do
             {
                 //Load group member data
-                FormationInfo member = new();
-                member.LeaderSpawnId = result.Read<ulong>(0);
+                ulong leaderSpawnId = result.Read<ulong>(0);
                 ulong memberSpawnId = result.Read<ulong>(1);
-                member.FollowDist = 0f;
-                member.FollowAngle = 0f;
-
-                //If creature is group leader we may skip loading of dist/angle
-                if (member.LeaderSpawnId != memberSpawnId)
-                {
-                    member.FollowDist = result.Read<float>(2);
-                    member.FollowAngle = result.Read<float>(3) * MathFunctions.PI / 180;
-                }
-
-                member.GroupAI = result.Read<uint>(4);
-
-                for (var i = 0; i < 2; ++i)
-                    member.LeaderWaypointIDs[i] = result.Read<ushort>(5 + i);
 
                 // check data correctness
                 {
-                    if (Global.ObjectMgr.GetCreatureData(member.LeaderSpawnId) == null)
+                    if (Global.ObjectMgr.GetCreatureData(leaderSpawnId) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"creature_formations table leader guid {member.LeaderSpawnId} incorrect (not exist)");
+                        Log.outError(LogFilter.Sql, $"creature_formations table leader guid {leaderSpawnId} incorrect (not exist)");
                         continue;
                     }
 
@@ -112,8 +103,24 @@ namespace Game.Entities
                         continue;
                     }
 
-                    leaderSpawnIds.Add(member.LeaderSpawnId);
+                    leaderSpawnIds.Add(leaderSpawnId);
                 }
+
+                FormationInfo member = new();
+                member.LeaderSpawnId = leaderSpawnId;
+                member.FollowDist = 0.0f;
+                member.FollowAngle = 0.0f;
+
+                //If creature is group leader we may skip loading of dist/angle
+                if (member.LeaderSpawnId != memberSpawnId)
+                {
+                    member.FollowDist = result.Read<float>(2);
+                    member.FollowAngle = result.Read<float>(3) * MathF.PI / 180.0f;
+                }
+
+                member.GroupAI = result.Read<uint>(4);
+                for (byte i = 0; i < 2; ++i)
+                    member.LeaderWaypointIDs[i] = result.Read<ushort>(5 + i);
 
                 _creatureGroupMap.Add(memberSpawnId, member);
                 ++count;
@@ -180,18 +187,17 @@ namespace Game.Entities
 
         public void AddMember(Creature member)
         {
-            Log.outDebug(LogFilter.Unit, "CreatureGroup.AddMember: Adding {0}.", member.GetGUID().ToString());
+            Log.outDebug(LogFilter.Unit, $"CreatureGroup.AddMember: Adding {member.GetGUID()}.");
 
             //Check if it is a leader
-            if (member.GetSpawnId() == _leaderSpawnId)
+            if ((_leaderSpawnId != 0 && member.GetSpawnId() == _leaderSpawnId)
+                || (_leaderSpawnId == 0 && _leader == null))   // in formations made of tempsummons first member to be added is leader
             {
-                Log.outDebug(LogFilter.Unit, "{0} is formation leader. Adding group.", member.GetGUID().ToString());
+                Log.outDebug(LogFilter.Unit, $"{member.GetGUID()} is formation leader. Adding group.");
                 _leader = member;
             }
 
-            // formation must be registered at this point
-            FormationInfo formationInfo = FormationMgr.GetFormationInfo(member.GetSpawnId());
-            _members.Add(member, formationInfo);
+            _members.Add(member, FormationMgr.GetFormationInfo(member.GetSpawnId()));
             member.SetFormation(this);
         }
 
@@ -210,7 +216,11 @@ namespace Game.Entities
             if (_engaging)
                 return;
 
-            GroupAIFlags groupAI = (GroupAIFlags)FormationMgr.GetFormationInfo(member.GetSpawnId()).GroupAI;
+            FormationInfo formationInfo = _members.LookupByKey(member);
+            if (formationInfo == null)
+                return;
+
+            GroupAIFlags groupAI = (GroupAIFlags)formationInfo.GroupAI;
             if (groupAI == 0)
                 return;
 
@@ -224,10 +234,8 @@ namespace Game.Entities
 
             _engaging = true;
 
-            foreach (var pair in _members)
+            foreach (var (other, _) in _members)
             {
-                Creature other = pair.Key;
-
                 // Skip self
                 if (other == member)
                     continue;
@@ -244,13 +252,16 @@ namespace Game.Entities
 
         public void FormationReset(bool dismiss)
         {
-            foreach (var (creature, _) in _members)
+            foreach (var (member, _) in _members)
             {
-                if (dismiss)
-                    creature.GetMotionMaster().Remove(MovementGeneratorType.Formation, MovementSlot.Default);
-                else
-                    creature.GetMotionMaster().MoveIdle();
-                Log.outDebug(LogFilter.Unit, $"CreatureGroup::FormationReset: Set {(dismiss ? "default" : "idle")} movement for member {creature.GetGUID()}");
+                if (member != _leader && member.IsAlive())
+                {
+                    if (dismiss)
+                        member.GetMotionMaster().Remove(MovementGeneratorType.Formation, MovementSlot.Default);
+                    else
+                        member.GetMotionMaster().MoveIdle();
+                    Log.outDebug(LogFilter.Unit, $"CreatureGroup::FormationReset: Set {(dismiss ? "default" : "idle")} movement for member {member.GetGUID()}");
+                }
             }
 
             _formed = !dismiss;
@@ -261,27 +272,26 @@ namespace Game.Entities
             if (_leader == null)
                 return;
 
-            foreach (var pair in _members)
+            foreach (var (member, formationInfo) in _members)
             {
-                Creature member = pair.Key;
-                if (member == _leader || !member.IsAlive() || member.IsEngaged() || !pair.Value.GroupAI.HasAnyFlag((uint)GroupAIFlags.IdleInFormation))
+                if (member == _leader || !member.IsAlive() || member.IsEngaged() || formationInfo == null || !formationInfo.GroupAI.HasAnyFlag((uint)GroupAIFlags.IdleInFormation))
                     continue;
 
-                float angle = pair.Value.FollowAngle + MathF.PI; // for some reason, someone thought it was a great idea to invert relativ angles...
-                float dist = pair.Value.FollowDist;
+                float angle = formationInfo.FollowAngle + MathF.PI; // for some reason, someone thought it was a great idea to invert relativ angles...
+                float dist = formationInfo.FollowDist;
 
                 if (!member.HasUnitState(UnitState.FollowFormation))
-                    member.GetMotionMaster().MoveFormation(_leader, dist, angle, pair.Value.LeaderWaypointIDs[0], pair.Value.LeaderWaypointIDs[1]);
+                    member.GetMotionMaster().MoveFormation(_leader, dist, angle, formationInfo.LeaderWaypointIDs[0], formationInfo.LeaderWaypointIDs[1]);
             }
         }
 
         public bool CanLeaderStartMoving()
         {
-            foreach (var pair in _members)
+            foreach (var (member, _) in _members)
             {
-                if (pair.Key != _leader && pair.Key.IsAlive())
+                if (member != _leader && member.IsAlive())
                 {
-                    if (pair.Key.IsEngaged() || pair.Key.IsReturningHome())
+                    if (member.IsEngaged() || member.IsReturningHome())
                         return false;
                 }
             }
