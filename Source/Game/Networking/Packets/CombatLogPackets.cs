@@ -565,17 +565,7 @@ namespace Game.Networking.Packets
             if (hitInfo.HasAnyFlag(HitInfo.Block | HitInfo.Unk12))
                 attackRoundInfo.WriteFloat(Unk);
 
-            attackRoundInfo.WriteUInt8((byte)ContentTuning.TuningType);
-            attackRoundInfo.WriteUInt8(ContentTuning.TargetLevel);
-            attackRoundInfo.WriteUInt8(ContentTuning.Expansion);
-            attackRoundInfo.WriteInt16(ContentTuning.PlayerLevelDelta);
-            attackRoundInfo.WriteInt8(ContentTuning.TargetScalingLevelDelta);
-            attackRoundInfo.WriteFloat(ContentTuning.PlayerItemLevel);
-            attackRoundInfo.WriteFloat(ContentTuning.TargetItemLevel);
-            attackRoundInfo.WriteUInt32(ContentTuning.ScalingHealthItemLevelCurveID);
-            attackRoundInfo.WriteUInt32((uint)ContentTuning.Flags);
-            attackRoundInfo.WriteUInt32(ContentTuning.PlayerContentTuningID);
-            attackRoundInfo.WriteUInt32(ContentTuning.TargetContentTuningID);
+            ContentTuning.Write(attackRoundInfo);
 
             WriteLogDataBit();
             FlushBits();
